@@ -85,6 +85,21 @@ if (keystorePropertiesFile.exists()) {
 
 
 apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
+
+// sentry.gradle attaches a source map upload task to every release build and runs
+// sentry-cli through an exec that does not ignore its exit value, so with no auth
+// token available the build FAILS instead of just skipping the upload. Opt out up
+// front in that case. CI exports SENTRY_AUTH_TOKEN, so uploads are unchanged there.
+def sentryPropertiesFile = rootProject.file('sentry.properties')
+def hasSentryAuthToken = (System.getenv('SENTRY_AUTH_TOKEN')?.trim() ? true : false) ||
+        (sentryPropertiesFile.exists() &&
+                sentryPropertiesFile.readLines().any { it.trim().startsWith('auth.token') })
+if (!hasSentryAuthToken) {
+    logger.lifecycle('Sentry: no auth token available, skipping source map upload for this build.')
+    def skipSentryUpload = { -> false }
+    project.ext.shouldSentryAutoUploadGeneral = skipSentryUpload
+    project.ext.shouldSentryAutoUpload = skipSentryUpload
+}
 android {
     ndkVersion rootProject.ext.ndkVersion
 
