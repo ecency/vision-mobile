@@ -39,6 +39,10 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: 12266719
+          # The action defaults to "tools platform-tools", and the legacy "tools"
+          # package no longer resolves, which makes sdkmanager exit 1. Ask only for
+          # what the build needs.
+          packages: platform-tools
 
       - name: Create .env file
         run: |
