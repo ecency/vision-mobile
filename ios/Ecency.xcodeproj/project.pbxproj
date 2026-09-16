@@ -711,7 +711,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "[ -f \"${SRCROOT}/.xcode.env\" ] && source \"${SRCROOT}/.xcode.env\"\n\nexport NODE_BINARY=$(command -v node)\n\nif [ \"$CI\" = \"true\" ]; then\n  echo \"Skipping automatic source map composition in CI\"\n  export SENTRY_DISABLE_AUTO_UPLOAD=true\n  export EXTRA_PACKAGER_ARGS=\"\"\n  ../node_modules/react-native/scripts/react-native-xcode.sh || true\nelse\n  if [ -z \"$SENTRY_AUTH_TOKEN\" ] && ! grep -q '^auth.token' \"${SRCROOT}/sentry.properties\" 2>/dev/null; then\n    echo \"Sentry: no auth token available, skipping source map upload\"\n    export SENTRY_DISABLE_AUTO_UPLOAD=true\n  fi\n  export SENTRY_SCRIPT_PATH=$($NODE_BINARY -e \"console.log(require('path').dirname(require.resolve('@sentry/react-native/package.json')) + '/scripts/sentry-xcode.sh')\")\n  /bin/sh \"$SENTRY_SCRIPT_PATH\"\n  ../node_modules/react-native/scripts/react-native-xcode.sh\nfi\n";
+			shellScript = "[ -f \"${SRCROOT}/.xcode.env\" ] && source \"${SRCROOT}/.xcode.env\"\n\nexport NODE_BINARY=$(command -v node)\n\nif [ \"$CI\" = \"true\" ]; then\n  echo \"Skipping automatic source map composition in CI\"\n  export SENTRY_DISABLE_AUTO_UPLOAD=true\n  export EXTRA_PACKAGER_ARGS=\"\"\n  ../node_modules/react-native/scripts/react-native-xcode.sh || true\nelse\n  if [ -z \"$SENTRY_AUTH_TOKEN\" ] && ! grep -qE '^[[:space:]]*auth\\.token[[:space:]]*=[[:space:]]*[^[:space:]]' \"${SRCROOT}/sentry.properties\" 2>/dev/null; then\n    echo \"Sentry: no auth token available, skipping source map upload\"\n    export SENTRY_DISABLE_AUTO_UPLOAD=true\n  fi\n  export SENTRY_SCRIPT_PATH=$($NODE_BINARY -e \"console.log(require('path').dirname(require.resolve('@sentry/react-native/package.json')) + '/scripts/sentry-xcode.sh')\")\n  /bin/sh \"$SENTRY_SCRIPT_PATH\"\n  ../node_modules/react-native/scripts/react-native-xcode.sh\nfi\n";
 		};
 		05BAAAEE25BF43F80072EA01 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -951,7 +951,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CI\" = \"true\" ]; then\n  echo \"Skipping sentry-xcode-debug-files.sh in CI\"\n  exit 0\nfi\n\nif [ -z \"$SENTRY_AUTH_TOKEN\" ] && ! grep -q '^auth.token' \"${SRCROOT}/sentry.properties\" 2>/dev/null; then\n  echo \"Sentry: no auth token available, skipping debug files upload\"\n  exit 0\nfi\n\n/bin/sh ../node_modules/@sentry/react-native/scripts/sentry-xcode-debug-files.sh\n";
+			shellScript = "if [ \"$CI\" = \"true\" ]; then\n  echo \"Skipping sentry-xcode-debug-files.sh in CI\"\n  exit 0\nfi\n\nif [ -z \"$SENTRY_AUTH_TOKEN\" ] && ! grep -qE '^[[:space:]]*auth\\.token[[:space:]]*=[[:space:]]*[^[:space:]]' \"${SRCROOT}/sentry.properties\" 2>/dev/null; then\n  echo \"Sentry: no auth token available, skipping debug files upload\"\n  exit 0\nfi\n\n/bin/sh ../node_modules/@sentry/react-native/scripts/sentry-xcode-debug-files.sh\n";
 		};
 		ACECBEF7D51B86CB8B7C8A22 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

@@ -93,7 +93,7 @@ apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/
 def sentryPropertiesFile = rootProject.file('sentry.properties')
 def hasSentryAuthToken = (System.getenv('SENTRY_AUTH_TOKEN')?.trim() ? true : false) ||
         (sentryPropertiesFile.exists() &&
-                sentryPropertiesFile.readLines().any { it.trim().startsWith('auth.token') })
+                sentryPropertiesFile.readLines().any { it =~ /^\s*auth\.token\s*=\s*\S/ })
 if (!hasSentryAuthToken) {
     logger.lifecycle('Sentry: no auth token available, skipping source map upload for this build.')
     def skipSentryUpload = { -> false }
