@@ -156,6 +156,8 @@ jobs:
         run: yarn run bundle:android
 
       - name: Execute Gradle APK build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd android
           ./gradlew assembleRelease
@@ -188,6 +190,8 @@ jobs:
           retention-days: 90
 
       - name: Execute Gradle Bundle build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           cd android
           ./gradlew bundleRelease

@@ -88,3 +88,6 @@ ios/Ecency.xcworkspace/xcuserdata/f.xcuserdatad/UserInterfaceState.xcuserstate
 .env.local
 
 .claude/settings.local.json
+# Android release signing material, generated at build time from secrets
+android/key.properties
+*.jks
