@@ -784,6 +784,16 @@ class ApplicationContainer extends Component<any, any> {
     });
   };
 
+  _registerAgainIfSignedIn = (username: string) => {
+    const { currentAccount, otherAccounts } = this.props;
+    const entry = getSignedInAccounts(currentAccount, otherAccounts).find(
+      (signedIn) => signedIn.username === username,
+    );
+    if (entry) {
+      this._registerAccountForNotifications(entry.account);
+    }
+  };
+
   _registerAccountForNotifications = (account: any) => {
     const { notificationDetails, isNotificationsEnabled } = this.props;
     const encAccessToken = account?.local?.accessToken;
@@ -1236,7 +1246,11 @@ class ApplicationContainer extends Component<any, any> {
       }
 
       // A logout may still be disabling rows and deleting this token; read it after that.
-      const token = await getRegistrationToken();
+      // If the wait gave up, register once more when that logout has finished, so its
+      // late disable request cannot be the last write for this account.
+      const token = await getRegistrationToken({
+        onReleaseSettled: () => this._registerAgainIfSignedIn(username),
+      });
       console.log('FCM Token obtained:', !!token);
       try {
         await saveNotificationSetting(

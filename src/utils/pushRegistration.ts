@@ -98,16 +98,22 @@ const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: bo
     accounts
       .filter((account) => account.username && account.accessToken)
       .map((account) =>
-        saveNotificationSetting(
-          account.accessToken,
-          account.username,
-          getPushSystem(),
-          0,
-          [],
-          token,
-        ).catch((err) => {
-          console.warn('Failed to disable push notifications for', account.username, err);
-        }),
+        // Inside then(), so even a synchronous throw becomes this account's failure
+        // and cannot skip the other accounts or the token delete.
+        Promise.resolve()
+          .then(() =>
+            saveNotificationSetting(
+              account.accessToken,
+              account.username,
+              getPushSystem(),
+              0,
+              [],
+              token,
+            ),
+          )
+          .catch((err) => {
+            console.warn('Failed to disable push notifications for', account.username, err);
+          }),
       ),
   );
 
@@ -144,27 +150,31 @@ export const disablePushRegistrations = (
   { deleteToken }: { deleteToken: boolean },
 ): Promise<void> => {
   const release = pendingRelease
-    .catch(() => undefined)
-    .then(() => releasePushRegistrations(accounts, deleteToken));
+    .then(() => releasePushRegistrations(accounts, deleteToken))
+    // Never rejects: releasePushRegistrations catches its own failures, and the chain
+    // must stay usable for the next release and for waiting registrations.
+    .catch((err) => {
+      console.warn('Push deregistration failed', err);
+    });
   pendingRelease = release;
   return release;
 };
 
 /**
- * Resolves once no deregistration is in progress, or after `timeoutMs`.
+ * Resolves to true once no deregistration is in progress, or to false after `timeoutMs`.
  *
  * A login right after the last account logged out would otherwise read the token
  * that the pending release is about to delete, and register a dead token. Waiting
  * lets the release finish, so `getToken()` returns the new token. The timeout keeps a
  * stuck release (a native call that never settles) from blocking registration.
  */
-export const waitForPushRelease = async (timeoutMs = PUSH_RELEASE_WAIT_MS) => {
+export const waitForPushRelease = async (timeoutMs = PUSH_RELEASE_WAIT_MS): Promise<boolean> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<void>((resolve) => {
-    timer = setTimeout(resolve, timeoutMs);
+  const timeout = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => resolve(false), timeoutMs);
   });
   try {
-    await Promise.race([pendingRelease.catch(() => undefined), timeout]);
+    return await Promise.race([pendingRelease.then(() => true), timeout]);
   } finally {
     clearTimeout(timer);
   }
@@ -172,11 +182,31 @@ export const waitForPushRelease = async (timeoutMs = PUSH_RELEASE_WAIT_MS) => {
 
 /**
  * Reads the device token for a registration, after any deregistration in progress.
- * A release that is still running when this reads the token (only possible once the
- * wait timed out) no longer deletes the token.
+ *
+ * When the wait times out, the release is still running:
+ *   - it no longer deletes the token this registration read;
+ *   - its disable requests are already out and may reach the backend AFTER this
+ *     registration, switching the row back off. They cannot be recalled, so
+ *     `onReleaseSettled` is called once the release has settled, for the caller to
+ *     register again.
  */
-export const getRegistrationToken = async (timeoutMs = PUSH_RELEASE_WAIT_MS) => {
-  await waitForPushRelease(timeoutMs);
+export const getRegistrationToken = async ({
+  timeoutMs = PUSH_RELEASE_WAIT_MS,
+  onReleaseSettled,
+}: { timeoutMs?: number; onReleaseSettled?: () => void } = {}) => {
+  const release = pendingRelease;
+  const settled = await waitForPushRelease(timeoutMs);
   registrationTokenReads += 1;
+
+  if (!settled && onReleaseSettled) {
+    release.then(() => {
+      try {
+        onReleaseSettled();
+      } catch (err) {
+        console.warn('Failed to register again after push deregistration', err);
+      }
+    });
+  }
+
   return getMessaging().getToken();
 };

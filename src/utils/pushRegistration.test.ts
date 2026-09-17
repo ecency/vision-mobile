@@ -9,6 +9,7 @@ import {
   getPushSystem,
   getRegistrationToken,
   getSignedInAccounts,
+  PushAccount,
   waitForPushRelease,
 } from './pushRegistration';
 
@@ -240,7 +241,7 @@ describe('waitForPushRelease', () => {
   const settle = () => new Promise((resolve) => setImmediate(resolve));
 
   it('resolves at once when nothing is being released', async () => {
-    await expect(waitForPushRelease(10_000)).resolves.toBeUndefined();
+    await expect(waitForPushRelease(10_000)).resolves.toBe(true);
   });
 
   it('waits until a pending release has deleted the token', async () => {
@@ -300,7 +301,7 @@ describe('waitForPushRelease', () => {
     const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
       deleteToken: true,
     });
-    await expect(waitForPushRelease(20)).resolves.toBeUndefined();
+    await expect(waitForPushRelease(20)).resolves.toBe(false);
     expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
 
     // Let the release finish so it does not hold up the next test.
@@ -315,7 +316,7 @@ describe('waitForPushRelease', () => {
     const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
       deleteToken: true,
     });
-    await expect(getRegistrationToken(20)).resolves.toBe('fcm-token');
+    await expect(getRegistrationToken({ timeoutMs: 20 })).resolves.toBe('fcm-token');
 
     stuck.resolve();
     await release;
@@ -323,9 +324,88 @@ describe('waitForPushRelease', () => {
   });
 
   it('still deletes the token for a release that starts after a registration', async () => {
-    await getRegistrationToken(20);
+    await getRegistrationToken({ timeoutMs: 20 });
 
     await disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks to register again once a release that outlived the wait settles', async () => {
+    const stuck = deferred();
+    saveMock.mockImplementation(() => stuck.promise);
+    const registerAgain = jest.fn();
+
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    await getRegistrationToken({ timeoutMs: 20, onReleaseSettled: registerAgain });
+    await settle();
+    // The disable request is still out: registering again now could still lose to it.
+    expect(registerAgain).not.toHaveBeenCalled();
+
+    stuck.resolve();
+    await release;
+    await settle();
+    expect(registerAgain).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not ask to register again when the release finished within the wait', async () => {
+    const quick = deferred();
+    saveMock.mockImplementation(() => quick.promise);
+    const registerAgain = jest.fn();
+
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: false,
+    });
+    const reading = getRegistrationToken({ timeoutMs: 10_000, onReleaseSettled: registerAgain });
+    quick.resolve();
+    await Promise.all([release, reading]);
+    await settle();
+
+    expect(registerAgain).not.toHaveBeenCalled();
+  });
+
+  it('does not ask to register again when nothing was being released', async () => {
+    const registerAgain = jest.fn();
+    await getRegistrationToken({ timeoutMs: 10_000, onReleaseSettled: registerAgain });
+    await settle();
+
+    expect(registerAgain).not.toHaveBeenCalled();
+  });
+
+  it('survives a request that throws synchronously', async () => {
+    saveMock.mockImplementationOnce(() => {
+      throw new Error('synchronous failure');
+    });
+
+    await disablePushRegistrations(
+      [
+        { username: 'alice', accessToken: 'a' },
+        { username: 'bob', accessToken: 'b' },
+      ],
+      { deleteToken: true },
+    );
+    expect(saveMock).toHaveBeenCalledTimes(2);
+    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+
+    // The chain stays usable for the next release and for waiting registrations.
+    await disablePushRegistrations([{ username: 'carol', accessToken: 'c' }], {
+      deleteToken: false,
+    });
+    expect(saveMock).toHaveBeenCalledTimes(3);
+    await expect(waitForPushRelease(20)).resolves.toBe(true);
+  });
+
+  it('keeps the chain usable after a release fails unexpectedly', async () => {
+    // A malformed call throws inside the release itself.
+    await expect(
+      disablePushRegistrations(null as unknown as PushAccount[], { deleteToken: true }),
+    ).resolves.toBeUndefined();
+
+    await expect(waitForPushRelease(20)).resolves.toBe(true);
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
       deleteToken: true,
     });
     expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
