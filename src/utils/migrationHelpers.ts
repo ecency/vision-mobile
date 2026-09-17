@@ -4,7 +4,7 @@ import Config from 'react-native-config';
 // Constants
 import { SheetManager } from 'react-native-actions-sheet';
 import { isArray } from 'lodash';
-import { getMutedUsersQueryOptions, getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
+import { getMutedUsersQueryOptions } from '@ecency/sdk';
 import THEME_OPTIONS from '../constants/options/theme';
 import { getPointsSummary } from '../providers/ecency/ePoint';
 import {
@@ -15,7 +15,7 @@ import {
   updatePinCode,
 } from '../providers/hive/auth';
 import { getDigitPinCode } from '../providers/hive/hive';
-import { getQueryClient } from '../providers/queries';
+import { fetchUnreadActivityCount, getQueryClient } from '../providers/queries';
 import AUTH_TYPE from '../constants/authType';
 
 // Services
@@ -187,9 +187,11 @@ export const migrateUserEncryption = async (
       (_currentAccount?.local?.accessToken
         ? decryptKey(_currentAccount.local.accessToken, Config.DEFAULT_PIN!)
         : '') ?? '';
-    _currentAccount.unread_activity_count = await queryClient.fetchQuery(
-      getNotificationsUnreadCountQueryOptions(_currentAccount.name, accessToken),
-    );
+    // Without a usable access code the helper returns nothing; keep the current count.
+    const unreadActivityCount = await fetchUnreadActivityCount(_currentAccount.name, accessToken);
+    if (typeof unreadActivityCount === 'number') {
+      _currentAccount.unread_activity_count = unreadActivityCount;
+    }
     _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
     // Fetch muted users using SDK query

@@ -12,8 +12,13 @@ import ROUTES from '../../../constants/routeNames';
 
 // Components
 import NotificationScreen from '../screen/notificationScreen';
-import { useAppSelector } from '../../../hooks';
-import { useNotificationReadMutation, useNotificationsQuery } from '../../../providers/queries';
+import { useAppDispatch, useAppSelector, useAppStore, useAuth } from '../../../hooks';
+import {
+  fetchUnreadActivityCount,
+  useNotificationReadMutation,
+  useNotificationsQuery,
+} from '../../../providers/queries';
+import { updateUnreadActivityCount } from '../../../redux/actions/accountAction';
 import { NotificationFilters } from '../../../providers/ecency/ecency.types';
 import QUERIES from '../../../providers/queries/queryKeys';
 import { SheetNames } from '../../../navigation/sheets';
@@ -26,13 +31,17 @@ import {
 
 const NotificationContainer = ({ navigation }: any) => {
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+  const store = useAppStore();
+  const { username: authUsername, code } = useAuth();
 
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const isConnected = useAppSelector(selectIsConnected);
   const currentAccount = useAppSelector(selectCurrentAccount);
   const globalProps = useAppSelector(selectGlobalProps);
 
-  const unreadCountRef = useRef(currentAccount.unread_acitivity_count || 0);
+  // Starts at the current count, so opening the screen does not look like new activity.
+  const unreadCountRef = useRef(currentAccount.unread_activity_count || 0);
   const curUsername = useRef(currentAccount.name);
 
   const notificationReadMutation = useNotificationReadMutation();
@@ -53,11 +62,14 @@ const NotificationContainer = ({ navigation }: any) => {
   }, [currentAccount.name]);
 
   useEffect(() => {
-    if (currentAccount.unread_activity_count > unreadCountRef.current) {
+    // A missing count reads as 0, so a later number still compares correctly.
+    const unreadCount = currentAccount.unread_activity_count || 0;
+    // Skipped while a pull to refresh is already reloading the list.
+    if (unreadCount > unreadCountRef.current && !selectedQuery.isRefreshing) {
       queryClient.invalidateQueries({ queryKey: [QUERIES.NOTIFICATIONS.GET] });
       // TODO: fetch new notifications instead
     }
-    unreadCountRef.current = currentAccount.unread_activity_count;
+    unreadCountRef.current = unreadCount;
   }, [currentAccount.unread_activity_count]);
 
   // Refetch when filter changes — the single dynamic query hook doesn't auto-fetch
@@ -84,6 +96,22 @@ const NotificationContainer = ({ navigation }: any) => {
       }
     } else {
       selectedQuery.refresh();
+      _refreshUnreadCount();
+    }
+  };
+
+  // A manual refresh updates the tab badge too, so the badge and the list agree.
+  const _refreshUnreadCount = async () => {
+    try {
+      const unreadCount = await fetchUnreadActivityCount(authUsername, code, { force: true });
+      // Read the account from the store: a switch may have committed while the request
+      // was out, before any effect of this screen could see it.
+      const latestUsername = selectCurrentAccount(store.getState())?.name;
+      if (typeof unreadCount === 'number' && latestUsername === authUsername) {
+        dispatch(updateUnreadActivityCount(unreadCount));
+      }
+    } catch (error) {
+      console.warn('Failed to refresh unread activity count', error);
     }
   };
 

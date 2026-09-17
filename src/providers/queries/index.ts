@@ -170,6 +170,7 @@ export const initQueryClient = () => {
 export const getQueryClient = getQueryClientFromSDK;
 
 export * from './notificationQueries';
+export * from './unreadActivityCount';
 export * from './draftQueries';
 export * from './bookmarkQueries';
 export * from './editorQueries';

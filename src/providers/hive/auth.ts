@@ -7,11 +7,10 @@ import {
   getAccountFullQueryOptions,
   getAccountRcQueryOptions,
   getMutedUsersQueryOptions,
-  getNotificationsUnreadCountQueryOptions,
   hsTokenRenew,
 } from '@ecency/sdk';
 import { getDigitPinCode } from './hive';
-import { getQueryClient } from '../queries';
+import { fetchUnreadActivityCount, getQueryClient } from '../queries';
 import { getPointsSummary } from '../ecency/ePoint';
 import {
   setUserData,
@@ -139,9 +138,8 @@ export const login = async (username: string, password: string) => {
   try {
     const queryClient = getQueryClient();
     const accessToken = scTokens?.access_token || '';
-    account.unread_activity_count = await queryClient.fetchQuery(
-      getNotificationsUnreadCountQueryOptions(account.username, accessToken),
-    );
+    account.unread_activity_count =
+      (await fetchUnreadActivityCount(account.username, accessToken)) ?? 0;
     account.pointsSummary = await getPointsSummary(account.username);
 
     // Fetch muted users using SDK query
@@ -207,9 +205,8 @@ export const loginWithSC2 = async (code: string) => {
     try {
       const queryClient = getQueryClient();
       const accessToken = scTokens ? scTokens.access_token : '';
-      account.unread_activity_count = await queryClient.fetchQuery(
-        getNotificationsUnreadCountQueryOptions(account.username, accessToken),
-      );
+      account.unread_activity_count =
+        (await fetchUnreadActivityCount(account.username, accessToken)) ?? 0;
       account.pointsSummary = await getPointsSummary(account.username);
 
       // Fetch muted users using SDK query
@@ -280,9 +277,7 @@ export const loginWithAuthTransfer = async (
     let avatar = '';
     try {
       const queryClient = getQueryClient();
-      account.unread_activity_count = await queryClient.fetchQuery(
-        getNotificationsUnreadCountQueryOptions(username, accessToken),
-      );
+      account.unread_activity_count = (await fetchUnreadActivityCount(username, accessToken)) ?? 0;
       account.pointsSummary = await getPointsSummary(username);
       account.mutes = await queryClient.fetchQuery(getMutedUsersQueryOptions(username));
     } catch (err) {
@@ -362,9 +357,8 @@ export const loginWithHiveAuth = async (
     try {
       const queryClient = getQueryClient();
       const accessToken = scTokens ? scTokens.access_token : '';
-      account.unread_activity_count = await queryClient.fetchQuery(
-        getNotificationsUnreadCountQueryOptions(account.username, accessToken),
-      );
+      account.unread_activity_count =
+        (await fetchUnreadActivityCount(account.username, accessToken)) ?? 0;
       account.pointsSummary = await getPointsSummary(account.username);
 
       // Fetch muted users using SDK query

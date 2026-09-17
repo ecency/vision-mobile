@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
-import { getMutedUsersQueryOptions, getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
+import { getMutedUsersQueryOptions } from '@ecency/sdk';
 import RootNavigation, { NavigateOptions } from '../../../navigation/rootNavigation';
 import { NavigateArgs, RouteName } from '../../../navigation/types';
 
@@ -23,7 +23,7 @@ import AccountsBottomSheet from '../view/accountsBottomSheetView';
 // Constants
 import AUTH_TYPE from '../../../constants/authType';
 import { getDigitPinCode } from '../../../providers/hive/hive';
-import { getQueryClient } from '../../../providers/queries';
+import { fetchUnreadActivityCount, getQueryClient } from '../../../providers/queries';
 
 import { useAppSelector } from '../../../hooks';
 import {
@@ -175,17 +175,24 @@ const AccountsBottomSheetContainer = () => {
 
       _currentAccount.local.accessToken = encryptedAccessToken;
 
-      const queryClient = getQueryClient();
-      const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
-      _currentAccount.unread_activity_count = await queryClient.fetchQuery(
-        getNotificationsUnreadCountQueryOptions(_currentAccount.name, accessToken),
-      );
-      _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
+      // Optional data: a failed request must not fail the switch, as in the app container.
+      try {
+        const queryClient = getQueryClient();
+        const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
+        _currentAccount.unread_activity_count =
+          (await fetchUnreadActivityCount(_currentAccount.name, accessToken)) ?? 0;
+        _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
-      // Fetch muted users using SDK query
-      _currentAccount.mutes = await queryClient.fetchQuery(
-        getMutedUsersQueryOptions(_currentAccount.name),
-      );
+        // Fetch muted users using SDK query
+        _currentAccount.mutes = await queryClient.fetchQuery(
+          getMutedUsersQueryOptions(_currentAccount.name),
+        );
+      } catch (err) {
+        console.warn(
+          'Optional user data fetch failed, account can still function without them',
+          err,
+        );
+      }
 
       dispatch(updateCurrentAccount(_currentAccount));
       dispatch(clearSubscribedCommunitiesCache());
