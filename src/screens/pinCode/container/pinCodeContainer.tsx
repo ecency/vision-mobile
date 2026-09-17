@@ -34,6 +34,7 @@ import {
 // Utils
 import { encryptKey, decryptKey } from '../../../utils/crypto';
 import MigrationHelpers from '../../../utils/migrationHelpers';
+import { disablePushRegistrations, getPushAccounts } from '../../../utils/pushRegistration';
 
 // Component
 import PinCodeView from '../children/pinCodeView';
@@ -306,7 +307,13 @@ class PinCodeContainer extends Component<any, any> {
   };
 
   _forgotPinCode = async () => {
-    const { otherAccounts, dispatch } = this.props;
+    const { otherAccounts, currentAccount, applicationPinCode, dispatch } = this.props;
+
+    // Every account leaves the device: stop their pushes and drop the device token.
+    // Tokens are read now, before the data below is wiped.
+    disablePushRegistrations(getPushAccounts(currentAccount, otherAccounts, applicationPinCode), {
+      deleteToken: true,
+    });
 
     await removeAllUserData()
       .then(async () => {

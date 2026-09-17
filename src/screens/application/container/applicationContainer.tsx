@@ -90,6 +90,16 @@ import { decryptKey, encryptKey } from '../../../utils/crypto';
 import parseVersionNumber from '../../../utils/parseVersionNumber';
 import { setMomentLocale } from '../../../utils/time';
 import { purgeExpiredCache } from '../../../redux/actions/cacheActions';
+import {
+  PUSH_REGISTRATION_DEDUPE_MS,
+  PUSH_REGISTRATION_REFRESH_MS,
+  beginPushRegistration,
+  decryptAccessToken,
+  disablePushRegistrations,
+  getPushSystem,
+  getSignedInAccounts,
+} from '../../../utils/pushRegistration';
+import { captureException, captureMessage } from '../../../utils/sentryUtils';
 import { fetchSubscribedCommunities } from '../../../redux/actions/communitiesAction';
 import MigrationHelpers, {
   repairOtherAccountsData,
@@ -118,6 +128,7 @@ import {
 } from '../../../redux/selectors';
 
 let firebaseOnMessageListener: any = null;
+let firebaseTokenRefreshListener: (() => void) | null = null;
 let appStateSub: NativeEventSubscription | null = null;
 
 class ApplicationContainer extends Component<any, any> {
@@ -134,6 +145,18 @@ class ApplicationContainer extends Component<any, any> {
   _wsReconnectAttempts: number = 0;
 
   _fcmAvailable: boolean | null = null; // Cache FCM availability check
+
+  _lastPushRegistration = 0;
+
+  // Accounts whose last push registration the server refused (401/403).
+  _rejectedPushRegistrations = new Set<string>();
+
+  // Accounts being logged out: still listed until the logout finishes, but never
+  // registered again.
+  _departingAccounts = new Set<string>();
+
+  // Push registration problems already reported to Sentry this session.
+  _reportedPushProblems = new Set<string>();
 
   constructor(props: any) {
     super(props);
@@ -159,6 +182,7 @@ class ApplicationContainer extends Component<any, any> {
     } else {
       console.log('FCM not available - will use WebSocket fallback when user logs in');
     }
+    this._createTokenRefreshListener();
 
     // set avatar cache stamp to invalidate previous session avatars
     dispatch(setAvatarCacheStamp(new Date().getTime()));
@@ -197,7 +221,21 @@ class ApplicationContainer extends Component<any, any> {
   };
 
   componentDidUpdate(prevProps: any) {
-    const { isGlobalRenderRequired, dispatch } = this.props;
+    const { isGlobalRenderRequired, dispatch, currentAccount } = this.props;
+
+    // A login (by any method) or an account switch makes a different account current.
+    // Register it right away instead of waiting for the next cold start. The access
+    // token is renewed on every start and foreground, so a token change alone only
+    // retries an account whose last registration the server refused.
+    const accountChanged =
+      !!currentAccount?.name && currentAccount.name !== prevProps.currentAccount?.name;
+    const rejectedTokenRenewed =
+      !!currentAccount?.name &&
+      currentAccount.local?.accessToken !== prevProps.currentAccount?.local?.accessToken &&
+      this._rejectedPushRegistrations.has(currentAccount.name);
+    if (accountChanged || rejectedTokenRenewed) {
+      this._registerAccountForNotifications(currentAccount);
+    }
 
     if (isGlobalRenderRequired !== prevProps.isGlobalRenderRequired && isGlobalRenderRequired) {
       this.setState(
@@ -228,6 +266,11 @@ class ApplicationContainer extends Component<any, any> {
 
     if (firebaseOnMessageListener) {
       firebaseOnMessageListener();
+    }
+
+    if (firebaseTokenRefreshListener) {
+      firebaseTokenRefreshListener();
+      firebaseTokenRefreshListener = null;
     }
 
     this._disconnectNotificationServer();
@@ -326,6 +369,9 @@ class ApplicationContainer extends Component<any, any> {
       this._refreshGlobalProps();
       this._refreshUnreadActivityCount();
       this._refreshUnreadChats();
+      if (Date.now() - this._lastPushRegistration > PUSH_REGISTRATION_REFRESH_MS) {
+        this._registerDeviceForNotifications();
+      }
       // Refresh account data to get latest profile updates from blockchain
       if (currentAccount?.local) {
         this._fetchUserDataFromDsteem(currentAccount.local);
@@ -358,7 +404,10 @@ class ApplicationContainer extends Component<any, any> {
     await this._getUserDataFromRealm();
     await this._refreshUnreadChats();
     this._compareAndPromptForUpdate();
-    this._registerDeviceForNotifications();
+    // Reconnects run this twice in a row (NetInfo listener and props change).
+    if (Date.now() - this._lastPushRegistration > PUSH_REGISTRATION_DEDUPE_MS) {
+      this._registerDeviceForNotifications();
+    }
     dispatch(purgeExpiredCache());
   };
 
@@ -401,6 +450,21 @@ class ApplicationContainer extends Component<any, any> {
         foregroundNotificationData: remoteMessage,
       });
     });
+  };
+
+  // FCM rotates tokens (app data restore, reinstall over backup, periodic refresh).
+  // The old token stops working, so register the new one for every account now.
+  _createTokenRefreshListener = () => {
+    if (firebaseTokenRefreshListener) {
+      return;
+    }
+    try {
+      firebaseTokenRefreshListener = getMessaging().onTokenRefresh(() => {
+        this._registerDeviceForNotifications();
+      });
+    } catch (error) {
+      console.warn('Failed to listen for push token refresh', error);
+    }
   };
 
   _handleConntectionChange = (status: any) => {
@@ -717,43 +781,63 @@ class ApplicationContainer extends Component<any, any> {
     }
   };
 
-  // update notification settings and update push token for each signed accoutn useing access tokens
-  _registerDeviceForNotifications = (settings?: any) => {
-    const { currentAccount, otherAccounts, notificationDetails, isNotificationsEnabled } =
-      this.props;
+  // Register the push token with each signed-in account's notification settings.
+  _registerDeviceForNotifications = () => {
+    const { currentAccount, otherAccounts } = this.props;
 
-    const isEnabled = settings ? !!settings.notification : isNotificationsEnabled;
-    settings = settings || notificationDetails;
+    this._lastPushRegistration = Date.now();
 
-    const _enabledNotificationForAccount = (account: any) => {
-      const encAccessToken = account?.local?.accessToken;
-      // otherAccounts entries are keyed by username; name can be undefined on some
-      // (e.g. HiveSigner) entries, so fall back to username.
-      this._enableNotification(
-        account.name || account.username,
-        isEnabled,
-        settings,
-        encAccessToken,
-      );
-    };
-
-    // updateing fcm token with settings;
-    otherAccounts.forEach((account: any) => {
-      // since there can be more than one accounts, process access tokens separate
-      if (account?.local?.accessToken) {
-        _enabledNotificationForAccount(account);
-        return;
-      }
-
-      // No stored access token on this other-account entry. This is common and benign
-      // (HiveSigner accounts, or entries keyed only by username), so do NOT report it to
-      // Sentry - it previously fired an error on every launch (ECENCY-MOBILE-1QY).
-      const acctName = account?.name || account?.username;
-      if (acctName && currentAccount?.name === acctName) {
-        // fallback to current account access token to register at least the logged-in account
-        _enabledNotificationForAccount(currentAccount);
+    // Accounts without a stored access token (HiveSigner accounts, entries keyed only by
+    // username) are skipped without a report: reporting them fired an error on every
+    // launch (ECENCY-MOBILE-1QY).
+    getSignedInAccounts(currentAccount, otherAccounts).forEach(({ username, account }) => {
+      if (!this._departingAccounts.has(username)) {
+        this._registerAccountForNotifications(account);
       }
     });
+  };
+
+  _signedInPushAccount = (username: string) => {
+    if (this._departingAccounts.has(username)) {
+      return undefined;
+    }
+    const { currentAccount, otherAccounts } = this.props;
+    return getSignedInAccounts(currentAccount, otherAccounts).find(
+      (signedIn) => signedIn.username === username,
+    )?.account;
+  };
+
+  _registerAgainIfSignedIn = (username: string) => {
+    const account = this._signedInPushAccount(username);
+    if (account) {
+      this._registerAccountForNotifications(account);
+    }
+  };
+
+  // Reports a push registration problem once per session.
+  _reportPushProblem = (key: string, report: () => void) => {
+    if (!this._reportedPushProblems.has(key)) {
+      this._reportedPushProblems.add(key);
+      report();
+    }
+  };
+
+  _registerAccountForNotifications = (account: any) => {
+    const { notificationDetails, isNotificationsEnabled } = this.props;
+    const encAccessToken = account?.local?.accessToken;
+
+    if (!encAccessToken) {
+      return;
+    }
+
+    // otherAccounts entries are keyed by username; name can be undefined on some
+    // (e.g. HiveSigner) entries, so fall back to username.
+    this._enableNotification(
+      account.name || account.username,
+      isNotificationsEnabled,
+      notificationDetails,
+      encAccessToken,
+    );
   };
 
   /**
@@ -1052,7 +1136,17 @@ class ApplicationContainer extends Component<any, any> {
   };
 
   _logout = async (username: any) => {
-    const { currentAccount, otherAccounts, dispatch, intl } = this.props;
+    const { currentAccount, otherAccounts, dispatch, intl, pinCode } = this.props;
+
+    // Read the token before the account data is removed below.
+    const loggedOutAccount =
+      currentAccount?.name === username
+        ? currentAccount
+        : otherAccounts.find((user: any) => (user.username || user.name) === username);
+    const accessToken = decryptAccessToken(loggedOutAccount?.local?.accessToken, pinCode);
+
+    // Until the logout finishes the account is still listed; keep it out of registrations.
+    this._departingAccounts.add(username);
 
     try {
       const response = await removeUserData(username);
@@ -1062,12 +1156,16 @@ class ApplicationContainer extends Component<any, any> {
       }
       this._updatePrevLoggedInUsersList(username);
 
-      const encAccessToken =
-        currentAccount.name === username ? currentAccount?.local?.accessToken : null;
-      this._enableNotification(username, false, null, encAccessToken);
-
       // switch account if other account exist
       const _otherAccounts = otherAccounts.filter((user: any) => user.username !== username);
+
+      // Stop pushes for the logged-out account. With no account left, also delete the
+      // device token so nothing registered under it is delivered any more.
+      disablePushRegistrations([{ username, accessToken }], {
+        deleteToken: _otherAccounts.length === 0,
+        // A replaced token must be registered again for whoever is still signed in.
+        onTokenReplaced: () => this._registerDeviceForNotifications(),
+      });
 
       if (_otherAccounts.length > 0) {
         const targetAccount = _otherAccounts[0];
@@ -1105,16 +1203,34 @@ class ApplicationContainer extends Component<any, any> {
       dispatch(logoutDone());
       Alert.alert(intl.formatMessage({ id: 'alert.fail' }), (err as any).message);
       this._repairUserAccountData(username);
+    } finally {
+      this._departingAccounts.delete(username);
     }
   };
 
   _enableNotification = async (
-    username: any,
-    isEnable: any,
-    settings = null,
-    encAccesstoken = null,
+    username: string,
+    isEnable: boolean,
+    settings: any,
+    encAccesstoken: string,
   ) => {
-    const accessToken = encAccesstoken ? decryptKey(encAccesstoken, Config.DEFAULT_PIN) : null;
+    const { pinCode } = this.props;
+    const accessToken = decryptAccessToken(encAccesstoken, pinCode);
+
+    if (!accessToken) {
+      // The request would be rejected without it. A stored token that does not decrypt
+      // means the PIN state and the stored keys disagree, which is worth knowing about.
+      this._reportPushProblem(`decrypt:${username}`, () =>
+        captureMessage(
+          'Push registration skipped: stored access token did not decrypt',
+          (scope) => {
+            scope.setTag('context', 'push-registration');
+            scope.setFingerprint(['push-registration-decrypt']);
+          },
+        ),
+      );
+      return;
+    }
 
     // compile notify_types
     let notify_types: any[] = [];
@@ -1168,16 +1284,53 @@ class ApplicationContainer extends Component<any, any> {
         return;
       }
 
-      const token = await getMessaging().getToken();
-      console.log('FCM Token obtained:', !!token);
-      saveNotificationSetting(
-        accessToken!,
-        username,
-        `fcm-${Platform.OS}`,
-        Number(isEnable),
-        notify_types,
-        token,
-      );
+      // A logout may still be disabling rows or replacing this token: register after it,
+      // and only if the account is still signed in by then. If the wait gave up, register
+      // once more when every logout has finished, so a late disable is not the last write.
+      const registration = await beginPushRegistration({
+        stillWanted: () => !!this._signedInPushAccount(username),
+        onReleaseSettled: () => this._registerAgainIfSignedIn(username),
+      });
+      if (!registration) {
+        return;
+      }
+      console.log('FCM Token obtained:', !!registration.token);
+      try {
+        await saveNotificationSetting(
+          accessToken,
+          username,
+          getPushSystem(),
+          Number(isEnable),
+          notify_types,
+          registration.token,
+        );
+        this._rejectedPushRegistrations.delete(username);
+      } catch (error) {
+        const status = (error as any)?.status;
+        if (typeof status !== 'number') {
+          // Offline or timed out: the next start, reconnect or daily refresh retries.
+          console.warn('Push registration request failed', error);
+          return;
+        }
+        if (status === 401 || status === 403) {
+          if (this._signedInPushAccount(username)?.local?.accessToken !== encAccesstoken) {
+            // The token was renewed while this request was out: retry with the new one.
+            this._registerAgainIfSignedIn(username);
+          } else {
+            // Retried when this account's access token is renewed (componentDidUpdate).
+            this._rejectedPushRegistrations.add(username);
+          }
+        }
+        this._reportPushProblem(`http:${status}:${username}`, () =>
+          captureException(error, (scope) => {
+            scope.setTag('context', 'push-registration');
+            scope.setTag('status', String(status));
+            scope.setFingerprint(['push-registration-http', String(status)]);
+          }),
+        );
+      } finally {
+        registration.finish();
+      }
     } catch (error) {
       // Handle platform-specific FCM errors gracefully
       const errorMessage = (error as any).message || '';
@@ -1190,9 +1343,12 @@ class ApplicationContainer extends Component<any, any> {
         Platform.OS === 'android' &&
         (errorMessage.includes('MISSING_INSTANCEID_SERVICE') ||
           errorMessage.includes('SERVICE_NOT_AVAILABLE') ||
-          errorMessage.includes('AUTHENTICATION_FAILED'))
+          errorMessage.includes('AUTHENTICATION_FAILED') ||
+          errorMessage.includes('FIS_AUTH_ERROR'))
       ) {
         // Android: Google Play Services issues (common on emulators, custom ROMs, outdated devices)
+        // FIS_AUTH_ERROR is Firebase Installations failing to authenticate the device
+        // (ECENCY-MOBILE-28Y); the app cannot fix it either.
         console.log(
           'Google Play Services not available or misconfigured - FCM disabled for this device',
         );
