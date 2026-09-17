@@ -13,8 +13,11 @@ import ROUTES from '../../../constants/routeNames';
 // Components
 import NotificationScreen from '../screen/notificationScreen';
 import { useAppDispatch, useAppSelector, useAuth } from '../../../hooks';
-import { useNotificationReadMutation, useNotificationsQuery } from '../../../providers/queries';
-import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
+import {
+  fetchUnreadActivityCount,
+  useNotificationReadMutation,
+  useNotificationsQuery,
+} from '../../../providers/queries';
 import { updateUnreadActivityCount } from '../../../redux/actions/accountAction';
 import { NotificationFilters } from '../../../providers/ecency/ecency.types';
 import QUERIES from '../../../providers/queries/queryKeys';
@@ -58,11 +61,13 @@ const NotificationContainer = ({ navigation }: any) => {
   }, [currentAccount.name]);
 
   useEffect(() => {
-    if (currentAccount.unread_activity_count > unreadCountRef.current) {
+    // A missing count reads as 0, so a later number still compares correctly.
+    const unreadCount = currentAccount.unread_activity_count || 0;
+    if (unreadCount > unreadCountRef.current) {
       queryClient.invalidateQueries({ queryKey: [QUERIES.NOTIFICATIONS.GET] });
       // TODO: fetch new notifications instead
     }
-    unreadCountRef.current = currentAccount.unread_activity_count;
+    unreadCountRef.current = unreadCount;
   }, [currentAccount.unread_activity_count]);
 
   // Refetch when filter changes — the single dynamic query hook doesn't auto-fetch

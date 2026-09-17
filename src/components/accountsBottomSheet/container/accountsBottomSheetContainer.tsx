@@ -23,8 +23,7 @@ import AccountsBottomSheet from '../view/accountsBottomSheetView';
 // Constants
 import AUTH_TYPE from '../../../constants/authType';
 import { getDigitPinCode } from '../../../providers/hive/hive';
-import { getQueryClient } from '../../../providers/queries';
-import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
+import { fetchUnreadActivityCount, getQueryClient } from '../../../providers/queries';
 
 import { useAppSelector } from '../../../hooks';
 import {
@@ -178,10 +177,8 @@ const AccountsBottomSheetContainer = () => {
 
       const queryClient = getQueryClient();
       const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
-      _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
-        _currentAccount.name,
-        accessToken,
-      );
+      _currentAccount.unread_activity_count =
+        (await fetchUnreadActivityCount(_currentAccount.name, accessToken)) ?? 0;
       _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
       // Fetch muted users using SDK query

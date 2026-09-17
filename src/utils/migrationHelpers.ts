@@ -15,8 +15,7 @@ import {
   updatePinCode,
 } from '../providers/hive/auth';
 import { getDigitPinCode } from '../providers/hive/hive';
-import { getQueryClient } from '../providers/queries';
-import { fetchUnreadActivityCount } from '../providers/queries/unreadActivityCount';
+import { fetchUnreadActivityCount, getQueryClient } from '../providers/queries';
 import AUTH_TYPE from '../constants/authType';
 
 // Services
@@ -188,10 +187,11 @@ export const migrateUserEncryption = async (
       (_currentAccount?.local?.accessToken
         ? decryptKey(_currentAccount.local.accessToken, Config.DEFAULT_PIN!)
         : '') ?? '';
-    _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
-      _currentAccount.name,
-      accessToken,
-    );
+    // Without a usable access code the helper returns nothing; keep the current count.
+    const unreadActivityCount = await fetchUnreadActivityCount(_currentAccount.name, accessToken);
+    if (typeof unreadActivityCount === 'number') {
+      _currentAccount.unread_activity_count = unreadActivityCount;
+    }
     _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
     // Fetch muted users using SDK query

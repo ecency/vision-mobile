@@ -37,8 +37,7 @@ import {
   setLastUpdateCheck,
 } from '../../../storage/storage';
 import { getDigitPinCode, getUser } from '../../../providers/hive/hive';
-import { getQueryClient } from '../../../providers/queries';
-import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
+import { fetchUnreadActivityCount, getQueryClient } from '../../../providers/queries';
 import { getPointsSummary } from '../../../providers/ecency/ePoint';
 import {
   migrateToMasterKeyWithAccessToken,
@@ -1270,10 +1269,8 @@ class ApplicationContainer extends Component<any, any> {
           (_currentAccount?.local?.accessToken
             ? decryptKey(_currentAccount.local.accessToken, getDigitPinCode(pinCode))
             : '') ?? '';
-        _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
-          _currentAccount.name,
-          accessToken,
-        );
+        _currentAccount.unread_activity_count =
+          (await fetchUnreadActivityCount(_currentAccount.name, accessToken)) ?? 0;
         _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
         // Fetch muted users using SDK query
