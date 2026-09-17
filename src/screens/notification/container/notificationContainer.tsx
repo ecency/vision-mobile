@@ -12,7 +12,7 @@ import ROUTES from '../../../constants/routeNames';
 
 // Components
 import NotificationScreen from '../screen/notificationScreen';
-import { useAppDispatch, useAppSelector, useAuth } from '../../../hooks';
+import { useAppDispatch, useAppSelector, useAppStore, useAuth } from '../../../hooks';
 import {
   fetchUnreadActivityCount,
   useNotificationReadMutation,
@@ -32,6 +32,7 @@ import {
 const NotificationContainer = ({ navigation }: any) => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
+  const store = useAppStore();
   const { username: authUsername, code } = useAuth();
 
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
@@ -102,7 +103,10 @@ const NotificationContainer = ({ navigation }: any) => {
   const _refreshUnreadCount = async () => {
     try {
       const unreadCount = await fetchUnreadActivityCount(authUsername, code, { force: true });
-      if (typeof unreadCount === 'number' && curUsername.current === authUsername) {
+      // Read the account from the store: a switch may have committed while the request
+      // was out, before any effect of this screen could see it.
+      const latestUsername = selectCurrentAccount(store.getState())?.name;
+      if (typeof unreadCount === 'number' && latestUsername === authUsername) {
         dispatch(updateUnreadActivityCount(unreadCount));
       }
     } catch (error) {
