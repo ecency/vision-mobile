@@ -175,16 +175,24 @@ const AccountsBottomSheetContainer = () => {
 
       _currentAccount.local.accessToken = encryptedAccessToken;
 
-      const queryClient = getQueryClient();
-      const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
-      _currentAccount.unread_activity_count =
-        (await fetchUnreadActivityCount(_currentAccount.name, accessToken)) ?? 0;
-      _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
+      // Optional data: a failed request must not fail the switch, as in the app container.
+      try {
+        const queryClient = getQueryClient();
+        const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
+        _currentAccount.unread_activity_count =
+          (await fetchUnreadActivityCount(_currentAccount.name, accessToken)) ?? 0;
+        _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
-      // Fetch muted users using SDK query
-      _currentAccount.mutes = await queryClient.fetchQuery(
-        getMutedUsersQueryOptions(_currentAccount.name),
-      );
+        // Fetch muted users using SDK query
+        _currentAccount.mutes = await queryClient.fetchQuery(
+          getMutedUsersQueryOptions(_currentAccount.name),
+        );
+      } catch (err) {
+        console.warn(
+          'Optional user data fetch failed, account can still function without them',
+          err,
+        );
+      }
 
       dispatch(updateCurrentAccount(_currentAccount));
       dispatch(clearSubscribedCommunitiesCache());

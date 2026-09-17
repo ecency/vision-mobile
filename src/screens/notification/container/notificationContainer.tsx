@@ -64,7 +64,8 @@ const NotificationContainer = ({ navigation }: any) => {
   useEffect(() => {
     // A missing count reads as 0, so a later number still compares correctly.
     const unreadCount = currentAccount.unread_activity_count || 0;
-    if (unreadCount > unreadCountRef.current) {
+    // Skipped while a pull to refresh is already reloading the list.
+    if (unreadCount > unreadCountRef.current && !selectedQuery.isRefreshing) {
       queryClient.invalidateQueries({ queryKey: [QUERIES.NOTIFICATIONS.GET] });
       // TODO: fetch new notifications instead
     }

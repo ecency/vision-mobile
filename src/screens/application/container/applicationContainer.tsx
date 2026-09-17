@@ -37,7 +37,11 @@ import {
   setLastUpdateCheck,
 } from '../../../storage/storage';
 import { getDigitPinCode, getUser } from '../../../providers/hive/hive';
-import { fetchUnreadActivityCount, getQueryClient } from '../../../providers/queries';
+import {
+  fetchUnreadActivityCount,
+  getCachedUnreadActivityCount,
+  getQueryClient,
+} from '../../../providers/queries';
 import { getPointsSummary } from '../../../providers/ecency/ePoint';
 import {
   migrateToMasterKeyWithAccessToken,
@@ -687,6 +691,19 @@ class ApplicationContainer extends Component<any, any> {
           err,
         );
       }
+
+      // The requests above take seconds. Apply nothing if the user switched account or
+      // logged out meanwhile, and take the newest count: a push or websocket event may
+      // have fetched a later one while they ran.
+      const { currentAccount: latestAccount } = this.props;
+      if (latestAccount?.name !== realmObject.username) {
+        return;
+      }
+      const latestCount = getCachedUnreadActivityCount(realmObject.username);
+      if (typeof latestCount === 'number') {
+        accountData.unread_activity_count = latestCount;
+      }
+
       dispatch(updateCurrentAccount(accountData));
       dispatch(fetchSubscribedCommunities(realmObject.username));
 

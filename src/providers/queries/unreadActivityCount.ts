@@ -11,6 +11,14 @@ import { getNotificationsUnreadCountQueryOptions, getQueryClient } from '@ecency
  * Needs @ecency/sdk 2.4.11 or later: earlier versions seeded the query with
  * `initialData: 0`, which counted as a fresh count and was returned without a request.
  */
+/** The most recent unread count fetched for `username`, if there is one. */
+export const getCachedUnreadActivityCount = (username: string | undefined): number | undefined =>
+  username
+    ? getQueryClient().getQueryData(
+        getNotificationsUnreadCountQueryOptions(username, undefined).queryKey,
+      )
+    : undefined;
+
 export const fetchUnreadActivityCount = async (
   username: string | undefined,
   code: string | undefined,

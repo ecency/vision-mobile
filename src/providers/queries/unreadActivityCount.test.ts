@@ -1,6 +1,6 @@
 import { QueryCache, QueryClient, dehydrate, hydrate } from '@tanstack/react-query';
 import { getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
-import { fetchUnreadActivityCount } from './unreadActivityCount';
+import { fetchUnreadActivityCount, getCachedUnreadActivityCount } from './unreadActivityCount';
 
 // The real SDK query options: the bug came from their old `initialData: 0`, so a mock
 // would hide exactly what these tests are about. Only the query client is swapped.
@@ -89,6 +89,22 @@ describe('fetchUnreadActivityCount', () => {
     await expect(fetchUnreadActivityCount('alice', 'code')).rejects.toThrow(
       'Network request failed',
     );
+  });
+});
+
+describe('getCachedUnreadActivityCount', () => {
+  it('returns the newest count fetched for the account', async () => {
+    expect(getCachedUnreadActivityCount('alice')).toBeUndefined();
+
+    answer(7);
+    await fetchUnreadActivityCount('alice', 'code');
+    expect(getCachedUnreadActivityCount('alice')).toBe(7);
+
+    answer(9);
+    await fetchUnreadActivityCount('alice', 'code', { force: true });
+    expect(getCachedUnreadActivityCount('alice')).toBe(9);
+    expect(getCachedUnreadActivityCount('bob')).toBeUndefined();
+    expect(getCachedUnreadActivityCount(undefined)).toBeUndefined();
   });
 });
 
