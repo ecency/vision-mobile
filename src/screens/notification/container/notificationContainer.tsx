@@ -12,8 +12,10 @@ import ROUTES from '../../../constants/routeNames';
 
 // Components
 import NotificationScreen from '../screen/notificationScreen';
-import { useAppSelector } from '../../../hooks';
+import { useAppDispatch, useAppSelector, useAuth } from '../../../hooks';
 import { useNotificationReadMutation, useNotificationsQuery } from '../../../providers/queries';
+import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
+import { updateUnreadActivityCount } from '../../../redux/actions/accountAction';
 import { NotificationFilters } from '../../../providers/ecency/ecency.types';
 import QUERIES from '../../../providers/queries/queryKeys';
 import { SheetNames } from '../../../navigation/sheets';
@@ -26,13 +28,16 @@ import {
 
 const NotificationContainer = ({ navigation }: any) => {
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+  const { username: authUsername, code } = useAuth();
 
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
   const isConnected = useAppSelector(selectIsConnected);
   const currentAccount = useAppSelector(selectCurrentAccount);
   const globalProps = useAppSelector(selectGlobalProps);
 
-  const unreadCountRef = useRef(currentAccount.unread_acitivity_count || 0);
+  // Starts at the current count, so opening the screen does not look like new activity.
+  const unreadCountRef = useRef(currentAccount.unread_activity_count || 0);
   const curUsername = useRef(currentAccount.name);
 
   const notificationReadMutation = useNotificationReadMutation();
@@ -84,6 +89,19 @@ const NotificationContainer = ({ navigation }: any) => {
       }
     } else {
       selectedQuery.refresh();
+      _refreshUnreadCount();
+    }
+  };
+
+  // A manual refresh updates the tab badge too, so the badge and the list agree.
+  const _refreshUnreadCount = async () => {
+    try {
+      const unreadCount = await fetchUnreadActivityCount(authUsername, code, { force: true });
+      if (typeof unreadCount === 'number' && curUsername.current === authUsername) {
+        dispatch(updateUnreadActivityCount(unreadCount));
+      }
+    } catch (error) {
+      console.warn('Failed to refresh unread activity count', error);
     }
   };
 

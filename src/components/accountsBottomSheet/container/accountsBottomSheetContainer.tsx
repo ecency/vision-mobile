@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { Alert } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
-import { getMutedUsersQueryOptions, getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
+import { getMutedUsersQueryOptions } from '@ecency/sdk';
 import RootNavigation, { NavigateOptions } from '../../../navigation/rootNavigation';
 import { NavigateArgs, RouteName } from '../../../navigation/types';
 
@@ -24,6 +24,7 @@ import AccountsBottomSheet from '../view/accountsBottomSheetView';
 import AUTH_TYPE from '../../../constants/authType';
 import { getDigitPinCode } from '../../../providers/hive/hive';
 import { getQueryClient } from '../../../providers/queries';
+import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
 
 import { useAppSelector } from '../../../hooks';
 import {
@@ -177,8 +178,9 @@ const AccountsBottomSheetContainer = () => {
 
       const queryClient = getQueryClient();
       const accessToken = decryptKey(encryptedAccessToken, getDigitPinCode(pinHash)) ?? '';
-      _currentAccount.unread_activity_count = await queryClient.fetchQuery(
-        getNotificationsUnreadCountQueryOptions(_currentAccount.name, accessToken),
+      _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
+        _currentAccount.name,
+        accessToken,
       );
       _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 

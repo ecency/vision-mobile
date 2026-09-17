@@ -4,7 +4,7 @@ import Config from 'react-native-config';
 // Constants
 import { SheetManager } from 'react-native-actions-sheet';
 import { isArray } from 'lodash';
-import { getMutedUsersQueryOptions, getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
+import { getMutedUsersQueryOptions } from '@ecency/sdk';
 import THEME_OPTIONS from '../constants/options/theme';
 import { getPointsSummary } from '../providers/ecency/ePoint';
 import {
@@ -16,6 +16,7 @@ import {
 } from '../providers/hive/auth';
 import { getDigitPinCode } from '../providers/hive/hive';
 import { getQueryClient } from '../providers/queries';
+import { fetchUnreadActivityCount } from '../providers/queries/unreadActivityCount';
 import AUTH_TYPE from '../constants/authType';
 
 // Services
@@ -187,8 +188,9 @@ export const migrateUserEncryption = async (
       (_currentAccount?.local?.accessToken
         ? decryptKey(_currentAccount.local.accessToken, Config.DEFAULT_PIN!)
         : '') ?? '';
-    _currentAccount.unread_activity_count = await queryClient.fetchQuery(
-      getNotificationsUnreadCountQueryOptions(_currentAccount.name, accessToken),
+    _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
+      _currentAccount.name,
+      accessToken,
     );
     _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 

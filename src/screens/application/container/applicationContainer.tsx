@@ -15,11 +15,7 @@ import ReceiveSharingIntent from 'react-native-receive-sharing-intent';
 // Constants
 import { SheetManager } from 'react-native-actions-sheet';
 import * as Sentry from '@sentry/react-native';
-import {
-  getMutedUsersQueryOptions,
-  getNotificationsUnreadCountQueryOptions,
-  saveNotificationSetting,
-} from '@ecency/sdk';
+import { getMutedUsersQueryOptions, saveNotificationSetting } from '@ecency/sdk';
 
 import AUTH_TYPE from '../../../constants/authType';
 import ROUTES from '../../../constants/routeNames';
@@ -42,6 +38,7 @@ import {
 } from '../../../storage/storage';
 import { getDigitPinCode, getUser } from '../../../providers/hive/hive';
 import { getQueryClient } from '../../../providers/queries';
+import { fetchUnreadActivityCount } from '../../../providers/queries/unreadActivityCount';
 import { getPointsSummary } from '../../../providers/ecency/ePoint';
 import {
   migrateToMasterKeyWithAccessToken,
@@ -426,11 +423,16 @@ class ApplicationContainer extends Component<any, any> {
           ? decryptKey(currentAccount.local.accessToken, getDigitPinCode(pinCode))
           : '') ?? '';
       try {
-        const queryClient = getQueryClient();
-        const unreadActivityCount = await queryClient.fetchQuery(
-          getNotificationsUnreadCountQueryOptions(username, accessToken),
-        );
-        dispatch(updateUnreadActivityCount(unreadActivityCount));
+        // Callers react to a new notification, so ask the server even when the cached
+        // count is under a minute old.
+        const unreadActivityCount = await fetchUnreadActivityCount(username, accessToken, {
+          force: true,
+        });
+        // The count belongs to the account that was current when the request started.
+        const { currentAccount: latestAccount } = this.props;
+        if (typeof unreadActivityCount === 'number' && latestAccount?.name === username) {
+          dispatch(updateUnreadActivityCount(unreadActivityCount));
+        }
       } catch (error) {
         // Keep the last-known count: this runs on every incoming notification,
         // and intermittent mobile connectivity must not wipe the badge to 0.
@@ -653,15 +655,26 @@ class ApplicationContainer extends Component<any, any> {
         accountData = await this._refreshAccessToken(accountData);
       }
 
+      // getUser() starts the count at 0. Keep the badge's current count for this
+      // account until a fresh one arrives, so a failed request does not clear it.
+      const { currentAccount } = this.props;
+      if (currentAccount?.name === realmObject.username) {
+        accountData.unread_activity_count = currentAccount.unread_activity_count || 0;
+      }
+
       try {
         const queryClient = getQueryClient();
         const accessToken =
           (accountData?.local?.accessToken
             ? decryptKey(accountData.local.accessToken, getDigitPinCode(pinCode))
             : '') ?? '';
-        accountData.unread_activity_count = await queryClient.fetchQuery(
-          getNotificationsUnreadCountQueryOptions(realmObject.username, accessToken),
+        const unreadActivityCount = await fetchUnreadActivityCount(
+          realmObject.username,
+          accessToken,
         );
+        if (typeof unreadActivityCount === 'number') {
+          accountData.unread_activity_count = unreadActivityCount;
+        }
 
         // Fetch muted users using SDK query
         accountData.mutes = await queryClient.fetchQuery(
@@ -1257,8 +1270,9 @@ class ApplicationContainer extends Component<any, any> {
           (_currentAccount?.local?.accessToken
             ? decryptKey(_currentAccount.local.accessToken, getDigitPinCode(pinCode))
             : '') ?? '';
-        _currentAccount.unread_activity_count = await queryClient.fetchQuery(
-          getNotificationsUnreadCountQueryOptions(_currentAccount.name, accessToken),
+        _currentAccount.unread_activity_count = await fetchUnreadActivityCount(
+          _currentAccount.name,
+          accessToken,
         );
         _currentAccount.pointsSummary = await getPointsSummary(_currentAccount.name);
 
