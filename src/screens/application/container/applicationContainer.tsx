@@ -95,8 +95,8 @@ import {
   decryptAccessToken,
   disablePushRegistrations,
   getPushSystem,
+  getRegistrationToken,
   getSignedInAccounts,
-  waitForPushRelease,
 } from '../../../utils/pushRegistration';
 import { captureException, captureMessage } from '../../../utils/sentryUtils';
 import { fetchSubscribedCommunities } from '../../../redux/actions/communitiesAction';
@@ -146,6 +146,9 @@ class ApplicationContainer extends Component<any, any> {
   _fcmAvailable: boolean | null = null; // Cache FCM availability check
 
   _lastPushRegistration = 0;
+
+  // Accounts whose last push registration the server refused (401/403).
+  _rejectedPushRegistrations = new Set<string>();
 
   constructor(props: any) {
     super(props);
@@ -213,8 +216,16 @@ class ApplicationContainer extends Component<any, any> {
     const { isGlobalRenderRequired, dispatch, currentAccount } = this.props;
 
     // A login (by any method) or an account switch makes a different account current.
-    // Register it right away instead of waiting for the next cold start.
-    if (currentAccount?.name && currentAccount.name !== prevProps.currentAccount?.name) {
+    // Register it right away instead of waiting for the next cold start. The access
+    // token is renewed on every start and foreground, so a token change alone only
+    // retries an account whose last registration the server refused.
+    const accountChanged =
+      !!currentAccount?.name && currentAccount.name !== prevProps.currentAccount?.name;
+    const rejectedTokenRenewed =
+      !!currentAccount?.name &&
+      currentAccount.local?.accessToken !== prevProps.currentAccount?.local?.accessToken &&
+      this._rejectedPushRegistrations.has(currentAccount.name);
+    if (accountChanged || rejectedTokenRenewed) {
       this._registerAccountForNotifications(currentAccount);
     }
 
@@ -1225,8 +1236,7 @@ class ApplicationContainer extends Component<any, any> {
       }
 
       // A logout may still be disabling rows and deleting this token; read it after that.
-      await waitForPushRelease();
-      const token = await getMessaging().getToken();
+      const token = await getRegistrationToken();
       console.log('FCM Token obtained:', !!token);
       try {
         await saveNotificationSetting(
@@ -1237,12 +1247,17 @@ class ApplicationContainer extends Component<any, any> {
           notify_types,
           token,
         );
+        this._rejectedPushRegistrations.delete(username);
       } catch (error) {
         const status = (error as any)?.status;
         if (typeof status !== 'number') {
           // Offline or timed out: the next start, reconnect or daily refresh retries.
           console.warn('Push registration request failed', error);
           return;
+        }
+        if (status === 401 || status === 403) {
+          // Retried when this account's access token is renewed (componentDidUpdate).
+          this._rejectedPushRegistrations.add(username);
         }
         captureException(error, (scope) => {
           scope.setTag('context', 'push-registration');

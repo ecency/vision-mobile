@@ -7,6 +7,7 @@ import {
   disablePushRegistrations,
   getPushAccounts,
   getPushSystem,
+  getRegistrationToken,
   getSignedInAccounts,
   waitForPushRelease,
 } from './pushRegistration';
@@ -305,5 +306,28 @@ describe('waitForPushRelease', () => {
     // Let the release finish so it does not hold up the next test.
     stuck.resolve();
     await release;
+  });
+
+  it('keeps the token when a registration read it while the release was stuck', async () => {
+    const stuck = deferred();
+    saveMock.mockImplementation(() => stuck.promise);
+
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    await expect(getRegistrationToken(20)).resolves.toBe('fcm-token');
+
+    stuck.resolve();
+    await release;
+    expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
+  });
+
+  it('still deletes the token for a release that starts after a registration', async () => {
+    await getRegistrationToken(20);
+
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
   });
 });

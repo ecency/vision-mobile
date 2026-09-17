@@ -78,9 +78,13 @@ export const getPushAccounts = (
 // registration waits for them (see waitForPushRelease).
 let pendingRelease: Promise<void> = Promise.resolve();
 
+// Counts the times a registration has read the device token (getRegistrationToken).
+let registrationTokenReads = 0;
+
 export const PUSH_RELEASE_WAIT_MS = 30 * 1000;
 
 const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: boolean) => {
+  const readsAtStart = registrationTokenReads;
   let token: string;
   try {
     token = await getMessaging().getToken();
@@ -108,6 +112,12 @@ const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: bo
   );
 
   if (deleteToken) {
+    if (registrationTokenReads !== readsAtStart) {
+      // A registration stopped waiting (timeout) and registered this token meanwhile.
+      // Deleting it now would leave that registration pointing at a dead token.
+      console.warn('Push token was registered during deregistration, keeping it');
+      return;
+    }
     try {
       await getMessaging().deleteToken();
     } catch (err) {
@@ -158,4 +168,15 @@ export const waitForPushRelease = async (timeoutMs = PUSH_RELEASE_WAIT_MS) => {
   } finally {
     clearTimeout(timer);
   }
+};
+
+/**
+ * Reads the device token for a registration, after any deregistration in progress.
+ * A release that is still running when this reads the token (only possible once the
+ * wait timed out) no longer deletes the token.
+ */
+export const getRegistrationToken = async (timeoutMs = PUSH_RELEASE_WAIT_MS) => {
+  await waitForPushRelease(timeoutMs);
+  registrationTokenReads += 1;
+  return getMessaging().getToken();
 };
