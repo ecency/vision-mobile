@@ -7,6 +7,8 @@ import {
   disablePushRegistrations,
   getPushAccounts,
   getPushSystem,
+  getSignedInAccounts,
+  waitForPushRelease,
 } from './pushRegistration';
 
 jest.unmock('crypto-js');
@@ -115,6 +117,27 @@ describe('getPushAccounts', () => {
   });
 });
 
+describe('getSignedInAccounts', () => {
+  it('includes the current account when otherAccounts does not list it', () => {
+    const current = { name: 'alice', local: { accessToken: 'enc-alice' } };
+    const bob = { username: 'bob', local: { accessToken: 'enc-bob' } };
+
+    expect(getSignedInAccounts(current, [bob])).toEqual([
+      { username: 'bob', account: bob },
+      { username: 'alice', account: current },
+    ]);
+  });
+
+  it('lists an account once when it is both current and in otherAccounts', () => {
+    const current = { name: 'alice', local: { accessToken: 'enc-new' } };
+    const stored = { username: 'alice', local: { accessToken: 'enc-old' } };
+
+    expect(getSignedInAccounts(current, [stored])).toEqual([
+      { username: 'alice', account: current },
+    ]);
+  });
+});
+
 describe('disablePushRegistrations', () => {
   it('disables every account that has a token, with the current device token', async () => {
     await disablePushRegistrations(
@@ -202,5 +225,85 @@ describe('disablePushRegistrations', () => {
 
     await expect(disablePushRegistrations([], { deleteToken: true })).resolves.toBeUndefined();
     expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('waitForPushRelease', () => {
+  const deferred = () => {
+    let resolve: () => void = () => undefined;
+    const promise = new Promise<void>((r) => {
+      resolve = r;
+    });
+    return { promise, resolve };
+  };
+  const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+  it('resolves at once when nothing is being released', async () => {
+    await expect(waitForPushRelease(10_000)).resolves.toBeUndefined();
+  });
+
+  it('waits until a pending release has deleted the token', async () => {
+    const request = deferred();
+    saveMock.mockImplementation(() => request.promise);
+    const events: string[] = [];
+    mockMessaging.deleteToken.mockImplementation(async () => {
+      events.push('token deleted');
+    });
+
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    const register = async () => {
+      await waitForPushRelease(10_000);
+      events.push('registration may read');
+    };
+    const waiting = register();
+    await settle();
+    expect(events).toEqual([]);
+
+    request.resolve();
+    await Promise.all([release, waiting]);
+    expect(events).toEqual(['token deleted', 'registration may read']);
+  });
+
+  it('runs releases one after another', async () => {
+    const first = deferred();
+    saveMock.mockImplementationOnce(() => first.promise);
+    const events: string[] = [];
+    mockMessaging.getToken.mockImplementation(async () => {
+      events.push('token read');
+      return 'fcm-token';
+    });
+    mockMessaging.deleteToken.mockImplementation(async () => {
+      events.push('token deleted');
+    });
+
+    const releaseA = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: true,
+    });
+    const releaseB = disablePushRegistrations([{ username: 'bob', accessToken: 'b' }], {
+      deleteToken: false,
+    });
+    await settle();
+    expect(events).toEqual(['token read']);
+
+    first.resolve();
+    await Promise.all([releaseA, releaseB]);
+    expect(events).toEqual(['token read', 'token deleted', 'token read']);
+  });
+
+  it('gives up waiting after the timeout when a release never settles', async () => {
+    const stuck = deferred();
+    saveMock.mockImplementation(() => stuck.promise);
+
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+      deleteToken: true,
+    });
+    await expect(waitForPushRelease(20)).resolves.toBeUndefined();
+    expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
+
+    // Let the release finish so it does not hold up the next test.
+    stuck.resolve();
+    await release;
   });
 });

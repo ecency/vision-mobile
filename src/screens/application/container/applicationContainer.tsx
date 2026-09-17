@@ -95,6 +95,8 @@ import {
   decryptAccessToken,
   disablePushRegistrations,
   getPushSystem,
+  getSignedInAccounts,
+  waitForPushRelease,
 } from '../../../utils/pushRegistration';
 import { captureException, captureMessage } from '../../../utils/sentryUtils';
 import { fetchSubscribedCommunities } from '../../../redux/actions/communitiesAction';
@@ -763,21 +765,11 @@ class ApplicationContainer extends Component<any, any> {
 
     this._lastPushRegistration = Date.now();
 
-    otherAccounts.forEach((account: any) => {
-      // since there can be more than one accounts, process access tokens separate
-      if (account?.local?.accessToken) {
-        this._registerAccountForNotifications(account);
-        return;
-      }
-
-      // No stored access token on this other-account entry. This is common and benign
-      // (HiveSigner accounts, or entries keyed only by username), so do NOT report it to
-      // Sentry - it previously fired an error on every launch (ECENCY-MOBILE-1QY).
-      const acctName = account?.name || account?.username;
-      if (acctName && currentAccount?.name === acctName) {
-        // fallback to current account access token to register at least the logged-in account
-        this._registerAccountForNotifications(currentAccount);
-      }
+    // Accounts without a stored access token (HiveSigner accounts, entries keyed only by
+    // username) are skipped without a report: reporting them fired an error on every
+    // launch (ECENCY-MOBILE-1QY).
+    getSignedInAccounts(currentAccount, otherAccounts).forEach(({ account }) => {
+      this._registerAccountForNotifications(account);
     });
   };
 
@@ -1172,7 +1164,8 @@ class ApplicationContainer extends Component<any, any> {
     if (!accessToken) {
       // The request would be rejected without it. A stored token that does not decrypt
       // means the PIN state and the stored keys disagree, which is worth knowing about.
-      captureMessage('Push registration skipped: stored access token did not decrypt', (scope) => {
+      const message = 'Push registration skipped: stored access token did not decrypt';
+      captureMessage(message, (scope) => {
         scope.setTag('context', 'push-registration');
         scope.setFingerprint(['push-registration-decrypt']);
       });
@@ -1231,6 +1224,8 @@ class ApplicationContainer extends Component<any, any> {
         return;
       }
 
+      // A logout may still be disabling rows and deleting this token; read it after that.
+      await waitForPushRelease();
       const token = await getMessaging().getToken();
       console.log('FCM Token obtained:', !!token);
       try {
