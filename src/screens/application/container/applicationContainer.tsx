@@ -91,11 +91,12 @@ import parseVersionNumber from '../../../utils/parseVersionNumber';
 import { setMomentLocale } from '../../../utils/time';
 import { purgeExpiredCache } from '../../../redux/actions/cacheActions';
 import {
+  PUSH_REGISTRATION_DEDUPE_MS,
   PUSH_REGISTRATION_REFRESH_MS,
+  beginPushRegistration,
   decryptAccessToken,
   disablePushRegistrations,
   getPushSystem,
-  getRegistrationToken,
   getSignedInAccounts,
 } from '../../../utils/pushRegistration';
 import { captureException, captureMessage } from '../../../utils/sentryUtils';
@@ -149,6 +150,13 @@ class ApplicationContainer extends Component<any, any> {
 
   // Accounts whose last push registration the server refused (401/403).
   _rejectedPushRegistrations = new Set<string>();
+
+  // Accounts being logged out: still listed until the logout finishes, but never
+  // registered again.
+  _departingAccounts = new Set<string>();
+
+  // Push registration problems already reported to Sentry this session.
+  _reportedPushProblems = new Set<string>();
 
   constructor(props: any) {
     super(props);
@@ -396,7 +404,10 @@ class ApplicationContainer extends Component<any, any> {
     await this._getUserDataFromRealm();
     await this._refreshUnreadChats();
     this._compareAndPromptForUpdate();
-    this._registerDeviceForNotifications();
+    // Reconnects run this twice in a row (NetInfo listener and props change).
+    if (Date.now() - this._lastPushRegistration > PUSH_REGISTRATION_DEDUPE_MS) {
+      this._registerDeviceForNotifications();
+    }
     dispatch(purgeExpiredCache());
   };
 
@@ -779,18 +790,35 @@ class ApplicationContainer extends Component<any, any> {
     // Accounts without a stored access token (HiveSigner accounts, entries keyed only by
     // username) are skipped without a report: reporting them fired an error on every
     // launch (ECENCY-MOBILE-1QY).
-    getSignedInAccounts(currentAccount, otherAccounts).forEach(({ account }) => {
-      this._registerAccountForNotifications(account);
+    getSignedInAccounts(currentAccount, otherAccounts).forEach(({ username, account }) => {
+      if (!this._departingAccounts.has(username)) {
+        this._registerAccountForNotifications(account);
+      }
     });
   };
 
-  _registerAgainIfSignedIn = (username: string) => {
+  _signedInPushAccount = (username: string) => {
+    if (this._departingAccounts.has(username)) {
+      return undefined;
+    }
     const { currentAccount, otherAccounts } = this.props;
-    const entry = getSignedInAccounts(currentAccount, otherAccounts).find(
+    return getSignedInAccounts(currentAccount, otherAccounts).find(
       (signedIn) => signedIn.username === username,
-    );
-    if (entry) {
-      this._registerAccountForNotifications(entry.account);
+    )?.account;
+  };
+
+  _registerAgainIfSignedIn = (username: string) => {
+    const account = this._signedInPushAccount(username);
+    if (account) {
+      this._registerAccountForNotifications(account);
+    }
+  };
+
+  // Reports a push registration problem once per session.
+  _reportPushProblem = (key: string, report: () => void) => {
+    if (!this._reportedPushProblems.has(key)) {
+      this._reportedPushProblems.add(key);
+      report();
     }
   };
 
@@ -1117,6 +1145,9 @@ class ApplicationContainer extends Component<any, any> {
         : otherAccounts.find((user: any) => (user.username || user.name) === username);
     const accessToken = decryptAccessToken(loggedOutAccount?.local?.accessToken, pinCode);
 
+    // Until the logout finishes the account is still listed; keep it out of registrations.
+    this._departingAccounts.add(username);
+
     try {
       const response = await removeUserData(username);
 
@@ -1132,6 +1163,8 @@ class ApplicationContainer extends Component<any, any> {
       // device token so nothing registered under it is delivered any more.
       disablePushRegistrations([{ username, accessToken }], {
         deleteToken: _otherAccounts.length === 0,
+        // A replaced token must be registered again for whoever is still signed in.
+        onTokenReplaced: () => this._registerDeviceForNotifications(),
       });
 
       if (_otherAccounts.length > 0) {
@@ -1170,6 +1203,8 @@ class ApplicationContainer extends Component<any, any> {
       dispatch(logoutDone());
       Alert.alert(intl.formatMessage({ id: 'alert.fail' }), (err as any).message);
       this._repairUserAccountData(username);
+    } finally {
+      this._departingAccounts.delete(username);
     }
   };
 
@@ -1185,11 +1220,15 @@ class ApplicationContainer extends Component<any, any> {
     if (!accessToken) {
       // The request would be rejected without it. A stored token that does not decrypt
       // means the PIN state and the stored keys disagree, which is worth knowing about.
-      const message = 'Push registration skipped: stored access token did not decrypt';
-      captureMessage(message, (scope) => {
-        scope.setTag('context', 'push-registration');
-        scope.setFingerprint(['push-registration-decrypt']);
-      });
+      this._reportPushProblem(`decrypt:${username}`, () =>
+        captureMessage(
+          'Push registration skipped: stored access token did not decrypt',
+          (scope) => {
+            scope.setTag('context', 'push-registration');
+            scope.setFingerprint(['push-registration-decrypt']);
+          },
+        ),
+      );
       return;
     }
 
@@ -1245,13 +1284,17 @@ class ApplicationContainer extends Component<any, any> {
         return;
       }
 
-      // A logout may still be disabling rows and deleting this token; read it after that.
-      // If the wait gave up, register once more when that logout has finished, so its
-      // late disable request cannot be the last write for this account.
-      const token = await getRegistrationToken({
+      // A logout may still be disabling rows or replacing this token: register after it,
+      // and only if the account is still signed in by then. If the wait gave up, register
+      // once more when every logout has finished, so a late disable is not the last write.
+      const registration = await beginPushRegistration({
+        stillWanted: () => !!this._signedInPushAccount(username),
         onReleaseSettled: () => this._registerAgainIfSignedIn(username),
       });
-      console.log('FCM Token obtained:', !!token);
+      if (!registration) {
+        return;
+      }
+      console.log('FCM Token obtained:', !!registration.token);
       try {
         await saveNotificationSetting(
           accessToken,
@@ -1259,7 +1302,7 @@ class ApplicationContainer extends Component<any, any> {
           getPushSystem(),
           Number(isEnable),
           notify_types,
-          token,
+          registration.token,
         );
         this._rejectedPushRegistrations.delete(username);
       } catch (error) {
@@ -1270,14 +1313,23 @@ class ApplicationContainer extends Component<any, any> {
           return;
         }
         if (status === 401 || status === 403) {
-          // Retried when this account's access token is renewed (componentDidUpdate).
-          this._rejectedPushRegistrations.add(username);
+          if (this._signedInPushAccount(username)?.local?.accessToken !== encAccesstoken) {
+            // The token was renewed while this request was out: retry with the new one.
+            this._registerAgainIfSignedIn(username);
+          } else {
+            // Retried when this account's access token is renewed (componentDidUpdate).
+            this._rejectedPushRegistrations.add(username);
+          }
         }
-        captureException(error, (scope) => {
-          scope.setTag('context', 'push-registration');
-          scope.setTag('status', String(status));
-          scope.setFingerprint(['push-registration-http', String(status)]);
-        });
+        this._reportPushProblem(`http:${status}:${username}`, () =>
+          captureException(error, (scope) => {
+            scope.setTag('context', 'push-registration');
+            scope.setTag('status', String(status));
+            scope.setFingerprint(['push-registration-http', String(status)]);
+          }),
+        );
+      } finally {
+        registration.finish();
       }
     } catch (error) {
       // Handle platform-specific FCM errors gracefully

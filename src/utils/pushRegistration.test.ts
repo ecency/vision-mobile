@@ -6,8 +6,8 @@ import {
   decryptAccessToken,
   disablePushRegistrations,
   getPushAccounts,
+  beginPushRegistration,
   getPushSystem,
-  getRegistrationToken,
   getSignedInAccounts,
   PushAccount,
   waitForPushRelease,
@@ -140,12 +140,26 @@ describe('getSignedInAccounts', () => {
   });
 });
 
+const deferred = () => {
+  let resolve: () => void = () => undefined;
+  let reject: (err: Error) => void = () => undefined;
+  const promise = new Promise<void>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+const always = () => true;
+
+// Every test leaves the release chain and the in-flight set empty: each release it starts
+// is awaited, and each registration it begins is finished.
+
 describe('disablePushRegistrations', () => {
-  it('disables every account that has a token, with the current device token', async () => {
+  it('disables every account with the current device token and keeps the token', async () => {
     await disablePushRegistrations(
       [
         { username: 'alice', accessToken: 'alice-code' },
-        { username: 'bob', accessToken: undefined },
         { username: 'carol', accessToken: 'carol-code' },
       ],
       { deleteToken: false },
@@ -173,21 +187,14 @@ describe('disablePushRegistrations', () => {
 
   it('deletes the device token only after every request has settled', async () => {
     const events: string[] = [];
-    let finishAlice: () => void = () => undefined;
-    saveMock.mockImplementation(
-      (_code: string, username: string) =>
-        new Promise<void>((resolve, reject) => {
-          if (username === 'alice') {
-            finishAlice = () => {
-              events.push('alice settled');
-              resolve();
-            };
-          } else {
-            events.push('bob settled');
-            reject(new Error('Request failed with status 500'));
-          }
-        }),
-    );
+    const alice = deferred();
+    saveMock.mockImplementation((_code: string, username: string) => {
+      if (username === 'alice') {
+        return alice.promise.then(() => events.push('alice settled'));
+      }
+      events.push('bob settled');
+      return Promise.reject(new Error('Request failed with status 500'));
+    });
     mockMessaging.deleteToken.mockImplementation(async () => {
       events.push('token deleted');
     });
@@ -199,14 +206,50 @@ describe('disablePushRegistrations', () => {
       ],
       { deleteToken: true },
     );
-    await new Promise((resolve) => setImmediate(resolve));
+    await settle();
     expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
 
-    finishAlice();
+    alice.resolve();
     await done;
-
-    // A failed request does not block the others or the token delete.
     expect(events).toEqual(['bob settled', 'alice settled', 'token deleted']);
+  });
+
+  it.each([
+    ['a request fails', [{ username: 'alice', accessToken: 'a' }], true],
+    ['an account has no access token', [{ username: 'alice', accessToken: undefined }], false],
+  ])(
+    'with accounts left, replaces the token when %s, so the row cannot stay on',
+    async (_case, accounts, failRequest) => {
+      if (failRequest) {
+        saveMock.mockRejectedValueOnce(new Error('Request failed with status 401'));
+      }
+      const onTokenReplaced = jest.fn();
+
+      await disablePushRegistrations(accounts, { deleteToken: false, onTokenReplaced });
+
+      expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+      expect(onTokenReplaced).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('asks for registration after deleting the token with no account left', async () => {
+    const onTokenReplaced = jest.fn();
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: true,
+      onTokenReplaced,
+    });
+    expect(onTokenReplaced).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not ask for registration when the token could not be deleted', async () => {
+    mockMessaging.deleteToken.mockRejectedValue(new Error('offline'));
+    const onTokenReplaced = jest.fn();
+
+    await expect(
+      disablePushRegistrations([], { deleteToken: true, onTokenReplaced }),
+    ).resolves.toBeUndefined();
+    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+    expect(onTokenReplaced).not.toHaveBeenCalled();
   });
 
   it('does nothing when the device has no token', async () => {
@@ -217,55 +260,68 @@ describe('disablePushRegistrations', () => {
         deleteToken: true,
       }),
     ).resolves.toBeUndefined();
-
     expect(saveMock).not.toHaveBeenCalled();
     expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
   });
 
-  it('does not throw when deleting the token fails', async () => {
-    mockMessaging.deleteToken.mockRejectedValue(new Error('offline'));
+  it('survives a request that throws synchronously', async () => {
+    saveMock.mockImplementationOnce(() => {
+      throw new Error('synchronous failure');
+    });
 
-    await expect(disablePushRegistrations([], { deleteToken: true })).resolves.toBeUndefined();
+    await disablePushRegistrations(
+      [
+        { username: 'alice', accessToken: 'a' },
+        { username: 'bob', accessToken: 'b' },
+      ],
+      { deleteToken: false },
+    );
+    // Both requests were attempted, and the failed one replaced the token.
+    expect(saveMock).toHaveBeenCalledTimes(2);
     expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the chain usable after a release fails unexpectedly', async () => {
+    // A malformed call throws inside the release itself.
+    await expect(
+      disablePushRegistrations(null as unknown as PushAccount[], { deleteToken: true }),
+    ).resolves.toBeUndefined();
+
+    await expect(waitForPushRelease(20)).resolves.toBe(true);
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: true,
+    });
+    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for a registration already in flight before disabling', async () => {
+    const registration = await beginPushRegistration({ stillWanted: always });
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: false,
+    });
+    await settle();
+    // The registration's request is still out: the disable must not overtake it.
+    expect(saveMock).not.toHaveBeenCalled();
+
+    registration!.finish();
+    await release;
+    expect(saveMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops waiting for a registration that never finishes', async () => {
+    const registration = await beginPushRegistration({ stillWanted: always });
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: false,
+      registrationWaitMs: 20,
+    });
+    expect(saveMock).toHaveBeenCalledTimes(1);
+    registration!.finish();
   });
 });
 
 describe('waitForPushRelease', () => {
-  const deferred = () => {
-    let resolve: () => void = () => undefined;
-    const promise = new Promise<void>((r) => {
-      resolve = r;
-    });
-    return { promise, resolve };
-  };
-  const settle = () => new Promise((resolve) => setImmediate(resolve));
-
   it('resolves at once when nothing is being released', async () => {
     await expect(waitForPushRelease(10_000)).resolves.toBe(true);
-  });
-
-  it('waits until a pending release has deleted the token', async () => {
-    const request = deferred();
-    saveMock.mockImplementation(() => request.promise);
-    const events: string[] = [];
-    mockMessaging.deleteToken.mockImplementation(async () => {
-      events.push('token deleted');
-    });
-
-    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
-      deleteToken: true,
-    });
-    const register = async () => {
-      await waitForPushRelease(10_000);
-      events.push('registration may read');
-    };
-    const waiting = register();
-    await settle();
-    expect(events).toEqual([]);
-
-    request.resolve();
-    await Promise.all([release, waiting]);
-    expect(events).toEqual(['token deleted', 'registration may read']);
   });
 
   it('runs releases one after another', async () => {
@@ -294,7 +350,35 @@ describe('waitForPushRelease', () => {
     expect(events).toEqual(['token read', 'token deleted', 'token read']);
   });
 
-  it('gives up waiting after the timeout when a release never settles', async () => {
+  it('waits for releases queued while it waits', async () => {
+    const first = deferred();
+    const second = deferred();
+    saveMock
+      .mockImplementationOnce(() => first.promise)
+      .mockImplementationOnce(() => second.promise);
+
+    const releaseA = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: false,
+    });
+    let waited: boolean | undefined;
+    const waiting = waitForPushRelease(10_000).then((result) => {
+      waited = result;
+    });
+    const releaseB = disablePushRegistrations([{ username: 'bob', accessToken: 'b' }], {
+      deleteToken: false,
+    });
+
+    first.resolve();
+    await releaseA;
+    await settle();
+    expect(waited).toBeUndefined();
+
+    second.resolve();
+    await Promise.all([releaseB, waiting]);
+    expect(waited).toBe(true);
+  });
+
+  it('gives up after the timeout when a release never settles', async () => {
     const stuck = deferred();
     saveMock.mockImplementation(() => stuck.promise);
 
@@ -304,110 +388,115 @@ describe('waitForPushRelease', () => {
     await expect(waitForPushRelease(20)).resolves.toBe(false);
     expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
 
-    // Let the release finish so it does not hold up the next test.
     stuck.resolve();
     await release;
   });
+});
 
-  it('keeps the token when a registration read it while the release was stuck', async () => {
-    const stuck = deferred();
-    saveMock.mockImplementation(() => stuck.promise);
-
-    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
-      deleteToken: true,
-    });
-    await expect(getRegistrationToken({ timeoutMs: 20 })).resolves.toBe('fcm-token');
-
-    stuck.resolve();
-    await release;
-    expect(mockMessaging.deleteToken).not.toHaveBeenCalled();
+describe('beginPushRegistration', () => {
+  it('reads the token once releases are done and the account is still wanted', async () => {
+    const registration = await beginPushRegistration({ stillWanted: always });
+    expect(registration?.token).toBe('fcm-token');
+    registration!.finish();
   });
 
-  it('still deletes the token for a release that starts after a registration', async () => {
-    await getRegistrationToken({ timeoutMs: 20 });
+  it('gives up when the account left while a queued release ran', async () => {
+    // Logout A (slow), login B waits, logout B queues a second release before the first ends.
+    const first = deferred();
+    saveMock.mockImplementationOnce(() => first.promise);
+    let signedIn = true;
+    const events: string[] = [];
+    mockMessaging.getToken.mockImplementation(async () => {
+      events.push('token read');
+      return 'fcm-token';
+    });
+    mockMessaging.deleteToken.mockImplementation(async () => {
+      events.push('token deleted');
+    });
 
-    await disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+    const releaseA = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
       deleteToken: true,
     });
-    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
+    const bob = beginPushRegistration({ stillWanted: () => signedIn });
+    signedIn = false;
+    const releaseB = disablePushRegistrations([{ username: 'bob', accessToken: 'b' }], {
+      deleteToken: true,
+    });
+
+    first.resolve();
+    await Promise.all([releaseA, releaseB]);
+    await expect(bob).resolves.toBeNull();
+    // Only the two releases read the token, and both deleted it.
+    expect(events).toEqual(['token read', 'token deleted', 'token read', 'token deleted']);
   });
 
-  it('asks to register again once a release that outlived the wait settles', async () => {
+  it('finishes its in-flight mark when the token cannot be read', async () => {
+    mockMessaging.getToken.mockRejectedValueOnce(new Error('SERVICE_NOT_AVAILABLE'));
+    await expect(beginPushRegistration({ stillWanted: always })).rejects.toThrow(
+      'SERVICE_NOT_AVAILABLE',
+    );
+
+    // A release does not wait for the failed registration.
+    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
+      deleteToken: false,
+      registrationWaitMs: 10_000,
+    });
+    expect(saveMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks to register again once every release has settled after a timed-out wait', async () => {
     const stuck = deferred();
-    saveMock.mockImplementation(() => stuck.promise);
+    const queued = deferred();
+    saveMock
+      .mockImplementationOnce(() => stuck.promise)
+      .mockImplementationOnce(() => queued.promise);
     const registerAgain = jest.fn();
 
-    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+    const releaseA = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
       deleteToken: true,
     });
-    await getRegistrationToken({ timeoutMs: 20, onReleaseSettled: registerAgain });
-    await settle();
-    // The disable request is still out: registering again now could still lose to it.
-    expect(registerAgain).not.toHaveBeenCalled();
+    const registration = await beginPushRegistration({
+      stillWanted: always,
+      onReleaseSettled: registerAgain,
+      timeoutMs: 20,
+    });
+    // The wait gave up: the registration proceeds, its retry waits for the releases.
+    expect(registration?.token).toBe('fcm-token');
+    registration!.finish();
+    const releaseB = disablePushRegistrations([{ username: 'bob', accessToken: 'b' }], {
+      deleteToken: false,
+    });
 
     stuck.resolve();
-    await release;
+    await releaseA;
+    await settle();
+    expect(registerAgain).not.toHaveBeenCalled();
+
+    queued.resolve();
+    await releaseB;
     await settle();
     expect(registerAgain).toHaveBeenCalledTimes(1);
   });
 
-  it('does not ask to register again when the release finished within the wait', async () => {
+  it('does not ask to register again when the wait did not time out', async () => {
     const quick = deferred();
-    saveMock.mockImplementation(() => quick.promise);
+    saveMock.mockImplementationOnce(() => quick.promise);
     const registerAgain = jest.fn();
 
-    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'code' }], {
+    const release = disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
       deleteToken: false,
     });
-    const reading = getRegistrationToken({ timeoutMs: 10_000, onReleaseSettled: registerAgain });
+    const pending = beginPushRegistration({
+      stillWanted: always,
+      onReleaseSettled: registerAgain,
+      timeoutMs: 10_000,
+    });
     quick.resolve();
-    await Promise.all([release, reading]);
+    await release;
+    const registration = await pending;
+    registration!.finish();
     await settle();
 
     expect(registerAgain).not.toHaveBeenCalled();
-  });
-
-  it('does not ask to register again when nothing was being released', async () => {
-    const registerAgain = jest.fn();
-    await getRegistrationToken({ timeoutMs: 10_000, onReleaseSettled: registerAgain });
-    await settle();
-
-    expect(registerAgain).not.toHaveBeenCalled();
-  });
-
-  it('survives a request that throws synchronously', async () => {
-    saveMock.mockImplementationOnce(() => {
-      throw new Error('synchronous failure');
-    });
-
-    await disablePushRegistrations(
-      [
-        { username: 'alice', accessToken: 'a' },
-        { username: 'bob', accessToken: 'b' },
-      ],
-      { deleteToken: true },
-    );
-    expect(saveMock).toHaveBeenCalledTimes(2);
-    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
-
-    // The chain stays usable for the next release and for waiting registrations.
-    await disablePushRegistrations([{ username: 'carol', accessToken: 'c' }], {
-      deleteToken: false,
-    });
-    expect(saveMock).toHaveBeenCalledTimes(3);
-    await expect(waitForPushRelease(20)).resolves.toBe(true);
-  });
-
-  it('keeps the chain usable after a release fails unexpectedly', async () => {
-    // A malformed call throws inside the release itself.
-    await expect(
-      disablePushRegistrations(null as unknown as PushAccount[], { deleteToken: true }),
-    ).resolves.toBeUndefined();
-
-    await expect(waitForPushRelease(20)).resolves.toBe(true);
-    await disablePushRegistrations([{ username: 'alice', accessToken: 'a' }], {
-      deleteToken: true,
-    });
-    expect(mockMessaging.deleteToken).toHaveBeenCalledTimes(1);
   });
 });

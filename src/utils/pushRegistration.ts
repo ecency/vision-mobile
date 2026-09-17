@@ -74,17 +74,55 @@ export const getPushAccounts = (
     accessToken: decryptAccessToken(account?.local?.accessToken, encAppPin),
   }));
 
-// The deregistration in progress, if any. Releases run one after another, and a
-// registration waits for them (see waitForPushRelease).
+// Deregistrations (releases) run one after another on this chain, and registrations
+// wait for it. It never rejects.
 let pendingRelease: Promise<void> = Promise.resolve();
 
-// Counts the times a registration has read the device token (getRegistrationToken).
-let registrationTokenReads = 0;
+// Registrations past their wait whose request has not settled yet. A release waits for
+// them before it sends its disable requests.
+const registrationsInFlight = new Set<Promise<void>>();
 
 export const PUSH_RELEASE_WAIT_MS = 30 * 1000;
 
-const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: boolean) => {
-  const readsAtStart = registrationTokenReads;
+// Cold start and reconnect both register every account; within this window the second
+// pass is skipped.
+export const PUSH_REGISTRATION_DEDUPE_MS = 60 * 1000;
+
+/** Resolves to true when `promise` settles within `ms`, false otherwise. */
+const settlesWithin = async (promise: Promise<unknown>, ms: number): Promise<boolean> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => resolve(false), Math.max(ms, 0));
+  });
+  try {
+    return await Promise.race([
+      promise.then(
+        () => true,
+        () => true,
+      ),
+      timeout,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+interface ReleaseOptions {
+  deleteToken: boolean;
+  /** Called after the token was deleted, to register the accounts still signed in. */
+  onTokenReplaced?: () => void;
+  /** How long to wait for registrations already in flight. */
+  registrationWaitMs?: number;
+}
+
+const releasePushRegistrations = async (
+  accounts: PushAccount[],
+  { deleteToken, onTokenReplaced, registrationWaitMs = PUSH_RELEASE_WAIT_MS }: ReleaseOptions,
+) => {
+  // A registration already on its way must land first, or it could switch a departing
+  // account back on after its disable.
+  await settlesWithin(Promise.all(registrationsInFlight), registrationWaitMs);
+
   let token: string;
   try {
     token = await getMessaging().getToken();
@@ -94,40 +132,52 @@ const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: bo
     return;
   }
 
-  await Promise.all(
-    accounts
-      .filter((account) => account.username && account.accessToken)
-      .map((account) =>
-        // Inside then(), so even a synchronous throw becomes this account's failure
-        // and cannot skip the other accounts or the token delete.
-        Promise.resolve()
-          .then(() =>
-            saveNotificationSetting(
-              account.accessToken,
-              account.username,
-              getPushSystem(),
-              0,
-              [],
-              token,
-            ),
-          )
-          .catch((err) => {
+  const disabled = await Promise.all(
+    accounts.map((account) => {
+      if (!account.username || !account.accessToken) {
+        return Promise.resolve(false);
+      }
+      // Inside then(), so even a synchronous throw becomes this account's failure.
+      return Promise.resolve()
+        .then(() =>
+          saveNotificationSetting(
+            account.accessToken,
+            account.username,
+            getPushSystem(),
+            0,
+            [],
+            token,
+          ),
+        )
+        .then(
+          () => true,
+          (err) => {
             console.warn('Failed to disable push notifications for', account.username, err);
-          }),
-      ),
+            return false;
+          },
+        );
+    }),
   );
 
-  if (deleteToken) {
-    if (registrationTokenReads !== readsAtStart) {
-      // A registration stopped waiting (timeout) and registered this token meanwhile.
-      // Deleting it now would leave that registration pointing at a dead token.
-      console.warn('Push token was registered during deregistration, keeping it');
-      return;
-    }
+  // With no account left the token goes. With accounts left it stays, unless a row could
+  // not be disabled: deleting the token is then the only way to stop that account's
+  // pushes, and the accounts still signed in register again with the new token.
+  if (!deleteToken && disabled.every(Boolean)) {
+    return;
+  }
+
+  try {
+    await getMessaging().deleteToken();
+  } catch (err) {
+    console.warn('Failed to delete push token', err);
+    return;
+  }
+
+  if (onTokenReplaced) {
     try {
-      await getMessaging().deleteToken();
+      onTokenReplaced();
     } catch (err) {
-      console.warn('Failed to delete push token', err);
+      console.warn('Failed to register after replacing the push token', err);
     }
   }
 };
@@ -135,24 +185,22 @@ const releasePushRegistrations = async (accounts: PushAccount[], deleteToken: bo
 /**
  * Turns push off for accounts leaving this device.
  *
- * Each account's row is disabled with the current FCM token. When no account is left
- * on the device, the token itself is deleted afterwards: the backend then gets
- * "unregistered" for it and stops sending, even for a row this call could not
- * disable (for example an account whose access token no longer decrypts). The
- * delete must come after the requests, because deleting first makes the next
- * `getToken()` mint a new token and the requests would disable the wrong rows.
+ * Each account's row is disabled with the current FCM token, after any registration
+ * already in flight has landed. The token is then deleted when no account is left, or
+ * when a row could not be disabled: the backend then gets "unregistered" for it and
+ * stops sending. The delete must come after the requests, because deleting first makes
+ * the next `getToken()` mint a new token and the requests would disable the wrong rows.
  *
  * Callers do not need to wait: the logout itself should not hang on the network.
- * Registrations wait instead, through waitForPushRelease.
+ * Registrations wait instead, through beginPushRegistration.
  */
 export const disablePushRegistrations = (
   accounts: PushAccount[],
-  { deleteToken }: { deleteToken: boolean },
+  options: ReleaseOptions,
 ): Promise<void> => {
   const release = pendingRelease
-    .then(() => releasePushRegistrations(accounts, deleteToken))
-    // Never rejects: releasePushRegistrations catches its own failures, and the chain
-    // must stay usable for the next release and for waiting registrations.
+    .then(() => releasePushRegistrations(accounts, options))
+    // Never rejects, so the chain stays usable for later releases and registrations.
     .catch((err) => {
       console.warn('Push deregistration failed', err);
     });
@@ -162,44 +210,73 @@ export const disablePushRegistrations = (
 
 /**
  * Resolves to true once no deregistration is in progress, or to false after `timeoutMs`.
- *
- * A login right after the last account logged out would otherwise read the token
- * that the pending release is about to delete, and register a dead token. Waiting
- * lets the release finish, so `getToken()` returns the new token. The timeout keeps a
- * stuck release (a native call that never settles) from blocking registration.
+ * Releases queued while it waits count too: it returns only when the chain has stopped
+ * growing.
  */
 export const waitForPushRelease = async (timeoutMs = PUSH_RELEASE_WAIT_MS): Promise<boolean> => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<boolean>((resolve) => {
-    timer = setTimeout(() => resolve(false), timeoutMs);
-  });
-  try {
-    return await Promise.race([pendingRelease.then(() => true), timeout]);
-  } finally {
-    clearTimeout(timer);
+  const release = pendingRelease;
+  const startedAt = Date.now();
+  if (!(await settlesWithin(release, timeoutMs))) {
+    return false;
+  }
+  return release === pendingRelease
+    ? true
+    : waitForPushRelease(timeoutMs - (Date.now() - startedAt));
+};
+
+const whenReleasesSettle = async (): Promise<void> => {
+  const release = pendingRelease;
+  await release;
+  if (release !== pendingRelease) {
+    await whenReleasesSettle();
   }
 };
 
+export interface PushRegistration {
+  token: string;
+  /** Call once the registration request has settled, whatever its outcome. */
+  finish: () => void;
+}
+
 /**
- * Reads the device token for a registration, after any deregistration in progress.
+ * Starts a registration: waits for deregistrations, checks the account is still wanted,
+ * then reads the device token.
  *
- * When the wait times out, the release is still running:
- *   - it no longer deletes the token this registration read;
- *   - its disable requests are already out and may reach the backend AFTER this
- *     registration, switching the row back off. They cannot be recalled, so
- *     `onReleaseSettled` is called once the release has settled, for the caller to
- *     register again.
+ * Resolves to null when `stillWanted()` is false after the wait (the account left while
+ * it waited). Otherwise the caller sends its request and calls `finish()`; releases that
+ * start meanwhile wait for it before disabling anything.
+ *
+ * When the wait times out, releases are still running. Their disable requests may reach
+ * the backend after this registration, and a release may replace the token it read.
+ * Neither can be recalled, so `onReleaseSettled` is called once every release has
+ * settled, for the caller to register again.
  */
-export const getRegistrationToken = async ({
-  timeoutMs = PUSH_RELEASE_WAIT_MS,
+export const beginPushRegistration = async ({
+  stillWanted,
   onReleaseSettled,
-}: { timeoutMs?: number; onReleaseSettled?: () => void } = {}) => {
-  const release = pendingRelease;
+  timeoutMs = PUSH_RELEASE_WAIT_MS,
+}: {
+  stillWanted: () => boolean;
+  onReleaseSettled?: () => void;
+  timeoutMs?: number;
+}): Promise<PushRegistration | null> => {
   const settled = await waitForPushRelease(timeoutMs);
-  registrationTokenReads += 1;
+  if (!stillWanted()) {
+    return null;
+  }
+
+  let resolveInFlight: () => void = () => undefined;
+  const inFlight = new Promise<void>((resolve) => {
+    resolveInFlight = resolve;
+  });
+  registrationsInFlight.add(inFlight);
+  const finish = () => {
+    registrationsInFlight.delete(inFlight);
+    resolveInFlight();
+  };
 
   if (!settled && onReleaseSettled) {
-    release.then(() => {
+    whenReleasesSettle().then(() => {
       try {
         onReleaseSettled();
       } catch (err) {
@@ -208,5 +285,11 @@ export const getRegistrationToken = async ({
     });
   }
 
-  return getMessaging().getToken();
+  try {
+    const token = await getMessaging().getToken();
+    return { token, finish };
+  } catch (err) {
+    finish();
+    throw err;
+  }
 };
