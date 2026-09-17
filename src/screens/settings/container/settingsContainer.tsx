@@ -102,6 +102,7 @@ import settingsTypes from '../../../constants/settingsTypes';
 import { sendEmail } from '../../../utils/sendEmail';
 import { encryptKey, decryptKey } from '../../../utils/crypto';
 import { openStoreListing } from '../../../utils/storeReview';
+import { disablePushRegistrations, getPushAccounts } from '../../../utils/pushRegistration';
 
 // Component
 import SettingsScreen from '../screen/settingsScreen';
@@ -798,7 +799,13 @@ class SettingsContainer extends Component<any, any> {
   };
 
   _clearUserData = async () => {
-    const { otherAccounts, dispatch } = this.props;
+    const { otherAccounts, currentAccount, pinCode, dispatch } = this.props;
+
+    // Every account leaves the device: stop their pushes and drop the device token.
+    // Tokens are read now, before the data below is wiped.
+    disablePushRegistrations(getPushAccounts(currentAccount, otherAccounts, pinCode), {
+      deleteToken: true,
+    });
 
     await removeAllUserData()
       .then(async () => {

@@ -1,15 +1,14 @@
 import React, { PureComponent } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import Config from 'react-native-config';
-import { getMessaging } from '@react-native-firebase/messaging';
 
 // Services and Actions
 import { useNavigation } from '@react-navigation/native';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { SheetManager } from 'react-native-actions-sheet';
-import { getAccountsQueryOptions, saveNotificationSetting } from '@ecency/sdk';
+import { getAccountsQueryOptions } from '@ecency/sdk';
 import { captureException } from '../../../utils/sentryUtils';
 import { getQueryClient } from '../../../providers/queries';
 import { login, loginWithSC2 } from '../../../providers/hive/auth';
@@ -22,7 +21,7 @@ import {
 } from '../../../redux/actions/accountAction';
 import { login as loginAction, setPinCode } from '../../../redux/actions/applicationActions';
 import { setInitPosts, setFeedPosts } from '../../../redux/actions/postsAction';
-import { setPushTokenSaved, setExistUser } from '../../../storage/storage';
+import { setExistUser } from '../../../storage/storage';
 import { decodeBase64, encryptKey } from '../../../utils/crypto';
 
 // Middleware
@@ -44,8 +43,6 @@ import {
   selectIsPinCodeOpen,
   selectIsConnected,
   selectPrevLoggedInUsers,
-  selectNotificationDetails,
-  selectIsNotificationOpen,
 } from '../../../redux/selectors';
 
 /*
@@ -200,7 +197,6 @@ class LoginContainer extends PureComponent<any, any> {
           // track user activity for login
           userActivityMutation.mutate({ pointsTy: PointActivityIds.LOGIN });
           setExistUser(true);
-          this._setPushToken(result.name, result.accessToken);
           const encryptedPin = encryptKey(Config.DEFAULT_PIN!, Config.PIN_KEY!);
           dispatch(setPinCode(encryptedPin));
 
@@ -238,69 +234,6 @@ class LoginContainer extends PureComponent<any, any> {
           scope.setTag('context', 'key-login-failure');
           scope.setUser({ username });
         });
-      });
-  };
-
-  _setPushToken = async (username: any, accessToken?: string) => {
-    const { notificationSettings, notificationDetails } = this.props;
-    const notifyTypesConst = {
-      vote: 1,
-      mention: 2,
-      follow: 3,
-      comment: 4,
-      reblog: 5,
-      transfers: 6,
-      favorite: 13,
-      bookmark: 15,
-      tags: 23,
-      delegations: 10,
-      payouts: 19,
-      accountUpdate: 20,
-      weeklyEarnings: 21,
-      scheduledPublished: 22,
-    };
-    const notifyTypes: any[] = [];
-
-    Object.keys(notificationDetails).forEach((item) => {
-      const notificationType = item.replace('Notification', '');
-      const notifyType = (notifyTypesConst as any)[notificationType];
-
-      // Only a mapped type: a settings key this map does not know would otherwise
-      // register as null and the device would be told nothing useful about it.
-      if (notificationDetails[item] && notifyType) {
-        notifyTypes.push(notifyType);
-      }
-    });
-
-    if (!accessToken) {
-      console.warn('Missing access token for notifications:', username);
-      return;
-    }
-
-    getMessaging()
-      .getToken()
-      .then((token) => {
-        const data = {
-          username,
-          token,
-          system: `fcm-${Platform.OS}`,
-          allows_notify: Number(notificationSettings),
-          notify_types: notifyTypes,
-        };
-        return saveNotificationSetting(
-          accessToken,
-          data.username,
-          data.system,
-          data.allows_notify,
-          data.notify_types,
-          data.token,
-        );
-      })
-      .then(() => {
-        setPushTokenSaved(true);
-      })
-      .catch((err) => {
-        console.warn('Failed to register push token', err);
       });
   };
 
@@ -348,8 +281,6 @@ class LoginContainer extends PureComponent<any, any> {
 
 const mapStateToProps = (state: any) => ({
   account: state.accounts,
-  notificationDetails: selectNotificationDetails(state),
-  notificationSettings: selectIsNotificationOpen(state),
   isConnected: selectIsConnected(state),
   isPinCodeOpen: selectIsPinCodeOpen(state),
   prevLoggedInUsers: selectPrevLoggedInUsers(state),
