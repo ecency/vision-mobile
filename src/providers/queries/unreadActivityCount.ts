@@ -1,29 +1,15 @@
 import { getNotificationsUnreadCountQueryOptions, getQueryClient } from '@ecency/sdk';
 
 /**
- * The SDK's unread notification count query, with its placeholder marked as never
- * fetched.
- *
- * The SDK seeds the count with `initialData: 0`, and TanStack stamps initial data as
- * fetched "now". Under the app's 60s default staleTime that 0 counted as fresh, so
- * `fetchQuery` returned it without a request and the badge stayed empty after a cold
- * start. The same 0 also won over the count restored from the persisted cache.
- */
-export const getUnreadActivityCountQueryOptions = (
-  username: string | undefined,
-  code: string | undefined,
-) => ({
-  ...getNotificationsUnreadCountQueryOptions(username, code),
-  initialDataUpdatedAt: 0,
-});
-
-/**
  * Fetches the unread notification count shown on the notifications tab badge.
  *
- * Resolves to undefined without a username or access code: the SDK query answers 0
- * without a code and would cache that 0 as a real count. A read within the default
- * staleTime reuses the cached count. `force` asks the server again, for callers that
- * react to a new notification; overlapping forced reads share one request.
+ * Resolves to undefined without a username or access code, instead of the SDK query's
+ * "Missing access token" error, so callers keep their current count. A read within the
+ * default staleTime reuses the cached count. `force` asks the server again, for callers
+ * that react to a new notification; overlapping forced reads share one request.
+ *
+ * Needs @ecency/sdk 2.4.11 or later: earlier versions seeded the query with
+ * `initialData: 0`, which counted as a fresh count and was returned without a request.
  */
 export const fetchUnreadActivityCount = async (
   username: string | undefined,
@@ -35,7 +21,7 @@ export const fetchUnreadActivityCount = async (
   }
 
   return getQueryClient().fetchQuery({
-    ...getUnreadActivityCountQueryOptions(username, code),
+    ...getNotificationsUnreadCountQueryOptions(username, code),
     ...(force ? { staleTime: 0 } : {}),
   });
 };

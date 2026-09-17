@@ -1,10 +1,8 @@
 import { QueryCache, QueryClient, dehydrate, hydrate } from '@tanstack/react-query';
-import {
-  fetchUnreadActivityCount,
-  getUnreadActivityCountQueryOptions,
-} from './unreadActivityCount';
+import { getNotificationsUnreadCountQueryOptions } from '@ecency/sdk';
+import { fetchUnreadActivityCount } from './unreadActivityCount';
 
-// The real SDK query options: the bug came from their `initialData: 0`, so a mock
+// The real SDK query options: the bug came from their old `initialData: 0`, so a mock
 // would hide exactly what these tests are about. Only the query client is swapped.
 let mockQueryClient: QueryClient;
 jest.mock('@ecency/sdk', () => ({
@@ -94,23 +92,24 @@ describe('fetchUnreadActivityCount', () => {
   });
 });
 
-describe('getUnreadActivityCountQueryOptions', () => {
-  it('lets a count restored from the persisted cache replace the placeholder', async () => {
+describe('SDK unread count options', () => {
+  it('let a count restored from the persisted cache stand', async () => {
+    const options = getNotificationsUnreadCountQueryOptions('alice', 'code');
     const previousSession = makeClient();
-    previousSession.setQueryData(getUnreadActivityCountQueryOptions('alice', 'code').queryKey, 3);
+    previousSession.setQueryData(options.queryKey, 3);
     const persisted = dehydrate(previousSession);
+    previousSession.clear();
 
-    // The placeholder query exists before the persisted cache is restored. `build`
-    // does not accept the SDK's tagged query key type, hence the cast.
-    const options = getUnreadActivityCountQueryOptions('alice', 'code');
+    // A query for the key exists before the persisted cache is restored. `build`
+    // does not accept the SDK's tagged query key type, hence the cast. The SDK seeds
+    // nothing any more, so there is no fresh-looking 0 to win over the restored count.
     mockQueryClient
       .getQueryCache()
       .build(mockQueryClient, options as Parameters<QueryCache['build']>[1]);
-    expect(mockQueryClient.getQueryData(options.queryKey)).toBe(0);
+    expect(mockQueryClient.getQueryData(options.queryKey)).toBeUndefined();
 
     hydrate(mockQueryClient, persisted);
 
     expect(mockQueryClient.getQueryData(options.queryKey)).toBe(3);
-    previousSession.clear();
   });
 });
