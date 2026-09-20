@@ -61,12 +61,17 @@ PODS:
     - Yoga
   - ExpoAsset (11.1.7):
     - ExpoModulesCore
+  - ExpoAudio (0.4.9):
+    - ExpoModulesCore
   - ExpoCrypto (14.1.5):
     - ExpoModulesCore
   - ExpoFileSystem (18.1.11):
     - ExpoModulesCore
   - ExpoFont (13.3.2):
     - ExpoModulesCore
+  - ExpoIap (4.6.0):
+    - ExpoModulesCore
+    - openiap (= 2.4.1)
   - ExpoImage (2.4.0):
     - ExpoModulesCore
     - libavif/libdav1d
@@ -239,6 +244,7 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - openiap (2.4.1)
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.11.18.00):
     - boost
@@ -2318,12 +2324,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNIap (12.16.2):
-    - RCT-Folly
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - ReactCommon/turbomodule/core
   - RNImageCropPicker (0.51.1):
     - DoubleConversion
     - glog
@@ -2713,9 +2713,11 @@ DEPENDENCIES:
   - EXImageLoader (from `../node_modules/expo-image-loader/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
+  - ExpoAudio (from `../node_modules/expo-audio/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
+  - ExpoIap (from `../node_modules/expo-iap/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
@@ -2824,7 +2826,6 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - RNIap (from `../node_modules/react-native-iap`)
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNOS (from `../node_modules/react-native-os`)
@@ -2855,6 +2856,7 @@ SPEC REPOS:
     - lottie-ios
     - MCEmojiPicker
     - nanopb
+    - openiap
     - PromisesObjC
     - SDWebImage
     - SDWebImageAVIFCoder
@@ -2879,12 +2881,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo"
   ExpoAsset:
     :path: "../node_modules/expo-asset/ios"
+  ExpoAudio:
+    :path: "../node_modules/expo-audio/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
     :path: "../node_modules/expo-font/ios"
+  ExpoIap:
+    :path: "../node_modules/expo-iap/ios"
   ExpoImage:
     :path: "../node_modules/expo-image/ios"
   ExpoImageManipulator:
@@ -3094,8 +3100,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNIap:
-    :path: "../node_modules/react-native-iap"
   RNImageCropPicker:
     :path: "../node_modules/react-native-image-crop-picker"
   RNNotifee:
@@ -3130,9 +3134,11 @@ SPEC CHECKSUMS:
   EXImageLoader: ab4fcf9240cf3636a83c00e3fc5229d692899428
   Expo: f36ead9aa4bf1f3d238ddf2a8e43c64510eae109
   ExpoAsset: 7bdbbacf4e6752ae6e3cf70555cee076f6229e6e
+  ExpoAudio: 052e187744415b4e04fc5c9bec08a51058983122
   ExpoCrypto: fcb6a8a08d1929f346cb95eb05a8f7818627177a
   ExpoFileSystem: 9681caebda23fa1b38a12a9c68b2bade7072ce20
   ExpoFont: 091a47eeaa1b30b0b760aa1d0a2e7814e8bf6fe6
+  ExpoIap: 4d76384e8e3fe1d817222c42b2aa37c2e65e166e
   ExpoImage: 04ffc79f9a0391573b77efbc549d59c655caa5a8
   ExpoImageManipulator: 094b748056f2654d5d7813370c910e20ef3d79b4
   ExpoKeepAwake: e8dedc115d9f6f24b153ccd2d1d8efcdfd68a527
@@ -3161,6 +3167,7 @@ SPEC CHECKSUMS:
   lottie-react-native: ac85754c6409da43b0b37b58b7042bc050aad57c
   MCEmojiPicker: 6650cfa8d79fc8d71bf77dbed6166f946cee9c96
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  openiap: b4270e3ce3877f25897cfeecb499fb11f60ed31d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 36fe2295e44b10d831836cc0d1daec5f8abcf809
   RCTDeprecation: 5f638f65935e273753b1f31a365db6a8d6dc53b5
@@ -3252,7 +3259,6 @@ SPEC CHECKSUMS:
   RNFBApp: 04850834479084af85bf3100391c38dd9ea79017
   RNFBMessaging: 8678e074c4ea9886d6fa83884dfa953967044ac8
   RNGestureHandler: 1cbf58542113b17d78c029f1791141e04ab5abf0
-  RNIap: daac81aa70fe3ac6d6967c1c8da3dc4b415b73d6
   RNImageCropPicker: 095bdb3cff665267dbe22b6ccdcd81ca6a9cb0e9
   RNNotifee: 4a6ee5c7deaf00e005050052d73ee6315dff7ec9
   RNOS: 6f2f9a70895bbbfbdad7196abd952e7b01d45027
