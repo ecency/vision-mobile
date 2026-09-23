@@ -71,7 +71,6 @@ jobs:
       - name: Create .env file
         run: |
           echo "ACTIVITY_WEBSOCKET_URL=${{ secrets.ACTIVITY_WEBSOCKET_URL }}" >> .env
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
           echo "DEFAULT_PIN=${{ secrets.DEFAULT_PIN }}" >> .env
           echo "ECENCY_BACKEND_API=${{ secrets.ECENCY_BACKEND_API }}" >> .env
           echo "NEW_IMAGE_API=${{ secrets.NEW_IMAGE_API }}" >> .env
