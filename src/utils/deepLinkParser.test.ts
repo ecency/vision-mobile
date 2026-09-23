@@ -62,10 +62,61 @@ describe('deepLinkParser', () => {
       expect(result.params.permlink).toBe('wave-202677t12348900z');
     });
 
-    it('routes bare waves url to waves tab', async () => {
+    it('routes bare waves url to waves tab without a key', async () => {
+      // A supplied key makes the tab router look the route up by key; tab
+      // routes have generated keys, so a fixed one drops the navigation.
       const result = await parse('https://ecency.com/waves');
       expect(result.name).toBe(ROUTES.TABBAR.WAVES);
-      expect(result.key).toBe('waves');
+      expect(result.params).toEqual({});
+      expect(result.key).toBeUndefined();
+    });
+
+    it('routes waves compose link to the waves tab with the text', async () => {
+      const encoded = [
+        'Just%20hit%20stage%203%20%F0%9F%90%9D%20',
+        'https%3A%2F%2Fecency.com%2Fhoneyback-share%2Fabc123defg',
+      ].join('');
+      const result = await parse(`https://ecency.com/waves?text=${encoded}`);
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.key).toBeUndefined();
+      expect(result.params).toEqual({
+        text: 'Just hit stage 3 🐝 https://ecency.com/honeyback-share/abc123defg',
+      });
+    });
+
+    it('routes ecency:// waves compose link the same way', async () => {
+      const result = await parse('ecency://waves?text=hello+waves');
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.params).toEqual({ text: 'hello waves' });
+    });
+
+    it('treats a blank text query as the bare waves tab', async () => {
+      const result = await parse('https://ecency.com/waves?text=%20%20');
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.key).toBeUndefined();
+      expect(result.params).toEqual({});
+    });
+
+    it('caps an oversized compose text without halving an emoji', async () => {
+      const result = await parse(`https://ecency.com/waves?text=${'a'.repeat(2500)}`);
+      expect(result.params.text).toHaveLength(2000);
+
+      const bee = encodeURIComponent('🐝');
+      const edge = await parse(`https://ecency.com/waves?text=${'a'.repeat(1999)}${bee}${bee}`);
+      expect(edge.params.text).toBe(`${'a'.repeat(1999)}🐝`);
+    });
+
+    it('opens other schemes and ports on ecency.com in the browser, not the composer', async () => {
+      // fall-through leaves name unset, which the link processor sends to the browser
+      const ftp = await deepLinkParser('ftp://ecency.com/waves?text=hi');
+      expect(ftp?.name).toBeUndefined();
+      const port = await deepLinkParser('https://ecency.com:8443/waves?text=hi');
+      expect(port?.name).toBeUndefined();
+    });
+
+    it('does not read text from a waves permalink query', async () => {
+      const result = await parse('https://ecency.com/waves/@jza/wave-202677t12348900z?text=x');
+      expect(result.name).toBe(ROUTES.SCREENS.POST);
     });
 
     it('routes waves permalink named like a profile filter to post screen', async () => {

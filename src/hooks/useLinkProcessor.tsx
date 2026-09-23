@@ -849,7 +849,7 @@ export const useLinkProcessor = (onClose?: () => void) => {
   const _handleDeepLink = async (url: string) => {
     const deepLinkData = await deepLinkParser(url);
     const { name, params, key } = deepLinkData || {};
-    if (name && params && key) {
+    if (name && params) {
       onClose && onClose();
       await delay(500);
       // `name` is a checked RouteName, but it is still the whole union here, so TS cannot pair

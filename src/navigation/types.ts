@@ -182,7 +182,7 @@ export type AppParamList = {
   [ROUTES.TABBAR.FEED]: { iconName?: string } | undefined;
   [ROUTES.TABBAR.NOTIFICATION]: { iconName?: string } | undefined;
   [ROUTES.TABBAR.WALLET]: { iconName?: string } | undefined;
-  [ROUTES.TABBAR.WAVES]: { iconName?: string } | undefined;
+  [ROUTES.TABBAR.WAVES]: { iconName?: string; text?: string } | undefined;
   [ROUTES.TABBAR.CHATS]: { iconName?: string } | undefined;
   [ROUTES.STACK.MAIN]: undefined;
 };
