@@ -30,6 +30,8 @@ export const parseWavesComposeUrl = (url: string): { text: string } | null => {
   }
 
   if (
+    !/^https?:$/i.test(parsed.protocol) ||
+    parsed.port !== '' ||
     !/^(?:www\.)?(?:ecency\.com|esteem\.app|estm\.to)$/i.test(parsed.hostname) ||
     !/^\/waves\/?$/i.test(parsed.pathname)
   ) {
@@ -37,8 +39,9 @@ export const parseWavesComposeUrl = (url: string): { text: string } | null => {
   }
 
   // A waves link with no usable text is still the waves tab, never the browser.
+  // Cut on code points, not UTF-16 units, so the bound never halves an emoji.
   const text = (parsed.searchParams.get('text') || '').trim();
-  return { text: text.slice(0, WAVE_COMPOSE_TEXT_MAX) };
+  return { text: Array.from(text).slice(0, WAVE_COMPOSE_TEXT_MAX).join('') };
 };
 
 export const parseWavesUrl = (url: string): PostUrlParseResult | null => {

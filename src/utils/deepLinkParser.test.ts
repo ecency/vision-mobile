@@ -62,10 +62,13 @@ describe('deepLinkParser', () => {
       expect(result.params.permlink).toBe('wave-202677t12348900z');
     });
 
-    it('routes bare waves url to waves tab', async () => {
+    it('routes bare waves url to waves tab without a key', async () => {
+      // A supplied key makes the tab router look the route up by key; tab
+      // routes have generated keys, so a fixed one drops the navigation.
       const result = await parse('https://ecency.com/waves');
       expect(result.name).toBe(ROUTES.TABBAR.WAVES);
-      expect(result.key).toBe('waves');
+      expect(result.params).toEqual({});
+      expect(result.key).toBeUndefined();
     });
 
     it('routes waves compose link to the waves tab with the text', async () => {
@@ -75,7 +78,7 @@ describe('deepLinkParser', () => {
       ].join('');
       const result = await parse(`https://ecency.com/waves?text=${encoded}`);
       expect(result.name).toBe(ROUTES.TABBAR.WAVES);
-      expect(result.key).toBe('waves/compose');
+      expect(result.key).toBeUndefined();
       expect(result.params).toEqual({
         text: 'Just hit stage 3 🐝 https://ecency.com/honeyback-share/abc123defg',
       });
@@ -90,13 +93,25 @@ describe('deepLinkParser', () => {
     it('treats a blank text query as the bare waves tab', async () => {
       const result = await parse('https://ecency.com/waves?text=%20%20');
       expect(result.name).toBe(ROUTES.TABBAR.WAVES);
-      expect(result.key).toBe('waves');
+      expect(result.key).toBeUndefined();
       expect(result.params).toEqual({});
     });
 
-    it('caps an oversized compose text', async () => {
+    it('caps an oversized compose text without halving an emoji', async () => {
       const result = await parse(`https://ecency.com/waves?text=${'a'.repeat(2500)}`);
       expect(result.params.text).toHaveLength(2000);
+
+      const bee = encodeURIComponent('🐝');
+      const edge = await parse(`https://ecency.com/waves?text=${'a'.repeat(1999)}${bee}${bee}`);
+      expect(edge.params.text).toBe(`${'a'.repeat(1999)}🐝`);
+    });
+
+    it('opens other schemes and ports on ecency.com in the browser, not the composer', async () => {
+      // fall-through leaves name unset, which the link processor sends to the browser
+      const ftp = await deepLinkParser('ftp://ecency.com/waves?text=hi');
+      expect(ftp?.name).toBeUndefined();
+      const port = await deepLinkParser('https://ecency.com:8443/waves?text=hi');
+      expect(port?.name).toBeUndefined();
     });
 
     it('does not read text from a waves permalink query', async () => {

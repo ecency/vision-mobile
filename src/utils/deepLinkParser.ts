@@ -7,8 +7,11 @@ import { RouteName } from '../navigation/types';
 import parsePurchaseUrl from './parsePurchaseUrl';
 
 // name can be undefined on fall-through: useLinkProcessor only navigates
-// natively when name, params and key are all set. Typing it as RouteName rather than string
-// means a route that does not exist fails here, at the branch that produced it.
+// natively when name and params are set. key is for stack screens, where it stops a
+// duplicate push of the same post; tab routes must leave it unset (their keys are
+// generated, and the tab router drops a navigation whose key it cannot find).
+// Typing name as RouteName rather than string means a route that does not exist
+// fails here, at the branch that produced it.
 export interface DeepLinkRoute {
   name?: RouteName;
   params?: any;
@@ -40,11 +43,15 @@ export const deepLinkParser = async (
   // ecency.com/waves?text=... opens the wave composer with that text, the
   // same link the web composer accepts; the Waves screen opens the sheet.
   // Without text it is the waves tab, whatever else the query carries.
+  // No key on a tab route: the tab router looks a supplied key up exactly,
+  // and tab routes have generated keys, so a fixed one is never found and
+  // the navigation is dropped.
   const composeLink = parseWavesComposeUrl(url);
   if (composeLink) {
-    return composeLink.text
-      ? { name: ROUTES.TABBAR.WAVES, params: { text: composeLink.text }, key: 'waves/compose' }
-      : { name: ROUTES.TABBAR.WAVES, params: {}, key: 'waves' };
+    return {
+      name: ROUTES.TABBAR.WAVES,
+      params: composeLink.text ? { text: composeLink.text } : {},
+    };
   }
 
   // profess url for post/content
@@ -139,15 +146,14 @@ export const deepLinkParser = async (
         params = {};
         keey = 'bookmarks';
         break;
+      // tab routes take no key (see the waves compose branch above)
       case 'wallet':
         routeName = ROUTES.TABBAR.WALLET;
         params = {};
-        keey = 'wallet';
         break;
       case 'waves':
         routeName = ROUTES.TABBAR.WAVES;
         params = {};
-        keey = 'waves';
         break;
       default:
         break;
