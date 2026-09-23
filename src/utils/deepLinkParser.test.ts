@@ -68,6 +68,42 @@ describe('deepLinkParser', () => {
       expect(result.key).toBe('waves');
     });
 
+    it('routes waves compose link to the waves tab with the text', async () => {
+      const encoded = [
+        'Just%20hit%20stage%203%20%F0%9F%90%9D%20',
+        'https%3A%2F%2Fecency.com%2Fhoneyback-share%2Fabc123defg',
+      ].join('');
+      const result = await parse(`https://ecency.com/waves?text=${encoded}`);
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.key).toBe('waves/compose');
+      expect(result.params).toEqual({
+        text: 'Just hit stage 3 🐝 https://ecency.com/honeyback-share/abc123defg',
+      });
+    });
+
+    it('routes ecency:// waves compose link the same way', async () => {
+      const result = await parse('ecency://waves?text=hello+waves');
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.params).toEqual({ text: 'hello waves' });
+    });
+
+    it('treats a blank text query as the bare waves tab', async () => {
+      const result = await parse('https://ecency.com/waves?text=%20%20');
+      expect(result.name).toBe(ROUTES.TABBAR.WAVES);
+      expect(result.key).toBe('waves');
+      expect(result.params).toEqual({});
+    });
+
+    it('caps an oversized compose text', async () => {
+      const result = await parse(`https://ecency.com/waves?text=${'a'.repeat(2500)}`);
+      expect(result.params.text).toHaveLength(2000);
+    });
+
+    it('does not read text from a waves permalink query', async () => {
+      const result = await parse('https://ecency.com/waves/@jza/wave-202677t12348900z?text=x');
+      expect(result.name).toBe(ROUTES.SCREENS.POST);
+    });
+
     it('routes waves permalink named like a profile filter to post screen', async () => {
       const result = await parse('https://ecency.com/waves/alice/wallet');
       expect(result.name).toBe(ROUTES.SCREENS.POST);

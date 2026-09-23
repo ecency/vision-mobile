@@ -15,7 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useIntl } from 'react-intl';
 import { getWavesFeedQueryOptions } from '@ecency/sdk';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import type { NavigationProp, RouteProp } from '@react-navigation/native';
 import {
   Comments,
   EmptyScreen,
@@ -42,6 +43,7 @@ import {
 } from '../../../redux/selectors';
 import ROUTES from '../../../constants/routeNames';
 import RootNavigation from '../../../navigation/rootNavigation';
+import { AppParamList } from '../../../navigation/types';
 
 const SCROLL_POPUP_THRESHOLD = 5000;
 
@@ -222,6 +224,22 @@ const WavesScreen = () => {
   // bottom tab / pushed screen). Combined with the active waves tab below to
   // decide if the Shorts reels should actually be playing.
   const isScreenFocused = useIsFocused();
+
+  // A share link (ecency.com/waves?text=...) lands here with the text as a
+  // route param. Open the wave composer with it the way the OS share sheet
+  // does, then clear the param so a later focus does not open it again.
+  const navigation = useNavigation<NavigationProp<AppParamList, typeof ROUTES.TABBAR.WAVES>>();
+  const screenRoute = useRoute<RouteProp<AppParamList, typeof ROUTES.TABBAR.WAVES>>();
+  const composeText = screenRoute.params?.text;
+  useEffect(() => {
+    if (!isScreenFocused || !composeText) {
+      return;
+    }
+    navigation.setParams({ text: undefined });
+    SheetManager.show(SheetNames.QUICK_POST, {
+      payload: { mode: 'wave', files: [{ text: composeText }] },
+    });
+  }, [isScreenFocused, composeText, navigation]);
 
   // Browsing waves is reading too, so it records a check-in like opening a post
   // does; users who only ever scroll waves still complete the daily quest.

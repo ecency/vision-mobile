@@ -9,6 +9,38 @@ interface PostUrlParseResult {
 // Waves permalinks (https://ecency.com/waves/{author}/{permlink}) carry no @
 // before the author segment, so none of the @-based post regexes below match
 // them; parse them explicitly so wave links open natively as a thread.
+// The web composer at ecency.com/waves accepts a `text` query and opens with it
+// filled in; the games app and other Ecency surfaces build share links that
+// way. Matches the waves tab URL itself (any query), so callers get `text`
+// empty for a plain link. The bound only guards against absurd links: the
+// composer shows its own character counter, so a long prefill is visible
+// rather than silently cut.
+export const WAVE_COMPOSE_TEXT_MAX = 2000;
+
+export const parseWavesComposeUrl = (url: string): { text: string } | null => {
+  if (!url) {
+    return null;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url.replace(/^(ecency|esteem):\/\//i, 'https://ecency.com/'));
+  } catch (e) {
+    return null;
+  }
+
+  if (
+    !/^(?:www\.)?(?:ecency\.com|esteem\.app|estm\.to)$/i.test(parsed.hostname) ||
+    !/^\/waves\/?$/i.test(parsed.pathname)
+  ) {
+    return null;
+  }
+
+  // A waves link with no usable text is still the waves tab, never the browser.
+  const text = (parsed.searchParams.get('text') || '').trim();
+  return { text: text.slice(0, WAVE_COMPOSE_TEXT_MAX) };
+};
+
 export const parseWavesUrl = (url: string): PostUrlParseResult | null => {
   if (!url) {
     return null;

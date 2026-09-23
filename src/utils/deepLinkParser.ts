@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 import { getQueryClient, getAccountFullQueryOptions } from '@ecency/sdk';
-import postUrlParser, { parseWavesUrl } from './postUrlParser';
+import postUrlParser, { parseWavesComposeUrl, parseWavesUrl } from './postUrlParser';
 import parseAuthUrl, { AUTH_MODES } from './parseAuthUrl';
 import ROUTES from '../constants/routeNames';
 import { RouteName } from '../navigation/types';
@@ -35,6 +35,16 @@ export const deepLinkParser = async (
       params: { author: wavesLink.author, permlink: wavesLink.permlink },
       key: `${wavesLink.author}/${wavesLink.permlink}`,
     };
+  }
+
+  // ecency.com/waves?text=... opens the wave composer with that text, the
+  // same link the web composer accepts; the Waves screen opens the sheet.
+  // Without text it is the waves tab, whatever else the query carries.
+  const composeLink = parseWavesComposeUrl(url);
+  if (composeLink) {
+    return composeLink.text
+      ? { name: ROUTES.TABBAR.WAVES, params: { text: composeLink.text }, key: 'waves/compose' }
+      : { name: ROUTES.TABBAR.WAVES, params: {}, key: 'waves' };
   }
 
   // profess url for post/content
