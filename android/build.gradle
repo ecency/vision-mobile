@@ -35,8 +35,13 @@ buildscript {
     dependencies {
         // Pinned above the version React Native 0.79 resolves (8.8.2), which caps
         // compileSdk at 35. compileSdk 36 needs AGP 8.9.1+.
+        // R8 bundled with AGP 8.9 cannot read Kotlin 2.2 metadata (kotlinVersion
+        // above); 8.10.21+ is the first R8 that supports it. Must precede AGP.
+        classpath("com.android.tools:r8:8.10.24")
         classpath("com.android.tools.build:gradle:8.9.2")
         classpath 'com.google.gms:google-services:4.4.3'
+        // Only used to upload the R8 mapping file, see the sentry block in app/build.gradle.
+        classpath("io.sentry:sentry-android-gradle-plugin:5.12.2")
         classpath("com.facebook.react:react-native-gradle-plugin")
         // Unversioned, this resolves to 2.0.21 from React Native's version
         // catalog, which is the compiler that fails on openiap's 2.2 metadata.

@@ -14,9 +14,11 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 
 /**
- * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ * Runs R8 on release builds to shrink and obfuscate the Java/Kotlin bytecode.
+ * Play Console flags apps whose DEX code is mostly unobfuscated. Keep rules for
+ * native modules that ship none of their own live in proguard-rules.pro.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 react {
     /* Folders */
@@ -99,6 +101,30 @@ if (!hasSentryAuthToken) {
     def skipSentryUpload = { -> false }
     project.ext.shouldSentryAutoUploadGeneral = skipSentryUpload
     project.ext.shouldSentryAutoUpload = skipSentryUpload
+}
+
+// R8 obfuscates release builds, so Java/Kotlin frames in Sentry need the mapping
+// file. This plugin only uploads it: the SDK itself comes from @sentry/react-native,
+// and bytecode instrumentation is off so it cannot change runtime behaviour.
+apply plugin: "io.sentry.android.gradle"
+sentry {
+    autoInstallation {
+        enabled = false
+    }
+    tracingInstrumentation {
+        enabled = false
+    }
+    includeDependenciesReport = false
+    includeSourceContext = false
+    uploadNativeSymbols = false
+    includeProguardMapping = true
+    autoUploadProguardMapping = hasSentryAuthToken
+    telemetry = false
+}
+// A Sentry outage must not fail the release build: a missed mapping upload only
+// costs symbolication for that build (same policy as the source map CI step).
+tasks.matching { it.name.startsWith("uploadSentryProguardMappings") }.configureEach {
+    ignoreExitValue = true
 }
 android {
     ndkVersion rootProject.ext.ndkVersion

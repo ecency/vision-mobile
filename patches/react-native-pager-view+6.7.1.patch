@@ -1,0 +1,84 @@
+diff --git a/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt b/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
+--- a/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
++++ b/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
+@@ -1,13 +1,19 @@
+ package com.reactnativepagerview
+ 
++import android.view.Choreographer
+ import android.view.View
+ import android.view.ViewGroup
+ import androidx.viewpager2.widget.ViewPager2
+ import com.facebook.react.uimanager.PixelUtil
++import java.util.WeakHashMap
+ 
+ object PagerViewViewManagerImpl {
+     const val NAME = "RNCViewPager"
+ 
++    // One pending refresh per pager (upstream 6.8.0 keeps a single global one,
++    // which lets one pager's removal cancel another pager's refresh).
++    private val refreshFrameCallbacks = WeakHashMap<View, Choreographer.FrameCallback>()
++
+     fun getViewPager(view: NestedScrollableHost): ViewPager2 {
+         if (view.getChildAt(0) is ViewPager2) {
+             return view.getChildAt(0) as ViewPager2
+@@ -62,6 +68,7 @@ object PagerViewViewManagerImpl {
+ 
+     fun removeAllViews(parent: NestedScrollableHost) {
+         val pager = getViewPager(parent)
++        cancelPendingRefresh(pager)
+         pager.isUserInputEnabled = false
+         val adapter = pager.adapter as ViewPagerAdapter?
+         adapter?.removeAll()
+@@ -78,8 +85,8 @@ object PagerViewViewManagerImpl {
+         }
+ 
+         adapter?.removeChildAt(index)
+-        
+-        refreshViewChildrenLayout(pager)
++
++        debouncedRefreshViewChildrenLayout(pager)
+     }
+ 
+     fun needsCustomLayoutForChildren(): Boolean {
+@@ -162,4 +169,40 @@ object PagerViewViewManagerImpl {
+             view.layout(view.left, view.top, view.right, view.bottom)
+         }
+     }
++
++    // Backport of react-native-pager-view 6.8.0 (callstack/react-native-pager-view#1001):
++    // forcing a layout while the pager unmounts crashes with "Scrapped or attached
++    // views may not be recycled" (callstack/react-native-pager-view#984).
++    private fun debouncedRefreshViewChildrenLayout(view: View) {
++        cancelPendingRefresh(view)
++        if (!hasItems(view)) {
++            // Do not refresh on pager unmount
++            return
++        }
++
++        // Measure and lay out inside the tracked callback rather than through
++        // refreshViewChildrenLayout, whose extra view.post could no longer be
++        // cancelled; re-check the pager at run time for the same reason.
++        val callback = Choreographer.FrameCallback {
++            refreshFrameCallbacks.remove(view)
++            if (hasItems(view)) {
++                view.measure(
++                    View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
++                    View.MeasureSpec.makeMeasureSpec(view.height, View.MeasureSpec.EXACTLY))
++                view.layout(view.left, view.top, view.right, view.bottom)
++            }
++        }
++        refreshFrameCallbacks[view] = callback
++        Choreographer.getInstance().postFrameCallback(callback)
++    }
++
++    private fun cancelPendingRefresh(view: View) {
++        val pending = refreshFrameCallbacks.remove(view) ?: return
++        Choreographer.getInstance().removeFrameCallback(pending)
++    }
++
++    private fun hasItems(view: View): Boolean {
++        val adapter = (view as? ViewPager2)?.adapter as? ViewPagerAdapter
++        return adapter != null && adapter.itemCount > 0
++    }
+ }
+\ No newline at end of file
