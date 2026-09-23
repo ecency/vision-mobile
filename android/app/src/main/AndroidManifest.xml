@@ -112,6 +112,16 @@
             <data
                 android:scheme="https"
                 android:host="ecency.com"
+                android:path="/waves"
+            />
+            <data
+                android:scheme="https"
+                android:host="ecency.com"
+                android:pathPattern="/waves/.*"
+            />
+            <data
+                android:scheme="https"
+                android:host="ecency.com"
                 android:path="/signup"
             />
             <data
