@@ -1,0 +1,35 @@
+diff --git a/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt b/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
+--- a/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
++++ b/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
+@@ -55,7 +55,9 @@ class ExpoImageModule : Module() {
+       val context = appContext.reactContext ?: return@AsyncFunction false
+ 
+       var imagesLoaded = 0
+-      var failed = false
++      // Glide restarts requests when connectivity returns, so a request that
++      // already failed (or finished) can report again. Settle the promise once.
++      var settled = false
+ 
+       val headers = headersMap?.let {
+         LazyHeaders.Builder().apply {
+@@ -82,8 +84,8 @@ class ExpoImageModule : Module() {
+               target: Target<Drawable>,
+               isFirstResource: Boolean
+             ): Boolean {
+-              if (!failed) {
+-                failed = true
++              if (!settled) {
++                settled = true
+                 promise.resolve(false)
+               }
+               return true
+@@ -98,7 +100,8 @@ class ExpoImageModule : Module() {
+             ): Boolean {
+               imagesLoaded++
+ 
+-              if (imagesLoaded == urls.size) {
++              if (!settled && imagesLoaded >= urls.size) {
++                settled = true
+                 promise.resolve(true)
+               }
+               return true
