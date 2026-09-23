@@ -42,6 +42,9 @@
 -keep class expo.modules.iap.** { *; }
 -keep class dev.hyo.openiap.** { *; }
 # openiap parses with Gson 2.10, which ships no consumer rules (TypeToken generics).
+# AGP's proguard-android.txt already keeps Signature; stated here so it survives a
+# switch of the default file.
+-keepattributes Signature
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
 

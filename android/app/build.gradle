@@ -121,6 +121,11 @@ sentry {
     autoUploadProguardMapping = hasSentryAuthToken
     telemetry = false
 }
+// A Sentry outage must not fail the release build: a missed mapping upload only
+// costs symbolication for that build (same policy as the source map CI step).
+tasks.matching { it.name.startsWith("uploadSentryProguardMappings") }.configureEach {
+    ignoreExitValue = true
+}
 android {
     ndkVersion rootProject.ext.ndkVersion
 

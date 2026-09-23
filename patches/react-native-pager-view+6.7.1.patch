@@ -21,7 +21,15 @@ diff --git a/node_modules/react-native-pager-view/android/src/main/java/com/reac
      fun getViewPager(view: NestedScrollableHost): ViewPager2 {
          if (view.getChildAt(0) is ViewPager2) {
              return view.getChildAt(0) as ViewPager2
-@@ -78,8 +84,8 @@ object PagerViewViewManagerImpl {
+@@ -62,6 +68,7 @@ object PagerViewViewManagerImpl {
+ 
+     fun removeAllViews(parent: NestedScrollableHost) {
+         val pager = getViewPager(parent)
++        cancelPendingRefresh(pager)
+         pager.isUserInputEnabled = false
+         val adapter = pager.adapter as ViewPagerAdapter?
+         adapter?.removeAll()
+@@ -78,8 +85,8 @@ object PagerViewViewManagerImpl {
          }
  
          adapter?.removeChildAt(index)
@@ -32,7 +40,7 @@ diff --git a/node_modules/react-native-pager-view/android/src/main/java/com/reac
      }
  
      fun needsCustomLayoutForChildren(): Boolean {
-@@ -162,4 +168,24 @@ object PagerViewViewManagerImpl {
+@@ -162,4 +169,40 @@ object PagerViewViewManagerImpl {
              view.layout(view.left, view.top, view.right, view.bottom)
          }
      }
@@ -41,20 +49,36 @@ diff --git a/node_modules/react-native-pager-view/android/src/main/java/com/reac
 +    // forcing a layout while the pager unmounts crashes with "Scrapped or attached
 +    // views may not be recycled" (callstack/react-native-pager-view#984).
 +    private fun debouncedRefreshViewChildrenLayout(view: View) {
-+        refreshFrameCallbacks.remove(view)?.let { Choreographer.getInstance().removeFrameCallback(it) }
-+
-+        val adapter = (view as? ViewPager2)?.adapter as? ViewPagerAdapter
-+        if (adapter == null || adapter.itemCount == 0) {
-+            // Do not call refreshViewChildrenLayout on pager unmount
++        cancelPendingRefresh(view)
++        if (!hasItems(view)) {
++            // Do not refresh on pager unmount
 +            return
 +        }
 +
++        // Measure and lay out inside the tracked callback rather than through
++        // refreshViewChildrenLayout, whose extra view.post could no longer be
++        // cancelled; re-check the pager at run time for the same reason.
 +        val callback = Choreographer.FrameCallback {
 +            refreshFrameCallbacks.remove(view)
-+            refreshViewChildrenLayout(view)
++            if (hasItems(view)) {
++                view.measure(
++                    View.MeasureSpec.makeMeasureSpec(view.width, View.MeasureSpec.EXACTLY),
++                    View.MeasureSpec.makeMeasureSpec(view.height, View.MeasureSpec.EXACTLY))
++                view.layout(view.left, view.top, view.right, view.bottom)
++            }
 +        }
 +        refreshFrameCallbacks[view] = callback
 +        Choreographer.getInstance().postFrameCallback(callback)
++    }
++
++    private fun cancelPendingRefresh(view: View) {
++        val pending = refreshFrameCallbacks.remove(view) ?: return
++        Choreographer.getInstance().removeFrameCallback(pending)
++    }
++
++    private fun hasItems(view: View): Boolean {
++        val adapter = (view as? ViewPager2)?.adapter as? ViewPagerAdapter
++        return adapter != null && adapter.itemCount > 0
 +    }
  }
 \ No newline at end of file
