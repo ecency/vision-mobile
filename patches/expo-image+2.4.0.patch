@@ -1,35 +1,47 @@
 diff --git a/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt b/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
 --- a/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
 +++ b/node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageModule.kt
-@@ -55,7 +55,9 @@ class ExpoImageModule : Module() {
+@@ -38,6 +38,8 @@ import expo.modules.kotlin.modules.ModuleDefinition
+ import expo.modules.kotlin.sharedobjects.SharedRef
+ import expo.modules.kotlin.types.EitherOfThree
+ import expo.modules.kotlin.types.toKClass
++import java.util.concurrent.atomic.AtomicBoolean
++import java.util.concurrent.atomic.AtomicInteger
+ 
+ class ExpoImageModule : Module() {
+   override fun definition() = ModuleDefinition {
+@@ -54,8 +56,11 @@ class ExpoImageModule : Module() {
+     AsyncFunction("prefetch") { urls: List<String>, cachePolicy: CachePolicy, headersMap: Map<String, String>?, promise: Promise ->
        val context = appContext.reactContext ?: return@AsyncFunction false
  
-       var imagesLoaded = 0
+-      var imagesLoaded = 0
 -      var failed = false
-+      // Glide restarts requests when connectivity returns, so a request that
-+      // already failed (or finished) can report again. Settle the promise once.
-+      var settled = false
++      // Glide restarts requests that failed when connectivity returns, so a prefetch
++      // can report again after its promise settled. Listeners also run on Glide's
++      // worker threads, hence the atomics. Settle the promise exactly once.
++      val imagesLoaded = AtomicInteger(0)
++      val settled = AtomicBoolean(false)
  
        val headers = headersMap?.let {
          LazyHeaders.Builder().apply {
-@@ -82,8 +84,8 @@ class ExpoImageModule : Module() {
+@@ -82,8 +87,7 @@ class ExpoImageModule : Module() {
                target: Target<Drawable>,
                isFirstResource: Boolean
              ): Boolean {
 -              if (!failed) {
 -                failed = true
-+              if (!settled) {
-+                settled = true
++              if (settled.compareAndSet(false, true)) {
                  promise.resolve(false)
                }
                return true
-@@ -98,7 +100,8 @@ class ExpoImageModule : Module() {
+@@ -96,9 +100,7 @@ class ExpoImageModule : Module() {
+               dataSource: DataSource,
+               isFirstResource: Boolean
              ): Boolean {
-               imagesLoaded++
- 
+-              imagesLoaded++
+-
 -              if (imagesLoaded == urls.size) {
-+              if (!settled && imagesLoaded >= urls.size) {
-+                settled = true
++              if (imagesLoaded.incrementAndGet() >= urls.size && settled.compareAndSet(false, true)) {
                  promise.resolve(true)
                }
                return true

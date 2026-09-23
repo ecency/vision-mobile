@@ -1,0 +1,60 @@
+diff --git a/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt b/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
+--- a/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
++++ b/node_modules/react-native-pager-view/android/src/main/java/com/reactnativepagerview/PagerViewViewManagerImpl.kt
+@@ -1,13 +1,19 @@
+ package com.reactnativepagerview
+ 
++import android.view.Choreographer
+ import android.view.View
+ import android.view.ViewGroup
+ import androidx.viewpager2.widget.ViewPager2
+ import com.facebook.react.uimanager.PixelUtil
++import java.util.WeakHashMap
+ 
+ object PagerViewViewManagerImpl {
+     const val NAME = "RNCViewPager"
+ 
++    // One pending refresh per pager (upstream 6.8.0 keeps a single global one,
++    // which lets one pager's removal cancel another pager's refresh).
++    private val refreshFrameCallbacks = WeakHashMap<View, Choreographer.FrameCallback>()
++
+     fun getViewPager(view: NestedScrollableHost): ViewPager2 {
+         if (view.getChildAt(0) is ViewPager2) {
+             return view.getChildAt(0) as ViewPager2
+@@ -78,8 +84,8 @@ object PagerViewViewManagerImpl {
+         }
+ 
+         adapter?.removeChildAt(index)
+-        
+-        refreshViewChildrenLayout(pager)
++
++        debouncedRefreshViewChildrenLayout(pager)
+     }
+ 
+     fun needsCustomLayoutForChildren(): Boolean {
+@@ -162,4 +168,24 @@ object PagerViewViewManagerImpl {
+             view.layout(view.left, view.top, view.right, view.bottom)
+         }
+     }
++
++    // Backport of react-native-pager-view 6.8.0 (callstack/react-native-pager-view#1001):
++    // forcing a layout while the pager unmounts crashes with "Scrapped or attached
++    // views may not be recycled" (callstack/react-native-pager-view#984).
++    private fun debouncedRefreshViewChildrenLayout(view: View) {
++        refreshFrameCallbacks.remove(view)?.let { Choreographer.getInstance().removeFrameCallback(it) }
++
++        val adapter = (view as? ViewPager2)?.adapter as? ViewPagerAdapter
++        if (adapter == null || adapter.itemCount == 0) {
++            // Do not call refreshViewChildrenLayout on pager unmount
++            return
++        }
++
++        val callback = Choreographer.FrameCallback {
++            refreshFrameCallbacks.remove(view)
++            refreshViewChildrenLayout(view)
++        }
++        refreshFrameCallbacks[view] = callback
++        Choreographer.getInstance().postFrameCallback(callback)
++    }
+ }
+\ No newline at end of file
