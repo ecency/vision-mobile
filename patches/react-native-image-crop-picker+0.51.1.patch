@@ -1,8 +1,14 @@
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-index b9c494e..0460d3e 100644
+index b9c494e..6bd5c17 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-@@ -7,6 +7,7 @@ import android.content.ContentResolver;
+@@ -2,11 +2,13 @@ package com.reactnative.ivpusic.imagepicker;
+ 
+ import android.Manifest;
+ import android.app.Activity;
++import android.content.ActivityNotFoundException;
+ import android.content.ClipData;
+ import android.content.ContentResolver;
  import android.content.Context;
  import android.content.Intent;
  import android.content.pm.PackageManager;
@@ -10,7 +16,7 @@ index b9c494e..0460d3e 100644
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
  import android.graphics.Color;
-@@ -14,7 +15,9 @@ import android.media.MediaMetadataRetriever;
+@@ -14,7 +16,9 @@ import android.media.MediaMetadataRetriever;
  import android.net.Uri;
  import android.os.Build;
  import android.os.Environment;
@@ -20,7 +26,7 @@ index b9c494e..0460d3e 100644
  import android.util.Base64;
  import android.util.Log;
  import android.webkit.MimeTypeMap;
-@@ -67,6 +70,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -67,6 +71,7 @@ class ImageCropPicker implements ActivityEventListener {
      private static final String E_FAILED_TO_SHOW_PICKER = "E_FAILED_TO_SHOW_PICKER";
      private static final String E_FAILED_TO_OPEN_CAMERA = "E_FAILED_TO_OPEN_CAMERA";
      private static final String E_NO_IMAGE_DATA_FOUND = "E_NO_IMAGE_DATA_FOUND";
@@ -28,7 +34,7 @@ index b9c494e..0460d3e 100644
      private static final String E_CAMERA_IS_NOT_AVAILABLE = "E_CAMERA_IS_NOT_AVAILABLE";
      private static final String E_CANNOT_LAUNCH_CAMERA = "E_CANNOT_LAUNCH_CAMERA";
      private static final String E_ERROR_WHILE_CLEANING_FILES = "E_ERROR_WHILE_CLEANING_FILES";
-@@ -103,10 +107,12 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -103,10 +108,12 @@ class ImageCropPicker implements ActivityEventListener {
      private int height = 0;
  
      private int maxFiles = 5;
@@ -42,7 +48,7 @@ index b9c494e..0460d3e 100644
      private Compression compression = new Compression();
      private ReactApplicationContext reactContext;
  
-@@ -130,6 +136,9 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -130,6 +137,9 @@ class ImageCropPicker implements ActivityEventListener {
          width = options.hasKey("width") ? options.getInt("width") : 0;
          height = options.hasKey("height") ? options.getInt("height") : 0;
          maxFiles = options.hasKey("maxFiles") ? options.getInt("maxFiles") : maxFiles;
@@ -52,7 +58,7 @@ index b9c494e..0460d3e 100644
          cropping = options.hasKey("cropping") && options.getBoolean("cropping");
          cropperActiveWidgetColor = options.hasKey("cropperActiveWidgetColor") ? options.getString("cropperActiveWidgetColor") : null;
          cropperToolbarColor = options.hasKey("cropperToolbarColor") ? options.getString("cropperToolbarColor") : null;
-@@ -148,6 +157,14 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -148,6 +158,14 @@ class ImageCropPicker implements ActivityEventListener {
          this.options = options;
      }
  
@@ -67,7 +73,7 @@ index b9c494e..0460d3e 100644
      private void deleteRecursive(File fileOrDirectory) {
          if (fileOrDirectory.isDirectory()) {
              for (File child : fileOrDirectory.listFiles()) {
-@@ -304,7 +321,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -304,7 +322,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -76,7 +82,7 @@ index b9c494e..0460d3e 100644
  
          permissionsCheck(activity, promise, Arrays.asList(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
              @Override
-@@ -354,8 +371,50 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -354,8 +372,58 @@ class ImageCropPicker implements ActivityEventListener {
  
      }
  
@@ -120,14 +126,22 @@ index b9c494e..0460d3e 100644
 +            // one from Google Play services, a module that fails to load on some
 +            // devices (Android Go) and then only reports a cancelled selection.
 +            if (useDocumentPicker || !hasSystemPhotoPicker()) {
-+                activity.startActivityForResult(createDocumentPickerIntent(), IMAGE_PICKER_REQUEST);
-+                return;
++                try {
++                    activity.startActivityForResult(createDocumentPickerIntent(), IMAGE_PICKER_REQUEST);
++                    return;
++                } catch (ActivityNotFoundException e) {
++                    // No document picker on this device. Unless it was asked for,
++                    // the AndroidX contracts below are still worth a try.
++                    if (useDocumentPicker) {
++                        throw e;
++                    }
++                }
 +            }
 +
              PickVisualMediaRequest.Builder builder = new PickVisualMediaRequest.Builder();
              // Simplified media type handling
              if (mediaType.equals("video")) {
-@@ -389,7 +448,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -389,7 +457,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -136,7 +150,7 @@ index b9c494e..0460d3e 100644
  
          permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
              @Override
-@@ -409,7 +468,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -409,7 +477,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -145,7 +159,7 @@ index b9c494e..0460d3e 100644
  
          final Uri uri = Uri.parse(options.getString("path"));
          permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-@@ -472,27 +531,90 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -472,27 +540,90 @@ class ImageCropPicker implements ActivityEventListener {
  
          String mime = getMimeType(path);
          if (mime != null && mime.startsWith("video/")) {
@@ -241,7 +255,7 @@ index b9c494e..0460d3e 100644
      }
  
      private Bitmap validateVideo(Uri uri) throws Exception {
-@@ -519,7 +641,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -519,7 +650,8 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -251,7 +265,7 @@ index b9c494e..0460d3e 100644
          validateVideo(Uri.parse(path));
          final String compressedVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
  
-@@ -540,13 +663,13 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -540,13 +672,13 @@ class ImageCropPicker implements ActivityEventListener {
                  video.putString("path", "file://" + videoPath);
                  video.putString("modificationDate", String.valueOf(modificationDate));
  
@@ -268,7 +282,7 @@ index b9c494e..0460d3e 100644
          }))).start();
      }
  
-@@ -564,7 +687,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -564,7 +696,8 @@ class ImageCropPicker implements ActivityEventListener {
              // For videos, get the real path but don't copy the file
              String mimeType = activity.getContentResolver().getType(uri);
              if (mimeType != null && mimeType.startsWith("video/")) {
@@ -278,7 +292,7 @@ index b9c494e..0460d3e 100644
              }
  
              String externalCacheDirPath = Uri.fromFile(activity.getExternalCacheDir()).getPath();
-@@ -572,10 +696,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -572,10 +705,11 @@ class ImageCropPicker implements ActivityEventListener {
              String cacheDirPath = Uri.fromFile(activity.getCacheDir()).getPath();
              String FilesDirPath = Uri.fromFile(activity.getFilesDir()).getPath();
  
@@ -292,7 +306,7 @@ index b9c494e..0460d3e 100644
                  File copiedFile = this.createExternalStoragePrivateFile(activity, uri);
                  path = RealPathUtil.getRealPathFromURI(activity, Uri.fromFile(copiedFile));
              }
-@@ -584,32 +709,33 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -584,32 +718,33 @@ class ImageCropPicker implements ActivityEventListener {
          return path;
      }
  
@@ -346,7 +360,7 @@ index b9c494e..0460d3e 100644
          }
  
          return file;
-@@ -755,24 +881,45 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -755,24 +890,45 @@ class ImageCropPicker implements ActivityEventListener {
          if (resultCode == Activity.RESULT_CANCELED) {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
          } else if (resultCode == Activity.RESULT_OK) {
@@ -393,7 +407,7 @@ index b9c494e..0460d3e 100644
 +                }
 +
 +                // The photo picker limits a selection in its own UI, a document
-+                // picker (asked for, or the AndroidX fallback) cannot.
++                // picker (asked for, or used for lack of a built-in photo picker) cannot.
 +                if (uris.size() > maxFiles) {
 +                    resultCollector.notifyProblem(E_TOO_MANY_FILES, "Too many files selected");
 +                    return;
@@ -403,7 +417,7 @@ index b9c494e..0460d3e 100644
              } else {
                  Uri uri = data.getData();
  
-@@ -792,13 +939,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -792,13 +948,11 @@ class ImageCropPicker implements ActivityEventListener {
                  }
  
                  if (cropping) {
@@ -421,7 +435,7 @@ index b9c494e..0460d3e 100644
                  }
              }
          }
-@@ -835,37 +980,61 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -835,37 +989,61 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
