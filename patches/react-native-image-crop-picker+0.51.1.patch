@@ -530,7 +530,7 @@ index b9c494e..99ec3b5 100644
          } else {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-index bcc5dd6..fea11c3 100644
+index bcc5dd6..541205c 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 @@ -9,11 +9,15 @@ import android.os.Build;
@@ -580,11 +580,7 @@ index bcc5dd6..fea11c3 100644
 +        try (InputStream is = context.getContentResolver().openInputStream(uri)) {
 +            if (is == null) {
 +                throw new FileNotFoundException();
-             }
--            oos.close();
--            is.close();
--        } catch (Exception e) {
--            e.printStackTrace();
++            }
 +
 +            try (FileOutputStream oos = new FileOutputStream(file)) {
 +                byte[] buf = new byte[8192];
@@ -592,7 +588,11 @@ index bcc5dd6..fea11c3 100644
 +                while ((c = is.read(buf, 0, buf.length)) > 0) {
 +                    oos.write(buf, 0, c);
 +                }
-+            }
+             }
+-            oos.close();
+-            is.close();
+-        } catch (Exception e) {
+-            e.printStackTrace();
 +        } catch (IOException | RuntimeException e) {
 +            file.delete();
 +            throw copyFailure(e);
@@ -632,8 +632,12 @@ index bcc5dd6..fea11c3 100644
  
          Cursor cursor = null;
          final String[] projection = {
-@@ -151,11 +181,13 @@ class RealPathUtil {
-                 // Fall back to writing to file if _data column does not exist
+@@ -148,26 +178,42 @@ class RealPathUtil {
+             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                     null);
+             if (cursor != null && cursor.moveToFirst()) {
+-                // Fall back to writing to file if _data column does not exist
++                // Copy through the uri unless the provider reports a path that opens
                  final int index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
                  String path = index > -1 ? cursor.getString(index) : null;
 -                if (path != null) {
@@ -650,7 +654,17 @@ index bcc5dd6..fea11c3 100644
                      File fileWritten = writeToFile(context, fileName, uri);
                      return fileWritten.getAbsolutePath();
                  }
-@@ -168,6 +200,16 @@ class RealPathUtil {
+             }
++        } catch (RuntimeException e) {
++            // a provider that cannot answer the query may still serve the uri
+         } finally {
+             if (cursor != null)
+                 cursor.close();
+         }
+-        return null;
++
++        // No row to read a path or a name from: the uri is all there is.
++        return writeToFile(context, null, uri).getAbsolutePath();
      }
  
  
