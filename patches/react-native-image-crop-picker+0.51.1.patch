@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-index b9c494e..48c760d 100644
+index b9c494e..99ec3b5 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 @@ -2,11 +2,13 @@ package com.reactnative.ivpusic.imagepicker;
@@ -142,16 +142,27 @@ index b9c494e..48c760d 100644
              PickVisualMediaRequest.Builder builder = new PickVisualMediaRequest.Builder();
              // Simplified media type handling
              if (mediaType.equals("video")) {
-@@ -389,7 +458,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -389,15 +458,11 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
 -        resultCollector.setup(promise, multiple);
 +        startRequest(promise, multiple);
  
-         permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-             @Override
-@@ -409,7 +478,7 @@ class ImageCropPicker implements ActivityEventListener {
+-        permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
+-            @Override
+-            public Void call() {
+-                initiatePicker(activity);
+-                return null;
+-            }
+-        });
++        // No storage permission to pick: every picker opened here hands back uris
++        // the app may read, and the copies go to the app's own directories.
++        initiatePicker(activity);
+     }
+ 
+     public void openCropper(final ReadableMap options, final Promise promise) {
+@@ -409,7 +474,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -160,7 +171,7 @@ index b9c494e..48c760d 100644
  
          final Uri uri = Uri.parse(options.getString("path"));
          permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-@@ -472,27 +541,90 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -472,27 +537,90 @@ class ImageCropPicker implements ActivityEventListener {
  
          String mime = getMimeType(path);
          if (mime != null && mime.startsWith("video/")) {
@@ -256,7 +267,7 @@ index b9c494e..48c760d 100644
      }
  
      private Bitmap validateVideo(Uri uri) throws Exception {
-@@ -519,7 +651,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -519,7 +647,8 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -266,7 +277,7 @@ index b9c494e..48c760d 100644
          validateVideo(Uri.parse(path));
          final String compressedVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
  
-@@ -540,13 +673,13 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -540,13 +669,13 @@ class ImageCropPicker implements ActivityEventListener {
                  video.putString("path", "file://" + videoPath);
                  video.putString("modificationDate", String.valueOf(modificationDate));
  
@@ -283,7 +294,7 @@ index b9c494e..48c760d 100644
          }))).start();
      }
  
-@@ -564,7 +697,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -564,7 +693,8 @@ class ImageCropPicker implements ActivityEventListener {
              // For videos, get the real path but don't copy the file
              String mimeType = activity.getContentResolver().getType(uri);
              if (mimeType != null && mimeType.startsWith("video/")) {
@@ -293,7 +304,7 @@ index b9c494e..48c760d 100644
              }
  
              String externalCacheDirPath = Uri.fromFile(activity.getExternalCacheDir()).getPath();
-@@ -572,10 +706,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -572,10 +702,11 @@ class ImageCropPicker implements ActivityEventListener {
              String cacheDirPath = Uri.fromFile(activity.getCacheDir()).getPath();
              String FilesDirPath = Uri.fromFile(activity.getFilesDir()).getPath();
  
@@ -307,7 +318,7 @@ index b9c494e..48c760d 100644
                  File copiedFile = this.createExternalStoragePrivateFile(activity, uri);
                  path = RealPathUtil.getRealPathFromURI(activity, Uri.fromFile(copiedFile));
              }
-@@ -584,32 +719,33 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -584,32 +715,33 @@ class ImageCropPicker implements ActivityEventListener {
          return path;
      }
  
@@ -361,7 +372,7 @@ index b9c494e..48c760d 100644
          }
  
          return file;
-@@ -755,24 +891,45 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -755,24 +887,45 @@ class ImageCropPicker implements ActivityEventListener {
          if (resultCode == Activity.RESULT_CANCELED) {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
          } else if (resultCode == Activity.RESULT_OK) {
@@ -418,7 +429,7 @@ index b9c494e..48c760d 100644
              } else {
                  Uri uri = data.getData();
  
-@@ -792,13 +949,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -792,13 +945,11 @@ class ImageCropPicker implements ActivityEventListener {
                  }
  
                  if (cropping) {
@@ -436,7 +447,7 @@ index b9c494e..48c760d 100644
                  }
              }
          }
-@@ -835,37 +990,61 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -835,37 +986,61 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -519,7 +530,7 @@ index b9c494e..48c760d 100644
          } else {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-index bcc5dd6..ff35a36 100644
+index bcc5dd6..79a3403 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 @@ -9,11 +9,14 @@ import android.os.Build;
@@ -620,6 +631,38 @@ index bcc5dd6..ff35a36 100644
  
          Cursor cursor = null;
          final String[] projection = {
+@@ -151,11 +180,13 @@ class RealPathUtil {
+                 // Fall back to writing to file if _data column does not exist
+                 final int index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
+                 String path = index > -1 ? cursor.getString(index) : null;
+-                if (path != null) {
+-                    return cursor.getString(index);
++                if (path != null && isReadable(path)) {
++                    return path;
+                 } else {
+-                    final int indexDisplayName = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+-                    String fileName = cursor.getString(indexDisplayName);
++                    // Without a display name the extension comes from the mime type.
++                    final int nameIndex =
++                            cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
++                    String fileName = nameIndex > -1 ? cursor.getString(nameIndex) : null;
+                     File fileWritten = writeToFile(context, fileName, uri);
+                     return fileWritten.getAbsolutePath();
+                 }
+@@ -168,6 +199,13 @@ class RealPathUtil {
+     }
+ 
+ 
++    // Before Android 11 a path on shared storage is readable only with the storage
++    // permission (on Android 10 not even then), which picking no longer asks for.
++    // The uri itself always is.
++    private static boolean isReadable(String path) {
++        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || new File(path).canRead();
++    }
++
+     /**
+      * @param uri The Uri to check.
+      * @return Whether the Uri authority is ExternalStorageProvider.
 diff --git a/node_modules/react-native-image-crop-picker/index.d.ts b/node_modules/react-native-image-crop-picker/index.d.ts
 index 59a9155..df47fcc 100644
 --- a/node_modules/react-native-image-crop-picker/index.d.ts
