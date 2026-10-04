@@ -179,7 +179,7 @@ class ProfileEditContainer extends Component<any, any> {
       mediaType: 'photo',
     });
 
-    if (get(error, 'code') === 'E_PERMISSION_MISSING') {
+    if (PICKER_PERMISSION_ERRORS.includes(get(error, 'code'))) {
       Alert.alert(
         intl.formatMessage({
           id: 'alert.permission_denied',
@@ -298,6 +298,13 @@ const mapHooksToProps = (props: any) => {
 };
 
 export default connect(mapStateToProps)(injectIntl(mapHooksToProps));
+
+// the codes the picker rejects with when a permission is denied
+const PICKER_PERMISSION_ERRORS = [
+  'E_PERMISSION_MISSING',
+  'E_NO_LIBRARY_PERMISSION',
+  'E_NO_CAMERA_PERMISSION',
+];
 
 const IMAGE_PICKER_AVATAR_OPTIONS = {
   includeBase64: true,

@@ -631,6 +631,7 @@ export const UploadsGalleryModal = forwardRef(
       switch (error.code) {
         case 'E_PERMISSION_MISSING':
         case 'E_NO_LIBRARY_PERMISSION':
+        case 'E_NO_CAMERA_PERMISSION':
           title = intl.formatMessage({
             id: 'alert.permission_denied',
           });
