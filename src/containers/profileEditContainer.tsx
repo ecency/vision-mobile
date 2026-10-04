@@ -140,24 +140,32 @@ class ProfileEditContainer extends Component<any, any> {
     }
   };
 
-  _handleOpenImagePicker = (action: any, useDocumentPicker = false) => {
+  // An image above maxFileSize comes back as its size only, it was never read.
+  // One the picker had no size for up front is caught here by its real size.
+  _rejectTooLarge = (media: any) => {
     const { intl } = this.props;
 
+    if (media?.path && !(media.size > MAX_IMAGE_UPLOAD_SIZE)) {
+      return false;
+    }
+
+    Alert.alert(
+      intl.formatMessage({ id: 'alert.fail' }),
+      intl.formatMessage({ id: 'alert.payloadTooLarge' }),
+    );
+    return true;
+  };
+
+  _handleOpenImagePicker = (action: any, useDocumentPicker = false) => {
     ImagePicker.openPicker({
       ...(action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS),
       mediaType: 'photo',
       useDocumentPicker,
     })
       .then((media) => {
-        // an image above maxFileSize comes back as its size only, it was never read
-        if (!media?.path) {
-          Alert.alert(
-            intl.formatMessage({ id: 'alert.fail' }),
-            intl.formatMessage({ id: 'alert.payloadTooLarge' }),
-          );
-          return;
+        if (!this._rejectTooLarge(media)) {
+          this._uploadImage(media, action);
         }
-        this._uploadImage(media, action);
       })
       .catch((e) => {
         this._handleMediaOnSelectFailure(e, 'openPicker');
@@ -169,7 +177,9 @@ class ProfileEditContainer extends Component<any, any> {
       action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS,
     )
       .then((media) => {
-        this._uploadImage(media, action);
+        if (!this._rejectTooLarge(media)) {
+          this._uploadImage(media, action);
+        }
       })
       .catch((e) => {
         this._handleMediaOnSelectFailure(e, 'openCamera');
