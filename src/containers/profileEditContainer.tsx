@@ -11,11 +11,11 @@ import { selectCurrentAccount, selectIsDarkTheme, selectPin } from '../redux/sel
 import { uploadImage } from '../providers/ecency/ecency';
 
 import { signImage } from '../providers/hive/hive';
-import { isSignImageUnavailable } from '../constants/imageUpload';
+import { MAX_IMAGE_UPLOAD_SIZE, isSignImageUnavailable } from '../constants/imageUpload';
 import { useAccountUpdateMutation } from '../providers/sdk/mutations';
 import { updateCurrentAccount } from '../redux/actions/accountAction';
 import { setAvatarCacheStamp } from '../redux/actions/uiAction';
-import { reportMediaPickerError } from '../utils/mediaPickerError';
+import { isMediaPickerCancellation, reportMediaPickerError } from '../utils/mediaPickerError';
 
 // import ROUTES from '../constants/routeNames';
 
@@ -135,15 +135,37 @@ class ProfileEditContainer extends Component<any, any> {
       this._handleOpenCamera(uploadAction);
     } else if (type === 'image') {
       this._handleOpenImagePicker(uploadAction);
+    } else if (type === 'files') {
+      this._handleOpenImagePicker(uploadAction, true);
     }
   };
 
-  _handleOpenImagePicker = (action: any) => {
-    ImagePicker.openPicker(
-      action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS,
-    )
+  // An image above maxFileSize comes back as its size only, it was never read.
+  // One the picker had no size for up front is caught here by its real size.
+  _rejectTooLarge = (media: any) => {
+    const { intl } = this.props;
+
+    if (media?.path && !(media.size > MAX_IMAGE_UPLOAD_SIZE)) {
+      return false;
+    }
+
+    Alert.alert(
+      intl.formatMessage({ id: 'alert.fail' }),
+      intl.formatMessage({ id: 'alert.payloadTooLarge' }),
+    );
+    return true;
+  };
+
+  _handleOpenImagePicker = (action: any, useDocumentPicker = false) => {
+    ImagePicker.openPicker({
+      ...(action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS),
+      mediaType: 'photo',
+      useDocumentPicker,
+    })
       .then((media) => {
-        this._uploadImage(media, action);
+        if (!this._rejectTooLarge(media)) {
+          this._uploadImage(media, action);
+        }
       })
       .catch((e) => {
         this._handleMediaOnSelectFailure(e, 'openPicker');
@@ -155,7 +177,9 @@ class ProfileEditContainer extends Component<any, any> {
       action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS,
     )
       .then((media) => {
-        this._uploadImage(media, action);
+        if (!this._rejectTooLarge(media)) {
+          this._uploadImage(media, action);
+        }
       })
       .catch((e) => {
         this._handleMediaOnSelectFailure(e, 'openCamera');
@@ -165,13 +189,17 @@ class ProfileEditContainer extends Component<any, any> {
   _handleMediaOnSelectFailure = (error: any, action: any = 'openPicker') => {
     const { intl } = this.props;
 
+    if (isMediaPickerCancellation(error)) {
+      return;
+    }
+
     reportMediaPickerError(error, {
       feature: 'profile-edit',
       action,
       mediaType: 'photo',
     });
 
-    if (get(error, 'code') === 'E_PERMISSION_MISSING') {
+    if (PICKER_PERMISSION_ERRORS.includes(get(error, 'code'))) {
       Alert.alert(
         intl.formatMessage({
           id: 'alert.permission_denied',
@@ -179,6 +207,12 @@ class ProfileEditContainer extends Component<any, any> {
         intl.formatMessage({
           id: 'alert.permission_text',
         }),
+      );
+    } else {
+      // a failed pick must not look like nothing happened
+      Alert.alert(
+        intl.formatMessage({ id: 'alert.fail' }),
+        get(error, 'message') || intl.formatMessage({ id: 'alert.unknow_error' }),
       );
     }
   };
@@ -285,13 +319,21 @@ const mapHooksToProps = (props: any) => {
 
 export default connect(mapStateToProps)(injectIntl(mapHooksToProps));
 
+// the codes the picker rejects with when a permission is denied
+const PICKER_PERMISSION_ERRORS = [
+  'E_PERMISSION_MISSING',
+  'E_NO_LIBRARY_PERMISSION',
+  'E_NO_CAMERA_PERMISSION',
+];
+
+// uploads read the file by path, so no base64
 const IMAGE_PICKER_AVATAR_OPTIONS = {
-  includeBase64: true,
+  maxFileSize: MAX_IMAGE_UPLOAD_SIZE,
   cropping: true,
   width: 512,
   height: 512,
 };
 
 const IMAGE_PICKER_COVER_OPTIONS = {
-  includeBase64: true,
+  maxFileSize: MAX_IMAGE_UPLOAD_SIZE,
 };

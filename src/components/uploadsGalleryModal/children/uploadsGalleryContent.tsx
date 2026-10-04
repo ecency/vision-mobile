@@ -34,6 +34,10 @@ import styles, {
 } from './uploadsGalleryModalStyles';
 import { Modes } from '../container/uploadsGalleryModal';
 
+// The system document picker, for Android devices whose photo picker is broken.
+// Images only: a video would be copied whole before anything shows.
+const HAS_FILES_SOURCE = Platform.OS === 'android';
+
 type Props = {
   mode: Modes;
   insertedMediaUrls: string[];
@@ -41,6 +45,7 @@ type Props = {
   isAddingToUploads: boolean;
   insertMedia: (map: Map<number, boolean>) => void;
   handleOpenGallery: (addToUploads?: boolean) => void;
+  handleOpenFiles: () => void;
   handleOpenSpeakUploader: () => void;
   handleOpenCamera: () => void;
   handleIsScrolledTop: (isScrolledTop: boolean) => void;
@@ -56,6 +61,7 @@ const UploadsGalleryContent = ({
   isAddingToUploads,
   insertMedia,
   handleOpenGallery,
+  handleOpenFiles,
   handleOpenCamera,
   handleOpenSpeakUploader,
   handleIsScrolledTop,
@@ -202,6 +208,8 @@ const UploadsGalleryContent = ({
     );
   };
 
+  const _showFilesSource = HAS_FILES_SOURCE && mode === Modes.MODE_IMAGE;
+
   const _renderSelectButtons = (
     <>
       {_renderSelectButton(
@@ -210,12 +218,15 @@ const UploadsGalleryContent = ({
         handleOpenGallery,
       )}
       {_renderSelectButton('camera', 'Camera', handleOpenCamera)}
+      {_showFilesSource && _renderSelectButton('folder', 'Files', handleOpenFiles)}
     </>
   );
 
   const _renderHeaderContent = () => (
     <View style={{ ...styles.buttonsContainer, paddingVertical: isExpandedMode ? 8 : 0 }}>
-      <View style={styles.selectButtonsContainer}>
+      <View
+        style={[styles.selectButtonsContainer, _showFilesSource && styles.selectButtonsCompact]}
+      >
         {mode === Modes.MODE_IMAGE
           ? _renderSelectButtons
           : isAddingToUploads
