@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-index b9c494e..1d488ab 100644
+index b9c494e..bb20800 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 @@ -103,6 +103,7 @@ class ImageCropPicker implements ActivityEventListener {
@@ -98,10 +98,10 @@ index b9c494e..1d488ab 100644
 -            // not currently mounted.
 -            Log.w("image-crop-picker", "Error writing " + file, e);
 +        // Copy in chunks: available() is not the file size for providers that
-+        // stream, and a failed copy must surface instead of leaving a partial file.
++        // stream. A failed copy must surface, a partial file would pass as the selection.
 +        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
 +            if (inputStream == null) {
-+                throw new FileNotFoundException("Cannot open " + uri);
++                throw new FileNotFoundException("Cannot open the selected file");
 +            }
 +
 +            try (OutputStream outputStream = new FileOutputStream(file)) {
@@ -114,7 +114,7 @@ index b9c494e..1d488ab 100644
          }
  
          return file;
-@@ -755,17 +779,33 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -755,20 +779,44 @@ class ImageCropPicker implements ActivityEventListener {
          if (resultCode == Activity.RESULT_CANCELED) {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
          } else if (resultCode == Activity.RESULT_OK) {
@@ -125,44 +125,167 @@ index b9c494e..1d488ab 100644
 +
              if (multiple) {
                  ClipData clipData = data.getClipData();
++                List<Uri> uris = new ArrayList<>();
  
-                 try {
-                     // only one image selected
-                     if (clipData == null) {
-+                        Uri uri = data.getData();
-+                        if (uri == null) {
-+                            resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot resolve image url");
-+                            return;
-+                        }
-+
-                         resultCollector.setWaitCount(1);
+-                try {
+-                    // only one image selected
+-                    if (clipData == null) {
+-                        resultCollector.setWaitCount(1);
 -                        getAsyncSelection(activity, data.getData(), false);
-+                        getAsyncSelection(activity, uri, false);
-                     } else {
+-                    } else {
 -                        resultCollector.setWaitCount(clipData.getItemCount());
 -                        for (int i = 0; i < clipData.getItemCount(); i++) {
-+                        // The document picker cannot limit a selection, so apply
-+                        // the limit the photo picker enforces in its own UI.
-+                        int count = useDocumentPicker
-+                                ? Math.min(clipData.getItemCount(), maxFiles)
-+                                : clipData.getItemCount();
-+                        resultCollector.setWaitCount(count);
-+                        for (int i = 0; i < count; i++) {
-                             getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false);
+-                            getAsyncSelection(activity, clipData.getItemAt(i).getUri(), false);
++                // only one image selected
++                if (clipData == null) {
++                    if (data.getData() != null) {
++                        uris.add(data.getData());
++                    }
++                } else {
++                    for (int i = 0; i < clipData.getItemCount(); i++) {
++                        Uri uri = clipData.getItemAt(i).getUri();
++                        if (uri != null) {
++                            uris.add(uri);
                          }
                      }
-@@ -865,7 +905,10 @@ class ImageCropPicker implements ActivityEventListener {
++                }
++
++                // Some pickers report success without a usable uri. An empty
++                // wait count would leave the promise unsettled.
++                if (uris.isEmpty()) {
++                    resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot resolve image url");
++                    return;
++                }
++
++                try {
++                    // The document picker cannot limit a selection, so apply
++                    // the limit the photo picker enforces in its own UI.
++                    int count = useDocumentPicker ? Math.min(uris.size(), maxFiles) : uris.size();
++                    resultCollector.setWaitCount(count);
++                    for (int i = 0; i < count; i++) {
++                        getAsyncSelection(activity, uris.get(i), false);
++                    }
+                 } catch (Exception ex) {
+                     resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
+                 }
+@@ -835,6 +883,17 @@ class ImageCropPicker implements ActivityEventListener {
+         }
+     }
+ 
++    // The cropper's own error, without the source uri its messages embed
++    // (it names the user's file and would split error grouping per file).
++    private static String describeCropError(Throwable error) {
++        if (error == null) {
++            return "Cannot find image data";
++        }
++
++        String message = error.getMessage() != null ? error.getMessage() : error.toString();
++        return message.replaceAll("(content|file)://[^\\]]*", "<uri>");
++    }
++
+     private void croppingResult(Activity activity, final int requestCode, final int resultCode, final Intent data) {
+         if (data != null) {
+             Uri resultUri = UCrop.getOutput(data);
+@@ -865,7 +924,7 @@ class ImageCropPicker implements ActivityEventListener {
                      resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
                  }
              } else {
 -                resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot find image data");
-+                Throwable cropError = UCrop.getError(data);
-+                resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, cropError != null && cropError.getMessage() != null
-+                        ? cropError.getMessage()
-+                        : "Cannot find image data");
++                resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, describeCropError(UCrop.getError(data)));
              }
          } else {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
+diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
+index bcc5dd6..f3ca2e5 100644
+--- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
++++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
+@@ -9,11 +9,14 @@ import android.os.Build;
+ import android.os.Environment;
+ import android.provider.DocumentsContract;
+ import android.provider.MediaStore;
++import android.webkit.MimeTypeMap;
+ 
+ import java.io.File;
++import java.io.FileNotFoundException;
+ import java.io.FileOutputStream;
+ import java.io.IOException;
+ import java.io.InputStream;
++import java.util.UUID;
+ 
+ class RealPathUtil {
+     @TargetApi(Build.VERSION_CODES.KITKAT)
+@@ -102,29 +105,44 @@ class RealPathUtil {
+      * @param uri file's URI
+      * @return file that has been written
+      */
+-    private static File writeToFile(Context context, String fileName, Uri uri) {
+-        String tmpDir = context.getCacheDir() + "/react-native-image-crop-picker";
+-        Boolean created = new File(tmpDir).mkdir();
+-        fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+-        File path = new File(tmpDir);
+-        File file = new File(path, fileName);
+-        try {
+-            FileOutputStream oos = new FileOutputStream(file);
+-            byte[] buf = new byte[8192];
+-            InputStream is = context.getContentResolver().openInputStream(uri);
+-            int c = 0;
+-            while ((c = is.read(buf, 0, buf.length)) > 0) {
+-                oos.write(buf, 0, c);
+-                oos.flush();
++    private static File writeToFile(Context context, String fileName, Uri uri) throws IOException {
++        File tmpDir = new File(context.getCacheDir(), "react-native-image-crop-picker");
++        tmpDir.mkdir();
++
++        // A generated name: display names can repeat within one selection, and
++        // characters such as '#' or '%' break the file:// uri built from this path.
++        File file = new File(tmpDir, UUID.randomUUID().toString() + getExtension(context, fileName, uri));
++
++        // A failed copy must surface, a partial file would pass as the selection.
++        try (InputStream is = context.getContentResolver().openInputStream(uri)) {
++            if (is == null) {
++                throw new FileNotFoundException("Cannot open the selected file");
++            }
++
++            try (FileOutputStream oos = new FileOutputStream(file)) {
++                byte[] buf = new byte[8192];
++                int c;
++                while ((c = is.read(buf, 0, buf.length)) > 0) {
++                    oos.write(buf, 0, c);
++                }
+             }
+-            oos.close();
+-            is.close();
+-        } catch (Exception e) {
+-            e.printStackTrace();
+         }
++
+         return file;
+     }
+ 
++    // The extension of the display name, else the one the provider's mime type maps to.
++    private static String getExtension(Context context, String fileName, Uri uri) {
++        int dot = fileName == null ? -1 : fileName.lastIndexOf('.');
++        String extension = dot > -1 ? fileName.substring(dot + 1) : "";
++
++        if (!extension.matches("[A-Za-z0-9]+")) {
++            extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(context.getContentResolver().getType(uri));
++        }
++
++        return extension == null || extension.isEmpty() ? "" : "." + extension;
++    }
++
+     /**
+      * Get the value of the data column for this Uri. This is useful for
+      * MediaStore Uris, and other file-based ContentProviders.
+@@ -136,7 +154,7 @@ class RealPathUtil {
+      * @return The value of the _data column, which is typically a file path.
+      */
+     private static String getDataColumn(Context context, Uri uri, String selection,
+-                                        String[] selectionArgs) {
++                                        String[] selectionArgs) throws IOException {
+ 
+         Cursor cursor = null;
+         final String[] projection = {
 diff --git a/node_modules/react-native-image-crop-picker/index.d.ts b/node_modules/react-native-image-crop-picker/index.d.ts
 index 59a9155..7f9ccc7 100644
 --- a/node_modules/react-native-image-crop-picker/index.d.ts

@@ -15,7 +15,7 @@ import { isSignImageUnavailable } from '../constants/imageUpload';
 import { useAccountUpdateMutation } from '../providers/sdk/mutations';
 import { updateCurrentAccount } from '../redux/actions/accountAction';
 import { setAvatarCacheStamp } from '../redux/actions/uiAction';
-import { reportMediaPickerError } from '../utils/mediaPickerError';
+import { isMediaPickerCancellation, reportMediaPickerError } from '../utils/mediaPickerError';
 
 // import ROUTES from '../constants/routeNames';
 
@@ -169,6 +169,10 @@ class ProfileEditContainer extends Component<any, any> {
   _handleMediaOnSelectFailure = (error: any, action: any = 'openPicker') => {
     const { intl } = this.props;
 
+    if (isMediaPickerCancellation(error)) {
+      return;
+    }
+
     reportMediaPickerError(error, {
       feature: 'profile-edit',
       action,
@@ -183,6 +187,12 @@ class ProfileEditContainer extends Component<any, any> {
         intl.formatMessage({
           id: 'alert.permission_text',
         }),
+      );
+    } else {
+      // a failed pick must not look like nothing happened
+      Alert.alert(
+        intl.formatMessage({ id: 'alert.fail' }),
+        get(error, 'message') || intl.formatMessage({ id: 'alert.unknow_error' }),
       );
     }
   };

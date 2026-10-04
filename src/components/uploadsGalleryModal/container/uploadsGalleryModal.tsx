@@ -294,7 +294,6 @@ export const UploadsGalleryModal = forwardRef(
         ? {
             mediaType: 'video',
             smartAlbums: ['UserLibrary', 'Favorites', 'Videos'],
-            useDocumentPicker,
           }
         : {
             includeBase64: true,
