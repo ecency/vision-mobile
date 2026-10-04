@@ -530,16 +530,17 @@ index b9c494e..99ec3b5 100644
          } else {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-index bcc5dd6..79a3403 100644
+index bcc5dd6..fea11c3 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-@@ -9,11 +9,14 @@ import android.os.Build;
+@@ -9,11 +9,15 @@ import android.os.Build;
  import android.os.Environment;
  import android.provider.DocumentsContract;
  import android.provider.MediaStore;
 +import android.webkit.MimeTypeMap;
  
  import java.io.File;
++import java.io.FileInputStream;
 +import java.io.FileNotFoundException;
  import java.io.FileOutputStream;
  import java.io.IOException;
@@ -548,7 +549,7 @@ index bcc5dd6..79a3403 100644
  
  class RealPathUtil {
      @TargetApi(Build.VERSION_CODES.KITKAT)
-@@ -102,29 +105,55 @@ class RealPathUtil {
+@@ -102,29 +106,55 @@ class RealPathUtil {
       * @param uri file's URI
       * @return file that has been written
       */
@@ -579,7 +580,11 @@ index bcc5dd6..79a3403 100644
 +        try (InputStream is = context.getContentResolver().openInputStream(uri)) {
 +            if (is == null) {
 +                throw new FileNotFoundException();
-+            }
+             }
+-            oos.close();
+-            is.close();
+-        } catch (Exception e) {
+-            e.printStackTrace();
 +
 +            try (FileOutputStream oos = new FileOutputStream(file)) {
 +                byte[] buf = new byte[8192];
@@ -587,11 +592,7 @@ index bcc5dd6..79a3403 100644
 +                while ((c = is.read(buf, 0, buf.length)) > 0) {
 +                    oos.write(buf, 0, c);
 +                }
-             }
--            oos.close();
--            is.close();
--        } catch (Exception e) {
--            e.printStackTrace();
++            }
 +        } catch (IOException | RuntimeException e) {
 +            file.delete();
 +            throw copyFailure(e);
@@ -622,7 +623,7 @@ index bcc5dd6..79a3403 100644
      /**
       * Get the value of the data column for this Uri. This is useful for
       * MediaStore Uris, and other file-based ContentProviders.
-@@ -136,7 +165,7 @@ class RealPathUtil {
+@@ -136,7 +166,7 @@ class RealPathUtil {
       * @return The value of the _data column, which is typically a file path.
       */
      private static String getDataColumn(Context context, Uri uri, String selection,
@@ -631,7 +632,7 @@ index bcc5dd6..79a3403 100644
  
          Cursor cursor = null;
          final String[] projection = {
-@@ -151,11 +180,13 @@ class RealPathUtil {
+@@ -151,11 +181,13 @@ class RealPathUtil {
                  // Fall back to writing to file if _data column does not exist
                  final int index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
                  String path = index > -1 ? cursor.getString(index) : null;
@@ -649,15 +650,18 @@ index bcc5dd6..79a3403 100644
                      File fileWritten = writeToFile(context, fileName, uri);
                      return fileWritten.getAbsolutePath();
                  }
-@@ -168,6 +199,13 @@ class RealPathUtil {
+@@ -168,6 +200,16 @@ class RealPathUtil {
      }
  
  
-+    // Before Android 11 a path on shared storage is readable only with the storage
-+    // permission (on Android 10 not even then), which picking no longer asks for.
-+    // The uri itself always is.
++    // A picker grants the uri, not the path a provider reports for it: opening a
++    // path on shared storage can fail on any Android version. Use it only if it opens.
 +    private static boolean isReadable(String path) {
-+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || new File(path).canRead();
++        try (FileInputStream probe = new FileInputStream(path)) {
++            return true;
++        } catch (IOException | RuntimeException e) {
++            return false;
++        }
 +    }
 +
      /**
