@@ -35,7 +35,7 @@ import styles, {
 import { Modes } from '../container/uploadsGalleryModal';
 
 // The system document picker, for Android devices whose photo picker is broken.
-// Images only: the picker library copies a document on the UI thread, too slow for videos.
+// Images only: a video would be copied whole before anything shows.
 const HAS_FILES_SOURCE = Platform.OS === 'android';
 
 type Props = {

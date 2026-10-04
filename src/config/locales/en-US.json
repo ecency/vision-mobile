@@ -883,6 +883,7 @@
     "remind_later": "Remind Later",
     "success_subscribe": "Subscribe success!",
     "payloadTooLarge": "File size too big, please resize or upload smaller image",
+    "too_many_images": "You can select up to {count} images at a time",
     "fail_follow": "Follow failed!",
     "clear_user_alert": "Are you sure you want to clear all user data?",
     "cancel": "Cancel",

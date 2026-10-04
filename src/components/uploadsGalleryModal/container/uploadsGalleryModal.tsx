@@ -38,6 +38,7 @@ export interface UploadsGalleryModalRef {
 }
 
 const MAX_IMAGE_UPLOAD_SIZE = 30000000; // 30MB server limit
+const MAX_IMAGES_PER_PICK = 5;
 const MAX_IMAGE_DIMENSION = 1920;
 const COMPRESS_QUALITY = 0.85;
 // Grace period between the editor reporting "typing stopped" and a queued insert
@@ -296,8 +297,12 @@ export const UploadsGalleryModal = forwardRef(
             smartAlbums: ['UserLibrary', 'Favorites', 'Videos'],
           }
         : {
-            includeBase64: true,
-            multiple: allowMultiple || true,
+            // uploads read the file by path, base64 would only cost memory.
+            // Single-image callers get a limit of one rather than multiple: false,
+            // which makes the iOS picker re-encode the image as JPEG.
+            multiple: true,
+            maxFiles: allowMultiple === false ? 1 : MAX_IMAGES_PER_PICK,
+            maxFileSize: MAX_IMAGE_UPLOAD_SIZE,
             mediaType: 'photo',
             smartAlbums: ['UserLibrary', 'Favorites', 'PhotoStream', 'Panoramas', 'Bursts'],
             useDocumentPicker,
@@ -332,7 +337,6 @@ export const UploadsGalleryModal = forwardRef(
             mediaType: 'video',
           }
         : {
-            includeBase64: true,
             mediaType: 'photo',
           };
 
@@ -613,14 +617,20 @@ export const UploadsGalleryModal = forwardRef(
         return;
       }
 
-      reportMediaPickerError(error, {
-        feature: 'editor-uploads-modal',
-        action,
-        mediaType,
-      });
+      // more files than the limit is the user's choice, not a picker failure
+      const _tooManyFiles = error.code === 'E_TOO_MANY_FILES';
+      if (!_tooManyFiles) {
+        reportMediaPickerError(error, {
+          feature: 'editor-uploads-modal',
+          action,
+          mediaType,
+        });
+      }
 
       let title = intl.formatMessage({ id: 'alert.something_wrong' });
-      let body = error.message || JSON.stringify(error);
+      let body = _tooManyFiles
+        ? intl.formatMessage({ id: 'alert.too_many_images' }, { count: MAX_IMAGES_PER_PICK })
+        : error.message || JSON.stringify(error);
       let dialogAction: AlertButton = {
         text: intl.formatMessage({ id: 'alert.okay' }),
         onPress: () => {
