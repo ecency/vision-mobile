@@ -20,7 +20,7 @@ import { MediaItem } from '../../../providers/ecency/ecency.types';
 import { SpeakUploaderModal } from '../children/speakUploaderModal';
 import { SheetNames } from '../../../navigation/sheets';
 import { selectIsLoggedIn } from '../../../redux/selectors';
-import { isSignImageUnavailable } from '../../../constants/imageUpload';
+import { MAX_IMAGE_UPLOAD_SIZE, isSignImageUnavailable } from '../../../constants/imageUpload';
 
 import { MediaInsertContext, MediaInsertData, MediaInsertStatus, Modes } from '../types';
 import {
@@ -37,7 +37,6 @@ export interface UploadsGalleryModalRef {
   showModal: () => void;
 }
 
-const MAX_IMAGE_UPLOAD_SIZE = 30000000; // 30MB server limit
 const MAX_IMAGES_PER_PICK = 5;
 const MAX_IMAGE_DIMENSION = 1920;
 const COMPRESS_QUALITY = 0.85;

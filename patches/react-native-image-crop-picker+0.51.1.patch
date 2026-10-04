@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-index b9c494e..39366d7 100644
+index b9c494e..8901cfd 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 @@ -7,6 +7,7 @@ import android.content.ContentResolver;
@@ -129,7 +129,7 @@ index b9c494e..39366d7 100644
  
          final Uri uri = Uri.parse(options.getString("path"));
          permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-@@ -472,27 +516,78 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -472,27 +516,90 @@ class ImageCropPicker implements ActivityEventListener {
  
          String mime = getMimeType(path);
          if (mime != null && mime.startsWith("video/")) {
@@ -144,15 +144,8 @@ index b9c494e..39366d7 100644
 -    private void getAsyncSelection(final Activity activity, Uri uri, boolean isCamera) throws Exception {
 +    private void getAsyncSelection(final Activity activity, Uri uri, boolean isCamera,
 +                                   ResultCollector collector, long sizeLimit) throws Exception {
-+        if (sizeLimit > 0) {
-+            long size = getReportedSize(activity, uri);
-+            if (size > sizeLimit) {
-+                // Not copied or read. The entry carries only its size, for the caller to reject.
-+                WritableMap tooLarge = new WritableNativeMap();
-+                tooLarge.putDouble("size", size);
-+                collector.notifySuccess(tooLarge);
-+                return;
-+            }
++        if (deliverIfTooLarge(activity, uri, sizeLimit, collector)) {
++            return;
 +        }
 +
          String path = resolveRealPath(activity, uri, isCamera);
@@ -171,6 +164,25 @@ index b9c494e..39366d7 100644
  
 -        resultCollector.notifySuccess(getImage(activity, path));
 +        collector.notifySuccess(getImage(activity, path));
++    }
++
++    // A file the provider reports as larger than the limit is not copied or read:
++    // its entry carries only the size, for the caller to reject.
++    private boolean deliverIfTooLarge(Context context, Uri uri, long sizeLimit,
++                                      ResultCollector collector) {
++        if (sizeLimit <= 0) {
++            return false;
++        }
++
++        long size = getReportedSize(context, uri);
++        if (size <= sizeLimit) {
++            return false;
++        }
++
++        WritableMap tooLarge = new WritableNativeMap();
++        tooLarge.putDouble("size", size);
++        collector.notifySuccess(tooLarge);
++        return true;
 +    }
 +
 +    // The size the provider reports for a uri, or -1 when it reports none.
@@ -213,7 +225,7 @@ index b9c494e..39366d7 100644
      }
  
      private Bitmap validateVideo(Uri uri) throws Exception {
-@@ -519,7 +614,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -519,7 +626,8 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -223,7 +235,7 @@ index b9c494e..39366d7 100644
          validateVideo(Uri.parse(path));
          final String compressedVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
  
-@@ -540,13 +636,13 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -540,13 +648,13 @@ class ImageCropPicker implements ActivityEventListener {
                  video.putString("path", "file://" + videoPath);
                  video.putString("modificationDate", String.valueOf(modificationDate));
  
@@ -240,7 +252,7 @@ index b9c494e..39366d7 100644
          }))).start();
      }
  
-@@ -564,7 +660,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -564,7 +672,8 @@ class ImageCropPicker implements ActivityEventListener {
              // For videos, get the real path but don't copy the file
              String mimeType = activity.getContentResolver().getType(uri);
              if (mimeType != null && mimeType.startsWith("video/")) {
@@ -250,7 +262,7 @@ index b9c494e..39366d7 100644
              }
  
              String externalCacheDirPath = Uri.fromFile(activity.getExternalCacheDir()).getPath();
-@@ -572,10 +669,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -572,10 +681,11 @@ class ImageCropPicker implements ActivityEventListener {
              String cacheDirPath = Uri.fromFile(activity.getCacheDir()).getPath();
              String FilesDirPath = Uri.fromFile(activity.getFilesDir()).getPath();
  
@@ -264,7 +276,7 @@ index b9c494e..39366d7 100644
                  File copiedFile = this.createExternalStoragePrivateFile(activity, uri);
                  path = RealPathUtil.getRealPathFromURI(activity, Uri.fromFile(copiedFile));
              }
-@@ -584,32 +682,33 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -584,32 +694,33 @@ class ImageCropPicker implements ActivityEventListener {
          return path;
      }
  
@@ -318,7 +330,7 @@ index b9c494e..39366d7 100644
          }
  
          return file;
-@@ -755,24 +854,45 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -755,24 +866,45 @@ class ImageCropPicker implements ActivityEventListener {
          if (resultCode == Activity.RESULT_CANCELED) {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
          } else if (resultCode == Activity.RESULT_OK) {
@@ -375,20 +387,25 @@ index b9c494e..39366d7 100644
              } else {
                  Uri uri = data.getData();
  
-@@ -794,11 +914,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -792,13 +924,11 @@ class ImageCropPicker implements ActivityEventListener {
+                 }
+ 
                  if (cropping) {
-                     startCropping(activity, uri);
-                 } else {
+-                    startCropping(activity, uri);
+-                } else {
 -                    try {
 -                        getAsyncSelection(activity, uri, false);
 -                    } catch (Exception ex) {
 -                        resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
--                    }
++                    if (!deliverIfTooLarge(activity, uri, maxFileSize, resultCollector)) {
++                        startCropping(activity, uri);
+                     }
++                } else {
 +                    processSelection(activity, Collections.singletonList(uri));
                  }
              }
          }
-@@ -835,6 +951,21 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -835,37 +965,61 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -410,9 +427,59 @@ index b9c494e..39366d7 100644
      private void croppingResult(Activity activity, final int requestCode, final int resultCode, final Intent data) {
          if (data != null) {
              Uri resultUri = UCrop.getOutput(data);
-@@ -865,7 +996,8 @@ class ImageCropPicker implements ActivityEventListener {
-                     resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
-                 }
+ 
+             if (resultUri != null) {
+-                try {
+-                    if (width > 0 && height > 0) {
+-                        File resized = null;
+-                        try{
+-                            resized = compression.resize(this.reactContext, resultUri.getPath(), width, height, width, height, 100);
+-                        } catch (OutOfMemoryError ex) {
+-                                 resultCollector.notifyProblem(E_LOW_MEMORY_ERROR, ex.getMessage());
++                // Resizing the crop decodes it as a full bitmap, so this runs off the UI
++                // thread, with the request's collector and size captured like a selection.
++                final ResultCollector collector = resultCollector;
++                final Uri cropUri = resultUri;
++                final int cropWidth = width;
++                final int cropHeight = height;
++
++                new Thread(() -> {
++                    try {
++                        Uri outputUri = cropUri;
++                        if (cropWidth > 0 && cropHeight > 0) {
++                            File resized = compression.resize(this.reactContext, cropUri.getPath(),
++                                    cropWidth, cropHeight, cropWidth, cropHeight, 100);
++                            outputUri = Uri.fromFile(resized);
+                         }
+-                        resultUri = Uri.fromFile(resized);
+-                    }
+ 
+-                    WritableMap result = getSelection(activity, resultUri, false);
++                        WritableMap result = getSelection(activity, outputUri, false);
+ 
+-                    if (result != null) {
+-                        result.putMap("cropRect", ImageCropPicker.getCroppedRectMap(data));
++                        if (result != null) {
++                            result.putMap("cropRect", ImageCropPicker.getCroppedRectMap(data));
+ 
+-                        resultCollector.setWaitCount(1);
+-                        resultCollector.notifySuccess(result);
+-                    } else {
+-                        throw new Exception("Cannot crop video files");
++                            collector.setWaitCount(1);
++                            collector.notifySuccess(result);
++                        } else {
++                            throw new Exception("Cannot crop video files");
++                        }
++                    } catch (OutOfMemoryError error) {
++                        collector.notifyProblem(E_LOW_MEMORY_ERROR, error.getMessage());
++                    } catch (Exception ex) {
++                        collector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
+                     }
+-                } catch (Exception ex) {
+-                    resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, ex.getMessage());
+-                }
++                }).start();
              } else {
 -                resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND, "Cannot find image data");
 +                resultCollector.notifyProblem(E_NO_IMAGE_DATA_FOUND,
@@ -523,7 +590,7 @@ index bcc5dd6..ff35a36 100644
          Cursor cursor = null;
          final String[] projection = {
 diff --git a/node_modules/react-native-image-crop-picker/index.d.ts b/node_modules/react-native-image-crop-picker/index.d.ts
-index 59a9155..1dc7288 100644
+index 59a9155..fd360b9 100644
 --- a/node_modules/react-native-image-crop-picker/index.d.ts
 +++ b/node_modules/react-native-image-crop-picker/index.d.ts
 @@ -72,6 +72,22 @@ declare module "react-native-image-crop-picker" {
@@ -539,8 +606,8 @@ index 59a9155..1dc7288 100644
 +        useDocumentPicker?: boolean;
 +
 +        /**
-+         * Largest file to read, in bytes. A larger file is not copied or read:
-+         * its entry carries only `size`. Does not apply with `cropping`.
++         * Largest file to read, in bytes. A larger file is not copied, read or
++         * cropped: its entry carries only `size`.
 +         *
 +         * @platform Android only
 +         */

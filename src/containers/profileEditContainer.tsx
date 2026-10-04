@@ -11,7 +11,7 @@ import { selectCurrentAccount, selectIsDarkTheme, selectPin } from '../redux/sel
 import { uploadImage } from '../providers/ecency/ecency';
 
 import { signImage } from '../providers/hive/hive';
-import { isSignImageUnavailable } from '../constants/imageUpload';
+import { MAX_IMAGE_UPLOAD_SIZE, isSignImageUnavailable } from '../constants/imageUpload';
 import { useAccountUpdateMutation } from '../providers/sdk/mutations';
 import { updateCurrentAccount } from '../redux/actions/accountAction';
 import { setAvatarCacheStamp } from '../redux/actions/uiAction';
@@ -141,12 +141,22 @@ class ProfileEditContainer extends Component<any, any> {
   };
 
   _handleOpenImagePicker = (action: any, useDocumentPicker = false) => {
+    const { intl } = this.props;
+
     ImagePicker.openPicker({
       ...(action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS),
       mediaType: 'photo',
       useDocumentPicker,
     })
       .then((media) => {
+        // an image above maxFileSize comes back as its size only, it was never read
+        if (!media?.path) {
+          Alert.alert(
+            intl.formatMessage({ id: 'alert.fail' }),
+            intl.formatMessage({ id: 'alert.payloadTooLarge' }),
+          );
+          return;
+        }
         this._uploadImage(media, action);
       })
       .catch((e) => {
@@ -306,13 +316,14 @@ const PICKER_PERMISSION_ERRORS = [
   'E_NO_CAMERA_PERMISSION',
 ];
 
+// uploads read the file by path, so no base64
 const IMAGE_PICKER_AVATAR_OPTIONS = {
-  includeBase64: true,
+  maxFileSize: MAX_IMAGE_UPLOAD_SIZE,
   cropping: true,
   width: 512,
   height: 512,
 };
 
 const IMAGE_PICKER_COVER_OPTIONS = {
-  includeBase64: true,
+  maxFileSize: MAX_IMAGE_UPLOAD_SIZE,
 };
