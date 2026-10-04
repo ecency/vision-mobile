@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { injectIntl } from 'react-intl';
 import get from 'lodash/get';
 
@@ -15,6 +15,9 @@ import { OptionsModal } from '../../../components/atoms';
 import styles from './profileEditScreenStyles';
 
 const ProfileEditForm: any = ProfileEditFormRaw;
+
+// The system document picker, for Android devices whose photo picker is broken.
+const SHOW_FILES_SOURCE = Platform.OS === 'android';
 
 class ProfileEditScreen extends PureComponent<any, any> {
   galleryRef: any;
@@ -100,14 +103,19 @@ class ProfileEditScreen extends PureComponent<any, any> {
                 intl.formatMessage({
                   id: 'editor.capture_photo',
                 }),
+                ...(SHOW_FILES_SOURCE ? [intl.formatMessage({ id: 'editor.open_files' })] : []),
                 intl.formatMessage({
                   id: 'alert.cancel',
                 }),
               ]}
-              cancelButtonIndex={2}
+              cancelButtonIndex={SHOW_FILES_SOURCE ? 3 : 2}
               onPress={(index) => {
                 handleMediaAction(
-                  index === 0 ? 'image' : index === 1 && 'camera',
+                  index === 0
+                    ? 'image'
+                    : index === 1
+                    ? 'camera'
+                    : index === 2 && SHOW_FILES_SOURCE && 'files',
                   selectedUploadAction,
                 );
               }}

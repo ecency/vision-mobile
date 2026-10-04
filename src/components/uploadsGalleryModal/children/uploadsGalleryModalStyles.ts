@@ -116,6 +116,11 @@ export default EStyleSheet.create({
     height: THUMB_SIZE,
   } as ViewStyle,
 
+  // three 32pt source buttons fill the thumbnail height exactly
+  selectButtonsCompact: {
+    paddingVertical: 0,
+  } as ViewStyle,
+
   selectButton: {
     flexDirection: 'row',
     alignItems: 'center',

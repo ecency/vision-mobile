@@ -34,6 +34,9 @@ import styles, {
 } from './uploadsGalleryModalStyles';
 import { Modes } from '../container/uploadsGalleryModal';
 
+// The system document picker, for Android devices whose photo picker is broken.
+const SHOW_FILES_SOURCE = Platform.OS === 'android';
+
 type Props = {
   mode: Modes;
   insertedMediaUrls: string[];
@@ -41,6 +44,7 @@ type Props = {
   isAddingToUploads: boolean;
   insertMedia: (map: Map<number, boolean>) => void;
   handleOpenGallery: (addToUploads?: boolean) => void;
+  handleOpenFiles: () => void;
   handleOpenSpeakUploader: () => void;
   handleOpenCamera: () => void;
   handleIsScrolledTop: (isScrolledTop: boolean) => void;
@@ -56,6 +60,7 @@ const UploadsGalleryContent = ({
   isAddingToUploads,
   insertMedia,
   handleOpenGallery,
+  handleOpenFiles,
   handleOpenCamera,
   handleOpenSpeakUploader,
   handleIsScrolledTop,
@@ -210,12 +215,15 @@ const UploadsGalleryContent = ({
         handleOpenGallery,
       )}
       {_renderSelectButton('camera', 'Camera', handleOpenCamera)}
+      {SHOW_FILES_SOURCE && _renderSelectButton('folder', 'Files', handleOpenFiles)}
     </>
   );
 
   const _renderHeaderContent = () => (
     <View style={{ ...styles.buttonsContainer, paddingVertical: isExpandedMode ? 8 : 0 }}>
-      <View style={styles.selectButtonsContainer}>
+      <View
+        style={[styles.selectButtonsContainer, SHOW_FILES_SOURCE && styles.selectButtonsCompact]}
+      >
         {mode === Modes.MODE_IMAGE
           ? _renderSelectButtons
           : isAddingToUploads

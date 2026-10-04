@@ -135,13 +135,17 @@ class ProfileEditContainer extends Component<any, any> {
       this._handleOpenCamera(uploadAction);
     } else if (type === 'image') {
       this._handleOpenImagePicker(uploadAction);
+    } else if (type === 'files') {
+      this._handleOpenImagePicker(uploadAction, true);
     }
   };
 
-  _handleOpenImagePicker = (action: any) => {
-    ImagePicker.openPicker(
-      action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS,
-    )
+  _handleOpenImagePicker = (action: any, useDocumentPicker = false) => {
+    ImagePicker.openPicker({
+      ...(action == 'avatarUrl' ? IMAGE_PICKER_AVATAR_OPTIONS : IMAGE_PICKER_COVER_OPTIONS),
+      mediaType: 'photo',
+      useDocumentPicker,
+    })
       .then((media) => {
         this._uploadImage(media, action);
       })

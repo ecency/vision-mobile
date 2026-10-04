@@ -282,7 +282,7 @@ export const UploadsGalleryModal = forwardRef(
       }
     }, [postBody, showModal, mode]);
 
-    const _handleOpenImagePicker = (addToUploads?: boolean) => {
+    const _handleOpenImagePicker = (addToUploads?: boolean, useDocumentPicker = false) => {
       const _vidMode = mode === Modes.MODE_VIDEO;
 
       if (_vidMode && isAddingToUploads) {
@@ -294,12 +294,14 @@ export const UploadsGalleryModal = forwardRef(
         ? {
             mediaType: 'video',
             smartAlbums: ['UserLibrary', 'Favorites', 'Videos'],
+            useDocumentPicker,
           }
         : {
             includeBase64: true,
             multiple: allowMultiple || true,
             mediaType: 'photo',
             smartAlbums: ['UserLibrary', 'Favorites', 'PhotoStream', 'Panoramas', 'Bursts'],
+            useDocumentPicker,
           };
 
       ImagePicker.openPicker(_options)
@@ -723,6 +725,7 @@ export const UploadsGalleryModal = forwardRef(
             insertMedia={_insertMedia}
             handleOpenCamera={_handleOpenCamera}
             handleOpenGallery={_handleOpenImagePicker}
+            handleOpenFiles={() => _handleOpenImagePicker(false, true)}
             handleOpenSpeakUploader={_handleOpenSpeakUploader}
             handleIsScrolledTop={setIsScrolledTop}
             // Pagination props
