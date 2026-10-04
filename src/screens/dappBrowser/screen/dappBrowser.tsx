@@ -64,6 +64,14 @@ const DAPP_DIRECTORY: DappEntry[] = [
     category: 'Social',
   },
   {
+    name: 'Raidstead',
+    url: 'https://ecency.com/raidstead',
+    icon: 'https://ecency.com/assets/raidstead-icon.png',
+    color: '#7A4BB4',
+    initial: 'R',
+    category: 'Gaming',
+  },
+  {
     name: 'PeakD',
     url: 'https://peakd.com',
     icon: 'https://www.google.com/s2/favicons?domain=peakd.com&sz=128',
