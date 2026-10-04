@@ -1,8 +1,14 @@
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-index b9c494e..8901cfd 100644
+index b9c494e..99ec3b5 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/ImageCropPicker.java
-@@ -7,6 +7,7 @@ import android.content.ContentResolver;
+@@ -2,11 +2,13 @@ package com.reactnative.ivpusic.imagepicker;
+ 
+ import android.Manifest;
+ import android.app.Activity;
++import android.content.ActivityNotFoundException;
+ import android.content.ClipData;
+ import android.content.ContentResolver;
  import android.content.Context;
  import android.content.Intent;
  import android.content.pm.PackageManager;
@@ -10,15 +16,17 @@ index b9c494e..8901cfd 100644
  import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
  import android.graphics.Color;
-@@ -15,6 +16,7 @@ import android.net.Uri;
+@@ -14,7 +16,9 @@ import android.media.MediaMetadataRetriever;
+ import android.net.Uri;
  import android.os.Build;
  import android.os.Environment;
++import android.os.ext.SdkExtensions;
  import android.provider.MediaStore;
 +import android.provider.OpenableColumns;
  import android.util.Base64;
  import android.util.Log;
  import android.webkit.MimeTypeMap;
-@@ -67,6 +69,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -67,6 +71,7 @@ class ImageCropPicker implements ActivityEventListener {
      private static final String E_FAILED_TO_SHOW_PICKER = "E_FAILED_TO_SHOW_PICKER";
      private static final String E_FAILED_TO_OPEN_CAMERA = "E_FAILED_TO_OPEN_CAMERA";
      private static final String E_NO_IMAGE_DATA_FOUND = "E_NO_IMAGE_DATA_FOUND";
@@ -26,7 +34,7 @@ index b9c494e..8901cfd 100644
      private static final String E_CAMERA_IS_NOT_AVAILABLE = "E_CAMERA_IS_NOT_AVAILABLE";
      private static final String E_CANNOT_LAUNCH_CAMERA = "E_CANNOT_LAUNCH_CAMERA";
      private static final String E_ERROR_WHILE_CLEANING_FILES = "E_ERROR_WHILE_CLEANING_FILES";
-@@ -103,10 +106,12 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -103,10 +108,12 @@ class ImageCropPicker implements ActivityEventListener {
      private int height = 0;
  
      private int maxFiles = 5;
@@ -40,7 +48,7 @@ index b9c494e..8901cfd 100644
      private Compression compression = new Compression();
      private ReactApplicationContext reactContext;
  
-@@ -130,6 +135,9 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -130,6 +137,9 @@ class ImageCropPicker implements ActivityEventListener {
          width = options.hasKey("width") ? options.getInt("width") : 0;
          height = options.hasKey("height") ? options.getInt("height") : 0;
          maxFiles = options.hasKey("maxFiles") ? options.getInt("maxFiles") : maxFiles;
@@ -50,7 +58,7 @@ index b9c494e..8901cfd 100644
          cropping = options.hasKey("cropping") && options.getBoolean("cropping");
          cropperActiveWidgetColor = options.hasKey("cropperActiveWidgetColor") ? options.getString("cropperActiveWidgetColor") : null;
          cropperToolbarColor = options.hasKey("cropperToolbarColor") ? options.getString("cropperToolbarColor") : null;
-@@ -148,6 +156,14 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -148,6 +158,14 @@ class ImageCropPicker implements ActivityEventListener {
          this.options = options;
      }
  
@@ -65,7 +73,7 @@ index b9c494e..8901cfd 100644
      private void deleteRecursive(File fileOrDirectory) {
          if (fileOrDirectory.isDirectory()) {
              for (File child : fileOrDirectory.listFiles()) {
-@@ -304,7 +320,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -304,7 +322,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -74,13 +82,24 @@ index b9c494e..8901cfd 100644
  
          permissionsCheck(activity, promise, Arrays.asList(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
              @Override
-@@ -354,8 +370,36 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -354,8 +372,59 @@ class ImageCropPicker implements ActivityEventListener {
  
      }
  
-+    // The system document picker, for devices whose photo picker (a Play services
-+    // module on Android 11 and 12 Go) is broken. ACTION_OPEN_DOCUMENT rather than
-+    // ACTION_GET_CONTENT, which the photo picker takes over for image and video types.
++    // The built-in photo picker: Android 13 and later, or Android 11 and 12 with
++    // the system update that carries it. Same test as the AndroidX contracts.
++    private static boolean hasSystemPhotoPicker() {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
++            return true;
++        }
++
++        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
++                && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2;
++    }
++
++    // The system document picker, on request or when the device has no built-in
++    // photo picker. ACTION_OPEN_DOCUMENT rather than ACTION_GET_CONTENT, which the
++    // photo picker takes over for image and video types.
 +    private Intent createDocumentPickerIntent() {
 +        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
 +        intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -103,24 +122,47 @@ index b9c494e..8901cfd 100644
 +
      private void initiatePicker(final Activity activity) {
          try {
-+            if (useDocumentPicker) {
-+                activity.startActivityForResult(createDocumentPickerIntent(), IMAGE_PICKER_REQUEST);
-+                return;
++            // Without the built-in photo picker the AndroidX contracts hand over to
++            // one from Google Play services, a module that fails to load on some
++            // devices (Android Go) and then only reports a cancelled selection.
++            if (useDocumentPicker || !hasSystemPhotoPicker()) {
++                try {
++                    activity.startActivityForResult(
++                            createDocumentPickerIntent(), IMAGE_PICKER_REQUEST);
++                    return;
++                } catch (ActivityNotFoundException e) {
++                    // No document picker on this device. Unless it was asked for,
++                    // the AndroidX contracts below are still worth a try.
++                    if (useDocumentPicker) {
++                        throw e;
++                    }
++                }
 +            }
 +
              PickVisualMediaRequest.Builder builder = new PickVisualMediaRequest.Builder();
              // Simplified media type handling
              if (mediaType.equals("video")) {
-@@ -389,7 +433,7 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -389,15 +458,11 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
 -        resultCollector.setup(promise, multiple);
 +        startRequest(promise, multiple);
  
-         permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-             @Override
-@@ -409,7 +453,7 @@ class ImageCropPicker implements ActivityEventListener {
+-        permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
+-            @Override
+-            public Void call() {
+-                initiatePicker(activity);
+-                return null;
+-            }
+-        });
++        // No storage permission to pick: every picker opened here hands back uris
++        // the app may read, and the copies go to the app's own directories.
++        initiatePicker(activity);
+     }
+ 
+     public void openCropper(final ReadableMap options, final Promise promise) {
+@@ -409,7 +474,7 @@ class ImageCropPicker implements ActivityEventListener {
          }
  
          setConfiguration(options);
@@ -129,7 +171,7 @@ index b9c494e..8901cfd 100644
  
          final Uri uri = Uri.parse(options.getString("path"));
          permissionsCheck(activity, promise, Collections.singletonList(Manifest.permission.WRITE_EXTERNAL_STORAGE), new Callable<Void>() {
-@@ -472,27 +516,90 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -472,27 +537,90 @@ class ImageCropPicker implements ActivityEventListener {
  
          String mime = getMimeType(path);
          if (mime != null && mime.startsWith("video/")) {
@@ -225,7 +267,7 @@ index b9c494e..8901cfd 100644
      }
  
      private Bitmap validateVideo(Uri uri) throws Exception {
-@@ -519,7 +626,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -519,7 +647,8 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -235,7 +277,7 @@ index b9c494e..8901cfd 100644
          validateVideo(Uri.parse(path));
          final String compressedVideoPath = getTmpDir(activity) + "/" + UUID.randomUUID().toString() + ".mp4";
  
-@@ -540,13 +648,13 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -540,13 +669,13 @@ class ImageCropPicker implements ActivityEventListener {
                  video.putString("path", "file://" + videoPath);
                  video.putString("modificationDate", String.valueOf(modificationDate));
  
@@ -252,7 +294,7 @@ index b9c494e..8901cfd 100644
          }))).start();
      }
  
-@@ -564,7 +672,8 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -564,7 +693,8 @@ class ImageCropPicker implements ActivityEventListener {
              // For videos, get the real path but don't copy the file
              String mimeType = activity.getContentResolver().getType(uri);
              if (mimeType != null && mimeType.startsWith("video/")) {
@@ -262,7 +304,7 @@ index b9c494e..8901cfd 100644
              }
  
              String externalCacheDirPath = Uri.fromFile(activity.getExternalCacheDir()).getPath();
-@@ -572,10 +681,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -572,10 +702,11 @@ class ImageCropPicker implements ActivityEventListener {
              String cacheDirPath = Uri.fromFile(activity.getCacheDir()).getPath();
              String FilesDirPath = Uri.fromFile(activity.getFilesDir()).getPath();
  
@@ -276,7 +318,7 @@ index b9c494e..8901cfd 100644
                  File copiedFile = this.createExternalStoragePrivateFile(activity, uri);
                  path = RealPathUtil.getRealPathFromURI(activity, Uri.fromFile(copiedFile));
              }
-@@ -584,32 +694,33 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -584,32 +715,33 @@ class ImageCropPicker implements ActivityEventListener {
          return path;
      }
  
@@ -330,7 +372,7 @@ index b9c494e..8901cfd 100644
          }
  
          return file;
-@@ -755,24 +866,45 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -755,24 +887,45 @@ class ImageCropPicker implements ActivityEventListener {
          if (resultCode == Activity.RESULT_CANCELED) {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
          } else if (resultCode == Activity.RESULT_OK) {
@@ -376,8 +418,8 @@ index b9c494e..8901cfd 100644
 +                    return;
 +                }
 +
-+                // The photo picker limits a selection in its own UI, a document
-+                // picker (asked for, or the AndroidX fallback) cannot.
++                // The photo picker limits a selection in its own UI. A document picker,
++                // asked for or used for lack of a built-in photo picker, cannot.
 +                if (uris.size() > maxFiles) {
 +                    resultCollector.notifyProblem(E_TOO_MANY_FILES, "Too many files selected");
 +                    return;
@@ -387,7 +429,7 @@ index b9c494e..8901cfd 100644
              } else {
                  Uri uri = data.getData();
  
-@@ -792,13 +924,11 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -792,13 +945,11 @@ class ImageCropPicker implements ActivityEventListener {
                  }
  
                  if (cropping) {
@@ -405,7 +447,7 @@ index b9c494e..8901cfd 100644
                  }
              }
          }
-@@ -835,37 +965,61 @@ class ImageCropPicker implements ActivityEventListener {
+@@ -835,37 +986,61 @@ class ImageCropPicker implements ActivityEventListener {
          }
      }
  
@@ -488,16 +530,17 @@ index b9c494e..8901cfd 100644
          } else {
              resultCollector.notifyProblem(E_PICKER_CANCELLED_KEY, E_PICKER_CANCELLED_MSG);
 diff --git a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-index bcc5dd6..ff35a36 100644
+index bcc5dd6..541205c 100644
 --- a/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
 +++ b/node_modules/react-native-image-crop-picker/android/src/main/java/com/reactnative/ivpusic/imagepicker/RealPathUtil.java
-@@ -9,11 +9,14 @@ import android.os.Build;
+@@ -9,11 +9,15 @@ import android.os.Build;
  import android.os.Environment;
  import android.provider.DocumentsContract;
  import android.provider.MediaStore;
 +import android.webkit.MimeTypeMap;
  
  import java.io.File;
++import java.io.FileInputStream;
 +import java.io.FileNotFoundException;
  import java.io.FileOutputStream;
  import java.io.IOException;
@@ -506,7 +549,7 @@ index bcc5dd6..ff35a36 100644
  
  class RealPathUtil {
      @TargetApi(Build.VERSION_CODES.KITKAT)
-@@ -102,29 +105,55 @@ class RealPathUtil {
+@@ -102,29 +106,55 @@ class RealPathUtil {
       * @param uri file's URI
       * @return file that has been written
       */
@@ -580,7 +623,7 @@ index bcc5dd6..ff35a36 100644
      /**
       * Get the value of the data column for this Uri. This is useful for
       * MediaStore Uris, and other file-based ContentProviders.
-@@ -136,7 +165,7 @@ class RealPathUtil {
+@@ -136,7 +166,7 @@ class RealPathUtil {
       * @return The value of the _data column, which is typically a file path.
       */
      private static String getDataColumn(Context context, Uri uri, String selection,
@@ -589,16 +632,66 @@ index bcc5dd6..ff35a36 100644
  
          Cursor cursor = null;
          final String[] projection = {
+@@ -148,26 +178,42 @@ class RealPathUtil {
+             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                     null);
+             if (cursor != null && cursor.moveToFirst()) {
+-                // Fall back to writing to file if _data column does not exist
++                // Copy through the uri unless the provider reports a path that opens
+                 final int index = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
+                 String path = index > -1 ? cursor.getString(index) : null;
+-                if (path != null) {
+-                    return cursor.getString(index);
++                if (path != null && isReadable(path)) {
++                    return path;
+                 } else {
+-                    final int indexDisplayName = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+-                    String fileName = cursor.getString(indexDisplayName);
++                    // Without a display name the extension comes from the mime type.
++                    final int nameIndex =
++                            cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
++                    String fileName = nameIndex > -1 ? cursor.getString(nameIndex) : null;
+                     File fileWritten = writeToFile(context, fileName, uri);
+                     return fileWritten.getAbsolutePath();
+                 }
+             }
++        } catch (RuntimeException e) {
++            // a provider that cannot answer the query may still serve the uri
+         } finally {
+             if (cursor != null)
+                 cursor.close();
+         }
+-        return null;
++
++        // No row to read a path or a name from: the uri is all there is.
++        return writeToFile(context, null, uri).getAbsolutePath();
+     }
+ 
+ 
++    // A picker grants the uri, not the path a provider reports for it: opening a
++    // path on shared storage can fail on any Android version. Use it only if it opens.
++    private static boolean isReadable(String path) {
++        try (FileInputStream probe = new FileInputStream(path)) {
++            return true;
++        } catch (IOException | RuntimeException e) {
++            return false;
++        }
++    }
++
+     /**
+      * @param uri The Uri to check.
+      * @return Whether the Uri authority is ExternalStorageProvider.
 diff --git a/node_modules/react-native-image-crop-picker/index.d.ts b/node_modules/react-native-image-crop-picker/index.d.ts
-index 59a9155..fd360b9 100644
+index 59a9155..df47fcc 100644
 --- a/node_modules/react-native-image-crop-picker/index.d.ts
 +++ b/node_modules/react-native-image-crop-picker/index.d.ts
-@@ -72,6 +72,22 @@ declare module "react-native-image-crop-picker" {
+@@ -72,6 +72,23 @@ declare module "react-native-image-crop-picker" {
           */
          maxFiles?: number;
  
 +        /**
-+         * Open the system document picker instead of the photo picker.
++         * Open the system document picker instead of the photo picker. Devices
++         * without the built-in photo picker get the document picker either way.
 +         *
 +         * @platform Android only
 +         * @default false
