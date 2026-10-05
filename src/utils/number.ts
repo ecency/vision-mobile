@@ -94,6 +94,16 @@ export const formatTokenQuantity = (value: number | string, precision = 8): stri
   return truncated.indexOf('.') === -1 ? truncated : truncated.replace(/\.?0+$/, '');
 };
 
+// Truncate a typed amount string to at most `maxDecimals` fraction digits, leaving the
+// rest of the input (including a trailing '.') untouched.
+export const capDecimals = (value: string, maxDecimals: number): string => {
+  const dotIndex = value.indexOf('.');
+  if (dotIndex === -1 || value.length - dotIndex - 1 <= maxDecimals) {
+    return value;
+  }
+  return value.slice(0, dotIndex + 1 + maxDecimals);
+};
+
 export const formatNumberInputStr = (text: string, precision = 10) => {
   if (text.includes(',')) {
     text = text.replace(',', '.');
