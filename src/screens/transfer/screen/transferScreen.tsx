@@ -74,6 +74,7 @@ interface TransferViewProps {
   tokenPrecision?: number;
   tokenPrecisionFailed?: boolean;
   retryTokenPrecision?: () => void;
+  balanceFailed?: boolean;
   badActors?: Set<string>;
   setFundType?: (fundType: string) => void;
 }
@@ -99,6 +100,7 @@ const TransferView = ({
   tokenPrecision,
   tokenPrecisionFailed,
   retryTokenPrecision,
+  balanceFailed,
   badActors,
   setFundType,
 }: TransferViewProps) => {
@@ -423,25 +425,6 @@ const TransferView = ({
       setAmount((prev) => capDecimals(prev, tokenPrecision));
     }
   }, [isEngineToken, tokenPrecision]);
-
-  // The route can seed an Engine balance as a float (rounded past ~16 significant
-  // digits) before the exact balance text arrives. If the amount was taken from that
-  // seed (MAX tapped early), move it to the exact balance so it can't exceed what
-  // the account holds.
-  const prevBalanceRef = useRef(balance);
-  useEffect(() => {
-    const prevBalance = prevBalanceRef.current;
-    prevBalanceRef.current = balance;
-    if (
-      isEngineToken &&
-      prevBalance !== balance &&
-      prevBalance !== '' &&
-      Number(prevBalance) > 0 &&
-      Number(amount) === Number(prevBalance)
-    ) {
-      setAmount(String(balance));
-    }
-  }, [balance, amount, isEngineToken]);
 
   // Keep `recurrence` normalized to a canonical preset value. The schedule pill in the
   // header reads scheduleOptions[scheduleSelectedIndex] directly, so it stays in sync
@@ -1049,6 +1032,13 @@ const TransferView = ({
             </Text>
             <Text style={styles.maxButton}>MAX</Text>
           </TouchableOpacity>
+          {isEngineToken && balanceFailed && (
+            <TouchableOpacity onPress={() => _fetchBalance(currentAccountName)}>
+              <Text style={styles.exchangeWarning}>
+                {intl.formatMessage({ id: 'transfer.balance_load_failed' })}
+              </Text>
+            </TouchableOpacity>
+          )}
           {isEngineToken && tokenPrecisionFailed && (
             <TouchableOpacity onPress={retryTokenPrecision}>
               <Text style={styles.exchangeWarning}>

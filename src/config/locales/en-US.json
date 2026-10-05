@@ -1599,6 +1599,7 @@
   },
   "transfer": {
     "custom_schedule": "Custom ({hours}h)",
+    "balance_load_failed": "Couldn't load your balance. Tap to retry.",
     "precision_load_failed": "Couldn't load this token's details, so only whole amounts can be sent. Tap to retry.",
     "close": "Close",
     "favorite_username_placeholder": "Username",

@@ -40,6 +40,7 @@ const Transfer = ({ navigation, route }: any) => {
         tokenPrecision,
         tokenPrecisionFailed,
         retryTokenPrecision,
+        balanceFailed,
         tokenAddress,
         setFundType,
       }: any) => {
@@ -118,6 +119,7 @@ const Transfer = ({ navigation, route }: any) => {
                 tokenPrecision={tokenPrecision}
                 tokenPrecisionFailed={tokenPrecisionFailed}
                 retryTokenPrecision={retryTokenPrecision}
+                balanceFailed={balanceFailed}
                 badActors={badActors}
                 setFundType={setFundType}
               />

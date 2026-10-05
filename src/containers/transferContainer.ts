@@ -35,15 +35,22 @@ import { normalizeTransferType, getNativeAccountBalance } from '../utils/transfe
  */
 
 class TransferContainer extends Component<any, any> {
+  _precisionRequestId = 0;
+
   constructor(props: any) {
     super(props);
     const routeParams = props.route.params ?? {};
     const transferType = normalizeTransferType(routeParams.transferType ?? '');
     const fundType = routeParams.fundType ?? '';
-    const initialBalance =
-      routeParams.balance ??
-      getNativeAccountBalance(props.currentAccount, transferType, fundType) ??
-      '';
+    // An Engine balance from the route is a float, rounded past ~16 significant
+    // digits, so it must not drive MAX or a submit. Start it as loading ('') and wait
+    // for the exact balance text from fetchBalance.
+    const isEngine = (routeParams.assetLayer ?? routeParams.tokenLayer) === TokenLayers.ENGINE;
+    const initialBalance = isEngine
+      ? ''
+      : routeParams.balance ??
+        getNativeAccountBalance(props.currentAccount, transferType, fundType) ??
+        '';
 
     this.state = {
       fundType,
@@ -57,6 +64,7 @@ class TransferContainer extends Component<any, any> {
       recurrentTransfers: [],
       tokenPrecision: undefined,
       tokenPrecisionFailed: false,
+      balanceFailed: false,
     };
   }
 
@@ -103,6 +111,9 @@ class TransferContainer extends Component<any, any> {
     // it and a failed lookup can be retried without refetching the balance.
     if (isEngine && tokenPrecision === undefined) {
       this.fetchTokenPrecision();
+    }
+    if (isEngine) {
+      this.setState({ balanceFailed: false });
     }
 
     // Fetch account using SDK
@@ -174,6 +185,11 @@ class TransferContainer extends Component<any, any> {
       });
     } catch (error) {
       console.warn('[TransferContainer] Failed to fetch transfer balance', error);
+      // An Engine balance stays loading until it is fetched exactly, so surface
+      // the failure with a retry instead of leaving NEXT disabled silently.
+      if (isEngine) {
+        this.setState({ balanceFailed: true });
+      }
     }
   };
 
@@ -181,8 +197,6 @@ class TransferContainer extends Component<any, any> {
   // `precision` field). Precision can legitimately be 0 (integer tokens), so keep it
   // as-is. A failed or empty lookup sets tokenPrecisionFailed so the screen can say
   // why only whole amounts are allowed and offer a retry.
-  _precisionRequestId = 0;
-
   fetchTokenPrecision = async () => {
     const { fundType } = this.state;
     this._precisionRequestId += 1;
@@ -623,6 +637,7 @@ class TransferContainer extends Component<any, any> {
       initialMemo,
       recurrentTransfers,
       tokenPrecisionFailed,
+      balanceFailed,
     } = this.state;
 
     const rawTransferType = route.params?.transferType ?? '';
@@ -661,6 +676,7 @@ class TransferContainer extends Component<any, any> {
         tokenPrecision: this.state.tokenPrecision,
         tokenPrecisionFailed,
         retryTokenPrecision: this.fetchTokenPrecision,
+        balanceFailed,
         setFundType: this._setFundType,
       })
     );
