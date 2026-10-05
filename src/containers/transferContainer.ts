@@ -181,8 +181,12 @@ class TransferContainer extends Component<any, any> {
   // `precision` field). Precision can legitimately be 0 (integer tokens), so keep it
   // as-is. A failed or empty lookup sets tokenPrecisionFailed so the screen can say
   // why only whole amounts are allowed and offer a retry.
+  _precisionRequestId = 0;
+
   fetchTokenPrecision = async () => {
     const { fundType } = this.state;
+    this._precisionRequestId += 1;
+    const requestId = this._precisionRequestId;
     this.setState({ tokenPrecisionFailed: false });
     let precision: number | undefined;
     try {
@@ -191,8 +195,8 @@ class TransferContainer extends Component<any, any> {
     } catch (err) {
       console.warn('[TransferContainer] Failed to fetch token precision', err);
     }
-    // Drop a response for a fund type the user has since switched away from.
-    if (this.state.fundType !== fundType) {
+    // Drop a superseded lookup, or one for a fund type the user switched away from.
+    if (requestId !== this._precisionRequestId || this.state.fundType !== fundType) {
       return;
     }
     this.setState({ tokenPrecision: precision, tokenPrecisionFailed: precision === undefined });
