@@ -129,26 +129,24 @@ class TransferContainer extends Component<any, any> {
       if (isEngine) {
         const tokenBalances = await fetchTokenBalances(username);
 
-        tokenBalances.forEach((tokenBalance) => {
-          if (tokenBalance.symbol === fundType) {
-            switch (transferType) {
-              case TransferTypes.UNDELEGATE:
-                balance = tokenBalance.delegationsOut;
-                break;
-              case TransferTypes.UNSTAKE:
-              case TransferTypes.DELEGATE:
-                balance = tokenBalance.stake;
-                break;
-              default:
-                const { balance: _balance } = tokenBalance;
-                balance = _balance;
-                break;
-            }
-          }
-          if (!balance) {
-            balance = '0';
-          }
-        });
+        // No row for this token is a valid result (never held it), not a failure:
+        // treat it as a zero balance so the screen leaves its loading state.
+        const tokenBalance = tokenBalances.find((t) => t.symbol === fundType);
+        switch (transferType) {
+          case TransferTypes.UNDELEGATE:
+            balance = tokenBalance?.delegationsOut;
+            break;
+          case TransferTypes.UNSTAKE:
+          case TransferTypes.DELEGATE:
+            balance = tokenBalance?.stake;
+            break;
+          default:
+            balance = tokenBalance?.balance;
+            break;
+        }
+        if (!balance) {
+          balance = '0';
+        }
       } else {
         balance = getNativeAccountBalance(account, transferType, fundType);
         if (transferType === TransferTypes.ECENCY_POINT_TRANSFER && fundType === 'POINT') {
@@ -177,6 +175,10 @@ class TransferContainer extends Component<any, any> {
           // ~16 significant digits, so MAX on a large 8-decimal balance would ask
           // for slightly more than the account holds and the sidechain rejects it.
           this.setState({ balance: isEngine ? formatTokenQuantity(balance) : nextBalance });
+        } else if (isEngine) {
+          // An Engine balance only leaves its loading state through here, so an
+          // unusable value must surface the retry notice rather than hang.
+          this.setState({ balanceFailed: true });
         }
       }
 
