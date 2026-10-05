@@ -8,6 +8,7 @@ import {
   getAssetPrecision,
   toFixedNoExp,
   formatTokenQuantity,
+  capDecimals,
 } from './number';
 
 describe('countDecimals', () => {
@@ -265,5 +266,24 @@ describe('formatTokenQuantity', () => {
   it('handles zero and invalid input', () => {
     expect(formatTokenQuantity(0)).toBe('0');
     expect(formatTokenQuantity('abc')).toBe('0');
+  });
+});
+
+describe('capDecimals', () => {
+  it('truncates extra fraction digits without rounding', () => {
+    expect(capDecimals('1.23456', 3)).toBe('1.234');
+    expect(capDecimals('130.1055333', 8)).toBe('130.1055333');
+    expect(capDecimals('0.99999', 2)).toBe('0.99');
+  });
+
+  it('leaves integers, partial input and empty strings alone', () => {
+    expect(capDecimals('130', 3)).toBe('130');
+    expect(capDecimals('130.', 0)).toBe('130.');
+    expect(capDecimals('.', 3)).toBe('.');
+    expect(capDecimals('', 3)).toBe('');
+  });
+
+  it('drops all fraction digits for precision 0', () => {
+    expect(capDecimals('130.5', 0)).toBe('130.');
   });
 });

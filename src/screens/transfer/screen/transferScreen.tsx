@@ -23,7 +23,12 @@ import TransferTypes from '../../../constants/transferTypes';
 import { getEngineActionJSON } from '../../../providers/hive-engine/hiveEngineActions';
 import parseToken from '../../../utils/parseToken';
 import { buildTransferOpsArray } from '../../../utils/transactionOpsBuilder';
-import { getAssetPrecision, toFixedNoExp, formatTokenQuantity } from '../../../utils/number';
+import {
+  getAssetPrecision,
+  toFixedNoExp,
+  formatTokenQuantity,
+  capDecimals,
+} from '../../../utils/number';
 import { SheetNames } from '../../../navigation/sheets';
 import TokenLayers from '../../../constants/tokenLayers';
 import { EngineActions } from '../../../providers/hive-engine/hiveEngine.types';
@@ -397,10 +402,7 @@ const TransferView = ({
     // Cap decimals to the asset's precision so an over-precise amount can never be
     // entered (HIVE/HBD/POINTS = 3, VESTS = 6; engine tokens allow up to 8).
     const maxDecimals = isEngineToken ? tokenPrecision ?? 8 : getAssetPrecision(fundType);
-    const dotIndex = newValue.indexOf('.');
-    if (dotIndex !== -1 && newValue.length - dotIndex - 1 > maxDecimals) {
-      newValue = newValue.slice(0, dotIndex + 1 + maxDecimals);
-    }
+    newValue = capDecimals(newValue, maxDecimals);
     const parsed = parseFloat(newValue);
     if (newValue === '' || newValue === '.' || Number.isNaN(parsed)) {
       setAmount(newValue);
@@ -408,6 +410,15 @@ const TransferView = ({
       setAmount(newValue);
     }
   };
+
+  // Engine precision loads after mount, so an amount typed before it arrived was only
+  // capped at the 8-decimal fallback. Re-cap it once the real precision is known so the
+  // field shows the same quantity that will be broadcast.
+  useEffect(() => {
+    if (isEngineToken && tokenPrecision !== undefined) {
+      setAmount((prev) => capDecimals(prev, tokenPrecision));
+    }
+  }, [isEngineToken, tokenPrecision]);
 
   // Keep `recurrence` normalized to a canonical preset value. The schedule pill in the
   // header reads scheduleOptions[scheduleSelectedIndex] directly, so it stays in sync
