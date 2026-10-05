@@ -56,6 +56,7 @@ class TransferContainer extends Component<any, any> {
       initialMemo: routeParams.initialMemo,
       recurrentTransfers: [],
       tokenPrecision: undefined,
+      tokenPrecisionFailed: false,
     };
   }
 
@@ -94,7 +95,15 @@ class TransferContainer extends Component<any, any> {
   };
 
   fetchBalance = async (username: any) => {
-    const { fundType, transferType, tokenAddress } = this.state;
+    const { fundType, transferType, tokenAddress, tokenPrecision } = this.state;
+
+    const assetLayer = this.props.route.params?.assetLayer ?? this.props.route.params?.tokenLayer;
+    const isEngine = assetLayer === TokenLayers.ENGINE;
+    // Engine precision loads on its own, so a balance or account failure can't hide
+    // it and a failed lookup can be retried without refetching the balance.
+    if (isEngine && tokenPrecision === undefined) {
+      this.fetchTokenPrecision();
+    }
 
     // Fetch account using SDK
     const queryClient = getQueryClient();
@@ -105,29 +114,9 @@ class TransferContainer extends Component<any, any> {
       const accounts = await queryClient.fetchQuery(accountQuery);
       const account = accounts?.[0] ?? {};
       let balance: any;
-      let enginePrecision;
 
-      const assetLayer = this.props.route.params?.assetLayer ?? this.props.route.params?.tokenLayer;
-      if (assetLayer === TokenLayers.ENGINE) {
-        // Engine precision lives on the TOKENS table, not the balances row — the
-        // balances table carries no `precision` field, so reading it from a balance
-        // returns undefined for every token. That leaves tokenPrecision undefined,
-        // which permanently disables the NEXT button and risks broadcasting an
-        // over-precise (sidechain-rejected) quantity. Fetch both and source
-        // precision from the token definition. Precision can legitimately be 0
-        // (integer tokens), so keep it as-is rather than defaulting a falsy 0 away.
-        // allSettled so a failure in one leg doesn't discard the other: a token-
-        // metadata (precision) outage shouldn't hide an already-fetched balance, and
-        // a balance outage shouldn't hide precision. Each read rejects (rather than
-        // resolving []) on a real proxy failure, so a rejected leg is left unset.
-        const [balancesResult, tokensResult] = await Promise.allSettled([
-          fetchTokenBalances(username),
-          fetchTokens([fundType]),
-        ]);
-        const tokenBalances = balancesResult.status === 'fulfilled' ? balancesResult.value : [];
-        const tokens = tokensResult.status === 'fulfilled' ? tokensResult.value : [];
-
-        enginePrecision = tokens.find((t) => t.symbol === fundType)?.precision;
+      if (isEngine) {
+        const tokenBalances = await fetchTokenBalances(username);
 
         tokenBalances.forEach((tokenBalance) => {
           if (tokenBalance.symbol === fundType) {
@@ -149,7 +138,6 @@ class TransferContainer extends Component<any, any> {
             balance = '0';
           }
         });
-        this.setState({ tokenPrecision: enginePrecision });
       } else {
         balance = getNativeAccountBalance(account, transferType, fundType);
         if (transferType === TransferTypes.ECENCY_POINT_TRANSFER && fundType === 'POINT') {
@@ -174,7 +162,10 @@ class TransferContainer extends Component<any, any> {
       if (balance !== undefined && balance !== null && balance !== '') {
         const nextBalance = Number(balance);
         if (Number.isFinite(nextBalance)) {
-          this.setState({ balance: nextBalance });
+          // Keep an Engine balance as its exact decimal text: a double holds only
+          // ~16 significant digits, so MAX on a large 8-decimal balance would ask
+          // for slightly more than the account holds and the sidechain rejects it.
+          this.setState({ balance: isEngine ? formatTokenQuantity(balance) : nextBalance });
         }
       }
 
@@ -184,6 +175,27 @@ class TransferContainer extends Component<any, any> {
     } catch (error) {
       console.warn('[TransferContainer] Failed to fetch transfer balance', error);
     }
+  };
+
+  // Engine precision lives on the TOKENS table, not the balances row (which has no
+  // `precision` field). Precision can legitimately be 0 (integer tokens), so keep it
+  // as-is. A failed or empty lookup sets tokenPrecisionFailed so the screen can say
+  // why only whole amounts are allowed and offer a retry.
+  fetchTokenPrecision = async () => {
+    const { fundType } = this.state;
+    this.setState({ tokenPrecisionFailed: false });
+    let precision: number | undefined;
+    try {
+      const tokens = await fetchTokens([fundType]);
+      precision = tokens.find((t) => t.symbol === fundType)?.precision;
+    } catch (err) {
+      console.warn('[TransferContainer] Failed to fetch token precision', err);
+    }
+    // Drop a response for a fund type the user has since switched away from.
+    if (this.state.fundType !== fundType) {
+      return;
+    }
+    this.setState({ tokenPrecision: precision, tokenPrecisionFailed: precision === undefined });
   };
 
   _getAccountsWithUsername = async (username: any) => {
@@ -606,6 +618,7 @@ class TransferContainer extends Component<any, any> {
       initialAmount,
       initialMemo,
       recurrentTransfers,
+      tokenPrecisionFailed,
     } = this.state;
 
     const rawTransferType = route.params?.transferType ?? '';
@@ -642,6 +655,8 @@ class TransferContainer extends Component<any, any> {
         recurrentTransfers,
         tokenLayer,
         tokenPrecision: this.state.tokenPrecision,
+        tokenPrecisionFailed,
+        retryTokenPrecision: this.fetchTokenPrecision,
         setFundType: this._setFundType,
       })
     );

@@ -1,5 +1,4 @@
 import type { Operation } from '@ecency/sdk';
-import parseToken from '../../utils/parseToken';
 import { formatTokenQuantity } from '../../utils/number';
 import { EngineActionJSON, EngineActions, EngineContracts } from './hiveEngine.types';
 
@@ -20,7 +19,9 @@ export const getEngineActionJSON = (
       // Truncate to the token's on-chain precision; an over-precise quantity is
       // silently rejected by the Engine sidechain. precision can be 0 (integer
       // tokens), so pass it through as-is rather than defaulting a falsy 0 away.
-      quantity: formatTokenQuantity(parseToken(amount), precision),
+      // Format the amount's own text rather than a parsed float, so a large balance
+      // keeps every digit instead of rounding above what the account holds.
+      quantity: formatTokenQuantity(amount.trim().split(' ')[0], precision),
       memo: action === EngineActions.TRANSFER ? memo : undefined,
     },
   };

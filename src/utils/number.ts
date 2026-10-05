@@ -47,50 +47,66 @@ export const getAssetPrecision = (symbol?: string): number => {
   return NATIVE_ASSET_PRECISION[symbol.trim().toUpperCase()] ?? 3;
 };
 
-// Truncate `num` toward zero to exactly `precision` decimals, returned as a plain
+// A plain decimal string ("12", "12.5", "12.", "-0.25"): no exponent, no grouping.
+const PLAIN_DECIMAL = /^-?\d+(\.\d*)?$/;
+
+// Slice an unsigned plain decimal string to exactly `precision` decimals, toward zero.
+const sliceDecimals = (s: string, precision: number): string => {
+  const dot = s.indexOf('.');
+  if (dot === -1) {
+    return precision > 0 ? `${s}.${'0'.repeat(precision)}` : s;
+  }
+  const frac = `${s.slice(dot + 1)}${'0'.repeat(precision)}`.slice(0, precision);
+  return precision > 0 ? `${s.slice(0, dot)}.${frac}` : s.slice(0, dot);
+};
+
+// Truncate `value` toward zero to exactly `precision` decimals, returned as a plain
 // decimal string. It slices the decimal-string representation rather than using
 // `toFixed`, which rounds and can carry on a run of 9s (e.g. 1.999999999 -> 2.000),
-// breaking the "never exceed the user's balance" guarantee. `Number.toString()` gives
-// the shortest round-trip form (so 0.3 stays "0.3", not "0.2999…"); scientific-
-// notation values (tiny magnitudes) are expanded via toFixed, where their
-// sub-precision digits truncate to zero anyway.
-const truncateToPrecision = (num: number, precision: number): string => {
-  let s = Math.abs(num).toString();
-  if (s.indexOf('e') !== -1 || s.indexOf('E') !== -1) {
-    s = Math.abs(num).toFixed(precision);
-  }
-  const dot = s.indexOf('.');
-  let cut: string;
-  if (dot === -1) {
-    cut = precision > 0 ? `${s}.${'0'.repeat(precision)}` : s;
+// breaking the "never exceed the user's balance" guarantee. A plain decimal string is
+// sliced as-is, so large Engine balances keep every digit (a double holds only ~16
+// significant digits, so 12345678912.12345678 would come back as ...12.123457, above
+// the real balance). Numbers use `Number.toString()`, the shortest round-trip form
+// (so 0.3 stays "0.3", not "0.2999..."); scientific-notation values (tiny
+// magnitudes) are expanded via toFixed, where their sub-precision digits truncate to
+// zero anyway. Returns null for a non-finite / unparseable value.
+const truncateToPrecision = (value: number | string, precision: number): string | null => {
+  const text = typeof value === 'string' ? value.trim() : '';
+  let negative: boolean;
+  let s: string;
+  if (PLAIN_DECIMAL.test(text)) {
+    negative = text.startsWith('-');
+    s = (negative ? text.slice(1) : text).replace(/^0+(?=\d)/, '');
   } else {
-    const frac = `${s.slice(dot + 1)}${'0'.repeat(precision)}`.slice(0, precision);
-    cut = precision > 0 ? `${s.slice(0, dot)}.${frac}` : s.slice(0, dot);
+    const num = typeof value === 'number' ? value : parseFloat(String(value));
+    if (!Number.isFinite(num)) {
+      return null;
+    }
+    negative = num < 0;
+    s = Math.abs(num).toString();
+    if (s.indexOf('e') !== -1 || s.indexOf('E') !== -1) {
+      s = Math.abs(num).toFixed(precision);
+    }
   }
-  const sign = num < 0 && Number(cut) !== 0 ? '-' : '';
+  const cut = sliceDecimals(s, precision);
+  const sign = negative && Number(cut) !== 0 ? '-' : '';
   return sign + cut;
 };
 
 // Format an amount to exactly `precision` decimals, truncating excess precision
 // toward zero (so the broadcast never inflates past the user's balance) and padding
 // when under-precise.
-export const toFixedNoExp = (value: number | string, precision: number): string => {
-  const num = typeof value === 'number' ? value : parseFloat(String(value));
-  if (!Number.isFinite(num)) {
-    return (0).toFixed(precision);
-  }
-  return truncateToPrecision(num, precision);
-};
+export const toFixedNoExp = (value: number | string, precision: number): string =>
+  truncateToPrecision(value, precision) ?? (0).toFixed(precision);
 
 // Format a Hive-Engine token quantity: truncated to the token precision (default 8 —
 // the engine maximum), never scientific notation, with trailing zeros and any
 // dangling decimal point stripped so the quantity string is clean.
 export const formatTokenQuantity = (value: number | string, precision = 8): string => {
-  const num = typeof value === 'number' ? value : parseFloat(String(value));
-  if (!Number.isFinite(num)) {
+  const truncated = truncateToPrecision(value, Math.max(0, Math.min(precision, 8)));
+  if (truncated === null) {
     return '0';
   }
-  const truncated = truncateToPrecision(num, Math.max(0, Math.min(precision, 8)));
   return truncated.indexOf('.') === -1 ? truncated : truncated.replace(/\.?0+$/, '');
 };
 

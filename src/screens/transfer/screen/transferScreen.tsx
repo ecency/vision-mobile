@@ -72,6 +72,8 @@ interface TransferViewProps {
   recurrentTransfers?: any;
   tokenLayer?: string;
   tokenPrecision?: number;
+  tokenPrecisionFailed?: boolean;
+  retryTokenPrecision?: () => void;
   badActors?: Set<string>;
   setFundType?: (fundType: string) => void;
 }
@@ -95,6 +97,8 @@ const TransferView = ({
   recurrentTransfers = [],
   tokenLayer,
   tokenPrecision,
+  tokenPrecisionFailed,
+  retryTokenPrecision,
   badActors,
   setFundType,
 }: TransferViewProps) => {
@@ -1026,6 +1030,13 @@ const TransferView = ({
             </Text>
             <Text style={styles.maxButton}>MAX</Text>
           </TouchableOpacity>
+          {isEngineToken && tokenPrecisionFailed && (
+            <TouchableOpacity onPress={retryTokenPrecision}>
+              <Text style={styles.exchangeWarning}>
+                {intl.formatMessage({ id: 'transfer.precision_load_failed' })}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* --- Recurrent Transfer Fields --- */}
