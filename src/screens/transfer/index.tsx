@@ -38,6 +38,9 @@ const Transfer = ({ navigation, route }: any) => {
         fetchRecurrentTransfers,
         tokenLayer,
         tokenPrecision,
+        tokenPrecisionFailed,
+        retryTokenPrecision,
+        balanceFailed,
         tokenAddress,
         setFundType,
       }: any) => {
@@ -114,6 +117,9 @@ const Transfer = ({ navigation, route }: any) => {
                 fetchRecurrentTransfers={fetchRecurrentTransfers}
                 tokenLayer={tokenLayer}
                 tokenPrecision={tokenPrecision}
+                tokenPrecisionFailed={tokenPrecisionFailed}
+                retryTokenPrecision={retryTokenPrecision}
+                balanceFailed={balanceFailed}
                 badActors={badActors}
                 setFundType={setFundType}
               />

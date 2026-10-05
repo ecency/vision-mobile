@@ -251,6 +251,14 @@ describe('toFixedNoExp', () => {
   });
 });
 
+describe('toFixedNoExp with plain decimal strings', () => {
+  it('slices the text instead of rounding through a float', () => {
+    expect(toFixedNoExp('12345678912.12345678', 8)).toBe('12345678912.12345678');
+    expect(toFixedNoExp('1.9999999999', 3)).toBe('1.999');
+    expect(toFixedNoExp('-0.0001', 3)).toBe('0.000');
+  });
+});
+
 describe('formatTokenQuantity', () => {
   it('strips trailing zeros and never pads', () => {
     expect(formatTokenQuantity('10')).toBe('10');
@@ -266,6 +274,20 @@ describe('formatTokenQuantity', () => {
   it('handles zero and invalid input', () => {
     expect(formatTokenQuantity(0)).toBe('0');
     expect(formatTokenQuantity('abc')).toBe('0');
+  });
+
+  it('keeps every digit of a plain decimal string beyond double precision', () => {
+    expect(formatTokenQuantity('12345678912.12345678')).toBe('12345678912.12345678');
+    expect(formatTokenQuantity('12345678912.12345678', 3)).toBe('12345678912.123');
+    expect(formatTokenQuantity('99999999999.99999999', 8)).toBe('99999999999.99999999');
+  });
+
+  it('normalizes plain decimal strings', () => {
+    expect(formatTokenQuantity('0.00000000')).toBe('0');
+    expect(formatTokenQuantity('147.40287800')).toBe('147.402878');
+    expect(formatTokenQuantity('130.')).toBe('130');
+    expect(formatTokenQuantity('007.5')).toBe('7.5');
+    expect(formatTokenQuantity(' 2.5 ')).toBe('2.5');
   });
 });
 

@@ -72,6 +72,9 @@ interface TransferViewProps {
   recurrentTransfers?: any;
   tokenLayer?: string;
   tokenPrecision?: number;
+  tokenPrecisionFailed?: boolean;
+  retryTokenPrecision?: () => void;
+  balanceFailed?: boolean;
   badActors?: Set<string>;
   setFundType?: (fundType: string) => void;
 }
@@ -95,6 +98,9 @@ const TransferView = ({
   recurrentTransfers = [],
   tokenLayer,
   tokenPrecision,
+  tokenPrecisionFailed,
+  retryTokenPrecision,
+  balanceFailed,
   badActors,
   setFundType,
 }: TransferViewProps) => {
@@ -1026,6 +1032,20 @@ const TransferView = ({
             </Text>
             <Text style={styles.maxButton}>MAX</Text>
           </TouchableOpacity>
+          {isEngineToken && balanceFailed && (
+            <TouchableOpacity onPress={() => _fetchBalance(currentAccountName)}>
+              <Text style={styles.exchangeWarning}>
+                {intl.formatMessage({ id: 'transfer.balance_load_failed' })}
+              </Text>
+            </TouchableOpacity>
+          )}
+          {isEngineToken && tokenPrecisionFailed && (
+            <TouchableOpacity onPress={retryTokenPrecision}>
+              <Text style={styles.exchangeWarning}>
+                {intl.formatMessage({ id: 'transfer.precision_load_failed' })}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* --- Recurrent Transfer Fields --- */}
