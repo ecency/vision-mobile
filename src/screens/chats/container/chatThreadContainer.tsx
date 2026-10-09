@@ -599,6 +599,30 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
     [],
   );
 
+  // Who to list as members of a group or direct message. Until the member
+  // list loads, or if it fails, a group falls back to the members the chat
+  // list already knew, never to everyone this screen has looked up.
+  const conversationMemberIds = useMemo(() => {
+    if (channelMemberIds.length) {
+      return channelMemberIds;
+    }
+    if (!isGroup) {
+      return [];
+    }
+    const known = groupInfo.users.map((user: any) => user?.id).filter(Boolean);
+    return bootstrapUserId ? [bootstrapUserId, ...known] : known;
+  }, [channelMemberIds, isGroup, groupInfo.users, bootstrapUserId]);
+
+  // Those members need records for the list to show them.
+  useEffect(() => {
+    if (isGroup && groupInfo.users.length) {
+      _mergeUserLookup((prev) => ({
+        ...ensureMattermostUsersHaveHiveNames(groupInfo.users),
+        ...prev,
+      }));
+    }
+  }, [isGroup, groupInfo.users, _mergeUserLookup]);
+
   const derivedCommunityIdentifier = useMemo(
     () =>
       // A group's title is its name or its members, never a community.
@@ -2411,7 +2435,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
         userLookup={userLookup}
         onlineUserIds={onlineUserIds}
         memberCount={memberCount || undefined}
-        memberIds={isGroup || isDM ? channelMemberIds : undefined}
+        memberIds={isGroup || isDM ? conversationMemberIds : undefined}
         onClose={() => setOnlineUsersModalVisible(false)}
         onUserPress={_showUserProfile}
       />

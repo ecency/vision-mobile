@@ -22,6 +22,10 @@ export const groupNameLength = (name: string): number => Array.from(name.trim())
 const userName = (user: any): string =>
   getHiveUsernameFromMattermostUser(user) || user?.username || '';
 
+/** Every other member's name, for search. */
+export const getGroupMemberNames = (channel: any): string[] =>
+  (channel?.groupUsers || []).map(userName).filter(Boolean);
+
 /**
  * "alice, bob, carol +2". Mattermost's own display name for a group lists every
  * member's username, the viewer included, cut at 64 characters.

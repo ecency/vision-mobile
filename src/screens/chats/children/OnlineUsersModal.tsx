@@ -47,7 +47,7 @@ export const OnlineUsersModal: React.FC<OnlineUsersModalProps> = ({
     const processedUserIds = new Set<string>();
 
     // Get all user IDs from userLookup (this should have all channel members)
-    const allUserIds = memberIds?.length ? memberIds : Object.keys(userLookup);
+    const allUserIds = memberIds ?? Object.keys(userLookup);
 
     console.log('[OnlineUsersModal] Total users in lookup:', allUserIds.length);
     console.log('[OnlineUsersModal] Channel members count:', channelMembers.length);

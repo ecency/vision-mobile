@@ -44,6 +44,7 @@ import { chatsStyles as styles } from '../styles/chats.styles';
 import { safeExtractCommunityIdentifier } from '../utils/userLookupHelpers';
 import {
   GROUP_RENAMED_EVENT,
+  getGroupMemberNames,
   getGroupTitle,
   isConversationChannel,
   isGroupChannel,
@@ -79,6 +80,25 @@ const ChatsContainer = () => {
   const [sortByName, setSortByName] = useState<boolean>(false);
 
   const userLookupRef = useRef<Record<string, any>>({});
+  // Group renames seen here, with when, so a channel fetch that started
+  // before one cannot put the old name back.
+  const groupRenamesRef = useRef<Map<string, { name: string; at: number }>>(new Map());
+
+  const _rememberGroupRename = useCallback((channelId: string, name: string) => {
+    groupRenamesRef.current.set(channelId, { name, at: Date.now() });
+  }, []);
+
+  const _withNewerRenames = useCallback((list: any[], fetchStartedAt: number) => {
+    if (!groupRenamesRef.current.size) {
+      return list;
+    }
+    return list.map((channel) => {
+      const rename = groupRenamesRef.current.get(channel?.id);
+      return rename && rename.at >= fetchStartedAt
+        ? { ...channel, group_name: rename.name || undefined }
+        : channel;
+    });
+  }, []);
   const searchTimeoutRef = useRef<any>(null);
 
   const currentUserId = bootstrapResult?.user?.id;
@@ -241,8 +261,12 @@ const ChatsContainer = () => {
         const session = await _ensureBootstrap(refresh);
         setBootstrapResult(session);
 
+        const fetchStartedAt = Date.now();
         const channelResponse = await fetchMattermostChannels();
-        const normalizedChannels = _normalizeChannels(channelResponse);
+        const normalizedChannels = _withNewerRenames(
+          _normalizeChannels(channelResponse),
+          fetchStartedAt,
+        );
         setChannels(normalizedChannels);
 
         _seedDirectUsers(normalizedChannels);
@@ -258,7 +282,7 @@ const ChatsContainer = () => {
         setIsRefreshing(false);
       }
     },
-    [_ensureBootstrap, intl, isConnected, isLoggedIn, _resolveUserProfiles],
+    [_ensureBootstrap, intl, isConnected, isLoggedIn, _resolveUserProfiles, _withNewerRenames],
   );
 
   // ============================================================================
@@ -455,10 +479,11 @@ const ChatsContainer = () => {
         payload: { channelId, currentName: channel?.group_name || '' },
       });
       if (typeof result?.name === 'string') {
+        _rememberGroupRename(channelId, result.name);
         _updateChannelState(channelId, { group_name: result.name || undefined });
       }
     },
-    [_getChannelId, _updateChannelState],
+    [_getChannelId, _rememberGroupRename, _updateChannelState],
   );
 
   const _confirmChannelOptions = useCallback(
@@ -740,14 +765,18 @@ const ChatsContainer = () => {
       return;
     }
     try {
-      const channelList = _normalizeChannels(await fetchMattermostChannels());
+      const fetchStartedAt = Date.now();
+      const channelList = _withNewerRenames(
+        _normalizeChannels(await fetchMattermostChannels()),
+        fetchStartedAt,
+      );
       setChannels(channelList);
       const created = channelList.find((item) => _getChannelId(item) === channelId);
       _openChannel(created || { id: channelId, type: 'G' });
     } catch (err) {
       _openChannel({ id: channelId, type: 'G' });
     }
-  }, [_getChannelId, _normalizeChannels, _openChannel, currentAccount?.name]);
+  }, [_getChannelId, _normalizeChannels, _openChannel, _withNewerRenames, currentAccount?.name]);
 
   // ============================================================================
   // Search
@@ -775,7 +804,7 @@ const ChatsContainer = () => {
           const displayName = (channel?.display_name || channel?.name || '').toLowerCase();
           // A group also matches its given name and its members' names.
           const groupTitle = isGroupChannel(channel)
-            ? `${channel?.group_name || ''} ${getGroupTitle(channel)}`.toLowerCase()
+            ? [channel?.group_name, ...getGroupMemberNames(channel)].join(' ').toLowerCase()
             : '';
           return displayName.includes(lowerQuery) || groupTitle.includes(lowerQuery);
         });
@@ -975,12 +1004,13 @@ const ChatsContainer = () => {
       GROUP_RENAMED_EVENT,
       ({ channelId, name }: { channelId: string; name: string }) => {
         if (channelId) {
+          _rememberGroupRename(channelId, name);
           _updateChannelState(channelId, { group_name: name || undefined });
         }
       },
     );
     return () => subscription.remove();
-  }, [_updateChannelState]);
+  }, [_rememberGroupRename, _updateChannelState]);
 
   useEffect(() => {
     if (currentAccount) {

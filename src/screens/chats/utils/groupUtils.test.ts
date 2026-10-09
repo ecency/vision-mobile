@@ -1,5 +1,6 @@
 import {
   findMissingUserIds,
+  getGroupMemberNames,
   getGroupMembersTitle,
   getGroupTitle,
   getRenamedGroupName,
@@ -35,6 +36,17 @@ describe('group channels', () => {
     expect(getGroupTitle({ groupUsers: members })).toBe('alice, bob, carol +2');
     expect(getGroupTitle({ display_name: 'a, b, me' })).toBe('a, b, me');
     expect(getGroupMembersTitle([], 'fallback')).toBe('fallback');
+  });
+
+  it('lists every other member for search, beyond the ones in the title', () => {
+    const members = [user('alice'), user('bob'), user('carol'), user('dave')];
+    expect(getGroupMemberNames({ group_name: 'Book club', groupUsers: members })).toEqual([
+      'alice',
+      'bob',
+      'carol',
+      'dave',
+    ]);
+    expect(getGroupMemberNames({})).toEqual([]);
   });
 
   it('counts a name as the server does, so an emoji is one character', () => {
