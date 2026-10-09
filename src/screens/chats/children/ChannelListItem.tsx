@@ -65,15 +65,33 @@ export const ChannelListItem: React.FC<ChannelListItemProps> = React.memo(
       if (names.length === 2) {
         channelAvatar = (
           <View style={styles.groupAvatar}>
-            <UserAvatar username={names[0]} style={styles.groupAvatarBack} disableSize />
-            <UserAvatar username={names[1]} style={styles.groupAvatarFront} disableSize />
+            {/* UserAvatar styles its image, not its wrapper, so position the wrappers. */}
+            <View style={styles.groupAvatarBackSlot}>
+              <UserAvatar
+                username={names[0]}
+                style={styles.groupAvatarImage}
+                disableSize
+                noAction
+              />
+            </View>
+            <View style={styles.groupAvatarFrontSlot}>
+              <UserAvatar
+                username={names[1]}
+                style={styles.groupAvatarFrontImage}
+                disableSize
+                noAction
+              />
+            </View>
           </View>
         );
       }
     }
 
     if (!channelAvatar) {
-      const communityId = safeExtractCommunityIdentifier(channel);
+      // A group's header is its name, which must not read as a community.
+      const communityId = isGroupChannel(channel)
+        ? undefined
+        : safeExtractCommunityIdentifier(channel);
       if (communityId) {
         channelAvatar = (
           <UserAvatar username={communityId} style={styles.channelAvatar} disableSize />

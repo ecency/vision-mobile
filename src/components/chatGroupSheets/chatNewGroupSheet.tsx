@@ -166,7 +166,7 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
                   { username },
                 )}
               >
-                <UserAvatar username={username} style={styles.chipAvatar} disableSize />
+                <UserAvatar username={username} style={styles.chipAvatar} disableSize noAction />
                 <Text style={styles.chipText}>{`@${username}`}</Text>
                 <Text style={styles.chipRemove}>×</Text>
               </TouchableOpacity>
@@ -209,7 +209,12 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
                   style={styles.personRow}
                   onPress={() => _add(username)}
                 >
-                  <UserAvatar username={username} style={styles.personAvatar} disableSize />
+                  <UserAvatar
+                    username={username}
+                    style={styles.personAvatar}
+                    disableSize
+                    noAction
+                  />
                   <Text style={styles.personName} numberOfLines={1}>{`@${username}`}</Text>
                 </TouchableOpacity>
               ))

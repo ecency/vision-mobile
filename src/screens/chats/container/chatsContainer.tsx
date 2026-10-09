@@ -704,8 +704,9 @@ const ChatsContainer = () => {
     (item: any) => {
       const channelId = item.id || item.channel_id || item.name;
       const description = item.header || item.purpose || '';
-      const communityIdentifier = safeExtractCommunityIdentifier(item);
       const isGroup = isGroupChannel(item);
+      // A group's header is its name, which must not read as a community.
+      const communityIdentifier = isGroup ? undefined : safeExtractCommunityIdentifier(item);
 
       navigation.navigate(ROUTES.SCREENS.CHAT_THREAD, {
         channelId,

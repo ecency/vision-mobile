@@ -111,7 +111,12 @@ const ChatReactorsSheet: React.FC<SheetProps<'chat_reactors'>> = ({ sheetId, pay
                 onPress={() => username && _openProfile(username)}
               >
                 {username ? (
-                  <UserAvatar username={username} style={styles.personAvatar} disableSize />
+                  <UserAvatar
+                    username={username}
+                    style={styles.personAvatar}
+                    disableSize
+                    noAction
+                  />
                 ) : (
                   <View style={[styles.personAvatar, styles.personAvatarEmpty]} />
                 )}

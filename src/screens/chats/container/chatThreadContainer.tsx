@@ -584,13 +584,16 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
 
   const derivedCommunityIdentifier = useMemo(
     () =>
-      paramCommunityIdentifier ||
-      safeExtractCommunityIdentifier({
-        name: channelName,
-        display_name: channelName,
-        header: channelDescription,
-      }),
-    [channelDescription, channelName, paramCommunityIdentifier],
+      // A group's title is its name or its members, never a community.
+      channelType === 'G'
+        ? undefined
+        : paramCommunityIdentifier ||
+          safeExtractCommunityIdentifier({
+            name: channelName,
+            display_name: channelName,
+            header: channelDescription,
+          }),
+    [channelDescription, channelName, channelType, paramCommunityIdentifier],
   );
 
   const _ensureBootstrap = useCallback(async () => {
@@ -1848,7 +1851,13 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
   // Header title
   const headerTitle = useMemo(() => {
     if (isGroup) {
-      return groupInfo.name || getGroupMembersTitle(groupInfo.users, channelName || channelId);
+      return (
+        groupInfo.name ||
+        getGroupMembersTitle(
+          groupInfo.users,
+          channelName || intl.formatMessage({ id: 'chats.group', defaultMessage: 'Group' }),
+        )
+      );
     }
     let title = '';
     if (headerUser) {
@@ -1857,7 +1866,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
       title = channelName || channelId;
     }
     return title;
-  }, [headerUser, channelName, channelId, isGroup, groupInfo]);
+  }, [headerUser, channelName, channelId, isGroup, groupInfo, intl]);
 
   const _showGroupOptions = useCallback(() => {
     SheetManager.show(SheetNames.CHAT_CHANNEL_OPTIONS, {

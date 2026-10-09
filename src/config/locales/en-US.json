@@ -735,7 +735,8 @@
     "reactions_title": "Reactions",
     "reactor_you": "You",
     "reactor_unknown": "Someone",
-    "see_who_reacted": "Long press to see who reacted"
+    "see_who_reacted": "Long press to see who reacted",
+    "group": "Group"
   },
   "free_estm": {
     "timer_text": "Next free spin in",

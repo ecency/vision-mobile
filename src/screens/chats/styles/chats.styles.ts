@@ -85,19 +85,23 @@ export const chatsStyles = EStyleSheet.create({
     height: 40,
     marginRight: 12,
   },
-  groupAvatarBack: {
+  groupAvatarBackSlot: {
     position: 'absolute',
     top: 0,
     left: 0,
+  },
+  groupAvatarFrontSlot: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+  },
+  groupAvatarImage: {
     width: 28,
     height: 28,
     borderRadius: 14,
     borderWidth: 0,
   },
-  groupAvatarFront: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
+  groupAvatarFrontImage: {
     width: 28,
     height: 28,
     borderRadius: 14,
