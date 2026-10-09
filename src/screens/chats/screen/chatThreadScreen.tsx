@@ -12,6 +12,9 @@ interface ChatThreadParams {
   lastViewedAt?: number;
   communityIdentifier?: string;
   channelType?: string;
+  groupOwner?: boolean;
+  groupName?: string;
+  groupUsers?: any[];
 }
 
 const ChatThreadScreen = ({ route }: { route: { params: ChatThreadParams } }) => {
@@ -24,6 +27,9 @@ const ChatThreadScreen = ({ route }: { route: { params: ChatThreadParams } }) =>
     userLookup,
     lastViewedAt,
     channelType,
+    groupOwner,
+    groupName,
+    groupUsers,
   } = route.params;
 
   return (
@@ -37,6 +43,9 @@ const ChatThreadScreen = ({ route }: { route: { params: ChatThreadParams } }) =>
         initialUserLookup={userLookup}
         initialLastViewedAt={lastViewedAt}
         channelType={channelType}
+        groupOwner={groupOwner}
+        groupName={groupName}
+        groupUsers={groupUsers}
       />
     </SafeAreaView>
   );

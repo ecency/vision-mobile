@@ -30,6 +30,11 @@ import type { CommunityManageAction } from '../components/communityManageSheet/c
 import type { CommunityRoleEditResult } from '../components/communityRoleEditSheet/communityRoleEditSheet';
 import type { SearchFilters } from '../components/searchFiltersSheet';
 import { ShareIntentSheet } from '../components/shareIntentSheet';
+import {
+  ChatNewGroupSheet,
+  ChatReactorsSheet,
+  ChatRenameGroupSheet,
+} from '../components/chatGroupSheets';
 import SignConfirmSheet from '../screens/dappBrowser/components/signConfirmSheet';
 import ReceiveQrSheet from '../components/receiveQrSheet/receiveQrSheet';
 import WalletHistoryFiltersSheet from '../components/walletHistoryFiltersSheet/walletHistoryFiltersSheet';
@@ -37,6 +42,7 @@ import BalanceAnalyticsSheet from '../components/balanceAnalyticsSheet/balanceAn
 import { TippingDialog } from '../components/tipping';
 import { TTSSettingsSheet } from '../components/textToSpeech/ttsSettingsSheet';
 import { ActionModalPayload } from '../components/actionModal/container/actionModalContainer';
+import type { ChatNewGroupResult, ChatRenameGroupResult } from '../components/chatGroupSheets';
 
 export enum SheetNames {
   POST_TRANSLATION = 'post_translation',
@@ -48,6 +54,9 @@ export enum SheetNames {
   QR_SCAN = 'qr_sheet',
   CHAT_OPTIONS = 'chat_options',
   CHAT_CHANNEL_OPTIONS = 'chat_channel_options',
+  CHAT_REACTORS = 'chat_reactors',
+  CHAT_NEW_GROUP = 'chat_new_group',
+  CHAT_RENAME_GROUP = 'chat_rename_group',
   TIPPING_DIALOG = 'tipping_dialog',
   TTS_SETTINGS = 'tts_settings',
   POSTING_AUTHORITY_PROMPT = 'posting_authority_prompt',
@@ -79,6 +88,9 @@ registerSheet(SheetNames.ACCOUNTS_SHEET, AccountsBottomSheet);
 registerSheet(SheetNames.QR_SCAN, QRModal);
 registerSheet(SheetNames.CHAT_OPTIONS, ChatOptionsSheet);
 registerSheet(SheetNames.CHAT_CHANNEL_OPTIONS, ChatChannelOptionsSheet);
+registerSheet(SheetNames.CHAT_REACTORS, ChatReactorsSheet);
+registerSheet(SheetNames.CHAT_NEW_GROUP, ChatNewGroupSheet);
+registerSheet(SheetNames.CHAT_RENAME_GROUP, ChatRenameGroupSheet);
 registerSheet(SheetNames.TIPPING_DIALOG, TippingDialog);
 registerSheet(SheetNames.TTS_SETTINGS, TTSSettingsSheet);
 registerSheet(SheetNames.POSTING_AUTHORITY_PROMPT, PostingAuthoritySheet);
@@ -171,7 +183,30 @@ declare module 'react-native-actions-sheet' {
         onToggleFavorite?: () => void;
         onToggleMute?: () => void;
         onLeave?: () => void;
+        onShowMembers?: () => void;
+        onRename?: () => void;
       };
+    }>;
+    chat_reactors: SheetDefinition<{
+      payload: {
+        reactions: { emoji_name: string; user_id: string }[];
+        userLookup: Record<string, any>;
+        currentUserId?: string;
+        initialEmoji?: string;
+      };
+    }>;
+    chat_new_group: SheetDefinition<{
+      payload: {
+        currentUsername?: string;
+      };
+      returnValue: ChatNewGroupResult;
+    }>;
+    chat_rename_group: SheetDefinition<{
+      payload: {
+        channelId: string;
+        currentName?: string;
+      };
+      returnValue: ChatRenameGroupResult;
     }>;
     tipping_dialog: SheetDefinition<{
       payload: {

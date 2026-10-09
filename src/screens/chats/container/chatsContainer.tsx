@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  DeviceEventEmitter,
+  FlatList,
+  RefreshControl,
+  Text,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useIntl } from 'react-intl';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -35,6 +42,12 @@ import {
 import { Header } from '../../../components';
 import { chatsStyles as styles } from '../styles/chats.styles';
 import { safeExtractCommunityIdentifier } from '../utils/userLookupHelpers';
+import {
+  GROUP_RENAMED_EVENT,
+  getGroupTitle,
+  isConversationChannel,
+  isGroupChannel,
+} from '../utils/groupUtils';
 import { StatusPill } from '../children/StatusPill';
 import { SearchBar } from '../children/SearchBar';
 import { ChannelListItem } from '../children/ChannelListItem';
@@ -432,12 +445,31 @@ const ChatsContainer = () => {
     [_ensureBootstrap, _getChannelId, _updateChannelState, _refreshGlobalUnreadChatCount, intl],
   );
 
+  const _handleRenameGroup = useCallback(
+    async (channel: any) => {
+      const channelId = _getChannelId(channel);
+      if (!channelId) {
+        return;
+      }
+      const result = await SheetManager.show(SheetNames.CHAT_RENAME_GROUP, {
+        payload: { channelId, currentName: channel?.group_name || '' },
+      });
+      if (typeof result?.name === 'string') {
+        _updateChannelState(channelId, { group_name: result.name || undefined });
+      }
+    },
+    [_getChannelId, _updateChannelState],
+  );
+
   const _confirmChannelOptions = useCallback(
     (channel: any) => {
-      const name = channel.display_name || channel.name;
+      const name = isGroupChannel(channel)
+        ? getGroupTitle(channel)
+        : channel.display_name || channel.name;
       const { totalUnread } = _getUnreadMeta(channel);
       const hasUnread = (totalUnread || 0) > 0;
-      const isDM = channel?.type === 'D';
+      // Groups are left like direct messages: closed for this viewer.
+      const isDM = isConversationChannel(channel);
 
       SheetManager.show(SheetNames.CHAT_CHANNEL_OPTIONS, {
         payload: {
@@ -450,12 +482,17 @@ const ChatsContainer = () => {
           onToggleFavorite: () => _handleToggleFavorite(channel),
           onToggleMute: () => _handleToggleMute(channel),
           onLeave: () => _handleLeaveChannel(channel),
+          onRename:
+            isGroupChannel(channel) && channel?.group_owner
+              ? () => _handleRenameGroup(channel)
+              : undefined,
         },
       });
     },
     [
       _getUnreadMeta,
       _handleLeaveChannel,
+      _handleRenameGroup,
       _handleMarkChannelRead,
       _handleToggleFavorite,
       _handleToggleMute,
@@ -663,6 +700,54 @@ const ChatsContainer = () => {
     [_ensureBootstrap, _resolveDirectChannel, bootstrapResult, navigation, userLookup],
   );
 
+  const _openChannel = useCallback(
+    (item: any) => {
+      const channelId = item.id || item.channel_id || item.name;
+      const description = item.header || item.purpose || '';
+      const communityIdentifier = safeExtractCommunityIdentifier(item);
+      const isGroup = isGroupChannel(item);
+
+      navigation.navigate(ROUTES.SCREENS.CHAT_THREAD, {
+        channelId,
+        channelName: isGroup ? getGroupTitle(item) : item.display_name || item.name || channelId,
+        // A group's header is its name, not a description.
+        channelDescription: isGroup ? '' : description,
+        communityIdentifier,
+        bootstrapResult,
+        userLookup,
+        lastViewedAt:
+          item?.last_viewed_at ||
+          item?.last_view_at ||
+          item?.lastViewedAt ||
+          item?.lastViewed ||
+          null,
+        channelType: item.type,
+        groupOwner: isGroup ? !!item.group_owner : undefined,
+        groupName: isGroup ? item.group_name || '' : undefined,
+        groupUsers: isGroup ? item.groupUsers : undefined,
+      });
+    },
+    [bootstrapResult, navigation, userLookup],
+  );
+
+  const _handleNewGroup = useCallback(async () => {
+    const result = await SheetManager.show(SheetNames.CHAT_NEW_GROUP, {
+      payload: { currentUsername: currentAccount?.name },
+    });
+    const channelId = result?.channelId;
+    if (!channelId) {
+      return;
+    }
+    try {
+      const channelList = _normalizeChannels(await fetchMattermostChannels());
+      setChannels(channelList);
+      const created = channelList.find((item) => _getChannelId(item) === channelId);
+      _openChannel(created || { id: channelId, type: 'G' });
+    } catch (err) {
+      _openChannel({ id: channelId, type: 'G' });
+    }
+  }, [_getChannelId, _normalizeChannels, _openChannel, currentAccount?.name]);
+
   // ============================================================================
   // Search
   // ============================================================================
@@ -778,6 +863,8 @@ const ChatsContainer = () => {
       let displayName = channel.display_name || channel.name || '';
       if (channel?.type === 'D') {
         displayName = channel.directUser?.username || '';
+      } else if (isGroupChannel(channel)) {
+        displayName = getGroupTitle(channel);
       }
       return displayName;
     };
@@ -866,36 +953,29 @@ const ChatsContainer = () => {
         userLookup={userLookup}
         getUnreadMeta={_getUnreadMeta}
         safeExtractCommunityIdentifier={safeExtractCommunityIdentifier}
-        onPress={() => {
-          const channelId = item.id || item.channel_id || item.name;
-          const description = item.header || item.purpose || '';
-          const communityIdentifier = safeExtractCommunityIdentifier(item);
-
-          navigation.navigate(ROUTES.SCREENS.CHAT_THREAD, {
-            channelId,
-            channelName: item.display_name || item.name || channelId,
-            channelDescription: description,
-            communityIdentifier,
-            bootstrapResult,
-            userLookup,
-            lastViewedAt:
-              item?.last_viewed_at ||
-              item?.last_view_at ||
-              item?.lastViewedAt ||
-              item?.lastViewed ||
-              null,
-            channelType: item.type,
-          });
-        }}
+        onPress={() => _openChannel(item)}
         onShowOptions={_confirmChannelOptions}
       />
     ),
-    [currentUserId, userLookup, _getUnreadMeta, bootstrapResult, navigation],
+    [currentUserId, userLookup, _getUnreadMeta, _openChannel, _confirmChannelOptions],
   );
 
   // ============================================================================
   // Effects
   // ============================================================================
+
+  // A group renamed from its conversation screen shows its new name here too.
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      GROUP_RENAMED_EVENT,
+      ({ channelId, name }: { channelId: string; name: string }) => {
+        if (channelId) {
+          _updateChannelState(channelId, { group_name: name || undefined });
+        }
+      },
+    );
+    return () => subscription.remove();
+  }, [_updateChannelState]);
 
   useEffect(() => {
     if (currentAccount) {
@@ -966,6 +1046,7 @@ const ChatsContainer = () => {
           onSearchChange={(text) => setSearchQuery(text.toLowerCase())}
           sortByName={sortByName}
           onToggleSort={() => setSortByName(!sortByName)}
+          onNewGroup={isLoggedIn ? _handleNewGroup : undefined}
           searchError={searchError}
         />
 

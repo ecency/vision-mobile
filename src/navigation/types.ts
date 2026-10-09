@@ -162,6 +162,9 @@ export type AppParamList = {
     userLookup?: any;
     lastViewedAt?: number;
     channelType?: string;
+    groupOwner?: boolean;
+    groupName?: string;
+    groupUsers?: any[];
   };
   [ROUTES.SCREENS.ACCOUNT_LIST]: { users?: any[]; title?: string } | undefined;
   [ROUTES.SCREENS.BACKUP_KEYS]: undefined;

@@ -5,6 +5,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { Icon, UserAvatar } from '../../../components';
 import { getHiveUsernameFromMattermostUser } from '../../../providers/chat/mattermost';
 import { chatsStyles as styles } from '../styles/chats.styles';
+import { getGroupTitle, isGroupChannel } from '../utils/groupUtils';
 
 interface ChannelListItemProps {
   channel: any;
@@ -50,6 +51,23 @@ export const ChannelListItem: React.FC<ChannelListItemProps> = React.memo(
         channelName = hiveUsername || directUser.nickname || directUser.username || channelName;
         channelAvatar = (
           <UserAvatar username={channelName} style={styles.channelAvatar} disableSize />
+        );
+      }
+    }
+
+    if (isGroupChannel(channel)) {
+      channelName = getGroupTitle(channel, channelName);
+      // Two of the other members, overlapped.
+      const names = (channel?.groupUsers || [])
+        .map((user: any) => getHiveUsernameFromMattermostUser(user))
+        .filter(Boolean)
+        .slice(0, 2);
+      if (names.length === 2) {
+        channelAvatar = (
+          <View style={styles.groupAvatar}>
+            <UserAvatar username={names[0]} style={styles.groupAvatarBack} disableSize />
+            <UserAvatar username={names[1]} style={styles.groupAvatarFront} disableSize />
+          </View>
         );
       }
     }

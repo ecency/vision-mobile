@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { useIntl } from 'react-intl';
 import { getEmojiDisplay } from '../utils/messageFormatters';
 import { chatThreadStyles as styles } from '../styles/chatThread.styles';
 
@@ -14,10 +15,14 @@ interface MessageReactionsProps {
   isOwnMessage: boolean;
   bootstrapUserId: string;
   onReactionPress?: (emojiName: string) => void;
+  /** Long-press: who reacted. */
+  onReactionLongPress?: (emojiName: string) => void;
 }
 
 export const MessageReactions: React.FC<MessageReactionsProps> = React.memo(
-  ({ reactions, isOwnMessage, bootstrapUserId, onReactionPress }) => {
+  ({ reactions, isOwnMessage, bootstrapUserId, onReactionPress, onReactionLongPress }) => {
+    const intl = useIntl();
+
     if (!reactions || reactions.length === 0) {
       return null;
     }
@@ -48,6 +53,18 @@ export const MessageReactions: React.FC<MessageReactionsProps> = React.memo(
               key={emojiName}
               style={[styles.reactionPill, hasCurrentUserReaction && styles.reactionPillActive]}
               onPress={() => onReactionPress?.(emojiName)}
+              onLongPress={onReactionLongPress ? () => onReactionLongPress(emojiName) : undefined}
+              delayLongPress={350}
+              accessibilityRole="button"
+              accessibilityLabel={`${emojiDisplay} ${count}`}
+              accessibilityHint={
+                onReactionLongPress
+                  ? intl.formatMessage({
+                      id: 'chats.see_who_reacted',
+                      defaultMessage: 'Long press to see who reacted',
+                    })
+                  : undefined
+              }
               activeOpacity={0.7}
             >
               <Text style={styles.reactionEmoji}>{emojiDisplay}</Text>
