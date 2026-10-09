@@ -10,11 +10,20 @@ interface SearchBarProps {
   onSearchChange: (text: string) => void;
   sortByName: boolean;
   onToggleSort: () => void;
+  /** Opens the New group sheet. */
+  onNewGroup?: () => void;
   searchError: string | null;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = React.memo(
-  ({ searchQuery, onSearchChange, sortByName, onToggleSort, searchError: _searchError }) => {
+  ({
+    searchQuery,
+    onSearchChange,
+    sortByName,
+    onToggleSort,
+    onNewGroup,
+    searchError: _searchError,
+  }) => {
     const intl = useIntl();
 
     return (
@@ -63,6 +72,25 @@ export const SearchBar: React.FC<SearchBarProps> = React.memo(
               color={EStyleSheet.value(sortByName ? '$primaryBlue' : '$iconColor')}
             />
           </TouchableOpacity>
+
+          {onNewGroup && (
+            <TouchableOpacity
+              onPress={onNewGroup}
+              style={styles.sortButton}
+              accessibilityRole="button"
+              accessibilityLabel={intl.formatMessage({
+                id: 'chats.new_group',
+                defaultMessage: 'New group',
+              })}
+            >
+              <Icon
+                name="account-multiple-plus"
+                iconType="MaterialCommunityIcons"
+                size={20}
+                color={EStyleSheet.value('$iconColor')}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );

@@ -19,6 +19,10 @@ interface ChatChannelOptionsSheetProps {
     onToggleFavorite?: () => void;
     onToggleMute?: () => void;
     onLeave?: () => void;
+    /** Groups: list who is in it. */
+    onShowMembers?: () => void;
+    /** Groups the viewer started: name it. */
+    onRename?: () => void;
   };
 }
 
@@ -64,33 +68,55 @@ const ChatChannelOptionsSheet = ({ payload }: ChatChannelOptionsSheetProps) => {
       });
     }
 
-    items.push({
-      key: 'favorite',
-      label: payload?.isFavorite
-        ? intl.formatMessage({ id: 'chats.unfavorite', defaultMessage: 'Remove favorite' })
-        : intl.formatMessage({ id: 'chats.favorite', defaultMessage: 'Favorite' }),
-      onPress: payload?.onToggleFavorite,
-    });
+    if (payload?.onShowMembers) {
+      items.push({
+        key: 'members',
+        label: intl.formatMessage({ id: 'chats.group_members', defaultMessage: 'Group members' }),
+        onPress: payload.onShowMembers,
+      });
+    }
 
-    items.push({
-      key: 'mute',
-      label: payload?.isMuted
-        ? intl.formatMessage({ id: 'chats.unmute', defaultMessage: 'Unmute' })
-        : intl.formatMessage({ id: 'chats.mute', defaultMessage: 'Mute' }),
-      onPress: payload?.onToggleMute,
-    });
+    if (payload?.onRename) {
+      items.push({
+        key: 'rename',
+        label: intl.formatMessage({ id: 'chats.rename_group', defaultMessage: 'Rename group' }),
+        onPress: payload.onRename,
+      });
+    }
 
-    items.push({
-      key: 'leave',
-      label: payload?.isDM
-        ? intl.formatMessage({
-            id: 'chats.leave_conversation',
-            defaultMessage: 'Leave conversation',
-          })
-        : intl.formatMessage({ id: 'chats.leave', defaultMessage: 'Leave channel' }),
-      destructive: true,
-      onPress: payload?.onLeave,
-    });
+    if (payload?.onToggleFavorite) {
+      items.push({
+        key: 'favorite',
+        label: payload?.isFavorite
+          ? intl.formatMessage({ id: 'chats.unfavorite', defaultMessage: 'Remove favorite' })
+          : intl.formatMessage({ id: 'chats.favorite', defaultMessage: 'Favorite' }),
+        onPress: payload.onToggleFavorite,
+      });
+    }
+
+    if (payload?.onToggleMute) {
+      items.push({
+        key: 'mute',
+        label: payload?.isMuted
+          ? intl.formatMessage({ id: 'chats.unmute', defaultMessage: 'Unmute' })
+          : intl.formatMessage({ id: 'chats.mute', defaultMessage: 'Mute' }),
+        onPress: payload.onToggleMute,
+      });
+    }
+
+    if (payload?.onLeave) {
+      items.push({
+        key: 'leave',
+        label: payload?.isDM
+          ? intl.formatMessage({
+              id: 'chats.leave_conversation',
+              defaultMessage: 'Leave conversation',
+            })
+          : intl.formatMessage({ id: 'chats.leave', defaultMessage: 'Leave channel' }),
+        destructive: true,
+        onPress: payload.onLeave,
+      });
+    }
 
     return items;
   }, [intl, payload]);

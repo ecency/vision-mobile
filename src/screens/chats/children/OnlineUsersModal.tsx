@@ -14,6 +14,12 @@ interface OnlineUsersModalProps {
   onClose: () => void;
   onUserPress: (username: string) => void;
   memberCount?: number;
+  /**
+   * When set, only these users are listed. Passed for groups and direct
+   * messages, whose member list is complete; the lookup also holds post
+   * authors, reactors and other conversations' partners.
+   */
+  memberIds?: string[];
 }
 
 interface UserStatus {
@@ -32,6 +38,7 @@ export const OnlineUsersModal: React.FC<OnlineUsersModalProps> = ({
   onClose,
   onUserPress,
   memberCount,
+  memberIds,
 }) => {
   const intl = useIntl();
 
@@ -40,7 +47,7 @@ export const OnlineUsersModal: React.FC<OnlineUsersModalProps> = ({
     const processedUserIds = new Set<string>();
 
     // Get all user IDs from userLookup (this should have all channel members)
-    const allUserIds = Object.keys(userLookup);
+    const allUserIds = memberIds ?? Object.keys(userLookup);
 
     console.log('[OnlineUsersModal] Total users in lookup:', allUserIds.length);
     console.log('[OnlineUsersModal] Channel members count:', channelMembers.length);
@@ -89,7 +96,7 @@ export const OnlineUsersModal: React.FC<OnlineUsersModalProps> = ({
     });
 
     return statuses;
-  }, [userLookup, onlineUserIds, channelMembers.length, memberCount]);
+  }, [userLookup, onlineUserIds, channelMembers.length, memberCount, memberIds]);
 
   const handleUserPress = useCallback(
     (username: string) => {

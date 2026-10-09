@@ -5,6 +5,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { Icon, UserAvatar } from '../../../components';
 import { getHiveUsernameFromMattermostUser } from '../../../providers/chat/mattermost';
 import { chatsStyles as styles } from '../styles/chats.styles';
+import { getGroupTitle, isGroupChannel } from '../utils/groupUtils';
 
 interface ChannelListItemProps {
   channel: any;
@@ -54,8 +55,43 @@ export const ChannelListItem: React.FC<ChannelListItemProps> = React.memo(
       }
     }
 
+    if (isGroupChannel(channel)) {
+      channelName = getGroupTitle(channel, channelName);
+      // Two of the other members, overlapped.
+      const names = (channel?.groupUsers || [])
+        .map((user: any) => getHiveUsernameFromMattermostUser(user))
+        .filter(Boolean)
+        .slice(0, 2);
+      if (names.length === 2) {
+        channelAvatar = (
+          <View style={styles.groupAvatar}>
+            {/* UserAvatar styles its image, not its wrapper, so position the wrappers. */}
+            <View style={styles.groupAvatarBackSlot}>
+              <UserAvatar
+                username={names[0]}
+                style={styles.groupAvatarImage}
+                disableSize
+                noAction
+              />
+            </View>
+            <View style={styles.groupAvatarFrontSlot}>
+              <UserAvatar
+                username={names[1]}
+                style={styles.groupAvatarFrontImage}
+                disableSize
+                noAction
+              />
+            </View>
+          </View>
+        );
+      }
+    }
+
     if (!channelAvatar) {
-      const communityId = safeExtractCommunityIdentifier(channel);
+      // A group's header is its name, which must not read as a community.
+      const communityId = isGroupChannel(channel)
+        ? undefined
+        : safeExtractCommunityIdentifier(channel);
       if (communityId) {
         channelAvatar = (
           <UserAvatar username={communityId} style={styles.channelAvatar} disableSize />

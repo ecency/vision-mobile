@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, BackHandler, Dimensions, Keyboard, Platform, View } from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  DeviceEventEmitter,
+  Dimensions,
+  Keyboard,
+  Platform,
+  View,
+} from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LinkifyIt from 'linkify-it';
@@ -38,6 +46,8 @@ import {
   pinMattermostPost,
   unpinMattermostPost,
   calculateGlobalUnreadTotal,
+  fetchMattermostChannels,
+  normalizeMattermostChannels,
 } from '../../../providers/chat/mattermost';
 import { uploadImage } from '../../../providers/ecency/ecency';
 import { signImage } from '../../../providers/hive/hive';
@@ -82,6 +92,12 @@ import { ThreadMessageItem } from '../children/ThreadMessageItem';
 import { GroupedSystemMessages } from '../children/GroupedSystemMessages';
 import { SystemMessageItem } from '../children/SystemMessageItem';
 import { MessageReactions } from '../children/MessageReactions';
+import { GroupRenameNotice } from '../children/GroupRenameNotice';
+import {
+  GROUP_RENAMED_EVENT,
+  getGroupMembersTitle,
+  getRenamedGroupName,
+} from '../utils/groupUtils';
 import { ChatHeader } from '../children/ChatHeader';
 import { PinnedMessagesModal } from '../children/PinnedMessagesModal';
 import { OnlineUsersModal } from '../children/OnlineUsersModal';
@@ -118,6 +134,12 @@ export interface ChatThreadContainerProps {
   initialLastViewedAt?: number;
   communityIdentifier?: string;
   channelType?: string;
+  /** Group channels: whether the viewer started it and may rename it. */
+  groupOwner?: boolean;
+  /** Group channels: the name its owner gave it, if any. */
+  groupName?: string;
+  /** Group channels: the other members. */
+  groupUsers?: any[];
 }
 
 export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
@@ -129,6 +151,9 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
   initialLastViewedAt,
   communityIdentifier: paramCommunityIdentifier,
   channelType,
+  groupOwner,
+  groupName,
+  groupUsers,
 }) => {
   const intl = useIntl();
   const insets = useSafeAreaInsets();
@@ -179,6 +204,13 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
   const [isFetchingLinkMeta, setIsFetchingLinkMeta] = useState<boolean>(false);
   const [pinnedCount, setPinnedCount] = useState<number>(0);
   const [channelMembers, setChannelMembers] = useState<any[]>([]);
+  const channelMemberIds = useMemo(
+    () =>
+      channelMembers
+        .map((member: any) => member?.user_id || member?.id)
+        .filter((id: any): id is string => typeof id === 'string' && !!id),
+    [channelMembers],
+  );
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [wsEnabled, setWsEnabled] = useState<boolean>(true);
 
@@ -230,6 +262,43 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
 
   // Derive pin/unpin permission: DMs allow both members, channels require moderator status
   const isDM = channelType === 'D';
+  const isGroup = channelType === 'G';
+  // Set when a rename arrives live, so a channel fetch already in flight does
+  // not put the old name back.
+  const groupRenamedLiveRef = useRef(false);
+  // Seeded from the channel list, then refreshed so a rename made elsewhere,
+  // or ownership, is never stale.
+  const [groupInfo, setGroupInfo] = useState<{ name: string; owner: boolean; users: any[] }>(
+    () => ({ name: groupName || '', owner: !!groupOwner, users: groupUsers || [] }),
+  );
+
+  useEffect(() => {
+    if (!isGroup || !channelId) {
+      return undefined;
+    }
+    let cancelled = false;
+    fetchMattermostChannels()
+      .then((response) => {
+        const channel = normalizeMattermostChannels(response).find(
+          (item: any) => item?.id === channelId,
+        );
+        if (!cancelled && channel) {
+          setGroupInfo((prev) => ({
+            name: groupRenamedLiveRef.current
+              ? prev.name
+              : typeof channel.group_name === 'string'
+              ? channel.group_name
+              : '',
+            owner: !!channel.group_owner,
+            users: Array.isArray(channel.groupUsers) ? channel.groupUsers : [],
+          }));
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [isGroup, channelId]);
   const canPinUnpin = isDM || canModerate;
 
   // Bootstrap user ID extraction
@@ -286,6 +355,14 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
         const normalized = normalizePost(post);
         if (!normalized) {
           return;
+        }
+
+        // A group was renamed: its header is its name.
+        if (channelType === 'G' && post?.type === 'system_header_change') {
+          const renamed = getRenamedGroupName(post);
+          groupRenamedLiveRef.current = true;
+          setGroupInfo((prev) => ({ ...prev, name: renamed }));
+          DeviceEventEmitter.emit(GROUP_RENAMED_EVENT, { channelId, name: renamed });
         }
 
         // Clear input when we get confirmation of our own message via WebSocket
@@ -383,7 +460,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
             .catch(console.error);
         }
       },
-      [bootstrapUserId, _updateMentionState, channelId],
+      [bootstrapUserId, _updateMentionState, channelId, channelType],
     ),
     onMessageEdited: useCallback(
       (post: any) => {
@@ -522,15 +599,42 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
     [],
   );
 
+  // Who to list as members of a group or direct message. Until the member
+  // list loads, or if it fails, a group falls back to the members the chat
+  // list already knew, never to everyone this screen has looked up.
+  const conversationMemberIds = useMemo(() => {
+    if (channelMemberIds.length) {
+      return channelMemberIds;
+    }
+    if (!isGroup) {
+      return [];
+    }
+    const known = groupInfo.users.map((user: any) => user?.id).filter(Boolean);
+    return bootstrapUserId ? [bootstrapUserId, ...known] : known;
+  }, [channelMemberIds, isGroup, groupInfo.users, bootstrapUserId]);
+
+  // Those members need records for the list to show them.
+  useEffect(() => {
+    if (isGroup && groupInfo.users.length) {
+      _mergeUserLookup((prev) => ({
+        ...ensureMattermostUsersHaveHiveNames(groupInfo.users),
+        ...prev,
+      }));
+    }
+  }, [isGroup, groupInfo.users, _mergeUserLookup]);
+
   const derivedCommunityIdentifier = useMemo(
     () =>
-      paramCommunityIdentifier ||
-      safeExtractCommunityIdentifier({
-        name: channelName,
-        display_name: channelName,
-        header: channelDescription,
-      }),
-    [channelDescription, channelName, paramCommunityIdentifier],
+      // A group's title is its name or its members, never a community.
+      channelType === 'G'
+        ? undefined
+        : paramCommunityIdentifier ||
+          safeExtractCommunityIdentifier({
+            name: channelName,
+            display_name: channelName,
+            header: channelDescription,
+          }),
+    [channelDescription, channelName, channelType, paramCommunityIdentifier],
   );
 
   const _ensureBootstrap = useCallback(async () => {
@@ -1787,6 +1891,15 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
 
   // Header title
   const headerTitle = useMemo(() => {
+    if (isGroup) {
+      return (
+        groupInfo.name ||
+        getGroupMembersTitle(
+          groupInfo.users,
+          channelName || intl.formatMessage({ id: 'chats.group', defaultMessage: 'Group' }),
+        )
+      );
+    }
     let title = '';
     if (headerUser) {
       title = headerUser.display_name || headerUser.name || channelName || channelId;
@@ -1794,7 +1907,28 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
       title = channelName || channelId;
     }
     return title;
-  }, [headerUser, channelName, channelId]);
+  }, [headerUser, channelName, channelId, isGroup, groupInfo, intl]);
+
+  const _showGroupOptions = useCallback(() => {
+    SheetManager.show(SheetNames.CHAT_CHANNEL_OPTIONS, {
+      payload: {
+        title: headerTitle,
+        onShowMembers: () => setOnlineUsersModalVisible(true),
+        onRename: groupInfo.owner
+          ? async () => {
+              const result = await SheetManager.show(SheetNames.CHAT_RENAME_GROUP, {
+                payload: { channelId, currentName: groupInfo.name },
+              });
+              if (typeof result?.name === 'string') {
+                groupRenamedLiveRef.current = true;
+                setGroupInfo((prev) => ({ ...prev, name: result.name || '' }));
+                DeviceEventEmitter.emit(GROUP_RENAMED_EVENT, { channelId, name: result.name });
+              }
+            }
+          : undefined,
+      },
+    });
+  }, [channelId, groupInfo, headerTitle]);
 
   // Header handlers
   const handleBack = useCallback(() => {
@@ -1962,10 +2096,20 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
           onReactionPress={(emojiName: string) => {
             _handleAddReaction(post, emojiName);
           }}
+          onReactionLongPress={(emojiName: string) => {
+            SheetManager.show(SheetNames.CHAT_REACTORS, {
+              payload: {
+                reactions: reactions || [],
+                userLookup,
+                currentUserId: bootstrapUserId,
+                initialEmoji: emojiName,
+              },
+            });
+          }}
         />
       );
     },
-    [bootstrapUserId, _handleAddReaction],
+    [bootstrapUserId, _handleAddReaction, userLookup],
   );
 
   const _renderMessageLinkPreview = useCallback(
@@ -2022,6 +2166,35 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
       const authorId = (postItem as any).user_id || (postItem as any).user?.id;
       const isOwnMessage = authorId && bootstrapUserId === authorId;
 
+      if (isGroup && postItem?.type === 'system_header_change') {
+        const actor =
+          getHiveUsernameFromMattermostUser(userLookup[authorId]) ||
+          intl.formatMessage({ id: 'chats.reactor_unknown', defaultMessage: 'Someone' });
+        const newName = getRenamedGroupName(postItem);
+        return (
+          <GroupRenameNotice
+            showUnreadMarker={firstUnreadIndex !== null && index === firstUnreadIndex}
+            text={
+              newName
+                ? intl.formatMessage(
+                    {
+                      id: 'chats.group_renamed',
+                      defaultMessage: '{user} renamed the group to "{name}"',
+                    },
+                    { user: actor, name: newName },
+                  )
+                : intl.formatMessage(
+                    {
+                      id: 'chats.group_name_cleared',
+                      defaultMessage: '{user} removed the group name',
+                    },
+                    { user: actor },
+                  )
+            }
+          />
+        );
+      }
+
       if (isSystemAddMessage) {
         return (
           <SystemMessageItem
@@ -2071,6 +2244,8 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
       _renderMessageLinkPreview,
       linkifyInstance,
       handleLink,
+      isGroup,
+      intl,
     ],
   );
 
@@ -2185,6 +2360,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
         onBack={handleBack}
         onMembersPress={() => setOnlineUsersModalVisible(true)}
         onPinnedPress={() => setPinnedMessagesModalVisible(true)}
+        onOptionsPress={isGroup ? _showGroupOptions : undefined}
         isDM={isDM}
       />
 
@@ -2259,6 +2435,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
         userLookup={userLookup}
         onlineUserIds={onlineUserIds}
         memberCount={memberCount || undefined}
+        memberIds={isGroup || isDM ? conversationMemberIds : undefined}
         onClose={() => setOnlineUsersModalVisible(false)}
         onUserPress={_showUserProfile}
       />

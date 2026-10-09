@@ -80,6 +80,34 @@ export const chatsStyles = EStyleSheet.create({
     marginRight: 12,
     borderWidth: 0,
   },
+  groupAvatar: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+  },
+  groupAvatarBackSlot: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  groupAvatarFrontSlot: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+  },
+  groupAvatarImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 0,
+  },
+  groupAvatarFrontImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '$primaryBackgroundColor',
+  },
   channelAvatarFallback: {
     width: 40,
     height: 40,

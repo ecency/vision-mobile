@@ -497,6 +497,22 @@ export const startMattermostDirectMessage = async (
   return data.channel || data;
 };
 
+/**
+ * Opens (or returns the existing) group conversation with 2 to 7 other people.
+ * Errors carry the server's message: someone not on chat, someone who does not
+ * accept messages, or a limit reached.
+ */
+export const createMattermostGroup = async (usernames: string[]) => {
+  const { data } = await chatApi.post('/api/mattermost/group', { usernames });
+  return data as { channelId: string };
+};
+
+/** Names a group the viewer started, or clears its name with "". */
+export const renameMattermostGroup = async (channelId: string, name: string) => {
+  const { data } = await chatApi.put(`/api/mattermost/channels/${channelId}/name`, { name });
+  return data as { name: string };
+};
+
 export const getHiveUsernameFromMattermostUser = (user: any): string | undefined =>
   user?.props?.hive_username || user?.nickname || user?.username || user?.name;
 

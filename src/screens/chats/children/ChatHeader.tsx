@@ -23,7 +23,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onMembersPress,
   onPinnedPress,
   onOptionsPress,
-  isDM,
+  isDM: _isDM,
 }) => {
   return (
     <View style={styles.container}>
@@ -64,8 +64,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </TouchableOpacity>
         )}
 
-        {/* Options Menu (DMs only) */}
-        {isDM && onOptionsPress && (
+        {/* Options Menu */}
+        {onOptionsPress && (
           <TouchableOpacity style={styles.iconButton} onPress={onOptionsPress}>
             <Icon
               name="dots-horizontal"
