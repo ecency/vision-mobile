@@ -204,6 +204,13 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
   const [isFetchingLinkMeta, setIsFetchingLinkMeta] = useState<boolean>(false);
   const [pinnedCount, setPinnedCount] = useState<number>(0);
   const [channelMembers, setChannelMembers] = useState<any[]>([]);
+  const channelMemberIds = useMemo(
+    () =>
+      channelMembers
+        .map((member: any) => member?.user_id || member?.id)
+        .filter((id: any): id is string => typeof id === 'string' && !!id),
+    [channelMembers],
+  );
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [wsEnabled, setWsEnabled] = useState<boolean>(true);
 
@@ -256,6 +263,9 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
   // Derive pin/unpin permission: DMs allow both members, channels require moderator status
   const isDM = channelType === 'D';
   const isGroup = channelType === 'G';
+  // Set when a rename arrives live, so a channel fetch already in flight does
+  // not put the old name back.
+  const groupRenamedLiveRef = useRef(false);
   // Seeded from the channel list, then refreshed so a rename made elsewhere,
   // or ownership, is never stale.
   const [groupInfo, setGroupInfo] = useState<{ name: string; owner: boolean; users: any[] }>(
@@ -273,11 +283,15 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
           (item: any) => item?.id === channelId,
         );
         if (!cancelled && channel) {
-          setGroupInfo({
-            name: typeof channel.group_name === 'string' ? channel.group_name : '',
+          setGroupInfo((prev) => ({
+            name: groupRenamedLiveRef.current
+              ? prev.name
+              : typeof channel.group_name === 'string'
+              ? channel.group_name
+              : '',
             owner: !!channel.group_owner,
             users: Array.isArray(channel.groupUsers) ? channel.groupUsers : [],
-          });
+          }));
         }
       })
       .catch(() => undefined);
@@ -345,7 +359,10 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
 
         // A group was renamed: its header is its name.
         if (channelType === 'G' && post?.type === 'system_header_change') {
-          setGroupInfo((prev) => ({ ...prev, name: getRenamedGroupName(post) }));
+          const renamed = getRenamedGroupName(post);
+          groupRenamedLiveRef.current = true;
+          setGroupInfo((prev) => ({ ...prev, name: renamed }));
+          DeviceEventEmitter.emit(GROUP_RENAMED_EVENT, { channelId, name: renamed });
         }
 
         // Clear input when we get confirmation of our own message via WebSocket
@@ -1879,6 +1896,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
                 payload: { channelId, currentName: groupInfo.name },
               });
               if (typeof result?.name === 'string') {
+                groupRenamedLiveRef.current = true;
                 setGroupInfo((prev) => ({ ...prev, name: result.name || '' }));
                 DeviceEventEmitter.emit(GROUP_RENAMED_EVENT, { channelId, name: result.name });
               }
@@ -2393,6 +2411,7 @@ export const ChatThreadContainer: React.FC<ChatThreadContainerProps> = ({
         userLookup={userLookup}
         onlineUserIds={onlineUserIds}
         memberCount={memberCount || undefined}
+        memberIds={isGroup || isDM ? channelMemberIds : undefined}
         onClose={() => setOnlineUsersModalVisible(false)}
         onUserPress={_showUserProfile}
       />

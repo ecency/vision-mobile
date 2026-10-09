@@ -718,6 +718,7 @@
     "new_group_search": "Search people by username",
     "new_group_full": "A group can have up to {max} other people.",
     "new_group_no_results": "No one found on chat with that name.",
+    "new_group_search_failed": "Search did not work. Check your connection and try again.",
     "new_group_remove": "Remove @{username}",
     "new_group_create": "Start group",
     "new_group_failed": "Could not start the group. Please try again.",

@@ -44,6 +44,7 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,7 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
     }
     let cancelled = false;
     setIsSearching(true);
+    setSearchFailed(false);
     const timer = setTimeout(() => {
       searchMattermostUsers(query)
         .then((users) => {
@@ -71,6 +73,7 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
         .catch(() => {
           if (!cancelled) {
             setResults([]);
+            setSearchFailed(true);
           }
         })
         .finally(() => {
@@ -220,10 +223,15 @@ const ChatNewGroupSheet: React.FC<SheetProps<'chat_new_group'>> = ({ sheetId, pa
               ))
             ) : (
               <Text style={styles.emptyText}>
-                {intl.formatMessage({
-                  id: 'chats.new_group_no_results',
-                  defaultMessage: 'No one found on chat with that name.',
-                })}
+                {searchFailed
+                  ? intl.formatMessage({
+                      id: 'chats.new_group_search_failed',
+                      defaultMessage: 'Search did not work. Check your connection and try again.',
+                    })
+                  : intl.formatMessage({
+                      id: 'chats.new_group_no_results',
+                      defaultMessage: 'No one found on chat with that name.',
+                    })}
               </Text>
             )}
           </ScrollView>

@@ -773,7 +773,11 @@ const ChatsContainer = () => {
         // Search existing channels locally
         const matchingExistingChannels = channels.filter((channel) => {
           const displayName = (channel?.display_name || channel?.name || '').toLowerCase();
-          return displayName.includes(lowerQuery);
+          // A group also matches its given name and its members' names.
+          const groupTitle = isGroupChannel(channel)
+            ? `${channel?.group_name || ''} ${getGroupTitle(channel)}`.toLowerCase()
+            : '';
+          return displayName.includes(lowerQuery) || groupTitle.includes(lowerQuery);
         });
 
         // Search API for public channels and users
@@ -1047,7 +1051,7 @@ const ChatsContainer = () => {
           onSearchChange={(text) => setSearchQuery(text.toLowerCase())}
           sortByName={sortByName}
           onToggleSort={() => setSortByName(!sortByName)}
-          onNewGroup={isLoggedIn ? _handleNewGroup : undefined}
+          onNewGroup={isLoggedIn && bootstrapResult ? _handleNewGroup : undefined}
           searchError={searchError}
         />
 
