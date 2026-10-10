@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getGameStatusCheckQueryOptions, useGameClaim } from '@ecency/sdk';
 import { captureException } from '../utils/sentryUtils';
 import { useAuth } from '../hooks';
-import QUERIES from '../providers/queries/queryKeys';
+import { gameStatusUncachedKey } from '../providers/queries/queryKeys';
 
 // Numbers every spin status request. Module level, not per screen: the query client
 // outlives the screen, so a reopened screen must not reuse the key of a request the
@@ -53,11 +53,7 @@ const RedeemContainer = ({ children }: any) => {
     const seq = statusRequestSeq;
     const request = queryClient.fetchQuery({
       ...options,
-      queryKey: [
-        ...options.queryKey,
-        QUERIES.GAMES.STATUS_UNCACHED,
-        seq,
-      ] as unknown as typeof options.queryKey,
+      queryKey: gameStatusUncachedKey(options.queryKey, seq) as unknown as typeof options.queryKey,
       staleTime: 0,
       gcTime: 0,
     });

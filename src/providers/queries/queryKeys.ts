@@ -62,4 +62,12 @@ const QUERIES = {
   },
 };
 
+// A spin status request that must not share a cache entry: the SDK status key plus a
+// number of its own per request.
+export const gameStatusUncachedKey = (statusKey: readonly unknown[], requestSeq: number) => [
+  ...statusKey,
+  QUERIES.GAMES.STATUS_UNCACHED,
+  requestSeq,
+];
+
 export default QUERIES;
