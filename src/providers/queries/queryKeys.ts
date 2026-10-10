@@ -52,6 +52,10 @@ const QUERIES = {
   REDEEM: {
     GET_BOOST_PLUS_PRICES: 'REDEEM_GET_BOOST_PLUS_PRICES',
   },
+  GAMES: {
+    // suffix for a spin status request that must not share a cache entry
+    STATUS_UNCACHED: 'QUERY_GAME_STATUS_UNCACHED',
+  },
   PROPOSALS: {
     GET_VOTES: 'QUERY_PROPOSAL_GET_VOTES',
     GET_ACTIVE_PROPOSAL: 'QUERY_PROPOSAL_GET_ACTIVE_PROPOSAL',

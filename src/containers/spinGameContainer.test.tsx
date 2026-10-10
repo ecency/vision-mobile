@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -27,9 +28,12 @@ jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: ({ id }: { id: string }) => id }),
 }));
 
+const mockCaptureException = jest.fn();
 jest.mock('../utils/sentryUtils', () => ({
-  captureException: jest.fn(),
+  captureException: (...args: any[]) => (mockCaptureException as any)(...args),
 }));
+
+const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
 
 // eslint-disable-next-line import/first
 import SpinGameContainer from './spinGameContainer';
@@ -91,6 +95,8 @@ describe('SpinGameContainer', () => {
   beforeEach(() => {
     mockStatus.mockReset();
     mockClaim.mockReset();
+    mockAlert.mockClear();
+    mockCaptureException.mockClear();
     mockClaim.mockResolvedValue({ score: 10 });
     mockAuth.code = 'token-1';
   });
@@ -212,6 +218,106 @@ describe('SpinGameContainer', () => {
     });
     await flush();
     expect(screen.api.current.gameRight).toBe(0);
+  });
+
+  it('does not claim with a status answer that a newer request has superseded', async () => {
+    mockStatus.mockResolvedValue(AVAILABLE);
+    const screen = mount(makeClient());
+    await flush();
+
+    // the press asks for the status and the answer is slow
+    let answerPress: (value: typeof AVAILABLE) => void = () => undefined;
+    mockStatus.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          answerPress = resolve;
+        }),
+    );
+    await act(async () => {
+      screen.api.current.startGame('spin');
+    });
+
+    // meanwhile a newer check finds the spin used
+    mockStatus.mockResolvedValue(USED);
+    mockAuth.code = 'token-2';
+    screen.rerender();
+    await flush();
+    expect(screen.api.current.gameRight).toBe(0);
+
+    await act(async () => {
+      answerPress(AVAILABLE);
+    });
+    await flush();
+    expect(mockClaim).not.toHaveBeenCalled();
+
+    // the guard was released: once a spin is available a press claims it
+    mockStatus.mockResolvedValue(AVAILABLE);
+    await press(screen.api);
+    expect(mockClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays quiet when a superseded status request fails', async () => {
+    let failOld: (reason: Error) => void = () => undefined;
+    mockStatus.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          failOld = reject;
+        }),
+    );
+    const screen = mount(makeClient());
+
+    mockStatus.mockResolvedValue(USED);
+    mockAuth.code = 'token-2';
+    screen.rerender();
+    await flush();
+    expect(screen.api.current.gameRight).toBe(0);
+
+    await act(async () => {
+      failOld(new Error('status failed'));
+    });
+    await flush();
+    expect(mockAlert).not.toHaveBeenCalled();
+    expect(mockCaptureException).not.toHaveBeenCalled();
+    expect(screen.api.current.gameRight).toBe(0);
+  });
+
+  it('shows the real status when the screen is reopened while a claim is finishing', async () => {
+    const markUsed = serveOneFreeSpin();
+    const client = makeClient();
+    const first = mount(client);
+    await flush();
+
+    let finishClaim: (value: { score: number }) => void = () => undefined;
+    mockClaim.mockImplementation(() => {
+      markUsed();
+      return new Promise<{ score: number }>((resolve) => {
+        finishClaim = resolve;
+      });
+    });
+    await press(first.api);
+    first.unmount();
+
+    // the reopened screen asks for the status and the answer is slow
+    let answerMount: (value: typeof USED) => void = () => undefined;
+    mockStatus.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          answerMount = resolve;
+        }),
+    );
+    const second = mount(client);
+
+    // the claim of the closed screen comes back in between
+    await act(async () => {
+      finishClaim({ score: 10 });
+    });
+    await flush();
+
+    await act(async () => {
+      answerMount(USED);
+    });
+    await flush();
+    expect(second.api.current.gameRight).toBe(0);
   });
 
   it('claims the free spin again on the same screen once it is available again', async () => {
