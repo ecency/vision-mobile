@@ -23,6 +23,10 @@ src/screens/<feature>/
   children/  hooks/            # optional
 ```
 
+## Step 0: failing test first
+
+Start from the issue's **Acceptance tests** list. Put the screen's logic (formatting, validation, what a button does with the data) in a hook or util and write its co-located `*.test.ts` before the code; a component-level `*.test.tsx` works too (`src/components/listen/listenBar.test.tsx` is one). Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. Navigation and full flows that Jest cannot reach go in a Maestro flow under `.maestro/`. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+
 ## Step 1: screen rooted in SafeAreaView
 
 Use `SafeAreaView` from `react-native-safe-area-context` as the root; that is where screens
@@ -168,6 +172,7 @@ settings, UI state and the optimistic cache reducer. Older reducers (`postsReduc
 
 ## Checklist
 
+- [ ] Test from Step 0 was red before the code and is green now (or the issue says `No test-first`)
 - [ ] Root is `SafeAreaView` from `react-native-safe-area-context`, no `edges` override
 - [ ] `src/screens/<feature>/index.ts` re-exported from `src/screens/index.ts`
 - [ ] Route in `routeNames.ts` **and** a params entry in `AppParamList` (`src/navigation/types.ts`)

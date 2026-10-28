@@ -132,6 +132,15 @@ and `payouts`, while the websocket allowlist has `payouts` but no `favorites`.
   `src/redux/selectors`. The finding is an inline lambda picking state apart, not the
   hook name. Handlers are `_`-prefixed.
 
+## Tests
+
+- [ ] Each new or changed test fails without the change. Check it: revert only the source part
+  of the diff (keep the test), run it and confirm it goes red for the behaviour it names, then
+  restore. For a new guard, delete just the guard. A test that stays green only covers the path
+  where the change does nothing: report it as `BUG`. Restore from a copy of the file, never
+  `git checkout -- <file>`, which drops uncommitted work.
+- [ ] A change with no test carries the issue's `No test-first: <reason>`.
+
 ## Report
 
 Group as inline (must fix), outside-diff (should fix), nitpick. Per finding:

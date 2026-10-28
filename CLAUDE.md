@@ -255,6 +255,9 @@ Uses `rn-nodeify` to polyfill Node.js modules (crypto, stream, buffer, etc.) for
 ## Testing
 
 ### Unit Tests
+- **Test first:** issues carry an **Acceptance tests** list (`.github/ISSUE_TEMPLATE/spec.md`). Write those
+  tests before the code, see them fail for the right reason, then make them green. The PR says so, or repeats
+  the issue's `No test-first: <reason>`
 - Test framework: Jest 29 with React Native preset
 - Config: `jest.config.ts`, Setup: `jest.setup.ts`
 - Tests co-located with source: `src/utils/*.test.ts`, `src/redux/reducers/*.test.ts`
