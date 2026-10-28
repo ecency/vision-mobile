@@ -172,7 +172,7 @@ settings, UI state and the optimistic cache reducer. Older reducers (`postsReduc
 
 ## Checklist
 
-- [ ] Test from Step 0 was red before the code and is green now (or the issue says `No test-first`)
+- [ ] Test from Step 0 was red before the code and is green now; the PR body lists each test path, the command and the assertion that failed before the change, then the green run after it (or it repeats the issue's `No test-first: <reason>`)
 - [ ] Root is `SafeAreaView` from `react-native-safe-area-context`, no `edges` override
 - [ ] `src/screens/<feature>/index.ts` re-exported from `src/screens/index.ts`
 - [ ] Route in `routeNames.ts` **and** a params entry in `AppParamList` (`src/navigation/types.ts`)

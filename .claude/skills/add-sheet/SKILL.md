@@ -53,7 +53,7 @@ reason is not.
 
 ## Step 0: failing test first
 
-Before the sheet, write a test for its result contract from the issue's **Acceptance tests**: which object it resolves with for each action and that dismissal reaches the caller as the cancel case, not as a falsy value read as a choice. Test the caller's gate on the named field too. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+Before the sheet, write a test for its result contract from the issue's **Acceptance tests**: which object it resolves with for each action, with separate assertions for explicit Cancel (resolves `{ cancelled: true }`) and passive dismissal by backdrop tap, swipe or hardware back (resolves `undefined`). Then test the caller's gate on the named field for both, so neither reads as a choice. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
 
 ## Step 1: Component
 
