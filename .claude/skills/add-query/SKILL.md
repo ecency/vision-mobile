@@ -8,6 +8,10 @@ argument-hint: [query-name]
 
 Read `CLAUDE.md` first (State Management, SDK Migration). Writes are a separate skill: `add-mutation`.
 
+## First: a failing test for what the app adds
+
+The fetch itself belongs to the SDK, so its spec is written first in vision-web (`add-query` skill there). On mobile, test what the app adds before writing it: a mapping or `select`, an `enabled` guard, a page param for an infinite query. `src/providers/queries/` already has co-located tests to copy. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+
 ## Rule: the SDK owns the fetch
 
 `@ecency/sdk` exports a large family of `get*QueryOptions` helpers. Most files under

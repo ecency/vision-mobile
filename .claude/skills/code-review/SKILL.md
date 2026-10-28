@@ -132,6 +132,20 @@ and `payouts`, while the websocket allowlist has `payouts` but no `favorites`.
   `src/redux/selectors`. The finding is an inline lambda picking state apart, not the
   hook name. Handlers are `_`-prefixed.
 
+## Tests
+
+- [ ] A test for added or fixed behaviour fails without the change. Check it: revert only the
+  source part of the diff (keep the test), run it and confirm it goes red on the assertion it
+  names, then restore. A source file the PR adds cannot be reverted that way, since the test
+  would then fail on its import: replace it with a stub export (a component returning `null`,
+  a function returning `undefined`) instead. For a new guard, delete just the guard. A test
+  that stays green only covers the path where the change does nothing: report it as `BUG`.
+  Restore from a copy of the file, never `git checkout -- <file>`, which drops uncommitted work.
+- [ ] Tests that pin behaviour which already works (a test-only PR, a refactor) are expected to
+  stay green and are not a finding.
+- [ ] The PR body lists each test path, the command, the assertion that failed before the change
+  and the green run after it. A change with no test repeats the issue's `No test-first: <reason>`.
+
 ## Report
 
 Group as inline (must fix), outside-diff (should fix), nitpick. Per finding:

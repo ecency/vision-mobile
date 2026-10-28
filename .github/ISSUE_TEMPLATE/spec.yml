@@ -1,0 +1,33 @@
+name: Spec (feature or bug)
+description: Work item with acceptance tests written before the code, or a stated reason why there are none
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong or missing and who sees it. For a bug, give the exact steps, the input that triggers it, what happens and what should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The change, at the level of behaviour. Name files only when the location is already known.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-tests
+    attributes:
+      label: Acceptance tests
+      description: |
+        Each line becomes a test that is written BEFORE the code, run and seen failing on its assertion, then made green by the change. For a bug, the first line reproduces the report with the real input.
+        If a test written first adds nothing (pure layout or styling, a dependency upgrade, native build config), write one line instead: `No test-first: <reason>`
+      placeholder: |
+        - [ ] Given <state>, when <action>, then <result>. Test: `<path to test file>`
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Optional. Related things this issue deliberately leaves alone.

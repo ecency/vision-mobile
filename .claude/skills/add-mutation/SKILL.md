@@ -10,6 +10,10 @@ Wrap an `@ecency/sdk` mutation hook in `src/providers/sdk/mutations/`. CLAUDE.md
 ("SDK Migration") covers the adapter; this file is the procedure plus the Hive authority
 rules a wrapper must respect.
 
+## 0. Failing test first
+
+A wrapper is thin by rule, so it rarely needs a test of its own. The behaviour lives elsewhere: the operation payload in `@ecency/sdk` (write that spec first in vision-web, `add-sdk-mutation` skill) and what the caller does with the result (toast, navigation, cache update) at the call site. For call-site logic, write the co-located test from the issue's **Acceptance tests** before wiring it. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+
 ## 1. Create the wrapper
 
 `src/providers/sdk/mutations/use<Operation>Mutation.ts`. Most wrappers there are exactly
