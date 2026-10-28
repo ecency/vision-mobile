@@ -174,7 +174,7 @@ checkout. `yarn typecheck` runs `scripts/typecheck.js`, not bare `tsc`.
    Then, before any fix, write a co-located Jest test that fails the way the report does, through
    the real code path with the reporter's input (`src/utils/` already has suites to copy). Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If it passes on the unchanged code, that is not a fix: either
    the report does not reproduce on current code or the test misses the reporter's input. Stop,
-   recheck the input, steps and assertion, and report that before writing any fix. Keep the test;
+   recheck the input, steps and assertion, then report that before writing any fix. Keep the test;
    the fix is done when it goes from red to green. A bug Jest cannot reach (native module, device only) gets a Maestro flow or written
    repro steps in the issue, plus the reason there is no test.
 2. Reads: SDK query options to query hook to component.
