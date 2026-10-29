@@ -76,7 +76,9 @@ android() {
   [[ -n "$("$adb" shell pidof "$id" 2>/dev/null | tr -d '\r')" ]] || fail "the process is gone"
   local front
   front="$("$adb" shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -E "topResumedActivity|mResumedActivity" | head -1)"
-  [[ "$front" == *"$id/"* ]] || fail "the app is not in front ($front)"
+  # a first start on Android 13+ asks for notifications: the system's permission prompt over the app is fine
+  [[ "$front" == *"$id/"* || "$front" == *"permissioncontroller/"*"GrantPermissionsActivity"* ]] \
+    || fail "the app is not in front ($front)"
   echo "Release launch check passed: $id ran ${wait_s}s without a crash"
 }
 
