@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Gumawa ng buong blog post sa editor",
     "wave": "Wave",
     "wave_desc": "Magbahagi ng mabilisang update"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Gumawa ka ng {count, plural, one {# post} other {# post}} ngayong buwan. Ituloy mo lang!",
+        "checkin": "Nag-check in ka ng {count, plural, one {# araw} other {# araw}} ngayong linggo. Ituloy mo lang!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# nabigong pagsubok} other {# nabigong pagsubok}}"
+      },
+      "perks": {
+        "streak": "{n}-araw na streak"
+      },
+      "post_poll": {
+        "age_limit": "• Mga account lamang na mas matanda sa {days} araw ang pinapayagan",
+        "max_choices": "• Maaari kang pumili ng hanggang {choices} na pagpipilian"
+      },
+      "recurrent": {
+        "remaining_executions": "Natitirang {executions} transfer",
+        "schedule_summary": "{executions} na paglilipat, bawat isa kada {hours} oras"
+      },
+      "chats": {
+        "people_joined": "{count} tao ang sumali"
+      },
+      "ai_assist": {
+        "min_chars": "Kailangan ng minimum na {count} character",
+        "chars_remaining": "{count} character ang natitira"
+      },
+      "transfer": {
+        "powering_down_info": "Ang susunod na unstake ay sa loob ng {days} araw, {hp} HIVE"
+      }
+    }
   }
 }

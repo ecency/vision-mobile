@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Cipta pos blog penuh dalam editor",
     "wave": "Wave",
     "wave_desc": "Kongsi kemas kini pantas"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Anda mencipta {count, plural, other {# siaran}} bulan ini. Teruskan!",
+        "checkin": "Anda mendaftar masuk {count, plural, other {# hari}} minggu ini. Teruskan!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# percubaan gagal}}"
+      },
+      "perks": {
+        "streak": "Rentetan {n} hari"
+      },
+      "post_poll": {
+        "age_limit": "• Hanya akaun lebih lama daripada {days} hari dibenarkan",
+        "max_choices": "• Anda boleh memilih sehingga {choices} pilihan"
+      },
+      "recurrent": {
+        "remaining_executions": "Baki {executions} pemindahan",
+        "schedule_summary": "{executions} pemindahan, setiap satu setiap {hours} jam"
+      },
+      "chats": {
+        "people_joined": "{count} orang telah menyertai"
+      },
+      "ai_assist": {
+        "min_chars": "Minimum {count} aksara diperlukan",
+        "chars_remaining": "{count} aksara berbaki"
+      },
+      "transfer": {
+        "powering_down_info": "Penyahpegunaan seterusnya dalam {days} hari, {hp} HIVE"
+      }
+    }
   }
 }

@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Luo kokonainen blogikirjoitus editorissa",
     "wave": "Wave",
     "wave_desc": "Jaa nopea päivitys"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Loit {count, plural, one {# julkaisu} other {# julkaisu}} tässä kuussa. Hyvin tehty!",
+        "checkin": "Kirjauduit {count, plural, one {# päivä} other {# päivä}} tällä viikolla. Jatka samaan malliin!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# epäonnistuneet yritykset} other {# epäonnistuneet yritykset}}"
+      },
+      "perks": {
+        "streak": "{n} päivän putki"
+      },
+      "post_poll": {
+        "age_limit": "• {days} päivää vanhemmat tilit",
+        "max_choices": "• Voit valita {choices}"
+      },
+      "recurrent": {
+        "remaining_executions": "Jäljellä olevat {executions}-siirrot",
+        "schedule_summary": "{executions} siirtoa, kukin {hours} tunnin välein"
+      },
+      "chats": {
+        "people_joined": "{count} henkilöä liittyi"
+      },
+      "ai_assist": {
+        "min_chars": "Vähintään {count} merkkiä vaaditaan",
+        "chars_remaining": "{count} merkkiä jäljellä"
+      },
+      "transfer": {
+        "powering_down_info": "Seuraavaan panostuksen poistoon on {days} päivää, {hp} HIVE"
+      }
+    }
   }
 }

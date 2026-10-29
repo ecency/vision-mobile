@@ -1743,5 +1743,37 @@
     "blog_post_desc": "편집기에서 전체 블로그 게시물을 작성하세요",
     "wave": "Wave",
     "wave_desc": "간단한 업데이트를 공유하세요"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "이번 달에 글을 {count}개 작성하셨습니다. 계속 이어가세요!",
+        "checkin": "이번 주에 {count}일 체크인하셨습니다. 계속 이어가세요!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# 실패 횟수}}"
+      },
+      "perks": {
+        "streak": "{n}일 연속"
+      },
+      "post_poll": {
+        "age_limit": "• {days}일 이상 된 계정만 허용",
+        "max_choices": "• 최대 {choices}개의 선택지를 선택할 수 있습니다"
+      },
+      "recurrent": {
+        "remaining_executions": "남은 송금 {executions}회",
+        "schedule_summary": "{executions}회 송금, {hours}시간마다"
+      },
+      "chats": {
+        "people_joined": "{count}명이 참여했습니다"
+      },
+      "ai_assist": {
+        "min_chars": "최소 {count}자가 필요합니다",
+        "chars_remaining": "{count}자 남음"
+      },
+      "transfer": {
+        "powering_down_info": "다음 언스테이킹은 {days}일 후, {hp} HIVE"
+      }
+    }
   }
 }

@@ -1743,5 +1743,37 @@
     "blog_post_desc": "এডিটরে একটি সম্পূর্ণ ব্লগ পোস্ট তৈরি করুন",
     "wave": "Wave",
     "wave_desc": "একটি দ্রুত আপডেট শেয়ার করুন"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "আপনি এই মাসে {count, plural, one {#টি পোস্ট} other {#টি পোস্ট}} তৈরি করেছেন। চালিয়ে যান!",
+        "checkin": "আপনি এই সপ্তাহে {count, plural, one {# দিন} other {# দিন}} চেক ইন করেছেন। চালিয়ে যান!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# ব্যর্থ চেষ্টা} other {# ব্যর্থ চেষ্টা}}"
+      },
+      "perks": {
+        "streak": "{n}-দিনের ধারাবাহিকতা"
+      },
+      "post_poll": {
+        "age_limit": "• শুধুমাত্র {days} দিনের পুরনো অ্যাকাউন্ট অনুমোদিত",
+        "max_choices": "• আপনি সর্বোচ্চ {choices}টি পছন্দ নির্বাচন করতে পারবেন"
+      },
+      "recurrent": {
+        "remaining_executions": "বাকি {executions}টি স্থানান্তর",
+        "schedule_summary": "{executions}টি স্থানান্তর, প্রতিটি প্রতি {hours} ঘণ্টা অন্তর"
+      },
+      "chats": {
+        "people_joined": "{count} জন যোগ দিয়েছেন"
+      },
+      "ai_assist": {
+        "min_chars": "ন্যূনতম {count}টি অক্ষর প্রয়োজন",
+        "chars_remaining": "{count}টি অক্ষর বাকি"
+      },
+      "transfer": {
+        "powering_down_info": "পরবর্তী আনস্টেক {days} দিনে, {hp} HIVE"
+      }
+    }
   }
 }

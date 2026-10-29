@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Loo redaktoris täielik blogipostitus",
     "wave": "Wave",
     "wave_desc": "Jaga kiiret uuendust"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Lõid sel kuul {count, plural, one {# postitust} other {# postitust}}. Jätka samas vaimus!",
+        "checkin": "Registreerusid sel nädalal {count, plural, one {# päeval} other {# päeval}}. Jätka samas vaimus!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# ebaõnnestunud katse(d)} other {# ebaõnnestunud katse(d)}}"
+      },
+      "perks": {
+        "streak": "{n}-päevane seeria"
+      },
+      "post_poll": {
+        "age_limit": "• Lubatud on ainult kontod, mis on vanemad kui {days} päeva",
+        "max_choices": "• Võid valida kuni {choices} valikut"
+      },
+      "recurrent": {
+        "remaining_executions": "Jäänud {executions} ülekannet",
+        "schedule_summary": "{executions} ülekannet, iga {hours} tunni järel"
+      },
+      "chats": {
+        "people_joined": "{count} inimest liitus"
+      },
+      "ai_assist": {
+        "min_chars": "Nõutav on vähemalt {count} tähemärki",
+        "chars_remaining": "{count} tähemärki jäänud"
+      },
+      "transfer": {
+        "powering_down_info": "Järgmine panustamise lõpetamine on {days} päeva pärast, {hp} HIVE"
+      }
+    }
   }
 }

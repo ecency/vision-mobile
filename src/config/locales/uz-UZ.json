@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Muharrirda to'liq blog posti yarating",
     "wave": "Wave",
     "wave_desc": "Tezkor yangilanish ulashing"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Siz bu oy {count, plural, one {# ta post} other {# ta post}} yaratdingiz. Shu zaylda davom eting!",
+        "checkin": "Siz bu hafta {count, plural, one {# kun} other {# kun}} belgilab o'tdingiz. Shu zaylda davom eting!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# muvaffaqiyatsiz urinish(lar)} other {# muvaffaqiyatsiz urinish(lar)}}"
+      },
+      "perks": {
+        "streak": "{n} kunlik seriya"
+      },
+      "post_poll": {
+        "age_limit": "• Faqat {days} kundan eski hisoblar uchun ruxsat berilgan",
+        "max_choices": "• Siz {choices} tagacha variant tanlashingiz mumkin"
+      },
+      "recurrent": {
+        "remaining_executions": "Qolgan {executions} ta o'tkazma",
+        "schedule_summary": "{executions} ta o‘tkazma, har biri har {hours} soatda"
+      },
+      "chats": {
+        "people_joined": "{count} kishi qo'shildi"
+      },
+      "ai_assist": {
+        "min_chars": "Kamida {count} ta belgi talab qilinadi",
+        "chars_remaining": "{count} ta belgi qoldi"
+      },
+      "transfer": {
+        "powering_down_info": "Keyingi staking bekor qilish {days} kundan keyin, {hp} HIVE"
+      }
+    }
   }
 }

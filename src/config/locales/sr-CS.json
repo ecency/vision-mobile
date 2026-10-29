@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Napravite punu blog objavu u uređivaču",
     "wave": "Wave",
     "wave_desc": "Podelite kratku novost"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Napravio/la si {count, plural, one {# objavu} few {# objavu} other {# objavu}} ovog meseca. Samo tako nastavi!",
+        "checkin": "Prijavio/la si se {count, plural, one {# dan} few {# dan} other {# dan}} ove nedelje. Samo tako nastavi!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# neuspeli pokušaj(i)} few {# neuspeli pokušaj(i)} other {# neuspeli pokušaj(i)}}"
+      },
+      "perks": {
+        "streak": "Niz od {n} dana"
+      },
+      "post_poll": {
+        "age_limit": "• Dozvoljeni samo nalozi stariji od {days} dana",
+        "max_choices": "• Možeš izabrati najviše {choices} izbora"
+      },
+      "recurrent": {
+        "remaining_executions": "Preostalo {executions} prenosa",
+        "schedule_summary": "{executions} prenosa, svaki na svakih {hours} sati"
+      },
+      "chats": {
+        "people_joined": "{count} ljudi se pridružilo"
+      },
+      "ai_assist": {
+        "min_chars": "Potrebno je najmanje {count} znakova",
+        "chars_remaining": "Preostalo {count} znakova"
+      },
+      "transfer": {
+        "powering_down_info": "Sledeće povlačenje uloga je za {days} dana, {hp} HIVE"
+      }
+    }
   }
 }

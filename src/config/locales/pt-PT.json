@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Criar uma publicação de blogue completa no editor",
     "wave": "Wave",
     "wave_desc": "Partilhar uma atualização rápida"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Criou {count, plural, one {# artigo} many {# artigo} other {# artigo}} este mês. Continue assim!",
+        "checkin": "Registou presença em {count, plural, one {# dia} many {# dia} other {# dia}} esta semana. Continue assim!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# tentativa(s) errada(s)} many {# tentativa(s) errada(s)} other {# tentativa(s) errada(s)}}"
+      },
+      "perks": {
+        "streak": "Sequência de {n} dias"
+      },
+      "post_poll": {
+        "age_limit": "• Apenas contas mais antigas do que {days} dias são permitidas",
+        "max_choices": "• Você pode selecionar até {choices} opções"
+      },
+      "recurrent": {
+        "remaining_executions": "Restantes {executions} transferências",
+        "schedule_summary": "{executions} transferências, cada uma a cada {hours} horas"
+      },
+      "chats": {
+        "people_joined": "{count} pessoas aderiram"
+      },
+      "ai_assist": {
+        "min_chars": "São necessários no mínimo {count} caracteres",
+        "chars_remaining": "{count} caracteres restantes"
+      },
+      "transfer": {
+        "powering_down_info": "Próxima redução de poder será em {days} dias, {hp} HIVE"
+      }
+    }
   }
 }

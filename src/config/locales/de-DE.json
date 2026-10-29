@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Erstellen Sie einen vollständigen Blogbeitrag im Editor",
     "wave": "Wave",
     "wave_desc": "Teilen Sie ein kurzes Update"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Du hast diesen Monat {count, plural, one {# Beitrag} other {# Beitrag}} erstellt. Weiter so!",
+        "checkin": "Du hast diese Woche an {count, plural, one {# Tag} other {# Tag}} eingecheckt. Weiter so!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# fehlgeschlagene(r) Versuch(e)} other {# fehlgeschlagene(r) Versuch(e)}}"
+      },
+      "perks": {
+        "streak": "{n}-Tage-Serie"
+      },
+      "post_poll": {
+        "age_limit": "• Nur Konten erlaubt, die älter als {days} Tage sind",
+        "max_choices": "• Du kannst bis zu {choices} Auswahlmöglichkeiten wählen"
+      },
+      "recurrent": {
+        "remaining_executions": "Verbleibende {executions} Überweisungen",
+        "schedule_summary": "{executions} Überweisungen, jeweils alle {hours} Stunden"
+      },
+      "chats": {
+        "people_joined": "{count} Personen beigetreten"
+      },
+      "ai_assist": {
+        "min_chars": "Mindestens {count} Zeichen erforderlich",
+        "chars_remaining": "{count} Zeichen übrig"
+      },
+      "transfer": {
+        "powering_down_info": "Nächstes Unstaking in {days} Tagen, {hp} HIVE"
+      }
+    }
   }
 }

@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Opret et fuldt blogindlæg i editoren",
     "wave": "Wave",
     "wave_desc": "Del en hurtig opdatering"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Du oprettede {count, plural, one {# indlæg} other {# indlæg}} denne måned. Bliv ved sådan!",
+        "checkin": "Du tjekkede ind {count, plural, one {# dag} other {# dag}} denne uge. Bliv ved sådan!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# mislykkede forsøg} other {# mislykkede forsøg}}"
+      },
+      "perks": {
+        "streak": "{n}-dages stime"
+      },
+      "post_poll": {
+        "age_limit": "• Kun konti ældre end {days} dage er tilladt",
+        "max_choices": "• Du kan vælge op til {choices} valgmuligheder"
+      },
+      "recurrent": {
+        "remaining_executions": "Resterende {executions} overførsler",
+        "schedule_summary": "{executions} overførsler, hver {hours} time"
+      },
+      "chats": {
+        "people_joined": "{count} personer tilsluttede sig"
+      },
+      "ai_assist": {
+        "min_chars": "Mindst {count} tegn kræves",
+        "chars_remaining": "{count} tegn tilbage"
+      },
+      "transfer": {
+        "powering_down_info": "Næste unstaking er om {days} dage, {hp} HIVE"
+      }
+    }
   }
 }

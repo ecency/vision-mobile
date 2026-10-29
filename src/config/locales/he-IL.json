@@ -1743,5 +1743,37 @@
     "blog_post_desc": "צור פוסט בלוג מלא בעורך",
     "wave": "Wave",
     "wave_desc": "שתף עדכון מהיר"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "יצרתם {count} פוסטים החודש. כל הכבוד, המשיכו כך!",
+        "checkin": "ביצעתם צ'ק אין {count} ימים השבוע. המשיכו כך!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# ניסיונות כושלים} two {# ניסיונות כושלים} other {# ניסיונות כושלים}}"
+      },
+      "perks": {
+        "streak": "רצף של {n} ימים"
+      },
+      "post_poll": {
+        "age_limit": "• מותר רק לחשבונות בני יותר מ-{days} ימים",
+        "max_choices": "• ניתן לבחור עד {choices} אפשרויות"
+      },
+      "recurrent": {
+        "remaining_executions": "נותרו {executions} העברות",
+        "schedule_summary": "{executions} העברות, כל אחת מדי {hours} שעות"
+      },
+      "chats": {
+        "people_joined": "{count} אנשים הצטרפו"
+      },
+      "ai_assist": {
+        "min_chars": "נדרשים לפחות {count} תווים",
+        "chars_remaining": "{count} תווים שנותרו"
+      },
+      "transfer": {
+        "powering_down_info": "ביטול ההקצאה הבא בעוד {days} ימים, {hp} HIVE"
+      }
+    }
   }
 }

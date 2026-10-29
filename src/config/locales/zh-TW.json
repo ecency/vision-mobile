@@ -1743,5 +1743,37 @@
     "blog_post_desc": "在編輯器中建立完整的部落格文章",
     "wave": "Wave",
     "wave_desc": "分享簡短動態"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "你本月發表了 {count, plural, other {# 篇文章}}。繼續加油！",
+        "checkin": "你本週簽到了 {count, plural, other {# 天}}。繼續加油！"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# 失敗嘗試}}"
+      },
+      "perks": {
+        "streak": "連續 {n} 天"
+      },
+      "post_poll": {
+        "age_limit": "• 僅允許註冊超過 {days} 天的帳號",
+        "max_choices": "• 你最多可選擇 {choices} 個選項"
+      },
+      "recurrent": {
+        "remaining_executions": "剩餘 {executions} 次轉帳",
+        "schedule_summary": "{executions} 筆轉帳，每 {hours} 小時一次"
+      },
+      "chats": {
+        "people_joined": "{count} 人已加入"
+      },
+      "ai_assist": {
+        "min_chars": "至少需要 {count} 個字元",
+        "chars_remaining": "尚餘 {count} 個字元"
+      },
+      "transfer": {
+        "powering_down_info": "下次解除質押將於 {days} 天後進行，{hp} HIVE"
+      }
+    }
   }
 }

@@ -1743,5 +1743,37 @@
     "blog_post_desc": "สร้างบล็อกโพสต์แบบเต็มในตัวแก้ไข",
     "wave": "Wave",
     "wave_desc": "แชร์อัปเดตแบบรวดเร็ว"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "คุณสร้าง {count, plural, other {# โพสต์}} ในเดือนนี้ ทำต่อไปนะ!",
+        "checkin": "คุณเช็คอิน {count, plural, other {# วัน}} ในสัปดาห์นี้ ทำต่อไปนะ!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# ครั้งที่ล้มเหลว}}"
+      },
+      "perks": {
+        "streak": "สตรีค {n} วัน"
+      },
+      "post_poll": {
+        "age_limit": "• อนุญาตเฉพาะบัญชีที่มีอายุมากกว่า {days} วันเท่านั้น",
+        "max_choices": "• คุณสามารถเลือกได้สูงสุด {choices} ตัวเลือก"
+      },
+      "recurrent": {
+        "remaining_executions": "เหลืออีก {executions} ครั้ง",
+        "schedule_summary": "{executions} การโอน แต่ละครั้งทุก {hours} ชั่วโมง"
+      },
+      "chats": {
+        "people_joined": "{count} คนเข้าร่วม"
+      },
+      "ai_assist": {
+        "min_chars": "ต้องมีอย่างน้อย {count} ตัวอักษร",
+        "chars_remaining": "เหลืออีก {count} ตัวอักษร"
+      },
+      "transfer": {
+        "powering_down_info": "การเลิก Stake ครั้งถัดไปในอีก {days} วัน, {hp} HIVE"
+      }
+    }
   }
 }

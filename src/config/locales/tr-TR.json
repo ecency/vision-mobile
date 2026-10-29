@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Düzenleyicide tam bir blog gönderisi oluşturun",
     "wave": "Wave",
     "wave_desc": "Hızlı bir güncelleme paylaşın"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Bu ay {count, plural, one {# gönderi} other {# gönderi}} oluşturdun. Böyle devam et!",
+        "checkin": "Bu hafta {count, plural, one {# gün} other {# gün}} giriş yaptın. Böyle devam et!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# hatalı deneme(ler)} other {# hatalı deneme(ler)}}"
+      },
+      "perks": {
+        "streak": "{n} günlük seri"
+      },
+      "post_poll": {
+        "age_limit": "• Yalnızca {days} günden eski hesaplara izin verilir",
+        "max_choices": "• En fazla {choices} seçenek seçebilirsiniz"
+      },
+      "recurrent": {
+        "remaining_executions": "Kalan {executions} transfer",
+        "schedule_summary": "{executions} transfer, her biri {hours} saatte bir"
+      },
+      "chats": {
+        "people_joined": "{count} kişi katıldı"
+      },
+      "ai_assist": {
+        "min_chars": "En az {count} karakter gerekli",
+        "chars_remaining": "{count} karakter kaldı"
+      },
+      "transfer": {
+        "powering_down_info": "Bir sonraki çözme {days} gün sonra, {hp} HIVE"
+      }
+    }
   }
 }

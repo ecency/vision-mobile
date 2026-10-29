@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Utwórz pełny wpis na blogu w edytorze",
     "wave": "Wave",
     "wave_desc": "Udostępnij szybką aktualizację"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "W tym miesiącu utworzyłeś(-aś) {count, plural, one {# wpis(ów)} few {# wpis(ów)} many {# wpis(ów)} other {# wpis(ów)}}. Tak trzymaj!",
+        "checkin": "W tym tygodniu zameldowałeś(-aś) się przez {count, plural, one {# dzień(dni)} few {# dzień(dni)} many {# dzień(dni)} other {# dzień(dni)}}. Tak trzymaj!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# nieudana(-e) próba(-y)} few {# nieudana(-e) próba(-y)} many {# nieudana(-e) próba(-y)} other {# nieudana(-e) próba(-y)}}"
+      },
+      "perks": {
+        "streak": "Seria {n} dni"
+      },
+      "post_poll": {
+        "age_limit": "• Dozwolone tylko konta starsze niż {days} dni",
+        "max_choices": "• Możesz wybrać maksymalnie {choices} opcji"
+      },
+      "recurrent": {
+        "remaining_executions": "Pozostało {executions} przelewów",
+        "schedule_summary": "{executions} przelewów, każdy co {hours} godz."
+      },
+      "chats": {
+        "people_joined": "Dołączyło osób: {count}"
+      },
+      "ai_assist": {
+        "min_chars": "Wymagane minimum {count} znaków",
+        "chars_remaining": "Pozostało znaków: {count}"
+      },
+      "transfer": {
+        "powering_down_info": "Następne wycofanie ze stakingu za {days} dni, {hp} HIVE"
+      }
+    }
   }
 }
