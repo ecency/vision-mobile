@@ -1,0 +1,100 @@
+[versions]
+agp = "9.0.0"
+kotlin = "2.3.10"
+coroutines = "1.10.2"
+composeBom = "2025.06.00"
+activityCompose = "1.10.1"
+# the launch screen (README "Launch screen"); 1.0.1 is built with Kotlin 1.x
+coreSplashscreen = "1.0.1"
+compileSdk = "36"
+minSdk = "24"
+appVersion = "4.0.0"
+junit = "4.13.2"
+secp256k1 = "0.24.0"
+kotlincrypto-hash = "0.8.0"
+serialization = "1.9.0"
+robolectric = "4.14.1"
+# 3.4.0 is the newest Coil built with Kotlin 2.3; 3.5+ needs Kotlin 2.4.
+coil = "3.4.0"
+media3 = "1.4.1"
+# home screen widgets (README "Widgets"); 1.1.1 is built with Kotlin 1.8
+glance = "1.1.1"
+# Glance 1.1.1 pulls WorkManager 2.7.1 (Room 2.2.5), whose WorkDatabase is found by a reflective name lookup that
+# R8 breaks: minified release builds crashed at launch. 2.11 ships its own keep rules and a current Room.
+work = "2.11.2"
+# 3.4.3 is the newest Ktor built with Kotlin 2.3.0 and coroutines 1.10.2; 3.5+ is built with 2.3.21 and coroutines 1.11.
+ktor = "3.4.3"
+sentry = "8.20.0"
+
+[libraries]
+# test only: the CLDR 45 oracle for the generated plural rules and the ICU subset formatter (Java, no Kotlin)
+icu4j = { module = "com.ibm.icu:icu4j", version = "75.1" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+junit = { module = "junit:junit", version.ref = "junit" }
+secp256k1-kmp = { module = "fr.acinq.secp256k1:secp256k1-kmp", version.ref = "secp256k1" }
+secp256k1-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "secp256k1" }
+secp256k1-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "secp256k1" }
+kotlincrypto-sha2 = { module = "org.kotlincrypto.hash:sha2", version.ref = "kotlincrypto-hash" }
+kotlincrypto-md = { module = "org.kotlincrypto.hash:md", version.ref = "kotlincrypto-hash" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version = "1.6.1" }
+androidx-test-runner = { module = "androidx.test:runner", version = "1.6.2" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
+androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-hls = { module = "androidx.media3:media3-exoplayer-hls", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version = "2.9.4" }
+glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+media3-session = { module = "androidx.media3:media3-session", version.ref = "media3" }
+# Custom Tabs; a Java library (no Kotlin stdlib constraint).
+androidx-browser = { module = "androidx.browser:browser", version = "1.8.0" }
+# Java library (no Kotlin): the signup challenge's origin-bound message listener and its own web view profile
+androidx-webkit = { module = "androidx.webkit:webkit", version = "1.12.1" }
+# BiometricPrompt for the app lock; a Java library (no Kotlin stdlib constraint). Needs a FragmentActivity.
+androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
+# QR codes: the HiveAuth sign-in (encoder) and the QR scanner (decoder); a Java library with no Android or Kotlin dependencies.
+zxing-core = { module = "com.google.zxing:core", version = "3.5.3" }
+# The QR scanner's camera (preview and frame analysis; zxing above decodes). 1.4.2 is built with Kotlin 1.9.
+camerax-core = { module = "androidx.camera:camera-core", version = "1.4.2" }
+camerax-camera2 = { module = "androidx.camera:camera-camera2", version = "1.4.2" }
+camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version = "1.4.2" }
+camerax-view = { module = "androidx.camera:camera-view", version = "1.4.2" }
+# Firebase Cloud Messaging (push). 25.1.3 and its Firebase dependencies are built with Kotlin 2.0.21; 26.x moves to 2.1.21,
+# still under the 2.3 limit, but changes the transport libraries, so it waits for a device test.
+# Play In-App Review (the rating prompt). 2.0.1 and what it pulls in (core-common 2.0.2, play-services-basement,
+# play-services-tasks) are Java-only: no class in their classes.jar carries kotlin/Metadata, so there is no Kotlin
+# version to match. The -ktx artifact is not used.
+play-review = { module = "com.google.android.play:review", version = "2.0.1" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version = "25.1.3" }
+# Google Play Billing 9 (in-app purchases; RN expo-iap runs Billing 9 too, Play wants 8+ from Aug 31, 2026). Its classes.jar
+# has no kotlin/Metadata (Java only); it pulls androidx.activity 1.2.3 and play-services 18.x, older than what the app has.
+play-billing = { module = "com.android.billingclient:billing", version = "9.1.0" }
+# Sentry (crash reports, RN @sentry/react-native). sentry, sentry-android-core and sentry-android-ndk 8.20.0 are Java
+# (no kotlin/Metadata in their classes); the ndk module adds native crash capture like RN's. No replay, no OkHttp module.
+sentry-android-core = { module = "io.sentry:sentry-android-core", version.ref = "sentry" }
+sentry-android-ndk = { module = "io.sentry:sentry-android-ndk", version.ref = "sentry" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

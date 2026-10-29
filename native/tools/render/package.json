@@ -1,0 +1,10 @@
+{
+  "name": "ecency-native-render-oracle",
+  "private": true,
+  "description": "Offline golden oracle for the native renderer. Never shipped in the app.",
+  "type": "module",
+  "dependencies": {
+    "@ecency/render-helper": "2.5.42",
+    "htmlparser2": "10.1.0"
+  }
+}

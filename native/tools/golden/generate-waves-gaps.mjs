@@ -1,0 +1,118 @@
+// Golden vectors for the Waves gaps: RN's own src/utils/wavesOnboarding.ts (the getting-started checklist) and a
+// wave with a poll through src/utils/editor.ts (extractMetadata, makeJsonMetadata, generateContentBasedPermlink),
+// run offline.
+//
+// Run from the RN app root:
+//   node --no-warnings native/tools/golden/generate-waves-gaps.mjs native/shared/src/commonTest/kotlin/com/ecency/core/app/WavesGapsGoldens.kt
+//
+// Synthetic values only.
+import { register } from 'node:module'
+import { writeFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+const out = process.argv[2]
+if (!out) throw new Error('usage: generate-waves-gaps.mjs <output.kt>')
+register(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), 'rn-hooks.mjs')))
+globalThis.__appVersion = '4.0.0'
+const log = console.log
+console.log = () => {}
+const rn = (p) => import(join(process.cwd(), 'src', p))
+const { deriveWavesOnboardingState, isNewAccount } = await rn('utils/wavesOnboarding.ts')
+const ed = await rn('utils/editor.ts')
+const extractHashTags = (await rn('utils/extractHashTags.ts')).default
+
+const k = (s) => JSON.stringify(s).replace(/\$/g, '\\$')
+const NOW = 1791288000000 // 2026-10-06T12:00:00Z
+
+// ---- isNewAccount ----
+const accounts = [
+  ['2026-10-06T11:59:59', 500], ['2026-09-06T12:00:00', 500], ['2026-09-06T11:59:59', 500], ['2026-09-06T12:00:00Z', 500],
+  ['2020-01-01T00:00:00', 9], ['2020-01-01T00:00:00', 10], ['2020-01-01T00:00:00', 0], ['', 50], ['not a date', 50], ['not a date', 3],
+  ['2026-10-07T12:00:00', 99], ['2026-09-06T12:00:00.000Z', 99], ['2026-09-06T12:00:01', 10],
+]
+const newRows = accounts.map(([created, posts]) => `        Triple(${k(created)}, ${posts}, ${isNewAccount({ created, post_count: posts }, NOW)}),`)
+
+// ---- deriveWavesOnboardingState ----
+const quests = [
+  { daily: [], streak: { current: 0 } },
+  { daily: [{ id: 'vote', progress: 1 }, { id: 'comment', progress: 0 }, { id: 'checkin', progress: 0 }], streak: { current: 0 } },
+  { daily: [{ id: 'vote', progress: 0 }, { id: 'comment', progress: 3 }, { id: 'checkin', progress: 1 }], streak: { current: 0 } },
+  { daily: [{ id: 'post', progress: 1 }], streak: { current: 4 } },
+  { daily: [{ id: 'vote', progress: 2 }, { id: 'comment', progress: 1 }, { id: 'checkin', progress: 1 }], streak: { current: 1 } },
+  { daily: [{ id: 'vote', progress: 0 }, { id: 'vote', progress: 5 }], streak: {} },
+  {},
+]
+const persistedSets = [[], ['wave'], ['vote', 'reply'], ['wave', 'vote', 'reply', 'checkin'], ['checkin']]
+const account = { created: '2026-10-01T00:00:00', post_count: 2 }
+const deriveRows = []
+for (const q of quests) {
+  for (const p of persistedSets) {
+    const s = deriveWavesOnboardingState(q, account, p, NOW)
+    deriveRows.push(`        DeriveCase(${k(JSON.stringify(q))}, listOf(${p.map(k).join(', ')}), ${s.eligible}, listOf(${s.items.map((i) => i.completed).join(', ')}), ${s.completedCount}, ${s.allComplete}),`)
+  }
+}
+
+// ---- a wave with a poll ----
+const poll = {
+  title: 'Tea or coffee?',
+  choices: ['Tea', 'Coffee', 'Neither'],
+  filters: { accountAge: 100 },
+  interpretation: 'number_of_votes',
+  voteChange: false,
+  hideVotes: false,
+  hideResults: true,
+  communityMembership: [],
+  token: undefined,
+  maxChoicesVoted: 1,
+  endTime: '2026-10-13T12:00:00.000Z',
+}
+const pollTokens = { ...poll, title: ' Weighted? ', interpretation: 'tokens', token: 'HIVE:HP', voteChange: true, hideVotes: true, hideResults: false, maxChoicesVoted: 2,
+  communityMembership: ['hive-125125'], filters: { accountAge: 30 } }
+const waveCases = []
+const VIDEO = 'https://play.3speak.tv/embed?v=spike-alice/vid123'
+const THUMB = 'https://images.ecency.com/DQmThumb/thumbnail.jpg'
+for (const [name, body, p, videoThumb] of [
+  ['plain', 'What do you drink in the morning? #poll', poll],
+  ['tokens', 'A weighted one with a link https://example.org/page and #Hive', pollTokens],
+  ['image', 'With a picture\n\n ![](https://images.ecency.com/demo/one.jpg)', poll],
+  // quickPostModalContent: a wave may carry a poll and an uploaded video (submitWave(body, pollDraft, videoThumbUrl))
+  ['video', `Vote on my short #fyp\n\n${VIDEO}`, poll, THUMB],
+  ['video_no_thumb', `Vote on my short\n\n${VIDEO}`, poll, null],
+]) {
+  const containerTags = ['ecency', 'waves']
+  const tags = [...containerTags, ...extractHashTags(body)]
+  const meta = await ed.extractMetadata({ body, videoThumbUrls: videoThumb ? [videoThumb] : undefined, fetchRatios: true, postType: 'wave', pollDraft: p })
+  const json = JSON.stringify(ed.makeJsonMetadata(meta, tags))
+  const key = JSON.stringify(p)
+  const permlink = ed.generateContentBasedPermlink('wave', ['spike-alice', 'ecency.waves', 'waves-2026-10-06', body, key].join('|'))
+  waveCases.push(`        WavePollCase(${k(name)}, ${k(body)}, ${k(key)}, ${k(permlink)}, ${k(json)}, ${k(videoThumb ?? null)}),`)
+}
+
+writeFileSync(out, `package com.ecency.core.app
+
+/** Generated by native/tools/golden/generate-waves-gaps.mjs from the RN app's own sources. Do not edit. */
+object WavesGapsGoldens {
+    const val NOW = ${NOW}L
+
+    /** created, post_count, RN isNewAccount at NOW */
+    val NEW_ACCOUNT: List<Triple<String, Int, Boolean>> = listOf(
+${newRows.join('\n')}
+    )
+
+    class DeriveCase(val quests: String, val persisted: List<String>, val eligible: Boolean, val completed: List<Boolean>, val completedCount: Int, val allComplete: Boolean)
+
+    /** RN deriveWavesOnboardingState for an account created 2026-10-01 with 2 posts, at NOW */
+    val DERIVE: List<DeriveCase> = listOf(
+${deriveRows.join('\n')}
+    )
+
+    class WavePollCase(val name: String, val body: String, val pollKey: String, val permlink: String, val jsonMetadata: String, val videoThumb: String?)
+
+    /** A wave with a poll (and, in the video cases, an uploaded video's embed and thumbnail) by spike-alice into ecency.waves/waves-2026-10-06 (container tags ecency, waves) */
+    val WAVE_POLLS: List<WavePollCase> = listOf(
+${waveCases.join('\n')}
+    )
+}
+`)
+log(`wrote ${out}: ${newRows.length} accounts, ${deriveRows.length} derive cases, ${waveCases.length} waves`)
