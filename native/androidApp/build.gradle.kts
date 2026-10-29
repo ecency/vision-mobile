@@ -219,6 +219,8 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        // the Firebase values above (AGP 9 has resource values off by default; CI writes google-services.json)
+        resValues = true
     }
 
     testOptions {
