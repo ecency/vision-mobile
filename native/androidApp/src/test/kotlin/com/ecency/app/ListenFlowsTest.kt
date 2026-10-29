@@ -279,7 +279,9 @@ class ListenFlowsTest {
         val asked = statusCalls().size
         status = { HttpResult(200, READY.replace("sig=1", "sig=2")) }
         compose.runOnIdle { first.events.failed() }
-        pumpUntil { first.loads.size == 1 }
+        pumpUntil { first.loads.isNotEmpty() }
+        compose.waitForIdle()
+        assertEquals("only the renewed URL loads, never the expired one again", listOf("https://audio.example/en.mp3?sig=2"), first.loads)
         assertTrue(statusCalls().size > asked)
         assertEquals("the same stream (and media session) takes the new URL", 1, streams.size)
         assertFalse(first.released)

@@ -577,6 +577,9 @@ final class ListenAudioController: ListenEvents {
             let next = s.renewed(ok: ok)
             self.state = next
             if ok {
+                // the renewed URLs, even when the watcher has not delivered them yet: never reload the expired one
+                let bar = self.model.current
+                if bar.showsPlayer, !bar.tracks.isEmpty { self.tracks = bar.tracks }
                 if next.started { self.reopen() }
             } else {
                 self.apply(next)

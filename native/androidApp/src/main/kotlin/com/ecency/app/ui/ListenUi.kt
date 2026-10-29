@@ -250,6 +250,8 @@ class ListenController(
             val next = s.renewed(ok)
             state = next
             if (ok) {
+                // the renewed URLs, even when the tracks collector has not run yet: never reload the expired one
+                freshTracks()
                 if (next.started) reopen()
             } else {
                 apply(next)
@@ -257,6 +259,12 @@ class ListenController(
         }
         renewal = job
         job.start()
+    }
+
+    /** The model's tracks right now, so a renewal does not wait for the collector to hand them over. */
+    private fun freshTracks() {
+        val bar = model.current
+        if (bar.showsPlayer && bar.tracks.isNotEmpty()) tracks = bar.tracks
     }
 
     // ---- the stream
