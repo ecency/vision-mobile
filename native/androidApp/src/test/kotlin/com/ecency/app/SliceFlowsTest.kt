@@ -3,6 +3,7 @@ package com.ecency.app
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -98,6 +99,12 @@ class SliceFlowsTest {
 
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
     private fun waitFor(tag: String) = compose.await("a node tagged $tag") { exists(tag) }
+
+    // The long body renders off the main thread, so on a slow machine the target may not be in the list yet:
+    // retry the scroll until it finds it.
+    private fun scrollToInPost(target: SemanticsMatcher) = compose.await("$target in the post") {
+        runCatching { compose.onNodeWithTag("postList").performScrollToNode(target) }.isSuccess
+    }
 
     private fun settle() {
         compose.mainClock.advanceTimeBy(2_000)
@@ -198,12 +205,12 @@ class SliceFlowsTest {
         openPost()
         val depth = navigator.state.stack.size
         val link = hasText("Jump down")
-        compose.onNodeWithTag("postList").performScrollToNode(link)
+        scrollToInPost(link)
         assertTrue(compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isEmpty())
         compose.onNode(link).performFirstLinkClick()
         compose.await("the destination on screen") { compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isNotEmpty() }
         // a finger on the link's first letters does the same (back to the link first)
-        compose.onNodeWithTag("postList").performScrollToNode(link)
+        scrollToInPost(link)
         compose.onNode(link).performTouchInput { click(androidx.compose.ui.geometry.Offset(12f, centerY)) }
         compose.await("the destination on screen") { compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isNotEmpty() }
         settle()
@@ -222,7 +229,7 @@ class SliceFlowsTest {
         openPost()
         val depth = navigator.state.stack.size
         val link = hasText("Back up")
-        compose.onNodeWithTag("postList").performScrollToNode(link)
+        scrollToInPost(link)
         // no body row is on screen now: only the comment
         assertTrue(compose.onAllNodes(hasText("Early heading")).fetchSemanticsNodes().isEmpty())
         compose.onNode(link).performFirstLinkClick()
