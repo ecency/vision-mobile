@@ -1,7 +1,10 @@
 package com.ecency.app
 
 import android.os.Looper
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performScrollToNode
 import org.robolectric.Shadows.shadowOf
 
 /**
@@ -28,6 +31,15 @@ fun ComposeTestRule.await(what: String, boundMillis: Long = FAILURE_BOUND_MILLIS
         // background threads get the processor
         Thread.sleep(5)
     }
+}
+
+/**
+ * Scrolls the list tagged [listTag] to [target], retrying until it is there: a row that comes from background work
+ * (a loaded discussion, a rendered body) may not be in the list yet on a slow machine, and a single
+ * `performScrollToNode` then fails at once. Returns as soon as one scroll finds it.
+ */
+fun ComposeTestRule.scrollListTo(listTag: String, target: SemanticsMatcher) = await("$target in $listTag") {
+    runCatching { onNode(hasTestTag(listTag)).performScrollToNode(target) }.isSuccess
 }
 
 /** Only reached by a failing test. */

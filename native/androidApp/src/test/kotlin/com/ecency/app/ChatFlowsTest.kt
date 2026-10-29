@@ -3,7 +3,6 @@ package com.ecency.app
 import androidx.compose.ui.test.onNodeWithText
 
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
 
 import androidx.compose.ui.semantics.getOrNull
 
@@ -258,11 +257,11 @@ class ChatFlowsTest {
         waitUntil { copied.isNotEmpty() }
         assertTrue(copied.last().startsWith("Has anyone tried"))
         // editing our own message: the banner's cancel button widens sideways only, so the banner keeps its text height
-        compose.onNodeWithTag("messages").performScrollToNode(androidx.compose.ui.test.hasText("hello 😄", substring = true))
+        compose.scrollListTo("messages", androidx.compose.ui.test.hasText("hello 😄", substring = true))
         val mine = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("own message actions") {
             it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("messageActions:") == true
         }, useUnmergedTree = true).fetchSemanticsNodes().last().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag]
-        compose.onNodeWithTag("messages").performScrollToNode(hasTestTag(mine))
+        compose.scrollListTo("messages", hasTestTag(mine))
         compose.onNodeWithTag(mine, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         waitFor("option:EDIT")
         tap("option:EDIT")

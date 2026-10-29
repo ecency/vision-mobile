@@ -13,7 +13,6 @@ import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -241,7 +240,7 @@ class CommunityFlowsTest {
         waitFor("manageSheet")
         tap("manage:MEMBERS")
         waitFor("member:spike-owner")
-        compose.onNodeWithTag("members").performScrollToNode(hasTestTag("member:spike-alice"))
+        compose.scrollListTo("members", hasTestTag("member:spike-alice"))
         assertTrue(navigator.top.screen is AppScreen.CommunityMembers)
 
         tap("role:spike-alice")

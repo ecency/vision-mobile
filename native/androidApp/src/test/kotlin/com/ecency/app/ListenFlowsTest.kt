@@ -12,7 +12,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.core.app.ApplicationProvider
 import coil3.ImageLoader
@@ -247,7 +246,7 @@ class ListenFlowsTest {
         assertTrue(stream.playing)
 
         // the bar is a lazy item: scrolling it away must not stop the audio (the stack entry owns the player)
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         compose.waitForIdle()
         assertFalse(exists("listenPlayer"))
         assertTrue(stream.playing && !stream.released)

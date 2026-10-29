@@ -100,11 +100,7 @@ class SliceFlowsTest {
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
     private fun waitFor(tag: String) = compose.await("a node tagged $tag") { exists(tag) }
 
-    // The long body renders off the main thread, so on a slow machine the target may not be in the list yet:
-    // retry the scroll until it finds it.
-    private fun scrollToInPost(target: SemanticsMatcher) = compose.await("$target in the post") {
-        runCatching { compose.onNodeWithTag("postList").performScrollToNode(target) }.isSuccess
-    }
+    private fun scrollToInPost(target: SemanticsMatcher) = compose.scrollListTo("postList", target)
 
     private fun settle() {
         compose.mainClock.advanceTimeBy(2_000)
@@ -246,7 +242,7 @@ class SliceFlowsTest {
         openPost()
         // the second image (the Listen bar above the body may leave only the first one composed after a scroll to "an image")
         val second = hasTestTag("image") and androidx.compose.ui.test.hasContentDescription("two")
-        compose.onNodeWithTag("postList").performScrollToNode(second)
+        compose.scrollListTo("postList", second)
         compose.onNode(second).performClick()
         waitFor("gallery")
         compose.onNodeWithTag("galleryPosition", useUnmergedTree = true).assertTextEquals("Preview (2/2)")
@@ -260,7 +256,7 @@ class SliceFlowsTest {
         com.ecency.app.render.RevealedImages.clear()
         launch()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("image-hidden"))
+        compose.scrollListTo("postList", hasTestTag("image-hidden"))
         assertTrue(compose.onAllNodes(hasTestTag("image"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
         // a tap reveals that one image; the gallery then pages through the revealed one only
         compose.onAllNodes(hasTestTag("image-hidden"))[0].performClick()

@@ -9,7 +9,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -210,7 +209,7 @@ class Gaps2FlowsTest {
         signIn()
         newsletterBackend()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("digestPrompt"))
+        compose.scrollListTo("postList", hasTestTag("digestPrompt"))
         waitFor("digestPrompt")
         click("digestPromptSubscribe")
         waitFor("digestSheet")
@@ -223,7 +222,7 @@ class Gaps2FlowsTest {
         signIn()
         newsletterBackend()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("digestPrompt"))
+        compose.scrollListTo("postList", hasTestTag("digestPrompt"))
         click("digestPromptDismiss")
         compose.await("the card is gone") { !exists("digestPrompt") }
         assertTrue(env.prefs.getString(com.ecency.core.app.DigestTarget.dismissKey("tester", com.ecency.core.app.DigestTarget("creator", "alice"))) != null)
@@ -275,7 +274,7 @@ class Gaps2FlowsTest {
         assertTrue(summary, summary.contains(com.ecency.core.app.PostBadges.SOURCE_ECENCY) && summary.contains(com.ecency.core.app.PostBadges.AI_DISCLOSED))
         compose.onNodeWithTag("open:alice/trending-one").performClick()
         waitFor("postActions")
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("postedBy"))
+        compose.scrollListTo("postList", hasTestTag("postedBy"))
         assertTrue(exists("postedByEcency"))
         assertTrue(compose.onAllNodes(androidx.compose.ui.test.hasText("Posted by alice via Ecency", substring = true)).fetchSemanticsNodes().isNotEmpty())
     }
@@ -295,7 +294,7 @@ class Gaps2FlowsTest {
         node.postBodyExtra = """\n\n![one](https://example.com/one.png)\n\n![two](https://example.com/two.png)"""
         openPost()
         val first = hasTestTag("image") and androidx.compose.ui.test.hasContentDescription("one")
-        compose.onNodeWithTag("postList").performScrollToNode(first)
+        compose.scrollListTo("postList", first)
         compose.onNode(first).performClick()
         waitFor("gallery")
         compose.onNodeWithTag("galleryPosition", useUnmergedTree = true).assertTextEquals("Preview (1/2)")
@@ -350,11 +349,11 @@ class Gaps2FlowsTest {
             } else null
         }
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         waitFor("threadToggle")
         assertTrue("collapsed by default", !exists("comment:dave/re-two"))
         click("threadToggle")
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:dave/re-two"))
+        compose.scrollListTo("postList", hasTestTag("comment:dave/re-two"))
         assertTrue(exists("comment:dave/re-two"))
         click("threadToggle")
         compose.await("collapsed again") { !exists("comment:dave/re-two") }
@@ -386,7 +385,7 @@ class Gaps2FlowsTest {
         signIn()
         threadOfTwo()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         waitFor("threadToggle")
         val comment = compose.onNode(androidx.compose.ui.test.hasText("Reply") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("comment:carol/re-one")), useUnmergedTree = true)
         comment.assertDoesNotExist()
@@ -401,9 +400,9 @@ class Gaps2FlowsTest {
         assertTrue(summary, com.ecency.core.l10n.L.post.a11yComments(count = 1) in summary)
         // the caret still opens and closes the replies
         click("threadToggle")
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:dave/re-two"))
+        compose.scrollListTo("postList", hasTestTag("comment:dave/re-two"))
         assertTrue(exists("comment:dave/re-two"))
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         // the icon opens the reply input for this comment
         compose.onNode(inComment("reply"), useUnmergedTree = true).performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
@@ -417,7 +416,7 @@ class Gaps2FlowsTest {
         signIn()
         threadOfTwo()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         waitFor("threadToggle")
         assertReplyAndToggleOnOneLine()
         // at least 8 dp between the reply, tip and toggle targets
@@ -437,7 +436,7 @@ class Gaps2FlowsTest {
         signIn()
         threadOfTwo()
         openPost(fontScale = 2f)
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         waitFor("threadToggle")
         val width = compose.activity.resources.displayMetrics.widthPixels.toFloat()
         for (tag in listOf("reply", "threadToggle", "vote")) {

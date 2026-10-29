@@ -4,7 +4,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.unit.dp
 import com.ecency.app.render.PostActions
@@ -84,9 +83,9 @@ class PostBodyTest {
     @Test
     fun samplePostRendersEveryBlockKindFromHtml() {
         compose.setContent { HomeScreen(actions = actions) }
-        compose.onNodeWithTag("post").performScrollToNode(hasTestTag("video"))
+        compose.scrollListTo("post", hasTestTag("video"))
         compose.onNodeWithTag("video").performClick()
-        compose.onNodeWithTag("post").performScrollToNode(androidx.compose.ui.test.hasText("some-post"))
+        compose.scrollListTo("post", androidx.compose.ui.test.hasText("some-post"))
         compose.onNodeWithText("some-post").performClick()
         assertEquals(listOf(LinkTarget.Youtube("dQw4w9WgXcQ", 0), LinkTarget.Post("ecency", "some-post")), taps)
         assertEquals(true, BlockBuilder.build(SampleHtml.POST).size > 10)

@@ -11,7 +11,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performScrollToNode
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -203,7 +202,7 @@ class WalletFlowsTest {
         assertEquals("$20.79", text("walletTotal")) // 0.2 + 12.5 + 3.08625 + 5, two decimals
         assertEquals("100.000", text("assetBalance:POINTS"))
         assertTrue(exists("claim:POINTS")) // RN: POINTS always offers its button (Get Points with nothing pending)
-        compose.onNodeWithTag("walletList").performScrollToNode(hasTestTag("asset:HIVE"))
+        compose.scrollListTo("walletList", hasTestTag("asset:HIVE"))
         compose.onNodeWithTag("asset:HIVE").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         until { exists("activity:7_2026-10-05T10:00:00") }
         assertTrue(navigator.state.top == AppScreen.AssetDetails("HIVE"))

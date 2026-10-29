@@ -11,7 +11,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
@@ -216,7 +215,7 @@ class FeedxFlowsTest {
         node.secondMuted = true
         launch()
         waitFor("card:bob/trending-two")
-        compose.onNodeWithTag("feed").performScrollToNode(hasTestTag("card:bob/trending-two"))
+        compose.scrollListTo("feed", hasTestTag("card:bob/trending-two"))
         compose.await("exists(\"mutedHint\")") { exists("mutedHint") }
         assertTrue(compose.onAllNodes(hasText("Content muted for community guidelines violation Tap to reveal")).fetchSemanticsNodes().isNotEmpty())
         // only the muted card carries the hint

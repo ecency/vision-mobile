@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -198,7 +197,7 @@ class AppFlowsTest {
         waitFor("postTitle")
         waitFor("bodyStart")
         waitForText("Body of trending-one")
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("comment:carol/re-one"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
         compose.onNodeWithTag("comment:carol/re-one").assertExists()
 
         // Draw-time marks (app_start, feed_first_content, post_body_drawn) need a real frame: Robolectric
@@ -304,7 +303,7 @@ class AppFlowsTest {
         compose.await("the reply sheet closes") { compose.onAllNodes(hasTestTag("replySheet")).fetchSemanticsNodes().isEmpty() }
         val all = sent.filter { "broadcast_transaction" in it }.map { it.substringAfter("\"params\":").substringBefore(",\"id\"") }
         assertEquals(first.single(), all.last()) // the same signed transaction, not a second reply
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("localComment"))
+        compose.scrollListTo("postList", hasTestTag("localComment"))
     }
 
     @Test
