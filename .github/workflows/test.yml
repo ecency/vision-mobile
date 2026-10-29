@@ -1,37 +1,60 @@
 name: Lint & Test
 
+# The native app's unit tests and Android lint on pull requests (Linux only, no app build, no device). A pull request
+# that does not touch native/ reports success without running them. iOS targets need macOS; the release workflow
+# and local runs cover them (native/README.md "Release pipeline").
 on:
   pull_request:
-  push:
-    branches:
-      - development
+  workflow_dispatch:
 
 concurrency:
   group: test-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lint-and-test:
     name: Lint & Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: '20'
-          cache: 'yarn'
+          persist-credentials: false
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Native changes
+        id: changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ -z "$BASE" ]] || ! git diff --quiet "$BASE...HEAD" -- native .github/workflows/test.yml; then
+            echo "native=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes under native/: nothing to test."
+            echo "native=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Lint
-        run: yarn lint
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        if: steps.changes.outputs.native == 'true'
+        with:
+          distribution: temurin
+          java-version: '17'
 
-      - name: Typecheck
-        run: yarn typecheck
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.changes.outputs.native == 'true'
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            !~/.gradle/caches/build-cache-1
+          key: native-android-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: native-android-gradle-
 
-      - name: Unit tests
-        run: yarn test:ci
+      - name: Unit tests and lint
+        if: steps.changes.outputs.native == 'true'
+        working-directory: native
+        run: ./gradlew --no-daemon :build-logic:test :shared:testAndroidHostTest :androidApp:testDebugUnitTest :androidApp:lintDebug

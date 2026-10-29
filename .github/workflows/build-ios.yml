@@ -1,327 +1,415 @@
 name: iOS Build
+
+# Store build of the Ecency app (native 4.x, app.esteem.mobile.ios, an update of the RN 3.x app) for TestFlight and
+# the App Store. Every push to development that changes native/ archives, signs and uploads to App Store Connect, as
+# the RN workflow did; a manual run can skip the upload. Never on pull requests (CI minutes). Signing reuses the RN
+# certificate and the RN App IDs' profiles (app, eshare share extension, ImageNotifi notification service).
+# Flow, secrets and owner checklist: native/README.md "Release pipeline" and native/docs/release-builds.md.
 on:
-  pull_request:
-    types: [ready_for_review, synchronize, labeled]
-  
   push:
     branches:
       - development
+    # native/ only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
+    # "First deploy" steps in native/docs/release-builds.md)
+    paths:
+      - 'native/**'
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: Upload the IPA to App Store Connect (TestFlight)
+        type: boolean
+        default: true
+      launch_check:
+        description: Build Release for the simulator and launch it once before the upload (about 15 macOS minutes)
+        type: boolean
+        default: true
+      run_shared_tests:
+        description: Run the shared core tests on the iOS simulator first (slow)
+        type: boolean
+        default: false
+      notes:
+        description: Notes for this build (job summary; enter "What to Test" in App Store Connect)
+        type: string
+        default: ''
+      build_number:
+        description: Build number (CFBundleVersion) override, default is the Unix time like the RN builds
+        type: string
+        default: ''
 
-concurrency:
-  # Keyed by ref so a PR build cannot cancel the development build, which is the
-  # one that uploads to TestFlight.
-  group: ios-build-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
+
+env:
+  # Same Xcode as the RN iOS build.
+  XCODE_VERSION: '26.3'
 
 jobs:
-  lint-and-test:
-    name: Lint & Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && github.repository ||
-            github.event.pull_request.head.repo.full_name }}
-          ref: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && 'development' ||
-            github.event.pull_request.head.sha }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Typecheck
-        run: yarn typecheck
-
-      - name: Unit tests
-        run: yarn test:ci
-
   ios-build:
     name: iOS Build
-    needs: lint-and-test
-    if: >
-        (github.event_name == 'pull_request') ||
-        (github.event_name == 'push' && github.ref == 'refs/heads/development')
+    # Keyed by ref, as the RN workflow: a newer development push replaces a build still running. On the job, not the
+    # workflow, so a newer push never cancels the symbol upload of a build the stores already have.
+    concurrency:
+      group: ios-build-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: macos-26
-
+    # with the launch check (a second Release build, for the simulator)
+    timeout-minutes: 110
+    outputs:
+      build_number: ${{ steps.version.outputs.build_number }}
+    defaults:
+      run:
+        working-directory: native
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with:
-          xcode-version: '26.3'
+          xcode-version: ${{ env.XCODE_VERSION }}
 
-      - name: Set Swift toolchain for Xcode 26
-        run: echo "TOOLCHAINS=com.apple.dt.toolchain.XcodeDefault" >> $GITHUB_ENV
-
-      - name: Show host machine information
-        run: |
-          uname -a
-          xcodebuild -showsdks
-      - name: Checkout PR head
-        uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: > 
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && github.repository || 
-            github.event.pull_request.head.repo.full_name }}
-          ref: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && 'development' || 
-            github.event.pull_request.head.sha }}
+          persist-credentials: false
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          ruby-version: "3.0.0"
+          distribution: temurin
+          java-version: '17'
 
-      - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          version: 1.15.2
+          # Dependencies, wrapper and the Kotlin/Native toolchain only, never the Gradle build cache. The build
+          # secrets live in native/local.properties and the generated Swift file, which are never cached.
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+            !~/.gradle/caches/build-cache-1
+          key: native-ios-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: native-ios-gradle-
 
-      - name: Create Google Services PLIST File
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # RN's scheme: the Unix time as CFBundleVersion.
+      - name: Resolve build number
+        id: version
         env:
+          OVERRIDE: ${{ inputs.build_number }}
+        run: |
+          n="${OVERRIDE:-$(date +%s)}"
+          if ! [[ "$n" =~ ^[1-9][0-9]{0,17}$ ]]; then
+            echo "::error::build_number must be a positive integer, got '$n'"
+            exit 1
+          fi
+          echo "BUILD_NUMBER=$n" >> "$GITHUB_ENV"
+          echo "build_number=$n" >> "$GITHUB_OUTPUT"
+          echo "Build number $n"
+
+      - name: Shared core tests (iOS simulator)
+        if: inputs.run_shared_tests
+        run: ./gradlew --no-daemon :build-logic:test :shared:iosSimulatorArm64Test
+
+      # Values go through env and printf only (no set -x), so they never reach the log. Xcode reads them from
+      # local.properties in its "Build secrets" phase; never export them in a step that runs xcodebuild, since
+      # Xcode copies the environment into its (printed) build settings. GitHub also masks them.
+      # The names are the RN workflow's secrets, except the two hashes (native/docs/release-builds.md).
+      - name: Write build secrets
+        env:
+          PIN_KEY: ${{ secrets.PIN_KEY }}
+          PIN_KEY_SHA256: ${{ secrets.NATIVE_PIN_KEY_SHA256 }}
+          DEFAULT_PIN: ${{ secrets.DEFAULT_PIN }}
+          DEFAULT_PIN_SHA256: ${{ secrets.NATIVE_DEFAULT_PIN_SHA256 }}
+          USER_AGENT: ${{ secrets.ECENCY_USER_AGENT || secrets.USER_AGENT }}
+          ACTIVITY_WEBSOCKET_URL: ${{ secrets.ACTIVITY_WEBSOCKET_URL }}
+          CHAT_BACKEND_URL: ${{ secrets.ECENCY_BACKEND_API }}
+          # Optional (README "Crash reporting"): Sentry's DSN; unset, the build reports nothing
+          SENTRY_DSN: ${{ secrets.NATIVE_SENTRY_DSN }}
+          # Optional, not secret (README "Analytics"): another Plausible host, or off
+          PLAUSIBLE_HOST: ${{ vars.ECENCY_PLAUSIBLE_HOST }}
+          # Not secret (repository variables), optional: where the update prompt looks for the app's releases
+          UPDATE_RELEASES_URL: ${{ vars.ECENCY_UPDATE_RELEASES_URL }}
+          UPDATE_TAG_PREFIX: ${{ vars.ECENCY_UPDATE_TAG_PREFIX }}
           GOOGLE_PLIST: ${{ secrets.GOOGLE_PLIST }}
         run: |
-          echo "$GOOGLE_PLIST" | base64 --decode -o ./ios/GoogleService-Info.plist
+          for v in PIN_KEY PIN_KEY_SHA256 DEFAULT_PIN DEFAULT_PIN_SHA256 GOOGLE_PLIST; do
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+          done
+          # a set but malformed update source, or a line break in it, fails the build: no silent fallback to the defaults
+          scripts/check-update-source.sh "$UPDATE_RELEASES_URL" "$UPDATE_TAG_PREFIX"
+          umask 077
+          {
+            printf 'ecency.pinKey=%s\n' "$PIN_KEY"
+            printf 'ecency.pinKeySha256=%s\n' "$PIN_KEY_SHA256"
+            printf 'ecency.defaultPin=%s\n' "$DEFAULT_PIN"
+            printf 'ecency.defaultPinSha256=%s\n' "$DEFAULT_PIN_SHA256"
+            printf 'ecency.userAgent=%s\n' "$USER_AGENT"
+            if [[ -n "$ACTIVITY_WEBSOCKET_URL" ]]; then printf 'ecency.activityWebsocketUrl=%s\n' "$ACTIVITY_WEBSOCKET_URL"; fi
+            if [[ -n "$CHAT_BACKEND_URL" ]]; then printf 'ecency.chatBackendUrl=%s\n' "$CHAT_BACKEND_URL"; fi
+            if [[ -n "$SENTRY_DSN" ]]; then printf 'ecency.sentryDsn=%s\n' "$SENTRY_DSN"; fi
+            if [[ -n "$PLAUSIBLE_HOST" ]]; then printf 'ecency.plausibleHost=%s\n' "$PLAUSIBLE_HOST"; fi
+            if [[ -n "$UPDATE_RELEASES_URL" ]]; then printf 'ecency.updateReleasesUrl=%s\n' "$UPDATE_RELEASES_URL"; fi
+            if [[ -n "$UPDATE_TAG_PREFIX" ]]; then printf 'ecency.updateTagPrefix=%s\n' "$UPDATE_TAG_PREFIX"; fi
+          } >> local.properties
+          # The RN app's Firebase config (app app.esteem.mobile.ios): push is linked in, same installation and token.
+          printf '%s' "$GOOGLE_PLIST" | base64 --decode > iosApp/GoogleService-Info.plist
 
-      - name: Install the Apple certificate and provisioning profile
+      # The RN workflow's certificate and profiles: PROVISIONING_PROFILE for app.esteem.mobile.ios,
+      # EXTEN_PROVISIONING_PROFILE for the eshare extension, NOTIFI_PROVISIONING_PROFILE for ImageNotifi, and
+      # WIDGET_PROVISIONING_PROFILE for the widget extension (app.esteem.mobile.ios.widgets, native/docs/release-builds.md).
+      - name: Install distribution certificate and provisioning profiles
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.CERTIFICATES_P12 }}
-          P12_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
-          EXTEN_PROVISION_PROFILE_BASE64: ${{ secrets.EXTEN_PROVISIONING_PROFILE }}
-          NOTIFI_PROVISION_PROFILE_BASE64: ${{ secrets.NOTIFI_PROVISIONING_PROFILE }}
-          KEYCHAIN_PASSWORD: ${{ secrets.APPLE_APP_PASS }}
-          EXPORT_OPTIONS_PLIST: ${{ secrets.EXPORT_OPTIONS_PLIST }}
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATES_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          APP_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          SHARE_PROFILE: ${{ secrets.EXTEN_PROVISIONING_PROFILE }}
+          NSE_PROFILE: ${{ secrets.NOTIFI_PROVISIONING_PROFILE }}
+          WIDGET_PROFILE: ${{ secrets.WIDGET_PROVISIONING_PROFILE }}
         run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          EX_PATH=$RUNNER_TEMP/build_ex.mobileprovision
-          NOT_PATH=$RUNNER_TEMP/build_not.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-          echo -n "$EXTEN_PROVISION_PROFILE_BASE64" | base64 --decode -o $EX_PATH
-          echo -n "$NOTIFI_PROVISION_PROFILE_BASE64" | base64 --decode -o $NOT_PATH
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          # the app embeds its extensions (EcencyShare and EcencyWidgets always, EcencyNotificationService with
+          # ECENCY_PUSH_EXTENSION)
+          for v in CERTIFICATE_P12 CERTIFICATE_PASSWORD APP_PROFILE SHARE_PROFILE NSE_PROFILE WIDGET_PROFILE; do
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+          done
+          umask 077
+          cert="$RUNNER_TEMP/dist.p12"
+          keychain="$RUNNER_TEMP/native-signing.keychain-db"
+          printf '%s' "$CERTIFICATE_P12" | base64 --decode > "$cert"
+
+          # Throwaway keychain with a random password, deleted at the end of the job.
+          keychain_password="$(openssl rand -hex 24)"
+          echo "::add-mask::$keychain_password"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$cert" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychain -d user -s "$keychain"
+          rm -f "$cert"
+          # The SHA-1 of the distribution identity ("Apple Distribution" or the older "iPhone Distribution"),
+          # used as the signing identity so Xcode cannot pick another certificate.
+          identity="$(security find-identity -v -p codesigning "$keychain" \
+            | awk '/"(Apple|iPhone) Distribution/ { print $2; exit }')"
+          if [[ -z "$identity" ]]; then
+            echo "::error::No valid distribution identity in CERTIFICATES_P12 (check the .p12 and CERTIFICATE_PASSWORD)"
+            exit 1
+          fi
+
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $EX_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $NOT_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          for PROVISION in `ls $RUNNER_TEMP/*.mobileprovision`
-          do
-            UUID=`/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< $(security cms -D -i $PROVISION)`
-            cp $PROVISION ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
-          done
-
-      - name: Verify signing certificate and provisioning profile expiry
-        # Fails fast and loudly when the iOS Distribution cert is missing or any
-        # provisioning profile is already expired (or expires within 7 days), so
-        # we don't bury the real cause inside a 1500-line xcodebuild log later.
-        env:
-          KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
-          WARN_DAYS: '7'
-        run: |
-          set -euo pipefail
-
-          echo "::group::Code signing identities"
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
-          echo "::endgroup::"
-
-          # Require at least one valid Apple/iPhone Distribution identity with a private key.
-          if ! security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
-               | grep -E '"(Apple|iPhone) Distribution' >/dev/null; then
-            echo "::error title=Distribution certificate missing::No valid 'Apple Distribution' or 'iPhone Distribution' identity with a private key was found in the build keychain. Re-export the .p12 from a Mac that has both the cert and its private key, base64-encode it, and update the CERTIFICATES_P12 secret. Also confirm CERTIFICATE_PASSWORD matches the .p12 export password."
-            exit 1
-          fi
-
-          NOW_EPOCH=$(date -u +%s)
-          WARN_SECS=$(( WARN_DAYS * 24 * 60 * 60 ))
-          FAIL=0
-
-          echo "::group::Provisioning profile expiry"
-          for PROVISION in "$RUNNER_TEMP"/*.mobileprovision; do
-            [ -f "$PROVISION" ] || continue
-            PLIST=$(security cms -D -i "$PROVISION")
-            NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<< "$PLIST" 2>/dev/null || echo "(unknown)")
-            UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< "$PLIST" 2>/dev/null || echo "(unknown)")
-            EXPIRATION=$(/usr/libexec/PlistBuddy -c 'Print :ExpirationDate' /dev/stdin <<< "$PLIST" 2>/dev/null || echo "")
-
-            if [ -z "$EXPIRATION" ]; then
-              echo "::error title=Provisioning profile unreadable::Could not read ExpirationDate from $(basename "$PROVISION") (name='$NAME', uuid='$UUID')"
-              FAIL=1
-              continue
+          : > "$RUNNER_TEMP/profiles.txt"
+          team=""
+          # install_profile <secret value> <bundle id> <build setting naming the profile>
+          install_profile() {
+            local profile="$RUNNER_TEMP/$3.mobileprovision" plist="$RUNNER_TEMP/$3.plist" name uuid t app_id expires epoch
+            printf '%s' "$1" | base64 --decode > "$profile"
+            security cms -D -i "$profile" > "$plist"
+            name="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$plist")"
+            uuid="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$plist")"
+            t="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$plist")"
+            app_id="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$plist")"
+            # ISO 8601 in UTC (for example 2027-10-07T10:00:00Z), independent of the runner's time zone.
+            expires="$(plutil -extract ExpirationDate raw -o - "$plist")"
+            rm -f "$plist"
+            if [[ "$app_id" != "$t.$2" ]]; then
+              echo "::error::The profile '$name' is for '$app_id', expected '$t.$2'"
+              exit 1
             fi
-
-            # PlistBuddy prints dates like "Fri Apr 10 16:43:34 GMT 2026" — parse to epoch.
-            EXP_EPOCH=$(date -u -j -f "%a %b %d %T %Z %Y" "$EXPIRATION" +%s 2>/dev/null || echo 0)
-            if [ "$EXP_EPOCH" = "0" ]; then
-              echo "::error title=Provisioning profile date parse failed::Could not parse ExpirationDate '$EXPIRATION' for profile '$NAME'"
-              FAIL=1
-              continue
+            if [[ -n "$team" && "$t" != "$team" ]]; then echo "::error::The profiles belong to different teams"; exit 1; fi
+            team="$t"
+            epoch="$(TZ=UTC date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$expires" +%s 2>/dev/null || echo 0)"
+            if (( epoch <= $(date -u +%s) )); then
+              echo "::error::Provisioning profile '$name' expired or has an unreadable date ($expires)"
+              exit 1
+            elif (( epoch - $(date -u +%s) < 7 * 86400 )); then
+              echo "::warning::Provisioning profile '$name' expires on $expires: regenerate it before the next build"
             fi
+            cp "$profile" ~/Library/MobileDevice/Provisioning\ Profiles/"$uuid".mobileprovision
+            rm -f "$profile"
+            # Not secrets: profile names and the team id are build settings Xcode prints anyway.
+            echo "$3=$name" >> "$GITHUB_ENV"
+            echo "$2 $name" >> "$RUNNER_TEMP/profiles.txt"
+            echo "PROFILE_UUIDS=${PROFILE_UUIDS:-} $uuid" >> "$GITHUB_ENV"
+            PROFILE_UUIDS="${PROFILE_UUIDS:-} $uuid"
+            echo "Profile '$name' for $2, expires $expires"
+          }
+          install_profile "$APP_PROFILE" app.esteem.mobile.ios ECENCY_APP_PROFILE
+          install_profile "$SHARE_PROFILE" app.esteem.mobile.ios.eshare ECENCY_SHARE_PROFILE
+          install_profile "$NSE_PROFILE" app.esteem.mobile.ios.ImageNotifi ECENCY_NSE_PROFILE
+          install_profile "$WIDGET_PROFILE" app.esteem.mobile.ios.widgets ECENCY_WIDGET_PROFILE
+          {
+            echo "SIGNING_KEYCHAIN=$keychain"
+            echo "SIGNING_IDENTITY=$identity"
+            echo "TEAM_ID=$team"
+          } >> "$GITHUB_ENV"
 
-            REMAINING=$(( EXP_EPOCH - NOW_EPOCH ))
-            REMAINING_DAYS=$(( REMAINING / 86400 ))
-
-            if [ "$REMAINING" -le 0 ]; then
-              echo "::error title=Provisioning profile expired::'$NAME' (uuid=$UUID) expired on $EXPIRATION. Regenerate it in the Apple Developer portal and update the matching GitHub secret (PROVISIONING_PROFILE / EXTEN_PROVISIONING_PROFILE / NOTIFI_PROVISIONING_PROFILE)."
-              FAIL=1
-            elif [ "$REMAINING" -le "$WARN_SECS" ]; then
-              echo "::warning title=Provisioning profile expiring soon::'$NAME' expires in $REMAINING_DAYS day(s) on $EXPIRATION. Regenerate before the next build."
-            else
-              echo "OK  $NAME — $REMAINING_DAYS day(s) remaining (expires $EXPIRATION)"
-            fi
-          done
-          echo "::endgroup::"
-
-          if [ "$FAIL" -ne 0 ]; then
-            echo "::error::One or more provisioning profiles or signing certificates are invalid. See errors above."
-            exit 1
-          fi
-
-      - name: Create .env file
+      # Each target names its own profile through ECENCY_APP_PROFILE, ECENCY_SHARE_PROFILE, ECENCY_NSE_PROFILE and
+      # ECENCY_WIDGET_PROFILE
+      # (iosApp/project.yml, push-extension.yml).
+      - name: Archive
+        working-directory: native/iosApp
         run: |
-          echo "ACTIVITY_WEBSOCKET_URL=${{ secrets.ACTIVITY_WEBSOCKET_URL }}" >> .env
-          echo "DEFAULT_PIN=${{ secrets.DEFAULT_PIN }}" >> .env
-          echo "ECENCY_BACKEND_API=${{ secrets.ECENCY_BACKEND_API }}" >> .env
-          echo "NEW_IMAGE_API=${{ secrets.NEW_IMAGE_API }}" >> .env
-          echo "PIN_KEY=${{ secrets.PIN_KEY }}" >> .env
-          echo "USER_AGENT=${{ secrets.USER_AGENT }}" >> .env
-          echo "PLAUSIBLE_API_KEY=${{ secrets.PLAUSIBLE_API_KEY }}" >> .env
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install npm dependency
-        run: yarn install
-
-      - name: Install Cocoapod dependencies
-        run: |
-          cd ios
-          pod install
-
-      - name: Set version code
-        run: |
-          TIMESTAMP=$(date +%s)
-          echo "Setting version code to: $TIMESTAMP"
-          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*/CURRENT_PROJECT_VERSION = $TIMESTAMP/" ios/Ecency.xcodeproj/project.pbxproj
-          echo "IOS_BUILD_NUMBER=$TIMESTAMP" >> $GITHUB_ENV
-
-      - name: Resolve iOS Sentry release metadata
-        run: |
-          BUNDLE_ID=$(xcodebuild -workspace ios/Ecency.xcworkspace -scheme Ecency -configuration Release -showBuildSettings | awk '/ PRODUCT_BUNDLE_IDENTIFIER / {print $3; exit}')
-          VERSION=$(node -p "require('./package.json').version")
-          DIST="${IOS_BUILD_NUMBER}"
-          RELEASE="${BUNDLE_ID}@${VERSION}+${DIST}"
-          echo "SENTRY_RELEASE=$RELEASE" >> $GITHUB_ENV
-          echo "SENTRY_DIST=$DIST" >> $GITHUB_ENV
-          echo "Using Sentry release: $RELEASE"
-          echo "Using Sentry dist: $DIST"
-
-      - name: Build iOS JS Bundle
-        run: |
-          yarn run bundle:ios
-
-      - name: Copy JS bundle and sourcemap to temp directory
-        run: |
-          mkdir -p $RUNNER_TEMP/js
-          cp ios/main.jsbundle $RUNNER_TEMP/js/main.jsbundle
-          cp ios/main.jsbundle.map $RUNNER_TEMP/js/main.jsbundle.map
-
-      # Source maps are only used for error symbolication, so a transient Sentry
-      # API error (e.g. HTTP 500) must not block the release build. The shared
-      # retry helper retries transient failures; continue-on-error lets a
-      # sustained Sentry outage degrade gracefully instead of failing the build.
-      - name: Upload source maps to Sentry (iOS)
-        continue-on-error: true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          retry="$GITHUB_WORKSPACE/.github/scripts/sentry-retry.sh"
-          bash "$retry" npx sentry-cli releases new "$SENTRY_RELEASE" --org ecency --project ecency-mobile
-          bash "$retry" npx sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps \
-            --dist "$SENTRY_DIST" \
-            --org ecency --project ecency-mobile \
-            --rewrite \
-            --strip-common-prefix \
-            $RUNNER_TEMP/js/main.jsbundle $RUNNER_TEMP/js/main.jsbundle.map
-          bash "$retry" npx sentry-cli releases finalize "$SENTRY_RELEASE" --org ecency --project ecency-mobile
-
-      - name: Build archive
-        run: |
-          cd ios
-          xcodebuild -workspace Ecency.xcworkspace \
-          -scheme "Ecency" \
-          -sdk iphoneos \
-          -configuration Release \
-          -destination generic/platform=iOS \
-          -archivePath $RUNNER_TEMP/Ecency.xcarchive \
-          clean archive
-
-      - name: Upload iOS dSYMs to Sentry
-        continue-on-error: true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: |
-          retry="$GITHUB_WORKSPACE/.github/scripts/sentry-retry.sh"
-          bash "$retry" npx sentry-cli debug-files upload \
-            --org ecency \
-            --project ecency-mobile \
-            --include-sources \
-            "$RUNNER_TEMP/Ecency.xcarchive/dSYMs"
+          # ECENCY_PUSH_EXTENSION builds the notification service extension (push-extension.yml, RN's ImageNotifi)
+          export ECENCY_FIREBASE=true ECENCY_PUSH_EXTENSION=true
+          xcodegen generate --quiet
+          xcodebuild archive \
+            -project EcencySpike.xcodeproj \
+            -scheme EcencyApp \
+            -configuration Release \
+            -destination generic/platform=iOS \
+            -archivePath "$RUNNER_TEMP/EcencyApp.xcarchive" \
+            -quiet \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
+            ECENCY_APP_PROFILE="$ECENCY_APP_PROFILE" \
+            ECENCY_SHARE_PROFILE="$ECENCY_SHARE_PROFILE" \
+            ECENCY_NSE_PROFILE="$ECENCY_NSE_PROFILE" \
+            ECENCY_WIDGET_PROFILE="$ECENCY_WIDGET_PROFILE" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $SIGNING_KEYCHAIN"
 
       - name: Export IPA
-        env:
-          EXPORT_OPTIONS_PLIST: ${{ secrets.EXPORT_OPTIONS_PLIST }}
+        working-directory: native/iosApp
         run: |
-          EXPORT_OPTS_PATH=$RUNNER_TEMP/ExportOptions.plist
-          echo -n "$EXPORT_OPTIONS_PLIST" | base64 --decode -o $EXPORT_OPTS_PATH
+          opts="$RUNNER_TEMP/ExportOptions.plist"
+          cp ci/ExportOptions.plist "$opts"
+          /usr/libexec/PlistBuddy -c "Set :teamID $TEAM_ID" "$opts"
+          /usr/libexec/PlistBuddy -c "Set :signingCertificate $SIGNING_IDENTITY" "$opts"
+          while read -r bundle name; do
+            /usr/libexec/PlistBuddy -c "Add :provisioningProfiles:$bundle string $name" "$opts"
+          done < "$RUNNER_TEMP/profiles.txt"
+          plutil -lint "$opts"
           xcodebuild -exportArchive \
-          -archivePath $RUNNER_TEMP/Ecency.xcarchive \
-          -exportOptionsPlist $EXPORT_OPTS_PATH \
-          -exportPath $RUNNER_TEMP/build
+            -archivePath "$RUNNER_TEMP/EcencyApp.xcarchive" \
+            -exportOptionsPlist "$opts" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -quiet
+          ls -la "$RUNNER_TEMP/export"
 
-      - name: List build contents
+      # Release launch check (docs/release-builds.md): the tests run Debug builds, so a crash only the optimised
+      # build has would pass them. The same Release configuration for the simulator, started once before any
+      # upload. Manual runs only (default on); a push skips it to save macOS minutes, the Android check runs always.
+      - name: Simulator release build for the launch check
+        if: inputs.launch_check
+        timeout-minutes: 40
+        working-directory: native/iosApp
         run: |
-          ls -la $RUNNER_TEMP/build
+          xcodebuild build \
+            -project EcencySpike.xcodeproj \
+            -scheme EcencyApp \
+            -configuration Release \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/launchcheck" \
+            -quiet \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            ECENCY_APP_PROFILE= ECENCY_SHARE_PROFILE= ECENCY_NSE_PROFILE= ECENCY_WIDGET_PROFILE=
 
-      - name: Upload App
-        uses: actions/upload-artifact@v4
+      - name: Remove build secrets
+        if: always()
+        run: rm -f local.properties iosApp/Generated/BuildSecrets.generated.swift iosApp/GoogleService-Info.plist
+
+      - name: Release launch check
+        if: inputs.launch_check
+        timeout-minutes: 15
+        run: |
+          # an iPhone on the newest iOS runtime (the app needs iOS 17)
+          udid="$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          best = None
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              m = re.search(r"iOS-(\d+)-(\d+)", runtime)
+              if not m:
+                  continue
+              version = (int(m.group(1)), int(m.group(2)))
+              for d in devices:
+                  if d["name"].startswith("iPhone") and (best is None or version > best[0]):
+                      best = (version, d["udid"])
+          print(best[1] if best else "")')"
+          if [[ -z "$udid" ]]; then echo "::error::No iPhone simulator on the runner"; exit 1; fi
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          ECENCY_SIM_UDID="$udid" scripts/release-launch-check.sh ios \
+            "$RUNNER_TEMP/launchcheck/Build/Products/Release-iphonesimulator/EcencyApp.app" 30
+
+      # the simulator app embeds the build secrets
+      - name: Remove the launch check build
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/launchcheck"
+
+      # Only the dSYMs: the IPA embeds the RN build secrets, and artifacts of a public repo can be downloaded
+      # by any signed-in GitHub user (the RN workflow's IPA artifact is gone for that reason). Testers get the
+      # build from TestFlight.
+      - name: Upload dSYMs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: Ecency-iOS
-          path: ${{ runner.temp }}/build/Ecency.ipa
-          retention-days: 90
+          name: ecency-ios-dsyms-${{ env.BUILD_NUMBER }}
+          path: ${{ runner.temp }}/EcencyApp.xcarchive/dSYMs
+          retention-days: 30
+          if-no-files-found: error
 
-  ios-deploy:
-    name: Deploy iOS Build
-    needs: ios-build
-    # Only deploy if the trigger is a pull_request with 'deploy-pr-build' label or a push to 'development'
-    if: >
-        (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-pr-build')) ||
-        (github.event_name == 'push' && github.ref == 'refs/heads/development')
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Get iOS Build from artifacts
-        uses: actions/download-artifact@v4
-      - name: Upload to AppStoreConnect
+      # The RN workflow's upload: Apple ID and app-specific password.
+      - name: Upload to App Store Connect
+        # a push uploads, as the RN workflow; a manual run asks
+        if: github.event_name == 'push' || inputs.upload
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASS: ${{ secrets.APPLE_APP_PASS }}
-        run: xcrun altool --upload-app -f "Ecency-iOS/Ecency.ipa" -t ios -u "$APPLE_ID" -p "$APPLE_APP_PASS"
+        run: |
+          for v in APPLE_ID APPLE_APP_PASS; do
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set"; exit 1; fi
+          done
+          xcrun altool --upload-app -t ios -f "$RUNNER_TEMP/export/EcencyApp.ipa" -u "$APPLE_ID" -p "$APPLE_APP_PASS"
+
+      - name: Summary
+        env:
+          NOTES: ${{ inputs.notes }}
+          UPLOADED: ${{ github.event_name == 'push' || inputs.upload }}
+        run: |
+          {
+            echo "### Ecency iOS ($BUILD_NUMBER)"
+            echo "Uploaded to App Store Connect: $UPLOADED"
+            if [[ -n "$NOTES" ]]; then echo; echo "$NOTES"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete signing keychain and profiles
+        if: always()
+        run: |
+          if [[ -n "${SIGNING_KEYCHAIN:-}" ]]; then security delete-keychain "$SIGNING_KEYCHAIN" || true; fi
+          rm -f "$RUNNER_TEMP"/*.mobileprovision "$RUNNER_TEMP/dist.p12" "$RUNNER_TEMP/ExportOptions.plist"
+          for uuid in ${PROFILE_UUIDS:-}; do
+            rm -f ~/Library/MobileDevice/Provisioning\ Profiles/"$uuid".mobileprovision
+          done
+
+  # The dSYMs to Sentry's ecency-mobile project (docs/release-builds.md, "Crash symbols"), as the RN workflow did.
+  # A job of its own on Linux: it runs a downloaded tool, so it gets only the dSYM artifact and SENTRY_AUTH_TOKEN,
+  # never the build's secrets, signing keychain or App Store credentials, and it never fails the release.
+  sentry-dsyms:
+    name: dSYMs to Sentry
+    needs: ios-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ecency-ios-dsyms-${{ needs.ios-build.outputs.build_number }}
+          path: ${{ runner.temp }}/dsyms
+
+      - name: Upload
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BUILD: ${{ needs.ios-build.outputs.build_number }}
+        run: |
+          if [[ -z "$SENTRY_AUTH_TOKEN" ]]; then echo "SENTRY_AUTH_TOKEN is not set: skipped"; exit 0; fi
+          cli="$RUNNER_TEMP/sentry-cli"
+          curl -fsSL -o "$cli" https://github.com/getsentry/sentry-cli/releases/download/2.58.6/sentry-cli-Linux-x86_64
+          echo "36b689311b399d9332950d84f4299aee682d2d290a770a77372b30a74f7e7add  $cli" | sha256sum -c -
+          chmod +x "$cli"
+          for attempt in 1 2 3; do
+            if "$cli" debug-files upload --org ecency --project ecency-mobile "$RUNNER_TEMP/dsyms"; then
+              exit 0
+            fi
+            sleep $((attempt * 15))
+          done
+          echo "::warning::The dSYMs did not reach Sentry: crash reports of build $BUILD stay unsymbolicated"
+          exit 1

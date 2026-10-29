@@ -1,228 +1,279 @@
 name: Android Build
-on:
 
-  pull_request:
-    types: [ready_for_review, synchronize, labeled]
-  
+# Store build of the Ecency app (native 4.x, app.esteem.mobile.android, an update of the RN 3.x app) for Google
+# Play. Every push to development that changes native/ builds, signs and releases to the alpha track, as the RN
+# workflow did; a manual run picks the track. Never on pull requests (CI minutes): test.yml runs the unit tests
+# there. Flow, secrets and owner checklist: native/README.md "Release pipeline" and native/docs/release-builds.md.
+on:
   push:
     branches:
       - development
+    # native/ only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
+    # "First deploy" steps in native/docs/release-builds.md)
+    paths:
+      - 'native/**'
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Play track to upload to
+        type: choice
+        options: [alpha, internal, none]
+        default: alpha
+      release_status:
+        description: Play release status
+        type: choice
+        options: [completed, draft]
+        default: completed
+      notes:
+        description: Release notes for testers (en-US, at most 500 characters)
+        type: string
+        default: ''
+      build_number:
+        description: versionCode override (default is the Unix time, like the RN builds; must be above every upload)
+        type: string
+        default: ''
 
-concurrency:
-  # Keyed by ref so a PR build cannot cancel the development build, which is the
-  # one that publishes the alpha release.
-  group: android-build-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
-  lint-and-test:
-    name: Lint & Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && github.repository ||
-            github.event.pull_request.head.repo.full_name }}
-          ref: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && 'development' ||
-            github.event.pull_request.head.sha }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Typecheck
-        run: yarn typecheck
-
-      - name: Unit tests
-        run: yarn test:ci
-
   android-build:
     name: Android Build
-    needs: lint-and-test
-    # Run only when the review is Approved, PR targets 'development', and it's a same-repo PR
-    if: >
-      (github.event_name == 'pull_request') ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/development')
-    runs-on: macos-latest
+    # Keyed by ref, as the RN workflow: a newer development push replaces a build still running. On the job, not the
+    # workflow, so a newer push never cancels the symbol upload of a build the stores already have.
+    concurrency:
+      group: android-build-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    # the release launch check boots an emulator (about 5 minutes)
+    timeout-minutes: 75
+    outputs:
+      build_number: ${{ steps.version.outputs.build_number }}
+      mapping_id: ${{ steps.mapping.outputs.id }}
+    defaults:
+      run:
+        working-directory: native
     steps:
-      - name: Show host machine information
-        run: uname -a
-
-      - name: Checkout PR head or development branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: > 
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && github.repository || 
-            github.event.pull_request.head.repo.full_name }}
-          ref: >
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/development' && 'development' || 
-            github.event.pull_request.head.sha }}
-      - name: Create .env file
-        run: |
-          echo "ACTIVITY_WEBSOCKET_URL=${{ secrets.ACTIVITY_WEBSOCKET_URL }}" >> .env
-          echo "DEFAULT_PIN=${{ secrets.DEFAULT_PIN }}" >> .env
-          echo "ECENCY_BACKEND_API=${{ secrets.ECENCY_BACKEND_API }}" >> .env
-          echo "NEW_IMAGE_API=${{ secrets.NEW_IMAGE_API }}" >> .env
-          echo "PIN_KEY=${{ secrets.PIN_KEY }}" >> .env
-          echo "USER_AGENT=${{ secrets.USER_AGENT }}" >> .env
-          echo "PLAUSIBLE_API_KEY=${{ secrets.PLAUSIBLE_API_KEY }}" >> .env
+          persist-credentials: false
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          node-version: '20'
+          distribution: temurin
+          java-version: '17'
 
-      - name: Install npm dependency
-        run: yarn install
-
-      - name: Run gradle patch script
-        run: bash patch-gradle.sh
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          java-version: "17"
-          distribution: "temurin"
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 12266719
-          # The action defaults to "tools platform-tools", and the legacy "tools"
-          # package no longer resolves, which makes sdkmanager exit 1. Ask only for
-          # what the build needs.
-          packages: platform-tools
-
-      - uses: actions/cache@v3
-        with:
+          # Dependencies and wrapper only: never the build cache, whose entries can hold build outputs. The
+          # release build also runs with --no-build-cache and its tasks are not cacheable (build.gradle.kts).
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+            !~/.gradle/caches/build-cache-1
+          key: native-android-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: native-android-gradle-
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Create Google Services JSON File
+      # RN's scheme: the Unix time as versionCode, so every upload is above the RN store builds and the last upload.
+      - name: Resolve version code
+        id: version
         env:
+          OVERRIDE: ${{ inputs.build_number }}
+        run: |
+          n="${OVERRIDE:-$(date +%s)}"
+          if ! [[ "$n" =~ ^[1-9][0-9]{0,9}$ ]] || (( n > 2100000000 )); then
+            echo "::error::build_number must be a positive integer up to 2100000000, got '$n'"
+            exit 1
+          fi
+          echo "ECENCY_BUILD_NUMBER=$n" >> "$GITHUB_ENV"
+          echo "build_number=$n" >> "$GITHUB_OUTPUT"
+          echo "versionCode $n"
+
+      # Before any secret is written, so test builds only ever see the dummy values.
+      - name: Unit tests
+        run: ./gradlew --no-daemon :build-logic:test :shared:testAndroidHostTest :androidApp:testDebugUnitTest
+
+      # A fresh id for this build's R8 mapping, compiled into the app and uploaded with mapping.txt, so Sentry can
+      # map the obfuscated stack traces back (docs/release-builds.md, "Crash symbols"). After the unit tests,
+      # whose debug build carries none.
+      - name: Mapping id
+        id: mapping
+        run: |
+          id="$(cat /proc/sys/kernel/random/uuid)"
+          echo "ECENCY_PROGUARD_UUID=$id" >> "$GITHUB_ENV"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      # Values go through env and printf only (no set -x), so they never reach the log. GitHub also masks them.
+      # The names are the RN workflow's secrets, except the two hashes (native/docs/release-builds.md).
+      - name: Write build secrets
+        env:
+          PIN_KEY: ${{ secrets.PIN_KEY }}
+          PIN_KEY_SHA256: ${{ secrets.NATIVE_PIN_KEY_SHA256 }}
+          DEFAULT_PIN: ${{ secrets.DEFAULT_PIN }}
+          DEFAULT_PIN_SHA256: ${{ secrets.NATIVE_DEFAULT_PIN_SHA256 }}
+          USER_AGENT: ${{ secrets.ECENCY_USER_AGENT || secrets.USER_AGENT }}
+          ACTIVITY_WEBSOCKET_URL: ${{ secrets.ACTIVITY_WEBSOCKET_URL }}
+          CHAT_BACKEND_URL: ${{ secrets.ECENCY_BACKEND_API }}
+          # Optional (README "Crash reporting"): Sentry's DSN; unset, the build reports nothing
+          SENTRY_DSN: ${{ secrets.NATIVE_SENTRY_DSN }}
+          # Optional, not secret (README "Analytics"): another Plausible host, or off
+          PLAUSIBLE_HOST: ${{ vars.ECENCY_PLAUSIBLE_HOST }}
+          # Not secret (repository variables), optional: where the update prompt looks for the app's releases
+          UPDATE_RELEASES_URL: ${{ vars.ECENCY_UPDATE_RELEASES_URL }}
+          UPDATE_TAG_PREFIX: ${{ vars.ECENCY_UPDATE_TAG_PREFIX }}
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
-        run: echo $GOOGLE_JSON | base64 --decode > ./android/app/google-services.json
-
-      - name: Upload-keystore generator
         run: |
-          echo "${{secrets.UPLOAD_KEYSTORE}}" > upload.keystore.asc
-          base64 -d --input upload.keystore.asc --output android/app/key.jks
+          for v in PIN_KEY PIN_KEY_SHA256 DEFAULT_PIN DEFAULT_PIN_SHA256 GOOGLE_JSON; do
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+          done
+          # a set but malformed update source, or a line break in it, fails the build: no silent fallback to the defaults
+          scripts/check-update-source.sh "$UPDATE_RELEASES_URL" "$UPDATE_TAG_PREFIX"
+          umask 077
+          {
+            printf 'ecency.pinKey=%s\n' "$PIN_KEY"
+            printf 'ecency.pinKeySha256=%s\n' "$PIN_KEY_SHA256"
+            printf 'ecency.defaultPin=%s\n' "$DEFAULT_PIN"
+            printf 'ecency.defaultPinSha256=%s\n' "$DEFAULT_PIN_SHA256"
+            printf 'ecency.userAgent=%s\n' "$USER_AGENT"
+            if [[ -n "$ACTIVITY_WEBSOCKET_URL" ]]; then printf 'ecency.activityWebsocketUrl=%s\n' "$ACTIVITY_WEBSOCKET_URL"; fi
+            if [[ -n "$CHAT_BACKEND_URL" ]]; then printf 'ecency.chatBackendUrl=%s\n' "$CHAT_BACKEND_URL"; fi
+            if [[ -n "$SENTRY_DSN" ]]; then printf 'ecency.sentryDsn=%s\n' "$SENTRY_DSN"; fi
+            if [[ -n "$PLAUSIBLE_HOST" ]]; then printf 'ecency.plausibleHost=%s\n' "$PLAUSIBLE_HOST"; fi
+            if [[ -n "$UPDATE_RELEASES_URL" ]]; then printf 'ecency.updateReleasesUrl=%s\n' "$UPDATE_RELEASES_URL"; fi
+            if [[ -n "$UPDATE_TAG_PREFIX" ]]; then printf 'ecency.updateTagPrefix=%s\n' "$UPDATE_TAG_PREFIX"; fi
+          } >> local.properties
+          # The RN app's Firebase config (app app.esteem.mobile.android): same installation and push token after the update.
+          printf '%s' "$GOOGLE_JSON" | base64 --decode > androidApp/google-services.json
 
-      - name: Key.Properties
-        run: |
-          echo "keyPassword=${{ secrets.UPLOAD_KEYSTORE_PASSPHRASE }}" >> ./android/key.properties
-          echo "storePassword=${{ secrets.UPLOAD_KEYSTORE_PASSPHRASE }}" >> ./android/key.properties
-          echo "keyAlias=${{ secrets.ALIAS }}" >> ./android/key.properties
-
-      - name: Generate signing report
-        run: |
-          cd android
-          ./gradlew signingReport
-          cd ..
-      - name: Set version code
-        run: |
-          TIMESTAMP=$(date +%s)
-          echo "Setting version code to: $TIMESTAMP"
-          sed -i '' "s/versionCode .*/versionCode $TIMESTAMP/" android/app/build.gradle
-          echo "ANDROID_VERSION_CODE=$TIMESTAMP" >> $GITHUB_ENV
-
-      - name: Resolve Android Sentry release metadata
-        run: |
-          APPLICATION_ID=$(ruby -e "c=File.read('android/app/build.gradle'); m=c.match(/applicationId\\s+['\\\"]([^'\\\"]+)['\\\"]/); puts(m && m[1] ? m[1] : 'app.esteem.mobile.android')")
-          VERSION_NAME=$(node -p "require('./package.json').version")
-          DIST="${ANDROID_VERSION_CODE}"
-          RELEASE="${APPLICATION_ID}@${VERSION_NAME}+${DIST}"
-          echo "SENTRY_RELEASE=$RELEASE" >> $GITHUB_ENV
-          echo "SENTRY_DIST=$DIST" >> $GITHUB_ENV
-          echo "Using Sentry release: $RELEASE"
-          echo "Using Sentry dist: $DIST"
-
-      - name: Bundle Android
-        run: yarn run bundle:android
-
-      - name: Execute Gradle APK build
+      - name: Decode upload keystore
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          UPLOAD_KEYSTORE: ${{ secrets.UPLOAD_KEYSTORE }}
         run: |
-          cd android
-          ./gradlew assembleRelease
+          if [[ -z "$UPLOAD_KEYSTORE" ]]; then echo "::error::UPLOAD_KEYSTORE is not set"; exit 1; fi
+          umask 077
+          printf '%s' "$UPLOAD_KEYSTORE" | base64 --decode > "$RUNNER_TEMP/upload.jks"
 
-      # Source maps are only used for error symbolication, so a transient Sentry
-      # API error (e.g. HTTP 500) must not block the release build. The shared
-      # retry helper retries transient failures; continue-on-error lets a
-      # sustained Sentry outage degrade gracefully instead of failing the build.
-      - name: Upload source maps to Sentry (Android)
-        continue-on-error: true
+      # The RN upload key (Play App Signing re-signs with the app signing key the RN app already has).
+      - name: Bundle release (R8)
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          ECENCY_REQUIRE_SIGNING: 'true'
+          ECENCY_UPLOAD_KEYSTORE: ${{ runner.temp }}/upload.jks
+          ECENCY_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSPHRASE }}
+          ECENCY_UPLOAD_KEY_ALIAS: ${{ secrets.ALIAS }}
+          ECENCY_UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSPHRASE }}
         run: |
-          retry="$GITHUB_WORKSPACE/.github/scripts/sentry-retry.sh"
-          BUNDLE_PATH=android/app/src/main/assets/index.android.bundle
-          MAP_PATH=android/app/src/main/assets/index.android.bundle.map
-          bash "$retry" npx sentry-cli releases new "$SENTRY_RELEASE" --org ecency --project ecency-mobile
-          bash "$retry" npx sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps \
-            --dist "$SENTRY_DIST" \
-            --org ecency --project ecency-mobile \
-            --rewrite \
-            "$BUNDLE_PATH" "$MAP_PATH"
-          bash "$retry" npx sentry-cli releases finalize "$SENTRY_RELEASE" --org ecency --project ecency-mobile
+          ./gradlew --no-daemon --no-build-cache :androidApp:bundleRelease
+          jarsigner -verify androidApp/build/outputs/bundle/release/androidApp-release.aab | grep 'jar verified'
 
-      - name: Upload APK application
-        uses: actions/upload-artifact@v4
+      - name: Remove signing material and secrets
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks" local.properties androidApp/google-services.json
+
+      # Only the R8 mapping: the AAB embeds the RN build secrets, and artifacts of a public repo can be
+      # downloaded by any signed-in GitHub user (the RN workflow's APK and AAB artifacts are gone for that reason).
+      # Before the launch check, so the obfuscated stack trace of a failed check can be retraced.
+      - name: Upload R8 mapping
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: Ecency-APK
-          path: ./android/app/build/outputs/apk/release/app-release.apk
-          retention-days: 90
+          name: ecency-android-mapping-${{ env.ECENCY_BUILD_NUMBER }}
+          path: native/androidApp/build/outputs/mapping/release/mapping.txt
+          retention-days: 30
+          if-no-files-found: error
 
-      - name: Execute Gradle Bundle build
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      # Release launch check (docs/release-builds.md): the tests above run debug builds, so a crash only the
+      # minified build has would pass them (the 4.0 WorkManager crash did). Install the bundle that is about to
+      # ship on an emulator, start it once and stop before any upload when it crashes. The universal APK is
+      # signed with a throwaway key and never leaves the runner (it embeds the build secrets).
+      - name: Universal APK for the launch check
         run: |
-          cd android
-          ./gradlew bundleRelease
+          jar="$RUNNER_TEMP/bundletool.jar"
+          curl -fsSL -o "$jar" https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $jar" | sha256sum -c -
+          keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/check.jks" -storepass launchcheck -keypass launchcheck \
+            -alias check -keyalg RSA -keysize 2048 -validity 1 -dname CN=launch-check
+          java -jar "$jar" build-apks --mode=universal \
+            --bundle=androidApp/build/outputs/bundle/release/androidApp-release.aab --output="$RUNNER_TEMP/check.apks" \
+            --ks="$RUNNER_TEMP/check.jks" --ks-pass=pass:launchcheck --ks-key-alias=check --key-pass=pass:launchcheck
+          unzip -o -q "$RUNNER_TEMP/check.apks" universal.apk -d "$RUNNER_TEMP"
 
-      - name: Upload App bundle to Releases
-        uses: actions/upload-artifact@v4
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Release launch check
+        timeout-minutes: 20
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
-          name: Ecency-Bundle
-          path: ./android/app/build/outputs/bundle/release/app-release.aab
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          disable-animations: true
+          working-directory: native
+          script: scripts/release-launch-check.sh android ${{ runner.temp }}/universal.apk 30
 
-  android-deploy:
-    name: Deploy Android Build
-    needs: android-build
-    # Only deploy if the trigger is a pull_request with 'deploy-pr-build' label or a push to 'development'
-    if: >
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-pr-build')) ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/development')
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Get Android Build from artifacts
-        uses: actions/download-artifact@v4
-      - name: Deploy to Play Store (BETA)
-        id: deploy
-        uses: r0adkll/upload-google-play@v1
+      - name: Remove the launch check APK
+        if: always()
+        run: rm -f "$RUNNER_TEMP/universal.apk" "$RUNNER_TEMP/check.apks" "$RUNNER_TEMP/check.jks"
+
+      - name: Release notes
+        if: github.event_name == 'push' || inputs.track != 'none'
+        env:
+          NOTES: ${{ inputs.notes }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/whatsnew"
+          notes="${NOTES:-Ecency build $ECENCY_BUILD_NUMBER}"
+          printf '%s' "${notes:0:500}" > "$RUNNER_TEMP/whatsnew/whatsnew-en-US"
+
+      # A push uses the RN workflow's track and status (alpha, completed); inputs are empty then.
+      - name: Upload to Google Play
+        if: github.event_name == 'push' || inputs.track != 'none'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: app.esteem.mobile.android
-          releaseFiles: Ecency-Bundle/app-release.aab
-          track: alpha
-          status: completed
+          releaseFiles: native/androidApp/build/outputs/bundle/release/androidApp-release.aab
+          mappingFile: native/androidApp/build/outputs/mapping/release/mapping.txt
+          track: ${{ inputs.track || 'alpha' }}
+          status: ${{ inputs.release_status || 'completed' }}
+          whatsNewDirectory: ${{ runner.temp }}/whatsnew
+
+  # The mapping to Sentry's ecency-mobile project under this build's id (docs/release-builds.md, "Crash symbols"),
+  # as RN uploaded its symbols. A job of its own: it runs a downloaded tool, so it gets only the mapping artifact
+  # and SENTRY_AUTH_TOKEN, never the build's secrets, signing key or Play credentials, and it never fails the release.
+  sentry-mapping:
+    name: R8 mapping to Sentry
+    needs: android-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ecency-android-mapping-${{ needs.android-build.outputs.build_number }}
+          path: ${{ runner.temp }}/mapping
+
+      - name: Upload
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          MAPPING_ID: ${{ needs.android-build.outputs.mapping_id }}
+        run: |
+          if [[ -z "$SENTRY_AUTH_TOKEN" ]]; then echo "SENTRY_AUTH_TOKEN is not set: skipped"; exit 0; fi
+          cli="$RUNNER_TEMP/sentry-cli"
+          curl -fsSL -o "$cli" https://github.com/getsentry/sentry-cli/releases/download/2.58.6/sentry-cli-Linux-x86_64
+          echo "36b689311b399d9332950d84f4299aee682d2d290a770a77372b30a74f7e7add  $cli" | sha256sum -c -
+          chmod +x "$cli"
+          for attempt in 1 2 3; do
+            if "$cli" upload-proguard --org ecency --project ecency-mobile --uuid "$MAPPING_ID" "$RUNNER_TEMP/mapping/mapping.txt"; then
+              exit 0
+            fi
+            sleep $((attempt * 15))
+          done
+          echo "::warning::The R8 mapping did not reach Sentry: crash reports of build ${{ needs.android-build.outputs.build_number }} stay obfuscated"
+          exit 1
