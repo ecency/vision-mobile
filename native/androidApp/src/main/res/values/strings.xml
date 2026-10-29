@@ -1,0 +1,5 @@
+<resources>
+    <!-- The brand, the same in every language (RN parity). The OS-read strings in every language (widget labels and
+         descriptions) are generated from src/config/locales: build-logic SystemStrings, README "Localization". -->
+    <string name="app_name" translatable="false">Ecency</string>
+</resources>

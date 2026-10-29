@@ -1,0 +1,25 @@
+# Android literals that read like copy but are not shown text (see build-logic UiLiteralLintTest).
+# One per line: File.kt<TAB>literal as in the source<TAB>why it stays English.
+BiometricKey.kt	AndroidKeyStore	keystore provider name
+EditorPlatform.kt	could not store the draft	exception message the editor maps to its own copy
+ImageSaver.kt	Ecency	brand: the gallery album name
+MainActivity.kt	Ecency	brand in the feedback platform line
+MainActivity.kt	Android	platform name in the feedback platform line
+MainActivity.kt	{} - Android {}	device and OS line sent with feedback, not shown
+EcencyApp.kt	Android	platform name sent with feedback, not shown
+SystemLanguageSurfaces.kt	unknown channel {}	exception for a programming error
+PostBody.kt	GIF	image format badge, a format name
+EditorScreens.kt	Aa	text format button glyph (its label is EditorUiCopy.TEXT_FORMAT)
+IconGallery.kt	Icons ({})	debug icon gallery
+RegisterScreen.kt	Demo run: the verification step is skipped.	demo and fake data runs only
+ReadingScreens.kt	TOP	test id of the tag feed sort (label: ReadingUiCopy.TOP_CAPS)
+ReadingScreens.kt	HOT	test id of the tag feed sort (label: UiCopy.HOT)
+ReadingScreens.kt	NEW	test id of the tag feed sort (label: UiCopy.NEW)
+Sheets.kt	Referer	HTTP header name
+ShellOverlays.kt	no activity for the toast window	exception for a programming error
+ShellOverlays.kt	EcencyToast	window title of the toast overlay, not shown
+TransferScreens.kt	 HP	ticker after a chain amount
+WalletScreens.kt	HIVE	ticker passed to a route
+WalletScreens.kt	HP	ticker passed to a route
+EcencyWidgets.kt	Ecency	brand: the notifications widget title
+ProfileScreens.kt	https://	URL field placeholder

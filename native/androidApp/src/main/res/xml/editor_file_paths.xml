@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Camera captures for the editor: one private cache folder, shared with the camera app for a single capture. -->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>

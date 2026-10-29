@@ -1,0 +1,6 @@
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- The launch screen (README "Launch screen"): RN bootsplash's background (the theme's page colour) and logo blue -->
+    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_logo">#004BD8</color>
+</resources>

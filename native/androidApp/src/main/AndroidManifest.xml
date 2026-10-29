@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- "Save image" into Pictures/Ecency on Android 9 and older (MediaStore needs no permission from Android 10) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Push notifications (Android 13+ asks the user at start, as the RN app does). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Dictation in the editor: asked for when the user taps Record, never before. Recording stops with the screen. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- The QR scanner (RN QR_SCAN). With it declared, "Capture a photo" and "Record Video" ask for it before the
+         camera app opens (Android refuses those intents to an app that declares the permission without holding it). -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Listen: post audio keeps playing in the background with media controls (README "Listen"). Play Console needs
+         the media playback foreground service declared for this permission. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Dictation goes on in the background with a visible notification and a Stop action (README "Background
+         media"). Play Console needs the microphone foreground service declared for this permission. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!-- Listen: ExoPlayer's network wake mode keeps streaming with the screen off -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <!-- No backup: the RN app had allowBackup=false too. Keys live in the Keystore, which never leaves the
+         device; the rules below also cover Android 12+ device-to-device transfer, which ignores allowBackup. -->
+    <!-- UnusedTranslation: the generated values-iw and values-in are Hebrew and Indonesian under Android's legacy codes
+         (the resource lookup needs them), which locales_config names "he" and "id"; lint counts them as other
+         languages (README "Localization", OS-read strings). -->
+    <!-- Predictive back (Android 13+; the default from targetSdk 36, set for clarity): the system back-to-home
+         preview at the Feed root, and the app's own pop preview (AnimatedNavHost). -->
+    <application
+        android:name=".EcencyApplication"
+        android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        tools:ignore="UnusedTranslation">
+        <!-- Portrait only, like the RN app and iOS. Other configuration changes still recreate the activity
+             and keep the back stack (NavigationViewModel). A language change (the in-app picker sets the per-app
+             language, or the system settings do) does not: the Compose root switches copy and direction live. -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="locale|layoutDirection"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Ecency.Starting"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Login and signing links (README "Login and accounts"); every one is confirmed in the app first. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ecency" />
+                <data android:scheme="hive" />
+            </intent-filter>
+            <!-- ecency.com/auth and /signup. The RN app's id, so ecency.com's assetlinks.json already verifies them
+                 (README "In-place upgrade from RN 3.x"). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="ecency.com" />
+                <data android:path="/auth" />
+                <data android:path="/signup" />
+                <!-- RN parsePurchaseUrl: the web app's "buy in the app" links (README "In-app purchases") -->
+                <data android:path="/purchase" />
+            </intent-filter>
+            <!-- ecency.com posts, profiles and feeds (ContentLinks), the RN app's patterns, verified through
+                 ecency.com/.well-known/assetlinks.json for app.esteem.mobile.android (README, App shell). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="ecency.com" />
+                <data android:pathPattern="/@.*" />
+                <data android:pathPattern="/.*/@.*/.*" />
+                <data android:pathPattern="/hot/.*" />
+                <data android:pathPattern="/trending/.*" />
+                <data android:pathPattern="/created/.*" />
+                <!-- RN's bare feeds (plus /created, which RN lacked, #3599) and Waves: the global feed, the Waves tab (a `text` query opens the composer),
+                     /waves/<author>/<permlink> the wave's thread -->
+                <data android:path="/trending" />
+                <data android:path="/hot" />
+                <data android:path="/created" />
+                <data android:path="/waves" />
+                <data android:pathPattern="/waves/.*" />
+            </intent-filter>
+            <!-- Share into the app (RN react-native-receive-sharing-intent): text, an image, several images. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
+        <!-- Listen: Media3's media session service, the media notification and lock-screen controls while post audio plays. -->
+        <service
+            android:name=".ListenPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+
+        <!-- Dictation: holds the microphone while a recording runs in the background, with its notification. -->
+        <service
+            android:name=".DictationService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- Home screen widgets (README "Widgets"): they read only the app's widget snapshot and open ecency:// shortcuts.
+             Exported as every app widget provider must be; the system only sends them APPWIDGET_UPDATE. -->
+        <receiver
+            android:name=".widgets.NotificationsWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_notifications_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_notifications_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.StreakWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_streak_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_streak_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.ComposeWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_compose_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_compose_info" />
+        </receiver>
+
+        <!-- Firebase Cloud Messaging (README "Notifications and push"). Inactive without google-services.json. -->
+        <service
+            android:name=".push.EcencyMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- Sentry starts from EcencyApplication with the build's DSN (README "Crash reporting"), never by itself. -->
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+        <!-- No token before consent: FirebasePushPlatform turns auto-init on once notifications are allowed.
+             No default_notification_channel_id on purpose: pushes then land in Firebase's
+             "fcm_fallback_notification_channel", the channel the RN app's pushes used (its value was empty),
+             so a user's sound and importance settings for it survive the update. -->
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
+        <!-- The editor's camera capture: one private cache folder the camera app may write a single photo to. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.editorfiles"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/editor_file_paths" />
+        </provider>
+    </application>
+
+    <!-- The HiveAuth wallets the app may open, and the Custom Tabs browsers openInCustomTab pins a tab to
+         (package visibility, Android 11+). -->
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.APP_BROWSER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="has" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="waves" />
+        </intent>
+    </queries>
+</manifest>

@@ -1,0 +1,4 @@
+<resources>
+    <!-- RN bootsplash's dark background, the dark theme's page colour; the logo keeps its blue as in RN -->
+    <color name="splash_background">#1E2835</color>
+</resources>
