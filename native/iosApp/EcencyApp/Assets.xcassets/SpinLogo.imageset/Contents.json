@@ -1,0 +1,8 @@
+{
+  "images" : [
+    { "filename" : "ecency-logo-round.png", "idiom" : "universal", "scale" : "1x" },
+    { "filename" : "ecency-logo-round@2x.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "ecency-logo-round@3x.png", "idiom" : "universal", "scale" : "3x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

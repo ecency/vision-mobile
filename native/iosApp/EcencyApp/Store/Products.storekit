@@ -1,0 +1,171 @@
+{
+  "identifier": "9B7F3A5C-0E1D-4C2B-9A11-3F6C1B2D4E5F",
+  "nonRenewingSubscriptions": [
+    {
+      "displayPrice": "19.99",
+      "familyShareable": false,
+      "internalID": "100100",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "Ecency Pro",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "1999pro",
+      "referenceName": "Ecency Pro",
+      "type": "NonRenewingSubscription"
+    }
+  ],
+  "products": [
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "100000",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "100 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "099points",
+      "referenceName": "100 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "1.99",
+      "familyShareable": false,
+      "internalID": "100001",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "200 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "199points",
+      "referenceName": "200 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "100002",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "550 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "499points",
+      "referenceName": "550 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "9.99",
+      "familyShareable": false,
+      "internalID": "100003",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "1200 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "999points",
+      "referenceName": "1200 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "49.99",
+      "familyShareable": false,
+      "internalID": "100004",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "6500 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "4999points",
+      "referenceName": "6500 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "99.99",
+      "familyShareable": false,
+      "internalID": "100005",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "14000 Points",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "9999points",
+      "referenceName": "14000 Points",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "9.99",
+      "familyShareable": false,
+      "internalID": "100006",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "Account Boost",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "999boosts",
+      "referenceName": "Account Boost",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "100007",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "5 Spins",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "499spins",
+      "referenceName": "5 Spins",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "9.99",
+      "familyShareable": false,
+      "internalID": "100008",
+      "localizations": [
+        {
+          "description": "Synthetic test product for local StoreKit testing.",
+          "displayName": "Premium Account",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "999accounts",
+      "referenceName": "Premium Account",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "0",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_lastSynchronizedDate": 0,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

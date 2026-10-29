@@ -1,0 +1,27 @@
+# Merged into project.yml only when ECENCY_FIREBASE=true (scripts/ios-sim.sh and CI set it when
+# iosApp/GoogleService-Info.plist exists). Without it the Firebase package is not part of the project at all:
+# the app builds and runs with push inactive (Push.swift checks `canImport(FirebaseMessaging)`).
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    # The RN app ships firebase-ios-sdk 12.x through @react-native-firebase 23; Swift and Objective-C only.
+    exactVersion: 12.4.0
+targets:
+  EcencyApp:
+    dependencies:
+      - package: Firebase
+        product: FirebaseMessaging
+    sources:
+      # The RN app's plist (Firebase app app.esteem.mobile.ios; CI decodes GOOGLE_PLIST): untracked, never committed.
+      - path: GoogleService-Info.plist
+        optional: true
+        buildPhase: resources
+    info:
+      properties:
+        # No token before consent: Push.swift turns auto-init on once notifications are allowed.
+        FirebaseMessagingAutoInitEnabled: false
+    entitlements:
+      # written by XcodeGen; Generated/ is gitignored
+      path: Generated/App.entitlements
+      properties:
+        aps-environment: development
