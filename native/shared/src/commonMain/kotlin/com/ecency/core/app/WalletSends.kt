@@ -154,6 +154,8 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
 
     private suspend fun drive(username: String, r: Running, actionId: String, operation: String): WalletSend {
         fun at(phase: SendPhase) = WalletSend(actionId, username, operation, phase)
+        // RN: the PIN before a new signature when the app lock is on (a resume signs nothing new); no PIN, nothing sent
+        if (r.pending == null && !WalletPin.confirmed(env, r.ops)) return at(SendPhase.Cancelled)
         val started = env.nowMillis()
         var lookups = 0
         val attempt: suspend () -> com.ecency.core.auth.SignedBroadcast = {

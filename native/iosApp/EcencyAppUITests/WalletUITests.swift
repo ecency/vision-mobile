@@ -91,6 +91,31 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Continue transaction?"].exists)
     }
 
+    /// RN: with the app lock on, a wallet operation asks for the PIN first. Cancel signs nothing and keeps the form.
+    func testWithTheLockOnATransferAsksForThePinBeforeSigning() {
+        let app = launch(["-lockDemo", "YES", "-openScreen", "wallet:transfer,transfer,HIVE,hive,spike-bob"])
+        XCTAssertTrue(app.staticTexts["pin-message"].waitForExistence(timeout: 30)) // cold start locks
+        for digit in "1234" { app.buttons["pin-key-\(digit)"].tap() }
+        let amount = app.textFields["transfer-amount"]
+        XCTAssertTrue(amount.waitForExistence(timeout: 30))
+        expectation(for: NSPredicate(format: "label CONTAINS '1234.567'"), evaluatedWith: app.buttons["transfer-balance"])
+        waitForExpectations(timeout: 20)
+        amount.focusAndType("1.5")
+        let next = app.buttons["transfer-next"]
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
+        waitForExpectations(timeout: 20)
+        next.tap()
+        let confirm = app.buttons["transfer-confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10))
+        confirm.tap()
+        XCTAssertTrue(app.staticTexts["pin-message"].waitForExistence(timeout: 10), "the PIN is asked before signing")
+        WalletShots.save("transfer-pin")
+        app.buttons["pin-close"].tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: app.staticTexts["pin-message"])
+        waitForExpectations(timeout: 10)
+        XCTAssertTrue(amount.exists, "cancel keeps the transfer form")
+    }
+
     func testOtherWalletScreensOpen() {
         let cases: [(String, String, String)] = [
             ("wallet:transfer,delegate_vesting_shares,HP,hive,spike-bob", "delegate-hp", "delegate"),

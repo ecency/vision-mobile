@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
@@ -257,6 +258,27 @@ class WalletFlowsTest {
         }
         val sent = node.broadcasts().single()
         assertTrue(sent, sent.contains(""""operations":[["transfer",{"from":"tester","to":"spike-bob","amount":"1.500 HIVE","memo":"thanks"}]]"""))
+    }
+
+    @Test
+    fun withTheAppLockOnATransferAsksForThePinBeforeSigning() {
+        com.ecency.core.secure.PinLock(KeyVault(node.store), 16).setPin("1234")
+        val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))
+        launch(navigator)
+        until { exists("pinScreen") } // cold start locks
+        "1234".forEach { d -> compose.onNodeWithTag("pinKey$d", useUnmergedTree = true).performClick() }
+        until { env.appLock.current.prompt == null && exists("transferForm") && text("transferBalance").contains("12.345") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        compose.onNodeWithTag("transferAmount").performTextInput("1.5")
+        until { compose.onAllNodes(hasTestTag("transferNext")).fetchSemanticsNodes().firstOrNull()?.config?.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled) == false }
+        compose.onNodeWithTag("transferNext").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("transferConfirm") }
+        compose.onNodeWithTag("transferConfirm").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("pinScreen") }
+        assertTrue("nothing signed before the PIN", node.broadcasts().isEmpty())
+        "1234".forEach { d -> compose.onNodeWithTag("pinKey$d", useUnmergedTree = true).performClick() }
+        until { node.broadcasts().isNotEmpty() }
+        assertTrue(node.broadcasts().single().contains(""""to":"spike-bob","amount":"1.500 HIVE""""))
     }
 
     @Test
