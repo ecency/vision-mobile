@@ -152,8 +152,10 @@ class PerksFlowsTest {
         assertFalse("the spin has its own screen", exists("quest:daily:spin"))
         assertTrue(exists("perksStreak") && exists("perksFreezeOwned") && exists("perksFreezeBuy"))
         assertFalse("Esie cheers only a finished tier", exists("esie"))
+        assertTrue(text("perksReset").startsWith("Today (UTC), resets in "))
         click("tier:weekly")
         waitFor("quest:weekly:post")
+        assertFalse("only the daily tier resets at midnight", exists("perksReset"))
         assertEquals("3/5", text("questCount:post"))
         click("tier:monthly")
         waitFor("quest:monthly:post")
@@ -243,7 +245,7 @@ class PerksFlowsTest {
         assertEquals(com.ecency.core.esie.EsieMood.HAPPY, compose.onNodeWithTag("esie", useUnmergedTree = true).fetchSemanticsNode().config[com.ecency.app.ui.EsieMoodKey])
         // the app's window (the toast layer is a second, smaller root)
         val screen = compose.onAllNodes(androidx.compose.ui.test.isRoot()).fetchSemanticsNodes().maxBy { it.size.height }.boundsInRoot
-        for (tag in listOf("spinTimer", "spinProduct")) {
+        for (tag in listOf("spinTimer", "spinReset", "spinProduct")) {
             val box = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
             assertTrue("$tag ($box) inside the screen ($screen)", box.bottom <= screen.bottom && box.top >= screen.top)
         }
@@ -283,6 +285,7 @@ class PerksFlowsTest {
         assertEquals(com.ecency.core.esie.EsieMood.HAPPY, compose.onNodeWithTag("esie", useUnmergedTree = true).fetchSemanticsNode().config[com.ecency.app.ui.EsieMoodKey])
         waitFor("spinProduct")
         assertTrue(text("spinTimer").startsWith("Next free spin in "))
+        assertEquals("Resets daily at 00:00 UTC", text("spinReset"))
         assertEquals(1, requests("/post-game").size)
     }
 }

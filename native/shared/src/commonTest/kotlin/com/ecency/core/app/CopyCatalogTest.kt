@@ -542,6 +542,8 @@ class CopyCatalogTest {
         "SpinCopy.KEY_MISSING" to { SpinCopy.KEY_MISSING },
         "SpinCopy.UNKNOWN_ERROR" to { SpinCopy.UNKNOWN_ERROR },
         "SpinCopy.score" to { SpinCopy.score(7) },
+        "DailyReset.RESETS_DAILY" to { DailyReset.RESETS_DAILY },
+        "DailyReset.todayLine" to { DailyReset.todayLine(1_793_299_680_000L) },
         "SpotlightCopy.LABEL" to { SpotlightCopy.LABEL },
         "SpotlightCopy.DISMISS" to { SpotlightCopy.DISMISS },
         "StakeCopy.DELEGATE" to { StakeCopy.DELEGATE },

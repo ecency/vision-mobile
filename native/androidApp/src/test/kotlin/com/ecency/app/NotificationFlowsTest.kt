@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -227,10 +228,13 @@ class NotificationFlowsTest {
         // the daily board puts finished quests first
         assertTrue(hasTextNode("Top Users"))
         assertTrue(hasTextNode("12.500"))
+        // the daily board says when it resets (00:00 UTC; the test clock is 12:00 UTC)
+        compose.onNodeWithTag("leaderboardReset", useUnmergedTree = true).assertTextEquals("Today (UTC), resets in 12h")
         compose.onNodeWithTag("leaderboardFilter").performClick()
         waitFor("leaderboardFilter:1")
         compose.onNodeWithTag("leaderboardFilter:1").performClick()
         waitUntil { node.calls("leaderboard/week").isNotEmpty() }
+        waitUntil { !exists("leaderboardReset") }
         assertTrue(node.calls("notifications").isEmpty())
         assertTrue(node.calls("notifications/unread").isEmpty())
     }

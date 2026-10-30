@@ -75,6 +75,9 @@ data class SpinState(
     val showProducts: Boolean get() = showCounters && gameRight <= 0
     val showTags: Boolean get() = showButton
     val showScore: Boolean get() = !spinning && score > 0
+
+    /** Under the countdown (shown with no spin left): the free spin resets at 00:00 UTC. */
+    val resetNote: String? get() = if (showProducts) DailyReset.RESETS_DAILY else null
 }
 
 /**

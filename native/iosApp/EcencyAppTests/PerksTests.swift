@@ -95,6 +95,31 @@ final class PerksTests: XCTestCase {
         XCTAssertTrue(DemoAuthServices.shared.demoSpinUsed)
     }
 
+    func testTheDailyTierAndTheSpinSayWhenTheyReset() {
+        // 2026-10-29T18:48:00Z: 5 h 12 min to 00:00 UTC
+        let now: Int64 = 1_793_299_680_000
+        let perks = Observed(env.perksModel(), ownsModel: true)
+        let model = perks.model as! PerksModel
+        model.start()
+        waitUntil { perks.state.quests != nil }
+        XCTAssertEqual(perks.state.resetLine(nowMillis: now), "Today (UTC), resets in 5h 12m")
+        XCTAssertEqual(perks.state.resetLine(nowMillis: now + 5 * 3_600_000 + 12 * 60_000), "Today (UTC), resets in 24h", "rolls over at midnight")
+        model.selectTier(tier: .weekly)
+        XCTAssertNil(model.current.resetLine(nowMillis: now))
+        model.selectTier(tier: .monthly)
+        XCTAssertNil(model.current.resetLine(nowMillis: now))
+        XCTAssertEqual(DailyReset.shared.nextTickMillis(nowMillis: now), 60_000)
+
+        let spin = Observed(env.spinGameModel(), ownsModel: true)
+        let game = spin.model as! SpinGameModel
+        game.start()
+        waitUntil { !spin.state.loading }
+        XCTAssertNil(spin.state.resetNote, "a spin is left: no countdown")
+        game.spin()
+        waitUntil(15) { game.current.gameRight == 0 && !game.current.claiming && !game.current.spinning }
+        XCTAssertEqual(game.current.resetNote, "Resets daily at 00:00 UTC")
+    }
+
     func testTheCountdownMatchesMoment() {
         // moment.utc(moment(next).diff(now)).format('H:m:ss'), now = 2026-10-20T10:00:00Z
         XCTAssertEqual(SpinCopy.shared.timeLeft(nextDate: "2026-10-20T11:05:09Z", nowMillis: 1_792_490_400_000), "1:5:09")

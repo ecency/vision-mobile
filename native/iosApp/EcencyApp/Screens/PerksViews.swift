@@ -106,6 +106,7 @@ struct PerksScreen: View {
                 Text(copy.QUESTS_SUBTITLE).scaledFont(13).foregroundStyle(theme.secondary).padding(.top, 2)
                 if mine && state.showStreak { streak(state) }
                 tiers(state.tier)
+                DailyResetLine(line: { state.resetLine(nowMillis: $0) }, identifier: "perks-reset").padding(.top, 8)
                 if !mine || (state.loading && state.quests == nil) {
                     ProgressView().frame(maxWidth: .infinity).padding(16).accessibilityIdentifier("perks-loading")
                 } else if state.rows.isEmpty {
@@ -281,6 +282,11 @@ struct SpinGameScreen: View {
                     Text("\(copy.TIMER_TEXT) \(copy.timeLeft(nextDate: state.nextDate, nowMillis: Int64(now.timeIntervalSince1970 * 1000)))")
                         .scaledFont(16, weight: .semibold).foregroundStyle(theme.secondary).padding(.top, 50)
                         .accessibilityIdentifier("spin-timer")
+                    if let note = state.resetNote {
+                        Text(note).scaledFont(13).foregroundStyle(theme.secondary).multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true).padding(.top, 6).padding(.horizontal, 16)
+                            .accessibilityIdentifier("spin-reset")
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -294,6 +300,33 @@ struct SpinGameScreen: View {
         .onReceive(timer) { now = $0 }
         .alert(state.alert ?? "", isPresented: Binding(get: { state.alert != nil }, set: { if !$0 { model.dismissAlert() } })) {
             Button(UiCopy.shared.OK, role: .cancel) { model.dismissAlert() }
+        }
+    }
+}
+
+/// The daily reset line (00:00 UTC, issue #3548): `line` reads the clock, nil hides it. It ticks while shown, each
+/// time the minutes it reads change, so it rolls over at midnight.
+struct DailyResetLine: View {
+    let line: (Int64) -> String?
+    let identifier: String
+    @Environment(\.appTheme) private var theme
+    @State private var now = DailyResetLine.clock()
+
+    private static func clock() -> Int64 { Int64(Date().timeIntervalSince1970 * 1000) }
+
+    var body: some View {
+        if let text = line(now) {
+            Text(text).scaledFont(13).foregroundStyle(theme.secondary)
+                .fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier(identifier)
+                .task {
+                    now = DailyResetLine.clock()
+                    while !Task.isCancelled {
+                        let wait = DailyReset.shared.nextTickMillis(nowMillis: DailyResetLine.clock())
+                        try? await Task.sleep(nanoseconds: UInt64(max(wait, 1)) * 1_000_000)
+                        now = DailyResetLine.clock()
+                    }
+                }
         }
     }
 }

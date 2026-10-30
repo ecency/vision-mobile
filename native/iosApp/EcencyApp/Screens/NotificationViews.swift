@@ -355,6 +355,7 @@ private struct LeaderboardView: View {
         VStack(spacing: 0) {
             FilterBar(selected: state.duration.label, options: LeaderboardDuration.entries.map(\.label), identifier: "leaderboard-filter",
                       onSelect: { board.select(duration: LeaderboardDuration.entries[$0]) }) { EmptyView() }
+            DailyResetLine(line: { state.resetLine(nowMillis: $0) }, identifier: "leaderboard-reset").padding(.horizontal, 20).padding(.top, 8)
             HStack(spacing: 0) {
                 Text(ReadingUiCopy.shared.TOP_USERS).scaledFont(14, weight: .bold).frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 20)
                 if !stacked {

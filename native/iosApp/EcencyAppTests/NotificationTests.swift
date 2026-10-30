@@ -172,6 +172,12 @@ final class NotificationTests: XCTestCase {
         waitUntil { board.state.users.count == 3 }
         XCTAssertEqual(board.state.users.first?.username, "spike-alice")
         XCTAssertEqual(board.state.users.first?.questsDone, true)
+        // 2026-10-29T18:48:00Z: the daily board says when it resets, the others do not
+        let now: Int64 = 1_793_299_680_000
+        XCTAssertEqual(board.state.resetLine(nowMillis: now), "Today (UTC), resets in 5h 12m")
+        (board.model as! LeaderboardModel).select(duration: .week)
+        waitUntil { board.state.duration == .week }
+        XCTAssertNil(board.state.resetLine(nowMillis: now))
     }
 
     func testWithoutFirebasePushIsInactive() throws {

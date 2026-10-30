@@ -367,6 +367,7 @@ private fun Leaderboard(model: LeaderboardModel, env: AppEnvironment, onProfile:
     LaunchedEffect(model) { model.start() }
     Column(Modifier.fillMaxSize()) {
         FilterBar(state.duration.label, LeaderboardDuration.entries.map { it.label }, { model.select(LeaderboardDuration.entries[it]) }, "leaderboardFilter")
+        DailyResetLine(env.nowMillis, state::resetLine, "leaderboardReset", Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp))
         Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(ReadingUiCopy.TOP_USERS, color = colors.darkGray, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.weight(1f).padding(start = 20.dp))
             Text(ReadingUiCopy.ACTIVITIES, color = colors.darkGray, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.width(80.dp))

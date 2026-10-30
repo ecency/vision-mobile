@@ -100,7 +100,10 @@ private fun OnStart(onForeground: () -> Unit) {
  * while the card's account is the signed-in one.
  */
 @Composable
-fun PerksScreen(model: PerksModel, signedIn: String?, onBack: () -> Unit, onOpen: (AppScreen) -> Unit, onGetPoints: (String) -> Unit, pro: com.ecency.core.app.ProModel? = null) {
+fun PerksScreen(
+    model: PerksModel, signedIn: String?, onBack: () -> Unit, onOpen: (AppScreen) -> Unit, onGetPoints: (String) -> Unit,
+    nowMillis: () -> Long, pro: com.ecency.core.app.ProModel? = null,
+) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
@@ -131,6 +134,7 @@ fun PerksScreen(model: PerksModel, signedIn: String?, onBack: () -> Unit, onOpen
                     Text(PerksCopy.QUESTS_SUBTITLE, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(top = 2.dp))
                     if (mine && s.showStreak) StreakRow(s.streak, s.showFreezeOwned, s.freezesOwned, s.showFreezeBuy, s.freezeLabel, s.buyingFreeze, model::askFreeze)
                     TierTabs(s.tier, model::selectTier)
+                    DailyResetLine(nowMillis, s::resetLine, "perksReset", Modifier.padding(top = 8.dp))
                     when {
                         !mine || (s.loading && s.quests == null) -> Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = colors.blueText, modifier = Modifier.size(24.dp).testTag("perksLoading"))
@@ -331,6 +335,9 @@ fun SpinGameScreen(env: com.ecency.core.app.AppEnvironment, model: SpinGameModel
                         "${SpinCopy.TIMER_TEXT} ${SpinCopy.timeLeft(s.nextDate, now.longValue)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                         color = colors.darkGray, modifier = Modifier.padding(top = 50.dp).testTag("spinTimer"),
                     )
+                    s.resetNote?.let {
+                        Text(it, fontSize = 13.sp, color = colors.darkGray, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp, start = 16.dp, end = 16.dp).testTag("spinReset"))
+                    }
                 }
             }
         }
@@ -343,6 +350,23 @@ fun SpinGameScreen(env: com.ecency.core.app.AppEnvironment, model: SpinGameModel
             confirmButton = { TextButton(onClick = model::dismissAlert, modifier = Modifier.testTag("spinAlertOk")) { Text(UiCopy.OK) } },
         )
     }
+}
+
+/**
+ * The daily reset line (00:00 UTC, issue #3548): [line] reads the clock, null hides it. It ticks while shown, each
+ * time the minutes it reads change, so it rolls over at midnight.
+ */
+@Composable
+internal fun DailyResetLine(nowMillis: () -> Long, line: (Long) -> String?, tag: String, modifier: Modifier = Modifier) {
+    val now = remember { mutableLongStateOf(nowMillis()) }
+    val text = line(now.longValue) ?: return
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(com.ecency.core.app.DailyReset.nextTickMillis(nowMillis()))
+            now.longValue = nowMillis()
+        }
+    }
+    Text(text, fontSize = 13.sp, color = LocalEcencyColors.current.darkGray, modifier = modifier.testTag(tag))
 }
 
 /** The outer ring's diameter. */

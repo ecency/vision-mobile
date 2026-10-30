@@ -900,6 +900,23 @@ class NotificationsTest {
     }
 
     @Test
+    fun theDailyBoardSaysWhenItResets() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        // 2026-10-29T18:48:00Z
+        val now = 1_793_299_680_000L
+        assertEquals("Today (UTC), resets in 5h 12m", board.current.resetLine(now))
+        board.select(LeaderboardDuration.WEEK); f.idle()
+        assertNull(board.current.resetLine(now), "weekly")
+        board.select(LeaderboardDuration.MONTH); f.idle()
+        assertNull(board.current.resetLine(now), "monthly")
+        board.select(LeaderboardDuration.DAY); f.idle()
+        assertEquals("Today (UTC), resets in 24h", board.current.resetLine(now + 5 * 3_600_000L + 12 * 60_000L), "rolls over at midnight")
+    }
+
+    @Test
     fun leaderboardFailureIsAToast() = runTest {
         val f = NotificationFixture(this, users = emptyList())
         f.start()

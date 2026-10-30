@@ -181,6 +181,7 @@ class SpinGameTest {
         assertEquals(0, model.current.gameRight)
         assertTrue(model.current.showProducts)
         assertEquals("3:4:05", SpinCopy.timeLeft(model.current.nextDate, app.now))
+        assertEquals("Resets daily at 00:00 UTC", model.current.resetNote, "under the countdown")
         model.close()
     }
 

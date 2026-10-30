@@ -2963,6 +2963,11 @@
       "key_missing": "Game key missing",
       "score": "{score, plural, one {# Point} other {# Points}}"
     },
+    "daily_reset": {
+      "today_resets_in": "Today (UTC), resets in {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Resets daily at 00:00 UTC"
+    },
     "storage_reset": {
       "title": "Sign in again",
       "message": "Secure storage was reset on this device. Sign in again.",

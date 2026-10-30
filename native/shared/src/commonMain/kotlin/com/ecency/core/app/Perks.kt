@@ -175,6 +175,9 @@ data class PerksState(
     val showFreezeBuy: Boolean get() = showStreak && freezesOwned < QuestCatalog.STREAK_FREEZE_MAX_OWNED
     val freezeLabel: String get() = if (buyingFreeze) PerksCopy.FREEZE_BUYING else PerksCopy.freezeBuy()
     val errorText: String get() = if (timedOut) PerksCopy.TIMED_OUT else PerksCopy.LOAD_FAILED
+
+    /** The daily tier's reset line (00:00 UTC); null on the weekly and monthly tiers. */
+    fun resetLine(nowMillis: Long): String? = if (tier == QuestTier.DAILY) DailyReset.todayLine(nowMillis) else null
 }
 
 /** How a streak freeze buy ended. */

@@ -401,6 +401,9 @@ data class LeaderboardState(
 ) {
     /** The daily board shows a check for users who finished their quests instead of the rank. */
     val showsQuestCheck: Boolean get() = duration == LeaderboardDuration.DAY
+
+    /** The daily board's reset line (00:00 UTC); null on the weekly and monthly boards. */
+    fun resetLine(nowMillis: Long): String? = if (duration == LeaderboardDuration.DAY) DailyReset.todayLine(nowMillis) else null
 }
 
 /** RN leaderboardContainer: the top users by points for a day, week or month. Public data, no account needed. */
