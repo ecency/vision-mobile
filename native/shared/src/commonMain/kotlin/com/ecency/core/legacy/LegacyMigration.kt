@@ -11,8 +11,6 @@ import com.ecency.core.secure.VaultAccount
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 
 /** What one migration run did. Lists usernames only, never secrets. */
 class LegacyMigrationReport(
@@ -71,7 +69,13 @@ object LegacyMigration {
         val report: LegacyMigrationReport
         // accounts whose RN secrets must stay
         val keep: Set<String>
-        if (vault.legacyImported()) {
+        // accounts the user removed in this app (forget): never imported again
+        val removed = names(vault, REMOVED)
+        val firstRun = !vault.legacyImported()
+        if (!firstRun) {
+            // without both lists a kept or removed entry cannot be told from the rest: import and delete nothing
+            val keptBefore = names(vault, KEPT)
+            if (keptBefore == null || removed == null) return done()
             val legacy = try {
                 LegacyImporter.import(storage::read, pinKey, defaultPin)
             } catch (_: LegacyImportError.NothingToImport) {
@@ -85,34 +89,37 @@ object LegacyMigration {
             } else {
                 // entries kept by an earlier run that read now go into the vault before their RN copy may go;
                 // other RN accounts were settled before (or came after the import: README "Rollback")
-                val settled = settle(legacy, vault, only = keptBefore(vault))
+                val settled = settle(legacy, vault, only = keptBefore, removed)
                 report = done(settled.imported)
                 keep = settled.keep
             }
         } else {
+            // unknown removals could bring a removed account back: retry on the next launch
+            if (removed == null) throw LegacyImportError.StorageUnreadable()
             val legacy = try {
                 LegacyImporter.import(storage::read, pinKey, defaultPin)
             } catch (_: LegacyImportError.NothingToImport) {
                 null
             }
             if (legacy == null) {
-                vault.markLegacyImported()
                 report = LegacyMigrationReport(emptyList(), emptyList(), emptyList(), emptyMap(), alreadyDone = false)
                 keep = emptySet()
             } else {
-                report = migrate(legacy, vault, pinIterations)
-                keep = settle(legacy, vault, only = null).keep
+                report = importAccounts(legacy, vault, pinIterations, removed)
+                keep = settle(legacy, vault, only = null, removed).keep
             }
         }
-        // the next run must know which entries are kept, or it could not tell them from accounts removed since
+        // the next run must know which entries are kept, or it could not tell them from accounts removed since;
+        // the first run writes it before the mark, so a run killed in between repeats the import instead of guessing
         if (!recordKept(vault, keep)) return report
+        if (firstRun) vault.markLegacyImported()
         // The mark is set, so the vault holds what it should: the RN copies of the secrets it holds can go.
-        val removed = try {
+        val scrubbed = try {
             LegacyCleanup.hasSecrets(storage, keep) && LegacyCleanup.scrub(storage, keep)
         } catch (_: LegacyImportError) {
             false // unreadable right now; the next run retries
         }
-        return report.withRemoved(removed)
+        return report.withRemoved(scrubbed)
     }
 
     private class Settled(val imported: List<String>, val keep: Set<String>)
@@ -122,10 +129,12 @@ object LegacyMigration {
      * vault lacks is written first (with its RN session), and so are keys a vault key account lacks; a key the
      * vault holds with another value is the vault's, and the RN entry then stays. A failed write keeps the entry.
      */
-    private fun settle(legacy: LegacyImport, vault: KeyVault, only: Set<String>?): Settled {
+    private fun settle(legacy: LegacyImport, vault: KeyVault, only: Set<String>?, removed: Set<String>): Settled {
         val imported = mutableListOf<String>()
         val keep = mutableSetOf<String>()
         for (account in legacy.accounts) {
+            // removed by the user: neither imported nor kept, so its RN entry goes
+            if (account.username in removed) continue
             val converted = account.toVaultAccount()
             if (converted == null || account.mustKeep()) {
                 keep += account.username
@@ -154,18 +163,42 @@ object LegacyMigration {
         return Settled(imported, keep)
     }
 
-    private const val KEPT = "legacy.kept"
-
-    /** The RN entries the last run kept (none before the first). */
-    private fun keptBefore(vault: KeyVault): Set<String> = try {
-        vault.store.getString(KEPT)?.let { Json.parseToJsonElement(it).jsonArray.map { e -> e.jsonPrimitive.content } }.orEmpty().toSet()
-    } catch (_: Exception) {
-        emptySet()
+    /**
+     * The user removed [names] in this app (sign-out): their RN entries are never imported again and are deleted.
+     * Call it before the vault accounts go. The names are recorded in the vault (`legacy.removed`, which every
+     * later run honours) and the RN entries are deleted now; either one is enough, so it throws only when both
+     * failed, and the caller then removes nothing.
+     */
+    @Throws(SecureStoreException::class, LegacyImportError::class)
+    fun forget(vault: KeyVault, storage: LegacyStorage?, names: Collection<String>) {
+        val recorded = runCatching {
+            vault.store.withLock {
+                val before = names(vault, REMOVED) ?: throw SecureStoreException.Corrupted(REMOVED)
+                if (!before.containsAll(names)) writeNames(vault, REMOVED, before + names)
+            }
+        }
+        val scrubbed = runCatching { storage?.let { LegacyCleanup.forget(it, names.toSet()) } }
+        if (scrubbed.isFailure) recorded.exceptionOrNull()?.let { throw it }
     }
+
+    private const val KEPT = "legacy.kept"
+    private const val REMOVED = "legacy.removed"
+
+    /** A list of usernames in the vault: empty when absent, null when it cannot be read (then nothing may be deleted). */
+    private fun names(vault: KeyVault, entry: String): Set<String>? = try {
+        vault.store.getString(entry)?.let { raw ->
+            (Json.parseToJsonElement(raw) as JsonArray).map { e -> (e as JsonPrimitive).also { check(it.isString) }.content }.toSet()
+        } ?: emptySet()
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun writeNames(vault: KeyVault, entry: String, names: Set<String>) =
+        vault.store.putString(entry, JsonArray(names.sorted().map(::JsonPrimitive)).toString())
 
     /** False when it could not be written: nothing is deleted then. */
     private fun recordKept(vault: KeyVault, keep: Set<String>): Boolean = try {
-        if (keep != keptBefore(vault)) vault.store.putString(KEPT, JsonArray(keep.sorted().map(::JsonPrimitive)).toString())
+        if (keep != names(vault, KEPT)) writeNames(vault, KEPT, keep)
         true
     } catch (_: Exception) {
         false
@@ -217,12 +250,19 @@ object LegacyMigration {
     @Throws(LegacyImportError::class, SecureStoreException::class)
     fun migrate(legacy: LegacyImport, vault: KeyVault, pinIterations: Int): LegacyMigrationReport {
         if (vault.legacyImported()) return done()
+        val removed = names(vault, REMOVED) ?: throw LegacyImportError.StorageUnreadable()
+        return importAccounts(legacy, vault, pinIterations, removed).also { vault.markLegacyImported() }
+    }
+
+    /** [migrate] without the mark; [removed] accounts are left out. */
+    private fun importAccounts(legacy: LegacyImport, vault: KeyVault, pinIterations: Int, removed: Set<String>): LegacyMigrationReport {
         val imported = mutableListOf<String>()
         val kept = mutableListOf<String>()
         val skipped = mutableListOf<String>()
         val written = mutableMapOf<String, VaultAccount>()
 
         for (account in legacy.accounts) {
+            if (account.username in removed) continue
             val converted = account.toVaultAccount()
             if (converted == null || !converted.hasCredential) {
                 skipped += account.username
@@ -271,7 +311,6 @@ object LegacyMigration {
             stored == null || (username in written && stored != written[username])
         }
         if (missing.isNotEmpty()) throw LegacyImportError.NotVerified(missing)
-        vault.markLegacyImported()
 
         return LegacyMigrationReport(
             imported = imported,

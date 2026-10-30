@@ -146,6 +146,8 @@ class AppEnvironment(
     val accounts: AccountManager = AccountManager(
         VaultAccountStore(vault.vault, vault.vault.store), chain,
         EcencyTokenApi(auth.http, auth.tokenHost), nowMillis, dispatchers.io,
+        // a signed-out account's RN entry goes too and is never imported again
+        beforeRemove = { com.ecency.core.legacy.LegacyMigration.forget(vault.vault, legacy?.storage, it) },
     )
 
     /** The HiveAuth relay client (sign-in and wallet signing). */

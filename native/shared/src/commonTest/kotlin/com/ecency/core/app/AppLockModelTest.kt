@@ -789,6 +789,31 @@ class AppLockModelTest {
         collector.cancel()
     }
 
+    @Test
+    fun aSignedOutAccountWhoseRnEntryWasKeptIsNotImportedAgain() = runTest {
+        val rn = MapLegacyStorage(mapOf("persist:root" to LegacyFixtures.PERSIST_ROOT, "user" to LegacyFixtures.USERS))
+        val app = legacyApp(storage = rn)
+        // signed in natively before the import with another key: the vault's wins and the RN entry is kept
+        KeyVault(app.store).save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        started(app)
+        assertTrue("spike-master" in rnNames(rn))
+        app.env.session.logout("spike-master")
+        testScheduler.advanceUntilIdle()
+        val leftAfterSignOut = "spike-master" in rnNames(rn)
+        // the next launch over the same vault and RN storage
+        val again = TestApp(this, legacy = LegacyMigrationSource(rn, LegacyFixtures.PIN_KEY, LegacyFixtures.DEFAULT_PIN)) { HttpResult(500, "") }
+        app.store.entries.forEach { (k, v) -> again.store.entries[k] = v }
+        started(again)
+        assertNull(KeyVault(again.store).account("spike-master"), "a signed-out account came back")
+        assertFalse(leftAfterSignOut, "the signed-out account's RN entry stayed")
+    }
+
+    private fun rnNames(rn: MapLegacyStorage): List<String> =
+        rn.read("user")?.let { u ->
+            kotlinx.serialization.json.Json.parseToJsonElement(u).let { it as kotlinx.serialization.json.JsonArray }
+                .map { (it as kotlinx.serialization.json.JsonObject)["username"].toString().trim('"') }
+        }.orEmpty()
+
     companion object {
         const val BINDING = "enrolled-at-enable"
     }

@@ -417,4 +417,139 @@ class LegacyMigrationTest {
         assertEquals(LegacyFixtures.MEMO, master.memoKey)
         assertTrue(store.entries.values.none { LegacyFixtures.PASSWORD in it.decodeToString() || LegacyFixtures.OWNER in it.decodeToString() })
     }
+
+    // the vault's "legacy.kept" list, as the migration writes it
+    private fun keptList(s: InMemorySecureStore = store) = s.getString("legacy.kept")
+
+    @Test
+    fun anUnreadableKeptListDeletesNothing() {
+        for (broken in listOf("{broken", "42", "[{\"a\":1}]")) {
+            val mem = InMemorySecureStore()
+            val storage = MapLegacyStorage(rnData)
+            // spike-default is kept: this build cannot read it
+            run(storage = storage, target = KeyVault(mem), defaultPin = null)
+            assertTrue("spike-default" in rnUsers(storage))
+            mem.putString("legacy.kept", broken)
+            // a later build reads it, but cannot tell which entries were kept
+            run(storage = storage, target = KeyVault(mem))
+            assertTrue("spike-default" in rnUsers(storage), "deleted although the kept list could not be read ($broken)")
+            assertEquals(originalUser("spike-default"), rnUser("spike-default", storage))
+            assertEquals(broken, mem.getString("legacy.kept"), "the unreadable list is left for the next run")
+        }
+    }
+
+    @Test
+    fun aKeptListThatFailsToReadDeletesNothing() {
+        val mem = InMemorySecureStore()
+        val storage = MapLegacyStorage(rnData)
+        run(storage = storage, target = KeyVault(mem), defaultPin = null)
+        val failing = object : SecureStore by mem {
+            override fun get(name: String): ByteArray? =
+                if (name == "legacy.kept") throw com.ecency.core.secure.SecureStoreException.Corrupted(name) else mem.get(name)
+            override fun getString(name: String): String? = get(name)?.decodeToString()
+        }
+        run(storage = storage, target = KeyVault(failing))
+        assertTrue("spike-default" in rnUsers(storage), "deleted although the kept list could not be read")
+        assertEquals(originalUser("spike-default"), rnUser("spike-default", storage))
+    }
+
+    @Test
+    fun killedAtEveryWriteOfALaterRunNeverDropsAnEntryTheVaultLacks() {
+        for (n in 0..6) {
+            val mem = InMemorySecureStore()
+            val storage = MapLegacyStorage(rnData)
+            run(storage = storage, target = KeyVault(mem), defaultPin = null)
+            runCatching { run(storage = storage, target = KeyVault(DyingStore(mem, n))) }
+            if (KeyVault(mem).account("spike-default")?.postingKey != LegacyFixtures.DEFAULT_POSTING) {
+                assertTrue("spike-default" in rnUsers(storage), "RN entry deleted before the vault held it ($n)")
+            }
+            run(storage = storage, target = KeyVault(mem))
+            assertEquals(LegacyFixtures.DEFAULT_POSTING, KeyVault(mem).account("spike-default")?.postingKey, "killed after $n writes")
+            assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers(storage).sorted(), "only the kept RN entries stay ($n)")
+        }
+    }
+
+    @Test
+    fun killedAtEveryWriteOfTheFirstRunNeverDropsAnEntryWhoseKeysTheVaultDoesNotHold() {
+        // signed in natively before the import with another key: the vault's wins, so the RN entry must stay
+        val native = VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif")
+        for (n in 0..20) {
+            val mem = InMemorySecureStore()
+            KeyVault(mem).save(native)
+            val storage = MapLegacyStorage(rnData)
+            runCatching { run(storage = storage, target = KeyVault(DyingStore(mem, n))) }
+            assertTrue("spike-master" in rnUsers(storage), "RN entry deleted by the killed run ($n)")
+            run(storage = storage, target = KeyVault(mem))
+            assertEquals(native, KeyVault(mem).account("spike-master"))
+            assertTrue("spike-master" in rnUsers(storage), "RN entry deleted after a kill at write $n")
+            assertEquals(originalUser("spike-master"), rnUser("spike-master", storage))
+        }
+    }
+
+    @Test
+    fun aSignedOutAccountIsNotImportedAgainAndItsRnEntryGoes() {
+        vault.save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        run()
+        assertTrue("spike-master" in rnUsers(), "kept: its RN keys differ from the vault's")
+        // the user signs it out in the app
+        LegacyMigration.forget(vault, rn, listOf("spike-master"))
+        vault.remove("spike-master")
+        assertFalse("spike-master" in rnUsers(), "the signed-out account's RN entry stayed")
+        run()
+        assertNull(vault.account("spike-master"), "a signed-out account came back")
+        assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers().sorted())
+        assertFalse("spike-master" in keptList().orEmpty())
+    }
+
+    @Test
+    fun aSignOutWhoseRnScrubFailedIsStillNotUndone() {
+        vault.save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        run()
+        // RN storage cannot be written at the sign-out (or the app dies right after the vault write)
+        val stuck = object : LegacyStorage by rn {
+            override fun write(key: String, value: String) = throw LegacyImportError.StorageUnreadable()
+            override fun remove(key: String) = throw LegacyImportError.StorageUnreadable()
+        }
+        LegacyMigration.forget(vault, stuck, listOf("spike-master"))
+        vault.remove("spike-master")
+        assertTrue("spike-master" in rnUsers())
+        run()
+        assertNull(vault.account("spike-master"), "a signed-out account came back")
+        assertFalse("spike-master" in rnUsers(), "the next run scrubs what the sign-out could not")
+    }
+
+    @Test
+    fun aSignOutWhoseVaultRecordFailedIsStillNotUndone() {
+        vault.save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        run()
+        // the vault refuses the record: the RN entry goes at once instead
+        LegacyMigration.forget(KeyVault(DyingStore(store, 0)), rn, listOf("spike-master"))
+        vault.remove("spike-master")
+        run()
+        assertNull(vault.account("spike-master"), "a signed-out account came back")
+    }
+
+    @Test
+    fun aSignOutThatCanRecordNothingFailsBeforeAnythingGoes() {
+        vault.save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        run()
+        val stuck = object : LegacyStorage by rn {
+            override fun write(key: String, value: String) = throw LegacyImportError.StorageUnreadable()
+        }
+        assertFailsWith<Exception> { LegacyMigration.forget(KeyVault(DyingStore(store, 0)), stuck, listOf("spike-master")) }
+        assertEquals(originalUser("spike-master"), rnUser("spike-master"))
+    }
+
+    @Test
+    fun anAccountSignedOutBeforeTheImportIsNotImported() {
+        // signed in natively while the RN data could not be opened yet, then signed out
+        vault.save(VaultAccount("spike-posting", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        val locked = MapLegacyStorage(rnData).apply { unreadable = true }
+        LegacyMigration.forget(vault, locked, listOf("spike-posting"))
+        vault.remove("spike-posting")
+        locked.unreadable = false
+        run(storage = locked)
+        assertNull(vault.account("spike-posting"), "a signed-out account came back")
+        assertFalse("spike-posting" in rnUsers(locked))
+    }
 }

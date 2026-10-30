@@ -34,7 +34,7 @@ object LegacyCleanup {
     @Throws(LegacyImportError::class)
     fun hasSecrets(storage: LegacyStorage, keep: Set<String>? = null): Boolean =
         storage.hasStaleCopies() || SECRET_KEYS.any { key -> storage.read(key)?.let { scrubbed(key, it, keep) != it } == true } ||
-            storage.read(ROOT)?.let { scrubbedRoot(it, keep, pinsNeeded(storage, keep)) != it } == true
+            storage.read(ROOT)?.let { scrubbedRoot(it, pinsNeeded(storage, keep), dropping(keep)) != it } == true
 
     /** @return true when anything was removed. */
     @Throws(LegacyImportError::class)
@@ -53,7 +53,7 @@ object LegacyCleanup {
             changed = true
         }
         val root = storage.read(ROOT) ?: return changed
-        val scrubbed = scrubbedRoot(root, keep, pinsNeeded(storage, keep))
+        val scrubbed = scrubbedRoot(root, pinsNeeded(storage, keep), dropping(keep))
         when {
             scrubbed == null -> storage.remove(ROOT) // unparsable: cannot keep the safe parts
             scrubbed != root -> storage.write(ROOT, scrubbed)
@@ -62,7 +62,27 @@ object LegacyCleanup {
         return true
     }
 
+    /**
+     * Deletes only the RN entries of [names] (accounts the user removed in the app): theirs in "user" and
+     * "sc_accounts" and their `local` copies. The PINs and everything else stay.
+     */
+    @Throws(LegacyImportError::class)
+    fun forget(storage: LegacyStorage, names: Set<String>) {
+        for (key in ACCOUNT_LISTS) {
+            val raw = storage.read(key) ?: continue
+            val list = runCatching { json.parseToJsonElement(raw) as JsonArray }.getOrNull() ?: continue
+            val left = list.filter { e -> nameOf(e, "username")?.let { it in names } != true }
+            if (left.size != list.size) storage.write(key, JsonArray(left).toString())
+        }
+        val root = storage.read(ROOT) ?: return
+        val left = scrubbedRoot(root, keepPins = true) { it != null && it in names } ?: return
+        if (left != root) storage.write(ROOT, left)
+    }
+
     private const val ROOT = "persist:root"
+
+    /** The `local` copies to drop: all but those of accounts in [keep] (all when null). */
+    private fun dropping(keep: Set<String>?): (String?) -> Boolean = { it == null || keep == null || it !in keep }
 
     /** Kept "user" entries are encrypted with one of the PINs. */
     private fun pinsNeeded(storage: LegacyStorage, keep: Set<String>?): Boolean =
@@ -83,15 +103,15 @@ object LegacyCleanup {
         }
     }
 
-    /** persist:root without PINs and account `local` copies (but those [keep] needs); null when it cannot be parsed. */
-    private fun scrubbedRoot(raw: String, keep: Set<String>?, keepPins: Boolean): String? = runCatching {
+    /** persist:root without PINs (unless [keepPins]) and the `local` copies of accounts [drop] names; null when it cannot be parsed. */
+    private fun scrubbedRoot(raw: String, keepPins: Boolean, drop: (String?) -> Boolean): String? = runCatching {
         val root = json.parseToJsonElement(raw).jsonObject
         val out = root.toMutableMap()
         reducer(root, "application")?.let { app ->
             if (!keepPins && PIN_FIELDS.any { it in app }) out["application"] = JsonPrimitive(JsonObject(app - PIN_FIELDS.toSet()).toString())
         }
         reducer(root, "account")?.let { account ->
-            val cleaned = JsonObject(account.mapValues { (_, v) -> withoutLocal(v, keep) })
+            val cleaned = JsonObject(account.mapValues { (_, v) -> withoutLocal(v, drop) })
             if (cleaned != account) out["account"] = JsonPrimitive(cleaned.toString())
         }
         if (out == root) raw else JsonObject(out).toString()
@@ -101,12 +121,10 @@ object LegacyCleanup {
     private fun reducer(root: JsonObject, name: String): JsonObject? =
         root[name]?.jsonPrimitive?.contentOrNull?.let { json.parseToJsonElement(it).jsonObject }
 
-    /** Drops "local" from an account object, or from each account in a list, unless the account is in [keep]. */
-    private fun withoutLocal(e: JsonElement, keep: Set<String>?): JsonElement = when (e) {
-        is JsonObject -> {
-            if ("local" in e && nameOf(e, "name")?.let { keep != null && it in keep } != true) JsonObject(e - "local") else e
-        }
-        is JsonArray -> JsonArray(e.map { withoutLocal(it, keep) })
+    /** Drops "local" from an account object, or from each account in a list, when [drop] names the account. */
+    private fun withoutLocal(e: JsonElement, drop: (String?) -> Boolean): JsonElement = when (e) {
+        is JsonObject -> if ("local" in e && drop(nameOf(e, "name"))) JsonObject(e - "local") else e
+        is JsonArray -> JsonArray(e.map { withoutLocal(it, drop) })
         else -> e
     }
 

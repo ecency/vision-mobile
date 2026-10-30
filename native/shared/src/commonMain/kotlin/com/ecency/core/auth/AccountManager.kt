@@ -89,6 +89,8 @@ class AccountManager(
     private val tokens: EcencyTokenApi,
     private val nowMillis: () -> Long,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** Runs (blocking, on [io]) before accounts are removed; when it throws nothing is removed. The app forgets their RN entries here. */
+    private val beforeRemove: (List<String>) -> Unit = {},
 ) : EcencyCodeProvider {
     private val mutex = Mutex()
 
@@ -342,6 +344,7 @@ class AccountManager(
      */
     @Throws(Exception::class)
     suspend fun remove(username: String): AccountSummary? = mutex.withLock {
+        db { beforeRemove(listOf(username)) }
         try {
             db {
                 val wasCurrent = currentUsername() == username
@@ -366,6 +369,7 @@ class AccountManager(
     /** Removes every account entry (unreadable ones too) and its session. */
     @Throws(Exception::class)
     suspend fun logoutAll() = mutex.withLock {
+        db { beforeRemove(usernames()) }
         try {
             db {
                 usernames().forEach { remove(it) }

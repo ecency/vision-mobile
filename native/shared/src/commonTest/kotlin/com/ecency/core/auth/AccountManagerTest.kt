@@ -38,7 +38,11 @@ class AccountManagerTest {
             EcencyTokenApi(fake, retryDelaysMillis = emptyList()),
             { now },
             StandardTestDispatcher(scope.testScheduler),
+            beforeRemove = { beforeRemove(it) },
         )
+
+        /** What the removal hook does (the app forgets the RN entries there). */
+        var beforeRemove: (List<String>) -> Unit = {}
 
         fun other(name: String) {
             chain[name] = TestKeys.authorities().copy(username = name)
@@ -122,6 +126,28 @@ class AccountManagerTest {
         rig.manager.logoutAll()
         assertFalse(rig.manager.hasAnyAccount())
         assertTrue(rig.secure.entries.keys.none { it.startsWith("account.") || it.startsWith("auth.session.") })
+    }
+
+    @Test
+    fun theRemovalHookRunsFirstAndAFailingHookRemovesNothing() = runTest {
+        val rig = Rig(this)
+        rig.other("second-user")
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        rig.http = { FakeAuthHttp.tokens(username = "second-user") }
+        rig.manager.loginWithKey("second-user", TestKeys.wif(KeyRole.POSTING))
+        val seen = mutableListOf<Pair<List<String>, List<String>>>()
+        rig.beforeRemove = { names -> seen += names to rig.vault.usernames() }
+        rig.manager.remove("second-user")
+        assertEquals(listOf(listOf("second-user") to listOf("second-user", "spike-user")), seen, "the hook runs before the account goes")
+        rig.beforeRemove = { throw IllegalStateException("nothing recorded") }
+        assertFailsWith<IllegalStateException> { rig.manager.remove("spike-user") }
+        assertFailsWith<IllegalStateException> { rig.manager.logoutAll() }
+        assertEquals(listOf("spike-user"), rig.vault.usernames(), "a failed hook keeps the account")
+        seen.clear()
+        rig.beforeRemove = { names -> seen += names to rig.vault.usernames() }
+        rig.manager.logoutAll()
+        assertEquals(listOf(listOf("spike-user") to listOf("spike-user")), seen)
+        assertFalse(rig.manager.hasAnyAccount())
     }
 
     @Test

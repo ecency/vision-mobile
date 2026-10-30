@@ -61,4 +61,19 @@ class LegacyCleanupTest {
         assertFalse(LegacyCleanup.hasSecrets(storage))
         assertFalse(LegacyCleanup.scrub(storage))
     }
+
+    @Test
+    fun forgetRemovesOnlyTheNamedAccounts() {
+        val sc = """[{"username":"spike-master","refreshToken":"dummy-refresh"},{"username":"spike-posting","refreshToken":"dummy-refresh-2"}]"""
+        val rn = MapLegacyStorage(mapOf("persist:root" to LegacyFixtures.PERSIST_ROOT, "user" to LegacyFixtures.USERS, "sc_accounts" to sc, "auth" to "{}"))
+        LegacyCleanup.forget(rn, setOf("spike-master"))
+        assertFalse(rn.read("user")!!.contains("\"spike-master\""))
+        assertTrue(rn.read("user")!!.contains("\"spike-posting\""))
+        assertEquals("""[{"username":"spike-posting","refreshToken":"dummy-refresh-2"}]""", rn.read("sc_accounts"))
+        val root = rn.read("persist:root")!!
+        // spike-master's local copy is gone, spike-posting's and the PINs stay
+        assertEquals(1, Regex("local").findAll(root).count())
+        assertTrue(root.contains("encUnlockPin") && root.contains("\\\"pin\\\""))
+        assertEquals("{}", rn.read("auth"))
+    }
 }
