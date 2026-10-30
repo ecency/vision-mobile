@@ -396,6 +396,23 @@ class PurchasesTest {
     }
 
     @Test
+    fun anUnverifiedTransactionIsReportedOncePerTransactionNotAtEveryLaunch() = runTest {
+        answers = mutableListOf(HttpResult(503, "{}"))
+        val prefs = InMemoryPrefs()
+        var held: List<StorePurchase>? = null
+        var reports = 0
+        repeat(3) {
+            val r = rig(platform = PurchaseService.APP_STORE, prefs = prefs, start = false)
+            r.store.held += held ?: listOf(r.store.paid("999points", StorePurchaseState.UNVERIFIED)).also { held = it }
+            r.env.purchases.start()
+            testScheduler.advanceUntilIdle()
+            assertTrue(r.store.finished.isEmpty())
+            reports += r.reporter.reports.count { it.tags["iap.code"] == StoreError.VERIFICATION_FAILED }
+        }
+        assertEquals(1, reports, "one report for the transaction, not one per launch")
+    }
+
+    @Test
     fun anUnverifiedTransactionEcencyRefusesOrHoldsStaysUnfinishedWithNothingDelivered() = runTest {
         answers = mutableListOf(HttpResult(400, "{}"))
         val r = rig(platform = PurchaseService.APP_STORE)

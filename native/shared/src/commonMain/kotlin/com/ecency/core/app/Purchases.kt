@@ -419,8 +419,10 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     finish(p)
                     return
                 }
-                // StoreKit could not check its signature: reported, then ordered as any purchase (Ecency verifies it)
-                StorePurchaseState.UNVERIFIED -> errors.report(StoreError(StoreError.VERIFICATION_FAILED, PurchaseCopy.VERIFICATION_FAILED, p.productId), IapStage.PURCHASE)
+                // StoreKit could not check its signature: reported once per transaction, then ordered as any purchase
+                // (Ecency verifies it)
+                StorePurchaseState.UNVERIFIED ->
+                    if (Marks.tellUnverified(env.prefs, key)) errors.report(StoreError(StoreError.VERIFICATION_FAILED, PurchaseCopy.VERIFICATION_FAILED, p.productId), IapStage.PURCHASE)
                 StorePurchaseState.PURCHASED -> Unit
             }
             mutableState.update { it.copy(pending = it.pending - p.productId, unfinished = it.unfinished + p.productId, busy = it.busy + p.productId) }
@@ -696,17 +698,27 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         }
     }
 
-    /** Per purchase key (hashes only, never a receipt): accepted by Ecency on this device; held order numbers told. */
+    /**
+     * Per purchase key (hashes only, never a receipt): accepted by Ecency on this device, unverified ones reported;
+     * held order numbers told. The accepted marks keep the newest [MAX], the others the newest [ONCE_MAX].
+     */
     internal object Marks {
         const val ACCEPTED = "purchases.accepted"
         const val HELD_TOLD = "purchases.heldTold"
+        const val UNVERIFIED_REPORTED = "purchases.unverifiedReported"
         private const val MAX = 64
+        private const val ONCE_MAX = 16
 
         /** True the first time [order] is told. */
-        fun tellHeld(prefs: Prefs, order: String): Boolean {
-            val all = list(prefs, HELD_TOLD)
-            if (all.any { it.first == order }) return false
-            write(prefs, HELD_TOLD, (all + (order to 1L)).takeLast(MAX))
+        fun tellHeld(prefs: Prefs, order: String): Boolean = once(prefs, HELD_TOLD, order)
+
+        /** True the first time the unverified purchase [hash] is reported. */
+        fun tellUnverified(prefs: Prefs, hash: String): Boolean = once(prefs, UNVERIFIED_REPORTED, hash)
+
+        private fun once(prefs: Prefs, key: String, id: String): Boolean {
+            val all = list(prefs, key)
+            if (all.any { it.first == id }) return false
+            write(prefs, key, (all + (id to 1L)).takeLast(ONCE_MAX))
             return true
         }
 
