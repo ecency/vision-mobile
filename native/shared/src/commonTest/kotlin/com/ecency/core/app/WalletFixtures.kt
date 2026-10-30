@@ -24,7 +24,11 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
     var broadcastAnswer: suspend (Sent) -> HttpResult = { FakeTransport.result(it, "{}") }
     var statusAnswer: (Sent) -> String = { "\"unknown\"" }
 
+    /** A method whose answer waits for its gate (an in-flight read held while the test acts). */
+    val gates = mutableMapOf<String, kotlinx.coroutines.CompletableDeferred<Unit>>()
+
     val app = TestApp(scope) { request ->
+        gates[request.method]?.await()
         when (request.method) {
             "condenser_api.broadcast_transaction" -> broadcastAnswer(request)
             "transaction_status_api.find_transaction" -> FakeTransport.result(request, """{"status":${statusAnswer(request)}}""")

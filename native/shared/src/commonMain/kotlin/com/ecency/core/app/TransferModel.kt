@@ -259,6 +259,9 @@ class TransferModel internal constructor(
     private var badActors: Set<String> = emptySet()
     private var schedules: List<RecurrentSchedule>? = null
     private var hydratedRecipient: String? = null
+
+    /** The form as the confirmation showed it: what confirm() signs. */
+    private var shown: TransferState? = null
     private var started = false
 
     init {
@@ -398,15 +401,20 @@ class TransferModel internal constructor(
             setState { it.copy(prompt = TransferPrompt.Alert(TransferCopy.LOW_LIQUIDITY, "")) }
             return
         }
+        shown = s
         setState { it.copy(prompt = TransferPrompt.Confirm) }
     }
 
-    fun dismissPrompt() = setState { it.copy(prompt = null) }
+    fun dismissPrompt() {
+        shown = null
+        setState { it.copy(prompt = null) }
+    }
 
     /** "Confirm": the action id is made now, once; the send runs app-wide. */
     fun confirm() {
-        val s = current
-        if (s.prompt != TransferPrompt.Confirm) return
+        if (current.prompt != TransferPrompt.Confirm) return
+        val s = shown ?: return
+        shown = null
         val user = s.from ?: return
         val ops = try {
             operations(s, user)
@@ -594,6 +602,10 @@ class TransferModel internal constructor(
         val user = current.from ?: return
         val to = current.recipients.singleOrNull() ?: return
         val list = schedules ?: runCatching { env.walletApi.recurrentTransfers(user) }.getOrNull()?.also { schedules = it } ?: return
+        // the form changed during the read: the answer is for a recipient or choice no longer shown
+        if (current.from != user || current.recipients.singleOrNull() != to || !current.isRecurrent) return
+        // a confirmation is open or a send started: what is signed stays what was shown
+        if (current.prompt != null || current.actionId != null) return
         val existing = list.firstOrNull { it.to == to && Vests.symbol(it.amount) == current.fund }
         if (existing == null) {
             if (hydratedRecipient != null) {
