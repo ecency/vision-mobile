@@ -170,6 +170,8 @@ object NotificationFormat {
         n.type == "transfer" -> LocaleFormat.assetText(n.amount)
         n.type == "delegations" -> when {
             n.amount.isEmpty() -> ""
+            // the rate not loaded yet: no amount rather than RN's "0 HP"
+            "VESTS" in n.amount && !(hivePerMVests.isFinite() && hivePerMVests > 0) -> ""
             "VESTS" in n.amount -> LocaleFormat.posix(Num.plain(round(vestsToHp(n.amount, hivePerMVests) * 1000) / 1000), grouping = false) + " HP"
             else -> rcFormat(leadingNumber(n.amount)) + " RC"
         }

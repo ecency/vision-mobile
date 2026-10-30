@@ -153,6 +153,11 @@ class NotificationsTest {
         // numbers arrive as JSON numbers too
         assertEquals("delegated 5B RC", text("""{"id":"1","type":"delegations","source":"a","amount":5000000000}"""))
         assertEquals("delegated", text("""{"id":"1","type":"delegations","source":"a"}"""), "RN crashes without an amount; here no extra")
+        // the VESTS rate not loaded (0) or broken: no amount rather than RN's "0 HP"
+        for (rate in listOf(0.0, Double.NaN, Double.POSITIVE_INFINITY, -1.0)) {
+            val n = parse("""{"id":"1","type":"delegations","source":"a","amount":"1234567.891234 VESTS"}""")
+            assertEquals("delegated", NotificationFormat.text(n, rate), "rate $rate")
+        }
     }
 
     @Test
