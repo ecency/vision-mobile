@@ -86,7 +86,7 @@ Rollback (installing an RN 3.x build over native; owner decision 10-21: not supp
 The RN app's GitHub Actions now build the native apps, with the RN secrets, signing and store targets
 ([docs/release-builds.md](docs/release-builds.md) has the secrets table and the details):
 
-- Pull request: `test.yml` ("Lint & Unit Tests") runs `:shared:testAndroidHostTest :androidApp:testDebugUnitTest :androidApp:lintDebug` on Linux when the pull request touches `native/`, and passes without running otherwise. No app builds on pull requests.
+- Pull request: `test.yml` ("Lint & Unit Tests") runs `:shared:testAndroidHostTest :androidApp:testDebugUnitTest :androidApp:lintDebug` on Linux when the pull request touches `native/`, and passes without running otherwise. Its "RN Lint & Unit Tests" job runs `yarn lint`, `yarn typecheck` and `yarn test:ci` when the pull request changes anything outside `native/`. No app builds on pull requests.
 - Push to `development` touching `native/`: `build-android.yml` (unit tests, secrets into `local.properties`, RN's `google-services.json`, R8 bundle signed with the RN upload key, the release launch check on an emulator, Play alpha track, mapping to Play and, in a job of its own, to Sentry) and `build-ios.yml` (secrets, RN's `GoogleService-Info.plist`, RN certificate and profiles, archive, export, the release launch check on a simulator for manual runs, upload with RN's Apple ID and app-specific password, dSYMs to Sentry in a job of its own). Sentry uploads need `SENTRY_AUTH_TOKEN` and are skipped without it. Build numbers are the Unix time, as RN.
 - By hand: both build workflows (track, notes, upload choice, build number) and `e2e-android.yml` (the Android device tests on an emulator; also on the `e2e-test` label).
 

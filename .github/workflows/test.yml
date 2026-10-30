@@ -1,8 +1,8 @@
 name: Lint & Test
 
-# The native app's unit tests and Android lint on pull requests (Linux only, no app build, no device). A pull request
-# that does not touch native/ reports success without running them. iOS targets need macOS; the release workflow
-# and local runs cover them (native/README.md "Release pipeline").
+# Pull request checks on Linux, each only when its part changed: the RN app's lint, typecheck and unit tests (its
+# source stays in the repo), and the native app's unit tests and Android lint (no app build, no device). iOS targets
+# need macOS; the release workflow and local runs cover them (native/README.md "Release pipeline").
 on:
   pull_request:
   workflow_dispatch:
@@ -15,6 +15,51 @@ permissions:
   contents: read
 
 jobs:
+  rn:
+    name: RN Lint & Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: RN changes
+        id: changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ -z "$BASE" ]] || ! git diff --quiet "$BASE...HEAD" -- . ':!native' ':!.github/workflows/build-*.yml'; then
+            echo "rn=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Only native/ changed: nothing to check for the RN app."
+            echo "rn=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.changes.outputs.rn == 'true'
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        if: steps.changes.outputs.rn == 'true'
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        if: steps.changes.outputs.rn == 'true'
+        run: yarn lint
+
+      - name: Typecheck
+        if: steps.changes.outputs.rn == 'true'
+        run: yarn typecheck
+
+      - name: Unit tests
+        if: steps.changes.outputs.rn == 'true'
+        run: yarn test:ci
+
   lint-and-test:
     name: Lint & Unit Tests
     runs-on: ubuntu-latest

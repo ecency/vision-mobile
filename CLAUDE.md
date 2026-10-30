@@ -282,7 +282,8 @@ Uses `rn-nodeify` to polyfill Node.js modules (crypto, stream, buffer, etc.) for
 
 ### CI Workflows
 - Since the native 4.x app (`native/`) ships as the update of this app, the workflows build the NATIVE apps:
-  `test.yml` runs its Gradle unit tests and lint on PRs; `build-android.yml` and `build-ios.yml` build, sign and
+  `test.yml` runs its Gradle unit tests and lint on PRs that touch `native/`, and the RN lint, typecheck and
+  Jest tests on PRs that change anything else; `build-android.yml` and `build-ios.yml` build, sign and
   upload on pushes to development (no PR builds). See `native/README.md` "Release pipeline"
 
 ## Code Style (ESLint)
