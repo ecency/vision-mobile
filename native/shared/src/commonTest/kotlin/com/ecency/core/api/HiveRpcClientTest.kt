@@ -242,4 +242,20 @@ class HiveRpcClientTest {
         coroutineScope { repeat(200) { launch(Dispatchers.Default) { client.call("condenser_api.get_config") } } }
         assertEquals(200, transport.sent.map { it.id }.toSet().size)
     }
+
+    @Test
+    fun aBroadcastAnswerThatIsNotTheChainsVerdictMayHaveReachedTheNode() = runTest {
+        val answers = listOf(
+            HttpResult(500, ""), HttpResult(502, "<html>Bad Gateway</html>"), HttpResult(503, "down"),
+            HttpResult(504, "<html>Gateway Timeout</html>"), HttpResult(200, "<html>ok</html>"), HttpResult(200, "{\"jsonrpc\":\"2.0\"}"),
+        )
+        for (answer in answers) {
+            val transport = FakeTransport { answer }
+            val e = assertFailsWith<NodeFailureException> {
+                clientWith(transport, now = { 1_000_000 }).broadcast("condenser_api.broadcast_transaction", buildJsonArray {}, failoverUntilMillis = 0)
+            }
+            assertTrue(e.mayHaveReachedNode, "HTTP ${answer.status} ${answer.body}")
+            assertEquals(1, transport.sent.size, "HTTP ${answer.status}: past the deadline no other node is asked")
+        }
+    }
 }

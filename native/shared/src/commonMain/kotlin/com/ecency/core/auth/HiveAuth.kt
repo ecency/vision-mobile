@@ -348,11 +348,12 @@ class HiveAuthClient(
         while (true) {
             val m = awaitFor(wait.uuid, wait.expire, setOf("sign_ack", "sign_nack", "sign_err"))
             when (m.cmd) {
-                "sign_ack" -> return HiveAuthSignResult(
-                    wait.uuid,
-                    broadcast = runCatching { m.json["broadcast"]?.jsonPrimitive?.booleanOrNull }.getOrNull() ?: false,
-                    txId = m.text("data"),
-                )
+                "sign_ack" -> {
+                    val broadcast = runCatching { m.json["broadcast"]?.jsonPrimitive?.booleanOrNull }.getOrNull() ?: false
+                    // signed without broadcasting is not on chain: never a success (RN useHiveAuth)
+                    if (!broadcast) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_BROADCAST)
+                    return HiveAuthSignResult(wait.uuid, broadcast = true, txId = m.text("data"))
+                }
                 // Like auth_nack: only a rejection whose data decrypts to the request uuid is the wallet's.
                 "sign_nack" -> {
                     val plain = runCatching { CryptoJsCipher.decrypt(m.text("data") ?: "", session.key) }.getOrNull()

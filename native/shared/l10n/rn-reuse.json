@@ -378,6 +378,7 @@
   "hiveauth.logging_in": "Logging In...",
   "hiveauth.not_installed": "Hive authentication app not installed",
   "hiveauth.title": "Hive Auth",
+  "hiveauth.transaction_fail": "Transaction Failed",
   "hiveauth.transaction_success": "Transaction Successful",
   "home.blog": "Blog",
   "home.communities": "Communities",

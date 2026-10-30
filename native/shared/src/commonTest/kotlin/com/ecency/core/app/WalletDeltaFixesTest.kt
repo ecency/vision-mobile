@@ -111,6 +111,21 @@ class WalletDeltaFixesTest {
         assertTrue(failed.error.message != BroadcastException.UNDECIDED_MESSAGE, failed.error.message)
     }
 
+    @Test
+    fun aHiveAuthSignatureThatWasNotBroadcastIsAFailureNotASuccess() = runTest {
+        val w = hiveAuthWorld(this)
+        val done = CompletableDeferred<WalletSend>()
+        w.env.walletSends.send(w.user, transferOps(w), KeyRole.ACTIVE, "a1") { done.complete(it) }
+        repeat(5) { testScheduler.runCurrent() }
+        assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt)
+        // the wallet signed but did not broadcast: nothing is on chain
+        w.app.relay.push(buildJsonObject { put("cmd", "sign_ack"); put("uuid", "sign-1"); put("broadcast", false); put("data", "signed-only") })
+        testScheduler.advanceUntilIdle()
+        val failed = assertIs<SendPhase.Failed>(done.await().phase)
+        // RN useHiveAuth: hiveauth.transaction_fail
+        assertEquals("Transaction Failed", failed.error.message)
+    }
+
     // ---- (c) amounts are ASCII digits on every platform ----
 
     @Test

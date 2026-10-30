@@ -630,4 +630,45 @@ class BroadcastTest {
             assertEquals(it, ChainTime.fromEpochSeconds(ChainTime.toEpochSeconds(it)))
         }
     }
+
+    @Test
+    fun aGatewayErrorAfterTheNodeTookATransferIsLookedUpNeverSentAgain() = runTest {
+        for (status in listOf(502, 504)) {
+            clock = now
+            statusLookups.clear()
+            val transfer = com.ecency.core.hive.Transfer("spike-voter", "ecency", Asset.parse("1.000 HIVE"), "")
+            // hived took it, the proxy in front answered with a gateway error
+            val transport = chain { HttpResult(status, "<html>$status Gateway</html>") }
+            val b = broadcaster(transport)
+            val first = assertFailsWith<BroadcastException.Network> { b.broadcastAction("t-$status", listOf(transfer), key) }
+            assertTrue(first.pending!!.mayHaveLanded, "HTTP $status: the transaction may be on chain")
+            val firstTx = first.pending!!.signed!!.id
+            val sentBefore = transport.broadcasts().size
+            clock += 120_000 // past the failover deadline: a retry may not sign anew without asking the chain
+            txStatus = "within_irreversible_block"
+            val result = b.broadcastAction("t-$status", listOf(transfer), key)
+            assertEquals(firstTx, result.txId, "HTTP $status")
+            assertEquals(sentBefore, transport.broadcasts().size, "HTTP $status: nothing sent a second time")
+            assertEquals(listOf(firstTx), statusLookups.toList(), "HTTP $status: looked up on chain")
+        }
+    }
+
+    @Test
+    fun aConnectFailureBeforeSendingAllowsAPlainRetry() = runTest {
+        val transfer = com.ecency.core.hive.Transfer("spike-voter", "ecency", Asset.parse("1.000 HIVE"), "")
+        var down = true
+        val transport = chain { req ->
+            if (down) throw IllegalStateException("Failed to connect to ${req.node} (Connection refused)")
+            FakeTransport.result(req, "null")
+        }
+        val b = broadcaster(transport)
+        val first = assertFailsWith<BroadcastException.Network> { b.broadcastAction("t1", listOf(transfer), key) }
+        assertTrue(!first.pending!!.mayHaveLanded, "nothing reached a node")
+        val firstTx = first.pending!!.signed!!.id
+        clock += 120_000
+        down = false
+        val result = b.broadcastAction("t1", listOf(transfer), key)
+        assertTrue(result.txId != firstTx, "signed anew")
+        assertTrue(statusLookups.isEmpty(), "no chain lookup needed")
+    }
 }

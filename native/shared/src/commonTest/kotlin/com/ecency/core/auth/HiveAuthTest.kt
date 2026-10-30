@@ -198,6 +198,21 @@ class HiveAuthTest {
     }
 
     @Test
+    fun anAckThatWasNotBroadcastIsAFailure() = runTest {
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        for (flag in listOf<Boolean?>(false, null)) {
+            val relay = FakeRelay {
+                push("cmd" to "sign_wait", "uuid" to "s1", "expire" to 50_000)
+                push("cmd" to "sign_ack", "uuid" to "s1", "broadcast" to flag, "data" to "signed-only")
+            }
+            val e = assertFailsWith<AuthException.HiveAuth>("broadcast=$flag") {
+                client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.ACTIVE, ops) {}
+            }
+            assertEquals("Transaction Failed", com.ecency.core.app.AppError.from(e).message, "broadcast=$flag")
+        }
+    }
+
+    @Test
     fun aSignNackThatDoesNotCarryTheUuidIsIgnored() = runTest {
         val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
         val relay = FakeRelay {

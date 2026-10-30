@@ -672,9 +672,34 @@ class WalletModelsTest {
     }
 
     @Test
+    fun aGatewayErrorAfterTheNodeTookATransferIsCheckedNotSentTwice() = runTest {
+        for (status in listOf(502, 504)) {
+            val w = world(this)
+            // hived took it, the proxy in front answered with a gateway error
+            w.broadcastAnswer = { HttpResult(status, "<html>$status Gateway</html>") }
+            val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+            m.setRecipient("spike-bob"); m.setAmount("1")
+            testScheduler.advanceUntilIdle()
+            m.next(); m.confirm()
+            testScheduler.runCurrent()
+            assertIs<SendPhase.Checking>(m.current.phase, "HTTP $status: never a plain Retry")
+            assertEquals(1, w.env.sendJournal.current.entries.size, "HTTP $status: journaled")
+            // the same signed transaction goes again; the chain already has it
+            w.broadcastAnswer = { FakeTransport.error(it, -32003, "Duplicate transaction check failed") }
+            testScheduler.advanceTimeBy(WalletSends.RECHECK_MILLIS + 1)
+            testScheduler.runCurrent()
+            testScheduler.advanceUntilIdle()
+            assertIs<SendPhase.Done>(m.current.phase, "HTTP $status")
+            val signed = w.app.broadcasts().map { (it.params.jsonArray[0] as JsonObject)["signatures"].toString() }.toSet()
+            assertEquals(1, signed.size, "HTTP $status: one signed transaction only")
+            assertTrue(w.env.sendJournal.current.entries.isEmpty(), "HTTP $status")
+        }
+    }
+
+    @Test
     fun aSendThatNeverReachedANodeFailsAsRetryableWithoutCheckingOrJournal() = runTest {
         val w = world(this)
-        w.broadcastAnswer = { HttpResult(503, "unavailable") }
+        w.broadcastAnswer = { throw IllegalStateException("Failed to connect to ${it.node} (Connection refused)") }
         val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
         m.setRecipient("spike-bob"); m.setAmount("1")
         testScheduler.advanceUntilIdle()

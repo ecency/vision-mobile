@@ -114,6 +114,7 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 AuthException.HiveAuth.Reason.EXPIRED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestExpiredBefore, true)
                 AuthException.HiveAuth.Reason.SESSION_EXPIRED -> AppError(ErrorKind.AUTH, HIVEAUTH_EXPIRED, false)
                 AuthException.HiveAuth.Reason.NOT_CONNECTED -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
+                AuthException.HiveAuth.Reason.NOT_BROADCAST -> AppError(ErrorKind.AUTH, L.hiveauth.transactionFail, false)
                 else -> AppError(ErrorKind.AUTH, L.hiveauth.authFail, false)
             }
         }

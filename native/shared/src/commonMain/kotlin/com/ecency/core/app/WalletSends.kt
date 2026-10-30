@@ -233,7 +233,10 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         val CHECK_LATER: String get() = L.native.walletSends.checkLater
 
         /** HiveAuth answers that say the wallet did not sign (or was never asked). */
-        private val DEFINITE_HIVEAUTH = setOf(AuthException.HiveAuth.Reason.REJECTED, AuthException.HiveAuth.Reason.NOT_CONNECTED, AuthException.HiveAuth.Reason.SESSION_EXPIRED)
+        private val DEFINITE_HIVEAUTH = setOf(
+            AuthException.HiveAuth.Reason.REJECTED, AuthException.HiveAuth.Reason.NOT_CONNECTED, AuthException.HiveAuth.Reason.SESSION_EXPIRED,
+            AuthException.HiveAuth.Reason.NOT_BROADCAST,
+        )
 
         val JOURNAL_FULL: String get() = L.native.walletSends.journalFull
     }

@@ -118,9 +118,10 @@ class NodeFailureException(
     val node: String,
     val reason: String,
     /**
-     * False when the request certainly never reached the node's RPC layer (connection refused,
-     * DNS failure, connect timeout) or the node answered at HTTP level. True for a connection
-     * that broke after the body may have been sent.
+     * False only when the request certainly never reached the node (connection refused, DNS
+     * failure, connect timeout, HTTP 429). True for anything else after the body may have been
+     * sent: a 5xx or gateway error (a proxy can fail after hived took the transaction), a body
+     * that is not a reply, a connection that broke mid-request.
      */
     val mayHaveReachedNode: Boolean = false,
     cause: Throwable? = null,
@@ -316,12 +317,12 @@ class HiveRpcClient(
      * A JSON-RPC error is the chain's verdict and is thrown at once, never re-sent elsewhere.
      * Otherwise the same signed transaction moves to the next node (Hive dedupes by transaction
      * id), following the SDK's isBroadcastSafeToRetry:
-     * - failures where the request certainly never reached a node's RPC layer (connection
-     *   refused, DNS, HTTP 429/5xx, an HTML error page) fail over freely;
-     * - after a failure where it may have reached one (a timeout, a connection reset
-     *   mid-request), every further failover happens only while [failoverUntilMillis] has not
-     *   passed. Past it a later node could answer "expired" for a transaction the earlier node
-     *   included.
+     * - failures where the request certainly never reached a node (connection refused, DNS,
+     *   HTTP 429) fail over freely;
+     * - after any other failure it may have reached one (a timeout, HTTP 5xx, a gateway error
+     *   or HTML page, a connection reset mid-request): every further failover happens only while
+     *   [failoverUntilMillis] has not passed. Past it a later node could answer "expired" for
+     *   a transaction the earlier node included.
      * When the transaction may have landed, that uncertain failure is what gets thrown, and a
      * later "Duplicate transaction" answer must be read as success (HiveBroadcaster does).
      */
@@ -396,14 +397,17 @@ class HiveRpcClient(
                 retryAfterMillis = parseRetryAfterMillis(response.headers["retry-after"], nowMillis()),
             )
         }
-        if (response.status in 500..599) throw NodeFailureException(node, "HTTP ${response.status}", scope = NodeFailureException.Scope.API)
+        // a proxy may answer 5xx after the node took the request
+        if (response.status in 500..599) {
+            throw NodeFailureException(node, "HTTP ${response.status}", mayHaveReachedNode = true, scope = NodeFailureException.Scope.API)
+        }
         val parsed = SafeJson.parseOrNull(response.body) as? JsonObject
         val isReply = parsed != null &&
             (parsed["jsonrpc"] as? JsonPrimitive)?.takeIf { it.isString }?.content == "2.0" &&
             // the id we sent is a number: "1" (a string) is not a reply to it
             (parsed["id"] as? JsonPrimitive)?.takeIf { !it.isString }?.longOrNull == id
         if (parsed == null || !isReply) {
-            throw NodeFailureException(node, "HTTP ${response.status}, not a JSON-RPC reply to this request")
+            throw NodeFailureException(node, "HTTP ${response.status}, not a JSON-RPC reply to this request", mayHaveReachedNode = true)
         }
         parsed["error"]?.let { error ->
             val obj = error as? JsonObject
@@ -411,7 +415,7 @@ class HiveRpcClient(
             val message = (obj?.get("message") as? JsonPrimitive)?.content ?: error.toString()
             throw RpcErrorException(method, node, code, message, obj?.get("data")?.toString())
         }
-        if ("result" !in parsed) throw NodeFailureException(node, "reply has neither result nor error")
+        if ("result" !in parsed) throw NodeFailureException(node, "reply has neither result nor error", mayHaveReachedNode = true)
         return parsed.getValue("result")
     }
 
