@@ -3,7 +3,8 @@ import Foundation
 import Sentry
 
 /// Sentry as RN App.tsx sets it up, with the DSN the shared `CrashDsn` picks (RN's project unless `ecency.sentryDsn`,
-/// written by the "Build secrets" phase, names another or "off"): no default PII, no tracing, no session replay, errors at
+/// written by the "Build secrets" phase, names another or "off"): no default PII, 5% of sessions traced (issue #3571) with
+/// no network, file or database spans, no session replay, errors at
 /// Sentry's default sample rate (all), the release `<bundle id>@<version>+<build>` with the build number as dist (RN's
 /// CI naming). Every event and breadcrumb goes through the shared `CrashScrubber`; RN's benign errors are dropped.
 /// Without a DSN nothing starts.
@@ -17,9 +18,19 @@ enum CrashReporting {
             o.releaseName = release(bundleId: bundleId, version: version, build: build)
             o.dist = build
             o.environment = debug ? "debug" : "production"
-            // RN sendDefaultPii: false; RN sets no tracesSampleRate and replays only in development builds
+            // RN sendDefaultPii: false; replays only in development builds, as RN
             o.sendDefaultPii = false
-            o.tracesSampleRate = nil
+            // performance data (app starts, slow and frozen frames, screen loads) at a low rate; spans that carry
+            // URLs, file paths or queries are never recorded
+            o.tracesSampleRate = NSNumber(value: tracesSampleRate)
+            o.enableNetworkTracking = false
+            o.enableFileIOTracing = false
+            o.enableCoreDataTracing = false
+            o.beforeSendSpan = { span in
+                guard let description = spanDescription(op: span.operation, description: span.spanDescription) else { return nil }
+                span.spanDescription = description
+                return span
+            }
             o.sessionReplay.sessionSampleRate = 0
             o.sessionReplay.onErrorSampleRate = 0
             o.attachScreenshot = false
@@ -33,6 +44,15 @@ enum CrashReporting {
     }
 
     static func release(bundleId: String, version: String, build: String) -> String { "\(bundleId)@\(version)+\(build)" }
+
+    static let tracesSampleRate = 0.05
+
+    /// A span's description to send, or nil to drop the span: network, file and database spans never go (their
+    /// descriptions are URLs, paths and queries, and transactions skip `beforeSend`); the rest is scrubbed.
+    static func spanDescription(op: String, description: String?) -> String?? {
+        if ["http", "file", "db"].contains(where: { op.hasPrefix($0) }) { return nil }
+        return .some(scrubber.scrub(text: description))
+    }
 
     private static var scrubber: CrashScrubber { CrashScrubber.shared }
 
