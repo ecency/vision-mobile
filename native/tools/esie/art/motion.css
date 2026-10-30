@@ -1,0 +1,66 @@
+/* Approved Esie motion (owner validated 10-22), extracted from the design page's rig demo. EsieMotion.kt implements it. */
+/* rig demo */
+#live .lid{transition:none}
+#live #esie{transform-box:fill-box;transform-origin:50% 100%}
+#live #fin_front{transform-box:fill-box;transform-origin:88% 86%}
+#live #tail_tip{transform-box:fill-box;transform-origin:10% 5%}
+#live #ears path{transform-box:fill-box;transform-origin:50% 100%}
+#live [id$="_pupil"]{transition:transform .35s cubic-bezier(.3,.7,.3,1)}
+.idle #esie{animation:breathe 3.2s ease-in-out infinite}
+.idle #tail_tip{animation:sway 2.6s ease-in-out infinite}
+.blink .lid{animation:blink 4s infinite}
+#live #fin_wave_arm{transform-box:fill-box;transform-origin:85% 88%}
+#live #fin_wave_hand{transform-box:fill-box;transform-origin:72% 96%}
+#live #fin_rest{transform-box:fill-box;transform-origin:70% 0%}
+#live #tear{transform-box:fill-box;transform-origin:50% 0%}
+.rest #fin_front,.rest #fin_back,.sad #fin_front,.sad #fin_back,.think #fin_front,.think #fin_back,.surprised #fin_front,.surprised #fin_back{display:none!important}
+.rest #fin_rest,.sad #fin_rest,.think #fin_rest,.surprised #fin_rest{display:inline!important}
+.idle.rest #fin_rest{animation:sway 2.8s ease-in-out infinite reverse}
+.waving #fin_front,.waving #fin_back,.waving #fin_rest{display:none!important}
+.waving #fin_wave{display:inline!important}
+.waving #fin_wave_arm{animation:armwave 1s ease-in-out infinite}
+.waving #fin_wave_hand{animation:handwave .5s ease-in-out infinite alternate}
+.happy #eye_l,.happy #eye_r,.happy #body_shade{display:none!important}
+.happy #eyes_happy{display:inline!important}
+.happy:not(.talk) #mouth .mouth{opacity:0!important}
+.happy:not(.talk) #mouth #mouth_big{opacity:1!important}
+.sad #brows_sad,.sad #lids_sad,.sad #tear{display:inline!important}
+.sad:not(.talk) #mouth .mouth{opacity:0!important}
+.sad:not(.talk) #mouth #mouth_frown{opacity:1!important}
+.sad [id$="_pupil"] > *{transform:translate(-6px,40px)}
+.sad #ears path{transform:rotate(-10deg)}
+.sad #tear{animation:drip 2.4s ease-in infinite}
+.think #brows_think,.think #thought{display:inline!important}
+.think:not(.talk) #mouth .mouth{opacity:0!important}
+.think:not(.talk) #mouth #mouth_hmm{opacity:1!important}
+.think [id$="_pupil"] > *{transform:translate(26px,-34px)}
+#live #thought circle{transform-box:fill-box;transform-origin:center}
+.think #thought_1{animation:dot 1.8s ease-in-out infinite}
+.think #thought_2{animation:dot 1.8s ease-in-out .3s infinite}
+.think #thought_3{animation:dot 1.8s ease-in-out .6s infinite}
+.think #esie{animation:ponder 3s ease-in-out infinite}
+.surprised #brows_surprised{display:inline!important}
+.surprised:not(.talk) #mouth .mouth{opacity:0!important}
+.surprised:not(.talk) #mouth #mouth_o{opacity:1!important}
+.surprised [id$="_pupil"]{transform-box:fill-box;transform-origin:center;transform:scale(.72)!important}
+.surprised #ears{transform:translateY(-14px)}
+.surprised #esie{animation:jolt .45s cubic-bezier(.2,1.8,.4,1) 1}
+.happy #ears path{animation:wiggle .5s ease-in-out 3}
+.happy #esie{animation:hop .6s cubic-bezier(.3,1.6,.5,1) 2}
+.sad #esie{animation:sigh 3.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,.988)}}
+@keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+@keyframes blink{0%,90%,100%{transform:translateY(var(--up))}94%{transform:translateY(0)}}
+@keyframes armwave{0%,100%{transform:rotate(2deg)}50%{transform:rotate(-5deg)}}
+@keyframes handwave{from{transform:rotate(12deg)}to{transform:rotate(-16deg)}}
+@keyframes drip{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:1}100%{transform:translateY(90px);opacity:0}}
+@keyframes dot{0%,100%{transform:scale(.6);opacity:.35}40%{transform:scale(1);opacity:1}}
+@keyframes ponder{0%,100%{transform:rotate(0)}50%{transform:rotate(-2deg)}}
+@keyframes jolt{0%{transform:translateY(0) scale(1,1)}35%{transform:translateY(-26px) scale(.97,1.04)}100%{transform:translateY(0) scale(1,1)}}
+@keyframes sigh{0%,100%{transform:scale(1,1) translateY(0)}50%{transform:scale(1.01,.985) translateY(8px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}50%{transform:rotate(12deg)}}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-40px) scale(.98,1.03)}}
+@media (prefers-reduced-motion: reduce){#live *{animation:none!important;transition:none!important}}
+/* From the demo script: look around moves both pupils through the spots (0,0) (-26,6) (22,-14) (18,16) (-14,-18),
+   one every 900 ms, easing .35s cubic-bezier(.3,.7,.3,1); talk swaps the mouth every 140 ms through
+   mouth_open, mouth_o, mouth_flat, mouth_open, mouth_smile, mouth_o. */

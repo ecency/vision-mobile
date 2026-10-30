@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Създайте пълна блог публикация в редактора",
     "wave": "Wave",
     "wave_desc": "Споделете бърза актуализация"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Създадохте {count, plural, one {# публикация} other {# публикация}} този месец. Продължавайте така!",
+        "checkin": "Регистрирахте се {count, plural, one {# ден} other {# ден}} тази седмица. Продължавайте така!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# неуспешни опити} other {# неуспешни опити}}"
+      },
+      "perks": {
+        "streak": "Серия от {n} дни"
+      },
+      "post_poll": {
+        "age_limit": "• Разрешени са само акаунти, по-стари от {days} дни",
+        "max_choices": "• Можете да изберете до {choices} опции"
+      },
+      "recurrent": {
+        "remaining_executions": "Остават {executions} превода",
+        "schedule_summary": "{executions} превода, всеки на всеки {hours} часа"
+      },
+      "chats": {
+        "people_joined": "{count} души се присъединиха"
+      },
+      "ai_assist": {
+        "min_chars": "Изискват се минимум {count} символа",
+        "chars_remaining": "Остават {count} символа"
+      },
+      "transfer": {
+        "powering_down_info": "Следващото изтегляне от стейк е след {days} дни, {hp} HIVE"
+      }
+    }
   }
 }

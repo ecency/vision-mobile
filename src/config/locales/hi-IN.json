@@ -1743,5 +1743,37 @@
     "blog_post_desc": "एडिटर में एक पूर्ण ब्लॉग पोस्ट बनाएं",
     "wave": "Wave",
     "wave_desc": "एक त्वरित अपडेट साझा करें"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "आपने इस महीने {count, plural, one {# पोस्ट} other {# पोस्ट}} बनाई। ऐसे ही जारी रखें!",
+        "checkin": "आपने इस सप्ताह {count, plural, one {# दिन} other {# दिन}} चेक इन किया। ऐसे ही जारी रखें!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# असफल प्रयास} other {# असफल प्रयास}}"
+      },
+      "perks": {
+        "streak": "{n}-दिन की स्ट्रीक"
+      },
+      "post_poll": {
+        "age_limit": "• केवल {days} दिनों से पुराने खातों की अनुमति है",
+        "max_choices": "• आप अधिकतम {choices} विकल्प चुन सकते हैं"
+      },
+      "recurrent": {
+        "remaining_executions": "शेष {executions} ट्रांसफ़र",
+        "schedule_summary": "{executions} ट्रांसफ़र, प्रत्येक हर {hours} घंटे में"
+      },
+      "chats": {
+        "people_joined": "{count} लोग शामिल हुए"
+      },
+      "ai_assist": {
+        "min_chars": "न्यूनतम {count} वर्ण आवश्यक हैं",
+        "chars_remaining": "{count} वर्ण शेष"
+      },
+      "transfer": {
+        "powering_down_info": "अगला अनस्टेक {days} दिनों में है, {hp} HIVE"
+      }
+    }
   }
 }

@@ -6,3 +6,6 @@ preserve_hierarchy: true
 files:
   - source: /src/config/locales/en-US.json
     translation: /src/config/locales/%locale%.json
+    # A changed English string keeps its translations (marked for review) instead of
+    # losing them. Without this an upload drops every translation of a reworded string.
+    update_option: update_as_unapproved

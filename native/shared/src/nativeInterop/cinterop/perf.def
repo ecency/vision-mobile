@@ -1,0 +1,33 @@
+package = com.ecency.core.app.perf
+headers = os/log.h os/signpost.h
+---
+#include <os/log.h>
+#include <os/signpost.h>
+#include <sys/sysctl.h>
+#include <sys/time.h>
+#include <unistd.h>
+
+static os_log_t ecency_perf_handle(void) {
+    static os_log_t handle = NULL;
+    if (handle == NULL) handle = os_log_create("app.esteem.mobile.ios", "perf");
+    return handle;
+}
+
+/* "EcencyPerf <event> <millis>" to the unified log, plus a signpost event for Instruments. */
+static inline void ecency_perf_emit(const char *event, long long millis) {
+    os_log_t log = ecency_perf_handle();
+    os_log(log, "EcencyPerf %{public}s %lld", event, millis);
+    os_signpost_event_emit(log, OS_SIGNPOST_ID_EXCLUSIVE, "EcencyPerf", "%{public}s %lld", event, millis);
+}
+
+/* Milliseconds since this process started (kinfo_proc start time vs. now, both wall clock). */
+static inline long long ecency_perf_process_millis(void) {
+    struct kinfo_proc info;
+    size_t size = sizeof(info);
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    if (sysctl(mib, 4, &info, &size, NULL, 0) != 0) return -1;
+    struct timeval start = info.kp_proc.p_starttime;
+    return (long long)(now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec - start.tv_usec) / 1000;
+}

@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Di edîtorê de posta blogê ya tam çêbike",
     "wave": "Wave",
     "wave_desc": "Nûvekirinek bilez parve bike"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Te vê mehê {count, plural, one {# şandî} other {# şandî}} çêkir. Wisa berdewam bike!",
+        "checkin": "Te vê heftê {count, plural, one {# roj} other {# roj}} têketin kir. Wisa berdewam bike!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# ceribandina(ên) têkçûyî} other {# ceribandina(ên) têkçûyî}}"
+      },
+      "perks": {
+        "streak": "Rêzeya {n} rojan"
+      },
+      "post_poll": {
+        "age_limit": "• Tenê hesabên ji {days} rojan kevintir destûr in",
+        "max_choices": "• Tu dikarî heta {choices} bijartinan hilbijêrî"
+      },
+      "recurrent": {
+        "remaining_executions": "Mayî {executions} veguhastin",
+        "schedule_summary": "{executions} veguhastin, her yek di her {hours} saetan de"
+      },
+      "chats": {
+        "people_joined": "{count} kes tevlî bûn"
+      },
+      "ai_assist": {
+        "min_chars": "Herî kêm {count} tîp pêwîst in",
+        "chars_remaining": "{count} tîp man"
+      },
+      "transfer": {
+        "powering_down_info": "Derxistina bê di {days} rojan de ye, {hp} HIVE"
+      }
+    }
   }
 }

@@ -277,12 +277,14 @@ Uses `rn-nodeify` to polyfill Node.js modules (crypto, stream, buffer, etc.) for
 - Config: `.maestro/config.yaml`
 - Flows: `.maestro/01-app-launch.yaml` through `04-feed-navigation.yaml`
 - Run locally: `maestro test .maestro/` (requires Android emulator or device)
-- CI: `.github/workflows/e2e-android.yml` — triggered by `e2e-test` label or manual dispatch
-- Uses `reactivecircus/android-emulator-runner@v2` with API 34
+- CI no longer runs these flows: `.github/workflows/e2e-android.yml` now runs the native app's device tests
+  (`native/androidApp/src/androidTest`), on the `e2e-test` label or manual dispatch
 
 ### CI Workflows
-- `.github/workflows/test.yml` — lint + typecheck + unit tests (runs on all PRs)
-- Build workflows (`.github/workflows/build-android.yml`, `build-ios.yml`) gate on `lint-and-test` job
+- Since the native 4.x app (`native/`) ships as the update of this app, the workflows build the NATIVE apps:
+  `test.yml` runs its Gradle unit tests and lint on PRs that touch `native/`, and the RN lint, typecheck and
+  Jest tests on PRs that change anything else; `build-android.yml` and `build-ios.yml` build, sign and
+  upload on pushes to development (no PR builds). See `native/README.md` "Release pipeline"
 
 ## Code Style (ESLint)
 

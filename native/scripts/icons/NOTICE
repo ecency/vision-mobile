@@ -1,0 +1,7 @@
+The vector drawables androidApp/src/main/res/drawable/ic_*.xml written by material_symbols.py are
+Material Symbols (Outlined) by Google, from https://github.com/google/material-design-icons,
+licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+The path data is unchanged; only the file format is converted (SVG to Android VectorDrawable).
+
+The Waves mark (com.ecency.core.app.WavesMark) is drawn after Twemoji's wavy dash (CC-BY 4.0,
+https://github.com/twitter/twemoji).

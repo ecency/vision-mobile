@@ -1743,5 +1743,36 @@
     "blog_post_desc": "Создать полноценную публикацию в редакторе",
     "wave": "Wave",
     "wave_desc": "Поделиться быстрым обновлением"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Вы создали {count, plural, one {# пост} few {# пост} many {# пост} other {# пост}} в этом месяце. Так держать!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# неудачные попытки} few {# неудачные попытки} many {# неудачные попытки} other {# неудачные попытки}}"
+      },
+      "perks": {
+        "streak": "Серия {n} дн."
+      },
+      "post_poll": {
+        "age_limit": "• Допускаются только аккаунты старше {days} дн.",
+        "max_choices": "• Можно выбрать до {choices} вариантов"
+      },
+      "recurrent": {
+        "remaining_executions": "Осталось переводов: {executions}",
+        "schedule_summary": "{executions} переводов, каждый раз через {hours} ч."
+      },
+      "chats": {
+        "people_joined": "Присоединилось участников: {count}"
+      },
+      "ai_assist": {
+        "min_chars": "Требуется минимум {count} символов",
+        "chars_remaining": "Осталось символов: {count}"
+      },
+      "transfer": {
+        "powering_down_info": "Следующий вывод из стейкинга через {days} дн., {hp} HIVE"
+      }
+    }
   }
 }

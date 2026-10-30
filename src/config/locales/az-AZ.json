@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Redaktorda tam bir bloq yazısı yaradın",
     "wave": "Wave",
     "wave_desc": "Sürətli bir yeniləmə paylaşın"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Bu ay {count, plural, one {# paylaşım} other {# paylaşım}} yaratdın. Belə davam et!",
+        "checkin": "Bu həftə {count, plural, one {# gün} other {# gün}} qeydiyyatdan keçdin. Belə davam et!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# uğursuz cəhd(lər)} other {# uğursuz cəhd(lər)}}"
+      },
+      "perks": {
+        "streak": "{n} günlük seriya"
+      },
+      "post_poll": {
+        "age_limit": "• Yalnız {days} gündən köhnə hesablara icazə verilir",
+        "max_choices": "• Ən çoxu {choices} seçim edə bilərsən"
+      },
+      "recurrent": {
+        "remaining_executions": "Qalan {executions} köçürmə",
+        "schedule_summary": "{executions} köçürmə, hər biri hər {hours} saatdan bir"
+      },
+      "chats": {
+        "people_joined": "{count} nəfər qoşuldu"
+      },
+      "ai_assist": {
+        "min_chars": "Minimum {count} simvol tələb olunur",
+        "chars_remaining": "{count} simvol qalıb"
+      },
+      "transfer": {
+        "powering_down_info": "Növbəti steyk çıxarması {days} gün sonradır, {hp} HIVE"
+      }
+    }
   }
 }

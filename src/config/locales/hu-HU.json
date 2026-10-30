@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Hozz létre egy teljes blogbejegyzést a szerkesztőben",
     "wave": "Wave",
     "wave_desc": "Ossz meg egy gyors frissítést"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Ebben a hónapban {count, plural, one {# bejegyzést} other {# bejegyzést}} hoztál létre. Csak így tovább!",
+        "checkin": "Ezen a héten {count, plural, one {# napon} other {# napon}} jelentkeztél be. Csak így tovább!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# sikertelen próbálkozás} other {# sikertelen próbálkozás}}"
+      },
+      "perks": {
+        "streak": "{n} napos sorozat"
+      },
+      "post_poll": {
+        "age_limit": "• Csak a {days} napnál régebbi fiókok engedélyezettek",
+        "max_choices": "• Legfeljebb {choices} lehetőséget választhatsz"
+      },
+      "recurrent": {
+        "remaining_executions": "Hátralévő {executions} utalás",
+        "schedule_summary": "{executions} átutalás, mindegyik {hours} óránként"
+      },
+      "chats": {
+        "people_joined": "{count} ember csatlakozott"
+      },
+      "ai_assist": {
+        "min_chars": "Legalább {count} karakter szükséges",
+        "chars_remaining": "{count} karakter maradt"
+      },
+      "transfer": {
+        "powering_down_info": "A következő letétfeloldás {days} nap múlva esedékes, {hp} HIVE"
+      }
+    }
   }
 }

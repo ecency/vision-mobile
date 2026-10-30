@@ -1743,5 +1743,37 @@
     "blog_post_desc": "ایجاد یک پست کامل وبلاگ در ویرایشگر",
     "wave": "Wave",
     "wave_desc": "اشتراک‌گذاری یک به‌روزرسانی سریع"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "این ماه {count, plural, one {# پست} other {# پست}} منتشر کردید. ادامه دهید!",
+        "checkin": "این هفته {count, plural, one {# روز} other {# روز}} ثبت حضور کردید. ادامه دهید!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# تلاش ناموفق} other {# تلاش ناموفق}}"
+      },
+      "perks": {
+        "streak": "زنجیره {n} روزه"
+      },
+      "post_poll": {
+        "age_limit": "• فقط حساب‌های قدیمی‌تر از {days} روز مجاز هستند",
+        "max_choices": "• می‌توانید تا {choices} گزینه انتخاب کنید"
+      },
+      "recurrent": {
+        "remaining_executions": "{executions} انتقال باقی‌مانده",
+        "schedule_summary": "{executions} انتقال، هر کدام هر {hours} ساعت"
+      },
+      "chats": {
+        "people_joined": "{count} نفر پیوستند"
+      },
+      "ai_assist": {
+        "min_chars": "حداقل {count} نویسه لازم است",
+        "chars_remaining": "{count} نویسه باقی‌مانده"
+      },
+      "transfer": {
+        "powering_down_info": "لغو استیک بعدی در {days} روز، {hp} HIVE"
+      }
+    }
   }
 }

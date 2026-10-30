@@ -1,0 +1,23 @@
+# Literals the iOS app shows as they are, on purpose (build-logic SwiftCopyLintTest, README "Localization").
+# One per line: File.swift<TAB>literal (interpolations as {}, a line break as \n)<TAB>why it is not catalog copy.
+# Everything else a SwiftUI text, title or spoken label shows comes from the shared copy or L.Native.Ios.*.
+
+# brand and product names
+WidgetViews.swift	Ecency	brand name on the widget
+EsieView.swift	Esie	the mascot's name (README "Esie")
+PostBodyView.swift	GIF	the image format's name on RN's animated image badge
+
+# not copy: queue labels, URL prefixes, crash report text, chain tickers
+PlatformViews.swift	com.ecency.qr	dispatch queue label
+ShellViews.swift	com.ecency.network	dispatch queue label
+ProfileViews.swift	https://	URL field placeholder, the scheme itself
+RootView.swift	No view for {}	crash report message, never shown
+TransferViews.swift	 HP	chain ticker after a delegation percent
+
+# debug and demo only (debug builds, fake data runs)
+AppContainer.swift	#photography	debug deep link to a demo tag feed
+FakeHiveTransport.swift	Spike Photos	fake data community title
+FakeHiveTransport.swift	Fixture post number {}	fake data post title
+FakeHiveTransport.swift	Fixture post	fake data post title
+IconGalleryView.swift	Icons ({})	debug icon gallery
+RegisterViews.swift	Demo run: the verification step is skipped.	demo runs only, never in a real sign up

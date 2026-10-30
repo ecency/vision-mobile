@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Buat postingan blog lengkap di editor",
     "wave": "Wave",
     "wave_desc": "Bagikan pembaruan singkat"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Anda membuat {count, plural, other {# postingan}} bulan ini. Pertahankan!",
+        "checkin": "Anda check in {count, plural, other {# hari}} minggu ini. Pertahankan!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# percobaan gagal}}"
+      },
+      "perks": {
+        "streak": "Streak {n} hari"
+      },
+      "post_poll": {
+        "age_limit": "• Hanya akun yang lebih tua dari {days} hari diizinkan",
+        "max_choices": "• Anda dapat memilih hingga {choices} pilihan"
+      },
+      "recurrent": {
+        "remaining_executions": "Sisa {executions} transfer",
+        "schedule_summary": "{executions} transfer, masing-masing setiap {hours} jam"
+      },
+      "chats": {
+        "people_joined": "{count} orang bergabung"
+      },
+      "ai_assist": {
+        "min_chars": "Minimal {count} karakter diperlukan",
+        "chars_remaining": "{count} karakter tersisa"
+      },
+      "transfer": {
+        "powering_down_info": "Pelepasan stake berikutnya dalam {days} hari, {hp} HIVE"
+      }
+    }
   }
 }

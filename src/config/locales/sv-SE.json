@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Skapa ett fullständigt blogginlägg i redigeraren",
     "wave": "Wave",
     "wave_desc": "Dela en snabb uppdatering"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Du skapade {count, plural, one {# inlägg} other {# inlägg}} den här månaden. Fortsätt så!",
+        "checkin": "Du checkade in {count, plural, one {# dag} other {# dag}} den här veckan. Fortsätt så!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# misslyckade försök} other {# misslyckade försök}}"
+      },
+      "perks": {
+        "streak": "{n}-dagars svit"
+      },
+      "post_poll": {
+        "age_limit": "• Endast konton äldre än {days} dagar tillåtna",
+        "max_choices": "• Du kan välja upp till {choices} alternativ"
+      },
+      "recurrent": {
+        "remaining_executions": "{executions} överföringar kvar",
+        "schedule_summary": "{executions} överföringar, var och en var {hours} timme"
+      },
+      "chats": {
+        "people_joined": "{count} personer gick med"
+      },
+      "ai_assist": {
+        "min_chars": "Minst {count} tecken krävs",
+        "chars_remaining": "{count} tecken kvar"
+      },
+      "transfer": {
+        "powering_down_info": "Nästa avstakning sker om {days} dagar, {hp} HIVE"
+      }
+    }
   }
 }

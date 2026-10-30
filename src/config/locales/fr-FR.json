@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Créer un article de blog complet dans l'éditeur",
     "wave": "Wave",
     "wave_desc": "Partager une mise à jour rapide"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Vous avez créé {count, plural, one {# publication} many {# publication} other {# publication}} ce mois-ci. Continuez ainsi !",
+        "checkin": "Vous avez pointé {count, plural, one {# jour} many {# jour} other {# jour}} cette semaine. Continuez ainsi !"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# Tentatives échouées} many {# Tentatives échouées} other {# Tentatives échouées}}"
+      },
+      "perks": {
+        "streak": "Série de {n} jours"
+      },
+      "post_poll": {
+        "age_limit": "• Seuls les comptes de plus de {days} jours sont autorisés",
+        "max_choices": "• Vous pouvez sélectionner jusqu'à {choices} choix"
+      },
+      "recurrent": {
+        "remaining_executions": "{executions} transferts restants",
+        "schedule_summary": "{executions} transferts, un toutes les {hours} heures"
+      },
+      "chats": {
+        "people_joined": "{count} personnes ont rejoint"
+      },
+      "ai_assist": {
+        "min_chars": "Minimum de {count} caractères requis",
+        "chars_remaining": "{count} caractères restants"
+      },
+      "transfer": {
+        "powering_down_info": "Prochain retrait du stake dans {days} jours, {hp} HIVE"
+      }
+    }
   }
 }

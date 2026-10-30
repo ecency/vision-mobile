@@ -1,0 +1,31 @@
+# Merged into project.yml with push (ECENCY_PUSH_EXTENSION=true; scripts/ios-sim.sh sets it with ECENCY_FIREBASE when
+# iosApp/GoogleService-Info.plist exists). RN's ImageNotifi: a notification service extension that attaches the push's
+# image (README "Notifications and push", rich push). It is RN's App ID (app.esteem.mobile.ios.ImageNotifi)
+# and profile (CI secret NOTIFI_PROVISIONING_PROFILE).
+targets:
+  EcencyNotificationService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - NotificationService
+      - path: EcencyApp/App/RichPush.swift
+    info:
+      path: Generated/NotificationService-Info.plist
+      properties:
+        CFBundleDisplayName: Ecency Notifications
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+    settings:
+      base:
+        # RN's ImageNotifi id (README "In-place upgrade from RN 3.x"); store builds get its profile from CI
+        PRODUCT_BUNDLE_IDENTIFIER: app.esteem.mobile.ios.ImageNotifi
+        PROVISIONING_PROFILE_SPECIFIER: $(ECENCY_NSE_PROFILE)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+  EcencyApp:
+    dependencies:
+      - target: EcencyNotificationService
+        embed: true

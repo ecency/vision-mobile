@@ -1,0 +1,10 @@
+<resources>
+    <!-- The launch screen (README "Launch screen"): the Ecency logo on the page colour, through androidx
+         core-splashscreen (the system splash on Android 12+, the library's own window before), then the app's
+         theme. MainActivity installs it and fades it out like RN's bootsplash. -->
+    <style name="Theme.Ecency.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
+    </style>
+</resources>

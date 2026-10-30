@@ -1743,5 +1743,33 @@
     "blog_post_desc": "Створити повноцінний допис у редакторі",
     "wave": "Wave",
     "wave_desc": "Поділитися швидким оновленням"
+  },
+  "native": {
+    "plurals": {
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# невдалих спроб} few {# невдалих спроб} many {# невдалих спроб} other {# невдалих спроб}}"
+      },
+      "perks": {
+        "streak": "Серія: {n} дн."
+      },
+      "post_poll": {
+        "age_limit": "• Дозволено лише акаунтам, старшим за {days} дн.",
+        "max_choices": "• Можна обрати до {choices} варіантів"
+      },
+      "recurrent": {
+        "remaining_executions": "Залишилося переказів: {executions}",
+        "schedule_summary": "{executions} переказів, кожен раз на {hours} год"
+      },
+      "chats": {
+        "people_joined": "Приєдналося людей: {count}"
+      },
+      "ai_assist": {
+        "min_chars": "Потрібно щонайменше {count} символів",
+        "chars_remaining": "Залишилося символів: {count}"
+      },
+      "transfer": {
+        "powering_down_info": "Наступне розстейкання через {days} днів, {hp} HIVE"
+      }
+    }
   }
 }

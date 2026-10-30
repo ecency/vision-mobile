@@ -1,0 +1,292 @@
+name: EcencySpike
+# Push (README "Notifications and push"): Firebase is linked only when ECENCY_FIREBASE=true at generation time.
+include:
+  - path: push-firebase.yml
+    enable: ${ECENCY_FIREBASE}
+  # rich push (RN ImageNotifi): the notification service extension, with push
+  - path: push-extension.yml
+    enable: ${ECENCY_PUSH_EXTENSION}
+packages:
+  # Crash reports (README "Crash reporting"); RN @sentry/react-native 6 ships sentry-cocoa 8.x. Swift and Objective-C only.
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    exactVersion: 8.58.4
+options:
+  bundleIdPrefix: com.ecency
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "4.0.0"
+    # Build number (CFBundleVersion). CI passes CURRENT_PROJECT_VERSION=<Unix time>, as the RN workflow did, so every
+    # upload increases; see native/docs/release-builds.md.
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  EcencyApp:
+    type: application
+    platform: iOS
+    dependencies:
+      - package: Sentry
+        product: Sentry
+      # the share extension (README "Share into the app"), embedded in the app
+      - target: EcencyShare
+      # the lock and home screen widgets (README "Widgets"), embedded in the app
+      - target: EcencyWidgets
+    sources:
+      - path: EcencyApp
+        # the StoreKit test configuration is for local runs and the tests, never in the app
+        excludes: ["Store/*.storekit"]
+      # Written by the "Build secrets" phase below; gitignored.
+      - path: Generated/BuildSecrets.generated.swift
+        optional: true
+      # The typed copy API (README "Localization"): generated from src/config/locales by Gradle and copied here by
+      # the "Build Kotlin shared core" phase; gitignored.
+      - path: Generated/L10n.generated.swift
+        optional: true
+    info:
+      path: EcencyApp/Info.plist
+      properties:
+        # The RN app's name (RN Info.plist: $(PRODUCT_NAME) of the "Ecency" target).
+        CFBundleDisplayName: Ecency
+        # The app's 39 languages by their OS tag (shared L10n.systemTag; EcencyApp/Localizations has an lproj for each),
+        # so Settings > Ecency > Language lists them (README "Localization"). AppLanguageTests checks both lists.
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [ar, az, bg, bn, cs, da, de, el, en, es, et, fa, fi, fil, fr, he, hi, hu, id, it, ja, ko, ku, lt, ms, nl, pl, pt-PT, ro, ru, sr-Latn, sv, th, tr, uk, uz, vi, zh-Hans, zh-Hant]
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Same as the RN app: HTTPS and standard signing crypto only, which is exempt from export compliance.
+        ITSAppUsesNonExemptEncryption: false
+        # The launch screen (README "Launch screen"): RN bootsplash's logo on the page colour, light or dark with the
+        # system; LaunchSplashCover draws it again over the first frame and fades it out.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchLogo
+          UIImageRespectsSafeAreaInsets: false
+        # Universal and portrait only, like the RN app; full screen opts out of iPad multitasking, which
+        # would otherwise require every orientation.
+        UIRequiresFullScreen: true
+        # Listen: post audio keeps playing in the background with lock-screen controls (README "Listen").
+        # remote-notification as RN: pushes that arrive in the background reach Firebase Messaging. RN's "fetch" is
+        # left out: nothing here uses background fetch.
+        UIBackgroundModes: [audio, remote-notification]
+        # The permission prompts below are English here and in every language in <tag>.lproj/InfoPlist.strings, generated
+        # from src/config/locales (native.permission, shared/l10n/system-strings.json) and copied into the bundle by the
+        # "Localized system strings" phase (README "Localization"). Keep each text equal to its en-US message.
+        NSFaceIDUsageDescription: Unlock Ecency with Face ID instead of your PIN.
+        # The editor's "Capture a photo". The photo library needs no permission: PHPicker hands over only what was picked.
+        NSCameraUsageDescription: Scan QR codes, and take a photo or record a video to add it to your post.
+        # The image viewer's "Download to device" (RN imageViewer): the image goes into an "Ecency" album, which needs
+        # library access to find or create the album; with add-only access it is saved without the album.
+        NSPhotoLibraryAddUsageDescription: Ecency saves the images you download from posts to your photo library.
+        NSPhotoLibraryUsageDescription: Ecency keeps the images you download from posts together in an Ecency album in your photo library.
+        # Dictation in the editor: asked for on the first Record. The audio is sent to Ecency to be transcribed.
+        NSMicrophoneUsageDescription: Ecency uses your microphone so you can dictate posts and comments (those recordings are sent to Ecency to be transcribed) and to record sound with a video you add to a post.
+        # Login and signing links (README "Login and accounts"); ecency.com universal links come through the
+        # associated-domains entitlement below.
+        CFBundleURLTypes:
+          - CFBundleURLName: app.esteem.mobile.ios.links
+            # esteem: the old scheme RN iOS still registers, read as ecency
+            CFBundleURLSchemes: [ecency, hive, esteem]
+          # The share extension opens the app with this scheme of its own (README "Share into the app"); only the
+          # folder id of the share in the App Group container travels in it.
+          - CFBundleURLName: app.esteem.mobile.ios.share
+            CFBundleURLSchemes: [app.esteem.mobile.ios.share]
+        # The HiveAuth wallets the app opens.
+        LSApplicationQueriesSchemes: [has, waves]
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    entitlements:
+      # written by XcodeGen; Generated/ is gitignored. push-firebase.yml adds aps-environment to the same file.
+      path: Generated/App.entitlements
+      properties:
+        # Universal links (README "Login and accounts"), as the RN App ID: ecency.com serves the
+        # apple-app-site-association for app.esteem.mobile.ios. ecency.page.link is left out (Firebase Dynamic
+        # Links is shut down).
+        com.apple.developer.associated-domains: [applinks:ecency.com, applinks:alpha.ecency.com]
+        # The App Group carries shared content from the share extension; RN's group, so its profiles sign it.
+        com.apple.security.application-groups: [group.com.ecency.eshare]
+    settings:
+      base:
+        # The RN store app's id: native 4.x is an update of it (README "In-place upgrade from RN 3.x"). RN's
+        # extensions keep their ids too: share app.esteem.mobile.ios.eshare, notification service
+        # app.esteem.mobile.ios.ImageNotifi, App Group group.com.ecency.eshare.
+        PRODUCT_BUNDLE_IDENTIFIER: app.esteem.mobile.ios
+        # Store builds: the profile for this target comes from CI (ECENCY_APP_PROFILE, release workflow); empty locally.
+        PROVISIONING_PROFILE_SPECIFIER: $(ECENCY_APP_PROFILE)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+        OTHER_LDFLAGS: [$(inherited), -framework, EcencyCore]
+    preBuildScripts:
+      - name: Build secrets
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Generated/BuildSecrets.generated.swift
+        script: |
+          "$SRCROOT/scripts/build-secrets.sh" "$SRCROOT/Generated/BuildSecrets.generated.swift"
+      - name: Build Kotlin shared core
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Generated/L10n.generated.swift
+        script: |
+          # fail the phase on any error (a Gradle failure must never link a stale framework)
+          set -eu
+          cd "$SRCROOT/.."
+          ./gradlew :shared:embedAndSignAppleFrameworkForXcode :shared:generateAppleL10n
+          # the Swift copy API generated with the framework; copied only when it changed, so Swift recompiles only then
+          mkdir -p "$SRCROOT/Generated"
+          if ! cmp -s shared/build/generated/l10n/swift/L.swift "$SRCROOT/Generated/L10n.generated.swift"; then
+            cp shared/build/generated/l10n/swift/L.swift "$SRCROOT/Generated/L10n.generated.swift"
+          fi
+    postBuildScripts:
+      # The permission prompts in the 39 languages (README "Localization"): generated by the phase above, copied into
+      # the bundle's <tag>.lproj folders (the ones CFBundleLocalizations names) before the app is signed. plutil
+      # writes them binary and fails the build on a malformed file.
+      - name: Localized system strings
+        basedOnDependencyAnalysis: false
+        script: |
+          set -eu
+          src="$SRCROOT/../shared/build/generated/l10n/apple/InfoPlist"
+          dest="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+          count=0
+          for dir in "$src"/*.lproj; do
+            name=$(basename "$dir")
+            mkdir -p "$dest/$name"
+            plutil -convert binary1 -o "$dest/$name/InfoPlist.strings" "$dir/InfoPlist.strings"
+            count=$((count + 1))
+          done
+          [ "$count" -ge 39 ] || { echo "error: only $count InfoPlist.strings generated"; exit 1; }
+
+  # RN ios/eshare: the share sheet's "Ecency" entry. It only writes the shared items into the App Group container
+  # and opens the app; it reads nothing of the app's (no Keychain group, no settings).
+  EcencyShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ShareExtension
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        # RN showed "eshare"; v4 shows the brand name (the bundle id stays .eshare)
+        CFBundleDisplayName: Ecency
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              # RN's rule; the extension hands over the first 5 images (the app uploads 5 per pick)
+              NSExtensionActivationSupportsImageWithMaxCount: 100
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+    entitlements:
+      path: Generated/Share.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.ecency.eshare]
+    settings:
+      base:
+        # RN's share extension id (README "In-place upgrade from RN 3.x"); store builds get its profile from CI
+        PRODUCT_BUNDLE_IDENTIFIER: app.esteem.mobile.ios.eshare
+        PROVISIONING_PROFILE_SPECIFIER: $(ECENCY_SHARE_PROFILE)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+
+  # README "Widgets": lock screen and home screen widgets. They read only the snapshot the app writes into the App
+  # Group (no Keychain group, no network) and open ecency:// shortcuts the app routes like any link.
+  EcencyWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      # the contrast colors shared with the app (README "Accessibility")
+      - path: EcencyApp/App/ContrastPalette.swift
+      # The widgets' copy in every language (README "Localization"): generated from src/config/locales by Gradle and
+      # copied here by the "Widget copy" phase; gitignored.
+      - path: Generated/WidgetL10nData.generated.swift
+        optional: true
+    preBuildScripts:
+      - name: Widget copy
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Generated/WidgetL10nData.generated.swift
+        script: |
+          set -eu
+          cd "$SRCROOT/.."
+          ./gradlew :shared:generateAppleL10n
+          mkdir -p "$SRCROOT/Generated"
+          if ! cmp -s shared/build/generated/l10n/apple/WidgetL10nData.swift "$SRCROOT/Generated/WidgetL10nData.generated.swift"; then
+            cp shared/build/generated/l10n/apple/WidgetL10nData.swift "$SRCROOT/Generated/WidgetL10nData.generated.swift"
+          fi
+    info:
+      path: Generated/Widgets-Info.plist
+      properties:
+        CFBundleDisplayName: Ecency
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Generated/Widgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.ecency.eshare]
+    settings:
+      base:
+        # a new App ID under the app's (owner action: docs/release-builds.md); store builds get its profile from CI
+        PRODUCT_BUNDLE_IDENTIFIER: app.esteem.mobile.ios.widgets
+        PROVISIONING_PROFILE_SPECIFIER: $(ECENCY_WIDGET_PROFILE)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+  EcencyAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - EcencyAppTests
+      # the widget views, rendered by WidgetViewTests (the extension itself is not a test host)
+      - path: Widgets/WidgetViews.swift
+      - path: Widgets/WidgetSymbols.swift
+      - path: Widgets/WidgetL10n.swift
+      - path: EcencyApp/App/ContrastPalette.swift
+      - path: Generated/WidgetL10nData.generated.swift
+        optional: true
+      # StoreKitTest sessions read it from the test bundle (README "In-app purchases")
+      - path: EcencyApp/Store/Products.storekit
+        buildPhase: resources
+    dependencies:
+      - target: EcencyApp
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+
+  EcencyAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - EcencyAppUITests
+    dependencies:
+      - target: EcencyApp
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: EcencyApp
+
+schemes:
+  EcencyApp:
+    build:
+      targets:
+        EcencyApp: all
+    run:
+      # Xcode runs use the local StoreKit test products (synthetic, nothing is charged); store builds use the App Store
+      storeKitConfiguration: EcencyApp/Store/Products.storekit
+    test:
+      targets:
+        - EcencyAppTests
+        - EcencyAppUITests

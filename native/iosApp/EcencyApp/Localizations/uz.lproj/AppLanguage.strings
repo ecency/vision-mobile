@@ -1,0 +1,2 @@
+/* Marks this language as one of the app's localizations, so iOS lists it under Settings > Ecency > Language
+   (README "Localization"). The copy itself comes from the shared catalog. */

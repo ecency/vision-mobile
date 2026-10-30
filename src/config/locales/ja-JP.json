@@ -1743,5 +1743,37 @@
     "blog_post_desc": "エディターで完全なブログ投稿を作成",
     "wave": "Wave",
     "wave_desc": "短い近況を共有"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "今月 {count} 件の投稿を作成しました。この調子で続けましょう！",
+        "checkin": "今週 {count} 日チェックインしました。この調子で続けましょう！"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# 回失敗}}"
+      },
+      "perks": {
+        "streak": "{n}日連続"
+      },
+      "post_poll": {
+        "age_limit": "• {days}日以上経過したアカウントのみ許可",
+        "max_choices": "• 最大 {choices} 件の選択肢を選べます"
+      },
+      "recurrent": {
+        "remaining_executions": "残り {executions} 回の送金",
+        "schedule_summary": "{executions}回の送金（それぞれ{hours}時間ごと）"
+      },
+      "chats": {
+        "people_joined": "{count} 人が参加しました"
+      },
+      "ai_assist": {
+        "min_chars": "最低 {count} 文字必要です",
+        "chars_remaining": "残り {count} 文字"
+      },
+      "transfer": {
+        "powering_down_info": "次回のアンステークは {days} 日後、{hp} HIVE です"
+      }
+    }
   }
 }

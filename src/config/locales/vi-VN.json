@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Tạo một bài viết blog đầy đủ trong trình soạn thảo",
     "wave": "Wave",
     "wave_desc": "Chia sẻ một cập nhật nhanh"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Bạn đã tạo {count, plural, other {# bài viết}} trong tháng này. Cố gắng phát huy nhé!",
+        "checkin": "Bạn đã điểm danh {count, plural, other {# ngày}} trong tuần này. Cố gắng phát huy nhé!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, other {# lần thử thất bại}}"
+      },
+      "perks": {
+        "streak": "Chuỗi {n} ngày"
+      },
+      "post_poll": {
+        "age_limit": "• Chỉ cho phép tài khoản cũ hơn {days} ngày",
+        "max_choices": "• Bạn có thể chọn tối đa {choices} lựa chọn"
+      },
+      "recurrent": {
+        "remaining_executions": "Còn lại {executions} lần chuyển",
+        "schedule_summary": "{executions} lần chuyển, mỗi lần cách nhau {hours} giờ"
+      },
+      "chats": {
+        "people_joined": "{count} người đã tham gia"
+      },
+      "ai_assist": {
+        "min_chars": "Yêu cầu tối thiểu {count} ký tự",
+        "chars_remaining": "Còn lại {count} ký tự"
+      },
+      "transfer": {
+        "powering_down_info": "Lần hủy đặt cọc tiếp theo sau {days} ngày, {hp} HIVE"
+      }
+    }
   }
 }

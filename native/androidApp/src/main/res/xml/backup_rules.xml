@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and lower, in case backup is ever enabled (the manifest sets allowBackup=false). Secure
+     store ciphertext is useless without its Keystore key, which never leaves the device; RKStorage holds
+     the RN app's PIN-encrypted keys until the migration deletes them. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="ecency.secure.xml" />
+    <exclude domain="database" path="RKStorage" />
+    <!-- Local drafts (unpublished text). Camera captures live in the cache folder, which is never backed up. -->
+    <exclude domain="file" path="drafts/" />
+    <!-- the widgets\' snapshot belongs to this device\'s session (README "Widgets") -->
+    <exclude domain="sharedpref" path="ecency.widgets.xml" />
+</full-backup-content>

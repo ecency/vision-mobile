@@ -1,0 +1,39 @@
+{
+  "about": "The strings the OS reads outside the app's catalog, generated in all 39 languages from src/config/locales by native/build-logic (SystemStrings, README Localization). android: resource name to key, for res/values*/strings.xml (manifest and widget provider labels). infoPlist: Info.plist key to key, for <tag>.lproj/InfoPlist.strings (permission prompts). widget: Swift accessor name to key, for the iOS widget extension's table (WidgetL10nData.generated.swift).",
+  "android": {
+    "widget_notifications_label": "notification.notification",
+    "widget_notifications_description": "native.widget.notifications_description",
+    "widget_streak_label": "native.widget.streak_name",
+    "widget_streak_description": "native.widget.streak_description",
+    "widget_compose_label": "native.widget.write",
+    "widget_compose_description": "native.widget.compose_description"
+  },
+  "infoPlist": {
+    "NSFaceIDUsageDescription": "native.permission.face_id",
+    "NSCameraUsageDescription": "native.permission.camera",
+    "NSPhotoLibraryAddUsageDescription": "native.permission.photo_library_add",
+    "NSPhotoLibraryUsageDescription": "native.permission.photo_library",
+    "NSMicrophoneUsageDescription": "native.permission.microphone"
+  },
+  "widget": {
+    "notifications": "notification.notification",
+    "notificationsDescription": "native.widget.notifications_description",
+    "streakName": "native.widget.streak_name",
+    "streakDescription": "native.widget.streak_description",
+    "write": "native.widget.write",
+    "composeDescription": "native.widget.compose_description",
+    "newWave": "native.widget.new_wave",
+    "wave": "share_intent.wave",
+    "streakTitle": "native.widget.streak_title",
+    "dailyQuests": "native.widget.daily_quests",
+    "streakHint": "native.widget.streak_hint",
+    "openPerks": "native.widget.open_perks",
+    "openApp": "native.widget.open_app",
+    "unread": "native.widgets.unread",
+    "unreadCaption": "native.widget.unread_caption",
+    "streak": "native.plurals.perks.streak",
+    "streakCaption": "native.widget.streak_caption",
+    "locked": "native.widgets.locked_text",
+    "signedOut": "native.widgets.signed_out_text"
+  }
+}

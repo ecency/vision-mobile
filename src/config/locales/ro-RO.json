@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Creează o postare completă pe blog în editor",
     "wave": "Wave",
     "wave_desc": "Distribuie o actualizare rapidă"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Ai creat {count, plural, one {# postare} few {# postare} other {# postare}} luna aceasta. Continuă tot așa!",
+        "checkin": "Te-ai înregistrat {count, plural, one {# zi} few {# zi} other {# zi}} săptămâna aceasta. Continuă tot așa!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# încercare(ări) eșuate} few {# încercare(ări) eșuate} other {# încercare(ări) eșuate}}"
+      },
+      "perks": {
+        "streak": "Serie de {n} zile"
+      },
+      "post_poll": {
+        "age_limit": "• Sunt permise doar conturile mai vechi de {days} zile",
+        "max_choices": "• Poți selecta până la {choices} opțiuni"
+      },
+      "recurrent": {
+        "remaining_executions": "{executions} transferuri rămase",
+        "schedule_summary": "{executions} transferuri, fiecare la {hours} ore"
+      },
+      "chats": {
+        "people_joined": "{count} persoane s-au alăturat"
+      },
+      "ai_assist": {
+        "min_chars": "Sunt necesare minimum {count} caractere",
+        "chars_remaining": "{count} caractere rămase"
+      },
+      "transfer": {
+        "powering_down_info": "Următorul Power Down este în {days} zile, {hp} HIVE"
+      }
+    }
   }
 }

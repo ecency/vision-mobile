@@ -1743,5 +1743,37 @@
     "blog_post_desc": "أنشئ منشور مدونة كاملًا في المحرر",
     "wave": "Wave",
     "wave_desc": "شارك تحديثًا سريعًا"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "أنشأت {count, plural, zero {# منشور} one {# منشور} two {# منشور} few {# منشور} many {# منشور} other {# منشور}} هذا الشهر. واصل التميّز!",
+        "checkin": "سجّلت حضورك {count, plural, zero {# يوم} one {# يوم} two {# يوم} few {# يوم} many {# يوم} other {# يوم}} هذا الأسبوع. واصل التميّز!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, zero {# المحاولات الفاشلة} one {# المحاولات الفاشلة} two {# المحاولات الفاشلة} few {# المحاولات الفاشلة} many {# المحاولات الفاشلة} other {# المحاولات الفاشلة}}"
+      },
+      "perks": {
+        "streak": "سلسلة {n} يوم"
+      },
+      "post_poll": {
+        "age_limit": "فقط الحسابات الأقدم من {days} أيام المسموح بها",
+        "max_choices": "• يمكنك اختيار حتى {choices} خيارات"
+      },
+      "recurrent": {
+        "remaining_executions": "متبقٍّ {executions} تحويلات",
+        "schedule_summary": "{executions} تحويلات، كل {hours} ساعة"
+      },
+      "chats": {
+        "people_joined": "انضم {count} شخص"
+      },
+      "ai_assist": {
+        "min_chars": "مطلوب {count} حرف كحد أدنى",
+        "chars_remaining": "متبقٍّ {count} حرف"
+      },
+      "transfer": {
+        "powering_down_info": "إلغاء التجميد التالي بعد {days} يوم، {hp} HIVE"
+      }
+    }
   }
 }

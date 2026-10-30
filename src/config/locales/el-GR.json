@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Δημιουργήστε μια πλήρη ανάρτηση ιστολογίου στον επεξεργαστή",
     "wave": "Wave",
     "wave_desc": "Κοινοποιήστε μια γρήγορη ενημέρωση"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Δημιουργήσατε {count, plural, one {# ανάρτηση} other {# ανάρτηση}} αυτόν τον μήνα. Συνεχίστε έτσι!",
+        "checkin": "Κάνατε check in {count, plural, one {# ημέρα} other {# ημέρα}} αυτή την εβδομάδα. Συνεχίστε έτσι!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# αποτυχημένη(ες) προσπάθεια(ες)} other {# αποτυχημένη(ες) προσπάθεια(ες)}}"
+      },
+      "perks": {
+        "streak": "Σερί {n} ημερών"
+      },
+      "post_poll": {
+        "age_limit": "• Επιτρέπονται μόνο λογαριασμοί παλαιότεροι από {days} ημέρες",
+        "max_choices": "• Μπορείτε να επιλέξετε έως {choices} επιλογές"
+      },
+      "recurrent": {
+        "remaining_executions": "Απομένουν {executions} μεταφορές",
+        "schedule_summary": "{executions} μεταφορές, κάθε {hours} ώρες"
+      },
+      "chats": {
+        "people_joined": "{count} άτομα συμμετείχαν"
+      },
+      "ai_assist": {
+        "min_chars": "Απαιτούνται τουλάχιστον {count} χαρακτήρες",
+        "chars_remaining": "Απομένουν {count} χαρακτήρες"
+      },
+      "transfer": {
+        "powering_down_info": "Το επόμενο unstaking είναι σε {days} ημέρες, {hp} HIVE"
+      }
+    }
   }
 }

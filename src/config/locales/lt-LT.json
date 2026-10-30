@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Sukurkite pilną tinklaraščio įrašą redaktoriuje",
     "wave": "Wave",
     "wave_desc": "Pasidalinkite greitu atnaujinimu"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Šį mėnesį sukūrėte {count, plural, one {# įrašą} few {# įrašą} many {# įrašą} other {# įrašą}}. Taip ir toliau!",
+        "checkin": "Šią savaitę pažymėjote {count, plural, one {# dieną} few {# dieną} many {# dieną} other {# dieną}}. Taip ir toliau!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# nepavykę bandymas(ai)} few {# nepavykę bandymas(ai)} many {# nepavykę bandymas(ai)} other {# nepavykę bandymas(ai)}}"
+      },
+      "perks": {
+        "streak": "{n} d. serija"
+      },
+      "post_poll": {
+        "age_limit": "• Leidžiama tik senesnėms nei {days} d. paskyroms",
+        "max_choices": "• Galite pasirinkti iki {choices} variantų"
+      },
+      "recurrent": {
+        "remaining_executions": "Liko {executions} pervedimų",
+        "schedule_summary": "{executions} pavedimų, kas {hours} val."
+      },
+      "chats": {
+        "people_joined": "Prisijungė {count} žmonių"
+      },
+      "ai_assist": {
+        "min_chars": "Reikalingi mažiausiai {count} simboliai",
+        "chars_remaining": "Liko {count} simbolių"
+      },
+      "transfer": {
+        "powering_down_info": "Kitas įkrovimo atšaukimas po {days} d., {hp} HIVE"
+      }
+    }
   }
 }

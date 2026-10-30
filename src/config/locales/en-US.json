@@ -1985,5 +1985,1116 @@
     "required": "Required",
     "title_length": "Between {min} and {max} characters",
     "owner_admin_only": "Only the owner and admins can change these settings."
+  },
+  "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Expanded",
+        "collapsed": "Collapsed"
+      },
+      "a11y_chat": {
+        "quote": "Replying to {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Select",
+        "deselect": "Deselect"
+      },
+      "store": {
+        "billing_unavailable": "In-app purchases are not allowed on this device.",
+        "verification_failed": "The App Store could not verify this purchase.",
+        "cancelled": "Purchase cancelled",
+        "unknown_result": "Unknown purchase result"
+      },
+      "navigation": {
+        "feed_unavailable": "This feed is not available yet.",
+        "link_cannot_open": "This link cannot be opened.",
+        "video_cannot_play": "This video cannot be played."
+      },
+      "media": {
+        "load_failed": "This item could not be loaded. Check your connection and try again.",
+        "loading": "Loading media",
+        "download_failed": "Download failed with status {status}"
+      },
+      "sign_in": {
+        "required": "Sign in required",
+        "to_reply": "Sign in to reply.",
+        "to_vote": "Sign in to vote.",
+        "button": "Sign in"
+      },
+      "account": {
+        "logout_user": "Logout @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  \u2022  {votes, plural, one {# vote} other {# votes}}  \u2022  {replies, plural, one {# reply} other {# replies}}",
+        "voting_power": "Voting power {percent}",
+        "remove_favourite": "Remove from favourites",
+        "add_favourite": "Add to favourites"
+      },
+      "waves": {
+        "clear_tag_filter": "Clear tag filter {tag}",
+        "new_wave": "New wave",
+        "replies_open_thread": "{count, plural, one {# reply, open thread} other {# replies, open thread}}",
+        "characters": "{count} of {max} characters",
+        "retry": "{message}\nTry again",
+        "playing": "Playing {permlink}",
+        "video_attached_remove": "Video attached, remove",
+        "image_attached_remove": "Attached image, remove",
+        "take_photo": "Take photo",
+        "edit_poll": "Edit poll",
+        "add_poll": "Add poll",
+        "add_video": "Add video"
+      },
+      "reading": {
+        "reply_to": "Reply to {username}",
+        "opens_post": "Opens the post",
+        "sort_comments": "Sort comments",
+        "sort_comments_value": "Sort comments, {sort}",
+        "no_comments": "No comments yet.",
+        "loading_post": "Loading post",
+        "show_version": "Show version",
+        "show_changes": "Show changes",
+        "replying_to": "Replying to @{username}",
+        "reply_text": "Reply text",
+        "translate_from": "From",
+        "translate_to": "To"
+      },
+      "feed": {
+        "tab_pinned": "{label}, pinned",
+        "tab_add": "{label}, add",
+        "customise": "Customise"
+      },
+      "card": {
+        "in_category": "in {category}",
+        "pinned": "Pinned",
+        "by_author": "by {username}",
+        "payout": "payout {payout}",
+        "payout_declined": "payout {payout}, declined",
+        "reblogged_by": "Reblogged by {username}"
+      },
+      "shell": {
+        "close_menu": "Close menu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Thumbnail, pick another image",
+        "words": "{count, plural, one {# word} other {# words}}",
+        "poll_min_age": "Min. Account Age (Days): {days}",
+        "poll_max_options": "Max Options: {count}",
+        "thumbnail_selected": "Selected thumbnail",
+        "thumbnail": "Thumbnail",
+        "uploaded_image": "Uploaded image",
+        "community_search": "search"
+      },
+      "vote": {
+        "not_voted": "Not voted",
+        "voting": "Voting",
+        "failed_with": "Vote failed: {message}",
+        "failed": "Vote failed",
+        "payout": "Payout {payout}",
+        "payout_declined": "Payout {payout}, declined",
+        "percent": "{percent} percent",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "On",
+        "off": "Off"
+      },
+      "lock": {
+        "biometric_reason": "Turn on biometric unlock for Ecency",
+        "offer_title": "Unlock with {method}",
+        "offer_use": "Use {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Keys are hidden while the screen is recorded or mirrored.",
+        "screenshot_notice": "A screenshot was taken. Private keys were hidden again; if the screenshot shows a key, delete it.",
+        "hold_hint": "Press and hold a key to show it.",
+        "hold_to_show": "Hold to show"
+      },
+      "wallet": {
+        "cancel_order": "Cancel this order?",
+        "days": "{count, plural, one {# day} other {# days}}"
+      },
+      "chat": {
+        "reactors_hint": "Long press to see who reacted",
+        "see_reactors": "See who reacted"
+      },
+      "esie": {
+        "still": "{mood}, still"
+      }
+    },
+    "ui": {
+      "profile_of": "Profile of @{username}",
+      "preview": "Preview ({index}/{count})",
+      "balance": "Balance: {amount}",
+      "expires_in": "Expires in {time}",
+      "expired": "Expired. Close and try again.",
+      "user_has_no_posts": "@{username} haven't posted anything yet",
+      "attach_image": "Attach image",
+      "auto": "Auto",
+      "back": "Back",
+      "hot": "HOT",
+      "image_of": "Image {index} of {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW Tap to reveal",
+      "new_reply": "New reply",
+      "remove": "Remove",
+      "unlock_ecency": "Unlock Ecency",
+      "update_it": "Update it",
+      "update_it_or_post_this_as": "Update it, or post this as a new reply?",
+      "use_pin": "Use PIN",
+      "your_reply_was_already_posted": "Your reply was already posted",
+      "error_try_again": "{message} Try again?",
+      "auth": {
+        "account_label": "Account: @{username}",
+        "approve_the_request_in_your_wallet": "Approve the request in your wallet app.",
+        "copy_key": "Copy {title}",
+        "current_account": "Current account",
+        "qr_code": "QR code",
+        "requested_by": "Requested by {requester}",
+        "pin_digits": "{filled} of {total, plural, one {# digit} other {# digits}}",
+        "private_key_shown": "{title}, private key shown",
+        "open_wallet_app": "Open wallet app",
+        "hiveauth_scan": "Approve in Hive Keychain or another HiveAuth wallet: open it on this device, or scan this code with it.",
+        "switching": "Switching...",
+        "logout_all": "Log out of all accounts",
+        "logout_all_title": "Log out of every account on this device?",
+        "stored_key": "@{username} is already signed in on this device. Its stored keys stay; only its session is renewed.",
+        "stored_hivesigner": "@{username} is already signed in with HiveSigner on this device. Its session is replaced.",
+        "stored_hiveauth": "@{username} is signed in with HiveAuth on this device. It will sign with HiveSigner instead.",
+        "method_key": "Key",
+        "logout_failed": "Logout failed"
+      },
+      "browser": {
+        "account": "Account",
+        "authority": "Authority",
+        "phishing": "Warning: This domain has been flagged as a known phishing site. Proceed with extreme caution."
+      },
+      "chat": {
+        "cancel_edit": "Cancel edit",
+        "cancel_reply": "Cancel reply",
+        "copied_to_clipboard": "Copied to clipboard",
+        "edited_at": "Edited {time}",
+        "group_options": "Group options",
+        "pinned_messages": "Pinned messages",
+        "remove_user": "Remove @{username}",
+        "sort_by_name": "Sort by name",
+        "more": "More",
+        "reaction_label": "{emoji} {count}. Long press to see who reacted",
+        "members": "Members"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "A post already exists at this link and differs from what you sent. Update it, or publish as new?",
+        "a_scheduled_post_is_published_by": "A scheduled post is published by Ecency at the chosen time. That needs the posting authority for ecency.app on your account. Your keys and other authorities stay as they are. Granting it needs your active key.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "AI tools",
+        "allow_ecency_to_publish_for_you": "Allow Ecency to publish for you?",
+        "bold": "Bold",
+        "clone": "Clone",
+        "cost": "Cost: {cost}",
+        "could_not_store_the_draft_on": "Could not store the draft on this device. Keep the app open and save the draft.",
+        "draft": "DRAFT",
+        "delete_count": "Delete ({count})",
+        "dictate_desc": "Speak, and the transcript goes into your post",
+        "discard": "Discard",
+        "discard_changes": "Discard changes?",
+        "grant": "Grant",
+        "italic": "Italic",
+        "keep_editing": "Keep editing",
+        "my_blog": "MY BLOG",
+        "my_communities": "MY COMMUNITIES",
+        "new_post": "New post",
+        "notice": "Notice",
+        "restore": "Restore",
+        "restore_unsaved_changes": "Restore unsaved changes?",
+        "saved": "Saved",
+        "top_communities": "TOP COMMUNITIES",
+        "table": "Table",
+        "text_format": "Text format",
+        "this_link_is_already_in_use": "This link is already in use",
+        "untitled": "Untitled",
+        "update_it_or_publish_this_as": "Update it, or publish this as a new post?",
+        "you_have_unsaved_changes_from_an": "You have unsaved changes from an earlier edit. The post has changed since then; restoring them replaces the text below.",
+        "your_edits_were_not_published": "Your edits were not published.",
+        "your_post_was_already_published": "Your post was already published",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Thumbnail, tap to pick another image",
+        "thumbnail_number": "Thumbnail {number}",
+        "recording_busy": "A recording is already in progress. Finish it in the camera first.",
+        "photo_lost": "The photo was lost while the camera was open. Please take it again.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# word} other {# words}}",
+        "community_search": "search"
+      },
+      "profile": {
+        "open_wallet": "Open Wallet",
+        "your_wallet_is_on_the_wallet": "Your wallet is on the Wallet tab.",
+        "user_has_no_comments": "@{username} haven't commented anything yet",
+        "votes_count": "{count, plural, one {# vote} other {# votes}}",
+        "replies_count": "{count, plural, one {# reply} other {# replies}}",
+        "menu": "More",
+        "users": "Users"
+      },
+      "reading": {
+        "apply": "APPLY",
+        "add_tag": "Add tag",
+        "age": "Age",
+        "audio_language": "Audio language",
+        "available_filters": "Available Filters",
+        "could_not_unlock_the_audio_please": "Could not unlock the audio, please try again",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Listen to this post",
+        "log_in": "Log in",
+        "mark_all_as_read": "Mark all as read",
+        "mark_as_read": "Mark as read",
+        "more_replies": "More replies",
+        "not_enough_points": "Not enough Points",
+        "nothing_here_yet": "Nothing here yet.",
+        "open_editor": "Open editor",
+        "pause_voice": "Pause voice",
+        "play_voice": "Play voice",
+        "playback_speed": "Playback speed",
+        "publishing_in_waves": "Publishing in Waves",
+        "quests_done": "Quests done",
+        "read": "Read",
+        "remove_vote": "Remove vote",
+        "seek": "Seek",
+        "select_community": "Select Community",
+        "selected_filters": "Selected Filters",
+        "the_audio_could_not_be_loaded": "The audio could not be loaded.",
+        "this_post_does_not_exist_or": "This post does not exist or was deleted.",
+        "unread": "Unread",
+        "voice_position": "Voice position",
+        "vote_weight": "Vote weight",
+        "reblogged_by": "reblogged by {username}",
+        "no_more_posts": "No more posts.",
+        "favourite": "Favourite",
+        "no_votes_yet": "No votes yet",
+        "no_comments_yet": "No comments yet. Be the first!",
+        "comments_count": "Comments ({count})",
+        "sending_to_chain": "sending to the chain",
+        "compare": "Compare",
+        "your_vote": "Your vote",
+        "reply_to": "Reply to @{username}",
+        "what_do_you_think": "What do you think?",
+        "clear_tag_filter": "Clear tag filter",
+        "tab_selected": "{title}, selected",
+        "add_tag_feed": "Add tag feed",
+        "feed_pinned": "{label}, pinned",
+        "attached_image_remove": "Attached image, tap to remove",
+        "camera": "Camera",
+        "files": "Files",
+        "paused": "Paused",
+        "in_topic": "in {topic}",
+        "poll_vote": "Vote",
+        "reply": "Reply",
+        "mute_sound": "Mute",
+        "unmute_sound": "Unmute",
+        "leaderboard_activities": "Activities",
+        "leaderboard_reward": "Reward",
+        "sort_votes": "Votes"
+      },
+      "shell": {
+        "account_of": "Account @{username}",
+        "account_signed_out": "Account, signed out",
+        "close_tab": "Close tab",
+        "coming_soon_to_the_native_app": "Coming soon to the native app.",
+        "create": "Create",
+        "expand": "Expand",
+        "forward": "Forward",
+        "loading": "Loading",
+        "new_tab": "New tab",
+        "reload": "Reload",
+        "sent": "Sent",
+        "tab_unread": "{title}, {count} unread",
+        "no_app_for_link": "No app can open this link."
+      },
+      "wallet": {
+        "product_not_available": "Product not available.",
+        "repeat": "Repeat"
+      },
+      "copied": "Copied",
+      "trending_caps": "TRENDING",
+      "move_up": "Move up",
+      "move_down": "Move down",
+      "scroll_to_top": "Scroll to top",
+      "load_more": "More"
+    },
+    "wallet": {
+      "checking": "Checking with the network",
+      "leave_title": "Still sending",
+      "leave_message": "This is still being sent or checked with the network. You can leave this screen: the app tells you when it is done.",
+      "stay": "Stay",
+      "collateralized_convert_request": "Collateralized Convert Request",
+      "op_transfer": "transfer",
+      "op_power_up": "power up",
+      "op_power_down_change": "power down change",
+      "op_delegation": "delegation",
+      "op_savings_deposit": "savings deposit",
+      "op_savings_withdrawal": "savings withdrawal",
+      "op_conversion": "conversion",
+      "op_swap": "swap",
+      "op_order_cancel": "order cancel",
+      "op_reward_claim": "reward claim",
+      "op_withdraw_route_change": "withdraw route change",
+      "op_token_operation": "token operation"
+    },
+    "notification": {
+      "amount_unknown": "Amount unavailable",
+      "weekly_earnings_breakdown": "You earned ${amount} this week - ${authorUsd} from posts, ${curationUsd} from curation.",
+      "weekly_earnings_total": "You earned ${amount} this week from your posts and curation."
+    },
+    "settings": {
+      "open": "Open",
+      "feedback_subject": "Feedback/Bug report",
+      "unknown_user": "Unknown User"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Followers",
+      "spin_game": "Spin game",
+      "edit_profile": "Edit profile",
+      "redeem_points": "Redeem points",
+      "community": "Community",
+      "community_members": "Community members",
+      "community_activities": "Community activities",
+      "browser": "Browser",
+      "asset_details": "Asset details",
+      "edit_history": "Edit history",
+      "welcome": "Welcome",
+      "chat": "Chat",
+      "backup_keys": "Backup keys",
+      "trade": "Trade",
+      "ai_image_generator": "AI image generator",
+      "select_assets": "Select assets",
+      "poll": "Poll",
+      "bot_comments": "Bot comments"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operations that need the owner key cannot be signed in Ecency.",
+      "post": "Post/Comment",
+      "custom": "Custom JSON",
+      "sign_buffer": "Sign Message",
+      "send_token": "Send Token",
+      "witness_vote": "Witness Vote",
+      "proxy": "Set Proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Broadcast",
+      "sign_tx": "Sign Transaction",
+      "encode": "Encode Message",
+      "decode": "Verify Key",
+      "add_account_authority": "Add Account Authority",
+      "remove_account_authority": "Remove Account Authority",
+      "add_key_authority": "Add Key Authority",
+      "remove_key_authority": "Remove Key Authority",
+      "create_claimed_account": "Create Account",
+      "create_proposal": "Create Proposal",
+      "remove_proposal": "Remove Proposal",
+      "update_proposal_vote": "Proposal Vote",
+      "signed_call": "Signed Call"
+    },
+    "translate_language": {
+      "ar": "Arabic",
+      "az": "Azerbaijani",
+      "bg": "Bulgarian",
+      "bn": "Bengali",
+      "ca": "Catalan",
+      "cs": "Czech",
+      "da": "Danish",
+      "de": "German",
+      "el": "Greek",
+      "en": "English",
+      "eo": "Esperanto",
+      "es": "Spanish",
+      "et": "Estonian",
+      "fa": "Persian",
+      "fi": "Finnish",
+      "fr": "French",
+      "ga": "Irish",
+      "he": "Hebrew",
+      "hi": "Hindi",
+      "hu": "Hungarian",
+      "id": "Indonesian",
+      "it": "Italian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "lt": "Lithuanian",
+      "lv": "Latvian",
+      "ms": "Malay",
+      "nb": "Norwegian",
+      "nl": "Dutch",
+      "pl": "Polish",
+      "pt": "Portuguese",
+      "ro": "Romanian",
+      "ru": "Russian",
+      "sk": "Slovak",
+      "sl": "Slovenian",
+      "sq": "Albanian",
+      "sv": "Swedish",
+      "th": "Thai",
+      "tl": "Tagalog",
+      "tr": "Turkish",
+      "uk": "Ukrainian",
+      "zh": "Chinese",
+      "zt": "Chinese (Traditional)"
+    },
+    "reading": {
+      "banner_text": "This post is in {source}. Translate to {target}?",
+      "translated_from_text": "Translated from {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# Member} other {# Members}} • {authors, plural, one {# Poster} other {# Posters}} • {posts, plural, one {# Post} other {# Posts}}",
+      "community_title": "{title} community",
+      "members_title": "{title} members",
+      "activities_title": "{title} activity",
+      "cannot_start_with_or": "Cannot start with @ or #",
+      "use_a_two_letter": "Use a two letter language code, like en",
+      "at_most_characters": "At most {max, plural, one {# character} other {# characters}}",
+      "council": "Council",
+      "journal": "Journal",
+      "topic": "Topic",
+      "community_not_found": "Community not found."
+    },
+    "transfer": {
+      "one_recipient": "Only one recipient can be used for this transfer.",
+      "is_an_exchange_and": "{exchange} is an exchange and may not support recurring transfers: funds sent on a schedule can be lost. Use a one-time transfer instead."
+    },
+    "dapps": {
+      "signing_info": "Ecency acts as your Hive signing extension. When a dApp asks you to log in with a browser extension like Keychain, Keeper, or Peak Vault, select that option. Ecency will handle the signing securely.",
+      "category_social": "Social",
+      "category_gaming": "Gaming",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Group",
+      "unable_to_load_messages": "Unable to load messages.",
+      "someone": "Someone",
+      "renamed_the_group_to": "{actor} renamed the group to \"{name}\"",
+      "removed_the_group_name": "{actor} removed the group name",
+      "unable_to_send_your": "Unable to send your message.",
+      "unable_to_remove_message": "Unable to remove message.",
+      "unknown": "Unknown",
+      "members_online": "{members, plural, one {# member} other {# members}} • {online} online",
+      "failed_to_load_pinned": "Failed to load pinned messages",
+      "you": "You",
+      "title": "Reactions"
+    },
+    "tip": {
+      "login_required": "Please login to send tips",
+      "max_decimals": "Maximum {n, plural, one {# decimal place} other {# decimal places}}"
+    },
+    "paid": {
+      "check_again": "Check again",
+      "give_up": "Give up",
+      "unknown": "No answer yet. The request may still be running. Check again to fetch the result: it is not charged a second time.",
+      "pending": "Your request is still being processed. Check again in a moment: it is not charged a second time.",
+      "restored": "An earlier request has no answer yet. Check again to fetch its result: it is not charged a second time.",
+      "give_up_confirm": "If the request went through, the points were spent and the result will be lost.",
+      "not_stored": "This request could not be stored on the device. Keep this screen open until it has finished.",
+      "sign_in_again": "Your session has expired. Sign in again, then check again.",
+      "other_account": "This belongs to @{owner}. Switch back to that account to continue."
+    },
+    "ai": {
+      "run_ai_assist": "Run AI Assist ({costText})",
+      "no_longer_free_cost": "This run is no longer free today. It costs {cost} {unit}.",
+      "no_longer_free": "This run is no longer free today.",
+      "content_violates_our_content": "Content violates our content policy. Please modify your text. Points were not refunded.",
+      "generate_image": "Generate Image ({costLabel})",
+      "use_prompt": "Use: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Please wait, another action is in progress",
+      "not_a_community_post": "Not a community post.",
+      "parent_post_not_found": "Parent post not found",
+      "the_account_changed": "The account changed."
+    },
+    "dictation": {
+      "balance": "Balance: {balance} {unit}",
+      "stop_points": "Stop ({cost} Points)",
+      "stop_free": "Stop (Free)",
+      "transcribe_points": "Transcribe ({cost} Points)",
+      "transcribe": "Transcribe",
+      "no_longer_free_cost": "This recording is no longer free today. It costs {cost} Points.",
+      "no_longer_free": "This recording is no longer free today.",
+      "held_locked": "Recording stopped when Ecency locked. Nothing was sent. Tap Transcribe to send it, or give it up.",
+      "held_no_background": "Recording stopped when Ecency left the screen (it could not show its recording notification). Nothing was sent. Tap Transcribe to send it, or give it up.",
+      "held_stopped": "Recording stopped from the notification. Nothing was sent. Tap Transcribe to send it, or give it up.",
+      "held_focus_lost": "Recording stopped for a call or another app's sound. Nothing was sent. Tap Transcribe to send it, or give it up.",
+      "held_interrupted": "Recording stopped because another app took the microphone. Nothing was sent. Tap Transcribe to send it, or give it up.",
+      "unavailable": "Recording is not available on this device.",
+      "not_read": "That recording could not be read or is too large. Nothing was sent and nothing was charged.",
+      "give_up_not_sent": "This recording was not sent, so nothing was charged. It will be deleted.",
+      "give_up_not_charged": "Nothing was charged for this recording. It will be deleted.",
+      "clip_lost": "The recording of an earlier request is no longer on this device. If that request went through, your points were spent, and its transcript cannot be fetched."
+    },
+    "register": {
+      "error_code_28": "Your request couldn't be processed. The signup queue is likely full. Please try again in a few minutes."
+    },
+    "perks": {
+      "quests_empty": "No quests here yet, check back soon.",
+      "freeze_confirm_title": "Protect your streak",
+      "spend_points_on_a": "Spend {price} Points on a streak freeze? It is used up to protect your streak on a day you miss."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Support Ecency, get a free blog, and stand out with a verified Pro badge.",
+      "card_description": "Go Pro for {price} a year. Verified badge, a free blog, and support Ecency.",
+      "card_description_plain": "Go Pro for a year. Verified badge, a free blog, and support Ecency.",
+      "member": "You are a Pro member.",
+      "benefit_badge": "A verified Pro badge next to your name.",
+      "benefit_blog": "A free blog at yourname.blogs.ecency.com.",
+      "benefit_support": "Directly support Ecency development.",
+      "benefit_early": "Early access to new features.",
+      "buy": "Get Pro for {price} a year",
+      "extend": "Extend by 12 months for {price}",
+      "extend_note": "Buying again adds 12 months to your membership.",
+      "unavailable": "Ecency Pro is not available from the store right now.",
+      "activating": "Payment received. Activating your membership.",
+      "success_title": "Welcome to Ecency Pro",
+      "success_body": "Your Pro membership is active. Your badge will appear on your profile shortly.",
+      "extending": "Payment received. Your Pro membership is being extended by 12 months.",
+      "open_a11y": "Open Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Saving draft...",
+      "please_sign_in_first": "Please sign in first.",
+      "fetch_failed": "Fetch failed.",
+      "you_can_only_edit": "You can only edit your own content.",
+      "invalid_percent": "Invalid percent",
+      "beneficiary_exists_already": "Beneficiary exists already",
+      "this_draft_belongs_to": "This draft belongs to @{owner}. Switch back to that account to publish it.",
+      "could_not_make_a": "Could not make a new link for this post. Change the title a little and try again.",
+      "an_earlier_attempt_was": "An earlier attempt was published after this one. Check which version you want to keep.",
+      "could_not_check_your": "Could not check your account's posting authority. Check your connection and try again.",
+      "this_post_was_changed": "This post was changed elsewhere since you opened it. Copy your text, go back and open it again to edit the latest version.",
+      "link_text_placeholder": "Text here"
+    },
+    "app_error": {
+      "this_reply_is_too": "This reply is too long.",
+      "the_network_refused_this": "The network refused this action.",
+      "invalid_input": "Invalid input.",
+      "secure_storage_is_unavailable": "Secure storage is unavailable. Please sign in again.",
+      "please_sign_in_first": "Please sign in first.",
+      "these_credentials_belong_to": "These credentials belong to @{actual}, not @{expected}.",
+      "is_not_signed_in": "@{username} is not signed in on this device.",
+      "key_required": "{role} key is required to perform this transaction. {hint}",
+      "cancelled": "Cancelled.",
+      "the_request_was_rejected": "The request was rejected in the wallet app.",
+      "the_request_expired_before": "The request expired before the wallet app answered. Please try again.",
+      "could_not_reach_the": "Could not reach the HiveAuth server. Please try again.",
+      "unexpected_redirect": "The server sent an unexpected redirect. Nothing was changed. Please try again later.",
+      "missing_key_hint": "Add it under Settings, Manage Authorities (Import Private), or sign in again with it.",
+      "this_key_is_also": "This key is also this account's owner key. Ecency does not keep a key that controls the owner role: give your active and posting roles keys of their own, then sign in with those.",
+      "this_is_the_owner": "This is the owner key. Ecency never stores or uses the owner key: sign in with your master password, or with your posting or active key.",
+      "this_password_only_matches": "This password only matches the account's owner key. Ecency never stores or uses the owner key: sign in with your posting or active key.",
+      "this_key_cannot_sign": "This key cannot sign for the account on its own: the account needs more than one signature (its weight is below the threshold).",
+      "public_key_given": "This is your public key. Paste the private key (starts with 5) or your master password.",
+      "memo_key_only": "The memo key cannot be used to sign in. Use your posting key, active key or master password.",
+      "network_message": "Network error. Please check your connection and try again.",
+      "network_error_this_may": "Network error. This may have gone through already; retrying is safe and will not post twice."
+    },
+    "purchases": {
+      "deal_best": "BEST DEAL!",
+      "deal_popular": "POPULAR!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "The store did not answer."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Email and username are required for 999accounts consumption",
+      "stuck": "An earlier purchase of this product could not be completed. Please contact support@ecency.com with your store receipt, it is kept for this.",
+      "held": "This purchase is held for review. Contact support@ecency.com with order #{order}.",
+      "earlier_purchase": "An earlier purchase of this product is being completed for @{target} first.",
+      "earlier_pending": "An earlier payment for this product is still pending for @{target}. It completes once the store confirms the payment.",
+      "pending": "Your payment is pending. The purchase completes once the store confirms the payment.",
+      "processing": "Your purchase is being processed. It will be completed shortly."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Recurring Transfers",
+      "delegate_hive_power": "Delegate Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Set withdraw vesting route",
+      "power_down": "Power down",
+      "transfer_to_saving": "Transfer to saving",
+      "transfer_from_saving": "Transfer from saving",
+      "cancel_transfer_from_saving": "Cancel transfer from saving",
+      "collateralized_convert": "Collateralized Convert",
+      "witness_vote": "Witness vote",
+      "witness_update": "Witness update",
+      "witness_set_properties": "Witness set properties",
+      "governance_proxy": "Governance proxy",
+      "claim_account": "Claim account",
+      "create_account": "Create account",
+      "create_account_with_account": "Create account with account credits",
+      "create_limit_order": "Create limit order",
+      "cancel_limit_order": "Cancel limit order",
+      "redeem_rewards": "Redeem rewards",
+      "post_or_comment": "Post or comment",
+      "post_or_comment_options": "Post or comment options",
+      "custom_operation": "Custom operation",
+      "update_account_active": "Update account (active)",
+      "update_account_posting": "Update account (posting)",
+      "change_recovery_account": "Change recovery account",
+      "create_proposal": "Create proposal",
+      "remove_proposal": "Remove proposal",
+      "update_proposal_votes": "Update proposal votes",
+      "update_proposal": "Update proposal"
+    },
+    "auth_link": {
+      "must_be_signed_by": "This link must be signed by @{account}. Switch to that account and open it again.",
+      "ecency_can_only_sign": "Ecency can only sign and broadcast transactions from links.",
+      "requester_page": "the page {host}",
+      "owner_refused": "Operations that need the owner key cannot be signed from a link.",
+      "busy": "Please wait: another request is still being processed.",
+      "not_supported": "Ecency cannot sign this operation in this version yet."
+    },
+    "chats": {
+      "group_members": "Group members",
+      "rename_group": "Rename group",
+      "failed_to_load_chats": "Failed to load chats",
+      "unknown": "Unknown",
+      "unable_to_mark_channel": "Unable to mark channel as read",
+      "unable_to_update_favorites": "Unable to update favorites",
+      "unable_to_update_mute": "Unable to update mute",
+      "group": "Group",
+      "unable_to_search": "Unable to search",
+      "unable_to_start_chat": "Unable to start chat",
+      "no_internet": "No Internet Connection"
+    },
+    "stake": {
+      "confirm_summary": "Delegate {hp} HP ({vests} VESTS) To @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Already delegated to @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Public only. Ecency never stores the owner key.",
+      "shared_owner": "This account uses the same key for its owner role and its {names} role. Whoever has that key controls the whole account. Give the {names} role a key of its own and keep the owner key offline.",
+      "copy_warning": "Anyone with this private key controls this part of your account. Other apps can read the clipboard; paste it only where you trust it. It is cleared from the clipboard after 2 minutes."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN lock is on.",
+      "pin_changed": "PIN changed.",
+      "pin_lock_is_off": "PIN lock is off.",
+      "wiped_notice": "All accounts, keys and credentials were removed from this device.",
+      "we_could_not_bring": "We could not bring over your accounts from the previous version of the app. Please log in again.",
+      "your_pin_lock_could": "Your PIN lock could not be carried over from the previous version. Set a PIN again from the account menu to turn the app lock back on.",
+      "biometric_unlock_was_turned": "Biometric unlock was turned off because the biometrics on this device changed. Unlock with your PIN, then turn it on again from the account menu.",
+      "biometric_unavailable_notice": "Biometric unlock could not be turned on: no biometrics are set up on this device.",
+      "set_backup": "Set a PIN to back up biometric unlock",
+      "biometric_on_notice": "PIN lock is on. Unlock with biometrics, or with your PIN.",
+      "offer_title": "Unlock with biometrics",
+      "offer_body": "Open Ecency with your face or fingerprint. You also set a PIN, which unlocks the app when biometrics are not available.",
+      "offer_use": "Use biometrics",
+      "offer_use_pin": "Use PIN instead"
+    },
+    "common": {
+      "list_and": "{first} and {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Replies of 25 characters or fewer do not earn points (links do not count)",
+      "short_content_hint": "Too short to earn points (25 characters or fewer, links excluded)",
+      "daily_post": "Daily post {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# day streak} other {# day streak}}",
+      "grant_description": "Grant the Ecency account @ecency.app posting permission on your account, so you can post without opening Keychain each time. Granting it changes your account's posting authority and needs your active key."
+    },
+    "wallet_history": {
+      "from_to": "@{from} to @{to}",
+      "from_user_id": "from @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} to @{to}, id: {id}",
+      "from_to_account": "@{from} to {to}",
+      "from_user": "from @{user}",
+      "to_user": "to @{user}",
+      "interest": "Interest",
+      "proposal_pay": "Proposal Payment",
+      "categories": "Activity types",
+      "category_all": "All",
+      "category_transfers": "Transfers",
+      "category_market": "Market orders",
+      "category_interest": "Interests",
+      "category_stake": "Stake operations",
+      "category_rewards": "Rewards",
+      "point_type_checkin": "Heartbeats",
+      "point_type_login": "Login",
+      "point_type_post": "Post",
+      "point_type_comment": "Comment",
+      "point_type_vote": "Vote",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Transfers sent",
+      "point_type_transfer_received": "Transfers received"
+    },
+    "video_upload": {
+      "continue_upload": "CONTINUE UPLOAD",
+      "source_gone": "This recording is no longer available on the device. Record or choose the video again.",
+      "no_camera": "The camera is not available on this device."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Next unstaking is in {hours, plural, one {# hour} other {# hours}}",
+      "account_not_found": "Account not found"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Image in clipboard · Paste image",
+      "no_container": "Latest waves container could not be fetched",
+      "please_sign_in_first": "Please sign in first.",
+      "write_something_first": "Write something first.",
+      "account_changed": "This wave was written as another account. Close it and write it again.",
+      "no_upload": "Image upload is not available in this build yet. Paste an image link into the text instead.",
+      "fail": "Fail"
+    },
+    "delete_account": {
+      "sign_out_failed": "Your request was sent, but signing out failed. Please log out from the menu.",
+      "not_sent": "Your request for deletion could not be sent. Please try again."
+    },
+    "chat_sheets": {
+      "group_limit": "A group can have up to {max, plural, one {# other person} other {# other people}}.",
+      "search_people_by_username": "Search people by username",
+      "new_group_title": "New group",
+      "new_group_hint": "Add {min} to {max, plural, one {# person} other {# people}} to start a group conversation.",
+      "no_results": "No one found on chat with that name.",
+      "search_failed": "Search did not work. Check your connection and try again.",
+      "create": "Start group",
+      "new_group_failed": "Could not start the group. Please try again.",
+      "name_limit": "A group name can be up to {max, plural, one {# character} other {# characters}}.",
+      "rename_title": "Rename group",
+      "rename_hint": "Give this group a name everyone in it will see. Leave it empty to show the members' names instead.",
+      "placeholder": "Group name",
+      "not_owner": "Only the person who started this group can rename it.",
+      "rename_failed": "Could not rename the group. Please try again."
+    },
+    "editor_side": {
+      "copy_of": "Copy of {title}",
+      "deletions_failed": "Something went wrong\n{failed} of {total, plural, one {# deletion} other {# deletions}} failed",
+      "uploads_failed": "{count, plural, one {# upload failed} other {# uploads failed}}:\n\n{messages}",
+      "failed_to_delete": "Failed to delete"
+    },
+    "uploads": {
+      "add_to_gallery": "Add to gallery"
+    },
+    "account_notice": {
+      "manage_keys": "Settings, Manage Authorities",
+      "no_signing_key_title": "Sign in again as @{account}",
+      "no_signing_key": "Ecency no longer keeps the owner key or the master password on this device, and @{account} has no posting or active key stored here. Sign in again with your master password or with a posting or active key, or add a key under {manageKeys} (Import Private).",
+      "missing_roles_title": "Some keys were not added",
+      "cannot_post": "post, vote or comment",
+      "cannot_transfer": "send transfers or change account settings",
+      "missing_roles": "Your password no longer matches @{account}''s {missing} key: it was changed on the account since the password was set. Stored on this device: the {kept} key. Until you add the {missing} key under {manageKeys} (Import Private), this app cannot {cannot} with keys for @{account}.",
+      "shared_owner_title": "This key also controls the owner role",
+      "shared_owner": "@{account} uses the same key for its owner role and its {names} role. Whoever has this key controls the whole account. Ecency keeps it as the {names} key only and never uses it for owner operations. Give the {names} role a key of its own, and keep the owner key offline."
+    },
+    "dapp_browser": {
+      "message_from": "Message from {host}",
+      "home_title": "Home",
+      "loading_title": "Loading...",
+      "blank_run": "[{count, plural, one {# blank character} other {# blank characters}}]",
+      "too_large": "This page asked to sign a request too large to show, so Ecency refused it."
+    },
+    "community_service": {
+      "the_account_changed": "The account changed."
+    },
+    "profile_edit": {
+      "enter_link": "Enter image link",
+      "please_sign_in_first": "Please sign in first.",
+      "account_not_found": "Account not found",
+      "please_enter_an_image": "Please enter an image link starting with https://"
+    },
+    "background_media": {
+      "post_by": "Post by @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Please sign in first."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "You have already voted with the same weight.",
+      "insufficient_rc": "Insufficient Resource Credits. Please wait or power up.",
+      "missing_authority": "Missing posting authority. Please check your login method.",
+      "comment_too_soon": "Please wait before posting again.",
+      "paid_out": "This post has already been paid out.",
+      "too_large": "Transaction is {size, plural, one {# byte} other {# bytes}}, over the {max} byte limit.",
+      "network_error_please_check": "Network error. Please check your connection and try again.",
+      "unconfirmed_message": "Could not confirm whether this went through. Please check your wallet or history; start it again only if it is not there.",
+      "undecided_message": "This may already have gone through. Please check your wallet or history before trying again."
+    },
+    "chat_api": {
+      "request_failed": "Request failed ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} is typing...",
+      "typing_two": "{first} and {second} are typing...",
+      "typing_three": "{first}, {second}, and {third} are typing...",
+      "typing_many": "{first}, {second}, and {count, plural, one {# other is} other {# others are}} typing...",
+      "banned": "{reason} You can still read chat. Posting unlocks {until}.",
+      "joined_when": "joined {time}",
+      "joined": "joined",
+      "official_badge": "Official",
+      "official_badge_label": "Official Ecency account"
+    },
+    "side_menu": {
+      "ask_esie": "Ask Esie"
+    },
+    "chat_service": {
+      "missing_token": "Hive access token missing. Please log out and log back in.",
+      "dm_error": "User has not joined chats"
+    },
+    "compose_reply": {
+      "account_changed": "This reply was written as another account. Close it and write it again.",
+      "write_something_first": "Write something first.",
+      "please_sign_in_first": "Please sign in first."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Too many beneficiaries: {max} at most.",
+      "a_beneficiary_s_share": "A beneficiary's share must be between 0.01% and 100%.",
+      "beneficiaries_add_up_to": "Beneficiaries add up to more than 100%.",
+      "a_beneficiary_is_listed": "A beneficiary is listed twice.",
+      "you_cannot_be_a": "You cannot be a beneficiary of your own post.",
+      "a_beneficiary_has_an": "A beneficiary has an invalid account name."
+    },
+    "follows": {
+      "fail": "Fail!: {message}",
+      "follower_count": "Follower ({count})",
+      "following_count": "Following ({count})"
+    },
+    "link": {
+      "unsupported": "This link is not supported yet.",
+      "cannot_open": "Cannot open link",
+      "unsupported_version": "This link is not supported in this version."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "The Explore browser can access your Hive wallet to sign transactions. This link comes from post content and is not verified by Ecency. Only continue if you trust it:\n\n{url}"
+    },
+    "listen": {
+      "message": "Listening needs {required} Points and you have {available}.",
+      "unlock_label": "Unlock · {cost} Points",
+      "preparing_audio": "Preparing audio · {preparingPercent}%",
+      "waiting_in_line_ahead": "Waiting in line, {ahead} ahead…",
+      "next_in_line": "Next in line…",
+      "preparing_about_minutes": "Preparing audio, about {minutes} min…",
+      "preparing_audio_2": "Preparing audio…",
+      "spend_confirm": "Spend {cost} Points to listen to this post? The audio is yours to replay any time.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Audio could not be made, your Points were refunded"
+    },
+    "media_pick": {
+      "preparing_video": "Preparing video...",
+      "library_hint": "Pick from your photos",
+      "camera_hint": "Take a new photo now",
+      "files_hint": "Browse files on this device and in the cloud",
+      "paste_hint": "Use the image you copied",
+      "link_hint": "Use an image from the web"
+    },
+    "media_picking": {
+      "image_types_message": "This file type is not supported. Choose a JPEG, PNG, GIF, WebP or HEIC image.",
+      "video_types_message": "This file type is not supported. Choose an MP4 or MOV video.",
+      "gif_too_large": "This GIF is larger than {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "This operation needs both an active and a posting signature, which Ecency cannot sign together yet."
+    },
+    "poll": {
+      "fail": "Fail!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Could not check your account's posting authority. Check your connection and try again."
+    },
+    "post_lists": {
+      "voters_title": "Voters Info ({total})",
+      "reblogs_title": "Reblog Info ({total})",
+      "no_history_found": "No History found!",
+      "no_edit_history_available": "No edit history available for this content.",
+      "version_label": "Version {version}"
+    },
+    "stats": {
+      "other_device": "Other"
+    },
+    "profile": {
+      "account_not_found": "Account not found",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Full in {hours, plural, one {# hour} other {# hours}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Could not read your current profile, try again"
+    },
+    "profile_sheet": {
+      "fail": "Fail! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Account not found"
+    },
+    "push_payload": {
+      "mentioned": "@{source} mentioned @{target}",
+      "replied": "@{source} replied to @{target}",
+      "transferred": "@{source} transferred to @{target}",
+      "delegated": "@{source} delegated to @{target}",
+      "rewards_received": "Rewards received",
+      "account_updated": "Account updated",
+      "account_updated_body": "Your account details were updated",
+      "followed": "@{source} followed @{target}",
+      "unfollowed": "@{source} unfollowed @{target}",
+      "ignored": "@{source} ignored @{target}",
+      "blacklisted": "@{source} blacklisted @{target}",
+      "posted_in": "@{source} posted in #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Unable to get Camera permission",
+      "permission_message": "Please grant camera permission in ecency settings.",
+      "permission_allow": "Allow"
+    },
+    "reply_account": {
+      "switch": "Reply as another account"
+    },
+    "send_journal": {
+      "your_from_went_through": "Your {label} from @{account} went through.",
+      "not_sent": "Your {label} from @{account} did not go through. Nothing was sent; you can start it again.",
+      "checking_whether_your_from": "Checking whether your {label} from @{account} went through. Please check your wallet before sending it again."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner page closed",
+      "wrong_role": "This is your {given} key; this operation needs your {needed} key.",
+      "action_id_required": "This action needs an action id to be retried safely."
+    },
+    "signing_router": {
+      "owner_never": "Owner operations are never signed in the app."
+    },
+    "spin": {
+      "key_missing": "Game key missing",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Today (UTC), resets in {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Resets daily at 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Sign in again",
+      "message": "Secure storage was reset on this device. Sign in again.",
+      "failed": "The accounts on this device could not be removed. Please try again."
+    },
+    "store": {
+      "in_app_purchases_are": "In-app purchases are not available in this build."
+    },
+    "wallet_sends": {
+      "journal_full": "Too many earlier sends are still being checked with the network. Please wait until they are confirmed before sending more.",
+      "check_later": "The network did not confirm this in time. Please check your wallet or history before sending it again; the app checks again at its next start."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# unread} other {# unread}}",
+      "locked_text": "Unlock Ecency to see",
+      "signed_out_text": "Log in to Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Could not read your account's current authorities. Nothing was changed; please try again.",
+      "reads_disagree": "Two reads of your account's posting authority disagree. Nothing was changed; please try again."
+    },
+    "vote": {
+      "vote_weight_must_be": "Vote weight must be between -100% and 100%.",
+      "please_sign_in_first": "Please sign in first."
+    },
+    "widget": {
+      "streak_name": "Quest streak",
+      "write": "Write",
+      "new_wave": "New wave",
+      "notifications_description": "Your unread notifications. Hidden while the PIN lock is on.",
+      "streak_description": "Your daily quest streak. Hidden while the PIN lock is on.",
+      "compose_description": "Write a post or a new wave.",
+      "streak_title": "Streak",
+      "daily_quests": "Daily quests",
+      "streak_hint": "Open Perks to see your streak",
+      "open_perks": "Open Perks",
+      "open_app": "Open Ecency",
+      "unread_caption": "{count, plural, one {unread} other {unread}}",
+      "streak_caption": "{count, plural, one {day streak} other {day streak}}"
+    },
+    "system": {
+      "dictation_channel": "Dictation",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "Shows while a recording for dictation goes on in the background, with a Stop action.",
+      "dictation_title": "Recording for dictation",
+      "dictation_text": "Ecency is recording your dictation. Stop keeps it unsent until you confirm in the app.",
+      "listen_channel_description": "Tells you when Listen could not go on in the background.",
+      "listen_paused": "Listen paused",
+      "listen_paused_text": "Open Ecency to keep listening.",
+      "skip_back": "Back 15 seconds",
+      "skip_forward": "Forward 15 seconds"
+    },
+    "permission": {
+      "face_id": "Unlock Ecency with Face ID instead of your PIN.",
+      "camera": "Scan QR codes, and take a photo or record a video to add it to your post.",
+      "photo_library_add": "Ecency saves the images you download from posts to your photo library.",
+      "photo_library": "Ecency keeps the images you download from posts together in an Ecency album in your photo library.",
+      "microphone": "Ecency uses your microphone so you can dictate posts and comments (those recordings are sent to Ecency to be transcribed) and to record sound with a video you add to a post."
+    },
+    "android": {
+      "no_browser": "No browser available",
+      "biometric_unlock_title": "Unlock Ecency with biometrics",
+      "biometric_confirm": "Confirm with your fingerprint or face",
+      "image_unsupported_address": "Unsupported image address",
+      "image_create_failed": "Could not create the file",
+      "image_write_failed": "Could not write the file",
+      "image_too_large": "Image too large",
+      "image_download_failed": "Download failed with status {status}",
+      "billing_disconnected": "Google Play Billing disconnected.",
+      "billing_no_screen": "No screen to show the purchase on.",
+      "billing_error": "Google Play Billing error {code}"
+    },
+    "plurals": {
+      "notification": {
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# new post} other {# new posts}} in #{tag}"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+      },
+      "perks": {
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+      },
+      "post_poll": {
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+      },
+      "recurrent": {
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Too short to earn points ({n, plural, one {# character} other {# characters}} or fewer, links excluded)"
+      },
+      "chats": {
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "in about {count, plural, one {# minute} other {# minutes}}",
+        "ban-remaining-hours": "in about {count, plural, one {# hour} other {# hours}}",
+        "ban-remaining-days": "in about {count, plural, one {# day} other {# days}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Use at most {n, plural, one {# tag} other {# tags}}",
+          "too_long": "Search is too long. Use at most {n, plural, one {# character} other {# characters}}"
+        }
+      },
+      "ai_assist": {
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "You can select up to {count, plural, one {# image} other {# images}} at a time"
+      },
+      "dictation": {
+        "stop_hint": "Stop to transcribe and add it to your post. Up to {m, plural, one {# minute} other {# minutes}}.",
+        "rate": "{n} Points per {s, plural, one {# second} other {# seconds}}"
+      },
+      "transfer": {
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Between {min} and {max, plural, one {# character} other {# characters}}"
+      }
+    }
   }
 }

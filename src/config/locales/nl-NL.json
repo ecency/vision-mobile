@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Maak een volledig blogbericht in de editor",
     "wave": "Wave",
     "wave_desc": "Deel een snelle update"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Je hebt deze maand {count, plural, one {# bericht} other {# bericht}} gemaakt. Ga zo door!",
+        "checkin": "Je hebt deze week {count, plural, one {# dag} other {# dag}} ingecheckt. Ga zo door!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# mislukte poging(en)} other {# mislukte poging(en)}}"
+      },
+      "perks": {
+        "streak": "Reeks van {n} dagen"
+      },
+      "post_poll": {
+        "age_limit": "• Alleen accounts ouder dan {days} dagen toegestaan",
+        "max_choices": "• Je mag maximaal {choices} keuzes selecteren"
+      },
+      "recurrent": {
+        "remaining_executions": "Resterend: {executions} overboekingen",
+        "schedule_summary": "{executions} overboekingen, telkens elke {hours} uur"
+      },
+      "chats": {
+        "people_joined": "{count} personen toegevoegd"
+      },
+      "ai_assist": {
+        "min_chars": "Minimaal {count} tekens vereist",
+        "chars_remaining": "{count} tekens resterend"
+      },
+      "transfer": {
+        "powering_down_info": "Volgende ontstaken is over {days} dagen, {hp} HIVE"
+      }
+    }
   }
 }

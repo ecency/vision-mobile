@@ -1743,5 +1743,37 @@
     "blog_post_desc": "Vytvořit úplný příspěvek na blog v editoru",
     "wave": "Wave",
     "wave_desc": "Sdílet rychlou aktualizaci"
+  },
+  "native": {
+    "plurals": {
+      "notification": {
+        "monthly_posts": "Tento měsíc jste vytvořili {count, plural, one {# příspěvek} few {# příspěvek} many {# příspěvek} other {# příspěvek}}. Tak dál!",
+        "checkin": "Tento týden jste se přihlásili {count, plural, one {# den} few {# den} many {# den} other {# den}}. Tak dál!"
+      },
+      "pincode": {
+        "attempts_postfix": "{count, plural, one {# neúspěšných pokusů} few {# neúspěšných pokusů} many {# neúspěšných pokusů} other {# neúspěšných pokusů}}"
+      },
+      "perks": {
+        "streak": "{n}denní série"
+      },
+      "post_poll": {
+        "age_limit": "• Hlasovat mohou jen uživatelé s účtem starším než {days} dní",
+        "max_choices": "• Můžeš zvolit až {choices} odpovědí"
+      },
+      "recurrent": {
+        "remaining_executions": "Zbývá {executions} převodů",
+        "schedule_summary": "{executions} převodů, každý jednou za {hours} hodin"
+      },
+      "chats": {
+        "people_joined": "Připojilo se {count} lidí"
+      },
+      "ai_assist": {
+        "min_chars": "Vyžadováno minimálně {count} znaků",
+        "chars_remaining": "Zbývá {count} znaků"
+      },
+      "transfer": {
+        "powering_down_info": "Další odebrání je za {days} dní, {hp} HIVE"
+      }
+    }
   }
 }
