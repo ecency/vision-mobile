@@ -39,7 +39,32 @@ class SentryMappingTest {
         assertEquals("57", o.dist)
         assertEquals("production", o.environment)
         assertEquals(false, o.isSendDefaultPii)
-        assertNull(o.tracesSampleRate)
+        // issue #3571: performance data at a low sample rate
+        assertEquals(0.05, o.tracesSampleRate!!, 0.0)
+    }
+
+    @Test
+    fun aTransactionKeepsNoUrlPathQueryOrSecret() {
+        val wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw" // Bitcoin wiki example key, controls nothing
+        fun span(op: String, description: String) = io.sentry.protocol.SentrySpan(
+            1.0, 2.0, io.sentry.protocol.SentryId(), io.sentry.SpanId(), null, op, description,
+            io.sentry.SpanStatus.OK, "auto", mutableMapOf(), mutableMapOf(), mutableMapOf(),
+        )
+        val tx = io.sentry.protocol.SentryTransaction(
+            "MainActivity", 1.0, 2.0,
+            mutableListOf(
+                span("ui.load", "MainActivity"),
+                span("http.client", "GET https://images.example/upload/tester/signature"),
+                span("file.read", "/data/user/0/app/files/tester.json"),
+                span("db.sql.query", "select * from accounts"),
+                span("ui.load.initial_display", "key $wif"),
+            ),
+            mutableMapOf(), io.sentry.protocol.TransactionInfo("component"),
+        ).apply { user = io.sentry.protocol.User().apply { username = "tester" } }
+        val out = configured(id).beforeSendTransaction!!.execute(tx, io.sentry.Hint())!!
+        assertEquals(listOf("ui.load", "ui.load.initial_display"), out.spans.map { it.op })
+        assertEquals(false, out.spans.any { wif in it.description.orEmpty() })
+        assertNull(out.user)
     }
 
     @Test

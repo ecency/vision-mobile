@@ -758,6 +758,10 @@ object ContentLinks {
         return safe
     }
 
+    /** RN iOS's old `esteem://` scheme, read as `ecency://` (RN postUrlParser); any other link unchanged. */
+    fun legacyScheme(url: String): String =
+        if (url.startsWith("esteem://", ignoreCase = true)) "ecency://" + url.substring("esteem://".length) else url
+
     fun entry(url: String): NavEntry? {
         val safe = com.ecency.core.render.blocks.SafeTarget.httpUrl(url) ?: return null
         val rest = safe.substringAfter("://", "")

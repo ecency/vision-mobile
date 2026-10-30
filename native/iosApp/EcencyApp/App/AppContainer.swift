@@ -560,7 +560,8 @@ final class AppContainer: ObservableObject {
     /// ecency://, hive:// and the ecency.com /auth and /signup links; the shared model asks before acting.
     /// Content links (ecency.com posts, profiles, feeds) open in the navigation, gated like every entry; while
     /// locked they open behind the lock.
-    func handle(url: URL) {
+    func handle(url incoming: URL) {
+        let url = URL(string: ContentLinks.shared.legacyScheme(url: incoming.absoluteString)) ?? incoming
         // RN #2627: a first launch from a link shows the welcome screen (a full screen cover); a sheet the link would
         // open (login for a gated screen, the in-app browser, a link prompt) cannot show over it and was lost. The
         // link waits for the terms and is handled once they are accepted; the newest wins.

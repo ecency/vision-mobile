@@ -309,7 +309,9 @@ class WalletApi(
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun points(username: String): Pair<String, String> {
         val o = rest.post("$host/private-api/points", buildJsonObject { put("username", username) }).obj()
-        return (o?.str("points") ?: "0.000") to (o?.str("unclaimed_points") ?: "0.000")
+        // a 2xx without a balance is a shape change or an error body, not an empty wallet
+        val points = o?.str("points") ?: throw EcencyHttpException(200, "Points payload contained no balance")
+        return points to (o.str("unclaimed_points") ?: "0.000")
     }
 
     /** `POST /private-api/point-list {username, type}` (0: every type; web's points filter sends one), in the API's order. */

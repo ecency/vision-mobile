@@ -517,6 +517,15 @@ class WalletModelsTest {
     }
 
     @Test
+    fun aPointsAnswerWithoutABalanceFailsInsteadOfShowingZero() = runTest {
+        val w = world(this)
+        // an API shape change (or an error body with a 2xx) is not an empty wallet
+        w.http["/private-api/points"] = { HttpResult(200, """{"message":"maintenance"}""") }
+        val p = transfer(w, AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))
+        assertTrue(p.current.balanceFailed, "balance ${p.current.balance}")
+    }
+
+    @Test
     fun pointsAndEngineTransfersUseTheirCustomJsonAndTheTokensPrecision() = runTest {
         val w = world(this)
         w.http["/private-api/points"] = { HttpResult(200, """{"points":"1,500.500","unclaimed_points":"0.750"}""") }

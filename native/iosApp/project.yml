@@ -86,7 +86,8 @@ targets:
         # associated-domains entitlement below.
         CFBundleURLTypes:
           - CFBundleURLName: app.esteem.mobile.ios.links
-            CFBundleURLSchemes: [ecency, hive]
+            # esteem: the old scheme RN iOS still registers, read as ecency
+            CFBundleURLSchemes: [ecency, hive, esteem]
           # The share extension opens the app with this scheme of its own (README "Share into the app"); only the
           # folder id of the share in the App Group container travels in it.
           - CFBundleURLName: app.esteem.mobile.ios.share

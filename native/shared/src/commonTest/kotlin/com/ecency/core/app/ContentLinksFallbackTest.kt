@@ -37,4 +37,13 @@ class ContentLinksFallbackTest {
             assertNull(ContentLinks.browserFallback(url), url)
         }
     }
+
+    @Test
+    fun theOldEsteemSchemeReadsAsEcency() {
+        // RN iOS registers esteem:// and reads it as ecency:// (postUrlParser)
+        assertEquals("ecency://@alice/post", ContentLinks.legacyScheme("esteem://@alice/post"))
+        assertEquals("ecency://login?username=a", ContentLinks.legacyScheme("ESTEEM://login?username=a"))
+        assertEquals("hive://sign/op/x", ContentLinks.legacyScheme("hive://sign/op/x"))
+        assertEquals("https://ecency.com/@alice", ContentLinks.legacyScheme("https://ecency.com/@alice"))
+    }
 }

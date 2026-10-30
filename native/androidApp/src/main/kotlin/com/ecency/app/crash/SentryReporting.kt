@@ -9,6 +9,8 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
+import io.sentry.protocol.SentryTransaction
+import io.sentry.protocol.SentrySpan
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.protocol.Message
@@ -39,8 +41,9 @@ object SentryReporting {
         o.environment = if (debug) "debug" else "production"
         // RN sendDefaultPii: false; nothing of the user, no IP from the device
         o.isSendDefaultPii = false
-        // RN sets no tracesSampleRate (no performance data) and replays only in development builds
-        o.tracesSampleRate = null
+        // performance data at a low sample rate (issue #3571: app starts, slow and frozen frames, screen loads);
+        // replays only in development builds, as RN
+        o.tracesSampleRate = TRACES_SAMPLE_RATE
         o.sessionReplay.sessionSampleRate = 0.0
         o.sessionReplay.onErrorSampleRate = 0.0
         o.isAttachScreenshot = false
@@ -49,6 +52,34 @@ object SentryReporting {
         mappingId.trim().lowercase().takeIf { MAPPING_ID.matches(it) }?.let { o.proguardUuid = it }
         o.beforeSend = SentryOptions.BeforeSendCallback { event, _ -> beforeSend(event) }
         o.beforeBreadcrumb = SentryOptions.BeforeBreadcrumbCallback { crumb, _ -> scrub(crumb) }
+        o.beforeSendTransaction = SentryOptions.BeforeSendTransactionCallback { tx, _ -> beforeSendTransaction(tx) }
+    }
+
+    const val TRACES_SAMPLE_RATE = 0.05
+
+    /** Span kinds whose descriptions are URLs, file paths or queries: never sent. */
+    private val PRIVATE_SPANS = listOf("http", "file", "db")
+
+    /**
+     * Transactions skip [beforeSend]: no network, file or database spans, every other text scrubbed, no user.
+     * Never throws: when scrubbing fails the transaction is dropped, a lost sample costs nothing.
+     */
+    fun beforeSendTransaction(tx: SentryTransaction): SentryTransaction? = try {
+        val kept = tx.spans.filter { s -> PRIVATE_SPANS.none { s.op.startsWith(it) } }.map { s ->
+            SentrySpan(
+                s.startTimestamp, s.timestamp, s.traceId, s.spanId, s.parentSpanId, s.op,
+                CrashScrubber.scrub(s.description), s.status, s.origin, s.tags.orEmpty(), s.measurements, null,
+            )
+        }
+        tx.spans.clear()
+        tx.spans.addAll(kept)
+        tx.breadcrumbs?.forEach { scrub(it) }
+        tx.extras = null
+        tx.request = null
+        tx.user = null
+        tx
+    } catch (t: Throwable) {
+        null
     }
 
     private val MAPPING_ID = Regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
