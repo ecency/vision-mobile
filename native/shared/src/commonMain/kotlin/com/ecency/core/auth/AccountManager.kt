@@ -387,18 +387,26 @@ class AccountManager(
     suspend fun refreshToken(username: String): String? = db { session(username)?.refreshToken?.takeIf { it.isNotEmpty() } }
 
     /**
-     * RN refreshSCToken, run at app start for the current account: without a refresh token the stored token
-     * is kept; otherwise the refresh token is exchanged and the new session stored. When the refresh fails,
-     * the old token is kept while it has not expired, else [AuthException.SessionExpired] is thrown (RN then
-     * offers to sign out). Null, with nothing stored, when the account was removed while the renewal ran
-     * (signed out, or signed out and in again): see [removals].
+     * RN refreshSCToken, run at app start for the current account: the refresh token is exchanged and the new
+     * session stored. A key account whose token expired signs a fresh code instead when it has no refresh token
+     * (RN data without `sc_accounts`, which the import marks expired) or the refresh failed; otherwise the stored
+     * token is kept (RN never re-signs). When renewal fails, the old token is kept while it has not expired,
+     * else [AuthException.SessionExpired] is thrown (RN then offers to sign out). Null, with nothing stored, when
+     * the account was removed while the renewal ran (signed out, or signed out and in again): see [removals].
      */
     @Throws(Exception::class)
     suspend fun refreshSession(username: String): String? {
         // before the first suspension: a removal that starts at any point after this voids the write below
         val mark = removalMark(username)
         val existing = db { session(username) } ?: return null
-        val refresh = existing.refreshToken ?: return existing.accessToken
+        val refresh = existing.refreshToken ?: return if (!existing.isExpired(nowMillis())) existing.accessToken else try {
+            signKeySession(username, mark) ?: if (removalMark(username) != mark) null else existing.accessToken
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: AuthException) {
+            if (e !is AuthException.TokenExchangeFailed && e !is AuthException.AccountMismatch) throw e
+            if (removalMark(username) != mark) null else existing.accessToken
+        }
         val now = nowMillis()
         val renewed = try {
             tokens.exchange(refresh, now).also {
@@ -410,8 +418,12 @@ class AccountManager(
             if (e !is AuthException.TokenExchangeFailed && e !is AuthException.AccountMismatch) throw e
             // signed out meanwhile: no "session expired" for an account that is gone
             if (removalMark(username) != mark) return null
-            if (existing.isExpired(now)) throw AuthException.SessionExpired(e)
-            return existing.accessToken
+            if (!existing.isExpired(now)) return existing.accessToken
+            // expired: a key account can still sign itself a new session
+            val signed = runCatching { signKeySession(username, mark) }
+                .onFailure { if (it is CancellationException) throw it }.getOrNull()
+            if (removalMark(username) != mark) return null
+            return signed ?: throw AuthException.SessionExpired(e)
         }
         val stored = mutex.withLock {
             removalMark(username) == mark && db { (account(username) != null).also { if (it) saveSession(renewed.copy(username = username)) } }
@@ -430,6 +442,15 @@ class AccountManager(
         val mark = removalMark(username)
         val a = db { account(username) } ?: throw AuthException.UnknownStoredAccount(username)
         a.accessToken?.takeIf { it.isNotEmpty() }?.let { return it }
+        return signKeySession(username, mark)
+    }
+
+    /**
+     * A new session from a code signed with the account's posting key, else its active key; null when it is not a key
+     * account, holds neither key, or was removed meanwhile ([mark]). Throws what the exchange throws.
+     */
+    private suspend fun signKeySession(username: String, mark: RemovalMark): String? {
+        val a = db { account(username) } ?: return null
         if (a.authType?.loginMethod() != LoginMethod.KEY) return null
         val key = listOf(a.postingKey, a.activeKey)
             .firstNotNullOfOrNull { wif -> wif?.let { runCatching { com.ecency.core.hive.PrivateKey.fromWif(it) }.getOrNull() } }

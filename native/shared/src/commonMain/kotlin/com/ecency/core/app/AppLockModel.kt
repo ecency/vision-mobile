@@ -461,7 +461,8 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
      * RN storage that cannot be read now is retried on the next launch; vault failures propagate (fail closed).
      * A failure a retry cannot fix ([LegacyImportError.PinUnavailable], [LegacyImportError.Malformed]) is counted in
      * the prefs and reported ([AppEvent.LegacyImportFailed]); the first one tells the user once ([IMPORT_FAILED_NOTICE])
-     * and after [IMPORT_ATTEMPTS] of them the import is given up and the RN secrets are deleted ([LegacyMigration.abandon]).
+     * and after [IMPORT_ATTEMPTS] of them it is no longer counted or reported. Nothing is marked done or deleted: the
+     * RN data stays for a later build that can open it (each launch still tries, silently).
      */
     private suspend fun migrateLegacy(): LegacyMigrationReport? {
         val source = env.legacy ?: return null
@@ -469,7 +470,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             try {
                 LegacyMigration.run(env.vault.vault, source.storage, source.pinKey, source.defaultPin, config.pinIterations)
             } catch (e: LegacyImportError) {
-                if (e is LegacyImportError.PinUnavailable || e is LegacyImportError.Malformed) importFailed(source, e)
+                if (e is LegacyImportError.PinUnavailable || e is LegacyImportError.Malformed) importFailed(e)
                 null
             }
         }
@@ -478,9 +479,11 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
     /** Set by [importFailed] for the start that shows it. */
     private var importNotice: String? = null
 
-    private fun importFailed(source: LegacyMigrationSource, e: LegacyImportError) {
+    private fun importFailed(e: LegacyImportError) {
         val prefs = env.prefs
-        val attempts = (prefs.getString(IMPORT_FAILURES)?.toIntOrNull() ?: 0) + 1
+        val before = prefs.getString(IMPORT_FAILURES)?.toIntOrNull() ?: 0
+        if (before >= IMPORT_ATTEMPTS) return
+        val attempts = before + 1
         prefs.putString(IMPORT_FAILURES, attempts.toString())
         val kind = e::class.simpleName ?: "LegacyImportError"
         prefs.putString(IMPORT_FAILURE_KIND, kind)
@@ -489,9 +492,8 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             importNotice = IMPORT_FAILED_NOTICE
         }
         val abandoned = attempts >= IMPORT_ATTEMPTS
-        if (abandoned) LegacyMigration.abandon(env.vault.vault, source.storage)
         // kind and count only, nothing secret: the platform log and a crash reporter breadcrumb (sent with the next report)
-        appLogWarning("RN import failed: $kind, attempt $attempts of $IMPORT_ATTEMPTS" + if (abandoned) ", given up, RN secrets deleted" else "")
+        appLogWarning("RN import failed: $kind, attempt $attempts of $IMPORT_ATTEMPTS" + if (abandoned) ", no longer reported, RN data kept" else "")
         runCatching {
             env.crashReporter.breadcrumb(
                 "legacy", "RN import failed",
@@ -711,7 +713,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
         val RESET_WARNING: String get() = L.pincode.messageResetWarning
         val WIPED_NOTICE: String get() = L.native.appLock.wipedNotice
         val IMPORT_FAILED_NOTICE: String get() = L.native.appLock.weCouldNotBring
-        /** Launches with a failed RN import before it is given up and the RN secrets are deleted. */
+        /** Launches with a failed RN import that are counted and reported; the RN data is never deleted for it. */
         const val IMPORT_ATTEMPTS = 3
         internal const val IMPORT_FAILURES = "legacy.importFailures"
         internal const val IMPORT_FAILURE_KIND = "legacy.importFailureKind"

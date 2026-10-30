@@ -1,5 +1,6 @@
 package com.ecency.core.legacy
 
+import com.ecency.core.api.rpc.HttpDate
 import com.ecency.core.hive.KeyRole
 import com.ecency.core.hive.PrivateKey
 import kotlinx.serialization.json.Json
@@ -42,6 +43,10 @@ class LegacyAccount(
     val hiveAuthExpiry: Long,
     /** Fields that held data but could not be decrypted or validated. */
     val unreadable: List<String>,
+    /** RN "sc_accounts" refresh token (stored in plain text by RN), when there is one. */
+    val refreshToken: String? = null,
+    /** RN "sc_accounts" expireDate as epoch milliseconds; 0 when unknown. */
+    val tokenExpiresAt: Long = 0,
 ) {
     override fun toString(): String =
         "LegacyAccount(username=$username, authType=$authType, unreadable=$unreadable, secrets=<redacted>)"
@@ -68,7 +73,7 @@ class LegacyImport(
 sealed class LegacyImportError(message: String, cause: Throwable? = null) : Exception(message, cause) {
     class NothingToImport : LegacyImportError("no RN app data found")
 
-    /** The stored app PIN does not decrypt with this build's PIN_KEY, or there is no PIN to try. */
+    /** The stored app PIN does not decrypt with this build's PIN_KEY and an account needed it, or there is no PIN to try. */
     class PinUnavailable : LegacyImportError("stored PIN could not be decrypted")
 
     /** RN storage exists but cannot be read now; retry later, never treat it as "nothing to import". */
@@ -110,8 +115,9 @@ object LegacyImporter {
         }
         val usersJson = get("user") ?: throw LegacyImportError.NothingToImport()
         val rootJson = get("persist:root")
+        val sessions = scSessions(get("sc_accounts"))
         return try {
-            parse(usersJson, rootJson, pinKey, defaultPin)
+            parse(usersJson, rootJson, pinKey, defaultPin, sessions)
         } catch (e: LegacyImportError) {
             throw e
         } catch (e: Exception) {
@@ -119,20 +125,30 @@ object LegacyImporter {
         }
     }
 
-    private fun parse(usersJson: String, rootJson: String?, pinKey: String, defaultPin: String?): LegacyImport {
+    private fun parse(
+        usersJson: String,
+        rootJson: String?,
+        pinKey: String,
+        defaultPin: String?,
+        sessions: Map<String, Pair<String, Long>>,
+    ): LegacyImport {
         // the accounts first: RN data without any account has nothing a PIN could open, whatever the PIN_KEY
         val users = json.parseToJsonElement(usersJson).jsonArray
         if (users.isEmpty()) throw LegacyImportError.NothingToImport()
         val root = rootJson?.let { json.parseToJsonElement(it).jsonObject }
         val application = root.reducer("application")
         val encPin = application?.string("pin")?.ifEmpty { null }
-        val appPin = encPin?.let { decryptStamped(it, pinKey) ?: throw LegacyImportError.PinUnavailable() }
+        // an app PIN that does not decrypt does not stop the other PINs from being tried (checked below)
+        val appPin = encPin?.let { decryptStamped(it, pinKey) }
         val encUnlock = application?.string("encUnlockPin")?.ifEmpty { null }
         val unlockPin = encUnlock?.let { decryptStamped(it, pinKey) }
         val pins = listOfNotNull(appPin, defaultPin, unlockPin).filter { it.isNotEmpty() }.distinct()
         if (pins.isEmpty()) throw LegacyImportError.PinUnavailable()
 
-        val accounts = users.map { readAccount(it.jsonObject, pins) }
+        // an entry that is not an account is skipped (and kept by the cleanup), never fatal to the others
+        val accounts = users.mapNotNull { (it as? JsonObject)?.let { user -> readAccount(user, pins, sessions) } }
+        // the app PIN was needed but did not open: retry later rather than import without what it encrypts
+        if (encPin != null && appPin == null && accounts.any { it.unreadable.isNotEmpty() }) throw LegacyImportError.PinUnavailable()
         return LegacyImport(
             accounts = accounts,
             currentUsername = root.reducer("account")?.get("currentAccount")?.jsonObject?.string("name"),
@@ -143,7 +159,7 @@ object LegacyImporter {
         )
     }
 
-    private fun readAccount(user: JsonObject, pins: List<String>): LegacyAccount {
+    private fun readAccount(user: JsonObject, pins: List<String>, sessions: Map<String, Pair<String, Long>>): LegacyAccount {
         val unreadable = mutableListOf<String>()
         fun secret(field: String): String? {
             val value = user.string(field)
@@ -177,7 +193,34 @@ object LegacyImporter {
             hiveAuthToken = secret("hiveAuthToken"),
             hiveAuthExpiry = user["hiveAuthExpiry"]?.jsonPrimitive?.longOrNull ?: 0,
             unreadable = unreadable,
+            refreshToken = sessions[username]?.first,
+            tokenExpiresAt = sessions[username]?.second ?: 0,
         )
+    }
+
+    /**
+     * RN setSCAccount: a plain JSON list of {username, accessToken, refreshToken, expireDate}. Its accessToken is
+     * stale after a refresh (only "user" gets the new one), so only the refresh token and expiry are read.
+     * Unparsable data gives no sessions: the access tokens still work until they expire.
+     */
+    private fun scSessions(raw: String?): Map<String, Pair<String, Long>> = runCatching {
+        raw ?: return emptyMap()
+        json.parseToJsonElement(raw).jsonArray.mapNotNull { e ->
+            val o = e as? JsonObject ?: return@mapNotNull null
+            val name = o.string("username") ?: return@mapNotNull null
+            val refresh = o.string("refreshToken")?.ifEmpty { null } ?: return@mapNotNull null
+            name to (refresh to (o.string("expireDate")?.let(::parseJsDate) ?: 0L))
+        }.toMap()
+    }.getOrDefault(emptyMap())
+
+    private val JS_DATE = Regex("""^\w{3} (\w{3}) (\d{1,2}) (\d{4}) (\d{2}:\d{2}:\d{2}) GMT([+-])(\d{2})(\d{2})""")
+
+    /** JS Date.toString() ("Thu Oct 29 2026 12:00:00 GMT+0000 (zone name)") as epoch milliseconds, or null. */
+    internal fun parseJsDate(text: String): Long? {
+        val m = JS_DATE.find(text)?.groupValues ?: return null
+        val local = HttpDate.parseMillis("${m[2]} ${m[1]} ${m[3]} ${m[4]} GMT") ?: return null
+        val offset = (m[6].toLong() * 60 + m[7].toLong()) * 60_000
+        return if (m[5] == "-") local + offset else local - offset
     }
 
     /** encryptKey() output: base64(crypto-js ciphertext of {"data","stamp"}). Null when it does not decrypt. */

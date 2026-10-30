@@ -1,5 +1,8 @@
 package com.ecency.core.legacy
 
+import com.ecency.core.auth.LoginMethod
+import com.ecency.core.auth.VaultAccountStore
+import com.ecency.core.auth.loginMethod
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
 import com.ecency.core.secure.PinLock
@@ -41,7 +44,8 @@ class LegacyMigrationReport(
  * migrated account is read back before the vault's "legacy imported" mark is written, and the mark is the
  * last vault write: a run interrupted half way completes on the next launch, a finished run is never
  * repeated (accounts removed later are not resurrected). Only after the mark are the RN secrets deleted
- * ([LegacyCleanup]); if that fails it is retried on the next run.
+ * ([LegacyCleanup]); if that fails it is retried on the next run. Secrets the vault did not take stay in the RN
+ * storage ([mustKeep]), and so does all of it while it cannot be read.
  */
 object LegacyMigration {
 
@@ -59,41 +63,51 @@ object LegacyMigration {
     /** As [run], with the PIN hash cost (tests use a low one). */
     @Throws(LegacyImportError::class, SecureStoreException::class)
     fun run(vault: KeyVault, storage: LegacyStorage, pinKey: String, defaultPin: String?, pinIterations: Int): LegacyMigrationReport {
-        val report = if (vault.legacyImported()) {
-            done()
-        } else {
-            try {
-                migrate(LegacyImporter.import(storage::read, pinKey, defaultPin), vault, pinIterations)
+        val report: LegacyMigrationReport
+        // accounts whose RN secrets must stay; null keeps the whole RN storage
+        val keep: Set<String>?
+        if (vault.legacyImported()) {
+            report = done()
+            keep = try {
+                keptUsernames(LegacyImporter.import(storage::read, pinKey, defaultPin))
             } catch (_: LegacyImportError.NothingToImport) {
+                emptySet()
+            } catch (_: LegacyImportError) {
+                null // cannot tell what the vault lacks: delete nothing
+            }
+        } else {
+            val legacy = try {
+                LegacyImporter.import(storage::read, pinKey, defaultPin)
+            } catch (_: LegacyImportError.NothingToImport) {
+                null
+            }
+            if (legacy == null) {
                 vault.markLegacyImported()
-                LegacyMigrationReport(emptyList(), emptyList(), emptyList(), emptyMap(), alreadyDone = false)
+                report = LegacyMigrationReport(emptyList(), emptyList(), emptyList(), emptyMap(), alreadyDone = false)
+                keep = emptySet()
+            } else {
+                report = migrate(legacy, vault, pinIterations)
+                keep = keptUsernames(legacy)
             }
         }
-        // The mark is set, so the vault holds what it should: the RN copies of the secrets can go.
-        val removed = try {
-            LegacyCleanup.hasSecrets(storage) && LegacyCleanup.scrub(storage)
+        // The mark is set, so the vault holds what it should: the RN copies of the secrets it holds can go.
+        val removed = keep != null && try {
+            LegacyCleanup.hasSecrets(storage, keep) && LegacyCleanup.scrub(storage, keep)
         } catch (_: LegacyImportError) {
             false // unreadable right now; the next run retries
         }
         return report.withRemoved(removed)
     }
 
+    private fun keptUsernames(legacy: LegacyImport): Set<String> = legacy.accounts.filter { it.mustKeep() }.map { it.username }.toSet()
+
     /**
-     * Gives up on an import that keeps failing the same way (the build's `PIN_KEY` does not open this data, or the
-     * data is malformed): marks the import done, so it is never tried again, then deletes the RN secrets, which
-     * nothing can use any more (going back to an RN build is not supported; README "In-place upgrade from RN 3.x").
-     * A cleanup that fails now is retried by every later [run], as after a normal import.
-     * @return true when RN secrets were removed now.
+     * True when the RN entry holds a secret the vault never gets: a field that did not decrypt or validate, an
+     * account with no credential the vault takes (or an invalid name), or an owner key without the master
+     * password it comes from (the vault never stores owner keys). Deleting it would delete the only copy.
      */
-    @Throws(SecureStoreException::class)
-    fun abandon(vault: KeyVault, storage: LegacyStorage): Boolean {
-        vault.markLegacyImported()
-        return try {
-            LegacyCleanup.hasSecrets(storage) && LegacyCleanup.scrub(storage)
-        } catch (_: LegacyImportError) {
-            false
-        }
-    }
+    private fun LegacyAccount.mustKeep(): Boolean =
+        unreadable.isNotEmpty() || toVaultAccount()?.hasCredential != true || (ownerKey != null && masterPassword == null)
 
     /** Migrates without touching the RN storage; [run] is the normal entry point. */
     @Throws(LegacyImportError::class, SecureStoreException::class)
@@ -122,6 +136,16 @@ object LegacyMigration {
             if (existing != null || converted.username in imported) {
                 kept += converted.username
             } else {
+                // the RN session first: the account entry is what marks this account done. A key account without a
+                // refresh token is marked expired (1), so its first renewal signs it a new session.
+                if (!converted.accessToken.isNullOrEmpty()) {
+                    val keyAccount = converted.authType?.loginMethod() == LoginMethod.KEY
+                    when {
+                        account.refreshToken != null ->
+                            VaultAccountStore.putSession(vault.store, converted.username, account.refreshToken, account.tokenExpiresAt)
+                        keyAccount -> VaultAccountStore.putSession(vault.store, converted.username, null, 1)
+                    }
+                }
                 vault.save(converted)
                 imported += converted.username
                 written[converted.username] = converted

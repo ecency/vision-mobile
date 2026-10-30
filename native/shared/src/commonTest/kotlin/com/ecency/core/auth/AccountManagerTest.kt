@@ -277,6 +277,53 @@ class AccountManagerTest {
     }
 
     @Test
+    fun aMigratedHiveSignerAccountRenewsWithItsRnRefreshToken() = runTest {
+        val rig = Rig(this)
+        val sc = """[{"username":"spike-signer","accessToken":"stale","refreshToken":"dummy-rn-refresh","expireDate":"Thu Oct 29 2026 12:00:00 GMT+0000"}]"""
+        val rn = com.ecency.core.legacy.MapLegacyStorage(
+            mapOf("persist:root" to com.ecency.core.legacy.LegacyFixtures.PERSIST_ROOT, "user" to com.ecency.core.legacy.LegacyFixtures.USERS, "sc_accounts" to sc),
+        )
+        com.ecency.core.legacy.LegacyMigration.run(rig.vault, rn, com.ecency.core.legacy.LegacyFixtures.PIN_KEY, com.ecency.core.legacy.LegacyFixtures.DEFAULT_PIN, 16)
+        assertNull(rn.read("sc_accounts"), "the RN copy is gone once the vault holds it")
+        rig.http = { FakeAuthHttp.tokens(username = "spike-signer", access = "access-2", refresh = "refresh-2") }
+        assertEquals("access-2", rig.manager.refreshSession("spike-signer"))
+        assertEquals("dummy-rn-refresh", rig.sentCode())
+        assertEquals("access-2", rig.vault.account("spike-signer")!!.accessToken)
+    }
+
+    @Test
+    fun aMigratedKeyAccountWithoutRefreshTokenSignsAFreshSession() = runTest {
+        val rig = Rig(this)
+        // RN data without sc_accounts: spike-posting comes over with its Ecency token and no refresh token
+        val rn = com.ecency.core.legacy.MapLegacyStorage(
+            mapOf("persist:root" to com.ecency.core.legacy.LegacyFixtures.PERSIST_ROOT, "user" to com.ecency.core.legacy.LegacyFixtures.USERS),
+        )
+        com.ecency.core.legacy.LegacyMigration.run(rig.vault, rn, com.ecency.core.legacy.LegacyFixtures.PIN_KEY, com.ecency.core.legacy.LegacyFixtures.DEFAULT_PIN, 16)
+        assertNull(rig.store.session("spike-posting")!!.refreshToken)
+        rig.http = { FakeAuthHttp.tokens(username = "spike-posting", access = "access-2", refresh = "refresh-2") }
+        assertEquals("access-2", rig.manager.refreshSession("spike-posting"))
+        // a code signed with the stored posting key, and the session it bought can renew from now on
+        val decoded = HiveSignerMessages.decode(rig.sentCode())
+        assertEquals("code", decoded.type)
+        assertEquals(
+            com.ecency.core.hive.PrivateKey.fromWif(com.ecency.core.legacy.LegacyFixtures.POSTING_ONLY).publicKey().toString(),
+            HiveSignerMessages.recoverSigner(decoded.unsignedJson, decoded.signatures.single()).toString(),
+        )
+        assertEquals("refresh-2", rig.store.session("spike-posting")!!.refreshToken)
+    }
+
+    @Test
+    fun anExpiredKeySessionWhoseRefreshFailsSignsAgain() = runTest {
+        val rig = Rig(this)
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        rig.now += 604_800_001
+        // the refresh token is refused, a freshly signed code is not
+        rig.http = { if (rig.fake.sent.size == 2) HttpResult(500, "") else FakeAuthHttp.tokens(access = "access-3") }
+        assertEquals("access-3", rig.manager.refreshSession("spike-user"))
+        assertEquals("code", HiveSignerMessages.decode(rig.sentCode()).type)
+    }
+
+    @Test
     fun migratedAccountWithoutRefreshTokenKeepsItsToken() = runTest {
         val rig = Rig(this)
         rig.vault.save(VaultAccount("spike-user", AuthType.HIVE_SIGNER, accessToken = "legacy"))

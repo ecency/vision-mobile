@@ -649,8 +649,8 @@ class AppLockModelTest {
         var previous: TestApp? = null
         val events = mutableListOf<AppEvent>()
         val reporter = RecordingReporter()
-        fun launch(): AppLockModel {
-            val app = TestApp(this, legacy = LegacyMigrationSource(rn, "not-the-build-pin-key", null)) { HttpResult(500, "") }
+        fun launch(pinKey: String = "not-the-build-pin-key"): AppLockModel {
+            val app = TestApp(this, legacy = LegacyMigrationSource(rn, pinKey, null)) { HttpResult(500, "") }
             app.env.prefs = prefs
             app.env.crashReporter = reporter
             previous?.store?.entries?.forEach { (k, v) -> app.store.entries[k] = v }
@@ -666,12 +666,12 @@ class AppLockModelTest {
         assertNull(launch().current.notice)
         assertTrue(rn.values.containsKey("user"))
         assertFalse(KeyVault(previous!!.store).legacyImported())
-        // the third failure gives up: marked done, RN secrets deleted, settings kept
+        // the third failure stops counting and reporting, but nothing was imported: the RN data stays whole
         assertNull(launch().current.notice)
-        assertFalse(rn.values.containsKey("user"))
-        assertFalse(rn.values.containsKey("auth"))
-        assertTrue(rn.values.containsKey("persist:root"))
-        assertTrue(KeyVault(previous!!.store).legacyImported())
+        assertTrue(rn.values.containsKey("user"), "un-imported RN accounts were deleted on giving up")
+        assertTrue(rn.values.containsKey("auth"))
+        assertEquals(LegacyFixtures.PERSIST_ROOT, rn.values["persist:root"])
+        assertFalse(KeyVault(previous!!.store).legacyImported())
         assertEquals("3", prefs.getString("legacy.importFailures"))
         assertEquals("PinUnavailable", prefs.getString("legacy.importFailureKind"))
         assertEquals(
@@ -688,6 +688,11 @@ class AppLockModelTest {
         // later launches neither count nor report again
         launch()
         assertEquals("3", prefs.getString("legacy.importFailures"))
+        assertEquals(3, events.filterIsInstance<AppEvent.LegacyImportFailed>().size)
+        // a later build that opens the data still imports it
+        launch(LegacyFixtures.PIN_KEY)
+        assertTrue(KeyVault(previous!!.store).legacyImported())
+        assertTrue("spike-posting" in KeyVault(previous!!.store).usernames())
     }
 
     @Test

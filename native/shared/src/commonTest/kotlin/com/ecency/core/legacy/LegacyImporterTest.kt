@@ -120,6 +120,39 @@ class LegacyImporterTest {
         assertFailsWith<LegacyImportError.Malformed> { import(data = storage + ("persist:root" to "[1]")) }
     }
 
+    /** The fixture users, only those named. */
+    private fun usersNamed(vararg names: String) = kotlinx.serialization.json.JsonArray(
+        kotlinx.serialization.json.Json.parseToJsonElement(LegacyFixtures.USERS).let { it as kotlinx.serialization.json.JsonArray }
+            .filter { (it as kotlinx.serialization.json.JsonObject)["username"].toString().trim('"') in names },
+    ).toString()
+
+    private val rootWithBrokenAppPin =
+        LegacyFixtures.PERSIST_ROOT.replace(Regex("""(\\"pin\\":\\")[^\\]+"""), "$1Z2FyYmFnZQ==")
+
+    @Test
+    fun anAppPinThatDoesNotDecryptStillLetsTheOtherPinsTry() {
+        assertTrue(rootWithBrokenAppPin != LegacyFixtures.PERSIST_ROOT)
+        // these two accounts are under DEFAULT_PIN and the old unlock PIN, not the app PIN
+        val result = import(data = mapOf("persist:root" to rootWithBrokenAppPin, "user" to usersNamed("spike-default", "spike-owner")))
+        assertEquals(LegacyFixtures.DEFAULT_POSTING, result.account("spike-default").postingKey)
+        assertEquals(LegacyFixtures.OWNER_ONLY, result.account("spike-owner").ownerKey)
+        assertTrue(result.accounts.all { it.unreadable.isEmpty() })
+    }
+
+    @Test
+    fun anAppPinThatDoesNotDecryptStopsTheImportWhenAnAccountNeededIt() {
+        // retry later rather than import without the accounts only the app PIN opens
+        assertFailsWith<LegacyImportError.PinUnavailable> { import(data = storage + ("persist:root" to rootWithBrokenAppPin)) }
+    }
+
+    @Test
+    fun aUserEntryThatIsNotAnAccountIsSkippedNotFatal() {
+        val users = "[42," + LegacyFixtures.USERS.removePrefix("[")
+        val result = import(data = storage + ("user" to users))
+        assertEquals(7, result.accounts.size)
+        assertEquals(LegacyFixtures.POSTING, result.account("spike-master").postingKey)
+    }
+
     @Test
     fun wrongPinKeyStopsTheImport() {
         assertFailsWith<LegacyImportError.PinUnavailable> { import(pinKey = "not-the-pin-key") }

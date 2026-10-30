@@ -7,6 +7,11 @@ import com.ecency.core.secure.PinCheck
 import com.ecency.core.secure.PinLock
 import com.ecency.core.secure.SecureStore
 import com.ecency.core.secure.VaultAccount
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -27,6 +32,14 @@ private class DyingStore(val inner: InMemorySecureStore, var putsLeft: Int) : Se
 class LegacyMigrationTest {
     private val rnData = mapOf("persist:root" to LegacyFixtures.PERSIST_ROOT, "user" to LegacyFixtures.USERS)
     private val rn = MapLegacyStorage(rnData + ("auth" to "{\"pinCode\":\"dummy-hash\"}") + ("sc_accounts" to "[]"))
+
+    /** The same RN data without the two accounts whose RN entries must stay (owner-only, unreadable). */
+    private val importableRn by lazy {
+        MapLegacyStorage(
+            rnData + ("auth" to "{\"pinCode\":\"dummy-hash\"}") + ("sc_accounts" to "[]") + ("user" to
+                JsonArray(Json.parseToJsonElement(LegacyFixtures.USERS).jsonArray.filter { it.jsonObject["username"]!!.jsonPrimitive.content in usable }).toString()),
+        )
+    }
     private val store = InMemorySecureStore()
     private val vault = KeyVault(store)
 
@@ -37,7 +50,7 @@ class LegacyMigrationTest {
     ) = LegacyMigration.run(target, storage, pinKey, LegacyFixtures.DEFAULT_PIN, PIN_ITERATIONS)
 
     // "spike-owner" is an RN account whose only credential is an owner key (no token, no other key): nothing of
-    // it may be stored, so it is skipped like an account without credentials and its owner signs in again
+    // it may be stored, so it is skipped like an account without credentials (its RN entry stays, see below)
     private val usable = listOf("spike-default", "spike-has", "spike-master", "spike-posting", "spike-signer")
 
     @Test
@@ -77,7 +90,8 @@ class LegacyMigrationTest {
 
     @Test
     fun rnSecretsAreDeletedAfterAVerifiedRun() {
-        val report = run()
+        val rn = importableRn
+        val report = run(storage = rn)
         assertTrue(report.rnSecretsRemoved)
         assertNull(rn.read("user"))
         assertNull(rn.read("auth"))
@@ -111,14 +125,15 @@ class LegacyMigrationTest {
             if (!KeyVault(mem).legacyImported()) assertEquals(rnData["user"], storage.read("user"), "RN data deleted before the mark ($n)")
             run(storage = storage, target = KeyVault(mem))
             assertEquals(usable, KeyVault(mem).usernames(), "killed after $n writes")
-            assertNull(storage.read("user"))
+            assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers(storage).sorted(), "only the kept RN entries stay ($n)")
             assertEquals(PinCheck.Success, PinLock(KeyVault(mem), PIN_ITERATIONS).verify(LegacyFixtures.UNLOCK_PIN), "PIN after $n writes")
         }
     }
 
     @Test
     fun theRnUnlockPinBecomesTheVerifier() {
-        val report = run()
+        val rn = importableRn
+        val report = run(storage = rn)
         assertFalse(report.pinLockDropped)
         val lock = PinLock(KeyVault(store), PIN_ITERATIONS)
         assertTrue(lock.isEnabled())
@@ -258,7 +273,7 @@ class LegacyMigrationTest {
         val again = run(storage = flaky)
         assertTrue(again.alreadyDone)
         assertTrue(again.rnSecretsRemoved)
-        assertNull(rn.read("user"))
+        assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers().sorted())
     }
 
     @Test
@@ -270,6 +285,96 @@ class LegacyMigrationTest {
 
     private companion object {
         const val PIN_ITERATIONS = 16
+        const val NOON_UTC = 1793275200000L // 2026-10-29T12:00:00Z
+    }
+
+    /** Usernames left in the RN "user" list. */
+    private fun rnUsers(storage: LegacyStorage = rn): List<String> =
+        storage.read("user")?.let { Json.parseToJsonElement(it).jsonArray.map { u -> u.jsonObject["username"]!!.jsonPrimitive.content } }.orEmpty()
+
+    private fun rnUser(name: String, storage: LegacyStorage = rn) =
+        Json.parseToJsonElement(storage.read("user")!!).jsonArray.single { it.jsonObject["username"]!!.jsonPrimitive.content == name }
+
+    private fun originalUser(name: String) =
+        Json.parseToJsonElement(LegacyFixtures.USERS).jsonArray.single { it.jsonObject["username"]!!.jsonPrimitive.content == name }
+
+    @Test
+    fun anOwnerOnlyAccountKeepsItsRnEntry() {
+        // the vault never stores an owner key, so the RN entry is its only copy: it stays, with the PIN it opens with
+        run()
+        assertTrue("spike-owner" in rnUsers(), "the owner-only account's RN entry was deleted")
+        assertEquals(originalUser("spike-owner"), rnUser("spike-owner"))
+        assertTrue(rn.read("persist:root")!!.contains("encUnlockPin"), "the PIN that opens it was deleted")
+    }
+
+    @Test
+    fun anUnreadableAccountKeepsItsRnEntry() {
+        run()
+        assertTrue("spike-legacy" in rnUsers(), "the unreadable account's RN entry was deleted")
+        assertEquals(originalUser("spike-legacy"), rnUser("spike-legacy"))
+    }
+
+    @Test
+    fun importedAccountsLeaveTheRnStoreAndKeptOnesSurviveLaterRuns() {
+        run()
+        assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers().sorted())
+        assertNull(rn.read("auth"))
+        // a later launch (marked done) cleans again but never the entries kept above
+        run()
+        assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers().sorted())
+    }
+
+    @Test
+    fun anRnStoreThatNoLongerOpensAfterTheMarkIsLeftWhole() {
+        vault.markLegacyImported()
+        val report = run(pinKey = "not-the-pin-key")
+        assertTrue(report.alreadyDone)
+        assertFalse(report.rnSecretsRemoved)
+        assertEquals(LegacyFixtures.USERS, rn.read("user"))
+        assertEquals(LegacyFixtures.PERSIST_ROOT, rn.read("persist:root"))
+    }
+
+    @Test
+    fun theRnRefreshTokenAndExpiryComeAlong() {
+        // RN setSCAccount: plain JSON, expireDate is Date.toString(); its accessToken is stale after a refresh
+        val sc = """[{"username":"spike-signer","accessToken":"stale","refreshToken":"dummy-rn-refresh",""" +
+            """"expireDate":"Thu Oct 29 2026 12:00:00 GMT+0000 (Coordinated Universal Time)"},""" +
+            """{"username":"spike-posting","accessToken":"stale","refreshToken":"dummy-rn-refresh-2","expireDate":"Thu Oct 29 2026 17:30:00 GMT+0530"}]"""
+        val report = run(storage = MapLegacyStorage(rnData + ("sc_accounts" to sc)))
+        assertTrue("spike-signer" in report.imported)
+        val sessions = com.ecency.core.auth.VaultAccountStore(vault, store)
+        assertEquals(
+            com.ecency.core.auth.TokenSession("spike-signer", "dummy-hivesigner-access-token", "dummy-rn-refresh", NOON_UTC),
+            sessions.session("spike-signer"),
+        )
+        assertEquals(
+            com.ecency.core.auth.TokenSession("spike-posting", "dummy-ecency-token-2", "dummy-rn-refresh-2", NOON_UTC),
+            sessions.session("spike-posting"),
+        )
+        // a key account without an RN session is marked expired, so its first renewal signs a new one
+        assertEquals(com.ecency.core.auth.TokenSession("spike-master", "dummy-ecency-token", null, 1), sessions.session("spike-master"))
+        // a HiveSigner account without one keeps its token as it is: nothing could renew it
+        val signerOnly = InMemorySecureStore()
+        run(storage = MapLegacyStorage(rnData), target = KeyVault(signerOnly))
+        assertEquals(
+            com.ecency.core.auth.TokenSession("spike-signer", "dummy-hivesigner-access-token", null, 0),
+            com.ecency.core.auth.VaultAccountStore(KeyVault(signerOnly), signerOnly).session("spike-signer"),
+        )
+    }
+
+    @Test
+    fun aUserEntryThatIsNotAnAccountIsKeptInTheRnStore() {
+        val storage = MapLegacyStorage(rnData + ("user" to "[42," + LegacyFixtures.USERS.removePrefix("[")))
+        assertEquals(usable, run(storage = storage).imported.sorted())
+        val left = Json.parseToJsonElement(storage.read("user")!!).jsonArray
+        assertTrue(left.any { it.toString() == "42" }, "the entry nothing could read was deleted")
+        assertTrue(storage.read("persist:root")!!.contains("encUnlockPin"))
+    }
+
+    @Test
+    fun aMalformedScAccountsListDoesNotBlockTheImport() {
+        assertEquals(usable, run(storage = MapLegacyStorage(rnData + ("sc_accounts" to "{broken"))).imported.sorted())
+        assertNull(com.ecency.core.auth.VaultAccountStore(vault, store).session("spike-signer")!!.refreshToken)
     }
 
     @Test

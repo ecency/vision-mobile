@@ -75,7 +75,7 @@ sealed interface AppEvent {
     /**
      * The RN import failed in a way a retry does not fix ([AppLockModel]: a `PIN_KEY` that does not open the RN data,
      * or malformed data). [kind] is the error's class name and [attempts] the launches that failed so far; nothing
-     * secret. For logs and the crash reporter (as a breadcrumb); [abandoned] is true once the RN secrets were given up.
+     * secret. For logs and the crash reporter (as a breadcrumb); [abandoned] is true on the last reported failure (the RN data is kept).
      */
     data class LegacyImportFailed(val kind: String, val attempts: Int, val abandoned: Boolean) : AppEvent
 

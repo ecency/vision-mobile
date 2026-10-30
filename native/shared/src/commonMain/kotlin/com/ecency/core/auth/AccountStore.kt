@@ -73,17 +73,21 @@ class VaultAccountStore(private val vault: KeyVault, private val store: SecureSt
         if (!KeyVault.isValidUsername(session.username)) throw SecureStoreException.InvalidArgument("invalid Hive username")
         val account = vault.account(session.username) ?: throw SecureStoreException.InvalidArgument("unknown account")
         vault.save(account.copy(accessToken = session.accessToken))
-        store.putString(
-            SESSION_PREFIX + session.username,
-            buildJsonObject {
-                put("v", 1)
-                put("refreshToken", session.refreshToken)
-                put("expiresAt", session.expiresAtMillis)
-            }.toString(),
-        )
+        putSession(store, session.username, session.refreshToken, session.expiresAtMillis)
     }
 
     companion object {
         const val SESSION_PREFIX = "auth.session."
+
+        /** Writes the refresh token and expiry entry only (the RN migration, before it saves the account). */
+        internal fun putSession(store: SecureStore, username: String, refreshToken: String?, expiresAtMillis: Long) =
+            store.putString(
+                SESSION_PREFIX + username,
+                buildJsonObject {
+                    put("v", 1)
+                    put("refreshToken", refreshToken)
+                    put("expiresAt", expiresAtMillis)
+                }.toString(),
+            )
     }
 }
