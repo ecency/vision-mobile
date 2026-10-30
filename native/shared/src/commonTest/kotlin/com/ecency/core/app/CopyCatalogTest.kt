@@ -413,7 +413,7 @@ class CopyCatalogTest {
         "PurchaseCopy.NOT_LOGGED_IN" to { PurchaseCopy.NOT_LOGGED_IN },
         "PurchaseCopy.NOT_LOGGED_IN_DESC" to { PurchaseCopy.NOT_LOGGED_IN_DESC },
         "PurchaseCopy.ACCOUNT_META_MISSING" to { PurchaseCopy.ACCOUNT_META_MISSING },
-        "PurchaseCopy.STUCK" to { PurchaseCopy.STUCK },
+        "PurchaseCopy.VERIFICATION_FAILED" to { PurchaseCopy.VERIFICATION_FAILED },
         "PurchaseCopy.earlierPurchase" to { PurchaseCopy.earlierPurchase("7") },
         "PurchaseCopy.earlierPending" to { PurchaseCopy.earlierPending("7") },
         "PurchaseCopy.PENDING" to { PurchaseCopy.PENDING },

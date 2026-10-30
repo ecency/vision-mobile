@@ -21,6 +21,9 @@ final class PurchaseTests: XCTestCase {
 
     override func tearDown() async throws {
         PurchaseTests.detachServiceStores()
+        try await session.setSimulatedError(nil, forAPI: .verification)
+        DemoAuthServices.shared.demoOrderLost = 0
+        DemoAuthServices.shared.demoOrderStatus = 201
         session.clearTransactions()
     }
 
@@ -171,6 +174,60 @@ final class PurchaseTests: XCTestCase {
         XCTAssertFalse(unfinished(refunded).contains { $0.ref == refundedRef }, "finished")
         let delivered = (outcomes.all + later.all).filter { $0.productId == "499points" && $0 is PurchaseOutcomeDelivered }
         XCTAssertTrue(delivered.isEmpty, "a refunded purchase is never delivered")
+    }
+
+    func testAnOrderWhoseAcceptWasLostIsFinishedOnThe409AsDelivered() throws {
+        // Ecency stored the order but its 201 never arrived; the retry is answered 409 (the receipt is recorded)
+        DemoAuthServices.shared.demoOrderLost = 1
+        DemoAuthServices.shared.demoOrderStatus = 409
+        let env = try PurchaseTests.environment()
+        let store = PurchaseTests.serviceStore()
+        env.store = store
+        let outcomes = OutcomeRecorder()
+        let watch = env.purchases.watchOutcomes { outcomes.add($0) }
+        defer { watch.close() }
+        env.purchases.start()
+        let screen = Observed(env.storeScreenModel(kind: .points, username: "", productId: ""), ownsModel: true)
+        let model = screen.model as! StoreScreenModel
+        model.start()
+        waitUntil { !screen.state.rows.isEmpty }
+        model.buy(productId: "999points")
+        waitUntil { !outcomes.all.isEmpty && self.unfinished(store).isEmpty }
+        XCTAssertTrue(outcomes.all.first is PurchaseOutcomeDelivered, "\(outcomes.all)")
+        XCTAssertEqual(env.ui.current.toast?.text, PurchaseCopy.shared.POINTS_SUCCESS)
+        XCTAssertTrue(unfinished(store).isEmpty, "the transaction is finished on 409")
+        XCTAssertEqual(DemoAuthServices.shared.demoOrderLost, 0, "the lost answer was retried")
+    }
+
+    func testAnUnverifiedTransactionIsFinishedAndNeverDelivered() throws {
+        // StoreKit could not check the signature: nothing is ordered or delivered, but the transaction is finished so
+        // StoreKit stops handing it over at every launch
+        var simulated = false
+        let session = self.session!
+        Task { try? await session.setSimulatedError(.verification(.invalidSignature), forAPI: .verification); simulated = true }
+        waitUntil { simulated }
+        let raw = StoreKitStore()
+        let recorder = Recorder()
+        raw.setListener(listener: recorder)
+        _ = products(raw, ["199points"])
+        raw.purchase(productId: "199points", accountToken: "") { _ in }
+        waitUntil { !recorder.snapshot.0.isEmpty || !recorder.snapshot.1.isEmpty }
+        let handed = try XCTUnwrap(recorder.snapshot.0.single, "handed over as unverified, errors: \(recorder.snapshot.1.map(\.code))")
+        XCTAssertEqual(handed.state, .unverified)
+        XCTAssertEqual(unfinished(raw).map(\.state), [.unverified])
+        raw.setListener(listener: nil)
+
+        // the next start finishes it without an order or a delivery
+        let env = try PurchaseTests.environment()
+        env.store = PurchaseTests.serviceStore()
+        let outcomes = OutcomeRecorder()
+        let watch = env.purchases.watchOutcomes { outcomes.add($0) }
+        defer { watch.close() }
+        env.purchases.start()
+        waitUntil(30) { self.unfinished(raw).isEmpty }
+        XCTAssertTrue(unfinished(raw).isEmpty, "finished")
+        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeDelivered }, "never delivered")
+        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeProcessing }, "never ordered")
     }
 
     func testSentryEventsAreScrubbedAndBenignErrorsDropped() {

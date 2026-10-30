@@ -30,6 +30,8 @@ import com.ecency.core.app.PurchaseCopy
 import com.ecency.core.app.PurchaseService
 import com.ecency.core.app.SignupPrefill
 import com.ecency.core.app.StoreError
+import com.ecency.core.app.StorePlatform
+import com.ecency.core.app.StorePurchase
 import com.ecency.core.app.StorePurchaseState
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
@@ -205,6 +207,27 @@ class PurchaseFlowsTest {
         assertEquals(PurchaseCopy.PENDING, text("storeAlert"))
         assertTrue(orders().isEmpty())
         assertNull(env.ui.current.toast)
+    }
+
+    @Test
+    fun aPurchaseEcencyAlreadyHasIsConsumedAndToldAsBought() {
+        // the 201 of an earlier post was lost: Ecency answers 409 for the receipt it stored
+        orderStatus = 409
+        val consumed = java.util.Collections.synchronizedList(mutableListOf<String>())
+        env.store = object : StorePlatform by store {
+            override fun finish(purchase: StorePurchase, done: (StoreError?) -> Unit) {
+                consumed += purchase.token
+                store.finish(purchase, done)
+            }
+        }
+        signIn()
+        launch(Navigator(NavState().push(AppScreen.GetPoints())))
+        waitFor("product-999points")
+        click("buy-999points")
+        compose.await("the success toast") { env.ui.current.toast?.text == PurchaseCopy.POINTS_SUCCESS }
+        assertEquals(1, orders().size)
+        assertEquals("consumed on 409", 1, consumed.size)
+        assertTrue(env.purchases.current.unfinished.isEmpty())
     }
 
     @Test

@@ -6,7 +6,8 @@ import StoreKit
 /// receipt is the signed transaction (`jwsRepresentation`), which Ecency verifies with Apple's library, exactly what
 /// RN sends. `StoreKit.Transaction.updates` is listened to from the start (an Ask to Buy approval, a purchase made while the
 /// app was killed, a refund); `StoreKit.Transaction.unfinished` is the recovery list (RN's `getAvailablePurchases` missed
-/// unfinished consumables). Unverified transactions are never handed over: StoreKit could not check their signature.
+/// unfinished consumables). An unverified transaction (StoreKit could not check its signature) is handed over as UNVERIFIED:
+/// the shared service never orders it, finishes it so it stops coming back at every launch, and reports it.
 final class StoreKitStore: NSObject, StorePlatform {
     let platform: String = PurchaseService.companion.APP_STORE
 
@@ -21,7 +22,7 @@ final class StoreKitStore: NSObject, StorePlatform {
         updates = Task.detached { [weak self] in
             for await result in StoreKit.Transaction.updates {
                 guard let self else { return }
-                if let purchase = self.storePurchase(of: result) { self.currentListener()?.onPurchases(purchases: [purchase]) }
+                self.currentListener()?.onPurchases(purchases: [self.storePurchase(of: result)])
             }
         }
     }
@@ -59,7 +60,7 @@ final class StoreKitStore: NSObject, StorePlatform {
         Task {
             var list: [StorePurchase] = []
             for await result in StoreKit.Transaction.unfinished {
-                if let p = storePurchase(of: result) { list.append(p) }
+                list.append(storePurchase(of: result))
             }
             done(list, nil)
         }
@@ -78,12 +79,7 @@ final class StoreKitStore: NSObject, StorePlatform {
                 let options: Set<Product.PurchaseOption> = UUID(uuidString: accountToken).map { [.appAccountToken($0)] } ?? []
                 switch try await product.purchase(options: options) {
                 case let .success(result):
-                    if let p = self.storePurchase(of: result) {
-                        l?.onPurchases(purchases: [p])
-                    } else {
-                        l?.onError(error: StoreError(code: StoreError.companion.VERIFICATION_FAILED, message: L.Native.Ios.Store.verificationFailed,
-                                                     productId: productId, responseCode: nil, debugMessage: nil))
-                    }
+                    l?.onPurchases(purchases: [self.storePurchase(of: result)])
                 case .pending:
                     // Ask to Buy or a payment that needs action: nothing to post until StoreKit.Transaction.updates delivers it
                     l?.onPurchases(purchases: [StorePurchase(productId: productId, token: "pending:\(productId):\(UUID().uuidString)", state: .pending, acknowledged: false, ref: "",
@@ -104,7 +100,8 @@ final class StoreKitStore: NSObject, StorePlatform {
             lock.lock(); var transaction = transactions[purchase.ref]; lock.unlock()
             if transaction == nil {
                 for await result in StoreKit.Transaction.unfinished {
-                    if case let .verified(t) = result, String(t.id) == purchase.ref { transaction = t; break }
+                    // an unverified one is finished too (it is never delivered)
+                    if String(result.unsafePayloadValue.id) == purchase.ref { transaction = result.unsafePayloadValue; break }
                 }
             }
             guard let transaction else { return done(nil) }
@@ -114,14 +111,20 @@ final class StoreKitStore: NSObject, StorePlatform {
         }
     }
 
-    /// A verified transaction as the shared model's purchase (revoked ones as REVOKED); nil when unverified.
-    private func storePurchase(of result: VerificationResult<StoreKit.Transaction>) -> StorePurchase? {
-        guard case let .verified(t) = result else { return nil }
+    /// A transaction as the shared model's purchase: revoked ones as REVOKED, unverified ones as UNVERIFIED.
+    private func storePurchase(of result: VerificationResult<StoreKit.Transaction>) -> StorePurchase {
+        let t = result.unsafePayloadValue
         lock.lock(); transactions[String(t.id)] = t; lock.unlock()
         return StorePurchase(productId: t.productID, token: result.jwsRepresentation,
-                             state: t.revocationDate == nil ? .purchased : .revoked, acknowledged: false, ref: String(t.id),
+                             state: StoreKitStore.state(of: result), acknowledged: false, ref: String(t.id),
                              purchasedAtMillis: Int64(t.purchaseDate.timeIntervalSince1970 * 1000),
                              accountToken: t.appAccountToken?.uuidString.lowercased() ?? "")
+    }
+
+    /// Unverified wins over revoked: neither is delivered, both are finished.
+    static func state(of result: VerificationResult<StoreKit.Transaction>) -> StorePurchaseState {
+        guard case let .verified(t) = result else { return .unverified }
+        return t.revocationDate == nil ? .purchased : .revoked
     }
 
     /// The product types the shared service handles: consumables, and Ecency Pro (`1999pro`, issue #3555) as a

@@ -32,7 +32,7 @@ data class PurchaseOrder(
  * (Ecency's purchase worker does not read it; signed out, the body has none).
  *
  * The server only queues the order: 201 means it was stored and will be verified with the store and delivered by
- * Ecency's worker; 409 means an order with the same receipt was stored before (or the insert failed), see
+ * Ecency's worker; 409 means an order with the same receipt is already stored (any other failed insert is 503), see
  * [com.ecency.core.app.PurchaseService]. Not idempotent per call, so it is bounded by [TIMEOUT_MILLIS] (RN
  * `PURCHASE_ORDER_TIMEOUT_MS`), much longer than other private calls: a slow success must not read as no answer.
  */

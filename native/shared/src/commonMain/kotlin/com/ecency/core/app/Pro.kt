@@ -198,7 +198,6 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 }
             }
             is PurchaseOutcome.Failed -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, o.message)) }
-            is PurchaseOutcome.Stuck -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.STUCK)) }
             // a cancel is told nothing (IapReport); the rest as the other purchase screens
             is PurchaseOutcome.StoreFailed -> when {
                 o.report != IapReport.REPORTED -> Unit

@@ -136,7 +136,6 @@ class StoreScreenModel internal constructor(
         val points = kind == StoreScreenKind.POINTS
         when (o) {
             is PurchaseOutcome.Delivered -> if (points) env.ui.toast(PurchaseCopy.POINTS_SUCCESS)
-            is PurchaseOutcome.Stuck -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.STUCK)) }
             is PurchaseOutcome.Earlier -> setState {
                 it.copy(alert = StoreAlert(PurchaseCopy.WARNING, if (o.pending) PurchaseCopy.earlierPending(o.target) else PurchaseCopy.earlierPurchase(o.target)))
             }

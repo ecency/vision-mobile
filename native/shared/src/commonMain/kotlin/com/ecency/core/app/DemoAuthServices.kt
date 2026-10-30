@@ -150,9 +150,15 @@ object DemoAuthServices {
                 put("count", demoProMembers.size)
             }.toString())
             // a demo Pro purchase puts its account on the roster (Ecency's Pro fulfilment); nothing is charged
-            path == "purchase-order" -> HttpResult(201, "{}").also {
-                val o = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject }.getOrNull()
-                if (o?.get("product")?.jsonPrimitive?.content == PurchaseSkus.PRO) o["user"]?.jsonPrimitive?.content?.let { demoProMembers += it }
+            path == "purchase-order" -> {
+                if (demoOrderLost > 0) {
+                    demoOrderLost--
+                    throw IllegalStateException("demo: the order's answer was lost")
+                }
+                HttpResult(demoOrderStatus, "{}").also {
+                    val o = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject }.getOrNull()
+                    if (demoOrderStatus == 201 && o?.get("product")?.jsonPrimitive?.content == PurchaseSkus.PRO) o["user"]?.jsonPrimitive?.content?.let { demoProMembers += it }
+                }
             }
             path.startsWith("favorites-check") -> HttpResult(200, "false")
             path.startsWith("bookmarks?") -> wrapped("""[{"_id":"demo-b1","author":"spike-alice","permlink":"fake-post-1","timestamp":2},{"_id":"demo-b2","author":"spike-bob","permlink":"fake-post-2","timestamp":1}]""")
@@ -248,6 +254,12 @@ object DemoAuthServices {
 
     /** Debug `demoNoPro`: nobody is Pro until a demo purchase (the Pro card's non-member screenshots and UI tests). */
     fun clearDemoPro() = demoProMembers.clear()
+
+    /** How many demo purchase orders lose their answer (a network failure after Ecency stored them; tests). */
+    var demoOrderLost: Int = 0
+
+    /** What the demo purchase order answers once nothing is lost: 201, or 409 for a receipt Ecency already has (tests). */
+    var demoOrderStatus: Int = 201
 
     /** The demo spin was claimed in this run. */
     var demoSpinUsed: Boolean = false

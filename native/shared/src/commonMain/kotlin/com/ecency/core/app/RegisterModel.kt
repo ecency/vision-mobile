@@ -243,7 +243,6 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
     private fun onPurchase(o: PurchaseOutcome) {
         when (o) {
             is PurchaseOutcome.Delivered -> setState { it.copy(isRegistering = false, isRegistered = true) }
-            is PurchaseOutcome.Stuck -> setState { it.copy(alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.STUCK)) }
             is PurchaseOutcome.Earlier -> setState {
                 it.copy(
                     // the earlier purchase is another name's: its delivery is not this screen's (no follow-up comes)

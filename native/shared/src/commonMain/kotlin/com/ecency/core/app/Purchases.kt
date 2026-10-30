@@ -98,7 +98,7 @@ object PurchaseCopy {
     val NOT_LOGGED_IN_DESC: String get() = L.login.notLoggedinAlertDesc
     val ACCOUNT_META_MISSING: String get() = L.native.purchase.accountMetaMissing
 
-    val STUCK: String get() = L.native.purchase.stuck
+    val VERIFICATION_FAILED: String get() = L.native.ios.store.verificationFailed
 
     fun earlierPurchase(target: String) = L.native.purchase.earlierPurchase(target = target)
     fun earlierPending(target: String) = L.native.purchase.earlierPending(target = target)
@@ -134,9 +134,6 @@ sealed interface PurchaseOutcome {
      */
     data class Earlier(override val productId: String, override val fromBuy: Boolean, val target: String, val pending: Boolean) : PurchaseOutcome
 
-    /** An earlier purchase of this product Ecency keeps refusing: the user is told once to contact support (a new purchase opens). */
-    data class Stuck(override val productId: String, override val fromBuy: Boolean) : PurchaseOutcome
-
     /** The store refused or the user cancelled ([report] says whether the user still has to hear about it). */
     data class StoreFailed(override val productId: String, override val fromBuy: Boolean, val error: StoreError, val report: IapReport) : PurchaseOutcome
 }
@@ -165,13 +162,11 @@ data class PurchaseServiceState(
  * - A pending payment is never posted and never shown as paid (RN posted Play's pending purchases).
  * - One receipt is never posted twice at once ([inFlight]), and every unfinished paid purchase is posted again at
  *   start, on foreground and after an account change until Ecency took it, so a paid purchase is never dropped.
- * - 409 is not taken at its word: Ecency answers it for a receipt it stored before but also for any failed insert
- *   (its database down or locked, for as long as that lasts). The purchase is finished on it only when this device
- *   saw Ecency accept the receipt before, or when Play says the purchase was acknowledged (Ecency's worker
- *   acknowledges after it delivered). Otherwise it stays unfinished and is posted again later (silently): on Play an
- *   order Ecency failed lapses into Google's automatic refund instead of being consumed with nothing delivered (RN
- *   consumed it); on the App Store the transaction waits in `Transaction.unfinished`, since a finished one is never
- *   refunded.
+ * - 409 means Ecency already holds an order for this receipt (it answers 503 for any other failed insert, and
+ *   reopens a failed order of the same buyer with 201): the purchase is delivered and finished as on 201 (RN). This
+ *   is how a purchase whose 201 was lost ends instead of being posted again forever.
+ * - An App Store transaction StoreKit could not verify is never ordered or delivered, but it is finished (it would
+ *   otherwise come back at every launch) and reported.
  * - Who an order is for is saved before the store sheet opens (`purchases.intents`), so an interrupted purchase is
  *   delivered to the account it was bought for, not to whoever is signed in at the next start (RN), and a paid account
  *   keeps its username and e-mail (RN `pendingAccountPurchaseMeta`).
@@ -226,17 +221,17 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         env.store.setListener(listener)
         env.background.launch {
             connect()
-            recover(counting = true)
+            recover()
         }
         env.background.launch {
-            env.events.collect { if (it is AppEvent.SessionChanged && it.username != null) recover(counting = true) }
+            env.events.collect { if (it is AppEvent.SessionChanged && it.username != null) recover() }
         }
     }
 
     /** The app came back: purchases that completed meanwhile (a settled pending payment) are delivered. Main thread. */
     fun onForeground() {
         if (!started || env.nowMillis() - lastRecoveryMillis < FOREGROUND_RECOVERY_MILLIS) return
-        env.background.launch { recover(counting = true) }
+        env.background.launch { recover() }
     }
 
     /** RN `initConnection`; null when connected. */
@@ -279,18 +274,12 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 storeFailed(e.copy(productId = productId), IapStage.INIT, fromBuy = true)
                 return@launch
             }
-            val held = held.values.filter { it.productId == productId && it.state != StorePurchaseState.REVOKED }
+            val held = held.values.filter { it.productId == productId && (it.state == StorePurchaseState.PURCHASED || it.state == StorePurchaseState.PENDING) }
             // one Ecency already took (only its finish is missing, or the store handed it back re-signed) is no earlier
             // purchase: it is finished quietly and this buy goes on
             held.filter { isAccepted(it) }.forEach { process(it, fromBuy = false) }
             mutableState.update { it.copy(busy = it.busy + productId) }
-            val ofProduct = held.filterNot { isAccepted(it) }
-            val earlier = ofProduct.firstOrNull { !stuck(it) }
-            // a purchase Ecency keeps refusing no longer blocks new ones: it stays unfinished (and retried), the user
-            // is told once to contact support
-            if (earlier == null) ofProduct.firstOrNull { stuck(it) }?.let { s ->
-                if (Marks.tellStuck(env.prefs, orderKey(s))) mutableOutcomes.emit(PurchaseOutcome.Stuck(productId, true))
-            }
+            val earlier = held.firstOrNull { !isAccepted(it) }
             val saved = earlier?.let { Intents.find(env.prefs, productId, orderKey(it)) }
             val buyer = target.user.ifEmpty { env.session.current.username.orEmpty() }
             // no account (a paid account bought signed out): no token
@@ -329,33 +318,16 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     }
 
     /**
-     * A purchase's identity on this device (the in-flight set, the accepted marks): the App Store transaction id, since
-     * the same transaction can come back with another signed form; Play's purchase token otherwise.
-     */
-    /**
-     * An App Store purchase Ecency keeps refusing (a failed order answers 409 for good): 409 counted on
-     * [STUCK_CONFLICTS] recoveries (a start, a return to the foreground or an account change, at least
-     * [CONFLICT_GAP_MILLIS] apart; never the automatic rechecks), or counted once and still not accepted
-     * [STUCK_AGE_MILLIS] after the store's purchase date. It stays unfinished
-     * and is posted again, but no longer blocks buying the product. Play needs none of this: Google refunds an
-     * unacknowledged purchase after 3 days.
-     */
-    internal fun stuck(p: StorePurchase): Boolean {
-        if (env.store.platform == PLAY || p.state != StorePurchaseState.PURCHASED) return false
-        if (isAccepted(p)) return false
-        val conflicts = Marks.conflicts(env.prefs, orderKey(p))
-        // the age alone never decides (a device clock a day ahead would mark a fresh purchase): it needs a refusal too
-        return conflicts >= STUCK_CONFLICTS ||
-            (conflicts >= 1 && p.purchasedAtMillis > 0 && env.nowMillis() - p.purchasedAtMillis > STUCK_AGE_MILLIS)
-    }
-
-    /**
      * Ecency accepted [p] on this device. An earlier build marked App Store purchases by the hash of their signed
      * receipt: that mark still counts for the same receipt.
      */
     internal fun isAccepted(p: StorePurchase): Boolean =
         Marks.accepted(env.prefs, orderKey(p)) || (env.store.platform == APP_STORE && Marks.accepted(env.prefs, receiptHash(p.token)))
 
+    /**
+     * A purchase's identity on this device (the in-flight set, the accepted marks): the App Store transaction id, since
+     * the same transaction can come back with another signed form; Play's purchase token otherwise.
+     */
     internal fun orderKey(p: StorePurchase): String =
         if (env.store.platform == APP_STORE && p.ref.isNotEmpty()) receiptHash("tx:${p.ref}") else receiptHash(p.token)
 
@@ -364,12 +336,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     /** The account a saved target names: the paid account's name, else the user (empty: the signed-in account). */
     private fun PurchaseTarget.label(): String = meta?.username?.takeIf { it.isNotEmpty() } ?: user.ifEmpty { env.session.current.username.orEmpty() }
 
-    /**
-     * RN `_consumeAvailablePurchases`: every purchase the store holds, processed again (outcomes are silent).
-     * [counting]: a recovery trigger (start, foreground, account change), whose 409 answers count towards [stuck];
-     * the automatic rechecks do not count.
-     */
-    internal suspend fun recover(counting: Boolean = false) {
+    /** RN `_consumeAvailablePurchases`: every purchase the store holds, processed again (outcomes are silent). */
+    internal suspend fun recover() {
         lastRecoveryMillis = env.nowMillis()
         // who an interrupted purchase is credited to needs the accounts on the device (iOS starts purchases and
         // reports the foreground before the session has loaded)
@@ -392,11 +360,11 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         if ((purchases + waiting).none { it.productId == PurchaseSkus.PRO && it.state == StorePurchaseState.PENDING }) env.proPurchases.dropPending(null)
         mutableState.update { s ->
             s.copy(
-                unfinished = purchases.filter { it.state == StorePurchaseState.PURCHASED && !stuck(it) }.map { it.productId }.toSet(),
+                unfinished = purchases.filter { it.state == StorePurchaseState.PURCHASED }.map { it.productId }.toSet(),
                 pending = (purchases + waiting).filter { it.state == StorePurchaseState.PENDING }.map { it.productId }.toSet(),
             )
         }
-        for (p in purchases) process(p, fromBuy = p.productId in awaiting, counting = counting)
+        for (p in purchases) process(p, fromBuy = p.productId in awaiting)
     }
 
     private suspend fun storeFailed(error: StoreError, stage: IapStage, fromBuy: Boolean? = null) {
@@ -418,14 +386,14 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     }
 
     /** RN `_consumePurchase`, with the rules in the class comment. Main thread. */
-    internal suspend fun process(p: StorePurchase, fromBuy: Boolean, counting: Boolean = false) {
+    internal suspend fun process(p: StorePurchase, fromBuy: Boolean) {
         if (p.productId !in PurchaseSkus.ALL || p.token.isEmpty()) return
         val key = orderKey(p)
         if (!inFlight.add(key)) return
         try {
             // a real transaction of the product replaces its synthetic pending entry (an approved Ask to Buy)
             if (!p.isSyntheticPending) held = held.filterValues { !(it.isSyntheticPending && it.productId == p.productId) }
-            if (p.state != StorePurchaseState.REVOKED) held = held + (key to p)
+            if (p.state == StorePurchaseState.PURCHASED || p.state == StorePurchaseState.PENDING) held = held + (key to p)
             when (p.state) {
                 StorePurchaseState.PENDING -> {
                     if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, ProProgress.PENDING) }
@@ -439,6 +407,13 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     held = held - key
                     Intents.removeKey(env.prefs, key)
                     finish(p)
+                    return
+                }
+                StorePurchaseState.UNVERIFIED -> {
+                    // StoreKit could not check its signature: never delivered, but finished so it stops coming back
+                    held = held - key
+                    finish(p)
+                    storeFailed(StoreError(StoreError.VERIFICATION_FAILED, PurchaseCopy.VERIFICATION_FAILED, p.productId), IapStage.PURCHASE, fromBuy)
                     return
                 }
                 StorePurchaseState.PURCHASED -> Unit
@@ -469,23 +444,16 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     delivered(p, fromBuy)
                 }
                 OrderResult.Duplicate -> {
-                    if (counting) Marks.conflict(env.prefs, hash, env.nowMillis())
-                    // a 409 can be a failed insert that repeats for a whole outage: no timing makes it a stored order
-                    val confirmed = Marks.accepted(env.prefs, hash) || (env.store.platform == PLAY && p.acknowledged)
-                    if (confirmed) {
-                        if (!Marks.accepted(env.prefs, hash)) {
-                            env.crashReporter.capture(
-                                CrashReport(
-                                    "IapOrderDuplicate", "purchase-order 409 taken as recorded", isMessage = true, level = "warning",
-                                    tags = mapOf("iap.stage" to IapStage.ORDER.tag, "iap.product" to p.productId, "iap.platform" to env.store.platform),
-                                    fingerprint = listOf("iap", "order-409"),
-                                ),
-                            )
-                        }
-                        delivered(p, fromBuy)
-                    } else {
-                        stillProcessing(p, fromBuy, hash)
-                    }
+                    // Ecency holds this receipt already (a lost 201, or another device posted it): delivered
+                    env.crashReporter.capture(
+                        CrashReport(
+                            "IapOrderDuplicate", "purchase-order 409 taken as recorded", isMessage = true, level = "warning",
+                            tags = mapOf("iap.stage" to IapStage.ORDER.tag, "iap.product" to p.productId, "iap.platform" to env.store.platform),
+                            fingerprint = listOf("iap", "order-409"),
+                        ),
+                    )
+                    Marks.accept(env.prefs, hash)
+                    delivered(p, fromBuy)
                 }
                 OrderResult.Unknown -> stillProcessing(p, fromBuy, hash)
                 is OrderResult.Failed -> {
@@ -514,7 +482,6 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
 
     private suspend fun stillProcessing(p: StorePurchase, fromBuy: Boolean, hash: String) {
         if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, ProProgress.PROCESSING) }
-        if (stuck(p)) mutableState.update { it.copy(unfinished = it.unfinished - p.productId) }
         emit(PurchaseOutcome.Processing(p.productId, fromBuy))
         val n = rechecks[hash] ?: 0
         if (n >= MAX_RECHECKS) return
@@ -714,41 +681,10 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         }
     }
 
-    /**
-     * Per purchase key (hashes only, never a receipt): accepted by Ecency on this device, how many separate order
-     * attempts Ecency answered 409, and whether the user was told the purchase is stuck.
-     */
+    /** Per purchase key (hashes only, never a receipt): accepted by Ecency on this device. */
     internal object Marks {
         const val ACCEPTED = "purchases.accepted"
-        const val CONFLICTS = "purchases.conflicts"
-        const val CONFLICT_AT = "purchases.conflictAt"
-        const val STUCK_TOLD = "purchases.stuckTold"
         private const val MAX = 64
-
-        /**
-         * A recovery's 409 for [hash]: counted when none was counted in the last [CONFLICT_GAP_MILLIS] (an outage of
-         * Ecency's database answers 409 to every attempt for its whole length). Returns the count.
-         */
-        fun conflict(prefs: Prefs, hash: String, now: Long): Long {
-            val all = list(prefs, CONFLICTS)
-            val at = list(prefs, CONFLICT_AT)
-            val n = all.firstOrNull { it.first == hash }?.second ?: 0L
-            val last = at.firstOrNull { it.first == hash }?.second
-            if (last != null && now - last < CONFLICT_GAP_MILLIS) return n
-            write(prefs, CONFLICTS, (all.filter { it.first != hash } + (hash to n + 1)).takeLast(MAX))
-            write(prefs, CONFLICT_AT, (at.filter { it.first != hash } + (hash to now)).takeLast(MAX))
-            return n + 1
-        }
-
-        fun conflicts(prefs: Prefs, hash: String): Long = list(prefs, CONFLICTS).firstOrNull { it.first == hash }?.second ?: 0L
-
-        /** True the first time only. */
-        fun tellStuck(prefs: Prefs, hash: String): Boolean {
-            val all = list(prefs, STUCK_TOLD)
-            if (all.any { it.first == hash }) return false
-            write(prefs, STUCK_TOLD, (all + (hash to 1L)).takeLast(MAX))
-            return true
-        }
 
         fun accepted(prefs: Prefs, hash: String): Boolean = list(prefs, ACCEPTED).any { it.first == hash }
 
@@ -775,13 +711,6 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         /** An order without a known outcome is asked again after this long, at most [MAX_RECHECKS] times a run. */
         const val RECHECK_MILLIS = 30_000L
         const val MAX_RECHECKS = 3
-
-        /** An App Store purchase answered 409 this many separate times, or this old unaccepted, stops blocking ([stuck]). */
-        const val STUCK_CONFLICTS = 3L
-        const val STUCK_AGE_MILLIS = 24L * 60 * 60 * 1000
-
-        /** Counted 409s of one purchase are at least this far apart. */
-        const val CONFLICT_GAP_MILLIS = 6L * 60 * 60 * 1000
 
         /** How long a synthetic pending purchase (Ask to Buy) blocks a second purchase without the store reporting it. */
         const val SYNTHETIC_PENDING_MILLIS = 48L * 60 * 60 * 1000

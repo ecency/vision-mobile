@@ -271,28 +271,27 @@ class PurchasesTest {
     }
 
     @Test
-    fun onPlayA409IsTakenAsRecordedOnlyOnceThePurchaseWasAcknowledged() = runTest {
+    fun onPlayA409MeansEcencyHasTheOrderAndThePurchaseIsConsumed() = runTest {
+        // ePoints answers 409 only when a row for this receipt exists (its other failures are 503)
         answers = mutableListOf(HttpResult(409, "{}"))
         val r = rig()
         val model = screen(r, StoreScreenKind.POINTS)
         model.buy("999points")
-        testScheduler.runCurrent()
+        testScheduler.advanceUntilIdle()
         assertEquals(1, r.orders.size, "409 is not retried")
-        assertTrue(r.store.finished.isEmpty(), "not acknowledged: Ecency has not delivered (a FAIL order lapses into Google's refund)")
-        assertEquals(PurchaseCopy.PROCESSING, r.env.ui.current.toast?.text)
-
-        // Ecency's worker delivered and acknowledged: the recheck finishes it
-        r.store.held[0] = r.store.held[0].copy(acknowledged = true)
-        testScheduler.advanceTimeBy(PurchaseService.RECHECK_MILLIS + 1)
-        testScheduler.runCurrent()
-        assertEquals(2, r.orders.size)
-        assertEquals(1, r.store.finished.size)
+        assertEquals(listOf("token-999points-1"), r.store.finished, "consumed on 409, acknowledged or not")
+        assertEquals(PurchaseCopy.POINTS_SUCCESS, r.env.ui.current.toast?.text)
+        assertTrue(r.env.purchases.current.unfinished.isEmpty())
         val warning = r.reporter.reports.single { it.type == "IapOrderDuplicate" }
         assertEquals(listOf("iap", "order-409"), warning.fingerprint)
         assertTrue(warning.isMessage)
+        // nothing is posted again later
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.orders.size)
         model.close()
     }
-
     @Test
     fun aReceiptThisDeviceSawAcceptedIsFinishedWithoutPostingAgain() = runTest {
         val r = rig()
@@ -317,37 +316,73 @@ class PurchasesTest {
     }
 
     @Test
-    fun onTheAppStoreA409NeverFinishesAReceiptThisDeviceDidNotSeeAccepted() = runTest {
-        // ePoints answers 409 for every failed insert, for as long as its database is down: no timing makes it a stored order
-        answers = mutableListOf(HttpResult(409, "{}"))
+    fun onTheAppStoreAPurchaseWhoseAcceptWasLostIsFinishedOnThe409AndNeverLoops() = runTest {
         val r = rig(platform = PurchaseService.APP_STORE)
+        var posts = 0
+        // Ecency stored the order but its 201 never arrived; every later post of the receipt is answered 409
+        r.app.authBackend.rest = { req ->
+            when {
+                !req.url.endsWith("/private-api/purchase-order") -> null
+                posts++ == 0 -> throw IllegalStateException("connection reset")
+                else -> HttpResult(409, "{}")
+            }
+        }
         val outcomes = mutableListOf<PurchaseOutcome>()
         backgroundScope.launch(r.app.main) { r.env.purchases.outcomes.collect { outcomes += it } }
         val model = screen(r, StoreScreenKind.POINTS)
         model.buy("999points")
-        testScheduler.runCurrent()
-        assertEquals("app_store", r.orders.single().json()["platform"]!!.jsonPrimitive.content)
-        assertEquals(PurchaseCopy.PROCESSING, r.env.ui.current.toast?.text, "the user hears it is being processed")
-        // the rechecks (and later starts) keep getting 409, minutes apart: the transaction stays unfinished
-        r.app.now += 60_000
-        testScheduler.advanceTimeBy(PurchaseService.RECHECK_MILLIS * (PurchaseService.MAX_RECHECKS + 1) + 1)
-        testScheduler.runCurrent()
-        r.app.now += 3_600_000
-        r.env.purchases.recover()
-        testScheduler.runCurrent()
-        assertTrue(r.orders.size >= 3)
-        assertTrue(r.store.finished.isEmpty(), "never finished on a 409 alone (Apple never refunds a finished transaction)")
-        assertEquals(1, outcomes.count { it.fromBuy }, "the redeliveries are silent")
-        assertTrue(r.reporter.reports.none { it.type == "IapOrderDuplicate" })
-
-        // once Ecency accepted it (a later 201), a 409 after that finishes at once
-        answers = mutableListOf(HttpResult(201, "{}"))
-        r.env.purchases.recover()
-        testScheduler.runCurrent()
-        assertEquals(1, r.store.finished.size)
+        testScheduler.advanceUntilIdle()
+        assertEquals(2, r.orders.size, "the lost answer is retried, the 409 ends it")
+        assertEquals("app_store", r.orders.last().json()["platform"]!!.jsonPrimitive.content)
+        assertEquals(listOf("token-999points-1"), r.store.finished, "the transaction is finished on 409")
+        assertEquals(PurchaseCopy.POINTS_SUCCESS, r.env.ui.current.toast?.text)
+        assertEquals(listOf<PurchaseOutcome>(PurchaseOutcome.Delivered("999points", true)), outcomes)
+        assertTrue(r.store.held.isEmpty())
+        assertTrue(r.env.purchases.current.unfinished.isEmpty())
+        // later starts and returns hours apart post nothing and tell the user nothing more
+        repeat(3) {
+            r.app.now += 6 * 3_600_000L
+            r.env.purchases.onForeground()
+            testScheduler.advanceUntilIdle()
+        }
+        assertEquals(2, r.orders.size)
+        assertEquals(1, outcomes.size)
+        // buying the pack again opens a new sheet
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("999points", "999points"), r.store.sheets)
         model.close()
     }
 
+    @Test
+    fun anUnverifiedTransactionIsFinishedWithoutAnOrderAndReported() = runTest {
+        // StoreKit could not check its signature: nothing is delivered, but it is finished so it stops coming back
+        val r = rig(platform = PurchaseService.APP_STORE, start = false)
+        r.store.held += r.store.paid("999points", StorePurchaseState.UNVERIFIED)
+        val outcomes = mutableListOf<PurchaseOutcome>()
+        backgroundScope.launch(r.app.main) { r.env.purchases.outcomes.collect { outcomes += it } }
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.orders.isEmpty(), "never ordered")
+        assertEquals(listOf("token-999points-1"), r.store.finished, "finished, so StoreKit stops handing it over at every launch")
+        assertTrue(outcomes.none { it is PurchaseOutcome.Delivered })
+        val report = r.reporter.reports.single()
+        assertEquals(StoreError.VERIFICATION_FAILED, report.tags["iap.code"])
+        assertEquals("999points", report.tags["iap.product"])
+        assertFalse("token-999points-1" in report.toString(), "the receipt is never reported")
+        assertTrue(r.env.purchases.current.unfinished.isEmpty())
+
+        // a buy that comes back unverified: the buyer is told, nothing is ordered, the sheet is free again
+        r.store.onSheet = { id -> r.store.deliver(r.store.paid(id, StorePurchaseState.UNVERIFIED)) }
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("199points")
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.orders.isEmpty())
+        assertEquals(2, r.store.finished.size)
+        assertEquals(PurchaseCopy.pointsFailed(PurchaseCopy.VERIFICATION_FAILED), r.env.ui.current.toast?.text)
+        assertFalse(model.current.processing)
+        model.close()
+    }
     @Test
     fun onTheAppStoreAReSignedReceiptOfAnAcceptedTransactionIsNotANewOrder() = runTest {
         // ePoints dedupes on the receipt's hash only: the same transaction with a new jwsRepresentation would be a second order
@@ -366,150 +401,6 @@ class PurchasesTest {
         assertEquals(1, r.orders.size, "the same transaction is never ordered twice")
         assertEquals(listOf("re-signed-${first.token}"), r.store.finished)
         model.close()
-    }
-
-    @Test
-    fun anAppStorePurchaseRefusedOnThreeRecoveriesHoursApartStopsBlockingAndTheUserIsToldOnce() = runTest {
-        answers = mutableListOf(HttpResult(409, "{}"))
-        val r = rig(platform = PurchaseService.APP_STORE)
-        val stuckSeen = mutableListOf<PurchaseOutcome>()
-        backgroundScope.launch(r.app.main) { r.env.purchases.outcomes.collect { if (it is PurchaseOutcome.Stuck) stuckSeen += it } }
-        val model = screen(r, StoreScreenKind.POINTS, username = bob)
-        val own = screen(r, StoreScreenKind.POINTS)
-        model.buy("999points")
-        testScheduler.runCurrent()
-        val old = r.store.held.single()
-        // three recoveries (a start, a foreground, an account change), hours apart, each answered 409
-        repeat(3) {
-            r.app.now += PurchaseService.CONFLICT_GAP_MILLIS
-            r.env.purchases.recover(counting = true)
-            testScheduler.runCurrent()
-        }
-        assertTrue(r.env.purchases.stuck(old))
-        assertFalse("999points" in r.env.purchases.current.unfinished, "no longer offered as waiting")
-        // a new buy is not blocked: a new sheet, the stuck one stays unfinished and keeps its target
-        answers = mutableListOf(HttpResult(201, "{}"))
-        model.dismissAlert()
-        own.buy("999points")
-        testScheduler.runCurrent()
-        assertEquals(2, r.store.sheets.size)
-        assertEquals(StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.STUCK), own.current.alert)
-        assertEquals(alice, r.orders.last().json()["user"]!!.jsonPrimitive.content, "the new purchase is ordered for its own target")
-        assertFalse(old.token in r.store.finished, "the stuck one stays unfinished (never finished on 409)")
-        assertEquals(bob, PurchaseService.Intents.find(r.env.prefs, "999points", r.env.purchases.orderKey(old))!!.target.user)
-        // told once
-        own.dismissAlert()
-        own.buy("999points")
-        testScheduler.runCurrent()
-        assertEquals(1, stuckSeen.size)
-        model.close()
-        own.close()
-    }
-
-    @Test
-    fun aShortOutageNeverMakesAFreshPurchaseStuck() = runTest {
-        // ePoints answers 409 to every insert while its database is down: the rechecks and quick returns count once
-        answers = mutableListOf(HttpResult(409, "{}"))
-        val r = rig(platform = PurchaseService.APP_STORE)
-        val model = screen(r, StoreScreenKind.POINTS)
-        model.buy("999points")
-        testScheduler.advanceTimeBy(PurchaseService.RECHECK_MILLIS * (PurchaseService.MAX_RECHECKS + 1) + 1)
-        testScheduler.runCurrent()
-        repeat(3) {
-            r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
-            r.env.purchases.onForeground()
-            testScheduler.runCurrent()
-        }
-        val p = r.store.held.single()
-        assertTrue(r.orders.size >= 5)
-        assertEquals(1L, PurchaseService.Marks.conflicts(r.env.prefs, r.env.purchases.orderKey(p)))
-        assertFalse(r.env.purchases.stuck(p))
-        // hours later the user taps the pack again: that attempt and its rechecks are no recovery and count nothing
-        r.app.now += PurchaseService.CONFLICT_GAP_MILLIS + 1
-        model.dismissAlert()
-        model.buy("999points")
-        testScheduler.advanceTimeBy(PurchaseService.RECHECK_MILLIS * (PurchaseService.MAX_RECHECKS + 1) + 1)
-        testScheduler.runCurrent()
-        assertEquals(1L, PurchaseService.Marks.conflicts(r.env.prefs, r.env.purchases.orderKey(p)))
-        assertEquals(1, r.store.sheets.size, "still the one purchase: no invitation to pay again")
-        assertTrue(model.current.alert?.body != PurchaseCopy.STUCK)
-        model.close()
-    }
-
-    @Test
-    fun theAgeAloneNeverMakesAPurchaseStuck() = runTest {
-        // a device clock a day ahead: the purchase looks old, but nothing was refused yet
-        answers = mutableListOf(HttpResult(500, ""))
-        val r = rig(platform = PurchaseService.APP_STORE, start = false)
-        r.store.purchasedAt = r.app.now - 48 * 3_600_000L
-        r.store.held += r.store.paid("999points")
-        r.env.purchases.start()
-        testScheduler.advanceUntilIdle()
-        assertFalse(r.env.purchases.stuck(r.store.held.single()))
-    }
-
-    @Test
-    fun anAppStorePurchaseUnacceptedForADayByItsStoreDateStopsBlocking() = runTest {
-        answers = mutableListOf(HttpResult(409, "{}"))
-        // bought an hour ago, refused once: it still blocks (a new buy completes it instead)
-        val r = rig(platform = PurchaseService.APP_STORE, start = false)
-        r.store.purchasedAt = r.app.now - 3_600_000
-        r.store.held += r.store.paid("999points")
-        val model = screen(r, StoreScreenKind.POINTS)
-        r.env.purchases.start()
-        testScheduler.runCurrent()
-        model.buy("999points")
-        testScheduler.runCurrent()
-        assertTrue(r.store.sheets.isEmpty())
-        model.close()
-
-        // the store dates another one 25 hours back, refused once only: by its date it no longer blocks
-        val old = rig(platform = PurchaseService.APP_STORE, start = false)
-        old.store.purchasedAt = old.app.now - 25 * 3_600_000L
-        old.store.held += old.store.paid("999points")
-        val screen2 = screen(old, StoreScreenKind.POINTS)
-        old.env.purchases.start()
-        testScheduler.runCurrent()
-        assertEquals(1, old.orders.size)
-        screen2.buy("999points")
-        testScheduler.runCurrent()
-        assertEquals(listOf("999points"), old.store.sheets)
-        assertEquals(StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.STUCK), screen2.current.alert)
-        screen2.close()
-    }
-
-    @Test
-    fun onPlayARefusedPurchaseStillBlocksGoogleRefundsIt() = runTest {
-        answers = mutableListOf(HttpResult(409, "{}"))
-        val r = rig()
-        r.store.purchasedAt = r.app.now - 48 * 3_600_000L
-        r.store.held += r.store.paid("999points")
-        repeat(4) { r.app.now += PurchaseService.CONFLICT_GAP_MILLIS; r.env.purchases.recover(counting = true); testScheduler.runCurrent() }
-        assertFalse(r.env.purchases.stuck(r.store.held.single()))
-        val model = screen(r, StoreScreenKind.POINTS)
-        model.buy("999points")
-        testScheduler.runCurrent()
-        assertTrue(r.store.sheets.isEmpty(), "Play: the unconsumed purchase lapses into Google's refund instead")
-        model.close()
-    }
-
-    @Test
-    fun aStuckPaidAccountLetsTheUserPickANewName() = runTest {
-        answers = mutableListOf(HttpResult(409, "{}"))
-        val r = rig(platform = PurchaseService.APP_STORE, signedIn = null)
-        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta("taken.name", "a@b.co", "")), r.app.now)
-        r.store.held += r.store.paid(PurchaseSkus.ACCOUNT)
-        repeat(3) { r.app.now += PurchaseService.CONFLICT_GAP_MILLIS; r.env.purchases.recover(counting = true); testScheduler.runCurrent() }
-        r.env.signupPrefill = SignupPrefill("fresh.name", "a@b.co", "", purchaseOnly = true)
-        val register = r.env.registerModel("")
-        testScheduler.advanceUntilIdle()
-        assertEquals("Buy Account - $9.99", register.current.paidButton, "no longer \"Claim\" with the old name")
-        answers = mutableListOf(HttpResult(201, "{}"))
-        register.buyAccount()
-        testScheduler.advanceUntilIdle()
-        assertEquals(1, r.store.sheets.size)
-        assertEquals("fresh.name", r.orders.last().json()["meta"]!!.jsonObject["username"]!!.jsonPrimitive.content)
-        register.close()
     }
 
     @Test
