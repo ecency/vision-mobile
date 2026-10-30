@@ -22,23 +22,29 @@ class AvatarStamps internal constructor(dispatchers: AppDispatchers) : StateMode
 
 /**
  * Ecency Pro members (RN useProMembersQuery / ProBadge): loaded once on first use, from the public list.
- * A failed load leaves the set empty (no badges) and is tried again on the next [ensureLoaded].
+ * A failed load leaves the set empty (no badges) and is tried again on an [ensureLoaded] after [RETRY_AFTER_MILLIS].
  */
 class ProMembersModel internal constructor(private val env: AppEnvironment) : StateModel<Set<String>>(emptySet(), env.dispatchers) {
     private var job: Job? = null
     private var loaded = false
 
+    /** When the last read failed (0: none), so a failure is not retried by every row that appears. */
+    private var failedAt = 0L
+
     fun ensureLoaded() {
         if (loaded || job?.isActive == true) return
+        if (failedAt != 0L && env.nowMillis() - failedAt < RETRY_AFTER_MILLIS) return
         job = scope.launch {
             try {
                 val members = env.accountApi.proMembers()
                 loaded = true
+                failedAt = 0L
                 setState { members }
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                // no badges until the next try
+                // no badges until the next try, after the pause
+                failedAt = env.nowMillis()
             }
         }
     }
@@ -86,6 +92,9 @@ class ProMembersModel internal constructor(private val env: AppEnvironment) : St
     companion object {
         const val ACTIVATION_POLL_MILLIS = 30_000L
         const val ACTIVATION_POLLS = 12
+
+        /** After a failed read, the roster is asked again only after this pause (not by every row that appears). */
+        const val RETRY_AFTER_MILLIS = 60_000L
     }
 }
 

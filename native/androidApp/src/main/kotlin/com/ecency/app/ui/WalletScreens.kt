@@ -473,7 +473,10 @@ private fun RecurrentSheet(list: List<RecurrentSchedule>, onUser: (String) -> Un
             list.forEach { r ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f).clickable(role = Role.Button) { onUser(r.to) }) {
-                        Text(r.to, color = colors.text, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(r.to, color = colors.text, fontWeight = FontWeight.Bold)
+                            ProBadge(LocalFeedx.current?.env, r.to)
+                        }
                         Text(RecurrentCopy.transferIn(relativeTime(r.triggerDate)), color = colors.darkGray, fontSize = 12.sp)
                     }
                     Column(horizontalAlignment = Alignment.End) {
@@ -503,7 +506,10 @@ private fun DelegationsSheet(model: DelegationsModel, onUser: (String) -> Unit, 
                 items(state.visible, key = { it.account }) { d ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("delegation:${d.account}"), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f).clickable(enabled = !d.expiring, role = Role.Button) { onUser(d.account) }) {
-                            Text(if (d.expiring) WalletCopy.EXPIRING else d.account, color = if (d.expiring) colors.redText else colors.text, fontWeight = FontWeight.Bold)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(if (d.expiring) WalletCopy.EXPIRING else d.account, color = if (d.expiring) colors.redText else colors.text, fontWeight = FontWeight.Bold)
+                                if (!d.expiring) ProBadge(LocalFeedx.current?.env, d.account)
+                            }
                             (d.timeLeft ?: d.date?.take(10))?.let { Text(it, color = colors.darkGray, fontSize = 12.sp) }
                         }
                         Column(Modifier.clickable(enabled = d.updatable, role = Role.Button) { onUpdate(d.account) }, horizontalAlignment = Alignment.End) {

@@ -500,7 +500,10 @@ fun CommunityMembersScreen(model: CommunityMembersModel, env: AppEnvironment, en
                 ) {
                     Avatar(PostCard.avatarUrl(member.account, env.proxyBase), 36.dp)
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                        Text("@${member.account}", color = colors.text, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("@${member.account}", color = colors.text, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            ProBadge(env, member.account)
+                        }
                         if (member.title.isNotEmpty()) Text(member.title, color = colors.darkGray, fontSize = 13.sp)
                     }
                     if (member.account in state.saving) {

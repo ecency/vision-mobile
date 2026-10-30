@@ -244,6 +244,7 @@ fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions
     // Built once per card, state and language (not on every recomposition); the summary is read when asked for.
     val payoutDetails = rememberPayoutDetails()
     val language = LocalAppLanguage.current
+    val pro = isProMember(LocalFeedx.current?.env, card.author)
     val a11yActions = androidx.compose.runtime.remember(card, dimmed, actions, language) {
         buildList {
             if (dimmed) add(a11yAction(com.ecency.core.app.MutedReveals.REVEAL) { reveals?.reveal(card.key); revealed = true })
@@ -263,7 +264,7 @@ fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions
     Column(
         modifier.fillMaxWidth().background(colors.background)
             .semantics(mergeDescendants = true) {
-                contentDescription = postCardSummary(card, nowMillis)
+                contentDescription = postCardSummary(card, nowMillis, pro)
                 role = Role.Button
                 onClick { actions.onOpen(card); true }
                 customActions = a11yActions
@@ -382,6 +383,7 @@ fun PostHeader(
                 card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text,
                 modifier = Modifier.padding(start = 10.dp).clickable(onClick = onAuthor, role = Role.Button).inMergedRow(merged).testTag("author"),
             )
+            ProBadge(LocalFeedx.current?.env, card.author)
             Text(
                 " " + TimeAgo.short(card.createdEpochMillis, nowMillis),
                 fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray, modifier = Modifier.testTag("age"),
@@ -404,6 +406,7 @@ fun PostHeader(
                     card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text,
                     modifier = Modifier.clickable(onClick = onAuthor, role = Role.Button).inMergedRow(merged).testTag("author"),
                 )
+                ProBadge(LocalFeedx.current?.env, card.author)
                 if (card.isPinned || card.isPinnedBlog) Glyph(AppIcon.PIN, colors.redText, 16.dp, Modifier.padding(start = 8.dp).testTag("pinned"), filled = true)
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {

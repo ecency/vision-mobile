@@ -131,7 +131,10 @@ private fun ReferralRowView(env: AppEnvironment, row: ReferralRow, onUser: () ->
         )
         Avatar(PostCard.avatarUrl(row.username, env.proxyBase), 36.dp, Modifier.padding(horizontal = 10.dp))
         Column(Modifier.weight(1f)) {
-            Text(row.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(row.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                ProBadge(env, row.username)
+            }
             row.createdMillis?.let { Text(com.ecency.core.l10n.LocaleFormat.dateShort(it), color = colors.darkGray, fontSize = 12.sp) }
         }
         Text(

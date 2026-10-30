@@ -158,4 +158,54 @@ class ProFlowsTest {
         compose.await("the alert") { exists("proAlertOk") }
         assertFalse(exists("proSuccess"))
     }
+
+    // ---- the badge beside a member's name (RN ProBadge) ----
+
+    /** Ecency answers the roster only (no sign in): alice wrote the post, carol the comment, x voted. */
+    private fun launchAt(state: NavState) {
+        roster += listOf("alice", "carol", "x")
+        node.auth.rest = { r -> if (r.url.endsWith("/private-api/pro-members")) HttpResult(200, """{"members":[${roster.joinToString(",") { "\"$it\"" }}]}""") else null }
+        compose.setContent { EcencyTheme(dark = false) { EcencyApp(env, host, Navigator(state)) } }
+    }
+
+    private fun badgeIn(tag: String) =
+        compose.onAllNodes(hasTestTag("proBadge") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(tag)), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+
+    @Test
+    fun aMembersFeedCardShowsTheBadgeAndSaysItInItsOneStop() {
+        launchAt(NavState())
+        waitFor("card:alice/trending-one")
+        compose.await("the badge on alice's card") { badgeIn("card:alice/trending-one") }
+        assertFalse("bob is no member", badgeIn("card:bob/trending-two"))
+        val card = compose.onNodeWithTag("card:alice/trending-one").fetchSemanticsNode()
+        val labels = card.config[SemanticsProperties.ContentDescription]
+        assertEquals("still one description", 1, labels.size)
+        assertTrue(labels.single(), labels.single().contains("alice, ${com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER}"))
+    }
+
+    @Test
+    fun thePostHeaderAndAMembersCommentShowTheBadge() {
+        launchAt(NavState().push(AppScreen.Post("alice", "trending-one")))
+        waitFor("postHeader")
+        compose.await("the badge in the post header") { badgeIn("postHeader") }
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
+        compose.await("the badge on carol's comment") { badgeIn("comment:carol/re-one") }
+        val header = compose.onNodeWithTag("commentHeader").fetchSemanticsNode().config[SemanticsProperties.ContentDescription].joinToString()
+        assertTrue(header, header.contains("carol, ${com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER}"))
+    }
+
+    @Test
+    fun aMemberVoterShowsTheBadge() {
+        launchAt(NavState().push(AppScreen.Voters("alice", "trending-one")))
+        waitFor("voter:y")
+        compose.await("the badge on voter x") { badgeIn("voter:x") }
+        assertFalse("y is no member", badgeIn("voter:y"))
+    }
+
+    @Test
+    fun aMemberRebloggerShowsTheBadge() {
+        launchAt(NavState().push(AppScreen.Reblogs("alice", "trending-one")))
+        waitFor("reblogger:carol")
+        compose.await("the badge on reblogger carol") { badgeIn("reblogger:carol") && badgeIn("reblogger:alice") }
+    }
 }

@@ -402,7 +402,10 @@ private fun LeaderboardRow(env: AppEnvironment, user: LeaderboardEntry, index: I
         }
         Spacer(Modifier.width(13.dp))
         Avatar(PostCard.avatarUrl(user.username, env.proxyBase), 32.dp)
-        Text(user.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(start = 12.dp))
+        Row(Modifier.weight(1f).padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(user.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            ProBadge(env, user.username)
+        }
         Text(user.count, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.width(80.dp))
         // RN: a tap on the reward shows the "Earn points" tooltip
         Text(
