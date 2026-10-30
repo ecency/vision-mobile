@@ -39,7 +39,8 @@ final class WalletTests: XCTestCase {
         let account = FakeHiveTransport.answer(#"{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_accounts","params":[["spike-alice"]]}"#)
         XCTAssertTrue(account.body.contains("1234.567 HIVE"))
         let broadcast = FakeHiveTransport().answerSync(#"{"jsonrpc":"2.0","id":4,"method":"condenser_api.broadcast_transaction","params":[{}]}"#)
-        XCTAssertNotEqual(broadcast.status, 200, "nothing a demo run does can reach a chain")
+        // refused as the chain refuses one (a JSON-RPC error, no result): never a "may have landed" 5xx
+        XCTAssertTrue(broadcast.body.contains("\"error\"") && !broadcast.body.contains("\"result\""), "nothing a demo run does can reach a chain: \(broadcast.body)")
     }
 
     func testHistoryCategoriesAndPointTypesAsSwiftSeesThem() {

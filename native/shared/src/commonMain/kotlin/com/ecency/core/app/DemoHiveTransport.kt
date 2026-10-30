@@ -45,6 +45,15 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         val listed = request["params"] as? JsonArray
         fun text(key: String): String? = (named?.get(key) as? JsonPrimitive)?.takeIf { it.isString }?.content
         fun firstPage() = text("start_author").isNullOrEmpty()
+        // broadcasts: refused as the chain refuses one (a JSON-RPC error), never like an unreachable node, which
+        // could mean the transaction landed and would leave the send undecided
+        if (method.endsWith(".broadcast_transaction") || method.endsWith(".broadcast_transaction_synchronous")) {
+            return HttpResult(200, buildJsonObject {
+                put("jsonrpc", "2.0")
+                put("error", buildJsonObject { put("code", -32000); put("message", "demo transport: broadcasts are not available offline") })
+                put("id", id)
+            }.toString())
+        }
         val result: JsonElement = when (method) {
             "bridge.get_ranked_posts" -> if (firstPage()) feed(null) else JsonArray(emptyList())
             "bridge.get_account_posts" -> if (firstPage()) feed(text("account") ?: AUTHORS[0]) else JsonArray(emptyList())
@@ -114,7 +123,7 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
                 put("proposals", buildJsonArray { add(buildJsonObject { put("id", 1); put("proposal_id", 342); put("creator", "ecency"); put("status", "active") }) })
             }
             "database_api.list_proposal_votes" -> buildJsonObject { put("proposal_votes", JsonArray(emptyList())) }
-            // chain state and broadcasts: refused, like an unreachable node
+            // other chain state: refused, like an unreachable node
             else -> return HttpResult(503, "demo transport: $method is not available offline")
         }
         return HttpResult(200, buildJsonObject { put("jsonrpc", "2.0"); put("result", result); put("id", id) }.toString())

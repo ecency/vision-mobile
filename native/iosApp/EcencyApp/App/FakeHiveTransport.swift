@@ -39,6 +39,13 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         }
         let id = request["id"] ?? 0
         let params = request["params"] as? [String: Any] ?? [:]
+        // broadcasts: refused as the chain refuses one (a JSON-RPC error), as DemoHiveTransport; a 5xx could mean the
+        // transaction landed and would leave the send undecided
+        if method.hasSuffix(".broadcast_transaction") || method.hasSuffix(".broadcast_transaction_synchronous") {
+            let refusal: [String: Any] = ["jsonrpc": "2.0", "error": ["code": -32000, "message": "fake transport: broadcasts are not available offline"], "id": id]
+            let json = (try? JSONSerialization.data(withJSONObject: refusal)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+            return HttpResult(status: 200, body: json)
+        }
         let result: Any
         switch method {
         case "bridge.get_ranked_posts":
@@ -106,7 +113,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         case "database_api.list_proposal_votes":
             result = ["proposal_votes": [Any]()]
         default:
-            // Account lookups, chain state and broadcasts: refused, like an unreachable node.
+            // Account lookups and chain state: refused, like an unreachable node.
             return HttpResult(status: 503, body: "fake transport: \(method) is not available offline")
         }
         let reply: [String: Any] = ["jsonrpc": "2.0", "result": result, "id": id]

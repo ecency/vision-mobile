@@ -17,6 +17,16 @@ class DemoHiveTransportTest {
     private val api = EcencyApi(listOf("https://demo-hive.invalid"), demo)
 
     @Test
+    fun aBroadcastIsRefusedAsTheChainWouldNotAsAnUnreachableNode() {
+        // a 5xx may have reached a node (the send would wait as undecided); the demo's refusal is the chain's verdict
+        for (method in listOf("condenser_api.broadcast_transaction", "condenser_api.broadcast_transaction_synchronous", "network_broadcast_api.broadcast_transaction")) {
+            val r = demo.answer("""{"jsonrpc":"2.0","method":"$method","params":[{}],"id":7}""")
+            assertEquals(200, r.status, method)
+            assertTrue("\"error\"" in r.body && "\"id\":7" in r.body, "$method: ${r.body}")
+        }
+    }
+
+    @Test
     fun theAppsReadersAcceptTheSyntheticAnswers() = runTest {
         val trending = api.feeds.page(FeedSource.Ranked(RankedSort.TRENDING), null, "spike-alice")
         assertEquals(6, trending.posts.size)
@@ -32,8 +42,11 @@ class DemoHiveTransportTest {
 
     @Test
     fun nothingADemoRunDoesCanReachAChain() {
-        for (method in listOf("condenser_api.broadcast_transaction", "condenser_api.get_dynamic_global_properties", "network_broadcast_api.broadcast_transaction")) {
-            assertEquals(503, demo.answer("""{"jsonrpc":"2.0","id":1,"method":"$method","params":[]}""").status, method)
+        // chain state is unavailable; broadcasts are refused with the chain's kind of error (no result, nothing sent)
+        assertEquals(503, demo.answer("""{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_dynamic_global_properties","params":[]}""").status)
+        for (method in listOf("condenser_api.broadcast_transaction", "network_broadcast_api.broadcast_transaction")) {
+            val body = demo.answer("""{"jsonrpc":"2.0","id":1,"method":"$method","params":[]}""").body
+            assertTrue("\"error\"" in body && "\"result\"" !in body, method)
         }
         assertEquals(400, demo.answer("not json").status)
     }
