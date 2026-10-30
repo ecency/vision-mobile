@@ -24,6 +24,7 @@ final class PurchaseTests: XCTestCase {
         try await session.setSimulatedError(nil, forAPI: .verification)
         DemoAuthServices.shared.demoOrderLost = 0
         DemoAuthServices.shared.demoOrderStatus = 201
+        DemoAuthServices.shared.demoOrderBody = "{}"
         session.clearTransactions()
     }
 
@@ -199,9 +200,9 @@ final class PurchaseTests: XCTestCase {
         XCTAssertEqual(DemoAuthServices.shared.demoOrderLost, 0, "the lost answer was retried")
     }
 
-    func testAnUnverifiedTransactionIsFinishedAndNeverDelivered() throws {
-        // StoreKit could not check the signature: nothing is ordered or delivered, but the transaction is finished so
-        // StoreKit stops handing it over at every launch
+    func testAnUnverifiedTransactionIsOrderedAndFinishedOnlyOnEcencysAnswer() throws {
+        // StoreKit could not check the signature: the signed transaction still goes to Ecency, which verifies it itself;
+        // it is finished only on Ecency's definite answer
         var simulated = false
         let session = self.session!
         Task { try? await session.setSimulatedError(.verification(.invalidSignature), forAPI: .verification); simulated = true }
@@ -214,20 +215,56 @@ final class PurchaseTests: XCTestCase {
         waitUntil { !recorder.snapshot.0.isEmpty || !recorder.snapshot.1.isEmpty }
         let handed = try XCTUnwrap(recorder.snapshot.0.single, "handed over as unverified, errors: \(recorder.snapshot.1.map(\.code))")
         XCTAssertEqual(handed.state, .unverified)
+        XCTAssertEqual(handed.token.split(separator: ".").count, 3, "the receipt is the JWS (jwsRepresentation)")
         XCTAssertEqual(unfinished(raw).map(\.state), [.unverified])
         raw.setListener(listener: nil)
 
-        // the next start finishes it without an order or a delivery
+        // Ecency cannot answer: posted, kept unfinished
+        DemoAuthServices.shared.demoOrderStatus = 503
         let env = try PurchaseTests.environment()
         env.store = PurchaseTests.serviceStore()
         let outcomes = OutcomeRecorder()
         let watch = env.purchases.watchOutcomes { outcomes.add($0) }
         defer { watch.close() }
         env.purchases.start()
+        waitUntil(30) { outcomes.all.contains { $0 is PurchaseOutcomeFailed } }
+        XCTAssertTrue(outcomes.all.contains { $0 is PurchaseOutcomeFailed }, "posted: \(outcomes.all)")
+        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeDelivered })
+        XCTAssertEqual(unfinished(raw).map(\.state), [.unverified], "not finished before a definite answer")
+
+        // the next start, Ecency accepts it: finished
+        PurchaseTests.detachServiceStores()
+        DemoAuthServices.shared.demoOrderStatus = 201
+        let restarted = try PurchaseTests.environment()
+        restarted.store = PurchaseTests.serviceStore()
+        let later = OutcomeRecorder()
+        let watchLater = restarted.purchases.watchOutcomes { later.add($0) }
+        defer { watchLater.close() }
+        restarted.purchases.start()
         waitUntil(30) { self.unfinished(raw).isEmpty }
-        XCTAssertTrue(unfinished(raw).isEmpty, "finished")
-        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeDelivered }, "never delivered")
-        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeProcessing }, "never ordered")
+        XCTAssertTrue(unfinished(raw).isEmpty, "finished after Ecency accepted it")
+        XCTAssertTrue(later.all.contains { $0 is PurchaseOutcomeDelivered })
+    }
+
+    func testAReceiptHeldForReviewStaysUnfinishedAndShowsTheOrderNumber() throws {
+        DemoAuthServices.shared.demoOrderStatus = 422
+        DemoAuthServices.shared.demoOrderBody = #"{"reason":"receipt_held","order":55}"#
+        let env = try PurchaseTests.environment()
+        let store = PurchaseTests.serviceStore()
+        env.store = store
+        let outcomes = OutcomeRecorder()
+        let watch = env.purchases.watchOutcomes { outcomes.add($0) }
+        defer { watch.close() }
+        env.purchases.start()
+        let screen = Observed(env.storeScreenModel(kind: .points, username: "", productId: ""), ownsModel: true)
+        let model = screen.model as! StoreScreenModel
+        model.start()
+        waitUntil { !screen.state.rows.isEmpty }
+        model.buy(productId: "999points")
+        waitUntil { screen.state.alert != nil }
+        XCTAssertEqual(screen.state.alert?.body, PurchaseCopy.shared.held(order: "55"), "\(outcomes.all)")
+        XCTAssertFalse(outcomes.all.contains { $0 is PurchaseOutcomeDelivered })
+        XCTAssertEqual(unfinished(store).map(\.productId), ["999points"], "kept unfinished while support reviews it")
     }
 
     func testSentryEventsAreScrubbedAndBenignErrorsDropped() {

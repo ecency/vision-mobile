@@ -355,34 +355,137 @@ class PurchasesTest {
     }
 
     @Test
-    fun anUnverifiedTransactionIsFinishedWithoutAnOrderAndReported() = runTest {
-        // StoreKit could not check its signature: nothing is delivered, but it is finished so it stops coming back
-        val r = rig(platform = PurchaseService.APP_STORE, start = false)
-        r.store.held += r.store.paid("999points", StorePurchaseState.UNVERIFIED)
-        val outcomes = mutableListOf<PurchaseOutcome>()
-        backgroundScope.launch(r.app.main) { r.env.purchases.outcomes.collect { outcomes += it } }
-        r.env.purchases.start()
-        testScheduler.advanceUntilIdle()
-        assertTrue(r.orders.isEmpty(), "never ordered")
-        assertEquals(listOf("token-999points-1"), r.store.finished, "finished, so StoreKit stops handing it over at every launch")
-        assertTrue(outcomes.none { it is PurchaseOutcome.Delivered })
-        val report = r.reporter.reports.single()
-        assertEquals(StoreError.VERIFICATION_FAILED, report.tags["iap.code"])
-        assertEquals("999points", report.tags["iap.product"])
-        assertFalse("token-999points-1" in report.toString(), "the receipt is never reported")
-        assertTrue(r.env.purchases.current.unfinished.isEmpty())
-
-        // a buy that comes back unverified: the buyer is told, nothing is ordered, the sheet is free again
+    fun anUnverifiedTransactionIsOrderedWithItsSignedPayloadAndFinishedOnlyAfterEcencyAccepted() = runTest {
+        // the device's verdict decides nothing: Ecency's worker verifies the JWS itself
+        val r = rig(platform = PurchaseService.APP_STORE)
+        var finishedBeforeOrder = true
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("purchase-order")) finishedBeforeOrder = r.store.finished.isNotEmpty() }
         r.store.onSheet = { id -> r.store.deliver(r.store.paid(id, StorePurchaseState.UNVERIFIED)) }
         val model = screen(r, StoreScreenKind.POINTS)
-        model.buy("199points")
+        model.buy("999points")
         testScheduler.advanceUntilIdle()
-        assertTrue(r.orders.isEmpty())
-        assertEquals(2, r.store.finished.size)
-        assertEquals(PurchaseCopy.pointsFailed(PurchaseCopy.VERIFICATION_FAILED), r.env.ui.current.toast?.text)
-        assertFalse(model.current.processing)
+        val order = r.orders.single()
+        assertEquals("token-999points-1", order.json()["receipt"]!!.jsonPrimitive.content, "the signed transaction, as for a verified one")
+        assertEquals("app_store", order.json()["platform"]!!.jsonPrimitive.content)
+        assertFalse(finishedBeforeOrder, "not finished before Ecency answered")
+        assertEquals(listOf("token-999points-1"), r.store.finished)
+        assertEquals(PurchaseCopy.POINTS_SUCCESS, r.env.ui.current.toast?.text)
+        assertTrue(model.current.alert == null, "no \"could not verify\"")
+        val report = r.reporter.reports.single { it.tags["iap.code"] == StoreError.VERIFICATION_FAILED }
+        assertEquals("999points", report.tags["iap.product"])
+        assertFalse("token-999points-1" in report.toString(), "the receipt is never reported")
         model.close()
     }
+
+    @Test
+    fun anUnverifiedTransactionStaysUnfinishedWhileEcencyCannotAnswer() = runTest {
+        answers = mutableListOf(HttpResult(503, "{}"))
+        val r = rig(platform = PurchaseService.APP_STORE, start = false)
+        r.store.held += r.store.paid("999points", StorePurchaseState.UNVERIFIED)
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(3, r.orders.size, "posted and retried as any purchase")
+        assertTrue(r.store.finished.isEmpty(), "never finished without a definite answer")
+        assertEquals(setOf("999points"), r.env.purchases.current.unfinished)
+        // Ecency is back: the next foreground delivers it
+        answers = mutableListOf(HttpResult(201, "{}"))
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("token-999points-1"), r.store.finished)
+    }
+
+    @Test
+    fun anUnverifiedTransactionEcencyRefusesOrHoldsStaysUnfinishedWithNothingDelivered() = runTest {
+        answers = mutableListOf(HttpResult(400, "{}"))
+        val r = rig(platform = PurchaseService.APP_STORE)
+        val outcomes = mutableListOf<PurchaseOutcome>()
+        backgroundScope.launch(r.app.main) { r.env.purchases.outcomes.collect { outcomes += it } }
+        r.store.onSheet = { id -> r.store.deliver(r.store.paid(id, StorePurchaseState.UNVERIFIED)) }
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.orders.isNotEmpty())
+        assertTrue(r.store.finished.isEmpty(), "finished only on 201 or 409")
+        assertTrue(outcomes.none { it is PurchaseOutcome.Delivered })
+        assertEquals(setOf("999points"), r.env.purchases.current.unfinished)
+        // held for review: still unfinished
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":7}"""))
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.store.finished.isEmpty())
+        assertTrue(outcomes.none { it is PurchaseOutcome.Delivered })
+        model.close()
+    }
+
+    @Test
+    fun aHeldReceiptStaysUnfinishedAndTheBuyerGetsTheOrderNumber() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":4711}"""))
+        val r = rig()
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.orders.size, "a held receipt is not retried")
+        assertTrue(r.store.finished.isEmpty(), "kept unfinished while support reviews it")
+        assertEquals(StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.held("4711")), model.current.alert)
+        assertTrue("#4711" in PurchaseCopy.held("4711"))
+        assertEquals(setOf("999points"), r.env.purchases.current.unfinished)
+        assertFalse(model.current.processing)
+        // the next start resends it and is told nothing again (the buyer saw it)
+        val prefs = r.env.prefs
+        val held = r.store.held.toList()
+        model.close()
+        val again = rig(prefs = prefs, start = false)
+        again.store.held += held
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, again.orders.size)
+        assertNull(again.env.ui.current.toast)
+        assertTrue(again.store.finished.isEmpty())
+        // support released it: the next resend gets 409 and finishes it
+        answers = mutableListOf(HttpResult(409, "{}"))
+        again.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        again.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(held.single().token), again.store.finished)
+    }
+
+    @Test
+    fun aHeldReceiptFoundAtRecoveryIsToldOncePerOrder() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(PurchaseCopy.held("12"), r.env.ui.current.toast?.text)
+        r.env.ui.dismiss(r.env.ui.current.toast!!.id)
+        repeat(2) {
+            r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+            r.env.purchases.onForeground()
+            testScheduler.advanceUntilIdle()
+        }
+        assertEquals(3, r.orders.size, "resent at each recovery")
+        assertNull(r.env.ui.current.toast, "told once, not at every launch")
+        assertTrue(r.store.finished.isEmpty())
+    }
+
+    @Test
+    fun a400OrA422WithoutTheHeldBodyKeepsThePurchaseUnfinished() = runTest {
+        for (answer in listOf(HttpResult(400, """{"message":"unknown product"}"""), HttpResult(422, """{"reason":"other"}"""))) {
+            answers = mutableListOf(answer)
+            val r = rig()
+            val model = screen(r, StoreScreenKind.POINTS)
+            model.buy("999points")
+            testScheduler.advanceUntilIdle()
+            assertEquals(3, r.orders.size, "retried as any failure (${answer.status})")
+            assertTrue(r.store.finished.isEmpty(), "never finished (${answer.status})")
+            assertEquals(PurchaseCopy.pointsFailed("Ecency API error ${answer.status}"), r.env.ui.current.toast?.text)
+            assertEquals(setOf("999points"), r.env.purchases.current.unfinished)
+            model.close()
+        }
+    }
+
     @Test
     fun onTheAppStoreAReSignedReceiptOfAnAcceptedTransactionIsNotANewOrder() = runTest {
         // ePoints dedupes on the receipt's hash only: the same transaction with a new jwsRepresentation would be a second order

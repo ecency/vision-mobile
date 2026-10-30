@@ -6,7 +6,9 @@ import com.ecency.core.auth.AuthHttp
 import com.ecency.core.auth.AuthHttpRequest
 import com.ecency.core.auth.EcencyCodeProvider
 import kotlinx.coroutines.withTimeoutOrNull
+import com.ecency.core.api.json.SafeJson
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -31,15 +33,22 @@ data class PurchaseOrder(
  * `{platform, product, receipt, user, meta?}`, plus the signed-in account's `code` as RN's axios interceptor adds it
  * (Ecency's purchase worker does not read it; signed out, the body has none).
  *
- * The server only queues the order: 201 means it was stored and will be verified with the store and delivered by
- * Ecency's worker; 409 means an order with the same receipt is already stored (any other failed insert is 503), see
- * [com.ecency.core.app.PurchaseService]. Not idempotent per call, so it is bounded by [TIMEOUT_MILLIS] (RN
+ * The server only queues the order; Ecency's worker verifies it with the store (an App Store JWS against Apple's
+ * roots, unverified on the device or not) and delivers it. The answers and what [com.ecency.core.app.PurchaseService]
+ * does with them:
+ * - 201 stored: finish the store purchase.
+ * - 409 already stored (delivered once, or it will be): finish, as delivered.
+ * - 422 `{"reason":"receipt_held","order":<id>}` held for review ([ReceiptHeldException]): keep unfinished, the user
+ *   contacts support with the order number; once released a resend gets 409.
+ * - 400, any other 422, 503, no answer: keep unfinished, resent later.
+ * Not idempotent per call, so it is bounded by [TIMEOUT_MILLIS] (RN
  * `PURCHASE_ORDER_TIMEOUT_MS`), much longer than other private calls: a slow success must not read as no answer.
  */
 class PurchaseApi(private val http: AuthHttp, private val codes: EcencyCodeProvider, private val host: String) {
     /**
      * Sends [order] once. [codeOf] names the signed-in account whose `code` goes along (null: none).
-     * @throws EcencyHttpException with the refused status; [EcencyTimeoutException] after [TIMEOUT_MILLIS].
+     * @throws EcencyHttpException with the refused status ([ReceiptHeldException] for a held receipt);
+     *   [EcencyTimeoutException] after [TIMEOUT_MILLIS].
      */
     @Throws(Exception::class)
     suspend fun purchaseOrder(order: PurchaseOrder, codeOf: String?): Int {
@@ -52,11 +61,20 @@ class PurchaseApi(private val http: AuthHttp, private val codes: EcencyCodeProvi
                 ),
             )
         } ?: throw EcencyTimeoutException()
+        if (response.status == 422) heldOrder(response.body)?.let { throw ReceiptHeldException(it) }
         if (response.status !in 200..299) throw EcencyHttpException(response.status)
         return response.status
     }
 
     companion object {
+        /** The order number of a 422 that is exactly `{"reason":"receipt_held","order":<id>}`; null otherwise. */
+        fun heldOrder(body: String): String? {
+            val o = SafeJson.parseOrNull(body, 2) as? JsonObject ?: return null
+            if ((o["reason"] as? JsonPrimitive)?.takeIf { it.isString }?.content != "receipt_held") return null
+            val order = o["order"] as? JsonPrimitive ?: return null
+            return order.takeIf { !it.isString }?.content?.toLongOrNull()?.takeIf { it > 0 }?.toString()
+        }
+
         /** RN `PURCHASE_ORDER_TIMEOUT_MS`. */
         const val TIMEOUT_MILLIS = 60_000L
 
@@ -76,3 +94,6 @@ class PurchaseApi(private val http: AuthHttp, private val codes: EcencyCodeProvi
         }
     }
 }
+
+/** Ecency holds this receipt for review (422 `receipt_held`): [order] is the number support needs. */
+class ReceiptHeldException(val order: String) : EcencyHttpException(422, "Purchase held for review")

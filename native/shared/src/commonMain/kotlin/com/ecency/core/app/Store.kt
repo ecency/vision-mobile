@@ -84,7 +84,7 @@ enum class StorePurchaseState {
     /** Refunded or revoked by the store before it was finished: nothing to deliver. */
     REVOKED,
 
-    /** StoreKit could not verify its signature: never delivered, only finished (else it comes back at every launch). */
+    /** StoreKit could not verify its signature: reported, then ordered as a paid one (Ecency verifies it itself). */
     UNVERIFIED,
 }
 

@@ -2603,6 +2603,7 @@
       "boost_row": "Boost+  |  {hp} HP",
       "account_meta_missing": "Email and username are required for 999accounts consumption",
       "stuck": "An earlier purchase of this product could not be completed. Please contact support@ecency.com with your store receipt, it is kept for this.",
+      "held": "This purchase is held for review. Contact support@ecency.com with order #{order}.",
       "earlier_purchase": "An earlier purchase of this product is being completed for @{target} first.",
       "earlier_pending": "An earlier payment for this product is still pending for @{target}. It completes once the store confirms the payment.",
       "pending": "Your payment is pending. The purchase completes once the store confirms the payment.",

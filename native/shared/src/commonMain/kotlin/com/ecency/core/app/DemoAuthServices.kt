@@ -155,7 +155,7 @@ object DemoAuthServices {
                     demoOrderLost--
                     throw IllegalStateException("demo: the order's answer was lost")
                 }
-                HttpResult(demoOrderStatus, "{}").also {
+                HttpResult(demoOrderStatus, demoOrderBody).also {
                     val o = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject }.getOrNull()
                     if (demoOrderStatus == 201 && o?.get("product")?.jsonPrimitive?.content == PurchaseSkus.PRO) o["user"]?.jsonPrimitive?.content?.let { demoProMembers += it }
                 }
@@ -260,6 +260,9 @@ object DemoAuthServices {
 
     /** What the demo purchase order answers once nothing is lost: 201, or 409 for a receipt Ecency already has (tests). */
     var demoOrderStatus: Int = 201
+
+    /** The body of that answer (a 422 `receipt_held` carries the order number; tests). */
+    var demoOrderBody: String = "{}"
 
     /** The demo spin was claimed in this run. */
     var demoSpinUsed: Boolean = false

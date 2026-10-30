@@ -6,8 +6,8 @@ import StoreKit
 /// receipt is the signed transaction (`jwsRepresentation`), which Ecency verifies with Apple's library, exactly what
 /// RN sends. `StoreKit.Transaction.updates` is listened to from the start (an Ask to Buy approval, a purchase made while the
 /// app was killed, a refund); `StoreKit.Transaction.unfinished` is the recovery list (RN's `getAvailablePurchases` missed
-/// unfinished consumables). An unverified transaction (StoreKit could not check its signature) is handed over as UNVERIFIED:
-/// the shared service never orders it, finishes it so it stops coming back at every launch, and reports it.
+/// unfinished consumables). An unverified transaction (StoreKit could not check its signature) is handed over as UNVERIFIED
+/// with its signed form: the shared service reports it and orders it like any other, Ecency verifies it.
 final class StoreKitStore: NSObject, StorePlatform {
     let platform: String = PurchaseService.companion.APP_STORE
 
@@ -100,7 +100,7 @@ final class StoreKitStore: NSObject, StorePlatform {
             lock.lock(); var transaction = transactions[purchase.ref]; lock.unlock()
             if transaction == nil {
                 for await result in StoreKit.Transaction.unfinished {
-                    // an unverified one is finished too (it is never delivered)
+                    // an unverified one too, once Ecency answered for it
                     if String(result.unsafePayloadValue.id) == purchase.ref { transaction = result.unsafePayloadValue; break }
                 }
             }
@@ -121,7 +121,7 @@ final class StoreKitStore: NSObject, StorePlatform {
                              accountToken: t.appAccountToken?.uuidString.lowercased() ?? "")
     }
 
-    /// Unverified wins over revoked: neither is delivered, both are finished.
+    /// Unverified wins over revoked: Ecency decides on both from the signed transaction.
     static func state(of result: VerificationResult<StoreKit.Transaction>) -> StorePurchaseState {
         guard case let .verified(t) = result else { return .unverified }
         return t.revocationDate == nil ? .purchased : .revoked

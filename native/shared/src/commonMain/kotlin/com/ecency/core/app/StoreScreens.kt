@@ -140,6 +140,7 @@ class StoreScreenModel internal constructor(
                 it.copy(alert = StoreAlert(PurchaseCopy.WARNING, if (o.pending) PurchaseCopy.earlierPending(o.target) else PurchaseCopy.earlierPurchase(o.target)))
             }
             is PurchaseOutcome.Pending -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.PENDING)) }
+            is PurchaseOutcome.Held -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.held(o.order))) }
             is PurchaseOutcome.Processing -> env.ui.toast(PurchaseCopy.PROCESSING)
             is PurchaseOutcome.Failed ->
                 if (points) env.ui.toast(PurchaseCopy.pointsFailed(o.message)) else setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, o.message)) }

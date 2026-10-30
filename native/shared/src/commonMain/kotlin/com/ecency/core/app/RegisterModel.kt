@@ -251,6 +251,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
                 )
             }
             is PurchaseOutcome.Pending -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.PENDING)) }
+            is PurchaseOutcome.Held -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.held(o.order))) }
             is PurchaseOutcome.Processing -> setState { it.copy(isRegistering = false, alert = RegisterAlert(PurchaseCopy.WARNING, PurchaseCopy.PROCESSING)) }
             is PurchaseOutcome.Failed -> setState { it.copy(isRegistering = false, alert = RegisterAlert(RegisterCopy.FAIL, "${PurchaseCopy.REGISTER_FAIL}\n${o.message}")) }
             is PurchaseOutcome.StoreFailed -> setState {

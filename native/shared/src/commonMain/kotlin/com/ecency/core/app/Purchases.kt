@@ -5,6 +5,7 @@ import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.ecency.AccountOrderMeta
 import com.ecency.core.api.ecency.PurchaseApi
 import com.ecency.core.api.ecency.PurchaseOrder
+import com.ecency.core.api.ecency.ReceiptHeldException
 import com.ecency.core.api.json.SafeJson
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.long
@@ -100,6 +101,8 @@ object PurchaseCopy {
 
     val VERIFICATION_FAILED: String get() = L.native.ios.store.verificationFailed
 
+    fun held(order: String) = L.native.purchase.held(order = order)
+
     fun earlierPurchase(target: String) = L.native.purchase.earlierPurchase(target = target)
     fun earlierPending(target: String) = L.native.purchase.earlierPending(target = target)
 
@@ -134,6 +137,9 @@ sealed interface PurchaseOutcome {
      */
     data class Earlier(override val productId: String, override val fromBuy: Boolean, val target: String, val pending: Boolean) : PurchaseOutcome
 
+    /** Ecency holds this receipt for review ([order]): kept unfinished, the user contacts support with the order number. */
+    data class Held(override val productId: String, override val fromBuy: Boolean, val order: String) : PurchaseOutcome
+
     /** The store refused or the user cancelled ([report] says whether the user still has to hear about it). */
     data class StoreFailed(override val productId: String, override val fromBuy: Boolean, val error: StoreError, val report: IapReport) : PurchaseOutcome
 }
@@ -165,8 +171,12 @@ data class PurchaseServiceState(
  * - 409 means Ecency already holds an order for this receipt (it answers 503 for any other failed insert, and
  *   reopens a failed order of the same buyer with 201): the purchase is delivered and finished as on 201 (RN). This
  *   is how a purchase whose 201 was lost ends instead of being posted again forever.
- * - An App Store transaction StoreKit could not verify is never ordered or delivered, but it is finished (it would
- *   otherwise come back at every launch) and reported.
+ * - 422 `receipt_held` (Ecency holds the receipt for review): kept unfinished, the buyer is shown the order number to
+ *   give support; found at recovery it is told once per order. Released, a later resend gets 409 and finishes it.
+ *   Any other answer (400, another 422, 503, no answer) keeps the purchase unfinished for a later resend.
+ * - An App Store transaction StoreKit could not verify is reported and ordered like any other with its signed
+ *   transaction: Ecency's worker verifies it itself (a forged one ends FAIL with nothing granted). Like every purchase
+ *   it is finished only on 201 or 409, never on the device's verdict.
  * - Who an order is for is saved before the store sheet opens (`purchases.intents`), so an interrupted purchase is
  *   delivered to the account it was bought for, not to whoever is signed in at the next start (RN), and a paid account
  *   keeps its username and e-mail (RN `pendingAccountPurchaseMeta`).
@@ -274,7 +284,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 storeFailed(e.copy(productId = productId), IapStage.INIT, fromBuy = true)
                 return@launch
             }
-            val held = held.values.filter { it.productId == productId && (it.state == StorePurchaseState.PURCHASED || it.state == StorePurchaseState.PENDING) }
+            val held = held.values.filter { it.productId == productId && it.state != StorePurchaseState.REVOKED }
             // one Ecency already took (only its finish is missing, or the store handed it back re-signed) is no earlier
             // purchase: it is finished quietly and this buy goes on
             held.filter { isAccepted(it) }.forEach { process(it, fromBuy = false) }
@@ -360,7 +370,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         if ((purchases + waiting).none { it.productId == PurchaseSkus.PRO && it.state == StorePurchaseState.PENDING }) env.proPurchases.dropPending(null)
         mutableState.update { s ->
             s.copy(
-                unfinished = purchases.filter { it.state == StorePurchaseState.PURCHASED }.map { it.productId }.toSet(),
+                unfinished = purchases.filter { it.state == StorePurchaseState.PURCHASED || it.state == StorePurchaseState.UNVERIFIED }.map { it.productId }.toSet(),
                 pending = (purchases + waiting).filter { it.state == StorePurchaseState.PENDING }.map { it.productId }.toSet(),
             )
         }
@@ -393,7 +403,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         try {
             // a real transaction of the product replaces its synthetic pending entry (an approved Ask to Buy)
             if (!p.isSyntheticPending) held = held.filterValues { !(it.isSyntheticPending && it.productId == p.productId) }
-            if (p.state == StorePurchaseState.PURCHASED || p.state == StorePurchaseState.PENDING) held = held + (key to p)
+            if (p.state != StorePurchaseState.REVOKED) held = held + (key to p)
             when (p.state) {
                 StorePurchaseState.PENDING -> {
                     if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, ProProgress.PENDING) }
@@ -409,13 +419,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     finish(p)
                     return
                 }
-                StorePurchaseState.UNVERIFIED -> {
-                    // StoreKit could not check its signature: never delivered, but finished so it stops coming back
-                    held = held - key
-                    finish(p)
-                    storeFailed(StoreError(StoreError.VERIFICATION_FAILED, PurchaseCopy.VERIFICATION_FAILED, p.productId), IapStage.PURCHASE, fromBuy)
-                    return
-                }
+                // StoreKit could not check its signature: reported, then ordered as any purchase (Ecency verifies it)
+                StorePurchaseState.UNVERIFIED -> errors.report(StoreError(StoreError.VERIFICATION_FAILED, PurchaseCopy.VERIFICATION_FAILED, p.productId), IapStage.PURCHASE)
                 StorePurchaseState.PURCHASED -> Unit
             }
             mutableState.update { it.copy(pending = it.pending - p.productId, unfinished = it.unfinished + p.productId, busy = it.busy + p.productId) }
@@ -460,6 +465,13 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, null) }
                     errors.reportThrown(result.error, IapStage.ORDER, p.productId)
                     emit(PurchaseOutcome.Failed(p.productId, fromBuy, result.error.message ?: PurchaseCopy.CONNECTION_ISSUES))
+                }
+                is OrderResult.Held -> {
+                    // kept unfinished for support; told with a buy, and once per order when a resend finds it
+                    if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, null) }
+                    val first = Marks.tellHeld(env.prefs, result.order)
+                    if (!fromBuy && first) env.ui.toast(PurchaseCopy.held(result.order))
+                    emit(PurchaseOutcome.Held(p.productId, fromBuy, result.order))
                 }
             }
         } finally {
@@ -541,10 +553,11 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         data object Accepted : OrderResult
         data object Duplicate : OrderResult
         data object Unknown : OrderResult
+        data class Held(val order: String) : OrderResult
         data class Failed(val error: Exception) : OrderResult
     }
 
-    /** RN `_purchaseOrderWithRetry`: 3 tries (1 s, then 2 s apart); 409 and a timeout stop at once. */
+    /** RN `_purchaseOrderWithRetry`: 3 tries (1 s, then 2 s apart); 409, a held receipt and a timeout stop at once. */
     private suspend fun post(order: PurchaseOrder): OrderResult {
         var last: Exception = EcencyHttpException(0)
         for (attempt in 0 until ORDER_ATTEMPTS) {
@@ -555,6 +568,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 throw e
             } catch (e: EcencyTimeoutException) {
                 return OrderResult.Unknown
+            } catch (e: ReceiptHeldException) {
+                return OrderResult.Held(e.order)
             } catch (e: EcencyHttpException) {
                 if (e.status == 409) return OrderResult.Duplicate
                 last = e
@@ -681,10 +696,19 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         }
     }
 
-    /** Per purchase key (hashes only, never a receipt): accepted by Ecency on this device. */
+    /** Per purchase key (hashes only, never a receipt): accepted by Ecency on this device; held order numbers told. */
     internal object Marks {
         const val ACCEPTED = "purchases.accepted"
+        const val HELD_TOLD = "purchases.heldTold"
         private const val MAX = 64
+
+        /** True the first time [order] is told. */
+        fun tellHeld(prefs: Prefs, order: String): Boolean {
+            val all = list(prefs, HELD_TOLD)
+            if (all.any { it.first == order }) return false
+            write(prefs, HELD_TOLD, (all + (order to 1L)).takeLast(MAX))
+            return true
+        }
 
         fun accepted(prefs: Prefs, hash: String): Boolean = list(prefs, ACCEPTED).any { it.first == hash }
 

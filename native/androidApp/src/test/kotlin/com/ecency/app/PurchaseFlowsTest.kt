@@ -74,6 +74,8 @@ class PurchaseFlowsTest {
 
     @Volatile private var orderStatus = 201
 
+    @Volatile private var orderBody = "{}"
+
     @Volatile private var game = """{"status":18,"remaining":0,"next_date":"2026-10-07T12:00:00Z"}"""
 
     private val host = object : AppHost {
@@ -96,7 +98,7 @@ class PurchaseFlowsTest {
         }
         node.auth.rest = { r ->
             when {
-                r.url.endsWith("/private-api/purchase-order") -> HttpResult(orderStatus, "{}")
+                r.url.endsWith("/private-api/purchase-order") -> HttpResult(orderStatus, orderBody)
                 r.url.endsWith("/private-api/get-game") -> HttpResult(200, game)
                 r.url.endsWith("/private-api/quests") -> HttpResult(200, """{"daily":[],"weekly":[],"monthly":[]}""")
                 else -> null
@@ -228,6 +230,27 @@ class PurchaseFlowsTest {
         assertEquals(1, orders().size)
         assertEquals("consumed on 409", 1, consumed.size)
         assertTrue(env.purchases.current.unfinished.isEmpty())
+    }
+
+    @Test
+    fun aReceiptHeldForReviewStaysUnconsumedAndShowsTheOrderNumber() {
+        orderStatus = 422
+        orderBody = """{"reason":"receipt_held","order":31}"""
+        val consumed = java.util.Collections.synchronizedList(mutableListOf<String>())
+        env.store = object : StorePlatform by store {
+            override fun finish(purchase: StorePurchase, done: (StoreError?) -> Unit) {
+                consumed += purchase.token
+                store.finish(purchase, done)
+            }
+        }
+        signIn()
+        launch(Navigator(NavState().push(AppScreen.GetPoints())))
+        waitFor("product-999points")
+        click("buy-999points")
+        waitFor("storeAlert")
+        assertEquals(PurchaseCopy.held("31"), text("storeAlert"))
+        assertEquals("not retried", 1, orders().size)
+        assertTrue("kept unconsumed", consumed.isEmpty())
     }
 
     @Test
