@@ -548,9 +548,18 @@ class NotificationFlowsTest {
             .putExtra("url", "https://evil.example").putExtra("screen", "BackupKeysScreen").putExtra("amount", 5)
             .putExtra("hiveUri", "hive://sign/op/WyJ2b3RlIix7fV0.")
         val data = PushIntents.data(intent)!!
-        assertEquals(mapOf("type" to "reply", "id" to "r-1", "source" to "erin", "permlink1" to "re-", "permlink2" to "post"), data)
+        // hiveUri is copied (a hiveuri push needs it); the shared payload reads it only for that type
+        assertEquals(mapOf("type" to "reply", "id" to "r-1", "source" to "erin", "permlink1" to "re-", "permlink2" to "post", "hiveUri" to "hive://sign/op/WyJ2b3RlIix7fV0."), data)
         PushIntents.consume(intent)
         assertNull("a recreated activity does not route the same tap again", PushIntents.data(intent))
+    }
+
+    @Test
+    fun aTappedHiveLinkPushKeepsItsLink() {
+        // RN `hiveuri` pushes carry the link in data.hiveUri; the shared routing checks it and asks before signing
+        val intent = Intent().putExtra("google.message_id", "m2").putExtra("type", "hiveuri").putExtra("id", "h-1")
+            .putExtra("hiveUri", "hive://sign/op/WyJ2b3RlIix7fV0.")
+        assertEquals(mapOf("type" to "hiveuri", "id" to "h-1", "hiveUri" to "hive://sign/op/WyJ2b3RlIix7fV0."), PushIntents.data(intent))
     }
 
     @Test

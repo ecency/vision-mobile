@@ -136,7 +136,7 @@ class EcencyMessagingService : FirebaseMessagingService() {
 
 /** The launcher intent of a tapped system notification: FCM puts the message's data into its extras. */
 object PushIntents {
-    private val KEYS = listOf("id", "type", "source", "target", "permlink1", "permlink2", "permlink3", "amount", "tag")
+    private val KEYS = listOf("id", "type", "source", "target", "permlink1", "permlink2", "permlink3", "amount", "tag", "hiveUri")
 
     /**
      * The push data in [intent], or null when it is not a tapped FCM notification. Only the known keys are read
