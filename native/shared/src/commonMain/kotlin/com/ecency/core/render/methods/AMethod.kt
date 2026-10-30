@@ -431,9 +431,8 @@ internal object AMethod {
         }
 
         // Vimeo
-        Consts.VIMEO_REGEX.find(href)?.let { m ->
-            val id = m.g(3)
-            if (!id.isNullOrEmpty() && href == el.textContent) {
+        Scanners.vimeoId(href)?.let { id ->
+            if (id.isNotEmpty() && href == el.textContent) {
                 el.setAttribute("class", "markdown-video-link markdown-video-link-vimeo")
                 el.removeAttribute("href")
                 el.textContent = ""
@@ -581,10 +580,10 @@ internal object AMethod {
         }
 
         // Tweets
-        val tw = Consts.TWITTER_REGEX.find(href)
+        val tw = Scanners.twitterFind(href)
         if (tw != null && textTrim() == href) {
-            val url = Helper.stripHtmlTags(tw.value)
-            val author = Helper.stripHtmlTags(tw.g(1) ?: "undefined")
+            val url = Helper.stripHtmlTags(tw.first)
+            val author = Helper.stripHtmlTags(tw.second)
             val blockquote = doc.createElement("blockquote")
             blockquote.setAttribute("class", "twitter-tweet")
             val p = doc.createElement("p")

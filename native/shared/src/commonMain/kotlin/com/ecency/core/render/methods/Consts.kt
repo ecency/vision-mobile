@@ -3,7 +3,8 @@ package com.ecency.core.render.methods
 /**
  * render-helper `consts/`: the frontend whitelist, profile sections and the per-element regexes.
  * Sources are the JS literals verbatim, compiled through [JsRegex] (flags noted per pattern). The
- * hot patterns (linkify, IMG_REGEX, ENTITY_REGEX, YOUTUBE_REGEX) are scanners in [Scanners].
+ * hot patterns (linkify, IMG_REGEX, ENTITY_REGEX, YOUTUBE_REGEX) and the backtracking ones (VIMEO_REGEX,
+ * TWITTER_REGEX) are scanners in [Scanners].
  * Every regex is compiled once and is immutable, so it is safe to share across threads.
  */
 internal object Consts {
@@ -31,7 +32,6 @@ internal object Consts {
     val INTERNAL_POST_REGEX by lazy { i("""^\/(@[\w.\d-]+)\/(.*)$""") }
     val CUSTOM_COMMUNITY_REGEX by lazy { i("""^https?:\/\/(.*)\/c\/(hive-\d+)(.*)""") }
     val YOUTUBE_EMBED_REGEX by lazy { i("""^(https?:)?\/\/(?:www\.|m\.)?youtube\.com\/(embed|shorts)\/.*""") }
-    val VIMEO_REGEX by lazy { i("""(https?:\/\/)?(www\.)?(?:vimeo)\.com.*(?:videos|video|channels|)\/([\d]+)""") }
     val VIMEO_EMBED_REGEX by lazy { cs("""https:\/\/player\.vimeo\.com\/video\/([0-9]+)(?:$|[?#])""") }
     val BITCHUTE_REGEX by lazy { i("""^(?:https?:\/\/)?(?:www\.)?bitchute\.com\/(?:video|embed)\/([a-z0-9_-]+)""") }
     val D_TUBE_REGEX by lazy { cs("""(https?:\/\/d\.tube\/#!\/v\/)(\w+)\/(\w+)""") }
@@ -57,9 +57,6 @@ internal object Consts {
     val SPEAK_AUDIO_REGEX by lazy { i("""https?:\/\/audio\.3speak\.tv\/play\?[^\s]+""") }
     val SPEAK_AUDIO_EMBED_REGEX by lazy { i("""^https?:\/\/audio\.3speak\.tv\/play\?.+$""") }
     val LIKETU_AUDIO_REGEX by lazy { i("""^https?:\/\/cdn\.liketu\.com\/.+\.(?:webm|mp3|m4a|ogg|wav)(?:\?.*)?$""") }
-
-    /** `/g` in JS, but every use resets it (match() or lastIndex = 0 before exec), so it is stateless. */
-    val TWITTER_REGEX by lazy { i("""(?:https?:\/\/(?:(?:twitter\.com\/(.*?)\/status\/(.*))))""") }
 
     /** `/g` in JS; a.method resets lastIndex before exec. */
     val SPOTIFY_REGEX by lazy { i("""^https:\/\/open\.spotify\.com\/playlist\/(.*)?$""") }

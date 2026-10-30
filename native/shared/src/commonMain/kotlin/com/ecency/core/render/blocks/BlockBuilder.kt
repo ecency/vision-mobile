@@ -115,9 +115,9 @@ object BlockBuilder {
     internal fun postTarget(author: String?, permlink: String?): LinkTarget.Post? {
         var a = author
         var p = permlink?.takeIf { it.isNotEmpty() } ?: return null
-        if ("#@" in p) ANCHORED_POST.find(p)?.let {
-            a = it.groupValues[2]
-            p = it.groupValues[3]
+        anchoredPost(p)?.let {
+            a = it.first
+            p = it.second
         }
         val q = p.lastIndexOf('?')
         if (q > -1) p = p.substring(0, q)
@@ -156,7 +156,27 @@ object BlockBuilder {
         }
     }
 
-    private val ANCHORED_POST = Regex("(.*?#@)(.*)/(.*)")
+    /**
+     * Author and permlink of an anchored `...#@author/permlink`, as linkDataParser's `(.*?#@)(.*)/(.*)`
+     * reads them, in linear time (the regex backtracks cubically on a long data-permlink). `.` stops
+     * at a line terminator, so the match is the first line whose first `#@` has a `/` after it on that
+     * line: the author runs to that line's last `/`, the permlink to the line's end.
+     */
+    internal fun anchoredPost(p: String): Pair<String, String>? {
+        var h = p.indexOf("#@")
+        while (h >= 0) {
+            var end = h + 2
+            while (end < p.length && !isLineTerminator(p[end])) end++
+            var slash = end - 1
+            while (slash >= h + 2 && p[slash] != '/') slash--
+            if (slash >= h + 2) return p.substring(h + 2, slash) to p.substring(slash + 1, end)
+            h = p.indexOf("#@", end)
+        }
+        return null
+    }
+
+    /** What a Kotlin regex `.` does not match. JS's `.` does match U+0085; this keeps the old regex's reading. */
+    private fun isLineTerminator(c: Char) = c == '\n' || c == '\r' || c == '\u0085' || c == '\u2028' || c == '\u2029'
 
     /** The fragment of a `#id` href (`#` alone is the top, an empty id), or null when [href] is more than that. */
     internal fun fragmentOnly(href: String?): String? {

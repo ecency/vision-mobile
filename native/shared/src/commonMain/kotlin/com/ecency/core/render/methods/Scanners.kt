@@ -207,4 +207,52 @@ internal object Scanners {
         val c = if (t + 5 < s.length) s[t + 5] else return false
         return c != '/' && c != '?' && c != '#'
     }
+
+    /**
+     * Group 3 of `VIMEO_REGEX = /(https?:\/\/)?(www\.)?(?:vimeo)\.com.*(?:videos|video|channels|)\/([\d]+)/i`.
+     * The match is the first line holding "vimeo.com" with a "/" and a digit after it (later
+     * "vimeo.com"s on a failing line fail too). The greedy `.*` makes the id the digit run after the
+     * last such "/" on that line: each named alternative ends in the same "/", so the empty one wins.
+     * The regex itself backtracks quadratically over an href repeating "vimeo.com".
+     */
+    fun vimeoId(s: String): String? {
+        var v = Js.indexOfCi(s, "vimeo.com")
+        while (v >= 0) {
+            val from = v + 9
+            val end = lineEnd(s, from)
+            var p = end - 2
+            while (p >= from && !(s[p] == '/' && Js.isDigit(s[p + 1]))) p--
+            if (p >= from) {
+                var q = p + 1
+                while (q < end && Js.isDigit(s[q])) q++
+                return s.substring(p + 1, q)
+            }
+            v = Js.indexOfCi(s, "vimeo.com", end)
+        }
+        return null
+    }
+
+    /**
+     * Match and group 1 of `TWITTER_REGEX = /(?:https?:\/\/(?:(?:twitter\.com\/(.*?)\/status\/(.*))))/i`:
+     * the first "http(s)://twitter.com/" whose line has "/status/" after it; group 1 runs to the
+     * first "/status/", the match to the line's end. The regex backtracks quadratically over an href
+     * repeating the prefix.
+     */
+    fun twitterFind(s: String): Pair<String, String>? {
+        var h = Js.indexOfCi(s, "http")
+        while (h >= 0) {
+            val e = schemeEnd(s, h)
+            if (e >= 0 && Js.startsWithCi(s, "twitter.com/", e)) {
+                val from = e + 12
+                val end = lineEnd(s, from)
+                var k = from
+                while (k + 8 <= end && !Js.startsWithCi(s, "/status/", k)) k++
+                if (k + 8 <= end) return s.substring(h, end) to s.substring(from, k)
+                h = Js.indexOfCi(s, "http", end)
+            } else {
+                h = Js.indexOfCi(s, "http", h + 1)
+            }
+        }
+        return null
+    }
 }
