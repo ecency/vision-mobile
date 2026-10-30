@@ -118,6 +118,8 @@ node native/tools/golden/generate.mjs native/shared/src/commonTest/kotlin/com/ec
 
 All keys in the vectors derive from public throwaway seeds and control no funds.
 
+Why a Kotlin port and not Hive's `wax` C++ core (#3573): [docs/wax-assessment.md](docs/wax-assessment.md).
+
 ## Importing accounts from the RN app (3.x to 4.0.0)
 
 `shared/src/commonMain/kotlin/com/ecency/core/legacy` reads what the RN app stored so users stay signed in:
