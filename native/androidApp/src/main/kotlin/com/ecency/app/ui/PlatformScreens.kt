@@ -515,7 +515,7 @@ fun BridgeConfirmSheet(prompt: BridgePrompt, onConfirm: () -> Unit, onReject: ()
                 prompt.details.forEach { DetailRow(it.name, it.value) }
                 prompt.operations.forEach { op ->
                     Text(op.title, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp))
-                    op.fields.forEach { DetailRow(it.name, it.value, mono = true) }
+                    op.fields.forEach { DetailRow(it.name, it.value, mono = true, tag = "bridgeField-${it.name}") }
                 }
             }
             Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue), modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("bridgeConfirmButton")) {
@@ -530,16 +530,28 @@ fun BridgeConfirmSheet(prompt: BridgePrompt, onConfirm: () -> Unit, onReject: ()
 private fun DetailRow(label: String, value: String, mono: Boolean = false, tag: String? = null) {
     if (value.isEmpty()) return
     val colors = LocalEcencyColors.current
+    // every value shows whole (it is what gets signed); a long one goes under its label, full width
+    if (value.length > LONG_DETAIL) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Text(label, color = colors.darkGray, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            DetailValue(value, mono, tag, androidx.compose.ui.text.style.TextAlign.Start, Modifier.fillMaxWidth().padding(top = 4.dp))
+        }
+        return
+    }
     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, color = colors.darkGray, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
-        Text(
-            value, color = colors.text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 4, overflow = TextOverflow.Ellipsis,
-            fontFamily = if (mono) FontFamily.Monospace else FontFamily.Default,
-            textAlign = androidx.compose.ui.text.style.TextAlign.End,
-            modifier = Modifier.weight(2f).let { m -> tag?.let { m.testTag(it) } ?: m },
-        )
+        DetailValue(value, mono, tag, androidx.compose.ui.text.style.TextAlign.End, Modifier.weight(2f))
     }
 }
+
+@Composable
+private fun DetailValue(value: String, mono: Boolean, tag: String?, align: androidx.compose.ui.text.style.TextAlign, modifier: Modifier) = Text(
+    value, color = LocalEcencyColors.current.text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+    fontFamily = if (mono) FontFamily.Monospace else FontFamily.Default, textAlign = align,
+    modifier = tag?.let { modifier.testTag(it) } ?: modifier,
+)
+
+private const val LONG_DETAIL = 80
 
 // ---------------------------------------------------------------------------------------------------------------
 // RN QR_SCAN: the scanner screen (header and side menu)

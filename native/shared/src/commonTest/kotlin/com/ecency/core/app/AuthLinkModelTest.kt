@@ -71,6 +71,49 @@ class AuthLinkModelTest {
     }
 
     @Test
+    fun theRecipientAndAmountComeFirstAndPaddingCannotHideThem() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        val memo = "\n".repeat(500) + "x".repeat(1_500)
+        val link = HiveUri.encodeOps(
+            HiveUri.ops(
+                "transfer" to buildJsonObject {
+                    put("memo", JsonPrimitive(memo)); put("from", JsonPrimitive("__signer"))
+                    put("to", JsonPrimitive("spike-mallory")); put("amount", JsonPrimitive("1000.000 HIVE"))
+                },
+            ),
+        )
+        assertTrue(links.handle(link))
+        testScheduler.advanceUntilIdle()
+        val prompt = assertIs<LinkPrompt.SignConfirm>(links.current.prompt)
+        assertEquals(listOf("to", "amount"), prompt.fields.take(2).map { it.name }, "the recipient and amount lead: ${prompt.fields.map { it.name }}")
+        val shown = prompt.fields.single { it.name == "memo" }.value
+        assertEquals(DappBrowserModel.blankRun(500) + "x".repeat(1_500), shown, "the line breaks show as a marker")
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(JsonPrimitive(memo).toString() in app.broadcasts().single().params.toString(), "the signed memo is the link's, unchanged")
+    }
+
+    @Test
+    fun theAccountAnUpdateChangesLeadsALongMetadataField() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        val link = HiveUri.encodeOps(
+            HiveUri.ops(
+                "account_update2" to buildJsonObject {
+                    put("json_metadata", JsonPrimitive("{\"about\":\"" + "x".repeat(2_000) + "\"}")); put("posting_json_metadata", JsonPrimitive(""))
+                    put("extensions", JsonArray(emptyList())); put("account", JsonPrimitive("__signer"))
+                },
+            ),
+        )
+        assertTrue(links.handle(link))
+        testScheduler.advanceUntilIdle()
+        val prompt = assertIs<LinkPrompt.SignConfirm>(links.current.prompt)
+        assertEquals("account", prompt.fields.first().name, "the account leads: ${prompt.fields.map { it.name }}")
+        links.decline()
+    }
+
+    @Test
     fun aLinkFromContentNeverTellsItsRequesterAnythingBeforeTheUserWasAsked() = runTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val links = app.env.authLinks

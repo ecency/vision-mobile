@@ -395,7 +395,7 @@ fun SignConfirmSheet(prompt: LinkPrompt.SignConfirm, onApprove: () -> Unit, onCa
             prompt.requester?.let { Text(AuthUiCopy.requestedBy(it), color = colors.darkGray, fontSize = 12.sp) }
             Column(Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState()).padding(vertical = 8.dp)) {
                 prompt.fields.forEach { f ->
-                    Row(Modifier.padding(vertical = 2.dp)) {
+                    Row(Modifier.padding(vertical = 2.dp).testTag("signField-${f.name}")) {
                         Text(f.name, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.weight(0.4f))
                         Text(f.value, color = colors.text, fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(0.6f))
                     }

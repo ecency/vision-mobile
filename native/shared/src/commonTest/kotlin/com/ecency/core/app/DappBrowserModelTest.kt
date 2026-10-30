@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
@@ -449,6 +450,95 @@ class DappBrowserModelTest {
         assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), response["publicKey"]!!.jsonPrimitive.content)
         assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), Signature.fromHex(signature).recover(BridgeSignatures.digest(message)).toString())
         assertTrue(app.broadcasts().isEmpty(), "a message signature broadcasts nothing")
+    }
+
+    // ---- what is shown is what is signed ----
+
+    private fun field(b: DappBrowserModel, name: String) = b.current.prompt!!.operations.single().fields.single { it.name == name }.value
+
+    @Test
+    fun paddingCannotPushACustomJsonsTransferOutOfView() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val payload = """{"contractName":"tokens","contractAction":"transfer","contractPayload":{"symbol":"SWAP.HIVE","to":"spike-mallory","quantity":"1000"}}"""
+        val json = " ".repeat(2_001) + payload
+        send(b, page, keychain("custom", ""","id":"ssc-mainnet-hive","method":"Active","json":${JsonPrimitive(json)},"display_msg":${JsonPrimitive(" ".repeat(2_001) + "send 1000 to spike-mallory")}"""))
+        testScheduler.advanceUntilIdle()
+        val shown = field(b, "json")
+        assertTrue("spike-mallory" in shown && "\"quantity\":\"1000\"" in shown, "the recipient and amount are shown: $shown")
+        assertTrue(DappBrowserModel.blankRun(2_001) in shown, "the padding shows as a marker")
+        assertTrue(shown.length < 400, "the padding does not fill the view")
+        val said = b.current.prompt!!.details.single().value
+        assertTrue("spike-mallory" in said && said.length < 200, "the page's message is shown whole: $said")
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        val op = app.broadcasts().single().params.jsonArray.single().jsonObject["operations"]!!.jsonArray.single().jsonArray
+        assertEquals(json, op[1].jsonObject["json"]!!.jsonPrimitive.content, "what is signed is what the page sent, padding included")
+    }
+
+    @Test
+    fun bidiControlsShowAsMarkersAndStayInWhatIsSigned() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val json = "{\"to\":\"\u202Eyrallam-ekips\",\"quantity\":\"1000\"}"
+        send(b, page, keychain("custom", ""","id":"ssc-mainnet-hive","json":${JsonPrimitive(json)}"""))
+        testScheduler.advanceUntilIdle()
+        val shown = field(b, "json")
+        assertTrue("[U+202E]yrallam-ekips" in shown, "the override shows as a marker, the name in reading order: $shown")
+        assertFalse('\u202E' in shown)
+        listOf('\u202A', '\u202B', '\u202C', '\u202D', '\u2066', '\u2067', '\u2068', '\u2069', '\u200E', '\u200F', '\u061C').forEach { c ->
+            val marker = "[U+" + c.code.toString(16).uppercase().padStart(4, '0') + "]"
+            assertEquals("a${marker}b", BridgeDisplay.shown("a${c}b"), "U+${c.code.toString(16)}")
+        }
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        val op = app.broadcasts().single().params.jsonArray.single().jsonObject["operations"]!!.jsonArray.single().jsonArray
+        assertEquals(json, op[1].jsonObject["json"]!!.jsonPrimitive.content, "the signed json keeps the character")
+    }
+
+    @Test
+    fun aLongMemoIsShownWholeAndShortSpacingStays() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val memo = "a  b " + "x".repeat(3_000) + "\n\n" + "\t".repeat(50) + "#end-of-memo"
+        send(b, page, keychain("transfer", ""","to":"spike-bob","amount":"1","currency":"HIVE","memo":${JsonPrimitive(memo)}"""))
+        testScheduler.advanceUntilIdle()
+        val shown = field(b, "memo")
+        assertTrue(shown.startsWith("a  b "), "short spacing is kept")
+        assertTrue(shown.endsWith(DappBrowserModel.blankRun(52) + "#end-of-memo"), "nothing is cut: ${shown.takeLast(80)}")
+    }
+
+    @Test
+    fun paddingCannotPushASignedMessageOutOfView() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val message = "Log in to dapp.example" + "\n".repeat(2_001) + "and approve 1000 HIVE to spike-mallory"
+        send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Active""""))
+        testScheduler.advanceUntilIdle()
+        val shown = b.current.prompt!!.details.single { it.name == DappBrowserModel.MESSAGE }.value
+        assertTrue(shown.endsWith("approve 1000 HIVE to spike-mallory"), "the whole message is shown: ${shown.takeLast(80)}")
+        assertTrue(DappBrowserModel.blankRun(2_001) in shown && shown.length < 200, "the line breaks show as a marker")
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        val signature = page.lastResponse["result"]!!.jsonPrimitive.content
+        assertEquals(AppTestKeys.pub(alice, KeyRole.ACTIVE), Signature.fromHex(signature).recover(BridgeSignatures.digest(message)).toString(), "the signed message is the page's, unchanged")
+    }
+
+    @Test
+    fun aRequestTooLargeToShowIsRefusedAndTheUserIsTold() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("custom", ""","id":"x","json":${JsonPrimitive("y".repeat(DappBrowserModel.MAX_SHOWN + 1))}"""))
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt, "nothing to confirm")
+        assertEquals(DappBrowserModel.TOO_LARGE, page.error())
+        assertEquals(DappBrowserModel.tooLargeNotice, b.current.notice, "the user is told")
+        assertTrue(app.broadcasts().isEmpty())
     }
 
     @Test

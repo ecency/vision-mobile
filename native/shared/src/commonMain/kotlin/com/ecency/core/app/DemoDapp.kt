@@ -13,10 +13,12 @@ object DemoDapp {
 <body><h2>Demo dApp</h2><p id="status">Asking for a vote...</p>
 <button id="transfer" onclick="transfer()">Send 1 HIVE</button>
 <button id="login" onclick="login()">Sign in with Keychain</button>
+<button id="padded" onclick="padded()">Padded custom json</button>
 <script>
 function show(r){document.getElementById('status').textContent=JSON.stringify(r);}
 function transfer(){window.hive_keychain.requestTransfer('','spike-bob','1','Thanks','HIVE',show);}
 function login(){window.hive_keychain.requestSignBuffer('','demo-login','Posting',show);}
+function padded(){window.hive_keychain.requestCustomJson('','ssc-mainnet-hive','Active',' '.repeat(2001)+'{"note":"'+'x'.repeat(1500)+'","to":"spike-mallory","quantity":"1000"}','Swap',show);}
 setTimeout(function(){ if (window.hive_keychain) window.hive_keychain.requestVote('','native-golden-post','spike-author',10000,show); else show('no bridge'); }, 600);
 </script></body></html>"""
 }

@@ -532,7 +532,10 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         }
     }
 
-    private fun fields(body: JsonObject?): List<LinkField> = body.orEmpty().map { (k, v) -> LinkField(k, text(v)) }
+    /** Who gets what first, so a long value cannot push them out of view; a run of blanks shows as a marker. */
+    private fun fields(body: JsonObject?): List<LinkField> = body.orEmpty().entries
+        .sortedBy { (k, _) -> KEY_FIELDS.indexOf(k).let { if (it < 0) KEY_FIELDS.size else it } }
+        .map { (k, v) -> LinkField(k, BridgeDisplay.shown(text(v))) }
 
     private fun text(v: JsonElement): String = when (v) {
         is JsonPrimitive -> v.contentOrNull ?: "null"
@@ -540,6 +543,12 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
     }
 
     companion object {
+        private val KEY_FIELDS = listOf(
+            "account", "to", "to_account", "delegatee", "receiver", "agent", "new_account_name",
+            "new_recovery_account", "recovery_account", "owner", "active", "posting",
+            "amount", "vesting_shares", "hive_amount", "hbd_amount", "fee",
+        )
+
         /** Callback error when the chain cannot say whether the link's transaction went in (the user checks the wallet). */
         const val UNCONFIRMED = "unconfirmed"
 

@@ -98,6 +98,19 @@ final class LoginUITests: XCTestCase {
         XCTAssertFalse(app2.buttons["link-approve"].exists)
     }
 
+    func testALongMemoCannotPushTheRecipientAndAmountOutOfView() {
+        let memo = String(repeating: #"\n"#, count: 500) + String(repeating: "x", count: 1500)
+        let link = "hive://sign/op/" + b64u(#"["transfer",{"memo":""# + memo + #"","from":"__signer","to":"spike-mallory","amount":"1000.000 HIVE"}]"#)
+        let app = launch(["-seedAccounts", "YES", "-seedActive", "YES", "-openLink", link])
+        XCTAssertTrue(app.buttons["link-approve"].waitForExistence(timeout: 15))
+        for name in ["to", "amount"] {
+            let field = app.descendants(matching: .any)["sign-field-\(name)"].firstMatch
+            XCTAssertTrue(field.waitForExistence(timeout: 5), name)
+            XCTAssertTrue(field.isHittable, "\(name) is on screen without scrolling")
+        }
+        app.buttons["link-cancel"].tap()
+    }
+
     func testWelcomeNeedsTheTerms() {
         let app = launch(["-showWelcome", "YES"])
         let start = app.buttons["welcome-start"]

@@ -248,6 +248,7 @@ private struct LinkPromptView: View {
                             Text(field.value).font(.footnote.monospaced())
                         }
                         .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("sign-field-\(field.name)")
                     }
                 }
             }

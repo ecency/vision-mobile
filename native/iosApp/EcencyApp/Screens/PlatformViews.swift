@@ -505,12 +505,14 @@ struct BridgeConfirmSheet: View {
     }
 
     private func row(_ label: String, _ value: String, mono: Bool = false, id: String? = nil) -> some View {
-        // label above value at accessibility sizes
-        AdaptiveStack(verticalAlignment: .firstTextBaseline) {
+        // every value shows whole (it is what gets signed); label above value at accessibility sizes and for long values
+        let long = value.count > 80
+        let stacked = typeSize.isAccessibilitySize || long
+        return AdaptiveStack(threshold: long ? .xSmall : .stacksRows, verticalAlignment: .firstTextBaseline) {
             Text(label).scaledFont(14, weight: .medium).foregroundStyle(theme.secondary)
             FormRowGap(minLength: 12)
             Text(value).font(mono ? .system(.subheadline, design: .monospaced) : .subheadline.weight(.semibold)).foregroundStyle(theme.text)
-                .lineLimit(typeSize.isAccessibilitySize ? nil : 4).multilineTextAlignment(typeSize.isAccessibilitySize ? .leading : .trailing)
+                .fixedSize(horizontal: false, vertical: true).multilineTextAlignment(stacked ? .leading : .trailing)
                 .accessibilityIdentifier(id ?? "bridge-row-\(label)")
         }
         .frame(maxWidth: .infinity, alignment: .leading)

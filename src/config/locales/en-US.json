@@ -2788,7 +2788,9 @@
     "dapp_browser": {
       "message_from": "Message from {host}",
       "home_title": "Home",
-      "loading_title": "Loading..."
+      "loading_title": "Loading...",
+      "blank_run": "[{count, plural, one {# blank character} other {# blank characters}}]",
+      "too_large": "This page asked to sign a request too large to show, so Ecency refused it."
     },
     "community_service": {
       "the_account_changed": "The account changed."

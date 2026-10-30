@@ -488,7 +488,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                 return@launch answer.error("Failed to build operations for \"$type\".")
             }
             val details = listOfNotNull(
-                (data["display_msg"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() && type == "custom" }?.let { pageSays(origin, it.take(MAX_DETAIL)) },
+                (data["display_msg"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() && type == "custom" }?.let { pageSays(origin, it) },
             )
             askBroadcast(tabId, origin, user, BridgeLabels.of(type), ops, details, answer)
         }
@@ -532,6 +532,11 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     }
 
     private fun askBroadcast(tabId: Int, origin: String, user: String, title: String, ops: JsonArray, details: List<LinkField>, answer: Answerer) {
+        // the sheet shows every field whole, so a request too large to show is refused, and the user told
+        if (ops.toString().length + details.sumOf { it.value.length } > MAX_SHOWN) {
+            setState { it.copy(notice = tooLargeNotice) }
+            return answer.error(TOO_LARGE)
+        }
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val signsHere = account.authType?.loginMethod() == LoginMethod.KEY
@@ -557,7 +562,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             if (!stillAsking(tabId, origin, user)) return@launch answer.error(BUSY)
             prompt(
                 PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.SignBuffer(message, authority)),
-                BridgeLabels.of("signBuffer"), listOf(LinkField(MESSAGE, message.take(MAX_DETAIL))), null,
+                BridgeLabels.of("signBuffer"), listOf(LinkField(MESSAGE, BridgeDisplay.shown(message))), null,
             )
         }
     }
@@ -594,7 +599,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private fun view(op: JsonArray): BridgeOperationView {
         val name = (op.getOrNull(0) as? JsonPrimitive)?.contentOrNull.orEmpty()
         val body = op.getOrNull(1) as? JsonObject
-        return BridgeOperationView(BridgeLabels.operation(name), body.orEmpty().map { (k, v) -> LinkField(k, fieldText(v).take(MAX_DETAIL)) })
+        return BridgeOperationView(BridgeLabels.operation(name), body.orEmpty().map { (k, v) -> LinkField(k, BridgeDisplay.shown(fieldText(v))) })
     }
 
     private fun fieldText(v: JsonElement): String = when (v) {
@@ -684,7 +689,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     }
 
     /** Text a page wrote for the sheet, labelled as the page's and quoted. */
-    private fun pageSays(origin: String, text: String) = LinkField(L.native.dappBrowser.messageFrom(host = BrowserPolicy.host(origin)), "\u201C$text\u201D")
+    private fun pageSays(origin: String, text: String) = LinkField(L.native.dappBrowser.messageFrom(host = BrowserPolicy.host(origin)), "\u201C${BridgeDisplay.shown(text)}\u201D")
 
     /** A waiting request of [tabId] is dropped: its page is gone, nobody is answered. */
     private fun dropPendingFor(tabId: Int) {
@@ -728,7 +733,6 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         /** Larger messages are ignored (a post body fits many times over). */
         const val MAX_MESSAGE = 2_000_000
         const val MAX_MESSAGE_TO_SIGN = 64_000
-        private const val MAX_DETAIL = 2_000
         private const val MAX_TITLE = 120
 
         private val UNSUPPORTED = setOf(
@@ -744,7 +748,66 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
         val MESSAGE: String get() = L.profile.message
 
+        /** Ops JSON plus the page's text: Hive takes 64 KB a transaction, this leaves room for JSON escapes. */
+        const val MAX_SHOWN = 128_000
+        const val TOO_LARGE = "Request too large to show."
+        val tooLargeNotice: String get() = L.native.dappBrowser.tooLarge
+
+        fun blankRun(count: Int) = L.native.dappBrowser.blankRun(count = count)
+
         fun mismatch(requested: String, user: String) = "Account mismatch: requested \"$requested\" but logged in as \"$user\""
+    }
+}
+
+/**
+ * What the confirm sheet shows of a value the user signs: all of it. A run of blanks that could push the rest out
+ * of view (more than [MAX_RUN] blank characters or more than [MAX_BREAKS] line breaks) shows as a counted marker, and
+ * every bidi control shows as "[U+202E]" (one alone can reorder what the user reads).
+ * Display only: the signed value is never changed.
+ */
+object BridgeDisplay {
+    const val MAX_RUN = 16
+    const val MAX_BREAKS = 2
+
+    // blank looking characters that are not whitespace in Kotlin
+    private val BLANK_LOOKING = setOf('\u0085', '\u115F', '\u1160', '\u180E', '\u2800', '\u3164', '\uFFA0')
+    private val BREAKS = setOf('\n', '\r', '\u000B', '\u000C', '\u0085', '\u2028', '\u2029')
+
+    // embeddings, overrides, isolates and marks
+    private val BIDI = setOf(
+        '\u202A', '\u202B', '\u202C', '\u202D', '\u202E', '\u2066', '\u2067', '\u2068', '\u2069', '\u200E', '\u200F', '\u061C',
+    )
+
+    private fun bidiMarker(c: Char) = "[U+" + c.code.toString(16).uppercase().padStart(4, '0') + "]"
+
+    private fun Char.looksBlank(): Boolean = this !in BIDI && (
+        isWhitespace() || category == CharCategory.CONTROL || category == CharCategory.FORMAT || this in BLANK_LOOKING
+        )
+
+    fun shown(text: String): String {
+        if (text.none { it.looksBlank() || it in BIDI }) return text
+        val out = StringBuilder(text.length)
+        var i = 0
+        while (i < text.length) {
+            if (text[i] in BIDI) {
+                out.append(bidiMarker(text[i++]))
+                continue
+            }
+            if (!text[i].looksBlank()) {
+                out.append(text[i++])
+                continue
+            }
+            var j = i
+            var breaks = 0
+            while (j < text.length && text[j].looksBlank()) {
+                // \r\n is one break
+                if (text[j] in BREAKS && !(text[j] == '\n' && j > i && text[j - 1] == '\r')) breaks++
+                j++
+            }
+            if (j - i > MAX_RUN || breaks > MAX_BREAKS) out.append(DappBrowserModel.blankRun(j - i)) else out.append(text, i, j)
+            i = j
+        }
+        return out.toString()
     }
 }
 

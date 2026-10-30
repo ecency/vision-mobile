@@ -40,6 +40,22 @@ final class PlatformUITests: XCTestCase {
         XCTAssertTrue(rejected.waitForExistence(timeout: 10))
     }
 
+    func testALongFieldIsShownWholeOnTheSheet() {
+        let app = launch(["-openScreen", "dapp"])
+        XCTAssertTrue(any(app, "bridge-sheet").waitForExistence(timeout: 20))
+        app.buttons["bridge-cancel"].tap()
+        // the demo page pads a custom_json with 2,001 spaces and a 1,500 character note before the transfer
+        let padded = app.webViews.buttons["Padded custom json"].firstMatch
+        XCTAssertTrue(padded.waitForExistence(timeout: 10))
+        padded.tap()
+        XCTAssertTrue(any(app, "bridge-sheet").waitForExistence(timeout: 20))
+        let json = app.staticTexts["bridge-row-json"]
+        XCTAssertTrue(json.waitForExistence(timeout: 5))
+        XCTAssertTrue(json.label.hasSuffix("\"to\":\"spike-mallory\",\"quantity\":\"1000\"}"), json.label)
+        let line = app.staticTexts["bridge-authority"].frame.height
+        XCTAssertGreaterThan(json.frame.height, line * 8, "the value is not clipped to four lines")
+    }
+
     func testAConfirmedRequestThatFailsAnswersThePageWithTheError() {
         let app = launch(["-openScreen", "dapp"])
         XCTAssertTrue(any(app, "bridge-sheet").waitForExistence(timeout: 20))

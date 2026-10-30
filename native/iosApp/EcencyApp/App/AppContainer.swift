@@ -778,8 +778,11 @@ final class AppContainer: ObservableObject {
         let vault = KeyVault(store: store)
         for user in ["spike-bob", "spike-alice"] {
             let wif = PrivateKey.companion.fromLogin(username: user, password: FakeHiveTransport.password, role: .posting).toWif()
+            // -seedActive YES: the active key too (UI tests of active operations)
+            let active = UserDefaults.standard.bool(forKey: "seedActive")
+                ? PrivateKey.companion.fromLogin(username: user, password: FakeHiveTransport.password, role: .active).toWif() : nil
             try vault.save(account: VaultAccount(
-                username: user, authType: .postingKey, postingKey: wif, activeKey: nil,
+                username: user, authType: active == nil ? .postingKey : .masterPassword, postingKey: wif, activeKey: active,
                 memoKey: nil, accessToken: "demo-access-\(user)", hiveAuthKey: nil, hiveAuthToken: nil, hiveAuthExpiry: 0
             ))
         }

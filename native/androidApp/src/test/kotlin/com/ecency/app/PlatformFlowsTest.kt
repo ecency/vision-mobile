@@ -12,6 +12,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -198,6 +199,33 @@ class PlatformFlowsTest {
         compose.await("answered") { idleMain(); page.answers.isNotEmpty() }
         assertNull(page.lastError())
         assertFalse(exists("bridgeConfirm"))
+    }
+
+    @Test
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE) // real font metrics
+    fun aLongFieldIsShownWholeOnTheSheet() {
+        launchSignedIn()
+        push(AppScreen.DappBrowser("https://dapp.example/"))
+        waitFor("dappPage")
+        val model = browser()
+        val json = " ".repeat(2_001) + """{"note":"${"x".repeat(1_500)}","to":"spike-mallory","quantity":"1000"}"""
+        compose.runOnUiThread {
+            model.bridgeMessage(
+                model.current.activeTabId, "https://dapp.example", true,
+                """{"name":"swRequest_hive","request_id":5,"data":{"type":"custom","id":"ssc-mainnet-hive","json":${kotlinx.serialization.json.JsonPrimitive(json)}}}""",
+                Page().reply,
+            )
+        }
+        waitFor("bridgeConfirm")
+        val field = compose.onNodeWithTag("bridgeField-json", useUnmergedTree = true)
+        field.performScrollTo()
+        field.assertTextContains("spike-mallory", substring = true)
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        field.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val layout = layouts.single()
+        assertFalse("the value is not clipped (${layout.lineCount} lines)", layout.hasVisualOverflow || layout.isLineEllipsized(layout.lineCount - 1))
+        assertTrue("the value runs past four lines", layout.lineCount > 4)
+        assertTrue("its end is laid out", layout.layoutInput.text.text.endsWith("\"quantity\":\"1000\"}"))
     }
 
     @Test

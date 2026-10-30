@@ -3,6 +3,7 @@ package com.ecency.app
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
@@ -317,6 +318,27 @@ class LoginFlowsTest {
         tapInSheet("upgradeCancel")
         until { outcome != null }
         assertTrue(node.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun aLongMemoCannotPushTheRecipientAndAmountOutOfView() {
+        // a transfer needs the active key
+        store(tester().copy(authType = AuthType.MASTER_PASSWORD, activeKey = node.key.toWif()))
+        launch()
+        waitFor("account")
+        val link = HiveUri.encodeOps(
+            HiveUri.ops(
+                "transfer" to buildJsonObject {
+                    put("memo", JsonPrimitive("\n".repeat(500) + "x".repeat(1_500))); put("from", JsonPrimitive("__signer"))
+                    put("to", JsonPrimitive("spike-mallory")); put("amount", JsonPrimitive("1000.000 HIVE"))
+                },
+            ),
+        )
+        compose.runOnIdle { env.authLinks.handle(link) }
+        waitFor("signConfirm")
+        compose.onNodeWithTag("signField-to", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithTag("signField-amount", useUnmergedTree = true).assertIsDisplayed()
+        tapInSheet("signCancel")
     }
 
     @Test
