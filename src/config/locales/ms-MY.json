@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ahli Ecency Pro"
   },
   "perks": {
     "header": "Faedah",
@@ -31,42 +31,42 @@
     "promote_desc": "Dapatkan lebih ramai melihat siaran anda",
     "account_boost": "Boost akaun",
     "account_boost_desc": "Boost mana-mana akaun",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Tambah nilai RC",
+    "rc_topup_desc": "Teruskan menyiarkan apabila Kredit Sumber hampir habis",
+    "streak_freeze_owned": "{n} dalam simpanan",
+    "streak_freeze_buy": "Lindungi streak ({price} Points)",
+    "streak_freeze_buying": "Melindungi",
+    "streak_freeze_error": "Tidak dapat membeli pembekuan streak. Sila cuba lagi."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Catatan harian",
+    "streak": "Streak {n} hari",
+    "keep_streak": "Kekalkan streak anda"
   },
   "waves": {
     "for_you": "Untuk anda",
     "following": "Diikuti",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Suapan tersuai",
+    "custom_feeds_subtitle": "Semat sumber dan tag untuk menambahkannya sebagai tab suapan.",
+    "add_tag_placeholder": "Tambah tag",
+    "sources": "Sumber",
+    "your_feeds": "Suapan anda",
+    "trending_tags": "Tag sedang tren",
+    "shorts_empty": "Belum ada video pendek untuk dipaparkan",
+    "mute": "Senyapkan",
+    "unmute": "Nyahsenyap"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Bermula",
+    "subtitle": "Baru di sini? Waves ialah catatan pendek dan cara paling mudah untuk menyertai.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Tolak",
+    "item_wave": "Siarkan Wave pertama anda",
+    "item_vote": "Undi Wave yang anda suka",
+    "item_reply": "Balas seseorang",
+    "item_checkin": "Daftar masuk untuk memulakan streak anda",
+    "all_done_title": "Semua selesai 🎉",
+    "all_done_subtitle": "Anda sudah bersedia. Teruskan menghasilkan Waves!"
   },
   "profile": {
     "havent_commented": "tidak mengulas apa-apa lagi",
@@ -82,7 +82,7 @@
     "comments": "Komen-komen",
     "waves": "Waves",
     "details": "Maklumat profil",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "Kredit Sumber",
     "voting_power": "Kuasa Undian",
     "follow_people": "Apabila anda mengikuti orang, anda akan melihat siaran mereka di sini.",
     "hours": "jam",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Umur  |  Keterlihatan  |  Tafsiran",
     "attach_poll": "Lampirkan Tinjauan"
   },
+  "favorite_tags": {
+    "title": "Tag",
+    "hint": "Ikut untuk dimaklumkan tentang hantaran baharu dengan tag ini",
+    "following_hint": "Anda dimaklumkan tentang hantaran baharu dengan tag ini",
+    "follow": "Ikut",
+    "following": "Mengikut",
+    "added": "Mengikut tag",
+    "removed": "Berhenti mengikut tag",
+    "empty_list": "Tiada apa-apa di sini"
+  },
   "favorites": {
     "add": "Tambah kegemaran",
     "add_error": "Tidak dapat menambah kegemaran",
@@ -181,7 +191,33 @@
     "payout": "Bayaran",
     "details": "Butir-butir",
     "community": "komuniti",
-    "new_post": "Siaran Baharu"
+    "new_post": "Siaran Baharu",
+    "mute_post_title": "Senyapkan hantaran ini",
+    "unmute_post_title": "Nyahsenyap hantaran ini",
+    "mute_post_reason": "Mengapa hantaran ini disenyapkan?",
+    "unmute_post_reason": "Mengapa hantaran ini dipulihkan?",
+    "manage": "Urus komuniti",
+    "manage_members": "Ahli dan peranan",
+    "manage_settings": "Tetapan komuniti",
+    "manage_activities": "Log aktiviti",
+    "activities": "aktiviti",
+    "no_activities": "Belum ada aktiviti",
+    "activities_load_failed": "Tidak dapat memuatkan aktiviti. Tarik untuk muat semula.",
+    "set_role": "Tetapkan peranan",
+    "assign_role": "Umpuk peranan",
+    "assign_role_hint": "Cari mana-mana akaun, termasuk yang belum melanggan, kemudian pilih peranan.",
+    "username_placeholder": "Nama pengguna",
+    "invalid_username": "Pilih akaun sedia ada daripada hasil carian",
+    "members": "ahli",
+    "no_members": "Tiada ahli ditemui",
+    "members_incomplete": "Sesetengah ahli tidak dapat dimuatkan. Tarik untuk muat semula.",
+    "members_load_failed": "Tidak dapat memuatkan ahli. Tarik untuk muat semula.",
+    "role_owner": "Pemilik",
+    "role_admin": "Admin",
+    "role_mod": "Mod",
+    "role_member": "Ahli",
+    "role_guest": "Tetamu",
+    "role_muted": "Disenyapkan"
   },
   "trade": {
     "swap_for": "Menukar {fromAmount} untuk {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Siar Silang",
     "pin-blog": "Sematkan ke blog",
     "copy": "salin pautan",
+    "copy-text": "salin teks",
+    "open-thread": "buka utas",
     "unpin-community": "Nyahsemat dari komuniti",
+    "mute-post": "Senyapkan hantaran",
+    "unmute-post": "Nyahsenyap hantaran",
     "mute": "Senyapkan / Sekat",
     "reblog": "ulang siar",
     "undo-reblog": "buat asal siar semula",
@@ -232,24 +272,24 @@
     "unpin-reply": "Nyahsemat komen"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Catatan ini dalam bahasa {lang}. Terjemah ke {target}?",
+    "translate_to": "Terjemah ke {lang}",
+    "show_original": "Tunjukkan asal",
+    "translated_from": "Diterjemah daripada {lang}",
+    "change_language": "Tukar bahasa"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Terjemah catatan",
+    "source": "Bahasa sumber",
+    "target": "Bahasa sasaran",
+    "detected": "Dikesan: {lang}",
+    "translate": "Terjemah",
+    "apply": "Guna",
+    "review_note": "Menambah terjemahan mesin bagi tulisan anda sendiri di hujung catatan. Semak dan sunting sebelum menerbitkan.",
+    "too_short": "Tulis sedikit lagi dahulu. Terjemahan memerlukan sekurang-kurangnya beberapa ayat.",
+    "progress": "Menterjemah {done} daripada {total}...",
+    "error": "Terjemahan gagal. Sila cuba lagi.",
+    "add_title_marker": "Tambah penanda bahasa pada tajuk"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Hangat",
     "popular": "Terkenal",
     "new": "Baru",
-    "friends": "Following",
+    "friends": "Diikuti",
     "my_blog": "Blog Saya"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Kosong"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Templat",
+    "untitled": "Templat tanpa tajuk",
+    "empty_list": "Simpan catatan sebagai templat daripada editor untuk menggunakannya semula di sini.",
+    "delete_confirm": "Adakah anda pasti mahu memadam templat ini?",
+    "applied": "Templat digunakan sebagai catatan baharu",
+    "save_as_template": "Simpan sebagai templat",
+    "name_placeholder": "Nama templat",
+    "saved": "Templat disimpan"
   },
   "selection_list": {
     "available": "Tersedia {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Semua",
+      "replies": "Balasan",
+      "mentions": "Sebutan",
+      "rvotes": "Undian",
+      "follows": "Ikutan",
+      "reblogs": "Reblog",
+      "transfers": "Pindahan",
+      "delegations": "Delegasi",
+      "nfavorites": "Kegemaran",
+      "tags": "Tag",
+      "nbookmarks": "Penanda buku",
+      "payouts": "Bayaran",
+      "scheduled_published": "Catatan berjadual",
+      "account_updates": "Kemas kini akaun",
+      "weekly_earnings": "Pendapatan mingguan"
     },
     "this_week": "Minggu ini",
     "reblog": "blog semula",
@@ -417,11 +458,15 @@
     "yesterday": "Semalam",
     "mention": "disebutkan dalam",
     "favorites": "membuat siaran baharu",
+    "tags": "menghantar dalam #{tag}",
+    "tags_bundle": "{count} hantaran baharu dalam #{tag}",
+    "tags_title": "Hantaran baharu dalam tag yang anda ikuti",
     "mentions": "Sebutan",
     "spin": "Masa untuk dapatkan lebih banyak Mata",
     "last_week": "Minggu Lepas",
     "recent": "Terbaru",
     "ignore": "abaikan anda",
+    "blacklist": "menyenaraihitamkan anda",
     "follow": "mengikuti anda",
     "notification": "Pemberitahuan",
     "this_month": "Bulan Ini",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} kini boleh menyiar dan mengundi bagi pihak anda. Jika anda tidak membenarkan ini, batalkannya.",
     "weekly_earnings": "Anda memperoleh ${amount} minggu ini{breakdown}",
     "payouts": "Bayaran diterima: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "menyiarkan catatan berjadual",
+    "scheduled_published_title": "Catatan berjadual disiarkan",
+    "scheduled_published_body": "Catatan berjadual anda kini disiarkan, ketik untuk melihatnya"
   },
   "recurrent": {
     "delete_failed": "Gagal memadam pemindahan berulang, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Buka draf terbaru atau Buat kiriman baru",
     "reward_power_up": "Pertaruh 100%",
     "open_gallery": "Membuka galeri",
+    "open_files": "Pilih daripada Fail",
     "clipboard_no_image": "Tiada imej ditemui dalam papan keratan",
     "clipboard_image_detected": "Imej dalam papan keratan",
     "paste_image": "Tampal imej",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Kemudian",
     "settings_title": "Pilihan Siaran",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Tidak"
+    "support_ecency": "Sokong Ecency {percent}%",
+    "alert_btn_no": "Tidak",
+    "short_reply_hint": "Balasan dengan {n} aksara atau kurang tidak mendapat mata (pautan tidak dikira)",
+    "short_content_hint": "Terlalu pendek untuk mendapat mata ({n} aksara atau kurang, pautan dikecualikan)"
   },
   "time": {
     "week": "minggu",
@@ -655,7 +703,41 @@
     "select_emoji": "Pilih Emoji",
     "more_emojis": "Lagi",
     "search_emojis": "Cari emoji...",
-    "no_emoji_found": "Tiada emoji ditemui"
+    "no_emoji_found": "Tiada emoji ditemui",
+    "ban-reason-spray": "Anda digantung daripada menghantar kerana mesej yang sama dihantar ke beberapa saluran serentak.",
+    "ban-reason-mass-dm": "Anda digantung daripada menghantar kerana satu mesej dihantar kepada ramai orang serentak.",
+    "ban-reason-generic": "Anda digantung daripada menghantar dalam sembang.",
+    "ban-can-still-read": "Anda masih boleh membaca sembang.",
+    "ban-unlocks": "Penghantaran dibuka {when}.",
+    "ban-remaining-soon": "dalam kurang seminit",
+    "ban-remaining-minutes": "dalam kira-kira {count} minit",
+    "ban-remaining-hours": "dalam kira-kira {count} jam",
+    "ban-remaining-days": "dalam kira-kira {count} hari",
+    "new_group": "Kumpulan baharu",
+    "new_group_hint": "Tambah {min} hingga {max} orang untuk memulakan perbualan kumpulan.",
+    "new_group_search": "Cari orang mengikut nama pengguna",
+    "new_group_full": "Satu kumpulan boleh mempunyai sehingga {max} orang lain.",
+    "new_group_no_results": "Tiada sesiapa dengan nama itu ditemui dalam sembang.",
+    "new_group_search_failed": "Carian gagal. Semak sambungan anda dan cuba lagi.",
+    "new_group_remove": "Buang @{username}",
+    "new_group_create": "Mulakan kumpulan",
+    "new_group_failed": "Tidak dapat memulakan kumpulan. Sila cuba lagi.",
+    "rename_group": "Namakan semula kumpulan",
+    "rename_group_hint": "Beri kumpulan ini nama yang dilihat oleh semua ahlinya. Biarkan kosong untuk memaparkan nama ahli.",
+    "group_name": "Nama kumpulan",
+    "rename_group_too_long": "Nama kumpulan boleh sehingga {max} aksara.",
+    "rename_group_not_owner": "Hanya orang yang memulakan kumpulan ini boleh menamakannya semula.",
+    "rename_group_failed": "Tidak dapat menamakan semula kumpulan. Sila cuba lagi.",
+    "group_renamed": "{user} menamakan semula kumpulan kepada \"{name}\"",
+    "group_name_cleared": "{user} membuang nama kumpulan",
+    "group_members": "Ahli kumpulan",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "reactions_title": "Reaksi",
+    "reactor_you": "Anda",
+    "reactor_unknown": "Seseorang",
+    "see_who_reacted": "Tekan lama untuk melihat siapa yang bereaksi",
+    "group": "Kumpulan"
   },
   "free_estm": {
     "timer_text": "Spin percuma seterusnya dalam",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transaksi Gagal"
   },
   "search_result": {
+    "error": "Carian tidak dapat diselesaikan. Sila cuba lagi",
+    "filters": {
+      "title": "Penapis",
+      "open": "Penapis",
+      "author": "Penulis",
+      "author_placeholder": "nama pengguna",
+      "category": "Kategori",
+      "category_placeholder": "komuniti atau kategori",
+      "tags": "Tag",
+      "tags_placeholder": "dipisahkan dengan koma",
+      "type": "Jenis",
+      "type_all": "Semua",
+      "type_post": "Hantaran",
+      "type_comment": "Komen",
+      "date": "Tarikh",
+      "date_week": "Minggu lepas",
+      "date_month": "Bulan lepas",
+      "date_year": "Tahun lepas",
+      "date_all": "Sepanjang masa",
+      "sort": "Isih",
+      "apply": "Guna",
+      "active": "{n} aktif",
+      "too_many_tags": "Gunakan paling banyak {n} tag",
+      "too_long": "Carian terlalu panjang. Gunakan paling banyak {n} aksara",
+      "needs_criteria": "Masukkan istilah carian, atau penulis, kategori atau tag untuk menapis"
+    },
     "communities_filter": {
       "new": "Baharu",
       "my": "Komuniti Saya",
@@ -727,7 +835,7 @@
     "title": "Siaran Silang"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Penulis mendedahkan penggunaan AI"
   },
   "ai_assist": {
     "title": "Pembantu Penulisan AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Dapatkan tag yang berkaitan untuk siaran anda",
     "action_generate_title": "Jana Tajuk",
     "action_generate_title_desc": "Cipta pilihan tajuk yang menarik",
-    "action_summarize": "Recap",
+    "action_summarize": "Ringkasan",
     "action_summarize_desc": "Cipta ringkasan yang padat",
     "action_check_grammar": "Semak Tatabahasa",
     "action_check_grammar_desc": "Betulkan isu tatabahasa dan ejaan",
+    "action_generate_image": "Jana Imej",
+    "action_generate_image_desc": "Cipta imej AI untuk hantaran anda",
+    "cost_from": "bermula {cost} {unit}",
     "text_label": "Teks anda",
     "text_placeholder": "Tampal atau taip kandungan anda di sini...",
     "min_chars": "Minimum {count} aksara diperlukan",
@@ -797,16 +908,26 @@
     "remind_later": "Ingatkan Kemudian",
     "success_subscribe": "Berjaya melanggan!",
     "payloadTooLarge": "Saiz fail terlalu besar, sila ubah saiz atau muat naik imej yang lebih kecil",
+    "too_many_images": "Anda boleh memilih sehingga {count} imej sekali gus",
     "fail_follow": "Ikut gagal!",
     "clear_user_alert": "Adakah anda pasti memadamkan semua data pengguna?",
     "cancel": "Batal",
     "connection_success": "Berjaya disambungkan!",
     "rc_down": "Resource Credits tidak mencukupi untuk melaksanakan tindakan! \n\nBoost akaun anda untuk terus menikmati pengalaman. Adakah anda mahu boost akaun anda sekarang?",
+    "rc_down_title": "Resource Credits tidak mencukupi",
+    "rc_precheck_title": "Hantaran ini mungkin terlalu besar untuk diterbitkan",
+    "rc_precheck_body": "Resource Credits anda nampaknya terlalu rendah untuk hantaran sebesar ini.",
+    "rc_down_body": "Resource Credits anda tidak mencukupi untuk tindakan ini.\n\nTambah sekarang dengan Points untuk teruskan, atau tingkatkan akaun anda secara kekal.",
+    "rc_down_topup": "Tambah RC dengan Points",
+    "rc_down_boost": "Tingkatkan akaun",
     "done": "Selesai",
     "something_wrong_alt": "Sementara itu, cuba Ecency.com daripada Pelayar anda",
     "same_user": "Pengguna telah ditambah ke dalam senarai",
     "fail": "Gagal!",
     "operation_failed_with_reason": "{operation} gagal: {reason}",
+    "request_timed_out": "Sambungan mengambil masa terlalu lama. Semak rangkaian anda dan cuba lagi.",
+    "load_failed_retry": "Kami tidak dapat memuatkan ini. Sila cuba lagi.",
+    "retrying": "Mencuba semula...",
     "wallet_refresh_failed": "Penyegaran dompet gagal. Sila cuba lagi.",
     "wallet_refresh_missing_account": "Penyegaran dompet gagal: akaun tiada.",
     "boost_failed": "Boost gagal.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video dilampirkan"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Undi naik",
+    "upvoted": "Telah diundi naik",
+    "downvoted": "Telah diundi turun",
+    "upvote_hint": "Ketik dua kali untuk membuka pilihan undian",
+    "payout_details": "Butiran bayaran",
+    "a11y_votes": "{count, plural, other {# undi}}",
+    "a11y_voters_hint": "Lihat pengundi",
+    "a11y_reblogs": "{count, plural, other {# reblog}}",
+    "a11y_reblogs_hint": "Lihat reblog",
+    "a11y_comments": "{count, plural, other {# komen}}",
+    "a11y_comments_hint": "Lihat komen",
+    "a11y_reply_hint": "Balas",
+    "a11y_tip": "Hantar tip",
+    "a11y_tips": "{count, plural, other {# tip}}",
+    "a11y_edit": "Sunting komen",
+    "a11y_delete": "Padam komen",
+    "a11y_show_replies": "Tunjukkan balasan",
+    "a11y_hide_replies": "Sembunyikan balasan",
+    "a11y_post_options": "Pilihan catatan",
+    "a11y_views": "{count, plural, other {# tontonan}}",
+    "source_ecency": "Disiarkan dengan Ecency",
+    "a11y_stats_hint": "Lihat statistik catatan",
     "image": "Gambar",
     "reveal_muted": "DIBISUKAN\nKetuk untuk mendedahkan kandungan",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Ketik untuk memuatkan imej",
     "in": "dalam",
     "poll": "TINJAUAN",
     "copy_link": "Salin pautan",
@@ -998,13 +1119,14 @@
     "save_to_local": "Muat turun ke peranti",
     "muted": "Kandungan disenyapkan kerana pelanggaran",
     "community_muted": "Kandungan disenyapkan kerana pelanggaran garis panduan komuniti",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Kandungan daripada akaun reputasi rendah",
+    "muted_downvoted": "Kandungan yang diundi turun oleh pengguna",
+    "muted_low_trust": "Akaun reputasi rendah dengan pautan keluar yang belum disahkan",
+    "muted_reveal": "Ketik untuk dedahkan",
     "promoted": "DIPROMOSI",
     "image_saved": "Gambar tersimpan ke Galeri Foto",
     "words": "Perkataan",
     "reading": "Membaca",
-    "listen": "Dengar",
     "min": "min",
     "summarize_start": "Mula"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Pos tidak wujud",
     "invalid_link": "URL tidak sah, anda boleh cuba lagi dengan URL yang sah atau cuba membukanya dalam pelayar web",
-    "no_existing_user": "Pengguna tidak wujud"
+    "no_existing_user": "Pengguna tidak wujud",
+    "posting_key_request": "{requester} meminta kunci peribadi posting untuk @{username}.\n\nTeruskan hanya jika anda mempercayai permintaan ini.",
+    "posting_key_request_unnamed": "Aplikasi lain meminta kunci peribadi posting untuk @{username}.\n\nTeruskan hanya jika anda mempercayai permintaan ini.",
+    "auth_request_as_user": "{requester} mahu melog masuk anda sebagai @{username}.\n\nHanya nama pengguna dan bukti log masuk dikongsi. Tiada kunci keluar daripada Ecency.",
+    "auth_request_as_current": "{requester} mahu melog masuk anda dengan akaun Ecency anda.\n\nHanya nama pengguna dan bukti log masuk dikongsi. Tiada kunci keluar daripada Ecency."
   },
   "payout": {
     "breakdown": "Pecahan",
@@ -1065,7 +1191,7 @@
     "open": "Buka URL",
     "invalid_key_desc": "sila log masuk dengan kunci {key} atau kunci induk untuk melaksanakan transaksi ini",
     "auth_transfer_confirm": "Sahkan pemindahan kepada {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Luluskan hanya jika anda mempercayai sumber pautan ini. Kelulusan akan menyiarkan operasi di bawah daripada akaun anda menggunakan kunci {authority} anda."
   },
   "voters_dropdown": {
     "rewards": "GANJARAN",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Hanya boleh mengandungi huruf, nombor, sengkang",
       "username_no_ascii_first_letter_error": "Mestilah bermula dengan huruf",
       "username_contains_double_hyphens": "Tidak boleh mengandungi sengkang berganda",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Nama pengguna ini terlalu serupa dengan akaun bursa kripto dan boleh mengelirukan orang lain. Sila pilih nama yang lebih unik.",
+      "username_restricted_prefix": "Nama pengguna yang bermula dengan ‘uid’ diikuti nombor tidak dibenarkan kerana sering digunakan untuk menyamar sebagai orang lain. Sila pilih nama lain.",
       "username_contains_underscore": "Tidak boleh mengandungi garis bawah"
     },
     "500_error": "Permintaan anda tidak dapat ditunaikan, barisan pendaftaran kemungkinan sudah penuh! Sila cuba lagi dalam masa beberapa minit...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Nama pengguna telah diambil",
+      "14": "Alamat e-mel sudah didaftarkan",
+      "15": "Sila masukkan alamat e-mel yang sah",
+      "16": "Sila masukkan nama pengguna yang sah",
+      "17": "Nama pengguna terlalu panjang, sila pilih yang lebih pendek",
+      "19": "Sila gunakan alamat e-mel tetap, atau dapatkan akaun Premium",
+      "21": "Rujukan ini tidak sah",
+      "28": "Permintaan anda tidak dapat diproses, baris gilir pendaftaran mungkin penuh. Sila cuba lagi dalam beberapa minit.",
+      "107": "Sambungan VPN dikesan. Sila matikan VPN anda dan cuba lagi, atau dapatkan akaun Premium.",
+      "110": "Untuk mengelakkan penyalahgunaan, kami mengehadkan bilangan akaun bagi setiap orang/rangkaian. Sila cuba lagi dari rangkaian lain.",
+      "111": "Sambungan Tor dikesan. Sila lumpuhkan Tor semasa mendaftar.",
+      "112": "Kami tidak dapat mengesahkan sambungan anda sekarang. Sila cuba lagi dalam beberapa minit."
     },
     "have_account_text": "Sudah mempunyai akaun?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Dapatkan akaun Hive yang lengkap, kaedah ini mempunyai semakan asas untuk memastikan botnet tidak menyalahgunakan saluran pendaftaran kami.",
     "btn_register": "Daftar Percuma",
     "title": "Akaun Percuma"
+  },
+  "dictation": {
+    "title": "Dikte",
+    "start": "Rakam",
+    "stop": "Henti",
+    "record_more": "Rakam lagi",
+    "done": "Selesai",
+    "recording": "Merakam",
+    "stop_hint": "Henti untuk mentranskripsi dan menambahkannya ke hantaran anda. Sehingga {m} minit.",
+    "inserted": "Ditambah ke hantaran anda. Rakam lagi, atau ketik Selesai.",
+    "transcribing": "Mentranskripsi",
+    "rate": "{n} Points setiap {s} saat",
+    "cost_running": "{n} Points setakat ini",
+    "cost_running_free": "Percuma setakat ini",
+    "free_remaining": "{n} x {s}s seterusnya percuma hari ini",
+    "price_loading": "Menyemak harga",
+    "price_error": "Tidak dapat memuatkan harga transkripsi.",
+    "denied": "Ecency memerlukan akses mikrofon untuk dikte. Benarkan dalam Tetapan dan cuba lagi.",
+    "error_empty": "Tiada pertuturan dikesan dalam rakaman itu.",
+    "error_insufficient_points": "Points tidak mencukupi untuk mentranskripsi rakaman itu.",
+    "error_rate_limited": "Terlalu banyak rakaman buat masa ini. Sila cuba lagi sebentar lagi.",
+    "error_too_long": "Rakaman itu terlalu panjang untuk ditranskripsi.",
+    "error_failed": "Tidak dapat mentranskripsi rakaman itu. Sila cuba lagi.",
+    "error_recorder": "Tidak dapat memulakan rakaman. Sila cuba lagi."
   },
   "wallet": {
     "delegations_out": "Delegasi Keluar",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Daftar masuk secara berkala memberikan anda 0.25 mata.",
     "fill_transfer_from_savings": "Simpanan Terlaksana",
     "activities": "Aktiviti",
+    "no_activities": "Belum ada transaksi",
+    "activities_failed": "Tidak dapat memuatkan transaksi. Tarik ke bawah untuk cuba lagi.",
     "tap_update": "Ketik untuk kemas kini",
     "mining_lottery": "Loteri Dimenangi",
     "checkin": "CheckIn",
     "tokens_transfer": "Token Dipindahkan",
     "outgoing_transfer_title": "Pemindahan/Hadiah",
+    "burned_title": "Penggunaan AI",
+    "burned_description": "Points yang dibelanjakan untuk ciri AI",
+    "burn_refund_title": "Bayaran balik AI",
+    "burn_refund_description": "Points dikembalikan selepas permintaan AI gagal",
     "manage_assets": "Tambah / Buang Aset",
     "selected_assets": "Aset Dipilih",
     "nft_setPropertyPermissions": "Kebenaran Sifat Ditetapkan untuk Simbol NFT",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Kemas Kini Ketepatan Token",
     "tokens_transferOwnership": "Pemilikan Token Dipindahkan",
     "withdraw_vesting": "Nyahpertaruh",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Akaun pengeluaran",
     "delegate_engine": "Delegasi",
     "market_close": "Pesanan Ditutup",
     "nftmarket_transferFee": "Yuran Pesanan Beli",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "DAPATKAN MATA",
     "escrow_approve": "Penyetujuan Escrow",
     "expires": "tamat tempoh",
+    "transaction_id": "ID Transaksi",
+    "copy_transaction_id": "Salin pautan transaksi",
+    "filter_activities": "Tapis aktiviti",
+    "filter_activities_desc": "Pilih operasi yang diminta oleh sejarah ini",
+    "filter_all": "Pilih semua",
+    "filter_none": "Kosongkan semua",
+    "filter_apply": "Guna",
     "author_reward": "Ganjaran penulis",
     "withdraw_hbd": "Keluarkan Simpanan",
     "convert_request": "Permintaan Tukar",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Tambah nilai RC",
+    "desc": "Peningkatan RC jangka pendek supaya anda boleh terus menyiarkan.",
+    "confirm": "Gunakan Points untuk menambah nilai Kredit Sumber anda?",
+    "insufficient": "Anda tidak mempunyai Points yang mencukupi.",
+    "buy_points": "Beli Points"
   },
   "ai_image_generator": {
     "title": "Penjana Imej AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Tersuai ({hours}j)",
+    "balance_load_failed": "Tidak dapat memuatkan baki anda. Ketik untuk cuba lagi.",
+    "precision_load_failed": "Tidak dapat memuatkan butiran token ini, jadi hanya jumlah bulat boleh dihantar. Ketik untuk cuba lagi.",
     "close": "Tutup",
     "favorite_username_placeholder": "Nama pengguna",
     "invalid_recipient_qr": "Tidak dapat menemui nama pengguna dalam kod QR ini.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Urus Kuasa",
     "pincode": "Pincode",
     "general": "Umum",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Sokong Ecency",
+    "support_beneficiary": "Kongsi ganjaran catatan dengan Ecency",
+    "support_beneficiary_percent": "Bahagian ganjaran catatan",
+    "support_curation": "Tahan sebahagian ganjaran kurasi",
+    "support_curation_percent": "Penahanan ganjaran kurasi",
     "feedback_body": "Tulis mesej anda di sini!\n\nNama pengguna Hive: {username}\nVersi aplikasi: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Tunjuk Imej",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Komen",
       "bookmark": "Penanda Buku",
+      "tags": "Tag",
       "reblog": "Reblog",
       "favorite": "Kegemaran",
       "mention": "Menyebut",
@@ -1599,10 +1765,10 @@
       "transfers": "Pindah",
       "vote": "Undi",
       "follow": "Ikut",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Catatan berjadual disiarkan",
+      "payouts": "Bayaran",
+      "account_update": "Kemas kini akaun",
+      "weekly_earnings": "Pendapatan mingguan",
       "fcm_unavailable": "Pemberitahuan tolak tidak disokong pada peranti ini. Anda hanya akan menerima pemberitahuan semasa aplikasi dibuka."
     },
     "keys_warning": "Maklumat akaun sensitif!\nEcency mesti dilindungi dengan kod PIN sebelum melihat kunci peribadi.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Hantar Maklum Balas",
     "rate_app": "Nilai Ecency",
+    "email_digests": "Ringkasan e-mel",
     "rate": "Nilai",
     "dm-privacy-updated": "Tetapan privasi DM berjaya dikemas kini",
     "dm-privacy-failed": "Gagal mengemas kini tetapan privasi DM",
@@ -1685,19 +1852,29 @@
     "request_sent": "Permintaan pemadaman anda telah dihantar",
     "confirm_delete_body": "Adakah anda pasti mahu memadam akaun? Ia akan memadam semua data anda"
   },
-  "tts": {
-    "settings_title": "Tetapan Teks-ke-Pertuturan",
-    "voice": "Suara",
-    "voice_hint": "Suara lalai sistem akan digunakan",
-    "speed": "Kelajuan",
-    "pitch": "Nada",
-    "test_voice": "Uji Suara",
-    "settings_info": "Tetapan ini akan digunakan semasa membaca pos dengan kuat",
+  "listen": {
+    "title": "Dengar hantaran ini",
+    "minutes": "~{n} min",
+    "login": "Log masuk",
+    "unlock": "Buka kunci · {n} Points",
+    "confirm": "Belanjakan {n} Points untuk mendengar hantaran ini? Audio ini milik anda dan boleh dimainkan semula bila-bila masa.",
+    "not_enough_title": "Points tidak mencukupi",
+    "not_enough": "Mendengar memerlukan {required} Points dan anda mempunyai {available}.",
+    "get_points": "Dapatkan Points",
+    "unlock_failed": "Tidak dapat membuka kunci audio, sila cuba lagi",
+    "failed_refunded": "Audio tidak dapat dihasilkan, Points anda dikembalikan",
+    "preparing": "Menyediakan audio…",
+    "preparing_eta": "Menyediakan audio, kira-kira {n} min…",
+    "preparing_progress": "Menyediakan audio · {n}%",
+    "waiting": "Menunggu giliran, {n} di hadapan…",
+    "next_in_line": "Seterusnya dalam giliran…",
     "play": "Main",
     "pause": "Jeda",
-    "language": "Bahasa",
-    "language_auto": "Kesan automatik",
-    "language_hint": "Kesan automatik memilih bahasa berdasarkan kandungan pos"
+    "seek": "Cari kedudukan",
+    "speed": "Kelajuan main balik",
+    "language": "Bahasa audio",
+    "unavailable": "Audio tidak dapat dimuatkan.",
+    "retry": "Cuba lagi"
   },
   "posting_authority": {
     "title": "Dayakan Pengeposan Lebih Pantas",
@@ -1732,7 +1909,7 @@
     "error-auth": "Pengesahan gagal. Sila log masuk semula.",
     "error-generic": "Muat naik video gagal. Sila cuba lagi.",
     "error-too-long-short": "Video pendek mestilah 60 saat atau kurang.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Satu catatan hanya boleh mengandungi satu video. Buang video semasa sebelum menambah yang lain.",
     "select_source": "Tambah Video",
     "record": "Rakam Video",
     "choose_library": "Pilih daripada Pustaka"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Kongsi kemas kini pantas"
   },
+  "newsletter": {
+    "screen_title": "Ringkasan e-mel",
+    "title": "{list}",
+    "body_own": "Ringkasan e-mel mingguan atau bulanan bagi pemberitahuan anda.",
+    "body_creator": "Hantaran baharu oleh {list} dalam peti masuk anda.",
+    "body_community": "Ringkasan hantaran baharu dalam {list} melalui e-mel.",
+    "body_site": "Yang terbaik daripada Ecency dalam peti masuk anda.",
+    "first_publish_title": "Tahniah atas hantaran pertama anda!",
+    "first_publish_body": "Mahu ringkasan e-mel bagi pemberitahuan anda? Mingguan atau bulanan, ubah atau hentikan bila-bila masa dalam Tetapan.",
+    "list_own": "Ringkasan pemberitahuan saya",
+    "list_site": "Surat berita Ecency",
+    "status_active": "Anda telah melanggan.",
+    "status_pending": "Menunggu pengesahan e-mel.",
+    "status_short_active": "aktif",
+    "status_short_pending_confirmation": "belum selesai",
+    "status_short_suppressed": "dihentikan",
+    "status_short_ended": "tamat",
+    "cadence_weekly": "Mingguan",
+    "cadence_monthly": "Bulanan",
+    "email_placeholder": "anda@contoh.com",
+    "subscribe": "Langgan",
+    "update": "Kemas kini",
+    "resend": "Hantar semula pengesahan",
+    "leave": "Keluar daripada ringkasan",
+    "cancel": "Batal",
+    "ok": "OK",
+    "manage": "Urus",
+    "check_inbox_title": "Semak peti masuk anda",
+    "check_inbox_body": "Kami menghantar pautan pengesahan ke {email}. Langganan bermula setelah anda mengesahkan.",
+    "subscribed": "Melanggan ringkasan e-mel",
+    "left": "Keluar daripada ringkasan",
+    "refused": "Alamat ini tidak boleh melanggan.",
+    "unavailable": "Ringkasan e-mel tidak tersedia sekarang.",
+    "too_many": "Terlalu banyak percubaan, sila cuba lagi kemudian.",
+    "fail": "Sesuatu tidak kena, sila cuba lagi.",
+    "empty": "Belum ada ringkasan e-mel. Langgan di bawah untuk bermula.",
+    "discover": "Dapatkan lebih melalui e-mel",
+    "stop_all": "Henti semua",
+    "stop_all_title": "Henti semua e-mel?",
+    "stop_all_body": "Tiada e-mel Ecency akan dihantar ke {email} lagi. Langganan di bawah alamat lain kekal.",
+    "stop_all_ok": "Henti semua",
+    "stop_all_done": "Alamat dinyahlanggan daripada semua e-mel",
+    "profile_option": "RINGKASAN E-MEL",
+    "subscriber_count": "{weekly} pelanggan mingguan • {monthly} pelanggan e-mel bulanan",
+    "community_button": "Surat berita"
+  },
+  "mod_notes": {
+    "title": "Tambah sebab",
+    "placeholder": "Sebab (kelihatan kepada moderator lain)",
+    "confirm": "Sahkan",
+    "cancel": "Batal"
+  },
+  "community_settings": {
+    "title_header": "Tetapan komuniti",
+    "title_label": "Tajuk",
+    "about": "Perihal",
+    "lang": "Bahasa",
+    "description": "Penerangan",
+    "rules": "Peraturan",
+    "nsfw": "Tidak selamat untuk tempat kerja",
+    "save": "Simpan",
+    "required": "Diperlukan",
+    "title_length": "Antara {min} dan {max} aksara",
+    "owner_admin_only": "Hanya pemilik dan admin boleh mengubah tetapan ini."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Dikembangkan",
+        "collapsed": "Dilipat"
+      },
+      "a11y_chat": {
+        "quote": "Membalas {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Pilih",
+        "deselect": "Nyahpilih"
+      },
+      "store": {
+        "billing_unavailable": "Pembelian dalam aplikasi tidak dibenarkan pada peranti ini.",
+        "verification_failed": "App Store tidak dapat mengesahkan pembelian ini.",
+        "cancelled": "Pembelian dibatalkan",
+        "unknown_result": "Keputusan pembelian tidak diketahui"
+      },
+      "navigation": {
+        "feed_unavailable": "Suapan ini belum tersedia.",
+        "link_cannot_open": "Pautan ini tidak dapat dibuka.",
+        "video_cannot_play": "Video ini tidak dapat dimainkan."
+      },
+      "media": {
+        "load_failed": "Item ini tidak dapat dimuatkan. Semak sambungan anda dan cuba lagi.",
+        "loading": "Memuatkan media",
+        "download_failed": "Muat turun gagal dengan status {status}"
+      },
+      "sign_in": {
+        "required": "Log masuk diperlukan",
+        "to_reply": "Log masuk untuk membalas.",
+        "to_vote": "Log masuk untuk mengundi.",
+        "button": "Log masuk"
+      },
+      "account": {
+        "logout_user": "Log keluar @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# undi}}  •  {replies, plural, other {# balasan}}",
+        "voting_power": "Kuasa mengundi {percent}",
+        "remove_favourite": "Buang daripada kegemaran",
+        "add_favourite": "Tambah ke kegemaran"
+      },
+      "waves": {
+        "clear_tag_filter": "Kosongkan penapis tag {tag}",
+        "new_wave": "Wave baharu",
+        "replies_open_thread": "{count, plural, other {# balasan, buka utas}}",
+        "characters": "{count} daripada {max} aksara",
+        "retry": "{message}\nCuba lagi",
+        "playing": "Memainkan {permlink}",
+        "video_attached_remove": "Video dilampirkan, buang",
+        "image_attached_remove": "Imej dilampirkan, buang",
+        "take_photo": "Ambil foto",
+        "edit_poll": "Sunting tinjauan",
+        "add_poll": "Tambah tinjauan",
+        "add_video": "Tambah video"
+      },
+      "reading": {
+        "reply_to": "Balas kepada {username}",
+        "opens_post": "Membuka hantaran",
+        "sort_comments": "Isih komen",
+        "sort_comments_value": "Isih komen, {sort}",
+        "no_comments": "Belum ada komen.",
+        "loading_post": "Memuatkan hantaran",
+        "show_version": "Tunjukkan versi",
+        "show_changes": "Tunjukkan perubahan",
+        "replying_to": "Membalas kepada @{username}",
+        "reply_text": "Teks balasan",
+        "translate_from": "Daripada",
+        "translate_to": "Kepada"
+      },
+      "feed": {
+        "tab_pinned": "{label}, disematkan",
+        "tab_add": "{label}, tambah",
+        "customise": "Suaikan"
+      },
+      "card": {
+        "in_category": "dalam {category}",
+        "pinned": "Disematkan",
+        "by_author": "oleh {username}",
+        "payout": "bayaran {payout}",
+        "payout_declined": "bayaran {payout}, ditolak",
+        "reblogged_by": "Disiar semula oleh {username}"
+      },
+      "shell": {
+        "close_menu": "Tutup menu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Gambar kecil, pilih imej lain",
+        "words": "{count, plural, other {# perkataan}}",
+        "poll_min_age": "Umur Akaun Min. (Hari): {days}",
+        "poll_max_options": "Pilihan Maks.: {count}",
+        "thumbnail_selected": "Gambar kecil dipilih",
+        "thumbnail": "Gambar kecil",
+        "uploaded_image": "Imej dimuat naik",
+        "community_search": "cari"
+      },
+      "vote": {
+        "not_voted": "Belum mengundi",
+        "voting": "Mengundi",
+        "failed_with": "Undi gagal: {message}",
+        "failed": "Undi gagal",
+        "payout": "Bayaran {payout}",
+        "payout_declined": "Bayaran {payout}, ditolak",
+        "percent": "{percent} peratus",
+        "upvote_percent": "Undi naik {percent}%"
+      },
+      "settings": {
+        "on": "Hidup",
+        "off": "Mati"
+      },
+      "lock": {
+        "biometric_reason": "Hidupkan buka kunci biometrik untuk Ecency",
+        "offer_title": "Buka kunci dengan {method}",
+        "offer_use": "Guna {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Kunci disembunyikan semasa skrin dirakam atau dicerminkan.",
+        "screenshot_notice": "Tangkapan skrin telah diambil. Kunci peribadi disembunyikan semula; jika tangkapan skrin menunjukkan kunci, padamkannya.",
+        "hold_hint": "Tekan dan tahan kunci untuk memaparkannya.",
+        "hold_to_show": "Tahan untuk paparkan"
+      },
+      "wallet": {
+        "cancel_order": "Batalkan pesanan ini?",
+        "days": "{count, plural, other {# hari}}"
+      },
+      "chat": {
+        "reactors_hint": "Tekan lama untuk melihat siapa yang bereaksi",
+        "see_reactors": "Lihat siapa yang bereaksi"
+      },
+      "esie": {
+        "still": "{mood}, diam"
+      }
+    },
+    "ui": {
+      "profile_of": "Profil @{username}",
+      "preview": "Pratonton ({index}/{count})",
+      "balance": "Baki: {amount}",
+      "expires_in": "Tamat dalam {time}",
+      "expired": "Telah tamat. Tutup dan cuba lagi.",
+      "user_has_no_posts": "@{username} belum menghantar apa-apa",
+      "attach_image": "Lampirkan imej",
+      "auto": "Auto",
+      "back": "Kembali",
+      "hot": "HANGAT",
+      "image_of": "Imej {index} daripada {count}",
+      "new": "BAHARU",
+      "nsfw_tap_to_reveal": "NSFW Ketik untuk dedahkan",
+      "new_reply": "Balasan baharu",
+      "remove": "Buang",
+      "unlock_ecency": "Buka kunci Ecency",
+      "update_it": "Kemas kininya",
+      "update_it_or_post_this_as": "Kemas kininya, atau hantar ini sebagai balasan baharu?",
+      "use_pin": "Guna PIN",
+      "your_reply_was_already_posted": "Balasan anda telah pun dihantar",
+      "error_try_again": "{message} Cuba lagi?",
+      "auth": {
+        "account_label": "Akaun: @{username}",
+        "approve_the_request_in_your_wallet": "Luluskan permintaan dalam aplikasi dompet anda.",
+        "copy_key": "Salin {title}",
+        "current_account": "Akaun semasa",
+        "qr_code": "Kod QR",
+        "requested_by": "Diminta oleh {requester}",
+        "pin_digits": "{filled} daripada {total, plural, other {# digit}}",
+        "private_key_shown": "{title}, kunci peribadi dipaparkan",
+        "open_wallet_app": "Buka aplikasi dompet",
+        "hiveauth_scan": "Luluskan dalam Hive Keychain atau dompet HiveAuth lain: buka pada peranti ini, atau imbas kod ini dengannya.",
+        "switching": "Bertukar...",
+        "logout_all": "Log keluar daripada semua akaun",
+        "logout_all_title": "Log keluar daripada setiap akaun pada peranti ini?",
+        "stored_key": "@{username} sudah log masuk pada peranti ini. Kunci tersimpannya kekal; hanya sesinya diperbaharui.",
+        "stored_hivesigner": "@{username} sudah log masuk dengan HiveSigner pada peranti ini. Sesinya diganti.",
+        "stored_hiveauth": "@{username} log masuk dengan HiveAuth pada peranti ini. Ia akan menandatangani dengan HiveSigner sebaliknya.",
+        "method_key": "Kunci",
+        "logout_failed": "Log keluar gagal"
+      },
+      "browser": {
+        "account": "Akaun",
+        "authority": "Autoriti",
+        "phishing": "Amaran: Domain ini telah ditandakan sebagai laman pancingan data yang diketahui. Teruskan dengan sangat berhati-hati."
+      },
+      "chat": {
+        "cancel_edit": "Batal sunting",
+        "cancel_reply": "Batal balas",
+        "copied_to_clipboard": "Disalin ke papan keratan",
+        "edited_at": "Disunting {time}",
+        "group_options": "Pilihan kumpulan",
+        "pinned_messages": "Mesej tersemat",
+        "remove_user": "Buang @{username}",
+        "sort_by_name": "Isih mengikut nama",
+        "more": "Lagi",
+        "reaction_label": "{emoji} {count}. Tekan lama untuk melihat siapa yang bereaksi",
+        "members": "Ahli"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Satu hantaran sudah wujud pada pautan ini dan berbeza daripada yang anda hantar. Kemas kininya, atau terbitkan sebagai baharu?",
+        "a_scheduled_post_is_published_by": "Hantaran berjadual diterbitkan oleh Ecency pada masa yang dipilih. Itu memerlukan autoriti posting untuk ecency.app pada akaun anda. Kunci dan autoriti lain anda kekal seperti sedia ada. Memberikannya memerlukan kunci active anda.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "Alat AI",
+        "allow_ecency_to_publish_for_you": "Benarkan Ecency menerbitkan untuk anda?",
+        "bold": "Tebal",
+        "clone": "Klon",
+        "cost": "Kos: {cost}",
+        "could_not_store_the_draft_on": "Tidak dapat menyimpan draf pada peranti ini. Biarkan aplikasi terbuka dan simpan draf.",
+        "draft": "DRAF",
+        "delete_count": "Padam ({count})",
+        "dictate_desc": "Bercakap, dan transkrip masuk ke dalam hantaran anda",
+        "discard": "Buang",
+        "discard_changes": "Buang perubahan?",
+        "grant": "Berikan",
+        "italic": "Condong",
+        "keep_editing": "Teruskan menyunting",
+        "my_blog": "BLOG SAYA",
+        "my_communities": "KOMUNITI SAYA",
+        "new_post": "Hantaran baharu",
+        "notice": "Notis",
+        "restore": "Pulihkan",
+        "restore_unsaved_changes": "Pulihkan perubahan yang belum disimpan?",
+        "saved": "Disimpan",
+        "top_communities": "KOMUNITI TERATAS",
+        "table": "Jadual",
+        "text_format": "Format teks",
+        "this_link_is_already_in_use": "Pautan ini sudah digunakan",
+        "untitled": "Tanpa tajuk",
+        "update_it_or_publish_this_as": "Kemas kininya, atau terbitkan ini sebagai hantaran baharu?",
+        "you_have_unsaved_changes_from_an": "Anda mempunyai perubahan belum disimpan daripada suntingan terdahulu. Hantaran telah berubah sejak itu; memulihkannya menggantikan teks di bawah.",
+        "your_edits_were_not_published": "Suntingan anda tidak diterbitkan.",
+        "your_post_was_already_published": "Hantaran anda telah pun diterbitkan",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Gambar kecil, ketik untuk memilih imej lain",
+        "thumbnail_number": "Gambar kecil {number}",
+        "recording_busy": "Rakaman sedang berjalan. Selesaikannya dalam kamera dahulu.",
+        "photo_lost": "Foto hilang semasa kamera dibuka. Sila ambil semula.",
+        "add_snippet_button": "+ Coretan",
+        "words_count": "{count, plural, other {# perkataan}}",
+        "community_search": "cari"
+      },
+      "profile": {
+        "open_wallet": "Buka Dompet",
+        "your_wallet_is_on_the_wallet": "Dompet anda berada pada tab Dompet.",
+        "user_has_no_comments": "@{username} belum mengulas apa-apa",
+        "votes_count": "{count, plural, other {# undi}}",
+        "replies_count": "{count, plural, other {# balasan}}",
+        "menu": "Lagi",
+        "users": "Pengguna"
+      },
+      "reading": {
+        "apply": "GUNA",
+        "add_tag": "Tambah tag",
+        "age": "Umur",
+        "audio_language": "Bahasa audio",
+        "available_filters": "Penapis Tersedia",
+        "could_not_unlock_the_audio_please": "Tidak dapat membuka kunci audio, sila cuba lagi",
+        "downvote": "Undi turun",
+        "downvote_percent": "Undi turun {percent}%",
+        "listen_to_this_post": "Dengar hantaran ini",
+        "log_in": "Log masuk",
+        "mark_all_as_read": "Tandakan semua sebagai dibaca",
+        "mark_as_read": "Tandakan sebagai dibaca",
+        "more_replies": "Lagi balasan",
+        "not_enough_points": "Points tidak mencukupi",
+        "nothing_here_yet": "Belum ada apa-apa di sini.",
+        "open_editor": "Buka editor",
+        "pause_voice": "Jeda suara",
+        "play_voice": "Main suara",
+        "playback_speed": "Kelajuan main balik",
+        "publishing_in_waves": "Menerbitkan dalam Waves",
+        "quests_done": "Misi selesai",
+        "read": "Baca",
+        "remove_vote": "Buang undi",
+        "seek": "Cari kedudukan",
+        "select_community": "Pilih Komuniti",
+        "selected_filters": "Penapis Dipilih",
+        "the_audio_could_not_be_loaded": "Audio tidak dapat dimuatkan.",
+        "this_post_does_not_exist_or": "Hantaran ini tidak wujud atau telah dipadam.",
+        "unread": "Belum dibaca",
+        "voice_position": "Kedudukan suara",
+        "vote_weight": "Wajaran undi",
+        "reblogged_by": "disiar semula oleh {username}",
+        "no_more_posts": "Tiada lagi hantaran.",
+        "favourite": "Kegemaran",
+        "no_votes_yet": "Belum ada undi",
+        "no_comments_yet": "Belum ada komen. Jadilah yang pertama!",
+        "comments_count": "Komen ({count})",
+        "sending_to_chain": "menghantar ke rantaian",
+        "compare": "Banding",
+        "your_vote": "Undi anda",
+        "reply_to": "Balas kepada @{username}",
+        "what_do_you_think": "Apa pendapat anda?",
+        "clear_tag_filter": "Kosongkan penapis tag",
+        "tab_selected": "{title}, dipilih",
+        "add_tag_feed": "Tambah suapan tag",
+        "feed_pinned": "{label}, disematkan",
+        "attached_image_remove": "Imej dilampirkan, ketik untuk membuang",
+        "camera": "Kamera",
+        "files": "Fail",
+        "paused": "Dijeda",
+        "in_topic": "dalam {topic}",
+        "poll_vote": "Undi",
+        "reply": "Balas",
+        "mute_sound": "Senyap",
+        "unmute_sound": "Nyahsenyap",
+        "leaderboard_activities": "Aktiviti",
+        "leaderboard_reward": "Ganjaran",
+        "sort_votes": "Undi"
+      },
+      "shell": {
+        "account_of": "Akaun @{username}",
+        "account_signed_out": "Akaun, belum log masuk",
+        "close_tab": "Tutup tab",
+        "coming_soon_to_the_native_app": "Akan datang ke aplikasi natif.",
+        "create": "Cipta",
+        "expand": "Kembangkan",
+        "forward": "Maju",
+        "loading": "Memuatkan",
+        "new_tab": "Tab baharu",
+        "reload": "Muat semula",
+        "sent": "Dihantar",
+        "tab_unread": "{title}, {count} belum dibaca",
+        "no_app_for_link": "Tiada aplikasi boleh membuka pautan ini."
+      },
+      "wallet": {
+        "product_not_available": "Produk tidak tersedia.",
+        "repeat": "Ulang"
+      },
+      "copied": "Disalin",
+      "trending_caps": "TRENDING",
+      "move_up": "Alih ke atas",
+      "move_down": "Alih ke bawah",
+      "scroll_to_top": "Tatal ke atas",
+      "load_more": "Lagi"
+    },
+    "wallet": {
+      "checking": "Menyemak dengan rangkaian",
+      "leave_title": "Masih menghantar",
+      "leave_message": "Ini masih dihantar atau disemak dengan rangkaian. Anda boleh meninggalkan skrin ini: aplikasi akan memberitahu apabila selesai.",
+      "stay": "Kekal",
+      "collateralized_convert_request": "Permintaan Penukaran Bercagar",
+      "op_transfer": "pindahan",
+      "op_power_up": "tingkatkan kuasa",
+      "op_power_down_change": "perubahan nyahpertaruh",
+      "op_delegation": "delegasi",
+      "op_savings_deposit": "deposit simpanan",
+      "op_savings_withdrawal": "pengeluaran simpanan",
+      "op_conversion": "penukaran",
+      "op_swap": "pertukaran",
+      "op_order_cancel": "pembatalan pesanan",
+      "op_reward_claim": "tuntutan ganjaran",
+      "op_withdraw_route_change": "perubahan laluan pengeluaran",
+      "op_token_operation": "operasi token"
+    },
+    "notification": {
+      "amount_unknown": "Jumlah tidak tersedia",
+      "weekly_earnings_breakdown": "Anda memperoleh ${amount} minggu ini - ${authorUsd} daripada hantaran, ${curationUsd} daripada kurasi.",
+      "weekly_earnings_total": "Anda memperoleh ${amount} minggu ini daripada hantaran dan kurasi anda."
+    },
+    "settings": {
+      "open": "Buka",
+      "feedback_subject": "Maklum balas/Laporan pepijat",
+      "unknown_user": "Pengguna Tidak Diketahui"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Pengikut",
+      "spin_game": "Permainan putar",
+      "edit_profile": "Sunting profil",
+      "redeem_points": "Tebus points",
+      "community": "Komuniti",
+      "community_members": "Ahli komuniti",
+      "community_activities": "Aktiviti komuniti",
+      "browser": "Pelayar",
+      "asset_details": "Butiran aset",
+      "edit_history": "Sejarah suntingan",
+      "welcome": "Selamat datang",
+      "chat": "Sembang",
+      "backup_keys": "Sandaran kunci",
+      "trade": "Dagangan",
+      "ai_image_generator": "Penjana imej AI",
+      "select_assets": "Pilih aset",
+      "poll": "Tinjauan",
+      "bot_comments": "Komen bot"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operasi yang memerlukan kunci owner tidak boleh ditandatangani dalam Ecency.",
+      "post": "Hantaran/Komen",
+      "custom": "Custom JSON",
+      "sign_buffer": "Tandatangan Mesej",
+      "send_token": "Hantar Token",
+      "witness_vote": "Undi Witness",
+      "proxy": "Tetapkan Proksi",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Siarkan",
+      "sign_tx": "Tandatangan Transaksi",
+      "encode": "Kodkan Mesej",
+      "decode": "Sahkan Kunci",
+      "add_account_authority": "Tambah Autoriti Akaun",
+      "remove_account_authority": "Buang Autoriti Akaun",
+      "add_key_authority": "Tambah Autoriti Kunci",
+      "remove_key_authority": "Buang Autoriti Kunci",
+      "create_claimed_account": "Cipta Akaun",
+      "create_proposal": "Cipta Cadangan",
+      "remove_proposal": "Buang Cadangan",
+      "update_proposal_vote": "Undi Cadangan",
+      "signed_call": "Panggilan Bertandatangan"
+    },
+    "translate_language": {
+      "ar": "Arab",
+      "az": "Azerbaijan",
+      "bg": "Bulgaria",
+      "bn": "Benggali",
+      "ca": "Catalan",
+      "cs": "Czech",
+      "da": "Denmark",
+      "de": "Jerman",
+      "el": "Greek",
+      "en": "Inggeris",
+      "eo": "Esperanto",
+      "es": "Sepanyol",
+      "et": "Estonia",
+      "fa": "Parsi",
+      "fi": "Finland",
+      "fr": "Perancis",
+      "ga": "Ireland",
+      "he": "Ibrani",
+      "hi": "Hindi",
+      "hu": "Hungary",
+      "id": "Indonesia",
+      "it": "Itali",
+      "ja": "Jepun",
+      "ko": "Korea",
+      "lt": "Lithuania",
+      "lv": "Latvia",
+      "ms": "Melayu",
+      "nb": "Norway",
+      "nl": "Belanda",
+      "pl": "Poland",
+      "pt": "Portugis",
+      "ro": "Romania",
+      "ru": "Rusia",
+      "sk": "Slovak",
+      "sl": "Slovenia",
+      "sq": "Albania",
+      "sv": "Sweden",
+      "th": "Thai",
+      "tl": "Tagalog",
+      "tr": "Turki",
+      "uk": "Ukraine",
+      "zh": "Cina",
+      "zt": "Cina (Tradisional)"
+    },
+    "reading": {
+      "banner_text": "Hantaran ini dalam bahasa {source}. Terjemah ke {target}?",
+      "translated_from_text": "Diterjemah daripada {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# Ahli}} • {authors, plural, other {# Penghantar}} • {posts, plural, other {# Hantaran}}",
+      "community_title": "Komuniti {title}",
+      "members_title": "Ahli {title}",
+      "activities_title": "Aktiviti {title}",
+      "cannot_start_with_or": "Tidak boleh bermula dengan @ atau #",
+      "use_a_two_letter": "Gunakan kod bahasa dua huruf, seperti en",
+      "at_most_characters": "Paling banyak {max, plural, other {# aksara}}",
+      "council": "Majlis",
+      "journal": "Jurnal",
+      "topic": "Topik",
+      "community_not_found": "Komuniti tidak ditemui."
+    },
+    "transfer": {
+      "one_recipient": "Hanya seorang penerima boleh digunakan untuk pindahan ini.",
+      "is_an_exchange_and": "{exchange} ialah bursa dan mungkin tidak menyokong pindahan berulang: dana yang dihantar mengikut jadual boleh hilang. Gunakan pindahan sekali sahaja."
+    },
+    "dapps": {
+      "signing_info": "Ecency bertindak sebagai sambungan penandatanganan Hive anda. Apabila dApp meminta anda log masuk dengan sambungan pelayar seperti Keychain, Keeper atau Peak Vault, pilih pilihan itu. Ecency akan mengendalikan penandatanganan dengan selamat.",
+      "category_social": "Sosial",
+      "category_gaming": "Permainan",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Kumpulan",
+      "unable_to_load_messages": "Tidak dapat memuatkan mesej.",
+      "someone": "Seseorang",
+      "renamed_the_group_to": "{actor} menamakan semula kumpulan kepada \"{name}\"",
+      "removed_the_group_name": "{actor} membuang nama kumpulan",
+      "unable_to_send_your": "Tidak dapat menghantar mesej anda.",
+      "unable_to_remove_message": "Tidak dapat membuang mesej.",
+      "unknown": "Tidak diketahui",
+      "members_online": "{members, plural, other {# ahli}} • {online} dalam talian",
+      "failed_to_load_pinned": "Gagal memuatkan mesej tersemat",
+      "you": "Anda",
+      "title": "Reaksi"
+    },
+    "tip": {
+      "login_required": "Sila log masuk untuk menghantar tip",
+      "max_decimals": "Maksimum {n, plural, other {# tempat perpuluhan}}"
+    },
+    "paid": {
+      "check_again": "Semak lagi",
+      "give_up": "Putus asa",
+      "unknown": "Belum ada jawapan. Permintaan mungkin masih berjalan. Semak lagi untuk mendapatkan keputusannya: ia tidak dicaj kali kedua.",
+      "pending": "Permintaan anda masih diproses. Semak lagi sebentar lagi: ia tidak dicaj kali kedua.",
+      "restored": "Permintaan terdahulu belum ada jawapan. Semak lagi untuk mendapatkan keputusannya: ia tidak dicaj kali kedua.",
+      "give_up_confirm": "Jika permintaan telah berjaya, points telah dibelanjakan dan keputusannya akan hilang.",
+      "not_stored": "Permintaan ini tidak dapat disimpan pada peranti. Biarkan skrin ini terbuka sehingga selesai.",
+      "sign_in_again": "Sesi anda telah tamat. Log masuk semula, kemudian semak lagi.",
+      "other_account": "Ini milik @{owner}. Tukar semula ke akaun itu untuk meneruskan."
+    },
+    "ai": {
+      "run_ai_assist": "Jalankan AI Assist ({costText})",
+      "no_longer_free_cost": "Larian ini tidak lagi percuma hari ini. Kosnya {cost} {unit}.",
+      "no_longer_free": "Larian ini tidak lagi percuma hari ini.",
+      "content_violates_our_content": "Kandungan melanggar dasar kandungan kami. Sila ubah teks anda. Points tidak dikembalikan.",
+      "generate_image": "Jana Imej ({costLabel})",
+      "use_prompt": "Guna: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Sila tunggu, tindakan lain sedang berjalan",
+      "not_a_community_post": "Bukan hantaran komuniti.",
+      "parent_post_not_found": "Hantaran induk tidak ditemui",
+      "the_account_changed": "Akaun telah berubah."
+    },
+    "dictation": {
+      "balance": "Baki: {balance} {unit}",
+      "stop_points": "Henti ({cost} Points)",
+      "stop_free": "Henti (Percuma)",
+      "transcribe_points": "Transkripsi ({cost} Points)",
+      "transcribe": "Transkripsi",
+      "no_longer_free_cost": "Rakaman ini tidak lagi percuma hari ini. Kosnya {cost} Points.",
+      "no_longer_free": "Rakaman ini tidak lagi percuma hari ini.",
+      "held_locked": "Rakaman berhenti apabila Ecency dikunci. Tiada apa dihantar. Ketik Transkripsi untuk menghantarnya, atau putus asa.",
+      "held_no_background": "Rakaman berhenti apabila Ecency meninggalkan skrin (ia tidak dapat memaparkan pemberitahuan rakaman). Tiada apa dihantar. Ketik Transkripsi untuk menghantarnya, atau putus asa.",
+      "held_stopped": "Rakaman dihentikan daripada pemberitahuan. Tiada apa dihantar. Ketik Transkripsi untuk menghantarnya, atau putus asa.",
+      "held_focus_lost": "Rakaman berhenti kerana panggilan atau bunyi aplikasi lain. Tiada apa dihantar. Ketik Transkripsi untuk menghantarnya, atau putus asa.",
+      "held_interrupted": "Rakaman berhenti kerana aplikasi lain mengambil mikrofon. Tiada apa dihantar. Ketik Transkripsi untuk menghantarnya, atau putus asa.",
+      "unavailable": "Rakaman tidak tersedia pada peranti ini.",
+      "not_read": "Rakaman itu tidak dapat dibaca atau terlalu besar. Tiada apa dihantar dan tiada apa dicaj.",
+      "give_up_not_sent": "Rakaman ini tidak dihantar, jadi tiada apa dicaj. Ia akan dipadam.",
+      "give_up_not_charged": "Tiada apa dicaj untuk rakaman ini. Ia akan dipadam.",
+      "clip_lost": "Rakaman permintaan terdahulu tiada lagi pada peranti ini. Jika permintaan itu berjaya, points anda telah dibelanjakan, dan transkripnya tidak dapat diambil."
+    },
+    "register": {
+      "error_code_28": "Permintaan anda tidak dapat diproses. Barisan pendaftaran mungkin penuh. Sila cuba lagi dalam beberapa minit."
+    },
+    "perks": {
+      "quests_empty": "Belum ada misi di sini, semak semula tidak lama lagi.",
+      "freeze_confirm_title": "Lindungi rentetan anda",
+      "spend_points_on_a": "Belanjakan {price} Points untuk streak freeze? Ia digunakan untuk melindungi rentetan anda pada hari yang anda terlepas."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Sokong Ecency, dapatkan blog percuma, dan menonjol dengan lencana Pro yang disahkan.",
+      "card_description": "Jadi Pro dengan {price} setahun. Lencana disahkan, blog percuma, dan sokong Ecency.",
+      "card_description_plain": "Jadi Pro selama setahun. Lencana disahkan, blog percuma, dan sokong Ecency.",
+      "member": "Anda ahli Pro.",
+      "benefit_badge": "Lencana Pro yang disahkan di sebelah nama anda.",
+      "benefit_blog": "Blog percuma di namaanda.blogs.ecency.com.",
+      "benefit_support": "Sokong pembangunan Ecency secara langsung.",
+      "benefit_early": "Akses awal kepada ciri baharu.",
+      "buy": "Dapatkan Pro dengan {price} setahun",
+      "extend": "Lanjutkan 12 bulan dengan {price}",
+      "extend_note": "Membeli semula menambah 12 bulan pada keahlian anda.",
+      "unavailable": "Ecency Pro tidak tersedia daripada kedai sekarang.",
+      "activating": "Bayaran diterima. Mengaktifkan keahlian anda.",
+      "success_title": "Selamat datang ke Ecency Pro",
+      "success_body": "Keahlian Pro anda aktif. Lencana anda akan muncul pada profil tidak lama lagi.",
+      "extending": "Bayaran diterima. Keahlian Pro anda sedang dilanjutkan selama 12 bulan.",
+      "open_a11y": "Buka Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Menyimpan draf...",
+      "please_sign_in_first": "Sila log masuk dahulu.",
+      "fetch_failed": "Pengambilan gagal.",
+      "you_can_only_edit": "Anda hanya boleh menyunting kandungan anda sendiri.",
+      "invalid_percent": "Peratus tidak sah",
+      "beneficiary_exists_already": "Penerima manfaat sudah wujud",
+      "this_draft_belongs_to": "Draf ini milik @{owner}. Tukar semula ke akaun itu untuk menerbitkannya.",
+      "could_not_make_a": "Tidak dapat membuat pautan baharu untuk hantaran ini. Ubah sedikit tajuk dan cuba lagi.",
+      "an_earlier_attempt_was": "Percubaan terdahulu diterbitkan selepas yang ini. Semak versi mana yang anda mahu simpan.",
+      "could_not_check_your": "Tidak dapat menyemak autoriti posting akaun anda. Semak sambungan anda dan cuba lagi.",
+      "this_post_was_changed": "Hantaran ini diubah di tempat lain sejak anda membukanya. Salin teks anda, kembali dan buka semula untuk menyunting versi terkini.",
+      "link_text_placeholder": "Teks di sini"
+    },
+    "app_error": {
+      "this_reply_is_too": "Balasan ini terlalu panjang.",
+      "the_network_refused_this": "Rangkaian menolak tindakan ini.",
+      "invalid_input": "Input tidak sah.",
+      "secure_storage_is_unavailable": "Storan selamat tidak tersedia. Sila log masuk semula.",
+      "please_sign_in_first": "Sila log masuk dahulu.",
+      "these_credentials_belong_to": "Kelayakan ini milik @{actual}, bukan @{expected}.",
+      "is_not_signed_in": "@{username} belum log masuk pada peranti ini.",
+      "key_required": "Kunci {role} diperlukan untuk melakukan transaksi ini. {hint}",
+      "cancelled": "Dibatalkan.",
+      "the_request_was_rejected": "Permintaan ditolak dalam aplikasi dompet.",
+      "the_request_expired_before": "Permintaan tamat sebelum aplikasi dompet menjawab. Sila cuba lagi.",
+      "could_not_reach_the": "Tidak dapat menghubungi pelayan HiveAuth. Sila cuba lagi.",
+      "unexpected_redirect": "Pelayan menghantar ubah hala yang tidak dijangka. Tiada apa diubah. Sila cuba lagi kemudian.",
+      "missing_key_hint": "Tambahkannya di bawah Tetapan, Urus Autoriti (Import Peribadi), atau log masuk semula dengannya.",
+      "this_key_is_also": "Kunci ini juga kunci owner akaun ini. Ecency tidak menyimpan kunci yang mengawal peranan owner: beri peranan active dan posting kunci tersendiri, kemudian log masuk dengan kunci itu.",
+      "this_is_the_owner": "Ini ialah kunci owner. Ecency tidak pernah menyimpan atau menggunakan kunci owner: log masuk dengan kata laluan induk, atau kunci posting atau active anda.",
+      "this_password_only_matches": "Kata laluan ini hanya sepadan dengan kunci owner akaun. Ecency tidak pernah menyimpan atau menggunakan kunci owner: log masuk dengan kunci posting atau active anda.",
+      "this_key_cannot_sign": "Kunci ini tidak boleh menandatangani untuk akaun bersendirian: akaun memerlukan lebih daripada satu tandatangan (wajarannya di bawah ambang).",
+      "public_key_given": "Ini kunci awam anda. Tampal kunci peribadi (bermula dengan 5) atau kata laluan induk anda.",
+      "memo_key_only": "Kunci memo tidak boleh digunakan untuk log masuk. Gunakan kunci posting, kunci active atau kata laluan induk anda.",
+      "network_message": "Ralat rangkaian. Sila semak sambungan anda dan cuba lagi.",
+      "network_error_this_may": "Ralat rangkaian. Ini mungkin sudah berjaya; mencuba semula adalah selamat dan tidak akan menghantar dua kali."
+    },
+    "purchases": {
+      "deal_best": "TAWARAN TERBAIK!",
+      "deal_popular": "POPULAR!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Kedai tidak menjawab."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "E-mel dan nama pengguna diperlukan untuk penggunaan 999accounts",
+      "stuck": "Pembelian produk ini sebelum ini tidak dapat diselesaikan. Sila hubungi support@ecency.com dengan resit kedai anda, ia disimpan untuk tujuan ini.",
+      "held": "Pembelian ini ditahan untuk semakan. Hubungi support@ecency.com dengan pesanan #{order}.",
+      "earlier_purchase": "Pembelian produk ini sebelum ini sedang diselesaikan untuk @{target} terlebih dahulu.",
+      "earlier_pending": "Bayaran produk ini sebelum ini masih belum selesai untuk @{target}. Ia selesai setelah kedai mengesahkan bayaran.",
+      "pending": "Bayaran anda belum selesai. Pembelian selesai setelah kedai mengesahkan bayaran.",
+      "processing": "Pembelian anda sedang diproses. Ia akan selesai tidak lama lagi."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Pindahan Berulang",
+      "delegate_hive_power": "Wakilkan Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Tetapkan laluan pengeluaran vesting",
+      "power_down": "Power down",
+      "transfer_to_saving": "Pindah ke simpanan",
+      "transfer_from_saving": "Pindah daripada simpanan",
+      "cancel_transfer_from_saving": "Batalkan pindahan daripada simpanan",
+      "collateralized_convert": "Penukaran Bercagar",
+      "witness_vote": "Undi witness",
+      "witness_update": "Kemas kini witness",
+      "witness_set_properties": "Tetapkan sifat witness",
+      "governance_proxy": "Proksi tadbir urus",
+      "claim_account": "Tuntut akaun",
+      "create_account": "Cipta akaun",
+      "create_account_with_account": "Cipta akaun dengan kredit akaun",
+      "create_limit_order": "Cipta pesanan had",
+      "cancel_limit_order": "Batalkan pesanan had",
+      "redeem_rewards": "Tebus ganjaran",
+      "post_or_comment": "Hantaran atau komen",
+      "post_or_comment_options": "Pilihan hantaran atau komen",
+      "custom_operation": "Operasi tersuai",
+      "update_account_active": "Kemas kini akaun (active)",
+      "update_account_posting": "Kemas kini akaun (posting)",
+      "change_recovery_account": "Tukar akaun pemulihan",
+      "create_proposal": "Cipta cadangan",
+      "remove_proposal": "Buang cadangan",
+      "update_proposal_votes": "Kemas kini undi cadangan",
+      "update_proposal": "Kemas kini cadangan"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Pautan ini mesti ditandatangani oleh @{account}. Tukar ke akaun itu dan buka semula.",
+      "ecency_can_only_sign": "Ecency hanya boleh menandatangani dan menyiarkan transaksi daripada pautan.",
+      "requester_page": "halaman {host}",
+      "owner_refused": "Operasi yang memerlukan kunci owner tidak boleh ditandatangani daripada pautan.",
+      "busy": "Sila tunggu: permintaan lain masih diproses.",
+      "not_supported": "Ecency belum boleh menandatangani operasi ini dalam versi ini."
+    },
+    "chats": {
+      "group_members": "Ahli kumpulan",
+      "rename_group": "Namakan semula kumpulan",
+      "failed_to_load_chats": "Gagal memuatkan sembang",
+      "unknown": "Tidak diketahui",
+      "unable_to_mark_channel": "Tidak dapat menandakan saluran sebagai dibaca",
+      "unable_to_update_favorites": "Tidak dapat mengemas kini kegemaran",
+      "unable_to_update_mute": "Tidak dapat mengemas kini senyap",
+      "group": "Kumpulan",
+      "unable_to_search": "Tidak dapat mencari",
+      "unable_to_start_chat": "Tidak dapat memulakan sembang",
+      "no_internet": "Tiada Sambungan Internet"
+    },
+    "stake": {
+      "confirm_summary": "Wakilkan {hp} HP ({vests} VESTS) Kepada @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Sudah diwakilkan kepada @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Awam sahaja. Ecency tidak pernah menyimpan kunci owner.",
+      "shared_owner": "Akaun ini menggunakan kunci yang sama untuk peranan owner dan peranan {names}. Sesiapa yang memiliki kunci itu mengawal seluruh akaun. Beri peranan {names} kunci tersendiri dan simpan kunci owner secara luar talian.",
+      "copy_warning": "Sesiapa yang memiliki kunci peribadi ini mengawal bahagian akaun anda ini. Aplikasi lain boleh membaca papan keratan; tampal hanya di tempat yang anda percayai. Ia dikosongkan daripada papan keratan selepas 2 minit."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Kunci PIN hidup.",
+      "pin_changed": "PIN ditukar.",
+      "pin_lock_is_off": "Kunci PIN mati.",
+      "wiped_notice": "Semua akaun, kunci dan kelayakan telah dibuang daripada peranti ini.",
+      "we_could_not_bring": "Kami tidak dapat membawa akaun anda daripada versi aplikasi sebelumnya. Sila log masuk semula.",
+      "your_pin_lock_could": "Kunci PIN anda tidak dapat dibawa daripada versi sebelumnya. Tetapkan PIN semula daripada menu akaun untuk menghidupkan semula kunci aplikasi.",
+      "biometric_unlock_was_turned": "Buka kunci biometrik dimatikan kerana biometrik pada peranti ini berubah. Buka kunci dengan PIN anda, kemudian hidupkannya semula daripada menu akaun.",
+      "biometric_unavailable_notice": "Buka kunci biometrik tidak dapat dihidupkan: tiada biometrik disediakan pada peranti ini.",
+      "set_backup": "Tetapkan PIN sebagai sandaran buka kunci biometrik",
+      "biometric_on_notice": "Kunci PIN hidup. Buka kunci dengan biometrik, atau dengan PIN anda.",
+      "offer_title": "Buka kunci dengan biometrik",
+      "offer_body": "Buka Ecency dengan wajah atau cap jari anda. Anda juga menetapkan PIN, yang membuka kunci aplikasi apabila biometrik tidak tersedia.",
+      "offer_use": "Guna biometrik",
+      "offer_use_pin": "Guna PIN sebaliknya"
+    },
+    "common": {
+      "list_and": "{first} dan {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Balasan dengan 25 aksara atau kurang tidak mendapat mata (pautan tidak dikira)",
+      "short_content_hint": "Terlalu pendek untuk mendapat mata (25 aksara atau kurang, pautan dikecualikan)",
+      "daily_post": "Hantaran harian {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {rentetan # hari}}",
+      "grant_description": "Berikan akaun Ecency @ecency.app kebenaran posting pada akaun anda, supaya anda boleh menghantar tanpa membuka Keychain setiap kali. Memberikannya mengubah autoriti posting akaun anda dan memerlukan kunci active anda."
+    },
+    "wallet_history": {
+      "from_to": "@{from} kepada @{to}",
+      "from_user_id": "daripada @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} kepada @{to}, id: {id}",
+      "from_to_account": "@{from} kepada {to}",
+      "from_user": "daripada @{user}",
+      "to_user": "kepada @{user}",
+      "interest": "Faedah",
+      "proposal_pay": "Bayaran Cadangan",
+      "categories": "Jenis aktiviti",
+      "category_all": "Semua",
+      "category_transfers": "Pindahan",
+      "category_market": "Pesanan pasaran",
+      "category_interest": "Faedah",
+      "category_stake": "Operasi pertaruhan",
+      "category_rewards": "Ganjaran",
+      "point_type_checkin": "Heartbeat",
+      "point_type_login": "Log masuk",
+      "point_type_post": "Hantaran",
+      "point_type_comment": "Komen",
+      "point_type_vote": "Undi",
+      "point_type_reblog": "Siar semula",
+      "point_type_transfer_sent": "Pindahan dihantar",
+      "point_type_transfer_received": "Pindahan diterima"
+    },
+    "video_upload": {
+      "continue_upload": "TERUSKAN MUAT NAIK",
+      "source_gone": "Rakaman ini tidak lagi tersedia pada peranti. Rakam atau pilih video semula.",
+      "no_camera": "Kamera tidak tersedia pada peranti ini."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Nyahpertaruh seterusnya dalam {hours, plural, other {# jam}}",
+      "account_not_found": "Akaun tidak ditemui"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Imej dalam papan keratan · Tampal imej",
+      "no_container": "Bekas wave terkini tidak dapat diambil",
+      "please_sign_in_first": "Sila log masuk dahulu.",
+      "write_something_first": "Tulis sesuatu dahulu.",
+      "account_changed": "Wave ini ditulis sebagai akaun lain. Tutup dan tulis semula.",
+      "no_upload": "Muat naik imej belum tersedia dalam binaan ini. Tampal pautan imej ke dalam teks.",
+      "fail": "Gagal"
+    },
+    "delete_account": {
+      "sign_out_failed": "Permintaan anda dihantar, tetapi log keluar gagal. Sila log keluar daripada menu.",
+      "not_sent": "Permintaan pemadaman anda tidak dapat dihantar. Sila cuba lagi."
+    },
+    "chat_sheets": {
+      "group_limit": "Satu kumpulan boleh mempunyai sehingga {max, plural, other {# orang lain}}.",
+      "search_people_by_username": "Cari orang mengikut nama pengguna",
+      "new_group_title": "Kumpulan baharu",
+      "new_group_hint": "Tambah {min} hingga {max, plural, other {# orang}} untuk memulakan perbualan kumpulan.",
+      "no_results": "Tiada sesiapa dengan nama itu ditemui dalam sembang.",
+      "search_failed": "Carian gagal. Semak sambungan anda dan cuba lagi.",
+      "create": "Mulakan kumpulan",
+      "new_group_failed": "Tidak dapat memulakan kumpulan. Sila cuba lagi.",
+      "name_limit": "Nama kumpulan boleh sehingga {max, plural, other {# aksara}}.",
+      "rename_title": "Namakan semula kumpulan",
+      "rename_hint": "Beri kumpulan ini nama yang dilihat oleh semua ahlinya. Biarkan kosong untuk memaparkan nama ahli.",
+      "placeholder": "Nama kumpulan",
+      "not_owner": "Hanya orang yang memulakan kumpulan ini boleh menamakannya semula.",
+      "rename_failed": "Tidak dapat menamakan semula kumpulan. Sila cuba lagi."
+    },
+    "editor_side": {
+      "copy_of": "Salinan {title}",
+      "deletions_failed": "Sesuatu tidak kena\n{failed} daripada {total, plural, other {# pemadaman}} gagal",
+      "uploads_failed": "{count, plural, other {# muat naik gagal}}:\n\n{messages}",
+      "failed_to_delete": "Gagal memadam"
+    },
+    "uploads": {
+      "add_to_gallery": "Tambah ke galeri"
+    },
+    "account_notice": {
+      "manage_keys": "Tetapan, Urus Autoriti",
+      "no_signing_key_title": "Log masuk semula sebagai @{account}",
+      "no_signing_key": "Ecency tidak lagi menyimpan kunci owner atau kata laluan induk pada peranti ini, dan @{account} tidak mempunyai kunci posting atau active disimpan di sini. Log masuk semula dengan kata laluan induk atau kunci posting atau active, atau tambah kunci di bawah {manageKeys} (Import Peribadi).",
+      "missing_roles_title": "Sesetengah kunci tidak ditambah",
+      "cannot_post": "menghantar, mengundi atau mengulas",
+      "cannot_transfer": "menghantar pindahan atau mengubah tetapan akaun",
+      "missing_roles": "Kata laluan anda tidak lagi sepadan dengan kunci {missing} milik @{account}: ia diubah pada akaun sejak kata laluan ditetapkan. Disimpan pada peranti ini: kunci {kept}. Sehingga anda menambah kunci {missing} di bawah {manageKeys} (Import Peribadi), aplikasi ini tidak boleh {cannot} dengan kunci untuk @{account}.",
+      "shared_owner_title": "Kunci ini juga mengawal peranan owner",
+      "shared_owner": "@{account} menggunakan kunci yang sama untuk peranan owner dan peranan {names}. Sesiapa yang memiliki kunci ini mengawal seluruh akaun. Ecency menyimpannya sebagai kunci {names} sahaja dan tidak pernah menggunakannya untuk operasi owner. Beri peranan {names} kunci tersendiri, dan simpan kunci owner secara luar talian."
+    },
+    "dapp_browser": {
+      "message_from": "Mesej daripada {host}",
+      "home_title": "Utama",
+      "loading_title": "Memuatkan...",
+      "blank_run": "[{count, plural, other {# aksara kosong}}]",
+      "too_large": "Halaman ini meminta penandatanganan permintaan yang terlalu besar untuk dipaparkan, jadi Ecency menolaknya."
+    },
+    "community_service": {
+      "the_account_changed": "Akaun telah berubah."
+    },
+    "profile_edit": {
+      "enter_link": "Masukkan pautan imej",
+      "please_sign_in_first": "Sila log masuk dahulu.",
+      "account_not_found": "Akaun tidak ditemui",
+      "please_enter_an_image": "Sila masukkan pautan imej yang bermula dengan https://"
+    },
+    "background_media": {
+      "post_by": "Hantaran oleh @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Sila log masuk dahulu."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Anda sudah mengundi dengan wajaran yang sama.",
+      "insufficient_rc": "Resource Credits tidak mencukupi. Sila tunggu atau power up.",
+      "missing_authority": "Autoriti posting tiada. Sila semak kaedah log masuk anda.",
+      "comment_too_soon": "Sila tunggu sebelum menghantar semula.",
+      "paid_out": "Hantaran ini sudah dibayar.",
+      "too_large": "Transaksi berukuran {size, plural, other {# bait}}, melebihi had {max} bait.",
+      "network_error_please_check": "Ralat rangkaian. Sila semak sambungan anda dan cuba lagi.",
+      "unconfirmed_message": "Tidak dapat mengesahkan sama ada ini berjaya. Sila semak dompet atau sejarah anda; mulakan semula hanya jika tiada di sana.",
+      "undecided_message": "Ini mungkin sudah berjaya. Sila semak dompet atau sejarah anda sebelum mencuba lagi."
+    },
+    "chat_api": {
+      "request_failed": "Permintaan gagal ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} sedang menaip...",
+      "typing_two": "{first} dan {second} sedang menaip...",
+      "typing_three": "{first}, {second}, dan {third} sedang menaip...",
+      "typing_many": "{first}, {second}, dan {count, plural, other {# lagi}} sedang menaip...",
+      "banned": "{reason} Anda masih boleh membaca sembang. Penghantaran dibuka {until}.",
+      "joined_when": "menyertai {time}",
+      "joined": "menyertai",
+      "official_badge": "Rasmi",
+      "official_badge_label": "Akaun rasmi Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Tanya Esie"
+    },
+    "chat_service": {
+      "missing_token": "Token akses Hive tiada. Sila log keluar dan log masuk semula.",
+      "dm_error": "Pengguna belum menyertai sembang"
+    },
+    "compose_reply": {
+      "account_changed": "Balasan ini ditulis sebagai akaun lain. Tutup dan tulis semula.",
+      "write_something_first": "Tulis sesuatu dahulu.",
+      "please_sign_in_first": "Sila log masuk dahulu."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Terlalu banyak penerima manfaat: paling banyak {max}.",
+      "a_beneficiary_s_share": "Bahagian penerima manfaat mestilah antara 0.01% dan 100%.",
+      "beneficiaries_add_up_to": "Jumlah penerima manfaat melebihi 100%.",
+      "a_beneficiary_is_listed": "Seorang penerima manfaat disenaraikan dua kali.",
+      "you_cannot_be_a": "Anda tidak boleh menjadi penerima manfaat hantaran anda sendiri.",
+      "a_beneficiary_has_an": "Seorang penerima manfaat mempunyai nama akaun yang tidak sah."
+    },
+    "follows": {
+      "fail": "Gagal!: {message}",
+      "follower_count": "Pengikut ({count})",
+      "following_count": "Mengikut ({count})"
+    },
+    "link": {
+      "unsupported": "Pautan ini belum disokong.",
+      "cannot_open": "Tidak dapat membuka pautan",
+      "unsupported_version": "Pautan ini tidak disokong dalam versi ini."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Pelayar Explore boleh mengakses dompet Hive anda untuk menandatangani transaksi. Pautan ini datang daripada kandungan hantaran dan tidak disahkan oleh Ecency. Teruskan hanya jika anda mempercayainya:\n\n{url}"
+    },
+    "listen": {
+      "message": "Mendengar memerlukan {required} Points dan anda mempunyai {available}.",
+      "unlock_label": "Buka kunci · {cost} Points",
+      "preparing_audio": "Menyediakan audio · {preparingPercent}%",
+      "waiting_in_line_ahead": "Menunggu giliran, {ahead} di hadapan…",
+      "next_in_line": "Seterusnya dalam giliran…",
+      "preparing_about_minutes": "Menyediakan audio, kira-kira {minutes} min…",
+      "preparing_audio_2": "Menyediakan audio…",
+      "spend_confirm": "Belanjakan {cost} Points untuk mendengar hantaran ini? Audio ini milik anda dan boleh dimainkan semula bila-bila masa.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Audio tidak dapat dihasilkan, Points anda dikembalikan"
+    },
+    "media_pick": {
+      "preparing_video": "Menyediakan video...",
+      "library_hint": "Pilih daripada foto anda",
+      "camera_hint": "Ambil foto baharu sekarang",
+      "files_hint": "Semak imbas fail pada peranti ini dan dalam awan",
+      "paste_hint": "Guna imej yang anda salin",
+      "link_hint": "Guna imej daripada web"
+    },
+    "media_picking": {
+      "image_types_message": "Jenis fail ini tidak disokong. Pilih imej JPEG, PNG, GIF, WebP atau HEIC.",
+      "video_types_message": "Jenis fail ini tidak disokong. Pilih video MP4 atau MOV.",
+      "gif_too_large": "GIF ini lebih besar daripada {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Operasi ini memerlukan tandatangan active dan posting sekali gus, yang belum dapat ditandatangani Ecency bersama."
+    },
+    "poll": {
+      "fail": "Gagal!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Tidak dapat menyemak autoriti posting akaun anda. Semak sambungan anda dan cuba lagi."
+    },
+    "post_lists": {
+      "voters_title": "Maklumat Pengundi ({total})",
+      "reblogs_title": "Maklumat Siar Semula ({total})",
+      "no_history_found": "Sejarah tidak ditemui!",
+      "no_edit_history_available": "Tiada sejarah suntingan untuk kandungan ini.",
+      "version_label": "Versi {version}"
+    },
+    "stats": {
+      "other_device": "Lain-lain"
+    },
+    "profile": {
+      "account_not_found": "Akaun tidak ditemui",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Penuh dalam {hours, plural, other {# jam}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Tidak dapat membaca profil semasa anda, cuba lagi"
+    },
+    "profile_sheet": {
+      "fail": "Gagal! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Akaun tidak ditemui"
+    },
+    "push_payload": {
+      "mentioned": "@{source} menyebut @{target}",
+      "replied": "@{source} membalas @{target}",
+      "transferred": "@{source} memindahkan kepada @{target}",
+      "delegated": "@{source} mewakilkan kepada @{target}",
+      "rewards_received": "Ganjaran diterima",
+      "account_updated": "Akaun dikemas kini",
+      "account_updated_body": "Butiran akaun anda telah dikemas kini",
+      "followed": "@{source} mengikut @{target}",
+      "unfollowed": "@{source} berhenti mengikut @{target}",
+      "ignored": "@{source} mengabaikan @{target}",
+      "blacklisted": "@{source} menyenaraihitamkan @{target}",
+      "posted_in": "@{source} menghantar dalam #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Tidak dapat memperoleh kebenaran Kamera",
+      "permission_message": "Sila berikan kebenaran kamera dalam tetapan ecency.",
+      "permission_allow": "Benarkan"
+    },
+    "reply_account": {
+      "switch": "Balas sebagai akaun lain"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} anda daripada @{account} berjaya.",
+      "not_sent": "{label} anda daripada @{account} tidak berjaya. Tiada apa dihantar; anda boleh memulakannya semula.",
+      "checking_whether_your_from": "Menyemak sama ada {label} anda daripada @{account} berjaya. Sila semak dompet anda sebelum menghantarnya semula."
+    },
+    "signing": {
+      "hot_page_closed": "Halaman HiveSigner ditutup",
+      "wrong_role": "Ini kunci {given} anda; operasi ini memerlukan kunci {needed} anda.",
+      "action_id_required": "Tindakan ini memerlukan id tindakan untuk dicuba semula dengan selamat."
+    },
+    "signing_router": {
+      "owner_never": "Operasi owner tidak pernah ditandatangani dalam aplikasi."
+    },
+    "spin": {
+      "key_missing": "Kunci permainan tiada",
+      "score": "{score, plural, other {# Point}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Hari ini (UTC), set semula dalam {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Set semula setiap hari pada 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Log masuk semula",
+      "message": "Storan selamat telah ditetapkan semula pada peranti ini. Log masuk semula.",
+      "failed": "Akaun pada peranti ini tidak dapat dibuang. Sila cuba lagi."
+    },
+    "store": {
+      "in_app_purchases_are": "Pembelian dalam aplikasi tidak tersedia dalam binaan ini."
+    },
+    "wallet_sends": {
+      "journal_full": "Terlalu banyak penghantaran terdahulu masih disemak dengan rangkaian. Sila tunggu sehingga disahkan sebelum menghantar lebih banyak.",
+      "check_later": "Rangkaian tidak mengesahkan ini tepat pada masanya. Sila semak dompet atau sejarah anda sebelum menghantarnya semula; aplikasi menyemak semula pada permulaan seterusnya."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {# belum dibaca}}",
+      "locked_text": "Buka kunci Ecency untuk melihat",
+      "signed_out_text": "Log masuk ke Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Tidak dapat membaca autoriti semasa akaun anda. Tiada apa diubah; sila cuba lagi.",
+      "reads_disagree": "Dua bacaan autoriti posting akaun anda tidak sepadan. Tiada apa diubah; sila cuba lagi."
+    },
+    "vote": {
+      "vote_weight_must_be": "Wajaran undi mestilah antara -100% dan 100%.",
+      "please_sign_in_first": "Sila log masuk dahulu."
+    },
+    "widget": {
+      "streak_name": "Rentetan misi",
+      "write": "Tulis",
+      "new_wave": "Wave baharu",
+      "notifications_description": "Pemberitahuan anda yang belum dibaca. Disembunyikan semasa kunci PIN hidup.",
+      "streak_description": "Rentetan misi harian anda. Disembunyikan semasa kunci PIN hidup.",
+      "compose_description": "Tulis hantaran atau wave baharu.",
+      "streak_title": "Rentetan",
+      "daily_quests": "Misi harian",
+      "streak_hint": "Buka Perks untuk melihat rentetan anda",
+      "open_perks": "Buka Perks",
+      "open_app": "Buka Ecency",
+      "unread_caption": "{count, plural, other {belum dibaca}}",
+      "streak_caption": "{count, plural, other {rentetan hari}}"
+    },
+    "system": {
+      "dictation_channel": "Dikte",
+      "listen_channel": "Dengar",
+      "dictation_channel_description": "Dipaparkan semasa rakaman dikte berjalan di latar belakang, dengan tindakan Henti.",
+      "dictation_title": "Merakam untuk dikte",
+      "dictation_text": "Ecency sedang merakam dikte anda. Henti menyimpannya tanpa dihantar sehingga anda mengesahkan dalam aplikasi.",
+      "listen_channel_description": "Memberitahu anda apabila Dengar tidak dapat diteruskan di latar belakang.",
+      "listen_paused": "Dengar dijeda",
+      "listen_paused_text": "Buka Ecency untuk terus mendengar.",
+      "skip_back": "Undur 15 saat",
+      "skip_forward": "Maju 15 saat"
+    },
+    "permission": {
+      "face_id": "Buka kunci Ecency dengan Face ID dan bukannya PIN anda.",
+      "camera": "Imbas kod QR, dan ambil foto atau rakam video untuk ditambah ke hantaran anda.",
+      "photo_library_add": "Ecency menyimpan imej yang anda muat turun daripada hantaran ke pustaka foto anda.",
+      "photo_library": "Ecency menyimpan imej yang anda muat turun daripada hantaran bersama dalam album Ecency di pustaka foto anda.",
+      "microphone": "Ecency menggunakan mikrofon anda supaya anda boleh mendikte hantaran dan komen (rakaman itu dihantar ke Ecency untuk ditranskripsi) dan untuk merakam bunyi bersama video yang anda tambah ke hantaran."
+    },
+    "android": {
+      "no_browser": "Tiada pelayar tersedia",
+      "biometric_unlock_title": "Buka kunci Ecency dengan biometrik",
+      "biometric_confirm": "Sahkan dengan cap jari atau wajah anda",
+      "image_unsupported_address": "Alamat imej tidak disokong",
+      "image_create_failed": "Tidak dapat mencipta fail",
+      "image_write_failed": "Tidak dapat menulis fail",
+      "image_too_large": "Imej terlalu besar",
+      "image_download_failed": "Muat turun gagal dengan status {status}",
+      "billing_disconnected": "Google Play Billing terputus.",
+      "billing_no_screen": "Tiada skrin untuk memaparkan pembelian.",
+      "billing_error": "Ralat Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Anda mencipta {count, plural, other {# siaran}} bulan ini. Teruskan!",
-        "checkin": "Anda mendaftar masuk {count, plural, other {# hari}} minggu ini. Teruskan!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, other {# hantaran baharu}} dalam #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# percubaan gagal}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Rentetan {n} hari"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Hanya akaun lebih lama daripada {days} hari dibenarkan",
-        "max_choices": "• Anda boleh memilih sehingga {choices} pilihan"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Baki {executions} pemindahan",
-        "schedule_summary": "{executions} pemindahan, setiap satu setiap {hours} jam"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Terlalu pendek untuk mendapat mata ({n, plural, other {# aksara}} atau kurang, pautan dikecualikan)"
       },
       "chats": {
-        "people_joined": "{count} orang telah menyertai"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "dalam kira-kira {count, plural, other {# minit}}",
+        "ban-remaining-hours": "dalam kira-kira {count, plural, other {# jam}}",
+        "ban-remaining-days": "dalam kira-kira {count, plural, other {# hari}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Gunakan paling banyak {n, plural, other {# tag}}",
+          "too_long": "Carian terlalu panjang. Gunakan paling banyak {n, plural, other {# aksara}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count} aksara diperlukan",
-        "chars_remaining": "{count} aksara berbaki"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Anda boleh memilih sehingga {count, plural, other {# imej}} sekali gus"
+      },
+      "dictation": {
+        "stop_hint": "Henti untuk mentranskripsi dan menambahkannya ke hantaran anda. Sehingga {m, plural, other {# minit}}.",
+        "rate": "{n} Points setiap {s, plural, other {# saat}}"
       },
       "transfer": {
-        "powering_down_info": "Penyahpegunaan seterusnya dalam {days} hari, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Antara {min} dan {max, plural, other {# aksara}}"
       }
     }
   }

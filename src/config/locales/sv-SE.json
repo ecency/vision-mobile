@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro-medlem"
   },
   "perks": {
     "header": "Förmåner",
@@ -31,42 +31,42 @@
     "promote_desc": "Få fler ögon på ditt inlägg",
     "account_boost": "Kontoboost",
     "account_boost_desc": "Boosta valfritt konto",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Fyll på RC",
+    "rc_topup_desc": "Fortsätt posta när du har få Resource Credits",
+    "streak_freeze_owned": "{n} i reserv",
+    "streak_freeze_buy": "Skydda serien ({price} Points)",
+    "streak_freeze_buying": "Skyddar",
+    "streak_freeze_error": "Det gick inte att köpa serieskydd. Försök igen."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Dagligt inlägg",
+    "streak": "Serie på {n} dagar",
+    "keep_streak": "Håll serien vid liv"
   },
   "waves": {
     "for_you": "För dig",
     "following": "Följer",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Egna flöden",
+    "custom_feeds_subtitle": "Fäst källor och taggar för att lägga till dem som flödesflikar.",
+    "add_tag_placeholder": "Lägg till en tagg",
+    "sources": "Källor",
+    "your_feeds": "Dina flöden",
+    "trending_tags": "Trendande taggar",
+    "shorts_empty": "Inga shorts att visa ännu",
+    "mute": "Tysta",
+    "unmute": "Sluta tysta"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Kom igång",
+    "subtitle": "Ny här? Waves är korta inlägg och det enklaste sättet att komma igång.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Stäng",
+    "item_wave": "Posta din första Wave",
+    "item_vote": "Rösta på en Wave du gillar",
+    "item_reply": "Svara någon",
+    "item_checkin": "Checka in för att starta din serie",
+    "all_done_title": "Allt klart 🎉",
+    "all_done_subtitle": "Nu är du redo. Fortsätt med Waves!"
   },
   "profile": {
     "havent_commented": "har inte kommenterat något än",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Ålder  |  Synlighet  |  Tolkning",
     "attach_poll": "Bifoga omröstning"
   },
+  "favorite_tags": {
+    "title": "Taggar",
+    "hint": "Följ för att få aviseringar om nya inlägg med den här taggen",
+    "following_hint": "Du får aviseringar om nya inlägg med den här taggen",
+    "follow": "Följ",
+    "following": "Följer",
+    "added": "Följer taggen",
+    "removed": "Slutade följa taggen",
+    "empty_list": "Inget här"
+  },
   "favorites": {
     "add": "Lägg till favorit",
     "add_error": "Kunde inte lägga till favorit",
@@ -181,7 +191,33 @@
     "payout": "Utbetalning",
     "details": "Detaljer",
     "community": "community",
-    "new_post": "Nytt inlägg"
+    "new_post": "Nytt inlägg",
+    "mute_post_title": "Tysta det här inlägget",
+    "unmute_post_title": "Sluta tysta det här inlägget",
+    "mute_post_reason": "Varför tystas det här?",
+    "unmute_post_reason": "Varför återställs det här?",
+    "manage": "Hantera community",
+    "manage_members": "Medlemmar och roller",
+    "manage_settings": "Communityinställningar",
+    "manage_activities": "Aktivitetslogg",
+    "activities": "aktivitet",
+    "no_activities": "Ingen aktivitet än",
+    "activities_load_failed": "Det gick inte att ladda aktiviteten. Dra för att uppdatera.",
+    "set_role": "Ange roll",
+    "assign_role": "Tilldela roll",
+    "assign_role_hint": "Sök efter valfritt konto, även ett som inte har gått med, och välj en roll.",
+    "username_placeholder": "Användarnamn",
+    "invalid_username": "Välj ett befintligt konto från resultaten",
+    "members": "medlemmar",
+    "no_members": "Inga medlemmar hittades",
+    "members_incomplete": "Vissa medlemmar kunde inte laddas. Dra för att uppdatera.",
+    "members_load_failed": "Det gick inte att ladda medlemmarna. Dra för att uppdatera.",
+    "role_owner": "Ägare",
+    "role_admin": "Admin",
+    "role_mod": "Moderator",
+    "role_member": "Medlem",
+    "role_guest": "Gäst",
+    "role_muted": "Tystad"
   },
   "trade": {
     "swap_for": "Byter {fromAmount} mot {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Korspublicera",
     "pin-blog": "Fäst på blogg",
     "copy": "kopiera länk",
+    "copy-text": "kopiera text",
+    "open-thread": "öppna tråd",
     "unpin-community": "Lossa från community",
+    "mute-post": "Tysta inlägg",
+    "unmute-post": "Sluta tysta inlägg",
     "mute": "Tysta / Blockera",
     "reblog": "reblogga",
     "undo-reblog": "ångra reblogg",
@@ -232,24 +272,24 @@
     "unpin-reply": "Lossa kommentar"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Det här inlägget är på {lang}. Översätta till {target}?",
+    "translate_to": "Översätt till {lang}",
+    "show_original": "Visa original",
+    "translated_from": "Översatt från {lang}",
+    "change_language": "Byt språk"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Översätt inlägg",
+    "source": "Källspråk",
+    "target": "Målspråk",
+    "detected": "Identifierat: {lang}",
+    "translate": "Översätt",
+    "apply": "Använd",
+    "review_note": "Lägger till en maskinöversättning av din egen text i slutet av inlägget. Granska och redigera innan du publicerar.",
+    "too_short": "Skriv lite mer först. Översättning kräver minst några meningar.",
+    "progress": "Översätter {done} av {total}...",
+    "error": "Översättningen misslyckades. Försök igen.",
+    "add_title_marker": "Lägg till språkmarkering i titeln"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Hett",
     "popular": "Populärt",
     "new": "Nytt",
-    "friends": "Following",
+    "friends": "Följer",
     "my_blog": "Min blogg"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Inget här"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Mallar",
+    "untitled": "Namnlös mall",
+    "empty_list": "Spara ett inlägg som mall från redigeraren för att återanvända det här.",
+    "delete_confirm": "Vill du verkligen ta bort den här mallen?",
+    "applied": "Mallen har tillämpats som nytt inlägg",
+    "save_as_template": "Spara som mall",
+    "name_placeholder": "Mallnamn",
+    "saved": "Mallen sparades"
   },
   "selection_list": {
     "available": "Tillgängliga {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
+      "activities": "Alla",
+      "replies": "Svar",
+      "mentions": "Omnämnanden",
+      "rvotes": "Röster",
+      "follows": "Nya följare",
       "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "transfers": "Överföringar",
+      "delegations": "Delegeringar",
+      "nfavorites": "Favoriter",
+      "tags": "Taggar",
+      "nbookmarks": "Bokmärken",
+      "payouts": "Utbetalningar",
+      "scheduled_published": "Schemalagda inlägg",
+      "account_updates": "Kontouppdateringar",
+      "weekly_earnings": "Veckointäkter"
     },
     "this_week": "Denna vecka",
     "reblog": "rebloggade",
@@ -417,11 +458,15 @@
     "yesterday": "Igår",
     "mention": "omnämnd i",
     "favorites": "skapade ett nytt inlägg",
+    "tags": "publicerade i #{tag}",
+    "tags_bundle": "{count} nya inlägg i #{tag}",
+    "tags_title": "Nya inlägg i en tagg du följer",
     "mentions": "Omnämnanden",
     "spin": "Dags att tjäna fler Points",
     "last_week": "Förra veckan",
     "recent": "Senaste",
     "ignore": "ignorerade dig",
+    "blacklist": "svartlistade dig",
     "follow": "började följa dig",
     "notification": "Aviseringar",
     "this_month": "Denna månad",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} kan nu publicera och rösta åt dig. Om du inte godkände detta, återkalla det.",
     "weekly_earnings": "Du tjänade ${amount} den här veckan{breakdown}",
     "payouts": "Utbetalning mottagen: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "publicerade ett schemalagt inlägg",
+    "scheduled_published_title": "Schemalagt inlägg publicerat",
+    "scheduled_published_body": "Ditt schemalagda inlägg är nu live, tryck för att visa det"
   },
   "recurrent": {
     "delete_failed": "Det gick inte att ta bort den återkommande överföringen, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Öppna senaste utkast eller skapa nytt inlägg",
     "reward_power_up": "Staka 100 %",
     "open_gallery": "Öppna galleri",
+    "open_files": "Välj från Filer",
     "clipboard_no_image": "Ingen bild hittades i urklipp",
     "clipboard_image_detected": "Bild i urklipp",
     "paste_image": "Klistra in bild",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Senare",
     "settings_title": "Inläggsalternativ",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Nej"
+    "support_ecency": "Stöd Ecency {percent}%",
+    "alert_btn_no": "Nej",
+    "short_reply_hint": "Svar på {n} tecken eller färre ger inga poäng (länkar räknas inte)",
+    "short_content_hint": "För kort för att ge poäng ({n} tecken eller färre, länkar oräknade)"
   },
   "time": {
     "week": "veckor",
@@ -655,7 +703,41 @@
     "select_emoji": "Välj emoji",
     "more_emojis": "Mer",
     "search_emojis": "Sök emojis...",
-    "no_emoji_found": "Ingen emoji hittades"
+    "no_emoji_found": "Ingen emoji hittades",
+    "ban-reason-spray": "Du är pausad från att skriva eftersom samma meddelande skickades till flera kanaler samtidigt.",
+    "ban-reason-mass-dm": "Du är pausad från att skriva eftersom ett meddelande skickades till många personer samtidigt.",
+    "ban-reason-generic": "Du är pausad från att skriva i chatten.",
+    "ban-can-still-read": "Du kan fortfarande läsa chatten.",
+    "ban-unlocks": "Du kan skriva igen {when}.",
+    "ban-remaining-soon": "om mindre än en minut",
+    "ban-remaining-minutes": "om ungefär {count} minuter",
+    "ban-remaining-hours": "om ungefär {count} timmar",
+    "ban-remaining-days": "om ungefär {count} dagar",
+    "new_group": "Ny grupp",
+    "new_group_hint": "Lägg till {min} till {max} personer för att starta en gruppkonversation.",
+    "new_group_search": "Sök personer med användarnamn",
+    "new_group_full": "En grupp kan ha upp till {max} andra personer.",
+    "new_group_no_results": "Ingen hittades i chatten med det namnet.",
+    "new_group_search_failed": "Sökningen misslyckades. Kontrollera anslutningen och försök igen.",
+    "new_group_remove": "Ta bort @{username}",
+    "new_group_create": "Starta grupp",
+    "new_group_failed": "Det gick inte att starta gruppen. Försök igen.",
+    "rename_group": "Byt namn på gruppen",
+    "rename_group_hint": "Ge gruppen ett namn som alla i den ser. Lämna tomt för att visa medlemmarnas namn i stället.",
+    "group_name": "Gruppnamn",
+    "rename_group_too_long": "Ett gruppnamn kan vara upp till {max} tecken långt.",
+    "rename_group_not_owner": "Bara den som startade gruppen kan byta namn på den.",
+    "rename_group_failed": "Det gick inte att byta namn på gruppen. Försök igen.",
+    "group_renamed": "{user} bytte namn på gruppen till \"{name}\"",
+    "group_name_cleared": "{user} tog bort gruppnamnet",
+    "group_members": "Gruppmedlemmar",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "reactions_title": "Reaktioner",
+    "reactor_you": "Du",
+    "reactor_unknown": "Någon",
+    "see_who_reacted": "Tryck länge för att se vem som reagerade",
+    "group": "Grupp"
   },
   "free_estm": {
     "timer_text": "Nästa gratis spin om",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transaktionen misslyckades"
   },
   "search_result": {
+    "error": "Sökningen kunde inte slutföras. Försök igen",
+    "filters": {
+      "title": "Filter",
+      "open": "Filter",
+      "author": "Författare",
+      "author_placeholder": "användarnamn",
+      "category": "Kategori",
+      "category_placeholder": "community eller kategori",
+      "tags": "Taggar",
+      "tags_placeholder": "kommaseparerade",
+      "type": "Typ",
+      "type_all": "Alla",
+      "type_post": "Inlägg",
+      "type_comment": "Kommentarer",
+      "date": "Datum",
+      "date_week": "Senaste veckan",
+      "date_month": "Senaste månaden",
+      "date_year": "Senaste året",
+      "date_all": "Alla tider",
+      "sort": "Sortera",
+      "apply": "Använd",
+      "active": "{n} aktiva",
+      "too_many_tags": "Använd högst {n} taggar",
+      "too_long": "Sökningen är för lång. Använd högst {n} tecken",
+      "needs_criteria": "Ange en sökterm, eller en författare, kategori eller tagg att filtrera på"
+    },
     "communities_filter": {
       "new": "Nya",
       "my": "Mina communityn",
@@ -727,7 +835,7 @@
     "title": "Korsinlägg"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Författaren har uppgett AI-användning"
   },
   "ai_assist": {
     "title": "AI-skrivassistent",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Få relevanta taggar för ditt inlägg",
     "action_generate_title": "Generera titel",
     "action_generate_title_desc": "Skapa fängslande titelalternativ",
-    "action_summarize": "Recap",
+    "action_summarize": "Sammanfattning",
     "action_summarize_desc": "Skapa en koncis sammanfattning",
     "action_check_grammar": "Kontrollera grammatik",
     "action_check_grammar_desc": "Åtgärda grammatik- och stavfel",
+    "action_generate_image": "Skapa bild",
+    "action_generate_image_desc": "Skapa en AI-bild till ditt inlägg",
+    "cost_from": "från {cost} {unit}",
     "text_label": "Din text",
     "text_placeholder": "Klistra in eller skriv ditt innehåll här...",
     "min_chars": "Minst {count} tecken krävs",
@@ -797,16 +908,26 @@
     "remind_later": "Påminn senare",
     "success_subscribe": "Prenumeration lyckades!",
     "payloadTooLarge": "Filstorleken är för stor, ändra storlek eller ladda upp en mindre bild",
+    "too_many_images": "Du kan välja upp till {count} bilder åt gången",
     "fail_follow": "Följning misslyckades!",
     "clear_user_alert": "Är du säker på att du vill rensa all användardata?",
     "cancel": "Avbryt",
     "connection_success": "Anslutningen lyckades!",
     "rc_down": "Inte tillräckligt med Resource Credits för att utföra en åtgärd! \n\nBoosta ditt konto för att fortsätta njuta av upplevelsen. Vill du boosta ditt konto nu?",
+    "rc_down_title": "Inte tillräckligt med Resource Credits",
+    "rc_precheck_title": "Det här inlägget kan vara för stort för att publiceras",
+    "rc_precheck_body": "Dina Resource Credits verkar vara för låga för ett inlägg av den här storleken.",
+    "rc_down_body": "Du har inte tillräckligt med Resource Credits för den här åtgärden.\n\nFyll på med Points nu för att fortsätta, eller boosta ditt konto för gott.",
+    "rc_down_topup": "Fyll på RC med Points",
+    "rc_down_boost": "Boosta konto",
     "done": "Klart",
     "something_wrong_alt": "Prova under tiden Ecency.com från din webbläsare",
     "same_user": "Den här användaren är redan tillagd i listan",
     "fail": "Misslyckades!",
     "operation_failed_with_reason": "{operation} misslyckades: {reason}",
+    "request_timed_out": "Anslutningen tar för lång tid. Kontrollera nätverket och försök igen.",
+    "load_failed_retry": "Vi kunde inte ladda det här. Försök igen.",
+    "retrying": "Försöker igen...",
     "wallet_refresh_failed": "Uppdatering av plånboken misslyckades. Försök igen.",
     "wallet_refresh_missing_account": "Uppdatering av plånboken misslyckades: konto saknas.",
     "boost_failed": "Boost misslyckades.",
@@ -950,30 +1071,30 @@
   },
   "post": {
     "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
+    "upvoted": "Upvotad",
+    "downvoted": "Downvotad",
+    "upvote_hint": "Tryck två gånger för att öppna röstalternativen",
+    "payout_details": "Utbetalningsdetaljer",
+    "a11y_votes": "{count, plural, one {# röst} other {# röster}}",
+    "a11y_voters_hint": "Visa väljare",
     "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "a11y_reblogs_hint": "Visa reblogs",
+    "a11y_comments": "{count, plural, one {# kommentar} other {# kommentarer}}",
+    "a11y_comments_hint": "Visa kommentarer",
+    "a11y_reply_hint": "Svara",
+    "a11y_tip": "Skicka dricks",
+    "a11y_tips": "{count, plural, one {# dricks} other {# drickspengar}}",
+    "a11y_edit": "Redigera kommentar",
+    "a11y_delete": "Ta bort kommentar",
+    "a11y_show_replies": "Visa svar",
+    "a11y_hide_replies": "Dölj svar",
+    "a11y_post_options": "Inläggsalternativ",
+    "a11y_views": "{count, plural, one {# visning} other {# visningar}}",
+    "source_ecency": "Publicerat med Ecency",
+    "a11y_stats_hint": "Visa inläggsstatistik",
     "image": "Bild",
     "reveal_muted": "TYSTAT\nTryck för att visa innehåll",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Tryck för att ladda bilden",
     "in": "i",
     "poll": "OMRÖSTNING",
     "copy_link": "Kopiera länk",
@@ -998,13 +1119,14 @@
     "save_to_local": "Ladda ned till enheten",
     "muted": "Innehållet är tystat på grund av regelbrott",
     "community_muted": "Innehållet tystat på grund av brott mot communityns riktlinjer",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Innehåll från ett konto med lågt anseende",
+    "muted_downvoted": "Innehåll som användare har downvotat",
+    "muted_low_trust": "Konto med låg reputation och en overifierad utgående länk",
+    "muted_reveal": "Tryck för att visa",
     "promoted": "MARKNADSFÖRT",
     "image_saved": "Bilden sparad i fotogalleriet",
     "words": "Ord",
     "reading": "Lästid",
-    "listen": "Lyssna",
     "min": "min",
     "summarize_start": "Starta"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Inget befintligt inlägg",
     "invalid_link": "Webbadressen är ogiltig, du kan försöka igen med en giltig webbadress eller försöka öppna den i en webbläsare",
-    "no_existing_user": "Ingen befintlig användare"
+    "no_existing_user": "Ingen befintlig användare",
+    "posting_key_request": "{requester} begär den privata posting-nyckeln för @{username}.\n\nFortsätt bara om du litar på begäran.",
+    "posting_key_request_unnamed": "Ett annat program begär den privata posting-nyckeln för @{username}.\n\nFortsätt bara om du litar på begäran.",
+    "auth_request_as_user": "{requester} vill logga in dig som @{username}.\n\nBara ditt användarnamn och ett inloggningsbevis delas. Ingen nyckel lämnar Ecency.",
+    "auth_request_as_current": "{requester} vill logga in dig med ditt Ecency-konto.\n\nBara ditt användarnamn och ett inloggningsbevis delas. Ingen nyckel lämnar Ecency."
   },
   "payout": {
     "breakdown": "Specifikation",
@@ -1065,7 +1191,7 @@
     "open": "Öppna webbadress",
     "invalid_key_desc": "vänligen logga in med {key}-nyckel eller huvudnyckel för att genomföra den här transaktionen",
     "auth_transfer_confirm": "Bekräfta överföring till {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Godkänn bara om du litar på källan till den här länken. Godkännandet skickar operationen nedan från ditt konto med din {authority}-nyckel."
   },
   "voters_dropdown": {
     "rewards": "BELÖNINGAR",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Får endast innehålla bokstäver, siffror och bindestreck",
       "username_no_ascii_first_letter_error": "Bör börja med en bokstav",
       "username_contains_double_hyphens": "Får inte innehålla dubbla bindestreck",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Det här användarnamnet liknar för mycket ett konto hos en kryptobörs och kan förvirra andra. Välj ett mer unikt namn.",
+      "username_restricted_prefix": "Användarnamn som börjar med 'uid' följt av siffror är inte tillåtna eftersom de ofta används för att utge sig för att vara andra. Välj ett annat namn.",
       "username_contains_underscore": "Får inte innehålla understreck"
     },
     "500_error": "Din begäran kunde inte behandlas, registreringskön är förmodligen full! Försök igen om några minuter...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Användarnamnet är redan taget",
+      "14": "E-postadressen är redan registrerad",
+      "15": "Ange en giltig e-postadress",
+      "16": "Ange ett giltigt användarnamn",
+      "17": "Användarnamnet är för långt, välj ett kortare",
+      "19": "Använd en permanent e-postadress eller skaffa ett Premium-konto istället",
+      "21": "Den här värvningen är inte giltig",
+      "28": "Din förfrågan kunde inte behandlas: registreringskön är troligen full. Försök igen om några minuter.",
+      "107": "VPN-anslutning upptäcktes. Stäng av ditt VPN och försök igen, eller skaffa ett Premium-konto istället.",
+      "110": "För att förhindra missbruk begränsar vi antalet konton per person/nätverk. Försök igen från ett annat nätverk.",
+      "111": "Tor-anslutning upptäcktes. Inaktivera Tor under registreringen.",
+      "112": "Vi kunde inte verifiera din anslutning just nu. Försök igen om några minuter."
     },
     "have_account_text": "Har du redan ett konto?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Skaffa ett fullständigt Hive-konto. Den här metoden har grundläggande kontroller för att säkerställa att botnät inte missbrukar vår registreringskälla.",
     "btn_register": "Registrera gratis",
     "title": "Gratis konto"
+  },
+  "dictation": {
+    "title": "Diktera",
+    "start": "Spela in",
+    "stop": "Stoppa",
+    "record_more": "Spela in mer",
+    "done": "Klar",
+    "recording": "Spelar in",
+    "stop_hint": "Stoppa för att transkribera och lägga till i ditt inlägg. Upp till {m} minuter.",
+    "inserted": "Tillagt i ditt inlägg. Spela in mer, eller tryck på Klar.",
+    "transcribing": "Transkriberar",
+    "rate": "{n} Points per {s} sekunder",
+    "cost_running": "{n} Points hittills",
+    "cost_running_free": "Gratis hittills",
+    "free_remaining": "Dina nästa {n} x {s}s är gratis i dag",
+    "price_loading": "Kontrollerar pris",
+    "price_error": "Det gick inte att ladda priset för transkribering.",
+    "denied": "Ecency behöver mikrofonåtkomst för att diktera. Tillåt det i Inställningar och försök igen.",
+    "error_empty": "Inget tal hittades i inspelningen.",
+    "error_insufficient_points": "Inte tillräckligt med Points för att transkribera inspelningen.",
+    "error_rate_limited": "För många inspelningar just nu. Försök igen om en stund.",
+    "error_too_long": "Inspelningen är för lång för att transkribera.",
+    "error_failed": "Det gick inte att transkribera inspelningen. Försök igen.",
+    "error_recorder": "Det gick inte att starta inspelningen. Försök igen."
   },
   "wallet": {
     "delegations_out": "Utgående delegeringar",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Att checka in regelbundet ger dig 0,25 points.",
     "fill_transfer_from_savings": "Sparande genomfört",
     "activities": "Aktiviteter",
+    "no_activities": "Inga transaktioner än",
+    "activities_failed": "Det gick inte att ladda transaktionerna. Dra nedåt för att försöka igen.",
     "tap_update": "Tryck för att uppdatera",
     "mining_lottery": "Lotteri vunnet",
     "checkin": "Checka in",
     "tokens_transfer": "Tokens överförda",
     "outgoing_transfer_title": "Överföring/gåva",
+    "burned_title": "AI-användning",
+    "burned_description": "Points som spenderats på en AI-funktion",
+    "burn_refund_title": "AI-återbetalning",
+    "burn_refund_description": "Points som återbetalats efter en misslyckad AI-förfrågan",
     "manage_assets": "Lägg till/ta bort tillgångar",
     "selected_assets": "Valda tillgångar",
     "nft_setPropertyPermissions": "Egenskapsbehörigheter inställda för NFT-symbol",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Tokens uppdatera precision",
     "tokens_transferOwnership": "Tokenägarskap överfört",
     "withdraw_vesting": "Avstaka",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Uttagskonton",
     "delegate_engine": "Delegera",
     "market_close": "Order stängd",
     "nftmarket_transferFee": "Köporderavgift",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "SKAFFA POINTS",
     "escrow_approve": "Godkänn spärrmedel",
     "expires": "går ut",
+    "transaction_id": "Transaktions-ID",
+    "copy_transaction_id": "Kopiera transaktionslänk",
+    "filter_activities": "Filtrera aktiviteter",
+    "filter_activities_desc": "Välj vilka operationer historiken hämtar",
+    "filter_all": "Markera alla",
+    "filter_none": "Rensa alla",
+    "filter_apply": "Använd",
     "author_reward": "Författarbelöning",
     "withdraw_hbd": "Ta ut sparande",
     "convert_request": "Konverteringsbegäran",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Fyll på RC",
+    "desc": "En kortvarig RC-boost så att du kan fortsätta posta.",
+    "confirm": "Använda Points för att fylla på dina Resource Credits?",
+    "insufficient": "Du har inte tillräckligt med Points.",
+    "buy_points": "Köp Points"
   },
   "ai_image_generator": {
     "title": "AI-bildgenerator",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Anpassad ({hours} h)",
+    "balance_load_failed": "Det gick inte att ladda ditt saldo. Tryck för att försöka igen.",
+    "precision_load_failed": "Det gick inte att ladda tokenets uppgifter, så bara hela belopp kan skickas. Tryck för att försöka igen.",
     "close": "Stäng",
     "favorite_username_placeholder": "Användarnamn",
     "invalid_recipient_qr": "Kunde inte hitta något användarnamn i den här QR-koden.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Hantera behörigheter",
     "pincode": "PIN-kod",
     "general": "Allmänt",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Stöd Ecency",
+    "support_beneficiary": "Dela inläggsbelöningar med Ecency",
+    "support_beneficiary_percent": "Andel av inläggsbelöningar",
+    "support_curation": "Behåll en del av kurationsbelöningarna",
+    "support_curation_percent": "Innehållning av kurationsbelöningar",
     "feedback_body": "Skriv ditt meddelande här!\n\nHive-användarnamn: {username}\nAppversion: {appVersion}\nPlattform: {platform}\n",
     "show_imgs": "Visa bilder",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Kommentar",
       "bookmark": "Bokmärken",
+      "tags": "Taggar",
       "reblog": "Reblogg",
       "favorite": "Favoriter",
       "mention": "Omnämnande",
@@ -1599,10 +1765,10 @@
       "transfers": "Överföringar",
       "vote": "Rösta",
       "follow": "Följ",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Schemalagt inlägg publicerat",
+      "payouts": "Utbetalningar",
+      "account_update": "Kontouppdateringar",
+      "weekly_earnings": "Veckointäkter",
       "fcm_unavailable": "Push-aviseringar stöds inte på den här enheten. Du får aviseringar endast när appen är öppen."
     },
     "keys_warning": "Känslig kontoinformation!\nEcency måste säkras med PIN-kod innan du visar privata nycklar.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Skicka feedback",
     "rate_app": "Betygsätt Ecency",
+    "email_digests": "E-postsammanställningar",
     "rate": "Betygsätt",
     "dm-privacy-updated": "Sekretessinställningarna för direktmeddelanden uppdaterades",
     "dm-privacy-failed": "Det gick inte att uppdatera sekretessinställningarna för direktmeddelanden",
@@ -1685,19 +1852,29 @@
     "request_sent": "Din begäran om borttagning har skickats",
     "confirm_delete_body": "Är du säker på att du vill ta bort kontot? Alla dina data raderas"
   },
-  "tts": {
-    "settings_title": "Inställningar för text till tal",
-    "voice": "Röst",
-    "voice_hint": "Systemets standardröst används",
-    "speed": "Hastighet",
-    "pitch": "Tonhöjd",
-    "test_voice": "Testa röst",
-    "settings_info": "Dessa inställningar används när inlägg läses upp",
+  "listen": {
+    "title": "Lyssna på det här inlägget",
+    "minutes": "~{n} min",
+    "login": "Logga in",
+    "unlock": "Lås upp · {n} Points",
+    "confirm": "Spendera {n} Points för att lyssna på det här inlägget? Ljudet är ditt och kan spelas upp när som helst.",
+    "not_enough_title": "Inte tillräckligt med Points",
+    "not_enough": "Att lyssna kostar {required} Points och du har {available}.",
+    "get_points": "Skaffa Points",
+    "unlock_failed": "Det gick inte att låsa upp ljudet, försök igen",
+    "failed_refunded": "Ljudet kunde inte skapas, dina Points har återbetalats",
+    "preparing": "Förbereder ljud…",
+    "preparing_eta": "Förbereder ljud, ungefär {n} min…",
+    "preparing_progress": "Förbereder ljud · {n}%",
+    "waiting": "I kö, {n} före dig…",
+    "next_in_line": "Du är näst i kön…",
     "play": "Spela upp",
     "pause": "Pausa",
-    "language": "Språk",
-    "language_auto": "Identifiera automatiskt",
-    "language_hint": "Automatisk identifiering väljer språk baserat på inläggets innehåll"
+    "seek": "Spola",
+    "speed": "Uppspelningshastighet",
+    "language": "Ljudspråk",
+    "unavailable": "Ljudet kunde inte laddas.",
+    "retry": "Försök igen"
   },
   "posting_authority": {
     "title": "Aktivera snabbare publicering",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentiseringen misslyckades. Logga in igen.",
     "error-generic": "Videouppladdningen misslyckades. Försök igen.",
     "error-too-long-short": "Korta videor måste vara högst 60 sekunder.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Ett inlägg kan bara innehålla en video. Ta bort den nuvarande videon innan du lägger till en ny.",
     "select_source": "Lägg till video",
     "record": "Spela in video",
     "choose_library": "Välj från biblioteket"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Dela en snabb uppdatering"
   },
+  "newsletter": {
+    "screen_title": "E-postsammanställningar",
+    "title": "{list}",
+    "body_own": "En veckovis eller månatlig e-postsammanställning av dina aviseringar.",
+    "body_creator": "Nya inlägg av {list} i din inkorg.",
+    "body_community": "En sammanställning av nya inlägg i {list} via e-post.",
+    "body_site": "Det bästa från Ecency i din inkorg.",
+    "first_publish_title": "Grattis till ditt första inlägg!",
+    "first_publish_body": "Vill du ha en e-postsammanställning av dina aviseringar? Varje vecka eller månad, ändra eller avsluta när som helst i Inställningar.",
+    "list_own": "Sammanställning av mina aviseringar",
+    "list_site": "Ecency-nyhetsbrev",
+    "status_active": "Du prenumererar.",
+    "status_pending": "Väntar på e-postbekräftelse.",
+    "status_short_active": "aktiv",
+    "status_short_pending_confirmation": "väntar",
+    "status_short_suppressed": "stoppad",
+    "status_short_ended": "avslutad",
+    "cadence_weekly": "Varje vecka",
+    "cadence_monthly": "Varje månad",
+    "email_placeholder": "du@exempel.se",
+    "subscribe": "Prenumerera",
+    "update": "Uppdatera",
+    "resend": "Skicka bekräftelse igen",
+    "leave": "Lämna sammanställningen",
+    "cancel": "Avbryt",
+    "ok": "OK",
+    "manage": "Hantera",
+    "check_inbox_title": "Kolla din inkorg",
+    "check_inbox_body": "Vi har skickat en bekräftelselänk till {email}. Prenumerationen startar när du bekräftar.",
+    "subscribed": "Prenumererar på e-postsammanställningen",
+    "left": "Lämnade sammanställningen",
+    "refused": "Den här adressen kan inte prenumerera.",
+    "unavailable": "E-postsammanställningar är inte tillgängliga just nu.",
+    "too_many": "För många försök, försök igen senare.",
+    "fail": "Något gick fel, försök igen.",
+    "empty": "Inga e-postsammanställningar än. Prenumerera nedan för att komma igång.",
+    "discover": "Få mer via e-post",
+    "stop_all": "Stoppa alla",
+    "stop_all_title": "Stoppa all e-post?",
+    "stop_all_body": "Ingen Ecency-post skickas till {email} igen. Prenumerationer under andra adresser finns kvar.",
+    "stop_all_ok": "Stoppa alla",
+    "stop_all_done": "Adressen har avregistrerats från all post",
+    "profile_option": "E-POSTSAMMANSTÄLLNING",
+    "subscriber_count": "{weekly} veckovisa • {monthly} månatliga e-postprenumeranter",
+    "community_button": "Nyhetsbrev"
+  },
+  "mod_notes": {
+    "title": "Lägg till en anledning",
+    "placeholder": "Anledning (synlig för andra moderatorer)",
+    "confirm": "Bekräfta",
+    "cancel": "Avbryt"
+  },
+  "community_settings": {
+    "title_header": "Communityinställningar",
+    "title_label": "Titel",
+    "about": "Om",
+    "lang": "Språk",
+    "description": "Beskrivning",
+    "rules": "Regler",
+    "nsfw": "Inte lämpligt på jobbet",
+    "save": "Spara",
+    "required": "Obligatoriskt",
+    "title_length": "Mellan {min} och {max} tecken",
+    "owner_admin_only": "Bara ägaren och administratörerna kan ändra de här inställningarna."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Expanderad",
+        "collapsed": "Hopfälld"
+      },
+      "a11y_chat": {
+        "quote": "Svarar {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Välj",
+        "deselect": "Avmarkera"
+      },
+      "store": {
+        "billing_unavailable": "Köp i appen är inte tillåtna på den här enheten.",
+        "verification_failed": "App Store kunde inte verifiera köpet.",
+        "cancelled": "Köpet avbröts",
+        "unknown_result": "Okänt köpresultat"
+      },
+      "navigation": {
+        "feed_unavailable": "Det här flödet är inte tillgängligt än.",
+        "link_cannot_open": "Den här länken kan inte öppnas.",
+        "video_cannot_play": "Den här videon kan inte spelas upp."
+      },
+      "media": {
+        "load_failed": "Det här objektet kunde inte laddas. Kontrollera anslutningen och försök igen.",
+        "loading": "Laddar media",
+        "download_failed": "Nedladdningen misslyckades med status {status}"
+      },
+      "sign_in": {
+        "required": "Inloggning krävs",
+        "to_reply": "Logga in för att svara.",
+        "to_vote": "Logga in för att rösta.",
+        "button": "Logga in"
+      },
+      "account": {
+        "logout_user": "Logga ut @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# röst} other {# röster}}  •  {replies, plural, one {# svar} other {# svar}}",
+        "voting_power": "Rösträtt {percent}",
+        "remove_favourite": "Ta bort från favoriter",
+        "add_favourite": "Lägg till i favoriter"
+      },
+      "waves": {
+        "clear_tag_filter": "Rensa taggfilter {tag}",
+        "new_wave": "Ny wave",
+        "replies_open_thread": "{count, plural, one {# svar, öppna tråd} other {# svar, öppna tråd}}",
+        "characters": "{count} av {max} tecken",
+        "retry": "{message}\nFörsök igen",
+        "playing": "Spelar upp {permlink}",
+        "video_attached_remove": "Video bifogad, ta bort",
+        "image_attached_remove": "Bifogad bild, ta bort",
+        "take_photo": "Ta foto",
+        "edit_poll": "Redigera omröstning",
+        "add_poll": "Lägg till omröstning",
+        "add_video": "Lägg till video"
+      },
+      "reading": {
+        "reply_to": "Svara {username}",
+        "opens_post": "Öppnar inlägget",
+        "sort_comments": "Sortera kommentarer",
+        "sort_comments_value": "Sortera kommentarer, {sort}",
+        "no_comments": "Inga kommentarer än.",
+        "loading_post": "Laddar inlägg",
+        "show_version": "Visa version",
+        "show_changes": "Visa ändringar",
+        "replying_to": "Svarar @{username}",
+        "reply_text": "Svarstext",
+        "translate_from": "Från",
+        "translate_to": "Till"
+      },
+      "feed": {
+        "tab_pinned": "{label}, fäst",
+        "tab_add": "{label}, lägg till",
+        "customise": "Anpassa"
+      },
+      "card": {
+        "in_category": "i {category}",
+        "pinned": "Fäst",
+        "by_author": "av {username}",
+        "payout": "utbetalning {payout}",
+        "payout_declined": "utbetalning {payout}, nekad",
+        "reblogged_by": "Rebloggat av {username}"
+      },
+      "shell": {
+        "close_menu": "Stäng menyn"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatyr, välj en annan bild",
+        "words": "{count, plural, one {# ord} other {# ord}}",
+        "poll_min_age": "Min. kontoålder (dagar): {days}",
+        "poll_max_options": "Max antal alternativ: {count}",
+        "thumbnail_selected": "Vald miniatyr",
+        "thumbnail": "Miniatyr",
+        "uploaded_image": "Uppladdad bild",
+        "community_search": "sök"
+      },
+      "vote": {
+        "not_voted": "Inte röstat",
+        "voting": "Röstar",
+        "failed_with": "Rösten misslyckades: {message}",
+        "failed": "Rösten misslyckades",
+        "payout": "Utbetalning {payout}",
+        "payout_declined": "Utbetalning {payout}, nekad",
+        "percent": "{percent} procent",
+        "upvote_percent": "Uppröst {percent}%"
+      },
+      "settings": {
+        "on": "På",
+        "off": "Av"
+      },
+      "lock": {
+        "biometric_reason": "Aktivera biometrisk upplåsning för Ecency",
+        "offer_title": "Lås upp med {method}",
+        "offer_use": "Använd {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Nycklar döljs medan skärmen spelas in eller speglas.",
+        "screenshot_notice": "En skärmbild togs. Privata nycklar doldes igen; om skärmbilden visar en nyckel, ta bort den.",
+        "hold_hint": "Tryck och håll på en nyckel för att visa den.",
+        "hold_to_show": "Håll för att visa"
+      },
+      "wallet": {
+        "cancel_order": "Avbryta den här ordern?",
+        "days": "{count, plural, one {# dag} other {# dagar}}"
+      },
+      "chat": {
+        "reactors_hint": "Tryck länge för att se vem som reagerade",
+        "see_reactors": "Se vem som reagerade"
+      },
+      "esie": {
+        "still": "{mood}, stilla"
+      }
+    },
+    "ui": {
+      "profile_of": "Profil för @{username}",
+      "preview": "Förhandsvisning ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Går ut om {time}",
+      "expired": "Utgången. Stäng och försök igen.",
+      "user_has_no_posts": "@{username} har inte publicerat något än",
+      "attach_image": "Bifoga bild",
+      "auto": "Auto",
+      "back": "Tillbaka",
+      "hot": "HOT",
+      "image_of": "Bild {index} av {count}",
+      "new": "NYTT",
+      "nsfw_tap_to_reveal": "NSFW Tryck för att visa",
+      "new_reply": "Nytt svar",
+      "remove": "Ta bort",
+      "unlock_ecency": "Lås upp Ecency",
+      "update_it": "Uppdatera det",
+      "update_it_or_post_this_as": "Uppdatera det, eller publicera detta som ett nytt svar?",
+      "use_pin": "Använd PIN",
+      "your_reply_was_already_posted": "Ditt svar har redan publicerats",
+      "error_try_again": "{message} Försöka igen?",
+      "auth": {
+        "account_label": "Konto: @{username}",
+        "approve_the_request_in_your_wallet": "Godkänn begäran i din plånboksapp.",
+        "copy_key": "Kopiera {title}",
+        "current_account": "Nuvarande konto",
+        "qr_code": "QR-kod",
+        "requested_by": "Begärt av {requester}",
+        "pin_digits": "{filled} av {total, plural, one {# siffra} other {# siffror}}",
+        "private_key_shown": "{title}, privat nyckel visas",
+        "open_wallet_app": "Öppna plånboksappen",
+        "hiveauth_scan": "Godkänn i Hive Keychain eller en annan HiveAuth-plånbok: öppna den på den här enheten, eller skanna koden med den.",
+        "switching": "Byter...",
+        "logout_all": "Logga ut från alla konton",
+        "logout_all_title": "Logga ut från alla konton på den här enheten?",
+        "stored_key": "@{username} är redan inloggad på den här enheten. De sparade nycklarna finns kvar; bara sessionen förnyas.",
+        "stored_hivesigner": "@{username} är redan inloggad med HiveSigner på den här enheten. Sessionen ersätts.",
+        "stored_hiveauth": "@{username} är inloggad med HiveAuth på den här enheten. Kontot signerar med HiveSigner i stället.",
+        "method_key": "Nyckel",
+        "logout_failed": "Utloggningen misslyckades"
+      },
+      "browser": {
+        "account": "Konto",
+        "authority": "Behörighet",
+        "phishing": "Varning: Den här domänen har flaggats som en känd nätfiskesida. Fortsätt med största försiktighet."
+      },
+      "chat": {
+        "cancel_edit": "Avbryt redigering",
+        "cancel_reply": "Avbryt svar",
+        "copied_to_clipboard": "Kopierat till urklipp",
+        "edited_at": "Redigerad {time}",
+        "group_options": "Gruppalternativ",
+        "pinned_messages": "Fästa meddelanden",
+        "remove_user": "Ta bort @{username}",
+        "sort_by_name": "Sortera efter namn",
+        "more": "Mer",
+        "reaction_label": "{emoji} {count}. Tryck länge för att se vem som reagerade",
+        "members": "Medlemmar"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Det finns redan ett inlägg på den här länken och det skiljer sig från det du skickade. Uppdatera det, eller publicera som nytt?",
+        "a_scheduled_post_is_published_by": "Ett schemalagt inlägg publiceras av Ecency vid vald tidpunkt. Det kräver posting-behörigheten för ecency.app på ditt konto. Dina nycklar och andra behörigheter förblir som de är. Att bevilja den kräver din active-nyckel.",
+        "ai_assist": "AI-assistent",
+        "ai_tools": "AI-verktyg",
+        "allow_ecency_to_publish_for_you": "Låt Ecency publicera åt dig?",
+        "bold": "Fet",
+        "clone": "Klona",
+        "cost": "Kostnad: {cost}",
+        "could_not_store_the_draft_on": "Det gick inte att spara utkastet på den här enheten. Håll appen öppen och spara utkastet.",
+        "draft": "UTKAST",
+        "delete_count": "Ta bort ({count})",
+        "dictate_desc": "Tala, så hamnar utskriften i ditt inlägg",
+        "discard": "Släng",
+        "discard_changes": "Släng ändringar?",
+        "grant": "Bevilja",
+        "italic": "Kursiv",
+        "keep_editing": "Fortsätt redigera",
+        "my_blog": "MIN BLOGG",
+        "my_communities": "MINA COMMUNITYN",
+        "new_post": "Nytt inlägg",
+        "notice": "Observera",
+        "restore": "Återställ",
+        "restore_unsaved_changes": "Återställ osparade ändringar?",
+        "saved": "Sparat",
+        "top_communities": "TOPPCOMMUNITYN",
+        "table": "Tabell",
+        "text_format": "Textformat",
+        "this_link_is_already_in_use": "Den här länken används redan",
+        "untitled": "Utan titel",
+        "update_it_or_publish_this_as": "Uppdatera det, eller publicera detta som ett nytt inlägg?",
+        "you_have_unsaved_changes_from_an": "Du har osparade ändringar från en tidigare redigering. Inlägget har ändrats sedan dess; om du återställer dem ersätts texten nedan.",
+        "your_edits_were_not_published": "Dina ändringar publicerades inte.",
+        "your_post_was_already_published": "Ditt inlägg har redan publicerats",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatyr, tryck för att välja en annan bild",
+        "thumbnail_number": "Miniatyr {number}",
+        "recording_busy": "En inspelning pågår redan. Avsluta den i kameran först.",
+        "photo_lost": "Fotot gick förlorat medan kameran var öppen. Ta det igen.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# ord} other {# ord}}",
+        "community_search": "sök"
+      },
+      "profile": {
+        "open_wallet": "Öppna plånboken",
+        "your_wallet_is_on_the_wallet": "Din plånbok finns på fliken Plånbok.",
+        "user_has_no_comments": "@{username} har inte kommenterat något än",
+        "votes_count": "{count, plural, one {# röst} other {# röster}}",
+        "replies_count": "{count, plural, one {# svar} other {# svar}}",
+        "menu": "Mer",
+        "users": "Användare"
+      },
+      "reading": {
+        "apply": "ANVÄND",
+        "add_tag": "Lägg till tagg",
+        "age": "Ålder",
+        "audio_language": "Ljudspråk",
+        "available_filters": "Tillgängliga filter",
+        "could_not_unlock_the_audio_please": "Det gick inte att låsa upp ljudet, försök igen",
+        "downvote": "Nedrösta",
+        "downvote_percent": "Nedrösta {percent}%",
+        "listen_to_this_post": "Lyssna på det här inlägget",
+        "log_in": "Logga in",
+        "mark_all_as_read": "Markera alla som lästa",
+        "mark_as_read": "Markera som läst",
+        "more_replies": "Fler svar",
+        "not_enough_points": "Inte tillräckligt med Points",
+        "nothing_here_yet": "Inget här än.",
+        "open_editor": "Öppna redigeraren",
+        "pause_voice": "Pausa rösten",
+        "play_voice": "Spela upp rösten",
+        "playback_speed": "Uppspelningshastighet",
+        "publishing_in_waves": "Publicerar i Waves",
+        "quests_done": "Klarade uppdrag",
+        "read": "Läs",
+        "remove_vote": "Ta bort röst",
+        "seek": "Spola",
+        "select_community": "Välj community",
+        "selected_filters": "Valda filter",
+        "the_audio_could_not_be_loaded": "Ljudet kunde inte laddas.",
+        "this_post_does_not_exist_or": "Det här inlägget finns inte eller har tagits bort.",
+        "unread": "Oläst",
+        "voice_position": "Röstens position",
+        "vote_weight": "Rösträtt",
+        "reblogged_by": "rebloggat av {username}",
+        "no_more_posts": "Inga fler inlägg.",
+        "favourite": "Favorit",
+        "no_votes_yet": "Inga röster än",
+        "no_comments_yet": "Inga kommentarer än. Bli den första!",
+        "comments_count": "Kommentarer ({count})",
+        "sending_to_chain": "skickas till kedjan",
+        "compare": "Jämför",
+        "your_vote": "Din röst",
+        "reply_to": "Svara @{username}",
+        "what_do_you_think": "Vad tycker du?",
+        "clear_tag_filter": "Rensa taggfilter",
+        "tab_selected": "{title}, vald",
+        "add_tag_feed": "Lägg till taggflöde",
+        "feed_pinned": "{label}, fäst",
+        "attached_image_remove": "Bifogad bild, tryck för att ta bort",
+        "camera": "Kamera",
+        "files": "Filer",
+        "paused": "Pausad",
+        "in_topic": "i {topic}",
+        "poll_vote": "Rösta",
+        "reply": "Svara",
+        "mute_sound": "Ljud av",
+        "unmute_sound": "Ljud på",
+        "leaderboard_activities": "Aktiviteter",
+        "leaderboard_reward": "Belöning",
+        "sort_votes": "Röster"
+      },
+      "shell": {
+        "account_of": "Konto @{username}",
+        "account_signed_out": "Konto, utloggad",
+        "close_tab": "Stäng fliken",
+        "coming_soon_to_the_native_app": "Kommer snart till den inbyggda appen.",
+        "create": "Skapa",
+        "expand": "Expandera",
+        "forward": "Framåt",
+        "loading": "Laddar",
+        "new_tab": "Ny flik",
+        "reload": "Ladda om",
+        "sent": "Skickat",
+        "tab_unread": "{title}, {count} olästa",
+        "no_app_for_link": "Ingen app kan öppna den här länken."
+      },
+      "wallet": {
+        "product_not_available": "Produkten är inte tillgänglig.",
+        "repeat": "Upprepa"
+      },
+      "copied": "Kopierat",
+      "trending_caps": "TRENDAR",
+      "move_up": "Flytta upp",
+      "move_down": "Flytta ned",
+      "scroll_to_top": "Till toppen",
+      "load_more": "Mer"
+    },
+    "wallet": {
+      "checking": "Kontrollerar med nätverket",
+      "leave_title": "Skickas fortfarande",
+      "leave_message": "Det här skickas eller kontrolleras fortfarande med nätverket. Du kan lämna den här skärmen: appen meddelar dig när det är klart.",
+      "stay": "Stanna",
+      "collateralized_convert_request": "Begäran om säkrad konvertering",
+      "op_transfer": "överföring",
+      "op_power_up": "power up",
+      "op_power_down_change": "ändring av power down",
+      "op_delegation": "delegering",
+      "op_savings_deposit": "sparinsättning",
+      "op_savings_withdrawal": "sparuttag",
+      "op_conversion": "konvertering",
+      "op_swap": "byte",
+      "op_order_cancel": "avbryt order",
+      "op_reward_claim": "belöningsuttag",
+      "op_withdraw_route_change": "ändring av uttagsrutt",
+      "op_token_operation": "tokenoperation"
+    },
+    "notification": {
+      "amount_unknown": "Beloppet är inte tillgängligt",
+      "weekly_earnings_breakdown": "Du tjänade ${amount} den här veckan - ${authorUsd} från inlägg, ${curationUsd} från kurering.",
+      "weekly_earnings_total": "Du tjänade ${amount} den här veckan från dina inlägg och kurering."
+    },
+    "settings": {
+      "open": "Öppna",
+      "feedback_subject": "Feedback/Felrapport",
+      "unknown_user": "Okänd användare"
+    },
+    "navigation": {
+      "editor": "Redigerare",
+      "followers": "Följare",
+      "spin_game": "Snurrspel",
+      "edit_profile": "Redigera profil",
+      "redeem_points": "Lös in Points",
+      "community": "Community",
+      "community_members": "Communitymedlemmar",
+      "community_activities": "Communityaktivitet",
+      "browser": "Webbläsare",
+      "asset_details": "Tillgångsdetaljer",
+      "edit_history": "Redigeringshistorik",
+      "welcome": "Välkommen",
+      "chat": "Chatt",
+      "backup_keys": "Säkerhetskopiera nycklar",
+      "trade": "Handla",
+      "ai_image_generator": "AI-bildgenerator",
+      "select_assets": "Välj tillgångar",
+      "poll": "Omröstning",
+      "bot_comments": "Botkommentarer"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operationer som kräver owner-nyckeln kan inte signeras i Ecency.",
+      "post": "Inlägg/Kommentar",
+      "custom": "Anpassad JSON",
+      "sign_buffer": "Signera meddelande",
+      "send_token": "Skicka token",
+      "witness_vote": "Witness-röst",
+      "proxy": "Ange proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Sänd",
+      "sign_tx": "Signera transaktion",
+      "encode": "Koda meddelande",
+      "decode": "Verifiera nyckel",
+      "add_account_authority": "Lägg till kontobehörighet",
+      "remove_account_authority": "Ta bort kontobehörighet",
+      "add_key_authority": "Lägg till nyckelbehörighet",
+      "remove_key_authority": "Ta bort nyckelbehörighet",
+      "create_claimed_account": "Skapa konto",
+      "create_proposal": "Skapa förslag",
+      "remove_proposal": "Ta bort förslag",
+      "update_proposal_vote": "Förslagsröst",
+      "signed_call": "Signerat anrop"
+    },
+    "translate_language": {
+      "ar": "Arabiska",
+      "az": "Azerbajdzjanska",
+      "bg": "Bulgariska",
+      "bn": "Bengali",
+      "ca": "Katalanska",
+      "cs": "Tjeckiska",
+      "da": "Danska",
+      "de": "Tyska",
+      "el": "Grekiska",
+      "en": "Engelska",
+      "eo": "Esperanto",
+      "es": "Spanska",
+      "et": "Estniska",
+      "fa": "Persiska",
+      "fi": "Finska",
+      "fr": "Franska",
+      "ga": "Iriska",
+      "he": "Hebreiska",
+      "hi": "Hindi",
+      "hu": "Ungerska",
+      "id": "Indonesiska",
+      "it": "Italienska",
+      "ja": "Japanska",
+      "ko": "Koreanska",
+      "lt": "Litauiska",
+      "lv": "Lettiska",
+      "ms": "Malajiska",
+      "nb": "Norska",
+      "nl": "Nederländska",
+      "pl": "Polska",
+      "pt": "Portugisiska",
+      "ro": "Rumänska",
+      "ru": "Ryska",
+      "sk": "Slovakiska",
+      "sl": "Slovenska",
+      "sq": "Albanska",
+      "sv": "Svenska",
+      "th": "Thailändska",
+      "tl": "Tagalog",
+      "tr": "Turkiska",
+      "uk": "Ukrainska",
+      "zh": "Kinesiska",
+      "zt": "Kinesiska (traditionell)"
+    },
+    "reading": {
+      "banner_text": "Det här inlägget är på {source}. Översätta till {target}?",
+      "translated_from_text": "Översatt från {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# medlem} other {# medlemmar}} • {authors, plural, one {# skribent} other {# skribenter}} • {posts, plural, one {# inlägg} other {# inlägg}}",
+      "community_title": "Communityn {title}",
+      "members_title": "Medlemmar i {title}",
+      "activities_title": "Aktivitet i {title}",
+      "cannot_start_with_or": "Får inte börja med @ eller #",
+      "use_a_two_letter": "Använd en språkkod med två bokstäver, till exempel en",
+      "at_most_characters": "Högst {max, plural, one {# tecken} other {# tecken}}",
+      "council": "Råd",
+      "journal": "Journal",
+      "topic": "Ämne",
+      "community_not_found": "Communityn hittades inte."
+    },
+    "transfer": {
+      "one_recipient": "Bara en mottagare kan användas för den här överföringen.",
+      "is_an_exchange_and": "{exchange} är en börs och stöder kanske inte återkommande överföringar: pengar som skickas enligt schema kan gå förlorade. Använd en engångsöverföring i stället."
+    },
+    "dapps": {
+      "signing_info": "Ecency fungerar som ditt Hive-signeringstillägg. När en dApp ber dig logga in med ett webbläsartillägg som Keychain, Keeper eller Peak Vault, välj det alternativet. Ecency sköter signeringen säkert.",
+      "category_social": "Socialt",
+      "category_gaming": "Spel",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupp",
+      "unable_to_load_messages": "Det gick inte att ladda meddelandena.",
+      "someone": "Någon",
+      "renamed_the_group_to": "{actor} bytte namn på gruppen till \"{name}\"",
+      "removed_the_group_name": "{actor} tog bort gruppnamnet",
+      "unable_to_send_your": "Det gick inte att skicka ditt meddelande.",
+      "unable_to_remove_message": "Det gick inte att ta bort meddelandet.",
+      "unknown": "Okänd",
+      "members_online": "{members, plural, one {# medlem} other {# medlemmar}} • {online} online",
+      "failed_to_load_pinned": "Det gick inte att ladda fästa meddelanden",
+      "you": "Du",
+      "title": "Reaktioner"
+    },
+    "tip": {
+      "login_required": "Logga in för att skicka tips",
+      "max_decimals": "Högst {n, plural, one {# decimal} other {# decimaler}}"
+    },
+    "paid": {
+      "check_again": "Kontrollera igen",
+      "give_up": "Ge upp",
+      "unknown": "Inget svar än. Begäran kan fortfarande pågå. Kontrollera igen för att hämta resultatet: du debiteras inte en andra gång.",
+      "pending": "Din begäran behandlas fortfarande. Kontrollera igen om en stund: du debiteras inte en andra gång.",
+      "restored": "En tidigare begäran har inget svar än. Kontrollera igen för att hämta resultatet: du debiteras inte en andra gång.",
+      "give_up_confirm": "Om begäran gick igenom har poängen spenderats och resultatet går förlorat.",
+      "not_stored": "Begäran kunde inte sparas på enheten. Håll den här skärmen öppen tills den är klar.",
+      "sign_in_again": "Din session har gått ut. Logga in igen och kontrollera sedan igen.",
+      "other_account": "Det här tillhör @{owner}. Byt tillbaka till det kontot för att fortsätta."
+    },
+    "ai": {
+      "run_ai_assist": "Kör AI-assistent ({costText})",
+      "no_longer_free_cost": "Den här körningen är inte längre gratis i dag. Den kostar {cost} {unit}.",
+      "no_longer_free": "Den här körningen är inte längre gratis i dag.",
+      "content_violates_our_content": "Innehållet bryter mot vår innehållspolicy. Ändra din text. Points återbetalades inte.",
+      "generate_image": "Skapa bild ({costLabel})",
+      "use_prompt": "Använd: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Vänta, en annan åtgärd pågår",
+      "not_a_community_post": "Inte ett communityinlägg.",
+      "parent_post_not_found": "Det överordnade inlägget hittades inte",
+      "the_account_changed": "Kontot har ändrats."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Stoppa ({cost} Points)",
+      "stop_free": "Stoppa (gratis)",
+      "transcribe_points": "Transkribera ({cost} Points)",
+      "transcribe": "Transkribera",
+      "no_longer_free_cost": "Den här inspelningen är inte längre gratis i dag. Den kostar {cost} Points.",
+      "no_longer_free": "Den här inspelningen är inte längre gratis i dag.",
+      "held_locked": "Inspelningen stoppades när Ecency låstes. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
+      "held_no_background": "Inspelningen stoppades när Ecency lämnade skärmen (den kunde inte visa sin inspelningsavisering). Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
+      "held_stopped": "Inspelningen stoppades från aviseringen. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
+      "held_focus_lost": "Inspelningen stoppades på grund av ett samtal eller ljud från en annan app. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
+      "held_interrupted": "Inspelningen stoppades eftersom en annan app tog mikrofonen. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
+      "unavailable": "Inspelning är inte tillgänglig på den här enheten.",
+      "not_read": "Inspelningen kunde inte läsas eller är för stor. Inget skickades och inget debiterades.",
+      "give_up_not_sent": "Inspelningen skickades inte, så inget debiterades. Den raderas.",
+      "give_up_not_charged": "Inget debiterades för den här inspelningen. Den raderas.",
+      "clip_lost": "Inspelningen från en tidigare begäran finns inte längre på den här enheten. Om begäran gick igenom har dina poäng spenderats och utskriften kan inte hämtas."
+    },
+    "register": {
+      "error_code_28": "Din begäran kunde inte behandlas. Registreringskön är troligen full. Försök igen om några minuter."
+    },
+    "perks": {
+      "quests_empty": "Inga uppdrag här än, kom tillbaka snart.",
+      "freeze_confirm_title": "Skydda din svit",
+      "spend_points_on_a": "Spendera {price} Points på ett sviträddningsskydd? Det används för att skydda din svit en dag du missar."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Stöd Ecency, få en gratis blogg och stick ut med en verifierad Pro-bricka.",
+      "card_description": "Bli Pro för {price} per år. Verifierad bricka, en gratis blogg och stöd till Ecency.",
+      "card_description_plain": "Bli Pro i ett år. Verifierad bricka, en gratis blogg och stöd till Ecency.",
+      "member": "Du är Pro-medlem.",
+      "benefit_badge": "En verifierad Pro-bricka bredvid ditt namn.",
+      "benefit_blog": "En gratis blogg på dittnamn.blogs.ecency.com.",
+      "benefit_support": "Stöd utvecklingen av Ecency direkt.",
+      "benefit_early": "Tidig tillgång till nya funktioner.",
+      "buy": "Skaffa Pro för {price} per år",
+      "extend": "Förläng med 12 månader för {price}",
+      "extend_note": "Ett nytt köp lägger till 12 månader på ditt medlemskap.",
+      "unavailable": "Ecency Pro är inte tillgängligt i butiken just nu.",
+      "activating": "Betalningen är mottagen. Ditt medlemskap aktiveras.",
+      "success_title": "Välkommen till Ecency Pro",
+      "success_body": "Ditt Pro-medlemskap är aktivt. Din bricka visas snart på din profil.",
+      "extending": "Betalningen är mottagen. Ditt Pro-medlemskap förlängs med 12 månader.",
+      "open_a11y": "Öppna Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Sparar utkast...",
+      "please_sign_in_first": "Logga in först.",
+      "fetch_failed": "Hämtningen misslyckades.",
+      "you_can_only_edit": "Du kan bara redigera ditt eget innehåll.",
+      "invalid_percent": "Ogiltig procentsats",
+      "beneficiary_exists_already": "Förmånstagaren finns redan",
+      "this_draft_belongs_to": "Det här utkastet tillhör @{owner}. Byt tillbaka till det kontot för att publicera det.",
+      "could_not_make_a": "Det gick inte att skapa en ny länk för det här inlägget. Ändra titeln lite och försök igen.",
+      "an_earlier_attempt_was": "Ett tidigare försök publicerades efter det här. Kontrollera vilken version du vill behålla.",
+      "could_not_check_your": "Det gick inte att kontrollera ditt kontos posting-behörighet. Kontrollera anslutningen och försök igen.",
+      "this_post_was_changed": "Det här inlägget ändrades någon annanstans sedan du öppnade det. Kopiera din text, gå tillbaka och öppna det igen för att redigera den senaste versionen.",
+      "link_text_placeholder": "Text här"
+    },
+    "app_error": {
+      "this_reply_is_too": "Svaret är för långt.",
+      "the_network_refused_this": "Nätverket avvisade åtgärden.",
+      "invalid_input": "Ogiltig inmatning.",
+      "secure_storage_is_unavailable": "Säker lagring är inte tillgänglig. Logga in igen.",
+      "please_sign_in_first": "Logga in först.",
+      "these_credentials_belong_to": "De här inloggningsuppgifterna tillhör @{actual}, inte @{expected}.",
+      "is_not_signed_in": "@{username} är inte inloggad på den här enheten.",
+      "key_required": "{role}-nyckeln krävs för att utföra den här transaktionen. {hint}",
+      "cancelled": "Avbrutet.",
+      "the_request_was_rejected": "Begäran avvisades i plånboksappen.",
+      "the_request_expired_before": "Begäran gick ut innan plånboksappen svarade. Försök igen.",
+      "could_not_reach_the": "Det gick inte att nå HiveAuth-servern. Försök igen.",
+      "unexpected_redirect": "Servern skickade en oväntad omdirigering. Inget ändrades. Försök igen senare.",
+      "missing_key_hint": "Lägg till den under Inställningar, Hantera behörigheter (Importera privat), eller logga in igen med den.",
+      "this_key_is_also": "Den här nyckeln är också kontots owner-nyckel. Ecency sparar ingen nyckel som styr owner-rollen: ge dina active- och posting-roller egna nycklar och logga sedan in med dem.",
+      "this_is_the_owner": "Det här är owner-nyckeln. Ecency sparar eller använder aldrig owner-nyckeln: logga in med ditt huvudlösenord, eller med din posting- eller active-nyckel.",
+      "this_password_only_matches": "Det här lösenordet matchar bara kontots owner-nyckel. Ecency sparar eller använder aldrig owner-nyckeln: logga in med din posting- eller active-nyckel.",
+      "this_key_cannot_sign": "Den här nyckeln kan inte signera för kontot på egen hand: kontot behöver mer än en signatur (dess vikt är under tröskeln).",
+      "public_key_given": "Det här är din publika nyckel. Klistra in den privata nyckeln (börjar med 5) eller ditt huvudlösenord.",
+      "memo_key_only": "Memo-nyckeln kan inte användas för att logga in. Använd din posting-nyckel, active-nyckel eller ditt huvudlösenord.",
+      "network_message": "Nätverksfel. Kontrollera anslutningen och försök igen.",
+      "network_error_this_may": "Nätverksfel. Det här kan redan ha gått igenom; det är säkert att försöka igen och det publiceras inte två gånger."
+    },
+    "purchases": {
+      "deal_best": "BÄSTA ERBJUDANDET!",
+      "deal_popular": "POPULÄRT!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Butiken svarade inte."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "E-post och användarnamn krävs för 999accounts-förbrukning",
+      "stuck": "Ett tidigare köp av den här produkten kunde inte slutföras. Kontakta support@ecency.com med ditt butikskvitto, det sparas för det här.",
+      "held": "Köpet är pausat för granskning. Kontakta support@ecency.com med order #{order}.",
+      "earlier_purchase": "Ett tidigare köp av den här produkten slutförs först för @{target}.",
+      "earlier_pending": "En tidigare betalning för den här produkten väntar fortfarande för @{target}. Den slutförs när butiken bekräftar betalningen.",
+      "pending": "Din betalning väntar. Köpet slutförs när butiken bekräftar betalningen.",
+      "processing": "Ditt köp behandlas. Det slutförs snart."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Återkommande överföringar",
+      "delegate_hive_power": "Delegera Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Ange uttagsrutt för vesting",
+      "power_down": "Power down",
+      "transfer_to_saving": "Överför till sparande",
+      "transfer_from_saving": "Överför från sparande",
+      "cancel_transfer_from_saving": "Avbryt överföring från sparande",
+      "collateralized_convert": "Säkrad konvertering",
+      "witness_vote": "Witness-röst",
+      "witness_update": "Witness-uppdatering",
+      "witness_set_properties": "Ange witness-egenskaper",
+      "governance_proxy": "Styrningsproxy",
+      "claim_account": "Hämta konto",
+      "create_account": "Skapa konto",
+      "create_account_with_account": "Skapa konto med kontokrediter",
+      "create_limit_order": "Skapa limitorder",
+      "cancel_limit_order": "Avbryt limitorder",
+      "redeem_rewards": "Lös in belöningar",
+      "post_or_comment": "Inlägg eller kommentar",
+      "post_or_comment_options": "Alternativ för inlägg eller kommentar",
+      "custom_operation": "Anpassad operation",
+      "update_account_active": "Uppdatera konto (active)",
+      "update_account_posting": "Uppdatera konto (posting)",
+      "change_recovery_account": "Byt återställningskonto",
+      "create_proposal": "Skapa förslag",
+      "remove_proposal": "Ta bort förslag",
+      "update_proposal_votes": "Uppdatera förslagsröster",
+      "update_proposal": "Uppdatera förslag"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Den här länken måste signeras av @{account}. Byt till det kontot och öppna den igen.",
+      "ecency_can_only_sign": "Ecency kan bara signera och sända transaktioner från länkar.",
+      "requester_page": "sidan {host}",
+      "owner_refused": "Operationer som kräver owner-nyckeln kan inte signeras från en länk.",
+      "busy": "Vänta: en annan begäran behandlas fortfarande.",
+      "not_supported": "Ecency kan inte signera den här operationen i den här versionen än."
+    },
+    "chats": {
+      "group_members": "Gruppmedlemmar",
+      "rename_group": "Byt namn på gruppen",
+      "failed_to_load_chats": "Det gick inte att ladda chattarna",
+      "unknown": "Okänd",
+      "unable_to_mark_channel": "Det gick inte att markera kanalen som läst",
+      "unable_to_update_favorites": "Det gick inte att uppdatera favoriter",
+      "unable_to_update_mute": "Det gick inte att uppdatera tystning",
+      "group": "Grupp",
+      "unable_to_search": "Det gick inte att söka",
+      "unable_to_start_chat": "Det gick inte att starta chatten",
+      "no_internet": "Ingen internetanslutning"
+    },
+    "stake": {
+      "confirm_summary": "Delegera {hp} HP ({vests} VESTS) till @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Redan delegerat till @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Bara publik. Ecency sparar aldrig owner-nyckeln.",
+      "shared_owner": "Det här kontot använder samma nyckel för owner-rollen och {names}-rollen. Den som har nyckeln styr hela kontot. Ge {names}-rollen en egen nyckel och förvara owner-nyckeln offline.",
+      "copy_warning": "Alla som har den här privata nyckeln styr den här delen av ditt konto. Andra appar kan läsa urklipp; klistra bara in den där du litar på. Den rensas från urklipp efter 2 minuter."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-lås är på.",
+      "pin_changed": "PIN ändrad.",
+      "pin_lock_is_off": "PIN-lås är av.",
+      "wiped_notice": "Alla konton, nycklar och inloggningsuppgifter togs bort från den här enheten.",
+      "we_could_not_bring": "Vi kunde inte föra över dina konton från den tidigare versionen av appen. Logga in igen.",
+      "your_pin_lock_could": "Ditt PIN-lås kunde inte föras över från den tidigare versionen. Ange en PIN igen från kontomenyn för att slå på applåset igen.",
+      "biometric_unlock_was_turned": "Biometrisk upplåsning stängdes av eftersom biometrin på den här enheten ändrades. Lås upp med din PIN och slå sedan på den igen från kontomenyn.",
+      "biometric_unavailable_notice": "Biometrisk upplåsning kunde inte slås på: ingen biometri är inställd på den här enheten.",
+      "set_backup": "Ange en PIN som reserv för biometrisk upplåsning",
+      "biometric_on_notice": "PIN-lås är på. Lås upp med biometri eller med din PIN.",
+      "offer_title": "Lås upp med biometri",
+      "offer_body": "Öppna Ecency med ansiktet eller fingeravtrycket. Du har också angett en PIN, som låser upp appen när biometri inte är tillgänglig.",
+      "offer_use": "Använd biometri",
+      "offer_use_pin": "Använd PIN i stället"
+    },
+    "common": {
+      "list_and": "{first} och {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Svar på 25 tecken eller färre ger inga poäng (länkar räknas inte)",
+      "short_content_hint": "För kort för att ge poäng (25 tecken eller färre, länkar oräknade)",
+      "daily_post": "Dagligt inlägg {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# dags svit} other {# dagars svit}}",
+      "grant_description": "Ge Ecency-kontot @ecency.app posting-behörighet på ditt konto, så att du kan publicera utan att öppna Keychain varje gång. Att bevilja den ändrar ditt kontos posting-behörighet och kräver din active-nyckel."
+    },
+    "wallet_history": {
+      "from_to": "@{from} till @{to}",
+      "from_user_id": "från @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} till @{to}, id: {id}",
+      "from_to_account": "@{from} till {to}",
+      "from_user": "från @{user}",
+      "to_user": "till @{user}",
+      "interest": "Ränta",
+      "proposal_pay": "Förslagsbetalning",
+      "categories": "Aktivitetstyper",
+      "category_all": "Alla",
+      "category_transfers": "Överföringar",
+      "category_market": "Marknadsorder",
+      "category_interest": "Ränta",
+      "category_stake": "Stakeoperationer",
+      "category_rewards": "Belöningar",
+      "point_type_checkin": "Heartbeats",
+      "point_type_login": "Inloggning",
+      "point_type_post": "Inlägg",
+      "point_type_comment": "Kommentar",
+      "point_type_vote": "Röst",
+      "point_type_reblog": "Reblogg",
+      "point_type_transfer_sent": "Skickade överföringar",
+      "point_type_transfer_received": "Mottagna överföringar"
+    },
+    "video_upload": {
+      "continue_upload": "FORTSÄTT UPPLADDNING",
+      "source_gone": "Inspelningen finns inte längre på enheten. Spela in eller välj videon igen.",
+      "no_camera": "Kameran är inte tillgänglig på den här enheten."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Nästa unstake är om {hours, plural, one {# timme} other {# timmar}}",
+      "account_not_found": "Kontot hittades inte"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Bild i urklipp · Klistra in bild",
+      "no_container": "Det gick inte att hämta senaste wave-behållaren",
+      "please_sign_in_first": "Logga in först.",
+      "write_something_first": "Skriv något först.",
+      "account_changed": "Den här waven skrevs som ett annat konto. Stäng den och skriv den igen.",
+      "no_upload": "Bilduppladdning är inte tillgänglig i den här versionen än. Klistra in en bildlänk i texten i stället.",
+      "fail": "Misslyckades"
+    },
+    "delete_account": {
+      "sign_out_failed": "Din begäran skickades, men utloggningen misslyckades. Logga ut från menyn.",
+      "not_sent": "Din begäran om radering kunde inte skickas. Försök igen."
+    },
+    "chat_sheets": {
+      "group_limit": "En grupp kan ha upp till {max, plural, one {# annan person} other {# andra personer}}.",
+      "search_people_by_username": "Sök personer med användarnamn",
+      "new_group_title": "Ny grupp",
+      "new_group_hint": "Lägg till {min} till {max, plural, one {# person} other {# personer}} för att starta en gruppkonversation.",
+      "no_results": "Ingen hittades i chatten med det namnet.",
+      "search_failed": "Sökningen misslyckades. Kontrollera anslutningen och försök igen.",
+      "create": "Starta grupp",
+      "new_group_failed": "Det gick inte att starta gruppen. Försök igen.",
+      "name_limit": "Ett gruppnamn kan vara upp till {max, plural, one {# tecken} other {# tecken}} långt.",
+      "rename_title": "Byt namn på gruppen",
+      "rename_hint": "Ge gruppen ett namn som alla i den ser. Lämna tomt för att visa medlemmarnas namn i stället.",
+      "placeholder": "Gruppnamn",
+      "not_owner": "Bara den som startade gruppen kan byta namn på den.",
+      "rename_failed": "Det gick inte att byta namn på gruppen. Försök igen."
+    },
+    "editor_side": {
+      "copy_of": "Kopia av {title}",
+      "deletions_failed": "Något gick fel\n{failed} av {total, plural, one {# radering} other {# raderingar}} misslyckades",
+      "uploads_failed": "{count, plural, one {# uppladdning misslyckades} other {# uppladdningar misslyckades}}:\n\n{messages}",
+      "failed_to_delete": "Det gick inte att ta bort"
+    },
+    "uploads": {
+      "add_to_gallery": "Lägg till i galleri"
+    },
+    "account_notice": {
+      "manage_keys": "Inställningar, Hantera behörigheter",
+      "no_signing_key_title": "Logga in igen som @{account}",
+      "no_signing_key": "Ecency sparar inte längre owner-nyckeln eller huvudlösenordet på den här enheten, och @{account} har ingen posting- eller active-nyckel sparad här. Logga in igen med ditt huvudlösenord eller med en posting- eller active-nyckel, eller lägg till en nyckel under {manageKeys} (Importera privat).",
+      "missing_roles_title": "Vissa nycklar lades inte till",
+      "cannot_post": "publicera, rösta eller kommentera",
+      "cannot_transfer": "skicka överföringar eller ändra kontoinställningar",
+      "missing_roles": "Ditt lösenord matchar inte längre {missing}-nyckeln för @{account}: den ändrades på kontot efter att lösenordet angavs. Sparad på den här enheten: {kept}-nyckeln. Tills du lägger till {missing}-nyckeln under {manageKeys} (Importera privat) kan den här appen inte {cannot} med nycklar för @{account}.",
+      "shared_owner_title": "Den här nyckeln styr också owner-rollen",
+      "shared_owner": "@{account} använder samma nyckel för owner-rollen och {names}-rollen. Den som har den här nyckeln styr hela kontot. Ecency sparar den bara som {names}-nyckel och använder den aldrig för owner-operationer. Ge {names}-rollen en egen nyckel och förvara owner-nyckeln offline."
+    },
+    "dapp_browser": {
+      "message_from": "Meddelande från {host}",
+      "home_title": "Hem",
+      "loading_title": "Laddar...",
+      "blank_run": "[{count, plural, one {# tomt tecken} other {# tomma tecken}}]",
+      "too_large": "Sidan bad om att signera en begäran som är för stor för att visas, så Ecency avvisade den."
+    },
+    "community_service": {
+      "the_account_changed": "Kontot har ändrats."
+    },
+    "profile_edit": {
+      "enter_link": "Ange bildlänk",
+      "please_sign_in_first": "Logga in först.",
+      "account_not_found": "Kontot hittades inte",
+      "please_enter_an_image": "Ange en bildlänk som börjar med https://"
+    },
+    "background_media": {
+      "post_by": "Inlägg av @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Logga in först."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Du har redan röstat med samma vikt.",
+      "insufficient_rc": "Inte tillräckligt med Resource Credits. Vänta eller gör en power up.",
+      "missing_authority": "Posting-behörighet saknas. Kontrollera din inloggningsmetod.",
+      "comment_too_soon": "Vänta innan du publicerar igen.",
+      "paid_out": "Det här inlägget har redan betalats ut.",
+      "too_large": "Transaktionen är {size, plural, one {# byte} other {# byte}}, över gränsen på {max} byte.",
+      "network_error_please_check": "Nätverksfel. Kontrollera anslutningen och försök igen.",
+      "unconfirmed_message": "Det gick inte att bekräfta om detta gick igenom. Kontrollera din plånbok eller historik; börja om bara om det inte finns där.",
+      "undecided_message": "Det här kan redan ha gått igenom. Kontrollera din plånbok eller historik innan du försöker igen."
+    },
+    "chat_api": {
+      "request_failed": "Begäran misslyckades ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} skriver...",
+      "typing_two": "{first} och {second} skriver...",
+      "typing_three": "{first}, {second} och {third} skriver...",
+      "typing_many": "{first}, {second} och {count, plural, one {# annan} other {# andra}} skriver...",
+      "banned": "{reason} Du kan fortfarande läsa chatten. Du kan skriva igen {until}.",
+      "joined_when": "gick med {time}",
+      "joined": "gick med",
+      "official_badge": "Officiell",
+      "official_badge_label": "Officiellt Ecency-konto"
+    },
+    "side_menu": {
+      "ask_esie": "Fråga Esie"
+    },
+    "chat_service": {
+      "missing_token": "Hive-åtkomsttoken saknas. Logga ut och in igen.",
+      "dm_error": "Användaren har inte gått med i chattar"
+    },
+    "compose_reply": {
+      "account_changed": "Svaret skrevs som ett annat konto. Stäng det och skriv det igen.",
+      "write_something_first": "Skriv något först.",
+      "please_sign_in_first": "Logga in först."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "För många förmånstagare: högst {max}.",
+      "a_beneficiary_s_share": "En förmånstagares andel måste vara mellan 0,01% och 100%.",
+      "beneficiaries_add_up_to": "Förmånstagarna summerar till mer än 100%.",
+      "a_beneficiary_is_listed": "En förmånstagare är listad två gånger.",
+      "you_cannot_be_a": "Du kan inte vara förmånstagare till ditt eget inlägg.",
+      "a_beneficiary_has_an": "En förmånstagare har ett ogiltigt kontonamn."
+    },
+    "follows": {
+      "fail": "Misslyckades!: {message}",
+      "follower_count": "Följare ({count})",
+      "following_count": "Följer ({count})"
+    },
+    "link": {
+      "unsupported": "Den här länken stöds inte än.",
+      "cannot_open": "Det går inte att öppna länken",
+      "unsupported_version": "Den här länken stöds inte i den här versionen."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Utforska-webbläsaren kan komma åt din Hive-plånbok för att signera transaktioner. Den här länken kommer från inläggsinnehåll och är inte verifierad av Ecency. Fortsätt bara om du litar på den:\n\n{url}"
+    },
+    "listen": {
+      "message": "Att lyssna kostar {required} Points och du har {available}.",
+      "unlock_label": "Lås upp · {cost} Points",
+      "preparing_audio": "Förbereder ljud · {preparingPercent}%",
+      "waiting_in_line_ahead": "I kö, {ahead} före dig…",
+      "next_in_line": "Du är näst i kön…",
+      "preparing_about_minutes": "Förbereder ljud, ungefär {minutes} min…",
+      "preparing_audio_2": "Förbereder ljud…",
+      "spend_confirm": "Spendera {cost} Points för att lyssna på det här inlägget? Ljudet är ditt och kan spelas upp när som helst.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Ljudet kunde inte skapas, dina Points har återbetalats"
+    },
+    "media_pick": {
+      "preparing_video": "Förbereder video...",
+      "library_hint": "Välj bland dina foton",
+      "camera_hint": "Ta ett nytt foto nu",
+      "files_hint": "Bläddra bland filer på den här enheten och i molnet",
+      "paste_hint": "Använd bilden du kopierade",
+      "link_hint": "Använd en bild från webben"
+    },
+    "media_picking": {
+      "image_types_message": "Filtypen stöds inte. Välj en JPEG-, PNG-, GIF-, WebP- eller HEIC-bild.",
+      "video_types_message": "Filtypen stöds inte. Välj en MP4- eller MOV-video.",
+      "gif_too_large": "Den här GIF:en är större än {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Den här operationen kräver både en active- och en posting-signatur, vilket Ecency inte kan signera tillsammans än."
+    },
+    "poll": {
+      "fail": "Misslyckades!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Det gick inte att kontrollera ditt kontos posting-behörighet. Kontrollera anslutningen och försök igen."
+    },
+    "post_lists": {
+      "voters_title": "Info om röstare ({total})",
+      "reblogs_title": "Reblogg-info ({total})",
+      "no_history_found": "Ingen historik hittades!",
+      "no_edit_history_available": "Ingen redigeringshistorik finns för det här innehållet.",
+      "version_label": "Version {version}"
+    },
+    "stats": {
+      "other_device": "Övrigt"
+    },
+    "profile": {
+      "account_not_found": "Kontot hittades inte",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Full om {hours, plural, one {# timme} other {# timmar}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Det gick inte att läsa din nuvarande profil, försök igen"
+    },
+    "profile_sheet": {
+      "fail": "Misslyckades! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Kontot hittades inte"
+    },
+    "push_payload": {
+      "mentioned": "@{source} nämnde @{target}",
+      "replied": "@{source} svarade @{target}",
+      "transferred": "@{source} överförde till @{target}",
+      "delegated": "@{source} delegerade till @{target}",
+      "rewards_received": "Belöningar mottagna",
+      "account_updated": "Kontot uppdaterat",
+      "account_updated_body": "Dina kontouppgifter uppdaterades",
+      "followed": "@{source} följde @{target}",
+      "unfollowed": "@{source} slutade följa @{target}",
+      "ignored": "@{source} ignorerade @{target}",
+      "blacklisted": "@{source} svartlistade @{target}",
+      "posted_in": "@{source} publicerade i #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Det gick inte att få kamerabehörighet",
+      "permission_message": "Ge kamerabehörighet i Ecency-inställningarna.",
+      "permission_allow": "Tillåt"
+    },
+    "reply_account": {
+      "switch": "Svara som ett annat konto"
+    },
+    "send_journal": {
+      "your_from_went_through": "Din {label} från @{account} gick igenom.",
+      "not_sent": "Din {label} från @{account} gick inte igenom. Inget skickades; du kan börja om.",
+      "checking_whether_your_from": "Kontrollerar om din {label} från @{account} gick igenom. Kontrollera din plånbok innan du skickar den igen."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner-sidan stängdes",
+      "wrong_role": "Det här är din {given}-nyckel; den här operationen behöver din {needed}-nyckel.",
+      "action_id_required": "Den här åtgärden behöver ett åtgärds-ID för att kunna försökas om på ett säkert sätt."
+    },
+    "signing_router": {
+      "owner_never": "Owner-operationer signeras aldrig i appen."
+    },
+    "spin": {
+      "key_missing": "Spelnyckel saknas",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Idag (UTC), återställs om {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Återställs dagligen kl. 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Logga in igen",
+      "message": "Säker lagring har återställts på den här enheten. Logga in igen.",
+      "failed": "Kontona på den här enheten kunde inte tas bort. Försök igen."
+    },
+    "store": {
+      "in_app_purchases_are": "Köp i appen är inte tillgängliga i den här versionen."
+    },
+    "wallet_sends": {
+      "journal_full": "För många tidigare utskick kontrolleras fortfarande med nätverket. Vänta tills de bekräftats innan du skickar fler.",
+      "check_later": "Nätverket bekräftade inte detta i tid. Kontrollera din plånbok eller historik innan du skickar det igen; appen kontrollerar igen vid nästa start."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# oläst} other {# olästa}}",
+      "locked_text": "Lås upp Ecency för att se",
+      "signed_out_text": "Logga in på Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Det gick inte att läsa ditt kontos nuvarande behörigheter. Inget ändrades; försök igen.",
+      "reads_disagree": "Två avläsningar av ditt kontos posting-behörighet stämmer inte överens. Inget ändrades; försök igen."
+    },
+    "vote": {
+      "vote_weight_must_be": "Rösträtten måste vara mellan -100% och 100%.",
+      "please_sign_in_first": "Logga in först."
+    },
+    "widget": {
+      "streak_name": "Uppdragssvit",
+      "write": "Skriv",
+      "new_wave": "Ny wave",
+      "notifications_description": "Dina olästa aviseringar. Dolda när PIN-lås är på.",
+      "streak_description": "Din svit av dagliga uppdrag. Dold när PIN-lås är på.",
+      "compose_description": "Skriv ett inlägg eller en ny wave.",
+      "streak_title": "Svit",
+      "daily_quests": "Dagliga uppdrag",
+      "streak_hint": "Öppna Perks för att se din svit",
+      "open_perks": "Öppna Perks",
+      "open_app": "Öppna Ecency",
+      "unread_caption": "{count, plural, one {oläst} other {olästa}}",
+      "streak_caption": "{count, plural, one {dags svit} other {dagars svit}}"
+    },
+    "system": {
+      "dictation_channel": "Diktering",
+      "listen_channel": "Lyssna",
+      "dictation_channel_description": "Visas medan en inspelning för diktering pågår i bakgrunden, med en Stoppa-åtgärd.",
+      "dictation_title": "Inspelning för diktering",
+      "dictation_text": "Ecency spelar in din diktering. Stoppa håller den oskickad tills du bekräftar i appen.",
+      "listen_channel_description": "Meddelar när Lyssna inte kunde fortsätta i bakgrunden.",
+      "listen_paused": "Lyssna pausad",
+      "listen_paused_text": "Öppna Ecency för att fortsätta lyssna.",
+      "skip_back": "Bakåt 15 sekunder",
+      "skip_forward": "Framåt 15 sekunder"
+    },
+    "permission": {
+      "face_id": "Lås upp Ecency med Face ID i stället för din PIN.",
+      "camera": "Skanna QR-koder, och ta ett foto eller spela in en video för att lägga till den i ditt inlägg.",
+      "photo_library_add": "Ecency sparar bilderna du laddar ned från inlägg i ditt fotobibliotek.",
+      "photo_library": "Ecency samlar bilderna du laddar ned från inlägg i ett Ecency-album i ditt fotobibliotek.",
+      "microphone": "Ecency använder din mikrofon så att du kan diktera inlägg och kommentarer (inspelningarna skickas till Ecency för att transkriberas) och för att spela in ljud till en video du lägger till i ett inlägg."
+    },
+    "android": {
+      "no_browser": "Ingen webbläsare tillgänglig",
+      "biometric_unlock_title": "Lås upp Ecency med biometri",
+      "biometric_confirm": "Bekräfta med fingeravtryck eller ansikte",
+      "image_unsupported_address": "Bildadressen stöds inte",
+      "image_create_failed": "Det gick inte att skapa filen",
+      "image_write_failed": "Det gick inte att skriva filen",
+      "image_too_large": "Bilden är för stor",
+      "image_download_failed": "Nedladdningen misslyckades med status {status}",
+      "billing_disconnected": "Google Play Billing frånkopplades.",
+      "billing_no_screen": "Ingen skärm att visa köpet på.",
+      "billing_error": "Google Play Billing-fel {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Du skapade {count, plural, one {# inlägg} other {# inlägg}} den här månaden. Fortsätt så!",
-        "checkin": "Du checkade in {count, plural, one {# dag} other {# dag}} den här veckan. Fortsätt så!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# nytt inlägg} other {# nya inlägg}} i #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# misslyckade försök} other {# misslyckade försök}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}-dagars svit"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Endast konton äldre än {days} dagar tillåtna",
-        "max_choices": "• Du kan välja upp till {choices} alternativ"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} överföringar kvar",
-        "schedule_summary": "{executions} överföringar, var och en var {hours} timme"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "För kort för att ge poäng ({n, plural, one {# tecken} other {# tecken}} eller färre, länkar oräknade)"
       },
       "chats": {
-        "people_joined": "{count} personer gick med"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "om ungefär {count, plural, one {# minut} other {# minuter}}",
+        "ban-remaining-hours": "om ungefär {count, plural, one {# timme} other {# timmar}}",
+        "ban-remaining-days": "om ungefär {count, plural, one {# dag} other {# dagar}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Använd högst {n, plural, one {# tagg} other {# taggar}}",
+          "too_long": "Sökningen är för lång. Använd högst {n, plural, one {# tecken} other {# tecken}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Minst {count} tecken krävs",
-        "chars_remaining": "{count} tecken kvar"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Du kan välja upp till {count, plural, one {# bild} other {# bilder}} åt gången"
+      },
+      "dictation": {
+        "stop_hint": "Stoppa för att transkribera och lägga till i ditt inlägg. Upp till {m, plural, one {# minut} other {# minuter}}.",
+        "rate": "{n} Points per {s, plural, one {# sekund} other {# sekunder}}"
       },
       "transfer": {
-        "powering_down_info": "Nästa avstakning sker om {days} dagar, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Mellan {min} och {max, plural, one {# tecken} other {# tecken}}"
       }
     }
   }

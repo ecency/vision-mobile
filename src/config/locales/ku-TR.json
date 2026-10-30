@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Endamê Ecency Pro"
   },
   "perks": {
     "header": "Feydeyên Taybet",
@@ -31,42 +31,42 @@
     "promote_desc": "Bila bêtir kes şandiya te bibînin",
     "account_boost": "Boosta hesêb",
     "account_boost_desc": "Her hesabekî boost bike",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC tije bike",
+    "rc_topup_desc": "Gava Krediyên Çavkaniyê kêm bin jî posta xwe berdewam bike",
+    "streak_freeze_owned": "{n} di embarê de",
+    "streak_freeze_buy": "Rêzeyê biparêze ({price} Points)",
+    "streak_freeze_buying": "Tê parastin",
+    "streak_freeze_error": "Qeşagirtina rêzeyê nehat kirîn. Ji kerema xwe dîsa biceribîne."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Posta rojane",
+    "streak": "Rêzeya {n} rojan",
+    "keep_streak": "Rêzeya xwe zindî bihêle"
   },
   "waves": {
     "for_you": "Ji bo te",
     "following": "Dişopîne",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Herikînên taybet",
+    "custom_feeds_subtitle": "Çavkanî û tagan bi pin bike da ku wekî tabên herikînê werin zêdekirin.",
+    "add_tag_placeholder": "Tagekê zêde bike",
+    "sources": "Çavkanî",
+    "your_feeds": "Herikînên te",
+    "trending_tags": "Tagên trend",
+    "shorts_empty": "Hê tu vîdyoyên kurt tune ne",
+    "mute": "Bêdeng bike",
+    "unmute": "Dengê veke"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Destpêk",
+    "subtitle": "Li vir nû yî? Waves postên kurt in û rêya herî hêsan e ji bo tevlîbûnê.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Bigire",
+    "item_wave": "Wave a xwe ya yekem biweşîne",
+    "item_vote": "Deng bide Waveek ku ji te re xweş tê",
+    "item_reply": "Bersiva kesekî bide",
+    "item_checkin": "Check-in bike da ku rêzeya xwe dest pê bikî",
+    "all_done_title": "Hemû qediya 🎉",
+    "all_done_subtitle": "Tu amade yî. Waves çêkirinê berdewam bike!"
   },
   "profile": {
     "havent_commented": "heta niha şîrove nehatiye kirin",
@@ -82,7 +82,7 @@
     "comments": "Şîrove",
     "waves": "Waves",
     "details": "Hûrgiliyên Profîlê",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "Krediyên Çavkaniyê",
     "voting_power": "Hêza dengdanê",
     "follow_people": "Gava tu kesan bişopînî, tê şandiyên wan li vir bibînî.",
     "hours": "demjimêr",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Temen  |  Xuyabûn  |  Şîrovekirin",
     "attach_poll": "Rapirsî Pêve Bike"
   },
+  "favorite_tags": {
+    "title": "Etîket",
+    "hint": "Ji bo agahdarbûna li ser şandiyên nû yên bi vê etîketê bişopîne",
+    "following_hint": "Tu ji şandiyên nû yên bi vê etîketê agahdar dibî",
+    "follow": "Bişopîne",
+    "following": "Tê şopandin",
+    "added": "Etîket tê şopandin",
+    "removed": "Şopandina etîketê hat rawestandin",
+    "empty_list": "Li vir tiştek tune"
+  },
   "favorites": {
     "add": "Bijarteyekê lê zêde bike",
     "add_error": "Bijarte nehat zêdekirin",
@@ -181,7 +191,33 @@
     "payout": "Dayîn",
     "details": "Hûragahî",
     "community": "civat",
-    "new_post": "Şandiya Nû"
+    "new_post": "Şandiya Nû",
+    "mute_post_title": "Vî şandiyî bêdeng bike",
+    "unmute_post_title": "Bêdengiya vî şandiyî rake",
+    "mute_post_reason": "Çima ev şandî bêdeng dibe?",
+    "unmute_post_reason": "Çima ev şandî vedigere?",
+    "manage": "Civatê birêve bibe",
+    "manage_members": "Endam û rol",
+    "manage_settings": "Sazkariyên civatê",
+    "manage_activities": "Tomara çalakiyan",
+    "activities": "çalakî",
+    "no_activities": "Hê çalakî tune",
+    "activities_load_failed": "Çalakî barkirin nebû. Ji bo nûkirinê bikşîne jêr.",
+    "set_role": "Rolê diyar bike",
+    "assign_role": "Rol bide",
+    "assign_role_hint": "Her hesabekî bigere, hesabên ku nebûne abone jî, paşê rolek hilbijêre.",
+    "username_placeholder": "Navê bikarhêner",
+    "invalid_username": "Ji encaman hesabekî heyî hilbijêre",
+    "members": "endam",
+    "no_members": "Endam nehat dîtin",
+    "members_incomplete": "Hin endam barkirin nebûn. Ji bo nûkirinê bikşîne jêr.",
+    "members_load_failed": "Endam barkirin nebûn. Ji bo nûkirinê bikşîne jêr.",
+    "role_owner": "Xwedî",
+    "role_admin": "Admîn",
+    "role_mod": "Moderator",
+    "role_member": "Endam",
+    "role_guest": "Mêvan",
+    "role_muted": "Bêdeng kirî"
   },
   "trade": {
     "swap_for": "{fromAmount} ji bo {toAmount} tê guhertin",
@@ -212,7 +248,11 @@
     "cross-post": "Şandina Hevbeş",
     "pin-blog": "Bi blogê ve bizeliqîne",
     "copy": "kopî bike",
+    "copy-text": "nivîsê kopî bike",
+    "open-thread": "mijarê veke",
     "unpin-community": "Ji civatê veqetîne",
+    "mute-post": "Şandiyê bêdeng bike",
+    "unmute-post": "Bêdengiya şandiyê rake",
     "mute": "Bêdeng / Asteng Bike",
     "reblog": "dîsa biweşîne",
     "undo-reblog": "ji nû ve weşandinê vegerîne",
@@ -232,24 +272,24 @@
     "unpin-reply": "Şîroveyê veqetîne"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Ev post bi zimanê {lang} ye. Bê wergerandin bo {target}?",
+    "translate_to": "Bo {lang} wergerîne",
+    "show_original": "Orîjînalê nîşan bide",
+    "translated_from": "Ji {lang} hatiye wergerandin",
+    "change_language": "Ziman biguherîne"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Postê wergerîne",
+    "source": "Zimanê çavkaniyê",
+    "target": "Zimanê armancê",
+    "detected": "Hate tespîtkirin: {lang}",
+    "translate": "Wergerîne",
+    "apply": "Bisepîne",
+    "review_note": "Wergera makîneyê ya nivîsa xwe ya bi xwe li dawiya postê zêde dike. Berî weşandinê kontrol bike û biguherîne.",
+    "too_short": "Pêşî hinekî bêtir binivîse. Werger bi kêmanî çend hevokan hewce dike.",
+    "progress": "{done} ji {total} tê wergerandin...",
+    "error": "Werger têk çû. Ji kerema xwe dîsa biceribîne.",
+    "add_title_marker": "Nîşana zimanê li sernavê zêde bike"
   },
   "side_menu": {
     "profile": "Profîl",
@@ -296,7 +336,7 @@
     "hot": "Germ",
     "popular": "Populer",
     "new": "Nû",
-    "friends": "Following",
+    "friends": "Şopandî",
     "my_blog": "Bloga Min"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Li vir ti tişt tune ye"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Şablon",
+    "untitled": "Şablona bê sernav",
+    "empty_list": "Postekê di edîtorê de wekî şablon tomar bike da ku li vir dîsa bikar bînî.",
+    "delete_confirm": "Tu bi rastî dixwazî vê şablonê jêbibî?",
+    "applied": "Şablon wekî postek nû hat sepandin",
+    "save_as_template": "Wekî şablon tomar bike",
+    "name_placeholder": "Navê şablonê",
+    "saved": "Şablon hat tomarkirin"
   },
   "selection_list": {
     "available": "Berdest {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Hemû",
+      "replies": "Bersiv",
+      "mentions": "Behskirin",
+      "rvotes": "Deng",
+      "follows": "Şopandin",
+      "reblogs": "Reblog",
+      "transfers": "Veguhastin",
+      "delegations": "Delegasyon",
+      "nfavorites": "Hezkirî",
+      "tags": "Etîket",
+      "nbookmarks": "Nîşanek",
+      "payouts": "Dayîn",
+      "scheduled_published": "Postên bernamekirî",
+      "account_updates": "Nûvekirinên hesabê",
+      "weekly_earnings": "Qezenca heftane"
     },
     "this_week": "Ev Hefteya",
     "reblog": "dîsa hate weşandin",
@@ -417,11 +458,15 @@
     "yesterday": "Doh",
     "mention": "hate behskirin",
     "favorites": "şandiyek nû çêkir",
+    "tags": "di #{tag} de şand",
+    "tags_bundle": "{count} şandiyên nû di #{tag} de",
+    "tags_title": "Şandiyên nû di etîketeke ku tu dişopînî de",
     "mentions": "Behskirin",
     "spin": "Dema bidestxistina bêtir Points hat",
     "last_week": "Hefteya Borî",
     "recent": "Dawîn",
     "ignore": "te asteng kir",
+    "blacklist": "tu xistî lîsteya reş",
     "follow": "te şopand",
     "notification": "Danezanên Te",
     "this_month": "Ev Meha",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} niha dikare li şûna te şandiyan biweşîne û deng bide. Ger te ev destûr nedabe, vegerîne.",
     "weekly_earnings": "Te vê heftê ${amount} qezenc kir{breakdown}",
     "payouts": "Dayîn hate wergirtin: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "postek bernamekirî weşand",
+    "scheduled_published_title": "Posta bernamekirî hat weşandin",
+    "scheduled_published_body": "Posta te ya bernamekirî niha zindî ye, ji bo dîtinê bitikîne"
   },
   "recurrent": {
     "delete_failed": "Jêbirina veguhastina dubarbar têk çû, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Reşnivîsa dawî veke an şandiyek nû çêke",
     "reward_power_up": "100% Stake Bike",
     "open_gallery": "Pêşangehê Veke",
+    "open_files": "Ji Pelan hilbijêre",
     "clipboard_no_image": "Di panoyê de tu wêne nehat dîtin",
     "clipboard_image_detected": "Wêne di panoyê de",
     "paste_image": "Wêneyê pêve bike",
@@ -539,8 +585,10 @@
     "video": "Vîdyo",
     "scheduled_later": "Paşê",
     "settings_title": "Vebijarkên Şandiyê",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Na"
+    "support_ecency": "Piştgiriya Ecency bike {percent}%",
+    "alert_btn_no": "Na",
+    "short_reply_hint": "Bersivên bi {n} tîp an kêmtir Points nakêşin (lînk nayên jimartin)",
+    "short_content_hint": "Ji bo qezenckirina Points pir kurt e ({n} tîp an kêmtir, bêyî lînkan)"
   },
   "time": {
     "week": "hefte",
@@ -655,7 +703,41 @@
     "select_emoji": "Emojiyê hilbijêre",
     "more_emojis": "Bêtir",
     "search_emojis": "Li emojiyan bigere...",
-    "no_emoji_found": "Tu emoji nehat dîtin"
+    "no_emoji_found": "Tu emoji nehat dîtin",
+    "ban-reason-spray": "Şandina te hat rawestandin ji ber ku heman peyam di heman demê de ji gelek kanalan re hat şandin.",
+    "ban-reason-mass-dm": "Şandina te hat rawestandin ji ber ku peyamek di heman demê de ji gelek kesan re hat şandin.",
+    "ban-reason-generic": "Şandina te di sohbetê de hat rawestandin.",
+    "ban-can-still-read": "Tu dîsa jî dikarî sohbetê bixwînî.",
+    "ban-unlocks": "Şandin {when} vedibe.",
+    "ban-remaining-soon": "di kêmtirî deqeyekê de",
+    "ban-remaining-minutes": "di nêzîkî {count} deqeyan de",
+    "ban-remaining-hours": "di nêzîkî {count} demjimêran de",
+    "ban-remaining-days": "di nêzîkî {count} rojan de",
+    "new_group": "Komeke nû",
+    "new_group_hint": "Ji bo destpêkirina sohbeta komê {min} heta {max} kesan zêde bike.",
+    "new_group_search": "Kesan bi navê bikarhêner bigere",
+    "new_group_full": "Di komekê de heta {max} kesên din dikarin hebin.",
+    "new_group_no_results": "Bi vî navî kes di sohbetê de nehat dîtin.",
+    "new_group_search_failed": "Lêgerîn xebitî nebû. Girêdana xwe kontrol bike û dîsa biceribîne.",
+    "new_group_remove": "@{username} rake",
+    "new_group_create": "Komê dest pê bike",
+    "new_group_failed": "Kom dest pê nekir. Ji kerema xwe dîsa biceribîne.",
+    "rename_group": "Navê komê biguherîne",
+    "rename_group_hint": "Navekî bide vê komê ku her kes tê de bibîne. Vala bihêle da ku navên endaman werin nîşandan.",
+    "group_name": "Navê komê",
+    "rename_group_too_long": "Navê komê heta {max} tîpan dikare hebe.",
+    "rename_group_not_owner": "Navê komê tenê ew kesê ku dest pê kiriye dikare biguherîne.",
+    "rename_group_failed": "Navê komê nehat guhertin. Ji kerema xwe dîsa biceribîne.",
+    "group_renamed": "{user} navê komê kir \"{name}\"",
+    "group_name_cleared": "{user} navê komê rakir",
+    "group_members": "Endamên komê",
+    "save": "Tomar bike",
+    "cancel": "Betal bike",
+    "reactions_title": "Reaksiyon",
+    "reactor_you": "Tu",
+    "reactor_unknown": "Kesek",
+    "see_who_reacted": "Ji bo dîtina kê reaksiyon daye demeke dirêj bitikîne",
+    "group": "Kom"
   },
   "free_estm": {
     "timer_text": "Ji zîvirandina pêş re, maye",
@@ -684,6 +766,32 @@
     "transaction_fail": "Danûstandin neserkeftî"
   },
   "search_result": {
+    "error": "Lêgerîn temam nebû. Ji kerema xwe dîsa biceribîne",
+    "filters": {
+      "title": "Parzûn",
+      "open": "Parzûn",
+      "author": "Nivîskar",
+      "author_placeholder": "navê bikarhêner",
+      "category": "Kategorî",
+      "category_placeholder": "civat an kategorî",
+      "tags": "Etîket",
+      "tags_placeholder": "bi komayê veqetîne",
+      "type": "Cure",
+      "type_all": "Hemû",
+      "type_post": "Şandî",
+      "type_comment": "Şîrove",
+      "date": "Dîrok",
+      "date_week": "Hefteya borî",
+      "date_month": "Meha borî",
+      "date_year": "Sala borî",
+      "date_all": "Hemû dem",
+      "sort": "Rêz bike",
+      "apply": "Bicîh bîne",
+      "active": "{n} çalak",
+      "too_many_tags": "Herî zêde {n} etîket bi kar bîne",
+      "too_long": "Lêgerîn pir dirêj e. Herî zêde {n} tîp bi kar bîne",
+      "needs_criteria": "Ji bo parzûnkirinê peyvek lêgerînê an nivîskar, kategorî an etîketekê binivîse"
+    },
     "communities_filter": {
       "new": "Nû",
       "my": "Civakên Min",
@@ -727,7 +835,7 @@
     "title": "Şandina Hevdem"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Nivîskar bikaranîna AI eşkere kir"
   },
   "ai_assist": {
     "title": "Alîkarê Nivîsandinê yê AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Ji bo şandiya xwe etîketên têkildar bistîne",
     "action_generate_title": "Sernavê Çêke",
     "action_generate_title_desc": "Vebijarkên sernavên balkêş çêke",
-    "action_summarize": "Recap",
+    "action_summarize": "Kurte",
     "action_summarize_desc": "Kurteyeke kurt çêke",
     "action_check_grammar": "Rêzimanê Kontrol Bike",
     "action_check_grammar_desc": "Çewtiyên rêziman û rastnivîsê serast bike",
+    "action_generate_image": "Wêne çêke",
+    "action_generate_image_desc": "Ji bo şandiya xwe wêneyekî AI çêke",
+    "cost_from": "ji {cost} {unit} dest pê dike",
     "text_label": "Nivîsa te",
     "text_placeholder": "Naveroka xwe li vir pê ve bike an binivîse...",
     "min_chars": "Herî kêm {count} tîp pêwîst in",
@@ -797,16 +908,26 @@
     "remind_later": "Paşê Bîne Bîra Min",
     "success_subscribe": "Abonebûn serkeftî!",
     "payloadTooLarge": "Mezinahiya pelê pir mezin e, ji kerema xwe wê biçûk bike an wêneyeke biçûktir bar bike",
+    "too_many_images": "Tu dikarî di carekê de heta {count} wêneyan hilbijêrî",
     "fail_follow": "Şopandin neserkeftî!",
     "clear_user_alert": "Bi rastî jî tu dixwazî hemû daneyên bikarhêner paqij bikî?",
     "cancel": "Betal",
     "connection_success": "Bi serkevtî hate girêdan!",
     "rc_down": "Resource Credits têrê nakin ku çalakiyek were kirin! \n\nHesabê xwe boost bike da ku tu bi kêf berdewam bikî. Tu dixwazî niha hesabê xwe boost bikî?",
+    "rc_down_title": "Krediyên Çavkaniyê têr nakin",
+    "rc_precheck_title": "Dibe ku ev şandî ji bo weşandinê pir mezin be",
+    "rc_precheck_body": "Krediyên te yên çavkaniyê ji bo şandiyeke bi vê mezinahiyê kêm xuya dikin.",
+    "rc_down_body": "Krediyên te yên çavkaniyê ji bo vê çalakiyê têr nakin.\n\nJi bo domandinê niha bi Points tije bike an hesabê xwe her û her xurt bike.",
+    "rc_down_topup": "RC bi Points tije bike",
+    "rc_down_boost": "Hesabê xurt bike",
     "done": "Temam",
     "something_wrong_alt": "Di vê navberê de, ji geroka xwe Ecency.com biceribîne",
     "same_user": "Ev bikarhêner berê li lîsteyê hatiye zêdekirin",
     "fail": "Biserneket!",
     "operation_failed_with_reason": "{operation} neserkeftî: {reason}",
+    "request_timed_out": "Girêdan pir dem digire. Torê kontrol bike û dîsa biceribîne.",
+    "load_failed_retry": "Ev barkirin nebû. Ji kerema xwe dîsa biceribîne.",
+    "retrying": "Dîsa tê ceribandin...",
     "wallet_refresh_failed": "Nûkirina cizdanê neserkeftî. Ji kerema xwe dîsa biceribîne.",
     "wallet_refresh_missing_account": "Nûkirina cizdanê neserkeftî: hesab winda ye.",
     "boost_failed": "Boost neserkeftî.",
@@ -949,31 +1070,31 @@
     "video_attached": "Vîdyo hate pêvekirin"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Deng bide",
+    "upvoted": "Deng hat dayîn",
+    "downvoted": "Dengê dijî hat dayîn",
+    "upvote_hint": "Du caran bitikîne da ku vebijarkên dengdanê vebin",
+    "payout_details": "Hûrgiliyên dayînê",
+    "a11y_votes": "{count, plural, one {# deng} other {# deng}}",
+    "a11y_voters_hint": "Dengdêran bibîne",
+    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblog}}",
+    "a11y_reblogs_hint": "Reblogan bibîne",
+    "a11y_comments": "{count, plural, one {# şîrove} other {# şîrove}}",
+    "a11y_comments_hint": "Şîroveyan bibîne",
+    "a11y_reply_hint": "Bersiv bide",
+    "a11y_tip": "Bexşîş bişîne",
+    "a11y_tips": "{count, plural, one {# bexşîş} other {# bexşîş}}",
+    "a11y_edit": "Şîroveyê biguherîne",
+    "a11y_delete": "Şîroveyê jê bibe",
+    "a11y_show_replies": "Bersivan nîşan bide",
+    "a11y_hide_replies": "Bersivan veşêre",
+    "a11y_post_options": "Vebijarkên postê",
+    "a11y_views": "{count, plural, one {# dîtin} other {# dîtin}}",
+    "source_ecency": "Bi Ecency hat weşandin",
+    "a11y_stats_hint": "Statîstîkên postê bibîne",
     "image": "Wêne",
     "reveal_muted": "BÊDENGKIRÎ\nJi bo dîtina naverokê bitikîne",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Ji bo barkirina wêneyê bitikîne",
     "in": "li",
     "poll": "RAPIRSÎ",
     "copy_link": "Girêdanê kopî bike",
@@ -998,13 +1119,14 @@
     "save_to_local": "Daxîne amûrê",
     "muted": "Naverok ji ber binpêkirinê hate bêdengkirin",
     "community_muted": "Naverok ji ber binpêkirina rêbazên civakî hate bêdengkirin",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Naverok ji hesabekî bi navdariya kêm",
+    "muted_downvoted": "Naveroka ku bikarhêneran dijî deng dane",
+    "muted_low_trust": "Hesabek bi navdariya kêm û lînkeke derve ya nepejirandî",
+    "muted_reveal": "Ji bo nîşandanê bitikîne",
     "promoted": "TÊ TANÎN",
     "image_saved": "Wêne li Pêşangeha Wêneyan Hate Tomarkirin",
     "words": "Bêje",
     "reading": "Xwendin",
-    "listen": "Guhdarî bike",
     "min": "deq",
     "summarize_start": "Dest pê bike"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Şandî tune ye",
     "invalid_link": "Url ne derbasdar e, dibe ku tu bi urlek derbasdar dîsa biceribînî an wê di geroka tevnê de vekî",
-    "no_existing_user": "Bikarhêner tune ye"
+    "no_existing_user": "Bikarhêner tune ye",
+    "posting_key_request": "{requester} kilîta taybet a posting ji bo @{username} dixwaze.\n\nTenê heke tu bi vê daxwazê bawer î bidomîne.",
+    "posting_key_request_unnamed": "Sepaneke din kilîta taybet a posting ji bo @{username} dixwaze.\n\nTenê heke tu bi vê daxwazê bawer î bidomîne.",
+    "auth_request_as_user": "{requester} dixwaze te wekî @{username} têkeve.\n\nTenê navê te yê bikarhêner û delîlek têketinê tê parvekirin. Tu kilît ji Ecency dernakeve.",
+    "auth_request_as_current": "{requester} dixwaze te bi hesabê te yê Ecency têkeve.\n\nTenê navê te yê bikarhêner û delîlek têketinê tê parvekirin. Tu kilît ji Ecency dernakeve."
   },
   "payout": {
     "breakdown": "Hilweşîne",
@@ -1065,7 +1191,7 @@
     "open": "URL'ê veke",
     "invalid_key_desc": "ji kerema xwe bi mifteya {key} an mifteya sereke têkeve da ku vê danûstandinê bikî",
     "auth_transfer_confirm": "Veguhastina bo {username} piştrast bike?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Tenê heke tu bi çavkaniya vê lînkê bawer î bipejirîne. Pejirandin operasyona jêrîn bi kilîta te ya {authority} ji hesabê te dişîne."
   },
   "voters_dropdown": {
     "rewards": "XELAT",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Divê tenê tîp, hejmar û xêzika navberê hebe",
       "username_no_ascii_first_letter_error": "Divê bi tîpekê dest pê bike",
       "username_contains_double_hyphens": "Divê du xêzikên navberê li pey hev nehebin",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Ev navê bikarhêner pir dişibe hesabê borseyeke krîpto û dibe ku kesên din tevlihev bike. Ji kerema xwe navekî bêhempatir hilbijêre.",
+      "username_restricted_prefix": "Navên bikarhêner ên bi „uid“ dest pê dikin û hejmar li pey wan tên nayên destûrdan, ji ber ku pir caran ji bo xwe wekî kesên din nîşan bidin tên bikaranîn. Ji kerema xwe navekî din hilbijêre.",
       "username_contains_underscore": "Divê xêzika binî (underscore) nehebe"
     },
     "500_error": "Daxwaza te nehat hilanîn, dibe ku rêza qeydkirinê tijî be! Çend deqeyan din dîsa biceribîne...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Navê bikarhêner jixwe hatiye girtin",
+      "14": "Navnîşana e-nameyê jixwe hatiye qeydkirin",
+      "15": "Ji kerema xwe navnîşana e-nameyeke derbasdar binivîse",
+      "16": "Ji kerema xwe navekî bikarhêner ê derbasdar binivîse",
+      "17": "Navê bikarhêner pir dirêj e, yekî kurttir hilbijêre",
+      "19": "Ji kerema xwe navnîşana e-nameyeke domdar bikar bîne, an hesabekî Premium bistîne",
+      "21": "Ev referans derbasdar nîne",
+      "28": "Daxwaza te nehat pêvajoyê, dibe ku rêza qeydkirinê tije be. Ji kerema xwe piştî çend deqeyan dîsa biceribîne.",
+      "107": "Girêdana VPN hate tespîtkirin. Ji kerema xwe VPN a xwe bigire û dîsa biceribîne, an hesabekî Premium bistîne.",
+      "110": "Ji bo pêşîgirtina li xerabkariyê, em hejmara hesaban ji bo her kes/tor sînordar dikin. Ji kerema xwe ji torekî din dîsa biceribîne.",
+      "111": "Girêdana Tor hate tespîtkirin. Ji kerema xwe di dema qeydkirinê de Tor bigire.",
+      "112": "Me nikaribû girêdana te niha rast bikira. Ji kerema xwe piştî çend deqeyan dîsa biceribîne."
     },
     "have_account_text": "Jixwe hesabek te heye?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Hesabek Hive ya temam bistîne; ev rêbaz xwedî kontrolên bingehîn e ji bo ku botnet feyzê me ya qeydkirinê xerab neke.",
     "btn_register": "Belaş Qeyd Bibe",
     "title": "Hesabê Belaş"
+  },
+  "dictation": {
+    "title": "Bi dengê binivîse",
+    "start": "Tomar bike",
+    "stop": "Raweste",
+    "record_more": "Zêdetir tomar bike",
+    "done": "Temam",
+    "recording": "Tê tomarkirin",
+    "stop_hint": "Ji bo veguheztina nivîsê û lêzêdekirina şandiyê raweste. Heta {m} deqe.",
+    "inserted": "Li şandiya te hat zêdekirin. Zêdetir tomar bike an Temam bitikîne.",
+    "transcribing": "Tê veguhertin nivîsê",
+    "rate": "{n} Points ji bo {s} çirkeyan",
+    "cost_running": "Heta niha {n} Points",
+    "cost_running_free": "Heta niha belaş",
+    "free_remaining": "Îro {n} x {s} çirkeyên din belaş in",
+    "price_loading": "Biha tê kontrolkirin",
+    "price_error": "Bihayê veguhertina nivîsê barkirin nebû.",
+    "denied": "Ecency ji bo nivîsandina bi deng hewceyî gihîştina mîkrofonê ye. Di Sazkariyan de destûr bide û dîsa biceribîne.",
+    "error_empty": "Di vê tomarê de axaftin nehat dîtin.",
+    "error_insufficient_points": "Ji bo veguhertina vê tomarê Points têr nakin.",
+    "error_rate_limited": "Niha pir tomar hene. Ji kerema xwe piştî demekê dîsa biceribîne.",
+    "error_too_long": "Ev tomar ji bo veguhertinê pir dirêj e.",
+    "error_failed": "Ev tomar nehat veguhertin. Ji kerema xwe dîsa biceribîne.",
+    "error_recorder": "Tomarkirin dest pê nekir. Ji kerema xwe dîsa biceribîne."
   },
   "wallet": {
     "delegations_out": "Wekîltiyên Derketî",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Çavpêxistina bi rêkûpêk 0.25 puanan dide qezenckirin.",
     "fill_transfer_from_savings": "Berhevkirin Pek Hat",
     "activities": "Çalakî",
+    "no_activities": "Hê muameleyek tune",
+    "activities_failed": "Muamele barkirin nebûn. Ji bo ceribandinê bikşîne jêr.",
     "tap_update": "Ji bo nûkirinê bitepîne",
     "mining_lottery": "Pîyango Hat Birin",
     "checkin": "Têketin",
     "tokens_transfer": "Token Hatin Veguhastin",
     "outgoing_transfer_title": "Veguhastin/Diyarî",
+    "burned_title": "Bikaranîna AI",
+    "burned_description": "Points ku ji bo taybetmendiyeke AI hatine xerckirin",
+    "burn_refund_title": "Vegera AI",
+    "burn_refund_description": "Points ku piştî daxwazeke AI ya têkçûyî hatine vegerandin",
     "manage_assets": "Maldaran Lê Zêde Bike / Rake",
     "selected_assets": "Maldarên Hilbijartî",
     "nft_setPropertyPermissions": "Destûrên Taybetmendiyê ji bo Sembola NFT Hatin Danîn",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Nûkirina Hûrdekariya Token",
     "tokens_transferOwnership": "Xwedîtiya Token Hat Veguhastin",
     "withdraw_vesting": "Bişkîne",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Hesabên vekişandinê",
     "delegate_engine": "Wekîl bike",
     "market_close": "Ferman Hat Girtin",
     "nftmarket_transferFee": "Heqê Fermana Kirînê",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "POINTS BISTÎNE",
     "escrow_approve": "Pejirandina Emanetê",
     "expires": "diqede",
+    "transaction_id": "Nasnameya muameleyê",
+    "copy_transaction_id": "Lînka muameleyê kopî bike",
+    "filter_activities": "Çalakiyan parzûn bike",
+    "filter_activities_desc": "Hilbijêre ev dîrok kîjan çalakiyan dixwaze",
+    "filter_all": "Hemûyan hilbijêre",
+    "filter_none": "Hemûyan paqij bike",
+    "filter_apply": "Bicîh bîne",
     "author_reward": "Xelata Nivîskêr",
     "withdraw_hbd": "Hilanînê Vekişîne",
     "convert_request": "Daxwaza Veguhastinê",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC tije bike",
+    "desc": "Zêdekirina kurtdem a RC da ku tu bikaribî posta xwe berdewam bikî.",
+    "confirm": "Points xerc bikî da ku Krediyên Çavkaniyê tije bikî?",
+    "insufficient": "Points a te têr nake.",
+    "buy_points": "Points bikire"
   },
   "ai_image_generator": {
     "title": "Çêkerê Wêneyê AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Taybet ({hours}st)",
+    "balance_load_failed": "Bakiyeya te barkirin nebû. Ji bo ceribandinê bitikîne.",
+    "precision_load_failed": "Hûrgiliyên vî tokenî barkirin nebûn, ji ber vê tenê mîqdarên tam dikarin werin şandin. Ji bo ceribandinê bitikîne.",
     "close": "Bigire",
     "favorite_username_placeholder": "Navê bikarhêner",
     "invalid_recipient_qr": "Di vê koda QR de tu navê bikarhêner nehat dîtin.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Bi Rêvebirina Desthilatan",
     "pincode": "Pînkod",
     "general": "Giştî",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Piştgiriya Ecency bike",
+    "support_beneficiary": "Xelatên postê bi Ecency re parve bike",
+    "support_beneficiary_percent": "Para xelatên postê",
+    "support_curation": "Beşek ji xelatên kuratorîyê bigire",
+    "support_curation_percent": "Girtina xelatên kuratorîyê",
     "feedback_body": "Peyama xwe li vir binivîse!\n\nNavê bikarhênerê Hive: {username}\nGuhertoya sepanê: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Wêneyan Nîşan Bide",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Şîrovekirin",
       "bookmark": "Şûnpan",
+      "tags": "Etîket",
       "reblog": "Dîsweşandin",
       "favorite": "Bijarte",
       "mention": "Behskirin",
@@ -1599,10 +1765,10 @@
       "transfers": "Transfer",
       "vote": "Dengdan",
       "follow": "Şopandin",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Posta bernamekirî hat weşandin",
+      "payouts": "Dayîn",
+      "account_update": "Nûvekirinên hesabê",
+      "weekly_earnings": "Qezenca heftane",
       "fcm_unavailable": "Agahdariyên pêl li ser vî cîhazî nayên piştgirîkirin. Tu dê tenê dema sepan vekirî be agahdariyan bistînî."
     },
     "keys_warning": "Agahiyên hesabê hesas!\nEcency divê berî dîtina kilîtên taybet bi koda PIN ewle bibe.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Paşragihandin",
     "rate_app": "Ecency binirxîne",
+    "email_digests": "Kurteyên e-nameyê",
     "rate": "Nirxandin",
     "dm-privacy-updated": "Mîhengên nehêniya DMyê bi serkeftî hatin nûkirin",
     "dm-privacy-failed": "Nûkirina mîhengên nehêniya DMyê têk çû",
@@ -1685,19 +1852,29 @@
     "request_sent": "Daxwaza te ya jêbirinê hat şandin",
     "confirm_delete_body": "Tu piştrast î ku dixwazî hesab jê bibî? Ev ê hemû daneyên te jê bibe"
   },
-  "tts": {
-    "settings_title": "Mîhengên Nivîs-bo-Deng",
-    "voice": "Deng",
-    "voice_hint": "Dengê standard ê pergalê dê bê bikaranîn",
-    "speed": "Lez",
-    "pitch": "Asta dengî",
-    "test_voice": "Dengî Biceribîne",
-    "settings_info": "Ev mîheng dê dema xwendina deng a postan bên bikaranîn",
-    "play": "Bilîze",
-    "pause": "Rawestîne",
-    "language": "Ziman",
-    "language_auto": "Xweber-tespîtkirin",
-    "language_hint": "Xweber-tespîtkirin zimanî li gorî naveroka postê hildibijêre"
+  "listen": {
+    "title": "Guh bide vî şandiyî",
+    "minutes": "~{n} deq",
+    "login": "Têkeve",
+    "unlock": "Veke · {n} Points",
+    "confirm": "{n} Points ji bo guhdana vî şandiyî bên xerckirin? Deng ya te ye, her dem dikarî dîsa guh bidî.",
+    "not_enough_title": "Points têr nakin",
+    "not_enough": "Ji bo guhdanê {required} Points pêwîst in û te {available} heye.",
+    "get_points": "Points bistîne",
+    "unlock_failed": "Deng venebû, ji kerema xwe dîsa biceribîne",
+    "failed_refunded": "Deng nehat çêkirin, Points hatin vegerandin",
+    "preparing": "Deng tê amadekirin…",
+    "preparing_eta": "Deng tê amadekirin, nêzîkî {n} deq…",
+    "preparing_progress": "Deng tê amadekirin · {n}%",
+    "waiting": "Di rêzê de li bendê ye, {n} kes li pêşiya te ne…",
+    "next_in_line": "Rêza te ye…",
+    "play": "Lê bide",
+    "pause": "Bisekine",
+    "seek": "Bigere",
+    "speed": "Leza lêdanê",
+    "language": "Zimanê dengê",
+    "unavailable": "Deng barkirin nebû.",
+    "retry": "Dîsa biceribîne"
   },
   "posting_authority": {
     "title": "Şandina Lezgîntir Çalak Bike",
@@ -1732,7 +1909,7 @@
     "error-auth": "Rastandin têk çû. Ji kerema xwe dîsa têkeve.",
     "error-generic": "Barkirina vîdyoyê têk çû. Ji kerema xwe dîsa biceribîne.",
     "error-too-long-short": "Vîdyoyên kurt divê 60 çirke an kêmtir bin.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Postek tenê dikare vîdyoyek hebe. Berî zêdekirina yekî din vîdyoya heyî rake.",
     "select_source": "Vîdyo Lê Zêde Bike",
     "record": "Vîdyo Tomar Bike",
     "choose_library": "Ji Pirtûkxaneyê Hilbijêre"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Nûvekirinek bilez parve bike"
   },
+  "newsletter": {
+    "screen_title": "Kurteyên e-nameyê",
+    "title": "{list}",
+    "body_own": "Kurteyeke hefteyî an mehane ya agahdariyên te bi e-nameyê.",
+    "body_creator": "Şandiyên nû yên {list} di qutiya te de.",
+    "body_community": "Kurteya şandiyên nû yên {list} bi e-nameyê.",
+    "body_site": "Çêtirînên Ecency di qutiya te de.",
+    "first_publish_title": "Spas ji bo şandiya te ya yekem!",
+    "first_publish_body": "Tu kurteya agahdariyên xwe bi e-nameyê dixwazî? Hefteyî an mehane, her dem di Sazkariyan de biguherîne an derkeve.",
+    "list_own": "Kurteya agahdariyên min",
+    "list_site": "Nûçenameya Ecency",
+    "status_active": "Tu abone yî.",
+    "status_pending": "Li benda pejirandina e-nameyê ye.",
+    "status_short_active": "çalak",
+    "status_short_pending_confirmation": "li bendê",
+    "status_short_suppressed": "hatiye rawestandin",
+    "status_short_ended": "qediyaye",
+    "cadence_weekly": "Hefteyî",
+    "cadence_monthly": "Mehane",
+    "email_placeholder": "tu@nimune.com",
+    "subscribe": "Abone bibe",
+    "update": "Nû bike",
+    "resend": "Pejirandinê dîsa bişîne",
+    "leave": "Ji kurteyê derkeve",
+    "cancel": "Betal bike",
+    "ok": "Baş e",
+    "manage": "Birêve bibe",
+    "check_inbox_title": "Qutiya xwe kontrol bike",
+    "check_inbox_body": "Me lînkeke pejirandinê şand {email}. Abonebûn piştî pejirandina te dest pê dike.",
+    "subscribed": "Bûye abone ya kurteya e-nameyê",
+    "left": "Te ji kurteyê derket",
+    "refused": "Ev navnîşan nikare bibe abone.",
+    "unavailable": "Kurteyên e-nameyê niha ne berdest in.",
+    "too_many": "Gelek hewl hatin dayîn, ji kerema xwe paşê dîsa biceribîne.",
+    "fail": "Tiştek şaş çû, ji kerema xwe dîsa biceribîne.",
+    "empty": "Hê kurteya e-nameyê tune. Ji bo destpêkirinê li jêr abone bibe.",
+    "discover": "Bi e-nameyê zêdetir bistîne",
+    "stop_all": "Hemûyan raweste",
+    "stop_all_title": "Hemû e-name werin rawestandin?",
+    "stop_all_body": "Êdî e-nameya Ecency nayê şandin {email}. Abonetiyên bi navnîşanên din dimînin.",
+    "stop_all_ok": "Hemûyan raweste",
+    "stop_all_done": "Navnîşan ji hemû e-nameyan hat derxistin",
+    "profile_option": "KURTEYA E-NAMEYÊ",
+    "subscriber_count": "{weekly} hefteyî • {monthly} mehane abonên e-nameyê",
+    "community_button": "Nûçename"
+  },
+  "mod_notes": {
+    "title": "Sedemekê zêde bike",
+    "placeholder": "Sedem (ji moderatorên din re xuya ye)",
+    "confirm": "Bipejirîne",
+    "cancel": "Betal bike"
+  },
+  "community_settings": {
+    "title_header": "Sazkariyên civatê",
+    "title_label": "Sernav",
+    "about": "Der barê",
+    "lang": "Ziman",
+    "description": "Danasîn",
+    "rules": "Rêgez",
+    "nsfw": "Ji bo kar ne guncav e",
+    "save": "Tomar bike",
+    "required": "Pêwîst e",
+    "title_length": "Di navbera {min} û {max} tîpan de",
+    "owner_admin_only": "Van sazkariyan tenê xwedî û admîn dikarin biguherînin."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Vekirî",
+        "collapsed": "Girtî"
+      },
+      "a11y_chat": {
+        "quote": "Bersiva {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Hilbijêre",
+        "deselect": "Hilbijartinê rake"
+      },
+      "store": {
+        "billing_unavailable": "Li ser vê cîhazê kirîna di nav sepanê de nayê destûrdan.",
+        "verification_failed": "App Store nikaribû vê kirînê bipejirîne.",
+        "cancelled": "Kirîn hat betalkirin",
+        "unknown_result": "Encama kirînê nayê zanîn"
+      },
+      "navigation": {
+        "feed_unavailable": "Ev herik hê ne berdest e.",
+        "link_cannot_open": "Ev lînk venabe.",
+        "video_cannot_play": "Ev vîdyo nayê lêdan."
+      },
+      "media": {
+        "load_failed": "Ev tişt barkirin nebû. Girêdana xwe kontrol bike û dîsa biceribîne.",
+        "loading": "Medya tê barkirin",
+        "download_failed": "Daxistin bi rewşa {status} têk çû"
+      },
+      "sign_in": {
+        "required": "Têketin pêwîst e",
+        "to_reply": "Ji bo bersivdanê têkeve.",
+        "to_vote": "Ji bo dengdanê têkeve.",
+        "button": "Têkeve"
+      },
+      "account": {
+        "logout_user": "Ji @{username} derkeve"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# deng} other {# deng}}  •  {replies, plural, one {# bersiv} other {# bersiv}}",
+        "voting_power": "Hêza dengdanê {percent}",
+        "remove_favourite": "Ji bijarteyan rake",
+        "add_favourite": "Li bijarteyan zêde bike"
+      },
+      "waves": {
+        "clear_tag_filter": "Parzûna etîketa {tag} paqij bike",
+        "new_wave": "Wave a nû",
+        "replies_open_thread": "{count, plural, one {# bersiv, mijarê veke} other {# bersiv, mijarê veke}}",
+        "characters": "{count} ji {max} tîpan",
+        "retry": "{message}\nDîsa biceribîne",
+        "playing": "{permlink} tê lêdan",
+        "video_attached_remove": "Vîdyo hat girêdan, rake",
+        "image_attached_remove": "Wêne hat girêdan, rake",
+        "take_photo": "Wêne bikişîne",
+        "edit_poll": "Nêrîngehê biguherîne",
+        "add_poll": "Nêrîngeh zêde bike",
+        "add_video": "Vîdyo zêde bike"
+      },
+      "reading": {
+        "reply_to": "Bersiva {username} bide",
+        "opens_post": "Şandiyê vedike",
+        "sort_comments": "Şîroveyan rêz bike",
+        "sort_comments_value": "Şîroveyan rêz bike, {sort}",
+        "no_comments": "Hê şîrove tune.",
+        "loading_post": "Şandî tê barkirin",
+        "show_version": "Guhertoyê nîşan bide",
+        "show_changes": "Guhertinan nîşan bide",
+        "replying_to": "Bersiv ji @{username} re tê dayîn",
+        "reply_text": "Nivîsa bersivê",
+        "translate_from": "Ji",
+        "translate_to": "Bo"
+      },
+      "feed": {
+        "tab_pinned": "{label}, hatiye derzîkirin",
+        "tab_add": "{label}, zêde bike",
+        "customise": "Taybet bike"
+      },
+      "card": {
+        "in_category": "di {category} de",
+        "pinned": "Hatiye derzîkirin",
+        "by_author": "ji aliyê {username}",
+        "payout": "xelat {payout}",
+        "payout_declined": "xelat {payout}, hatiye redkirin",
+        "reblogged_by": "{username} dîsa weşand"
+      },
+      "shell": {
+        "close_menu": "Menuyê bigire"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Wêneya biçûk, wêneyekî din hilbijêre",
+        "words": "{count, plural, one {# peyv} other {# peyv}}",
+        "poll_min_age": "Temenê hesabê yê herî kêm (roj): {days}",
+        "poll_max_options": "Vebijarkên herî zêde: {count}",
+        "thumbnail_selected": "Wêneya biçûk a hilbijartî",
+        "thumbnail": "Wêneya biçûk",
+        "uploaded_image": "Wêneya barkirî",
+        "community_search": "bigere"
+      },
+      "vote": {
+        "not_voted": "Deng nehatiye dayîn",
+        "voting": "Deng tê dayîn",
+        "failed_with": "Deng neçû: {message}",
+        "failed": "Deng neçû",
+        "payout": "Xelat {payout}",
+        "payout_declined": "Xelat {payout}, hatiye redkirin",
+        "percent": "sedî {percent}",
+        "upvote_percent": "%{percent} dengê erênî"
+      },
+      "settings": {
+        "on": "Vekirî",
+        "off": "Girtî"
+      },
+      "lock": {
+        "biometric_reason": "Ji bo Ecency vekirina bi biyometrîk çalak bike",
+        "offer_title": "Bi {method} veke",
+        "offer_use": "{method} bi kar bîne"
+      },
+      "keys": {
+        "hidden_while_captured": "Dema ekran tê tomarkirin an neynikkirin kilît têne veşartin.",
+        "screenshot_notice": "Dîmenek hat girtin. Kilîtên taybet dîsa hatin veşartin; heke dîmen kilîtekê nîşan dide, jê bibe.",
+        "hold_hint": "Ji bo nîşandana kilîtekê dirêj bitikîne.",
+        "hold_to_show": "Ji bo nîşandanê dirêj bitikîne"
+      },
+      "wallet": {
+        "cancel_order": "Ev ferman were betalkirin?",
+        "days": "{count, plural, one {# roj} other {# roj}}"
+      },
+      "chat": {
+        "reactors_hint": "Ji bo dîtina kê reaksiyon daye dirêj bitikîne",
+        "see_reactors": "Bibîne kê reaksiyon daye"
+      },
+      "esie": {
+        "still": "{mood}, sekinî"
+      }
+    },
+    "ui": {
+      "profile_of": "Profîla @{username}",
+      "preview": "Pêşdîtin ({index}/{count})",
+      "balance": "Bakiye: {amount}",
+      "expires_in": "Heta qedandinê: {time}",
+      "expired": "Dem qediya. Bigire û dîsa biceribîne.",
+      "user_has_no_posts": "@{username} hê tiştek neşandiye",
+      "attach_image": "Wêne girêde",
+      "auto": "Otomatîk",
+      "back": "Vegere",
+      "hot": "GERM",
+      "image_of": "Wêne {index} ji {count}",
+      "new": "NÛ",
+      "nsfw_tap_to_reveal": "NSFW Ji bo nîşandanê bitikîne",
+      "new_reply": "Bersiva nû",
+      "remove": "Rake",
+      "unlock_ecency": "Ecency veke",
+      "update_it": "Nû bike",
+      "update_it_or_post_this_as": "Were nûkirin, an wekî bersivekî nû were şandin?",
+      "use_pin": "PIN bi kar bîne",
+      "your_reply_was_already_posted": "Bersiva te jixwe hatiye şandin",
+      "error_try_again": "{message} Dîsa were ceribandin?",
+      "auth": {
+        "account_label": "Hesab: @{username}",
+        "approve_the_request_in_your_wallet": "Daxwazê di sepana cizdanê de bipejirîne.",
+        "copy_key": "{title} kopî bike",
+        "current_account": "Hesabê heyî",
+        "qr_code": "Koda QR",
+        "requested_by": "Daxwaz ji aliyê {requester}",
+        "pin_digits": "{filled} ji {total, plural, one {# reqem} other {# reqem}}",
+        "private_key_shown": "{title}, kilîta taybet tê nîşandan",
+        "open_wallet_app": "Sepana cizdanê veke",
+        "hiveauth_scan": "Di Hive Keychain an cizdanekî din ê HiveAuth de bipejirîne: wê li ser vê cîhazê veke an vê kodê pê bişopîne.",
+        "switching": "Tê guhertin...",
+        "logout_all": "Ji hemû hesaban derkeve",
+        "logout_all_title": "Ji hemû hesabên li ser vê cîhazê derkeve?",
+        "stored_key": "@{username} jixwe li ser vê cîhazê têketiye. Kilîtên wê yên tomarkirî dimînin; tenê rûniştina wê tê nûkirin.",
+        "stored_hivesigner": "@{username} jixwe li ser vê cîhazê bi HiveSigner têketiye. Rûniştina wê tê guhertin.",
+        "stored_hiveauth": "@{username} li ser vê cîhazê bi HiveAuth têketiye. Wê li şûna wê bi HiveSigner îmze bike.",
+        "method_key": "Kilît",
+        "logout_failed": "Derketin pêk nehat"
+      },
+      "browser": {
+        "account": "Hesab",
+        "authority": "Rayedarî",
+        "phishing": "Hişyarî: Ev domain wekî malpereke fîşînga naskirî hatiye nîşankirin. Bi pir baldarî bidomîne."
+      },
+      "chat": {
+        "cancel_edit": "Guherandinê betal bike",
+        "cancel_reply": "Bersivê betal bike",
+        "copied_to_clipboard": "Li clipboardê hat kopîkirin",
+        "edited_at": "Hat guherandin {time}",
+        "group_options": "Vebijarkên komê",
+        "pinned_messages": "Peyamên derzîkirî",
+        "remove_user": "@{username} rake",
+        "sort_by_name": "Li gorî nav rêz bike",
+        "more": "Zêdetir",
+        "reaction_label": "{emoji} {count}. Ji bo dîtina kê reaksiyon daye dirêj bitikîne",
+        "members": "Endam"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Li vê lînkê jixwe şandiyek heye û ji ya te şandî cuda ye. Were nûkirin, an wekî nû were weşandin?",
+        "a_scheduled_post_is_published_by": "Şandiyeke plankirî di dema hilbijartî de ji aliyê Ecency ve tê weşandin. Ji bo vê, rayedariya posting a ecency.app li ser hesabê te pêwîst e. Kilît û rayedariyên te yên din wekî xwe dimînin. Dayîna wê kilîta te ya çalak dixwaze.",
+        "ai_assist": "Alîkariya AI",
+        "ai_tools": "Amûrên AI",
+        "allow_ecency_to_publish_for_you": "Destûr bidî Ecency ji bo te biweşîne?",
+        "bold": "Qalind",
+        "clone": "Klon bike",
+        "cost": "Bihaya wê: {cost}",
+        "could_not_store_the_draft_on": "Reşnivîs li ser vê cîhazê nehat tomarkirin. Sepanê vekirî bihêle û reşnivîsê tomar bike.",
+        "draft": "REŞNIVÎS",
+        "delete_count": "Jê bibe ({count})",
+        "dictate_desc": "Biaxive, nivîs dikeve şandiya te",
+        "discard": "Paşguh bike",
+        "discard_changes": "Guhertin werin paşguhkirin?",
+        "grant": "Bide",
+        "italic": "Îtalîk",
+        "keep_editing": "Guherandinê bidomîne",
+        "my_blog": "BLOGA MIN",
+        "my_communities": "CIVATÊN MIN",
+        "new_post": "Şandiya nû",
+        "notice": "Nîşe",
+        "restore": "Vegerîne",
+        "restore_unsaved_changes": "Guhertinên netomarkirî werin vegerandin?",
+        "saved": "Hat tomarkirin",
+        "top_communities": "CIVATÊN HERÎ BAŞ",
+        "table": "Tablo",
+        "text_format": "Formata nivîsê",
+        "this_link_is_already_in_use": "Ev lînk jixwe tê bikaranîn",
+        "untitled": "Bê sernav",
+        "update_it_or_publish_this_as": "Were nûkirin, an wekî şandiyeke nû were weşandin?",
+        "you_have_unsaved_changes_from_an": "Ji guherandineke berê guhertinên te yên netomarkirî hene. Şandî ji wê demê ve guheriye; vegerandin nivîsa jêr diguherîne.",
+        "your_edits_were_not_published": "Guhertinên te nehatin weşandin.",
+        "your_post_was_already_published": "Şandiya te jixwe hatiye weşandin",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Wêneya biçûk, ji bo hilbijartina wêneyekî din bitikîne",
+        "thumbnail_number": "Wêneya biçûk {number}",
+        "recording_busy": "Tomarkirinek jixwe didome. Pêşî di kamerayê de biqedîne.",
+        "photo_lost": "Dema kamera vekirî bû wêne winda bû. Ji kerema xwe dîsa bikişîne.",
+        "add_snippet_button": "+ Parçe",
+        "words_count": "{count, plural, one {# peyv} other {# peyv}}",
+        "community_search": "bigere"
+      },
+      "profile": {
+        "open_wallet": "Cizdanê veke",
+        "your_wallet_is_on_the_wallet": "Cizdana te di tabloya Cizdan de ye.",
+        "user_has_no_comments": "@{username} hê şîrove nekiriye",
+        "votes_count": "{count, plural, one {# deng} other {# deng}}",
+        "replies_count": "{count, plural, one {# bersiv} other {# bersiv}}",
+        "menu": "Zêdetir",
+        "users": "Bikarhêner"
+      },
+      "reading": {
+        "apply": "BICÎH BÎNE",
+        "add_tag": "Etîket zêde bike",
+        "age": "Temen",
+        "audio_language": "Zimanê dengê",
+        "available_filters": "Parzûnên berdest",
+        "could_not_unlock_the_audio_please": "Deng venebû, ji kerema xwe dîsa biceribîne",
+        "downvote": "Dengê neyînî",
+        "downvote_percent": "%{percent} dengê neyînî",
+        "listen_to_this_post": "Guh bide vî şandiyî",
+        "log_in": "Têkeve",
+        "mark_all_as_read": "Hemûyan wekî xwendî nîşan bike",
+        "mark_as_read": "Wekî xwendî nîşan bike",
+        "more_replies": "Bersivên zêdetir",
+        "not_enough_points": "Points têr nakin",
+        "nothing_here_yet": "Hê tiştek tune.",
+        "open_editor": "Edîtorê veke",
+        "pause_voice": "Dengê bisekinîne",
+        "play_voice": "Dengê lê bide",
+        "playback_speed": "Leza lêdanê",
+        "publishing_in_waves": "Di Waves de tê weşandin",
+        "quests_done": "Erk qediyan",
+        "read": "Bixwîne",
+        "remove_vote": "Dengê rake",
+        "seek": "Bigere",
+        "select_community": "Civatê hilbijêre",
+        "selected_filters": "Parzûnên hilbijartî",
+        "the_audio_could_not_be_loaded": "Deng barkirin nebû.",
+        "this_post_does_not_exist_or": "Ev şandî tune ye an hatiye jêbirin.",
+        "unread": "Nexwendî",
+        "voice_position": "Cihê dengê",
+        "vote_weight": "Giraniya dengê",
+        "reblogged_by": "{username} dîsa weşand",
+        "no_more_posts": "Şandiyên din tune ne.",
+        "favourite": "Bijare",
+        "no_votes_yet": "Hê deng tune",
+        "no_comments_yet": "Hê şîrove tune. Yekem be!",
+        "comments_count": "Şîrove ({count})",
+        "sending_to_chain": "ji zincîrê re tê şandin",
+        "compare": "Berhev bike",
+        "your_vote": "Dengê te",
+        "reply_to": "Bersiva @{username} bide",
+        "what_do_you_think": "Tu çi difikirî?",
+        "clear_tag_filter": "Parzûna etîketê paqij bike",
+        "tab_selected": "{title}, hilbijartî",
+        "add_tag_feed": "Herikê etîketê zêde bike",
+        "feed_pinned": "{label}, hatiye derzîkirin",
+        "attached_image_remove": "Wêneya girêdayî, ji bo rakirinê bitikîne",
+        "camera": "Kamera",
+        "files": "Pel",
+        "paused": "Hatiye sekinandin",
+        "in_topic": "di {topic} de",
+        "poll_vote": "Deng bide",
+        "reply": "Bersiv bide",
+        "mute_sound": "Bêdeng",
+        "unmute_sound": "Dengê veke",
+        "leaderboard_activities": "Çalakî",
+        "leaderboard_reward": "Xelat",
+        "sort_votes": "Deng"
+      },
+      "shell": {
+        "account_of": "Hesabê @{username}",
+        "account_signed_out": "Hesab, derketî",
+        "close_tab": "Tabê bigire",
+        "coming_soon_to_the_native_app": "Zû tê sepana xwemalî.",
+        "create": "Çêke",
+        "expand": "Fireh bike",
+        "forward": "Pêş",
+        "loading": "Tê barkirin",
+        "new_tab": "Tabeke nû",
+        "reload": "Dîsa bar bike",
+        "sent": "Hat şandin",
+        "tab_unread": "{title}, {count} nexwendî",
+        "no_app_for_link": "Tu sepan nikare vê lînkê veke."
+      },
+      "wallet": {
+        "product_not_available": "Berhem ne berdest e.",
+        "repeat": "Dubare bike"
+      },
+      "copied": "Hat kopîkirin",
+      "trending_caps": "TREND",
+      "move_up": "Biçe jor",
+      "move_down": "Biçe jêr",
+      "scroll_to_top": "Biçe jor",
+      "load_more": "Zêdetir"
+    },
+    "wallet": {
+      "checking": "Bi torê re tê kontrolkirin",
+      "leave_title": "Hê tê şandin",
+      "leave_message": "Ev hê tê şandin an bi torê re tê kontrolkirin. Tu dikarî ji vê ekranê derkevî: dema qediya sepan ji te re dibêje.",
+      "stay": "Bimîne",
+      "collateralized_convert_request": "Daxwaza veguhertina bi garantî",
+      "op_transfer": "veguhastin",
+      "op_power_up": "stake kirin",
+      "op_power_down_change": "guhertina derxistina stake",
+      "op_delegation": "wekîltî",
+      "op_savings_deposit": "danîna teserûfê",
+      "op_savings_withdrawal": "derxistina teserûfê",
+      "op_conversion": "veguhertin",
+      "op_swap": "guhertin",
+      "op_order_cancel": "betalkirina fermanê",
+      "op_reward_claim": "wergirtina xelatê",
+      "op_withdraw_route_change": "guhertina rêya derxistinê",
+      "op_token_operation": "çalakiya token"
+    },
+    "notification": {
+      "amount_unknown": "Mîqdar ne berdest e",
+      "weekly_earnings_breakdown": "Vê hefteyê te ${amount} qezenc kir: ${authorUsd} ji şandiyan, ${curationUsd} ji kuratorîyê.",
+      "weekly_earnings_total": "Vê hefteyê te ${amount} ji şandî û kuratorîya xwe qezenc kir."
+    },
+    "settings": {
+      "open": "Veke",
+      "feedback_subject": "Bersiv/Raporta xeletiyê",
+      "unknown_user": "Bikarhênerê nenas"
+    },
+    "navigation": {
+      "editor": "Edîtor",
+      "followers": "Şopîner",
+      "spin_game": "Lîstika zivirandinê",
+      "edit_profile": "Profîlê biguherîne",
+      "redeem_points": "Points bi kar bîne",
+      "community": "Civat",
+      "community_members": "Endamên civatê",
+      "community_activities": "Çalakiyên civatê",
+      "browser": "Gerok",
+      "asset_details": "Hûrgiliyên asetê",
+      "edit_history": "Dîroka guherandinan",
+      "welcome": "Bi xêr hatî",
+      "chat": "Sohbet",
+      "backup_keys": "Kilîtan yedek bike",
+      "trade": "Bazirganî",
+      "ai_image_generator": "Çêkerê wêneyan ê AI",
+      "select_assets": "Asetan hilbijêre",
+      "poll": "Nêrîngeh",
+      "bot_comments": "Şîroveyên botan"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Çalakiyên ku kilîta xwedî dixwazin di Ecency de nayên îmzekirin.",
+      "post": "Şandî/Şîrove",
+      "custom": "JSON a taybet",
+      "sign_buffer": "Peyamê îmze bike",
+      "send_token": "Token bişîne",
+      "witness_vote": "Dengê Witness",
+      "proxy": "Proxy diyar bike",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Weşan",
+      "sign_tx": "Muameleyê îmze bike",
+      "encode": "Peyamê kod bike",
+      "decode": "Kilîtê erê bike",
+      "add_account_authority": "Rayedariya hesabê zêde bike",
+      "remove_account_authority": "Rayedariya hesabê rake",
+      "add_key_authority": "Rayedariya kilîtê zêde bike",
+      "remove_key_authority": "Rayedariya kilîtê rake",
+      "create_claimed_account": "Hesab çêke",
+      "create_proposal": "Pêşniyar çêke",
+      "remove_proposal": "Pêşniyarê rake",
+      "update_proposal_vote": "Dengê pêşniyarê",
+      "signed_call": "Gazîkirina îmzekirî"
+    },
+    "translate_language": {
+      "ar": "Erebî",
+      "az": "Azerî",
+      "bg": "Bulgarî",
+      "bn": "Bengalî",
+      "ca": "Katalanî",
+      "cs": "Çekî",
+      "da": "Danmarkî",
+      "de": "Almanî",
+      "el": "Yewnanî",
+      "en": "Îngilîzî",
+      "eo": "Esperanto",
+      "es": "Spanî",
+      "et": "Estonî",
+      "fa": "Farisî",
+      "fi": "Fînî",
+      "fr": "Fransî",
+      "ga": "Îrlendî",
+      "he": "Îbranî",
+      "hi": "Hindî",
+      "hu": "Macarî",
+      "id": "Endonezî",
+      "it": "Îtalî",
+      "ja": "Japonî",
+      "ko": "Koreyî",
+      "lt": "Lîtvanî",
+      "lv": "Letonî",
+      "ms": "Malezî",
+      "nb": "Norwecî",
+      "nl": "Holendî",
+      "pl": "Polonî",
+      "pt": "Portekizî",
+      "ro": "Romanî",
+      "ru": "Rusî",
+      "sk": "Slovakî",
+      "sl": "Slovenî",
+      "sq": "Arnawidî",
+      "sv": "Swêdî",
+      "th": "Tayî",
+      "tl": "Tagalogî",
+      "tr": "Tirkî",
+      "uk": "Ukraynî",
+      "zh": "Çînî",
+      "zt": "Çînî (Kevneşopî)"
+    },
+    "reading": {
+      "banner_text": "Ev şandî bi {source} ye. Were wergerandin {target}?",
+      "translated_from_text": "Ji {source} hatiye wergerandin"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# endam} other {# endam}} • {authors, plural, one {# nivîskar} other {# nivîskar}} • {posts, plural, one {# şandî} other {# şandî}}",
+      "community_title": "Civata {title}",
+      "members_title": "Endamên {title}",
+      "activities_title": "Çalakiya {title}",
+      "cannot_start_with_or": "Nikare bi @ an # dest pê bike",
+      "use_a_two_letter": "Koda zimanekî ya du tîpî bi kar bîne, mînak en",
+      "at_most_characters": "Herî zêde {max, plural, one {# tîp} other {# tîp}}",
+      "council": "Şûra",
+      "journal": "Rojname",
+      "topic": "Mijar",
+      "community_not_found": "Civat nehat dîtin."
+    },
+    "transfer": {
+      "one_recipient": "Ji bo vê veguhastinê tenê yek wergir dikare were bikaranîn.",
+      "is_an_exchange_and": "{exchange} borsayek e û dibe ku veguhastinên dubarebûyî piştgirî neke: pereyên bi plan hatine şandin dikarin winda bibin. Li şûna wê veguhastineke yekcar bi kar bîne."
+    },
+    "dapps": {
+      "signing_info": "Ecency wekî dirêjkirina te ya îmzeya Hive tevdigere. Dema dApp ji te dixwaze bi dirêjkirineke gerokê wekî Keychain, Keeper an Peak Vault têkevî, wê vebijarkê hilbijêre. Ecency îmzekirinê bi ewlehî dike.",
+      "category_social": "Civakî",
+      "category_gaming": "Lîstik",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Kom",
+      "unable_to_load_messages": "Peyam nayên barkirin.",
+      "someone": "Kesek",
+      "renamed_the_group_to": "{actor} navê komê kir \"{name}\"",
+      "removed_the_group_name": "{actor} navê komê rakir",
+      "unable_to_send_your": "Peyama te nayê şandin.",
+      "unable_to_remove_message": "Peyam nayê rakirin.",
+      "unknown": "Nenas",
+      "members_online": "{members, plural, one {# endam} other {# endam}} • {online} serhêl",
+      "failed_to_load_pinned": "Peyamên derzîkirî barkirin nebûn",
+      "you": "Tu",
+      "title": "Reaksiyon"
+    },
+    "tip": {
+      "login_required": "Ji bo şandina bexşîşê têkeve",
+      "max_decimals": "Herî zêde {n, plural, one {# cihê dehjimarî} other {# cihê dehjimarî}}"
+    },
+    "paid": {
+      "check_again": "Dîsa kontrol bike",
+      "give_up": "Dev jê berde",
+      "unknown": "Hê bersiv tune. Dibe ku daxwaz hê dixebite. Ji bo wergirtina encamê dîsa kontrol bike: cara duyem pere nayê girtin.",
+      "pending": "Daxwaza te hê tê pêvajoykirin. Piştî demekê dîsa kontrol bike: cara duyem pere nayê girtin.",
+      "restored": "Daxwaza berê hê bersiv tune. Ji bo wergirtina encama wê dîsa kontrol bike: cara duyem pere nayê girtin.",
+      "give_up_confirm": "Heke daxwaz çûbe, Points hatine xerckirin û encam wê winda bibe.",
+      "not_stored": "Ev daxwaz li ser cîhazê nehat tomarkirin. Heta ku biqede vê ekranê vekirî bihêle.",
+      "sign_in_again": "Rûniştina te qediya. Dîsa têkeve, paşê dîsa kontrol bike.",
+      "other_account": "Ev yê @{owner} e. Ji bo berdewamiyê vegere ser wî hesabî."
+    },
+    "ai": {
+      "run_ai_assist": "AI Assist bixebitîne ({costText})",
+      "no_longer_free_cost": "Ev xebitandin îro êdî belaş nine. Bihayê wê {cost} {unit} e.",
+      "no_longer_free": "Ev xebitandin îro êdî belaş nine.",
+      "content_violates_our_content": "Naverok polîtîkaya naverokê ya me binpê dike. Ji kerema xwe nivîsa xwe biguherîne. Points nehatin vegerandin.",
+      "generate_image": "Wêne çêke ({costLabel})",
+      "use_prompt": "Bi kar bîne: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Ji kerema xwe bisekine, çalakiyeke din didome",
+      "not_a_community_post": "Ne şandiyeke civatê ye.",
+      "parent_post_not_found": "Şandiya dêûbav nehat dîtin",
+      "the_account_changed": "Hesab hat guhertin."
+    },
+    "dictation": {
+      "balance": "Bakiye: {balance} {unit}",
+      "stop_points": "Raweste ({cost} Points)",
+      "stop_free": "Raweste (Belaş)",
+      "transcribe_points": "Veguherîne nivîsê ({cost} Points)",
+      "transcribe": "Veguherîne nivîsê",
+      "no_longer_free_cost": "Ev tomar îro êdî belaş nine. Bihayê wê {cost} Points e.",
+      "no_longer_free": "Ev tomar îro êdî belaş nine.",
+      "held_locked": "Dema Ecency hat kilîtkirin tomarkirin sekinî. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
+      "held_no_background": "Dema Ecency ji ekranê derket tomarkirin sekinî (nekarî agahdariya tomarkirinê nîşan bide). Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
+      "held_stopped": "Tomarkirin ji agahdariyê hat rawestandin. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
+      "held_focus_lost": "Tomarkirin ji ber gazî an dengê sepaneke din sekinî. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
+      "held_interrupted": "Tomarkirin sekinî ji ber ku sepaneke din mîkrofon girt. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
+      "unavailable": "Tomarkirin li ser vê cîhazê ne berdest e.",
+      "not_read": "Ev tomar nehat xwendin an pir mezin e. Tiştek nehat şandin û pere nehat girtin.",
+      "give_up_not_sent": "Ev tomar nehat şandin, ji ber vê pere nehat girtin. Wê were jêbirin.",
+      "give_up_not_charged": "Ji bo vê tomarê pere nehat girtin. Wê were jêbirin.",
+      "clip_lost": "Tomara daxwazeke berê êdî li ser vê cîhazê tune ye. Heke ew daxwaz çûbe, Points hatine xerckirin û nivîsa wê nayê stendin."
+    },
+    "register": {
+      "error_code_28": "Daxwaza te nehat pêvajoykirin. Dibe ku rêza qeydkirinê tije be. Ji kerema xwe piştî çend deqeyan dîsa biceribîne."
+    },
+    "perks": {
+      "quests_empty": "Li vir hê erk tune, zû dîsa binêre.",
+      "freeze_confirm_title": "Rêza xwe biparêze",
+      "spend_points_on_a": "{price} Points ji bo cemidandina rêzê bên xerckirin? Roja ku tu winda bikî ji bo parastina rêza te tê bikaranîn."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Piştgiriya Ecency bike, bloga belaş bistîne û bi nîşana Pro ya erêkirî xwe cuda bike.",
+      "card_description": "Bi salê {price} bibe Pro. Nîşana erêkirî, bloga belaş û piştgiriya Ecency.",
+      "card_description_plain": "Ji bo salekê bibe Pro. Nîşana erêkirî, bloga belaş û piştgiriya Ecency.",
+      "member": "Tu endamê Pro yî.",
+      "benefit_badge": "Nîşana Pro ya erêkirî li kêleka navê te.",
+      "benefit_blog": "Bloga belaş li yourname.blogs.ecency.com.",
+      "benefit_support": "Piştgiriya rasterast ji bo pêşxistina Ecency.",
+      "benefit_early": "Gihîştina zû ya taybetmendiyên nû.",
+      "buy": "Bi salê {price} bibe Pro",
+      "extend": "Bi {price} 12 mehan dirêj bike",
+      "extend_note": "Kirîna dîsa 12 meh li endametiya te zêde dike.",
+      "unavailable": "Ecency Pro niha ji dikanê ne berdest e.",
+      "activating": "Drav hat wergirtin. Endametiya te tê çalakkirin.",
+      "success_title": "Bi xêr hatî Ecency Pro",
+      "success_body": "Endametiya te ya Pro çalak e. Nîşana te zû di profîla te de xuya dibe.",
+      "extending": "Drav hat wergirtin. Endametiya te ya Pro 12 meh tê dirêjkirin.",
+      "open_a11y": "Ecency Pro veke"
+    },
+    "editor": {
+      "saving_draft": "Reşnivîs tê tomarkirin...",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve.",
+      "fetch_failed": "Anîn têk çû.",
+      "you_can_only_edit": "Tu tenê dikarî naveroka xwe biguherînî.",
+      "invalid_percent": "Sedî ne derbasdar e",
+      "beneficiary_exists_already": "Sûdwergir jixwe heye",
+      "this_draft_belongs_to": "Ev reşnivîs yê @{owner} e. Ji bo weşandinê vegere ser wî hesabî.",
+      "could_not_make_a": "Ji bo vê şandiyê lînkeke nû nehat çêkirin. Sernavê hinekî biguherîne û dîsa biceribîne.",
+      "an_earlier_attempt_was": "Hewldaneke berê piştî vê hat weşandin. Kontrol bike kîjan guhertoyê dixwazî bihêlî.",
+      "could_not_check_your": "Rayedariya posting a hesabê te nehat kontrolkirin. Girêdana xwe kontrol bike û dîsa biceribîne.",
+      "this_post_was_changed": "Ev şandî ji dema ku te vekir ve li cihekî din hat guhertin. Nivîsa xwe kopî bike, vegere û ji bo guherandina guhertoya herî nû dîsa veke.",
+      "link_text_placeholder": "Nivîs li vir"
+    },
+    "app_error": {
+      "this_reply_is_too": "Ev bersiv pir dirêj e.",
+      "the_network_refused_this": "Tor vê çalakiyê red kir.",
+      "invalid_input": "Têketina nederbasdar.",
+      "secure_storage_is_unavailable": "Hilanîna ewle ne berdest e. Ji kerema xwe dîsa têkeve.",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve.",
+      "these_credentials_belong_to": "Ev agahiyên têketinê yên @{actual} in, ne yên @{expected}.",
+      "is_not_signed_in": "@{username} li ser vê cîhazê ne têketiye.",
+      "key_required": "Ji bo encamdana vê muameleyê kilîta {role} pêwîst e. {hint}",
+      "cancelled": "Hat betalkirin.",
+      "the_request_was_rejected": "Daxwaz di sepana cizdanê de hat redkirin.",
+      "the_request_expired_before": "Daxwaz berî ku sepana cizdanê bersiv bide qediya. Ji kerema xwe dîsa biceribîne.",
+      "could_not_reach_the": "Negihîşt servera HiveAuth. Ji kerema xwe dîsa biceribîne.",
+      "unexpected_redirect": "Server beralîkirinek ne li bendê şand. Tiştek nehat guhertin. Ji kerema xwe paşê dîsa biceribîne.",
+      "missing_key_hint": "Wê di Sazkarî, Rayedariyan Birêve Bibe (Kilîta Taybet Têxe) de zêde bike an pê dîsa têkeve.",
+      "this_key_is_also": "Ev kilît di heman demê de kilîta xwedî ya vî hesabî ye. Ecency kilîta ku rola xwedî kontrol dike nahêle: ji rolên çalak û posting re kilîtên wan ên taybet bide, paşê pê têkeve.",
+      "this_is_the_owner": "Ev kilîta xwedî ye. Ecency kilîta xwedî tu carî nahêle û bi kar neyne: bi şîfreya serekî an bi kilîta posting an çalak têkeve.",
+      "this_password_only_matches": "Ev şîfre tenê bi kilîta xwedî ya hesabî re li hev dike. Ecency kilîta xwedî tu carî nahêle û bi kar neyne: bi kilîta posting an çalak têkeve.",
+      "this_key_cannot_sign": "Ev kilît bi tena serê xwe nikare ji bo hesabê îmze bike: hesab ji yekê zêdetir îmze dixwaze (giraniya wê di bin sînor de ye).",
+      "public_key_given": "Ev kilîta te ya gelemperî ye. Kilîta taybet (bi 5 dest pê dike) an şîfreya serekî bixe.",
+      "memo_key_only": "Bi kilîta memo nikare were têketin. Kilîta posting, kilîta çalak an şîfreya serekî bi kar bîne.",
+      "network_message": "Xeletiya torê. Ji kerema xwe girêdana xwe kontrol bike û dîsa biceribîne.",
+      "network_error_this_may": "Xeletiya torê. Dibe ku ev jixwe çûbe; dîsa ceribandin ewle ye û du caran nayê şandin."
+    },
+    "purchases": {
+      "deal_best": "PÊŞNIYARA HERÎ BAŞ!",
+      "deal_popular": "POPÛLER!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Dikanê bersiv neda."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Ji bo xerckirina 999accounts e-name û navê bikarhêner pêwîst in",
+      "stuck": "Kirîna berê ya vî berhemî nehat temamkirin. Ji kerema xwe bi qebza dikanê re bi support@ecency.com re têkilî daynin, qebz ji bo vê tê hilanîn.",
+      "held": "Ev kirîn ji bo nirxandinê hatiye girtin. Bi hejmara fermanê #{order} bi support@ecency.com re têkilî dayne.",
+      "earlier_purchase": "Kirîna berê ya vî berhemî pêşî ji bo @{target} tê temamkirin.",
+      "earlier_pending": "Dravdana berê ji bo vî berhemî ji bo @{target} hê li bendê ye. Dema dikan dravdanê piştrast bike temam dibe.",
+      "pending": "Dravdana te li bendê ye. Dema dikan dravdanê piştrast bike kirîn temam dibe.",
+      "processing": "Kirîna te tê pêvajoykirin. Zû temam dibe."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Veguhastinên dubarebûyî",
+      "delegate_hive_power": "Hive Power bide wekîltiyê",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "Rêya derxistina vestingê diyar bike",
+      "power_down": "Power Down",
+      "transfer_to_saving": "Veguhezîne teserûfê",
+      "transfer_from_saving": "Ji teserûfê veguhezîne",
+      "cancel_transfer_from_saving": "Veguhastina ji teserûfê betal bike",
+      "collateralized_convert": "Veguhertina bi garantî",
+      "witness_vote": "Dengê Witness",
+      "witness_update": "Nûkirina Witness",
+      "witness_set_properties": "Taybetmendiyên Witness diyar bike",
+      "governance_proxy": "Proxya rêvebirinê",
+      "claim_account": "Hesab daxwaz bike",
+      "create_account": "Hesab çêke",
+      "create_account_with_account": "Bi krediyên hesabê hesab çêke",
+      "create_limit_order": "Fermana sînor çêke",
+      "cancel_limit_order": "Fermana sînor betal bike",
+      "redeem_rewards": "Xelatan bistîne",
+      "post_or_comment": "Şandî an şîrove",
+      "post_or_comment_options": "Vebijarkên şandî an şîrove",
+      "custom_operation": "Çalakiya taybet",
+      "update_account_active": "Hesabê nû bike (çalak)",
+      "update_account_posting": "Hesabê nû bike (posting)",
+      "change_recovery_account": "Hesabê vegerandinê biguherîne",
+      "create_proposal": "Pêşniyar çêke",
+      "remove_proposal": "Pêşniyarê rake",
+      "update_proposal_votes": "Dengên pêşniyarê nû bike",
+      "update_proposal": "Pêşniyarê nû bike"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Divê ev lînk ji aliyê @{account} ve were îmzekirin. Biçe ser wî hesabî û dîsa veke.",
+      "ecency_can_only_sign": "Ecency tenê dikare muameleyên ji lînkan îmze bike û biweşîne.",
+      "requester_page": "rûpela {host}",
+      "owner_refused": "Çalakiyên ku kilîta xwedî dixwazin ji lînkê nayên îmzekirin.",
+      "busy": "Ji kerema xwe bisekine: daxwazeke din hê tê pêvajoykirin.",
+      "not_supported": "Ecency vê çalakiyê di vê guhertoyê de hê nikare îmze bike."
+    },
+    "chats": {
+      "group_members": "Endamên komê",
+      "rename_group": "Navê komê biguherîne",
+      "failed_to_load_chats": "Sohbet barkirin nebûn",
+      "unknown": "Nenas",
+      "unable_to_mark_channel": "Kanal nikare wekî xwendî were nîşankirin",
+      "unable_to_update_favorites": "Bijare nikarin werin nûkirin",
+      "unable_to_update_mute": "Bêdengî nikare were nûkirin",
+      "group": "Kom",
+      "unable_to_search": "Lêgerîn nabe",
+      "unable_to_start_chat": "Sohbet nikare dest pê bike",
+      "no_internet": "Girêdana înternetê tune"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) bide @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Jixwe ji @{recipient} re hatiye şandin (wekîltî)"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Tenê gelemperî. Ecency kilîta xwedî tu carî nahêle.",
+      "shared_owner": "Ev hesab ji bo rola xwedî û rola {names} heman kilîtê bi kar tîne. Kesê ku vê kilîtê hebe tevahiya hesabî kontrol dike. Ji rola {names} re kilîtekî taybet bide û kilîta xwedî derveyî torê bihêle.",
+      "copy_warning": "Her kesê ku vê kilîta taybet hebe vê beşa hesabê te kontrol dike. Sepanên din dikarin clipboardê bixwînin; tenê li cihê ku pê bawer î bixe. Piştî 2 deqeyan ji clipboardê tê paqijkirin."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Kilîta PIN vekirî ye.",
+      "pin_changed": "PIN hat guhertin.",
+      "pin_lock_is_off": "Kilîta PIN girtî ye.",
+      "wiped_notice": "Hemû hesab, kilît û agahiyên têketinê ji vê cîhazê hatin rakirin.",
+      "we_could_not_bring": "Hesabên te ji guhertoya berê ya sepanê nehatin anîn. Ji kerema xwe dîsa têkeve.",
+      "your_pin_lock_could": "Kilîta PIN a te ji guhertoya berê nehat anîn. Ji bo vekirina dîsa ya kilîta sepanê, ji menuya hesabê dîsa PIN diyar bike.",
+      "biometric_unlock_was_turned": "Kilîta biyometrîk hat girtin ji ber ku biyometrîkên li ser vê cîhazê hatin guhertin. Bi PIN veke, paşê ji menuya hesabê dîsa çalak bike.",
+      "biometric_unavailable_notice": "Kilîta biyometrîk nehat vekirin: li ser vê cîhazê biyometrîk nehatiye sazkirin.",
+      "set_backup": "PIN ji bo yedekkirina kilîta biyometrîk diyar bike",
+      "biometric_on_notice": "Kilîta PIN vekirî ye. Bi biyometrîk an bi PIN veke.",
+      "offer_title": "Bi biyometrîk veke",
+      "offer_body": "Ecency bi rû an şopa tiliya xwe veke. Te PIN jî diyar kiriye, ku dema biyometrîk ne berdest in sepanê vedike.",
+      "offer_use": "Biyometrîk bi kar bîne",
+      "offer_use_pin": "Li şûna wê PIN bi kar bîne"
+    },
+    "common": {
+      "list_and": "{first} û {second}",
+      "role_owner": "xwedî",
+      "role_active": "çalak",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Bersivên bi 25 tîp an kêmtir Points nakêşin (lînk nayên jimartin)",
+      "short_content_hint": "Ji bo qezenckirina Points pir kurt e (25 tîp an kêmtir, bêyî lînkan)",
+      "daily_post": "Şandiya rojane {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {rêzeya # rojan} other {rêzeya # rojan}}",
+      "grant_description": "Rayedariya posting ya hesabê Ecency @ecency.app bide hesabê xwe, da ku tu bêyî vekirina Keychain a her car bi şandiyê bikî. Dayîna wê rayedariya posting a hesabê te diguherîne û kilîta te ya çalak dixwaze."
+    },
+    "wallet_history": {
+      "from_to": "@{from} ji bo @{to}",
+      "from_user_id": "ji @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} ji bo @{to}, id: {id}",
+      "from_to_account": "@{from} ji bo {to}",
+      "from_user": "ji @{user}",
+      "to_user": "ji bo @{user}",
+      "interest": "Faîz",
+      "proposal_pay": "Dravdana pêşniyarê",
+      "categories": "Cureyên çalakiyê",
+      "category_all": "Hemû",
+      "category_transfers": "Veguhastin",
+      "category_market": "Fermanên bazarê",
+      "category_interest": "Faîz",
+      "category_stake": "Çalakiyên stake",
+      "category_rewards": "Xelat",
+      "point_type_checkin": "Lêdana dil",
+      "point_type_login": "Têketin",
+      "point_type_post": "Şandî",
+      "point_type_comment": "Şîrove",
+      "point_type_vote": "Deng",
+      "point_type_reblog": "Dîsa weşandin",
+      "point_type_transfer_sent": "Veguhastinên şandî",
+      "point_type_transfer_received": "Veguhastinên wergirtî"
+    },
+    "video_upload": {
+      "continue_upload": "BARKIRINÊ BIDOMÎNE",
+      "source_gone": "Ev tomar êdî li ser cîhazê tune ye. Vîdyoyê dîsa tomar bike an hilbijêre.",
+      "no_camera": "Kamera li ser vê cîhazê ne berdest e."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Derxistina stake ya din {hours, plural, one {piştî # demjimêran} other {piştî # demjimêran}} e",
+      "account_not_found": "Hesab nehat dîtin"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Wêne di clipboardê de ye · Wêneyê bixe",
+      "no_container": "Konteynera waves ya herî nû nehat anîn",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve.",
+      "write_something_first": "Pêşî tiştekî binivîse.",
+      "account_changed": "Ev wave wekî hesabekî din hatiye nivîsandin. Bigire û dîsa binivîse.",
+      "no_upload": "Barkirina wêneyan di vê çêkirinê de hê ne berdest e. Li şûna wê lînkeke wêneyê têxe nivîsê.",
+      "fail": "Têk çû"
+    },
+    "delete_account": {
+      "sign_out_failed": "Daxwaza te hat şandin, lê derketin têk çû. Ji kerema xwe ji menuyê derkeve.",
+      "not_sent": "Daxwaza te ya jêbirinê nehat şandin. Ji kerema xwe dîsa biceribîne."
+    },
+    "chat_sheets": {
+      "group_limit": "Di komekê de heta {max, plural, one {# kesê din} other {# kesên din}} dikarin hebin.",
+      "search_people_by_username": "Kesan bi navê bikarhêner bigere",
+      "new_group_title": "Komeke nû",
+      "new_group_hint": "Ji bo destpêkirina sohbeta komê {min} heta {max, plural, one {# kes} other {# kes}} zêde bike.",
+      "no_results": "Bi vî navî kes di sohbetê de nehat dîtin.",
+      "search_failed": "Lêgerîn xebitî nebû. Girêdana xwe kontrol bike û dîsa biceribîne.",
+      "create": "Komê dest pê bike",
+      "new_group_failed": "Kom dest pê nekir. Ji kerema xwe dîsa biceribîne.",
+      "name_limit": "Navê komê heta {max, plural, one {# tîp} other {# tîp}} dikare hebe.",
+      "rename_title": "Navê komê biguherîne",
+      "rename_hint": "Navekî bide vê komê ku her kes tê de bibîne. Vala bihêle da ku navên endaman werin nîşandan.",
+      "placeholder": "Navê komê",
+      "not_owner": "Navê komê tenê ew kesê ku dest pê kiriye dikare biguherîne.",
+      "rename_failed": "Navê komê nehat guhertin. Ji kerema xwe dîsa biceribîne."
+    },
+    "editor_side": {
+      "copy_of": "Kopiya {title}",
+      "deletions_failed": "Tiştek şaş çû\n{failed} ji {total, plural, one {# jêbirinê} other {# jêbirinan}} têk çû",
+      "uploads_failed": "{count, plural, one {# barkirin têk çû} other {# barkirin têk çûn}}:\n\n{messages}",
+      "failed_to_delete": "Jêbirin têk çû"
+    },
+    "uploads": {
+      "add_to_gallery": "Li galeriyê zêde bike"
+    },
+    "account_notice": {
+      "manage_keys": "Sazkarî, Rayedariyan Birêve Bibe",
+      "no_signing_key_title": "Dîsa wekî @{account} têkeve",
+      "no_signing_key": "Ecency êdî kilîta xwedî an şîfreya serekî li ser vê cîhazê nahêle û ji bo @{account} li vir kilîta posting an çalak nehatiye tomarkirin. Bi şîfreya serekî an bi kilîta posting an çalak dîsa têkeve, an jî di {manageKeys} de (Kilîta Taybet Têxe) kilîtekê zêde bike.",
+      "missing_roles_title": "Hin kilît nehatin zêdekirin",
+      "cannot_post": "şandin, dengdan an şîrovekirin",
+      "cannot_transfer": "veguhastin şandin an sazkariyên hesabê guhertin",
+      "missing_roles": "Şîfreya te êdî bi kilîta {missing} ya hesabê @{account} re li hev nake: ji dema ku şîfre hat danîn li ser hesabê hat guhertin. Li ser vê cîhazê hatiye tomarkirin: kilîta {kept}. Heta ku tu kilîta {missing} di {manageKeys} de (Kilîta Taybet Têxe) zêde nekî, ev sepan nikare bi kilîtên @{account} re {cannot}.",
+      "shared_owner_title": "Ev kilît rola xwedî jî kontrol dike",
+      "shared_owner": "@{account} ji bo rola xwedî û rola {names} heman kilîtê bi kar tîne. Kesê ku vê kilîtê hebe tevahiya hesabî kontrol dike. Ecency wê tenê wekî kilîta {names} dihêle û ji bo çalakiyên xwedî tu carî bi kar neyne. Ji rola {names} re kilîtekî taybet bide û kilîta xwedî derveyî torê bihêle."
+    },
+    "dapp_browser": {
+      "message_from": "Peyam ji {host}",
+      "home_title": "Mal",
+      "loading_title": "Tê barkirin...",
+      "blank_run": "[{count, plural, one {# tîpa vala} other {# tîpên vala}}]",
+      "too_large": "Ev rûpel daxwazeke îmzeyê ya pir mezin ji bo nîşandanê şand, ji ber vê Ecency red kir."
+    },
+    "community_service": {
+      "the_account_changed": "Hesab hat guhertin."
+    },
+    "profile_edit": {
+      "enter_link": "Lînka wêneyê binivîse",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve.",
+      "account_not_found": "Hesab nehat dîtin",
+      "please_enter_an_image": "Lînkeke wêneyê ya bi https:// dest pê dike binivîse"
+    },
+    "background_media": {
+      "post_by": "Şandiya @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Te jixwe bi heman giraniyê deng daye.",
+      "insufficient_rc": "Krediyên Çavkaniyê têr nakin. Ji kerema xwe bisekine an Power Up bike.",
+      "missing_authority": "Rayedariya posting kêm e. Ji kerema xwe rêbaza têketinê kontrol bike.",
+      "comment_too_soon": "Ji kerema xwe berî şandina dîsa bisekine.",
+      "paid_out": "Xelata vê şandiyê jixwe hatiye dayîn.",
+      "too_large": "Muamele {size, plural, one {# bayt} other {# bayt}} e, ji sînorê {max} bayt zêdetir e.",
+      "network_error_please_check": "Xeletiya torê. Ji kerema xwe girêdana xwe kontrol bike û dîsa biceribîne.",
+      "unconfirmed_message": "Nehat piştrastkirin ka ev çû an na. Ji kerema xwe cizdan an dîrokê kontrol bike; tenê heke li wir nîne dîsa dest pê bike.",
+      "undecided_message": "Dibe ku ev jixwe çûbe. Ji kerema xwe berî ceribandina dîsa cizdan an dîrokê kontrol bike."
+    },
+    "chat_api": {
+      "request_failed": "Daxwaz têk çû ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} dinivîse...",
+      "typing_two": "{first} û {second} dinivîsin...",
+      "typing_three": "{first}, {second} û {third} dinivîsin...",
+      "typing_many": "{first}, {second} û {count, plural, one {# kesê din} other {# kesên din}} dinivîsin...",
+      "banned": "{reason} Tu dîsa jî dikarî sohbetê bixwînî. Şandin {until} vedibe.",
+      "joined_when": "tevlî bû {time}",
+      "joined": "tevlî bû",
+      "official_badge": "Fermî",
+      "official_badge_label": "Hesabê fermî yê Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Ji Esie bipirse"
+    },
+    "chat_service": {
+      "missing_token": "Tokena gihîştina Hive tune. Ji kerema xwe derkeve û dîsa têkeve.",
+      "dm_error": "Bikarhêner tevlî sohbetan nebûye"
+    },
+    "compose_reply": {
+      "account_changed": "Ev bersiv wekî hesabekî din hatiye nivîsandin. Bigire û dîsa binivîse.",
+      "write_something_first": "Pêşî tiştekî binivîse.",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Sûdwergirên pir zêde: herî zêde {max}.",
+      "a_beneficiary_s_share": "Beşa sûdwergir divê di navbera %0,01 û %100 de be.",
+      "beneficiaries_add_up_to": "Beşên sûdwergiran ji %100 zêdetir in.",
+      "a_beneficiary_is_listed": "Sûdwergirek du caran hatiye lîstekirin.",
+      "you_cannot_be_a": "Tu nikarî bibî sûdwergirê şandiya xwe.",
+      "a_beneficiary_has_an": "Navê hesabê sûdwergirekî nederbasdar e."
+    },
+    "follows": {
+      "fail": "Têk çû!: {message}",
+      "follower_count": "Şopîner ({count})",
+      "following_count": "Tê şopandin ({count})"
+    },
+    "link": {
+      "unsupported": "Ev lînk hê nayê piştgirîkirin.",
+      "cannot_open": "Lînk nayê vekirin",
+      "unsupported_version": "Ev lînk di vê guhertoyê de nayê piştgirîkirin."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Gerokê Explore dikare ji bo îmzekirina muameleyan bigihîje cizdana te ya Hive. Ev lînk ji naveroka şandiyê tê û ji aliyê Ecency ve nehatiye erêkirin. Tenê heke tu pê bawer î bidomîne:\n\n{url}"
+    },
+    "listen": {
+      "message": "Ji bo guhdanê {required} Points pêwîst in û te {available} heye.",
+      "unlock_label": "Veke · {cost} Points",
+      "preparing_audio": "Deng tê amadekirin · {preparingPercent}%",
+      "waiting_in_line_ahead": "Di rêzê de li bendê ye, {ahead} kes li pêşiya te ne…",
+      "next_in_line": "Rêza te ye…",
+      "preparing_about_minutes": "Deng tê amadekirin, nêzîkî {minutes} deq…",
+      "preparing_audio_2": "Deng tê amadekirin…",
+      "spend_confirm": "{cost} Points ji bo guhdana vî şandiyî bên xerckirin? Deng ya te ye, her dem dikarî dîsa guh bidî.",
+      "about_minutes": "~{minutes} deq",
+      "failed_refunded": "Deng nehat çêkirin, Points hatin vegerandin"
+    },
+    "media_pick": {
+      "preparing_video": "Vîdyo tê amadekirin...",
+      "library_hint": "Ji wêneyên xwe hilbijêre",
+      "camera_hint": "Niha wêneyekî nû bikişîne",
+      "files_hint": "Li pelên vê cîhazê û ên di ewr de bigere",
+      "paste_hint": "Wêneyê ku te kopî kiriye bi kar bîne",
+      "link_hint": "Wêneyekî ji webê bi kar bîne"
+    },
+    "media_picking": {
+      "image_types_message": "Ev cureya pelê nayê piştgirîkirin. Wêneyekî JPEG, PNG, GIF, WebP an HEIC hilbijêre.",
+      "video_types_message": "Ev cureya pelê nayê piştgirîkirin. Vîdyoyeke MP4 an MOV hilbijêre.",
+      "gif_too_large": "Ev GIF ji {mb} MB mezintir e."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Ev çalakî hem îmzeya çalak hem jî ya posting dixwaze, ku Ecency hê nikare bi hev re îmze bike."
+    },
+    "poll": {
+      "fail": "Têk çû!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Rayedariya posting a hesabê te nehat kontrolkirin. Girêdana xwe kontrol bike û dîsa biceribîne."
+    },
+    "post_lists": {
+      "voters_title": "Dengdêr ({total})",
+      "reblogs_title": "Agahiya dîsa weşandinê ({total})",
+      "no_history_found": "Dîrok nehat dîtin!",
+      "no_edit_history_available": "Ji bo vê naverokê dîroka guherandinê tune.",
+      "version_label": "Guhertoya {version}"
+    },
+    "stats": {
+      "other_device": "Yên din"
+    },
+    "profile": {
+      "account_not_found": "Hesab nehat dîtin",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • {hours, plural, one {piştî # demjimêran} other {piştî # demjimêran}} tije dibe"
+    },
+    "profile_metadata_guard": {
+      "refused": "Profîla te ya heyî nehat xwendin, dîsa biceribîne"
+    },
+    "profile_sheet": {
+      "fail": "Têk çû! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Hesab nehat dîtin"
+    },
+    "push_payload": {
+      "mentioned": "@{source} @{target} bi nav kir",
+      "replied": "@{source} bersiva @{target} da",
+      "transferred": "@{source} ji bo @{target} veguhast",
+      "delegated": "@{source} da wekîltiyê @{target}",
+      "rewards_received": "Xelat hatin wergirtin",
+      "account_updated": "Hesab hat nûkirin",
+      "account_updated_body": "Hûrgiliyên hesabê te hatin nûkirin",
+      "followed": "@{source} @{target} şopand",
+      "unfollowed": "@{source} @{target} neşopand",
+      "ignored": "@{source} @{target} paşguh kir",
+      "blacklisted": "@{source} @{target} xist lîsteya reş",
+      "posted_in": "@{source} di #{firstTag} de şand"
+    },
+    "qr_scan": {
+      "permission_title": "Destûra kamerayê nehat wergirtin",
+      "permission_message": "Ji kerema xwe di sazkariyên Ecency de destûra kamerayê bide.",
+      "permission_allow": "Destûr bide"
+    },
+    "reply_account": {
+      "switch": "Wekî hesabekî din bersiv bide"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} a te ji @{account} çû.",
+      "not_sent": "{label} a te ji @{account} neçû. Tiştek nehat şandin; tu dikarî dîsa dest pê bikî.",
+      "checking_whether_your_from": "Tê kontrolkirin ka {label} a te ji @{account} çû an na. Ji kerema xwe berî şandina dîsa cizdana xwe kontrol bike."
+    },
+    "signing": {
+      "hot_page_closed": "Rûpela HiveSigner hat girtin",
+      "wrong_role": "Ev kilîta te ya {given} e; ev çalakî kilîta te ya {needed} dixwaze.",
+      "action_id_required": "Ev çalakî ji bo ceribandina ewle nasnameya çalakiyê dixwaze."
+    },
+    "signing_router": {
+      "owner_never": "Çalakiyên xwedî di sepanê de tu carî nayên îmzekirin."
+    },
+    "spin": {
+      "key_missing": "Kilîta lîstikê tune",
+      "score": "{score, plural, one {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Îro (UTC), piştî {time} vedigere sifirê",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Her roj di 00:00 UTC de vedigere sifirê"
+    },
+    "storage_reset": {
+      "title": "Dîsa têkeve",
+      "message": "Hilanîna ewle li ser vê cîhazê hat vesazkirin. Dîsa têkeve.",
+      "failed": "Hesabên li ser vê cîhazê nehatin rakirin. Ji kerema xwe dîsa biceribîne."
+    },
+    "store": {
+      "in_app_purchases_are": "Kirînên di nav sepanê de di vê çêkirinê de ne berdest in."
+    },
+    "wallet_sends": {
+      "journal_full": "Gelek şandinên berê hê bi torê re tên kontrolkirin. Ji kerema xwe berî şandina zêdetir bisekine heta ku werin piştrastkirin.",
+      "check_later": "Tor vê di wextê xwe de nepejirand. Ji kerema xwe berî şandina dîsa cizdan an dîrokê kontrol bike; sepan di destpêka din de dîsa kontrol dike."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# nexwendî} other {# nexwendî}}",
+      "locked_text": "Ji bo dîtinê Ecency veke",
+      "signed_out_text": "Têkeve Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Rayedariyên heyî yên hesabê te nehatin xwendin. Tiştek nehat guhertin; ji kerema xwe dîsa biceribîne.",
+      "reads_disagree": "Du xwendinên rayedariya posting a hesabê te li hev nakin. Tiştek nehat guhertin; ji kerema xwe dîsa biceribîne."
+    },
+    "vote": {
+      "vote_weight_must_be": "Giraniya dengê divê di navbera -%100 û %100 de be.",
+      "please_sign_in_first": "Ji kerema xwe pêşî têkeve."
+    },
+    "widget": {
+      "streak_name": "Rêzeya erkan",
+      "write": "Binivîse",
+      "new_wave": "Wave a nû",
+      "notifications_description": "Agahdariyên te yên nexwendî. Dema kilîta PIN vekirî be tên veşartin.",
+      "streak_description": "Rêzeya te ya erkên rojane. Dema kilîta PIN vekirî be tê veşartin.",
+      "compose_description": "Şandiyek an wave ya nû binivîse.",
+      "streak_title": "Rêze",
+      "daily_quests": "Erkên rojane",
+      "streak_hint": "Ji bo dîtina rêzeya xwe Perks veke",
+      "open_perks": "Perks veke",
+      "open_app": "Ecency veke",
+      "unread_caption": "{count, plural, one {nexwendî} other {nexwendî}}",
+      "streak_caption": "{count, plural, one {rêzeya rojan} other {rêzeya rojan}}"
+    },
+    "system": {
+      "dictation_channel": "Nivîsandina bi deng",
+      "listen_channel": "Guhdarî",
+      "dictation_channel_description": "Dema tomarkirina nivîsandina bi deng li paşperdeyê didome bi çalakiya Raweste tê nîşandan.",
+      "dictation_title": "Tomarkirin ji bo nivîsandina bi deng",
+      "dictation_text": "Ecency nivîsandina te ya bi deng tomar dike. Raweste heta ku tu di sepanê de bipejirînî nayê şandin.",
+      "listen_channel_description": "Dema Guhdarî li paşperdeyê nekaribe bidome ji te re dibêje.",
+      "listen_paused": "Guhdarî hat sekinandin",
+      "listen_paused_text": "Ji bo domandina guhdariyê Ecency veke.",
+      "skip_back": "15 çirke paş",
+      "skip_forward": "15 çirke pêş"
+    },
+    "permission": {
+      "face_id": "Li şûna PIN Ecency bi Face ID veke.",
+      "camera": "Kodên QR bişopîne, wêne bikişîne an vîdyo tomar bike û li şandiya xwe zêde bike.",
+      "photo_library_add": "Ecency wêneyên ku te ji şandiyan daxistine li pirtûkxaneya wêneyên te tomar dike.",
+      "photo_library": "Ecency wêneyên ku te ji şandiyan daxistine di albûmeke Ecency de li pirtûkxaneya wêneyên te bi hev re dihêle.",
+      "microphone": "Ecency mîkrofona te bi kar tîne da ku tu şandî û şîroveyan bi deng binivîsî (ev tomar ji bo veguhertina nivîsê ji Ecency re tên şandin) û dengê vîdyoyeke ku li şandiyê zêde dikî tomar bikî."
+    },
+    "android": {
+      "no_browser": "Gerok ne berdest e",
+      "biometric_unlock_title": "Ecency bi biyometrîk veke",
+      "biometric_confirm": "Bi şopa tiliyê an rûyê xwe bipejirîne",
+      "image_unsupported_address": "Navnîşana wêneyê nayê piştgirîkirin",
+      "image_create_failed": "Pel nehat çêkirin",
+      "image_write_failed": "Pel nehat nivîsandin",
+      "image_too_large": "Wêne pir mezin e",
+      "image_download_failed": "Daxistin bi rewşa {status} têk çû",
+      "billing_disconnected": "Girêdana Google Play Billing qut bû.",
+      "billing_no_screen": "Ekrana nîşandana kirînê tune.",
+      "billing_error": "Xeletiya Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Te vê mehê {count, plural, one {# şandî} other {# şandî}} çêkir. Wisa berdewam bike!",
-        "checkin": "Te vê heftê {count, plural, one {# roj} other {# roj}} têketin kir. Wisa berdewam bike!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# şandiya nû} other {# şandiyên nû}} di #{tag} de"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# ceribandina(ên) têkçûyî} other {# ceribandina(ên) têkçûyî}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Rêzeya {n} rojan"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Tenê hesabên ji {days} rojan kevintir destûr in",
-        "max_choices": "• Tu dikarî heta {choices} bijartinan hilbijêrî"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Mayî {executions} veguhastin",
-        "schedule_summary": "{executions} veguhastin, her yek di her {hours} saetan de"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Ji bo qezenckirina Points pir kurt e ({n, plural, one {# tîp} other {# tîp}} an kêmtir, bêyî lînkan)"
       },
       "chats": {
-        "people_joined": "{count} kes tevlî bûn"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "di nêzîkî {count, plural, one {# deqeyê} other {# deqeyan}} de",
+        "ban-remaining-hours": "di nêzîkî {count, plural, one {# demjimêrê} other {# demjimêran}} de",
+        "ban-remaining-days": "di nêzîkî {count, plural, one {# rojê} other {# rojan}} de"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Herî zêde {n, plural, one {# etîket} other {# etîket}} bi kar bîne",
+          "too_long": "Lêgerîn pir dirêj e. Herî zêde {n, plural, one {# tîp} other {# tîp}} bi kar bîne"
+        }
       },
       "ai_assist": {
-        "min_chars": "Herî kêm {count} tîp pêwîst in",
-        "chars_remaining": "{count} tîp man"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Tu dikarî di carekê de heta {count, plural, one {# wêne} other {# wêne}} hilbijêrî"
+      },
+      "dictation": {
+        "stop_hint": "Ji bo veguheztina nivîsê û lêzêdekirina şandiyê raweste. Heta {m, plural, one {# deqe} other {# deqe}}.",
+        "rate": "{n} Points ji bo {s, plural, one {# çirkeyê} other {# çirkeyan}}"
       },
       "transfer": {
-        "powering_down_info": "Derxistina bê di {days} rojan de ye, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Di navbera {min} û {max, plural, one {# tîp} other {# tîp}} de"
       }
     }
   }

@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Участник Ecency Pro"
   },
   "perks": {
     "header": "Бонусы",
@@ -31,42 +31,42 @@
     "promote_desc": "Привлеките больше внимания к вашему посту",
     "account_boost": "Boost аккаунта",
     "account_boost_desc": "Прокачайте любой аккаунт",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Пополнить RC",
+    "rc_topup_desc": "Продолжайте публиковать, когда мало Resource Credits",
+    "streak_freeze_owned": "В запасе: {n}",
+    "streak_freeze_buy": "Защитить серию ({price} Points)",
+    "streak_freeze_buying": "Защищаем",
+    "streak_freeze_error": "Не удалось купить заморозку серии. Попробуйте ещё раз."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Пост дня",
+    "streak": "Серия: {n} дн.",
+    "keep_streak": "Не прерывайте серию"
   },
   "waves": {
     "for_you": "Для вас",
     "following": "Подписки",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Свои ленты",
+    "custom_feeds_subtitle": "Закрепляйте источники и теги, чтобы добавить их вкладками ленты.",
+    "add_tag_placeholder": "Добавить тег",
+    "sources": "Источники",
+    "your_feeds": "Ваши ленты",
+    "trending_tags": "Популярные теги",
+    "shorts_empty": "Пока нет коротких видео",
+    "mute": "Отключить звук",
+    "unmute": "Включить звук"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Начало работы",
+    "subtitle": "Вы здесь впервые? Waves это короткие посты, с них проще всего начать.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Закрыть",
+    "item_wave": "Опубликуйте свой первый Wave",
+    "item_vote": "Проголосуйте за понравившийся Wave",
+    "item_reply": "Ответьте кому-нибудь",
+    "item_checkin": "Отметьтесь, чтобы начать серию",
+    "all_done_title": "Всё готово 🎉",
+    "all_done_subtitle": "Вы всё освоили. Продолжайте публиковать Waves!"
   },
   "profile": {
     "havent_commented": "ещё ничего не комментировал",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Возраст  |  Видимость  |  Интерпретация",
     "attach_poll": "Прикрепить опрос"
   },
+  "favorite_tags": {
+    "title": "Теги",
+    "hint": "Подпишитесь, чтобы получать уведомления о новых постах с этим тегом",
+    "following_hint": "Вы получаете уведомления о новых постах с этим тегом",
+    "follow": "Подписаться",
+    "following": "Вы подписаны",
+    "added": "Подписка на тег оформлена",
+    "removed": "Подписка на тег отменена",
+    "empty_list": "Здесь пока ничего нет"
+  },
   "favorites": {
     "add": "Добавить в избранное",
     "add_error": "Не удалось добавить в избранное",
@@ -181,7 +191,33 @@
     "payout": "Выплата",
     "details": "Подробности",
     "community": "сообщество",
-    "new_post": "Новый пост"
+    "new_post": "Новый пост",
+    "mute_post_title": "Скрыть этот пост",
+    "unmute_post_title": "Вернуть этот пост",
+    "mute_post_reason": "Почему этот пост скрывается?",
+    "unmute_post_reason": "Почему этот пост возвращается?",
+    "manage": "Управление сообществом",
+    "manage_members": "Участники и роли",
+    "manage_settings": "Настройки сообщества",
+    "manage_activities": "Журнал действий",
+    "activities": "активность",
+    "no_activities": "Пока нет активности",
+    "activities_load_failed": "Не удалось загрузить активность. Потяните вниз, чтобы обновить.",
+    "set_role": "Назначить роль",
+    "assign_role": "Назначить роль",
+    "assign_role_hint": "Найдите любой аккаунт, даже не подписанный на сообщество, и выберите роль.",
+    "username_placeholder": "Имя пользователя",
+    "invalid_username": "Выберите существующий аккаунт из результатов",
+    "members": "участников",
+    "no_members": "Участники не найдены",
+    "members_incomplete": "Не удалось загрузить часть участников. Потяните вниз, чтобы обновить.",
+    "members_load_failed": "Не удалось загрузить участников. Потяните вниз, чтобы обновить.",
+    "role_owner": "Владелец",
+    "role_admin": "Админ",
+    "role_mod": "Модератор",
+    "role_member": "Участник",
+    "role_guest": "Гость",
+    "role_muted": "Заглушён"
   },
   "trade": {
     "swap_for": "Обмен {fromAmount} для {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Кросс-пост",
     "pin-blog": "Закрепить в блоге",
     "copy": "копировать ссылку",
+    "copy-text": "копировать текст",
+    "open-thread": "открыть обсуждение",
     "unpin-community": "Открепить от сообщества",
+    "mute-post": "Скрыть пост",
+    "unmute-post": "Вернуть пост",
     "mute": "Отключить / Блокировать",
     "reblog": "репост",
     "undo-reblog": "отменить репост",
@@ -232,24 +272,24 @@
     "unpin-reply": "Открепить комментарий"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Этот пост на языке: {lang}. Перевести на {target}?",
+    "translate_to": "Перевести на {lang}",
+    "show_original": "Показать оригинал",
+    "translated_from": "Переведено с языка: {lang}",
+    "change_language": "Сменить язык"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Перевести пост",
+    "source": "Исходный язык",
+    "target": "Язык перевода",
+    "detected": "Определён язык: {lang}",
+    "translate": "Перевести",
+    "apply": "Применить",
+    "review_note": "Добавляет в конец поста машинный перевод вашего текста. Проверьте и отредактируйте его перед публикацией.",
+    "too_short": "Сначала напишите чуть больше. Для перевода нужно хотя бы несколько предложений.",
+    "progress": "Перевод: {done} из {total}...",
+    "error": "Не удалось перевести. Попробуйте ещё раз.",
+    "add_title_marker": "Добавить метку языка в заголовок"
   },
   "side_menu": {
     "profile": "Профиль",
@@ -296,7 +336,7 @@
     "hot": "Актуальное",
     "popular": "Популярное",
     "new": "Новое",
-    "friends": "Following",
+    "friends": "Подписки",
     "my_blog": "Мой блог"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Ничего нет"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Шаблоны",
+    "untitled": "Шаблон без названия",
+    "empty_list": "Сохраните пост как шаблон в редакторе, чтобы использовать его здесь снова.",
+    "delete_confirm": "Вы уверены, что хотите удалить этот шаблон?",
+    "applied": "Шаблон применён как новый пост",
+    "save_as_template": "Сохранить как шаблон",
+    "name_placeholder": "Название шаблона",
+    "saved": "Шаблон сохранён"
   },
   "selection_list": {
     "available": "Доступно {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Все",
+      "replies": "Ответы",
+      "mentions": "Упоминания",
+      "rvotes": "Голоса",
+      "follows": "Подписки",
+      "reblogs": "Репосты",
+      "transfers": "Переводы",
+      "delegations": "Делегирование",
+      "nfavorites": "Избранное",
+      "tags": "Теги",
+      "nbookmarks": "Закладки",
+      "payouts": "Выплаты",
+      "scheduled_published": "Отложенные посты",
+      "account_updates": "Изменения аккаунта",
+      "weekly_earnings": "Доход за неделю"
     },
     "this_week": "На неделе",
     "reblog": "сделал репост",
@@ -417,11 +458,15 @@
     "yesterday": "Вчера",
     "mention": "упомянул вас в",
     "favorites": "создать новый пост",
+    "tags": "опубликовал(а) в #{tag}",
+    "tags_bundle": "{count} новых постов в #{tag}",
+    "tags_title": "Новые посты в теге, на который вы подписаны",
     "mentions": "Упоминания",
     "spin": "Пора заработать больше Баллов",
     "last_week": "На прошлой неделе",
     "recent": "Недавно",
     "ignore": "игнорирует",
+    "blacklist": "добавил(а) вас в чёрный список",
     "follow": "подписан",
     "notification": "Уведомления",
     "this_month": "В этом месяце",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} теперь может публиковать и голосовать от вашего имени. Если вы не давали на это разрешения, отзовите его.",
     "weekly_earnings": "Вы заработали ${amount} на этой неделе{breakdown}",
     "payouts": "Получена выплата: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "опубликовал(а) отложенный пост",
+    "scheduled_published_title": "Отложенный пост опубликован",
+    "scheduled_published_body": "Ваш отложенный пост уже опубликован, нажмите, чтобы посмотреть"
   },
   "recurrent": {
     "delete_failed": "Не удалось удалить регулярный перевод, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Открыть недавний черновик или Создать новый пост",
     "reward_power_up": "Застейкать 100%",
     "open_gallery": "Перейти в галерею",
+    "open_files": "Выбрать из Файлов",
     "clipboard_no_image": "В буфере обмена нет изображения",
     "clipboard_image_detected": "Изображение в буфере обмена",
     "paste_image": "Вставить изображение",
@@ -539,8 +585,10 @@
     "video": "Видео",
     "scheduled_later": "Позже",
     "settings_title": "Параметры статьи",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Нет"
+    "support_ecency": "Поддержать Ecency: {percent}%",
+    "alert_btn_no": "Нет",
+    "short_reply_hint": "Ответы длиной {n} символов и короче не приносят Points (ссылки не считаются)",
+    "short_content_hint": "Слишком коротко для Points ({n} символов и меньше, ссылки не считаются)"
   },
   "time": {
     "week": "недель",
@@ -655,7 +703,41 @@
     "select_emoji": "Выбрать эмодзи",
     "more_emojis": "Ещё",
     "search_emojis": "Поиск эмодзи...",
-    "no_emoji_found": "Эмодзи не найдены"
+    "no_emoji_found": "Эмодзи не найдены",
+    "ban-reason-spray": "Вам временно закрыт доступ к публикации: одно и то же сообщение ушло сразу в несколько каналов.",
+    "ban-reason-mass-dm": "Вам временно закрыт доступ к публикации: сообщение было разослано множеству людей одновременно.",
+    "ban-reason-generic": "Вам временно закрыт доступ к публикации в чате.",
+    "ban-can-still-read": "Читать чат по-прежнему можно.",
+    "ban-unlocks": "Публикация откроется {when}.",
+    "ban-remaining-soon": "менее чем через минуту",
+    "ban-remaining-minutes": "примерно через {count} мин.",
+    "ban-remaining-hours": "примерно через {count} ч.",
+    "ban-remaining-days": "примерно через {count} дн.",
+    "new_group": "Новая группа",
+    "new_group_hint": "Добавьте от {min} до {max} человек, чтобы начать групповой чат.",
+    "new_group_search": "Поиск людей по имени пользователя",
+    "new_group_full": "В группе может быть не больше {max} других участников.",
+    "new_group_no_results": "Никто с таким именем в чате не найден.",
+    "new_group_search_failed": "Поиск не удался. Проверьте соединение и повторите попытку.",
+    "new_group_remove": "Удалить @{username}",
+    "new_group_create": "Создать группу",
+    "new_group_failed": "Не удалось создать группу. Повторите попытку.",
+    "rename_group": "Переименовать группу",
+    "rename_group_hint": "Дайте группе название, которое увидят все её участники. Оставьте поле пустым, чтобы показывать имена участников.",
+    "group_name": "Название группы",
+    "rename_group_too_long": "Название группы может содержать не более {max} символов.",
+    "rename_group_not_owner": "Переименовать группу может только тот, кто её создал.",
+    "rename_group_failed": "Не удалось переименовать группу. Повторите попытку.",
+    "group_renamed": "{user} переименовал(а) группу в «{name}»",
+    "group_name_cleared": "{user} удалил(а) название группы",
+    "group_members": "Участники группы",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "reactions_title": "Реакции",
+    "reactor_you": "Вы",
+    "reactor_unknown": "Кто-то",
+    "see_who_reacted": "Нажмите и удерживайте, чтобы увидеть, кто отреагировал",
+    "group": "Группа"
   },
   "free_estm": {
     "timer_text": "Следующее бесплатное вращение через",
@@ -684,6 +766,32 @@
     "transaction_fail": "Транзакция не выполнена"
   },
   "search_result": {
+    "error": "Не удалось выполнить поиск. Повторите попытку",
+    "filters": {
+      "title": "Фильтры",
+      "open": "Фильтры",
+      "author": "Автор",
+      "author_placeholder": "имя пользователя",
+      "category": "Категория",
+      "category_placeholder": "сообщество или категория",
+      "tags": "Теги",
+      "tags_placeholder": "через запятую",
+      "type": "Тип",
+      "type_all": "Все",
+      "type_post": "Посты",
+      "type_comment": "Комментарии",
+      "date": "Дата",
+      "date_week": "За неделю",
+      "date_month": "За месяц",
+      "date_year": "За год",
+      "date_all": "За всё время",
+      "sort": "Сортировка",
+      "apply": "Применить",
+      "active": "Активно: {n}",
+      "too_many_tags": "Используйте не более {n} тегов",
+      "too_long": "Слишком длинный запрос. Используйте не более {n} символов",
+      "needs_criteria": "Введите запрос либо автора, категорию или тег для фильтра"
+    },
     "communities_filter": {
       "new": "Новое",
       "my": "Мои сообщества",
@@ -727,7 +835,7 @@
     "title": "Кросс-пост"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Автор указал, что использовал ИИ"
   },
   "ai_assist": {
     "title": "ИИ-ассистент для письма",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Получите подходящие теги для вашего поста",
     "action_generate_title": "Сгенерировать заголовок",
     "action_generate_title_desc": "Создайте привлекательные варианты заголовков",
-    "action_summarize": "Recap",
+    "action_summarize": "Кратко",
     "action_summarize_desc": "Создать краткое резюме",
     "action_check_grammar": "Проверить грамматику",
     "action_check_grammar_desc": "Исправить грамматические и орфографические ошибки",
+    "action_generate_image": "Создать изображение",
+    "action_generate_image_desc": "Создайте ИИ-изображение для поста",
+    "cost_from": "от {cost} {unit}",
     "text_label": "Ваш текст",
     "text_placeholder": "Вставьте или введите свой текст здесь...",
     "min_chars": "Требуется минимум {count} символов",
@@ -797,16 +908,26 @@
     "remind_later": "Напомнить позже",
     "success_subscribe": "Успешная подписка!",
     "payloadTooLarge": "Размер файла слишком большой. Ппожалуйста, измените размер или загрузите изображение меньшего размера",
+    "too_many_images": "За раз можно выбрать не более {count} изображений",
     "fail_follow": "Не удалось подписаться!",
     "clear_user_alert": "Вы уверены, что хотите удалить все данные своей учётной записи?",
     "cancel": "Отмена",
     "connection_success": "Успешное подключение!",
     "rc_down": "Недостаточно ресурс кредитов для совершения действия! \n\nУсильте свой аккаунт, чтобы и далее получать удовольствие от использования. Хотите усилить свой аккаунт сейчас?",
+    "rc_down_title": "Недостаточно Resource Credits",
+    "rc_precheck_title": "Этот пост может быть слишком большим для публикации",
+    "rc_precheck_body": "Resource Credits, похоже, не хватает для поста такого размера.",
+    "rc_down_body": "У вас недостаточно Resource Credits для этого действия.\n\nПополните их сейчас за Points, чтобы продолжить, или усильте аккаунт навсегда.",
+    "rc_down_topup": "Пополнить RC за Points",
+    "rc_down_boost": "Усилить аккаунт",
     "done": "Готово",
     "something_wrong_alt": "Тем временем, попробуйте Ecency.com в вашем браузере",
     "same_user": "Этот пользователь уже добавлен в список",
     "fail": "Не вышло!",
     "operation_failed_with_reason": "Не удалось выполнить «{operation}»: {reason}",
+    "request_timed_out": "Соединение занимает слишком много времени. Проверьте сеть и повторите попытку.",
+    "load_failed_retry": "Не удалось загрузить. Повторите попытку.",
+    "retrying": "Повтор...",
     "wallet_refresh_failed": "Не удалось обновить кошелёк. Попробуйте ещё раз.",
     "wallet_refresh_missing_account": "Не удалось обновить кошелёк: отсутствует аккаунт.",
     "boost_failed": "Не удалось выполнить Boost.",
@@ -949,31 +1070,31 @@
     "video_attached": "Видео прикреплено"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Проголосовать",
+    "upvoted": "Вы проголосовали",
+    "downvoted": "Вы поставили дизлайк",
+    "upvote_hint": "Дважды нажмите, чтобы открыть параметры голоса",
+    "payout_details": "Детали выплаты",
+    "a11y_votes": "{count, plural, one {# голос} few {# голоса} many {# голосов} other {# голоса}}",
+    "a11y_voters_hint": "Посмотреть голосовавших",
+    "a11y_reblogs": "{count, plural, one {# репост} few {# репоста} many {# репостов} other {# репоста}}",
+    "a11y_reblogs_hint": "Посмотреть репосты",
+    "a11y_comments": "{count, plural, one {# комментарий} few {# комментария} many {# комментариев} other {# комментария}}",
+    "a11y_comments_hint": "Посмотреть комментарии",
+    "a11y_reply_hint": "Ответить",
+    "a11y_tip": "Отправить чаевые",
+    "a11y_tips": "{count, plural, one {# чаевые} few {# чаевых} many {# чаевых} other {# чаевых}}",
+    "a11y_edit": "Изменить комментарий",
+    "a11y_delete": "Удалить комментарий",
+    "a11y_show_replies": "Показать ответы",
+    "a11y_hide_replies": "Скрыть ответы",
+    "a11y_post_options": "Параметры поста",
+    "a11y_views": "{count, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}",
+    "source_ecency": "Опубликовано в Ecency",
+    "a11y_stats_hint": "Посмотреть статистику поста",
     "image": "Изображение",
     "reveal_muted": "ОТКЛЮЧЕНО\nНажмите, чтобы показать контент",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Нажмите, чтобы загрузить изображение",
     "in": "в",
     "poll": "ОПРОС",
     "copy_link": "Копировать ссылку",
@@ -998,13 +1119,14 @@
     "save_to_local": "Загрузить на устройство",
     "muted": "Контент скрыт за нарушение",
     "community_muted": "Контент скрыт за нарушение правил сообщества",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Контент аккаунта с низкой репутацией",
+    "muted_downvoted": "Контент, за который проголосовали против",
+    "muted_low_trust": "Аккаунт с низкой репутацией и непроверенной внешней ссылкой",
+    "muted_reveal": "Нажмите, чтобы показать",
     "promoted": "ПРОДВИГАЕТСЯ",
     "image_saved": "Изображение сохранено в фотогалерею",
     "words": "Слова",
     "reading": "Чтение",
-    "listen": "Слушать",
     "min": "мин",
     "summarize_start": "Начать"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Несуществующий пост",
     "invalid_link": "Неверный Url, вы можете попробовать еще раз с корректным url или попытаться открыть его в веб-браузере",
-    "no_existing_user": "Несуществующий пользователь"
+    "no_existing_user": "Несуществующий пользователь",
+    "posting_key_request": "{requester} запрашивает приватный posting-ключ для @{username}.\n\nПродолжайте, только если доверяете этому запросу.",
+    "posting_key_request_unnamed": "Другое приложение запрашивает приватный posting-ключ для @{username}.\n\nПродолжайте, только если доверяете этому запросу.",
+    "auth_request_as_user": "{requester} хочет выполнить вход от имени @{username}.\n\nПередаются только имя пользователя и подтверждение входа. Ни один ключ не покидает Ecency.",
+    "auth_request_as_current": "{requester} хочет выполнить вход с вашим аккаунтом Ecency.\n\nПередаются только имя пользователя и подтверждение входа. Ни один ключ не покидает Ecency."
   },
   "payout": {
     "breakdown": "Разбивка",
@@ -1065,7 +1191,7 @@
     "open": "Открыть Ссылку",
     "invalid_key_desc": "пожалуйста, войдите в систему с ключом {key} или мастер-ключом для выполнения этой операции",
     "auth_transfer_confirm": "Подтвердить перевод для {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Подтверждайте, только если доверяете источнику этой ссылки. Подтверждение отправит указанную ниже операцию от вашего аккаунта с помощью вашего ключа {authority}."
   },
   "voters_dropdown": {
     "rewards": "НАГРАДЫ",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Должно содержать только буквы, цифры и дефисы",
       "username_no_ascii_first_letter_error": "Должно начинаться с буквы",
       "username_contains_double_hyphens": "Не должно содержать двойные дефисы",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Это имя слишком похоже на аккаунт криптобиржи и может ввести других в заблуждение. Выберите более уникальное имя.",
+      "username_restricted_prefix": "Имена, которые начинаются с «uid» и цифр, не допускаются, так как их часто используют для выдачи себя за других. Выберите другое имя.",
       "username_contains_underscore": "Не должно содержать подчеркивания"
     },
     "500_error": "Ваш запрос не удалось обработать, скорее всего, очередь регистрации заполнена! Повторите попытку через несколько минут...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Это имя пользователя уже занято",
+      "14": "Этот адрес электронной почты уже зарегистрирован",
+      "15": "Введите действительный адрес электронной почты",
+      "16": "Введите действительное имя пользователя",
+      "17": "Имя пользователя слишком длинное, выберите покороче",
+      "19": "Используйте постоянный адрес электронной почты или получите Premium-аккаунт",
+      "21": "Эта реферальная ссылка недействительна",
+      "28": "Не удалось обработать ваш запрос: вероятно, очередь регистрации переполнена. Повторите попытку через несколько минут.",
+      "107": "Обнаружено VPN-соединение. Отключите VPN и повторите попытку или получите Premium-аккаунт.",
+      "110": "Чтобы предотвратить злоупотребления, мы ограничиваем число аккаунтов на одного человека или сеть. Повторите попытку из другой сети.",
+      "111": "Обнаружено соединение через Tor. Отключите Tor на время регистрации.",
+      "112": "Сейчас не удалось проверить ваше соединение. Повторите попытку через несколько минут."
     },
     "have_account_text": "У вас уже есть аккаунт?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Получите полнофункциональный аккаунт Hive, этот метод содержит основные проверки, чтобы убедиться, что ботнет не нарушает наши регистрационные шлюзы.",
     "btn_register": "Зарегистрироваться бесплатно",
     "title": "Бесплатный аккаунт"
+  },
+  "dictation": {
+    "title": "Диктовка",
+    "start": "Запись",
+    "stop": "Стоп",
+    "record_more": "Записать ещё",
+    "done": "Готово",
+    "recording": "Идёт запись",
+    "stop_hint": "Нажмите «Стоп», чтобы расшифровать и добавить текст в пост. До {m} мин.",
+    "inserted": "Добавлено в пост. Запишите ещё или нажмите «Готово».",
+    "transcribing": "Расшифровка",
+    "rate": "{n} Points за {s} с",
+    "cost_running": "Уже {n} Points",
+    "cost_running_free": "Пока бесплатно",
+    "free_remaining": "Следующие {n} x {s} с сегодня бесплатны",
+    "price_loading": "Проверка цены",
+    "price_error": "Не удалось загрузить цены на расшифровку.",
+    "denied": "Для диктовки Ecency нужен доступ к микрофону. Разрешите его в настройках и повторите попытку.",
+    "error_empty": "В этой записи не обнаружено речи.",
+    "error_insufficient_points": "Недостаточно Points для расшифровки этой записи.",
+    "error_rate_limited": "Слишком много записей. Повторите попытку чуть позже.",
+    "error_too_long": "Эта запись слишком длинная для расшифровки.",
+    "error_failed": "Не удалось расшифровать запись. Повторите попытку.",
+    "error_recorder": "Не удалось начать запись. Повторите попытку."
   },
   "wallet": {
     "delegations_out": "Делегировано другим",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Каждый вход в приложение дает вам 0,25 баллов.",
     "fill_transfer_from_savings": "Сбережения сняты",
     "activities": "Активности",
+    "no_activities": "Транзакций пока нет",
+    "activities_failed": "Не удалось загрузить транзакции. Потяните вниз, чтобы повторить.",
     "tap_update": "Нажмите, чтобы обновить",
     "mining_lottery": "Выигрыш в лотерее",
     "checkin": "Чекин",
     "tokens_transfer": "Токенов переведено",
     "outgoing_transfer_title": "Перевод/Подарок",
+    "burned_title": "Использование ИИ",
+    "burned_description": "Points, потраченные на функцию ИИ",
+    "burn_refund_title": "Возврат за ИИ",
+    "burn_refund_description": "Points, возвращённые после неудачного запроса к ИИ",
     "manage_assets": "Добавить / Удалить активы",
     "selected_assets": "Выбранные активы",
     "nft_setPropertyPermissions": "Набор прав доступа для символа NFT",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Точность обновления токенов",
     "tokens_transferOwnership": "Право собственности на токен передано",
     "withdraw_vesting": "Вывести из стейкинга",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Аккаунты для вывода",
     "delegate_engine": "Делегировать",
     "market_close": "Ордер закрыт",
     "nftmarket_transferFee": "Комиссия за покупку ордера",
@@ -1251,10 +1407,10 @@
     "nft_undelegate": "Отзыв NFT запущен",
     "escrow_dispute": "Спор по депозиту",
     "market_expire": "Срок действия ордера истёк",
-    "boost": "Boost",
+    "boost": "Буст",
     "dropdown_transfer": "Перевести",
     "dropdown_promote": "Продвигать",
-    "dropdown_boost": "Boost",
+    "dropdown_boost": "Буст",
     "dropdown_ai_image": "AI-изображение",
     "tokens_undelegateStart": "Отмена делегирование началась",
     "undelegate": "Отозвать делегирование",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "ПОЛУЧИТЬ БАЛЛЫ",
     "escrow_approve": "Подтверждение депозита",
     "expires": "истекает",
+    "transaction_id": "ID транзакции",
+    "copy_transaction_id": "Скопировать ссылку на транзакцию",
+    "filter_activities": "Фильтр действий",
+    "filter_activities_desc": "Выберите, какие операции запрашивать в истории",
+    "filter_all": "Выбрать все",
+    "filter_none": "Снять все",
+    "filter_apply": "Применить",
     "author_reward": "Авторская награда",
     "withdraw_hbd": "Вывести сбережения",
     "convert_request": "Преобразовать запрос",
@@ -1426,11 +1589,11 @@
     "title": "Усилить+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Пополнить RC",
+    "desc": "Краткосрочный прирост RC, чтобы вы могли продолжать публиковать.",
+    "confirm": "Потратить Points на пополнение Resource Credits?",
+    "insufficient": "У вас недостаточно Points.",
+    "buy_points": "Купить Points"
   },
   "ai_image_generator": {
     "title": "Генератор изображений AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Свой интервал ({hours} ч.)",
+    "balance_load_failed": "Не удалось загрузить баланс. Нажмите, чтобы повторить.",
+    "precision_load_failed": "Не удалось загрузить данные токена, поэтому можно отправлять только целые суммы. Нажмите, чтобы повторить.",
     "close": "Закрыть",
     "favorite_username_placeholder": "Имя пользователя",
     "invalid_recipient_qr": "Не удалось найти имя пользователя в этом QR-коде.",
@@ -1527,7 +1692,7 @@
     "powering_down_info": "Следующий вывод из стейкинга через {days} дн., {hp} HIVE",
     "convert": "Конвертировать HBD в HIVE",
     "auto_vests": "Авто Vests",
-    "vests": "Vests",
+    "vests": "VESTS",
     "stop_information": "Вы уверены, что хотите остановиться?",
     "amount": "Сумма",
     "memo_desc": "Эта заметка публична",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Управление полномочиями",
     "pincode": "Пинкод",
     "general": "Общие",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Поддержать Ecency",
+    "support_beneficiary": "Делиться наградами за посты с Ecency",
+    "support_beneficiary_percent": "Доля наград за посты",
+    "support_curation": "Удерживать часть кураторских наград",
+    "support_curation_percent": "Доля удержания кураторских наград",
     "feedback_body": "Напишите ваше сообщение здесь!\n\nИмя пользователя Hive: {username}\nВерсия приложения: {appVersion}\nПлатформа: {platform}\n",
     "show_imgs": "Показать изображения",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Комментарии",
       "bookmark": "Закладки",
+      "tags": "Теги",
       "reblog": "Репосты",
       "favorite": "Избранное",
       "mention": "Упоминания",
@@ -1599,10 +1765,10 @@
       "transfers": "Переводы",
       "vote": "Голоса",
       "follow": "Подписки",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Отложенный пост опубликован",
+      "payouts": "Выплаты",
+      "account_update": "Изменения аккаунта",
+      "weekly_earnings": "Доход за неделю",
       "fcm_unavailable": "Push-уведомления не поддерживаются на этом устройстве. Вы будете получать уведомления только при открытом приложении."
     },
     "keys_warning": "Конфиденциальная информация об учётной записи!\nПриложение Ecency должно быть защищено PIN-кодом перед просмотром закрытых ключей.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Отправить отзыв",
     "rate_app": "Оценить Ecency",
+    "email_digests": "Email-рассылки",
     "rate": "Оценить",
     "dm-privacy-updated": "Настройки конфиденциальности личных сообщений успешно обновлены",
     "dm-privacy-failed": "Не удалось обновить настройки конфиденциальности личных сообщений",
@@ -1685,19 +1852,29 @@
     "request_sent": "Ваш запрос на удаление отправлен",
     "confirm_delete_body": "Вы уверены, что хотите удалить учётную запись? Это сотрёт все ваши данные"
   },
-  "tts": {
-    "settings_title": "Настройки синтеза речи",
-    "voice": "Голос",
-    "voice_hint": "Будет использован системный голос по умолчанию",
-    "speed": "Скорость",
-    "pitch": "Тон",
-    "test_voice": "Проверить голос",
-    "settings_info": "Эти настройки будут использоваться при чтении публикаций вслух",
+  "listen": {
+    "title": "Слушать этот пост",
+    "minutes": "~{n} мин",
+    "login": "Войти",
+    "unlock": "Открыть · {n} Points",
+    "confirm": "Потратить {n} Points на прослушивание этого поста? Аудио останется у вас, его можно переслушивать в любое время.",
+    "not_enough_title": "Недостаточно Points",
+    "not_enough": "Для прослушивания нужно {required} Points, у вас {available}.",
+    "get_points": "Получить Points",
+    "unlock_failed": "Не удалось открыть аудио, повторите попытку",
+    "failed_refunded": "Не удалось создать аудио, Points возвращены",
+    "preparing": "Подготовка аудио…",
+    "preparing_eta": "Подготовка аудио, примерно {n} мин…",
+    "preparing_progress": "Подготовка аудио · {n}%",
+    "waiting": "В очереди, впереди {n}…",
+    "next_in_line": "Вы следующий в очереди…",
     "play": "Воспроизвести",
     "pause": "Пауза",
-    "language": "Язык",
-    "language_auto": "Автоопределение",
-    "language_hint": "Автоопределение выбирает язык на основе содержания публикации"
+    "seek": "Перемотка",
+    "speed": "Скорость воспроизведения",
+    "language": "Язык аудио",
+    "unavailable": "Не удалось загрузить аудио.",
+    "retry": "Повторить"
   },
   "posting_authority": {
     "title": "Включить быструю публикацию",
@@ -1732,7 +1909,7 @@
     "error-auth": "Ошибка аутентификации. Войдите снова.",
     "error-generic": "Не удалось загрузить видео. Попробуйте снова.",
     "error-too-long-short": "Короткие видео должны быть не длиннее 60 секунд.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "В посте может быть только одно видео. Удалите текущее видео, прежде чем добавить другое.",
     "select_source": "Добавить видео",
     "record": "Записать видео",
     "choose_library": "Выбрать из медиатеки"
@@ -1744,34 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Поделиться быстрым обновлением"
   },
+  "newsletter": {
+    "screen_title": "Email-рассылки",
+    "title": "{list}",
+    "body_own": "Еженедельная или ежемесячная сводка ваших уведомлений по email.",
+    "body_creator": "Новые посты {list} в вашей почте.",
+    "body_community": "Дайджест новых постов сообщества {list} по email.",
+    "body_site": "Лучшее из Ecency в вашей почте.",
+    "first_publish_title": "Поздравляем с первым постом!",
+    "first_publish_body": "Хотите получать дайджест уведомлений по email? Раз в неделю или в месяц, изменить или отключить можно в любой момент в настройках.",
+    "list_own": "Дайджест моих уведомлений",
+    "list_site": "Рассылка Ecency",
+    "status_active": "Вы подписаны.",
+    "status_pending": "Ожидается подтверждение email.",
+    "status_short_active": "активна",
+    "status_short_pending_confirmation": "ожидает",
+    "status_short_suppressed": "остановлена",
+    "status_short_ended": "завершена",
+    "cadence_weekly": "Еженедельно",
+    "cadence_monthly": "Ежемесячно",
+    "email_placeholder": "you@example.com",
+    "subscribe": "Подписаться",
+    "update": "Обновить",
+    "resend": "Отправить подтверждение ещё раз",
+    "leave": "Отписаться от дайджеста",
+    "cancel": "Отмена",
+    "ok": "OK",
+    "manage": "Управление",
+    "check_inbox_title": "Проверьте почту",
+    "check_inbox_body": "Мы отправили ссылку для подтверждения на {email}. Подписка начнётся после подтверждения.",
+    "subscribed": "Вы подписались на email-дайджест",
+    "left": "Вы отписались от дайджеста",
+    "refused": "Этот адрес нельзя подписать.",
+    "unavailable": "Email-рассылки сейчас недоступны.",
+    "too_many": "Слишком много попыток, повторите позже.",
+    "fail": "Что-то пошло не так, повторите попытку.",
+    "empty": "Email-рассылок пока нет. Подпишитесь ниже, чтобы начать.",
+    "discover": "Больше рассылок по email",
+    "stop_all": "Отписаться от всех",
+    "stop_all_title": "Отписаться от всех писем?",
+    "stop_all_body": "Ecency больше не будет отправлять письма на {email}. Подписки на другие адреса сохранятся.",
+    "stop_all_ok": "Отписаться от всех",
+    "stop_all_done": "Адрес отписан от всех писем",
+    "profile_option": "EMAIL-ДАЙДЖЕСТ",
+    "subscriber_count": "Подписчиков по email: {weekly} еженедельно • {monthly} ежемесячно",
+    "community_button": "Рассылка"
+  },
+  "mod_notes": {
+    "title": "Укажите причину",
+    "placeholder": "Причина (видна другим модераторам)",
+    "confirm": "Подтвердить",
+    "cancel": "Отмена"
+  },
+  "community_settings": {
+    "title_header": "Настройки сообщества",
+    "title_label": "Название",
+    "about": "О сообществе",
+    "lang": "Язык",
+    "description": "Описание",
+    "rules": "Правила",
+    "nsfw": "Не для работы (NSFW)",
+    "save": "Сохранить",
+    "required": "Обязательно",
+    "title_length": "От {min} до {max} символов",
+    "owner_admin_only": "Менять эти настройки могут только владелец и админы."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Развёрнуто",
+        "collapsed": "Свёрнуто"
+      },
+      "a11y_chat": {
+        "quote": "Ответ {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Выбрать",
+        "deselect": "Снять выбор"
+      },
+      "store": {
+        "billing_unavailable": "Покупки в приложении запрещены на этом устройстве.",
+        "verification_failed": "App Store не смог подтвердить эту покупку.",
+        "cancelled": "Покупка отменена",
+        "unknown_result": "Неизвестный результат покупки"
+      },
+      "navigation": {
+        "feed_unavailable": "Эта лента пока недоступна.",
+        "link_cannot_open": "Эту ссылку нельзя открыть.",
+        "video_cannot_play": "Это видео нельзя воспроизвести."
+      },
+      "media": {
+        "load_failed": "Не удалось загрузить элемент. Проверьте соединение и повторите попытку.",
+        "loading": "Загрузка медиа",
+        "download_failed": "Загрузка не удалась, статус {status}"
+      },
+      "sign_in": {
+        "required": "Требуется вход",
+        "to_reply": "Войдите, чтобы ответить.",
+        "to_vote": "Войдите, чтобы проголосовать.",
+        "button": "Войти"
+      },
+      "account": {
+        "logout_user": "Выйти из @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# голос} few {# голоса} many {# голосов} other {# голоса}}  •  {replies, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответа}}",
+        "voting_power": "Сила голоса {percent}",
+        "remove_favourite": "Убрать из избранного",
+        "add_favourite": "Добавить в избранное"
+      },
+      "waves": {
+        "clear_tag_filter": "Сбросить фильтр по тегу {tag}",
+        "new_wave": "Новая wave",
+        "replies_open_thread": "{count, plural, one {# ответ, открыть обсуждение} few {# ответа, открыть обсуждение} many {# ответов, открыть обсуждение} other {# ответа, открыть обсуждение}}",
+        "characters": "{count} из {max} символов",
+        "retry": "{message}\nПовторить",
+        "playing": "Воспроизведение {permlink}",
+        "video_attached_remove": "Видео прикреплено, удалить",
+        "image_attached_remove": "Изображение прикреплено, удалить",
+        "take_photo": "Сделать фото",
+        "edit_poll": "Изменить опрос",
+        "add_poll": "Добавить опрос",
+        "add_video": "Добавить видео"
+      },
+      "reading": {
+        "reply_to": "Ответить {username}",
+        "opens_post": "Открывает пост",
+        "sort_comments": "Сортировка комментариев",
+        "sort_comments_value": "Сортировка комментариев, {sort}",
+        "no_comments": "Комментариев пока нет.",
+        "loading_post": "Загрузка поста",
+        "show_version": "Показать версию",
+        "show_changes": "Показать изменения",
+        "replying_to": "Ответ @{username}",
+        "reply_text": "Текст ответа",
+        "translate_from": "С языка",
+        "translate_to": "На язык"
+      },
+      "feed": {
+        "tab_pinned": "{label}, закреплено",
+        "tab_add": "{label}, добавить",
+        "customise": "Настроить"
+      },
+      "card": {
+        "in_category": "в {category}",
+        "pinned": "Закреплено",
+        "by_author": "от {username}",
+        "payout": "выплата {payout}",
+        "payout_declined": "выплата {payout}, отклонена",
+        "reblogged_by": "Репост от {username}"
+      },
+      "shell": {
+        "close_menu": "Закрыть меню"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Миниатюра, выбрать другое изображение",
+        "words": "{count, plural, one {# слово} few {# слова} many {# слов} other {# слова}}",
+        "poll_min_age": "Мин. возраст аккаунта (дней): {days}",
+        "poll_max_options": "Макс. вариантов: {count}",
+        "thumbnail_selected": "Выбранная миниатюра",
+        "thumbnail": "Миниатюра",
+        "uploaded_image": "Загруженное изображение",
+        "community_search": "поиск"
+      },
+      "vote": {
+        "not_voted": "Без голоса",
+        "voting": "Голосование",
+        "failed_with": "Не удалось проголосовать: {message}",
+        "failed": "Не удалось проголосовать",
+        "payout": "Выплата {payout}",
+        "payout_declined": "Выплата {payout}, отклонена",
+        "percent": "{percent} процентов",
+        "upvote_percent": "Голос за {percent}%"
+      },
+      "settings": {
+        "on": "Вкл.",
+        "off": "Выкл."
+      },
+      "lock": {
+        "biometric_reason": "Включить разблокировку биометрией для Ecency",
+        "offer_title": "Разблокировать через {method}",
+        "offer_use": "Использовать {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Ключи скрыты, пока идёт запись или трансляция экрана.",
+        "screenshot_notice": "Сделан снимок экрана. Приватные ключи снова скрыты; если на снимке виден ключ, удалите его.",
+        "hold_hint": "Нажмите и удерживайте ключ, чтобы показать его.",
+        "hold_to_show": "Удерживайте, чтобы показать"
+      },
+      "wallet": {
+        "cancel_order": "Отменить этот ордер?",
+        "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
+      },
+      "chat": {
+        "reactors_hint": "Нажмите и удерживайте, чтобы увидеть, кто отреагировал",
+        "see_reactors": "Кто отреагировал"
+      },
+      "esie": {
+        "still": "{mood}, неподвижно"
+      }
+    },
+    "ui": {
+      "profile_of": "Профиль @{username}",
+      "preview": "Предпросмотр ({index}/{count})",
+      "balance": "Баланс: {amount}",
+      "expires_in": "Истекает через {time}",
+      "expired": "Срок истёк. Закройте и повторите попытку.",
+      "user_has_no_posts": "@{username} пока ничего не публиковал(а)",
+      "attach_image": "Прикрепить изображение",
+      "auto": "Авто",
+      "back": "Назад",
+      "hot": "ГОРЯЧЕЕ",
+      "image_of": "Изображение {index} из {count}",
+      "new": "НОВОЕ",
+      "nsfw_tap_to_reveal": "NSFW. Нажмите, чтобы показать",
+      "new_reply": "Новый ответ",
+      "remove": "Удалить",
+      "unlock_ecency": "Разблокировать Ecency",
+      "update_it": "Обновить",
+      "update_it_or_post_this_as": "Обновить его или опубликовать как новый ответ?",
+      "use_pin": "Использовать PIN",
+      "your_reply_was_already_posted": "Ваш ответ уже опубликован",
+      "error_try_again": "{message} Повторить?",
+      "auth": {
+        "account_label": "Аккаунт: @{username}",
+        "approve_the_request_in_your_wallet": "Подтвердите запрос в приложении кошелька.",
+        "copy_key": "Скопировать: {title}",
+        "current_account": "Текущий аккаунт",
+        "qr_code": "QR-код",
+        "requested_by": "Запрос от {requester}",
+        "pin_digits": "{filled} из {total, plural, one {# цифры} few {# цифр} many {# цифр} other {# цифры}}",
+        "private_key_shown": "{title}, приватный ключ показан",
+        "open_wallet_app": "Открыть приложение кошелька",
+        "hiveauth_scan": "Подтвердите в Hive Keychain или другом кошельке HiveAuth: откройте его на этом устройстве или отсканируйте им этот код.",
+        "switching": "Переключение...",
+        "logout_all": "Выйти из всех аккаунтов",
+        "logout_all_title": "Выйти из всех аккаунтов на этом устройстве?",
+        "stored_key": "@{username} уже выполнил(а) вход на этом устройстве. Сохранённые ключи остаются, обновляется только сессия.",
+        "stored_hivesigner": "@{username} уже выполнил(а) вход через HiveSigner на этом устройстве. Сессия будет заменена.",
+        "stored_hiveauth": "@{username} выполнил(а) вход через HiveAuth на этом устройстве. Вместо этого подпись будет идти через HiveSigner.",
+        "method_key": "Ключ",
+        "logout_failed": "Не удалось выйти"
+      },
+      "browser": {
+        "account": "Аккаунт",
+        "authority": "Полномочие",
+        "phishing": "Внимание: этот домен помечен как известный фишинговый сайт. Действуйте с крайней осторожностью."
+      },
+      "chat": {
+        "cancel_edit": "Отменить редактирование",
+        "cancel_reply": "Отменить ответ",
+        "copied_to_clipboard": "Скопировано в буфер обмена",
+        "edited_at": "Изменено {time}",
+        "group_options": "Параметры группы",
+        "pinned_messages": "Закреплённые сообщения",
+        "remove_user": "Удалить @{username}",
+        "sort_by_name": "Сортировать по имени",
+        "more": "Ещё",
+        "reaction_label": "{emoji} {count}. Нажмите и удерживайте, чтобы увидеть, кто отреагировал",
+        "members": "Участники"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Пост по этой ссылке уже существует и отличается от отправленного. Обновить его или опубликовать как новый?",
+        "a_scheduled_post_is_published_by": "Отложенный пост публикует Ecency в выбранное время. Для этого аккаунту нужно posting-полномочие для ecency.app. Ваши ключи и другие полномочия не меняются. Для его выдачи нужен active-ключ.",
+        "ai_assist": "ИИ-помощник",
+        "ai_tools": "Инструменты ИИ",
+        "allow_ecency_to_publish_for_you": "Разрешить Ecency публиковать за вас?",
+        "bold": "Жирный",
+        "clone": "Дублировать",
+        "cost": "Стоимость: {cost}",
+        "could_not_store_the_draft_on": "Не удалось сохранить черновик на устройстве. Не закрывайте приложение и сохраните черновик.",
+        "draft": "ЧЕРНОВИК",
+        "delete_count": "Удалить ({count})",
+        "dictate_desc": "Говорите, и расшифровка попадёт в ваш пост",
+        "discard": "Отменить",
+        "discard_changes": "Отменить изменения?",
+        "grant": "Выдать",
+        "italic": "Курсив",
+        "keep_editing": "Продолжить редактирование",
+        "my_blog": "МОЙ БЛОГ",
+        "my_communities": "МОИ СООБЩЕСТВА",
+        "new_post": "Новый пост",
+        "notice": "Уведомление",
+        "restore": "Восстановить",
+        "restore_unsaved_changes": "Восстановить несохранённые изменения?",
+        "saved": "Сохранено",
+        "top_communities": "ТОП СООБЩЕСТВ",
+        "table": "Таблица",
+        "text_format": "Формат текста",
+        "this_link_is_already_in_use": "Эта ссылка уже используется",
+        "untitled": "Без названия",
+        "update_it_or_publish_this_as": "Обновить его или опубликовать как новый пост?",
+        "you_have_unsaved_changes_from_an": "У вас есть несохранённые изменения от прошлой правки. Пост с тех пор изменился; восстановление заменит текст ниже.",
+        "your_edits_were_not_published": "Ваши правки не опубликованы.",
+        "your_post_was_already_published": "Ваш пост уже опубликован",
+        "file_size": "{name} ({size} МБ)",
+        "thumbnail_pick": "Миниатюра, нажмите, чтобы выбрать другое изображение",
+        "thumbnail_number": "Миниатюра {number}",
+        "recording_busy": "Запись уже идёт. Сначала завершите её в камере.",
+        "photo_lost": "Фото потерялось, пока была открыта камера. Снимите его ещё раз.",
+        "add_snippet_button": "+ Сниппет",
+        "words_count": "{count, plural, one {# слово} few {# слова} many {# слов} other {# слова}}",
+        "community_search": "поиск"
+      },
+      "profile": {
+        "open_wallet": "Открыть кошелёк",
+        "your_wallet_is_on_the_wallet": "Ваш кошелёк находится на вкладке «Кошелёк».",
+        "user_has_no_comments": "@{username} пока ничего не комментировал(а)",
+        "votes_count": "{count, plural, one {# голос} few {# голоса} many {# голосов} other {# голоса}}",
+        "replies_count": "{count, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответа}}",
+        "menu": "Ещё",
+        "users": "Пользователи"
+      },
+      "reading": {
+        "apply": "ПРИМЕНИТЬ",
+        "add_tag": "Добавить тег",
+        "age": "Возраст",
+        "audio_language": "Язык аудио",
+        "available_filters": "Доступные фильтры",
+        "could_not_unlock_the_audio_please": "Не удалось открыть аудио, повторите попытку",
+        "downvote": "Голос против",
+        "downvote_percent": "Голос против {percent}%",
+        "listen_to_this_post": "Слушать этот пост",
+        "log_in": "Войти",
+        "mark_all_as_read": "Отметить все как прочитанные",
+        "mark_as_read": "Отметить как прочитанное",
+        "more_replies": "Ещё ответы",
+        "not_enough_points": "Недостаточно Points",
+        "nothing_here_yet": "Пока ничего нет.",
+        "open_editor": "Открыть редактор",
+        "pause_voice": "Пауза озвучки",
+        "play_voice": "Включить озвучку",
+        "playback_speed": "Скорость воспроизведения",
+        "publishing_in_waves": "Публикация в Waves",
+        "quests_done": "Заданий выполнено",
+        "read": "Читать",
+        "remove_vote": "Убрать голос",
+        "seek": "Перемотка",
+        "select_community": "Выберите сообщество",
+        "selected_filters": "Выбранные фильтры",
+        "the_audio_could_not_be_loaded": "Не удалось загрузить аудио.",
+        "this_post_does_not_exist_or": "Этот пост не существует или был удалён.",
+        "unread": "Непрочитанные",
+        "voice_position": "Позиция озвучки",
+        "vote_weight": "Сила голоса",
+        "reblogged_by": "репост от {username}",
+        "no_more_posts": "Больше постов нет.",
+        "favourite": "Избранное",
+        "no_votes_yet": "Голосов пока нет",
+        "no_comments_yet": "Комментариев пока нет. Будьте первым!",
+        "comments_count": "Комментарии ({count})",
+        "sending_to_chain": "отправка в блокчейн",
+        "compare": "Сравнить",
+        "your_vote": "Ваш голос",
+        "reply_to": "Ответить @{username}",
+        "what_do_you_think": "Что вы думаете?",
+        "clear_tag_filter": "Сбросить фильтр по тегу",
+        "tab_selected": "{title}, выбрано",
+        "add_tag_feed": "Добавить ленту тега",
+        "feed_pinned": "{label}, закреплено",
+        "attached_image_remove": "Прикреплено изображение, нажмите, чтобы удалить",
+        "camera": "Камера",
+        "files": "Файлы",
+        "paused": "На паузе",
+        "in_topic": "в {topic}",
+        "poll_vote": "Голосовать",
+        "reply": "Ответить",
+        "mute_sound": "Выключить звук",
+        "unmute_sound": "Включить звук",
+        "leaderboard_activities": "Действия",
+        "leaderboard_reward": "Награда",
+        "sort_votes": "Голоса"
+      },
+      "shell": {
+        "account_of": "Аккаунт @{username}",
+        "account_signed_out": "Аккаунт, вход не выполнен",
+        "close_tab": "Закрыть вкладку",
+        "coming_soon_to_the_native_app": "Скоро в нативном приложении.",
+        "create": "Создать",
+        "expand": "Развернуть",
+        "forward": "Вперёд",
+        "loading": "Загрузка",
+        "new_tab": "Новая вкладка",
+        "reload": "Обновить",
+        "sent": "Отправлено",
+        "tab_unread": "{title}, непрочитанных: {count}",
+        "no_app_for_link": "Нет приложения, которое может открыть эту ссылку."
+      },
+      "wallet": {
+        "product_not_available": "Товар недоступен.",
+        "repeat": "Повторить"
+      },
+      "copied": "Скопировано",
+      "trending_caps": "В ТРЕНДЕ",
+      "move_up": "Вверх",
+      "move_down": "Вниз",
+      "scroll_to_top": "Наверх",
+      "load_more": "Ещё"
+    },
+    "wallet": {
+      "checking": "Проверка сетью",
+      "leave_title": "Ещё отправляется",
+      "leave_message": "Это всё ещё отправляется или проверяется сетью. Можно покинуть этот экран: приложение сообщит о результате.",
+      "stay": "Остаться",
+      "collateralized_convert_request": "Запрос на конвертацию с залогом",
+      "op_transfer": "перевод",
+      "op_power_up": "Power Up",
+      "op_power_down_change": "изменение Power Down",
+      "op_delegation": "делегирование",
+      "op_savings_deposit": "вклад в сейф",
+      "op_savings_withdrawal": "вывод из сейфа",
+      "op_conversion": "конвертация",
+      "op_swap": "обмен",
+      "op_order_cancel": "отмена ордера",
+      "op_reward_claim": "получение награды",
+      "op_withdraw_route_change": "изменение маршрута вывода",
+      "op_token_operation": "операция с токеном"
+    },
+    "notification": {
+      "amount_unknown": "Сумма недоступна",
+      "weekly_earnings_breakdown": "Вы заработали ${amount} за эту неделю: ${authorUsd} за посты, ${curationUsd} за курирование.",
+      "weekly_earnings_total": "Вы заработали ${amount} за эту неделю на постах и курировании."
+    },
+    "settings": {
+      "open": "Открыть",
+      "feedback_subject": "Отзыв/Сообщение об ошибке",
+      "unknown_user": "Неизвестный пользователь"
+    },
+    "navigation": {
+      "editor": "Редактор",
+      "followers": "Подписчики",
+      "spin_game": "Игра Spin",
+      "edit_profile": "Редактировать профиль",
+      "redeem_points": "Обменять Points",
+      "community": "Сообщество",
+      "community_members": "Участники сообщества",
+      "community_activities": "Активность сообщества",
+      "browser": "Браузер",
+      "asset_details": "Сведения об активе",
+      "edit_history": "История правок",
+      "welcome": "Добро пожаловать",
+      "chat": "Чат",
+      "backup_keys": "Резервные копии ключей",
+      "trade": "Торговля",
+      "ai_image_generator": "Генератор изображений ИИ",
+      "select_assets": "Выбор активов",
+      "poll": "Опрос",
+      "bot_comments": "Комментарии ботов"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Операции, требующие owner-ключа, нельзя подписать в Ecency.",
+      "post": "Пост/Комментарий",
+      "custom": "Custom JSON",
+      "sign_buffer": "Подписать сообщение",
+      "send_token": "Отправить токен",
+      "witness_vote": "Голос за свидетеля",
+      "proxy": "Установить прокси",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Транслировать",
+      "sign_tx": "Подписать транзакцию",
+      "encode": "Зашифровать сообщение",
+      "decode": "Проверить ключ",
+      "add_account_authority": "Добавить полномочие аккаунта",
+      "remove_account_authority": "Удалить полномочие аккаунта",
+      "add_key_authority": "Добавить полномочие ключа",
+      "remove_key_authority": "Удалить полномочие ключа",
+      "create_claimed_account": "Создать аккаунт",
+      "create_proposal": "Создать предложение",
+      "remove_proposal": "Удалить предложение",
+      "update_proposal_vote": "Голос за предложение",
+      "signed_call": "Подписанный вызов"
+    },
+    "translate_language": {
+      "ar": "Арабский",
+      "az": "Азербайджанский",
+      "bg": "Болгарский",
+      "bn": "Бенгальский",
+      "ca": "Каталанский",
+      "cs": "Чешский",
+      "da": "Датский",
+      "de": "Немецкий",
+      "el": "Греческий",
+      "en": "Английский",
+      "eo": "Эсперанто",
+      "es": "Испанский",
+      "et": "Эстонский",
+      "fa": "Персидский",
+      "fi": "Финский",
+      "fr": "Французский",
+      "ga": "Ирландский",
+      "he": "Иврит",
+      "hi": "Хинди",
+      "hu": "Венгерский",
+      "id": "Индонезийский",
+      "it": "Итальянский",
+      "ja": "Японский",
+      "ko": "Корейский",
+      "lt": "Литовский",
+      "lv": "Латышский",
+      "ms": "Малайский",
+      "nb": "Норвежский",
+      "nl": "Нидерландский",
+      "pl": "Польский",
+      "pt": "Португальский",
+      "ro": "Румынский",
+      "ru": "Русский",
+      "sk": "Словацкий",
+      "sl": "Словенский",
+      "sq": "Албанский",
+      "sv": "Шведский",
+      "th": "Тайский",
+      "tl": "Тагальский",
+      "tr": "Турецкий",
+      "uk": "Украинский",
+      "zh": "Китайский",
+      "zt": "Китайский (традиционный)"
+    },
+    "reading": {
+      "banner_text": "Этот пост на языке: {source}. Перевести на {target}?",
+      "translated_from_text": "Переведено с языка: {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# участник} few {# участника} many {# участников} other {# участника}} • {authors, plural, one {# автор} few {# автора} many {# авторов} other {# автора}} • {posts, plural, one {# пост} few {# поста} many {# постов} other {# поста}}",
+      "community_title": "Сообщество {title}",
+      "members_title": "Участники {title}",
+      "activities_title": "Активность {title}",
+      "cannot_start_with_or": "Нельзя начинать с @ или #",
+      "use_a_two_letter": "Используйте двухбуквенный код языка, например en",
+      "at_most_characters": "Не более {max, plural, one {# символа} few {# символов} many {# символов} other {# символа}}",
+      "council": "Совет",
+      "journal": "Журнал",
+      "topic": "Тема",
+      "community_not_found": "Сообщество не найдено."
+    },
+    "transfer": {
+      "one_recipient": "Для этого перевода можно указать только одного получателя.",
+      "is_an_exchange_and": "{exchange} — биржа и может не поддерживать регулярные переводы: средства, отправленные по расписанию, могут быть потеряны. Используйте разовый перевод."
+    },
+    "dapps": {
+      "signing_info": "Ecency работает как расширение Hive для подписи. Когда dApp предлагает войти через браузерное расширение, например Keychain, Keeper или Peak Vault, выберите этот вариант. Ecency безопасно выполнит подпись.",
+      "category_social": "Соцсети",
+      "category_gaming": "Игры",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Группа",
+      "unable_to_load_messages": "Не удалось загрузить сообщения.",
+      "someone": "Кто-то",
+      "renamed_the_group_to": "{actor} переименовал(а) группу в «{name}»",
+      "removed_the_group_name": "{actor} удалил(а) название группы",
+      "unable_to_send_your": "Не удалось отправить сообщение.",
+      "unable_to_remove_message": "Не удалось удалить сообщение.",
+      "unknown": "Неизвестно",
+      "members_online": "{members, plural, one {# участник} few {# участника} many {# участников} other {# участника}} • {online} в сети",
+      "failed_to_load_pinned": "Не удалось загрузить закреплённые сообщения",
+      "you": "Вы",
+      "title": "Реакции"
+    },
+    "tip": {
+      "login_required": "Войдите, чтобы отправлять чаевые",
+      "max_decimals": "Максимум {n, plural, one {# знак} few {# знака} many {# знаков} other {# знака}} после запятой"
+    },
+    "paid": {
+      "check_again": "Проверить снова",
+      "give_up": "Отказаться",
+      "unknown": "Ответа пока нет. Запрос может ещё выполняться. Проверьте снова, чтобы получить результат: повторно списано не будет.",
+      "pending": "Ваш запрос ещё обрабатывается. Проверьте снова чуть позже: повторно списано не будет.",
+      "restored": "На предыдущий запрос ответа пока нет. Проверьте снова, чтобы получить результат: повторно списано не будет.",
+      "give_up_confirm": "Если запрос был выполнен, Points потрачены, а результат будет потерян.",
+      "not_stored": "Не удалось сохранить этот запрос на устройстве. Не закрывайте этот экран, пока он не завершится.",
+      "sign_in_again": "Сессия истекла. Войдите снова, затем проверьте снова.",
+      "other_account": "Это принадлежит @{owner}. Вернитесь в этот аккаунт, чтобы продолжить."
+    },
+    "ai": {
+      "run_ai_assist": "Запустить ИИ-помощника ({costText})",
+      "no_longer_free_cost": "Сегодня этот запуск уже не бесплатный. Стоимость: {cost} {unit}.",
+      "no_longer_free": "Сегодня этот запуск уже не бесплатный.",
+      "content_violates_our_content": "Содержимое нарушает правила контента. Измените текст. Points не возвращены.",
+      "generate_image": "Создать изображение ({costLabel})",
+      "use_prompt": "Использовать: «{prompt}»"
+    },
+    "post_actions": {
+      "busy": "Подождите, выполняется другое действие",
+      "not_a_community_post": "Это не пост сообщества.",
+      "parent_post_not_found": "Родительский пост не найден",
+      "the_account_changed": "Аккаунт изменился."
+    },
+    "dictation": {
+      "balance": "Баланс: {balance} {unit}",
+      "stop_points": "Стоп ({cost} Points)",
+      "stop_free": "Стоп (бесплатно)",
+      "transcribe_points": "Расшифровать ({cost} Points)",
+      "transcribe": "Расшифровать",
+      "no_longer_free_cost": "Сегодня эта запись уже не бесплатная. Стоимость: {cost} Points.",
+      "no_longer_free": "Сегодня эта запись уже не бесплатная.",
+      "held_locked": "Запись остановилась, когда Ecency заблокировался. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
+      "held_no_background": "Запись остановилась, когда Ecency ушёл с экрана (не удалось показать уведомление о записи). Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
+      "held_stopped": "Запись остановлена из уведомления. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
+      "held_focus_lost": "Запись остановилась из-за звонка или звука другого приложения. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
+      "held_interrupted": "Запись остановилась, потому что другое приложение заняло микрофон. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
+      "unavailable": "Запись недоступна на этом устройстве.",
+      "not_read": "Не удалось прочитать запись, либо она слишком большая. Ничего не отправлено и ничего не списано.",
+      "give_up_not_sent": "Эта запись не была отправлена, поэтому ничего не списано. Она будет удалена.",
+      "give_up_not_charged": "За эту запись ничего не списано. Она будет удалена.",
+      "clip_lost": "Запись предыдущего запроса больше не хранится на устройстве. Если запрос был выполнен, Points потрачены, а расшифровку получить нельзя."
+    },
+    "register": {
+      "error_code_28": "Не удалось обработать ваш запрос. Вероятно, очередь регистрации переполнена. Повторите попытку через несколько минут."
+    },
+    "perks": {
+      "quests_empty": "Заданий пока нет, загляните позже.",
+      "freeze_confirm_title": "Сохраните свою серию",
+      "spend_points_on_a": "Потратить {price} Points на заморозку серии? Она сработает и сохранит серию в день, который вы пропустите."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Поддержите Ecency, получите бесплатный блог и выделяйтесь значком проверенного Pro.",
+      "card_description": "Перейдите на Pro за {price} в год. Значок проверенного, бесплатный блог и поддержка Ecency.",
+      "card_description_plain": "Перейдите на Pro на год. Значок проверенного, бесплатный блог и поддержка Ecency.",
+      "member": "Вы участник Pro.",
+      "benefit_badge": "Значок проверенного Pro рядом с вашим именем.",
+      "benefit_blog": "Бесплатный блог на yourname.blogs.ecency.com.",
+      "benefit_support": "Прямая поддержка разработки Ecency.",
+      "benefit_early": "Ранний доступ к новым функциям.",
+      "buy": "Получить Pro за {price} в год",
+      "extend": "Продлить на 12 месяцев за {price}",
+      "extend_note": "Повторная покупка добавит 12 месяцев к вашему членству.",
+      "unavailable": "Ecency Pro сейчас недоступен в магазине.",
+      "activating": "Платёж получен. Активируем ваше членство.",
+      "success_title": "Добро пожаловать в Ecency Pro",
+      "success_body": "Ваше членство Pro активно. Значок скоро появится в вашем профиле.",
+      "extending": "Платёж получен. Ваше членство Pro продлевается на 12 месяцев.",
+      "open_a11y": "Открыть Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Сохранение черновика...",
+      "please_sign_in_first": "Сначала войдите.",
+      "fetch_failed": "Не удалось получить данные.",
+      "you_can_only_edit": "Редактировать можно только собственный контент.",
+      "invalid_percent": "Недопустимый процент",
+      "beneficiary_exists_already": "Бенефициар уже добавлен",
+      "this_draft_belongs_to": "Этот черновик принадлежит @{owner}. Вернитесь в этот аккаунт, чтобы опубликовать его.",
+      "could_not_make_a": "Не удалось создать новую ссылку для этого поста. Немного измените заголовок и повторите попытку.",
+      "an_earlier_attempt_was": "Предыдущая попытка была опубликована после этой. Проверьте, какую версию оставить.",
+      "could_not_check_your": "Не удалось проверить posting-полномочие вашего аккаунта. Проверьте соединение и повторите попытку.",
+      "this_post_was_changed": "Этот пост был изменён в другом месте после того, как вы его открыли. Скопируйте текст, вернитесь и откройте пост снова, чтобы редактировать последнюю версию.",
+      "link_text_placeholder": "Текст здесь"
+    },
+    "app_error": {
+      "this_reply_is_too": "Этот ответ слишком длинный.",
+      "the_network_refused_this": "Сеть отклонила это действие.",
+      "invalid_input": "Недопустимый ввод.",
+      "secure_storage_is_unavailable": "Защищённое хранилище недоступно. Войдите снова.",
+      "please_sign_in_first": "Сначала войдите.",
+      "these_credentials_belong_to": "Эти учётные данные принадлежат @{actual}, а не @{expected}.",
+      "is_not_signed_in": "@{username} не выполнил(а) вход на этом устройстве.",
+      "key_required": "Для этой транзакции нужен ключ {role}. {hint}",
+      "cancelled": "Отменено.",
+      "the_request_was_rejected": "Запрос отклонён в приложении кошелька.",
+      "the_request_expired_before": "Срок запроса истёк до ответа приложения кошелька. Повторите попытку.",
+      "could_not_reach_the": "Не удалось связаться с сервером HiveAuth. Повторите попытку.",
+      "unexpected_redirect": "Сервер вернул неожиданное перенаправление. Ничего не изменено. Повторите попытку позже.",
+      "missing_key_hint": "Добавьте его в разделе «Настройки», «Управление полномочиями» (Импорт приватного ключа) или войдите снова с ним.",
+      "this_key_is_also": "Этот ключ также является owner-ключом аккаунта. Ecency не хранит ключ, управляющий ролью owner: задайте для ролей active и posting отдельные ключи и войдите с ними.",
+      "this_is_the_owner": "Это owner-ключ. Ecency никогда не хранит и не использует owner-ключ: войдите с мастер-паролем либо с posting- или active-ключом.",
+      "this_password_only_matches": "Этот пароль подходит только к owner-ключу аккаунта. Ecency никогда не хранит и не использует owner-ключ: войдите с posting- или active-ключом.",
+      "this_key_cannot_sign": "Этот ключ не может подписывать за аккаунт самостоятельно: аккаунту нужно больше одной подписи (его вес ниже порога).",
+      "public_key_given": "Это ваш публичный ключ. Вставьте приватный ключ (начинается с 5) или мастер-пароль.",
+      "memo_key_only": "Memo-ключ нельзя использовать для входа. Используйте posting-ключ, active-ключ или мастер-пароль.",
+      "network_message": "Ошибка сети. Проверьте соединение и повторите попытку.",
+      "network_error_this_may": "Ошибка сети. Возможно, действие уже выполнено; повтор безопасен и не создаст дубликат."
+    },
+    "purchases": {
+      "deal_best": "ЛУЧШАЯ СДЕЛКА!",
+      "deal_popular": "ПОПУЛЯРНО!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Магазин не ответил."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Для 999accounts необходимы email и имя пользователя",
+      "stuck": "Предыдущую покупку этого товара не удалось завершить. Напишите на support@ecency.com и приложите чек магазина, он сохраняется для этого.",
+      "held": "Эта покупка отложена на проверку. Напишите на support@ecency.com, указав заказ #{order}.",
+      "earlier_purchase": "Сначала завершается предыдущая покупка этого товара для @{target}.",
+      "earlier_pending": "Предыдущий платёж за этот товар для @{target} всё ещё в обработке. Покупка завершится, когда магазин подтвердит платёж.",
+      "pending": "Ваш платёж в обработке. Покупка завершится, когда магазин подтвердит платёж.",
+      "processing": "Ваша покупка обрабатывается. Скоро она будет завершена."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Регулярные переводы",
+      "delegate_hive_power": "Делегировать Hive Power",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "Задать маршрут вывода вестов",
+      "power_down": "Power Down",
+      "transfer_to_saving": "Перевод в сейф",
+      "transfer_from_saving": "Перевод из сейфа",
+      "cancel_transfer_from_saving": "Отмена перевода из сейфа",
+      "collateralized_convert": "Конвертация с залогом",
+      "witness_vote": "Голос за свидетеля",
+      "witness_update": "Обновление свидетеля",
+      "witness_set_properties": "Параметры свидетеля",
+      "governance_proxy": "Прокси управления",
+      "claim_account": "Получить аккаунт",
+      "create_account": "Создать аккаунт",
+      "create_account_with_account": "Создать аккаунт за кредиты аккаунтов",
+      "create_limit_order": "Создать лимитный ордер",
+      "cancel_limit_order": "Отменить лимитный ордер",
+      "redeem_rewards": "Получить награды",
+      "post_or_comment": "Пост или комментарий",
+      "post_or_comment_options": "Параметры поста или комментария",
+      "custom_operation": "Пользовательская операция",
+      "update_account_active": "Обновление аккаунта (active)",
+      "update_account_posting": "Обновление аккаунта (posting)",
+      "change_recovery_account": "Сменить аккаунт восстановления",
+      "create_proposal": "Создать предложение",
+      "remove_proposal": "Удалить предложение",
+      "update_proposal_votes": "Обновить голоса за предложение",
+      "update_proposal": "Обновить предложение"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Эту ссылку должен подписать @{account}. Переключитесь на этот аккаунт и откройте её снова.",
+      "ecency_can_only_sign": "Ecency может только подписывать и транслировать транзакции из ссылок.",
+      "requester_page": "страница {host}",
+      "owner_refused": "Операции, требующие owner-ключа, нельзя подписать из ссылки.",
+      "busy": "Подождите: другой запрос ещё обрабатывается.",
+      "not_supported": "Ecency пока не может подписать эту операцию в этой версии."
+    },
+    "chats": {
+      "group_members": "Участники группы",
+      "rename_group": "Переименовать группу",
+      "failed_to_load_chats": "Не удалось загрузить чаты",
+      "unknown": "Неизвестно",
+      "unable_to_mark_channel": "Не удалось отметить канал прочитанным",
+      "unable_to_update_favorites": "Не удалось обновить избранное",
+      "unable_to_update_mute": "Не удалось изменить настройки уведомлений",
+      "group": "Группа",
+      "unable_to_search": "Не удалось выполнить поиск",
+      "unable_to_start_chat": "Не удалось начать чат",
+      "no_internet": "Нет подключения к интернету"
+    },
+    "stake": {
+      "confirm_summary": "Делегировать {hp} HP ({vests} VESTS) пользователю @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Уже делегировано @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Только публичный. Ecency никогда не хранит owner-ключ.",
+      "shared_owner": "Этот аккаунт использует один ключ для роли owner и роли {names}. Кто владеет этим ключом, управляет всем аккаунтом. Задайте для роли {names} отдельный ключ, а owner-ключ храните офлайн.",
+      "copy_warning": "Любой, у кого есть этот приватный ключ, управляет этой частью вашего аккаунта. Другие приложения могут читать буфер обмена; вставляйте ключ только там, где доверяете. Через 2 минуты он будет удалён из буфера обмена."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-блокировка включена.",
+      "pin_changed": "PIN изменён.",
+      "pin_lock_is_off": "PIN-блокировка выключена.",
+      "wiped_notice": "Все аккаунты, ключи и учётные данные удалены с этого устройства.",
+      "we_could_not_bring": "Не удалось перенести ваши аккаунты из предыдущей версии приложения. Войдите снова.",
+      "your_pin_lock_could": "Не удалось перенести PIN-блокировку из предыдущей версии. Задайте PIN снова в меню аккаунта, чтобы включить блокировку приложения.",
+      "biometric_unlock_was_turned": "Разблокировка биометрией отключена, потому что биометрические данные на этом устройстве изменились. Разблокируйте PIN-кодом, затем включите её снова в меню аккаунта.",
+      "biometric_unavailable_notice": "Не удалось включить разблокировку биометрией: на этом устройстве не настроена биометрия.",
+      "set_backup": "Задайте PIN как резервный способ для биометрии",
+      "biometric_on_notice": "PIN-блокировка включена. Разблокируйте биометрией или PIN-кодом.",
+      "offer_title": "Разблокировка биометрией",
+      "offer_body": "Открывайте Ecency по лицу или отпечатку пальца. Вы также задали PIN, он разблокирует приложение, когда биометрия недоступна.",
+      "offer_use": "Использовать биометрию",
+      "offer_use_pin": "Использовать PIN"
+    },
+    "common": {
+      "list_and": "{first} и {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Ответы длиной 25 символов и короче не приносят Points (ссылки не считаются)",
+      "short_content_hint": "Слишком коротко для Points (25 символов и меньше, ссылки не считаются)",
+      "daily_post": "Пост дня {postProgress}/{postGoal}",
+      "day_streak": "🔥 Серия: {streak, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+      "grant_description": "Выдайте аккаунту Ecency @ecency.app posting-разрешение на ваш аккаунт, чтобы публиковать, не открывая Keychain каждый раз. Это меняет posting-полномочие вашего аккаунта и требует active-ключа."
+    },
+    "wallet_history": {
+      "from_to": "@{from} → @{to}",
+      "from_user_id": "от @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} → @{to}, id: {id}",
+      "from_to_account": "@{from} → {to}",
+      "from_user": "от @{user}",
+      "to_user": "для @{user}",
+      "interest": "Проценты",
+      "proposal_pay": "Выплата по предложению",
+      "categories": "Типы активности",
+      "category_all": "Все",
+      "category_transfers": "Переводы",
+      "category_market": "Рыночные ордера",
+      "category_interest": "Проценты",
+      "category_stake": "Операции со стейком",
+      "category_rewards": "Награды",
+      "point_type_checkin": "Отметки активности",
+      "point_type_login": "Вход",
+      "point_type_post": "Пост",
+      "point_type_comment": "Комментарий",
+      "point_type_vote": "Голос",
+      "point_type_reblog": "Репост",
+      "point_type_transfer_sent": "Отправленные переводы",
+      "point_type_transfer_received": "Полученные переводы"
+    },
+    "video_upload": {
+      "continue_upload": "ПРОДОЛЖИТЬ ЗАГРУЗКУ",
+      "source_gone": "Эта запись больше недоступна на устройстве. Запишите или выберите видео снова.",
+      "no_camera": "Камера недоступна на этом устройстве."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Следующий вывод из стейка через {hours, plural, one {# час} few {# часа} many {# часов} other {# часа}}",
+      "account_not_found": "Аккаунт не найден"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Изображение в буфере обмена · Вставить изображение",
+      "no_container": "Не удалось получить последний контейнер wave",
+      "please_sign_in_first": "Сначала войдите.",
+      "write_something_first": "Сначала напишите что-нибудь.",
+      "account_changed": "Эта wave написана от имени другого аккаунта. Закройте её и напишите заново.",
+      "no_upload": "Загрузка изображений пока недоступна в этой сборке. Вставьте ссылку на изображение в текст.",
+      "fail": "Ошибка"
+    },
+    "delete_account": {
+      "sign_out_failed": "Ваш запрос отправлен, но выйти не удалось. Выйдите из меню.",
+      "not_sent": "Не удалось отправить запрос на удаление. Повторите попытку."
+    },
+    "chat_sheets": {
+      "group_limit": "В группе может быть не больше {max, plural, one {# другого человека} few {# других человек} many {# других человек} other {# другого человека}}.",
+      "search_people_by_username": "Поиск людей по имени пользователя",
+      "new_group_title": "Новая группа",
+      "new_group_hint": "Добавьте от {min} до {max, plural, one {# человека} few {# человек} many {# человек} other {# человека}}, чтобы начать групповой чат.",
+      "no_results": "Никто с таким именем в чате не найден.",
+      "search_failed": "Поиск не удался. Проверьте соединение и повторите попытку.",
+      "create": "Создать группу",
+      "new_group_failed": "Не удалось создать группу. Повторите попытку.",
+      "name_limit": "Название группы может содержать не более {max, plural, one {# символа} few {# символов} many {# символов} other {# символа}}.",
+      "rename_title": "Переименовать группу",
+      "rename_hint": "Дайте группе название, которое увидят все её участники. Оставьте поле пустым, чтобы показывать имена участников.",
+      "placeholder": "Название группы",
+      "not_owner": "Переименовать группу может только тот, кто её создал.",
+      "rename_failed": "Не удалось переименовать группу. Повторите попытку."
+    },
+    "editor_side": {
+      "copy_of": "Копия «{title}»",
+      "deletions_failed": "Что-то пошло не так\nНе удалось удалить {failed} из {total, plural, one {# элемента} few {# элементов} many {# элементов} other {# элемента}}",
+      "uploads_failed": "{count, plural, one {# загрузка не удалась} few {# загрузки не удались} many {# загрузок не удались} other {# загрузки не удались}}:\n\n{messages}",
+      "failed_to_delete": "Не удалось удалить"
+    },
+    "uploads": {
+      "add_to_gallery": "Добавить в галерею"
+    },
+    "account_notice": {
+      "manage_keys": "Настройки, Управление полномочиями",
+      "no_signing_key_title": "Войдите снова как @{account}",
+      "no_signing_key": "Ecency больше не хранит на этом устройстве owner-ключ и мастер-пароль, а для @{account} здесь нет сохранённого posting- или active-ключа. Войдите снова с мастер-паролем либо posting- или active-ключом или добавьте ключ в разделе «{manageKeys}» (Импорт приватного ключа).",
+      "missing_roles_title": "Некоторые ключи не добавлены",
+      "cannot_post": "публиковать, голосовать и комментировать",
+      "cannot_transfer": "отправлять переводы и менять настройки аккаунта",
+      "missing_roles": "Ваш пароль больше не подходит к ключу {missing} для @{account}: он был изменён в аккаунте после установки пароля. Сохранён на этом устройстве ключ: {kept}. Пока вы не добавите ключ {missing} в разделе «{manageKeys}» (Импорт приватного ключа), это приложение не сможет {cannot} с ключами для @{account}.",
+      "shared_owner_title": "Этот ключ также управляет ролью owner",
+      "shared_owner": "@{account} использует один ключ для роли owner и роли {names}. Кто владеет этим ключом, управляет всем аккаунтом. Ecency хранит его только как ключ {names} и никогда не использует для операций owner. Задайте для роли {names} отдельный ключ, а owner-ключ храните офлайн."
+    },
+    "dapp_browser": {
+      "message_from": "Сообщение от {host}",
+      "home_title": "Главная",
+      "loading_title": "Загрузка...",
+      "blank_run": "[{count, plural, one {# пустой символ} few {# пустых символа} many {# пустых символов} other {# пустого символа}}]",
+      "too_large": "Эта страница запросила подпись, слишком большую для отображения, поэтому Ecency отклонил её."
+    },
+    "community_service": {
+      "the_account_changed": "Аккаунт изменился."
+    },
+    "profile_edit": {
+      "enter_link": "Введите ссылку на изображение",
+      "please_sign_in_first": "Сначала войдите.",
+      "account_not_found": "Аккаунт не найден",
+      "please_enter_an_image": "Введите ссылку на изображение, начинающуюся с https://"
+    },
+    "background_media": {
+      "post_by": "Пост от @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Сначала войдите."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Вы уже голосовали с такой же силой.",
+      "insufficient_rc": "Недостаточно Resource Credits. Подождите или сделайте Power Up.",
+      "missing_authority": "Нет posting-полномочия. Проверьте способ входа.",
+      "comment_too_soon": "Подождите перед следующей публикацией.",
+      "paid_out": "Выплата по этому посту уже произведена.",
+      "too_large": "Транзакция весит {size, plural, one {# байт} few {# байта} many {# байт} other {# байта}}, лимит {max} байт.",
+      "network_error_please_check": "Ошибка сети. Проверьте соединение и повторите попытку.",
+      "unconfirmed_message": "Не удалось подтвердить, выполнено ли действие. Проверьте кошелёк или историю; повторяйте, только если его там нет.",
+      "undecided_message": "Возможно, действие уже выполнено. Проверьте кошелёк или историю, прежде чем повторять."
+    },
+    "chat_api": {
+      "request_failed": "Запрос не удался ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} печатает...",
+      "typing_two": "{first} и {second} печатают...",
+      "typing_three": "{first}, {second} и {third} печатают...",
+      "typing_many": "{first}, {second} и ещё {count, plural, one {# человек печатает} few {# человека печатают} many {# человек печатают} other {# человека печатают}}...",
+      "banned": "{reason} Читать чат по-прежнему можно. Публикация откроется {until}.",
+      "joined_when": "присоединился(-ась) {time}",
+      "joined": "присоединился(-ась)",
+      "official_badge": "Официальный",
+      "official_badge_label": "Официальный аккаунт Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Спросить Esie"
+    },
+    "chat_service": {
+      "missing_token": "Отсутствует токен доступа Hive. Выйдите и войдите снова.",
+      "dm_error": "Пользователь не присоединился к чатам"
+    },
+    "compose_reply": {
+      "account_changed": "Этот ответ написан от имени другого аккаунта. Закройте его и напишите заново.",
+      "write_something_first": "Сначала напишите что-нибудь.",
+      "please_sign_in_first": "Сначала войдите."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Слишком много бенефициаров: не более {max}.",
+      "a_beneficiary_s_share": "Доля бенефициара должна быть от 0,01% до 100%.",
+      "beneficiaries_add_up_to": "Сумма долей бенефициаров превышает 100%.",
+      "a_beneficiary_is_listed": "Бенефициар указан дважды.",
+      "you_cannot_be_a": "Нельзя быть бенефициаром собственного поста.",
+      "a_beneficiary_has_an": "У бенефициара недопустимое имя аккаунта."
+    },
+    "follows": {
+      "fail": "Ошибка: {message}",
+      "follower_count": "Подписчики ({count})",
+      "following_count": "Подписки ({count})"
+    },
+    "link": {
+      "unsupported": "Эта ссылка пока не поддерживается.",
+      "cannot_open": "Не удаётся открыть ссылку",
+      "unsupported_version": "Эта ссылка не поддерживается в этой версии."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Браузер Explore может получить доступ к вашему кошельку Hive для подписи транзакций. Эта ссылка взята из содержимого поста и не проверена Ecency. Продолжайте, только если доверяете ей:\n\n{url}"
+    },
+    "listen": {
+      "message": "Для прослушивания нужно {required} Points, у вас {available}.",
+      "unlock_label": "Открыть · {cost} Points",
+      "preparing_audio": "Подготовка аудио · {preparingPercent}%",
+      "waiting_in_line_ahead": "В очереди, впереди {ahead}…",
+      "next_in_line": "Вы следующий в очереди…",
+      "preparing_about_minutes": "Подготовка аудио, примерно {minutes} мин…",
+      "preparing_audio_2": "Подготовка аудио…",
+      "spend_confirm": "Потратить {cost} Points на прослушивание этого поста? Аудио останется у вас, его можно переслушивать в любое время.",
+      "about_minutes": "~{minutes} мин",
+      "failed_refunded": "Не удалось создать аудио, Points возвращены"
+    },
+    "media_pick": {
+      "preparing_video": "Подготовка видео...",
+      "library_hint": "Выбрать из ваших фото",
+      "camera_hint": "Сделать новое фото",
+      "files_hint": "Файлы на этом устройстве и в облаке",
+      "paste_hint": "Использовать скопированное изображение",
+      "link_hint": "Использовать изображение из интернета"
+    },
+    "media_picking": {
+      "image_types_message": "Этот тип файла не поддерживается. Выберите изображение JPEG, PNG, GIF, WebP или HEIC.",
+      "video_types_message": "Этот тип файла не поддерживается. Выберите видео MP4 или MOV.",
+      "gif_too_large": "Этот GIF больше {mb} МБ."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Эта операция требует одновременно active- и posting-подписи, а Ecency пока не умеет подписывать их вместе."
+    },
+    "poll": {
+      "fail": "Ошибка. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Не удалось проверить posting-полномочие вашего аккаунта. Проверьте соединение и повторите попытку."
+    },
+    "post_lists": {
+      "voters_title": "Информация о голосах ({total})",
+      "reblogs_title": "Информация о репостах ({total})",
+      "no_history_found": "История не найдена!",
+      "no_edit_history_available": "История правок для этого контента недоступна.",
+      "version_label": "Версия {version}"
+    },
+    "stats": {
+      "other_device": "Другое"
+    },
+    "profile": {
+      "account_not_found": "Аккаунт не найден",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Заполнится через {hours, plural, one {# час} few {# часа} many {# часов} other {# часа}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Не удалось прочитать ваш текущий профиль, повторите попытку"
+    },
+    "profile_sheet": {
+      "fail": "Ошибка! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Аккаунт не найден"
+    },
+    "push_payload": {
+      "mentioned": "@{source} упомянул(а) @{target}",
+      "replied": "@{source} ответил(а) @{target}",
+      "transferred": "@{source} перевёл(а) @{target}",
+      "delegated": "@{source} делегировал(а) @{target}",
+      "rewards_received": "Награды получены",
+      "account_updated": "Аккаунт обновлён",
+      "account_updated_body": "Данные вашего аккаунта обновлены",
+      "followed": "@{source} подписался(лась) на @{target}",
+      "unfollowed": "@{source} отписался(лась) от @{target}",
+      "ignored": "@{source} игнорирует @{target}",
+      "blacklisted": "@{source} добавил(а) @{target} в чёрный список",
+      "posted_in": "@{source} опубликовал(а) в #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Не удалось получить разрешение на камеру",
+      "permission_message": "Предоставьте доступ к камере в настройках Ecency.",
+      "permission_allow": "Разрешить"
+    },
+    "reply_account": {
+      "switch": "Ответить от другого аккаунта"
+    },
+    "send_journal": {
+      "your_from_went_through": "Ваш {label} с @{account} выполнен.",
+      "not_sent": "Ваш {label} с @{account} не выполнен. Ничего не отправлено; можно начать заново.",
+      "checking_whether_your_from": "Проверяем, выполнен ли ваш {label} с @{account}. Проверьте кошелёк, прежде чем отправлять снова."
+    },
+    "signing": {
+      "hot_page_closed": "Страница HiveSigner закрыта",
+      "wrong_role": "Это ваш ключ {given}; для этой операции нужен ключ {needed}.",
+      "action_id_required": "Для безопасного повтора этому действию нужен идентификатор действия."
+    },
+    "signing_router": {
+      "owner_never": "Операции owner никогда не подписываются в приложении."
+    },
+    "spin": {
+      "key_missing": "Отсутствует ключ игры",
+      "score": "{score, plural, one {# Point} few {# Points} many {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Сегодня (UTC), сброс через {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Сбрасывается ежедневно в 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Войдите снова",
+      "message": "Защищённое хранилище на этом устройстве было сброшено. Войдите снова.",
+      "failed": "Не удалось удалить аккаунты с этого устройства. Повторите попытку."
+    },
+    "store": {
+      "in_app_purchases_are": "Покупки в приложении недоступны в этой сборке."
+    },
+    "wallet_sends": {
+      "journal_full": "Слишком много предыдущих отправок ещё проверяются сетью. Дождитесь их подтверждения, прежде чем отправлять новые.",
+      "check_later": "Сеть не подтвердила это вовремя. Проверьте кошелёк или историю, прежде чем отправлять снова; приложение проверит ещё раз при следующем запуске."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# непрочитанное} few {# непрочитанных} many {# непрочитанных} other {# непрочитанных}}",
+      "locked_text": "Разблокируйте Ecency, чтобы увидеть",
+      "signed_out_text": "Войдите в Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Не удалось прочитать текущие полномочия вашего аккаунта. Ничего не изменено; повторите попытку.",
+      "reads_disagree": "Два прочтения posting-полномочия вашего аккаунта не совпали. Ничего не изменено; повторите попытку."
+    },
+    "vote": {
+      "vote_weight_must_be": "Сила голоса должна быть от -100% до 100%.",
+      "please_sign_in_first": "Сначала войдите."
+    },
+    "widget": {
+      "streak_name": "Серия заданий",
+      "write": "Написать",
+      "new_wave": "Новая wave",
+      "notifications_description": "Ваши непрочитанные уведомления. Скрыто, пока включена PIN-блокировка.",
+      "streak_description": "Ваша серия ежедневных заданий. Скрыто, пока включена PIN-блокировка.",
+      "compose_description": "Напишите пост или новую wave.",
+      "streak_title": "Серия",
+      "daily_quests": "Ежедневные задания",
+      "streak_hint": "Откройте Perks, чтобы увидеть серию",
+      "open_perks": "Открыть Perks",
+      "open_app": "Открыть Ecency",
+      "unread_caption": "{count, plural, one {непрочитанное} few {непрочитанных} many {непрочитанных} other {непрочитанных}}",
+      "streak_caption": "{count, plural, one {день подряд} few {дня подряд} many {дней подряд} other {дня подряд}}"
+    },
+    "system": {
+      "dictation_channel": "Диктовка",
+      "listen_channel": "Прослушивание",
+      "dictation_channel_description": "Отображается, пока в фоне идёт запись для диктовки, с действием «Стоп».",
+      "dictation_title": "Запись для диктовки",
+      "dictation_text": "Ecency записывает вашу диктовку. После «Стоп» запись не отправляется, пока вы не подтвердите в приложении.",
+      "listen_channel_description": "Сообщает, когда прослушивание не удалось продолжить в фоне.",
+      "listen_paused": "Прослушивание приостановлено",
+      "listen_paused_text": "Откройте Ecency, чтобы продолжить слушать.",
+      "skip_back": "Назад на 15 секунд",
+      "skip_forward": "Вперёд на 15 секунд"
+    },
+    "permission": {
+      "face_id": "Разблокируйте Ecency с помощью Face ID вместо PIN.",
+      "camera": "Сканируйте QR-коды, снимайте фото и записывайте видео, чтобы добавить их в пост.",
+      "photo_library_add": "Ecency сохраняет изображения, загруженные из постов, в вашу фотогалерею.",
+      "photo_library": "Ecency собирает изображения, загруженные из постов, в альбом Ecency в вашей фотогалерее.",
+      "microphone": "Ecency использует микрофон, чтобы вы могли диктовать посты и комментарии (эти записи отправляются в Ecency для расшифровки) и записывать звук для видео, добавляемого в пост."
+    },
+    "android": {
+      "no_browser": "Браузер недоступен",
+      "biometric_unlock_title": "Разблокировать Ecency биометрией",
+      "biometric_confirm": "Подтвердите отпечатком пальца или лицом",
+      "image_unsupported_address": "Неподдерживаемый адрес изображения",
+      "image_create_failed": "Не удалось создать файл",
+      "image_write_failed": "Не удалось записать файл",
+      "image_too_large": "Изображение слишком большое",
+      "image_download_failed": "Загрузка не удалась, статус {status}",
+      "billing_disconnected": "Google Play Billing отключён.",
+      "billing_no_screen": "Нет экрана для показа покупки.",
+      "billing_error": "Ошибка Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Вы создали {count, plural, one {# пост} few {# пост} many {# пост} other {# пост}} в этом месяце. Так держать!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "Вы отмечались {count, plural, one {# день} few {# дня} many {# дней} other {# дня}} на этой неделе. Так держать!",
+        "tags_bundle": "{count, plural, one {# новый пост} few {# новых поста} many {# новых постов} other {# нового поста}} в #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# неудачные попытки} few {# неудачные попытки} many {# неудачные попытки} other {# неудачные попытки}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Серия {n} дн."
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Допускаются только аккаунты старше {days} дн.",
-        "max_choices": "• Можно выбрать до {choices} вариантов"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Осталось переводов: {executions}",
-        "schedule_summary": "{executions} переводов, каждый раз через {hours} ч."
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Слишком коротко для Points ({n, plural, one {# символ} few {# символа} many {# символов} other {# символа}} и меньше, ссылки не считаются)"
       },
       "chats": {
-        "people_joined": "Присоединилось участников: {count}"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "примерно через {count, plural, one {# минуту} few {# минуты} many {# минут} other {# минуты}}",
+        "ban-remaining-hours": "примерно через {count, plural, one {# час} few {# часа} many {# часов} other {# часа}}",
+        "ban-remaining-days": "примерно через {count, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Используйте не более {n, plural, one {# тега} few {# тегов} many {# тегов} other {# тега}}",
+          "too_long": "Слишком длинный запрос. Используйте не более {n, plural, one {# символа} few {# символов} many {# символов} other {# символа}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Требуется минимум {count} символов",
-        "chars_remaining": "Осталось символов: {count}"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "За раз можно выбрать не более {count, plural, one {# изображения} few {# изображений} many {# изображений} other {# изображения}}"
+      },
+      "dictation": {
+        "stop_hint": "Нажмите «Стоп», чтобы расшифровать и добавить текст в пост. До {m, plural, one {# минуты} few {# минут} many {# минут} other {# минуты}}.",
+        "rate": "{n} Points за {s, plural, one {# секунду} few {# секунды} many {# секунд} other {# секунды}}"
       },
       "transfer": {
-        "powering_down_info": "Следующий вывод из стейкинга через {days} дн., {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "От {min} до {max, plural, one {# символа} few {# символов} many {# символов} other {# символа}}"
       }
     }
   }

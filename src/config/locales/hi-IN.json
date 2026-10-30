@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro सदस्य"
   },
   "perks": {
     "header": "लाभ",
@@ -31,42 +31,42 @@
     "promote_desc": "अपनी पोस्ट को और अधिक लोगों तक पहुँचाएँ",
     "account_boost": "खाता बूस्ट",
     "account_boost_desc": "किसी भी खाते को बूस्ट करें",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC टॉप अप करें",
+    "rc_topup_desc": "रिसोर्स क्रेडिट्स कम होने पर भी पोस्ट करते रहें",
+    "streak_freeze_owned": "{n} रिज़र्व में",
+    "streak_freeze_buy": "स्ट्रीक सुरक्षित करें ({price} Points)",
+    "streak_freeze_buying": "सुरक्षित किया जा रहा है",
+    "streak_freeze_error": "स्ट्रीक फ़्रीज़ नहीं खरीदा जा सका। कृपया फिर से प्रयास करें।"
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "आज की पोस्ट",
+    "streak": "{n} दिन की स्ट्रीक",
+    "keep_streak": "अपनी स्ट्रीक बनाए रखें"
   },
   "waves": {
     "for_you": "आपके लिए",
     "following": "फ़ॉलो किए गए",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "कस्टम फ़ीड",
+    "custom_feeds_subtitle": "स्रोत और टैग पिन करें ताकि वे फ़ीड टैब के रूप में जुड़ जाएँ।",
+    "add_tag_placeholder": "टैग जोड़ें",
+    "sources": "स्रोत",
+    "your_feeds": "आपकी फ़ीड",
+    "trending_tags": "ट्रेंडिंग टैग",
+    "shorts_empty": "अभी दिखाने के लिए कोई शॉर्ट्स नहीं हैं",
+    "mute": "म्यूट करें",
+    "unmute": "अनम्यूट करें"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "शुरुआत करें",
+    "subtitle": "यहाँ नए हैं? Waves छोटी पोस्ट हैं और जुड़ने का सबसे आसान तरीका हैं।",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "बंद करें",
+    "item_wave": "अपनी पहली Wave पोस्ट करें",
+    "item_vote": "अपनी पसंद की Wave पर वोट करें",
+    "item_reply": "किसी को जवाब दें",
+    "item_checkin": "स्ट्रीक शुरू करने के लिए चेक-इन करें",
+    "all_done_title": "सब पूरा 🎉",
+    "all_done_subtitle": "आप पूरी तरह तैयार हैं। Waves पोस्ट करते रहें!"
   },
   "profile": {
     "havent_commented": "अभी तक कोई टिपण्णी नहीं की है",
@@ -147,6 +147,16 @@
     "wizard_config_val": "आयु  |  दृश्यता  |  व्याख्या",
     "attach_poll": "पोल संलग्न करें"
   },
+  "favorite_tags": {
+    "title": "टैग",
+    "hint": "इस टैग की नई पोस्ट की सूचना पाने के लिए फ़ॉलो करें",
+    "following_hint": "आपको इस टैग की नई पोस्ट की सूचना मिलती है",
+    "follow": "फ़ॉलो करें",
+    "following": "फ़ॉलो कर रहे हैं",
+    "added": "टैग को फ़ॉलो कर रहे हैं",
+    "removed": "टैग अनफ़ॉलो किया गया",
+    "empty_list": "यहाँ कुछ नहीं है"
+  },
   "favorites": {
     "add": "पसंदीदा जोड़ें",
     "add_error": "पसंदीदा नहीं जोड़ा जा सका",
@@ -181,7 +191,33 @@
     "payout": "भुगतान",
     "details": "विवरण",
     "community": "समुदाय",
-    "new_post": "नया पोस्ट"
+    "new_post": "नया पोस्ट",
+    "mute_post_title": "इस पोस्ट को म्यूट करें",
+    "unmute_post_title": "इस पोस्ट को अनम्यूट करें",
+    "mute_post_reason": "इसे म्यूट क्यों किया जा रहा है?",
+    "unmute_post_reason": "इसे वापस क्यों बहाल किया जा रहा है?",
+    "manage": "समुदाय प्रबंधित करें",
+    "manage_members": "सदस्य और भूमिकाएँ",
+    "manage_settings": "समुदाय सेटिंग",
+    "manage_activities": "गतिविधि लॉग",
+    "activities": "गतिविधि",
+    "no_activities": "अभी कोई गतिविधि नहीं",
+    "activities_load_failed": "गतिविधि लोड नहीं हो सकी। रिफ़्रेश करने के लिए नीचे खींचें।",
+    "set_role": "भूमिका सेट करें",
+    "assign_role": "भूमिका सौंपें",
+    "assign_role_hint": "कोई भी खाता खोजें, यहाँ तक कि वह भी जिसने सब्सक्राइब नहीं किया है, फिर भूमिका चुनें।",
+    "username_placeholder": "प्रयोक्ता नाम",
+    "invalid_username": "नतीजों में से कोई मौजूदा खाता चुनें",
+    "members": "सदस्य",
+    "no_members": "कोई सदस्य नहीं मिला",
+    "members_incomplete": "कुछ सदस्य लोड नहीं हो सके। रिफ़्रेश करने के लिए नीचे खींचें।",
+    "members_load_failed": "सदस्य लोड नहीं हो सके। रिफ़्रेश करने के लिए नीचे खींचें।",
+    "role_owner": "मालिक",
+    "role_admin": "एडमिन",
+    "role_mod": "मॉड",
+    "role_member": "सदस्य",
+    "role_guest": "अतिथि",
+    "role_muted": "म्यूट"
   },
   "trade": {
     "swap_for": "{fromAmount} को {toAmount} के लिए स्वैप किया जा रहा है",
@@ -212,7 +248,11 @@
     "cross-post": "क्रॉस पोस्ट",
     "pin-blog": "ब्लॉग पर पिन करें",
     "copy": "लिंक कापी करें",
+    "copy-text": "टेक्स्ट कॉपी करें",
+    "open-thread": "थ्रेड खोलें",
     "unpin-community": "समुदाय से अनपिन करें",
+    "mute-post": "पोस्ट म्यूट करें",
+    "unmute-post": "पोस्ट अनम्यूट करें",
     "mute": "म्यूट / ब्लॉक",
     "reblog": "रीब्लॉग करें",
     "undo-reblog": "रीब्लॉग पूर्ववत करें",
@@ -232,24 +272,24 @@
     "unpin-reply": "टिप्पणी अनपिन करें"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "यह पोस्ट {lang} में है। क्या इसे {target} में अनुवाद करें?",
+    "translate_to": "{lang} में अनुवाद करें",
+    "show_original": "मूल दिखाएँ",
+    "translated_from": "{lang} से अनुवादित",
+    "change_language": "भाषा बदलें"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "पोस्ट का अनुवाद करें",
+    "source": "मूल भाषा",
+    "target": "लक्षित भाषा",
+    "detected": "पहचानी गई: {lang}",
+    "translate": "अनुवाद करें",
+    "apply": "लागू करें",
+    "review_note": "आपके अपने लेखन का मशीनी अनुवाद पोस्ट के अंत में जोड़ता है। प्रकाशित करने से पहले जाँचें और संपादित करें।",
+    "too_short": "पहले थोड़ा और लिखें। अनुवाद के लिए कम से कम कुछ वाक्य चाहिए।",
+    "progress": "अनुवाद हो रहा है {done}/{total}...",
+    "error": "अनुवाद विफल रहा। कृपया फिर से प्रयास करें।",
+    "add_title_marker": "शीर्षक में भाषा चिह्न जोड़ें"
   },
   "side_menu": {
     "profile": "रुपरेखा",
@@ -296,7 +336,7 @@
     "hot": "लोकप्रीय",
     "popular": "लोकप्रिय",
     "new": "नया",
-    "friends": "Following",
+    "friends": "फ़ॉलो कर रहे हैं",
     "my_blog": "मेरा ब्लॉग"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "कुछ नहीं है यहां"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "टेम्पलेट",
+    "untitled": "बिना शीर्षक का टेम्पलेट",
+    "empty_list": "संपादक से पोस्ट को टेम्पलेट के रूप में सहेजें, ताकि उसे यहाँ दोबारा उपयोग कर सकें।",
+    "delete_confirm": "क्या आप वाकई इस टेम्पलेट को हटाना चाहते हैं?",
+    "applied": "टेम्पलेट नई पोस्ट के रूप में लागू किया गया",
+    "save_as_template": "टेम्पलेट के रूप में सहेजें",
+    "name_placeholder": "टेम्पलेट का नाम",
+    "saved": "टेम्पलेट सहेजा गया"
   },
   "selection_list": {
     "available": "उपलब्ध {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "सभी",
+      "replies": "जवाब",
+      "mentions": "उल्लेख",
+      "rvotes": "वोट",
+      "follows": "फ़ॉलो",
+      "reblogs": "रीब्लॉग",
+      "transfers": "स्थानांतरण",
+      "delegations": "डेलीगेशन",
+      "nfavorites": "पसंदीदा",
+      "tags": "टैग",
+      "nbookmarks": "बुकमार्क",
+      "payouts": "भुगतान",
+      "scheduled_published": "शेड्यूल की गई पोस्ट",
+      "account_updates": "खाते के अपडेट",
+      "weekly_earnings": "साप्ताहिक कमाई"
     },
     "this_week": "इस सप्ताह",
     "reblog": "रीब्लॉग हुवा",
@@ -417,11 +458,15 @@
     "yesterday": "बीता कल",
     "mention": "में वर्णित",
     "favorites": "नई पोस्ट बनाई",
+    "tags": "ने #{tag} में पोस्ट किया",
+    "tags_bundle": "#{tag} में {count} नई पोस्ट",
+    "tags_title": "आपके फ़ॉलो किए टैग में नई पोस्ट",
     "mentions": "का उल्लेख है",
     "spin": "अधिक अंक अर्जित करने का समय",
     "last_week": "पिछला सप्ताह",
     "recent": "ताजा",
     "ignore": "आपको अनदेखा किया",
+    "blacklist": "ने आपको ब्लैकलिस्ट किया",
     "follow": "आपके साथ जुड़ा",
     "notification": "अधिसूचनाएं",
     "this_month": "इस महीने",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} अब आपकी ओर से पोस्ट और वोट कर सकता है। यदि आपने इसकी अनुमति नहीं दी, तो इसे रद्द करें।",
     "weekly_earnings": "आपने इस सप्ताह ${amount} कमाए{breakdown}",
     "payouts": "भुगतान प्राप्त हुआ: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "ने शेड्यूल की हुई पोस्ट प्रकाशित की",
+    "scheduled_published_title": "शेड्यूल की गई पोस्ट प्रकाशित हुई",
+    "scheduled_published_body": "आपकी शेड्यूल की गई पोस्ट अब लाइव है, देखने के लिए टैप करें"
   },
   "recurrent": {
     "delete_failed": "आवर्ती ट्रांसफ़र हटाने में विफल, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "हाल का मसौदा खोलें या नई पोस्ट बनाएँ",
     "reward_power_up": "100% स्टेक करें",
     "open_gallery": "गैलरी खोलें",
+    "open_files": "फ़ाइलों में से चुनें",
     "clipboard_no_image": "क्लिपबोर्ड में कोई छवि नहीं मिली",
     "clipboard_image_detected": "क्लिपबोर्ड में छवि",
     "paste_image": "छवि पेस्ट करें",
@@ -539,8 +585,10 @@
     "video": "वीडियो",
     "scheduled_later": "बाद में",
     "settings_title": "पोस्ट विकल्प",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "नहीं"
+    "support_ecency": "Ecency का समर्थन करें {percent}%",
+    "alert_btn_no": "नहीं",
+    "short_reply_hint": "{n} या उससे कम अक्षरों के जवाब पर Points नहीं मिलते (लिंक गिने नहीं जाते)",
+    "short_content_hint": "Points कमाने के लिए बहुत छोटा ({n} या उससे कम अक्षर, लिंक छोड़कर)"
   },
   "time": {
     "week": "सप्ताह",
@@ -655,7 +703,41 @@
     "select_emoji": "इमोजी चुनें",
     "more_emojis": "और",
     "search_emojis": "इमोजी खोजें...",
-    "no_emoji_found": "कोई इमोजी नहीं मिला"
+    "no_emoji_found": "कोई इमोजी नहीं मिला",
+    "ban-reason-spray": "एक ही संदेश एक साथ कई चैनलों में भेजे जाने के कारण आपकी पोस्टिंग रोक दी गई है।",
+    "ban-reason-mass-dm": "एक साथ बहुत से लोगों को संदेश भेजे जाने के कारण आपकी पोस्टिंग रोक दी गई है।",
+    "ban-reason-generic": "चैट में आपकी पोस्टिंग रोक दी गई है।",
+    "ban-can-still-read": "आप अब भी चैट पढ़ सकते हैं।",
+    "ban-unlocks": "पोस्टिंग {when} फिर चालू होगी।",
+    "ban-remaining-soon": "एक मिनट से कम में",
+    "ban-remaining-minutes": "लगभग {count} मिनट में",
+    "ban-remaining-hours": "लगभग {count} घंटे में",
+    "ban-remaining-days": "लगभग {count} दिन में",
+    "new_group": "नया ग्रुप",
+    "new_group_hint": "ग्रुप बातचीत शुरू करने के लिए {min} से {max} लोगों को जोड़ें।",
+    "new_group_search": "प्रयोक्ता नाम से लोगों को खोजें",
+    "new_group_full": "एक ग्रुप में अधिकतम {max} अन्य लोग हो सकते हैं।",
+    "new_group_no_results": "चैट पर इस नाम का कोई नहीं मिला।",
+    "new_group_search_failed": "खोज नहीं हो सकी। अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+    "new_group_remove": "@{username} को हटाएँ",
+    "new_group_create": "ग्रुप शुरू करें",
+    "new_group_failed": "ग्रुप शुरू नहीं हो सका। कृपया फिर प्रयास करें।",
+    "rename_group": "ग्रुप का नाम बदलें",
+    "rename_group_hint": "इस ग्रुप को ऐसा नाम दें जो इसमें सभी को दिखे। खाली छोड़ने पर सदस्यों के नाम दिखाए जाएँगे।",
+    "group_name": "ग्रुप का नाम",
+    "rename_group_too_long": "ग्रुप के नाम में अधिकतम {max} अक्षर हो सकते हैं।",
+    "rename_group_not_owner": "केवल ग्रुप शुरू करने वाला व्यक्ति ही इसका नाम बदल सकता है।",
+    "rename_group_failed": "ग्रुप का नाम नहीं बदला जा सका। कृपया फिर प्रयास करें।",
+    "group_renamed": "{user} ने ग्रुप का नाम बदलकर \"{name}\" कर दिया",
+    "group_name_cleared": "{user} ने ग्रुप का नाम हटा दिया",
+    "group_members": "ग्रुप सदस्य",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "reactions_title": "प्रतिक्रियाएँ",
+    "reactor_you": "आप",
+    "reactor_unknown": "कोई",
+    "see_who_reacted": "किसने प्रतिक्रिया दी, देखने के लिए देर तक दबाएँ",
+    "group": "ग्रुप"
   },
   "free_estm": {
     "timer_text": "अगले फ्री स्पिन में",
@@ -684,6 +766,32 @@
     "transaction_fail": "लेन-देन विफल"
   },
   "search_result": {
+    "error": "खोज पूरी नहीं हो सकी। कृपया फिर प्रयास करें",
+    "filters": {
+      "title": "फ़िल्टर",
+      "open": "फ़िल्टर",
+      "author": "लेखक",
+      "author_placeholder": "प्रयोक्ता नाम",
+      "category": "श्रेणी",
+      "category_placeholder": "समुदाय या श्रेणी",
+      "tags": "टैग",
+      "tags_placeholder": "कॉमा से अलग करें",
+      "type": "प्रकार",
+      "type_all": "सभी",
+      "type_post": "पोस्ट",
+      "type_comment": "टिप्पणियाँ",
+      "date": "तारीख़",
+      "date_week": "पिछला सप्ताह",
+      "date_month": "पिछला महीना",
+      "date_year": "पिछला वर्ष",
+      "date_all": "सभी समय",
+      "sort": "क्रमबद्ध करें",
+      "apply": "लागू करें",
+      "active": "{n} सक्रिय",
+      "too_many_tags": "अधिकतम {n} टैग उपयोग करें",
+      "too_long": "खोज बहुत लंबी है। अधिकतम {n} अक्षर उपयोग करें",
+      "needs_criteria": "फ़िल्टर करने के लिए खोज शब्द, या कोई लेखक, श्रेणी या टैग दर्ज करें"
+    },
     "communities_filter": {
       "new": "नया",
       "my": "मेरे समुदाय",
@@ -727,7 +835,7 @@
     "title": "क्रॉस पोस्ट"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "लेखक ने AI के उपयोग की जानकारी दी है"
   },
   "ai_assist": {
     "title": "AI लेखन सहायक",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "अपनी पोस्ट के लिए प्रासंगिक टैग पाएँ",
     "action_generate_title": "शीर्षक बनाएँ",
     "action_generate_title_desc": "आकर्षक शीर्षक विकल्प बनाएँ",
-    "action_summarize": "Recap",
+    "action_summarize": "सारांश",
     "action_summarize_desc": "एक संक्षिप्त सारांश बनाएँ",
     "action_check_grammar": "व्याकरण जाँचें",
     "action_check_grammar_desc": "व्याकरण और वर्तनी की समस्याएँ ठीक करें",
+    "action_generate_image": "छवि बनाएँ",
+    "action_generate_image_desc": "अपनी पोस्ट के लिए AI छवि बनाएँ",
+    "cost_from": "{cost} {unit} से",
     "text_label": "आपका टेक्स्ट",
     "text_placeholder": "अपनी सामग्री यहाँ पेस्ट या टाइप करें...",
     "min_chars": "न्यूनतम {count} वर्ण आवश्यक हैं",
@@ -797,16 +908,26 @@
     "remind_later": "बाद में याद दिलाना",
     "success_subscribe": "सदस्यता लें सफलता!",
     "payloadTooLarge": "फ़ाइल का आकार बहुत बड़ा है, कृपया आकार बदलें या छोटी छवि अपलोड करें",
+    "too_many_images": "आप एक बार में अधिकतम {count} छवियाँ चुन सकते हैं",
     "fail_follow": "फॉलो फेल हो गए!",
     "clear_user_alert": "क्या आप वाकई सभी उपयोगकर्ता डेटा को साफ़ करना चाहते हैं?",
     "cancel": "रद्द करें",
     "connection_success": "सफलतापूर्वक जुड़ा हुआ है!",
     "rc_down": "कार्रवाई करने के लिए पर्याप्त संसाधन क्रेडिट नहीं! \n\nअनुभव का आनंद लेना जारी रखने के लिए अपने खाते को बढ़ावा दें। क्या आप अब अपना खाता बढ़ाना चाहते हैं?",
+    "rc_down_title": "रिसोर्स क्रेडिट्स पर्याप्त नहीं हैं",
+    "rc_precheck_title": "यह पोस्ट प्रकाशित करने के लिए बहुत बड़ी हो सकती है",
+    "rc_precheck_body": "इतने बड़े आकार की पोस्ट के लिए आपके रिसोर्स क्रेडिट्स कम लगते हैं।",
+    "rc_down_body": "इस कार्य के लिए आपके पास पर्याप्त रिसोर्स क्रेडिट्स नहीं हैं।\n\nजारी रखने के लिए अभी Points से टॉप अप करें, या अपने खाते को हमेशा के लिए बूस्ट करें।",
+    "rc_down_topup": "Points से RC टॉप अप करें",
+    "rc_down_boost": "खाता बूस्ट करें",
     "done": "हो गया",
     "something_wrong_alt": "इस बीच, अपने ब्राउज़र से Ecency.com आज़माएं",
     "same_user": "इस उपयोगकर्ता को पहले ही सूची में जोड़ दिया",
     "fail": "असफल!",
     "operation_failed_with_reason": "{operation} विफल: {reason}",
+    "request_timed_out": "कनेक्शन में बहुत समय लग रहा है। अपना नेटवर्क जाँचें और फिर प्रयास करें।",
+    "load_failed_retry": "हम इसे लोड नहीं कर सके। कृपया फिर प्रयास करें।",
+    "retrying": "फिर प्रयास हो रहा है...",
     "wallet_refresh_failed": "वॉलेट रीफ़्रेश विफल। कृपया पुनः प्रयास करें।",
     "wallet_refresh_missing_account": "वॉलेट रीफ़्रेश विफल: खाता अनुपस्थित।",
     "boost_failed": "बूस्ट विफल।",
@@ -949,31 +1070,31 @@
     "video_attached": "वीडियो संलग्न किया गया"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "अपवोट",
+    "upvoted": "अपवोट किया",
+    "downvoted": "डाउनवोट किया",
+    "upvote_hint": "वोट विकल्प खोलने के लिए दो बार टैप करें",
+    "payout_details": "भुगतान का विवरण",
+    "a11y_votes": "{count, plural, one {# वोट} other {# वोट}}",
+    "a11y_voters_hint": "वोट देने वाले देखें",
+    "a11y_reblogs": "{count, plural, one {# रीब्लॉग} other {# रीब्लॉग}}",
+    "a11y_reblogs_hint": "रीब्लॉग देखें",
+    "a11y_comments": "{count, plural, one {# टिप्पणी} other {# टिप्पणियाँ}}",
+    "a11y_comments_hint": "टिप्पणियाँ देखें",
+    "a11y_reply_hint": "जवाब दें",
+    "a11y_tip": "टिप भेजें",
+    "a11y_tips": "{count, plural, one {# टिप} other {# टिप}}",
+    "a11y_edit": "टिप्पणी संपादित करें",
+    "a11y_delete": "टिप्पणी हटाएँ",
+    "a11y_show_replies": "जवाब दिखाएँ",
+    "a11y_hide_replies": "जवाब छिपाएँ",
+    "a11y_post_options": "पोस्ट विकल्प",
+    "a11y_views": "{count, plural, one {# व्यू} other {# व्यू}}",
+    "source_ecency": "Ecency के साथ प्रकाशित",
+    "a11y_stats_hint": "पोस्ट के आँकड़े देखें",
     "image": "छवि",
     "reveal_muted": "मौन कर दिया गया\nसामग्री प्रकट करने के लिए टैप करें",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "छवि लोड करने के लिए टैप करें",
     "in": "में",
     "poll": "पोल",
     "copy_link": "लिंक कापी करें",
@@ -998,13 +1119,14 @@
     "save_to_local": "डिवाइस पर डाउनलोड करें",
     "muted": "उल्लंघन के लिए सामग्री म्यूट की गई है",
     "community_muted": "समुदाय दिशानिर्देशों के उल्लंघन के लिए सामग्री म्यूट की गई",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "कम प्रतिष्ठा वाले खाते की सामग्री",
+    "muted_downvoted": "उपयोगकर्ताओं द्वारा डाउनवोट की गई सामग्री",
+    "muted_low_trust": "असत्यापित बाहरी लिंक वाला कम प्रतिष्ठा का खाता",
+    "muted_reveal": "देखने के लिए टैप करें",
     "promoted": "पदोन्नत",
     "image_saved": "फोटो गैलरी के लिए छवि सहेजी गई",
     "words": "शब्द",
     "reading": "पढ़ना",
-    "listen": "सुनें",
     "min": "मिनट",
     "summarize_start": "शुरू करें"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "कोई विद्यमान पोस्ट नहीं",
     "invalid_link": "यूआरएल अमान्य है, आप वैध यूआरएल के साथ फिर से कोशिश कर सकते हैं या इसे वेब ब्राउज़र में खोलने का प्रयास कर सकते हैं",
-    "no_existing_user": "कोई विद्यमान उपयोगकर्ता नहीं"
+    "no_existing_user": "कोई विद्यमान उपयोगकर्ता नहीं",
+    "posting_key_request": "{requester} @{username} की पोस्टिंग निजी कुंजी माँग रहा है।\n\nकेवल तभी आगे बढ़ें जब आप इस अनुरोध पर भरोसा करते हों।",
+    "posting_key_request_unnamed": "कोई अन्य एप्लिकेशन @{username} की पोस्टिंग निजी कुंजी माँग रही है।\n\nकेवल तभी आगे बढ़ें जब आप इस अनुरोध पर भरोसा करते हों।",
+    "auth_request_as_user": "{requester} आपको @{username} के रूप में साइन इन कराना चाहता है।\n\nकेवल आपका प्रयोक्ता नाम और साइन-इन प्रमाण साझा किया जाता है। कोई कुंजी Ecency से बाहर नहीं जाती।",
+    "auth_request_as_current": "{requester} आपको आपके Ecency खाते से साइन इन कराना चाहता है।\n\nकेवल आपका प्रयोक्ता नाम और साइन-इन प्रमाण साझा किया जाता है। कोई कुंजी Ecency से बाहर नहीं जाती।"
   },
   "payout": {
     "breakdown": "विश्लेषण",
@@ -1065,7 +1191,7 @@
     "open": "यूआरएल खोलें",
     "invalid_key_desc": "यह लेनदेन करने के लिए कृपया {key} कुंजी या मास्टर कुंजी से लॉग इन करें",
     "auth_transfer_confirm": "@{username} को ट्रांसफर की पुष्टि करें?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "केवल तभी स्वीकृत करें जब आप इस लिंक के स्रोत पर भरोसा करते हों। स्वीकृत करने पर नीचे दिया गया ऑपरेशन आपके {authority} कुंजी से आपके खाते द्वारा ब्रॉडकास्ट किया जाएगा।"
   },
   "voters_dropdown": {
     "rewards": "इनाम",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "केवल अक्षर, अंक, हाइफ़न होना चाहिए",
       "username_no_ascii_first_letter_error": "किसी अक्षर से शुरू होना चाहिए",
       "username_contains_double_hyphens": "डबल हाइफ़न नहीं होना चाहिए",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "यह उपयोगकर्ता नाम किसी क्रिप्टो एक्सचेंज खाते से बहुत मिलता-जुलता है और दूसरों को भ्रम में डाल सकता है। कृपया कोई अधिक अनूठा नाम चुनें।",
+      "username_restricted_prefix": "'uid' से शुरू होकर अंकों वाले उपयोगकर्ता नाम की अनुमति नहीं है, क्योंकि इनका उपयोग अक्सर दूसरों का रूप धरने के लिए होता है। कृपया कोई दूसरा नाम चुनें।",
       "username_contains_underscore": "अंडरस्कोर नहीं होना चाहिए"
     },
     "500_error": "आपके अनुरोध को संसाधित नहीं किया जा सका, साइनअप कतार पूर्ण होने की संभावना है! कुछ मिनटों में पुन: प्रयास करें...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "यह उपयोगकर्ता नाम पहले ही लिया जा चुका है",
+      "14": "यह ईमेल पता पहले से पंजीकृत है",
+      "15": "कृपया मान्य ईमेल पता दर्ज करें",
+      "16": "कृपया मान्य उपयोगकर्ता नाम दर्ज करें",
+      "17": "उपयोगकर्ता नाम बहुत लंबा है, कृपया छोटा नाम चुनें",
+      "19": "कृपया स्थायी ईमेल पता उपयोग करें, या इसके बजाय प्रीमियम खाता लें",
+      "21": "यह रेफ़रल मान्य नहीं है",
+      "28": "आपका अनुरोध प्रोसेस नहीं हो सका। संभवतः साइनअप कतार भरी हुई है। कृपया कुछ मिनट बाद फिर से प्रयास करें।",
+      "107": "VPN कनेक्शन पाया गया। कृपया अपना VPN बंद करके फिर से प्रयास करें, या इसके बजाय प्रीमियम खाता लें।",
+      "110": "दुरुपयोग रोकने के लिए हम प्रति व्यक्ति/नेटवर्क खातों की संख्या सीमित रखते हैं। कृपया किसी दूसरे नेटवर्क से फिर प्रयास करें।",
+      "111": "Tor कनेक्शन पाया गया। साइन अप करते समय कृपया Tor बंद रखें।",
+      "112": "हम अभी आपके कनेक्शन की पुष्टि नहीं कर सके। कृपया कुछ मिनट बाद फिर से प्रयास करें।"
     },
     "have_account_text": "पहले से खाता है?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "एक पूर्ण विकसित Hive खाता प्राप्त करें, इस विधि में बुनियादी जाँच होती है ताकि यह सुनिश्चित किया जा सके कि बॉटनेट हमारे साइनअप फॉसेट का दुरुपयोग न करे।",
     "btn_register": "मुफ़्त पंजीकरण करें",
     "title": "मुफ़्त खाता"
+  },
+  "dictation": {
+    "title": "बोलकर लिखें",
+    "start": "रिकॉर्ड करें",
+    "stop": "रोकें",
+    "record_more": "और रिकॉर्ड करें",
+    "done": "हो गया",
+    "recording": "रिकॉर्डिंग",
+    "stop_hint": "ट्रांसक्राइब करके अपनी पोस्ट में जोड़ने के लिए रोकें। अधिकतम {m} मिनट।",
+    "inserted": "आपकी पोस्ट में जोड़ दिया गया। और रिकॉर्ड करें, या हो गया पर टैप करें।",
+    "transcribing": "ट्रांसक्राइब हो रहा है",
+    "rate": "हर {s} सेकंड के लिए {n} Points",
+    "cost_running": "अब तक {n} Points",
+    "cost_running_free": "अब तक निःशुल्क",
+    "free_remaining": "आज आपके अगले {n} x {s} सेकंड निःशुल्क हैं",
+    "price_loading": "कीमत जाँची जा रही है",
+    "price_error": "ट्रांसक्रिप्शन की कीमत लोड नहीं हो सकी।",
+    "denied": "बोलकर लिखने के लिए Ecency को माइक्रोफ़ोन की अनुमति चाहिए। सेटिंग में अनुमति दें और फिर प्रयास करें।",
+    "error_empty": "उस रिकॉर्डिंग में कोई आवाज़ नहीं मिली।",
+    "error_insufficient_points": "उस रिकॉर्डिंग को ट्रांसक्राइब करने के लिए Points पर्याप्त नहीं हैं।",
+    "error_rate_limited": "अभी बहुत ज़्यादा रिकॉर्डिंग हो चुकी हैं। कृपया थोड़ी देर में फिर प्रयास करें।",
+    "error_too_long": "वह रिकॉर्डिंग ट्रांसक्राइब करने के लिए बहुत लंबी है।",
+    "error_failed": "वह रिकॉर्डिंग ट्रांसक्राइब नहीं हो सकी। कृपया फिर प्रयास करें।",
+    "error_recorder": "रिकॉर्डिंग शुरू नहीं हो सकी। कृपया फिर प्रयास करें।"
   },
   "wallet": {
     "delegations_out": "बाहर जाने वाली डेलिगेशन",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "नियमित रूप से जाँच करने पर आपको 0.25 अंक मिलते हैं।",
     "fill_transfer_from_savings": "बचत की गई",
     "activities": "क्रियाएँ",
+    "no_activities": "अभी कोई लेन-देन नहीं",
+    "activities_failed": "लेन-देन लोड नहीं हो सके। फिर प्रयास करने के लिए नीचे खींचें।",
     "tap_update": "अपडेट करने के लिए टैप करें",
     "mining_lottery": "लॉटरी जीती",
     "checkin": "चेक इन",
     "tokens_transfer": "टोकन ट्रांसफर किया गया है",
     "outgoing_transfer_title": "ट्रांसफर/उपहार",
+    "burned_title": "AI उपयोग",
+    "burned_description": "AI फ़ीचर पर खर्च हुए Points",
+    "burn_refund_title": "AI रिफ़ंड",
+    "burn_refund_description": "असफल AI अनुरोध के बाद लौटाए गए Points",
     "manage_assets": "संपत्तियां जोड़ें/हटाएं",
     "selected_assets": "चयनित संपत्ति",
     "nft_setPropertyPermissions": "NFT सिंबल के लिए प्रॉपर्टी अनुमतियाँ सेट की गईं",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "टोकन अद्यतन परिशुद्धता",
     "tokens_transferOwnership": "टोकन स्वामित्व हस्तांतरित",
     "withdraw_vesting": "अनस्टेक करें",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "निकासी खाते",
     "delegate_engine": "डेलिगेट करें",
     "market_close": "ऑर्डर बंद",
     "nftmarket_transferFee": "खरीद ऑर्डर शुल्क",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "अंक प्राप्त करें",
     "escrow_approve": "एस्क्रो अनुमोदन",
     "expires": "समय सीमा समाप्त",
+    "transaction_id": "लेन-देन आईडी",
+    "copy_transaction_id": "लेन-देन लिंक कॉपी करें",
+    "filter_activities": "गतिविधियाँ फ़िल्टर करें",
+    "filter_activities_desc": "चुनें कि यह इतिहास कौन-से ऑपरेशन माँगे",
+    "filter_all": "सभी चुनें",
+    "filter_none": "सभी हटाएँ",
+    "filter_apply": "लागू करें",
     "author_reward": "लेखक इनाम",
     "withdraw_hbd": "बचत खाते से निकालें",
     "convert_request": "अनुरोध कनवर्ट करें",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC टॉप अप करें",
+    "desc": "अल्पकालिक RC बूस्ट, ताकि आप पोस्ट करते रहें।",
+    "confirm": "क्या रिसोर्स क्रेडिट्स टॉप अप करने के लिए Points खर्च करें?",
+    "insufficient": "आपके पास पर्याप्त Points नहीं हैं।",
+    "buy_points": "Points खरीदें"
   },
   "ai_image_generator": {
     "title": "AI इमेज जनरेटर",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "कस्टम ({hours}घं॰)",
+    "balance_load_failed": "आपका बैलेंस लोड नहीं हो सका। फिर प्रयास करने के लिए टैप करें।",
+    "precision_load_failed": "इस टोकन का विवरण लोड नहीं हो सका, इसलिए केवल पूर्ण राशि भेजी जा सकती है। फिर प्रयास करने के लिए टैप करें।",
     "close": "बंद करें",
     "favorite_username_placeholder": "उपयोगकर्ता नाम",
     "invalid_recipient_qr": "इस QR कोड में कोई उपयोगकर्ता नाम नहीं मिला।",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "प्राधिकारियों को प्रबंधित करें",
     "pincode": "Pincode",
     "general": "सामान्य",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecency का समर्थन करें",
+    "support_beneficiary": "पोस्ट के रिवॉर्ड Ecency के साथ साझा करें",
+    "support_beneficiary_percent": "पोस्ट रिवॉर्ड का हिस्सा",
+    "support_curation": "क्यूरेशन रिवॉर्ड का कुछ हिस्सा रोकें",
+    "support_curation_percent": "क्यूरेशन रिवॉर्ड रोकने का प्रतिशत",
     "feedback_body": "अपना संदेश यहाँ लिखें!\n\nHive उपयोगकर्ता नाम: {username}\nऐप संस्करण: {appVersion}\nप्लेटफ़ॉर्म: {platform}\n",
     "show_imgs": "छवियां दिखाएं",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "टिप्पणी",
       "bookmark": "बुकमार्क",
+      "tags": "टैग",
       "reblog": "पुनर्प्रेशण",
       "favorite": "पसंदीदा",
       "mention": "उल्लेख",
@@ -1599,10 +1765,10 @@
       "transfers": "स्थानांतरण",
       "vote": "वोट",
       "follow": "का पालन करें",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "शेड्यूल की गई पोस्ट प्रकाशित हुई",
+      "payouts": "भुगतान",
+      "account_update": "खाते के अपडेट",
+      "weekly_earnings": "साप्ताहिक कमाई",
       "fcm_unavailable": "इस डिवाइस पर पुश नोटिफ़िकेशन समर्थित नहीं हैं। आपको नोटिफ़िकेशन केवल तभी प्राप्त होंगे जब ऐप खुला हो।"
     },
     "keys_warning": "संवेदनशील खाता जानकारी!\nनिजी कुंजी देखने से पहले इसेंसी को पिन कोड से सुरक्षित किया जाना चाहिए।",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "प्रतिक्रिया भेजें",
     "rate_app": "Ecency को रेटिंग दें",
+    "email_digests": "ईमेल डाइजेस्ट",
     "rate": "रेटिंग दें",
     "dm-privacy-updated": "DM गोपनीयता सेटिंग्स सफलतापूर्वक अपडेट की गईं",
     "dm-privacy-failed": "DM गोपनीयता सेटिंग्स अपडेट करने में विफल",
@@ -1685,19 +1852,29 @@
     "request_sent": "हटाने के लिए आपका अनुरोध भेजा गया है",
     "confirm_delete_body": "क्या आप वाकई खाता हटाना चाहते हैं? यह आपका सारा डेटा मिटा देगा"
   },
-  "tts": {
-    "settings_title": "टेक्स्ट-टू-स्पीच सेटिंग्स",
-    "voice": "आवाज़",
-    "voice_hint": "सिस्टम डिफ़ॉल्ट आवाज़ का उपयोग किया जाएगा",
-    "speed": "गति",
-    "pitch": "पिच",
-    "test_voice": "आवाज़ परखें",
-    "settings_info": "इन सेटिंग्स का उपयोग पोस्ट को ज़ोर से पढ़ते समय किया जाएगा",
+  "listen": {
+    "title": "इस पोस्ट को सुनें",
+    "minutes": "~{n} मिनट",
+    "login": "लॉग इन करें",
+    "unlock": "अनलॉक करें · {n} Points",
+    "confirm": "इस पोस्ट को सुनने के लिए {n} Points खर्च करें? यह ऑडियो आप कभी भी दोबारा चला सकते हैं।",
+    "not_enough_title": "Points पर्याप्त नहीं हैं",
+    "not_enough": "सुनने के लिए {required} Points चाहिए और आपके पास {available} हैं।",
+    "get_points": "Points पाएँ",
+    "unlock_failed": "ऑडियो अनलॉक नहीं हो सका, कृपया फिर प्रयास करें",
+    "failed_refunded": "ऑडियो नहीं बन सका, आपके Points लौटा दिए गए",
+    "preparing": "ऑडियो तैयार हो रहा है…",
+    "preparing_eta": "ऑडियो तैयार हो रहा है, लगभग {n} मिनट…",
+    "preparing_progress": "ऑडियो तैयार हो रहा है · {n}%",
+    "waiting": "कतार में प्रतीक्षा, आगे {n}…",
+    "next_in_line": "कतार में अगले…",
     "play": "चलाएँ",
-    "pause": "रोकें",
-    "language": "भाषा",
-    "language_auto": "स्वतः पहचानें",
-    "language_hint": "स्वतः पहचान पोस्ट सामग्री के आधार पर भाषा चुनती है"
+    "pause": "पॉज़ करें",
+    "seek": "आगे-पीछे करें",
+    "speed": "प्लेबैक गति",
+    "language": "ऑडियो भाषा",
+    "unavailable": "ऑडियो लोड नहीं हो सका।",
+    "retry": "फिर प्रयास करें"
   },
   "posting_authority": {
     "title": "तेज़ पोस्टिंग सक्षम करें",
@@ -1732,7 +1909,7 @@
     "error-auth": "प्रमाणीकरण विफल। कृपया फिर से लॉग इन करें।",
     "error-generic": "वीडियो अपलोड विफल। कृपया पुनः प्रयास करें।",
     "error-too-long-short": "छोटे वीडियो 60 सेकंड या उससे कम के होने चाहिए।",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "एक पोस्ट में केवल एक वीडियो हो सकता है। दूसरा जोड़ने से पहले मौजूदा वीडियो हटाएँ।",
     "select_source": "वीडियो जोड़ें",
     "record": "वीडियो रिकॉर्ड करें",
     "choose_library": "लाइब्रेरी से चुनें"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "एक त्वरित अपडेट साझा करें"
   },
+  "newsletter": {
+    "screen_title": "ईमेल डाइजेस्ट",
+    "title": "{list}",
+    "body_own": "आपकी नोटिफ़िकेशन का साप्ताहिक या मासिक ईमेल सारांश।",
+    "body_creator": "{list} की नई पोस्ट आपके इनबॉक्स में।",
+    "body_community": "{list} की नई पोस्ट का डाइजेस्ट ईमेल से।",
+    "body_site": "Ecency की बेहतरीन सामग्री आपके इनबॉक्स में।",
+    "first_publish_title": "पहली पोस्ट की बधाई!",
+    "first_publish_body": "अपनी नोटिफ़िकेशन का ईमेल डाइजेस्ट चाहते हैं? साप्ताहिक या मासिक, सेटिंग में कभी भी बदलें या छोड़ें।",
+    "list_own": "मेरी नोटिफ़िकेशन का डाइजेस्ट",
+    "list_site": "Ecency न्यूज़लेटर",
+    "status_active": "आपने सब्सक्राइब किया है।",
+    "status_pending": "ईमेल पुष्टि की प्रतीक्षा है।",
+    "status_short_active": "सक्रिय",
+    "status_short_pending_confirmation": "लंबित",
+    "status_short_suppressed": "बंद",
+    "status_short_ended": "समाप्त",
+    "cadence_weekly": "साप्ताहिक",
+    "cadence_monthly": "मासिक",
+    "email_placeholder": "you@example.com",
+    "subscribe": "सब्सक्राइब करें",
+    "update": "अपडेट करें",
+    "resend": "पुष्टि दोबारा भेजें",
+    "leave": "डाइजेस्ट छोड़ें",
+    "cancel": "रद्द करें",
+    "ok": "ठीक है",
+    "manage": "प्रबंधित करें",
+    "check_inbox_title": "अपना इनबॉक्स देखें",
+    "check_inbox_body": "हमने {email} पर पुष्टि लिंक भेजा है। पुष्टि करते ही सब्सक्रिप्शन शुरू हो जाएगा।",
+    "subscribed": "ईमेल डाइजेस्ट के लिए सब्सक्राइब किया गया",
+    "left": "डाइजेस्ट छोड़ दिया",
+    "refused": "इस पते को सब्सक्राइब नहीं किया जा सकता।",
+    "unavailable": "ईमेल डाइजेस्ट अभी उपलब्ध नहीं हैं।",
+    "too_many": "बहुत ज़्यादा प्रयास हो गए, कृपया बाद में फिर प्रयास करें।",
+    "fail": "कुछ गलत हो गया, कृपया फिर प्रयास करें।",
+    "empty": "अभी कोई ईमेल डाइजेस्ट नहीं है। शुरू करने के लिए नीचे सब्सक्राइब करें।",
+    "discover": "ईमेल से और पाएँ",
+    "stop_all": "सब बंद करें",
+    "stop_all_title": "सारे ईमेल बंद करें?",
+    "stop_all_body": "{email} पर Ecency का कोई मेल दोबारा नहीं भेजा जाएगा। अन्य पतों के सब्सक्रिप्शन बने रहेंगे।",
+    "stop_all_ok": "सब बंद करें",
+    "stop_all_done": "पते को सभी मेल से अनसब्सक्राइब कर दिया गया",
+    "profile_option": "ईमेल डाइजेस्ट",
+    "subscriber_count": "{weekly} साप्ताहिक • {monthly} मासिक ईमेल सब्सक्राइबर",
+    "community_button": "न्यूज़लेटर"
+  },
+  "mod_notes": {
+    "title": "कारण जोड़ें",
+    "placeholder": "कारण (अन्य मॉडरेटरों को दिखेगा)",
+    "confirm": "पुष्टि करें",
+    "cancel": "रद्द करें"
+  },
+  "community_settings": {
+    "title_header": "समुदाय सेटिंग",
+    "title_label": "शीर्षक",
+    "about": "परिचय",
+    "lang": "भाषा",
+    "description": "विवरण",
+    "rules": "नियम",
+    "nsfw": "NSFW (कार्यस्थल के लिए अनुपयुक्त)",
+    "save": "सहेजें",
+    "required": "आवश्यक",
+    "title_length": "{min} से {max} अक्षरों के बीच",
+    "owner_admin_only": "ये सेटिंग केवल मालिक और एडमिन बदल सकते हैं।"
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "विस्तृत",
+        "collapsed": "संक्षिप्त"
+      },
+      "a11y_chat": {
+        "quote": "{author} को जवाब: {text}"
+      },
+      "a11y_forms": {
+        "select": "चुनें",
+        "deselect": "चयन हटाएँ"
+      },
+      "store": {
+        "billing_unavailable": "इस डिवाइस पर ऐप-में खरीदारी की अनुमति नहीं है।",
+        "verification_failed": "App Store इस खरीदारी को सत्यापित नहीं कर सका।",
+        "cancelled": "खरीदारी रद्द की गई",
+        "unknown_result": "खरीदारी का परिणाम अज्ञात"
+      },
+      "navigation": {
+        "feed_unavailable": "यह फ़ीड अभी उपलब्ध नहीं है।",
+        "link_cannot_open": "यह लिंक नहीं खोला जा सकता।",
+        "video_cannot_play": "यह वीडियो नहीं चलाया जा सकता।"
+      },
+      "media": {
+        "load_failed": "यह आइटम लोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+        "loading": "मीडिया लोड हो रहा है",
+        "download_failed": "डाउनलोड स्टेटस {status} के साथ विफल रहा"
+      },
+      "sign_in": {
+        "required": "साइन इन आवश्यक है",
+        "to_reply": "जवाब देने के लिए साइन इन करें।",
+        "to_vote": "वोट करने के लिए साइन इन करें।",
+        "button": "साइन इन करें"
+      },
+      "account": {
+        "logout_user": "@{username} लॉग आउट करें"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# वोट} other {# वोट}}  •  {replies, plural, one {# जवाब} other {# जवाब}}",
+        "voting_power": "वोटिंग पावर {percent}",
+        "remove_favourite": "पसंदीदा से हटाएँ",
+        "add_favourite": "पसंदीदा में जोड़ें"
+      },
+      "waves": {
+        "clear_tag_filter": "टैग फ़िल्टर {tag} हटाएँ",
+        "new_wave": "नई Wave",
+        "replies_open_thread": "{count, plural, one {# जवाब, थ्रेड खोलें} other {# जवाब, थ्रेड खोलें}}",
+        "characters": "{max} में से {count} अक्षर",
+        "retry": "{message}\nफिर प्रयास करें",
+        "playing": "{permlink} चल रहा है",
+        "video_attached_remove": "वीडियो जुड़ा है, हटाएँ",
+        "image_attached_remove": "जुड़ी छवि, हटाएँ",
+        "take_photo": "फ़ोटो लें",
+        "edit_poll": "पोल संपादित करें",
+        "add_poll": "पोल जोड़ें",
+        "add_video": "वीडियो जोड़ें"
+      },
+      "reading": {
+        "reply_to": "{username} को जवाब दें",
+        "opens_post": "पोस्ट खोलता है",
+        "sort_comments": "टिप्पणियाँ क्रमबद्ध करें",
+        "sort_comments_value": "टिप्पणियाँ क्रमबद्ध करें, {sort}",
+        "no_comments": "अभी कोई टिप्पणी नहीं।",
+        "loading_post": "पोस्ट लोड हो रही है",
+        "show_version": "संस्करण दिखाएँ",
+        "show_changes": "बदलाव दिखाएँ",
+        "replying_to": "@{username} को जवाब दे रहे हैं",
+        "reply_text": "जवाब का टेक्स्ट",
+        "translate_from": "से",
+        "translate_to": "में"
+      },
+      "feed": {
+        "tab_pinned": "{label}, पिन किया हुआ",
+        "tab_add": "{label}, जोड़ें",
+        "customise": "अनुकूलित करें"
+      },
+      "card": {
+        "in_category": "{category} में",
+        "pinned": "पिन किया हुआ",
+        "by_author": "{username} द्वारा",
+        "payout": "भुगतान {payout}",
+        "payout_declined": "भुगतान {payout}, अस्वीकृत",
+        "reblogged_by": "{username} ने रीब्लॉग किया"
+      },
+      "shell": {
+        "close_menu": "मेनू बंद करें"
+      },
+      "editor": {
+        "thumbnail_pick_another": "थंबनेल, दूसरी छवि चुनें",
+        "words": "{count, plural, one {# शब्द} other {# शब्द}}",
+        "poll_min_age": "न्यूनतम खाता आयु (दिन): {days}",
+        "poll_max_options": "अधिकतम विकल्प: {count}",
+        "thumbnail_selected": "चुना हुआ थंबनेल",
+        "thumbnail": "थंबनेल",
+        "uploaded_image": "अपलोड की गई छवि",
+        "community_search": "खोजें"
+      },
+      "vote": {
+        "not_voted": "वोट नहीं किया",
+        "voting": "वोट हो रहा है",
+        "failed_with": "वोट विफल: {message}",
+        "failed": "वोट विफल",
+        "payout": "भुगतान {payout}",
+        "payout_declined": "भुगतान {payout}, अस्वीकृत",
+        "percent": "{percent} प्रतिशत",
+        "upvote_percent": "अपवोट {percent}%"
+      },
+      "settings": {
+        "on": "चालू",
+        "off": "बंद"
+      },
+      "lock": {
+        "biometric_reason": "Ecency के लिए बायोमेट्रिक अनलॉक चालू करें",
+        "offer_title": "{method} से अनलॉक करें",
+        "offer_use": "{method} का उपयोग करें"
+      },
+      "keys": {
+        "hidden_while_captured": "स्क्रीन रिकॉर्ड या मिरर होने के दौरान कुंजियाँ छिपी रहती हैं।",
+        "screenshot_notice": "स्क्रीनशॉट लिया गया। निजी कुंजियाँ फिर छिपा दी गईं; यदि स्क्रीनशॉट में कोई कुंजी दिखती है, तो उसे हटा दें।",
+        "hold_hint": "कुंजी दिखाने के लिए उसे दबाकर रखें।",
+        "hold_to_show": "दिखाने के लिए दबाकर रखें"
+      },
+      "wallet": {
+        "cancel_order": "इस ऑर्डर को रद्द करें?",
+        "days": "{count, plural, one {# दिन} other {# दिन}}"
+      },
+      "chat": {
+        "reactors_hint": "किसने प्रतिक्रिया दी, देखने के लिए देर तक दबाएँ",
+        "see_reactors": "देखें किसने प्रतिक्रिया दी"
+      },
+      "esie": {
+        "still": "{mood}, स्थिर"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} की प्रोफ़ाइल",
+      "preview": "पूर्वावलोकन ({index}/{count})",
+      "balance": "बैलेंस: {amount}",
+      "expires_in": "{time} में समाप्त होगा",
+      "expired": "समय समाप्त। बंद करें और फिर प्रयास करें।",
+      "user_has_no_posts": "@{username} ने अभी तक कुछ पोस्ट नहीं किया",
+      "attach_image": "छवि संलग्न करें",
+      "auto": "ऑटो",
+      "back": "वापस",
+      "hot": "हॉट",
+      "image_of": "{count} में से छवि {index}",
+      "new": "नया",
+      "nsfw_tap_to_reveal": "NSFW देखने के लिए टैप करें",
+      "new_reply": "नया जवाब",
+      "remove": "हटाएँ",
+      "unlock_ecency": "Ecency अनलॉक करें",
+      "update_it": "अपडेट करें",
+      "update_it_or_post_this_as": "इसे अपडेट करें, या नए जवाब के रूप में पोस्ट करें?",
+      "use_pin": "PIN का उपयोग करें",
+      "your_reply_was_already_posted": "आपका जवाब पहले ही पोस्ट हो चुका है",
+      "error_try_again": "{message} फिर प्रयास करें?",
+      "auth": {
+        "account_label": "खाता: @{username}",
+        "approve_the_request_in_your_wallet": "अपने वॉलेट ऐप में अनुरोध स्वीकृत करें।",
+        "copy_key": "{title} कॉपी करें",
+        "current_account": "मौजूदा खाता",
+        "qr_code": "QR कोड",
+        "requested_by": "{requester} द्वारा अनुरोधित",
+        "pin_digits": "{total, plural, one {# अंक} other {# अंकों}} में से {filled}",
+        "private_key_shown": "{title}, निजी कुंजी दिख रही है",
+        "open_wallet_app": "वॉलेट ऐप खोलें",
+        "hiveauth_scan": "Hive Keychain या किसी अन्य HiveAuth वॉलेट में स्वीकृत करें: उसे इसी डिवाइस पर खोलें, या उससे यह कोड स्कैन करें।",
+        "switching": "बदला जा रहा है...",
+        "logout_all": "सभी खातों से लॉग आउट करें",
+        "logout_all_title": "इस डिवाइस के हर खाते से लॉग आउट करें?",
+        "stored_key": "@{username} इस डिवाइस पर पहले से साइन इन है। इसकी सहेजी कुंजियाँ बनी रहेंगी; केवल सत्र नवीनीकृत होगा।",
+        "stored_hivesigner": "@{username} इस डिवाइस पर HiveSigner से पहले से साइन इन है। इसका सत्र बदल दिया जाएगा।",
+        "stored_hiveauth": "@{username} इस डिवाइस पर HiveAuth से साइन इन है। यह इसके बजाय HiveSigner से साइन करेगा।",
+        "method_key": "कुंजी",
+        "logout_failed": "लॉग आउट विफल रहा"
+      },
+      "browser": {
+        "account": "खाता",
+        "authority": "अथॉरिटी",
+        "phishing": "चेतावनी: इस डोमेन को ज्ञात फ़िशिंग साइट के रूप में चिह्नित किया गया है। अत्यधिक सावधानी से आगे बढ़ें।"
+      },
+      "chat": {
+        "cancel_edit": "संपादन रद्द करें",
+        "cancel_reply": "जवाब रद्द करें",
+        "copied_to_clipboard": "क्लिपबोर्ड पर कॉपी किया गया",
+        "edited_at": "{time} संपादित",
+        "group_options": "ग्रुप विकल्प",
+        "pinned_messages": "पिन किए संदेश",
+        "remove_user": "@{username} को हटाएँ",
+        "sort_by_name": "नाम से क्रमबद्ध करें",
+        "more": "अधिक",
+        "reaction_label": "{emoji} {count}. किसने प्रतिक्रिया दी, देखने के लिए देर तक दबाएँ",
+        "members": "सदस्य"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "इस लिंक पर पहले से एक पोस्ट मौजूद है और वह आपके भेजे से अलग है। इसे अपडेट करें, या नई प्रकाशित करें?",
+        "a_scheduled_post_is_published_by": "शेड्यूल की गई पोस्ट Ecency द्वारा चुने गए समय पर प्रकाशित की जाती है। इसके लिए आपके खाते पर ecency.app की पोस्टिंग अथॉरिटी चाहिए। आपकी कुंजियाँ और अन्य अथॉरिटी जैसी हैं वैसी रहेंगी। इसे देने के लिए आपकी एक्टिव कुंजी चाहिए।",
+        "ai_assist": "AI असिस्ट",
+        "ai_tools": "AI टूल",
+        "allow_ecency_to_publish_for_you": "Ecency को आपकी ओर से प्रकाशित करने की अनुमति दें?",
+        "bold": "बोल्ड",
+        "clone": "क्लोन करें",
+        "cost": "लागत: {cost}",
+        "could_not_store_the_draft_on": "प्रारूप इस डिवाइस पर सहेजा नहीं जा सका। ऐप खुला रखें और प्रारूप सहेजें।",
+        "draft": "प्रारूप",
+        "delete_count": "मिटाएँ ({count})",
+        "dictate_desc": "बोलिए, और ट्रांसक्रिप्ट आपकी पोस्ट में चला जाएगा",
+        "discard": "छोड़ें",
+        "discard_changes": "बदलाव छोड़ें?",
+        "grant": "दें",
+        "italic": "इटैलिक",
+        "keep_editing": "संपादन जारी रखें",
+        "my_blog": "मेरा ब्लॉग",
+        "my_communities": "मेरे समुदाय",
+        "new_post": "नई पोस्ट",
+        "notice": "सूचना",
+        "restore": "पुनर्स्थापित करें",
+        "restore_unsaved_changes": "बिना सहेजे बदलाव पुनर्स्थापित करें?",
+        "saved": "सहेजा गया",
+        "top_communities": "शीर्ष समुदाय",
+        "table": "तालिका",
+        "text_format": "टेक्स्ट फ़ॉर्मैट",
+        "this_link_is_already_in_use": "यह लिंक पहले से उपयोग में है",
+        "untitled": "बिना शीर्षक",
+        "update_it_or_publish_this_as": "इसे अपडेट करें, या नई पोस्ट के रूप में प्रकाशित करें?",
+        "you_have_unsaved_changes_from_an": "पिछले संपादन के आपके कुछ बदलाव सहेजे नहीं गए हैं। तब से पोस्ट बदल चुकी है; उन्हें पुनर्स्थापित करने से नीचे का टेक्स्ट बदल जाएगा।",
+        "your_edits_were_not_published": "आपके संपादन प्रकाशित नहीं हुए।",
+        "your_post_was_already_published": "आपकी पोस्ट पहले ही प्रकाशित हो चुकी है",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "थंबनेल, दूसरी छवि चुनने के लिए टैप करें",
+        "thumbnail_number": "थंबनेल {number}",
+        "recording_busy": "एक रिकॉर्डिंग पहले से चल रही है। पहले उसे कैमरे में पूरा करें।",
+        "photo_lost": "कैमरा खुला होने के दौरान फ़ोटो खो गई। कृपया दोबारा लें।",
+        "add_snippet_button": "+ स्निपेट",
+        "words_count": "{count, plural, one {# शब्द} other {# शब्द}}",
+        "community_search": "खोजें"
+      },
+      "profile": {
+        "open_wallet": "बटुआ खोलें",
+        "your_wallet_is_on_the_wallet": "आपका बटुआ वॉलेट टैब में है।",
+        "user_has_no_comments": "@{username} ने अभी तक कोई टिप्पणी नहीं की",
+        "votes_count": "{count, plural, one {# वोट} other {# वोट}}",
+        "replies_count": "{count, plural, one {# जवाब} other {# जवाब}}",
+        "menu": "अधिक",
+        "users": "प्रयोक्ता"
+      },
+      "reading": {
+        "apply": "लागू करें",
+        "add_tag": "टैग जोड़ें",
+        "age": "आयु",
+        "audio_language": "ऑडियो भाषा",
+        "available_filters": "उपलब्ध फ़िल्टर",
+        "could_not_unlock_the_audio_please": "ऑडियो अनलॉक नहीं हो सका, कृपया फिर प्रयास करें",
+        "downvote": "डाउनवोट",
+        "downvote_percent": "डाउनवोट {percent}%",
+        "listen_to_this_post": "इस पोस्ट को सुनें",
+        "log_in": "लॉग इन करें",
+        "mark_all_as_read": "सभी को पढ़ा हुआ चिह्नित करें",
+        "mark_as_read": "पढ़ा हुआ चिह्नित करें",
+        "more_replies": "और जवाब",
+        "not_enough_points": "Points पर्याप्त नहीं हैं",
+        "nothing_here_yet": "यहाँ अभी कुछ नहीं है।",
+        "open_editor": "एडिटर खोलें",
+        "pause_voice": "आवाज़ पॉज़ करें",
+        "play_voice": "आवाज़ चलाएँ",
+        "playback_speed": "प्लेबैक गति",
+        "publishing_in_waves": "Waves में प्रकाशित हो रहा है",
+        "quests_done": "पूरे किए क्वेस्ट",
+        "read": "पढ़ा हुआ",
+        "remove_vote": "वोट हटाएँ",
+        "seek": "आगे-पीछे करें",
+        "select_community": "समुदाय चुनें",
+        "selected_filters": "चुने हुए फ़िल्टर",
+        "the_audio_could_not_be_loaded": "ऑडियो लोड नहीं हो सका।",
+        "this_post_does_not_exist_or": "यह पोस्ट मौजूद नहीं है या हटा दी गई है।",
+        "unread": "अपठित",
+        "voice_position": "आवाज़ की स्थिति",
+        "vote_weight": "वोट का भार",
+        "reblogged_by": "{username} ने रीब्लॉग किया",
+        "no_more_posts": "और पोस्ट नहीं हैं।",
+        "favourite": "पसंदीदा",
+        "no_votes_yet": "अभी कोई वोट नहीं",
+        "no_comments_yet": "अभी कोई टिप्पणी नहीं। पहले बनें!",
+        "comments_count": "टिप्पणियाँ ({count})",
+        "sending_to_chain": "चेन पर भेजा जा रहा है",
+        "compare": "तुलना करें",
+        "your_vote": "आपका वोट",
+        "reply_to": "@{username} को जवाब दें",
+        "what_do_you_think": "आप क्या सोचते हैं?",
+        "clear_tag_filter": "टैग फ़िल्टर हटाएँ",
+        "tab_selected": "{title}, चुना गया",
+        "add_tag_feed": "टैग फ़ीड जोड़ें",
+        "feed_pinned": "{label}, पिन किया हुआ",
+        "attached_image_remove": "जुड़ी छवि, हटाने के लिए टैप करें",
+        "camera": "कैमरा",
+        "files": "फ़ाइलें",
+        "paused": "पॉज़ किया गया",
+        "in_topic": "{topic} में",
+        "poll_vote": "वोट करें",
+        "reply": "जवाब दें",
+        "mute_sound": "म्यूट करें",
+        "unmute_sound": "अनम्यूट करें",
+        "leaderboard_activities": "गतिविधियाँ",
+        "leaderboard_reward": "इनाम",
+        "sort_votes": "वोट"
+      },
+      "shell": {
+        "account_of": "खाता @{username}",
+        "account_signed_out": "खाता, साइन आउट",
+        "close_tab": "टैब बंद करें",
+        "coming_soon_to_the_native_app": "नेटिव ऐप में जल्द आ रहा है।",
+        "create": "बनाएँ",
+        "expand": "फैलाएँ",
+        "forward": "आगे",
+        "loading": "लोड हो रहा है",
+        "new_tab": "नया टैब",
+        "reload": "रीलोड करें",
+        "sent": "भेजा गया",
+        "tab_unread": "{title}, {count} अपठित",
+        "no_app_for_link": "कोई ऐप इस लिंक को नहीं खोल सकता।"
+      },
+      "wallet": {
+        "product_not_available": "उत्पाद उपलब्ध नहीं है।",
+        "repeat": "दोहराएँ"
+      },
+      "copied": "कॉपी किया गया",
+      "trending_caps": "ट्रेंडिंग",
+      "move_up": "ऊपर ले जाएँ",
+      "move_down": "नीचे ले जाएँ",
+      "scroll_to_top": "ऊपर स्क्रोल करें",
+      "load_more": "और"
+    },
+    "wallet": {
+      "checking": "नेटवर्क से जाँच हो रही है",
+      "leave_title": "अभी भेजा जा रहा है",
+      "leave_message": "यह अभी भेजा जा रहा है या नेटवर्क से जाँचा जा रहा है। आप इस स्क्रीन से जा सकते हैं: पूरा होने पर ऐप आपको बता देगा।",
+      "stay": "रुकें",
+      "collateralized_convert_request": "कोलैटरलाइज़्ड कन्वर्ट अनुरोध",
+      "op_transfer": "स्थानांतरण",
+      "op_power_up": "पावर अप",
+      "op_power_down_change": "पावर डाउन बदलाव",
+      "op_delegation": "डेलिगेशन",
+      "op_savings_deposit": "बचत जमा",
+      "op_savings_withdrawal": "बचत निकासी",
+      "op_conversion": "कन्वर्ज़न",
+      "op_swap": "स्वैप",
+      "op_order_cancel": "ऑर्डर रद्द",
+      "op_reward_claim": "इनाम क्लेम",
+      "op_withdraw_route_change": "निकासी रूट बदलाव",
+      "op_token_operation": "टोकन ऑपरेशन"
+    },
+    "notification": {
+      "amount_unknown": "राशि उपलब्ध नहीं",
+      "weekly_earnings_breakdown": "इस सप्ताह आपने ${amount} कमाए - ${authorUsd} पोस्ट से, ${curationUsd} क्यूरेशन से।",
+      "weekly_earnings_total": "इस सप्ताह आपने अपनी पोस्ट और क्यूरेशन से ${amount} कमाए।"
+    },
+    "settings": {
+      "open": "खोलें",
+      "feedback_subject": "फ़ीडबैक/बग रिपोर्ट",
+      "unknown_user": "अज्ञात प्रयोक्ता"
+    },
+    "navigation": {
+      "editor": "एडिटर",
+      "followers": "फ़ॉलोअर",
+      "spin_game": "स्पिन गेम",
+      "edit_profile": "प्रोफ़ाइल संपादित करें",
+      "redeem_points": "Points रिडीम करें",
+      "community": "समुदाय",
+      "community_members": "समुदाय के सदस्य",
+      "community_activities": "समुदाय की गतिविधियाँ",
+      "browser": "ब्राउज़र",
+      "asset_details": "एसेट विवरण",
+      "edit_history": "संपादन इतिहास",
+      "welcome": "स्वागत है",
+      "chat": "चैट",
+      "backup_keys": "कुंजियों का बैकअप",
+      "trade": "ट्रेड",
+      "ai_image_generator": "AI छवि जनरेटर",
+      "select_assets": "एसेट चुनें",
+      "poll": "पोल",
+      "bot_comments": "बॉट टिप्पणियाँ"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "जिन ऑपरेशनों में ओनर कुंजी चाहिए, उन्हें Ecency में साइन नहीं किया जा सकता।",
+      "post": "पोस्ट/टिप्पणी",
+      "custom": "कस्टम JSON",
+      "sign_buffer": "संदेश साइन करें",
+      "send_token": "टोकन भेजें",
+      "witness_vote": "विटनेस वोट",
+      "proxy": "प्रॉक्सी सेट करें",
+      "power_up": "पावर अप",
+      "power_down": "पावर डाउन",
+      "broadcast": "ब्रॉडकास्ट",
+      "sign_tx": "लेन-देन साइन करें",
+      "encode": "संदेश एन्कोड करें",
+      "decode": "कुंजी सत्यापित करें",
+      "add_account_authority": "खाता अथॉरिटी जोड़ें",
+      "remove_account_authority": "खाता अथॉरिटी हटाएँ",
+      "add_key_authority": "कुंजी अथॉरिटी जोड़ें",
+      "remove_key_authority": "कुंजी अथॉरिटी हटाएँ",
+      "create_claimed_account": "खाता बनाएँ",
+      "create_proposal": "प्रस्ताव बनाएँ",
+      "remove_proposal": "प्रस्ताव हटाएँ",
+      "update_proposal_vote": "प्रस्ताव वोट",
+      "signed_call": "साइन्ड कॉल"
+    },
+    "translate_language": {
+      "ar": "अरबी",
+      "az": "अज़रबैजानी",
+      "bg": "बुल्गारियाई",
+      "bn": "बंगाली",
+      "ca": "कैटलन",
+      "cs": "चेक",
+      "da": "डेनिश",
+      "de": "जर्मन",
+      "el": "ग्रीक",
+      "en": "अंग्रेज़ी",
+      "eo": "एस्पेरांतो",
+      "es": "स्पेनिश",
+      "et": "एस्टोनियाई",
+      "fa": "फ़ारसी",
+      "fi": "फ़िनिश",
+      "fr": "फ़्रेंच",
+      "ga": "आयरिश",
+      "he": "हिब्रू",
+      "hi": "हिन्दी",
+      "hu": "हंगेरियन",
+      "id": "इंडोनेशियाई",
+      "it": "इतालवी",
+      "ja": "जापानी",
+      "ko": "कोरियाई",
+      "lt": "लिथुआनियाई",
+      "lv": "लातवियाई",
+      "ms": "मलय",
+      "nb": "नॉर्वेजियन",
+      "nl": "डच",
+      "pl": "पोलिश",
+      "pt": "पुर्तगाली",
+      "ro": "रोमानियाई",
+      "ru": "रूसी",
+      "sk": "स्लोवाक",
+      "sl": "स्लोवेनियाई",
+      "sq": "अल्बानियाई",
+      "sv": "स्वीडिश",
+      "th": "थाई",
+      "tl": "तागालोग",
+      "tr": "तुर्की",
+      "uk": "यूक्रेनी",
+      "zh": "चीनी",
+      "zt": "चीनी (पारंपरिक)"
+    },
+    "reading": {
+      "banner_text": "यह पोस्ट {source} में है। {target} में अनुवाद करें?",
+      "translated_from_text": "{source} से अनुवादित"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# सदस्य} other {# सदस्य}} • {authors, plural, one {# पोस्टर} other {# पोस्टर}} • {posts, plural, one {# पोस्ट} other {# पोस्ट}}",
+      "community_title": "{title} समुदाय",
+      "members_title": "{title} के सदस्य",
+      "activities_title": "{title} की गतिविधि",
+      "cannot_start_with_or": "@ या # से शुरू नहीं हो सकता",
+      "use_a_two_letter": "दो अक्षरों का भाषा कोड उपयोग करें, जैसे en",
+      "at_most_characters": "अधिकतम {max, plural, one {# अक्षर} other {# अक्षर}}",
+      "council": "परिषद",
+      "journal": "जर्नल",
+      "topic": "विषय",
+      "community_not_found": "समुदाय नहीं मिला।"
+    },
+    "transfer": {
+      "one_recipient": "इस स्थानांतरण के लिए केवल एक प्राप्तकर्ता उपयोग किया जा सकता है।",
+      "is_an_exchange_and": "{exchange} एक एक्सचेंज है और हो सकता है कि वह आवर्ती स्थानांतरण का समर्थन न करे: शेड्यूल पर भेजे गए फंड खो सकते हैं। इसके बजाय एकल स्थानांतरण का उपयोग करें।"
+    },
+    "dapps": {
+      "signing_info": "Ecency आपके Hive साइनिंग एक्सटेंशन की तरह काम करता है। जब कोई dApp आपसे Keychain, Keeper या Peak Vault जैसे ब्राउज़र एक्सटेंशन से लॉग इन करने को कहे, तो वही विकल्प चुनें। Ecency साइनिंग को सुरक्षित रूप से संभाल लेगा।",
+      "category_social": "सोशल",
+      "category_gaming": "गेमिंग",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "ग्रुप",
+      "unable_to_load_messages": "संदेश लोड नहीं हो सके।",
+      "someone": "कोई",
+      "renamed_the_group_to": "{actor} ने ग्रुप का नाम बदलकर \"{name}\" कर दिया",
+      "removed_the_group_name": "{actor} ने ग्रुप का नाम हटा दिया",
+      "unable_to_send_your": "आपका संदेश भेजा नहीं जा सका।",
+      "unable_to_remove_message": "संदेश हटाया नहीं जा सका।",
+      "unknown": "अज्ञात",
+      "members_online": "{members, plural, one {# सदस्य} other {# सदस्य}} • {online} ऑनलाइन",
+      "failed_to_load_pinned": "पिन किए संदेश लोड नहीं हो सके",
+      "you": "आप",
+      "title": "प्रतिक्रियाएँ"
+    },
+    "tip": {
+      "login_required": "टिप भेजने के लिए कृपया लॉग इन करें",
+      "max_decimals": "अधिकतम {n, plural, one {# दशमलव स्थान} other {# दशमलव स्थान}}"
+    },
+    "paid": {
+      "check_again": "फिर जाँचें",
+      "give_up": "छोड़ दें",
+      "unknown": "अभी तक कोई उत्तर नहीं। अनुरोध अब भी चल रहा हो सकता है। परिणाम पाने के लिए फिर जाँचें: इसका शुल्क दोबारा नहीं लगेगा।",
+      "pending": "आपका अनुरोध अभी प्रोसेस हो रहा है। थोड़ी देर में फिर जाँचें: इसका शुल्क दोबारा नहीं लगेगा।",
+      "restored": "पिछले अनुरोध का अभी तक कोई उत्तर नहीं है। उसका परिणाम पाने के लिए फिर जाँचें: इसका शुल्क दोबारा नहीं लगेगा।",
+      "give_up_confirm": "यदि अनुरोध पूरा हो गया था, तो Points खर्च हो चुके हैं और परिणाम खो जाएगा।",
+      "not_stored": "यह अनुरोध डिवाइस पर सहेजा नहीं जा सका। पूरा होने तक इस स्क्रीन को खुला रखें।",
+      "sign_in_again": "आपका सत्र समाप्त हो गया है। फिर साइन इन करें, फिर जाँचें।",
+      "other_account": "यह @{owner} का है। जारी रखने के लिए उसी खाते पर वापस जाएँ।"
+    },
+    "ai": {
+      "run_ai_assist": "AI असिस्ट चलाएँ ({costText})",
+      "no_longer_free_cost": "यह रन आज अब निःशुल्क नहीं है। इसकी लागत {cost} {unit} है।",
+      "no_longer_free": "यह रन आज अब निःशुल्क नहीं है।",
+      "content_violates_our_content": "सामग्री हमारी सामग्री नीति का उल्लंघन करती है। कृपया अपना टेक्स्ट बदलें। Points वापस नहीं किए गए।",
+      "generate_image": "छवि बनाएँ ({costLabel})",
+      "use_prompt": "उपयोग करें: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "कृपया प्रतीक्षा करें, दूसरी क्रिया चल रही है",
+      "not_a_community_post": "यह समुदाय की पोस्ट नहीं है।",
+      "parent_post_not_found": "मूल पोस्ट नहीं मिली",
+      "the_account_changed": "खाता बदल गया।"
+    },
+    "dictation": {
+      "balance": "बैलेंस: {balance} {unit}",
+      "stop_points": "रोकें ({cost} Points)",
+      "stop_free": "रोकें (निःशुल्क)",
+      "transcribe_points": "ट्रांसक्राइब करें ({cost} Points)",
+      "transcribe": "ट्रांसक्राइब करें",
+      "no_longer_free_cost": "यह रिकॉर्डिंग आज अब निःशुल्क नहीं है। इसकी लागत {cost} Points है।",
+      "no_longer_free": "यह रिकॉर्डिंग आज अब निःशुल्क नहीं है।",
+      "held_locked": "Ecency लॉक होने पर रिकॉर्डिंग रुक गई। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
+      "held_no_background": "Ecency के स्क्रीन से हटने पर रिकॉर्डिंग रुक गई (वह अपनी रिकॉर्डिंग नोटिफ़िकेशन नहीं दिखा सका)। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
+      "held_stopped": "नोटिफ़िकेशन से रिकॉर्डिंग रोकी गई। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
+      "held_focus_lost": "किसी कॉल या दूसरे ऐप की आवाज़ के कारण रिकॉर्डिंग रुक गई। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
+      "held_interrupted": "रिकॉर्डिंग रुक गई क्योंकि किसी दूसरे ऐप ने माइक्रोफ़ोन ले लिया। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
+      "unavailable": "इस डिवाइस पर रिकॉर्डिंग उपलब्ध नहीं है।",
+      "not_read": "वह रिकॉर्डिंग पढ़ी नहीं जा सकी या बहुत बड़ी है। कुछ नहीं भेजा गया और कोई शुल्क नहीं लगा।",
+      "give_up_not_sent": "यह रिकॉर्डिंग भेजी नहीं गई, इसलिए कोई शुल्क नहीं लगा। इसे हटा दिया जाएगा।",
+      "give_up_not_charged": "इस रिकॉर्डिंग का कोई शुल्क नहीं लगा। इसे हटा दिया जाएगा।",
+      "clip_lost": "पिछले अनुरोध की रिकॉर्डिंग अब इस डिवाइस पर नहीं है। यदि वह अनुरोध पूरा हो गया था, तो आपके Points खर्च हो चुके हैं, और उसका ट्रांसक्रिप्ट प्राप्त नहीं किया जा सकता।"
+    },
+    "register": {
+      "error_code_28": "आपका अनुरोध प्रोसेस नहीं हो सका। साइनअप कतार शायद भरी है। कृपया कुछ मिनट बाद फिर प्रयास करें।"
+    },
+    "perks": {
+      "quests_empty": "यहाँ अभी कोई क्वेस्ट नहीं है, जल्द ही फिर देखें।",
+      "freeze_confirm_title": "अपनी स्ट्रीक बचाएँ",
+      "spend_points_on_a": "स्ट्रीक फ़्रीज़ पर {price} Points खर्च करें? जिस दिन आप चूक जाएँ, उस दिन आपकी स्ट्रीक बचाने में यह इस्तेमाल हो जाएगा।"
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ecency का समर्थन करें, मुफ़्त ब्लॉग पाएँ, और सत्यापित Pro बैज के साथ अलग दिखें।",
+      "card_description": "साल के {price} में Pro बनें। सत्यापित बैज, मुफ़्त ब्लॉग, और Ecency का समर्थन।",
+      "card_description_plain": "एक साल के लिए Pro बनें। सत्यापित बैज, मुफ़्त ब्लॉग, और Ecency का समर्थन।",
+      "member": "आप Pro सदस्य हैं।",
+      "benefit_badge": "आपके नाम के साथ सत्यापित Pro बैज।",
+      "benefit_blog": "yourname.blogs.ecency.com पर मुफ़्त ब्लॉग।",
+      "benefit_support": "Ecency के विकास को सीधे समर्थन दें।",
+      "benefit_early": "नई सुविधाओं तक शीघ्र पहुँच।",
+      "buy": "साल के {price} में Pro पाएँ",
+      "extend": "{price} में 12 महीने बढ़ाएँ",
+      "extend_note": "दोबारा खरीदने पर आपकी सदस्यता में 12 महीने जुड़ जाते हैं।",
+      "unavailable": "Ecency Pro अभी स्टोर से उपलब्ध नहीं है।",
+      "activating": "भुगतान मिल गया। आपकी सदस्यता सक्रिय की जा रही है।",
+      "success_title": "Ecency Pro में आपका स्वागत है",
+      "success_body": "आपकी Pro सदस्यता सक्रिय है। आपका बैज जल्द ही आपकी प्रोफ़ाइल पर दिखेगा।",
+      "extending": "भुगतान मिल गया। आपकी Pro सदस्यता 12 महीने बढ़ाई जा रही है।",
+      "open_a11y": "Ecency Pro खोलें"
+    },
+    "editor": {
+      "saving_draft": "प्रारूप सहेजा जा रहा है...",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।",
+      "fetch_failed": "प्राप्त करना विफल रहा।",
+      "you_can_only_edit": "आप केवल अपनी सामग्री संपादित कर सकते हैं।",
+      "invalid_percent": "अमान्य प्रतिशत",
+      "beneficiary_exists_already": "लाभार्थी पहले से मौजूद है",
+      "this_draft_belongs_to": "यह प्रारूप @{owner} का है। इसे प्रकाशित करने के लिए उसी खाते पर वापस जाएँ।",
+      "could_not_make_a": "इस पोस्ट के लिए नया लिंक नहीं बन सका। शीर्षक थोड़ा बदलें और फिर प्रयास करें।",
+      "an_earlier_attempt_was": "पिछला प्रयास इसके बाद प्रकाशित हुआ। जाँचें कि आप कौन-सा संस्करण रखना चाहते हैं।",
+      "could_not_check_your": "आपके खाते की पोस्टिंग अथॉरिटी जाँची नहीं जा सकी। अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+      "this_post_was_changed": "आपके खोलने के बाद यह पोस्ट कहीं और बदल दी गई। अपना टेक्स्ट कॉपी करें, वापस जाएँ और नवीनतम संस्करण संपादित करने के लिए इसे फिर खोलें।",
+      "link_text_placeholder": "यहाँ टेक्स्ट"
+    },
+    "app_error": {
+      "this_reply_is_too": "यह जवाब बहुत लंबा है।",
+      "the_network_refused_this": "नेटवर्क ने इस क्रिया को अस्वीकार कर दिया।",
+      "invalid_input": "अमान्य इनपुट।",
+      "secure_storage_is_unavailable": "सुरक्षित भंडारण उपलब्ध नहीं है। कृपया फिर साइन इन करें।",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।",
+      "these_credentials_belong_to": "ये क्रेडेंशियल @{actual} के हैं, @{expected} के नहीं।",
+      "is_not_signed_in": "@{username} इस डिवाइस पर साइन इन नहीं है।",
+      "key_required": "यह लेन-देन करने के लिए {role} कुंजी चाहिए। {hint}",
+      "cancelled": "रद्द किया गया।",
+      "the_request_was_rejected": "वॉलेट ऐप में अनुरोध अस्वीकार कर दिया गया।",
+      "the_request_expired_before": "वॉलेट ऐप के जवाब देने से पहले अनुरोध समाप्त हो गया। कृपया फिर प्रयास करें।",
+      "could_not_reach_the": "HiveAuth सर्वर तक नहीं पहुँचा जा सका। कृपया फिर प्रयास करें।",
+      "unexpected_redirect": "सर्वर ने अनपेक्षित रीडायरेक्ट भेजा। कुछ नहीं बदला गया। कृपया बाद में फिर प्रयास करें।",
+      "missing_key_hint": "इसे सेटिंग, अथॉरिटी प्रबंधित करें (Import Private) में जोड़ें, या इसके साथ फिर साइन इन करें।",
+      "this_key_is_also": "यह कुंजी इस खाते की ओनर कुंजी भी है। Ecency ऐसी कुंजी नहीं रखता जो ओनर भूमिका को नियंत्रित करती हो: अपनी एक्टिव और पोस्टिंग भूमिकाओं को अलग-अलग कुंजियाँ दें, फिर उन्हीं से साइन इन करें।",
+      "this_is_the_owner": "यह ओनर कुंजी है। Ecency ओनर कुंजी को कभी सहेजता या उपयोग नहीं करता: अपने मास्टर पासवर्ड से, या अपनी पोस्टिंग या एक्टिव कुंजी से साइन इन करें।",
+      "this_password_only_matches": "यह पासवर्ड केवल खाते की ओनर कुंजी से मेल खाता है। Ecency ओनर कुंजी को कभी सहेजता या उपयोग नहीं करता: अपनी पोस्टिंग या एक्टिव कुंजी से साइन इन करें।",
+      "this_key_cannot_sign": "यह कुंजी अकेले खाते के लिए साइन नहीं कर सकती: खाते को एक से अधिक हस्ताक्षर चाहिए (इसका भार सीमा से कम है)।",
+      "public_key_given": "यह आपकी सार्वजनिक कुंजी है। निजी कुंजी (5 से शुरू होती है) या अपना मास्टर पासवर्ड पेस्ट करें।",
+      "memo_key_only": "मेमो कुंजी से साइन इन नहीं किया जा सकता। अपनी पोस्टिंग कुंजी, एक्टिव कुंजी या मास्टर पासवर्ड का उपयोग करें।",
+      "network_message": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+      "network_error_this_may": "नेटवर्क त्रुटि। हो सकता है यह पहले ही हो चुका हो; दोबारा प्रयास करना सुरक्षित है और दो बार पोस्ट नहीं होगा।"
+    },
+    "purchases": {
+      "deal_best": "सबसे बढ़िया डील!",
+      "deal_popular": "लोकप्रिय!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "स्टोर से कोई उत्तर नहीं मिला।"
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts उपयोग के लिए ईमेल और प्रयोक्ता नाम आवश्यक हैं",
+      "stuck": "इस उत्पाद की पिछली खरीदारी पूरी नहीं हो सकी। कृपया अपनी स्टोर रसीद के साथ support@ecency.com से संपर्क करें, यह इसी के लिए सुरक्षित रखी गई है।",
+      "held": "यह खरीदारी समीक्षा के लिए रोकी गई है। ऑर्डर #{order} के साथ support@ecency.com से संपर्क करें।",
+      "earlier_purchase": "इस उत्पाद की पिछली खरीदारी पहले @{target} के लिए पूरी की जा रही है।",
+      "earlier_pending": "इस उत्पाद का पिछला भुगतान @{target} के लिए अभी लंबित है। स्टोर द्वारा भुगतान की पुष्टि होते ही यह पूरा हो जाएगा।",
+      "pending": "आपका भुगतान लंबित है। स्टोर द्वारा भुगतान की पुष्टि होते ही खरीदारी पूरी हो जाएगी।",
+      "processing": "आपकी खरीदारी प्रोसेस हो रही है। यह जल्द ही पूरी हो जाएगी।"
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "आवर्ती स्थानांतरण",
+      "delegate_hive_power": "Hive Power डेलिगेट करें",
+      "power_up": "पावर अप",
+      "set_withdraw_vesting_route": "निकासी वेस्टिंग रूट सेट करें",
+      "power_down": "पावर डाउन",
+      "transfer_to_saving": "बचत में स्थानांतरित करें",
+      "transfer_from_saving": "बचत से स्थानांतरित करें",
+      "cancel_transfer_from_saving": "बचत से स्थानांतरण रद्द करें",
+      "collateralized_convert": "कोलैटरलाइज़्ड कन्वर्ट",
+      "witness_vote": "विटनेस वोट",
+      "witness_update": "विटनेस अपडेट",
+      "witness_set_properties": "विटनेस प्रॉपर्टी सेट करें",
+      "governance_proxy": "गवर्नेंस प्रॉक्सी",
+      "claim_account": "खाता क्लेम करें",
+      "create_account": "खाता बनाएँ",
+      "create_account_with_account": "खाता क्रेडिट से खाता बनाएँ",
+      "create_limit_order": "लिमिट ऑर्डर बनाएँ",
+      "cancel_limit_order": "लिमिट ऑर्डर रद्द करें",
+      "redeem_rewards": "इनाम रिडीम करें",
+      "post_or_comment": "पोस्ट या टिप्पणी",
+      "post_or_comment_options": "पोस्ट या टिप्पणी विकल्प",
+      "custom_operation": "कस्टम ऑपरेशन",
+      "update_account_active": "खाता अपडेट (एक्टिव)",
+      "update_account_posting": "खाता अपडेट (पोस्टिंग)",
+      "change_recovery_account": "रिकवरी खाता बदलें",
+      "create_proposal": "प्रस्ताव बनाएँ",
+      "remove_proposal": "प्रस्ताव हटाएँ",
+      "update_proposal_votes": "प्रस्ताव वोट अपडेट करें",
+      "update_proposal": "प्रस्ताव अपडेट करें"
+    },
+    "auth_link": {
+      "must_be_signed_by": "इस लिंक पर @{account} को साइन करना होगा। उस खाते पर जाएँ और इसे फिर खोलें।",
+      "ecency_can_only_sign": "Ecency लिंक से केवल लेन-देन साइन और ब्रॉडकास्ट कर सकता है।",
+      "requester_page": "पेज {host}",
+      "owner_refused": "जिन ऑपरेशनों में ओनर कुंजी चाहिए, उन्हें लिंक से साइन नहीं किया जा सकता।",
+      "busy": "कृपया प्रतीक्षा करें: दूसरा अनुरोध अभी प्रोसेस हो रहा है।",
+      "not_supported": "Ecency इस संस्करण में अभी यह ऑपरेशन साइन नहीं कर सकता।"
+    },
+    "chats": {
+      "group_members": "ग्रुप सदस्य",
+      "rename_group": "ग्रुप का नाम बदलें",
+      "failed_to_load_chats": "चैट लोड नहीं हो सकीं",
+      "unknown": "अज्ञात",
+      "unable_to_mark_channel": "चैनल को पढ़ा हुआ चिह्नित नहीं किया जा सका",
+      "unable_to_update_favorites": "पसंदीदा अपडेट नहीं हो सके",
+      "unable_to_update_mute": "म्यूट अपडेट नहीं हो सका",
+      "group": "ग्रुप",
+      "unable_to_search": "खोज नहीं हो सकी",
+      "unable_to_start_chat": "चैट शुरू नहीं हो सकी",
+      "no_internet": "इंटरनेट कनेक्शन नहीं है"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) @{to} को डेलिगेट करें",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "@{recipient} को पहले ही डेलिगेट किया जा चुका है"
+    },
+    "backup_keys": {
+      "owner_not_stored": "केवल सार्वजनिक। Ecency ओनर कुंजी कभी नहीं सहेजता।",
+      "shared_owner": "यह खाता अपनी ओनर भूमिका और {names} भूमिका के लिए एक ही कुंजी उपयोग करता है। जिसके पास वह कुंजी है, वह पूरे खाते को नियंत्रित करता है। {names} भूमिका को अपनी अलग कुंजी दें और ओनर कुंजी को ऑफ़लाइन रखें।",
+      "copy_warning": "इस निजी कुंजी वाला कोई भी व्यक्ति आपके खाते के इस हिस्से को नियंत्रित करता है। अन्य ऐप क्लिपबोर्ड पढ़ सकते हैं; इसे केवल वहीं पेस्ट करें जहाँ आपको भरोसा हो। 2 मिनट बाद इसे क्लिपबोर्ड से हटा दिया जाता है।"
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN लॉक चालू है।",
+      "pin_changed": "PIN बदल दिया गया।",
+      "pin_lock_is_off": "PIN लॉक बंद है।",
+      "wiped_notice": "सभी खाते, कुंजियाँ और क्रेडेंशियल इस डिवाइस से हटा दिए गए।",
+      "we_could_not_bring": "हम ऐप के पिछले संस्करण से आपके खाते नहीं ला सके। कृपया फिर लॉग इन करें।",
+      "your_pin_lock_could": "आपका PIN लॉक पिछले संस्करण से नहीं लाया जा सका। ऐप लॉक फिर चालू करने के लिए खाता मेनू से PIN दोबारा सेट करें।",
+      "biometric_unlock_was_turned": "बायोमेट्रिक अनलॉक बंद कर दिया गया क्योंकि इस डिवाइस की बायोमेट्रिक जानकारी बदल गई है। अपने PIN से अनलॉक करें, फिर खाता मेनू से इसे दोबारा चालू करें।",
+      "biometric_unavailable_notice": "बायोमेट्रिक अनलॉक चालू नहीं हो सका: इस डिवाइस पर कोई बायोमेट्रिक सेट नहीं है।",
+      "set_backup": "बायोमेट्रिक अनलॉक के बैकअप के लिए PIN सेट करें",
+      "biometric_on_notice": "PIN लॉक चालू है। बायोमेट्रिक से या अपने PIN से अनलॉक करें।",
+      "offer_title": "बायोमेट्रिक से अनलॉक करें",
+      "offer_body": "अपने चेहरे या फ़िंगरप्रिंट से Ecency खोलें। आपने PIN भी सेट किया है, जो बायोमेट्रिक उपलब्ध न होने पर ऐप को अनलॉक करता है।",
+      "offer_use": "बायोमेट्रिक उपयोग करें",
+      "offer_use_pin": "इसके बजाय PIN उपयोग करें"
+    },
+    "common": {
+      "list_and": "{first} और {second}",
+      "role_owner": "ओनर",
+      "role_active": "एक्टिव",
+      "role_posting": "पोस्टिंग",
+      "role_memo": "मेमो"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 या उससे कम अक्षरों के जवाब पर Points नहीं मिलते (लिंक गिने नहीं जाते)",
+      "short_content_hint": "Points कमाने के लिए बहुत छोटा (25 या उससे कम अक्षर, लिंक छोड़कर)",
+      "daily_post": "दैनिक पोस्ट {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# दिन की स्ट्रीक} other {# दिन की स्ट्रीक}}",
+      "grant_description": "Ecency खाते @ecency.app को अपने खाते पर पोस्टिंग की अनुमति दें, ताकि हर बार Keychain खोले बिना आप पोस्ट कर सकें। इसे देने से आपके खाते की पोस्टिंग अथॉरिटी बदलती है और आपकी एक्टिव कुंजी चाहिए।"
+    },
+    "wallet_history": {
+      "from_to": "@{from} से @{to} को",
+      "from_user_id": "@{from} से, आईडी: {id}",
+      "user_id": "@{user}, आईडी: {id}",
+      "from_to_id": "@{from} से @{to} को, आईडी: {id}",
+      "from_to_account": "@{from} से {to} को",
+      "from_user": "@{user} से",
+      "to_user": "@{user} को",
+      "interest": "ब्याज",
+      "proposal_pay": "प्रस्ताव भुगतान",
+      "categories": "गतिविधि के प्रकार",
+      "category_all": "सभी",
+      "category_transfers": "स्थानांतरण",
+      "category_market": "मार्केट ऑर्डर",
+      "category_interest": "ब्याज",
+      "category_stake": "स्टेक ऑपरेशन",
+      "category_rewards": "इनाम",
+      "point_type_checkin": "हार्टबीट",
+      "point_type_login": "लॉगिन",
+      "point_type_post": "पोस्ट",
+      "point_type_comment": "टिप्पणी",
+      "point_type_vote": "वोट",
+      "point_type_reblog": "रीब्लॉग",
+      "point_type_transfer_sent": "भेजे गए स्थानांतरण",
+      "point_type_transfer_received": "प्राप्त स्थानांतरण"
+    },
+    "video_upload": {
+      "continue_upload": "अपलोड जारी रखें",
+      "source_gone": "यह रिकॉर्डिंग अब डिवाइस पर उपलब्ध नहीं है। वीडियो फिर रिकॉर्ड करें या चुनें।",
+      "no_camera": "इस डिवाइस पर कैमरा उपलब्ध नहीं है।"
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "अगला अनस्टेकिंग {hours, plural, one {# घंटे} other {# घंटे}} में है",
+      "account_not_found": "खाता नहीं मिला"
+    },
+    "wave_compose": {
+      "clipboard_chip": "क्लिपबोर्ड में छवि · छवि पेस्ट करें",
+      "no_container": "नवीनतम waves कंटेनर प्राप्त नहीं हो सका",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।",
+      "write_something_first": "पहले कुछ लिखें।",
+      "account_changed": "यह wave दूसरे खाते के रूप में लिखी गई थी। इसे बंद करें और फिर से लिखें।",
+      "no_upload": "इस बिल्ड में छवि अपलोड अभी उपलब्ध नहीं है। इसके बजाय टेक्स्ट में छवि का लिंक पेस्ट करें।",
+      "fail": "विफल"
+    },
+    "delete_account": {
+      "sign_out_failed": "आपका अनुरोध भेज दिया गया, लेकिन साइन आउट विफल रहा। कृपया मेनू से लॉग आउट करें।",
+      "not_sent": "आपका हटाने का अनुरोध भेजा नहीं जा सका। कृपया फिर प्रयास करें।"
+    },
+    "chat_sheets": {
+      "group_limit": "एक ग्रुप में अधिकतम {max, plural, one {# अन्य व्यक्ति} other {# अन्य लोग}} हो सकते हैं।",
+      "search_people_by_username": "प्रयोक्ता नाम से लोगों को खोजें",
+      "new_group_title": "नया ग्रुप",
+      "new_group_hint": "ग्रुप बातचीत शुरू करने के लिए {min} से {max, plural, one {# व्यक्ति} other {# लोगों}} को जोड़ें।",
+      "no_results": "चैट पर इस नाम का कोई नहीं मिला।",
+      "search_failed": "खोज नहीं हो सकी। अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+      "create": "ग्रुप शुरू करें",
+      "new_group_failed": "ग्रुप शुरू नहीं हो सका। कृपया फिर प्रयास करें।",
+      "name_limit": "ग्रुप के नाम में अधिकतम {max, plural, one {# अक्षर} other {# अक्षर}} हो सकते हैं।",
+      "rename_title": "ग्रुप का नाम बदलें",
+      "rename_hint": "इस ग्रुप को ऐसा नाम दें जो इसमें सभी को दिखे। खाली छोड़ने पर सदस्यों के नाम दिखाए जाएँगे।",
+      "placeholder": "ग्रुप का नाम",
+      "not_owner": "केवल ग्रुप शुरू करने वाला व्यक्ति ही इसका नाम बदल सकता है।",
+      "rename_failed": "ग्रुप का नाम नहीं बदला जा सका। कृपया फिर प्रयास करें।"
+    },
+    "editor_side": {
+      "copy_of": "{title} की प्रति",
+      "deletions_failed": "कुछ गलत हो गया\n{total, plural, one {# हटाने} other {# हटाने}} में से {failed} विफल रहे",
+      "uploads_failed": "{count, plural, one {# अपलोड विफल रहा} other {# अपलोड विफल रहे}}:\n\n{messages}",
+      "failed_to_delete": "हटाना विफल रहा"
+    },
+    "uploads": {
+      "add_to_gallery": "गैलरी में जोड़ें"
+    },
+    "account_notice": {
+      "manage_keys": "सेटिंग, अथॉरिटी प्रबंधित करें",
+      "no_signing_key_title": "@{account} के रूप में फिर साइन इन करें",
+      "no_signing_key": "Ecency अब ओनर कुंजी या मास्टर पासवर्ड इस डिवाइस पर नहीं रखता, और @{account} की कोई पोस्टिंग या एक्टिव कुंजी यहाँ सहेजी नहीं है। अपने मास्टर पासवर्ड से या पोस्टिंग या एक्टिव कुंजी से फिर साइन इन करें, या {manageKeys} (Import Private) में कुंजी जोड़ें।",
+      "missing_roles_title": "कुछ कुंजियाँ नहीं जोड़ी गईं",
+      "cannot_post": "पोस्ट, वोट या टिप्पणी करना",
+      "cannot_transfer": "स्थानांतरण भेजना या खाता सेटिंग बदलना",
+      "missing_roles": "आपका पासवर्ड अब @{account} की {missing} कुंजी से मेल नहीं खाता: पासवर्ड सेट होने के बाद खाते पर इसे बदला गया। इस डिवाइस पर सहेजी: {kept} कुंजी। जब तक आप {manageKeys} (Import Private) में {missing} कुंजी नहीं जोड़ते, @{account} की कुंजियों के साथ {cannot} संभव नहीं होगा।",
+      "shared_owner_title": "यह कुंजी ओनर भूमिका को भी नियंत्रित करती है",
+      "shared_owner": "@{account} अपनी ओनर भूमिका और {names} भूमिका के लिए एक ही कुंजी उपयोग करता है। जिसके पास यह कुंजी है, वह पूरे खाते को नियंत्रित करता है। Ecency इसे केवल {names} कुंजी के रूप में रखता है और ओनर ऑपरेशनों के लिए कभी उपयोग नहीं करता। {names} भूमिका को अपनी अलग कुंजी दें, और ओनर कुंजी को ऑफ़लाइन रखें।"
+    },
+    "dapp_browser": {
+      "message_from": "{host} से संदेश",
+      "home_title": "होम",
+      "loading_title": "लोड हो रहा है...",
+      "blank_run": "[{count, plural, one {# खाली अक्षर} other {# खाली अक्षर}}]",
+      "too_large": "इस पेज ने इतना बड़ा अनुरोध साइन करने को कहा जो दिखाया नहीं जा सकता, इसलिए Ecency ने उसे अस्वीकार कर दिया।"
+    },
+    "community_service": {
+      "the_account_changed": "खाता बदल गया।"
+    },
+    "profile_edit": {
+      "enter_link": "छवि का लिंक दर्ज करें",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।",
+      "account_not_found": "खाता नहीं मिला",
+      "please_enter_an_image": "कृपया https:// से शुरू होने वाला छवि लिंक दर्ज करें"
+    },
+    "background_media": {
+      "post_by": "@{author} की पोस्ट"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "कृपया पहले साइन इन करें।"
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "आप इसी भार के साथ पहले ही वोट कर चुके हैं।",
+      "insufficient_rc": "रिसोर्स क्रेडिट्स अपर्याप्त हैं। कृपया प्रतीक्षा करें या पावर अप करें।",
+      "missing_authority": "पोस्टिंग अथॉरिटी नहीं है। कृपया अपना लॉगिन तरीका जाँचें।",
+      "comment_too_soon": "दोबारा पोस्ट करने से पहले कृपया प्रतीक्षा करें।",
+      "paid_out": "इस पोस्ट का भुगतान पहले ही हो चुका है।",
+      "too_large": "लेन-देन {size, plural, one {# बाइट} other {# बाइट}} का है, जो {max} बाइट की सीमा से अधिक है।",
+      "network_error_please_check": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जाँचें और फिर प्रयास करें।",
+      "unconfirmed_message": "पुष्टि नहीं हो सकी कि यह पूरा हुआ या नहीं। कृपया अपना बटुआ या इतिहास जाँचें; वहाँ न दिखे तभी इसे फिर शुरू करें।",
+      "undecided_message": "हो सकता है यह पहले ही पूरा हो चुका हो। फिर प्रयास करने से पहले कृपया अपना बटुआ या इतिहास जाँचें।"
+    },
+    "chat_api": {
+      "request_failed": "अनुरोध विफल रहा ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} टाइप कर रहा है...",
+      "typing_two": "{first} और {second} टाइप कर रहे हैं...",
+      "typing_three": "{first}, {second} और {third} टाइप कर रहे हैं...",
+      "typing_many": "{first}, {second} और {count, plural, one {# अन्य} other {# अन्य}} टाइप कर रहे हैं...",
+      "banned": "{reason} आप अब भी चैट पढ़ सकते हैं। पोस्टिंग {until} फिर चालू होगी।",
+      "joined_when": "{time} जुड़े",
+      "joined": "जुड़े",
+      "official_badge": "आधिकारिक",
+      "official_badge_label": "आधिकारिक Ecency खाता"
+    },
+    "side_menu": {
+      "ask_esie": "Esie से पूछें"
+    },
+    "chat_service": {
+      "missing_token": "Hive एक्सेस टोकन नहीं मिला। कृपया लॉग आउट करके फिर लॉग इन करें।",
+      "dm_error": "प्रयोक्ता चैट से नहीं जुड़ा है"
+    },
+    "compose_reply": {
+      "account_changed": "यह जवाब दूसरे खाते के रूप में लिखा गया था। इसे बंद करें और फिर से लिखें।",
+      "write_something_first": "पहले कुछ लिखें।",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।"
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "बहुत ज़्यादा लाभार्थी: अधिकतम {max}।",
+      "a_beneficiary_s_share": "लाभार्थी का हिस्सा 0.01% और 100% के बीच होना चाहिए।",
+      "beneficiaries_add_up_to": "लाभार्थियों का कुल हिस्सा 100% से अधिक है।",
+      "a_beneficiary_is_listed": "एक लाभार्थी दो बार सूचीबद्ध है।",
+      "you_cannot_be_a": "आप अपनी ही पोस्ट के लाभार्थी नहीं हो सकते।",
+      "a_beneficiary_has_an": "किसी लाभार्थी का खाता नाम अमान्य है।"
+    },
+    "follows": {
+      "fail": "विफल!: {message}",
+      "follower_count": "फ़ॉलोअर ({count})",
+      "following_count": "फ़ॉलो कर रहे हैं ({count})"
+    },
+    "link": {
+      "unsupported": "यह लिंक अभी समर्थित नहीं है।",
+      "cannot_open": "लिंक नहीं खुल सकता",
+      "unsupported_version": "यह लिंक इस संस्करण में समर्थित नहीं है।"
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "एक्सप्लोर ब्राउज़र लेन-देन साइन करने के लिए आपके Hive वॉलेट तक पहुँच सकता है। यह लिंक पोस्ट की सामग्री से आया है और Ecency द्वारा सत्यापित नहीं है। केवल तभी आगे बढ़ें जब आप इस पर भरोसा करते हों:\n\n{url}"
+    },
+    "listen": {
+      "message": "सुनने के लिए {required} Points चाहिए और आपके पास {available} हैं।",
+      "unlock_label": "अनलॉक करें · {cost} Points",
+      "preparing_audio": "ऑडियो तैयार हो रहा है · {preparingPercent}%",
+      "waiting_in_line_ahead": "कतार में प्रतीक्षा, आगे {ahead}…",
+      "next_in_line": "कतार में अगले…",
+      "preparing_about_minutes": "ऑडियो तैयार हो रहा है, लगभग {minutes} मिनट…",
+      "preparing_audio_2": "ऑडियो तैयार हो रहा है…",
+      "spend_confirm": "इस पोस्ट को सुनने के लिए {cost} Points खर्च करें? यह ऑडियो आप कभी भी दोबारा चला सकते हैं।",
+      "about_minutes": "~{minutes} मिनट",
+      "failed_refunded": "ऑडियो नहीं बन सका, आपके Points लौटा दिए गए"
+    },
+    "media_pick": {
+      "preparing_video": "वीडियो तैयार हो रहा है...",
+      "library_hint": "अपनी फ़ोटो में से चुनें",
+      "camera_hint": "अभी नई फ़ोटो लें",
+      "files_hint": "इस डिवाइस और क्लाउड की फ़ाइलें ब्राउज़ करें",
+      "paste_hint": "कॉपी की हुई छवि उपयोग करें",
+      "link_hint": "वेब से कोई छवि उपयोग करें"
+    },
+    "media_picking": {
+      "image_types_message": "यह फ़ाइल प्रकार समर्थित नहीं है। JPEG, PNG, GIF, WebP या HEIC छवि चुनें।",
+      "video_types_message": "यह फ़ाइल प्रकार समर्थित नहीं है। MP4 या MOV वीडियो चुनें।",
+      "gif_too_large": "यह GIF {mb} MB से बड़ी है।"
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "इस ऑपरेशन में एक्टिव और पोस्टिंग दोनों हस्ताक्षर चाहिए, जिन्हें Ecency अभी एक साथ साइन नहीं कर सकता।"
+    },
+    "poll": {
+      "fail": "विफल!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "आपके खाते की पोस्टिंग अथॉरिटी जाँची नहीं जा सकी। अपना कनेक्शन जाँचें और फिर प्रयास करें।"
+    },
+    "post_lists": {
+      "voters_title": "वोटर जानकारी ({total})",
+      "reblogs_title": "रीब्लॉग जानकारी ({total})",
+      "no_history_found": "कोई इतिहास नहीं मिला!",
+      "no_edit_history_available": "इस सामग्री का कोई संपादन इतिहास उपलब्ध नहीं है।",
+      "version_label": "संस्करण {version}"
+    },
+    "stats": {
+      "other_device": "अन्य"
+    },
+    "profile": {
+      "account_not_found": "खाता नहीं मिला",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • {hours, plural, one {# घंटे} other {# घंटे}} में पूरा"
+    },
+    "profile_metadata_guard": {
+      "refused": "आपकी वर्तमान प्रोफ़ाइल नहीं पढ़ी जा सकी, फिर प्रयास करें"
+    },
+    "profile_sheet": {
+      "fail": "विफल! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "खाता नहीं मिला"
+    },
+    "push_payload": {
+      "mentioned": "@{source} ने @{target} का उल्लेख किया",
+      "replied": "@{source} ने @{target} को जवाब दिया",
+      "transferred": "@{source} ने @{target} को स्थानांतरित किया",
+      "delegated": "@{source} ने @{target} को डेलिगेट किया",
+      "rewards_received": "इनाम मिले",
+      "account_updated": "खाता अपडेट हुआ",
+      "account_updated_body": "आपके खाते का विवरण अपडेट किया गया",
+      "followed": "@{source} ने @{target} को फ़ॉलो किया",
+      "unfollowed": "@{source} ने @{target} को अनफ़ॉलो किया",
+      "ignored": "@{source} ने @{target} को अनदेखा किया",
+      "blacklisted": "@{source} ने @{target} को ब्लैकलिस्ट किया",
+      "posted_in": "@{source} ने #{firstTag} में पोस्ट किया"
+    },
+    "qr_scan": {
+      "permission_title": "कैमरा अनुमति नहीं मिल सकी",
+      "permission_message": "कृपया ecency सेटिंग में कैमरा अनुमति दें।",
+      "permission_allow": "अनुमति दें"
+    },
+    "reply_account": {
+      "switch": "दूसरे खाते से जवाब दें"
+    },
+    "send_journal": {
+      "your_from_went_through": "@{account} से आपका {label} पूरा हो गया।",
+      "not_sent": "@{account} से आपका {label} पूरा नहीं हुआ। कुछ नहीं भेजा गया; आप इसे फिर शुरू कर सकते हैं।",
+      "checking_whether_your_from": "जाँच हो रही है कि @{account} से आपका {label} पूरा हुआ या नहीं। इसे फिर भेजने से पहले कृपया अपना बटुआ जाँचें।"
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner पेज बंद हो गया",
+      "wrong_role": "यह आपकी {given} कुंजी है; इस ऑपरेशन के लिए आपकी {needed} कुंजी चाहिए।",
+      "action_id_required": "इस क्रिया को सुरक्षित रूप से दोबारा करने के लिए एक्शन आईडी चाहिए।"
+    },
+    "signing_router": {
+      "owner_never": "ओनर ऑपरेशन ऐप में कभी साइन नहीं किए जाते।"
+    },
+    "spin": {
+      "key_missing": "गेम कुंजी नहीं मिली",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "आज (UTC), {time} में रीसेट होगा",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "प्रतिदिन 00:00 UTC पर रीसेट होता है"
+    },
+    "storage_reset": {
+      "title": "फिर साइन इन करें",
+      "message": "इस डिवाइस पर सुरक्षित भंडारण रीसेट हो गया। फिर साइन इन करें।",
+      "failed": "इस डिवाइस के खाते हटाए नहीं जा सके। कृपया फिर प्रयास करें।"
+    },
+    "store": {
+      "in_app_purchases_are": "इस बिल्ड में ऐप-में खरीदारी उपलब्ध नहीं है।"
+    },
+    "wallet_sends": {
+      "journal_full": "पिछले बहुत से भेजे गए लेन-देन की नेटवर्क से जाँच अभी चल रही है। और भेजने से पहले कृपया उनकी पुष्टि होने तक प्रतीक्षा करें।",
+      "check_later": "नेटवर्क ने समय पर इसकी पुष्टि नहीं की। इसे फिर भेजने से पहले कृपया अपना बटुआ या इतिहास जाँचें; ऐप अगली बार शुरू होने पर फिर जाँच करेगा।"
+    },
+    "waves": {
+      "shorts": "शॉर्ट्स"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# अपठित} other {# अपठित}}",
+      "locked_text": "देखने के लिए Ecency अनलॉक करें",
+      "signed_out_text": "Ecency में लॉग इन करें"
+    },
+    "posting_grant": {
+      "unreadable": "आपके खाते की मौजूदा अथॉरिटी पढ़ी नहीं जा सकीं। कुछ नहीं बदला गया; कृपया फिर प्रयास करें।",
+      "reads_disagree": "आपके खाते की पोस्टिंग अथॉरिटी के दो पाठ आपस में मेल नहीं खाते। कुछ नहीं बदला गया; कृपया फिर प्रयास करें।"
+    },
+    "vote": {
+      "vote_weight_must_be": "वोट का भार -100% और 100% के बीच होना चाहिए।",
+      "please_sign_in_first": "कृपया पहले साइन इन करें।"
+    },
+    "widget": {
+      "streak_name": "क्वेस्ट स्ट्रीक",
+      "write": "लिखें",
+      "new_wave": "नई Wave",
+      "notifications_description": "आपकी अपठित नोटिफ़िकेशन। PIN लॉक चालू होने पर छिपी रहती हैं।",
+      "streak_description": "आपकी दैनिक क्वेस्ट स्ट्रीक। PIN लॉक चालू होने पर छिपी रहती है।",
+      "compose_description": "पोस्ट या नई wave लिखें।",
+      "streak_title": "स्ट्रीक",
+      "daily_quests": "दैनिक क्वेस्ट",
+      "streak_hint": "अपनी स्ट्रीक देखने के लिए Perks खोलें",
+      "open_perks": "Perks खोलें",
+      "open_app": "Ecency खोलें",
+      "unread_caption": "{count, plural, one {अपठित} other {अपठित}}",
+      "streak_caption": "{count, plural, one {दिन की स्ट्रीक} other {दिन की स्ट्रीक}}"
+    },
+    "system": {
+      "dictation_channel": "डिक्टेशन",
+      "listen_channel": "सुनें",
+      "dictation_channel_description": "पृष्ठभूमि में डिक्टेशन की रिकॉर्डिंग चलने के दौरान दिखता है, रोकने की क्रिया के साथ।",
+      "dictation_title": "डिक्टेशन के लिए रिकॉर्डिंग",
+      "dictation_text": "Ecency आपका डिक्टेशन रिकॉर्ड कर रहा है। रोकने पर यह तब तक नहीं भेजा जाता जब तक आप ऐप में पुष्टि न करें।",
+      "listen_channel_description": "बताता है कि कब सुनें पृष्ठभूमि में जारी नहीं रह सका।",
+      "listen_paused": "सुनना रुका",
+      "listen_paused_text": "सुनना जारी रखने के लिए Ecency खोलें।",
+      "skip_back": "15 सेकंड पीछे",
+      "skip_forward": "15 सेकंड आगे"
+    },
+    "permission": {
+      "face_id": "अपने PIN की जगह Face ID से Ecency अनलॉक करें।",
+      "camera": "QR कोड स्कैन करें, और अपनी पोस्ट में जोड़ने के लिए फ़ोटो लें या वीडियो रिकॉर्ड करें।",
+      "photo_library_add": "Ecency पोस्ट से डाउनलोड की गई छवियों को आपकी फ़ोटो लाइब्रेरी में सहेजता है।",
+      "photo_library": "Ecency पोस्ट से डाउनलोड की गई छवियों को आपकी फ़ोटो लाइब्रेरी में एक Ecency एल्बम में एक साथ रखता है।",
+      "microphone": "Ecency आपका माइक्रोफ़ोन इसलिए उपयोग करता है ताकि आप पोस्ट और टिप्पणियाँ बोलकर लिख सकें (वे रिकॉर्डिंग ट्रांसक्राइब करने के लिए Ecency को भेजी जाती हैं) और पोस्ट में जोड़े गए वीडियो के साथ आवाज़ रिकॉर्ड कर सकें।"
+    },
+    "android": {
+      "no_browser": "कोई ब्राउज़र उपलब्ध नहीं",
+      "biometric_unlock_title": "बायोमेट्रिक से Ecency अनलॉक करें",
+      "biometric_confirm": "अपने फ़िंगरप्रिंट या चेहरे से पुष्टि करें",
+      "image_unsupported_address": "असमर्थित छवि पता",
+      "image_create_failed": "फ़ाइल बनाई नहीं जा सकी",
+      "image_write_failed": "फ़ाइल लिखी नहीं जा सकी",
+      "image_too_large": "छवि बहुत बड़ी है",
+      "image_download_failed": "डाउनलोड स्टेटस {status} के साथ विफल रहा",
+      "billing_disconnected": "Google Play Billing डिस्कनेक्ट हो गया।",
+      "billing_no_screen": "खरीदारी दिखाने के लिए कोई स्क्रीन नहीं है।",
+      "billing_error": "Google Play Billing त्रुटि {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "आपने इस महीने {count, plural, one {# पोस्ट} other {# पोस्ट}} बनाई। ऐसे ही जारी रखें!",
-        "checkin": "आपने इस सप्ताह {count, plural, one {# दिन} other {# दिन}} चेक इन किया। ऐसे ही जारी रखें!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} में {count, plural, one {# नई पोस्ट} other {# नई पोस्ट}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# असफल प्रयास} other {# असफल प्रयास}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}-दिन की स्ट्रीक"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• केवल {days} दिनों से पुराने खातों की अनुमति है",
-        "max_choices": "• आप अधिकतम {choices} विकल्प चुन सकते हैं"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "शेष {executions} ट्रांसफ़र",
-        "schedule_summary": "{executions} ट्रांसफ़र, प्रत्येक हर {hours} घंटे में"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Points कमाने के लिए बहुत छोटा ({n, plural, one {# अक्षर} other {# अक्षर}} या उससे कम, लिंक छोड़कर)"
       },
       "chats": {
-        "people_joined": "{count} लोग शामिल हुए"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "लगभग {count, plural, one {# मिनट} other {# मिनट}} में",
+        "ban-remaining-hours": "लगभग {count, plural, one {# घंटे} other {# घंटे}} में",
+        "ban-remaining-days": "लगभग {count, plural, one {# दिन} other {# दिन}} में"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "अधिकतम {n, plural, one {# टैग} other {# टैग}} उपयोग करें",
+          "too_long": "खोज बहुत लंबी है। अधिकतम {n, plural, one {# अक्षर} other {# अक्षर}} उपयोग करें"
+        }
       },
       "ai_assist": {
-        "min_chars": "न्यूनतम {count} वर्ण आवश्यक हैं",
-        "chars_remaining": "{count} वर्ण शेष"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "आप एक बार में अधिकतम {count, plural, one {# छवि} other {# छवियाँ}} चुन सकते हैं"
+      },
+      "dictation": {
+        "stop_hint": "ट्रांसक्राइब करके अपनी पोस्ट में जोड़ने के लिए रोकें। अधिकतम {m, plural, one {# मिनट} other {# मिनट}}।",
+        "rate": "हर {s, plural, one {# सेकंड} other {# सेकंड}} के लिए {n} Points"
       },
       "transfer": {
-        "powering_down_info": "अगला अनस्टेक {days} दिनों में है, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} से {max, plural, one {# अक्षर} other {# अक्षर}} के बीच"
       }
     }
   }
