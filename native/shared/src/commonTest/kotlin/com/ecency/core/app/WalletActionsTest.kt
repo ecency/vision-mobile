@@ -186,6 +186,35 @@ class WalletActionsTest {
         }
     }
 
+    @Test
+    fun aRefreshThatFindsAnEmptyBookDropsTheOldQuote() = runTest {
+        val w = world(this)
+        var empty = false
+        w.rpc["condenser_api.get_order_book"] = {
+            if (empty) """{"bids":[],"asks":[]}"""
+            else """{"bids":[{"created":"x","hbd":2500,"hive":10000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":2600,"hive":10000,"real_price":"0.26000000"}]}"""
+        }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        val m = w.env.tradeModel("HIVE")
+        try {
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("4")
+            assertEquals(1.0, m.current.toAmount)
+            assertTrue(m.current.continueEnabled)
+            // the next refresh finds no orders: the 1.000 HBD quote is gone and nothing can be confirmed
+            empty = true
+            testScheduler.advanceTimeBy(TradeModel.BOOK_REFRESH_MILLIS + 1_000)
+            assertEquals(0.0, m.current.toAmount)
+            assertTrue(TradeCopy.OFFER_UNAVAILABLE in m.current.errors)
+            assertFalse(m.current.continueEnabled)
+        } finally {
+            m.close()
+        }
+    }
+
     // ---- redeem ----
 
     @Test

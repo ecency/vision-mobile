@@ -115,7 +115,7 @@ data class TradeState(
     val errors: List<String>
         get() = buildList {
             if (moreThanBalance) add(TradeCopy.MORE_THAN_BALANCE)
-            if (quote?.invalidAmount == true) add(TradeCopy.OFFER_UNAVAILABLE)
+            if (quote?.invalidAmount == true || (quote?.emptyOrderBook == true && fromValue > 0)) add(TradeCopy.OFFER_UNAVAILABLE)
             if (quote?.tooMuchSlippage == true) add(TradeCopy.TOO_MUCH_SLIPPAGE)
         }
 
@@ -210,7 +210,8 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         val s = current
         val amount = s.fromValue
         val q = SwapCalculator.quote(bids, asks, amount, s.from == "HIVE")
-        setState { it.copy(quote = q, toAmount = if (amount == 0.0) 0.0 else q.toAmount?.let(SwapCalculator::strip3) ?: it.toAmount) }
+        // no amount in the new quote (an empty book): no amount to confirm (RN kept the last one)
+        setState { it.copy(quote = q, toAmount = if (amount == 0.0) 0.0 else q.toAmount?.let(SwapCalculator::strip3) ?: 0.0) }
     }
 
     fun setAmount(text: String) {
