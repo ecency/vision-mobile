@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Proメンバー"
   },
   "perks": {
     "header": "特典",
@@ -31,42 +31,42 @@
     "promote_desc": "投稿をより多くの人に見てもらう",
     "account_boost": "アカウントブースト",
     "account_boost_desc": "任意のアカウントをブースト",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RCをチャージ",
+    "rc_topup_desc": "リソースクレジットが少ないときも投稿を続けられます",
+    "streak_freeze_owned": "予備 {n}個",
+    "streak_freeze_buy": "連続記録を守る（{price} Points）",
+    "streak_freeze_buying": "保護しています",
+    "streak_freeze_error": "連続記録の保護を購入できませんでした。もう一度お試しください。"
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "デイリー投稿",
+    "streak": "{n}日連続",
+    "keep_streak": "連続記録を途切れさせないで"
   },
   "waves": {
     "for_you": "おすすめ",
     "following": "フォロー中",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "カスタムフィード",
+    "custom_feeds_subtitle": "ソースやタグをピン留めして、フィードのタブに追加できます。",
+    "add_tag_placeholder": "タグを追加",
+    "sources": "ソース",
+    "your_feeds": "あなたのフィード",
+    "trending_tags": "トレンドのタグ",
+    "shorts_empty": "表示できるショートはまだありません",
+    "mute": "ミュート",
+    "unmute": "ミュート解除"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "はじめに",
+    "subtitle": "初めてですか？Wavesは短い投稿で、いちばん気軽に始められます。",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "閉じる",
+    "item_wave": "最初のWaveを投稿する",
+    "item_vote": "気に入ったWaveに投票する",
+    "item_reply": "誰かに返信する",
+    "item_checkin": "チェックインして連続記録を始める",
+    "all_done_title": "すべて完了 🎉",
+    "all_done_subtitle": "準備は万端です。これからもWavesを続けましょう！"
   },
   "profile": {
     "havent_commented": "まだ何もコメントしていません",
@@ -82,7 +82,7 @@
     "comments": "コメント",
     "waves": "Waves",
     "details": "プロフィールの詳細",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "リソースクレジット",
     "voting_power": "ヴォート能力",
     "follow_people": "ユーザーをフォローすると、その投稿がここに表示されます。",
     "hours": "時間",
@@ -147,6 +147,16 @@
     "wizard_config_val": "年齢  |  表示  |  解釈",
     "attach_poll": "投票を添付"
   },
+  "favorite_tags": {
+    "title": "タグ",
+    "hint": "フォローすると、このタグの新しい投稿が通知されます",
+    "following_hint": "このタグの新しい投稿が通知されます",
+    "follow": "フォロー",
+    "following": "フォロー中",
+    "added": "タグをフォローしました",
+    "removed": "タグのフォローを解除しました",
+    "empty_list": "まだ何もありません"
+  },
   "favorites": {
     "add": "お気に入りに追加",
     "add_error": "お気に入りに追加できませんでした",
@@ -181,7 +191,33 @@
     "payout": "ペイアウト",
     "details": "詳細",
     "community": "コミュニティ",
-    "new_post": "新規投稿"
+    "new_post": "新規投稿",
+    "mute_post_title": "この投稿をミュート",
+    "unmute_post_title": "この投稿のミュートを解除",
+    "mute_post_reason": "ミュートする理由は何ですか？",
+    "unmute_post_reason": "復元する理由は何ですか？",
+    "manage": "コミュニティを管理",
+    "manage_members": "メンバーとロール",
+    "manage_settings": "コミュニティ設定",
+    "manage_activities": "アクティビティログ",
+    "activities": "アクティビティ",
+    "no_activities": "アクティビティはまだありません",
+    "activities_load_failed": "アクティビティを読み込めませんでした。プルダウンして更新してください。",
+    "set_role": "ロールを設定",
+    "assign_role": "ロールを割り当て",
+    "assign_role_hint": "未参加のアカウントも含め、アカウントを検索してロールを選択してください。",
+    "username_placeholder": "ユーザー名",
+    "invalid_username": "検索結果から既存のアカウントを選択してください",
+    "members": "メンバー",
+    "no_members": "メンバーが見つかりません",
+    "members_incomplete": "一部のメンバーを読み込めませんでした。プルダウンして更新してください。",
+    "members_load_failed": "メンバーを読み込めませんでした。プルダウンして更新してください。",
+    "role_owner": "オーナー",
+    "role_admin": "管理者",
+    "role_mod": "モデレーター",
+    "role_member": "メンバー",
+    "role_guest": "ゲスト",
+    "role_muted": "ミュート中"
   },
   "trade": {
     "swap_for": "{fromAmount} を {toAmount} にスワップ中",
@@ -212,7 +248,11 @@
     "cross-post": "クロス投稿",
     "pin-blog": "ブログに固定",
     "copy": "リンクをコピー",
+    "copy-text": "テキストをコピー",
+    "open-thread": "スレッドを開く",
     "unpin-community": "コミュニティの固定を解除",
+    "mute-post": "投稿をミュート",
+    "unmute-post": "投稿のミュートを解除",
     "mute": "ミュート / ブロック",
     "reblog": "リブログ",
     "undo-reblog": "リブログを取り消す",
@@ -232,24 +272,24 @@
     "unpin-reply": "コメントの固定を解除"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "この投稿は{lang}です。{target}に翻訳しますか？",
+    "translate_to": "{lang}に翻訳",
+    "show_original": "原文を表示",
+    "translated_from": "{lang}から翻訳",
+    "change_language": "言語を変更"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "投稿を翻訳",
+    "source": "原文の言語",
+    "target": "翻訳先の言語",
+    "detected": "検出：{lang}",
+    "translate": "翻訳",
+    "apply": "適用",
+    "review_note": "あなた自身の文章の機械翻訳を投稿の末尾に追加します。公開する前に確認して編集してください。",
+    "too_short": "もう少し書いてください。翻訳には数文以上が必要です。",
+    "progress": "翻訳中 {done}/{total}...",
+    "error": "翻訳に失敗しました。もう一度お試しください。",
+    "add_title_marker": "タイトルに言語マークを追加"
   },
   "side_menu": {
     "profile": "プロフィール",
@@ -296,7 +336,7 @@
     "hot": "人気",
     "popular": "人気",
     "new": "新着",
-    "friends": "Following",
+    "friends": "フォロー中",
     "my_blog": "自分のブログ"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "まだ何もありません"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "テンプレート",
+    "untitled": "無題のテンプレート",
+    "empty_list": "エディターで投稿をテンプレートとして保存すると、ここで再利用できます。",
+    "delete_confirm": "このテンプレートを削除してもよろしいですか？",
+    "applied": "テンプレートを新しい投稿として適用しました",
+    "save_as_template": "テンプレートとして保存",
+    "name_placeholder": "テンプレート名",
+    "saved": "テンプレートを保存しました"
   },
   "selection_list": {
     "available": "利用可能な{postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "すべて",
+      "replies": "返信",
+      "mentions": "メンション",
+      "rvotes": "投票",
+      "follows": "フォロー",
+      "reblogs": "リブログ",
+      "transfers": "送金",
+      "delegations": "委任",
+      "nfavorites": "お気に入り",
+      "tags": "タグ",
+      "nbookmarks": "ブックマーク",
+      "payouts": "報酬の支払い",
+      "scheduled_published": "予約投稿",
+      "account_updates": "アカウントの更新",
+      "weekly_earnings": "週間の収益"
     },
     "this_week": "今週",
     "reblog": "リブログ済み",
@@ -417,11 +458,15 @@
     "yesterday": "昨日",
     "mention": "話題にされました",
     "favorites": "が新しい投稿をしました",
+    "tags": "が #{tag} に投稿しました",
+    "tags_bundle": "#{tag} に新しい投稿が {count} 件あります",
+    "tags_title": "フォロー中のタグに新しい投稿があります",
     "mentions": "メンション",
     "spin": "もっと Points を獲得する時間です",
     "last_week": "先週",
     "recent": "最新",
     "ignore": "あなたをミュートしました",
+    "blacklist": "があなたをブラックリストに追加しました",
     "follow": "あなたをフォローしました",
     "notification": "通知",
     "this_month": "今月",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} があなたの代わりに投稿や投票ができるようになりました。これを許可していない場合は、取り消してください。",
     "weekly_earnings": "今週 ${amount} を獲得しました{breakdown}",
     "payouts": "ペイアウトを受け取りました: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "が予約投稿を公開しました",
+    "scheduled_published_title": "予約投稿を公開しました",
+    "scheduled_published_body": "予約投稿が公開されました。タップして確認"
   },
   "recurrent": {
     "delete_failed": "定期送金の削除に失敗しました。{error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "最近の下書きを開くか、新しい投稿を作成してください",
     "reward_power_up": "100% をステーク",
     "open_gallery": "ギャラリーを開く",
+    "open_files": "ファイルから選択",
     "clipboard_no_image": "クリップボードに画像が見つかりません",
     "clipboard_image_detected": "クリップボードに画像があります",
     "paste_image": "画像を貼り付け",
@@ -539,8 +585,10 @@
     "video": "動画",
     "scheduled_later": "後で",
     "settings_title": "投稿オプション",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "いいえ"
+    "support_ecency": "Ecencyを支援 {percent}%",
+    "alert_btn_no": "いいえ",
+    "short_reply_hint": "{n} 文字以下の返信ではポイントは獲得できません（リンクは含みません）",
+    "short_content_hint": "短すぎるためポイントは獲得できません（{n} 文字以下、リンクを除く）"
   },
   "time": {
     "week": "週間",
@@ -655,7 +703,41 @@
     "select_emoji": "絵文字を選択",
     "more_emojis": "もっと見る",
     "search_emojis": "絵文字を検索...",
-    "no_emoji_found": "絵文字が見つかりません"
+    "no_emoji_found": "絵文字が見つかりません",
+    "ban-reason-spray": "同じメッセージを複数のチャンネルに同時に送信したため、投稿が一時停止されています。",
+    "ban-reason-mass-dm": "多くの人に一斉にメッセージを送信したため、投稿が一時停止されています。",
+    "ban-reason-generic": "チャットへの投稿が一時停止されています。",
+    "ban-can-still-read": "チャットの閲覧は引き続き可能です。",
+    "ban-unlocks": "投稿は{when}に解除されます。",
+    "ban-remaining-soon": "1分以内",
+    "ban-remaining-minutes": "約{count}分後",
+    "ban-remaining-hours": "約{count}時間後",
+    "ban-remaining-days": "約{count}日後",
+    "new_group": "新しいグループ",
+    "new_group_hint": "{min}～{max}人を追加してグループ会話を始めましょう。",
+    "new_group_search": "ユーザー名で検索",
+    "new_group_full": "グループには他に最大{max}人まで参加できます。",
+    "new_group_no_results": "その名前のユーザーがチャットに見つかりません。",
+    "new_group_search_failed": "検索に失敗しました。接続を確認してもう一度お試しください。",
+    "new_group_remove": "@{username} を削除",
+    "new_group_create": "グループを開始",
+    "new_group_failed": "グループを開始できませんでした。もう一度お試しください。",
+    "rename_group": "グループ名を変更",
+    "rename_group_hint": "グループ全員に表示される名前を付けてください。空欄の場合はメンバーの名前が表示されます。",
+    "group_name": "グループ名",
+    "rename_group_too_long": "グループ名は{max}文字までです。",
+    "rename_group_not_owner": "グループ名を変更できるのは、グループを作成した人だけです。",
+    "rename_group_failed": "グループ名を変更できませんでした。もう一度お試しください。",
+    "group_renamed": "{user} がグループ名を「{name}」に変更しました",
+    "group_name_cleared": "{user} がグループ名を削除しました",
+    "group_members": "グループメンバー",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "reactions_title": "リアクション",
+    "reactor_you": "あなた",
+    "reactor_unknown": "誰か",
+    "see_who_reacted": "長押しでリアクションした人を表示",
+    "group": "グループ"
   },
   "free_estm": {
     "timer_text": "次の無料スピンまで",
@@ -684,6 +766,32 @@
     "transaction_fail": "取引に失敗しました"
   },
   "search_result": {
+    "error": "検索を完了できませんでした。もう一度お試しください",
+    "filters": {
+      "title": "フィルター",
+      "open": "フィルター",
+      "author": "投稿者",
+      "author_placeholder": "ユーザー名",
+      "category": "カテゴリー",
+      "category_placeholder": "コミュニティまたはカテゴリー",
+      "tags": "タグ",
+      "tags_placeholder": "カンマ区切り",
+      "type": "種類",
+      "type_all": "すべて",
+      "type_post": "投稿",
+      "type_comment": "コメント",
+      "date": "日付",
+      "date_week": "過去1週間",
+      "date_month": "過去1か月",
+      "date_year": "過去1年",
+      "date_all": "全期間",
+      "sort": "並び替え",
+      "apply": "適用",
+      "active": "{n} 件適用中",
+      "too_many_tags": "タグは最大 {n} 個までです",
+      "too_long": "検索語が長すぎます。{n} 文字以内にしてください",
+      "needs_criteria": "検索語、または絞り込む投稿者・カテゴリー・タグを入力してください"
+    },
     "communities_filter": {
       "new": "新着",
       "my": "マイコミュニティ",
@@ -727,7 +835,7 @@
     "title": "クロス投稿"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "作者がAIの利用を明示しています"
   },
   "ai_assist": {
     "title": "AI ライティングアシスタント",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "投稿に関連するタグを取得します",
     "action_generate_title": "タイトルを生成",
     "action_generate_title_desc": "魅力的なタイトルの候補を作成します",
-    "action_summarize": "Recap",
+    "action_summarize": "要約",
     "action_summarize_desc": "簡潔な要約を作成します",
     "action_check_grammar": "文法をチェック",
     "action_check_grammar_desc": "文法やスペルの問題を修正します",
+    "action_generate_image": "画像を生成",
+    "action_generate_image_desc": "投稿用のAI画像を作成します",
+    "cost_from": "{cost} {unit} から",
     "text_label": "あなたのテキスト",
     "text_placeholder": "ここにコンテンツを貼り付けるか入力してください...",
     "min_chars": "最低 {count} 文字必要です",
@@ -797,16 +908,26 @@
     "remind_later": "後で通知",
     "success_subscribe": "登録に成功しました！",
     "payloadTooLarge": "ファイルのサイズが大きすぎます、リサイズするか小さい画像をアップロードしてください",
+    "too_many_images": "一度に選択できる画像は{count}枚までです",
     "fail_follow": "フォローに失敗しました！",
     "clear_user_alert": "本当に全てのユーザーデータを消去しますか？",
     "cancel": "キャンセル",
     "connection_success": "接続に成功しました！",
     "rc_down": "アクションを実行するのに十分なリソースクレジットがありません！ \n\nアカウントを強化して、体験を楽しみましょう。アカウントを強化しますか？",
+    "rc_down_title": "Resource Credits が不足しています",
+    "rc_precheck_title": "この投稿は大きすぎて公開できない可能性があります",
+    "rc_precheck_body": "この大きさの投稿には Resource Credits が足りないようです。",
+    "rc_down_body": "この操作に必要な Resource Credits が足りません。\n\nPoints でチャージして続けるか、アカウントを恒久的にブーストしてください。",
+    "rc_down_topup": "Points で RC をチャージ",
+    "rc_down_boost": "アカウントをブースト",
     "done": "完了",
     "something_wrong_alt": "その間、ブラウザから Ecency.com をお試しください",
     "same_user": "このユーザーは既にリストに追加されています",
     "fail": "失敗！",
     "operation_failed_with_reason": "{operation} に失敗しました: {reason}",
+    "request_timed_out": "接続に時間がかかっています。ネットワークを確認してもう一度お試しください。",
+    "load_failed_retry": "読み込めませんでした。もう一度お試しください。",
+    "retrying": "再試行中...",
     "wallet_refresh_failed": "ウォレットの更新に失敗しました。もう一度お試しください。",
     "wallet_refresh_missing_account": "ウォレットの更新に失敗しました: アカウントがありません。",
     "boost_failed": "Boost に失敗しました。",
@@ -949,31 +1070,31 @@
     "video_attached": "動画を添付しました"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "アップボート",
+    "upvoted": "アップボート済み",
+    "downvoted": "ダウンボート済み",
+    "upvote_hint": "ダブルタップで投票オプションを開く",
+    "payout_details": "報酬の詳細",
+    "a11y_votes": "{count, plural, other {#件の投票}}",
+    "a11y_voters_hint": "投票者を表示",
+    "a11y_reblogs": "{count, plural, other {#件のリブログ}}",
+    "a11y_reblogs_hint": "リブログを表示",
+    "a11y_comments": "{count, plural, other {#件のコメント}}",
+    "a11y_comments_hint": "コメントを表示",
+    "a11y_reply_hint": "返信",
+    "a11y_tip": "チップを送る",
+    "a11y_tips": "{count, plural, other {#件のチップ}}",
+    "a11y_edit": "コメントを編集",
+    "a11y_delete": "コメントを削除",
+    "a11y_show_replies": "返信を表示",
+    "a11y_hide_replies": "返信を非表示",
+    "a11y_post_options": "投稿のオプション",
+    "a11y_views": "{count, plural, other {#回の閲覧}}",
+    "source_ecency": "Ecencyで投稿",
+    "a11y_stats_hint": "投稿の統計を表示",
     "image": "画像",
     "reveal_muted": "ミュート済み\nタップしてコンテンツを表示",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "タップして画像を読み込む",
     "in": "場所:",
     "poll": "投票",
     "copy_link": "リンクをコピー",
@@ -998,19 +1119,20 @@
     "save_to_local": "デバイスにダウンロード",
     "muted": "コンテンツは違反のためミュートされています",
     "community_muted": "コミュニティガイドライン違反のためコンテンツがミュートされています",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "評価の低いアカウントのコンテンツ",
+    "muted_downvoted": "ユーザーにダウンボートされたコンテンツ",
+    "muted_low_trust": "未確認の外部リンクを含む低評価アカウント",
+    "muted_reveal": "タップして表示",
     "promoted": "プロモーション",
     "image_saved": "画像をフォトギャラリーに保存しました",
     "words": "単語",
     "reading": "読書",
-    "listen": "聴く",
     "min": "分",
     "summarize_start": "開始"
   },
   "promote": {
     "information": "本当にプロモートしますか？",
-    "permlinkPlaceholder": "username/permlink",
+    "permlinkPlaceholder": "ユーザー名/permlink",
     "title": "プロモート",
     "days": "日間",
     "user": "ユーザー",
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "投稿は存在しません",
     "invalid_link": "URL が無効です。有効な URL で再度お試しいただくか、ウェブブラウザで開いてみてください",
-    "no_existing_user": "ユーザーは存在しません"
+    "no_existing_user": "ユーザーは存在しません",
+    "posting_key_request": "{requester} が @{username} のポスティング秘密鍵を要求しています。\n\n信頼できる要求の場合のみ続行してください。",
+    "posting_key_request_unnamed": "別のアプリが @{username} のポスティング秘密鍵を要求しています。\n\n信頼できる要求の場合のみ続行してください。",
+    "auth_request_as_user": "{requester} が @{username} としてサインインしようとしています。\n\nユーザー名とサインイン証明のみが共有されます。鍵が Ecency の外に出ることはありません。",
+    "auth_request_as_current": "{requester} が Ecency アカウントでサインインしようとしています。\n\nユーザー名とサインイン証明のみが共有されます。鍵が Ecency の外に出ることはありません。"
   },
   "payout": {
     "breakdown": "詳細",
@@ -1065,7 +1191,7 @@
     "open": "URL を開く",
     "invalid_key_desc": "この取引を実行するには {key} キーまたはマスターキーでログインしてください",
     "auth_transfer_confirm": "{username} への送金を確認しますか？",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "このリンクの提供元を信頼できる場合のみ承認してください。承認すると、下記の操作があなたの{authority}キーでアカウントからブロードキャストされます。"
   },
   "voters_dropdown": {
     "rewards": "報酬",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "使用できるのは英字、数字、ハイフンのみです",
       "username_no_ascii_first_letter_error": "先頭は英字で始めてください",
       "username_contains_double_hyphens": "ハイフンを連続して使用することはできません",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "このユーザー名は暗号資産取引所のアカウントに似すぎており、他の人を混乱させるおそれがあります。もっと独自の名前を選んでください。",
+      "username_restricted_prefix": "「uid」の後に数字が続くユーザー名は、他人のなりすましに使われやすいため使用できません。別の名前を選んでください。",
       "username_contains_underscore": "アンダースコアは使用できません"
     },
     "500_error": "リクエストは処理されませんでした、サインアップのキューが一杯です！時間を置いて再度お試しください。。。",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "このユーザー名はすでに使われています",
+      "14": "このメールアドレスはすでに登録されています",
+      "15": "有効なメールアドレスを入力してください",
+      "16": "有効なユーザー名を入力してください",
+      "17": "ユーザー名が長すぎます。もっと短いものを選んでください",
+      "19": "使い捨てでないメールアドレスを使うか、代わりにPremiumアカウントを取得してください",
+      "21": "この紹介コードは無効です",
+      "28": "リクエストを処理できませんでした。登録の待ち行列が満杯の可能性があります。数分後にもう一度お試しください。",
+      "107": "VPN接続が検出されました。VPNをオフにしてもう一度お試しいただくか、代わりにPremiumアカウントを取得してください。",
+      "110": "不正利用を防ぐため、1人またはネットワークごとのアカウント数を制限しています。別のネットワークからもう一度お試しください。",
+      "111": "Tor接続が検出されました。登録中はTorを無効にしてください。",
+      "112": "現在、接続を確認できませんでした。数分後にもう一度お試しください。"
     },
     "have_account_text": "すでにアカウントをお持ちですか？"
   },
@@ -1140,6 +1266,30 @@
     "desc": "本格的な Hive アカウントを取得できます。この方法には、ボットネットがサインアップ用のフォーセットを悪用しないようにするための基本的なチェックが含まれています。",
     "btn_register": "無料で登録",
     "title": "無料アカウント"
+  },
+  "dictation": {
+    "title": "音声入力",
+    "start": "録音",
+    "stop": "停止",
+    "record_more": "さらに録音",
+    "done": "完了",
+    "recording": "録音中",
+    "stop_hint": "停止すると文字起こしして投稿に追加します。最長{m}分。",
+    "inserted": "投稿に追加しました。さらに録音するか、「完了」をタップしてください。",
+    "transcribing": "文字起こし中",
+    "rate": "{s}秒あたり {n} Points",
+    "cost_running": "ここまで {n} Points",
+    "cost_running_free": "ここまで無料",
+    "free_remaining": "今日は次の {n} × {s}秒が無料です",
+    "price_loading": "料金を確認中",
+    "price_error": "文字起こしの料金を読み込めませんでした。",
+    "denied": "音声入力にはマイクへのアクセスが必要です。設定で許可してからもう一度お試しください。",
+    "error_empty": "この録音から音声が検出されませんでした。",
+    "error_insufficient_points": "この録音を文字起こしするには Points が足りません。",
+    "error_rate_limited": "録音が多すぎます。しばらくしてからもう一度お試しください。",
+    "error_too_long": "この録音は長すぎて文字起こしできません。",
+    "error_failed": "この録音を文字起こしできませんでした。もう一度お試しください。",
+    "error_recorder": "録音を開始できませんでした。もう一度お試しください。"
   },
   "wallet": {
     "delegations_out": "委任(送信)",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "定期的にチェックインすると0.25ポイント貰えます。",
     "fill_transfer_from_savings": "貯蓄口座への送金が完了",
     "activities": "アクティビティ",
+    "no_activities": "取引はまだありません",
+    "activities_failed": "取引を読み込めませんでした。下に引いて再試行してください。",
     "tap_update": "タップして更新",
     "mining_lottery": "宝くじ当選",
     "checkin": "チェックイン",
     "tokens_transfer": "トークンを送金しました",
     "outgoing_transfer_title": "送金/ギフト",
+    "burned_title": "AI利用",
+    "burned_description": "AI機能に使用した Points",
+    "burn_refund_title": "AI返金",
+    "burn_refund_description": "AIリクエストの失敗により返却された Points",
     "manage_assets": "アセットの追加/削除",
     "selected_assets": "選択したアセット",
     "nft_setPropertyPermissions": "NFT シンボルのプロパティ権限を設定しました",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "トークンの精度更新",
     "tokens_transferOwnership": "トークンの所有権を移転しました",
     "withdraw_vesting": "アンステーク",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "引き出し先アカウント",
     "delegate_engine": "委任",
     "market_close": "注文をクローズしました",
     "nftmarket_transferFee": "購入注文手数料",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "POINTS を取得",
     "escrow_approve": "エスクロー承認",
     "expires": "有効期限",
+    "transaction_id": "トランザクションID",
+    "copy_transaction_id": "トランザクションのリンクをコピー",
+    "filter_activities": "アクティビティを絞り込む",
+    "filter_activities_desc": "この履歴で取得する操作を選択してください",
+    "filter_all": "すべて選択",
+    "filter_none": "すべて解除",
+    "filter_apply": "適用",
     "author_reward": "投稿者報酬",
     "withdraw_hbd": "貯蓄を引き出す",
     "convert_request": "変換リクエスト",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RCをチャージ",
+    "desc": "短期間のRCブーストで、投稿を続けられます。",
+    "confirm": "Pointsを使ってリソースクレジットをチャージしますか？",
+    "insufficient": "Pointsが足りません。",
+    "buy_points": "Pointsを購入"
   },
   "ai_image_generator": {
     "title": "AI 画像ジェネレーター",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "カスタム（{hours}時間）",
+    "balance_load_failed": "残高を読み込めませんでした。タップして再試行してください。",
+    "precision_load_failed": "このトークンの詳細を読み込めなかったため、整数の金額のみ送信できます。タップして再試行してください。",
     "close": "閉じる",
     "favorite_username_placeholder": "ユーザー名",
     "invalid_recipient_qr": "このQRコードからユーザー名を見つけられませんでした。",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "権限を管理",
     "pincode": "PINコード",
     "general": "一般",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecencyを支援",
+    "support_beneficiary": "投稿報酬をEcencyと分け合う",
+    "support_beneficiary_percent": "投稿報酬の分配率",
+    "support_curation": "キュレーション報酬の一部を留保する",
+    "support_curation_percent": "キュレーション報酬の留保率",
     "feedback_body": "ここにメッセージを入力してください！\n\nHive ユーザー名: {username}\nアプリのバージョン: {appVersion}\nプラットフォーム: {platform}\n",
     "show_imgs": "画像を表示",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "コメント",
       "bookmark": "ブックマーク",
+      "tags": "タグ",
       "reblog": "リブログ",
       "favorite": "お気に入り",
       "mention": "メンション",
@@ -1599,10 +1765,10 @@
       "transfers": "送金",
       "vote": "ヴォート",
       "follow": "フォロー",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "予約投稿の公開",
+      "payouts": "報酬の支払い",
+      "account_update": "アカウントの更新",
+      "weekly_earnings": "週間の収益",
       "fcm_unavailable": "このデバイスではプッシュ通知がサポートされていません。アプリを開いている間のみ通知を受け取ります。"
     },
     "keys_warning": "機密性の高いアカウント情報です！\n秘密鍵を表示する前に、Ecency を PIN コードで保護する必要があります。",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "フィードバックを送信する",
     "rate_app": "Ecencyを評価する",
+    "email_digests": "メールダイジェスト",
     "rate": "評価する",
     "dm-privacy-updated": "DM のプライバシー設定を更新しました",
     "dm-privacy-failed": "DM のプライバシー設定の更新に失敗しました",
@@ -1685,19 +1852,29 @@
     "request_sent": "削除リクエストを送信しました",
     "confirm_delete_body": "本当にアカウントを削除しますか？すべてのデータが消去されます"
   },
-  "tts": {
-    "settings_title": "テキスト読み上げの設定",
-    "voice": "音声",
-    "voice_hint": "システムのデフォルト音声が使用されます",
-    "speed": "速度",
-    "pitch": "ピッチ",
-    "test_voice": "音声をテスト",
-    "settings_info": "これらの設定は投稿を読み上げる際に使用されます",
+  "listen": {
+    "title": "この投稿を聴く",
+    "minutes": "約{n}分",
+    "login": "ログイン",
+    "unlock": "ロック解除 · {n} Points",
+    "confirm": "この投稿を聴くのに {n} Points を使いますか？音声はいつでも再生できます。",
+    "not_enough_title": "Points が不足しています",
+    "not_enough": "聴くには {required} Points が必要ですが、{available} Points しかありません。",
+    "get_points": "Points を取得",
+    "unlock_failed": "音声のロックを解除できませんでした。もう一度お試しください",
+    "failed_refunded": "音声を作成できなかったため、Points は返金されました",
+    "preparing": "音声を準備中…",
+    "preparing_eta": "音声を準備中、約{n}分…",
+    "preparing_progress": "音声を準備中 · {n}%",
+    "waiting": "順番待ち中、あと{n}件…",
+    "next_in_line": "次の順番です…",
     "play": "再生",
     "pause": "一時停止",
-    "language": "言語",
-    "language_auto": "自動検出",
-    "language_hint": "自動検出は投稿の内容に基づいて言語を選択します"
+    "seek": "シーク",
+    "speed": "再生速度",
+    "language": "音声の言語",
+    "unavailable": "音声を読み込めませんでした。",
+    "retry": "再試行"
   },
   "posting_authority": {
     "title": "より速い投稿を有効化",
@@ -1732,7 +1909,7 @@
     "error-auth": "認証に失敗しました。もう一度ログインしてください。",
     "error-generic": "動画のアップロードに失敗しました。もう一度お試しください。",
     "error-too-long-short": "ショート動画は 60 秒以下である必要があります。",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "1つの投稿に含められる動画は1本だけです。別の動画を追加する前に、現在の動画を削除してください。",
     "select_source": "動画を追加",
     "record": "動画を録画",
     "choose_library": "ライブラリから選択"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "短い近況を共有"
   },
+  "newsletter": {
+    "screen_title": "メールダイジェスト",
+    "title": "{list}",
+    "body_own": "通知の概要を毎週または毎月メールでお届けします。",
+    "body_creator": "{list} の新しい投稿をメールで受け取れます。",
+    "body_community": "{list} の新しい投稿のダイジェストをメールで受け取れます。",
+    "body_site": "Ecency のベストをメールでお届けします。",
+    "first_publish_title": "初投稿おめでとうございます！",
+    "first_publish_body": "通知のメールダイジェストを受け取りませんか？毎週または毎月から選べて、設定でいつでも変更・解除できます。",
+    "list_own": "自分の通知ダイジェスト",
+    "list_site": "Ecency ニュースレター",
+    "status_active": "購読中です。",
+    "status_pending": "メールの確認待ちです。",
+    "status_short_active": "有効",
+    "status_short_pending_confirmation": "保留中",
+    "status_short_suppressed": "停止",
+    "status_short_ended": "終了",
+    "cadence_weekly": "毎週",
+    "cadence_monthly": "毎月",
+    "email_placeholder": "you@example.com",
+    "subscribe": "購読する",
+    "update": "更新",
+    "resend": "確認メールを再送",
+    "leave": "ダイジェストを解除",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "manage": "管理",
+    "check_inbox_title": "受信トレイを確認してください",
+    "check_inbox_body": "{email} に確認リンクを送信しました。確認すると購読が始まります。",
+    "subscribed": "メールダイジェストを購読しました",
+    "left": "ダイジェストを解除しました",
+    "refused": "このアドレスは購読できません。",
+    "unavailable": "現在メールダイジェストはご利用いただけません。",
+    "too_many": "試行回数が多すぎます。しばらくしてからもう一度お試しください。",
+    "fail": "問題が発生しました。もう一度お試しください。",
+    "empty": "メールダイジェストはまだありません。下から購読を始めましょう。",
+    "discover": "メールでもっと受け取る",
+    "stop_all": "すべて停止",
+    "stop_all_title": "すべてのメールを停止しますか？",
+    "stop_all_body": "{email} に Ecency のメールは今後送信されません。他のアドレスの購読は維持されます。",
+    "stop_all_ok": "すべて停止",
+    "stop_all_done": "このアドレスのすべてのメールを配信停止しました",
+    "profile_option": "メールダイジェスト",
+    "subscriber_count": "週刊 {weekly} 人 • 月刊 {monthly} 人のメール購読者",
+    "community_button": "ニュースレター"
+  },
+  "mod_notes": {
+    "title": "理由を追加",
+    "placeholder": "理由（他のモデレーターに表示されます）",
+    "confirm": "確定",
+    "cancel": "キャンセル"
+  },
+  "community_settings": {
+    "title_header": "コミュニティ設定",
+    "title_label": "タイトル",
+    "about": "概要",
+    "lang": "言語",
+    "description": "説明",
+    "rules": "ルール",
+    "nsfw": "職場閲覧注意（NSFW）",
+    "save": "保存",
+    "required": "必須",
+    "title_length": "{min}～{max}文字",
+    "owner_admin_only": "これらの設定を変更できるのはオーナーと管理者のみです。"
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "展開済み",
+        "collapsed": "折りたたみ済み"
+      },
+      "a11y_chat": {
+        "quote": "{author} への返信: {text}"
+      },
+      "a11y_forms": {
+        "select": "選択",
+        "deselect": "選択解除"
+      },
+      "store": {
+        "billing_unavailable": "このデバイスではアプリ内課金は許可されていません。",
+        "verification_failed": "App Store がこの購入を確認できませんでした。",
+        "cancelled": "購入がキャンセルされました",
+        "unknown_result": "不明な購入結果"
+      },
+      "navigation": {
+        "feed_unavailable": "このフィードはまだ利用できません。",
+        "link_cannot_open": "このリンクを開けません。",
+        "video_cannot_play": "この動画を再生できません。"
+      },
+      "media": {
+        "load_failed": "読み込めませんでした。接続を確認してもう一度お試しください。",
+        "loading": "メディアを読み込み中",
+        "download_failed": "ダウンロードに失敗しました（ステータス {status}）"
+      },
+      "sign_in": {
+        "required": "サインインが必要です",
+        "to_reply": "返信するにはサインインしてください。",
+        "to_vote": "投票するにはサインインしてください。",
+        "button": "サインイン"
+      },
+      "account": {
+        "logout_user": "@{username} をログアウト"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# 票}}  •  {replies, plural, other {# 件の返信}}",
+        "voting_power": "投票力 {percent}",
+        "remove_favourite": "お気に入りから削除",
+        "add_favourite": "お気に入りに追加"
+      },
+      "waves": {
+        "clear_tag_filter": "タグフィルター {tag} を解除",
+        "new_wave": "新しい Wave",
+        "replies_open_thread": "{count, plural, other {# 件の返信、スレッドを開く}}",
+        "characters": "{count} / {max} 文字",
+        "retry": "{message}\n再試行",
+        "playing": "{permlink} を再生中",
+        "video_attached_remove": "動画を添付済み、タップで削除",
+        "image_attached_remove": "画像を添付済み、タップで削除",
+        "take_photo": "写真を撮る",
+        "edit_poll": "投票を編集",
+        "add_poll": "投票を追加",
+        "add_video": "動画を追加"
+      },
+      "reading": {
+        "reply_to": "{username} に返信",
+        "opens_post": "投稿を開きます",
+        "sort_comments": "コメントを並び替え",
+        "sort_comments_value": "コメントを並び替え、{sort}",
+        "no_comments": "コメントはまだありません。",
+        "loading_post": "投稿を読み込み中",
+        "show_version": "バージョンを表示",
+        "show_changes": "変更点を表示",
+        "replying_to": "@{username} に返信中",
+        "reply_text": "返信テキスト",
+        "translate_from": "翻訳元",
+        "translate_to": "翻訳先"
+      },
+      "feed": {
+        "tab_pinned": "{label}、固定済み",
+        "tab_add": "{label}、追加",
+        "customise": "カスタマイズ"
+      },
+      "card": {
+        "in_category": "{category} 内",
+        "pinned": "固定",
+        "by_author": "{username} による投稿",
+        "payout": "ペイアウト {payout}",
+        "payout_declined": "ペイアウト {payout}、辞退",
+        "reblogged_by": "{username} がリブログ"
+      },
+      "shell": {
+        "close_menu": "メニューを閉じる"
+      },
+      "editor": {
+        "thumbnail_pick_another": "サムネイル、別の画像を選択",
+        "words": "{count, plural, other {# 語}}",
+        "poll_min_age": "アカウント最低年齢（日数）: {days}",
+        "poll_max_options": "最大選択肢数: {count}",
+        "thumbnail_selected": "選択中のサムネイル",
+        "thumbnail": "サムネイル",
+        "uploaded_image": "アップロードした画像",
+        "community_search": "検索"
+      },
+      "vote": {
+        "not_voted": "未投票",
+        "voting": "投票中",
+        "failed_with": "投票に失敗しました: {message}",
+        "failed": "投票に失敗しました",
+        "payout": "ペイアウト {payout}",
+        "payout_declined": "ペイアウト {payout}、辞退",
+        "percent": "{percent} パーセント",
+        "upvote_percent": "アップボート {percent}%"
+      },
+      "settings": {
+        "on": "オン",
+        "off": "オフ"
+      },
+      "lock": {
+        "biometric_reason": "Ecency の生体認証ロック解除を有効にします",
+        "offer_title": "{method} でロック解除",
+        "offer_use": "{method} を使用"
+      },
+      "keys": {
+        "hidden_while_captured": "画面の録画やミラーリング中は鍵が非表示になります。",
+        "screenshot_notice": "スクリーンショットが撮影されました。秘密鍵は再び非表示になりました。スクリーンショットに鍵が写っている場合は削除してください。",
+        "hold_hint": "鍵を長押しすると表示されます。",
+        "hold_to_show": "長押しで表示"
+      },
+      "wallet": {
+        "cancel_order": "この注文をキャンセルしますか？",
+        "days": "{count, plural, other {# 日}}"
+      },
+      "chat": {
+        "reactors_hint": "長押しでリアクションした人を表示",
+        "see_reactors": "リアクションした人を見る"
+      },
+      "esie": {
+        "still": "{mood}、静止"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} のプロフィール",
+      "preview": "プレビュー（{index}/{count}）",
+      "balance": "残高: {amount}",
+      "expires_in": "{time} 後に期限切れ",
+      "expired": "期限切れです。閉じてもう一度お試しください。",
+      "user_has_no_posts": "@{username} はまだ投稿していません",
+      "attach_image": "画像を添付",
+      "auto": "自動",
+      "back": "戻る",
+      "hot": "HOT",
+      "image_of": "画像 {index} / {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW タップして表示",
+      "new_reply": "新しい返信",
+      "remove": "削除",
+      "unlock_ecency": "Ecency のロック解除",
+      "update_it": "更新する",
+      "update_it_or_post_this_as": "更新しますか？それとも新しい返信として投稿しますか？",
+      "use_pin": "PINを使用",
+      "your_reply_was_already_posted": "返信はすでに投稿されています",
+      "error_try_again": "{message} もう一度試しますか？",
+      "auth": {
+        "account_label": "アカウント: @{username}",
+        "approve_the_request_in_your_wallet": "ウォレットアプリでリクエストを承認してください。",
+        "copy_key": "{title} をコピー",
+        "current_account": "現在のアカウント",
+        "qr_code": "QRコード",
+        "requested_by": "リクエスト元: {requester}",
+        "pin_digits": "{total, plural, other {# 桁}}中 {filled} 桁",
+        "private_key_shown": "{title}、秘密鍵を表示中",
+        "open_wallet_app": "ウォレットアプリを開く",
+        "hiveauth_scan": "Hive Keychain などの HiveAuth ウォレットで承認してください。このデバイスで開くか、このコードをスキャンします。",
+        "switching": "切り替え中...",
+        "logout_all": "すべてのアカウントからログアウト",
+        "logout_all_title": "このデバイス上のすべてのアカウントからログアウトしますか？",
+        "stored_key": "@{username} はすでにこのデバイスでサインイン済みです。保存されている鍵はそのままで、セッションのみ更新されます。",
+        "stored_hivesigner": "@{username} はすでにこのデバイスで HiveSigner でサインイン済みです。セッションは置き換えられます。",
+        "stored_hiveauth": "@{username} はこのデバイスで HiveAuth でサインイン中です。代わりに HiveSigner で署名します。",
+        "method_key": "鍵",
+        "logout_failed": "ログアウトに失敗しました"
+      },
+      "browser": {
+        "account": "アカウント",
+        "authority": "権限",
+        "phishing": "警告: このドメインは既知のフィッシングサイトとして報告されています。細心の注意を払ってください。"
+      },
+      "chat": {
+        "cancel_edit": "編集をキャンセル",
+        "cancel_reply": "返信をキャンセル",
+        "copied_to_clipboard": "クリップボードにコピーしました",
+        "edited_at": "{time} に編集",
+        "group_options": "グループ設定",
+        "pinned_messages": "ピン留めメッセージ",
+        "remove_user": "@{username} を削除",
+        "sort_by_name": "名前順",
+        "more": "その他",
+        "reaction_label": "{emoji} {count}。長押しでリアクションした人を表示",
+        "members": "メンバー"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "このリンクにはすでに投稿があり、送信した内容と異なります。更新しますか？それとも新規として公開しますか？",
+        "a_scheduled_post_is_published_by": "予約投稿は、指定した時刻に Ecency が公開します。そのためには、アカウントで ecency.app にポスティング権限を付与する必要があります。鍵やその他の権限はそのままです。付与にはアクティブキーが必要です。",
+        "ai_assist": "AIアシスト",
+        "ai_tools": "AIツール",
+        "allow_ecency_to_publish_for_you": "Ecency による代理公開を許可しますか？",
+        "bold": "太字",
+        "clone": "複製",
+        "cost": "費用: {cost}",
+        "could_not_store_the_draft_on": "下書きをこのデバイスに保存できませんでした。アプリを開いたままにして、下書きを保存してください。",
+        "draft": "下書き",
+        "delete_count": "削除（{count}）",
+        "dictate_desc": "話すと、書き起こしが投稿に入力されます",
+        "discard": "破棄",
+        "discard_changes": "変更を破棄しますか？",
+        "grant": "付与",
+        "italic": "斜体",
+        "keep_editing": "編集を続ける",
+        "my_blog": "マイブログ",
+        "my_communities": "マイコミュニティ",
+        "new_post": "新しい投稿",
+        "notice": "お知らせ",
+        "restore": "復元",
+        "restore_unsaved_changes": "保存されていない変更を復元しますか？",
+        "saved": "保存しました",
+        "top_communities": "人気のコミュニティ",
+        "table": "表",
+        "text_format": "テキスト形式",
+        "this_link_is_already_in_use": "このリンクはすでに使用されています",
+        "untitled": "無題",
+        "update_it_or_publish_this_as": "更新しますか？それとも新しい投稿として公開しますか？",
+        "you_have_unsaved_changes_from_an": "以前の編集で保存されていない変更があります。その後に投稿が変更されているため、復元すると下のテキストが置き換えられます。",
+        "your_edits_were_not_published": "編集内容は公開されませんでした。",
+        "your_post_was_already_published": "投稿はすでに公開されています",
+        "file_size": "{name}（{size} MB）",
+        "thumbnail_pick": "サムネイル、タップして別の画像を選択",
+        "thumbnail_number": "サムネイル {number}",
+        "recording_busy": "録画がすでに進行中です。先にカメラで終了してください。",
+        "photo_lost": "カメラを開いている間に写真が失われました。もう一度撮影してください。",
+        "add_snippet_button": "+ スニペット",
+        "words_count": "{count, plural, other {# 語}}",
+        "community_search": "検索"
+      },
+      "profile": {
+        "open_wallet": "ウォレットを開く",
+        "your_wallet_is_on_the_wallet": "ウォレットはウォレットタブにあります。",
+        "user_has_no_comments": "@{username} はまだコメントしていません",
+        "votes_count": "{count, plural, other {# 票}}",
+        "replies_count": "{count, plural, other {# 件の返信}}",
+        "menu": "その他",
+        "users": "ユーザー"
+      },
+      "reading": {
+        "apply": "適用",
+        "add_tag": "タグを追加",
+        "age": "経過時間",
+        "audio_language": "音声の言語",
+        "available_filters": "利用可能なフィルター",
+        "could_not_unlock_the_audio_please": "音声のロックを解除できませんでした。もう一度お試しください",
+        "downvote": "ダウンボート",
+        "downvote_percent": "ダウンボート {percent}%",
+        "listen_to_this_post": "この投稿を聴く",
+        "log_in": "ログイン",
+        "mark_all_as_read": "すべて既読にする",
+        "mark_as_read": "既読にする",
+        "more_replies": "さらに返信",
+        "not_enough_points": "Points が不足しています",
+        "nothing_here_yet": "まだ何もありません。",
+        "open_editor": "エディターを開く",
+        "pause_voice": "音声を一時停止",
+        "play_voice": "音声を再生",
+        "playback_speed": "再生速度",
+        "publishing_in_waves": "Waves に公開中",
+        "quests_done": "完了したクエスト",
+        "read": "読む",
+        "remove_vote": "投票を取り消す",
+        "seek": "シーク",
+        "select_community": "コミュニティを選択",
+        "selected_filters": "選択中のフィルター",
+        "the_audio_could_not_be_loaded": "音声を読み込めませんでした。",
+        "this_post_does_not_exist_or": "この投稿は存在しないか、削除されました。",
+        "unread": "未読",
+        "voice_position": "音声の位置",
+        "vote_weight": "投票の強さ",
+        "reblogged_by": "{username} がリブログ",
+        "no_more_posts": "これ以上投稿はありません。",
+        "favourite": "お気に入り",
+        "no_votes_yet": "まだ投票はありません",
+        "no_comments_yet": "まだコメントはありません。最初のコメントを書きましょう！",
+        "comments_count": "コメント（{count}）",
+        "sending_to_chain": "ブロックチェーンに送信中",
+        "compare": "比較",
+        "your_vote": "あなたの投票",
+        "reply_to": "@{username} に返信",
+        "what_do_you_think": "ご意見をどうぞ",
+        "clear_tag_filter": "タグフィルターを解除",
+        "tab_selected": "{title}、選択中",
+        "add_tag_feed": "タグフィードを追加",
+        "feed_pinned": "{label}、固定済み",
+        "attached_image_remove": "画像を添付済み、タップで削除",
+        "camera": "カメラ",
+        "files": "ファイル",
+        "paused": "一時停止中",
+        "in_topic": "{topic} 内",
+        "poll_vote": "投票",
+        "reply": "返信",
+        "mute_sound": "ミュート",
+        "unmute_sound": "ミュート解除",
+        "leaderboard_activities": "アクティビティ",
+        "leaderboard_reward": "報酬",
+        "sort_votes": "投票"
+      },
+      "shell": {
+        "account_of": "アカウント @{username}",
+        "account_signed_out": "アカウント、サインアウト中",
+        "close_tab": "タブを閉じる",
+        "coming_soon_to_the_native_app": "ネイティブアプリでまもなく利用可能になります。",
+        "create": "作成",
+        "expand": "展開",
+        "forward": "進む",
+        "loading": "読み込み中",
+        "new_tab": "新しいタブ",
+        "reload": "再読み込み",
+        "sent": "送信済み",
+        "tab_unread": "{title}、未読 {count} 件",
+        "no_app_for_link": "このリンクを開けるアプリがありません。"
+      },
+      "wallet": {
+        "product_not_available": "商品は利用できません。",
+        "repeat": "繰り返す"
+      },
+      "copied": "コピーしました",
+      "trending_caps": "トレンド",
+      "move_up": "上へ移動",
+      "move_down": "下へ移動",
+      "scroll_to_top": "一番上へスクロール",
+      "load_more": "もっと見る"
+    },
+    "wallet": {
+      "checking": "ネットワークで確認中",
+      "leave_title": "送信中",
+      "leave_message": "送信中、またはネットワークで確認中です。この画面を離れても、完了時にアプリからお知らせします。",
+      "stay": "とどまる",
+      "collateralized_convert_request": "担保付き変換リクエスト",
+      "op_transfer": "送金",
+      "op_power_up": "ステーク",
+      "op_power_down_change": "アンステークの変更",
+      "op_delegation": "デリゲーション",
+      "op_savings_deposit": "貯蓄への預入",
+      "op_savings_withdrawal": "貯蓄からの引出",
+      "op_conversion": "変換",
+      "op_swap": "スワップ",
+      "op_order_cancel": "注文キャンセル",
+      "op_reward_claim": "報酬の請求",
+      "op_withdraw_route_change": "引出ルートの変更",
+      "op_token_operation": "トークン操作"
+    },
+    "notification": {
+      "amount_unknown": "金額を取得できません",
+      "weekly_earnings_breakdown": "今週は ${amount} を獲得しました。投稿から ${authorUsd}、キュレーションから ${curationUsd} です。",
+      "weekly_earnings_total": "今週は投稿とキュレーションで ${amount} を獲得しました。"
+    },
+    "settings": {
+      "open": "開く",
+      "feedback_subject": "フィードバック／バグ報告",
+      "unknown_user": "不明なユーザー"
+    },
+    "navigation": {
+      "editor": "エディター",
+      "followers": "フォロワー",
+      "spin_game": "スピンゲーム",
+      "edit_profile": "プロフィールを編集",
+      "redeem_points": "ポイントを交換",
+      "community": "コミュニティ",
+      "community_members": "コミュニティメンバー",
+      "community_activities": "コミュニティのアクティビティ",
+      "browser": "ブラウザー",
+      "asset_details": "アセットの詳細",
+      "edit_history": "編集履歴",
+      "welcome": "ようこそ",
+      "chat": "チャット",
+      "backup_keys": "鍵のバックアップ",
+      "trade": "トレード",
+      "ai_image_generator": "AI画像ジェネレーター",
+      "select_assets": "アセットを選択",
+      "poll": "投票",
+      "bot_comments": "ボットのコメント"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "オーナーキーが必要な操作は Ecency では署名できません。",
+      "post": "投稿／コメント",
+      "custom": "カスタム JSON",
+      "sign_buffer": "メッセージに署名",
+      "send_token": "トークンを送信",
+      "witness_vote": "ウィットネス投票",
+      "proxy": "プロキシを設定",
+      "power_up": "ステーク",
+      "power_down": "アンステーク",
+      "broadcast": "ブロードキャスト",
+      "sign_tx": "トランザクションに署名",
+      "encode": "メッセージをエンコード",
+      "decode": "鍵を検証",
+      "add_account_authority": "アカウント権限を追加",
+      "remove_account_authority": "アカウント権限を削除",
+      "add_key_authority": "キー権限を追加",
+      "remove_key_authority": "キー権限を削除",
+      "create_claimed_account": "アカウントを作成",
+      "create_proposal": "プロポーザルを作成",
+      "remove_proposal": "プロポーザルを削除",
+      "update_proposal_vote": "プロポーザル投票",
+      "signed_call": "署名付き呼び出し"
+    },
+    "translate_language": {
+      "ar": "アラビア語",
+      "az": "アゼルバイジャン語",
+      "bg": "ブルガリア語",
+      "bn": "ベンガル語",
+      "ca": "カタルーニャ語",
+      "cs": "チェコ語",
+      "da": "デンマーク語",
+      "de": "ドイツ語",
+      "el": "ギリシャ語",
+      "en": "英語",
+      "eo": "エスペラント語",
+      "es": "スペイン語",
+      "et": "エストニア語",
+      "fa": "ペルシア語",
+      "fi": "フィンランド語",
+      "fr": "フランス語",
+      "ga": "アイルランド語",
+      "he": "ヘブライ語",
+      "hi": "ヒンディー語",
+      "hu": "ハンガリー語",
+      "id": "インドネシア語",
+      "it": "イタリア語",
+      "ja": "日本語",
+      "ko": "韓国語",
+      "lt": "リトアニア語",
+      "lv": "ラトビア語",
+      "ms": "マレー語",
+      "nb": "ノルウェー語",
+      "nl": "オランダ語",
+      "pl": "ポーランド語",
+      "pt": "ポルトガル語",
+      "ro": "ルーマニア語",
+      "ru": "ロシア語",
+      "sk": "スロバキア語",
+      "sl": "スロベニア語",
+      "sq": "アルバニア語",
+      "sv": "スウェーデン語",
+      "th": "タイ語",
+      "tl": "タガログ語",
+      "tr": "トルコ語",
+      "uk": "ウクライナ語",
+      "zh": "中国語",
+      "zt": "中国語（繁体字）"
+    },
+    "reading": {
+      "banner_text": "この投稿は{source}です。{target}に翻訳しますか？",
+      "translated_from_text": "{source}から翻訳"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# メンバー}} • {authors, plural, other {# 投稿者}} • {posts, plural, other {# 投稿}}",
+      "community_title": "{title} コミュニティ",
+      "members_title": "{title} のメンバー",
+      "activities_title": "{title} のアクティビティ",
+      "cannot_start_with_or": "@ や # で始めることはできません",
+      "use_a_two_letter": "en のような2文字の言語コードを使用してください",
+      "at_most_characters": "最大{max, plural, other {# 文字}}",
+      "council": "評議会",
+      "journal": "ジャーナル",
+      "topic": "トピック",
+      "community_not_found": "コミュニティが見つかりません。"
+    },
+    "transfer": {
+      "one_recipient": "この送金では受取人は1人のみ指定できます。",
+      "is_an_exchange_and": "{exchange} は取引所であり、定期送金に対応していない可能性があります。スケジュール送金した資金は失われるおそれがあります。代わりに1回限りの送金を使用してください。"
+    },
+    "dapps": {
+      "signing_info": "Ecency は Hive の署名拡張機能として動作します。dApp でブラウザー拡張機能（Keychain、Keeper、Peak Vault など）でのログインを求められたら、そのオプションを選択してください。署名は Ecency が安全に処理します。",
+      "category_social": "ソーシャル",
+      "category_gaming": "ゲーム",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "グループ",
+      "unable_to_load_messages": "メッセージを読み込めません。",
+      "someone": "誰か",
+      "renamed_the_group_to": "{actor} がグループ名を「{name}」に変更しました",
+      "removed_the_group_name": "{actor} がグループ名を削除しました",
+      "unable_to_send_your": "メッセージを送信できません。",
+      "unable_to_remove_message": "メッセージを削除できません。",
+      "unknown": "不明",
+      "members_online": "{members, plural, other {# メンバー}} • {online} 人がオンライン",
+      "failed_to_load_pinned": "ピン留めメッセージを読み込めませんでした",
+      "you": "あなた",
+      "title": "リアクション"
+    },
+    "tip": {
+      "login_required": "チップを送るにはログインしてください",
+      "max_decimals": "小数点以下は最大{n, plural, other {# 桁}}です"
+    },
+    "paid": {
+      "check_again": "もう一度確認",
+      "give_up": "あきらめる",
+      "unknown": "まだ応答がありません。リクエストは実行中の可能性があります。もう一度確認して結果を取得してください。二重に課金されることはありません。",
+      "pending": "リクエストは処理中です。しばらくしてからもう一度確認してください。二重に課金されることはありません。",
+      "restored": "以前のリクエストにはまだ応答がありません。もう一度確認して結果を取得してください。二重に課金されることはありません。",
+      "give_up_confirm": "リクエストが成功していた場合、Points はすでに消費されており、結果は失われます。",
+      "not_stored": "このリクエストをデバイスに保存できませんでした。完了するまでこの画面を開いたままにしてください。",
+      "sign_in_again": "セッションの有効期限が切れました。再度サインインしてから、もう一度確認してください。",
+      "other_account": "これは @{owner} のものです。続行するにはそのアカウントに切り替えてください。"
+    },
+    "ai": {
+      "run_ai_assist": "AIアシストを実行（{costText}）",
+      "no_longer_free_cost": "今日はこの実行は無料ではなくなりました。{cost} {unit} かかります。",
+      "no_longer_free": "今日はこの実行は無料ではなくなりました。",
+      "content_violates_our_content": "コンテンツがコンテンツポリシーに違反しています。テキストを修正してください。Points は返金されません。",
+      "generate_image": "画像を生成（{costLabel}）",
+      "use_prompt": "使用: 「{prompt}」"
+    },
+    "post_actions": {
+      "busy": "別の操作が進行中です。しばらくお待ちください",
+      "not_a_community_post": "コミュニティの投稿ではありません。",
+      "parent_post_not_found": "親の投稿が見つかりません",
+      "the_account_changed": "アカウントが変更されました。"
+    },
+    "dictation": {
+      "balance": "残高: {balance} {unit}",
+      "stop_points": "停止（{cost} Points）",
+      "stop_free": "停止（無料）",
+      "transcribe_points": "文字起こし（{cost} Points）",
+      "transcribe": "文字起こし",
+      "no_longer_free_cost": "今日はこの録音は無料ではなくなりました。{cost} Points かかります。",
+      "no_longer_free": "今日はこの録音は無料ではなくなりました。",
+      "held_locked": "Ecency がロックされたため録音が停止しました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
+      "held_no_background": "Ecency が画面から離れたため録音が停止しました（録音通知を表示できませんでした）。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
+      "held_stopped": "通知から録音が停止されました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
+      "held_focus_lost": "通話または他のアプリの音声のため録音が停止しました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
+      "held_interrupted": "他のアプリがマイクを使用したため録音が停止しました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
+      "unavailable": "このデバイスでは録音を利用できません。",
+      "not_read": "録音を読み取れなかったか、サイズが大きすぎます。何も送信されず、課金もされていません。",
+      "give_up_not_sent": "この録音は送信されていないため、課金されていません。録音は削除されます。",
+      "give_up_not_charged": "この録音には課金されていません。録音は削除されます。",
+      "clip_lost": "以前のリクエストの録音はこのデバイスにありません。そのリクエストが成功していた場合、Points はすでに消費されており、文字起こしは取得できません。"
+    },
+    "register": {
+      "error_code_28": "リクエストを処理できませんでした。登録キューが満杯の可能性があります。数分後にもう一度お試しください。"
+    },
+    "perks": {
+      "quests_empty": "ここにはまだクエストがありません。後でまた確認してください。",
+      "freeze_confirm_title": "連続記録を守る",
+      "spend_points_on_a": "連続記録の保護に {price} Points を使いますか？記録が途切れる日に使用されます。"
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ecency を応援して、無料ブログと認証済み Pro バッジを手に入れましょう。",
+      "card_description": "年額 {price} で Pro に。認証バッジ、無料ブログ、Ecency への支援が付きます。",
+      "card_description_plain": "1年間 Pro に。認証バッジ、無料ブログ、Ecency への支援が付きます。",
+      "member": "あなたは Pro メンバーです。",
+      "benefit_badge": "名前の横に表示される認証済み Pro バッジ。",
+      "benefit_blog": "yourname.blogs.ecency.com の無料ブログ。",
+      "benefit_support": "Ecency の開発を直接支援できます。",
+      "benefit_early": "新機能への先行アクセス。",
+      "buy": "年額 {price} で Pro を購入",
+      "extend": "{price} で12か月延長",
+      "extend_note": "再度購入すると、メンバーシップが12か月延長されます。",
+      "unavailable": "現在、ストアで Ecency Pro をご利用いただけません。",
+      "activating": "お支払いを受け付けました。メンバーシップを有効化しています。",
+      "success_title": "Ecency Pro へようこそ",
+      "success_body": "Pro メンバーシップが有効になりました。まもなくプロフィールにバッジが表示されます。",
+      "extending": "お支払いを受け付けました。Pro メンバーシップを12か月延長しています。",
+      "open_a11y": "Ecency Pro を開く"
+    },
+    "editor": {
+      "saving_draft": "下書きを保存中...",
+      "please_sign_in_first": "先にサインインしてください。",
+      "fetch_failed": "取得に失敗しました。",
+      "you_can_only_edit": "編集できるのは自分のコンテンツのみです。",
+      "invalid_percent": "無効なパーセンテージです",
+      "beneficiary_exists_already": "受益者はすでに登録されています",
+      "this_draft_belongs_to": "この下書きは @{owner} のものです。公開するにはそのアカウントに切り替えてください。",
+      "could_not_make_a": "この投稿の新しいリンクを作成できませんでした。タイトルを少し変更してもう一度お試しください。",
+      "an_earlier_attempt_was": "以前の試行がこの操作の後に公開されました。どちらのバージョンを残すか確認してください。",
+      "could_not_check_your": "アカウントのポスティング権限を確認できませんでした。接続を確認してもう一度お試しください。",
+      "this_post_was_changed": "この投稿は開いた後に別の場所で変更されました。テキストをコピーして戻り、もう一度開いて最新バージョンを編集してください。",
+      "link_text_placeholder": "ここにテキスト"
+    },
+    "app_error": {
+      "this_reply_is_too": "この返信は長すぎます。",
+      "the_network_refused_this": "ネットワークがこの操作を拒否しました。",
+      "invalid_input": "入力が無効です。",
+      "secure_storage_is_unavailable": "セキュアストレージを利用できません。もう一度サインインしてください。",
+      "please_sign_in_first": "先にサインインしてください。",
+      "these_credentials_belong_to": "この認証情報は @{expected} ではなく @{actual} のものです。",
+      "is_not_signed_in": "@{username} はこのデバイスでサインインしていません。",
+      "key_required": "このトランザクションを実行するには {role} キーが必要です。{hint}",
+      "cancelled": "キャンセルしました。",
+      "the_request_was_rejected": "ウォレットアプリでリクエストが拒否されました。",
+      "the_request_expired_before": "ウォレットアプリが応答する前にリクエストの有効期限が切れました。もう一度お試しください。",
+      "could_not_reach_the": "HiveAuth サーバーに接続できませんでした。もう一度お試しください。",
+      "unexpected_redirect": "サーバーが予期しないリダイレクトを返しました。何も変更されていません。後でもう一度お試しください。",
+      "missing_key_hint": "設定の「権限を管理」（秘密鍵をインポート）から追加するか、その鍵で再度サインインしてください。",
+      "this_key_is_also": "この鍵はこのアカウントのオーナーキーでもあります。Ecency はオーナーロールを制御する鍵を保存しません。アクティブとポスティングのロールに専用の鍵を設定し、それでサインインしてください。",
+      "this_is_the_owner": "これはオーナーキーです。Ecency はオーナーキーを保存・使用しません。マスターパスワード、またはポスティングキーかアクティブキーでサインインしてください。",
+      "this_password_only_matches": "このパスワードはアカウントのオーナーキーにのみ一致します。Ecency はオーナーキーを保存・使用しません。ポスティングキーかアクティブキーでサインインしてください。",
+      "this_key_cannot_sign": "この鍵だけではアカウントに署名できません。このアカウントには複数の署名が必要です（重みがしきい値を下回っています）。",
+      "public_key_given": "これは公開鍵です。秘密鍵（5 で始まる）またはマスターパスワードを貼り付けてください。",
+      "memo_key_only": "メモキーではサインインできません。ポスティングキー、アクティブキー、またはマスターパスワードを使用してください。",
+      "network_message": "ネットワークエラーです。接続を確認してもう一度お試しください。",
+      "network_error_this_may": "ネットワークエラーです。すでに処理されている可能性があります。再試行しても二重に投稿されることはありません。"
+    },
+    "purchases": {
+      "deal_best": "ベストディール！",
+      "deal_popular": "人気！",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "ストアから応答がありませんでした。"
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts の利用にはメールアドレスとユーザー名が必要です",
+      "stuck": "この商品の以前の購入を完了できませんでした。ストアのレシートを添えて support@ecency.com までお問い合わせください。レシートは保管されています。",
+      "held": "この購入は審査のため保留されています。注文番号 #{order} を添えて support@ecency.com までお問い合わせください。",
+      "earlier_purchase": "この商品の以前の購入を、先に @{target} 向けに完了しています。",
+      "earlier_pending": "この商品の以前のお支払いが @{target} 向けにまだ保留中です。ストアが支払いを確認すると完了します。",
+      "pending": "お支払いは保留中です。ストアが支払いを確認すると購入が完了します。",
+      "processing": "購入を処理中です。まもなく完了します。"
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "定期送金",
+      "delegate_hive_power": "Hive Power をデリゲート",
+      "power_up": "パワーアップ",
+      "set_withdraw_vesting_route": "ベスティング引出ルートを設定",
+      "power_down": "パワーダウン",
+      "transfer_to_saving": "貯蓄へ送金",
+      "transfer_from_saving": "貯蓄から送金",
+      "cancel_transfer_from_saving": "貯蓄からの送金をキャンセル",
+      "collateralized_convert": "担保付き変換",
+      "witness_vote": "ウィットネス投票",
+      "witness_update": "ウィットネス更新",
+      "witness_set_properties": "ウィットネスのプロパティを設定",
+      "governance_proxy": "ガバナンスプロキシ",
+      "claim_account": "アカウントを請求",
+      "create_account": "アカウントを作成",
+      "create_account_with_account": "アカウントクレジットでアカウントを作成",
+      "create_limit_order": "指値注文を作成",
+      "cancel_limit_order": "指値注文をキャンセル",
+      "redeem_rewards": "報酬を受け取る",
+      "post_or_comment": "投稿またはコメント",
+      "post_or_comment_options": "投稿またはコメントのオプション",
+      "custom_operation": "カスタム操作",
+      "update_account_active": "アカウントを更新（アクティブ）",
+      "update_account_posting": "アカウントを更新（ポスティング）",
+      "change_recovery_account": "リカバリーアカウントを変更",
+      "create_proposal": "プロポーザルを作成",
+      "remove_proposal": "プロポーザルを削除",
+      "update_proposal_votes": "プロポーザル投票を更新",
+      "update_proposal": "プロポーザルを更新"
+    },
+    "auth_link": {
+      "must_be_signed_by": "このリンクは @{account} で署名する必要があります。そのアカウントに切り替えてもう一度開いてください。",
+      "ecency_can_only_sign": "Ecency はリンクからのトランザクションの署名とブロードキャストのみ可能です。",
+      "requester_page": "ページ {host}",
+      "owner_refused": "オーナーキーが必要な操作はリンクから署名できません。",
+      "busy": "しばらくお待ちください。別のリクエストを処理中です。",
+      "not_supported": "Ecency はこのバージョンではこの操作にまだ署名できません。"
+    },
+    "chats": {
+      "group_members": "グループメンバー",
+      "rename_group": "グループ名を変更",
+      "failed_to_load_chats": "チャットを読み込めませんでした",
+      "unknown": "不明",
+      "unable_to_mark_channel": "チャンネルを既読にできません",
+      "unable_to_update_favorites": "お気に入りを更新できません",
+      "unable_to_update_mute": "ミュートを更新できません",
+      "group": "グループ",
+      "unable_to_search": "検索できません",
+      "unable_to_start_chat": "チャットを開始できません",
+      "no_internet": "インターネット接続がありません"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP（{vests} VESTS）を @{to} にデリゲート",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "@{recipient} にはすでにデリゲート済みです"
+    },
+    "backup_keys": {
+      "owner_not_stored": "公開鍵のみです。Ecency はオーナーキーを保存しません。",
+      "shared_owner": "このアカウントはオーナーロールと {names} ロールに同じ鍵を使用しています。その鍵を持つ人はアカウント全体を制御できます。{names} ロールに専用の鍵を設定し、オーナーキーはオフラインで保管してください。",
+      "copy_warning": "この秘密鍵を持つ人は、アカウントのこの部分を制御できます。他のアプリがクリップボードを読み取れる場合があるため、信頼できる場所にのみ貼り付けてください。クリップボードは2分後にクリアされます。"
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PINロックはオンです。",
+      "pin_changed": "PINを変更しました。",
+      "pin_lock_is_off": "PINロックはオフです。",
+      "wiped_notice": "すべてのアカウント、鍵、認証情報がこのデバイスから削除されました。",
+      "we_could_not_bring": "以前のバージョンのアプリからアカウントを引き継げませんでした。もう一度ログインしてください。",
+      "your_pin_lock_could": "以前のバージョンからPINロックを引き継げませんでした。アカウントメニューからPINを再設定して、アプリロックをオンに戻してください。",
+      "biometric_unlock_was_turned": "このデバイスの生体情報が変更されたため、生体認証によるロック解除がオフになりました。PINでロックを解除し、アカウントメニューから再度オンにしてください。",
+      "biometric_unavailable_notice": "生体認証によるロック解除をオンにできませんでした。このデバイスには生体情報が設定されていません。",
+      "set_backup": "生体認証ロック解除のバックアップ用にPINを設定",
+      "biometric_on_notice": "PINロックはオンです。生体認証またはPINでロックを解除してください。",
+      "offer_title": "生体認証でロック解除",
+      "offer_body": "顔または指紋で Ecency を開きます。生体認証が使えない場合にアプリのロックを解除できるよう、PINも設定します。",
+      "offer_use": "生体認証を使用",
+      "offer_use_pin": "代わりにPINを使用"
+    },
+    "common": {
+      "list_and": "{first}と{second}",
+      "role_owner": "オーナー",
+      "role_active": "アクティブ",
+      "role_posting": "ポスティング",
+      "role_memo": "メモ"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25文字以下の返信ではポイントは獲得できません（リンクは含みません）",
+      "short_content_hint": "短すぎるためポイントは獲得できません（25文字以下、リンクを除く）",
+      "daily_post": "デイリー投稿 {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {#日連続}}",
+      "grant_description": "Ecency アカウント @ecency.app にアカウントへのポスティング権限を付与すると、毎回 Keychain を開かずに投稿できます。付与するとアカウントのポスティング権限が変更され、アクティブキーが必要です。"
+    },
+    "wallet_history": {
+      "from_to": "@{from} から @{to}",
+      "from_user_id": "@{from} から、ID: {id}",
+      "user_id": "@{user}、ID: {id}",
+      "from_to_id": "@{from} から @{to}、ID: {id}",
+      "from_to_account": "@{from} から {to}",
+      "from_user": "@{user} から",
+      "to_user": "@{user} 宛",
+      "interest": "利息",
+      "proposal_pay": "プロポーザル支払い",
+      "categories": "アクティビティの種類",
+      "category_all": "すべて",
+      "category_transfers": "送金",
+      "category_market": "マーケット注文",
+      "category_interest": "利息",
+      "category_stake": "ステーク操作",
+      "category_rewards": "報酬",
+      "point_type_checkin": "ハートビート",
+      "point_type_login": "ログイン",
+      "point_type_post": "投稿",
+      "point_type_comment": "コメント",
+      "point_type_vote": "投票",
+      "point_type_reblog": "リブログ",
+      "point_type_transfer_sent": "送金（送信）",
+      "point_type_transfer_received": "送金（受信）"
+    },
+    "video_upload": {
+      "continue_upload": "アップロードを続行",
+      "source_gone": "この録画はデバイス上で利用できなくなりました。動画をもう一度録画または選択してください。",
+      "no_camera": "このデバイスではカメラを利用できません。"
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "次回のアンステークは{hours, plural, other {# 時間}}後です",
+      "account_not_found": "アカウントが見つかりません"
+    },
+    "wave_compose": {
+      "clipboard_chip": "クリップボードの画像 · 画像を貼り付け",
+      "no_container": "最新の Waves コンテナを取得できませんでした",
+      "please_sign_in_first": "先にサインインしてください。",
+      "write_something_first": "先に何か書いてください。",
+      "account_changed": "この Wave は別のアカウントで書かれました。閉じてもう一度書いてください。",
+      "no_upload": "このビルドでは画像のアップロードはまだ利用できません。代わりに画像リンクをテキストに貼り付けてください。",
+      "fail": "失敗"
+    },
+    "delete_account": {
+      "sign_out_failed": "リクエストは送信されましたが、サインアウトに失敗しました。メニューからログアウトしてください。",
+      "not_sent": "削除リクエストを送信できませんでした。もう一度お試しください。"
+    },
+    "chat_sheets": {
+      "group_limit": "グループには他に最大{max, plural, other {# 人}}まで参加できます。",
+      "search_people_by_username": "ユーザー名で検索",
+      "new_group_title": "新しいグループ",
+      "new_group_hint": "{min}～{max, plural, other {# 人}}を追加してグループ会話を始めましょう。",
+      "no_results": "その名前のユーザーがチャットに見つかりません。",
+      "search_failed": "検索に失敗しました。接続を確認してもう一度お試しください。",
+      "create": "グループを開始",
+      "new_group_failed": "グループを開始できませんでした。もう一度お試しください。",
+      "name_limit": "グループ名は{max, plural, other {# 文字}}までです。",
+      "rename_title": "グループ名を変更",
+      "rename_hint": "グループ全員に表示される名前を付けてください。空欄の場合はメンバーの名前が表示されます。",
+      "placeholder": "グループ名",
+      "not_owner": "グループ名を変更できるのは、グループを作成した人だけです。",
+      "rename_failed": "グループ名を変更できませんでした。もう一度お試しください。"
+    },
+    "editor_side": {
+      "copy_of": "{title} のコピー",
+      "deletions_failed": "問題が発生しました\n{total, plural, other {# 件}}中 {failed} 件の削除に失敗しました",
+      "uploads_failed": "{count, plural, other {# 件のアップロードに失敗しました}}:\n\n{messages}",
+      "failed_to_delete": "削除に失敗しました"
+    },
+    "uploads": {
+      "add_to_gallery": "ギャラリーに追加"
+    },
+    "account_notice": {
+      "manage_keys": "設定、権限を管理",
+      "no_signing_key_title": "@{account} として再度サインイン",
+      "no_signing_key": "Ecency はこのデバイスにオーナーキーやマスターパスワードを保持しなくなりました。また @{account} のポスティングキーやアクティブキーもここに保存されていません。マスターパスワード、またはポスティングキーかアクティブキーで再度サインインするか、{manageKeys}（秘密鍵をインポート）から鍵を追加してください。",
+      "missing_roles_title": "追加されなかった鍵があります",
+      "cannot_post": "投稿・投票・コメントすること",
+      "cannot_transfer": "送金やアカウント設定の変更をすること",
+      "missing_roles": "パスワードが @{account} の {missing} キーと一致しなくなりました。パスワード設定後にアカウント側で鍵が変更されたためです。このデバイスに保存されているのは {kept} キーです。{manageKeys}（秘密鍵をインポート）で {missing} キーを追加するまで、このアプリは @{account} の鍵で{cannot}はできません。",
+      "shared_owner_title": "この鍵はオーナーロールも制御します",
+      "shared_owner": "@{account} はオーナーロールと {names} ロールに同じ鍵を使用しています。この鍵を持つ人はアカウント全体を制御できます。Ecency はこれを {names} キーとしてのみ保持し、オーナー操作には使用しません。{names} ロールに専用の鍵を設定し、オーナーキーはオフラインで保管してください。"
+    },
+    "dapp_browser": {
+      "message_from": "{host} からのメッセージ",
+      "home_title": "ホーム",
+      "loading_title": "読み込み中...",
+      "blank_run": "[{count, plural, other {# 個の空白文字}}]",
+      "too_large": "このページは大きすぎて表示できない署名リクエストを要求したため、Ecency が拒否しました。"
+    },
+    "community_service": {
+      "the_account_changed": "アカウントが変更されました。"
+    },
+    "profile_edit": {
+      "enter_link": "画像リンクを入力",
+      "please_sign_in_first": "先にサインインしてください。",
+      "account_not_found": "アカウントが見つかりません",
+      "please_enter_an_image": "https:// で始まる画像リンクを入力してください"
+    },
+    "background_media": {
+      "post_by": "@{author} の投稿"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "先にサインインしてください。"
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "同じ強さですでに投票済みです。",
+      "insufficient_rc": "Resource Credits が不足しています。しばらく待つか、パワーアップしてください。",
+      "missing_authority": "ポスティング権限がありません。ログイン方法を確認してください。",
+      "comment_too_soon": "再度投稿するまでしばらくお待ちください。",
+      "paid_out": "この投稿の報酬はすでに支払われています。",
+      "too_large": "トランザクションが{size, plural, other {# バイト}}で、{max} バイトの上限を超えています。",
+      "network_error_please_check": "ネットワークエラーです。接続を確認してもう一度お試しください。",
+      "unconfirmed_message": "処理されたかどうか確認できませんでした。ウォレットまたは履歴を確認し、見当たらない場合のみもう一度実行してください。",
+      "undecided_message": "すでに処理されている可能性があります。もう一度実行する前に、ウォレットまたは履歴を確認してください。"
+    },
+    "chat_api": {
+      "request_failed": "リクエストに失敗しました（{status}）"
+    },
+    "chat": {
+      "typing_one": "{name} が入力中...",
+      "typing_two": "{first} と {second} が入力中...",
+      "typing_three": "{first}、{second}、{third} が入力中...",
+      "typing_many": "{first}、{second}、ほか{count, plural, other {# 人}}が入力中...",
+      "banned": "{reason} チャットの閲覧は引き続き可能です。投稿は{until}に解除されます。",
+      "joined_when": "{time} に参加",
+      "joined": "参加済み",
+      "official_badge": "公式",
+      "official_badge_label": "Ecency 公式アカウント"
+    },
+    "side_menu": {
+      "ask_esie": "Esie に聞く"
+    },
+    "chat_service": {
+      "missing_token": "Hive アクセストークンがありません。一度ログアウトして、もう一度ログインしてください。",
+      "dm_error": "ユーザーはまだチャットに参加していません"
+    },
+    "compose_reply": {
+      "account_changed": "この返信は別のアカウントで書かれました。閉じてもう一度書いてください。",
+      "write_something_first": "先に何か書いてください。",
+      "please_sign_in_first": "先にサインインしてください。"
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "受益者が多すぎます。最大 {max} 人までです。",
+      "a_beneficiary_s_share": "受益者の割合は 0.01% から 100% の間でなければなりません。",
+      "beneficiaries_add_up_to": "受益者の合計が 100% を超えています。",
+      "a_beneficiary_is_listed": "受益者が重複しています。",
+      "you_cannot_be_a": "自分の投稿の受益者にはなれません。",
+      "a_beneficiary_has_an": "受益者のアカウント名が無効です。"
+    },
+    "follows": {
+      "fail": "失敗！: {message}",
+      "follower_count": "フォロワー（{count}）",
+      "following_count": "フォロー中（{count}）"
+    },
+    "link": {
+      "unsupported": "このリンクはまだサポートされていません。",
+      "cannot_open": "リンクを開けません",
+      "unsupported_version": "このリンクはこのバージョンではサポートされていません。"
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore ブラウザーは Hive ウォレットにアクセスしてトランザクションに署名できます。このリンクは投稿内容からのもので、Ecency による確認は行われていません。信頼できる場合のみ続行してください:\n\n{url}"
+    },
+    "listen": {
+      "message": "聴くには {required} Points が必要ですが、{available} Points しかありません。",
+      "unlock_label": "ロック解除 · {cost} Points",
+      "preparing_audio": "音声を準備中 · {preparingPercent}%",
+      "waiting_in_line_ahead": "順番待ち中、あと{ahead}件…",
+      "next_in_line": "次の順番です…",
+      "preparing_about_minutes": "音声を準備中、約{minutes}分…",
+      "preparing_audio_2": "音声を準備中…",
+      "spend_confirm": "この投稿を聴くのに {cost} Points を使いますか？音声はいつでも再生できます。",
+      "about_minutes": "約{minutes}分",
+      "failed_refunded": "音声を作成できなかったため、Points は返金されました"
+    },
+    "media_pick": {
+      "preparing_video": "動画を準備中...",
+      "library_hint": "写真から選択",
+      "camera_hint": "今すぐ新しい写真を撮影",
+      "files_hint": "このデバイスやクラウド上のファイルを参照",
+      "paste_hint": "コピーした画像を使用",
+      "link_hint": "ウェブ上の画像を使用"
+    },
+    "media_picking": {
+      "image_types_message": "このファイル形式はサポートされていません。JPEG、PNG、GIF、WebP、HEIC のいずれかの画像を選択してください。",
+      "video_types_message": "このファイル形式はサポートされていません。MP4 または MOV の動画を選択してください。",
+      "gif_too_large": "この GIF は {mb} MB を超えています。"
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "この操作にはアクティブとポスティングの両方の署名が必要ですが、Ecency ではまだ同時に署名できません。"
+    },
+    "poll": {
+      "fail": "失敗！{message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "アカウントのポスティング権限を確認できませんでした。接続を確認してもう一度お試しください。"
+    },
+    "post_lists": {
+      "voters_title": "投票者情報（{total}）",
+      "reblogs_title": "リブログ情報（{total}）",
+      "no_history_found": "履歴が見つかりません！",
+      "no_edit_history_available": "このコンテンツの編集履歴はありません。",
+      "version_label": "バージョン {version}"
+    },
+    "stats": {
+      "other_device": "その他"
+    },
+    "profile": {
+      "account_not_found": "アカウントが見つかりません",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • 満タンまで{hours, plural, other {# 時間}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "現在のプロフィールを読み取れませんでした。もう一度お試しください"
+    },
+    "profile_sheet": {
+      "fail": "失敗！{message}"
+    },
+    "profile_writes": {
+      "account_not_found": "アカウントが見つかりません"
+    },
+    "push_payload": {
+      "mentioned": "@{source} が @{target} をメンションしました",
+      "replied": "@{source} が @{target} に返信しました",
+      "transferred": "@{source} が @{target} に送金しました",
+      "delegated": "@{source} が @{target} にデリゲートしました",
+      "rewards_received": "報酬を受け取りました",
+      "account_updated": "アカウントが更新されました",
+      "account_updated_body": "アカウントの詳細が更新されました",
+      "followed": "@{source} が @{target} をフォローしました",
+      "unfollowed": "@{source} が @{target} のフォローを解除しました",
+      "ignored": "@{source} が @{target} を無視しました",
+      "blacklisted": "@{source} が @{target} をブラックリストに追加しました",
+      "posted_in": "@{source} が #{firstTag} に投稿しました"
+    },
+    "qr_scan": {
+      "permission_title": "カメラの権限を取得できません",
+      "permission_message": "Ecency の設定でカメラの権限を許可してください。",
+      "permission_allow": "許可"
+    },
+    "reply_account": {
+      "switch": "別のアカウントで返信"
+    },
+    "send_journal": {
+      "your_from_went_through": "@{account} からの{label}は完了しました。",
+      "not_sent": "@{account} からの{label}は完了しませんでした。何も送信されていません。もう一度実行できます。",
+      "checking_whether_your_from": "@{account} からの{label}が完了したか確認中です。もう一度送信する前にウォレットを確認してください。"
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner のページを閉じました",
+      "wrong_role": "これは {given} キーです。この操作には {needed} キーが必要です。",
+      "action_id_required": "この操作を安全に再試行するにはアクション ID が必要です。"
+    },
+    "signing_router": {
+      "owner_never": "オーナー操作はアプリ内では署名されません。"
+    },
+    "spin": {
+      "key_missing": "ゲームキーがありません",
+      "score": "{score, plural, other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "本日（UTC）、リセットまで {time}",
+      "hours_minutes": "{hours}{minutes}",
+      "resets_daily": "毎日 00:00 UTC にリセット"
+    },
+    "storage_reset": {
+      "title": "もう一度サインイン",
+      "message": "このデバイスのセキュアストレージがリセットされました。もう一度サインインしてください。",
+      "failed": "このデバイス上のアカウントを削除できませんでした。もう一度お試しください。"
+    },
+    "store": {
+      "in_app_purchases_are": "このビルドではアプリ内課金は利用できません。"
+    },
+    "wallet_sends": {
+      "journal_full": "ネットワークで確認中の送信が多すぎます。確認が完了するまでお待ちいただき、その後で送信してください。",
+      "check_later": "ネットワークが時間内に確認できませんでした。もう一度送信する前にウォレットまたは履歴を確認してください。アプリは次回起動時に再確認します。"
+    },
+    "waves": {
+      "shorts": "ショート"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {未読 #}}",
+      "locked_text": "Ecency のロックを解除して表示",
+      "signed_out_text": "Ecency にログイン"
+    },
+    "posting_grant": {
+      "unreadable": "アカウントの現在の権限を読み取れませんでした。何も変更されていません。もう一度お試しください。",
+      "reads_disagree": "アカウントのポスティング権限の2回の読み取り結果が一致しません。何も変更されていません。もう一度お試しください。"
+    },
+    "vote": {
+      "vote_weight_must_be": "投票の強さは -100% から 100% の間でなければなりません。",
+      "please_sign_in_first": "先にサインインしてください。"
+    },
+    "widget": {
+      "streak_name": "クエスト連続記録",
+      "write": "書く",
+      "new_wave": "新しい Wave",
+      "notifications_description": "未読の通知です。PINロックがオンの間は非表示になります。",
+      "streak_description": "デイリークエストの連続記録です。PINロックがオンの間は非表示になります。",
+      "compose_description": "投稿または新しい Wave を書きます。",
+      "streak_title": "連続記録",
+      "daily_quests": "デイリークエスト",
+      "streak_hint": "Perks を開いて連続記録を確認",
+      "open_perks": "Perks を開く",
+      "open_app": "Ecency を開く",
+      "unread_caption": "{count, plural, other {未読}}",
+      "streak_caption": "{count, plural, other {日連続}}"
+    },
+    "system": {
+      "dictation_channel": "音声入力",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "音声入力の録音がバックグラウンドで実行中の間表示され、停止操作ができます。",
+      "dictation_title": "音声入力の録音中",
+      "dictation_text": "Ecency が音声入力を録音しています。停止すると、アプリで確認するまで送信されません。",
+      "listen_channel_description": "Listen がバックグラウンドで続行できなかったときにお知らせします。",
+      "listen_paused": "Listen を一時停止しました",
+      "listen_paused_text": "聴き続けるには Ecency を開いてください。",
+      "skip_back": "15秒戻る",
+      "skip_forward": "15秒進む"
+    },
+    "permission": {
+      "face_id": "PINの代わりに Face ID で Ecency のロックを解除します。",
+      "camera": "QRコードのスキャンや、投稿に追加する写真の撮影・動画の録画に使用します。",
+      "photo_library_add": "Ecency は投稿からダウンロードした画像をフォトライブラリに保存します。",
+      "photo_library": "Ecency は投稿からダウンロードした画像を、フォトライブラリ内の Ecency アルバムにまとめて保存します。",
+      "microphone": "投稿やコメントの音声入力（録音は文字起こしのため Ecency に送信されます）や、投稿に追加する動画の音声録音のためにマイクを使用します。"
+    },
+    "android": {
+      "no_browser": "利用可能なブラウザーがありません",
+      "biometric_unlock_title": "生体認証で Ecency のロックを解除",
+      "biometric_confirm": "指紋または顔で確認してください",
+      "image_unsupported_address": "サポートされていない画像アドレスです",
+      "image_create_failed": "ファイルを作成できませんでした",
+      "image_write_failed": "ファイルを書き込めませんでした",
+      "image_too_large": "画像が大きすぎます",
+      "image_download_failed": "ダウンロードに失敗しました（ステータス {status}）",
+      "billing_disconnected": "Google Play Billing の接続が切断されました。",
+      "billing_no_screen": "購入を表示する画面がありません。",
+      "billing_error": "Google Play Billing エラー {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "今月 {count} 件の投稿を作成しました。この調子で続けましょう！",
-        "checkin": "今週 {count} 日チェックインしました。この調子で続けましょう！"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} に{count, plural, other {新しい投稿が # 件}}あります"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# 回失敗}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}日連続"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• {days}日以上経過したアカウントのみ許可",
-        "max_choices": "• 最大 {choices} 件の選択肢を選べます"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "残り {executions} 回の送金",
-        "schedule_summary": "{executions}回の送金（それぞれ{hours}時間ごと）"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "短すぎるためポイントは獲得できません（{n, plural, other {# 文字}}以下、リンクを除く）"
       },
       "chats": {
-        "people_joined": "{count} 人が参加しました"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "約{count, plural, other {# 分}}後",
+        "ban-remaining-hours": "約{count, plural, other {# 時間}}後",
+        "ban-remaining-days": "約{count, plural, other {# 日}}後"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "タグは最大{n, plural, other {# 個}}までです",
+          "too_long": "検索語が長すぎます。{n, plural, other {# 文字}}以内にしてください"
+        }
       },
       "ai_assist": {
-        "min_chars": "最低 {count} 文字必要です",
-        "chars_remaining": "残り {count} 文字"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "一度に選択できる画像は{count, plural, other {# 枚}}までです"
+      },
+      "dictation": {
+        "stop_hint": "停止すると文字起こしして投稿に追加します。最長{m, plural, other {# 分}}。",
+        "rate": "{s, plural, other {# 秒}}あたり {n} Points"
       },
       "transfer": {
-        "powering_down_info": "次回のアンステークは {days} 日後、{hp} HIVE です"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min}～{max, plural, other {# 文字}}"
       }
     }
   }

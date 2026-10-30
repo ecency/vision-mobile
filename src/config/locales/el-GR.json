@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Μέλος Ecency Pro"
   },
   "perks": {
     "header": "Προνόμια",
@@ -31,42 +31,42 @@
     "promote_desc": "Αποκτήστε περισσότερη προβολή για την ανάρτησή σας",
     "account_boost": "Ενίσχυση λογαριασμού",
     "account_boost_desc": "Ενισχύστε οποιονδήποτε λογαριασμό",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Αναπλήρωση RC",
+    "rc_topup_desc": "Συνεχίστε να δημοσιεύετε όταν τα Resource Credits σας εξαντλούνται",
+    "streak_freeze_owned": "{n} σε απόθεμα",
+    "streak_freeze_buy": "Προστασία σερί ({price} Points)",
+    "streak_freeze_buying": "Γίνεται προστασία",
+    "streak_freeze_error": "Δεν ήταν δυνατή η αγορά πάγωματος σερί. Δοκιμάστε ξανά."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Ανάρτηση ημέρας",
+    "streak": "Σερί {n} ημερών",
+    "keep_streak": "Κρατήστε το σερί σας ζωντανό"
   },
   "waves": {
     "for_you": "Για εσάς",
     "following": "Ακολουθείτε",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Προσαρμοσμένα feeds",
+    "custom_feeds_subtitle": "Καρφιτσώστε πηγές και ετικέτες για να τις προσθέσετε ως καρτέλες feed.",
+    "add_tag_placeholder": "Προσθήκη ετικέτας",
+    "sources": "Πηγές",
+    "your_feeds": "Τα feeds σας",
+    "trending_tags": "Ετικέτες τάσης",
+    "shorts_empty": "Δεν υπάρχουν ακόμη σύντομα βίντεο",
+    "mute": "Σίγαση",
+    "unmute": "Επαναφορά ήχου"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Πρώτα βήματα",
+    "subtitle": "Είστε νέοι εδώ; Τα Waves είναι σύντομες αναρτήσεις και ο ευκολότερος τρόπος να ξεκινήσετε.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Απόρριψη",
+    "item_wave": "Δημοσιεύστε το πρώτο σας Wave",
+    "item_vote": "Ψηφίστε ένα Wave που σας αρέσει",
+    "item_reply": "Απαντήστε σε κάποιον",
+    "item_checkin": "Κάντε check-in για να ξεκινήσετε το σερί σας",
+    "all_done_title": "Όλα έτοιμα 🎉",
+    "all_done_subtitle": "Είστε έτοιμοι. Συνεχίστε να δημοσιεύετε Waves!"
   },
   "profile": {
     "havent_commented": "δεν έχει σχολιάσει τίποτα ακόμα",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Ηλικία  |  Ορατότητα  |  Ερμηνεία",
     "attach_poll": "Επισύναψη δημοσκόπησης"
   },
+  "favorite_tags": {
+    "title": "Ετικέτες",
+    "hint": "Ακολουθήστε για να ειδοποιείστε για νέες αναρτήσεις με αυτή την ετικέτα",
+    "following_hint": "Ειδοποιείστε για νέες αναρτήσεις με αυτή την ετικέτα",
+    "follow": "Ακολούθηση",
+    "following": "Ακολουθείτε",
+    "added": "Ακολουθείτε την ετικέτα",
+    "removed": "Η ετικέτα δεν ακολουθείται πια",
+    "empty_list": "Δεν υπάρχει τίποτα εδώ"
+  },
   "favorites": {
     "add": "Προσθήκη αγαπημένου",
     "add_error": "Δεν ήταν δυνατή η προσθήκη του αγαπημένου",
@@ -181,7 +191,33 @@
     "payout": "Πληρωμή",
     "details": "Λεπτομέρειες",
     "community": "κοινότητα",
-    "new_post": "Νέα ανάρτηση"
+    "new_post": "Νέα ανάρτηση",
+    "mute_post_title": "Σίγαση αυτής της ανάρτησης",
+    "unmute_post_title": "Άρση σίγασης αυτής της ανάρτησης",
+    "mute_post_reason": "Γιατί γίνεται σίγαση;",
+    "unmute_post_reason": "Γιατί γίνεται επαναφορά;",
+    "manage": "Διαχείριση κοινότητας",
+    "manage_members": "Μέλη και ρόλοι",
+    "manage_settings": "Ρυθμίσεις κοινότητας",
+    "manage_activities": "Αρχείο δραστηριότητας",
+    "activities": "δραστηριότητα",
+    "no_activities": "Καμία δραστηριότητα ακόμα",
+    "activities_load_failed": "Δεν ήταν δυνατή η φόρτωση της δραστηριότητας. Τραβήξτε προς τα κάτω για ανανέωση.",
+    "set_role": "Ορισμός ρόλου",
+    "assign_role": "Ανάθεση ρόλου",
+    "assign_role_hint": "Αναζητήστε οποιονδήποτε λογαριασμό, ακόμα και αν δεν έχει εγγραφεί, και επιλέξτε ρόλο.",
+    "username_placeholder": "Όνομα χρήστη",
+    "invalid_username": "Επιλέξτε έναν υπάρχοντα λογαριασμό από τα αποτελέσματα",
+    "members": "μέλη",
+    "no_members": "Δεν βρέθηκαν μέλη",
+    "members_incomplete": "Ορισμένα μέλη δεν φορτώθηκαν. Τραβήξτε προς τα κάτω για ανανέωση.",
+    "members_load_failed": "Δεν ήταν δυνατή η φόρτωση των μελών. Τραβήξτε προς τα κάτω για ανανέωση.",
+    "role_owner": "Ιδιοκτήτης",
+    "role_admin": "Διαχειριστής",
+    "role_mod": "Συντονιστής",
+    "role_member": "Μέλος",
+    "role_guest": "Επισκέπτης",
+    "role_muted": "Σε σίγαση"
   },
   "trade": {
     "swap_for": "Ανταλλαγή {fromAmount} με {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Αναδημοσίευση σε άλλη κοινότητα",
     "pin-blog": "Καρφίτσωμα στο ιστολόγιο",
     "copy": "αντιγραφή συνδέσμου",
+    "copy-text": "αντιγραφή κειμένου",
+    "open-thread": "άνοιγμα νήματος",
     "unpin-community": "Ξεκαρφίτσωμα από την κοινότητα",
+    "mute-post": "Σίγαση ανάρτησης",
+    "unmute-post": "Άρση σίγασης ανάρτησης",
     "mute": "Σίγαση / Αποκλεισμός",
     "reblog": "αναδημοσίευση",
     "undo-reblog": "αναίρεση reblog",
@@ -232,24 +272,24 @@
     "unpin-reply": "Ξεκαρφίτσωμα σχολίου"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Αυτή η ανάρτηση είναι στη γλώσσα: {lang}. Μετάφραση στα {target};",
+    "translate_to": "Μετάφραση σε {lang}",
+    "show_original": "Εμφάνιση πρωτοτύπου",
+    "translated_from": "Μεταφράστηκε από: {lang}",
+    "change_language": "Αλλαγή γλώσσας"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Μετάφραση ανάρτησης",
+    "source": "Γλώσσα πηγής",
+    "target": "Γλώσσα στόχος",
+    "detected": "Εντοπίστηκε: {lang}",
+    "translate": "Μετάφραση",
+    "apply": "Εφαρμογή",
+    "review_note": "Προσθέτει στο τέλος της ανάρτησης μια αυτόματη μετάφραση του κειμένου σας. Ελέγξτε και επεξεργαστείτε πριν τη δημοσίευση.",
+    "too_short": "Γράψτε πρώτα λίγο περισσότερο. Η μετάφραση χρειάζεται τουλάχιστον μερικές προτάσεις.",
+    "progress": "Μετάφραση {done} από {total}...",
+    "error": "Η μετάφραση απέτυχε. Δοκιμάστε ξανά.",
+    "add_title_marker": "Προσθήκη ένδειξης γλώσσας στον τίτλο"
   },
   "side_menu": {
     "profile": "Προφίλ",
@@ -296,7 +336,7 @@
     "hot": "Καυτά",
     "popular": "Δημοφιλή",
     "new": "Νέα",
-    "friends": "Following",
+    "friends": "Ακολουθείτε",
     "my_blog": "Το ιστολόγιό μου"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Δεν υπάρχει τίποτα εδώ"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Πρότυπα",
+    "untitled": "Πρότυπο χωρίς τίτλο",
+    "empty_list": "Αποθηκεύστε μια ανάρτηση ως πρότυπο από τον επεξεργαστή για να τη χρησιμοποιήσετε ξανά εδώ.",
+    "delete_confirm": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το πρότυπο;",
+    "applied": "Το πρότυπο εφαρμόστηκε ως νέα ανάρτηση",
+    "save_as_template": "Αποθήκευση ως πρότυπο",
+    "name_placeholder": "Όνομα προτύπου",
+    "saved": "Το πρότυπο αποθηκεύτηκε"
   },
   "selection_list": {
     "available": "Διαθέσιμα {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
+      "activities": "Όλα",
+      "replies": "Απαντήσεις",
+      "mentions": "Αναφορές",
+      "rvotes": "Ψήφοι",
+      "follows": "Ακολουθήσεις",
       "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "transfers": "Μεταφορές",
+      "delegations": "Αναθέσεις",
+      "nfavorites": "Αγαπημένα",
+      "tags": "Ετικέτες",
+      "nbookmarks": "Σελιδοδείκτες",
+      "payouts": "Πληρωμές",
+      "scheduled_published": "Προγραμματισμένες αναρτήσεις",
+      "account_updates": "Ενημερώσεις λογαριασμού",
+      "weekly_earnings": "Εβδομαδιαία κέρδη"
     },
     "this_week": "Αυτή την εβδομάδα",
     "reblog": "έκανε reblog",
@@ -417,11 +458,15 @@
     "yesterday": "Χθες",
     "mention": "αναφέρθηκε σε",
     "favorites": "έκανε νέα ανάρτηση",
+    "tags": "έκανε ανάρτηση στο #{tag}",
+    "tags_bundle": "{count} νέες αναρτήσεις στο #{tag}",
+    "tags_title": "Νέες αναρτήσεις σε ετικέτα που ακολουθείτε",
     "mentions": "Αναφορές",
     "spin": "Ώρα να κερδίσετε περισσότερα Points",
     "last_week": "Την περασμένη εβδομάδα",
     "recent": "Πρόσφατα",
     "ignore": "σας αγνόησε",
+    "blacklist": "σας έβαλε στη μαύρη λίστα",
     "follow": "σας ακολούθησε",
     "notification": "Ειδοποιήσεις",
     "this_month": "Αυτόν τον μήνα",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "Ο {accounts} μπορεί τώρα να αναρτά και να ψηφίζει εκ μέρους σας. Αν δεν το εξουσιοδοτήσατε, ανακαλέστε το.",
     "weekly_earnings": "Κερδίσατε ${amount} αυτή την εβδομάδα{breakdown}",
     "payouts": "Λήφθηκε πληρωμή: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "δημοσίευσε μια προγραμματισμένη ανάρτηση",
+    "scheduled_published_title": "Η προγραμματισμένη ανάρτηση δημοσιεύτηκε",
+    "scheduled_published_body": "Η προγραμματισμένη ανάρτησή σας είναι πλέον ζωντανή, πατήστε για να τη δείτε"
   },
   "recurrent": {
     "delete_failed": "Η διαγραφή της επαναλαμβανόμενης μεταφοράς απέτυχε, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Ανοίξτε πρόσφατο πρόχειρο ή δημιουργήστε νέα ανάρτηση",
     "reward_power_up": "Δέσμευση 100%",
     "open_gallery": "Άνοιγμα συλλογής",
+    "open_files": "Επιλογή από Αρχεία",
     "clipboard_no_image": "Δεν βρέθηκε εικόνα στο πρόχειρο",
     "clipboard_image_detected": "Εικόνα στο πρόχειρο",
     "paste_image": "Επικόλληση εικόνας",
@@ -539,8 +585,10 @@
     "video": "Βίντεο",
     "scheduled_later": "Αργότερα",
     "settings_title": "Επιλογές ανάρτησης",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Όχι"
+    "support_ecency": "Στηρίξτε το Ecency {percent}%",
+    "alert_btn_no": "Όχι",
+    "short_reply_hint": "Οι απαντήσεις έως {n} χαρακτήρες δεν κερδίζουν points (οι σύνδεσμοι δεν μετράνε)",
+    "short_content_hint": "Πολύ σύντομο για να κερδίσει points (έως {n} χαρακτήρες, χωρίς τους συνδέσμους)"
   },
   "time": {
     "week": "εβδομάδες",
@@ -655,7 +703,41 @@
     "select_emoji": "Επιλογή emoji",
     "more_emojis": "Περισσότερα",
     "search_emojis": "Αναζήτηση emoji...",
-    "no_emoji_found": "Δεν βρέθηκε emoji"
+    "no_emoji_found": "Δεν βρέθηκε emoji",
+    "ban-reason-spray": "Έχετε τεθεί σε παύση από τις αναρτήσεις επειδή το ίδιο μήνυμα στάλθηκε σε πολλά κανάλια ταυτόχρονα.",
+    "ban-reason-mass-dm": "Έχετε τεθεί σε παύση από τις αναρτήσεις επειδή ένα μήνυμα στάλθηκε σε πολλά άτομα ταυτόχρονα.",
+    "ban-reason-generic": "Έχετε τεθεί σε παύση από τις αναρτήσεις στη συνομιλία.",
+    "ban-can-still-read": "Μπορείτε ακόμα να διαβάζετε τη συνομιλία.",
+    "ban-unlocks": "Οι αναρτήσεις ξεκλειδώνουν {when}.",
+    "ban-remaining-soon": "σε λιγότερο από ένα λεπτό",
+    "ban-remaining-minutes": "σε περίπου {count} λεπτά",
+    "ban-remaining-hours": "σε περίπου {count} ώρες",
+    "ban-remaining-days": "σε περίπου {count} ημέρες",
+    "new_group": "Νέα ομάδα",
+    "new_group_hint": "Προσθέστε από {min} έως {max} άτομα για να ξεκινήσετε μια ομαδική συζήτηση.",
+    "new_group_search": "Αναζήτηση ατόμων με όνομα χρήστη",
+    "new_group_full": "Μια ομάδα μπορεί να έχει έως {max} ακόμα άτομα.",
+    "new_group_no_results": "Δεν βρέθηκε κανείς στη συνομιλία με αυτό το όνομα.",
+    "new_group_search_failed": "Η αναζήτηση απέτυχε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+    "new_group_remove": "Αφαίρεση του @{username}",
+    "new_group_create": "Έναρξη ομάδας",
+    "new_group_failed": "Δεν ήταν δυνατή η έναρξη της ομάδας. Δοκιμάστε ξανά.",
+    "rename_group": "Μετονομασία ομάδας",
+    "rename_group_hint": "Δώστε στην ομάδα ένα όνομα που θα βλέπουν όλα τα μέλη. Αφήστε το κενό για να εμφανίζονται τα ονόματα των μελών.",
+    "group_name": "Όνομα ομάδας",
+    "rename_group_too_long": "Το όνομα της ομάδας μπορεί να έχει έως {max} χαρακτήρες.",
+    "rename_group_not_owner": "Μόνο το άτομο που ξεκίνησε την ομάδα μπορεί να τη μετονομάσει.",
+    "rename_group_failed": "Δεν ήταν δυνατή η μετονομασία της ομάδας. Δοκιμάστε ξανά.",
+    "group_renamed": "Ο/Η {user} μετονόμασε την ομάδα σε «{name}»",
+    "group_name_cleared": "Ο/Η {user} αφαίρεσε το όνομα της ομάδας",
+    "group_members": "Μέλη ομάδας",
+    "save": "Αποθήκευση",
+    "cancel": "Ακύρωση",
+    "reactions_title": "Αντιδράσεις",
+    "reactor_you": "Εσείς",
+    "reactor_unknown": "Κάποιος",
+    "see_who_reacted": "Πατήστε παρατεταμένα για να δείτε ποιοι αντέδρασαν",
+    "group": "Ομάδα"
   },
   "free_estm": {
     "timer_text": "Επόμενο δωρεάν Spin σε",
@@ -684,6 +766,32 @@
     "transaction_fail": "Η συναλλαγή απέτυχε"
   },
   "search_result": {
+    "error": "Η αναζήτηση δεν ολοκληρώθηκε. Δοκιμάστε ξανά",
+    "filters": {
+      "title": "Φίλτρα",
+      "open": "Φίλτρα",
+      "author": "Συγγραφέας",
+      "author_placeholder": "όνομα χρήστη",
+      "category": "Κατηγορία",
+      "category_placeholder": "κοινότητα ή κατηγορία",
+      "tags": "Ετικέτες",
+      "tags_placeholder": "χωρισμένες με κόμμα",
+      "type": "Τύπος",
+      "type_all": "Όλα",
+      "type_post": "Αναρτήσεις",
+      "type_comment": "Σχόλια",
+      "date": "Ημερομηνία",
+      "date_week": "Την τελευταία εβδομάδα",
+      "date_month": "Τον τελευταίο μήνα",
+      "date_year": "Τον τελευταίο χρόνο",
+      "date_all": "Όλες οι εποχές",
+      "sort": "Ταξινόμηση",
+      "apply": "Εφαρμογή",
+      "active": "{n} ενεργά",
+      "too_many_tags": "Χρησιμοποιήστε έως {n} ετικέτες",
+      "too_long": "Η αναζήτηση είναι πολύ μεγάλη. Χρησιμοποιήστε έως {n} χαρακτήρες",
+      "needs_criteria": "Εισαγάγετε όρο αναζήτησης ή συγγραφέα, κατηγορία ή ετικέτα για φιλτράρισμα"
+    },
     "communities_filter": {
       "new": "Νέες",
       "my": "Οι κοινότητές μου",
@@ -727,7 +835,7 @@
     "title": "Διασταυρούμενη ανάρτηση"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Ο συγγραφέας δήλωσε χρήση AI"
   },
   "ai_assist": {
     "title": "Βοηθός συγγραφής AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Λάβετε σχετικές ετικέτες για την ανάρτησή σας",
     "action_generate_title": "Δημιουργία τίτλου",
     "action_generate_title_desc": "Δημιουργήστε ελκυστικές επιλογές τίτλου",
-    "action_summarize": "Recap",
+    "action_summarize": "Περίληψη",
     "action_summarize_desc": "Δημιουργήστε μια συνοπτική περίληψη",
     "action_check_grammar": "Έλεγχος γραμματικής",
     "action_check_grammar_desc": "Διορθώστε προβλήματα γραμματικής και ορθογραφίας",
+    "action_generate_image": "Δημιουργία εικόνας",
+    "action_generate_image_desc": "Δημιουργήστε μια εικόνα AI για την ανάρτησή σας",
+    "cost_from": "από {cost} {unit}",
     "text_label": "Το κείμενό σας",
     "text_placeholder": "Επικολλήστε ή πληκτρολογήστε το περιεχόμενό σας εδώ...",
     "min_chars": "Απαιτούνται τουλάχιστον {count} χαρακτήρες",
@@ -797,16 +908,26 @@
     "remind_later": "Υπενθύμιση αργότερα",
     "success_subscribe": "Επιτυχής εγγραφή!",
     "payloadTooLarge": "Το μέγεθος του αρχείου είναι πολύ μεγάλο, παρακαλώ αλλάξτε το μέγεθος ή μεταφορτώστε μικρότερη εικόνα",
+    "too_many_images": "Μπορείτε να επιλέξετε έως {count} εικόνες τη φορά",
     "fail_follow": "Η ακολούθηση απέτυχε!",
     "clear_user_alert": "Είστε σίγουροι ότι θέλετε να εκκαθαρίσετε όλα τα δεδομένα χρήστη;",
     "cancel": "Ακύρωση",
     "connection_success": "Επιτυχής σύνδεση!",
     "rc_down": "Δεν υπάρχουν αρκετά Resource Credits για την εκτέλεση μιας ενέργειας! \n\nΕνισχύστε τον λογαριασμό σας για να συνεχίσετε να απολαμβάνετε την εμπειρία. Θέλετε να ενισχύσετε τον λογαριασμό σας τώρα;",
+    "rc_down_title": "Μη επαρκή Resource Credits",
+    "rc_precheck_title": "Αυτή η ανάρτηση ίσως είναι πολύ μεγάλη για δημοσίευση",
+    "rc_precheck_body": "Τα resource credits σας φαίνονται πολύ χαμηλά για ανάρτηση τέτοιου μεγέθους.",
+    "rc_down_body": "Δεν έχετε αρκετά resource credits για αυτή την ενέργεια.\n\nΑναπληρώστε τώρα με Points για να συνεχίσετε ή ενισχύστε μόνιμα τον λογαριασμό σας.",
+    "rc_down_topup": "Αναπλήρωση RC με Points",
+    "rc_down_boost": "Ενίσχυση λογαριασμού",
     "done": "Έγινε",
     "something_wrong_alt": "Στο μεταξύ, δοκιμάστε το Ecency.com από το πρόγραμμα περιήγησής σας",
     "same_user": "Αυτός ο χρήστης έχει ήδη προστεθεί στη λίστα",
     "fail": "Αποτυχία!",
     "operation_failed_with_reason": "Η λειτουργία {operation} απέτυχε: {reason}",
+    "request_timed_out": "Η σύνδεση καθυστερεί υπερβολικά. Ελέγξτε το δίκτυό σας και δοκιμάστε ξανά.",
+    "load_failed_retry": "Δεν ήταν δυνατή η φόρτωση. Δοκιμάστε ξανά.",
+    "retrying": "Επανάληψη...",
     "wallet_refresh_failed": "Η ανανέωση του πορτοφολιού απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
     "wallet_refresh_missing_account": "Η ανανέωση του πορτοφολιού απέτυχε: λείπει ο λογαριασμός.",
     "boost_failed": "Η ενίσχυση απέτυχε.",
@@ -949,31 +1070,31 @@
     "video_attached": "Επισυνάφθηκε βίντεο"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
+    "upvote": "Ψήφος",
+    "upvoted": "Ψηφίστηκε",
+    "downvoted": "Αρνητική ψήφος",
+    "upvote_hint": "Πατήστε δύο φορές για επιλογές ψήφου",
+    "payout_details": "Λεπτομέρειες πληρωμής",
+    "a11y_votes": "{count, plural, one {# ψήφος} other {# ψήφοι}}",
+    "a11y_voters_hint": "Προβολή ψηφισάντων",
     "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "a11y_reblogs_hint": "Προβολή reblogs",
+    "a11y_comments": "{count, plural, one {# σχόλιο} other {# σχόλια}}",
+    "a11y_comments_hint": "Προβολή σχολίων",
+    "a11y_reply_hint": "Απάντηση",
+    "a11y_tip": "Αποστολή φιλοδωρήματος",
+    "a11y_tips": "{count, plural, one {# φιλοδώρημα} other {# φιλοδωρήματα}}",
+    "a11y_edit": "Επεξεργασία σχολίου",
+    "a11y_delete": "Διαγραφή σχολίου",
+    "a11y_show_replies": "Εμφάνιση απαντήσεων",
+    "a11y_hide_replies": "Απόκρυψη απαντήσεων",
+    "a11y_post_options": "Επιλογές ανάρτησης",
+    "a11y_views": "{count, plural, one {# προβολή} other {# προβολές}}",
+    "source_ecency": "Δημοσιεύτηκε με το Ecency",
+    "a11y_stats_hint": "Προβολή στατιστικών ανάρτησης",
     "image": "Εικόνα",
     "reveal_muted": "ΣΕ ΣΙΓΑΣΗ\nΠατήστε για εμφάνιση περιεχομένου",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Πατήστε για φόρτωση εικόνας",
     "in": "σε",
     "poll": "ΨΗΦΟΦΟΡΙΑ",
     "copy_link": "Αντιγραφή συνδέσμου",
@@ -998,13 +1119,14 @@
     "save_to_local": "Λήψη στη συσκευή",
     "muted": "Το περιεχόμενο τέθηκε σε σίγαση λόγω παράβασης",
     "community_muted": "Το περιεχόμενο τέθηκε σε σίγαση λόγω παράβασης των κανόνων της κοινότητας",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Περιεχόμενο από λογαριασμό με χαμηλή φήμη",
+    "muted_downvoted": "Περιεχόμενο με αρνητικές ψήφους από χρήστες",
+    "muted_low_trust": "Λογαριασμός με χαμηλή φήμη και μη επαληθευμένο εξωτερικό σύνδεσμο",
+    "muted_reveal": "Πατήστε για εμφάνιση",
     "promoted": "ΠΡΟΩΘΗΜΕΝΟ",
     "image_saved": "Η εικόνα αποθηκεύτηκε στη Συλλογή Φωτογραφιών",
     "words": "Λέξεις",
     "reading": "Ανάγνωση",
-    "listen": "Ακρόαση",
     "min": "λεπτά",
     "summarize_start": "Έναρξη"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Δεν υπάρχει ανάρτηση",
     "invalid_link": "Το url δεν είναι έγκυρο, δοκιμάστε ξανά με έγκυρο url ή ανοίξτε το σε πρόγραμμα περιήγησης",
-    "no_existing_user": "Δεν υπάρχει χρήστης"
+    "no_existing_user": "Δεν υπάρχει χρήστης",
+    "posting_key_request": "Ο/Η {requester} ζητά το ιδιωτικό κλειδί ανάρτησης για τον @{username}.\n\nΣυνεχίστε μόνο αν εμπιστεύεστε αυτό το αίτημα.",
+    "posting_key_request_unnamed": "Μια άλλη εφαρμογή ζητά το ιδιωτικό κλειδί ανάρτησης για τον @{username}.\n\nΣυνεχίστε μόνο αν εμπιστεύεστε αυτό το αίτημα.",
+    "auth_request_as_user": "Ο/Η {requester} θέλει να σας συνδέσει ως @{username}.\n\nΚοινοποιούνται μόνο το όνομα χρήστη σας και μια απόδειξη σύνδεσης. Κανένα κλειδί δεν φεύγει από το Ecency.",
+    "auth_request_as_current": "Ο/Η {requester} θέλει να σας συνδέσει με τον λογαριασμό σας στο Ecency.\n\nΚοινοποιούνται μόνο το όνομα χρήστη σας και μια απόδειξη σύνδεσης. Κανένα κλειδί δεν φεύγει από το Ecency."
   },
   "payout": {
     "breakdown": "Ανάλυση",
@@ -1065,7 +1191,7 @@
     "open": "Άνοιγμα URL",
     "invalid_key_desc": "συνδεθείτε με το κλειδί {key} ή το κύριο κλειδί για να εκτελέσετε αυτή τη συναλλαγή",
     "auth_transfer_confirm": "Επιβεβαίωση μεταφοράς στον/στην {username};",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Εγκρίνετε μόνο αν εμπιστεύεστε την πηγή αυτού του συνδέσμου. Η έγκριση εκπέμπει την παρακάτω λειτουργία από τον λογαριασμό σας με το κλειδί {authority}."
   },
   "voters_dropdown": {
     "rewards": "ΑΝΤΑΜΟΙΒΕΣ",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Πρέπει να περιέχει μόνο γράμματα, αριθμούς, παύλα",
       "username_no_ascii_first_letter_error": "Πρέπει να ξεκινά με γράμμα",
       "username_contains_double_hyphens": "Δεν πρέπει να περιέχει διπλές παύλες",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Αυτό το όνομα χρήστη μοιάζει πολύ με λογαριασμό ανταλλακτηρίου κρυπτονομισμάτων και μπορεί να μπερδέψει τους άλλους. Επιλέξτε ένα πιο μοναδικό όνομα.",
+      "username_restricted_prefix": "Δεν επιτρέπονται ονόματα χρήστη που ξεκινούν με «uid» ακολουθούμενο από αριθμούς, καθώς χρησιμοποιούνται συχνά για πλαστοπροσωπία. Επιλέξτε διαφορετικό όνομα.",
       "username_contains_underscore": "Δεν πρέπει να περιέχει κάτω παύλα"
     },
     "500_error": "Το αίτημά σας δεν ήταν δυνατό να επεξεργαστεί, η ουρά εγγραφών είναι πιθανότατα γεμάτη! Δοκιμάστε ξανά σε λίγα λεπτά...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Το όνομα χρήστη είναι ήδη σε χρήση",
+      "14": "Η διεύθυνση email είναι ήδη καταχωρισμένη",
+      "15": "Εισαγάγετε μια έγκυρη διεύθυνση email",
+      "16": "Εισαγάγετε ένα έγκυρο όνομα χρήστη",
+      "17": "Το όνομα χρήστη είναι πολύ μεγάλο, επιλέξτε ένα συντομότερο",
+      "19": "Χρησιμοποιήστε μόνιμη διεύθυνση email ή αποκτήστε έναν λογαριασμό Premium",
+      "21": "Αυτή η παραπομπή δεν είναι έγκυρη",
+      "28": "Το αίτημά σας δεν μπόρεσε να υποβληθεί σε επεξεργασία: η ουρά εγγραφής είναι πιθανότατα γεμάτη. Δοκιμάστε ξανά σε λίγα λεπτά.",
+      "107": "Εντοπίστηκε σύνδεση VPN. Απενεργοποιήστε το VPN και δοκιμάστε ξανά ή αποκτήστε έναν λογαριασμό Premium.",
+      "110": "Για να αποτρέψουμε την κατάχρηση, περιορίζουμε τον αριθμό λογαριασμών ανά άτομο/δίκτυο. Δοκιμάστε ξανά από διαφορετικό δίκτυο.",
+      "111": "Εντοπίστηκε σύνδεση Tor. Απενεργοποιήστε το Tor κατά την εγγραφή.",
+      "112": "Δεν μπορέσαμε να επαληθεύσουμε τη σύνδεσή σας αυτή τη στιγμή. Δοκιμάστε ξανά σε λίγα λεπτά."
     },
     "have_account_text": "Έχετε ήδη λογαριασμό;"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Αποκτήστε έναν πλήρη λογαριασμό Hive· αυτή η μέθοδος έχει βασικούς ελέγχους για να διασφαλίσει ότι δίκτυα bot δεν θα καταχραστούν τη βρύση εγγραφών μας.",
     "btn_register": "Δωρεάν Εγγραφή",
     "title": "Δωρεάν Λογαριασμός"
+  },
+  "dictation": {
+    "title": "Υπαγόρευση",
+    "start": "Εγγραφή",
+    "stop": "Διακοπή",
+    "record_more": "Περισσότερη εγγραφή",
+    "done": "Τέλος",
+    "recording": "Εγγραφή σε εξέλιξη",
+    "stop_hint": "Πατήστε διακοπή για μεταγραφή και προσθήκη στην ανάρτησή σας. Έως {m} λεπτά.",
+    "inserted": "Προστέθηκε στην ανάρτησή σας. Συνεχίστε την εγγραφή ή πατήστε Τέλος.",
+    "transcribing": "Μεταγραφή",
+    "rate": "{n} Points ανά {s} δευτερόλεπτα",
+    "cost_running": "{n} Points μέχρι στιγμής",
+    "cost_running_free": "Δωρεάν μέχρι στιγμής",
+    "free_remaining": "Το επόμενο {n} x {s}δ σας είναι δωρεάν σήμερα",
+    "price_loading": "Έλεγχος τιμής",
+    "price_error": "Δεν ήταν δυνατή η φόρτωση της τιμολόγησης μεταγραφής.",
+    "denied": "Το Ecency χρειάζεται πρόσβαση στο μικρόφωνο για υπαγόρευση. Επιτρέψτε την στις Ρυθμίσεις και δοκιμάστε ξανά.",
+    "error_empty": "Δεν εντοπίστηκε ομιλία σε αυτή την εγγραφή.",
+    "error_insufficient_points": "Δεν υπάρχουν αρκετά Points για τη μεταγραφή αυτής της εγγραφής.",
+    "error_rate_limited": "Πάρα πολλές εγγραφές προς το παρόν. Δοκιμάστε ξανά σε λίγο.",
+    "error_too_long": "Αυτή η εγγραφή είναι πολύ μεγάλη για μεταγραφή.",
+    "error_failed": "Δεν ήταν δυνατή η μεταγραφή αυτής της εγγραφής. Δοκιμάστε ξανά.",
+    "error_recorder": "Δεν ήταν δυνατή η έναρξη της εγγραφής. Δοκιμάστε ξανά."
   },
   "wallet": {
     "delegations_out": "Εξερχόμενες Αναθέσεις",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Το τακτικό check-in σας δίνει 0.25 points.",
     "fill_transfer_from_savings": "Η Αποταμίευση Εκτελέστηκε",
     "activities": "Δραστηριότητες",
+    "no_activities": "Δεν υπάρχουν συναλλαγές ακόμα",
+    "activities_failed": "Δεν ήταν δυνατή η φόρτωση των συναλλαγών. Τραβήξτε προς τα κάτω για επανάληψη.",
     "tap_update": "Πατήστε για ενημέρωση",
     "mining_lottery": "Κερδίσατε στη Λοταρία",
     "checkin": "Check-in",
     "tokens_transfer": "Τα Tokens Μεταφέρθηκαν",
     "outgoing_transfer_title": "Μεταφορά/Δώρο",
+    "burned_title": "Χρήση AI",
+    "burned_description": "Points που δαπανήθηκαν σε λειτουργία AI",
+    "burn_refund_title": "Επιστροφή AI",
+    "burn_refund_description": "Points που επιστράφηκαν μετά από αποτυχημένο αίτημα AI",
     "manage_assets": "Προσθήκη / Αφαίρεση Assets",
     "selected_assets": "Επιλεγμένα Assets",
     "nft_setPropertyPermissions": "Ορίστηκαν Δικαιώματα Ιδιότητας για το NFT Symbol",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Ενημέρωση ακρίβειας tokens",
     "tokens_transferOwnership": "Μεταβιβάστηκε η κυριότητα token",
     "withdraw_vesting": "Αποδέσμευση",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Λογαριασμοί ανάληψης",
     "delegate_engine": "Ανάθεση",
     "market_close": "Η εντολή έκλεισε",
     "nftmarket_transferFee": "Τέλος εντολής αγοράς",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "ΑΠΟΚΤΗΣΤΕ POINTS",
     "escrow_approve": "Έγκριση μεσεγγύησης",
     "expires": "λήγει",
+    "transaction_id": "Αναγνωριστικό συναλλαγής",
+    "copy_transaction_id": "Αντιγραφή συνδέσμου συναλλαγής",
+    "filter_activities": "Φιλτράρισμα δραστηριοτήτων",
+    "filter_activities_desc": "Επιλέξτε ποιες λειτουργίες θα ζητά αυτό το ιστορικό",
+    "filter_all": "Επιλογή όλων",
+    "filter_none": "Εκκαθάριση όλων",
+    "filter_apply": "Εφαρμογή",
     "author_reward": "Ανταμοιβή συγγραφέα",
     "withdraw_hbd": "Ανάληψη αποταμιεύσεων",
     "convert_request": "Αίτημα μετατροπής",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Αναπλήρωση RC",
+    "desc": "Μια βραχυπρόθεσμη ώθηση RC για να συνεχίσετε να δημοσιεύετε.",
+    "confirm": "Να δαπανηθούν Points για αναπλήρωση των Resource Credits σας;",
+    "insufficient": "Δεν έχετε αρκετά Points.",
+    "buy_points": "Αγορά Points"
   },
   "ai_image_generator": {
     "title": "Δημιουργός εικόνων AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Προσαρμοσμένο ({hours}ω)",
+    "balance_load_failed": "Δεν ήταν δυνατή η φόρτωση του υπολοίπου σας. Πατήστε για επανάληψη.",
+    "precision_load_failed": "Δεν ήταν δυνατή η φόρτωση των στοιχείων αυτού του token, οπότε μπορούν να σταλούν μόνο ακέραια ποσά. Πατήστε για επανάληψη.",
     "close": "Κλείσιμο",
     "favorite_username_placeholder": "Όνομα χρήστη",
     "invalid_recipient_qr": "Δεν βρέθηκε όνομα χρήστη σε αυτόν τον κωδικό QR.",
@@ -1527,7 +1692,7 @@
     "powering_down_info": "Το επόμενο unstaking είναι σε {days} ημέρες, {hp} HIVE",
     "convert": "Μετατροπή HBD σε HIVE",
     "auto_vests": "Αυτόματα Vests",
-    "vests": "Vests",
+    "vests": "VESTS",
     "stop_information": "Είστε βέβαιοι ότι θέλετε να διακόψετε;",
     "amount": "Ποσό",
     "memo_desc": "Αυτό το σημείωμα είναι δημόσιο",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Διαχείριση εξουσιοδοτήσεων",
     "pincode": "Pincode",
     "general": "Γενικά",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Στηρίξτε το Ecency",
+    "support_beneficiary": "Μοιραστείτε τις ανταμοιβές αναρτήσεων με το Ecency",
+    "support_beneficiary_percent": "Ποσοστό ανταμοιβών αναρτήσεων",
+    "support_curation": "Παρακράτηση μέρους των ανταμοιβών επιμέλειας",
+    "support_curation_percent": "Ποσοστό παρακράτησης ανταμοιβών επιμέλειας",
     "feedback_body": "Γράψτε το μήνυμά σας εδώ!\n\nΌνομα χρήστη Hive: {username}\nΈκδοση εφαρμογής: {appVersion}\nΠλατφόρμα: {platform}\n",
     "show_imgs": "Εμφάνιση εικόνων",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Σχόλιο",
       "bookmark": "Σελιδοδείκτες",
+      "tags": "Ετικέτες",
       "reblog": "Αναδημοσίευση",
       "favorite": "Αγαπημένα",
       "mention": "Αναφορά",
@@ -1599,10 +1765,10 @@
       "transfers": "Μεταφορές",
       "vote": "Ψήφος",
       "follow": "Ακολούθηση",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Η προγραμματισμένη ανάρτηση δημοσιεύτηκε",
+      "payouts": "Πληρωμές",
+      "account_update": "Ενημερώσεις λογαριασμού",
+      "weekly_earnings": "Εβδομαδιαία κέρδη",
       "fcm_unavailable": "Οι ειδοποιήσεις push δεν υποστηρίζονται σε αυτή τη συσκευή. Θα λαμβάνετε ειδοποιήσεις μόνο όταν η εφαρμογή είναι ανοιχτή."
     },
     "keys_warning": "Ευαίσθητες πληροφορίες λογαριασμού!\nΤο Ecency πρέπει να ασφαλιστεί με κωδικό PIN πριν δείτε τα ιδιωτικά κλειδιά.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Αποστολή σχολίων",
     "rate_app": "Αξιολογήστε το Ecency",
+    "email_digests": "Περιλήψεις email",
     "rate": "Αξιολόγηση",
     "dm-privacy-updated": "Οι ρυθμίσεις απορρήτου άμεσων μηνυμάτων ενημερώθηκαν με επιτυχία",
     "dm-privacy-failed": "Αποτυχία ενημέρωσης των ρυθμίσεων απορρήτου άμεσων μηνυμάτων",
@@ -1685,19 +1852,29 @@
     "request_sent": "Το αίτημα διαγραφής σας στάλθηκε",
     "confirm_delete_body": "Είστε βέβαιοι ότι θέλετε να διαγράψετε τον λογαριασμό; Θα διαγραφούν όλα τα δεδομένα σας"
   },
-  "tts": {
-    "settings_title": "Ρυθμίσεις μετατροπής κειμένου σε ομιλία",
-    "voice": "Φωνή",
-    "voice_hint": "Θα χρησιμοποιηθεί η προεπιλεγμένη φωνή του συστήματος",
-    "speed": "Ταχύτητα",
-    "pitch": "Τόνος",
-    "test_voice": "Δοκιμή φωνής",
-    "settings_info": "Αυτές οι ρυθμίσεις θα χρησιμοποιηθούν κατά την ανάγνωση των αναρτήσεων δυνατά",
+  "listen": {
+    "title": "Ακούστε αυτή την ανάρτηση",
+    "minutes": "~{n} λεπτά",
+    "login": "Σύνδεση",
+    "unlock": "Ξεκλείδωμα · {n} Points",
+    "confirm": "Να δαπανηθούν {n} Points για να ακούσετε αυτή την ανάρτηση; Ο ήχος είναι δικός σας και μπορείτε να τον ξανακούσετε όποτε θέλετε.",
+    "not_enough_title": "Δεν υπάρχουν αρκετά Points",
+    "not_enough": "Η ακρόαση απαιτεί {required} Points και έχετε {available}.",
+    "get_points": "Αποκτήστε Points",
+    "unlock_failed": "Δεν ήταν δυνατό το ξεκλείδωμα του ήχου, δοκιμάστε ξανά",
+    "failed_refunded": "Ο ήχος δεν μπόρεσε να δημιουργηθεί, τα Points σας επιστράφηκαν",
+    "preparing": "Προετοιμασία ήχου…",
+    "preparing_eta": "Προετοιμασία ήχου, περίπου {n} λεπτά…",
+    "preparing_progress": "Προετοιμασία ήχου · {n}%",
+    "waiting": "Αναμονή στη σειρά, {n} μπροστά…",
+    "next_in_line": "Επόμενος στη σειρά…",
     "play": "Αναπαραγωγή",
     "pause": "Παύση",
-    "language": "Γλώσσα",
-    "language_auto": "Αυτόματη ανίχνευση",
-    "language_hint": "Η αυτόματη ανίχνευση επιλέγει τη γλώσσα με βάση το περιεχόμενο της ανάρτησης"
+    "seek": "Αναζήτηση θέσης",
+    "speed": "Ταχύτητα αναπαραγωγής",
+    "language": "Γλώσσα ήχου",
+    "unavailable": "Δεν ήταν δυνατή η φόρτωση του ήχου.",
+    "retry": "Δοκιμάστε ξανά"
   },
   "posting_authority": {
     "title": "Ενεργοποίηση ταχύτερης δημοσίευσης",
@@ -1732,7 +1909,7 @@
     "error-auth": "Ο έλεγχος ταυτότητας απέτυχε. Παρακαλώ συνδεθείτε ξανά.",
     "error-generic": "Η μεταφόρτωση του βίντεο απέτυχε. Παρακαλώ προσπαθήστε ξανά.",
     "error-too-long-short": "Τα σύντομα βίντεο πρέπει να διαρκούν 60 δευτερόλεπτα ή λιγότερο.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Μια ανάρτηση μπορεί να περιέχει μόνο ένα βίντεο. Αφαιρέστε το τρέχον βίντεο πριν προσθέσετε άλλο.",
     "select_source": "Προσθήκη βίντεο",
     "record": "Εγγραφή βίντεο",
     "choose_library": "Επιλογή από τη βιβλιοθήκη"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Κοινοποιήστε μια γρήγορη ενημέρωση"
   },
+  "newsletter": {
+    "screen_title": "Περιλήψεις email",
+    "title": "{list}",
+    "body_own": "Μια εβδομαδιαία ή μηνιαία περίληψη των ειδοποιήσεών σας με email.",
+    "body_creator": "Νέες αναρτήσεις από {list} στα εισερχόμενά σας.",
+    "body_community": "Μια περίληψη των νέων αναρτήσεων στο {list} με email.",
+    "body_site": "Τα καλύτερα του Ecency στα εισερχόμενά σας.",
+    "first_publish_title": "Συγχαρητήρια για την πρώτη σας ανάρτηση!",
+    "first_publish_body": "Θέλετε περίληψη των ειδοποιήσεών σας με email; Εβδομαδιαία ή μηνιαία, αλλάξτε την ή διακόψτε την όποτε θέλετε από τις Ρυθμίσεις.",
+    "list_own": "Περίληψη των ειδοποιήσεών μου",
+    "list_site": "Ενημερωτικό δελτίο Ecency",
+    "status_active": "Έχετε εγγραφεί.",
+    "status_pending": "Αναμονή επιβεβαίωσης email.",
+    "status_short_active": "ενεργή",
+    "status_short_pending_confirmation": "σε αναμονή",
+    "status_short_suppressed": "διακόπηκε",
+    "status_short_ended": "έληξε",
+    "cadence_weekly": "Εβδομαδιαία",
+    "cadence_monthly": "Μηνιαία",
+    "email_placeholder": "you@example.com",
+    "subscribe": "Εγγραφή",
+    "update": "Ενημέρωση",
+    "resend": "Επανάληψη αποστολής επιβεβαίωσης",
+    "leave": "Αποχώρηση από την περίληψη",
+    "cancel": "Ακύρωση",
+    "ok": "OK",
+    "manage": "Διαχείριση",
+    "check_inbox_title": "Ελέγξτε τα εισερχόμενά σας",
+    "check_inbox_body": "Στείλαμε έναν σύνδεσμο επιβεβαίωσης στο {email}. Η συνδρομή ξεκινά μόλις επιβεβαιώσετε.",
+    "subscribed": "Εγγραφή στην περίληψη email",
+    "left": "Αποχωρήσατε από την περίληψη",
+    "refused": "Αυτή η διεύθυνση δεν μπορεί να εγγραφεί.",
+    "unavailable": "Οι περιλήψεις email δεν είναι διαθέσιμες αυτή τη στιγμή.",
+    "too_many": "Πάρα πολλές προσπάθειες, δοκιμάστε ξανά αργότερα.",
+    "fail": "Κάτι πήγε στραβά, δοκιμάστε ξανά.",
+    "empty": "Δεν υπάρχουν περιλήψεις email ακόμα. Εγγραφείτε παρακάτω για να ξεκινήσετε.",
+    "discover": "Λάβετε περισσότερα με email",
+    "stop_all": "Διακοπή όλων",
+    "stop_all_title": "Διακοπή όλων των email;",
+    "stop_all_body": "Δεν θα σταλεί ξανά αλληλογραφία του Ecency στο {email}. Οι συνδρομές με άλλες διευθύνσεις παραμένουν.",
+    "stop_all_ok": "Διακοπή όλων",
+    "stop_all_done": "Η διεύθυνση διαγράφηκε από όλη την αλληλογραφία",
+    "profile_option": "ΠΕΡΙΛΗΨΗ EMAIL",
+    "subscriber_count": "{weekly} εβδομαδιαίοι • {monthly} μηνιαίοι συνδρομητές email",
+    "community_button": "Ενημερωτικό δελτίο"
+  },
+  "mod_notes": {
+    "title": "Προσθήκη αιτιολογίας",
+    "placeholder": "Αιτιολογία (ορατή σε άλλους συντονιστές)",
+    "confirm": "Επιβεβαίωση",
+    "cancel": "Ακύρωση"
+  },
+  "community_settings": {
+    "title_header": "Ρυθμίσεις κοινότητας",
+    "title_label": "Τίτλος",
+    "about": "Σχετικά",
+    "lang": "Γλώσσα",
+    "description": "Περιγραφή",
+    "rules": "Κανόνες",
+    "nsfw": "Ακατάλληλο για εργασιακό χώρο",
+    "save": "Αποθήκευση",
+    "required": "Υποχρεωτικό",
+    "title_length": "Μεταξύ {min} και {max} χαρακτήρων",
+    "owner_admin_only": "Μόνο ο ιδιοκτήτης και οι διαχειριστές μπορούν να αλλάξουν αυτές τις ρυθμίσεις."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Ανεπτυγμένο",
+        "collapsed": "Συμπτυγμένο"
+      },
+      "a11y_chat": {
+        "quote": "Απάντηση στον/στην {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Επιλογή",
+        "deselect": "Αποεπιλογή"
+      },
+      "store": {
+        "billing_unavailable": "Οι αγορές εντός εφαρμογής δεν επιτρέπονται σε αυτή τη συσκευή.",
+        "verification_failed": "Το App Store δεν μπόρεσε να επαληθεύσει αυτή την αγορά.",
+        "cancelled": "Η αγορά ακυρώθηκε",
+        "unknown_result": "Άγνωστο αποτέλεσμα αγοράς"
+      },
+      "navigation": {
+        "feed_unavailable": "Αυτή η ροή δεν είναι ακόμα διαθέσιμη.",
+        "link_cannot_open": "Αυτός ο σύνδεσμος δεν μπορεί να ανοίξει.",
+        "video_cannot_play": "Αυτό το βίντεο δεν μπορεί να αναπαραχθεί."
+      },
+      "media": {
+        "load_failed": "Αυτό το στοιχείο δεν μπόρεσε να φορτωθεί. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+        "loading": "Φόρτωση πολυμέσων",
+        "download_failed": "Η λήψη απέτυχε με κατάσταση {status}"
+      },
+      "sign_in": {
+        "required": "Απαιτείται σύνδεση",
+        "to_reply": "Συνδεθείτε για να απαντήσετε.",
+        "to_vote": "Συνδεθείτε για να ψηφίσετε.",
+        "button": "Σύνδεση"
+      },
+      "account": {
+        "logout_user": "Αποσύνδεση του @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# ψήφος} other {# ψήφοι}}  •  {replies, plural, one {# απάντηση} other {# απαντήσεις}}",
+        "voting_power": "Ισχύς ψήφου {percent}",
+        "remove_favourite": "Αφαίρεση από τα αγαπημένα",
+        "add_favourite": "Προσθήκη στα αγαπημένα"
+      },
+      "waves": {
+        "clear_tag_filter": "Εκκαθάριση φίλτρου ετικέτας {tag}",
+        "new_wave": "Νέο wave",
+        "replies_open_thread": "{count, plural, one {# απάντηση, άνοιγμα νήματος} other {# απαντήσεις, άνοιγμα νήματος}}",
+        "characters": "{count} από {max} χαρακτήρες",
+        "retry": "{message}\nΔοκιμάστε ξανά",
+        "playing": "Αναπαραγωγή {permlink}",
+        "video_attached_remove": "Επισυνάπτεται βίντεο, αφαίρεση",
+        "image_attached_remove": "Επισυνάπτεται εικόνα, αφαίρεση",
+        "take_photo": "Λήψη φωτογραφίας",
+        "edit_poll": "Επεξεργασία δημοσκόπησης",
+        "add_poll": "Προσθήκη δημοσκόπησης",
+        "add_video": "Προσθήκη βίντεο"
+      },
+      "reading": {
+        "reply_to": "Απάντηση στον/στην {username}",
+        "opens_post": "Ανοίγει την ανάρτηση",
+        "sort_comments": "Ταξινόμηση σχολίων",
+        "sort_comments_value": "Ταξινόμηση σχολίων, {sort}",
+        "no_comments": "Κανένα σχόλιο ακόμα.",
+        "loading_post": "Φόρτωση ανάρτησης",
+        "show_version": "Εμφάνιση έκδοσης",
+        "show_changes": "Εμφάνιση αλλαγών",
+        "replying_to": "Απάντηση στον @{username}",
+        "reply_text": "Κείμενο απάντησης",
+        "translate_from": "Από",
+        "translate_to": "Προς"
+      },
+      "feed": {
+        "tab_pinned": "{label}, καρφιτσωμένο",
+        "tab_add": "{label}, προσθήκη",
+        "customise": "Προσαρμογή"
+      },
+      "card": {
+        "in_category": "στο {category}",
+        "pinned": "Καρφιτσωμένο",
+        "by_author": "από τον/την {username}",
+        "payout": "πληρωμή {payout}",
+        "payout_declined": "πληρωμή {payout}, απορρίφθηκε",
+        "reblogged_by": "Αναδημοσίευση από τον/την {username}"
+      },
+      "shell": {
+        "close_menu": "Κλείσιμο μενού"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Μικρογραφία, επιλέξτε άλλη εικόνα",
+        "words": "{count, plural, one {# λέξη} other {# λέξεις}}",
+        "poll_min_age": "Ελάχ. ηλικία λογαριασμού (ημέρες): {days}",
+        "poll_max_options": "Μέγ. επιλογές: {count}",
+        "thumbnail_selected": "Επιλεγμένη μικρογραφία",
+        "thumbnail": "Μικρογραφία",
+        "uploaded_image": "Μεταφορτωμένη εικόνα",
+        "community_search": "αναζήτηση"
+      },
+      "vote": {
+        "not_voted": "Χωρίς ψήφο",
+        "voting": "Ψήφιση",
+        "failed_with": "Η ψήφος απέτυχε: {message}",
+        "failed": "Η ψήφος απέτυχε",
+        "payout": "Πληρωμή {payout}",
+        "payout_declined": "Πληρωμή {payout}, απορρίφθηκε",
+        "percent": "{percent} τοις εκατό",
+        "upvote_percent": "Θετική ψήφος {percent}%"
+      },
+      "settings": {
+        "on": "Ενεργό",
+        "off": "Ανενεργό"
+      },
+      "lock": {
+        "biometric_reason": "Ενεργοποιήστε το βιομετρικό ξεκλείδωμα για το Ecency",
+        "offer_title": "Ξεκλείδωμα με {method}",
+        "offer_use": "Χρήση {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Τα κλειδιά αποκρύπτονται όσο γίνεται εγγραφή ή αντικατοπτρισμός της οθόνης.",
+        "screenshot_notice": "Λήφθηκε στιγμιότυπο οθόνης. Τα ιδιωτικά κλειδιά αποκρύφθηκαν ξανά· αν το στιγμιότυπο δείχνει κλειδί, διαγράψτε το.",
+        "hold_hint": "Πατήστε παρατεταμένα ένα κλειδί για να το εμφανίσετε.",
+        "hold_to_show": "Κρατήστε πατημένο για εμφάνιση"
+      },
+      "wallet": {
+        "cancel_order": "Ακύρωση αυτής της εντολής;",
+        "days": "{count, plural, one {# ημέρα} other {# ημέρες}}"
+      },
+      "chat": {
+        "reactors_hint": "Πατήστε παρατεταμένα για να δείτε ποιοι αντέδρασαν",
+        "see_reactors": "Δείτε ποιοι αντέδρασαν"
+      },
+      "esie": {
+        "still": "{mood}, ακίνητο"
+      }
+    },
+    "ui": {
+      "profile_of": "Προφίλ του @{username}",
+      "preview": "Προεπισκόπηση ({index}/{count})",
+      "balance": "Υπόλοιπο: {amount}",
+      "expires_in": "Λήγει σε {time}",
+      "expired": "Έληξε. Κλείστε και δοκιμάστε ξανά.",
+      "user_has_no_posts": "Ο/Η @{username} δεν έχει αναρτήσει τίποτα ακόμα",
+      "attach_image": "Επισύναψη εικόνας",
+      "auto": "Αυτόματα",
+      "back": "Πίσω",
+      "hot": "HOT",
+      "image_of": "Εικόνα {index} από {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW Πατήστε για εμφάνιση",
+      "new_reply": "Νέα απάντηση",
+      "remove": "Αφαίρεση",
+      "unlock_ecency": "Ξεκλείδωμα Ecency",
+      "update_it": "Ενημέρωση",
+      "update_it_or_post_this_as": "Να ενημερωθεί ή να αναρτηθεί ως νέα απάντηση;",
+      "use_pin": "Χρήση PIN",
+      "your_reply_was_already_posted": "Η απάντησή σας έχει ήδη αναρτηθεί",
+      "error_try_again": "{message} Δοκιμή ξανά;",
+      "auth": {
+        "account_label": "Λογαριασμός: @{username}",
+        "approve_the_request_in_your_wallet": "Εγκρίνετε το αίτημα στην εφαρμογή πορτοφολιού σας.",
+        "copy_key": "Αντιγραφή {title}",
+        "current_account": "Τρέχων λογαριασμός",
+        "qr_code": "Κωδικός QR",
+        "requested_by": "Αίτημα από {requester}",
+        "pin_digits": "{filled} από {total, plural, one {# ψηφίο} other {# ψηφία}}",
+        "private_key_shown": "{title}, εμφανίζεται το ιδιωτικό κλειδί",
+        "open_wallet_app": "Άνοιγμα εφαρμογής πορτοφολιού",
+        "hiveauth_scan": "Εγκρίνετε στο Hive Keychain ή σε άλλο πορτοφόλι HiveAuth: ανοίξτε το σε αυτή τη συσκευή ή σαρώστε αυτόν τον κωδικό με αυτό.",
+        "switching": "Εναλλαγή...",
+        "logout_all": "Αποσύνδεση από όλους τους λογαριασμούς",
+        "logout_all_title": "Αποσύνδεση από κάθε λογαριασμό σε αυτή τη συσκευή;",
+        "stored_key": "Ο @{username} είναι ήδη συνδεδεμένος σε αυτή τη συσκευή. Τα αποθηκευμένα κλειδιά του παραμένουν· ανανεώνεται μόνο η συνεδρία του.",
+        "stored_hivesigner": "Ο @{username} είναι ήδη συνδεδεμένος με HiveSigner σε αυτή τη συσκευή. Η συνεδρία του αντικαθίσταται.",
+        "stored_hiveauth": "Ο @{username} είναι συνδεδεμένος με HiveAuth σε αυτή τη συσκευή. Θα υπογράφει με HiveSigner.",
+        "method_key": "Κλειδί",
+        "logout_failed": "Η αποσύνδεση απέτυχε"
+      },
+      "browser": {
+        "account": "Λογαριασμός",
+        "authority": "Εξουσιοδότηση",
+        "phishing": "Προειδοποίηση: Αυτός ο τομέας έχει επισημανθεί ως γνωστός ιστότοπος ηλεκτρονικού ψαρέματος (phishing). Προχωρήστε με ιδιαίτερη προσοχή."
+      },
+      "chat": {
+        "cancel_edit": "Ακύρωση επεξεργασίας",
+        "cancel_reply": "Ακύρωση απάντησης",
+        "copied_to_clipboard": "Αντιγράφηκε στο πρόχειρο",
+        "edited_at": "Επεξεργάστηκε {time}",
+        "group_options": "Επιλογές ομάδας",
+        "pinned_messages": "Καρφιτσωμένα μηνύματα",
+        "remove_user": "Αφαίρεση του @{username}",
+        "sort_by_name": "Ταξινόμηση κατά όνομα",
+        "more": "Περισσότερα",
+        "reaction_label": "{emoji} {count}. Πατήστε παρατεταμένα για να δείτε ποιοι αντέδρασαν",
+        "members": "Μέλη"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Υπάρχει ήδη ανάρτηση σε αυτόν τον σύνδεσμο που διαφέρει από αυτήν που στείλατε. Να ενημερωθεί ή να δημοσιευτεί ως νέα;",
+        "a_scheduled_post_is_published_by": "Μια προγραμματισμένη ανάρτηση δημοσιεύεται από το Ecency τη στιγμή που επιλέξατε. Αυτό απαιτεί την εξουσιοδότηση ανάρτησης για το ecency.app στον λογαριασμό σας. Τα κλειδιά σας και οι άλλες εξουσιοδοτήσεις παραμένουν ως έχουν. Η παραχώρησή της απαιτεί το ενεργό κλειδί σας.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "Εργαλεία AI",
+        "allow_ecency_to_publish_for_you": "Να επιτρέψετε στο Ecency να δημοσιεύει για εσάς;",
+        "bold": "Έντονα",
+        "clone": "Κλωνοποίηση",
+        "cost": "Κόστος: {cost}",
+        "could_not_store_the_draft_on": "Δεν ήταν δυνατή η αποθήκευση του πρόχειρου σε αυτή τη συσκευή. Κρατήστε την εφαρμογή ανοιχτή και αποθηκεύστε το πρόχειρο.",
+        "draft": "ΠΡΟΧΕΙΡΟ",
+        "delete_count": "Διαγραφή ({count})",
+        "dictate_desc": "Μιλήστε και η μεταγραφή μπαίνει στην ανάρτησή σας",
+        "discard": "Απόρριψη",
+        "discard_changes": "Απόρριψη αλλαγών;",
+        "grant": "Παραχώρηση",
+        "italic": "Πλάγια",
+        "keep_editing": "Συνέχεια επεξεργασίας",
+        "my_blog": "ΤΟ ΙΣΤΟΛΟΓΙΟ ΜΟΥ",
+        "my_communities": "ΟΙ ΚΟΙΝΟΤΗΤΕΣ ΜΟΥ",
+        "new_post": "Νέα ανάρτηση",
+        "notice": "Ειδοποίηση",
+        "restore": "Επαναφορά",
+        "restore_unsaved_changes": "Επαναφορά μη αποθηκευμένων αλλαγών;",
+        "saved": "Αποθηκεύτηκε",
+        "top_communities": "ΚΟΡΥΦΑΙΕΣ ΚΟΙΝΟΤΗΤΕΣ",
+        "table": "Πίνακας",
+        "text_format": "Μορφή κειμένου",
+        "this_link_is_already_in_use": "Αυτός ο σύνδεσμος χρησιμοποιείται ήδη",
+        "untitled": "Χωρίς τίτλο",
+        "update_it_or_publish_this_as": "Να ενημερωθεί ή να δημοσιευτεί ως νέα ανάρτηση;",
+        "you_have_unsaved_changes_from_an": "Έχετε μη αποθηκευμένες αλλαγές από προηγούμενη επεξεργασία. Η ανάρτηση έχει αλλάξει από τότε· η επαναφορά τους αντικαθιστά το παρακάτω κείμενο.",
+        "your_edits_were_not_published": "Οι αλλαγές σας δεν δημοσιεύτηκαν.",
+        "your_post_was_already_published": "Η ανάρτησή σας έχει ήδη δημοσιευτεί",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Μικρογραφία, πατήστε για να επιλέξετε άλλη εικόνα",
+        "thumbnail_number": "Μικρογραφία {number}",
+        "recording_busy": "Μια εγγραφή βρίσκεται ήδη σε εξέλιξη. Ολοκληρώστε την πρώτα στην κάμερα.",
+        "photo_lost": "Η φωτογραφία χάθηκε ενώ η κάμερα ήταν ανοιχτή. Τραβήξτε την ξανά.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# λέξη} other {# λέξεις}}",
+        "community_search": "αναζήτηση"
+      },
+      "profile": {
+        "open_wallet": "Άνοιγμα πορτοφολιού",
+        "your_wallet_is_on_the_wallet": "Το πορτοφόλι σας βρίσκεται στην καρτέλα Πορτοφόλι.",
+        "user_has_no_comments": "Ο/Η @{username} δεν έχει σχολιάσει τίποτα ακόμα",
+        "votes_count": "{count, plural, one {# ψήφος} other {# ψήφοι}}",
+        "replies_count": "{count, plural, one {# απάντηση} other {# απαντήσεις}}",
+        "menu": "Περισσότερα",
+        "users": "Χρήστες"
+      },
+      "reading": {
+        "apply": "ΕΦΑΡΜΟΓΗ",
+        "add_tag": "Προσθήκη ετικέτας",
+        "age": "Ηλικία",
+        "audio_language": "Γλώσσα ήχου",
+        "available_filters": "Διαθέσιμα φίλτρα",
+        "could_not_unlock_the_audio_please": "Δεν ήταν δυνατό το ξεκλείδωμα του ήχου, δοκιμάστε ξανά",
+        "downvote": "Αρνητική ψήφος",
+        "downvote_percent": "Αρνητική ψήφος {percent}%",
+        "listen_to_this_post": "Ακούστε αυτή την ανάρτηση",
+        "log_in": "Σύνδεση",
+        "mark_all_as_read": "Επισήμανση όλων ως αναγνωσμένων",
+        "mark_as_read": "Επισήμανση ως αναγνωσμένου",
+        "more_replies": "Περισσότερες απαντήσεις",
+        "not_enough_points": "Δεν υπάρχουν αρκετά Points",
+        "nothing_here_yet": "Τίποτα εδώ ακόμα.",
+        "open_editor": "Άνοιγμα επεξεργαστή",
+        "pause_voice": "Παύση φωνής",
+        "play_voice": "Αναπαραγωγή φωνής",
+        "playback_speed": "Ταχύτητα αναπαραγωγής",
+        "publishing_in_waves": "Δημοσίευση στα Waves",
+        "quests_done": "Ολοκληρωμένες αποστολές",
+        "read": "Ανάγνωση",
+        "remove_vote": "Αφαίρεση ψήφου",
+        "seek": "Αναζήτηση θέσης",
+        "select_community": "Επιλογή κοινότητας",
+        "selected_filters": "Επιλεγμένα φίλτρα",
+        "the_audio_could_not_be_loaded": "Δεν ήταν δυνατή η φόρτωση του ήχου.",
+        "this_post_does_not_exist_or": "Αυτή η ανάρτηση δεν υπάρχει ή διαγράφηκε.",
+        "unread": "Μη αναγνωσμένα",
+        "voice_position": "Θέση φωνής",
+        "vote_weight": "Βάρος ψήφου",
+        "reblogged_by": "αναδημοσίευση από τον/την {username}",
+        "no_more_posts": "Δεν υπάρχουν άλλες αναρτήσεις.",
+        "favourite": "Αγαπημένο",
+        "no_votes_yet": "Καμία ψήφος ακόμα",
+        "no_comments_yet": "Κανένα σχόλιο ακόμα. Γίνετε ο πρώτος!",
+        "comments_count": "Σχόλια ({count})",
+        "sending_to_chain": "αποστολή στο blockchain",
+        "compare": "Σύγκριση",
+        "your_vote": "Η ψήφος σας",
+        "reply_to": "Απάντηση στον @{username}",
+        "what_do_you_think": "Τι σκέφτεστε;",
+        "clear_tag_filter": "Εκκαθάριση φίλτρου ετικέτας",
+        "tab_selected": "{title}, επιλεγμένο",
+        "add_tag_feed": "Προσθήκη ροής ετικέτας",
+        "feed_pinned": "{label}, καρφιτσωμένο",
+        "attached_image_remove": "Επισυναπτόμενη εικόνα, πατήστε για αφαίρεση",
+        "camera": "Κάμερα",
+        "files": "Αρχεία",
+        "paused": "Σε παύση",
+        "in_topic": "στο {topic}",
+        "poll_vote": "Ψήφος",
+        "reply": "Απάντηση",
+        "mute_sound": "Σίγαση",
+        "unmute_sound": "Άρση σίγασης",
+        "leaderboard_activities": "Δραστηριότητες",
+        "leaderboard_reward": "Ανταμοιβή",
+        "sort_votes": "Ψήφοι"
+      },
+      "shell": {
+        "account_of": "Λογαριασμός @{username}",
+        "account_signed_out": "Λογαριασμός, αποσυνδεδεμένος",
+        "close_tab": "Κλείσιμο καρτέλας",
+        "coming_soon_to_the_native_app": "Έρχεται σύντομα στη native εφαρμογή.",
+        "create": "Δημιουργία",
+        "expand": "Ανάπτυξη",
+        "forward": "Μπροστά",
+        "loading": "Φόρτωση",
+        "new_tab": "Νέα καρτέλα",
+        "reload": "Επαναφόρτωση",
+        "sent": "Στάλθηκε",
+        "tab_unread": "{title}, {count} μη αναγνωσμένα",
+        "no_app_for_link": "Καμία εφαρμογή δεν μπορεί να ανοίξει αυτόν τον σύνδεσμο."
+      },
+      "wallet": {
+        "product_not_available": "Το προϊόν δεν είναι διαθέσιμο.",
+        "repeat": "Επανάληψη"
+      },
+      "copied": "Αντιγράφηκε",
+      "trending_caps": "ΤΑΣΕΙΣ",
+      "move_up": "Μετακίνηση πάνω",
+      "move_down": "Μετακίνηση κάτω",
+      "scroll_to_top": "Κύλιση στην κορυφή",
+      "load_more": "Περισσότερα"
+    },
+    "wallet": {
+      "checking": "Έλεγχος με το δίκτυο",
+      "leave_title": "Η αποστολή συνεχίζεται",
+      "leave_message": "Η αποστολή ή ο έλεγχος με το δίκτυο συνεχίζεται ακόμα. Μπορείτε να φύγετε από αυτή την οθόνη: η εφαρμογή θα σας ενημερώσει όταν ολοκληρωθεί.",
+      "stay": "Παραμονή",
+      "collateralized_convert_request": "Αίτημα μετατροπής με εγγύηση",
+      "op_transfer": "μεταφορά",
+      "op_power_up": "δέσμευση",
+      "op_power_down_change": "αλλαγή απόσυρσης",
+      "op_delegation": "ανάθεση",
+      "op_savings_deposit": "κατάθεση αποταμίευσης",
+      "op_savings_withdrawal": "ανάληψη αποταμίευσης",
+      "op_conversion": "μετατροπή",
+      "op_swap": "ανταλλαγή",
+      "op_order_cancel": "ακύρωση εντολής",
+      "op_reward_claim": "διεκδίκηση ανταμοιβής",
+      "op_withdraw_route_change": "αλλαγή διαδρομής απόσυρσης",
+      "op_token_operation": "λειτουργία token"
+    },
+    "notification": {
+      "amount_unknown": "Το ποσό δεν είναι διαθέσιμο",
+      "weekly_earnings_breakdown": "Κερδίσατε ${amount} αυτή την εβδομάδα - ${authorUsd} από αναρτήσεις, ${curationUsd} από επιμέλεια.",
+      "weekly_earnings_total": "Κερδίσατε ${amount} αυτή την εβδομάδα από τις αναρτήσεις και την επιμέλειά σας."
+    },
+    "settings": {
+      "open": "Άνοιγμα",
+      "feedback_subject": "Σχόλια/Αναφορά σφάλματος",
+      "unknown_user": "Άγνωστος χρήστης"
+    },
+    "navigation": {
+      "editor": "Επεξεργαστής",
+      "followers": "Ακόλουθοι",
+      "spin_game": "Παιχνίδι Spin",
+      "edit_profile": "Επεξεργασία προφίλ",
+      "redeem_points": "Εξαργύρωση points",
+      "community": "Κοινότητα",
+      "community_members": "Μέλη κοινότητας",
+      "community_activities": "Δραστηριότητες κοινότητας",
+      "browser": "Πρόγραμμα περιήγησης",
+      "asset_details": "Λεπτομέρειες περιουσιακού στοιχείου",
+      "edit_history": "Ιστορικό επεξεργασιών",
+      "welcome": "Καλώς ήρθατε",
+      "chat": "Συνομιλία",
+      "backup_keys": "Αντίγραφο ασφαλείας κλειδιών",
+      "trade": "Συναλλαγές",
+      "ai_image_generator": "Δημιουργός εικόνων AI",
+      "select_assets": "Επιλογή περιουσιακών στοιχείων",
+      "poll": "Δημοσκόπηση",
+      "bot_comments": "Σχόλια bot"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Οι λειτουργίες που απαιτούν το κλειδί ιδιοκτήτη δεν μπορούν να υπογραφούν στο Ecency.",
+      "post": "Ανάρτηση/Σχόλιο",
+      "custom": "Custom JSON",
+      "sign_buffer": "Υπογραφή μηνύματος",
+      "send_token": "Αποστολή token",
+      "witness_vote": "Ψήφος witness",
+      "proxy": "Ορισμός proxy",
+      "power_up": "Δέσμευση",
+      "power_down": "Απόσυρση",
+      "broadcast": "Εκπομπή",
+      "sign_tx": "Υπογραφή συναλλαγής",
+      "encode": "Κωδικοποίηση μηνύματος",
+      "decode": "Επαλήθευση κλειδιού",
+      "add_account_authority": "Προσθήκη εξουσιοδότησης λογαριασμού",
+      "remove_account_authority": "Αφαίρεση εξουσιοδότησης λογαριασμού",
+      "add_key_authority": "Προσθήκη εξουσιοδότησης κλειδιού",
+      "remove_key_authority": "Αφαίρεση εξουσιοδότησης κλειδιού",
+      "create_claimed_account": "Δημιουργία λογαριασμού",
+      "create_proposal": "Δημιουργία πρότασης",
+      "remove_proposal": "Αφαίρεση πρότασης",
+      "update_proposal_vote": "Ψήφος πρότασης",
+      "signed_call": "Υπογεγραμμένη κλήση"
+    },
+    "translate_language": {
+      "ar": "Αραβικά",
+      "az": "Αζερμπαϊτζανικά",
+      "bg": "Βουλγαρικά",
+      "bn": "Μπενγκάλι",
+      "ca": "Καταλανικά",
+      "cs": "Τσεχικά",
+      "da": "Δανικά",
+      "de": "Γερμανικά",
+      "el": "Ελληνικά",
+      "en": "Αγγλικά",
+      "eo": "Εσπεράντο",
+      "es": "Ισπανικά",
+      "et": "Εσθονικά",
+      "fa": "Περσικά",
+      "fi": "Φινλανδικά",
+      "fr": "Γαλλικά",
+      "ga": "Ιρλανδικά",
+      "he": "Εβραϊκά",
+      "hi": "Χίντι",
+      "hu": "Ουγγρικά",
+      "id": "Ινδονησιακά",
+      "it": "Ιταλικά",
+      "ja": "Ιαπωνικά",
+      "ko": "Κορεατικά",
+      "lt": "Λιθουανικά",
+      "lv": "Λετονικά",
+      "ms": "Μαλαισιανά",
+      "nb": "Νορβηγικά",
+      "nl": "Ολλανδικά",
+      "pl": "Πολωνικά",
+      "pt": "Πορτογαλικά",
+      "ro": "Ρουμανικά",
+      "ru": "Ρωσικά",
+      "sk": "Σλοβακικά",
+      "sl": "Σλοβενικά",
+      "sq": "Αλβανικά",
+      "sv": "Σουηδικά",
+      "th": "Ταϊλανδικά",
+      "tl": "Ταγκαλόγκ",
+      "tr": "Τουρκικά",
+      "uk": "Ουκρανικά",
+      "zh": "Κινεζικά",
+      "zt": "Κινεζικά (Παραδοσιακά)"
+    },
+    "reading": {
+      "banner_text": "Αυτή η ανάρτηση είναι στα {source}. Μετάφραση στα {target};",
+      "translated_from_text": "Μεταφράστηκε από τα {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# Μέλος} other {# Μέλη}} • {authors, plural, one {# Συγγραφέας} other {# Συγγραφείς}} • {posts, plural, one {# Ανάρτηση} other {# Αναρτήσεις}}",
+      "community_title": "Κοινότητα {title}",
+      "members_title": "Μέλη του {title}",
+      "activities_title": "Δραστηριότητα του {title}",
+      "cannot_start_with_or": "Δεν μπορεί να ξεκινά με @ ή #",
+      "use_a_two_letter": "Χρησιμοποιήστε κωδικό γλώσσας δύο γραμμάτων, όπως en",
+      "at_most_characters": "Έως {max, plural, one {# χαρακτήρας} other {# χαρακτήρες}}",
+      "council": "Συμβούλιο",
+      "journal": "Ημερολόγιο",
+      "topic": "Θέμα",
+      "community_not_found": "Η κοινότητα δεν βρέθηκε."
+    },
+    "transfer": {
+      "one_recipient": "Για αυτή τη μεταφορά μπορεί να χρησιμοποιηθεί μόνο ένας παραλήπτης.",
+      "is_an_exchange_and": "Το {exchange} είναι ανταλλακτήριο και ίσως δεν υποστηρίζει επαναλαμβανόμενες μεταφορές: τα κεφάλαια που στέλνονται με πρόγραμμα μπορεί να χαθούν. Χρησιμοποιήστε μια εφάπαξ μεταφορά."
+    },
+    "dapps": {
+      "signing_info": "Το Ecency λειτουργεί ως η επέκταση υπογραφής Hive. Όταν ένα dApp σας ζητά να συνδεθείτε με επέκταση προγράμματος περιήγησης όπως Keychain, Keeper ή Peak Vault, επιλέξτε αυτή την επιλογή. Το Ecency θα χειριστεί την υπογραφή με ασφάλεια.",
+      "category_social": "Κοινωνικά",
+      "category_gaming": "Παιχνίδια",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Ομάδα",
+      "unable_to_load_messages": "Δεν ήταν δυνατή η φόρτωση των μηνυμάτων.",
+      "someone": "Κάποιος",
+      "renamed_the_group_to": "Ο/Η {actor} μετονόμασε την ομάδα σε «{name}»",
+      "removed_the_group_name": "Ο/Η {actor} αφαίρεσε το όνομα της ομάδας",
+      "unable_to_send_your": "Δεν ήταν δυνατή η αποστολή του μηνύματός σας.",
+      "unable_to_remove_message": "Δεν ήταν δυνατή η αφαίρεση του μηνύματος.",
+      "unknown": "Άγνωστο",
+      "members_online": "{members, plural, one {# μέλος} other {# μέλη}} • {online} συνδεδεμένα",
+      "failed_to_load_pinned": "Η φόρτωση των καρφιτσωμένων μηνυμάτων απέτυχε",
+      "you": "Εσείς",
+      "title": "Αντιδράσεις"
+    },
+    "tip": {
+      "login_required": "Συνδεθείτε για να στείλετε φιλοδωρήματα",
+      "max_decimals": "Μέγιστο {n, plural, one {# δεκαδικό ψηφίο} other {# δεκαδικά ψηφία}}"
+    },
+    "paid": {
+      "check_again": "Έλεγχος ξανά",
+      "give_up": "Εγκατάλειψη",
+      "unknown": "Καμία απάντηση ακόμα. Το αίτημα ίσως εξακολουθεί να εκτελείται. Ελέγξτε ξανά για να λάβετε το αποτέλεσμα: δεν χρεώνεται δεύτερη φορά.",
+      "pending": "Το αίτημά σας εξακολουθεί να επεξεργάζεται. Ελέγξτε ξανά σε λίγο: δεν χρεώνεται δεύτερη φορά.",
+      "restored": "Ένα προηγούμενο αίτημα δεν έχει ακόμα απάντηση. Ελέγξτε ξανά για να λάβετε το αποτέλεσμά του: δεν χρεώνεται δεύτερη φορά.",
+      "give_up_confirm": "Αν το αίτημα εκτελέστηκε, τα points δαπανήθηκαν και το αποτέλεσμα θα χαθεί.",
+      "not_stored": "Αυτό το αίτημα δεν μπόρεσε να αποθηκευτεί στη συσκευή. Κρατήστε αυτή την οθόνη ανοιχτή μέχρι να ολοκληρωθεί.",
+      "sign_in_again": "Η συνεδρία σας έληξε. Συνδεθείτε ξανά και μετά ελέγξτε ξανά.",
+      "other_account": "Αυτό ανήκει στον @{owner}. Επιστρέψτε σε αυτόν τον λογαριασμό για να συνεχίσετε."
+    },
+    "ai": {
+      "run_ai_assist": "Εκτέλεση AI Assist ({costText})",
+      "no_longer_free_cost": "Αυτή η εκτέλεση δεν είναι πλέον δωρεάν σήμερα. Κοστίζει {cost} {unit}.",
+      "no_longer_free": "Αυτή η εκτέλεση δεν είναι πλέον δωρεάν σήμερα.",
+      "content_violates_our_content": "Το περιεχόμενο παραβιάζει την πολιτική περιεχομένου μας. Τροποποιήστε το κείμενό σας. Τα points δεν επιστράφηκαν.",
+      "generate_image": "Δημιουργία εικόνας ({costLabel})",
+      "use_prompt": "Χρήση: «{prompt}»"
+    },
+    "post_actions": {
+      "busy": "Περιμένετε, μια άλλη ενέργεια βρίσκεται σε εξέλιξη",
+      "not_a_community_post": "Δεν είναι ανάρτηση κοινότητας.",
+      "parent_post_not_found": "Η αρχική ανάρτηση δεν βρέθηκε",
+      "the_account_changed": "Ο λογαριασμός άλλαξε."
+    },
+    "dictation": {
+      "balance": "Υπόλοιπο: {balance} {unit}",
+      "stop_points": "Διακοπή ({cost} Points)",
+      "stop_free": "Διακοπή (Δωρεάν)",
+      "transcribe_points": "Μεταγραφή ({cost} Points)",
+      "transcribe": "Μεταγραφή",
+      "no_longer_free_cost": "Αυτή η εγγραφή δεν είναι πλέον δωρεάν σήμερα. Κοστίζει {cost} Points.",
+      "no_longer_free": "Αυτή η εγγραφή δεν είναι πλέον δωρεάν σήμερα.",
+      "held_locked": "Η εγγραφή σταμάτησε όταν κλειδώθηκε το Ecency. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
+      "held_no_background": "Η εγγραφή σταμάτησε όταν το Ecency έφυγε από την οθόνη (δεν μπόρεσε να εμφανίσει την ειδοποίηση εγγραφής). Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
+      "held_stopped": "Η εγγραφή σταμάτησε από την ειδοποίηση. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
+      "held_focus_lost": "Η εγγραφή σταμάτησε λόγω κλήσης ή ήχου άλλης εφαρμογής. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
+      "held_interrupted": "Η εγγραφή σταμάτησε επειδή άλλη εφαρμογή πήρε το μικρόφωνο. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
+      "unavailable": "Η εγγραφή δεν είναι διαθέσιμη σε αυτή τη συσκευή.",
+      "not_read": "Αυτή η εγγραφή δεν μπόρεσε να διαβαστεί ή είναι πολύ μεγάλη. Δεν στάλθηκε τίποτα και δεν χρεώθηκε τίποτα.",
+      "give_up_not_sent": "Αυτή η εγγραφή δεν στάλθηκε, οπότε δεν χρεώθηκε τίποτα. Θα διαγραφεί.",
+      "give_up_not_charged": "Δεν χρεώθηκε τίποτα για αυτή την εγγραφή. Θα διαγραφεί.",
+      "clip_lost": "Η εγγραφή ενός προηγούμενου αιτήματος δεν υπάρχει πια σε αυτή τη συσκευή. Αν το αίτημα εκτελέστηκε, τα points σας δαπανήθηκαν και η μεταγραφή του δεν μπορεί να ανακτηθεί."
+    },
+    "register": {
+      "error_code_28": "Το αίτημά σας δεν μπόρεσε να επεξεργαστεί. Η ουρά εγγραφής είναι πιθανώς γεμάτη. Δοκιμάστε ξανά σε λίγα λεπτά."
+    },
+    "perks": {
+      "quests_empty": "Δεν υπάρχουν αποστολές ακόμα, ελέγξτε ξανά σύντομα.",
+      "freeze_confirm_title": "Προστατέψτε τη σειρά σας",
+      "spend_points_on_a": "Να δαπανηθούν {price} Points για πάγωμα της σειράς; Χρησιμοποιείται για να προστατεύσει τη σειρά σας μια ημέρα που θα χάσετε."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Υποστηρίξτε το Ecency, αποκτήστε δωρεάν ιστολόγιο και ξεχωρίστε με ένα επαληθευμένο σήμα Pro.",
+      "card_description": "Γίνετε Pro για {price} τον χρόνο. Επαληθευμένο σήμα, δωρεάν ιστολόγιο και υποστήριξη του Ecency.",
+      "card_description_plain": "Γίνετε Pro για έναν χρόνο. Επαληθευμένο σήμα, δωρεάν ιστολόγιο και υποστήριξη του Ecency.",
+      "member": "Είστε μέλος Pro.",
+      "benefit_badge": "Ένα επαληθευμένο σήμα Pro δίπλα στο όνομά σας.",
+      "benefit_blog": "Ένα δωρεάν ιστολόγιο στο yourname.blogs.ecency.com.",
+      "benefit_support": "Άμεση υποστήριξη της ανάπτυξης του Ecency.",
+      "benefit_early": "Πρώιμη πρόσβαση σε νέες λειτουργίες.",
+      "buy": "Αποκτήστε Pro για {price} τον χρόνο",
+      "extend": "Παράταση κατά 12 μήνες για {price}",
+      "extend_note": "Μια νέα αγορά προσθέτει 12 μήνες στη συνδρομή σας.",
+      "unavailable": "Το Ecency Pro δεν είναι διαθέσιμο από το κατάστημα αυτή τη στιγμή.",
+      "activating": "Η πληρωμή ελήφθη. Ενεργοποίηση της συνδρομής σας.",
+      "success_title": "Καλώς ήρθατε στο Ecency Pro",
+      "success_body": "Η συνδρομή Pro είναι ενεργή. Το σήμα σας θα εμφανιστεί σύντομα στο προφίλ σας.",
+      "extending": "Η πληρωμή ελήφθη. Η συνδρομή Pro παρατείνεται κατά 12 μήνες.",
+      "open_a11y": "Άνοιγμα Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Αποθήκευση πρόχειρου...",
+      "please_sign_in_first": "Συνδεθείτε πρώτα.",
+      "fetch_failed": "Η ανάκτηση απέτυχε.",
+      "you_can_only_edit": "Μπορείτε να επεξεργάζεστε μόνο το δικό σας περιεχόμενο.",
+      "invalid_percent": "Μη έγκυρο ποσοστό",
+      "beneficiary_exists_already": "Ο δικαιούχος υπάρχει ήδη",
+      "this_draft_belongs_to": "Αυτό το πρόχειρο ανήκει στον @{owner}. Επιστρέψτε σε αυτόν τον λογαριασμό για να το δημοσιεύσετε.",
+      "could_not_make_a": "Δεν ήταν δυνατή η δημιουργία νέου συνδέσμου για αυτή την ανάρτηση. Αλλάξτε λίγο τον τίτλο και δοκιμάστε ξανά.",
+      "an_earlier_attempt_was": "Μια προηγούμενη προσπάθεια δημοσιεύτηκε μετά από αυτή. Ελέγξτε ποια έκδοση θέλετε να κρατήσετε.",
+      "could_not_check_your": "Δεν ήταν δυνατός ο έλεγχος της εξουσιοδότησης ανάρτησης του λογαριασμού σας. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+      "this_post_was_changed": "Αυτή η ανάρτηση άλλαξε αλλού αφότου την ανοίξατε. Αντιγράψτε το κείμενό σας, γυρίστε πίσω και ανοίξτε την ξανά για να επεξεργαστείτε την τελευταία έκδοση.",
+      "link_text_placeholder": "Κείμενο εδώ"
+    },
+    "app_error": {
+      "this_reply_is_too": "Αυτή η απάντηση είναι πολύ μεγάλη.",
+      "the_network_refused_this": "Το δίκτυο απέρριψε αυτή την ενέργεια.",
+      "invalid_input": "Μη έγκυρη είσοδος.",
+      "secure_storage_is_unavailable": "Ο ασφαλής αποθηκευτικός χώρος δεν είναι διαθέσιμος. Συνδεθείτε ξανά.",
+      "please_sign_in_first": "Συνδεθείτε πρώτα.",
+      "these_credentials_belong_to": "Αυτά τα διαπιστευτήρια ανήκουν στον @{actual}, όχι στον @{expected}.",
+      "is_not_signed_in": "Ο @{username} δεν είναι συνδεδεμένος σε αυτή τη συσκευή.",
+      "key_required": "Απαιτείται το κλειδί {role} για την εκτέλεση αυτής της συναλλαγής. {hint}",
+      "cancelled": "Ακυρώθηκε.",
+      "the_request_was_rejected": "Το αίτημα απορρίφθηκε στην εφαρμογή πορτοφολιού.",
+      "the_request_expired_before": "Το αίτημα έληξε πριν απαντήσει η εφαρμογή πορτοφολιού. Δοκιμάστε ξανά.",
+      "could_not_reach_the": "Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή HiveAuth. Δοκιμάστε ξανά.",
+      "unexpected_redirect": "Ο διακομιστής έστειλε μια μη αναμενόμενη ανακατεύθυνση. Δεν άλλαξε τίποτα. Δοκιμάστε ξανά αργότερα.",
+      "missing_key_hint": "Προσθέστε το στις Ρυθμίσεις, Διαχείριση εξουσιοδοτήσεων (Εισαγωγή ιδιωτικού) ή συνδεθείτε ξανά με αυτό.",
+      "this_key_is_also": "Αυτό το κλειδί είναι επίσης το κλειδί ιδιοκτήτη του λογαριασμού. Το Ecency δεν κρατά κλειδί που ελέγχει τον ρόλο ιδιοκτήτη: δώστε στους ρόλους active και posting δικά τους κλειδιά και συνδεθείτε με αυτά.",
+      "this_is_the_owner": "Αυτό είναι το κλειδί ιδιοκτήτη. Το Ecency δεν αποθηκεύει ούτε χρησιμοποιεί ποτέ το κλειδί ιδιοκτήτη: συνδεθείτε με τον κύριο κωδικό πρόσβασης ή με το κλειδί posting ή active.",
+      "this_password_only_matches": "Αυτός ο κωδικός πρόσβασης ταιριάζει μόνο με το κλειδί ιδιοκτήτη του λογαριασμού. Το Ecency δεν αποθηκεύει ούτε χρησιμοποιεί ποτέ το κλειδί ιδιοκτήτη: συνδεθείτε με το κλειδί posting ή active.",
+      "this_key_cannot_sign": "Αυτό το κλειδί δεν μπορεί να υπογράψει μόνο του για τον λογαριασμό: ο λογαριασμός χρειάζεται περισσότερες από μία υπογραφές (το βάρος του είναι κάτω από το όριο).",
+      "public_key_given": "Αυτό είναι το δημόσιο κλειδί σας. Επικολλήστε το ιδιωτικό κλειδί (ξεκινά με 5) ή τον κύριο κωδικό πρόσβασής σας.",
+      "memo_key_only": "Το κλειδί memo δεν μπορεί να χρησιμοποιηθεί για σύνδεση. Χρησιμοποιήστε το κλειδί posting, το κλειδί active ή τον κύριο κωδικό πρόσβασης.",
+      "network_message": "Σφάλμα δικτύου. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+      "network_error_this_may": "Σφάλμα δικτύου. Ίσως έχει ήδη ολοκληρωθεί· η επανάληψη είναι ασφαλής και δεν θα αναρτήσει δύο φορές."
+    },
+    "purchases": {
+      "deal_best": "ΚΑΛΥΤΕΡΗ ΠΡΟΣΦΟΡΑ!",
+      "deal_popular": "ΔΗΜΟΦΙΛΕΣ!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Το κατάστημα δεν απάντησε."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Απαιτούνται email και όνομα χρήστη για την κατανάλωση 999accounts",
+      "stuck": "Μια προηγούμενη αγορά αυτού του προϊόντος δεν μπόρεσε να ολοκληρωθεί. Επικοινωνήστε με το support@ecency.com με την απόδειξη του καταστήματος, φυλάσσεται για αυτό.",
+      "held": "Αυτή η αγορά κρατείται για έλεγχο. Επικοινωνήστε με το support@ecency.com με την παραγγελία #{order}.",
+      "earlier_purchase": "Μια προηγούμενη αγορά αυτού του προϊόντος ολοκληρώνεται πρώτα για τον @{target}.",
+      "earlier_pending": "Μια προηγούμενη πληρωμή για αυτό το προϊόν εκκρεμεί ακόμα για τον @{target}. Ολοκληρώνεται μόλις το κατάστημα επιβεβαιώσει την πληρωμή.",
+      "pending": "Η πληρωμή σας εκκρεμεί. Η αγορά ολοκληρώνεται μόλις το κατάστημα επιβεβαιώσει την πληρωμή.",
+      "processing": "Η αγορά σας επεξεργάζεται. Θα ολοκληρωθεί σύντομα."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Επαναλαμβανόμενες μεταφορές",
+      "delegate_hive_power": "Ανάθεση Hive Power",
+      "power_up": "Δέσμευση",
+      "set_withdraw_vesting_route": "Ορισμός διαδρομής απόσυρσης vesting",
+      "power_down": "Απόσυρση",
+      "transfer_to_saving": "Μεταφορά σε αποταμίευση",
+      "transfer_from_saving": "Μεταφορά από αποταμίευση",
+      "cancel_transfer_from_saving": "Ακύρωση μεταφοράς από αποταμίευση",
+      "collateralized_convert": "Μετατροπή με εγγύηση",
+      "witness_vote": "Ψήφος witness",
+      "witness_update": "Ενημέρωση witness",
+      "witness_set_properties": "Ορισμός ιδιοτήτων witness",
+      "governance_proxy": "Proxy διακυβέρνησης",
+      "claim_account": "Διεκδίκηση λογαριασμού",
+      "create_account": "Δημιουργία λογαριασμού",
+      "create_account_with_account": "Δημιουργία λογαριασμού με credits λογαριασμού",
+      "create_limit_order": "Δημιουργία εντολής με όριο",
+      "cancel_limit_order": "Ακύρωση εντολής με όριο",
+      "redeem_rewards": "Εξαργύρωση ανταμοιβών",
+      "post_or_comment": "Ανάρτηση ή σχόλιο",
+      "post_or_comment_options": "Επιλογές ανάρτησης ή σχολίου",
+      "custom_operation": "Προσαρμοσμένη λειτουργία",
+      "update_account_active": "Ενημέρωση λογαριασμού (active)",
+      "update_account_posting": "Ενημέρωση λογαριασμού (posting)",
+      "change_recovery_account": "Αλλαγή λογαριασμού ανάκτησης",
+      "create_proposal": "Δημιουργία πρότασης",
+      "remove_proposal": "Αφαίρεση πρότασης",
+      "update_proposal_votes": "Ενημέρωση ψήφων πρότασης",
+      "update_proposal": "Ενημέρωση πρότασης"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Αυτός ο σύνδεσμος πρέπει να υπογραφεί από τον @{account}. Αλλάξτε σε αυτόν τον λογαριασμό και ανοίξτε τον ξανά.",
+      "ecency_can_only_sign": "Το Ecency μπορεί να υπογράφει και να εκπέμπει συναλλαγές μόνο από συνδέσμους.",
+      "requester_page": "η σελίδα {host}",
+      "owner_refused": "Οι λειτουργίες που απαιτούν το κλειδί ιδιοκτήτη δεν μπορούν να υπογραφούν από σύνδεσμο.",
+      "busy": "Περιμένετε: άλλο αίτημα εξακολουθεί να επεξεργάζεται.",
+      "not_supported": "Το Ecency δεν μπορεί ακόμα να υπογράψει αυτή τη λειτουργία σε αυτή την έκδοση."
+    },
+    "chats": {
+      "group_members": "Μέλη ομάδας",
+      "rename_group": "Μετονομασία ομάδας",
+      "failed_to_load_chats": "Η φόρτωση των συνομιλιών απέτυχε",
+      "unknown": "Άγνωστο",
+      "unable_to_mark_channel": "Δεν ήταν δυνατή η επισήμανση του καναλιού ως αναγνωσμένου",
+      "unable_to_update_favorites": "Δεν ήταν δυνατή η ενημέρωση των αγαπημένων",
+      "unable_to_update_mute": "Δεν ήταν δυνατή η ενημέρωση της σίγασης",
+      "group": "Ομάδα",
+      "unable_to_search": "Δεν ήταν δυνατή η αναζήτηση",
+      "unable_to_start_chat": "Δεν ήταν δυνατή η έναρξη συνομιλίας",
+      "no_internet": "Χωρίς σύνδεση στο Διαδίκτυο"
+    },
+    "stake": {
+      "confirm_summary": "Ανάθεση {hp} HP ({vests} VESTS) στον @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Έχει ήδη γίνει ανάθεση στον @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Μόνο δημόσιο. Το Ecency δεν αποθηκεύει ποτέ το κλειδί ιδιοκτήτη.",
+      "shared_owner": "Αυτός ο λογαριασμός χρησιμοποιεί το ίδιο κλειδί για τον ρόλο ιδιοκτήτη και τον ρόλο {names}. Όποιος έχει αυτό το κλειδί ελέγχει ολόκληρο τον λογαριασμό. Δώστε στον ρόλο {names} δικό του κλειδί και κρατήστε το κλειδί ιδιοκτήτη εκτός σύνδεσης.",
+      "copy_warning": "Όποιος έχει αυτό το ιδιωτικό κλειδί ελέγχει αυτό το τμήμα του λογαριασμού σας. Άλλες εφαρμογές μπορούν να διαβάσουν το πρόχειρο· επικολλήστε το μόνο όπου εμπιστεύεστε. Διαγράφεται από το πρόχειρο μετά από 2 λεπτά."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Το κλείδωμα με PIN είναι ενεργό.",
+      "pin_changed": "Το PIN άλλαξε.",
+      "pin_lock_is_off": "Το κλείδωμα με PIN είναι ανενεργό.",
+      "wiped_notice": "Όλοι οι λογαριασμοί, τα κλειδιά και τα διαπιστευτήρια αφαιρέθηκαν από αυτή τη συσκευή.",
+      "we_could_not_bring": "Δεν μπορέσαμε να μεταφέρουμε τους λογαριασμούς σας από την προηγούμενη έκδοση της εφαρμογής. Συνδεθείτε ξανά.",
+      "your_pin_lock_could": "Το κλείδωμα με PIN δεν μπόρεσε να μεταφερθεί από την προηγούμενη έκδοση. Ορίστε ξανά PIN από το μενού λογαριασμού για να ενεργοποιήσετε ξανά το κλείδωμα της εφαρμογής.",
+      "biometric_unlock_was_turned": "Το βιομετρικό ξεκλείδωμα απενεργοποιήθηκε επειδή άλλαξαν τα βιομετρικά στοιχεία αυτής της συσκευής. Ξεκλειδώστε με το PIN και μετά ενεργοποιήστε το ξανά από το μενού λογαριασμού.",
+      "biometric_unavailable_notice": "Δεν ήταν δυνατή η ενεργοποίηση του βιομετρικού ξεκλειδώματος: δεν έχουν ρυθμιστεί βιομετρικά στοιχεία σε αυτή τη συσκευή.",
+      "set_backup": "Ορίστε PIN για εφεδρικό βιομετρικό ξεκλείδωμα",
+      "biometric_on_notice": "Το κλείδωμα με PIN είναι ενεργό. Ξεκλειδώστε με βιομετρικά ή με το PIN σας.",
+      "offer_title": "Ξεκλείδωμα με βιομετρικά",
+      "offer_body": "Ανοίξτε το Ecency με το πρόσωπο ή το δακτυλικό σας αποτύπωμα. Ορίσατε επίσης PIN, που ξεκλειδώνει την εφαρμογή όταν δεν είναι διαθέσιμα τα βιομετρικά.",
+      "offer_use": "Χρήση βιομετρικών",
+      "offer_use_pin": "Χρήση PIN"
+    },
+    "common": {
+      "list_and": "{first} και {second}",
+      "role_owner": "ιδιοκτήτη",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Οι απαντήσεις έως 25 χαρακτήρες δεν κερδίζουν points (οι σύνδεσμοι δεν μετράνε)",
+      "short_content_hint": "Πολύ σύντομο για να κερδίσει points (έως 25 χαρακτήρες, χωρίς τους συνδέσμους)",
+      "daily_post": "Ημερήσια ανάρτηση {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {σειρά # ημέρας} other {σειρά # ημερών}}",
+      "grant_description": "Παραχωρήστε στον λογαριασμό Ecency @ecency.app άδεια ανάρτησης στον λογαριασμό σας, ώστε να αναρτάτε χωρίς να ανοίγετε κάθε φορά το Keychain. Η παραχώρηση αλλάζει την εξουσιοδότηση ανάρτησης του λογαριασμού σας και απαιτεί το ενεργό κλειδί σας."
+    },
+    "wallet_history": {
+      "from_to": "@{from} προς @{to}",
+      "from_user_id": "από @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} προς @{to}, id: {id}",
+      "from_to_account": "@{from} προς {to}",
+      "from_user": "από @{user}",
+      "to_user": "προς @{user}",
+      "interest": "Τόκος",
+      "proposal_pay": "Πληρωμή πρότασης",
+      "categories": "Τύποι δραστηριότητας",
+      "category_all": "Όλα",
+      "category_transfers": "Μεταφορές",
+      "category_market": "Εντολές αγοράς",
+      "category_interest": "Τόκοι",
+      "category_stake": "Λειτουργίες δέσμευσης",
+      "category_rewards": "Ανταμοιβές",
+      "point_type_checkin": "Παλμοί",
+      "point_type_login": "Σύνδεση",
+      "point_type_post": "Ανάρτηση",
+      "point_type_comment": "Σχόλιο",
+      "point_type_vote": "Ψήφος",
+      "point_type_reblog": "Αναδημοσίευση",
+      "point_type_transfer_sent": "Απεσταλμένες μεταφορές",
+      "point_type_transfer_received": "Ληφθείσες μεταφορές"
+    },
+    "video_upload": {
+      "continue_upload": "ΣΥΝΕΧΕΙΑ ΜΕΤΑΦΟΡΤΩΣΗΣ",
+      "source_gone": "Αυτή η εγγραφή δεν είναι πλέον διαθέσιμη στη συσκευή. Ηχογραφήστε ή επιλέξτε ξανά το βίντεο.",
+      "no_camera": "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Η επόμενη απόσυρση είναι σε {hours, plural, one {# ώρα} other {# ώρες}}",
+      "account_not_found": "Ο λογαριασμός δεν βρέθηκε"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Εικόνα στο πρόχειρο · Επικόλληση εικόνας",
+      "no_container": "Δεν ήταν δυνατή η ανάκτηση του πιο πρόσφατου container των waves",
+      "please_sign_in_first": "Συνδεθείτε πρώτα.",
+      "write_something_first": "Γράψτε πρώτα κάτι.",
+      "account_changed": "Αυτό το wave γράφτηκε ως άλλος λογαριασμός. Κλείστε το και γράψτε το ξανά.",
+      "no_upload": "Η μεταφόρτωση εικόνων δεν είναι ακόμα διαθέσιμη σε αυτή την έκδοση. Επικολλήστε έναν σύνδεσμο εικόνας στο κείμενο.",
+      "fail": "Αποτυχία"
+    },
+    "delete_account": {
+      "sign_out_failed": "Το αίτημά σας στάλθηκε, αλλά η αποσύνδεση απέτυχε. Αποσυνδεθείτε από το μενού.",
+      "not_sent": "Το αίτημα διαγραφής δεν μπόρεσε να σταλεί. Δοκιμάστε ξανά."
+    },
+    "chat_sheets": {
+      "group_limit": "Μια ομάδα μπορεί να έχει έως {max, plural, one {# ακόμα άτομο} other {# ακόμα άτομα}}.",
+      "search_people_by_username": "Αναζήτηση ατόμων με όνομα χρήστη",
+      "new_group_title": "Νέα ομάδα",
+      "new_group_hint": "Προσθέστε από {min} έως {max, plural, one {# άτομο} other {# άτομα}} για να ξεκινήσετε μια ομαδική συζήτηση.",
+      "no_results": "Δεν βρέθηκε κανείς στη συνομιλία με αυτό το όνομα.",
+      "search_failed": "Η αναζήτηση απέτυχε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+      "create": "Έναρξη ομάδας",
+      "new_group_failed": "Δεν ήταν δυνατή η έναρξη της ομάδας. Δοκιμάστε ξανά.",
+      "name_limit": "Το όνομα της ομάδας μπορεί να έχει έως {max, plural, one {# χαρακτήρα} other {# χαρακτήρες}}.",
+      "rename_title": "Μετονομασία ομάδας",
+      "rename_hint": "Δώστε στην ομάδα ένα όνομα που θα βλέπουν όλα τα μέλη. Αφήστε το κενό για να εμφανίζονται τα ονόματα των μελών.",
+      "placeholder": "Όνομα ομάδας",
+      "not_owner": "Μόνο το άτομο που ξεκίνησε την ομάδα μπορεί να τη μετονομάσει.",
+      "rename_failed": "Δεν ήταν δυνατή η μετονομασία της ομάδας. Δοκιμάστε ξανά."
+    },
+    "editor_side": {
+      "copy_of": "Αντίγραφο του {title}",
+      "deletions_failed": "Κάτι πήγε στραβά\n{failed} από {total, plural, one {# διαγραφή} other {# διαγραφές}} απέτυχαν",
+      "uploads_failed": "{count, plural, one {# μεταφόρτωση απέτυχε} other {# μεταφορτώσεις απέτυχαν}}:\n\n{messages}",
+      "failed_to_delete": "Η διαγραφή απέτυχε"
+    },
+    "uploads": {
+      "add_to_gallery": "Προσθήκη στη συλλογή"
+    },
+    "account_notice": {
+      "manage_keys": "Ρυθμίσεις, Διαχείριση εξουσιοδοτήσεων",
+      "no_signing_key_title": "Συνδεθείτε ξανά ως @{account}",
+      "no_signing_key": "Το Ecency δεν κρατά πια το κλειδί ιδιοκτήτη ή τον κύριο κωδικό πρόσβασης σε αυτή τη συσκευή και ο @{account} δεν έχει αποθηκευμένο εδώ κλειδί posting ή active. Συνδεθείτε ξανά με τον κύριο κωδικό πρόσβασης ή με κλειδί posting ή active, ή προσθέστε κλειδί στο {manageKeys} (Εισαγωγή ιδιωτικού).",
+      "missing_roles_title": "Ορισμένα κλειδιά δεν προστέθηκαν",
+      "cannot_post": "αναρτήσετε, ψηφίσετε ή σχολιάσετε",
+      "cannot_transfer": "στείλετε μεταφορές ή αλλάξετε ρυθμίσεις λογαριασμού",
+      "missing_roles": "Ο κωδικός πρόσβασής σας δεν ταιριάζει πια με το κλειδί {missing} του @{account}: άλλαξε στον λογαριασμό μετά τον ορισμό του κωδικού. Αποθηκευμένο σε αυτή τη συσκευή: το κλειδί {kept}. Μέχρι να προσθέσετε το κλειδί {missing} στο {manageKeys} (Εισαγωγή ιδιωτικού), δεν μπορείτε να {cannot} με αυτή την εφαρμογή χρησιμοποιώντας κλειδιά για τον @{account}.",
+      "shared_owner_title": "Αυτό το κλειδί ελέγχει επίσης τον ρόλο ιδιοκτήτη",
+      "shared_owner": "Ο @{account} χρησιμοποιεί το ίδιο κλειδί για τον ρόλο ιδιοκτήτη και τον ρόλο {names}. Όποιος έχει αυτό το κλειδί ελέγχει ολόκληρο τον λογαριασμό. Το Ecency το κρατά μόνο ως κλειδί {names} και δεν το χρησιμοποιεί ποτέ για λειτουργίες ιδιοκτήτη. Δώστε στον ρόλο {names} δικό του κλειδί και κρατήστε το κλειδί ιδιοκτήτη εκτός σύνδεσης."
+    },
+    "dapp_browser": {
+      "message_from": "Μήνυμα από {host}",
+      "home_title": "Αρχική",
+      "loading_title": "Φόρτωση...",
+      "blank_run": "[{count, plural, one {# κενός χαρακτήρας} other {# κενοί χαρακτήρες}}]",
+      "too_large": "Αυτή η σελίδα ζήτησε υπογραφή αιτήματος πολύ μεγάλου για εμφάνιση, οπότε το Ecency το απέρριψε."
+    },
+    "community_service": {
+      "the_account_changed": "Ο λογαριασμός άλλαξε."
+    },
+    "profile_edit": {
+      "enter_link": "Εισαγάγετε σύνδεσμο εικόνας",
+      "please_sign_in_first": "Συνδεθείτε πρώτα.",
+      "account_not_found": "Ο λογαριασμός δεν βρέθηκε",
+      "please_enter_an_image": "Εισαγάγετε σύνδεσμο εικόνας που ξεκινά με https://"
+    },
+    "background_media": {
+      "post_by": "Ανάρτηση από @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Συνδεθείτε πρώτα."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Έχετε ήδη ψηφίσει με το ίδιο βάρος.",
+      "insufficient_rc": "Μη επαρκή Resource Credits. Περιμένετε ή δεσμεύστε περισσότερα.",
+      "missing_authority": "Λείπει η εξουσιοδότηση ανάρτησης. Ελέγξτε τη μέθοδο σύνδεσής σας.",
+      "comment_too_soon": "Περιμένετε πριν αναρτήσετε ξανά.",
+      "paid_out": "Αυτή η ανάρτηση έχει ήδη πληρωθεί.",
+      "too_large": "Η συναλλαγή είναι {size, plural, one {# byte} other {# bytes}}, πάνω από το όριο των {max} byte.",
+      "network_error_please_check": "Σφάλμα δικτύου. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.",
+      "unconfirmed_message": "Δεν ήταν δυνατή η επιβεβαίωση αν ολοκληρώθηκε. Ελέγξτε το πορτοφόλι ή το ιστορικό σας· ξεκινήστε ξανά μόνο αν δεν υπάρχει εκεί.",
+      "undecided_message": "Ίσως έχει ήδη ολοκληρωθεί. Ελέγξτε το πορτοφόλι ή το ιστορικό σας πριν δοκιμάσετε ξανά."
+    },
+    "chat_api": {
+      "request_failed": "Το αίτημα απέτυχε ({status})"
+    },
+    "chat": {
+      "typing_one": "Ο/Η {name} πληκτρολογεί...",
+      "typing_two": "Οι {first} και {second} πληκτρολογούν...",
+      "typing_three": "Οι {first}, {second} και {third} πληκτρολογούν...",
+      "typing_many": "Οι {first}, {second} και {count, plural, one {# άλλος πληκτρολογεί} other {# άλλοι πληκτρολογούν}}...",
+      "banned": "{reason} Μπορείτε ακόμα να διαβάζετε τη συνομιλία. Οι αναρτήσεις ξεκλειδώνουν {until}.",
+      "joined_when": "εντάχθηκε {time}",
+      "joined": "εντάχθηκε",
+      "official_badge": "Επίσημος",
+      "official_badge_label": "Επίσημος λογαριασμός Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Ρωτήστε την Esie"
+    },
+    "chat_service": {
+      "missing_token": "Λείπει το token πρόσβασης Hive. Αποσυνδεθείτε και συνδεθείτε ξανά.",
+      "dm_error": "Ο χρήστης δεν έχει εγγραφεί στις συνομιλίες"
+    },
+    "compose_reply": {
+      "account_changed": "Αυτή η απάντηση γράφτηκε ως άλλος λογαριασμός. Κλείστε την και γράψτε την ξανά.",
+      "write_something_first": "Γράψτε πρώτα κάτι.",
+      "please_sign_in_first": "Συνδεθείτε πρώτα."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Πάρα πολλοί δικαιούχοι: το πολύ {max}.",
+      "a_beneficiary_s_share": "Το μερίδιο ενός δικαιούχου πρέπει να είναι μεταξύ 0,01% και 100%.",
+      "beneficiaries_add_up_to": "Οι δικαιούχοι αθροίζονται σε περισσότερο από 100%.",
+      "a_beneficiary_is_listed": "Ένας δικαιούχος αναφέρεται δύο φορές.",
+      "you_cannot_be_a": "Δεν μπορείτε να είστε δικαιούχος της δικής σας ανάρτησης.",
+      "a_beneficiary_has_an": "Ένας δικαιούχος έχει μη έγκυρο όνομα λογαριασμού."
+    },
+    "follows": {
+      "fail": "Αποτυχία!: {message}",
+      "follower_count": "Ακόλουθοι ({count})",
+      "following_count": "Ακολουθεί ({count})"
+    },
+    "link": {
+      "unsupported": "Αυτός ο σύνδεσμος δεν υποστηρίζεται ακόμα.",
+      "cannot_open": "Ο σύνδεσμος δεν μπορεί να ανοίξει",
+      "unsupported_version": "Αυτός ο σύνδεσμος δεν υποστηρίζεται σε αυτή την έκδοση."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Το πρόγραμμα περιήγησης Explore μπορεί να έχει πρόσβαση στο πορτοφόλι Hive σας για να υπογράφει συναλλαγές. Αυτός ο σύνδεσμος προέρχεται από περιεχόμενο ανάρτησης και δεν επαληθεύεται από το Ecency. Συνεχίστε μόνο αν τον εμπιστεύεστε:\n\n{url}"
+    },
+    "listen": {
+      "message": "Η ακρόαση απαιτεί {required} Points και έχετε {available}.",
+      "unlock_label": "Ξεκλείδωμα · {cost} Points",
+      "preparing_audio": "Προετοιμασία ήχου · {preparingPercent}%",
+      "waiting_in_line_ahead": "Αναμονή στη σειρά, {ahead} μπροστά…",
+      "next_in_line": "Επόμενος στη σειρά…",
+      "preparing_about_minutes": "Προετοιμασία ήχου, περίπου {minutes} λεπτά…",
+      "preparing_audio_2": "Προετοιμασία ήχου…",
+      "spend_confirm": "Να δαπανηθούν {cost} Points για να ακούσετε αυτή την ανάρτηση; Ο ήχος είναι δικός σας και μπορείτε να τον ξανακούσετε όποτε θέλετε.",
+      "about_minutes": "~{minutes} λεπτά",
+      "failed_refunded": "Ο ήχος δεν μπόρεσε να δημιουργηθεί, τα Points σας επιστράφηκαν"
+    },
+    "media_pick": {
+      "preparing_video": "Προετοιμασία βίντεο...",
+      "library_hint": "Επιλέξτε από τις φωτογραφίες σας",
+      "camera_hint": "Τραβήξτε μια νέα φωτογραφία τώρα",
+      "files_hint": "Περιήγηση σε αρχεία σε αυτή τη συσκευή και στο cloud",
+      "paste_hint": "Χρήση της εικόνας που αντιγράψατε",
+      "link_hint": "Χρήση εικόνας από το διαδίκτυο"
+    },
+    "media_picking": {
+      "image_types_message": "Αυτός ο τύπος αρχείου δεν υποστηρίζεται. Επιλέξτε εικόνα JPEG, PNG, GIF, WebP ή HEIC.",
+      "video_types_message": "Αυτός ο τύπος αρχείου δεν υποστηρίζεται. Επιλέξτε βίντεο MP4 ή MOV.",
+      "gif_too_large": "Αυτό το GIF είναι μεγαλύτερο από {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Αυτή η λειτουργία απαιτεί τόσο υπογραφή active όσο και posting, κάτι που το Ecency δεν μπορεί ακόμα να υπογράψει μαζί."
+    },
+    "poll": {
+      "fail": "Αποτυχία!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Δεν ήταν δυνατός ο έλεγχος της εξουσιοδότησης ανάρτησης του λογαριασμού σας. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά."
+    },
+    "post_lists": {
+      "voters_title": "Πληροφορίες ψηφοφόρων ({total})",
+      "reblogs_title": "Πληροφορίες αναδημοσιεύσεων ({total})",
+      "no_history_found": "Δεν βρέθηκε ιστορικό!",
+      "no_edit_history_available": "Δεν υπάρχει ιστορικό επεξεργασιών για αυτό το περιεχόμενο.",
+      "version_label": "Έκδοση {version}"
+    },
+    "stats": {
+      "other_device": "Άλλο"
+    },
+    "profile": {
+      "account_not_found": "Ο λογαριασμός δεν βρέθηκε",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Πλήρης σε {hours, plural, one {# ώρα} other {# ώρες}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Δεν ήταν δυνατή η ανάγνωση του τρέχοντος προφίλ σας, δοκιμάστε ξανά"
+    },
+    "profile_sheet": {
+      "fail": "Αποτυχία! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Ο λογαριασμός δεν βρέθηκε"
+    },
+    "push_payload": {
+      "mentioned": "Ο @{source} ανέφερε τον @{target}",
+      "replied": "Ο @{source} απάντησε στον @{target}",
+      "transferred": "Ο @{source} έκανε μεταφορά στον @{target}",
+      "delegated": "Ο @{source} έκανε ανάθεση στον @{target}",
+      "rewards_received": "Ελήφθησαν ανταμοιβές",
+      "account_updated": "Ο λογαριασμός ενημερώθηκε",
+      "account_updated_body": "Τα στοιχεία του λογαριασμού σας ενημερώθηκαν",
+      "followed": "Ο @{source} ακολούθησε τον @{target}",
+      "unfollowed": "Ο @{source} σταμάτησε να ακολουθεί τον @{target}",
+      "ignored": "Ο @{source} αγνόησε τον @{target}",
+      "blacklisted": "Ο @{source} έβαλε στη μαύρη λίστα τον @{target}",
+      "posted_in": "Ο @{source} έκανε ανάρτηση στο #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Δεν ήταν δυνατή η λήψη άδειας κάμερας",
+      "permission_message": "Παραχωρήστε άδεια κάμερας στις ρυθμίσεις του ecency.",
+      "permission_allow": "Να επιτρέπεται"
+    },
+    "reply_account": {
+      "switch": "Απάντηση ως άλλος λογαριασμός"
+    },
+    "send_journal": {
+      "your_from_went_through": "Το {label} από τον @{account} ολοκληρώθηκε.",
+      "not_sent": "Το {label} από τον @{account} δεν ολοκληρώθηκε. Δεν στάλθηκε τίποτα· μπορείτε να το ξεκινήσετε ξανά.",
+      "checking_whether_your_from": "Έλεγχος αν ολοκληρώθηκε το {label} από τον @{account}. Ελέγξτε το πορτοφόλι σας πριν το στείλετε ξανά."
+    },
+    "signing": {
+      "hot_page_closed": "Η σελίδα HiveSigner έκλεισε",
+      "wrong_role": "Αυτό είναι το κλειδί {given}· αυτή η λειτουργία απαιτεί το κλειδί {needed}.",
+      "action_id_required": "Αυτή η ενέργεια χρειάζεται αναγνωριστικό ενέργειας για ασφαλή επανάληψη."
+    },
+    "signing_router": {
+      "owner_never": "Οι λειτουργίες ιδιοκτήτη δεν υπογράφονται ποτέ στην εφαρμογή."
+    },
+    "spin": {
+      "key_missing": "Λείπει το κλειδί παιχνιδιού",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Σήμερα (UTC), επαναφορά σε {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Επαναφορά καθημερινά στις 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Συνδεθείτε ξανά",
+      "message": "Ο ασφαλής αποθηκευτικός χώρος επαναφέρθηκε σε αυτή τη συσκευή. Συνδεθείτε ξανά.",
+      "failed": "Οι λογαριασμοί σε αυτή τη συσκευή δεν μπόρεσαν να αφαιρεθούν. Δοκιμάστε ξανά."
+    },
+    "store": {
+      "in_app_purchases_are": "Οι αγορές εντός εφαρμογής δεν είναι διαθέσιμες σε αυτή την έκδοση."
+    },
+    "wallet_sends": {
+      "journal_full": "Πάρα πολλές προηγούμενες αποστολές εξακολουθούν να ελέγχονται με το δίκτυο. Περιμένετε μέχρι να επιβεβαιωθούν πριν στείλετε περισσότερα.",
+      "check_later": "Το δίκτυο δεν το επιβεβαίωσε εγκαίρως. Ελέγξτε το πορτοφόλι ή το ιστορικό σας πριν το στείλετε ξανά· η εφαρμογή ελέγχει ξανά στην επόμενη εκκίνηση."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# μη αναγνωσμένο} other {# μη αναγνωσμένα}}",
+      "locked_text": "Ξεκλειδώστε το Ecency για να δείτε",
+      "signed_out_text": "Συνδεθείτε στο Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Δεν ήταν δυνατή η ανάγνωση των τρεχουσών εξουσιοδοτήσεων του λογαριασμού σας. Δεν άλλαξε τίποτα· δοκιμάστε ξανά.",
+      "reads_disagree": "Δύο αναγνώσεις της εξουσιοδότησης ανάρτησης του λογαριασμού σας διαφωνούν. Δεν άλλαξε τίποτα· δοκιμάστε ξανά."
+    },
+    "vote": {
+      "vote_weight_must_be": "Το βάρος ψήφου πρέπει να είναι μεταξύ -100% και 100%.",
+      "please_sign_in_first": "Συνδεθείτε πρώτα."
+    },
+    "widget": {
+      "streak_name": "Σειρά αποστολών",
+      "write": "Γράψτε",
+      "new_wave": "Νέο wave",
+      "notifications_description": "Οι μη αναγνωσμένες ειδοποιήσεις σας. Κρύβονται όσο το κλείδωμα PIN είναι ενεργό.",
+      "streak_description": "Η ημερήσια σειρά αποστολών σας. Κρύβεται όσο το κλείδωμα PIN είναι ενεργό.",
+      "compose_description": "Γράψτε μια ανάρτηση ή ένα νέο wave.",
+      "streak_title": "Σειρά",
+      "daily_quests": "Ημερήσιες αποστολές",
+      "streak_hint": "Ανοίξτε τα Perks για να δείτε τη σειρά σας",
+      "open_perks": "Άνοιγμα Perks",
+      "open_app": "Άνοιγμα Ecency",
+      "unread_caption": "{count, plural, one {μη αναγνωσμένο} other {μη αναγνωσμένα}}",
+      "streak_caption": "{count, plural, one {ημέρα σειράς} other {ημέρες σειράς}}"
+    },
+    "system": {
+      "dictation_channel": "Υπαγόρευση",
+      "listen_channel": "Ακρόαση",
+      "dictation_channel_description": "Εμφανίζεται όσο μια εγγραφή υπαγόρευσης συνεχίζεται στο παρασκήνιο, με ενέργεια Διακοπής.",
+      "dictation_title": "Εγγραφή για υπαγόρευση",
+      "dictation_text": "Το Ecency καταγράφει την υπαγόρευσή σας. Η Διακοπή δεν την στέλνει μέχρι να επιβεβαιώσετε στην εφαρμογή.",
+      "listen_channel_description": "Σας ενημερώνει όταν η Ακρόαση δεν μπόρεσε να συνεχιστεί στο παρασκήνιο.",
+      "listen_paused": "Η Ακρόαση σε παύση",
+      "listen_paused_text": "Ανοίξτε το Ecency για να συνεχίσετε την ακρόαση.",
+      "skip_back": "Πίσω 15 δευτερόλεπτα",
+      "skip_forward": "Μπροστά 15 δευτερόλεπτα"
+    },
+    "permission": {
+      "face_id": "Ξεκλειδώστε το Ecency με Face ID αντί για το PIN σας.",
+      "camera": "Σαρώστε κωδικούς QR και τραβήξτε φωτογραφία ή ηχογραφήστε βίντεο για να το προσθέσετε στην ανάρτησή σας.",
+      "photo_library_add": "Το Ecency αποθηκεύει στη βιβλιοθήκη φωτογραφιών σας τις εικόνες που κατεβάζετε από αναρτήσεις.",
+      "photo_library": "Το Ecency κρατά τις εικόνες που κατεβάζετε από αναρτήσεις μαζί σε άλμπουμ Ecency στη βιβλιοθήκη φωτογραφιών σας.",
+      "microphone": "Το Ecency χρησιμοποιεί το μικρόφωνό σας ώστε να υπαγορεύετε αναρτήσεις και σχόλια (οι εγγραφές αυτές στέλνονται στο Ecency για μεταγραφή) και να ηχογραφείτε ήχο με βίντεο που προσθέτετε σε ανάρτηση."
+    },
+    "android": {
+      "no_browser": "Δεν υπάρχει διαθέσιμο πρόγραμμα περιήγησης",
+      "biometric_unlock_title": "Ξεκλειδώστε το Ecency με βιομετρικά",
+      "biometric_confirm": "Επιβεβαιώστε με το δακτυλικό αποτύπωμα ή το πρόσωπό σας",
+      "image_unsupported_address": "Μη υποστηριζόμενη διεύθυνση εικόνας",
+      "image_create_failed": "Δεν ήταν δυνατή η δημιουργία του αρχείου",
+      "image_write_failed": "Δεν ήταν δυνατή η εγγραφή του αρχείου",
+      "image_too_large": "Η εικόνα είναι πολύ μεγάλη",
+      "image_download_failed": "Η λήψη απέτυχε με κατάσταση {status}",
+      "billing_disconnected": "Το Google Play Billing αποσυνδέθηκε.",
+      "billing_no_screen": "Δεν υπάρχει οθόνη για εμφάνιση της αγοράς.",
+      "billing_error": "Σφάλμα Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Δημιουργήσατε {count, plural, one {# ανάρτηση} other {# ανάρτηση}} αυτόν τον μήνα. Συνεχίστε έτσι!",
-        "checkin": "Κάνατε check in {count, plural, one {# ημέρα} other {# ημέρα}} αυτή την εβδομάδα. Συνεχίστε έτσι!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# νέα ανάρτηση} other {# νέες αναρτήσεις}} στο #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# αποτυχημένη(ες) προσπάθεια(ες)} other {# αποτυχημένη(ες) προσπάθεια(ες)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Σερί {n} ημερών"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Επιτρέπονται μόνο λογαριασμοί παλαιότεροι από {days} ημέρες",
-        "max_choices": "• Μπορείτε να επιλέξετε έως {choices} επιλογές"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Απομένουν {executions} μεταφορές",
-        "schedule_summary": "{executions} μεταφορές, κάθε {hours} ώρες"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Πολύ σύντομο για να κερδίσει points (έως {n, plural, one {# χαρακτήρας} other {# χαρακτήρες}}, χωρίς τους συνδέσμους)"
       },
       "chats": {
-        "people_joined": "{count} άτομα συμμετείχαν"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "σε περίπου {count, plural, one {# λεπτό} other {# λεπτά}}",
+        "ban-remaining-hours": "σε περίπου {count, plural, one {# ώρα} other {# ώρες}}",
+        "ban-remaining-days": "σε περίπου {count, plural, one {# ημέρα} other {# ημέρες}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Χρησιμοποιήστε έως {n, plural, one {# ετικέτα} other {# ετικέτες}}",
+          "too_long": "Η αναζήτηση είναι πολύ μεγάλη. Χρησιμοποιήστε έως {n, plural, one {# χαρακτήρα} other {# χαρακτήρες}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Απαιτούνται τουλάχιστον {count} χαρακτήρες",
-        "chars_remaining": "Απομένουν {count} χαρακτήρες"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Μπορείτε να επιλέξετε έως {count, plural, one {# εικόνα} other {# εικόνες}} τη φορά"
+      },
+      "dictation": {
+        "stop_hint": "Πατήστε διακοπή για μεταγραφή και προσθήκη στην ανάρτησή σας. Έως {m, plural, one {# λεπτό} other {# λεπτά}}.",
+        "rate": "{n} Points ανά {s, plural, one {# δευτερόλεπτο} other {# δευτερόλεπτα}}"
       },
       "transfer": {
-        "powering_down_info": "Το επόμενο unstaking είναι σε {days} ημέρες, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Μεταξύ {min} και {max, plural, one {# χαρακτήρα} other {# χαρακτήρες}}"
       }
     }
   }

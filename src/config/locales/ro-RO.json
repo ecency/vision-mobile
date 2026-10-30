@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Membru Ecency Pro"
   },
   "perks": {
     "header": "Avantaje",
@@ -31,42 +31,42 @@
     "promote_desc": "Atrage mai multă atenție asupra postării tale",
     "account_boost": "Boost de cont",
     "account_boost_desc": "Boostează orice cont",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Reîncarcă RC",
+    "rc_topup_desc": "Continuă să postezi când ai puține Credite de resurse",
+    "streak_freeze_owned": "{n} în rezervă",
+    "streak_freeze_buy": "Protejează seria ({price} Points)",
+    "streak_freeze_buying": "Se protejează",
+    "streak_freeze_error": "Nu s-a putut cumpăra înghețarea seriei. Încearcă din nou."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Postarea zilei",
+    "streak": "Serie de {n} zile",
+    "keep_streak": "Păstrează-ți seria activă"
   },
   "waves": {
     "for_you": "Pentru tine",
     "following": "Urmărite",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Fluxuri personalizate",
+    "custom_feeds_subtitle": "Fixează surse și etichete pentru a le adăuga ca file de flux.",
+    "add_tag_placeholder": "Adaugă o etichetă",
+    "sources": "Surse",
+    "your_feeds": "Fluxurile tale",
+    "trending_tags": "Etichete în trend",
+    "shorts_empty": "Nu există încă clipuri scurte de afișat",
+    "mute": "Dezactivează sunetul",
+    "unmute": "Activează sunetul"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Primii pași",
+    "subtitle": "Ești nou aici? Waves sunt postări scurte și cea mai simplă cale de a începe.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Închide",
+    "item_wave": "Postează primul tău Wave",
+    "item_vote": "Votează un Wave care îți place",
+    "item_reply": "Răspunde cuiva",
+    "item_checkin": "Fă check-in pentru a începe seria",
+    "all_done_title": "Totul gata 🎉",
+    "all_done_subtitle": "Ești gata. Continuă să postezi Waves!"
   },
   "profile": {
     "havent_commented": "încă nu a comentat",
@@ -82,7 +82,7 @@
     "comments": "Comentarii",
     "waves": "Waves",
     "details": "Detalii Profil",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "Credite de resurse",
     "voting_power": "Putere de votare",
     "follow_people": "Când urmărești persoane, vei vedea aici postările lor.",
     "hours": "ore",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Vârstă  |  Vizibilitate  |  Interpretare",
     "attach_poll": "Atașează sondaj"
   },
+  "favorite_tags": {
+    "title": "Etichete",
+    "hint": "Urmărește pentru a primi notificări despre postările noi cu această etichetă",
+    "following_hint": "Primești notificări despre postările noi cu această etichetă",
+    "follow": "Urmărește",
+    "following": "Urmărești",
+    "added": "Urmărești eticheta",
+    "removed": "Nu mai urmărești eticheta",
+    "empty_list": "Nimic aici"
+  },
   "favorites": {
     "add": "Adaugă un favorit",
     "add_error": "Nu s-a putut adăuga la favorite",
@@ -181,7 +191,33 @@
     "payout": "Plată",
     "details": "Detalii",
     "community": "comunitate",
-    "new_post": "Postare nouă"
+    "new_post": "Postare nouă",
+    "mute_post_title": "Silențiază această postare",
+    "unmute_post_title": "Anulează silențierea acestei postări",
+    "mute_post_reason": "De ce este silențiată această postare?",
+    "unmute_post_reason": "De ce este restabilită această postare?",
+    "manage": "Gestionează comunitatea",
+    "manage_members": "Membri și roluri",
+    "manage_settings": "Setările comunității",
+    "manage_activities": "Jurnal de activitate",
+    "activities": "activitate",
+    "no_activities": "Nicio activitate încă",
+    "activities_load_failed": "Activitatea nu a putut fi încărcată. Trage în jos pentru a reîmprospăta.",
+    "set_role": "Setează rolul",
+    "assign_role": "Atribuie rolul",
+    "assign_role_hint": "Caută orice cont, inclusiv unul care nu s-a abonat, apoi alege un rol.",
+    "username_placeholder": "Nume de utilizator",
+    "invalid_username": "Alege un cont existent din rezultate",
+    "members": "membri",
+    "no_members": "Nu s-au găsit membri",
+    "members_incomplete": "Unii membri nu au putut fi încărcați. Trage în jos pentru a reîmprospăta.",
+    "members_load_failed": "Membrii nu au putut fi încărcați. Trage în jos pentru a reîmprospăta.",
+    "role_owner": "Proprietar",
+    "role_admin": "Administrator",
+    "role_mod": "Moderator",
+    "role_member": "Membru",
+    "role_guest": "Invitat",
+    "role_muted": "Silențiat"
   },
   "trade": {
     "swap_for": "Se schimbă {fromAmount} pentru {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Postare încrucișată",
     "pin-blog": "Fixează pe blog",
     "copy": "copiază link",
+    "copy-text": "copiază textul",
+    "open-thread": "deschide discuția",
     "unpin-community": "Anulează fixarea din comunitate",
+    "mute-post": "Silențiază postarea",
+    "unmute-post": "Anulează silențierea postării",
     "mute": "Dezactivează / Blochează",
     "reblog": "repostează",
     "undo-reblog": "anulează repostarea",
@@ -232,24 +272,24 @@
     "unpin-reply": "Anulează fixarea comentariului"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Această postare este în limba: {lang}. Traduci în: {target}?",
+    "translate_to": "Tradu în: {lang}",
+    "show_original": "Arată originalul",
+    "translated_from": "Tradus din: {lang}",
+    "change_language": "Schimbă limba"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Tradu postarea",
+    "source": "Limba sursă",
+    "target": "Limba țintă",
+    "detected": "Detectat: {lang}",
+    "translate": "Tradu",
+    "apply": "Aplică",
+    "review_note": "Adaugă la finalul postării o traducere automată a textului scris de tine. Verifică și editează înainte de publicare.",
+    "too_short": "Scrie mai întâi ceva mai mult. Traducerea are nevoie de cel puțin câteva propoziții.",
+    "progress": "Se traduce {done} din {total}...",
+    "error": "Traducerea a eșuat. Încearcă din nou.",
+    "add_title_marker": "Adaugă marcajul limbii în titlu"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "În tendințe",
     "popular": "Populare",
     "new": "Nou",
-    "friends": "Following",
+    "friends": "Urmăriți",
     "my_blog": "Blogul meu"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Nici un rezultat"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Șabloane",
+    "untitled": "Șablon fără titlu",
+    "empty_list": "Salvează o postare ca șablon din editor pentru a o refolosi aici.",
+    "delete_confirm": "Sigur vrei să ștergi acest șablon?",
+    "applied": "Șablon aplicat ca postare nouă",
+    "save_as_template": "Salvează ca șablon",
+    "name_placeholder": "Numele șablonului",
+    "saved": "Șablon salvat"
   },
   "selection_list": {
     "available": "Disponibil {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Toate",
+      "replies": "Răspunsuri",
+      "mentions": "Mențiuni",
+      "rvotes": "Voturi",
+      "follows": "Urmăriri",
+      "reblogs": "Reblogări",
+      "transfers": "Transferuri",
+      "delegations": "Delegări",
+      "nfavorites": "Favorite",
+      "tags": "Etichete",
+      "nbookmarks": "Marcaje",
+      "payouts": "Plăți",
+      "scheduled_published": "Postări programate",
+      "account_updates": "Actualizări de cont",
+      "weekly_earnings": "Câștiguri săptămânale"
     },
     "this_week": "Săptămâna aceasta",
     "reblog": "redistribuit",
@@ -417,11 +458,15 @@
     "yesterday": "Ieri",
     "mention": "te-a menționat in",
     "favorites": "a făcut o postare nouă",
+    "tags": "a postat în #{tag}",
+    "tags_bundle": "{count} postări noi în #{tag}",
+    "tags_title": "Postări noi într-o etichetă pe care o urmărești",
     "mentions": "Menționări",
     "spin": "E timpul să câștigi mai multe Points",
     "last_week": "Săptămâna trecută",
     "recent": "Recente",
     "ignore": "te-a ignorat",
+    "blacklist": "te-a adăugat pe lista neagră",
     "follow": "te urmărește",
     "notification": "Notificări",
     "this_month": "Luna Aceasta",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} poate acum să posteze și să voteze în numele tău. Dacă nu ai autorizat acest lucru, revocă-l.",
     "weekly_earnings": "Ai câștigat ${amount} săptămâna aceasta{breakdown}",
     "payouts": "Plată primită: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "a publicat o postare programată",
+    "scheduled_published_title": "Postare programată publicată",
+    "scheduled_published_body": "Postarea ta programată este acum live, atinge pentru a o vedea"
   },
   "recurrent": {
     "delete_failed": "Ștergerea transferului recurent a eșuat, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Deschide o ciornă recentă sau creează o postare nouă",
     "reward_power_up": "Blochează 100%",
     "open_gallery": "Deschide Galeria",
+    "open_files": "Alege din Fișiere",
     "clipboard_no_image": "Nicio imagine găsită în clipboard",
     "clipboard_image_detected": "Imagine în clipboard",
     "paste_image": "Lipește imaginea",
@@ -539,8 +585,10 @@
     "video": "Videoclip",
     "scheduled_later": "Mai târziu",
     "settings_title": "Opțiuni postare",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Nu"
+    "support_ecency": "Susține Ecency {percent}%",
+    "alert_btn_no": "Nu",
+    "short_reply_hint": "Răspunsurile de {n} caractere sau mai puține nu primesc puncte (linkurile nu se numără)",
+    "short_content_hint": "Prea scurt pentru a primi puncte ({n} caractere sau mai puține, fără linkuri)"
   },
   "time": {
     "week": "săptămâni",
@@ -655,7 +703,41 @@
     "select_emoji": "Selectează emoji",
     "more_emojis": "Mai multe",
     "search_emojis": "Caută emoji...",
-    "no_emoji_found": "Niciun emoji găsit"
+    "no_emoji_found": "Niciun emoji găsit",
+    "ban-reason-spray": "Ai fost suspendat de la postare deoarece același mesaj a ajuns în mai multe canale deodată.",
+    "ban-reason-mass-dm": "Ai fost suspendat de la postare deoarece un mesaj a fost trimis la mulți oameni deodată.",
+    "ban-reason-generic": "Ai fost suspendat de la postarea în chat.",
+    "ban-can-still-read": "Poți citi în continuare chatul.",
+    "ban-unlocks": "Postarea se deblochează {when}.",
+    "ban-remaining-soon": "în mai puțin de un minut",
+    "ban-remaining-minutes": "în aproximativ {count} minute",
+    "ban-remaining-hours": "în aproximativ {count} ore",
+    "ban-remaining-days": "în aproximativ {count} zile",
+    "new_group": "Grup nou",
+    "new_group_hint": "Adaugă între {min} și {max} persoane pentru a începe o conversație de grup.",
+    "new_group_search": "Caută persoane după numele de utilizator",
+    "new_group_full": "Un grup poate avea cel mult {max} alte persoane.",
+    "new_group_no_results": "Nimeni cu acest nume nu a fost găsit în chat.",
+    "new_group_search_failed": "Căutarea nu a funcționat. Verifică conexiunea și încearcă din nou.",
+    "new_group_remove": "Elimină @{username}",
+    "new_group_create": "Creează grupul",
+    "new_group_failed": "Grupul nu a putut fi creat. Încearcă din nou.",
+    "rename_group": "Redenumește grupul",
+    "rename_group_hint": "Dă grupului un nume pe care îl vor vedea toți membrii. Lasă gol pentru a afișa numele membrilor.",
+    "group_name": "Numele grupului",
+    "rename_group_too_long": "Numele unui grup poate avea cel mult {max} caractere.",
+    "rename_group_not_owner": "Doar persoana care a creat grupul îl poate redenumi.",
+    "rename_group_failed": "Grupul nu a putut fi redenumit. Încearcă din nou.",
+    "group_renamed": "{user} a redenumit grupul în „{name}”",
+    "group_name_cleared": "{user} a șters numele grupului",
+    "group_members": "Membrii grupului",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "reactions_title": "Reacții",
+    "reactor_you": "Tu",
+    "reactor_unknown": "Cineva",
+    "see_who_reacted": "Apasă lung pentru a vedea cine a reacționat",
+    "group": "Grup"
   },
   "free_estm": {
     "timer_text": "Urmăroarea rotare gratuită în",
@@ -684,6 +766,32 @@
     "transaction_fail": "Tranzacție eșuată"
   },
   "search_result": {
+    "error": "Căutarea nu a putut fi finalizată. Încearcă din nou",
+    "filters": {
+      "title": "Filtre",
+      "open": "Filtre",
+      "author": "Autor",
+      "author_placeholder": "nume de utilizator",
+      "category": "Categorie",
+      "category_placeholder": "comunitate sau categorie",
+      "tags": "Etichete",
+      "tags_placeholder": "separate prin virgulă",
+      "type": "Tip",
+      "type_all": "Toate",
+      "type_post": "Postări",
+      "type_comment": "Comentarii",
+      "date": "Dată",
+      "date_week": "Ultima săptămână",
+      "date_month": "Ultima lună",
+      "date_year": "Ultimul an",
+      "date_all": "Oricând",
+      "sort": "Sortează",
+      "apply": "Aplică",
+      "active": "{n} active",
+      "too_many_tags": "Folosește cel mult {n} etichete",
+      "too_long": "Căutarea este prea lungă. Folosește cel mult {n} caractere",
+      "needs_criteria": "Introdu un termen de căutare sau un autor, o categorie ori o etichetă după care să filtrezi"
+    },
     "communities_filter": {
       "new": "Noi",
       "my": "Comunitățile mele",
@@ -727,7 +835,7 @@
     "title": "Publicare încrucișată"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Autorul a declarat utilizarea AI"
   },
   "ai_assist": {
     "title": "Asistent de scriere AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Obține etichete relevante pentru postarea ta",
     "action_generate_title": "Generează titlu",
     "action_generate_title_desc": "Creează opțiuni de titlu atrăgătoare",
-    "action_summarize": "Recap",
+    "action_summarize": "Rezumat",
     "action_summarize_desc": "Creează un rezumat concis",
     "action_check_grammar": "Verifică gramatica",
     "action_check_grammar_desc": "Corectează problemele de gramatică și ortografie",
+    "action_generate_image": "Generează imagine",
+    "action_generate_image_desc": "Creează o imagine AI pentru postarea ta",
+    "cost_from": "de la {cost} {unit}",
     "text_label": "Textul tău",
     "text_placeholder": "Lipește sau scrie conținutul aici...",
     "min_chars": "Sunt necesare minimum {count} caractere",
@@ -797,16 +908,26 @@
     "remind_later": "Amintește-mi mai târziu",
     "success_subscribe": "Abonare reușită!",
     "payloadTooLarge": "Dimensiunea fișierului este prea mare, te rugăm să redimensionezi sau să încarci o imagine mai mică",
+    "too_many_images": "Poți selecta cel mult {count} imagini deodată",
     "fail_follow": "Urmărirea a eșuat!",
     "clear_user_alert": "Esti sigur că vrei să ștergi toate datele?",
     "cancel": "Anulează",
     "connection_success": "Conectat cu succes!",
     "rc_down": "Resource Credits insuficiente pentru a efectua o acțiune! \n\nÎți poți crește contul pentru a continua să te bucuri de experiență. Vrei să-ți crești contul acum?",
+    "rc_down_title": "Resource Credits insuficiente",
+    "rc_precheck_title": "Această postare ar putea fi prea mare pentru a fi publicată",
+    "rc_precheck_body": "Resource Credits par prea puține pentru o postare de această dimensiune.",
+    "rc_down_body": "Nu ai suficiente Resource Credits pentru această acțiune.\n\nReîncarcă acum cu Points ca să continui sau întărește-ți contul definitiv.",
+    "rc_down_topup": "Reîncarcă RC cu Points",
+    "rc_down_boost": "Întărește contul",
     "done": "Gata",
     "something_wrong_alt": "Între timp, încearcă Ecency.com din browserul tău",
     "same_user": "Utilizator adăugat deja la listă",
     "fail": "Eșuat!",
     "operation_failed_with_reason": "{operation} a eșuat: {reason}",
+    "request_timed_out": "Conexiunea durează prea mult. Verifică rețeaua și încearcă din nou.",
+    "load_failed_retry": "Nu am putut încărca. Încearcă din nou.",
+    "retrying": "Se reîncearcă...",
     "wallet_refresh_failed": "Reîmprospătarea portofelului a eșuat. Încearcă din nou.",
     "wallet_refresh_missing_account": "Reîmprospătarea portofelului a eșuat: lipsește contul.",
     "boost_failed": "Boost+ a eșuat.",
@@ -949,31 +1070,31 @@
     "video_attached": "Videoclip atașat"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Votează pozitiv",
+    "upvoted": "Votat pozitiv",
+    "downvoted": "Votat negativ",
+    "upvote_hint": "Atinge de două ori pentru a deschide opțiunile de vot",
+    "payout_details": "Detalii plată",
+    "a11y_votes": "{count, plural, one {# vot} few {# voturi} other {# de voturi}}",
+    "a11y_voters_hint": "Vezi votanții",
+    "a11y_reblogs": "{count, plural, one {# reblog} few {# reblogări} other {# de reblogări}}",
+    "a11y_reblogs_hint": "Vezi reblogările",
+    "a11y_comments": "{count, plural, one {# comentariu} few {# comentarii} other {# de comentarii}}",
+    "a11y_comments_hint": "Vezi comentariile",
+    "a11y_reply_hint": "Răspunde",
+    "a11y_tip": "Trimite bacșiș",
+    "a11y_tips": "{count, plural, one {# bacșiș} few {# bacșișuri} other {# de bacșișuri}}",
+    "a11y_edit": "Editează comentariul",
+    "a11y_delete": "Șterge comentariul",
+    "a11y_show_replies": "Arată răspunsurile",
+    "a11y_hide_replies": "Ascunde răspunsurile",
+    "a11y_post_options": "Opțiunile postării",
+    "a11y_views": "{count, plural, one {# vizualizare} few {# vizualizări} other {# de vizualizări}}",
+    "source_ecency": "Publicat cu Ecency",
+    "a11y_stats_hint": "Vezi statisticile postării",
     "image": "Imagine",
     "reveal_muted": "DEZACTIVAT\nApasă pentru a dezvălui conținutul",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Atinge pentru a încărca imaginea",
     "in": "în",
     "poll": "SONDAJ",
     "copy_link": "Copiază linkul",
@@ -998,13 +1119,14 @@
     "save_to_local": "Descarcă pe dispozitiv",
     "muted": "Conținut dezactivat pentru încălcare",
     "community_muted": "Conținut dezactivat pentru încălcarea regulilor comunității",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Conținut de la un cont cu reputație scăzută",
+    "muted_downvoted": "Conținut votat negativ de utilizatori",
+    "muted_low_trust": "Cont cu reputație scăzută și cu un link extern neverificat",
+    "muted_reveal": "Atinge pentru a afișa",
     "promoted": "PROMOVAT",
     "image_saved": "Imagine salvată în Galerie Foto",
     "words": "Cuvinte",
     "reading": "Citire",
-    "listen": "Ascultă",
     "min": "min",
     "summarize_start": "Începe"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Utilizator inexistent",
     "invalid_link": "Adresa URL este nevalidă, poți încerca din nou cu o adresă URL validă sau să o deschizi într-un browser web",
-    "no_existing_user": "Utilizator inexistent"
+    "no_existing_user": "Utilizator inexistent",
+    "posting_key_request": "{requester} solicită cheia privată posting pentru @{username}.\n\nContinuă doar dacă ai încredere în această solicitare.",
+    "posting_key_request_unnamed": "O altă aplicație solicită cheia privată posting pentru @{username}.\n\nContinuă doar dacă ai încredere în această solicitare.",
+    "auth_request_as_user": "{requester} vrea să te autentifice ca @{username}.\n\nSe partajează doar numele tău de utilizator și o dovadă de autentificare. Nicio cheie nu părăsește Ecency.",
+    "auth_request_as_current": "{requester} vrea să te autentifice cu contul tău Ecency.\n\nSe partajează doar numele tău de utilizator și o dovadă de autentificare. Nicio cheie nu părăsește Ecency."
   },
   "payout": {
     "breakdown": "Defalcare",
@@ -1065,7 +1191,7 @@
     "open": "Deschide URL",
     "invalid_key_desc": "vă rugăm să vă autentificați cu cheia {key} sau cu cheia principală pentru a efectua această tranzacție",
     "auth_transfer_confirm": "Confirmați transferul către {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Aprobă doar dacă ai încredere în sursa acestui link. Aprobarea transmite operațiunea de mai jos din contul tău, folosind cheia ta {authority}."
   },
   "voters_dropdown": {
     "rewards": "RECOMPENSE",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Trebuie să conțină doar litere, cifre și cratimă",
       "username_no_ascii_first_letter_error": "Trebuie să înceapă cu o literă",
       "username_contains_double_hyphens": "Nu trebuie să conțină cratimă dublă",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Acest nume de utilizator seamănă prea mult cu un cont de bursă crypto și îi poate induce în eroare pe alții. Alege un nume mai unic.",
+      "username_restricted_prefix": "Numele de utilizator care încep cu „uid” urmat de cifre nu sunt permise, deoarece sunt folosite des pentru a păcăli pe alții. Alege alt nume.",
       "username_contains_underscore": "Nu trebuie să conțină liniuță de subliniere"
     },
     "500_error": "Solicitarea dvs. nu a putut fi procesată, coada de înregistrare este probabil plină! Încercați din nou peste câteva minute...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Numele de utilizator este deja luat",
+      "14": "Adresa de e-mail este deja înregistrată",
+      "15": "Introdu o adresă de e-mail validă",
+      "16": "Introdu un nume de utilizator valid",
+      "17": "Numele de utilizator este prea lung, alege unul mai scurt",
+      "19": "Folosește o adresă de e-mail permanentă sau ia un cont Premium",
+      "21": "Acest cod de recomandare nu este valid",
+      "28": "Cererea ta nu a putut fi procesată, probabil coada de înscriere este plină. Încearcă din nou peste câteva minute.",
+      "107": "A fost detectată o conexiune VPN. Dezactivează VPN-ul și încearcă din nou sau ia un cont Premium.",
+      "110": "Pentru a preveni abuzurile, limităm numărul de conturi pe persoană/rețea. Încearcă din nou dintr-o altă rețea.",
+      "111": "A fost detectată o conexiune Tor. Dezactivează Tor în timpul înscrierii.",
+      "112": "Nu am putut verifica acum conexiunea ta. Încearcă din nou peste câteva minute."
     },
     "have_account_text": "Aveți deja un cont?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Obțineți un cont Hive complet; această metodă are verificări de bază pentru a ne asigura că rețelele de boți nu abuzează de serviciul nostru de înregistrare gratuită.",
     "btn_register": "Înregistrare gratuită",
     "title": "Cont gratuit"
+  },
+  "dictation": {
+    "title": "Dictare",
+    "start": "Înregistrează",
+    "stop": "Oprește",
+    "record_more": "Înregistrează mai mult",
+    "done": "Gata",
+    "recording": "Se înregistrează",
+    "stop_hint": "Oprește pentru a transcrie și a adăuga în postare. Cel mult {m} minute.",
+    "inserted": "Adăugat în postare. Înregistrează mai mult sau atinge Gata.",
+    "transcribing": "Se transcrie",
+    "rate": "{n} Points la {s} secunde",
+    "cost_running": "{n} Points până acum",
+    "cost_running_free": "Gratuit până acum",
+    "free_remaining": "Următoarele {n} x {s} s sunt gratuite astăzi",
+    "price_loading": "Se verifică prețul",
+    "price_error": "Prețurile pentru transcriere nu au putut fi încărcate.",
+    "denied": "Ecency are nevoie de acces la microfon pentru dictare. Permite-l în Setări și încearcă din nou.",
+    "error_empty": "Nu s-a detectat vorbire în această înregistrare.",
+    "error_insufficient_points": "Points insuficiente pentru a transcrie această înregistrare.",
+    "error_rate_limited": "Prea multe înregistrări pentru moment. Încearcă din nou în scurt timp.",
+    "error_too_long": "Această înregistrare este prea lungă pentru a fi transcrisă.",
+    "error_failed": "Înregistrarea nu a putut fi transcrisă. Încearcă din nou.",
+    "error_recorder": "Înregistrarea nu a putut porni. Încearcă din nou."
   },
   "wallet": {
     "delegations_out": "Delegări efectuate",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Logarea regulată îți aduce 0,25 puncte.",
     "fill_transfer_from_savings": "Transfer de la economii efectuat",
     "activities": "Activități",
+    "no_activities": "Nicio tranzacție încă",
+    "activities_failed": "Tranzacțiile nu au putut fi încărcate. Trage în jos pentru a reîncerca.",
     "tap_update": "Atingeți pentru a actualiza",
     "mining_lottery": "Loterie câștigată",
     "checkin": "Logare",
     "tokens_transfer": "Token-uri transferate",
     "outgoing_transfer_title": "Transfer/Cadou",
+    "burned_title": "Utilizare AI",
+    "burned_description": "Points cheltuite pentru o funcție AI",
+    "burn_refund_title": "Rambursare AI",
+    "burn_refund_description": "Points returnate după o solicitare AI eșuată",
     "manage_assets": "Adaugă / Elimină active",
     "selected_assets": "Active selectate",
     "nft_setPropertyPermissions": "Permisiuni proprietate setate pentru simbolul NFT",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Actualizare precizie token-uri",
     "tokens_transferOwnership": "Proprietate token transferată",
     "withdraw_vesting": "Retrage",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Conturi de retragere",
     "delegate_engine": "Deleagă",
     "market_close": "Comandă închisă",
     "nftmarket_transferFee": "Taxă comandă de cumpărare",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "OBȚINE POINTS",
     "escrow_approve": "Aprobare Escrow",
     "expires": "expiră",
+    "transaction_id": "ID tranzacție",
+    "copy_transaction_id": "Copiază linkul tranzacției",
+    "filter_activities": "Filtrează activitățile",
+    "filter_activities_desc": "Alege ce operațiuni solicită acest istoric",
+    "filter_all": "Selectează tot",
+    "filter_none": "Șterge tot",
+    "filter_apply": "Aplică",
     "author_reward": "Recompensă Autor",
     "withdraw_hbd": "Retrage din economii",
     "convert_request": "Solicitare de conversie",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Reîncarcă RC",
+    "desc": "O creștere pe termen scurt a RC pentru a putea continua să postezi.",
+    "confirm": "Cheltuiești Points pentru a reîncărca Creditele de resurse?",
+    "insufficient": "Nu ai suficiente Points.",
+    "buy_points": "Cumpără Points"
   },
   "ai_image_generator": {
     "title": "Generator de imagini AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Personalizat ({hours}h)",
+    "balance_load_failed": "Soldul nu a putut fi încărcat. Atinge pentru a reîncerca.",
+    "precision_load_failed": "Detaliile acestui token nu au putut fi încărcate, așa că se pot trimite doar sume întregi. Atinge pentru a reîncerca.",
     "close": "Închide",
     "favorite_username_placeholder": "Nume de utilizator",
     "invalid_recipient_qr": "Nu s-a găsit niciun nume de utilizator în acest cod QR.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Gestionează autorizările",
     "pincode": "Pincode",
     "general": "Generale",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Susține Ecency",
+    "support_beneficiary": "Împarte recompensele postărilor cu Ecency",
+    "support_beneficiary_percent": "Cota din recompensele postărilor",
+    "support_curation": "Reține o parte din recompensele de curatoriat",
+    "support_curation_percent": "Reținere din recompensele de curatoriat",
     "feedback_body": "Scrie mesajul tău aici!\n\nNume de utilizator Hive: {username}\nVersiune aplicație: {appVersion}\nPlatformă: {platform}\n",
     "show_imgs": "Afișează imaginile",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Comentarii",
       "bookmark": "Marcaje",
+      "tags": "Etichete",
       "reblog": "Repostare",
       "favorite": "Favorite",
       "mention": "Menționări",
@@ -1599,10 +1765,10 @@
       "transfers": "Transferuri",
       "vote": "Vot",
       "follow": "Urmăriri",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Postare programată publicată",
+      "payouts": "Plăți",
+      "account_update": "Actualizări de cont",
+      "weekly_earnings": "Câștiguri săptămânale",
       "fcm_unavailable": "Notificările push nu sunt acceptate pe acest dispozitiv. Vei primi notificări doar cât timp aplicația este deschisă."
     },
     "keys_warning": "Informații sensibile despre cont!\nEcency trebuie securizat cu un cod PIN înainte de a vizualiza cheile private.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Trimite Feedback",
     "rate_app": "Evaluează Ecency",
+    "email_digests": "Rezumate prin e-mail",
     "rate": "Evaluează",
     "dm-privacy-updated": "Setările de confidențialitate pentru mesaje directe au fost actualizate cu succes",
     "dm-privacy-failed": "Actualizarea setărilor de confidențialitate pentru mesaje directe a eșuat",
@@ -1685,19 +1852,29 @@
     "request_sent": "Cererea ta de ștergere a fost trimisă",
     "confirm_delete_body": "Sigur vrei să ștergi contul? Acest lucru va șterge toate datele tale"
   },
-  "tts": {
-    "settings_title": "Setări text-în-vorbire",
-    "voice": "Voce",
-    "voice_hint": "Va fi folosită vocea implicită a sistemului",
-    "speed": "Viteză",
-    "pitch": "Tonalitate",
-    "test_voice": "Testează vocea",
-    "settings_info": "Aceste setări vor fi folosite la citirea cu voce tare a postărilor",
+  "listen": {
+    "title": "Ascultă această postare",
+    "minutes": "~{n} min",
+    "login": "Autentifică-te",
+    "unlock": "Deblochează · {n} Points",
+    "confirm": "Cheltuiești {n} Points pentru a asculta această postare? Audio este al tău și îl poți reda oricând.",
+    "not_enough_title": "Points insuficiente",
+    "not_enough": "Ascultarea necesită {required} Points și ai {available}.",
+    "get_points": "Obține Points",
+    "unlock_failed": "Audio nu a putut fi deblocat, încearcă din nou",
+    "failed_refunded": "Audio nu a putut fi creat, Points au fost returnate",
+    "preparing": "Se pregătește audio…",
+    "preparing_eta": "Se pregătește audio, aproximativ {n} min…",
+    "preparing_progress": "Se pregătește audio · {n}%",
+    "waiting": "La coadă, {n} înaintea ta…",
+    "next_in_line": "Urmează la rând…",
     "play": "Redă",
     "pause": "Pauză",
-    "language": "Limbă",
-    "language_auto": "Detectare automată",
-    "language_hint": "Detectarea automată alege limba în funcție de conținutul postării"
+    "seek": "Derulează",
+    "speed": "Viteza de redare",
+    "language": "Limba audio",
+    "unavailable": "Audio nu a putut fi încărcat.",
+    "retry": "Încearcă din nou"
   },
   "posting_authority": {
     "title": "Activează postarea rapidă",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentificarea a eșuat. Te rugăm să te autentifici din nou.",
     "error-generic": "Încărcarea videoclipului a eșuat. Te rugăm să încerci din nou.",
     "error-too-long-short": "Videoclipurile scurte trebuie să dureze cel mult 60 de secunde.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "O postare poate conține un singur videoclip. Elimină videoclipul curent înainte de a adăuga altul.",
     "select_source": "Adaugă videoclip",
     "record": "Înregistrează videoclip",
     "choose_library": "Alege din bibliotecă"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Distribuie o actualizare rapidă"
   },
+  "newsletter": {
+    "screen_title": "Rezumate prin e-mail",
+    "title": "{list}",
+    "body_own": "Un rezumat săptămânal sau lunar prin e-mail al notificărilor tale.",
+    "body_creator": "Postări noi de la {list} în căsuța ta de e-mail.",
+    "body_community": "Un rezumat al postărilor noi din {list} prin e-mail.",
+    "body_site": "Ce e mai bun din Ecency în căsuța ta de e-mail.",
+    "first_publish_title": "Felicitări pentru prima postare!",
+    "first_publish_body": "Vrei un rezumat al notificărilor prin e-mail? Săptămânal sau lunar, îl poți schimba sau renunța oricând în Setări.",
+    "list_own": "Rezumatul notificărilor mele",
+    "list_site": "Newsletter Ecency",
+    "status_active": "Ești abonat.",
+    "status_pending": "Se așteaptă confirmarea e-mailului.",
+    "status_short_active": "activ",
+    "status_short_pending_confirmation": "în așteptare",
+    "status_short_suppressed": "oprit",
+    "status_short_ended": "încheiat",
+    "cadence_weekly": "Săptămânal",
+    "cadence_monthly": "Lunar",
+    "email_placeholder": "tu@example.com",
+    "subscribe": "Abonează-te",
+    "update": "Actualizează",
+    "resend": "Retrimite confirmarea",
+    "leave": "Părăsește rezumatul",
+    "cancel": "Anulează",
+    "ok": "OK",
+    "manage": "Gestionează",
+    "check_inbox_title": "Verifică-ți căsuța de e-mail",
+    "check_inbox_body": "Am trimis un link de confirmare la {email}. Abonamentul începe după ce confirmi.",
+    "subscribed": "Abonat la rezumatul prin e-mail",
+    "left": "Ai părăsit rezumatul",
+    "refused": "Această adresă nu poate fi abonată.",
+    "unavailable": "Rezumatele prin e-mail nu sunt disponibile momentan.",
+    "too_many": "Prea multe încercări, încearcă din nou mai târziu.",
+    "fail": "Ceva nu a mers bine, încearcă din nou.",
+    "empty": "Niciun rezumat prin e-mail încă. Abonează-te mai jos pentru a începe.",
+    "discover": "Primește mai multe prin e-mail",
+    "stop_all": "Oprește tot",
+    "stop_all_title": "Oprești toate e-mailurile?",
+    "stop_all_body": "Nu vor mai fi trimise e-mailuri Ecency la {email}. Abonamentele de pe alte adrese rămân.",
+    "stop_all_ok": "Oprește tot",
+    "stop_all_done": "Adresa a fost dezabonată de la toate e-mailurile",
+    "profile_option": "REZUMAT PRIN E-MAIL",
+    "subscriber_count": "{weekly} săptămânal • {monthly} lunar abonați la e-mail",
+    "community_button": "Newsletter"
+  },
+  "mod_notes": {
+    "title": "Adaugă un motiv",
+    "placeholder": "Motiv (vizibil pentru ceilalți moderatori)",
+    "confirm": "Confirmă",
+    "cancel": "Anulează"
+  },
+  "community_settings": {
+    "title_header": "Setările comunității",
+    "title_label": "Titlu",
+    "about": "Despre",
+    "lang": "Limbă",
+    "description": "Descriere",
+    "rules": "Reguli",
+    "nsfw": "Nepotrivit la serviciu (NSFW)",
+    "save": "Salvează",
+    "required": "Obligatoriu",
+    "title_length": "Între {min} și {max} caractere",
+    "owner_admin_only": "Doar proprietarul și administratorii pot modifica aceste setări."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Extins",
+        "collapsed": "Restrâns"
+      },
+      "a11y_chat": {
+        "quote": "Răspuns către {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Selectează",
+        "deselect": "Deselectează"
+      },
+      "store": {
+        "billing_unavailable": "Achizițiile în aplicație nu sunt permise pe acest dispozitiv.",
+        "verification_failed": "App Store nu a putut verifica această achiziție.",
+        "cancelled": "Achiziție anulată",
+        "unknown_result": "Rezultat necunoscut al achiziției"
+      },
+      "navigation": {
+        "feed_unavailable": "Acest flux nu este încă disponibil.",
+        "link_cannot_open": "Acest link nu poate fi deschis.",
+        "video_cannot_play": "Acest videoclip nu poate fi redat."
+      },
+      "media": {
+        "load_failed": "Acest element nu a putut fi încărcat. Verifică conexiunea și încearcă din nou.",
+        "loading": "Se încarcă conținutul media",
+        "download_failed": "Descărcarea a eșuat cu starea {status}"
+      },
+      "sign_in": {
+        "required": "Autentificare necesară",
+        "to_reply": "Autentifică-te pentru a răspunde.",
+        "to_vote": "Autentifică-te pentru a vota.",
+        "button": "Autentifică-te"
+      },
+      "account": {
+        "logout_user": "Deconectează @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# vot} few {# voturi} other {# de voturi}}  •  {replies, plural, one {# răspuns} few {# răspunsuri} other {# de răspunsuri}}",
+        "voting_power": "Putere de vot {percent}",
+        "remove_favourite": "Elimină din favorite",
+        "add_favourite": "Adaugă la favorite"
+      },
+      "waves": {
+        "clear_tag_filter": "Șterge filtrul de etichetă {tag}",
+        "new_wave": "Wave nou",
+        "replies_open_thread": "{count, plural, one {# răspuns, deschide discuția} few {# răspunsuri, deschide discuția} other {# de răspunsuri, deschide discuția}}",
+        "characters": "{count} din {max} caractere",
+        "retry": "{message}\nÎncearcă din nou",
+        "playing": "Se redă {permlink}",
+        "video_attached_remove": "Videoclip atașat, elimină",
+        "image_attached_remove": "Imagine atașată, elimină",
+        "take_photo": "Fă o fotografie",
+        "edit_poll": "Editează sondajul",
+        "add_poll": "Adaugă sondaj",
+        "add_video": "Adaugă videoclip"
+      },
+      "reading": {
+        "reply_to": "Răspunde lui {username}",
+        "opens_post": "Deschide postarea",
+        "sort_comments": "Sortează comentariile",
+        "sort_comments_value": "Sortează comentariile, {sort}",
+        "no_comments": "Niciun comentariu încă.",
+        "loading_post": "Se încarcă postarea",
+        "show_version": "Arată versiunea",
+        "show_changes": "Arată modificările",
+        "replying_to": "Răspunzi lui @{username}",
+        "reply_text": "Textul răspunsului",
+        "translate_from": "Din",
+        "translate_to": "În"
+      },
+      "feed": {
+        "tab_pinned": "{label}, fixat",
+        "tab_add": "{label}, adaugă",
+        "customise": "Personalizează"
+      },
+      "card": {
+        "in_category": "în {category}",
+        "pinned": "Fixat",
+        "by_author": "de {username}",
+        "payout": "recompensă {payout}",
+        "payout_declined": "recompensă {payout}, refuzată",
+        "reblogged_by": "Redistribuit de {username}"
+      },
+      "shell": {
+        "close_menu": "Închide meniul"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatură, alege altă imagine",
+        "words": "{count, plural, one {# cuvânt} few {# cuvinte} other {# de cuvinte}}",
+        "poll_min_age": "Vechime min. cont (zile): {days}",
+        "poll_max_options": "Opțiuni max.: {count}",
+        "thumbnail_selected": "Miniatură selectată",
+        "thumbnail": "Miniatură",
+        "uploaded_image": "Imagine încărcată",
+        "community_search": "caută"
+      },
+      "vote": {
+        "not_voted": "Fără vot",
+        "voting": "Se votează",
+        "failed_with": "Votul a eșuat: {message}",
+        "failed": "Votul a eșuat",
+        "payout": "Recompensă {payout}",
+        "payout_declined": "Recompensă {payout}, refuzată",
+        "percent": "{percent} la sută",
+        "upvote_percent": "Vot pozitiv {percent}%"
+      },
+      "settings": {
+        "on": "Activat",
+        "off": "Dezactivat"
+      },
+      "lock": {
+        "biometric_reason": "Activează deblocarea biometrică pentru Ecency",
+        "offer_title": "Deblochează cu {method}",
+        "offer_use": "Folosește {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Cheile sunt ascunse cât timp ecranul este înregistrat sau oglindit.",
+        "screenshot_notice": "A fost făcută o captură de ecran. Cheile private au fost ascunse din nou; dacă captura conține o cheie, șterge-o.",
+        "hold_hint": "Ține apăsat pe o cheie pentru a o afișa.",
+        "hold_to_show": "Ține apăsat pentru a afișa"
+      },
+      "wallet": {
+        "cancel_order": "Anulezi această comandă?",
+        "days": "{count, plural, one {# zi} few {# zile} other {# de zile}}"
+      },
+      "chat": {
+        "reactors_hint": "Apasă lung pentru a vedea cine a reacționat",
+        "see_reactors": "Vezi cine a reacționat"
+      },
+      "esie": {
+        "still": "{mood}, nemișcat"
+      }
+    },
+    "ui": {
+      "profile_of": "Profilul lui @{username}",
+      "preview": "Previzualizare ({index}/{count})",
+      "balance": "Sold: {amount}",
+      "expires_in": "Expiră în {time}",
+      "expired": "Expirat. Închide și încearcă din nou.",
+      "user_has_no_posts": "@{username} nu a postat încă nimic",
+      "attach_image": "Atașează imagine",
+      "auto": "Auto",
+      "back": "Înapoi",
+      "hot": "HOT",
+      "image_of": "Imaginea {index} din {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW Atinge pentru a afișa",
+      "new_reply": "Răspuns nou",
+      "remove": "Elimină",
+      "unlock_ecency": "Deblochează Ecency",
+      "update_it": "Actualizează",
+      "update_it_or_post_this_as": "O actualizezi sau o postezi ca răspuns nou?",
+      "use_pin": "Folosește PIN",
+      "your_reply_was_already_posted": "Răspunsul tău a fost deja postat",
+      "error_try_again": "{message} Încerci din nou?",
+      "auth": {
+        "account_label": "Cont: @{username}",
+        "approve_the_request_in_your_wallet": "Aprobă solicitarea în aplicația portofel.",
+        "copy_key": "Copiază {title}",
+        "current_account": "Contul curent",
+        "qr_code": "Cod QR",
+        "requested_by": "Solicitat de {requester}",
+        "pin_digits": "{filled} din {total, plural, one {# cifră} few {# cifre} other {# de cifre}}",
+        "private_key_shown": "{title}, cheie privată afișată",
+        "open_wallet_app": "Deschide aplicația portofel",
+        "hiveauth_scan": "Aprobă în Hive Keychain sau în alt portofel HiveAuth: deschide-l pe acest dispozitiv sau scanează cu el acest cod.",
+        "switching": "Se comută...",
+        "logout_all": "Deconectează-te de la toate conturile",
+        "logout_all_title": "Te deconectezi de la toate conturile de pe acest dispozitiv?",
+        "stored_key": "@{username} este deja autentificat pe acest dispozitiv. Cheile stocate rămân; doar sesiunea este reînnoită.",
+        "stored_hivesigner": "@{username} este deja autentificat cu HiveSigner pe acest dispozitiv. Sesiunea este înlocuită.",
+        "stored_hiveauth": "@{username} este autentificat cu HiveAuth pe acest dispozitiv. Va semna cu HiveSigner în schimb.",
+        "method_key": "Cheie",
+        "logout_failed": "Deconectarea a eșuat"
+      },
+      "browser": {
+        "account": "Cont",
+        "authority": "Autoritate",
+        "phishing": "Atenție: acest domeniu a fost marcat ca site de phishing cunoscut. Continuă cu mare precauție."
+      },
+      "chat": {
+        "cancel_edit": "Anulează editarea",
+        "cancel_reply": "Anulează răspunsul",
+        "copied_to_clipboard": "Copiat în clipboard",
+        "edited_at": "Editat {time}",
+        "group_options": "Opțiunile grupului",
+        "pinned_messages": "Mesaje fixate",
+        "remove_user": "Elimină @{username}",
+        "sort_by_name": "Sortează după nume",
+        "more": "Mai multe",
+        "reaction_label": "{emoji} {count}. Apasă lung pentru a vedea cine a reacționat",
+        "members": "Membri"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Există deja o postare la acest link și diferă de ce ai trimis. O actualizezi sau o publici ca nouă?",
+        "a_scheduled_post_is_published_by": "O postare programată este publicată de Ecency la ora aleasă. Pentru asta e nevoie de autoritatea posting pentru ecency.app pe contul tău. Cheile și celelalte autorități rămân neschimbate. Acordarea ei necesită cheia ta active.",
+        "ai_assist": "Asistent AI",
+        "ai_tools": "Instrumente AI",
+        "allow_ecency_to_publish_for_you": "Permiți ca Ecency să publice în numele tău?",
+        "bold": "Aldin",
+        "clone": "Clonează",
+        "cost": "Cost: {cost}",
+        "could_not_store_the_draft_on": "Schița nu a putut fi stocată pe acest dispozitiv. Ține aplicația deschisă și salvează schița.",
+        "draft": "SCHIȚĂ",
+        "delete_count": "Șterge ({count})",
+        "dictate_desc": "Vorbește, iar transcrierea ajunge în postarea ta",
+        "discard": "Renunță",
+        "discard_changes": "Renunți la modificări?",
+        "grant": "Acordă",
+        "italic": "Cursiv",
+        "keep_editing": "Continuă editarea",
+        "my_blog": "BLOGUL MEU",
+        "my_communities": "COMUNITĂȚILE MELE",
+        "new_post": "Postare nouă",
+        "notice": "Notă",
+        "restore": "Restabilește",
+        "restore_unsaved_changes": "Restabilești modificările nesalvate?",
+        "saved": "Salvat",
+        "top_communities": "TOP COMUNITĂȚI",
+        "table": "Tabel",
+        "text_format": "Format text",
+        "this_link_is_already_in_use": "Acest link este deja folosit",
+        "untitled": "Fără titlu",
+        "update_it_or_publish_this_as": "O actualizezi sau publici aceasta ca postare nouă?",
+        "you_have_unsaved_changes_from_an": "Ai modificări nesalvate dintr-o editare anterioară. Postarea s-a schimbat de atunci; restabilirea lor înlocuiește textul de mai jos.",
+        "your_edits_were_not_published": "Modificările tale nu au fost publicate.",
+        "your_post_was_already_published": "Postarea ta a fost deja publicată",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatură, atinge pentru a alege altă imagine",
+        "thumbnail_number": "Miniatura {number}",
+        "recording_busy": "O înregistrare este deja în curs. Termin-o mai întâi în cameră.",
+        "photo_lost": "Fotografia s-a pierdut cât timp camera era deschisă. Fă-o din nou.",
+        "add_snippet_button": "+ Fragment",
+        "words_count": "{count, plural, one {# cuvânt} few {# cuvinte} other {# de cuvinte}}",
+        "community_search": "caută"
+      },
+      "profile": {
+        "open_wallet": "Deschide portofelul",
+        "your_wallet_is_on_the_wallet": "Portofelul tău este în fila Portofel.",
+        "user_has_no_comments": "@{username} nu a comentat încă nimic",
+        "votes_count": "{count, plural, one {# vot} few {# voturi} other {# de voturi}}",
+        "replies_count": "{count, plural, one {# răspuns} few {# răspunsuri} other {# de răspunsuri}}",
+        "menu": "Mai multe",
+        "users": "Utilizatori"
+      },
+      "reading": {
+        "apply": "APLICĂ",
+        "add_tag": "Adaugă etichetă",
+        "age": "Vechime",
+        "audio_language": "Limba audio",
+        "available_filters": "Filtre disponibile",
+        "could_not_unlock_the_audio_please": "Audio nu a putut fi deblocat, încearcă din nou",
+        "downvote": "Vot negativ",
+        "downvote_percent": "Vot negativ {percent}%",
+        "listen_to_this_post": "Ascultă această postare",
+        "log_in": "Autentifică-te",
+        "mark_all_as_read": "Marchează toate ca citite",
+        "mark_as_read": "Marchează ca citit",
+        "more_replies": "Mai multe răspunsuri",
+        "not_enough_points": "Points insuficiente",
+        "nothing_here_yet": "Nimic aici încă.",
+        "open_editor": "Deschide editorul",
+        "pause_voice": "Pune vocea în pauză",
+        "play_voice": "Redă vocea",
+        "playback_speed": "Viteza de redare",
+        "publishing_in_waves": "Se publică în Waves",
+        "quests_done": "Misiuni finalizate",
+        "read": "Citește",
+        "remove_vote": "Elimină votul",
+        "seek": "Derulează",
+        "select_community": "Selectează comunitatea",
+        "selected_filters": "Filtre selectate",
+        "the_audio_could_not_be_loaded": "Audio nu a putut fi încărcat.",
+        "this_post_does_not_exist_or": "Această postare nu există sau a fost ștearsă.",
+        "unread": "Necitite",
+        "voice_position": "Poziția vocii",
+        "vote_weight": "Puterea votului",
+        "reblogged_by": "redistribuit de {username}",
+        "no_more_posts": "Nu mai sunt postări.",
+        "favourite": "Favorit",
+        "no_votes_yet": "Niciun vot încă",
+        "no_comments_yet": "Niciun comentariu încă. Fii primul!",
+        "comments_count": "Comentarii ({count})",
+        "sending_to_chain": "se trimite în blockchain",
+        "compare": "Compară",
+        "your_vote": "Votul tău",
+        "reply_to": "Răspunde lui @{username}",
+        "what_do_you_think": "Ce părere ai?",
+        "clear_tag_filter": "Șterge filtrul de etichetă",
+        "tab_selected": "{title}, selectat",
+        "add_tag_feed": "Adaugă flux de etichetă",
+        "feed_pinned": "{label}, fixat",
+        "attached_image_remove": "Imagine atașată, atinge pentru a elimina",
+        "camera": "Cameră",
+        "files": "Fișiere",
+        "paused": "În pauză",
+        "in_topic": "în {topic}",
+        "poll_vote": "Votează",
+        "reply": "Răspunde",
+        "mute_sound": "Dezactivează sunetul",
+        "unmute_sound": "Activează sunetul",
+        "leaderboard_activities": "Activități",
+        "leaderboard_reward": "Recompensă",
+        "sort_votes": "Voturi"
+      },
+      "shell": {
+        "account_of": "Contul @{username}",
+        "account_signed_out": "Cont, deconectat",
+        "close_tab": "Închide fila",
+        "coming_soon_to_the_native_app": "În curând în aplicația nativă.",
+        "create": "Creează",
+        "expand": "Extinde",
+        "forward": "Înainte",
+        "loading": "Se încarcă",
+        "new_tab": "Filă nouă",
+        "reload": "Reîncarcă",
+        "sent": "Trimis",
+        "tab_unread": "{title}, {count} necitite",
+        "no_app_for_link": "Nicio aplicație nu poate deschide acest link."
+      },
+      "wallet": {
+        "product_not_available": "Produsul nu este disponibil.",
+        "repeat": "Repetă"
+      },
+      "copied": "Copiat",
+      "trending_caps": "TRENDING",
+      "move_up": "Mută în sus",
+      "move_down": "Mută în jos",
+      "scroll_to_top": "Derulează la început",
+      "load_more": "Mai multe"
+    },
+    "wallet": {
+      "checking": "Se verifică cu rețeaua",
+      "leave_title": "Se mai trimite",
+      "leave_message": "Aceasta este încă în curs de trimitere sau verificare cu rețeaua. Poți părăsi acest ecran: aplicația te anunță când este gata.",
+      "stay": "Rămâi",
+      "collateralized_convert_request": "Cerere de conversie cu garanție",
+      "op_transfer": "transfer",
+      "op_power_up": "power up",
+      "op_power_down_change": "modificare power down",
+      "op_delegation": "delegare",
+      "op_savings_deposit": "depunere în economii",
+      "op_savings_withdrawal": "retragere din economii",
+      "op_conversion": "conversie",
+      "op_swap": "schimb",
+      "op_order_cancel": "anulare comandă",
+      "op_reward_claim": "revendicare recompensă",
+      "op_withdraw_route_change": "modificare rută de retragere",
+      "op_token_operation": "operațiune cu token"
+    },
+    "notification": {
+      "amount_unknown": "Suma nu este disponibilă",
+      "weekly_earnings_breakdown": "Săptămâna aceasta ai câștigat ${amount} - ${authorUsd} din postări, ${curationUsd} din curare.",
+      "weekly_earnings_total": "Săptămâna aceasta ai câștigat ${amount} din postările și curarea ta."
+    },
+    "settings": {
+      "open": "Deschide",
+      "feedback_subject": "Feedback/Raport de eroare",
+      "unknown_user": "Utilizator necunoscut"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Urmăritori",
+      "spin_game": "Jocul Spin",
+      "edit_profile": "Editează profilul",
+      "redeem_points": "Răscumpără puncte",
+      "community": "Comunitate",
+      "community_members": "Membrii comunității",
+      "community_activities": "Activitățile comunității",
+      "browser": "Browser",
+      "asset_details": "Detalii despre activ",
+      "edit_history": "Istoricul modificărilor",
+      "welcome": "Bun venit",
+      "chat": "Chat",
+      "backup_keys": "Backup chei",
+      "trade": "Tranzacționare",
+      "ai_image_generator": "Generator de imagini AI",
+      "select_assets": "Selectează active",
+      "poll": "Sondaj",
+      "bot_comments": "Comentarii de la boți"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operațiunile care necesită cheia owner nu pot fi semnate în Ecency.",
+      "post": "Postare/Comentariu",
+      "custom": "Custom JSON",
+      "sign_buffer": "Semnează mesajul",
+      "send_token": "Trimite token",
+      "witness_vote": "Vot pentru witness",
+      "proxy": "Setează proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Transmite",
+      "sign_tx": "Semnează tranzacția",
+      "encode": "Codifică mesajul",
+      "decode": "Verifică cheia",
+      "add_account_authority": "Adaugă autoritate de cont",
+      "remove_account_authority": "Elimină autoritate de cont",
+      "add_key_authority": "Adaugă autoritate de cheie",
+      "remove_key_authority": "Elimină autoritate de cheie",
+      "create_claimed_account": "Creează cont",
+      "create_proposal": "Creează propunere",
+      "remove_proposal": "Elimină propunerea",
+      "update_proposal_vote": "Vot pentru propunere",
+      "signed_call": "Apel semnat"
+    },
+    "translate_language": {
+      "ar": "arabă",
+      "az": "azeră",
+      "bg": "bulgară",
+      "bn": "bengaleză",
+      "ca": "catalană",
+      "cs": "cehă",
+      "da": "daneză",
+      "de": "germană",
+      "el": "greacă",
+      "en": "engleză",
+      "eo": "esperanto",
+      "es": "spaniolă",
+      "et": "estonă",
+      "fa": "persană",
+      "fi": "finlandeză",
+      "fr": "franceză",
+      "ga": "irlandeză",
+      "he": "ebraică",
+      "hi": "hindi",
+      "hu": "maghiară",
+      "id": "indoneziană",
+      "it": "italiană",
+      "ja": "japoneză",
+      "ko": "coreeană",
+      "lt": "lituaniană",
+      "lv": "letonă",
+      "ms": "malaeză",
+      "nb": "norvegiană",
+      "nl": "olandeză",
+      "pl": "poloneză",
+      "pt": "portugheză",
+      "ro": "română",
+      "ru": "rusă",
+      "sk": "slovacă",
+      "sl": "slovenă",
+      "sq": "albaneză",
+      "sv": "suedeză",
+      "th": "thailandeză",
+      "tl": "tagalog",
+      "tr": "turcă",
+      "uk": "ucraineană",
+      "zh": "chineză",
+      "zt": "chineză (tradițională)"
+    },
+    "reading": {
+      "banner_text": "Această postare este în {source}. O traduci în {target}?",
+      "translated_from_text": "Tradus din {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# membru} few {# membri} other {# de membri}} • {authors, plural, one {# autor} few {# autori} other {# de autori}} • {posts, plural, one {# postare} few {# postări} other {# de postări}}",
+      "community_title": "Comunitatea {title}",
+      "members_title": "Membrii comunității {title}",
+      "activities_title": "Activitatea comunității {title}",
+      "cannot_start_with_or": "Nu poate începe cu @ sau #",
+      "use_a_two_letter": "Folosește un cod de limbă din două litere, de exemplu en",
+      "at_most_characters": "Cel mult {max, plural, one {# caracter} few {# caractere} other {# de caractere}}",
+      "council": "Consiliu",
+      "journal": "Jurnal",
+      "topic": "Subiect",
+      "community_not_found": "Comunitatea nu a fost găsită."
+    },
+    "transfer": {
+      "one_recipient": "Pentru acest transfer se poate folosi un singur destinatar.",
+      "is_an_exchange_and": "{exchange} este un exchange și poate să nu accepte transferuri recurente: fondurile trimise după un program se pot pierde. Folosește în schimb un transfer unic."
+    },
+    "dapps": {
+      "signing_info": "Ecency acționează ca extensia ta de semnare pentru Hive. Când un dApp îți cere să te autentifici cu o extensie de browser precum Keychain, Keeper sau Peak Vault, alege această opțiune. Ecency se ocupă de semnare în siguranță.",
+      "category_social": "Social",
+      "category_gaming": "Jocuri",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grup",
+      "unable_to_load_messages": "Mesajele nu au putut fi încărcate.",
+      "someone": "Cineva",
+      "renamed_the_group_to": "{actor} a redenumit grupul în „{name}”",
+      "removed_the_group_name": "{actor} a șters numele grupului",
+      "unable_to_send_your": "Mesajul tău nu a putut fi trimis.",
+      "unable_to_remove_message": "Mesajul nu a putut fi șters.",
+      "unknown": "Necunoscut",
+      "members_online": "{members, plural, one {# membru} few {# membri} other {# de membri}} • {online} online",
+      "failed_to_load_pinned": "Mesajele fixate nu au putut fi încărcate",
+      "you": "Tu",
+      "title": "Reacții"
+    },
+    "tip": {
+      "login_required": "Autentifică-te pentru a trimite bacșișuri",
+      "max_decimals": "Cel mult {n, plural, one {# zecimală} few {# zecimale} other {# de zecimale}}"
+    },
+    "paid": {
+      "check_again": "Verifică din nou",
+      "give_up": "Renunță",
+      "unknown": "Încă niciun răspuns. Solicitarea ar putea fi încă în curs. Verifică din nou pentru a prelua rezultatul: nu se taxează a doua oară.",
+      "pending": "Solicitarea ta este încă în curs de procesare. Verifică din nou într-un moment: nu se taxează a doua oară.",
+      "restored": "O solicitare anterioară nu are încă un răspuns. Verifică din nou pentru a prelua rezultatul: nu se taxează a doua oară.",
+      "give_up_confirm": "Dacă solicitarea a fost procesată, punctele au fost cheltuite, iar rezultatul se va pierde.",
+      "not_stored": "Această solicitare nu a putut fi stocată pe dispozitiv. Ține acest ecran deschis până se termină.",
+      "sign_in_again": "Sesiunea ta a expirat. Autentifică-te din nou, apoi verifică din nou.",
+      "other_account": "Aceasta aparține lui @{owner}. Revino la acel cont pentru a continua."
+    },
+    "ai": {
+      "run_ai_assist": "Rulează asistentul AI ({costText})",
+      "no_longer_free_cost": "Această rulare nu mai este gratuită astăzi. Costă {cost} {unit}.",
+      "no_longer_free": "Această rulare nu mai este gratuită astăzi.",
+      "content_violates_our_content": "Conținutul încalcă politica noastră de conținut. Modifică textul. Points nu au fost returnate.",
+      "generate_image": "Generează imagine ({costLabel})",
+      "use_prompt": "Folosește: „{prompt}”"
+    },
+    "post_actions": {
+      "busy": "Așteaptă, altă acțiune este în curs",
+      "not_a_community_post": "Nu este o postare de comunitate.",
+      "parent_post_not_found": "Postarea părinte nu a fost găsită",
+      "the_account_changed": "Contul s-a schimbat."
+    },
+    "dictation": {
+      "balance": "Sold: {balance} {unit}",
+      "stop_points": "Oprește ({cost} Points)",
+      "stop_free": "Oprește (gratuit)",
+      "transcribe_points": "Transcrie ({cost} Points)",
+      "transcribe": "Transcrie",
+      "no_longer_free_cost": "Această înregistrare nu mai este gratuită astăzi. Costă {cost} Points.",
+      "no_longer_free": "Această înregistrare nu mai este gratuită astăzi.",
+      "held_locked": "Înregistrarea s-a oprit când Ecency s-a blocat. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
+      "held_no_background": "Înregistrarea s-a oprit când Ecency a părăsit ecranul (nu a putut afișa notificarea de înregistrare). Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
+      "held_stopped": "Înregistrarea a fost oprită din notificare. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
+      "held_focus_lost": "Înregistrarea s-a oprit din cauza unui apel sau a sunetului altei aplicații. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
+      "held_interrupted": "Înregistrarea s-a oprit deoarece altă aplicație a preluat microfonul. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
+      "unavailable": "Înregistrarea nu este disponibilă pe acest dispozitiv.",
+      "not_read": "Această înregistrare nu a putut fi citită sau este prea mare. Nu s-a trimis nimic și nu s-a taxat nimic.",
+      "give_up_not_sent": "Această înregistrare nu a fost trimisă, deci nu s-a taxat nimic. Va fi ștearsă.",
+      "give_up_not_charged": "Nu s-a taxat nimic pentru această înregistrare. Va fi ștearsă.",
+      "clip_lost": "Înregistrarea unei solicitări anterioare nu mai este pe acest dispozitiv. Dacă acea solicitare a fost procesată, punctele tale au fost cheltuite, iar transcrierea nu poate fi preluată."
+    },
+    "register": {
+      "error_code_28": "Solicitarea ta nu a putut fi procesată. Coada de înscriere este probabil plină. Încearcă din nou în câteva minute."
+    },
+    "perks": {
+      "quests_empty": "Nicio misiune aici încă, revino în curând.",
+      "freeze_confirm_title": "Protejează-ți seria",
+      "spend_points_on_a": "Cheltuiești {price} Points pe înghețarea seriei? Se consumă pentru a-ți proteja seria într-o zi pe care o ratezi."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Sprijină Ecency, primește un blog gratuit și remarcă-te cu o insignă Pro verificată.",
+      "card_description": "Treci la Pro cu {price} pe an. Insignă verificată, blog gratuit și sprijin pentru Ecency.",
+      "card_description_plain": "Treci la Pro pentru un an. Insignă verificată, blog gratuit și sprijin pentru Ecency.",
+      "member": "Ești membru Pro.",
+      "benefit_badge": "O insignă Pro verificată lângă numele tău.",
+      "benefit_blog": "Un blog gratuit la numeletau.blogs.ecency.com.",
+      "benefit_support": "Sprijini direct dezvoltarea Ecency.",
+      "benefit_early": "Acces anticipat la funcții noi.",
+      "buy": "Obține Pro cu {price} pe an",
+      "extend": "Prelungește cu 12 luni cu {price}",
+      "extend_note": "O nouă achiziție adaugă 12 luni la abonamentul tău.",
+      "unavailable": "Ecency Pro nu este disponibil momentan din magazin.",
+      "activating": "Plată primită. Se activează abonamentul tău.",
+      "success_title": "Bun venit la Ecency Pro",
+      "success_body": "Abonamentul tău Pro este activ. Insigna ta va apărea în curând pe profil.",
+      "extending": "Plată primită. Abonamentul tău Pro este prelungit cu 12 luni.",
+      "open_a11y": "Deschide Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Se salvează schița...",
+      "please_sign_in_first": "Autentifică-te mai întâi.",
+      "fetch_failed": "Preluarea a eșuat.",
+      "you_can_only_edit": "Poți edita doar conținutul tău.",
+      "invalid_percent": "Procent invalid",
+      "beneficiary_exists_already": "Beneficiarul există deja",
+      "this_draft_belongs_to": "Această schiță aparține lui @{owner}. Revino la acel cont pentru a o publica.",
+      "could_not_make_a": "Nu s-a putut crea un link nou pentru această postare. Schimbă puțin titlul și încearcă din nou.",
+      "an_earlier_attempt_was": "O încercare anterioară a fost publicată după aceasta. Verifică ce versiune vrei să păstrezi.",
+      "could_not_check_your": "Autoritatea posting a contului tău nu a putut fi verificată. Verifică conexiunea și încearcă din nou.",
+      "this_post_was_changed": "Această postare a fost modificată în altă parte de când ai deschis-o. Copiază textul, revino și deschide-o din nou pentru a edita cea mai recentă versiune.",
+      "link_text_placeholder": "Text aici"
+    },
+    "app_error": {
+      "this_reply_is_too": "Acest răspuns este prea lung.",
+      "the_network_refused_this": "Rețeaua a refuzat această acțiune.",
+      "invalid_input": "Date de intrare invalide.",
+      "secure_storage_is_unavailable": "Stocarea securizată nu este disponibilă. Autentifică-te din nou.",
+      "please_sign_in_first": "Autentifică-te mai întâi.",
+      "these_credentials_belong_to": "Aceste date de autentificare aparțin lui @{actual}, nu lui @{expected}.",
+      "is_not_signed_in": "@{username} nu este autentificat pe acest dispozitiv.",
+      "key_required": "Pentru această tranzacție este necesară cheia {role}. {hint}",
+      "cancelled": "Anulat.",
+      "the_request_was_rejected": "Solicitarea a fost respinsă în aplicația portofel.",
+      "the_request_expired_before": "Solicitarea a expirat înainte ca aplicația portofel să răspundă. Încearcă din nou.",
+      "could_not_reach_the": "Serverul HiveAuth nu a putut fi contactat. Încearcă din nou.",
+      "unexpected_redirect": "Serverul a trimis o redirecționare neașteptată. Nu s-a modificat nimic. Încearcă din nou mai târziu.",
+      "missing_key_hint": "Adaug-o în Setări, Gestionare autorități (Importă cheie privată) sau autentifică-te din nou cu ea.",
+      "this_key_is_also": "Această cheie este și cheia owner a contului. Ecency nu păstrează o cheie care controlează rolul owner: dă rolurilor active și posting chei proprii, apoi autentifică-te cu ele.",
+      "this_is_the_owner": "Aceasta este cheia owner. Ecency nu stochează și nu folosește niciodată cheia owner: autentifică-te cu parola principală sau cu cheia posting ori active.",
+      "this_password_only_matches": "Această parolă se potrivește doar cu cheia owner a contului. Ecency nu stochează și nu folosește niciodată cheia owner: autentifică-te cu cheia posting sau active.",
+      "this_key_cannot_sign": "Această cheie nu poate semna singură pentru cont: contul necesită mai mult de o semnătură (ponderea sa este sub prag).",
+      "public_key_given": "Aceasta este cheia ta publică. Lipește cheia privată (începe cu 5) sau parola principală.",
+      "memo_key_only": "Cheia memo nu poate fi folosită pentru autentificare. Folosește cheia posting, cheia active sau parola principală.",
+      "network_message": "Eroare de rețea. Verifică conexiunea și încearcă din nou.",
+      "network_error_this_may": "Eroare de rețea. Este posibil să fi fost deja procesat; reîncercarea este sigură și nu va posta de două ori."
+    },
+    "purchases": {
+      "deal_best": "CEA MAI BUNĂ OFERTĂ!",
+      "deal_popular": "POPULAR!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Magazinul nu a răspuns."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Pentru consumul 999accounts sunt necesare e-mailul și numele de utilizator",
+      "stuck": "O achiziție anterioară a acestui produs nu a putut fi finalizată. Contactează support@ecency.com cu chitanța din magazin, este păstrată pentru asta.",
+      "held": "Această achiziție este reținută pentru verificare. Contactează support@ecency.com cu comanda #{order}.",
+      "earlier_purchase": "O achiziție anterioară a acestui produs este mai întâi finalizată pentru @{target}.",
+      "earlier_pending": "O plată anterioară pentru acest produs este încă în așteptare pentru @{target}. Se finalizează după ce magazinul confirmă plata.",
+      "pending": "Plata ta este în așteptare. Achiziția se finalizează după ce magazinul confirmă plata.",
+      "processing": "Achiziția ta este în curs de procesare. Va fi finalizată în scurt timp."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Transferuri recurente",
+      "delegate_hive_power": "Deleagă Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Setează ruta de retragere a vestingului",
+      "power_down": "Power down",
+      "transfer_to_saving": "Transfer în economii",
+      "transfer_from_saving": "Transfer din economii",
+      "cancel_transfer_from_saving": "Anulează transferul din economii",
+      "collateralized_convert": "Conversie cu garanție",
+      "witness_vote": "Vot pentru witness",
+      "witness_update": "Actualizare witness",
+      "witness_set_properties": "Setare proprietăți witness",
+      "governance_proxy": "Proxy de guvernanță",
+      "claim_account": "Revendică cont",
+      "create_account": "Creează cont",
+      "create_account_with_account": "Creează cont cu credite de cont",
+      "create_limit_order": "Creează ordin limită",
+      "cancel_limit_order": "Anulează ordinul limită",
+      "redeem_rewards": "Revendică recompensele",
+      "post_or_comment": "Postare sau comentariu",
+      "post_or_comment_options": "Opțiuni postare sau comentariu",
+      "custom_operation": "Operațiune personalizată",
+      "update_account_active": "Actualizare cont (active)",
+      "update_account_posting": "Actualizare cont (posting)",
+      "change_recovery_account": "Schimbă contul de recuperare",
+      "create_proposal": "Creează propunere",
+      "remove_proposal": "Elimină propunerea",
+      "update_proposal_votes": "Actualizează voturile propunerii",
+      "update_proposal": "Actualizează propunerea"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Acest link trebuie semnat de @{account}. Treci la acel cont și deschide-l din nou.",
+      "ecency_can_only_sign": "Ecency poate semna și transmite din linkuri doar tranzacții.",
+      "requester_page": "pagina {host}",
+      "owner_refused": "Operațiunile care necesită cheia owner nu pot fi semnate dintr-un link.",
+      "busy": "Așteaptă: altă solicitare este încă în curs de procesare.",
+      "not_supported": "Ecency nu poate semna încă această operațiune în această versiune."
+    },
+    "chats": {
+      "group_members": "Membrii grupului",
+      "rename_group": "Redenumește grupul",
+      "failed_to_load_chats": "Chaturile nu au putut fi încărcate",
+      "unknown": "Necunoscut",
+      "unable_to_mark_channel": "Canalul nu a putut fi marcat ca citit",
+      "unable_to_update_favorites": "Favoritele nu au putut fi actualizate",
+      "unable_to_update_mute": "Silențierea nu a putut fi actualizată",
+      "group": "Grup",
+      "unable_to_search": "Căutarea nu a reușit",
+      "unable_to_start_chat": "Chatul nu a putut fi început",
+      "no_internet": "Fără conexiune la internet"
+    },
+    "stake": {
+      "confirm_summary": "Deleagă {hp} HP ({vests} VESTS) lui @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Deja delegat lui @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Doar publică. Ecency nu stochează niciodată cheia owner.",
+      "shared_owner": "Acest cont folosește aceeași cheie pentru rolul owner și rolul {names}. Cine are această cheie controlează întregul cont. Dă rolului {names} o cheie proprie și păstrează cheia owner offline.",
+      "copy_warning": "Oricine are această cheie privată controlează această parte a contului tău. Alte aplicații pot citi clipboardul; lipește-o doar unde ai încredere. Este ștearsă din clipboard după 2 minute."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Blocarea cu PIN este activată.",
+      "pin_changed": "PIN schimbat.",
+      "pin_lock_is_off": "Blocarea cu PIN este dezactivată.",
+      "wiped_notice": "Toate conturile, cheile și datele de autentificare au fost eliminate de pe acest dispozitiv.",
+      "we_could_not_bring": "Conturile tale din versiunea anterioară a aplicației nu au putut fi preluate. Autentifică-te din nou.",
+      "your_pin_lock_could": "Blocarea ta cu PIN nu a putut fi preluată din versiunea anterioară. Setează din nou un PIN din meniul contului pentru a reactiva blocarea aplicației.",
+      "biometric_unlock_was_turned": "Deblocarea biometrică a fost dezactivată deoarece datele biometrice de pe acest dispozitiv s-au schimbat. Deblochează cu PIN, apoi activeaz-o din nou din meniul contului.",
+      "biometric_unavailable_notice": "Deblocarea biometrică nu a putut fi activată: pe acest dispozitiv nu sunt configurate date biometrice.",
+      "set_backup": "Setează un PIN ca rezervă pentru deblocarea biometrică",
+      "biometric_on_notice": "Blocarea cu PIN este activată. Deblochează cu date biometrice sau cu PIN.",
+      "offer_title": "Deblochează cu date biometrice",
+      "offer_body": "Deschide Ecency cu fața sau amprenta. Setezi și un PIN, care deblochează aplicația când datele biometrice nu sunt disponibile.",
+      "offer_use": "Folosește datele biometrice",
+      "offer_use_pin": "Folosește PIN în schimb"
+    },
+    "common": {
+      "list_and": "{first} și {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Răspunsurile de 25 de caractere sau mai puține nu primesc puncte (linkurile nu se numără)",
+      "short_content_hint": "Prea scurt pentru a primi puncte (25 de caractere sau mai puține, fără linkuri)",
+      "daily_post": "Postarea zilei {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# zi la rând} few {# zile la rând} other {# de zile la rând}}",
+      "grant_description": "Acordă contului Ecency @ecency.app permisiunea posting pe contul tău, ca să poți posta fără să deschizi Keychain de fiecare dată. Acordarea modifică autoritatea posting a contului tău și necesită cheia ta active."
+    },
+    "wallet_history": {
+      "from_to": "@{from} către @{to}",
+      "from_user_id": "de la @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} către @{to}, id: {id}",
+      "from_to_account": "@{from} către {to}",
+      "from_user": "de la @{user}",
+      "to_user": "către @{user}",
+      "interest": "Dobândă",
+      "proposal_pay": "Plata propunerii",
+      "categories": "Tipuri de activitate",
+      "category_all": "Toate",
+      "category_transfers": "Transferuri",
+      "category_market": "Ordine de piață",
+      "category_interest": "Dobânzi",
+      "category_stake": "Operațiuni de staking",
+      "category_rewards": "Recompense",
+      "point_type_checkin": "Activitate zilnică",
+      "point_type_login": "Autentificare",
+      "point_type_post": "Postare",
+      "point_type_comment": "Comentariu",
+      "point_type_vote": "Vot",
+      "point_type_reblog": "Redistribuire",
+      "point_type_transfer_sent": "Transferuri trimise",
+      "point_type_transfer_received": "Transferuri primite"
+    },
+    "video_upload": {
+      "continue_upload": "CONTINUĂ ÎNCĂRCAREA",
+      "source_gone": "Această înregistrare nu mai este disponibilă pe dispozitiv. Înregistrează sau alege din nou videoclipul.",
+      "no_camera": "Camera nu este disponibilă pe acest dispozitiv."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Următorul unstaking este peste {hours, plural, one {# oră} few {# ore} other {# de ore}}",
+      "account_not_found": "Contul nu a fost găsit"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Imagine în clipboard · Lipește imaginea",
+      "no_container": "Cel mai recent container de waves nu a putut fi preluat",
+      "please_sign_in_first": "Autentifică-te mai întâi.",
+      "write_something_first": "Scrie ceva mai întâi.",
+      "account_changed": "Acest wave a fost scris ca alt cont. Închide-l și scrie-l din nou.",
+      "no_upload": "Încărcarea imaginilor nu este încă disponibilă în această versiune. Lipește în schimb un link către imagine în text.",
+      "fail": "Eroare"
+    },
+    "delete_account": {
+      "sign_out_failed": "Solicitarea ta a fost trimisă, dar deconectarea a eșuat. Deconectează-te din meniu.",
+      "not_sent": "Solicitarea ta de ștergere nu a putut fi trimisă. Încearcă din nou."
+    },
+    "chat_sheets": {
+      "group_limit": "Un grup poate avea cel mult {max, plural, one {# altă persoană} few {# alte persoane} other {# de alte persoane}}.",
+      "search_people_by_username": "Caută persoane după numele de utilizator",
+      "new_group_title": "Grup nou",
+      "new_group_hint": "Adaugă între {min} și {max, plural, one {# persoană} few {# persoane} other {# de persoane}} pentru a începe o conversație de grup.",
+      "no_results": "Nimeni cu acest nume nu a fost găsit în chat.",
+      "search_failed": "Căutarea nu a funcționat. Verifică conexiunea și încearcă din nou.",
+      "create": "Creează grupul",
+      "new_group_failed": "Grupul nu a putut fi creat. Încearcă din nou.",
+      "name_limit": "Numele unui grup poate avea cel mult {max, plural, one {# caracter} few {# caractere} other {# de caractere}}.",
+      "rename_title": "Redenumește grupul",
+      "rename_hint": "Dă grupului un nume pe care îl vor vedea toți membrii. Lasă gol pentru a afișa numele membrilor.",
+      "placeholder": "Numele grupului",
+      "not_owner": "Doar persoana care a creat grupul îl poate redenumi.",
+      "rename_failed": "Grupul nu a putut fi redenumit. Încearcă din nou."
+    },
+    "editor_side": {
+      "copy_of": "Copie a {title}",
+      "deletions_failed": "Ceva nu a mers bine\n{failed} din {total, plural, one {# ștergere} few {# ștergeri} other {# de ștergeri}} au eșuat",
+      "uploads_failed": "{count, plural, one {# încărcare a eșuat} few {# încărcări au eșuat} other {# de încărcări au eșuat}}:\n\n{messages}",
+      "failed_to_delete": "Ștergerea a eșuat"
+    },
+    "uploads": {
+      "add_to_gallery": "Adaugă în galerie"
+    },
+    "account_notice": {
+      "manage_keys": "Setări, Gestionare autorități",
+      "no_signing_key_title": "Autentifică-te din nou ca @{account}",
+      "no_signing_key": "Ecency nu mai păstrează pe acest dispozitiv cheia owner sau parola principală, iar @{account} nu are aici nicio cheie posting sau active stocată. Autentifică-te din nou cu parola principală sau cu o cheie posting ori active, sau adaugă o cheie la {manageKeys} (Importă cheie privată).",
+      "missing_roles_title": "Unele chei nu au fost adăugate",
+      "cannot_post": "posta, vota sau comenta",
+      "cannot_transfer": "trimite transferuri sau schimba setările contului",
+      "missing_roles": "Parola ta nu se mai potrivește cu cheia {missing} a contului @{account}: a fost schimbată pe cont de la setarea parolei. Stocată pe acest dispozitiv: cheia {kept}. Până adaugi cheia {missing} la {manageKeys} (Importă cheie privată), această aplicație nu poate {cannot} cu cheile pentru @{account}.",
+      "shared_owner_title": "Această cheie controlează și rolul owner",
+      "shared_owner": "@{account} folosește aceeași cheie pentru rolul owner și rolul {names}. Cine are această cheie controlează întregul cont. Ecency o păstrează doar ca cheie {names} și nu o folosește niciodată pentru operațiuni owner. Dă rolului {names} o cheie proprie și păstrează cheia owner offline."
+    },
+    "dapp_browser": {
+      "message_from": "Mesaj de la {host}",
+      "home_title": "Acasă",
+      "loading_title": "Se încarcă...",
+      "blank_run": "[{count, plural, one {# caracter gol} few {# caractere goale} other {# de caractere goale}}]",
+      "too_large": "Această pagină a cerut semnarea unei solicitări prea mari pentru a fi afișată, așa că Ecency a refuzat-o."
+    },
+    "community_service": {
+      "the_account_changed": "Contul s-a schimbat."
+    },
+    "profile_edit": {
+      "enter_link": "Introdu linkul imaginii",
+      "please_sign_in_first": "Autentifică-te mai întâi.",
+      "account_not_found": "Contul nu a fost găsit",
+      "please_enter_an_image": "Introdu un link către o imagine care începe cu https://"
+    },
+    "background_media": {
+      "post_by": "Postare de @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Autentifică-te mai întâi."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Ai votat deja cu aceeași pondere.",
+      "insufficient_rc": "Resource Credits insuficiente. Așteaptă sau fă power up.",
+      "missing_authority": "Lipsește autoritatea posting. Verifică metoda de autentificare.",
+      "comment_too_soon": "Așteaptă înainte de a posta din nou.",
+      "paid_out": "Această postare a fost deja plătită.",
+      "too_large": "Tranzacția are {size, plural, one {# octet} few {# octeți} other {# de octeți}}, peste limita de {max} octeți.",
+      "network_error_please_check": "Eroare de rețea. Verifică conexiunea și încearcă din nou.",
+      "unconfirmed_message": "Nu s-a putut confirma dacă a fost procesat. Verifică portofelul sau istoricul; reia doar dacă nu apare acolo.",
+      "undecided_message": "Este posibil să fi fost deja procesat. Verifică portofelul sau istoricul înainte de a încerca din nou."
+    },
+    "chat_api": {
+      "request_failed": "Solicitarea a eșuat ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} scrie...",
+      "typing_two": "{first} și {second} scriu...",
+      "typing_three": "{first}, {second} și {third} scriu...",
+      "typing_many": "{first}, {second} și încă {count, plural, one {# persoană scrie} few {# persoane scriu} other {# de persoane scriu}}...",
+      "banned": "{reason} Poți citi în continuare chatul. Postarea se deblochează {until}.",
+      "joined_when": "s-a alăturat {time}",
+      "joined": "s-a alăturat",
+      "official_badge": "Oficial",
+      "official_badge_label": "Cont oficial Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Întreabă-o pe Esie"
+    },
+    "chat_service": {
+      "missing_token": "Lipsește tokenul de acces Hive. Deconectează-te și autentifică-te din nou.",
+      "dm_error": "Utilizatorul nu s-a alăturat chaturilor"
+    },
+    "compose_reply": {
+      "account_changed": "Acest răspuns a fost scris ca alt cont. Închide-l și scrie-l din nou.",
+      "write_something_first": "Scrie ceva mai întâi.",
+      "please_sign_in_first": "Autentifică-te mai întâi."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Prea mulți beneficiari: cel mult {max}.",
+      "a_beneficiary_s_share": "Cota unui beneficiar trebuie să fie între 0,01% și 100%.",
+      "beneficiaries_add_up_to": "Cotele beneficiarilor însumează peste 100%.",
+      "a_beneficiary_is_listed": "Un beneficiar apare de două ori.",
+      "you_cannot_be_a": "Nu poți fi beneficiar al propriei postări.",
+      "a_beneficiary_has_an": "Un beneficiar are un nume de cont invalid."
+    },
+    "follows": {
+      "fail": "Eroare!: {message}",
+      "follower_count": "Urmăritori ({count})",
+      "following_count": "Urmărești ({count})"
+    },
+    "link": {
+      "unsupported": "Acest link nu este încă acceptat.",
+      "cannot_open": "Linkul nu poate fi deschis",
+      "unsupported_version": "Acest link nu este acceptat în această versiune."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Browserul Explore poate accesa portofelul tău Hive pentru a semna tranzacții. Acest link provine din conținutul postării și nu este verificat de Ecency. Continuă doar dacă ai încredere în el:\n\n{url}"
+    },
+    "listen": {
+      "message": "Ascultarea necesită {required} Points și ai {available}.",
+      "unlock_label": "Deblochează · {cost} Points",
+      "preparing_audio": "Se pregătește audio · {preparingPercent}%",
+      "waiting_in_line_ahead": "La coadă, {ahead} înaintea ta…",
+      "next_in_line": "Urmează la rând…",
+      "preparing_about_minutes": "Se pregătește audio, aproximativ {minutes} min…",
+      "preparing_audio_2": "Se pregătește audio…",
+      "spend_confirm": "Cheltuiești {cost} Points pentru a asculta această postare? Audio este al tău și îl poți reda oricând.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Audio nu a putut fi creat, Points au fost returnate"
+    },
+    "media_pick": {
+      "preparing_video": "Se pregătește videoclipul...",
+      "library_hint": "Alege din fotografiile tale",
+      "camera_hint": "Fă acum o fotografie nouă",
+      "files_hint": "Răsfoiește fișierele de pe acest dispozitiv și din cloud",
+      "paste_hint": "Folosește imaginea copiată",
+      "link_hint": "Folosește o imagine de pe web"
+    },
+    "media_picking": {
+      "image_types_message": "Acest tip de fișier nu este acceptat. Alege o imagine JPEG, PNG, GIF, WebP sau HEIC.",
+      "video_types_message": "Acest tip de fișier nu este acceptat. Alege un videoclip MP4 sau MOV.",
+      "gif_too_large": "Acest GIF este mai mare de {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Această operațiune necesită atât o semnătură active, cât și una posting, pe care Ecency nu le poate semna încă împreună."
+    },
+    "poll": {
+      "fail": "Eroare!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Autoritatea posting a contului tău nu a putut fi verificată. Verifică conexiunea și încearcă din nou."
+    },
+    "post_lists": {
+      "voters_title": "Informații despre votanți ({total})",
+      "reblogs_title": "Informații despre redistribuiri ({total})",
+      "no_history_found": "Nu s-a găsit niciun istoric!",
+      "no_edit_history_available": "Nu există istoric de editări pentru acest conținut.",
+      "version_label": "Versiunea {version}"
+    },
+    "stats": {
+      "other_device": "Altul"
+    },
+    "profile": {
+      "account_not_found": "Contul nu a fost găsit",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Plin în {hours, plural, one {# oră} few {# ore} other {# de ore}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Profilul tău curent nu a putut fi citit, încearcă din nou"
+    },
+    "profile_sheet": {
+      "fail": "Eroare! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Contul nu a fost găsit"
+    },
+    "push_payload": {
+      "mentioned": "@{source} l-a menționat pe @{target}",
+      "replied": "@{source} i-a răspuns lui @{target}",
+      "transferred": "@{source} a făcut un transfer către @{target}",
+      "delegated": "@{source} a delegat către @{target}",
+      "rewards_received": "Recompense primite",
+      "account_updated": "Cont actualizat",
+      "account_updated_body": "Detaliile contului tău au fost actualizate",
+      "followed": "@{source} a început să-l urmărească pe @{target}",
+      "unfollowed": "@{source} a încetat să-l urmărească pe @{target}",
+      "ignored": "@{source} l-a ignorat pe @{target}",
+      "blacklisted": "@{source} l-a adăugat pe @{target} pe lista neagră",
+      "posted_in": "@{source} a postat în #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Nu s-a putut obține permisiunea pentru cameră",
+      "permission_message": "Acordă permisiunea pentru cameră în setările Ecency.",
+      "permission_allow": "Permite"
+    },
+    "reply_account": {
+      "switch": "Răspunde cu alt cont"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} din contul @{account} a fost procesat.",
+      "not_sent": "{label} din contul @{account} nu a fost procesat. Nu s-a trimis nimic; îl poți relua.",
+      "checking_whether_your_from": "Se verifică dacă {label} din contul @{account} a fost procesat. Verifică portofelul înainte de a-l trimite din nou."
+    },
+    "signing": {
+      "hot_page_closed": "Pagina HiveSigner a fost închisă",
+      "wrong_role": "Aceasta este cheia ta {given}; această operațiune necesită cheia ta {needed}.",
+      "action_id_required": "Această acțiune are nevoie de un id de acțiune pentru a fi reîncercată în siguranță."
+    },
+    "signing_router": {
+      "owner_never": "Operațiunile owner nu sunt niciodată semnate în aplicație."
+    },
+    "spin": {
+      "key_missing": "Lipsește cheia jocului",
+      "score": "{score, plural, one {# punct} few {# puncte} other {# de puncte}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Astăzi (UTC), se resetează în {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Se resetează zilnic la 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Autentifică-te din nou",
+      "message": "Stocarea securizată a fost resetată pe acest dispozitiv. Autentifică-te din nou.",
+      "failed": "Conturile de pe acest dispozitiv nu au putut fi eliminate. Încearcă din nou."
+    },
+    "store": {
+      "in_app_purchases_are": "Achizițiile în aplicație nu sunt disponibile în această versiune."
+    },
+    "wallet_sends": {
+      "journal_full": "Prea multe trimiteri anterioare sunt încă verificate cu rețeaua. Așteaptă confirmarea lor înainte de a trimite altele.",
+      "check_later": "Rețeaua nu a confirmat la timp. Verifică portofelul sau istoricul înainte de a-l trimite din nou; aplicația verifică din nou la următoarea pornire."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# necitit} few {# necitite} other {# necitite}}",
+      "locked_text": "Deblochează Ecency pentru a vedea",
+      "signed_out_text": "Autentifică-te în Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Autoritățile curente ale contului tău nu au putut fi citite. Nu s-a modificat nimic; încearcă din nou.",
+      "reads_disagree": "Două citiri ale autorității posting a contului tău nu coincid. Nu s-a modificat nimic; încearcă din nou."
+    },
+    "vote": {
+      "vote_weight_must_be": "Ponderea votului trebuie să fie între -100% și 100%.",
+      "please_sign_in_first": "Autentifică-te mai întâi."
+    },
+    "widget": {
+      "streak_name": "Seria de misiuni",
+      "write": "Scrie",
+      "new_wave": "Wave nou",
+      "notifications_description": "Notificările tale necitite. Ascuns cât timp blocarea cu PIN este activată.",
+      "streak_description": "Seria ta de misiuni zilnice. Ascuns cât timp blocarea cu PIN este activată.",
+      "compose_description": "Scrie o postare sau un wave nou.",
+      "streak_title": "Serie",
+      "daily_quests": "Misiuni zilnice",
+      "streak_hint": "Deschide Perks pentru a-ți vedea seria",
+      "open_perks": "Deschide Perks",
+      "open_app": "Deschide Ecency",
+      "unread_caption": "{count, plural, one {necitit} few {necitite} other {necitite}}",
+      "streak_caption": "{count, plural, one {zi la rând} few {zile la rând} other {de zile la rând}}"
+    },
+    "system": {
+      "dictation_channel": "Dictare",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "Apare cât timp o înregistrare pentru dictare rulează în fundal, cu o acțiune Oprește.",
+      "dictation_title": "Înregistrare pentru dictare",
+      "dictation_text": "Ecency îți înregistrează dictarea. Oprirea o păstrează netrimisă până confirmi în aplicație.",
+      "listen_channel_description": "Te anunță când Listen nu a putut continua în fundal.",
+      "listen_paused": "Listen în pauză",
+      "listen_paused_text": "Deschide Ecency pentru a continua să asculți.",
+      "skip_back": "Înapoi 15 secunde",
+      "skip_forward": "Înainte 15 secunde"
+    },
+    "permission": {
+      "face_id": "Deblochează Ecency cu Face ID în loc de PIN.",
+      "camera": "Scanează coduri QR și fă o fotografie sau înregistrează un videoclip pentru a-l adăuga în postare.",
+      "photo_library_add": "Ecency salvează imaginile descărcate din postări în biblioteca ta foto.",
+      "photo_library": "Ecency păstrează imaginile descărcate din postări împreună într-un album Ecency din biblioteca ta foto.",
+      "microphone": "Ecency folosește microfonul pentru a putea dicta postări și comentarii (aceste înregistrări sunt trimise la Ecency pentru transcriere) și pentru a înregistra sunetul unui videoclip adăugat într-o postare."
+    },
+    "android": {
+      "no_browser": "Niciun browser disponibil",
+      "biometric_unlock_title": "Deblochează Ecency cu date biometrice",
+      "biometric_confirm": "Confirmă cu amprenta sau fața",
+      "image_unsupported_address": "Adresă de imagine neacceptată",
+      "image_create_failed": "Fișierul nu a putut fi creat",
+      "image_write_failed": "Fișierul nu a putut fi scris",
+      "image_too_large": "Imaginea este prea mare",
+      "image_download_failed": "Descărcarea a eșuat cu starea {status}",
+      "billing_disconnected": "Google Play Billing deconectat.",
+      "billing_no_screen": "Nu există ecran pe care să fie afișată achiziția.",
+      "billing_error": "Eroare Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Ai creat {count, plural, one {# postare} few {# postare} other {# postare}} luna aceasta. Continuă tot așa!",
-        "checkin": "Te-ai înregistrat {count, plural, one {# zi} few {# zi} other {# zi}} săptămâna aceasta. Continuă tot așa!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# postare nouă} few {# postări noi} other {# de postări noi}} în #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# încercare(ări) eșuate} few {# încercare(ări) eșuate} other {# încercare(ări) eșuate}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Serie de {n} zile"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Sunt permise doar conturile mai vechi de {days} zile",
-        "max_choices": "• Poți selecta până la {choices} opțiuni"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} transferuri rămase",
-        "schedule_summary": "{executions} transferuri, fiecare la {hours} ore"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Prea scurt pentru a primi puncte ({n, plural, one {# caracter} few {# caractere} other {# de caractere}} sau mai puține, fără linkuri)"
       },
       "chats": {
-        "people_joined": "{count} persoane s-au alăturat"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "în aproximativ {count, plural, one {# minut} few {# minute} other {# de minute}}",
+        "ban-remaining-hours": "în aproximativ {count, plural, one {# oră} few {# ore} other {# de ore}}",
+        "ban-remaining-days": "în aproximativ {count, plural, one {# zi} few {# zile} other {# de zile}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Folosește cel mult {n, plural, one {# etichetă} few {# etichete} other {# de etichete}}",
+          "too_long": "Căutarea este prea lungă. Folosește cel mult {n, plural, one {# caracter} few {# caractere} other {# de caractere}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Sunt necesare minimum {count} caractere",
-        "chars_remaining": "{count} caractere rămase"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Poți selecta cel mult {count, plural, one {# imagine} few {# imagini} other {# de imagini}} deodată"
+      },
+      "dictation": {
+        "stop_hint": "Oprește pentru a transcrie și a adăuga în postare. Cel mult {m, plural, one {# minut} few {# minute} other {# de minute}}.",
+        "rate": "{n} Points la {s, plural, one {# secundă} few {# secunde} other {# de secunde}}"
       },
       "transfer": {
-        "powering_down_info": "Următorul Power Down este în {days} zile, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Între {min} și {max, plural, one {# caracter} few {# caractere} other {# de caractere}}"
       }
     }
   }

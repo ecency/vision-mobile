@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "חבר Ecency Pro"
   },
   "perks": {
     "header": "הטבות",
@@ -31,42 +31,42 @@
     "promote_desc": "הביאו יותר עיניים לפוסט שלכם",
     "account_boost": "Boost לחשבון",
     "account_boost_desc": "בצעו Boost לכל חשבון",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "טעינת RC",
+    "rc_topup_desc": "המשיכו לפרסם כשנגמרים Resource Credits",
+    "streak_freeze_owned": "{n} במלאי",
+    "streak_freeze_buy": "הגנה על הרצף ({price} Points)",
+    "streak_freeze_buying": "מגינים",
+    "streak_freeze_error": "לא ניתן היה לרכוש הקפאת רצף. נסו שוב."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "פוסט יומי",
+    "streak": "רצף של {n} ימים",
+    "keep_streak": "שמרו על הרצף"
   },
   "waves": {
     "for_you": "בשבילך",
     "following": "עוקב",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "פידים מותאמים",
+    "custom_feeds_subtitle": "הצמידו מקורות ותגיות כדי להוסיף אותם ככרטיסיות פיד.",
+    "add_tag_placeholder": "הוסיפו תגית",
+    "sources": "מקורות",
+    "your_feeds": "הפידים שלכם",
+    "trending_tags": "תגיות פופולריות",
+    "shorts_empty": "אין עדיין סרטונים קצרים להצגה",
+    "mute": "השתקה",
+    "unmute": "ביטול השתקה"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "מתחילים",
+    "subtitle": "חדשים כאן? Waves הם פוסטים קצרים והדרך הקלה ביותר להצטרף.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "סגירה",
+    "item_wave": "פרסמו את ה-Wave הראשון שלכם",
+    "item_vote": "הצביעו על Wave שאהבתם",
+    "item_reply": "הגיבו למישהו",
+    "item_checkin": "בצעו צ׳ק-אין כדי להתחיל רצף",
+    "all_done_title": "הכול מוכן 🎉",
+    "all_done_subtitle": "אתם מוכנים. המשיכו לפרסם Waves!"
   },
   "profile": {
     "havent_commented": "לא הגיבו עדיין",
@@ -147,6 +147,16 @@
     "wizard_config_val": "גיל  |  נראות  |  פירוש",
     "attach_poll": "צרף סקר"
   },
+  "favorite_tags": {
+    "title": "תגיות",
+    "hint": "עקבו כדי לקבל התראות על פוסטים חדשים בתגית זו",
+    "following_hint": "אתם מקבלים התראות על פוסטים חדשים בתגית זו",
+    "follow": "מעקב",
+    "following": "במעקב",
+    "added": "עוקבים אחרי התגית",
+    "removed": "הפסקתם לעקוב אחרי התגית",
+    "empty_list": "אין כאן כלום"
+  },
   "favorites": {
     "add": "הוספת מועדף",
     "add_error": "לא ניתן היה להוסיף למועדפים",
@@ -181,7 +191,33 @@
     "payout": "תשלום",
     "details": "פרטים",
     "community": "קהילה",
-    "new_post": "פוסט חדש"
+    "new_post": "פוסט חדש",
+    "mute_post_title": "השתקת הפוסט",
+    "unmute_post_title": "ביטול השתקת הפוסט",
+    "mute_post_reason": "מדוע הפוסט מושתק?",
+    "unmute_post_reason": "מדוע הפוסט משוחזר?",
+    "manage": "ניהול הקהילה",
+    "manage_members": "חברים ותפקידים",
+    "manage_settings": "הגדרות הקהילה",
+    "manage_activities": "יומן פעילות",
+    "activities": "פעילות",
+    "no_activities": "אין פעילות עדיין",
+    "activities_load_failed": "לא ניתן לטעון את הפעילות. משכו למטה לרענון.",
+    "set_role": "הגדרת תפקיד",
+    "assign_role": "הקצאת תפקיד",
+    "assign_role_hint": "חפשו כל חשבון, גם כזה שלא הצטרף לקהילה, ואז בחרו תפקיד.",
+    "username_placeholder": "שם משתמש",
+    "invalid_username": "בחרו חשבון קיים מהתוצאות",
+    "members": "חברים",
+    "no_members": "לא נמצאו חברים",
+    "members_incomplete": "לא ניתן היה לטעון חלק מהחברים. משכו למטה לרענון.",
+    "members_load_failed": "לא ניתן לטעון את החברים. משכו למטה לרענון.",
+    "role_owner": "בעלים",
+    "role_admin": "מנהל",
+    "role_mod": "מודרטור",
+    "role_member": "חבר",
+    "role_guest": "אורח",
+    "role_muted": "מושתק"
   },
   "trade": {
     "swap_for": "מחליף {fromAmount} ב-{toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "פרסום מוצלב",
     "pin-blog": "הצמד לבלוג",
     "copy": "העתק קישור",
+    "copy-text": "העתקת טקסט",
+    "open-thread": "פתיחת שרשור",
     "unpin-community": "בטל הצמדה מהקהילה",
+    "mute-post": "השתקת פוסט",
+    "unmute-post": "ביטול השתקת פוסט",
     "mute": "השתקה / חסימה",
     "reblog": "שתף/י שוב",
     "undo-reblog": "בטל שיתוף מחדש",
@@ -232,24 +272,24 @@
     "unpin-reply": "בטל הצמדת תגובה"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "הפוסט הזה בשפה: {lang}. לתרגם ל{target}?",
+    "translate_to": "תרגום ל{lang}",
+    "show_original": "הצגת המקור",
+    "translated_from": "תורגם מ{lang}",
+    "change_language": "שינוי שפה"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "תרגום פוסט",
+    "source": "שפת מקור",
+    "target": "שפת יעד",
+    "detected": "זוהתה: {lang}",
+    "translate": "תרגום",
+    "apply": "החלה",
+    "review_note": "מוסיף בסוף הפוסט תרגום מכונה של הכתיבה שלכם. עברו עליו וערכו אותו לפני הפרסום.",
+    "too_short": "כתבו קצת יותר קודם. התרגום דורש לפחות כמה משפטים.",
+    "progress": "מתרגם {done} מתוך {total}...",
+    "error": "התרגום נכשל. נסו שוב.",
+    "add_title_marker": "הוספת סימון שפה לכותרת"
   },
   "side_menu": {
     "profile": "פרופיל",
@@ -296,7 +336,7 @@
     "hot": "חם",
     "popular": "מקובל",
     "new": "חדש",
-    "friends": "Following",
+    "friends": "עוקב",
     "my_blog": "הבלוג שלי"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "אין כאן מידע"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "תבניות",
+    "untitled": "תבנית ללא שם",
+    "empty_list": "שמרו פוסט כתבנית מהעורך כדי להשתמש בו שוב כאן.",
+    "delete_confirm": "בטוחים שברצונכם למחוק את התבנית הזו?",
+    "applied": "התבנית הוחלה כפוסט חדש",
+    "save_as_template": "שמירה כתבנית",
+    "name_placeholder": "שם התבנית",
+    "saved": "התבנית נשמרה"
   },
   "selection_list": {
     "available": "זמינים {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "הכול",
+      "replies": "תגובות",
+      "mentions": "אזכורים",
+      "rvotes": "הצבעות",
+      "follows": "עוקבים",
+      "reblogs": "שיתופים מחדש",
+      "transfers": "העברות",
+      "delegations": "האצלות",
+      "nfavorites": "מועדפים",
+      "tags": "תגיות",
+      "nbookmarks": "סימניות",
+      "payouts": "תשלומים",
+      "scheduled_published": "פוסטים מתוזמנים",
+      "account_updates": "עדכוני חשבון",
+      "weekly_earnings": "רווחים שבועיים"
     },
     "this_week": "השבוע",
     "reblog": "שיתף מחדש",
@@ -417,11 +458,15 @@
     "yesterday": "אתמול",
     "mention": "אוזכר ב",
     "favorites": "פרסם פוסט חדש",
+    "tags": "פרסם/ה ב-#{tag}",
+    "tags_bundle": "{count} פוסטים חדשים ב-#{tag}",
+    "tags_title": "פוסטים חדשים בתגית שאתם עוקבים אחריה",
     "mentions": "אזכורים",
     "spin": "הגיע הזמן להרוויח עוד Points",
     "last_week": "השבוע שעבר",
     "recent": "לאחרונה",
     "ignore": "התעלם\\ה ממך",
+    "blacklist": "הוסיף/ה אתכם לרשימה השחורה",
     "follow": "עקב\\ה אחרייך",
     "notification": "התראות",
     "this_month": "החודש הזה",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} יכול כעת לפרסם ולהצביע בשמכם. אם לא אישרתם זאת, בטלו את ההרשאה.",
     "weekly_earnings": "הרווחתם ${amount} השבוע{breakdown}",
     "payouts": "התקבל תשלום: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "פרסם פוסט מתוזמן",
+    "scheduled_published_title": "פוסט מתוזמן פורסם",
+    "scheduled_published_body": "הפוסט המתוזמן שלכם באוויר, הקישו כדי לצפות בו"
   },
   "recurrent": {
     "delete_failed": "מחיקת ההעברה החוזרת נכשלה, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "פתחו טיוטה אחרונה או צרו פוסט חדש",
     "reward_power_up": "Stake של 100%",
     "open_gallery": "פתחו גלריה",
+    "open_files": "בחירה מקבצים",
     "clipboard_no_image": "לא נמצאה תמונה בלוח",
     "clipboard_image_detected": "תמונה בלוח",
     "paste_image": "הדבק תמונה",
@@ -539,8 +585,10 @@
     "video": "וידאו",
     "scheduled_later": "מאוחר יותר",
     "settings_title": "אפשרויות פוסט",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "לא"
+    "support_ecency": "תמכו ב-Ecency {percent}%",
+    "alert_btn_no": "לא",
+    "short_reply_hint": "תגובות של {n} תווים או פחות לא מזכות בנקודות (קישורים לא נספרים)",
+    "short_content_hint": "קצר מדי כדי לזכות בנקודות ({n} תווים או פחות, לא כולל קישורים)"
   },
   "time": {
     "week": "שבועות",
@@ -655,7 +703,41 @@
     "select_emoji": "בחירת אימוג'י",
     "more_emojis": "עוד",
     "search_emojis": "חיפוש אימוג'ים...",
-    "no_emoji_found": "לא נמצא אימוג'י"
+    "no_emoji_found": "לא נמצא אימוג'י",
+    "ban-reason-spray": "הפרסום שלכם הושהה כי אותה הודעה נשלחה לכמה ערוצים בבת אחת.",
+    "ban-reason-mass-dm": "הפרסום שלכם הושהה כי הודעה נשלחה להרבה אנשים בבת אחת.",
+    "ban-reason-generic": "הפרסום שלכם בצ'אט הושהה.",
+    "ban-can-still-read": "אפשר עדיין לקרוא את הצ'אט.",
+    "ban-unlocks": "הפרסום ייפתח {when}.",
+    "ban-remaining-soon": "בעוד פחות מדקה",
+    "ban-remaining-minutes": "בעוד כ-{count} דקות",
+    "ban-remaining-hours": "בעוד כ-{count} שעות",
+    "ban-remaining-days": "בעוד כ-{count} ימים",
+    "new_group": "קבוצה חדשה",
+    "new_group_hint": "הוסיפו {min} עד {max} אנשים כדי להתחיל שיחה קבוצתית.",
+    "new_group_search": "חיפוש אנשים לפי שם משתמש",
+    "new_group_full": "בקבוצה יכולים להיות עד {max} אנשים נוספים.",
+    "new_group_no_results": "לא נמצא בצ'אט אף אחד בשם הזה.",
+    "new_group_search_failed": "החיפוש לא עבד. בדקו את החיבור ונסו שוב.",
+    "new_group_remove": "הסרת @{username}",
+    "new_group_create": "פתיחת קבוצה",
+    "new_group_failed": "לא ניתן היה לפתוח את הקבוצה. נסו שוב.",
+    "rename_group": "שינוי שם הקבוצה",
+    "rename_group_hint": "תנו לקבוצה שם שכל חבריה יראו. השאירו ריק כדי להציג את שמות החברים במקומו.",
+    "group_name": "שם הקבוצה",
+    "rename_group_too_long": "שם קבוצה יכול להכיל עד {max} תווים.",
+    "rename_group_not_owner": "רק מי שפתח את הקבוצה יכול לשנות את שמה.",
+    "rename_group_failed": "לא ניתן היה לשנות את שם הקבוצה. נסו שוב.",
+    "group_renamed": "{user} שינה/תה את שם הקבוצה ל\"{name}\"",
+    "group_name_cleared": "{user} הסיר/ה את שם הקבוצה",
+    "group_members": "חברי הקבוצה",
+    "save": "שמירה",
+    "cancel": "ביטול",
+    "reactions_title": "תגובות אימוג'י",
+    "reactor_you": "אתם",
+    "reactor_unknown": "מישהו",
+    "see_who_reacted": "לחיצה ארוכה כדי לראות מי הגיב",
+    "group": "קבוצה"
   },
   "free_estm": {
     "timer_text": "הסיבוב החינמי הבא בעוד",
@@ -684,6 +766,32 @@
     "transaction_fail": "העסקה נכשלה"
   },
   "search_result": {
+    "error": "לא ניתן היה להשלים את החיפוש. נסו שוב",
+    "filters": {
+      "title": "מסננים",
+      "open": "מסננים",
+      "author": "מחבר",
+      "author_placeholder": "שם משתמש",
+      "category": "קטגוריה",
+      "category_placeholder": "קהילה או קטגוריה",
+      "tags": "תגיות",
+      "tags_placeholder": "מופרדות בפסיקים",
+      "type": "סוג",
+      "type_all": "הכול",
+      "type_post": "פוסטים",
+      "type_comment": "תגובות",
+      "date": "תאריך",
+      "date_week": "שבוע אחרון",
+      "date_month": "חודש אחרון",
+      "date_year": "שנה אחרונה",
+      "date_all": "כל הזמנים",
+      "sort": "מיון",
+      "apply": "החלה",
+      "active": "{n} פעילים",
+      "too_many_tags": "השתמשו ב-{n} תגיות לכל היותר",
+      "too_long": "החיפוש ארוך מדי. השתמשו ב-{n} תווים לכל היותר",
+      "needs_criteria": "הזינו מונח חיפוש, או מחבר, קטגוריה או תגית לסינון"
+    },
     "communities_filter": {
       "new": "חדשות",
       "my": "הקהילות שלי",
@@ -727,7 +835,7 @@
     "title": "פרסום צולב"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "הכותב דיווח על שימוש בבינה מלאכותית"
   },
   "ai_assist": {
     "title": "עוזר הכתיבה החכם",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "קבלת תגיות רלוונטיות לפרסום שלכם",
     "action_generate_title": "יצירת כותרת",
     "action_generate_title_desc": "יצירת אפשרויות כותרת מושכות",
-    "action_summarize": "Recap",
+    "action_summarize": "סיכום",
     "action_summarize_desc": "יצירת סיכום תמציתי",
     "action_check_grammar": "בדיקת דקדוק",
     "action_check_grammar_desc": "תיקון שגיאות דקדוק וכתיב",
+    "action_generate_image": "יצירת תמונה",
+    "action_generate_image_desc": "יצירת תמונת AI לפוסט שלכם",
+    "cost_from": "מ-{cost} {unit}",
     "text_label": "הטקסט שלכם",
     "text_placeholder": "הדביקו או הקלידו את התוכן שלכם כאן...",
     "min_chars": "נדרשים לפחות {count} תווים",
@@ -797,16 +908,26 @@
     "remind_later": "הזכירו לי מאוחר יותר",
     "success_subscribe": "ההצטרפות בוצעה בהצלחה!",
     "payloadTooLarge": "גודל הקובץ גדול מדי, אנא שנו את הגודל או העלו תמונה קטנה יותר",
+    "too_many_images": "אפשר לבחור עד {count} תמונות בכל פעם",
     "fail_follow": "המעקב נכשל!",
     "clear_user_alert": "האם את/ה בטוח/ה שברצונך למחוק את כל נתוני המשתמש?",
     "cancel": "בטל\\י",
     "connection_success": "החיבור בוצע בהצלחה!",
     "rc_down": "אין מספיק Resource Credits לביצוע הפעולה! \n\nחזקו את החשבון שלכם כדי להמשיך ליהנות מהחוויה. האם תרצו לחזק את החשבון שלכם, עכשיו?",
+    "rc_down_title": "אין מספיק Resource Credits",
+    "rc_precheck_title": "ייתכן שהפוסט גדול מדי לפרסום",
+    "rc_precheck_body": "נראה שה-Resource Credits שלכם נמוכים מדי לפוסט בגודל כזה.",
+    "rc_down_body": "אין לכם מספיק Resource Credits לפעולה הזו.\n\nמלאו עכשיו באמצעות Points כדי להמשיך, או חזקו את החשבון לצמיתות.",
+    "rc_down_topup": "מילוי RC באמצעות Points",
+    "rc_down_boost": "חיזוק החשבון",
     "done": "בוצע",
     "something_wrong_alt": "בינתיים, נסו את Ecency.com מהדפדפן שלכם",
     "same_user": "משתמש זה כבר נוסף לרשימה",
     "fail": "נכשל!",
     "operation_failed_with_reason": "{operation} נכשל: {reason}",
+    "request_timed_out": "החיבור לוקח יותר מדי זמן. בדקו את הרשת ונסו שוב.",
+    "load_failed_retry": "לא ניתן היה לטעון זאת. נסו שוב.",
+    "retrying": "מנסה שוב...",
     "wallet_refresh_failed": "רענון הארנק נכשל. נסו שוב.",
     "wallet_refresh_missing_account": "רענון הארנק נכשל: חשבון חסר.",
     "boost_failed": "ה-Boost נכשל.",
@@ -949,31 +1070,31 @@
     "video_attached": "סרטון מצורף"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "הצבעה",
+    "upvoted": "הצבעתם",
+    "downvoted": "הצבעה נגד",
+    "upvote_hint": "הקישו פעמיים כדי לפתוח אפשרויות הצבעה",
+    "payout_details": "פרטי התשלום",
+    "a11y_votes": "{count, plural, one {הצבעה #} two {# הצבעות} other {# הצבעות}}",
+    "a11y_voters_hint": "הצגת המצביעים",
+    "a11y_reblogs": "{count, plural, one {שיתוף מחדש #} two {# שיתופים מחדש} other {# שיתופים מחדש}}",
+    "a11y_reblogs_hint": "הצגת שיתופים מחדש",
+    "a11y_comments": "{count, plural, one {תגובה #} two {# תגובות} other {# תגובות}}",
+    "a11y_comments_hint": "הצגת תגובות",
+    "a11y_reply_hint": "תגובה",
+    "a11y_tip": "שליחת טיפ",
+    "a11y_tips": "{count, plural, one {טיפ #} two {# טיפים} other {# טיפים}}",
+    "a11y_edit": "עריכת תגובה",
+    "a11y_delete": "מחיקת תגובה",
+    "a11y_show_replies": "הצגת תגובות",
+    "a11y_hide_replies": "הסתרת תגובות",
+    "a11y_post_options": "אפשרויות פוסט",
+    "a11y_views": "{count, plural, one {צפייה #} two {# צפיות} other {# צפיות}}",
+    "source_ecency": "פורסם עם Ecency",
+    "a11y_stats_hint": "הצגת סטטיסטיקות הפוסט",
     "image": "תמונה",
     "reveal_muted": "מושתק\nהקישו כדי לחשוף את התוכן",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "הקישו כדי לטעון תמונה",
     "in": "ב",
     "poll": "סקר",
     "copy_link": "העתקת הקישור",
@@ -998,13 +1119,14 @@
     "save_to_local": "הורדה למכשיר",
     "muted": "התוכן הושתק בשל הפרה",
     "community_muted": "התוכן הושתק בשל הפרת הנחיות הקהילה",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "תוכן מחשבון בעל מוניטין נמוך",
+    "muted_downvoted": "תוכן שמשתמשים הצביעו נגדו",
+    "muted_low_trust": "חשבון בעל מוניטין נמוך עם קישור חיצוני לא מאומת",
+    "muted_reveal": "הקישו כדי להציג",
     "promoted": "מקודם",
     "image_saved": "התמונה נשמרה בגלריית התמונות",
     "words": "מילים",
     "reading": "קריאה",
-    "listen": "האזנה",
     "min": "דק'",
     "summarize_start": "התחל"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "הפוסט אינו קיים",
     "invalid_link": "הכתובת אינה חוקית, נסה שוב עם כתובת חוקית או נסה לפתוח אותה בדפדפן אינטרנט",
-    "no_existing_user": "המשתמש אינו קיים"
+    "no_existing_user": "המשתמש אינו קיים",
+    "posting_key_request": "{requester} מבקש/ת את מפתח הפרסום הפרטי של @{username}.\n\nהמשיכו רק אם אתם סומכים על הבקשה.",
+    "posting_key_request_unnamed": "אפליקציה אחרת מבקשת את מפתח הפרסום הפרטי של @{username}.\n\nהמשיכו רק אם אתם סומכים על הבקשה.",
+    "auth_request_as_user": "{requester} רוצה לחבר אתכם בתור @{username}.\n\nרק שם המשתמש והוכחת התחברות משותפים. אף מפתח לא יוצא מ-Ecency.",
+    "auth_request_as_current": "{requester} רוצה לחבר אתכם עם חשבון ה-Ecency שלכם.\n\nרק שם המשתמש והוכחת התחברות משותפים. אף מפתח לא יוצא מ-Ecency."
   },
   "payout": {
     "breakdown": "פירוט",
@@ -1065,7 +1191,7 @@
     "open": "פתח כתובת",
     "invalid_key_desc": "אנא התחבר עם מפתח {key} או עם מפתח המאסטר כדי לבצע עסקה זו",
     "auth_transfer_confirm": "לאשר העברה אל {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "אשרו רק אם אתם סומכים על מקור הקישור הזה. האישור משדר את הפעולה שלהלן מהחשבון שלכם באמצעות מפתח ה-{authority} שלכם."
   },
   "voters_dropdown": {
     "rewards": "תגמולים",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "צריך להכיל אותיות, מספרים ומקף בלבד",
       "username_no_ascii_first_letter_error": "חייב להתחיל באות",
       "username_contains_double_hyphens": "אסור שיכיל מקף כפול",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "שם המשתמש הזה דומה מדי לחשבון של בורסת קריפטו ועלול לבלבל אחרים. בחרו שם ייחודי יותר.",
+      "username_restricted_prefix": "שמות משתמש שמתחילים ב-“uid” ואחריו מספרים אינם מותרים, כי הם משמשים לעתים קרובות להתחזות לאחרים. בחרו שם אחר.",
       "username_contains_underscore": "אסור שיכיל קו תחתון"
     },
     "500_error": "לא ניתן היה לעבד את בקשתך, ייתכן שתור ההרשמה מלא! נסה שוב בעוד מספר דקות...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "שם המשתמש כבר תפוס",
+      "14": "כתובת האימייל כבר רשומה",
+      "15": "הזינו כתובת אימייל תקינה",
+      "16": "הזינו שם משתמש תקין",
+      "17": "שם המשתמש ארוך מדי, בחרו שם קצר יותר",
+      "19": "השתמשו בכתובת אימייל קבועה, או קבלו חשבון Premium במקום",
+      "21": "ההפניה הזו אינה תקפה",
+      "28": "לא ניתן היה לעבד את הבקשה שלכם: תור ההרשמה כנראה מלא. נסו שוב בעוד כמה דקות.",
+      "107": "זוהה חיבור VPN. כבו את ה-VPN ונסו שוב, או קבלו חשבון Premium במקום.",
+      "110": "כדי למנוע ניצול לרעה, אנו מגבילים את מספר החשבונות לאדם או לרשת. נסו שוב מרשת אחרת.",
+      "111": "זוהה חיבור Tor. כבו את Tor בזמן ההרשמה.",
+      "112": "לא הצלחנו לאמת את החיבור שלכם כרגע. נסו שוב בעוד כמה דקות."
     },
     "have_account_text": "כבר יש לך חשבון?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "קבל חשבון Hive מלא, שיטה זו כוללת בדיקות בסיסיות כדי לוודא שרשת בוטים לא תנצל לרעה את ברז ההרשמה שלנו.",
     "btn_register": "הרשמה חינם",
     "title": "חשבון חינמי"
+  },
+  "dictation": {
+    "title": "הקלטה להקלדה",
+    "start": "הקלטה",
+    "stop": "עצירה",
+    "record_more": "הקלטה נוספת",
+    "done": "סיום",
+    "recording": "מקליט",
+    "stop_hint": "עצרו כדי לתמלל ולהוסיף לפוסט. עד {m} דקות.",
+    "inserted": "נוסף לפוסט שלכם. הקליטו עוד, או הקישו על סיום.",
+    "transcribing": "מתמלל",
+    "rate": "{n} Points לכל {s} שניות",
+    "cost_running": "{n} Points עד כה",
+    "cost_running_free": "חינם עד כה",
+    "free_remaining": "ה-{n} x {s} שניות הבאות שלכם חינם היום",
+    "price_loading": "בודק מחיר",
+    "price_error": "לא ניתן לטעון את מחירי התמלול.",
+    "denied": "Ecency צריכה גישה למיקרופון כדי להקליד בדיבור. אפשרו אותה בהגדרות ונסו שוב.",
+    "error_empty": "לא זוהה דיבור בהקלטה.",
+    "error_insufficient_points": "אין מספיק Points כדי לתמלל את ההקלטה.",
+    "error_rate_limited": "יותר מדי הקלטות כרגע. נסו שוב בעוד מעט.",
+    "error_too_long": "ההקלטה ארוכה מדי לתמלול.",
+    "error_failed": "לא ניתן היה לתמלל את ההקלטה. נסו שוב.",
+    "error_recorder": "לא ניתן היה להתחיל להקליט. נסו שוב."
   },
   "wallet": {
     "delegations_out": "האצלות יוצאות",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "צ'ק-אין באופן קבוע מעניק לך 0.25 Points.",
     "fill_transfer_from_savings": "החיסכון בוצע",
     "activities": "פעילויות",
+    "no_activities": "אין עסקאות עדיין",
+    "activities_failed": "לא ניתן לטעון את העסקאות. משכו למטה כדי לנסות שוב.",
     "tap_update": "הקש לעדכון",
     "mining_lottery": "זכייה בהגרלה",
     "checkin": "צ'ק-אין",
     "tokens_transfer": "אסימונים הועברו",
     "outgoing_transfer_title": "העברה/מתנה",
+    "burned_title": "שימוש ב-AI",
+    "burned_description": "Points שהוצאו על תכונת AI",
+    "burn_refund_title": "החזר AI",
+    "burn_refund_description": "Points שהוחזרו לאחר בקשת AI שנכשלה",
     "manage_assets": "הוסף / הסר נכסים",
     "selected_assets": "נכסים נבחרים",
     "nft_setPropertyPermissions": "הרשאות מאפיין הוגדרו עבור סמל NFT",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "עדכון דיוק אסימונים",
     "tokens_transferOwnership": "בעלות על האסימון הועברה",
     "withdraw_vesting": "הסרה מנעילה",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "חשבונות משיכה",
     "delegate_engine": "האצל",
     "market_close": "ההזמנה נסגרה",
     "nftmarket_transferFee": "עמלת הזמנת קנייה",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "קבל Points",
     "escrow_approve": "אישור נאמנות",
     "expires": "פג תוקף",
+    "transaction_id": "מזהה עסקה",
+    "copy_transaction_id": "העתקת קישור לעסקה",
+    "filter_activities": "סינון פעילויות",
+    "filter_activities_desc": "בחרו אילו פעולות ההיסטוריה תבקש",
+    "filter_all": "בחירת הכול",
+    "filter_none": "ניקוי הכול",
+    "filter_apply": "החלה",
     "author_reward": "תגמול הסופר",
     "withdraw_hbd": "משיכה מחיסכון",
     "convert_request": "בקשת המרה",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "טעינת RC",
+    "desc": "הגברת RC לטווח קצר כדי שתוכלו להמשיך לפרסם.",
+    "confirm": "להוציא Points כדי לטעון את ה-Resource Credits שלכם?",
+    "insufficient": "אין לכם מספיק Points.",
+    "buy_points": "קניית Points"
   },
   "ai_image_generator": {
     "title": "מחולל תמונות AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "מותאם אישית ({hours} שע')",
+    "balance_load_failed": "לא ניתן לטעון את היתרה. הקישו כדי לנסות שוב.",
+    "precision_load_failed": "לא ניתן לטעון את פרטי הטוקן, ולכן אפשר לשלוח רק סכומים שלמים. הקישו כדי לנסות שוב.",
     "close": "סגירה",
     "favorite_username_placeholder": "שם משתמש",
     "invalid_recipient_qr": "לא נמצא שם משתמש בקוד QR זה.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "נהל הרשאות",
     "pincode": "קוד PIN",
     "general": "כללי",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "תמכו ב-Ecency",
+    "support_beneficiary": "שיתוף תגמולי פוסטים עם Ecency",
+    "support_beneficiary_percent": "חלק מתגמולי הפוסטים",
+    "support_curation": "עיכוב חלק מתגמולי האוצרות",
+    "support_curation_percent": "שיעור העיכוב מתגמולי האוצרות",
     "feedback_body": "כתוב את הודעתך כאן!\n\nשם משתמש Hive: {username}\nגרסת אפליקציה: {appVersion}\nפלטפורמה: {platform}\n",
     "show_imgs": "הצג תמונות",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "תגיב/י",
       "bookmark": "סימניות",
+      "tags": "תגיות",
       "reblog": "שתף/י",
       "favorite": "מועדפים",
       "mention": "איזכור",
@@ -1599,10 +1765,10 @@
       "transfers": "העברות",
       "vote": "הצבע/י",
       "follow": "עקוב/י",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "פוסט מתוזמן פורסם",
+      "payouts": "תשלומים",
+      "account_update": "עדכוני חשבון",
+      "weekly_earnings": "רווחים שבועיים",
       "fcm_unavailable": "התראות דחיפה אינן נתמכות במכשיר זה. תקבל התראות רק כאשר האפליקציה פתוחה."
     },
     "keys_warning": "מידע רגיש של החשבון!\nיש לאבטח את Ecency באמצעות קוד PIN לפני הצגת מפתחות פרטיים.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "שלח/י משוב",
     "rate_app": "דרגו את Ecency",
+    "email_digests": "תקצירים במייל",
     "rate": "דירוג",
     "dm-privacy-updated": "הגדרות פרטיות ההודעות הישירות עודכנו בהצלחה",
     "dm-privacy-failed": "עדכון הגדרות פרטיות ההודעות הישירות נכשל",
@@ -1685,19 +1852,29 @@
     "request_sent": "בקשתך למחיקה נשלחה",
     "confirm_delete_body": "האם אתה בטוח שברצונך למחוק את החשבון? פעולה זו תמחק את כל הנתונים שלך"
   },
-  "tts": {
-    "settings_title": "הגדרות טקסט-לדיבור",
-    "voice": "קול",
-    "voice_hint": "ייעשה שימוש בקול ברירת המחדל של המערכת",
-    "speed": "מהירות",
-    "pitch": "גובה צליל",
-    "test_voice": "בדוק קול",
-    "settings_info": "הגדרות אלו ישמשו בעת הקראת פוסטים בקול",
-    "play": "נגן",
-    "pause": "השהה",
-    "language": "שפה",
-    "language_auto": "זיהוי אוטומטי",
-    "language_hint": "זיהוי אוטומטי בוחר את השפה על סמך תוכן הפוסט"
+  "listen": {
+    "title": "האזנה לפוסט",
+    "minutes": "~{n} דק'",
+    "login": "התחברות",
+    "unlock": "פתיחה · {n} Points",
+    "confirm": "להוציא {n} Points כדי להאזין לפוסט? האודיו שלכם להשמעה חוזרת בכל עת.",
+    "not_enough_title": "אין מספיק Points",
+    "not_enough": "האזנה דורשת {required} Points ויש לכם {available}.",
+    "get_points": "קבלת Points",
+    "unlock_failed": "לא ניתן היה לפתוח את האודיו, נסו שוב",
+    "failed_refunded": "לא ניתן היה ליצור את האודיו, ה-Points שלכם הוחזרו",
+    "preparing": "מכין אודיו…",
+    "preparing_eta": "מכין אודיו, בערך {n} דק'…",
+    "preparing_progress": "מכין אודיו · {n}%",
+    "waiting": "ממתין בתור, {n} לפניכם…",
+    "next_in_line": "הבא בתור…",
+    "play": "ניגון",
+    "pause": "השהיה",
+    "seek": "דילוג",
+    "speed": "מהירות ניגון",
+    "language": "שפת האודיו",
+    "unavailable": "לא ניתן היה לטעון את האודיו.",
+    "retry": "נסו שוב"
   },
   "posting_authority": {
     "title": "אפשר פרסום מהיר יותר",
@@ -1732,7 +1909,7 @@
     "error-auth": "האימות נכשל. אנא התחבר שוב.",
     "error-generic": "העלאת הווידאו נכשלה. אנא נסה שוב.",
     "error-too-long-short": "סרטונים קצרים חייבים להיות באורך 60 שניות או פחות.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "פוסט יכול להכיל סרטון אחד בלבד. הסירו את הסרטון הנוכחי לפני הוספת סרטון אחר.",
     "select_source": "הוסף וידאו",
     "record": "הקלט וידאו",
     "choose_library": "בחר מהספרייה"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "שתף עדכון מהיר"
   },
+  "newsletter": {
+    "screen_title": "תקצירים במייל",
+    "title": "{list}",
+    "body_own": "סיכום שבועי או חודשי של ההתראות שלכם במייל.",
+    "body_creator": "פוסטים חדשים של {list} בתיבת הדואר שלכם.",
+    "body_community": "תקציר של פוסטים חדשים ב-{list} במייל.",
+    "body_site": "המיטב של Ecency בתיבת הדואר שלכם.",
+    "first_publish_title": "מזל טוב על הפוסט הראשון!",
+    "first_publish_body": "רוצים תקציר התראות במייל? שבועי או חודשי, אפשר לשנות או לבטל בכל עת בהגדרות.",
+    "list_own": "תקציר ההתראות שלי",
+    "list_site": "הניוזלטר של Ecency",
+    "status_active": "אתם רשומים.",
+    "status_pending": "ממתין לאישור במייל.",
+    "status_short_active": "פעיל",
+    "status_short_pending_confirmation": "ממתין",
+    "status_short_suppressed": "הופסק",
+    "status_short_ended": "הסתיים",
+    "cadence_weekly": "שבועי",
+    "cadence_monthly": "חודשי",
+    "email_placeholder": "you@example.com",
+    "subscribe": "הרשמה",
+    "update": "עדכון",
+    "resend": "שליחת אישור מחדש",
+    "leave": "עזיבת התקציר",
+    "cancel": "ביטול",
+    "ok": "אישור",
+    "manage": "ניהול",
+    "check_inbox_title": "בדקו את תיבת הדואר",
+    "check_inbox_body": "שלחנו קישור אישור אל {email}. ההרשמה תתחיל לאחר האישור.",
+    "subscribed": "נרשמתם לתקציר במייל",
+    "left": "עזבתם את התקציר",
+    "refused": "לא ניתן לרשום את הכתובת הזו.",
+    "unavailable": "תקצירים במייל אינם זמינים כרגע.",
+    "too_many": "יותר מדי ניסיונות, נסו שוב מאוחר יותר.",
+    "fail": "משהו השתבש, נסו שוב.",
+    "empty": "אין עדיין תקצירים במייל. הירשמו למטה כדי להתחיל.",
+    "discover": "עוד במייל",
+    "stop_all": "הפסקת הכול",
+    "stop_all_title": "להפסיק את כל המיילים?",
+    "stop_all_body": "לא יישלח יותר דואר מ-Ecency אל {email}. הרשמות בכתובות אחרות יישארו.",
+    "stop_all_ok": "הפסקת הכול",
+    "stop_all_done": "הכתובת הוסרה מכל הדואר",
+    "profile_option": "תקציר במייל",
+    "subscriber_count": "{weekly} מנויים שבועיים • {monthly} מנויים חודשיים במייל",
+    "community_button": "ניוזלטר"
+  },
+  "mod_notes": {
+    "title": "הוספת סיבה",
+    "placeholder": "סיבה (גלויה למודרטורים אחרים)",
+    "confirm": "אישור",
+    "cancel": "ביטול"
+  },
+  "community_settings": {
+    "title_header": "הגדרות הקהילה",
+    "title_label": "כותרת",
+    "about": "אודות",
+    "lang": "שפה",
+    "description": "תיאור",
+    "rules": "כללים",
+    "nsfw": "לא בטוח לצפייה בעבודה",
+    "save": "שמירה",
+    "required": "שדה חובה",
+    "title_length": "בין {min} ל-{max} תווים",
+    "owner_admin_only": "רק הבעלים והמנהלים יכולים לשנות הגדרות אלה."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "מורחב",
+        "collapsed": "מכווץ"
+      },
+      "a11y_chat": {
+        "quote": "משיבים ל-{author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "בחירה",
+        "deselect": "ביטול בחירה"
+      },
+      "store": {
+        "billing_unavailable": "רכישות באפליקציה אינן מותרות במכשיר זה.",
+        "verification_failed": "ה-App Store לא הצליח לאמת את הרכישה.",
+        "cancelled": "הרכישה בוטלה",
+        "unknown_result": "תוצאת רכישה לא ידועה"
+      },
+      "navigation": {
+        "feed_unavailable": "הפיד הזה עדיין לא זמין.",
+        "link_cannot_open": "לא ניתן לפתוח את הקישור.",
+        "video_cannot_play": "לא ניתן לנגן את הסרטון."
+      },
+      "media": {
+        "load_failed": "לא ניתן היה לטעון את הפריט. בדקו את החיבור ונסו שוב.",
+        "loading": "טוען מדיה",
+        "download_failed": "ההורדה נכשלה עם סטטוס {status}"
+      },
+      "sign_in": {
+        "required": "נדרשת התחברות",
+        "to_reply": "התחברו כדי להגיב.",
+        "to_vote": "התחברו כדי להצביע.",
+        "button": "התחברות"
+      },
+      "account": {
+        "logout_user": "התנתקות מ-@{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {הצבעה #} two {# הצבעות} other {# הצבעות}}  •  {replies, plural, one {תגובה #} two {# תגובות} other {# תגובות}}",
+        "voting_power": "עוצמת הצבעה {percent}",
+        "remove_favourite": "הסרה מהמועדפים",
+        "add_favourite": "הוספה למועדפים"
+      },
+      "waves": {
+        "clear_tag_filter": "ניקוי סינון התגית {tag}",
+        "new_wave": "Wave חדש",
+        "replies_open_thread": "{count, plural, one {תגובה #, פתיחת שרשור} two {# תגובות, פתיחת שרשור} other {# תגובות, פתיחת שרשור}}",
+        "characters": "{count} מתוך {max} תווים",
+        "retry": "{message}\nנסו שוב",
+        "playing": "מנגן {permlink}",
+        "video_attached_remove": "סרטון מצורף, הקישו להסרה",
+        "image_attached_remove": "תמונה מצורפת, הקישו להסרה",
+        "take_photo": "צילום תמונה",
+        "edit_poll": "עריכת סקר",
+        "add_poll": "הוספת סקר",
+        "add_video": "הוספת סרטון"
+      },
+      "reading": {
+        "reply_to": "תגובה ל-{username}",
+        "opens_post": "פותח את הפוסט",
+        "sort_comments": "מיון תגובות",
+        "sort_comments_value": "מיון תגובות, {sort}",
+        "no_comments": "אין תגובות עדיין.",
+        "loading_post": "טוען פוסט",
+        "show_version": "הצגת גרסה",
+        "show_changes": "הצגת שינויים",
+        "replying_to": "משיבים ל-@{username}",
+        "reply_text": "טקסט התגובה",
+        "translate_from": "מ",
+        "translate_to": "אל"
+      },
+      "feed": {
+        "tab_pinned": "{label}, מוצמד",
+        "tab_add": "{label}, הוספה",
+        "customise": "התאמה אישית"
+      },
+      "card": {
+        "in_category": "ב-{category}",
+        "pinned": "מוצמד",
+        "by_author": "מאת {username}",
+        "payout": "תגמול {payout}",
+        "payout_declined": "תגמול {payout}, נדחה",
+        "reblogged_by": "שותף מחדש על ידי {username}"
+      },
+      "shell": {
+        "close_menu": "סגירת התפריט"
+      },
+      "editor": {
+        "thumbnail_pick_another": "תמונה ממוזערת, בחרו תמונה אחרת",
+        "words": "{count, plural, one {מילה #} two {# מילים} other {# מילים}}",
+        "poll_min_age": "גיל חשבון מינימלי (ימים): {days}",
+        "poll_max_options": "מקסימום אפשרויות: {count}",
+        "thumbnail_selected": "התמונה הממוזערת שנבחרה",
+        "thumbnail": "תמונה ממוזערת",
+        "uploaded_image": "תמונה שהועלתה",
+        "community_search": "חיפוש"
+      },
+      "vote": {
+        "not_voted": "לא הצבעתם",
+        "voting": "מצביע",
+        "failed_with": "ההצבעה נכשלה: {message}",
+        "failed": "ההצבעה נכשלה",
+        "payout": "תגמול {payout}",
+        "payout_declined": "תגמול {payout}, נדחה",
+        "percent": "{percent} אחוז",
+        "upvote_percent": "הצבעה בעד {percent}%"
+      },
+      "settings": {
+        "on": "פועל",
+        "off": "כבוי"
+      },
+      "lock": {
+        "biometric_reason": "הפעלת ביטול נעילה ביומטרי עבור Ecency",
+        "offer_title": "ביטול נעילה עם {method}",
+        "offer_use": "שימוש ב-{method}"
+      },
+      "keys": {
+        "hidden_while_captured": "המפתחות מוסתרים בזמן הקלטת המסך או שיקופו.",
+        "screenshot_notice": "צולם מסך. המפתחות הפרטיים הוסתרו שוב; אם בצילום מופיע מפתח, מחקו אותו.",
+        "hold_hint": "לחצו והחזיקו מפתח כדי להציג אותו.",
+        "hold_to_show": "החזקה להצגה"
+      },
+      "wallet": {
+        "cancel_order": "לבטל את ההזמנה?",
+        "days": "{count, plural, one {יום #} two {# ימים} other {# ימים}}"
+      },
+      "chat": {
+        "reactors_hint": "לחיצה ארוכה כדי לראות מי הגיב",
+        "see_reactors": "הצגת מי הגיב"
+      },
+      "esie": {
+        "still": "{mood}, במנוחה"
+      }
+    },
+    "ui": {
+      "profile_of": "הפרופיל של @{username}",
+      "preview": "תצוגה מקדימה ({index}/{count})",
+      "balance": "יתרה: {amount}",
+      "expires_in": "פג תוקף בעוד {time}",
+      "expired": "פג התוקף. סגרו ונסו שוב.",
+      "user_has_no_posts": "@{username} עדיין לא פרסם/ה דבר",
+      "attach_image": "צירוף תמונה",
+      "auto": "אוטומטי",
+      "back": "חזרה",
+      "hot": "חם",
+      "image_of": "תמונה {index} מתוך {count}",
+      "new": "חדש",
+      "nsfw_tap_to_reveal": "NSFW הקישו להצגה",
+      "new_reply": "תגובה חדשה",
+      "remove": "הסרה",
+      "unlock_ecency": "פתיחת Ecency",
+      "update_it": "עדכון",
+      "update_it_or_post_this_as": "לעדכן אותה, או לפרסם זאת כתגובה חדשה?",
+      "use_pin": "שימוש בקוד PIN",
+      "your_reply_was_already_posted": "התגובה שלכם כבר פורסמה",
+      "error_try_again": "{message} לנסות שוב?",
+      "auth": {
+        "account_label": "חשבון: @{username}",
+        "approve_the_request_in_your_wallet": "אשרו את הבקשה באפליקציית הארנק שלכם.",
+        "copy_key": "העתקת {title}",
+        "current_account": "החשבון הנוכחי",
+        "qr_code": "קוד QR",
+        "requested_by": "התבקש על ידי {requester}",
+        "pin_digits": "{filled} מתוך {total, plural, one {ספרה #} two {# ספרות} other {# ספרות}}",
+        "private_key_shown": "{title}, המפתח הפרטי מוצג",
+        "open_wallet_app": "פתיחת אפליקציית הארנק",
+        "hiveauth_scan": "אשרו ב-Hive Keychain או בארנק אחר התומך ב-HiveAuth: פתחו אותו במכשיר זה, או סרקו איתו את הקוד.",
+        "switching": "מחליף...",
+        "logout_all": "התנתקות מכל החשבונות",
+        "logout_all_title": "להתנתק מכל חשבון במכשיר זה?",
+        "stored_key": "@{username} כבר מחובר במכשיר זה. המפתחות השמורים נשארים; רק ההפעלה מתחדשת.",
+        "stored_hivesigner": "@{username} כבר מחובר עם HiveSigner במכשיר זה. ההפעלה תוחלף.",
+        "stored_hiveauth": "@{username} מחובר עם HiveAuth במכשיר זה. החתימה תתבצע במקום זאת עם HiveSigner.",
+        "method_key": "מפתח",
+        "logout_failed": "ההתנתקות נכשלה"
+      },
+      "browser": {
+        "account": "חשבון",
+        "authority": "הרשאה",
+        "phishing": "אזהרה: הדומיין הזה סומן כאתר פישינג ידוע. המשיכו בזהירות רבה."
+      },
+      "chat": {
+        "cancel_edit": "ביטול העריכה",
+        "cancel_reply": "ביטול התגובה",
+        "copied_to_clipboard": "הועתק ללוח",
+        "edited_at": "נערך {time}",
+        "group_options": "אפשרויות קבוצה",
+        "pinned_messages": "הודעות מוצמדות",
+        "remove_user": "הסרת @{username}",
+        "sort_by_name": "מיון לפי שם",
+        "more": "עוד",
+        "reaction_label": "{emoji} {count}. לחיצה ארוכה כדי לראות מי הגיב",
+        "members": "חברים"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "כבר קיים פוסט בקישור הזה והוא שונה ממה ששלחתם. לעדכן אותו, או לפרסם כחדש?",
+        "a_scheduled_post_is_published_by": "פוסט מתוזמן מתפרסם על ידי Ecency בזמן שנבחר. לשם כך נדרשת הרשאת פרסום עבור ecency.app בחשבון שלכם. המפתחות וההרשאות האחרות שלכם נשארים כפי שהם. מתן ההרשאה דורש את המפתח הפעיל שלכם.",
+        "ai_assist": "עוזר AI",
+        "ai_tools": "כלי AI",
+        "allow_ecency_to_publish_for_you": "לאפשר ל-Ecency לפרסם בשמכם?",
+        "bold": "מודגש",
+        "clone": "שכפול",
+        "cost": "עלות: {cost}",
+        "could_not_store_the_draft_on": "לא ניתן היה לשמור את הטיוטה במכשיר זה. השאירו את האפליקציה פתוחה ושמרו את הטיוטה.",
+        "draft": "טיוטה",
+        "delete_count": "מחיקה ({count})",
+        "dictate_desc": "דברו, והתמלול ייכנס לפוסט שלכם",
+        "discard": "ביטול השינויים",
+        "discard_changes": "לבטל את השינויים?",
+        "grant": "מתן הרשאה",
+        "italic": "נטוי",
+        "keep_editing": "המשך עריכה",
+        "my_blog": "הבלוג שלי",
+        "my_communities": "הקהילות שלי",
+        "new_post": "פוסט חדש",
+        "notice": "הודעה",
+        "restore": "שחזור",
+        "restore_unsaved_changes": "לשחזר שינויים שלא נשמרו?",
+        "saved": "נשמר",
+        "top_communities": "הקהילות המובילות",
+        "table": "טבלה",
+        "text_format": "עיצוב טקסט",
+        "this_link_is_already_in_use": "הקישור הזה כבר בשימוש",
+        "untitled": "ללא כותרת",
+        "update_it_or_publish_this_as": "לעדכן אותו, או לפרסם כפוסט חדש?",
+        "you_have_unsaved_changes_from_an": "יש לכם שינויים שלא נשמרו מעריכה קודמת. הפוסט השתנה מאז; שחזור שלהם יחליף את הטקסט שלמטה.",
+        "your_edits_were_not_published": "העריכות שלכם לא פורסמו.",
+        "your_post_was_already_published": "הפוסט שלכם כבר פורסם",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "תמונה ממוזערת, הקישו כדי לבחור תמונה אחרת",
+        "thumbnail_number": "תמונה ממוזערת {number}",
+        "recording_busy": "הקלטה כבר מתבצעת. סיימו אותה קודם במצלמה.",
+        "photo_lost": "התמונה אבדה בזמן שהמצלמה הייתה פתוחה. צלמו אותה שוב.",
+        "add_snippet_button": "+ קטע",
+        "words_count": "{count, plural, one {מילה #} two {# מילים} other {# מילים}}",
+        "community_search": "חיפוש"
+      },
+      "profile": {
+        "open_wallet": "פתיחת הארנק",
+        "your_wallet_is_on_the_wallet": "הארנק שלכם נמצא בלשונית הארנק.",
+        "user_has_no_comments": "@{username} עדיין לא הגיב/ה",
+        "votes_count": "{count, plural, one {הצבעה #} two {# הצבעות} other {# הצבעות}}",
+        "replies_count": "{count, plural, one {תגובה #} two {# תגובות} other {# תגובות}}",
+        "menu": "עוד",
+        "users": "משתמשים"
+      },
+      "reading": {
+        "apply": "החלה",
+        "add_tag": "הוספת תגית",
+        "age": "גיל",
+        "audio_language": "שפת האודיו",
+        "available_filters": "מסננים זמינים",
+        "could_not_unlock_the_audio_please": "לא ניתן היה לפתוח את האודיו, נסו שוב",
+        "downvote": "הצבעה נגד",
+        "downvote_percent": "הצבעה נגד {percent}%",
+        "listen_to_this_post": "האזנה לפוסט",
+        "log_in": "התחברות",
+        "mark_all_as_read": "סימון הכול כנקרא",
+        "mark_as_read": "סימון כנקרא",
+        "more_replies": "עוד תגובות",
+        "not_enough_points": "אין מספיק Points",
+        "nothing_here_yet": "אין כאן כלום עדיין.",
+        "open_editor": "פתיחת העורך",
+        "pause_voice": "השהיית הקול",
+        "play_voice": "ניגון הקול",
+        "playback_speed": "מהירות ניגון",
+        "publishing_in_waves": "מפרסמים ב-Waves",
+        "quests_done": "משימות שהושלמו",
+        "read": "נקרא",
+        "remove_vote": "הסרת ההצבעה",
+        "seek": "דילוג",
+        "select_community": "בחירת קהילה",
+        "selected_filters": "מסננים שנבחרו",
+        "the_audio_could_not_be_loaded": "לא ניתן היה לטעון את האודיו.",
+        "this_post_does_not_exist_or": "הפוסט הזה לא קיים או נמחק.",
+        "unread": "לא נקרא",
+        "voice_position": "מיקום בקול",
+        "vote_weight": "עוצמת ההצבעה",
+        "reblogged_by": "שותף מחדש על ידי {username}",
+        "no_more_posts": "אין עוד פוסטים.",
+        "favourite": "מועדף",
+        "no_votes_yet": "אין הצבעות עדיין",
+        "no_comments_yet": "אין תגובות עדיין. היו הראשונים!",
+        "comments_count": "תגובות ({count})",
+        "sending_to_chain": "נשלח לבלוקצ'יין",
+        "compare": "השוואה",
+        "your_vote": "ההצבעה שלכם",
+        "reply_to": "תגובה ל-@{username}",
+        "what_do_you_think": "מה דעתכם?",
+        "clear_tag_filter": "ניקוי סינון התגית",
+        "tab_selected": "{title}, נבחר",
+        "add_tag_feed": "הוספת פיד תגית",
+        "feed_pinned": "{label}, מוצמד",
+        "attached_image_remove": "תמונה מצורפת, הקישו להסרה",
+        "camera": "מצלמה",
+        "files": "קבצים",
+        "paused": "מושהה",
+        "in_topic": "ב-{topic}",
+        "poll_vote": "הצבעה",
+        "reply": "תגובה",
+        "mute_sound": "השתקה",
+        "unmute_sound": "ביטול השתקה",
+        "leaderboard_activities": "פעילויות",
+        "leaderboard_reward": "תגמול",
+        "sort_votes": "הצבעות"
+      },
+      "shell": {
+        "account_of": "חשבון @{username}",
+        "account_signed_out": "חשבון, לא מחובר",
+        "close_tab": "סגירת הלשונית",
+        "coming_soon_to_the_native_app": "בקרוב באפליקציה הנייטיבית.",
+        "create": "יצירה",
+        "expand": "הרחבה",
+        "forward": "קדימה",
+        "loading": "טוען",
+        "new_tab": "לשונית חדשה",
+        "reload": "רענון",
+        "sent": "נשלח",
+        "tab_unread": "{title}, {count} שלא נקראו",
+        "no_app_for_link": "אין אפליקציה שיכולה לפתוח את הקישור."
+      },
+      "wallet": {
+        "product_not_available": "המוצר אינו זמין.",
+        "repeat": "ביצוע שוב"
+      },
+      "copied": "הועתק",
+      "trending_caps": "פופולרי",
+      "move_up": "הזזה למעלה",
+      "move_down": "הזזה למטה",
+      "scroll_to_top": "גלילה לראש הדף",
+      "load_more": "עוד"
+    },
+    "wallet": {
+      "checking": "בודק מול הרשת",
+      "leave_title": "עדיין שולח",
+      "leave_message": "הפעולה עדיין נשלחת או נבדקת מול הרשת. אפשר לצאת מהמסך: האפליקציה תודיע כשתסתיים.",
+      "stay": "להישאר",
+      "collateralized_convert_request": "בקשת המרה מגובה בביטחונות",
+      "op_transfer": "העברה",
+      "op_power_up": "הגדלת Power",
+      "op_power_down_change": "שינוי בהפחתת Power",
+      "op_delegation": "האצלה",
+      "op_savings_deposit": "הפקדה לחיסכון",
+      "op_savings_withdrawal": "משיכה מחיסכון",
+      "op_conversion": "המרה",
+      "op_swap": "החלפה",
+      "op_order_cancel": "ביטול הזמנה",
+      "op_reward_claim": "קבלת תגמול",
+      "op_withdraw_route_change": "שינוי נתיב משיכה",
+      "op_token_operation": "פעולת טוקן"
+    },
+    "notification": {
+      "amount_unknown": "הסכום אינו זמין",
+      "weekly_earnings_breakdown": "הרווחתם ${amount} השבוע - ${authorUsd} מפוסטים, ${curationUsd} מאצירה.",
+      "weekly_earnings_total": "הרווחתם ${amount} השבוע מהפוסטים והאצירה שלכם."
+    },
+    "settings": {
+      "open": "פתיחה",
+      "feedback_subject": "משוב/דיווח על באג",
+      "unknown_user": "משתמש לא ידוע"
+    },
+    "navigation": {
+      "editor": "עורך",
+      "followers": "עוקבים",
+      "spin_game": "משחק הסיבוב",
+      "edit_profile": "עריכת פרופיל",
+      "redeem_points": "מימוש נקודות",
+      "community": "קהילה",
+      "community_members": "חברי הקהילה",
+      "community_activities": "פעילות הקהילה",
+      "browser": "דפדפן",
+      "asset_details": "פרטי הנכס",
+      "edit_history": "היסטוריית עריכות",
+      "welcome": "ברוכים הבאים",
+      "chat": "צ'אט",
+      "backup_keys": "גיבוי מפתחות",
+      "trade": "מסחר",
+      "ai_image_generator": "יצירת תמונות AI",
+      "select_assets": "בחירת נכסים",
+      "poll": "סקר",
+      "bot_comments": "תגובות בוטים"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "לא ניתן לחתום ב-Ecency על פעולות הדורשות את מפתח הבעלים.",
+      "post": "פוסט/תגובה",
+      "custom": "Custom JSON",
+      "sign_buffer": "חתימה על הודעה",
+      "send_token": "שליחת טוקן",
+      "witness_vote": "הצבעה לעד",
+      "proxy": "הגדרת פרוקסי",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "שידור",
+      "sign_tx": "חתימה על עסקה",
+      "encode": "הצפנת הודעה",
+      "decode": "אימות מפתח",
+      "add_account_authority": "הוספת הרשאת חשבון",
+      "remove_account_authority": "הסרת הרשאת חשבון",
+      "add_key_authority": "הוספת הרשאת מפתח",
+      "remove_key_authority": "הסרת הרשאת מפתח",
+      "create_claimed_account": "יצירת חשבון",
+      "create_proposal": "יצירת הצעה",
+      "remove_proposal": "הסרת הצעה",
+      "update_proposal_vote": "הצבעה להצעה",
+      "signed_call": "קריאה חתומה"
+    },
+    "translate_language": {
+      "ar": "ערבית",
+      "az": "אזרית",
+      "bg": "בולגרית",
+      "bn": "בנגלית",
+      "ca": "קטלאנית",
+      "cs": "צ'כית",
+      "da": "דנית",
+      "de": "גרמנית",
+      "el": "יוונית",
+      "en": "אנגלית",
+      "eo": "אספרנטו",
+      "es": "ספרדית",
+      "et": "אסטונית",
+      "fa": "פרסית",
+      "fi": "פינית",
+      "fr": "צרפתית",
+      "ga": "אירית",
+      "he": "עברית",
+      "hi": "הינדי",
+      "hu": "הונגרית",
+      "id": "אינדונזית",
+      "it": "איטלקית",
+      "ja": "יפנית",
+      "ko": "קוריאנית",
+      "lt": "ליטאית",
+      "lv": "לטבית",
+      "ms": "מלאית",
+      "nb": "נורווגית",
+      "nl": "הולנדית",
+      "pl": "פולנית",
+      "pt": "פורטוגזית",
+      "ro": "רומנית",
+      "ru": "רוסית",
+      "sk": "סלובקית",
+      "sl": "סלובנית",
+      "sq": "אלבנית",
+      "sv": "שוודית",
+      "th": "תאית",
+      "tl": "טגלוג",
+      "tr": "טורקית",
+      "uk": "אוקראינית",
+      "zh": "סינית",
+      "zt": "סינית (מסורתית)"
+    },
+    "reading": {
+      "banner_text": "הפוסט הזה ב{source}. לתרגם ל{target}?",
+      "translated_from_text": "תורגם מ{source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {חבר #} two {# חברים} other {# חברים}} • {authors, plural, one {מפרסם #} two {# מפרסמים} other {# מפרסמים}} • {posts, plural, one {פוסט #} two {# פוסטים} other {# פוסטים}}",
+      "community_title": "קהילת {title}",
+      "members_title": "חברי {title}",
+      "activities_title": "פעילות ב-{title}",
+      "cannot_start_with_or": "אי אפשר להתחיל ב-@ או ב-#",
+      "use_a_two_letter": "השתמשו בקוד שפה בן שתי אותיות, כמו en",
+      "at_most_characters": "לכל היותר {max, plural, one {תו #} two {# תווים} other {# תווים}}",
+      "council": "מועצה",
+      "journal": "יומן",
+      "topic": "נושא",
+      "community_not_found": "הקהילה לא נמצאה."
+    },
+    "transfer": {
+      "one_recipient": "בהעברה זו אפשר להשתמש רק בנמען אחד.",
+      "is_an_exchange_and": "{exchange} היא בורסה וייתכן שאינה תומכת בהעברות חוזרות: כספים שנשלחים בתזמון עלולים ללכת לאיבוד. השתמשו בהעברה חד-פעמית במקום."
+    },
+    "dapps": {
+      "signing_info": "Ecency משמשת כתוסף החתימה שלכם ל-Hive. כאשר dApp מבקש להתחבר עם תוסף דפדפן כמו Keychain, Keeper או Peak Vault, בחרו באפשרות זו. Ecency תטפל בחתימה בצורה מאובטחת.",
+      "category_social": "חברתי",
+      "category_gaming": "משחקים",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "קבוצה",
+      "unable_to_load_messages": "לא ניתן לטעון הודעות.",
+      "someone": "מישהו",
+      "renamed_the_group_to": "{actor} שינה/תה את שם הקבוצה ל\"{name}\"",
+      "removed_the_group_name": "{actor} הסיר/ה את שם הקבוצה",
+      "unable_to_send_your": "לא ניתן לשלוח את ההודעה.",
+      "unable_to_remove_message": "לא ניתן להסיר את ההודעה.",
+      "unknown": "לא ידוע",
+      "members_online": "{members, plural, one {חבר #} two {# חברים} other {# חברים}} • {online} מחוברים",
+      "failed_to_load_pinned": "טעינת ההודעות המוצמדות נכשלה",
+      "you": "אתם",
+      "title": "תגובות אימוג'י"
+    },
+    "tip": {
+      "login_required": "התחברו כדי לשלוח טיפים",
+      "max_decimals": "עד {n, plural, one {ספרה # אחרי הנקודה} two {# ספרות אחרי הנקודה} other {# ספרות אחרי הנקודה}}"
+    },
+    "paid": {
+      "check_again": "בדיקה מחדש",
+      "give_up": "ויתור",
+      "unknown": "אין תשובה עדיין. ייתכן שהבקשה עדיין רצה. בדקו שוב כדי להביא את התוצאה: לא יהיה חיוב שני.",
+      "pending": "הבקשה עדיין מעובדת. בדקו שוב בעוד רגע: לא יהיה חיוב שני.",
+      "restored": "לבקשה קודמת אין עדיין תשובה. בדקו שוב כדי להביא את התוצאה: לא יהיה חיוב שני.",
+      "give_up_confirm": "אם הבקשה עברה, ה-Points כבר הוצאו והתוצאה תאבד.",
+      "not_stored": "לא ניתן היה לשמור את הבקשה במכשיר. השאירו את המסך פתוח עד שתסתיים.",
+      "sign_in_again": "פג תוקף ההפעלה. התחברו שוב ואז בדקו שוב.",
+      "other_account": "זה שייך ל-@{owner}. חזרו לחשבון ההוא כדי להמשיך."
+    },
+    "ai": {
+      "run_ai_assist": "הפעלת עוזר AI ({costText})",
+      "no_longer_free_cost": "הריצה הזו כבר אינה חינמית היום. העלות {cost} {unit}.",
+      "no_longer_free": "הריצה הזו כבר אינה חינמית היום.",
+      "content_violates_our_content": "התוכן מפר את מדיניות התוכן שלנו. שנו את הטקסט. ה-Points לא הוחזרו.",
+      "generate_image": "יצירת תמונה ({costLabel})",
+      "use_prompt": "שימוש ב: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "המתינו, פעולה אחרת מתבצעת",
+      "not_a_community_post": "זה אינו פוסט בקהילה.",
+      "parent_post_not_found": "פוסט האב לא נמצא",
+      "the_account_changed": "החשבון השתנה."
+    },
+    "dictation": {
+      "balance": "יתרה: {balance} {unit}",
+      "stop_points": "עצירה ({cost} Points)",
+      "stop_free": "עצירה (חינם)",
+      "transcribe_points": "תמלול ({cost} Points)",
+      "transcribe": "תמלול",
+      "no_longer_free_cost": "ההקלטה הזו כבר אינה חינמית היום. העלות {cost} Points.",
+      "no_longer_free": "ההקלטה הזו כבר אינה חינמית היום.",
+      "held_locked": "ההקלטה נעצרה כש-Ecency ננעלה. דבר לא נשלח. הקישו על תמלול כדי לשלוח, או ותרו עליה.",
+      "held_no_background": "ההקלטה נעצרה כש-Ecency עזבה את המסך (לא הצליחה להציג התראת הקלטה). דבר לא נשלח. הקישו על תמלול כדי לשלוח, או ותרו עליה.",
+      "held_stopped": "ההקלטה נעצרה מההתראה. דבר לא נשלח. הקישו על תמלול כדי לשלוח, או ותרו עליה.",
+      "held_focus_lost": "ההקלטה נעצרה בגלל שיחה או צליל של אפליקציה אחרת. דבר לא נשלח. הקישו על תמלול כדי לשלוח, או ותרו עליה.",
+      "held_interrupted": "ההקלטה נעצרה כי אפליקציה אחרת תפסה את המיקרופון. דבר לא נשלח. הקישו על תמלול כדי לשלוח, או ותרו עליה.",
+      "unavailable": "הקלטה אינה זמינה במכשיר זה.",
+      "not_read": "לא ניתן היה לקרוא את ההקלטה או שהיא גדולה מדי. דבר לא נשלח ולא בוצע חיוב.",
+      "give_up_not_sent": "ההקלטה לא נשלחה, ולכן לא בוצע חיוב. היא תימחק.",
+      "give_up_not_charged": "לא בוצע חיוב על ההקלטה הזו. היא תימחק.",
+      "clip_lost": "ההקלטה של בקשה קודמת אינה במכשיר זה עוד. אם הבקשה עברה, ה-Points שלכם הוצאו ולא ניתן להביא את התמלול."
+    },
+    "register": {
+      "error_code_28": "לא ניתן היה לעבד את הבקשה. סביר שתור ההרשמה מלא. נסו שוב בעוד כמה דקות."
+    },
+    "perks": {
+      "quests_empty": "אין כאן משימות עדיין, חזרו בקרוב.",
+      "freeze_confirm_title": "הגנה על הרצף",
+      "spend_points_on_a": "להוציא {price} Points על הקפאת רצף? היא תנוצל כדי להגן על הרצף ביום שתחמיצו."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "תמכו ב-Ecency, קבלו בלוג חינם והתבלטו עם תג Pro מאומת.",
+      "card_description": "עברו ל-Pro תמורת {price} לשנה. תג מאומת, בלוג חינם ותמיכה ב-Ecency.",
+      "card_description_plain": "עברו ל-Pro לשנה. תג מאומת, בלוג חינם ותמיכה ב-Ecency.",
+      "member": "אתם חברי Pro.",
+      "benefit_badge": "תג Pro מאומת לצד השם שלכם.",
+      "benefit_blog": "בלוג חינם בכתובת yourname.blogs.ecency.com.",
+      "benefit_support": "תמיכה ישירה בפיתוח של Ecency.",
+      "benefit_early": "גישה מוקדמת לתכונות חדשות.",
+      "buy": "קבלת Pro תמורת {price} לשנה",
+      "extend": "הארכה ב-12 חודשים תמורת {price}",
+      "extend_note": "רכישה נוספת מוסיפה 12 חודשים לחברות שלכם.",
+      "unavailable": "Ecency Pro אינה זמינה כרגע מהחנות.",
+      "activating": "התשלום התקבל. מפעילים את החברות שלכם.",
+      "success_title": "ברוכים הבאים ל-Ecency Pro",
+      "success_body": "חברות ה-Pro שלכם פעילה. התג יופיע בפרופיל בקרוב.",
+      "extending": "התשלום התקבל. חברות ה-Pro שלכם מוארכת ב-12 חודשים.",
+      "open_a11y": "פתיחת Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "שומר טיוטה...",
+      "please_sign_in_first": "התחברו קודם.",
+      "fetch_failed": "השליפה נכשלה.",
+      "you_can_only_edit": "אפשר לערוך רק תוכן שלכם.",
+      "invalid_percent": "אחוז לא תקין",
+      "beneficiary_exists_already": "המוטב כבר קיים",
+      "this_draft_belongs_to": "הטיוטה הזו שייכת ל-@{owner}. חזרו לחשבון ההוא כדי לפרסם אותה.",
+      "could_not_make_a": "לא ניתן היה ליצור קישור חדש לפוסט. שנו מעט את הכותרת ונסו שוב.",
+      "an_earlier_attempt_was": "ניסיון קודם פורסם אחרי זה. בדקו איזו גרסה אתם רוצים לשמור.",
+      "could_not_check_your": "לא ניתן היה לבדוק את הרשאת הפרסום של החשבון. בדקו את החיבור ונסו שוב.",
+      "this_post_was_changed": "הפוסט שונה במקום אחר מאז שפתחתם אותו. העתיקו את הטקסט, חזרו ופתחו אותו שוב כדי לערוך את הגרסה העדכנית.",
+      "link_text_placeholder": "הטקסט כאן"
+    },
+    "app_error": {
+      "this_reply_is_too": "התגובה הזו ארוכה מדי.",
+      "the_network_refused_this": "הרשת דחתה את הפעולה.",
+      "invalid_input": "קלט לא תקין.",
+      "secure_storage_is_unavailable": "האחסון המאובטח אינו זמין. התחברו שוב.",
+      "please_sign_in_first": "התחברו קודם.",
+      "these_credentials_belong_to": "פרטי הגישה האלה שייכים ל-@{actual}, לא ל-@{expected}.",
+      "is_not_signed_in": "@{username} אינו מחובר במכשיר זה.",
+      "key_required": "נדרש מפתח {role} כדי לבצע את העסקה. {hint}",
+      "cancelled": "בוטל.",
+      "the_request_was_rejected": "הבקשה נדחתה באפליקציית הארנק.",
+      "the_request_expired_before": "הבקשה פגה לפני שאפליקציית הארנק ענתה. נסו שוב.",
+      "could_not_reach_the": "לא ניתן להגיע לשרת HiveAuth. נסו שוב.",
+      "unexpected_redirect": "השרת שלח הפניה בלתי צפויה. דבר לא שונה. נסו שוב מאוחר יותר.",
+      "missing_key_hint": "הוסיפו אותו תחת הגדרות, ניהול הרשאות (ייבוא פרטי), או התחברו שוב איתו.",
+      "this_key_is_also": "המפתח הזה הוא גם מפתח הבעלים של החשבון. Ecency אינה שומרת מפתח השולט בתפקיד הבעלים: תנו לתפקידים הפעיל והפרסום מפתחות משלהם, ואז התחברו איתם.",
+      "this_is_the_owner": "זהו מפתח הבעלים. Ecency לעולם אינה שומרת או משתמשת במפתח הבעלים: התחברו עם סיסמת האב, או עם מפתח הפרסום או הפעיל.",
+      "this_password_only_matches": "הסיסמה הזו תואמת רק למפתח הבעלים של החשבון. Ecency לעולם אינה שומרת או משתמשת במפתח הבעלים: התחברו עם מפתח הפרסום או הפעיל.",
+      "this_key_cannot_sign": "המפתח הזה אינו יכול לחתום לבדו עבור החשבון: החשבון דורש יותר מחתימה אחת (משקלו מתחת לסף).",
+      "public_key_given": "זהו המפתח הציבורי שלכם. הדביקו את המפתח הפרטי (מתחיל ב-5) או את סיסמת האב.",
+      "memo_key_only": "אי אפשר להתחבר עם מפתח המזכר. השתמשו במפתח הפרסום, במפתח הפעיל או בסיסמת האב.",
+      "network_message": "שגיאת רשת. בדקו את החיבור ונסו שוב.",
+      "network_error_this_may": "שגיאת רשת. ייתכן שהפעולה כבר עברה; ניסיון חוזר בטוח ולא יפרסם פעמיים."
+    },
+    "purchases": {
+      "deal_best": "המבצע הכי טוב!",
+      "deal_popular": "פופולרי!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "החנות לא ענתה."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "נדרשים אימייל ושם משתמש לצריכת 999accounts",
+      "stuck": "רכישה קודמת של המוצר הזה לא הושלמה. פנו אל support@ecency.com עם קבלת החנות, היא נשמרת לשם כך.",
+      "held": "הרכישה הזו מוחזקת לבדיקה. פנו אל support@ecency.com עם הזמנה מס' {order}.",
+      "earlier_purchase": "רכישה קודמת של המוצר הזה מושלמת קודם עבור @{target}.",
+      "earlier_pending": "תשלום קודם עבור המוצר הזה עדיין ממתין עבור @{target}. הוא יושלם כשהחנות תאשר את התשלום.",
+      "pending": "התשלום שלכם ממתין. הרכישה תושלם כשהחנות תאשר את התשלום.",
+      "processing": "הרכישה שלכם בעיבוד. היא תושלם בקרוב."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "העברות חוזרות",
+      "delegate_hive_power": "האצלת Hive Power",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "הגדרת נתיב משיכת vesting",
+      "power_down": "Power Down",
+      "transfer_to_saving": "העברה לחיסכון",
+      "transfer_from_saving": "העברה מחיסכון",
+      "cancel_transfer_from_saving": "ביטול העברה מחיסכון",
+      "collateralized_convert": "המרה מגובה בביטחונות",
+      "witness_vote": "הצבעה לעד",
+      "witness_update": "עדכון עד",
+      "witness_set_properties": "הגדרת מאפייני עד",
+      "governance_proxy": "פרוקסי ממשל",
+      "claim_account": "תביעת חשבון",
+      "create_account": "יצירת חשבון",
+      "create_account_with_account": "יצירת חשבון עם קרדיטים של חשבון",
+      "create_limit_order": "יצירת הוראת קנייה/מכירה במחיר מוגבל",
+      "cancel_limit_order": "ביטול הוראה במחיר מוגבל",
+      "redeem_rewards": "מימוש תגמולים",
+      "post_or_comment": "פוסט או תגובה",
+      "post_or_comment_options": "אפשרויות פוסט או תגובה",
+      "custom_operation": "פעולה מותאמת",
+      "update_account_active": "עדכון חשבון (פעיל)",
+      "update_account_posting": "עדכון חשבון (פרסום)",
+      "change_recovery_account": "שינוי חשבון שחזור",
+      "create_proposal": "יצירת הצעה",
+      "remove_proposal": "הסרת הצעה",
+      "update_proposal_votes": "עדכון הצבעות להצעה",
+      "update_proposal": "עדכון הצעה"
+    },
+    "auth_link": {
+      "must_be_signed_by": "הקישור הזה חייב להיחתם על ידי @{account}. עברו לחשבון ההוא ופתחו אותו שוב.",
+      "ecency_can_only_sign": "Ecency יכולה לחתום ולשדר רק עסקאות מקישורים.",
+      "requester_page": "הדף {host}",
+      "owner_refused": "לא ניתן לחתום מקישור על פעולות הדורשות את מפתח הבעלים.",
+      "busy": "המתינו: בקשה אחרת עדיין מעובדת.",
+      "not_supported": "Ecency עדיין לא יכולה לחתום על פעולה זו בגרסה הזו."
+    },
+    "chats": {
+      "group_members": "חברי הקבוצה",
+      "rename_group": "שינוי שם הקבוצה",
+      "failed_to_load_chats": "טעינת הצ'אטים נכשלה",
+      "unknown": "לא ידוע",
+      "unable_to_mark_channel": "לא ניתן לסמן את הערוץ כנקרא",
+      "unable_to_update_favorites": "לא ניתן לעדכן מועדפים",
+      "unable_to_update_mute": "לא ניתן לעדכן השתקה",
+      "group": "קבוצה",
+      "unable_to_search": "לא ניתן לחפש",
+      "unable_to_start_chat": "לא ניתן להתחיל צ'אט",
+      "no_internet": "אין חיבור לאינטרנט"
+    },
+    "stake": {
+      "confirm_summary": "האצלת {hp} HP ({vests} VESTS) ל-@{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "כבר הואצל ל-@{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "ציבורי בלבד. Ecency לעולם אינה שומרת את מפתח הבעלים.",
+      "shared_owner": "החשבון הזה משתמש באותו מפתח לתפקיד הבעלים ולתפקיד {names}. מי שמחזיק במפתח הזה שולט בכל החשבון. תנו לתפקיד {names} מפתח משלו ושמרו את מפתח הבעלים במצב לא מקוון.",
+      "copy_warning": "כל מי שמחזיק במפתח הפרטי הזה שולט בחלק זה של החשבון. אפליקציות אחרות יכולות לקרוא את הלוח; הדביקו אותו רק במקום שאתם סומכים עליו. הוא נמחק מהלוח לאחר 2 דקות."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "נעילת PIN פועלת.",
+      "pin_changed": "קוד ה-PIN שונה.",
+      "pin_lock_is_off": "נעילת PIN כבויה.",
+      "wiped_notice": "כל החשבונות, המפתחות ופרטי הגישה הוסרו מהמכשיר הזה.",
+      "we_could_not_bring": "לא הצלחנו להעביר את החשבונות שלכם מהגרסה הקודמת של האפליקציה. התחברו שוב.",
+      "your_pin_lock_could": "לא ניתן היה להעביר את נעילת ה-PIN מהגרסה הקודמת. הגדירו PIN מחדש מתפריט החשבון כדי להפעיל שוב את נעילת האפליקציה.",
+      "biometric_unlock_was_turned": "ביטול הנעילה הביומטרי כובה כי הנתונים הביומטריים במכשיר השתנו. בטלו נעילה עם ה-PIN ואז הפעילו שוב מתפריט החשבון.",
+      "biometric_unavailable_notice": "לא ניתן היה להפעיל ביטול נעילה ביומטרי: לא הוגדרו נתונים ביומטריים במכשיר.",
+      "set_backup": "הגדירו PIN כגיבוי לביטול נעילה ביומטרי",
+      "biometric_on_notice": "נעילת PIN פועלת. בטלו נעילה בנתונים ביומטריים, או עם ה-PIN.",
+      "offer_title": "ביטול נעילה ביומטרי",
+      "offer_body": "פתחו את Ecency עם הפנים או טביעת האצבע. הגדרתם גם PIN, שפותח את האפליקציה כשהנתונים הביומטריים אינם זמינים.",
+      "offer_use": "שימוש בביומטריה",
+      "offer_use_pin": "שימוש ב-PIN במקום"
+    },
+    "common": {
+      "list_and": "{first} ו{second}",
+      "role_owner": "בעלים",
+      "role_active": "פעיל",
+      "role_posting": "פרסום",
+      "role_memo": "מזכר"
+    },
+    "editor_extras": {
+      "short_reply_hint": "תגובות של 25 תווים או פחות לא מזכות בנקודות (קישורים לא נספרים)",
+      "short_content_hint": "קצר מדי כדי לזכות בנקודות (25 תווים או פחות, לא כולל קישורים)",
+      "daily_post": "פוסט יומי {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {רצף של יום #} two {רצף של # ימים} other {רצף של # ימים}}",
+      "grant_description": "תנו לחשבון Ecency @ecency.app הרשאת פרסום בחשבון שלכם, כדי שתוכלו לפרסם בלי לפתוח את Keychain בכל פעם. מתן ההרשאה משנה את הרשאת הפרסום של החשבון ודורש את המפתח הפעיל שלכם."
+    },
+    "wallet_history": {
+      "from_to": "@{from} אל @{to}",
+      "from_user_id": "מ-@{from}, מזהה: {id}",
+      "user_id": "@{user}, מזהה: {id}",
+      "from_to_id": "@{from} אל @{to}, מזהה: {id}",
+      "from_to_account": "@{from} אל {to}",
+      "from_user": "מ-@{user}",
+      "to_user": "אל @{user}",
+      "interest": "ריבית",
+      "proposal_pay": "תשלום הצעה",
+      "categories": "סוגי פעילות",
+      "category_all": "הכול",
+      "category_transfers": "העברות",
+      "category_market": "הוראות שוק",
+      "category_interest": "ריביות",
+      "category_stake": "פעולות Stake",
+      "category_rewards": "תגמולים",
+      "point_type_checkin": "פעימות לב",
+      "point_type_login": "התחברות",
+      "point_type_post": "פוסט",
+      "point_type_comment": "תגובה",
+      "point_type_vote": "הצבעה",
+      "point_type_reblog": "שיתוף מחדש",
+      "point_type_transfer_sent": "העברות שנשלחו",
+      "point_type_transfer_received": "העברות שהתקבלו"
+    },
+    "video_upload": {
+      "continue_upload": "המשך ההעלאה",
+      "source_gone": "ההקלטה הזו אינה זמינה עוד במכשיר. הקליטו או בחרו את הסרטון שוב.",
+      "no_camera": "המצלמה אינה זמינה במכשיר זה."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "הפחתת ה-Power הבאה בעוד {hours, plural, one {שעה #} two {# שעות} other {# שעות}}",
+      "account_not_found": "החשבון לא נמצא"
+    },
+    "wave_compose": {
+      "clipboard_chip": "תמונה בלוח · הדבקת תמונה",
+      "no_container": "לא ניתן היה להביא את מכל ה-Waves האחרון",
+      "please_sign_in_first": "התחברו קודם.",
+      "write_something_first": "כתבו משהו קודם.",
+      "account_changed": "ה-Wave הזה נכתב מחשבון אחר. סגרו אותו וכתבו אותו שוב.",
+      "no_upload": "העלאת תמונות עדיין אינה זמינה בגרסה הזו. הדביקו קישור לתמונה בטקסט במקום.",
+      "fail": "נכשל"
+    },
+    "delete_account": {
+      "sign_out_failed": "הבקשה נשלחה, אך ההתנתקות נכשלה. התנתקו מהתפריט.",
+      "not_sent": "לא ניתן היה לשלוח את בקשת המחיקה. נסו שוב."
+    },
+    "chat_sheets": {
+      "group_limit": "בקבוצה יכולים להיות עד {max, plural, one {אדם נוסף #} two {# אנשים נוספים} other {# אנשים נוספים}}.",
+      "search_people_by_username": "חיפוש אנשים לפי שם משתמש",
+      "new_group_title": "קבוצה חדשה",
+      "new_group_hint": "הוסיפו {min} עד {max, plural, one {אדם #} two {# אנשים} other {# אנשים}} כדי להתחיל שיחה קבוצתית.",
+      "no_results": "לא נמצא בצ'אט אף אחד בשם הזה.",
+      "search_failed": "החיפוש לא עבד. בדקו את החיבור ונסו שוב.",
+      "create": "פתיחת קבוצה",
+      "new_group_failed": "לא ניתן היה לפתוח את הקבוצה. נסו שוב.",
+      "name_limit": "שם קבוצה יכול להכיל עד {max, plural, one {תו #} two {# תווים} other {# תווים}}.",
+      "rename_title": "שינוי שם הקבוצה",
+      "rename_hint": "תנו לקבוצה שם שכל חבריה יראו. השאירו ריק כדי להציג את שמות החברים במקומו.",
+      "placeholder": "שם הקבוצה",
+      "not_owner": "רק מי שפתח את הקבוצה יכול לשנות את שמה.",
+      "rename_failed": "לא ניתן היה לשנות את שם הקבוצה. נסו שוב."
+    },
+    "editor_side": {
+      "copy_of": "עותק של {title}",
+      "deletions_failed": "משהו השתבש\n{failed} מתוך {total, plural, one {מחיקה #} two {# מחיקות} other {# מחיקות}} נכשלו",
+      "uploads_failed": "{count, plural, one {העלאה # נכשלה} two {# העלאות נכשלו} other {# העלאות נכשלו}}:\n\n{messages}",
+      "failed_to_delete": "המחיקה נכשלה"
+    },
+    "uploads": {
+      "add_to_gallery": "הוספה לגלריה"
+    },
+    "account_notice": {
+      "manage_keys": "הגדרות, ניהול הרשאות",
+      "no_signing_key_title": "התחברו שוב בתור @{account}",
+      "no_signing_key": "Ecency אינה שומרת עוד את מפתח הבעלים או את סיסמת האב במכשיר זה, ולחשבון @{account} אין כאן מפתח פרסום או פעיל שמור. התחברו שוב עם סיסמת האב או עם מפתח פרסום או פעיל, או הוסיפו מפתח תחת {manageKeys} (ייבוא פרטי).",
+      "missing_roles_title": "חלק מהמפתחות לא נוספו",
+      "cannot_post": "לפרסם, להצביע או להגיב",
+      "cannot_transfer": "לשלוח העברות או לשנות הגדרות חשבון",
+      "missing_roles": "הסיסמה שלכם אינה תואמת עוד את מפתח ה-{missing} של @{account}: הוא שונה בחשבון מאז שהסיסמה הוגדרה. שמור במכשיר זה: מפתח {kept}. עד שתוסיפו את מפתח ה-{missing} תחת {manageKeys} (ייבוא פרטי), האפליקציה לא תוכל {cannot} עם מפתחות של @{account}.",
+      "shared_owner_title": "המפתח הזה שולט גם בתפקיד הבעלים",
+      "shared_owner": "@{account} משתמש באותו מפתח לתפקיד הבעלים ולתפקיד {names}. מי שמחזיק במפתח הזה שולט בכל החשבון. Ecency שומרת אותו כמפתח {names} בלבד ולעולם לא משתמשת בו לפעולות בעלים. תנו לתפקיד {names} מפתח משלו, ושמרו את מפתח הבעלים במצב לא מקוון."
+    },
+    "dapp_browser": {
+      "message_from": "הודעה מ-{host}",
+      "home_title": "בית",
+      "loading_title": "טוען...",
+      "blank_run": "[{count, plural, one {תו ריק #} two {# תווים ריקים} other {# תווים ריקים}}]",
+      "too_large": "הדף ביקש לחתום על בקשה גדולה מכדי להציגה, ולכן Ecency דחתה אותה."
+    },
+    "community_service": {
+      "the_account_changed": "החשבון השתנה."
+    },
+    "profile_edit": {
+      "enter_link": "הזינו קישור לתמונה",
+      "please_sign_in_first": "התחברו קודם.",
+      "account_not_found": "החשבון לא נמצא",
+      "please_enter_an_image": "הזינו קישור לתמונה שמתחיל ב-https://"
+    },
+    "background_media": {
+      "post_by": "פוסט מאת @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "התחברו קודם."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "כבר הצבעתם באותו משקל.",
+      "insufficient_rc": "Resource Credits לא מספיקים. המתינו או בצעו Power Up.",
+      "missing_authority": "חסרה הרשאת פרסום. בדקו את שיטת ההתחברות.",
+      "comment_too_soon": "המתינו לפני פרסום נוסף.",
+      "paid_out": "הפוסט הזה כבר שילם תגמולים.",
+      "too_large": "העסקה היא {size, plural, one {בייט #} two {# בייטים} other {# בייטים}}, מעל מגבלת {max} בייטים.",
+      "network_error_please_check": "שגיאת רשת. בדקו את החיבור ונסו שוב.",
+      "unconfirmed_message": "לא ניתן היה לאשר אם הפעולה עברה. בדקו את הארנק או ההיסטוריה; התחילו מחדש רק אם היא לא שם.",
+      "undecided_message": "ייתכן שהפעולה כבר עברה. בדקו את הארנק או ההיסטוריה לפני שתנסו שוב."
+    },
+    "chat_api": {
+      "request_failed": "הבקשה נכשלה ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} מקליד/ה...",
+      "typing_two": "{first} ו{second} מקלידים...",
+      "typing_three": "{first}, {second} ו{third} מקלידים...",
+      "typing_many": "{first}, {second} ו{count, plural, one {עוד אחד מקליד} two {עוד # מקלידים} other {עוד # מקלידים}}...",
+      "banned": "{reason} אפשר עדיין לקרוא את הצ'אט. הפרסום ייפתח {until}.",
+      "joined_when": "הצטרף/ה {time}",
+      "joined": "הצטרף/ה",
+      "official_badge": "רשמי",
+      "official_badge_label": "חשבון Ecency רשמי"
+    },
+    "side_menu": {
+      "ask_esie": "שאלו את Esie"
+    },
+    "chat_service": {
+      "missing_token": "חסר טוקן גישה ל-Hive. התנתקו והתחברו שוב.",
+      "dm_error": "המשתמש לא הצטרף לצ'אטים"
+    },
+    "compose_reply": {
+      "account_changed": "התגובה הזו נכתבה מחשבון אחר. סגרו אותה וכתבו אותה שוב.",
+      "write_something_first": "כתבו משהו קודם.",
+      "please_sign_in_first": "התחברו קודם."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "יותר מדי מוטבים: {max} לכל היותר.",
+      "a_beneficiary_s_share": "חלקו של מוטב חייב להיות בין 0.01% ל-100%.",
+      "beneficiaries_add_up_to": "סך המוטבים עולה על 100%.",
+      "a_beneficiary_is_listed": "מוטב מופיע פעמיים.",
+      "you_cannot_be_a": "אי אפשר להיות מוטב של הפוסט שלכם.",
+      "a_beneficiary_has_an": "לאחד המוטבים יש שם חשבון לא תקין."
+    },
+    "follows": {
+      "fail": "נכשל!: {message}",
+      "follower_count": "עוקבים ({count})",
+      "following_count": "במעקב ({count})"
+    },
+    "link": {
+      "unsupported": "הקישור הזה עדיין אינו נתמך.",
+      "cannot_open": "לא ניתן לפתוח את הקישור",
+      "unsupported_version": "הקישור הזה אינו נתמך בגרסה זו."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "דפדפן Explore יכול לגשת לארנק ה-Hive שלכם כדי לחתום על עסקאות. הקישור הזה מגיע מתוכן פוסט ואינו מאומת על ידי Ecency. המשיכו רק אם אתם סומכים עליו:\n\n{url}"
+    },
+    "listen": {
+      "message": "האזנה דורשת {required} Points ויש לכם {available}.",
+      "unlock_label": "פתיחה · {cost} Points",
+      "preparing_audio": "מכין אודיו · {preparingPercent}%",
+      "waiting_in_line_ahead": "ממתין בתור, {ahead} לפניכם…",
+      "next_in_line": "הבא בתור…",
+      "preparing_about_minutes": "מכין אודיו, בערך {minutes} דק'…",
+      "preparing_audio_2": "מכין אודיו…",
+      "spend_confirm": "להוציא {cost} Points כדי להאזין לפוסט? האודיו שלכם להשמעה חוזרת בכל עת.",
+      "about_minutes": "~{minutes} דק'",
+      "failed_refunded": "לא ניתן היה ליצור את האודיו, ה-Points שלכם הוחזרו"
+    },
+    "media_pick": {
+      "preparing_video": "מכין סרטון...",
+      "library_hint": "בחירה מהתמונות שלכם",
+      "camera_hint": "צילום תמונה חדשה עכשיו",
+      "files_hint": "עיון בקבצים במכשיר ובענן",
+      "paste_hint": "שימוש בתמונה שהעתקתם",
+      "link_hint": "שימוש בתמונה מהאינטרנט"
+    },
+    "media_picking": {
+      "image_types_message": "סוג הקובץ אינו נתמך. בחרו תמונה בפורמט JPEG, PNG, GIF, WebP או HEIC.",
+      "video_types_message": "סוג הקובץ אינו נתמך. בחרו סרטון MP4 או MOV.",
+      "gif_too_large": "ה-GIF הזה גדול מ-{mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "הפעולה הזו דורשת גם חתימה פעילה וגם חתימת פרסום, ש-Ecency עדיין אינה יכולה לחתום יחד."
+    },
+    "poll": {
+      "fail": "נכשל!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "לא ניתן היה לבדוק את הרשאת הפרסום של החשבון. בדקו את החיבור ונסו שוב."
+    },
+    "post_lists": {
+      "voters_title": "פרטי מצביעים ({total})",
+      "reblogs_title": "פרטי שיתופים מחדש ({total})",
+      "no_history_found": "לא נמצאה היסטוריה!",
+      "no_edit_history_available": "אין היסטוריית עריכות לתוכן הזה.",
+      "version_label": "גרסה {version}"
+    },
+    "stats": {
+      "other_device": "אחר"
+    },
+    "profile": {
+      "account_not_found": "החשבון לא נמצא",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • מלא בעוד {hours, plural, one {שעה #} two {# שעות} other {# שעות}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "לא ניתן היה לקרוא את הפרופיל הנוכחי שלכם, נסו שוב"
+    },
+    "profile_sheet": {
+      "fail": "נכשל! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "החשבון לא נמצא"
+    },
+    "push_payload": {
+      "mentioned": "@{source} הזכיר/ה את @{target}",
+      "replied": "@{source} הגיב/ה ל-@{target}",
+      "transferred": "@{source} העביר/ה ל-@{target}",
+      "delegated": "@{source} האציל/ה ל-@{target}",
+      "rewards_received": "התקבלו תגמולים",
+      "account_updated": "החשבון עודכן",
+      "account_updated_body": "פרטי החשבון שלכם עודכנו",
+      "followed": "@{source} התחיל/ה לעקוב אחרי @{target}",
+      "unfollowed": "@{source} הפסיק/ה לעקוב אחרי @{target}",
+      "ignored": "@{source} התעלם/ה מ-@{target}",
+      "blacklisted": "@{source} הוסיף/ה את @{target} לרשימה השחורה",
+      "posted_in": "@{source} פרסם/ה ב-#{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "לא ניתן לקבל הרשאת מצלמה",
+      "permission_message": "אפשרו גישה למצלמה בהגדרות ecency.",
+      "permission_allow": "אפשר"
+    },
+    "reply_account": {
+      "switch": "תגובה מחשבון אחר"
+    },
+    "send_journal": {
+      "your_from_went_through": "ה{label} מ-@{account} עברה.",
+      "not_sent": "ה{label} מ-@{account} לא עברה. דבר לא נשלח; אפשר להתחיל מחדש.",
+      "checking_whether_your_from": "בודקים אם ה{label} מ-@{account} עברה. בדקו את הארנק לפני שליחה חוזרת."
+    },
+    "signing": {
+      "hot_page_closed": "דף HiveSigner נסגר",
+      "wrong_role": "זה מפתח ה-{given} שלכם; הפעולה הזו דורשת את מפתח ה-{needed}.",
+      "action_id_required": "הפעולה הזו דורשת מזהה פעולה כדי שאפשר יהיה לנסות שוב בבטחה."
+    },
+    "signing_router": {
+      "owner_never": "פעולות בעלים לעולם אינן נחתמות באפליקציה."
+    },
+    "spin": {
+      "key_missing": "חסר מפתח המשחק",
+      "score": "{score, plural, one {נקודה #} two {# נקודות} other {# נקודות}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "היום (UTC), מתאפס בעוד {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "מתאפס מדי יום ב-00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "התחברו שוב",
+      "message": "האחסון המאובטח אופס במכשיר זה. התחברו שוב.",
+      "failed": "לא ניתן היה להסיר את החשבונות במכשיר זה. נסו שוב."
+    },
+    "store": {
+      "in_app_purchases_are": "רכישות באפליקציה אינן זמינות בגרסה הזו."
+    },
+    "wallet_sends": {
+      "journal_full": "יותר מדי שליחות קודמות עדיין נבדקות מול הרשת. המתינו לאישורן לפני שליחה נוספת.",
+      "check_later": "הרשת לא אישרה זאת בזמן. בדקו את הארנק או ההיסטוריה לפני שליחה חוזרת; האפליקציה תבדוק שוב בהפעלה הבאה."
+    },
+    "waves": {
+      "shorts": "קצרים"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# שלא נקרא} two {# שלא נקראו} other {# שלא נקראו}}",
+      "locked_text": "בטלו נעילה של Ecency כדי לראות",
+      "signed_out_text": "התחברו ל-Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "לא ניתן היה לקרוא את ההרשאות הנוכחיות של החשבון. דבר לא שונה; נסו שוב.",
+      "reads_disagree": "שתי קריאות של הרשאת הפרסום של החשבון אינן תואמות. דבר לא שונה; נסו שוב."
+    },
+    "vote": {
+      "vote_weight_must_be": "משקל ההצבעה חייב להיות בין -100% ל-100%.",
+      "please_sign_in_first": "התחברו קודם."
+    },
+    "widget": {
+      "streak_name": "רצף משימות",
+      "write": "כתיבה",
+      "new_wave": "Wave חדש",
+      "notifications_description": "ההתראות שלכם שלא נקראו. מוסתר כשנעילת PIN פועלת.",
+      "streak_description": "רצף המשימות היומיות שלכם. מוסתר כשנעילת PIN פועלת.",
+      "compose_description": "כתבו פוסט או Wave חדש.",
+      "streak_title": "רצף",
+      "daily_quests": "משימות יומיות",
+      "streak_hint": "פתחו את Perks כדי לראות את הרצף",
+      "open_perks": "פתיחת Perks",
+      "open_app": "פתיחת Ecency",
+      "unread_caption": "{count, plural, one {לא נקרא} two {לא נקראו} other {לא נקראו}}",
+      "streak_caption": "{count, plural, one {יום ברצף} two {ימים ברצף} other {ימים ברצף}}"
+    },
+    "system": {
+      "dictation_channel": "הקלטה להקלדה",
+      "listen_channel": "האזנה",
+      "dictation_channel_description": "מוצגת בזמן שהקלטה להקלדה מתבצעת ברקע, עם פעולת עצירה.",
+      "dictation_title": "מקליט להקלדה",
+      "dictation_text": "Ecency מקליטה את ההקלדה שלכם. עצירה משאירה אותה לא שלוחה עד שתאשרו באפליקציה.",
+      "listen_channel_description": "מודיעה לכם כשההאזנה לא יכלה להמשיך ברקע.",
+      "listen_paused": "ההאזנה הושהתה",
+      "listen_paused_text": "פתחו את Ecency כדי להמשיך להאזין.",
+      "skip_back": "אחורה 15 שניות",
+      "skip_forward": "קדימה 15 שניות"
+    },
+    "permission": {
+      "face_id": "ביטול נעילה של Ecency עם Face ID במקום PIN.",
+      "camera": "סריקת קודי QR, וצילום תמונה או הקלטת סרטון כדי להוסיפם לפוסט.",
+      "photo_library_add": "Ecency שומרת בספריית התמונות שלכם את התמונות שהורדתם מפוסטים.",
+      "photo_library": "Ecency שומרת את התמונות שהורדתם מפוסטים יחד באלבום Ecency בספריית התמונות שלכם.",
+      "microphone": "Ecency משתמשת במיקרופון כדי שתוכלו להקליד פוסטים ותגובות בדיבור (ההקלטות נשלחות ל-Ecency לתמלול) ולהקליט קול בסרטון שתוסיפו לפוסט."
+    },
+    "android": {
+      "no_browser": "אין דפדפן זמין",
+      "biometric_unlock_title": "ביטול נעילה של Ecency בנתונים ביומטריים",
+      "biometric_confirm": "אשרו עם טביעת האצבע או הפנים",
+      "image_unsupported_address": "כתובת תמונה לא נתמכת",
+      "image_create_failed": "לא ניתן היה ליצור את הקובץ",
+      "image_write_failed": "לא ניתן היה לכתוב את הקובץ",
+      "image_too_large": "התמונה גדולה מדי",
+      "image_download_failed": "ההורדה נכשלה עם סטטוס {status}",
+      "billing_disconnected": "החיבור ל-Google Play Billing נותק.",
+      "billing_no_screen": "אין מסך להצגת הרכישה.",
+      "billing_error": "שגיאת Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "יצרתם {count} פוסטים החודש. כל הכבוד, המשיכו כך!",
-        "checkin": "ביצעתם צ'ק אין {count} ימים השבוע. המשיכו כך!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {פוסט חדש #} two {# פוסטים חדשים} other {# פוסטים חדשים}} ב-#{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# ניסיונות כושלים} two {# ניסיונות כושלים} other {# ניסיונות כושלים}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "רצף של {n} ימים"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• מותר רק לחשבונות בני יותר מ-{days} ימים",
-        "max_choices": "• ניתן לבחור עד {choices} אפשרויות"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "נותרו {executions} העברות",
-        "schedule_summary": "{executions} העברות, כל אחת מדי {hours} שעות"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "קצר מדי כדי לזכות בנקודות (עד {n, plural, one {תו #} two {# תווים} other {# תווים}}, לא כולל קישורים)"
       },
       "chats": {
-        "people_joined": "{count} אנשים הצטרפו"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "בעוד כ{count, plural, one {דקה #} two {# דקות} other {# דקות}}",
+        "ban-remaining-hours": "בעוד כ{count, plural, one {שעה #} two {# שעות} other {# שעות}}",
+        "ban-remaining-days": "בעוד כ{count, plural, one {יום #} two {# ימים} other {# ימים}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "השתמשו ב{n, plural, one {תגית # לכל היותר} two {# תגיות לכל היותר} other {# תגיות לכל היותר}}",
+          "too_long": "החיפוש ארוך מדי. השתמשו ב{n, plural, one {תו # לכל היותר} two {# תווים לכל היותר} other {# תווים לכל היותר}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "נדרשים לפחות {count} תווים",
-        "chars_remaining": "{count} תווים שנותרו"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "אפשר לבחור עד {count, plural, one {תמונה #} two {# תמונות} other {# תמונות}} בכל פעם"
+      },
+      "dictation": {
+        "stop_hint": "עצרו כדי לתמלל ולהוסיף לפוסט. עד {m, plural, one {דקה #} two {# דקות} other {# דקות}}.",
+        "rate": "{n} Points לכל {s, plural, one {שנייה #} two {# שניות} other {# שניות}}"
       },
       "transfer": {
-        "powering_down_info": "ביטול ההקצאה הבא בעוד {days} ימים, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "בין {min} ל-{max, plural, one {תו #} two {# תווים} other {# תווים}}"
       }
     }
   }

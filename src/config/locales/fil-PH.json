@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Miyembro ng Ecency Pro"
   },
   "perks": {
     "header": "Mga Perk",
@@ -31,42 +31,42 @@
     "promote_desc": "Magkaroon ng mas maraming tumitingin sa iyong post",
     "account_boost": "Account boost",
     "account_boost_desc": "I-boost ang anumang account",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Mag-top up ng RC",
+    "rc_topup_desc": "Magpatuloy sa pag-post kahit paubos na ang Resource Credits",
+    "streak_freeze_owned": "{n} sa reserba",
+    "streak_freeze_buy": "Protektahan ang streak ({price} Points)",
+    "streak_freeze_buying": "Pinoprotektahan",
+    "streak_freeze_error": "Hindi nabili ang streak freeze. Pakisubukang muli."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Pang-araw-araw na post",
+    "streak": "{n} araw na streak",
+    "keep_streak": "Panatilihing buhay ang iyong streak"
   },
   "waves": {
     "for_you": "Para sa iyo",
     "following": "Sinusundan",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Mga custom na feed",
+    "custom_feeds_subtitle": "I-pin ang mga source at tag para idagdag ang mga ito bilang mga tab ng feed.",
+    "add_tag_placeholder": "Magdagdag ng tag",
+    "sources": "Mga source",
+    "your_feeds": "Mga feed mo",
+    "trending_tags": "Mga trending na tag",
+    "shorts_empty": "Wala pang maipapakitang shorts",
+    "mute": "I-mute",
+    "unmute": "I-unmute"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Pagsisimula",
+    "subtitle": "Bago ka rito? Ang Waves ay mga maiikling post at ang pinakamadaling paraan para makasali.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Isara",
+    "item_wave": "Mag-post ng una mong Wave",
+    "item_vote": "Mag-vote sa Wave na gusto mo",
+    "item_reply": "Sumagot sa isang tao",
+    "item_checkin": "Mag-check in para simulan ang iyong streak",
+    "all_done_title": "Tapos na lahat 🎉",
+    "all_done_subtitle": "Handa ka na. Ituloy ang paggawa ng Waves!"
   },
   "profile": {
     "havent_commented": "wala pang na i-komentong bagay",
@@ -111,7 +111,7 @@
   },
   "post_poll": {
     "choice_placeholder": "Pagpipilian {number}",
-    "wizard_config_label": "Configuration",
+    "wizard_config_label": "Konpigurasyon",
     "config_max_options": "Pinakamaraming Opsyon",
     "config_vote_change": "Payagan ang pagbabago ng boto",
     "voters": "Mga Botante",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Edad  |  Visibility  |  Interpretasyon",
     "attach_poll": "Maglakip ng Poll"
   },
+  "favorite_tags": {
+    "title": "Mga Tag",
+    "hint": "I-follow para maabisuhan tungkol sa mga bagong post na may tag na ito",
+    "following_hint": "Naabisuhan ka tungkol sa mga bagong post na may tag na ito",
+    "follow": "I-follow",
+    "following": "Sinusundan",
+    "added": "Sinusundan ang tag",
+    "removed": "Na-unfollow ang tag",
+    "empty_list": "Walang laman dito"
+  },
   "favorites": {
     "add": "Magdagdag ng paborito",
     "add_error": "Hindi maidagdag ang paborito",
@@ -181,7 +191,33 @@
     "payout": "Payout",
     "details": "Mga Detalye",
     "community": "komunidad",
-    "new_post": "Bagong Post"
+    "new_post": "Bagong Post",
+    "mute_post_title": "I-mute ang post na ito",
+    "unmute_post_title": "I-unmute ang post na ito",
+    "mute_post_reason": "Bakit ito ini-mute?",
+    "unmute_post_reason": "Bakit ito ibinabalik?",
+    "manage": "Pamahalaan ang komunidad",
+    "manage_members": "Mga miyembro at tungkulin",
+    "manage_settings": "Mga setting ng komunidad",
+    "manage_activities": "Talaan ng aktibidad",
+    "activities": "aktibidad",
+    "no_activities": "Wala pang aktibidad",
+    "activities_load_failed": "Hindi ma-load ang aktibidad. I-pull para mag-refresh.",
+    "set_role": "Itakda ang tungkulin",
+    "assign_role": "Magtalaga ng tungkulin",
+    "assign_role_hint": "Maghanap ng kahit anong account, kahit hindi pa naka-subscribe, saka pumili ng tungkulin.",
+    "username_placeholder": "Username",
+    "invalid_username": "Pumili ng umiiral na account mula sa mga resulta",
+    "members": "mga miyembro",
+    "no_members": "Walang nahanap na miyembro",
+    "members_incomplete": "Hindi na-load ang ilang miyembro. I-pull para mag-refresh.",
+    "members_load_failed": "Hindi ma-load ang mga miyembro. I-pull para mag-refresh.",
+    "role_owner": "May-ari",
+    "role_admin": "Admin",
+    "role_mod": "Mod",
+    "role_member": "Miyembro",
+    "role_guest": "Bisita",
+    "role_muted": "Naka-mute"
   },
   "trade": {
     "swap_for": "Pinapalitan ang {fromAmount} para sa {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Cross Post",
     "pin-blog": "I-pin sa blog",
     "copy": "kopyahin ang link",
+    "copy-text": "kopyahin ang text",
+    "open-thread": "buksan ang thread",
     "unpin-community": "I-unpin mula sa komunidad",
+    "mute-post": "I-mute ang post",
+    "unmute-post": "I-unmute ang post",
     "mute": "I-mute / I-block",
     "reblog": "i-reblog",
     "undo-reblog": "bawiin ang reblog",
@@ -232,24 +272,24 @@
     "unpin-reply": "I-unpin ang komento"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Ang post na ito ay nasa wikang {lang}. I-translate sa {target}?",
+    "translate_to": "I-translate sa {lang}",
+    "show_original": "Ipakita ang orihinal",
+    "translated_from": "Isinalin mula sa {lang}",
+    "change_language": "Palitan ang wika"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "I-translate ang post",
+    "source": "Wikang pinagmulan",
+    "target": "Target na wika",
+    "detected": "Natukoy: {lang}",
+    "translate": "I-translate",
+    "apply": "Ilapat",
+    "review_note": "Nagdaragdag ng machine translation ng sarili mong sulat sa dulo ng post. Suriin at i-edit bago i-publish.",
+    "too_short": "Magsulat muna ng kaunti pa. Kailangan ng pagsasalin ng hindi bababa sa ilang pangungusap.",
+    "progress": "Isinasalin ang {done} sa {total}...",
+    "error": "Nabigo ang pagsasalin. Pakisubukang muli.",
+    "add_title_marker": "Magdagdag ng marker ng wika sa pamagat"
   },
   "side_menu": {
     "profile": "Profile",
@@ -296,7 +336,7 @@
     "hot": "Mainit",
     "popular": "Tanyag",
     "new": "Bago",
-    "friends": "Following",
+    "friends": "Sinusundan",
     "my_blog": "Aking Blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Walang makita dito"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Mga template",
+    "untitled": "Template na walang pamagat",
+    "empty_list": "Mag-save ng post bilang template mula sa editor para magamit ito ulit dito.",
+    "delete_confirm": "Sigurado ka bang gusto mong burahin ang template na ito?",
+    "applied": "Inilapat ang template bilang bagong post",
+    "save_as_template": "I-save bilang template",
+    "name_placeholder": "Pangalan ng template",
+    "saved": "Na-save ang template"
   },
   "selection_list": {
     "available": "Available na {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Lahat",
+      "replies": "Mga sagot",
+      "mentions": "Mga mention",
+      "rvotes": "Mga vote",
+      "follows": "Mga follow",
+      "reblogs": "Mga reblog",
+      "transfers": "Mga transfer",
+      "delegations": "Mga delegasyon",
+      "nfavorites": "Mga paborito",
+      "tags": "Mga Tag",
+      "nbookmarks": "Mga bookmark",
+      "payouts": "Mga payout",
+      "scheduled_published": "Mga naka-iskedyul na post",
+      "account_updates": "Mga update sa account",
+      "weekly_earnings": "Lingguhang kita"
     },
     "this_week": "Ngayong Linggo",
     "reblog": "nireblogged",
@@ -417,11 +458,15 @@
     "yesterday": "Kahapon",
     "mention": "binanggit sa",
     "favorites": "gumawa ng bagong post",
+    "tags": "nag-post sa #{tag}",
+    "tags_bundle": "{count} bagong post sa #{tag}",
+    "tags_title": "Mga bagong post sa tag na sinusundan mo",
     "mentions": "Mga banggit",
     "spin": "Panahon na para kumita ng mas maraming Points",
     "last_week": "Nakaraang Linggo",
     "recent": "Kamakailan",
     "ignore": "ayaw kang makita",
+    "blacklist": "ni-blacklist ka",
     "follow": "sinundan ka",
     "notification": "Mga Abiso",
     "this_month": "Ngayong Buwan",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "Maaari nang mag-post at bumoto ang {accounts} sa ngalan mo. Kung hindi mo ito pinahintulutan, bawiin ito.",
     "weekly_earnings": "Kumita ka ng ${amount} ngayong linggo{breakdown}",
     "payouts": "Natanggap na payout: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "nag-publish ng naka-iskedyul na post",
+    "scheduled_published_title": "Na-publish ang naka-iskedyul na post",
+    "scheduled_published_body": "Live na ang iyong naka-iskedyul na post, i-tap para tingnan"
   },
   "recurrent": {
     "delete_failed": "Nabigong tanggalin ang recurrent transfer, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Buksan ang kamakailang draft o Gumawa ng bagong post",
     "reward_power_up": "I-stake ang 100%",
     "open_gallery": "Buksan ang Gallery",
+    "open_files": "Pumili mula sa Files",
     "clipboard_no_image": "Walang nakitang larawan sa clipboard",
     "clipboard_image_detected": "May larawan sa clipboard",
     "paste_image": "I-paste ang larawan",
@@ -528,7 +574,7 @@
     "limited_lastchar": "Dapat nakatapus sa letra o numero ang tag",
     "alert_btn_new": "Bagong Post",
     "url": "URL",
-    "plain": "Plain",
+    "plain": "Payak",
     "select_community": "Pumili ng komunidad",
     "enter_url_placeholder": "Maglagay ng URL",
     "label": "Label",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Mamaya",
     "settings_title": "Mga Opsyon sa Post",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Hindi"
+    "support_ecency": "Suportahan ang Ecency {percent}%",
+    "alert_btn_no": "Hindi",
+    "short_reply_hint": "Ang mga reply na {n} karakter o mas kaunti ay hindi kumikita ng points (hindi kasama ang mga link)",
+    "short_content_hint": "Masyadong maikli para kumita ng points ({n} karakter o mas kaunti, hindi kasama ang mga link)"
   },
   "time": {
     "week": "linggo",
@@ -655,7 +703,41 @@
     "select_emoji": "Pumili ng Emoji",
     "more_emojis": "Higit pa",
     "search_emojis": "Maghanap ng emoji...",
-    "no_emoji_found": "Walang nakitang emoji"
+    "no_emoji_found": "Walang nakitang emoji",
+    "ban-reason-spray": "Naka-pause ang pag-post mo dahil iisang mensahe ang ipinadala sa ilang channel nang sabay.",
+    "ban-reason-mass-dm": "Naka-pause ang pag-post mo dahil may mensaheng ipinadala sa maraming tao nang sabay.",
+    "ban-reason-generic": "Naka-pause ang pag-post mo sa chat.",
+    "ban-can-still-read": "Mababasa mo pa rin ang chat.",
+    "ban-unlocks": "Magbubukas ang pag-post {when}.",
+    "ban-remaining-soon": "sa loob ng wala pang isang minuto",
+    "ban-remaining-minutes": "sa loob ng mga {count} minuto",
+    "ban-remaining-hours": "sa loob ng mga {count} oras",
+    "ban-remaining-days": "sa loob ng mga {count} araw",
+    "new_group": "Bagong grupo",
+    "new_group_hint": "Magdagdag ng {min} hanggang {max} tao para magsimula ng group conversation.",
+    "new_group_search": "Maghanap ng tao gamit ang username",
+    "new_group_full": "Hanggang {max} ibang tao ang puwede sa isang grupo.",
+    "new_group_no_results": "Walang nahanap sa chat na may ganyang pangalan.",
+    "new_group_search_failed": "Hindi gumana ang paghahanap. Tingnan ang koneksyon mo at subukang muli.",
+    "new_group_remove": "Alisin si @{username}",
+    "new_group_create": "Simulan ang grupo",
+    "new_group_failed": "Hindi masimulan ang grupo. Pakisubukang muli.",
+    "rename_group": "Palitan ang pangalan ng grupo",
+    "rename_group_hint": "Bigyan ng pangalan ang grupong ito na makikita ng lahat ng miyembro. Iwanang walang laman para ipakita ang mga pangalan ng miyembro.",
+    "group_name": "Pangalan ng grupo",
+    "rename_group_too_long": "Hanggang {max} karakter ang pangalan ng grupo.",
+    "rename_group_not_owner": "Ang nagsimula lang ng grupong ito ang puwedeng magpalit ng pangalan nito.",
+    "rename_group_failed": "Hindi napalitan ang pangalan ng grupo. Pakisubukang muli.",
+    "group_renamed": "Pinalitan ni {user} ang pangalan ng grupo sa \"{name}\"",
+    "group_name_cleared": "Inalis ni {user} ang pangalan ng grupo",
+    "group_members": "Mga miyembro ng grupo",
+    "save": "I-save",
+    "cancel": "Kanselahin",
+    "reactions_title": "Mga reaksyon",
+    "reactor_you": "Ikaw",
+    "reactor_unknown": "May isang tao",
+    "see_who_reacted": "Pindutin nang matagal para makita kung sino ang nag-react",
+    "group": "Grupo"
   },
   "free_estm": {
     "timer_text": "Libre ikot sa sunod na",
@@ -684,6 +766,32 @@
     "transaction_fail": "Nabigo ang Transaksyon"
   },
   "search_result": {
+    "error": "Hindi nakumpleto ang paghahanap. Pakisubukang muli",
+    "filters": {
+      "title": "Mga Filter",
+      "open": "Mga Filter",
+      "author": "May-akda",
+      "author_placeholder": "username",
+      "category": "Kategorya",
+      "category_placeholder": "komunidad o kategorya",
+      "tags": "Mga Tag",
+      "tags_placeholder": "paghiwalayin ng kuwit",
+      "type": "Uri",
+      "type_all": "Lahat",
+      "type_post": "Mga Post",
+      "type_comment": "Mga Komento",
+      "date": "Petsa",
+      "date_week": "Nakaraang linggo",
+      "date_month": "Nakaraang buwan",
+      "date_year": "Nakaraang taon",
+      "date_all": "Lahat ng panahon",
+      "sort": "Ayusin",
+      "apply": "Ilapat",
+      "active": "{n} aktibo",
+      "too_many_tags": "Gumamit ng hanggang {n} tag lang",
+      "too_long": "Masyadong mahaba ang hinahanap. Gumamit ng hanggang {n} karakter lang",
+      "needs_criteria": "Maglagay ng hahanapin, o may-akda, kategorya o tag na ifi-filter"
+    },
     "communities_filter": {
       "new": "Bago",
       "my": "Aking mga Komunidad",
@@ -727,7 +835,7 @@
     "title": "Cross Post"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Isiniwalat ng may-akda ang paggamit ng AI"
   },
   "ai_assist": {
     "title": "AI Writing Assistant",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Kumuha ng mga kaugnay na tag para sa iyong post",
     "action_generate_title": "Bumuo ng Pamagat",
     "action_generate_title_desc": "Lumikha ng mga kaakit-akit na opsyon ng pamagat",
-    "action_summarize": "Recap",
+    "action_summarize": "Buod",
     "action_summarize_desc": "Lumikha ng maikli at malinaw na buod",
     "action_check_grammar": "Suriin ang Gramatika",
     "action_check_grammar_desc": "Ayusin ang mga isyu sa gramatika at pagbabaybay",
+    "action_generate_image": "Gumawa ng Larawan",
+    "action_generate_image_desc": "Gumawa ng AI image para sa post mo",
+    "cost_from": "mula {cost} {unit}",
     "text_label": "Iyong teksto",
     "text_placeholder": "I-paste o i-type ang iyong nilalaman dito...",
     "min_chars": "Kailangan ng minimum na {count} character",
@@ -797,16 +908,26 @@
     "remind_later": "Ipaalala Mamaya",
     "success_subscribe": "Matagumpay ang pag-subscribe!",
     "payloadTooLarge": "Masyadong malaki ang file, maaaring baguhin ang laki nito o mag-upload ng mas maliit na imahe",
+    "too_many_images": "Hanggang {count} larawan ang puwede mong piliin nang sabay",
     "fail_follow": "Nabigo ang pag-follow!",
     "clear_user_alert": "Sigurado kang buburahin ang lahat ng user data?",
     "cancel": "Kaselahin",
     "connection_success": "Matagumpay na komunekta!",
     "rc_down": "Hindi sapat ang resource credits para maisagawa ang aksyon! \n\nPalakasin ang iyong account para tuloy tuloy na tamasin ang karanasan. Gusto mo bang palakasin ang iyong account?",
+    "rc_down_title": "Kulang ang Resource Credits",
+    "rc_precheck_title": "Maaaring masyadong malaki ang post na ito para i-publish",
+    "rc_precheck_body": "Mukhang masyadong mababa ang resource credits mo para sa post na ganito kalaki.",
+    "rc_down_body": "Kulang ang resource credits mo para sa aksyong ito.\n\nMag-top up ngayon gamit ang Points para magpatuloy, o i-boost ang account mo nang permanente.",
+    "rc_down_topup": "Mag-top up ng RC gamit ang Points",
+    "rc_down_boost": "I-boost ang account",
     "done": "Tapos na",
     "something_wrong_alt": "Samantala, subukan ang Ecency.com mula sa iyong Browser",
     "same_user": "Ang user na ito ay nasa listahan na",
     "fail": "Bigo!",
     "operation_failed_with_reason": "Nabigo ang {operation}: {reason}",
+    "request_timed_out": "Masyadong matagal ang koneksyon. Tingnan ang network mo at subukang muli.",
+    "load_failed_retry": "Hindi namin ito ma-load. Pakisubukang muli.",
+    "retrying": "Sinusubukang muli...",
     "wallet_refresh_failed": "Nabigo ang pag-refresh ng wallet. Pakisubukan muli.",
     "wallet_refresh_missing_account": "Nabigo ang pag-refresh ng wallet: nawawalang account.",
     "boost_failed": "Nabigo ang Boost.",
@@ -949,31 +1070,31 @@
     "video_attached": "Naka-attach ang video"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "I-upvote",
+    "upvoted": "Na-upvote",
+    "downvoted": "Na-downvote",
+    "upvote_hint": "Mag-double tap para buksan ang mga opsyon sa pag-vote",
+    "payout_details": "Mga detalye ng payout",
+    "a11y_votes": "{count, plural, one {# vote} other {# vote}}",
+    "a11y_voters_hint": "Tingnan ang mga bumoto",
+    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblog}}",
+    "a11y_reblogs_hint": "Tingnan ang mga reblog",
+    "a11y_comments": "{count, plural, one {# komento} other {# komento}}",
+    "a11y_comments_hint": "Tingnan ang mga komento",
+    "a11y_reply_hint": "Sumagot",
+    "a11y_tip": "Magpadala ng tip",
+    "a11y_tips": "{count, plural, one {# tip} other {# tip}}",
+    "a11y_edit": "I-edit ang komento",
+    "a11y_delete": "Burahin ang komento",
+    "a11y_show_replies": "Ipakita ang mga sagot",
+    "a11y_hide_replies": "Itago ang mga sagot",
+    "a11y_post_options": "Mga opsyon sa post",
+    "a11y_views": "{count, plural, one {# view} other {# view}}",
+    "source_ecency": "Na-publish gamit ang Ecency",
+    "a11y_stats_hint": "Tingnan ang stats ng post",
     "image": "Imahe",
     "reveal_muted": "NAKA-MUTE\nI-tap para ipakita ang nilalaman",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "I-tap para i-load ang larawan",
     "in": "sa",
     "poll": "POLL",
     "copy_link": "Kopyahin ang link",
@@ -998,13 +1119,14 @@
     "save_to_local": "I-download sa device",
     "muted": "Naka-mute ang nilalaman dahil sa paglabag",
     "community_muted": "Naka-mute ang nilalaman dahil sa paglabag sa patnubay ng komunidad",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Nilalaman mula sa account na mababa ang reputasyon",
+    "muted_downvoted": "Nilalamang dinownvote ng mga user",
+    "muted_low_trust": "Account na mababa ang reputasyon na may hindi pa napapatunayang outbound link",
+    "muted_reveal": "I-tap para ipakita",
     "promoted": "PROMOTED",
     "image_saved": "Ang imahe ang na i-save sa Gallery ng mga Imahe",
     "words": "Mga Salita",
     "reading": "Pagbabasa",
-    "listen": "Makinig",
     "min": "min",
     "summarize_start": "Simulan"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Walang makita na post",
     "invalid_link": "Hindi wasto ang Url, maaari kang subukang muli gamit ang wastong url o subukang buksan ito sa web browser",
-    "no_existing_user": "Walang makita na user"
+    "no_existing_user": "Walang makita na user",
+    "posting_key_request": "Hinihingi ni {requester} ang posting private key para kay @{username}.\n\nMagpatuloy lang kung pinagkakatiwalaan mo ang kahilingang ito.",
+    "posting_key_request_unnamed": "Humihingi ang ibang application ng posting private key para kay @{username}.\n\nMagpatuloy lang kung pinagkakatiwalaan mo ang kahilingang ito.",
+    "auth_request_as_user": "Gusto ni {requester} na i-sign in ka bilang @{username}.\n\nUsername at patunay ng sign-in lang ang ibinabahagi. Walang key na lalabas sa Ecency.",
+    "auth_request_as_current": "Gusto ni {requester} na i-sign in ka gamit ang Ecency account mo.\n\nUsername at patunay ng sign-in lang ang ibinabahagi. Walang key na lalabas sa Ecency."
   },
   "payout": {
     "breakdown": "Detalye",
@@ -1065,7 +1191,7 @@
     "open": "Buksan ang URL",
     "invalid_key_desc": "mangyaring mag-login gamit ang {key} key o master key para isagawa ang transaksyong ito",
     "auth_transfer_confirm": "Kumpirmahin ang paglilipat kay {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Aprubahan lamang kung pinagkakatiwalaan mo ang pinagmulan ng link na ito. Ang pag-apruba ay magbo-broadcast ng operasyon sa ibaba mula sa iyong account gamit ang iyong {authority} key."
   },
   "voters_dropdown": {
     "rewards": "GANTIMPALA",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Dapat maglaman lamang ng mga titik, numero, at gitling",
       "username_no_ascii_first_letter_error": "Dapat magsimula sa isang letra",
       "username_contains_double_hyphens": "Hindi dapat maglaman ng dobleng gitling",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Masyadong kahawig ng account ng crypto exchange ang username na ito at maaaring makalito sa iba. Pumili ng mas natatanging pangalan.",
+      "username_restricted_prefix": "Hindi pinapayagan ang mga username na nagsisimula sa ‘uid’ na sinusundan ng mga numero, dahil madalas itong ginagamit sa panggagaya sa iba. Pumili ng ibang pangalan.",
       "username_contains_underscore": "Hindi dapat maglaman ng underscore"
     },
     "500_error": "Ang iyong request ay hindi maproseso, ang pila ng pagsali ay maaaring puno na! Subukan ulit nang ilang minuto...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Kinuha na ang username",
+      "14": "Rehistrado na ang email address",
+      "15": "Maglagay ng wastong email address",
+      "16": "Maglagay ng wastong username",
+      "17": "Masyadong mahaba ang username, pumili ng mas maikli",
+      "19": "Gumamit ng permanenteng email address, o kumuha na lang ng Premium account",
+      "21": "Hindi wasto ang referral na ito",
+      "28": "Hindi naproseso ang iyong request, malamang na puno ang pila sa signup. Pakisubukang muli sa loob ng ilang minuto.",
+      "107": "May natukoy na koneksyon sa VPN. Pakipatay ang iyong VPN at subukang muli, o kumuha na lang ng Premium account.",
+      "110": "Para maiwasan ang abuso, nililimitahan namin ang bilang ng account kada tao/network. Pakisubukang muli mula sa ibang network.",
+      "111": "May natukoy na koneksyon sa Tor. Pakipatay ang Tor habang nagsa-sign up.",
+      "112": "Hindi namin ma-verify ang iyong koneksyon ngayon. Pakisubukang muli sa loob ng ilang minuto."
     },
     "have_account_text": "Mayroon ka nang account?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Kumuha ng ganap na Hive account, ang paraang ito ay may pangunahing pagsusuri upang matiyak na hindi inaabuso ng botnet ang aming signup faucet.",
     "btn_register": "Magrehistro nang Libre",
     "title": "Libreng Account"
+  },
+  "dictation": {
+    "title": "Mag-dictate",
+    "start": "Mag-record",
+    "stop": "Ihinto",
+    "record_more": "Mag-record pa",
+    "done": "Tapos na",
+    "recording": "Nagre-record",
+    "stop_hint": "Ihinto para i-transcribe at idagdag sa post mo. Hanggang {m} minuto.",
+    "inserted": "Naidagdag sa post mo. Mag-record pa, o i-tap ang Tapos na.",
+    "transcribing": "Nagta-transcribe",
+    "rate": "{n} Points kada {s} segundo",
+    "cost_running": "{n} Points sa ngayon",
+    "cost_running_free": "Libre sa ngayon",
+    "free_remaining": "Libre ngayong araw ang susunod mong {n} x {s}s",
+    "price_loading": "Sinusuri ang presyo",
+    "price_error": "Hindi ma-load ang presyo ng transcription.",
+    "denied": "Kailangan ng Ecency ng access sa mikropono para mag-dictate. Payagan ito sa Settings at subukang muli.",
+    "error_empty": "Walang nadetect na boses sa recording na iyon.",
+    "error_insufficient_points": "Kulang ang Points para ma-transcribe ang recording na iyon.",
+    "error_rate_limited": "Masyadong maraming recording sa ngayon. Pakisubukang muli mamaya.",
+    "error_too_long": "Masyadong mahaba ang recording na iyon para i-transcribe.",
+    "error_failed": "Hindi ma-transcribe ang recording na iyon. Pakisubukang muli.",
+    "error_recorder": "Hindi masimulan ang pagre-record. Pakisubukang muli."
   },
   "wallet": {
     "delegations_out": "Mga Delegasyong Palabas",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Ang regular na pagsuri ay nagbibigay sa iyo ng 0.25 na puntos.",
     "fill_transfer_from_savings": "Ang pag-ipon ay naisagawa",
     "activities": "Mga Aktibidad",
+    "no_activities": "Wala pang transaksyon",
+    "activities_failed": "Hindi ma-load ang mga transaksyon. I-pull pababa para subukang muli.",
     "tap_update": "I-tap para mag-update",
     "mining_lottery": "Nanalo sa Lottery",
     "checkin": "Magcheck-in",
     "tokens_transfer": "Nailipat ang mga Token",
     "outgoing_transfer_title": "Paglilipat/Pagbibigay",
+    "burned_title": "Paggamit ng AI",
+    "burned_description": "Mga Points na ginastos sa AI feature",
+    "burn_refund_title": "Refund sa AI",
+    "burn_refund_description": "Mga Points na ibinalik pagkatapos mabigo ang AI request",
     "manage_assets": "Magdagdag / Mag-alis ng mga Asset",
     "selected_assets": "Mga Napiling Asset",
     "nft_setPropertyPermissions": "Itinakda ang Property Permissions para sa NFT Symbol",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "I-update ang Precision ng mga Token",
     "tokens_transferOwnership": "Nailipat ang Pagmamay-ari ng Token",
     "withdraw_vesting": "I-unstake",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Mga account sa withdraw",
     "delegate_engine": "I-delegate",
     "market_close": "Isinara ang Order",
     "nftmarket_transferFee": "Bayad sa Buy Order",
@@ -1380,13 +1536,20 @@
     },
     "tokens_transferFromContract": "Nailipat ang mga Token mula sa Contract",
     "total_recurrent_transfers": "Kabuuang Paulit-ulit na Paglilipat",
-    "address_label": "{symbol} Address",
+    "address_label": "Address ng {symbol}",
     "tokens_transferToContract": "Nailipat ang mga Token sa Contract",
     "nft_updateOrgName": "Na-update ang NFT Organization Name",
     "inactive_token": "Medyo hindi aktibo ang token, maaaring maapektuhan ang ilang functionalities.",
     "purchase_estm": "MAGKAROON NG POINTS",
     "escrow_approve": "Pag-approve ng Escrow",
     "expires": "mag-e-expire",
+    "transaction_id": "Transaction ID",
+    "copy_transaction_id": "Kopyahin ang link ng transaksyon",
+    "filter_activities": "I-filter ang mga aktibidad",
+    "filter_activities_desc": "Piliin kung aling mga operasyon ang hihilingin ng history na ito",
+    "filter_all": "Piliin lahat",
+    "filter_none": "Alisin lahat",
+    "filter_apply": "Ilapat",
     "author_reward": "Gantimpala ng may-akda",
     "withdraw_hbd": "Mag-withdraw ng Savings",
     "convert_request": "Kahilingan sa Convert",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Mag-top up ng RC",
+    "desc": "Panandaliang pagtaas ng RC para makapagpatuloy ka sa pag-post.",
+    "confirm": "Gumastos ng Points para i-top up ang iyong Resource Credits?",
+    "insufficient": "Wala kang sapat na Points.",
+    "buy_points": "Bumili ng Points"
   },
   "ai_image_generator": {
     "title": "AI Image Generator",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Custom ({hours}h)",
+    "balance_load_failed": "Hindi ma-load ang balanse mo. I-tap para subukang muli.",
+    "precision_load_failed": "Hindi ma-load ang detalye ng token na ito, kaya buong halaga lang ang maipapadala. I-tap para subukang muli.",
     "close": "Isara",
     "favorite_username_placeholder": "Username",
     "invalid_recipient_qr": "Walang nahanap na username sa QR code na ito.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Pamahalaan ang Mga Awtoridad",
     "pincode": "Pincode",
     "general": "Pangkalahatan",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Suportahan ang Ecency",
+    "support_beneficiary": "Ibahagi ang mga reward ng post sa Ecency",
+    "support_beneficiary_percent": "Bahagi sa mga reward ng post",
+    "support_curation": "Magpigil ng bahagi ng curation rewards",
+    "support_curation_percent": "Pagpigil sa curation rewards",
     "feedback_body": "Isulat ang iyong mensahe dito!\n\nHive username: {username}\nBersyon ng app: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Ipakita ang Mga Larawan",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Komento",
       "bookmark": "Mga Bookmark",
+      "tags": "Mga Tag",
       "reblog": "I-reblog",
       "favorite": "Mga Paborito",
       "mention": "Banggit",
@@ -1599,10 +1765,10 @@
       "transfers": "Ilipat",
       "vote": "Boto",
       "follow": "Sundan",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Na-publish ang naka-iskedyul na post",
+      "payouts": "Mga payout",
+      "account_update": "Mga update sa account",
+      "weekly_earnings": "Lingguhang kita",
       "fcm_unavailable": "Hindi suportado ang push notifications sa device na ito. Makakatanggap ka lamang ng notipikasyon habang bukas ang app."
     },
     "keys_warning": "Sensitibong impormasyon ng account!\nKailangang ma-secure ang Ecency gamit ang PIN code bago tingnan ang mga private key.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Magbigay Feedback",
     "rate_app": "I-rate ang Ecency",
+    "email_digests": "Mga email digest",
     "rate": "I-rate",
     "dm-privacy-updated": "Matagumpay na na-update ang mga setting ng privacy ng DM",
     "dm-privacy-failed": "Nabigong i-update ang mga setting ng privacy ng DM",
@@ -1662,7 +1829,7 @@
       "no_keys": "Hivesigner ang iyong paraan ng pag-login. Walang nakaimbak na key ang application sa device. Mag-login gamit ang master password para makabuo ng mga key",
       "posting_key": "Posting Key"
     },
-    "biometric": "Finger Print / Face Unlock"
+    "biometric": "Fingerprint / Face Unlock"
   },
   "tipping": {
     "existing_tips": "Mga Umiiral na Tip",
@@ -1685,19 +1852,29 @@
     "request_sent": "Naipadala na ang iyong kahilingan para sa pag-delete",
     "confirm_delete_body": "Sigurado ka bang gusto mong i-delete ang account? Buburahin nito ang lahat ng iyong data"
   },
-  "tts": {
-    "settings_title": "Mga Setting ng Text-to-Speech",
-    "voice": "Boses",
-    "voice_hint": "Gagamitin ang default na boses ng sistema",
-    "speed": "Bilis",
-    "pitch": "Tono",
-    "test_voice": "Subukan ang Boses",
-    "settings_info": "Gagamitin ang mga setting na ito kapag binabasa nang malakas ang mga post",
+  "listen": {
+    "title": "Pakinggan ang post na ito",
+    "minutes": "~{n} min",
+    "login": "Mag-log in",
+    "unlock": "I-unlock · {n} Points",
+    "confirm": "Gumastos ng {n} Points para pakinggan ang post na ito? Sa iyo ang audio at puwede mong ulitin anumang oras.",
+    "not_enough_title": "Kulang ang Points",
+    "not_enough": "Kailangan ng {required} Points sa pakikinig at mayroon kang {available}.",
+    "get_points": "Kumuha ng Points",
+    "unlock_failed": "Hindi ma-unlock ang audio, pakisubukang muli",
+    "failed_refunded": "Hindi nagawa ang audio, naibalik ang iyong Points",
+    "preparing": "Inihahanda ang audio…",
+    "preparing_eta": "Inihahanda ang audio, mga {n} min…",
+    "preparing_progress": "Inihahanda ang audio · {n}%",
+    "waiting": "Naghihintay sa pila, {n} pa ang nauuna…",
+    "next_in_line": "Susunod sa pila…",
     "play": "I-play",
     "pause": "I-pause",
-    "language": "Wika",
-    "language_auto": "Awtomatikong tukuyin",
-    "language_hint": "Pinipili ng awtomatikong pagtukoy ang wika batay sa nilalaman ng post"
+    "seek": "Lumundag",
+    "speed": "Bilis ng playback",
+    "language": "Wika ng audio",
+    "unavailable": "Hindi ma-load ang audio.",
+    "retry": "Subukang muli"
   },
   "posting_authority": {
     "title": "I-enable ang Mas Mabilis na Pag-post",
@@ -1732,7 +1909,7 @@
     "error-auth": "Nabigo ang authentication. Mag-login ulit.",
     "error-generic": "Nabigo ang pag-upload ng video. Subukan ulit.",
     "error-too-long-short": "Ang mga maikling video ay dapat 60 segundo o mas maikli.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Isang video lang ang puwede sa isang post. Alisin ang kasalukuyang video bago magdagdag ng isa pa.",
     "select_source": "Magdagdag ng Video",
     "record": "Mag-record ng Video",
     "choose_library": "Pumili mula sa Library"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Magbahagi ng mabilisang update"
   },
+  "newsletter": {
+    "screen_title": "Mga email digest",
+    "title": "{list}",
+    "body_own": "Lingguhan o buwanang email na buod ng mga abiso mo.",
+    "body_creator": "Mga bagong post ni {list} sa inbox mo.",
+    "body_community": "Digest ng mga bagong post sa {list} sa email.",
+    "body_site": "Ang pinakamaganda sa Ecency sa inbox mo.",
+    "first_publish_title": "Congrats sa una mong post!",
+    "first_publish_body": "Gusto mo ba ng email digest ng mga abiso mo? Lingguhan o buwanan, palitan o itigil anumang oras sa Settings.",
+    "list_own": "Digest ng mga abiso ko",
+    "list_site": "Newsletter ng Ecency",
+    "status_active": "Naka-subscribe ka.",
+    "status_pending": "Naghihintay ng kumpirmasyon sa email.",
+    "status_short_active": "aktibo",
+    "status_short_pending_confirmation": "nakabinbin",
+    "status_short_suppressed": "itinigil",
+    "status_short_ended": "tapos na",
+    "cadence_weekly": "Lingguhan",
+    "cadence_monthly": "Buwanan",
+    "email_placeholder": "ikaw@halimbawa.com",
+    "subscribe": "Mag-subscribe",
+    "update": "I-update",
+    "resend": "Ipadala muli ang kumpirmasyon",
+    "leave": "Umalis sa digest",
+    "cancel": "Kanselahin",
+    "ok": "OK",
+    "manage": "Pamahalaan",
+    "check_inbox_title": "Tingnan ang inbox mo",
+    "check_inbox_body": "Nagpadala kami ng link ng kumpirmasyon sa {email}. Magsisimula ang subscription kapag nakumpirma mo.",
+    "subscribed": "Naka-subscribe sa email digest",
+    "left": "Umalis sa digest",
+    "refused": "Hindi puwedeng i-subscribe ang address na ito.",
+    "unavailable": "Hindi available ang mga email digest ngayon.",
+    "too_many": "Masyadong maraming pagtatangka, pakisubukang muli mamaya.",
+    "fail": "May nagkamali, pakisubukang muli.",
+    "empty": "Wala pang email digest. Mag-subscribe sa ibaba para magsimula.",
+    "discover": "Kumuha pa sa email",
+    "stop_all": "Ihinto lahat",
+    "stop_all_title": "Ihinto ang lahat ng email?",
+    "stop_all_body": "Wala nang Ecency mail na ipapadala sa {email}. Mananatili ang mga subscription sa ibang address.",
+    "stop_all_ok": "Ihinto lahat",
+    "stop_all_done": "Na-unsubscribe ang address sa lahat ng mail",
+    "profile_option": "EMAIL DIGEST",
+    "subscriber_count": "{weekly} lingguhan • {monthly} buwanang email subscriber",
+    "community_button": "Newsletter"
+  },
+  "mod_notes": {
+    "title": "Magdagdag ng dahilan",
+    "placeholder": "Dahilan (nakikita ng ibang moderator)",
+    "confirm": "Kumpirmahin",
+    "cancel": "Kanselahin"
+  },
+  "community_settings": {
+    "title_header": "Mga setting ng komunidad",
+    "title_label": "Pamagat",
+    "about": "Tungkol",
+    "lang": "Wika",
+    "description": "Paglalarawan",
+    "rules": "Mga Patakaran",
+    "nsfw": "Hindi ligtas sa trabaho",
+    "save": "I-save",
+    "required": "Kinakailangan",
+    "title_length": "Pagitan ng {min} at {max} karakter",
+    "owner_admin_only": "Ang may-ari at mga admin lang ang puwedeng magbago ng mga setting na ito."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Nakabukas",
+        "collapsed": "Nakatiklop"
+      },
+      "a11y_chat": {
+        "quote": "Tumutugon kay {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Piliin",
+        "deselect": "Alisin sa pagkapili"
+      },
+      "store": {
+        "billing_unavailable": "Hindi pinapayagan ang in-app purchases sa device na ito.",
+        "verification_failed": "Hindi ma-verify ng App Store ang pagbiling ito.",
+        "cancelled": "Kinansela ang pagbili",
+        "unknown_result": "Hindi kilalang resulta ng pagbili"
+      },
+      "navigation": {
+        "feed_unavailable": "Hindi pa available ang feed na ito.",
+        "link_cannot_open": "Hindi mabuksan ang link na ito.",
+        "video_cannot_play": "Hindi mapapanood ang video na ito."
+      },
+      "media": {
+        "load_failed": "Hindi ma-load ang item na ito. Tingnan ang koneksyon mo at subukang muli.",
+        "loading": "Nilo-load ang media",
+        "download_failed": "Nabigo ang download na may status {status}"
+      },
+      "sign_in": {
+        "required": "Kailangang mag-sign in",
+        "to_reply": "Mag-sign in para tumugon.",
+        "to_vote": "Mag-sign in para bumoto.",
+        "button": "Mag-sign in"
+      },
+      "account": {
+        "logout_user": "Mag-logout si @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# boto} other {# boto}}  •  {replies, plural, one {# tugon} other {# tugon}}",
+        "voting_power": "Voting power {percent}",
+        "remove_favourite": "Alisin sa mga paborito",
+        "add_favourite": "Idagdag sa mga paborito"
+      },
+      "waves": {
+        "clear_tag_filter": "Alisin ang tag filter na {tag}",
+        "new_wave": "Bagong wave",
+        "replies_open_thread": "{count, plural, one {# tugon, buksan ang thread} other {# tugon, buksan ang thread}}",
+        "characters": "{count} sa {max} karakter",
+        "retry": "{message}\nSubukang muli",
+        "playing": "Pine-play ang {permlink}",
+        "video_attached_remove": "May nakalakip na video, alisin",
+        "image_attached_remove": "May nakalakip na larawan, alisin",
+        "take_photo": "Kumuha ng litrato",
+        "edit_poll": "I-edit ang poll",
+        "add_poll": "Magdagdag ng poll",
+        "add_video": "Magdagdag ng video"
+      },
+      "reading": {
+        "reply_to": "Tumugon kay {username}",
+        "opens_post": "Binubuksan ang post",
+        "sort_comments": "Ayusin ang mga komento",
+        "sort_comments_value": "Ayusin ang mga komento, {sort}",
+        "no_comments": "Wala pang komento.",
+        "loading_post": "Nilo-load ang post",
+        "show_version": "Ipakita ang bersyon",
+        "show_changes": "Ipakita ang mga pagbabago",
+        "replying_to": "Tumutugon kay @{username}",
+        "reply_text": "Teksto ng tugon",
+        "translate_from": "Mula",
+        "translate_to": "Patungo"
+      },
+      "feed": {
+        "tab_pinned": "{label}, naka-pin",
+        "tab_add": "{label}, idagdag",
+        "customise": "I-customize"
+      },
+      "card": {
+        "in_category": "sa {category}",
+        "pinned": "Naka-pin",
+        "by_author": "ni {username}",
+        "payout": "payout na {payout}",
+        "payout_declined": "payout na {payout}, tinanggihan",
+        "reblogged_by": "Na-reblog ni {username}"
+      },
+      "shell": {
+        "close_menu": "Isara ang menu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Thumbnail, pumili ng ibang larawan",
+        "words": "{count, plural, one {# salita} other {# salita}}",
+        "poll_min_age": "Min. Edad ng Account (Araw): {days}",
+        "poll_max_options": "Max na Opsyon: {count}",
+        "thumbnail_selected": "Napiling thumbnail",
+        "thumbnail": "Thumbnail",
+        "uploaded_image": "Na-upload na larawan",
+        "community_search": "maghanap"
+      },
+      "vote": {
+        "not_voted": "Hindi pa bumoboto",
+        "voting": "Bumoboto",
+        "failed_with": "Nabigo ang boto: {message}",
+        "failed": "Nabigo ang boto",
+        "payout": "Payout na {payout}",
+        "payout_declined": "Payout na {payout}, tinanggihan",
+        "percent": "{percent} porsyento",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "Naka-on",
+        "off": "Naka-off"
+      },
+      "lock": {
+        "biometric_reason": "I-on ang biometric unlock para sa Ecency",
+        "offer_title": "I-unlock gamit ang {method}",
+        "offer_use": "Gamitin ang {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Nakatago ang mga key habang nire-record o ini-mirror ang screen.",
+        "screenshot_notice": "May kumuha ng screenshot. Itinago muli ang mga private key; kung may key sa screenshot, burahin ito.",
+        "hold_hint": "Pindutin at hawakan ang key para ipakita ito.",
+        "hold_to_show": "Hawakan para ipakita"
+      },
+      "wallet": {
+        "cancel_order": "Kanselahin ang order na ito?",
+        "days": "{count, plural, one {# araw} other {# araw}}"
+      },
+      "chat": {
+        "reactors_hint": "Pindutin nang matagal para makita kung sino ang nag-react",
+        "see_reactors": "Tingnan kung sino ang nag-react"
+      },
+      "esie": {
+        "still": "{mood}, nakatigil"
+      }
+    },
+    "ui": {
+      "profile_of": "Profile ni @{username}",
+      "preview": "Preview ({index}/{count})",
+      "balance": "Balanse: {amount}",
+      "expires_in": "Mag-e-expire sa {time}",
+      "expired": "Nag-expire na. Isara at subukang muli.",
+      "user_has_no_posts": "Wala pang na-post si @{username}",
+      "attach_image": "Maglakip ng larawan",
+      "auto": "Auto",
+      "back": "Bumalik",
+      "hot": "HOT",
+      "image_of": "Larawan {index} sa {count}",
+      "new": "BAGO",
+      "nsfw_tap_to_reveal": "NSFW I-tap para ipakita",
+      "new_reply": "Bagong tugon",
+      "remove": "Alisin",
+      "unlock_ecency": "I-unlock ang Ecency",
+      "update_it": "I-update ito",
+      "update_it_or_post_this_as": "I-update ito, o i-post bilang bagong tugon?",
+      "use_pin": "Gamitin ang PIN",
+      "your_reply_was_already_posted": "Na-post na ang tugon mo",
+      "error_try_again": "{message} Subukang muli?",
+      "auth": {
+        "account_label": "Account: @{username}",
+        "approve_the_request_in_your_wallet": "Aprubahan ang kahilingan sa wallet app mo.",
+        "copy_key": "Kopyahin ang {title}",
+        "current_account": "Kasalukuyang account",
+        "qr_code": "QR code",
+        "requested_by": "Hiniling ni {requester}",
+        "pin_digits": "{filled} sa {total, plural, one {# digit} other {# digit}}",
+        "private_key_shown": "{title}, ipinapakita ang private key",
+        "open_wallet_app": "Buksan ang wallet app",
+        "hiveauth_scan": "Aprubahan sa Hive Keychain o ibang HiveAuth wallet: buksan ito sa device na ito, o i-scan ang code na ito gamit iyon.",
+        "switching": "Nagpapalit...",
+        "logout_all": "Mag-log out sa lahat ng account",
+        "logout_all_title": "Mag-log out sa lahat ng account sa device na ito?",
+        "stored_key": "Naka-sign in na si @{username} sa device na ito. Mananatili ang mga naka-store na key; ang session lang ang ire-renew.",
+        "stored_hivesigner": "Naka-sign in na si @{username} gamit ang HiveSigner sa device na ito. Papalitan ang session nito.",
+        "stored_hiveauth": "Naka-sign in si @{username} gamit ang HiveAuth sa device na ito. HiveSigner na lang ang gagamitin nitong mag-sign.",
+        "method_key": "Key",
+        "logout_failed": "Nabigo ang logout"
+      },
+      "browser": {
+        "account": "Account",
+        "authority": "Awtoridad",
+        "phishing": "Babala: Namarkahan ang domain na ito bilang kilalang phishing site. Mag-ingat nang husto."
+      },
+      "chat": {
+        "cancel_edit": "Kanselahin ang pag-edit",
+        "cancel_reply": "Kanselahin ang pagtugon",
+        "copied_to_clipboard": "Nakopya sa clipboard",
+        "edited_at": "Na-edit {time}",
+        "group_options": "Mga opsyon ng grupo",
+        "pinned_messages": "Mga naka-pin na mensahe",
+        "remove_user": "Alisin si @{username}",
+        "sort_by_name": "Ayusin ayon sa pangalan",
+        "more": "Higit pa",
+        "reaction_label": "{emoji} {count}. Pindutin nang matagal para makita kung sino ang nag-react",
+        "members": "Mga Miyembro"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "May post na sa link na ito at iba ito sa ipinadala mo. I-update ito, o i-publish bilang bago?",
+        "a_scheduled_post_is_published_by": "Pini-publish ng Ecency ang naka-schedule na post sa napiling oras. Kailangan nito ng posting authority para sa ecency.app sa account mo. Mananatili ang mga key at iba pang authority mo. Kailangan ng active key mo para ibigay ito.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "Mga AI tool",
+        "allow_ecency_to_publish_for_you": "Payagan ang Ecency na mag-publish para sa iyo?",
+        "bold": "Bold",
+        "clone": "I-clone",
+        "cost": "Gastos: {cost}",
+        "could_not_store_the_draft_on": "Hindi ma-store ang draft sa device na ito. Panatilihing bukas ang app at i-save ang draft.",
+        "draft": "DRAFT",
+        "delete_count": "Burahin ({count})",
+        "dictate_desc": "Magsalita, at mapupunta sa post mo ang transcript",
+        "discard": "Itapon",
+        "discard_changes": "Itapon ang mga pagbabago?",
+        "grant": "Ibigay",
+        "italic": "Italic",
+        "keep_editing": "Ituloy ang pag-edit",
+        "my_blog": "BLOG KO",
+        "my_communities": "MGA KOMUNIDAD KO",
+        "new_post": "Bagong post",
+        "notice": "Paunawa",
+        "restore": "Ibalik",
+        "restore_unsaved_changes": "Ibalik ang mga hindi na-save na pagbabago?",
+        "saved": "Na-save",
+        "top_communities": "MGA TOP NA KOMUNIDAD",
+        "table": "Table",
+        "text_format": "Format ng teksto",
+        "this_link_is_already_in_use": "Ginagamit na ang link na ito",
+        "untitled": "Walang pamagat",
+        "update_it_or_publish_this_as": "I-update ito, o i-publish bilang bagong post?",
+        "you_have_unsaved_changes_from_an": "May hindi na-save na pagbabago ka mula sa naunang pag-edit. Nagbago na ang post mula noon; papalitan ng pagbabalik ang teksto sa ibaba.",
+        "your_edits_were_not_published": "Hindi na-publish ang mga pag-edit mo.",
+        "your_post_was_already_published": "Na-publish na ang post mo",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Thumbnail, i-tap para pumili ng ibang larawan",
+        "thumbnail_number": "Thumbnail {number}",
+        "recording_busy": "May kasalukuyang recording. Tapusin muna ito sa camera.",
+        "photo_lost": "Nawala ang litrato habang bukas ang camera. Pakikuha ulit.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# salita} other {# salita}}",
+        "community_search": "maghanap"
+      },
+      "profile": {
+        "open_wallet": "Buksan ang Wallet",
+        "your_wallet_is_on_the_wallet": "Nasa Wallet tab ang wallet mo.",
+        "user_has_no_comments": "Wala pang komento si @{username}",
+        "votes_count": "{count, plural, one {# boto} other {# boto}}",
+        "replies_count": "{count, plural, one {# tugon} other {# tugon}}",
+        "menu": "Higit pa",
+        "users": "Mga User"
+      },
+      "reading": {
+        "apply": "ILAPAT",
+        "add_tag": "Magdagdag ng tag",
+        "age": "Edad",
+        "audio_language": "Wika ng audio",
+        "available_filters": "Mga Available na Filter",
+        "could_not_unlock_the_audio_please": "Hindi ma-unlock ang audio, pakisubukang muli",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Pakinggan ang post na ito",
+        "log_in": "Mag-log in",
+        "mark_all_as_read": "Markahan lahat bilang nabasa",
+        "mark_as_read": "Markahan bilang nabasa",
+        "more_replies": "Higit pang tugon",
+        "not_enough_points": "Kulang ang Points",
+        "nothing_here_yet": "Wala pa rito.",
+        "open_editor": "Buksan ang editor",
+        "pause_voice": "I-pause ang boses",
+        "play_voice": "I-play ang boses",
+        "playback_speed": "Bilis ng playback",
+        "publishing_in_waves": "Pini-publish sa Waves",
+        "quests_done": "Tapos na ang mga quest",
+        "read": "Basahin",
+        "remove_vote": "Alisin ang boto",
+        "seek": "Lumundag",
+        "select_community": "Pumili ng Komunidad",
+        "selected_filters": "Mga Napiling Filter",
+        "the_audio_could_not_be_loaded": "Hindi ma-load ang audio.",
+        "this_post_does_not_exist_or": "Walang ganitong post o nabura na ito.",
+        "unread": "Hindi pa nababasa",
+        "voice_position": "Posisyon ng boses",
+        "vote_weight": "Bigat ng boto",
+        "reblogged_by": "na-reblog ni {username}",
+        "no_more_posts": "Wala nang post.",
+        "favourite": "Paborito",
+        "no_votes_yet": "Wala pang boto",
+        "no_comments_yet": "Wala pang komento. Ikaw ang una!",
+        "comments_count": "Mga Komento ({count})",
+        "sending_to_chain": "ipinapadala sa chain",
+        "compare": "Ihambing",
+        "your_vote": "Boto mo",
+        "reply_to": "Tumugon kay @{username}",
+        "what_do_you_think": "Ano sa tingin mo?",
+        "clear_tag_filter": "Alisin ang tag filter",
+        "tab_selected": "{title}, napili",
+        "add_tag_feed": "Magdagdag ng tag feed",
+        "feed_pinned": "{label}, naka-pin",
+        "attached_image_remove": "May nakalakip na larawan, i-tap para alisin",
+        "camera": "Camera",
+        "files": "Files",
+        "paused": "Naka-pause",
+        "in_topic": "sa {topic}",
+        "poll_vote": "Bumoto",
+        "reply": "Tumugon",
+        "mute_sound": "I-mute",
+        "unmute_sound": "I-unmute",
+        "leaderboard_activities": "Mga Aktibidad",
+        "leaderboard_reward": "Gantimpala",
+        "sort_votes": "Mga Boto"
+      },
+      "shell": {
+        "account_of": "Account @{username}",
+        "account_signed_out": "Account, naka-sign out",
+        "close_tab": "Isara ang tab",
+        "coming_soon_to_the_native_app": "Darating na sa native app.",
+        "create": "Gumawa",
+        "expand": "Palawakin",
+        "forward": "Sumulong",
+        "loading": "Naglo-load",
+        "new_tab": "Bagong tab",
+        "reload": "I-reload",
+        "sent": "Naipadala",
+        "tab_unread": "{title}, {count} hindi pa nababasa",
+        "no_app_for_link": "Walang app na makakabukas ng link na ito."
+      },
+      "wallet": {
+        "product_not_available": "Hindi available ang produkto.",
+        "repeat": "Ulitin"
+      },
+      "copied": "Nakopya",
+      "trending_caps": "TRENDING",
+      "move_up": "Itaas",
+      "move_down": "Ibaba",
+      "scroll_to_top": "Mag-scroll pataas",
+      "load_more": "Higit pa"
+    },
+    "wallet": {
+      "checking": "Sinusuri sa network",
+      "leave_title": "Ipinapadala pa",
+      "leave_message": "Ipinapadala o sinusuri pa ito sa network. Puwede kang umalis sa screen na ito: sasabihan ka ng app kapag tapos na.",
+      "stay": "Manatili",
+      "collateralized_convert_request": "Collateralized Convert Request",
+      "op_transfer": "transfer",
+      "op_power_up": "power up",
+      "op_power_down_change": "pagbabago sa power down",
+      "op_delegation": "delegasyon",
+      "op_savings_deposit": "savings deposit",
+      "op_savings_withdrawal": "savings withdrawal",
+      "op_conversion": "conversion",
+      "op_swap": "swap",
+      "op_order_cancel": "pagkansela ng order",
+      "op_reward_claim": "pag-claim ng reward",
+      "op_withdraw_route_change": "pagbabago ng withdraw route",
+      "op_token_operation": "operasyon ng token"
+    },
+    "notification": {
+      "amount_unknown": "Hindi available ang halaga",
+      "weekly_earnings_breakdown": "Kumita ka ng ${amount} ngayong linggo - ${authorUsd} mula sa mga post, ${curationUsd} mula sa curation.",
+      "weekly_earnings_total": "Kumita ka ng ${amount} ngayong linggo mula sa mga post at curation mo."
+    },
+    "settings": {
+      "open": "Buksan",
+      "feedback_subject": "Feedback/Bug report",
+      "unknown_user": "Hindi Kilalang User"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Mga Tagasunod",
+      "spin_game": "Spin game",
+      "edit_profile": "I-edit ang profile",
+      "redeem_points": "I-redeem ang points",
+      "community": "Komunidad",
+      "community_members": "Mga miyembro ng komunidad",
+      "community_activities": "Mga aktibidad ng komunidad",
+      "browser": "Browser",
+      "asset_details": "Detalye ng asset",
+      "edit_history": "Kasaysayan ng pag-edit",
+      "welcome": "Maligayang pagdating",
+      "chat": "Chat",
+      "backup_keys": "I-backup ang mga key",
+      "trade": "Trade",
+      "ai_image_generator": "AI image generator",
+      "select_assets": "Pumili ng mga asset",
+      "poll": "Poll",
+      "bot_comments": "Mga komento ng bot"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Hindi malalagdaan sa Ecency ang mga operasyong nangangailangan ng owner key.",
+      "post": "Post/Komento",
+      "custom": "Custom JSON",
+      "sign_buffer": "Lagdaan ang Mensahe",
+      "send_token": "Magpadala ng Token",
+      "witness_vote": "Witness Vote",
+      "proxy": "Itakda ang Proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "I-broadcast",
+      "sign_tx": "Lagdaan ang Transaksyon",
+      "encode": "I-encode ang Mensahe",
+      "decode": "I-verify ang Key",
+      "add_account_authority": "Magdagdag ng Account Authority",
+      "remove_account_authority": "Alisin ang Account Authority",
+      "add_key_authority": "Magdagdag ng Key Authority",
+      "remove_key_authority": "Alisin ang Key Authority",
+      "create_claimed_account": "Gumawa ng Account",
+      "create_proposal": "Gumawa ng Proposal",
+      "remove_proposal": "Alisin ang Proposal",
+      "update_proposal_vote": "Proposal Vote",
+      "signed_call": "Signed Call"
+    },
+    "translate_language": {
+      "ar": "Arabic",
+      "az": "Azerbaijani",
+      "bg": "Bulgarian",
+      "bn": "Bengali",
+      "ca": "Catalan",
+      "cs": "Czech",
+      "da": "Danish",
+      "de": "German",
+      "el": "Greek",
+      "en": "English",
+      "eo": "Esperanto",
+      "es": "Spanish",
+      "et": "Estonian",
+      "fa": "Persian",
+      "fi": "Finnish",
+      "fr": "French",
+      "ga": "Irish",
+      "he": "Hebrew",
+      "hi": "Hindi",
+      "hu": "Hungarian",
+      "id": "Indonesian",
+      "it": "Italian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "lt": "Lithuanian",
+      "lv": "Latvian",
+      "ms": "Malay",
+      "nb": "Norwegian",
+      "nl": "Dutch",
+      "pl": "Polish",
+      "pt": "Portuguese",
+      "ro": "Romanian",
+      "ru": "Russian",
+      "sk": "Slovak",
+      "sl": "Slovenian",
+      "sq": "Albanian",
+      "sv": "Swedish",
+      "th": "Thai",
+      "tl": "Tagalog",
+      "tr": "Turkish",
+      "uk": "Ukrainian",
+      "zh": "Chinese",
+      "zt": "Chinese (Traditional)"
+    },
+    "reading": {
+      "banner_text": "Nasa {source} ang post na ito. I-translate sa {target}?",
+      "translated_from_text": "Isinalin mula sa {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# Miyembro} other {# Miyembro}} • {authors, plural, one {# Poster} other {# Poster}} • {posts, plural, one {# Post} other {# Post}}",
+      "community_title": "Komunidad ng {title}",
+      "members_title": "Mga miyembro ng {title}",
+      "activities_title": "Aktibidad ng {title}",
+      "cannot_start_with_or": "Hindi puwedeng magsimula sa @ o #",
+      "use_a_two_letter": "Gumamit ng two-letter na language code, tulad ng en",
+      "at_most_characters": "Hanggang {max, plural, one {# karakter} other {# karakter}} lang",
+      "council": "Council",
+      "journal": "Journal",
+      "topic": "Paksa",
+      "community_not_found": "Hindi nahanap ang komunidad."
+    },
+    "transfer": {
+      "one_recipient": "Isang tatanggap lang ang puwede sa transfer na ito.",
+      "is_an_exchange_and": "Ang {exchange} ay isang exchange at maaaring hindi suportado ang recurring transfer: maaaring mawala ang pondong ipinadala nang naka-schedule. Gumamit ng one-time na transfer."
+    },
+    "dapps": {
+      "signing_info": "Gumaganap ang Ecency bilang Hive signing extension mo. Kapag hiniling ng isang dApp na mag-log in ka gamit ang browser extension tulad ng Keychain, Keeper, o Peak Vault, piliin ang opsyong iyon. Ligtas na hahawakan ng Ecency ang pagpirma.",
+      "category_social": "Social",
+      "category_gaming": "Gaming",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupo",
+      "unable_to_load_messages": "Hindi ma-load ang mga mensahe.",
+      "someone": "May isang tao",
+      "renamed_the_group_to": "Pinalitan ni {actor} ang pangalan ng grupo sa \"{name}\"",
+      "removed_the_group_name": "Inalis ni {actor} ang pangalan ng grupo",
+      "unable_to_send_your": "Hindi maipadala ang mensahe mo.",
+      "unable_to_remove_message": "Hindi maalis ang mensahe.",
+      "unknown": "Hindi kilala",
+      "members_online": "{members, plural, one {# miyembro} other {# miyembro}} • {online} online",
+      "failed_to_load_pinned": "Nabigong i-load ang mga naka-pin na mensahe",
+      "you": "Ikaw",
+      "title": "Mga reaksyon"
+    },
+    "tip": {
+      "login_required": "Mag-login para magpadala ng tip",
+      "max_decimals": "Hanggang {n, plural, one {# decimal place} other {# decimal places}}"
+    },
+    "paid": {
+      "check_again": "Tingnan muli",
+      "give_up": "Sumuko",
+      "unknown": "Wala pang sagot. Maaaring tumatakbo pa ang kahilingan. Tingnan muli para makuha ang resulta: hindi ito sisingilin nang pangalawang beses.",
+      "pending": "Pinoproseso pa ang kahilingan mo. Tingnan muli mamaya: hindi ito sisingilin nang pangalawang beses.",
+      "restored": "Wala pang sagot ang naunang kahilingan. Tingnan muli para makuha ang resulta: hindi ito sisingilin nang pangalawang beses.",
+      "give_up_confirm": "Kung natuloy ang kahilingan, nagastos na ang points at mawawala ang resulta.",
+      "not_stored": "Hindi ma-store sa device ang kahilingang ito. Panatilihing bukas ang screen na ito hanggang matapos.",
+      "sign_in_again": "Nag-expire na ang session mo. Mag-sign in muli, saka tingnan muli.",
+      "other_account": "Kay @{owner} ito. Bumalik sa account na iyon para magpatuloy."
+    },
+    "ai": {
+      "run_ai_assist": "Patakbuhin ang AI Assist ({costText})",
+      "no_longer_free_cost": "Hindi na libre ngayong araw ang pagtakbong ito. Nagkakahalaga ito ng {cost} {unit}.",
+      "no_longer_free": "Hindi na libre ngayong araw ang pagtakbong ito.",
+      "content_violates_our_content": "Lumalabag ang content sa content policy namin. Pakibago ang teksto mo. Hindi naibalik ang Points.",
+      "generate_image": "Gumawa ng Larawan ({costLabel})",
+      "use_prompt": "Gamitin: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Pakihintay, may ibang aksyong isinasagawa",
+      "not_a_community_post": "Hindi ito post ng komunidad.",
+      "parent_post_not_found": "Hindi nahanap ang parent post",
+      "the_account_changed": "Nagbago ang account."
+    },
+    "dictation": {
+      "balance": "Balanse: {balance} {unit}",
+      "stop_points": "Ihinto ({cost} Points)",
+      "stop_free": "Ihinto (Libre)",
+      "transcribe_points": "I-transcribe ({cost} Points)",
+      "transcribe": "I-transcribe",
+      "no_longer_free_cost": "Hindi na libre ngayong araw ang recording na ito. Nagkakahalaga ito ng {cost} Points.",
+      "no_longer_free": "Hindi na libre ngayong araw ang recording na ito.",
+      "held_locked": "Huminto ang recording nang ma-lock ang Ecency. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
+      "held_no_background": "Huminto ang recording nang umalis ang Ecency sa screen (hindi nito naipakita ang recording notification). Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
+      "held_stopped": "Huminto ang recording mula sa notification. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
+      "held_focus_lost": "Huminto ang recording dahil sa tawag o tunog ng ibang app. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
+      "held_interrupted": "Huminto ang recording dahil kinuha ng ibang app ang mikropono. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
+      "unavailable": "Hindi available ang pagre-record sa device na ito.",
+      "not_read": "Hindi mabasa o masyadong malaki ang recording na iyon. Walang naipadala at walang siningil.",
+      "give_up_not_sent": "Hindi naipadala ang recording na ito, kaya walang siningil. Buburahin ito.",
+      "give_up_not_charged": "Walang siningil para sa recording na ito. Buburahin ito.",
+      "clip_lost": "Wala na sa device na ito ang recording ng naunang kahilingan. Kung natuloy ang kahilingang iyon, nagastos na ang points mo, at hindi na makukuha ang transcript nito."
+    },
+    "register": {
+      "error_code_28": "Hindi napoproseso ang kahilingan mo. Malamang puno na ang signup queue. Pakisubukang muli sa loob ng ilang minuto."
+    },
+    "perks": {
+      "quests_empty": "Wala pang quest dito, bumalik ka mamaya.",
+      "freeze_confirm_title": "Protektahan ang streak mo",
+      "spend_points_on_a": "Gumastos ng {price} Points para sa streak freeze? Magagamit ito para protektahan ang streak mo sa araw na makaligtaan mo."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Suportahan ang Ecency, kumuha ng libreng blog, at mamukod gamit ang verified na Pro badge.",
+      "card_description": "Mag-Pro sa halagang {price} kada taon. Verified badge, libreng blog, at suporta sa Ecency.",
+      "card_description_plain": "Mag-Pro nang isang taon. Verified badge, libreng blog, at suporta sa Ecency.",
+      "member": "Pro member ka.",
+      "benefit_badge": "Verified na Pro badge sa tabi ng pangalan mo.",
+      "benefit_blog": "Libreng blog sa pangalanmo.blogs.ecency.com.",
+      "benefit_support": "Direktang suportahan ang pag-develop ng Ecency.",
+      "benefit_early": "Maagang access sa mga bagong feature.",
+      "buy": "Kumuha ng Pro sa halagang {price} kada taon",
+      "extend": "Dagdagan ng 12 buwan sa halagang {price}",
+      "extend_note": "Ang muling pagbili ay nagdaragdag ng 12 buwan sa membership mo.",
+      "unavailable": "Hindi available ang Ecency Pro mula sa store ngayon.",
+      "activating": "Natanggap ang bayad. Ina-activate ang membership mo.",
+      "success_title": "Maligayang pagdating sa Ecency Pro",
+      "success_body": "Aktibo na ang Pro membership mo. Lalabas ang badge mo sa profile mo sa lalong madaling panahon.",
+      "extending": "Natanggap ang bayad. Dinadagdagan ng 12 buwan ang Pro membership mo.",
+      "open_a11y": "Buksan ang Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Sine-save ang draft...",
+      "please_sign_in_first": "Mag-sign in muna.",
+      "fetch_failed": "Nabigo ang fetch.",
+      "you_can_only_edit": "Sarili mong content lang ang puwede mong i-edit.",
+      "invalid_percent": "Di-wastong porsyento",
+      "beneficiary_exists_already": "Nariyan na ang beneficiary",
+      "this_draft_belongs_to": "Kay @{owner} ang draft na ito. Bumalik sa account na iyon para i-publish ito.",
+      "could_not_make_a": "Hindi makagawa ng bagong link para sa post na ito. Bahagyang baguhin ang pamagat at subukang muli.",
+      "an_earlier_attempt_was": "Na-publish ang naunang pagtatangka pagkatapos ng isang ito. Tingnan kung aling bersyon ang gusto mong itago.",
+      "could_not_check_your": "Hindi masuri ang posting authority ng account mo. Tingnan ang koneksyon mo at subukang muli.",
+      "this_post_was_changed": "Nabago ang post na ito sa ibang lugar mula nang buksan mo. Kopyahin ang teksto mo, bumalik at buksan ulit para i-edit ang pinakabagong bersyon.",
+      "link_text_placeholder": "Teksto rito"
+    },
+    "app_error": {
+      "this_reply_is_too": "Masyadong mahaba ang tugon na ito.",
+      "the_network_refused_this": "Tinanggihan ng network ang aksyong ito.",
+      "invalid_input": "Di-wastong input.",
+      "secure_storage_is_unavailable": "Hindi available ang secure storage. Mag-sign in muli.",
+      "please_sign_in_first": "Mag-sign in muna.",
+      "these_credentials_belong_to": "Kay @{actual} ang mga credential na ito, hindi kay @{expected}.",
+      "is_not_signed_in": "Hindi naka-sign in si @{username} sa device na ito.",
+      "key_required": "Kailangan ang {role} key para maisagawa ang transaksyong ito. {hint}",
+      "cancelled": "Kinansela.",
+      "the_request_was_rejected": "Tinanggihan ang kahilingan sa wallet app.",
+      "the_request_expired_before": "Nag-expire ang kahilingan bago sumagot ang wallet app. Pakisubukang muli.",
+      "could_not_reach_the": "Hindi maabot ang HiveAuth server. Pakisubukang muli.",
+      "unexpected_redirect": "Nagpadala ang server ng hindi inaasahang redirect. Walang binago. Pakisubukang muli mamaya.",
+      "missing_key_hint": "Idagdag ito sa Settings, Pamahalaan ang Authorities (Import Private), o mag-sign in muli gamit ito.",
+      "this_key_is_also": "Owner key rin ng account na ito ang key na ito. Hindi iniimbak ng Ecency ang key na kumokontrol sa owner role: bigyan ng sariling key ang active at posting role mo, saka mag-sign in gamit ang mga iyon.",
+      "this_is_the_owner": "Ito ang owner key. Hindi kailanman iniimbak o ginagamit ng Ecency ang owner key: mag-sign in gamit ang master password mo, o ang posting o active key mo.",
+      "this_password_only_matches": "Ang password na ito ay tumutugma lang sa owner key ng account. Hindi kailanman iniimbak o ginagamit ng Ecency ang owner key: mag-sign in gamit ang posting o active key mo.",
+      "this_key_cannot_sign": "Hindi makapirma nang mag-isa ang key na ito para sa account: kailangan ng account ng higit sa isang pirma (mas mababa sa threshold ang weight nito).",
+      "public_key_given": "Ito ang public key mo. I-paste ang private key (nagsisimula sa 5) o ang master password mo.",
+      "memo_key_only": "Hindi magagamit ang memo key para mag-sign in. Gamitin ang posting key, active key o master password mo.",
+      "network_message": "Network error. Tingnan ang koneksyon mo at subukang muli.",
+      "network_error_this_may": "Network error. Maaaring natuloy na ito; ligtas ang muling pagsubok at hindi magpo-post nang dalawang beses."
+    },
+    "purchases": {
+      "deal_best": "PINAKAMAGANDANG DEAL!",
+      "deal_popular": "SIKAT!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Hindi sumagot ang store."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Kailangan ang email at username para sa paggamit ng 999accounts",
+      "stuck": "Hindi makumpleto ang naunang pagbili ng produktong ito. Makipag-ugnayan sa support@ecency.com dala ang store receipt mo, itinatago ito para rito.",
+      "held": "Naka-hold para sa review ang pagbiling ito. Makipag-ugnayan sa support@ecency.com dala ang order #{order}.",
+      "earlier_purchase": "Kinukumpleto muna ang naunang pagbili ng produktong ito para kay @{target}.",
+      "earlier_pending": "Nakabinbin pa ang naunang bayad para sa produktong ito para kay @{target}. Makukumpleto ito kapag kinumpirma ng store ang bayad.",
+      "pending": "Nakabinbin ang bayad mo. Makukumpleto ang pagbili kapag kinumpirma ng store ang bayad.",
+      "processing": "Pinoproseso ang pagbili mo. Makukumpleto ito sa lalong madaling panahon."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Mga Paulit-ulit na Transfer",
+      "delegate_hive_power": "I-delegate ang Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Itakda ang withdraw vesting route",
+      "power_down": "Power down",
+      "transfer_to_saving": "Ilipat sa savings",
+      "transfer_from_saving": "Ilipat mula sa savings",
+      "cancel_transfer_from_saving": "Kanselahin ang paglipat mula sa savings",
+      "collateralized_convert": "Collateralized Convert",
+      "witness_vote": "Witness vote",
+      "witness_update": "Witness update",
+      "witness_set_properties": "Witness set properties",
+      "governance_proxy": "Governance proxy",
+      "claim_account": "I-claim ang account",
+      "create_account": "Gumawa ng account",
+      "create_account_with_account": "Gumawa ng account gamit ang account credits",
+      "create_limit_order": "Gumawa ng limit order",
+      "cancel_limit_order": "Kanselahin ang limit order",
+      "redeem_rewards": "I-redeem ang mga reward",
+      "post_or_comment": "Post o komento",
+      "post_or_comment_options": "Mga opsyon ng post o komento",
+      "custom_operation": "Custom na operasyon",
+      "update_account_active": "I-update ang account (active)",
+      "update_account_posting": "I-update ang account (posting)",
+      "change_recovery_account": "Palitan ang recovery account",
+      "create_proposal": "Gumawa ng proposal",
+      "remove_proposal": "Alisin ang proposal",
+      "update_proposal_votes": "I-update ang mga boto sa proposal",
+      "update_proposal": "I-update ang proposal"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Dapat lagdaan ng @{account} ang link na ito. Lumipat sa account na iyon at buksan itong muli.",
+      "ecency_can_only_sign": "Ang Ecency ay makakapirma at makakapag-broadcast lang ng mga transaksyon mula sa mga link.",
+      "requester_page": "ang pahinang {host}",
+      "owner_refused": "Hindi malalagdaan mula sa link ang mga operasyong nangangailangan ng owner key.",
+      "busy": "Pakihintay: may ibang kahilingang pinoproseso pa.",
+      "not_supported": "Hindi pa makakapirma ang Ecency sa operasyong ito sa bersyong ito."
+    },
+    "chats": {
+      "group_members": "Mga miyembro ng grupo",
+      "rename_group": "Palitan ang pangalan ng grupo",
+      "failed_to_load_chats": "Nabigong i-load ang mga chat",
+      "unknown": "Hindi kilala",
+      "unable_to_mark_channel": "Hindi maitakda ang channel bilang nabasa na",
+      "unable_to_update_favorites": "Hindi ma-update ang mga paborito",
+      "unable_to_update_mute": "Hindi ma-update ang mute",
+      "group": "Grupo",
+      "unable_to_search": "Hindi makapaghanap",
+      "unable_to_start_chat": "Hindi masimulan ang chat",
+      "no_internet": "Walang Koneksyon sa Internet"
+    },
+    "stake": {
+      "confirm_summary": "I-delegate ang {hp} HP ({vests} VESTS) Kay @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Naka-delegate na kay @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Public lang. Hindi kailanman iniimbak ng Ecency ang owner key.",
+      "shared_owner": "Iisang key ang gamit ng account na ito para sa owner role at sa {names} role nito. Ang sinumang may hawak ng key na iyon ang kumokontrol sa buong account. Bigyan ng sariling key ang {names} role at itago offline ang owner key.",
+      "copy_warning": "Ang sinumang may hawak ng private key na ito ang kumokontrol sa bahaging ito ng account mo. Nababasa ng ibang app ang clipboard; i-paste lang ito sa lugar na pinagkakatiwalaan mo. Buburahin ito sa clipboard pagkalipas ng 2 minuto."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Naka-on ang PIN lock.",
+      "pin_changed": "Napalitan ang PIN.",
+      "pin_lock_is_off": "Naka-off ang PIN lock.",
+      "wiped_notice": "Naalis na sa device na ito ang lahat ng account, key at credential.",
+      "we_could_not_bring": "Hindi namin nadala ang mga account mo mula sa nakaraang bersyon ng app. Mag-log in muli.",
+      "your_pin_lock_could": "Hindi nadala ang PIN lock mo mula sa nakaraang bersyon. Magtakda ulit ng PIN mula sa account menu para i-on muli ang app lock.",
+      "biometric_unlock_was_turned": "Na-off ang biometric unlock dahil nagbago ang biometrics sa device na ito. I-unlock gamit ang PIN mo, saka i-on muli mula sa account menu.",
+      "biometric_unavailable_notice": "Hindi ma-on ang biometric unlock: walang naka-set up na biometrics sa device na ito.",
+      "set_backup": "Magtakda ng PIN bilang backup ng biometric unlock",
+      "biometric_on_notice": "Naka-on ang PIN lock. I-unlock gamit ang biometrics, o ang PIN mo.",
+      "offer_title": "I-unlock gamit ang biometrics",
+      "offer_body": "Buksan ang Ecency gamit ang mukha o fingerprint mo. Nagtakda ka rin ng PIN, na nag-a-unlock sa app kapag hindi available ang biometrics.",
+      "offer_use": "Gamitin ang biometrics",
+      "offer_use_pin": "PIN na lang ang gamitin"
+    },
+    "common": {
+      "list_and": "{first} at {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Ang mga reply na 25 karakter o mas kaunti ay hindi kumikita ng points (hindi kasama ang mga link)",
+      "short_content_hint": "Masyadong maikli para kumita ng points (25 karakter o mas kaunti, hindi kasama ang mga link)",
+      "daily_post": "Pang-araw-araw na post {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# araw na streak} other {# araw na streak}}",
+      "grant_description": "Bigyan ang Ecency account na @ecency.app ng posting permission sa account mo, para makapag-post ka nang hindi nagbubukas ng Keychain tuwing magpo-post. Binabago nito ang posting authority ng account mo at kailangan ang active key mo."
+    },
+    "wallet_history": {
+      "from_to": "@{from} para kay @{to}",
+      "from_user_id": "mula kay @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} para kay @{to}, id: {id}",
+      "from_to_account": "@{from} para sa {to}",
+      "from_user": "mula kay @{user}",
+      "to_user": "para kay @{user}",
+      "interest": "Interes",
+      "proposal_pay": "Bayad sa Proposal",
+      "categories": "Mga uri ng aktibidad",
+      "category_all": "Lahat",
+      "category_transfers": "Mga Transfer",
+      "category_market": "Mga market order",
+      "category_interest": "Mga Interes",
+      "category_stake": "Mga stake operation",
+      "category_rewards": "Mga Reward",
+      "point_type_checkin": "Mga Heartbeat",
+      "point_type_login": "Login",
+      "point_type_post": "Post",
+      "point_type_comment": "Komento",
+      "point_type_vote": "Boto",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Mga naipadalang transfer",
+      "point_type_transfer_received": "Mga natanggap na transfer"
+    },
+    "video_upload": {
+      "continue_upload": "ITULOY ANG UPLOAD",
+      "source_gone": "Wala na sa device ang recording na ito. Mag-record o piliing muli ang video.",
+      "no_camera": "Hindi available ang camera sa device na ito."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Ang susunod na unstaking ay sa loob ng {hours, plural, one {# oras} other {# oras}}",
+      "account_not_found": "Hindi nahanap ang account"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Larawan sa clipboard · I-paste ang larawan",
+      "no_container": "Hindi makuha ang pinakabagong waves container",
+      "please_sign_in_first": "Mag-sign in muna.",
+      "write_something_first": "Sumulat muna ng kahit ano.",
+      "account_changed": "Isinulat ang wave na ito bilang ibang account. Isara ito at isulat muli.",
+      "no_upload": "Hindi pa available ang pag-upload ng larawan sa build na ito. I-paste na lang ang link ng larawan sa teksto.",
+      "fail": "Bigo"
+    },
+    "delete_account": {
+      "sign_out_failed": "Naipadala ang kahilingan mo, ngunit nabigo ang pag-sign out. Mag-log out mula sa menu.",
+      "not_sent": "Hindi naipadala ang kahilingan mo para sa pagbura. Pakisubukang muli."
+    },
+    "chat_sheets": {
+      "group_limit": "Hanggang {max, plural, one {# ibang tao} other {# ibang tao}} ang puwede sa isang grupo.",
+      "search_people_by_username": "Maghanap ng tao gamit ang username",
+      "new_group_title": "Bagong grupo",
+      "new_group_hint": "Magdagdag ng {min} hanggang {max, plural, one {# tao} other {# tao}} para magsimula ng group conversation.",
+      "no_results": "Walang nahanap sa chat na may ganyang pangalan.",
+      "search_failed": "Hindi gumana ang paghahanap. Tingnan ang koneksyon mo at subukang muli.",
+      "create": "Simulan ang grupo",
+      "new_group_failed": "Hindi masimulan ang grupo. Pakisubukang muli.",
+      "name_limit": "Hanggang {max, plural, one {# karakter} other {# karakter}} ang pangalan ng grupo.",
+      "rename_title": "Palitan ang pangalan ng grupo",
+      "rename_hint": "Bigyan ng pangalan ang grupong ito na makikita ng lahat ng miyembro. Iwanang walang laman para ipakita ang mga pangalan ng miyembro.",
+      "placeholder": "Pangalan ng grupo",
+      "not_owner": "Ang nagsimula lang ng grupong ito ang puwedeng magpalit ng pangalan nito.",
+      "rename_failed": "Hindi napalitan ang pangalan ng grupo. Pakisubukang muli."
+    },
+    "editor_side": {
+      "copy_of": "Kopya ng {title}",
+      "deletions_failed": "May nagkamali\n{failed} sa {total, plural, one {# pagbura} other {# pagbura}} ang nabigo",
+      "uploads_failed": "{count, plural, one {# upload ang nabigo} other {# upload ang nabigo}}:\n\n{messages}",
+      "failed_to_delete": "Nabigong burahin"
+    },
+    "uploads": {
+      "add_to_gallery": "Idagdag sa gallery"
+    },
+    "account_notice": {
+      "manage_keys": "Settings, Pamahalaan ang Authorities",
+      "no_signing_key_title": "Mag-sign in muli bilang @{account}",
+      "no_signing_key": "Hindi na itinatago ng Ecency ang owner key o master password sa device na ito, at walang naka-store na posting o active key dito si @{account}. Mag-sign in muli gamit ang master password o posting o active key, o magdagdag ng key sa {manageKeys} (Import Private).",
+      "missing_roles_title": "Hindi naidagdag ang ilang key",
+      "cannot_post": "mag-post, bumoto o magkomento",
+      "cannot_transfer": "magpadala ng transfer o magbago ng settings ng account",
+      "missing_roles": "Hindi na tugma ang password mo sa {missing} key ni @{account}: nabago ito sa account mula nang itakda ang password. Naka-store sa device na ito: ang {kept} key. Hanggang hindi ka nagdaragdag ng {missing} key sa {manageKeys} (Import Private), hindi magagawa ng app na ito ang mga ito gamit ang mga key para kay @{account}: {cannot}.",
+      "shared_owner_title": "Kinokontrol din ng key na ito ang owner role",
+      "shared_owner": "Iisang key ang gamit ni @{account} para sa owner role at sa {names} role nito. Ang sinumang may hawak ng key na ito ang kumokontrol sa buong account. Itinatago ito ng Ecency bilang {names} key lang at hindi kailanman ginagamit para sa mga owner operation. Bigyan ng sariling key ang {names} role, at itago offline ang owner key."
+    },
+    "dapp_browser": {
+      "message_from": "Mensahe mula sa {host}",
+      "home_title": "Home",
+      "loading_title": "Naglo-load...",
+      "blank_run": "[{count, plural, one {# blankong karakter} other {# blankong karakter}}]",
+      "too_large": "Humiling ang page na ito na pumirma ng kahilingang masyadong malaki para ipakita, kaya tinanggihan ito ng Ecency."
+    },
+    "community_service": {
+      "the_account_changed": "Nagbago ang account."
+    },
+    "profile_edit": {
+      "enter_link": "Ilagay ang link ng larawan",
+      "please_sign_in_first": "Mag-sign in muna.",
+      "account_not_found": "Hindi nahanap ang account",
+      "please_enter_an_image": "Maglagay ng link ng larawan na nagsisimula sa https://"
+    },
+    "background_media": {
+      "post_by": "Post ni @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Mag-sign in muna."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Bumoto ka na nang may parehong bigat.",
+      "insufficient_rc": "Kulang ang Resource Credits. Maghintay o mag-power up.",
+      "missing_authority": "Kulang ang posting authority. Tingnan ang paraan mo ng pag-login.",
+      "comment_too_soon": "Maghintay muna bago mag-post muli.",
+      "paid_out": "Na-payout na ang post na ito.",
+      "too_large": "{size, plural, one {# byte} other {# byte}} ang transaksyon, lampas sa limitasyong {max} byte.",
+      "network_error_please_check": "Network error. Tingnan ang koneksyon mo at subukang muli.",
+      "unconfirmed_message": "Hindi makumpirma kung natuloy ito. Tingnan ang wallet o history mo; simulan lang muli kung wala roon.",
+      "undecided_message": "Maaaring natuloy na ito. Tingnan ang wallet o history mo bago subukang muli."
+    },
+    "chat_api": {
+      "request_failed": "Nabigo ang kahilingan ({status})"
+    },
+    "chat": {
+      "typing_one": "Nagta-type si {name}...",
+      "typing_two": "Nagta-type sina {first} at {second}...",
+      "typing_three": "Nagta-type sina {first}, {second}, at {third}...",
+      "typing_many": "Nagta-type sina {first}, {second}, at {count, plural, one {# iba pa} other {# iba pa}}...",
+      "banned": "{reason} Mababasa mo pa rin ang chat. Magbubukas ang pag-post {until}.",
+      "joined_when": "sumali {time}",
+      "joined": "sumali",
+      "official_badge": "Opisyal",
+      "official_badge_label": "Opisyal na Ecency account"
+    },
+    "side_menu": {
+      "ask_esie": "Tanungin si Esie"
+    },
+    "chat_service": {
+      "missing_token": "Walang Hive access token. Mag-log out at mag-log in muli.",
+      "dm_error": "Hindi pa sumasali sa chat ang user"
+    },
+    "compose_reply": {
+      "account_changed": "Isinulat ang tugon na ito bilang ibang account. Isara ito at isulat muli.",
+      "write_something_first": "Sumulat muna ng kahit ano.",
+      "please_sign_in_first": "Mag-sign in muna."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Masyadong maraming beneficiary: hanggang {max} lang.",
+      "a_beneficiary_s_share": "Dapat nasa pagitan ng 0.01% at 100% ang bahagi ng beneficiary.",
+      "beneficiaries_add_up_to": "Lampas sa 100% ang kabuuan ng mga beneficiary.",
+      "a_beneficiary_is_listed": "May beneficiary na nakalista nang dalawang beses.",
+      "you_cannot_be_a": "Hindi ka puwedeng maging beneficiary ng sarili mong post.",
+      "a_beneficiary_has_an": "May beneficiary na may di-wastong pangalan ng account."
+    },
+    "follows": {
+      "fail": "Bigo!: {message}",
+      "follower_count": "Mga Tagasunod ({count})",
+      "following_count": "Sinusundan ({count})"
+    },
+    "link": {
+      "unsupported": "Hindi pa suportado ang link na ito.",
+      "cannot_open": "Hindi mabuksan ang link",
+      "unsupported_version": "Hindi suportado ang link na ito sa bersyong ito."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Maa-access ng Explore browser ang Hive wallet mo para pumirma ng mga transaksyon. Galing sa content ng post ang link na ito at hindi ito bineberipika ng Ecency. Magpatuloy lang kung pinagkakatiwalaan mo ito:\n\n{url}"
+    },
+    "listen": {
+      "message": "Kailangan ng {required} Points sa pakikinig at mayroon kang {available}.",
+      "unlock_label": "I-unlock · {cost} Points",
+      "preparing_audio": "Inihahanda ang audio · {preparingPercent}%",
+      "waiting_in_line_ahead": "Naghihintay sa pila, {ahead} pa ang nauuna…",
+      "next_in_line": "Susunod sa pila…",
+      "preparing_about_minutes": "Inihahanda ang audio, mga {minutes} min…",
+      "preparing_audio_2": "Inihahanda ang audio…",
+      "spend_confirm": "Gumastos ng {cost} Points para pakinggan ang post na ito? Sa iyo ang audio at puwede mong ulitin anumang oras.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Hindi nagawa ang audio, naibalik ang iyong Points"
+    },
+    "media_pick": {
+      "preparing_video": "Inihahanda ang video...",
+      "library_hint": "Pumili mula sa mga litrato mo",
+      "camera_hint": "Kumuha ng bagong litrato ngayon",
+      "files_hint": "Mag-browse ng files sa device na ito at sa cloud",
+      "paste_hint": "Gamitin ang larawang kinopya mo",
+      "link_hint": "Gumamit ng larawan mula sa web"
+    },
+    "media_picking": {
+      "image_types_message": "Hindi suportado ang uri ng file na ito. Pumili ng JPEG, PNG, GIF, WebP o HEIC na larawan.",
+      "video_types_message": "Hindi suportado ang uri ng file na ito. Pumili ng MP4 o MOV na video.",
+      "gif_too_large": "Mas malaki sa {mb} MB ang GIF na ito."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Kailangan ng operasyong ito ng active at posting na pirma, na hindi pa kayang pagsabayin ng Ecency."
+    },
+    "poll": {
+      "fail": "Bigo!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Hindi masuri ang posting authority ng account mo. Tingnan ang koneksyon mo at subukang muli."
+    },
+    "post_lists": {
+      "voters_title": "Impormasyon ng mga Bumoto ({total})",
+      "reblogs_title": "Impormasyon ng Reblog ({total})",
+      "no_history_found": "Walang nahanap na History!",
+      "no_edit_history_available": "Walang available na kasaysayan ng pag-edit para sa content na ito.",
+      "version_label": "Bersyon {version}"
+    },
+    "stats": {
+      "other_device": "Iba pa"
+    },
+    "profile": {
+      "account_not_found": "Hindi nahanap ang account",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Puno sa loob ng {hours, plural, one {# oras} other {# oras}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Hindi mabasa ang kasalukuyan mong profile, subukang muli"
+    },
+    "profile_sheet": {
+      "fail": "Bigo! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Hindi nahanap ang account"
+    },
+    "push_payload": {
+      "mentioned": "Binanggit ni @{source} si @{target}",
+      "replied": "Tumugon si @{source} kay @{target}",
+      "transferred": "Naglipat si @{source} kay @{target}",
+      "delegated": "Nag-delegate si @{source} kay @{target}",
+      "rewards_received": "Natanggap ang mga reward",
+      "account_updated": "Na-update ang account",
+      "account_updated_body": "Na-update ang mga detalye ng account mo",
+      "followed": "Sinundan ni @{source} si @{target}",
+      "unfollowed": "Hindi na sinundan ni @{source} si @{target}",
+      "ignored": "Binalewala ni @{source} si @{target}",
+      "blacklisted": "Ni-blacklist ni @{source} si @{target}",
+      "posted_in": "Nag-post si @{source} sa #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Hindi makuha ang permiso sa Camera",
+      "permission_message": "Pakibigay ang permiso sa camera sa settings ng ecency.",
+      "permission_allow": "Payagan"
+    },
+    "reply_account": {
+      "switch": "Tumugon bilang ibang account"
+    },
+    "send_journal": {
+      "your_from_went_through": "Natuloy ang {label} mo mula kay @{account}.",
+      "not_sent": "Hindi natuloy ang {label} mo mula kay @{account}. Walang naipadala; puwede mo itong simulang muli.",
+      "checking_whether_your_from": "Sinusuri kung natuloy ang {label} mo mula kay @{account}. Tingnan ang wallet mo bago ito ipadalang muli."
+    },
+    "signing": {
+      "hot_page_closed": "Isinara ang page ng HiveSigner",
+      "wrong_role": "Ito ang {given} key mo; kailangan ng operasyong ito ang {needed} key mo.",
+      "action_id_required": "Kailangan ng action id ang aksyong ito para ligtas na maulit."
+    },
+    "signing_router": {
+      "owner_never": "Hindi kailanman nalalagdaan sa app ang mga owner operation."
+    },
+    "spin": {
+      "key_missing": "Walang game key",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Ngayon (UTC), magre-reset sa loob ng {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Nagre-reset araw-araw ng 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Mag-sign in muli",
+      "message": "Na-reset ang secure storage sa device na ito. Mag-sign in muli.",
+      "failed": "Hindi naalis ang mga account sa device na ito. Pakisubukang muli."
+    },
+    "store": {
+      "in_app_purchases_are": "Hindi available ang in-app purchases sa build na ito."
+    },
+    "wallet_sends": {
+      "journal_full": "Masyadong maraming naunang padala ang sinusuri pa sa network. Hintaying makumpirma ang mga ito bago magpadala ng iba.",
+      "check_later": "Hindi ito nakumpirma ng network sa takdang oras. Tingnan ang wallet o history mo bago ito ipadalang muli; susuriin ulit ito ng app sa susunod na pagbukas."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# hindi pa nababasa} other {# hindi pa nababasa}}",
+      "locked_text": "I-unlock ang Ecency para makita",
+      "signed_out_text": "Mag-log in sa Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Hindi mabasa ang kasalukuyang authorities ng account mo. Walang binago; pakisubukang muli.",
+      "reads_disagree": "Hindi magkatugma ang dalawang pagbasa sa posting authority ng account mo. Walang binago; pakisubukang muli."
+    },
+    "vote": {
+      "vote_weight_must_be": "Dapat nasa pagitan ng -100% at 100% ang bigat ng boto.",
+      "please_sign_in_first": "Mag-sign in muna."
+    },
+    "widget": {
+      "streak_name": "Quest streak",
+      "write": "Magsulat",
+      "new_wave": "Bagong wave",
+      "notifications_description": "Ang mga hindi mo pa nababasang abiso. Nakatago habang naka-on ang PIN lock.",
+      "streak_description": "Ang daily quest streak mo. Nakatago habang naka-on ang PIN lock.",
+      "compose_description": "Magsulat ng post o bagong wave.",
+      "streak_title": "Streak",
+      "daily_quests": "Mga daily quest",
+      "streak_hint": "Buksan ang Perks para makita ang streak mo",
+      "open_perks": "Buksan ang Perks",
+      "open_app": "Buksan ang Ecency",
+      "unread_caption": "{count, plural, one {hindi pa nababasa} other {hindi pa nababasa}}",
+      "streak_caption": "{count, plural, one {araw na streak} other {araw na streak}}"
+    },
+    "system": {
+      "dictation_channel": "Dictation",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "Lumalabas habang nagaganap sa background ang recording para sa dictation, may Stop action.",
+      "dictation_title": "Nagre-record para sa dictation",
+      "dictation_text": "Nire-record ng Ecency ang dictation mo. Ang pagtigil ay hindi magpapadala nito hangga't hindi mo kinukumpirma sa app.",
+      "listen_channel_description": "Sinasabi sa iyo kapag hindi na makapagpatuloy ang Listen sa background.",
+      "listen_paused": "Naka-pause ang Listen",
+      "listen_paused_text": "Buksan ang Ecency para magpatuloy sa pakikinig.",
+      "skip_back": "Umatras ng 15 segundo",
+      "skip_forward": "Sumulong ng 15 segundo"
+    },
+    "permission": {
+      "face_id": "I-unlock ang Ecency gamit ang Face ID sa halip na PIN mo.",
+      "camera": "Mag-scan ng QR code, at kumuha ng litrato o mag-record ng video para idagdag sa post mo.",
+      "photo_library_add": "Sine-save ng Ecency sa photo library mo ang mga larawang dina-download mo mula sa mga post.",
+      "photo_library": "Pinagsasama-sama ng Ecency sa isang Ecency album sa photo library mo ang mga larawang dina-download mo mula sa mga post.",
+      "microphone": "Ginagamit ng Ecency ang mikropono mo para makapag-dictate ka ng mga post at komento (ipinapadala sa Ecency ang mga recording na iyon para ma-transcribe) at para mag-record ng tunog kasama ng video na idinaragdag mo sa post."
+    },
+    "android": {
+      "no_browser": "Walang available na browser",
+      "biometric_unlock_title": "I-unlock ang Ecency gamit ang biometrics",
+      "biometric_confirm": "Kumpirmahin gamit ang fingerprint o mukha mo",
+      "image_unsupported_address": "Hindi suportadong address ng larawan",
+      "image_create_failed": "Hindi magawa ang file",
+      "image_write_failed": "Hindi maisulat ang file",
+      "image_too_large": "Masyadong malaki ang larawan",
+      "image_download_failed": "Nabigo ang download na may status {status}",
+      "billing_disconnected": "Nadiskonekta ang Google Play Billing.",
+      "billing_no_screen": "Walang screen na mapagpapakitaan ng pagbili.",
+      "billing_error": "Google Play Billing error {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Gumawa ka ng {count, plural, one {# post} other {# post}} ngayong buwan. Ituloy mo lang!",
-        "checkin": "Nag-check in ka ng {count, plural, one {# araw} other {# araw}} ngayong linggo. Ituloy mo lang!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# bagong post} other {# bagong post}} sa #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# nabigong pagsubok} other {# nabigong pagsubok}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}-araw na streak"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Mga account lamang na mas matanda sa {days} araw ang pinapayagan",
-        "max_choices": "• Maaari kang pumili ng hanggang {choices} na pagpipilian"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Natitirang {executions} transfer",
-        "schedule_summary": "{executions} na paglilipat, bawat isa kada {hours} oras"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Masyadong maikli para kumita ng points ({n, plural, one {# karakter} other {# karakter}} o mas kaunti, hindi kasama ang mga link)"
       },
       "chats": {
-        "people_joined": "{count} tao ang sumali"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "sa loob ng mga {count, plural, one {# minuto} other {# minuto}}",
+        "ban-remaining-hours": "sa loob ng mga {count, plural, one {# oras} other {# oras}}",
+        "ban-remaining-days": "sa loob ng mga {count, plural, one {# araw} other {# araw}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Gumamit ng hanggang {n, plural, one {# tag} other {# tag}} lang",
+          "too_long": "Masyadong mahaba ang hinahanap. Gumamit ng hanggang {n, plural, one {# karakter} other {# karakter}} lang"
+        }
       },
       "ai_assist": {
-        "min_chars": "Kailangan ng minimum na {count} character",
-        "chars_remaining": "{count} character ang natitira"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Hanggang {count, plural, one {# larawan} other {# larawan}} ang puwede mong piliin nang sabay"
+      },
+      "dictation": {
+        "stop_hint": "Ihinto para i-transcribe at idagdag sa post mo. Hanggang {m, plural, one {# minuto} other {# minuto}}.",
+        "rate": "{n} Points kada {s, plural, one {# segundo} other {# segundo}}"
       },
       "transfer": {
-        "powering_down_info": "Ang susunod na unstake ay sa loob ng {days} araw, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Pagitan ng {min} at {max, plural, one {# karakter} other {# karakter}}"
       }
     }
   }

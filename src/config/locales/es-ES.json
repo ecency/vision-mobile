@@ -147,6 +147,16 @@
     "wizard_config_val": "Antigüedad | visibilidad | Interpretación",
     "attach_poll": "Adjuntar encuesta"
   },
+  "favorite_tags": {
+    "title": "Etiquetas",
+    "hint": "Sigue para recibir avisos de nuevas publicaciones con esta etiqueta",
+    "following_hint": "Recibes avisos de nuevas publicaciones con esta etiqueta",
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "added": "Siguiendo la etiqueta",
+    "removed": "Dejaste de seguir la etiqueta",
+    "empty_list": "No hay nada aquí"
+  },
   "favorites": {
     "add": "Añadir un favorito",
     "add_error": "No se pudo añadir el favorito",
@@ -181,7 +191,33 @@
     "payout": "Pago",
     "details": "Detalles",
     "community": "comunidad",
-    "new_post": "Escribir un post"
+    "new_post": "Escribir un post",
+    "mute_post_title": "Silenciar esta publicación",
+    "unmute_post_title": "Dejar de silenciar esta publicación",
+    "mute_post_reason": "¿Por qué se silencia?",
+    "unmute_post_reason": "¿Por qué se restaura?",
+    "manage": "Gestionar comunidad",
+    "manage_members": "Miembros y roles",
+    "manage_settings": "Ajustes de la comunidad",
+    "manage_activities": "Registro de actividad",
+    "activities": "actividad",
+    "no_activities": "Aún no hay actividad",
+    "activities_load_failed": "No se pudo cargar la actividad. Desliza hacia abajo para actualizar.",
+    "set_role": "Establecer rol",
+    "assign_role": "Asignar rol",
+    "assign_role_hint": "Busca cualquier cuenta, incluso una que no esté suscrita, y elige un rol.",
+    "username_placeholder": "Nombre de usuario",
+    "invalid_username": "Elige una cuenta existente de los resultados",
+    "members": "miembros",
+    "no_members": "No se encontraron miembros",
+    "members_incomplete": "No se pudieron cargar algunos miembros. Desliza hacia abajo para actualizar.",
+    "members_load_failed": "No se pudieron cargar los miembros. Desliza hacia abajo para actualizar.",
+    "role_owner": "Propietario",
+    "role_admin": "Administrador",
+    "role_mod": "Moderador",
+    "role_member": "Miembro",
+    "role_guest": "Invitado",
+    "role_muted": "Silenciado"
   },
   "trade": {
     "swap_for": "Intercambiando {fromAmount} por {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Publicación cruzada",
     "pin-blog": "Anclar al blog",
     "copy": "copiar enlace",
+    "copy-text": "copiar texto",
+    "open-thread": "abrir hilo",
     "unpin-community": "Desanclar de la comunidad",
+    "mute-post": "Silenciar publicación",
+    "unmute-post": "Dejar de silenciar",
     "mute": "Silenciar / Bloquear",
     "reblog": "rebloguear",
     "undo-reblog": "deshacer reblogueo",
@@ -383,6 +423,7 @@
       "transfers": "Transacciones",
       "delegations": "Delegaciones",
       "nfavorites": "Favoritos",
+      "tags": "Etiquetas",
       "nbookmarks": "Marcadores",
       "payouts": "Pagos",
       "scheduled_published": "Publicaciones programadas",
@@ -408,7 +449,7 @@
     "reply": "respondido a",
     "older_then": "Último Mes & Anteriores",
     "leaderboard": "Tabla de posiciones",
-    "unvote": "downvoted",
+    "unvote": "ha votado en contra",
     "activities": "Todo",
     "rvotes": "Votos",
     "follows": "Seguidores",
@@ -417,11 +458,15 @@
     "yesterday": "Ayer",
     "mention": "te mencionó en",
     "favorites": "crear nuevo post",
+    "tags": "publicó en #{tag}",
+    "tags_bundle": "{count} publicaciones nuevas en #{tag}",
+    "tags_title": "Nuevas publicaciones en una etiqueta que sigues",
     "mentions": "Menciones",
     "spin": "Es hora de ganar más puntos",
     "last_week": "Última semana",
     "recent": "Reciente",
     "ignore": "te ignoró",
+    "blacklist": "te añadió a la lista negra",
     "follow": "te siguió",
     "notification": "Notificaciones",
     "this_month": "Este mes",
@@ -471,6 +516,7 @@
     "alert_init_body": "Abrir borrador reciente o Crear nueva publicación",
     "reward_power_up": "Estacar 100%",
     "open_gallery": "Abrir galería",
+    "open_files": "Elegir de Archivos",
     "clipboard_no_image": "No se encontró imagen en el portapapeles",
     "clipboard_image_detected": "Imagen en el portapapeles",
     "paste_image": "Pegar imagen",
@@ -540,7 +586,9 @@
     "scheduled_later": "Más tarde",
     "settings_title": "Opciones de Publicación",
     "support_ecency": "Apoyo a Ecency {percent}%",
-    "alert_btn_no": "No"
+    "alert_btn_no": "No",
+    "short_reply_hint": "Las respuestas de {n} caracteres o menos no ganan puntos (los enlaces no cuentan)",
+    "short_content_hint": "Demasiado corto para ganar puntos ({n} caracteres o menos, sin contar enlaces)"
   },
   "time": {
     "week": "semanas",
@@ -655,7 +703,41 @@
     "select_emoji": "Escoger emoji",
     "more_emojis": "Más",
     "search_emojis": "Buscar emojis...",
-    "no_emoji_found": "No se encontraron emojis"
+    "no_emoji_found": "No se encontraron emojis",
+    "ban-reason-spray": "Se te ha pausado la publicación porque el mismo mensaje se envió a varios canales a la vez.",
+    "ban-reason-mass-dm": "Se te ha pausado la publicación porque se envió un mensaje a muchas personas a la vez.",
+    "ban-reason-generic": "Se te ha pausado la publicación en el chat.",
+    "ban-can-still-read": "Aún puedes leer el chat.",
+    "ban-unlocks": "Podrás publicar de nuevo {when}.",
+    "ban-remaining-soon": "en menos de un minuto",
+    "ban-remaining-minutes": "en unos {count} minutos",
+    "ban-remaining-hours": "en unas {count} horas",
+    "ban-remaining-days": "en unos {count} días",
+    "new_group": "Nuevo grupo",
+    "new_group_hint": "Añade de {min} a {max} personas para iniciar una conversación de grupo.",
+    "new_group_search": "Buscar personas por nombre de usuario",
+    "new_group_full": "Un grupo puede tener hasta {max} personas más.",
+    "new_group_no_results": "No se encontró a nadie en el chat con ese nombre.",
+    "new_group_search_failed": "La búsqueda no funcionó. Comprueba tu conexión e inténtalo de nuevo.",
+    "new_group_remove": "Quitar a @{username}",
+    "new_group_create": "Iniciar grupo",
+    "new_group_failed": "No se pudo iniciar el grupo. Inténtalo de nuevo.",
+    "rename_group": "Renombrar grupo",
+    "rename_group_hint": "Ponle al grupo un nombre que todos vean. Déjalo vacío para mostrar los nombres de los miembros.",
+    "group_name": "Nombre del grupo",
+    "rename_group_too_long": "El nombre de un grupo puede tener hasta {max} caracteres.",
+    "rename_group_not_owner": "Solo quien inició este grupo puede renombrarlo.",
+    "rename_group_failed": "No se pudo renombrar el grupo. Inténtalo de nuevo.",
+    "group_renamed": "{user} cambió el nombre del grupo a «{name}»",
+    "group_name_cleared": "{user} quitó el nombre del grupo",
+    "group_members": "Miembros del grupo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "reactions_title": "Reacciones",
+    "reactor_you": "Tú",
+    "reactor_unknown": "Alguien",
+    "see_who_reacted": "Mantén pulsado para ver quién reaccionó",
+    "group": "Grupo"
   },
   "free_estm": {
     "timer_text": "Siguiente giro gratuito en",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transacción fallida"
   },
   "search_result": {
+    "error": "No se pudo completar la búsqueda. Inténtalo de nuevo",
+    "filters": {
+      "title": "Filtros",
+      "open": "Filtros",
+      "author": "Autor",
+      "author_placeholder": "nombre de usuario",
+      "category": "Categoría",
+      "category_placeholder": "comunidad o categoría",
+      "tags": "Etiquetas",
+      "tags_placeholder": "separadas por comas",
+      "type": "Tipo",
+      "type_all": "Todo",
+      "type_post": "Publicaciones",
+      "type_comment": "Comentarios",
+      "date": "Fecha",
+      "date_week": "Última semana",
+      "date_month": "Último mes",
+      "date_year": "Último año",
+      "date_all": "Todo el tiempo",
+      "sort": "Ordenar",
+      "apply": "Aplicar",
+      "active": "{n} activos",
+      "too_many_tags": "Usa como máximo {n} etiquetas",
+      "too_long": "La búsqueda es demasiado larga. Usa como máximo {n} caracteres",
+      "needs_criteria": "Escribe un término de búsqueda, o un autor, categoría o etiqueta para filtrar"
+    },
     "communities_filter": {
       "new": "Nuevo",
       "my": "Mis comunidades",
@@ -731,7 +839,7 @@
   },
   "ai_assist": {
     "title": "Asistente de Escritura de IA",
-    "balance_label": "Balance",
+    "balance_label": "Saldo",
     "points_unit": "PUNTOS",
     "cost_label": "Costo",
     "free_label": "Gratis",
@@ -748,6 +856,9 @@
     "action_summarize_desc": "Crear un resumen conciso",
     "action_check_grammar": "Revisar Gramática",
     "action_check_grammar_desc": "Corregir problemas de gramática y ortografía",
+    "action_generate_image": "Generar imagen",
+    "action_generate_image_desc": "Crea una imagen con IA para tu publicación",
+    "cost_from": "desde {cost} {unit}",
     "text_label": "Tu texto",
     "text_placeholder": "Pegar o escribir tu contenido aquí...",
     "min_chars": "Mínimo {count} caracteres requeridos",
@@ -797,16 +908,26 @@
     "remind_later": "Recordar Más Tarde",
     "success_subscribe": "¡Suscrito con éxito!",
     "payloadTooLarge": "El tamaño del archivo es demasiado grande, por favor cambia el tamaño o suba una imagen más pequeña",
+    "too_many_images": "Puedes seleccionar hasta {count} imágenes a la vez",
     "fail_follow": "¡Error al seguir!",
     "clear_user_alert": "¿Estás seguro de querer borrar toda la información del usuario?",
     "cancel": "Cancelar",
     "connection_success": "¡Conectado con éxito!",
     "rc_down": "¡No hay suficientes créditos de recursos para realizar una acción! \n\nPotencia tu cuenta para continuar disfrutando de la experiencia. ¿Quieres potenciar tu cuenta ahora?",
+    "rc_down_title": "Resource Credits insuficientes",
+    "rc_precheck_title": "Es posible que esta publicación sea demasiado grande para publicarse",
+    "rc_precheck_body": "Tus Resource Credits parecen demasiado bajos para una publicación de este tamaño.",
+    "rc_down_body": "No tienes suficientes Resource Credits para esta acción.\n\nRecarga ahora con puntos para continuar, o potencia tu cuenta de forma permanente.",
+    "rc_down_topup": "Recargar RC con puntos",
+    "rc_down_boost": "Potenciar cuenta",
     "done": "Hecho",
     "something_wrong_alt": "Mientras tanto, prueba Ecency.com desde tu navegador",
     "same_user": "Este usuario ya ha sido añadido a la lista",
     "fail": "Falló!",
     "operation_failed_with_reason": "{operation} falló: {reason}",
+    "request_timed_out": "La conexión tarda demasiado. Comprueba tu red e inténtalo de nuevo.",
+    "load_failed_retry": "No pudimos cargar esto. Inténtalo de nuevo.",
+    "retrying": "Reintentando...",
     "wallet_refresh_failed": "Error al actualizar la cartera. Por favor, inténtalo de nuevo.",
     "wallet_refresh_missing_account": "Error al actualizar Wallet: falta la cuenta.",
     "boost_failed": "Impulso fallido.",
@@ -956,7 +1077,7 @@
     "payout_details": "Detalles del pago",
     "a11y_votes": "{count, plural, one {# voto} other {# votos}}",
     "a11y_voters_hint": "Ver votantes",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
+    "a11y_reblogs": "{count, plural, one {# reblog} many {# reblogs} other {# reblogs}}",
     "a11y_reblogs_hint": "Ver reblogs",
     "a11y_comments": "{count, plural, one {# comentario} other {# comentarios}}",
     "a11y_comments_hint": "Ver comentarios",
@@ -998,13 +1119,14 @@
     "save_to_local": "Descargar al dispositivo",
     "muted": "Contenido silenciado por infracción",
     "community_muted": "Contenido silenciado por violación de las directrices comunitarias",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Contenido de una cuenta con baja reputación",
+    "muted_downvoted": "Contenido con votos negativos de los usuarios",
+    "muted_low_trust": "Cuenta de baja reputación con un enlace externo sin verificar",
+    "muted_reveal": "Toca para mostrar",
     "promoted": "PROMOCIONADO",
     "image_saved": "Imagen guardada en la galería de fotos",
     "words": "Palabras",
     "reading": "Leyendo",
-    "listen": "Escuchar",
     "min": "min",
     "summarize_start": "Comenzar"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Publicación no existe",
     "invalid_link": "La Url no es válida, puedes intentarlo de nuevo con una url válida o intentar abrirla en el navegador web",
-    "no_existing_user": "Usuario no existe"
+    "no_existing_user": "Usuario no existe",
+    "posting_key_request": "{requester} solicita la clave privada de publicación de @{username}.\n\nContinúa solo si confías en esta solicitud.",
+    "posting_key_request_unnamed": "Otra aplicación solicita la clave privada de publicación de @{username}.\n\nContinúa solo si confías en esta solicitud.",
+    "auth_request_as_user": "{requester} quiere iniciar tu sesión como @{username}.\n\nSolo se comparten tu nombre de usuario y una prueba de inicio de sesión. Ninguna clave sale de Ecency.",
+    "auth_request_as_current": "{requester} quiere iniciar tu sesión con tu cuenta de Ecency.\n\nSolo se comparten tu nombre de usuario y una prueba de inicio de sesión. Ninguna clave sale de Ecency."
   },
   "payout": {
     "breakdown": "Intermedio",
@@ -1141,6 +1267,30 @@
     "btn_register": "Regístrate Gratis",
     "title": "Cuenta Gratuita"
   },
+  "dictation": {
+    "title": "Dictar",
+    "start": "Grabar",
+    "stop": "Detener",
+    "record_more": "Grabar más",
+    "done": "Listo",
+    "recording": "Grabando",
+    "stop_hint": "Detén para transcribir y añadirlo a tu publicación. Hasta {m} minutos.",
+    "inserted": "Añadido a tu publicación. Graba más o toca Listo.",
+    "transcribing": "Transcribiendo",
+    "rate": "{n} puntos por {s} segundos",
+    "cost_running": "{n} puntos hasta ahora",
+    "cost_running_free": "Gratis hasta ahora",
+    "free_remaining": "Tus próximos {n} x {s}s son gratis hoy",
+    "price_loading": "Comprobando precio",
+    "price_error": "No se pudo cargar el precio de la transcripción.",
+    "denied": "Ecency necesita acceso al micrófono para dictar. Permítelo en Ajustes e inténtalo de nuevo.",
+    "error_empty": "No se detectó voz en esa grabación.",
+    "error_insufficient_points": "No hay suficientes puntos para transcribir esa grabación.",
+    "error_rate_limited": "Demasiadas grabaciones por ahora. Inténtalo de nuevo en un momento.",
+    "error_too_long": "Esa grabación es demasiado larga para transcribirla.",
+    "error_failed": "No se pudo transcribir esa grabación. Inténtalo de nuevo.",
+    "error_recorder": "No se pudo iniciar la grabación. Inténtalo de nuevo."
+  },
   "wallet": {
     "delegations_out": "Delegaciones emitidas",
     "estimated_value_desc": "De acuerdo al valor de compra",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Estar al tanto regularmente te da 0,25 puntos.",
     "fill_transfer_from_savings": "Ahorros ejecutados",
     "activities": "Actividades",
+    "no_activities": "Aún no hay transacciones",
+    "activities_failed": "No se pudieron cargar las transacciones. Desliza hacia abajo para reintentar.",
     "tap_update": "Toca para actualizar",
     "mining_lottery": "Lotería ganada",
     "checkin": "Registrarse",
     "tokens_transfer": "Tokens Transferidos",
     "outgoing_transfer_title": "Transferir/Regalar",
+    "burned_title": "Uso de IA",
+    "burned_description": "Puntos gastados en una función de IA",
+    "burn_refund_title": "Reembolso de IA",
+    "burn_refund_description": "Puntos devueltos tras una solicitud de IA fallida",
     "manage_assets": "Agregar / Quitar Activos",
     "selected_assets": "Activos Seleccionados",
     "nft_setPropertyPermissions": "Conjunto de permisos de propiedad para el símbolo NFT",
@@ -1224,7 +1380,7 @@
     "last_updated": "Actualizado {datetime}",
     "estimated_value": "Valor estimado",
     "nftmarket_cancel": "Orden cancelada",
-    "amount_desc": "Balance",
+    "amount_desc": "Saldo",
     "market_sell": "Tokens vendidos",
     "nft_transferFee": "Tarifa de transferencia NFT",
     "net_hive_power": "Neto en estaca",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "OBTENER PUNTOS",
     "escrow_approve": "Aprobar fideicomiso",
     "expires": "caduca el",
+    "transaction_id": "ID de transacción",
+    "copy_transaction_id": "Copiar enlace de la transacción",
+    "filter_activities": "Filtrar actividades",
+    "filter_activities_desc": "Elige qué operaciones solicita este historial",
+    "filter_all": "Seleccionar todo",
+    "filter_none": "Borrar todo",
+    "filter_apply": "Aplicar",
     "author_reward": "Recompensa de autor",
     "withdraw_hbd": "Retirar ahorros",
     "convert_request": "Solicitudes de conversión",
@@ -1440,7 +1603,7 @@
     "select_aspect_ratio": "Seleccionar relación de aspecto",
     "select_power": "Mejora de calidad",
     "cost_label": "Costo",
-    "balance_label": "Balance",
+    "balance_label": "Saldo",
     "points_unit": "PUNTOS",
     "generate_button": "Generar imagen",
     "generating": "Generando tu imagen...",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Personalizado ({hours} h)",
+    "balance_load_failed": "No se pudo cargar tu saldo. Toca para reintentar.",
+    "precision_load_failed": "No se pudieron cargar los detalles de este token, así que solo se pueden enviar importes enteros. Toca para reintentar.",
     "close": "Cerrar",
     "favorite_username_placeholder": "Nombre de usuario",
     "invalid_recipient_qr": "No se encontró ningún nombre de usuario en este código QR.",
@@ -1479,7 +1644,7 @@
     "delegat_detail_subhead": "Nueva cantidad sobrescribe el monto anteriormente delegado de HIVE Power ",
     "unstake_engine": "Retirar Token de Estaca",
     "withdraw_hive": "Retirar HIVE",
-    "amount_desc": "Balance",
+    "amount_desc": "Saldo",
     "account_detail_subhead": "Introduce el nombre de usuario para la delegación de HIVE Power",
     "transfer_to_savings": "Transferir a Ahorros",
     "amount_hp": "Cantidad (HP)",
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Comentario",
       "bookmark": "Marcadores",
+      "tags": "Etiquetas",
       "reblog": "Reblogueo",
       "favorite": "Favoritos",
       "mention": "Mención",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Enviar comentarios",
     "rate_app": "Valorar Ecency",
+    "email_digests": "Resúmenes por correo",
     "rate": "Valorar",
     "dm-privacy-updated": "Ajustes de privacidad de DM actualizados correctamente",
     "dm-privacy-failed": "Error al actualizar la configuración de privacidad de DM",
@@ -1685,19 +1852,29 @@
     "request_sent": "Su solicitud de eliminación está enviada",
     "confirm_delete_body": "¿Estás seguro de que deseas eliminar la cuenta? Se borrarán todos tus datos"
   },
-  "tts": {
-    "settings_title": "Configuración de texto a voz",
-    "voice": "Voz",
-    "voice_hint": "Se utilizará la voz predeterminada del sistema",
-    "speed": "Velocidad",
-    "pitch": "Pitch",
-    "test_voice": "Probar Voz",
-    "settings_info": "Estos ajustes se utilizarán al leer mensajes en voz alta",
+  "listen": {
+    "title": "Escuchar esta publicación",
+    "minutes": "~{n} min",
+    "login": "Acceder",
+    "unlock": "Desbloquear · {n} puntos",
+    "confirm": "¿Gastar {n} puntos para escuchar esta publicación? El audio es tuyo y puedes volver a reproducirlo cuando quieras.",
+    "not_enough_title": "Puntos insuficientes",
+    "not_enough": "Escuchar requiere {required} puntos y tienes {available}.",
+    "get_points": "Obtener puntos",
+    "unlock_failed": "No se pudo desbloquear el audio, inténtalo de nuevo",
+    "failed_refunded": "No se pudo generar el audio, se reembolsaron tus puntos",
+    "preparing": "Preparando audio…",
+    "preparing_eta": "Preparando audio, unos {n} min…",
+    "preparing_progress": "Preparando audio · {n} %",
+    "waiting": "En cola, {n} por delante…",
+    "next_in_line": "Eres el siguiente…",
     "play": "Reproducir",
     "pause": "Pausa",
-    "language": "Idioma",
-    "language_auto": "Autodetectar",
-    "language_hint": "Autodetectar elige el idioma basado en el contenido del post"
+    "seek": "Buscar",
+    "speed": "Velocidad de reproducción",
+    "language": "Idioma del audio",
+    "unavailable": "No se pudo cargar el audio.",
+    "retry": "Reintentar"
   },
   "posting_authority": {
     "title": "Habilitar publicación más rápida",
@@ -1732,7 +1909,7 @@
     "error-auth": "Error de autenticación. Inicie sesión de nuevo, por favor.",
     "error-generic": "Error al subir el vídeo. Vuelve a intentarlo, por favor.",
     "error-too-long-short": "Los videos cortos deben ser de 60 segundos o menos.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Una publicación solo puede contener un vídeo. Elimina el vídeo actual antes de añadir otro.",
     "select_source": "Añadir vídeos",
     "record": "Grabar video",
     "choose_library": "Elegir desde Galería"
@@ -1744,35 +1921,1179 @@
     "wave": "Ola",
     "wave_desc": "Compartir una actualización rápida"
   },
+  "newsletter": {
+    "screen_title": "Resúmenes por correo",
+    "title": "{list}",
+    "body_own": "Un resumen semanal o mensual de tus notificaciones por correo.",
+    "body_creator": "Nuevas publicaciones de {list} en tu bandeja de entrada.",
+    "body_community": "Un resumen por correo de las nuevas publicaciones en {list}.",
+    "body_site": "Lo mejor de Ecency en tu bandeja de entrada.",
+    "first_publish_title": "¡Enhorabuena por tu primera publicación!",
+    "first_publish_body": "¿Quieres un resumen por correo de tus notificaciones? Semanal o mensual, cámbialo o déjalo cuando quieras en Ajustes.",
+    "list_own": "Resumen de mis notificaciones",
+    "list_site": "Boletín de Ecency",
+    "status_active": "Estás suscrito.",
+    "status_pending": "Esperando confirmación por correo.",
+    "status_short_active": "activo",
+    "status_short_pending_confirmation": "pendiente",
+    "status_short_suppressed": "detenido",
+    "status_short_ended": "finalizado",
+    "cadence_weekly": "Semanal",
+    "cadence_monthly": "Mensual",
+    "email_placeholder": "tu@ejemplo.com",
+    "subscribe": "Suscribirse",
+    "update": "Actualizar",
+    "resend": "Reenviar confirmación",
+    "leave": "Salir del resumen",
+    "cancel": "Cancelar",
+    "ok": "Ok",
+    "manage": "Gestionar",
+    "check_inbox_title": "Revisa tu bandeja de entrada",
+    "check_inbox_body": "Enviamos un enlace de confirmación a {email}. La suscripción comienza cuando confirmes.",
+    "subscribed": "Suscrito al resumen por correo",
+    "left": "Saliste del resumen",
+    "refused": "Esta dirección no se puede suscribir.",
+    "unavailable": "Los resúmenes por correo no están disponibles ahora mismo.",
+    "too_many": "Demasiados intentos, inténtalo de nuevo más tarde.",
+    "fail": "Algo salió mal, inténtalo de nuevo.",
+    "empty": "Aún no hay resúmenes por correo. Suscríbete abajo para empezar.",
+    "discover": "Recibe más por correo",
+    "stop_all": "Detener todo",
+    "stop_all_title": "¿Detener todos los correos?",
+    "stop_all_body": "No se enviará más correo de Ecency a {email}. Las suscripciones con otras direcciones se mantienen.",
+    "stop_all_ok": "Detener todo",
+    "stop_all_done": "Dirección dada de baja de todo el correo",
+    "profile_option": "RESUMEN POR CORREO",
+    "subscriber_count": "{weekly} semanales • {monthly} mensuales suscriptores por correo",
+    "community_button": "Boletín"
+  },
+  "mod_notes": {
+    "title": "Añadir un motivo",
+    "placeholder": "Motivo (visible para otros moderadores)",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  },
+  "community_settings": {
+    "title_header": "Ajustes de la comunidad",
+    "title_label": "Título",
+    "about": "Acerca de",
+    "lang": "Idioma",
+    "description": "Descripción",
+    "rules": "Reglas",
+    "nsfw": "No apto para el trabajo (NSFW)",
+    "save": "Guardar",
+    "required": "Obligatorio",
+    "title_length": "Entre {min} y {max} caracteres",
+    "owner_admin_only": "Solo el propietario y los administradores pueden cambiar estos ajustes."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Expandido",
+        "collapsed": "Contraído"
+      },
+      "a11y_chat": {
+        "quote": "Respondiendo a {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Seleccionar",
+        "deselect": "Deseleccionar"
+      },
+      "store": {
+        "billing_unavailable": "Las compras dentro de la aplicación no están permitidas en este dispositivo.",
+        "verification_failed": "App Store no pudo verificar esta compra.",
+        "cancelled": "Compra cancelada",
+        "unknown_result": "Resultado de compra desconocido"
+      },
+      "navigation": {
+        "feed_unavailable": "Este feed aún no está disponible.",
+        "link_cannot_open": "Este enlace no se puede abrir.",
+        "video_cannot_play": "Este vídeo no se puede reproducir."
+      },
+      "media": {
+        "load_failed": "No se pudo cargar este elemento. Comprueba tu conexión e inténtalo de nuevo.",
+        "loading": "Cargando contenido",
+        "download_failed": "Descarga fallida con estado {status}"
+      },
+      "sign_in": {
+        "required": "Inicio de sesión requerido",
+        "to_reply": "Inicia sesión para responder.",
+        "to_vote": "Inicia sesión para votar.",
+        "button": "Iniciar sesión"
+      },
+      "account": {
+        "logout_user": "Cerrar sesión de @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# voto} many {# votos} other {# votos}}  •  {replies, plural, one {# respuesta} many {# respuestas} other {# respuestas}}",
+        "voting_power": "Poder de voto {percent}",
+        "remove_favourite": "Quitar de favoritos",
+        "add_favourite": "Añadir a favoritos"
+      },
+      "waves": {
+        "clear_tag_filter": "Quitar filtro de etiqueta {tag}",
+        "new_wave": "Nueva wave",
+        "replies_open_thread": "{count, plural, one {# respuesta, abrir hilo} many {# respuestas, abrir hilo} other {# respuestas, abrir hilo}}",
+        "characters": "{count} de {max} caracteres",
+        "retry": "{message}\nReintentar",
+        "playing": "Reproduciendo {permlink}",
+        "video_attached_remove": "Vídeo adjunto, quitar",
+        "image_attached_remove": "Imagen adjunta, quitar",
+        "take_photo": "Hacer foto",
+        "edit_poll": "Editar encuesta",
+        "add_poll": "Añadir encuesta",
+        "add_video": "Añadir vídeo"
+      },
+      "reading": {
+        "reply_to": "Responder a {username}",
+        "opens_post": "Abre la publicación",
+        "sort_comments": "Ordenar comentarios",
+        "sort_comments_value": "Ordenar comentarios, {sort}",
+        "no_comments": "Aún no hay comentarios.",
+        "loading_post": "Cargando publicación",
+        "show_version": "Mostrar versión",
+        "show_changes": "Mostrar cambios",
+        "replying_to": "Respondiendo a @{username}",
+        "reply_text": "Texto de la respuesta",
+        "translate_from": "De",
+        "translate_to": "A"
+      },
+      "feed": {
+        "tab_pinned": "{label}, fijado",
+        "tab_add": "{label}, añadir",
+        "customise": "Personalizar"
+      },
+      "card": {
+        "in_category": "en {category}",
+        "pinned": "Fijado",
+        "by_author": "por {username}",
+        "payout": "pago {payout}",
+        "payout_declined": "pago {payout}, rechazado",
+        "reblogged_by": "Reblogueado por {username}"
+      },
+      "shell": {
+        "close_menu": "Cerrar menú"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatura, elegir otra imagen",
+        "words": "{count, plural, one {# palabra} many {# palabras} other {# palabras}}",
+        "poll_min_age": "Antigüedad mín. de la cuenta (días): {days}",
+        "poll_max_options": "Máx. de opciones: {count}",
+        "thumbnail_selected": "Miniatura seleccionada",
+        "thumbnail": "Miniatura",
+        "uploaded_image": "Imagen subida",
+        "community_search": "buscar"
+      },
+      "vote": {
+        "not_voted": "Sin votar",
+        "voting": "Votando",
+        "failed_with": "Voto fallido: {message}",
+        "failed": "Voto fallido",
+        "payout": "Pago {payout}",
+        "payout_declined": "Pago {payout}, rechazado",
+        "percent": "{percent} por ciento",
+        "upvote_percent": "Voto positivo {percent} %"
+      },
+      "settings": {
+        "on": "Activado",
+        "off": "Desactivado"
+      },
+      "lock": {
+        "biometric_reason": "Activar el desbloqueo biométrico para Ecency",
+        "offer_title": "Desbloquear con {method}",
+        "offer_use": "Usar {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Las claves se ocultan mientras se graba o se duplica la pantalla.",
+        "screenshot_notice": "Se hizo una captura de pantalla. Las claves privadas se ocultaron de nuevo; si la captura muestra una clave, elimínala.",
+        "hold_hint": "Mantén pulsada una clave para mostrarla.",
+        "hold_to_show": "Mantén para mostrar"
+      },
+      "wallet": {
+        "cancel_order": "¿Cancelar esta orden?",
+        "days": "{count, plural, one {# día} many {# días} other {# días}}"
+      },
+      "chat": {
+        "reactors_hint": "Mantén pulsado para ver quién reaccionó",
+        "see_reactors": "Ver quién reaccionó"
+      },
+      "esie": {
+        "still": "{mood}, quieto"
+      }
+    },
+    "ui": {
+      "profile_of": "Perfil de @{username}",
+      "preview": "Vista previa ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Caduca en {time}",
+      "expired": "Caducado. Cierra e inténtalo de nuevo.",
+      "user_has_no_posts": "@{username} aún no ha publicado nada",
+      "attach_image": "Adjuntar imagen",
+      "auto": "Auto",
+      "back": "Atrás",
+      "hot": "HOT",
+      "image_of": "Imagen {index} de {count}",
+      "new": "NUEVO",
+      "nsfw_tap_to_reveal": "NSFW Toca para mostrar",
+      "new_reply": "Nueva respuesta",
+      "remove": "Quitar",
+      "unlock_ecency": "Desbloquear Ecency",
+      "update_it": "Actualizarla",
+      "update_it_or_post_this_as": "¿Actualizarla o publicar esto como una respuesta nueva?",
+      "use_pin": "Usar PIN",
+      "your_reply_was_already_posted": "Tu respuesta ya se publicó",
+      "error_try_again": "{message} ¿Reintentar?",
+      "auth": {
+        "account_label": "Cuenta: @{username}",
+        "approve_the_request_in_your_wallet": "Aprueba la solicitud en tu aplicación de cartera.",
+        "copy_key": "Copiar {title}",
+        "current_account": "Cuenta actual",
+        "qr_code": "Código QR",
+        "requested_by": "Solicitado por {requester}",
+        "pin_digits": "{filled} de {total, plural, one {# dígito} many {# dígitos} other {# dígitos}}",
+        "private_key_shown": "{title}, clave privada visible",
+        "open_wallet_app": "Abrir aplicación de cartera",
+        "hiveauth_scan": "Aprueba en Hive Keychain u otra cartera HiveAuth: ábrela en este dispositivo o escanea este código con ella.",
+        "switching": "Cambiando...",
+        "logout_all": "Cerrar sesión en todas las cuentas",
+        "logout_all_title": "¿Cerrar sesión en todas las cuentas de este dispositivo?",
+        "stored_key": "@{username} ya tiene la sesión iniciada en este dispositivo. Sus claves guardadas se mantienen; solo se renueva la sesión.",
+        "stored_hivesigner": "@{username} ya tiene la sesión iniciada con HiveSigner en este dispositivo. Se reemplaza su sesión.",
+        "stored_hiveauth": "@{username} tiene la sesión iniciada con HiveAuth en este dispositivo. Firmará con HiveSigner en su lugar.",
+        "method_key": "Clave",
+        "logout_failed": "Error al cerrar sesión"
+      },
+      "browser": {
+        "account": "Cuenta",
+        "authority": "Autoridad",
+        "phishing": "Advertencia: este dominio ha sido marcado como sitio de phishing conocido. Procede con extrema precaución."
+      },
+      "chat": {
+        "cancel_edit": "Cancelar edición",
+        "cancel_reply": "Cancelar respuesta",
+        "copied_to_clipboard": "Copiado al portapapeles",
+        "edited_at": "Editado {time}",
+        "group_options": "Opciones del grupo",
+        "pinned_messages": "Mensajes fijados",
+        "remove_user": "Quitar a @{username}",
+        "sort_by_name": "Ordenar por nombre",
+        "more": "Más",
+        "reaction_label": "{emoji} {count}. Mantén pulsado para ver quién reaccionó",
+        "members": "Miembros"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Ya existe una publicación en este enlace y es distinta de lo que enviaste. ¿Actualizarla o publicar como nueva?",
+        "a_scheduled_post_is_published_by": "Ecency publica una publicación programada a la hora elegida. Para ello se necesita la autoridad de publicación para ecency.app en tu cuenta. Tus claves y demás autoridades no cambian. Concederla requiere tu clave activa.",
+        "ai_assist": "Asistente IA",
+        "ai_tools": "Herramientas IA",
+        "allow_ecency_to_publish_for_you": "¿Permitir que Ecency publique por ti?",
+        "bold": "Negrita",
+        "clone": "Clonar",
+        "cost": "Coste: {cost}",
+        "could_not_store_the_draft_on": "No se pudo guardar el borrador en este dispositivo. Mantén la aplicación abierta y guarda el borrador.",
+        "draft": "BORRADOR",
+        "delete_count": "Eliminar ({count})",
+        "dictate_desc": "Habla y la transcripción pasa a tu publicación",
+        "discard": "Descartar",
+        "discard_changes": "¿Descartar cambios?",
+        "grant": "Conceder",
+        "italic": "Cursiva",
+        "keep_editing": "Seguir editando",
+        "my_blog": "MI BLOG",
+        "my_communities": "MIS COMUNIDADES",
+        "new_post": "Nueva publicación",
+        "notice": "Aviso",
+        "restore": "Restaurar",
+        "restore_unsaved_changes": "¿Restaurar los cambios sin guardar?",
+        "saved": "Guardado",
+        "top_communities": "COMUNIDADES POPULARES",
+        "table": "Tabla",
+        "text_format": "Formato de texto",
+        "this_link_is_already_in_use": "Este enlace ya está en uso",
+        "untitled": "Sin título",
+        "update_it_or_publish_this_as": "¿Actualizarla o publicar esto como una publicación nueva?",
+        "you_have_unsaved_changes_from_an": "Tienes cambios sin guardar de una edición anterior. La publicación ha cambiado desde entonces; al restaurarlos se reemplaza el texto de abajo.",
+        "your_edits_were_not_published": "Tus cambios no se publicaron.",
+        "your_post_was_already_published": "Tu publicación ya se publicó",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatura, toca para elegir otra imagen",
+        "thumbnail_number": "Miniatura {number}",
+        "recording_busy": "Ya hay una grabación en curso. Termínala primero en la cámara.",
+        "photo_lost": "La foto se perdió mientras la cámara estaba abierta. Vuelve a hacerla.",
+        "add_snippet_button": "+ Fragmento",
+        "words_count": "{count, plural, one {# palabra} many {# palabras} other {# palabras}}",
+        "community_search": "buscar"
+      },
+      "profile": {
+        "open_wallet": "Abrir cartera",
+        "your_wallet_is_on_the_wallet": "Tu cartera está en la pestaña Cartera.",
+        "user_has_no_comments": "@{username} aún no ha comentado nada",
+        "votes_count": "{count, plural, one {# voto} many {# votos} other {# votos}}",
+        "replies_count": "{count, plural, one {# respuesta} many {# respuestas} other {# respuestas}}",
+        "menu": "Más",
+        "users": "Usuarios"
+      },
+      "reading": {
+        "apply": "APLICAR",
+        "add_tag": "Añadir etiqueta",
+        "age": "Antigüedad",
+        "audio_language": "Idioma del audio",
+        "available_filters": "Filtros disponibles",
+        "could_not_unlock_the_audio_please": "No se pudo desbloquear el audio, inténtalo de nuevo",
+        "downvote": "Voto negativo",
+        "downvote_percent": "Voto negativo {percent} %",
+        "listen_to_this_post": "Escuchar esta publicación",
+        "log_in": "Acceder",
+        "mark_all_as_read": "Marcar todo como leído",
+        "mark_as_read": "Marcar como leído",
+        "more_replies": "Más respuestas",
+        "not_enough_points": "Puntos insuficientes",
+        "nothing_here_yet": "Aún no hay nada aquí.",
+        "open_editor": "Abrir editor",
+        "pause_voice": "Pausar voz",
+        "play_voice": "Reproducir voz",
+        "playback_speed": "Velocidad de reproducción",
+        "publishing_in_waves": "Publicando en Waves",
+        "quests_done": "Misiones completadas",
+        "read": "Leer",
+        "remove_vote": "Quitar voto",
+        "seek": "Buscar",
+        "select_community": "Seleccionar comunidad",
+        "selected_filters": "Filtros seleccionados",
+        "the_audio_could_not_be_loaded": "No se pudo cargar el audio.",
+        "this_post_does_not_exist_or": "Esta publicación no existe o fue eliminada.",
+        "unread": "No leído",
+        "voice_position": "Posición de la voz",
+        "vote_weight": "Peso del voto",
+        "reblogged_by": "reblogueado por {username}",
+        "no_more_posts": "No hay más publicaciones.",
+        "favourite": "Favorito",
+        "no_votes_yet": "Aún no hay votos",
+        "no_comments_yet": "Aún no hay comentarios. ¡Sé el primero!",
+        "comments_count": "Comentarios ({count})",
+        "sending_to_chain": "enviando a la cadena",
+        "compare": "Comparar",
+        "your_vote": "Tu voto",
+        "reply_to": "Responder a @{username}",
+        "what_do_you_think": "¿Qué opinas?",
+        "clear_tag_filter": "Quitar filtro de etiqueta",
+        "tab_selected": "{title}, seleccionado",
+        "add_tag_feed": "Añadir feed de etiqueta",
+        "feed_pinned": "{label}, fijado",
+        "attached_image_remove": "Imagen adjunta, toca para quitar",
+        "camera": "Cámara",
+        "files": "Archivos",
+        "paused": "En pausa",
+        "in_topic": "en {topic}",
+        "poll_vote": "Votar",
+        "reply": "Responder",
+        "mute_sound": "Silenciar",
+        "unmute_sound": "Activar sonido",
+        "leaderboard_activities": "Actividades",
+        "leaderboard_reward": "Recompensa",
+        "sort_votes": "Votos"
+      },
+      "shell": {
+        "account_of": "Cuenta @{username}",
+        "account_signed_out": "Cuenta, sesión cerrada",
+        "close_tab": "Cerrar pestaña",
+        "coming_soon_to_the_native_app": "Próximamente en la aplicación nativa.",
+        "create": "Crear",
+        "expand": "Expandir",
+        "forward": "Adelante",
+        "loading": "Cargando",
+        "new_tab": "Nueva pestaña",
+        "reload": "Recargar",
+        "sent": "Enviado",
+        "tab_unread": "{title}, {count} sin leer",
+        "no_app_for_link": "Ninguna aplicación puede abrir este enlace."
+      },
+      "wallet": {
+        "product_not_available": "Producto no disponible.",
+        "repeat": "Repetir"
+      },
+      "copied": "Copiado",
+      "trending_caps": "TENDENCIAS",
+      "move_up": "Subir",
+      "move_down": "Bajar",
+      "scroll_to_top": "Ir al inicio",
+      "load_more": "Más"
+    },
+    "wallet": {
+      "checking": "Comprobando con la red",
+      "leave_title": "Aún enviando",
+      "leave_message": "Esto aún se está enviando o comprobando con la red. Puedes salir de esta pantalla: la aplicación te avisará cuando termine.",
+      "stay": "Quedarse",
+      "collateralized_convert_request": "Solicitud de conversión colateralizada",
+      "op_transfer": "transferencia",
+      "op_power_up": "aumento de poder",
+      "op_power_down_change": "cambio de retiro de poder",
+      "op_delegation": "delegación",
+      "op_savings_deposit": "depósito en ahorros",
+      "op_savings_withdrawal": "retiro de ahorros",
+      "op_conversion": "conversión",
+      "op_swap": "intercambio",
+      "op_order_cancel": "cancelación de orden",
+      "op_reward_claim": "reclamo de recompensas",
+      "op_withdraw_route_change": "cambio de ruta de retiro",
+      "op_token_operation": "operación de token"
+    },
+    "notification": {
+      "amount_unknown": "Importe no disponible",
+      "weekly_earnings_breakdown": "Ganaste ${amount} esta semana: ${authorUsd} por publicaciones y ${curationUsd} por curación.",
+      "weekly_earnings_total": "Ganaste ${amount} esta semana con tus publicaciones y la curación."
+    },
+    "settings": {
+      "open": "Abrir",
+      "feedback_subject": "Comentarios/Informe de errores",
+      "unknown_user": "Usuario desconocido"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Seguidores",
+      "spin_game": "Juego Spin",
+      "edit_profile": "Editar perfil",
+      "redeem_points": "Canjear puntos",
+      "community": "Comunidad",
+      "community_members": "Miembros de la comunidad",
+      "community_activities": "Actividades de la comunidad",
+      "browser": "Navegador",
+      "asset_details": "Detalles del activo",
+      "edit_history": "Historial de ediciones",
+      "welcome": "Bienvenido",
+      "chat": "Chat",
+      "backup_keys": "Copia de seguridad de claves",
+      "trade": "Operar",
+      "ai_image_generator": "Generador de imágenes IA",
+      "select_assets": "Seleccionar activos",
+      "poll": "Encuesta",
+      "bot_comments": "Comentarios de bots"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Las operaciones que requieren la clave de propietario no se pueden firmar en Ecency.",
+      "post": "Publicación/Comentario",
+      "custom": "JSON personalizado",
+      "sign_buffer": "Firmar mensaje",
+      "send_token": "Enviar token",
+      "witness_vote": "Voto de testigo",
+      "proxy": "Establecer proxy",
+      "power_up": "Aumentar poder",
+      "power_down": "Reducir poder",
+      "broadcast": "Difundir",
+      "sign_tx": "Firmar transacción",
+      "encode": "Codificar mensaje",
+      "decode": "Verificar clave",
+      "add_account_authority": "Añadir autoridad de cuenta",
+      "remove_account_authority": "Quitar autoridad de cuenta",
+      "add_key_authority": "Añadir autoridad de clave",
+      "remove_key_authority": "Quitar autoridad de clave",
+      "create_claimed_account": "Crear cuenta",
+      "create_proposal": "Crear propuesta",
+      "remove_proposal": "Quitar propuesta",
+      "update_proposal_vote": "Voto de propuesta",
+      "signed_call": "Llamada firmada"
+    },
+    "translate_language": {
+      "ar": "Árabe",
+      "az": "Azerbaiyano",
+      "bg": "Búlgaro",
+      "bn": "Bengalí",
+      "ca": "Catalán",
+      "cs": "Checo",
+      "da": "Danés",
+      "de": "Alemán",
+      "el": "Griego",
+      "en": "Inglés",
+      "eo": "Esperanto",
+      "es": "Español",
+      "et": "Estonio",
+      "fa": "Persa",
+      "fi": "Finés",
+      "fr": "Francés",
+      "ga": "Irlandés",
+      "he": "Hebreo",
+      "hi": "Hindi",
+      "hu": "Húngaro",
+      "id": "Indonesio",
+      "it": "Italiano",
+      "ja": "Japonés",
+      "ko": "Coreano",
+      "lt": "Lituano",
+      "lv": "Letón",
+      "ms": "Malayo",
+      "nb": "Noruego",
+      "nl": "Neerlandés",
+      "pl": "Polaco",
+      "pt": "Portugués",
+      "ro": "Rumano",
+      "ru": "Ruso",
+      "sk": "Eslovaco",
+      "sl": "Esloveno",
+      "sq": "Albanés",
+      "sv": "Sueco",
+      "th": "Tailandés",
+      "tl": "Tagalo",
+      "tr": "Turco",
+      "uk": "Ucraniano",
+      "zh": "Chino",
+      "zt": "Chino (tradicional)"
+    },
+    "reading": {
+      "banner_text": "Esta publicación está en {source}. ¿Traducir a {target}?",
+      "translated_from_text": "Traducido de {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# miembro} many {# miembros} other {# miembros}} • {authors, plural, one {# autor} many {# autores} other {# autores}} • {posts, plural, one {# publicación} many {# publicaciones} other {# publicaciones}}",
+      "community_title": "Comunidad {title}",
+      "members_title": "Miembros de {title}",
+      "activities_title": "Actividad de {title}",
+      "cannot_start_with_or": "No puede empezar por @ ni #",
+      "use_a_two_letter": "Usa un código de idioma de dos letras, como en",
+      "at_most_characters": "Como máximo {max, plural, one {# carácter} many {# caracteres} other {# caracteres}}",
+      "council": "Consejo",
+      "journal": "Diario",
+      "topic": "Tema",
+      "community_not_found": "Comunidad no encontrada."
+    },
+    "transfer": {
+      "one_recipient": "Solo se puede usar un destinatario en esta transferencia.",
+      "is_an_exchange_and": "{exchange} es un exchange y puede que no admita transferencias recurrentes: los fondos enviados de forma programada pueden perderse. Usa mejor una transferencia única."
+    },
+    "dapps": {
+      "signing_info": "Ecency actúa como tu extensión de firma de Hive. Cuando una dApp te pida iniciar sesión con una extensión de navegador como Keychain, Keeper o Peak Vault, selecciona esa opción. Ecency se encarga de firmar de forma segura.",
+      "category_social": "Social",
+      "category_gaming": "Juegos",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupo",
+      "unable_to_load_messages": "No se pudieron cargar los mensajes.",
+      "someone": "Alguien",
+      "renamed_the_group_to": "{actor} cambió el nombre del grupo a «{name}»",
+      "removed_the_group_name": "{actor} quitó el nombre del grupo",
+      "unable_to_send_your": "No se pudo enviar tu mensaje.",
+      "unable_to_remove_message": "No se pudo eliminar el mensaje.",
+      "unknown": "Desconocido",
+      "members_online": "{members, plural, one {# miembro} many {# miembros} other {# miembros}} • {online} en línea",
+      "failed_to_load_pinned": "No se pudieron cargar los mensajes fijados",
+      "you": "Tú",
+      "title": "Reacciones"
+    },
+    "tip": {
+      "login_required": "Inicia sesión para enviar propinas",
+      "max_decimals": "Máximo {n, plural, one {# decimal} many {# decimales} other {# decimales}}"
+    },
+    "paid": {
+      "check_again": "Comprobar de nuevo",
+      "give_up": "Rendirse",
+      "unknown": "Aún no hay respuesta. Puede que la solicitud siga en curso. Comprueba de nuevo para obtener el resultado: no se cobra una segunda vez.",
+      "pending": "Tu solicitud aún se está procesando. Comprueba de nuevo en un momento: no se cobra una segunda vez.",
+      "restored": "Una solicitud anterior aún no tiene respuesta. Comprueba de nuevo para obtener su resultado: no se cobra una segunda vez.",
+      "give_up_confirm": "Si la solicitud se completó, los puntos se gastaron y el resultado se perderá.",
+      "not_stored": "No se pudo guardar esta solicitud en el dispositivo. Mantén esta pantalla abierta hasta que termine.",
+      "sign_in_again": "Tu sesión ha caducado. Inicia sesión de nuevo y comprueba otra vez.",
+      "other_account": "Esto pertenece a @{owner}. Vuelve a esa cuenta para continuar."
+    },
+    "ai": {
+      "run_ai_assist": "Ejecutar asistente IA ({costText})",
+      "no_longer_free_cost": "Esta ejecución ya no es gratis hoy. Cuesta {cost} {unit}.",
+      "no_longer_free": "Esta ejecución ya no es gratis hoy.",
+      "content_violates_our_content": "El contenido infringe nuestra política de contenido. Modifica tu texto. Los puntos no se reembolsaron.",
+      "generate_image": "Generar imagen ({costLabel})",
+      "use_prompt": "Usar: «{prompt}»"
+    },
+    "post_actions": {
+      "busy": "Espera, hay otra acción en curso",
+      "not_a_community_post": "No es una publicación de comunidad.",
+      "parent_post_not_found": "Publicación original no encontrada",
+      "the_account_changed": "La cuenta cambió."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Detener ({cost} puntos)",
+      "stop_free": "Detener (gratis)",
+      "transcribe_points": "Transcribir ({cost} puntos)",
+      "transcribe": "Transcribir",
+      "no_longer_free_cost": "Esta grabación ya no es gratis hoy. Cuesta {cost} puntos.",
+      "no_longer_free": "Esta grabación ya no es gratis hoy.",
+      "held_locked": "La grabación se detuvo cuando Ecency se bloqueó. No se envió nada. Toca Transcribir para enviarla o descártala.",
+      "held_no_background": "La grabación se detuvo cuando Ecency salió de la pantalla (no pudo mostrar su notificación de grabación). No se envió nada. Toca Transcribir para enviarla o descártala.",
+      "held_stopped": "La grabación se detuvo desde la notificación. No se envió nada. Toca Transcribir para enviarla o descártala.",
+      "held_focus_lost": "La grabación se detuvo por una llamada o el sonido de otra aplicación. No se envió nada. Toca Transcribir para enviarla o descártala.",
+      "held_interrupted": "La grabación se detuvo porque otra aplicación tomó el micrófono. No se envió nada. Toca Transcribir para enviarla o descártala.",
+      "unavailable": "La grabación no está disponible en este dispositivo.",
+      "not_read": "No se pudo leer esa grabación o es demasiado grande. No se envió nada ni se cobró nada.",
+      "give_up_not_sent": "Esta grabación no se envió, así que no se cobró nada. Se eliminará.",
+      "give_up_not_charged": "No se cobró nada por esta grabación. Se eliminará.",
+      "clip_lost": "La grabación de una solicitud anterior ya no está en este dispositivo. Si esa solicitud se completó, tus puntos se gastaron y no se puede obtener su transcripción."
+    },
+    "register": {
+      "error_code_28": "No se pudo procesar tu solicitud. Es probable que la cola de registro esté llena. Inténtalo de nuevo en unos minutos."
+    },
+    "perks": {
+      "quests_empty": "Aún no hay misiones aquí, vuelve pronto.",
+      "freeze_confirm_title": "Protege tu racha",
+      "spend_points_on_a": "¿Gastar {price} puntos en un congelador de racha? Se consume para proteger tu racha un día que faltes."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Apoya a Ecency, consigue un blog gratis y destaca con una insignia Pro verificada.",
+      "card_description": "Hazte Pro por {price} al año. Insignia verificada, un blog gratis y apoyo a Ecency.",
+      "card_description_plain": "Hazte Pro por un año. Insignia verificada, un blog gratis y apoyo a Ecency.",
+      "member": "Eres miembro Pro.",
+      "benefit_badge": "Una insignia Pro verificada junto a tu nombre.",
+      "benefit_blog": "Un blog gratis en tunombre.blogs.ecency.com.",
+      "benefit_support": "Apoya directamente el desarrollo de Ecency.",
+      "benefit_early": "Acceso anticipado a nuevas funciones.",
+      "buy": "Hazte Pro por {price} al año",
+      "extend": "Ampliar 12 meses por {price}",
+      "extend_note": "Comprar de nuevo suma 12 meses a tu membresía.",
+      "unavailable": "Ecency Pro no está disponible en la tienda ahora mismo.",
+      "activating": "Pago recibido. Activando tu membresía.",
+      "success_title": "Te damos la bienvenida a Ecency Pro",
+      "success_body": "Tu membresía Pro está activa. Tu insignia aparecerá en tu perfil en breve.",
+      "extending": "Pago recibido. Tu membresía Pro se está ampliando 12 meses.",
+      "open_a11y": "Abrir Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Guardando borrador...",
+      "please_sign_in_first": "Inicia sesión primero.",
+      "fetch_failed": "Error al obtener.",
+      "you_can_only_edit": "Solo puedes editar tu propio contenido.",
+      "invalid_percent": "Porcentaje no válido",
+      "beneficiary_exists_already": "El beneficiario ya existe",
+      "this_draft_belongs_to": "Este borrador pertenece a @{owner}. Vuelve a esa cuenta para publicarlo.",
+      "could_not_make_a": "No se pudo crear un enlace nuevo para esta publicación. Cambia un poco el título e inténtalo de nuevo.",
+      "an_earlier_attempt_was": "Un intento anterior se publicó después de este. Comprueba qué versión quieres conservar.",
+      "could_not_check_your": "No se pudo comprobar la autoridad de publicación de tu cuenta. Comprueba tu conexión e inténtalo de nuevo.",
+      "this_post_was_changed": "Esta publicación se modificó en otro lugar desde que la abriste. Copia tu texto, vuelve atrás y ábrela de nuevo para editar la última versión.",
+      "link_text_placeholder": "Texto aquí"
+    },
+    "app_error": {
+      "this_reply_is_too": "Esta respuesta es demasiado larga.",
+      "the_network_refused_this": "La red rechazó esta acción.",
+      "invalid_input": "Entrada no válida.",
+      "secure_storage_is_unavailable": "El almacenamiento seguro no está disponible. Inicia sesión de nuevo.",
+      "please_sign_in_first": "Inicia sesión primero.",
+      "these_credentials_belong_to": "Estas credenciales pertenecen a @{actual}, no a @{expected}.",
+      "is_not_signed_in": "@{username} no tiene la sesión iniciada en este dispositivo.",
+      "key_required": "Se requiere la clave {role} para realizar esta transacción. {hint}",
+      "cancelled": "Cancelado.",
+      "the_request_was_rejected": "La solicitud fue rechazada en la aplicación de cartera.",
+      "the_request_expired_before": "La solicitud caducó antes de que respondiera la aplicación de cartera. Inténtalo de nuevo.",
+      "could_not_reach_the": "No se pudo conectar con el servidor de HiveAuth. Inténtalo de nuevo.",
+      "unexpected_redirect": "El servidor envió una redirección inesperada. No se cambió nada. Inténtalo de nuevo más tarde.",
+      "missing_key_hint": "Añádela en Ajustes, Gestionar autoridades (Importar privada), o inicia sesión de nuevo con ella.",
+      "this_key_is_also": "Esta clave también es la clave de propietario de esta cuenta. Ecency no conserva una clave que controle el rol de propietario: da a tus roles activo y de publicación claves propias y luego inicia sesión con ellas.",
+      "this_is_the_owner": "Esta es la clave de propietario. Ecency nunca guarda ni usa la clave de propietario: inicia sesión con tu contraseña maestra o con tu clave de publicación o activa.",
+      "this_password_only_matches": "Esta contraseña solo coincide con la clave de propietario de la cuenta. Ecency nunca guarda ni usa la clave de propietario: inicia sesión con tu clave de publicación o activa.",
+      "this_key_cannot_sign": "Esta clave no puede firmar sola por la cuenta: la cuenta necesita más de una firma (su peso está por debajo del umbral).",
+      "public_key_given": "Esta es tu clave pública. Pega la clave privada (empieza por 5) o tu contraseña maestra.",
+      "memo_key_only": "La clave de notas no se puede usar para iniciar sesión. Usa tu clave de publicación, tu clave activa o tu contraseña maestra.",
+      "network_message": "Error de red. Comprueba tu conexión e inténtalo de nuevo.",
+      "network_error_this_may": "Error de red. Puede que ya se haya completado; reintentar es seguro y no publicará dos veces."
+    },
+    "purchases": {
+      "deal_best": "¡MEJOR OFERTA!",
+      "deal_popular": "¡POPULAR!",
+      "points_title": "{points} PUNTOS",
+      "the_store_did_not": "La tienda no respondió."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Se requieren correo y nombre de usuario para el consumo de 999accounts",
+      "stuck": "No se pudo completar una compra anterior de este producto. Contacta con support@ecency.com con tu recibo de la tienda, se conserva para ello.",
+      "held": "Esta compra está retenida para revisión. Contacta con support@ecency.com indicando el pedido n.º {order}.",
+      "earlier_purchase": "Una compra anterior de este producto se está completando primero para @{target}.",
+      "earlier_pending": "Un pago anterior de este producto sigue pendiente para @{target}. Se completa cuando la tienda confirme el pago.",
+      "pending": "Tu pago está pendiente. La compra se completa cuando la tienda confirme el pago.",
+      "processing": "Tu compra se está procesando. Se completará en breve."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Transferencias recurrentes",
+      "delegate_hive_power": "Delegar Hive Power",
+      "power_up": "Aumentar poder",
+      "set_withdraw_vesting_route": "Establecer ruta de retiro",
+      "power_down": "Reducir poder",
+      "transfer_to_saving": "Transferir a ahorros",
+      "transfer_from_saving": "Transferir desde ahorros",
+      "cancel_transfer_from_saving": "Cancelar transferencia desde ahorros",
+      "collateralized_convert": "Conversión colateralizada",
+      "witness_vote": "Voto de testigo",
+      "witness_update": "Actualización de testigo",
+      "witness_set_properties": "Establecer propiedades de testigo",
+      "governance_proxy": "Proxy de gobernanza",
+      "claim_account": "Reclamar cuenta",
+      "create_account": "Crear cuenta",
+      "create_account_with_account": "Crear cuenta con créditos de cuenta",
+      "create_limit_order": "Crear orden límite",
+      "cancel_limit_order": "Cancelar orden límite",
+      "redeem_rewards": "Canjear recompensas",
+      "post_or_comment": "Publicación o comentario",
+      "post_or_comment_options": "Opciones de publicación o comentario",
+      "custom_operation": "Operación personalizada",
+      "update_account_active": "Actualizar cuenta (activa)",
+      "update_account_posting": "Actualizar cuenta (publicación)",
+      "change_recovery_account": "Cambiar cuenta de recuperación",
+      "create_proposal": "Crear propuesta",
+      "remove_proposal": "Quitar propuesta",
+      "update_proposal_votes": "Actualizar votos de propuesta",
+      "update_proposal": "Actualizar propuesta"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Este enlace debe firmarlo @{account}. Cambia a esa cuenta y ábrelo de nuevo.",
+      "ecency_can_only_sign": "Ecency solo puede firmar y difundir transacciones procedentes de enlaces.",
+      "requester_page": "la página {host}",
+      "owner_refused": "Las operaciones que requieren la clave de propietario no se pueden firmar desde un enlace.",
+      "busy": "Espera: otra solicitud aún se está procesando.",
+      "not_supported": "Ecency aún no puede firmar esta operación en esta versión."
+    },
+    "chats": {
+      "group_members": "Miembros del grupo",
+      "rename_group": "Renombrar grupo",
+      "failed_to_load_chats": "Error al cargar los chats",
+      "unknown": "Desconocido",
+      "unable_to_mark_channel": "No se pudo marcar el canal como leído",
+      "unable_to_update_favorites": "No se pudieron actualizar los favoritos",
+      "unable_to_update_mute": "No se pudo actualizar el silencio",
+      "group": "Grupo",
+      "unable_to_search": "No se pudo buscar",
+      "unable_to_start_chat": "No se pudo iniciar el chat",
+      "no_internet": "Sin conexión a Internet"
+    },
+    "stake": {
+      "confirm_summary": "Delegar {hp} HP ({vests} VESTS) a @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Ya delegado a @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Solo pública. Ecency nunca guarda la clave de propietario.",
+      "shared_owner": "Esta cuenta usa la misma clave para su rol de propietario y su rol {names}. Quien tenga esa clave controla toda la cuenta. Da al rol {names} una clave propia y guarda la clave de propietario sin conexión.",
+      "copy_warning": "Cualquiera con esta clave privada controla esta parte de tu cuenta. Otras aplicaciones pueden leer el portapapeles; pégala solo donde confíes. Se borra del portapapeles tras 2 minutos."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "El bloqueo por PIN está activado.",
+      "pin_changed": "PIN cambiado.",
+      "pin_lock_is_off": "El bloqueo por PIN está desactivado.",
+      "wiped_notice": "Se eliminaron todas las cuentas, claves y credenciales de este dispositivo.",
+      "we_could_not_bring": "No pudimos traer tus cuentas de la versión anterior de la aplicación. Inicia sesión de nuevo.",
+      "your_pin_lock_could": "No se pudo trasladar tu bloqueo por PIN de la versión anterior. Establece un PIN de nuevo desde el menú de la cuenta para volver a activar el bloqueo de la aplicación.",
+      "biometric_unlock_was_turned": "El desbloqueo biométrico se desactivó porque cambió la biometría de este dispositivo. Desbloquea con tu PIN y vuelve a activarlo desde el menú de la cuenta.",
+      "biometric_unavailable_notice": "No se pudo activar el desbloqueo biométrico: no hay biometría configurada en este dispositivo.",
+      "set_backup": "Establece un PIN como respaldo del desbloqueo biométrico",
+      "biometric_on_notice": "El bloqueo por PIN está activado. Desbloquea con biometría o con tu PIN.",
+      "offer_title": "Desbloquear con biometría",
+      "offer_body": "Abre Ecency con tu cara o huella. También estableciste un PIN, que desbloquea la aplicación cuando la biometría no está disponible.",
+      "offer_use": "Usar biometría",
+      "offer_use_pin": "Usar PIN en su lugar"
+    },
+    "common": {
+      "list_and": "{first} y {second}",
+      "role_owner": "propietario",
+      "role_active": "activa",
+      "role_posting": "publicación",
+      "role_memo": "notas"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Las respuestas de 25 caracteres o menos no ganan puntos (los enlaces no cuentan)",
+      "short_content_hint": "Demasiado corto para ganar puntos (25 caracteres o menos, sin contar enlaces)",
+      "daily_post": "Publicación diaria {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# día de racha} many {# días de racha} other {# días de racha}}",
+      "grant_description": "Concede a la cuenta de Ecency @ecency.app permiso de publicación en tu cuenta, para que puedas publicar sin abrir Keychain cada vez. Concederlo cambia la autoridad de publicación de tu cuenta y requiere tu clave activa."
+    },
+    "wallet_history": {
+      "from_to": "@{from} a @{to}",
+      "from_user_id": "de @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} a @{to}, id: {id}",
+      "from_to_account": "@{from} a {to}",
+      "from_user": "de @{user}",
+      "to_user": "a @{user}",
+      "interest": "Intereses",
+      "proposal_pay": "Pago de propuesta",
+      "categories": "Tipos de actividad",
+      "category_all": "Todo",
+      "category_transfers": "Transferencias",
+      "category_market": "Órdenes de mercado",
+      "category_interest": "Intereses",
+      "category_stake": "Operaciones de estaca",
+      "category_rewards": "Recompensas",
+      "point_type_checkin": "Latidos",
+      "point_type_login": "Inicio de sesión",
+      "point_type_post": "Publicación",
+      "point_type_comment": "Comentario",
+      "point_type_vote": "Voto",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Transferencias enviadas",
+      "point_type_transfer_received": "Transferencias recibidas"
+    },
+    "video_upload": {
+      "continue_upload": "CONTINUAR SUBIDA",
+      "source_gone": "Esta grabación ya no está disponible en el dispositivo. Graba o elige el vídeo de nuevo.",
+      "no_camera": "La cámara no está disponible en este dispositivo."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "La próxima retirada de estaca es en {hours, plural, one {# hora} many {# horas} other {# horas}}",
+      "account_not_found": "Cuenta no encontrada"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Imagen en el portapapeles · Pegar imagen",
+      "no_container": "No se pudo obtener el último contenedor de waves",
+      "please_sign_in_first": "Inicia sesión primero.",
+      "write_something_first": "Escribe algo primero.",
+      "account_changed": "Esta wave se escribió con otra cuenta. Ciérrala y escríbela de nuevo.",
+      "no_upload": "La subida de imágenes aún no está disponible en esta versión. Pega un enlace de imagen en el texto.",
+      "fail": "Error"
+    },
+    "delete_account": {
+      "sign_out_failed": "Tu solicitud se envió, pero falló el cierre de sesión. Cierra sesión desde el menú.",
+      "not_sent": "No se pudo enviar tu solicitud de eliminación. Inténtalo de nuevo."
+    },
+    "chat_sheets": {
+      "group_limit": "Un grupo puede tener hasta {max, plural, one {# persona más} many {# personas más} other {# personas más}}.",
+      "search_people_by_username": "Buscar personas por nombre de usuario",
+      "new_group_title": "Nuevo grupo",
+      "new_group_hint": "Añade de {min} a {max, plural, one {# persona} many {# personas} other {# personas}} para iniciar una conversación de grupo.",
+      "no_results": "No se encontró a nadie en el chat con ese nombre.",
+      "search_failed": "La búsqueda no funcionó. Comprueba tu conexión e inténtalo de nuevo.",
+      "create": "Iniciar grupo",
+      "new_group_failed": "No se pudo iniciar el grupo. Inténtalo de nuevo.",
+      "name_limit": "El nombre de un grupo puede tener hasta {max, plural, one {# carácter} many {# caracteres} other {# caracteres}}.",
+      "rename_title": "Renombrar grupo",
+      "rename_hint": "Ponle al grupo un nombre que todos vean. Déjalo vacío para mostrar los nombres de los miembros.",
+      "placeholder": "Nombre del grupo",
+      "not_owner": "Solo quien inició este grupo puede renombrarlo.",
+      "rename_failed": "No se pudo renombrar el grupo. Inténtalo de nuevo."
+    },
+    "editor_side": {
+      "copy_of": "Copia de {title}",
+      "deletions_failed": "Algo salió mal\n{failed} de {total, plural, one {# eliminación} many {# eliminaciones} other {# eliminaciones}} fallaron",
+      "uploads_failed": "{count, plural, one {# subida falló} many {# subidas fallaron} other {# subidas fallaron}}:\n\n{messages}",
+      "failed_to_delete": "Error al eliminar"
+    },
+    "uploads": {
+      "add_to_gallery": "Añadir a la galería"
+    },
+    "account_notice": {
+      "manage_keys": "Ajustes, Gestionar autoridades",
+      "no_signing_key_title": "Inicia sesión de nuevo como @{account}",
+      "no_signing_key": "Ecency ya no guarda la clave de propietario ni la contraseña maestra en este dispositivo, y @{account} no tiene guardada aquí ninguna clave de publicación o activa. Inicia sesión de nuevo con tu contraseña maestra o con una clave de publicación o activa, o añade una clave en {manageKeys} (Importar privada).",
+      "missing_roles_title": "Algunas claves no se añadieron",
+      "cannot_post": "publicar, votar o comentar",
+      "cannot_transfer": "enviar transferencias o cambiar ajustes de la cuenta",
+      "missing_roles": "Tu contraseña ya no coincide con la clave {missing} de @{account}: se cambió en la cuenta desde que se estableció la contraseña. Guardada en este dispositivo: la clave {kept}. Hasta que añadas la clave {missing} en {manageKeys} (Importar privada), esta aplicación no puede {cannot} con las claves de @{account}.",
+      "shared_owner_title": "Esta clave también controla el rol de propietario",
+      "shared_owner": "@{account} usa la misma clave para su rol de propietario y su rol {names}. Quien tenga esta clave controla toda la cuenta. Ecency la conserva solo como clave {names} y nunca la usa para operaciones de propietario. Da al rol {names} una clave propia y guarda la clave de propietario sin conexión."
+    },
+    "dapp_browser": {
+      "message_from": "Mensaje de {host}",
+      "home_title": "Inicio",
+      "loading_title": "Cargando...",
+      "blank_run": "[{count, plural, one {# carácter en blanco} many {# caracteres en blanco} other {# caracteres en blanco}}]",
+      "too_large": "Esta página pidió firmar una solicitud demasiado grande para mostrarla, así que Ecency la rechazó."
+    },
+    "community_service": {
+      "the_account_changed": "La cuenta cambió."
+    },
+    "profile_edit": {
+      "enter_link": "Introduce el enlace de la imagen",
+      "please_sign_in_first": "Inicia sesión primero.",
+      "account_not_found": "Cuenta no encontrada",
+      "please_enter_an_image": "Introduce un enlace de imagen que empiece por https://"
+    },
+    "background_media": {
+      "post_by": "Publicación de @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Inicia sesión primero."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Ya votaste con el mismo peso.",
+      "insufficient_rc": "Resource Credits insuficientes. Espera o aumenta tu poder.",
+      "missing_authority": "Falta la autoridad de publicación. Comprueba tu método de inicio de sesión.",
+      "comment_too_soon": "Espera antes de volver a publicar.",
+      "paid_out": "Esta publicación ya se pagó.",
+      "too_large": "La transacción es de {size, plural, one {# byte} many {# bytes} other {# bytes}}, por encima del límite de {max} bytes.",
+      "network_error_please_check": "Error de red. Comprueba tu conexión e inténtalo de nuevo.",
+      "unconfirmed_message": "No se pudo confirmar si se completó. Comprueba tu cartera o el historial; vuelve a iniciarlo solo si no aparece.",
+      "undecided_message": "Puede que ya se haya completado. Comprueba tu cartera o el historial antes de volver a intentarlo."
+    },
+    "chat_api": {
+      "request_failed": "Solicitud fallida ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} está escribiendo...",
+      "typing_two": "{first} y {second} están escribiendo...",
+      "typing_three": "{first}, {second} y {third} están escribiendo...",
+      "typing_many": "{first}, {second} y {count, plural, one {# persona más está} many {# personas más están} other {# personas más están}} escribiendo...",
+      "banned": "{reason} Aún puedes leer el chat. Podrás publicar de nuevo {until}.",
+      "joined_when": "se unió {time}",
+      "joined": "se unió",
+      "official_badge": "Oficial",
+      "official_badge_label": "Cuenta oficial de Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Preguntar a Esie"
+    },
+    "chat_service": {
+      "missing_token": "Falta el token de acceso de Hive. Cierra sesión y vuelve a iniciarla.",
+      "dm_error": "El usuario no se ha unido a los chats"
+    },
+    "compose_reply": {
+      "account_changed": "Esta respuesta se escribió con otra cuenta. Ciérrala y escríbela de nuevo.",
+      "write_something_first": "Escribe algo primero.",
+      "please_sign_in_first": "Inicia sesión primero."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Demasiados beneficiarios: {max} como máximo.",
+      "a_beneficiary_s_share": "La parte de un beneficiario debe estar entre 0,01 % y 100 %.",
+      "beneficiaries_add_up_to": "Los beneficiarios suman más del 100 %.",
+      "a_beneficiary_is_listed": "Un beneficiario aparece dos veces.",
+      "you_cannot_be_a": "No puedes ser beneficiario de tu propia publicación.",
+      "a_beneficiary_has_an": "Un beneficiario tiene un nombre de cuenta no válido."
+    },
+    "follows": {
+      "fail": "¡Error!: {message}",
+      "follower_count": "Seguidores ({count})",
+      "following_count": "Siguiendo ({count})"
+    },
+    "link": {
+      "unsupported": "Este enlace aún no es compatible.",
+      "cannot_open": "No se puede abrir el enlace",
+      "unsupported_version": "Este enlace no es compatible con esta versión."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "El navegador Explorar puede acceder a tu cartera de Hive para firmar transacciones. Este enlace procede del contenido de una publicación y Ecency no lo ha verificado. Continúa solo si confías en él:\n\n{url}"
+    },
+    "listen": {
+      "message": "Escuchar requiere {required} puntos y tienes {available}.",
+      "unlock_label": "Desbloquear · {cost} puntos",
+      "preparing_audio": "Preparando audio · {preparingPercent} %",
+      "waiting_in_line_ahead": "En cola, {ahead} por delante…",
+      "next_in_line": "Eres el siguiente…",
+      "preparing_about_minutes": "Preparando audio, unos {minutes} min…",
+      "preparing_audio_2": "Preparando audio…",
+      "spend_confirm": "¿Gastar {cost} puntos para escuchar esta publicación? El audio es tuyo y puedes volver a reproducirlo cuando quieras.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "No se pudo generar el audio, se reembolsaron tus puntos"
+    },
+    "media_pick": {
+      "preparing_video": "Preparando vídeo...",
+      "library_hint": "Elegir de tus fotos",
+      "camera_hint": "Hacer una foto nueva ahora",
+      "files_hint": "Explorar archivos de este dispositivo y de la nube",
+      "paste_hint": "Usar la imagen copiada",
+      "link_hint": "Usar una imagen de la web"
+    },
+    "media_picking": {
+      "image_types_message": "Este tipo de archivo no es compatible. Elige una imagen JPEG, PNG, GIF, WebP o HEIC.",
+      "video_types_message": "Este tipo de archivo no es compatible. Elige un vídeo MP4 o MOV.",
+      "gif_too_large": "Este GIF pesa más de {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Esta operación necesita a la vez una firma activa y una de publicación, que Ecency aún no puede firmar juntas."
+    },
+    "poll": {
+      "fail": "¡Error!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "No se pudo comprobar la autoridad de publicación de tu cuenta. Comprueba tu conexión e inténtalo de nuevo."
+    },
+    "post_lists": {
+      "voters_title": "Info de votantes ({total})",
+      "reblogs_title": "Info de reblogs ({total})",
+      "no_history_found": "¡No se encontró historial!",
+      "no_edit_history_available": "No hay historial de ediciones disponible para este contenido.",
+      "version_label": "Versión {version}"
+    },
+    "stats": {
+      "other_device": "Otro"
+    },
+    "profile": {
+      "account_not_found": "Cuenta no encontrada",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Lleno en {hours, plural, one {# hora} many {# horas} other {# horas}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "No se pudo leer tu perfil actual, inténtalo de nuevo"
+    },
+    "profile_sheet": {
+      "fail": "¡Error! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Cuenta no encontrada"
+    },
+    "push_payload": {
+      "mentioned": "@{source} mencionó a @{target}",
+      "replied": "@{source} respondió a @{target}",
+      "transferred": "@{source} transfirió a @{target}",
+      "delegated": "@{source} delegó a @{target}",
+      "rewards_received": "Recompensas recibidas",
+      "account_updated": "Cuenta actualizada",
+      "account_updated_body": "Los datos de tu cuenta se actualizaron",
+      "followed": "@{source} siguió a @{target}",
+      "unfollowed": "@{source} dejó de seguir a @{target}",
+      "ignored": "@{source} ignoró a @{target}",
+      "blacklisted": "@{source} añadió a @{target} a la lista negra",
+      "posted_in": "@{source} publicó en #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "No se pudo obtener el permiso de cámara",
+      "permission_message": "Concede el permiso de cámara en los ajustes de Ecency.",
+      "permission_allow": "Permitir"
+    },
+    "reply_account": {
+      "switch": "Responder con otra cuenta"
+    },
+    "send_journal": {
+      "your_from_went_through": "Tu {label} desde @{account} se completó.",
+      "not_sent": "Tu {label} desde @{account} no se completó. No se envió nada; puedes volver a iniciarlo.",
+      "checking_whether_your_from": "Comprobando si tu {label} desde @{account} se completó. Revisa tu cartera antes de volver a enviarlo."
+    },
+    "signing": {
+      "hot_page_closed": "Página de HiveSigner cerrada",
+      "wrong_role": "Esta es tu clave {given}; esta operación necesita tu clave {needed}.",
+      "action_id_required": "Esta acción necesita un id de acción para poder reintentarse con seguridad."
+    },
+    "signing_router": {
+      "owner_never": "Las operaciones de propietario nunca se firman en la aplicación."
+    },
+    "spin": {
+      "key_missing": "Falta la clave del juego",
+      "score": "{score, plural, one {# punto} many {# puntos} other {# puntos}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Hoy (UTC), se reinicia en {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Se reinicia a diario a las 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Inicia sesión de nuevo",
+      "message": "El almacenamiento seguro se restableció en este dispositivo. Inicia sesión de nuevo.",
+      "failed": "No se pudieron eliminar las cuentas de este dispositivo. Inténtalo de nuevo."
+    },
+    "store": {
+      "in_app_purchases_are": "Las compras dentro de la aplicación no están disponibles en esta versión."
+    },
+    "wallet_sends": {
+      "journal_full": "Demasiados envíos anteriores aún se están comprobando con la red. Espera a que se confirmen antes de enviar más.",
+      "check_later": "La red no lo confirmó a tiempo. Comprueba tu cartera o el historial antes de volver a enviarlo; la aplicación lo comprobará de nuevo en su próximo inicio."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# sin leer} many {# sin leer} other {# sin leer}}",
+      "locked_text": "Desbloquea Ecency para ver",
+      "signed_out_text": "Inicia sesión en Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "No se pudieron leer las autoridades actuales de tu cuenta. No se cambió nada; inténtalo de nuevo.",
+      "reads_disagree": "Dos lecturas de la autoridad de publicación de tu cuenta no coinciden. No se cambió nada; inténtalo de nuevo."
+    },
+    "vote": {
+      "vote_weight_must_be": "El peso del voto debe estar entre -100 % y 100 %.",
+      "please_sign_in_first": "Inicia sesión primero."
+    },
+    "widget": {
+      "streak_name": "Racha de misiones",
+      "write": "Escribir",
+      "new_wave": "Nueva wave",
+      "notifications_description": "Tus notificaciones sin leer. Oculto mientras el bloqueo por PIN está activado.",
+      "streak_description": "Tu racha de misiones diarias. Oculto mientras el bloqueo por PIN está activado.",
+      "compose_description": "Escribe una publicación o una nueva wave.",
+      "streak_title": "Racha",
+      "daily_quests": "Misiones diarias",
+      "streak_hint": "Abre Ventajas para ver tu racha",
+      "open_perks": "Abrir Ventajas",
+      "open_app": "Abrir Ecency",
+      "unread_caption": "{count, plural, one {sin leer} many {sin leer} other {sin leer}}",
+      "streak_caption": "{count, plural, one {día de racha} many {días de racha} other {días de racha}}"
+    },
+    "system": {
+      "dictation_channel": "Dictado",
+      "listen_channel": "Escuchar",
+      "dictation_channel_description": "Se muestra mientras una grabación de dictado continúa en segundo plano, con una acción Detener.",
+      "dictation_title": "Grabando dictado",
+      "dictation_text": "Ecency está grabando tu dictado. Detener lo deja sin enviar hasta que confirmes en la aplicación.",
+      "listen_channel_description": "Te avisa cuando Escuchar no pudo continuar en segundo plano.",
+      "listen_paused": "Escucha en pausa",
+      "listen_paused_text": "Abre Ecency para seguir escuchando.",
+      "skip_back": "Retroceder 15 segundos",
+      "skip_forward": "Avanzar 15 segundos"
+    },
+    "permission": {
+      "face_id": "Desbloquea Ecency con Face ID en lugar de tu PIN.",
+      "camera": "Escanea códigos QR y haz una foto o graba un vídeo para añadirlo a tu publicación.",
+      "photo_library_add": "Ecency guarda en tu fototeca las imágenes que descargas de las publicaciones.",
+      "photo_library": "Ecency mantiene juntas, en un álbum de Ecency de tu fototeca, las imágenes que descargas de las publicaciones.",
+      "microphone": "Ecency usa tu micrófono para que puedas dictar publicaciones y comentarios (esas grabaciones se envían a Ecency para transcribirse) y para grabar sonido con un vídeo que añadas a una publicación."
+    },
+    "android": {
+      "no_browser": "No hay navegador disponible",
+      "biometric_unlock_title": "Desbloquear Ecency con biometría",
+      "biometric_confirm": "Confirma con tu huella o tu cara",
+      "image_unsupported_address": "Dirección de imagen no compatible",
+      "image_create_failed": "No se pudo crear el archivo",
+      "image_write_failed": "No se pudo escribir el archivo",
+      "image_too_large": "Imagen demasiado grande",
+      "image_download_failed": "Descarga fallida con estado {status}",
+      "billing_disconnected": "Google Play Billing desconectado.",
+      "billing_no_screen": "No hay pantalla donde mostrar la compra.",
+      "billing_error": "Error de Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Has creado {count, plural, one {# publicación} many {# publicación} other {# publicación}} este mes. ¡Sigue así!",
-        "checkin": "Has comprobado {count, plural, one {# día} many {# día} other {# día}} esta semana. ¡Sigue así!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# publicación nueva} many {# publicaciones nuevas} other {# publicaciones nuevas}} en #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# intento(s) fallidos} many {# intento(s) fallidos} other {# intento(s) fallidos}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Racha de {n} días"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Solo se permiten cuentas de más de {days} días",
-        "max_choices": "• Puedes seleccionar hasta {choices} opciones"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} Transferencias restantes",
-        "schedule_summary": "{executions} transferencias, cada {hours} horas"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Demasiado corto para ganar puntos ({n, plural, one {# carácter} many {# caracteres} other {# caracteres}} o menos, sin contar enlaces)"
       },
       "chats": {
-        "people_joined": "{count} personas se unieron"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "en unos {count, plural, one {# minuto} many {# minutos} other {# minutos}}",
+        "ban-remaining-hours": "en unas {count, plural, one {# hora} many {# horas} other {# horas}}",
+        "ban-remaining-days": "en unos {count, plural, one {# día} many {# días} other {# días}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Usa como máximo {n, plural, one {# etiqueta} many {# etiquetas} other {# etiquetas}}",
+          "too_long": "La búsqueda es demasiado larga. Usa como máximo {n, plural, one {# carácter} many {# caracteres} other {# caracteres}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Mínimo {count} caracteres requeridos",
-        "chars_remaining": "{count} caracteres restantes"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Puedes seleccionar hasta {count, plural, one {# imagen} many {# imágenes} other {# imágenes}} a la vez"
+      },
+      "dictation": {
+        "stop_hint": "Detén para transcribir y añadirlo a tu publicación. Hasta {m, plural, one {# minuto} many {# minutos} other {# minutos}}.",
+        "rate": "{n} puntos por {s, plural, one {# segundo} many {# segundos} other {# segundos}}"
       },
       "transfer": {
-        "powering_down_info": "El siguiente apagado es en {days} días, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Entre {min} y {max, plural, one {# carácter} many {# caracteres} other {# caracteres}}"
       }
     }
   }

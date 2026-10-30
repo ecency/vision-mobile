@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro üyesi"
   },
   "perks": {
     "header": "Avantajlar",
@@ -31,42 +31,42 @@
     "promote_desc": "Gönderini daha fazla kişiye ulaştır",
     "account_boost": "Hesap Boost'u",
     "account_boost_desc": "Herhangi bir hesabı boost'la",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC yükle",
+    "rc_topup_desc": "Kaynak Kredilerin azaldığında paylaşmaya devam et",
+    "streak_freeze_owned": "Yedekte: {n}",
+    "streak_freeze_buy": "Seriyi koru ({price} Points)",
+    "streak_freeze_buying": "Korunuyor",
+    "streak_freeze_error": "Seri dondurma satın alınamadı. Lütfen tekrar dene."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Günün gönderisi",
+    "streak": "{n} günlük seri",
+    "keep_streak": "Serini canlı tut"
   },
   "waves": {
     "for_you": "Senin için",
     "following": "Takip edilenler",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Özel akışlar",
+    "custom_feeds_subtitle": "Kaynakları ve etiketleri sabitleyerek akış sekmesi olarak ekle.",
+    "add_tag_placeholder": "Etiket ekle",
+    "sources": "Kaynaklar",
+    "your_feeds": "Akışların",
+    "trending_tags": "Gündemdeki etiketler",
+    "shorts_empty": "Henüz gösterilecek kısa video yok",
+    "mute": "Sesi kapat",
+    "unmute": "Sesi aç"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Başlarken",
+    "subtitle": "Burada yeni misin? Waves kısa gönderilerdir ve katılmanın en kolay yoludur.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Kapat",
+    "item_wave": "İlk Wave’ini paylaş",
+    "item_vote": "Beğendiğin bir Wave’e oy ver",
+    "item_reply": "Birine yanıt ver",
+    "item_checkin": "Serini başlatmak için giriş yap",
+    "all_done_title": "Hepsi tamam 🎉",
+    "all_done_subtitle": "Hazırsın. Waves paylaşmaya devam et!"
   },
   "profile": {
     "havent_commented": "henüz yorum yapmadı",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Yaş  |  Görünürlük  |  Yorumlama",
     "attach_poll": "Anket Ekle"
   },
+  "favorite_tags": {
+    "title": "Etiketler",
+    "hint": "Bu etiketli yeni gönderilerden haberdar olmak için takip et",
+    "following_hint": "Bu etiketli yeni gönderilerden haberdar ediliyorsun",
+    "follow": "Takip et",
+    "following": "Takip ediliyor",
+    "added": "Etiket takip ediliyor",
+    "removed": "Etiket takipten çıkarıldı",
+    "empty_list": "Burada henüz bir şey yok"
+  },
   "favorites": {
     "add": "Favori ekle",
     "add_error": "Favori eklenemedi",
@@ -181,7 +191,33 @@
     "payout": "Ödeme",
     "details": "Detaylar",
     "community": "topluluk",
-    "new_post": "Yeni Gönderi"
+    "new_post": "Yeni Gönderi",
+    "mute_post_title": "Bu gönderiyi sustur",
+    "unmute_post_title": "Bu gönderinin susturmasını kaldır",
+    "mute_post_reason": "Bu gönderi neden susturuluyor?",
+    "unmute_post_reason": "Bu gönderi neden geri yükleniyor?",
+    "manage": "Topluluğu yönet",
+    "manage_members": "Üyeler ve roller",
+    "manage_settings": "Topluluk ayarları",
+    "manage_activities": "Etkinlik günlüğü",
+    "activities": "etkinlik",
+    "no_activities": "Henüz etkinlik yok",
+    "activities_load_failed": "Etkinlik yüklenemedi. Yenilemek için aşağı çek.",
+    "set_role": "Rol belirle",
+    "assign_role": "Rol ata",
+    "assign_role_hint": "Abone olmamış olanlar dahil herhangi bir hesabı ara, sonra bir rol seç.",
+    "username_placeholder": "Kullanıcı adı",
+    "invalid_username": "Sonuçlardan var olan bir hesabı seç",
+    "members": "üye",
+    "no_members": "Üye bulunamadı",
+    "members_incomplete": "Bazı üyeler yüklenemedi. Yenilemek için aşağı çek.",
+    "members_load_failed": "Üyeler yüklenemedi. Yenilemek için aşağı çek.",
+    "role_owner": "Sahip",
+    "role_admin": "Yönetici",
+    "role_mod": "Moderatör",
+    "role_member": "Üye",
+    "role_guest": "Misafir",
+    "role_muted": "Susturuldu"
   },
   "trade": {
     "swap_for": "{fromAmount} miktarı {toAmount} ile takas ediliyor",
@@ -212,7 +248,11 @@
     "cross-post": "Çapraz Paylaş",
     "pin-blog": "Bloga sabitle",
     "copy": "kopyala",
+    "copy-text": "metni kopyala",
+    "open-thread": "konuyu aç",
     "unpin-community": "Topluluktan sabitlemeyi kaldır",
+    "mute-post": "Gönderiyi sustur",
+    "unmute-post": "Gönderinin susturmasını kaldır",
     "mute": "Sessize Al / Engelle",
     "reblog": "Reblog",
     "undo-reblog": "yeniden paylaşımı geri al",
@@ -232,24 +272,24 @@
     "unpin-reply": "Yorum sabitlemesini kaldır"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Bu gönderi şu dilde: {lang}. {target} diline çevrilsin mi?",
+    "translate_to": "{lang} diline çevir",
+    "show_original": "Orijinali göster",
+    "translated_from": "Şu dilden çevrildi: {lang}",
+    "change_language": "Dili değiştir"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Gönderiyi çevir",
+    "source": "Kaynak dil",
+    "target": "Hedef dil",
+    "detected": "Algılanan: {lang}",
+    "translate": "Çevir",
+    "apply": "Uygula",
+    "review_note": "Kendi yazının makine çevirisini gönderinin sonuna ekler. Yayınlamadan önce gözden geçir ve düzenle.",
+    "too_short": "Önce biraz daha yaz. Çeviri için en az birkaç cümle gerekir.",
+    "progress": "{done} / {total} çevriliyor...",
+    "error": "Çeviri başarısız oldu. Lütfen tekrar dene.",
+    "add_title_marker": "Başlığa dil işareti ekle"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Sıcak",
     "popular": "Popüler",
     "new": "Yeni",
-    "friends": "Following",
+    "friends": "Takip edilenler",
     "my_blog": "Blogum"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Burada hiçbir şey yok"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Şablonlar",
+    "untitled": "Adsız şablon",
+    "empty_list": "Burada yeniden kullanmak için editörden bir gönderiyi şablon olarak kaydet.",
+    "delete_confirm": "Bu şablonu silmek istediğinden emin misin?",
+    "applied": "Şablon yeni gönderi olarak uygulandı",
+    "save_as_template": "Şablon olarak kaydet",
+    "name_placeholder": "Şablon adı",
+    "saved": "Şablon kaydedildi"
   },
   "selection_list": {
     "available": "Mevcut {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Tümü",
+      "replies": "Yanıtlar",
+      "mentions": "Anmalar",
+      "rvotes": "Oylar",
+      "follows": "Takipler",
+      "reblogs": "Yeniden paylaşımlar",
+      "transfers": "Transferler",
+      "delegations": "Delegasyonlar",
+      "nfavorites": "Favoriler",
+      "tags": "Etiketler",
+      "nbookmarks": "Yer imleri",
+      "payouts": "Ödemeler",
+      "scheduled_published": "Zamanlanmış gönderiler",
+      "account_updates": "Hesap güncellemeleri",
+      "weekly_earnings": "Haftalık kazançlar"
     },
     "this_week": "Bu Hafta",
     "reblog": "tekrar yayınlandı",
@@ -417,11 +458,15 @@
     "yesterday": "Dün",
     "mention": "bahsedildi",
     "favorites": "yeni gönderi oluşturdu",
+    "tags": "#{tag} etiketinde paylaştı",
+    "tags_bundle": "#{tag} etiketinde {count} yeni gönderi",
+    "tags_title": "Takip ettiğin bir etikette yeni gönderiler",
     "mentions": "Bahsedilmeler",
     "spin": "Daha fazla puan kazanma vakti",
     "last_week": "Geçen Hafta",
     "recent": "Geçen",
     "ignore": "seni engelledi",
+    "blacklist": "seni kara listeye aldı",
     "follow": "seni takip etti",
     "notification": "Bildirimler",
     "this_month": "Bu Ay",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} artık sizin adınıza gönderi paylaşabilir ve oy verebilir. Buna izin vermediyseniz yetkiyi iptal edin.",
     "weekly_earnings": "Bu hafta ${amount} kazandın{breakdown}",
     "payouts": "Ödeme alındı: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "zamanlanmış bir gönderi yayınladı",
+    "scheduled_published_title": "Zamanlanmış gönderi yayınlandı",
+    "scheduled_published_body": "Zamanlanmış gönderin yayında, görmek için dokun"
   },
   "recurrent": {
     "delete_failed": "Tekrarlanan transfer silinemedi, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Son taslağı aç veya Yeni gönderi oluştur",
     "reward_power_up": "%100 Stake Et",
     "open_gallery": "Galeriyi Aç",
+    "open_files": "Dosyalardan seç",
     "clipboard_no_image": "Panoda görsel bulunamadı",
     "clipboard_image_detected": "Panoda görsel var",
     "paste_image": "Görseli yapıştır",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Daha Sonra",
     "settings_title": "Gönderi Seçenekleri",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Hayır"
+    "support_ecency": "Ecency’yi destekle %{percent}",
+    "alert_btn_no": "Hayır",
+    "short_reply_hint": "{n} karakter veya daha kısa yanıtlar Points kazandırmaz (bağlantılar sayılmaz)",
+    "short_content_hint": "Points kazanmak için çok kısa ({n} karakter veya daha az, bağlantılar hariç)"
   },
   "time": {
     "week": "hafta",
@@ -655,7 +703,41 @@
     "select_emoji": "Emoji Seç",
     "more_emojis": "Daha Fazla",
     "search_emojis": "Emoji ara...",
-    "no_emoji_found": "Emoji bulunamadı"
+    "no_emoji_found": "Emoji bulunamadı",
+    "ban-reason-spray": "Aynı mesaj aynı anda birden fazla kanala gönderildiği için paylaşım yapman duraklatıldı.",
+    "ban-reason-mass-dm": "Bir mesaj aynı anda çok sayıda kişiye gönderildiği için paylaşım yapman duraklatıldı.",
+    "ban-reason-generic": "Sohbette paylaşım yapman duraklatıldı.",
+    "ban-can-still-read": "Sohbeti yine de okuyabilirsin.",
+    "ban-unlocks": "Paylaşım {when} açılacak.",
+    "ban-remaining-soon": "bir dakikadan kısa sürede",
+    "ban-remaining-minutes": "yaklaşık {count} dakika sonra",
+    "ban-remaining-hours": "yaklaşık {count} saat sonra",
+    "ban-remaining-days": "yaklaşık {count} gün sonra",
+    "new_group": "Yeni grup",
+    "new_group_hint": "Grup sohbeti başlatmak için {min} ile {max} kişi arasında ekle.",
+    "new_group_search": "Kullanıcı adına göre kişi ara",
+    "new_group_full": "Bir grupta en fazla {max} kişi daha olabilir.",
+    "new_group_no_results": "Bu adla sohbette kimse bulunamadı.",
+    "new_group_search_failed": "Arama çalışmadı. Bağlantını kontrol edip tekrar dene.",
+    "new_group_remove": "@{username} kullanıcısını çıkar",
+    "new_group_create": "Grubu başlat",
+    "new_group_failed": "Grup başlatılamadı. Lütfen tekrar dene.",
+    "rename_group": "Grubu yeniden adlandır",
+    "rename_group_hint": "Gruba, içindeki herkesin göreceği bir ad ver. Boş bırakırsan üyelerin adları gösterilir.",
+    "group_name": "Grup adı",
+    "rename_group_too_long": "Grup adı en fazla {max} karakter olabilir.",
+    "rename_group_not_owner": "Grubu yalnızca başlatan kişi yeniden adlandırabilir.",
+    "rename_group_failed": "Grup yeniden adlandırılamadı. Lütfen tekrar dene.",
+    "group_renamed": "{user} grubun adını \"{name}\" yaptı",
+    "group_name_cleared": "{user} grup adını kaldırdı",
+    "group_members": "Grup üyeleri",
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "reactions_title": "Tepkiler",
+    "reactor_you": "Sen",
+    "reactor_unknown": "Biri",
+    "see_who_reacted": "Kimin tepki verdiğini görmek için basılı tut",
+    "group": "Grup"
   },
   "free_estm": {
     "timer_text": "Sıradaki ücretsiz çeviri",
@@ -684,6 +766,32 @@
     "transaction_fail": "İşlem Başarısız"
   },
   "search_result": {
+    "error": "Arama tamamlanamadı. Lütfen tekrar dene",
+    "filters": {
+      "title": "Filtreler",
+      "open": "Filtreler",
+      "author": "Yazar",
+      "author_placeholder": "kullanıcı adı",
+      "category": "Kategori",
+      "category_placeholder": "topluluk veya kategori",
+      "tags": "Etiketler",
+      "tags_placeholder": "virgülle ayır",
+      "type": "Tür",
+      "type_all": "Tümü",
+      "type_post": "Gönderiler",
+      "type_comment": "Yorumlar",
+      "date": "Tarih",
+      "date_week": "Geçen hafta",
+      "date_month": "Geçen ay",
+      "date_year": "Geçen yıl",
+      "date_all": "Tüm zamanlar",
+      "sort": "Sırala",
+      "apply": "Uygula",
+      "active": "{n} etkin",
+      "too_many_tags": "En fazla {n} etiket kullan",
+      "too_long": "Arama çok uzun. En fazla {n} karakter kullan",
+      "needs_criteria": "Filtrelemek için bir arama terimi veya yazar, kategori ya da etiket gir"
+    },
     "communities_filter": {
       "new": "Yeni",
       "my": "Topluluklarım",
@@ -727,7 +835,7 @@
     "title": "Çapraz Paylaş"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Yazar yapay zeka kullandığını belirtti"
   },
   "ai_assist": {
     "title": "Yapay Zekâ Yazma Asistanı",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Gönderin için ilgili etiketler al",
     "action_generate_title": "Başlık Oluştur",
     "action_generate_title_desc": "Etkileyici başlık seçenekleri oluştur",
-    "action_summarize": "Recap",
+    "action_summarize": "Özet",
     "action_summarize_desc": "Kısa ve öz bir özet oluştur",
     "action_check_grammar": "Dil Bilgisini Denetle",
     "action_check_grammar_desc": "Dil bilgisi ve yazım sorunlarını düzelt",
+    "action_generate_image": "Görsel oluştur",
+    "action_generate_image_desc": "Gönderin için yapay zekâ görseli oluştur",
+    "cost_from": "{cost} {unit} fiyatından başlayan",
     "text_label": "Metnin",
     "text_placeholder": "İçeriğini buraya yapıştır veya yaz...",
     "min_chars": "En az {count} karakter gerekli",
@@ -797,16 +908,26 @@
     "remind_later": "Daha Sonra Hatırlat",
     "success_subscribe": "Abonelik başarılı!",
     "payloadTooLarge": "Dosya boyutu çok büyük, lütfen yeniden boyutlandırın veya daha küçük bir görüntü yükleyin",
+    "too_many_images": "Bir seferde en fazla {count} görsel seçebilirsin",
     "fail_follow": "Takip etme başarısız!",
     "clear_user_alert": "Tüm kullanıcı verilerini silmek istediğinize emin misiniz?",
     "cancel": "Vazgeç",
     "connection_success": "Başarıyla bağlanıldı!",
     "rc_down": "Bu eylemei gerçekleştirmek için yeterli kredi bulunmuyor!\n\nDeneyimin tadını çıkarmaya devam etmek için hesabınızı yükseltin. Şimdi hesabınızı yükseltmek ister misiniz?",
+    "rc_down_title": "Yeterli Kaynak Kredisi yok",
+    "rc_precheck_title": "Bu gönderi yayınlanamayacak kadar büyük olabilir",
+    "rc_precheck_body": "Kaynak Kredilerin bu boyuttaki bir gönderi için düşük görünüyor.",
+    "rc_down_body": "Bu işlem için yeterli Kaynak Kredin yok.\n\nDevam etmek için şimdi Points ile yükle ya da hesabını kalıcı olarak güçlendir.",
+    "rc_down_topup": "RC'yi Points ile yükle",
+    "rc_down_boost": "Hesabı güçlendir",
     "done": "Tamamlandı",
     "something_wrong_alt": "Bu sırada, tarayıcınızda Ecency.com adresini deneyin",
     "same_user": "Bu üye zaten listeye eklenmiş",
     "fail": "Başarısız!",
     "operation_failed_with_reason": "{operation} başarısız oldu: {reason}",
+    "request_timed_out": "Bağlantı çok uzun sürüyor. Ağını kontrol edip tekrar dene.",
+    "load_failed_retry": "Bu yüklenemedi. Lütfen tekrar dene.",
+    "retrying": "Yeniden deneniyor...",
     "wallet_refresh_failed": "Cüzdan yenileme başarısız oldu. Lütfen tekrar deneyin.",
     "wallet_refresh_missing_account": "Cüzdan yenileme başarısız oldu: hesap eksik.",
     "boost_failed": "Boost başarısız oldu.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video eklendi"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Oy ver",
+    "upvoted": "Oy verildi",
+    "downvoted": "Aleyhte oy verildi",
+    "upvote_hint": "Oy seçeneklerini açmak için çift dokun",
+    "payout_details": "Ödeme ayrıntıları",
+    "a11y_votes": "{count, plural, one {# oy} other {# oy}}",
+    "a11y_voters_hint": "Oy verenleri gör",
+    "a11y_reblogs": "{count, plural, one {# yeniden paylaşım} other {# yeniden paylaşım}}",
+    "a11y_reblogs_hint": "Yeniden paylaşımları gör",
+    "a11y_comments": "{count, plural, one {# yorum} other {# yorum}}",
+    "a11y_comments_hint": "Yorumları gör",
+    "a11y_reply_hint": "Yanıtla",
+    "a11y_tip": "Bahşiş gönder",
+    "a11y_tips": "{count, plural, one {# bahşiş} other {# bahşiş}}",
+    "a11y_edit": "Yorumu düzenle",
+    "a11y_delete": "Yorumu sil",
+    "a11y_show_replies": "Yanıtları göster",
+    "a11y_hide_replies": "Yanıtları gizle",
+    "a11y_post_options": "Gönderi seçenekleri",
+    "a11y_views": "{count, plural, one {# görüntülenme} other {# görüntülenme}}",
+    "source_ecency": "Ecency ile yayınlandı",
+    "a11y_stats_hint": "Gönderi istatistiklerini gör",
     "image": "Görsel",
     "reveal_muted": "SUSTURULDU\nİçeriği ortaya çıkarmak için dokunun",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Görseli yüklemek için dokun",
     "in": "içinde",
     "poll": "ANKET",
     "copy_link": "Bağlantıyı kopyala",
@@ -998,13 +1119,14 @@
     "save_to_local": "Cihaza indir",
     "muted": "İçerik ihlal nedeniyle susturuldu",
     "community_muted": "Topluluk kurallarının ihlali nedeniyle içerik susturuldu",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Düşük itibarlı bir hesaptan içerik",
+    "muted_downvoted": "Kullanıcılar tarafından aleyhte oylanan içerik",
+    "muted_low_trust": "Doğrulanmamış dış bağlantı içeren düşük itibarlı hesap",
+    "muted_reveal": "Göstermek için dokun",
     "promoted": "ÖNE ÇIKARILDI",
     "image_saved": "Görsel Fotoğraf Galerisi'ne kaydedildi",
     "words": "Kelime",
     "reading": "Okuma",
-    "listen": "Dinle",
     "min": "dk",
     "summarize_start": "Başla"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Mevcut yayın yok",
     "invalid_link": "URL geçersiz, geçerli bir URL ile tekrar deneyebilir veya web tarayıcısında açmayı deneyebilirsiniz",
-    "no_existing_user": "Kullanici Bulunamadi"
+    "no_existing_user": "Kullanici Bulunamadi",
+    "posting_key_request": "{requester}, @{username} için paylaşım özel anahtarını istiyor.\n\nYalnızca bu isteğe güveniyorsan devam et.",
+    "posting_key_request_unnamed": "Başka bir uygulama @{username} için paylaşım özel anahtarını istiyor.\n\nYalnızca bu isteğe güveniyorsan devam et.",
+    "auth_request_as_user": "{requester} seni @{username} olarak oturum açtırmak istiyor.\n\nYalnızca kullanıcı adın ve bir oturum açma kanıtı paylaşılır. Hiçbir anahtar Ecency'den çıkmaz.",
+    "auth_request_as_current": "{requester} seni Ecency hesabınla oturum açtırmak istiyor.\n\nYalnızca kullanıcı adın ve bir oturum açma kanıtı paylaşılır. Hiçbir anahtar Ecency'den çıkmaz."
   },
   "payout": {
     "breakdown": "Ayrıntılı Hesap",
@@ -1065,7 +1191,7 @@
     "open": "URL'yi Aç",
     "invalid_key_desc": "Bu işlemi gerçekleştirmek için lütfen {key} anahtarı veya ana anahtarla giriş yapın",
     "auth_transfer_confirm": "{username} kullanıcısına transfer onaylansın mı?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Yalnızca bu bağlantının kaynağına güveniyorsan onayla. Onaylamak, aşağıdaki işlemi {authority} anahtarınla hesabından yayınlar."
   },
   "voters_dropdown": {
     "rewards": "ÖDÜLLER",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Yalnızca harf, rakam ve tire içermelidir",
       "username_no_ascii_first_letter_error": "Bir harfle başlamalı",
       "username_contains_double_hyphens": "Çift tire içermemelidir",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Bu kullanıcı adı bir kripto borsası hesabına çok benziyor ve başkalarını yanıltabilir. Lütfen daha özgün bir ad seç.",
+      "username_restricted_prefix": "“uid” ile başlayıp ardından rakam gelen kullanıcı adlarına, başkalarını taklit etmek için sık kullanıldığından izin verilmez. Lütfen farklı bir ad seç.",
       "username_contains_underscore": "Alt çizgi içermemelidir"
     },
     "500_error": "İsteğiniz işlenemedi, kayıt sırası büyük olasılıkla dolu! Birkaç dakika sonra yeniden deneyiniz...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Kullanıcı adı zaten alınmış",
+      "14": "E-posta adresi zaten kayıtlı",
+      "15": "Lütfen geçerli bir e-posta adresi gir",
+      "16": "Lütfen geçerli bir kullanıcı adı gir",
+      "17": "Kullanıcı adı çok uzun, lütfen daha kısa bir ad seç",
+      "19": "Lütfen kalıcı bir e-posta adresi kullan veya bunun yerine Premium hesap al",
+      "21": "Bu referans geçerli değil",
+      "28": "İsteğin işlenemedi: kayıt kuyruğu büyük olasılıkla dolu. Lütfen birkaç dakika sonra tekrar dene.",
+      "107": "VPN bağlantısı algılandı. Lütfen VPN’ini kapatıp tekrar dene veya bunun yerine Premium hesap al.",
+      "110": "Kötüye kullanımı önlemek için kişi/ağ başına hesap sayısını sınırlıyoruz. Lütfen farklı bir ağdan tekrar dene.",
+      "111": "Tor bağlantısı algılandı. Lütfen kayıt olurken Tor’u kapat.",
+      "112": "Bağlantını şu anda doğrulayamadık. Lütfen birkaç dakika sonra tekrar dene."
     },
     "have_account_text": "Zaten bir hesabınız var mı?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Tam donanımlı bir Hive hesabı edinin; bu yöntem, botnet'in kayıt musluğumuzu kötüye kullanmamasını sağlamak için temel kontrollere sahiptir.",
     "btn_register": "Ücretsiz Kayıt Ol",
     "title": "Ücretsiz Hesap"
+  },
+  "dictation": {
+    "title": "Dikte et",
+    "start": "Ses kaydet",
+    "stop": "Durdur",
+    "record_more": "Daha fazla kaydet",
+    "done": "Tamam",
+    "recording": "Kaydediliyor",
+    "stop_hint": "Metne dönüştürüp gönderine eklemek için durdur. En fazla {m} dakika.",
+    "inserted": "Gönderine eklendi. Daha fazla kaydet veya Tamam'a dokun.",
+    "transcribing": "Metne dönüştürülüyor",
+    "rate": "{s} saniye için {n} Points",
+    "cost_running": "Şu ana kadar {n} Points",
+    "cost_running_free": "Şu ana kadar ücretsiz",
+    "free_remaining": "Bugün sonraki {n} x {s} sn ücretsiz",
+    "price_loading": "Fiyat kontrol ediliyor",
+    "price_error": "Metne dönüştürme fiyatı yüklenemedi.",
+    "denied": "Ecency'nin dikte için mikrofon erişimine ihtiyacı var. Ayarlar'dan izin ver ve tekrar dene.",
+    "error_empty": "Bu kayıtta konuşma algılanmadı.",
+    "error_insufficient_points": "Bu kaydı metne dönüştürmek için yeterli Points yok.",
+    "error_rate_limited": "Şimdilik çok fazla kayıt var. Lütfen kısa süre sonra tekrar dene.",
+    "error_too_long": "Bu kayıt metne dönüştürülemeyecek kadar uzun.",
+    "error_failed": "Bu kayıt metne dönüştürülemedi. Lütfen tekrar dene.",
+    "error_recorder": "Kayıt başlatılamadı. Lütfen tekrar dene."
   },
   "wallet": {
     "delegations_out": "Verilen Delegasyonlar",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Düzenli olarak giriş yapmak size 0,25 puan kazandırır.",
     "fill_transfer_from_savings": "Tasarruf Edilen",
     "activities": "Etkinlikler",
+    "no_activities": "Henüz işlem yok",
+    "activities_failed": "İşlemler yüklenemedi. Yeniden denemek için aşağı çek.",
     "tap_update": "Güncellemek için dokunun",
     "mining_lottery": "Çekiliş Kazanıldı",
     "checkin": "Giriş",
     "tokens_transfer": "Token'lar Transfer Edildi",
     "outgoing_transfer_title": "Transfer/Hediye",
+    "burned_title": "Yapay zekâ kullanımı",
+    "burned_description": "Bir yapay zekâ özelliği için harcanan Points",
+    "burn_refund_title": "Yapay zekâ iadesi",
+    "burn_refund_description": "Başarısız bir yapay zekâ isteğinden sonra iade edilen Points",
     "manage_assets": "Varlık Ekle / Kaldır",
     "selected_assets": "Seçili Varlıklar",
     "nft_setPropertyPermissions": "NFT Sembolü için Özellik İzinleri Ayarlandı",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Token Hassasiyet Güncelleme",
     "tokens_transferOwnership": "Token Sahipliği Transfer Edildi",
     "withdraw_vesting": "Stake Çöz",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Çekim hesapları",
     "delegate_engine": "Delege Et",
     "market_close": "Emir Kapatıldı",
     "nftmarket_transferFee": "Alış Emri Ücreti",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "Puan Kazanın",
     "escrow_approve": "Emanet Onayı",
     "expires": "sona eriyor",
+    "transaction_id": "İşlem kimliği",
+    "copy_transaction_id": "İşlem bağlantısını kopyala",
+    "filter_activities": "Etkinlikleri filtrele",
+    "filter_activities_desc": "Bu geçmişin hangi işlemleri isteyeceğini seç",
+    "filter_all": "Tümünü seç",
+    "filter_none": "Tümünü temizle",
+    "filter_apply": "Uygula",
     "author_reward": "Yazar Ödülü",
     "withdraw_hbd": "Tasarruftan Çek",
     "convert_request": "Dönüştürme Talebi",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC yükle",
+    "desc": "Paylaşmaya devam edebilmen için kısa süreli bir RC desteği.",
+    "confirm": "Kaynak Kredilerini yüklemek için Points harcansın mı?",
+    "insufficient": "Yeterli Points’in yok.",
+    "buy_points": "Points satın al"
   },
   "ai_image_generator": {
     "title": "Yapay Zeka Görsel Oluşturucu",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Özel ({hours}sa)",
+    "balance_load_failed": "Bakiyen yüklenemedi. Yeniden denemek için dokun.",
+    "precision_load_failed": "Bu tokenın ayrıntıları yüklenemedi, bu yüzden yalnızca tam tutarlar gönderilebilir. Yeniden denemek için dokun.",
     "close": "Kapat",
     "favorite_username_placeholder": "Kullanıcı adı",
     "invalid_recipient_qr": "Bu QR kodunda bir kullanıcı adı bulunamadı.",
@@ -1527,7 +1692,7 @@
     "powering_down_info": "Bir sonraki çözme {days} gün sonra, {hp} HIVE",
     "convert": "HBD'den HIVE'a dönüştür",
     "auto_vests": "Otomatik Tasarruf",
-    "vests": "Vests",
+    "vests": "VESTS",
     "stop_information": "Durdurmak istediğinize emin misiniz?",
     "amount": "Miktar",
     "memo_desc": "Bu not herkese açık",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Yetkileri Yönet",
     "pincode": "Pinkod",
     "general": "Genel",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecency’yi destekle",
+    "support_beneficiary": "Gönderi ödüllerini Ecency ile paylaş",
+    "support_beneficiary_percent": "Gönderi ödülü payı",
+    "support_curation": "Küratörlük ödüllerinin bir kısmını bırak",
+    "support_curation_percent": "Küratörlük ödülü kesinti oranı",
     "feedback_body": "Mesajınızı buraya yazın!\n\nHive kullanıcı adı: {username}\nUygulama sürümü: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Görselleri Göster",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Yorum",
       "bookmark": "Yer İmleri",
+      "tags": "Etiketler",
       "reblog": "Yeniden yayınla",
       "favorite": "Favoriler",
       "mention": "Bahset",
@@ -1599,10 +1765,10 @@
       "transfers": "Transferler",
       "vote": "Oy",
       "follow": "Takip Et",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Zamanlanmış gönderi yayınlandı",
+      "payouts": "Ödemeler",
+      "account_update": "Hesap güncellemeleri",
+      "weekly_earnings": "Haftalık kazançlar",
       "fcm_unavailable": "Anlık bildirimler bu cihazda desteklenmiyor. Bildirimleri yalnızca uygulama açıkken alacaksınız."
     },
     "keys_warning": "Hassas hesap bilgileri!\nÖzel anahtarları görüntülemeden önce Ecency'nin PIN kodu ile korunması gerekir.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Geri Bildirim Gönder",
     "rate_app": "Ecency'yi puanla",
+    "email_digests": "E-posta özetleri",
     "rate": "Puan ver",
     "dm-privacy-updated": "DM gizlilik ayarları başarıyla güncellendi",
     "dm-privacy-failed": "DM gizlilik ayarları güncellenemedi",
@@ -1685,19 +1852,29 @@
     "request_sent": "Silme talebiniz gönderildi",
     "confirm_delete_body": "Hesabı silmek istediğinizden emin misiniz? Bu, tüm verilerinizi silecektir"
   },
-  "tts": {
-    "settings_title": "Metin Okuma Ayarları",
-    "voice": "Ses",
-    "voice_hint": "Sistem varsayılan sesi kullanılacaktır",
-    "speed": "Hız",
-    "pitch": "Ton",
-    "test_voice": "Sesi Test Et",
-    "settings_info": "Bu ayarlar gönderiler sesli okunurken kullanılacaktır",
+  "listen": {
+    "title": "Bu gönderiyi dinle",
+    "minutes": "~{n} dk",
+    "login": "Giriş yap",
+    "unlock": "Kilidi aç · {n} Points",
+    "confirm": "Bu gönderiyi dinlemek için {n} Points harcansın mı? Ses kaydı istediğin zaman tekrar dinlemen için senin olur.",
+    "not_enough_title": "Yeterli Points yok",
+    "not_enough": "Dinlemek için {required} Points gerekiyor, sende {available} var.",
+    "get_points": "Points al",
+    "unlock_failed": "Sesin kilidi açılamadı, lütfen tekrar dene",
+    "failed_refunded": "Ses oluşturulamadı, Points iade edildi",
+    "preparing": "Ses hazırlanıyor…",
+    "preparing_eta": "Ses hazırlanıyor, yaklaşık {n} dk…",
+    "preparing_progress": "Ses hazırlanıyor · %{n}",
+    "waiting": "Sırada bekleniyor, önünde {n} kişi var…",
+    "next_in_line": "Sıradaki sensin…",
     "play": "Oynat",
     "pause": "Duraklat",
-    "language": "Dil",
-    "language_auto": "Otomatik algıla",
-    "language_hint": "Otomatik algılama, gönderi içeriğine göre dili seçer"
+    "seek": "Ara",
+    "speed": "Oynatma hızı",
+    "language": "Ses dili",
+    "unavailable": "Ses yüklenemedi.",
+    "retry": "Tekrar dene"
   },
   "posting_authority": {
     "title": "Daha Hızlı Gönderimi Etkinleştir",
@@ -1732,7 +1909,7 @@
     "error-auth": "Kimlik doğrulama başarısız oldu. Lütfen tekrar giriş yapın.",
     "error-generic": "Video yükleme başarısız oldu. Lütfen tekrar deneyin.",
     "error-too-long-short": "Kısa videolar 60 saniye veya daha kısa olmalıdır.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Bir gönderide yalnızca bir video olabilir. Başka bir video eklemeden önce mevcut videoyu kaldır.",
     "select_source": "Video Ekle",
     "record": "Video Kaydet",
     "choose_library": "Kütüphaneden Seç"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Hızlı bir güncelleme paylaşın"
   },
+  "newsletter": {
+    "screen_title": "E-posta özetleri",
+    "title": "{list}",
+    "body_own": "Bildirimlerinin haftalık veya aylık e-posta özeti.",
+    "body_creator": "{list} tarafından paylaşılan yeni gönderiler gelen kutunda.",
+    "body_community": "{list} topluluğundaki yeni gönderilerin e-posta ile özeti.",
+    "body_site": "Ecency'nin en iyileri gelen kutunda.",
+    "first_publish_title": "İlk gönderin için tebrikler!",
+    "first_publish_body": "Bildirimlerinin e-posta özetini ister misin? Haftalık veya aylık, Ayarlar'dan istediğin zaman değiştir ya da bırak.",
+    "list_own": "Bildirim özetim",
+    "list_site": "Ecency bülteni",
+    "status_active": "Abonesin.",
+    "status_pending": "E-posta onayı bekleniyor.",
+    "status_short_active": "etkin",
+    "status_short_pending_confirmation": "beklemede",
+    "status_short_suppressed": "durduruldu",
+    "status_short_ended": "sona erdi",
+    "cadence_weekly": "Haftalık",
+    "cadence_monthly": "Aylık",
+    "email_placeholder": "sen@ornek.com",
+    "subscribe": "Abone ol",
+    "update": "Güncelle",
+    "resend": "Onayı yeniden gönder",
+    "leave": "Özetten ayrıl",
+    "cancel": "Vazgeç",
+    "ok": "Tamam",
+    "manage": "Yönet",
+    "check_inbox_title": "Gelen kutunu kontrol et",
+    "check_inbox_body": "{email} adresine bir onay bağlantısı gönderdik. Abonelik, onayladığında başlar.",
+    "subscribed": "E-posta özetine abone olundu",
+    "left": "Özetten ayrıldın",
+    "refused": "Bu adres abone olamaz.",
+    "unavailable": "E-posta özetleri şu anda kullanılamıyor.",
+    "too_many": "Çok fazla deneme yapıldı, lütfen daha sonra tekrar dene.",
+    "fail": "Bir şeyler ters gitti, lütfen tekrar dene.",
+    "empty": "Henüz e-posta özeti yok. Başlamak için aşağıdan abone ol.",
+    "discover": "E-postayla daha fazlasını al",
+    "stop_all": "Tümünü durdur",
+    "stop_all_title": "Tüm e-postalar durdurulsun mu?",
+    "stop_all_body": "{email} adresine bir daha Ecency postası gönderilmeyecek. Diğer adreslerdeki abonelikler kalır.",
+    "stop_all_ok": "Tümünü durdur",
+    "stop_all_done": "Adresin tüm postalardan çıkarıldı",
+    "profile_option": "E-POSTA ÖZETİ",
+    "subscriber_count": "{weekly} haftalık • {monthly} aylık e-posta abonesi",
+    "community_button": "Bülten"
+  },
+  "mod_notes": {
+    "title": "Bir neden ekle",
+    "placeholder": "Neden (diğer moderatörler görebilir)",
+    "confirm": "Onayla",
+    "cancel": "Vazgeç"
+  },
+  "community_settings": {
+    "title_header": "Topluluk ayarları",
+    "title_label": "Başlık",
+    "about": "Hakkında",
+    "lang": "Dil",
+    "description": "Açıklama",
+    "rules": "Kurallar",
+    "nsfw": "İş yerinde uygun değil",
+    "save": "Kaydet",
+    "required": "Zorunlu",
+    "title_length": "{min} ile {max} karakter arasında",
+    "owner_admin_only": "Bu ayarları yalnızca sahip ve yöneticiler değiştirebilir."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Genişletildi",
+        "collapsed": "Daraltıldı"
+      },
+      "a11y_chat": {
+        "quote": "{author} kullanıcısına yanıt: {text}"
+      },
+      "a11y_forms": {
+        "select": "Seç",
+        "deselect": "Seçimi kaldır"
+      },
+      "store": {
+        "billing_unavailable": "Bu cihazda uygulama içi satın alımlara izin verilmiyor.",
+        "verification_failed": "App Store bu satın alımı doğrulayamadı.",
+        "cancelled": "Satın alma iptal edildi",
+        "unknown_result": "Bilinmeyen satın alma sonucu"
+      },
+      "navigation": {
+        "feed_unavailable": "Bu akış henüz kullanılamıyor.",
+        "link_cannot_open": "Bu bağlantı açılamıyor.",
+        "video_cannot_play": "Bu video oynatılamıyor."
+      },
+      "media": {
+        "load_failed": "Bu öğe yüklenemedi. Bağlantını kontrol edip tekrar dene.",
+        "loading": "Medya yükleniyor",
+        "download_failed": "İndirme {status} durumuyla başarısız oldu"
+      },
+      "sign_in": {
+        "required": "Oturum açmak gerekiyor",
+        "to_reply": "Yanıtlamak için oturum aç.",
+        "to_vote": "Oy vermek için oturum aç.",
+        "button": "Oturum aç"
+      },
+      "account": {
+        "logout_user": "@{username} oturumunu kapat"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# oy} other {# oy}}  •  {replies, plural, one {# yanıt} other {# yanıt}}",
+        "voting_power": "Oy gücü {percent}",
+        "remove_favourite": "Favorilerden kaldır",
+        "add_favourite": "Favorilere ekle"
+      },
+      "waves": {
+        "clear_tag_filter": "{tag} etiket filtresini temizle",
+        "new_wave": "Yeni wave",
+        "replies_open_thread": "{count, plural, one {# yanıt, konuyu aç} other {# yanıt, konuyu aç}}",
+        "characters": "{count} / {max} karakter",
+        "retry": "{message}\nTekrar dene",
+        "playing": "{permlink} oynatılıyor",
+        "video_attached_remove": "Video eklendi, kaldır",
+        "image_attached_remove": "Görsel eklendi, kaldır",
+        "take_photo": "Fotoğraf çek",
+        "edit_poll": "Anketi düzenle",
+        "add_poll": "Anket ekle",
+        "add_video": "Video ekle"
+      },
+      "reading": {
+        "reply_to": "{username} kullanıcısına yanıt ver",
+        "opens_post": "Gönderiyi açar",
+        "sort_comments": "Yorumları sırala",
+        "sort_comments_value": "Yorumları sırala, {sort}",
+        "no_comments": "Henüz yorum yok.",
+        "loading_post": "Gönderi yükleniyor",
+        "show_version": "Sürümü göster",
+        "show_changes": "Değişiklikleri göster",
+        "replying_to": "@{username} kullanıcısına yanıt veriliyor",
+        "reply_text": "Yanıt metni",
+        "translate_from": "Kaynak dil",
+        "translate_to": "Hedef dil"
+      },
+      "feed": {
+        "tab_pinned": "{label}, sabitlenmiş",
+        "tab_add": "{label}, ekle",
+        "customise": "Özelleştir"
+      },
+      "card": {
+        "in_category": "{category} içinde",
+        "pinned": "Sabitlenmiş",
+        "by_author": "{username} tarafından",
+        "payout": "ödül {payout}",
+        "payout_declined": "ödül {payout}, reddedildi",
+        "reblogged_by": "{username} yeniden yayınladı"
+      },
+      "shell": {
+        "close_menu": "Menüyü kapat"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Küçük resim, başka bir görsel seç",
+        "words": "{count, plural, one {# kelime} other {# kelime}}",
+        "poll_min_age": "Min. hesap yaşı (gün): {days}",
+        "poll_max_options": "Maks. seçenek: {count}",
+        "thumbnail_selected": "Seçilen küçük resim",
+        "thumbnail": "Küçük resim",
+        "uploaded_image": "Yüklenen görsel",
+        "community_search": "ara"
+      },
+      "vote": {
+        "not_voted": "Oy verilmedi",
+        "voting": "Oy veriliyor",
+        "failed_with": "Oy verilemedi: {message}",
+        "failed": "Oy verilemedi",
+        "payout": "Ödül {payout}",
+        "payout_declined": "Ödül {payout}, reddedildi",
+        "percent": "yüzde {percent}",
+        "upvote_percent": "%{percent} yukarı oy"
+      },
+      "settings": {
+        "on": "Açık",
+        "off": "Kapalı"
+      },
+      "lock": {
+        "biometric_reason": "Ecency için biyometrik kilit açmayı etkinleştir",
+        "offer_title": "{method} ile kilidi aç",
+        "offer_use": "{method} kullan"
+      },
+      "keys": {
+        "hidden_while_captured": "Ekran kaydedilirken veya yansıtılırken anahtarlar gizlenir.",
+        "screenshot_notice": "Ekran görüntüsü alındı. Özel anahtarlar yeniden gizlendi; ekran görüntüsünde bir anahtar görünüyorsa sil.",
+        "hold_hint": "Bir anahtarı göstermek için basılı tut.",
+        "hold_to_show": "Göstermek için basılı tut"
+      },
+      "wallet": {
+        "cancel_order": "Bu emir iptal edilsin mi?",
+        "days": "{count, plural, one {# gün} other {# gün}}"
+      },
+      "chat": {
+        "reactors_hint": "Kimin tepki verdiğini görmek için basılı tut",
+        "see_reactors": "Kimin tepki verdiğini gör"
+      },
+      "esie": {
+        "still": "{mood}, hareketsiz"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} profili",
+      "preview": "Önizleme ({index}/{count})",
+      "balance": "Bakiye: {amount}",
+      "expires_in": "Süre dolmasına: {time}",
+      "expired": "Süresi doldu. Kapat ve tekrar dene.",
+      "user_has_no_posts": "@{username} henüz bir şey paylaşmadı",
+      "attach_image": "Görsel ekle",
+      "auto": "Otomatik",
+      "back": "Geri",
+      "hot": "SICAK",
+      "image_of": "Görsel {index} / {count}",
+      "new": "YENİ",
+      "nsfw_tap_to_reveal": "NSFW Göstermek için dokun",
+      "new_reply": "Yeni yanıt",
+      "remove": "Kaldır",
+      "unlock_ecency": "Ecency kilidini aç",
+      "update_it": "Güncelle",
+      "update_it_or_post_this_as": "Güncellensin mi, yoksa yeni yanıt olarak mı paylaşılsın?",
+      "use_pin": "PIN kullan",
+      "your_reply_was_already_posted": "Yanıtın zaten paylaşıldı",
+      "error_try_again": "{message} Tekrar denensin mi?",
+      "auth": {
+        "account_label": "Hesap: @{username}",
+        "approve_the_request_in_your_wallet": "İsteği cüzdan uygulamanda onayla.",
+        "copy_key": "{title} kopyala",
+        "current_account": "Geçerli hesap",
+        "qr_code": "QR kod",
+        "requested_by": "İsteyen: {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# hane} other {# hane}}",
+        "private_key_shown": "{title}, özel anahtar gösteriliyor",
+        "open_wallet_app": "Cüzdan uygulamasını aç",
+        "hiveauth_scan": "Hive Keychain'de veya başka bir HiveAuth cüzdanında onayla: bu cihazda aç ya da bu kodu onunla tara.",
+        "switching": "Geçiş yapılıyor...",
+        "logout_all": "Tüm hesaplardan çıkış yap",
+        "logout_all_title": "Bu cihazdaki tüm hesaplardan çıkış yapılsın mı?",
+        "stored_key": "@{username} bu cihazda zaten oturum açmış. Kayıtlı anahtarları kalır; yalnızca oturumu yenilenir.",
+        "stored_hivesigner": "@{username} bu cihazda HiveSigner ile zaten oturum açmış. Oturumu değiştirilir.",
+        "stored_hiveauth": "@{username} bu cihazda HiveAuth ile oturum açmış. Bunun yerine HiveSigner ile imzalayacak.",
+        "method_key": "Anahtar",
+        "logout_failed": "Çıkış yapılamadı"
+      },
+      "browser": {
+        "account": "Hesap",
+        "authority": "Yetki",
+        "phishing": "Uyarı: Bu alan adı bilinen bir kimlik avı sitesi olarak işaretlendi. Son derece dikkatli ilerle."
+      },
+      "chat": {
+        "cancel_edit": "Düzenlemeyi iptal et",
+        "cancel_reply": "Yanıtı iptal et",
+        "copied_to_clipboard": "Panoya kopyalandı",
+        "edited_at": "Düzenlendi {time}",
+        "group_options": "Grup seçenekleri",
+        "pinned_messages": "Sabitlenmiş mesajlar",
+        "remove_user": "@{username} kullanıcısını çıkar",
+        "sort_by_name": "Ada göre sırala",
+        "more": "Daha fazla",
+        "reaction_label": "{emoji} {count}. Kimin tepki verdiğini görmek için basılı tut",
+        "members": "Üyeler"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Bu bağlantıda zaten bir gönderi var ve gönderdiğinden farklı. Güncellensin mi, yoksa yeni olarak mı yayınlansın?",
+        "a_scheduled_post_is_published_by": "Zamanlanmış bir gönderi, seçilen saatte Ecency tarafından yayınlanır. Bunun için hesabında ecency.app için paylaşım yetkisi gerekir. Anahtarların ve diğer yetkilerin olduğu gibi kalır. Bu yetkiyi vermek için aktif anahtarın gerekir.",
+        "ai_assist": "Yapay zekâ yardımcısı",
+        "ai_tools": "Yapay zekâ araçları",
+        "allow_ecency_to_publish_for_you": "Ecency'nin senin adına yayınlamasına izin verilsin mi?",
+        "bold": "Kalın",
+        "clone": "Çoğalt",
+        "cost": "Maliyet: {cost}",
+        "could_not_store_the_draft_on": "Taslak bu cihaza kaydedilemedi. Uygulamayı açık tut ve taslağı kaydet.",
+        "draft": "TASLAK",
+        "delete_count": "Sil ({count})",
+        "dictate_desc": "Konuş, metin gönderine eklensin",
+        "discard": "Vazgeç",
+        "discard_changes": "Değişikliklerden vazgeçilsin mi?",
+        "grant": "Ver",
+        "italic": "İtalik",
+        "keep_editing": "Düzenlemeye devam et",
+        "my_blog": "BLOGUM",
+        "my_communities": "TOPLULUKLARIM",
+        "new_post": "Yeni gönderi",
+        "notice": "Bildirim",
+        "restore": "Geri yükle",
+        "restore_unsaved_changes": "Kaydedilmemiş değişiklikler geri yüklensin mi?",
+        "saved": "Kaydedildi",
+        "top_communities": "EN İYİ TOPLULUKLAR",
+        "table": "Tablo",
+        "text_format": "Metin biçimi",
+        "this_link_is_already_in_use": "Bu bağlantı zaten kullanımda",
+        "untitled": "Başlıksız",
+        "update_it_or_publish_this_as": "Güncellensin mi, yoksa yeni gönderi olarak mı yayınlansın?",
+        "you_have_unsaved_changes_from_an": "Daha önceki bir düzenlemeden kaydedilmemiş değişiklikler var. Gönderi o zamandan beri değişti; geri yüklersen aşağıdaki metin değiştirilir.",
+        "your_edits_were_not_published": "Düzenlemelerin yayınlanmadı.",
+        "your_post_was_already_published": "Gönderin zaten yayınlandı",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Küçük resim, başka bir görsel seçmek için dokun",
+        "thumbnail_number": "Küçük resim {number}",
+        "recording_busy": "Zaten devam eden bir kayıt var. Önce kamerada bitir.",
+        "photo_lost": "Kamera açıkken fotoğraf kayboldu. Lütfen tekrar çek.",
+        "add_snippet_button": "+ Parça",
+        "words_count": "{count, plural, one {# kelime} other {# kelime}}",
+        "community_search": "ara"
+      },
+      "profile": {
+        "open_wallet": "Cüzdanı aç",
+        "your_wallet_is_on_the_wallet": "Cüzdanın Cüzdan sekmesinde.",
+        "user_has_no_comments": "@{username} henüz yorum yapmadı",
+        "votes_count": "{count, plural, one {# oy} other {# oy}}",
+        "replies_count": "{count, plural, one {# yanıt} other {# yanıt}}",
+        "menu": "Daha fazla",
+        "users": "Kullanıcılar"
+      },
+      "reading": {
+        "apply": "UYGULA",
+        "add_tag": "Etiket ekle",
+        "age": "Yaş",
+        "audio_language": "Ses dili",
+        "available_filters": "Kullanılabilir filtreler",
+        "could_not_unlock_the_audio_please": "Sesin kilidi açılamadı, lütfen tekrar dene",
+        "downvote": "Aşağı oy",
+        "downvote_percent": "%{percent} aşağı oy",
+        "listen_to_this_post": "Bu gönderiyi dinle",
+        "log_in": "Giriş yap",
+        "mark_all_as_read": "Tümünü okundu işaretle",
+        "mark_as_read": "Okundu işaretle",
+        "more_replies": "Daha fazla yanıt",
+        "not_enough_points": "Yeterli Points yok",
+        "nothing_here_yet": "Henüz bir şey yok.",
+        "open_editor": "Düzenleyiciyi aç",
+        "pause_voice": "Sesi duraklat",
+        "play_voice": "Sesi oynat",
+        "playback_speed": "Oynatma hızı",
+        "publishing_in_waves": "Waves'te yayınlanıyor",
+        "quests_done": "Görevler tamamlandı",
+        "read": "Oku",
+        "remove_vote": "Oyu kaldır",
+        "seek": "Ara",
+        "select_community": "Topluluk seç",
+        "selected_filters": "Seçilen filtreler",
+        "the_audio_could_not_be_loaded": "Ses yüklenemedi.",
+        "this_post_does_not_exist_or": "Bu gönderi mevcut değil veya silinmiş.",
+        "unread": "Okunmamış",
+        "voice_position": "Ses konumu",
+        "vote_weight": "Oy ağırlığı",
+        "reblogged_by": "{username} yeniden yayınladı",
+        "no_more_posts": "Başka gönderi yok.",
+        "favourite": "Favori",
+        "no_votes_yet": "Henüz oy yok",
+        "no_comments_yet": "Henüz yorum yok. İlk yorumu sen yap!",
+        "comments_count": "Yorumlar ({count})",
+        "sending_to_chain": "zincire gönderiliyor",
+        "compare": "Karşılaştır",
+        "your_vote": "Senin oyun",
+        "reply_to": "@{username} kullanıcısına yanıt ver",
+        "what_do_you_think": "Ne düşünüyorsun?",
+        "clear_tag_filter": "Etiket filtresini temizle",
+        "tab_selected": "{title}, seçili",
+        "add_tag_feed": "Etiket akışı ekle",
+        "feed_pinned": "{label}, sabitlenmiş",
+        "attached_image_remove": "Eklenen görsel, kaldırmak için dokun",
+        "camera": "Kamera",
+        "files": "Dosyalar",
+        "paused": "Duraklatıldı",
+        "in_topic": "{topic} içinde",
+        "poll_vote": "Oy ver",
+        "reply": "Yanıtla",
+        "mute_sound": "Sesi kapat",
+        "unmute_sound": "Sesi aç",
+        "leaderboard_activities": "Etkinlikler",
+        "leaderboard_reward": "Ödül",
+        "sort_votes": "Oylar"
+      },
+      "shell": {
+        "account_of": "@{username} hesabı",
+        "account_signed_out": "Hesap, oturum kapalı",
+        "close_tab": "Sekmeyi kapat",
+        "coming_soon_to_the_native_app": "Yerel uygulamaya yakında geliyor.",
+        "create": "Oluştur",
+        "expand": "Genişlet",
+        "forward": "İleri",
+        "loading": "Yükleniyor",
+        "new_tab": "Yeni sekme",
+        "reload": "Yeniden yükle",
+        "sent": "Gönderildi",
+        "tab_unread": "{title}, {count} okunmamış",
+        "no_app_for_link": "Bu bağlantıyı açabilecek uygulama yok."
+      },
+      "wallet": {
+        "product_not_available": "Ürün kullanılamıyor.",
+        "repeat": "Tekrarla"
+      },
+      "copied": "Kopyalandı",
+      "trending_caps": "TREND",
+      "move_up": "Yukarı taşı",
+      "move_down": "Aşağı taşı",
+      "scroll_to_top": "En üste kaydır",
+      "load_more": "Daha fazla"
+    },
+    "wallet": {
+      "checking": "Ağ ile kontrol ediliyor",
+      "leave_title": "Hâlâ gönderiliyor",
+      "leave_message": "Bu işlem hâlâ gönderiliyor veya ağ ile kontrol ediliyor. Bu ekrandan ayrılabilirsin: bittiğinde uygulama sana haber verir.",
+      "stay": "Kal",
+      "collateralized_convert_request": "Teminatlı dönüştürme isteği",
+      "op_transfer": "transfer",
+      "op_power_up": "stake etme",
+      "op_power_down_change": "stake çözme değişikliği",
+      "op_delegation": "delegasyon",
+      "op_savings_deposit": "tasarruf yatırımı",
+      "op_savings_withdrawal": "tasarruf çekimi",
+      "op_conversion": "dönüştürme",
+      "op_swap": "takas",
+      "op_order_cancel": "emir iptali",
+      "op_reward_claim": "ödül talebi",
+      "op_withdraw_route_change": "çekim rotası değişikliği",
+      "op_token_operation": "token işlemi"
+    },
+    "notification": {
+      "amount_unknown": "Tutar kullanılamıyor",
+      "weekly_earnings_breakdown": "Bu hafta ${amount} kazandın: ${authorUsd} gönderilerden, ${curationUsd} küratörlükten.",
+      "weekly_earnings_total": "Bu hafta gönderilerinden ve küratörlükten ${amount} kazandın."
+    },
+    "settings": {
+      "open": "Aç",
+      "feedback_subject": "Geri bildirim/Hata raporu",
+      "unknown_user": "Bilinmeyen kullanıcı"
+    },
+    "navigation": {
+      "editor": "Düzenleyici",
+      "followers": "Takipçiler",
+      "spin_game": "Çarkıfelek oyunu",
+      "edit_profile": "Profili düzenle",
+      "redeem_points": "Points kullan",
+      "community": "Topluluk",
+      "community_members": "Topluluk üyeleri",
+      "community_activities": "Topluluk etkinlikleri",
+      "browser": "Tarayıcı",
+      "asset_details": "Varlık ayrıntıları",
+      "edit_history": "Düzenleme geçmişi",
+      "welcome": "Hoş geldin",
+      "chat": "Sohbet",
+      "backup_keys": "Anahtarları yedekle",
+      "trade": "Ticaret",
+      "ai_image_generator": "Yapay zekâ görsel oluşturucu",
+      "select_assets": "Varlıkları seç",
+      "poll": "Anket",
+      "bot_comments": "Bot yorumları"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Sahip anahtarı gerektiren işlemler Ecency'de imzalanamaz.",
+      "post": "Gönderi/Yorum",
+      "custom": "Özel JSON",
+      "sign_buffer": "Mesajı imzala",
+      "send_token": "Token gönder",
+      "witness_vote": "Witness oyu",
+      "proxy": "Proxy belirle",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Yayınla",
+      "sign_tx": "İşlemi imzala",
+      "encode": "Mesajı kodla",
+      "decode": "Anahtarı doğrula",
+      "add_account_authority": "Hesap yetkisi ekle",
+      "remove_account_authority": "Hesap yetkisini kaldır",
+      "add_key_authority": "Anahtar yetkisi ekle",
+      "remove_key_authority": "Anahtar yetkisini kaldır",
+      "create_claimed_account": "Hesap oluştur",
+      "create_proposal": "Öneri oluştur",
+      "remove_proposal": "Öneriyi kaldır",
+      "update_proposal_vote": "Öneri oyu",
+      "signed_call": "İmzalı çağrı"
+    },
+    "translate_language": {
+      "ar": "Arapça",
+      "az": "Azerbaycanca",
+      "bg": "Bulgarca",
+      "bn": "Bengalce",
+      "ca": "Katalanca",
+      "cs": "Çekçe",
+      "da": "Danca",
+      "de": "Almanca",
+      "el": "Yunanca",
+      "en": "İngilizce",
+      "eo": "Esperanto",
+      "es": "İspanyolca",
+      "et": "Estonca",
+      "fa": "Farsça",
+      "fi": "Fince",
+      "fr": "Fransızca",
+      "ga": "İrlandaca",
+      "he": "İbranice",
+      "hi": "Hintçe",
+      "hu": "Macarca",
+      "id": "Endonezce",
+      "it": "İtalyanca",
+      "ja": "Japonca",
+      "ko": "Korece",
+      "lt": "Litvanca",
+      "lv": "Letonca",
+      "ms": "Malayca",
+      "nb": "Norveççe",
+      "nl": "Felemenkçe",
+      "pl": "Lehçe",
+      "pt": "Portekizce",
+      "ro": "Romence",
+      "ru": "Rusça",
+      "sk": "Slovakça",
+      "sl": "Slovence",
+      "sq": "Arnavutça",
+      "sv": "İsveççe",
+      "th": "Tayca",
+      "tl": "Tagalogca",
+      "tr": "Türkçe",
+      "uk": "Ukraynaca",
+      "zh": "Çince",
+      "zt": "Çince (Geleneksel)"
+    },
+    "reading": {
+      "banner_text": "Bu gönderi {source} dilinde. {target} diline çevrilsin mi?",
+      "translated_from_text": "{source} dilinden çevrildi"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# üye} other {# üye}} • {authors, plural, one {# yazar} other {# yazar}} • {posts, plural, one {# gönderi} other {# gönderi}}",
+      "community_title": "{title} topluluğu",
+      "members_title": "{title} üyeleri",
+      "activities_title": "{title} etkinliği",
+      "cannot_start_with_or": "@ veya # ile başlayamaz",
+      "use_a_two_letter": "İki harfli bir dil kodu kullan, örneğin en",
+      "at_most_characters": "En fazla {max, plural, one {# karakter} other {# karakter}}",
+      "council": "Konsey",
+      "journal": "Günlük",
+      "topic": "Konu",
+      "community_not_found": "Topluluk bulunamadı."
+    },
+    "transfer": {
+      "one_recipient": "Bu transfer için yalnızca bir alıcı kullanılabilir.",
+      "is_an_exchange_and": "{exchange} bir borsadır ve düzenli transferleri desteklemeyebilir: zamanlanmış gönderilen fonlar kaybolabilir. Bunun yerine tek seferlik transfer kullan."
+    },
+    "dapps": {
+      "signing_info": "Ecency, Hive imza uzantın olarak çalışır. Bir dApp senden Keychain, Keeper veya Peak Vault gibi bir tarayıcı uzantısıyla giriş yapmanı istediğinde bu seçeneği seç. İmzalamayı Ecency güvenli şekilde halleder.",
+      "category_social": "Sosyal",
+      "category_gaming": "Oyun",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grup",
+      "unable_to_load_messages": "Mesajlar yüklenemiyor.",
+      "someone": "Biri",
+      "renamed_the_group_to": "{actor} grubun adını \"{name}\" yaptı",
+      "removed_the_group_name": "{actor} grup adını kaldırdı",
+      "unable_to_send_your": "Mesajın gönderilemiyor.",
+      "unable_to_remove_message": "Mesaj kaldırılamıyor.",
+      "unknown": "Bilinmiyor",
+      "members_online": "{members, plural, one {# üye} other {# üye}} • {online} çevrimiçi",
+      "failed_to_load_pinned": "Sabitlenmiş mesajlar yüklenemedi",
+      "you": "Sen",
+      "title": "Tepkiler"
+    },
+    "tip": {
+      "login_required": "Bahşiş göndermek için lütfen giriş yap",
+      "max_decimals": "En fazla {n, plural, one {# ondalık basamak} other {# ondalık basamak}}"
+    },
+    "paid": {
+      "check_again": "Tekrar kontrol et",
+      "give_up": "Vazgeç",
+      "unknown": "Henüz yanıt yok. İstek hâlâ çalışıyor olabilir. Sonucu almak için tekrar kontrol et: ikinci kez ücretlendirilmez.",
+      "pending": "İsteğin hâlâ işleniyor. Birazdan tekrar kontrol et: ikinci kez ücretlendirilmez.",
+      "restored": "Daha önceki bir isteğin henüz yanıtı yok. Sonucunu almak için tekrar kontrol et: ikinci kez ücretlendirilmez.",
+      "give_up_confirm": "İstek gerçekleştiyse puanlar harcandı ve sonuç kaybolacak.",
+      "not_stored": "Bu istek cihazda saklanamadı. Bitene kadar bu ekranı açık tut.",
+      "sign_in_again": "Oturumun sona erdi. Tekrar oturum aç, sonra tekrar kontrol et.",
+      "other_account": "Bu @{owner} hesabına ait. Devam etmek için o hesaba geri dön."
+    },
+    "ai": {
+      "run_ai_assist": "Yapay zekâ yardımcısını çalıştır ({costText})",
+      "no_longer_free_cost": "Bu çalıştırma bugün artık ücretsiz değil. Maliyeti {cost} {unit}.",
+      "no_longer_free": "Bu çalıştırma bugün artık ücretsiz değil.",
+      "content_violates_our_content": "İçerik, içerik politikamızı ihlal ediyor. Lütfen metnini değiştir. Points iade edilmedi.",
+      "generate_image": "Görsel oluştur ({costLabel})",
+      "use_prompt": "Kullan: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Lütfen bekle, başka bir işlem sürüyor",
+      "not_a_community_post": "Bir topluluk gönderisi değil.",
+      "parent_post_not_found": "Üst gönderi bulunamadı",
+      "the_account_changed": "Hesap değişti."
+    },
+    "dictation": {
+      "balance": "Bakiye: {balance} {unit}",
+      "stop_points": "Durdur ({cost} Points)",
+      "stop_free": "Durdur (Ücretsiz)",
+      "transcribe_points": "Metne dönüştür ({cost} Points)",
+      "transcribe": "Metne dönüştür",
+      "no_longer_free_cost": "Bu kayıt bugün artık ücretsiz değil. Maliyeti {cost} Points.",
+      "no_longer_free": "Bu kayıt bugün artık ücretsiz değil.",
+      "held_locked": "Ecency kilitlendiğinde kayıt durdu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
+      "held_no_background": "Ecency ekrandan ayrıldığında kayıt durdu (kayıt bildirimini gösteremedi). Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
+      "held_stopped": "Kayıt bildirimden durduruldu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
+      "held_focus_lost": "Kayıt bir arama veya başka bir uygulamanın sesi nedeniyle durdu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
+      "held_interrupted": "Başka bir uygulama mikrofonu aldığı için kayıt durdu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
+      "unavailable": "Bu cihazda kayıt kullanılamıyor.",
+      "not_read": "Bu kayıt okunamadı veya çok büyük. Hiçbir şey gönderilmedi ve ücret alınmadı.",
+      "give_up_not_sent": "Bu kayıt gönderilmedi, bu yüzden ücret alınmadı. Silinecek.",
+      "give_up_not_charged": "Bu kayıt için ücret alınmadı. Silinecek.",
+      "clip_lost": "Daha önceki bir isteğin kaydı artık bu cihazda yok. İstek gerçekleştiyse puanların harcandı ve metni alınamaz."
+    },
+    "register": {
+      "error_code_28": "İsteğin işlenemedi. Kayıt kuyruğu büyük olasılıkla dolu. Lütfen birkaç dakika sonra tekrar dene."
+    },
+    "perks": {
+      "quests_empty": "Burada henüz görev yok, yakında tekrar bak.",
+      "freeze_confirm_title": "Serini koru",
+      "spend_points_on_a": "Seri dondurma için {price} Points harcansın mı? Kaçırdığın bir günde serini korumak için kullanılır."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ecency'yi destekle, ücretsiz bir blog edin ve doğrulanmış Pro rozetiyle öne çık.",
+      "card_description": "Yıllık {price} karşılığında Pro ol. Doğrulanmış rozet, ücretsiz blog ve Ecency'ye destek.",
+      "card_description_plain": "Bir yıllığına Pro ol. Doğrulanmış rozet, ücretsiz blog ve Ecency'ye destek.",
+      "member": "Pro üyesisin.",
+      "benefit_badge": "Adının yanında doğrulanmış Pro rozeti.",
+      "benefit_blog": "yourname.blogs.ecency.com adresinde ücretsiz blog.",
+      "benefit_support": "Ecency geliştirmesine doğrudan destek.",
+      "benefit_early": "Yeni özelliklere erken erişim.",
+      "buy": "Yıllık {price} karşılığında Pro ol",
+      "extend": "{price} karşılığında 12 ay uzat",
+      "extend_note": "Tekrar satın almak üyeliğine 12 ay ekler.",
+      "unavailable": "Ecency Pro şu anda mağazadan edinilemiyor.",
+      "activating": "Ödeme alındı. Üyeliğin etkinleştiriliyor.",
+      "success_title": "Ecency Pro'ya hoş geldin",
+      "success_body": "Pro üyeliğin etkin. Rozetin kısa süre içinde profilinde görünecek.",
+      "extending": "Ödeme alındı. Pro üyeliğin 12 ay uzatılıyor.",
+      "open_a11y": "Ecency Pro'yu aç"
+    },
+    "editor": {
+      "saving_draft": "Taslak kaydediliyor...",
+      "please_sign_in_first": "Lütfen önce oturum aç.",
+      "fetch_failed": "Getirme başarısız.",
+      "you_can_only_edit": "Yalnızca kendi içeriğini düzenleyebilirsin.",
+      "invalid_percent": "Geçersiz yüzde",
+      "beneficiary_exists_already": "Yararlanıcı zaten var",
+      "this_draft_belongs_to": "Bu taslak @{owner} hesabına ait. Yayınlamak için o hesaba geri dön.",
+      "could_not_make_a": "Bu gönderi için yeni bir bağlantı oluşturulamadı. Başlığı biraz değiştirip tekrar dene.",
+      "an_earlier_attempt_was": "Daha önceki bir deneme bundan sonra yayınlandı. Hangi sürümü tutmak istediğini kontrol et.",
+      "could_not_check_your": "Hesabının paylaşım yetkisi kontrol edilemedi. Bağlantını kontrol edip tekrar dene.",
+      "this_post_was_changed": "Bu gönderi sen açtıktan sonra başka bir yerde değiştirildi. Metnini kopyala, geri dön ve en son sürümü düzenlemek için tekrar aç.",
+      "link_text_placeholder": "Metin buraya"
+    },
+    "app_error": {
+      "this_reply_is_too": "Bu yanıt çok uzun.",
+      "the_network_refused_this": "Ağ bu işlemi reddetti.",
+      "invalid_input": "Geçersiz giriş.",
+      "secure_storage_is_unavailable": "Güvenli depolama kullanılamıyor. Lütfen tekrar oturum aç.",
+      "please_sign_in_first": "Lütfen önce oturum aç.",
+      "these_credentials_belong_to": "Bu kimlik bilgileri @{expected} hesabına değil, @{actual} hesabına ait.",
+      "is_not_signed_in": "@{username} bu cihazda oturum açmamış.",
+      "key_required": "Bu işlemi gerçekleştirmek için {role} anahtarı gerekli. {hint}",
+      "cancelled": "İptal edildi.",
+      "the_request_was_rejected": "İstek cüzdan uygulamasında reddedildi.",
+      "the_request_expired_before": "İstek, cüzdan uygulaması yanıtlamadan önce zaman aşımına uğradı. Lütfen tekrar dene.",
+      "could_not_reach_the": "HiveAuth sunucusuna ulaşılamadı. Lütfen tekrar dene.",
+      "unexpected_redirect": "Sunucu beklenmedik bir yönlendirme gönderdi. Hiçbir şey değişmedi. Lütfen daha sonra tekrar dene.",
+      "missing_key_hint": "Ayarlar, Yetkileri Yönet (Özel Anahtar İçe Aktar) bölümünden ekle veya onunla tekrar oturum aç.",
+      "this_key_is_also": "Bu anahtar aynı zamanda bu hesabın sahip anahtarı. Ecency sahip rolünü denetleyen bir anahtarı saklamaz: aktif ve paylaşım rollerine kendi anahtarlarını ver, sonra bunlarla oturum aç.",
+      "this_is_the_owner": "Bu sahip anahtarı. Ecency sahip anahtarını asla saklamaz veya kullanmaz: ana parolanla ya da paylaşım veya aktif anahtarınla oturum aç.",
+      "this_password_only_matches": "Bu parola yalnızca hesabın sahip anahtarıyla eşleşiyor. Ecency sahip anahtarını asla saklamaz veya kullanmaz: paylaşım veya aktif anahtarınla oturum aç.",
+      "this_key_cannot_sign": "Bu anahtar hesap için tek başına imzalayamaz: hesabın birden fazla imzaya ihtiyacı var (ağırlığı eşiğin altında).",
+      "public_key_given": "Bu senin genel anahtarın. Özel anahtarı (5 ile başlar) veya ana parolanı yapıştır.",
+      "memo_key_only": "Not anahtarıyla oturum açılamaz. Paylaşım anahtarını, aktif anahtarını veya ana parolanı kullan.",
+      "network_message": "Ağ hatası. Lütfen bağlantını kontrol edip tekrar dene.",
+      "network_error_this_may": "Ağ hatası. Bu zaten gerçekleşmiş olabilir; tekrar denemek güvenlidir ve iki kez paylaşılmaz."
+    },
+    "purchases": {
+      "deal_best": "EN İYİ FIRSAT!",
+      "deal_popular": "POPÜLER!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Mağaza yanıt vermedi."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts tüketimi için e-posta ve kullanıcı adı gerekli",
+      "stuck": "Bu ürünün daha önceki bir satın alımı tamamlanamadı. Lütfen mağaza makbuzunla support@ecency.com adresine ulaş, makbuz bunun için saklanıyor.",
+      "held": "Bu satın alma inceleme için bekletiliyor. #{order} sipariş numarasıyla support@ecency.com adresine ulaş.",
+      "earlier_purchase": "Bu ürünün daha önceki bir satın alımı önce @{target} için tamamlanıyor.",
+      "earlier_pending": "Bu ürün için daha önceki bir ödeme @{target} için hâlâ beklemede. Mağaza ödemeyi onaylayınca tamamlanır.",
+      "pending": "Ödemen beklemede. Mağaza ödemeyi onaylayınca satın alma tamamlanır.",
+      "processing": "Satın alımın işleniyor. Kısa süre içinde tamamlanacak."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Yinelenen transferler",
+      "delegate_hive_power": "Hive Power devret",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "Çekim rotası belirle",
+      "power_down": "Power Down",
+      "transfer_to_saving": "Tasarrufa transfer",
+      "transfer_from_saving": "Tasarruftan transfer",
+      "cancel_transfer_from_saving": "Tasarruftan transferi iptal et",
+      "collateralized_convert": "Teminatlı dönüştürme",
+      "witness_vote": "Witness oyu",
+      "witness_update": "Witness güncelleme",
+      "witness_set_properties": "Witness özelliklerini belirleme",
+      "governance_proxy": "Yönetişim proxy'si",
+      "claim_account": "Hesap talep et",
+      "create_account": "Hesap oluştur",
+      "create_account_with_account": "Hesap kredisiyle hesap oluştur",
+      "create_limit_order": "Limit emri oluştur",
+      "cancel_limit_order": "Limit emrini iptal et",
+      "redeem_rewards": "Ödülleri al",
+      "post_or_comment": "Gönderi veya yorum",
+      "post_or_comment_options": "Gönderi veya yorum seçenekleri",
+      "custom_operation": "Özel işlem",
+      "update_account_active": "Hesabı güncelle (aktif)",
+      "update_account_posting": "Hesabı güncelle (paylaşım)",
+      "change_recovery_account": "Kurtarma hesabını değiştir",
+      "create_proposal": "Öneri oluştur",
+      "remove_proposal": "Öneriyi kaldır",
+      "update_proposal_votes": "Öneri oylarını güncelle",
+      "update_proposal": "Öneriyi güncelle"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Bu bağlantı @{account} tarafından imzalanmalı. O hesaba geç ve tekrar aç.",
+      "ecency_can_only_sign": "Ecency yalnızca bağlantılardan gelen işlemleri imzalayıp yayınlayabilir.",
+      "requester_page": "{host} sayfası",
+      "owner_refused": "Sahip anahtarı gerektiren işlemler bağlantıdan imzalanamaz.",
+      "busy": "Lütfen bekle: başka bir istek hâlâ işleniyor.",
+      "not_supported": "Ecency bu işlemi bu sürümde henüz imzalayamıyor."
+    },
+    "chats": {
+      "group_members": "Grup üyeleri",
+      "rename_group": "Grubu yeniden adlandır",
+      "failed_to_load_chats": "Sohbetler yüklenemedi",
+      "unknown": "Bilinmiyor",
+      "unable_to_mark_channel": "Kanal okundu olarak işaretlenemiyor",
+      "unable_to_update_favorites": "Favoriler güncellenemiyor",
+      "unable_to_update_mute": "Sessize alma güncellenemiyor",
+      "group": "Grup",
+      "unable_to_search": "Arama yapılamıyor",
+      "unable_to_start_chat": "Sohbet başlatılamıyor",
+      "no_internet": "İnternet bağlantısı yok"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) @{to} kullanıcısına delege edilsin",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "@{recipient} kullanıcısına zaten delege edilmiş"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Yalnızca genel. Ecency sahip anahtarını asla saklamaz.",
+      "shared_owner": "Bu hesap sahip rolü ile {names} rolü için aynı anahtarı kullanıyor. O anahtara sahip olan hesabın tamamını denetler. {names} rolüne kendi anahtarını ver ve sahip anahtarını çevrimdışı tut.",
+      "copy_warning": "Bu özel anahtara sahip olan, hesabının bu bölümünü denetler. Diğer uygulamalar panoyu okuyabilir; yalnızca güvendiğin yere yapıştır. 2 dakika sonra panodan temizlenir."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN kilidi açık.",
+      "pin_changed": "PIN değiştirildi.",
+      "pin_lock_is_off": "PIN kilidi kapalı.",
+      "wiped_notice": "Tüm hesaplar, anahtarlar ve kimlik bilgileri bu cihazdan kaldırıldı.",
+      "we_could_not_bring": "Hesapların uygulamanın önceki sürümünden aktarılamadı. Lütfen tekrar giriş yap.",
+      "your_pin_lock_could": "PIN kilidin önceki sürümden aktarılamadı. Uygulama kilidini tekrar açmak için hesap menüsünden yeniden PIN belirle.",
+      "biometric_unlock_was_turned": "Bu cihazdaki biyometrik veriler değiştiği için biyometrik kilit kapatıldı. PIN ile kilidi aç, sonra hesap menüsünden tekrar etkinleştir.",
+      "biometric_unavailable_notice": "Biyometrik kilit açılamadı: bu cihazda biyometrik veri tanımlı değil.",
+      "set_backup": "Biyometrik kilide yedek olarak PIN belirle",
+      "biometric_on_notice": "PIN kilidi açık. Biyometrik verinle veya PIN'inle kilidi aç.",
+      "offer_title": "Biyometrik veriyle kilidi aç",
+      "offer_body": "Ecency'yi yüzünle veya parmak izinle aç. Biyometrik veri kullanılamadığında uygulamanın kilidini açan bir PIN de belirledin.",
+      "offer_use": "Biyometrik kullan",
+      "offer_use_pin": "Bunun yerine PIN kullan"
+    },
+    "common": {
+      "list_and": "{first} ve {second}",
+      "role_owner": "sahip",
+      "role_active": "aktif",
+      "role_posting": "paylaşım",
+      "role_memo": "not"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 karakter veya daha kısa yanıtlar Points kazandırmaz (bağlantılar sayılmaz)",
+      "short_content_hint": "Points kazanmak için çok kısa (25 karakter veya daha az, bağlantılar hariç)",
+      "daily_post": "Günlük gönderi {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# günlük seri} other {# günlük seri}}",
+      "grant_description": "Ecency hesabı @ecency.app'e hesabında paylaşım izni ver; böylece her seferinde Keychain'i açmadan paylaşım yapabilirsin. Bu izin hesabının paylaşım yetkisini değiştirir ve aktif anahtarını gerektirir."
+    },
+    "wallet_history": {
+      "from_to": "@{from} - @{to}",
+      "from_user_id": "@{from} kullanıcısından, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} - @{to}, id: {id}",
+      "from_to_account": "@{from} - {to}",
+      "from_user": "@{user} kullanıcısından",
+      "to_user": "@{user} kullanıcısına",
+      "interest": "Faiz",
+      "proposal_pay": "Öneri ödemesi",
+      "categories": "Etkinlik türleri",
+      "category_all": "Tümü",
+      "category_transfers": "Transferler",
+      "category_market": "Piyasa emirleri",
+      "category_interest": "Faizler",
+      "category_stake": "Stake işlemleri",
+      "category_rewards": "Ödüller",
+      "point_type_checkin": "Kalp atışları",
+      "point_type_login": "Giriş",
+      "point_type_post": "Gönderi",
+      "point_type_comment": "Yorum",
+      "point_type_vote": "Oy",
+      "point_type_reblog": "Yeniden yayın",
+      "point_type_transfer_sent": "Gönderilen transferler",
+      "point_type_transfer_received": "Alınan transferler"
+    },
+    "video_upload": {
+      "continue_upload": "YÜKLEMEYE DEVAM ET",
+      "source_gone": "Bu kayıt artık cihazda yok. Videoyu tekrar kaydet veya seç.",
+      "no_camera": "Bu cihazda kamera kullanılamıyor."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Sonraki stake çözme {hours, plural, one {# saat} other {# saat}} sonra",
+      "account_not_found": "Hesap bulunamadı"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Panoda görsel var · Görseli yapıştır",
+      "no_container": "En son waves kapsayıcısı getirilemedi",
+      "please_sign_in_first": "Lütfen önce oturum aç.",
+      "write_something_first": "Önce bir şeyler yaz.",
+      "account_changed": "Bu wave başka bir hesap olarak yazılmış. Kapat ve tekrar yaz.",
+      "no_upload": "Görsel yükleme bu sürümde henüz kullanılamıyor. Bunun yerine metne bir görsel bağlantısı yapıştır.",
+      "fail": "Başarısız"
+    },
+    "delete_account": {
+      "sign_out_failed": "İsteğin gönderildi ama oturum kapatılamadı. Lütfen menüden çıkış yap.",
+      "not_sent": "Silme isteğin gönderilemedi. Lütfen tekrar dene."
+    },
+    "chat_sheets": {
+      "group_limit": "Bir grupta en fazla {max, plural, one {# kişi daha} other {# kişi daha}} olabilir.",
+      "search_people_by_username": "Kullanıcı adına göre kişi ara",
+      "new_group_title": "Yeni grup",
+      "new_group_hint": "Grup sohbeti başlatmak için {min} ile {max, plural, one {# kişi} other {# kişi}} arasında ekle.",
+      "no_results": "Bu adla sohbette kimse bulunamadı.",
+      "search_failed": "Arama çalışmadı. Bağlantını kontrol edip tekrar dene.",
+      "create": "Grubu başlat",
+      "new_group_failed": "Grup başlatılamadı. Lütfen tekrar dene.",
+      "name_limit": "Grup adı en fazla {max, plural, one {# karakter} other {# karakter}} olabilir.",
+      "rename_title": "Grubu yeniden adlandır",
+      "rename_hint": "Gruba, içindeki herkesin göreceği bir ad ver. Boş bırakırsan üyelerin adları gösterilir.",
+      "placeholder": "Grup adı",
+      "not_owner": "Grubu yalnızca başlatan kişi yeniden adlandırabilir.",
+      "rename_failed": "Grup yeniden adlandırılamadı. Lütfen tekrar dene."
+    },
+    "editor_side": {
+      "copy_of": "{title} kopyası",
+      "deletions_failed": "Bir şeyler ters gitti\n{failed} / {total, plural, one {# silme} other {# silme}} başarısız",
+      "uploads_failed": "{count, plural, one {# yükleme başarısız} other {# yükleme başarısız}}:\n\n{messages}",
+      "failed_to_delete": "Silinemedi"
+    },
+    "uploads": {
+      "add_to_gallery": "Galeriye ekle"
+    },
+    "account_notice": {
+      "manage_keys": "Ayarlar, Yetkileri Yönet",
+      "no_signing_key_title": "@{account} olarak tekrar oturum aç",
+      "no_signing_key": "Ecency artık sahip anahtarını veya ana parolayı bu cihazda tutmuyor ve @{account} için burada kayıtlı paylaşım veya aktif anahtar yok. Ana parolanla ya da bir paylaşım veya aktif anahtarla tekrar oturum aç ya da {manageKeys} bölümünden (Özel Anahtar İçe Aktar) bir anahtar ekle.",
+      "missing_roles_title": "Bazı anahtarlar eklenmedi",
+      "cannot_post": "gönderi paylaşmak, oy vermek veya yorum yapmak",
+      "cannot_transfer": "transfer göndermek veya hesap ayarlarını değiştirmek",
+      "missing_roles": "Parolan artık @{account} hesabının {missing} anahtarıyla eşleşmiyor: parola belirlendiğinden beri hesapta değiştirilmiş. Bu cihazda saklanan: {kept} anahtarı. {manageKeys} bölümünden (Özel Anahtar İçe Aktar) {missing} anahtarını ekleyene kadar bu uygulama @{account} için anahtarlarla {cannot} işlemini yapamaz.",
+      "shared_owner_title": "Bu anahtar sahip rolünü de denetliyor",
+      "shared_owner": "@{account}, sahip rolü ve {names} rolü için aynı anahtarı kullanıyor. Bu anahtara sahip olan hesabın tamamını denetler. Ecency onu yalnızca {names} anahtarı olarak saklar ve sahip işlemleri için asla kullanmaz. {names} rolüne kendi anahtarını ver ve sahip anahtarını çevrimdışı tut."
+    },
+    "dapp_browser": {
+      "message_from": "{host} sitesinden mesaj",
+      "home_title": "Ana sayfa",
+      "loading_title": "Yükleniyor...",
+      "blank_run": "[{count, plural, one {# boş karakter} other {# boş karakter}}]",
+      "too_large": "Bu sayfa, gösterilemeyecek kadar büyük bir imza isteği gönderdi, bu yüzden Ecency reddetti."
+    },
+    "community_service": {
+      "the_account_changed": "Hesap değişti."
+    },
+    "profile_edit": {
+      "enter_link": "Görsel bağlantısını gir",
+      "please_sign_in_first": "Lütfen önce oturum aç.",
+      "account_not_found": "Hesap bulunamadı",
+      "please_enter_an_image": "Lütfen https:// ile başlayan bir görsel bağlantısı gir"
+    },
+    "background_media": {
+      "post_by": "@{author} tarafından gönderi"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Lütfen önce oturum aç."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Aynı ağırlıkla zaten oy verdin.",
+      "insufficient_rc": "Kaynak Kredisi yetersiz. Lütfen bekle veya Power Up yap.",
+      "missing_authority": "Paylaşım yetkisi eksik. Lütfen giriş yöntemini kontrol et.",
+      "comment_too_soon": "Lütfen tekrar paylaşım yapmadan önce bekle.",
+      "paid_out": "Bu gönderinin ödülü zaten ödendi.",
+      "too_large": "İşlem {size, plural, one {# bayt} other {# bayt}}, {max} bayt sınırını aşıyor.",
+      "network_error_please_check": "Ağ hatası. Lütfen bağlantını kontrol edip tekrar dene.",
+      "unconfirmed_message": "Bunun gerçekleşip gerçekleşmediği doğrulanamadı. Lütfen cüzdanını veya geçmişi kontrol et; yalnızca orada yoksa yeniden başlat.",
+      "undecided_message": "Bu zaten gerçekleşmiş olabilir. Tekrar denemeden önce lütfen cüzdanını veya geçmişi kontrol et."
+    },
+    "chat_api": {
+      "request_failed": "İstek başarısız ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} yazıyor...",
+      "typing_two": "{first} ve {second} yazıyor...",
+      "typing_three": "{first}, {second} ve {third} yazıyor...",
+      "typing_many": "{first}, {second} ve {count, plural, one {# kişi daha} other {# kişi daha}} yazıyor...",
+      "banned": "{reason} Sohbeti yine de okuyabilirsin. Paylaşım {until} açılacak.",
+      "joined_when": "katıldı {time}",
+      "joined": "katıldı",
+      "official_badge": "Resmî",
+      "official_badge_label": "Resmî Ecency hesabı"
+    },
+    "side_menu": {
+      "ask_esie": "Esie'ye sor"
+    },
+    "chat_service": {
+      "missing_token": "Hive erişim tokenı eksik. Lütfen çıkış yapıp tekrar giriş yap.",
+      "dm_error": "Kullanıcı sohbetlere katılmamış"
+    },
+    "compose_reply": {
+      "account_changed": "Bu yanıt başka bir hesap olarak yazılmış. Kapat ve tekrar yaz.",
+      "write_something_first": "Önce bir şeyler yaz.",
+      "please_sign_in_first": "Lütfen önce oturum aç."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Çok fazla yararlanıcı: en fazla {max}.",
+      "a_beneficiary_s_share": "Yararlanıcı payı %0,01 ile %100 arasında olmalı.",
+      "beneficiaries_add_up_to": "Yararlanıcı payları toplamı %100'ü aşıyor.",
+      "a_beneficiary_is_listed": "Bir yararlanıcı iki kez listelenmiş.",
+      "you_cannot_be_a": "Kendi gönderinin yararlanıcısı olamazsın.",
+      "a_beneficiary_has_an": "Bir yararlanıcının hesap adı geçersiz."
+    },
+    "follows": {
+      "fail": "Başarısız!: {message}",
+      "follower_count": "Takipçi ({count})",
+      "following_count": "Takip edilen ({count})"
+    },
+    "link": {
+      "unsupported": "Bu bağlantı henüz desteklenmiyor.",
+      "cannot_open": "Bağlantı açılamıyor",
+      "unsupported_version": "Bu bağlantı bu sürümde desteklenmiyor."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Keşfet tarayıcısı, işlemleri imzalamak için Hive cüzdanına erişebilir. Bu bağlantı gönderi içeriğinden geliyor ve Ecency tarafından doğrulanmadı. Yalnızca güveniyorsan devam et:\n\n{url}"
+    },
+    "listen": {
+      "message": "Dinlemek için {required} Points gerekiyor, sende {available} var.",
+      "unlock_label": "Kilidi aç · {cost} Points",
+      "preparing_audio": "Ses hazırlanıyor · %{preparingPercent}",
+      "waiting_in_line_ahead": "Sırada bekleniyor, önünde {ahead} kişi var…",
+      "next_in_line": "Sıradaki sensin…",
+      "preparing_about_minutes": "Ses hazırlanıyor, yaklaşık {minutes} dk…",
+      "preparing_audio_2": "Ses hazırlanıyor…",
+      "spend_confirm": "Bu gönderiyi dinlemek için {cost} Points harcansın mı? Ses kaydı istediğin zaman tekrar dinlemen için senin olur.",
+      "about_minutes": "~{minutes} dk",
+      "failed_refunded": "Ses oluşturulamadı, Points iade edildi"
+    },
+    "media_pick": {
+      "preparing_video": "Video hazırlanıyor...",
+      "library_hint": "Fotoğraflarından seç",
+      "camera_hint": "Şimdi yeni fotoğraf çek",
+      "files_hint": "Bu cihazdaki ve buluttaki dosyalara göz at",
+      "paste_hint": "Kopyaladığın görseli kullan",
+      "link_hint": "Web'den bir görsel kullan"
+    },
+    "media_picking": {
+      "image_types_message": "Bu dosya türü desteklenmiyor. JPEG, PNG, GIF, WebP veya HEIC görsel seç.",
+      "video_types_message": "Bu dosya türü desteklenmiyor. MP4 veya MOV video seç.",
+      "gif_too_large": "Bu GIF, {mb} MB sınırından büyük."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Bu işlem hem aktif hem de paylaşım imzası gerektiriyor; Ecency bunları henüz birlikte imzalayamıyor."
+    },
+    "poll": {
+      "fail": "Başarısız!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Hesabının paylaşım yetkisi kontrol edilemedi. Bağlantını kontrol edip tekrar dene."
+    },
+    "post_lists": {
+      "voters_title": "Oy verenler ({total})",
+      "reblogs_title": "Yeniden yayın bilgisi ({total})",
+      "no_history_found": "Geçmiş bulunamadı!",
+      "no_edit_history_available": "Bu içerik için düzenleme geçmişi yok.",
+      "version_label": "Sürüm {version}"
+    },
+    "stats": {
+      "other_device": "Diğer"
+    },
+    "profile": {
+      "account_not_found": "Hesap bulunamadı",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • {hours, plural, one {# saat} other {# saat}} içinde dolacak"
+    },
+    "profile_metadata_guard": {
+      "refused": "Mevcut profilin okunamadı, tekrar dene"
+    },
+    "profile_sheet": {
+      "fail": "Başarısız! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Hesap bulunamadı"
+    },
+    "push_payload": {
+      "mentioned": "@{source}, @{target} kullanıcısından bahsetti",
+      "replied": "@{source}, @{target} kullanıcısına yanıt verdi",
+      "transferred": "@{source}, @{target} kullanıcısına transfer yaptı",
+      "delegated": "@{source}, @{target} kullanıcısına delege etti",
+      "rewards_received": "Ödüller alındı",
+      "account_updated": "Hesap güncellendi",
+      "account_updated_body": "Hesap bilgilerin güncellendi",
+      "followed": "@{source}, @{target} kullanıcısını takip etti",
+      "unfollowed": "@{source}, @{target} kullanıcısını takipten çıktı",
+      "ignored": "@{source}, @{target} kullanıcısını yok saydı",
+      "blacklisted": "@{source}, @{target} kullanıcısını kara listeye aldı",
+      "posted_in": "@{source}, #{firstTag} etiketinde paylaştı"
+    },
+    "qr_scan": {
+      "permission_title": "Kamera izni alınamadı",
+      "permission_message": "Lütfen ecency ayarlarından kamera izni ver.",
+      "permission_allow": "İzin ver"
+    },
+    "reply_account": {
+      "switch": "Başka bir hesap olarak yanıtla"
+    },
+    "send_journal": {
+      "your_from_went_through": "@{account} hesabından {label} işlemin gerçekleşti.",
+      "not_sent": "@{account} hesabından {label} işlemin gerçekleşmedi. Hiçbir şey gönderilmedi; yeniden başlatabilirsin.",
+      "checking_whether_your_from": "@{account} hesabından {label} işleminin gerçekleşip gerçekleşmediği kontrol ediliyor. Tekrar göndermeden önce lütfen cüzdanını kontrol et."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner sayfası kapandı",
+      "wrong_role": "Bu senin {given} anahtarın; bu işlem {needed} anahtarını gerektiriyor.",
+      "action_id_required": "Bu işlemin güvenle yeniden denenebilmesi için bir işlem kimliği gerekir."
+    },
+    "signing_router": {
+      "owner_never": "Sahip işlemleri uygulamada asla imzalanmaz."
+    },
+    "spin": {
+      "key_missing": "Oyun anahtarı eksik",
+      "score": "{score, plural, one {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Bugün (UTC), {time} sonra sıfırlanır",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Her gün 00:00 UTC'de sıfırlanır"
+    },
+    "storage_reset": {
+      "title": "Tekrar oturum aç",
+      "message": "Güvenli depolama bu cihazda sıfırlandı. Tekrar oturum aç.",
+      "failed": "Bu cihazdaki hesaplar kaldırılamadı. Lütfen tekrar dene."
+    },
+    "store": {
+      "in_app_purchases_are": "Uygulama içi satın alımlar bu sürümde kullanılamıyor."
+    },
+    "wallet_sends": {
+      "journal_full": "Önceki çok sayıda gönderim hâlâ ağ ile kontrol ediliyor. Daha fazla göndermeden önce lütfen onaylanmalarını bekle.",
+      "check_later": "Ağ bunu zamanında onaylamadı. Tekrar göndermeden önce lütfen cüzdanını veya geçmişi kontrol et; uygulama bir sonraki açılışında yeniden kontrol eder."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# okunmamış} other {# okunmamış}}",
+      "locked_text": "Görmek için Ecency kilidini aç",
+      "signed_out_text": "Ecency'ye giriş yap"
+    },
+    "posting_grant": {
+      "unreadable": "Hesabının mevcut yetkileri okunamadı. Hiçbir şey değişmedi; lütfen tekrar dene.",
+      "reads_disagree": "Hesabının paylaşım yetkisinin iki okuması uyuşmuyor. Hiçbir şey değişmedi; lütfen tekrar dene."
+    },
+    "vote": {
+      "vote_weight_must_be": "Oy ağırlığı -%100 ile %100 arasında olmalı.",
+      "please_sign_in_first": "Lütfen önce oturum aç."
+    },
+    "widget": {
+      "streak_name": "Görev serisi",
+      "write": "Yaz",
+      "new_wave": "Yeni wave",
+      "notifications_description": "Okunmamış bildirimlerin. PIN kilidi açıkken gizlenir.",
+      "streak_description": "Günlük görev serin. PIN kilidi açıkken gizlenir.",
+      "compose_description": "Bir gönderi veya yeni wave yaz.",
+      "streak_title": "Seri",
+      "daily_quests": "Günlük görevler",
+      "streak_hint": "Serini görmek için Avantajlar'ı aç",
+      "open_perks": "Avantajları aç",
+      "open_app": "Ecency'yi aç",
+      "unread_caption": "{count, plural, one {okunmamış} other {okunmamış}}",
+      "streak_caption": "{count, plural, one {günlük seri} other {günlük seri}}"
+    },
+    "system": {
+      "dictation_channel": "Dikte",
+      "listen_channel": "Dinle",
+      "dictation_channel_description": "Dikte kaydı arka planda sürerken Durdur eylemiyle birlikte gösterilir.",
+      "dictation_title": "Dikte için kayıt yapılıyor",
+      "dictation_text": "Ecency dikteni kaydediyor. Durdur, uygulamada onaylayana kadar göndermez.",
+      "listen_channel_description": "Dinleme arka planda devam edemediğinde sana haber verir.",
+      "listen_paused": "Dinleme duraklatıldı",
+      "listen_paused_text": "Dinlemeye devam etmek için Ecency'yi aç.",
+      "skip_back": "15 saniye geri",
+      "skip_forward": "15 saniye ileri"
+    },
+    "permission": {
+      "face_id": "PIN yerine Face ID ile Ecency kilidini aç.",
+      "camera": "QR kodları tara, fotoğraf çek veya video kaydedip gönderine ekle.",
+      "photo_library_add": "Ecency, gönderilerden indirdiğin görselleri fotoğraf kitaplığına kaydeder.",
+      "photo_library": "Ecency, gönderilerden indirdiğin görselleri fotoğraf kitaplığında bir Ecency albümünde bir arada tutar.",
+      "microphone": "Ecency, gönderi ve yorumları dikte edebilmen (bu kayıtlar metne dönüştürülmek üzere Ecency'ye gönderilir) ve gönderine eklediğin videoyla ses kaydedebilmen için mikrofonunu kullanır."
+    },
+    "android": {
+      "no_browser": "Kullanılabilir tarayıcı yok",
+      "biometric_unlock_title": "Ecency kilidini biyometrik veriyle aç",
+      "biometric_confirm": "Parmak izin veya yüzünle onayla",
+      "image_unsupported_address": "Desteklenmeyen görsel adresi",
+      "image_create_failed": "Dosya oluşturulamadı",
+      "image_write_failed": "Dosya yazılamadı",
+      "image_too_large": "Görsel çok büyük",
+      "image_download_failed": "İndirme {status} durumuyla başarısız oldu",
+      "billing_disconnected": "Google Play Faturalandırma bağlantısı kesildi.",
+      "billing_no_screen": "Satın alımı gösterecek ekran yok.",
+      "billing_error": "Google Play Faturalandırma hatası {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Bu ay {count, plural, one {# gönderi} other {# gönderi}} oluşturdun. Böyle devam et!",
-        "checkin": "Bu hafta {count, plural, one {# gün} other {# gün}} giriş yaptın. Böyle devam et!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} etiketinde {count, plural, one {# yeni gönderi} other {# yeni gönderi}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# hatalı deneme(ler)} other {# hatalı deneme(ler)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} günlük seri"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Yalnızca {days} günden eski hesaplara izin verilir",
-        "max_choices": "• En fazla {choices} seçenek seçebilirsiniz"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Kalan {executions} transfer",
-        "schedule_summary": "{executions} transfer, her biri {hours} saatte bir"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Points kazanmak için çok kısa ({n, plural, one {# karakter} other {# karakter}} veya daha az, bağlantılar hariç)"
       },
       "chats": {
-        "people_joined": "{count} kişi katıldı"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "yaklaşık {count, plural, one {# dakika} other {# dakika}} sonra",
+        "ban-remaining-hours": "yaklaşık {count, plural, one {# saat} other {# saat}} sonra",
+        "ban-remaining-days": "yaklaşık {count, plural, one {# gün} other {# gün}} sonra"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "En fazla {n, plural, one {# etiket} other {# etiket}} kullan",
+          "too_long": "Arama çok uzun. En fazla {n, plural, one {# karakter} other {# karakter}} kullan"
+        }
       },
       "ai_assist": {
-        "min_chars": "En az {count} karakter gerekli",
-        "chars_remaining": "{count} karakter kaldı"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Bir seferde en fazla {count, plural, one {# görsel} other {# görsel}} seçebilirsin"
+      },
+      "dictation": {
+        "stop_hint": "Metne dönüştürüp gönderine eklemek için durdur. En fazla {m, plural, one {# dakika} other {# dakika}}.",
+        "rate": "{s, plural, one {# saniye} other {# saniye}} için {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Bir sonraki çözme {days} gün sonra, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} ile {max, plural, one {# karakter} other {# karakter}} arasında"
       }
     }
   }

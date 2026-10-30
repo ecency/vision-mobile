@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro liige"
   },
   "perks": {
     "header": "Hüved",
@@ -31,42 +31,42 @@
     "promote_desc": "Too oma postitusele rohkem vaatajaid",
     "account_boost": "Konto võimendus",
     "account_boost_desc": "Võimenda mis tahes kontot",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Lae RC juurde",
+    "rc_topup_desc": "Jätka postitamist, kui Resource Credits on vähe",
+    "streak_freeze_owned": "{n} varus",
+    "streak_freeze_buy": "Kaitse seeriat ({price} Pointsi)",
+    "streak_freeze_buying": "Kaitsen",
+    "streak_freeze_error": "Seeriakaitset ei õnnestunud osta. Proovi uuesti."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Päevane postitus",
+    "streak": "{n} päeva seeria",
+    "keep_streak": "Hoia oma seeria elus"
   },
   "waves": {
     "for_you": "Sulle",
     "following": "Jälgitavad",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Enda voogud",
+    "custom_feeds_subtitle": "Kinnita allikad ja sildid, et lisada need voo vahelehtedena.",
+    "add_tag_placeholder": "Lisa silt",
+    "sources": "Allikad",
+    "your_feeds": "Sinu voogud",
+    "trending_tags": "Populaarsed sildid",
+    "shorts_empty": "Näidata pole veel ühtegi lühivideot",
+    "mute": "Vaigista",
+    "unmute": "Lõpeta vaigistus"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Alustamine",
+    "subtitle": "Oled uus? Wave'id on lühipostitused ja lihtsaim viis alustada.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Sulge",
+    "item_wave": "Postita oma esimene Wave",
+    "item_vote": "Hääleta Wave'i, mis sulle meeldib",
+    "item_reply": "Vasta kellelegi",
+    "item_checkin": "Registreeri end sisse, et alustada oma seeriat",
+    "all_done_title": "Kõik tehtud 🎉",
+    "all_done_subtitle": "Oled valmis. Jätka Wave'ide postitamist!"
   },
   "profile": {
     "havent_commented": "ei ole veel midagi kommenteerinud",
@@ -80,7 +80,7 @@
     "wallet": "Rahakott",
     "wallet_details": "Rahakoti Detailid",
     "comments": "Kommentaarid",
-    "waves": "Waves",
+    "waves": "Wave'id",
     "details": "Profiili Detailid",
     "resource_credits": "Resource Credits",
     "voting_power": "Hääletusjõud",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Vanus  |  Nähtavus  |  Tõlgendus",
     "attach_poll": "Lisa küsitlus"
   },
+  "favorite_tags": {
+    "title": "Sildid",
+    "hint": "Jälgi, et saada teavitusi selle sildiga uutest postitustest",
+    "following_hint": "Saad teavitusi selle sildiga uutest postitustest",
+    "follow": "Jälgi",
+    "following": "Jälgitav",
+    "added": "Silti jälgitakse",
+    "removed": "Sildi jälgimine lõpetatud",
+    "empty_list": "Siin pole midagi"
+  },
   "favorites": {
     "add": "Lisa lemmik",
     "add_error": "Lemmiku lisamine ebaõnnestus",
@@ -181,7 +191,33 @@
     "payout": "Väljamakse",
     "details": "Üksikasjad",
     "community": "kogukond",
-    "new_post": "Uus postitus"
+    "new_post": "Uus postitus",
+    "mute_post_title": "Vaigista see postitus",
+    "unmute_post_title": "Lõpeta selle postituse vaigistamine",
+    "mute_post_reason": "Miks see vaigistatakse?",
+    "unmute_post_reason": "Miks see taastatakse?",
+    "manage": "Halda kogukonda",
+    "manage_members": "Liikmed ja rollid",
+    "manage_settings": "Kogukonna seaded",
+    "manage_activities": "Tegevuslogi",
+    "activities": "tegevus",
+    "no_activities": "Tegevust veel pole",
+    "activities_load_failed": "Tegevust ei õnnestunud laadida. Värskenda allatõmbamisega.",
+    "set_role": "Määra roll",
+    "assign_role": "Anna roll",
+    "assign_role_hint": "Otsi suvalist kontot, ka sellist, kes pole liitunud, ja vali seejärel roll.",
+    "username_placeholder": "Kasutajanimi",
+    "invalid_username": "Vali tulemustest olemasolev konto",
+    "members": "liiget",
+    "no_members": "Liikmeid ei leitud",
+    "members_incomplete": "Mõnda liiget ei õnnestunud laadida. Värskenda allatõmbamisega.",
+    "members_load_failed": "Liikmeid ei õnnestunud laadida. Värskenda allatõmbamisega.",
+    "role_owner": "Omanik",
+    "role_admin": "Admin",
+    "role_mod": "Moderaator",
+    "role_member": "Liige",
+    "role_guest": "Külaline",
+    "role_muted": "Vaigistatud"
   },
   "trade": {
     "swap_for": "Vahetan {fromAmount} {toAmount} vastu",
@@ -212,7 +248,11 @@
     "cross-post": "Risti postitamine",
     "pin-blog": "Kinnita ajaveebi",
     "copy": "kopeeri link",
+    "copy-text": "kopeeri tekst",
+    "open-thread": "ava jutulõng",
     "unpin-community": "Eemalda kinnitus kogukonnast",
+    "mute-post": "Vaigista postitus",
+    "unmute-post": "Lõpeta postituse vaigistamine",
     "mute": "Vaigista / blokeeri",
     "reblog": "jaga",
     "undo-reblog": "tühista uuesti jagamine",
@@ -232,24 +272,24 @@
     "unpin-reply": "Eemalda kommentaari kinnitus"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "See postitus on keeles {lang}. Kas tõlkida keelde {target}?",
+    "translate_to": "Tõlgi keelde {lang}",
+    "show_original": "Näita originaali",
+    "translated_from": "Tõlgitud keelest {lang}",
+    "change_language": "Muuda keelt"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Tõlgi postitus",
+    "source": "Lähtekeel",
+    "target": "Sihtkeel",
+    "detected": "Tuvastatud: {lang}",
+    "translate": "Tõlgi",
+    "apply": "Rakenda",
+    "review_note": "Lisab postituse lõppu sinu enda teksti masintõlke. Vaata see üle ja muuda enne avaldamist.",
+    "too_short": "Kirjuta kõigepealt veidi rohkem. Tõlkimiseks on vaja vähemalt paari lauset.",
+    "progress": "Tõlgin {done} / {total}...",
+    "error": "Tõlkimine ebaõnnestus. Proovi uuesti.",
+    "add_title_marker": "Lisa pealkirjale keelemärge"
   },
   "side_menu": {
     "profile": "Profiil",
@@ -296,7 +336,7 @@
     "hot": "Kuum",
     "popular": "Populaarne",
     "new": "Uus",
-    "friends": "Following",
+    "friends": "Jälgitavad",
     "my_blog": "Minu ajaveeb"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Siin pole midagi"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Mallid",
+    "untitled": "Nimetu mall",
+    "empty_list": "Salvesta postitus redaktoris mallina, et seda siin uuesti kasutada.",
+    "delete_confirm": "Kas oled kindel, et soovid selle malli kustutada?",
+    "applied": "Mall rakendatud uue postitusena",
+    "save_as_template": "Salvesta mallina",
+    "name_placeholder": "Malli nimi",
+    "saved": "Mall salvestatud"
   },
   "selection_list": {
     "available": "Saadaval {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Kõik",
+      "replies": "Vastused",
+      "mentions": "Mainimised",
+      "rvotes": "Hääled",
+      "follows": "Uued jälgijad",
+      "reblogs": "Jagamised",
+      "transfers": "Ülekanded",
+      "delegations": "Volitused",
+      "nfavorites": "Lemmikud",
+      "tags": "Sildid",
+      "nbookmarks": "Järjehoidjad",
+      "payouts": "Väljamaksed",
+      "scheduled_published": "Ajastatud postitused",
+      "account_updates": "Konto uuendused",
+      "weekly_earnings": "Nädala tulu"
     },
     "this_week": "Sel nädalal",
     "reblog": "jagatud",
@@ -417,11 +458,15 @@
     "yesterday": "Eile",
     "mention": "mainis",
     "favorites": "tegi uue postituse",
+    "tags": "postitas siltide all #{tag}",
+    "tags_bundle": "{count} uut postitust sildi all #{tag}",
+    "tags_title": "Uusi postitusi sildi all, mida jälgid",
     "mentions": "Mainimised",
     "spin": "Aeg teenida rohkem Punkte",
     "last_week": "Eelmine nädal",
     "recent": "Hiljutised",
     "ignore": "ignoreeris sind",
+    "blacklist": "lisas sind musta nimekirja",
     "follow": "hakkas sind jälgima",
     "notification": "Teavitused",
     "this_month": "Sel kuul",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} saab nüüd sinu nimel postitada ja hääletada. Kui sa seda ei lubanud, tühista see.",
     "weekly_earnings": "Teenisid sel nädalal ${amount}{breakdown}",
     "payouts": "Väljamakse saadud: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "avaldas ajastatud postituse",
+    "scheduled_published_title": "Ajastatud postitus avaldatud",
+    "scheduled_published_body": "Sinu ajastatud postitus on nüüd avaldatud, puuduta, et seda vaadata"
   },
   "recurrent": {
     "delete_failed": "Korduva ülekande kustutamine ebaõnnestus, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Ava hiljutine mustand või loo uus postitus",
     "reward_power_up": "Panusta 100%",
     "open_gallery": "Ava Galerii",
+    "open_files": "Vali failidest",
     "clipboard_no_image": "Lõikepuhvris pilti ei leitud",
     "clipboard_image_detected": "Pilt lõikepuhvris",
     "paste_image": "Kleebi pilt",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Hiljem",
     "settings_title": "Postituse valikud",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Ei"
+    "support_ecency": "Toeta Ecencyt {percent}%",
+    "alert_btn_no": "Ei",
+    "short_reply_hint": "Kuni {n} tähemärgi pikkuste vastuste eest ei teenita punkte (lingid ei lähe arvesse)",
+    "short_content_hint": "Liiga lühike punktide teenimiseks ({n} tähemärki või vähem, lingid välja arvatud)"
   },
   "time": {
     "week": "nädalat",
@@ -587,7 +635,7 @@
     "comment": "Kommentaar",
     "placeholder_wave": "Mis toimub?",
     "publish": "AVALDA",
-    "host_waves": "Waves",
+    "host_waves": "Wave'id",
     "close": "SULGE",
     "reply": "VASTA",
     "placeholder": "Lisa kommentaar..."
@@ -655,7 +703,41 @@
     "select_emoji": "Vali emoji",
     "more_emojis": "Rohkem",
     "search_emojis": "Otsi emojisid...",
-    "no_emoji_found": "Emojit ei leitud"
+    "no_emoji_found": "Emojit ei leitud",
+    "ban-reason-spray": "Sinu postitamine on peatatud, sest sama sõnum saadeti korraga mitmesse kanalisse.",
+    "ban-reason-mass-dm": "Sinu postitamine on peatatud, sest sõnum saadeti korraga paljudele inimestele.",
+    "ban-reason-generic": "Sinu postitamine vestluses on peatatud.",
+    "ban-can-still-read": "Vestlust saad endiselt lugeda.",
+    "ban-unlocks": "Postitamine avaneb {when}.",
+    "ban-remaining-soon": "alla minuti pärast",
+    "ban-remaining-minutes": "umbes {count} minuti pärast",
+    "ban-remaining-hours": "umbes {count} tunni pärast",
+    "ban-remaining-days": "umbes {count} päeva pärast",
+    "new_group": "Uus grupp",
+    "new_group_hint": "Grupivestluse alustamiseks lisa {min} kuni {max} inimest.",
+    "new_group_search": "Otsi inimesi kasutajanime järgi",
+    "new_group_full": "Grupis võib olla kuni {max} teist inimest.",
+    "new_group_no_results": "Selle nimega kedagi vestluses ei leitud.",
+    "new_group_search_failed": "Otsing ei töötanud. Kontrolli ühendust ja proovi uuesti.",
+    "new_group_remove": "Eemalda @{username}",
+    "new_group_create": "Alusta gruppi",
+    "new_group_failed": "Gruppi ei õnnestunud alustada. Proovi uuesti.",
+    "rename_group": "Nimeta grupp ümber",
+    "rename_group_hint": "Anna grupile nimi, mida kõik selle liikmed näevad. Jäta tühjaks, et näidata hoopis liikmete nimesid.",
+    "group_name": "Grupi nimi",
+    "rename_group_too_long": "Grupi nimi võib olla kuni {max} tähemärki pikk.",
+    "rename_group_not_owner": "Gruppi saab ümber nimetada ainult selle alustaja.",
+    "rename_group_failed": "Gruppi ei õnnestunud ümber nimetada. Proovi uuesti.",
+    "group_renamed": "{user} nimetas grupi ümber: \"{name}\"",
+    "group_name_cleared": "{user} eemaldas grupi nime",
+    "group_members": "Grupi liikmed",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "reactions_title": "Reaktsioonid",
+    "reactor_you": "Sina",
+    "reactor_unknown": "Keegi",
+    "see_who_reacted": "Vajuta pikalt, et näha, kes reageeris",
+    "group": "Grupp"
   },
   "free_estm": {
     "timer_text": "Järgmine tasuta keerutus",
@@ -684,6 +766,32 @@
     "transaction_fail": "Tehing ebaõnnestus"
   },
   "search_result": {
+    "error": "Otsingut ei õnnestunud lõpule viia. Proovi uuesti",
+    "filters": {
+      "title": "Filtrid",
+      "open": "Filtrid",
+      "author": "Autor",
+      "author_placeholder": "kasutajanimi",
+      "category": "Kategooria",
+      "category_placeholder": "kogukond või kategooria",
+      "tags": "Sildid",
+      "tags_placeholder": "komaga eraldatud",
+      "type": "Tüüp",
+      "type_all": "Kõik",
+      "type_post": "Postitused",
+      "type_comment": "Kommentaarid",
+      "date": "Kuupäev",
+      "date_week": "Eelmine nädal",
+      "date_month": "Eelmine kuu",
+      "date_year": "Eelmine aasta",
+      "date_all": "Kogu aeg",
+      "sort": "Sorteeri",
+      "apply": "Rakenda",
+      "active": "{n} aktiivset",
+      "too_many_tags": "Kasuta kuni {n} silti",
+      "too_long": "Otsing on liiga pikk. Kasuta kuni {n} tähemärki",
+      "needs_criteria": "Sisesta otsingusõna või filtreeri autori, kategooria või sildi järgi"
+    },
     "communities_filter": {
       "new": "Värske",
       "my": "Minu Kogukonnad",
@@ -727,12 +835,12 @@
     "title": "Ristpostitus"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Autor teatas tehisintellekti kasutamisest"
   },
   "ai_assist": {
     "title": "AI kirjutamisabiline",
     "balance_label": "Saldo",
-    "points_unit": "POINTS",
+    "points_unit": "POINTSI",
     "cost_label": "Maksumus",
     "free_label": "Tasuta",
     "free_remaining": "{count} tasuta järel",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Saa oma postitusele asjakohaseid silte",
     "action_generate_title": "Loo pealkiri",
     "action_generate_title_desc": "Loo köitvaid pealkirjavariante",
-    "action_summarize": "Recap",
+    "action_summarize": "Kokkuvõte",
     "action_summarize_desc": "Loo kokkuvõtlik ülevaade",
     "action_check_grammar": "Kontrolli grammatikat",
     "action_check_grammar_desc": "Paranda grammatika- ja õigekirjavead",
+    "action_generate_image": "Loo pilt",
+    "action_generate_image_desc": "Loo oma postitusele tehisintellekti pilt",
+    "cost_from": "alates {cost} {unit}",
     "text_label": "Sinu tekst",
     "text_placeholder": "Kleebi või kirjuta oma sisu siia...",
     "min_chars": "Nõutav on vähemalt {count} tähemärki",
@@ -797,16 +908,26 @@
     "remind_later": "Tuleta hiljem meelde",
     "success_subscribe": "Tellimine õnnestus!",
     "payloadTooLarge": "Fail liiga suur, palun vähenda suurust või lae üles väiksem pilt",
+    "too_many_images": "Korraga saad valida kuni {count} pilti",
     "fail_follow": "Jälgimine ebaõnnestus!",
     "clear_user_alert": "Oled kindel, et soovid puhastada kõik kasutajaandmed?",
     "cancel": "Tühista",
     "connection_success": "Edukalt ühendatud!",
     "rc_down": "Toimingu jaoks pole piisavalt ressursipunkte!\n\nVõimendage oma kontot, et jätkata nautimisega. Kas soovite kohe võimendada oma kontot?",
+    "rc_down_title": "Resource Credits pole piisavalt",
+    "rc_precheck_title": "See postitus võib olla avaldamiseks liiga suur",
+    "rc_precheck_body": "Sinu Resource Credits tundub sellise suurusega postituse jaoks liiga väike.",
+    "rc_down_body": "Sul pole selle toimingu jaoks piisavalt Resource Credits.\n\nTäienda kohe Pointsiga, et jätkata, või võimenda oma kontot püsivalt.",
+    "rc_down_topup": "Täienda RC Pointsiga",
+    "rc_down_boost": "Võimenda kontot",
     "done": "Valmis",
     "something_wrong_alt": "Vahepeal proovi oma brauseris Ecency.com",
     "same_user": "See konto on juba nimekirja lisatud",
     "fail": "Ebaõnnestumine!",
     "operation_failed_with_reason": "{operation} ebaõnnestus: {reason}",
+    "request_timed_out": "Ühendus võtab liiga kaua aega. Kontrolli võrku ja proovi uuesti.",
+    "load_failed_retry": "Seda ei õnnestunud laadida. Proovi uuesti.",
+    "retrying": "Proovin uuesti...",
     "wallet_refresh_failed": "Rahakoti värskendamine ebaõnnestus. Palun proovi uuesti.",
     "wallet_refresh_missing_account": "Rahakoti värskendamine ebaõnnestus: konto puudub.",
     "boost_failed": "Boost ebaõnnestus.",
@@ -949,37 +1070,37 @@
     "video_attached": "Video lisatud"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Hääleta poolt",
+    "upvoted": "Poolt hääletatud",
+    "downvoted": "Vastu hääletatud",
+    "upvote_hint": "Topeltpuudutus avab hääletamise valikud",
+    "payout_details": "Väljamakse üksikasjad",
+    "a11y_votes": "{count, plural, one {# hääl} other {# häält}}",
+    "a11y_voters_hint": "Vaata hääletajaid",
+    "a11y_reblogs": "{count, plural, one {# jagamine} other {# jagamist}}",
+    "a11y_reblogs_hint": "Vaata jagamisi",
+    "a11y_comments": "{count, plural, one {# kommentaar} other {# kommentaari}}",
+    "a11y_comments_hint": "Vaata kommentaare",
+    "a11y_reply_hint": "Vasta",
+    "a11y_tip": "Saada jootraha",
+    "a11y_tips": "{count, plural, one {# jootraha} other {# jootraha}}",
+    "a11y_edit": "Muuda kommentaari",
+    "a11y_delete": "Kustuta kommentaar",
+    "a11y_show_replies": "Näita vastuseid",
+    "a11y_hide_replies": "Peida vastused",
+    "a11y_post_options": "Postituse valikud",
+    "a11y_views": "{count, plural, one {# vaatamine} other {# vaatamist}}",
+    "source_ecency": "Avaldatud Ecencyga",
+    "a11y_stats_hint": "Vaata postituse statistikat",
     "image": "Pilt",
     "reveal_muted": "VAIGISTATUD\nPuuduta sisu kuvamiseks",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Puuduta pildi laadimiseks",
     "in": "kogukonnas",
     "poll": "KÜSITLUS",
     "copy_link": "Kopeeri link",
     "wrong_link": "Vale link",
     "select_action": "Vali tegevus",
-    "ecency_waves": "Waves",
+    "ecency_waves": "Wave'id",
     "open_thread": "Ava lõim",
     "cross_post": "ristpostitus kasutajalt {username} kogukonnas {community}",
     "image_saved_error": "Pildi salvestamine ebaõnnestus",
@@ -998,13 +1119,14 @@
     "save_to_local": "Lae enda seadmesse",
     "muted": "Sisu on rikkumise tõttu vaigistatud",
     "community_muted": "Sisu on vaigistatud kogukonna juhiste rikkumise tõttu",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Madala reputatsiooniga konto sisu",
+    "muted_downvoted": "Kasutajate vastu hääletatud sisu",
+    "muted_low_trust": "Madala mainega konto kinnitamata väljuva lingiga",
+    "muted_reveal": "Puuduta, et näha",
     "promoted": "REKLAAMITUD",
     "image_saved": "Pilt salvestatud Galeriisse",
     "words": "Sõnu",
     "reading": "Lugemine",
-    "listen": "Kuula",
     "min": "min",
     "summarize_start": "Alusta"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Postitus ei eksisteeri",
     "invalid_link": "URL on vigane, võid proovida uuesti kehtiva URL-iga või proovida seda avada veebibrauseris",
-    "no_existing_user": "Kasutaja ei eksisteeri"
+    "no_existing_user": "Kasutaja ei eksisteeri",
+    "posting_key_request": "{requester} küsib kontolt @{username} posting privaatvõtit.\n\nJätka ainult siis, kui usaldad seda päringut.",
+    "posting_key_request_unnamed": "Teine rakendus küsib kontolt @{username} posting privaatvõtit.\n\nJätka ainult siis, kui usaldad seda päringut.",
+    "auth_request_as_user": "{requester} soovib sind sisse logida kontoga @{username}.\n\nJagatakse ainult sinu kasutajanime ja sisselogimise tõendit. Ükski võti ei lahku Ecencyst.",
+    "auth_request_as_current": "{requester} soovib sind sisse logida sinu Ecency kontoga.\n\nJagatakse ainult sinu kasutajanime ja sisselogimise tõendit. Ükski võti ei lahku Ecencyst."
   },
   "payout": {
     "breakdown": "Analüüs",
@@ -1065,7 +1191,7 @@
     "open": "Ava URL",
     "invalid_key_desc": "selle tehingu sooritamiseks logi palun sisse {key} võtmega või põhivõtmega",
     "auth_transfer_confirm": "Kinnita ülekanne kasutajale {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Kinnita ainult siis, kui usaldad selle lingi allikat. Kinnitamine saadab allpool oleva toimingu sinu kontolt välja sinu {authority} võtmega."
   },
   "voters_dropdown": {
     "rewards": "TASUD",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Tohib sisaldada ainult tähti, numbreid ja sidekriipsu",
       "username_no_ascii_first_letter_error": "Peab algama tähega",
       "username_contains_double_hyphens": "Ei tohi sisaldada topeltsidekriipse",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "See kasutajanimi sarnaneb liialt krüptobörsi kontole ja võib teisi segadusse ajada. Vali ainulaadsem nimi.",
+      "username_restricted_prefix": "Kasutajanimed, mis algavad 'uid' ja numbritega, ei ole lubatud, kuna neid kasutatakse sageli teiste matkimiseks. Vali teine nimi.",
       "username_contains_underscore": "Ei tohi sisaldada alakriipsu"
     },
     "500_error": "Toiming ebaõnnestus, registreerumise järjekord on täis! Proovi uuesti mõne minuti pärast...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Kasutajanimi on juba hõivatud",
+      "14": "E-posti aadress on juba registreeritud",
+      "15": "Sisesta kehtiv e-posti aadress",
+      "16": "Sisesta kehtiv kasutajanimi",
+      "17": "Kasutajanimi on liiga pikk, vali lühem",
+      "19": "Kasuta püsivat e-posti aadressi või hangi selle asemel Premium-konto",
+      "21": "See soovitus ei ole kehtiv",
+      "28": "Sinu päringut ei õnnestunud töödelda: registreerimisjärjekord on tõenäoliselt täis. Proovi mõne minuti pärast uuesti.",
+      "107": "Tuvastati VPN-ühendus. Lülita VPN välja ja proovi uuesti või hangi selle asemel Premium-konto.",
+      "110": "Väärkasutuse vältimiseks piirame kontode arvu inimese/võrgu kohta. Proovi uuesti teisest võrgust.",
+      "111": "Tuvastati Tori ühendus. Lülita Tor registreerumise ajaks välja.",
+      "112": "Sinu ühendust ei õnnestunud praegu kontrollida. Proovi mõne minuti pärast uuesti."
     },
     "have_account_text": "Kas sul on juba konto?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Hangi täisväärtuslik Hive konto; sellel meetodil on põhikontrollid tagamaks, et botivõrgud ei kuritarvitaks meie registreerimiskraani.",
     "btn_register": "Registreeru tasuta",
     "title": "Tasuta konto"
+  },
+  "dictation": {
+    "title": "Dikteeri",
+    "start": "Alusta salvestust",
+    "stop": "Peata",
+    "record_more": "Salvesta veel",
+    "done": "Valmis",
+    "recording": "Salvestan",
+    "stop_hint": "Peata, et salvestus tekstiks teha ja postitusele lisada. Kuni {m} minutit.",
+    "inserted": "Lisatud sinu postitusele. Salvesta veel või puuduta Valmis.",
+    "transcribing": "Teen tekstiks",
+    "rate": "{n} Points {s} sekundi kohta",
+    "cost_running": "Siiani {n} Points",
+    "cost_running_free": "Siiani tasuta",
+    "free_remaining": "Sinu järgmised {n} x {s} s on täna tasuta",
+    "price_loading": "Kontrollin hinda",
+    "price_error": "Transkribeerimise hinda ei õnnestunud laadida.",
+    "denied": "Ecency vajab dikteerimiseks mikrofoni juurdepääsu. Luba see seadetes ja proovi uuesti.",
+    "error_empty": "Salvestusest ei tuvastatud kõnet.",
+    "error_insufficient_points": "Selle salvestuse transkribeerimiseks pole piisavalt Points.",
+    "error_rate_limited": "Hetkel liiga palju salvestusi. Proovi varsti uuesti.",
+    "error_too_long": "See salvestus on transkribeerimiseks liiga pikk.",
+    "error_failed": "Salvestust ei õnnestunud transkribeerida. Proovi uuesti.",
+    "error_recorder": "Salvestamist ei õnnestunud alustada. Proovi uuesti."
   },
   "wallet": {
     "delegations_out": "Väljaminevad delegeeringud",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Regulaarselt sisse logides saad 0,25 punkti.",
     "fill_transfer_from_savings": "Hoius alustatud",
     "activities": "Tegevused",
+    "no_activities": "Tehinguid veel pole",
+    "activities_failed": "Tehinguid ei õnnestunud laadida. Proovi uuesti, tõmmates alla.",
     "tap_update": "Puuduta uuendamiseks",
     "mining_lottery": "Loterii võidetud",
     "checkin": "Kasutus",
     "tokens_transfer": "Tokenid üle kantud",
     "outgoing_transfer_title": "Ülekanne/kinkimine",
+    "burned_title": "Tehisintellekti kasutus",
+    "burned_description": "Tehisintellekti funktsioonile kulutatud Points",
+    "burn_refund_title": "Tehisintellekti tagasimakse",
+    "burn_refund_description": "Ebaõnnestunud tehisintellekti päringu järel tagastatud Points",
     "manage_assets": "Lisa / eemalda varasid",
     "selected_assets": "Valitud varad",
     "nft_setPropertyPermissions": "NFT sümboli atribuudi õigused määratud",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Tokenite täpsuse uuendamine",
     "tokens_transferOwnership": "Tokeni omandiõigus üle antud",
     "withdraw_vesting": "Lõpeta panustamine",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Väljavõtte kontod",
     "delegate_engine": "Delegeeri",
     "market_close": "Tellimus suletud",
     "nftmarket_transferFee": "Ostutellimuse tasu",
@@ -1251,10 +1407,10 @@
     "nft_undelegate": "NFT delegeerimise lõpetamine alustatud",
     "escrow_dispute": "Deposiidi Vaidlustamine",
     "market_expire": "Tellimus aegunud",
-    "boost": "Boost",
+    "boost": "Võimenda",
     "dropdown_transfer": "Ülekanne",
     "dropdown_promote": "Reklaami",
-    "dropdown_boost": "Boost",
+    "dropdown_boost": "Võimenda",
     "dropdown_ai_image": "Tehisintellekti pilt",
     "tokens_undelegateStart": "Delegeerimise lõpetamine alustatud",
     "undelegate": "Lõpeta delegeerimine",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "OSTA PUNKTE",
     "escrow_approve": "Deposiidi Kinnitamine",
     "expires": "aegub",
+    "transaction_id": "Tehingu ID",
+    "copy_transaction_id": "Kopeeri tehingu link",
+    "filter_activities": "Filtreeri tegevusi",
+    "filter_activities_desc": "Vali, milliseid toiminguid see ajalugu küsib",
+    "filter_all": "Vali kõik",
+    "filter_none": "Tühjenda kõik",
+    "filter_apply": "Rakenda",
     "author_reward": "Autoritasu",
     "withdraw_hbd": "Võta säästudest välja",
     "convert_request": "Konverteerimispäring",
@@ -1401,7 +1564,7 @@
     },
     "claim_reward_balance": "Tasu lunastatud ",
     "hivepegged_buy": "HIVE deponeeritud",
-    "boost_account": "Boost",
+    "boost_account": "Võimenda",
     "savings_withdrawal": "Ootel väljavõtmised",
     "savings": "Säästud",
     "points": "Kanna Points üle",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Lae RC juurde",
+    "desc": "Lühiajaline RC võimendus, et saaksid jätkata postitamist.",
+    "confirm": "Kas kulutada Pointse oma Resource Creditsi juurde laadimiseks?",
+    "insufficient": "Sul ei ole piisavalt Pointse.",
+    "buy_points": "Osta Pointse"
   },
   "ai_image_generator": {
     "title": "Tehisintellekti pildigeneraator",
@@ -1441,7 +1604,7 @@
     "select_power": "Kvaliteedi parandus",
     "cost_label": "Maksumus",
     "balance_label": "Saldo",
-    "points_unit": "POINTS",
+    "points_unit": "POINTSI",
     "generate_button": "Genereeri pilt",
     "generating": "Sinu pildi genereerimine...",
     "result_title": "Genereeritud pilt",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Kohandatud ({hours} h)",
+    "balance_load_failed": "Saldot ei õnnestunud laadida. Puuduta, et uuesti proovida.",
+    "precision_load_failed": "Selle tokeni andmeid ei õnnestunud laadida, seega saab saata ainult täisarve. Puuduta, et uuesti proovida.",
     "close": "Sulge",
     "favorite_username_placeholder": "Kasutajanimi",
     "invalid_recipient_qr": "Sellest QR-koodist ei leitud kasutajanime.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Halda volitusi",
     "pincode": "Pincode",
     "general": "Üldine",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Toeta Ecencyt",
+    "support_beneficiary": "Jaga postituse tasusid Ecencyga",
+    "support_beneficiary_percent": "Postituse tasude osa",
+    "support_curation": "Hoia kuraatoritasudest osa kinni",
+    "support_curation_percent": "Kuraatoritasude kinnipidamine",
     "feedback_body": "Kirjuta oma sõnum siia!\n\nHive kasutajanimi: {username}\nRakenduse versioon: {appVersion}\nPlatvorm: {platform}\n",
     "show_imgs": "Näita pilte",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Kommenteeri",
       "bookmark": "Järjehoidjad",
+      "tags": "Sildid",
       "reblog": "Jaga",
       "favorite": "Lemmikud",
       "mention": "Maini",
@@ -1599,10 +1765,10 @@
       "transfers": "Ülekanded",
       "vote": "Hääleta",
       "follow": "Jälgi",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Ajastatud postitus avaldatud",
+      "payouts": "Väljamaksed",
+      "account_update": "Konto uuendused",
+      "weekly_earnings": "Nädala tulu",
       "fcm_unavailable": "Tõuketeavitused ei ole sellel seadmel toetatud. Saad teavitusi ainult siis, kui rakendus on avatud."
     },
     "keys_warning": "Tundlik kontoteave!\nEcency peab enne privaatvõtmete vaatamist olema PIN-koodiga turvatud.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Saada Tagasisidet",
     "rate_app": "Hinda Ecencyt",
+    "email_digests": "E-posti kokkuvõtted",
     "rate": "Hinda",
     "dm-privacy-updated": "Otsesõnumite privaatsusseaded edukalt uuendatud",
     "dm-privacy-failed": "Otsesõnumite privaatsusseadete uuendamine ebaõnnestus",
@@ -1685,19 +1852,29 @@
     "request_sent": "Sinu kustutamistaotlus on saadetud",
     "confirm_delete_body": "Kas oled kindel, et soovid konto kustutada? See kustutab kõik sinu andmed"
   },
-  "tts": {
-    "settings_title": "Teksti kõneks muutmise seaded",
-    "voice": "Hääl",
-    "voice_hint": "Kasutatakse süsteemi vaikehäält",
-    "speed": "Kiirus",
-    "pitch": "Helikõrgus",
-    "test_voice": "Testi häält",
-    "settings_info": "Neid seadeid kasutatakse postituste ettelugemisel",
+  "listen": {
+    "title": "Kuula seda postitust",
+    "minutes": "~{n} min",
+    "login": "Logi sisse",
+    "unlock": "Ava · {n} Points",
+    "confirm": "Kas kulutada {n} Points selle postituse kuulamiseks? Heli on sinu, saad seda igal ajal uuesti esitada.",
+    "not_enough_title": "Points pole piisavalt",
+    "not_enough": "Kuulamiseks on vaja {required} Points, sul on {available}.",
+    "get_points": "Hangi Points",
+    "unlock_failed": "Heli avamine ei õnnestunud, proovi uuesti",
+    "failed_refunded": "Heli loomine ei õnnestunud, sinu Points tagastati",
+    "preparing": "Valmistan heli ette…",
+    "preparing_eta": "Valmistan heli ette, umbes {n} min…",
+    "preparing_progress": "Valmistan heli ette · {n}%",
+    "waiting": "Ootan järjekorras, ees on {n}…",
+    "next_in_line": "Järgmine järjekorras…",
     "play": "Esita",
     "pause": "Peata",
-    "language": "Keel",
-    "language_auto": "Tuvasta automaatselt",
-    "language_hint": "Automaatne tuvastamine valib keele postituse sisu põhjal"
+    "seek": "Keri",
+    "speed": "Taasesituse kiirus",
+    "language": "Heli keel",
+    "unavailable": "Heli ei õnnestunud laadida.",
+    "retry": "Proovi uuesti"
   },
   "posting_authority": {
     "title": "Luba kiirem postitamine",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentimine ebaõnnestus. Palun logi uuesti sisse.",
     "error-generic": "Video üleslaadimine ebaõnnestus. Palun proovi uuesti.",
     "error-too-long-short": "Lühikesed videod peavad olema 60 sekundit või lühemad.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Postitus võib sisaldada ainult ühte videot. Eemalda praegune video enne teise lisamist.",
     "select_source": "Lisa video",
     "record": "Salvesta video",
     "choose_library": "Vali galeriist"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Jaga kiiret uuendust"
   },
+  "newsletter": {
+    "screen_title": "E-posti kokkuvõtted",
+    "title": "{list}",
+    "body_own": "Nädala- või kuukokkuvõte sinu teavitustest e-postiga.",
+    "body_creator": "Autori {list} uued postitused sinu postkasti.",
+    "body_community": "Kogukonna {list} uute postituste kokkuvõte e-postiga.",
+    "body_site": "Ecency parim sinu postkasti.",
+    "first_publish_title": "Palju õnne esimese postituse puhul!",
+    "first_publish_body": "Kas soovid oma teavitustest e-posti kokkuvõtet? Iga nädal või kuu, muuda või lõpeta see igal ajal seadetes.",
+    "list_own": "Minu teavituste kokkuvõte",
+    "list_site": "Ecency uudiskiri",
+    "status_active": "Oled tellinud.",
+    "status_pending": "Ootab e-posti kinnitust.",
+    "status_short_active": "aktiivne",
+    "status_short_pending_confirmation": "ootel",
+    "status_short_suppressed": "peatatud",
+    "status_short_ended": "lõppenud",
+    "cadence_weekly": "Iga nädal",
+    "cadence_monthly": "Iga kuu",
+    "email_placeholder": "sina@example.com",
+    "subscribe": "Telli",
+    "update": "Uuenda",
+    "resend": "Saada kinnitus uuesti",
+    "leave": "Lahku kokkuvõttest",
+    "cancel": "Tühista",
+    "ok": "OK",
+    "manage": "Halda",
+    "check_inbox_title": "Kontrolli oma postkasti",
+    "check_inbox_body": "Saatsime kinnituslingi aadressile {email}. Tellimus algab pärast kinnitamist.",
+    "subscribed": "E-posti kokkuvõte tellitud",
+    "left": "Kokkuvõttest lahkutud",
+    "refused": "Seda aadressi ei saa tellida.",
+    "unavailable": "E-posti kokkuvõtted pole praegu saadaval.",
+    "too_many": "Liiga palju katseid, proovi hiljem uuesti.",
+    "fail": "Midagi läks valesti, proovi uuesti.",
+    "empty": "E-posti kokkuvõtteid veel pole. Alustamiseks telli allpool.",
+    "discover": "Saa rohkem e-postiga",
+    "stop_all": "Peata kõik",
+    "stop_all_title": "Peatada kogu e-post?",
+    "stop_all_body": "Ecency kirju ei saadeta aadressile {email} enam kunagi. Teiste aadresside tellimused jäävad alles.",
+    "stop_all_ok": "Peata kõik",
+    "stop_all_done": "Aadress on kogu postist loobunud",
+    "profile_option": "E-POSTI KOKKUVÕTE",
+    "subscriber_count": "{weekly} iganädalast • {monthly} igakuist e-posti tellijat",
+    "community_button": "Uudiskiri"
+  },
+  "mod_notes": {
+    "title": "Lisa põhjus",
+    "placeholder": "Põhjus (nähtav teistele moderaatoritele)",
+    "confirm": "Kinnita",
+    "cancel": "Tühista"
+  },
+  "community_settings": {
+    "title_header": "Kogukonna seaded",
+    "title_label": "Pealkiri",
+    "about": "Kirjeldus",
+    "lang": "Keel",
+    "description": "Kirjeldus",
+    "rules": "Reeglid",
+    "nsfw": "Ei sobi tööle",
+    "save": "Salvesta",
+    "required": "Kohustuslik",
+    "title_length": "{min} kuni {max} tähemärki",
+    "owner_admin_only": "Neid seadeid saavad muuta ainult omanik ja adminid."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Laiendatud",
+        "collapsed": "Ahendatud"
+      },
+      "a11y_chat": {
+        "quote": "Vastus kasutajale {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Vali",
+        "deselect": "Tühista valik"
+      },
+      "store": {
+        "billing_unavailable": "Rakendusesiseseid oste ei lubata sellel seadmel.",
+        "verification_failed": "App Store ei suutnud seda ostu kinnitada.",
+        "cancelled": "Ost tühistatud",
+        "unknown_result": "Tundmatu ostu tulemus"
+      },
+      "navigation": {
+        "feed_unavailable": "See voog pole veel saadaval.",
+        "link_cannot_open": "Seda linki ei saa avada.",
+        "video_cannot_play": "Seda videot ei saa esitada."
+      },
+      "media": {
+        "load_failed": "Seda üksust ei õnnestunud laadida. Kontrolli ühendust ja proovi uuesti.",
+        "loading": "Laadin meediat",
+        "download_failed": "Allalaadimine ebaõnnestus olekuga {status}"
+      },
+      "sign_in": {
+        "required": "Vajalik on sisselogimine",
+        "to_reply": "Vastamiseks logi sisse.",
+        "to_vote": "Hääletamiseks logi sisse.",
+        "button": "Logi sisse"
+      },
+      "account": {
+        "logout_user": "Logi välja @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# hääl} other {# häält}}  •  {replies, plural, one {# vastus} other {# vastust}}",
+        "voting_power": "Hääletusjõud {percent}",
+        "remove_favourite": "Eemalda lemmikutest",
+        "add_favourite": "Lisa lemmikutesse"
+      },
+      "waves": {
+        "clear_tag_filter": "Tühista sildifilter {tag}",
+        "new_wave": "Uus wave",
+        "replies_open_thread": "{count, plural, one {# vastus, ava jutulõng} other {# vastust, ava jutulõng}}",
+        "characters": "{count} / {max} tähemärki",
+        "retry": "{message}\nProovi uuesti",
+        "playing": "Esitan {permlink}",
+        "video_attached_remove": "Video lisatud, eemalda",
+        "image_attached_remove": "Lisatud pilt, eemalda",
+        "take_photo": "Tee foto",
+        "edit_poll": "Muuda küsitlust",
+        "add_poll": "Lisa küsitlus",
+        "add_video": "Lisa video"
+      },
+      "reading": {
+        "reply_to": "Vasta kasutajale {username}",
+        "opens_post": "Avab postituse",
+        "sort_comments": "Sorteeri kommentaarid",
+        "sort_comments_value": "Sorteeri kommentaarid, {sort}",
+        "no_comments": "Kommentaare veel pole.",
+        "loading_post": "Laadin postitust",
+        "show_version": "Näita versiooni",
+        "show_changes": "Näita muudatusi",
+        "replying_to": "Vastus kasutajale @{username}",
+        "reply_text": "Vastuse tekst",
+        "translate_from": "Keelest",
+        "translate_to": "Keelde"
+      },
+      "feed": {
+        "tab_pinned": "{label}, kinnitatud",
+        "tab_add": "{label}, lisa",
+        "customise": "Kohanda"
+      },
+      "card": {
+        "in_category": "kategoorias {category}",
+        "pinned": "Kinnitatud",
+        "by_author": "autor {username}",
+        "payout": "väljamakse {payout}",
+        "payout_declined": "väljamakse {payout}, tagasi lükatud",
+        "reblogged_by": "Jaganud {username}"
+      },
+      "shell": {
+        "close_menu": "Sulge menüü"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Pisipilt, vali teine pilt",
+        "words": "{count, plural, one {# sõna} other {# sõna}}",
+        "poll_min_age": "Min. konto vanus (päeva): {days}",
+        "poll_max_options": "Maks. valikuid: {count}",
+        "thumbnail_selected": "Valitud pisipilt",
+        "thumbnail": "Pisipilt",
+        "uploaded_image": "Üleslaaditud pilt",
+        "community_search": "otsi"
+      },
+      "vote": {
+        "not_voted": "Pole hääletatud",
+        "voting": "Hääletan",
+        "failed_with": "Hääletamine ebaõnnestus: {message}",
+        "failed": "Hääletamine ebaõnnestus",
+        "payout": "Väljamakse {payout}",
+        "payout_declined": "Väljamakse {payout}, tagasi lükatud",
+        "percent": "{percent} protsenti",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "Sees",
+        "off": "Väljas"
+      },
+      "lock": {
+        "biometric_reason": "Lülita Ecency jaoks sisse biomeetriline avamine",
+        "offer_title": "Ava meetodiga {method}",
+        "offer_use": "Kasuta meetodit {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Võtmed on peidetud, kui ekraani salvestatakse või peegeldatakse.",
+        "screenshot_notice": "Tehti ekraanipilt. Privaatvõtmed peideti uuesti; kui ekraanipildil on võti, kustuta see.",
+        "hold_hint": "Võtme nägemiseks vajuta ja hoia seda all.",
+        "hold_to_show": "Hoia all, et näha"
+      },
+      "wallet": {
+        "cancel_order": "Kas tühistada see korraldus?",
+        "days": "{count, plural, one {# päev} other {# päeva}}"
+      },
+      "chat": {
+        "reactors_hint": "Vajuta pikalt, et näha, kes reageeris",
+        "see_reactors": "Vaata, kes reageeris"
+      },
+      "esie": {
+        "still": "{mood}, liikumatu"
+      }
+    },
+    "ui": {
+      "profile_of": "Kasutaja @{username} profiil",
+      "preview": "Eelvaade ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Aegub: {time}",
+      "expired": "Aegunud. Sulge ja proovi uuesti.",
+      "user_has_no_posts": "@{username} pole veel midagi postitanud",
+      "attach_image": "Lisa pilt",
+      "auto": "Automaatne",
+      "back": "Tagasi",
+      "hot": "KUUM",
+      "image_of": "Pilt {index} / {count}",
+      "new": "UUS",
+      "nsfw_tap_to_reveal": "NSFW Puuduta, et näha",
+      "new_reply": "Uus vastus",
+      "remove": "Eemalda",
+      "unlock_ecency": "Ava Ecency",
+      "update_it": "Uuenda seda",
+      "update_it_or_post_this_as": "Kas uuendada seda või postitada see uue vastusena?",
+      "use_pin": "Kasuta PIN-koodi",
+      "your_reply_was_already_posted": "Sinu vastus on juba postitatud",
+      "error_try_again": "{message} Proovi uuesti?",
+      "auth": {
+        "account_label": "Konto: @{username}",
+        "approve_the_request_in_your_wallet": "Kinnita päring oma rahakotirakenduses.",
+        "copy_key": "Kopeeri {title}",
+        "current_account": "Praegune konto",
+        "qr_code": "QR-kood",
+        "requested_by": "Päringu esitas {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# number} other {# numbrit}}",
+        "private_key_shown": "{title}, privaatvõti nähtav",
+        "open_wallet_app": "Ava rahakotirakendus",
+        "hiveauth_scan": "Kinnita rakenduses Hive Keychain või mõnes muus HiveAuth rahakotis: ava see sellel seadmel või skanni sellega see kood.",
+        "switching": "Vahetan...",
+        "logout_all": "Logi välja kõigist kontodest",
+        "logout_all_title": "Kas logida välja igast sellel seadmel olevast kontost?",
+        "stored_key": "@{username} on sellel seadmel juba sisse logitud. Salvestatud võtmed jäävad alles; uuendatakse ainult seanssi.",
+        "stored_hivesigner": "@{username} on sellel seadmel juba HiveSigneriga sisse logitud. Selle seanss asendatakse.",
+        "stored_hiveauth": "@{username} on sellel seadmel HiveAuthiga sisse logitud. See allkirjastab hoopis HiveSigneriga.",
+        "method_key": "Võti",
+        "logout_failed": "Väljalogimine ebaõnnestus"
+      },
+      "browser": {
+        "account": "Konto",
+        "authority": "Volitus",
+        "phishing": "Hoiatus: see domeen on märgitud tuntud õngitsussaidina. Jätka äärmise ettevaatusega."
+      },
+      "chat": {
+        "cancel_edit": "Tühista muutmine",
+        "cancel_reply": "Tühista vastus",
+        "copied_to_clipboard": "Kopeeritud lõikelauale",
+        "edited_at": "Muudetud {time}",
+        "group_options": "Grupi valikud",
+        "pinned_messages": "Kinnitatud sõnumid",
+        "remove_user": "Eemalda @{username}",
+        "sort_by_name": "Sorteeri nime järgi",
+        "more": "Rohkem",
+        "reaction_label": "{emoji} {count}. Vajuta pikalt, et näha, kes reageeris",
+        "members": "Liikmed"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Selle lingi all on juba postitus, mis erineb sinu saadetust. Uuenda seda või avalda uuena?",
+        "a_scheduled_post_is_published_by": "Ajastatud postituse avaldab Ecency valitud ajal. Selleks on vaja posting-volitust ecency.app jaoks sinu kontol. Sinu võtmed ja muud volitused jäävad samaks. Volituse andmiseks on vaja sinu active-võtit.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "Tehisintellekti tööriistad",
+        "allow_ecency_to_publish_for_you": "Kas lubada Ecencyl sinu eest avaldada?",
+        "bold": "Rasvane",
+        "clone": "Klooni",
+        "cost": "Hind: {cost}",
+        "could_not_store_the_draft_on": "Mustandit ei õnnestunud sellel seadmel salvestada. Hoia rakendus avatuna ja salvesta mustand.",
+        "draft": "MUSTAND",
+        "delete_count": "Kustuta ({count})",
+        "dictate_desc": "Räägi ja tekst lisatakse sinu postitusse",
+        "discard": "Loobu",
+        "discard_changes": "Kas loobuda muudatustest?",
+        "grant": "Anna",
+        "italic": "Kursiiv",
+        "keep_editing": "Jätka muutmist",
+        "my_blog": "MINU BLOGI",
+        "my_communities": "MINU KOGUKONNAD",
+        "new_post": "Uus postitus",
+        "notice": "Märkus",
+        "restore": "Taasta",
+        "restore_unsaved_changes": "Kas taastada salvestamata muudatused?",
+        "saved": "Salvestatud",
+        "top_communities": "PARIMAD KOGUKONNAD",
+        "table": "Tabel",
+        "text_format": "Teksti vorming",
+        "this_link_is_already_in_use": "See link on juba kasutusel",
+        "untitled": "Pealkirjata",
+        "update_it_or_publish_this_as": "Kas uuendada seda või avaldada see uue postitusena?",
+        "you_have_unsaved_changes_from_an": "Sul on varasemast muutmisest salvestamata muudatusi. Postitus on sellest ajast muutunud; nende taastamine asendab allolevat teksti.",
+        "your_edits_were_not_published": "Sinu muudatusi ei avaldatud.",
+        "your_post_was_already_published": "Sinu postitus on juba avaldatud",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Pisipilt, puuduta teise pildi valimiseks",
+        "thumbnail_number": "Pisipilt {number}",
+        "recording_busy": "Salvestamine on juba käimas. Lõpeta see esmalt kaameras.",
+        "photo_lost": "Foto läks kaotsi, kui kaamera oli avatud. Tee see uuesti.",
+        "add_snippet_button": "+ Katke",
+        "words_count": "{count, plural, one {# sõna} other {# sõna}}",
+        "community_search": "otsi"
+      },
+      "profile": {
+        "open_wallet": "Ava rahakott",
+        "your_wallet_is_on_the_wallet": "Sinu rahakott asub Rahakoti vahekaardil.",
+        "user_has_no_comments": "@{username} pole veel midagi kommenteerinud",
+        "votes_count": "{count, plural, one {# hääl} other {# häält}}",
+        "replies_count": "{count, plural, one {# vastus} other {# vastust}}",
+        "menu": "Rohkem",
+        "users": "Kasutajad"
+      },
+      "reading": {
+        "apply": "RAKENDA",
+        "add_tag": "Lisa silt",
+        "age": "Vanus",
+        "audio_language": "Heli keel",
+        "available_filters": "Saadaolevad filtrid",
+        "could_not_unlock_the_audio_please": "Heli avamine ei õnnestunud, proovi uuesti",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Kuula seda postitust",
+        "log_in": "Logi sisse",
+        "mark_all_as_read": "Märgi kõik loetuks",
+        "mark_as_read": "Märgi loetuks",
+        "more_replies": "Veel vastuseid",
+        "not_enough_points": "Points pole piisavalt",
+        "nothing_here_yet": "Siin pole veel midagi.",
+        "open_editor": "Ava redaktor",
+        "pause_voice": "Peata hääl",
+        "play_voice": "Esita hääl",
+        "playback_speed": "Taasesituse kiirus",
+        "publishing_in_waves": "Avaldamine Wavesis",
+        "quests_done": "Ülesanded tehtud",
+        "read": "Loe",
+        "remove_vote": "Eemalda hääl",
+        "seek": "Keri",
+        "select_community": "Vali kogukond",
+        "selected_filters": "Valitud filtrid",
+        "the_audio_could_not_be_loaded": "Heli ei õnnestunud laadida.",
+        "this_post_does_not_exist_or": "Seda postitust pole olemas või see on kustutatud.",
+        "unread": "Lugemata",
+        "voice_position": "Hääle asukoht",
+        "vote_weight": "Hääle kaal",
+        "reblogged_by": "jaganud {username}",
+        "no_more_posts": "Rohkem postitusi pole.",
+        "favourite": "Lemmik",
+        "no_votes_yet": "Hääli veel pole",
+        "no_comments_yet": "Kommentaare veel pole. Ole esimene!",
+        "comments_count": "Kommentaarid ({count})",
+        "sending_to_chain": "saadan ahelasse",
+        "compare": "Võrdle",
+        "your_vote": "Sinu hääl",
+        "reply_to": "Vasta kasutajale @{username}",
+        "what_do_you_think": "Mida sa arvad?",
+        "clear_tag_filter": "Tühista sildifilter",
+        "tab_selected": "{title}, valitud",
+        "add_tag_feed": "Lisa sildivoog",
+        "feed_pinned": "{label}, kinnitatud",
+        "attached_image_remove": "Lisatud pilt, puuduta eemaldamiseks",
+        "camera": "Kaamera",
+        "files": "Failid",
+        "paused": "Peatatud",
+        "in_topic": "teemas {topic}",
+        "poll_vote": "Hääleta",
+        "reply": "Vasta",
+        "mute_sound": "Vaigista",
+        "unmute_sound": "Lõpeta vaigistus",
+        "leaderboard_activities": "Tegevused",
+        "leaderboard_reward": "Tasu",
+        "sort_votes": "Hääled"
+      },
+      "shell": {
+        "account_of": "Konto @{username}",
+        "account_signed_out": "Konto, välja logitud",
+        "close_tab": "Sulge vahekaart",
+        "coming_soon_to_the_native_app": "Tuleb peagi natiivrakendusse.",
+        "create": "Loo",
+        "expand": "Laienda",
+        "forward": "Edasi",
+        "loading": "Laadin",
+        "new_tab": "Uus vahekaart",
+        "reload": "Laadi uuesti",
+        "sent": "Saadetud",
+        "tab_unread": "{title}, {count} lugemata",
+        "no_app_for_link": "Ükski rakendus ei saa seda linki avada."
+      },
+      "wallet": {
+        "product_not_available": "Toode pole saadaval.",
+        "repeat": "Korda"
+      },
+      "copied": "Kopeeritud",
+      "trending_caps": "TÕUSEV",
+      "move_up": "Liiguta üles",
+      "move_down": "Liiguta alla",
+      "scroll_to_top": "Keri üles",
+      "load_more": "Rohkem"
+    },
+    "wallet": {
+      "checking": "Kontrollin võrgus",
+      "leave_title": "Saatmine käib veel",
+      "leave_message": "Seda saadetakse või kontrollitakse veel võrgus. Võid sellelt ekraanilt lahkuda: rakendus annab teada, kui see on valmis.",
+      "stay": "Jää",
+      "collateralized_convert_request": "Tagatisega konverteerimise päring",
+      "op_transfer": "ülekanne",
+      "op_power_up": "panustamine",
+      "op_power_down_change": "panustamise lõpetamise muutus",
+      "op_delegation": "volitus",
+      "op_savings_deposit": "säästude hoius",
+      "op_savings_withdrawal": "säästude väljavõtt",
+      "op_conversion": "konverteerimine",
+      "op_swap": "vahetus",
+      "op_order_cancel": "korralduse tühistamine",
+      "op_reward_claim": "tasu lunastamine",
+      "op_withdraw_route_change": "väljavõtmise marsruudi muutus",
+      "op_token_operation": "tokeni toiming"
+    },
+    "notification": {
+      "amount_unknown": "Summa pole saadaval",
+      "weekly_earnings_breakdown": "Teenisid sel nädalal ${amount} - ${authorUsd} postitustest, ${curationUsd} kureerimisest.",
+      "weekly_earnings_total": "Teenisid sel nädalal ${amount} oma postitustest ja kureerimisest."
+    },
+    "settings": {
+      "open": "Ava",
+      "feedback_subject": "Tagasiside/Veateade",
+      "unknown_user": "Tundmatu kasutaja"
+    },
+    "navigation": {
+      "editor": "Redaktor",
+      "followers": "Jälgijad",
+      "spin_game": "Spin-mäng",
+      "edit_profile": "Muuda profiili",
+      "redeem_points": "Lunasta Points",
+      "community": "Kogukond",
+      "community_members": "Kogukonna liikmed",
+      "community_activities": "Kogukonna tegevused",
+      "browser": "Brauser",
+      "asset_details": "Vara üksikasjad",
+      "edit_history": "Muutmisajalugu",
+      "welcome": "Tere tulemast",
+      "chat": "Vestlus",
+      "backup_keys": "Varunda võtmed",
+      "trade": "Kauple",
+      "ai_image_generator": "Tehisintellekti pildigeneraator",
+      "select_assets": "Vali varad",
+      "poll": "Küsitlus",
+      "bot_comments": "Botide kommentaarid"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Omaniku võtit nõudvaid toiminguid ei saa Ecencys allkirjastada.",
+      "post": "Postitus/Kommentaar",
+      "custom": "Custom JSON",
+      "sign_buffer": "Allkirjasta sõnum",
+      "send_token": "Saada token",
+      "witness_vote": "Witness-hääl",
+      "proxy": "Määra proxy",
+      "power_up": "Panusta",
+      "power_down": "Lõpeta panustamine",
+      "broadcast": "Edasta",
+      "sign_tx": "Allkirjasta tehing",
+      "encode": "Kodeeri sõnum",
+      "decode": "Kontrolli võtit",
+      "add_account_authority": "Lisa konto volitus",
+      "remove_account_authority": "Eemalda konto volitus",
+      "add_key_authority": "Lisa võtme volitus",
+      "remove_key_authority": "Eemalda võtme volitus",
+      "create_claimed_account": "Loo konto",
+      "create_proposal": "Loo ettepanek",
+      "remove_proposal": "Eemalda ettepanek",
+      "update_proposal_vote": "Ettepaneku hääl",
+      "signed_call": "Allkirjastatud kutse"
+    },
+    "translate_language": {
+      "ar": "araabia",
+      "az": "aserbaidžaani",
+      "bg": "bulgaaria",
+      "bn": "bengali",
+      "ca": "katalaani",
+      "cs": "tšehhi",
+      "da": "taani",
+      "de": "saksa",
+      "el": "kreeka",
+      "en": "inglise",
+      "eo": "esperanto",
+      "es": "hispaania",
+      "et": "eesti",
+      "fa": "pärsia",
+      "fi": "soome",
+      "fr": "prantsuse",
+      "ga": "iiri",
+      "he": "heebrea",
+      "hi": "hindi",
+      "hu": "ungari",
+      "id": "indoneesia",
+      "it": "itaalia",
+      "ja": "jaapani",
+      "ko": "korea",
+      "lt": "leedu",
+      "lv": "läti",
+      "ms": "malai",
+      "nb": "norra",
+      "nl": "hollandi",
+      "pl": "poola",
+      "pt": "portugali",
+      "ro": "rumeenia",
+      "ru": "vene",
+      "sk": "slovaki",
+      "sl": "sloveeni",
+      "sq": "albaania",
+      "sv": "rootsi",
+      "th": "tai",
+      "tl": "tagalogi",
+      "tr": "türgi",
+      "uk": "ukraina",
+      "zh": "hiina",
+      "zt": "hiina (traditsiooniline)"
+    },
+    "reading": {
+      "banner_text": "See postitus on keeles {source}. Tõlgin keelde {target}?",
+      "translated_from_text": "Tõlgitud keelest {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# liige} other {# liiget}} • {authors, plural, one {# autor} other {# autorit}} • {posts, plural, one {# postitus} other {# postitust}}",
+      "community_title": "Kogukond {title}",
+      "members_title": "Kogukonna {title} liikmed",
+      "activities_title": "Kogukonna {title} tegevus",
+      "cannot_start_with_or": "Ei tohi alata märgiga @ ega #",
+      "use_a_two_letter": "Kasuta kahetähelist keelekoodi, näiteks en",
+      "at_most_characters": "Kuni {max, plural, one {# tähemärk} other {# tähemärki}}",
+      "council": "Nõukogu",
+      "journal": "Päevik",
+      "topic": "Teema",
+      "community_not_found": "Kogukonda ei leitud."
+    },
+    "transfer": {
+      "one_recipient": "Selle ülekande jaoks saab kasutada ainult ühte saajat.",
+      "is_an_exchange_and": "{exchange} on börs ja ei pruugi korduvaid ülekandeid toetada: ajakava alusel saadetud raha võib kaduda. Kasuta selle asemel ühekordset ülekannet."
+    },
+    "dapps": {
+      "signing_info": "Ecency toimib sinu Hive allkirjastamislaiendina. Kui dApp palub sisse logida brauserilaiendiga nagu Keychain, Keeper või Peak Vault, vali see valik. Ecency allkirjastab turvaliselt.",
+      "category_social": "Sotsiaalne",
+      "category_gaming": "Mängud",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupp",
+      "unable_to_load_messages": "Sõnumeid ei õnnestunud laadida.",
+      "someone": "Keegi",
+      "renamed_the_group_to": "{actor} nimetas grupi ümber: \"{name}\"",
+      "removed_the_group_name": "{actor} eemaldas grupi nime",
+      "unable_to_send_your": "Sinu sõnumit ei õnnestunud saata.",
+      "unable_to_remove_message": "Sõnumit ei õnnestunud eemaldada.",
+      "unknown": "Tundmatu",
+      "members_online": "{members, plural, one {# liige} other {# liiget}} • {online} võrgus",
+      "failed_to_load_pinned": "Kinnitatud sõnumeid ei õnnestunud laadida",
+      "you": "Sina",
+      "title": "Reaktsioonid"
+    },
+    "tip": {
+      "login_required": "Näpunäidete saatmiseks logi sisse",
+      "max_decimals": "Kuni {n, plural, one {# kümnendkoht} other {# kümnendkohta}}"
+    },
+    "paid": {
+      "check_again": "Kontrolli uuesti",
+      "give_up": "Loobu",
+      "unknown": "Vastust veel pole. Päring võib veel käia. Kontrolli uuesti, et tulemus tuua: teist korda selle eest ei arvestata.",
+      "pending": "Sinu päringut töödeldakse veel. Kontrolli hetke pärast uuesti: teist korda selle eest ei arvestata.",
+      "restored": "Varasemal päringul pole veel vastust. Kontrolli uuesti, et tulemus tuua: teist korda selle eest ei arvestata.",
+      "give_up_confirm": "Kui päring läks läbi, on Points kulutatud ja tulemus läheb kaduma.",
+      "not_stored": "Seda päringut ei õnnestunud seadmes salvestada. Hoia see ekraan avatuna, kuni see on lõppenud.",
+      "sign_in_again": "Sinu seanss on aegunud. Logi uuesti sisse ja kontrolli siis uuesti.",
+      "other_account": "See kuulub kasutajale @{owner}. Jätkamiseks lülitu tagasi sellele kontole."
+    },
+    "ai": {
+      "run_ai_assist": "Käivita AI Assist ({costText})",
+      "no_longer_free_cost": "See käivitus pole täna enam tasuta. See maksab {cost} {unit}.",
+      "no_longer_free": "See käivitus pole täna enam tasuta.",
+      "content_violates_our_content": "Sisu rikub meie sisureegleid. Muuda oma teksti. Points ei tagastatud.",
+      "generate_image": "Loo pilt ({costLabel})",
+      "use_prompt": "Kasuta: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Palun oota, mõni teine toiming on pooleli",
+      "not_a_community_post": "See pole kogukonna postitus.",
+      "parent_post_not_found": "Algpostitust ei leitud",
+      "the_account_changed": "Konto muutus."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Peata ({cost} Points)",
+      "stop_free": "Peata (tasuta)",
+      "transcribe_points": "Transkribeeri ({cost} Points)",
+      "transcribe": "Transkribeeri",
+      "no_longer_free_cost": "See salvestus pole täna enam tasuta. See maksab {cost} Points.",
+      "no_longer_free": "See salvestus pole täna enam tasuta.",
+      "held_locked": "Salvestus peatus, kui Ecency lukustus. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
+      "held_no_background": "Salvestus peatus, kui Ecency ekraanilt lahkus (see ei saanud salvestusteavitust näidata). Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
+      "held_stopped": "Salvestus peatati teavitusest. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
+      "held_focus_lost": "Salvestus peatus kõne või mõne teise rakenduse heli tõttu. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
+      "held_interrupted": "Salvestus peatus, sest mõni teine rakendus võttis mikrofoni. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
+      "unavailable": "Salvestamine pole sellel seadmel saadaval.",
+      "not_read": "Seda salvestust ei õnnestunud lugeda või see on liiga suur. Midagi ei saadetud ega arvestatud.",
+      "give_up_not_sent": "Seda salvestust ei saadetud, seega midagi ei arvestatud. See kustutatakse.",
+      "give_up_not_charged": "Selle salvestuse eest midagi ei arvestatud. See kustutatakse.",
+      "clip_lost": "Varasema päringu salvestust pole enam sellel seadmel. Kui päring läks läbi, on sinu Points kulutatud ja selle transkriptsiooni ei saa tuua."
+    },
+    "register": {
+      "error_code_28": "Sinu päringut ei õnnestunud töödelda. Registreerumisjärjekord on tõenäoliselt täis. Proovi mõne minuti pärast uuesti."
+    },
+    "perks": {
+      "quests_empty": "Siin pole veel ülesandeid, vaata varsti uuesti.",
+      "freeze_confirm_title": "Kaitse oma jada",
+      "spend_points_on_a": "Kas kulutada {price} Points jadakaitsele? See kasutatakse ära, et kaitsta sinu jada päeval, mil jätad vahele."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Toeta Ecencyt, saa tasuta blogi ja paista silma kinnitatud Pro märgiga.",
+      "card_description": "Hangi Pro aastaks hinnaga {price}. Kinnitatud märk, tasuta blogi ja Ecency toetus.",
+      "card_description_plain": "Hangi Pro aastaks. Kinnitatud märk, tasuta blogi ja Ecency toetus.",
+      "member": "Oled Pro liige.",
+      "benefit_badge": "Kinnitatud Pro märk sinu nime kõrval.",
+      "benefit_blog": "Tasuta blogi aadressil yourname.blogs.ecency.com.",
+      "benefit_support": "Toeta otse Ecency arendust.",
+      "benefit_early": "Varajane juurdepääs uutele funktsioonidele.",
+      "buy": "Hangi Pro aastaks hinnaga {price}",
+      "extend": "Pikenda 12 kuu võrra hinnaga {price}",
+      "extend_note": "Uuesti ostmine lisab sinu liikmesusele 12 kuud.",
+      "unavailable": "Ecency Pro pole poest praegu saadaval.",
+      "activating": "Makse laekus. Aktiveerin sinu liikmesuse.",
+      "success_title": "Tere tulemast Ecency Prosse",
+      "success_body": "Sinu Pro liikmesus on aktiivne. Sinu märk ilmub peagi profiilile.",
+      "extending": "Makse laekus. Sinu Pro liikmesust pikendatakse 12 kuu võrra.",
+      "open_a11y": "Ava Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Salvestan mustandit...",
+      "please_sign_in_first": "Logi esmalt sisse.",
+      "fetch_failed": "Toomine ebaõnnestus.",
+      "you_can_only_edit": "Saad muuta ainult oma sisu.",
+      "invalid_percent": "Vigane protsent",
+      "beneficiary_exists_already": "Kasusaaja on juba olemas",
+      "this_draft_belongs_to": "See mustand kuulub kasutajale @{owner}. Selle avaldamiseks lülitu tagasi sellele kontole.",
+      "could_not_make_a": "Sellele postitusele ei õnnestunud uut linki teha. Muuda pealkirja pisut ja proovi uuesti.",
+      "an_earlier_attempt_was": "Varasem katse avaldati pärast seda. Vaata, millist versiooni soovid alles jätta.",
+      "could_not_check_your": "Sinu konto posting-volitust ei õnnestunud kontrollida. Kontrolli ühendust ja proovi uuesti.",
+      "this_post_was_changed": "Seda postitust muudeti mujal pärast selle avamist. Kopeeri oma tekst, mine tagasi ja ava see uuesti, et muuta uusimat versiooni.",
+      "link_text_placeholder": "Tekst siia"
+    },
+    "app_error": {
+      "this_reply_is_too": "See vastus on liiga pikk.",
+      "the_network_refused_this": "Võrk keeldus selle toimingu tegemisest.",
+      "invalid_input": "Vigane sisend.",
+      "secure_storage_is_unavailable": "Turvaline salvestusruum pole saadaval. Logi uuesti sisse.",
+      "please_sign_in_first": "Logi esmalt sisse.",
+      "these_credentials_belong_to": "Need volitused kuuluvad kontole @{actual}, mitte @{expected}.",
+      "is_not_signed_in": "@{username} pole sellel seadmel sisse logitud.",
+      "key_required": "Selle tehingu tegemiseks on vaja {role}-võtit. {hint}",
+      "cancelled": "Tühistatud.",
+      "the_request_was_rejected": "Päring lükati rahakotirakenduses tagasi.",
+      "the_request_expired_before": "Päring aegus enne, kui rahakotirakendus vastas. Proovi uuesti.",
+      "could_not_reach_the": "HiveAuth serverini ei õnnestunud jõuda. Proovi uuesti.",
+      "unexpected_redirect": "Server saatis ootamatu ümbersuunamise. Midagi ei muudetud. Proovi hiljem uuesti.",
+      "missing_key_hint": "Lisa see jaotises Seaded, Halda volitusi (Impordi privaatvõti) või logi selle võtmega uuesti sisse.",
+      "this_key_is_also": "See võti on ka selle konto owner-võti. Ecency ei hoia võtit, mis juhib owner-rolli: anna oma active- ja posting-rollile eraldi võtmed ja logi siis sisse nendega.",
+      "this_is_the_owner": "See on owner-võti. Ecency ei salvesta ega kasuta owner-võtit kunagi: logi sisse oma master-parooli või posting- või active-võtmega.",
+      "this_password_only_matches": "See parool sobib ainult konto owner-võtmega. Ecency ei salvesta ega kasuta owner-võtit kunagi: logi sisse oma posting- või active-võtmega.",
+      "this_key_cannot_sign": "See võti ei saa ise selle konto eest allkirjastada: konto vajab rohkem kui ühte allkirja (selle kaal on alla läve).",
+      "public_key_given": "See on sinu avalik võti. Kleebi privaatvõti (algab numbriga 5) või oma master-parool.",
+      "memo_key_only": "Memo-võtit ei saa sisselogimiseks kasutada. Kasuta oma posting-võtit, active-võtit või master-parooli.",
+      "network_message": "Võrgutõrge. Kontrolli ühendust ja proovi uuesti.",
+      "network_error_this_may": "Võrgutõrge. See võis juba läbi minna; uuesti proovimine on ohutu ja ei postita kaks korda."
+    },
+    "purchases": {
+      "deal_best": "PARIM PAKKUMINE!",
+      "deal_popular": "POPULAARNE!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Pood ei vastanud."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts tarbimiseks on vaja e-posti ja kasutajanime",
+      "stuck": "Selle toote varasemat ostu ei õnnestunud lõpule viia. Kirjuta aadressile support@ecency.com ja lisa poe tšekk, see hoitakse selleks alles.",
+      "held": "See ost on ülevaatamiseks peatatud. Kirjuta aadressile support@ecency.com ja lisa tellimus #{order}.",
+      "earlier_purchase": "Selle toote varasem ost viiakse esmalt lõpule kasutajale @{target}.",
+      "earlier_pending": "Selle toote varasem makse on kasutajale @{target} veel ootel. See lõpeb, kui pood makse kinnitab.",
+      "pending": "Sinu makse on ootel. Ost lõpeb, kui pood makse kinnitab.",
+      "processing": "Sinu ostu töödeldakse. See lõpeb varsti."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Korduvad ülekanded",
+      "delegate_hive_power": "Volita Hive Power",
+      "power_up": "Panusta",
+      "set_withdraw_vesting_route": "Määra panustamise väljavõtmise marsruut",
+      "power_down": "Lõpeta panustamine",
+      "transfer_to_saving": "Kanna säästudesse",
+      "transfer_from_saving": "Kanna säästudest",
+      "cancel_transfer_from_saving": "Tühista ülekanne säästudest",
+      "collateralized_convert": "Tagatisega konverteerimine",
+      "witness_vote": "Witness-hääl",
+      "witness_update": "Witness-i uuendus",
+      "witness_set_properties": "Witness-i omaduste määramine",
+      "governance_proxy": "Valitsemise proxy",
+      "claim_account": "Lunasta konto",
+      "create_account": "Loo konto",
+      "create_account_with_account": "Loo konto konto krediitidega",
+      "create_limit_order": "Loo limiitkorraldus",
+      "cancel_limit_order": "Tühista limiitkorraldus",
+      "redeem_rewards": "Lunasta tasud",
+      "post_or_comment": "Postitus või kommentaar",
+      "post_or_comment_options": "Postituse või kommentaari valikud",
+      "custom_operation": "Kohandatud toiming",
+      "update_account_active": "Uuenda kontot (active)",
+      "update_account_posting": "Uuenda kontot (posting)",
+      "change_recovery_account": "Muuda taastekontot",
+      "create_proposal": "Loo ettepanek",
+      "remove_proposal": "Eemalda ettepanek",
+      "update_proposal_votes": "Uuenda ettepaneku hääli",
+      "update_proposal": "Uuenda ettepanekut"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Selle lingi peab allkirjastama @{account}. Lülitu sellele kontole ja ava see uuesti.",
+      "ecency_can_only_sign": "Ecency saab linkidelt allkirjastada ja edastada ainult tehinguid.",
+      "requester_page": "leht {host}",
+      "owner_refused": "Omaniku võtit nõudvaid toiminguid ei saa lingilt allkirjastada.",
+      "busy": "Palun oota: teist päringut töödeldakse veel.",
+      "not_supported": "Ecency ei saa seda toimingut selles versioonis veel allkirjastada."
+    },
+    "chats": {
+      "group_members": "Grupi liikmed",
+      "rename_group": "Nimeta grupp ümber",
+      "failed_to_load_chats": "Vestlusi ei õnnestunud laadida",
+      "unknown": "Tundmatu",
+      "unable_to_mark_channel": "Kanalit ei õnnestunud loetuks märkida",
+      "unable_to_update_favorites": "Lemmikuid ei õnnestunud uuendada",
+      "unable_to_update_mute": "Vaigistust ei õnnestunud uuendada",
+      "group": "Grupp",
+      "unable_to_search": "Otsimine ei õnnestunud",
+      "unable_to_start_chat": "Vestlust ei õnnestunud alustada",
+      "no_internet": "Internetiühendust pole"
+    },
+    "stake": {
+      "confirm_summary": "Volita {hp} HP ({vests} VESTS) kasutajale @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Juba volitatud kasutajale @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Ainult avalik. Ecency ei salvesta owner-võtit kunagi.",
+      "shared_owner": "See konto kasutab owner-rolli ja {names}-rolli jaoks sama võtit. Kes seda võtit omab, juhib kogu kontot. Anna {names}-rollile eraldi võti ja hoia owner-võtit võrguühenduseta.",
+      "copy_warning": "Igaüks, kellel on see privaatvõti, juhib seda osa sinu kontost. Teised rakendused saavad lõikelauda lugeda; kleebi see ainult kohta, mida usaldad. Lõikelaualt see kustutatakse 2 minuti pärast."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-lukk on sees.",
+      "pin_changed": "PIN muudetud.",
+      "pin_lock_is_off": "PIN-lukk on väljas.",
+      "wiped_notice": "Kõik kontod, võtmed ja volitused eemaldati sellelt seadmelt.",
+      "we_could_not_bring": "Me ei suutnud sinu kontosid rakenduse eelmisest versioonist üle tuua. Logi uuesti sisse.",
+      "your_pin_lock_could": "Sinu PIN-lukku ei õnnestunud eelmisest versioonist üle tuua. Määra konto menüüs uuesti PIN, et rakenduse lukk taas sisse lülitada.",
+      "biometric_unlock_was_turned": "Biomeetriline avamine lülitati välja, sest selle seadme biomeetrilised andmed muutusid. Ava PIN-iga ja lülita see konto menüüs uuesti sisse.",
+      "biometric_unavailable_notice": "Biomeetrilist avamist ei õnnestunud sisse lülitada: sellel seadmel pole biomeetriat seadistatud.",
+      "set_backup": "Määra PIN, et biomeetrilisele avamisele varukoopia luua",
+      "biometric_on_notice": "PIN-lukk on sees. Ava biomeetria või PIN-iga.",
+      "offer_title": "Ava biomeetriaga",
+      "offer_body": "Ava Ecency näo või sõrmejäljega. Määrasid ka PIN-i, mis avab rakenduse, kui biomeetria pole saadaval.",
+      "offer_use": "Kasuta biomeetriat",
+      "offer_use_pin": "Kasuta hoopis PIN-i"
+    },
+    "common": {
+      "list_and": "{first} ja {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Kuni 25 tähemärgi pikkuste vastuste eest ei teenita punkte (lingid ei lähe arvesse)",
+      "short_content_hint": "Liiga lühike punktide teenimiseks (25 tähemärki või vähem, lingid välja arvatud)",
+      "daily_post": "Päevane postitus {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# päeva jada} other {# päeva jada}}",
+      "grant_description": "Anna Ecency kontole @ecency.app oma kontol posting-luba, et saaksid postitada ilma Keychaini iga kord avamata. Loa andmine muudab sinu konto posting-volitust ja vajab sinu active-võtit."
+    },
+    "wallet_history": {
+      "from_to": "@{from} kasutajale @{to}",
+      "from_user_id": "kasutajalt @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} kasutajale @{to}, id: {id}",
+      "from_to_account": "@{from} kasutajale {to}",
+      "from_user": "kasutajalt @{user}",
+      "to_user": "kasutajale @{user}",
+      "interest": "Intress",
+      "proposal_pay": "Ettepaneku väljamakse",
+      "categories": "Tegevuste tüübid",
+      "category_all": "Kõik",
+      "category_transfers": "Ülekanded",
+      "category_market": "Turukorraldused",
+      "category_interest": "Intressid",
+      "category_stake": "Panustamistoimingud",
+      "category_rewards": "Tasud",
+      "point_type_checkin": "Südamelöögid",
+      "point_type_login": "Sisselogimine",
+      "point_type_post": "Postitus",
+      "point_type_comment": "Kommentaar",
+      "point_type_vote": "Hääl",
+      "point_type_reblog": "Jagamine",
+      "point_type_transfer_sent": "Saadetud ülekanded",
+      "point_type_transfer_received": "Saadud ülekanded"
+    },
+    "video_upload": {
+      "continue_upload": "JÄTKA ÜLESLAADIMIST",
+      "source_gone": "See salvestus pole enam seadmes saadaval. Salvesta või vali video uuesti.",
+      "no_camera": "Kaamera pole sellel seadmel saadaval."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Järgmine panustamise lõpetamine on {hours, plural, one {# tunni} other {# tunni}} pärast",
+      "account_not_found": "Kontot ei leitud"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Pilt lõikelaual · Kleebi pilt",
+      "no_container": "Uusimat waves-konteinerit ei õnnestunud tuua",
+      "please_sign_in_first": "Logi esmalt sisse.",
+      "write_something_first": "Kirjuta esmalt midagi.",
+      "account_changed": "See wave kirjutati teise kontona. Sulge see ja kirjuta uuesti.",
+      "no_upload": "Piltide üleslaadimine pole selles versioonis veel saadaval. Kleebi hoopis tekstis pildi link.",
+      "fail": "Ebaõnnestus"
+    },
+    "delete_account": {
+      "sign_out_failed": "Sinu päring saadeti, aga väljalogimine ebaõnnestus. Logi menüüst välja.",
+      "not_sent": "Sinu kustutamispäringut ei õnnestunud saata. Proovi uuesti."
+    },
+    "chat_sheets": {
+      "group_limit": "Grupis võib olla kuni {max, plural, one {# teine inimene} other {# teist inimest}}.",
+      "search_people_by_username": "Otsi inimesi kasutajanime järgi",
+      "new_group_title": "Uus grupp",
+      "new_group_hint": "Grupivestluse alustamiseks lisa {min} kuni {max, plural, one {# inimene} other {# inimest}}.",
+      "no_results": "Selle nimega kedagi vestluses ei leitud.",
+      "search_failed": "Otsing ei töötanud. Kontrolli ühendust ja proovi uuesti.",
+      "create": "Alusta gruppi",
+      "new_group_failed": "Gruppi ei õnnestunud alustada. Proovi uuesti.",
+      "name_limit": "Grupi nimi võib olla kuni {max, plural, one {# tähemärk} other {# tähemärki}} pikk.",
+      "rename_title": "Nimeta grupp ümber",
+      "rename_hint": "Anna grupile nimi, mida kõik selle liikmed näevad. Jäta tühjaks, et näidata hoopis liikmete nimesid.",
+      "placeholder": "Grupi nimi",
+      "not_owner": "Gruppi saab ümber nimetada ainult selle alustaja.",
+      "rename_failed": "Gruppi ei õnnestunud ümber nimetada. Proovi uuesti."
+    },
+    "editor_side": {
+      "copy_of": "Koopia: {title}",
+      "deletions_failed": "Midagi läks valesti\n{failed} / {total, plural, one {# kustutamine} other {# kustutamist}} ebaõnnestus",
+      "uploads_failed": "{count, plural, one {# üleslaadimine ebaõnnestus} other {# üleslaadimist ebaõnnestus}}:\n\n{messages}",
+      "failed_to_delete": "Kustutamine ebaõnnestus"
+    },
+    "uploads": {
+      "add_to_gallery": "Lisa galeriisse"
+    },
+    "account_notice": {
+      "manage_keys": "Seaded, Halda volitusi",
+      "no_signing_key_title": "Logi uuesti sisse kontona @{account}",
+      "no_signing_key": "Ecency ei hoia sellel seadmel enam owner-võtit ega master-parooli ning kontol @{account} pole siin salvestatud posting- ega active-võtit. Logi uuesti sisse oma master-parooli või posting- või active-võtmega või lisa võti jaotises {manageKeys} (Impordi privaatvõti).",
+      "missing_roles_title": "Mõnda võtit ei lisatud",
+      "cannot_post": "postitada, hääletada ega kommenteerida",
+      "cannot_transfer": "saata ülekandeid ega muuta konto seadeid",
+      "missing_roles": "Sinu parool ei vasta enam konto @{account} {missing}-võtmele: seda muudeti kontol pärast parooli määramist. Sellel seadmel on salvestatud: {kept}-võti. Kuni lisad {missing}-võtme jaotises {manageKeys} (Impordi privaatvõti), ei saa see rakendus kontole @{account} kuuluvate võtmetega {cannot}.",
+      "shared_owner_title": "See võti juhib ka owner-rolli",
+      "shared_owner": "@{account} kasutab owner-rolli ja {names}-rolli jaoks sama võtit. Kes seda võtit omab, juhib kogu kontot. Ecency hoiab seda ainult {names}-võtmena ega kasuta seda kunagi owner-toiminguteks. Anna {names}-rollile eraldi võti ja hoia owner-võtit võrguühenduseta."
+    },
+    "dapp_browser": {
+      "message_from": "Sõnum saidilt {host}",
+      "home_title": "Avaleht",
+      "loading_title": "Laadin...",
+      "blank_run": "[{count, plural, one {# tühi tähemärk} other {# tühja tähemärki}}]",
+      "too_large": "See leht palus allkirjastada päringu, mis on kuvamiseks liiga suur, seega Ecency keeldus sellest."
+    },
+    "community_service": {
+      "the_account_changed": "Konto muutus."
+    },
+    "profile_edit": {
+      "enter_link": "Sisesta pildi link",
+      "please_sign_in_first": "Logi esmalt sisse.",
+      "account_not_found": "Kontot ei leitud",
+      "please_enter_an_image": "Sisesta pildi link, mis algab https://"
+    },
+    "background_media": {
+      "post_by": "Postitus: @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Logi esmalt sisse."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Oled juba sama kaaluga hääletanud.",
+      "insufficient_rc": "Resource Credits ei ole piisavalt. Oota või panusta.",
+      "missing_authority": "Posting-volitus puudub. Kontrolli oma sisselogimisviisi.",
+      "comment_too_soon": "Oota enne uuesti postitamist.",
+      "paid_out": "See postitus on juba välja makstud.",
+      "too_large": "Tehing on {size, plural, one {# bait} other {# baiti}}, üle {max} baidi piiri.",
+      "network_error_please_check": "Võrgutõrge. Kontrolli ühendust ja proovi uuesti.",
+      "unconfirmed_message": "Ei õnnestunud kinnitada, kas see läks läbi. Kontrolli oma rahakotti või ajalugu; alusta uuesti ainult siis, kui seda seal pole.",
+      "undecided_message": "See võis juba läbi minna. Kontrolli enne uuesti proovimist oma rahakotti või ajalugu."
+    },
+    "chat_api": {
+      "request_failed": "Päring ebaõnnestus ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} kirjutab...",
+      "typing_two": "{first} ja {second} kirjutavad...",
+      "typing_three": "{first}, {second} ja {third} kirjutavad...",
+      "typing_many": "{first}, {second} ja {count, plural, one {# teine kirjutab} other {# teist kirjutavad}}...",
+      "banned": "{reason} Vestlust saad endiselt lugeda. Postitamine avaneb {until}.",
+      "joined_when": "liitus {time}",
+      "joined": "liitus",
+      "official_badge": "Ametlik",
+      "official_badge_label": "Ametlik Ecency konto"
+    },
+    "side_menu": {
+      "ask_esie": "Küsi Esiet"
+    },
+    "chat_service": {
+      "missing_token": "Hive juurdepääsutoken puudub. Logi välja ja uuesti sisse.",
+      "dm_error": "Kasutaja pole vestlustega liitunud"
+    },
+    "compose_reply": {
+      "account_changed": "See vastus kirjutati teise kontona. Sulge see ja kirjuta uuesti.",
+      "write_something_first": "Kirjuta esmalt midagi.",
+      "please_sign_in_first": "Logi esmalt sisse."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Liiga palju kasusaajaid: kuni {max}.",
+      "a_beneficiary_s_share": "Kasusaaja osa peab olema vahemikus 0,01% kuni 100%.",
+      "beneficiaries_add_up_to": "Kasusaajate osad ületavad kokku 100%.",
+      "a_beneficiary_is_listed": "Kasusaaja on loetletud kaks korda.",
+      "you_cannot_be_a": "Sa ei saa olla oma postituse kasusaaja.",
+      "a_beneficiary_has_an": "Kasusaaja kontonimi on vigane."
+    },
+    "follows": {
+      "fail": "Ebaõnnestus!: {message}",
+      "follower_count": "Jälgijaid ({count})",
+      "following_count": "Jälgitavaid ({count})"
+    },
+    "link": {
+      "unsupported": "Seda linki ei toetata veel.",
+      "cannot_open": "Linki ei saa avada",
+      "unsupported_version": "Seda linki ei toetata selles versioonis."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore brauser pääseb ligi sinu Hive rahakotile, et tehinguid allkirjastada. See link pärineb postituse sisust ja Ecency pole seda kinnitanud. Jätka ainult siis, kui seda usaldad:\n\n{url}"
+    },
+    "listen": {
+      "message": "Kuulamiseks on vaja {required} Points, sul on {available}.",
+      "unlock_label": "Ava · {cost} Points",
+      "preparing_audio": "Valmistan heli ette · {preparingPercent}%",
+      "waiting_in_line_ahead": "Ootan järjekorras, ees on {ahead}…",
+      "next_in_line": "Järgmine järjekorras…",
+      "preparing_about_minutes": "Valmistan heli ette, umbes {minutes} min…",
+      "preparing_audio_2": "Valmistan heli ette…",
+      "spend_confirm": "Kas kulutada {cost} Points selle postituse kuulamiseks? Heli on sinu, saad seda igal ajal uuesti esitada.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Heli loomine ei õnnestunud, sinu Points tagastati"
+    },
+    "media_pick": {
+      "preparing_video": "Valmistan videot ette...",
+      "library_hint": "Vali oma fotode seast",
+      "camera_hint": "Tee kohe uus foto",
+      "files_hint": "Sirvi selle seadme ja pilve faile",
+      "paste_hint": "Kasuta kopeeritud pilti",
+      "link_hint": "Kasuta veebist pärit pilti"
+    },
+    "media_picking": {
+      "image_types_message": "Seda failitüüpi ei toetata. Vali JPEG, PNG, GIF, WebP või HEIC pilt.",
+      "video_types_message": "Seda failitüüpi ei toetata. Vali MP4 või MOV video.",
+      "gif_too_large": "See GIF on suurem kui {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "See toiming vajab nii active- kui posting-allkirja, mida Ecency ei saa veel koos allkirjastada."
+    },
+    "poll": {
+      "fail": "Ebaõnnestus!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Sinu konto posting-volitust ei õnnestunud kontrollida. Kontrolli ühendust ja proovi uuesti."
+    },
+    "post_lists": {
+      "voters_title": "Hääletajate info ({total})",
+      "reblogs_title": "Jagamiste info ({total})",
+      "no_history_found": "Ajalugu ei leitud!",
+      "no_edit_history_available": "Selle sisu muutmisajalugu pole saadaval.",
+      "version_label": "Versioon {version}"
+    },
+    "stats": {
+      "other_device": "Muu"
+    },
+    "profile": {
+      "account_not_found": "Kontot ei leitud",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Täis {hours, plural, one {# tunni} other {# tunni}} pärast"
+    },
+    "profile_metadata_guard": {
+      "refused": "Sinu praegust profiili ei õnnestunud lugeda, proovi uuesti"
+    },
+    "profile_sheet": {
+      "fail": "Ebaõnnestus! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Kontot ei leitud"
+    },
+    "push_payload": {
+      "mentioned": "@{source} mainis kasutajat @{target}",
+      "replied": "@{source} vastas kasutajale @{target}",
+      "transferred": "@{source} tegi ülekande kasutajale @{target}",
+      "delegated": "@{source} volitas kasutajat @{target}",
+      "rewards_received": "Tasud kätte saadud",
+      "account_updated": "Konto uuendatud",
+      "account_updated_body": "Sinu konto andmeid uuendati",
+      "followed": "@{source} hakkas jälgima kasutajat @{target}",
+      "unfollowed": "@{source} lõpetas kasutaja @{target} jälgimise",
+      "ignored": "@{source} eiras kasutajat @{target}",
+      "blacklisted": "@{source} lisas kasutaja @{target} musta nimekirja",
+      "posted_in": "@{source} postitas sildi all #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Kaamera luba ei õnnestunud saada",
+      "permission_message": "Anna kaamera luba Ecency seadetes.",
+      "permission_allow": "Luba"
+    },
+    "reply_account": {
+      "switch": "Vasta teise kontona"
+    },
+    "send_journal": {
+      "your_from_went_through": "Sinu {label} kontolt @{account} läks läbi.",
+      "not_sent": "Sinu {label} kontolt @{account} ei läinud läbi. Midagi ei saadetud; saad selle uuesti alustada.",
+      "checking_whether_your_from": "Kontrollin, kas sinu {label} kontolt @{account} läks läbi. Kontrolli enne uuesti saatmist oma rahakotti."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigneri leht suleti",
+      "wrong_role": "See on sinu {given}-võti; see toiming vajab sinu {needed}-võtit.",
+      "action_id_required": "See toiming vajab turvaliseks uuesti proovimiseks toimingu ID-d."
+    },
+    "signing_router": {
+      "owner_never": "Owner-toiminguid ei allkirjastata kunagi rakenduses."
+    },
+    "spin": {
+      "key_missing": "Mängu võti puudub",
+      "score": "{score, plural, one {# Point} other {# Pointi}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Täna (UTC), lähtestub {time} pärast",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Lähtestub iga päev kell 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Logi uuesti sisse",
+      "message": "Turvaline salvestusruum lähtestati sellel seadmel. Logi uuesti sisse.",
+      "failed": "Sellel seadmel olevaid kontosid ei õnnestunud eemaldada. Proovi uuesti."
+    },
+    "store": {
+      "in_app_purchases_are": "Rakendusesisesed ostud pole selles versioonis saadaval."
+    },
+    "wallet_sends": {
+      "journal_full": "Liiga palju varasemaid saatmisi kontrollitakse veel võrgus. Oota, kuni need on kinnitatud, enne kui saadad rohkem.",
+      "check_later": "Võrk ei kinnitanud seda õigel ajal. Kontrolli enne uuesti saatmist oma rahakotti või ajalugu; rakendus kontrollib uuesti järgmisel käivitusel."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# lugemata} other {# lugemata}}",
+      "locked_text": "Ava Ecency, et näha",
+      "signed_out_text": "Logi sisse Ecencysse"
+    },
+    "posting_grant": {
+      "unreadable": "Sinu konto praeguseid volitusi ei õnnestunud lugeda. Midagi ei muudetud; proovi uuesti.",
+      "reads_disagree": "Kaks lugemist sinu konto posting-volitusest ei ühti. Midagi ei muudetud; proovi uuesti."
+    },
+    "vote": {
+      "vote_weight_must_be": "Hääle kaal peab olema vahemikus -100% kuni 100%.",
+      "please_sign_in_first": "Logi esmalt sisse."
+    },
+    "widget": {
+      "streak_name": "Ülesannete jada",
+      "write": "Kirjuta",
+      "new_wave": "Uus wave",
+      "notifications_description": "Sinu lugemata teavitused. Peidetud, kui PIN-lukk on sees.",
+      "streak_description": "Sinu päevaste ülesannete jada. Peidetud, kui PIN-lukk on sees.",
+      "compose_description": "Kirjuta postitus või uus wave.",
+      "streak_title": "Jada",
+      "daily_quests": "Päevased ülesanded",
+      "streak_hint": "Jada nägemiseks ava Perks",
+      "open_perks": "Ava Perks",
+      "open_app": "Ava Ecency",
+      "unread_caption": "{count, plural, one {lugemata} other {lugemata}}",
+      "streak_caption": "{count, plural, one {päeva jada} other {päeva jada}}"
+    },
+    "system": {
+      "dictation_channel": "Dikteerimine",
+      "listen_channel": "Kuulamine",
+      "dictation_channel_description": "Kuvatakse, kui dikteerimise salvestus käib taustal, koos Peata-toiminguga.",
+      "dictation_title": "Dikteerimise salvestus",
+      "dictation_text": "Ecency salvestab sinu dikteerimist. Peatamine jätab selle saatmata, kuni kinnitad rakenduses.",
+      "listen_channel_description": "Teavitab, kui kuulamine ei saanud taustal jätkuda.",
+      "listen_paused": "Kuulamine peatatud",
+      "listen_paused_text": "Kuulamise jätkamiseks ava Ecency.",
+      "skip_back": "Tagasi 15 sekundit",
+      "skip_forward": "Edasi 15 sekundit"
+    },
+    "permission": {
+      "face_id": "Ava Ecency PIN-i asemel Face ID-ga.",
+      "camera": "Skanni QR-koode ning tee foto või salvesta video, et see oma postitusele lisada.",
+      "photo_library_add": "Ecency salvestab postitustest allalaaditud pildid sinu fototeeki.",
+      "photo_library": "Ecency hoiab postitustest allalaaditud pilte koos Ecency albumis sinu fototeegis.",
+      "microphone": "Ecency kasutab sinu mikrofoni, et saaksid postitusi ja kommentaare dikteerida (need salvestised saadetakse transkribeerimiseks Ecencyle) ning postitusele lisatava video heli salvestada."
+    },
+    "android": {
+      "no_browser": "Brauserit pole saadaval",
+      "biometric_unlock_title": "Ava Ecency biomeetriaga",
+      "biometric_confirm": "Kinnita sõrmejälje või näoga",
+      "image_unsupported_address": "Toetamata pildiaadress",
+      "image_create_failed": "Faili ei õnnestunud luua",
+      "image_write_failed": "Faili ei õnnestunud kirjutada",
+      "image_too_large": "Pilt on liiga suur",
+      "image_download_failed": "Allalaadimine ebaõnnestus olekuga {status}",
+      "billing_disconnected": "Google Play Billing ühendus katkes.",
+      "billing_no_screen": "Pole ekraani, kus ostu näidata.",
+      "billing_error": "Google Play Billing tõrge {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Lõid sel kuul {count, plural, one {# postitust} other {# postitust}}. Jätka samas vaimus!",
-        "checkin": "Registreerusid sel nädalal {count, plural, one {# päeval} other {# päeval}}. Jätka samas vaimus!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# uus postitus} other {# uut postitust}} sildi all #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# ebaõnnestunud katse(d)} other {# ebaõnnestunud katse(d)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}-päevane seeria"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Lubatud on ainult kontod, mis on vanemad kui {days} päeva",
-        "max_choices": "• Võid valida kuni {choices} valikut"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Jäänud {executions} ülekannet",
-        "schedule_summary": "{executions} ülekannet, iga {hours} tunni järel"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Liiga lühike punktide teenimiseks ({n, plural, one {# tähemärk} other {# tähemärki}} või vähem, lingid välja arvatud)"
       },
       "chats": {
-        "people_joined": "{count} inimest liitus"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "umbes {count, plural, one {# minuti} other {# minuti}} pärast",
+        "ban-remaining-hours": "umbes {count, plural, one {# tunni} other {# tunni}} pärast",
+        "ban-remaining-days": "umbes {count, plural, one {# päeva} other {# päeva}} pärast"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Kasuta kuni {n, plural, one {# silti} other {# silti}}",
+          "too_long": "Otsing on liiga pikk. Kasuta kuni {n, plural, one {# tähemärki} other {# tähemärki}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Nõutav on vähemalt {count} tähemärki",
-        "chars_remaining": "{count} tähemärki jäänud"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Korraga saad valida kuni {count, plural, one {# pildi} other {# pilti}}"
+      },
+      "dictation": {
+        "stop_hint": "Peata, et salvestus tekstiks teha ja postitusele lisada. Kuni {m, plural, one {# minut} other {# minutit}}.",
+        "rate": "{n} Points {s, plural, one {# sekundi} other {# sekundi}} kohta"
       },
       "transfer": {
-        "powering_down_info": "Järgmine panustamise lõpetamine on {days} päeva pärast, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} kuni {max, plural, one {# tähemärki} other {# tähemärki}}"
       }
     }
   }

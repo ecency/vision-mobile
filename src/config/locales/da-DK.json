@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro-medlem"
   },
   "perks": {
     "header": "Fordele",
@@ -31,42 +31,42 @@
     "promote_desc": "Få flere øjne på dit indlæg",
     "account_boost": "Konto-boost",
     "account_boost_desc": "Boost en hvilken som helst konto",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Fyld RC op",
+    "rc_topup_desc": "Bliv ved med at poste, når du har få Resource Credits",
+    "streak_freeze_owned": "{n} i reserve",
+    "streak_freeze_buy": "Beskyt serie ({price} Points)",
+    "streak_freeze_buying": "Beskytter",
+    "streak_freeze_error": "Kunne ikke købe serie-beskyttelse. Prøv igen."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Dagligt opslag",
+    "streak": "Serie på {n} dage",
+    "keep_streak": "Hold din serie i live"
   },
   "waves": {
     "for_you": "Til dig",
     "following": "Følger",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Egne feeds",
+    "custom_feeds_subtitle": "Fastgør kilder og tags for at tilføje dem som feed-faner.",
+    "add_tag_placeholder": "Tilføj et tag",
+    "sources": "Kilder",
+    "your_feeds": "Dine feeds",
+    "trending_tags": "Populære tags",
+    "shorts_empty": "Ingen shorts at vise endnu",
+    "mute": "Gør lydløs",
+    "unmute": "Slå lyd til"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Kom i gang",
+    "subtitle": "Ny her? Waves er korte opslag og den nemmeste måde at komme i gang på.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Afvis",
+    "item_wave": "Post din første Wave",
+    "item_vote": "Stem på en Wave, du kan lide",
+    "item_reply": "Svar nogen",
+    "item_checkin": "Tjek ind for at starte din serie",
+    "all_done_title": "Alt klaret 🎉",
+    "all_done_subtitle": "Du er klar. Bliv ved med Waves!"
   },
   "profile": {
     "havent_commented": "har ikke kommenteret noget endnu",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Alder  |  Synlighed  |  Fortolkning",
     "attach_poll": "Vedhæft afstemning"
   },
+  "favorite_tags": {
+    "title": "Tags",
+    "hint": "Følg for at få besked om nye indlæg med dette tag",
+    "following_hint": "Du får besked om nye indlæg med dette tag",
+    "follow": "Følg",
+    "following": "Følger",
+    "added": "Følger tag",
+    "removed": "Følger ikke længere tagget",
+    "empty_list": "Intet her"
+  },
   "favorites": {
     "add": "Tilføj en favorit",
     "add_error": "Kunne ikke tilføje favorit",
@@ -181,7 +191,33 @@
     "payout": "Udbetaling",
     "details": "Detaljer",
     "community": "fællesskab",
-    "new_post": "Nyt indlæg"
+    "new_post": "Nyt indlæg",
+    "mute_post_title": "Gør dette indlæg tavst",
+    "unmute_post_title": "Ophæv tavsgørelse af dette indlæg",
+    "mute_post_reason": "Hvorfor gøres dette tavst?",
+    "unmute_post_reason": "Hvorfor genoprettes dette?",
+    "manage": "Administrer fællesskab",
+    "manage_members": "Medlemmer og roller",
+    "manage_settings": "Fællesskabsindstillinger",
+    "manage_activities": "Aktivitetslog",
+    "activities": "aktivitet",
+    "no_activities": "Ingen aktivitet endnu",
+    "activities_load_failed": "Kunne ikke indlæse aktivitet. Træk ned for at opdatere.",
+    "set_role": "Angiv rolle",
+    "assign_role": "Tildel rolle",
+    "assign_role_hint": "Søg efter en hvilken som helst konto, også en der ikke har tilmeldt sig, og vælg en rolle.",
+    "username_placeholder": "Brugernavn",
+    "invalid_username": "Vælg en eksisterende konto fra resultaterne",
+    "members": "medlemmer",
+    "no_members": "Ingen medlemmer fundet",
+    "members_incomplete": "Nogle medlemmer kunne ikke indlæses. Træk ned for at opdatere.",
+    "members_load_failed": "Kunne ikke indlæse medlemmer. Træk ned for at opdatere.",
+    "role_owner": "Ejer",
+    "role_admin": "Admin",
+    "role_mod": "Moderator",
+    "role_member": "Medlem",
+    "role_guest": "Gæst",
+    "role_muted": "Gjort tavs"
   },
   "trade": {
     "swap_for": "Bytter {fromAmount} til {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Kryds-post",
     "pin-blog": "Fastgør til blog",
     "copy": "kopiér link",
+    "copy-text": "kopiér tekst",
+    "open-thread": "åbn tråd",
     "unpin-community": "Frigør fra fællesskab",
+    "mute-post": "Gør indlæg tavst",
+    "unmute-post": "Ophæv tavsgørelse af indlæg",
     "mute": "Tavsgør / Bloker",
     "reblog": "reblog",
     "undo-reblog": "fortryd reblog",
@@ -232,24 +272,24 @@
     "unpin-reply": "Frigør kommentar"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Dette opslag er på {lang}. Oversæt til {target}?",
+    "translate_to": "Oversæt til {lang}",
+    "show_original": "Vis original",
+    "translated_from": "Oversat fra {lang}",
+    "change_language": "Skift sprog"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Oversæt opslag",
+    "source": "Kildesprog",
+    "target": "Målsprog",
+    "detected": "Registreret: {lang}",
+    "translate": "Oversæt",
+    "apply": "Anvend",
+    "review_note": "Tilføjer en maskinoversættelse af din egen tekst i slutningen af opslaget. Gennemgå og ret den, før du udgiver.",
+    "too_short": "Skriv lidt mere først. Oversættelse kræver mindst et par sætninger.",
+    "progress": "Oversætter {done} af {total}...",
+    "error": "Oversættelsen mislykkedes. Prøv igen.",
+    "add_title_marker": "Tilføj sprogmarkering til titlen"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Populært",
     "popular": "Populær",
     "new": "Ny",
-    "friends": "Following",
+    "friends": "Følger",
     "my_blog": "Min blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Intet her"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Skabeloner",
+    "untitled": "Unavngivet skabelon",
+    "empty_list": "Gem et opslag som skabelon fra editoren for at genbruge det her.",
+    "delete_confirm": "Er du sikker på, at du vil slette denne skabelon?",
+    "applied": "Skabelon anvendt som nyt opslag",
+    "save_as_template": "Gem som skabelon",
+    "name_placeholder": "Skabelonnavn",
+    "saved": "Skabelon gemt"
   },
   "selection_list": {
     "available": "Tilgængelige {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
+      "activities": "Alle",
+      "replies": "Svar",
+      "mentions": "Omtaler",
+      "rvotes": "Stemmer",
+      "follows": "Nye følgere",
       "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "transfers": "Overførsler",
+      "delegations": "Delegeringer",
+      "nfavorites": "Favoritter",
+      "tags": "Tags",
+      "nbookmarks": "Bogmærker",
+      "payouts": "Udbetalinger",
+      "scheduled_published": "Planlagte opslag",
+      "account_updates": "Kontoopdateringer",
+      "weekly_earnings": "Ugentlig indtjening"
     },
     "this_week": "Denne uge",
     "reblog": "rebloggede",
@@ -417,11 +458,15 @@
     "yesterday": "I går",
     "mention": "omtalt i",
     "favorites": "lavede et nyt indlæg",
+    "tags": "skrev i #{tag}",
+    "tags_bundle": "{count} nye indlæg i #{tag}",
+    "tags_title": "Nye indlæg i et tag, du følger",
     "mentions": "Omtaler",
     "spin": "Tid til at tjene flere Points",
     "last_week": "Sidste uge",
     "recent": "Nyligt",
     "ignore": "ignorerede dig",
+    "blacklist": "satte dig på sortlisten",
     "follow": "fulgte dig",
     "notification": "Notifikationer",
     "this_month": "Denne måned",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} kan nu poste og stemme på dine vegne. Hvis du ikke godkendte dette, så tilbagekald det.",
     "weekly_earnings": "Du tjente ${amount} denne uge{breakdown}",
     "payouts": "Udbetaling modtaget: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "udgav et planlagt opslag",
+    "scheduled_published_title": "Planlagt opslag udgivet",
+    "scheduled_published_body": "Dit planlagte opslag er nu live, tryk for at se det"
   },
   "recurrent": {
     "delete_failed": "Kunne ikke slette den tilbagevendende overførsel, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Åbn seneste kladde eller opret nyt indlæg",
     "reward_power_up": "Stake 100 %",
     "open_gallery": "Åbn galleri",
+    "open_files": "Vælg fra Filer",
     "clipboard_no_image": "Intet billede fundet i udklipsholderen",
     "clipboard_image_detected": "Billede i udklipsholderen",
     "paste_image": "Indsæt billede",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Senere",
     "settings_title": "Indlægsindstillinger",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Nej"
+    "support_ecency": "Støt Ecency {percent}%",
+    "alert_btn_no": "Nej",
+    "short_reply_hint": "Svar på {n} tegn eller færre giver ingen point (links tæller ikke)",
+    "short_content_hint": "For kort til at give point ({n} tegn eller færre, links ikke medregnet)"
   },
   "time": {
     "week": "uger",
@@ -655,7 +703,41 @@
     "select_emoji": "Vælg emoji",
     "more_emojis": "Flere",
     "search_emojis": "Søg efter emojis...",
-    "no_emoji_found": "Ingen emoji fundet"
+    "no_emoji_found": "Ingen emoji fundet",
+    "ban-reason-spray": "Du er sat på pause fra at skrive, fordi den samme besked blev sendt til flere kanaler på én gang.",
+    "ban-reason-mass-dm": "Du er sat på pause fra at skrive, fordi en besked blev sendt til mange personer på én gang.",
+    "ban-reason-generic": "Du er sat på pause fra at skrive i chatten.",
+    "ban-can-still-read": "Du kan stadig læse chatten.",
+    "ban-unlocks": "Du kan skrive igen {when}.",
+    "ban-remaining-soon": "om under et minut",
+    "ban-remaining-minutes": "om cirka {count} minutter",
+    "ban-remaining-hours": "om cirka {count} timer",
+    "ban-remaining-days": "om cirka {count} dage",
+    "new_group": "Ny gruppe",
+    "new_group_hint": "Tilføj {min} til {max} personer for at starte en gruppesamtale.",
+    "new_group_search": "Søg efter personer med brugernavn",
+    "new_group_full": "En gruppe kan have op til {max} andre personer.",
+    "new_group_no_results": "Ingen fundet i chatten med det navn.",
+    "new_group_search_failed": "Søgningen mislykkedes. Tjek din forbindelse, og prøv igen.",
+    "new_group_remove": "Fjern @{username}",
+    "new_group_create": "Start gruppe",
+    "new_group_failed": "Kunne ikke starte gruppen. Prøv igen.",
+    "rename_group": "Omdøb gruppe",
+    "rename_group_hint": "Giv gruppen et navn, som alle i den kan se. Lad feltet stå tomt for i stedet at vise medlemmernes navne.",
+    "group_name": "Gruppenavn",
+    "rename_group_too_long": "Et gruppenavn kan være op til {max} tegn langt.",
+    "rename_group_not_owner": "Kun den, der startede gruppen, kan omdøbe den.",
+    "rename_group_failed": "Kunne ikke omdøbe gruppen. Prøv igen.",
+    "group_renamed": "{user} omdøbte gruppen til \"{name}\"",
+    "group_name_cleared": "{user} fjernede gruppenavnet",
+    "group_members": "Gruppemedlemmer",
+    "save": "Gem",
+    "cancel": "Annuller",
+    "reactions_title": "Reaktioner",
+    "reactor_you": "Dig",
+    "reactor_unknown": "Nogen",
+    "see_who_reacted": "Tryk og hold for at se, hvem der reagerede",
+    "group": "Gruppe"
   },
   "free_estm": {
     "timer_text": "Næste gratis spin om",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transaktion mislykkedes"
   },
   "search_result": {
+    "error": "Søgningen kunne ikke gennemføres. Prøv igen",
+    "filters": {
+      "title": "Filtre",
+      "open": "Filtre",
+      "author": "Forfatter",
+      "author_placeholder": "brugernavn",
+      "category": "Kategori",
+      "category_placeholder": "fællesskab eller kategori",
+      "tags": "Tags",
+      "tags_placeholder": "adskilt med komma",
+      "type": "Type",
+      "type_all": "Alle",
+      "type_post": "Indlæg",
+      "type_comment": "Kommentarer",
+      "date": "Dato",
+      "date_week": "Sidste uge",
+      "date_month": "Sidste måned",
+      "date_year": "Sidste år",
+      "date_all": "Altid",
+      "sort": "Sortér",
+      "apply": "Anvend",
+      "active": "{n} aktive",
+      "too_many_tags": "Brug højst {n} tags",
+      "too_long": "Søgningen er for lang. Brug højst {n} tegn",
+      "needs_criteria": "Indtast et søgeord, eller en forfatter, kategori eller et tag at filtrere på"
+    },
     "communities_filter": {
       "new": "Ny",
       "my": "Mine fællesskaber",
@@ -727,7 +835,7 @@
     "title": "Krydsindlæg"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Forfatteren har oplyst brug af AI"
   },
   "ai_assist": {
     "title": "AI-skriveassistent",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Få relevante tags til dit indlæg",
     "action_generate_title": "Generér titel",
     "action_generate_title_desc": "Skab fængende titelmuligheder",
-    "action_summarize": "Recap",
+    "action_summarize": "Resumé",
     "action_summarize_desc": "Skab et kortfattet resumé",
     "action_check_grammar": "Tjek grammatik",
     "action_check_grammar_desc": "Ret grammatik- og stavefejl",
+    "action_generate_image": "Generér billede",
+    "action_generate_image_desc": "Opret et AI-billede til dit indlæg",
+    "cost_from": "fra {cost} {unit}",
     "text_label": "Din tekst",
     "text_placeholder": "Indsæt eller skriv dit indhold her...",
     "min_chars": "Mindst {count} tegn kræves",
@@ -797,16 +908,26 @@
     "remind_later": "Påmind mig senere",
     "success_subscribe": "Abonnement gennemført!",
     "payloadTooLarge": "Filstørrelsen er for stor, tilpas venligst eller upload et mindre billede",
+    "too_many_images": "Du kan vælge op til {count} billeder ad gangen",
     "fail_follow": "Følg mislykkedes!",
     "clear_user_alert": "Er du sikker på, at du vil rydde alle brugerdata?",
     "cancel": "Annuller",
     "connection_success": "Forbindelse oprettet!",
     "rc_down": "Ikke nok Resource Credits til at udføre en handling! \n\nBoost din konto for fortsat at nyde oplevelsen. Vil du booste din konto nu?",
+    "rc_down_title": "Ikke nok Resource Credits",
+    "rc_precheck_title": "Dette indlæg er måske for stort til at blive udgivet",
+    "rc_precheck_body": "Dine Resource Credits ser ud til at være for lave til et indlæg af denne størrelse.",
+    "rc_down_body": "Du har ikke nok Resource Credits til denne handling.\n\nFyld op med Points nu for at fortsætte, eller boost din konto for altid.",
+    "rc_down_topup": "Fyld RC op med Points",
+    "rc_down_boost": "Boost konto",
     "done": "Færdig",
     "something_wrong_alt": "Prøv i mellemtiden Ecency.com fra din browser",
     "same_user": "Denne bruger er allerede tilføjet til listen",
     "fail": "Mislykkedes!",
     "operation_failed_with_reason": "{operation} mislykkedes: {reason}",
+    "request_timed_out": "Forbindelsen tager for lang tid. Tjek dit netværk, og prøv igen.",
+    "load_failed_retry": "Vi kunne ikke indlæse dette. Prøv igen.",
+    "retrying": "Prøver igen...",
     "wallet_refresh_failed": "Opdatering af tegnebog mislykkedes. Prøv igen.",
     "wallet_refresh_missing_account": "Opdatering af tegnebog mislykkedes: konto mangler.",
     "boost_failed": "Boost mislykkedes.",
@@ -950,30 +1071,30 @@
   },
   "post": {
     "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
+    "upvoted": "Upvotet",
+    "downvoted": "Downvotet",
+    "upvote_hint": "Tryk to gange for at åbne stemmemuligheder",
+    "payout_details": "Udbetalingsdetaljer",
+    "a11y_votes": "{count, plural, one {# stemme} other {# stemmer}}",
+    "a11y_voters_hint": "Se stemmer",
     "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "a11y_reblogs_hint": "Se reblogs",
+    "a11y_comments": "{count, plural, one {# kommentar} other {# kommentarer}}",
+    "a11y_comments_hint": "Se kommentarer",
+    "a11y_reply_hint": "Svar",
+    "a11y_tip": "Send drikkepenge",
+    "a11y_tips": "{count, plural, one {# drikkepenge} other {# drikkepenge}}",
+    "a11y_edit": "Rediger kommentar",
+    "a11y_delete": "Slet kommentar",
+    "a11y_show_replies": "Vis svar",
+    "a11y_hide_replies": "Skjul svar",
+    "a11y_post_options": "Opslagsmuligheder",
+    "a11y_views": "{count, plural, one {# visning} other {# visninger}}",
+    "source_ecency": "Udgivet med Ecency",
+    "a11y_stats_hint": "Se opslagsstatistik",
     "image": "Billede",
     "reveal_muted": "GJORT LYDLØS\nTryk for at vise indhold",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Tryk for at indlæse billedet",
     "in": "i",
     "poll": "AFSTEMNING",
     "copy_link": "Kopiér link",
@@ -998,13 +1119,14 @@
     "save_to_local": "Download til enhed",
     "muted": "Indhold er gjort lydløst på grund af overtrædelse",
     "community_muted": "Indhold gjort lydløst på grund af overtrædelse af fællesskabets retningslinjer",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Indhold fra en konto med lavt omdømme",
+    "muted_downvoted": "Indhold downvotet af brugere",
+    "muted_low_trust": "Konto med lav omdømme og et ubekræftet eksternt link",
+    "muted_reveal": "Tryk for at vise",
     "promoted": "PROMOVERET",
     "image_saved": "Billede gemt i fotogalleriet",
     "words": "Ord",
     "reading": "Læsning",
-    "listen": "Lyt",
     "min": "min",
     "summarize_start": "Start"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Intet eksisterende indlæg",
     "invalid_link": "URL'en er ugyldig, du kan prøve igen med en gyldig URL eller prøve at åbne den i en webbrowser",
-    "no_existing_user": "Ingen eksisterende bruger"
+    "no_existing_user": "Ingen eksisterende bruger",
+    "posting_key_request": "{requester} beder om den private posting-nøgle til @{username}.\n\nFortsæt kun, hvis du stoler på anmodningen.",
+    "posting_key_request_unnamed": "En anden app beder om den private posting-nøgle til @{username}.\n\nFortsæt kun, hvis du stoler på anmodningen.",
+    "auth_request_as_user": "{requester} vil logge dig ind som @{username}.\n\nKun dit brugernavn og et bevis på login deles. Ingen nøgle forlader Ecency.",
+    "auth_request_as_current": "{requester} vil logge dig ind med din Ecency-konto.\n\nKun dit brugernavn og et bevis på login deles. Ingen nøgle forlader Ecency."
   },
   "payout": {
     "breakdown": "Specifikation",
@@ -1065,7 +1191,7 @@
     "open": "Åbn URL",
     "invalid_key_desc": "log venligst ind med {key}-nøgle eller hovednøgle for at udføre denne transaktion",
     "auth_transfer_confirm": "Bekræft overførsel til {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Godkend kun, hvis du stoler på kilden til dette link. Godkendelsen udsender handlingen nedenfor fra din konto med din {authority}-nøgle."
   },
   "voters_dropdown": {
     "rewards": "BELØNNINGER",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Må kun indeholde bogstaver, tal og bindestreg",
       "username_no_ascii_first_letter_error": "Skal starte med et bogstav",
       "username_contains_double_hyphens": "Må ikke indeholde dobbelte bindestreger",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Dette brugernavn minder for meget om en kryptobørskonto og kan forvirre andre. Vælg et mere unikt navn.",
+      "username_restricted_prefix": "Brugernavne, der starter med 'uid' efterfulgt af tal, er ikke tilladt, da de ofte bruges til at udgive sig for at være andre. Vælg et andet navn.",
       "username_contains_underscore": "Må ikke indeholde understregningstegn"
     },
     "500_error": "Din anmodning kunne ikke behandles, tilmeldingskøen er sandsynligvis fuld! Prøv igen om et par minutter...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Brugernavnet er allerede optaget",
+      "14": "E-mailadressen er allerede registreret",
+      "15": "Indtast en gyldig e-mailadresse",
+      "16": "Indtast et gyldigt brugernavn",
+      "17": "Brugernavnet er for langt, vælg et kortere",
+      "19": "Brug en permanent e-mailadresse, eller få i stedet en Premium-konto",
+      "21": "Denne henvisning er ikke gyldig",
+      "28": "Din anmodning kunne ikke behandles: tilmeldingskøen er sandsynligvis fuld. Prøv igen om et par minutter.",
+      "107": "VPN-forbindelse registreret. Slå din VPN fra og prøv igen, eller få i stedet en Premium-konto.",
+      "110": "For at forhindre misbrug begrænser vi antallet af konti pr. person/netværk. Prøv igen fra et andet netværk.",
+      "111": "Tor-forbindelse registreret. Deaktiver Tor under tilmeldingen.",
+      "112": "Vi kunne ikke bekræfte din forbindelse lige nu. Prøv igen om et par minutter."
     },
     "have_account_text": "Har du allerede en konto?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Få en fuldgyldig Hive-konto. Denne metode har grundlæggende kontroller for at sikre, at botnet ikke misbruger vores tilmeldingsfaucet.",
     "btn_register": "Registrér gratis",
     "title": "Gratis konto"
+  },
+  "dictation": {
+    "title": "Diktér",
+    "start": "Optag",
+    "stop": "Stop",
+    "record_more": "Optag mere",
+    "done": "Færdig",
+    "recording": "Optager",
+    "stop_hint": "Stop for at transskribere og føje til dit indlæg. Op til {m} minutter.",
+    "inserted": "Føjet til dit indlæg. Optag mere, eller tryk på Færdig.",
+    "transcribing": "Transskriberer",
+    "rate": "{n} Points pr. {s} sekunder",
+    "cost_running": "{n} Points indtil videre",
+    "cost_running_free": "Gratis indtil videre",
+    "free_remaining": "Dine næste {n} x {s}s er gratis i dag",
+    "price_loading": "Tjekker pris",
+    "price_error": "Kunne ikke indlæse prisen for transskribering.",
+    "denied": "Ecency har brug for adgang til mikrofonen for at kunne diktere. Tillad det i Indstillinger, og prøv igen.",
+    "error_empty": "Der blev ikke registreret tale i optagelsen.",
+    "error_insufficient_points": "Ikke nok Points til at transskribere optagelsen.",
+    "error_rate_limited": "For mange optagelser lige nu. Prøv igen om lidt.",
+    "error_too_long": "Optagelsen er for lang til at transskribere.",
+    "error_failed": "Kunne ikke transskribere optagelsen. Prøv igen.",
+    "error_recorder": "Kunne ikke starte optagelsen. Prøv igen."
   },
   "wallet": {
     "delegations_out": "Udgående delegeringer",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Regelmæssig check-in giver dig 0,25 points.",
     "fill_transfer_from_savings": "Opsparing udført",
     "activities": "Aktiviteter",
+    "no_activities": "Ingen transaktioner endnu",
+    "activities_failed": "Kunne ikke indlæse transaktioner. Træk ned for at prøve igen.",
     "tap_update": "Tryk for at opdatere",
     "mining_lottery": "Lotteri vundet",
     "checkin": "Tjek ind",
     "tokens_transfer": "Tokens overført",
     "outgoing_transfer_title": "Overførsel/Gave",
+    "burned_title": "AI-brug",
+    "burned_description": "Points brugt på en AI-funktion",
+    "burn_refund_title": "AI-refundering",
+    "burn_refund_description": "Points returneret efter en mislykket AI-anmodning",
     "manage_assets": "Tilføj / fjern aktiver",
     "selected_assets": "Valgte aktiver",
     "nft_setPropertyPermissions": "Egenskabstilladelser angivet for NFT-symbol",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Tokens opdater præcision",
     "tokens_transferOwnership": "Token-ejerskab overført",
     "withdraw_vesting": "Fjern stake",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Udbetalingskonti",
     "delegate_engine": "Deleger",
     "market_close": "Ordre lukket",
     "nftmarket_transferFee": "Købsordregebyr",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "KØB POINTS",
     "escrow_approve": "Escrow-godkendelse",
     "expires": "udløber",
+    "transaction_id": "Transaktions-ID",
+    "copy_transaction_id": "Kopiér transaktionslink",
+    "filter_activities": "Filtrér aktiviteter",
+    "filter_activities_desc": "Vælg, hvilke handlinger denne historik henter",
+    "filter_all": "Vælg alle",
+    "filter_none": "Ryd alle",
+    "filter_apply": "Anvend",
     "author_reward": "Forfatterbelønning",
     "withdraw_hbd": "Hæv opsparing",
     "convert_request": "Konverteringsanmodning",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Fyld RC op",
+    "desc": "Et kortvarigt RC-boost, så du kan blive ved med at poste.",
+    "confirm": "Brug Points til at fylde dine Resource Credits op?",
+    "insufficient": "Du har ikke nok Points.",
+    "buy_points": "Køb Points"
   },
   "ai_image_generator": {
     "title": "AI-billedgenerator",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Tilpasset ({hours}t)",
+    "balance_load_failed": "Kunne ikke indlæse din saldo. Tryk for at prøve igen.",
+    "precision_load_failed": "Kunne ikke indlæse tokenets oplysninger, så kun hele beløb kan sendes. Tryk for at prøve igen.",
     "close": "Luk",
     "favorite_username_placeholder": "Brugernavn",
     "invalid_recipient_qr": "Kunne ikke finde et brugernavn i denne QR-kode.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Administrer autoriteter",
     "pincode": "Pincode",
     "general": "Generelt",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Støt Ecency",
+    "support_beneficiary": "Del opslagsbelønninger med Ecency",
+    "support_beneficiary_percent": "Andel af opslagsbelønninger",
+    "support_curation": "Tilbagehold en del af kurationsbelønningerne",
+    "support_curation_percent": "Tilbageholdelse af kurationsbelønninger",
     "feedback_body": "Skriv din besked her!\n\nHive-brugernavn: {username}\nApp-version: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Vis billeder",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Kommentar",
       "bookmark": "Bogmærker",
+      "tags": "Tags",
       "reblog": "Reblog",
       "favorite": "Favoritter",
       "mention": "Omtale",
@@ -1599,10 +1765,10 @@
       "transfers": "Overførsler",
       "vote": "Stem",
       "follow": "Følg",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Planlagt opslag udgivet",
+      "payouts": "Udbetalinger",
+      "account_update": "Kontoopdateringer",
+      "weekly_earnings": "Ugentlig indtjening",
       "fcm_unavailable": "Push-notifikationer understøttes ikke på denne enhed. Du vil kun modtage notifikationer, mens appen er åben."
     },
     "keys_warning": "Følsomme kontooplysninger!\nEcency skal sikres med en PIN-kode, før du kan se private nøgler.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Send feedback",
     "rate_app": "Bedøm Ecency",
+    "email_digests": "E-mailoversigter",
     "rate": "Bedøm",
     "dm-privacy-updated": "DM-privatlivsindstillinger opdateret",
     "dm-privacy-failed": "Kunne ikke opdatere DM-privatlivsindstillinger",
@@ -1685,19 +1852,29 @@
     "request_sent": "Din anmodning om sletning er sendt",
     "confirm_delete_body": "Er du sikker på, at du vil slette kontoen? Det vil slette alle dine data"
   },
-  "tts": {
-    "settings_title": "Indstillinger for tekst-til-tale",
-    "voice": "Stemme",
-    "voice_hint": "Systemets standardstemme vil blive brugt",
-    "speed": "Hastighed",
-    "pitch": "Toneleje",
-    "test_voice": "Test stemme",
-    "settings_info": "Disse indstillinger vil blive brugt, når indlæg læses højt",
+  "listen": {
+    "title": "Lyt til dette indlæg",
+    "minutes": "~{n} min.",
+    "login": "Log ind",
+    "unlock": "Lås op · {n} Points",
+    "confirm": "Brug {n} Points på at lytte til dette indlæg? Lyden er din og kan afspilles igen når som helst.",
+    "not_enough_title": "Ikke nok Points",
+    "not_enough": "Det koster {required} Points at lytte, og du har {available}.",
+    "get_points": "Hent Points",
+    "unlock_failed": "Kunne ikke låse lyden op, prøv igen",
+    "failed_refunded": "Lyden kunne ikke laves, dine Points er refunderet",
+    "preparing": "Forbereder lyd…",
+    "preparing_eta": "Forbereder lyd, cirka {n} min.…",
+    "preparing_progress": "Forbereder lyd · {n}%",
+    "waiting": "I kø, {n} foran dig…",
+    "next_in_line": "Du er den næste i køen…",
     "play": "Afspil",
     "pause": "Pause",
-    "language": "Sprog",
-    "language_auto": "Find automatisk",
-    "language_hint": "Automatisk registrering vælger sproget baseret på indlæggets indhold"
+    "seek": "Søg",
+    "speed": "Afspilningshastighed",
+    "language": "Lydsprog",
+    "unavailable": "Lyden kunne ikke indlæses.",
+    "retry": "Prøv igen"
   },
   "posting_authority": {
     "title": "Aktivér hurtigere udgivelse",
@@ -1732,7 +1909,7 @@
     "error-auth": "Godkendelse mislykkedes. Log venligst ind igen.",
     "error-generic": "Videoupload mislykkedes. Prøv venligst igen.",
     "error-too-long-short": "Korte videoer skal være 60 sekunder eller mindre.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Et opslag kan kun indeholde én video. Fjern den nuværende video, før du tilføjer en anden.",
     "select_source": "Tilføj video",
     "record": "Optag video",
     "choose_library": "Vælg fra bibliotek"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Del en hurtig opdatering"
   },
+  "newsletter": {
+    "screen_title": "E-mailoversigter",
+    "title": "{list}",
+    "body_own": "En ugentlig eller månedlig e-mailoversigt over dine notifikationer.",
+    "body_creator": "Nye indlæg af {list} i din indbakke.",
+    "body_community": "En oversigt over nye indlæg i {list} på e-mail.",
+    "body_site": "Det bedste fra Ecency i din indbakke.",
+    "first_publish_title": "Tillykke med dit første indlæg!",
+    "first_publish_body": "Vil du have en e-mailoversigt over dine notifikationer? Ugentligt eller månedligt, ret eller afmeld når som helst i Indstillinger.",
+    "list_own": "Oversigt over mine notifikationer",
+    "list_site": "Ecency-nyhedsbrev",
+    "status_active": "Du abonnerer.",
+    "status_pending": "Afventer bekræftelse via e-mail.",
+    "status_short_active": "aktiv",
+    "status_short_pending_confirmation": "afventer",
+    "status_short_suppressed": "stoppet",
+    "status_short_ended": "afsluttet",
+    "cadence_weekly": "Ugentligt",
+    "cadence_monthly": "Månedligt",
+    "email_placeholder": "dig@eksempel.dk",
+    "subscribe": "Abonnér",
+    "update": "Opdatér",
+    "resend": "Send bekræftelse igen",
+    "leave": "Forlad oversigt",
+    "cancel": "Annuller",
+    "ok": "OK",
+    "manage": "Administrer",
+    "check_inbox_title": "Tjek din indbakke",
+    "check_inbox_body": "Vi har sendt et bekræftelseslink til {email}. Abonnementet starter, når du bekræfter.",
+    "subscribed": "Abonnerer på e-mailoversigten",
+    "left": "Forlod oversigten",
+    "refused": "Denne adresse kan ikke tilmeldes.",
+    "unavailable": "E-mailoversigter er ikke tilgængelige lige nu.",
+    "too_many": "For mange forsøg, prøv igen senere.",
+    "fail": "Noget gik galt, prøv igen.",
+    "empty": "Ingen e-mailoversigter endnu. Abonnér nedenfor for at komme i gang.",
+    "discover": "Få mere på e-mail",
+    "stop_all": "Stop alle",
+    "stop_all_title": "Stop al e-mail?",
+    "stop_all_body": "Der sendes ikke mere Ecency-mail til {email}. Abonnementer under andre adresser bliver ved.",
+    "stop_all_ok": "Stop alle",
+    "stop_all_done": "Adressen er afmeldt al mail",
+    "profile_option": "E-MAILOVERSIGT",
+    "subscriber_count": "{weekly} ugentlige • {monthly} månedlige e-mailabonnenter",
+    "community_button": "Nyhedsbrev"
+  },
+  "mod_notes": {
+    "title": "Tilføj en begrundelse",
+    "placeholder": "Begrundelse (synlig for andre moderatorer)",
+    "confirm": "Bekræft",
+    "cancel": "Annuller"
+  },
+  "community_settings": {
+    "title_header": "Fællesskabsindstillinger",
+    "title_label": "Titel",
+    "about": "Om",
+    "lang": "Sprog",
+    "description": "Beskrivelse",
+    "rules": "Regler",
+    "nsfw": "Upassende på arbejde",
+    "save": "Gem",
+    "required": "Påkrævet",
+    "title_length": "Mellem {min} og {max} tegn",
+    "owner_admin_only": "Kun ejeren og administratorerne kan ændre disse indstillinger."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Udvidet",
+        "collapsed": "Sammenfoldet"
+      },
+      "a11y_chat": {
+        "quote": "Svarer {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Vælg",
+        "deselect": "Fravælg"
+      },
+      "store": {
+        "billing_unavailable": "Køb i appen er ikke tilladt på denne enhed.",
+        "verification_failed": "App Store kunne ikke bekræfte dette køb.",
+        "cancelled": "Køb annulleret",
+        "unknown_result": "Ukendt købsresultat"
+      },
+      "navigation": {
+        "feed_unavailable": "Dette feed er der ikke adgang til endnu.",
+        "link_cannot_open": "Dette link kan ikke åbnes.",
+        "video_cannot_play": "Denne video kan ikke afspilles."
+      },
+      "media": {
+        "load_failed": "Dette element kunne ikke indlæses. Tjek din forbindelse, og prøv igen.",
+        "loading": "Indlæser medie",
+        "download_failed": "Download mislykkedes med status {status}"
+      },
+      "sign_in": {
+        "required": "Login påkrævet",
+        "to_reply": "Log ind for at svare.",
+        "to_vote": "Log ind for at stemme.",
+        "button": "Log ind"
+      },
+      "account": {
+        "logout_user": "Log @{username} ud"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# stemme} other {# stemmer}}  •  {replies, plural, one {# svar} other {# svar}}",
+        "voting_power": "Stemmekraft {percent}",
+        "remove_favourite": "Fjern fra favoritter",
+        "add_favourite": "Føj til favoritter"
+      },
+      "waves": {
+        "clear_tag_filter": "Ryd tagfilter {tag}",
+        "new_wave": "Ny wave",
+        "replies_open_thread": "{count, plural, one {# svar, åbn tråd} other {# svar, åbn tråd}}",
+        "characters": "{count} af {max} tegn",
+        "retry": "{message}\nPrøv igen",
+        "playing": "Afspiller {permlink}",
+        "video_attached_remove": "Video vedhæftet, fjern",
+        "image_attached_remove": "Vedhæftet billede, fjern",
+        "take_photo": "Tag foto",
+        "edit_poll": "Rediger afstemning",
+        "add_poll": "Tilføj afstemning",
+        "add_video": "Tilføj video"
+      },
+      "reading": {
+        "reply_to": "Svar til {username}",
+        "opens_post": "Åbner indlægget",
+        "sort_comments": "Sortér kommentarer",
+        "sort_comments_value": "Sortér kommentarer, {sort}",
+        "no_comments": "Ingen kommentarer endnu.",
+        "loading_post": "Indlæser indlæg",
+        "show_version": "Vis version",
+        "show_changes": "Vis ændringer",
+        "replying_to": "Svarer @{username}",
+        "reply_text": "Svartekst",
+        "translate_from": "Fra",
+        "translate_to": "Til"
+      },
+      "feed": {
+        "tab_pinned": "{label}, fastgjort",
+        "tab_add": "{label}, tilføj",
+        "customise": "Tilpas"
+      },
+      "card": {
+        "in_category": "i {category}",
+        "pinned": "Fastgjort",
+        "by_author": "af {username}",
+        "payout": "udbetaling {payout}",
+        "payout_declined": "udbetaling {payout}, afvist",
+        "reblogged_by": "Rebloggede af {username}"
+      },
+      "shell": {
+        "close_menu": "Luk menu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniature, vælg et andet billede",
+        "words": "{count, plural, one {# ord} other {# ord}}",
+        "poll_min_age": "Min. kontoalder (dage): {days}",
+        "poll_max_options": "Maks. valgmuligheder: {count}",
+        "thumbnail_selected": "Valgt miniature",
+        "thumbnail": "Miniature",
+        "uploaded_image": "Uploadet billede",
+        "community_search": "søg"
+      },
+      "vote": {
+        "not_voted": "Ikke stemt",
+        "voting": "Stemmer",
+        "failed_with": "Stemmen mislykkedes: {message}",
+        "failed": "Stemmen mislykkedes",
+        "payout": "Udbetaling {payout}",
+        "payout_declined": "Udbetaling {payout}, afvist",
+        "percent": "{percent} procent",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "Til",
+        "off": "Fra"
+      },
+      "lock": {
+        "biometric_reason": "Slå biometrisk oplåsning til for Ecency",
+        "offer_title": "Lås op med {method}",
+        "offer_use": "Brug {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Nøgler skjules, mens skærmen optages eller spejles.",
+        "screenshot_notice": "Der blev taget et skærmbillede. Private nøgler blev skjult igen; hvis skærmbilledet viser en nøgle, så slet det.",
+        "hold_hint": "Tryk og hold på en nøgle for at vise den.",
+        "hold_to_show": "Hold for at vise"
+      },
+      "wallet": {
+        "cancel_order": "Annullér denne ordre?",
+        "days": "{count, plural, one {# dag} other {# dage}}"
+      },
+      "chat": {
+        "reactors_hint": "Tryk og hold for at se, hvem der reagerede",
+        "see_reactors": "Se, hvem der reagerede"
+      },
+      "esie": {
+        "still": "{mood}, stille"
+      }
+    },
+    "ui": {
+      "profile_of": "Profil for @{username}",
+      "preview": "Forhåndsvisning ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Udløber om {time}",
+      "expired": "Udløbet. Luk, og prøv igen.",
+      "user_has_no_posts": "@{username} har ikke skrevet noget endnu",
+      "attach_image": "Vedhæft billede",
+      "auto": "Auto",
+      "back": "Tilbage",
+      "hot": "HOT",
+      "image_of": "Billede {index} af {count}",
+      "new": "NYT",
+      "nsfw_tap_to_reveal": "NSFW Tryk for at vise",
+      "new_reply": "Nyt svar",
+      "remove": "Fjern",
+      "unlock_ecency": "Lås Ecency op",
+      "update_it": "Opdatér det",
+      "update_it_or_post_this_as": "Opdatér det, eller send dette som et nyt svar?",
+      "use_pin": "Brug PIN",
+      "your_reply_was_already_posted": "Dit svar er allerede sendt",
+      "error_try_again": "{message} Prøv igen?",
+      "auth": {
+        "account_label": "Konto: @{username}",
+        "approve_the_request_in_your_wallet": "Godkend anmodningen i din tegnebogsapp.",
+        "copy_key": "Kopiér {title}",
+        "current_account": "Nuværende konto",
+        "qr_code": "QR-kode",
+        "requested_by": "Anmodet af {requester}",
+        "pin_digits": "{filled} af {total, plural, one {# ciffer} other {# cifre}}",
+        "private_key_shown": "{title}, privat nøgle vist",
+        "open_wallet_app": "Åbn tegnebogsapp",
+        "hiveauth_scan": "Godkend i Hive Keychain eller en anden HiveAuth-tegnebog: åbn den på denne enhed, eller scan denne kode med den.",
+        "switching": "Skifter...",
+        "logout_all": "Log ud af alle konti",
+        "logout_all_title": "Log ud af alle konti på denne enhed?",
+        "stored_key": "@{username} er allerede logget ind på denne enhed. De gemte nøgler bliver, kun sessionen fornyes.",
+        "stored_hivesigner": "@{username} er allerede logget ind med HiveSigner på denne enhed. Sessionen erstattes.",
+        "stored_hiveauth": "@{username} er logget ind med HiveAuth på denne enhed. Der signeres i stedet med HiveSigner.",
+        "method_key": "Nøgle",
+        "logout_failed": "Logud mislykkedes"
+      },
+      "browser": {
+        "account": "Konto",
+        "authority": "Myndighed",
+        "phishing": "Advarsel: Dette domæne er markeret som et kendt phishingsite. Fortsæt med yderste forsigtighed."
+      },
+      "chat": {
+        "cancel_edit": "Annullér redigering",
+        "cancel_reply": "Annullér svar",
+        "copied_to_clipboard": "Kopieret til udklipsholder",
+        "edited_at": "Redigeret {time}",
+        "group_options": "Gruppeindstillinger",
+        "pinned_messages": "Fastgjorte beskeder",
+        "remove_user": "Fjern @{username}",
+        "sort_by_name": "Sortér efter navn",
+        "more": "Mere",
+        "reaction_label": "{emoji} {count}. Tryk og hold for at se, hvem der reagerede",
+        "members": "Medlemmer"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Der findes allerede et indlæg på dette link, og det adskiller sig fra det, du sendte. Opdatér det, eller udgiv som nyt?",
+        "a_scheduled_post_is_published_by": "Et planlagt indlæg udgives af Ecency på det valgte tidspunkt. Det kræver posting-myndigheden for ecency.app på din konto. Dine nøgler og andre myndigheder forbliver uændrede. At give den kræver din active-nøgle.",
+        "ai_assist": "AI-assistent",
+        "ai_tools": "AI-værktøjer",
+        "allow_ecency_to_publish_for_you": "Lad Ecency udgive for dig?",
+        "bold": "Fed",
+        "clone": "Klon",
+        "cost": "Pris: {cost}",
+        "could_not_store_the_draft_on": "Kunne ikke gemme kladden på denne enhed. Hold appen åben, og gem kladden.",
+        "draft": "KLADDE",
+        "delete_count": "Slet ({count})",
+        "dictate_desc": "Tal, og udskriften kommer ind i dit indlæg",
+        "discard": "Kassér",
+        "discard_changes": "Kassér ændringer?",
+        "grant": "Giv",
+        "italic": "Kursiv",
+        "keep_editing": "Fortsæt redigering",
+        "my_blog": "MIN BLOG",
+        "my_communities": "MINE FÆLLESSKABER",
+        "new_post": "Nyt indlæg",
+        "notice": "Bemærk",
+        "restore": "Gendan",
+        "restore_unsaved_changes": "Gendan ikke-gemte ændringer?",
+        "saved": "Gemt",
+        "top_communities": "TOPFÆLLESSKABER",
+        "table": "Tabel",
+        "text_format": "Tekstformat",
+        "this_link_is_already_in_use": "Dette link er allerede i brug",
+        "untitled": "Uden titel",
+        "update_it_or_publish_this_as": "Opdatér det, eller udgiv dette som et nyt indlæg?",
+        "you_have_unsaved_changes_from_an": "Du har ikke-gemte ændringer fra en tidligere redigering. Indlægget er ændret siden da; hvis du gendanner dem, erstattes teksten nedenfor.",
+        "your_edits_were_not_published": "Dine ændringer blev ikke udgivet.",
+        "your_post_was_already_published": "Dit indlæg er allerede udgivet",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniature, tryk for at vælge et andet billede",
+        "thumbnail_number": "Miniature {number}",
+        "recording_busy": "En optagelse er allerede i gang. Afslut den først i kameraet.",
+        "photo_lost": "Fotoet gik tabt, mens kameraet var åbent. Tag det igen.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# ord} other {# ord}}",
+        "community_search": "søg"
+      },
+      "profile": {
+        "open_wallet": "Åbn tegnebog",
+        "your_wallet_is_on_the_wallet": "Din tegnebog findes under fanen Tegnebog.",
+        "user_has_no_comments": "@{username} har ikke kommenteret noget endnu",
+        "votes_count": "{count, plural, one {# stemme} other {# stemmer}}",
+        "replies_count": "{count, plural, one {# svar} other {# svar}}",
+        "menu": "Mere",
+        "users": "Brugere"
+      },
+      "reading": {
+        "apply": "ANVEND",
+        "add_tag": "Tilføj tag",
+        "age": "Alder",
+        "audio_language": "Lydsprog",
+        "available_filters": "Tilgængelige filtre",
+        "could_not_unlock_the_audio_please": "Kunne ikke låse lyden op, prøv igen",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Lyt til dette indlæg",
+        "log_in": "Log ind",
+        "mark_all_as_read": "Markér alle som læst",
+        "mark_as_read": "Markér som læst",
+        "more_replies": "Flere svar",
+        "not_enough_points": "Ikke nok Points",
+        "nothing_here_yet": "Intet her endnu.",
+        "open_editor": "Åbn editor",
+        "pause_voice": "Sæt stemme på pause",
+        "play_voice": "Afspil stemme",
+        "playback_speed": "Afspilningshastighed",
+        "publishing_in_waves": "Udgiver i Waves",
+        "quests_done": "Gennemførte opgaver",
+        "read": "Læs",
+        "remove_vote": "Fjern stemme",
+        "seek": "Søg",
+        "select_community": "Vælg fællesskab",
+        "selected_filters": "Valgte filtre",
+        "the_audio_could_not_be_loaded": "Lyden kunne ikke indlæses.",
+        "this_post_does_not_exist_or": "Dette indlæg findes ikke eller er slettet.",
+        "unread": "Ulæst",
+        "voice_position": "Stemmens position",
+        "vote_weight": "Stemmevægt",
+        "reblogged_by": "rebloggede af {username}",
+        "no_more_posts": "Ikke flere indlæg.",
+        "favourite": "Favorit",
+        "no_votes_yet": "Ingen stemmer endnu",
+        "no_comments_yet": "Ingen kommentarer endnu. Vær den første!",
+        "comments_count": "Kommentarer ({count})",
+        "sending_to_chain": "sender til kæden",
+        "compare": "Sammenlign",
+        "your_vote": "Din stemme",
+        "reply_to": "Svar til @{username}",
+        "what_do_you_think": "Hvad synes du?",
+        "clear_tag_filter": "Ryd tagfilter",
+        "tab_selected": "{title}, valgt",
+        "add_tag_feed": "Tilføj tagfeed",
+        "feed_pinned": "{label}, fastgjort",
+        "attached_image_remove": "Vedhæftet billede, tryk for at fjerne",
+        "camera": "Kamera",
+        "files": "Filer",
+        "paused": "På pause",
+        "in_topic": "i {topic}",
+        "poll_vote": "Stem",
+        "reply": "Svar",
+        "mute_sound": "Slå lyd fra",
+        "unmute_sound": "Slå lyd til",
+        "leaderboard_activities": "Aktiviteter",
+        "leaderboard_reward": "Belønning",
+        "sort_votes": "Stemmer"
+      },
+      "shell": {
+        "account_of": "Konto @{username}",
+        "account_signed_out": "Konto, logget ud",
+        "close_tab": "Luk fane",
+        "coming_soon_to_the_native_app": "Kommer snart til den native app.",
+        "create": "Opret",
+        "expand": "Udvid",
+        "forward": "Frem",
+        "loading": "Indlæser",
+        "new_tab": "Ny fane",
+        "reload": "Genindlæs",
+        "sent": "Sendt",
+        "tab_unread": "{title}, {count} ulæste",
+        "no_app_for_link": "Ingen app kan åbne dette link."
+      },
+      "wallet": {
+        "product_not_available": "Produktet er ikke tilgængeligt.",
+        "repeat": "Gentag"
+      },
+      "copied": "Kopieret",
+      "trending_caps": "TRENDING",
+      "move_up": "Flyt op",
+      "move_down": "Flyt ned",
+      "scroll_to_top": "Rul til toppen",
+      "load_more": "Mere"
+    },
+    "wallet": {
+      "checking": "Tjekker med netværket",
+      "leave_title": "Sender stadig",
+      "leave_message": "Dette sendes eller tjekkes stadig med netværket. Du kan forlade denne skærm: appen giver besked, når det er færdigt.",
+      "stay": "Bliv",
+      "collateralized_convert_request": "Anmodning om sikret konvertering",
+      "op_transfer": "overførsel",
+      "op_power_up": "power up",
+      "op_power_down_change": "ændring af power down",
+      "op_delegation": "delegering",
+      "op_savings_deposit": "indbetaling til opsparing",
+      "op_savings_withdrawal": "udbetaling fra opsparing",
+      "op_conversion": "konvertering",
+      "op_swap": "bytte",
+      "op_order_cancel": "annullering af ordre",
+      "op_reward_claim": "afhentning af belønning",
+      "op_withdraw_route_change": "ændring af udbetalingsrute",
+      "op_token_operation": "tokenhandling"
+    },
+    "notification": {
+      "amount_unknown": "Beløb ikke tilgængeligt",
+      "weekly_earnings_breakdown": "Du tjente ${amount} i denne uge - ${authorUsd} fra indlæg, ${curationUsd} fra kuratering.",
+      "weekly_earnings_total": "Du tjente ${amount} i denne uge fra dine indlæg og kuratering."
+    },
+    "settings": {
+      "open": "Åbn",
+      "feedback_subject": "Feedback/Fejlrapport",
+      "unknown_user": "Ukendt bruger"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Følgere",
+      "spin_game": "Snurrespil",
+      "edit_profile": "Rediger profil",
+      "redeem_points": "Indløs Points",
+      "community": "Fællesskab",
+      "community_members": "Fællesskabsmedlemmer",
+      "community_activities": "Fællesskabsaktivitet",
+      "browser": "Browser",
+      "asset_details": "Aktivdetaljer",
+      "edit_history": "Redigeringshistorik",
+      "welcome": "Velkommen",
+      "chat": "Chat",
+      "backup_keys": "Sikkerhedskopiér nøgler",
+      "trade": "Handel",
+      "ai_image_generator": "AI-billedgenerator",
+      "select_assets": "Vælg aktiver",
+      "poll": "Afstemning",
+      "bot_comments": "Botkommentarer"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Handlinger, der kræver owner-nøglen, kan ikke signeres i Ecency.",
+      "post": "Indlæg/Kommentar",
+      "custom": "Brugerdefineret JSON",
+      "sign_buffer": "Signér besked",
+      "send_token": "Send token",
+      "witness_vote": "Witness-stemme",
+      "proxy": "Angiv proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Udsend",
+      "sign_tx": "Signér transaktion",
+      "encode": "Kod besked",
+      "decode": "Bekræft nøgle",
+      "add_account_authority": "Tilføj kontomyndighed",
+      "remove_account_authority": "Fjern kontomyndighed",
+      "add_key_authority": "Tilføj nøglemyndighed",
+      "remove_key_authority": "Fjern nøglemyndighed",
+      "create_claimed_account": "Opret konto",
+      "create_proposal": "Opret forslag",
+      "remove_proposal": "Fjern forslag",
+      "update_proposal_vote": "Forslagsstemme",
+      "signed_call": "Signeret kald"
+    },
+    "translate_language": {
+      "ar": "Arabisk",
+      "az": "Aserbajdsjansk",
+      "bg": "Bulgarsk",
+      "bn": "Bengali",
+      "ca": "Catalansk",
+      "cs": "Tjekkisk",
+      "da": "Dansk",
+      "de": "Tysk",
+      "el": "Græsk",
+      "en": "Engelsk",
+      "eo": "Esperanto",
+      "es": "Spansk",
+      "et": "Estisk",
+      "fa": "Persisk",
+      "fi": "Finsk",
+      "fr": "Fransk",
+      "ga": "Irsk",
+      "he": "Hebraisk",
+      "hi": "Hindi",
+      "hu": "Ungarsk",
+      "id": "Indonesisk",
+      "it": "Italiensk",
+      "ja": "Japansk",
+      "ko": "Koreansk",
+      "lt": "Litauisk",
+      "lv": "Lettisk",
+      "ms": "Malajisk",
+      "nb": "Norsk",
+      "nl": "Hollandsk",
+      "pl": "Polsk",
+      "pt": "Portugisisk",
+      "ro": "Rumænsk",
+      "ru": "Russisk",
+      "sk": "Slovakisk",
+      "sl": "Slovensk",
+      "sq": "Albansk",
+      "sv": "Svensk",
+      "th": "Thai",
+      "tl": "Tagalog",
+      "tr": "Tyrkisk",
+      "uk": "Ukrainsk",
+      "zh": "Kinesisk",
+      "zt": "Kinesisk (traditionelt)"
+    },
+    "reading": {
+      "banner_text": "Dette indlæg er på {source}. Oversæt til {target}?",
+      "translated_from_text": "Oversat fra {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# medlem} other {# medlemmer}} • {authors, plural, one {# skribent} other {# skribenter}} • {posts, plural, one {# indlæg} other {# indlæg}}",
+      "community_title": "Fællesskabet {title}",
+      "members_title": "Medlemmer af {title}",
+      "activities_title": "Aktivitet i {title}",
+      "cannot_start_with_or": "Må ikke starte med @ eller #",
+      "use_a_two_letter": "Brug en sprogkode på to bogstaver, f.eks. en",
+      "at_most_characters": "Højst {max, plural, one {# tegn} other {# tegn}}",
+      "council": "Råd",
+      "journal": "Journal",
+      "topic": "Emne",
+      "community_not_found": "Fællesskabet blev ikke fundet."
+    },
+    "transfer": {
+      "one_recipient": "Der kan kun bruges én modtager til denne overførsel.",
+      "is_an_exchange_and": "{exchange} er en børs og understøtter måske ikke tilbagevendende overførsler: penge sendt efter en tidsplan kan gå tabt. Brug en engangsoverførsel i stedet."
+    },
+    "dapps": {
+      "signing_info": "Ecency fungerer som din Hive-signeringsudvidelse. Når en dApp beder dig logge ind med en browserudvidelse som Keychain, Keeper eller Peak Vault, så vælg den mulighed. Ecency klarer signeringen sikkert.",
+      "category_social": "Socialt",
+      "category_gaming": "Spil",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Gruppe",
+      "unable_to_load_messages": "Kunne ikke indlæse beskeder.",
+      "someone": "Nogen",
+      "renamed_the_group_to": "{actor} omdøbte gruppen til \"{name}\"",
+      "removed_the_group_name": "{actor} fjernede gruppenavnet",
+      "unable_to_send_your": "Kunne ikke sende din besked.",
+      "unable_to_remove_message": "Kunne ikke fjerne beskeden.",
+      "unknown": "Ukendt",
+      "members_online": "{members, plural, one {# medlem} other {# medlemmer}} • {online} online",
+      "failed_to_load_pinned": "Kunne ikke indlæse fastgjorte beskeder",
+      "you": "Dig",
+      "title": "Reaktioner"
+    },
+    "tip": {
+      "login_required": "Log ind for at sende drikkepenge",
+      "max_decimals": "Højst {n, plural, one {# decimal} other {# decimaler}}"
+    },
+    "paid": {
+      "check_again": "Tjek igen",
+      "give_up": "Giv op",
+      "unknown": "Intet svar endnu. Anmodningen kører måske stadig. Tjek igen for at hente resultatet: det koster ikke igen.",
+      "pending": "Din anmodning behandles stadig. Tjek igen om lidt: det koster ikke igen.",
+      "restored": "En tidligere anmodning har endnu intet svar. Tjek igen for at hente resultatet: det koster ikke igen.",
+      "give_up_confirm": "Hvis anmodningen gik igennem, er pointene brugt, og resultatet går tabt.",
+      "not_stored": "Denne anmodning kunne ikke gemmes på enheden. Hold denne skærm åben, indtil den er færdig.",
+      "sign_in_again": "Din session er udløbet. Log ind igen, og tjek derefter igen.",
+      "other_account": "Dette tilhører @{owner}. Skift tilbage til den konto for at fortsætte."
+    },
+    "ai": {
+      "run_ai_assist": "Kør AI-assistent ({costText})",
+      "no_longer_free_cost": "Denne kørsel er ikke længere gratis i dag. Den koster {cost} {unit}.",
+      "no_longer_free": "Denne kørsel er ikke længere gratis i dag.",
+      "content_violates_our_content": "Indholdet overtræder vores indholdspolitik. Ret din tekst. Points blev ikke refunderet.",
+      "generate_image": "Generér billede ({costLabel})",
+      "use_prompt": "Brug: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Vent lidt, en anden handling er i gang",
+      "not_a_community_post": "Ikke et fællesskabsindlæg.",
+      "parent_post_not_found": "Det overordnede indlæg blev ikke fundet",
+      "the_account_changed": "Kontoen er ændret."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Stop ({cost} Points)",
+      "stop_free": "Stop (gratis)",
+      "transcribe_points": "Transskribér ({cost} Points)",
+      "transcribe": "Transskribér",
+      "no_longer_free_cost": "Denne optagelse er ikke længere gratis i dag. Den koster {cost} Points.",
+      "no_longer_free": "Denne optagelse er ikke længere gratis i dag.",
+      "held_locked": "Optagelsen stoppede, da Ecency blev låst. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
+      "held_no_background": "Optagelsen stoppede, da Ecency forlod skærmen (den kunne ikke vise sin optagelsesnotifikation). Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
+      "held_stopped": "Optagelsen blev stoppet fra notifikationen. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
+      "held_focus_lost": "Optagelsen stoppede på grund af et opkald eller lyd fra en anden app. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
+      "held_interrupted": "Optagelsen stoppede, fordi en anden app overtog mikrofonen. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
+      "unavailable": "Optagelse er ikke tilgængelig på denne enhed.",
+      "not_read": "Optagelsen kunne ikke læses eller er for stor. Intet blev sendt, og intet blev trukket.",
+      "give_up_not_sent": "Denne optagelse blev ikke sendt, så intet blev trukket. Den slettes.",
+      "give_up_not_charged": "Der blev ikke trukket noget for denne optagelse. Den slettes.",
+      "clip_lost": "Optagelsen fra en tidligere anmodning er ikke længere på denne enhed. Hvis anmodningen gik igennem, er dine point brugt, og udskriften kan ikke hentes."
+    },
+    "register": {
+      "error_code_28": "Din anmodning kunne ikke behandles. Tilmeldingskøen er sandsynligvis fuld. Prøv igen om nogle minutter."
+    },
+    "perks": {
+      "quests_empty": "Ingen opgaver her endnu, kig forbi igen snart.",
+      "freeze_confirm_title": "Beskyt din stime",
+      "spend_points_on_a": "Brug {price} Points på en stimebeskyttelse? Den bruges til at beskytte din stime på en dag, du misser."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Støt Ecency, få en gratis blog, og skil dig ud med et bekræftet Pro-mærke.",
+      "card_description": "Bliv Pro for {price} om året. Bekræftet mærke, en gratis blog og støtte til Ecency.",
+      "card_description_plain": "Bliv Pro i et år. Bekræftet mærke, en gratis blog og støtte til Ecency.",
+      "member": "Du er Pro-medlem.",
+      "benefit_badge": "Et bekræftet Pro-mærke ved siden af dit navn.",
+      "benefit_blog": "En gratis blog på ditnavn.blogs.ecency.com.",
+      "benefit_support": "Støt udviklingen af Ecency direkte.",
+      "benefit_early": "Tidlig adgang til nye funktioner.",
+      "buy": "Få Pro for {price} om året",
+      "extend": "Forlæng med 12 måneder for {price}",
+      "extend_note": "Et nyt køb lægger 12 måneder til dit medlemskab.",
+      "unavailable": "Ecency Pro er ikke tilgængelig i butikken lige nu.",
+      "activating": "Betaling modtaget. Dit medlemskab aktiveres.",
+      "success_title": "Velkommen til Ecency Pro",
+      "success_body": "Dit Pro-medlemskab er aktivt. Dit mærke vises snart på din profil.",
+      "extending": "Betaling modtaget. Dit Pro-medlemskab forlænges med 12 måneder.",
+      "open_a11y": "Åbn Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Gemmer kladde...",
+      "please_sign_in_first": "Log ind først.",
+      "fetch_failed": "Hentning mislykkedes.",
+      "you_can_only_edit": "Du kan kun redigere dit eget indhold.",
+      "invalid_percent": "Ugyldig procentsats",
+      "beneficiary_exists_already": "Modtageren findes allerede",
+      "this_draft_belongs_to": "Denne kladde tilhører @{owner}. Skift tilbage til den konto for at udgive den.",
+      "could_not_make_a": "Kunne ikke lave et nyt link til dette indlæg. Ret titlen lidt, og prøv igen.",
+      "an_earlier_attempt_was": "Et tidligere forsøg blev udgivet efter dette. Tjek, hvilken version du vil beholde.",
+      "could_not_check_your": "Kunne ikke tjekke din kontos posting-myndighed. Tjek din forbindelse, og prøv igen.",
+      "this_post_was_changed": "Dette indlæg blev ændret et andet sted, siden du åbnede det. Kopiér din tekst, gå tilbage, og åbn det igen for at redigere den nyeste version.",
+      "link_text_placeholder": "Tekst her"
+    },
+    "app_error": {
+      "this_reply_is_too": "Dette svar er for langt.",
+      "the_network_refused_this": "Netværket afviste denne handling.",
+      "invalid_input": "Ugyldigt input.",
+      "secure_storage_is_unavailable": "Sikker lagring er ikke tilgængelig. Log ind igen.",
+      "please_sign_in_first": "Log ind først.",
+      "these_credentials_belong_to": "Disse legitimationsoplysninger tilhører @{actual}, ikke @{expected}.",
+      "is_not_signed_in": "@{username} er ikke logget ind på denne enhed.",
+      "key_required": "{role}-nøglen kræves for at udføre denne transaktion. {hint}",
+      "cancelled": "Annulleret.",
+      "the_request_was_rejected": "Anmodningen blev afvist i tegnebogsappen.",
+      "the_request_expired_before": "Anmodningen udløb, før tegnebogsappen svarede. Prøv igen.",
+      "could_not_reach_the": "Kunne ikke nå HiveAuth-serveren. Prøv igen.",
+      "unexpected_redirect": "Serveren sendte en uventet omdirigering. Intet blev ændret. Prøv igen senere.",
+      "missing_key_hint": "Tilføj den under Indstillinger, Administrer myndigheder (Importér privat), eller log ind igen med den.",
+      "this_key_is_also": "Denne nøgle er også kontoens owner-nøgle. Ecency gemmer ikke en nøgle, der styrer owner-rollen: giv dine active- og posting-roller egne nøgler, og log derefter ind med dem.",
+      "this_is_the_owner": "Dette er owner-nøglen. Ecency gemmer eller bruger aldrig owner-nøglen: log ind med din hovedadgangskode eller din posting- eller active-nøgle.",
+      "this_password_only_matches": "Denne adgangskode matcher kun kontoens owner-nøgle. Ecency gemmer eller bruger aldrig owner-nøglen: log ind med din posting- eller active-nøgle.",
+      "this_key_cannot_sign": "Denne nøgle kan ikke signere for kontoen alene: kontoen kræver mere end én signatur (dens vægt er under tærsklen).",
+      "public_key_given": "Dette er din offentlige nøgle. Indsæt den private nøgle (starter med 5) eller din hovedadgangskode.",
+      "memo_key_only": "Memo-nøglen kan ikke bruges til at logge ind. Brug din posting-nøgle, active-nøgle eller hovedadgangskode.",
+      "network_message": "Netværksfejl. Tjek din forbindelse, og prøv igen.",
+      "network_error_this_may": "Netværksfejl. Dette er måske allerede gået igennem; det er sikkert at prøve igen, og der udgives ikke to gange."
+    },
+    "purchases": {
+      "deal_best": "BEDSTE TILBUD!",
+      "deal_popular": "POPULÆRT!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Butikken svarede ikke."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "E-mail og brugernavn kræves til 999accounts-forbrug",
+      "stuck": "Et tidligere køb af dette produkt kunne ikke gennemføres. Kontakt support@ecency.com med din butikskvittering, den gemmes til dette formål.",
+      "held": "Dette køb er sat i bero til gennemgang. Kontakt support@ecency.com med ordre #{order}.",
+      "earlier_purchase": "Et tidligere køb af dette produkt gennemføres først for @{target}.",
+      "earlier_pending": "En tidligere betaling for dette produkt afventer stadig for @{target}. Den gennemføres, når butikken bekræfter betalingen.",
+      "pending": "Din betaling afventer. Købet gennemføres, når butikken bekræfter betalingen.",
+      "processing": "Dit køb behandles. Det gennemføres om lidt."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Tilbagevendende overførsler",
+      "delegate_hive_power": "Delegér Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Angiv udbetalingsrute for vesting",
+      "power_down": "Power down",
+      "transfer_to_saving": "Overfør til opsparing",
+      "transfer_from_saving": "Overfør fra opsparing",
+      "cancel_transfer_from_saving": "Annullér overførsel fra opsparing",
+      "collateralized_convert": "Sikret konvertering",
+      "witness_vote": "Witness-stemme",
+      "witness_update": "Witness-opdatering",
+      "witness_set_properties": "Angiv witness-egenskaber",
+      "governance_proxy": "Styringsproxy",
+      "claim_account": "Gør krav på konto",
+      "create_account": "Opret konto",
+      "create_account_with_account": "Opret konto med kontokreditter",
+      "create_limit_order": "Opret limitordre",
+      "cancel_limit_order": "Annullér limitordre",
+      "redeem_rewards": "Indløs belønninger",
+      "post_or_comment": "Indlæg eller kommentar",
+      "post_or_comment_options": "Indstillinger for indlæg eller kommentar",
+      "custom_operation": "Brugerdefineret handling",
+      "update_account_active": "Opdatér konto (active)",
+      "update_account_posting": "Opdatér konto (posting)",
+      "change_recovery_account": "Skift gendannelseskonto",
+      "create_proposal": "Opret forslag",
+      "remove_proposal": "Fjern forslag",
+      "update_proposal_votes": "Opdatér forslagsstemmer",
+      "update_proposal": "Opdatér forslag"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Dette link skal signeres af @{account}. Skift til den konto, og åbn det igen.",
+      "ecency_can_only_sign": "Ecency kan kun signere og udsende transaktioner fra links.",
+      "requester_page": "siden {host}",
+      "owner_refused": "Handlinger, der kræver owner-nøglen, kan ikke signeres fra et link.",
+      "busy": "Vent lidt: en anden anmodning behandles stadig.",
+      "not_supported": "Ecency kan endnu ikke signere denne handling i denne version."
+    },
+    "chats": {
+      "group_members": "Gruppemedlemmer",
+      "rename_group": "Omdøb gruppe",
+      "failed_to_load_chats": "Kunne ikke indlæse chats",
+      "unknown": "Ukendt",
+      "unable_to_mark_channel": "Kunne ikke markere kanalen som læst",
+      "unable_to_update_favorites": "Kunne ikke opdatere favoritter",
+      "unable_to_update_mute": "Kunne ikke opdatere tavsgørelse",
+      "group": "Gruppe",
+      "unable_to_search": "Kunne ikke søge",
+      "unable_to_start_chat": "Kunne ikke starte chat",
+      "no_internet": "Ingen internetforbindelse"
+    },
+    "stake": {
+      "confirm_summary": "Delegér {hp} HP ({vests} VESTS) til @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Allerede delegeret til @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Kun offentlig. Ecency gemmer aldrig owner-nøglen.",
+      "shared_owner": "Denne konto bruger den samme nøgle til owner-rollen og {names}-rollen. Den, der har nøglen, styrer hele kontoen. Giv {names}-rollen en egen nøgle, og opbevar owner-nøglen offline.",
+      "copy_warning": "Alle med denne private nøgle styrer denne del af din konto. Andre apps kan læse udklipsholderen; indsæt den kun, hvor du stoler på det. Den ryddes fra udklipsholderen efter 2 minutter."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-lås er slået til.",
+      "pin_changed": "PIN ændret.",
+      "pin_lock_is_off": "PIN-lås er slået fra.",
+      "wiped_notice": "Alle konti, nøgler og legitimationsoplysninger blev fjernet fra denne enhed.",
+      "we_could_not_bring": "Vi kunne ikke overføre dine konti fra den tidligere version af appen. Log ind igen.",
+      "your_pin_lock_could": "Din PIN-lås kunne ikke overføres fra den tidligere version. Angiv en PIN igen fra kontomenuen for at slå applåsen til igen.",
+      "biometric_unlock_was_turned": "Biometrisk oplåsning blev slået fra, fordi biometrien på denne enhed er ændret. Lås op med din PIN, og slå den til igen fra kontomenuen.",
+      "biometric_unavailable_notice": "Biometrisk oplåsning kunne ikke slås til: der er ingen biometri sat op på denne enhed.",
+      "set_backup": "Angiv en PIN som reserve til biometrisk oplåsning",
+      "biometric_on_notice": "PIN-lås er slået til. Lås op med biometri eller din PIN.",
+      "offer_title": "Lås op med biometri",
+      "offer_body": "Åbn Ecency med dit ansigt eller fingeraftryk. Du har også angivet en PIN, som låser appen op, når biometri ikke er tilgængelig.",
+      "offer_use": "Brug biometri",
+      "offer_use_pin": "Brug PIN i stedet"
+    },
+    "common": {
+      "list_and": "{first} og {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Svar på 25 tegn eller færre giver ingen point (links tæller ikke)",
+      "short_content_hint": "For kort til at give point (25 tegn eller færre, links ikke medregnet)",
+      "daily_post": "Dagligt indlæg {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# dags stime} other {# dages stime}}",
+      "grant_description": "Giv Ecency-kontoen @ecency.app posting-tilladelse på din konto, så du kan udgive uden at åbne Keychain hver gang. At give den ændrer din kontos posting-myndighed og kræver din active-nøgle."
+    },
+    "wallet_history": {
+      "from_to": "@{from} til @{to}",
+      "from_user_id": "fra @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} til @{to}, id: {id}",
+      "from_to_account": "@{from} til {to}",
+      "from_user": "fra @{user}",
+      "to_user": "til @{user}",
+      "interest": "Rente",
+      "proposal_pay": "Forslagsbetaling",
+      "categories": "Aktivitetstyper",
+      "category_all": "Alle",
+      "category_transfers": "Overførsler",
+      "category_market": "Markedsordrer",
+      "category_interest": "Renter",
+      "category_stake": "Stake-handlinger",
+      "category_rewards": "Belønninger",
+      "point_type_checkin": "Heartbeats",
+      "point_type_login": "Login",
+      "point_type_post": "Indlæg",
+      "point_type_comment": "Kommentar",
+      "point_type_vote": "Stemme",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Sendte overførsler",
+      "point_type_transfer_received": "Modtagne overførsler"
+    },
+    "video_upload": {
+      "continue_upload": "FORTSÆT UPLOAD",
+      "source_gone": "Denne optagelse er ikke længere tilgængelig på enheden. Optag eller vælg videoen igen.",
+      "no_camera": "Kameraet er ikke tilgængeligt på denne enhed."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Næste unstake er om {hours, plural, one {# time} other {# timer}}",
+      "account_not_found": "Kontoen blev ikke fundet"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Billede i udklipsholder · Indsæt billede",
+      "no_container": "Kunne ikke hente den seneste wave-beholder",
+      "please_sign_in_first": "Log ind først.",
+      "write_something_first": "Skriv noget først.",
+      "account_changed": "Denne wave blev skrevet som en anden konto. Luk den, og skriv den igen.",
+      "no_upload": "Billedupload er ikke tilgængelig i denne version endnu. Indsæt et billedlink i teksten i stedet.",
+      "fail": "Mislykkedes"
+    },
+    "delete_account": {
+      "sign_out_failed": "Din anmodning blev sendt, men udlogningen mislykkedes. Log ud fra menuen.",
+      "not_sent": "Din anmodning om sletning kunne ikke sendes. Prøv igen."
+    },
+    "chat_sheets": {
+      "group_limit": "En gruppe kan have op til {max, plural, one {# anden person} other {# andre personer}}.",
+      "search_people_by_username": "Søg efter personer med brugernavn",
+      "new_group_title": "Ny gruppe",
+      "new_group_hint": "Tilføj {min} til {max, plural, one {# person} other {# personer}} for at starte en gruppesamtale.",
+      "no_results": "Ingen fundet i chatten med det navn.",
+      "search_failed": "Søgningen mislykkedes. Tjek din forbindelse, og prøv igen.",
+      "create": "Start gruppe",
+      "new_group_failed": "Kunne ikke starte gruppen. Prøv igen.",
+      "name_limit": "Et gruppenavn kan være op til {max, plural, one {# tegn} other {# tegn}} langt.",
+      "rename_title": "Omdøb gruppe",
+      "rename_hint": "Giv gruppen et navn, som alle i den kan se. Lad feltet stå tomt for i stedet at vise medlemmernes navne.",
+      "placeholder": "Gruppenavn",
+      "not_owner": "Kun den, der startede gruppen, kan omdøbe den.",
+      "rename_failed": "Kunne ikke omdøbe gruppen. Prøv igen."
+    },
+    "editor_side": {
+      "copy_of": "Kopi af {title}",
+      "deletions_failed": "Noget gik galt\n{failed} af {total, plural, one {# sletning} other {# sletninger}} mislykkedes",
+      "uploads_failed": "{count, plural, one {# upload mislykkedes} other {# uploads mislykkedes}}:\n\n{messages}",
+      "failed_to_delete": "Kunne ikke slette"
+    },
+    "uploads": {
+      "add_to_gallery": "Føj til galleri"
+    },
+    "account_notice": {
+      "manage_keys": "Indstillinger, Administrer myndigheder",
+      "no_signing_key_title": "Log ind igen som @{account}",
+      "no_signing_key": "Ecency gemmer ikke længere owner-nøglen eller hovedadgangskoden på denne enhed, og @{account} har ingen posting- eller active-nøgle gemt her. Log ind igen med din hovedadgangskode eller en posting- eller active-nøgle, eller tilføj en nøgle under {manageKeys} (Importér privat).",
+      "missing_roles_title": "Nogle nøgler blev ikke tilføjet",
+      "cannot_post": "udgive, stemme eller kommentere",
+      "cannot_transfer": "sende overførsler eller ændre kontoindstillinger",
+      "missing_roles": "Din adgangskode matcher ikke længere {missing}-nøglen for @{account}: den blev ændret på kontoen, efter adgangskoden blev angivet. Gemt på denne enhed: {kept}-nøglen. Indtil du tilføjer {missing}-nøglen under {manageKeys} (Importér privat), kan denne app ikke {cannot} med nøgler til @{account}.",
+      "shared_owner_title": "Denne nøgle styrer også owner-rollen",
+      "shared_owner": "@{account} bruger den samme nøgle til owner-rollen og {names}-rollen. Den, der har denne nøgle, styrer hele kontoen. Ecency gemmer den kun som {names}-nøgle og bruger den aldrig til owner-handlinger. Giv {names}-rollen en egen nøgle, og opbevar owner-nøglen offline."
+    },
+    "dapp_browser": {
+      "message_from": "Besked fra {host}",
+      "home_title": "Hjem",
+      "loading_title": "Indlæser...",
+      "blank_run": "[{count, plural, one {# tomt tegn} other {# tomme tegn}}]",
+      "too_large": "Siden bad om at signere en anmodning, der er for stor til at blive vist, så Ecency afviste den."
+    },
+    "community_service": {
+      "the_account_changed": "Kontoen er ændret."
+    },
+    "profile_edit": {
+      "enter_link": "Indtast billedlink",
+      "please_sign_in_first": "Log ind først.",
+      "account_not_found": "Kontoen blev ikke fundet",
+      "please_enter_an_image": "Indtast et billedlink, der starter med https://"
+    },
+    "background_media": {
+      "post_by": "Indlæg af @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Log ind først."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Du har allerede stemt med samme vægt.",
+      "insufficient_rc": "Ikke nok Resource Credits. Vent, eller lav en power up.",
+      "missing_authority": "Posting-myndighed mangler. Tjek din loginmetode.",
+      "comment_too_soon": "Vent, før du skriver igen.",
+      "paid_out": "Dette indlæg er allerede udbetalt.",
+      "too_large": "Transaktionen er {size, plural, one {# byte} other {# bytes}}, over grænsen på {max} bytes.",
+      "network_error_please_check": "Netværksfejl. Tjek din forbindelse, og prøv igen.",
+      "unconfirmed_message": "Kunne ikke bekræfte, om dette gik igennem. Tjek din tegnebog eller historik; start kun forfra, hvis det ikke er der.",
+      "undecided_message": "Dette er måske allerede gået igennem. Tjek din tegnebog eller historik, før du prøver igen."
+    },
+    "chat_api": {
+      "request_failed": "Anmodningen mislykkedes ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} skriver...",
+      "typing_two": "{first} og {second} skriver...",
+      "typing_three": "{first}, {second} og {third} skriver...",
+      "typing_many": "{first}, {second} og {count, plural, one {# anden} other {# andre}} skriver...",
+      "banned": "{reason} Du kan stadig læse chatten. Du kan skrive igen {until}.",
+      "joined_when": "tilmeldte sig {time}",
+      "joined": "tilmeldte sig",
+      "official_badge": "Officiel",
+      "official_badge_label": "Officiel Ecency-konto"
+    },
+    "side_menu": {
+      "ask_esie": "Spørg Esie"
+    },
+    "chat_service": {
+      "missing_token": "Hive-adgangstoken mangler. Log ud, og log ind igen.",
+      "dm_error": "Brugeren har ikke tilmeldt sig chats"
+    },
+    "compose_reply": {
+      "account_changed": "Dette svar blev skrevet som en anden konto. Luk det, og skriv det igen.",
+      "write_something_first": "Skriv noget først.",
+      "please_sign_in_first": "Log ind først."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "For mange modtagere: højst {max}.",
+      "a_beneficiary_s_share": "En modtagers andel skal være mellem 0,01% og 100%.",
+      "beneficiaries_add_up_to": "Modtagerne summerer til mere end 100%.",
+      "a_beneficiary_is_listed": "En modtager er angivet to gange.",
+      "you_cannot_be_a": "Du kan ikke være modtager af dit eget indlæg.",
+      "a_beneficiary_has_an": "En modtager har et ugyldigt kontonavn."
+    },
+    "follows": {
+      "fail": "Mislykkedes!: {message}",
+      "follower_count": "Følgere ({count})",
+      "following_count": "Følger ({count})"
+    },
+    "link": {
+      "unsupported": "Dette link understøttes ikke endnu.",
+      "cannot_open": "Kan ikke åbne link",
+      "unsupported_version": "Dette link understøttes ikke i denne version."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Udforsk-browseren kan få adgang til din Hive-tegnebog for at signere transaktioner. Dette link kommer fra indholdet i et indlæg og er ikke bekræftet af Ecency. Fortsæt kun, hvis du stoler på det:\n\n{url}"
+    },
+    "listen": {
+      "message": "Det koster {required} Points at lytte, og du har {available}.",
+      "unlock_label": "Lås op · {cost} Points",
+      "preparing_audio": "Forbereder lyd · {preparingPercent}%",
+      "waiting_in_line_ahead": "I kø, {ahead} foran dig…",
+      "next_in_line": "Du er den næste i køen…",
+      "preparing_about_minutes": "Forbereder lyd, cirka {minutes} min.…",
+      "preparing_audio_2": "Forbereder lyd…",
+      "spend_confirm": "Brug {cost} Points på at lytte til dette indlæg? Lyden er din og kan afspilles igen når som helst.",
+      "about_minutes": "~{minutes} min.",
+      "failed_refunded": "Lyden kunne ikke laves, dine Points er refunderet"
+    },
+    "media_pick": {
+      "preparing_video": "Forbereder video...",
+      "library_hint": "Vælg blandt dine fotos",
+      "camera_hint": "Tag et nyt foto nu",
+      "files_hint": "Gennemse filer på denne enhed og i skyen",
+      "paste_hint": "Brug det billede, du kopierede",
+      "link_hint": "Brug et billede fra nettet"
+    },
+    "media_picking": {
+      "image_types_message": "Denne filtype understøttes ikke. Vælg et JPEG-, PNG-, GIF-, WebP- eller HEIC-billede.",
+      "video_types_message": "Denne filtype understøttes ikke. Vælg en MP4- eller MOV-video.",
+      "gif_too_large": "Denne GIF er større end {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Denne handling kræver både en active- og en posting-signatur, hvilket Ecency endnu ikke kan signere sammen."
+    },
+    "poll": {
+      "fail": "Mislykkedes!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Kunne ikke tjekke din kontos posting-myndighed. Tjek din forbindelse, og prøv igen."
+    },
+    "post_lists": {
+      "voters_title": "Info om stemmegivere ({total})",
+      "reblogs_title": "Reblog-info ({total})",
+      "no_history_found": "Ingen historik fundet!",
+      "no_edit_history_available": "Ingen redigeringshistorik tilgængelig for dette indhold.",
+      "version_label": "Version {version}"
+    },
+    "stats": {
+      "other_device": "Andet"
+    },
+    "profile": {
+      "account_not_found": "Kontoen blev ikke fundet",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Fuld om {hours, plural, one {# time} other {# timer}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Kunne ikke læse din nuværende profil, prøv igen"
+    },
+    "profile_sheet": {
+      "fail": "Mislykkedes! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Kontoen blev ikke fundet"
+    },
+    "push_payload": {
+      "mentioned": "@{source} nævnte @{target}",
+      "replied": "@{source} svarede @{target}",
+      "transferred": "@{source} overførte til @{target}",
+      "delegated": "@{source} delegerede til @{target}",
+      "rewards_received": "Belønninger modtaget",
+      "account_updated": "Konto opdateret",
+      "account_updated_body": "Dine kontooplysninger blev opdateret",
+      "followed": "@{source} fulgte @{target}",
+      "unfollowed": "@{source} fulgte ikke længere @{target}",
+      "ignored": "@{source} ignorerede @{target}",
+      "blacklisted": "@{source} satte @{target} på sortlisten",
+      "posted_in": "@{source} skrev i #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Kunne ikke få kameratilladelse",
+      "permission_message": "Giv kameratilladelse i Ecency-indstillingerne.",
+      "permission_allow": "Tillad"
+    },
+    "reply_account": {
+      "switch": "Svar som en anden konto"
+    },
+    "send_journal": {
+      "your_from_went_through": "Din {label} fra @{account} gik igennem.",
+      "not_sent": "Din {label} fra @{account} gik ikke igennem. Intet blev sendt; du kan starte forfra.",
+      "checking_whether_your_from": "Tjekker, om din {label} fra @{account} gik igennem. Tjek din tegnebog, før du sender den igen."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner-siden blev lukket",
+      "wrong_role": "Dette er din {given}-nøgle; denne handling kræver din {needed}-nøgle.",
+      "action_id_required": "Denne handling kræver et handlings-ID for at kunne prøves igen sikkert."
+    },
+    "signing_router": {
+      "owner_never": "Owner-handlinger signeres aldrig i appen."
+    },
+    "spin": {
+      "key_missing": "Spilnøgle mangler",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "I dag (UTC), nulstilles om {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Nulstilles dagligt kl. 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Log ind igen",
+      "message": "Sikker lagring blev nulstillet på denne enhed. Log ind igen.",
+      "failed": "Kontoerne på denne enhed kunne ikke fjernes. Prøv igen."
+    },
+    "store": {
+      "in_app_purchases_are": "Køb i appen er ikke tilgængelige i denne version."
+    },
+    "wallet_sends": {
+      "journal_full": "For mange tidligere afsendelser tjekkes stadig med netværket. Vent, til de er bekræftet, før du sender flere.",
+      "check_later": "Netværket bekræftede ikke dette i tide. Tjek din tegnebog eller historik, før du sender det igen; appen tjekker igen ved næste start."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# ulæst} other {# ulæste}}",
+      "locked_text": "Lås Ecency op for at se",
+      "signed_out_text": "Log ind på Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Kunne ikke læse din kontos nuværende myndigheder. Intet blev ændret; prøv igen.",
+      "reads_disagree": "To aflæsninger af din kontos posting-myndighed er ikke ens. Intet blev ændret; prøv igen."
+    },
+    "vote": {
+      "vote_weight_must_be": "Stemmevægten skal være mellem -100% og 100%.",
+      "please_sign_in_first": "Log ind først."
+    },
+    "widget": {
+      "streak_name": "Opgavestime",
+      "write": "Skriv",
+      "new_wave": "Ny wave",
+      "notifications_description": "Dine ulæste notifikationer. Skjult, mens PIN-lås er slået til.",
+      "streak_description": "Din stime af daglige opgaver. Skjult, mens PIN-lås er slået til.",
+      "compose_description": "Skriv et indlæg eller en ny wave.",
+      "streak_title": "Stime",
+      "daily_quests": "Daglige opgaver",
+      "streak_hint": "Åbn Perks for at se din stime",
+      "open_perks": "Åbn Perks",
+      "open_app": "Åbn Ecency",
+      "unread_caption": "{count, plural, one {ulæst} other {ulæste}}",
+      "streak_caption": "{count, plural, one {dags stime} other {dages stime}}"
+    },
+    "system": {
+      "dictation_channel": "Diktering",
+      "listen_channel": "Lyt",
+      "dictation_channel_description": "Vises, mens en optagelse til diktering kører i baggrunden, med en Stop-handling.",
+      "dictation_title": "Optager til diktering",
+      "dictation_text": "Ecency optager din diktering. Stop holder den usendt, indtil du bekræfter i appen.",
+      "listen_channel_description": "Fortæller dig, når Lyt ikke kunne fortsætte i baggrunden.",
+      "listen_paused": "Lyt sat på pause",
+      "listen_paused_text": "Åbn Ecency for at fortsætte med at lytte.",
+      "skip_back": "Tilbage 15 sekunder",
+      "skip_forward": "Frem 15 sekunder"
+    },
+    "permission": {
+      "face_id": "Lås Ecency op med Face ID i stedet for din PIN.",
+      "camera": "Scan QR-koder, og tag et foto eller optag en video for at føje den til dit indlæg.",
+      "photo_library_add": "Ecency gemmer de billeder, du henter fra indlæg, i dit fotobibliotek.",
+      "photo_library": "Ecency samler de billeder, du henter fra indlæg, i et Ecency-album i dit fotobibliotek.",
+      "microphone": "Ecency bruger din mikrofon, så du kan diktere indlæg og kommentarer (optagelserne sendes til Ecency for at blive transskriberet) og optage lyd til en video, du føjer til et indlæg."
+    },
+    "android": {
+      "no_browser": "Ingen browser tilgængelig",
+      "biometric_unlock_title": "Lås Ecency op med biometri",
+      "biometric_confirm": "Bekræft med dit fingeraftryk eller ansigt",
+      "image_unsupported_address": "Billedadressen understøttes ikke",
+      "image_create_failed": "Kunne ikke oprette filen",
+      "image_write_failed": "Kunne ikke skrive filen",
+      "image_too_large": "Billedet er for stort",
+      "image_download_failed": "Download mislykkedes med status {status}",
+      "billing_disconnected": "Google Play Billing blev afbrudt.",
+      "billing_no_screen": "Ingen skærm at vise købet på.",
+      "billing_error": "Google Play Billing-fejl {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Du oprettede {count, plural, one {# indlæg} other {# indlæg}} denne måned. Bliv ved sådan!",
-        "checkin": "Du tjekkede ind {count, plural, one {# dag} other {# dag}} denne uge. Bliv ved sådan!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# nyt indlæg} other {# nye indlæg}} i #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# mislykkede forsøg} other {# mislykkede forsøg}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}-dages stime"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Kun konti ældre end {days} dage er tilladt",
-        "max_choices": "• Du kan vælge op til {choices} valgmuligheder"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Resterende {executions} overførsler",
-        "schedule_summary": "{executions} overførsler, hver {hours} time"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "For kort til at give point ({n, plural, one {# tegn} other {# tegn}} eller færre, links ikke medregnet)"
       },
       "chats": {
-        "people_joined": "{count} personer tilsluttede sig"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "om cirka {count, plural, one {# minut} other {# minutter}}",
+        "ban-remaining-hours": "om cirka {count, plural, one {# time} other {# timer}}",
+        "ban-remaining-days": "om cirka {count, plural, one {# dag} other {# dage}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Brug højst {n, plural, one {# tag} other {# tags}}",
+          "too_long": "Søgningen er for lang. Brug højst {n, plural, one {# tegn} other {# tegn}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Mindst {count} tegn kræves",
-        "chars_remaining": "{count} tegn tilbage"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Du kan vælge op til {count, plural, one {# billede} other {# billeder}} ad gangen"
+      },
+      "dictation": {
+        "stop_hint": "Stop for at transskribere og føje til dit indlæg. Op til {m, plural, one {# minut} other {# minutter}}.",
+        "rate": "{n} Points pr. {s, plural, one {# sekund} other {# sekunder}}"
       },
       "transfer": {
-        "powering_down_info": "Næste unstaking er om {days} dage, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Mellem {min} og {max, plural, one {# tegn} other {# tegn}}"
       }
     }
   }

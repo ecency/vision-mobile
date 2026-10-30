@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "عضو Ecency Pro"
   },
   "perks": {
     "header": "المزايا",
@@ -31,42 +31,42 @@
     "promote_desc": "احصل على مشاهدات أكثر لمنشورك",
     "account_boost": "تعزيز الحساب",
     "account_boost_desc": "عزِّز أي حساب",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "شحن RC",
+    "rc_topup_desc": "واصل النشر عندما ينخفض رصيد الموارد لديك",
+    "streak_freeze_owned": "في الاحتياطي: {n}",
+    "streak_freeze_buy": "احمِ السلسلة ({price} Points)",
+    "streak_freeze_buying": "جارٍ الحماية",
+    "streak_freeze_error": "تعذر شراء تجميد السلسلة. حاول مرة أخرى."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "منشور اليوم",
+    "streak": "سلسلة {n} يوم",
+    "keep_streak": "حافظ على سلسلتك"
   },
   "waves": {
     "for_you": "مخصص لك",
     "following": "المتابَعون",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "خلاصات مخصصة",
+    "custom_feeds_subtitle": "ثبّت المصادر والوسوم لإضافتها كتبويبات في الخلاصة.",
+    "add_tag_placeholder": "أضف وسمًا",
+    "sources": "المصادر",
+    "your_feeds": "خلاصاتك",
+    "trending_tags": "الوسوم الرائجة",
+    "shorts_empty": "لا توجد مقاطع قصيرة بعد",
+    "mute": "كتم الصوت",
+    "unmute": "تشغيل الصوت"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "البدء",
+    "subtitle": "جديد هنا؟ Waves منشورات قصيرة وأسهل طريقة للانضمام.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "تجاهل",
+    "item_wave": "انشر أول Wave لك",
+    "item_vote": "صوّت على Wave يعجبك",
+    "item_reply": "رد على شخص ما",
+    "item_checkin": "سجّل حضورك لتبدأ سلسلتك",
+    "all_done_title": "اكتمل كل شيء 🎉",
+    "all_done_subtitle": "أنت جاهز. واصل نشر Waves!"
   },
   "profile": {
     "havent_commented": "لم تكن قد علقت أي شيء حتى الآن",
@@ -147,6 +147,16 @@
     "wizard_config_val": "العمر  |  الظهور  |  التفسير",
     "attach_poll": "إرفاق استطلاع"
   },
+  "favorite_tags": {
+    "title": "الوسوم",
+    "hint": "تابع لتتلقى إشعارات عن المنشورات الجديدة بهذا الوسم",
+    "following_hint": "تتلقى إشعارات عن المنشورات الجديدة بهذا الوسم",
+    "follow": "تابع",
+    "following": "تتابع",
+    "added": "تتابع الوسم",
+    "removed": "أُلغيت متابعة الوسم",
+    "empty_list": "لا شيء هنا"
+  },
   "favorites": {
     "add": "إضافة إلى المفضلة",
     "add_error": "تعذّرت الإضافة إلى المفضلة",
@@ -181,7 +191,33 @@
     "payout": "المكافأة",
     "details": "التفاصيل",
     "community": "المجتمع",
-    "new_post": "منشور جديد"
+    "new_post": "منشور جديد",
+    "mute_post_title": "كتم هذا المنشور",
+    "unmute_post_title": "إلغاء كتم هذا المنشور",
+    "mute_post_reason": "لماذا يتم كتمه؟",
+    "unmute_post_reason": "لماذا تتم استعادته؟",
+    "manage": "إدارة المجتمع",
+    "manage_members": "الأعضاء والأدوار",
+    "manage_settings": "إعدادات المجتمع",
+    "manage_activities": "سجل النشاط",
+    "activities": "النشاط",
+    "no_activities": "لا يوجد نشاط بعد",
+    "activities_load_failed": "تعذر تحميل النشاط. اسحب للتحديث.",
+    "set_role": "تعيين دور",
+    "assign_role": "إسناد دور",
+    "assign_role_hint": "ابحث عن أي حساب، حتى لو لم يشترك، ثم اختر دورًا.",
+    "username_placeholder": "اسم المستخدم",
+    "invalid_username": "اختر حسابًا موجودًا من النتائج",
+    "members": "الأعضاء",
+    "no_members": "لم يُعثر على أعضاء",
+    "members_incomplete": "تعذر تحميل بعض الأعضاء. اسحب للتحديث.",
+    "members_load_failed": "تعذر تحميل الأعضاء. اسحب للتحديث.",
+    "role_owner": "المالك",
+    "role_admin": "مشرف عام",
+    "role_mod": "مشرف",
+    "role_member": "عضو",
+    "role_guest": "زائر",
+    "role_muted": "مكتوم"
   },
   "trade": {
     "swap_for": "مبادلة {fromAmount} ل {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "نشر متقاطع",
     "pin-blog": "تثبيت بأعلى الصفحة",
     "copy": "أنسخ الرابط",
+    "copy-text": "نسخ النص",
+    "open-thread": "فتح السلسلة",
     "unpin-community": "إزالة التثبيت من المجتمع",
+    "mute-post": "كتم المنشور",
+    "unmute-post": "إلغاء كتم المنشور",
     "mute": "كتم / حظر",
     "reblog": "إعادة التدوين",
     "undo-reblog": "التراجع عن إعادة النشر",
@@ -232,24 +272,24 @@
     "unpin-reply": "إلغاء تثبيت التعليق"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "هذا المنشور بلغة: {lang}. هل تريد ترجمته إلى {target}؟",
+    "translate_to": "ترجمة إلى {lang}",
+    "show_original": "عرض الأصل",
+    "translated_from": "مترجم من: {lang}",
+    "change_language": "تغيير اللغة"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "ترجمة المنشور",
+    "source": "لغة المصدر",
+    "target": "اللغة الهدف",
+    "detected": "تم الكشف: {lang}",
+    "translate": "ترجم",
+    "apply": "تطبيق",
+    "review_note": "تضيف ترجمة آلية لنصك في نهاية المنشور. راجعها وعدّلها قبل النشر.",
+    "too_short": "اكتب المزيد أولًا. تحتاج الترجمة إلى بضع جمل على الأقل.",
+    "progress": "جارٍ ترجمة {done} من {total}...",
+    "error": "فشلت الترجمة. حاول مرة أخرى.",
+    "add_title_marker": "أضف علامة اللغة إلى العنوان"
   },
   "side_menu": {
     "profile": "الملف الشّخصي",
@@ -296,7 +336,7 @@
     "hot": "ذات شعبية",
     "popular": "الأكثر شعبية",
     "new": "الجديد",
-    "friends": "Following",
+    "friends": "المتابَعون",
     "my_blog": "مدونتي"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "لا شيء هنا"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "القوالب",
+    "untitled": "قالب بلا عنوان",
+    "empty_list": "احفظ منشورًا كقالب من المحرر لإعادة استخدامه هنا.",
+    "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا القالب؟",
+    "applied": "تم تطبيق القالب كمنشور جديد",
+    "save_as_template": "حفظ كقالب",
+    "name_placeholder": "اسم القالب",
+    "saved": "تم حفظ القالب"
   },
   "selection_list": {
     "available": "المتاح {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "الكل",
+      "replies": "الردود",
+      "mentions": "الإشارات",
+      "rvotes": "الأصوات",
+      "follows": "المتابعات",
+      "reblogs": "إعادة النشر",
+      "transfers": "التحويلات",
+      "delegations": "التفويضات",
+      "nfavorites": "المفضلة",
+      "tags": "الوسوم",
+      "nbookmarks": "العلامات المرجعية",
+      "payouts": "المدفوعات",
+      "scheduled_published": "المنشورات المجدولة",
+      "account_updates": "تحديثات الحساب",
+      "weekly_earnings": "الأرباح الأسبوعية"
     },
     "this_week": "هذا الأسبوع",
     "reblog": "تمت إعادة النشر",
@@ -417,11 +458,15 @@
     "yesterday": "يوم أمس",
     "mention": "أشارك إليك في",
     "favorites": "إنشاء مشاركة جديدة",
+    "tags": "نشر في #{tag}",
+    "tags_bundle": "{count} منشورات جديدة في #{tag}",
+    "tags_title": "منشورات جديدة في وسم تتابعه",
     "mentions": "الإشارات",
     "spin": "حان وقت كسب المزيد من النقاط",
     "last_week": "الأسبوع الماضي",
     "recent": "الأخيرة",
     "ignore": "قام بتجاهلك",
+    "blacklist": "أضافك إلى القائمة السوداء",
     "follow": "قام بمتابعتك",
     "notification": "الإشعارات",
     "this_month": "هذا الشهر",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "يمكن لـ {accounts} الآن النشر والتصويت نيابةً عنك. إذا لم تأذن بذلك، فألغِها.",
     "weekly_earnings": "ربحت ${amount} هذا الأسبوع{breakdown}",
     "payouts": "تم استلام دفعة: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "نشر منشورًا مجدولًا",
+    "scheduled_published_title": "تم نشر المنشور المجدول",
+    "scheduled_published_body": "منشورك المجدول متاح الآن، اضغط لعرضه"
   },
   "recurrent": {
     "delete_failed": "فشل حذف التحويل المتكرر، {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "فتح المسودة الأخيرة أو إنشاء مشاركة جديدة",
     "reward_power_up": "تجميد 100%",
     "open_gallery": "فتح معرض الصور",
+    "open_files": "اختيار من الملفات",
     "clipboard_no_image": "لا توجد صورة في الحافظة",
     "clipboard_image_detected": "صورة في الحافظة",
     "paste_image": "لصق الصورة",
@@ -539,8 +585,10 @@
     "video": "فيديو",
     "scheduled_later": "لاحقاً",
     "settings_title": "خياراتُ المَنشور",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "لا"
+    "support_ecency": "ادعم Ecency {percent}%",
+    "alert_btn_no": "لا",
+    "short_reply_hint": "الردود التي لا تتجاوز {n} حرفًا لا تكسب نقاطًا (الروابط لا تُحتسب)",
+    "short_content_hint": "قصير جدًا لكسب النقاط ({n} حرفًا أو أقل، دون الروابط)"
   },
   "time": {
     "week": "أسابيع",
@@ -655,7 +703,41 @@
     "select_emoji": "اختر رمزًا تعبيريًا",
     "more_emojis": "المزيد",
     "search_emojis": "ابحث عن الرموز التعبيرية...",
-    "no_emoji_found": "لم يُعثر على رمز تعبيري"
+    "no_emoji_found": "لم يُعثر على رمز تعبيري",
+    "ban-reason-spray": "تم إيقاف النشر لديك لأن الرسالة نفسها أُرسلت إلى عدة قنوات في وقت واحد.",
+    "ban-reason-mass-dm": "تم إيقاف النشر لديك لأن رسالة أُرسلت إلى عدد كبير من الأشخاص في وقت واحد.",
+    "ban-reason-generic": "تم إيقاف النشر لديك في المحادثة.",
+    "ban-can-still-read": "لا يزال بإمكانك قراءة المحادثة.",
+    "ban-unlocks": "يُفتح النشر {when}.",
+    "ban-remaining-soon": "خلال أقل من دقيقة",
+    "ban-remaining-minutes": "خلال حوالي {count} دقيقة",
+    "ban-remaining-hours": "خلال حوالي {count} ساعة",
+    "ban-remaining-days": "خلال حوالي {count} يوم",
+    "new_group": "مجموعة جديدة",
+    "new_group_hint": "أضف من {min} إلى {max} أشخاص لبدء محادثة جماعية.",
+    "new_group_search": "ابحث عن أشخاص باسم المستخدم",
+    "new_group_full": "يمكن أن تضم المجموعة حتى {max} أشخاص آخرين.",
+    "new_group_no_results": "لم يُعثر على أحد بهذا الاسم في المحادثة.",
+    "new_group_search_failed": "لم يعمل البحث. تحقق من اتصالك وحاول مرة أخرى.",
+    "new_group_remove": "إزالة @{username}",
+    "new_group_create": "بدء المجموعة",
+    "new_group_failed": "تعذر بدء المجموعة. يرجى المحاولة مرة أخرى.",
+    "rename_group": "إعادة تسمية المجموعة",
+    "rename_group_hint": "أعطِ هذه المجموعة اسمًا يراه كل من فيها. اتركه فارغًا لعرض أسماء الأعضاء بدلًا منه.",
+    "group_name": "اسم المجموعة",
+    "rename_group_too_long": "يمكن أن يصل اسم المجموعة إلى {max} حرفًا.",
+    "rename_group_not_owner": "الشخص الذي بدأ هذه المجموعة وحده يمكنه إعادة تسميتها.",
+    "rename_group_failed": "تعذرت إعادة تسمية المجموعة. يرجى المحاولة مرة أخرى.",
+    "group_renamed": "غيّر {user} اسم المجموعة إلى \"{name}\"",
+    "group_name_cleared": "أزال {user} اسم المجموعة",
+    "group_members": "أعضاء المجموعة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "reactions_title": "التفاعلات",
+    "reactor_you": "أنت",
+    "reactor_unknown": "شخص ما",
+    "see_who_reacted": "اضغط مطولًا لمعرفة من تفاعل",
+    "group": "مجموعة"
   },
   "free_estm": {
     "timer_text": "الدوران المجاني التالي",
@@ -684,6 +766,32 @@
     "transaction_fail": "فشلت المعاملة"
   },
   "search_result": {
+    "error": "تعذر إكمال البحث. يرجى المحاولة مرة أخرى",
+    "filters": {
+      "title": "عوامل التصفية",
+      "open": "عوامل التصفية",
+      "author": "المؤلف",
+      "author_placeholder": "اسم المستخدم",
+      "category": "الفئة",
+      "category_placeholder": "مجتمع أو فئة",
+      "tags": "الوسوم",
+      "tags_placeholder": "مفصولة بفواصل",
+      "type": "النوع",
+      "type_all": "الكل",
+      "type_post": "المنشورات",
+      "type_comment": "التعليقات",
+      "date": "التاريخ",
+      "date_week": "الأسبوع الماضي",
+      "date_month": "الشهر الماضي",
+      "date_year": "السنة الماضية",
+      "date_all": "كل الأوقات",
+      "sort": "ترتيب",
+      "apply": "تطبيق",
+      "active": "{n} نشطة",
+      "too_many_tags": "استخدم {n} وسوم على الأكثر",
+      "too_long": "البحث طويل جدًا. استخدم {n} حرفًا على الأكثر",
+      "needs_criteria": "أدخل كلمة بحث، أو مؤلفًا أو فئة أو وسمًا للتصفية"
+    },
     "communities_filter": {
       "new": "الجديد",
       "my": "مجتمعاتي",
@@ -727,7 +835,7 @@
     "title": "نشر متقاطع"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "أفصح الكاتب عن استخدام الذكاء الاصطناعي"
   },
   "ai_assist": {
     "title": "مساعد الكتابة بالذكاء الاصطناعي",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "احصل على وسوم مناسبة لمنشورك",
     "action_generate_title": "توليد عنوان",
     "action_generate_title_desc": "أنشئ خيارات عناوين جذّابة",
-    "action_summarize": "Recap",
+    "action_summarize": "ملخص",
     "action_summarize_desc": "أنشئ ملخصًا موجزًا",
     "action_check_grammar": "التحقق من القواعد",
     "action_check_grammar_desc": "إصلاح مشكلات القواعد والإملاء",
+    "action_generate_image": "إنشاء صورة",
+    "action_generate_image_desc": "أنشئ صورة بالذكاء الاصطناعي لمنشورك",
+    "cost_from": "من {cost} {unit}",
     "text_label": "نصّك",
     "text_placeholder": "الصق أو اكتب محتواك هنا...",
     "min_chars": "مطلوب {count} حرف كحد أدنى",
@@ -797,16 +908,26 @@
     "remind_later": "تذكير لاحقاً",
     "success_subscribe": "تم الاشتراك بنجاح!",
     "payloadTooLarge": "حجم الملف كبير جداً، يرجى تغيير الحجم أو تحميل صورة أصغر",
+    "too_many_images": "يمكنك اختيار حتى {count} صور في المرة الواحدة",
     "fail_follow": "فشل المتابعة!",
     "clear_user_alert": "هل أنت متأكد أنك تريد مسح جميع بيانات المستخدم؟",
     "cancel": "إلغاء",
     "connection_success": "تم الاتصال بنجاح!",
     "rc_down": "لا توجد أرصدة كافية من الموارد لإنجاز إجراء! \n\nقم بتعزيز حسابك للاستمرار في الاستمتاع بالتجربة. هل تريد تعزيز حسابك، الآن؟",
+    "rc_down_title": "رصيد الموارد غير كافٍ",
+    "rc_precheck_title": "قد يكون هذا المنشور كبيرًا جدًا للنشر",
+    "rc_precheck_body": "يبدو أن رصيد مواردك منخفض جدًا لمنشور بهذا الحجم.",
+    "rc_down_body": "ليس لديك رصيد موارد كافٍ لهذا الإجراء.\n\nاشحن الآن بالنقاط للمتابعة، أو عزّز حسابك بشكل دائم.",
+    "rc_down_topup": "اشحن رصيد الموارد بالنقاط",
+    "rc_down_boost": "عزّز الحساب",
     "done": "تم",
     "something_wrong_alt": "في هذا الوقت، جرب Ecency.com من متصفحك",
     "same_user": "تمت إضافة هذا المستخدم بالفعل إلى القائمة",
     "fail": "فشل!",
     "operation_failed_with_reason": "فشل {operation}: {reason}",
+    "request_timed_out": "الاتصال يستغرق وقتًا طويلًا. تحقق من شبكتك وحاول مرة أخرى.",
+    "load_failed_retry": "تعذر تحميل هذا. يرجى المحاولة مرة أخرى.",
+    "retrying": "جارٍ إعادة المحاولة...",
     "wallet_refresh_failed": "فشل تحديث المحفظة. يُرجى المحاولة مرة أخرى.",
     "wallet_refresh_missing_account": "فشل تحديث المحفظة: الحساب مفقود.",
     "boost_failed": "فشل التعزيز.",
@@ -949,31 +1070,31 @@
     "video_attached": "تم إرفاق الفيديو"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "تصويت",
+    "upvoted": "تم التصويت",
+    "downvoted": "تصويت سلبي",
+    "upvote_hint": "اضغط مرتين لفتح خيارات التصويت",
+    "payout_details": "تفاصيل الدفع",
+    "a11y_votes": "{count, plural, zero {لا أصوات} one {صوت واحد} two {صوتان} few {# أصوات} many {# صوتًا} other {# صوت}}",
+    "a11y_voters_hint": "عرض المصوّتين",
+    "a11y_reblogs": "{count, plural, zero {لا إعادات نشر} one {إعادة نشر واحدة} two {إعادتا نشر} few {# إعادات نشر} many {# إعادة نشر} other {# إعادة نشر}}",
+    "a11y_reblogs_hint": "عرض إعادات النشر",
+    "a11y_comments": "{count, plural, zero {لا تعليقات} one {تعليق واحد} two {تعليقان} few {# تعليقات} many {# تعليقًا} other {# تعليق}}",
+    "a11y_comments_hint": "عرض التعليقات",
+    "a11y_reply_hint": "رد",
+    "a11y_tip": "إرسال إكرامية",
+    "a11y_tips": "{count, plural, zero {لا إكراميات} one {إكرامية واحدة} two {إكراميتان} few {# إكراميات} many {# إكرامية} other {# إكرامية}}",
+    "a11y_edit": "تعديل التعليق",
+    "a11y_delete": "حذف التعليق",
+    "a11y_show_replies": "عرض الردود",
+    "a11y_hide_replies": "إخفاء الردود",
+    "a11y_post_options": "خيارات المنشور",
+    "a11y_views": "{count, plural, zero {لا مشاهدات} one {مشاهدة واحدة} two {مشاهدتان} few {# مشاهدات} many {# مشاهدة} other {# مشاهدة}}",
+    "source_ecency": "نُشر عبر Ecency",
+    "a11y_stats_hint": "عرض إحصاءات المنشور",
     "image": "الصورة",
     "reveal_muted": "مكتوم\nانقر لإظهار المحتوى",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "اضغط لتحميل الصورة",
     "in": "في",
     "poll": "استطلاع",
     "copy_link": "نسخ الرابط",
@@ -998,13 +1119,14 @@
     "save_to_local": "التحميل إلى الجهاز",
     "muted": "تم كتم المحتوى بسبب مخالفة",
     "community_muted": "تم كتم المحتوى بسبب مخالفة إرشادات المجتمع",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "محتوى من حساب منخفض السمعة",
+    "muted_downvoted": "محتوى صوّت المستخدمون ضده",
+    "muted_low_trust": "حساب ضعيف السمعة برابط خارجي لم يتم التحقق منه",
+    "muted_reveal": "انقر للكشف",
     "promoted": "مروّجة",
     "image_saved": "تم حفظ الصورة في معرض الصور",
     "words": "الكلمات",
     "reading": "القراءة",
-    "listen": "استماع",
     "min": "دقيقة",
     "summarize_start": "ابدأ"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "لا يوجد أي منشور حالياً",
     "invalid_link": "عنوان الرابط غير صالح ، يمكنك المحاولة مرة أخرى باستخدام عنوان رابط صالح أو محاولة فتحه في متصفح ويب",
-    "no_existing_user": "لا يوجد أي مستخدم حاليا"
+    "no_existing_user": "لا يوجد أي مستخدم حاليا",
+    "posting_key_request": "طلب {requester} المفتاح الخاص للنشر (posting) للحساب @{username}.\n\nتابع فقط إذا كنت تثق بهذا الطلب.",
+    "posting_key_request_unnamed": "يطلب تطبيق آخر المفتاح الخاص للنشر (posting) للحساب @{username}.\n\nتابع فقط إذا كنت تثق بهذا الطلب.",
+    "auth_request_as_user": "يريد {requester} تسجيل دخولك باسم @{username}.\n\nتتم مشاركة اسم المستخدم وإثبات تسجيل الدخول فقط. لا يغادر أي مفتاح Ecency.",
+    "auth_request_as_current": "يريد {requester} تسجيل دخولك بحسابك في Ecency.\n\nتتم مشاركة اسم المستخدم وإثبات تسجيل الدخول فقط. لا يغادر أي مفتاح Ecency."
   },
   "payout": {
     "breakdown": "تفصيل",
@@ -1065,7 +1191,7 @@
     "open": "فتح الرابط",
     "invalid_key_desc": "يرجى تسجيل الدخول باستخدام مفتاح {key} أو مفتاح رئيس لتنفيذ هذه المعاملة",
     "auth_transfer_confirm": "تأكيد التحويل إلى {username}؟",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "وافق فقط إذا كنت تثق بمصدر هذا الرابط. الموافقة تبث العملية أدناه من حسابك باستخدام مفتاح {authority} الخاص بك."
   },
   "voters_dropdown": {
     "rewards": "المكافآت",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "يجب أن تحتوي على أحرف وأرقام وواصلة فقط",
       "username_no_ascii_first_letter_error": "يجب أن يبدأ بحرف",
       "username_contains_double_hyphens": "يجب ألا تحتوي على واصلات مزدوجة",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "اسم المستخدم هذا يشبه كثيرًا حساب منصة تداول عملات رقمية وقد يربك الآخرين. يرجى اختيار اسم أكثر تفردًا.",
+      "username_restricted_prefix": "لا يُسمح بأسماء المستخدمين التي تبدأ بـ «uid» متبوعة بأرقام، لأنها تُستخدم عادةً لانتحال هوية الآخرين. يرجى اختيار اسم آخر.",
       "username_contains_underscore": "يجب ألا تحتوي على شرطة سفلية"
     },
     "500_error": "تعذر معالجة طلبك، قائمة انتظار التسجيل ممتلئة! حاول مرة أخرى في بضع دقائق...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "اسم المستخدم مأخوذ بالفعل",
+      "14": "عنوان البريد الإلكتروني مسجل بالفعل",
+      "15": "يرجى إدخال عنوان بريد إلكتروني صالح",
+      "16": "يرجى إدخال اسم مستخدم صالح",
+      "17": "اسم المستخدم طويل جدًا، يرجى اختيار اسم أقصر",
+      "19": "يرجى استخدام عنوان بريد إلكتروني دائم، أو احصل على حساب Premium بدلًا من ذلك",
+      "21": "هذه الإحالة غير صالحة",
+      "28": "تعذرت معالجة طلبك: من المرجح أن طابور التسجيل ممتلئ. يرجى المحاولة مرة أخرى بعد بضع دقائق.",
+      "107": "تم اكتشاف اتصال VPN. يرجى إيقاف VPN والمحاولة مرة أخرى، أو احصل على حساب Premium بدلًا من ذلك.",
+      "110": "لمنع إساءة الاستخدام، نحدد عدد الحسابات لكل شخص/شبكة. يرجى المحاولة مرة أخرى من شبكة مختلفة.",
+      "111": "تم اكتشاف اتصال Tor. يرجى تعطيل Tor أثناء التسجيل.",
+      "112": "تعذر التحقق من اتصالك الآن. يرجى المحاولة مرة أخرى بعد بضع دقائق."
     },
     "have_account_text": "لديك حساب مسبقا؟"
   },
@@ -1140,6 +1266,30 @@
     "desc": "احصل على حساب Hive كامل، تحتوي هذه الطريقة على فحوص أساسية للتأكد من أن شبكة الروبوتات لا تسئ استخدام صنبور التسجيل الخاص بنا.",
     "btn_register": "تسجيل (مجاني)",
     "title": "حساب مجاني"
+  },
+  "dictation": {
+    "title": "إملاء",
+    "start": "تسجيل",
+    "stop": "إيقاف",
+    "record_more": "تسجيل المزيد",
+    "done": "تم",
+    "recording": "جارٍ التسجيل",
+    "stop_hint": "أوقف التسجيل لتحويله إلى نص وإضافته إلى منشورك. حتى {m} دقيقة.",
+    "inserted": "أُضيف إلى منشورك. سجّل المزيد، أو انقر على تم.",
+    "transcribing": "جارٍ التحويل إلى نص",
+    "rate": "{n} نقاط لكل {s} ثانية",
+    "cost_running": "{n} نقاط حتى الآن",
+    "cost_running_free": "مجاني حتى الآن",
+    "free_remaining": "التالي {n} × {s} ثانية مجاني اليوم",
+    "price_loading": "جارٍ التحقق من السعر",
+    "price_error": "تعذر تحميل تسعيرة التحويل إلى نص.",
+    "denied": "يحتاج Ecency إلى الوصول إلى الميكروفون للإملاء. اسمح به من الإعدادات وحاول مرة أخرى.",
+    "error_empty": "لم يُكتشف أي كلام في هذا التسجيل.",
+    "error_insufficient_points": "لا توجد نقاط كافية لتحويل هذا التسجيل إلى نص.",
+    "error_rate_limited": "عدد كبير من التسجيلات حاليًا. يرجى المحاولة بعد قليل.",
+    "error_too_long": "هذا التسجيل طويل جدًا للتحويل إلى نص.",
+    "error_failed": "تعذر تحويل هذا التسجيل إلى نص. يرجى المحاولة مرة أخرى.",
+    "error_recorder": "تعذر بدء التسجيل. يرجى المحاولة مرة أخرى."
   },
   "wallet": {
     "delegations_out": "التفويضات الخارجة",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "التحقق بشكل منتظم يعطيك 0.25 نقطة.",
     "fill_transfer_from_savings": "تم الإدخار بنجاح",
     "activities": "الأنشطة والمستجدّات",
+    "no_activities": "لا توجد معاملات بعد",
+    "activities_failed": "تعذر تحميل المعاملات. اسحب للأسفل لإعادة المحاولة.",
     "tap_update": "انقر للتحديث",
     "mining_lottery": "تم الفوز باليانصيب",
     "checkin": "تحقق في",
     "tokens_transfer": "الرموز المحوّلة",
     "outgoing_transfer_title": "تحويل/إهداء",
+    "burned_title": "استخدام الذكاء الاصطناعي",
+    "burned_description": "نقاط أُنفقت على ميزة ذكاء اصطناعي",
+    "burn_refund_title": "استرداد الذكاء الاصطناعي",
+    "burn_refund_description": "نقاط أُعيدت بعد فشل طلب ذكاء اصطناعي",
     "manage_assets": "إضافة & حذف الأصول",
     "selected_assets": "أصول مختاره",
     "nft_setPropertyPermissions": "إرساء أذونات الخاصية لشعار الرمز الغير قابل للاستبدال",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "دقة تحديث الرموز",
     "tokens_transferOwnership": "ملكية الرمز المحوّلة",
     "withdraw_vesting": "إلغاء التجميد",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "حسابات السحب",
     "delegate_engine": "تفويض",
     "market_close": "تم إغلاق الطلب",
     "nftmarket_transferFee": "رسم شراء الطلب",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "احصل على نقاط",
     "escrow_approve": "موافقة الضمان",
     "expires": "انتهاء الصلاحية",
+    "transaction_id": "معرّف المعاملة",
+    "copy_transaction_id": "نسخ رابط المعاملة",
+    "filter_activities": "تصفية الأنشطة",
+    "filter_activities_desc": "اختر العمليات التي يطلبها هذا السجل",
+    "filter_all": "تحديد الكل",
+    "filter_none": "مسح الكل",
+    "filter_apply": "تطبيق",
     "author_reward": "مكافأة المؤلف",
     "withdraw_hbd": "سحب المدخرات",
     "convert_request": "طلب تحويل",
@@ -1426,11 +1589,11 @@
     "title": "دعاية+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "شحن RC",
+    "desc": "دفعة قصيرة الأمد من RC لتواصل النشر.",
+    "confirm": "هل تريد إنفاق Points لشحن رصيد الموارد؟",
+    "insufficient": "ليس لديك Points كافية.",
+    "buy_points": "شراء Points"
   },
   "ai_image_generator": {
     "title": "مولّد الصور بالذكاء الاصطناعي",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "مخصص ({hours} ساعة)",
+    "balance_load_failed": "تعذر تحميل رصيدك. انقر لإعادة المحاولة.",
+    "precision_load_failed": "تعذر تحميل تفاصيل هذه العملة، لذا يمكن إرسال المبالغ الصحيحة فقط. انقر لإعادة المحاولة.",
     "close": "إغلاق",
     "favorite_username_placeholder": "اسم المستخدم",
     "invalid_recipient_qr": "تعذّر العثور على اسم مستخدم في رمز QR هذا.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "إدارة السلطات",
     "pincode": "رمز PIN",
     "general": "عام",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "ادعم Ecency",
+    "support_beneficiary": "مشاركة مكافآت المنشورات مع Ecency",
+    "support_beneficiary_percent": "نسبة مكافآت المنشورات",
+    "support_curation": "اقتطاع جزء من مكافآت المقيّمين",
+    "support_curation_percent": "نسبة اقتطاع مكافآت المقيّمين",
     "feedback_body": "اكتب رسالتك هنا!\n\nاسم مستخدم Hive: {username}\nإصدار التطبيق: {appVersion}\nالنظام: {platform}\n",
     "show_imgs": "عرض الصور",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "تعليق",
       "bookmark": "إشارات مرجعية",
+      "tags": "الوسوم",
       "reblog": "إعادة النشر",
       "favorite": "المفضلات",
       "mention": "إشارة",
@@ -1599,10 +1765,10 @@
       "transfers": "التحويلات",
       "vote": "تصويت",
       "follow": "تابع",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "تم نشر المنشور المجدول",
+      "payouts": "المدفوعات",
+      "account_update": "تحديثات الحساب",
+      "weekly_earnings": "الأرباح الأسبوعية",
       "fcm_unavailable": "الإشعارات الفورية غير مدعومة على هذا الجهاز. ستتلقى الإشعارات فقط أثناء فتح التطبيق."
     },
     "keys_warning": "معلومات الحساب الحساسة!\nيجب تأمين Ecency برمز التعريف الشخصي قبل عرض المفاتيح الخاصة.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "إرسال الملاحظات",
     "rate_app": "تقييم Ecency",
+    "email_digests": "ملخصات البريد الإلكتروني",
     "rate": "تقييم",
     "dm-privacy-updated": "تم تحديث إعدادات خصوصية الرسائل المباشرة بنجاح",
     "dm-privacy-failed": "فشل تحديث إعدادات خصوصية الرسائل المباشرة",
@@ -1685,19 +1852,29 @@
     "request_sent": "تم إرسال طلب الحذف الخاص بك",
     "confirm_delete_body": "هل أنت متأكد أنك تريد حذف الحساب؟ سوف يمحو جميع البيانات الخاصة بك"
   },
-  "tts": {
-    "settings_title": "إعدادات تحويل النص إلى كلام",
-    "voice": "الصوت",
-    "voice_hint": "سيتم استخدام الصوت الافتراضي للنظام",
-    "speed": "السرعة",
-    "pitch": "حدّة الصوت",
-    "test_voice": "اختبار الصوت",
-    "settings_info": "ستُستخدم هذه الإعدادات عند قراءة المنشورات بصوت عالٍ",
+  "listen": {
+    "title": "استمع إلى هذا المنشور",
+    "minutes": "~{n} د",
+    "login": "تسجيل الدخول",
+    "unlock": "فتح القفل · {n} نقاط",
+    "confirm": "هل تريد إنفاق {n} نقاط للاستماع إلى هذا المنشور؟ الصوت لك لإعادة تشغيله في أي وقت.",
+    "not_enough_title": "نقاط غير كافية",
+    "not_enough": "الاستماع يتطلب {required} نقاط ولديك {available}.",
+    "get_points": "احصل على النقاط",
+    "unlock_failed": "تعذر فتح قفل الصوت، يرجى المحاولة مرة أخرى",
+    "failed_refunded": "تعذر إنشاء الصوت، وأُعيدت نقاطك",
+    "preparing": "جارٍ تجهيز الصوت…",
+    "preparing_eta": "جارٍ تجهيز الصوت، حوالي {n} د…",
+    "preparing_progress": "جارٍ تجهيز الصوت · {n}%",
+    "waiting": "في قائمة الانتظار، يسبقك {n}…",
+    "next_in_line": "التالي في الدور…",
     "play": "تشغيل",
     "pause": "إيقاف مؤقت",
-    "language": "اللغة",
-    "language_auto": "كشف تلقائي",
-    "language_hint": "يختار الكشف التلقائي اللغة بناءً على محتوى المنشور"
+    "seek": "تقديم",
+    "speed": "سرعة التشغيل",
+    "language": "لغة الصوت",
+    "unavailable": "تعذر تحميل الصوت.",
+    "retry": "حاول مرة أخرى"
   },
   "posting_authority": {
     "title": "تفعيل النشر الأسرع",
@@ -1732,7 +1909,7 @@
     "error-auth": "فشل المصادقة. يرجى تسجيل الدخول مرة أخرى.",
     "error-generic": "فشل رفع الفيديو. يرجى المحاولة مرة أخرى.",
     "error-too-long-short": "يجب ألا تتجاوز مقاطع الفيديو القصيرة 60 ثانية.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "يمكن أن يحتوي المنشور على فيديو واحد فقط. أزل الفيديو الحالي قبل إضافة فيديو آخر.",
     "select_source": "إضافة فيديو",
     "record": "تسجيل فيديو",
     "choose_library": "اختر من المكتبة"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "شارك تحديثًا سريعًا"
   },
+  "newsletter": {
+    "screen_title": "ملخصات البريد الإلكتروني",
+    "title": "{list}",
+    "body_own": "ملخص أسبوعي أو شهري بالبريد الإلكتروني لإشعاراتك.",
+    "body_creator": "المنشورات الجديدة من {list} في بريدك.",
+    "body_community": "ملخص المنشورات الجديدة في {list} عبر البريد الإلكتروني.",
+    "body_site": "أفضل ما في Ecency في بريدك.",
+    "first_publish_title": "تهانينا على أول منشور لك!",
+    "first_publish_body": "هل تريد ملخصًا بالبريد الإلكتروني لإشعاراتك؟ أسبوعيًا أو شهريًا، يمكنك تغييره أو تركه في أي وقت من الإعدادات.",
+    "list_own": "ملخص إشعاراتي",
+    "list_site": "نشرة Ecency الإخبارية",
+    "status_active": "أنت مشترك.",
+    "status_pending": "بانتظار تأكيد البريد الإلكتروني.",
+    "status_short_active": "نشط",
+    "status_short_pending_confirmation": "قيد الانتظار",
+    "status_short_suppressed": "متوقف",
+    "status_short_ended": "منتهٍ",
+    "cadence_weekly": "أسبوعيًا",
+    "cadence_monthly": "شهريًا",
+    "email_placeholder": "you@example.com",
+    "subscribe": "اشتراك",
+    "update": "تحديث",
+    "resend": "إعادة إرسال التأكيد",
+    "leave": "ترك الملخص",
+    "cancel": "إلغاء",
+    "ok": "حسنًا",
+    "manage": "إدارة",
+    "check_inbox_title": "تحقق من بريدك الوارد",
+    "check_inbox_body": "أرسلنا رابط تأكيد إلى {email}. يبدأ الاشتراك بعد التأكيد.",
+    "subscribed": "تم الاشتراك في ملخص البريد الإلكتروني",
+    "left": "تم ترك الملخص",
+    "refused": "لا يمكن الاشتراك بهذا العنوان.",
+    "unavailable": "ملخصات البريد الإلكتروني غير متاحة حاليًا.",
+    "too_many": "محاولات كثيرة جدًا، يرجى المحاولة لاحقًا.",
+    "fail": "حدث خطأ ما، يرجى المحاولة مرة أخرى.",
+    "empty": "لا توجد ملخصات بريد إلكتروني بعد. اشترك أدناه للبدء.",
+    "discover": "المزيد عبر البريد الإلكتروني",
+    "stop_all": "إيقاف الكل",
+    "stop_all_title": "إيقاف كل البريد؟",
+    "stop_all_body": "لن يُرسل أي بريد من Ecency إلى {email} مرة أخرى. تبقى الاشتراكات بعناوين أخرى.",
+    "stop_all_ok": "إيقاف الكل",
+    "stop_all_done": "تم إلغاء اشتراك العنوان من كل البريد",
+    "profile_option": "ملخص البريد الإلكتروني",
+    "subscriber_count": "{weekly} مشترك أسبوعي • {monthly} مشترك شهري في البريد الإلكتروني",
+    "community_button": "النشرة الإخبارية"
+  },
+  "mod_notes": {
+    "title": "إضافة سبب",
+    "placeholder": "السبب (يظهر للمشرفين الآخرين)",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  },
+  "community_settings": {
+    "title_header": "إعدادات المجتمع",
+    "title_label": "العنوان",
+    "about": "نبذة",
+    "lang": "اللغة",
+    "description": "الوصف",
+    "rules": "القواعد",
+    "nsfw": "غير مناسب للعمل",
+    "save": "حفظ",
+    "required": "مطلوب",
+    "title_length": "بين {min} و{max} حرفًا",
+    "owner_admin_only": "المالك والمشرفون فقط يمكنهم تغيير هذه الإعدادات."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "موسّع",
+        "collapsed": "مطوي"
+      },
+      "a11y_chat": {
+        "quote": "رد على {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "تحديد",
+        "deselect": "إلغاء التحديد"
+      },
+      "store": {
+        "billing_unavailable": "غير مسموح بالشراء داخل التطبيق على هذا الجهاز.",
+        "verification_failed": "تعذر على App Store التحقق من هذه العملية.",
+        "cancelled": "أُلغيت عملية الشراء",
+        "unknown_result": "نتيجة شراء غير معروفة"
+      },
+      "navigation": {
+        "feed_unavailable": "هذه الخلاصة غير متاحة بعد.",
+        "link_cannot_open": "لا يمكن فتح هذا الرابط.",
+        "video_cannot_play": "لا يمكن تشغيل هذا الفيديو."
+      },
+      "media": {
+        "load_failed": "تعذر تحميل هذا العنصر. تحقق من اتصالك وحاول مرة أخرى.",
+        "loading": "جارٍ تحميل الوسائط",
+        "download_failed": "فشل التنزيل بالحالة {status}"
+      },
+      "sign_in": {
+        "required": "تسجيل الدخول مطلوب",
+        "to_reply": "سجّل الدخول للرد.",
+        "to_vote": "سجّل الدخول للتصويت.",
+        "button": "تسجيل الدخول"
+      },
+      "account": {
+        "logout_user": "تسجيل خروج @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, zero {# تصويت} one {تصويت واحد} two {تصويتان} few {# تصويتات} many {# تصويتًا} other {# تصويت}}  •  {replies, plural, zero {# رد} one {رد واحد} two {ردان} few {# ردود} many {# ردًا} other {# رد}}",
+        "voting_power": "قوة التصويت {percent}",
+        "remove_favourite": "إزالة من المفضلة",
+        "add_favourite": "إضافة إلى المفضلة"
+      },
+      "waves": {
+        "clear_tag_filter": "مسح تصفية الوسم {tag}",
+        "new_wave": "Wave جديد",
+        "replies_open_thread": "{count, plural, zero {لا ردود، فتح السلسلة} one {رد واحد، فتح السلسلة} two {ردان، فتح السلسلة} few {# ردود، فتح السلسلة} many {# ردًا، فتح السلسلة} other {# رد، فتح السلسلة}}",
+        "characters": "{count} من {max} حرفًا",
+        "retry": "{message}\nحاول مرة أخرى",
+        "playing": "تشغيل {permlink}",
+        "video_attached_remove": "تم إرفاق فيديو، إزالة",
+        "image_attached_remove": "صورة مرفقة، إزالة",
+        "take_photo": "التقاط صورة",
+        "edit_poll": "تعديل الاستطلاع",
+        "add_poll": "إضافة استطلاع",
+        "add_video": "إضافة فيديو"
+      },
+      "reading": {
+        "reply_to": "رد على {username}",
+        "opens_post": "يفتح المنشور",
+        "sort_comments": "ترتيب التعليقات",
+        "sort_comments_value": "ترتيب التعليقات، {sort}",
+        "no_comments": "لا توجد تعليقات بعد.",
+        "loading_post": "جارٍ تحميل المنشور",
+        "show_version": "عرض النسخة",
+        "show_changes": "عرض التغييرات",
+        "replying_to": "الرد على @{username}",
+        "reply_text": "نص الرد",
+        "translate_from": "من",
+        "translate_to": "إلى"
+      },
+      "feed": {
+        "tab_pinned": "{label}، مثبّت",
+        "tab_add": "{label}، إضافة",
+        "customise": "تخصيص"
+      },
+      "card": {
+        "in_category": "في {category}",
+        "pinned": "مثبّت",
+        "by_author": "بواسطة {username}",
+        "payout": "العائد {payout}",
+        "payout_declined": "العائد {payout}، مرفوض",
+        "reblogged_by": "أعاد نشره {username}"
+      },
+      "shell": {
+        "close_menu": "إغلاق القائمة"
+      },
+      "editor": {
+        "thumbnail_pick_another": "صورة مصغّرة، اختر صورة أخرى",
+        "words": "{count, plural, zero {# كلمة} one {كلمة واحدة} two {كلمتان} few {# كلمات} many {# كلمة} other {# كلمة}}",
+        "poll_min_age": "الحد الأدنى لعمر الحساب (أيام): {days}",
+        "poll_max_options": "الحد الأقصى للخيارات: {count}",
+        "thumbnail_selected": "الصورة المصغّرة المحددة",
+        "thumbnail": "صورة مصغّرة",
+        "uploaded_image": "صورة مرفوعة",
+        "community_search": "بحث"
+      },
+      "vote": {
+        "not_voted": "لم يُصوَّت",
+        "voting": "جارٍ التصويت",
+        "failed_with": "فشل التصويت: {message}",
+        "failed": "فشل التصويت",
+        "payout": "العائد {payout}",
+        "payout_declined": "العائد {payout}، مرفوض",
+        "percent": "{percent} بالمئة",
+        "upvote_percent": "تصويت إيجابي {percent}%"
+      },
+      "settings": {
+        "on": "مفعّل",
+        "off": "متوقف"
+      },
+      "lock": {
+        "biometric_reason": "فعّل فتح القفل بالقياسات الحيوية لـ Ecency",
+        "offer_title": "فتح القفل باستخدام {method}",
+        "offer_use": "استخدم {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "المفاتيح مخفية أثناء تسجيل الشاشة أو عكسها.",
+        "screenshot_notice": "تم التقاط لقطة شاشة. أُخفيت المفاتيح الخاصة مجددًا؛ إذا كانت اللقطة تُظهر مفتاحًا فاحذفها.",
+        "hold_hint": "اضغط مطولًا على مفتاح لإظهاره.",
+        "hold_to_show": "اضغط مطولًا للإظهار"
+      },
+      "wallet": {
+        "cancel_order": "إلغاء هذا الطلب؟",
+        "days": "{count, plural, zero {# يوم} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}"
+      },
+      "chat": {
+        "reactors_hint": "اضغط مطولًا لمعرفة من تفاعل",
+        "see_reactors": "عرض من تفاعل"
+      },
+      "esie": {
+        "still": "{mood}، ثابت"
+      }
+    },
+    "ui": {
+      "profile_of": "ملف @{username}",
+      "preview": "معاينة ({index}/{count})",
+      "balance": "الرصيد: {amount}",
+      "expires_in": "تنتهي خلال {time}",
+      "expired": "انتهت الصلاحية. أغلق وحاول مرة أخرى.",
+      "user_has_no_posts": "لم ينشر @{username} أي شيء بعد",
+      "attach_image": "إرفاق صورة",
+      "auto": "تلقائي",
+      "back": "رجوع",
+      "hot": "الأكثر رواجًا",
+      "image_of": "صورة {index} من {count}",
+      "new": "جديد",
+      "nsfw_tap_to_reveal": "محتوى NSFW انقر للكشف",
+      "new_reply": "رد جديد",
+      "remove": "إزالة",
+      "unlock_ecency": "فتح قفل Ecency",
+      "update_it": "حدّثه",
+      "update_it_or_post_this_as": "حدّثه، أم تنشر هذا كردّ جديد؟",
+      "use_pin": "استخدم PIN",
+      "your_reply_was_already_posted": "تم نشر ردك بالفعل",
+      "error_try_again": "{message} هل تحاول مرة أخرى؟",
+      "auth": {
+        "account_label": "الحساب: @{username}",
+        "approve_the_request_in_your_wallet": "وافق على الطلب في تطبيق محفظتك.",
+        "copy_key": "نسخ {title}",
+        "current_account": "الحساب الحالي",
+        "qr_code": "رمز QR",
+        "requested_by": "بطلب من {requester}",
+        "pin_digits": "{filled} من {total, plural, zero {# رقم} one {رقم واحد} two {رقمين} few {# أرقام} many {# رقمًا} other {# رقم}}",
+        "private_key_shown": "{title}، المفتاح الخاص ظاهر",
+        "open_wallet_app": "فتح تطبيق المحفظة",
+        "hiveauth_scan": "وافق في Hive Keychain أو محفظة أخرى تدعم HiveAuth: افتحها على هذا الجهاز، أو امسح هذا الرمز بها.",
+        "switching": "جارٍ التبديل...",
+        "logout_all": "تسجيل الخروج من كل الحسابات",
+        "logout_all_title": "تسجيل الخروج من كل حساب على هذا الجهاز؟",
+        "stored_key": "@{username} مسجّل الدخول بالفعل على هذا الجهاز. تبقى مفاتيحه المخزنة؛ تُجدَّد جلسته فقط.",
+        "stored_hivesigner": "@{username} مسجّل الدخول بالفعل عبر HiveSigner على هذا الجهاز. ستُستبدل جلسته.",
+        "stored_hiveauth": "@{username} مسجّل الدخول عبر HiveAuth على هذا الجهاز. سيوقّع عبر HiveSigner بدلًا من ذلك.",
+        "method_key": "مفتاح",
+        "logout_failed": "فشل تسجيل الخروج"
+      },
+      "browser": {
+        "account": "الحساب",
+        "authority": "الصلاحية",
+        "phishing": "تحذير: تم الإبلاغ عن هذا النطاق كموقع تصيّد معروف. تابع بحذر شديد."
+      },
+      "chat": {
+        "cancel_edit": "إلغاء التعديل",
+        "cancel_reply": "إلغاء الرد",
+        "copied_to_clipboard": "تم النسخ إلى الحافظة",
+        "edited_at": "عُدّل {time}",
+        "group_options": "خيارات المجموعة",
+        "pinned_messages": "الرسائل المثبّتة",
+        "remove_user": "إزالة @{username}",
+        "sort_by_name": "الترتيب حسب الاسم",
+        "more": "المزيد",
+        "reaction_label": "{emoji} {count}. اضغط مطولًا لمعرفة من تفاعل",
+        "members": "الأعضاء"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "يوجد منشور بهذا الرابط ويختلف عما أرسلته. هل تحدّثه أم تنشره كمنشور جديد؟",
+        "a_scheduled_post_is_published_by": "يتولى Ecency نشر المنشور المجدول في الوقت المحدد. يتطلب ذلك صلاحية النشر (posting) لـ ecency.app على حسابك. تبقى مفاتيحك وصلاحياتك الأخرى كما هي. منح هذه الصلاحية يتطلب مفتاحك النشط.",
+        "ai_assist": "مساعد الذكاء الاصطناعي",
+        "ai_tools": "أدوات الذكاء الاصطناعي",
+        "allow_ecency_to_publish_for_you": "السماح لـ Ecency بالنشر نيابةً عنك؟",
+        "bold": "غامق",
+        "clone": "نسخ",
+        "cost": "التكلفة: {cost}",
+        "could_not_store_the_draft_on": "تعذر حفظ المسودة على هذا الجهاز. أبقِ التطبيق مفتوحًا واحفظ المسودة.",
+        "draft": "مسودة",
+        "delete_count": "حذف ({count})",
+        "dictate_desc": "تحدّث، وسيُضاف النص المفرّغ إلى منشورك",
+        "discard": "تجاهل",
+        "discard_changes": "تجاهل التغييرات؟",
+        "grant": "منح",
+        "italic": "مائل",
+        "keep_editing": "متابعة التحرير",
+        "my_blog": "مدونتي",
+        "my_communities": "مجتمعاتي",
+        "new_post": "منشور جديد",
+        "notice": "ملاحظة",
+        "restore": "استعادة",
+        "restore_unsaved_changes": "استعادة التغييرات غير المحفوظة؟",
+        "saved": "تم الحفظ",
+        "top_communities": "أبرز المجتمعات",
+        "table": "جدول",
+        "text_format": "تنسيق النص",
+        "this_link_is_already_in_use": "هذا الرابط مستخدم بالفعل",
+        "untitled": "بدون عنوان",
+        "update_it_or_publish_this_as": "هل تحدّثه أم تنشر هذا كمنشور جديد؟",
+        "you_have_unsaved_changes_from_an": "لديك تغييرات غير محفوظة من تعديل سابق. تغيّر المنشور منذ ذلك الحين؛ ستستبدل استعادتها النص أدناه.",
+        "your_edits_were_not_published": "لم تُنشر تعديلاتك.",
+        "your_post_was_already_published": "تم نشر منشورك بالفعل",
+        "file_size": "{name} ({size} ميجابايت)",
+        "thumbnail_pick": "صورة مصغّرة، انقر لاختيار صورة أخرى",
+        "thumbnail_number": "صورة مصغّرة {number}",
+        "recording_busy": "هناك تسجيل قيد التقدم بالفعل. أنهِه في الكاميرا أولًا.",
+        "photo_lost": "ضاعت الصورة أثناء فتح الكاميرا. يرجى التقاطها مرة أخرى.",
+        "add_snippet_button": "+ مقتطف",
+        "words_count": "{count, plural, zero {# كلمة} one {كلمة واحدة} two {كلمتان} few {# كلمات} many {# كلمة} other {# كلمة}}",
+        "community_search": "بحث"
+      },
+      "profile": {
+        "open_wallet": "فتح المحفظة",
+        "your_wallet_is_on_the_wallet": "محفظتك في تبويب المحفظة.",
+        "user_has_no_comments": "لم يعلّق @{username} على أي شيء بعد",
+        "votes_count": "{count, plural, zero {# تصويت} one {تصويت واحد} two {تصويتان} few {# تصويتات} many {# تصويتًا} other {# تصويت}}",
+        "replies_count": "{count, plural, zero {# رد} one {رد واحد} two {ردان} few {# ردود} many {# ردًا} other {# رد}}",
+        "menu": "المزيد",
+        "users": "المستخدمون"
+      },
+      "reading": {
+        "apply": "تطبيق",
+        "add_tag": "إضافة وسم",
+        "age": "العمر",
+        "audio_language": "لغة الصوت",
+        "available_filters": "عوامل التصفية المتاحة",
+        "could_not_unlock_the_audio_please": "تعذر فتح قفل الصوت، يرجى المحاولة مرة أخرى",
+        "downvote": "تصويت سلبي",
+        "downvote_percent": "تصويت سلبي {percent}%",
+        "listen_to_this_post": "استمع إلى هذا المنشور",
+        "log_in": "تسجيل الدخول",
+        "mark_all_as_read": "تعليم الكل كمقروء",
+        "mark_as_read": "تعليم كمقروء",
+        "more_replies": "المزيد من الردود",
+        "not_enough_points": "نقاط غير كافية",
+        "nothing_here_yet": "لا شيء هنا بعد.",
+        "open_editor": "فتح المحرر",
+        "pause_voice": "إيقاف الصوت مؤقتًا",
+        "play_voice": "تشغيل الصوت",
+        "playback_speed": "سرعة التشغيل",
+        "publishing_in_waves": "النشر في Waves",
+        "quests_done": "المهام المنجزة",
+        "read": "قراءة",
+        "remove_vote": "إزالة التصويت",
+        "seek": "تقديم",
+        "select_community": "اختيار المجتمع",
+        "selected_filters": "عوامل التصفية المحددة",
+        "the_audio_could_not_be_loaded": "تعذر تحميل الصوت.",
+        "this_post_does_not_exist_or": "هذا المنشور غير موجود أو تم حذفه.",
+        "unread": "غير مقروء",
+        "voice_position": "موضع الصوت",
+        "vote_weight": "وزن التصويت",
+        "reblogged_by": "أعاد نشره {username}",
+        "no_more_posts": "لا مزيد من المنشورات.",
+        "favourite": "المفضلة",
+        "no_votes_yet": "لا تصويتات بعد",
+        "no_comments_yet": "لا توجد تعليقات بعد. كن الأول!",
+        "comments_count": "التعليقات ({count})",
+        "sending_to_chain": "جارٍ الإرسال إلى السلسلة",
+        "compare": "مقارنة",
+        "your_vote": "تصويتك",
+        "reply_to": "الرد على @{username}",
+        "what_do_you_think": "ما رأيك؟",
+        "clear_tag_filter": "مسح تصفية الوسم",
+        "tab_selected": "{title}، محدد",
+        "add_tag_feed": "إضافة خلاصة وسم",
+        "feed_pinned": "{label}، مثبّت",
+        "attached_image_remove": "صورة مرفقة، انقر للإزالة",
+        "camera": "الكاميرا",
+        "files": "الملفات",
+        "paused": "متوقف مؤقتًا",
+        "in_topic": "في {topic}",
+        "poll_vote": "تصويت",
+        "reply": "رد",
+        "mute_sound": "كتم الصوت",
+        "unmute_sound": "إلغاء كتم الصوت",
+        "leaderboard_activities": "الأنشطة",
+        "leaderboard_reward": "المكافأة",
+        "sort_votes": "التصويتات"
+      },
+      "shell": {
+        "account_of": "الحساب @{username}",
+        "account_signed_out": "الحساب، غير مسجّل الدخول",
+        "close_tab": "إغلاق التبويب",
+        "coming_soon_to_the_native_app": "قريبًا في التطبيق الأصلي.",
+        "create": "إنشاء",
+        "expand": "توسيع",
+        "forward": "إلى الأمام",
+        "loading": "جارٍ التحميل",
+        "new_tab": "تبويب جديد",
+        "reload": "إعادة تحميل",
+        "sent": "تم الإرسال",
+        "tab_unread": "{title}، {count} غير مقروء",
+        "no_app_for_link": "لا يوجد تطبيق يمكنه فتح هذا الرابط."
+      },
+      "wallet": {
+        "product_not_available": "المنتج غير متاح.",
+        "repeat": "تكرار"
+      },
+      "copied": "تم النسخ",
+      "trending_caps": "الأكثر رواجًا",
+      "move_up": "نقل للأعلى",
+      "move_down": "نقل للأسفل",
+      "scroll_to_top": "التمرير إلى الأعلى",
+      "load_more": "المزيد"
+    },
+    "wallet": {
+      "checking": "جارٍ التحقق مع الشبكة",
+      "leave_title": "لا يزال الإرسال جاريًا",
+      "leave_message": "لا يزال الإرسال أو التحقق منه مع الشبكة جاريًا. يمكنك مغادرة هذه الشاشة: سيخبرك التطبيق عند الانتهاء.",
+      "stay": "البقاء",
+      "collateralized_convert_request": "طلب تحويل بضمان",
+      "op_transfer": "تحويل",
+      "op_power_up": "رفع الطاقة",
+      "op_power_down_change": "تغيير خفض الطاقة",
+      "op_delegation": "تفويض",
+      "op_savings_deposit": "إيداع في المدخرات",
+      "op_savings_withdrawal": "سحب من المدخرات",
+      "op_conversion": "تحويل عملة",
+      "op_swap": "مبادلة",
+      "op_order_cancel": "إلغاء أمر",
+      "op_reward_claim": "المطالبة بالمكافأة",
+      "op_withdraw_route_change": "تغيير مسار السحب",
+      "op_token_operation": "عملية رمز"
+    },
+    "notification": {
+      "amount_unknown": "المبلغ غير متاح",
+      "weekly_earnings_breakdown": "ربحت ${amount} هذا الأسبوع - ${authorUsd} من المنشورات، و${curationUsd} من الانتقاء.",
+      "weekly_earnings_total": "ربحت ${amount} هذا الأسبوع من منشوراتك والانتقاء."
+    },
+    "settings": {
+      "open": "فتح",
+      "feedback_subject": "ملاحظات/تقرير خلل",
+      "unknown_user": "مستخدم غير معروف"
+    },
+    "navigation": {
+      "editor": "المحرر",
+      "followers": "المتابعون",
+      "spin_game": "لعبة الدوران",
+      "edit_profile": "تعديل الملف الشخصي",
+      "redeem_points": "استبدال النقاط",
+      "community": "المجتمع",
+      "community_members": "أعضاء المجتمع",
+      "community_activities": "أنشطة المجتمع",
+      "browser": "المتصفح",
+      "asset_details": "تفاصيل الأصل",
+      "edit_history": "سجل التعديلات",
+      "welcome": "مرحبًا",
+      "chat": "المحادثة",
+      "backup_keys": "نسخ المفاتيح احتياطيًا",
+      "trade": "تداول",
+      "ai_image_generator": "مولّد الصور بالذكاء الاصطناعي",
+      "select_assets": "اختيار الأصول",
+      "poll": "استطلاع",
+      "bot_comments": "تعليقات الروبوتات"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "لا يمكن توقيع العمليات التي تحتاج إلى مفتاح المالك في Ecency.",
+      "post": "منشور/تعليق",
+      "custom": "JSON مخصص",
+      "sign_buffer": "توقيع رسالة",
+      "send_token": "إرسال عملة",
+      "witness_vote": "تصويت للشاهد",
+      "proxy": "تعيين وكيل",
+      "power_up": "رفع الطاقة",
+      "power_down": "خفض الطاقة",
+      "broadcast": "بث",
+      "sign_tx": "توقيع معاملة",
+      "encode": "ترميز رسالة",
+      "decode": "التحقق من المفتاح",
+      "add_account_authority": "إضافة صلاحية حساب",
+      "remove_account_authority": "إزالة صلاحية حساب",
+      "add_key_authority": "إضافة صلاحية مفتاح",
+      "remove_key_authority": "إزالة صلاحية مفتاح",
+      "create_claimed_account": "إنشاء حساب",
+      "create_proposal": "إنشاء مقترح",
+      "remove_proposal": "إزالة مقترح",
+      "update_proposal_vote": "التصويت على مقترح",
+      "signed_call": "استدعاء موقّع"
+    },
+    "translate_language": {
+      "ar": "العربية",
+      "az": "الأذربيجانية",
+      "bg": "البلغارية",
+      "bn": "البنغالية",
+      "ca": "الكتالانية",
+      "cs": "التشيكية",
+      "da": "الدنماركية",
+      "de": "الألمانية",
+      "el": "اليونانية",
+      "en": "الإنجليزية",
+      "eo": "الإسبرانتو",
+      "es": "الإسبانية",
+      "et": "الإستونية",
+      "fa": "الفارسية",
+      "fi": "الفنلندية",
+      "fr": "الفرنسية",
+      "ga": "الأيرلندية",
+      "he": "العبرية",
+      "hi": "الهندية",
+      "hu": "المجرية",
+      "id": "الإندونيسية",
+      "it": "الإيطالية",
+      "ja": "اليابانية",
+      "ko": "الكورية",
+      "lt": "الليتوانية",
+      "lv": "اللاتفية",
+      "ms": "الماليزية",
+      "nb": "النرويجية",
+      "nl": "الهولندية",
+      "pl": "البولندية",
+      "pt": "البرتغالية",
+      "ro": "الرومانية",
+      "ru": "الروسية",
+      "sk": "السلوفاكية",
+      "sl": "السلوفينية",
+      "sq": "الألبانية",
+      "sv": "السويدية",
+      "th": "التايلاندية",
+      "tl": "التاغالوغية",
+      "tr": "التركية",
+      "uk": "الأوكرانية",
+      "zh": "الصينية",
+      "zt": "الصينية (التقليدية)"
+    },
+    "reading": {
+      "banner_text": "هذا المنشور بلغة {source}. هل تريد ترجمته إلى {target}؟",
+      "translated_from_text": "مترجم من {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, zero {# عضو} one {عضو واحد} two {عضوان} few {# أعضاء} many {# عضوًا} other {# عضو}} • {authors, plural, zero {# ناشر} one {ناشر واحد} two {ناشران} few {# ناشرين} many {# ناشرًا} other {# ناشر}} • {posts, plural, zero {# منشور} one {منشور واحد} two {منشوران} few {# منشورات} many {# منشورًا} other {# منشور}}",
+      "community_title": "مجتمع {title}",
+      "members_title": "أعضاء {title}",
+      "activities_title": "نشاط {title}",
+      "cannot_start_with_or": "لا يمكن أن يبدأ بـ @ أو #",
+      "use_a_two_letter": "استخدم رمز لغة من حرفين، مثل en",
+      "at_most_characters": "على الأكثر {max, plural, zero {# حرف} one {حرف واحد} two {حرفان} few {# أحرف} many {# حرفًا} other {# حرف}}",
+      "council": "المجلس",
+      "journal": "اليوميات",
+      "topic": "الموضوع",
+      "community_not_found": "لم يُعثر على المجتمع."
+    },
+    "transfer": {
+      "one_recipient": "يمكن استخدام مستلم واحد فقط لهذا التحويل.",
+      "is_an_exchange_and": "{exchange} منصة تداول وقد لا تدعم التحويلات المتكررة: قد تضيع الأموال المرسلة بجدول زمني. استخدم تحويلًا لمرة واحدة بدلًا من ذلك."
+    },
+    "dapps": {
+      "signing_info": "يعمل Ecency كامتداد توقيع Hive لديك. عندما يطلب تطبيق لامركزي تسجيل الدخول باستخدام إضافة متصفح مثل Keychain أو Keeper أو Peak Vault، اختر ذلك الخيار. سيتولى Ecency التوقيع بأمان.",
+      "category_social": "اجتماعي",
+      "category_gaming": "ألعاب",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "مجموعة",
+      "unable_to_load_messages": "تعذر تحميل الرسائل.",
+      "someone": "شخص ما",
+      "renamed_the_group_to": "غيّر {actor} اسم المجموعة إلى \"{name}\"",
+      "removed_the_group_name": "أزال {actor} اسم المجموعة",
+      "unable_to_send_your": "تعذر إرسال رسالتك.",
+      "unable_to_remove_message": "تعذرت إزالة الرسالة.",
+      "unknown": "غير معروف",
+      "members_online": "{members, plural, zero {# عضو} one {عضو واحد} two {عضوان} few {# أعضاء} many {# عضوًا} other {# عضو}} • {online} متصل",
+      "failed_to_load_pinned": "تعذر تحميل الرسائل المثبّتة",
+      "you": "أنت",
+      "title": "التفاعلات"
+    },
+    "tip": {
+      "login_required": "يرجى تسجيل الدخول لإرسال البقشيش",
+      "max_decimals": "الحد الأقصى {n, plural, zero {# خانة عشرية} one {خانة عشرية واحدة} two {خانتان عشريتان} few {# خانات عشرية} many {# خانة عشرية} other {# خانة عشرية}}"
+    },
+    "paid": {
+      "check_again": "تحقق مرة أخرى",
+      "give_up": "تخلَّ",
+      "unknown": "لا توجد إجابة بعد. قد يكون الطلب لا يزال قيد التنفيذ. تحقق مرة أخرى لجلب النتيجة: لن يُحاسب عليه مرة ثانية.",
+      "pending": "لا يزال طلبك قيد المعالجة. تحقق مرة أخرى بعد قليل: لن يُحاسب عليه مرة ثانية.",
+      "restored": "لا توجد إجابة بعد لطلب سابق. تحقق مرة أخرى لجلب نتيجته: لن يُحاسب عليه مرة ثانية.",
+      "give_up_confirm": "إذا تم تنفيذ الطلب فقد أُنفقت النقاط وستضيع النتيجة.",
+      "not_stored": "تعذر حفظ هذا الطلب على الجهاز. أبقِ هذه الشاشة مفتوحة حتى ينتهي.",
+      "sign_in_again": "انتهت جلستك. سجّل الدخول مرة أخرى ثم تحقق مرة أخرى.",
+      "other_account": "هذا يخص @{owner}. عُد إلى ذلك الحساب للمتابعة."
+    },
+    "ai": {
+      "run_ai_assist": "تشغيل مساعد الذكاء الاصطناعي ({costText})",
+      "no_longer_free_cost": "لم يعد هذا التشغيل مجانيًا اليوم. تكلفته {cost} {unit}.",
+      "no_longer_free": "لم يعد هذا التشغيل مجانيًا اليوم.",
+      "content_violates_our_content": "المحتوى ينتهك سياسة المحتوى لدينا. يرجى تعديل نصك. لم تُسترد النقاط.",
+      "generate_image": "إنشاء صورة ({costLabel})",
+      "use_prompt": "استخدم: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "يرجى الانتظار، هناك إجراء آخر قيد التنفيذ",
+      "not_a_community_post": "ليس منشور مجتمع.",
+      "parent_post_not_found": "لم يُعثر على المنشور الأصلي",
+      "the_account_changed": "تغيّر الحساب."
+    },
+    "dictation": {
+      "balance": "الرصيد: {balance} {unit}",
+      "stop_points": "إيقاف ({cost} نقاط)",
+      "stop_free": "إيقاف (مجاني)",
+      "transcribe_points": "تحويل إلى نص ({cost} نقاط)",
+      "transcribe": "تحويل إلى نص",
+      "no_longer_free_cost": "لم يعد هذا التسجيل مجانيًا اليوم. تكلفته {cost} نقاط.",
+      "no_longer_free": "لم يعد هذا التسجيل مجانيًا اليوم.",
+      "held_locked": "توقف التسجيل عند قفل Ecency. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
+      "held_no_background": "توقف التسجيل عندما غادر Ecency الشاشة (تعذر عرض إشعار التسجيل). لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
+      "held_stopped": "توقف التسجيل من الإشعار. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
+      "held_focus_lost": "توقف التسجيل بسبب مكالمة أو صوت تطبيق آخر. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
+      "held_interrupted": "توقف التسجيل لأن تطبيقًا آخر استحوذ على الميكروفون. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
+      "unavailable": "التسجيل غير متاح على هذا الجهاز.",
+      "not_read": "تعذرت قراءة هذا التسجيل أو أنه كبير جدًا. لم يُرسل شيء ولم يُحاسب عليه.",
+      "give_up_not_sent": "لم يُرسل هذا التسجيل، لذا لم يُحاسب عليه. سيُحذف.",
+      "give_up_not_charged": "لم يُحاسب على هذا التسجيل. سيُحذف.",
+      "clip_lost": "لم يعد تسجيل طلب سابق موجودًا على هذا الجهاز. إذا تم تنفيذ ذلك الطلب فقد أُنفقت نقاطك ولا يمكن جلب نصه المفرّغ."
+    },
+    "register": {
+      "error_code_28": "تعذرت معالجة طلبك. يُرجّح أن قائمة انتظار التسجيل ممتلئة. يرجى المحاولة مرة أخرى بعد بضع دقائق."
+    },
+    "perks": {
+      "quests_empty": "لا توجد مهام هنا بعد، عاود التحقق قريبًا.",
+      "freeze_confirm_title": "احمِ سلسلتك",
+      "spend_points_on_a": "هل تنفق {price} نقاط على تجميد السلسلة؟ يُستهلك لحماية سلسلتك في يوم تفوّته."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "ادعم Ecency، واحصل على مدونة مجانية، وتميّز بشارة Pro الموثقة.",
+      "card_description": "اشترك في Pro مقابل {price} سنويًا. شارة موثقة، ومدونة مجانية، ودعم لـ Ecency.",
+      "card_description_plain": "اشترك في Pro لمدة سنة. شارة موثقة، ومدونة مجانية، ودعم لـ Ecency.",
+      "member": "أنت عضو في Pro.",
+      "benefit_badge": "شارة Pro موثقة بجانب اسمك.",
+      "benefit_blog": "مدونة مجانية على yourname.blogs.ecency.com.",
+      "benefit_support": "دعم مباشر لتطوير Ecency.",
+      "benefit_early": "وصول مبكر إلى الميزات الجديدة.",
+      "buy": "احصل على Pro مقابل {price} سنويًا",
+      "extend": "تمديد 12 شهرًا مقابل {price}",
+      "extend_note": "الشراء مرة أخرى يضيف 12 شهرًا إلى عضويتك.",
+      "unavailable": "Ecency Pro غير متاح من المتجر حاليًا.",
+      "activating": "تم استلام الدفع. جارٍ تفعيل عضويتك.",
+      "success_title": "مرحبًا بك في Ecency Pro",
+      "success_body": "عضوية Pro نشطة. ستظهر شارتك على ملفك الشخصي قريبًا.",
+      "extending": "تم استلام الدفع. جارٍ تمديد عضوية Pro لمدة 12 شهرًا.",
+      "open_a11y": "فتح Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "جارٍ حفظ المسودة...",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا.",
+      "fetch_failed": "فشل الجلب.",
+      "you_can_only_edit": "يمكنك تعديل المحتوى الخاص بك فقط.",
+      "invalid_percent": "نسبة غير صالحة",
+      "beneficiary_exists_already": "المستفيد موجود بالفعل",
+      "this_draft_belongs_to": "هذه المسودة تخص @{owner}. عُد إلى ذلك الحساب لنشرها.",
+      "could_not_make_a": "تعذر إنشاء رابط جديد لهذا المنشور. غيّر العنوان قليلًا وحاول مرة أخرى.",
+      "an_earlier_attempt_was": "نُشرت محاولة سابقة بعد هذه. تحقق من النسخة التي تريد الاحتفاظ بها.",
+      "could_not_check_your": "تعذر التحقق من صلاحية النشر لحسابك. تحقق من اتصالك وحاول مرة أخرى.",
+      "this_post_was_changed": "تغيّر هذا المنشور في مكان آخر منذ فتحته. انسخ نصك، ثم ارجع وافتحه مرة أخرى لتعديل أحدث نسخة.",
+      "link_text_placeholder": "النص هنا"
+    },
+    "app_error": {
+      "this_reply_is_too": "هذا الرد طويل جدًا.",
+      "the_network_refused_this": "رفضت الشبكة هذا الإجراء.",
+      "invalid_input": "إدخال غير صالح.",
+      "secure_storage_is_unavailable": "التخزين الآمن غير متاح. يرجى تسجيل الدخول مرة أخرى.",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا.",
+      "these_credentials_belong_to": "بيانات الاعتماد هذه تخص @{actual}، وليس @{expected}.",
+      "is_not_signed_in": "@{username} غير مسجّل الدخول على هذا الجهاز.",
+      "key_required": "مفتاح {role} مطلوب لتنفيذ هذه المعاملة. {hint}",
+      "cancelled": "أُلغي.",
+      "the_request_was_rejected": "رُفض الطلب في تطبيق المحفظة.",
+      "the_request_expired_before": "انتهت صلاحية الطلب قبل أن يرد تطبيق المحفظة. يرجى المحاولة مرة أخرى.",
+      "could_not_reach_the": "تعذر الوصول إلى خادم HiveAuth. يرجى المحاولة مرة أخرى.",
+      "unexpected_redirect": "أرسل الخادم إعادة توجيه غير متوقعة. لم يتغير شيء. يرجى المحاولة لاحقًا.",
+      "missing_key_hint": "أضفه من الإعدادات، إدارة الصلاحيات (استيراد المفتاح الخاص)، أو سجّل الدخول مرة أخرى به.",
+      "this_key_is_also": "هذا المفتاح هو أيضًا مفتاح المالك لهذا الحساب. لا يحتفظ Ecency بمفتاح يتحكم في دور المالك: امنح دوري النشط والنشر مفتاحين خاصين بهما، ثم سجّل الدخول بهما.",
+      "this_is_the_owner": "هذا هو مفتاح المالك. لا يخزّن Ecency مفتاح المالك ولا يستخدمه أبدًا: سجّل الدخول بكلمة مرورك الرئيسية، أو بمفتاح النشر أو المفتاح النشط.",
+      "this_password_only_matches": "كلمة المرور هذه تطابق مفتاح مالك الحساب فقط. لا يخزّن Ecency مفتاح المالك ولا يستخدمه أبدًا: سجّل الدخول بمفتاح النشر أو المفتاح النشط.",
+      "this_key_cannot_sign": "لا يستطيع هذا المفتاح التوقيع عن الحساب وحده: يحتاج الحساب إلى أكثر من توقيع واحد (وزنه أقل من الحد الأدنى).",
+      "public_key_given": "هذا هو مفتاحك العام. الصق المفتاح الخاص (يبدأ بـ 5) أو كلمة مرورك الرئيسية.",
+      "memo_key_only": "لا يمكن استخدام مفتاح الملاحظات (memo) لتسجيل الدخول. استخدم مفتاح النشر أو المفتاح النشط أو كلمة المرور الرئيسية.",
+      "network_message": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+      "network_error_this_may": "خطأ في الشبكة. قد يكون الإجراء قد تم بالفعل؛ إعادة المحاولة آمنة ولن تنشر مرتين."
+    },
+    "purchases": {
+      "deal_best": "أفضل عرض!",
+      "deal_popular": "شائع!",
+      "points_title": "{points} نقطة",
+      "the_store_did_not": "لم يرد المتجر."
+    },
+    "purchase": {
+      "boost_row": "تعزيز+  |  {hp} HP",
+      "account_meta_missing": "البريد الإلكتروني واسم المستخدم مطلوبان لاستهلاك 999accounts",
+      "stuck": "تعذر إكمال عملية شراء سابقة لهذا المنتج. يرجى التواصل مع support@ecency.com مع إيصال المتجر، فهو محفوظ لهذا الغرض.",
+      "held": "هذه العملية قيد المراجعة. تواصل مع support@ecency.com مع الطلب رقم #{order}.",
+      "earlier_purchase": "يجري إكمال عملية شراء سابقة لهذا المنتج للحساب @{target} أولًا.",
+      "earlier_pending": "لا تزال دفعة سابقة لهذا المنتج قيد الانتظار للحساب @{target}. تكتمل بمجرد أن يؤكد المتجر الدفع.",
+      "pending": "دفعتك قيد الانتظار. تكتمل عملية الشراء بمجرد أن يؤكد المتجر الدفع.",
+      "processing": "جارٍ معالجة عملية الشراء. ستكتمل قريبًا."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "التحويلات المتكررة",
+      "delegate_hive_power": "تفويض Hive Power",
+      "power_up": "رفع الطاقة",
+      "set_withdraw_vesting_route": "تعيين مسار سحب الطاقة",
+      "power_down": "خفض الطاقة",
+      "transfer_to_saving": "تحويل إلى المدخرات",
+      "transfer_from_saving": "تحويل من المدخرات",
+      "cancel_transfer_from_saving": "إلغاء التحويل من المدخرات",
+      "collateralized_convert": "تحويل بضمان",
+      "witness_vote": "تصويت للشاهد",
+      "witness_update": "تحديث الشاهد",
+      "witness_set_properties": "تعيين خصائص الشاهد",
+      "governance_proxy": "وكيل الحوكمة",
+      "claim_account": "المطالبة بحساب",
+      "create_account": "إنشاء حساب",
+      "create_account_with_account": "إنشاء حساب برصيد الحسابات",
+      "create_limit_order": "إنشاء أمر محدد",
+      "cancel_limit_order": "إلغاء أمر محدد",
+      "redeem_rewards": "استلام المكافآت",
+      "post_or_comment": "منشور أو تعليق",
+      "post_or_comment_options": "خيارات المنشور أو التعليق",
+      "custom_operation": "عملية مخصصة",
+      "update_account_active": "تحديث الحساب (النشط)",
+      "update_account_posting": "تحديث الحساب (النشر)",
+      "change_recovery_account": "تغيير حساب الاسترداد",
+      "create_proposal": "إنشاء مقترح",
+      "remove_proposal": "إزالة مقترح",
+      "update_proposal_votes": "تحديث تصويتات المقترح",
+      "update_proposal": "تحديث المقترح"
+    },
+    "auth_link": {
+      "must_be_signed_by": "يجب توقيع هذا الرابط بواسطة @{account}. بدّل إلى ذلك الحساب وافتحه مرة أخرى.",
+      "ecency_can_only_sign": "يمكن لـ Ecency توقيع المعاملات وبثها من الروابط فقط.",
+      "requester_page": "الصفحة {host}",
+      "owner_refused": "لا يمكن توقيع العمليات التي تحتاج إلى مفتاح المالك من رابط.",
+      "busy": "يرجى الانتظار: لا يزال طلب آخر قيد المعالجة.",
+      "not_supported": "لا يستطيع Ecency توقيع هذه العملية في هذا الإصدار بعد."
+    },
+    "chats": {
+      "group_members": "أعضاء المجموعة",
+      "rename_group": "إعادة تسمية المجموعة",
+      "failed_to_load_chats": "تعذر تحميل المحادثات",
+      "unknown": "غير معروف",
+      "unable_to_mark_channel": "تعذر تعليم القناة كمقروءة",
+      "unable_to_update_favorites": "تعذر تحديث المفضلة",
+      "unable_to_update_mute": "تعذر تحديث الكتم",
+      "group": "مجموعة",
+      "unable_to_search": "تعذر البحث",
+      "unable_to_start_chat": "تعذر بدء المحادثة",
+      "no_internet": "لا يوجد اتصال بالإنترنت"
+    },
+    "stake": {
+      "confirm_summary": "تفويض {hp} HP ({vests} VESTS) إلى @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "تم التفويض بالفعل إلى @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "للعرض فقط. لا يخزّن Ecency مفتاح المالك أبدًا.",
+      "shared_owner": "يستخدم هذا الحساب المفتاح نفسه لدور المالك ودور {names}. من يملك هذا المفتاح يتحكم في الحساب كله. امنح دور {names} مفتاحًا خاصًا به واحتفظ بمفتاح المالك دون اتصال.",
+      "copy_warning": "أي شخص يملك هذا المفتاح الخاص يتحكم في هذا الجزء من حسابك. يمكن للتطبيقات الأخرى قراءة الحافظة؛ الصقه فقط حيث تثق. يُمسح من الحافظة بعد دقيقتين."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "قفل PIN مفعّل.",
+      "pin_changed": "تم تغيير PIN.",
+      "pin_lock_is_off": "قفل PIN متوقف.",
+      "wiped_notice": "أُزيلت جميع الحسابات والمفاتيح وبيانات الاعتماد من هذا الجهاز.",
+      "we_could_not_bring": "تعذر نقل حساباتك من الإصدار السابق للتطبيق. يرجى تسجيل الدخول مرة أخرى.",
+      "your_pin_lock_could": "تعذر نقل قفل PIN من الإصدار السابق. عيّن PIN مرة أخرى من قائمة الحساب لتشغيل قفل التطبيق من جديد.",
+      "biometric_unlock_was_turned": "أُوقف فتح القفل بالقياسات الحيوية لأن القياسات الحيوية على هذا الجهاز تغيّرت. افتح القفل بـ PIN، ثم فعّله مرة أخرى من قائمة الحساب.",
+      "biometric_unavailable_notice": "تعذر تشغيل فتح القفل بالقياسات الحيوية: لم تُعدّ أي قياسات حيوية على هذا الجهاز.",
+      "set_backup": "عيّن PIN لدعم فتح القفل بالقياسات الحيوية",
+      "biometric_on_notice": "قفل PIN مفعّل. افتح القفل بالقياسات الحيوية أو بـ PIN.",
+      "offer_title": "فتح القفل بالقياسات الحيوية",
+      "offer_body": "افتح Ecency ببصمة الوجه أو الإصبع. عيّنت أيضًا PIN يفتح التطبيق عندما لا تتوفر القياسات الحيوية.",
+      "offer_use": "استخدام القياسات الحيوية",
+      "offer_use_pin": "استخدام PIN بدلًا من ذلك"
+    },
+    "common": {
+      "list_and": "{first} و{second}",
+      "role_owner": "المالك",
+      "role_active": "النشط",
+      "role_posting": "النشر",
+      "role_memo": "الملاحظات"
+    },
+    "editor_extras": {
+      "short_reply_hint": "الردود التي لا تتجاوز 25 حرفًا لا تكسب نقاطًا (الروابط لا تُحتسب)",
+      "short_content_hint": "قصير جدًا لكسب النقاط (25 حرفًا أو أقل، دون الروابط)",
+      "daily_post": "المنشور اليومي {postProgress}/{postGoal}",
+      "day_streak": "🔥 سلسلة {streak, plural, zero {# يوم} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}",
+      "grant_description": "امنح حساب Ecency ‏@ecency.app صلاحية النشر على حسابك، لتتمكن من النشر دون فتح Keychain في كل مرة. منح الصلاحية يغيّر صلاحية النشر لحسابك ويتطلب مفتاحك النشط."
+    },
+    "wallet_history": {
+      "from_to": "@{from} إلى @{to}",
+      "from_user_id": "من @{from}، المعرّف: {id}",
+      "user_id": "@{user}، المعرّف: {id}",
+      "from_to_id": "@{from} إلى @{to}، المعرّف: {id}",
+      "from_to_account": "@{from} إلى {to}",
+      "from_user": "من @{user}",
+      "to_user": "إلى @{user}",
+      "interest": "الفائدة",
+      "proposal_pay": "دفعة المقترح",
+      "categories": "أنواع النشاط",
+      "category_all": "الكل",
+      "category_transfers": "التحويلات",
+      "category_market": "أوامر السوق",
+      "category_interest": "الفوائد",
+      "category_stake": "عمليات الرهن",
+      "category_rewards": "المكافآت",
+      "point_type_checkin": "نبضات",
+      "point_type_login": "تسجيل الدخول",
+      "point_type_post": "منشور",
+      "point_type_comment": "تعليق",
+      "point_type_vote": "تصويت",
+      "point_type_reblog": "إعادة نشر",
+      "point_type_transfer_sent": "التحويلات المرسلة",
+      "point_type_transfer_received": "التحويلات المستلمة"
+    },
+    "video_upload": {
+      "continue_upload": "متابعة الرفع",
+      "source_gone": "لم يعد هذا التسجيل متاحًا على الجهاز. سجّل الفيديو أو اخترْه مرة أخرى.",
+      "no_camera": "الكاميرا غير متاحة على هذا الجهاز."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "الخفض التالي خلال {hours, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
+      "account_not_found": "لم يُعثر على الحساب"
+    },
+    "wave_compose": {
+      "clipboard_chip": "صورة في الحافظة · لصق الصورة",
+      "no_container": "تعذر جلب حاوية أحدث Waves",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا.",
+      "write_something_first": "اكتب شيئًا أولًا.",
+      "account_changed": "كُتب هذا الـ Wave بحساب آخر. أغلقه واكتبه مرة أخرى.",
+      "no_upload": "رفع الصور غير متاح في هذا الإصدار بعد. الصق رابط صورة في النص بدلًا من ذلك.",
+      "fail": "فشل"
+    },
+    "delete_account": {
+      "sign_out_failed": "أُرسل طلبك، لكن تعذر تسجيل الخروج. يرجى تسجيل الخروج من القائمة.",
+      "not_sent": "تعذر إرسال طلب الحذف. يرجى المحاولة مرة أخرى."
+    },
+    "chat_sheets": {
+      "group_limit": "يمكن أن تضم المجموعة حتى {max, plural, zero {# شخص آخر} one {شخص آخر واحد} two {شخصين آخرين} few {# أشخاص آخرين} many {# شخصًا آخر} other {# شخص آخر}}.",
+      "search_people_by_username": "ابحث عن أشخاص باسم المستخدم",
+      "new_group_title": "مجموعة جديدة",
+      "new_group_hint": "أضف من {min} إلى {max, plural, zero {# شخص} one {شخص واحد} two {شخصين} few {# أشخاص} many {# شخصًا} other {# شخص}} لبدء محادثة جماعية.",
+      "no_results": "لم يُعثر على أحد بهذا الاسم في المحادثة.",
+      "search_failed": "لم يعمل البحث. تحقق من اتصالك وحاول مرة أخرى.",
+      "create": "بدء المجموعة",
+      "new_group_failed": "تعذر بدء المجموعة. يرجى المحاولة مرة أخرى.",
+      "name_limit": "يمكن أن يصل اسم المجموعة إلى {max, plural, zero {# حرف} one {حرف واحد} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}}.",
+      "rename_title": "إعادة تسمية المجموعة",
+      "rename_hint": "أعطِ هذه المجموعة اسمًا يراه كل من فيها. اتركه فارغًا لعرض أسماء الأعضاء بدلًا منه.",
+      "placeholder": "اسم المجموعة",
+      "not_owner": "الشخص الذي بدأ هذه المجموعة وحده يمكنه إعادة تسميتها.",
+      "rename_failed": "تعذرت إعادة تسمية المجموعة. يرجى المحاولة مرة أخرى."
+    },
+    "editor_side": {
+      "copy_of": "نسخة من {title}",
+      "deletions_failed": "حدث خطأ ما\nفشل {failed} من {total, plural, zero {# عملية حذف} one {عملية حذف واحدة} two {عمليتي حذف} few {# عمليات حذف} many {# عملية حذف} other {# عملية حذف}}",
+      "uploads_failed": "{count, plural, zero {فشل رفع #} one {فشل رفع واحد} two {فشل رفعان} few {فشل # عمليات رفع} many {فشل # عملية رفع} other {فشل # عملية رفع}}:\n\n{messages}",
+      "failed_to_delete": "فشل الحذف"
+    },
+    "uploads": {
+      "add_to_gallery": "إضافة إلى المعرض"
+    },
+    "account_notice": {
+      "manage_keys": "الإعدادات، إدارة الصلاحيات",
+      "no_signing_key_title": "سجّل الدخول مرة أخرى بحساب @{account}",
+      "no_signing_key": "لم يعد Ecency يحتفظ بمفتاح المالك أو كلمة المرور الرئيسية على هذا الجهاز، وليس لدى @{account} مفتاح نشر أو مفتاح نشط مخزّن هنا. سجّل الدخول مرة أخرى بكلمة مرورك الرئيسية أو بمفتاح النشر أو المفتاح النشط، أو أضف مفتاحًا ضمن {manageKeys} (استيراد المفتاح الخاص).",
+      "missing_roles_title": "بعض المفاتيح لم تُضف",
+      "cannot_post": "النشر أو التصويت أو التعليق",
+      "cannot_transfer": "إرسال التحويلات أو تغيير إعدادات الحساب",
+      "missing_roles": "لم تعد كلمة مرورك تطابق مفتاح {missing} للحساب @{account}'': فقد تغيّر على الحساب منذ تعيين كلمة المرور. المخزّن على هذا الجهاز: مفتاح {kept}. إلى أن تضيف مفتاح {missing} ضمن {manageKeys} (استيراد المفتاح الخاص)، لا يستطيع هذا التطبيق {cannot} بمفاتيح الحساب @{account}.",
+      "shared_owner_title": "هذا المفتاح يتحكم أيضًا في دور المالك",
+      "shared_owner": "يستخدم @{account} المفتاح نفسه لدور المالك ودور {names}. من يملك هذا المفتاح يتحكم في الحساب كله. يحتفظ Ecency به كمفتاح {names} فقط ولا يستخدمه أبدًا في عمليات المالك. امنح دور {names} مفتاحًا خاصًا به، واحتفظ بمفتاح المالك دون اتصال."
+    },
+    "dapp_browser": {
+      "message_from": "رسالة من {host}",
+      "home_title": "الرئيسية",
+      "loading_title": "جارٍ التحميل...",
+      "blank_run": "[{count, plural, zero {# حرف فارغ} one {حرف فارغ واحد} two {حرفان فارغان} few {# أحرف فارغة} many {# حرفًا فارغًا} other {# حرف فارغ}}]",
+      "too_large": "طلبت هذه الصفحة توقيع طلب أكبر من أن يُعرض، لذا رفضه Ecency."
+    },
+    "community_service": {
+      "the_account_changed": "تغيّر الحساب."
+    },
+    "profile_edit": {
+      "enter_link": "أدخل رابط الصورة",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا.",
+      "account_not_found": "لم يُعثر على الحساب",
+      "please_enter_an_image": "يرجى إدخال رابط صورة يبدأ بـ https://"
+    },
+    "background_media": {
+      "post_by": "منشور من @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "لقد صوّتَّ بالوزن نفسه بالفعل.",
+      "insufficient_rc": "رصيد الموارد غير كافٍ. يرجى الانتظار أو رفع الطاقة.",
+      "missing_authority": "صلاحية النشر مفقودة. يرجى التحقق من طريقة تسجيل الدخول.",
+      "comment_too_soon": "يرجى الانتظار قبل النشر مرة أخرى.",
+      "paid_out": "تم صرف عائد هذا المنشور بالفعل.",
+      "too_large": "حجم المعاملة {size, plural, zero {# بايت} one {بايت واحد} two {بايتان} few {# بايتات} many {# بايتًا} other {# بايت}}، وهو أكبر من الحد المسموح {max} بايت.",
+      "network_error_please_check": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+      "unconfirmed_message": "تعذر التأكد مما إذا كان ذلك قد تم. يرجى التحقق من محفظتك أو السجل؛ ابدأه من جديد فقط إذا لم يكن موجودًا.",
+      "undecided_message": "قد يكون ذلك قد تم بالفعل. يرجى التحقق من محفظتك أو السجل قبل المحاولة مرة أخرى."
+    },
+    "chat_api": {
+      "request_failed": "فشل الطلب ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} يكتب...",
+      "typing_two": "{first} و{second} يكتبان...",
+      "typing_three": "{first} و{second} و{third} يكتبون...",
+      "typing_many": "{first} و{second} و{count, plural, zero {# آخرين} one {آخر واحد} two {آخران} few {# آخرين} many {# آخرًا} other {# آخرين}} يكتبون...",
+      "banned": "{reason} لا يزال بإمكانك قراءة المحادثة. يُفتح النشر {until}.",
+      "joined_when": "انضم {time}",
+      "joined": "انضم",
+      "official_badge": "رسمي",
+      "official_badge_label": "حساب Ecency الرسمي"
+    },
+    "side_menu": {
+      "ask_esie": "اسأل Esie"
+    },
+    "chat_service": {
+      "missing_token": "رمز وصول Hive مفقود. يرجى تسجيل الخروج ثم الدخول مرة أخرى.",
+      "dm_error": "لم ينضم المستخدم إلى المحادثات"
+    },
+    "compose_reply": {
+      "account_changed": "كُتب هذا الرد بحساب آخر. أغلقه واكتبه مرة أخرى.",
+      "write_something_first": "اكتب شيئًا أولًا.",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "عدد المستفيدين كبير جدًا: {max} على الأكثر.",
+      "a_beneficiary_s_share": "يجب أن تكون حصة المستفيد بين 0.01% و100%.",
+      "beneficiaries_add_up_to": "مجموع حصص المستفيدين يتجاوز 100%.",
+      "a_beneficiary_is_listed": "أحد المستفيدين مذكور مرتين.",
+      "you_cannot_be_a": "لا يمكنك أن تكون مستفيدًا من منشورك.",
+      "a_beneficiary_has_an": "اسم حساب أحد المستفيدين غير صالح."
+    },
+    "follows": {
+      "fail": "فشل!: {message}",
+      "follower_count": "المتابعون ({count})",
+      "following_count": "يتابع ({count})"
+    },
+    "link": {
+      "unsupported": "هذا الرابط غير مدعوم بعد.",
+      "cannot_open": "لا يمكن فتح الرابط",
+      "unsupported_version": "هذا الرابط غير مدعوم في هذا الإصدار."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "يمكن لمتصفح الاستكشاف الوصول إلى محفظة Hive لديك لتوقيع المعاملات. هذا الرابط من محتوى منشور ولم يتحقق منه Ecency. تابع فقط إذا كنت تثق به:\n\n{url}"
+    },
+    "listen": {
+      "message": "الاستماع يتطلب {required} نقاط ولديك {available}.",
+      "unlock_label": "فتح القفل · {cost} نقاط",
+      "preparing_audio": "جارٍ تجهيز الصوت · {preparingPercent}%",
+      "waiting_in_line_ahead": "في قائمة الانتظار، يسبقك {ahead}…",
+      "next_in_line": "التالي في الدور…",
+      "preparing_about_minutes": "جارٍ تجهيز الصوت، حوالي {minutes} د…",
+      "preparing_audio_2": "جارٍ تجهيز الصوت…",
+      "spend_confirm": "هل تريد إنفاق {cost} نقاط للاستماع إلى هذا المنشور؟ الصوت لك لإعادة تشغيله في أي وقت.",
+      "about_minutes": "~{minutes} د",
+      "failed_refunded": "تعذر إنشاء الصوت، وأُعيدت نقاطك"
+    },
+    "media_pick": {
+      "preparing_video": "جارٍ تجهيز الفيديو...",
+      "library_hint": "اختر من صورك",
+      "camera_hint": "التقط صورة جديدة الآن",
+      "files_hint": "تصفح الملفات على هذا الجهاز وفي السحابة",
+      "paste_hint": "استخدم الصورة التي نسختها",
+      "link_hint": "استخدم صورة من الويب"
+    },
+    "media_picking": {
+      "image_types_message": "نوع الملف هذا غير مدعوم. اختر صورة JPEG أو PNG أو GIF أو WebP أو HEIC.",
+      "video_types_message": "نوع الملف هذا غير مدعوم. اختر فيديو MP4 أو MOV.",
+      "gif_too_large": "حجم هذا الـ GIF أكبر من {mb} ميجابايت."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "تحتاج هذه العملية إلى توقيع نشط وتوقيع نشر معًا، ولا يستطيع Ecency توقيعهما معًا بعد."
+    },
+    "poll": {
+      "fail": "فشل!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "تعذر التحقق من صلاحية النشر لحسابك. تحقق من اتصالك وحاول مرة أخرى."
+    },
+    "post_lists": {
+      "voters_title": "معلومات المصوّتين ({total})",
+      "reblogs_title": "معلومات إعادة النشر ({total})",
+      "no_history_found": "لا يوجد سجل!",
+      "no_edit_history_available": "لا يتوفر سجل تعديلات لهذا المحتوى.",
+      "version_label": "النسخة {version}"
+    },
+    "stats": {
+      "other_device": "أخرى"
+    },
+    "profile": {
+      "account_not_found": "لم يُعثر على الحساب",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • يمتلئ خلال {hours, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتين} few {# ساعات} many {# ساعة} other {# ساعة}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "تعذرت قراءة ملفك الشخصي الحالي، حاول مرة أخرى"
+    },
+    "profile_sheet": {
+      "fail": "فشل! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "لم يُعثر على الحساب"
+    },
+    "push_payload": {
+      "mentioned": "ذكر @{source} الحساب @{target}",
+      "replied": "رد @{source} على @{target}",
+      "transferred": "حوّل @{source} إلى @{target}",
+      "delegated": "فوّض @{source} إلى @{target}",
+      "rewards_received": "تم استلام المكافآت",
+      "account_updated": "تم تحديث الحساب",
+      "account_updated_body": "تم تحديث تفاصيل حسابك",
+      "followed": "تابع @{source} الحساب @{target}",
+      "unfollowed": "ألغى @{source} متابعة @{target}",
+      "ignored": "تجاهل @{source} الحساب @{target}",
+      "blacklisted": "أضاف @{source} الحساب @{target} إلى القائمة السوداء",
+      "posted_in": "نشر @{source} في #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "تعذر الحصول على إذن الكاميرا",
+      "permission_message": "يرجى منح إذن الكاميرا في إعدادات ecency.",
+      "permission_allow": "السماح"
+    },
+    "reply_account": {
+      "switch": "الرد بحساب آخر"
+    },
+    "send_journal": {
+      "your_from_went_through": "تمت عملية {label} من @{account} بنجاح.",
+      "not_sent": "لم تتم عملية {label} من @{account}. لم يُرسل شيء؛ يمكنك بدءها من جديد.",
+      "checking_whether_your_from": "جارٍ التحقق مما إذا كانت عملية {label} من @{account} قد تمت. يرجى التحقق من محفظتك قبل إرسالها مرة أخرى."
+    },
+    "signing": {
+      "hot_page_closed": "أُغلقت صفحة HiveSigner",
+      "wrong_role": "هذا هو مفتاح {given} لديك؛ تحتاج هذه العملية إلى مفتاح {needed}.",
+      "action_id_required": "يحتاج هذا الإجراء إلى معرّف إجراء ليُعاد المحاولة بأمان."
+    },
+    "signing_router": {
+      "owner_never": "لا يتم توقيع عمليات المالك في التطبيق أبدًا."
+    },
+    "spin": {
+      "key_missing": "مفتاح اللعبة مفقود",
+      "score": "{score, plural, zero {# نقطة} one {نقطة واحدة} two {نقطتان} few {# نقاط} many {# نقطة} other {# نقطة}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "اليوم (UTC)، يُعاد الضبط خلال {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "يُعاد الضبط يوميًا عند 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "سجّل الدخول مرة أخرى",
+      "message": "أُعيد ضبط التخزين الآمن على هذا الجهاز. سجّل الدخول مرة أخرى.",
+      "failed": "تعذرت إزالة الحسابات على هذا الجهاز. يرجى المحاولة مرة أخرى."
+    },
+    "store": {
+      "in_app_purchases_are": "المشتريات داخل التطبيق غير متاحة في هذا الإصدار."
+    },
+    "wallet_sends": {
+      "journal_full": "لا تزال عمليات إرسال سابقة كثيرة قيد التحقق مع الشبكة. يرجى الانتظار حتى تتأكد قبل إرسال المزيد.",
+      "check_later": "لم تؤكد الشبكة ذلك في الوقت المناسب. يرجى التحقق من محفظتك أو السجل قبل إرساله مرة أخرى؛ يتحقق التطبيق مرة أخرى عند بدء تشغيله التالي."
+    },
+    "waves": {
+      "shorts": "مقاطع قصيرة"
+    },
+    "widgets": {
+      "unread": "{count, plural, zero {# غير مقروءة} one {غير مقروءة واحدة} two {غير مقروءتان} few {# غير مقروءة} many {# غير مقروءة} other {# غير مقروءة}}",
+      "locked_text": "افتح قفل Ecency للعرض",
+      "signed_out_text": "سجّل الدخول إلى Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "تعذرت قراءة صلاحيات حسابك الحالية. لم يتغير شيء؛ يرجى المحاولة مرة أخرى.",
+      "reads_disagree": "قراءتان لصلاحية النشر لحسابك غير متطابقتين. لم يتغير شيء؛ يرجى المحاولة مرة أخرى."
+    },
+    "vote": {
+      "vote_weight_must_be": "يجب أن يكون وزن التصويت بين -100% و100%.",
+      "please_sign_in_first": "يرجى تسجيل الدخول أولًا."
+    },
+    "widget": {
+      "streak_name": "سلسلة المهام",
+      "write": "اكتب",
+      "new_wave": "Wave جديد",
+      "notifications_description": "إشعاراتك غير المقروءة. مخفية أثناء تفعيل قفل PIN.",
+      "streak_description": "سلسلة مهامك اليومية. مخفية أثناء تفعيل قفل PIN.",
+      "compose_description": "اكتب منشورًا أو Wave جديدًا.",
+      "streak_title": "السلسلة",
+      "daily_quests": "المهام اليومية",
+      "streak_hint": "افتح المزايا لرؤية سلسلتك",
+      "open_perks": "فتح المزايا",
+      "open_app": "فتح Ecency",
+      "unread_caption": "{count, plural, zero {غير مقروءة} one {غير مقروءة} two {غير مقروءتان} few {غير مقروءة} many {غير مقروءة} other {غير مقروءة}}",
+      "streak_caption": "{count, plural, zero {يوم متتالٍ} one {يوم متتالٍ} two {يومان متتاليان} few {أيام متتالية} many {يومًا متتاليًا} other {يوم متتالٍ}}"
+    },
+    "system": {
+      "dictation_channel": "الإملاء",
+      "listen_channel": "الاستماع",
+      "dictation_channel_description": "يظهر أثناء استمرار تسجيل الإملاء في الخلفية، مع إجراء إيقاف.",
+      "dictation_title": "تسجيل للإملاء",
+      "dictation_text": "يسجّل Ecency إملاءك. الإيقاف يبقيه غير مرسل حتى تؤكد في التطبيق.",
+      "listen_channel_description": "يخبرك عندما يتعذر استمرار الاستماع في الخلفية.",
+      "listen_paused": "توقف الاستماع مؤقتًا",
+      "listen_paused_text": "افتح Ecency لمواصلة الاستماع.",
+      "skip_back": "رجوع 15 ثانية",
+      "skip_forward": "تقديم 15 ثانية"
+    },
+    "permission": {
+      "face_id": "افتح قفل Ecency باستخدام Face ID بدلًا من PIN.",
+      "camera": "امسح رموز QR والتقط صورة أو سجّل فيديو لإضافته إلى منشورك.",
+      "photo_library_add": "يحفظ Ecency الصور التي تنزّلها من المنشورات في مكتبة صورك.",
+      "photo_library": "يحتفظ Ecency بالصور التي تنزّلها من المنشورات معًا في ألبوم Ecency داخل مكتبة صورك.",
+      "microphone": "يستخدم Ecency الميكروفون لتتمكن من إملاء المنشورات والتعليقات (تُرسل هذه التسجيلات إلى Ecency لتحويلها إلى نص) ولتسجيل الصوت مع فيديو تضيفه إلى منشور."
+    },
+    "android": {
+      "no_browser": "لا يوجد متصفح متاح",
+      "biometric_unlock_title": "افتح قفل Ecency بالقياسات الحيوية",
+      "biometric_confirm": "أكّد ببصمة إصبعك أو وجهك",
+      "image_unsupported_address": "عنوان صورة غير مدعوم",
+      "image_create_failed": "تعذر إنشاء الملف",
+      "image_write_failed": "تعذرت كتابة الملف",
+      "image_too_large": "الصورة كبيرة جدًا",
+      "image_download_failed": "فشل التنزيل بالحالة {status}",
+      "billing_disconnected": "انقطع اتصال Google Play Billing.",
+      "billing_no_screen": "لا توجد شاشة لعرض عملية الشراء عليها.",
+      "billing_error": "خطأ في Google Play Billing ‏{code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "أنشأت {count, plural, zero {# منشور} one {# منشور} two {# منشور} few {# منشور} many {# منشور} other {# منشور}} هذا الشهر. واصل التميّز!",
-        "checkin": "سجّلت حضورك {count, plural, zero {# يوم} one {# يوم} two {# يوم} few {# يوم} many {# يوم} other {# يوم}} هذا الأسبوع. واصل التميّز!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, zero {# منشور جديد} one {منشور جديد واحد} two {منشوران جديدان} few {# منشورات جديدة} many {# منشورًا جديدًا} other {# منشور جديد}} في #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, zero {# المحاولات الفاشلة} one {# المحاولات الفاشلة} two {# المحاولات الفاشلة} few {# المحاولات الفاشلة} many {# المحاولات الفاشلة} other {# المحاولات الفاشلة}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "سلسلة {n} يوم"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "فقط الحسابات الأقدم من {days} أيام المسموح بها",
-        "max_choices": "• يمكنك اختيار حتى {choices} خيارات"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "متبقٍّ {executions} تحويلات",
-        "schedule_summary": "{executions} تحويلات، كل {hours} ساعة"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "قصير جدًا لكسب النقاط ({n, plural, zero {# حرف} one {حرف واحد} two {حرفان} few {# أحرف} many {# حرفًا} other {# حرف}} أو أقل، دون الروابط)"
       },
       "chats": {
-        "people_joined": "انضم {count} شخص"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "خلال حوالي {count, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
+        "ban-remaining-hours": "خلال حوالي {count, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتين} few {# ساعات} many {# ساعة} other {# ساعة}}",
+        "ban-remaining-days": "خلال حوالي {count, plural, zero {# يوم} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "استخدم {n, plural, zero {# وسم} one {وسمًا واحدًا} two {وسمين} few {# وسوم} many {# وسمًا} other {# وسم}} على الأكثر",
+          "too_long": "البحث طويل جدًا. استخدم {n, plural, zero {# حرف} one {حرفًا واحدًا} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}} على الأكثر"
+        }
       },
       "ai_assist": {
-        "min_chars": "مطلوب {count} حرف كحد أدنى",
-        "chars_remaining": "متبقٍّ {count} حرف"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "يمكنك اختيار حتى {count, plural, zero {# صورة} one {صورة واحدة} two {صورتين} few {# صور} many {# صورة} other {# صورة}} في المرة الواحدة"
+      },
+      "dictation": {
+        "stop_hint": "أوقف التسجيل لتحويله إلى نص وإضافته إلى منشورك. حتى {m, plural, zero {# دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}.",
+        "rate": "{n} نقاط لكل {s, plural, zero {# ثانية} one {ثانية واحدة} two {ثانيتين} few {# ثوانٍ} many {# ثانية} other {# ثانية}}"
       },
       "transfer": {
-        "powering_down_info": "إلغاء التجميد التالي بعد {days} يوم، {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "بين {min} و{max, plural, zero {# حرف} one {حرف واحد} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}}"
       }
     }
   }
