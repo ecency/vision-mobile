@@ -8,6 +8,11 @@ import com.ecency.core.secure.KeyVault
 import com.ecency.core.secure.PinLock
 import com.ecency.core.secure.SecureStoreException
 import com.ecency.core.secure.VaultAccount
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 
 /** What one migration run did. Lists usernames only, never secrets. */
 class LegacyMigrationReport(
@@ -19,7 +24,7 @@ class LegacyMigrationReport(
     val skipped: List<String>,
     /** Per account, RN fields that held data but could not be decrypted or validated. */
     val unreadable: Map<String, List<String>>,
-    /** True when a previous run had finished, so this one did nothing. */
+    /** True when a previous run had finished: this one only settled kept RN entries ([imported] lists any it wrote). */
     val alreadyDone: Boolean,
     /** True when this run deleted RN secrets ([LegacyCleanup]); false when there were none or it must retry. */
     val rnSecretsRemoved: Boolean = false,
@@ -64,16 +69,25 @@ object LegacyMigration {
     @Throws(LegacyImportError::class, SecureStoreException::class)
     fun run(vault: KeyVault, storage: LegacyStorage, pinKey: String, defaultPin: String?, pinIterations: Int): LegacyMigrationReport {
         val report: LegacyMigrationReport
-        // accounts whose RN secrets must stay; null keeps the whole RN storage
-        val keep: Set<String>?
+        // accounts whose RN secrets must stay
+        val keep: Set<String>
         if (vault.legacyImported()) {
-            report = done()
-            keep = try {
-                keptUsernames(LegacyImporter.import(storage::read, pinKey, defaultPin))
+            val legacy = try {
+                LegacyImporter.import(storage::read, pinKey, defaultPin)
             } catch (_: LegacyImportError.NothingToImport) {
-                emptySet()
+                null
             } catch (_: LegacyImportError) {
-                null // cannot tell what the vault lacks: delete nothing
+                return done() // cannot tell what the vault lacks: delete nothing
+            }
+            if (legacy == null) {
+                report = done()
+                keep = emptySet()
+            } else {
+                // entries kept by an earlier run that read now go into the vault before their RN copy may go;
+                // other RN accounts were settled before (or came after the import: README "Rollback")
+                val settled = settle(legacy, vault, only = keptBefore(vault))
+                report = done(settled.imported)
+                keep = settled.keep
             }
         } else {
             val legacy = try {
@@ -87,11 +101,13 @@ object LegacyMigration {
                 keep = emptySet()
             } else {
                 report = migrate(legacy, vault, pinIterations)
-                keep = keptUsernames(legacy)
+                keep = settle(legacy, vault, only = null).keep
             }
         }
+        // the next run must know which entries are kept, or it could not tell them from accounts removed since
+        if (!recordKept(vault, keep)) return report
         // The mark is set, so the vault holds what it should: the RN copies of the secrets it holds can go.
-        val removed = keep != null && try {
+        val removed = try {
             LegacyCleanup.hasSecrets(storage, keep) && LegacyCleanup.scrub(storage, keep)
         } catch (_: LegacyImportError) {
             false // unreadable right now; the next run retries
@@ -99,7 +115,91 @@ object LegacyMigration {
         return report.withRemoved(removed)
     }
 
-    private fun keptUsernames(legacy: LegacyImport): Set<String> = legacy.accounts.filter { it.mustKeep() }.map { it.username }.toSet()
+    private class Settled(val imported: List<String>, val keep: Set<String>)
+
+    /**
+     * Which RN entries must stay: an entry leaves only once the vault holds its keys, read back. An account the
+     * vault lacks is written first (with its RN session), and so are keys a vault key account lacks; a key the
+     * vault holds with another value is the vault's, and the RN entry then stays. A failed write keeps the entry.
+     */
+    private fun settle(legacy: LegacyImport, vault: KeyVault, only: Set<String>?): Settled {
+        val imported = mutableListOf<String>()
+        val keep = mutableSetOf<String>()
+        for (account in legacy.accounts) {
+            val converted = account.toVaultAccount()
+            if (converted == null || account.mustKeep()) {
+                keep += account.username
+                continue
+            }
+            if (only != null && account.username !in only) continue
+            val safe = try {
+                val existing = try {
+                    vault.account(converted.username)
+                } catch (_: SecureStoreException.Corrupted) {
+                    null
+                }
+                val target = if (existing == null) converted else existing.withKeysOf(converted)
+                if (target != null && target != existing) {
+                    if (existing == null) saveSession(vault, account, converted)
+                    vault.save(target)
+                }
+                val held = vault.account(converted.username)?.holdsKeysOf(converted) == true
+                if (held && existing == null) imported += converted.username
+                held
+            } catch (_: Exception) {
+                false // the vault did not take it: the RN copy stays for the next run
+            }
+            if (!safe) keep += account.username
+        }
+        return Settled(imported, keep)
+    }
+
+    private const val KEPT = "legacy.kept"
+
+    /** The RN entries the last run kept (none before the first). */
+    private fun keptBefore(vault: KeyVault): Set<String> = try {
+        vault.store.getString(KEPT)?.let { Json.parseToJsonElement(it).jsonArray.map { e -> e.jsonPrimitive.content } }.orEmpty().toSet()
+    } catch (_: Exception) {
+        emptySet()
+    }
+
+    /** False when it could not be written: nothing is deleted then. */
+    private fun recordKept(vault: KeyVault, keep: Set<String>): Boolean = try {
+        if (keep != keptBefore(vault)) vault.store.putString(KEPT, JsonArray(keep.sorted().map(::JsonPrimitive)).toString())
+        true
+    } catch (_: Exception) {
+        false
+    }
+
+    private fun VaultAccount.keyPairs(rn: VaultAccount) = listOf(postingKey to rn.postingKey, activeKey to rn.activeKey, memoKey to rn.memoKey)
+
+    /** Every key [rn] holds is in this account with the same value. */
+    private fun VaultAccount.holdsKeysOf(rn: VaultAccount) = keyPairs(rn).all { (mine, theirs) -> theirs.isNullOrEmpty() || mine == theirs }
+
+    /** This key account with the keys it lacks taken from [rn]; null when a key differs or either is not a key account. */
+    private fun VaultAccount.withKeysOf(rn: VaultAccount): VaultAccount? {
+        if (holdsKeysOf(rn)) return this
+        if (authType?.loginMethod() != LoginMethod.KEY || rn.authType?.loginMethod() != LoginMethod.KEY) return null
+        if (keyPairs(rn).any { (mine, theirs) -> !mine.isNullOrEmpty() && !theirs.isNullOrEmpty() && mine != theirs }) return null
+        return copy(
+            postingKey = postingKey?.ifEmpty { null } ?: rn.postingKey,
+            activeKey = activeKey?.ifEmpty { null } ?: rn.activeKey,
+            memoKey = memoKey?.ifEmpty { null } ?: rn.memoKey,
+        )
+    }
+
+    /**
+     * The RN session, written before the account entry (that entry is what marks the account done). A key account
+     * without a refresh token is marked expired (1), so its first renewal signs it a new session.
+     */
+    private fun saveSession(vault: KeyVault, account: LegacyAccount, converted: VaultAccount) {
+        if (converted.accessToken.isNullOrEmpty()) return
+        when {
+            account.refreshToken != null ->
+                VaultAccountStore.putSession(vault.store, converted.username, account.refreshToken, account.tokenExpiresAt)
+            converted.authType?.loginMethod() == LoginMethod.KEY -> VaultAccountStore.putSession(vault.store, converted.username, null, 1)
+        }
+    }
 
     /**
      * True when the RN entry holds a secret the vault never gets: a field that did not decrypt or validate, an
@@ -136,16 +236,7 @@ object LegacyMigration {
             if (existing != null || converted.username in imported) {
                 kept += converted.username
             } else {
-                // the RN session first: the account entry is what marks this account done. A key account without a
-                // refresh token is marked expired (1), so its first renewal signs it a new session.
-                if (!converted.accessToken.isNullOrEmpty()) {
-                    val keyAccount = converted.authType?.loginMethod() == LoginMethod.KEY
-                    when {
-                        account.refreshToken != null ->
-                            VaultAccountStore.putSession(vault.store, converted.username, account.refreshToken, account.tokenExpiresAt)
-                        keyAccount -> VaultAccountStore.putSession(vault.store, converted.username, null, 1)
-                    }
-                }
+                saveSession(vault, account, converted)
                 vault.save(converted)
                 imported += converted.username
                 written[converted.username] = converted
@@ -192,7 +283,8 @@ object LegacyMigration {
         )
     }
 
-    private fun done() = LegacyMigrationReport(emptyList(), emptyList(), emptyList(), emptyMap(), alreadyDone = true)
+    private fun done(imported: List<String> = emptyList()) =
+        LegacyMigrationReport(imported, emptyList(), emptyList(), emptyMap(), alreadyDone = true)
 
     private fun LegacyAccount.toVaultAccount(): VaultAccount? {
         if (!KeyVault.isValidUsername(username)) return null

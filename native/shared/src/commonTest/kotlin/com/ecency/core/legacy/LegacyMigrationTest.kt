@@ -47,7 +47,8 @@ class LegacyMigrationTest {
         storage: LegacyStorage = rn,
         pinKey: String = LegacyFixtures.PIN_KEY,
         target: KeyVault = vault,
-    ) = LegacyMigration.run(target, storage, pinKey, LegacyFixtures.DEFAULT_PIN, PIN_ITERATIONS)
+        defaultPin: String? = LegacyFixtures.DEFAULT_PIN,
+    ) = LegacyMigration.run(target, storage, pinKey, defaultPin, PIN_ITERATIONS)
 
     // "spike-owner" is an RN account whose only credential is an owner key (no token, no other key): nothing of
     // it may be stored, so it is skipped like an account without credentials (its RN entry stays, see below)
@@ -369,6 +370,29 @@ class LegacyMigrationTest {
         val left = Json.parseToJsonElement(storage.read("user")!!).jsonArray
         assertTrue(left.any { it.toString() == "42" }, "the entry nothing could read was deleted")
         assertTrue(storage.read("persist:root")!!.contains("encUnlockPin"))
+    }
+
+    @Test
+    fun aKeptEntryThatReadsLaterIsImportedBeforeItsRnCopyGoes() {
+        // a build without DEFAULT_PIN cannot read spike-default: imported elsewhere, its entry is kept
+        run(defaultPin = null)
+        assertNull(vault.account("spike-default"))
+        assertTrue("spike-default" in rnUsers())
+        // a later build reads it: into the vault first, checked, and only then out of the RN storage
+        val again = run()
+        assertEquals(LegacyFixtures.DEFAULT_POSTING, vault.account("spike-default")?.postingKey, "a newly readable entry never reached the vault")
+        assertEquals(listOf("spike-default"), again.imported)
+        assertEquals(listOf("spike-legacy", "spike-owner"), rnUsers().sorted())
+    }
+
+    @Test
+    fun aKeptEntryThatReadsLaterStaysWhenTheVaultWriteFails() {
+        run(defaultPin = null)
+        assertTrue("spike-default" in rnUsers())
+        run(target = KeyVault(DyingStore(store, 0)))
+        assertNull(vault.account("spike-default"))
+        assertTrue("spike-default" in rnUsers(), "deleted although the vault never took it")
+        assertEquals(originalUser("spike-default"), rnUser("spike-default"))
     }
 
     @Test
