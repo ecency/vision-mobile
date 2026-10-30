@@ -76,10 +76,10 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [[ -z "$BASE" ]] || ! git diff --quiet "$BASE...HEAD" -- native .github/workflows/test.yml; then
+          if [[ -z "$BASE" ]] || ! git diff --quiet "$BASE...HEAD" -- native src/config/locales .github/workflows/test.yml; then
             echo "native=true" >> "$GITHUB_OUTPUT"
           else
-            echo "No changes under native/: nothing to test."
+            echo "No changes under native/ or the locale files: nothing to test."
             echo "native=false" >> "$GITHUB_OUTPUT"
           fi
 

@@ -13,6 +13,8 @@ on:
     # "First deploy" steps in native/docs/release-builds.md)
     paths:
       - 'native/**'
+      # the native strings are generated from the RN locale files (a Crowdin pull ships through here)
+      - 'src/config/locales/**'
   workflow_dispatch:
     inputs:
       upload:
@@ -85,8 +87,20 @@ jobs:
           key: native-ios-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: native-ios-gradle-
 
+      # pinned like every other downloaded tool (GitHub's digest of the 2.46.0 release asset)
       - name: Install XcodeGen
-        run: brew install xcodegen
+        env:
+          XCODEGEN_URL: https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+        run: |
+          dir="$RUNNER_TEMP/xcodegen"
+          mkdir -p "$dir"
+          curl -fsSL --retry 3 -o "$dir/xcodegen.zip" "$XCODEGEN_URL"
+          echo "$XCODEGEN_SHA256  $dir/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$dir/xcodegen.zip" -d "$dir"
+          bin="$(find "$dir" -type f -name xcodegen -perm -u+x | head -1)"
+          [[ -n "$bin" ]] || { echo "xcodegen binary not found in the release zip" >&2; exit 1; }
+          echo "$(dirname "$bin")" >> "$GITHUB_PATH"
 
       # RN's scheme: the Unix time as CFBundleVersion.
       - name: Resolve build number

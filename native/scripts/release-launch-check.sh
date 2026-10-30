@@ -45,7 +45,8 @@ android() {
   "$adb" logcat -b all -c 2>/dev/null || "$adb" logcat -b main,system,crash,events -c
 
   crash_log() { "$adb" logcat -d -b crash 2>/dev/null | tr -d '\r' | grep -A40 -E "Process: $id|>>> $id <<<" || true; }
-  out="$("$adb" shell am start -W -n "$activity" 2>&1 | tr -d '\r')"
+  # "|| true": a failed start must reach the crash log below, not end the script under pipefail
+  out="$("$adb" shell am start -W -n "$activity" 2>&1 | tr -d '\r')" || true
   echo "$out"
   if [[ "$out" != *"Status: ok"* ]]; then
     crash_log >&2
@@ -75,7 +76,7 @@ android() {
   fi
   [[ -n "$("$adb" shell pidof "$id" 2>/dev/null | tr -d '\r')" ]] || fail "the process is gone"
   local front
-  front="$("$adb" shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -E "topResumedActivity|mResumedActivity" | head -1)"
+  front="$("$adb" shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -E "topResumedActivity|mResumedActivity" | head -1)" || true
   # a first start on Android 13+ asks for notifications: the system's permission prompt over the app is fine
   [[ "$front" == *"$id/"* || "$front" == *"permissioncontroller/"*"GrantPermissionsActivity"* ]] \
     || fail "the app is not in front ($front)"

@@ -12,6 +12,8 @@ on:
     # "First deploy" steps in native/docs/release-builds.md)
     paths:
       - 'native/**'
+      # the native strings are generated from the RN locale files (a Crowdin pull ships through here)
+      - 'src/config/locales/**'
   workflow_dispatch:
     inputs:
       track:
