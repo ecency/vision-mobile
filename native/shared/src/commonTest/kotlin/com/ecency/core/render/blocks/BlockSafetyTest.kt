@@ -9,6 +9,9 @@ import kotlin.test.assertTrue
 
 /** Tap targets, embeds and thumbnails from authored attributes; invalid ones degrade to text. */
 class BlockSafetyTest {
+    // body images load through the image proxy (BlockBuilder.image)
+    private fun px(url: String) = SafeTarget.proxify(url, "https://images.ecency.com")!!
+
     private fun t(text: String) = Inline.Text(text)
     private fun p(vararg inlines: Inline) = Block.Paragraph(inlines.toList())
     private fun a(cls: String, attrs: String, text: String = "x") = BlockBuilder.build("<p><a class=\"$cls\" $attrs>$text</a></p>")
@@ -133,7 +136,7 @@ class BlockSafetyTest {
         assertNull(TextFidelity.diff(html, blocks))
         val first = blocks[0] as Block.Paragraph
         assertEquals(Inline.Link(LinkTarget.External("https://x.example"), listOf(t("link"))), first.inlines.last())
-        assertTrue(Block.Image("https://x.example/i.png", null, LinkTarget.External("https://y.example")) in blocks)
+        assertTrue(Block.Image(px("https://x.example/i.png"), null, LinkTarget.External("https://y.example")) in blocks)
         assertTrue(Block.PostPreview("alice", "p", null) in blocks)
         assertEquals(listOf("bold link", "para", "cell", "item"), blocks.filterIsInstance<Block.Paragraph>().map { BlockText.ofInlines(it.inlines) })
     }
@@ -146,7 +149,7 @@ class BlockSafetyTest {
             p(t("a "), Inline.Link(LinkTarget.External("https://x.example?a=1&b=2"), listOf(t("l"), Inline.Text("i", setOf(Inline.Mark.Bold)))), t(" &")),
             blocks[0],
         )
-        assertEquals(Block.Image("https://x.example/i.png", null), blocks[1])
+        assertEquals(Block.Image(px("https://x.example/i.png"), null), blocks[1])
         // The end tag of the outer p closes the open div and span too.
         assertEquals(listOf("unclosed x", "tail"), blocks.drop(2).map { BlockText.of(listOf(it)).trim() })
         assertNotNull(BlockBuilder.build("<<<a href=x><img src=y"))

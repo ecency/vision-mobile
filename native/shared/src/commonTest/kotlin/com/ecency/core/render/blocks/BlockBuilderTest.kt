@@ -10,6 +10,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class BlockBuilderTest {
+    // body images load through the image proxy (BlockBuilder.image)
+    private fun px(url: String) = SafeTarget.proxify(url, "https://images.ecency.com")!!
+
     private fun build(name: String, waves: Boolean = false) = BlockBuilder.build(BlockInputs[name], BuildOptions(waves = waves))
     private fun t(text: String, vararg marks: Mark) = Inline.Text(text, marks.toSet())
     private fun p(vararg inlines: Inline, style: BlockStyle = BlockStyle.Default) = Block.Paragraph(inlines.toList(), style)
@@ -226,7 +229,7 @@ class BlockBuilderTest {
         )
         // Nested containers stay whole below the top level.
         val q = BlockBuilder.build("<blockquote><center><img src=\"https://x.example/a.png\" /> cap</center></blockquote>").single() as Block.Quote
-        assertEquals(listOf(Block.Container(listOf(Block.Image("https://x.example/a.png", null), p(t("cap"), style = center)), center)), q.blocks)
+        assertEquals(listOf(Block.Container(listOf(Block.Image(px("https://x.example/a.png"), null), p(t("cap"), style = center)), center)), q.blocks)
     }
 
     @Test
@@ -237,7 +240,7 @@ class BlockBuilderTest {
     @Test
     fun alignedParagraphWithImageBecomesContainer() {
         assertEquals(
-            listOf(Block.Container(listOf(Block.Image("https://x.example/a.png", null)), center), p(t("cap"), style = center)),
+            listOf(Block.Container(listOf(Block.Image(px("https://x.example/a.png"), null)), center), p(t("cap"), style = center)),
             BlockBuilder.build("<p data-align=\"center\"><img src=\"https://x.example/a.png\" /> cap</p>"),
         )
     }
@@ -340,13 +343,13 @@ class BlockBuilderTest {
         assertEquals(listOf(p(t("before")), Block.Image("https://images.ecency.com/p/mid.png", "mid"), p(t("after"))), build("image_in_text"))
         // An image inside an inline post link is a linked image, not a preview card.
         assertEquals(
-            listOf(Block.Image("https://x.example/i.png", null, LinkTarget.Post("alice", "b"))),
+            listOf(Block.Image(px("https://x.example/i.png"), null, LinkTarget.Post("alice", "b"))),
             BlockBuilder.build("<p><a class=\"markdown-post-link\" data-is-inline=\"true\" data-author=\"alice\" data-permlink=\"b\"><img src=\"https://x.example/i.png\" /></a></p>"),
         )
         // Text and an image in one link: the text links, the image opens the gallery (RN: only a lone image follows the link).
         val target = LinkTarget.External("https://x.example")
         assertEquals(
-            listOf(p(Inline.Link(target, listOf(t("go")))), Block.Image("https://x.example/i.png", null), p(Inline.Link(target, listOf(t("on"))))),
+            listOf(p(Inline.Link(target, listOf(t("go")))), Block.Image(px("https://x.example/i.png"), null), p(Inline.Link(target, listOf(t("on"))))),
             BlockBuilder.build("<p><a class=\"markdown-external-link\" data-href=\"https://x.example\">go <img src=\"https://x.example/i.png\" /> on</a></p>"),
         )
         assertEquals(emptyList(), BlockBuilder.build("<p><img alt=\"no src\" /></p>"))
@@ -396,7 +399,7 @@ class BlockBuilderTest {
         assertEquals(listOf(Block.ImageGrid(listOf(img("a"), img("b"), img("c"))), p(t("text")), img("d")), build("wave_images", waves = true))
         // Inside <center> too, as the RN app's regex runs over the whole body.
         val two = "<p><img src=\"https://x.example/1.png\" /></p>\n<p><img src=\"https://x.example/2.png\" /></p>"
-        val grid = Block.ImageGrid(listOf(Block.Image("https://x.example/1.png", null), Block.Image("https://x.example/2.png", null)))
+        val grid = Block.ImageGrid(listOf(Block.Image(px("https://x.example/1.png"), null), Block.Image(px("https://x.example/2.png"), null)))
         assertEquals(listOf(Block.Container(listOf(grid), center)), BlockBuilder.build("<center>$two</center>", BuildOptions(waves = true)))
     }
 
@@ -440,5 +443,25 @@ class BlockBuilderTest {
         for (k in listOf("Heading", "Paragraph", "Image", "ListBlock", "Quote", "Code", "Rule", "Table", "Video", "PostPreview")) {
             assertTrue(k in kinds, "missing $k in $kinds")
         }
+    }
+
+    @Test
+    fun bodyImagesAlwaysLoadThroughTheProxy() {
+        fun html(body: String) = BlockBuilder.build(body, BuildOptions())
+        // through the whole pipeline: an author's own class="no-replace" survives render-helper and skips its proxy
+        val rendered = com.ecency.core.render.RenderHelper().renderPostBody("""<img class="no-replace" src="https://tracker.example/pixel.png">""", true)
+        assertTrue("tracker.example/pixel.png" in rendered && "no-replace" in rendered, rendered)
+        assertTrue(BlockBuilder.build(rendered, BuildOptions()).filterIsInstance<Block.Image>().all { it.src.startsWith("https://images.ecency.com/") }, rendered)
+        // render-helper leaves class="no-replace" images unproxied, so an author could make every reader's device
+        // fetch from their own server (the reader's IP); the app only loads images through the proxy
+        val images = html("""<p><img class="no-replace" src="https://tracker.example/pixel.png" alt="x"></p>""")
+            .filterIsInstance<Block.Image>()
+        assertEquals(1, images.size)
+        assertTrue(images.single().src.startsWith("https://images.ecency.com/"), images.single().src)
+        // too long for the proxy: not loaded at all rather than fetched directly
+        val long = "https://tracker.example/" + "a".repeat(2100) + ".png"
+        assertTrue(html("""<p><img src="$long"></p>""").filterIsInstance<Block.Image>().none { !it.src.startsWith("https://images.ecency.com/") })
+        // already proxied images are kept as they are
+        assertEquals("https://images.ecency.com/p/abc.png", html("""<p><img src="https://images.ecency.com/p/abc.png"></p>""").filterIsInstance<Block.Image>().single().src)
     }
 }

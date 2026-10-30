@@ -107,3 +107,16 @@ sanitize-only output (with the iframe gap above). Not a security issue on its ow
 
 **Native port.** Repairs iteratively and returns the repaired body with every element closed
 (`DomGoldenTest.deepNestingPastTheJsStackIsRepaired`).
+
+## An author's `class="no-replace"` skips the image proxy
+
+**Where.** `img()` (`methods/img.method.ts`), with the sanitizer allowing any `class` on `<img>`.
+
+**What happens.** `no-replace` is render-helper's own marker for the video thumbnails it builds,
+but nothing strips it from author markup, so `<img class="no-replace" src="https://example.com/a.png">`
+renders with that `src` and readers load it straight from the author's server (their IP addresses
+go to the author). URLs over the proxy's 2,048 character limit are also left unproxied.
+
+**Native.** The HTML stays identical to render-helper's. `BlockBuilder.image` loads body images
+only through the image proxy and leaves out an image the proxy cannot serve
+(`BlockBuilderTest.bodyImagesAlwaysLoadThroughTheProxy`). Upstream: ecency/vision-web#1999.

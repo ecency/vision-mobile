@@ -451,7 +451,11 @@ private class Walker(private val options: BuildOptions) {
     }
 
     private fun image(el: Element, link: LinkTarget?): Block.Image? {
-        val src = SafeTarget.image(el.getAttribute("src")) ?: return null
+        // only through the image proxy: render-helper keeps an author's class="no-replace" (its own marker for video
+        // thumbnails) and URLs too long for the proxy unproxied, which would let a post fetch from any server with
+        // the reader's IP. An image the proxy cannot serve is left out.
+        val safe = SafeTarget.image(el.getAttribute("src")) ?: return null
+        val src = SafeTarget.proxify(safe, options.proxyBase) ?: return null
         return Block.Image(src, el.getAttribute("alt")?.takeIf { it.isNotBlank() }, link)
     }
 
