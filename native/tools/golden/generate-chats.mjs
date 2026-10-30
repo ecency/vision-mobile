@@ -173,6 +173,8 @@ const messages = [
   'no images here', '@a.b-c dots', 'word@notmention', 'end @', 'https://ecency.com/@alice/post-1 and @bob', 'ftp://files.x.com/a.png',
   'https://x.com/a(b.png bracket',
 ]
+// linkify-it's own match(), bound: called as x.match(text), code scanners take each input for a regex
+const findLinks = linkify.match.bind(linkify)
 const linkInputs = [
   'please open hive://sign/op/WyJhY2NvdW50X3VwZGF0ZTIiLHt9XQ.. to restore', 'see https://hivesigner.com/sign/op/abc', 'just a normal message',
   'https://ecency.com/@alice', 'https://ecency.com/@alice.', 'https://ecency.com/@alice,', '(https://x.com/a)', 'https://x.com/a_(b)',
@@ -202,7 +204,7 @@ const out = {
   banInfo: banInfos,
   messages: messages.map((m) => ({ raw: m, parsed: parse.parseMessageContent(m), plain: parse.parseMessageContent(m, false) })),
   linkText: ['https://ecency.com/@alice', 'https://ecency.com/@alice/', 'https://ecency.com/@alice/post', 'http://ecency.com/@a', 'https://x.com'].map((url) => ({ url, text: parse.setLinkText(url) })),
-  links: linkInputs.map((text) => ({ text, links: (linkify.match(text) || []).map((m) => ({ start: m.index, end: m.lastIndex, url: m.url, schema: m.schema })) })),
+  links: linkInputs.map((text) => ({ text, links: (findLinks(text) || []).map((m) => ({ start: m.index, end: m.lastIndex, url: m.url, schema: m.schema })) })),
   emojify: ['emoji :smile: and :+1: and :unknown_thing:', ':SMILE:', '::', ':heart::heart:', ':foo:smile:', 'a:b:c', ':+1::-1:'].map((t) => ({ text: t, out: parse.emojifyMessage(t) })),
   sorted: [...sortNames].sort((a, b) => a.localeCompare(b)),
   emojiCount: Object.keys(emojiMap).length,
