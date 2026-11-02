@@ -17,6 +17,27 @@ enum class AssetLayer(val value: String) {
     }
 }
 
+/** The logos the portfolio API serves for the base assets, for an item that came without one. HBD has its own. */
+object AssetIcons {
+    private const val HIVE = "https://images.ecency.com/DQmb7w4JNXXPKyzYVk615xGSfMTKLArQ7R9kWapuiY8dNHW/hive_icon.png"
+    private val known = mapOf(
+        AssetLayer.POINTS to mapOf("POINTS" to "https://images.ecency.com/DQmRhnpQt7zzfS67uDGv6TPLGmKFhWfNFrDLECP4M3bRo4f/ecency_logo_2x.png"),
+        AssetLayer.HIVE to mapOf(
+            "HIVE" to HIVE,
+            "HP" to HIVE,
+            "HBD" to "https://images.ecency.com/DQmbXwGcbDvATn7x7XpZVPuYhB8YYTozDDvNtJanVpbdE8f/hbd_icon.png",
+        ),
+        AssetLayer.CHAIN to mapOf(
+            "BNB" to "https://images.ecency.com/DQmezqZDiHN1NKYsLBWYwvBQ1mNhypkoe5w4JPwjeC3E4xH/bnb.png",
+            "ETH" to "https://images.ecency.com/DQmebRVg81CP1kMeSEsMm8JHDMCu5Vkac5ndUHH4ppGSFU6/eth.png",
+            "SOL" to "https://images.ecency.com/DQmZJJmjz38nQGwNDG7Fuo6dHbS6P29SN7FcNy1RcSbWaj1/solana.png",
+            "BTC" to "https://images.ecency.com/DQmPKC8rkqjCdMLMtwayQ81Mj62pjVBj81ZZoZBVdiJSeeH/btc.png",
+        ),
+    )
+
+    fun fallback(symbol: String, layer: AssetLayer): String? = known[layer]?.get(symbol.uppercase())
+}
+
 /** One extra row of an asset (portfolio-v2 `extraData`): label key, value text and optional sub value. */
 data class AssetExtra(val dataKey: String, val value: String, val subValue: String? = null)
 
@@ -59,7 +80,7 @@ data class PortfolioItem(
                 fiatRate = num("fiatRate"),
                 currency = (o.str("currency") ?: fallbackCurrency).uppercase(),
                 precision = o["precision"].asDouble()?.toInt()?.takeIf { it in 0..18 } ?: 3,
-                iconUrl = o.str("iconUrl")?.takeIf { it.startsWith("https://") },
+                iconUrl = o.str("iconUrl")?.takeIf { it.startsWith("https://") } ?: AssetIcons.fallback(symbol, layer),
                 address = o.str("address"),
                 pendingRewards = num("pendingRewards") ?: 0.0,
                 liquid = num("liquid"),

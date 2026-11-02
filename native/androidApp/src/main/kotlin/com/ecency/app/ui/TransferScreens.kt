@@ -506,7 +506,7 @@ fun ManageAssetsScreen(model: ManageAssetsModel, onBack: () -> Unit) {
             s.selected.forEachIndexed { i, a ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("selected:${a.symbol}"), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = true, onCheckedChange = { model.toggle(a.symbol) })
-                    Avatar(a.iconUrl.orEmpty(), 24.dp)
+                    AssetIcon(a.iconUrl, 24.dp, "pick:${a.symbol}")
                     Text(a.symbol, color = colors.text, modifier = Modifier.weight(1f).padding(start = 8.dp))
                     IconButton(onClick = { model.move(i, i - 1) }, enabled = i > 0) {
                         Glyph(AppIcon.ARROW_UP, if (i > 0) colors.blueText else colors.icon, 20.dp, description = UiCopy.MOVE_UP)
@@ -520,7 +520,7 @@ fun ManageAssetsScreen(model: ManageAssetsModel, onBack: () -> Unit) {
             s.visibleAvailable.forEach { a ->
                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.toggle(a.symbol) }.padding(vertical = 4.dp).testTag("available:${a.symbol}"), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = false, onCheckedChange = { model.toggle(a.symbol) })
-                    Avatar(a.iconUrl.orEmpty(), 24.dp)
+                    AssetIcon(a.iconUrl, 24.dp, "pick:${a.symbol}")
                     Text(a.symbol, color = colors.text, modifier = Modifier.padding(start = 8.dp))
                 }
             }
