@@ -157,4 +157,71 @@ class QuickReplyToolsTest {
         val stored = app.env.localDrafts.load(TestApp.USER, LocalDrafts.reply("alice", "root"))
         assertEquals("half a thought\n\n ![]($url)", stored?.body)
     }
+
+    @Test
+    fun anAttachedImageSurvivesARestartWithTheDraftUntilItIsRemovedOrSent() = runTest {
+        val app = signedIn()
+        app.uploads { url }
+        val slot = LocalDrafts.reply("alice", "root")
+        val reply = app.env.replyModel(key, parent)
+        reply.setText("Nice post")
+        reply.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        // the app is closed and opened again: a new composer over the same device storage
+        val reopened = ComposeReplyModel(app.env, key, parent)
+        testScheduler.advanceUntilIdle()
+        assertEquals("Nice post", reopened.current.text)
+        assertEquals(url, reopened.current.imageUrl, "the uploaded image is part of the saved reply draft")
+        reopened.removeImage()
+        testScheduler.advanceUntilIdle()
+        assertNull(app.env.localDrafts.load(TestApp.USER, slot)?.replyImage, "removing the image updates the saved draft")
+        assertNull(ComposeReplyModel(app.env, key, parent).also { testScheduler.advanceUntilIdle() }.current.imageUrl)
+        // an image alone is a draft too
+        reopened.setText("")
+        reopened.attach(WaveImageSource.CAMERA)
+        testScheduler.advanceUntilIdle()
+        val imageOnly = ComposeReplyModel(app.env, key, parent)
+        testScheduler.advanceUntilIdle()
+        assertEquals(url, imageOnly.current.imageUrl)
+        assertTrue(imageOnly.current.canSend)
+        imageOnly.send()
+        testScheduler.advanceUntilIdle()
+        assertEquals(com.ecency.core.api.waves.WavePublish.body("", url), app.sentBody())
+        assertNull(app.env.localDrafts.load(TestApp.USER, slot), "a sent reply leaves no draft, image included")
+    }
+
+    @Test
+    fun aTextOnlyReplyDraftFromAnEarlierBuildStillOpens() = runTest {
+        val app = signedIn()
+        val slot = LocalDrafts.reply("alice", "root")
+        app.env.localDrafts.saveRaw(TestApp.USER, slot, """{"title":"","body":"old words","tags":[],"updated":1,"description":"","thumb":"","reblog":false}""")
+        val reply = ComposeReplyModel(app.env, key, parent)
+        testScheduler.advanceUntilIdle()
+        assertEquals("old words", reply.current.text)
+        assertNull(reply.current.imageUrl)
+        assertFalse("replyImage" in LocalDraft(body = "x").encode(), "a draft without an image is written as before")
+    }
+
+    @Test
+    fun expandWaitsForARunningUploadSoTheImageIsNotLost() = runTest {
+        val app = signedIn()
+        val upload = CompletableDeferred<String?>()
+        app.uploads { upload.await() }
+        val reply = app.env.replyModel(key, parent)
+        reply.setText("half a thought")
+        reply.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        var args: EditorArgs? = null
+        reply.expand { args = it }
+        testScheduler.advanceUntilIdle()
+        assertNull(args, "the editor does not open while the image is uploading")
+        assertEquals("half a thought", reply.current.text)
+        upload.complete(url)
+        testScheduler.advanceUntilIdle()
+        assertEquals(url, reply.current.imageUrl, "the upload still lands in the reply")
+        reply.expand { args = it }
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorKind.REPLY, args?.kind)
+        assertEquals("half a thought\n\n ![]($url)", reply.current.text)
+    }
 }

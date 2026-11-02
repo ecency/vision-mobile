@@ -115,6 +115,8 @@ data class LocalDraft(
     val aiTools: List<String> = emptyList(),
     /** RN videoThumbs: uploaded videos' thumbnails by embed address. */
     val videoThumbs: List<com.ecency.core.editor.VideoThumb> = emptyList(),
+    /** The quick reply's uploaded image ([ReplyState.imageUrl]), kept apart from the body until it is sent. */
+    val replyImage: String? = null,
 ) {
     /** RN: an id-less draft counts when it has a title, tags or a body. */
     val hasContent: Boolean get() = title.isNotEmpty() || body.isNotEmpty() || tags.isNotEmpty()
@@ -143,6 +145,7 @@ data class LocalDraft(
         baseUpdated?.let { put("baseUpdated", it) }
         if (aiTools.isNotEmpty()) putJsonArray("aiTools") { aiTools.forEach { add(JsonPrimitive(it)) } }
         if (videoThumbs.isNotEmpty()) putJsonArray("videoThumbs") { videoThumbs.forEach { add(buildJsonArray { add(JsonPrimitive(it.embedUrl)); add(JsonPrimitive(it.thumbUrl)) }) } }
+        replyImage?.let { put("replyImage", it) }
     }.toString()
 
     companion object {
@@ -173,6 +176,7 @@ data class LocalDraft(
                     if (pair.size == 2) com.ecency.core.editor.VideoThumb(pair[0], pair[1]) else null
                 },
                 aiTools = o["aiTools"].arr().orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }.filter { it in AI_TOOLS },
+                replyImage = o.str("replyImage")?.takeIf { it.isNotEmpty() },
             )
         }
 

@@ -113,6 +113,8 @@ struct ReplyComposer: View {
                 ToolbarItem(placement: .primaryAction) {
                     if !state.isSending, let onExpand {
                         Button { draft.model.expand { args in dismiss(); onExpand(args) } } label: { Image(appIcon: .fullscreen) }
+                            // as Android: the editor waits for an image being picked or uploaded (the model refuses too)
+                            .disabled(state.isAttaching)
                             .accessibilityLabel(ReadingUiCopy.shared.OPEN_EDITOR).largeContent(ReadingUiCopy.shared.OPEN_EDITOR, appIcon: .fullscreen)
                             .accessibilityIdentifier("reply-expand")
                     }

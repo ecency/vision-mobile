@@ -509,7 +509,8 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         // the reply editor's account tile switched accounts: the text carries over, unless this account has its own draft
         val handed = carried?.takeIf { local?.body.isNullOrEmpty() }
         carried = null
-        val body = handed ?: local?.body.orEmpty()
+        // the quick reply's image (kept apart in the shared slot) continues in the body, as its expand writes it
+        val body = handed ?: local?.let { com.ecency.core.api.waves.WavePublish.body(it.body, it.replyImage) }.orEmpty()
         setState { s -> s.copy(parentSummary = summary, body = body, selection = TextSelection(body.length), bodyRevision = s.bodyRevision + 1) }
         if (handed != null) markChanged()
     }
