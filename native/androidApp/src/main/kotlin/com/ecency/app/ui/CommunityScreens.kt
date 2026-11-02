@@ -253,7 +253,10 @@ fun CommunitiesScreen(model: CommunitiesModel, proxy: String, entry: StackEntry,
     LaunchedEffect(model) { model.start() }
     val tab = entry.get("tab") { mutableIntStateOf(0) }
     TopBar(CommunityCopy.TITLE, onBack = nav.pop)
-    UnderlineTabs(listOf(CommunityCopy.JOINED_TAB, CommunityCopy.DISCOVER_TAB), listOf("joined", "discover"), tab.intValue, { tab.intValue = it })
+    UnderlineTabs(
+        listOf(CommunityCopy.JOINED_TAB, CommunityCopy.DISCOVER_TAB), listOf("joined", "discover"), tab.intValue,
+        rememberTabTap(tab.intValue, { entry.get(if (tab.intValue == 0) "joined" else "discover") { LazyListState() } }) { tab.intValue = it },
+    )
     PullToRefreshBox(isRefreshing = false, onRefresh = model::refresh, modifier = Modifier.fillMaxSize()) {
         if (tab.intValue == 0) {
             LazyColumn(Modifier.fillMaxSize().testTag("joinedList"), state = entry.get("joined") { LazyListState() }) {
@@ -329,8 +332,8 @@ fun CommunityScreen(
     }
     val selected = CommunityTab.entries[tab.intValue]
     val listState = entry.get("list:${selected.name}") { LazyListState() }
-    // RN CollapsibleCard "Details" above the tabs: it closes as the feed scrolls down and opens near the top, after
-    // a drag up or on a tap on its title, the same rule as the profile summary (RN closed it on any drag)
+    // RN CollapsibleCard "Details" above the tabs: it closes as the feed scrolls down and opens back at the top or
+    // on a tap on its title, the same rule as the profile summary (RN closed it on any drag)
     val collapse = rememberSummaryCollapse(entry.get("summary") { SummaryCollapseState() }, listState)
     CommunityDetails(
         state, collapse, onJoin = { if (!model.toggleSubscription()) nav.login() },
@@ -340,7 +343,7 @@ fun CommunityScreen(
         onRetry = model::retry,
     )
     // another tab's list: the card opens over it (the three ways in agree)
-    PillTabs(CommunityTab.entries.map { it.label }, CommunityTab.entries.map { it.name }, tab.intValue, { if (it != tab.intValue) collapse.reset(); tab.intValue = it })
+    PillTabs(CommunityTab.entries.map { it.label }, CommunityTab.entries.map { it.name }, tab.intValue, rememberTabTap(tab.intValue, { listState }) { collapse.reset(); tab.intValue = it })
     key(selected) {
         Guarded({ entry.get("feed:${selected.name}") { env.feedModel(model.feedSource(selected)) } }) { feed ->
             FeedList(feed, listState, env.votes.state, now, feedActions, collapse = collapse, scrollTopModifier = Modifier.navigationBarsPadding())

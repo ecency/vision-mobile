@@ -73,6 +73,9 @@ class ProfileNode {
     val store = TestStore()
     private val nowS = 1_791_288_000L
 
+    /** How many posts an account's blog (and posts) list has: "{sort}-one", then "{sort}-2" on. */
+    @Volatile var postCount = 1
+
     private fun account(name: String, posting: String) = """{"name":"$name","created":"2018-05-01T10:00:00","reputation":0,"post_count":3,""" +
         """"vesting_shares":"1000.000000 VESTS","delegated_vesting_shares":"0.000000 VESTS","received_vesting_shares":"0.000000 VESTS",""" +
         """"vesting_withdraw_rate":"0.000000 VESTS","to_withdraw":0,"withdrawn":0,"voting_manabar":{"current_mana":"873000000","last_update_time":$nowS},""" +
@@ -120,7 +123,7 @@ class ProfileNode {
                 val account = params.jsonObject["account"]!!.jsonPrimitive.content
                 if (params.jsonObject["start_author"] != null) ok("[]")
                 else if (sort == "comments") ok("[${post(account, "re-one", parent = "bob")}]")
-                else ok("[${post(account, "$sort-one")}]")
+                else ok((1..postCount).joinToString(",", "[", "]") { post(account, if (it == 1) "$sort-one" else "$sort-$it") })
             }
             "condenser_api.get_dynamic_global_properties" -> ok(
                 """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00"}""",
@@ -279,6 +282,40 @@ class ProfileFlowsTest {
         compose.onNodeWithTag("profileList").performTouchInput { swipeDown(durationMillis = 600) }
         waitFor("profileSummary")
         compose.await("!exists(\"profileCompactHeader\")") { idleMain(); !exists("profileCompactHeader") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aScrollUpMidListKeepsTheSummaryClosedUntilTheTop() {
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        repeat(3) {
+            compose.onNodeWithTag("profileList").performTouchInput { swipeUp(durationMillis = 600) }
+            compose.mainClock.advanceTimeBy(1_000)
+        }
+        waitFor("profileCompactHeader")
+        assertFalse(exists("card:alice/blog-one"))
+        // the owner's rule: a scroll up through the list (well past RN's 60 dp reveal run) keeps it closed
+        compose.onNodeWithTag("profileList").performTouchInput { swipeDown(startY = centerY - 100.dp.toPx(), endY = centerY + 100.dp.toPx(), durationMillis = 600) }
+        repeat(2) { compose.mainClock.advanceTimeBy(500); idleMain() }
+        compose.waitForIdle()
+        assertTrue("a scroll up mid-list keeps the summary closed", exists("profileCompactHeader"))
+        assertFalse(exists("profileSummary"))
+        // back at the top it opens
+        compose.onNodeWithTag("profileList").performScrollToIndex(0)
+        waitFor("profileSummary")
+    }
+
+    @Test
+    fun aTapOnTheSelectedProfileTabScrollsItsListToTheTop() {
+        node.postCount = 30
+        launch(AppScreen.Profile("alice"))
+        waitFor("card:alice/blog-one")
+        compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-25")
+        compose.await("the first card scrolled away") { idleMain(); !exists("card:alice/blog-one") }
+        compose.onNodeWithTag("tab:blog").performClick()
+        waitFor("card:alice/blog-one")
     }
 
     @Test

@@ -353,6 +353,59 @@ extension View {
     }
 }
 
+/// The UIScrollView under a SwiftUI ScrollView, found by `tracksScrollMomentum` in its content. A scroll to the top asked
+/// for while the list still decelerates (a fling) stops it first: `ScrollViewReader.scrollTo` alone is lost under the
+/// running deceleration, which keeps moving the list (owner note 10-30: the scroll to top did nothing mid-fling).
+@MainActor final class ScrollMomentum {
+    fileprivate weak var scrollView: UIScrollView?
+
+    /// Stops a fling where it is, so the scroll that follows sticks.
+    func stop() {
+        guard let view = scrollView, view.isDecelerating else { return }
+        view.setContentOffset(view.contentOffset, animated: false)
+    }
+}
+
+private struct ScrollMomentumProbe: UIViewRepresentable {
+    let momentum: ScrollMomentum
+
+    func makeUIView(context: Context) -> Probe { Probe(momentum: momentum) }
+    func updateUIView(_ view: Probe, context: Context) {
+        view.momentum = momentum
+        view.attach()
+    }
+
+    final class Probe: UIView {
+        weak var momentum: ScrollMomentum?
+
+        init(momentum: ScrollMomentum) {
+            self.momentum = momentum
+            super.init(frame: .zero)
+            isUserInteractionEnabled = false
+        }
+
+        required init?(coder: NSCoder) { nil }
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            attach()
+        }
+
+        func attach() {
+            var view = superview
+            while let v = view, !(v is UIScrollView) { view = v.superview }
+            if let scroll = view as? UIScrollView { momentum?.scrollView = scroll }
+        }
+    }
+}
+
+extension View {
+    /// Put on a ScrollView's content (its stack, which stays while rows come and go): lets [momentum] stop a fling.
+    func tracksScrollMomentum(_ momentum: ScrollMomentum) -> some View {
+        background(ScrollMomentumProbe(momentum: momentum).frame(width: 0, height: 0).accessibilityHidden(true))
+    }
+}
+
 private struct ScrollTopPopupModifier: ViewModifier {
     let space: String
     let onTap: () -> Void

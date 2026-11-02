@@ -96,7 +96,7 @@ final class ProfileFeeds: ObservableObject {
 
 /// RN profile: summary (cover, avatar, Follow / Message / email digest / menu or Edit, name, bio, date, website,
 /// location, follower counts, voting power and RC), then the tabs over the list. The summary sits above the list and
-/// closes as it scrolls down, opening near the top, after a drag up or on a tap on the user in the bar (RN profileView,
+/// closes as it scrolls down, opening back at the top or on a tap on the user in the bar (RN profileView,
 /// `SummaryCollapseDriver`); the tabs stay.
 struct ProfileScreen: View {
     @StateObject private var profile: Observed<ProfileState>
@@ -106,6 +106,9 @@ struct ProfileScreen: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
     @State private var confirmReport = false
+    /// Bumped by a tap on the selected tab (RN TabbedPosts onTabPress): the list goes to the top.
+    @State private var scrollTop = 0
+    @State private var momentum = ScrollMomentum()
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
@@ -133,10 +136,10 @@ struct ProfileScreen: View {
                     }
                     if !state.isMuted {
                         // another tab's list: the summary opens over it (the three ways in agree)
-                        ProfileTabsView(state: state) { i in
-                            if i != Int(state.selectedTab) { collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass)) }
+                        ProfileTabsView(state: state, onSelect: { i in
+                            collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass))
                             model.selectTab(index: Int32(i))
-                        }
+                        }, onReselect: { scrollTop += 1 })
                     }
                     list(state, width: geo.size.width)
                 } else if let error = state.error {
@@ -197,16 +200,22 @@ struct ProfileScreen: View {
                     }
                 }
                 .reportsScrollOffset("profile-scroll")
+                .tracksScrollMomentum(momentum)
             }
             .refreshable { model.refresh() }
             .collapsesSummary(collapse, space: "profile-scroll")
             // RN postsTabContent's ScrollTopPopup (the profile's post tabs); the top opens the summary
-            .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") {
-                collapse.expand()
-                proxy.scrollTo("profile-top", anchor: .top)
-            }
+            .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") { toTop(proxy) }
+            .onChange(of: scrollTop) { _, _ in toTop(proxy) }
             .accessibilityIdentifier("profile-list")
         }
+    }
+
+    /// The scroll to top (popup or tab reselect), mid-fling too; the top opens the summary.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        collapse.expand()
+        proxy.scrollTo("profile-top", anchor: .top)
     }
 
     @ViewBuilder private func tabContent(_ state: ProfileState, width: CGFloat) -> some View {
@@ -328,13 +337,15 @@ private struct ProfileCommentRow: View {
 private struct ProfileTabsView: View {
     let state: ProfileState
     let onSelect: (Int) -> Void
+    /// A tap on the selected tab (RN TabbedPosts: its list scrolls to the top).
+    let onReselect: () -> Void
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         FittingSegments {
             ForEach(Array(state.tabs.enumerated()), id: \.offset) { i, tab in
                 let selected = i == Int(state.selectedTab)
-                Button { onSelect(i) } label: {
+                Button { if selected { onReselect() } else { onSelect(i) } } label: {
                     VStack(spacing: 0) {
                         Text(tab.label).font(.subheadline.weight(selected ? .bold : .regular))
                             .foregroundStyle(selected ? theme.accentText : theme.secondary).fixedSize()

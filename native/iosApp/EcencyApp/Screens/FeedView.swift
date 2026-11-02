@@ -9,7 +9,10 @@ struct FeedListView: View {
     var header: AnyView? = nil
     /// A header above the list that closes as it scrolls (community Details).
     var collapse: SummaryCollapseDriver? = nil
+    /// Bumped by a tap on the selected tab or filter above (RN TabbedPosts onTabPress): back to the top.
+    var scrollToTop = 0
     @Environment(\.appTheme) private var theme
+    @State private var momentum = ScrollMomentum()
 
     private var model: FeedModel { feed.model as! FeedModel }
 
@@ -55,18 +58,25 @@ struct FeedListView: View {
                     }
                 }
                 .reportsScrollOffset("feed-scroll")
+                .tracksScrollMomentum(momentum)
             }
+            .accessibilityIdentifier("feed-list")
             .refreshable { await refresh() }
             .collapsesSummary(collapse, space: "feed-scroll")
             // RN postsTabContent's ScrollTopPopup (feed, tag and community lists); the top opens a header above
-            .scrollTopPopup(space: "feed-scroll", id: "feed-scroll-top") {
-                collapse?.expand()
-                proxy.scrollTo("feed-top", anchor: .top)
-            }
+            .scrollTopPopup(space: "feed-scroll", id: "feed-scroll-top") { toTop(proxy) }
+            .onChange(of: scrollToTop) { _, _ in toTop(proxy) }
             }
         }
         .background(theme.background)
         .onAppear { model.start() }
+    }
+
+    /// The scroll to top (popup or tab reselect): mid-fling too; the top opens a header above.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        collapse?.expand()
+        proxy.scrollTo("feed-top", anchor: .top)
     }
 
     /// Pull to refresh: keeps the spinner until the model finishes (or is closed with the screen).
@@ -124,6 +134,7 @@ struct HomeView: View {
     @AppStorage("homeFilter") private var selectedKey = ""
     /// Bumped when the customise sheet saved, so the pills re-read the tabs.
     @AppStorage("homeTabsVersion") private var tabsVersion = 0
+    @State private var scrollTop = 0
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
@@ -141,6 +152,7 @@ struct HomeView: View {
             if let username = session.state.username { FeedWavesCard(username: username) }
             FilterPills(titles: tabs.map(\.title), selected: tabs.firstIndex(of: selected) ?? 0,
                         onSelect: { selectedKey = tabs[$0].key },
+                        onReselect: { scrollTop += 1 },
                         onCustomise: {
                             app.env.walkthrough.intercept(step: step, hidden: signedOut)
                             if session.state.isLoggedIn { app.sheet = .customiseFilters } else { app.sheet = .login }
@@ -157,7 +169,7 @@ struct HomeView: View {
                 FeedListView(feed: feed, header: proposal || spotlit ? AnyView(VStack(spacing: 0) {
                     if proposal { ProposalCardView(env: app.env) }
                     if spotlit { SpotlightCardView(env: app.env) }
-                }) : nil)
+                }) : nil, scrollToTop: scrollTop)
                     .id("\(selected.key)|\(session.state.username ?? "")")
             } else {
                 LoginPromptView(text: ReadingUiCopy.shared.LOGIN_TO_SEE) { app.sheet = .login }
@@ -218,6 +230,8 @@ struct FilterPills: View {
     let titles: [String]
     let selected: Int
     let onSelect: (Int) -> Void
+    /// A tap on the selected pill (RN TabbedPosts: its list scrolls to the top); without it the tap goes to [onSelect].
+    var onReselect: (() -> Void)?
     var onCustomise: (() -> Void)?
     /// RN WalkthroughMarker: a red dot on "+" until its first use.
     var customiseMarker = false
@@ -230,7 +244,7 @@ struct FilterPills: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
-                        Button { onSelect(index) } label: {
+                        Button { if index == selected, let onReselect { onReselect() } else { onSelect(index) } } label: {
                             Text(title).scaledFont(13, weight: .bold)
                                 .padding(.horizontal, 14).padding(.vertical, 5)
                                 .foregroundStyle(index == selected ? .white : theme.secondary)
@@ -348,6 +362,7 @@ struct TagFeedScreen: View {
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
     @State private var selected: Int
+    @State private var scrollTop = 0
     @StateObject private var feeds = TagFeeds()
     @StateObject private var follow: Observed<TagFollowState>
 
@@ -375,8 +390,8 @@ struct TagFeedScreen: View {
                 }
                 .padding(.horizontal, 16).padding(.vertical, 8)
             }
-            FilterPills(titles: Self.sorts.map(\.1), selected: selected, onSelect: { selected = $0 })
-            FeedListView(feed: feed(selected)).id(selected)
+            FilterPills(titles: Self.sorts.map(\.1), selected: selected, onSelect: { selected = $0 }, onReselect: { scrollTop += 1 })
+            FeedListView(feed: feed(selected), scrollToTop: scrollTop).id(selected)
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)

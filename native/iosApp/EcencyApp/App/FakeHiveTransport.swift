@@ -175,8 +175,9 @@ final class FakeHiveTransport: NSObject, RpcTransport {
          "stats": ["followers": 1234, "following": 56], "metadata": ["profile": ["name": user]]]
     }
 
+    /// Debug `-fakeFeedSize N`: a first page of N posts (at least 6), for the scroll tests that need a long list.
     static func feed(tag: String? = nil, author: String? = nil) -> [[String: Any]] {
-        (1...6).map { i in
+        (1...max(6, UserDefaults.standard.integer(forKey: "fakeFeedSize"))).map { i in
             let a = author ?? authors[(i - 1) % authors.count]
             return entry(author: a, permlink: "fake-post-\(i)", title: "Fixture post number \(i)", children: 4, votes: i * 3)
         }

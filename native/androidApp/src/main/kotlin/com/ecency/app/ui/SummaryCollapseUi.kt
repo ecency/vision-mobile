@@ -39,7 +39,7 @@ import com.ecency.core.app.SummaryCollapse
 import kotlinx.coroutines.delay
 
 /**
- * The header above a lazy list that closes on scroll down and opens near the top or on a drag up (RN profileView,
+ * The header above a lazy list that closes on scroll down and opens back at the top (RN profileView,
  * shared [SummaryCollapse]). The list reports the reader's drags through [connection] (put it on the list); its offset
  * is exact on the first row and an estimate further down, where only "past the dead zone" matters. Kept in the
  * screen's stack entry, so a covered screen (a post opened from the profile) comes back as it was left.

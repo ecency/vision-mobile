@@ -4,11 +4,12 @@ import kotlin.math.abs
 
 /**
  * RN profileView's summary collapse, also used for the community Details card: the header above a list closes
- * as the reader scrolls down and opens again near the top, or mid-list after a deliberate drag upward (#1915).
+ * as the reader scrolls down and opens again only back at the top. RN also opened it mid-list after a drag upward
+ * (#1915); the owner dropped that: any scroll up through a long list reopened it.
  *
  * A dead zone and a cooldown keep it from oscillating: it closes only once scrolled past [COLLAPSE_AT] with a
- * downward run of [COLLAPSE_RUN], opens within [EXPAND_AT] of the top or after an upward run of [REVEAL_RUN], and
- * ignores further flips for [COOLDOWN_MS] after a toggle. The run is signed (positive down), sums same-direction
+ * downward run of [COLLAPSE_RUN], opens within [EXPAND_AT] of the top (one held closed there by a tap or a clamp
+ * needs a pull down of [REVEAL_RUN] at the top), and ignores further flips for [COOLDOWN_MS] after a toggle. The run is signed (positive down), sums same-direction
  * deltas and restarts when the direction flips; a single delta of [LAYOUT_JUMP] or more is a layout blip (tab
  * switch, reflow), not the reader, and zeroes it. Offsets are in points (dp) from the top, as RN's.
  *
@@ -49,7 +50,7 @@ class SummaryCollapse {
      * The offset moved without the reader: a clamp after the header closed or the viewport changed, a relayout, a
      * programmatic scroll. It never counts as a drag. A closed header over a list that cannot [scrollable] scroll is
      * held closed, so the top does not reopen it (that would loop: open, the list shrinks and scrolls, it closes, the
-     * list clamps back to the top); a tap, a real drag up or a scroll to top reopens it. A list that can scroll and is
+     * list clamps back to the top); a tap, a pull down at the top or a scroll to top reopens it. A list that can scroll and is
      * moved by code from below the dead zone to the top (status bar tap, scroll to top, tab reselect) opens it, as
      * reaching the top by hand does. Returns a recheck delay, or null.
      */
@@ -99,7 +100,7 @@ class SummaryCollapse {
 
     private fun evaluate(nowMillis: Long): Long? {
         val wantCollapse = isOpen && lastOffset > COLLAPSE_AT && run >= COLLAPSE_RUN
-        val wantExpand = !isOpen && ((lastOffset <= EXPAND_AT && !heldClosed) || run <= -REVEAL_RUN)
+        val wantExpand = !isOpen && lastOffset <= EXPAND_AT && (!heldClosed || run <= -REVEAL_RUN)
         if (!wantCollapse && !wantExpand) return null
         val since = lastToggleAt?.let { nowMillis - it }
         if (since != null && since < COOLDOWN_MS) return COOLDOWN_MS - since + RECHECK_SLACK_MS
