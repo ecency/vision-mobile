@@ -32,9 +32,13 @@ class VotePayoutTest {
         var broadcast: (com.ecency.core.api.Sent) -> HttpResult = { FakeTransport.result(it, "null") }
         var pending = "1.500 HBD"
         var indexedPending = "1.750 HBD"
+        var maxAccepted = "1000000.000 HBD"
     }
 
     private fun post(c: Chain, author: String = "alice", permlink: String = "root", parent: Pair<String, String>? = null) =
+        rawPost(c, author, permlink, parent).replace("\"max_accepted_payout\":\"1000000.000 HBD\"", "\"max_accepted_payout\":\"${c.maxAccepted}\"")
+
+    private fun rawPost(c: Chain, author: String, permlink: String, parent: Pair<String, String>?) =
         if (c.indexed) {
             entry(author, permlink, parent = parent, pending = c.indexedPending, votes = listOf("x", user), voteRshares = mapOf("x" to 900_000_000L, user to c.serverVote))
         } else {
@@ -188,6 +192,50 @@ class VotePayoutTest {
         testScheduler.runCurrent()
         assertEquals("$1.750", post.commentPayout())
         assertEquals("$1.500", post.payout(), "only the voted entry moves")
+        feed.close()
+        post.close()
+    }
+
+    @Test
+    fun onceTheChainHoldsTheVoteAChangeFromAnotherClientShowsTheServersPayout() = runTest {
+        val c = Chain()
+        val app = app(this, c)
+        val (feed, post) = ready(app)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        assertEquals("$1.750", feed.payout())
+
+        // the chain has this app's vote
+        c.indexed = true
+        c.serverVote = voteRshares
+        feed.refresh()
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals("$1.750", feed.payout())
+
+        // the reader changed the vote to 50 % on another client: the fresh payout is the truth, the old estimate is spent
+        c.serverVote = voteRshares / 2
+        c.indexedPending = "1.625 HBD"
+        feed.refresh()
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals("$1.625", feed.payout())
+        assertEquals("$1.625", post.payout())
+        feed.close()
+        post.close()
+    }
+
+    @Test
+    fun aVoteOnAPostThatDeclinedRewardsAddsNothingToItsPayout() = runTest {
+        val c = Chain().apply { gate = CompletableDeferred(); pending = "0.000 HBD"; maxAccepted = "0.000 HBD" }
+        val app = app(this, c)
+        val (feed, post) = ready(app)
+        assertEquals(true, feed.current.items.single().isPayoutDeclined)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.runCurrent()
+        assertEquals("$0.000", feed.payout())
+        assertEquals("$0.000", post.payout())
+        assertEquals(2, feed.current.items.single().votes, "the vote itself still shows")
         feed.close()
         post.close()
     }

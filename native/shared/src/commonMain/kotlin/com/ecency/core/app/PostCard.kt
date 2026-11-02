@@ -155,6 +155,25 @@ class LocalVotes {
         votes.value = emptyMap()
     }
 
+    /**
+     * Retires the estimate of each landed vote that [posts] (fresh server data, already stored by the caller) hold on
+     * chain: the server's payout counts the vote from then on, so a later change of it from another client shows as
+     * the server has it instead of the spent estimate being added again.
+     */
+    fun retireConfirmed(posts: Collection<Post>, username: String?) {
+        if (username == null) return
+        votes.update { map ->
+            var out = map
+            for (post in posts) {
+                val local = map[post.key] ?: continue
+                val estimate = local.estimate ?: continue
+                if (local.pending || !sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
+                out = out + (post.key to local.copy(estimate = null))
+            }
+            out
+        }
+    }
+
     companion object {
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {
@@ -178,11 +197,12 @@ class LocalVotes {
          * RN applyVoteToPost: what the local vote adds to the server's payout, the estimate less the share of the
          * reader's vote the server already counts ([serverRshares], RN calculateVoteReward). Nothing once the
          * server holds the vote itself (its rshares are the estimate's, or none for an unvote: RN skips a voter
-         * record without its optimistic marker), so fresh chain data is never counted twice; nothing for a post
-         * already paid out.
+         * record without its optimistic marker), so fresh chain data is never counted twice ([retireConfirmed] then
+         * drops the estimate for good); nothing for a post already paid out or one that declined rewards (a vote
+         * adds nothing it pays).
          */
         internal fun payoutDelta(post: Post, serverRshares: Long, estimate: VoteEstimate?): Double {
-            if (estimate == null || post.isPaidout) return 0.0
+            if (estimate == null || post.isPaidout || post.isDeclinedPayout) return 0.0
             if (sameVote(serverRshares, estimate.rshares)) return 0.0
             val total = post.activeVotes.sumOf { it.rshares.toDouble() }
             val share = if (serverRshares == 0L || total == 0.0) 0.0 else serverRshares * post.totalPayout / total
@@ -190,7 +210,7 @@ class LocalVotes {
         }
 
         /** The chain's rshares for the vote match the estimate (within 1 %: vests can move between read and vote). */
-        private fun sameVote(server: Long, estimate: Long): Boolean {
+        internal fun sameVote(server: Long, estimate: Long): Boolean {
             if (estimate == 0L) return server == 0L
             if ((server > 0) != (estimate > 0) || server == 0L) return false
             return abs(server - estimate) <= abs(estimate) / 100
