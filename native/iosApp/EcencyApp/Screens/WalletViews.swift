@@ -138,7 +138,7 @@ struct AssetCardView: View {
 
     private var assetName: some View {
         HStack {
-            AvatarView(url: row.item.iconUrl ?? "", size: 32)
+            AssetIconView(url: row.item.iconUrl, size: 32)
             VStack(alignment: .leading) {
                 Text(row.symbol).bold().foregroundStyle(theme.text).fixedSize()
                 Text(row.name).font(.caption).foregroundStyle(theme.secondary).accessibilityIdentifier("asset-name")
@@ -408,7 +408,7 @@ struct AssetDetailsView: View {
     private func summary(_ s: AssetDetailsState) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                AvatarView(url: s.asset?.iconUrl ?? "", size: 36)
+                AssetIconView(url: s.asset?.iconUrl, size: 40)
                 Text(s.symbol).font(.title3).bold().foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
                 Spacer()
                 if let apr = s.aprText { Text(apr).font(.footnote).foregroundStyle(theme.accentText).accessibilityIdentifier("asset-apr") }

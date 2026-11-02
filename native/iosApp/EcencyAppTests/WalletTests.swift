@@ -1,4 +1,5 @@
 import EcencyCore
+import SwiftUI
 import XCTest
 @testable import EcencyApp
 
@@ -75,5 +76,35 @@ final class WalletTests: XCTestCase {
         let entry = JournalEntry(account: "spike-alice", actionId: "a", txId: String(repeating: "ab", count: 20), expiration: "2026-10-06T12:00:00",
                                  operation: "transfer_to_vesting", outcome: .notSent)
         XCTAssertEqual(entry.message, "Your power up from @spike-alice did not go through. Nothing was sent; you can start it again.")
+    }
+
+    /// RN AssetIcon: the logo is contained (aspect fit) and centred at RN's sizes (card 32, details 40, picker 24), never cropped.
+    func testAnAssetIconFitsItsLogoInsideItsBox() {
+        ImageLoader.shared.setFetch { _ in nil }
+        defer { ImageLoader.shared.setFetch(ImageLoader.networkFetch) }
+        for size in [CGFloat(32), 40, 24] {
+            let host = UIHostingController(rootView: AssetIconView(url: "https://images.ecency.com/x/hbd_icon.png", size: size)
+                .frame(maxWidth: .infinity, maxHeight: .infinity).ignoresSafeArea())
+            let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
+            let window = scene.map { UIWindow(windowScene: $0) } ?? UIWindow()
+            window.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+            window.rootViewController = host
+            window.makeKeyAndVisible()
+            RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+            guard let image = Self.imageView(in: window) else { XCTFail("\(size): no image view"); window.isHidden = true; continue }
+            XCTAssertEqual(image.contentMode, .scaleAspectFit, "\(size): content mode \(image.contentMode.rawValue)")
+            let frame = image.convert(image.bounds, to: window)
+            XCTAssertEqual(frame.width, size, accuracy: 0.5, "\(size): \(frame)")
+            XCTAssertEqual(frame.height, size, accuracy: 0.5, "\(size): \(frame)")
+            XCTAssertEqual(frame.midX, 50, accuracy: 0.5, "\(size): centred \(frame)")
+            XCTAssertEqual(frame.midY, 50, accuracy: 0.5, "\(size): centred \(frame)")
+            window.isHidden = true
+        }
+    }
+
+    private static func imageView(in view: UIView) -> UIImageView? {
+        if let hit = view as? UIImageView { return hit }
+        for sub in view.subviews { if let hit = imageView(in: sub) { return hit } }
+        return nil
     }
 }

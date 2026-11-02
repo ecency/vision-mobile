@@ -490,7 +490,7 @@ struct ManageAssetsView: View {
                 if s.selected.isEmpty { Text(copy.NO_SELECTED_ASSETS).font(.footnote).foregroundStyle(theme.secondary) }
                 ForEach(s.selected, id: \.symbol) { a in
                     Button { model.toggle(symbol: a.symbol) } label: {
-                        HStack { Image(appIcon: .checkbox, filled: true).accessibilityHidden(true); AvatarView(url: a.iconUrl ?? "", size: 24); Text(a.symbol) }
+                        HStack { Image(appIcon: .checkbox, filled: true).accessibilityHidden(true); AssetIconView(url: a.iconUrl, size: 24); Text(a.symbol) }
                     }
                     .accessibilityAddTraits(.isSelected)
                     .accessibilityIdentifier("selected-\(a.symbol)")
@@ -500,7 +500,7 @@ struct ManageAssetsView: View {
             Section(copy.AVAILABLE_ASSETS) {
                 ForEach(s.visibleAvailable, id: \.symbol) { a in
                     Button { model.toggle(symbol: a.symbol) } label: {
-                        HStack { Image(appIcon: .checkbox).accessibilityHidden(true); AvatarView(url: a.iconUrl ?? "", size: 24); Text(a.symbol) }
+                        HStack { Image(appIcon: .checkbox).accessibilityHidden(true); AssetIconView(url: a.iconUrl, size: 24); Text(a.symbol) }
                     }
                     .accessibilityIdentifier("available-\(a.symbol)")
                 }

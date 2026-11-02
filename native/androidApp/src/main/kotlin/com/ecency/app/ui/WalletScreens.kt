@@ -194,7 +194,7 @@ private fun AssetCard(row: AssetRow, onOpen: () -> Unit, onClaim: () -> Unit) {
             .clickable(onClick = onOpen, role = Role.Button).padding(14.dp).testTag("asset:${row.symbol}"),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Avatar(row.item.iconUrl.orEmpty(), 32.dp)
+            AssetIcon(row.item.iconUrl, 32.dp, "row:${row.symbol}")
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(row.symbol, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 Text(row.name, color = colors.darkGray, fontSize = 12.sp)
@@ -286,7 +286,7 @@ fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsMo
                 item(key = "summary") {
                     Column(Modifier.fillMaxWidth().padding(16.dp).clip(RoundedCornerShape(12.dp)).background(colors.lightBackground).padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Avatar(state.asset?.iconUrl.orEmpty(), 36.dp)
+                            AssetIcon(state.asset?.iconUrl, 40.dp, "details:${state.symbol}")
                             Text(state.symbol, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp).weight(1f))
                             state.aprText?.let { Text(it, color = colors.blueText, fontSize = 13.sp, modifier = Modifier.testTag("assetApr")) }
                             // RN coinBasics: the chart-line button opens the balance analytics (HIVE, HBD, HP)

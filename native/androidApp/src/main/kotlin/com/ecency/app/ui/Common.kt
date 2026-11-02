@@ -69,6 +69,20 @@ fun Avatar(url: String, size: Dp, modifier: Modifier = Modifier) {
     }
 }
 
+/** How an asset icon's image is scaled (tests read it). */
+val AssetIconScale = androidx.compose.ui.semantics.SemanticsPropertyKey<ContentScale>("AssetIconScale")
+
+/** RN AssetIcon: the asset's logo contained in a square box, no disc or crop (logos have their own shapes). */
+@Composable
+fun AssetIcon(url: String?, size: Dp, tag: String, modifier: Modifier = Modifier) {
+    val scale = ContentScale.Fit
+    Box(modifier.size(size).testTag("assetIcon:$tag"), contentAlignment = Alignment.Center) {
+        if (!url.isNullOrEmpty()) {
+            AsyncImage(model = url, contentDescription = null, contentScale = scale, modifier = Modifier.fillMaxSize().testTag("assetIconImage:$tag").semantics { set(AssetIconScale, scale) })
+        }
+    }
+}
+
 /**
  * The RN action row: upvote circle, payout, heart with vote count, then comments. Used by feed
  * cards, the post screen's bottom bar and comments.

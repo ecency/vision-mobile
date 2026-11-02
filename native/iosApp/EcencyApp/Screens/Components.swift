@@ -23,6 +23,24 @@ struct AvatarView: View {
     }
 }
 
+/// An asset's logo (RN AssetIcon): contained in a square box, no disc or crop (logos have their own shapes).
+struct AssetIconView: View {
+    let url: String?
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if let url, !url.isEmpty {
+                LoadedImageView(src: url, maxWidth: size, contentMode: .scaleAspectFit) { _ in }
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
 /// Author line used by cards, the post header and comments: name, community or tag and age.
 struct AuthorLine: View {
     /// The author's name color (AccessibilityTests checks it against the card background).
