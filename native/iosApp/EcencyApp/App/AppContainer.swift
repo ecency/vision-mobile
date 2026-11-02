@@ -691,9 +691,14 @@ final class AppContainer: ObservableObject {
 
     /// The lock window follows the theme choice too (it is a separate window).
     func applyThemeToLockWindow() {
-        let style: UIUserInterfaceStyle = themeMode == .light ? .light : themeMode == .dark ? .dark : .unspecified
+        let style = Self.lockWindowStyle(themeMode, forcedDark: ThemeChoice<EmptyView>.forcedDark)
         lockOverlay.window?.overrideUserInterfaceStyle = style
         toastOverlay.window?.overrideUserInterfaceStyle = style
+    }
+
+    /// The in-app theme choice over the system's, as `ThemeChoice` sets it on the app window (the debug dark run too).
+    static func lockWindowStyle(_ mode: ThemeMode, forcedDark: Bool) -> UIUserInterfaceStyle {
+        forcedDark || mode == .dark ? .dark : mode == .light ? .light : .unspecified
     }
 
     func logoutAll() {

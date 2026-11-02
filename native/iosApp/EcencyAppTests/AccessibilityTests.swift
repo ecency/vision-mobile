@@ -261,6 +261,24 @@ final class AccessibilityTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(Self.contrast(Color(hex: ContrastPalette.lightRcText), .white), 4.5, "RC text")
         XCTAssertGreaterThanOrEqual(Self.contrast(Color(hex: 0x3C4449), Color(hex: 0xFDEDED)), 4.5, "phishing warning")
     }
+
+    /// The chat warning box (DM warning, ban notice): its text and icons 4.5:1 on its fill in every theme; the border
+    /// 3:1 on the fill wherever the box is not RN's light cream (RN's light border is kept, 1.5:1, the fill and text
+    /// mark the box), and the dark fill stays a dark surface under light text.
+    func testTheWarningBoxMeetsAAInEveryTheme() {
+        let themes = [("light", AppTheme.light), ("dark", AppTheme.dark),
+                      ("light high contrast", AppTheme.light.highContrast), ("dark high contrast", AppTheme.dark.highContrast)]
+        for (name, theme) in themes {
+            XCTAssertGreaterThanOrEqual(Self.contrast(theme.warningText, theme.warningBackground), 4.5, "\(name) warning text")
+            if name != "light" {
+                XCTAssertGreaterThanOrEqual(Self.contrast(theme.warningBorder, theme.warningBackground), 3, "\(name) warning border")
+            }
+        }
+        XCTAssertLessThan(Self.luminance(AppTheme.dark.warningBackground), Self.luminance(AppTheme.dark.lightBackground) + 0.02,
+                          "the dark warning fill is a dark surface")
+        XCTAssertGreaterThanOrEqual(Self.contrast(AppTheme.dark.highContrast.warningText, AppTheme.dark.highContrast.warningBackground),
+                                    Self.contrast(AppTheme.dark.warningText, AppTheme.dark.warningBackground), "high contrast is stronger")
+    }
 }
 
 /// A view that shows an announced error while `shown` is true (AccessibilityTests).

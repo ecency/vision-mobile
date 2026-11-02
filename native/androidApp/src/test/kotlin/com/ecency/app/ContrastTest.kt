@@ -35,6 +35,13 @@ class ContrastTest {
                 check(failures, "$theme blueText border on $bgName", c.blueText, bg, 3.0)
                 check(failures, "$theme redText border on $bgName", c.redText, bg, 3.0)
             }
+            // the chat warning box (DM warning, ban notice): text and icons on its fill, and in dark a border that
+            // shows (light keeps RN's border, 1.5:1, as iOS does) on a fill that stays a dark surface
+            check(failures, "$theme warningText on warningBackground", c.warningText, c.warningBackground, 4.5)
+            if (c.isDark) {
+                check(failures, "$theme warningBorder on warningBackground", c.warningBorder, c.warningBackground, 3.0)
+                if (c.warningBackground.luminance() > c.lightBackground.luminance() + 0.02f) failures += "$theme warningBackground is not a dark surface"
+            }
             // white labels on the blue and red fills (buttons, badges)
             check(failures, "$theme white on blue", Color.White, c.blue, 4.5)
             check(failures, "$theme white on red", Color.White, c.red, 4.5)

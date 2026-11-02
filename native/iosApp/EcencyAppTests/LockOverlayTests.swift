@@ -111,4 +111,39 @@ final class LockOverlayTests: XCTestCase {
         XCTAssertFalse(overlay.isAccessibilityModal)
         XCTAssertTrue(owner.isKeyWindow, "the key window goes back to the one that had it")
     }
+
+    private func assertSameColor(_ a: UIColor, _ b: UIColor, _ what: String, file: StaticString = #filePath, line: UInt = #line) {
+        var (r1, g1, b1, a1, r2, g2, b2, a2): (CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0, 0, 0, 0, 0)
+        a.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        b.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        let same = abs(r1 - r2) < 0.01 && abs(g1 - g2) < 0.01 && abs(b1 - b2) < 0.01 && abs(a1 - a2) < 0.01
+        XCTAssertTrue(same, "\(what): got \(a), want \(b)", file: file, line: line)
+    }
+
+    /// The app switcher cover is the app's theme (background and icon color), light, dark and Increase Contrast, not
+    /// the system background (black in dark mode), and it follows the in-app theme choice the lock window takes.
+    func testThePrivacyCoverTakesTheAppTheme() throws {
+        let cover = overlay.cover
+        let icon = try XCTUnwrap(cover.subviews.compactMap { $0 as? UIImageView }.first)
+        let cases: [(UIUserInterfaceStyle, UIAccessibilityContrast, AppTheme, String)] = [
+            (.light, .normal, .light, "light"), (.dark, .normal, .dark, "dark"),
+            (.light, .high, AppTheme.light.highContrast, "light high contrast"), (.dark, .high, AppTheme.dark.highContrast, "dark high contrast"),
+        ]
+        for (style, contrast, theme, name) in cases {
+            let traits = UITraitCollection { $0.userInterfaceStyle = style; $0.accessibilityContrast = contrast }
+            assertSameColor(try XCTUnwrap(cover.backgroundColor).resolvedColor(with: traits), UIColor(theme.background), "\(name) background")
+            assertSameColor(icon.tintColor.resolvedColor(with: traits), UIColor(theme.icon), "\(name) icon")
+        }
+        // the in-app choice over the system's (and the debug dark run)
+        XCTAssertEqual(AppContainer.lockWindowStyle(.dark, forcedDark: false), .dark)
+        XCTAssertEqual(AppContainer.lockWindowStyle(.light, forcedDark: false), .light)
+        XCTAssertEqual(AppContainer.lockWindowStyle(.system, forcedDark: false), .unspecified)
+        XCTAssertEqual(AppContainer.lockWindowStyle(.light, forcedDark: true), .dark)
+        overlay.window?.overrideUserInterfaceStyle = .dark
+        overlay.sceneDeactivated()
+        overlay.window?.layoutIfNeeded()
+        XCTAssertTrue(overlay.isCoverShowing)
+        assertSameColor(try XCTUnwrap(cover.backgroundColor).resolvedColor(with: cover.traitCollection), UIColor(AppTheme.dark.background),
+                        "the cover in a dark lock window")
+    }
 }

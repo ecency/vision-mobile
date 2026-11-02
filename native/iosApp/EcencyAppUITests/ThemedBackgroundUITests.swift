@@ -230,4 +230,22 @@ final class ThemedBackgroundUITests: XCTestCase {
             app.terminate()
         }
     }
+
+    /// A direct message's warning box takes the theme's warning fill (AppTheme.warningBackground), not RN's light
+    /// cream in dark mode.
+    func testDmWarningBox() {
+        for dark in [true, false] {
+            let app = launch(dark: dark, ["-seedAccounts", "YES", "-openScreen", "chat:ch-dm-alice:D"])
+            let warning = element(app, "dm-warning")
+            XCTAssertTrue(warning.waitForExistence(timeout: 30))
+            let s = shot("dm-warning-\(dark ? "dark" : "light")", app)
+            // inside the box's bottom padding, under the text
+            let point = CGPoint(x: warning.frame.midX, y: warning.frame.maxY - 4)
+            let want = dark ? (0x3A, 0x32, 0x23) : (0xFF, 0xF6, 0xDF)
+            let got = pixel(s, app, point)
+            let close = abs(got.0 - want.0) <= 6 && abs(got.1 - want.1) <= 6 && abs(got.2 - want.2) <= 6
+            XCTAssertTrue(close, "the warning box (\(dark ? "dark" : "light")) at \(point): got \(hex(got)), want \(hex(want))")
+            app.terminate()
+        }
+    }
 }

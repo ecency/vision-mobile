@@ -120,6 +120,25 @@ class ChatsThemedBackgroundTest {
         assertEquals("beside the composer ($side)", want(dark), Integer.toHexString(at(2f, (composer.top.value + composer.bottom.value) / 2)))
     }
 
+    /** A direct message's warning box takes the theme's warning fill, not RN's light cream in dark mode. */
+    private fun dmWarning(dark: Boolean) {
+        launch(dark, Navigator(NavState(tab = AppTab.CHATS)).also { it.push(AppScreen.ChatThread("ch-dm-alice", "D")) })
+        waitFor("dmWarning")
+        val at = pixels("dm-warning-${if (dark) "dark" else "light"}")
+        val box = bounds("dmWarning")
+        // EcencyColors.warningBackground: an amber-tinted dark surface in dark, RN's cream in light
+        val want = if (dark) 0xFF3A3223.toInt() else 0xFFFFF6DF.toInt()
+        // inside the box's bottom padding, under the text
+        assertEquals("the warning box (dark=$dark)", Integer.toHexString(want), Integer.toHexString(at((box.left.value + box.right.value) / 2, box.bottom.value + 6)))
+        assertEquals(Integer.toHexString(want), Integer.toHexString((if (dark) EcencyColors.Dark else EcencyColors.Light).warningBackground.toArgb()))
+    }
+
+    @Test
+    fun dmWarningOnTheDarkTheme() = dmWarning(dark = true)
+
+    @Test
+    fun dmWarningOnTheLightTheme() = dmWarning(dark = false)
+
     @Test
     fun chatsListOnTheDarkTheme() = chatsList(dark = true)
 
