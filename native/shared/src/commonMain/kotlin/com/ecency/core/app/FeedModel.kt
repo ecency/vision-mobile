@@ -65,6 +65,9 @@ class FeedModel internal constructor(
     private var job: Job? = null
     private var posts: Map<PostKey, Post> = emptyMap()
 
+    /** When the shown cards began to be read ([Freshness.stamp]); a long trip away since makes them stale. */
+    private var readAt = Long.MIN_VALUE
+
     init {
         // votes made anywhere show on these cards at once; only the cards whose vote changed are rebuilt
         scope.launch {
@@ -107,10 +110,14 @@ class FeedModel internal constructor(
         }
     }
 
-    /** Loads the first page unless already loaded or loading. */
+    /**
+     * The feed is shown (the apps call it on show and on every return to the foreground): loads the first page unless
+     * already loaded or loading, and refreshes quietly when the cards predate a long trip away (README "Foreground refresh").
+     */
     fun start() {
-        if (current.loaded || job?.isActive == true) return
-        load(reset = true, refreshing = false)
+        if (job?.isActive == true) return
+        if (!current.loaded) load(reset = true, refreshing = false)
+        else if (env.freshness.isStale(readAt)) refreshQuietly()
     }
 
     /** Drops everything and loads the first page again; cancels a running load. */
@@ -166,6 +173,7 @@ class FeedModel internal constructor(
     private fun load(reset: Boolean, refreshing: Boolean) {
         job?.cancel()
         if (reset) pager = env.api.feeds.pager(source, env.session.current.username)
+        val stamp = env.freshness.stamp()
         val activePager = pager ?: env.api.feeds.pager(source, env.session.current.username).also { pager = it }
         setState {
             it.copy(
@@ -179,18 +187,13 @@ class FeedModel internal constructor(
         job = scope.launch {
             try {
                 val nsfw = NsfwMode.of(env.prefs)
-                // RN filterNsfwPost ("Always hide") and the account's mutes
-                fun shown(posts: List<Post>) = posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
-                var fresh = shown(activePager.loadMore())
+                var fresh = shown(activePager.loadMore(), nsfw)
                 // nothing to show yet is not the end: the lists only ask for more from a card on screen
-                while (fresh.isEmpty() && (reset || base.isEmpty()) && !activePager.isEndReached) fresh = shown(activePager.loadMore())
-                val user = env.session.current.username
-                val local = env.localVotes.state.value
-                val cards = withContext(dispatchers.render) {
-                    fresh.map { Cards.of(it, env.renderer, user, local[it.key], env.proxyBase, nsfwWarn = nsfw == NsfwMode.WARN) }
-                }
+                while (fresh.isEmpty() && (reset || base.isEmpty()) && !activePager.isEndReached) fresh = shown(activePager.loadMore(), nsfw)
+                val cards = cards(fresh, nsfw)
                 posts = (if (reset) emptyMap() else posts) + fresh.associateBy { it.key }
                 base = if (reset) cards else base + cards
+                if (reset) readAt = stamp
                 if (reset && withPromoted) loadPromoted(nsfw)
                 setState {
                     it.copy(
@@ -210,6 +213,51 @@ class FeedModel internal constructor(
                 if (reset) pager = null
                 setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e)) }
             }
+        }
+    }
+
+    /**
+     * README "Foreground refresh": the pages shown are read again from the top in the background (RN refetches every
+     * page of the infinite query) and replace the cards at once when all arrived: no spinner, no skeleton, the list
+     * stays. A failure keeps the cards and says nothing; the next show tries again.
+     */
+    private fun refreshQuietly() {
+        val stamp = env.freshness.stamp()
+        val wanted = current.pages.coerceAtLeast(1)
+        val fresh = env.api.feeds.pager(source, env.session.current.username)
+        job = scope.launch {
+            try {
+                val nsfw = NsfwMode.of(env.prefs)
+                val read = mutableListOf<Post>()
+                var pages = 0
+                while (!fresh.isEndReached && (pages < wanted || read.isEmpty())) {
+                    read += shown(fresh.loadMore(), nsfw)
+                    pages++
+                }
+                val cards = cards(read, nsfw)
+                pager = fresh
+                posts = read.associateBy { it.key }
+                base = cards
+                readAt = stamp
+                if (withPromoted) loadPromoted(nsfw)
+                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, pages = pages) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the cards on screen stay as they are
+            }
+        }
+    }
+
+    /** RN filterNsfwPost ("Always hide") and the account's mutes. */
+    private fun shown(posts: List<Post>, nsfw: NsfwMode) =
+        posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
+
+    private suspend fun cards(posts: List<Post>, nsfw: NsfwMode): List<PostCard> {
+        val user = env.session.current.username
+        val local = env.localVotes.state.value
+        return withContext(dispatchers.render) {
+            posts.map { Cards.of(it, env.renderer, user, local[it.key], env.proxyBase, nsfwWarn = nsfw == NsfwMode.WARN) }
         }
     }
 }

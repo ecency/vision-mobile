@@ -69,6 +69,36 @@ import kotlinx.coroutines.flow.map
 import com.ecency.core.app.ReadingUiCopy
 
 /**
+ * [onShow] when the screen appears and again on every return to the foreground (README "Foreground refresh"): the
+ * shared model's `start()` loads the first time and, after a long trip away, refreshes quietly; otherwise it does nothing.
+ */
+@Composable
+internal fun OnShow(key: Any?, onShow: () -> Unit) {
+    val action by rememberUpdatedState(onShow)
+    androidx.lifecycle.compose.LifecycleStartEffect(key) {
+        action()
+        onStopOrDispose { }
+    }
+}
+
+/**
+ * New cards on top (a quiet refresh after a long trip away): a list at its very top shows them, a list scrolled down
+ * keeps the card it shows (the lazy list keeps its first visible item by key), so nothing jumps under the reader.
+ */
+@Composable
+internal fun NewCardsOnTop(listState: LazyListState, firstKey: Any?, firstCardIndex: Int) {
+    val shown = remember(listState) { arrayOfNulls<Any>(1) }
+    // in composition, before the list measures the new cards (the first page replacing the skeleton is FirstPageAnchor's)
+    if (firstKey != shown[0]) {
+        // the top: nothing but header rows above the first card (a header of no height is never the first visible item)
+        val index = listState.firstVisibleItemIndex
+        val atTop = index < firstCardIndex || (index == firstCardIndex && listState.firstVisibleItemScrollOffset == 0)
+        if (shown[0] != null && firstKey != null && atTop) listState.requestScrollToItem(0)
+        shown[0] = firstKey
+    }
+}
+
+/**
  * Where a feed stays when its first page replaces the skeleton. A list the user did not scroll during the load is
  * put at the top: it anchors on the skeleton's row, which goes, and would land below a header that was still empty
  * then. A list the user scrolled keeps its place: a header they scrolled part of the way keeps that offset (a tall
@@ -158,7 +188,7 @@ fun FeedList(
 ) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
-    LaunchedEffect(model) { model.start() }
+    OnShow(model) { model.start() }
     // the options menu needs the card's post, which this feed holds
     val feedx = LocalFeedx.current
     val cardActions = remember(actions, model, feedx) {
@@ -184,6 +214,7 @@ fun FeedList(
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
     FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model)
+    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = if (header != null) 1 else 0)
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
         onRefresh = { haptics(com.ecency.core.app.HapticEvent.REFRESH); model.refresh() },

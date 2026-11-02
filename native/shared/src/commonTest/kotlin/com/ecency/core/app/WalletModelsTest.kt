@@ -132,6 +132,48 @@ class WalletModelsTest {
     private fun historyRow(num: Long, op: String, fields: String, trx: String = "0".repeat(40)) =
         """[$num,{"trx_id":"$trx","block":1,"trx_in_block":0,"op_in_trx":0,"virtual_op":false,"timestamp":"2026-10-0${(num % 9) + 1}T10:00:00","op":["$op",$fields]}]"""
 
+    /** README "Foreground refresh": shown again after a long trip, the history is read again as far as it was scrolled, quietly. */
+    @Test
+    fun assetDetailsShownAfterALongTripReloadAsManyRowsQuietly() = runTest {
+        val w = world(this)
+        fun hive(num: Long) = historyRow(num, "transfer", """{"from":"spike-voter","to":"spike-bob","amount":"$num.000 HIVE","memo":""}""")
+        var newest = listOf(101L, 102L, 103L)
+        w.rpc["condenser_api.get_account_history"] = { r ->
+            val start = r.params.jsonArray[1].jsonPrimitive.content.toLong()
+            (if (start < 0) newest else listOf(1L, 2L)).joinToString(",", "[", "]") { hive(it) }
+        }
+        w.env.wallet.start()
+        val details = w.env.assetDetailsModel("HIVE")
+        details.start()
+        testScheduler.advanceUntilIdle()
+        details.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(103L, 102L, 101L, 2L, 1L), details.current.activities.map { it.trxIndex })
+        fun reads() = w.app.transport.sent.count { it.method == "condenser_api.get_account_history" }
+        val before = reads()
+
+        w.app.env.appLock.onBackground()
+        w.app.monotonic += Freshness.STALE_AFTER_MILLIS - 1
+        w.app.env.appLock.onForeground()
+        details.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(before, reads(), "a short trip does not refetch")
+
+        newest = listOf(102L, 103L, 104L)
+        val seen = mutableListOf<AssetDetailsState>()
+        val watch = details.watch { seen += it }
+        w.app.env.appLock.onBackground()
+        w.app.monotonic += Freshness.STALE_AFTER_MILLIS
+        w.app.env.appLock.onForeground()
+        details.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(104L, 103L, 102L, 2L, 1L), details.current.activities.map { it.trxIndex }, "both pages again")
+        assertTrue(seen.none { it.isRefreshing || it.isLoading || it.activities.isEmpty() }, "no spinner, the rows stay: $seen")
+        assertFalse(w.env.wallet.current.isRefreshing)
+        watch.close()
+        details.close()
+    }
+
     @Test
     fun chainHistoryIsNewestFirstAcrossAscendingPagesAndAsksOnlyTheTabsOperations() = runTest {
         val w = world(this)

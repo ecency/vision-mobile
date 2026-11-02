@@ -197,6 +197,7 @@ struct ProfileScreen: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
         // at accessibility text sizes the open summary and the tabs would leave the list no room (SummarySizeRule)
         .closesSummaryForSize(collapse)
         .accessibilityElement(children: .contain)
@@ -325,6 +326,7 @@ private struct ProfileTabFeed: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
     }
 }
 

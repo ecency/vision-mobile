@@ -195,16 +195,17 @@ fun ProfileScreen(
 ) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
-    LaunchedEffect(model) { model.start() }
+    // README "Foreground refresh": the header, the open tab's posts or waves, shown and back in front
+    OnShow(model) { model.start() }
     val tab = state.tab
     // RN wavesTabContent: the author's waves, loaded when the tab is first shown
     val waves = remember(tab, model) { if (tab == ProfileTab.WAVES) model.waves() else null }
     val wavesState = waves?.state?.collectAsState()?.value
-    LaunchedEffect(waves) { waves?.start() }
+    OnShow(waves) { waves?.start() }
     val wavesWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp - 32.dp
     val feed: FeedModel? = remember(tab) { model.feed(tab) }
     val feedState = feed?.state?.collectAsState()?.value
-    LaunchedEffect(feed) { feed?.start() }
+    OnShow(feed) { feed?.start() }
     val nearEnd by remember(listState) {
         derivedStateOf {
             val info = listState.layoutInfo
