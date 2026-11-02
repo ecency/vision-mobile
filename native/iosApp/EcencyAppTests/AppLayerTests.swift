@@ -116,11 +116,12 @@ final class ViewStateMappingTests: XCTestCase {
     }
 
     func testVoteWeightsAreBasisPointsClampedToOneToHundredPercent() {
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 100, down: false), 10000)
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 37.4, down: false), 3700)
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 50, down: true), -5000)
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 0, down: false), 100)
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 250, down: true), -10000)
+        let up = VoteSheetState(percent: 100, down: false)
+        XCTAssertEqual(up.weight, 10000)
+        XCTAssertEqual(up.withPercent(value: 37.4).weight, 3700)
+        XCTAssertEqual(up.withDirection(down: true).withPreset(preset: 50).weight, -5000)
+        XCTAssertEqual(up.withPercent(value: 0).weight, 100)
+        XCTAssertEqual(up.withDirection(down: true).withPercent(value: 250).weight, -10000)
     }
 
     func testCardTextUsesCommunityTitleElseTagAndSpeaksTheWholeCard() {

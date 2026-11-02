@@ -285,7 +285,7 @@ class UiNotesFlowsTest {
         compose.onAllNodes(hasTestTag("vote"))[0].performClick()
         waitFor("voteSheet")
         compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("upvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         compose.await("the failure snackbar") {
             compose.onAllNodes(hasTestTag("snackbar")).fetchSemanticsNodes().any { it.boundsInRoot.height > 0f }
         }
@@ -330,7 +330,7 @@ class UiNotesFlowsTest {
         compose.onAllNodes(hasTestTag("vote"))[0].performClick()
         waitFor("voteSheet")
         compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("upvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         compose.await("the failure snackbar") {
             compose.onAllNodes(hasTestTag("snackbar")).fetchSemanticsNodes().any { it.boundsInRoot.height > 0f }
         }
