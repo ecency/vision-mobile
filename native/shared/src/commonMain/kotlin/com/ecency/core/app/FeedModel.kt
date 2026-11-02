@@ -178,10 +178,12 @@ class FeedModel internal constructor(
         }
         job = scope.launch {
             try {
-                val loaded = activePager.loadMore()
                 val nsfw = NsfwMode.of(env.prefs)
                 // RN filterNsfwPost ("Always hide") and the account's mutes
-                val fresh = loaded.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
+                fun shown(posts: List<Post>) = posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
+                var fresh = shown(activePager.loadMore())
+                // nothing to show yet is not the end: the lists only ask for more from a card on screen
+                while (fresh.isEmpty() && (reset || base.isEmpty()) && !activePager.isEndReached) fresh = shown(activePager.loadMore())
                 val user = env.session.current.username
                 val local = env.localVotes.state.value
                 val cards = withContext(dispatchers.render) {

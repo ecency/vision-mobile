@@ -70,6 +70,28 @@ class FeedModelTest {
         feed.close()
     }
 
+    /**
+     * A first page whose every post is filtered out (muted author, or NSFW under "Always hide") is not the end of
+     * the feed: the model asks for the next page itself. The list only pages from a card on screen, so it used to
+     * stay on the loading skeleton for good, pull to refresh included.
+     */
+    @Test
+    fun aFirstPageFilteredAwayLoadsTheNextPage() = runTest {
+        val muted = array(*Array(10) { entry("spammer", "s-$it") })
+        val pages = ArrayDeque(listOf(muted, page("p2", 4)))
+        val app = TestApp(this) { FakeTransport.result(it, pages.removeFirstOrNull() ?: "[]") }
+        app.env.setAuthorMuted("spammer", true)
+        val feed = app.env.feedModel(FeedSource.Account("alice", com.ecency.core.api.AccountPostsSort.FEED))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(4, feed.current.items.size, "the next page was loaded: ${feed.current}")
+        assertTrue(feed.current.endReached)
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.loaded)
+        feed.close()
+    }
+
     @Test
     fun cardData() = runTest {
         val app = TestApp(this) { FakeTransport.result(it, page("p", 1)) }
