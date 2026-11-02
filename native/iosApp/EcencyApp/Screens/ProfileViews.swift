@@ -732,6 +732,7 @@ struct ProfileEditScreen: View {
                         .disabled(state.uploading != nil || state.isSaving)
                         .accessibilityLabel(ProfileUiCopy.shared.COVER_IMAGE).accessibilityIdentifier("edit-cover")
                     }
+                    .themedCardRow()
                     ForEach(ProfileField.companion.form, id: \.self) { field in
                         Section(field.label) {
                             TextField(field.label, text: Binding(get: { edit.state.value(field: field) }, set: { model.setValue(field: field, value: $0) }),
@@ -739,9 +740,10 @@ struct ProfileEditScreen: View {
                                 .disabled(state.isSaving)
                                 .accessibilityIdentifier("field-\(field.name)")
                         }
+                        .themedCardRow()
                     }
                 }
-                .scrollContentBackground(.hidden)
+                .themedList()
             }
             if state.saveEnabled || state.isSaving {
                 Button { model.save(close: true) } label: {

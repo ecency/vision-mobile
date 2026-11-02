@@ -198,6 +198,8 @@ struct ErrorStateView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
+        // as a List row: on the list's background, no separator under it
+        .listStateRow()
     }
 }
 
@@ -248,5 +250,63 @@ struct FabButton: View {
         .accessibilityLabel(label)
         .largeContent(label, appIcon: appIcon)
         .accessibilityIdentifier(id)
+    }
+}
+
+// MARK: Themed lists
+
+/// Lists and forms on the theme background. Without it the system list colours show: black rows and black
+/// grouped backgrounds in dark mode, grey in light.
+private struct ThemedListModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        content.scrollContentBackground(.hidden).background(theme.background)
+    }
+}
+
+/// A plain list row on the theme background (the system row colour is black in dark mode).
+private struct ThemedRowModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View { content.listRowBackground(theme.background) }
+}
+
+/// A grouped list (form) row on the theme's card colour.
+private struct ThemedCardRowModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View { content.listRowBackground(theme.lightBackground) }
+}
+
+extension View {
+    /// On every List and Form: the theme background behind and between the rows.
+    func themedList() -> some View { modifier(ThemedListModifier()) }
+    /// Plain list rows (or a ForEach of them) that set no row colour of their own.
+    func themedRow() -> some View { modifier(ThemedRowModifier()) }
+    /// Grouped list rows, or a Section of them: the card colour.
+    func themedCardRow() -> some View { modifier(ThemedCardRowModifier()) }
+    /// A loading, empty or error state shown as a List row: full width, no row colour and no separator under it,
+    /// so it sits on the list's theme background like the space around it. No effect outside a List.
+    func listStateRow() -> some View {
+        frame(maxWidth: .infinity).listRowBackground(Color.clear).listRowSeparator(.hidden)
+    }
+}
+
+/// A Form whose rows are theme cards on the theme background (the system grouped colours are black in dark mode).
+struct ThemedForm<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        Form { Group { content }.themedCardRow() }.themedList()
+    }
+}
+
+/// The spinner of a list still loading its first page, as a List row (`listStateRow`).
+struct ListLoadingRow: View {
+    var topPadding: CGFloat = 48
+
+    var body: some View {
+        ProgressView().frame(maxWidth: .infinity).padding(.top, topPadding).listStateRow()
     }
 }

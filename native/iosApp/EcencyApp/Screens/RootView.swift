@@ -9,6 +9,7 @@ struct RootView: View {
     /// Zoom navigation sources and destinations (iOS 18; Motion.swift).
     @Namespace private var hero
     @Environment(\.motion) private var motion
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +19,9 @@ struct RootView: View {
                     TabsRoot(badges: app.badges)
                         .navigationDestination(for: NavItem.self) { item in
                             DestinationView(screen: item.screen)
+                                // every pushed screen on the theme, also while it slides in (no system colour behind it)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(theme.background)
                                 .heroDestination(app.heroSources[item.id], namespace: hero, motion: motion)
                         }
                 }
@@ -69,6 +73,8 @@ struct RootView: View {
             .environmentObject(app)
             .environmentObject(app.session)
             .environmentObject(app.votes)
+            // the sheets on the theme, not the system sheet colour (black in dark mode)
+            .presentationBackground(theme.background)
         }
         // ---- feed, posts and reading: menu confirmations and failures ----
         .alert(app.confirm?.title ?? "", isPresented: Binding(get: { app.confirm != nil }, set: { if !$0 { app.confirm = nil } }),

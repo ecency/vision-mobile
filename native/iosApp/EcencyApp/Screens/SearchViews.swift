@@ -68,6 +68,7 @@ struct SearchScreen: View {
                 }
             }
             .listStyle(.plain)
+            .themedList()
             .onChange(of: scrollTop) { _, _ in
                 // the rows' ForEach ids
                 let first: AnyHashable? = switch state.tab {
@@ -93,7 +94,7 @@ struct SearchScreen: View {
     }
 
     @ViewBuilder private func posts(_ posts: SearchPostsState, query: String) -> some View {
-        if posts.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if posts.loading { ListLoadingRow() }
         if let empty = posts.emptyText {
             VStack(spacing: 8) {
                 EsieView(posts.error != nil ? .error : .empty)
@@ -101,7 +102,7 @@ struct SearchScreen: View {
                     .announces(posts.error != nil ? empty : nil)
                 if posts.error != nil { Button(UiCopy.shared.RETRY) { search.retry() } }
             }
-            .frame(maxWidth: .infinity).padding(.top, 48)
+            .padding(.top, 48).listStateRow()
             .accessibilityIdentifier("search-empty")
         }
         ForEach(Array(posts.items.enumerated()), id: \.element.key) { index, row in
@@ -113,14 +114,15 @@ struct SearchScreen: View {
             .accessibilityIdentifier("result-\(row.key)")
             .onAppear { if index >= posts.items.count - 3 { search.loadMorePosts() } }
         }
-        if posts.loadingMore { ProgressView().frame(maxWidth: .infinity) }
+        if posts.loadingMore { ListLoadingRow(topPadding: 0) }
         if let more = posts.moreError {
             AdaptiveStack { Text(more).foregroundStyle(theme.secondary).announces(more, sticky: true); Spacer(minLength: 0); Button(UiCopy.shared.RETRY) { search.retry() } }
+                .listStateRow()
         }
     }
 
     @ViewBuilder private func people(_ people: SearchPeopleState) -> some View {
-        if people.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if people.loading { ListLoadingRow() }
         if let empty = people.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48) }
         ForEach(Array(people.items.enumerated()), id: \.element) { index, name in
             Button { app.push(AppScreenProfile(author: name)) } label: {
@@ -139,7 +141,7 @@ struct SearchScreen: View {
 
     @ViewBuilder private func communities(_ state: SearchState) -> some View {
         let c = state.communities
-        if c.loading && c.rows.isEmpty { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if c.loading && c.rows.isEmpty { ListLoadingRow() }
         if let empty = c.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(c.error != nil ? .error : .empty).padding(.top, 48) }
         ForEach(Array(c.rows.enumerated()), id: \.element.name) { index, row in
             CommunityListRow(row: row, index: index, showJoin: state.loggedIn, onOpen: { app.push(AppScreenCommunity(name: row.name, filter: "")) }) {

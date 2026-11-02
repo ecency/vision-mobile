@@ -34,8 +34,9 @@ struct VotersView: View {
                 }
                 .listRowSeparator(.hidden)
             }
+            .themedRow()
             if s.isLoading && s.rows.isEmpty {
-                ProgressView().frame(maxWidth: .infinity)
+                ListLoadingRow()
             } else if let error = s.error, s.rows.isEmpty {
                 ErrorStateView(error: error) { voters.refresh() }
             } else if s.rows.isEmpty {
@@ -64,11 +65,13 @@ struct VotersView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .themedRow()
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("voter-\(row.voter)")
             }
         }
         .listStyle(.plain)
+        .themedList()
         .searchable(text: $query)
         .onChange(of: query) { _, q in voters.search(query: q) }
         .refreshable { voters.refresh() }
@@ -99,7 +102,7 @@ struct ReblogsView: View {
     var body: some View {
         let s = model.state
         List {
-            if s.isLoading && s.accounts.isEmpty { ProgressView().frame(maxWidth: .infinity) }
+            if s.isLoading && s.accounts.isEmpty { ListLoadingRow() }
             if let error = s.error, s.accounts.isEmpty { ErrorStateView(error: error) { reblogs.refresh() } }
             ForEach(s.accounts, id: \.self) { name in
                 ProMemberReader(username: name) { pro in
@@ -113,9 +116,11 @@ struct ReblogsView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(proLabel(UiCopy.shared.profileOf(username: name), pro))
                 }
+                .themedRow()
             }
         }
         .listStyle(.plain)
+        .themedList()
         .searchable(text: $query)
         .onChange(of: query) { _, q in reblogs.search(query: q) }
         .refreshable { reblogs.refresh() }

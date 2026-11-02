@@ -27,27 +27,30 @@ struct WalletTabView: View {
         let user = session.state.username ?? ""
         let mine = s.account == user
         List {
-            header(s, mine: mine).listRowSeparator(.hidden).listRowInsets(EdgeInsets())
+            header(s, mine: mine).listRowSeparator(.hidden).listRowInsets(EdgeInsets()).themedRow()
             ForEach(journal.state.forAccount(account: user), id: \.actionId) { entry in
-                JournalNoticeView(entry: entry) { app.env.sendJournal.dismiss(entry: entry) }.listRowSeparator(.hidden)
+                JournalNoticeView(entry: entry) { app.env.sendJournal.dismiss(entry: entry) }.listRowSeparator(.hidden).themedRow()
             }
             if s.showError {
                 VStack(spacing: 6) {
                     Text(copy.REFRESH_FAILED).foregroundStyle(theme.text)
                     Button(copy.TRY_AGAIN) { model.retry() }.accessibilityIdentifier("wallet-retry")
                 }
-                .frame(maxWidth: .infinity).listRowSeparator(.hidden)
+                .listStateRow()
             }
-            if s.showSkeleton { RowsSkeleton(count: 5, avatar: false, identifier: "wallet-skeleton").listRowSeparator(.hidden).listRowInsets(EdgeInsets()) }
+            if s.showSkeleton { RowsSkeleton(count: 5, avatar: false, identifier: "wallet-skeleton").listRowSeparator(.hidden).listRowInsets(EdgeInsets()).themedRow() }
             ForEach(mine ? s.rows : [], id: \.symbol) { row in
                 AssetCardView(row: row) { app.push(AppScreenAssetDetails(symbol: row.symbol)) } onClaim: {
                     if row.pendingText == nil && row.symbol == "POINTS" { app.push(AppScreenCompanion.shared.of(route: .boost, arg: user)) }
                     else { model.claim(symbol: row.symbol) }
                 }
                 .listRowSeparator(.hidden)
+                // the theme between and beside the cards (the system row colour is black in dark mode)
+                .themedRow()
             }
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { model.refresh(); app.env.sendJournal.recheck() }
         .onAppear { model.start(); app.env.sendJournal.start(); model.visible(shown: true) }
         .onDisappear { model.visible(shown: false) }
@@ -327,7 +330,7 @@ struct AssetDetailsView: View {
     var body: some View {
         let s = observed.state
         List {
-            summary(s).listRowSeparator(.hidden)
+            summary(s).listRowSeparator(.hidden).themedRow()
             if s.symbol == "POINTS" {
                 // RN HorizontalIconList of POINTS_KEYS: the ways to earn points
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -343,12 +346,13 @@ struct AssetDetailsView: View {
                         }
                     }
                 }
-                .listRowSeparator(.hidden).accessibilityIdentifier("points-earn")
+                .listRowSeparator(.hidden).themedRow().accessibilityIdentifier("points-earn")
             }
             if !s.pending.isEmpty {
                 Section(copy.PENDING_REQUESTS) {
                     ForEach(s.pending, id: \.key) { row in ActivityRowView(row: row, pending: true, expanded: s.expanded.contains(row.key), busy: s.busyKey == "order:\(row.trxIndex ?? 0)", model: model) }
                 }
+                .themedRow()
             }
             if s.activitiesEnabled {
                 Section(copy.ACTIVITIES) {
@@ -372,11 +376,13 @@ struct AssetDetailsView: View {
                         else if s.historyFailed { Text(copy.ACTIVITIES_FAILED).accessibilityIdentifier("history-failed") }
                         else if s.isEmpty { Text(copy.NO_ACTIVITIES).accessibilityIdentifier("history-empty") }
                     }
-                    .font(.footnote).foregroundStyle(theme.secondary).frame(maxWidth: .infinity)
+                    .font(.footnote).foregroundStyle(theme.secondary).listStateRow()
                 }
+                .themedRow()
             }
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { model.refresh() }
         .navigationTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -536,7 +542,7 @@ struct HistoryFilterSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            ThemedForm {
                 Text(copy.FILTER_DESC).font(.footnote)
                 Button(picked.count == all.count ? copy.FILTER_NONE : copy.FILTER_ALL) { picked = picked.count == all.count ? [] : Set(all) }
                 ForEach(all, id: \.self) { op in
@@ -578,7 +584,9 @@ struct RecurrentSheet: View {
                     Button { onDelete(r) } label: { Image(appIcon: .close).foregroundStyle(theme.dangerText).tapTarget() }.buttonStyle(.borderless).accessibilityLabel(UiCopy.shared.DELETE)
                         .accessibilityIdentifier("recurrent-delete-\(r.to)")
                 }
+                .themedCardRow()
             }
+            .themedList()
             .navigationTitle(RecurrentCopy.shared.title(total: Int32(list.count))).navigationBarTitleDisplayMode(.inline)
         }
         .accessibilityIdentifier("recurrent-sheet")
@@ -619,8 +627,10 @@ struct DelegationsSheet: View {
                     }
                     .buttonStyle(.borderless).disabled(!d.updatable)
                 }
+                .themedCardRow()
                 .accessibilityIdentifier("delegation-\(d.account)")
             }
+            .themedList()
             .overlay { if s.isLoading { ProgressView() } }
             .searchable(text: Binding(get: { s.query }, set: { model.setQuery(q: $0) }), prompt: copy.SEARCH)
             .navigationTitle(s.title).navigationBarTitleDisplayMode(.inline)

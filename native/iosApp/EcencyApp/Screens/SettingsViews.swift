@@ -19,7 +19,7 @@ struct SettingsView: View {
     var body: some View {
         let state = observed.state
         let loggedIn = session.state.isLoggedIn
-        List {
+        ThemedForm {
             Section {
                 picker(copy.CURRENCY, options.CURRENCIES, selected: state.currency, id: "settings-currency") { settings.setCurrency(code: $0) }
                 picker(L.Settings.language, options.LANGUAGES, selected: state.language, id: "settings-language") { settings.setLanguage(code: $0) }

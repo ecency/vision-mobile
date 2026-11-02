@@ -7,6 +7,7 @@ import com.ecency.core.auth.HasSocketFactory
 import com.ecency.core.auth.HiveSignerMessages
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
@@ -53,7 +54,12 @@ object DemoAuthServices {
                 return@AuthHttp demoReleaseTag?.let { HttpResult(200, """{"tag_name":"$it"}""") } ?: HttpResult(503, "offline")
             }
             // the search screen: one synthetic page (fake authors, made-up text)
-            if (request.url.endsWith("/search-api/search")) return@AuthHttp HttpResult(200, demoSearch())
+            // a query with "nohits" finds nothing and one with "slowload" stays loading (empty and loading state tests)
+            if (request.url.endsWith("/search-api/search")) {
+                val body = request.body.orEmpty()
+                if ("slowload" in body) delay(120_000)
+                return@AuthHttp HttpResult(200, if ("nohits" in body) """{"took":1,"hits":0,"results":[]}""" else demoSearch())
+            }
             if (!request.url.endsWith("/auth-api/hs-token-refresh")) return@AuthHttp HttpResult(503, "offline")
             val code = runCatching { Json.parseToJsonElement(request.body ?: "{}").jsonObject["code"]?.jsonPrimitive?.content }.getOrNull().orEmpty()
             val user = if (code.startsWith("refresh-")) code.removePrefix("refresh-")
