@@ -127,6 +127,7 @@ struct SearchScreen: View {
                 HStack(spacing: 12) {
                     AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 36)
                     Text("@\(name)").scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                    ProBadge(username: name)
                     Spacer()
                 }
             }

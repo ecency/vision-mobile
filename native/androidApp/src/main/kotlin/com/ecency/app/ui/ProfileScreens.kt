@@ -100,11 +100,20 @@ import com.ecency.core.app.ReadingUiCopy
 
 /** RN ProBadge: the blue check-decagram next to an Ecency Pro member's name; nothing for others. */
 @Composable
-fun ProBadge(env: AppEnvironment, username: String, size: Dp = 15.dp) {
-    val members by env.proMembers.state.collectAsState()
-    LaunchedEffect(Unit) { env.proMembers.ensureLoaded() }
-    if (username.lowercase() !in members) return
-    Glyph(AppIcon.VERIFIED, LocalEcencyColors.current.blueText, size, Modifier.padding(start = 4.dp).testTag("proBadge"), ProfileUiCopy.ECENCY_PRO_MEMBER, filled = true)
+fun ProBadge(env: AppEnvironment?, username: String, size: Dp = 15.dp) {
+    if (!isProMember(env, username)) return
+    // inside a merged row the row's own label says it
+    val label = if (LocalMergedRow.current) null else ProfileUiCopy.ECENCY_PRO_MEMBER
+    Glyph(AppIcon.VERIFIED, LocalEcencyColors.current.blueText, size, Modifier.padding(start = 4.dp).testTag("proBadge"), label, filled = true)
+}
+
+/** Whether [username] is on the Pro roster (loaded once, on first use); a set lookup, nothing per row. */
+@Composable
+fun isProMember(env: AppEnvironment?, username: String): Boolean {
+    val model = env?.proMembers ?: return false
+    val members by model.state.collectAsState()
+    LaunchedEffect(model) { model.ensureLoaded() }
+    return username.lowercase() in members
 }
 
 /** RN userRibbon: avatar and @username in one row. */

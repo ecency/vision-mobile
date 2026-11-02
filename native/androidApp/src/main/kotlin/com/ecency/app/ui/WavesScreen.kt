@@ -428,8 +428,10 @@ internal fun WaveView(
         if (feedx != null) add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, PostMenuContext(translate = true), item.key) })
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
     } }
+    val pro = isProMember(env, card.author)
     fun header() = buildList {
         add(card.author)
+        if (pro) add(com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER)
         add(TimeAgo.short(card.createdEpochMillis, nowMillis))
         if (item.isFromEcency) add(com.ecency.core.app.PostBadges.SOURCE_ECENCY)
         if (item.isPromoted) add(ReadingUiCopy.PROMOTED)
@@ -451,6 +453,7 @@ internal fun WaveView(
                         card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false).clickable(role = Role.Button) { actions.onAuthor(card.author) }.then(HiddenFromA11y),
                     )
+                    ProBadge(env, card.author)
                     Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray)
                     if (item.isFromEcency) EcencySourceBadge(Modifier.padding(start = 6.dp), tag = "wave:ecency")
                     if (item.isLocal) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("wave:local"))
@@ -845,6 +848,7 @@ private fun ReelView(env: AppEnvironment, item: ShortItem, state: ShortsState, m
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(role = Role.Button) { actions.onAuthor(item.card.author) }.testTag("reel:author")) {
                 Avatar(item.card.avatarUrl, 36.dp)
                 Text("@${item.card.author}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp))
+                ProBadge(env, item.card.author)
             }
             if (item.caption.isNotEmpty()) {
                 Text(item.caption, color = Color.White, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp).testTag("reel:caption"))

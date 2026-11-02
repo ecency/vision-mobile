@@ -174,6 +174,7 @@ fun SearchScreen(model: SearchModel, env: AppEnvironment, entry: StackEntry, now
                     ) {
                         Avatar(PostCard.avatarUrl(name, env.proxyBase), 36.dp)
                         Text("@$name", color = colors.text, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp))
+                        ProBadge(env, name)
                     }
                 }
             }

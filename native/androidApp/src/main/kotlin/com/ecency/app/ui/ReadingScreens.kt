@@ -272,7 +272,10 @@ fun VotersScreen(env: AppEnvironment, entry: StackEntry, key: PostKey, onBack: (
                 ) {
                     Avatar(row.avatarUrl, 40.dp)
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                        Text(row.voter, fontWeight = FontWeight.Bold, color = colors.text)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(row.voter, fontWeight = FontWeight.Bold, color = colors.text)
+                            ProBadge(env, row.voter)
+                        }
                         row.timeAgo?.let { Text(it, fontSize = 12.sp, color = colors.darkGray) }
                     }
                     Column(horizontalAlignment = Alignment.End) {
@@ -305,6 +308,7 @@ fun ReblogsScreen(env: AppEnvironment, entry: StackEntry, key: PostKey, loggedIn
                     Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { onProfile(name) }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("reblogger:$name"), verticalAlignment = Alignment.CenterVertically) {
                         Avatar(PostCard.avatarUrl(name, env.proxyBase), 40.dp)
                         Text(name, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(start = 12.dp))
+                        ProBadge(env, name)
                     }
                 }
             }
@@ -530,10 +534,11 @@ fun SimilarEntries(model: SimilarEntriesModel, post: Post, now: Long, showImages
                         }
                     }
                     Text(e.title, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = colors.text, modifier = Modifier.padding(top = 4.dp))
-                    Text(
-                        "@${e.author} " + FromNow.ofTime(e.created, now),
-                        fontSize = 11.sp, color = colors.darkGray, maxLines = 1,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("@${e.author}", fontSize = 11.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        ProBadge(LocalFeedx.current?.env, e.author, 11.dp)
+                        Text(" " + FromNow.ofTime(e.created, now), fontSize = 11.sp, color = colors.darkGray, maxLines = 1)
+                    }
                 }
             }
         }

@@ -29,7 +29,10 @@ struct QuickProfileSheet: View {
                 .frame(width: 144, height: 144)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(L.Native.Ios.Profile.votingPower(percent: QuickProfileText.percent(s.votingPower?.doubleValue)))
-                Text("@\(s.username)").scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
+                HStack(spacing: 4) {
+                    Text("@\(s.username)").scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
+                    ProBadge(username: s.username, size: 16)
+                }
                 if let about = s.about { Text(about).scaledFont(13).foregroundStyle(theme.secondary).lineLimit(2).multilineTextAlignment(.center) }
                 Text(s.joined).scaledFont(12).foregroundStyle(theme.secondary)
                 AdaptiveStack(horizontalAlignment: .center) {

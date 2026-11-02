@@ -374,6 +374,7 @@ private struct LeaderboardView: View {
                         Text(UiCopy.shared.NOTHING_HERE).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48)
                     }
                     ForEach(Array(state.users.enumerated()), id: \.element.username) { index, user in
+                        ProMemberReader(username: user.username) { pro in
                         Button { app.sheet = .quickProfile(user.username) } label: {
                             HStack(spacing: 0) {
                                 Group {
@@ -389,14 +390,20 @@ private struct LeaderboardView: View {
                                 AvatarView(url: PostCard.companion.avatarUrl(account: user.username, proxyBase: app.env.proxyBase, size: "small"), size: 32)
                                 if stacked {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(user.username).scaledFont(14, weight: .bold).foregroundStyle(theme.text)
+                                        HStack(spacing: 4) {
+                                            Text(user.username).scaledFont(14, weight: .bold).foregroundStyle(theme.text)
+                                            ProBadge(username: user.username)
+                                        }
                                         Text(user.count).scaledFont(14).foregroundStyle(theme.secondary)
                                         reward(user)
                                     }
                                     .padding(.leading, 12).frame(maxWidth: .infinity, alignment: .leading)
                                 } else {
-                                    Text(user.username).scaledFont(14, weight: .bold).foregroundStyle(theme.text).lineLimit(1)
-                                        .padding(.leading, 12).frame(maxWidth: .infinity, alignment: .leading)
+                                    HStack(spacing: 4) {
+                                        Text(user.username).scaledFont(14, weight: .bold).foregroundStyle(theme.text).lineLimit(1)
+                                        ProBadge(username: user.username)
+                                    }
+                                    .padding(.leading, 12).frame(maxWidth: .infinity, alignment: .leading)
                                     Text(user.count).scaledFont(14).foregroundStyle(theme.secondary).frame(width: 80, alignment: .leading)
                                     reward(user).frame(width: 72, alignment: .leading)
                                 }
@@ -408,7 +415,7 @@ private struct LeaderboardView: View {
                         .buttonStyle(.plain)
                         // one stop per user: name, then each value under its column's name
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel([user.username, "\(ReadingUiCopy.shared.ACTIVITIES): \(user.count)",
+                        .accessibilityLabel([proLabel(user.username, pro), "\(ReadingUiCopy.shared.ACTIVITIES): \(user.count)",
                                              "\(ReadingUiCopy.shared.LEADERBOARD_REWARD): \(user.points)"].joined(separator: ", "))
                         .accessibilityValue(state.showsQuestCheck && user.questsDone ? ReadingUiCopy.shared.QUESTS_DONE : "")
                         .accessibilityAddTraits(.isButton)
@@ -416,6 +423,7 @@ private struct LeaderboardView: View {
                         // the reward's "Earn points" tip (a toast, which VoiceOver reads)
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.LEADERBOARD_REWARD)) { board.showEarnHint() }
                         .accessibilityIdentifier("leader-\(user.username)")
+                        }
                     }
                     Color.clear.frame(height: 60)
                 }

@@ -758,6 +758,12 @@ class SocialModelsTest {
         testScheduler.advanceUntilIdle()
         assertFalse(app.env.proMembers.isPro("alice"))
         fail = false
+        // every badge on screen asks; after a failure the roster is read again only once the pause has passed
+        val failed = app.authBackend.sent.count { it.url.endsWith("pro-members") }
+        repeat(3) { app.env.proMembers.ensureLoaded() }
+        testScheduler.advanceUntilIdle()
+        assertEquals(failed, app.authBackend.sent.count { it.url.endsWith("pro-members") }, "no read per row right after a failure")
+        app.now += ProMembersModel.RETRY_AFTER_MILLIS
         app.env.proMembers.ensureLoaded()
         testScheduler.advanceUntilIdle()
         assertTrue(app.env.proMembers.isPro("ALICE"))

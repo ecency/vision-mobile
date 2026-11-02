@@ -371,7 +371,10 @@ private fun QuickProfileSheet(ui: FeedxUi, username: String) {
                 )
                 Avatar(s.avatarUrl, 96.dp)
             }
-            Text("@${s.username}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(top = 10.dp).testTag("qpName"))
+            Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("@${s.username}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.testTag("qpName"))
+                ProBadge(ui.env, s.username, 16.dp)
+            }
             s.about?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(top = 4.dp)) }
             Text(s.joined, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 4.dp))
             Row(Modifier.fillMaxWidth().padding(top = 14.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
