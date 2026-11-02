@@ -213,7 +213,8 @@ fun ProfileScreen(
             info.totalItemsCount > 0 && last >= info.totalItemsCount - 3
         }
     }
-    LaunchedEffect(nearEnd, feedState?.pages, feed) { if (nearEnd) feed?.loadMore() }
+    // not from the empty state: its "Load more" goes on (FeedModel.MAX_AUTO_ADVANCE)
+    LaunchedEffect(nearEnd, feedState?.pages, feed) { if (nearEnd && feedState?.items?.isNotEmpty() == true) feed?.loadMore() }
     LaunchedEffect(nearEnd, wavesState?.pages, waves) { if (nearEnd) waves?.loadMore() }
     var confirmReport by remember { mutableStateOf(false) }
 
@@ -291,11 +292,13 @@ fun ProfileScreen(
                                 feedState.items.isEmpty() && feedState.error != null -> item(key = "error") {
                                     ErrorBlock(feedState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, feed!!::retry)
                                 }
+                                feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading") { FeedSkeleton(2) }
                                 feedState.items.isEmpty() && feedState.loaded -> item(key = "empty") {
-                                    // RN profile.havent_posted / havent_commented
+                                    // RN profile.havent_posted / havent_commented; the pages read so far may all be filtered out
                                     EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY,
                                         if (tab.isComments) ProfileUiCopy.userHasNoComments(state.username) else UiCopy.userHasNoPosts(state.username),
                                         Modifier.padding(top = 32.dp),
+                                        actionLabel = if (feedState.endReached) null else UiCopy.LOAD_MORE, onAction = feed!!::loadMore,
                                     )
                                 }
                             }

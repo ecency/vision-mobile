@@ -297,9 +297,11 @@ private struct ProfileTabFeed: View {
             if state.items.isEmpty {
                 if let error = state.error {
                     ErrorStateView(error: error) { model.retry() }.padding(.top, 32)
-                } else if state.loaded {
+                } else if state.loaded && !state.isLoadingMore {
                     Text(tab.isComments ? ProfileUiCopy.shared.userHasNoComments(username: username) : UiCopy.shared.userHasNoPosts(username: username))
                         .foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 32)
+                    // the pages read so far may all be filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
+                    if FeedPaging.shouldLoadMoreAtEnd(state) { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.padding(.top, 12) }
                 } else {
                     ProgressView().padding(.top, 32)
                 }

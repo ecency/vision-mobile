@@ -155,6 +155,72 @@ class ForegroundRefreshTest {
         feed.close()
     }
 
+    /**
+     * A ranked feed whose first page is all by a muted author ("[round]-s0..9"), then "[round]-0..9", then
+     * "[round]-10..19", then nothing; with [allMuted] every page is by the muted author, for 100 pages.
+     */
+    private class FilteredFeed(scope: TestScope) {
+        var round = "a"
+        var allMuted = false
+        var calls = 0
+        val app = TestApp(scope) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            calls++
+            val cursor = req.params.jsonObject["start_permlink"]?.jsonPrimitive?.contentOrNull.orEmpty()
+            val posts = when {
+                allMuted -> if (calls % 100 == 0) emptyList() else (0 until 10).map { entry("spammer", "$round-m$calls-$it") }
+                cursor.isEmpty() -> (0 until 10).map { entry("spammer", "$round-s$it") }
+                cursor.endsWith("-s9") -> (0 until 10).map { entry("author$it", "$round-$it") }
+                cursor == "$round-9" -> (10 until 20).map { entry("author$it", "$round-$it") }
+                else -> emptyList()
+            }
+            FakeTransport.result(req, array(*posts.toTypedArray()))
+        }.also { it.env.setAuthorMuted("spammer", true) }
+    }
+
+    /** Review of #3617: the pages the first load skipped count, so the quiet refresh reads them all again. */
+    @Test
+    fun aQuietRefreshAfterSkippedPagesKeepsEveryVisibleCard() = runTest {
+        val f = FilteredFeed(this)
+        val feed = f.app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertEquals(20, feed.current.items.size)
+        assertEquals(3, f.calls)
+        assertEquals(3, feed.current.pages, "the skipped page counts")
+
+        f.round = "b"
+        f.app.away(long)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(6, f.calls, "all three pages are read again")
+        assertEquals((0 until 20).map { "b-$it" }, feed.current.items.map { it.key.permlink })
+        feed.close()
+    }
+
+    /** Review of #3617: a feed with nothing to show reads at most the first load's cap again, not its whole history. */
+    @Test
+    fun aQuietRefreshOfAFeedFilteredAwayIsBounded() = runTest {
+        val f = FilteredFeed(this)
+        f.allMuted = true
+        val feed = f.app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(6, f.calls, "the first load stops after the page asked for and 5 more")
+        assertTrue(feed.current.loaded && feed.current.items.isEmpty() && !feed.current.endReached)
+
+        f.round = "b"
+        f.app.away(long)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(12, f.calls, "the refresh reads as many pages as were loaded, not the whole history")
+        assertTrue(feed.current.loaded && feed.current.items.isEmpty() && !feed.current.endReached)
+        assertEquals(6, feed.current.pages)
+        feed.close()
+    }
+
     // ---- wallet ----
 
     private fun WalletWorld.portfolioReads() = app.authBackend.sent.count { it.url.endsWith("portfolio-v2") }
