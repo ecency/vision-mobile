@@ -287,6 +287,60 @@ class PostBodyTest {
         assertEquals(listOf("https://images.ecency.com/u/alice/avatar/128"), requested.toList())
     }
 
+    // Body images load the proxy size web's srcset picks (README "Body images"), so they share its CDN cache entries.
+    private val raw = "https://files.peakd.com/file/peakd-hive/alice/photo.jpg"
+    private val src = com.ecency.core.render.ImageProxy().proxify(raw, forceProxy = true)
+    private val hash = src.substringAfter("/p/").substringBefore('?')
+    private fun sized(format: String, width: Int) = "https://i.ecency.com/p/$hash?format=$format&mode=fit&width=$width"
+
+    @Test
+    @Config(qualifiers = "xxhdpi")
+    fun bodyImagesRequestWebsAvifSizeForTheirWidthInPixels() {
+        val tile = com.ecency.core.render.ImageProxy().proxify("https://files.peakd.com/file/peakd-hive/alice/tile.png", forceProxy = true)
+        val grid = Block.ImageGrid(listOf(Block.Image(tile, null), Block.Image(tile, null)))
+        compose.setContent { PostBody(listOf(Block.Image(src, null), grid), 360.dp, actions) }
+        // 360dp at 3x is 1080 px: the 1280 entry; a grid tile is 179dp, 537 px: the 600 entry.
+        waitForRequest(sized("avif", 1280))
+        waitForRequest(tile.replace("?format=match&mode=fit", "?format=avif&mode=fit&width=600"))
+        assertTrue("full size requested: $requested", requested.none { it == src || it == tile })
+    }
+
+    @Test
+    @Config(sdk = [30])
+    fun androidWithoutAvifRequestsTheWebpSize() {
+        compose.setContent { PostBody(listOf(Block.Image(src, null)), 360.dp, actions) }
+        waitForRequest(sized("webp", 600))
+    }
+
+    @Test
+    fun animatedSourceKeepsWebsMatchSize() {
+        val gif = com.ecency.core.render.ImageProxy().proxify("https://media.giphy.com/media/abc/giphy.gif", forceProxy = true)
+        compose.setContent { PostBody(listOf(Block.Image(gif, null)), 360.dp, actions) }
+        waitForRequest(gif.replace("?format=match&mode=fit", "?format=match&mode=fit&width=600"))
+    }
+
+    @Test
+    fun anAvifThatFailsToDecodeFallsBackToWebp() {
+        val failAvif = object : Interceptor {
+            override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
+                val url = chain.request.data.toString()
+                requested += url
+                if ("format=avif" in url) return coil3.request.ErrorResult(null, chain.request, IllegalStateException("no avif"))
+                return SuccessResult(image = ColorDrawable(0xFF336699.toInt()).asImage(), request = chain.request)
+            }
+        }
+        SingletonImageLoader.setUnsafe { ctx -> ImageLoader.Builder(ctx).components { add(failAvif) }.build() }
+        compose.setContent { PostBody(listOf(Block.Image(src, null)), 360.dp, actions) }
+        waitForRequest(sized("avif", 600))
+        waitForRequest(sized("webp", 600))
+    }
+
+    @Test
+    fun galleryImageRequestsTheWidestSize() {
+        compose.setContent { com.ecency.app.ui.ZoomableImage(src, "image 1 of 1") }
+        waitForRequest(sized("avif", 1280))
+    }
+
     private fun hasTestTagStartingWith(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("tag starts with $prefix") {
         it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null }?.startsWith(prefix) == true
     }

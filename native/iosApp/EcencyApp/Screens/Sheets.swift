@@ -264,7 +264,8 @@ struct ZoomableImageView: View {
     @State private var lastOffset: CGSize = .zero
 
     var body: some View {
-        LoadedImageView(src: src, maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
+        // web's widest srcset size; share, copy and save keep `src`
+        LoadedImageView(src: ImageProxy.companion.bodyVariant(src: src, widthPx: 1280, avif: true), maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
             .frame(width: size.width, height: size.height)
             .scaleEffect(scale)
             .offset(offset)

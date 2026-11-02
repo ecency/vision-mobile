@@ -74,6 +74,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import android.os.Build
+import com.ecency.core.render.ImageProxy
 import com.ecency.core.render.blocks.Block
 import com.ecency.core.render.blocks.BlockStyle
 import com.ecency.core.render.blocks.LinkTarget
@@ -264,6 +266,19 @@ private fun ParagraphView(
     )
 }
 
+/**
+ * The proxy size web loads for a body image [src] drawn [widthPx] device pixels wide ([ImageProxy.bodyVariant]):
+ * AVIF on Android 12+, which decodes it, and WebP before that or once an AVIF fails to load (call [onError]).
+ */
+internal class BodyImage(val url: String, val onError: () -> Unit)
+
+@Composable
+internal fun rememberBodyImage(src: String, widthPx: Int): BodyImage {
+    var avif by remember(src) { mutableStateOf(Build.VERSION.SDK_INT >= 31) }
+    val url = remember(src, widthPx, avif) { ImageProxy.bodyVariant(src, widthPx, avif) }
+    return BodyImage(url) { avif = false }
+}
+
 @Composable
 private fun ImageView(block: Block.Image, maxWidth: Dp, actions: PostActions, images: Lazy<List<String>>) {
     val theme = LocalPostTheme.current
@@ -293,10 +308,13 @@ private fun ImageView(block: Block.Image, maxWidth: Dp, actions: PostActions, im
             }
             .testTag("image"),
     ) {
+        // the column width, not the loaded size, so the URL never changes once the image is in
+        val image = rememberBodyImage(block.src, with(LocalDensity.current) { maxWidth.roundToPx() })
         AsyncImage(
-            model = block.src,
+            model = image.url,
             contentDescription = block.alt,
             contentScale = ContentScale.Crop,
+            onError = { image.onError() },
             onSuccess = { state ->
                 // Unspecified for drawables without a size (vectors, colors); reading it would throw.
                 val s = state.painter.intrinsicSize
@@ -391,9 +409,11 @@ private fun ImageGridView(block: Block.ImageGrid, maxWidth: Dp, actions: PostAct
                         HiddenImage(tile, tile * 3 / 4) { RevealedImages.reveal(img.src) }
                         return@forEach
                     }
+                    val image = rememberBodyImage(img.src, with(LocalDensity.current) { tile.roundToPx() })
                     AsyncImage(
-                        model = img.src,
+                        model = image.url,
                         contentDescription = img.alt,
+                        onError = { image.onError() },
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .width(tile)

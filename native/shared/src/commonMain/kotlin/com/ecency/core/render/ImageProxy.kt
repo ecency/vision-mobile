@@ -87,6 +87,19 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
         return avif to webp
     }
 
+    /**
+     * The srcset web loads a body image from. [src] is render-helper's `<img src>`: when it is the proxified form
+     * of a raw URL web wraps in `<picture>` (the hash decodes back to that URL), the avif or webp source;
+     * otherwise the `<img>` srcset (format=match), as render-helper builds for gifs and already proxied URLs.
+     */
+    fun bodySrcSet(src: String, avif: Boolean): String {
+        if (!src.startsWith("$base/p/")) return ""
+        val hash = extractPHash(src)?.takeIf { it.length <= MAX_HASH_LENGTH }
+        val raw = hash?.let { runCatching { Base58.decode(it).decodeToString() }.getOrNull() }
+        val sources = raw?.takeIf { proxify(it, forceProxy = true) == src }?.let(::pictureSources) ?: return srcSet(src)
+        return if (avif) sources.first else sources.second
+    }
+
     /** Whether avif/webp renditions are safe for a raw image URL (static raster, not already proxied). */
     fun isPictureEligibleRawUrl(rawUrl: String?): Boolean = isPictureEligible(rawUrl, mayUnwrapLegacy = true)
 
@@ -108,8 +121,33 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
 
     companion object {
         const val DEFAULT_BASE = "https://i.ecency.com"
+
+        /** Ecency's own proxies, whose sized variants web requests; other image servers keep their URLs. */
+        private val SIZED_BASES = listOf(DEFAULT_BASE, "https://img.ecency.com")
+
+        /**
+         * The URL to load a body image [src] (render-helper's `<img src>`) drawn [widthPx] device pixels wide: the
+         * srcset entry a phone browser picks on web (smallest width that covers it, else 1280), so the CDN has it
+         * warm. AVIF, or WebP when [avif] is false, where web wraps the image in `<picture>`; format=match for
+         * the rest (gifs, files without a raster extension), as web. Other hosts and routes come back unchanged.
+         */
+        fun bodyVariant(src: String, widthPx: Int, avif: Boolean): String {
+            val base = SIZED_BASES.firstOrNull { src.startsWith("$it/p/") } ?: return src
+            return pickWidth(ImageProxy(base).bodySrcSet(src, avif), widthPx) ?: src
+        }
+
+        private fun pickWidth(srcSet: String, widthPx: Int): String? {
+            val candidates = srcSet.split(", ").mapNotNull { c ->
+                val w = c.substringAfterLast(' ').removeSuffix("w").toIntOrNull() ?: return@mapNotNull null
+                w to c.substringBeforeLast(' ')
+            }
+            return (candidates.filter { it.first >= widthPx }.minByOrNull { it.first } ?: candidates.maxByOrNull { it.first })?.second
+        }
+
         private const val LEGACY_BASE = "https://images.ecency.com"
         private const val MAX_PROXIED_URL_LENGTH = 2048
+        // about base58 of MAX_PROXIED_URL_LENGTH bytes: a longer hash is not decoded and keeps the match srcset.
+        private const val MAX_HASH_LENGTH = 2800
         private val SRCSET_WIDTHS = listOf(320, 600, 800, 1024, 1280)
         private val LEGACY_SIZED_PROXY_RE = Regex("^https://(?:images\\.hive\\.blog|steemitimages\\.com)/\\d+x\\d+/(.+)$")
         private val STATIC_RASTER_PATH_EXT = Regex("\\.(?:jpe?g|png|webp)$", RegexOption.IGNORE_CASE)
