@@ -351,7 +351,7 @@ struct ImageGridView: View {
                 if !actions.showImages && !RevealedImages.shared.isRevealed(img.src) {
                     HiddenImageView(width: tile, height: tile * 3 / 4) { RevealedImages.shared.reveal(img.src) }
                 } else {
-                    LoadedImageView(src: img.src, maxWidth: tile) { _ in }
+                    LoadedImageView(src: bodyImageURL(img.src, points: tile), maxWidth: tile) { _ in }
                         .frame(width: tile, height: tile * 3 / 4)
                         .clipped()
                         .contentShape(Rectangle())
@@ -423,7 +423,8 @@ struct RemoteImageView: View {
             HiddenImageView(width: size.width, height: size.height) { RevealedImages.shared.reveal(src) }
                 .padding(.vertical, 4)
         } else {
-            LoadedImageView(src: src, maxWidth: maxWidth) { loaded in
+            // the column width, not the loaded size, so the URL never changes once the image is in
+            LoadedImageView(src: bodyImageURL(src, points: maxWidth), maxWidth: maxWidth) { loaded in
                 natural = loaded.naturalSize
                 animated = loaded.animated
             }
@@ -441,6 +442,11 @@ struct RemoteImageView: View {
             .padding(.vertical, 4)
         }
     }
+}
+
+/// The proxy size web loads for a body image drawn `points` wide (`ImageProxy.bodyVariant`); iOS decodes AVIF.
+func bodyImageURL(_ src: String, points: CGFloat) -> String {
+    ImageProxy.companion.bodyVariant(src: src, widthPx: Int32((points * UIScreen.main.scale).rounded()), avif: true)
 }
 
 /// RN AutoHeightImage's badge on animated images.

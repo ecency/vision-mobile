@@ -366,6 +366,8 @@ private fun GalleryButton(icon: AppIcon, label: String, tag: String, onClick: ()
     }
 }
 
+private const val GALLERY_WIDTH_PX = 1280
+
 /**
  * One image of the viewer: two fingers zoom (1x to 5x) and pan; a double tap toggles 1.5x (RN doubleTapScale). At 1x
  * a one-finger drag is left to the pager, so swiping between images still works; [onZoom] says when it is zoomed.
@@ -403,10 +405,13 @@ fun ZoomableImage(url: String, description: String, modifier: Modifier = Modifie
                 }
             },
     ) {
+        // web's widest srcset size; share, copy and save keep [url]
+        val image = com.ecency.app.render.rememberBodyImage(url, GALLERY_WIDTH_PX)
         AsyncImage(
-            model = url,
+            model = image.url,
             contentDescription = description,
             contentScale = ContentScale.Fit,
+            onError = { image.onError() },
             modifier = Modifier.fillMaxSize().graphicsLayer {
                 scaleX = scale
                 scaleY = scale

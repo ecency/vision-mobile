@@ -236,4 +236,40 @@ final class ImagePipelineTests: XCTestCase {
         RevealedImages.shared.reveal("https://example.com/2.png")
         XCTAssertEqual(gallery.visible(showImages: false), ["https://example.com/2.png"])
     }
+
+    // MARK: body images load the proxy size web's srcset picks (README "Body images")
+
+    private let raw = "https://files.peakd.com/file/peakd-hive/alice/photo.jpg"
+    private var src: String { ImageProxy(base: ImageProxy.companion.DEFAULT_BASE).proxify(url: raw, width: 0, height: 0, blur: false, forceProxy: true) }
+    private func sized(_ src: String, _ format: String, _ width: Int) -> String {
+        src.replacingOccurrences(of: "?format=match&mode=fit", with: "?format=\(format)&mode=fit&width=\(width)")
+    }
+    private func pick(_ px: CGFloat) -> Int { [320, 600, 800, 1024, 1280].first { CGFloat($0) >= px } ?? 1280 }
+
+    func testBodyImageRequestsWebsAvifSizeForItsWidthInPixels() throws {
+        _ = host(PostBodyView(blocks: [BlockImage(src: src, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        let expected = sized(src, "avif", pick(320 * UIScreen.main.scale))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [expected])
+    }
+
+    func testGridTilesRequestTheirOwnSize() throws {
+        let grid = BlockImageGrid(images: [BlockImage(src: src, alt: nil, link: nil), BlockImage(src: src, alt: nil, link: nil)])
+        _ = host(PostBodyView(blocks: [grid], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(Set(counter.all), [sized(src, "avif", pick(159 * UIScreen.main.scale))])
+    }
+
+    func testAnimatedSourceKeepsWebsMatchSize() throws {
+        let gif = ImageProxy(base: ImageProxy.companion.DEFAULT_BASE).proxify(url: "https://media.giphy.com/media/abc/giphy.gif", width: 0, height: 0, blur: false, forceProxy: true)
+        _ = host(PostBodyView(blocks: [BlockImage(src: gif, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [sized(gif, "match", pick(320 * UIScreen.main.scale))])
+    }
+
+    func testGalleryImageRequestsTheWidestSize() throws {
+        _ = host(ZoomableImageView(src: src, size: CGSize(width: 390, height: 520)) { _ in })
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [sized(src, "avif", 1280)])
+    }
 }
