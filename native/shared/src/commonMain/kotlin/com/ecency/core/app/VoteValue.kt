@@ -109,6 +109,18 @@ class VotePreview(private val account: Account, private val props: RewardProps, 
     /** RN `$amount` (a "-" prefix in downvote mode is the UI's). */
     fun text(weightBasisPoints: Int): String = "$" + VoteValue.format(VoteValue.value(account, props, weightBasisPoints, nowMillis))
 
+    /** The account the estimate is for. */
+    val voter: String get() = account.name
+
+    /** What a vote of [weight] adds to a payout (RN `estimated`), negative for a downvote. */
+    fun estimate(weight: Int): VoteEstimate {
+        if (weight == 0) return VoteEstimate.NONE
+        val sign = if (weight < 0) -1 else 1
+        val vPower = Mana.votingPowerPercent(account, nowMillis) * 100
+        val rshares = VoteValue.rshares(account, props, vPower, kotlin.math.abs(weight).toDouble(), nowMillis)
+        return VoteEstimate(VoteValue.value(account, props, weight, nowMillis) * sign, rshares.toLong() * sign)
+    }
+
     /** "Voting power 93%" for the vote sheet's footer; null when the account has no manabar. */
     val votingPowerText: String? get() = account.votingManabar?.let {
         ReadingUiCopy.votingPower(LocaleFormat.percent(Mana.votingPowerPercent(account, nowMillis), 0, 0))
@@ -121,7 +133,8 @@ suspend fun AppEnvironment.votePreview(): VotePreview? {
     val user = session.current.username ?: return null
     return try {
         val account = api.accounts.getAccount(user) ?: return null
-        VotePreview(account, VoteValue.props(api.hive), nowMillis())
+        // the vote that follows moves the payout by this estimate (VoteModel)
+        VotePreview(account, VoteValue.props(api.hive), nowMillis()).also { votes.preview = it }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
