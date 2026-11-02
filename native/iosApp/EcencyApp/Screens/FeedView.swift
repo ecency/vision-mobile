@@ -130,6 +130,9 @@ struct HomeView: View {
     @StateObject private var walkthrough: Observed<WalkthroughState>
     /// Whether there is a spotlight: an empty header row would leave a zero-height row at the top of the lazy list.
     @StateObject private var spotlight: Observed<SpotlightState>
+    /// Whether the proposal card shows: a hidden one (voted, dismissed) left an empty header row on the first tab,
+    /// and the lazy list under it drew no rows at all, so that tab never showed its posts.
+    @StateObject private var proposalCard: Observed<ProposalCardState>
     private var feeds: HomeFeeds { app.homeFeeds }
     @AppStorage("homeFilter") private var selectedKey = ""
     /// Bumped when the customise sheet saved, so the pills re-read the tabs.
@@ -140,6 +143,7 @@ struct HomeView: View {
     init(env: AppEnvironment) {
         _walkthrough = StateObject(wrappedValue: Observed(env.walkthrough, ownsModel: false))
         _spotlight = StateObject(wrappedValue: Observed(env.spotlight, ownsModel: false))
+        _proposalCard = StateObject(wrappedValue: Observed(env.proposalVote, ownsModel: false))
     }
 
     var body: some View {
@@ -163,7 +167,7 @@ struct HomeView: View {
                 // A session change reloads each feed in place (the shared models refresh themselves).
                 // RN postsTabContent: on the main feed's first tab, the proposal card (signed in) then the spotlight
                 let first = tabs.first == selected
-                let proposal = first && session.state.isLoggedIn
+                let proposal = first && session.state.isLoggedIn && proposalCard.state.visible
                 let spotlit = first && spotlight.state.card != nil
                 // no header row at all when there is nothing to head the list with
                 FeedListView(feed: feed, header: proposal || spotlit ? AnyView(VStack(spacing: 0) {

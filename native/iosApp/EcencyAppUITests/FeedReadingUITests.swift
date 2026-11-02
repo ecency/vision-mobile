@@ -32,6 +32,18 @@ final class FeedReadingUITests: XCTestCase {
         XCTAssertFalse(app.buttons["filter-FOLLOWING"].exists)
     }
 
+    /// The first home tab carries the proposal card above its list; an account that voted (or dismissed it for good)
+    /// has no card there, and the list under it still shows its posts, whichever filter is first.
+    func testTheFirstTabShowsItsPostsWithoutTheProposalCard() {
+        let app = launch(["-seedAccounts", "YES", "-prefs.customTabs.mainTabs", "trending,friends,hot",
+                          "-prefs.proposal.vote.342_spike-alice", "processed"])
+        let first = app.buttons["filter-TRENDING"]
+        XCTAssertTrue(first.waitForExistence(timeout: 15))
+        XCTAssertTrue(first.isSelected, "the first tab is the selected one")
+        XCTAssertTrue(app.buttons.matching(identifier: "post-card").firstMatch.waitForExistence(timeout: 20), "the first tab shows its posts")
+        XCTAssertFalse(element(app, "proposal-card").exists)
+    }
+
     func testPostMenuListsRnItems() {
         let app = launch(["-seedAccounts", "YES"])
         let options = app.buttons["post-options"].firstMatch
