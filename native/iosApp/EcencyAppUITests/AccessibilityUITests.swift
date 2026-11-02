@@ -213,6 +213,19 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    /// The vote sheet at the largest text: the audit passes and the vote button stays reachable (the sheet scrolls).
+    func testVoteSheetAuditAtTheLargestText() {
+        let app = launch(["-seedAccounts", "YES"] + Self.ax5)
+        let vote = app.buttons["vote-button"].firstMatch
+        XCTAssertTrue(vote.waitForExistence(timeout: 25))
+        vote.tap()
+        audit(app, "vote sheet (AX5)", ready: "vote-dir-up")
+        let submit = app.buttons["vote-submit"]
+        for _ in 0..<4 where !submit.isHittable { app.swipeUp() }
+        XCTAssertTrue(submit.isHittable, "the vote button is reachable")
+        XCTAssertTrue(submit.label.hasPrefix("Upvote"), submit.label)
+    }
+
     /// Tabs are buttons with their names, the selected one says so, and the bar never grows with the text.
     func testTabBarLabelsTraitsAndSizeAtTheLargestText() {
         let app = launch(Self.ax5)
@@ -290,6 +303,8 @@ enum AuditExclusions {
         "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2], "settings (AX5)": [clipped: 3],
         // 2026-10-29: the closed profile's compact header, one line in the navigation bar
         "profile closed (AX5)": [clipped: 1],
+        // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one)
+        "vote sheet (AX5)": [clipped: 1],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).

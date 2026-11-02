@@ -202,10 +202,10 @@ class FeedxFlowsTest {
         compose.onAllNodes(hasTestTag("vote"))[0].performClick()
         waitFor("voteSheet")
         settle()
-        compose.onNodeWithTag("downvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteDirDown").performSemanticsAction(SemanticsActions.OnClick)
         settle()
-        assertTrue("first tap only switches mode", node.broadcasts().isEmpty())
-        compose.onNodeWithTag("downvote").performSemanticsAction(SemanticsActions.OnClick)
+        assertTrue("the toggle only switches mode", node.broadcasts().isEmpty())
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         pump { node.broadcasts().isNotEmpty() }
         assertTrue(node.broadcasts().single(), "\"weight\":-10000" in node.broadcasts().single())
     }

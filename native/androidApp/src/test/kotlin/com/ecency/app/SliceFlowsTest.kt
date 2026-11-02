@@ -5,6 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasAnyAncestor
@@ -277,11 +281,48 @@ class SliceFlowsTest {
         waitFor("voteSheet")
         settle()
         compose.onNodeWithTag("votePercent").assertTextEquals("40%")
-        compose.onNodeWithTag("upvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
         compose.await("the vote reaches the node") { node.broadcasts().isNotEmpty() }
         assertTrue(node.broadcasts().single().contains("\"weight\":4000"))
         assertEquals(listOf(40f), savedWeights)
+    }
+
+    /** Owner feedback: the compact sheet, a direction toggle, four presets and ONE vote button, no empty space. */
+    @Test
+    fun theCompactVoteSheetHasADirectionTogglePresetsAndOneVoteButton() {
+        node.signIn()
+        weight = 12f
+        launch()
+        waitFor("card:alice/trending-one")
+        compose.onAllNodes(hasTestTag("vote"))[0].performClick()
+        waitFor("voteSheet")
+        settle()
+        for (tag in listOf("voteDirUp", "voteDirDown", "votePreset:25", "votePreset:50", "votePreset:75", "votePreset:100", "voteSubmit")) {
+            assertTrue("$tag in the sheet", exists(tag))
+        }
+        assertFalse("no separate upvote button", exists("upvote"))
+        assertFalse("no separate downvote button", exists("downvote"))
+        compose.onNodeWithTag("votePercent").assertTextEquals("12%")
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Upvote 12%")
+        compose.onNodeWithTag("voteDirUp").assertIsSelected()
+        compose.onNodeWithTag("voteDirDown").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteDirDown").assertIsSelected()
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Downvote 12%")
+        compose.onNodeWithTag("votePreset:50").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("votePreset:50").assertIsSelected()
+        compose.onNodeWithTag("votePreset:25").assertIsNotSelected()
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Downvote 50%")
+        assertTrue("nothing voted yet", node.broadcasts().isEmpty())
+        // the sheet ends right under its content: the vote button is near the sheet's bottom
+        val sheet = compose.onNodeWithTag("voteSheet").getBoundsInRoot()
+        val button = compose.onNodeWithTag("voteSubmit").getBoundsInRoot()
+        assertTrue("button bottom ${button.bottom} vs sheet bottom ${sheet.bottom}", sheet.bottom - button.bottom <= 72.dp)
+        assertTrue("button at least 50 dp high: ${button.bottom - button.top}", button.bottom - button.top >= 50.dp)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the vote reaches the node") { node.broadcasts().isNotEmpty() }
+        assertTrue(node.broadcasts().single(), node.broadcasts().single().contains("\"weight\":-5000"))
+        assertEquals(listOf(50f), savedWeights)
     }
 
     @Test

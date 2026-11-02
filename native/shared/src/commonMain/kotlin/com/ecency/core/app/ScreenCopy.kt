@@ -246,6 +246,14 @@ object ReadingUiCopy {
     /** The comment sort by votes. */
     val VOTES: String get() = L.native.ui.reading.sortVotes
     val VOTE_WEIGHT: String get() = L.native.ui.reading.voteWeight
+    /** The vote sheet's direction toggle. */
+    val VOTE_UP: String get() = L.native.ui.reading.voteUp
+    val VOTE_DOWN: String get() = L.native.ui.reading.voteDown
+    /** The caption under the vote sheet's `$` estimate. */
+    val ESTIMATED_VALUE: String get() = L.wallet.estimatedValue
+    fun upvotePercent(percent: Int): String = L.native.ui.reading.upvotePercent(percent = LocaleFormat.integer(percent.toLong()))
+    /** [percent] is already formatted ("93%"). */
+    fun votingPower(percent: String): String = L.native.ui.reading.votingPower(percent = percent)
     val WHATS_HAPPENING: String get() = L.quickReply.placeholderWave
     val YOUR_FEEDS: String get() = L.waves.yourFeeds
     fun downvotePercent(percent: Int): String = L.native.ui.reading.downvotePercent(percent = LocaleFormat.integer(percent.toLong()))

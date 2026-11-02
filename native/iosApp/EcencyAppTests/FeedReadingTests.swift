@@ -24,9 +24,7 @@ final class FeedReadingTests: XCTestCase {
     }
 
     func testVoteSheetValueText() {
-        XCTAssertEqual(VoteSheetText.amount("$0.123", down: false), "$0.123")
-        XCTAssertEqual(VoteSheetText.amount("$0.123", down: true), "-$0.123")
-        XCTAssertEqual(VoteWeight.basisPoints(percent: 50, down: true), -5000)
+        XCTAssertEqual(VoteSheetState(percent: 50, down: true).weight, -5000)
     }
 
     func testHistoryDatesAndDiffRuns() {
@@ -64,9 +62,9 @@ final class FeedReadingTests: XCTestCase {
     }
 
     func testVoteSheetStartsInDownvoteModeForADownvotedPost() {
-        XCTAssertTrue(VoteWeight.startsDown(votedByMe: false, downvotedByMe: true))
-        XCTAssertFalse(VoteWeight.startsDown(votedByMe: true, downvotedByMe: false))
-        XCTAssertFalse(VoteWeight.startsDown(votedByMe: false, downvotedByMe: false))
+        XCTAssertTrue(VoteSheetState.companion.open(rememberedPercent: 100, votedByMe: false, downvotedByMe: true).down)
+        XCTAssertFalse(VoteSheetState.companion.open(rememberedPercent: 100, votedByMe: true, downvotedByMe: false).down)
+        XCTAssertFalse(VoteSheetState.companion.open(rememberedPercent: 100, votedByMe: false, downvotedByMe: false).down)
     }
 
     func testFakeRestAnswersTheReadingServices() {

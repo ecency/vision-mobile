@@ -108,6 +108,11 @@ object VoteValue {
 class VotePreview(private val account: Account, private val props: RewardProps, private val nowMillis: Long) {
     /** RN `$amount` (a "-" prefix in downvote mode is the UI's). */
     fun text(weightBasisPoints: Int): String = "$" + VoteValue.format(VoteValue.value(account, props, weightBasisPoints, nowMillis))
+
+    /** "Voting power 93%" for the vote sheet's footer; null when the account has no manabar. */
+    val votingPowerText: String? get() = account.votingManabar?.let {
+        ReadingUiCopy.votingPower(LocaleFormat.percent(Mana.votingPowerPercent(account, nowMillis), 0, 0))
+    }
 }
 
 /** Loads a [VotePreview] for the signed-in account; null when signed out or the reads failed (the sheet shows none). */

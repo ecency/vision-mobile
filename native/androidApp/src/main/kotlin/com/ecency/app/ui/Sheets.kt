@@ -52,7 +52,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
@@ -78,15 +77,22 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.ecency.core.app.ComposeReplyModel
 import com.ecency.core.app.PostCard
 import com.ecency.core.render.blocks.SafeTarget
-import kotlin.math.roundToInt
 import com.ecency.core.app.ReadingUiCopy
 import com.ecency.core.app.UiCopy
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.contentDescription
+import com.ecency.core.app.VoteSheetState
 
 /**
- * Vote weight, as the RN upvote popover: a 1..100% slider, upvote and downvote, and "remove"
- * when the user already voted. [onVote] gets basis points (10000 = 100%, negative = downvote).
+ * The compact vote sheet: an Up / Down toggle with the `$` estimate, the weight, a 1..100% slider with
+ * 25/50/75 ticks, four presets and one vote button whose label follows the direction ([VoteSheetState]).
+ * "Remove vote" when the user already voted. [onVote] gets basis points (10000 = 100%, negative = downvote).
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun VoteSheet(
     card: PostCard,
@@ -97,41 +103,110 @@ fun VoteSheet(
     preview: com.ecency.core.app.VotePreview? = null,
 ) {
     val colors = LocalEcencyColors.current
-    // starts at the last weight used, as the RN upvote slider and the iOS sheet do
-    var percent by remember { mutableFloatStateOf(initialPercent.coerceIn(1f, 100f)) }
-    // RN popover: the first tap on the down arrow only switches to downvote mode (red), the second one votes
-    var downMode by remember { mutableStateOf(card.downvotedByMe) }
-    val accent = if (downMode) Color_Downvote else colors.blueText
+    // starts at the last weight used, in downvote mode for a post the reader downvoted
+    var sheet by remember { mutableStateOf(VoteSheetState.open(initialPercent.toDouble(), card.votedByMe, card.downvotedByMe)) }
+    // text, ticks, slider and outlines in the AA text colours; the fills only under white text
+    val tint = if (sheet.down) colors.redText else colors.blueText
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("voteSheet")) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(ReadingUiCopy.VOTE_WEIGHT, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colors.text, modifier = Modifier.weight(1f))
+        // wraps its content; scrolls at large font scales instead of clipping
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()
+                .padding(bottom = 12.dp).testTag("voteSheet"),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            androidx.compose.foundation.layout.FlowRow(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(Modifier.clip(RoundedCornerShape(12.dp)).background(colors.lightBackground).padding(3.dp)) {
+                    VoteDirection(ReadingUiCopy.VOTE_UP, UiCopy.UPVOTE, AppIcon.COLLAPSE, !sheet.down, false, "voteDirUp") { sheet = sheet.withDirection(false) }
+                    VoteDirection(ReadingUiCopy.VOTE_DOWN, ReadingUiCopy.DOWNVOTE, AppIcon.EXPAND, sheet.down, true, "voteDirDown") { sheet = sheet.withDirection(true) }
+                }
                 preview?.let {
-                    val weight = percent.roundToInt() * 100
-                    Text((if (downMode) "-" else "") + it.text(weight), fontSize = 14.sp, color = colors.darkGray, modifier = Modifier.padding(end = 10.dp).testTag("voteValue"))
+                    Column(horizontalAlignment = Alignment.End, modifier = Modifier.semantics(mergeDescendants = true) {}) {
+                        Text(sheet.valueText(it), fontWeight = FontWeight.Bold, fontSize = 24.sp, color = colors.text, modifier = Modifier.testTag("voteValue"))
+                        Text(ReadingUiCopy.ESTIMATED_VALUE, fontSize = 12.sp, color = colors.darkGray)
+                    }
                 }
-                Text((if (downMode) "-" else "") + "${percent.roundToInt()}%", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = accent, modifier = Modifier.testTag("votePercent"))
             }
-            Slider(
-                value = percent, onValueChange = { percent = it }, valueRange = 1f..100f,
-                colors = SliderDefaults.colors(thumbColor = accent, activeTrackColor = accent),
-                modifier = Modifier.testTag("voteSlider"),
-            )
-            Text(card.payoutText, fontSize = 12.sp, color = colors.darkGray)
-            Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (card.votedByMe || card.downvotedByMe) {
-                    OutlinedButton(onClick = { onVote(0) }, modifier = Modifier.testTag("unvote")) { Text(ReadingUiCopy.REMOVE_VOTE, color = colors.darkGray) }
+            Column {
+                Text(sheet.percentText, fontWeight = FontWeight.Bold, fontSize = 40.sp, lineHeight = 44.sp, color = tint, modifier = Modifier.testTag("votePercent"))
+                Text(ReadingUiCopy.VOTE_WEIGHT, fontSize = 12.sp, color = colors.darkGray)
+            }
+            Box {
+                Slider(
+                    value = sheet.percent.toFloat(), onValueChange = { sheet = sheet.withPercent(it.toDouble()) }, valueRange = 1f..100f,
+                    colors = SliderDefaults.colors(thumbColor = tint, activeTrackColor = tint),
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = ReadingUiCopy.VOTE_WEIGHT }.testTag("voteSlider"),
+                )
+                VoteTicks(colors.darkGray, Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(6.dp))
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                for (p in VoteSheetState.PRESETS) {
+                    val selected = sheet.selectedPreset == p
+                    Box(
+                        Modifier.weight(1f).heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp))
+                            .background(colors.lightBackground)
+                            .then(if (selected) Modifier.border(2.dp, tint, RoundedCornerShape(10.dp)) else Modifier)
+                            .selectable(selected = selected, role = Role.Button) { sheet = sheet.withPreset(p) }
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .testTag("votePreset:$p"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(com.ecency.core.l10n.LocaleFormat.percent(p.toDouble(), 0, 0), fontSize = 14.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, color = if (selected) tint else colors.text)
+                    }
                 }
-                OutlinedButton(
-                    onClick = { if (downMode) onVote(-(percent.roundToInt() * 100)) else downMode = true },
-                    modifier = Modifier.testTag("downvote"),
-                ) { Text(if (downMode) ReadingUiCopy.downvotePercent(percent.roundToInt()) else ReadingUiCopy.DOWNVOTE, color = Color_Downvote) }
-                Button(
-                    onClick = { if (downMode) downMode = false else onVote(percent.roundToInt() * 100) },
-                    colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
-                    modifier = Modifier.weight(1f).testTag("upvote"),
-                ) { Text(UiCopy.UPVOTE, color = Color.White, fontWeight = FontWeight.Bold) }
             }
+            Button(
+                onClick = { onVote(sheet.weight) },
+                colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = if (sheet.down) colors.red else colors.blue),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("voteSubmit"),
+            ) { Text(sheet.buttonLabel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+            if (card.votedByMe || card.downvotedByMe) {
+                androidx.compose.material3.TextButton(onClick = { onVote(0) }, modifier = Modifier.align(Alignment.CenterHorizontally).heightIn(min = 44.dp).testTag("unvote")) {
+                    Text(ReadingUiCopy.REMOVE_VOTE, color = colors.darkGray)
+                }
+            }
+            preview?.votingPowerText?.let {
+                Text(it, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("voteVotingPower"))
+            }
+        }
+    }
+}
+
+/** One half of the vote sheet's direction toggle: a short label with its chevron, filled when selected. */
+@Composable
+private fun VoteDirection(label: String, a11y: String, icon: AppIcon, selected: Boolean, down: Boolean, tag: String, onClick: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    val content = if (selected) Color.White else colors.text
+    Row(
+        Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).background(if (!selected) Color.Transparent else if (down) colors.red else colors.blue)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = a11y }
+            .padding(horizontal = 14.dp).testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        androidx.compose.material3.Icon(icon.vector(), contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
+        Text(label, color = content, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+    }
+}
+
+/** Tick marks under the slider at 25, 50 and 75 percent (mirrored right to left). */
+@Composable
+private fun VoteTicks(color: Color, modifier: Modifier) {
+    val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+    androidx.compose.foundation.Canvas(modifier) {
+        // the thumb's half width insets the track at both ends
+        val inset = 10.dp.toPx()
+        val track = size.width - 2 * inset
+        for (p in listOf(25, 50, 75)) {
+            val f = (p - 1) / 99f
+            val x = inset + track * (if (rtl) 1 - f else f)
+            drawLine(color, androidx.compose.ui.geometry.Offset(x, 0f), androidx.compose.ui.geometry.Offset(x, size.height), strokeWidth = 1.5.dp.toPx())
         }
     }
 }
