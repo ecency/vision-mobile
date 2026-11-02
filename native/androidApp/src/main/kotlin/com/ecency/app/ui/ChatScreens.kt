@@ -620,16 +620,22 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
                                 }
                             }
                         }
-                        item(key = "footer") {
+                        // only under messages: alone in the list on the first load, it was the item the list kept in
+                        // place when the first page came in, so the conversation opened at its oldest end and asked at
+                        // once for the page before (README "Chats")
+                        if (s.items.isNotEmpty()) item(key = "footer") {
                             Box(Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                                 when {
                                     s.isLoading -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText)
-                                    !s.hasMore && s.items.isNotEmpty() -> Text(ChatThreadModel.NO_MORE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("noMore"))
+                                    !s.hasMore -> Text(ChatThreadModel.NO_MORE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("noMore"))
                                 }
                             }
                         }
                     }
                 }
+            }
+            if (mine && s.items.isEmpty() && s.isLoading) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center).size(24.dp), color = colors.blueText)
             }
             if (mine && s.items.isEmpty() && s.loaded && !s.isLoading) {
                 Text(

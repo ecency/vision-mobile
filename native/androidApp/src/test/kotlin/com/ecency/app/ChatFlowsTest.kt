@@ -14,6 +14,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
@@ -222,6 +223,80 @@ class ChatFlowsTest {
         waitUntil { !exists("chatUnread:ch-ecency") }
         assertTrue("POST channels/ch-ecency/view" in node.chatCalls())
         waitUntil { env.badges.current.chats == 2 }
+    }
+
+    /** The node's bounds lie inside the message list's (laid out and on screen, not only composed). */
+    private fun onScreen(matcher: androidx.compose.ui.test.SemanticsMatcher): Boolean {
+        val list = compose.onNodeWithTag("messages").fetchSemanticsNode().boundsInRoot
+        return compose.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().any {
+            val b = it.boundsInRoot
+            b.height > 0 && b.top >= list.top - 1 && b.bottom <= list.bottom + 1
+        }
+    }
+
+    /** The pages of [channelId] read so far (`GET /channels/{id}/posts[?before=...]`, not a single post's calls). */
+    private fun postReads(channelId: String) = node.chat.sent.count { it.method == "GET" && Regex("/channels/$channelId/posts(\\?|$)").containsMatchIn(it.url) }
+
+    @Test
+    fun aLongChannelOpensAtItsUnreadMessagesAndPagesBackOnScroll() {
+        node.chat.seedHistory("ch-ecency", 60)
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("unreadMarker")
+        idleMain()
+        compose.waitForIdle()
+        assertTrue("the first unread message is on screen", onScreen(hasTestTag("unreadMarker")))
+        assertEquals("only the newest page is read on opening", 1, postReads("ch-ecency"))
+        assertFalse(hasTextNode("Older message 1:"))
+        // scrolling up (to the oldest end) loads the pages before, down to "No more messages"
+        compose.await("the oldest page") {
+            compose.onNodeWithTag("messages").performScrollToKey("footer")
+            idleMain()
+            exists("noMore")
+        }
+        assertTrue(hasTextNode("Older message 1:"))
+    }
+
+    @Test
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE) // real text layout
+    fun aDirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
+        node.chat.seedHistory("ch-dm-alice", 60)
+        node.signIn()
+        launch(fontScale = 1.15f)
+        waitFor("chatRow:ch-dm-alice")
+        compose.onNodeWithTag("chatRow:ch-dm-alice").performClick()
+        waitUntil { hasTextNode("Do you have a minute?") }
+        assertTrue("the newest message is on screen", onScreen(hasText("Do you have a minute?", substring = true)))
+        assertEquals(1, postReads("ch-dm-alice"))
+        // a long message, and a reply from someone else with its quote above a long body (cut on iOS, owner report)
+        val messageText = androidx.compose.ui.test.SemanticsMatcher("message text") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("messageText:") == true }
+        for (ending in listOf("the final words of the long reply", "the last line of the long message")) {
+            val text = hasText(ending, substring = true)
+            compose.scrollListTo("messages", text)
+            val node = compose.onAllNodes(text and messageText, useUnmergedTree = true).onFirst()
+            val layout = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            node.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layout) }
+            assertFalse("$ending: the whole text is laid out", layout.single().hasVisualOverflow)
+            assertTrue("$ending: on many lines", layout.single().lineCount > 4)
+            assertTrue("$ending: given its full height", node.fetchSemanticsNode().size.height >= layout.single().size.height)
+        }
+    }
+
+    @Test
+    fun aConversationReadOnScreenShowsReadInTheListOnReturn() {
+        node.signIn()
+        launch()
+        for (id in listOf("ch-ecency", "ch-dm-alice", "ch-group")) {
+            waitFor("chatUnread:$id")
+            compose.onNodeWithTag("chatRow:$id").performClick()
+            waitFor("composer")
+            waitUntil { "POST channels/$id/view" in node.chatCalls() }
+            compose.onNodeWithTag("back").performClick()
+            waitFor("chatRow:$id")
+            waitUntil { !exists("chatUnread:$id") }
+        }
     }
 
     @Test

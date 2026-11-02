@@ -302,6 +302,14 @@ final class AppContainer: ObservableObject {
             // -demoProMember <name>: one more account on the Pro roster (badge UI tests)
             if let name = UserDefaults.standard.string(forKey: "demoProMember") { DemoAuthServices.shared.demoProMembers.add(name) }
             DemoAuthServices.shared.demoReleaseTag = UserDefaults.standard.bool(forKey: "demoUpdate") ? "99.1.0" : nil
+            // -demoChatHistory <n>: n older messages and one long one in the demo channel, DM and group (long
+            // conversations: where a conversation opens, paging back, long messages)
+            let history = UserDefaults.standard.integer(forKey: "demoChatHistory")
+            if history > 0 {
+                for id in ["ch-ecency", "ch-dm-alice", "ch-group"] {
+                    DemoAuthServices.shared.chat?.seedHistory(channelId: id, read: Int32(history), unread: 0)
+                }
+            }
             // -demoToast "<text>": a toast through the shared channel at launch (toast layout UI tests)
             if let text = UserDefaults.standard.string(forKey: "demoToast") {
                 // -demoToastDelay <s>: later, so a test can open a sheet first

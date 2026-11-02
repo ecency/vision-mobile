@@ -708,31 +708,37 @@ struct ChatThreadView: View {
     }
 
     private func messages(_ s: ChatThreadState) -> some View {
-        // RN's list is inverted: the newest message at the bottom, older pages above
-        let items = Array(s.items.reversed())
-        return ScrollViewReader { proxy in
+        // RN's list is inverted (FlatList `inverted`, Android `reverseLayout`), and so is this one: the scroll view is
+        // flipped and its rows flipped back, so the newest message is the scroll view's start. It opens there with no
+        // bottom anchor to resolve against rows not laid out yet, and an older page is added at the end (on screen,
+        // above) without moving what is shown. A bottom-anchored stack in reading order instead opened at its top for
+        // a moment: the oldest row's appearance loaded the page before, which went in above and pushed the view up
+        // into old history (or blank space) page after page.
+        ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 0) {
                     if s.account != nil {
+                        ForEach(s.items, id: \.rowId) { item in
+                            VStack(spacing: 0) {
+                                if item.rowId == s.unreadItemId { unreadMarker }
+                                row(item)
+                            }
+                            .chatFlipped()
+                            .id(item.rowId)
+                            .onAppear { if item.rowId == s.items.last?.rowId { thread.loadMore() } }
+                        }
                         Group {
                             if s.isLoading { ProgressView().padding(16) } else if !s.hasMore && !s.items.isEmpty {
                                 Text(ChatThreadModel.companion.NO_MORE).scaledFont(12).foregroundStyle(theme.secondary).padding(16)
                                     .accessibilityIdentifier("chat-no-more")
                             }
                         }
-                        ForEach(items, id: \.rowId) { item in
-                            VStack(spacing: 0) {
-                                if item.rowId == s.unreadItemId { unreadMarker }
-                                row(item)
-                            }
-                            .id(item.rowId)
-                            .onAppear { if item.rowId == items.first?.rowId { thread.loadMore() } }
-                        }
+                        .chatFlipped()
                     }
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
             }
-            .defaultScrollAnchor(.bottom)
+            .chatFlipped()
             .refreshable { try? await thread.refreshAndWait() }
             .overlay {
                 if s.account != nil, s.items.isEmpty, s.loaded, !s.isLoading {
@@ -962,6 +968,9 @@ struct ChatMessageBubble: View {
                 if !item.spans.isEmpty {
                     Text(ChatAttributed.make(item.spans, linkColor: own ? .white : theme.accentText))
                         .scaledFont(15).foregroundStyle(text)
+                        // the whole message, always: under a quote (whose bar takes any height it is offered) a long
+                        // reply gave its height to the quote and was cut after a few lines
+                        .fixedSize(horizontal: false, vertical: true)
                         .environment(\.openURL, OpenURLAction { url in
                             app.openChatLink(url.absoluteString)
                             return .handled
@@ -1525,4 +1534,9 @@ struct ReactionPillView: View {
         .accessibilityAction(named: L.Native.Ios.Chat.seeReactors) { onReactors(name) }
         .accessibilityIdentifier(id)
     }
+}
+
+private extension View {
+    /// Upside down: the conversation's scroll view, and each of its rows again so they read the right way up.
+    func chatFlipped() -> some View { scaleEffect(x: 1, y: -1) }
 }

@@ -24,6 +24,9 @@ import kotlin.coroutines.cancellation.CancellationException
 /** A group renamed on this device or live: [name] is empty when the name was removed. */
 data class ChatRename(val channelId: String, val name: String, val atMillis: Long)
 
+/** A conversation [owner] read in this app (an open conversation told the server it was viewed), at [atMillis]. */
+data class ChatViewed(val channelId: String, val owner: String, val atMillis: Long)
+
 /** What the list knew about a channel when it opened it (RN's navigation params), kept in memory only. */
 internal class ChatHint(val channel: ChatChannel?, val title: String, val users: Map<String, ChatUser>)
 
@@ -57,6 +60,15 @@ class ChatService internal constructor(private val env: AppEnvironment) {
 
     /** Every rename made here or seen live; the list and an open conversation follow it. */
     val renamed: SharedFlow<ChatRename> = renameEvents.asSharedFlow()
+
+    private val viewedEvents = MutableSharedFlow<ChatViewed>(extraBufferCapacity = 16)
+
+    /** Every conversation read in an open thread; the list clears its unread count without asking again. */
+    val viewed: SharedFlow<ChatViewed> = viewedEvents.asSharedFlow()
+
+    internal fun markedViewed(channelId: String, owner: String) {
+        viewedEvents.tryEmit(ChatViewed(channelId, owner, env.nowMillis()))
+    }
 
     internal val hints = LinkedHashMap<String, ChatHint>()
 

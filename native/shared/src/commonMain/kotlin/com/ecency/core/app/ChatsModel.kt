@@ -136,6 +136,11 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 rebuild()
             }
         }
+        scope.launch {
+            // RN refreshes only the badge on leaving a read conversation, and its list kept the old count until the
+            // next reload; here the row clears as the conversation is read
+            env.chat.viewed.collect { v -> if (v.owner == current.account) markRead(v.channelId, v.atMillis) }
+        }
     }
 
     private fun sync() {
@@ -305,8 +310,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     ChatChannelAction.MARK_READ -> {
                         env.chat.call(user) { env.chat.api.markViewed(it.token, id) }
                         if (gen != generation) return@launch
-                        val viewedAt = maxOf(row.channel.lastPostAt, env.nowMillis())
-                        update(id) { it.copy(mentionCounters = it.mentionCounters.map { 0.0 }, messageCounter = it.messageCounter?.let { 0.0 }, lastViewedAt = viewedAt, lastViewAt = viewedAt) }
+                        markRead(id, env.nowMillis())
                         env.chat.refreshUnread()
                     }
                     ChatChannelAction.FAVORITE, ChatChannelAction.UNFAVORITE -> {
@@ -342,6 +346,12 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 setState { it.copy(error = message(e, fallback)) }
             }
         }
+    }
+
+    /** The row of [id] read at [atMillis]: no unread or mention count. */
+    private fun markRead(id: String, atMillis: Long) = update(id) {
+        val viewedAt = maxOf(it.lastPostAt, atMillis)
+        it.copy(mentionCounters = it.mentionCounters.map { 0.0 }, messageCounter = it.messageCounter?.let { 0.0 }, lastViewedAt = viewedAt, lastViewAt = viewedAt)
     }
 
     private fun update(id: String, change: (ChatChannel) -> ChatChannel) {
