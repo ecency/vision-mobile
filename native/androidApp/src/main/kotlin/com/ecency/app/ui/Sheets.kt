@@ -212,18 +212,24 @@ private fun VoteTicks(color: Color, modifier: Modifier) {
 }
 
 /**
- * Reply composer. The draft lives in [model] (app-wide, one per parent) until a send succeeds, so
+ * Reply composer (RN quick reply, quickPostModalContent in comment mode): the text, the attached image, the
+ * clipboard chip and RN's toolbar on its own line under the text (image, camera, files, dictation, AI assist: the wave
+ * composer's [QuickComposeTools] without poll and video), then expand to the full editor and Reply. The draft lives in [model] (app-wide, one per parent) until a send succeeds, so
  * retries reuse its permlink and closing the sheet or leaving the post keeps it. While a send runs the
  * sheet cannot be swiped, tapped or backed away: back and scrim taps go through the same
  * confirmValueChange as a swipe (the send itself would survive, but its result and a retry belong on screen).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReplySheet(model: ComposeReplyModel, onSent: () -> Unit, onDismiss: () -> Unit, onExpand: ((com.ecency.core.app.EditorArgs) -> Unit)? = null) {
+fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel, onSent: () -> Unit, onDismiss: () -> Unit, onExpand: ((com.ecency.core.app.EditorArgs) -> Unit)? = null) {
     val colors = LocalEcencyColors.current
     val state by model.state.collectAsState()
     val sending by rememberUpdatedState(state.isSending)
     LaunchedEffect(state.sent) { if (state.sent != null) onSent() }
+    // RN quick reply's image button: the app's pickers behind the shared attach (as the wave composer)
+    (env.waves.attacher as? com.ecency.core.app.WaveUploadAttacher)?.let { WaveImagePickers(env, it) }
+    ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
+    var aiSheet by remember { mutableStateOf<String?>(null) }
     // RN: a reply HiveSigner refused for the missing ecency.app authority offers the grant; closing it is a skip
     if (state.authorityPrompt) PostingAuthorityDialog(onAnswer = model::answerAuthorityPrompt, onDismiss = { model.answerAuthorityPrompt(false) })
     if (state.conflict) {
@@ -271,10 +277,19 @@ fun ReplySheet(model: ComposeReplyModel, onSent: () -> Unit, onDismiss: () -> Un
             if (com.ecency.core.app.Quests.showsShortHint("me", false, state.text)) {
                 Text(com.ecency.core.app.Quests.SHORT_CONTENT_HINT, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp).testTag("shortContentHint"))
             }
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+            AttachedImageThumb(state.imageUrl, state.isAttaching, "replyImage", enabled = !state.isSending, onRemove = model::removeImage)
+            if (state.clipboardChip) {
+                ClipboardImageChip("reply", enabled = !state.isSending && !state.isAttaching, onPaste = model::pasteClipboardImage, onDismiss = model::dismissClipboardChip)
+            }
+            // RN quick reply's toolbar, on its own line so every button shows next to the keyboard
+            QuickComposeTools(
+                "reply", state.isSending, state.isAttaching, onAttach = model::attach,
+                onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            )
+            Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 // RN quick reply "expand": the same reply continues in the full editor
                 if (onExpand != null && !state.isSending) {
-                    androidx.compose.material3.TextButton(onClick = { model.expand(onExpand) }, modifier = Modifier.testTag("replyExpand")) { Text(ReadingUiCopy.OPEN_EDITOR, color = colors.blueText) }
+                    androidx.compose.material3.TextButton(onClick = { model.expand(onExpand) }, enabled = !state.isAttaching, modifier = Modifier.testTag("replyExpand")) { Text(ReadingUiCopy.OPEN_EDITOR, color = colors.blueText) }
                     androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                 }
                 // the button turns into its own progress while the reply goes out (Motion.kt); the sheet closes on success
@@ -292,6 +307,7 @@ fun ReplySheet(model: ComposeReplyModel, onSent: () -> Unit, onDismiss: () -> Un
             }
         }
     }
+    QuickComposeAiSheet(env, model, aiSheet) { aiSheet = null }
 }
 
 /**

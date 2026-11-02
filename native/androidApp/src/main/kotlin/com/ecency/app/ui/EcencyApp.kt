@@ -785,7 +785,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
             }
             env.share.consumeNavigation()
         }
-        reply?.let { model -> ReplySheet(model, onSent = { reply = null }, onDismiss = { reply = null }, onExpand = { args -> reply = null; navigator.push(AppScreen.Editor(args)) }) }
+        reply?.let { model -> ReplySheet(env, model, onSent = { reply = null }, onDismiss = { reply = null }, onExpand = { args -> reply = null; navigator.push(AppScreen.Editor(args)) }) }
         tip?.let { key ->
             val model = remember(key) { env.tipModel(key.author, key.permlink) }
             androidx.compose.runtime.DisposableEffect(model) { onDispose { model.close() } }
