@@ -203,14 +203,14 @@ struct CommunitiesScreen: View {
             List {
                 if tab == 0 {
                     if state.joined.isEmpty {
-                        if state.joinedLoading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+                        if state.joinedLoading { ListLoadingRow() }
                         else if let error = state.joinedError { ErrorStateView(error: error, sticky: true) { communities.refresh() } }
                         else {
                             VStack(spacing: 12) {
                                 Text(CommunityCopy.shared.NO_COMMUNITIES).multilineTextAlignment(.center).foregroundStyle(theme.secondary)
                                 Button(CommunityCopy.shared.DISCOVER_COMMUNITIES) { tab = 1 }.accessibilityIdentifier("discover-communities")
                             }
-                            .frame(maxWidth: .infinity).padding(.top, 48)
+                            .padding(.top, 48).listStateRow()
                         }
                     }
                     ForEach(Array(state.joined.enumerated()), id: \.element.name) { index, row in
@@ -232,7 +232,7 @@ struct CommunitiesScreen: View {
                     }
                 } else {
                     if state.discover.isEmpty {
-                        if state.discoverLoading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+                        if state.discoverLoading { ListLoadingRow() }
                         else if let error = state.discoverError { ErrorStateView(error: error, sticky: true) { communities.refresh() } }
                     }
                     ForEach(Array(state.discover.enumerated()), id: \.element.name) { index, row in
@@ -244,6 +244,7 @@ struct CommunitiesScreen: View {
                 }
             }
             .listStyle(.plain)
+            .themedList()
             .refreshable { communities.refresh() }
         }
         .background(theme.background)
@@ -404,7 +405,7 @@ struct CommunityMembersScreen: View {
     var body: some View {
         let state = model.state
         List {
-            if state.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+            if state.loading { ListLoadingRow() }
             if let empty = state.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48) }
             ForEach(Array(state.members.enumerated()), id: \.element.account) { index, member in
                 AdaptiveStack(horizontalAlignment: .leading, spacing: 12) {
@@ -440,10 +441,11 @@ struct CommunityMembersScreen: View {
                 .accessibilityIdentifier("member-\(member.account)")
                 .onAppear { if index >= state.members.count - 3 { members.loadMore() } }
             }
-            if state.loadingMore { ProgressView().frame(maxWidth: .infinity) }
-            if let note = state.footerNote { Text(note).scaledFont(13).foregroundStyle(theme.secondary) }
+            if state.loadingMore { ListLoadingRow(topPadding: 0) }
+            if let note = state.footerNote { Text(note).scaledFont(13).foregroundStyle(theme.secondary).listStateRow() }
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { members.refresh() }
         .navigationTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -630,7 +632,7 @@ struct CommunitySettingsScreen: View {
     var body: some View {
         let state = model.state
         let f = state.form
-        Form {
+        ThemedForm {
             if let notice = state.notice {
                 Text(notice).scaledFont(13).foregroundStyle(theme.secondary).accessibilityIdentifier("settings-notice")
             }
@@ -696,7 +698,7 @@ struct CommunityActivitiesScreen: View {
     var body: some View {
         let state = model.state
         List {
-            if state.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+            if state.loading { ListLoadingRow() }
             if let empty = state.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48) }
             ForEach(Array(state.items.enumerated()), id: \.element.id) { index, row in
                 HStack(alignment: .top, spacing: 8) {
@@ -711,13 +713,15 @@ struct CommunityActivitiesScreen: View {
                             .scaledFont(12).foregroundStyle(theme.secondary)
                     }
                 }
+                .themedRow()
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("activity-\(row.id)")
                 .onAppear { if index >= state.items.count - 3 { activities.loadMore() } }
             }
-            if state.loadingMore { ProgressView().frame(maxWidth: .infinity) }
+            if state.loadingMore { ListLoadingRow(topPadding: 0) }
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { activities.refresh() }
         .environment(\.openURL, OpenURLAction { url in
             // ecency-activity://account[/permlink]: the mention links of the log

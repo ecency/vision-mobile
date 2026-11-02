@@ -90,7 +90,7 @@ struct TranslationSheet: View {
     var body: some View {
         let s = model.state
         NavigationStack {
-            Form {
+            ThemedForm {
                 Picker(L.Native.Ios.Reading.translateFrom, selection: Binding(get: { s.source }, set: { sheet.setSource(code: $0) })) {
                     Text(UiCopy.shared.AUTO).tag("auto")
                     ForEach(s.languages, id: \.first) { pair in Text(pair.second as String? ?? "").tag(pair.first as String? ?? "") }

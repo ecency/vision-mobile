@@ -14,7 +14,7 @@ struct AccountSwitcherSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            ThemedForm {
                 Section {
                     ForEach(session.state.accounts, id: \.username) { account in
                         // the current mark and log out go under the name at accessibility text sizes

@@ -176,6 +176,8 @@ struct ChatsTabView: View {
                     ProgressView().padding(.top, 12).accessibilityIdentifier("chats-loading")
                 }
                 List {
+                    // the theme behind every row (no row sets its own colour)
+                    Group {
                     if mine {
                         if let e = s.searchError { Text(e).scaledFont(13).foregroundStyle(theme.dangerText).announces(e, debounce: true, sticky: true).listRowSeparator(.hidden) }
                         if !s.channelResults.isEmpty {
@@ -205,8 +207,11 @@ struct ChatsTabView: View {
                     if !typeSize.isAccessibilitySize {
                         Color.clear.frame(height: pillClearance).listRowSeparator(.hidden).accessibilityHidden(true)
                     }
+                    }
+                    .themedRow()
                 }
                 .listStyle(.plain)
+                .themedList()
                 .refreshable { try? await model.refreshAndWait() }
                 .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chats-list")

@@ -319,7 +319,7 @@ struct ReferScreen: View {
                 }
                 .buttonStyle(.borderedProminent).tint(theme.accent).disabled(!mine).accessibilityIdentifier("refer-share")
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 12).listRowSeparator(.hidden)
+            .frame(maxWidth: .infinity).padding(.vertical, 12).listRowSeparator(.hidden).themedRow()
 
             ForEach(rows, id: \.id) { row in
                 AdaptiveStack(spacing: 10) {
@@ -343,6 +343,7 @@ struct ReferScreen: View {
                     Button(copy.DELEGATE_HP) { app.push(AppScreenCompanion.shared.of(route: .transfer, arg: row.username)) }
                         .buttonStyle(.borderless).font(.footnote.bold()).accessibilityIdentifier("referral-delegate-\(row.username)")
                 }
+                .themedRow()
                 .onAppear { if row.id == rows.last?.id { model.loadMore() } }
             }
 
@@ -357,9 +358,10 @@ struct ReferScreen: View {
                         .accessibilityIdentifier("refer-empty")
                 }
             }
-            .frame(minHeight: 72).listRowSeparator(.hidden)
+            .frame(minHeight: 72).listStateRow()
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { model.refresh() }
         .navigationTitle(copy.TITLE)
         .navigationBarTitleDisplayMode(.inline)

@@ -734,7 +734,7 @@ private struct LinkSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            ThemedForm {
                 Picker(L.Editor.linkTypeText, selection: $type) {
                     Text(EditorUiCopy.shared.PLAIN).tag(0)
                     Text(UiCopy.shared.VIDEO).tag(1)
@@ -785,7 +785,7 @@ private struct SnippetsSheet: View {
         let state = snippets.state
         NavigationStack {
             List {
-                if state.loaded, state.snippets.isEmpty { Text(EditorUiCopy.shared.NO_SNIPPETS_FOUND).foregroundStyle(theme.secondary).accessibilityIdentifier("snippets-empty") }
+                if state.loaded, state.snippets.isEmpty { Text(EditorUiCopy.shared.NO_SNIPPETS_FOUND).foregroundStyle(theme.secondary).listStateRow().accessibilityIdentifier("snippets-empty") }
                 ForEach(state.snippets, id: \.id) { snippet in
                     Button { onPick(snippet.body) } label: {
                         VStack(alignment: .leading, spacing: 2) {
@@ -793,6 +793,7 @@ private struct SnippetsSheet: View {
                             Text(snippet.body).font(.footnote).lineLimit(2).foregroundStyle(theme.secondary)
                         }
                     }
+                    .themedCardRow()
                     .accessibilityIdentifier("snippet-\(snippet.title)")
                     .swipeActions {
                         if !snippet.id.isEmpty {
@@ -801,8 +802,9 @@ private struct SnippetsSheet: View {
                         }
                     }
                 }
-                if !state.endReached, state.loaded { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() } }
+                if !state.endReached, state.loaded { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.themedCardRow() }
             }
+            .themedList()
             .overlay { if !state.loaded { ProgressView() } }
             .navigationTitle(EditorUiCopy.shared.SNIPPETS).navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -814,7 +816,7 @@ private struct SnippetsSheet: View {
             .onAppear { model.start() }
             .sheet(isPresented: $editorShown) {
                 NavigationStack {
-                    Form {
+                    ThemedForm {
                         TextField(EditorUiCopy.shared.SNIPPET_TITLE, text: $title, axis: .vertical).accessibilityIdentifier("snippet-title")
                         TextField(EditorUiCopy.shared.ADD_SNIPPET_BODY_HERE, text: $text, axis: .vertical).lineLimit(5...).accessibilityIdentifier("snippet-body")
                         if incomplete { Text(EditorUiCopy.shared.SNIPPET_INCOMPLETE).font(.footnote).foregroundStyle(theme.dangerText).announces(EditorUiCopy.shared.SNIPPET_INCOMPLETE, debounce: true) }
@@ -878,7 +880,7 @@ struct PollSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            ThemedForm {
                 Section(EditorUiCopy.shared.POLL_QUESTION) { TextField(EditorUiCopy.shared.ADD_POLL_QUESTION, text: $title, axis: .vertical).accessibilityIdentifier("poll-question") }
                 Section(EditorUiCopy.shared.CHOICES) {
                     ForEach(choices.indices, id: \.self) { i in
@@ -940,7 +942,7 @@ private struct OptionsSheet: View {
     var body: some View {
         let state = editor.state
         NavigationStack {
-            Form {
+            ThemedForm {
                 if !state.isEdit {
                     Section(EditorUiCopy.shared.SCHEDULED_FOR) {
                         Picker(EditorUiCopy.shared.SCHEDULED_FOR, selection: Binding(get: { later }, set: { later = $0; if !$0 { model.setSchedule(dateTime: nil) } })) {
@@ -1077,6 +1079,7 @@ private struct CommunitySheet: View {
                 Text(c.title)
             }
         }
+        .themedCardRow()
         .accessibilityIdentifier("community-\(c.name)")
     }
 
@@ -1087,11 +1090,12 @@ private struct CommunitySheet: View {
                 if let results = state.results {
                     ForEach(results, id: \.name) { row($0) }
                 } else {
-                    Section(EditorUiCopy.shared.MY_BLOG_CAPS) { Button(EditorUiCopy.shared.MY_BLOG) { onPick(nil) }.accessibilityIdentifier("community-my-blog") }
+                    Section(EditorUiCopy.shared.MY_BLOG_CAPS) { Button(EditorUiCopy.shared.MY_BLOG) { onPick(nil) }.themedCardRow().accessibilityIdentifier("community-my-blog") }
                     if !state.subscribed.isEmpty { Section(EditorUiCopy.shared.MY_COMMUNITIES) { ForEach(state.subscribed, id: \.name) { row($0) } } }
                     if !state.top.isEmpty { Section(EditorUiCopy.shared.TOP_COMMUNITIES) { ForEach(state.top, id: \.name) { row($0) } } }
                 }
             }
+            .themedList()
             .searchable(text: Binding(get: { picker.state.query }, set: { model.setQuery(text: $0) }), prompt: L.Native.Ios.Editor.communitySearch)
             .navigationTitle(L.Editor.selectCommunity).navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(UiCopy.shared.CLOSE) { dismiss() } } }
@@ -1252,10 +1256,11 @@ struct DraftsScreen: View {
                     if state.loaded, !state.loadingDrafts, state.templates.isEmpty { empty(EditorUiCopy.shared.TEMPLATES_EMPTY) }
                 }
                 let end = state.tab == 1 ? state.schedulesEnd : state.draftsEnd
-                if !end, state.loaded { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.accessibilityIdentifier("drafts-more") }
+                if !end, state.loaded { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.listStateRow().accessibilityIdentifier("drafts-more") }
                 if let error = state.error { ErrorStateView(error: error, esie: nil) { model.refresh() } }
             }
             .listStyle(.plain)
+            .themedList()
             .refreshable { model.refresh() }
             .overlay { if !state.loaded { ProgressView() } }
         }

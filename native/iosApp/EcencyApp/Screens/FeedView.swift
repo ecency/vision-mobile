@@ -284,10 +284,13 @@ struct CustomiseFiltersSheet: View {
                     ForEach(selected, id: \.self) { f in row(f, on: true) }
                         .onMove { selected.move(fromOffsets: $0, toOffset: $1) }
                 }
+                .themedCardRow()
                 Section(ReadingUiCopy.shared.AVAILABLE_FILTERS) {
                     ForEach(FeedFilter.entries.filter { !selected.contains($0) }, id: \.self) { f in row(f, on: false) }
                 }
+                .themedCardRow()
             }
+            .themedList()
             .environment(\.editMode, .constant(.active))
             .navigationTitle(ReadingUiCopy.shared.CUSTOMISE_FILTERS)
             .navigationBarTitleDisplayMode(.inline)
