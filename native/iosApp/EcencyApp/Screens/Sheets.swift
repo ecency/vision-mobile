@@ -308,8 +308,8 @@ struct ZoomableImageView: View {
     @State private var lastOffset: CGSize = .zero
 
     var body: some View {
-        // web's widest srcset size; share, copy and save keep `src`
-        LoadedImageView(src: ImageProxy.companion.bodyVariant(src: src, widthPx: 1280, avif: true), maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
+        // the full file through the proxy, not a sized body variant: zoomed 5x, a 1280 px one would blur
+        LoadedImageView(src: src, maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
             .frame(width: size.width, height: size.height)
             .scaleEffect(scale)
             .offset(offset)
