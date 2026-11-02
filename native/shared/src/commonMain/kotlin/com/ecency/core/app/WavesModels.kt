@@ -326,6 +326,7 @@ class WavesFeedModel internal constructor(
         val known = organic.map { it.key }.toHashSet()
         organic = fresh.filter { it.key !in known } + organic.map { byKey[it.key] ?: it }
         redisplay()
+        env.localVotes.retireConfirmed(fresh.map { it.post }, user)
     }
 
     /**
@@ -364,6 +365,7 @@ class WavesFeedModel internal constructor(
             if (startedIn != generation) return@launch
             promoted = items
             redisplay()
+            env.localVotes.retireConfirmed(items.map { it.post }, user)
         }
     }
 
@@ -412,6 +414,7 @@ class WavesFeedModel internal constructor(
                         pages = if (reset) 1 else it.pages + 1,
                     )
                 }
+                env.localVotes.retireConfirmed(items.map { it.post }, user)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

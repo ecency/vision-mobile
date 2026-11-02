@@ -154,6 +154,7 @@ class PostModel internal constructor(
         val previous = current.post
         val card = card(post, withSummary = false)
         setState { it.copy(post = post, card = card, notFound = false) }
+        env.localVotes.retireConfirmed(listOf(post), env.session.current.username)
         // RN usePlausibleTracker: one pageview per post screen, when its post first loads
         if (!pageviewRecorded) {
             pageviewRecorded = true
@@ -235,6 +236,7 @@ class PostModel internal constructor(
                     val items = nodes.map { item(it) }
                     setState { it.copy(comments = withVotesSince(items, votesAtBuild), commentsLoading = false) }
                 }
+                env.localVotes.retireConfirmed(nodes.map { it.first }, env.session.current.username)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

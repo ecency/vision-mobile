@@ -167,6 +167,7 @@ class FeedModel internal constructor(
             promotedPosts = list.associateBy { it.key }
             promotedCards = cards
             redisplay()
+            env.localVotes.retireConfirmed(list, user)
         }
     }
 
@@ -212,6 +213,7 @@ class FeedModel internal constructor(
                         pages = (if (reset) 0 else it.pages) + read,
                     )
                 }
+                env.localVotes.retireConfirmed(fresh, env.session.current.username)
                 PerfMarks.markOnce(PerfEvent.FEED_FIRST_PAGE)
             } catch (e: CancellationException) {
                 throw e
@@ -248,6 +250,7 @@ class FeedModel internal constructor(
                 readAt = stamp
                 if (withPromoted) loadPromoted(nsfw)
                 setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, pages = pages) }
+                env.localVotes.retireConfirmed(read, env.session.current.username)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
