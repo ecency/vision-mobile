@@ -54,6 +54,11 @@ data class EcencyColors(
     val blueText: Color = blue,
     /** [red] as text (errors, destructive actions): 4.5:1 or more on the backgrounds. */
     val redText: Color = red,
+    /** The chat warning box (RN dmWarningContainer, the DM warning and ban notice): RN's cream in light. */
+    val warningBackground: Color = Color(0xFFFFF6DF),
+    val warningBorder: Color = Color(0xFFF4C26B),
+    /** Text and icons on [warningBackground]: 4.5:1 or more. */
+    val warningText: Color = Color(0xFF8A5B00),
 ) {
     companion object {
         val Light = EcencyColors(
@@ -95,6 +100,10 @@ data class EcencyColors(
             headerGradient = listOf(Color(0xFF081C36), Color(0xFF43638E)),
             blueText = Color(0xFF7FB0F7),
             redText = Color(0xFFFF8F8F),
+            // the same values as iOS AppTheme: an amber dark surface, border 4.8:1 and text 9.4:1 on it
+            warningBackground = Color(0xFF3A3223),
+            warningBorder = Color(0xFFC9963A),
+            warningText = Color(0xFFFFD98A),
         )
     }
 }

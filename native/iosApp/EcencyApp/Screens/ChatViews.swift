@@ -10,10 +10,6 @@ enum ChatColors {
     static let connecting = Color(hex: 0xDC3545)
     /// RN `#FFB300`: a favourite's star.
     static let star = Color(hex: 0xFFB300)
-    /// RN dmWarningContainer.
-    static let warningBackground = Color(hex: 0xFFF6DF)
-    static let warningBorder = Color(hex: 0xF4C26B)
-    static let warningText = Color(hex: 0x8A5B00)
     /// RN `#4CAF50`: online in the members list.
     static let online = Color(hex: 0x4CAF50)
 }
@@ -673,7 +669,7 @@ struct ChatThreadView: View {
 
     private var dmWarning: some View {
         HStack(alignment: .top, spacing: 8) {
-            Image(appIcon: .warning).foregroundStyle(ChatColors.warningText).accessibilityHidden(true)
+            Image(appIcon: .warning).foregroundStyle(theme.warningText).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(ChatThreadModel.companion.DM_WARNING_TITLE).scaledFont(14, weight: .bold).accessibilityAddTraits(.isHeader)
                 Text(ChatThreadModel.companion.DM_WARNING_BODY).scaledFont(13)
@@ -682,14 +678,14 @@ struct ChatThreadView: View {
                 }
                 .accessibilityIdentifier("dm-warning-settings")
             }
-            .foregroundStyle(ChatColors.warningText)
+            .foregroundStyle(theme.warningText)
             Spacer(minLength: 0)
-            Button { thread.dismissDmWarning() } label: { Image(appIcon: .close).foregroundStyle(ChatColors.warningText).tapTarget() }
+            Button { thread.dismissDmWarning() } label: { Image(appIcon: .close).foregroundStyle(theme.warningText).tapTarget() }
                 .accessibilityLabel(UiCopy.shared.CLOSE).accessibilityIdentifier("dm-warning-close")
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(ChatColors.warningBackground))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(ChatColors.warningBorder))
+        .background(RoundedRectangle(cornerRadius: 10).fill(theme.warningBackground))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.warningBorder))
         .padding(.horizontal, 16).padding(.top, 12)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("dm-warning")
@@ -698,12 +694,12 @@ struct ChatThreadView: View {
     private func notice(_ icon: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(icon).accessibilityHidden(true)
-            Text(text).scaledFont(13).foregroundStyle(ChatColors.warningText)
+            Text(text).scaledFont(13).foregroundStyle(theme.warningText)
             Spacer(minLength: 0)
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(ChatColors.warningBackground))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(ChatColors.warningBorder))
+        .background(RoundedRectangle(cornerRadius: 10).fill(theme.warningBackground))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.warningBorder))
         .padding(.horizontal, 16).padding(.vertical, 6)
     }
 

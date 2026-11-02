@@ -131,11 +131,6 @@ private val ConnectingRed = Color(0xFFDC3545)
 /** RN `#FFB300`: a favourite's star. */
 private val FavoriteStar = Color(0xFFFFB300)
 
-/** RN dmWarningContainer: `#FFF6DF` with a `#F4C26B` border, text `#8A5B00`. */
-private val WarningBackground = Color(0xFFFFF6DF)
-private val WarningBorder = Color(0xFFF4C26B)
-private val WarningText = Color(0xFF8A5B00)
-
 /** RN `#4CAF50`: the online dot in the members list. */
 private val OnlineGreen = Color(0xFF4CAF50)
 
@@ -742,13 +737,14 @@ private fun HeaderChip(icon: AppIcon, count: String?, description: String, tag: 
 
 @Composable
 private fun DmWarning(onDismiss: () -> Unit, onSettings: () -> Unit) {
+    val colors = LocalEcencyColors.current
     Row(
-        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp).clip(RoundedCornerShape(10.dp)).background(WarningBackground)
-            .border(1.dp, WarningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("dmWarning"),
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.warningBackground)
+            .border(1.dp, colors.warningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("dmWarning"),
     ) {
-        Glyph(AppIcon.WARNING, WarningText, 20.dp, Modifier.padding(end = 8.dp))
+        Glyph(AppIcon.WARNING, colors.warningText, 20.dp, Modifier.padding(end = 8.dp))
         Column(Modifier.weight(1f)) {
-            Text(ChatThreadModel.DM_WARNING_TITLE, fontWeight = FontWeight.Bold, color = WarningText, fontSize = 14.sp)
+            Text(ChatThreadModel.DM_WARNING_TITLE, fontWeight = FontWeight.Bold, color = colors.warningText, fontSize = 14.sp)
             Text(
                 buildAnnotatedString {
                     append(ChatThreadModel.DM_WARNING_BODY + " ")
@@ -756,21 +752,22 @@ private fun DmWarning(onDismiss: () -> Unit, onSettings: () -> Unit) {
                         append(ChatThreadModel.DM_WARNING_SETTINGS)
                     }
                 },
-                color = WarningText, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp),
+                color = colors.warningText, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp),
             )
         }
-        Glyph(AppIcon.CLOSE, WarningText, 18.dp, Modifier.clickable(onClick = onDismiss, role = Role.Button).padding(start = 8.dp).testTag("dmWarningClose"), description = UiCopy.DISMISS)
+        Glyph(AppIcon.CLOSE, colors.warningText, 18.dp, Modifier.clickable(onClick = onDismiss, role = Role.Button).padding(start = 8.dp).testTag("dmWarningClose"), description = UiCopy.DISMISS)
     }
 }
 
 @Composable
 private fun BanNotice(text: String) {
+    val colors = LocalEcencyColors.current
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clip(RoundedCornerShape(10.dp)).background(WarningBackground)
-            .border(1.dp, WarningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("banNotice"),
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clip(RoundedCornerShape(10.dp)).background(colors.warningBackground)
+            .border(1.dp, colors.warningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("banNotice"),
     ) {
         Text("⏳", fontSize = 16.sp, modifier = Modifier.padding(end = 8.dp))
-        Text(text, color = WarningText, fontSize = 13.sp)
+        Text(text, color = colors.warningText, fontSize = 13.sp)
     }
 }
 
