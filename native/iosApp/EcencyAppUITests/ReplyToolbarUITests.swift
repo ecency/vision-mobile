@@ -43,4 +43,15 @@ final class ReplyToolbarUITests: XCTestCase {
         XCTAssertFalse(app.buttons["ai-action-generate_title"].exists)
         XCTAssertFalse(app.buttons["ai-action-suggest_tags"].exists)
     }
+
+    func testOpenEditorWaitsWhileAnImageIsBeingPicked() {
+        let app = openReplyComposer()
+        let expand = app.buttons["reply-expand"]
+        XCTAssertTrue(expand.waitForExistence(timeout: 10))
+        XCTAssertTrue(expand.isEnabled)
+        // the photo picker is open: the attach is running, nothing is uploaded
+        app.buttons["reply-attach"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["reply-image-uploading"].waitForExistence(timeout: 10))
+        XCTAssertFalse(expand.isEnabled, "as Android: the editor would open without the image")
+    }
 }

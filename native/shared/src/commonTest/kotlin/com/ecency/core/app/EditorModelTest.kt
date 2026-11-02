@@ -639,6 +639,17 @@ class EditorModelTest {
     }
 
     @Test
+    fun aQuickReplysSavedImageOpensInTheReplyEditorsBody() = runTest {
+        val w = World(this)
+        w.posts["alice/root"] = entry("alice", "root", "Root", "root body")
+        val image = "https://images.ecency.com/DQmReply/photo.jpg"
+        // the quick reply sheet kept its uploaded image apart from the text; the post menu opens the editor on the same slot
+        w.app.env.localDrafts.save(user, LocalDrafts.reply("alice", "root"), LocalDraft(body = "Half a reply", replyImage = image))
+        val m = w.newPost(this, EditorArgs(EditorKind.REPLY, "alice", "root"))
+        assertEquals("Half a reply\n\n ![]($image)", m.current.body, "the image continues in the body, as expand writes it")
+    }
+
+    @Test
     fun theReplyAccountTileHandsTheReplyToTheAccountSwitchedTo() = runTest {
         val w = World(this)
         w.posts["alice/root"] = entry("alice", "root", "Root", "root body")

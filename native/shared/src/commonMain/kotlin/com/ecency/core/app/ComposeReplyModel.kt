@@ -125,7 +125,7 @@ class ComposeReplyModel internal constructor(
     /**
      * RN's image button (UploadsGalleryModal, `allowMultiple={false}`): pick, upload for [owner] through the app's
      * image upload (the wave composer's [WaveImageAttacher]), attach one image; a second one replaces it, as RN.
-     * Kept in memory with the draft (RN also wrote it to its reply cache).
+     * Saved with the draft, apart from the text, as RN's reply cache kept it.
      */
     fun attach(source: WaveImageSource) {
         val s = current
@@ -145,6 +145,7 @@ class ComposeReplyModel internal constructor(
             try {
                 val url = attacher.attach(user, source)
                 setState { it.copy(isAttaching = false, imageUrl = url ?: it.imageUrl, sent = null) }
+                if (url != null) saveNow()
             } catch (e: CancellationException) {
                 setState { it.copy(isAttaching = false) }
                 throw e
@@ -158,6 +159,7 @@ class ComposeReplyModel internal constructor(
     fun removeImage() {
         if (current.isSending) return
         setState { it.copy(imageUrl = null) }
+        saveNow()
     }
 
     /** What goes on chain: RN _submitPost's `text\n\n ![](url)` with an image. */
@@ -190,18 +192,27 @@ class ComposeReplyModel internal constructor(
             val user = owner ?: return@launch
             val local = env.localDrafts.load(user, slot) ?: return@launch
             if (pending == null) pending = local.pending
-            if (local.body.isNotEmpty() && current.text.isEmpty() && !current.isSending) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
+            if (current.isSending) return@launch
+            if (local.body.isNotEmpty() && current.text.isEmpty()) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
+            if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
         }
     }
 
-    /** The slot's draft with [text]; the pending publish is always carried along. */
-    private suspend fun store(user: String, text: String) {
-        if (text.isEmpty() && pending == null) {
+    /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
+    private suspend fun store(user: String, text: String, image: String?) {
+        if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
         } else {
             val base = env.localDrafts.load(user, slot) ?: LocalDraft()
-            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending))
+            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
         }
+    }
+
+    /** The image changed: the draft is written at once, with the latest text. */
+    private fun saveNow() {
+        val user = owner ?: return
+        saveJob?.cancel()
+        saveJob = scope.launch { store(user, current.text, current.imageUrl) }
     }
 
     fun setText(text: String) {
@@ -210,22 +221,24 @@ class ComposeReplyModel internal constructor(
         saveJob?.cancel()
         saveJob = scope.launch {
             kotlinx.coroutines.delay(EditorModel.LOCAL_SAVE_DELAY_MILLIS)
-            store(user, text)
+            store(user, text, current.imageUrl)
         }
     }
 
     /**
      * RN's quick reply "expand" button: the full editor continues this reply. The text is written to the shared
-     * slot first, then [onReady] gets the editor's arguments (main thread).
+     * slot first, then [onReady] gets the editor's arguments (main thread). Nothing happens while an image is
+     * being picked or uploaded: the editor would open without it.
      */
     fun expand(onReady: (EditorArgs) -> Unit) {
+        if (current.isAttaching) return
         val user = owner
         // RN editorContainer: the quick reply's image (replyMediaUrls) continues in the editor's body
         val text = bodyOf(current)
         if (current.imageUrl != null) setState { it.copy(text = text, imageUrl = null, prefillSeq = it.prefillSeq + 1) }
         scope.launch {
             saveJob?.cancel()
-            if (user != null) store(user, text)
+            if (user != null) store(user, text, null)
             onReady(EditorArgs(EditorKind.REPLY, parent.author, parent.permlink, rootAuthor = root.author, rootPermlink = root.permlink))
         }
     }
@@ -303,7 +316,8 @@ class ComposeReplyModel internal constructor(
                         }
                     }
                     pending = pending?.takeIf { it.permlink == link }?.alsoSent(hash, now) ?: PendingPublish(link, listOf(hash), now)
-                    store(author, text)
+                    // the body as sent (the image in it), so the editor's reply mode sees what the pending hash covers
+                    store(author, text, null)
                     // the same text gives the same operations, so a key account's retry resends the same transaction
                     val signed = env.signing.broadcast(author, JsonArray(ops.map(OperationJson::encode)))
                     // SDK useComment: a new reply earns points, an edit of the one that is out does not
