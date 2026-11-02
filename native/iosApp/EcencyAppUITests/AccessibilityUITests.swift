@@ -303,8 +303,10 @@ enum AuditExclusions {
         "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2], "settings (AX5)": [clipped: 3],
         // 2026-10-29: the closed profile's compact header, one line in the navigation bar
         "profile closed (AX5)": [clipped: 1],
-        // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one)
-        "vote sheet (AX5)": [clipped: 1],
+        // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one), and
+        // the sheet's estimate and voting power lines, shown whole at AX5 (checked on screenshots) since the demo data
+        // answers the reward fund
+        "vote sheet (AX5)": [clipped: 3],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).
