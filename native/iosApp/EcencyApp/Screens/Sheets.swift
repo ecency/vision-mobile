@@ -3,8 +3,11 @@ import SafariServices
 import SwiftUI
 import WebKit
 
-/// Reply composer over a `ComposeReplyModel`. The text lives in the model, so closing the sheet after a
-/// failure keeps the draft (and its permlink) for the next attempt; only a success clears it.
+/// Reply composer over a `ComposeReplyModel` (RN quick reply, quickPostModalContent in comment mode): the text, the
+/// attached image, the clipboard chip and RN's toolbar under the text (image, camera, files, dictation, AI assist:
+/// the wave composer's `QuickComposeTools` without poll and video); expand and Send in the bar. The text lives in
+/// the model, so closing the sheet after a failure keeps the draft (and its permlink) for the next attempt; only a
+/// success clears it.
 struct ReplyComposer: View {
     let parent: Post
     let draft: ReplyDrafts.Draft
@@ -14,7 +17,17 @@ struct ReplyComposer: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
+    @EnvironmentObject private var app: AppContainer
+    @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focused: Bool
+    /// RN quick reply: dictation and AI assist, the editor's sheets over this reply.
+    @State private var aiSheet: AiSheet?
+
+    private enum AiSheet: String, Identifiable {
+        case assist, dictation
+        var id: String { rawValue }
+    }
+
     /// The editor's own text. Reading it back from `reply.state` lost keystrokes: the watched state arrives a
     /// main-queue turn after `setText`, so the editor was reset to a stale value while the user kept typing.
     @State private var text: String
@@ -27,6 +40,9 @@ struct ReplyComposer: View {
         _reply = ObservedObject(wrappedValue: draft.observed)
         _text = State(initialValue: draft.observed.state.text)
     }
+
+    /// RN hasClipboardImage: `hasImages` reads no content, so iOS shows no paste notice for the check.
+    private func checkClipboard() { draft.model.setClipboardHasImage(has: UIPasteboard.general.hasImages) }
 
     var body: some View {
         let state = reply.state
@@ -46,6 +62,21 @@ struct ReplyComposer: View {
                 if Quests.shared.showsShortHint(username: "me", isEditing: false, body: text) {
                     Text(Quests.shared.SHORT_CONTENT_HINT).scaledFont(12, relativeTo: .caption).foregroundStyle(theme.secondary).accessibilityIdentifier("short-content-hint")
                 }
+                AttachedImageThumb(url: state.imageUrl, attaching: state.isAttaching, id: "reply-image") { draft.model.removeImage() }
+                    .disabled(state.isSending)
+                if state.clipboardChip {
+                    ClipboardImageChip(idPrefix: "reply", pasteDisabled: state.isSending || state.isAttaching,
+                                       onPaste: { draft.model.pasteClipboardImage() }, onDismiss: { draft.model.dismissClipboardChip() })
+                }
+                // RN quick reply's toolbar, under the text (it scrolls sideways when it does not fit)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 0) {
+                        QuickComposeTools(idPrefix: "reply", onAttach: { draft.model.attach(source: $0) },
+                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist })
+                    }
+                }
+                .foregroundStyle(theme.text)
+                .disabled(state.isSending || state.isAttaching)
                 if let error = state.error {
                     AdaptiveStack(verticalAlignment: .top) {
                         HStack(alignment: .top) {
@@ -99,7 +130,20 @@ struct ReplyComposer: View {
                 }
             }
         }
-        .onAppear { focused = true }
+        .modifier(ImageAttachPickers(attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui))
+        .sheet(item: $aiSheet) { which in
+            switch which {
+            case .assist: AiAssistSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
+            case .dictation: DictationSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
+            }
+        }
+        .onAppear {
+            focused = true
+            checkClipboard()
+        }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { checkClipboard() } }
+        // dictation, AI assist and expand replace the model's text: the editor follows
+        .onChange(of: state.prefillSeq) { _, _ in text = reply.state.text }
         .onChange(of: state.sent) { if state.sent != nil { Haptics.play(.success); onSent() } }
         .interactiveDismissDisabled(state.isSending)
     }
