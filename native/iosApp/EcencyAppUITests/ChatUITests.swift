@@ -28,7 +28,9 @@ final class ChatUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Book club"].exists)
         XCTAssertTrue(app.staticTexts["Photography"].exists)
         XCTAssertTrue(element(app, "chat-unread-ch-ecency").exists, "the unread badge")
-        XCTAssertTrue(app.staticTexts["Connected"].waitForExistence(timeout: 10))
+        // connected says nothing: no "Connected" pill, no offline notice
+        XCTAssertFalse(app.staticTexts["Connected"].exists)
+        XCTAssertFalse(element(app, "chats-offline").exists)
         // the options of a channel
         element(app, "chat-options-ch-ecency").tap()
         XCTAssertTrue(app.buttons["Mark as read"].waitForExistence(timeout: 5))
@@ -68,6 +70,30 @@ final class ChatUITests: XCTestCase {
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the
     /// quick profile only (the long press's release never also taps).
+    /// The chat server refuses the sign-in: a notice in the list instead of the floating pill, and no Esie button.
+    func testARefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
+        let app = launch(["-startTab", "CHATS", "-demoChat", "offline"])
+        XCTAssertTrue(element(app, "chats-offline").waitForExistence(timeout: 20), "the offline notice")
+        XCTAssertTrue(element(app, "chats-offline").label.contains("Preparing your chat session"), "the connecting copy")
+        XCTAssertFalse(app.buttons["chats-esie-fab"].exists)
+    }
+
+    /// The round Esie button over the list opens her direct message, as "Ask Esie" does.
+    func testTheEsieButtonOpensHerConversation() {
+        let app = launch(["-startTab", "CHATS"])
+        XCTAssertTrue(element(app, "chat-row-ch-ecency").waitForExistence(timeout: 20))
+        let fab = app.buttons["chats-esie-fab"]
+        XCTAssertTrue(fab.waitForExistence(timeout: 10))
+        XCTAssertEqual(fab.label, "Chat with Esie")
+        let env = ProcessInfo.processInfo.environment
+        if let dir = env["BG_SHOT_DIR"], !dir.isEmpty {
+            try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("esie-list.png"))
+        }
+        fab.tap()
+        XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["chat-title"].label, "esie")
+    }
+
     func testTheAuthorNameLongPressesToOptionsAndTapsToTheProfile() {
         let app = launch(["-startTab", "CHATS"])
         let row = element(app, "chat-row-ch-ecency")

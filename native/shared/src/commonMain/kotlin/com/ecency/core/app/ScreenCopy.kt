@@ -288,6 +288,7 @@ object ChatUiCopy {
     val CHANNELS: String get() = L.chats.channels
     val CHANNEL_MEMBERS: String get() = L.chats.channelMembers
     val CHANNEL_OPTIONS: String get() = L.chats.channelOptions
+    val CHAT_WITH_ESIE: String get() = L.native.ui.chat.chatWithEsie
     val COPIED_TO_CLIPBOARD: String get() = L.native.ui.chat.copiedToClipboard
     val DELETE_MESSAGE: String get() = L.chats.remove
     val FAVORITE: String get() = L.chats.favorite

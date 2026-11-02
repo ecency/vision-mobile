@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.semantics.getOrNull
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -210,7 +211,9 @@ class ChatFlowsTest {
         waitFor("chatRow:ch-ecency")
         assertTrue(hasTextNode("Photography") && hasTextNode("Book club"))
         compose.onNodeWithTag("chatUnread:ch-ecency", useUnmergedTree = true).assertTextContains("3")
-        assertTrue(hasTextNode("Connected"))
+        // connected says nothing: no "Connected" pill, no offline notice
+        assertFalse(hasTextNode("Connected"))
+        assertFalse(exists("chatsOffline"))
         // mark as read from the row's options
         tap("chatOptions:ch-ecency")
         waitFor("option:MARK_READ")
@@ -346,6 +349,35 @@ class ChatFlowsTest {
         // only Esie's row is official: spike-alice's direct message is not
         assertEquals(1, compose.onAllNodes(hasTestTag("officialBadge"), useUnmergedTree = true).fetchSemanticsNodes().size)
         assertTrue(compose.onAllNodes(hasTestTag("chatRow:ch-dm-alice").and(androidx.compose.ui.test.hasAnyDescendant(hasTestTag("officialBadge"))), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+    }
+
+    /** The chat server refuses the sign-in: a notice in the list (not floating), and no Esie button. */
+    @Test
+    fun aRefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
+        node.chat.refuseSignIn()
+        node.signIn()
+        launch()
+        waitFor("chatsOffline")
+        assertTrue(hasTextNode(com.ecency.core.app.ChatsModel.CONNECTING))
+        assertFalse(exists("chatsStatus"))
+        assertFalse(exists("chatsEsieFab"))
+    }
+
+    /** The round Esie button over the list opens her direct message, as "Ask Esie" does. */
+    @Test
+    fun theEsieButtonOpensHerConversation() {
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        waitFor("chatsEsieFab")
+        val fab = compose.onNodeWithTag("chatsEsieFab")
+        fab.assert(androidx.compose.ui.test.hasContentDescription("Chat with Esie"))
+        val box = fab.fetchSemanticsNode().boundsInRoot
+        val density = compose.activity.resources.displayMetrics.density
+        assertEquals(56f, box.width / density, 0.5f)
+        fab.performClick()
+        waitUntil { navigator.state.top == AppScreen.ChatThread("ch-dm-esie", "D") }
+        assertTrue(node.chatCalls().contains("POST direct"))
     }
 
     @Test

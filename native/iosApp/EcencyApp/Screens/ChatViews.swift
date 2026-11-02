@@ -6,8 +6,7 @@ import SwiftUI
 
 /// RN chat colours that are not theme tokens.
 enum ChatColors {
-    /// RN `#28a745` / `#dc3545`: the status pill's dot.
-    static let connected = Color(hex: 0x28A745)
+    /// RN `#dc3545`: the dot of the connecting notice.
     static let connecting = Color(hex: 0xDC3545)
     /// RN `#FFB300`: a favourite's star.
     static let star = Color(hex: 0xFFB300)
@@ -150,8 +149,6 @@ struct ChatsTabView: View {
     @State private var rename: RenameTarget?
     @State private var newGroup = false
     @Environment(\.dynamicTypeSize) private var typeSize
-    /// Room under the last row for the floating status pill, growing with the text size.
-    @ScaledMetric(relativeTo: .caption) private var pillClearance: CGFloat = 48
 
     struct RenameTarget: Identifiable {
         let id: String
@@ -163,12 +160,16 @@ struct ChatsTabView: View {
     var body: some View {
         let s = observed.state
         let mine = s.account != nil && s.account == session.state.username
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 if mine, let error = s.error, !s.isLoading, !s.rows.isEmpty {
                     Text(error).scaledFont(13).foregroundStyle(theme.dangerText).padding(.horizontal, 16).announces(error).accessibilityIdentifier("chats-error")
                 }
                 searchBar(s)
+                // a connected chat says nothing; only a missing connection shows, in line
+                if mine && !s.connected {
+                    connectingNotice.padding(.horizontal, 16).padding(.vertical, 4).frame(maxWidth: .infinity, alignment: .leading)
+                }
                 // the first load draws the rows' shape; a search or a reload over rows keeps the spinner
                 if mine && s.isLoading && s.rows.isEmpty && !s.searching {
                     RowsSkeleton(count: 6, identifier: "chats-loading")
@@ -204,9 +205,8 @@ struct ChatsTabView: View {
                                 .listRowSeparator(.hidden)
                         }
                     }
-                    if !typeSize.isAccessibilitySize {
-                        Color.clear.frame(height: pillClearance).listRowSeparator(.hidden).accessibilityHidden(true)
-                    }
+                    // room under the last row for the Esie button (a fixed size, as every FAB)
+                    Color.clear.frame(height: FabMetrics.size + FabMetrics.margin * 2).listRowSeparator(.hidden).accessibilityHidden(true)
                     }
                     .themedRow()
                 }
@@ -215,15 +215,9 @@ struct ChatsTabView: View {
                 .refreshable { try? await model.refreshAndWait() }
                 .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chats-list")
-                // at accessibility sizes the pill takes its own line under the list instead of floating over the
-                // rows (it covered the last row's text while scrolling)
-                if typeSize.isAccessibilitySize {
-                    statusPill(connected: s.connected && mine).padding(.horizontal, 16).padding(.vertical, 8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
             }
-            if !typeSize.isAccessibilitySize {
-                statusPill(connected: s.connected && mine).padding(16)
+            if mine && s.connected {
+                EsieFab { app.openDirectMessage(OfficialAccounts.shared.ESIE_USERNAME) }
             }
         }
         .onAppear {
@@ -376,16 +370,37 @@ struct ChatsTabView: View {
         .listRowSeparator(.hidden)
     }
 
-    private func statusPill(connected: Bool) -> some View {
+    /// The chat is not connected (yet, or any more): a dot and the connecting copy, in line under the search bar.
+    private var connectingNotice: some View {
         HStack(spacing: 6) {
-            Circle().fill(connected ? ChatColors.connected : ChatColors.connecting).frame(width: 8, height: 8).accessibilityHidden(true)
-            Text(connected ? ChatsModel.companion.CONNECTED : ChatsModel.companion.CONNECTING).scaledFont(12).foregroundStyle(theme.text)
+            Circle().fill(ChatColors.connecting).frame(width: 8, height: 8).accessibilityHidden(true)
+            Text(ChatsModel.companion.CONNECTING).scaledFont(12).foregroundStyle(theme.text)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(Capsule().fill(theme.lightBackground))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.updatesFrequently)
-        .accessibilityIdentifier("chats-status")
+        .accessibilityIdentifier("chats-offline")
+    }
+}
+
+/// The round button over the chats list that opens the direct message with Esie (as "Ask Esie" does), in the FAB's
+/// place and size ([FabMetrics]) on the theme's card colour.
+private struct EsieFab: View {
+    let action: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            EsieView(mood: .rest, height: 44)
+                .frame(width: FabMetrics.size, height: FabMetrics.size)
+                .clipShape(Circle())
+                .background(Circle().fill(theme.lightBackground).shadow(color: .black.opacity(0.3), radius: 8, y: 4))
+        }
+        .buttonStyle(PressScaleStyle(scale: 0.92))
+        .padding(FabMetrics.margin)
+        .accessibilityLabel(ChatUiCopy.shared.CHAT_WITH_ESIE)
+        .accessibilityIdentifier("chats-esie-fab")
     }
 }
 
