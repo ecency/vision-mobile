@@ -267,9 +267,25 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(counter.all, [sized(gif, "match", pick(320 * UIScreen.main.scale))])
     }
 
-    func testGalleryImageRequestsTheWidestSize() throws {
+    func testAnAvifThatFailsFallsBackToWebp() throws {
+        let png = counter.png
+        let failAvif: ImageLoader.Fetch = { [counter] url in
+            _ = await counter.fetch(url)
+            return url.absoluteString.contains("format=avif") ? nil : png
+        }
+        ImageLoader.shared.setFetch(failAvif)
+        let width = pick(320 * UIScreen.main.scale)
+        let page = host(PostBodyView(blocks: [BlockImage(src: src, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.count < 2 { spin(0.1) }
+        XCTAssertEqual(counter.all, [sized(src, "avif", width), sized(src, "webp", width)])
+        for _ in 0..<30 where find(UIImageView.self, in: page.view)?.image == nil { spin(0.1) }
+        XCTAssertNotNil(find(UIImageView.self, in: page.view)?.image, "the WebP is shown")
+    }
+
+    /// The viewer zooms up to 5x, so a capped width would blur: it loads the full file, still through the proxy.
+    func testGalleryImageLoadsTheFullResolutionProxyUrlForZoom() throws {
         _ = host(ZoomableImageView(src: src, size: CGSize(width: 390, height: 520)) { _ in })
         for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
-        XCTAssertEqual(counter.all, [sized(src, "avif", 1280)])
+        XCTAssertEqual(counter.all, [src])
     }
 }

@@ -351,7 +351,7 @@ struct ImageGridView: View {
                 if !actions.showImages && !RevealedImages.shared.isRevealed(img.src) {
                     HiddenImageView(width: tile, height: tile * 3 / 4) { RevealedImages.shared.reveal(img.src) }
                 } else {
-                    LoadedImageView(src: bodyImageURL(img.src, points: tile), maxWidth: tile) { _ in }
+                    LoadedImageView(src: bodyImageURL(img.src, points: tile), fallback: bodyImageURL(img.src, points: tile, avif: false), maxWidth: tile) { _ in }
                         .frame(width: tile, height: tile * 3 / 4)
                         .clipped()
                         .contentShape(Rectangle())
@@ -424,7 +424,7 @@ struct RemoteImageView: View {
                 .padding(.vertical, 4)
         } else {
             // the column width, not the loaded size, so the URL never changes once the image is in
-            LoadedImageView(src: bodyImageURL(src, points: maxWidth), maxWidth: maxWidth) { loaded in
+            LoadedImageView(src: bodyImageURL(src, points: maxWidth), fallback: bodyImageURL(src, points: maxWidth, avif: false), maxWidth: maxWidth) { loaded in
                 natural = loaded.naturalSize
                 animated = loaded.animated
             }
@@ -444,9 +444,10 @@ struct RemoteImageView: View {
     }
 }
 
-/// The proxy size web loads for a body image drawn `points` wide (`ImageProxy.bodyVariant`); iOS decodes AVIF.
-func bodyImageURL(_ src: String, points: CGFloat) -> String {
-    ImageProxy.companion.bodyVariant(src: src, widthPx: Int32((points * UIScreen.main.scale).rounded()), avif: true)
+/// The proxy size web loads for a body image drawn `points` wide (`ImageProxy.bodyVariant`): AVIF, which iOS
+/// decodes, and the WebP of the same size as the fallback when an AVIF fails to load or decode.
+func bodyImageURL(_ src: String, points: CGFloat, avif: Bool = true) -> String {
+    ImageProxy.companion.bodyVariant(src: src, widthPx: Int32((points * UIScreen.main.scale).rounded()), avif: avif)
 }
 
 /// RN AutoHeightImage's badge on animated images.
@@ -495,6 +496,8 @@ struct HiddenImageView: View {
 /// UIImageView host, so animated GIFs play (SwiftUI's Image shows only the first frame).
 struct LoadedImageView: UIViewRepresentable {
     let src: String
+    /// Loaded when `src` fails to load or decode (the WebP of an AVIF body variant); nil or `src` itself: none.
+    var fallback: String? = nil
     /// Widest the image is drawn, in points; it is decoded at this width times the screen scale.
     let maxWidth: CGFloat
     var contentMode: UIView.ContentMode = .scaleAspectFill
@@ -519,17 +522,22 @@ struct LoadedImageView: UIViewRepresentable {
         guard coordinator.src != src else { return }
         coordinator.src = src
         let src = self.src
+        let fallback = self.fallback == src ? nil : self.fallback
         let maxPixel = maxWidth * UIScreen.main.scale
         // Rows scrolling back in are drawn from the decoded cache at once, without a flash.
-        if let hit = ImageLoader.shared.cached(src, maxPixel: maxPixel) {
+        if let hit = ImageLoader.shared.cached(src, maxPixel: maxPixel) ?? fallback.flatMap({ ImageLoader.shared.cached($0, maxPixel: maxPixel) }) {
             view.image = hit.image
             DispatchQueue.main.async { coordinator.onLoad?(hit) }
             return
         }
         view.image = nil
         Task { @MainActor [weak view, weak coordinator] in
-            guard let loaded = await ImageLoader.shared.load(src, maxPixel: maxPixel),
-                  let view, let coordinator, coordinator.src == src else { return }
+            var loaded = await ImageLoader.shared.load(src, maxPixel: maxPixel)
+            // a different URL, so the failure remembered for `src` does not block it
+            if loaded == nil, let fallback, coordinator?.src == src {
+                loaded = await ImageLoader.shared.load(fallback, maxPixel: maxPixel)
+            }
+            guard let loaded, let view, let coordinator, coordinator.src == src else { return }
             view.image = loaded.image
             coordinator.onLoad?(loaded)
         }

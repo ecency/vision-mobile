@@ -336,9 +336,11 @@ class PostBodyTest {
     }
 
     @Test
-    fun galleryImageRequestsTheWidestSize() {
+    fun galleryImageLoadsTheFullResolutionProxyUrlForZoom() {
+        // the viewer zooms up to 5x, so a capped width would blur; it loads the full file, still through the proxy
         compose.setContent { com.ecency.app.ui.ZoomableImage(src, "image 1 of 1") }
-        waitForRequest(sized("avif", 1280))
+        waitForRequest(src)
+        assertTrue("sized variant requested: $requested", requested.none { "width=" in it })
     }
 
     private fun hasTestTagStartingWith(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("tag starts with $prefix") {
