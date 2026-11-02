@@ -208,8 +208,9 @@ fun FeedList(
         }
     }
     // keyed on the page counter, not the item count: a page of duplicates adds no items but must
-    // still let the next page start while the end of the list stays in view
-    LaunchedEffect(nearEnd, state.pages) { if (nearEnd) model.loadMore() }
+    // still let the next page start while the end of the list stays in view. Not from the empty state: a feed
+    // filtered down to nothing would read page after page by itself; its "Load more" goes on instead
+    LaunchedEffect(nearEnd, state.pages) { if (nearEnd && state.items.isNotEmpty()) model.loadMore() }
 
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
@@ -227,7 +228,14 @@ fun FeedList(
                 state.items.isEmpty() && state.error != null -> item(key = "error") {
                     ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry)
                 }
-                state.items.isEmpty() && state.loaded -> item(key = "empty") { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NOTHING_HERE_YET, Modifier.padding(top = 48.dp)) }
+                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading") { FeedSkeleton() }
+                // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
+                state.items.isEmpty() && state.loaded -> item(key = "empty") {
+                    EsieMessageBlock(
+                        com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NOTHING_HERE_YET, Modifier.padding(top = 48.dp),
+                        actionLabel = if (state.endReached) null else com.ecency.core.app.UiCopy.LOAD_MORE, onAction = model::loadMore,
+                    )
+                }
             }
             items(state.items, key = { it.key.toString() }, contentType = { "card" }) { card ->
                 // cards fade in as they replace the skeleton or a page lands; opacity only, no placement animation

@@ -3,6 +3,7 @@ package com.ecency.app
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import coil3.ImageLoader
@@ -131,6 +132,35 @@ class ForegroundRefreshFlowsTest {
         assertEquals("the card being read stays first on screen", reading, scrolled.layoutInfo.visibleItemsInfo.first().key)
         assertFalse("no pull to refresh spinner", seen.any { it.isRefreshing || it.isLoading })
         watch.close()
+    }
+
+    /**
+     * Review of #3617 (not a foreground refresh, but this harness renders [FeedList] on its own): a feed whose
+     * pages are all filtered out stops after the model's cap and shows its empty state, which neither reads on by
+     * itself nor leaves the reader stuck: its "Load more" reads on from where the pager is.
+     */
+    @Test
+    fun aFeedFilteredAwayShowsItsEmptyStateAndLoadsOnWhenAsked() {
+        val counter = java.util.concurrent.atomic.AtomicInteger()
+        node.extra = { method, _ ->
+            if (method != "bridge.get_ranked_posts") null
+            else when (val n = counter.incrementAndGet()) {
+                in 1..6 -> (1..10).joinToString(",", "[", "]") { node.entry("spammer", "s-$n-$it") }
+                7 -> "[" + node.entry("alice", "v-1") + "]"
+                else -> "[]"
+            }
+        }
+        env.setAuthorMuted("spammer", true)
+        val feed = env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        compose.setContent { EcencyTheme(dark = false) { FeedList(feed, LazyListState(), env.votes.state, 0L, FeedActions({}, {}, {}, {})) } }
+        waitFor("message")
+        idleMain()
+        compose.waitForIdle()
+        assertEquals("the page asked for and 5 more, then the list waits for the reader", 6, counter.get())
+        assertFalse(exists("card:alice/v-1"))
+        compose.onNode(hasTestTag("retry"), useUnmergedTree = true).performClick()
+        // read on from the pager: the seventh page, the first with a card (the list then pages as usual)
+        waitFor("card:alice/v-1")
     }
 
     @Test

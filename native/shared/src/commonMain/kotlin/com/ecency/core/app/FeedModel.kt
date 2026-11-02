@@ -188,8 +188,13 @@ class FeedModel internal constructor(
             try {
                 val nsfw = NsfwMode.of(env.prefs)
                 var fresh = shown(activePager.loadMore(), nsfw)
-                // nothing to show yet is not the end: the lists only ask for more from a card on screen
-                while (fresh.isEmpty() && (reset || base.isEmpty()) && !activePager.isEndReached) fresh = shown(activePager.loadMore(), nsfw)
+                var read = 1
+                // nothing to show yet is not the end: the lists only ask for more from a card on screen. Capped, so a
+                // feed filtered almost whole (an nsfw tag under "Always hide") shows its empty state with load more
+                while (fresh.isEmpty() && (reset || base.isEmpty()) && !activePager.isEndReached && read <= MAX_AUTO_ADVANCE) {
+                    fresh = shown(activePager.loadMore(), nsfw)
+                    read++
+                }
                 val cards = cards(fresh, nsfw)
                 posts = (if (reset) emptyMap() else posts) + fresh.associateBy { it.key }
                 base = if (reset) cards else base + cards
@@ -203,7 +208,8 @@ class FeedModel internal constructor(
                         isLoadingMore = false,
                         endReached = activePager.isEndReached,
                         loaded = true,
-                        pages = if (reset) 1 else it.pages + 1,
+                        // every page read, skipped ones too: the quiet refresh reads this many again
+                        pages = (if (reset) 0 else it.pages) + read,
                     )
                 }
                 PerfMarks.markOnce(PerfEvent.FEED_FIRST_PAGE)
@@ -230,7 +236,8 @@ class FeedModel internal constructor(
                 val nsfw = NsfwMode.of(env.prefs)
                 val read = mutableListOf<Post>()
                 var pages = 0
-                while (!fresh.isEndReached && (pages < wanted || read.isEmpty())) {
+                // as many pages as were loaded; with nothing to show, on to the first load's cap at most
+                while (!fresh.isEndReached && (pages < wanted || (read.isEmpty() && pages <= MAX_AUTO_ADVANCE))) {
                     read += shown(fresh.loadMore(), nsfw)
                     pages++
                 }
@@ -259,5 +266,10 @@ class FeedModel internal constructor(
         return withContext(dispatchers.render) {
             posts.map { Cards.of(it, env.renderer, user, local[it.key], env.proxyBase, nsfwWarn = nsfw == NsfwMode.WARN) }
         }
+    }
+
+    companion object {
+        /** Pages read by themselves after one that filtered down to nothing (as [AssetDetailsModel.MAX_AUTO_ADVANCE]). */
+        const val MAX_AUTO_ADVANCE = 5
     }
 }

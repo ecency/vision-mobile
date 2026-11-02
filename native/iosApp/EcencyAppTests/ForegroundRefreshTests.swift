@@ -20,19 +20,46 @@ final class ForegroundRefreshTests: XCTestCase {
         private let lock = NSLock()
         private var feedReads = 0
         private var top = 0
+        private var muted = false
+        private var template: [String: Any]?
 
         var reads: Int { lock.withLock { feedReads } }
         var extraTop: Int {
             get { lock.withLock { top } }
             set { lock.withLock { top = newValue } }
         }
+        /// Every ranked page is 10 posts by "spammer" ("s-[read]-0..9"), page after page.
+        var allBySpammer: Bool {
+            get { lock.withLock { muted } }
+            set { lock.withLock { muted = newValue } }
+        }
 
         func post(url: String, body: String, completionHandler: @escaping (HttpResult?, Error?) -> Void) {
             let answer = inner.answerSync(body)
             guard body.contains("bridge.get_ranked_posts") else { return completionHandler(answer, nil) }
             let firstPage = !body.contains("\"start_permlink\":\"") || body.contains("\"start_permlink\":\"\"")
-            let extra = lock.withLock { () -> Int in feedReads += 1; return top }
+            let (extra, read, spammer) = lock.withLock { () -> (Int, Int, Bool) in feedReads += 1; return (top, feedReads, muted) }
+            if spammer { return completionHandler(spammerPage(read, from: answer), nil) }
             completionHandler(firstPage && extra > 0 ? Self.prepend(extra, to: answer) : answer, nil)
+        }
+
+        /// The fake's first post as 10 posts by "spammer"; the fake's later pages are empty, so the first one is kept.
+        private func spammerPage(_ read: Int, from answer: HttpResult) -> HttpResult {
+            guard var json = (try? JSONSerialization.jsonObject(with: Data(answer.body.utf8))) as? [String: Any] else { return answer }
+            let first = lock.withLock { () -> [String: Any]? in
+                if template == nil { template = (json["result"] as? [[String: Any]])?.first }
+                return template
+            }
+            guard let first else { return answer }
+            json["result"] = (0..<10).map { i -> [String: Any] in
+                var post = first
+                post["author"] = "spammer"
+                post["permlink"] = "s-\(read)-\(i)"
+                post["url"] = "/hive-100001/@spammer/s-\(read)-\(i)"
+                return post
+            }
+            guard let data = try? JSONSerialization.data(withJSONObject: json), let body = String(data: data, encoding: .utf8) else { return answer }
+            return HttpResult(status: answer.status, body: body)
         }
 
         /// [count] copies of the page's first post, as newer posts ("fresh-0"...), on top of the page.
@@ -162,6 +189,28 @@ final class ForegroundRefreshTests: XCTestCase {
         XCTAssertEqual(feed.state.items.first?.key.permlink, "fresh-0")
         XCTAssertGreaterThan(transport.reads, reads)
         XCTAssertFalse(spinner, "no spinner, no skeleton, the list stayed")
+    }
+
+    /// Review of #3617: a feed whose pages are all filtered out stops after the model's cap and shows its empty state
+    /// with "Load more" (no skeleton for good); the list does not read on by itself, the button reads on from the pager.
+    func testAFeedFilteredAwayStopsAtTheCapAndLoadsOnWhenAsked() throws {
+        try make()
+        transport.allBySpammer = true
+        env.setAuthorMuted(author: "spammer", muted: true)
+        let feed = Observed(env.feedModel(source: FeedSourceRanked(sort: .trending, tag: "")), ownsModel: true)
+        host(FeedListView(feed: feed))
+        waitUntil { feed.state.loaded }
+        spin(1)
+        let cap = Int(FeedModel.companion.MAX_AUTO_ADVANCE)
+        XCTAssertEqual(transport.reads, 1 + cap, "the page asked for and the cap, then the list waits")
+        XCTAssertTrue(feed.state.items.isEmpty)
+        XCTAssertFalse(feed.state.endReached)
+        XCTAssertTrue(FeedPaging.shouldLoadMoreAtEnd(feed.state), "the empty state offers Load more")
+        (feed.model as! FeedModel).loadMore()
+        waitUntil { transport.reads == 2 * (1 + cap) && !feed.state.isLoadingMore }
+        spin(0.5)
+        XCTAssertEqual(transport.reads, 2 * (1 + cap))
+        XCTAssertEqual(Int(feed.state.pages), 2 * (1 + cap))
     }
 
     func testAReaderScrolledDownKeepsTheCardTheyRead() throws {
