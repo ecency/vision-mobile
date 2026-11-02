@@ -43,11 +43,18 @@ struct AuthorLine: View {
             .buttonStyle(.plain)
             .accessibilityLabel(UiCopy.shared.profileOf(username: card.author))
             VStack(alignment: .leading, spacing: 2) {
-                Button(action: onAuthor) {
-                    Text(card.author).scaledFont(nameSize, weight: .bold).foregroundStyle(Self.nameColor(theme)).lineLimit(2)
+                // RN postHeaderDescription: the Pro badge after the name; the name button says it ("author, Ecency Pro member")
+                ProMemberReader(username: card.author) { pro in
+                    HStack(spacing: 4) {
+                        Button(action: onAuthor) {
+                            Text(card.author).scaledFont(nameSize, weight: .bold).foregroundStyle(Self.nameColor(theme)).lineLimit(2)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(proLabel(card.author, pro))
+                        .accessibilityIdentifier("card-author-name")
+                        ProBadge(username: card.author).accessibilityHidden(true)
+                    }
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("card-author-name")
                 // category and age on one line while they fit, else the category takes its own line(s)
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: 4) {

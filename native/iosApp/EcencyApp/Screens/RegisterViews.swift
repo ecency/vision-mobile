@@ -331,7 +331,10 @@ struct ReferScreen: View {
                         HStack {
                             AvatarView(url: PostCard.companion.avatarUrl(account: row.username, proxyBase: app.env.proxyBase, size: "small"), size: 36)
                             VStack(alignment: .leading) {
-                                Text(row.username).bold().foregroundStyle(theme.text)
+                                HStack(spacing: 4) {
+                                    Text(row.username).bold().foregroundStyle(theme.text)
+                                    ProBadge(username: row.username)
+                                }
                                 if let millis = row.createdMillis?.int64Value {
                                     Text(LocaleFormat.shared.date(epochMillis: millis)).font(.caption).foregroundStyle(theme.secondary)
                                 }

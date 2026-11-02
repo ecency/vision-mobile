@@ -365,13 +365,14 @@ struct WaveRowView: View {
                     .accessibilityIdentifier("wave-avatar")
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
+                        ProMemberReader(username: card.author) { pro in
                         Button { app.openQuickProfile(card.author) } label: {
                             Text(card.author).scaledFont(15, weight: .bold).foregroundStyle(theme.text).lineLimit(1)
                                 .frame(minHeight: minTapTarget).contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         // VoiceOver: one stop for the author and age, the wave's actions in its actions rotor
-                        .accessibilityLabel([card.author, CardText.age(card)].joined(separator: ", "))
+                        .accessibilityLabel([proLabel(card.author, pro), CardText.age(card)].joined(separator: ", "))
                         .accessibilityAction(named: Text(L.Native.Ios.Waves.repliesOpenThread(count: Int(card.comments)))) { app.openPost(item.key) }
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.REPLY)) {
                             if app.requireSignIn(to: .reply) { app.sheet = .reply(ReplyRequest(root: item.key, parent: item.post)) }
@@ -379,6 +380,8 @@ struct WaveRowView: View {
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.POST_OPTIONS)) {
                             app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: false, ownProfile: false), root: item.key)
                         }
+                        }
+                        ProBadge(username: card.author).accessibilityHidden(true)
                     }
                     HStack(spacing: 6) {
                         Text(CardText.age(card)).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary).accessibilityIdentifier("wave-age")
@@ -1026,6 +1029,7 @@ struct ReelView: View {
                     HStack(spacing: 8) {
                         AvatarView(url: item.card.avatarUrl, size: 36)
                         Text("@\(item.card.author)").scaledFont(15, weight: .bold).foregroundStyle(.white)
+                        ProBadge(username: item.card.author)
                     }
                 }
                 .buttonStyle(.plain)

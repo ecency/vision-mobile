@@ -297,6 +297,8 @@ final class AppContainer: ObservableObject {
             if UserDefaults.standard.bool(forKey: "demoStreak") { DemoAuthServices.shared.demoQuests = DemoAuthServices.shared.SAMPLE_QUESTS }
             // -demoNoPro YES: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots, UI tests)
             if UserDefaults.standard.bool(forKey: "demoNoPro") { DemoAuthServices.shared.clearDemoPro() }
+            // -demoProMember <name>: one more account on the Pro roster (badge UI tests)
+            if let name = UserDefaults.standard.string(forKey: "demoProMember") { DemoAuthServices.shared.demoProMembers.add(name) }
             DemoAuthServices.shared.demoReleaseTag = UserDefaults.standard.bool(forKey: "demoUpdate") ? "99.1.0" : nil
             // -demoToast "<text>": a toast through the shared channel at launch (toast layout UI tests)
             if let text = UserDefaults.standard.string(forKey: "demoToast") {
@@ -498,6 +500,8 @@ final class AppContainer: ObservableObject {
         // the chat badge (README "Chats"): read at start, unlock and foreground
         env.chat.start()
         env.push.start()
+        // the Pro roster for the badges, once at start (an empty badge never appears, so it cannot ask itself)
+        env.proMembers.ensureLoaded()
         PushBridge.attach(env)
         // a tapped notification, released by the shared model once the accounts were read and the lock is open
         pushOpens = push.$state.sink { [weak self] state in
@@ -517,6 +521,8 @@ final class AppContainer: ObservableObject {
                     self?.env.chat.onForeground()
                     self?.env.push.onForeground()
                     self?.env.purchases.onForeground()
+                    // a failed roster read is tried again (no-op once loaded)
+                    self?.env.proMembers.ensureLoaded()
                     // RN lazyMutatePendingActivities on every return to the foreground (the launch's own replay is
                     // shellStarted's: the first activation is skipped)
                     if let self {

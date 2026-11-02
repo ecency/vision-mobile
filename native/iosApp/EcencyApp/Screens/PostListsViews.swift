@@ -48,7 +48,10 @@ struct VotersView: View {
                         // name and amounts side by side; stacked at accessibility text sizes
                         AdaptiveStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(row.voter).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                            HStack(spacing: 4) {
+                                Text(row.voter).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                                ProBadge(username: row.voter)
+                            }
                             if let time = row.timeAgo { Text(time).scaledFont(12).foregroundStyle(theme.secondary) }
                         }
                         Spacer(minLength: 0)
@@ -99,14 +102,17 @@ struct ReblogsView: View {
             if s.isLoading && s.accounts.isEmpty { ProgressView().frame(maxWidth: .infinity) }
             if let error = s.error, s.accounts.isEmpty { ErrorStateView(error: error) { reblogs.refresh() } }
             ForEach(s.accounts, id: \.self) { name in
-                Button { app.open(.profile(author: name)) } label: {
-                    HStack(spacing: 10) {
-                        AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 40)
-                        Text(name).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                ProMemberReader(username: name) { pro in
+                    Button { app.open(.profile(author: name)) } label: {
+                        HStack(spacing: 10) {
+                            AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 40)
+                            Text(name).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                            ProBadge(username: name)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(proLabel(UiCopy.shared.profileOf(username: name), pro))
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(UiCopy.shared.profileOf(username: name))
             }
         }
         .listStyle(.plain)

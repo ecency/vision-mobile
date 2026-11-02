@@ -564,7 +564,10 @@ struct RecurrentSheet: View {
             List(list, id: \.to) { r in
                 AdaptiveStack {
                     VStack(alignment: .leading) {
-                        Text(r.to).bold()
+                        HStack(spacing: 4) {
+                            Text(r.to).bold()
+                            ProBadge(username: r.to)
+                        }
                         Text(RecurrentCopy.shared.transferIn(time: ActivityRowView.relative(r.triggerDate))).font(.caption).foregroundStyle(theme.secondary)
                     }
                     FormRowGap()
@@ -601,7 +604,10 @@ struct DelegationsSheet: View {
             List(s.visible, id: \.account) { d in
                 AdaptiveStack {
                     VStack(alignment: .leading) {
-                        Text(d.expiring ? copy.EXPIRING : d.account).bold().foregroundStyle(d.expiring ? theme.dangerText : theme.text)
+                        HStack(spacing: 4) {
+                            Text(d.expiring ? copy.EXPIRING : d.account).bold().foregroundStyle(d.expiring ? theme.dangerText : theme.text)
+                            if !d.expiring { ProBadge(username: d.account) }
+                        }
                         if let t = d.timeLeft ?? d.date.map({ String($0.prefix(10)) }) { Text(t).font(.caption).foregroundStyle(theme.secondary) }
                     }
                     FormRowGap()

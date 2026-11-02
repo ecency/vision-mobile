@@ -412,7 +412,10 @@ struct CommunityMembersScreen: View {
                         HStack(spacing: 12) {
                             AvatarView(url: PostCard.companion.avatarUrl(account: member.account, proxyBase: app.env.proxyBase, size: "small"), size: 36)
                             VStack(alignment: .leading) {
-                                Text("@\(member.account)").scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                                HStack(spacing: 4) {
+                                    Text("@\(member.account)").scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                                    ProBadge(username: member.account)
+                                }
                                 if !member.title.isEmpty { Text(member.title).scaledFont(13).foregroundStyle(theme.secondary) }
                             }
                         }

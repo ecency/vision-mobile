@@ -15,6 +15,30 @@ struct ProBadge: View {
     }
 }
 
+/// Hands its content whether `username` is on the Pro roster, for rows whose VoiceOver label is written out;
+/// redrawn when the roster loads (a set lookup).
+struct ProMemberReader<Content: View>: View {
+    let username: String
+    @ViewBuilder let content: (Bool) -> Content
+    @EnvironmentObject private var app: AppContainer
+
+    var body: some View { Inner(members: app.proMembers, username: username, content: content) }
+
+    private struct Inner: View {
+        @ObservedObject var members: Observed<NSSet>
+        let username: String
+        let content: (Bool) -> Content
+
+        var body: some View {
+            content(members.state.contains(username.lowercased()))
+                .onAppear { (members.model as? ProMembersModel)?.ensureLoaded() }
+        }
+    }
+}
+
+/// `name`, then "Ecency Pro member" for a member: the badge said in a written out label.
+func proLabel(_ name: String, _ pro: Bool) -> String { pro ? "\(name), \(ProfileUiCopy.shared.ECENCY_PRO_MEMBER)" : name }
+
 private struct ProBadgeContent: View {
     @ObservedObject var members: Observed<NSSet>
     let username: String
@@ -28,6 +52,7 @@ private struct ProBadgeContent: View {
                     .accessibilityLabel(ProfileUiCopy.shared.ECENCY_PRO_MEMBER).accessibilityIdentifier("pro-badge")
             }
         }
+        // only reached for a visible badge (an empty Group never appears); AppContainer loads the roster at start
         .onAppear { (members.model as? ProMembersModel)?.ensureLoaded() }
     }
 }
