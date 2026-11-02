@@ -123,6 +123,44 @@ final class ChatUITests: XCTestCase {
         XCTAssertEqual(alice.descendants(matching: .any).matching(official).count, 0)
     }
 
+    private func message(_ app: XCUIApplication, containing text: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
+    }
+
+    /// A long public channel (-demoChatHistory: 60 older messages) opens where its unread messages start, as RN does,
+    /// without paging back on its own; scrolling up loads the older pages above, down to "No more messages".
+    func testALongChannelOpensAtItsUnreadMessagesAndPagesBackOnScroll() {
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "60"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let marker = element(app, "chat-unread-marker")
+        XCTAssertTrue(marker.waitForExistence(timeout: 10))
+        sleep(2)
+        XCTAssertTrue(marker.isHittable, "the first unread message is on screen without scrolling")
+        XCTAssertTrue(message(app, containing: "Yes, works well for me").isHittable, "the first unread message")
+        XCTAssertFalse(message(app, containing: "Older message 1:").exists, "the oldest page waits for a scroll up")
+        let list = element(app, "chat-messages")
+        for _ in 0..<30 where !element(app, "chat-no-more").exists { list.swipeDown(velocity: .fast) }
+        XCTAssertTrue(element(app, "chat-no-more").exists, "the older pages loaded above")
+        XCTAssertTrue(message(app, containing: "Older message 1:").exists)
+    }
+
+    /// A direct message with a long history opens at its newest message, and a message of many lines shows whole.
+    func testADirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
+        let app = launch(["-demoChatHistory", "60", "-openScreen", "chat:ch-dm-alice:D"])
+        let newest = message(app, containing: "Do you have a minute?")
+        XCTAssertTrue(newest.waitForExistence(timeout: 20))
+        sleep(2)
+        XCTAssertTrue(newest.isHittable, "the newest message is on screen without scrolling")
+        XCTAssertLessThanOrEqual(newest.frame.maxY, element(app, "chat-messages").frame.maxY + 1)
+        XCTAssertFalse(message(app, containing: "Older message 1:").exists, "the oldest page waits for a scroll up")
+        let long = message(app, containing: "the last line of the long message")
+        XCTAssertTrue(long.isHittable)
+        // about 13 lines of 15 pt text with its name and time; cut after 4 lines it was about 110 pt
+        XCTAssertGreaterThan(long.frame.height, 200, "the long message shows whole")
+    }
+
     func testADirectMessageWarnsUntilClosed() {
         let app = launch(["-startTab", "CHATS"])
         let row = element(app, "chat-row-ch-dm-alice")

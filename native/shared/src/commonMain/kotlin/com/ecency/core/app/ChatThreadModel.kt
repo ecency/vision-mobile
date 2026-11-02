@@ -484,6 +484,7 @@ class ChatThreadModel internal constructor(
             try {
                 env.chat.call(u) { env.chat.api.markViewed(it.token, channelId) }
                 markedAny = true
+                env.chat.markedViewed(channelId, u)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {

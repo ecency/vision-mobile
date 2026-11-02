@@ -373,6 +373,23 @@ class DemoChat(private val nowMillis: () -> Long) {
         emit("posted", channelId, buildJsonObject { put("post", postJson(p).toString()) })
     }
 
+    /**
+     * A long history in [channelId] (demo runs and tests): [read] messages older than everything seeded, the read
+     * [LONG_MESSAGE] just before the viewer's last visit, and [unread] more after it, so the conversation is taller
+     * than the screen and pages back.
+     */
+    fun seedHistory(channelId: String, read: Int, unread: Int = 0) {
+        val room = channels.firstOrNull { it.id == channelId } ?: return
+        val first = posts.filter { it.channel == channelId }.minOfOrNull { it.at } ?: nowMillis()
+        repeat(read) { i ->
+            posts += Post("p${++seq}", channelId, people[i % people.size], "Older message ${read - i}: a synthetic line of history.", first - (i + 1) * 60_000L)
+        }
+        posts += Post("p${++seq}", channelId, "spike-carol", LONG_MESSAGE, room.lastViewed - 60_000L)
+        repeat(unread) { i ->
+            posts += Post("p${++seq}", channelId, people[i % people.size], "Unread message ${i + 1}: a synthetic line after your last visit.", room.lastViewed + (i + 1) * 5_000L)
+        }
+    }
+
     /** The viewer's own post [pendingId] lands and its echo comes before the create's answer (tests). */
     fun echoOwn(channelId: String, message: String, pendingId: String) {
         val p = Post("p${++seq}", channelId, "VIEWER", message, nowMillis(), pendingId = pendingId)
@@ -390,6 +407,13 @@ class DemoChat(private val nowMillis: () -> Long) {
 
     companion object {
         const val PAGE = 30
+
+        /** A message of many lines (shown whole, never cut), added by [seedHistory]. */
+        const val LONG_MESSAGE = "A long synthetic message. It goes on for a while so that it wraps over many lines on a phone. " +
+            "Line after line, it keeps going, the way a long announcement in a community channel does. " +
+            "There is a second paragraph worth of words here too, with nothing special in it. " +
+            "And a third, because the bubble has to grow with its text instead of stopping after a few lines. " +
+            "It ends with these closing words: the last line of the long message."
         const val WEBSOCKET_PATH = "/api/mattermost/websocket"
     }
 }
