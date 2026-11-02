@@ -132,7 +132,7 @@ class TestApp(
         /** Answers the chain-state calls a broadcast needs; null for anything else. */
         fun chain(request: Sent): HttpResult? = when (request.method) {
             "condenser_api.get_dynamic_global_properties" -> FakeTransport.result(
-                request, """{"head_block_number":$HEAD,"head_block_id":"$HEAD_ID","time":"2026-10-06T11:59:00"}""",
+                request, """{"head_block_number":$HEAD,"head_block_id":"$HEAD_ID","vote_power_reserve_rate":10,"time":"2026-10-06T11:59:00"}""",
             )
             "condenser_api.get_block_header" -> FakeTransport.result(request, """{"previous":"$REF_ID"}""")
             "condenser_api.get_content" -> FakeTransport.result(request, """{"author":"","permlink":""}""")

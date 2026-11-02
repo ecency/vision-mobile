@@ -29,7 +29,7 @@ object DemoWallet {
         "reward_vesting_balance" to JsonPrimitive("2048.000000 VESTS"), "next_vesting_withdrawal" to JsonPrimitive("1969-12-31T23:59:59"),
     )
 
-    const val DGP = """{"head_block_number":100000000,"head_block_id":"05f5e10011111111111111111111111111111111","time":"2026-10-06T12:00:00","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}"""
+    const val DGP = """{"head_block_number":100000000,"head_block_id":"05f5e10011111111111111111111111111111111","time":"2026-10-06T12:00:00","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS","vote_power_reserve_rate":1}"""
 
     /** A Hive RPC call of the wallet, or null when it is not a wallet call. */
     suspend fun rpc(method: String, params: JsonElement?): JsonElement? =
@@ -48,6 +48,11 @@ object DemoWallet {
 
     private fun read(method: String, params: JsonElement?): JsonElement? = when (method) {
         "condenser_api.get_dynamic_global_properties" -> kotlinx.serialization.json.Json.parseToJsonElement(DGP)
+        // the vote estimate's chain values: with the reserve rate of [DGP], a full upvote of a demo account
+        // (1000 VESTS) is worth $0.250, so the vote sheet and the optimistic payout have a value to show
+        "condenser_api.get_feed_history" -> json("""{"current_median_history":{"base":"0.250 HBD","quote":"1.000 HIVE"}}""")
+        "condenser_api.get_reward_fund" -> json("""{"recent_claims":"120000000000000","reward_balance":"800000.000 HIVE"}""")
+        "database_api.get_hardfork_properties" -> json("""{"last_hardfork":28}""")
         "condenser_api.get_account_history" -> history((params as? JsonArray)?.getOrNull(1)?.let { (it as? JsonPrimitive)?.content?.toLongOrNull() } ?: -1)
         "condenser_api.get_savings_withdraw_from" -> json("""[{"id":1,"from":"spike-alice","to":"spike-alice","memo":"","request_id":7001,"amount":"25.000 HBD","complete":"2026-10-09T08:00:00"}]""")
         "condenser_api.get_conversion_requests", "condenser_api.get_collateralized_conversion_requests" -> JsonArray(emptyList())

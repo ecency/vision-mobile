@@ -325,6 +325,44 @@ class SliceFlowsTest {
         assertEquals(listOf(50f), savedWeights)
     }
 
+    /** Owner (TestFlight): the payout moves by the vote's estimate at once, as RN; a failed vote puts it back. */
+    @Test
+    fun aVoteMovesTheCardsPayoutAtOnceAndAFailurePutsItBack() {
+        node.signIn()
+        // the reader's stake (10000 VESTS, mana long since full) and the reserve rate: a full upvote is worth $0.200 here
+        node.extra = { method, _ ->
+            when (method) {
+                "condenser_api.get_accounts" -> """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},""" +
+                    """"memo_key":"${node.key.publicKey()}","vesting_shares":"10000.000000 VESTS","voting_manabar":{"current_mana":"0","last_update_time":0}}]"""
+                "condenser_api.get_dynamic_global_properties" ->
+                    """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00","vote_power_reserve_rate":10}"""
+                "condenser_api.get_reward_fund" -> """{"recent_claims":"150000000000000","reward_balance":"800000.000 HIVE"}"""
+                else -> null
+            }
+        }
+        val gate = CompletableDeferred<Unit>()
+        node.broadcastGate = gate
+        node.broadcastDown = true
+        launch()
+        waitFor("card:alice/trending-one")
+        val payout = compose.onAllNodes(hasTestTag("payout") and hasAnyAncestor(hasTestTag("card:alice/trending-one")), useUnmergedTree = true)[0]
+        payout.assertTextEquals("$ 1.500")
+        compose.onAllNodes(hasTestTag("vote"))[0].performClick()
+        waitFor("voteSheet")
+        // the estimate sits in a merged group: its tag is in the unmerged tree
+        compose.await("the vote estimate") { compose.onAllNodes(hasTestTag("voteValue"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("voteValue", useUnmergedTree = true).assertTextEquals("$0.200")
+        compose.onNodeWithTag("votePreset:100").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        // optimistic: the broadcast is still held
+        payout.assertTextEquals("$ 1.700")
+        gate.complete(Unit)
+        compose.await("the vote failed") { env.votes.current.statuses.values.any { it.error != null } }
+        compose.waitForIdle()
+        payout.assertTextEquals("$ 1.500")
+    }
+
     @Test
     fun aVoteRecomposesOnlyItsOwnCard() {
         node.signIn()

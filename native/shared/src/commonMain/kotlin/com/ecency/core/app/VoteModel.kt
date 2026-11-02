@@ -41,12 +41,14 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
             update(key, VoteStatus(key, weight, false, AppError(ErrorKind.INVALID_INPUT, L.native.vote.voteWeightMustBe, false)))
             return
         }
-        val previous = env.localVotes.get(key)
-        env.localVotes.set(key, LocalVote(weight, pending = true))
-        update(key, VoteStatus(key, weight, inFlight = true, error = null))
-        val session = generation
         // the account that voted is the one signed in now, not whoever is signed in when the coroutine runs
         val voter = env.session.current.username
+        val previous = env.localVotes.get(key)
+        // RN upvotePopover: the payout moves by the sheet's estimate at once (an unvote is worth nothing)
+        val estimate = if (weight == 0) VoteEstimate.NONE else preview?.takeIf { it.voter == voter }?.estimate(weight)
+        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate))
+        update(key, VoteStatus(key, weight, inFlight = true, error = null))
+        val session = generation
         scope.launch {
             try {
                 // the account changed before the broadcast started: never sign this vote as the next account
@@ -66,7 +68,7 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 }
                 // the account changed meanwhile: this result belongs to a session that is gone
                 if (session != generation) return@launch
-                env.localVotes.set(key, LocalVote(weight, pending = false))
+                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate))
                 env.api.posts.invalidate(key)
                 setState { VoteState(it.statuses - key) }
             } catch (e: CancellationException) {
@@ -85,6 +87,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
 
     /** Bumped on every session change; results of votes started before it are ignored. */
     private var generation = 0
+
+    /** The vote sheet's last estimate ([votePreview]); a vote of its account moves the payout by it. */
+    internal var preview: VotePreview? = null
 
     /** Sends the failed vote on [author]/[permlink] again, same weight. */
     fun retry(author: String, permlink: String) {
@@ -106,6 +111,7 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
      */
     internal fun reset() {
         generation++
+        preview = null
         setState { VoteState() }
     }
 
