@@ -953,8 +953,8 @@ struct ChatMessageBubble: View {
                 if !item.spans.isEmpty {
                     Text(ChatAttributed.make(item.spans, linkColor: own ? .white : theme.accentText))
                         .scaledFont(15).foregroundStyle(text)
-                        // the whole message, always: a height measured for another width (the bubble sits between a
-                        // spacer and the avatar) cut long messages after a few lines on a device
+                        // the whole message, always: under a quote (whose bar takes any height it is offered) a long
+                        // reply gave its height to the quote and was cut after a few lines
                         .fixedSize(horizontal: false, vertical: true)
                         .environment(\.openURL, OpenURLAction { url in
                             app.openChatLink(url.absoluteString)

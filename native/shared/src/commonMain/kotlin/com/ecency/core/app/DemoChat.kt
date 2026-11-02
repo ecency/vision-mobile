@@ -375,8 +375,8 @@ class DemoChat(private val nowMillis: () -> Long) {
 
     /**
      * A long history in [channelId] (demo runs and tests): [read] messages older than everything seeded, the read
-     * [LONG_MESSAGE] just before the viewer's last visit, and [unread] more after it, so the conversation is taller
-     * than the screen and pages back.
+     * [LONG_MESSAGE] and a [LONG_REPLY] quoting it just before the viewer's last visit, and [unread] more after it, so
+     * the conversation is taller than the screen and pages back.
      */
     fun seedHistory(channelId: String, read: Int, unread: Int = 0) {
         val room = channels.firstOrNull { it.id == channelId } ?: return
@@ -384,7 +384,10 @@ class DemoChat(private val nowMillis: () -> Long) {
         repeat(read) { i ->
             posts += Post("p${++seq}", channelId, people[i % people.size], "Older message ${read - i}: a synthetic line of history.", first - (i + 1) * 60_000L)
         }
-        posts += Post("p${++seq}", channelId, "spike-carol", LONG_MESSAGE, room.lastViewed - 60_000L)
+        val long = Post("p${++seq}", channelId, "spike-carol", LONG_MESSAGE, room.lastViewed - 60_000L).also { posts += it }
+        posts += Post("p${++seq}", channelId, "spike-alice", LONG_REPLY, room.lastViewed - 30_000L, rootId = long.id, props = buildJsonObject {
+            put("parent_id", long.id); put("parent_username", "spike-carol"); put("parent_message", long.message)
+        })
         repeat(unread) { i ->
             posts += Post("p${++seq}", channelId, people[i % people.size], "Unread message ${i + 1}: a synthetic line after your last visit.", room.lastViewed + (i + 1) * 5_000L)
         }
@@ -414,6 +417,15 @@ class DemoChat(private val nowMillis: () -> Long) {
             "There is a second paragraph worth of words here too, with nothing special in it. " +
             "And a third, because the bubble has to grow with its text instead of stopping after a few lines. " +
             "It ends with these closing words: the last line of the long message."
+
+        /** A reply of many lines under its quote (shown whole, never cut), added by [seedHistory]. */
+        const val LONG_REPLY = "Replying to that long message with a long answer of my own. " +
+            "The quote above it takes two lines and this body goes on well past four, " +
+            "the way replies in a curators channel do when someone explains a decision in full. " +
+            "It keeps going for a few more sentences so that it wraps over six lines or more on a phone, " +
+            "with a second thought about why the post was picked, a third about the tags it used, " +
+            "and a fourth about the community it was posted in, so it is clearly longer than a short note, " +
+            "and then it closes with the final words of the long reply."
         const val WEBSOCKET_PATH = "/api/mattermost/websocket"
     }
 }

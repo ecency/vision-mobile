@@ -261,20 +261,24 @@ class ChatFlowsTest {
     fun aDirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
         node.chat.seedHistory("ch-dm-alice", 60)
         node.signIn()
-        launch()
+        launch(fontScale = 1.15f)
         waitFor("chatRow:ch-dm-alice")
         compose.onNodeWithTag("chatRow:ch-dm-alice").performClick()
         waitUntil { hasTextNode("Do you have a minute?") }
         assertTrue("the newest message is on screen", onScreen(hasText("Do you have a minute?", substring = true)))
         assertEquals(1, postReads("ch-dm-alice"))
-        val long = hasText("the last line of the long message", substring = true)
-        compose.scrollListTo("messages", long)
-        val layout = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        // a long message, and a reply from someone else with its quote above a long body (cut on iOS, owner report)
         val messageText = androidx.compose.ui.test.SemanticsMatcher("message text") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("messageText:") == true }
-        compose.onAllNodes(long and messageText, useUnmergedTree = true).onFirst()
-            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layout) }
-        assertFalse("the whole message shows", layout.single().hasVisualOverflow)
-        assertTrue("on many lines", layout.single().lineCount > 4)
+        for (ending in listOf("the final words of the long reply", "the last line of the long message")) {
+            val text = hasText(ending, substring = true)
+            compose.scrollListTo("messages", text)
+            val node = compose.onAllNodes(text and messageText, useUnmergedTree = true).onFirst()
+            val layout = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            node.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layout) }
+            assertFalse("$ending: the whole text is laid out", layout.single().hasVisualOverflow)
+            assertTrue("$ending: on many lines", layout.single().lineCount > 4)
+            assertTrue("$ending: given its full height", node.fetchSemanticsNode().size.height >= layout.single().size.height)
+        }
     }
 
     @Test

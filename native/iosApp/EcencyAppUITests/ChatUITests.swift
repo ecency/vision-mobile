@@ -148,17 +148,52 @@ final class ChatUITests: XCTestCase {
 
     /// A direct message with a long history opens at its newest message, and a message of many lines shows whole.
     func testADirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
-        let app = launch(["-demoChatHistory", "60", "-openScreen", "chat:ch-dm-alice:D"])
+        // the large text size the owner's device showed it at
+        let app = launch(["-demoChatHistory", "60", "-openScreen", "chat:ch-dm-alice:D", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"])
         let newest = message(app, containing: "Do you have a minute?")
         XCTAssertTrue(newest.waitForExistence(timeout: 20))
         sleep(2)
         XCTAssertTrue(newest.isHittable, "the newest message is on screen without scrolling")
         XCTAssertLessThanOrEqual(newest.frame.maxY, element(app, "chat-messages").frame.maxY + 1)
         XCTAssertFalse(message(app, containing: "Older message 1:").exists, "the oldest page waits for a scroll up")
+        // a reply from someone else: the author, a two line quote and a body of about ten lines (cut after about four
+        // lines on a device, owner report); then the message it quotes, about thirteen lines
+        let list = element(app, "chat-messages")
+        let reply = message(app, containing: "the final words of the long reply")
+        for _ in 0..<4 where !reply.isHittable { list.swipeDown() }
+        XCTAssertTrue(reply.isHittable)
+        XCTAssertGreaterThan(reply.frame.height, 240, "the long reply shows whole under its quote")
+        // cut, the body gave its height to the quote above it: the quote's bar ran down past the quote's two lines
+        XCTAssertLessThan(quoteBarHeight(app, in: reply.frame), 90, "the quote keeps its two lines and the body the rest")
         let long = message(app, containing: "the last line of the long message")
+        for _ in 0..<4 where !long.isHittable { list.swipeDown() }
         XCTAssertTrue(long.isHittable)
-        // about 13 lines of 15 pt text with its name and time; cut after 4 lines it was about 110 pt
         XCTAssertGreaterThan(long.frame.height, 200, "the long message shows whole")
+    }
+
+    /// The tallest run of the quote's accent bar (strong blue) in the first 60 pt of [frame], in points.
+    private func quoteBarHeight(_ app: XCUIApplication, in frame: CGRect) -> CGFloat {
+        let image = app.screenshot().image
+        guard let cg = image.cgImage, let data = cg.dataProvider?.data, let bytes = CFDataGetBytePtr(data) else { return .infinity }
+        let scale = CGFloat(cg.width) / image.size.width
+        let perPixel = cg.bitsPerPixel / 8
+        func blue(_ x: Int, _ y: Int) -> Bool {
+            let i = y * cg.bytesPerRow + x * perPixel
+            // BGRA or RGBA: the bar is the only pixel run with one channel high and the other two low
+            let a = Int(bytes[i]), c = Int(bytes[i + 2])
+            let (r, b) = cg.bitmapInfo.contains(.byteOrder32Little) ? (c, a) : (a, c)
+            return b > 170 && r < 90 && Int(bytes[i + 1]) < 140
+        }
+        var best = 0
+        let top = Int(frame.minY * scale), bottom = min(Int(frame.maxY * scale), cg.height - 1)
+        for x in Int(frame.minX * scale)..<min(Int((frame.minX + 60) * scale), cg.width) {
+            var run = 0
+            for y in top...bottom {
+                run = blue(x, y) ? run + 1 : 0
+                best = max(best, run)
+            }
+        }
+        return CGFloat(best) / scale
     }
 
     func testADirectMessageWarnsUntilClosed() {
