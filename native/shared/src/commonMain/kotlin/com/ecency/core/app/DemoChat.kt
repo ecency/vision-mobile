@@ -78,6 +78,11 @@ class DemoChat(private val nowMillis: () -> Long) {
     /** Status codes to answer instead, by a path fragment (tests): "posts" to 403 refuses reading a channel. */
     val refuse = mutableMapOf<String, Pair<Int, String>>()
 
+    /** Debug runs and tests: the chat sign-in fails, so the chats stay disconnected. */
+    fun refuseSignIn() {
+        refuse["bootstrap"] = 503 to "{}"
+    }
+
     private val outgoing = mutableListOf<kotlinx.coroutines.channels.Channel<String>>()
 
     private val me get() = "u-$viewer"

@@ -198,4 +198,36 @@ final class ThemedBackgroundUITests: XCTestCase {
             app.terminate()
         }
     }
+
+    /// The Chats tab signed in: beside a channel row, beside the search bar, and below the rows.
+    func testChatsListBackground() {
+        for dark in [true, false] {
+            let app = launch(dark: dark, ["-seedAccounts", "YES", "-startTab", "CHATS"])
+            let row = element(app, "chat-row-ch-ecency")
+            XCTAssertTrue(row.waitForExistence(timeout: 30))
+            let s = shot("chats-list-\(dark ? "dark" : "light")", app)
+            assertTheme(s, app, dark: dark, at: rowEdge(app, row), "beside a channel row")
+            let search = app.textFields.firstMatch
+            XCTAssertTrue(search.exists, "the chats search field")
+            assertTheme(s, app, dark: dark, at: CGPoint(x: 4, y: search.frame.midY), "beside the chats search bar")
+            assertTheme(s, app, dark: dark, at: CGPoint(x: app.windows.firstMatch.frame.maxX - 6, y: below(app).y - 40), "below the channel rows")
+            app.terminate()
+        }
+    }
+
+    /// A channel: the message area, beside the header and beside the composer bar.
+    func testChatThreadBackground() {
+        for dark in [true, false] {
+            let app = launch(dark: dark, ["-seedAccounts", "YES", "-openScreen", "chat:ch-ecency"])
+            let composer = element(app, "chat-composer")
+            XCTAssertTrue(composer.waitForExistence(timeout: 30))
+            XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 10))
+            let s = shot("chat-thread-\(dark ? "dark" : "light")", app)
+            let title = app.staticTexts["chat-title"]
+            assertTheme(s, app, dark: dark, at: CGPoint(x: app.windows.firstMatch.frame.maxX - 4, y: title.frame.midY), "beside the chat header")
+            assertTheme(s, app, dark: dark, at: CGPoint(x: 4, y: composer.frame.midY), "beside the composer")
+            assertTheme(s, app, dark: dark, at: CGPoint(x: 4, y: composer.frame.minY - 80), "the message area")
+            app.terminate()
+        }
+    }
 }

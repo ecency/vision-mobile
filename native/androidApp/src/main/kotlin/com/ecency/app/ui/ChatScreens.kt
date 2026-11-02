@@ -69,6 +69,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -124,8 +125,7 @@ import com.ecency.core.app.ChatUiCopy
 import com.ecency.core.app.OfficialAccounts
 import com.ecency.core.app.UiCopy
 
-/** RN `#28a745` / `#dc3545`: the status pill's dot. */
-private val ConnectedGreen = Color(0xFF28A745)
+/** RN `#dc3545`: the dot of the connecting notice. */
 private val ConnectingRed = Color(0xFFDC3545)
 
 /** RN `#FFB300`: a favourite's star. */
@@ -170,6 +170,8 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
                 Text(state.error!!, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(horizontal = 16.dp, vertical = 4.dp).testTag("chatsError"))
             }
             ChatSearchBar(state.query, state.sortByName, onQuery = model::setQuery, onSort = model::toggleSort, onNewGroup = if (state.canStartGroup) ({ newGroup = true }) else null)
+            // a connected chat says nothing; only a missing connection shows, in line
+            if (mine && !state.connected) ConnectingNotice(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             // the first load draws the rows' shape; a search or a reload over rows keeps the spinner
             if (mine && state.isLoading && state.rows.isEmpty() && !state.searching) {
                 RowsSkeleton(6, tag = "chatsLoading")
@@ -181,7 +183,7 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
                 onRefresh = { scope.launch { model.refreshAndWait() } },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                LazyColumn(Modifier.fillMaxSize().testTag("chatsList"), state = listState, contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 56.dp)) {
+                LazyColumn(Modifier.fillMaxSize().testTag("chatsList"), state = listState, contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = FabTokens.SIZE + FabTokens.MARGIN * 2)) {
                     if (mine) {
                         state.searchError?.let { item { Text(it, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(vertical = 4.dp)) } }
                         if (state.channelResults.isNotEmpty()) {
@@ -217,7 +219,7 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
                 }
             }
         }
-        StatusPill(state.connected && mine, Modifier.align(Alignment.BottomStart).padding(16.dp))
+        if (mine && state.connected) EsieFab(onClick = { openDirectMessage(env, scope, OfficialAccounts.ESIE_USERNAME, push) }, modifier = Modifier.align(Alignment.BottomEnd))
     }
     options?.let { row ->
         OptionsSheet(model.actionsTitle(row), model.actions(row).map { it.label to it.destructive }, model.actions(row).map { it.name }, onDismiss = { options = null }) { index ->
@@ -364,16 +366,31 @@ private fun SearchRow(env: AppEnvironment, avatar: ChatAvatar, title: String, me
     }
 }
 
+/** The chat is not connected (yet, or any more): a dot and "Connecting", in line under the search bar. */
 @Composable
-private fun StatusPill(connected: Boolean, modifier: Modifier) {
+private fun ConnectingNotice(modifier: Modifier) {
     val colors = LocalEcencyColors.current
     Row(
-        modifier.clip(RoundedCornerShape(20.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 8.dp).testTag("chatsStatus"),
+        modifier.clip(RoundedCornerShape(20.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("chatsOffline"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(8.dp).clip(CircleShape).background(if (connected) ConnectedGreen else ConnectingRed))
-        Text(if (connected) ChatsModel.CONNECTED else ChatsModel.CONNECTING, fontSize = 12.sp, color = colors.text, modifier = Modifier.padding(start = 6.dp))
+        Box(Modifier.size(8.dp).clip(CircleShape).background(ConnectingRed))
+        Text(ChatsModel.CONNECTING, fontSize = 12.sp, color = colors.text, modifier = Modifier.padding(start = 6.dp))
     }
+}
+
+/** The round button over the chats list that opens the direct message with Esie (as "Ask Esie" does), in the FAB's place and size. */
+@Composable
+private fun EsieFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    Box(
+        modifier.padding(FabTokens.MARGIN).pressScale(interaction, MotionPressScale.FAB).size(FabTokens.SIZE).shadow(FabTokens.ELEVATION, CircleShape).clip(CircleShape)
+            .background(LocalEcencyColors.current.lightBackground)
+            .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), onClick = onClick, role = Role.Button)
+            .semantics { contentDescription = ChatUiCopy.CHAT_WITH_ESIE }.testTag("chatsEsieFab"),
+        contentAlignment = Alignment.Center,
+    ) { EsieView(com.ecency.core.esie.EsieMood.REST, height = 44.dp) }
 }
 
 /** RN chatChannelOptionsSheet / chatOptionsSheet's list: a title and one row per option (destructive in red). */

@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sort by name",
         "more": "More",
         "reaction_label": "{emoji} {count}. Long press to see who reacted",
-        "members": "Members"
+        "members": "Members",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "A post already exists at this link and differs from what you sent. Update it, or publish as new?",
