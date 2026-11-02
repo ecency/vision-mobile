@@ -192,11 +192,18 @@ struct WavesListView: View {
     @ObservedObject var feed: Observed<WavesFeedState>
     let scrollTop: Int
     let onTag: (String) -> Void
+    @State private var momentum = ScrollMomentum()
     @Environment(\.motion) private var motion
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
 
     private var model: WavesFeedModel { feed.model as! WavesFeedModel }
+
+    /// The scroll to top (popup or a tap on the selected tab), mid-fling too.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) }
+    }
 
     var body: some View {
         let state = feed.state
@@ -233,11 +240,12 @@ struct WavesListView: View {
                         }
                     }
                     .reportsScrollOffset("waves-scroll")
+                    .tracksScrollMomentum(momentum)
                 }
                 .refreshable { try? await model.refreshAndWait() }
                 // RN wavesScreen's ScrollTopPopup: also hidden on scroll down
-                .scrollTopPopup(space: "waves-scroll", hidesOnScrollDown: true, id: "waves-scroll-top") { withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) } }
-                .onChange(of: scrollTop) { _, _ in withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) } }
+                .scrollTopPopup(space: "waves-scroll", hidesOnScrollDown: true, id: "waves-scroll-top") { toTop(proxy) }
+                .onChange(of: scrollTop) { _, _ in toTop(proxy) }
                 // a wave just published from here goes on top: show it
                 .onChange(of: state.items.first?.isLocal == true ? state.items.first?.key : nil) { _, key in
                     if key != nil { proxy.scrollTo("waves-top", anchor: .top) }

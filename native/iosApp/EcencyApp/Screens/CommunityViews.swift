@@ -94,12 +94,14 @@ struct UnderlineTabs: View {
     let labels: [String]
     @Binding var selected: Int
     var idPrefix = "tab"
+    /// A tap on the selected tab (RN TabBar onTabPress: its list scrolls to the top).
+    var onReselect: (() -> Void)?
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         FittingSegments {
             ForEach(Array(labels.enumerated()), id: \.offset) { i, label in
-                Button { selected = i } label: {
+                Button { if i == selected { onReselect?() } else { selected = i } } label: {
                     VStack(spacing: 8) {
                         // a text style (not a scaled point size): the label follows every text size, the audit's check included
                         Text(label).font(.subheadline.bold()).foregroundStyle(i == selected ? theme.accentText : theme.secondary)
@@ -123,12 +125,14 @@ struct UnderlineTabs: View {
 struct PillTabs: View {
     let labels: [String]
     @Binding var selected: Int
+    /// A tap on the selected pill (RN TabbedPosts: its feed scrolls to the top).
+    var onReselect: (() -> Void)?
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         FittingSegments {
             ForEach(Array(labels.enumerated()), id: \.offset) { i, label in
-                Button { selected = i } label: {
+                Button { if i == selected { onReselect?() } else { selected = i } } label: {
                     Text(label.uppercased()).font(.subheadline.bold())
                         .foregroundStyle(i == selected ? Color.white : theme.secondary)
                         .fixedSize()
@@ -188,6 +192,7 @@ struct CommunitiesScreen: View {
     @EnvironmentObject private var app: AppContainer
     @StateObject private var model: Observed<CommunitiesState>
     @State private var tab = 0
+    @State private var scrollTop = 0
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
@@ -199,7 +204,8 @@ struct CommunitiesScreen: View {
     var body: some View {
         let state = model.state
         VStack(spacing: 0) {
-            UnderlineTabs(labels: [CommunityCopy.shared.JOINED_TAB, CommunityCopy.shared.DISCOVER_TAB], selected: $tab)
+            UnderlineTabs(labels: [CommunityCopy.shared.JOINED_TAB, CommunityCopy.shared.DISCOVER_TAB], selected: $tab) { scrollTop += 1 }
+            ScrollViewReader { proxy in
             List {
                 if tab == 0 {
                     if state.joined.isEmpty {
@@ -245,6 +251,12 @@ struct CommunitiesScreen: View {
             }
             .listStyle(.plain)
             .refreshable { communities.refresh() }
+            .onChange(of: scrollTop) { _, _ in
+                // the rows' ForEach ids
+                let first = tab == 0 ? state.joined.first?.name : state.discover.first?.name
+                if let first { withAnimation { proxy.scrollTo(first, anchor: .top) } }
+            }
+            }
         }
         .background(theme.background)
         .navigationTitle(CommunityCopy.shared.TITLE)
@@ -260,6 +272,7 @@ struct CommunityScreen: View {
     @StateObject private var model: Observed<CommunityState>
     @StateObject private var feeds = TabFeeds()
     @State private var tab: Int
+    @State private var scrollTop = 0
     @State private var manage = false
     @State private var managePick: CommunityManageAction?
     @StateObject private var collapse = SummaryCollapseDriver()
@@ -283,11 +296,11 @@ struct CommunityScreen: View {
         GeometryReader { geo in
             VStack(spacing: 0) {
                 details(state, maxHeight: geo.size.height * 0.7)
-                PillTabs(labels: tabs.map { $0.label }, selected: $tab)
+                PillTabs(labels: tabs.map { $0.label }, selected: $tab) { scrollTop += 1 }
                 let selected = tabs[tab]
-                // RN CollapsibleCard "Details": closes as the feed scrolls down, opens near the top, after a drag up
-                // or on a tap on its title, the profile summary's rule (RN closed it on any drag)
-                FeedListView(feed: feeds.feed(selected.name, source: community.feedSource(tab: selected), env: app.env), collapse: collapse)
+                // RN CollapsibleCard "Details": closes as the feed scrolls down, opens back at the top or on a tap on
+                // its title, the profile summary's rule (RN closed it on any drag)
+                FeedListView(feed: feeds.feed(selected.name, source: community.feedSource(tab: selected), env: app.env), collapse: collapse, scrollToTop: scrollTop)
                     .id(selected.name)
             }
             .animation(motion.reveal, value: collapse.open)

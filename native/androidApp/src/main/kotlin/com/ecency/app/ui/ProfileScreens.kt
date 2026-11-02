@@ -221,7 +221,7 @@ fun ProfileScreen(
                 return@Column
             }
             // RN profileView: the summary closes as the list scrolls down and RN's Header (back, avatar, name) takes its
-            // place; it opens again near the top, after a drag up, or on a tap on that header
+            // place; it opens again back at the top or on a tap on that header
             if (!collapse.open) ProfileCompactHeader(env, header, actions.onBack, collapse::expand)
             CollapsingSummary(collapse) {
                 ProfileSummary(env, state, header, model, actions, onReport = { confirmReport = true })
@@ -229,7 +229,7 @@ fun ProfileScreen(
                 if (state.isOwn) DigestSenderRow(env, state.username, actions.onManageDigests)
             }
             // another tab's list: the summary opens over it (the three ways in agree)
-            if (!state.isMuted) ProfileTabs(state) { i -> if (i != state.selectedTab) collapse.reset(); model.selectTab(i) }
+            if (!state.isMuted) ProfileTabs(state, rememberTabTap(state.selectedTab, { listState }) { i -> collapse.reset(); model.selectTab(i) })
             PullToRefreshBox(
                 isRefreshing = feedState?.isRefreshing == true || wavesState?.isRefreshing == true, onRefresh = model::refresh,
                 modifier = Modifier.weight(1f).fillMaxWidth(),

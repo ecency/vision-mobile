@@ -121,7 +121,8 @@ fun FilterHomeFeeds(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
-                tabs.forEachIndexed { index, filter -> Pill(filter.title, index == selected.intValue, tag = filter.name) { selected.intValue = index } }
+                val tap = rememberTabTap(selected.intValue, { entry.get("list:${tabs[selected.intValue].key}:$username") { LazyListState() } }) { selected.intValue = it }
+                tabs.forEachIndexed { index, filter -> Pill(filter.title, index == selected.intValue, tag = filter.name) { tap(index) } }
             }
             // RN WalkthroughMarker: a red dot on "+" until it was first used (signed in only)
             val walkthrough by env.walkthrough.state.collectAsState()
@@ -232,7 +233,8 @@ fun TagFeedScreen(env: AppEnvironment, entry: StackEntry, tag: String, title: St
             }
         }
         Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(8.dp)) {
-            sorts.forEachIndexed { i, (_, id) -> Pill(sortLabels[i], i == selected.intValue, tag = id) { selected.intValue = i } }
+            val tap = rememberTabTap(selected.intValue, { entry.get("list:${sorts[selected.intValue].first.name}") { LazyListState() } }) { selected.intValue = it }
+            sorts.forEachIndexed { i, (_, id) -> Pill(sortLabels[i], i == selected.intValue, tag = id) { tap(i) } }
         }
         val sort = sorts[selected.intValue].first
         androidx.compose.runtime.key(sort) {

@@ -1,7 +1,7 @@
 import EcencyCore
 import SwiftUI
 
-/// The header above a list that closes on scroll down and opens near the top or on a drag up (RN profileView, the
+/// The header above a list that closes on scroll down and opens back at the top (RN profileView, the
 /// shared `SummaryCollapse`), fed by `collapsesSummary`. Waits out the rule's cooldown with a task, as RN's recheck
 /// timer.
 @MainActor

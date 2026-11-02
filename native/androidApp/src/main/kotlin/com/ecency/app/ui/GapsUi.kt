@@ -213,6 +213,16 @@ fun androidx.compose.foundation.layout.BoxScope.ScrollTopPopup(
 }
 
 /**
+ * RN TabBar onTabPress (TabbedPosts on the feed, tag, community and profile; the communities and search tabs): a tap
+ * on the tab that is already selected scrolls its list (from [list]) to the top, a tap on another goes to [select].
+ */
+@Composable
+fun rememberTabTap(selected: Int, list: () -> androidx.compose.foundation.lazy.LazyListState?, select: (Int) -> Unit): (Int) -> Unit {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    return { i -> if (i == selected) list()?.let { scope.launch { it.animateScrollToItem(0) } } else select(i) }
+}
+
+/**
  * The scroll to top button of the feeds and Waves: the FAB's twin ([FabButton], an up arrow) at the bottom start (it
  * mirrors in RTL), opposite the compose FAB at the bottom end; it pops in and out.
  */
