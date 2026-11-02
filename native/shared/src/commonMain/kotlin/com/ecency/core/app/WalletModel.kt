@@ -69,6 +69,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private var started = false
     private var watchers = 0
 
+    /** When the portfolio on screen began to be read ([Freshness.stamp]). */
+    private var readAt = Long.MIN_VALUE
+
     /** RN claimsCollection: symbol to (claimed value, expiry), so a claimed reward reads 0 until the server agrees. */
     private val claimMask = mutableMapOf<String, Pair<Double, Long>>()
     private val claimingNow = mutableSetOf<String>()
@@ -88,12 +91,15 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 }
             }
         }
+        // README "Foreground refresh": back after a long trip with the wallet on screen
+        scope.launch { env.freshness.staleReturns.collect { if (watchers > 0) refreshIfStale() } }
         load(refresh = false)
     }
 
     /** A screen showing the wallet appeared (or went away, [visible] false): polls every [POLL_MILLIS] while shown. */
     fun visible(shown: Boolean) {
         watchers = (watchers + if (shown) 1 else -1).coerceAtLeast(0)
+        if (shown) refreshIfStale()
         poll?.cancel()
         if (watchers > 0) {
             poll = scope.launch {
@@ -112,6 +118,16 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     fun retry() = load(refresh = false)
+
+    /** The portfolio again without the spinner (README "Foreground refresh"; asset details on show). */
+    internal fun refreshQuietly() {
+        if (job?.isActive == true || !current.loaded) return
+        load(refresh = true, quiet = true)
+    }
+
+    private fun refreshIfStale() {
+        if (env.freshness.isStale(readAt)) refreshQuietly()
+    }
 
     /** Reloads now and returns when done (pull to refresh). */
     suspend fun refreshAndWait() {
@@ -212,9 +228,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun owns(user: String) = current.account == user && env.session.current.username == user
 
-    private fun load(refresh: Boolean) {
+    /** [quiet]: no spinner, and a failure keeps what is shown without the banner (README "Foreground refresh"). */
+    private fun load(refresh: Boolean, quiet: Boolean = false) {
         job?.cancel()
-        setState { it.copy(isLoading = !refresh, isRefreshing = refresh, error = null, currency = WalletCurrency.of(env.prefs)) }
+        val stamp = env.freshness.stamp()
+        setState { it.copy(isLoading = !refresh, isRefreshing = refresh && !quiet, error = if (quiet) it.error else null, currency = WalletCurrency.of(env.prefs)) }
         job = scope.launch {
             try {
                 env.session.awaitLoaded()
@@ -231,6 +249,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val tokens = accountJob.await()?.profileTokens.orEmpty()
                 val perMVests = rate.await()
                 if (!owns(user)) return@launch
+                readAt = stamp
                 setState {
                     withRows(
                         it.copy(
@@ -242,7 +261,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, isRefreshing = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, error = if (quiet) it.error else AppError.from(e)) }
             }
         }
     }

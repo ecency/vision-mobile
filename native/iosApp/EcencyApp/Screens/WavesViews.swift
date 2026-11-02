@@ -308,6 +308,7 @@ struct ProfileWavesTab: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
     }
 }
 

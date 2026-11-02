@@ -264,7 +264,8 @@ fun SendPhasePanel(phase: SendPhase?, onClose: () -> Unit) {
 fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsModel, list: LazyListState, onBack: () -> Unit, push: (AppScreen) -> Unit) {
     val colors = LocalEcencyColors.current
     val state by model.state.collectAsState()
-    LaunchedEffect(model) { model.start() }
+    // README "Foreground refresh": shown and back in front, the model refreshes after a long trip away
+    OnShow(model) { model.start() }
     var sheet by remember { mutableStateOf<DetailsSheet?>(null) }
     var filter by remember { mutableStateOf(false) }
     var analytics by remember { mutableStateOf(false) }

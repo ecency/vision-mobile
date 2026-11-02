@@ -981,6 +981,9 @@ class AppEnvironment(
     /** The platform's microphone recorder for dictation; null until an app sets one (then dictation says it is unavailable). */
     var dictationRecorder: DictationRecorder? = null
 
+    /** How long the app was away: screens' data goes stale after a long trip (README "Foreground refresh"). */
+    val freshness: Freshness by lazy { Freshness(security.monotonicMillis) }
+
     /** False while the app is in the background (the apps report it): nothing records then. */
     @kotlin.concurrent.Volatile
     var isForeground: Boolean = true

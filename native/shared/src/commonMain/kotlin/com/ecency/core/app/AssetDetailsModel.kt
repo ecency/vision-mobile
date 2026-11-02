@@ -113,8 +113,18 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
     private var autoAdvanced = 0
     private var started = false
 
+    /** When the history on screen began to be read ([Freshness.stamp]). */
+    private var readAt = Long.MIN_VALUE
+
+    /**
+     * The screen is shown (the apps call it on show and on every return to the foreground): starts once, and after a
+     * long trip away reads the portfolio and the history again quietly (README "Foreground refresh").
+     */
     fun start() {
-        if (started) return
+        if (started) {
+            if (job?.isActive != true && env.freshness.isStale(readAt)) refreshQuietly()
+            return
+        }
         started = true
         // the portfolio (asset, balances, fiat rates) comes from the app-wide wallet, started here when opened directly
         env.wallet.start()
@@ -235,13 +245,13 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
         enginePage = 0
         autoAdvanced = 0
         raw = emptyList()
+        readAt = env.freshness.stamp()
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh, historyFailed = false, endReached = false, activities = if (refresh) it.activities else emptyList()) }
         job = scope.launch {
             env.session.awaitLoaded()
             val user = env.session.current.username ?: return@launch
             setState { it.copy(account = user) }
-            val item = env.wallet.current.item(symbol)
-            val layer = item?.layer ?: if (symbol in setOf("HIVE", "HBD", "HP")) AssetLayer.HIVE else if (symbol == "POINTS") AssetLayer.POINTS else AssetLayer.ENGINE
+            val layer = layer()
             if (layer == AssetLayer.HIVE) {
                 launch { loadPending(user) }
                 if (symbol == "HIVE") launch { loadRecurrent(user) }
@@ -254,48 +264,94 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
         }
     }
 
+    private fun layer(): AssetLayer = env.wallet.current.item(symbol)?.layer
+        ?: if (symbol in setOf("HIVE", "HBD", "HP")) AssetLayer.HIVE else if (symbol == "POINTS") AssetLayer.POINTS else AssetLayer.ENGINE
+
     private suspend fun page(first: Boolean, layer: AssetLayer? = null) {
         val user = current.account ?: return
         val l = layer ?: current.asset?.layer ?: AssetLayer.HIVE
         if (!first) setState { it.copy(isLoadingMore = true) }
         try {
-            when (l) {
-                AssetLayer.POINTS -> {
-                    val type = current.pointType
-                    val rows = env.walletApi.pointHistory(user, type).map(WalletHistory::groomPoints)
-                    raw = rows
-                    setState { it.copy(activities = rows, endReached = true) }
-                }
-                AssetLayer.ENGINE -> {
-                    val rows = env.walletApi.engineHistory(user, symbol, PAGE, PAGE * enginePage).mapNotNull(WalletHistory::groomEngine)
-                    enginePage++
-                    raw = WalletHistory.orderEngine(raw + rows)
-                    setState { it.copy(activities = raw, endReached = rows.isEmpty()) }
-                }
-                AssetLayer.HIVE -> {
-                    val ops = WalletHistory.resolveOps(symbol, current.filter)
-                    val perMVests = env.wallet.current.hivePerMVests.takeIf { it > 0 } ?: env.walletApi.hivePerMVests()
-                    while (true) {
-                        val start = nextStart ?: break
-                        val rows = env.walletApi.history(user, start, PAGE, ops)
-                        nextStart = WalletHistory.nextStart(rows)
-                        val groomed = WalletHistory.page(rows, symbol, ops, perMVests)
-                        raw = WalletHistory.order(raw + groomed)
-                        setState { it.copy(activities = raw, endReached = nextStart == null) }
-                        // RN: while nothing at all shows, the next page is fetched by itself, at most 5 times per list
-                        if (raw.isNotEmpty() || nextStart == null || autoAdvanced >= MAX_AUTO_ADVANCE) break
-                        autoAdvanced++
-                    }
-                }
-                AssetLayer.CHAIN -> Unit
-            }
-            setState { it.copy(isLoading = false, isLoadingMore = false, isRefreshing = false, historyFailed = false) }
+            val end = fetch(user, l)
+            setState { it.copy(activities = raw, endReached = end, isLoading = false, isLoadingMore = false, isRefreshing = false, historyFailed = false) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             setState { it.copy(isLoading = false, isLoadingMore = false, isRefreshing = false, historyFailed = true) }
         }
     }
+
+    /** The next page of [user]'s history on [l] into [raw]; true when it was the last. */
+    private suspend fun fetch(user: String, l: AssetLayer): Boolean = when (l) {
+        AssetLayer.POINTS -> {
+            raw = env.walletApi.pointHistory(user, current.pointType).map(WalletHistory::groomPoints)
+            true
+        }
+        AssetLayer.ENGINE -> {
+            val rows = env.walletApi.engineHistory(user, symbol, PAGE, PAGE * enginePage).mapNotNull(WalletHistory::groomEngine)
+            enginePage++
+            raw = WalletHistory.orderEngine(raw + rows)
+            rows.isEmpty()
+        }
+        AssetLayer.HIVE -> {
+            val ops = WalletHistory.resolveOps(symbol, current.filter)
+            val perMVests = env.wallet.current.hivePerMVests.takeIf { it > 0 } ?: env.walletApi.hivePerMVests()
+            while (true) {
+                val start = nextStart ?: break
+                val rows = env.walletApi.history(user, start, PAGE, ops)
+                nextStart = WalletHistory.nextStart(rows)
+                raw = WalletHistory.order(raw + WalletHistory.page(rows, symbol, ops, perMVests))
+                // RN: while nothing at all shows, the next page is fetched by itself, at most 5 times per list
+                if (raw.isNotEmpty() || nextStart == null || autoAdvanced >= MAX_AUTO_ADVANCE) break
+                autoAdvanced++
+            }
+            nextStart == null
+        }
+        AssetLayer.CHAIN -> true
+    }
+
+    /**
+     * README "Foreground refresh": the portfolio and the history again without a spinner, the history as far as it was
+     * scrolled (RN's refetch reads every loaded page), swapped in when it arrived; a failure keeps the rows on screen.
+     */
+    private fun refreshQuietly() {
+        val user = current.account ?: return
+        val shown = current.activities.size
+        val stamp = env.freshness.stamp()
+        env.wallet.refreshQuietly()
+        job = scope.launch {
+            val layer = layer()
+            if (layer == AssetLayer.HIVE) {
+                launch { loadPending(user) }
+                if (symbol == "HIVE") launch { loadRecurrent(user) }
+            }
+            if (layer == AssetLayer.CHAIN || !current.activitiesEnabled) {
+                readAt = stamp
+                return@launch
+            }
+            val kept = Cursor(nextStart, enginePage, raw, autoAdvanced)
+            nextStart = -1
+            enginePage = 0
+            raw = emptyList()
+            autoAdvanced = 0
+            try {
+                var end = fetch(user, layer)
+                while (!end && raw.size < shown) end = fetch(user, layer)
+                readAt = stamp
+                setState { it.copy(activities = raw, endReached = end, historyFailed = false) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                nextStart = kept.nextStart
+                enginePage = kept.enginePage
+                raw = kept.raw
+                autoAdvanced = kept.autoAdvanced
+            }
+        }
+    }
+
+    /** Where the history's paging stood, put back when a quiet refresh failed. */
+    private class Cursor(val nextStart: Long?, val enginePage: Int, val raw: List<CoinActivity>, val autoAdvanced: Int)
 
     /** RN usePendingRequestsQuery: savings withdrawals, conversions and open orders that name the symbol, soonest first. */
     private suspend fun loadPending(user: String) {

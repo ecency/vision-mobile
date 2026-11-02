@@ -142,7 +142,8 @@ class TestNode {
 
     val auth = TestAuth()
 
-    fun env() = AppEnvironment(
+    /** [monotonic]: the app lock's clock, moved by tests that send the app away (README "Foreground refresh"). */
+    fun env(monotonic: (() -> Long)? = null) = AppEnvironment(
         api = EcencyApi(listOf("https://node-a.example"), transport),
         vault = KeyVaultAsync(KeyVault(store), Dispatchers.IO),
         renderer = InterimPostBodyRenderer("https://i.ecency.com"),
@@ -150,6 +151,7 @@ class TestNode {
         proxyBase = "https://i.ecency.com",
         debugKeyImport = true,
         nowMillis = { 1_791_288_000_000L },
+        security = monotonic?.let { com.ecency.core.app.SecurityConfig(monotonicMillis = it) } ?: com.ecency.core.app.SecurityConfig.DEFAULT,
         auth = auth.services,
     ).also {
         // signed-in readers get RN's feed tabs (Following first); these flows read the trending feed, so it leads

@@ -364,6 +364,20 @@ extension View {
         guard let view = scrollView, view.isDecelerating else { return }
         view.setContentOffset(view.contentOffset, animated: false)
     }
+
+    /// The list shows its very top (no scroll view found yet counts as the top).
+    var isAtTop: Bool {
+        guard let view = scrollView else { return true }
+        return view.contentOffset.y <= -view.adjustedContentInset.top + 1
+    }
+
+    /// Moves the content by [dy] without animation (README "Foreground refresh": rows that went in above the card
+    /// being read). Never past the top.
+    func shift(by dy: CGFloat) {
+        guard let view = scrollView, !view.isTracking else { return }
+        let top = -view.adjustedContentInset.top
+        view.setContentOffset(CGPoint(x: view.contentOffset.x, y: max(top, view.contentOffset.y + dy)), animated: false)
+    }
 }
 
 private struct ScrollMomentumProbe: UIViewRepresentable {

@@ -13,6 +13,9 @@ struct FeedListView: View {
     var scrollToTop = 0
     @Environment(\.appTheme) private var theme
     @State private var momentum = ScrollMomentum()
+    /// Where the drawn cards are (README "Foreground refresh"): the card at the top of the screen stays there when a
+    /// quiet refresh puts new cards above it, so nothing moves under a reader who scrolled down.
+    @State private var frames = CardFrames()
 
     private var model: FeedModel { feed.model as! FeedModel }
 
@@ -42,6 +45,10 @@ struct FeedListView: View {
                             _ = PerfMarks.shared.markOnce(event: PerfEvent.shared.FEED_FIRST_CONTENT)
                         }, payoutPost: { model.post(key: card.key) })
                         .onAppear { if FeedPaging.shouldLoadMore(appearing: card, in: state) { model.loadMore() } }
+                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("feed-scroll")).minY } action: { y in
+                            if let dy = frames.drawn(card.key, at: y, firstKey: feed.state.items.first?.key, atTop: momentum.isAtTop) { momentum.shift(by: dy) }
+                        }
+                        .onDisappear { frames.gone(card.key) }
                         Rectangle().fill(theme.lightBackground).frame(height: 4)
                     }
                     if !state.items.isEmpty {
@@ -60,6 +67,8 @@ struct FeedListView: View {
                 .reportsScrollOffset("feed-scroll")
                 .tracksScrollMomentum(momentum)
             }
+            // new cards on top: shown at the top; further down the card being read is kept in place (CardFrames)
+            .onChange(of: state.items.first?.key) { _, _ in if momentum.isAtTop { proxy.scrollTo("feed-top", anchor: .top) } }
             .accessibilityIdentifier("feed-list")
             .refreshable { await refresh() }
             .collapsesSummary(collapse, space: "feed-scroll")
@@ -70,6 +79,7 @@ struct FeedListView: View {
         }
         .background(theme.background)
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
     }
 
     /// The scroll to top (popup or tab reselect): mid-fling too; the top opens a header above.
@@ -103,6 +113,53 @@ enum FeedPaging {
 
     private static func canLoadMore(_ state: FeedState) -> Bool {
         state.loaded && !state.endReached && !state.isLoadingMore && state.error == nil
+    }
+}
+
+/// The drawn cards' tops in the list's viewport, by post, and the card at the top of the screen (not observed).
+@MainActor final class CardFrames {
+    private var minY: [PostKey: CGFloat] = [:]
+    /// The list's first card when the frames were last read: another one means new cards went in.
+    private var first: PostKey?
+    /// The card at the top of the screen in the last layout of the same list.
+    private var top: (key: PostKey, y: CGFloat)?
+    /// The card that was read before new cards went in above and where it was, while the new layout settles.
+    private var held: (key: PostKey, y: CGFloat, until: Date)?
+
+    /// The card [key] is drawn at [y] in a list whose first card is [firstKey]; returns by how much to move the content
+    /// so that the card at the top of the screen before new cards went in stays where it was while the layout settles.
+    func drawn(_ key: PostKey, at y: CGFloat, firstKey: PostKey?, atTop: Bool) -> CGFloat? {
+        if firstKey != first {
+            // the first layout of a changed list: hold the card read before it (at the top the new cards show instead)
+            held = first != nil && !atTop ? top.map { ($0.key, $0.y, Date().addingTimeInterval(Self.settleSeconds)) } : nil
+            first = firstKey
+            top = nil
+        }
+        minY[key] = y
+        if let until = held?.until, until < Date() { held = nil }
+        if let h = held, h.key == key {
+            // every move of that card while the rows above take their real heights is undone
+            let dy = y - h.y
+            return abs(dy) > 0.5 ? dy : nil
+        }
+        if held == nil {
+            let t = minY.filter { $0.value <= 1 }.max { $0.value < $1.value } ?? minY.min { $0.value < $1.value }
+            top = t.map { ($0.key, $0.value) }
+        }
+        return nil
+    }
+
+    func gone(_ key: PostKey) { minY[key] = nil }
+
+    static let settleSeconds: TimeInterval = 1
+}
+
+extension View {
+    /// README "Foreground refresh": [action] again when the app comes back from the background (the screen's model
+    /// `start()`: after a long trip away it refreshes quietly, otherwise it does nothing). Views kept below the top of
+    /// a navigation stack hear it too, so they are fresh when the reader goes back.
+    func onReturnToForeground(_ action: @escaping () -> Void) -> some View {
+        onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in action() }
     }
 }
 

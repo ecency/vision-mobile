@@ -392,6 +392,7 @@ struct AssetDetailsView: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
         .alert(copy.CONFIRM, isPresented: Binding(get: { s.prompt != nil }, set: { if !$0 { model.dismissPrompt() } })) {
             Button(copy.CONFIRM) { model.confirmPrompt() }.accessibilityIdentifier("details-confirm")
             Button(copy.CANCEL, role: .cancel) { model.dismissPrompt() }
