@@ -429,6 +429,7 @@ struct WaveRowView: View {
                 .padding(.leading, Self.bodyInset)
                 .contentShape(Rectangle())
                 .onTapGesture { app.openPost(item.key) }
+            if item.card.hasPoll { RowPoll(post: item.post).padding(.leading, Self.bodyInset) }
             footer(card)
             .padding(.leading, Self.bodyInset - 4)
         }

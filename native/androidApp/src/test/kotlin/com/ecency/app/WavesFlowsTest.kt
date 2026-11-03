@@ -54,8 +54,8 @@ class WavesFlowsTest {
     }
     private val wavesRequests: MutableList<String> = Collections.synchronizedList(mutableListOf())
 
-    private fun row(author: String, permlink: String, body: String = "Wave $permlink", video: Boolean = false) =
-        """{"id":1,"author":"$author","permlink":"$permlink","title":"","body":"$body","json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]},
+    private fun row(author: String, permlink: String, body: String = "Wave $permlink", video: Boolean = false, meta: String = "") =
+        """{"id":1,"author":"$author","permlink":"$permlink","title":"","body":"$body","json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]$meta},
            "timestamp":"2026-10-06T11:00:00+00:00","pending_payout_value":"0.100 HBD","net_votes":2,"children":1,"host":"ecency.waves","_cursor":"c-$permlink"
            ${if (video) ""","video":{"platform":"3speak","author":"$author","permlink":"v-$permlink","embed_url":"https://play.3speak.tv/embed?v=$author/v-$permlink","thumbnail_url":null}""" else ""}}"""
 
@@ -164,6 +164,18 @@ class WavesFlowsTest {
             .assert(androidx.compose.ui.test.SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Button))
         compose.onAllNodes(hasTestTag("wave:body") and hasAnyAncestor(hasTestTag("wave:alice/w1")))[0].performClick()
         waitFor("postScreen")
+    }
+
+    @Test
+    fun aWaveWithAPollShowsThePollInTheList() {
+        // RN's comment view draws a wave's poll in the list, not only in its thread
+        val poll = ""","content_type":"poll","question":"Dictation assist","choices":["Yes","No"],"end_time":4102444800,"version":1.1"""
+        feedOverride = "[${row("alice", "w1", body = "Do you dictate?", meta = poll)},${row("bob", "w2")}]"
+        launch()
+        openWaves()
+        waitFor("poll")
+        assertEquals(1, compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().size)
+        assertTrue("a wave without a poll has none", compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("wave:bob/w2"))).fetchSemanticsNodes().isEmpty())
     }
 
     @Test

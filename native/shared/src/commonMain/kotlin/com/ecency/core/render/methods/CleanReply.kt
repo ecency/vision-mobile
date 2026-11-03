@@ -16,6 +16,8 @@ internal object CleanReply {
     )
     private val LINE_FILTERS_AFTER = listOf(
         "originally posted through [scrobble.life", "*posted via lumen", "<sub>posted via [hivesuite](",
+        // HiveSuite's newer byline, ahead of render-helper (vision-web #2003)
+        "<sub>[via hivesuite](",
         "view this post <a href=\"https://travelfeed.com/",
         // "[via Inbox]" is compared against the lower-cased line, so it never matches; kept for parity.
         "[via Inbox]", "<sub>[via apps from](",

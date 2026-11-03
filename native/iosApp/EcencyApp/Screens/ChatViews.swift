@@ -942,7 +942,8 @@ struct ChatMessageBubble: View {
 
     private func bubble(_ own: Bool) -> some View {
         let text = own ? Color.white : theme.text
-        return VStack(alignment: .leading, spacing: 4) {
+        // one column as wide as the widest part, so the time can sit on the trailing side without widening the bubble
+        return Grid(alignment: .leading, horizontalSpacing: 0, verticalSpacing: 4) {
             VStack(alignment: .leading, spacing: 4) {
                 if !own {
                     // the author's name opens the quick profile too: at accessibility sizes it is the only way there
@@ -1018,6 +1019,8 @@ struct ChatMessageBubble: View {
                         .accessibilityIdentifier("chat-message-actions-\(item.rowId)")
                 }
             }
+            // the time on the trailing side, as chat apps put it
+            .gridCellAnchor(.trailing)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(UnevenRoundedRectangle(topLeadingRadius: own ? 16 : 4, bottomLeadingRadius: 16, bottomTrailingRadius: 16, topTrailingRadius: own ? 4 : 16)

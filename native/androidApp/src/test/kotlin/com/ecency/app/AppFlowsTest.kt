@@ -1,6 +1,7 @@
 package com.ecency.app
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -73,12 +74,14 @@ class AppFlowsTest {
     private val marks = Collections.synchronizedList(mutableListOf<String>())
     @Volatile private var feedDown = false
     @Volatile private var broadcastDown = false
+    /** More `json_metadata` fields for the reply carol/re-one, comma first. */
+    @Volatile private var replyMetadata = ""
 
-    private fun entry(author: String, permlink: String, parent: Pair<String, String>? = null, votes: List<String> = emptyList(), children: Int = 0) = """{
+    private fun entry(author: String, permlink: String, parent: Pair<String, String>? = null, votes: List<String> = emptyList(), children: Int = 0, meta: String = "") = """{
         "author":"$author","permlink":"$permlink",
         ${parent?.let { """"parent_author":"${it.first}","parent_permlink":"${it.second}",""" } ?: ""}
         "category":"hive-100001","title":"Title $permlink","body":"Body of $permlink with **bold** text",
-        "json_metadata":{"tags":["test"],"description":"Summary of $permlink"},
+        "json_metadata":{"tags":["test"],"description":"Summary of $permlink"$meta},
         "created":"2026-10-06T10:00:00","updated":"2026-10-06T10:00:00","depth":${if (parent == null) 0 else 1},"children":$children,
         "net_rshares":1000,"author_reputation":60.0,"payout":1.5,"is_paidout":false,"payout_at":"2026-10-13T10:00:00",
         "pending_payout_value":"1.500 HBD","author_payout_value":"0.000 HBD","curator_payout_value":"0.000 HBD",
@@ -104,7 +107,7 @@ class AppFlowsTest {
             "bridge.get_post" -> ok(entry("alice", "trending-one", votes = listOf("x"), children = 1))
             "bridge.get_discussion" -> ok(
                 """{"alice/trending-one":${entry("alice", "trending-one", votes = listOf("x"), children = 1)},""" +
-                    """"carol/re-one":${entry("carol", "re-one", parent = "alice" to "trending-one")}}""",
+                    """"carol/re-one":${entry("carol", "re-one", parent = "alice" to "trending-one", meta = replyMetadata)}}""",
             )
             "condenser_api.get_accounts" -> ok(
                 """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${key.publicKey()}",1]]},"memo_key":"${key.publicKey()}"}]""",
@@ -183,6 +186,21 @@ class AppFlowsTest {
         val vault = KeyVault(store)
         vault.save(com.ecency.core.secure.VaultAccount("tester", com.ecency.core.secure.AuthType.POSTING_KEY, postingKey = key.toWif()))
         vault.setCurrentUsername("tester")
+    }
+
+    @Test
+    fun aReplyWithAPollShowsItsPollInTheThread() {
+        // RN's comment view draws a reply's poll, as the post screen does for the post
+        val poll = ""","content_type":"poll","question":"Pick one","choices":["Yes","No"],"end_time":4102444800,"version":1.1"""
+        replyMetadata = poll
+        launch()
+        waitFor("card:alice/trending-one")
+        compose.onNodeWithTag("open:alice/trending-one").performClick()
+        waitFor("postTitle")
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
+        compose.await("the reply's poll") {
+            compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("comment:carol/re-one"))).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test
