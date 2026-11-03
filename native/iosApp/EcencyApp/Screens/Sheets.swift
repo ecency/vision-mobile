@@ -304,14 +304,16 @@ struct ZoomableImageView: View {
     let src: String
     let size: CGSize
     let onZoom: (Bool) -> Void
+    static let maxScale: CGFloat = 5
     @State private var scale: CGFloat = 1
     @State private var base: CGFloat = 1
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 
     var body: some View {
-        // the full file through the proxy, not a sized body variant: zoomed 5x, a 1280 px one would blur
-        LoadedImageView(src: src, maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
+        // the full file through the proxy, not a sized body variant, decoded for the widest zoom: a screen width
+        // decode scaled up 5x would blur (ImageLoader keeps it within its pixel budget)
+        LoadedImageView(src: src, maxWidth: size.width * Self.maxScale, contentMode: .scaleAspectFit) { _ in }
             .frame(width: size.width, height: size.height)
             .scaleEffect(scale)
             .offset(offset)
@@ -319,7 +321,7 @@ struct ZoomableImageView: View {
             .contentShape(Rectangle())
             .gesture(
                 MagnifyGesture()
-                    .onChanged { v in scale = min(5, max(1, base * v.magnification)) }
+                    .onChanged { v in scale = min(Self.maxScale, max(1, base * v.magnification)) }
                     .onEnded { _ in
                         base = scale
                         if scale <= 1 { reset() }

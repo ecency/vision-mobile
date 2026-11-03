@@ -6,6 +6,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.layout.onSizeChanged
 import com.ecency.app.render.PostActions
 import com.ecency.app.render.PostBody
 import com.ecency.core.render.blocks.Block
@@ -93,6 +95,8 @@ class PostBodyTest {
 
     /** Every URL Coil is asked for; answers each with an animated drawable so no network is used. */
     private val requested = Collections.synchronizedList(mutableListOf<String>())
+    /** The size Coil decodes each request at, by URL. */
+    private val sizes = java.util.concurrent.ConcurrentHashMap<String, coil3.size.Size>()
 
     private class FakeAnimated : ColorDrawable(0xFF336699.toInt()), Animatable {
         override fun start() {}
@@ -106,6 +110,7 @@ class PostBodyTest {
         val recorder = object : Interceptor {
             override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
                 requested += chain.request.data.toString()
+                sizes[chain.request.data.toString()] = chain.size
                 return SuccessResult(image = FakeAnimated().asImage(), request = chain.request)
             }
         }
@@ -341,6 +346,21 @@ class PostBodyTest {
         compose.setContent { com.ecency.app.ui.ZoomableImage(src, "image 1 of 1") }
         waitForRequest(src)
         assertTrue("sized variant requested: $requested", requested.none { "width=" in it })
+    }
+
+    @Test
+    fun galleryImageDecodesForItsZoomNotTheScreenWidth() {
+        // decoded at the screen width, a 5x zoom scales a thumbnail up and blurs
+        var widthPx = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize().onSizeChanged { widthPx = it.width }) {
+                com.ecency.app.ui.ZoomableImage(src, "image 1 of 1")
+            }
+        }
+        waitForRequest(src)
+        compose.await("decode size known", boundMillis = 5_000) { sizes[src] != null && widthPx > 0 }
+        val width = (sizes[src]!!.width as? coil3.size.Dimension.Pixels)?.px ?: Int.MAX_VALUE
+        assertTrue("decoded at $width px for a $widthPx px wide viewer", width >= widthPx * 5)
     }
 
     private fun hasTestTagStartingWith(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("tag starts with $prefix") {

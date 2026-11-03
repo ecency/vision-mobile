@@ -288,4 +288,23 @@ final class ImagePipelineTests: XCTestCase {
         for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
         XCTAssertEqual(counter.all, [src])
     }
+
+    /// Decoded at only the screen width, a 5x zoom scales a thumbnail up: the viewer decodes for its widest zoom.
+    func testGalleryImageDecodesForItsZoomNotTheScreenWidth() throws {
+        let photo = UIGraphicsImageRenderer(size: CGSize(width: 2400, height: 1800), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
+            .image { ctx in UIColor.blue.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 2400, height: 1800)) }.pngData()!
+        ImageLoader.shared.setFetch { _ in photo }
+        let page = host(ZoomableImageView(src: src, size: CGSize(width: 390, height: 520)) { _ in })
+        for _ in 0..<50 where find(UIImageView.self, in: page.view)?.image == nil { spin(0.1) }
+        let image = try XCTUnwrap(find(UIImageView.self, in: page.view)?.image)
+        XCTAssertEqual(image.size.width * image.scale, 2400, accuracy: 1, "the whole file, not \(390 * UIScreen.main.scale) px")
+    }
+
+    func testDecodeKeepsAHugeImageUnderThePixelBudget() throws {
+        let big = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 600), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
+            .image { ctx in UIColor.blue.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 1200, height: 600)) }.pngData()!
+        let loaded = try XCTUnwrap(ImageLoader.decode(big, maxPixel: 5000, maxArea: 20_000))
+        XCTAssertLessThanOrEqual(loaded.image.size.width * loaded.image.size.height, 20_000 * 1.05)
+        XCTAssertEqual(loaded.image.size.width, 200, accuracy: 2, "the aspect is kept")
+    }
 }
