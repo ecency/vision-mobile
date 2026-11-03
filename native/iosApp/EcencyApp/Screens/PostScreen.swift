@@ -546,6 +546,7 @@ struct CommentRow: View {
             }
             PostBodyView(blocks: item.blocks, contentWidth: bodyWidth, actions: actions)
                 .padding(.leading, Self.bodyInset)
+            if item.card.hasPoll { RowPoll(post: item.post).padding(.leading, Self.bodyInset) }
             // one row; at large text sizes the vote and count over the other controls, and at the largest the
             // replies (count and caret, kept together) on a line of their own
             ViewThatFits(in: .horizontal) {

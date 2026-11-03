@@ -130,7 +130,8 @@ class PollModel internal constructor(private val env: AppEnvironment, val key: P
             return
         }
         setState { it.copy(isVoting = true, selection = emptyList()) }
-        scope.launch {
+        // outlives the model: a wave or reply row closes its poll when it scrolls away, and the vote still goes
+        env.background.launch {
             val before = current.results
             setState { it.copy(results = withVote(results, user, choices), showResults = true) }
             rebuild()

@@ -858,7 +858,11 @@ private fun MessageBubble(
                     )
                 }
                 item.card?.let { LinkCard(it, own) { onLink(it.url) } }
-                Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                // the time on the trailing side, as chat apps put it
+                Row(
+                    Modifier.align(Alignment.End).padding(top = 4.dp).testTag("messageTime:${item.id}"),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(if (item.edited) ChatUiCopy.editedAt(item.time) else item.time, fontSize = 11.sp, color = if (own) Color.White.copy(alpha = 0.8f) else colors.darkGray)
                     if (own) Box(Modifier.padding(start = 10.dp).clickable(onClick = onLongPress, role = Role.Button).padding(horizontal = 6.dp).testTag("messageActions:${item.id}")) { Glyph(AppIcon.MORE, Color.White, 16.dp, description = ChatUiCopy.MESSAGE_OPTIONS) }
                 }

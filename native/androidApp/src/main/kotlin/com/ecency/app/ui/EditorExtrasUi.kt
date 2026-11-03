@@ -176,10 +176,12 @@ internal fun UnresolvedNotice(notice: String?, unresolved: Boolean, running: Boo
 }
 
 @Composable
-internal fun FailAlert(text: String?, tag: String, onDismiss: () -> Unit) {
+internal fun FailAlert(text: String?, tag: String, onDismiss: () -> Unit, title: String? = null) {
     if (text == null) return
     AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(UiCopy.FAIL) }, text = { Text(text, Modifier.testTag(tag)) },
+        onDismissRequest = onDismiss,
+        title = { Text(title ?: UiCopy.FAIL) },
+        text = { Text(text, Modifier.testTag(tag)) },
         confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("${tag}Ok")) { Text(UiCopy.OK) } },
     )
 }
@@ -447,7 +449,7 @@ internal fun DictationSheet(model: DictationModel, onDismiss: () -> Unit) {
             }
         }
     }
-    FailAlert(state.alert, "dictationAlert", model::clearAlert)
+    FailAlert(state.alert, "dictationAlert", model::clearAlert, title = state.alertTitle)
 }
 
 // What the dictation sheet's three late lines look like at their usual length; never shown, only measured.

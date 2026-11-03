@@ -285,6 +285,24 @@ class ChatFlowsTest {
     }
 
     @Test
+    fun aMessageShowsItsTimeOnTheTrailingSide() {
+        node.chat.seedHistory("ch-dm-alice", 60)
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-dm-alice")
+        compose.onNodeWithTag("chatRow:ch-dm-alice").performClick()
+        waitUntil { hasTextNode("Do you have a minute?") }
+        val tag = androidx.compose.ui.semantics.SemanticsProperties.TestTag
+        val text = compose.onAllNodes(hasText("Do you have a minute?", substring = true), useUnmergedTree = true)
+            .fetchSemanticsNodes().first { it.config.getOrNull(tag)?.startsWith("messageText:") == true }
+        val id = text.config[tag].removePrefix("messageText:")
+        val time = compose.onNodeWithTag("messageTime:$id", useUnmergedTree = true).fetchSemanticsNode()
+        // the message is wider than its time: the time ends where the text ends, not where it starts
+        assertTrue("the time starts after the text does", time.boundsInRoot.left > text.boundsInRoot.left + 1f)
+        assertEquals(text.boundsInRoot.right, time.boundsInRoot.right, 2f)
+    }
+
+    @Test
     fun aConversationReadOnScreenShowsReadInTheListOnReturn() {
         node.signIn()
         launch()

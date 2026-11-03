@@ -487,6 +487,15 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
             }
             androidx.compose.runtime.CompositionLocalProvider(LocalMergedRow provides false) {
                 PostBody(item.blocks, bodyWidth, actions.body, Modifier.padding(top = 2.dp))
+                // RN's comment view draws a reply's poll too
+                val env = feedx?.env
+                val poll = remember(item.post.metadata.rawJson, env) { env?.pollModel(item.post) }
+                androidx.compose.runtime.DisposableEffect(poll) { onDispose { poll?.close() } }
+                if (poll != null) {
+                    PollCard(poll) { voters ->
+                        env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET })
+                    }
+                }
             }
             ActionsRow(
                 card = item.card,
