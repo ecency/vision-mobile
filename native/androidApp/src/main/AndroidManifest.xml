@@ -6,6 +6,9 @@
     <!-- "Save image" into Pictures/Ecency on Android 9 and older (MediaStore needs no permission from Android 10) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Kept from the RN app, which declared it: Play checks one advertising ID declaration ("Yes") against every
+         bundle it still serves, RN ones included. Nothing in the app reads the advertising ID. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <!-- Push notifications (Android 13+ asks the user at start, as the RN app does). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Dictation in the editor: asked for when the user taps Record, never before. Recording stops with the screen. -->
