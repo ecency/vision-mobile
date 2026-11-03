@@ -146,7 +146,7 @@ private struct DetailPane: View {
                 .accessibilityIdentifier("detail-pane")
         } else {
             SwiftUI.Image(appIcon: tab.icon)
-                .font(.system(size: 64, weight: .light))
+                .font(.largeTitle.weight(.light)).imageScale(.large)
                 .foregroundStyle(theme.secondary.opacity(0.35))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(theme.background)
@@ -159,7 +159,7 @@ private struct DetailPane: View {
     /// screen, then the screen's title (or its own title item) in the middle and its actions at the trailing end.
     private func header(_ items: [ScreenBarPlacement: AnyView], title: String?) -> some View {
         HStack(spacing: 4) {
-            Button { app.openDrawer() } label: { SwiftUI.Image(systemName: "sidebar.left").scaledFont(18).foregroundStyle(theme.icon).tapTarget() }
+            Button { app.openDrawer() } label: { SwiftUI.Image(appIcon: .account).scaledFont(18).foregroundStyle(theme.icon).tapTarget() }
                 .accessibilityLabel(menuLabel)
                 .largeContent(menuLabel)
                 .accessibilityIdentifier("pane-menu")

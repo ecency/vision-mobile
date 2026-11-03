@@ -54,7 +54,7 @@ final class Gaps2UITests: XCTestCase {
         let spike = app.buttons["post-tag-spike"]
         let footer = element(app, "posted-by")
         // Clear of the post's bottom action bar too: a pill under it hands the tap to the bar.
-        let bar = app.buttons["gift"]
+        let bar = element(app, "post-footer")
         func clear() -> Bool {
             spike.exists && spike.isHittable && footer.exists && (!bar.exists || spike.frame.maxY <= bar.frame.minY)
         }

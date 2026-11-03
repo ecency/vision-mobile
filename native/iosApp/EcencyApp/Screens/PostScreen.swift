@@ -251,11 +251,17 @@ struct PostScreen: View {
                         .largeContent(UiCopy.shared.EDIT, appIcon: .compose)
                         .accessibilityIdentifier("post-edit")
                     }
-                    MenuButton {
+                    // a plain image button, as the edit one: a bar item iPhone Duo can lay out in its vertical bar
+                    Button {
                         // RN offers Translate in the menu only for sub-posts (comments opened on their own)
                         let isComment = p.depth > 0
                         app.openMenu(p, context: PostMenuContext(translate: isComment, openThread: false, ownProfile: false))
+                    } label: {
+                        Image(appIcon: .more)
                     }
+                    .accessibilityLabel(ReadingUiCopy.shared.POST_OPTIONS)
+                    .largeContent(ReadingUiCopy.shared.POST_OPTIONS, appIcon: .more)
+                    .accessibilityIdentifier("post-options")
                 }
             }
         }
