@@ -502,6 +502,7 @@ class DictationModelTest {
         assertEquals(listOf("start", "stop"), w.recorder.events, "stopped, the clip kept")
         assertEquals(DictationState.Retry.CONFIRM, m.current.retry)
         assertEquals(DictationModel.HELD_LOCKED, m.current.alert)
+        assertEquals(DictationModel.HELD_TITLE, m.current.alertTitle)
         assertFalse(w.app.env.dictationSessions.isRecording, "the background session and its notification went")
         w.idle()
         assertTrue(w.uploads.isEmpty(), "nothing is sent behind the lock")
@@ -652,6 +653,7 @@ class DictationModelTest {
         assertTrue(w.uploads.isEmpty(), "a Stop on the lock screen spends nothing")
         assertEquals(DictationState.Retry.CONFIRM, m.current.retry)
         assertEquals(DictationModel.HELD_STOPPED, m.current.alert)
+        assertEquals(DictationModel.HELD_TITLE, m.current.alertTitle, "a clip the user stopped is not a failure")
         assertFalse(w.app.env.dictationSessions.isRecording)
         // a second Stop from a stale notification does nothing
         w.app.env.dictationSessions.stopFromNotification()
@@ -674,6 +676,7 @@ class DictationModelTest {
         w.idle()
         assertEquals(DictationState.Retry.CONFIRM, m.current.retry)
         assertEquals(DictationModel.HELD_INTERRUPTED, m.current.alert)
+        assertEquals(DictationModel.HELD_TITLE, m.current.alertTitle)
         assertTrue(w.uploads.isEmpty())
         assertEquals(1, w.recorder.files.size)
     }
@@ -687,6 +690,7 @@ class DictationModelTest {
         w.idle()
         assertEquals(DictationState.Retry.CONFIRM, m.current.retry)
         assertEquals(DictationModel.HELD_FOCUS_LOST, m.current.alert)
+        assertEquals(DictationModel.HELD_TITLE, m.current.alertTitle)
         assertTrue(w.uploads.isEmpty())
     }
 
@@ -830,5 +834,16 @@ class DictationModelTest {
         assertNull(m.current.retry)
         assertTrue(w.recorder.files.isEmpty())
         assertNull(w.app.env.paidIntents.load(user, DictationModel.KIND, "new"))
+    }
+
+    @Test
+    fun aFailureAlertKeepsTheFailTitleAndAHeldClipGetsItsOwn() {
+        assertNull(DictationState(alert = DictationModel.NOT_READ).alertTitle, "a failure keeps the generic title")
+        assertNull(DictationState().alertTitle)
+        for (held in listOf(DictationModel.HELD_LOCKED, DictationModel.HELD_NO_BACKGROUND, DictationModel.HELD_STOPPED,
+            DictationModel.HELD_FOCUS_LOST, DictationModel.HELD_INTERRUPTED)) {
+            assertEquals(DictationModel.HELD_TITLE, DictationState(alert = held).alertTitle, held)
+        }
+        assertEquals("Recording stopped", DictationModel.HELD_TITLE)
     }
 }

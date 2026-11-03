@@ -112,6 +112,12 @@ data class DictationState(
 
     val isPriceReady: Boolean get() = price != null && !priceLoading && !priceFailed
 
+    /**
+     * The alert's own title, or null for the generic failure title. A clip held unsent (the notification's Stop, the
+     * lock, a call) is not a failure: it says "Recording stopped".
+     */
+    val alertTitle: String? get() = if (alert != null && alert in DictationModel.heldMessages()) DictationModel.HELD_TITLE else null
+
     val busy: Boolean get() = phase == DictationPhase.TRANSCRIBING || askPermission
 
     val clock: String get() = "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
@@ -587,11 +593,15 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
         const val MAX_TEXT = 100_000
 
         val TITLE: String get() = L.dictation.title
+        val HELD_TITLE: String get() = L.native.dictation.heldTitle
         val HELD_LOCKED: String get() = L.native.dictation.heldLocked
         val HELD_NO_BACKGROUND: String get() = L.native.dictation.heldNoBackground
         val HELD_STOPPED: String get() = L.native.dictation.heldStopped
         val HELD_FOCUS_LOST: String get() = L.native.dictation.heldFocusLost
         val HELD_INTERRUPTED: String get() = L.native.dictation.heldInterrupted
+
+        /** Every message of a clip held unsent ([holdRecording]), in the current language. */
+        fun heldMessages(): Set<String> = setOf(HELD_LOCKED, HELD_NO_BACKGROUND, HELD_STOPPED, HELD_FOCUS_LOST, HELD_INTERRUPTED)
         val DENIED: String get() = L.dictation.denied
         val RECORDER_ERROR: String get() = L.dictation.errorRecorder
         val PRICE_ERROR: String get() = L.dictation.priceError

@@ -2523,6 +2523,7 @@
       "transcribe": "Transcribe",
       "no_longer_free_cost": "This recording is no longer free today. It costs {cost} Points.",
       "no_longer_free": "This recording is no longer free today.",
+      "held_title": "Recording stopped",
       "held_locked": "Recording stopped when Ecency locked. Nothing was sent. Tap Transcribe to send it, or give it up.",
       "held_no_background": "Recording stopped when Ecency left the screen (it could not show its recording notification). Nothing was sent. Tap Transcribe to send it, or give it up.",
       "held_stopped": "Recording stopped from the notification. Nothing was sent. Tap Transcribe to send it, or give it up.",
