@@ -94,6 +94,8 @@ final class ThemedBackgroundLintTests: XCTestCase {
                 if ch == "}" || ch == ")" { depth -= 1 }
                 if opened && depth == 0 {
                     tail = String(code.dropFirst(k + 1))
+                    // `List(items) { row in`: the trailing closure is still the List
+                    if tail.trimmingCharacters(in: .whitespaces).hasPrefix("{") { continue }
                     break
                 }
             }
@@ -140,6 +142,8 @@ final class ThemedBackgroundLintTests: XCTestCase {
         XCTAssertTrue(Self.themedAfter(["List {", "  Text(a)", "}", ".listStyle(.plain)", ".themedList()"], from: 0))
         XCTAssertTrue(Self.themedAfter(["Form { Group { content }.themedCardRow() }.themedList()"], from: 0))
         XCTAssertTrue(Self.themedAfter(["List {", "}", ".refreshable {", "  model.refresh()", "}", ".themedList()"], from: 0))
+        XCTAssertTrue(Self.themedAfter(["List(list, id: \\.to) { r in", "  Text(r)", "}", ".themedList()"], from: 0), "a trailing closure")
+        XCTAssertFalse(Self.themedAfter(["List(list, id: \\.to) { r in", "  Text(r)", "}", ".listStyle(.plain)"], from: 0))
         XCTAssertFalse(Self.themedAfter(["List {", "  Text(a)", "}", ".listStyle(.plain)", "Text(b)", ".themedList()"], from: 0))
         XCTAssertTrue(Self.isBlackBackground("        .background(Color.black)"))
         XCTAssertTrue(Self.isBlackBackground("            Color.black"))

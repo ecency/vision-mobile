@@ -289,10 +289,13 @@ final class ThemedBackgroundUITests: XCTestCase {
         var leadingOnly = false
         /// A button that opens the sheet under test
         var tap: String? = nil
+        /// The sheet's root element: waited for, and the scan starts under its top (a medium sheet sits below the
+        /// dimmed screen, whose colours vary)
+        var sheetId: String? = nil
     }
 
     /// Identifier prefixes of elements whose rows are left out (see `pageScan`).
-    private static let stripPrefixes = ["notifications-page-", "editor-toolbar"]
+    private static let stripPrefixes = ["notifications-page-", "notification-", "editor-toolbar"]
 
     /// Content drawn edge to edge with its own fill: the profile cover and the skeleton's cover bone.
     private static let contentIds = ["skeleton-profile", "profile-cover"]
@@ -312,8 +315,8 @@ final class ThemedBackgroundUITests: XCTestCase {
         let w = app.windows.firstMatch.frame
         let want = dark ? Self.darkBackground : Self.lightBackground, card = dark ? Self.darkCard : Self.lightCard
         var skips = (page.skip + Self.contentIds).map { element(app, $0) }.filter { $0.exists }.map { $0.frame.insetBy(dx: -2, dy: -2) }
-        // the notifications page chips (the selected one is an accent fill at the edge) and the editor's toolbar
-        // (its labels run under the edge): their rows are left out
+        // the notifications page chips (the selected one is an accent fill at the edge), unread notification rows
+        // (RN's tint) and the editor's toolbar (its labels run under the edge): their rows are left out
         for prefix in Self.stripPrefixes {
             let chips = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).allElementsBoundByIndex
             for chip in chips where chip.exists && chip.frame.height < 80 {
@@ -326,7 +329,8 @@ final class ThemedBackgroundUITests: XCTestCase {
             skips.append(CGRect(x: w.minX, y: tabBar.frame.minY - 12, width: w.width, height: 13))
         }
         var runs: [String] = []
-        let top = page.sheet ? sheetTop(s, app) : page.top
+        var top = page.sheet ? sheetTop(s, app) : page.top
+        if let id = page.sheetId, element(app, id).exists { top = max(top, element(app, id).frame.minY + 24) }
         // a sheet floats inset from the window's edges and bottom (iOS 26): its columns are inside it
         let inset: CGFloat = page.sheet ? 12 : 2, bottom = w.maxY - (page.sheet ? 44 : 1)
         for x in page.leadingOnly ? [w.minX + inset] : [w.minX + inset, w.maxX - inset] {
@@ -381,6 +385,7 @@ final class ThemedBackgroundUITests: XCTestCase {
                     Thread.sleep(forTimeInterval: 1.5)
                     page.sheet = true
                 }
+                if let id = page.sheetId { XCTAssertTrue(element(app, id).waitForExistence(timeout: 20), "\(page.name): \(id)") }
                 // one screenshot: the edges are still by now, while Esie, shimmers and spinners in the middle never settle
                 Thread.sleep(forTimeInterval: 1)
                 let s = XCUIScreen.main.screenshot()
@@ -426,16 +431,18 @@ final class ThemedBackgroundUITests: XCTestCase {
 
     /// The app's sheets (they sit below the dimmed screen: the scan starts under the sheet's top edge).
     func testEverySheet() {
-        let sheets = ["login", "accounts", "backupKeys", "register", "quickProfile", "customise", "menu", "digest"]
-        sweep(sheets.map { Page(name: "sheet-\($0)", args: Self.signedIn + ["-openScreen", $0], sheet: true) })
+        // the keys sheet opens under its PIN warning alert, so it is left out
+        let sheets: [(String, String?)] = [("login", nil), ("accounts", nil), ("register", "register"), ("quickProfile", "quick-profile"),
+                                           ("customise", nil), ("menu", "post-menu"), ("digest", "digest-sheet")]
+        sweep(sheets.map { Page(name: "sheet-\($0.0)", args: Self.signedIn + ["-openScreen", $0.0], sheet: true, sheetId: $0.1) })
     }
 
     /// Sheets opened from a screen (not the app's sheet host).
     func testNestedSheets() {
-        sweep([Page(name: "wallet-receive", args: Self.signedIn + ["-startTab", "WALLET"], tap: "wallet-receive"),
+        sweep([Page(name: "wallet-receive", args: Self.signedIn + ["-startTab", "WALLET"], tap: "wallet-receive", sheetId: "receive-sheet"),
                Page(name: "search-filters", args: Self.signedIn + ["-openScreen", "route:SEARCH_RESULT"], tap: "search-filters"),
                Page(name: "history-filter", args: Self.signedIn + ["-openScreen", "route:ASSET_DETAILS:HIVE"], tap: "history-filter"),
-               Page(name: "chats-new-group", args: Self.signedIn + ["-startTab", "CHATS"], tap: "chats-new-group")])
+               Page(name: "chats-new-group", args: Self.signedIn + ["-startTab", "CHATS"], tap: "chats-new-group", sheetId: "new-group-sheet")])
     }
 
     /// The first load of every screen that loads, held in its loading state (`-demoNetwork hold`): skeletons and
