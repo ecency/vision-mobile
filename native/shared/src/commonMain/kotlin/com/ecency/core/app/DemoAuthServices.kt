@@ -30,6 +30,7 @@ object DemoAuthServices {
     fun create(nowMillis: () -> Long, waitMillis: Long = 5 * 60_000): AuthServices {
         val demoChat = DemoChat(nowMillis).also { chat = it }
         val http = AuthHttp { request ->
+            if (demoChat.holdSignIn && "/api/mattermost/bootstrap" in request.url) delay(120_000)
             demoChat.http(request)?.let { return@AuthHttp it }
             DemoWallet.http(request.url, request.body)?.let { return@AuthHttp it }
             demoPrivateApi(request.url, nowMillis(), request.body)?.let { return@AuthHttp it }
