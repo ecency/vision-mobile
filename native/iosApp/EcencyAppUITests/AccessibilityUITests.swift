@@ -213,6 +213,32 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    /// The post footer's tags row (below the fold, so the screen audit above misses it) at the largest text. Only the
+    /// pills' findings count: once scrolled, rows left under the translucent top bar read as low contrast whatever
+    /// their colours, and the screen audit covers those unscrolled.
+    func testPostTagsAuditAtTheLargestText() throws {
+        let app = launch(["-openPost", "spike-alice/fake-post-1"] + Self.ax5)
+        XCTAssertTrue(element(app, "post-title").waitForExistence(timeout: 25))
+        let pill = app.buttons["post-tag-spike"]
+        // short drags: a swipe at this text size can fling the row past the screen
+        let window = app.windows.firstMatch
+        for _ in 0..<40 where !(pill.exists && pill.isHittable) {
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)))
+        }
+        XCTAssertTrue(pill.isHittable, app.debugDescription)
+        XCTAssertGreaterThanOrEqual(pill.frame.height, 44)
+        _ = waitUntilStill(app, "post tags (AX5)")
+        var found: [String] = []
+        try app.performAccessibilityAudit(for: .all) { issue in
+            guard let e = issue.element, e.identifier.hasPrefix("post-tag") else { return true }
+            if AuditExclusions.excuses(issue) { return true }
+            found.append("[\(issue.auditType)] \(issue.compactDescription) on '\(e.identifier)' '\(e.label)'")
+            return true
+        }
+        XCTAssertEqual(found, [], "post tags (AX5)")
+    }
+
     /// The vote sheet at the largest text: the audit passes and the vote button stays reachable (the sheet scrolls).
     func testVoteSheetAuditAtTheLargestText() {
         let app = launch(["-seedAccounts", "YES"] + Self.ax5)

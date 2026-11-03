@@ -185,6 +185,8 @@ struct PostScreen: View {
                         } else {
                             bodySection(state, width: contentWidth)
                         }
+                        // RN postDisplayView footer <Tags> above "Posted by", once the body is in (RN keeps it beside a translation)
+                        if state.post != nil, state.body != nil, !state.tags.isEmpty { PostTagsRow(tags: state.tags) { app.push($0) } }
                         // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges
                         if let p = state.post, state.body != nil, extras.translate.state.translated == nil { PostedByRow(post: p) }
                         // RN NewsletterPostPrompt, once the body is in
