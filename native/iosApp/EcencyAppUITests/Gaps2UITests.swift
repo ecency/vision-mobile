@@ -53,7 +53,12 @@ final class Gaps2UITests: XCTestCase {
         let community = app.buttons["post-tag-hive-100001"]
         let spike = app.buttons["post-tag-spike"]
         let footer = element(app, "posted-by")
-        for _ in 0..<8 where !(spike.exists && spike.isHittable && footer.exists) { app.swipeUp() }
+        // Clear of the post's bottom action bar too: a pill under it hands the tap to the bar.
+        let bar = app.buttons["gift"]
+        func clear() -> Bool {
+            spike.exists && spike.isHittable && footer.exists && (!bar.exists || spike.frame.maxY <= bar.frame.minY)
+        }
+        for _ in 0..<8 where !clear() { app.swipeUp() }
         XCTAssertTrue(community.waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertTrue(spike.exists)
         XCTAssertEqual(community.label, "Spike Community, community")
@@ -64,6 +69,7 @@ final class Gaps2UITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(spike.frame.width, 44)
         XCTAssertTrue(footer.exists)
         XCTAssertLessThanOrEqual(spike.frame.maxY, footer.frame.minY + 0.5, "above the posted by line")
+        XCTAssertTrue(clear(), "the tag pill is on screen and clear of the action bar")
         spike.tap()
         XCTAssertTrue(app.navigationBars["#spike"].waitForExistence(timeout: 10), app.debugDescription)
         app.navigationBars.buttons.element(boundBy: 0).tap()
