@@ -179,16 +179,19 @@ struct PostCardView: View {
 }
 
 /// Card image: full card width, rounded 8, `$primaryLightBackground` until loaded. Starts at 16:9 like
-/// RN and takes the bitmap's ratio once known, never taller than the screen.
+/// RN and takes the bitmap's ratio once known, never taller than the app's window (not the screen: on iPhone Duo
+/// the window changes with every fold).
 struct CardImageView: View {
     let src: String
     let width: CGFloat
     @State private var ratio: CGFloat = 16.0 / 9.0
     @Environment(\.appTheme) private var theme
+    @Environment(\.viewportSize) private var viewport
 
-    static func height(width: CGFloat, ratio: CGFloat, screenHeight: CGFloat) -> CGFloat {
+    /// `maxHeight` nil (the window not measured yet): only the ratio counts.
+    static func height(width: CGFloat, ratio: CGFloat, maxHeight: CGFloat?) -> CGFloat {
         let safe = ratio.isFinite && ratio > 0 ? ratio : 16.0 / 9.0
-        return min(width / safe, screenHeight)
+        return min(width / safe, maxHeight ?? .infinity)
     }
 
     var body: some View {
@@ -196,7 +199,7 @@ struct CardImageView: View {
             let r = loaded.naturalSize.width / max(1, loaded.naturalSize.height)
             if r.isFinite, r > 0, abs(r - ratio) > 0.01 { ratio = r }
         }
-        .frame(width: width, height: Self.height(width: width, ratio: ratio, screenHeight: UIScreen.main.bounds.height))
+        .frame(width: width, height: Self.height(width: width, ratio: ratio, maxHeight: viewport?.height))
         .background(theme.lightBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }

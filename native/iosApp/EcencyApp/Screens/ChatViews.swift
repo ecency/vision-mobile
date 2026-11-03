@@ -560,6 +560,7 @@ struct ChatThreadView: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isInPane) private var isInPane
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var sheet: ThreadSheet?
     /// "Choose from Library" or "Choose from Files" for an attachment (RN #3561), and the Files importer while open.
@@ -594,7 +595,8 @@ struct ChatThreadView: View {
         }
         .mediaFileImporter(surface: $files) { _, images in if let image = images.first { thread.attach(file: image) } }
         .background(theme.background)
-        .toolbar(.hidden, for: .navigationBar)
+        // its own header instead of the bar; in the pane the bar is the list's too and stays
+        .toolbar(isInPane ? .automatic : .hidden, for: .navigationBar)
         .onAppear {
             thread.start()
             onScreen = true
@@ -632,10 +634,13 @@ struct ChatThreadView: View {
     private func header(_ s: ChatThreadState) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Button { dismiss() } label: { Image(appIcon: .back).scaledFont(20).foregroundStyle(theme.icon).tapTarget() }
-                    .accessibilityLabel(UiCopy.shared.BACK)
-                    .largeContent(UiCopy.shared.BACK, appIcon: .back)
-                    .accessibilityIdentifier("chat-back")
+                // in the pane its back button is the pane's own
+                if !isInPane {
+                    Button { dismiss() } label: { Image(appIcon: .back).scaledFont(20).foregroundStyle(theme.icon).tapTarget() }
+                        .accessibilityLabel(UiCopy.shared.BACK)
+                        .largeContent(UiCopy.shared.BACK, appIcon: .back)
+                        .accessibilityIdentifier("chat-back")
+                }
                 HStack(spacing: 6) {
                     Text(s.title).scaledFont(16, weight: .semibold).foregroundStyle(theme.text).lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
                         .accessibilityAddTraits(.isHeader)

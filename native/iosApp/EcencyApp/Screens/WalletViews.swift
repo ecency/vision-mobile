@@ -45,6 +45,9 @@ struct WalletTabView: View {
                     else { model.claim(symbol: row.symbol) }
                 }
                 .listRowSeparator(.hidden)
+                // the phone's 16 pt beside the cards, also where the list is a column beside the user menu (two
+                // panes), whose default row margin is none
+                .listRowInsets(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
                 // the theme between and beside the cards (the system row colour is black in dark mode)
                 .themedRow()
             }

@@ -31,7 +31,8 @@ final class NotificationUITests: XCTestCase {
         let app = launch(["-seedAccounts", "YES"])
         let tab = app.buttons["tab-notification"]
         XCTAssertTrue(tab.waitForExistence(timeout: 15))
-        let unread = NSPredicate(format: "label == %@", "Notifications, 3 unread")
+        // the system tab bar reads the badge as the button's value ("3 items")
+        let unread = NSPredicate(format: "label == %@ AND value CONTAINS %@", "Notifications", "3")
         expectation(for: unread, evaluatedWith: tab)
         waitForExpectations(timeout: 10)
         tab.tap()

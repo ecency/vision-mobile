@@ -239,9 +239,9 @@ struct PostScreen: View {
         .background(theme.background)
         .navigationTitle(state.card.map { "@\($0.author)" } ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .screenBarItem(.trailing) {
             if let p = state.post {
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                Group {
                     // RN header edit icon: own posts and comments, into the editor (editor wave)
                     if p.author == app.session.state.username {
                         Button { app.push(AppScreenCompanion.shared.of(route: .editor, arg: "\(p.author)/\(p.permlink)")) } label: {

@@ -18,6 +18,8 @@ struct InlineTextBuilder {
     var avatarURL: (String) -> String? = PostActions.defaultAvatarURL
     /// Dynamic Type: sizes scale like RN Text does with the system text size.
     var contentSize: UIContentSizeCategory = .large
+    /// Pixels per point of the display the text is drawn on (`\.displayScale`): chip images and avatars are made at it.
+    var displayScale: CGFloat = 1
 
     struct Built {
         let text: NSAttributedString
@@ -55,7 +57,8 @@ struct InlineTextBuilder {
 
         // RN wraps each chip in spaces: `{' '}<chip/>{' '}`.
         func chip(_ label: String, avatar: String?, target: Int) {
-            let attachment = ChipAttachment(label: label, avatarURL: avatar, theme: theme, font: base[.font] as! UIFont, contentSize: contentSize)
+            let attachment = ChipAttachment(label: label, avatarURL: avatar, theme: theme, font: base[.font] as! UIFont, contentSize: contentSize,
+                                            displayScale: displayScale)
             out.append(NSAttributedString(string: " ", attributes: base))
             var attrs = base
             attrs[.ecencyTarget] = target
@@ -141,7 +144,8 @@ struct InlineTextBuilder {
 final class ChipAttachment: NSTextAttachment {
     static let minHeight: CGFloat = 18
     static let avatarSize: CGFloat = 14
-    static var avatarPixels: CGFloat { avatarSize * UIScreen.main.scale }
+    /// The avatar's decoded size: its points at the display's scale.
+    var avatarPixels: CGFloat { ChipAttachment.avatarSize * displayScale }
     static let images: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
         cache.countLimit = 500
@@ -152,9 +156,11 @@ final class ChipAttachment: NSTextAttachment {
     let avatarURL: String?
     private let theme: PostTheme
     private let labelFont: UIFont
+    let displayScale: CGFloat
 
-    init(label: String, avatarURL: String?, theme: PostTheme, font: UIFont, contentSize: UIContentSizeCategory = .large) {
+    init(label: String, avatarURL: String?, theme: PostTheme, font: UIFont, contentSize: UIContentSizeCategory = .large, displayScale: CGFloat) {
         self.label = label
+        self.displayScale = displayScale
         self.avatarURL = avatarURL
         self.theme = theme
         labelFont = UIFont.systemFont(ofSize: InlineTextBuilder.scaled(12, contentSize))
@@ -176,14 +182,14 @@ final class ChipAttachment: NSTextAttachment {
     }
 
     private var avatar: UIImage? {
-        avatarURL.flatMap { ImageLoader.shared.cached($0, maxPixel: ChipAttachment.avatarPixels)?.image }
+        avatarURL.flatMap { ImageLoader.shared.cached($0, maxPixel: avatarPixels)?.image }
     }
 
     var needsAvatar: Bool { avatarURL != nil && avatar == nil }
 
     override func image(forBounds imageBounds: CGRect, textContainer: NSTextContainer?, characterIndex charIndex: Int) -> UIImage? {
         let avatar = self.avatar
-        let key = "\(label)|\(avatarURL ?? "")|\(avatar != nil)|\(theme.isDark)|\(bounds.width)x\(bounds.height)" as NSString
+        let key = "\(label)|\(avatarURL ?? "")|\(avatar != nil)|\(theme.isDark)|\(bounds.width)x\(bounds.height)@\(displayScale)" as NSString
         if let hit = ChipAttachment.images.object(forKey: key) { return hit }
         let image = render(avatar: avatar)
         ChipAttachment.images.setObject(image, forKey: key)
@@ -198,8 +204,11 @@ final class ChipAttachment: NSTextAttachment {
         let label = self.label
         let font = labelFont
         let hasAvatarSlot = avatarURL != nil
-        return UIGraphicsImageRenderer(size: size).image { ctx in
-            let hairline = 1 / UIScreen.main.scale
+        let scale = displayScale
+        let format = UIGraphicsImageRendererFormat.preferred()
+        format.scale = scale
+        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            let hairline = 1 / scale
             let pill = UIBezierPath(
                 roundedRect: CGRect(origin: .zero, size: size).insetBy(dx: hairline / 2, dy: hairline / 2),
                 cornerRadius: min(20, size.height / 2)

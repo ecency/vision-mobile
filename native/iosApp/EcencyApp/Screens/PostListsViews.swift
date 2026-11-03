@@ -205,8 +205,8 @@ struct EditHistoryView: View {
         }
         .navigationTitle(ReadingUiCopy.shared.EDIT_HISTORY)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+        .screenBarItem(.trailing) {
+            Group {
                 Button { history.toggleDiff() } label: { Image(appIcon: .swap) }
                     .accessibilityLabel(s.showDiff ? L.Native.Ios.Reading.showVersion : L.Native.Ios.Reading.showChanges)
                     .largeContent(s.showDiff ? L.Native.Ios.Reading.showVersion : L.Native.Ios.Reading.showChanges, appIcon: .swap)

@@ -18,7 +18,8 @@ struct BackupKeysSheet: View {
     @StateObject private var observed: Observed<BackupKeysState>
     @State private var secret = ""
     @State private var copied = false
-    @State private var captured = UIScreen.main.isCaptured
+    /// The window is recorded, mirrored or AirPlayed (Viewport.swift `onSceneCaptureChange`).
+    @State private var captured = false
     /// The app is not active (app switcher, control centre, a system prompt): the sheet shows its cover.
     @State private var covered = false
     /// A screenshot was taken while keys were on screen: revealed keys were hidden, and the sheet says so.
@@ -81,9 +82,9 @@ struct BackupKeysSheet: View {
             if shown || !ScreenShield.isAvailable { screenshotNotice = true }
         }
         .onChange(of: state.phase) { _, phase in if phase == .closed { dismiss() } }
-        .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
-            captured = UIScreen.main.isCaptured
-            if captured { model.hideAll() }
+        .onSceneCaptureChange { isCaptured in
+            captured = isCaptured
+            if isCaptured { model.hideAll() }
         }
         .interactiveDismissDisabled(state.isImporting)
         // RN settings.keys_warning: Cancel leaves, Set PIN opens the new PIN pad

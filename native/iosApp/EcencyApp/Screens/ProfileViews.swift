@@ -180,10 +180,10 @@ struct ProfileScreen: View {
         .background(theme.background)
         .navigationTitle(state.header?.displayName ?? "@\(state.username)")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .screenBarItem(.principal) {
             // RN Header with the selected user while the summary is closed; a tap opens it again
             if !collapse.open, let header = state.header {
-                ToolbarItem(placement: .principal) {
+                Group {
                     Button { collapse.expand() } label: {
                         HStack(spacing: 8) {
                             AvatarView(url: header.avatarUrl, size: 28)
@@ -404,6 +404,7 @@ private struct ProfileSummaryView: View {
     @Environment(\.motion) private var motion
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.viewportSize) private var viewport
     @State private var showBarText = false
 
     var body: some View {
@@ -411,7 +412,9 @@ private struct ProfileSummaryView: View {
             ZStack {
                 Rectangle().fill(scheme == .dark ? Color(hex: 0x2E3D51) : Color(hex: 0xE6EEF9))
                 if !header.coverUrl.isEmpty {
-                    LoadedImageView(src: header.coverUrl, maxWidth: UIScreen.main.bounds.width, contentMode: .scaleAspectFill) { _ in }
+                    // decoded for the window's width (it spans it), which changes as iPhone Duo folds and unfolds;
+                    // 400 pt until the window is measured
+                    LoadedImageView(src: header.coverUrl, maxWidth: viewport?.width ?? 400, contentMode: .scaleAspectFill) { _ in }
                         .accessibilityIdentifier("cover")
                 }
             }

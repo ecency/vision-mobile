@@ -868,9 +868,10 @@ final class AppContainer: ObservableObject {
         heroSources = heroSources.filter { live.contains($0.key) }
     }
 
-    /// Pushes [screen]; the login screen is the sign-in sheet on iOS, and gated screens ask for it first.
+    /// Pushes [screen]; the login screen is the sign-in sheet on iOS, and gated screens ask for it first. On a wide
+    /// window what a list opens goes to the pane beside it (NavState.pushIn, README "iPhone Duo").
     func push(_ screen: AppScreen) {
-        let next = nav.pushGated(screen: screen, loggedIn: session.state.isLoggedIn)
+        let next = nav.pushIn(screen: screen, loggedIn: session.state.isLoggedIn, wide: wideWindow)
         if next.top is AppScreenLogin {
             nav = nav.closeDrawer()
             sheet = .login
@@ -897,6 +898,23 @@ final class AppContainer: ObservableObject {
         set { nav = nav.popTo(size: Int32(newValue.count)) }
     }
 
+    /// The pane's own stack (README "iPhone Duo"); its back button or swipe sets a shorter one.
+    var panePath: [NavItem] {
+        get { nav.pane }
+        set { nav = nav.popPaneTo(size: Int32(newValue.count)) }
+    }
+
+    /// Whether the window has room for two panes (iPhone Duo's inner display held sideways). Never on a phone.
+    @Published private(set) var wideWindow = false
+
+    /// The window's width changed (a fold, an unfold, a turn): the pane joins the stack or comes back beside the list.
+    func fit(width: CGFloat) {
+        let wide = NavState.companion.hasRoomForPanes(width: Double(width))
+        guard wide != wideWindow else { return }
+        wideWindow = wide
+        nav = nav.fitTo(wide: wide)
+    }
+
     func selectTab(_ tab: AppTab) { nav = nav.selectTab(tab: tab) }
     func openDrawer() { nav = nav.openDrawer() }
     func closeDrawer() { nav = nav.closeDrawer() }
@@ -906,7 +924,8 @@ final class AppContainer: ObservableObject {
             nav = next.popTo(size: Int32(next.stack.count - 1))
             sheet = .login
         } else {
-            nav = next
+            // a post a notification opened shows beside the list on a wide window, as one opened from the list
+            nav = next.fitTo(wide: wideWindow)
         }
         // a New wave shortcut asks for its composer only now (README "Widgets")
         env.entryOpened()
