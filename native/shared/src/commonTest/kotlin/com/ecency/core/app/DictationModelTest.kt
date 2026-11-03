@@ -838,12 +838,38 @@ class DictationModelTest {
 
     @Test
     fun aFailureAlertKeepsTheFailTitleAndAHeldClipGetsItsOwn() {
-        assertNull(DictationState(alert = DictationModel.NOT_READ).alertTitle, "a failure keeps the generic title")
+        assertNull(
+            DictationState(alert = DictationModel.NOT_READ).alertTitle,
+            "a failure keeps the generic title",
+        )
         assertNull(DictationState().alertTitle)
+        val later = DictationState(alert = DictationModel.NOT_READ, heldAlert = DictationModel.HELD_STOPPED)
+        assertNull(later.alertTitle, "a failure after a held clip keeps the generic title")
         for (held in listOf(DictationModel.HELD_LOCKED, DictationModel.HELD_NO_BACKGROUND, DictationModel.HELD_STOPPED,
             DictationModel.HELD_FOCUS_LOST, DictationModel.HELD_INTERRUPTED)) {
-            assertEquals(DictationModel.HELD_TITLE, DictationState(alert = held).alertTitle, held)
+            val state = DictationState(alert = held, heldAlert = held)
+            assertEquals(DictationModel.HELD_TITLE, state.alertTitle, held)
         }
         assertEquals("Recording stopped", DictationModel.HELD_TITLE)
+    }
+
+    @Test
+    fun aHeldClipKeepsItsTitleAfterTheLanguageChanges() = world { w ->
+        val m = w.sheet(w.editor())
+        m.main()
+        w.pass(4_000)
+        w.app.env.dictationSessions.stopFromNotification()
+        w.idle()
+        try {
+            // the stored message stays English while the app now speaks German
+            com.ecency.core.l10n.L10n.setLanguage("de-DE")
+            assertEquals(
+                DictationModel.HELD_TITLE,
+                m.current.alertTitle,
+                "a held clip is not a failure in any language",
+            )
+        } finally {
+            com.ecency.core.l10n.L10n.setLanguage(com.ecency.core.l10n.L10n.SOURCE)
+        }
     }
 }

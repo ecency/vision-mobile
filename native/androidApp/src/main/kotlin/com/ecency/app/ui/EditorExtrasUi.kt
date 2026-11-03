@@ -179,7 +179,9 @@ internal fun UnresolvedNotice(notice: String?, unresolved: Boolean, running: Boo
 internal fun FailAlert(text: String?, tag: String, onDismiss: () -> Unit, title: String? = null) {
     if (text == null) return
     AlertDialog(
-        onDismissRequest = onDismiss, title = { Text(title ?: UiCopy.FAIL) }, text = { Text(text, Modifier.testTag(tag)) },
+        onDismissRequest = onDismiss,
+        title = { Text(title ?: UiCopy.FAIL) },
+        text = { Text(text, Modifier.testTag(tag)) },
         confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("${tag}Ok")) { Text(UiCopy.OK) } },
     )
 }

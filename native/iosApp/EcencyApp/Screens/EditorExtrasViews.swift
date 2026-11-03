@@ -453,7 +453,13 @@ struct DictationSheet: View {
         }
         .presentationDetents([.medium, .large])
         .interactiveDismissDisabled(state.busy)
-        .alert(state.alertTitle ?? UiCopy.shared.FAIL, isPresented: Binding(get: { dictation.state.alert != nil }, set: { if !$0 { model.clearAlert() } })) {
+        .alert(
+            state.alertTitle ?? UiCopy.shared.FAIL,
+            isPresented: Binding(
+                get: { dictation.state.alert != nil },
+                set: { if !$0 { model.clearAlert() } }
+            )
+        ) {
             Button(UiCopy.shared.OK, role: .cancel) { model.clearAlert() }
         } message: { Text(state.alert ?? "") }
         .onAppear { model.start() }
