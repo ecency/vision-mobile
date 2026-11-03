@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "สมาชิก Ecency Pro"
   },
   "perks": {
     "header": "สิทธิพิเศษ",
@@ -31,42 +31,42 @@
     "promote_desc": "ทำให้โพสต์ของคุณเป็นที่รู้จักมากขึ้น",
     "account_boost": "เพิ่มพลังบัญชี",
     "account_boost_desc": "เพิ่มพลังให้บัญชีใด ๆ",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "เติม RC",
+    "rc_topup_desc": "โพสต์ต่อได้แม้ Resource Credits เหลือน้อย",
+    "streak_freeze_owned": "สำรองไว้ {n}",
+    "streak_freeze_buy": "ปกป้องสตรีค ({price} Points)",
+    "streak_freeze_buying": "กำลังปกป้อง",
+    "streak_freeze_error": "ซื้อตัวหยุดสตรีคไม่สำเร็จ โปรดลองอีกครั้ง"
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "โพสต์ประจำวัน",
+    "streak": "สตรีค {n} วัน",
+    "keep_streak": "รักษาสตรีคของคุณไว้"
   },
   "waves": {
     "for_you": "สำหรับคุณ",
     "following": "กำลังติดตาม",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "ฟีดที่กำหนดเอง",
+    "custom_feeds_subtitle": "ปักหมุดแหล่งที่มาและแท็กเพื่อเพิ่มเป็นแท็บฟีด",
+    "add_tag_placeholder": "เพิ่มแท็ก",
+    "sources": "แหล่งที่มา",
+    "your_feeds": "ฟีดของคุณ",
+    "trending_tags": "แท็กยอดนิยม",
+    "shorts_empty": "ยังไม่มีคลิปสั้นให้แสดง",
+    "mute": "ปิดเสียง",
+    "unmute": "เปิดเสียง"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "เริ่มต้นใช้งาน",
+    "subtitle": "มาใหม่ใช่ไหม Waves คือโพสต์สั้น ๆ และเป็นวิธีที่ง่ายที่สุดในการเริ่มต้น",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "ปิด",
+    "item_wave": "โพสต์ Wave แรกของคุณ",
+    "item_vote": "โหวตให้ Wave ที่คุณชอบ",
+    "item_reply": "ตอบกลับใครสักคน",
+    "item_checkin": "เช็กอินเพื่อเริ่มสตรีค",
+    "all_done_title": "เสร็จครบแล้ว 🎉",
+    "all_done_subtitle": "พร้อมแล้ว โพสต์ Waves ต่อไปนะ!"
   },
   "profile": {
     "havent_commented": "ยังไม่ได้แสดงความคิดเห็นใด ๆ",
@@ -147,6 +147,16 @@
     "wizard_config_val": "อายุ  |  การมองเห็น  |  การตีความ",
     "attach_poll": "แนบโพล"
   },
+  "favorite_tags": {
+    "title": "แท็ก",
+    "hint": "ติดตามเพื่อรับการแจ้งเตือนโพสต์ใหม่ในแท็กนี้",
+    "following_hint": "คุณจะได้รับการแจ้งเตือนโพสต์ใหม่ในแท็กนี้",
+    "follow": "ติดตาม",
+    "following": "กำลังติดตาม",
+    "added": "กำลังติดตามแท็ก",
+    "removed": "เลิกติดตามแท็กแล้ว",
+    "empty_list": "ยังไม่มีอะไรที่นี่"
+  },
   "favorites": {
     "add": "เพิ่มรายการโปรด",
     "add_error": "ไม่สามารถเพิ่มรายการโปรดได้",
@@ -181,7 +191,33 @@
     "payout": "เงินที่จ่าย",
     "details": "รายละเอียด",
     "community": "ชุมชน",
-    "new_post": "โพสต์ใหม่"
+    "new_post": "โพสต์ใหม่",
+    "mute_post_title": "ปิดเสียงโพสต์นี้",
+    "unmute_post_title": "เลิกปิดเสียงโพสต์นี้",
+    "mute_post_reason": "ทำไมจึงปิดเสียงโพสต์นี้?",
+    "unmute_post_reason": "ทำไมจึงกู้คืนโพสต์นี้?",
+    "manage": "จัดการชุมชน",
+    "manage_members": "สมาชิกและบทบาท",
+    "manage_settings": "การตั้งค่าชุมชน",
+    "manage_activities": "บันทึกกิจกรรม",
+    "activities": "กิจกรรม",
+    "no_activities": "ยังไม่มีกิจกรรม",
+    "activities_load_failed": "โหลดกิจกรรมไม่ได้ ดึงลงเพื่อรีเฟรช",
+    "set_role": "ตั้งบทบาท",
+    "assign_role": "กำหนดบทบาท",
+    "assign_role_hint": "ค้นหาบัญชีใดก็ได้ รวมถึงบัญชีที่ยังไม่ได้สมัครรับ แล้วเลือกบทบาท",
+    "username_placeholder": "ชื่อผู้ใช้",
+    "invalid_username": "เลือกบัญชีที่มีอยู่จากผลลัพธ์",
+    "members": "สมาชิก",
+    "no_members": "ไม่พบสมาชิก",
+    "members_incomplete": "โหลดสมาชิกบางคนไม่ได้ ดึงลงเพื่อรีเฟรช",
+    "members_load_failed": "โหลดสมาชิกไม่ได้ ดึงลงเพื่อรีเฟรช",
+    "role_owner": "เจ้าของ",
+    "role_admin": "แอดมิน",
+    "role_mod": "ม็อด",
+    "role_member": "สมาชิก",
+    "role_guest": "ผู้เยี่ยมชม",
+    "role_muted": "ปิดเสียงอยู่"
   },
   "trade": {
     "swap_for": "กำลังสลับ {fromAmount} เป็น {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "โพสต์ข้ามชุมชน",
     "pin-blog": "ปักหมุดไปที่บล็อก",
     "copy": "คัดลอกลิงก์",
+    "copy-text": "คัดลอกข้อความ",
+    "open-thread": "เปิดเธรด",
     "unpin-community": "เลิกปักหมุดจากชุมชน",
+    "mute-post": "ปิดเสียงโพสต์",
+    "unmute-post": "เลิกปิดเสียงโพสต์",
     "mute": "ปิดเสียง / บล็อก",
     "reblog": "รีบล็อก",
     "undo-reblog": "เลิกรีบล็อก",
@@ -232,24 +272,24 @@
     "unpin-reply": "เลิกปักหมุดความคิดเห็น"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "โพสต์นี้เป็นภาษา{lang} ต้องการแปลเป็น{target}ไหม",
+    "translate_to": "แปลเป็น{lang}",
+    "show_original": "แสดงต้นฉบับ",
+    "translated_from": "แปลจาก{lang}",
+    "change_language": "เปลี่ยนภาษา"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "แปลโพสต์",
+    "source": "ภาษาต้นทาง",
+    "target": "ภาษาปลายทาง",
+    "detected": "ตรวจพบ: {lang}",
+    "translate": "แปล",
+    "apply": "นำไปใช้",
+    "review_note": "เพิ่มคำแปลโดยเครื่องของข้อความที่คุณเขียนเองไว้ท้ายโพสต์ โปรดตรวจและแก้ไขก่อนเผยแพร่",
+    "too_short": "เขียนเพิ่มอีกหน่อยก่อน การแปลต้องมีอย่างน้อยไม่กี่ประโยค",
+    "progress": "กำลังแปล {done}/{total}...",
+    "error": "แปลไม่สำเร็จ โปรดลองอีกครั้ง",
+    "add_title_marker": "เพิ่มเครื่องหมายภาษาในชื่อเรื่อง"
   },
   "side_menu": {
     "profile": "โปรไฟล์",
@@ -296,7 +336,7 @@
     "hot": "ฮอต",
     "popular": "ได้รับความนิยม",
     "new": "ใหม่",
-    "friends": "Following",
+    "friends": "กำลังติดตาม",
     "my_blog": "บล็อกของฉัน"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "ไม่มีอะไรที่นี่"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "แม่แบบ",
+    "untitled": "แม่แบบไม่มีชื่อ",
+    "empty_list": "บันทึกโพสต์เป็นแม่แบบจากตัวแก้ไข เพื่อนำกลับมาใช้ซ้ำที่นี่",
+    "delete_confirm": "คุณแน่ใจหรือไม่ว่าต้องการลบแม่แบบนี้",
+    "applied": "ใช้แม่แบบเป็นโพสต์ใหม่แล้ว",
+    "save_as_template": "บันทึกเป็นแม่แบบ",
+    "name_placeholder": "ชื่อแม่แบบ",
+    "saved": "บันทึกแม่แบบแล้ว"
   },
   "selection_list": {
     "available": "{postfix} ที่ใช้ได้",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "ทั้งหมด",
+      "replies": "การตอบกลับ",
+      "mentions": "การกล่าวถึง",
+      "rvotes": "การโหวต",
+      "follows": "การติดตาม",
+      "reblogs": "การรีบล็อก",
+      "transfers": "การโอน",
+      "delegations": "การมอบสิทธิ์",
+      "nfavorites": "รายการโปรด",
+      "tags": "แท็ก",
+      "nbookmarks": "บุ๊กมาร์ก",
+      "payouts": "การจ่ายรางวัล",
+      "scheduled_published": "โพสต์ที่ตั้งเวลาไว้",
+      "account_updates": "การอัปเดตบัญชี",
+      "weekly_earnings": "รายได้รายสัปดาห์"
     },
     "this_week": "สัปดาห์นี้",
     "reblog": "รีบล็อกแล้ว",
@@ -417,11 +458,15 @@
     "yesterday": "เมื่อวานนี้",
     "mention": "ถูกกล่าวถึงใน",
     "favorites": "สร้างโพสต์ใหม่",
+    "tags": "โพสต์ใน #{tag}",
+    "tags_bundle": "โพสต์ใหม่ {count} รายการใน #{tag}",
+    "tags_title": "โพสต์ใหม่ในแท็กที่คุณติดตาม",
     "mentions": "การกล่าวถึง",
     "spin": "ถึงเวลารับ Points เพิ่ม",
     "last_week": "สัปดาห์ที่แล้ว",
     "recent": "ล่าสุด",
     "ignore": "เพิกเฉยคุณ",
+    "blacklist": "ขึ้นบัญชีดำคุณ",
     "follow": "ติดตามคุณ",
     "notification": "การแจ้งเตือน",
     "this_month": "เดือนนี้",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} สามารถโพสต์และโหวตในนามของคุณได้แล้ว หากคุณไม่ได้อนุญาต โปรดเพิกถอน",
     "weekly_earnings": "คุณได้รับ ${amount} ในสัปดาห์นี้{breakdown}",
     "payouts": "ได้รับเงินที่จ่าย: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "เผยแพร่โพสต์ที่ตั้งเวลาไว้",
+    "scheduled_published_title": "เผยแพร่โพสต์ที่ตั้งเวลาไว้แล้ว",
+    "scheduled_published_body": "โพสต์ที่ตั้งเวลาไว้ของคุณเผยแพร่แล้ว แตะเพื่อดู"
   },
   "recurrent": {
     "delete_failed": "ลบการโอนแบบเกิดซ้ำไม่สำเร็จ, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "เปิดฉบับร่างล่าสุดหรือสร้างโพสต์ใหม่",
     "reward_power_up": "ปักหลัก 100%",
     "open_gallery": "เปิดแกลเลอรี",
+    "open_files": "เลือกจากไฟล์",
     "clipboard_no_image": "ไม่พบรูปภาพในคลิปบอร์ด",
     "clipboard_image_detected": "มีรูปภาพในคลิปบอร์ด",
     "paste_image": "วางรูปภาพ",
@@ -539,8 +585,10 @@
     "video": "วิดีโอ",
     "scheduled_later": "ภายหลัง",
     "settings_title": "ตัวเลือกโพสต์",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "ไม่"
+    "support_ecency": "สนับสนุน Ecency {percent}%",
+    "alert_btn_no": "ไม่",
+    "short_reply_hint": "การตอบกลับที่มี {n} ตัวอักษรหรือน้อยกว่าจะไม่ได้รับ Points (ไม่นับลิงก์)",
+    "short_content_hint": "สั้นเกินไปที่จะได้รับ Points ({n} ตัวอักษรหรือน้อยกว่า ไม่รวมลิงก์)"
   },
   "time": {
     "week": "สัปดาห์",
@@ -655,7 +703,41 @@
     "select_emoji": "เลือกอีโมจิ",
     "more_emojis": "เพิ่มเติม",
     "search_emojis": "ค้นหาอีโมจิ...",
-    "no_emoji_found": "ไม่พบอีโมจิ"
+    "no_emoji_found": "ไม่พบอีโมจิ",
+    "ban-reason-spray": "คุณถูกระงับการโพสต์ชั่วคราวเพราะส่งข้อความเดียวกันไปหลายช่องพร้อมกัน",
+    "ban-reason-mass-dm": "คุณถูกระงับการโพสต์ชั่วคราวเพราะส่งข้อความถึงหลายคนพร้อมกัน",
+    "ban-reason-generic": "คุณถูกระงับการโพสต์ในแชตชั่วคราว",
+    "ban-can-still-read": "คุณยังอ่านแชตได้",
+    "ban-unlocks": "จะโพสต์ได้อีกครั้ง{when}",
+    "ban-remaining-soon": "ในไม่ถึงหนึ่งนาที",
+    "ban-remaining-minutes": "ในอีกประมาณ {count} นาที",
+    "ban-remaining-hours": "ในอีกประมาณ {count} ชั่วโมง",
+    "ban-remaining-days": "ในอีกประมาณ {count} วัน",
+    "new_group": "กลุ่มใหม่",
+    "new_group_hint": "เพิ่ม {min} ถึง {max} คนเพื่อเริ่มสนทนากลุ่ม",
+    "new_group_search": "ค้นหาผู้คนด้วยชื่อผู้ใช้",
+    "new_group_full": "กลุ่มหนึ่งมีคนอื่นได้สูงสุด {max} คน",
+    "new_group_no_results": "ไม่พบใครในแชตที่ใช้ชื่อนี้",
+    "new_group_search_failed": "ค้นหาไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+    "new_group_remove": "นำ @{username} ออก",
+    "new_group_create": "เริ่มกลุ่ม",
+    "new_group_failed": "เริ่มกลุ่มไม่ได้ โปรดลองอีกครั้ง",
+    "rename_group": "เปลี่ยนชื่อกลุ่ม",
+    "rename_group_hint": "ตั้งชื่อกลุ่มนี้ที่ทุกคนในกลุ่มจะเห็น หากเว้นว่างไว้ ระบบจะแสดงชื่อสมาชิกแทน",
+    "group_name": "ชื่อกลุ่ม",
+    "rename_group_too_long": "ชื่อกลุ่มยาวได้สูงสุด {max} ตัวอักษร",
+    "rename_group_not_owner": "เฉพาะผู้ที่เริ่มกลุ่มนี้เท่านั้นที่เปลี่ยนชื่อได้",
+    "rename_group_failed": "เปลี่ยนชื่อกลุ่มไม่ได้ โปรดลองอีกครั้ง",
+    "group_renamed": "{user} เปลี่ยนชื่อกลุ่มเป็น \"{name}\"",
+    "group_name_cleared": "{user} ลบชื่อกลุ่มออก",
+    "group_members": "สมาชิกกลุ่ม",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "reactions_title": "รีแอคชัน",
+    "reactor_you": "คุณ",
+    "reactor_unknown": "ใครบางคน",
+    "see_who_reacted": "กดค้างเพื่อดูว่าใครแสดงรีแอคชัน",
+    "group": "กลุ่ม"
   },
   "free_estm": {
     "timer_text": "Spin ฟรีครั้งถัดไปใน",
@@ -684,6 +766,32 @@
     "transaction_fail": "ทำธุรกรรมล้มเหลว"
   },
   "search_result": {
+    "error": "การค้นหาไม่สำเร็จ โปรดลองอีกครั้ง",
+    "filters": {
+      "title": "ตัวกรอง",
+      "open": "ตัวกรอง",
+      "author": "ผู้เขียน",
+      "author_placeholder": "ชื่อผู้ใช้",
+      "category": "หมวดหมู่",
+      "category_placeholder": "ชุมชนหรือหมวดหมู่",
+      "tags": "แท็ก",
+      "tags_placeholder": "คั่นด้วยจุลภาค",
+      "type": "ประเภท",
+      "type_all": "ทั้งหมด",
+      "type_post": "โพสต์",
+      "type_comment": "ความคิดเห็น",
+      "date": "วันที่",
+      "date_week": "สัปดาห์ที่แล้ว",
+      "date_month": "เดือนที่แล้ว",
+      "date_year": "ปีที่แล้ว",
+      "date_all": "ทุกช่วงเวลา",
+      "sort": "เรียงลำดับ",
+      "apply": "ใช้",
+      "active": "ใช้งานอยู่ {n}",
+      "too_many_tags": "ใช้ได้สูงสุด {n} แท็ก",
+      "too_long": "การค้นหายาวเกินไป ใช้ได้สูงสุด {n} ตัวอักษร",
+      "needs_criteria": "ป้อนคำค้นหา หรือผู้เขียน หมวดหมู่ หรือแท็กที่ต้องการกรอง"
+    },
     "communities_filter": {
       "new": "ใหม่",
       "my": "ชุมชนของฉัน",
@@ -727,7 +835,7 @@
     "title": "ครอสโพสต์"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "ผู้เขียนเปิดเผยว่าใช้ AI"
   },
   "ai_assist": {
     "title": "ผู้ช่วยเขียน AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "รับแท็กที่เกี่ยวข้องสำหรับโพสต์ของคุณ",
     "action_generate_title": "สร้างหัวข้อ",
     "action_generate_title_desc": "สร้างตัวเลือกหัวข้อที่น่าสนใจ",
-    "action_summarize": "Recap",
+    "action_summarize": "สรุป",
     "action_summarize_desc": "สร้างบทสรุปกระชับ",
     "action_check_grammar": "ตรวจไวยากรณ์",
     "action_check_grammar_desc": "แก้ไขปัญหาไวยากรณ์และการสะกดคำ",
+    "action_generate_image": "สร้างรูปภาพ",
+    "action_generate_image_desc": "สร้างรูปภาพด้วย AI สำหรับโพสต์ของคุณ",
+    "cost_from": "เริ่มที่ {cost} {unit}",
     "text_label": "ข้อความของคุณ",
     "text_placeholder": "วางหรือพิมพ์เนื้อหาของคุณที่นี่...",
     "min_chars": "ต้องมีอย่างน้อย {count} ตัวอักษร",
@@ -797,16 +908,26 @@
     "remind_later": "เตือนภายหลัง",
     "success_subscribe": "ติดตามสำเร็จ!",
     "payloadTooLarge": "ขนาดไฟล์ใหญ่เกินไป โปรดปรับขนาดหรืออัปโหลดรูปภาพที่เล็กกว่า",
+    "too_many_images": "คุณเลือกได้สูงสุด {count} รูปภาพต่อครั้ง",
     "fail_follow": "ติดตามไม่สำเร็จ!",
     "clear_user_alert": "คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลผู้ใช้ทั้งหมด?",
     "cancel": "ยกเลิก",
     "connection_success": "เชื่อมต่อสำเร็จ!",
     "rc_down": "Resource Credits ไม่เพียงพอที่จะดำเนินการ! \n\nบูสต์บัญชีของคุณเพื่อเพลิดเพลินกับประสบการณ์ต่อไป คุณต้องการบูสต์บัญชีของคุณตอนนี้หรือไม่?",
+    "rc_down_title": "Resource Credits ไม่เพียงพอ",
+    "rc_precheck_title": "โพสต์นี้อาจใหญ่เกินกว่าจะเผยแพร่",
+    "rc_precheck_body": "Resource Credits ของคุณดูเหมือนน้อยเกินไปสำหรับโพสต์ขนาดนี้",
+    "rc_down_body": "คุณมี Resource Credits ไม่พอสำหรับการดำเนินการนี้\n\nเติมด้วย Points ตอนนี้เพื่อดำเนินการต่อ หรือบูสต์บัญชีของคุณถาวร",
+    "rc_down_topup": "เติม RC ด้วย Points",
+    "rc_down_boost": "บูสต์บัญชี",
     "done": "เสร็จสิ้น",
     "something_wrong_alt": "ในระหว่างนี้ ลองใช้ Ecency.com จากเบราว์เซอร์ของคุณ",
     "same_user": "ผู้ใช้รายนี้ถูกเพิ่มในรายการแล้ว",
     "fail": "ล้มเหลว!",
     "operation_failed_with_reason": "{operation} ล้มเหลว: {reason}",
+    "request_timed_out": "การเชื่อมต่อใช้เวลานานเกินไป ตรวจสอบเครือข่ายแล้วลองอีกครั้ง",
+    "load_failed_retry": "เราโหลดสิ่งนี้ไม่ได้ โปรดลองอีกครั้ง",
+    "retrying": "กำลังลองอีกครั้ง...",
     "wallet_refresh_failed": "รีเฟรชกระเป๋าเงินไม่สำเร็จ โปรดลองอีกครั้ง",
     "wallet_refresh_missing_account": "รีเฟรชกระเป๋าเงินไม่สำเร็จ: ไม่มีบัญชี",
     "boost_failed": "บูสต์ล้มเหลว",
@@ -949,31 +1070,31 @@
     "video_attached": "แนบวิดีโอแล้ว"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "อัปโหวต",
+    "upvoted": "อัปโหวตแล้ว",
+    "downvoted": "ดาวน์โหวตแล้ว",
+    "upvote_hint": "แตะสองครั้งเพื่อเปิดตัวเลือกการโหวต",
+    "payout_details": "รายละเอียดการจ่ายรางวัล",
+    "a11y_votes": "{count, plural, other {# โหวต}}",
+    "a11y_voters_hint": "ดูผู้โหวต",
+    "a11y_reblogs": "{count, plural, other {# รีบล็อก}}",
+    "a11y_reblogs_hint": "ดูรีบล็อก",
+    "a11y_comments": "{count, plural, other {# ความคิดเห็น}}",
+    "a11y_comments_hint": "ดูความคิดเห็น",
+    "a11y_reply_hint": "ตอบกลับ",
+    "a11y_tip": "ส่งทิป",
+    "a11y_tips": "{count, plural, other {# ทิป}}",
+    "a11y_edit": "แก้ไขความคิดเห็น",
+    "a11y_delete": "ลบความคิดเห็น",
+    "a11y_show_replies": "แสดงการตอบกลับ",
+    "a11y_hide_replies": "ซ่อนการตอบกลับ",
+    "a11y_post_options": "ตัวเลือกโพสต์",
+    "a11y_views": "{count, plural, other {# ครั้งที่ดู}}",
+    "source_ecency": "เผยแพร่ด้วย Ecency",
+    "a11y_stats_hint": "ดูสถิติของโพสต์",
     "image": "รูปภาพ",
     "reveal_muted": "ปิดเสียง\nแตะเพื่อแสดงเนื้อหา",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "แตะเพื่อโหลดรูปภาพ",
     "in": "ใน",
     "poll": "โพล",
     "copy_link": "คัดลอกลิงก์",
@@ -998,19 +1119,20 @@
     "save_to_local": "ดาวน์โหลดลงอุปกรณ์",
     "muted": "เนื้อหาถูกปิดเสียงเนื่องจากการละเมิด",
     "community_muted": "เนื้อหาถูกปิดเสียงเนื่องจากละเมิดแนวทางของชุมชน",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "เนื้อหาจากบัญชีที่มีชื่อเสียงต่ำ",
+    "muted_downvoted": "เนื้อหาที่ผู้ใช้ดาวน์โหวต",
+    "muted_low_trust": "บัญชีชื่อเสียงต่ำที่มีลิงก์ภายนอกซึ่งยังไม่ได้ตรวจสอบ",
+    "muted_reveal": "แตะเพื่อแสดง",
     "promoted": "โปรโมต",
     "image_saved": "บันทึกรูปภาพลงแกลเลอรีแล้ว",
     "words": "คำ",
     "reading": "อ่าน",
-    "listen": "ฟัง",
     "min": "นาที",
     "summarize_start": "เริ่ม"
   },
   "promote": {
     "information": "คุณแน่ใจหรือไม่ว่าต้องการโปรโมต?",
-    "permlinkPlaceholder": "username/permlink",
+    "permlinkPlaceholder": "ชื่อผู้ใช้/permlink",
     "title": "โปรโมต",
     "days": "วัน",
     "user": "ผู้ใช้",
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "ไม่มีโพสต์นี้",
     "invalid_link": "URL ไม่ถูกต้อง คุณอาจลองอีกครั้งด้วย URL ที่ถูกต้อง หรือลองเปิดในเว็บเบราว์เซอร์",
-    "no_existing_user": "ไม่มีผู้ใช้นี้"
+    "no_existing_user": "ไม่มีผู้ใช้นี้",
+    "posting_key_request": "{requester} ขอคีย์ส่วนตัวสำหรับการโพสต์ของ @{username}\n\nดำเนินการต่อเฉพาะเมื่อคุณไว้วางใจคำขอนี้",
+    "posting_key_request_unnamed": "แอปพลิเคชันอื่นขอคีย์ส่วนตัวสำหรับการโพสต์ของ @{username}\n\nดำเนินการต่อเฉพาะเมื่อคุณไว้วางใจคำขอนี้",
+    "auth_request_as_user": "{requester} ต้องการให้คุณเข้าสู่ระบบเป็น @{username}\n\nระบบแชร์เฉพาะชื่อผู้ใช้และหลักฐานการเข้าสู่ระบบของคุณ ไม่มีคีย์ใดออกจาก Ecency",
+    "auth_request_as_current": "{requester} ต้องการให้คุณเข้าสู่ระบบด้วยบัญชี Ecency ของคุณ\n\nระบบแชร์เฉพาะชื่อผู้ใช้และหลักฐานการเข้าสู่ระบบของคุณ ไม่มีคีย์ใดออกจาก Ecency"
   },
   "payout": {
     "breakdown": "รายละเอียด",
@@ -1065,7 +1191,7 @@
     "open": "เปิด URL",
     "invalid_key_desc": "โปรดเข้าสู่ระบบด้วยคีย์ {key} หรือคีย์หลักเพื่อดำเนินการธุรกรรมนี้",
     "auth_transfer_confirm": "ยืนยันการโอนไปยัง {username} หรือไม่?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "อนุมัติเฉพาะเมื่อคุณเชื่อถือแหล่งที่มาของลิงก์นี้ การอนุมัติจะบรอดแคสต์การดำเนินการด้านล่างจากบัญชีของคุณโดยใช้คีย์ {authority} ของคุณ"
   },
   "voters_dropdown": {
     "rewards": "รางวัล",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "ควรมีเฉพาะตัวอักษร ตัวเลข และเครื่องหมายขีดกลางเท่านั้น",
       "username_no_ascii_first_letter_error": "ควรขึ้นต้นด้วยตัวอักษร",
       "username_contains_double_hyphens": "ไม่ควรมีเครื่องหมายขีดกลางซ้อนกัน",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "ชื่อผู้ใช้นี้คล้ายกับบัญชีของกระดานเทรดคริปโตมากเกินไปและอาจทำให้ผู้อื่นสับสน โปรดเลือกชื่อที่ไม่ซ้ำใคร",
+      "username_restricted_prefix": "ไม่อนุญาตให้ใช้ชื่อผู้ใช้ที่ขึ้นต้นด้วย 'uid' ตามด้วยตัวเลข เพราะมักใช้เพื่อปลอมตัวเป็นผู้อื่น โปรดเลือกชื่ออื่น",
       "username_contains_underscore": "ไม่ควรมีเครื่องหมายขีดล่าง"
     },
     "500_error": "ไม่สามารถดำเนินการตามคำขอของคุณได้ คิวสมัครสมาชิกน่าจะเต็ม! ลองอีกครั้งในอีกไม่กี่นาที...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "ชื่อผู้ใช้นี้ถูกใช้แล้ว",
+      "14": "อีเมลนี้ลงทะเบียนไว้แล้ว",
+      "15": "โปรดป้อนอีเมลที่ถูกต้อง",
+      "16": "โปรดป้อนชื่อผู้ใช้ที่ถูกต้อง",
+      "17": "ชื่อผู้ใช้ยาวเกินไป โปรดเลือกชื่อที่สั้นลง",
+      "19": "โปรดใช้อีเมลถาวร หรือสมัครบัญชี Premium แทน",
+      "21": "การแนะนำนี้ไม่ถูกต้อง",
+      "28": "ประมวลผลคำขอของคุณไม่ได้ คิวสมัครสมาชิกน่าจะเต็ม โปรดลองอีกครั้งในอีกสักครู่",
+      "107": "ตรวจพบการเชื่อมต่อ VPN โปรดปิด VPN แล้วลองอีกครั้ง หรือสมัครบัญชี Premium แทน",
+      "110": "เพื่อป้องกันการใช้งานในทางที่ผิด เราจำกัดจำนวนบัญชีต่อบุคคล/เครือข่าย โปรดลองอีกครั้งจากเครือข่ายอื่น",
+      "111": "ตรวจพบการเชื่อมต่อ Tor โปรดปิด Tor ขณะสมัครสมาชิก",
+      "112": "ตอนนี้เรายืนยันการเชื่อมต่อของคุณไม่ได้ โปรดลองอีกครั้งในอีกสักครู่"
     },
     "have_account_text": "มีบัญชีอยู่แล้วใช่หรือไม่?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "รับบัญชี Hive ที่สมบูรณ์ วิธีนี้มีการตรวจสอบพื้นฐานเพื่อให้แน่ใจว่าบ็อตเน็ตไม่ใช้ประโยชน์จากระบบสมัครสมาชิกของเราในทางที่ผิด",
     "btn_register": "ลงทะเบียนฟรี",
     "title": "บัญชีฟรี"
+  },
+  "dictation": {
+    "title": "พูดเพื่อพิมพ์",
+    "start": "บันทึก",
+    "stop": "หยุด",
+    "record_more": "บันทึกเพิ่ม",
+    "done": "เสร็จสิ้น",
+    "recording": "กำลังบันทึก",
+    "stop_hint": "หยุดเพื่อถอดเสียงและเพิ่มลงในโพสต์ของคุณ สูงสุด {m} นาที",
+    "inserted": "เพิ่มลงในโพสต์ของคุณแล้ว บันทึกเพิ่ม หรือแตะเสร็จสิ้น",
+    "transcribing": "กำลังถอดเสียง",
+    "rate": "{n} Points ต่อ {s} วินาที",
+    "cost_running": "{n} Points จนถึงตอนนี้",
+    "cost_running_free": "ฟรีจนถึงตอนนี้",
+    "free_remaining": "{n} x {s} วินาทีถัดไปของคุณฟรีวันนี้",
+    "price_loading": "กำลังตรวจสอบราคา",
+    "price_error": "โหลดราคาถอดเสียงไม่ได้",
+    "denied": "Ecency ต้องการสิทธิ์เข้าถึงไมโครโฟนเพื่อพูดเพื่อพิมพ์ อนุญาตในการตั้งค่าแล้วลองอีกครั้ง",
+    "error_empty": "ไม่พบเสียงพูดในการบันทึกนั้น",
+    "error_insufficient_points": "Points ไม่เพียงพอสำหรับถอดเสียงการบันทึกนั้น",
+    "error_rate_limited": "ตอนนี้มีการบันทึกมากเกินไป โปรดลองอีกครั้งในอีกสักครู่",
+    "error_too_long": "การบันทึกนั้นยาวเกินกว่าจะถอดเสียง",
+    "error_failed": "ถอดเสียงการบันทึกนั้นไม่ได้ โปรดลองอีกครั้ง",
+    "error_recorder": "เริ่มบันทึกไม่ได้ โปรดลองอีกครั้ง"
   },
   "wallet": {
     "delegations_out": "การมอบหมายออก",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "การเช็คอินเป็นประจำจะให้คุณ 0.25 Points",
     "fill_transfer_from_savings": "ดำเนินการเงินออมแล้ว",
     "activities": "กิจกรรม",
+    "no_activities": "ยังไม่มีธุรกรรม",
+    "activities_failed": "โหลดธุรกรรมไม่ได้ ดึงลงเพื่อลองอีกครั้ง",
     "tap_update": "แตะเพื่ออัปเดต",
     "mining_lottery": "ถูกรางวัลลอตเตอรี",
     "checkin": "เช็คอิน",
     "tokens_transfer": "โอนโทเค็นแล้ว",
     "outgoing_transfer_title": "โอน/มอบเป็นของขวัญ",
+    "burned_title": "การใช้ AI",
+    "burned_description": "Points ที่ใช้กับฟีเจอร์ AI",
+    "burn_refund_title": "คืนเงิน AI",
+    "burn_refund_description": "Points ที่คืนหลังคำขอ AI ล้มเหลว",
     "manage_assets": "เพิ่ม / ลบ สินทรัพย์",
     "selected_assets": "สินทรัพย์ที่เลือก",
     "nft_setPropertyPermissions": "ตั้งค่าสิทธิ์คุณสมบัติสำหรับสัญลักษณ์ NFT แล้ว",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "อัปเดตความละเอียดของโทเค็น",
     "tokens_transferOwnership": "โอนความเป็นเจ้าของโทเค็นแล้ว",
     "withdraw_vesting": "เลิก Stake",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "บัญชีถอน",
     "delegate_engine": "มอบหมาย",
     "market_close": "ปิดคำสั่งแล้ว",
     "nftmarket_transferFee": "ค่าธรรมเนียมคำสั่งซื้อ",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "รับ POINTS",
     "escrow_approve": "อนุมัติ Escrow",
     "expires": "หมดอายุ",
+    "transaction_id": "รหัสธุรกรรม",
+    "copy_transaction_id": "คัดลอกลิงก์ธุรกรรม",
+    "filter_activities": "กรองกิจกรรม",
+    "filter_activities_desc": "เลือกการดำเนินการที่ประวัตินี้จะขอ",
+    "filter_all": "เลือกทั้งหมด",
+    "filter_none": "ล้างทั้งหมด",
+    "filter_apply": "ใช้",
     "author_reward": "รางวัลผู้เขียน",
     "withdraw_hbd": "ถอนเงินออม",
     "convert_request": "คำขอแปลง",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "เติม RC",
+    "desc": "เพิ่ม RC ระยะสั้นเพื่อให้คุณโพสต์ต่อได้",
+    "confirm": "ใช้ Points เพื่อเติม Resource Credits ไหม",
+    "insufficient": "คุณมี Points ไม่พอ",
+    "buy_points": "ซื้อ Points"
   },
   "ai_image_generator": {
     "title": "เครื่องสร้างภาพ AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "กำหนดเอง ({hours} ชม.)",
+    "balance_load_failed": "โหลดยอดคงเหลือของคุณไม่ได้ แตะเพื่อลองอีกครั้ง",
+    "precision_load_failed": "โหลดรายละเอียดโทเค็นนี้ไม่ได้ จึงส่งได้เฉพาะจำนวนเต็ม แตะเพื่อลองอีกครั้ง",
     "close": "ปิด",
     "favorite_username_placeholder": "ชื่อผู้ใช้",
     "invalid_recipient_qr": "ไม่พบชื่อผู้ใช้ในรหัส QR นี้",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "จัดการสิทธิ์การอนุญาต",
     "pincode": "Pincode",
     "general": "ทั่วไป",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "สนับสนุน Ecency",
+    "support_beneficiary": "แบ่งรางวัลโพสต์ให้ Ecency",
+    "support_beneficiary_percent": "สัดส่วนรางวัลโพสต์ที่แบ่ง",
+    "support_curation": "กันรางวัลการคิวเรตส่วนหนึ่งไว้",
+    "support_curation_percent": "สัดส่วนรางวัลการคิวเรตที่กันไว้",
     "feedback_body": "เขียนข้อความของคุณที่นี่!\n\nชื่อผู้ใช้ Hive: {username}\nเวอร์ชันแอป: {appVersion}\nแพลตฟอร์ม: {platform}\n",
     "show_imgs": "แสดงรูปภาพ",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "ความคิดเห็น",
       "bookmark": "บุ๊กมาร์ก",
+      "tags": "แท็ก",
       "reblog": "รีบล็อก",
       "favorite": "รายการโปรด",
       "mention": "การกล่าวถึง",
@@ -1599,10 +1765,10 @@
       "transfers": "การโอน",
       "vote": "โหวต",
       "follow": "ติดตาม",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "เผยแพร่โพสต์ที่ตั้งเวลาไว้แล้ว",
+      "payouts": "การจ่ายรางวัล",
+      "account_update": "การอัปเดตบัญชี",
+      "weekly_earnings": "รายได้รายสัปดาห์",
       "fcm_unavailable": "อุปกรณ์นี้ไม่รองรับการแจ้งเตือนแบบพุช คุณจะได้รับการแจ้งเตือนเฉพาะตอนที่เปิดแอปอยู่เท่านั้น"
     },
     "keys_warning": "ข้อมูลบัญชีที่ละเอียดอ่อน!\nต้องตั้งรหัส PIN เพื่อรักษาความปลอดภัยให้ Ecency ก่อนดูคีย์ส่วนตัว",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "ส่งความคิดเห็น",
     "rate_app": "ให้คะแนน Ecency",
+    "email_digests": "ไดเจสต์อีเมล",
     "rate": "ให้คะแนน",
     "dm-privacy-updated": "อัปเดตการตั้งค่าความเป็นส่วนตัวของข้อความส่วนตัวสำเร็จแล้ว",
     "dm-privacy-failed": "ไม่สามารถอัปเดตการตั้งค่าความเป็นส่วนตัวของข้อความส่วนตัวได้",
@@ -1685,19 +1852,29 @@
     "request_sent": "ส่งคำขอลบบัญชีของคุณแล้ว",
     "confirm_delete_body": "คุณแน่ใจหรือไม่ว่าต้องการลบบัญชี? การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ"
   },
-  "tts": {
-    "settings_title": "การตั้งค่าการอ่านออกเสียงข้อความ",
-    "voice": "เสียง",
-    "voice_hint": "จะใช้เสียงเริ่มต้นของระบบ",
-    "speed": "ความเร็ว",
-    "pitch": "ระดับเสียง",
-    "test_voice": "ทดสอบเสียง",
-    "settings_info": "การตั้งค่าเหล่านี้จะถูกใช้เมื่ออ่านโพสต์ออกเสียง",
+  "listen": {
+    "title": "ฟังโพสต์นี้",
+    "minutes": "~{n} นาที",
+    "login": "เข้าสู่ระบบ",
+    "unlock": "ปลดล็อก · {n} Points",
+    "confirm": "ใช้ {n} Points เพื่อฟังโพสต์นี้ไหม? คุณเล่นเสียงนี้ซ้ำได้ทุกเมื่อ",
+    "not_enough_title": "Points ไม่เพียงพอ",
+    "not_enough": "การฟังต้องใช้ {required} Points และคุณมี {available}",
+    "get_points": "รับ Points",
+    "unlock_failed": "ปลดล็อกเสียงไม่ได้ โปรดลองอีกครั้ง",
+    "failed_refunded": "สร้างเสียงไม่ได้ Points ของคุณถูกคืนแล้ว",
+    "preparing": "กำลังเตรียมเสียง…",
+    "preparing_eta": "กำลังเตรียมเสียง ประมาณ {n} นาที…",
+    "preparing_progress": "กำลังเตรียมเสียง · {n}%",
+    "waiting": "รอคิว ข้างหน้า {n}…",
+    "next_in_line": "คิวถัดไป…",
     "play": "เล่น",
     "pause": "หยุดชั่วคราว",
-    "language": "ภาษา",
-    "language_auto": "ตรวจหาอัตโนมัติ",
-    "language_hint": "การตรวจหาอัตโนมัติจะเลือกภาษาตามเนื้อหาของโพสต์"
+    "seek": "เลื่อนไปยังตำแหน่ง",
+    "speed": "ความเร็วในการเล่น",
+    "language": "ภาษาของเสียง",
+    "unavailable": "โหลดเสียงไม่ได้",
+    "retry": "ลองอีกครั้ง"
   },
   "posting_authority": {
     "title": "เปิดใช้การโพสต์ที่รวดเร็วขึ้น",
@@ -1732,7 +1909,7 @@
     "error-auth": "การยืนยันตัวตนล้มเหลว กรุณาเข้าสู่ระบบอีกครั้ง",
     "error-generic": "อัปโหลดวิดีโอล้มเหลว กรุณาลองอีกครั้ง",
     "error-too-long-short": "วิดีโอสั้นต้องมีความยาว 60 วินาทีหรือน้อยกว่า",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "หนึ่งโพสต์มีวิดีโอได้เพียงหนึ่งรายการ โปรดลบวิดีโอปัจจุบันก่อนเพิ่มรายการอื่น",
     "select_source": "เพิ่มวิดีโอ",
     "record": "บันทึกวิดีโอ",
     "choose_library": "เลือกจากคลัง"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "แชร์อัปเดตแบบรวดเร็ว"
   },
+  "newsletter": {
+    "screen_title": "ไดเจสต์อีเมล",
+    "title": "{list}",
+    "body_own": "สรุปการแจ้งเตือนของคุณทางอีเมลรายสัปดาห์หรือรายเดือน",
+    "body_creator": "โพสต์ใหม่โดย {list} ในกล่องจดหมายของคุณ",
+    "body_community": "ไดเจสต์โพสต์ใหม่ใน {list} ทางอีเมล",
+    "body_site": "สิ่งที่ดีที่สุดของ Ecency ในกล่องจดหมายของคุณ",
+    "first_publish_title": "ยินดีด้วยกับโพสต์แรกของคุณ!",
+    "first_publish_body": "ต้องการไดเจสต์อีเมลของการแจ้งเตือนไหม? รายสัปดาห์หรือรายเดือน เปลี่ยนหรือเลิกรับได้ทุกเมื่อในการตั้งค่า",
+    "list_own": "ไดเจสต์การแจ้งเตือนของฉัน",
+    "list_site": "จดหมายข่าว Ecency",
+    "status_active": "คุณสมัครรับแล้ว",
+    "status_pending": "รอการยืนยันอีเมล",
+    "status_short_active": "ใช้งานอยู่",
+    "status_short_pending_confirmation": "รอดำเนินการ",
+    "status_short_suppressed": "หยุดแล้ว",
+    "status_short_ended": "สิ้นสุดแล้ว",
+    "cadence_weekly": "รายสัปดาห์",
+    "cadence_monthly": "รายเดือน",
+    "email_placeholder": "you@example.com",
+    "subscribe": "สมัครรับ",
+    "update": "อัปเดต",
+    "resend": "ส่งการยืนยันอีกครั้ง",
+    "leave": "เลิกรับไดเจสต์",
+    "cancel": "ยกเลิก",
+    "ok": "ตกลง",
+    "manage": "จัดการ",
+    "check_inbox_title": "ตรวจสอบกล่องจดหมายของคุณ",
+    "check_inbox_body": "เราส่งลิงก์ยืนยันไปที่ {email} แล้ว การสมัครรับจะเริ่มเมื่อคุณยืนยัน",
+    "subscribed": "สมัครรับไดเจสต์อีเมลแล้ว",
+    "left": "เลิกรับไดเจสต์แล้ว",
+    "refused": "ไม่สามารถสมัครรับด้วยที่อยู่นี้ได้",
+    "unavailable": "ไดเจสต์อีเมลยังไม่พร้อมใช้งานในขณะนี้",
+    "too_many": "ลองหลายครั้งเกินไป โปรดลองอีกครั้งภายหลัง",
+    "fail": "เกิดข้อผิดพลาดบางอย่าง โปรดลองอีกครั้ง",
+    "empty": "ยังไม่มีไดเจสต์อีเมล สมัครรับด้านล่างเพื่อเริ่มต้น",
+    "discover": "รับเพิ่มเติมทางอีเมล",
+    "stop_all": "หยุดทั้งหมด",
+    "stop_all_title": "หยุดอีเมลทั้งหมดไหม?",
+    "stop_all_body": "จะไม่มีการส่งอีเมลจาก Ecency ไปที่ {email} อีก การสมัครรับด้วยที่อยู่อื่นจะยังอยู่",
+    "stop_all_ok": "หยุดทั้งหมด",
+    "stop_all_done": "ยกเลิกการสมัครรับอีเมลทั้งหมดของที่อยู่นี้แล้ว",
+    "profile_option": "ไดเจสต์อีเมล",
+    "subscriber_count": "ผู้สมัครรับอีเมลรายสัปดาห์ {weekly} • รายเดือน {monthly}",
+    "community_button": "จดหมายข่าว"
+  },
+  "mod_notes": {
+    "title": "เพิ่มเหตุผล",
+    "placeholder": "เหตุผล (ผู้ดูแลคนอื่นมองเห็น)",
+    "confirm": "ยืนยัน",
+    "cancel": "ยกเลิก"
+  },
+  "community_settings": {
+    "title_header": "การตั้งค่าชุมชน",
+    "title_label": "ชื่อ",
+    "about": "เกี่ยวกับ",
+    "lang": "ภาษา",
+    "description": "คำอธิบาย",
+    "rules": "กฎ",
+    "nsfw": "NSFW (ไม่เหมาะกับที่ทำงาน)",
+    "save": "บันทึก",
+    "required": "จำเป็น",
+    "title_length": "ระหว่าง {min} ถึง {max} ตัวอักษร",
+    "owner_admin_only": "เฉพาะเจ้าของและแอดมินเท่านั้นที่เปลี่ยนการตั้งค่านี้ได้"
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "ขยายอยู่",
+        "collapsed": "ย่ออยู่"
+      },
+      "a11y_chat": {
+        "quote": "กำลังตอบกลับ {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "เลือก",
+        "deselect": "ยกเลิกการเลือก"
+      },
+      "store": {
+        "billing_unavailable": "อุปกรณ์นี้ไม่อนุญาตให้ซื้อในแอป",
+        "verification_failed": "App Store ยืนยันการซื้อนี้ไม่ได้",
+        "cancelled": "ยกเลิกการซื้อแล้ว",
+        "unknown_result": "ไม่ทราบผลการซื้อ"
+      },
+      "navigation": {
+        "feed_unavailable": "ฟีดนี้ยังไม่พร้อมใช้งาน",
+        "link_cannot_open": "เปิดลิงก์นี้ไม่ได้",
+        "video_cannot_play": "เล่นวิดีโอนี้ไม่ได้"
+      },
+      "media": {
+        "load_failed": "โหลดรายการนี้ไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+        "loading": "กำลังโหลดสื่อ",
+        "download_failed": "ดาวน์โหลดล้มเหลว สถานะ {status}"
+      },
+      "sign_in": {
+        "required": "ต้องเข้าสู่ระบบ",
+        "to_reply": "เข้าสู่ระบบเพื่อตอบกลับ",
+        "to_vote": "เข้าสู่ระบบเพื่อโหวต",
+        "button": "เข้าสู่ระบบ"
+      },
+      "account": {
+        "logout_user": "ออกจากระบบ @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# โหวต}}  •  {replies, plural, other {# การตอบกลับ}}",
+        "voting_power": "พลังโหวต {percent}",
+        "remove_favourite": "ลบออกจากรายการโปรด",
+        "add_favourite": "เพิ่มในรายการโปรด"
+      },
+      "waves": {
+        "clear_tag_filter": "ล้างตัวกรองแท็ก {tag}",
+        "new_wave": "Wave ใหม่",
+        "replies_open_thread": "{count, plural, other {# การตอบกลับ เปิดเธรด}}",
+        "characters": "{count} จาก {max} ตัวอักษร",
+        "retry": "{message}\nลองอีกครั้ง",
+        "playing": "กำลังเล่น {permlink}",
+        "video_attached_remove": "แนบวิดีโอแล้ว นำออก",
+        "image_attached_remove": "แนบรูปภาพแล้ว นำออก",
+        "take_photo": "ถ่ายภาพ",
+        "edit_poll": "แก้ไขโพล",
+        "add_poll": "เพิ่มโพล",
+        "add_video": "เพิ่มวิดีโอ"
+      },
+      "reading": {
+        "reply_to": "ตอบกลับ {username}",
+        "opens_post": "เปิดโพสต์",
+        "sort_comments": "เรียงลำดับความคิดเห็น",
+        "sort_comments_value": "เรียงลำดับความคิดเห็น, {sort}",
+        "no_comments": "ยังไม่มีความคิดเห็น",
+        "loading_post": "กำลังโหลดโพสต์",
+        "show_version": "แสดงเวอร์ชัน",
+        "show_changes": "แสดงการเปลี่ยนแปลง",
+        "replying_to": "กำลังตอบกลับ @{username}",
+        "reply_text": "ข้อความตอบกลับ",
+        "translate_from": "จาก",
+        "translate_to": "เป็น"
+      },
+      "feed": {
+        "tab_pinned": "{label}, ปักหมุดแล้ว",
+        "tab_add": "{label}, เพิ่ม",
+        "customise": "ปรับแต่ง"
+      },
+      "card": {
+        "in_category": "ใน {category}",
+        "pinned": "ปักหมุดแล้ว",
+        "by_author": "โดย {username}",
+        "payout": "เงินที่จ่าย {payout}",
+        "payout_declined": "เงินที่จ่าย {payout}, ปฏิเสธรับ",
+        "reblogged_by": "รีบล็อกโดย {username}"
+      },
+      "shell": {
+        "close_menu": "ปิดเมนู"
+      },
+      "editor": {
+        "thumbnail_pick_another": "ภาพขนาดย่อ เลือกรูปภาพอื่น",
+        "words": "{count, plural, other {# คำ}}",
+        "poll_min_age": "อายุบัญชีขั้นต่ำ (วัน): {days}",
+        "poll_max_options": "ตัวเลือกสูงสุด: {count}",
+        "thumbnail_selected": "ภาพขนาดย่อที่เลือก",
+        "thumbnail": "ภาพขนาดย่อ",
+        "uploaded_image": "รูปภาพที่อัปโหลด",
+        "community_search": "ค้นหา"
+      },
+      "vote": {
+        "not_voted": "ยังไม่ได้โหวต",
+        "voting": "กำลังโหวต",
+        "failed_with": "โหวตไม่สำเร็จ: {message}",
+        "failed": "โหวตไม่สำเร็จ",
+        "payout": "เงินที่จ่าย {payout}",
+        "payout_declined": "เงินที่จ่าย {payout}, ปฏิเสธรับ",
+        "percent": "{percent} เปอร์เซ็นต์",
+        "upvote_percent": "อัปโหวต {percent}%"
+      },
+      "settings": {
+        "on": "เปิด",
+        "off": "ปิด"
+      },
+      "lock": {
+        "biometric_reason": "เปิดการปลดล็อกด้วยชีวมิติสำหรับ Ecency",
+        "offer_title": "ปลดล็อกด้วย {method}",
+        "offer_use": "ใช้ {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "คีย์จะถูกซ่อนขณะที่บันทึกหรือสะท้อนหน้าจอ",
+        "screenshot_notice": "มีการแคปหน้าจอ คีย์ส่วนตัวถูกซ่อนอีกครั้ง หากภาพแคปหน้าจอมีคีย์ ให้ลบทิ้ง",
+        "hold_hint": "กดค้างที่คีย์เพื่อแสดง",
+        "hold_to_show": "กดค้างเพื่อแสดง"
+      },
+      "wallet": {
+        "cancel_order": "ยกเลิกคำสั่งนี้ไหม?",
+        "days": "{count, plural, other {# วัน}}"
+      },
+      "chat": {
+        "reactors_hint": "กดค้างเพื่อดูว่าใครแสดงรีแอคชัน",
+        "see_reactors": "ดูว่าใครแสดงรีแอคชัน"
+      },
+      "esie": {
+        "still": "{mood}, นิ่ง"
+      }
+    },
+    "ui": {
+      "profile_of": "โปรไฟล์ของ @{username}",
+      "preview": "ตัวอย่าง ({index}/{count})",
+      "balance": "ยอดคงเหลือ: {amount}",
+      "expires_in": "หมดอายุใน {time}",
+      "expired": "หมดอายุแล้ว ปิดแล้วลองอีกครั้ง",
+      "user_has_no_posts": "@{username} ยังไม่ได้โพสต์อะไร",
+      "attach_image": "แนบรูปภาพ",
+      "auto": "อัตโนมัติ",
+      "back": "กลับ",
+      "hot": "มาแรง",
+      "image_of": "รูปภาพที่ {index} จาก {count}",
+      "new": "ใหม่",
+      "nsfw_tap_to_reveal": "NSFW แตะเพื่อแสดง",
+      "new_reply": "การตอบกลับใหม่",
+      "remove": "นำออก",
+      "unlock_ecency": "ปลดล็อก Ecency",
+      "update_it": "อัปเดต",
+      "update_it_or_post_this_as": "อัปเดตหรือโพสต์เป็นการตอบกลับใหม่?",
+      "use_pin": "ใช้ PIN",
+      "your_reply_was_already_posted": "การตอบกลับของคุณถูกโพสต์ไปแล้ว",
+      "error_try_again": "{message} ลองอีกครั้งไหม?",
+      "auth": {
+        "account_label": "บัญชี: @{username}",
+        "approve_the_request_in_your_wallet": "อนุมัติคำขอในแอปกระเป๋าเงินของคุณ",
+        "copy_key": "คัดลอก {title}",
+        "current_account": "บัญชีปัจจุบัน",
+        "qr_code": "คิวอาร์โค้ด",
+        "requested_by": "ขอโดย {requester}",
+        "pin_digits": "{filled} จาก {total, plural, other {# หลัก}}",
+        "private_key_shown": "{title} แสดงคีย์ส่วนตัวอยู่",
+        "open_wallet_app": "เปิดแอปกระเป๋าเงิน",
+        "hiveauth_scan": "อนุมัติใน Hive Keychain หรือกระเป๋า HiveAuth อื่น: เปิดบนอุปกรณ์นี้ หรือสแกนโค้ดนี้ด้วยแอปนั้น",
+        "switching": "กำลังสลับ...",
+        "logout_all": "ออกจากระบบทุกบัญชี",
+        "logout_all_title": "ออกจากระบบทุกบัญชีบนอุปกรณ์นี้ไหม?",
+        "stored_key": "@{username} เข้าสู่ระบบบนอุปกรณ์นี้อยู่แล้ว คีย์ที่เก็บไว้จะยังอยู่ เซสชันเท่านั้นที่ต่ออายุ",
+        "stored_hivesigner": "@{username} เข้าสู่ระบบด้วย HiveSigner บนอุปกรณ์นี้อยู่แล้ว เซสชันจะถูกแทนที่",
+        "stored_hiveauth": "@{username} เข้าสู่ระบบด้วย HiveAuth บนอุปกรณ์นี้ จะใช้ HiveSigner ในการลงนามแทน",
+        "method_key": "คีย์",
+        "logout_failed": "ออกจากระบบไม่สำเร็จ"
+      },
+      "browser": {
+        "account": "บัญชี",
+        "authority": "สิทธิ์",
+        "phishing": "คำเตือน: โดเมนนี้ถูกระบุว่าเป็นเว็บไซต์ฟิชชิงที่รู้จัก โปรดดำเนินการด้วยความระมัดระวังอย่างยิ่ง"
+      },
+      "chat": {
+        "cancel_edit": "ยกเลิกการแก้ไข",
+        "cancel_reply": "ยกเลิกการตอบกลับ",
+        "copied_to_clipboard": "คัดลอกไปยังคลิปบอร์ดแล้ว",
+        "edited_at": "แก้ไข {time}",
+        "group_options": "ตัวเลือกกลุ่ม",
+        "pinned_messages": "ข้อความที่ปักหมุด",
+        "remove_user": "นำ @{username} ออก",
+        "sort_by_name": "เรียงตามชื่อ",
+        "more": "เพิ่มเติม",
+        "reaction_label": "{emoji} {count} กดค้างเพื่อดูว่าใครแสดงรีแอคชัน",
+        "members": "สมาชิก"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "มีโพสต์ที่ลิงก์นี้อยู่แล้วและแตกต่างจากที่คุณส่ง อัปเดตหรือเผยแพร่เป็นโพสต์ใหม่?",
+        "a_scheduled_post_is_published_by": "โพสต์ที่ตั้งเวลาไว้จะถูกเผยแพร่โดย Ecency ตามเวลาที่เลือก ซึ่งต้องใช้สิทธิ์การโพสต์ของ ecency.app บนบัญชีของคุณ คีย์และสิทธิ์อื่นของคุณจะคงเดิม การให้สิทธิ์นี้ต้องใช้คีย์ active ของคุณ",
+        "ai_assist": "AI Assist",
+        "ai_tools": "เครื่องมือ AI",
+        "allow_ecency_to_publish_for_you": "อนุญาตให้ Ecency เผยแพร่แทนคุณไหม?",
+        "bold": "ตัวหนา",
+        "clone": "ทำสำเนา",
+        "cost": "ค่าใช้จ่าย: {cost}",
+        "could_not_store_the_draft_on": "เก็บฉบับร่างไว้บนอุปกรณ์นี้ไม่ได้ เปิดแอปค้างไว้แล้วบันทึกฉบับร่าง",
+        "draft": "ฉบับร่าง",
+        "delete_count": "ลบ ({count})",
+        "dictate_desc": "พูดแล้วข้อความถอดเสียงจะเข้าไปอยู่ในโพสต์ของคุณ",
+        "discard": "ทิ้ง",
+        "discard_changes": "ทิ้งการเปลี่ยนแปลงไหม?",
+        "grant": "ให้สิทธิ์",
+        "italic": "ตัวเอียง",
+        "keep_editing": "แก้ไขต่อ",
+        "my_blog": "บล็อกของฉัน",
+        "my_communities": "ชุมชนของฉัน",
+        "new_post": "โพสต์ใหม่",
+        "notice": "ประกาศ",
+        "restore": "กู้คืน",
+        "restore_unsaved_changes": "กู้คืนการเปลี่ยนแปลงที่ยังไม่ได้บันทึกไหม?",
+        "saved": "บันทึกแล้ว",
+        "top_communities": "ชุมชนยอดนิยม",
+        "table": "ตาราง",
+        "text_format": "รูปแบบข้อความ",
+        "this_link_is_already_in_use": "ลิงก์นี้ถูกใช้งานแล้ว",
+        "untitled": "ไม่มีชื่อ",
+        "update_it_or_publish_this_as": "อัปเดตหรือเผยแพร่เป็นโพสต์ใหม่?",
+        "you_have_unsaved_changes_from_an": "คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกจากการแก้ไขก่อนหน้า โพสต์เปลี่ยนไปแล้วตั้งแต่นั้น การกู้คืนจะแทนที่ข้อความด้านล่าง",
+        "your_edits_were_not_published": "การแก้ไขของคุณไม่ได้ถูกเผยแพร่",
+        "your_post_was_already_published": "โพสต์ของคุณถูกเผยแพร่ไปแล้ว",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "ภาพขนาดย่อ แตะเพื่อเลือกรูปภาพอื่น",
+        "thumbnail_number": "ภาพขนาดย่อ {number}",
+        "recording_busy": "กำลังบันทึกอยู่แล้ว โปรดทำให้เสร็จในกล้องก่อน",
+        "photo_lost": "ภาพหายไปขณะเปิดกล้อง โปรดถ่ายใหม่",
+        "add_snippet_button": "+ สนิปเพ็ต",
+        "words_count": "{count, plural, other {# คำ}}",
+        "community_search": "ค้นหา"
+      },
+      "profile": {
+        "open_wallet": "เปิดกระเป๋าเงิน",
+        "your_wallet_is_on_the_wallet": "กระเป๋าเงินของคุณอยู่ในแท็บกระเป๋าเงิน",
+        "user_has_no_comments": "@{username} ยังไม่ได้แสดงความคิดเห็นอะไร",
+        "votes_count": "{count, plural, other {# โหวต}}",
+        "replies_count": "{count, plural, other {# การตอบกลับ}}",
+        "menu": "เพิ่มเติม",
+        "users": "ผู้ใช้"
+      },
+      "reading": {
+        "apply": "ใช้",
+        "add_tag": "เพิ่มแท็ก",
+        "age": "อายุ",
+        "audio_language": "ภาษาของเสียง",
+        "available_filters": "ตัวกรองที่มี",
+        "could_not_unlock_the_audio_please": "ปลดล็อกเสียงไม่ได้ โปรดลองอีกครั้ง",
+        "downvote": "ดาวน์โหวต",
+        "downvote_percent": "ดาวน์โหวต {percent}%",
+        "listen_to_this_post": "ฟังโพสต์นี้",
+        "log_in": "เข้าสู่ระบบ",
+        "mark_all_as_read": "ทำเครื่องหมายอ่านแล้วทั้งหมด",
+        "mark_as_read": "ทำเครื่องหมายว่าอ่านแล้ว",
+        "more_replies": "การตอบกลับเพิ่มเติม",
+        "not_enough_points": "Points ไม่เพียงพอ",
+        "nothing_here_yet": "ยังไม่มีอะไรที่นี่",
+        "open_editor": "เปิดตัวแก้ไข",
+        "pause_voice": "หยุดเสียงชั่วคราว",
+        "play_voice": "เล่นเสียง",
+        "playback_speed": "ความเร็วในการเล่น",
+        "publishing_in_waves": "กำลังเผยแพร่ใน Waves",
+        "quests_done": "เควสต์ที่ทำแล้ว",
+        "read": "อ่านแล้ว",
+        "remove_vote": "ลบโหวต",
+        "seek": "เลื่อนไปยังตำแหน่ง",
+        "select_community": "เลือกชุมชน",
+        "selected_filters": "ตัวกรองที่เลือก",
+        "the_audio_could_not_be_loaded": "โหลดเสียงไม่ได้",
+        "this_post_does_not_exist_or": "โพสต์นี้ไม่มีอยู่หรือถูกลบแล้ว",
+        "unread": "ยังไม่ได้อ่าน",
+        "voice_position": "ตำแหน่งเสียง",
+        "vote_weight": "น้ำหนักโหวต",
+        "reblogged_by": "รีบล็อกโดย {username}",
+        "no_more_posts": "ไม่มีโพสต์เพิ่มเติม",
+        "favourite": "รายการโปรด",
+        "no_votes_yet": "ยังไม่มีโหวต",
+        "no_comments_yet": "ยังไม่มีความคิดเห็น เป็นคนแรกเลย!",
+        "comments_count": "ความคิดเห็น ({count})",
+        "sending_to_chain": "กำลังส่งไปยังเชน",
+        "compare": "เปรียบเทียบ",
+        "your_vote": "โหวตของคุณ",
+        "reply_to": "ตอบกลับ @{username}",
+        "what_do_you_think": "คุณคิดอย่างไร?",
+        "clear_tag_filter": "ล้างตัวกรองแท็ก",
+        "tab_selected": "{title}, เลือกแล้ว",
+        "add_tag_feed": "เพิ่มฟีดแท็ก",
+        "feed_pinned": "{label}, ปักหมุดแล้ว",
+        "attached_image_remove": "แนบรูปภาพแล้ว แตะเพื่อนำออก",
+        "camera": "กล้อง",
+        "files": "ไฟล์",
+        "paused": "หยุดชั่วคราวแล้ว",
+        "in_topic": "ใน {topic}",
+        "poll_vote": "โหวต",
+        "reply": "ตอบกลับ",
+        "mute_sound": "ปิดเสียง",
+        "unmute_sound": "เลิกปิดเสียง",
+        "leaderboard_activities": "กิจกรรม",
+        "leaderboard_reward": "รางวัล",
+        "sort_votes": "โหวต"
+      },
+      "shell": {
+        "account_of": "บัญชี @{username}",
+        "account_signed_out": "บัญชี ออกจากระบบแล้ว",
+        "close_tab": "ปิดแท็บ",
+        "coming_soon_to_the_native_app": "เร็ว ๆ นี้ในแอปเนทีฟ",
+        "create": "สร้าง",
+        "expand": "ขยาย",
+        "forward": "ไปข้างหน้า",
+        "loading": "กำลังโหลด",
+        "new_tab": "แท็บใหม่",
+        "reload": "โหลดซ้ำ",
+        "sent": "ส่งแล้ว",
+        "tab_unread": "{title}, ยังไม่ได้อ่าน {count}",
+        "no_app_for_link": "ไม่มีแอปที่เปิดลิงก์นี้ได้"
+      },
+      "wallet": {
+        "product_not_available": "ไม่มีผลิตภัณฑ์นี้",
+        "repeat": "ทำซ้ำ"
+      },
+      "copied": "คัดลอกแล้ว",
+      "trending_caps": "มาแรง",
+      "move_up": "เลื่อนขึ้น",
+      "move_down": "เลื่อนลง",
+      "scroll_to_top": "เลื่อนไปด้านบน",
+      "load_more": "เพิ่มเติม"
+    },
+    "wallet": {
+      "checking": "กำลังตรวจสอบกับเครือข่าย",
+      "leave_title": "ยังส่งอยู่",
+      "leave_message": "กำลังส่งหรือตรวจสอบกับเครือข่ายอยู่ คุณออกจากหน้าจอนี้ได้ แอปจะแจ้งเมื่อเสร็จ",
+      "stay": "อยู่ต่อ",
+      "collateralized_convert_request": "คำขอแปลงแบบมีหลักประกัน",
+      "op_transfer": "โอน",
+      "op_power_up": "Power Up",
+      "op_power_down_change": "เปลี่ยน Power Down",
+      "op_delegation": "การมอบหมาย",
+      "op_savings_deposit": "ฝากเงินออม",
+      "op_savings_withdrawal": "ถอนเงินออม",
+      "op_conversion": "การแปลง",
+      "op_swap": "สว็อป",
+      "op_order_cancel": "ยกเลิกคำสั่ง",
+      "op_reward_claim": "รับรางวัล",
+      "op_withdraw_route_change": "เปลี่ยนเส้นทางการถอน",
+      "op_token_operation": "การดำเนินการโทเค็น"
+    },
+    "notification": {
+      "amount_unknown": "ไม่มียอดเงิน",
+      "weekly_earnings_breakdown": "สัปดาห์นี้คุณได้ ${amount} - ${authorUsd} จากโพสต์ ${curationUsd} จากการคัดสรร",
+      "weekly_earnings_total": "สัปดาห์นี้คุณได้ ${amount} จากโพสต์และการคัดสรร"
+    },
+    "settings": {
+      "open": "เปิด",
+      "feedback_subject": "ความคิดเห็น/รายงานบั๊ก",
+      "unknown_user": "ผู้ใช้ที่ไม่รู้จัก"
+    },
+    "navigation": {
+      "editor": "ตัวแก้ไข",
+      "followers": "ผู้ติดตาม",
+      "spin_game": "เกมสปิน",
+      "edit_profile": "แก้ไขโปรไฟล์",
+      "redeem_points": "แลก Points",
+      "community": "ชุมชน",
+      "community_members": "สมาชิกชุมชน",
+      "community_activities": "กิจกรรมชุมชน",
+      "browser": "เบราว์เซอร์",
+      "asset_details": "รายละเอียดสินทรัพย์",
+      "edit_history": "ประวัติการแก้ไข",
+      "welcome": "ยินดีต้อนรับ",
+      "chat": "แชต",
+      "backup_keys": "สำรองคีย์",
+      "trade": "เทรด",
+      "ai_image_generator": "ตัวสร้างภาพ AI",
+      "select_assets": "เลือกสินทรัพย์",
+      "poll": "โพล",
+      "bot_comments": "ความคิดเห็นบอต"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "การดำเนินการที่ต้องใช้คีย์ owner ไม่สามารถลงนามใน Ecency ได้",
+      "post": "โพสต์/ความคิดเห็น",
+      "custom": "Custom JSON",
+      "sign_buffer": "ลงนามข้อความ",
+      "send_token": "ส่งโทเค็น",
+      "witness_vote": "โหวตวิตเนส",
+      "proxy": "ตั้งพร็อกซี",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "ออกอากาศ",
+      "sign_tx": "ลงนามธุรกรรม",
+      "encode": "เข้ารหัสข้อความ",
+      "decode": "ตรวจสอบคีย์",
+      "add_account_authority": "เพิ่มสิทธิ์บัญชี",
+      "remove_account_authority": "ลบสิทธิ์บัญชี",
+      "add_key_authority": "เพิ่มสิทธิ์คีย์",
+      "remove_key_authority": "ลบสิทธิ์คีย์",
+      "create_claimed_account": "สร้างบัญชี",
+      "create_proposal": "สร้างข้อเสนอ",
+      "remove_proposal": "ลบข้อเสนอ",
+      "update_proposal_vote": "โหวตข้อเสนอ",
+      "signed_call": "การเรียกที่ลงนามแล้ว"
+    },
+    "translate_language": {
+      "ar": "อาหรับ",
+      "az": "อาเซอร์ไบจาน",
+      "bg": "บัลแกเรีย",
+      "bn": "เบงกาลี",
+      "ca": "คาตาลัน",
+      "cs": "เช็ก",
+      "da": "เดนมาร์ก",
+      "de": "เยอรมัน",
+      "el": "กรีก",
+      "en": "อังกฤษ",
+      "eo": "เอสเปรันโต",
+      "es": "สเปน",
+      "et": "เอสโตเนีย",
+      "fa": "เปอร์เซีย",
+      "fi": "ฟินแลนด์",
+      "fr": "ฝรั่งเศส",
+      "ga": "ไอริช",
+      "he": "ฮีบรู",
+      "hi": "ฮินดี",
+      "hu": "ฮังการี",
+      "id": "อินโดนีเซีย",
+      "it": "อิตาลี",
+      "ja": "ญี่ปุ่น",
+      "ko": "เกาหลี",
+      "lt": "ลิทัวเนีย",
+      "lv": "ลัตเวีย",
+      "ms": "มาเลย์",
+      "nb": "นอร์เวย์",
+      "nl": "ดัตช์",
+      "pl": "โปแลนด์",
+      "pt": "โปรตุเกส",
+      "ro": "โรมาเนีย",
+      "ru": "รัสเซีย",
+      "sk": "สโลวัก",
+      "sl": "สโลวีเนีย",
+      "sq": "แอลเบเนีย",
+      "sv": "สวีเดน",
+      "th": "ไทย",
+      "tl": "ตากาล็อก",
+      "tr": "ตุรกี",
+      "uk": "ยูเครน",
+      "zh": "จีน",
+      "zt": "จีน (ตัวเต็ม)"
+    },
+    "reading": {
+      "banner_text": "โพสต์นี้เป็นภาษา{source} แปลเป็น{target}ไหม?",
+      "translated_from_text": "แปลจาก{source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# สมาชิก}} • {authors, plural, other {# ผู้โพสต์}} • {posts, plural, other {# โพสต์}}",
+      "community_title": "ชุมชน {title}",
+      "members_title": "สมาชิก {title}",
+      "activities_title": "กิจกรรมของ {title}",
+      "cannot_start_with_or": "ห้ามขึ้นต้นด้วย @ หรือ #",
+      "use_a_two_letter": "ใช้รหัสภาษาสองตัวอักษร เช่น en",
+      "at_most_characters": "สูงสุด {max, plural, other {# ตัวอักษร}}",
+      "council": "สภา",
+      "journal": "บันทึกประจำวัน",
+      "topic": "หัวข้อ",
+      "community_not_found": "ไม่พบชุมชน"
+    },
+    "transfer": {
+      "one_recipient": "การโอนครั้งนี้ใช้ผู้รับได้เพียงรายเดียว",
+      "is_an_exchange_and": "{exchange} เป็นตลาดแลกเปลี่ยนและอาจไม่รองรับการโอนซ้ำ เงินที่ส่งตามกำหนดเวลาอาจสูญหาย ให้ใช้การโอนครั้งเดียวแทน"
+    },
+    "dapps": {
+      "signing_info": "Ecency ทำหน้าที่เป็นส่วนขยายลงนาม Hive ของคุณ เมื่อ dApp ขอให้คุณเข้าสู่ระบบด้วยส่วนขยายเบราว์เซอร์อย่าง Keychain, Keeper หรือ Peak Vault ให้เลือกตัวเลือกนั้น Ecency จะจัดการการลงนามอย่างปลอดภัย",
+      "category_social": "โซเชียล",
+      "category_gaming": "เกม",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "กลุ่ม",
+      "unable_to_load_messages": "โหลดข้อความไม่ได้",
+      "someone": "ใครบางคน",
+      "renamed_the_group_to": "{actor} เปลี่ยนชื่อกลุ่มเป็น \"{name}\"",
+      "removed_the_group_name": "{actor} ลบชื่อกลุ่มออก",
+      "unable_to_send_your": "ส่งข้อความของคุณไม่ได้",
+      "unable_to_remove_message": "ลบข้อความไม่ได้",
+      "unknown": "ไม่ทราบ",
+      "members_online": "{members, plural, other {# สมาชิก}} • ออนไลน์ {online}",
+      "failed_to_load_pinned": "โหลดข้อความที่ปักหมุดไม่สำเร็จ",
+      "you": "คุณ",
+      "title": "รีแอคชัน"
+    },
+    "tip": {
+      "login_required": "เข้าสู่ระบบเพื่อส่งทิป",
+      "max_decimals": "ทศนิยมได้สูงสุด {n, plural, other {# ตำแหน่ง}}"
+    },
+    "paid": {
+      "check_again": "ตรวจสอบอีกครั้ง",
+      "give_up": "เลิกทำ",
+      "unknown": "ยังไม่มีคำตอบ คำขออาจยังทำงานอยู่ ตรวจสอบอีกครั้งเพื่อดึงผลลัพธ์ จะไม่เรียกเก็บเงินซ้ำ",
+      "pending": "คำขอของคุณยังอยู่ระหว่างประมวลผล ตรวจสอบอีกครั้งในอีกสักครู่ จะไม่เรียกเก็บเงินซ้ำ",
+      "restored": "คำขอก่อนหน้ายังไม่มีคำตอบ ตรวจสอบอีกครั้งเพื่อดึงผลลัพธ์ จะไม่เรียกเก็บเงินซ้ำ",
+      "give_up_confirm": "หากคำขอสำเร็จแล้ว Points ถูกใช้ไปแล้วและผลลัพธ์จะหายไป",
+      "not_stored": "เก็บคำขอนี้ไว้บนอุปกรณ์ไม่ได้ เปิดหน้าจอนี้ค้างไว้จนกว่าจะเสร็จ",
+      "sign_in_again": "เซสชันของคุณหมดอายุ เข้าสู่ระบบอีกครั้งแล้วตรวจสอบอีกครั้ง",
+      "other_account": "รายการนี้เป็นของ @{owner} สลับกลับไปที่บัญชีนั้นเพื่อดำเนินการต่อ"
+    },
+    "ai": {
+      "run_ai_assist": "เรียกใช้ AI Assist ({costText})",
+      "no_longer_free_cost": "การเรียกใช้ครั้งนี้ไม่ฟรีอีกต่อไปในวันนี้ ค่าใช้จ่าย {cost} {unit}",
+      "no_longer_free": "การเรียกใช้ครั้งนี้ไม่ฟรีอีกต่อไปในวันนี้",
+      "content_violates_our_content": "เนื้อหาละเมิดนโยบายเนื้อหาของเรา โปรดแก้ไขข้อความของคุณ ไม่มีการคืน Points",
+      "generate_image": "สร้างรูปภาพ ({costLabel})",
+      "use_prompt": "ใช้: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "โปรดรอสักครู่ กำลังดำเนินการอื่นอยู่",
+      "not_a_community_post": "ไม่ใช่โพสต์ในชุมชน",
+      "parent_post_not_found": "ไม่พบโพสต์ต้นทาง",
+      "the_account_changed": "บัญชีเปลี่ยนไปแล้ว"
+    },
+    "dictation": {
+      "balance": "ยอดคงเหลือ: {balance} {unit}",
+      "stop_points": "หยุด ({cost} Points)",
+      "stop_free": "หยุด (ฟรี)",
+      "transcribe_points": "ถอดเสียง ({cost} Points)",
+      "transcribe": "ถอดเสียง",
+      "no_longer_free_cost": "การบันทึกนี้ไม่ฟรีอีกต่อไปในวันนี้ ค่าใช้จ่าย {cost} Points",
+      "no_longer_free": "การบันทึกนี้ไม่ฟรีอีกต่อไปในวันนี้",
+      "held_locked": "การบันทึกหยุดเมื่อ Ecency ล็อก ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
+      "held_no_background": "การบันทึกหยุดเมื่อ Ecency ออกจากหน้าจอ (แสดงการแจ้งเตือนการบันทึกไม่ได้) ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
+      "held_stopped": "การบันทึกถูกหยุดจากการแจ้งเตือน ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
+      "held_focus_lost": "การบันทึกหยุดเพราะมีสายเรียกเข้าหรือเสียงจากแอปอื่น ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
+      "held_interrupted": "การบันทึกหยุดเพราะแอปอื่นใช้ไมโครโฟน ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
+      "unavailable": "อุปกรณ์นี้ไม่รองรับการบันทึก",
+      "not_read": "อ่านการบันทึกนั้นไม่ได้หรือไฟล์ใหญ่เกินไป ไม่มีการส่งอะไรและไม่มีการเรียกเก็บเงิน",
+      "give_up_not_sent": "การบันทึกนี้ไม่ได้ถูกส่ง จึงไม่มีการเรียกเก็บเงิน ระบบจะลบทิ้ง",
+      "give_up_not_charged": "ไม่มีการเรียกเก็บเงินสำหรับการบันทึกนี้ ระบบจะลบทิ้ง",
+      "clip_lost": "การบันทึกของคำขอก่อนหน้าไม่อยู่บนอุปกรณ์นี้แล้ว หากคำขอนั้นสำเร็จ Points ของคุณถูกใช้ไปแล้ว และดึงข้อความถอดเสียงไม่ได้"
+    },
+    "register": {
+      "error_code_28": "ประมวลผลคำขอของคุณไม่ได้ คิวสมัครสมาชิกน่าจะเต็ม โปรดลองอีกครั้งในอีกสองสามนาที"
+    },
+    "perks": {
+      "quests_empty": "ยังไม่มีเควสต์ที่นี่ กลับมาดูใหม่เร็ว ๆ นี้",
+      "freeze_confirm_title": "ปกป้องสตรีคของคุณ",
+      "spend_points_on_a": "ใช้ {price} Points กับการหยุดสตรีคไหม? จะถูกใช้เพื่อปกป้องสตรีคของคุณในวันที่คุณพลาด"
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "สนับสนุน Ecency รับบล็อกฟรี และโดดเด่นด้วยป้าย Pro ที่ยืนยันแล้ว",
+      "card_description": "เป็น Pro ในราคา {price} ต่อปี ป้ายยืนยัน บล็อกฟรี และสนับสนุน Ecency",
+      "card_description_plain": "เป็น Pro หนึ่งปี ป้ายยืนยัน บล็อกฟรี และสนับสนุน Ecency",
+      "member": "คุณเป็นสมาชิก Pro",
+      "benefit_badge": "ป้าย Pro ที่ยืนยันแล้วข้างชื่อของคุณ",
+      "benefit_blog": "บล็อกฟรีที่ yourname.blogs.ecency.com",
+      "benefit_support": "สนับสนุนการพัฒนา Ecency โดยตรง",
+      "benefit_early": "เข้าถึงฟีเจอร์ใหม่ก่อนใคร",
+      "buy": "รับ Pro ในราคา {price} ต่อปี",
+      "extend": "ต่ออายุ 12 เดือนในราคา {price}",
+      "extend_note": "การซื้ออีกครั้งจะเพิ่ม 12 เดือนให้สมาชิกของคุณ",
+      "unavailable": "ขณะนี้ไม่มี Ecency Pro ในสโตร์",
+      "activating": "ได้รับการชำระเงินแล้ว กำลังเปิดใช้งานสมาชิกของคุณ",
+      "success_title": "ยินดีต้อนรับสู่ Ecency Pro",
+      "success_body": "สมาชิก Pro ของคุณใช้งานได้แล้ว ป้ายของคุณจะแสดงในโปรไฟล์ในไม่ช้า",
+      "extending": "ได้รับการชำระเงินแล้ว กำลังต่ออายุสมาชิก Pro ของคุณ 12 เดือน",
+      "open_a11y": "เปิด Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "กำลังบันทึกฉบับร่าง...",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน",
+      "fetch_failed": "ดึงข้อมูลไม่สำเร็จ",
+      "you_can_only_edit": "คุณแก้ไขได้เฉพาะเนื้อหาของคุณเอง",
+      "invalid_percent": "เปอร์เซ็นต์ไม่ถูกต้อง",
+      "beneficiary_exists_already": "มีผู้รับผลประโยชน์นี้อยู่แล้ว",
+      "this_draft_belongs_to": "ฉบับร่างนี้เป็นของ @{owner} สลับกลับไปที่บัญชีนั้นเพื่อเผยแพร่",
+      "could_not_make_a": "สร้างลิงก์ใหม่สำหรับโพสต์นี้ไม่ได้ ลองเปลี่ยนชื่อเรื่องเล็กน้อยแล้วลองอีกครั้ง",
+      "an_earlier_attempt_was": "ความพยายามก่อนหน้าถูกเผยแพร่หลังจากครั้งนี้ ตรวจสอบว่าต้องการเก็บเวอร์ชันใด",
+      "could_not_check_your": "ตรวจสอบสิทธิ์การโพสต์ของบัญชีคุณไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      "this_post_was_changed": "โพสต์นี้ถูกเปลี่ยนที่อื่นนับตั้งแต่คุณเปิด คัดลอกข้อความของคุณ ย้อนกลับ แล้วเปิดใหม่เพื่อแก้ไขเวอร์ชันล่าสุด",
+      "link_text_placeholder": "ข้อความตรงนี้"
+    },
+    "app_error": {
+      "this_reply_is_too": "การตอบกลับนี้ยาวเกินไป",
+      "the_network_refused_this": "เครือข่ายปฏิเสธการดำเนินการนี้",
+      "invalid_input": "ข้อมูลที่ป้อนไม่ถูกต้อง",
+      "secure_storage_is_unavailable": "ที่เก็บข้อมูลที่ปลอดภัยใช้ไม่ได้ โปรดเข้าสู่ระบบอีกครั้ง",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน",
+      "these_credentials_belong_to": "ข้อมูลรับรองเหล่านี้เป็นของ @{actual} ไม่ใช่ @{expected}",
+      "is_not_signed_in": "@{username} ยังไม่ได้เข้าสู่ระบบบนอุปกรณ์นี้",
+      "key_required": "ต้องใช้คีย์ {role} เพื่อทำธุรกรรมนี้ {hint}",
+      "cancelled": "ยกเลิกแล้ว",
+      "the_request_was_rejected": "คำขอถูกปฏิเสธในแอปกระเป๋าเงิน",
+      "the_request_expired_before": "คำขอหมดอายุก่อนที่แอปกระเป๋าเงินจะตอบ โปรดลองอีกครั้ง",
+      "could_not_reach_the": "เชื่อมต่อเซิร์ฟเวอร์ HiveAuth ไม่ได้ โปรดลองอีกครั้ง",
+      "unexpected_redirect": "เซิร์ฟเวอร์ส่งการเปลี่ยนเส้นทางที่ไม่คาดคิด ไม่มีอะไรเปลี่ยนแปลง โปรดลองอีกครั้งภายหลัง",
+      "missing_key_hint": "เพิ่มได้ที่ การตั้งค่า, จัดการสิทธิ์ (Import Private) หรือเข้าสู่ระบบอีกครั้งด้วยคีย์นั้น",
+      "this_key_is_also": "คีย์นี้เป็นคีย์ owner ของบัญชีนี้ด้วย Ecency ไม่เก็บคีย์ที่ควบคุมบทบาท owner ให้บทบาท active และ posting ของคุณมีคีย์ของตัวเอง แล้วเข้าสู่ระบบด้วยคีย์เหล่านั้น",
+      "this_is_the_owner": "นี่คือคีย์ owner Ecency ไม่เก็บหรือใช้คีย์ owner เลย เข้าสู่ระบบด้วยรหัสผ่านหลัก หรือคีย์ posting หรือ active ของคุณ",
+      "this_password_only_matches": "รหัสผ่านนี้ตรงกับคีย์ owner ของบัญชีเท่านั้น Ecency ไม่เก็บหรือใช้คีย์ owner เลย เข้าสู่ระบบด้วยคีย์ posting หรือ active ของคุณ",
+      "this_key_cannot_sign": "คีย์นี้ลงนามแทนบัญชีเพียงลำพังไม่ได้ บัญชีต้องใช้มากกว่าหนึ่งลายเซ็น (น้ำหนักต่ำกว่าเกณฑ์)",
+      "public_key_given": "นี่คือคีย์สาธารณะของคุณ ให้วางคีย์ส่วนตัว (ขึ้นต้นด้วย 5) หรือรหัสผ่านหลักของคุณ",
+      "memo_key_only": "คีย์ memo ใช้เข้าสู่ระบบไม่ได้ ใช้คีย์ posting คีย์ active หรือรหัสผ่านหลักของคุณ",
+      "network_message": "ข้อผิดพลาดเครือข่าย โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      "network_error_this_may": "ข้อผิดพลาดเครือข่าย รายการนี้อาจสำเร็จไปแล้ว การลองอีกครั้งปลอดภัยและจะไม่โพสต์ซ้ำ"
+    },
+    "purchases": {
+      "deal_best": "ดีลที่ดีที่สุด!",
+      "deal_popular": "ยอดนิยม!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "สโตร์ไม่ตอบกลับ"
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "ต้องใช้อีเมลและชื่อผู้ใช้สำหรับการใช้ 999accounts",
+      "stuck": "การซื้อผลิตภัณฑ์นี้ก่อนหน้าดำเนินการไม่สำเร็จ โปรดติดต่อ support@ecency.com พร้อมใบเสร็จจากสโตร์ ระบบเก็บไว้เพื่อการนี้",
+      "held": "การซื้อนี้ถูกระงับเพื่อตรวจสอบ ติดต่อ support@ecency.com พร้อมคำสั่งซื้อ #{order}",
+      "earlier_purchase": "การซื้อผลิตภัณฑ์นี้ก่อนหน้ากำลังดำเนินการให้ @{target} ก่อน",
+      "earlier_pending": "การชำระเงินผลิตภัณฑ์นี้ก่อนหน้ายังรอดำเนินการสำหรับ @{target} จะเสร็จเมื่อสโตร์ยืนยันการชำระเงิน",
+      "pending": "การชำระเงินของคุณรอดำเนินการ การซื้อจะเสร็จเมื่อสโตร์ยืนยันการชำระเงิน",
+      "processing": "กำลังประมวลผลการซื้อของคุณ จะเสร็จในไม่ช้า"
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "การโอนซ้ำ",
+      "delegate_hive_power": "มอบหมาย Hive Power",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "ตั้งเส้นทางถอน vesting",
+      "power_down": "Power Down",
+      "transfer_to_saving": "โอนเข้าเงินออม",
+      "transfer_from_saving": "โอนจากเงินออม",
+      "cancel_transfer_from_saving": "ยกเลิกการโอนจากเงินออม",
+      "collateralized_convert": "การแปลงแบบมีหลักประกัน",
+      "witness_vote": "โหวตวิตเนส",
+      "witness_update": "อัปเดตวิตเนส",
+      "witness_set_properties": "ตั้งค่าคุณสมบัติวิตเนส",
+      "governance_proxy": "พร็อกซีธรรมาภิบาล",
+      "claim_account": "เคลมบัญชี",
+      "create_account": "สร้างบัญชี",
+      "create_account_with_account": "สร้างบัญชีด้วยเครดิตบัญชี",
+      "create_limit_order": "สร้างคำสั่งแบบกำหนดราคา",
+      "cancel_limit_order": "ยกเลิกคำสั่งแบบกำหนดราคา",
+      "redeem_rewards": "แลกรางวัล",
+      "post_or_comment": "โพสต์หรือความคิดเห็น",
+      "post_or_comment_options": "ตัวเลือกโพสต์หรือความคิดเห็น",
+      "custom_operation": "การดำเนินการกำหนดเอง",
+      "update_account_active": "อัปเดตบัญชี (active)",
+      "update_account_posting": "อัปเดตบัญชี (posting)",
+      "change_recovery_account": "เปลี่ยนบัญชีกู้คืน",
+      "create_proposal": "สร้างข้อเสนอ",
+      "remove_proposal": "ลบข้อเสนอ",
+      "update_proposal_votes": "อัปเดตโหวตข้อเสนอ",
+      "update_proposal": "อัปเดตข้อเสนอ"
+    },
+    "auth_link": {
+      "must_be_signed_by": "ลิงก์นี้ต้องลงนามโดย @{account} สลับไปที่บัญชีนั้นแล้วเปิดอีกครั้ง",
+      "ecency_can_only_sign": "Ecency ลงนามและออกอากาศได้เฉพาะธุรกรรมจากลิงก์",
+      "requester_page": "หน้า {host}",
+      "owner_refused": "การดำเนินการที่ต้องใช้คีย์ owner ไม่สามารถลงนามจากลิงก์ได้",
+      "busy": "โปรดรอสักครู่ ยังประมวลผลคำขออื่นอยู่",
+      "not_supported": "Ecency ยังลงนามการดำเนินการนี้ในเวอร์ชันนี้ไม่ได้"
+    },
+    "chats": {
+      "group_members": "สมาชิกกลุ่ม",
+      "rename_group": "เปลี่ยนชื่อกลุ่ม",
+      "failed_to_load_chats": "โหลดแชตไม่สำเร็จ",
+      "unknown": "ไม่ทราบ",
+      "unable_to_mark_channel": "ทำเครื่องหมายช่องว่าอ่านแล้วไม่ได้",
+      "unable_to_update_favorites": "อัปเดตรายการโปรดไม่ได้",
+      "unable_to_update_mute": "อัปเดตการปิดเสียงไม่ได้",
+      "group": "กลุ่ม",
+      "unable_to_search": "ค้นหาไม่ได้",
+      "unable_to_start_chat": "เริ่มแชตไม่ได้",
+      "no_internet": "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
+    },
+    "stake": {
+      "confirm_summary": "มอบหมาย {hp} HP ({vests} VESTS) ให้ @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "มอบหมายให้ @{recipient} แล้ว"
+    },
+    "backup_keys": {
+      "owner_not_stored": "เฉพาะสาธารณะ Ecency ไม่เก็บคีย์ owner",
+      "shared_owner": "บัญชีนี้ใช้คีย์เดียวกันสำหรับบทบาท owner และบทบาท {names} ใครมีคีย์นั้นก็ควบคุมทั้งบัญชี ให้บทบาท {names} มีคีย์ของตัวเอง และเก็บคีย์ owner ไว้แบบออฟไลน์",
+      "copy_warning": "ใครมีคีย์ส่วนตัวนี้ก็ควบคุมส่วนนี้ของบัญชีคุณ แอปอื่นอ่านคลิปบอร์ดได้ วางเฉพาะในที่ที่คุณไว้ใจ ระบบจะล้างออกจากคลิปบอร์ดหลัง 2 นาที"
+    },
+    "app_lock": {
+      "pin_lock_is_on": "การล็อกด้วย PIN เปิดอยู่",
+      "pin_changed": "เปลี่ยน PIN แล้ว",
+      "pin_lock_is_off": "การล็อกด้วย PIN ปิดอยู่",
+      "wiped_notice": "ลบบัญชี คีย์ และข้อมูลรับรองทั้งหมดออกจากอุปกรณ์นี้แล้ว",
+      "we_could_not_bring": "เราย้ายบัญชีของคุณจากแอปเวอร์ชันก่อนหน้ามาไม่ได้ โปรดเข้าสู่ระบบอีกครั้ง",
+      "your_pin_lock_could": "ย้ายการล็อกด้วย PIN ของคุณจากเวอร์ชันก่อนหน้ามาไม่ได้ ตั้ง PIN อีกครั้งจากเมนูบัญชีเพื่อเปิดการล็อกแอปอีกครั้ง",
+      "biometric_unlock_was_turned": "ปิดการปลดล็อกด้วยชีวมิติเพราะข้อมูลชีวมิติบนอุปกรณ์นี้เปลี่ยนไป ปลดล็อกด้วย PIN แล้วเปิดใหม่จากเมนูบัญชี",
+      "biometric_unavailable_notice": "เปิดการปลดล็อกด้วยชีวมิติไม่ได้ อุปกรณ์นี้ยังไม่ได้ตั้งค่าชีวมิติ",
+      "set_backup": "ตั้ง PIN เพื่อสำรองการปลดล็อกด้วยชีวมิติ",
+      "biometric_on_notice": "การล็อกด้วย PIN เปิดอยู่ ปลดล็อกด้วยชีวมิติหรือ PIN ของคุณ",
+      "offer_title": "ปลดล็อกด้วยชีวมิติ",
+      "offer_body": "เปิด Ecency ด้วยใบหน้าหรือลายนิ้วมือ คุณยังตั้ง PIN ไว้ด้วย ซึ่งจะปลดล็อกแอปเมื่อใช้ชีวมิติไม่ได้",
+      "offer_use": "ใช้ชีวมิติ",
+      "offer_use_pin": "ใช้ PIN แทน"
+    },
+    "common": {
+      "list_and": "{first} และ {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "การตอบกลับที่มี 25 ตัวอักษรหรือน้อยกว่าจะไม่ได้รับ Points (ไม่นับลิงก์)",
+      "short_content_hint": "สั้นเกินไปที่จะได้รับ Points (25 ตัวอักษรหรือน้อยกว่า ไม่รวมลิงก์)",
+      "daily_post": "โพสต์รายวัน {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {สตรีค # วัน}}",
+      "grant_description": "ให้บัญชี Ecency @ecency.app มีสิทธิ์โพสต์บนบัญชีของคุณ เพื่อให้โพสต์ได้โดยไม่ต้องเปิด Keychain ทุกครั้ง การให้สิทธิ์นี้เปลี่ยนสิทธิ์การโพสต์ของบัญชีและต้องใช้คีย์ active ของคุณ"
+    },
+    "wallet_history": {
+      "from_to": "@{from} ถึง @{to}",
+      "from_user_id": "จาก @{from}, รหัส: {id}",
+      "user_id": "@{user}, รหัส: {id}",
+      "from_to_id": "@{from} ถึง @{to}, รหัส: {id}",
+      "from_to_account": "@{from} ถึง {to}",
+      "from_user": "จาก @{user}",
+      "to_user": "ถึง @{user}",
+      "interest": "ดอกเบี้ย",
+      "proposal_pay": "การจ่ายเงินข้อเสนอ",
+      "categories": "ประเภทกิจกรรม",
+      "category_all": "ทั้งหมด",
+      "category_transfers": "การโอน",
+      "category_market": "คำสั่งตลาด",
+      "category_interest": "ดอกเบี้ย",
+      "category_stake": "การดำเนินการสเตก",
+      "category_rewards": "รางวัล",
+      "point_type_checkin": "Heartbeat",
+      "point_type_login": "เข้าสู่ระบบ",
+      "point_type_post": "โพสต์",
+      "point_type_comment": "ความคิดเห็น",
+      "point_type_vote": "โหวต",
+      "point_type_reblog": "รีบล็อก",
+      "point_type_transfer_sent": "การโอนที่ส่ง",
+      "point_type_transfer_received": "การโอนที่ได้รับ"
+    },
+    "video_upload": {
+      "continue_upload": "อัปโหลดต่อ",
+      "source_gone": "การบันทึกนี้ไม่อยู่บนอุปกรณ์แล้ว บันทึกหรือเลือกวิดีโออีกครั้ง",
+      "no_camera": "อุปกรณ์นี้ไม่มีกล้อง"
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "การเลิกสเตกครั้งถัดไปในอีก {hours, plural, other {# ชั่วโมง}}",
+      "account_not_found": "ไม่พบบัญชี"
+    },
+    "wave_compose": {
+      "clipboard_chip": "มีรูปภาพในคลิปบอร์ด · วางรูปภาพ",
+      "no_container": "ดึง container ของ waves ล่าสุดไม่ได้",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน",
+      "write_something_first": "เขียนอะไรสักอย่างก่อน",
+      "account_changed": "wave นี้ถูกเขียนในบัญชีอื่น ปิดแล้วเขียนใหม่",
+      "no_upload": "บิลด์นี้ยังอัปโหลดรูปภาพไม่ได้ ให้วางลิงก์รูปภาพลงในข้อความแทน",
+      "fail": "ล้มเหลว"
+    },
+    "delete_account": {
+      "sign_out_failed": "ส่งคำขอของคุณแล้ว แต่ออกจากระบบไม่สำเร็จ โปรดออกจากระบบจากเมนู",
+      "not_sent": "ส่งคำขอลบของคุณไม่ได้ โปรดลองอีกครั้ง"
+    },
+    "chat_sheets": {
+      "group_limit": "กลุ่มหนึ่งมีคนอื่นได้สูงสุด {max, plural, other {# คน}}",
+      "search_people_by_username": "ค้นหาผู้คนด้วยชื่อผู้ใช้",
+      "new_group_title": "กลุ่มใหม่",
+      "new_group_hint": "เพิ่ม {min} ถึง {max, plural, other {# คน}} เพื่อเริ่มสนทนากลุ่ม",
+      "no_results": "ไม่พบใครในแชตที่ใช้ชื่อนี้",
+      "search_failed": "ค้นหาไม่สำเร็จ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      "create": "เริ่มกลุ่ม",
+      "new_group_failed": "เริ่มกลุ่มไม่ได้ โปรดลองอีกครั้ง",
+      "name_limit": "ชื่อกลุ่มยาวได้สูงสุด {max, plural, other {# ตัวอักษร}}",
+      "rename_title": "เปลี่ยนชื่อกลุ่ม",
+      "rename_hint": "ตั้งชื่อกลุ่มนี้ที่ทุกคนในกลุ่มจะเห็น หากเว้นว่างไว้ ระบบจะแสดงชื่อสมาชิกแทน",
+      "placeholder": "ชื่อกลุ่ม",
+      "not_owner": "เฉพาะผู้ที่เริ่มกลุ่มนี้เท่านั้นที่เปลี่ยนชื่อได้",
+      "rename_failed": "เปลี่ยนชื่อกลุ่มไม่ได้ โปรดลองอีกครั้ง"
+    },
+    "editor_side": {
+      "copy_of": "สำเนาของ {title}",
+      "deletions_failed": "เกิดข้อผิดพลาดบางอย่าง\nล้มเหลว {failed} จาก {total, plural, other {# การลบ}}",
+      "uploads_failed": "{count, plural, other {อัปโหลดล้มเหลว #}}:\n\n{messages}",
+      "failed_to_delete": "ลบไม่สำเร็จ"
+    },
+    "uploads": {
+      "add_to_gallery": "เพิ่มในแกลเลอรี"
+    },
+    "account_notice": {
+      "manage_keys": "การตั้งค่า, จัดการสิทธิ์",
+      "no_signing_key_title": "เข้าสู่ระบบอีกครั้งเป็น @{account}",
+      "no_signing_key": "Ecency ไม่เก็บคีย์ owner หรือรหัสผ่านหลักบนอุปกรณ์นี้อีกต่อไป และ @{account} ไม่มีคีย์ posting หรือ active เก็บไว้ที่นี่ เข้าสู่ระบบอีกครั้งด้วยรหัสผ่านหลักหรือคีย์ posting หรือ active หรือเพิ่มคีย์ที่ {manageKeys} (Import Private)",
+      "missing_roles_title": "ไม่ได้เพิ่มบางคีย์",
+      "cannot_post": "โพสต์ โหวต หรือแสดงความคิดเห็น",
+      "cannot_transfer": "ส่งการโอนหรือเปลี่ยนการตั้งค่าบัญชี",
+      "missing_roles": "รหัสผ่านของคุณไม่ตรงกับคีย์ {missing} ของ @{account} อีกต่อไป เพราะมีการเปลี่ยนบนบัญชีหลังตั้งรหัสผ่าน คีย์ที่เก็บบนอุปกรณ์นี้: คีย์ {kept} จนกว่าคุณจะเพิ่มคีย์ {missing} ที่ {manageKeys} (Import Private) แอปนี้จะไม่สามารถ{cannot}ด้วยคีย์ของ @{account} ได้",
+      "shared_owner_title": "คีย์นี้ควบคุมบทบาท owner ด้วย",
+      "shared_owner": "@{account} ใช้คีย์เดียวกันสำหรับบทบาท owner และบทบาท {names} ใครมีคีย์นี้ก็ควบคุมทั้งบัญชี Ecency เก็บไว้เป็นคีย์ {names} เท่านั้นและไม่เคยใช้กับการดำเนินการ owner ให้บทบาท {names} มีคีย์ของตัวเอง และเก็บคีย์ owner ไว้แบบออฟไลน์"
+    },
+    "dapp_browser": {
+      "message_from": "ข้อความจาก {host}",
+      "home_title": "หน้าหลัก",
+      "loading_title": "กำลังโหลด...",
+      "blank_run": "[{count, plural, other {อักขระว่าง #}}]",
+      "too_large": "หน้านี้ขอให้ลงนามคำขอที่ใหญ่เกินกว่าจะแสดงได้ Ecency จึงปฏิเสธ"
+    },
+    "community_service": {
+      "the_account_changed": "บัญชีเปลี่ยนไปแล้ว"
+    },
+    "profile_edit": {
+      "enter_link": "ป้อนลิงก์รูปภาพ",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน",
+      "account_not_found": "ไม่พบบัญชี",
+      "please_enter_an_image": "โปรดป้อนลิงก์รูปภาพที่ขึ้นต้นด้วย https://"
+    },
+    "background_media": {
+      "post_by": "โพสต์โดย @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน"
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "คุณโหวตด้วยน้ำหนักเดียวกันไปแล้ว",
+      "insufficient_rc": "Resource Credits ไม่เพียงพอ โปรดรอหรือ Power Up",
+      "missing_authority": "ไม่มีสิทธิ์โพสต์ โปรดตรวจสอบวิธีเข้าสู่ระบบของคุณ",
+      "comment_too_soon": "โปรดรอก่อนโพสต์อีกครั้ง",
+      "paid_out": "โพสต์นี้จ่ายเงินไปแล้ว",
+      "too_large": "ธุรกรรมมีขนาด {size, plural, other {# ไบต์}} เกินขีดจำกัด {max} ไบต์",
+      "network_error_please_check": "ข้อผิดพลาดเครือข่าย โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      "unconfirmed_message": "ยืนยันไม่ได้ว่ารายการนี้สำเร็จหรือไม่ โปรดตรวจสอบกระเป๋าเงินหรือประวัติของคุณ เริ่มใหม่เฉพาะเมื่อไม่พบรายการ",
+      "undecided_message": "รายการนี้อาจสำเร็จไปแล้ว โปรดตรวจสอบกระเป๋าเงินหรือประวัติก่อนลองอีกครั้ง"
+    },
+    "chat_api": {
+      "request_failed": "คำขอล้มเหลว ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} กำลังพิมพ์...",
+      "typing_two": "{first} และ {second} กำลังพิมพ์...",
+      "typing_three": "{first}, {second} และ {third} กำลังพิมพ์...",
+      "typing_many": "{first}, {second} และอีก {count, plural, other {# คน}} กำลังพิมพ์...",
+      "banned": "{reason} คุณยังอ่านแชตได้ จะโพสต์ได้อีกครั้ง{until}",
+      "joined_when": "เข้าร่วม{time}",
+      "joined": "เข้าร่วมแล้ว",
+      "official_badge": "ทางการ",
+      "official_badge_label": "บัญชี Ecency ทางการ"
+    },
+    "side_menu": {
+      "ask_esie": "ถาม Esie"
+    },
+    "chat_service": {
+      "missing_token": "ไม่มีโทเค็นเข้าถึง Hive โปรดออกจากระบบแล้วเข้าสู่ระบบอีกครั้ง",
+      "dm_error": "ผู้ใช้ยังไม่ได้เข้าร่วมแชต"
+    },
+    "compose_reply": {
+      "account_changed": "การตอบกลับนี้ถูกเขียนในบัญชีอื่น ปิดแล้วเขียนใหม่",
+      "write_something_first": "เขียนอะไรสักอย่างก่อน",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน"
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "ผู้รับผลประโยชน์มากเกินไป: สูงสุด {max}",
+      "a_beneficiary_s_share": "ส่วนแบ่งของผู้รับผลประโยชน์ต้องอยู่ระหว่าง 0.01% ถึง 100%",
+      "beneficiaries_add_up_to": "ส่วนแบ่งของผู้รับผลประโยชน์รวมกันเกิน 100%",
+      "a_beneficiary_is_listed": "มีผู้รับผลประโยชน์ซ้ำกันในรายการ",
+      "you_cannot_be_a": "คุณเป็นผู้รับผลประโยชน์ของโพสต์ตัวเองไม่ได้",
+      "a_beneficiary_has_an": "ผู้รับผลประโยชน์คนหนึ่งมีชื่อบัญชีไม่ถูกต้อง"
+    },
+    "follows": {
+      "fail": "ล้มเหลว!: {message}",
+      "follower_count": "ผู้ติดตาม ({count})",
+      "following_count": "กำลังติดตาม ({count})"
+    },
+    "link": {
+      "unsupported": "ลิงก์นี้ยังไม่รองรับ",
+      "cannot_open": "เปิดลิงก์ไม่ได้",
+      "unsupported_version": "ลิงก์นี้ไม่รองรับในเวอร์ชันนี้"
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "เบราว์เซอร์สำรวจเข้าถึงกระเป๋าเงิน Hive ของคุณเพื่อลงนามธุรกรรมได้ ลิงก์นี้มาจากเนื้อหาโพสต์และ Ecency ไม่ได้ตรวจสอบ ดำเนินการต่อเฉพาะเมื่อคุณไว้วางใจ:\n\n{url}"
+    },
+    "listen": {
+      "message": "การฟังต้องใช้ {required} Points และคุณมี {available}",
+      "unlock_label": "ปลดล็อก · {cost} Points",
+      "preparing_audio": "กำลังเตรียมเสียง · {preparingPercent}%",
+      "waiting_in_line_ahead": "รอคิว ข้างหน้า {ahead}…",
+      "next_in_line": "คิวถัดไป…",
+      "preparing_about_minutes": "กำลังเตรียมเสียง ประมาณ {minutes} นาที…",
+      "preparing_audio_2": "กำลังเตรียมเสียง…",
+      "spend_confirm": "ใช้ {cost} Points เพื่อฟังโพสต์นี้ไหม? คุณเล่นเสียงนี้ซ้ำได้ทุกเมื่อ",
+      "about_minutes": "~{minutes} นาที",
+      "failed_refunded": "สร้างเสียงไม่ได้ Points ของคุณถูกคืนแล้ว"
+    },
+    "media_pick": {
+      "preparing_video": "กำลังเตรียมวิดีโอ...",
+      "library_hint": "เลือกจากรูปภาพของคุณ",
+      "camera_hint": "ถ่ายภาพใหม่ตอนนี้",
+      "files_hint": "เรียกดูไฟล์บนอุปกรณ์นี้และบนคลาวด์",
+      "paste_hint": "ใช้รูปภาพที่คุณคัดลอกไว้",
+      "link_hint": "ใช้รูปภาพจากเว็บ"
+    },
+    "media_picking": {
+      "image_types_message": "ไม่รองรับไฟล์ประเภทนี้ เลือกรูปภาพ JPEG, PNG, GIF, WebP หรือ HEIC",
+      "video_types_message": "ไม่รองรับไฟล์ประเภทนี้ เลือกวิดีโอ MP4 หรือ MOV",
+      "gif_too_large": "GIF นี้ใหญ่กว่า {mb} MB"
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "การดำเนินการนี้ต้องใช้ทั้งลายเซ็น active และ posting ซึ่ง Ecency ยังลงนามพร้อมกันไม่ได้"
+    },
+    "poll": {
+      "fail": "ล้มเหลว!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "ตรวจสอบสิทธิ์การโพสต์ของบัญชีคุณไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+    },
+    "post_lists": {
+      "voters_title": "ข้อมูลผู้โหวต ({total})",
+      "reblogs_title": "ข้อมูลรีบล็อก ({total})",
+      "no_history_found": "ไม่พบประวัติ!",
+      "no_edit_history_available": "ไม่มีประวัติการแก้ไขสำหรับเนื้อหานี้",
+      "version_label": "เวอร์ชัน {version}"
+    },
+    "stats": {
+      "other_device": "อื่น ๆ"
+    },
+    "profile": {
+      "account_not_found": "ไม่พบบัญชี",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • เต็มใน {hours, plural, other {# ชั่วโมง}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "อ่านโปรไฟล์ปัจจุบันของคุณไม่ได้ ลองอีกครั้ง"
+    },
+    "profile_sheet": {
+      "fail": "ล้มเหลว! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "ไม่พบบัญชี"
+    },
+    "push_payload": {
+      "mentioned": "@{source} กล่าวถึง @{target}",
+      "replied": "@{source} ตอบกลับ @{target}",
+      "transferred": "@{source} โอนให้ @{target}",
+      "delegated": "@{source} มอบหมายให้ @{target}",
+      "rewards_received": "ได้รับรางวัล",
+      "account_updated": "อัปเดตบัญชีแล้ว",
+      "account_updated_body": "อัปเดตรายละเอียดบัญชีของคุณแล้ว",
+      "followed": "@{source} ติดตาม @{target}",
+      "unfollowed": "@{source} เลิกติดตาม @{target}",
+      "ignored": "@{source} เพิกเฉย @{target}",
+      "blacklisted": "@{source} ขึ้นบัญชีดำ @{target}",
+      "posted_in": "@{source} โพสต์ใน #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "ขอสิทธิ์ใช้กล้องไม่ได้",
+      "permission_message": "โปรดให้สิทธิ์กล้องในการตั้งค่า ecency",
+      "permission_allow": "อนุญาต"
+    },
+    "reply_account": {
+      "switch": "ตอบกลับด้วยบัญชีอื่น"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} จาก @{account} ของคุณสำเร็จแล้ว",
+      "not_sent": "{label} จาก @{account} ของคุณไม่สำเร็จ ไม่มีการส่งอะไร คุณเริ่มใหม่ได้",
+      "checking_whether_your_from": "กำลังตรวจสอบว่า {label} จาก @{account} ของคุณสำเร็จหรือไม่ โปรดตรวจสอบกระเป๋าเงินก่อนส่งอีกครั้ง"
+    },
+    "signing": {
+      "hot_page_closed": "ปิดหน้า HiveSigner แล้ว",
+      "wrong_role": "นี่คือคีย์ {given} ของคุณ การดำเนินการนี้ต้องใช้คีย์ {needed} ของคุณ",
+      "action_id_required": "การดำเนินการนี้ต้องมีรหัสการดำเนินการเพื่อให้ลองอีกครั้งได้อย่างปลอดภัย"
+    },
+    "signing_router": {
+      "owner_never": "ไม่เคยลงนามการดำเนินการ owner ในแอป"
+    },
+    "spin": {
+      "key_missing": "ไม่มีคีย์เกม",
+      "score": "{score, plural, other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "วันนี้ (UTC) รีเซ็ตใน {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "รีเซ็ตทุกวันเวลา 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "เข้าสู่ระบบอีกครั้ง",
+      "message": "ที่เก็บข้อมูลที่ปลอดภัยบนอุปกรณ์นี้ถูกรีเซ็ต เข้าสู่ระบบอีกครั้ง",
+      "failed": "นำบัญชีบนอุปกรณ์นี้ออกไม่ได้ โปรดลองอีกครั้ง"
+    },
+    "store": {
+      "in_app_purchases_are": "บิลด์นี้ไม่รองรับการซื้อในแอป"
+    },
+    "wallet_sends": {
+      "journal_full": "การส่งก่อนหน้าหลายรายการยังตรวจสอบกับเครือข่ายอยู่ โปรดรอจนกว่าจะได้รับการยืนยันก่อนส่งเพิ่ม",
+      "check_later": "เครือข่ายไม่ได้ยืนยันรายการนี้ทันเวลา โปรดตรวจสอบกระเป๋าเงินหรือประวัติก่อนส่งอีกครั้ง แอปจะตรวจสอบอีกครั้งเมื่อเริ่มทำงานครั้งถัดไป"
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {ยังไม่ได้อ่าน #}}",
+      "locked_text": "ปลดล็อก Ecency เพื่อดู",
+      "signed_out_text": "เข้าสู่ระบบ Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "อ่านสิทธิ์ปัจจุบันของบัญชีคุณไม่ได้ ไม่มีอะไรเปลี่ยนแปลง โปรดลองอีกครั้ง",
+      "reads_disagree": "การอ่านสิทธิ์การโพสต์ของบัญชีคุณสองครั้งไม่ตรงกัน ไม่มีอะไรเปลี่ยนแปลง โปรดลองอีกครั้ง"
+    },
+    "vote": {
+      "vote_weight_must_be": "น้ำหนักโหวตต้องอยู่ระหว่าง -100% ถึง 100%",
+      "please_sign_in_first": "โปรดเข้าสู่ระบบก่อน"
+    },
+    "widget": {
+      "streak_name": "สตรีคเควสต์",
+      "write": "เขียน",
+      "new_wave": "Wave ใหม่",
+      "notifications_description": "การแจ้งเตือนที่ยังไม่ได้อ่านของคุณ ซ่อนไว้เมื่อเปิดการล็อกด้วย PIN",
+      "streak_description": "สตรีคเควสต์รายวันของคุณ ซ่อนไว้เมื่อเปิดการล็อกด้วย PIN",
+      "compose_description": "เขียนโพสต์หรือ wave ใหม่",
+      "streak_title": "สตรีค",
+      "daily_quests": "เควสต์รายวัน",
+      "streak_hint": "เปิด Perks เพื่อดูสตรีคของคุณ",
+      "open_perks": "เปิด Perks",
+      "open_app": "เปิด Ecency",
+      "unread_caption": "{count, plural, other {ยังไม่ได้อ่าน}}",
+      "streak_caption": "{count, plural, other {วันติดต่อกัน}}"
+    },
+    "system": {
+      "dictation_channel": "พูดเพื่อพิมพ์",
+      "listen_channel": "ฟัง",
+      "dictation_channel_description": "แสดงขณะที่การบันทึกเสียงเพื่อพูดเพื่อพิมพ์ทำงานอยู่เบื้องหลัง พร้อมปุ่มหยุด",
+      "dictation_title": "กำลังบันทึกเพื่อพูดเพื่อพิมพ์",
+      "dictation_text": "Ecency กำลังบันทึกเสียงของคุณ การหยุดจะเก็บไว้ไม่ส่งจนกว่าคุณจะยืนยันในแอป",
+      "listen_channel_description": "แจ้งเมื่อการฟังทำงานต่อเบื้องหลังไม่ได้",
+      "listen_paused": "หยุดฟังชั่วคราว",
+      "listen_paused_text": "เปิด Ecency เพื่อฟังต่อ",
+      "skip_back": "ย้อนกลับ 15 วินาที",
+      "skip_forward": "ไปข้างหน้า 15 วินาที"
+    },
+    "permission": {
+      "face_id": "ปลดล็อก Ecency ด้วย Face ID แทน PIN",
+      "camera": "สแกนคิวอาร์โค้ด และถ่ายภาพหรือบันทึกวิดีโอเพื่อเพิ่มลงในโพสต์ของคุณ",
+      "photo_library_add": "Ecency บันทึกรูปภาพที่คุณดาวน์โหลดจากโพสต์ลงในคลังรูปภาพของคุณ",
+      "photo_library": "Ecency เก็บรูปภาพที่คุณดาวน์โหลดจากโพสต์รวมกันในอัลบั้ม Ecency ในคลังรูปภาพของคุณ",
+      "microphone": "Ecency ใช้ไมโครโฟนของคุณเพื่อให้คุณพูดเพื่อพิมพ์โพสต์และความคิดเห็นได้ (การบันทึกเหล่านั้นจะส่งไปยัง Ecency เพื่อถอดเสียง) และเพื่อบันทึกเสียงพร้อมวิดีโอที่คุณเพิ่มลงในโพสต์"
+    },
+    "android": {
+      "no_browser": "ไม่มีเบราว์เซอร์",
+      "biometric_unlock_title": "ปลดล็อก Ecency ด้วยชีวมิติ",
+      "biometric_confirm": "ยืนยันด้วยลายนิ้วมือหรือใบหน้า",
+      "image_unsupported_address": "ไม่รองรับที่อยู่รูปภาพ",
+      "image_create_failed": "สร้างไฟล์ไม่ได้",
+      "image_write_failed": "เขียนไฟล์ไม่ได้",
+      "image_too_large": "รูปภาพใหญ่เกินไป",
+      "image_download_failed": "ดาวน์โหลดล้มเหลว สถานะ {status}",
+      "billing_disconnected": "Google Play Billing ตัดการเชื่อมต่อ",
+      "billing_no_screen": "ไม่มีหน้าจอสำหรับแสดงการซื้อ",
+      "billing_error": "ข้อผิดพลาดของ Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "คุณสร้าง {count, plural, other {# โพสต์}} ในเดือนนี้ ทำต่อไปนะ!",
-        "checkin": "คุณเช็คอิน {count, plural, other {# วัน}} ในสัปดาห์นี้ ทำต่อไปนะ!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "โพสต์ใหม่ {count, plural, other {# รายการ}}ใน #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# ครั้งที่ล้มเหลว}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "สตรีค {n} วัน"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• อนุญาตเฉพาะบัญชีที่มีอายุมากกว่า {days} วันเท่านั้น",
-        "max_choices": "• คุณสามารถเลือกได้สูงสุด {choices} ตัวเลือก"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "เหลืออีก {executions} ครั้ง",
-        "schedule_summary": "{executions} การโอน แต่ละครั้งทุก {hours} ชั่วโมง"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "สั้นเกินไปที่จะได้รับ Points ({n, plural, other {# ตัวอักษร}}หรือน้อยกว่า ไม่รวมลิงก์)"
       },
       "chats": {
-        "people_joined": "{count} คนเข้าร่วม"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "ในอีกประมาณ {count, plural, other {# นาที}}",
+        "ban-remaining-hours": "ในอีกประมาณ {count, plural, other {# ชั่วโมง}}",
+        "ban-remaining-days": "ในอีกประมาณ {count, plural, other {# วัน}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "ใช้ได้สูงสุด {n, plural, other {# แท็ก}}",
+          "too_long": "การค้นหายาวเกินไป ใช้ได้สูงสุด {n, plural, other {# ตัวอักษร}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "ต้องมีอย่างน้อย {count} ตัวอักษร",
-        "chars_remaining": "เหลืออีก {count} ตัวอักษร"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "คุณเลือกได้สูงสุด {count, plural, other {# รูปภาพ}}ต่อครั้ง"
+      },
+      "dictation": {
+        "stop_hint": "หยุดเพื่อถอดเสียงและเพิ่มลงในโพสต์ของคุณ สูงสุด {m, plural, other {# นาที}}",
+        "rate": "{n} Points ต่อ {s, plural, other {# วินาที}}"
       },
       "transfer": {
-        "powering_down_info": "การเลิก Stake ครั้งถัดไปในอีก {days} วัน, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "ระหว่าง {min} ถึง {max, plural, other {# ตัวอักษร}}"
       }
     }
   }

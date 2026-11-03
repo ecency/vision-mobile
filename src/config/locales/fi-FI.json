@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro -jäsen"
   },
   "perks": {
     "header": "Edut",
@@ -31,42 +31,42 @@
     "promote_desc": "Saa lisää näkyvyyttä julkaisullesi",
     "account_boost": "Tilin tehostus",
     "account_boost_desc": "Tehosta mitä tahansa tiliä",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Lataa RC",
+    "rc_topup_desc": "Jatka julkaisemista, kun Resurssipisteet ovat vähissä",
+    "streak_freeze_owned": "{n} varalla",
+    "streak_freeze_buy": "Suojaa putki ({price} Pointsia)",
+    "streak_freeze_buying": "Suojataan",
+    "streak_freeze_error": "Putken suojauksen osto epäonnistui. Yritä uudelleen."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Päivän julkaisu",
+    "streak": "{n} päivän putki",
+    "keep_streak": "Pidä putkesi hengissä"
   },
   "waves": {
     "for_you": "Sinulle",
     "following": "Seuratut",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Omat syötteet",
+    "custom_feeds_subtitle": "Kiinnitä lähteitä ja tunnisteita lisätäksesi ne syötevälilehdiksi.",
+    "add_tag_placeholder": "Lisää tunniste",
+    "sources": "Lähteet",
+    "your_feeds": "Syötteesi",
+    "trending_tags": "Suositut tunnisteet",
+    "shorts_empty": "Ei vielä näytettäviä lyhytvideoita",
+    "mute": "Mykistä",
+    "unmute": "Poista mykistys"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Aloittaminen",
+    "subtitle": "Uusi täällä? Wavet ovat lyhyitä julkaisuja ja helpoin tapa päästä alkuun.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Sulje",
+    "item_wave": "Julkaise ensimmäinen Wavesi",
+    "item_vote": "Äänestä Wavea, josta pidät",
+    "item_reply": "Vastaa jollekulle",
+    "item_checkin": "Kirjaudu päivän tarkistukseen aloittaaksesi putkesi",
+    "all_done_title": "Kaikki valmista 🎉",
+    "all_done_subtitle": "Olet valmis. Jatka Wavejen julkaisemista!"
   },
   "profile": {
     "havent_commented": "ei ole vielä kommentoinut mitään",
@@ -80,7 +80,7 @@
     "wallet": "Lompakko",
     "wallet_details": "Lompakon tiedot",
     "comments": "Kommentit",
-    "waves": "Waves",
+    "waves": "Wavet",
     "details": "Profiilitiedot",
     "resource_credits": "Resurssipisteet",
     "voting_power": "Äänivalta",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Ikä  |  Näkyvyys  |  Tulkinta",
     "attach_poll": "Liitä Kysely"
   },
+  "favorite_tags": {
+    "title": "Tagit",
+    "hint": "Seuraa saadaksesi ilmoituksen uusista julkaisuista tällä tagilla",
+    "following_hint": "Saat ilmoituksen uusista julkaisuista tällä tagilla",
+    "follow": "Seuraa",
+    "following": "Seurataan",
+    "added": "Tagia seurataan",
+    "removed": "Tagin seuraaminen lopetettu",
+    "empty_list": "Ei mitään täällä"
+  },
   "favorites": {
     "add": "Lisää suosikki",
     "add_error": "Suosikin lisääminen epäonnistui",
@@ -181,7 +191,33 @@
     "payout": "Palkkio",
     "details": "Lisätiedot",
     "community": "yhteisö",
-    "new_post": "Uusi julkaisu"
+    "new_post": "Uusi julkaisu",
+    "mute_post_title": "Mykistä tämä julkaisu",
+    "unmute_post_title": "Poista tämän julkaisun mykistys",
+    "mute_post_reason": "Miksi tämä mykistetään?",
+    "unmute_post_reason": "Miksi tämä palautetaan?",
+    "manage": "Hallitse yhteisöä",
+    "manage_members": "Jäsenet ja roolit",
+    "manage_settings": "Yhteisön asetukset",
+    "manage_activities": "Toimintaloki",
+    "activities": "toiminta",
+    "no_activities": "Ei vielä toimintaa",
+    "activities_load_failed": "Toimintaa ei voitu ladata. Päivitä vetämällä alas.",
+    "set_role": "Aseta rooli",
+    "assign_role": "Anna rooli",
+    "assign_role_hint": "Hae mitä tahansa tiliä, myös sellaista joka ei ole tilannut yhteisöä, ja valitse rooli.",
+    "username_placeholder": "Käyttäjänimi",
+    "invalid_username": "Valitse tulosten joukosta olemassa oleva tili",
+    "members": "jäsentä",
+    "no_members": "Jäseniä ei löytynyt",
+    "members_incomplete": "Joitakin jäseniä ei voitu ladata. Päivitä vetämällä alas.",
+    "members_load_failed": "Jäseniä ei voitu ladata. Päivitä vetämällä alas.",
+    "role_owner": "Omistaja",
+    "role_admin": "Ylläpitäjä",
+    "role_mod": "Moderaattori",
+    "role_member": "Jäsen",
+    "role_guest": "Vieras",
+    "role_muted": "Mykistetty"
   },
   "trade": {
     "swap_for": "Vaihdetaan {fromAmount}:sta {toAmount}:n",
@@ -212,7 +248,11 @@
     "cross-post": "Ristiinjulkaisu",
     "pin-blog": "Kiinnitä blogiin",
     "copy": "kopioi linkki",
+    "copy-text": "kopioi teksti",
+    "open-thread": "avaa ketju",
     "unpin-community": "Poista kiinnitys yhteisöstä",
+    "mute-post": "Mykistä julkaisu",
+    "unmute-post": "Poista julkaisun mykistys",
     "mute": "Mykistä / Estä",
     "reblog": "jaa blogissa",
     "undo-reblog": "kumoa uudelleenjako",
@@ -232,24 +272,24 @@
     "unpin-reply": "Poista kommentin kiinnitys"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Tämä julkaisu on kielellä {lang}. Käännetäänkö kielelle {target}?",
+    "translate_to": "Käännä kielelle {lang}",
+    "show_original": "Näytä alkuperäinen",
+    "translated_from": "Käännetty kielestä {lang}",
+    "change_language": "Vaihda kieli"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Käännä julkaisu",
+    "source": "Lähdekieli",
+    "target": "Kohdekieli",
+    "detected": "Tunnistettu: {lang}",
+    "translate": "Käännä",
+    "apply": "Ota käyttöön",
+    "review_note": "Lisää julkaisun loppuun oman tekstisi konekäännöksen. Tarkista ja muokkaa se ennen julkaisemista.",
+    "too_short": "Kirjoita ensin hieman enemmän. Käännös vaatii vähintään muutaman lauseen.",
+    "progress": "Käännetään {done}/{total}...",
+    "error": "Kääntäminen epäonnistui. Yritä uudelleen.",
+    "add_title_marker": "Lisää kielimerkintä otsikkoon"
   },
   "side_menu": {
     "profile": "Profiili",
@@ -296,7 +336,7 @@
     "hot": "Kuumat",
     "popular": "Suositut",
     "new": "Uusimmat",
-    "friends": "Following",
+    "friends": "Seuratut",
     "my_blog": "Oma Blogi"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Täällä ei ole mitään"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Mallipohjat",
+    "untitled": "Nimeämätön mallipohja",
+    "empty_list": "Tallenna julkaisu mallipohjaksi editorista, niin voit käyttää sitä täällä uudelleen.",
+    "delete_confirm": "Haluatko varmasti poistaa tämän mallipohjan?",
+    "applied": "Mallipohja otettu käyttöön uutena julkaisuna",
+    "save_as_template": "Tallenna mallipohjaksi",
+    "name_placeholder": "Mallipohjan nimi",
+    "saved": "Mallipohja tallennettu"
   },
   "selection_list": {
     "available": "Käytettävissä {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Kaikki",
+      "replies": "Vastaukset",
+      "mentions": "Maininnat",
+      "rvotes": "Äänet",
+      "follows": "Uudet seuraajat",
+      "reblogs": "Uudelleenjaot",
+      "transfers": "Siirrot",
+      "delegations": "Valtuutukset",
+      "nfavorites": "Suosikit",
+      "tags": "Tagit",
+      "nbookmarks": "Kirjanmerkit",
+      "payouts": "Maksut",
+      "scheduled_published": "Ajastetut julkaisut",
+      "account_updates": "Tilin päivitykset",
+      "weekly_earnings": "Viikkotulot"
     },
     "this_week": "Tällä Viikolla",
     "reblog": "jaettu uudelleen",
@@ -417,11 +458,15 @@
     "yesterday": "Eiliset",
     "mention": "mainittu",
     "favorites": "loi uuden julkaisun",
+    "tags": "julkaisi tagilla #{tag}",
+    "tags_bundle": "{count} uutta julkaisua tagilla #{tag}",
+    "tags_title": "Uusia julkaisuja seuraamallasi tagilla",
     "mentions": "Maininnat",
     "spin": "Aika ansaita enemmän pisteitä",
     "last_week": "Viime viikolla",
     "recent": "Viimeisimmät",
     "ignore": "sivuutti sinut",
+    "blacklist": "lisäsi sinut estolistalle",
     "follow": "seurasi sinua",
     "notification": "Ilmoitukset",
     "this_month": "Tässä kuussa",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} voi nyt julkaista ja äänestää puolestasi. Jos et valtuuttanut tätä, peru se.",
     "weekly_earnings": "Ansaitsit ${amount} tällä viikolla{breakdown}",
     "payouts": "Maksu vastaanotettu: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "julkaisi ajastetun julkaisun",
+    "scheduled_published_title": "Ajastettu julkaisu julkaistu",
+    "scheduled_published_body": "Ajastettu julkaisusi on nyt julkaistu, napauta nähdäksesi sen"
   },
   "recurrent": {
     "delete_failed": "Toistuvan siirron peruutus epäonnistui, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Avaa viimeaikainen luonnos tai luo uusi julkaisu",
     "reward_power_up": "Panosta 100%",
     "open_gallery": "Avaa Galleria",
+    "open_files": "Valitse Tiedostoista",
     "clipboard_no_image": "Leikepöydältä ei löytynyt kuvaa",
     "clipboard_image_detected": "Kuva leikepöydällä",
     "paste_image": "Liitä kuva",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Myöhemmin",
     "settings_title": "Julkaisuasetukset",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Ei"
+    "support_ecency": "Tue Ecencyä {percent}%",
+    "alert_btn_no": "Ei",
+    "short_reply_hint": "Enintään {n} merkin vastaukset eivät ansaitse pisteitä (linkkejä ei lasketa)",
+    "short_content_hint": "Liian lyhyt pisteiden ansaitsemiseen (enintään {n} merkkiä, linkkejä ei lasketa)"
   },
   "time": {
     "week": "v",
@@ -655,7 +703,41 @@
     "select_emoji": "Valitse emoji",
     "more_emojis": "Lisää",
     "search_emojis": "Hae emojeita...",
-    "no_emoji_found": "Emojia ei löytynyt"
+    "no_emoji_found": "Emojia ei löytynyt",
+    "ban-reason-spray": "Julkaiseminen on keskeytetty, koska sama viesti lähetettiin useille kanaville kerralla.",
+    "ban-reason-mass-dm": "Julkaiseminen on keskeytetty, koska viesti lähetettiin kerralla monelle ihmiselle.",
+    "ban-reason-generic": "Julkaiseminen chatissa on keskeytetty.",
+    "ban-can-still-read": "Voit yhä lukea chattia.",
+    "ban-unlocks": "Julkaiseminen avautuu {when}.",
+    "ban-remaining-soon": "alle minuutin kuluttua",
+    "ban-remaining-minutes": "noin {count} minuutin kuluttua",
+    "ban-remaining-hours": "noin {count} tunnin kuluttua",
+    "ban-remaining-days": "noin {count} päivän kuluttua",
+    "new_group": "Uusi ryhmä",
+    "new_group_hint": "Lisää {min}–{max} henkilöä aloittaaksesi ryhmäkeskustelun.",
+    "new_group_search": "Hae ihmisiä käyttäjänimellä",
+    "new_group_full": "Ryhmässä voi olla enintään {max} muuta henkilöä.",
+    "new_group_no_results": "Chatista ei löytynyt ketään tällä nimellä.",
+    "new_group_search_failed": "Haku ei onnistunut. Tarkista yhteytesi ja yritä uudelleen.",
+    "new_group_remove": "Poista @{username}",
+    "new_group_create": "Aloita ryhmä",
+    "new_group_failed": "Ryhmää ei voitu aloittaa. Yritä uudelleen.",
+    "rename_group": "Nimeä ryhmä uudelleen",
+    "rename_group_hint": "Anna ryhmälle nimi, jonka kaikki jäsenet näkevät. Jätä tyhjäksi, jos haluat näyttää jäsenten nimet.",
+    "group_name": "Ryhmän nimi",
+    "rename_group_too_long": "Ryhmän nimi voi olla enintään {max} merkkiä.",
+    "rename_group_not_owner": "Vain ryhmän aloittanut henkilö voi nimetä sen uudelleen.",
+    "rename_group_failed": "Ryhmää ei voitu nimetä uudelleen. Yritä uudelleen.",
+    "group_renamed": "{user} nimesi ryhmän uudelleen: \"{name}\"",
+    "group_name_cleared": "{user} poisti ryhmän nimen",
+    "group_members": "Ryhmän jäsenet",
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "reactions_title": "Reaktiot",
+    "reactor_you": "Sinä",
+    "reactor_unknown": "Joku",
+    "see_who_reacted": "Paina pitkään nähdäksesi, ketkä reagoivat",
+    "group": "Ryhmä"
   },
   "free_estm": {
     "timer_text": "Seuraava vapaapyöritys",
@@ -684,6 +766,32 @@
     "transaction_fail": "Siirto epäonnistui"
   },
   "search_result": {
+    "error": "Hakua ei voitu suorittaa. Yritä uudelleen",
+    "filters": {
+      "title": "Suodattimet",
+      "open": "Suodattimet",
+      "author": "Kirjoittaja",
+      "author_placeholder": "käyttäjänimi",
+      "category": "Kategoria",
+      "category_placeholder": "yhteisö tai kategoria",
+      "tags": "Tagit",
+      "tags_placeholder": "erotettu pilkuilla",
+      "type": "Tyyppi",
+      "type_all": "Kaikki",
+      "type_post": "Julkaisut",
+      "type_comment": "Kommentit",
+      "date": "Päivämäärä",
+      "date_week": "Viime viikko",
+      "date_month": "Viime kuukausi",
+      "date_year": "Viime vuosi",
+      "date_all": "Koko aika",
+      "sort": "Lajittele",
+      "apply": "Käytä",
+      "active": "{n} käytössä",
+      "too_many_tags": "Käytä enintään {n} tagia",
+      "too_long": "Haku on liian pitkä. Käytä enintään {n} merkkiä",
+      "needs_criteria": "Anna hakusana tai suodata kirjoittajan, kategorian tai tagin mukaan"
+    },
     "communities_filter": {
       "new": "Uudet",
       "my": "Yhteisöni",
@@ -727,12 +835,12 @@
     "title": "Ristiinjulkaisu"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Kirjoittaja ilmoitti käyttäneensä tekoälyä"
   },
   "ai_assist": {
     "title": "Tekoälyn kirjoitusapuri",
     "balance_label": "Saldo",
-    "points_unit": "POINTS",
+    "points_unit": "POINTSIA",
     "cost_label": "Hinta",
     "free_label": "Ilmainen",
     "free_remaining": "{count} ilmaista jäljellä",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Saa julkaisullesi sopivia tunnisteita",
     "action_generate_title": "Luo otsikko",
     "action_generate_title_desc": "Luo houkuttelevia otsikkovaihtoehtoja",
-    "action_summarize": "Recap",
+    "action_summarize": "Tiivistelmä",
     "action_summarize_desc": "Luo tiivis yhteenveto",
     "action_check_grammar": "Tarkista kielioppi",
     "action_check_grammar_desc": "Korjaa kielioppi- ja oikeinkirjoitusvirheet",
+    "action_generate_image": "Luo kuva",
+    "action_generate_image_desc": "Luo tekoälykuva julkaisullesi",
+    "cost_from": "alkaen {cost} {unit}",
     "text_label": "Tekstisi",
     "text_placeholder": "Liitä tai kirjoita sisältösi tähän...",
     "min_chars": "Vähintään {count} merkkiä vaaditaan",
@@ -797,16 +908,26 @@
     "remind_later": "Muistuta myöhemmin",
     "success_subscribe": "Tilaus onnistui!",
     "payloadTooLarge": "Tiedostokoko liian suuri, muuta kokoa tai lataa pienempi",
+    "too_many_images": "Voit valita kerralla enintään {count} kuvaa",
     "fail_follow": "Seuraaminen epäonnistui!",
     "clear_user_alert": "Haluatko varmasti tyhjentää kaikki historiatiedot?",
     "cancel": "Peruuta",
     "connection_success": "Yhdistetty onnistuneesti!",
     "rc_down": "Ei tarpeeksi resurssipisteitä toimintoon! \nTehosta tiliäsi nauttiaksesi kokemuksesta enemmän. Haluatko tehostaa heti?",
+    "rc_down_title": "Resurssipisteet eivät riitä",
+    "rc_precheck_title": "Tämä julkaisu voi olla liian suuri julkaistavaksi",
+    "rc_precheck_body": "Resurssipisteesi näyttävät olevan liian vähissä näin suurelle julkaisulle.",
+    "rc_down_body": "Resurssipisteesi eivät riitä tähän toimintoon.\n\nLataa lisää Pisteillä jatkaaksesi tai tehosta tiliäsi pysyvästi.",
+    "rc_down_topup": "Lataa RC Pisteillä",
+    "rc_down_boost": "Tehosta tiliä",
     "done": "Valmis",
     "something_wrong_alt": "Odottaessasi kokeile Ecency.com selaimella",
     "same_user": "Tämä käyttäjä on jo listassa",
     "fail": "Virhe!",
     "operation_failed_with_reason": "{operation} epäonnistui: {reason}",
+    "request_timed_out": "Yhteys kestää liian kauan. Tarkista verkkosi ja yritä uudelleen.",
+    "load_failed_retry": "Emme voineet ladata tätä. Yritä uudelleen.",
+    "retrying": "Yritetään uudelleen...",
     "wallet_refresh_failed": "Lompakon päivitys epäonnistui. Yritä uudelleen.",
     "wallet_refresh_missing_account": "Lompakon päivitys epäonnistui: tili puuttuu.",
     "boost_failed": "Tehostus epäonnistui.",
@@ -949,37 +1070,37 @@
     "video_attached": "Video liitetty"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Äänestä",
+    "upvoted": "Äänestetty",
+    "downvoted": "Vastaäänestetty",
+    "upvote_hint": "Kaksoisnapauta avataksesi äänestysvaihtoehdot",
+    "payout_details": "Maksun tiedot",
+    "a11y_votes": "{count, plural, one {# ääni} other {# ääntä}}",
+    "a11y_voters_hint": "Näytä äänestäjät",
+    "a11y_reblogs": "{count, plural, one {# uudelleenjako} other {# uudelleenjakoa}}",
+    "a11y_reblogs_hint": "Näytä uudelleenjaot",
+    "a11y_comments": "{count, plural, one {# kommentti} other {# kommenttia}}",
+    "a11y_comments_hint": "Näytä kommentit",
+    "a11y_reply_hint": "Vastaa",
+    "a11y_tip": "Lähetä tippi",
+    "a11y_tips": "{count, plural, one {# tippi} other {# tippiä}}",
+    "a11y_edit": "Muokkaa kommenttia",
+    "a11y_delete": "Poista kommentti",
+    "a11y_show_replies": "Näytä vastaukset",
+    "a11y_hide_replies": "Piilota vastaukset",
+    "a11y_post_options": "Julkaisun asetukset",
+    "a11y_views": "{count, plural, one {# katselu} other {# katselua}}",
+    "source_ecency": "Julkaistu Ecencyllä",
+    "a11y_stats_hint": "Näytä julkaisun tilastot",
     "image": "Kuva",
     "reveal_muted": "Hiljennetty\nNapauta näyttääksesi sisällön",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Napauta ladataksesi kuvan",
     "in": "yht",
     "poll": "Kysely",
     "copy_link": "Kopioi linkki",
     "wrong_link": "Väärä linkki",
     "select_action": "Valitse toiminto",
-    "ecency_waves": "Waves",
+    "ecency_waves": "Wavet",
     "open_thread": "Avaa ketju",
     "cross_post": "ristiinjulkaisu käyttäjältä {username} yhteisössä {community}",
     "image_saved_error": "Virhe tallentaessa kuvaa",
@@ -998,13 +1119,14 @@
     "save_to_local": "Lataa laitteelle",
     "muted": "Sisältö mykistetty rikkomuksen vuoksi",
     "community_muted": "Sisältö mykistetty yhteisön sääntöjen vastaisena",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Sisältöä heikon maineen tililtä",
+    "muted_downvoted": "Käyttäjien vastaäänestämä sisältö",
+    "muted_low_trust": "Matalan maineen tili, jolla on vahvistamaton ulkoinen linkki",
+    "muted_reveal": "Näytä napauttamalla",
     "promoted": "Ylennetty",
     "image_saved": "Tallennettu kuvagalleriaan",
     "words": "Sanaa",
     "reading": "Lukuaika",
-    "listen": "Kuuntele",
     "min": "min",
     "summarize_start": "Aloita"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Julkaisua ei ole",
     "invalid_link": "Url on virheellinen, voit yrittää uudelleen kelvollisella url-osoitteella tai kokeilla avata sen selaimessa",
-    "no_existing_user": "Käyttäjää ei ole"
+    "no_existing_user": "Käyttäjää ei ole",
+    "posting_key_request": "{requester} pyytää tilin @{username} posting-yksityisavainta.\n\nJatka vain, jos luotat tähän pyyntöön.",
+    "posting_key_request_unnamed": "Toinen sovellus pyytää tilin @{username} posting-yksityisavainta.\n\nJatka vain, jos luotat tähän pyyntöön.",
+    "auth_request_as_user": "{requester} haluaa kirjata sinut sisään tilillä @{username}.\n\nVain käyttäjänimi ja kirjautumistodiste jaetaan. Mikään avain ei poistu Ecencystä.",
+    "auth_request_as_current": "{requester} haluaa kirjata sinut sisään Ecency-tililläsi.\n\nVain käyttäjänimi ja kirjautumistodiste jaetaan. Mikään avain ei poistu Ecencystä."
   },
   "payout": {
     "breakdown": "Erittely",
@@ -1065,7 +1191,7 @@
     "open": "Avaa URL",
     "invalid_key_desc": "kirjaudu käyttämällä {key} avainta tai päänavainta tämän tapahtuman suorittamiseksi",
     "auth_transfer_confirm": "Vahvistetaanko siirto käyttäjälle {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Hyväksy vain, jos luotat tämän linkin lähteeseen. Hyväksyminen lähettää alla olevan toiminnon tililtäsi {authority}-avaimellasi."
   },
   "voters_dropdown": {
     "rewards": "PALKKIOT",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Tulisi sisältää vain kirjaimia, numeroita ja tavuviivoja",
       "username_no_ascii_first_letter_error": "Tulee alkaa kirjaimella",
       "username_contains_double_hyphens": "Ei kaksinkertaisia tavuviivoja",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Tämä käyttäjätunnus muistuttaa liikaa kryptovaihdon tiliä ja voi hämmentää muita. Valitse omaperäisempi nimi.",
+      "username_restricted_prefix": "Käyttäjätunnukset, jotka alkavat 'uid' ja numeroilla, eivät ole sallittuja, koska niitä käytetään usein toisen henkilön esiintymiseen. Valitse toinen nimi.",
       "username_contains_underscore": "Ei alaviivoja"
     },
     "500_error": "Toiminto epäonnistui, rekisteröitymisjono lienee täynnä! Yritä uudelleen parin minuutin päästä...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Käyttäjätunnus on jo varattu",
+      "14": "Sähköpostiosoite on jo rekisteröity",
+      "15": "Anna kelvollinen sähköpostiosoite",
+      "16": "Anna kelvollinen käyttäjätunnus",
+      "17": "Käyttäjätunnus on liian pitkä, valitse lyhyempi",
+      "19": "Käytä pysyvää sähköpostiosoitetta tai hanki sen sijaan Premium-tili",
+      "21": "Tämä suosittelu ei ole kelvollinen",
+      "28": "Pyyntöäsi ei voitu käsitellä: rekisteröitymisjono on todennäköisesti täynnä. Yritä uudelleen muutaman minuutin kuluttua.",
+      "107": "VPN-yhteys havaittu. Poista VPN käytöstä ja yritä uudelleen tai hanki sen sijaan Premium-tili.",
+      "110": "Väärinkäytösten estämiseksi rajoitamme tilien määrää henkilöä/verkkoa kohti. Yritä uudelleen toisesta verkosta.",
+      "111": "Tor-yhteys havaittu. Poista Tor käytöstä rekisteröitymisen ajaksi.",
+      "112": "Yhteyttäsi ei voitu tarkistaa juuri nyt. Yritä uudelleen muutaman minuutin kuluttua."
     },
     "have_account_text": "Onko sinulla jo tili?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Hanki täysimittainen Hive tili, tällä menetelmällä on perustarkastukset varmistaaksesi, että botnet ei väärinkäytä tilaushanaa.",
     "btn_register": "Rekisteröidy Ilmaiseksi",
     "title": "Ilmainen Tili"
+  },
+  "dictation": {
+    "title": "Sanele",
+    "start": "Nauhoita",
+    "stop": "Lopeta",
+    "record_more": "Nauhoita lisää",
+    "done": "Valmis",
+    "recording": "Nauhoitetaan",
+    "stop_hint": "Lopeta litteroidaksesi ja lisätäksesi sen julkaisuun. Enintään {m} minuuttia.",
+    "inserted": "Lisätty julkaisuusi. Nauhoita lisää tai napauta Valmis.",
+    "transcribing": "Litteroidaan",
+    "rate": "{n} pistettä / {s} sekuntia",
+    "cost_running": "{n} pistettä tähän mennessä",
+    "cost_running_free": "Ilmainen tähän mennessä",
+    "free_remaining": "Seuraava {n} x {s} s on ilmainen tänään",
+    "price_loading": "Tarkistetaan hintaa",
+    "price_error": "Litteroinnin hintaa ei voitu ladata.",
+    "denied": "Ecency tarvitsee mikrofonin käyttöoikeuden sanelua varten. Salli se Asetuksissa ja yritä uudelleen.",
+    "error_empty": "Nauhoituksesta ei havaittu puhetta.",
+    "error_insufficient_points": "Pisteet eivät riitä nauhoituksen litterointiin.",
+    "error_rate_limited": "Liikaa nauhoituksia juuri nyt. Yritä pian uudelleen.",
+    "error_too_long": "Nauhoitus on liian pitkä litteroitavaksi.",
+    "error_failed": "Nauhoitusta ei voitu litteroida. Yritä uudelleen.",
+    "error_recorder": "Nauhoitusta ei voitu aloittaa. Yritä uudelleen."
   },
   "wallet": {
     "delegations_out": "Annetut valtuutukset",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Säännöllisestä kirjautumisesta saat 0.25 pistettä.",
     "fill_transfer_from_savings": "Säästöt Toteutettu",
     "activities": "Toiminnat",
+    "no_activities": "Ei vielä tapahtumia",
+    "activities_failed": "Tapahtumia ei voitu ladata. Yritä uudelleen vetämällä alas.",
     "tap_update": "Napsauta päivittääksesi",
     "mining_lottery": "Arvontavoitto",
     "checkin": "Kirjautuminen",
     "tokens_transfer": "Siirretyt Merkit",
     "outgoing_transfer_title": "Siirto/Lahjoitus",
+    "burned_title": "Tekoälyn käyttö",
+    "burned_description": "Tekoälyominaisuuteen käytetyt pisteet",
+    "burn_refund_title": "Tekoälyn hyvitys",
+    "burn_refund_description": "Epäonnistuneen tekoälypyynnön jälkeen palautetut pisteet",
     "manage_assets": "Lisää / Poista Varoja",
     "selected_assets": "Valitut varat",
     "nft_setPropertyPermissions": "Ominaisuuden käyttöoikeudet asetettu NFT-symbolille",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Merkkien Päivityksen Tarkkuus",
     "tokens_transferOwnership": "Merkkien Omistajuus Siirretty",
     "withdraw_vesting": "Poista panostus",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Nostotilit",
     "delegate_engine": "Valtuuta",
     "market_close": "Tilaus Suljettu",
     "nftmarket_transferFee": "Osta Tilausmaksu",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "Lunasta pisteet",
     "escrow_approve": "Escrow Hyväksy",
     "expires": "vanhenee",
+    "transaction_id": "Tapahtuman tunnus",
+    "copy_transaction_id": "Kopioi tapahtuman linkki",
+    "filter_activities": "Suodata toiminnot",
+    "filter_activities_desc": "Valitse, mitkä toiminnot tämä historia hakee",
+    "filter_all": "Valitse kaikki",
+    "filter_none": "Tyhjennä kaikki",
+    "filter_apply": "Käytä",
     "author_reward": "Julkaisupalkinto",
     "withdraw_hbd": "Kotiuta säästöt",
     "convert_request": "Muunnospyyntö",
@@ -1426,11 +1589,11 @@
     "title": "Tehosta+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Lataa RC",
+    "desc": "Lyhytaikainen RC-tehostus, jotta voit jatkaa julkaisemista.",
+    "confirm": "Käytetäänkö Pointseja Resurssipisteidesi lataamiseen?",
+    "insufficient": "Sinulla ei ole tarpeeksi Pointseja.",
+    "buy_points": "Osta Pointseja"
   },
   "ai_image_generator": {
     "title": "Tekoälyn kuvageneraattori",
@@ -1441,7 +1604,7 @@
     "select_power": "Laadun tehostus",
     "cost_label": "Hinta",
     "balance_label": "Saldo",
-    "points_unit": "POINTS",
+    "points_unit": "POINTSIA",
     "generate_button": "Luo kuva",
     "generating": "Luodaan kuvaasi...",
     "result_title": "Luotu kuva",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Mukautettu ({hours} h)",
+    "balance_load_failed": "Saldoa ei voitu ladata. Yritä uudelleen napauttamalla.",
+    "precision_load_failed": "Tämän tokenin tietoja ei voitu ladata, joten vain kokonaisia määriä voi lähettää. Yritä uudelleen napauttamalla.",
     "close": "Sulje",
     "favorite_username_placeholder": "Käyttäjänimi",
     "invalid_recipient_qr": "Tästä QR-koodista ei löytynyt käyttäjänimeä.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Hallitse Valtuuksia",
     "pincode": "PIN-koodi",
     "general": "Yleiset",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Tue Ecencyä",
+    "support_beneficiary": "Jaa julkaisupalkkiot Ecencyn kanssa",
+    "support_beneficiary_percent": "Julkaisupalkkioiden osuus",
+    "support_curation": "Pidätä osa kuraattoripalkkioista",
+    "support_curation_percent": "Kuraattoripalkkioiden pidätys",
     "feedback_body": "Kirjoita viestisi tähän!\n\nHive Käyttäjänimi: {username}\nOhjelmaversio: {appVersion}\nAlusta: {platform}\n",
     "show_imgs": "Näytä kuvat",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Kommentti",
       "bookmark": "Kirjanmerkit",
+      "tags": "Tagit",
       "reblog": "Jako",
       "favorite": "Suosikit",
       "mention": "Maininta",
@@ -1599,10 +1765,10 @@
       "transfers": "Siirrot",
       "vote": "Äänestys",
       "follow": "Seuraa",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Ajastettu julkaisu julkaistu",
+      "payouts": "Maksut",
+      "account_update": "Tilin päivitykset",
+      "weekly_earnings": "Viikkotulot",
       "fcm_unavailable": "Push-ilmoituksia ei tueta tällä laitteella. Saat ilmoituksia vain sovelluksen ollessa auki."
     },
     "keys_warning": "Herkkä tilitieto!\nEcency on suojattava PIN-koodilla ennen yksityisavainten katselua.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Anna palautetta",
     "rate_app": "Arvioi Ecency",
+    "email_digests": "Sähköpostiyhteenvedot",
     "rate": "Arvioi",
     "dm-privacy-updated": "Yksityisviestien tietosuoja-asetukset päivitettiin onnistuneesti",
     "dm-privacy-failed": "Yksityisviestien tietosuoja-asetusten päivitys epäonnistui",
@@ -1685,19 +1852,29 @@
     "request_sent": "Pyyntösi poistamisesta on lähetetty",
     "confirm_delete_body": "Oletko varma, että haluat poistaa tilin? Se poistaa kaikki tietosi"
   },
-  "tts": {
-    "settings_title": "Tekstistä puheeksi -asetukset",
-    "voice": "Ääni",
-    "voice_hint": "Käytetään järjestelmän oletusääntä",
-    "speed": "Nopeus",
-    "pitch": "Sävelkorkeus",
-    "test_voice": "Testaa ääntä",
-    "settings_info": "Näitä asetuksia käytetään, kun julkaisuja luetaan ääneen",
+  "listen": {
+    "title": "Kuuntele tämä julkaisu",
+    "minutes": "~{n} min",
+    "login": "Kirjaudu sisään",
+    "unlock": "Avaa · {n} pistettä",
+    "confirm": "Käytetäänkö {n} pistettä tämän julkaisun kuunteluun? Ääni on sinun ja voit toistaa sen milloin tahansa.",
+    "not_enough_title": "Pisteet eivät riitä",
+    "not_enough": "Kuunteluun tarvitaan {required} pistettä ja sinulla on {available}.",
+    "get_points": "Hanki pisteitä",
+    "unlock_failed": "Äänen avaaminen ei onnistunut, yritä uudelleen",
+    "failed_refunded": "Ääntä ei voitu luoda, pisteesi palautettiin",
+    "preparing": "Valmistellaan ääntä…",
+    "preparing_eta": "Valmistellaan ääntä, noin {n} min…",
+    "preparing_progress": "Valmistellaan ääntä · {n} %",
+    "waiting": "Odotetaan jonossa, {n} edellä…",
+    "next_in_line": "Seuraavana jonossa…",
     "play": "Toista",
-    "pause": "Keskeytä",
-    "language": "Kieli",
-    "language_auto": "Tunnista automaattisesti",
-    "language_hint": "Automaattinen tunnistus valitsee kielen julkaisun sisällön perusteella"
+    "pause": "Tauko",
+    "seek": "Hae kohtaa",
+    "speed": "Toistonopeus",
+    "language": "Äänen kieli",
+    "unavailable": "Ääntä ei voitu ladata.",
+    "retry": "Yritä uudelleen"
   },
   "posting_authority": {
     "title": "Ota nopeampi julkaisu käyttöön",
@@ -1732,7 +1909,7 @@
     "error-auth": "Todennus epäonnistui. Kirjaudu uudelleen sisään.",
     "error-generic": "Videon lataus epäonnistui. Yritä uudelleen.",
     "error-too-long-short": "Lyhyiden videoiden on oltava enintään 60 sekuntia.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Julkaisussa voi olla vain yksi video. Poista nykyinen video ennen toisen lisäämistä.",
     "select_source": "Lisää video",
     "record": "Tallenna video",
     "choose_library": "Valitse kirjastosta"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Jaa nopea päivitys"
   },
+  "newsletter": {
+    "screen_title": "Sähköpostiyhteenvedot",
+    "title": "{list}",
+    "body_own": "Viikoittainen tai kuukausittainen sähköpostiyhteenveto ilmoituksistasi.",
+    "body_creator": "Käyttäjän {list} uudet julkaisut sähköpostiisi.",
+    "body_community": "Yhteenveto yhteisön {list} uusista julkaisuista sähköpostitse.",
+    "body_site": "Ecencyn parhaat sähköpostiisi.",
+    "first_publish_title": "Onnittelut ensimmäisestä julkaisustasi!",
+    "first_publish_body": "Haluatko sähköpostiyhteenvedon ilmoituksistasi? Viikoittain tai kuukausittain, muuta tai lopeta milloin tahansa Asetuksissa.",
+    "list_own": "Ilmoitusten yhteenvetoni",
+    "list_site": "Ecencyn uutiskirje",
+    "status_active": "Olet tilaaja.",
+    "status_pending": "Odotetaan sähköpostin vahvistusta.",
+    "status_short_active": "aktiivinen",
+    "status_short_pending_confirmation": "odottaa",
+    "status_short_suppressed": "pysäytetty",
+    "status_short_ended": "päättynyt",
+    "cadence_weekly": "Viikoittain",
+    "cadence_monthly": "Kuukausittain",
+    "email_placeholder": "sinä@esimerkki.fi",
+    "subscribe": "Tilaa",
+    "update": "Päivitä",
+    "resend": "Lähetä vahvistus uudelleen",
+    "leave": "Poistu yhteenvedosta",
+    "cancel": "Peruuta",
+    "ok": "OK",
+    "manage": "Hallitse",
+    "check_inbox_title": "Tarkista sähköpostisi",
+    "check_inbox_body": "Lähetimme vahvistuslinkin osoitteeseen {email}. Tilaus alkaa, kun vahvistat sen.",
+    "subscribed": "Sähköpostiyhteenveto tilattu",
+    "left": "Yhteenveto poistettu",
+    "refused": "Tätä osoitetta ei voi tilata.",
+    "unavailable": "Sähköpostiyhteenvedot eivät ole juuri nyt käytettävissä.",
+    "too_many": "Liian monta yritystä, yritä myöhemmin uudelleen.",
+    "fail": "Jokin meni pieleen, yritä uudelleen.",
+    "empty": "Ei vielä sähköpostiyhteenvetoja. Aloita tilaamalla alta.",
+    "discover": "Saa lisää sähköpostitse",
+    "stop_all": "Lopeta kaikki",
+    "stop_all_title": "Lopetetaanko kaikki sähköpostit?",
+    "stop_all_body": "Osoitteeseen {email} ei lähetetä enää Ecency-postia. Muilla osoitteilla tehdyt tilaukset säilyvät.",
+    "stop_all_ok": "Lopeta kaikki",
+    "stop_all_done": "Osoitteen kaikki postitukset peruttu",
+    "profile_option": "SÄHKÖPOSTIYHTEENVETO",
+    "subscriber_count": "{weekly} viikoittaista • {monthly} kuukausittaista sähköpostitilaajaa",
+    "community_button": "Uutiskirje"
+  },
+  "mod_notes": {
+    "title": "Lisää syy",
+    "placeholder": "Syy (näkyy muille moderaattoreille)",
+    "confirm": "Vahvista",
+    "cancel": "Peruuta"
+  },
+  "community_settings": {
+    "title_header": "Yhteisön asetukset",
+    "title_label": "Otsikko",
+    "about": "Tietoja",
+    "lang": "Kieli",
+    "description": "Kuvaus",
+    "rules": "Säännöt",
+    "nsfw": "Ei sovellu työpaikalle",
+    "save": "Tallenna",
+    "required": "Pakollinen",
+    "title_length": "{min}–{max} merkkiä",
+    "owner_admin_only": "Vain omistaja ja ylläpitäjät voivat muuttaa näitä asetuksia."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Laajennettu",
+        "collapsed": "Tiivistetty"
+      },
+      "a11y_chat": {
+        "quote": "Vastataan käyttäjälle {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Valitse",
+        "deselect": "Poista valinta"
+      },
+      "store": {
+        "billing_unavailable": "Sovelluksen sisäiset ostot eivät ole sallittuja tällä laitteella.",
+        "verification_failed": "App Store ei voinut vahvistaa tätä ostoa.",
+        "cancelled": "Osto peruttu",
+        "unknown_result": "Tuntematon ostotulos"
+      },
+      "navigation": {
+        "feed_unavailable": "Tämä syöte ei ole vielä käytettävissä.",
+        "link_cannot_open": "Tätä linkkiä ei voi avata.",
+        "video_cannot_play": "Tätä videota ei voi toistaa."
+      },
+      "media": {
+        "load_failed": "Kohdetta ei voitu ladata. Tarkista yhteytesi ja yritä uudelleen.",
+        "loading": "Ladataan mediaa",
+        "download_failed": "Lataus epäonnistui tilalla {status}"
+      },
+      "sign_in": {
+        "required": "Kirjautuminen vaaditaan",
+        "to_reply": "Kirjaudu sisään vastataksesi.",
+        "to_vote": "Kirjaudu sisään äänestääksesi.",
+        "button": "Kirjaudu sisään"
+      },
+      "account": {
+        "logout_user": "Kirjaa ulos @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# ääni} other {# ääntä}}  •  {replies, plural, one {# vastaus} other {# vastausta}}",
+        "voting_power": "Äänestysvoima {percent}",
+        "remove_favourite": "Poista suosikeista",
+        "add_favourite": "Lisää suosikkeihin"
+      },
+      "waves": {
+        "clear_tag_filter": "Tyhjennä tagisuodatin {tag}",
+        "new_wave": "Uusi wave",
+        "replies_open_thread": "{count, plural, one {# vastaus, avaa ketju} other {# vastausta, avaa ketju}}",
+        "characters": "{count} / {max} merkkiä",
+        "retry": "{message}\nYritä uudelleen",
+        "playing": "Toistetaan {permlink}",
+        "video_attached_remove": "Video liitetty, poista",
+        "image_attached_remove": "Kuva liitetty, poista",
+        "take_photo": "Ota kuva",
+        "edit_poll": "Muokkaa kyselyä",
+        "add_poll": "Lisää kysely",
+        "add_video": "Lisää video"
+      },
+      "reading": {
+        "reply_to": "Vastaa käyttäjälle {username}",
+        "opens_post": "Avaa julkaisun",
+        "sort_comments": "Lajittele kommentit",
+        "sort_comments_value": "Lajittele kommentit, {sort}",
+        "no_comments": "Ei vielä kommentteja.",
+        "loading_post": "Ladataan julkaisua",
+        "show_version": "Näytä versio",
+        "show_changes": "Näytä muutokset",
+        "replying_to": "Vastataan käyttäjälle @{username}",
+        "reply_text": "Vastausteksti",
+        "translate_from": "Mistä",
+        "translate_to": "Mihin"
+      },
+      "feed": {
+        "tab_pinned": "{label}, kiinnitetty",
+        "tab_add": "{label}, lisää",
+        "customise": "Mukauta"
+      },
+      "card": {
+        "in_category": "kategoriassa {category}",
+        "pinned": "Kiinnitetty",
+        "by_author": "käyttäjältä {username}",
+        "payout": "palkkio {payout}",
+        "payout_declined": "palkkio {payout}, hylätty",
+        "reblogged_by": "Jakanut {username}"
+      },
+      "shell": {
+        "close_menu": "Sulje valikko"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Pikkukuva, valitse toinen kuva",
+        "words": "{count, plural, one {# sana} other {# sanaa}}",
+        "poll_min_age": "Tilin vähimmäisikä (päivää): {days}",
+        "poll_max_options": "Enimmäisvaihtoehdot: {count}",
+        "thumbnail_selected": "Valittu pikkukuva",
+        "thumbnail": "Pikkukuva",
+        "uploaded_image": "Ladattu kuva",
+        "community_search": "haku"
+      },
+      "vote": {
+        "not_voted": "Ei äänestetty",
+        "voting": "Äänestetään",
+        "failed_with": "Äänestys epäonnistui: {message}",
+        "failed": "Äänestys epäonnistui",
+        "payout": "Palkkio {payout}",
+        "payout_declined": "Palkkio {payout}, hylätty",
+        "percent": "{percent} prosenttia",
+        "upvote_percent": "Ylääni {percent} %"
+      },
+      "settings": {
+        "on": "Päällä",
+        "off": "Pois"
+      },
+      "lock": {
+        "biometric_reason": "Ota biometrinen avaus käyttöön Ecencyssä",
+        "offer_title": "Avaa lukitus: {method}",
+        "offer_use": "Käytä: {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Avaimet piilotetaan, kun näyttöä tallennetaan tai peilataan.",
+        "screenshot_notice": "Kuvakaappaus otettiin. Yksityisavaimet piilotettiin uudelleen; jos kuvakaappauksessa näkyy avain, poista se.",
+        "hold_hint": "Näytä avain painamalla ja pitämällä sitä.",
+        "hold_to_show": "Pidä painettuna näyttääksesi"
+      },
+      "wallet": {
+        "cancel_order": "Perutaanko tämä toimeksianto?",
+        "days": "{count, plural, one {# päivä} other {# päivää}}"
+      },
+      "chat": {
+        "reactors_hint": "Paina pitkään nähdäksesi, ketkä reagoivat",
+        "see_reactors": "Katso, ketkä reagoivat"
+      },
+      "esie": {
+        "still": "{mood}, paikallaan"
+      }
+    },
+    "ui": {
+      "profile_of": "Käyttäjän @{username} profiili",
+      "preview": "Esikatselu ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Vanhenee: {time}",
+      "expired": "Vanhentunut. Sulje ja yritä uudelleen.",
+      "user_has_no_posts": "@{username} ei ole vielä julkaissut mitään",
+      "attach_image": "Liitä kuva",
+      "auto": "Automaattinen",
+      "back": "Takaisin",
+      "hot": "KUUMA",
+      "image_of": "Kuva {index} / {count}",
+      "new": "UUSI",
+      "nsfw_tap_to_reveal": "NSFW Näytä napauttamalla",
+      "new_reply": "Uusi vastaus",
+      "remove": "Poista",
+      "unlock_ecency": "Avaa Ecencyn lukitus",
+      "update_it": "Päivitä se",
+      "update_it_or_post_this_as": "Päivitetäänkö se vai julkaistaanko tämä uutena vastauksena?",
+      "use_pin": "Käytä PIN-koodia",
+      "your_reply_was_already_posted": "Vastauksesi on jo julkaistu",
+      "error_try_again": "{message} Yritetäänkö uudelleen?",
+      "auth": {
+        "account_label": "Tili: @{username}",
+        "approve_the_request_in_your_wallet": "Hyväksy pyyntö lompakkosovelluksessasi.",
+        "copy_key": "Kopioi {title}",
+        "current_account": "Nykyinen tili",
+        "qr_code": "QR-koodi",
+        "requested_by": "Pyytäjä: {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# numero} other {# numeroa}}",
+        "private_key_shown": "{title}, yksityisavain näkyvissä",
+        "open_wallet_app": "Avaa lompakkosovellus",
+        "hiveauth_scan": "Hyväksy Hive Keychainissa tai muussa HiveAuth-lompakossa: avaa se tällä laitteella tai skannaa tämä koodi sillä.",
+        "switching": "Vaihdetaan...",
+        "logout_all": "Kirjaudu ulos kaikilta tileiltä",
+        "logout_all_title": "Kirjaudutaanko ulos kaikilta tämän laitteen tileiltä?",
+        "stored_key": "@{username} on jo kirjautuneena tällä laitteella. Tallennetut avaimet säilyvät; vain istunto uusitaan.",
+        "stored_hivesigner": "@{username} on jo kirjautuneena HiveSignerilla tällä laitteella. Sen istunto korvataan.",
+        "stored_hiveauth": "@{username} on kirjautuneena HiveAuthilla tällä laitteella. Se allekirjoittaa jatkossa HiveSignerilla.",
+        "method_key": "Avain",
+        "logout_failed": "Uloskirjautuminen epäonnistui"
+      },
+      "browser": {
+        "account": "Tili",
+        "authority": "Valtuutus",
+        "phishing": "Varoitus: Tämä verkkotunnus on merkitty tunnetuksi tietojenkalastelusivustoksi. Jatka erittäin varovasti."
+      },
+      "chat": {
+        "cancel_edit": "Peruuta muokkaus",
+        "cancel_reply": "Peruuta vastaus",
+        "copied_to_clipboard": "Kopioitu leikepöydälle",
+        "edited_at": "Muokattu {time}",
+        "group_options": "Ryhmän asetukset",
+        "pinned_messages": "Kiinnitetyt viestit",
+        "remove_user": "Poista @{username}",
+        "sort_by_name": "Lajittele nimen mukaan",
+        "more": "Lisää",
+        "reaction_label": "{emoji} {count}. Paina pitkään nähdäksesi, ketkä reagoivat",
+        "members": "Jäsenet"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Tässä linkissä on jo julkaisu, joka eroaa lähettämästäsi. Päivitetäänkö se vai julkaistaanko uutena?",
+        "a_scheduled_post_is_published_by": "Ecency julkaisee ajastetun julkaisun valittuna aikana. Se vaatii tililläsi posting-valtuutuksen ecency.app-tilille. Avaimesi ja muut valtuutuksesi pysyvät ennallaan. Valtuutuksen antaminen vaatii active-avaimesi.",
+        "ai_assist": "Tekoälyavustaja",
+        "ai_tools": "Tekoälytyökalut",
+        "allow_ecency_to_publish_for_you": "Sallitaanko Ecencyn julkaista puolestasi?",
+        "bold": "Lihavointi",
+        "clone": "Kloonaa",
+        "cost": "Hinta: {cost}",
+        "could_not_store_the_draft_on": "Luonnosta ei voitu tallentaa tälle laitteelle. Pidä sovellus auki ja tallenna luonnos.",
+        "draft": "LUONNOS",
+        "delete_count": "Poista ({count})",
+        "dictate_desc": "Puhu, niin litteraatti tulee julkaisuusi",
+        "discard": "Hylkää",
+        "discard_changes": "Hylätäänkö muutokset?",
+        "grant": "Myönnä",
+        "italic": "Kursivointi",
+        "keep_editing": "Jatka muokkausta",
+        "my_blog": "BLOGINI",
+        "my_communities": "YHTEISÖNI",
+        "new_post": "Uusi julkaisu",
+        "notice": "Huomautus",
+        "restore": "Palauta",
+        "restore_unsaved_changes": "Palautetaanko tallentamattomat muutokset?",
+        "saved": "Tallennettu",
+        "top_communities": "SUOSITUIMMAT YHTEISÖT",
+        "table": "Taulukko",
+        "text_format": "Tekstin muotoilu",
+        "this_link_is_already_in_use": "Tämä linkki on jo käytössä",
+        "untitled": "Nimetön",
+        "update_it_or_publish_this_as": "Päivitetäänkö se vai julkaistaanko tämä uutena julkaisuna?",
+        "you_have_unsaved_changes_from_an": "Sinulla on tallentamattomia muutoksia aiemmasta muokkauksesta. Julkaisu on muuttunut sen jälkeen; palauttaminen korvaa alla olevan tekstin.",
+        "your_edits_were_not_published": "Muokkauksiasi ei julkaistu.",
+        "your_post_was_already_published": "Julkaisusi on jo julkaistu",
+        "file_size": "{name} ({size} Mt)",
+        "thumbnail_pick": "Pikkukuva, valitse toinen kuva napauttamalla",
+        "thumbnail_number": "Pikkukuva {number}",
+        "recording_busy": "Nauhoitus on jo käynnissä. Lopeta se ensin kamerassa.",
+        "photo_lost": "Kuva katosi kameran ollessa auki. Ota se uudelleen.",
+        "add_snippet_button": "+ Katkelma",
+        "words_count": "{count, plural, one {# sana} other {# sanaa}}",
+        "community_search": "haku"
+      },
+      "profile": {
+        "open_wallet": "Avaa lompakko",
+        "your_wallet_is_on_the_wallet": "Lompakkosi on Lompakko-välilehdellä.",
+        "user_has_no_comments": "@{username} ei ole vielä kommentoinut mitään",
+        "votes_count": "{count, plural, one {# ääni} other {# ääntä}}",
+        "replies_count": "{count, plural, one {# vastaus} other {# vastausta}}",
+        "menu": "Lisää",
+        "users": "Käyttäjät"
+      },
+      "reading": {
+        "apply": "KÄYTÄ",
+        "add_tag": "Lisää tagi",
+        "age": "Ikä",
+        "audio_language": "Äänen kieli",
+        "available_filters": "Käytettävissä olevat suodattimet",
+        "could_not_unlock_the_audio_please": "Äänen avaaminen ei onnistunut, yritä uudelleen",
+        "downvote": "Alaääni",
+        "downvote_percent": "Alaääni {percent} %",
+        "listen_to_this_post": "Kuuntele tämä julkaisu",
+        "log_in": "Kirjaudu sisään",
+        "mark_all_as_read": "Merkitse kaikki luetuiksi",
+        "mark_as_read": "Merkitse luetuksi",
+        "more_replies": "Lisää vastauksia",
+        "not_enough_points": "Pisteet eivät riitä",
+        "nothing_here_yet": "Täällä ei ole vielä mitään.",
+        "open_editor": "Avaa editori",
+        "pause_voice": "Keskeytä ääni",
+        "play_voice": "Toista ääni",
+        "playback_speed": "Toistonopeus",
+        "publishing_in_waves": "Julkaistaan Wavesissa",
+        "quests_done": "Tehtävät suoritettu",
+        "read": "Lue",
+        "remove_vote": "Poista ääni",
+        "seek": "Hae kohtaa",
+        "select_community": "Valitse yhteisö",
+        "selected_filters": "Valitut suodattimet",
+        "the_audio_could_not_be_loaded": "Ääntä ei voitu ladata.",
+        "this_post_does_not_exist_or": "Tätä julkaisua ei ole tai se on poistettu.",
+        "unread": "Lukematon",
+        "voice_position": "Äänen kohta",
+        "vote_weight": "Äänen paino",
+        "reblogged_by": "jakanut {username}",
+        "no_more_posts": "Ei enempää julkaisuja.",
+        "favourite": "Suosikki",
+        "no_votes_yet": "Ei vielä ääniä",
+        "no_comments_yet": "Ei vielä kommentteja. Ole ensimmäinen!",
+        "comments_count": "Kommentit ({count})",
+        "sending_to_chain": "lähetetään ketjuun",
+        "compare": "Vertaa",
+        "your_vote": "Äänesi",
+        "reply_to": "Vastaa käyttäjälle @{username}",
+        "what_do_you_think": "Mitä mieltä olet?",
+        "clear_tag_filter": "Tyhjennä tagisuodatin",
+        "tab_selected": "{title}, valittu",
+        "add_tag_feed": "Lisää tagisyöte",
+        "feed_pinned": "{label}, kiinnitetty",
+        "attached_image_remove": "Liitetty kuva, poista napauttamalla",
+        "camera": "Kamera",
+        "files": "Tiedostot",
+        "paused": "Tauolla",
+        "in_topic": "aiheessa {topic}",
+        "poll_vote": "Äänestä",
+        "reply": "Vastaa",
+        "mute_sound": "Mykistä",
+        "unmute_sound": "Poista mykistys",
+        "leaderboard_activities": "Toiminnot",
+        "leaderboard_reward": "Palkkio",
+        "sort_votes": "Äänet"
+      },
+      "shell": {
+        "account_of": "Tili @{username}",
+        "account_signed_out": "Tili, kirjautunut ulos",
+        "close_tab": "Sulje välilehti",
+        "coming_soon_to_the_native_app": "Tulossa natiivisovellukseen.",
+        "create": "Luo",
+        "expand": "Laajenna",
+        "forward": "Eteenpäin",
+        "loading": "Ladataan",
+        "new_tab": "Uusi välilehti",
+        "reload": "Lataa uudelleen",
+        "sent": "Lähetetty",
+        "tab_unread": "{title}, {count} lukematonta",
+        "no_app_for_link": "Mikään sovellus ei voi avata tätä linkkiä."
+      },
+      "wallet": {
+        "product_not_available": "Tuote ei ole saatavilla.",
+        "repeat": "Toista"
+      },
+      "copied": "Kopioitu",
+      "trending_caps": "TRENDAAVAT",
+      "move_up": "Siirrä ylös",
+      "move_down": "Siirrä alas",
+      "scroll_to_top": "Vieritä ylös",
+      "load_more": "Lisää"
+    },
+    "wallet": {
+      "checking": "Tarkistetaan verkosta",
+      "leave_title": "Lähetys kesken",
+      "leave_message": "Tätä lähetetään tai tarkistetaan vielä verkossa. Voit poistua tästä näkymästä: sovellus ilmoittaa, kun se on valmis.",
+      "stay": "Pysy",
+      "collateralized_convert_request": "Vakuudellinen muunnospyyntö",
+      "op_transfer": "siirto",
+      "op_power_up": "panostus",
+      "op_power_down_change": "panostuksen poiston muutos",
+      "op_delegation": "valtuutus",
+      "op_savings_deposit": "säästötalletus",
+      "op_savings_withdrawal": "säästöjen nosto",
+      "op_conversion": "muunnos",
+      "op_swap": "vaihto",
+      "op_order_cancel": "toimeksiannon peruutus",
+      "op_reward_claim": "palkkion lunastus",
+      "op_withdraw_route_change": "noutoreitin muutos",
+      "op_token_operation": "token-toiminto"
+    },
+    "notification": {
+      "amount_unknown": "Määrä ei saatavilla",
+      "weekly_earnings_breakdown": "Ansaitsit ${amount} tällä viikolla - ${authorUsd} julkaisuista, ${curationUsd} kuratoinnista.",
+      "weekly_earnings_total": "Ansaitsit ${amount} tällä viikolla julkaisuistasi ja kuratoinnista."
+    },
+    "settings": {
+      "open": "Avaa",
+      "feedback_subject": "Palaute/Virheilmoitus",
+      "unknown_user": "Tuntematon käyttäjä"
+    },
+    "navigation": {
+      "editor": "Editori",
+      "followers": "Seuraajat",
+      "spin_game": "Pyöräytyspeli",
+      "edit_profile": "Muokkaa profiilia",
+      "redeem_points": "Lunasta pisteet",
+      "community": "Yhteisö",
+      "community_members": "Yhteisön jäsenet",
+      "community_activities": "Yhteisön toiminta",
+      "browser": "Selain",
+      "asset_details": "Omaisuuserän tiedot",
+      "edit_history": "Muokkaushistoria",
+      "welcome": "Tervetuloa",
+      "chat": "Chat",
+      "backup_keys": "Varmuuskopioi avaimet",
+      "trade": "Kaupankäynti",
+      "ai_image_generator": "Tekoälykuvageneraattori",
+      "select_assets": "Valitse omaisuuserät",
+      "poll": "Kysely",
+      "bot_comments": "Bottien kommentit"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Owner-avainta vaativia toimintoja ei voi allekirjoittaa Ecencyssä.",
+      "post": "Julkaisu/Kommentti",
+      "custom": "Custom JSON",
+      "sign_buffer": "Allekirjoita viesti",
+      "send_token": "Lähetä token",
+      "witness_vote": "Witness-ääni",
+      "proxy": "Aseta proxy",
+      "power_up": "Panosta",
+      "power_down": "Poista panostus",
+      "broadcast": "Lähetä verkkoon",
+      "sign_tx": "Allekirjoita tapahtuma",
+      "encode": "Koodaa viesti",
+      "decode": "Vahvista avain",
+      "add_account_authority": "Lisää tilivaltuutus",
+      "remove_account_authority": "Poista tilivaltuutus",
+      "add_key_authority": "Lisää avainvaltuutus",
+      "remove_key_authority": "Poista avainvaltuutus",
+      "create_claimed_account": "Luo tili",
+      "create_proposal": "Luo ehdotus",
+      "remove_proposal": "Poista ehdotus",
+      "update_proposal_vote": "Ehdotusääni",
+      "signed_call": "Allekirjoitettu kutsu"
+    },
+    "translate_language": {
+      "ar": "arabia",
+      "az": "azeri",
+      "bg": "bulgaria",
+      "bn": "bengali",
+      "ca": "katalaani",
+      "cs": "tšekki",
+      "da": "tanska",
+      "de": "saksa",
+      "el": "kreikka",
+      "en": "englanti",
+      "eo": "esperanto",
+      "es": "espanja",
+      "et": "viro",
+      "fa": "persia",
+      "fi": "suomi",
+      "fr": "ranska",
+      "ga": "iiri",
+      "he": "heprea",
+      "hi": "hindi",
+      "hu": "unkari",
+      "id": "indonesia",
+      "it": "italia",
+      "ja": "japani",
+      "ko": "korea",
+      "lt": "liettua",
+      "lv": "latvia",
+      "ms": "malaiji",
+      "nb": "norja",
+      "nl": "hollanti",
+      "pl": "puola",
+      "pt": "portugali",
+      "ro": "romania",
+      "ru": "venäjä",
+      "sk": "slovakki",
+      "sl": "sloveeni",
+      "sq": "albania",
+      "sv": "ruotsi",
+      "th": "thai",
+      "tl": "tagalog",
+      "tr": "turkki",
+      "uk": "ukraina",
+      "zh": "kiina",
+      "zt": "kiina (perinteinen)"
+    },
+    "reading": {
+      "banner_text": "Tämä julkaisu on kielellä {source}. Käännetäänkö kielelle {target}?",
+      "translated_from_text": "Käännetty kielestä {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# jäsen} other {# jäsentä}} • {authors, plural, one {# julkaisija} other {# julkaisijaa}} • {posts, plural, one {# julkaisu} other {# julkaisua}}",
+      "community_title": "Yhteisö {title}",
+      "members_title": "Yhteisön {title} jäsenet",
+      "activities_title": "Yhteisön {title} toiminta",
+      "cannot_start_with_or": "Ei voi alkaa merkillä @ tai #",
+      "use_a_two_letter": "Käytä kaksikirjaimista kielikoodia, esimerkiksi en",
+      "at_most_characters": "Enintään {max, plural, one {# merkki} other {# merkkiä}}",
+      "council": "Neuvosto",
+      "journal": "Päiväkirja",
+      "topic": "Aihe",
+      "community_not_found": "Yhteisöä ei löytynyt."
+    },
+    "transfer": {
+      "one_recipient": "Tähän siirtoon voi käyttää vain yhtä vastaanottajaa.",
+      "is_an_exchange_and": "{exchange} on pörssi, eikä se välttämättä tue toistuvia siirtoja: ajastettuna lähetetyt varat voivat kadota. Käytä kertasiirtoa."
+    },
+    "dapps": {
+      "signing_info": "Ecency toimii Hive-allekirjoituslaajennuksenasi. Kun dApp pyytää kirjautumaan selainlaajennuksella, kuten Keychain, Keeper tai Peak Vault, valitse se vaihtoehto. Ecency hoitaa allekirjoituksen turvallisesti.",
+      "category_social": "Sosiaalinen",
+      "category_gaming": "Pelit",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Ryhmä",
+      "unable_to_load_messages": "Viestejä ei voitu ladata.",
+      "someone": "Joku",
+      "renamed_the_group_to": "{actor} nimesi ryhmän uudelleen: \"{name}\"",
+      "removed_the_group_name": "{actor} poisti ryhmän nimen",
+      "unable_to_send_your": "Viestiäsi ei voitu lähettää.",
+      "unable_to_remove_message": "Viestiä ei voitu poistaa.",
+      "unknown": "Tuntematon",
+      "members_online": "{members, plural, one {# jäsen} other {# jäsentä}} • {online} paikalla",
+      "failed_to_load_pinned": "Kiinnitettyjen viestien lataus epäonnistui",
+      "you": "Sinä",
+      "title": "Reaktiot"
+    },
+    "tip": {
+      "login_required": "Kirjaudu sisään lähettääksesi vinkkejä",
+      "max_decimals": "Enintään {n, plural, one {# desimaali} other {# desimaalia}}"
+    },
+    "paid": {
+      "check_again": "Tarkista uudelleen",
+      "give_up": "Luovuta",
+      "unknown": "Ei vielä vastausta. Pyyntö voi olla yhä käynnissä. Tarkista uudelleen noutaaksesi tuloksen: sitä ei veloiteta toista kertaa.",
+      "pending": "Pyyntöäsi käsitellään yhä. Tarkista hetken kuluttua uudelleen: sitä ei veloiteta toista kertaa.",
+      "restored": "Aiemmalla pyynnöllä ei ole vielä vastausta. Tarkista uudelleen noutaaksesi tuloksen: sitä ei veloiteta toista kertaa.",
+      "give_up_confirm": "Jos pyyntö meni läpi, pisteet on käytetty ja tulos menetetään.",
+      "not_stored": "Pyyntöä ei voitu tallentaa laitteelle. Pidä tämä näkymä auki, kunnes se on valmis.",
+      "sign_in_again": "Istuntosi on vanhentunut. Kirjaudu uudelleen sisään ja tarkista sitten uudelleen.",
+      "other_account": "Tämä kuuluu käyttäjälle @{owner}. Vaihda takaisin kyseiseen tiliin jatkaaksesi."
+    },
+    "ai": {
+      "run_ai_assist": "Suorita tekoälyavustaja ({costText})",
+      "no_longer_free_cost": "Tämä ajo ei ole enää ilmainen tänään. Se maksaa {cost} {unit}.",
+      "no_longer_free": "Tämä ajo ei ole enää ilmainen tänään.",
+      "content_violates_our_content": "Sisältö rikkoo sisältökäytäntöämme. Muokkaa tekstiäsi. Pisteitä ei palautettu.",
+      "generate_image": "Luo kuva ({costLabel})",
+      "use_prompt": "Käytä: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Odota, toinen toiminto on käynnissä",
+      "not_a_community_post": "Ei ole yhteisön julkaisu.",
+      "parent_post_not_found": "Päätason julkaisua ei löytynyt",
+      "the_account_changed": "Tili vaihtui."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Lopeta ({cost} pistettä)",
+      "stop_free": "Lopeta (ilmainen)",
+      "transcribe_points": "Litteroi ({cost} pistettä)",
+      "transcribe": "Litteroi",
+      "no_longer_free_cost": "Tämä nauhoitus ei ole enää ilmainen tänään. Se maksaa {cost} pistettä.",
+      "no_longer_free": "Tämä nauhoitus ei ole enää ilmainen tänään.",
+      "held_locked": "Nauhoitus pysähtyi, kun Ecency lukittui. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
+      "held_no_background": "Nauhoitus pysähtyi, kun Ecency poistui näytöltä (se ei voinut näyttää nauhoitusilmoitusta). Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
+      "held_stopped": "Nauhoitus pysäytettiin ilmoituksesta. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
+      "held_focus_lost": "Nauhoitus pysähtyi puhelun tai toisen sovelluksen äänen takia. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
+      "held_interrupted": "Nauhoitus pysähtyi, koska toinen sovellus otti mikrofonin. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
+      "unavailable": "Nauhoitus ei ole käytettävissä tällä laitteella.",
+      "not_read": "Nauhoitusta ei voitu lukea tai se on liian suuri. Mitään ei lähetetty eikä veloitettu.",
+      "give_up_not_sent": "Tätä nauhoitusta ei lähetetty, joten mitään ei veloitettu. Se poistetaan.",
+      "give_up_not_charged": "Tästä nauhoituksesta ei veloitettu mitään. Se poistetaan.",
+      "clip_lost": "Aiemman pyynnön nauhoitus ei ole enää tällä laitteella. Jos pyyntö meni läpi, pisteesi on käytetty, eikä sen litteraattia voi noutaa."
+    },
+    "register": {
+      "error_code_28": "Pyyntöäsi ei voitu käsitellä. Rekisteröitymisjono on todennäköisesti täynnä. Yritä uudelleen muutaman minuutin kuluttua."
+    },
+    "perks": {
+      "quests_empty": "Täällä ei ole vielä tehtäviä, tule pian takaisin.",
+      "freeze_confirm_title": "Suojaa putkesi",
+      "spend_points_on_a": "Käytetäänkö {price} pistettä putken jäädytykseen? Se kuluu suojaamaan putkeasi päivänä, jonka ohitat."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Tue Ecencyä, saa ilmainen blogi ja erotu vahvistetulla Pro-merkillä.",
+      "card_description": "Hanki Pro hintaan {price} vuodessa. Vahvistettu merkki, ilmainen blogi ja Ecencyn tukeminen.",
+      "card_description_plain": "Hanki Pro vuodeksi. Vahvistettu merkki, ilmainen blogi ja Ecencyn tukeminen.",
+      "member": "Olet Pro-jäsen.",
+      "benefit_badge": "Vahvistettu Pro-merkki nimesi vieressä.",
+      "benefit_blog": "Ilmainen blogi osoitteessa nimesi.blogs.ecency.com.",
+      "benefit_support": "Tue suoraan Ecencyn kehitystä.",
+      "benefit_early": "Varhainen pääsy uusiin ominaisuuksiin.",
+      "buy": "Hanki Pro hintaan {price} vuodessa",
+      "extend": "Jatka 12 kuukaudella hintaan {price}",
+      "extend_note": "Uusi osto lisää jäsenyyteesi 12 kuukautta.",
+      "unavailable": "Ecency Pro ei ole juuri nyt saatavilla kaupasta.",
+      "activating": "Maksu vastaanotettu. Jäsenyyttäsi aktivoidaan.",
+      "success_title": "Tervetuloa Ecency Prohon",
+      "success_body": "Pro-jäsenyytesi on aktiivinen. Merkkisi ilmestyy pian profiiliisi.",
+      "extending": "Maksu vastaanotettu. Pro-jäsenyyttäsi jatketaan 12 kuukaudella.",
+      "open_a11y": "Avaa Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Tallennetaan luonnosta...",
+      "please_sign_in_first": "Kirjaudu ensin sisään.",
+      "fetch_failed": "Haku epäonnistui.",
+      "you_can_only_edit": "Voit muokata vain omaa sisältöäsi.",
+      "invalid_percent": "Virheellinen prosentti",
+      "beneficiary_exists_already": "Edunsaaja on jo olemassa",
+      "this_draft_belongs_to": "Tämä luonnos kuuluu käyttäjälle @{owner}. Vaihda takaisin kyseiseen tiliin julkaistaksesi sen.",
+      "could_not_make_a": "Tälle julkaisulle ei voitu luoda uutta linkkiä. Muuta otsikkoa hieman ja yritä uudelleen.",
+      "an_earlier_attempt_was": "Aiempi yritys julkaistiin tämän jälkeen. Tarkista, minkä version haluat säilyttää.",
+      "could_not_check_your": "Tilisi posting-valtuutusta ei voitu tarkistaa. Tarkista yhteytesi ja yritä uudelleen.",
+      "this_post_was_changed": "Tätä julkaisua muutettiin muualla sen jälkeen, kun avasit sen. Kopioi tekstisi, palaa takaisin ja avaa se uudelleen muokataksesi uusinta versiota.",
+      "link_text_placeholder": "Teksti tähän"
+    },
+    "app_error": {
+      "this_reply_is_too": "Tämä vastaus on liian pitkä.",
+      "the_network_refused_this": "Verkko hylkäsi tämän toiminnon.",
+      "invalid_input": "Virheellinen syöte.",
+      "secure_storage_is_unavailable": "Suojattu tallennustila ei ole käytettävissä. Kirjaudu uudelleen sisään.",
+      "please_sign_in_first": "Kirjaudu ensin sisään.",
+      "these_credentials_belong_to": "Nämä tunnistetiedot kuuluvat tilille @{actual}, eivät tilille @{expected}.",
+      "is_not_signed_in": "@{username} ei ole kirjautuneena tällä laitteella.",
+      "key_required": "Tämän tapahtuman suorittamiseen tarvitaan {role}-avain. {hint}",
+      "cancelled": "Peruttu.",
+      "the_request_was_rejected": "Pyyntö hylättiin lompakkosovelluksessa.",
+      "the_request_expired_before": "Pyyntö vanheni ennen kuin lompakkosovellus vastasi. Yritä uudelleen.",
+      "could_not_reach_the": "HiveAuth-palvelimeen ei saatu yhteyttä. Yritä uudelleen.",
+      "unexpected_redirect": "Palvelin lähetti odottamattoman uudelleenohjauksen. Mitään ei muutettu. Yritä myöhemmin uudelleen.",
+      "missing_key_hint": "Lisää se kohdassa Asetukset, Hallitse valtuutuksia (Tuo yksityinen) tai kirjaudu uudelleen sisään sillä.",
+      "this_key_is_also": "Tämä avain on myös tämän tilin owner-avain. Ecency ei säilytä avainta, joka hallitsee owner-roolia: anna active- ja posting-rooleillesi omat avaimet ja kirjaudu sitten sisään niillä.",
+      "this_is_the_owner": "Tämä on owner-avain. Ecency ei koskaan tallenna tai käytä owner-avainta: kirjaudu sisään pääsalasanallasi tai posting- tai active-avaimellasi.",
+      "this_password_only_matches": "Tämä salasana vastaa vain tilin owner-avainta. Ecency ei koskaan tallenna tai käytä owner-avainta: kirjaudu sisään posting- tai active-avaimellasi.",
+      "this_key_cannot_sign": "Tämä avain ei voi yksin allekirjoittaa tilin puolesta: tili tarvitsee useamman kuin yhden allekirjoituksen (sen paino on kynnysarvoa pienempi).",
+      "public_key_given": "Tämä on julkinen avaimesi. Liitä yksityisavain (alkaa numerolla 5) tai pääsalasanasi.",
+      "memo_key_only": "Memo-avainta ei voi käyttää kirjautumiseen. Käytä posting-avainta, active-avainta tai pääsalasanaa.",
+      "network_message": "Verkkovirhe. Tarkista yhteytesi ja yritä uudelleen.",
+      "network_error_this_may": "Verkkovirhe. Tämä on voinut mennä jo läpi; uudelleen yrittäminen on turvallista, eikä se julkaise kahdesti."
+    },
+    "purchases": {
+      "deal_best": "PARAS TARJOUS!",
+      "deal_popular": "SUOSITTU!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Kauppa ei vastannut."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Sähköposti ja käyttäjänimi vaaditaan 999accounts-käyttöön",
+      "stuck": "Tämän tuotteen aiempaa ostoa ei voitu suorittaa loppuun. Ota yhteyttä osoitteeseen support@ecency.com kauppakuittisi kanssa, se säilytetään tätä varten.",
+      "held": "Tämä osto on pidätetty tarkistettavaksi. Ota yhteyttä osoitteeseen support@ecency.com tilausnumerolla #{order}.",
+      "earlier_purchase": "Tämän tuotteen aiempi osto viimeistellään ensin tilille @{target}.",
+      "earlier_pending": "Tämän tuotteen aiempi maksu on yhä vireillä tilille @{target}. Se valmistuu, kun kauppa vahvistaa maksun.",
+      "pending": "Maksusi on vireillä. Osto valmistuu, kun kauppa vahvistaa maksun.",
+      "processing": "Ostostasi käsitellään. Se valmistuu pian."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Toistuvat siirrot",
+      "delegate_hive_power": "Valtuuta Hive Power",
+      "power_up": "Panosta",
+      "set_withdraw_vesting_route": "Aseta noutoreitti",
+      "power_down": "Poista panostus",
+      "transfer_to_saving": "Siirrä säästöihin",
+      "transfer_from_saving": "Siirrä säästöistä",
+      "cancel_transfer_from_saving": "Peruuta siirto säästöistä",
+      "collateralized_convert": "Vakuudellinen muunnos",
+      "witness_vote": "Witness-ääni",
+      "witness_update": "Witnessin päivitys",
+      "witness_set_properties": "Aseta witnessin ominaisuudet",
+      "governance_proxy": "Hallinnon proxy",
+      "claim_account": "Lunasta tili",
+      "create_account": "Luo tili",
+      "create_account_with_account": "Luo tili tilikrediiteillä",
+      "create_limit_order": "Luo limiittitoimeksianto",
+      "cancel_limit_order": "Peruuta limiittitoimeksianto",
+      "redeem_rewards": "Lunasta palkkiot",
+      "post_or_comment": "Julkaisu tai kommentti",
+      "post_or_comment_options": "Julkaisun tai kommentin asetukset",
+      "custom_operation": "Mukautettu toiminto",
+      "update_account_active": "Päivitä tili (active)",
+      "update_account_posting": "Päivitä tili (posting)",
+      "change_recovery_account": "Vaihda palautustili",
+      "create_proposal": "Luo ehdotus",
+      "remove_proposal": "Poista ehdotus",
+      "update_proposal_votes": "Päivitä ehdotusäänet",
+      "update_proposal": "Päivitä ehdotus"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Tämän linkin on allekirjoitettava @{account}. Vaihda kyseiseen tiliin ja avaa se uudelleen.",
+      "ecency_can_only_sign": "Ecency voi allekirjoittaa ja lähettää vain linkeistä tulevia tapahtumia.",
+      "requester_page": "sivu {host}",
+      "owner_refused": "Owner-avainta vaativia toimintoja ei voi allekirjoittaa linkistä.",
+      "busy": "Odota: toista pyyntöä käsitellään vielä.",
+      "not_supported": "Ecency ei vielä voi allekirjoittaa tätä toimintoa tässä versiossa."
+    },
+    "chats": {
+      "group_members": "Ryhmän jäsenet",
+      "rename_group": "Nimeä ryhmä uudelleen",
+      "failed_to_load_chats": "Chattien lataus epäonnistui",
+      "unknown": "Tuntematon",
+      "unable_to_mark_channel": "Kanavaa ei voitu merkitä luetuksi",
+      "unable_to_update_favorites": "Suosikkeja ei voitu päivittää",
+      "unable_to_update_mute": "Mykistystä ei voitu päivittää",
+      "group": "Ryhmä",
+      "unable_to_search": "Hakua ei voitu tehdä",
+      "unable_to_start_chat": "Chattia ei voitu aloittaa",
+      "no_internet": "Ei internet-yhteyttä"
+    },
+    "stake": {
+      "confirm_summary": "Valtuuta {hp} HP ({vests} VESTS) tilille @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Jo valtuutettu tilille @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Vain julkinen. Ecency ei koskaan tallenna owner-avainta.",
+      "shared_owner": "Tämä tili käyttää samaa avainta owner-roolille ja {names}-roolille. Kuka tahansa, jolla on tämä avain, hallitsee koko tiliä. Anna {names}-roolille oma avain ja säilytä owner-avainta offline-tilassa.",
+      "copy_warning": "Kuka tahansa, jolla on tämä yksityisavain, hallitsee tämän osan tilistäsi. Muut sovellukset voivat lukea leikepöytää; liitä se vain paikkaan, johon luotat. Se tyhjennetään leikepöydältä 2 minuutin kuluttua."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-lukitus on päällä.",
+      "pin_changed": "PIN vaihdettu.",
+      "pin_lock_is_off": "PIN-lukitus on pois päältä.",
+      "wiped_notice": "Kaikki tilit, avaimet ja tunnistetiedot poistettiin tältä laitteelta.",
+      "we_could_not_bring": "Tilejäsi ei voitu tuoda sovelluksen edellisestä versiosta. Kirjaudu uudelleen sisään.",
+      "your_pin_lock_could": "PIN-lukitustasi ei voitu siirtää edellisestä versiosta. Aseta PIN uudelleen tilivalikosta ottaaksesi sovelluslukituksen takaisin käyttöön.",
+      "biometric_unlock_was_turned": "Biometrinen avaus poistettiin käytöstä, koska laitteen biometriset tiedot muuttuivat. Avaa PIN-koodilla ja ota se sitten uudelleen käyttöön tilivalikosta.",
+      "biometric_unavailable_notice": "Biometristä avausta ei voitu ottaa käyttöön: laitteelle ei ole määritetty biometrisiä tietoja.",
+      "set_backup": "Aseta PIN biometrisen avauksen varmuuskopioksi",
+      "biometric_on_notice": "PIN-lukitus on päällä. Avaa biometrisillä tiedoilla tai PIN-koodilla.",
+      "offer_title": "Avaa biometrisillä tiedoilla",
+      "offer_body": "Avaa Ecency kasvoillasi tai sormenjäljelläsi. Asetat myös PIN-koodin, joka avaa sovelluksen, kun biometriset tiedot eivät ole käytettävissä.",
+      "offer_use": "Käytä biometriikkaa",
+      "offer_use_pin": "Käytä sen sijaan PIN-koodia"
+    },
+    "common": {
+      "list_and": "{first} ja {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Enintään 25 merkin vastaukset eivät ansaitse pisteitä (linkkejä ei lasketa)",
+      "short_content_hint": "Liian lyhyt pisteiden ansaitsemiseen (enintään 25 merkkiä, linkkejä ei lasketa)",
+      "daily_post": "Päivän julkaisu {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# päivän putki} other {# päivän putki}}",
+      "grant_description": "Anna Ecency-tilille @ecency.app posting-oikeus tililläsi, jotta voit julkaista avaamatta Keychainia joka kerta. Oikeuden antaminen muuttaa tilisi posting-valtuutusta ja vaatii active-avaimesi."
+    },
+    "wallet_history": {
+      "from_to": "@{from} → @{to}",
+      "from_user_id": "käyttäjältä @{from}, tunnus: {id}",
+      "user_id": "@{user}, tunnus: {id}",
+      "from_to_id": "@{from} → @{to}, tunnus: {id}",
+      "from_to_account": "@{from} → {to}",
+      "from_user": "käyttäjältä @{user}",
+      "to_user": "käyttäjälle @{user}",
+      "interest": "Korko",
+      "proposal_pay": "Ehdotuksen maksu",
+      "categories": "Toimintotyypit",
+      "category_all": "Kaikki",
+      "category_transfers": "Siirrot",
+      "category_market": "Markkinatoimeksiannot",
+      "category_interest": "Korot",
+      "category_stake": "Panostustoiminnot",
+      "category_rewards": "Palkkiot",
+      "point_type_checkin": "Sykkeet",
+      "point_type_login": "Kirjautuminen",
+      "point_type_post": "Julkaisu",
+      "point_type_comment": "Kommentti",
+      "point_type_vote": "Ääni",
+      "point_type_reblog": "Jako",
+      "point_type_transfer_sent": "Lähetetyt siirrot",
+      "point_type_transfer_received": "Vastaanotetut siirrot"
+    },
+    "video_upload": {
+      "continue_upload": "JATKA LATAUSTA",
+      "source_gone": "Tämä nauhoitus ei ole enää laitteella. Nauhoita tai valitse video uudelleen.",
+      "no_camera": "Kamera ei ole käytettävissä tällä laitteella."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Seuraava panostuksen poisto on {hours, plural, one {# tunnin} other {# tunnin}} kuluttua",
+      "account_not_found": "Tiliä ei löytynyt"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Kuva leikepöydällä · Liitä kuva",
+      "no_container": "Uusimman wave-säiliön hakeminen epäonnistui",
+      "please_sign_in_first": "Kirjaudu ensin sisään.",
+      "write_something_first": "Kirjoita ensin jotain.",
+      "account_changed": "Tämä wave kirjoitettiin toisella tilillä. Sulje se ja kirjoita uudelleen.",
+      "no_upload": "Kuvan lataus ei ole vielä käytettävissä tässä versiossa. Liitä kuvan linkki tekstiin.",
+      "fail": "Epäonnistui"
+    },
+    "delete_account": {
+      "sign_out_failed": "Pyyntösi lähetettiin, mutta uloskirjautuminen epäonnistui. Kirjaudu ulos valikosta.",
+      "not_sent": "Poistopyyntöäsi ei voitu lähettää. Yritä uudelleen."
+    },
+    "chat_sheets": {
+      "group_limit": "Ryhmässä voi olla enintään {max, plural, one {# muu henkilö} other {# muuta henkilöä}}.",
+      "search_people_by_username": "Hae ihmisiä käyttäjänimellä",
+      "new_group_title": "Uusi ryhmä",
+      "new_group_hint": "Lisää {min}–{max, plural, one {# henkilö} other {# henkilöä}} aloittaaksesi ryhmäkeskustelun.",
+      "no_results": "Chatista ei löytynyt ketään tällä nimellä.",
+      "search_failed": "Haku ei onnistunut. Tarkista yhteytesi ja yritä uudelleen.",
+      "create": "Aloita ryhmä",
+      "new_group_failed": "Ryhmää ei voitu aloittaa. Yritä uudelleen.",
+      "name_limit": "Ryhmän nimi voi olla enintään {max, plural, one {# merkki} other {# merkkiä}}.",
+      "rename_title": "Nimeä ryhmä uudelleen",
+      "rename_hint": "Anna ryhmälle nimi, jonka kaikki jäsenet näkevät. Jätä tyhjäksi, jos haluat näyttää jäsenten nimet.",
+      "placeholder": "Ryhmän nimi",
+      "not_owner": "Vain ryhmän aloittanut henkilö voi nimetä sen uudelleen.",
+      "rename_failed": "Ryhmää ei voitu nimetä uudelleen. Yritä uudelleen."
+    },
+    "editor_side": {
+      "copy_of": "Kopio: {title}",
+      "deletions_failed": "Jokin meni pieleen\n{failed} / {total, plural, one {# poistosta} other {# poistosta}} epäonnistui",
+      "uploads_failed": "{count, plural, one {# lataus epäonnistui} other {# latausta epäonnistui}}:\n\n{messages}",
+      "failed_to_delete": "Poisto epäonnistui"
+    },
+    "uploads": {
+      "add_to_gallery": "Lisää galleriaan"
+    },
+    "account_notice": {
+      "manage_keys": "Asetukset, Hallitse valtuutuksia",
+      "no_signing_key_title": "Kirjaudu uudelleen sisään tilillä @{account}",
+      "no_signing_key": "Ecency ei enää säilytä owner-avainta tai pääsalasanaa tällä laitteella, eikä tilillä @{account} ole tässä tallennettuna posting- tai active-avainta. Kirjaudu uudelleen sisään pääsalasanalla tai posting- tai active-avaimella tai lisää avain kohdassa {manageKeys} (Tuo yksityinen).",
+      "missing_roles_title": "Joitakin avaimia ei lisätty",
+      "cannot_post": "julkaista, äänestää tai kommentoida",
+      "cannot_transfer": "lähettää siirtoja tai muuttaa tilin asetuksia",
+      "missing_roles": "Salasanasi ei enää vastaa tilin @{account} {missing}-avainta: sitä muutettiin tilillä salasanan asettamisen jälkeen. Tallennettuna tälle laitteelle: {kept}-avain. Kunnes lisäät {missing}-avaimen kohdassa {manageKeys} (Tuo yksityinen), tämä sovellus ei voi toimintoja \"{cannot}\" tilin @{account} avaimilla.",
+      "shared_owner_title": "Tämä avain hallitsee myös owner-roolia",
+      "shared_owner": "@{account} käyttää samaa avainta owner-roolille ja {names}-roolille. Kuka tahansa, jolla on tämä avain, hallitsee koko tiliä. Ecency säilyttää sen vain {names}-avaimena eikä koskaan käytä sitä owner-toimintoihin. Anna {names}-roolille oma avain ja säilytä owner-avainta offline-tilassa."
+    },
+    "dapp_browser": {
+      "message_from": "Viesti sivustolta {host}",
+      "home_title": "Koti",
+      "loading_title": "Ladataan...",
+      "blank_run": "[{count, plural, one {# tyhjä merkki} other {# tyhjää merkkiä}}]",
+      "too_large": "Tämä sivu pyysi allekirjoittamaan pyynnön, joka on liian suuri näytettäväksi, joten Ecency hylkäsi sen."
+    },
+    "community_service": {
+      "the_account_changed": "Tili vaihtui."
+    },
+    "profile_edit": {
+      "enter_link": "Anna kuvan linkki",
+      "please_sign_in_first": "Kirjaudu ensin sisään.",
+      "account_not_found": "Tiliä ei löytynyt",
+      "please_enter_an_image": "Anna kuvan linkki, joka alkaa https://"
+    },
+    "background_media": {
+      "post_by": "Julkaisu: @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Kirjaudu ensin sisään."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Olet jo äänestänyt samalla painolla.",
+      "insufficient_rc": "Resurssipisteet eivät riitä. Odota tai panosta.",
+      "missing_authority": "Posting-valtuutus puuttuu. Tarkista kirjautumistapasi.",
+      "comment_too_soon": "Odota ennen kuin julkaiset uudelleen.",
+      "paid_out": "Tämän julkaisun palkkio on jo maksettu.",
+      "too_large": "Tapahtuma on {size, plural, one {# tavu} other {# tavua}}, yli {max} tavun rajan.",
+      "network_error_please_check": "Verkkovirhe. Tarkista yhteytesi ja yritä uudelleen.",
+      "unconfirmed_message": "Ei voitu vahvistaa, meniko tämä läpi. Tarkista lompakkosi tai historiasi; aloita uudelleen vain, jos sitä ei ole siellä.",
+      "undecided_message": "Tämä on saattanut jo mennä läpi. Tarkista lompakkosi tai historiasi ennen uutta yritystä."
+    },
+    "chat_api": {
+      "request_failed": "Pyyntö epäonnistui ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} kirjoittaa...",
+      "typing_two": "{first} ja {second} kirjoittavat...",
+      "typing_three": "{first}, {second} ja {third} kirjoittavat...",
+      "typing_many": "{first}, {second} ja {count, plural, one {# muu} other {# muuta}} kirjoittavat...",
+      "banned": "{reason} Voit yhä lukea chattia. Julkaiseminen avautuu {until}.",
+      "joined_when": "liittyi {time}",
+      "joined": "liittyi",
+      "official_badge": "Virallinen",
+      "official_badge_label": "Ecencyn virallinen tili"
+    },
+    "side_menu": {
+      "ask_esie": "Kysy Esieltä"
+    },
+    "chat_service": {
+      "missing_token": "Hive-käyttötunniste puuttuu. Kirjaudu ulos ja takaisin sisään.",
+      "dm_error": "Käyttäjä ei ole liittynyt chatteihin"
+    },
+    "compose_reply": {
+      "account_changed": "Tämä vastaus kirjoitettiin toisella tilillä. Sulje se ja kirjoita uudelleen.",
+      "write_something_first": "Kirjoita ensin jotain.",
+      "please_sign_in_first": "Kirjaudu ensin sisään."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Liian monta edunsaajaa: enintään {max}.",
+      "a_beneficiary_s_share": "Edunsaajan osuuden on oltava 0,01–100 %.",
+      "beneficiaries_add_up_to": "Edunsaajien osuudet ylittävät yhteensä 100 %.",
+      "a_beneficiary_is_listed": "Edunsaaja on listattu kahdesti.",
+      "you_cannot_be_a": "Et voi olla oman julkaisusi edunsaaja.",
+      "a_beneficiary_has_an": "Edunsaajan tilin nimi on virheellinen."
+    },
+    "follows": {
+      "fail": "Epäonnistui!: {message}",
+      "follower_count": "Seuraajat ({count})",
+      "following_count": "Seurataan ({count})"
+    },
+    "link": {
+      "unsupported": "Tätä linkkiä ei vielä tueta.",
+      "cannot_open": "Linkkiä ei voi avata",
+      "unsupported_version": "Tätä linkkiä ei tueta tässä versiossa."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore-selain voi käyttää Hive-lompakkoasi tapahtumien allekirjoittamiseen. Tämä linkki tulee julkaisun sisällöstä, eikä Ecency ole vahvistanut sitä. Jatka vain, jos luotat siihen:\n\n{url}"
+    },
+    "listen": {
+      "message": "Kuunteluun tarvitaan {required} pistettä ja sinulla on {available}.",
+      "unlock_label": "Avaa · {cost} pistettä",
+      "preparing_audio": "Valmistellaan ääntä · {preparingPercent} %",
+      "waiting_in_line_ahead": "Odotetaan jonossa, {ahead} edellä…",
+      "next_in_line": "Seuraavana jonossa…",
+      "preparing_about_minutes": "Valmistellaan ääntä, noin {minutes} min…",
+      "preparing_audio_2": "Valmistellaan ääntä…",
+      "spend_confirm": "Käytetäänkö {cost} pistettä tämän julkaisun kuunteluun? Ääni on sinun ja voit toistaa sen milloin tahansa.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Ääntä ei voitu luoda, pisteesi palautettiin"
+    },
+    "media_pick": {
+      "preparing_video": "Valmistellaan videota...",
+      "library_hint": "Valitse omista kuvistasi",
+      "camera_hint": "Ota uusi kuva nyt",
+      "files_hint": "Selaa tämän laitteen ja pilven tiedostoja",
+      "paste_hint": "Käytä kopioimaasi kuvaa",
+      "link_hint": "Käytä kuvaa verkosta"
+    },
+    "media_picking": {
+      "image_types_message": "Tätä tiedostotyyppiä ei tueta. Valitse JPEG-, PNG-, GIF-, WebP- tai HEIC-kuva.",
+      "video_types_message": "Tätä tiedostotyyppiä ei tueta. Valitse MP4- tai MOV-video.",
+      "gif_too_large": "Tämä GIF on suurempi kuin {mb} Mt."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Tämä toiminto vaatii sekä active- että posting-allekirjoituksen, joita Ecency ei vielä voi antaa yhdessä."
+    },
+    "poll": {
+      "fail": "Epäonnistui!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Tilisi posting-valtuutusta ei voitu tarkistaa. Tarkista yhteytesi ja yritä uudelleen."
+    },
+    "post_lists": {
+      "voters_title": "Äänestäjien tiedot ({total})",
+      "reblogs_title": "Jakojen tiedot ({total})",
+      "no_history_found": "Historiaa ei löytynyt!",
+      "no_edit_history_available": "Tälle sisällölle ei ole muokkaushistoriaa.",
+      "version_label": "Versio {version}"
+    },
+    "stats": {
+      "other_device": "Muu"
+    },
+    "profile": {
+      "account_not_found": "Tiliä ei löytynyt",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Täynnä {hours, plural, one {# tunnin} other {# tunnin}} kuluttua"
+    },
+    "profile_metadata_guard": {
+      "refused": "Nykyistä profiiliasi ei voitu lukea, yritä uudelleen"
+    },
+    "profile_sheet": {
+      "fail": "Epäonnistui! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Tiliä ei löytynyt"
+    },
+    "push_payload": {
+      "mentioned": "@{source} mainitsi käyttäjän @{target}",
+      "replied": "@{source} vastasi käyttäjälle @{target}",
+      "transferred": "@{source} siirsi käyttäjälle @{target}",
+      "delegated": "@{source} valtuutti käyttäjälle @{target}",
+      "rewards_received": "Palkkiot vastaanotettu",
+      "account_updated": "Tili päivitetty",
+      "account_updated_body": "Tilisi tiedot päivitettiin",
+      "followed": "@{source} seurasi käyttäjää @{target}",
+      "unfollowed": "@{source} lopetti käyttäjän @{target} seuraamisen",
+      "ignored": "@{source} ohitti käyttäjän @{target}",
+      "blacklisted": "@{source} lisäsi käyttäjän @{target} estolistalle",
+      "posted_in": "@{source} julkaisi tagilla #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Kameran käyttöoikeutta ei saatu",
+      "permission_message": "Anna kameran käyttöoikeus ecencyn asetuksissa.",
+      "permission_allow": "Salli"
+    },
+    "reply_account": {
+      "switch": "Vastaa toisella tilillä"
+    },
+    "send_journal": {
+      "your_from_went_through": "Tilin @{account} {label} meni läpi.",
+      "not_sent": "Tilin @{account} {label} ei mennyt läpi. Mitään ei lähetetty; voit aloittaa sen uudelleen.",
+      "checking_whether_your_from": "Tarkistetaan, meniko tilin @{account} {label} läpi. Tarkista lompakkosi ennen kuin lähetät sen uudelleen."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner-sivu suljettu",
+      "wrong_role": "Tämä on {given}-avaimesi; tämä toiminto vaatii {needed}-avaimesi.",
+      "action_id_required": "Tämä toiminto tarvitsee toimintotunnuksen, jotta sen voi yrittää turvallisesti uudelleen."
+    },
+    "signing_router": {
+      "owner_never": "Owner-toimintoja ei koskaan allekirjoiteta sovelluksessa."
+    },
+    "spin": {
+      "key_missing": "Pelin avain puuttuu",
+      "score": "{score, plural, one {# piste} other {# pistettä}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Tänään (UTC), nollautuu {time} kuluttua",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Nollautuu päivittäin klo 00.00 UTC"
+    },
+    "storage_reset": {
+      "title": "Kirjaudu uudelleen sisään",
+      "message": "Suojattu tallennustila nollattiin tällä laitteella. Kirjaudu uudelleen sisään.",
+      "failed": "Tämän laitteen tilejä ei voitu poistaa. Yritä uudelleen."
+    },
+    "store": {
+      "in_app_purchases_are": "Sovelluksen sisäiset ostot eivät ole käytettävissä tässä versiossa."
+    },
+    "wallet_sends": {
+      "journal_full": "Liian monta aiempaa lähetystä tarkistetaan vielä verkossa. Odota, että ne on vahvistettu, ennen kuin lähetät lisää.",
+      "check_later": "Verkko ei vahvistanut tätä ajoissa. Tarkista lompakkosi tai historiasi ennen kuin lähetät sen uudelleen; sovellus tarkistaa uudelleen seuraavassa käynnistyksessä."
+    },
+    "waves": {
+      "shorts": "Shortsit"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# lukematon} other {# lukematonta}}",
+      "locked_text": "Avaa Ecencyn lukitus nähdäksesi",
+      "signed_out_text": "Kirjaudu Ecencyyn"
+    },
+    "posting_grant": {
+      "unreadable": "Tilisi nykyisiä valtuutuksia ei voitu lukea. Mitään ei muutettu; yritä uudelleen.",
+      "reads_disagree": "Kaksi tilisi posting-valtuutuksen lukua eroaa toisistaan. Mitään ei muutettu; yritä uudelleen."
+    },
+    "vote": {
+      "vote_weight_must_be": "Äänen painon on oltava -100 %–100 %.",
+      "please_sign_in_first": "Kirjaudu ensin sisään."
+    },
+    "widget": {
+      "streak_name": "Tehtäväputki",
+      "write": "Kirjoita",
+      "new_wave": "Uusi wave",
+      "notifications_description": "Lukemattomat ilmoituksesi. Piilotettu, kun PIN-lukitus on päällä.",
+      "streak_description": "Päivittäisten tehtävien putkesi. Piilotettu, kun PIN-lukitus on päällä.",
+      "compose_description": "Kirjoita julkaisu tai uusi wave.",
+      "streak_title": "Putki",
+      "daily_quests": "Päivittäiset tehtävät",
+      "streak_hint": "Avaa Perks nähdäksesi putkesi",
+      "open_perks": "Avaa Perks",
+      "open_app": "Avaa Ecency",
+      "unread_caption": "{count, plural, one {lukematon} other {lukematonta}}",
+      "streak_caption": "{count, plural, one {päivän putki} other {päivän putki}}"
+    },
+    "system": {
+      "dictation_channel": "Sanelu",
+      "listen_channel": "Kuuntelu",
+      "dictation_channel_description": "Näkyy, kun sanelun nauhoitus on käynnissä taustalla, Lopeta-toiminnolla.",
+      "dictation_title": "Nauhoitus sanelua varten",
+      "dictation_text": "Ecency nauhoittaa sanelua. Lopettaminen pitää sen lähettämättömänä, kunnes vahvistat sovelluksessa.",
+      "listen_channel_description": "Kertoo, kun Kuuntelu ei voinut jatkua taustalla.",
+      "listen_paused": "Kuuntelu tauolla",
+      "listen_paused_text": "Avaa Ecency jatkaaksesi kuuntelua.",
+      "skip_back": "Taaksepäin 15 sekuntia",
+      "skip_forward": "Eteenpäin 15 sekuntia"
+    },
+    "permission": {
+      "face_id": "Avaa Ecency Face ID:llä PIN-koodin sijaan.",
+      "camera": "Skannaa QR-koodeja sekä ota kuva tai nauhoita video lisättäväksi julkaisuusi.",
+      "photo_library_add": "Ecency tallentaa julkaisuista lataamasi kuvat kuvakirjastoosi.",
+      "photo_library": "Ecency pitää julkaisuista lataamasi kuvat yhdessä Ecency-albumissa kuvakirjastossasi.",
+      "microphone": "Ecency käyttää mikrofoniasi, jotta voit sanella julkaisuja ja kommentteja (nauhoitukset lähetetään Ecencylle litteroitaviksi) ja nauhoittaa ääntä julkaisuusi lisäämän videon kanssa."
+    },
+    "android": {
+      "no_browser": "Selainta ei ole saatavilla",
+      "biometric_unlock_title": "Avaa Ecency biometrisillä tiedoilla",
+      "biometric_confirm": "Vahvista sormenjäljellä tai kasvoilla",
+      "image_unsupported_address": "Kuvan osoitetta ei tueta",
+      "image_create_failed": "Tiedostoa ei voitu luoda",
+      "image_write_failed": "Tiedostoa ei voitu kirjoittaa",
+      "image_too_large": "Kuva on liian suuri",
+      "image_download_failed": "Lataus epäonnistui tilalla {status}",
+      "billing_disconnected": "Google Play Billing -yhteys katkesi.",
+      "billing_no_screen": "Ei näyttöä, jolla ostos voitaisiin näyttää.",
+      "billing_error": "Google Play Billing -virhe {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Loit {count, plural, one {# julkaisu} other {# julkaisu}} tässä kuussa. Hyvin tehty!",
-        "checkin": "Kirjauduit {count, plural, one {# päivä} other {# päivä}} tällä viikolla. Jatka samaan malliin!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# uusi julkaisu} other {# uutta julkaisua}} tagilla #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# epäonnistuneet yritykset} other {# epäonnistuneet yritykset}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} päivän putki"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• {days} päivää vanhemmat tilit",
-        "max_choices": "• Voit valita {choices}"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Jäljellä olevat {executions}-siirrot",
-        "schedule_summary": "{executions} siirtoa, kukin {hours} tunnin välein"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Liian lyhyt pisteiden ansaitsemiseen (enintään {n, plural, one {# merkki} other {# merkkiä}}, linkkejä ei lasketa)"
       },
       "chats": {
-        "people_joined": "{count} henkilöä liittyi"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "noin {count, plural, one {# minuutin} other {# minuutin}} kuluttua",
+        "ban-remaining-hours": "noin {count, plural, one {# tunnin} other {# tunnin}} kuluttua",
+        "ban-remaining-days": "noin {count, plural, one {# päivän} other {# päivän}} kuluttua"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Käytä enintään {n, plural, one {# tagia} other {# tagia}}",
+          "too_long": "Haku on liian pitkä. Käytä enintään {n, plural, one {# merkkiä} other {# merkkiä}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Vähintään {count} merkkiä vaaditaan",
-        "chars_remaining": "{count} merkkiä jäljellä"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Voit valita kerralla enintään {count, plural, one {# kuvan} other {# kuvaa}}"
+      },
+      "dictation": {
+        "stop_hint": "Lopeta litteroidaksesi ja lisätäksesi sen julkaisuun. Enintään {m, plural, one {# minuutti} other {# minuuttia}}.",
+        "rate": "{n} pistettä / {s, plural, one {# sekunti} other {# sekuntia}}"
       },
       "transfer": {
-        "powering_down_info": "Seuraavaan panostuksen poistoon on {days} päivää, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min}–{max, plural, one {# merkki} other {# merkkiä}}"
       }
     }
   }

@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Član Ecency Pro"
   },
   "perks": {
     "header": "Pogodnosti",
@@ -31,42 +31,42 @@
     "promote_desc": "Privuci više pažnje na svoju objavu",
     "account_boost": "Pojačanje naloga",
     "account_boost_desc": "Pojačaj bilo koji nalog",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Dopuni RC",
+    "rc_topup_desc": "Nastavite da objavljujete kada vam ponestaje Resource Credits",
+    "streak_freeze_owned": "U zalihi: {n}",
+    "streak_freeze_buy": "Zaštiti niz ({price} Points)",
+    "streak_freeze_buying": "Štitimo",
+    "streak_freeze_error": "Nije moguće kupiti zamrzavanje niza. Pokušajte ponovo."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Objava dana",
+    "streak": "Niz: {n} dana",
+    "keep_streak": "Ne prekidajte niz"
   },
   "waves": {
     "for_you": "Za tebe",
     "following": "Pratiš",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Prilagođeni tokovi",
+    "custom_feeds_subtitle": "Zakačite izvore i oznake da ih dodate kao kartice toka.",
+    "add_tag_placeholder": "Dodaj oznaku",
+    "sources": "Izvori",
+    "your_feeds": "Vaši tokovi",
+    "trending_tags": "Popularne oznake",
+    "shorts_empty": "Još nema kratkih videa",
+    "mute": "Isključi zvuk",
+    "unmute": "Uključi zvuk"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Prvi koraci",
+    "subtitle": "Novi ste ovde? Waves su kratke objave i najlakši način da se uključite.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Odbaci",
+    "item_wave": "Objavite svoj prvi Wave",
+    "item_vote": "Glasajte za Wave koji vam se sviđa",
+    "item_reply": "Odgovorite nekome",
+    "item_checkin": "Prijavite se da započnete niz",
+    "all_done_title": "Sve gotovo 🎉",
+    "all_done_subtitle": "Sve je spremno. Nastavite sa Waves objavama!"
   },
   "profile": {
     "havent_commented": "još uvek nije komentarisao ništa",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Starost  |  Vidljivost  |  Tumačenje",
     "attach_poll": "Priloži anketu"
   },
+  "favorite_tags": {
+    "title": "Oznake",
+    "hint": "Prati da dobijaš obaveštenja o novim objavama sa ovom oznakom",
+    "following_hint": "Dobijaš obaveštenja o novim objavama sa ovom oznakom",
+    "follow": "Prati",
+    "following": "Pratiš",
+    "added": "Oznaka se prati",
+    "removed": "Oznaka se više ne prati",
+    "empty_list": "Ovde nema ničega"
+  },
   "favorites": {
     "add": "Dodaj omiljeno",
     "add_error": "Nije moguće dodati omiljeno",
@@ -181,7 +191,33 @@
     "payout": "Isplata",
     "details": "Detalji",
     "community": "zajednica",
-    "new_post": "Nova objava"
+    "new_post": "Nova objava",
+    "mute_post_title": "Utišaj ovu objavu",
+    "unmute_post_title": "Vrati ovu objavu",
+    "mute_post_reason": "Zašto se ovo utišava?",
+    "unmute_post_reason": "Zašto se ovo vraća?",
+    "manage": "Upravljaj zajednicom",
+    "manage_members": "Članovi i uloge",
+    "manage_settings": "Podešavanja zajednice",
+    "manage_activities": "Dnevnik aktivnosti",
+    "activities": "aktivnost",
+    "no_activities": "Još nema aktivnosti",
+    "activities_load_failed": "Aktivnost nije mogla da se učita. Povuci nadole za osvežavanje.",
+    "set_role": "Postavi ulogu",
+    "assign_role": "Dodeli ulogu",
+    "assign_role_hint": "Pretraži bilo koji nalog, čak i onaj koji nije pretplaćen, pa izaberi ulogu.",
+    "username_placeholder": "Korisničko ime",
+    "invalid_username": "Izaberi postojeći nalog iz rezultata",
+    "members": "članova",
+    "no_members": "Nisu pronađeni članovi",
+    "members_incomplete": "Neki članovi nisu mogli da se učitaju. Povuci nadole za osvežavanje.",
+    "members_load_failed": "Članovi nisu mogli da se učitaju. Povuci nadole za osvežavanje.",
+    "role_owner": "Vlasnik",
+    "role_admin": "Admin",
+    "role_mod": "Moderator",
+    "role_member": "Član",
+    "role_guest": "Gost",
+    "role_muted": "Ućutkan"
   },
   "trade": {
     "swap_for": "Zamena {fromAmount} za {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Unakrsna objava",
     "pin-blog": "Zakači na blog",
     "copy": "kopiraj link",
+    "copy-text": "kopiraj tekst",
+    "open-thread": "otvori nit",
     "unpin-community": "Otkači iz zajednice",
+    "mute-post": "Utišaj objavu",
+    "unmute-post": "Vrati objavu",
     "mute": "Ućutkaj / Blokiraj",
     "reblog": "podeli",
     "undo-reblog": "poništi deljenje",
@@ -232,24 +272,24 @@
     "unpin-reply": "Otkači komentar"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Ova objava je na jeziku: {lang}. Prevesti na {target}?",
+    "translate_to": "Prevedi na {lang}",
+    "show_original": "Prikaži original",
+    "translated_from": "Prevedeno sa jezika: {lang}",
+    "change_language": "Promeni jezik"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Prevedi objavu",
+    "source": "Izvorni jezik",
+    "target": "Ciljni jezik",
+    "detected": "Prepoznat: {lang}",
+    "translate": "Prevedi",
+    "apply": "Primeni",
+    "review_note": "Dodaje mašinski prevod vašeg teksta na kraj objave. Pregledajte i izmenite pre objavljivanja.",
+    "too_short": "Prvo napišite malo više. Za prevod je potrebno bar nekoliko rečenica.",
+    "progress": "Prevodi se {done} od {total}...",
+    "error": "Prevod nije uspeo. Pokušajte ponovo.",
+    "add_title_marker": "Dodaj oznaku jezika u naslov"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Aktuelno",
     "popular": "Popularno",
     "new": "Novo",
-    "friends": "Following",
+    "friends": "Pratim",
     "my_blog": "Moj blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Ovde nema ništa"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Šabloni",
+    "untitled": "Šablon bez naziva",
+    "empty_list": "Sačuvajte objavu kao šablon u uređivaču da je ponovo koristite ovde.",
+    "delete_confirm": "Da li ste sigurni da želite da obrišete ovaj šablon?",
+    "applied": "Šablon je primenjen kao nova objava",
+    "save_as_template": "Sačuvaj kao šablon",
+    "name_placeholder": "Naziv šablona",
+    "saved": "Šablon je sačuvan"
   },
   "selection_list": {
     "available": "Dostupno {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Sve",
+      "replies": "Odgovori",
+      "mentions": "Pominjanja",
+      "rvotes": "Glasovi",
+      "follows": "Praćenja",
+      "reblogs": "Deljenja",
+      "transfers": "Transferi",
+      "delegations": "Delegiranja",
+      "nfavorites": "Omiljeno",
+      "tags": "Oznake",
+      "nbookmarks": "Obeleživači",
+      "payouts": "Isplate",
+      "scheduled_published": "Zakazane objave",
+      "account_updates": "Izmene naloga",
+      "weekly_earnings": "Nedeljna zarada"
     },
     "this_week": "Ove nedelje",
     "reblog": "podeljeno",
@@ -417,11 +458,15 @@
     "yesterday": "Juče",
     "mention": "spomenuto u",
     "favorites": "napravio/la novu objavu",
+    "tags": "je objavio/la u #{tag}",
+    "tags_bundle": "{count} novih objava u #{tag}",
+    "tags_title": "Nove objave u oznaci koju pratiš",
     "mentions": "Pominjanja",
     "spin": "Vreme je da zaradite više poena",
     "last_week": "Prošle nedelje",
     "recent": "Nedavno",
     "ignore": "vas je ignorisao",
+    "blacklist": "vas je stavio/la na crnu listu",
     "follow": "vas je zapratio",
     "notification": "Obaveštenja",
     "this_month": "Ovaj mesec",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} sada može da objavljuje i glasa u tvoje ime. Ako ovo nisi ti odobrio/la, opozovi ga.",
     "weekly_earnings": "Zaradio/la si ${amount} ove nedelje{breakdown}",
     "payouts": "Primljena isplata: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "je objavio/la zakazanu objavu",
+    "scheduled_published_title": "Zakazana objava je objavljena",
+    "scheduled_published_body": "Vaša zakazana objava je sada uživo, dodirnite da je vidite"
   },
   "recurrent": {
     "delete_failed": "Brisanje ponavljajućeg prenosa nije uspelo, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Otvori nedavni nacrt ili napravi novu objavu",
     "reward_power_up": "Uloži 100%",
     "open_gallery": "Otvori galeriju",
+    "open_files": "Izaberi iz Datoteka",
     "clipboard_no_image": "Nema slike u privremenoj memoriji",
     "clipboard_image_detected": "Slika u privremenoj memoriji",
     "paste_image": "Nalepi sliku",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Kasnije",
     "settings_title": "Opcije objave",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Ne"
+    "support_ecency": "Podrži Ecency {percent}%",
+    "alert_btn_no": "Ne",
+    "short_reply_hint": "Odgovori od {n} znakova ili kraći ne donose Points (veze se ne računaju)",
+    "short_content_hint": "Prekratko za Points ({n} znakova ili manje, bez veza)"
   },
   "time": {
     "week": "nedelje",
@@ -655,7 +703,41 @@
     "select_emoji": "Izaberi emodži",
     "more_emojis": "Više",
     "search_emojis": "Pretraži emodžije...",
-    "no_emoji_found": "Nijedan emodži nije pronađen"
+    "no_emoji_found": "Nijedan emodži nije pronađen",
+    "ban-reason-spray": "Pauziran/a si za objavljivanje jer je ista poruka poslata u više kanala odjednom.",
+    "ban-reason-mass-dm": "Pauziran/a si za objavljivanje jer je poruka poslata mnogim ljudima odjednom.",
+    "ban-reason-generic": "Pauziran/a si za objavljivanje u četu.",
+    "ban-can-still-read": "I dalje možeš da čitaš čet.",
+    "ban-unlocks": "Objavljivanje se otključava {when}.",
+    "ban-remaining-soon": "za manje od minut",
+    "ban-remaining-minutes": "za oko {count} minuta",
+    "ban-remaining-hours": "za oko {count} sati",
+    "ban-remaining-days": "za oko {count} dana",
+    "new_group": "Nova grupa",
+    "new_group_hint": "Dodaj od {min} do {max} ljudi da započneš grupni razgovor.",
+    "new_group_search": "Pretraži ljude po korisničkom imenu",
+    "new_group_full": "Grupa može imati najviše {max} drugih ljudi.",
+    "new_group_no_results": "Niko sa tim imenom nije pronađen na četu.",
+    "new_group_search_failed": "Pretraga nije uspela. Proveri vezu i pokušaj ponovo.",
+    "new_group_remove": "Ukloni @{username}",
+    "new_group_create": "Započni grupu",
+    "new_group_failed": "Grupa nije mogla da se započne. Pokušaj ponovo.",
+    "rename_group": "Preimenuj grupu",
+    "rename_group_hint": "Daj grupi ime koje će videti svi u njoj. Ostavi prazno da se prikažu imena članova.",
+    "group_name": "Ime grupe",
+    "rename_group_too_long": "Ime grupe može imati najviše {max} znakova.",
+    "rename_group_not_owner": "Samo osoba koja je započela grupu može da je preimenuje.",
+    "rename_group_failed": "Grupa nije mogla da se preimenuje. Pokušaj ponovo.",
+    "group_renamed": "{user} je preimenovao/la grupu u „{name}“",
+    "group_name_cleared": "{user} je uklonio/la ime grupe",
+    "group_members": "Članovi grupe",
+    "save": "Sačuvaj",
+    "cancel": "Otkaži",
+    "reactions_title": "Reakcije",
+    "reactor_you": "Ti",
+    "reactor_unknown": "Neko",
+    "see_who_reacted": "Dugo pritisni da vidiš ko je reagovao",
+    "group": "Grupa"
   },
   "free_estm": {
     "timer_text": "Novi besplatni obrtaj u",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transakcija nije uspela"
   },
   "search_result": {
+    "error": "Pretraga nije mogla da se završi. Pokušaj ponovo",
+    "filters": {
+      "title": "Filteri",
+      "open": "Filteri",
+      "author": "Autor",
+      "author_placeholder": "korisničko ime",
+      "category": "Kategorija",
+      "category_placeholder": "zajednica ili kategorija",
+      "tags": "Oznake",
+      "tags_placeholder": "odvojene zarezom",
+      "type": "Vrsta",
+      "type_all": "Sve",
+      "type_post": "Objave",
+      "type_comment": "Komentari",
+      "date": "Datum",
+      "date_week": "Prošle nedelje",
+      "date_month": "Prošlog meseca",
+      "date_year": "Prošle godine",
+      "date_all": "Za sve vreme",
+      "sort": "Sortiraj",
+      "apply": "Primeni",
+      "active": "Aktivno: {n}",
+      "too_many_tags": "Koristi najviše {n} oznaka",
+      "too_long": "Pretraga je predugačka. Koristi najviše {n} znakova",
+      "needs_criteria": "Unesi pojam za pretragu ili autora, kategoriju ili oznaku za filtriranje"
+    },
     "communities_filter": {
       "new": "Novo",
       "my": "Moje Zajednice",
@@ -727,7 +835,7 @@
     "title": "Unakrsna objava"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Autor je naveo upotrebu AI"
   },
   "ai_assist": {
     "title": "AI asistent za pisanje",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Dobijte relevantne oznake za svoju objavu",
     "action_generate_title": "Generiši naslov",
     "action_generate_title_desc": "Napravite privlačne predloge naslova",
-    "action_summarize": "Recap",
+    "action_summarize": "Rezime",
     "action_summarize_desc": "Napravite sažet rezime",
     "action_check_grammar": "Proveri gramatiku",
     "action_check_grammar_desc": "Ispravi gramatičke i pravopisne greške",
+    "action_generate_image": "Generiši sliku",
+    "action_generate_image_desc": "Napravi AI sliku za svoju objavu",
+    "cost_from": "od {cost} {unit}",
     "text_label": "Vaš tekst",
     "text_placeholder": "Nalepite ili otkucajte svoj sadržaj ovde...",
     "min_chars": "Potrebno je najmanje {count} znakova",
@@ -797,16 +908,26 @@
     "remind_later": "Podseti kasnije",
     "success_subscribe": "Uspešna pretplata!",
     "payloadTooLarge": "Veličina datoteke je prevelika, promenite veličinu ili otpremite manju sliku",
+    "too_many_images": "Možeš izabrati najviše {count} slika odjednom",
     "fail_follow": "Praćenje neuspešno!",
     "clear_user_alert": "Da li stе sigurni da žеlitе da izbrišеtе svе korisničke podatkе?",
     "cancel": "Otkaži",
     "connection_success": "Uspešno povezan!",
     "rc_down": "Nema dovoljno resurs kredita za izvođenje radnje! \n\nPojačajte svoj nalog da biste nastavili uživati u iskustvu. Da li želite da pojačate svoj nalog sada?",
+    "rc_down_title": "Nedovoljno Resource Credits",
+    "rc_precheck_title": "Ova objava je možda prevelika za objavljivanje",
+    "rc_precheck_body": "Izgleda da imaš premalo Resource Credits za objavu ove veličine.",
+    "rc_down_body": "Nemaš dovoljno Resource Credits za ovu radnju.\n\nDopuni ih sada pomoću Points da nastaviš ili trajno pojačaj nalog.",
+    "rc_down_topup": "Dopuni RC pomoću Points",
+    "rc_down_boost": "Pojačaj nalog",
     "done": "Gotovo",
     "something_wrong_alt": "U međuvremenu, probajte Ecency.com iz vašeg pregledača",
     "same_user": "Ovaj korisnik je već dodan na listu",
     "fail": "Nije uspelo!",
     "operation_failed_with_reason": "{operation} nije uspela: {reason}",
+    "request_timed_out": "Veza traje predugo. Proveri mrežu i pokušaj ponovo.",
+    "load_failed_retry": "Nismo mogli da učitamo ovo. Pokušaj ponovo.",
+    "retrying": "Ponovni pokušaj...",
     "wallet_refresh_failed": "Osvežavanje novčanika nije uspelo. Pokušajte ponovo.",
     "wallet_refresh_missing_account": "Osvežavanje novčanika nije uspelo: nedostaje nalog.",
     "boost_failed": "Boost+ nije uspeo.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video je priložen"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Glasaj",
+    "upvoted": "Glasano",
+    "downvoted": "Glasano protiv",
+    "upvote_hint": "Dvaput dodirnite da otvorite opcije glasanja",
+    "payout_details": "Detalji isplate",
+    "a11y_votes": "{count, plural, one {# glas} few {# glasa} other {# glasova}}",
+    "a11y_voters_hint": "Pogledaj glasače",
+    "a11y_reblogs": "{count, plural, one {# deljenje} few {# deljenja} other {# deljenja}}",
+    "a11y_reblogs_hint": "Pogledaj deljenja",
+    "a11y_comments": "{count, plural, one {# komentar} few {# komentara} other {# komentara}}",
+    "a11y_comments_hint": "Pogledaj komentare",
+    "a11y_reply_hint": "Odgovori",
+    "a11y_tip": "Pošalji bakšiš",
+    "a11y_tips": "{count, plural, one {# bakšiš} few {# bakšiša} other {# bakšiša}}",
+    "a11y_edit": "Izmeni komentar",
+    "a11y_delete": "Obriši komentar",
+    "a11y_show_replies": "Prikaži odgovore",
+    "a11y_hide_replies": "Sakrij odgovore",
+    "a11y_post_options": "Opcije objave",
+    "a11y_views": "{count, plural, one {# pregled} few {# pregleda} other {# pregleda}}",
+    "source_ecency": "Objavljeno sa Ecency",
+    "a11y_stats_hint": "Pogledaj statistiku objave",
     "image": "Slika",
     "reveal_muted": "UTIŠANO\nDodirnite da prikažete sadržaj",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Dodirnite da učitate sliku",
     "in": "u",
     "poll": "ANKETA",
     "copy_link": "Kopiraj vezu",
@@ -998,13 +1119,14 @@
     "save_to_local": "Preuzmi na uređaj",
     "muted": "Sadržaj je utišan zbog kršenja pravila",
     "community_muted": "Sadržaj je utišan zbog kršenja pravila zajednice",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Sadržaj sa naloga niske reputacije",
+    "muted_downvoted": "Sadržaj za koji su korisnici glasali protiv",
+    "muted_low_trust": "Nalog sa niskom reputacijom i neproverenom spoljnom vezom",
+    "muted_reveal": "Dodirni da prikažeš",
     "promoted": "PROMOVISANO",
     "image_saved": "Slika je sačuvana u galeriji fotografija",
     "words": "Reči",
     "reading": "Čitanje",
-    "listen": "Slušaj",
     "min": "min",
     "summarize_start": "Započni"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Nema postojećih postova",
     "invalid_link": "URL adresa je nevažeća, možete pokušati ponovo sa važećom adresom ili je otvoriti u veb pregledaču",
-    "no_existing_user": "Nema postojećih korisnika"
+    "no_existing_user": "Nema postojećih korisnika",
+    "posting_key_request": "{requester} traži privatni posting ključ za @{username}.\n\nNastavi samo ako veruješ ovom zahtevu.",
+    "posting_key_request_unnamed": "Druga aplikacija traži privatni posting ključ za @{username}.\n\nNastavi samo ako veruješ ovom zahtevu.",
+    "auth_request_as_user": "{requester} želi da te prijavi kao @{username}.\n\nDeli se samo korisničko ime i dokaz o prijavi. Nijedan ključ ne napušta Ecency.",
+    "auth_request_as_current": "{requester} želi da te prijavi sa tvojim Ecency nalogom.\n\nDeli se samo korisničko ime i dokaz o prijavi. Nijedan ključ ne napušta Ecency."
   },
   "payout": {
     "breakdown": "Presek",
@@ -1065,7 +1191,7 @@
     "open": "Otvori URL",
     "invalid_key_desc": "molimo prijavite se sa {key} ključem ili glavnim ključem da biste izvršili ovu transakciju",
     "auth_transfer_confirm": "Potvrditi prenos korisniku {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Odobrite samo ako verujete izvoru ovog linka. Odobravanjem se operacija ispod šalje sa vašeg naloga pomoću vašeg {authority} ključa."
   },
   "voters_dropdown": {
     "rewards": "NAGRADE",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Sme da sadrži samo slova, brojeve i crticu",
       "username_no_ascii_first_letter_error": "Treba da počinje slovom",
       "username_contains_double_hyphens": "Ne sme da sadrži dvostruke crtice",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Ovo korisničko ime je previše slično nalogu kripto berze i može zbuniti druge. Izaberite jedinstvenije ime.",
+      "username_restricted_prefix": "Korisnička imena koja počinju sa „uid“ i brojevima nisu dozvoljena, jer se često koriste za lažno predstavljanje. Izaberite drugo ime.",
       "username_contains_underscore": "Ne sme da sadrži donju crtu"
     },
     "500_error": "Vaš zahtev nije mogao da se obradi, red za registraciju je verovatno pun! Pokušajte ponovo za nekoliko minuta...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Korisničko ime je već zauzeto",
+      "14": "Email adresa je već registrovana",
+      "15": "Unesite ispravnu email adresu",
+      "16": "Unesite ispravno korisničko ime",
+      "17": "Korisničko ime je predugo, izaberite kraće",
+      "19": "Koristite trajnu email adresu ili nabavite Premium nalog",
+      "21": "Ova preporuka nije važeća",
+      "28": "Vaš zahtev nije mogao biti obrađen: red za registraciju je verovatno pun. Pokušajte ponovo za nekoliko minuta.",
+      "107": "Otkrivena je VPN veza. Isključite VPN i pokušajte ponovo ili nabavite Premium nalog.",
+      "110": "Da sprečimo zloupotrebe, ograničavamo broj naloga po osobi ili mreži. Pokušajte ponovo sa druge mreže.",
+      "111": "Otkrivena je Tor veza. Isključite Tor dok se registrujete.",
+      "112": "Trenutno nismo mogli da proverimo vašu vezu. Pokušajte ponovo za nekoliko minuta."
     },
     "have_account_text": "Već imate nalog?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Nabavite punopravan Hive nalog; ovaj metod ima osnovne provere kako bi se osiguralo da botneti ne zloupotrebljavaju naš servis za registraciju.",
     "btn_register": "Registruj se besplatno",
     "title": "Besplatan nalog"
+  },
+  "dictation": {
+    "title": "Diktiraj",
+    "start": "Snimaj",
+    "stop": "Zaustavi",
+    "record_more": "Snimi još",
+    "done": "Gotovo",
+    "recording": "Snimanje",
+    "stop_hint": "Zaustavi da se transkribuje i doda u tvoju objavu. Do {m} minuta.",
+    "inserted": "Dodato u tvoju objavu. Snimi još ili dodirni Gotovo.",
+    "transcribing": "Transkripcija",
+    "rate": "{n} Points na {s} sekundi",
+    "cost_running": "Do sada {n} Points",
+    "cost_running_free": "Do sada besplatno",
+    "free_remaining": "Tvojih sledećih {n} x {s}s je danas besplatno",
+    "price_loading": "Provera cene",
+    "price_error": "Cene transkripcije nisu mogle da se učitaju.",
+    "denied": "Ecency treba pristup mikrofonu za diktiranje. Dozvoli ga u podešavanjima i pokušaj ponovo.",
+    "error_empty": "U tom snimku nije otkriven govor.",
+    "error_insufficient_points": "Nema dovoljno Points za transkripciju tog snimka.",
+    "error_rate_limited": "Previše snimaka za sada. Pokušaj ponovo uskoro.",
+    "error_too_long": "Taj snimak je predugačak za transkripciju.",
+    "error_failed": "Snimak nije mogao da se transkribuje. Pokušaj ponovo.",
+    "error_recorder": "Snimanje nije moglo da počne. Pokušaj ponovo."
   },
   "wallet": {
     "delegations_out": "Odlazne delegacije",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Redovno prijavljivanje vam daje 0.25 poena.",
     "fill_transfer_from_savings": "Ušteda izvšena",
     "activities": "Aktivnosti",
+    "no_activities": "Još nema transakcija",
+    "activities_failed": "Transakcije nisu mogle da se učitaju. Povuci nadole da pokušaš ponovo.",
     "tap_update": "Dodirnite za ažuriranje",
     "mining_lottery": "Lutrija osvojena",
     "checkin": "Čekiraj se",
     "tokens_transfer": "Tokeni preneseni",
     "outgoing_transfer_title": "Prenos/Poklanjanje",
+    "burned_title": "Korišćenje AI",
+    "burned_description": "Points potrošeni na AI funkciju",
+    "burn_refund_title": "Povraćaj za AI",
+    "burn_refund_description": "Points vraćeni nakon neuspelog AI zahteva",
     "manage_assets": "Dodaj / Ukloni sredstva",
     "selected_assets": "Izabrana sredstva",
     "nft_setPropertyPermissions": "Postavljene dozvole za svojstva NFT simbola",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Ažuriranje preciznosti tokena",
     "tokens_transferOwnership": "Vlasništvo nad tokenom preneto",
     "withdraw_vesting": "Povuci ulog",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Nalozi za povlačenje",
     "delegate_engine": "Delegiraj",
     "market_close": "Nalog zatvoren",
     "nftmarket_transferFee": "Naknada za nalog kupovine",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "DOBIJTE POENE",
     "escrow_approve": "Odobri zalog",
     "expires": "ističe",
+    "transaction_id": "ID transakcije",
+    "copy_transaction_id": "Kopiraj vezu do transakcije",
+    "filter_activities": "Filtriraj aktivnosti",
+    "filter_activities_desc": "Izaberi koje operacije ova istorija traži",
+    "filter_all": "Izaberi sve",
+    "filter_none": "Poništi sve",
+    "filter_apply": "Primeni",
     "author_reward": "Nagrada za autora",
     "withdraw_hbd": "Povuci štednju",
     "convert_request": "Zahtev za konverziju",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Dopuni RC",
+    "desc": "Kratkoročno povećanje RC da biste mogli da nastavite sa objavljivanjem.",
+    "confirm": "Potrošiti Points za dopunu Resource Credits?",
+    "insufficient": "Nemate dovoljno Points.",
+    "buy_points": "Kupi Points"
   },
   "ai_image_generator": {
     "title": "AI generator slika",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Prilagođeno ({hours}h)",
+    "balance_load_failed": "Stanje nije moglo da se učita. Dodirni da pokušaš ponovo.",
+    "precision_load_failed": "Detalji ovog tokena nisu mogli da se učitaju, pa se mogu slati samo celi iznosi. Dodirni da pokušaš ponovo.",
     "close": "Zatvori",
     "favorite_username_placeholder": "Korisničko ime",
     "invalid_recipient_qr": "U ovom QR kodu nije pronađeno korisničko ime.",
@@ -1527,7 +1692,7 @@
     "powering_down_info": "Sledeće povlačenje uloga je za {days} dana, {hp} HIVE",
     "convert": "Pretvori HBD u HIVE",
     "auto_vests": "Automatsko odobravanje",
-    "vests": "Vests",
+    "vests": "VESTS",
     "stop_information": "Da li ste sigurni da želite da zaustavite?",
     "amount": "Iznos",
     "memo_desc": "Ova beleška je javna",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Upravljaj ovlašćenjima",
     "pincode": "PIN kod",
     "general": "Opšte",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Podrži Ecency",
+    "support_beneficiary": "Deli nagrade za objave sa Ecency",
+    "support_beneficiary_percent": "Udeo nagrada za objave",
+    "support_curation": "Zadrži deo kuratorskih nagrada",
+    "support_curation_percent": "Udeo zadržanih kuratorskih nagrada",
     "feedback_body": "Ovde napišite svoju poruku!\n\nHive korisničko ime: {username}\nVerzija aplikacije: {appVersion}\nPlatforma: {platform}\n",
     "show_imgs": "Prikaži slike",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Komentar",
       "bookmark": "Obeleživači",
+      "tags": "Oznake",
       "reblog": "Podeli",
       "favorite": "Omiljeni",
       "mention": "Pominjanje",
@@ -1599,10 +1765,10 @@
       "transfers": "Prenosi",
       "vote": "Glasaj",
       "follow": "Prati",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Zakazana objava je objavljena",
+      "payouts": "Isplate",
+      "account_update": "Izmene naloga",
+      "weekly_earnings": "Nedeljna zarada",
       "fcm_unavailable": "Push obaveštenja nisu podržana na ovom uređaju. Obaveštenja ćete primati samo dok je aplikacija otvorena."
     },
     "keys_warning": "Osetljive informacije o nalogu!\nEcency mora biti zaštićen PIN kodom pre pregleda privatnih ključeva.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Pošalji Povratnu Informaciju",
     "rate_app": "Oceni Ecency",
+    "email_digests": "E-mail pregledi",
     "rate": "Oceni",
     "dm-privacy-updated": "Postavke privatnosti DM-ova uspešno ažurirane",
     "dm-privacy-failed": "Ažuriranje postavki privatnosti DM-ova nije uspelo",
@@ -1685,19 +1852,29 @@
     "request_sent": "Vaš zahtev za brisanje je poslat",
     "confirm_delete_body": "Da li ste sigurni da želite da obrišete nalog? Time će biti izbrisani svi vaši podaci"
   },
-  "tts": {
-    "settings_title": "Podešavanja za pretvaranje teksta u govor",
-    "voice": "Glas",
-    "voice_hint": "Koristiće se podrazumevani glas sistema",
-    "speed": "Brzina",
-    "pitch": "Visina tona",
-    "test_voice": "Testiraj glas",
-    "settings_info": "Ova podešavanja će se koristiti pri naglasnom čitanju objava",
-    "play": "Reprodukuj",
+  "listen": {
+    "title": "Slušaj ovu objavu",
+    "minutes": "~{n} min",
+    "login": "Prijavi se",
+    "unlock": "Otključaj · {n} Points",
+    "confirm": "Potrošiti {n} Points da slušaš ovu objavu? Audio je tvoj i možeš ga ponovo pustiti bilo kada.",
+    "not_enough_title": "Nedovoljno Points",
+    "not_enough": "Za slušanje je potrebno {required} Points, a ti imaš {available}.",
+    "get_points": "Nabavi Points",
+    "unlock_failed": "Audio nije mogao da se otključa, pokušaj ponovo",
+    "failed_refunded": "Audio nije mogao da se napravi, tvoji Points su vraćeni",
+    "preparing": "Priprema zvuka…",
+    "preparing_eta": "Priprema zvuka, oko {n} min…",
+    "preparing_progress": "Priprema zvuka · {n}%",
+    "waiting": "Čekaš u redu, ispred tebe je {n}…",
+    "next_in_line": "Sledeći u redu…",
+    "play": "Pusti",
     "pause": "Pauziraj",
-    "language": "Jezik",
-    "language_auto": "Automatsko prepoznavanje",
-    "language_hint": "Automatsko prepoznavanje bira jezik na osnovu sadržaja objave"
+    "seek": "Premotaj",
+    "speed": "Brzina reprodukcije",
+    "language": "Jezik zvuka",
+    "unavailable": "Audio nije mogao da se učita.",
+    "retry": "Pokušaj ponovo"
   },
   "posting_authority": {
     "title": "Omogući brže objavljivanje",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentifikacija nije uspela. Prijavite se ponovo.",
     "error-generic": "Otpremanje videa nije uspelo. Pokušajte ponovo.",
     "error-too-long-short": "Kratki video snimci moraju biti dugi 60 sekundi ili manje.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Objava može sadržati samo jedan video. Uklonite trenutni video pre nego što dodate drugi.",
     "select_source": "Dodaj video",
     "record": "Snimi video",
     "choose_library": "Izaberi iz biblioteke"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Podelite kratku novost"
   },
+  "newsletter": {
+    "screen_title": "E-mail pregledi",
+    "title": "{list}",
+    "body_own": "Nedeljni ili mesečni pregled tvojih obaveštenja e-poštom.",
+    "body_creator": "Nove objave od {list} u tvom sandučetu.",
+    "body_community": "Pregled novih objava u {list} e-poštom.",
+    "body_site": "Najbolje od Ecency u tvom sandučetu.",
+    "first_publish_title": "Čestitamo na prvoj objavi!",
+    "first_publish_body": "Želiš li e-mail pregled svojih obaveštenja? Nedeljno ili mesečno, promeni ili otkaži bilo kada u Podešavanjima.",
+    "list_own": "Pregled mojih obaveštenja",
+    "list_site": "Ecency bilten",
+    "status_active": "Pretplaćen/a si.",
+    "status_pending": "Čeka se potvrda e-pošte.",
+    "status_short_active": "aktivno",
+    "status_short_pending_confirmation": "na čekanju",
+    "status_short_suppressed": "zaustavljeno",
+    "status_short_ended": "završeno",
+    "cadence_weekly": "Nedeljno",
+    "cadence_monthly": "Mesečno",
+    "email_placeholder": "you@example.com",
+    "subscribe": "Pretplati se",
+    "update": "Ažuriraj",
+    "resend": "Ponovo pošalji potvrdu",
+    "leave": "Napusti pregled",
+    "cancel": "Otkaži",
+    "ok": "U redu",
+    "manage": "Upravljaj",
+    "check_inbox_title": "Proveri sanduče",
+    "check_inbox_body": "Poslali smo vezu za potvrdu na {email}. Pretplata počinje kada potvrdiš.",
+    "subscribed": "Pretplaćen/a si na e-mail pregled",
+    "left": "Napustio/la si pregled",
+    "refused": "Ova adresa ne može da se pretplati.",
+    "unavailable": "E-mail pregledi trenutno nisu dostupni.",
+    "too_many": "Previše pokušaja, pokušaj ponovo kasnije.",
+    "fail": "Nešto je pošlo naopako, pokušaj ponovo.",
+    "empty": "Još nema e-mail pregleda. Pretplati se ispod da počneš.",
+    "discover": "Dobij više e-poštom",
+    "stop_all": "Zaustavi sve",
+    "stop_all_title": "Zaustaviti svu poštu?",
+    "stop_all_body": "Ecency više neće slati poštu na {email}. Pretplate na drugim adresama ostaju.",
+    "stop_all_ok": "Zaustavi sve",
+    "stop_all_done": "Adresa je odjavljena sa sve pošte",
+    "profile_option": "E-MAIL PREGLED",
+    "subscriber_count": "{weekly} nedeljno • {monthly} mesečno pretplatnika e-pošte",
+    "community_button": "Bilten"
+  },
+  "mod_notes": {
+    "title": "Dodaj razlog",
+    "placeholder": "Razlog (vidljiv drugim moderatorima)",
+    "confirm": "Potvrdi",
+    "cancel": "Otkaži"
+  },
+  "community_settings": {
+    "title_header": "Podešavanja zajednice",
+    "title_label": "Naslov",
+    "about": "O zajednici",
+    "lang": "Jezik",
+    "description": "Opis",
+    "rules": "Pravila",
+    "nsfw": "Neprikladno za posao (NSFW)",
+    "save": "Sačuvaj",
+    "required": "Obavezno",
+    "title_length": "Između {min} i {max} znakova",
+    "owner_admin_only": "Samo vlasnik i admini mogu menjati ova podešavanja."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Prošireno",
+        "collapsed": "Skupljeno"
+      },
+      "a11y_chat": {
+        "quote": "Odgovor korisniku {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Izaberi",
+        "deselect": "Poništi izbor"
+      },
+      "store": {
+        "billing_unavailable": "Kupovine u aplikaciji nisu dozvoljene na ovom uređaju.",
+        "verification_failed": "App Store nije mogao da potvrdi ovu kupovinu.",
+        "cancelled": "Kupovina otkazana",
+        "unknown_result": "Nepoznat ishod kupovine"
+      },
+      "navigation": {
+        "feed_unavailable": "Ovaj fid još nije dostupan.",
+        "link_cannot_open": "Ova veza ne može da se otvori.",
+        "video_cannot_play": "Ovaj video ne može da se pusti."
+      },
+      "media": {
+        "load_failed": "Ova stavka nije mogla da se učita. Proveri vezu i pokušaj ponovo.",
+        "loading": "Učitavanje medija",
+        "download_failed": "Preuzimanje nije uspelo, status {status}"
+      },
+      "sign_in": {
+        "required": "Potrebna je prijava",
+        "to_reply": "Prijavi se da odgovoriš.",
+        "to_vote": "Prijavi se da glasaš.",
+        "button": "Prijavi se"
+      },
+      "account": {
+        "logout_user": "Odjavi @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# glas} few {# glasa} other {# glasova}}  •  {replies, plural, one {# odgovor} few {# odgovora} other {# odgovora}}",
+        "voting_power": "Snaga glasa {percent}",
+        "remove_favourite": "Ukloni iz omiljenih",
+        "add_favourite": "Dodaj u omiljene"
+      },
+      "waves": {
+        "clear_tag_filter": "Poništi filter oznake {tag}",
+        "new_wave": "Novi talas",
+        "replies_open_thread": "{count, plural, one {# odgovor, otvori nit} few {# odgovora, otvori nit} other {# odgovora, otvori nit}}",
+        "characters": "{count} od {max} znakova",
+        "retry": "{message}\nPokušaj ponovo",
+        "playing": "Pušta se {permlink}",
+        "video_attached_remove": "Video priložen, ukloni",
+        "image_attached_remove": "Priložena slika, ukloni",
+        "take_photo": "Snimi fotografiju",
+        "edit_poll": "Izmeni anketu",
+        "add_poll": "Dodaj anketu",
+        "add_video": "Dodaj video"
+      },
+      "reading": {
+        "reply_to": "Odgovori korisniku {username}",
+        "opens_post": "Otvara objavu",
+        "sort_comments": "Sortiraj komentare",
+        "sort_comments_value": "Sortiraj komentare, {sort}",
+        "no_comments": "Još nema komentara.",
+        "loading_post": "Učitavanje objave",
+        "show_version": "Prikaži verziju",
+        "show_changes": "Prikaži izmene",
+        "replying_to": "Odgovor korisniku @{username}",
+        "reply_text": "Tekst odgovora",
+        "translate_from": "Sa",
+        "translate_to": "Na"
+      },
+      "feed": {
+        "tab_pinned": "{label}, zakačeno",
+        "tab_add": "{label}, dodaj",
+        "customise": "Prilagodi"
+      },
+      "card": {
+        "in_category": "u {category}",
+        "pinned": "Zakačeno",
+        "by_author": "od {username}",
+        "payout": "isplata {payout}",
+        "payout_declined": "isplata {payout}, odbijena",
+        "reblogged_by": "Podelio/la {username}"
+      },
+      "shell": {
+        "close_menu": "Zatvori meni"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Sličica, izaberi drugu sliku",
+        "words": "{count, plural, one {# reč} few {# reči} other {# reči}}",
+        "poll_min_age": "Min. starost naloga (dana): {days}",
+        "poll_max_options": "Maks. opcija: {count}",
+        "thumbnail_selected": "Izabrana sličica",
+        "thumbnail": "Sličica",
+        "uploaded_image": "Otpremljena slika",
+        "community_search": "pretraga"
+      },
+      "vote": {
+        "not_voted": "Nije glasano",
+        "voting": "Glasanje",
+        "failed_with": "Glasanje nije uspelo: {message}",
+        "failed": "Glasanje nije uspelo",
+        "payout": "Isplata {payout}",
+        "payout_declined": "Isplata {payout}, odbijena",
+        "percent": "{percent} procenata",
+        "upvote_percent": "Pozitivan glas {percent}%"
+      },
+      "settings": {
+        "on": "Uključeno",
+        "off": "Isključeno"
+      },
+      "lock": {
+        "biometric_reason": "Uključi otključavanje biometrijom za Ecency",
+        "offer_title": "Otključaj pomoću {method}",
+        "offer_use": "Koristi {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Ključevi su sakriveni dok se ekran snima ili preslikava.",
+        "screenshot_notice": "Napravljen je snimak ekrana. Privatni ključevi su ponovo sakriveni; ako snimak prikazuje ključ, obriši ga.",
+        "hold_hint": "Dugo pritisni ključ da ga prikažeš.",
+        "hold_to_show": "Drži da prikažeš"
+      },
+      "wallet": {
+        "cancel_order": "Otkazati ovaj nalog?",
+        "days": "{count, plural, one {# dan} few {# dana} other {# dana}}"
+      },
+      "chat": {
+        "reactors_hint": "Dugo pritisni da vidiš ko je reagovao",
+        "see_reactors": "Vidi ko je reagovao"
+      },
+      "esie": {
+        "still": "{mood}, mirno"
+      }
+    },
+    "ui": {
+      "profile_of": "Profil korisnika @{username}",
+      "preview": "Pregled ({index}/{count})",
+      "balance": "Stanje: {amount}",
+      "expires_in": "Ističe za {time}",
+      "expired": "Isteklo. Zatvori i pokušaj ponovo.",
+      "user_has_no_posts": "@{username} još ništa nije objavio/la",
+      "attach_image": "Priloži sliku",
+      "auto": "Auto",
+      "back": "Nazad",
+      "hot": "VRELO",
+      "image_of": "Slika {index} od {count}",
+      "new": "NOVO",
+      "nsfw_tap_to_reveal": "NSFW. Dodirni da prikažeš",
+      "new_reply": "Novi odgovor",
+      "remove": "Ukloni",
+      "unlock_ecency": "Otključaj Ecency",
+      "update_it": "Ažuriraj ga",
+      "update_it_or_post_this_as": "Ažurirati ga ili objaviti ovo kao novi odgovor?",
+      "use_pin": "Koristi PIN",
+      "your_reply_was_already_posted": "Tvoj odgovor je već objavljen",
+      "error_try_again": "{message} Pokušati ponovo?",
+      "auth": {
+        "account_label": "Nalog: @{username}",
+        "approve_the_request_in_your_wallet": "Odobri zahtev u aplikaciji novčanika.",
+        "copy_key": "Kopiraj {title}",
+        "current_account": "Trenutni nalog",
+        "qr_code": "QR kod",
+        "requested_by": "Zahteva {requester}",
+        "pin_digits": "{filled} od {total, plural, one {# cifre} few {# cifre} other {# cifara}}",
+        "private_key_shown": "{title}, privatni ključ prikazan",
+        "open_wallet_app": "Otvori aplikaciju novčanika",
+        "hiveauth_scan": "Odobri u Hive Keychain ili drugom HiveAuth novčaniku: otvori ga na ovom uređaju ili skeniraj ovaj kod njime.",
+        "switching": "Prebacivanje...",
+        "logout_all": "Odjavi se sa svih naloga",
+        "logout_all_title": "Odjaviti se sa svakog naloga na ovom uređaju?",
+        "stored_key": "@{username} je već prijavljen/a na ovom uređaju. Sačuvani ključevi ostaju; obnavlja se samo sesija.",
+        "stored_hivesigner": "@{username} je već prijavljen/a preko HiveSigner na ovom uređaju. Sesija se zamenjuje.",
+        "stored_hiveauth": "@{username} je prijavljen/a preko HiveAuth na ovom uređaju. Umesto toga će potpisivati preko HiveSigner.",
+        "method_key": "Ključ",
+        "logout_failed": "Odjava nije uspela"
+      },
+      "browser": {
+        "account": "Nalog",
+        "authority": "Ovlašćenje",
+        "phishing": "Upozorenje: ovaj domen je označen kao poznati fišing sajt. Nastavi uz izuzetan oprez."
+      },
+      "chat": {
+        "cancel_edit": "Otkaži izmenu",
+        "cancel_reply": "Otkaži odgovor",
+        "copied_to_clipboard": "Kopirano u privremenu memoriju",
+        "edited_at": "Izmenjeno {time}",
+        "group_options": "Opcije grupe",
+        "pinned_messages": "Zakačene poruke",
+        "remove_user": "Ukloni @{username}",
+        "sort_by_name": "Sortiraj po imenu",
+        "more": "Više",
+        "reaction_label": "{emoji} {count}. Dugo pritisni da vidiš ko je reagovao",
+        "members": "Članovi"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Objava na ovoj vezi već postoji i razlikuje se od onoga što si poslao/la. Ažurirati je ili objaviti kao novu?",
+        "a_scheduled_post_is_published_by": "Zakazanu objavu objavljuje Ecency u izabrano vreme. Za to je potrebno posting ovlašćenje za ecency.app na tvom nalogu. Tvoji ključevi i druga ovlašćenja ostaju kakvi jesu. Za davanje ovlašćenja potreban je tvoj active ključ.",
+        "ai_assist": "AI asistent",
+        "ai_tools": "AI alati",
+        "allow_ecency_to_publish_for_you": "Dozvoliti Ecency da objavljuje umesto tebe?",
+        "bold": "Podebljano",
+        "clone": "Kloniraj",
+        "cost": "Cena: {cost}",
+        "could_not_store_the_draft_on": "Nacrt nije mogao da se sačuva na ovom uređaju. Ostavi aplikaciju otvorenom i sačuvaj nacrt.",
+        "draft": "NACRT",
+        "delete_count": "Obriši ({count})",
+        "dictate_desc": "Govori, a transkript ide u tvoju objavu",
+        "discard": "Odbaci",
+        "discard_changes": "Odbaciti izmene?",
+        "grant": "Dodeli",
+        "italic": "Kurziv",
+        "keep_editing": "Nastavi uređivanje",
+        "my_blog": "MOJ BLOG",
+        "my_communities": "MOJE ZAJEDNICE",
+        "new_post": "Nova objava",
+        "notice": "Napomena",
+        "restore": "Vrati",
+        "restore_unsaved_changes": "Vratiti nesačuvane izmene?",
+        "saved": "Sačuvano",
+        "top_communities": "NAJBOLJE ZAJEDNICE",
+        "table": "Tabela",
+        "text_format": "Format teksta",
+        "this_link_is_already_in_use": "Ova veza je već u upotrebi",
+        "untitled": "Bez naslova",
+        "update_it_or_publish_this_as": "Ažurirati je ili objaviti ovo kao novu objavu?",
+        "you_have_unsaved_changes_from_an": "Imaš nesačuvane izmene iz ranijeg uređivanja. Objava se od tada promenila; vraćanje zamenjuje tekst ispod.",
+        "your_edits_were_not_published": "Tvoje izmene nisu objavljene.",
+        "your_post_was_already_published": "Tvoja objava je već objavljena",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Sličica, dodirni da izabereš drugu sliku",
+        "thumbnail_number": "Sličica {number}",
+        "recording_busy": "Snimanje je već u toku. Prvo ga završi u kameri.",
+        "photo_lost": "Fotografija je izgubljena dok je kamera bila otvorena. Snimi je ponovo.",
+        "add_snippet_button": "+ Isečak",
+        "words_count": "{count, plural, one {# reč} few {# reči} other {# reči}}",
+        "community_search": "pretraga"
+      },
+      "profile": {
+        "open_wallet": "Otvori novčanik",
+        "your_wallet_is_on_the_wallet": "Tvoj novčanik je na kartici Novčanik.",
+        "user_has_no_comments": "@{username} još ništa nije komentarisao/la",
+        "votes_count": "{count, plural, one {# glas} few {# glasa} other {# glasova}}",
+        "replies_count": "{count, plural, one {# odgovor} few {# odgovora} other {# odgovora}}",
+        "menu": "Više",
+        "users": "Korisnici"
+      },
+      "reading": {
+        "apply": "PRIMENI",
+        "add_tag": "Dodaj oznaku",
+        "age": "Starost",
+        "audio_language": "Jezik zvuka",
+        "available_filters": "Dostupni filteri",
+        "could_not_unlock_the_audio_please": "Audio nije mogao da se otključa, pokušaj ponovo",
+        "downvote": "Negativan glas",
+        "downvote_percent": "Negativan glas {percent}%",
+        "listen_to_this_post": "Slušaj ovu objavu",
+        "log_in": "Prijavi se",
+        "mark_all_as_read": "Označi sve kao pročitano",
+        "mark_as_read": "Označi kao pročitano",
+        "more_replies": "Više odgovora",
+        "not_enough_points": "Nedovoljno Points",
+        "nothing_here_yet": "Još ništa nema.",
+        "open_editor": "Otvori uređivač",
+        "pause_voice": "Pauziraj glas",
+        "play_voice": "Pusti glas",
+        "playback_speed": "Brzina reprodukcije",
+        "publishing_in_waves": "Objavljivanje u Waves",
+        "quests_done": "Završeni zadaci",
+        "read": "Čitaj",
+        "remove_vote": "Ukloni glas",
+        "seek": "Premotaj",
+        "select_community": "Izaberi zajednicu",
+        "selected_filters": "Izabrani filteri",
+        "the_audio_could_not_be_loaded": "Audio nije mogao da se učita.",
+        "this_post_does_not_exist_or": "Ova objava ne postoji ili je obrisana.",
+        "unread": "Nepročitano",
+        "voice_position": "Pozicija glasa",
+        "vote_weight": "Težina glasa",
+        "reblogged_by": "podelio/la {username}",
+        "no_more_posts": "Nema više objava.",
+        "favourite": "Omiljeno",
+        "no_votes_yet": "Još nema glasova",
+        "no_comments_yet": "Još nema komentara. Budi prvi!",
+        "comments_count": "Komentari ({count})",
+        "sending_to_chain": "šalje se na lanac",
+        "compare": "Uporedi",
+        "your_vote": "Tvoj glas",
+        "reply_to": "Odgovori korisniku @{username}",
+        "what_do_you_think": "Šta misliš?",
+        "clear_tag_filter": "Poništi filter oznake",
+        "tab_selected": "{title}, izabrano",
+        "add_tag_feed": "Dodaj fid oznake",
+        "feed_pinned": "{label}, zakačeno",
+        "attached_image_remove": "Priložena slika, dodirni da ukloniš",
+        "camera": "Kamera",
+        "files": "Datoteke",
+        "paused": "Pauzirano",
+        "in_topic": "u {topic}",
+        "poll_vote": "Glasaj",
+        "reply": "Odgovori",
+        "mute_sound": "Isključi zvuk",
+        "unmute_sound": "Uključi zvuk",
+        "leaderboard_activities": "Aktivnosti",
+        "leaderboard_reward": "Nagrada",
+        "sort_votes": "Glasovi"
+      },
+      "shell": {
+        "account_of": "Nalog @{username}",
+        "account_signed_out": "Nalog, odjavljen",
+        "close_tab": "Zatvori karticu",
+        "coming_soon_to_the_native_app": "Uskoro u nativnoj aplikaciji.",
+        "create": "Napravi",
+        "expand": "Proširi",
+        "forward": "Napred",
+        "loading": "Učitavanje",
+        "new_tab": "Nova kartica",
+        "reload": "Osveži",
+        "sent": "Poslato",
+        "tab_unread": "{title}, nepročitano: {count}",
+        "no_app_for_link": "Nijedna aplikacija ne može da otvori ovu vezu."
+      },
+      "wallet": {
+        "product_not_available": "Proizvod nije dostupan.",
+        "repeat": "Ponovi"
+      },
+      "copied": "Kopirano",
+      "trending_caps": "U TRENDU",
+      "move_up": "Pomeri gore",
+      "move_down": "Pomeri dole",
+      "scroll_to_top": "Na vrh",
+      "load_more": "Više"
+    },
+    "wallet": {
+      "checking": "Provera sa mrežom",
+      "leave_title": "Još se šalje",
+      "leave_message": "Ovo se još šalje ili proverava sa mrežom. Možeš napustiti ovaj ekran: aplikacija će te obavestiti kada se završi.",
+      "stay": "Ostani",
+      "collateralized_convert_request": "Zahtev za konverziju sa obezbeđenjem",
+      "op_transfer": "prenos",
+      "op_power_up": "Power Up",
+      "op_power_down_change": "promena Power Down",
+      "op_delegation": "delegiranje",
+      "op_savings_deposit": "uplata na štednju",
+      "op_savings_withdrawal": "isplata sa štednje",
+      "op_conversion": "konverzija",
+      "op_swap": "zamena",
+      "op_order_cancel": "otkazivanje naloga",
+      "op_reward_claim": "preuzimanje nagrade",
+      "op_withdraw_route_change": "promena rute isplate",
+      "op_token_operation": "operacija sa tokenom"
+    },
+    "notification": {
+      "amount_unknown": "Iznos nije dostupan",
+      "weekly_earnings_breakdown": "Ove nedelje si zaradio/la ${amount} - ${authorUsd} od objava, ${curationUsd} od kuriranja.",
+      "weekly_earnings_total": "Ove nedelje si zaradio/la ${amount} od svojih objava i kuriranja."
+    },
+    "settings": {
+      "open": "Otvori",
+      "feedback_subject": "Povratne informacije/Prijava greške",
+      "unknown_user": "Nepoznat korisnik"
+    },
+    "navigation": {
+      "editor": "Uređivač",
+      "followers": "Pratioci",
+      "spin_game": "Spin igra",
+      "edit_profile": "Izmeni profil",
+      "redeem_points": "Iskoristi poene",
+      "community": "Zajednica",
+      "community_members": "Članovi zajednice",
+      "community_activities": "Aktivnosti zajednice",
+      "browser": "Pregledač",
+      "asset_details": "Detalji imovine",
+      "edit_history": "Istorija izmena",
+      "welcome": "Dobro došao/la",
+      "chat": "Čet",
+      "backup_keys": "Rezervne kopije ključeva",
+      "trade": "Trgovina",
+      "ai_image_generator": "AI generator slika",
+      "select_assets": "Izbor imovine",
+      "poll": "Anketa",
+      "bot_comments": "Komentari botova"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operacije koje zahtevaju owner ključ ne mogu se potpisati u Ecency.",
+      "post": "Objava/Komentar",
+      "custom": "Custom JSON",
+      "sign_buffer": "Potpiši poruku",
+      "send_token": "Pošalji token",
+      "witness_vote": "Glas za svedoka",
+      "proxy": "Postavi proksi",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Emituj",
+      "sign_tx": "Potpiši transakciju",
+      "encode": "Šifruj poruku",
+      "decode": "Proveri ključ",
+      "add_account_authority": "Dodaj ovlašćenje naloga",
+      "remove_account_authority": "Ukloni ovlašćenje naloga",
+      "add_key_authority": "Dodaj ovlašćenje ključa",
+      "remove_key_authority": "Ukloni ovlašćenje ključa",
+      "create_claimed_account": "Napravi nalog",
+      "create_proposal": "Napravi predlog",
+      "remove_proposal": "Ukloni predlog",
+      "update_proposal_vote": "Glas za predlog",
+      "signed_call": "Potpisan poziv"
+    },
+    "translate_language": {
+      "ar": "Arapski",
+      "az": "Azerbejdžanski",
+      "bg": "Bugarski",
+      "bn": "Bengalski",
+      "ca": "Katalonski",
+      "cs": "Češki",
+      "da": "Danski",
+      "de": "Nemački",
+      "el": "Grčki",
+      "en": "Engleski",
+      "eo": "Esperanto",
+      "es": "Španski",
+      "et": "Estonski",
+      "fa": "Persijski",
+      "fi": "Finski",
+      "fr": "Francuski",
+      "ga": "Irski",
+      "he": "Hebrejski",
+      "hi": "Hindi",
+      "hu": "Mađarski",
+      "id": "Indonežanski",
+      "it": "Italijanski",
+      "ja": "Japanski",
+      "ko": "Korejski",
+      "lt": "Litvanski",
+      "lv": "Letonski",
+      "ms": "Malajski",
+      "nb": "Norveški",
+      "nl": "Holandski",
+      "pl": "Poljski",
+      "pt": "Portugalski",
+      "ro": "Rumunski",
+      "ru": "Ruski",
+      "sk": "Slovački",
+      "sl": "Slovenački",
+      "sq": "Albanski",
+      "sv": "Švedski",
+      "th": "Tajlandski",
+      "tl": "Tagaloški",
+      "tr": "Turski",
+      "uk": "Ukrajinski",
+      "zh": "Kineski",
+      "zt": "Kineski (tradicionalni)"
+    },
+    "reading": {
+      "banner_text": "Ova objava je na jeziku: {source}. Prevesti na {target}?",
+      "translated_from_text": "Prevedeno sa jezika: {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# član} few {# člana} other {# članova}} • {authors, plural, one {# autor} few {# autora} other {# autora}} • {posts, plural, one {# objava} few {# objave} other {# objava}}",
+      "community_title": "Zajednica {title}",
+      "members_title": "Članovi zajednice {title}",
+      "activities_title": "Aktivnost zajednice {title}",
+      "cannot_start_with_or": "Ne može počinjati sa @ ili #",
+      "use_a_two_letter": "Koristi dvoslovni kod jezika, na primer en",
+      "at_most_characters": "Najviše {max, plural, one {# znak} few {# znaka} other {# znakova}}",
+      "council": "Savet",
+      "journal": "Dnevnik",
+      "topic": "Tema",
+      "community_not_found": "Zajednica nije pronađena."
+    },
+    "transfer": {
+      "one_recipient": "Za ovaj prenos može se koristiti samo jedan primalac.",
+      "is_an_exchange_and": "{exchange} je menjačnica i možda ne podržava ponavljajuće prenose: sredstva poslata po rasporedu mogu biti izgubljena. Umesto toga koristi jednokratni prenos."
+    },
+    "dapps": {
+      "signing_info": "Ecency radi kao tvoja Hive ekstenzija za potpisivanje. Kada dApp traži prijavu pomoću ekstenzije pregledača kao što su Keychain, Keeper ili Peak Vault, izaberi tu opciju. Ecency će bezbedno obaviti potpisivanje.",
+      "category_social": "Društveno",
+      "category_gaming": "Igre",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupa",
+      "unable_to_load_messages": "Poruke nisu mogle da se učitaju.",
+      "someone": "Neko",
+      "renamed_the_group_to": "{actor} je preimenovao/la grupu u „{name}“",
+      "removed_the_group_name": "{actor} je uklonio/la ime grupe",
+      "unable_to_send_your": "Tvoja poruka nije mogla da se pošalje.",
+      "unable_to_remove_message": "Poruka nije mogla da se ukloni.",
+      "unknown": "Nepoznato",
+      "members_online": "{members, plural, one {# član} few {# člana} other {# članova}} • {online} na mreži",
+      "failed_to_load_pinned": "Zakačene poruke nisu mogle da se učitaju",
+      "you": "Ti",
+      "title": "Reakcije"
+    },
+    "tip": {
+      "login_required": "Prijavi se da šalješ napojnice",
+      "max_decimals": "Najviše {n, plural, one {# decimalno mesto} few {# decimalna mesta} other {# decimalnih mesta}}"
+    },
+    "paid": {
+      "check_again": "Proveri ponovo",
+      "give_up": "Odustani",
+      "unknown": "Još nema odgovora. Zahtev možda još traje. Proveri ponovo da dobiješ rezultat: neće biti naplaćen drugi put.",
+      "pending": "Tvoj zahtev se još obrađuje. Proveri ponovo za trenutak: neće biti naplaćen drugi put.",
+      "restored": "Raniji zahtev još nema odgovora. Proveri ponovo da dobiješ njegov rezultat: neće biti naplaćen drugi put.",
+      "give_up_confirm": "Ako je zahtev prošao, Points su potrošeni, a rezultat će biti izgubljen.",
+      "not_stored": "Ovaj zahtev nije mogao da se sačuva na uređaju. Ostavi ovaj ekran otvorenim dok se ne završi.",
+      "sign_in_again": "Tvoja sesija je istekla. Prijavi se ponovo, pa proveri ponovo.",
+      "other_account": "Ovo pripada korisniku @{owner}. Vrati se na taj nalog da nastaviš."
+    },
+    "ai": {
+      "run_ai_assist": "Pokreni AI asistenta ({costText})",
+      "no_longer_free_cost": "Ovo pokretanje danas više nije besplatno. Košta {cost} {unit}.",
+      "no_longer_free": "Ovo pokretanje danas više nije besplatno.",
+      "content_violates_our_content": "Sadržaj krši našu politiku sadržaja. Izmeni tekst. Points nisu vraćeni.",
+      "generate_image": "Generiši sliku ({costLabel})",
+      "use_prompt": "Koristi: „{prompt}“"
+    },
+    "post_actions": {
+      "busy": "Sačekaj, druga radnja je u toku",
+      "not_a_community_post": "Nije objava u zajednici.",
+      "parent_post_not_found": "Roditeljska objava nije pronađena",
+      "the_account_changed": "Nalog se promenio."
+    },
+    "dictation": {
+      "balance": "Stanje: {balance} {unit}",
+      "stop_points": "Zaustavi ({cost} Points)",
+      "stop_free": "Zaustavi (besplatno)",
+      "transcribe_points": "Transkribuj ({cost} Points)",
+      "transcribe": "Transkribuj",
+      "no_longer_free_cost": "Ovaj snimak danas više nije besplatan. Košta {cost} Points.",
+      "no_longer_free": "Ovaj snimak danas više nije besplatan.",
+      "held_locked": "Snimanje je zaustavljeno kada se Ecency zaključao. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
+      "held_no_background": "Snimanje je zaustavljeno kada je Ecency napustio ekran (nije mogao da prikaže obaveštenje o snimanju). Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
+      "held_stopped": "Snimanje je zaustavljeno iz obaveštenja. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
+      "held_focus_lost": "Snimanje je zaustavljeno zbog poziva ili zvuka druge aplikacije. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
+      "held_interrupted": "Snimanje je zaustavljeno jer je druga aplikacija preuzela mikrofon. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
+      "unavailable": "Snimanje nije dostupno na ovom uređaju.",
+      "not_read": "Taj snimak nije mogao da se pročita ili je prevelik. Ništa nije poslato i ništa nije naplaćeno.",
+      "give_up_not_sent": "Ovaj snimak nije poslat, pa ništa nije naplaćeno. Biće obrisan.",
+      "give_up_not_charged": "Za ovaj snimak ništa nije naplaćeno. Biće obrisan.",
+      "clip_lost": "Snimka ranijeg zahteva više nema na ovom uređaju. Ako je zahtev prošao, tvoji Points su potrošeni, a njegov transkript ne može da se preuzme."
+    },
+    "register": {
+      "error_code_28": "Tvoj zahtev nije mogao da se obradi. Red za registraciju je verovatno pun. Pokušaj ponovo za nekoliko minuta."
+    },
+    "perks": {
+      "quests_empty": "Još nema zadataka, proveri ponovo uskoro.",
+      "freeze_confirm_title": "Zaštiti svoj niz",
+      "spend_points_on_a": "Potrošiti {price} Points na zamrzavanje niza? Koristi se da zaštiti tvoj niz u danu koji propustiš."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Podrži Ecency, dobij besplatan blog i istakni se verifikovanom Pro značkom.",
+      "card_description": "Pređi na Pro za {price} godišnje. Verifikovana značka, besplatan blog i podrška za Ecency.",
+      "card_description_plain": "Pređi na Pro na godinu dana. Verifikovana značka, besplatan blog i podrška za Ecency.",
+      "member": "Ti si Pro član.",
+      "benefit_badge": "Verifikovana Pro značka pored tvog imena.",
+      "benefit_blog": "Besplatan blog na yourname.blogs.ecency.com.",
+      "benefit_support": "Direktna podrška razvoju Ecency.",
+      "benefit_early": "Rani pristup novim funkcijama.",
+      "buy": "Nabavi Pro za {price} godišnje",
+      "extend": "Produži za 12 meseci za {price}",
+      "extend_note": "Ponovna kupovina dodaje 12 meseci tvom članstvu.",
+      "unavailable": "Ecency Pro trenutno nije dostupan u prodavnici.",
+      "activating": "Uplata primljena. Aktivira se tvoje članstvo.",
+      "success_title": "Dobro došao/la u Ecency Pro",
+      "success_body": "Tvoje Pro članstvo je aktivno. Značka će se uskoro pojaviti na tvom profilu.",
+      "extending": "Uplata primljena. Tvoje Pro članstvo se produžava za 12 meseci.",
+      "open_a11y": "Otvori Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Čuvanje nacrta...",
+      "please_sign_in_first": "Prvo se prijavi.",
+      "fetch_failed": "Preuzimanje nije uspelo.",
+      "you_can_only_edit": "Možeš menjati samo sopstveni sadržaj.",
+      "invalid_percent": "Nevažeći procenat",
+      "beneficiary_exists_already": "Korisnik koji prima deo nagrade već postoji",
+      "this_draft_belongs_to": "Ovaj nacrt pripada korisniku @{owner}. Vrati se na taj nalog da ga objaviš.",
+      "could_not_make_a": "Nije moguće napraviti novu vezu za ovu objavu. Malo izmeni naslov i pokušaj ponovo.",
+      "an_earlier_attempt_was": "Raniji pokušaj je objavljen nakon ovog. Proveri koju verziju želiš da zadržiš.",
+      "could_not_check_your": "Posting ovlašćenje tvog naloga nije moglo da se proveri. Proveri vezu i pokušaj ponovo.",
+      "this_post_was_changed": "Ova objava je izmenjena negde drugde otkako si je otvorio/la. Kopiraj svoj tekst, vrati se i ponovo je otvori da urediš najnoviju verziju.",
+      "link_text_placeholder": "Tekst ovde"
+    },
+    "app_error": {
+      "this_reply_is_too": "Ovaj odgovor je predugačak.",
+      "the_network_refused_this": "Mreža je odbila ovu radnju.",
+      "invalid_input": "Nevažeći unos.",
+      "secure_storage_is_unavailable": "Bezbedno skladište nije dostupno. Prijavi se ponovo.",
+      "please_sign_in_first": "Prvo se prijavi.",
+      "these_credentials_belong_to": "Ovi podaci pripadaju korisniku @{actual}, a ne @{expected}.",
+      "is_not_signed_in": "@{username} nije prijavljen/a na ovom uređaju.",
+      "key_required": "Za ovu transakciju potreban je {role} ključ. {hint}",
+      "cancelled": "Otkazano.",
+      "the_request_was_rejected": "Zahtev je odbijen u aplikaciji novčanika.",
+      "the_request_expired_before": "Zahtev je istekao pre nego što je aplikacija novčanika odgovorila. Pokušaj ponovo.",
+      "could_not_reach_the": "HiveAuth server nije dostupan. Pokušaj ponovo.",
+      "unexpected_redirect": "Server je poslao neočekivano preusmeravanje. Ništa nije izmenjeno. Pokušaj ponovo kasnije.",
+      "missing_key_hint": "Dodaj ga u Podešavanja, Upravljanje ovlašćenjima (Uvezi privatni) ili se ponovo prijavi sa njim.",
+      "this_key_is_also": "Ovaj ključ je ujedno i owner ključ ovog naloga. Ecency ne čuva ključ koji kontroliše ulogu owner: daj ulogama active i posting sopstvene ključeve, pa se prijavi sa njima.",
+      "this_is_the_owner": "Ovo je owner ključ. Ecency nikada ne čuva niti koristi owner ključ: prijavi se glavnom lozinkom ili posting ili active ključem.",
+      "this_password_only_matches": "Ova lozinka odgovara samo owner ključu naloga. Ecency nikada ne čuva niti koristi owner ključ: prijavi se posting ili active ključem.",
+      "this_key_cannot_sign": "Ovaj ključ ne može sam da potpiše za nalog: nalogu je potrebno više od jednog potpisa (njegova težina je ispod praga).",
+      "public_key_given": "Ovo je tvoj javni ključ. Nalepi privatni ključ (počinje sa 5) ili glavnu lozinku.",
+      "memo_key_only": "Memo ključ ne može da se koristi za prijavu. Koristi posting ključ, active ključ ili glavnu lozinku.",
+      "network_message": "Greška mreže. Proveri vezu i pokušaj ponovo.",
+      "network_error_this_may": "Greška mreže. Možda je već prošlo; ponovni pokušaj je bezbedan i neće objaviti dvaput."
+    },
+    "purchases": {
+      "deal_best": "NAJBOLJA PONUDA!",
+      "deal_popular": "POPULARNO!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Prodavnica nije odgovorila."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Za 999accounts potrebni su e-pošta i korisničko ime",
+      "stuck": "Raniju kupovinu ovog proizvoda nije bilo moguće završiti. Obrati se na support@ecency.com sa potvrdom iz prodavnice, ona se čuva za to.",
+      "held": "Ova kupovina je zadržana na pregledu. Obrati se na support@ecency.com navodeći porudžbinu #{order}.",
+      "earlier_purchase": "Raniju kupovinu ovog proizvoda prvo završavamo za @{target}.",
+      "earlier_pending": "Ranija uplata za ovaj proizvod još čeka za @{target}. Završava se kada prodavnica potvrdi uplatu.",
+      "pending": "Tvoja uplata čeka. Kupovina se završava kada prodavnica potvrdi uplatu.",
+      "processing": "Tvoja kupovina se obrađuje. Uskoro će biti završena."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Ponavljajući prenosi",
+      "delegate_hive_power": "Delegiraj Hive Power",
+      "power_up": "Power Up",
+      "set_withdraw_vesting_route": "Postavi rutu isplate vesting-a",
+      "power_down": "Power Down",
+      "transfer_to_saving": "Prenos na štednju",
+      "transfer_from_saving": "Prenos sa štednje",
+      "cancel_transfer_from_saving": "Otkaži prenos sa štednje",
+      "collateralized_convert": "Konverzija sa obezbeđenjem",
+      "witness_vote": "Glas za svedoka",
+      "witness_update": "Ažuriranje svedoka",
+      "witness_set_properties": "Svojstva svedoka",
+      "governance_proxy": "Proksi upravljanja",
+      "claim_account": "Zatraži nalog",
+      "create_account": "Napravi nalog",
+      "create_account_with_account": "Napravi nalog pomoću kredita za naloge",
+      "create_limit_order": "Napravi limit nalog",
+      "cancel_limit_order": "Otkaži limit nalog",
+      "redeem_rewards": "Iskoristi nagrade",
+      "post_or_comment": "Objava ili komentar",
+      "post_or_comment_options": "Opcije objave ili komentara",
+      "custom_operation": "Prilagođena operacija",
+      "update_account_active": "Ažuriranje naloga (active)",
+      "update_account_posting": "Ažuriranje naloga (posting)",
+      "change_recovery_account": "Promeni nalog za oporavak",
+      "create_proposal": "Napravi predlog",
+      "remove_proposal": "Ukloni predlog",
+      "update_proposal_votes": "Ažuriraj glasove za predlog",
+      "update_proposal": "Ažuriraj predlog"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Ovu vezu mora potpisati @{account}. Prebaci se na taj nalog i ponovo je otvori.",
+      "ecency_can_only_sign": "Ecency može samo da potpisuje i emituje transakcije iz veza.",
+      "requester_page": "stranica {host}",
+      "owner_refused": "Operacije koje zahtevaju owner ključ ne mogu se potpisati iz veze.",
+      "busy": "Sačekaj: drugi zahtev se još obrađuje.",
+      "not_supported": "Ecency još ne može da potpiše ovu operaciju u ovoj verziji."
+    },
+    "chats": {
+      "group_members": "Članovi grupe",
+      "rename_group": "Preimenuj grupu",
+      "failed_to_load_chats": "Četovi nisu mogli da se učitaju",
+      "unknown": "Nepoznato",
+      "unable_to_mark_channel": "Kanal nije mogao da se označi kao pročitan",
+      "unable_to_update_favorites": "Omiljeni nisu mogli da se ažuriraju",
+      "unable_to_update_mute": "Utišavanje nije moglo da se ažurira",
+      "group": "Grupa",
+      "unable_to_search": "Pretraga nije moguća",
+      "unable_to_start_chat": "Čet nije mogao da počne",
+      "no_internet": "Nema internet veze"
+    },
+    "stake": {
+      "confirm_summary": "Delegiraj {hp} HP ({vests} VESTS) korisniku @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Već delegirano korisniku @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Samo javni. Ecency nikada ne čuva owner ključ.",
+      "shared_owner": "Ovaj nalog koristi isti ključ za ulogu owner i ulogu {names}. Ko ima taj ključ, kontroliše ceo nalog. Daj ulozi {names} sopstveni ključ, a owner ključ čuvaj van mreže.",
+      "copy_warning": "Svako ko ima ovaj privatni ključ kontroliše ovaj deo tvog naloga. Druge aplikacije mogu čitati privremenu memoriju; nalepi ga samo tamo gde veruješ. Briše se iz privremene memorije posle 2 minuta."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN zaključavanje je uključeno.",
+      "pin_changed": "PIN je promenjen.",
+      "pin_lock_is_off": "PIN zaključavanje je isključeno.",
+      "wiped_notice": "Svi nalozi, ključevi i podaci za prijavu uklonjeni su sa ovog uređaja.",
+      "we_could_not_bring": "Nismo mogli da prenesemo tvoje naloge iz prethodne verzije aplikacije. Prijavi se ponovo.",
+      "your_pin_lock_could": "Tvoje PIN zaključavanje nije moglo da se prenese iz prethodne verzije. Ponovo postavi PIN iz menija naloga da ponovo uključiš zaključavanje aplikacije.",
+      "biometric_unlock_was_turned": "Otključavanje biometrijom je isključeno jer su se biometrijski podaci na ovom uređaju promenili. Otključaj PIN-om, pa ga ponovo uključi iz menija naloga.",
+      "biometric_unavailable_notice": "Otključavanje biometrijom nije moglo da se uključi: na ovom uređaju nije podešena biometrija.",
+      "set_backup": "Postavi PIN kao rezervu za otključavanje biometrijom",
+      "biometric_on_notice": "PIN zaključavanje je uključeno. Otključaj biometrijom ili PIN-om.",
+      "offer_title": "Otključaj biometrijom",
+      "offer_body": "Otvori Ecency licem ili otiskom prsta. Postavio/la si i PIN, koji otključava aplikaciju kada biometrija nije dostupna.",
+      "offer_use": "Koristi biometriju",
+      "offer_use_pin": "Koristi PIN umesto toga"
+    },
+    "common": {
+      "list_and": "{first} i {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Odgovori od 25 znakova ili kraći ne donose Points (veze se ne računaju)",
+      "short_content_hint": "Prekratko za Points (25 znakova ili manje, bez veza)",
+      "daily_post": "Dnevna objava {postProgress}/{postGoal}",
+      "day_streak": "🔥 Niz od {streak, plural, one {# dan} few {# dana} other {# dana}}",
+      "grant_description": "Daj Ecency nalogu @ecency.app posting dozvolu na tvom nalogu, da možeš da objavljuješ bez otvaranja Keychain svaki put. Time se menja posting ovlašćenje tvog naloga i potreban je tvoj active ključ."
+    },
+    "wallet_history": {
+      "from_to": "@{from} korisniku @{to}",
+      "from_user_id": "od @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} korisniku @{to}, id: {id}",
+      "from_to_account": "@{from} za {to}",
+      "from_user": "od @{user}",
+      "to_user": "za @{user}",
+      "interest": "Kamata",
+      "proposal_pay": "Isplata po predlogu",
+      "categories": "Vrste aktivnosti",
+      "category_all": "Sve",
+      "category_transfers": "Prenosi",
+      "category_market": "Tržišni nalozi",
+      "category_interest": "Kamate",
+      "category_stake": "Operacije sa stake",
+      "category_rewards": "Nagrade",
+      "point_type_checkin": "Otkucaji srca",
+      "point_type_login": "Prijava",
+      "point_type_post": "Objava",
+      "point_type_comment": "Komentar",
+      "point_type_vote": "Glas",
+      "point_type_reblog": "Deljenje",
+      "point_type_transfer_sent": "Poslati prenosi",
+      "point_type_transfer_received": "Primljeni prenosi"
+    },
+    "video_upload": {
+      "continue_upload": "NASTAVI OTPREMANJE",
+      "source_gone": "Ovaj snimak više nije dostupan na uređaju. Ponovo snimi ili izaberi video.",
+      "no_camera": "Kamera nije dostupna na ovom uređaju."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Sledeće povlačenje iz stake-a je za {hours, plural, one {# sat} few {# sata} other {# sati}}",
+      "account_not_found": "Nalog nije pronađen"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Slika u privremenoj memoriji · Nalepi sliku",
+      "no_container": "Najnoviji kontejner talasa nije mogao da se preuzme",
+      "please_sign_in_first": "Prvo se prijavi.",
+      "write_something_first": "Prvo nešto napiši.",
+      "account_changed": "Ovaj talas je napisan kao drugi nalog. Zatvori ga i napiši ponovo.",
+      "no_upload": "Otpremanje slika još nije dostupno u ovoj verziji. Umesto toga nalepi vezu do slike u tekst.",
+      "fail": "Neuspeh"
+    },
+    "delete_account": {
+      "sign_out_failed": "Tvoj zahtev je poslat, ali odjava nije uspela. Odjavi se iz menija.",
+      "not_sent": "Tvoj zahtev za brisanje nije mogao da se pošalje. Pokušaj ponovo."
+    },
+    "chat_sheets": {
+      "group_limit": "Grupa može imati najviše {max, plural, one {# drugu osobu} few {# druge osobe} other {# drugih osoba}}.",
+      "search_people_by_username": "Pretraži ljude po korisničkom imenu",
+      "new_group_title": "Nova grupa",
+      "new_group_hint": "Dodaj od {min} do {max, plural, one {# osobe} few {# osobe} other {# osoba}} da započneš grupni razgovor.",
+      "no_results": "Niko sa tim imenom nije pronađen na četu.",
+      "search_failed": "Pretraga nije uspela. Proveri vezu i pokušaj ponovo.",
+      "create": "Započni grupu",
+      "new_group_failed": "Grupa nije mogla da se započne. Pokušaj ponovo.",
+      "name_limit": "Ime grupe može imati najviše {max, plural, one {# znak} few {# znaka} other {# znakova}}.",
+      "rename_title": "Preimenuj grupu",
+      "rename_hint": "Daj grupi ime koje će videti svi u njoj. Ostavi prazno da se prikažu imena članova.",
+      "placeholder": "Ime grupe",
+      "not_owner": "Samo osoba koja je započela grupu može da je preimenuje.",
+      "rename_failed": "Grupa nije mogla da se preimenuje. Pokušaj ponovo."
+    },
+    "editor_side": {
+      "copy_of": "Kopija: {title}",
+      "deletions_failed": "Nešto je pošlo naopako\nNeuspelih brisanja: {failed} od {total, plural, one {# brisanja} few {# brisanja} other {# brisanja}}",
+      "uploads_failed": "{count, plural, one {# otpremanje nije uspelo} few {# otpremanja nisu uspela} other {# otpremanja nije uspelo}}:\n\n{messages}",
+      "failed_to_delete": "Brisanje nije uspelo"
+    },
+    "uploads": {
+      "add_to_gallery": "Dodaj u galeriju"
+    },
+    "account_notice": {
+      "manage_keys": "Podešavanja, Upravljanje ovlašćenjima",
+      "no_signing_key_title": "Ponovo se prijavi kao @{account}",
+      "no_signing_key": "Ecency više ne čuva owner ključ ni glavnu lozinku na ovom uređaju, a @{account} ovde nema sačuvan posting ni active ključ. Ponovo se prijavi glavnom lozinkom ili posting ili active ključem, ili dodaj ključ u odeljku {manageKeys} (Uvezi privatni).",
+      "missing_roles_title": "Neki ključevi nisu dodati",
+      "cannot_post": "objavljuje, glasa ili komentariše",
+      "cannot_transfer": "šalje prenose ili menja podešavanja naloga",
+      "missing_roles": "Tvoja lozinka više ne odgovara {missing} ključu naloga @{account}: promenjen je na nalogu otkako je lozinka postavljena. Sačuvano na ovom uređaju: {kept} ključ. Dok ne dodaš {missing} ključ u odeljku {manageKeys} (Uvezi privatni), ova aplikacija ne može da {cannot} ključevima za @{account}.",
+      "shared_owner_title": "Ovaj ključ kontroliše i ulogu owner",
+      "shared_owner": "@{account} koristi isti ključ za ulogu owner i ulogu {names}. Ko ima ovaj ključ, kontroliše ceo nalog. Ecency ga čuva samo kao {names} ključ i nikada ga ne koristi za owner operacije. Daj ulozi {names} sopstveni ključ, a owner ključ čuvaj van mreže."
+    },
+    "dapp_browser": {
+      "message_from": "Poruka od {host}",
+      "home_title": "Početna",
+      "loading_title": "Učitavanje...",
+      "blank_run": "[{count, plural, one {# prazan znak} few {# prazna znaka} other {# praznih znakova}}]",
+      "too_large": "Ova stranica je tražila potpisivanje zahteva prevelikog za prikaz, pa ga je Ecency odbio."
+    },
+    "community_service": {
+      "the_account_changed": "Nalog se promenio."
+    },
+    "profile_edit": {
+      "enter_link": "Unesi vezu do slike",
+      "please_sign_in_first": "Prvo se prijavi.",
+      "account_not_found": "Nalog nije pronađen",
+      "please_enter_an_image": "Unesi vezu do slike koja počinje sa https://"
+    },
+    "background_media": {
+      "post_by": "Objava korisnika @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Prvo se prijavi."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Već si glasao/la istom težinom.",
+      "insufficient_rc": "Nedovoljno Resource Credits. Sačekaj ili uradi Power Up.",
+      "missing_authority": "Nedostaje posting ovlašćenje. Proveri način prijave.",
+      "comment_too_soon": "Sačekaj pre sledeće objave.",
+      "paid_out": "Ova objava je već isplaćena.",
+      "too_large": "Transakcija ima {size, plural, one {# bajt} few {# bajta} other {# bajtova}}, što je preko ograničenja od {max} bajtova.",
+      "network_error_please_check": "Greška mreže. Proveri vezu i pokušaj ponovo.",
+      "unconfirmed_message": "Nije moglo da se potvrdi da li je prošlo. Proveri novčanik ili istoriju; počni ponovo samo ako ga tamo nema.",
+      "undecided_message": "Možda je već prošlo. Proveri novčanik ili istoriju pre nego što pokušaš ponovo."
+    },
+    "chat_api": {
+      "request_failed": "Zahtev nije uspeo ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} kuca...",
+      "typing_two": "{first} i {second} kucaju...",
+      "typing_three": "{first}, {second} i {third} kucaju...",
+      "typing_many": "{first}, {second} i još {count, plural, one {# osoba kuca} few {# osobe kucaju} other {# osoba kuca}}...",
+      "banned": "{reason} I dalje možeš da čitaš čet. Objavljivanje se otključava {until}.",
+      "joined_when": "se pridružio/la {time}",
+      "joined": "se pridružio/la",
+      "official_badge": "Zvanično",
+      "official_badge_label": "Zvaničan Ecency nalog"
+    },
+    "side_menu": {
+      "ask_esie": "Pitaj Esie"
+    },
+    "chat_service": {
+      "missing_token": "Nedostaje Hive pristupni token. Odjavi se i ponovo prijavi.",
+      "dm_error": "Korisnik se nije pridružio četovima"
+    },
+    "compose_reply": {
+      "account_changed": "Ovaj odgovor je napisan kao drugi nalog. Zatvori ga i napiši ponovo.",
+      "write_something_first": "Prvo nešto napiši.",
+      "please_sign_in_first": "Prvo se prijavi."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Previše korisnika koji dobijaju deo nagrade: najviše {max}.",
+      "a_beneficiary_s_share": "Udeo korisnika koji prima deo nagrade mora biti između 0,01% i 100%.",
+      "beneficiaries_add_up_to": "Udeli primalaca nagrade zajedno prelaze 100%.",
+      "a_beneficiary_is_listed": "Primalac nagrade je naveden dvaput.",
+      "you_cannot_be_a": "Ne možeš biti primalac nagrade sopstvene objave.",
+      "a_beneficiary_has_an": "Primalac nagrade ima nevažeće ime naloga."
+    },
+    "follows": {
+      "fail": "Neuspeh: {message}",
+      "follower_count": "Pratioci ({count})",
+      "following_count": "Pratim ({count})"
+    },
+    "link": {
+      "unsupported": "Ova veza još nije podržana.",
+      "cannot_open": "Veza ne može da se otvori",
+      "unsupported_version": "Ova veza nije podržana u ovoj verziji."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore pregledač može pristupiti tvom Hive novčaniku radi potpisivanja transakcija. Ova veza potiče iz sadržaja objave i Ecency je nije proverio. Nastavi samo ako joj veruješ:\n\n{url}"
+    },
+    "listen": {
+      "message": "Za slušanje je potrebno {required} Points, a ti imaš {available}.",
+      "unlock_label": "Otključaj · {cost} Points",
+      "preparing_audio": "Priprema zvuka · {preparingPercent}%",
+      "waiting_in_line_ahead": "Čekaš u redu, ispred tebe je {ahead}…",
+      "next_in_line": "Sledeći u redu…",
+      "preparing_about_minutes": "Priprema zvuka, oko {minutes} min…",
+      "preparing_audio_2": "Priprema zvuka…",
+      "spend_confirm": "Potrošiti {cost} Points da slušaš ovu objavu? Audio je tvoj i možeš ga ponovo pustiti bilo kada.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Audio nije mogao da se napravi, tvoji Points su vraćeni"
+    },
+    "media_pick": {
+      "preparing_video": "Priprema videa...",
+      "library_hint": "Izaberi iz svojih fotografija",
+      "camera_hint": "Snimi novu fotografiju",
+      "files_hint": "Pregledaj datoteke na ovom uređaju i u oblaku",
+      "paste_hint": "Koristi sliku koju si kopirao/la",
+      "link_hint": "Koristi sliku sa weba"
+    },
+    "media_picking": {
+      "image_types_message": "Ova vrsta datoteke nije podržana. Izaberi JPEG, PNG, GIF, WebP ili HEIC sliku.",
+      "video_types_message": "Ova vrsta datoteke nije podržana. Izaberi MP4 ili MOV video.",
+      "gif_too_large": "Ovaj GIF je veći od {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Ova operacija zahteva i active i posting potpis, a Ecency još ne može da ih potpiše zajedno."
+    },
+    "poll": {
+      "fail": "Neuspeh. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Posting ovlašćenje tvog naloga nije moglo da se proveri. Proveri vezu i pokušaj ponovo."
+    },
+    "post_lists": {
+      "voters_title": "Informacije o glasačima ({total})",
+      "reblogs_title": "Informacije o deljenjima ({total})",
+      "no_history_found": "Istorija nije pronađena!",
+      "no_edit_history_available": "Nema dostupne istorije izmena za ovaj sadržaj.",
+      "version_label": "Verzija {version}"
+    },
+    "stats": {
+      "other_device": "Ostalo"
+    },
+    "profile": {
+      "account_not_found": "Nalog nije pronađen",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Puno za {hours, plural, one {# sat} few {# sata} other {# sati}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Tvoj trenutni profil nije mogao da se pročita, pokušaj ponovo"
+    },
+    "profile_sheet": {
+      "fail": "Neuspeh! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Nalog nije pronađen"
+    },
+    "push_payload": {
+      "mentioned": "@{source} je pomenuo/la @{target}",
+      "replied": "@{source} je odgovorio/la korisniku @{target}",
+      "transferred": "@{source} je preneo/la korisniku @{target}",
+      "delegated": "@{source} je delegirao/la korisniku @{target}",
+      "rewards_received": "Nagrade primljene",
+      "account_updated": "Nalog ažuriran",
+      "account_updated_body": "Podaci tvog naloga su ažurirani",
+      "followed": "@{source} je zapratio/la @{target}",
+      "unfollowed": "@{source} je prestao/la da prati @{target}",
+      "ignored": "@{source} ignoriše @{target}",
+      "blacklisted": "@{source} je stavio/la @{target} na crnu listu",
+      "posted_in": "@{source} je objavio/la u #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Nije moguće dobiti dozvolu za kameru",
+      "permission_message": "Dozvoli pristup kameri u podešavanjima Ecency.",
+      "permission_allow": "Dozvoli"
+    },
+    "reply_account": {
+      "switch": "Odgovori kao drugi nalog"
+    },
+    "send_journal": {
+      "your_from_went_through": "Tvoj {label} sa naloga @{account} je prošao.",
+      "not_sent": "Tvoj {label} sa naloga @{account} nije prošao. Ništa nije poslato; možeš ponovo da pokreneš.",
+      "checking_whether_your_from": "Proverava se da li je tvoj {label} sa naloga @{account} prošao. Proveri novčanik pre nego što ga ponovo pošalješ."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner stranica zatvorena",
+      "wrong_role": "Ovo je tvoj {given} ključ; ova operacija zahteva tvoj {needed} ključ.",
+      "action_id_required": "Ovoj radnji je potreban ID radnje da bi se bezbedno ponovila."
+    },
+    "signing_router": {
+      "owner_never": "Owner operacije se nikada ne potpisuju u aplikaciji."
+    },
+    "spin": {
+      "key_missing": "Nedostaje ključ igre",
+      "score": "{score, plural, one {# Point} few {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Danas (UTC), resetuje se za {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Resetuje se svakog dana u 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Prijavi se ponovo",
+      "message": "Bezbedno skladište je resetovano na ovom uređaju. Prijavi se ponovo.",
+      "failed": "Nalozi na ovom uređaju nisu mogli da se uklone. Pokušaj ponovo."
+    },
+    "store": {
+      "in_app_purchases_are": "Kupovine u aplikaciji nisu dostupne u ovoj verziji."
+    },
+    "wallet_sends": {
+      "journal_full": "Previše ranijih slanja se još proverava sa mrežom. Sačekaj da budu potvrđena pre slanja novih.",
+      "check_later": "Mreža ovo nije potvrdila na vreme. Proveri novčanik ili istoriju pre nego što ponovo pošalješ; aplikacija proverava ponovo pri sledećem pokretanju."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# nepročitano} few {# nepročitana} other {# nepročitanih}}",
+      "locked_text": "Otključaj Ecency da vidiš",
+      "signed_out_text": "Prijavi se u Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Trenutna ovlašćenja tvog naloga nisu mogla da se pročitaju. Ništa nije izmenjeno; pokušaj ponovo.",
+      "reads_disagree": "Dva čitanja posting ovlašćenja tvog naloga se ne slažu. Ništa nije izmenjeno; pokušaj ponovo."
+    },
+    "vote": {
+      "vote_weight_must_be": "Težina glasa mora biti između -100% i 100%.",
+      "please_sign_in_first": "Prvo se prijavi."
+    },
+    "widget": {
+      "streak_name": "Niz zadataka",
+      "write": "Napiši",
+      "new_wave": "Novi talas",
+      "notifications_description": "Tvoja nepročitana obaveštenja. Skriveno dok je PIN zaključavanje uključeno.",
+      "streak_description": "Tvoj niz dnevnih zadataka. Skriveno dok je PIN zaključavanje uključeno.",
+      "compose_description": "Napiši objavu ili novi talas.",
+      "streak_title": "Niz",
+      "daily_quests": "Dnevni zadaci",
+      "streak_hint": "Otvori Perks da vidiš svoj niz",
+      "open_perks": "Otvori Perks",
+      "open_app": "Otvori Ecency",
+      "unread_caption": "{count, plural, one {nepročitano} few {nepročitana} other {nepročitanih}}",
+      "streak_caption": "{count, plural, one {dan u nizu} few {dana u nizu} other {dana u nizu}}"
+    },
+    "system": {
+      "dictation_channel": "Diktiranje",
+      "listen_channel": "Slušanje",
+      "dictation_channel_description": "Prikazuje se dok u pozadini traje snimanje za diktiranje, sa radnjom Zaustavi.",
+      "dictation_title": "Snimanje za diktiranje",
+      "dictation_text": "Ecency snima tvoje diktiranje. Zaustavljanje ga ne šalje dok ne potvrdiš u aplikaciji.",
+      "listen_channel_description": "Obaveštava te kada slušanje nije moglo da se nastavi u pozadini.",
+      "listen_paused": "Slušanje pauzirano",
+      "listen_paused_text": "Otvori Ecency da nastaviš sa slušanjem.",
+      "skip_back": "Nazad 15 sekundi",
+      "skip_forward": "Napred 15 sekundi"
+    },
+    "permission": {
+      "face_id": "Otključaj Ecency pomoću Face ID umesto PIN-a.",
+      "camera": "Skeniraj QR kodove, slikaj ili snimi video da ga dodaš u objavu.",
+      "photo_library_add": "Ecency čuva slike koje preuzmeš iz objava u tvojoj biblioteci fotografija.",
+      "photo_library": "Ecency drži slike koje preuzmeš iz objava zajedno u Ecency albumu u tvojoj biblioteci fotografija.",
+      "microphone": "Ecency koristi tvoj mikrofon da bi mogao/la da diktiraš objave i komentare (ti snimci se šalju Ecency radi transkripcije) i da snimaš zvuk uz video koji dodaš u objavu."
+    },
+    "android": {
+      "no_browser": "Nema dostupnog pregledača",
+      "biometric_unlock_title": "Otključaj Ecency biometrijom",
+      "biometric_confirm": "Potvrdi otiskom prsta ili licem",
+      "image_unsupported_address": "Nepodržana adresa slike",
+      "image_create_failed": "Datoteka nije mogla da se napravi",
+      "image_write_failed": "Datoteka nije mogla da se upiše",
+      "image_too_large": "Slika je prevelika",
+      "image_download_failed": "Preuzimanje nije uspelo, status {status}",
+      "billing_disconnected": "Google Play Billing je prekinut.",
+      "billing_no_screen": "Nema ekrana na kom bi se prikazala kupovina.",
+      "billing_error": "Google Play Billing greška {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Napravio/la si {count, plural, one {# objavu} few {# objavu} other {# objavu}} ovog meseca. Samo tako nastavi!",
-        "checkin": "Prijavio/la si se {count, plural, one {# dan} few {# dan} other {# dan}} ove nedelje. Samo tako nastavi!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# nova objava} few {# nove objave} other {# novih objava}} u #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# neuspeli pokušaj(i)} few {# neuspeli pokušaj(i)} other {# neuspeli pokušaj(i)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Niz od {n} dana"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Dozvoljeni samo nalozi stariji od {days} dana",
-        "max_choices": "• Možeš izabrati najviše {choices} izbora"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Preostalo {executions} prenosa",
-        "schedule_summary": "{executions} prenosa, svaki na svakih {hours} sati"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Prekratko za Points ({n, plural, one {# znak} few {# znaka} other {# znakova}} ili manje, bez veza)"
       },
       "chats": {
-        "people_joined": "{count} ljudi se pridružilo"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "za oko {count, plural, one {# minut} few {# minuta} other {# minuta}}",
+        "ban-remaining-hours": "za oko {count, plural, one {# sat} few {# sata} other {# sati}}",
+        "ban-remaining-days": "za oko {count, plural, one {# dan} few {# dana} other {# dana}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Koristi najviše {n, plural, one {# oznaku} few {# oznake} other {# oznaka}}",
+          "too_long": "Pretraga je predugačka. Koristi najviše {n, plural, one {# znak} few {# znaka} other {# znakova}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Potrebno je najmanje {count} znakova",
-        "chars_remaining": "Preostalo {count} znakova"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Možeš izabrati najviše {count, plural, one {# sliku} few {# slike} other {# slika}} odjednom"
+      },
+      "dictation": {
+        "stop_hint": "Zaustavi da se transkribuje i doda u tvoju objavu. Do {m, plural, one {# minuta} few {# minuta} other {# minuta}}.",
+        "rate": "{n} Points na {s, plural, one {# sekundu} few {# sekunde} other {# sekundi}}"
       },
       "transfer": {
-        "powering_down_info": "Sledeće povlačenje uloga je za {days} dana, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Između {min} i {max, plural, one {# znak} few {# znaka} other {# znakova}}"
       }
     }
   }

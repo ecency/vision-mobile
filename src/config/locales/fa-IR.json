@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "عضو Ecency Pro"
   },
   "perks": {
     "header": "مزایا",
@@ -31,42 +31,42 @@
     "promote_desc": "بازدید بیشتری برای پست خود بگیرید",
     "account_boost": "تقویت حساب",
     "account_boost_desc": "هر حسابی را تقویت کنید",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "شارژ RC",
+    "rc_topup_desc": "وقتی Resource Credits کم است، به انتشار ادامه دهید",
+    "streak_freeze_owned": "{n} در ذخیره",
+    "streak_freeze_buy": "محافظت از زنجیره ({price} Points)",
+    "streak_freeze_buying": "در حال محافظت",
+    "streak_freeze_error": "خرید انجماد زنجیره ممکن نشد. لطفاً دوباره تلاش کنید."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "پست روز",
+    "streak": "زنجیره {n} روزه",
+    "keep_streak": "زنجیره‌تان را حفظ کنید"
   },
   "waves": {
     "for_you": "برای شما",
     "following": "دنبال‌شده‌ها",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "فیدهای سفارشی",
+    "custom_feeds_subtitle": "منابع و برچسب‌ها را سنجاق کنید تا به‌صورت تب فید اضافه شوند.",
+    "add_tag_placeholder": "افزودن برچسب",
+    "sources": "منابع",
+    "your_feeds": "فیدهای شما",
+    "trending_tags": "برچسب‌های پرطرفدار",
+    "shorts_empty": "هنوز ویدیوی کوتاهی برای نمایش نیست",
+    "mute": "قطع صدا",
+    "unmute": "وصل صدا"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "شروع کار",
+    "subtitle": "تازه آمده‌اید؟ Waves پست‌های کوتاه‌اند و ساده‌ترین راه برای شروع.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "بستن",
+    "item_wave": "اولین Wave خود را منتشر کنید",
+    "item_vote": "به یک Wave مورد علاقه‌تان رأی دهید",
+    "item_reply": "به کسی پاسخ دهید",
+    "item_checkin": "برای شروع زنجیره‌تان حضور بزنید",
+    "all_done_title": "همه‌چیز انجام شد 🎉",
+    "all_done_subtitle": "همه‌چیز آماده است. به انتشار Waves ادامه دهید!"
   },
   "profile": {
     "havent_commented": "هنوز نظری نداده",
@@ -147,6 +147,16 @@
     "wizard_config_val": "سن  |  نمایان‌بودن  |  تفسیر",
     "attach_poll": "پیوست نظرسنجی"
   },
+  "favorite_tags": {
+    "title": "برچسب‌ها",
+    "hint": "دنبال کنید تا از پست‌های جدید این برچسب باخبر شوید",
+    "following_hint": "از پست‌های جدید این برچسب باخبر می‌شوید",
+    "follow": "دنبال کردن",
+    "following": "دنبال می‌کنید",
+    "added": "برچسب دنبال شد",
+    "removed": "دنبال کردن برچسب لغو شد",
+    "empty_list": "اینجا چیزی نیست"
+  },
   "favorites": {
     "add": "افزودن به علاقه‌مندی‌ها",
     "add_error": "افزودن به علاقه‌مندی‌ها ممکن نشد",
@@ -181,7 +191,33 @@
     "payout": "پرداخت",
     "details": "جزئیات",
     "community": "انجمن",
-    "new_post": "پست جدید"
+    "new_post": "پست جدید",
+    "mute_post_title": "بی‌صدا کردن این پست",
+    "unmute_post_title": "لغو بی‌صدا کردن این پست",
+    "mute_post_reason": "چرا این پست بی‌صدا می‌شود؟",
+    "unmute_post_reason": "چرا این پست بازگردانده می‌شود؟",
+    "manage": "مدیریت انجمن",
+    "manage_members": "اعضا و نقش‌ها",
+    "manage_settings": "تنظیمات انجمن",
+    "manage_activities": "گزارش فعالیت",
+    "activities": "فعالیت",
+    "no_activities": "هنوز فعالیتی نیست",
+    "activities_load_failed": "فعالیت بارگیری نشد. برای تازه‌سازی به پایین بکشید.",
+    "set_role": "تعیین نقش",
+    "assign_role": "اختصاص نقش",
+    "assign_role_hint": "هر حسابی را جستجو کنید، حتی اگر عضو نشده باشد، سپس یک نقش انتخاب کنید.",
+    "username_placeholder": "نام کاربری",
+    "invalid_username": "یک حساب موجود را از نتایج انتخاب کنید",
+    "members": "عضو",
+    "no_members": "عضوی پیدا نشد",
+    "members_incomplete": "برخی اعضا بارگیری نشدند. برای تازه‌سازی به پایین بکشید.",
+    "members_load_failed": "اعضا بارگیری نشدند. برای تازه‌سازی به پایین بکشید.",
+    "role_owner": "مالک",
+    "role_admin": "مدیر",
+    "role_mod": "ناظر",
+    "role_member": "عضو",
+    "role_guest": "مهمان",
+    "role_muted": "بی‌صدا"
   },
   "trade": {
     "swap_for": "تبدیل {fromAmount} به {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "پست متقابل",
     "pin-blog": "سنجاق به بلاگ",
     "copy": "کپی لینک",
+    "copy-text": "کپی متن",
+    "open-thread": "باز کردن رشته",
     "unpin-community": "برداشتن سنجاق از انجمن",
+    "mute-post": "بی‌صدا کردن پست",
+    "unmute-post": "لغو بی‌صدا کردن پست",
     "mute": "بی‌صدا / مسدود",
     "reblog": "اشتراک گذاری",
     "undo-reblog": "لغو بازنشر",
@@ -232,24 +272,24 @@
     "unpin-reply": "برداشتن سنجاق دیدگاه"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "این پست به زبان {lang} است. به {target} ترجمه شود؟",
+    "translate_to": "ترجمه به {lang}",
+    "show_original": "نمایش متن اصلی",
+    "translated_from": "ترجمه از {lang}",
+    "change_language": "تغییر زبان"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "ترجمه پست",
+    "source": "زبان مبدأ",
+    "target": "زبان مقصد",
+    "detected": "شناسایی‌شده: {lang}",
+    "translate": "ترجمه",
+    "apply": "اعمال",
+    "review_note": "ترجمه ماشینی نوشته خودتان را به انتهای پست اضافه می‌کند. پیش از انتشار آن را بررسی و ویرایش کنید.",
+    "too_short": "ابتدا کمی بیشتر بنویسید. ترجمه دست‌کم به چند جمله نیاز دارد.",
+    "progress": "در حال ترجمه {done} از {total}...",
+    "error": "ترجمه ناموفق بود. لطفاً دوباره تلاش کنید.",
+    "add_title_marker": "افزودن نشانه زبان به عنوان"
   },
   "side_menu": {
     "profile": "نمایه",
@@ -296,7 +336,7 @@
     "hot": "داغ",
     "popular": "مورد علاقه",
     "new": "جدید",
-    "friends": "Following",
+    "friends": "دنبال‌شده‌ها",
     "my_blog": "بلاگ من"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "هیچی اینجا نیست"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "قالب‌ها",
+    "untitled": "قالب بدون عنوان",
+    "empty_list": "یک پست را از ویرایشگر به‌عنوان قالب ذخیره کنید تا اینجا دوباره استفاده شود.",
+    "delete_confirm": "آیا مطمئن هستید که می‌خواهید این قالب را حذف کنید؟",
+    "applied": "قالب به‌عنوان پست جدید اعمال شد",
+    "save_as_template": "ذخیره به‌عنوان قالب",
+    "name_placeholder": "نام قالب",
+    "saved": "قالب ذخیره شد"
   },
   "selection_list": {
     "available": "{postfix} در دسترس",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "همه",
+      "replies": "پاسخ‌ها",
+      "mentions": "اشاره‌ها",
+      "rvotes": "رأی‌ها",
+      "follows": "دنبال‌کردن‌ها",
+      "reblogs": "بازنشرها",
+      "transfers": "انتقال‌ها",
+      "delegations": "تفویض‌ها",
+      "nfavorites": "علاقه‌مندی‌ها",
+      "tags": "برچسب‌ها",
+      "nbookmarks": "نشانک‌ها",
+      "payouts": "پرداخت‌ها",
+      "scheduled_published": "پست‌های زمان‌بندی‌شده",
+      "account_updates": "به‌روزرسانی‌های حساب",
+      "weekly_earnings": "درآمد هفتگی"
     },
     "this_week": "این هفته",
     "reblog": "اشتراک شد",
@@ -417,11 +458,15 @@
     "yesterday": "دیروز",
     "mention": "نام برد به",
     "favorites": "پست جدیدی منتشر کرد",
+    "tags": "در #{tag} پست گذاشت",
+    "tags_bundle": "{count} پست جدید در #{tag}",
+    "tags_title": "پست‌های جدید در برچسبی که دنبال می‌کنید",
     "mentions": "خطاب ها",
     "spin": "وقت کسب امتیاز بیشتر است",
     "last_week": "هفته گذشته",
     "recent": "اخیر",
     "ignore": "شما را نادیده گرفته",
+    "blacklist": "شما را در فهرست سیاه قرار داد",
     "follow": "شما را دنبال میکند",
     "notification": "اطلاعیه ها",
     "this_month": "این ماه",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} اکنون می‌تواند از طرف شما پست بگذارد و رأی دهد. اگر شما این را مجاز نکرده‌اید، آن را لغو کنید.",
     "weekly_earnings": "این هفته ${amount} درآمد داشتید{breakdown}",
     "payouts": "پرداخت دریافت شد: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "یک پست زمان‌بندی‌شده منتشر کرد",
+    "scheduled_published_title": "پست زمان‌بندی‌شده منتشر شد",
+    "scheduled_published_body": "پست زمان‌بندی‌شده شما اکنون منتشر شده است، برای دیدن آن ضربه بزنید"
   },
   "recurrent": {
     "delete_failed": "حذف انتقال مکرر ناموفق بود، {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "پیش‌نویس اخیر را باز کنید یا پست جدید بسازید",
     "reward_power_up": "استیک ۱۰۰٪",
     "open_gallery": "باز کردن گالری",
+    "open_files": "انتخاب از فایل‌ها",
     "clipboard_no_image": "تصویری در کلیپ‌بورد یافت نشد",
     "clipboard_image_detected": "تصویر در کلیپ‌بورد",
     "paste_image": "چسباندن تصویر",
@@ -539,8 +585,10 @@
     "video": "ویدیو",
     "scheduled_later": "بعداً",
     "settings_title": "تنظیمات پست",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "خیر"
+    "support_ecency": "حمایت از Ecency {percent}%",
+    "alert_btn_no": "خیر",
+    "short_reply_hint": "پاسخ‌های {n} نویسه یا کمتر امتیاز نمی‌گیرند (پیوندها شمرده نمی‌شوند)",
+    "short_content_hint": "برای کسب امتیاز بیش از حد کوتاه است ({n} نویسه یا کمتر، بدون احتساب پیوندها)"
   },
   "time": {
     "week": "هفته",
@@ -655,7 +703,41 @@
     "select_emoji": "انتخاب ایموجی",
     "more_emojis": "بیشتر",
     "search_emojis": "جستجوی ایموجی‌ها...",
-    "no_emoji_found": "ایموجی‌ای یافت نشد"
+    "no_emoji_found": "ایموجی‌ای یافت نشد",
+    "ban-reason-spray": "ارسال شما متوقف شده است، زیرا یک پیام یکسان همزمان به چند کانال رفته است.",
+    "ban-reason-mass-dm": "ارسال شما متوقف شده است، زیرا یک پیام همزمان برای افراد زیادی فرستاده شده است.",
+    "ban-reason-generic": "ارسال شما در گفتگو متوقف شده است.",
+    "ban-can-still-read": "همچنان می‌توانید گفتگو را بخوانید.",
+    "ban-unlocks": "ارسال {when} باز می‌شود.",
+    "ban-remaining-soon": "کمتر از یک دقیقه دیگر",
+    "ban-remaining-minutes": "حدود {count} دقیقه دیگر",
+    "ban-remaining-hours": "حدود {count} ساعت دیگر",
+    "ban-remaining-days": "حدود {count} روز دیگر",
+    "new_group": "گروه جدید",
+    "new_group_hint": "برای شروع گفتگوی گروهی، {min} تا {max} نفر اضافه کنید.",
+    "new_group_search": "جستجوی افراد با نام کاربری",
+    "new_group_full": "یک گروه حداکثر {max} نفر دیگر می‌تواند داشته باشد.",
+    "new_group_no_results": "کسی با این نام در گفتگو پیدا نشد.",
+    "new_group_search_failed": "جستجو انجام نشد. اتصال خود را بررسی و دوباره تلاش کنید.",
+    "new_group_remove": "حذف @{username}",
+    "new_group_create": "شروع گروه",
+    "new_group_failed": "گروه شروع نشد. لطفاً دوباره تلاش کنید.",
+    "rename_group": "تغییر نام گروه",
+    "rename_group_hint": "برای این گروه نامی بگذارید که همه اعضا ببینند. خالی بگذارید تا نام اعضا نمایش داده شود.",
+    "group_name": "نام گروه",
+    "rename_group_too_long": "نام گروه حداکثر {max} نویسه می‌تواند باشد.",
+    "rename_group_not_owner": "فقط کسی که این گروه را ساخته می‌تواند نام آن را تغییر دهد.",
+    "rename_group_failed": "نام گروه تغییر نکرد. لطفاً دوباره تلاش کنید.",
+    "group_renamed": "{user} نام گروه را به «{name}» تغییر داد",
+    "group_name_cleared": "{user} نام گروه را حذف کرد",
+    "group_members": "اعضای گروه",
+    "save": "ذخیره",
+    "cancel": "لغو",
+    "reactions_title": "واکنش‌ها",
+    "reactor_you": "شما",
+    "reactor_unknown": "یک نفر",
+    "see_who_reacted": "برای دیدن واکنش‌دهندگان، نگه دارید",
+    "group": "گروه"
   },
   "free_estm": {
     "timer_text": "چرخش رایگان بعدی در",
@@ -684,6 +766,32 @@
     "transaction_fail": "تراکنش ناموفق بود"
   },
   "search_result": {
+    "error": "جستجو انجام نشد. لطفاً دوباره تلاش کنید",
+    "filters": {
+      "title": "فیلترها",
+      "open": "فیلترها",
+      "author": "نویسنده",
+      "author_placeholder": "نام کاربری",
+      "category": "دسته",
+      "category_placeholder": "انجمن یا دسته",
+      "tags": "برچسب‌ها",
+      "tags_placeholder": "جدا شده با ویرگول",
+      "type": "نوع",
+      "type_all": "همه",
+      "type_post": "پست‌ها",
+      "type_comment": "نظرات",
+      "date": "تاریخ",
+      "date_week": "هفته گذشته",
+      "date_month": "ماه گذشته",
+      "date_year": "سال گذشته",
+      "date_all": "همیشه",
+      "sort": "مرتب‌سازی",
+      "apply": "اعمال",
+      "active": "{n} فعال",
+      "too_many_tags": "حداکثر {n} برچسب استفاده کنید",
+      "too_long": "جستجو بیش از حد طولانی است. حداکثر {n} نویسه استفاده کنید",
+      "needs_criteria": "یک عبارت جستجو یا نویسنده، دسته یا برچسب برای فیلتر وارد کنید"
+    },
     "communities_filter": {
       "new": "جدید",
       "my": "انجمن(های) من",
@@ -727,7 +835,7 @@
     "title": "بازنشر متقابل"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "نویسنده استفاده از هوش مصنوعی را اعلام کرده است"
   },
   "ai_assist": {
     "title": "دستیار نگارش هوش مصنوعی",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "برچسب‌های مرتبط برای پست خود دریافت کنید",
     "action_generate_title": "تولید عنوان",
     "action_generate_title_desc": "گزینه‌های عنوان جذاب بسازید",
-    "action_summarize": "Recap",
+    "action_summarize": "خلاصه",
     "action_summarize_desc": "یک خلاصه مختصر بسازید",
     "action_check_grammar": "بررسی دستور زبان",
     "action_check_grammar_desc": "رفع مشکلات دستور زبان و املا",
+    "action_generate_image": "تولید تصویر",
+    "action_generate_image_desc": "برای پست خود تصویر هوش مصنوعی بسازید",
+    "cost_from": "از {cost} {unit}",
     "text_label": "متن شما",
     "text_placeholder": "محتوای خود را اینجا بچسبانید یا تایپ کنید...",
     "min_chars": "حداقل {count} نویسه لازم است",
@@ -797,16 +908,26 @@
     "remind_later": "یادآوری بعداً",
     "success_subscribe": "اشتراک، موفق شد!",
     "payloadTooLarge": "اندازه فایل خیلی بزرگ است ، لطفاً اندازه کوچکتر را تغییر دهید یا تصویر کوچکتر را بارگذاری کنید",
+    "too_many_images": "می‌توانید در هر بار حداکثر {count} تصویر انتخاب کنید",
     "fail_follow": "دنبال، ناکام شد!",
     "clear_user_alert": "آیا مطمئن هستید که میخواهید تمام اطلاعات را پاک کنید؟",
     "cancel": "لغو",
     "connection_success": "اتصال با موفقیت انجام شد!",
     "rc_down": "اعتبار منابع کافی برای انجام عملی نیست!\n\nبرای لذت بردن از تجربه ، حساب خود را تقویت کنید. آیا می خواهید حساب خود را تقویت کنید?",
+    "rc_down_title": "اعتبار منابع کافی نیست",
+    "rc_precheck_title": "انتشار این پست ممکن است بیش از حد بزرگ باشد",
+    "rc_precheck_body": "به نظر می‌رسد اعتبار منابع شما برای پستی با این اندازه کافی نیست.",
+    "rc_down_body": "اعتبار منابع شما برای این کار کافی نیست.\n\nهم‌اکنون با Points شارژ کنید تا ادامه دهید، یا حساب خود را برای همیشه تقویت کنید.",
+    "rc_down_topup": "شارژ RC با Points",
+    "rc_down_boost": "تقویت حساب",
     "done": "انجام شد",
     "something_wrong_alt": "در این میان، Ecency.com را از مرورگر خود امتحان کنید",
     "same_user": "این کاربر قبلا به لیست اضافه شده است",
     "fail": "ناموفق!",
     "operation_failed_with_reason": "{operation} ناموفق بود: {reason}",
+    "request_timed_out": "اتصال بیش از حد طول کشیده است. شبکه خود را بررسی و دوباره تلاش کنید.",
+    "load_failed_retry": "بارگیری انجام نشد. لطفاً دوباره تلاش کنید.",
+    "retrying": "در حال تلاش مجدد...",
     "wallet_refresh_failed": "تازه‌سازی کیف پول ناموفق بود. لطفاً دوباره تلاش کنید.",
     "wallet_refresh_missing_account": "تازه‌سازی کیف پول ناموفق بود: حساب موجود نیست.",
     "boost_failed": "Boost ناموفق بود.",
@@ -949,31 +1070,31 @@
     "video_attached": "ویدئو پیوست شد"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "رأی مثبت",
+    "upvoted": "رأی مثبت داده شد",
+    "downvoted": "رأی منفی داده شد",
+    "upvote_hint": "برای باز کردن گزینه‌های رأی دو بار ضربه بزنید",
+    "payout_details": "جزئیات پرداخت",
+    "a11y_votes": "{count, plural, one {# رأی} other {# رأی}}",
+    "a11y_voters_hint": "مشاهده رأی‌دهندگان",
+    "a11y_reblogs": "{count, plural, one {# بازنشر} other {# بازنشر}}",
+    "a11y_reblogs_hint": "مشاهده بازنشرها",
+    "a11y_comments": "{count, plural, one {# نظر} other {# نظر}}",
+    "a11y_comments_hint": "مشاهده نظرات",
+    "a11y_reply_hint": "پاسخ",
+    "a11y_tip": "ارسال انعام",
+    "a11y_tips": "{count, plural, one {# انعام} other {# انعام}}",
+    "a11y_edit": "ویرایش نظر",
+    "a11y_delete": "حذف نظر",
+    "a11y_show_replies": "نمایش پاسخ‌ها",
+    "a11y_hide_replies": "پنهان کردن پاسخ‌ها",
+    "a11y_post_options": "گزینه‌های پست",
+    "a11y_views": "{count, plural, one {# بازدید} other {# بازدید}}",
+    "source_ecency": "منتشرشده با Ecency",
+    "a11y_stats_hint": "مشاهده آمار پست",
     "image": "تصویر",
     "reveal_muted": "بی‌صدا شده\nبرای نمایش محتوا ضربه بزنید",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "برای بارگذاری تصویر ضربه بزنید",
     "in": "در",
     "poll": "نظرسنجی",
     "copy_link": "کاپی لنک",
@@ -998,13 +1119,14 @@
     "save_to_local": "بارگیری در دستگاه",
     "muted": "محتوا به دلیل تخلف بی‌صدا شده است",
     "community_muted": "محتوا به دلیل نقض دستورالعمل‌های جامعه بی‌صدا شده است",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "محتوا از حسابی با اعتبار پایین",
+    "muted_downvoted": "محتوایی که کاربران به آن رأی منفی داده‌اند",
+    "muted_low_trust": "حساب با اعتبار پایین و پیوند خروجی تأییدنشده",
+    "muted_reveal": "برای نمایش ضربه بزنید",
     "promoted": "تبلیغ‌شده",
     "image_saved": "تصویر در گالری عکس ذخیره شد",
     "words": "کلمه",
     "reading": "زمان مطالعه",
-    "listen": "گوش دادن",
     "min": "دقیقه",
     "summarize_start": "شروع"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "پستی موجود نیست",
     "invalid_link": "نشانی اینترنتی نامعتبر است، می‌توانید با نشانی معتبر دوباره تلاش کنید یا آن را در مرورگر وب باز کنید",
-    "no_existing_user": "کاربری موجود نیست"
+    "no_existing_user": "کاربری موجود نیست",
+    "posting_key_request": "{requester} کلید خصوصی posting حساب @{username} را درخواست می‌کند.\n\nفقط در صورتی ادامه دهید که به این درخواست اعتماد دارید.",
+    "posting_key_request_unnamed": "برنامه‌ای دیگر کلید خصوصی posting حساب @{username} را درخواست می‌کند.\n\nفقط در صورتی ادامه دهید که به این درخواست اعتماد دارید.",
+    "auth_request_as_user": "{requester} می‌خواهد شما را با نام @{username} وارد کند.\n\nفقط نام کاربری و یک اثبات ورود به اشتراک گذاشته می‌شود. هیچ کلیدی از Ecency خارج نمی‌شود.",
+    "auth_request_as_current": "{requester} می‌خواهد شما را با حساب Ecency خود وارد کند.\n\nفقط نام کاربری و یک اثبات ورود به اشتراک گذاشته می‌شود. هیچ کلیدی از Ecency خارج نمی‌شود."
   },
   "payout": {
     "breakdown": "درهم شکستن",
@@ -1065,7 +1191,7 @@
     "open": "باز کردن نشانی اینترنتی",
     "invalid_key_desc": "لطفاً برای انجام این تراکنش با کلید {key} یا کلید اصلی وارد شوید",
     "auth_transfer_confirm": "انتقال به {username} تأیید شود؟",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "فقط در صورتی تأیید کنید که به منبع این پیوند اعتماد دارید. تأیید، عملیات زیر را از حساب شما با کلید {authority} شما منتشر می‌کند."
   },
   "voters_dropdown": {
     "rewards": "امتیازات",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "باید فقط شامل حروف، اعداد و خط تیره باشد",
       "username_no_ascii_first_letter_error": "باید با یک حرف شروع شود",
       "username_contains_double_hyphens": "نباید شامل خط تیره دوتایی باشد",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "این نام کاربری بسیار شبیه حساب یک صرافی ارز دیجیتال است و ممکن است دیگران را گمراه کند. لطفاً نامی منحصربه‌فردتر انتخاب کنید.",
+      "username_restricted_prefix": "نام‌های کاربری که با «uid» و سپس عدد شروع می‌شوند مجاز نیستند، زیرا معمولاً برای جعل هویت دیگران استفاده می‌شوند. لطفاً نام دیگری انتخاب کنید.",
       "username_contains_underscore": "نباید شامل خط زیر باشد"
     },
     "500_error": "درخواست شما پردازش نشد ، صف ثبت نام احتمالاً پر است! چند دقیقه دیگر دوباره امتحان کنید...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "این نام کاربری قبلاً گرفته شده است",
+      "14": "این نشانی ایمیل قبلاً ثبت شده است",
+      "15": "لطفاً یک نشانی ایمیل معتبر وارد کنید",
+      "16": "لطفاً یک نام کاربری معتبر وارد کنید",
+      "17": "نام کاربری بیش از حد طولانی است، لطفاً نام کوتاه‌تری انتخاب کنید",
+      "19": "لطفاً از یک ایمیل دائمی استفاده کنید یا به‌جای آن حساب Premium بگیرید",
+      "21": "این معرف معتبر نیست",
+      "28": "درخواست شما پردازش نشد: صف ثبت‌نام احتمالاً پر است. لطفاً چند دقیقه دیگر دوباره تلاش کنید.",
+      "107": "اتصال VPN شناسایی شد. لطفاً VPN را خاموش کنید و دوباره تلاش کنید یا به‌جای آن حساب Premium بگیرید.",
+      "110": "برای جلوگیری از سوءاستفاده، تعداد حساب‌ها را برای هر شخص/شبکه محدود می‌کنیم. لطفاً از شبکه‌ای دیگر دوباره تلاش کنید.",
+      "111": "اتصال Tor شناسایی شد. لطفاً هنگام ثبت‌نام Tor را غیرفعال کنید.",
+      "112": "اکنون نتوانستیم اتصال شما را بررسی کنیم. لطفاً چند دقیقه دیگر دوباره تلاش کنید."
     },
     "have_account_text": "از قبل حساب دارید؟"
   },
@@ -1140,6 +1266,30 @@
     "desc": "یک حساب کامل Hive دریافت کنید؛ این روش بررسی‌های پایه‌ای دارد تا مطمئن شود بات‌نت‌ها از سامانه ثبت‌نام رایگان ما سوءاستفاده نمی‌کنند.",
     "btn_register": "ثبت‌نام رایگان",
     "title": "حساب رایگان"
+  },
+  "dictation": {
+    "title": "دیکته",
+    "start": "ضبط",
+    "stop": "توقف",
+    "record_more": "ضبط بیشتر",
+    "done": "انجام شد",
+    "recording": "در حال ضبط",
+    "stop_hint": "برای تبدیل به متن و افزودن به پست، متوقف کنید. تا {m} دقیقه.",
+    "inserted": "به پست شما افزوده شد. بیشتر ضبط کنید یا «انجام شد» را بزنید.",
+    "transcribing": "در حال تبدیل به متن",
+    "rate": "{n} Points برای هر {s} ثانیه",
+    "cost_running": "تاکنون {n} Points",
+    "cost_running_free": "تاکنون رایگان",
+    "free_remaining": "امروز {n} بار {s} ثانیه‌ای بعدی شما رایگان است",
+    "price_loading": "در حال بررسی قیمت",
+    "price_error": "قیمت تبدیل گفتار به متن بارگیری نشد.",
+    "denied": "Ecency برای دیکته به دسترسی میکروفون نیاز دارد. در تنظیمات اجازه دهید و دوباره تلاش کنید.",
+    "error_empty": "در این ضبط گفتاری شناسایی نشد.",
+    "error_insufficient_points": "Points کافی برای تبدیل این ضبط به متن نیست.",
+    "error_rate_limited": "ضبط‌ها فعلاً بیش از حد است. لطفاً کمی بعد دوباره تلاش کنید.",
+    "error_too_long": "این ضبط برای تبدیل به متن بیش از حد طولانی است.",
+    "error_failed": "تبدیل این ضبط به متن انجام نشد. لطفاً دوباره تلاش کنید.",
+    "error_recorder": "ضبط شروع نشد. لطفاً دوباره تلاش کنید."
   },
   "wallet": {
     "delegations_out": "واگذاری‌های خروجی",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "ورود به سیستم، بطور منظم ۰.۲۳ امیتاز بشما میدهد.",
     "fill_transfer_from_savings": "پس انداز اجرا اشد",
     "activities": "فعالیت‌ها",
+    "no_activities": "هنوز تراکنشی نیست",
+    "activities_failed": "تراکنش‌ها بارگیری نشدند. برای تلاش مجدد به پایین بکشید.",
     "tap_update": "برای به‌روزرسانی ضربه بزنید",
     "mining_lottery": "برنده قرعه‌کشی",
     "checkin": "حاضری زدن",
     "tokens_transfer": "توکن‌ها منتقل شدند",
     "outgoing_transfer_title": "انتقال/هدیه",
+    "burned_title": "استفاده از هوش مصنوعی",
+    "burned_description": "Points خرج‌شده برای یک قابلیت هوش مصنوعی",
+    "burn_refund_title": "بازپرداخت هوش مصنوعی",
+    "burn_refund_description": "Points بازگردانده‌شده پس از درخواست ناموفق هوش مصنوعی",
     "manage_assets": "افزودن / حذف دارایی‌ها",
     "selected_assets": "دارایی‌های انتخاب‌شده",
     "nft_setPropertyPermissions": "مجوزهای ویژگی برای نماد NFT تنظیم شد",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "به‌روزرسانی دقت توکن‌ها",
     "tokens_transferOwnership": "مالکیت توکن منتقل شد",
     "withdraw_vesting": "لغو استیک",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "حساب‌های برداشت",
     "delegate_engine": "واگذاری",
     "market_close": "سفارش بسته شد",
     "nftmarket_transferFee": "کارمزد سفارش خرید",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "گرفتن امتیاز",
     "escrow_approve": "تایید سپرده",
     "expires": "منقضی می‌شود",
+    "transaction_id": "شناسه تراکنش",
+    "copy_transaction_id": "کپی پیوند تراکنش",
+    "filter_activities": "فیلتر فعالیت‌ها",
+    "filter_activities_desc": "انتخاب کنید این تاریخچه کدام عملیات را درخواست کند",
+    "filter_all": "انتخاب همه",
+    "filter_none": "پاک کردن همه",
+    "filter_apply": "اعمال",
     "author_reward": "پاداش نویسنده",
     "withdraw_hbd": "برداشت از پس‌انداز",
     "convert_request": "درخواست تبدیل",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "شارژ RC",
+    "desc": "افزایش کوتاه‌مدت RC تا بتوانید به انتشار ادامه دهید.",
+    "confirm": "برای شارژ Resource Credits از Points خرج شود؟",
+    "insufficient": "Points کافی ندارید.",
+    "buy_points": "خرید Points"
   },
   "ai_image_generator": {
     "title": "مولد تصویر هوش مصنوعی",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "سفارشی ({hours} ساعت)",
+    "balance_load_failed": "بارگیری موجودی شما انجام نشد. برای تلاش مجدد ضربه بزنید.",
+    "precision_load_failed": "جزئیات این توکن بارگیری نشد، بنابراین فقط مقادیر صحیح قابل ارسال است. برای تلاش مجدد ضربه بزنید.",
     "close": "بستن",
     "favorite_username_placeholder": "نام کاربری",
     "invalid_recipient_qr": "نام کاربری در این کد QR یافت نشد.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "مدیریت دسترسی‌ها",
     "pincode": "Pincode",
     "general": "عمومی",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "حمایت از Ecency",
+    "support_beneficiary": "اشتراک پاداش پست‌ها با Ecency",
+    "support_beneficiary_percent": "سهم پاداش پست‌ها",
+    "support_curation": "نگه‌داشتن بخشی از پاداش کیوریت",
+    "support_curation_percent": "سهم نگه‌داشته‌شده از پاداش کیوریت",
     "feedback_body": "پیام خود را اینجا بنویسید!\n\nنام کاربری Hive: {username}\nنسخه برنامه: {appVersion}\nسکو: {platform}\n",
     "show_imgs": "نمایش تصاویر",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "نظر",
       "bookmark": "نشانک‌ها",
+      "tags": "برچسب‌ها",
       "reblog": "اشتراک گذاری",
       "favorite": "موارد دلخواه",
       "mention": "اشاره کردن",
@@ -1599,10 +1765,10 @@
       "transfers": "تراکنش ها",
       "vote": "رأی",
       "follow": "دنبال کردن",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "پست زمان‌بندی‌شده منتشر شد",
+      "payouts": "پرداخت‌ها",
+      "account_update": "به‌روزرسانی‌های حساب",
+      "weekly_earnings": "درآمد هفتگی",
       "fcm_unavailable": "اعلان‌های فشاری روی این دستگاه پشتیبانی نمی‌شوند. شما تنها زمانی که برنامه باز است اعلان دریافت خواهید کرد."
     },
     "keys_warning": "اطلاعات حساس حساب!\nEcency باید پیش از مشاهده کلیدهای خصوصی با کد PIN ایمن شود.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "ارسال پیشنهادات و انتقادات",
     "rate_app": "امتیاز به Ecency",
+    "email_digests": "خلاصه‌های ایمیلی",
     "rate": "امتیازدهی",
     "dm-privacy-updated": "تنظیمات حریم خصوصی پیام مستقیم با موفقیت به‌روزرسانی شد",
     "dm-privacy-failed": "به‌روزرسانی تنظیمات حریم خصوصی پیام مستقیم ناموفق بود",
@@ -1685,19 +1852,29 @@
     "request_sent": "درخواست حذف شما ارسال شد",
     "confirm_delete_body": "آیا مطمئنید که می‌خواهید حساب را حذف کنید؟ این کار همه داده‌های شما را پاک می‌کند"
   },
-  "tts": {
-    "settings_title": "تنظیمات تبدیل متن به گفتار",
-    "voice": "صدا",
-    "voice_hint": "از صدای پیش‌فرض سیستم استفاده خواهد شد",
-    "speed": "سرعت",
-    "pitch": "زیر و بمی",
-    "test_voice": "آزمایش صدا",
-    "settings_info": "این تنظیمات هنگام خواندن پست‌ها با صدای بلند استفاده می‌شوند",
+  "listen": {
+    "title": "گوش دادن به این پست",
+    "minutes": "~{n} دقیقه",
+    "login": "ورود",
+    "unlock": "بازگشایی · {n} Points",
+    "confirm": "برای گوش دادن به این پست {n} Points خرج شود؟ صوت هر زمان برای پخش دوباره از آنِ شماست.",
+    "not_enough_title": "Points کافی نیست",
+    "not_enough": "گوش دادن به {required} Points نیاز دارد و شما {available} دارید.",
+    "get_points": "دریافت Points",
+    "unlock_failed": "صوت باز نشد، لطفاً دوباره تلاش کنید",
+    "failed_refunded": "صوت ساخته نشد، Points شما بازگردانده شد",
+    "preparing": "در حال آماده‌سازی صوت…",
+    "preparing_eta": "در حال آماده‌سازی صوت، حدود {n} دقیقه…",
+    "preparing_progress": "در حال آماده‌سازی صوت · {n}%",
+    "waiting": "در صف انتظار، {n} نفر جلوتر…",
+    "next_in_line": "نفر بعدی در صف…",
     "play": "پخش",
     "pause": "توقف موقت",
-    "language": "زبان",
-    "language_auto": "تشخیص خودکار",
-    "language_hint": "تشخیص خودکار، زبان را بر اساس محتوای پست انتخاب می‌کند"
+    "seek": "جابه‌جایی",
+    "speed": "سرعت پخش",
+    "language": "زبان صوت",
+    "unavailable": "صوت بارگیری نشد.",
+    "retry": "تلاش دوباره"
   },
   "posting_authority": {
     "title": "فعال‌سازی انتشار سریع‌تر",
@@ -1732,7 +1909,7 @@
     "error-auth": "احراز هویت ناموفق بود. لطفاً دوباره وارد شوید.",
     "error-generic": "بارگذاری ویدیو ناموفق بود. لطفاً دوباره تلاش کنید.",
     "error-too-long-short": "ویدیوهای کوتاه باید ۶۰ ثانیه یا کمتر باشند.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "هر پست فقط می‌تواند یک ویدیو داشته باشد. پیش از افزودن ویدیوی دیگر، ویدیوی فعلی را حذف کنید.",
     "select_source": "افزودن ویدیو",
     "record": "ضبط ویدیو",
     "choose_library": "انتخاب از کتابخانه"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "اشتراک‌گذاری یک به‌روزرسانی سریع"
   },
+  "newsletter": {
+    "screen_title": "خلاصه‌های ایمیلی",
+    "title": "{list}",
+    "body_own": "خلاصه هفتگی یا ماهانه اعلان‌های شما به‌صورت ایمیل.",
+    "body_creator": "پست‌های جدید {list} در صندوق ایمیل شما.",
+    "body_community": "خلاصه پست‌های جدید {list} از طریق ایمیل.",
+    "body_site": "بهترین‌های Ecency در صندوق ایمیل شما.",
+    "first_publish_title": "برای اولین پست‌تان تبریک!",
+    "first_publish_body": "خلاصه ایمیلی اعلان‌های خود را می‌خواهید؟ هفتگی یا ماهانه؛ هر زمان در تنظیمات تغییر دهید یا کنار بگذارید.",
+    "list_own": "خلاصه اعلان‌های من",
+    "list_site": "خبرنامه Ecency",
+    "status_active": "مشترک هستید.",
+    "status_pending": "در انتظار تأیید ایمیل.",
+    "status_short_active": "فعال",
+    "status_short_pending_confirmation": "در انتظار",
+    "status_short_suppressed": "متوقف",
+    "status_short_ended": "پایان‌یافته",
+    "cadence_weekly": "هفتگی",
+    "cadence_monthly": "ماهانه",
+    "email_placeholder": "you@example.com",
+    "subscribe": "اشتراک",
+    "update": "به‌روزرسانی",
+    "resend": "ارسال دوباره تأییدیه",
+    "leave": "ترک خلاصه",
+    "cancel": "لغو",
+    "ok": "تأیید",
+    "manage": "مدیریت",
+    "check_inbox_title": "صندوق ایمیل خود را بررسی کنید",
+    "check_inbox_body": "پیوند تأیید به {email} ارسال شد. اشتراک پس از تأیید شما آغاز می‌شود.",
+    "subscribed": "در خلاصه ایمیلی مشترک شدید",
+    "left": "خلاصه ترک شد",
+    "refused": "این نشانی را نمی‌توان مشترک کرد.",
+    "unavailable": "خلاصه‌های ایمیلی در حال حاضر در دسترس نیستند.",
+    "too_many": "تلاش‌ها بیش از حد است، لطفاً بعداً دوباره تلاش کنید.",
+    "fail": "مشکلی پیش آمد، لطفاً دوباره تلاش کنید.",
+    "empty": "هنوز خلاصه ایمیلی ندارید. برای شروع، در پایین مشترک شوید.",
+    "discover": "دریافت بیشتر از طریق ایمیل",
+    "stop_all": "توقف همه",
+    "stop_all_title": "همه ایمیل‌ها متوقف شود؟",
+    "stop_all_body": "دیگر هیچ ایمیلی از Ecency به {email} ارسال نخواهد شد. اشتراک‌های نشانی‌های دیگر باقی می‌مانند.",
+    "stop_all_ok": "توقف همه",
+    "stop_all_done": "اشتراک نشانی از همه ایمیل‌ها لغو شد",
+    "profile_option": "خلاصه ایمیلی",
+    "subscriber_count": "{weekly} مشترک هفتگی • {monthly} مشترک ماهانه ایمیل",
+    "community_button": "خبرنامه"
+  },
+  "mod_notes": {
+    "title": "افزودن دلیل",
+    "placeholder": "دلیل (برای دیگر ناظران قابل مشاهده)",
+    "confirm": "تأیید",
+    "cancel": "لغو"
+  },
+  "community_settings": {
+    "title_header": "تنظیمات انجمن",
+    "title_label": "عنوان",
+    "about": "درباره",
+    "lang": "زبان",
+    "description": "توضیحات",
+    "rules": "قوانین",
+    "nsfw": "نامناسب برای محیط کار",
+    "save": "ذخیره",
+    "required": "الزامی",
+    "title_length": "بین {min} تا {max} نویسه",
+    "owner_admin_only": "فقط مالک و مدیران می‌توانند این تنظیمات را تغییر دهند."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "باز شده",
+        "collapsed": "بسته شده"
+      },
+      "a11y_chat": {
+        "quote": "در پاسخ به {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "انتخاب",
+        "deselect": "لغو انتخاب"
+      },
+      "store": {
+        "billing_unavailable": "خریدهای درون‌برنامه‌ای در این دستگاه مجاز نیست.",
+        "verification_failed": "App Store نتوانست این خرید را تأیید کند.",
+        "cancelled": "خرید لغو شد",
+        "unknown_result": "نتیجه خرید نامشخص است"
+      },
+      "navigation": {
+        "feed_unavailable": "این فید هنوز در دسترس نیست.",
+        "link_cannot_open": "این پیوند باز نمی‌شود.",
+        "video_cannot_play": "این ویدیو پخش نمی‌شود."
+      },
+      "media": {
+        "load_failed": "این مورد بارگیری نشد. اتصال خود را بررسی و دوباره تلاش کنید.",
+        "loading": "در حال بارگیری رسانه",
+        "download_failed": "دانلود با وضعیت {status} ناموفق بود"
+      },
+      "sign_in": {
+        "required": "ورود لازم است",
+        "to_reply": "برای پاسخ دادن وارد شوید.",
+        "to_vote": "برای رأی دادن وارد شوید.",
+        "button": "ورود"
+      },
+      "account": {
+        "logout_user": "خروج @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# رأی} other {# رأی}}  •  {replies, plural, one {# پاسخ} other {# پاسخ}}",
+        "voting_power": "قدرت رأی {percent}",
+        "remove_favourite": "حذف از موارد دلخواه",
+        "add_favourite": "افزودن به موارد دلخواه"
+      },
+      "waves": {
+        "clear_tag_filter": "پاک کردن فیلتر برچسب {tag}",
+        "new_wave": "Wave جدید",
+        "replies_open_thread": "{count, plural, one {# پاسخ، باز کردن رشته} other {# پاسخ، باز کردن رشته}}",
+        "characters": "{count} از {max} نویسه",
+        "retry": "{message}\nتلاش دوباره",
+        "playing": "در حال پخش {permlink}",
+        "video_attached_remove": "ویدیو پیوست شد، حذف",
+        "image_attached_remove": "تصویر پیوست شد، حذف",
+        "take_photo": "گرفتن عکس",
+        "edit_poll": "ویرایش نظرسنجی",
+        "add_poll": "افزودن نظرسنجی",
+        "add_video": "افزودن ویدیو"
+      },
+      "reading": {
+        "reply_to": "پاسخ به {username}",
+        "opens_post": "پست را باز می‌کند",
+        "sort_comments": "مرتب‌سازی نظرات",
+        "sort_comments_value": "مرتب‌سازی نظرات، {sort}",
+        "no_comments": "هنوز نظری نیست.",
+        "loading_post": "در حال بارگیری پست",
+        "show_version": "نمایش نسخه",
+        "show_changes": "نمایش تغییرات",
+        "replying_to": "در پاسخ به @{username}",
+        "reply_text": "متن پاسخ",
+        "translate_from": "از",
+        "translate_to": "به"
+      },
+      "feed": {
+        "tab_pinned": "{label}، سنجاق‌شده",
+        "tab_add": "{label}، افزودن",
+        "customise": "شخصی‌سازی"
+      },
+      "card": {
+        "in_category": "در {category}",
+        "pinned": "سنجاق‌شده",
+        "by_author": "توسط {username}",
+        "payout": "پرداخت {payout}",
+        "payout_declined": "پرداخت {payout}، ردشده",
+        "reblogged_by": "بازنشر توسط {username}"
+      },
+      "shell": {
+        "close_menu": "بستن منو"
+      },
+      "editor": {
+        "thumbnail_pick_another": "تصویر بندانگشتی، انتخاب تصویر دیگر",
+        "words": "{count, plural, one {# کلمه} other {# کلمه}}",
+        "poll_min_age": "حداقل سن حساب (روز): {days}",
+        "poll_max_options": "حداکثر گزینه‌ها: {count}",
+        "thumbnail_selected": "تصویر بندانگشتی انتخاب‌شده",
+        "thumbnail": "تصویر بندانگشتی",
+        "uploaded_image": "تصویر بارگذاری‌شده",
+        "community_search": "جستجو"
+      },
+      "vote": {
+        "not_voted": "رأی داده نشده",
+        "voting": "در حال رأی دادن",
+        "failed_with": "رأی ناموفق بود: {message}",
+        "failed": "رأی ناموفق بود",
+        "payout": "پرداخت {payout}",
+        "payout_declined": "پرداخت {payout}، ردشده",
+        "percent": "{percent} درصد",
+        "upvote_percent": "رأی مثبت {percent}%"
+      },
+      "settings": {
+        "on": "روشن",
+        "off": "خاموش"
+      },
+      "lock": {
+        "biometric_reason": "قفل‌گشایی زیستی را برای Ecency روشن کنید",
+        "offer_title": "قفل‌گشایی با {method}",
+        "offer_use": "استفاده از {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "هنگام ضبط یا انعکاس صفحه، کلیدها پنهان می‌شوند.",
+        "screenshot_notice": "یک اسکرین‌شات گرفته شد. کلیدهای خصوصی دوباره پنهان شدند؛ اگر اسکرین‌شات کلیدی را نشان می‌دهد، آن را حذف کنید.",
+        "hold_hint": "برای نمایش یک کلید، آن را فشار دهید و نگه دارید.",
+        "hold_to_show": "برای نمایش نگه دارید"
+      },
+      "wallet": {
+        "cancel_order": "این سفارش لغو شود؟",
+        "days": "{count, plural, one {# روز} other {# روز}}"
+      },
+      "chat": {
+        "reactors_hint": "برای دیدن واکنش‌دهندگان، نگه دارید",
+        "see_reactors": "دیدن واکنش‌دهندگان"
+      },
+      "esie": {
+        "still": "{mood}، ثابت"
+      }
+    },
+    "ui": {
+      "profile_of": "پروفایل @{username}",
+      "preview": "پیش‌نمایش ({index}/{count})",
+      "balance": "موجودی: {amount}",
+      "expires_in": "انقضا تا {time}",
+      "expired": "منقضی شد. ببندید و دوباره تلاش کنید.",
+      "user_has_no_posts": "@{username} هنوز چیزی پست نکرده است",
+      "attach_image": "پیوست تصویر",
+      "auto": "خودکار",
+      "back": "بازگشت",
+      "hot": "داغ",
+      "image_of": "تصویر {index} از {count}",
+      "new": "جدید",
+      "nsfw_tap_to_reveal": "نامناسب. برای نمایش ضربه بزنید",
+      "new_reply": "پاسخ جدید",
+      "remove": "حذف",
+      "unlock_ecency": "قفل‌گشایی Ecency",
+      "update_it": "به‌روزرسانی",
+      "update_it_or_post_this_as": "به‌روزرسانی کنید، یا این را پاسخ جدید ارسال کنید؟",
+      "use_pin": "استفاده از PIN",
+      "your_reply_was_already_posted": "پاسخ شما قبلاً ارسال شده است",
+      "error_try_again": "{message} دوباره تلاش شود؟",
+      "auth": {
+        "account_label": "حساب: @{username}",
+        "approve_the_request_in_your_wallet": "درخواست را در برنامه کیف پول خود تأیید کنید.",
+        "copy_key": "کپی {title}",
+        "current_account": "حساب فعلی",
+        "qr_code": "کد QR",
+        "requested_by": "درخواست‌شده توسط {requester}",
+        "pin_digits": "{filled} از {total, plural, one {# رقم} other {# رقم}}",
+        "private_key_shown": "{title}، کلید خصوصی نمایش داده شد",
+        "open_wallet_app": "باز کردن برنامه کیف پول",
+        "hiveauth_scan": "در Hive Keychain یا کیف پول دیگر HiveAuth تأیید کنید: آن را در همین دستگاه باز کنید یا این کد را با آن اسکن کنید.",
+        "switching": "در حال تعویض...",
+        "logout_all": "خروج از همه حساب‌ها",
+        "logout_all_title": "از همه حساب‌های این دستگاه خارج می‌شوید؟",
+        "stored_key": "@{username} از قبل در این دستگاه وارد شده است. کلیدهای ذخیره‌شده‌اش می‌مانند؛ فقط نشست آن تمدید می‌شود.",
+        "stored_hivesigner": "@{username} از قبل با HiveSigner در این دستگاه وارد شده است. نشست آن جایگزین می‌شود.",
+        "stored_hiveauth": "@{username} با HiveAuth در این دستگاه وارد شده است. به‌جای آن با HiveSigner امضا خواهد کرد.",
+        "method_key": "کلید",
+        "logout_failed": "خروج ناموفق بود"
+      },
+      "browser": {
+        "account": "حساب",
+        "authority": "مرجع تأیید",
+        "phishing": "هشدار: این دامنه به‌عنوان یک سایت فیشینگ شناخته‌شده علامت‌گذاری شده است. با نهایت احتیاط ادامه دهید."
+      },
+      "chat": {
+        "cancel_edit": "لغو ویرایش",
+        "cancel_reply": "لغو پاسخ",
+        "copied_to_clipboard": "در کلیپ‌بورد کپی شد",
+        "edited_at": "ویرایش‌شده {time}",
+        "group_options": "گزینه‌های گروه",
+        "pinned_messages": "پیام‌های سنجاق‌شده",
+        "remove_user": "حذف @{username}",
+        "sort_by_name": "مرتب‌سازی بر اساس نام",
+        "more": "بیشتر",
+        "reaction_label": "{emoji} {count}. برای دیدن واکنش‌دهندگان، نگه دارید",
+        "members": "اعضا"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "پستی در این پیوند وجود دارد و با آنچه فرستادید تفاوت دارد. به‌روزرسانی شود یا به‌عنوان جدید منتشر شود؟",
+        "a_scheduled_post_is_published_by": "پست زمان‌بندی‌شده در زمان انتخابی توسط Ecency منتشر می‌شود. این کار به اختیار posting برای ecency.app در حساب شما نیاز دارد. کلیدها و دیگر اختیارات شما بدون تغییر می‌مانند. اعطای آن به کلید active شما نیاز دارد.",
+        "ai_assist": "دستیار هوش مصنوعی",
+        "ai_tools": "ابزارهای هوش مصنوعی",
+        "allow_ecency_to_publish_for_you": "به Ecency اجازه می‌دهید به‌جای شما منتشر کند؟",
+        "bold": "پررنگ",
+        "clone": "کپی",
+        "cost": "هزینه: {cost}",
+        "could_not_store_the_draft_on": "پیش‌نویس روی این دستگاه ذخیره نشد. برنامه را باز نگه دارید و پیش‌نویس را ذخیره کنید.",
+        "draft": "پیش‌نویس",
+        "delete_count": "حذف ({count})",
+        "dictate_desc": "صحبت کنید تا متن پیاده‌شده در پست شما قرار گیرد",
+        "discard": "دور انداختن",
+        "discard_changes": "تغییرات دور انداخته شود؟",
+        "grant": "اعطا",
+        "italic": "کج",
+        "keep_editing": "ادامه ویرایش",
+        "my_blog": "وبلاگ من",
+        "my_communities": "انجمن‌های من",
+        "new_post": "پست جدید",
+        "notice": "توجه",
+        "restore": "بازیابی",
+        "restore_unsaved_changes": "تغییرات ذخیره‌نشده بازیابی شود؟",
+        "saved": "ذخیره شد",
+        "top_communities": "انجمن‌های برتر",
+        "table": "جدول",
+        "text_format": "قالب متن",
+        "this_link_is_already_in_use": "این پیوند قبلاً استفاده شده است",
+        "untitled": "بدون عنوان",
+        "update_it_or_publish_this_as": "به‌روزرسانی شود یا به‌عنوان پست جدید منتشر شود؟",
+        "you_have_unsaved_changes_from_an": "تغییرات ذخیره‌نشده‌ای از ویرایش قبلی دارید. پست از آن زمان تغییر کرده است؛ بازیابی آن‌ها متن زیر را جایگزین می‌کند.",
+        "your_edits_were_not_published": "ویرایش‌های شما منتشر نشد.",
+        "your_post_was_already_published": "پست شما قبلاً منتشر شده است",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "تصویر بندانگشتی، برای انتخاب تصویر دیگر ضربه بزنید",
+        "thumbnail_number": "تصویر بندانگشتی {number}",
+        "recording_busy": "یک ضبط از قبل در جریان است. ابتدا آن را در دوربین تمام کنید.",
+        "photo_lost": "عکس هنگام باز بودن دوربین از بین رفت. لطفاً دوباره بگیرید.",
+        "add_snippet_button": "+ قطعه",
+        "words_count": "{count, plural, one {# کلمه} other {# کلمه}}",
+        "community_search": "جستجو"
+      },
+      "profile": {
+        "open_wallet": "باز کردن کیف پول",
+        "your_wallet_is_on_the_wallet": "کیف پول شما در برگه کیف پول است.",
+        "user_has_no_comments": "@{username} هنوز نظری نداده است",
+        "votes_count": "{count, plural, one {# رأی} other {# رأی}}",
+        "replies_count": "{count, plural, one {# پاسخ} other {# پاسخ}}",
+        "menu": "بیشتر",
+        "users": "کاربران"
+      },
+      "reading": {
+        "apply": "اعمال",
+        "add_tag": "افزودن برچسب",
+        "age": "سن",
+        "audio_language": "زبان صوت",
+        "available_filters": "فیلترهای موجود",
+        "could_not_unlock_the_audio_please": "صوت باز نشد، لطفاً دوباره تلاش کنید",
+        "downvote": "رأی منفی",
+        "downvote_percent": "رأی منفی {percent}%",
+        "listen_to_this_post": "گوش دادن به این پست",
+        "log_in": "ورود",
+        "mark_all_as_read": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+        "mark_as_read": "علامت‌گذاری به‌عنوان خوانده‌شده",
+        "more_replies": "پاسخ‌های بیشتر",
+        "not_enough_points": "Points کافی نیست",
+        "nothing_here_yet": "هنوز چیزی اینجا نیست.",
+        "open_editor": "باز کردن ویرایشگر",
+        "pause_voice": "توقف صدا",
+        "play_voice": "پخش صدا",
+        "playback_speed": "سرعت پخش",
+        "publishing_in_waves": "انتشار در Waves",
+        "quests_done": "مأموریت‌های انجام‌شده",
+        "read": "خواندن",
+        "remove_vote": "حذف رأی",
+        "seek": "جابه‌جایی",
+        "select_community": "انتخاب انجمن",
+        "selected_filters": "فیلترهای انتخاب‌شده",
+        "the_audio_could_not_be_loaded": "صوت بارگیری نشد.",
+        "this_post_does_not_exist_or": "این پست وجود ندارد یا حذف شده است.",
+        "unread": "خوانده‌نشده",
+        "voice_position": "جایگاه صدا",
+        "vote_weight": "وزن رأی",
+        "reblogged_by": "بازنشر توسط {username}",
+        "no_more_posts": "پست دیگری نیست.",
+        "favourite": "دلخواه",
+        "no_votes_yet": "هنوز رأیی نیست",
+        "no_comments_yet": "هنوز نظری نیست. اولین نفر باشید!",
+        "comments_count": "نظرات ({count})",
+        "sending_to_chain": "در حال ارسال به زنجیره",
+        "compare": "مقایسه",
+        "your_vote": "رأی شما",
+        "reply_to": "پاسخ به @{username}",
+        "what_do_you_think": "نظر شما چیست؟",
+        "clear_tag_filter": "پاک کردن فیلتر برچسب",
+        "tab_selected": "{title}، انتخاب‌شده",
+        "add_tag_feed": "افزودن فید برچسب",
+        "feed_pinned": "{label}، سنجاق‌شده",
+        "attached_image_remove": "تصویر پیوست‌شده، برای حذف ضربه بزنید",
+        "camera": "دوربین",
+        "files": "فایل‌ها",
+        "paused": "متوقف‌شده",
+        "in_topic": "در {topic}",
+        "poll_vote": "رأی",
+        "reply": "پاسخ",
+        "mute_sound": "بی‌صدا",
+        "unmute_sound": "باصدا",
+        "leaderboard_activities": "فعالیت‌ها",
+        "leaderboard_reward": "پاداش",
+        "sort_votes": "رأی‌ها"
+      },
+      "shell": {
+        "account_of": "حساب @{username}",
+        "account_signed_out": "حساب، خارج‌شده",
+        "close_tab": "بستن زبانه",
+        "coming_soon_to_the_native_app": "به‌زودی در برنامه بومی.",
+        "create": "ایجاد",
+        "expand": "باز کردن",
+        "forward": "جلو",
+        "loading": "در حال بارگیری",
+        "new_tab": "زبانه جدید",
+        "reload": "بارگیری مجدد",
+        "sent": "ارسال شد",
+        "tab_unread": "{title}، {count} خوانده‌نشده",
+        "no_app_for_link": "هیچ برنامه‌ای نمی‌تواند این پیوند را باز کند."
+      },
+      "wallet": {
+        "product_not_available": "محصول در دسترس نیست.",
+        "repeat": "تکرار"
+      },
+      "copied": "کپی شد",
+      "trending_caps": "پرطرفدار",
+      "move_up": "انتقال به بالا",
+      "move_down": "انتقال به پایین",
+      "scroll_to_top": "رفتن به بالا",
+      "load_more": "بیشتر"
+    },
+    "wallet": {
+      "checking": "در حال بررسی با شبکه",
+      "leave_title": "هنوز در حال ارسال",
+      "leave_message": "این مورد هنوز در حال ارسال یا بررسی با شبکه است. می‌توانید از این صفحه خارج شوید: برنامه پایان آن را به شما اطلاع می‌دهد.",
+      "stay": "ماندن",
+      "collateralized_convert_request": "درخواست تبدیل وثیقه‌دار",
+      "op_transfer": "انتقال",
+      "op_power_up": "افزایش قدرت",
+      "op_power_down_change": "تغییر کاهش قدرت",
+      "op_delegation": "واگذاری",
+      "op_savings_deposit": "سپرده پس‌انداز",
+      "op_savings_withdrawal": "برداشت پس‌انداز",
+      "op_conversion": "تبدیل",
+      "op_swap": "مبادله",
+      "op_order_cancel": "لغو سفارش",
+      "op_reward_claim": "دریافت پاداش",
+      "op_withdraw_route_change": "تغییر مسیر برداشت",
+      "op_token_operation": "عملیات توکن"
+    },
+    "notification": {
+      "amount_unknown": "مبلغ در دسترس نیست",
+      "weekly_earnings_breakdown": "این هفته ${amount} کسب کردید - ${authorUsd} از پست‌ها، ${curationUsd} از کیوریشن.",
+      "weekly_earnings_total": "این هفته ${amount} از پست‌ها و کیوریشن خود کسب کردید."
+    },
+    "settings": {
+      "open": "باز کردن",
+      "feedback_subject": "بازخورد/گزارش خطا",
+      "unknown_user": "کاربر ناشناس"
+    },
+    "navigation": {
+      "editor": "ویرایشگر",
+      "followers": "دنبال‌کنندگان",
+      "spin_game": "بازی چرخش",
+      "edit_profile": "ویرایش پروفایل",
+      "redeem_points": "بازخرید امتیاز",
+      "community": "انجمن",
+      "community_members": "اعضای انجمن",
+      "community_activities": "فعالیت‌های انجمن",
+      "browser": "مرورگر",
+      "asset_details": "جزئیات دارایی",
+      "edit_history": "تاریخچه ویرایش",
+      "welcome": "خوش آمدید",
+      "chat": "گفتگو",
+      "backup_keys": "پشتیبان‌گیری از کلیدها",
+      "trade": "معامله",
+      "ai_image_generator": "تولیدکننده تصویر هوش مصنوعی",
+      "select_assets": "انتخاب دارایی‌ها",
+      "poll": "نظرسنجی",
+      "bot_comments": "نظرات ربات"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "عملیاتی که به کلید owner نیاز دارند در Ecency امضا نمی‌شوند.",
+      "post": "پست/نظر",
+      "custom": "JSON سفارشی",
+      "sign_buffer": "امضای پیام",
+      "send_token": "ارسال توکن",
+      "witness_vote": "رأی به witness",
+      "proxy": "تعیین پروکسی",
+      "power_up": "افزایش قدرت",
+      "power_down": "کاهش قدرت",
+      "broadcast": "پخش",
+      "sign_tx": "امضای تراکنش",
+      "encode": "رمزگذاری پیام",
+      "decode": "تأیید کلید",
+      "add_account_authority": "افزودن اختیار حساب",
+      "remove_account_authority": "حذف اختیار حساب",
+      "add_key_authority": "افزودن اختیار کلید",
+      "remove_key_authority": "حذف اختیار کلید",
+      "create_claimed_account": "ایجاد حساب",
+      "create_proposal": "ایجاد پیشنهاد",
+      "remove_proposal": "حذف پیشنهاد",
+      "update_proposal_vote": "رأی به پیشنهاد",
+      "signed_call": "فراخوان امضاشده"
+    },
+    "translate_language": {
+      "ar": "عربی",
+      "az": "آذربایجانی",
+      "bg": "بلغاری",
+      "bn": "بنگالی",
+      "ca": "کاتالان",
+      "cs": "چکی",
+      "da": "دانمارکی",
+      "de": "آلمانی",
+      "el": "یونانی",
+      "en": "انگلیسی",
+      "eo": "اسپرانتو",
+      "es": "اسپانیایی",
+      "et": "استونیایی",
+      "fa": "فارسی",
+      "fi": "فنلاندی",
+      "fr": "فرانسوی",
+      "ga": "ایرلندی",
+      "he": "عبری",
+      "hi": "هندی",
+      "hu": "مجارستانی",
+      "id": "اندونزیایی",
+      "it": "ایتالیایی",
+      "ja": "ژاپنی",
+      "ko": "کره‌ای",
+      "lt": "لیتوانیایی",
+      "lv": "لتونیایی",
+      "ms": "مالایی",
+      "nb": "نروژی",
+      "nl": "هلندی",
+      "pl": "لهستانی",
+      "pt": "پرتغالی",
+      "ro": "رومانیایی",
+      "ru": "روسی",
+      "sk": "اسلواکی",
+      "sl": "اسلووِنیایی",
+      "sq": "آلبانیایی",
+      "sv": "سوئدی",
+      "th": "تایلندی",
+      "tl": "تاگالوگ",
+      "tr": "ترکی",
+      "uk": "اوکراینی",
+      "zh": "چینی",
+      "zt": "چینی (سنتی)"
+    },
+    "reading": {
+      "banner_text": "این پست به زبان {source} است. به {target} ترجمه شود؟",
+      "translated_from_text": "ترجمه‌شده از {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# عضو} other {# عضو}} • {authors, plural, one {# نویسنده} other {# نویسنده}} • {posts, plural, one {# پست} other {# پست}}",
+      "community_title": "انجمن {title}",
+      "members_title": "اعضای {title}",
+      "activities_title": "فعالیت {title}",
+      "cannot_start_with_or": "نمی‌تواند با @ یا # شروع شود",
+      "use_a_two_letter": "یک کد زبان دو حرفی مانند en استفاده کنید",
+      "at_most_characters": "حداکثر {max, plural, one {# نویسه} other {# نویسه}}",
+      "council": "شورا",
+      "journal": "ژورنال",
+      "topic": "موضوع",
+      "community_not_found": "انجمن پیدا نشد."
+    },
+    "transfer": {
+      "one_recipient": "برای این انتقال فقط یک گیرنده می‌تواند باشد.",
+      "is_an_exchange_and": "{exchange} یک صرافی است و ممکن است از انتقال‌های دوره‌ای پشتیبانی نکند: وجوه ارسالی زمان‌بندی‌شده ممکن است از دست بروند. به‌جای آن از انتقال یک‌باره استفاده کنید."
+    },
+    "dapps": {
+      "signing_info": "Ecency به‌عنوان افزونه امضای Hive شما عمل می‌کند. وقتی یک dApp از شما می‌خواهد با افزونه مرورگری مانند Keychain، Keeper یا Peak Vault وارد شوید، همان گزینه را انتخاب کنید. Ecency امضا را به‌صورت امن انجام می‌دهد.",
+      "category_social": "اجتماعی",
+      "category_gaming": "بازی",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "گروه",
+      "unable_to_load_messages": "پیام‌ها بارگیری نشدند.",
+      "someone": "یک نفر",
+      "renamed_the_group_to": "{actor} نام گروه را به «{name}» تغییر داد",
+      "removed_the_group_name": "{actor} نام گروه را حذف کرد",
+      "unable_to_send_your": "پیام شما ارسال نشد.",
+      "unable_to_remove_message": "پیام حذف نشد.",
+      "unknown": "ناشناس",
+      "members_online": "{members, plural, one {# عضو} other {# عضو}} • {online} آنلاین",
+      "failed_to_load_pinned": "پیام‌های سنجاق‌شده بارگیری نشدند",
+      "you": "شما",
+      "title": "واکنش‌ها"
+    },
+    "tip": {
+      "login_required": "برای ارسال انعام وارد شوید",
+      "max_decimals": "حداکثر {n, plural, one {# رقم اعشار} other {# رقم اعشار}}"
+    },
+    "paid": {
+      "check_again": "بررسی دوباره",
+      "give_up": "انصراف",
+      "unknown": "هنوز پاسخی نیست. ممکن است درخواست هنوز در حال اجرا باشد. برای دریافت نتیجه دوباره بررسی کنید: بار دوم هزینه‌ای کسر نمی‌شود.",
+      "pending": "درخواست شما هنوز در حال پردازش است. چند لحظه بعد دوباره بررسی کنید: بار دوم هزینه‌ای کسر نمی‌شود.",
+      "restored": "درخواستی قبلی هنوز پاسخی ندارد. برای دریافت نتیجه دوباره بررسی کنید: بار دوم هزینه‌ای کسر نمی‌شود.",
+      "give_up_confirm": "اگر درخواست انجام شده باشد، امتیازها خرج شده‌اند و نتیجه از دست می‌رود.",
+      "not_stored": "این درخواست روی دستگاه ذخیره نشد. این صفحه را تا پایان کار باز نگه دارید.",
+      "sign_in_again": "نشست شما منقضی شده است. دوباره وارد شوید، سپس دوباره بررسی کنید.",
+      "other_account": "این متعلق به @{owner} است. برای ادامه به آن حساب برگردید."
+    },
+    "ai": {
+      "run_ai_assist": "اجرای دستیار هوش مصنوعی ({costText})",
+      "no_longer_free_cost": "این اجرا امروز دیگر رایگان نیست. هزینه آن {cost} {unit} است.",
+      "no_longer_free": "این اجرا امروز دیگر رایگان نیست.",
+      "content_violates_our_content": "محتوا سیاست محتوای ما را نقض می‌کند. لطفاً متن خود را تغییر دهید. امتیازها بازگردانده نشدند.",
+      "generate_image": "تولید تصویر ({costLabel})",
+      "use_prompt": "استفاده: «{prompt}»"
+    },
+    "post_actions": {
+      "busy": "لطفاً صبر کنید، اقدام دیگری در جریان است",
+      "not_a_community_post": "پست انجمن نیست.",
+      "parent_post_not_found": "پست والد پیدا نشد",
+      "the_account_changed": "حساب تغییر کرد."
+    },
+    "dictation": {
+      "balance": "موجودی: {balance} {unit}",
+      "stop_points": "توقف ({cost} Points)",
+      "stop_free": "توقف (رایگان)",
+      "transcribe_points": "تبدیل به متن ({cost} Points)",
+      "transcribe": "تبدیل به متن",
+      "no_longer_free_cost": "این ضبط امروز دیگر رایگان نیست. هزینه آن {cost} Points است.",
+      "no_longer_free": "این ضبط امروز دیگر رایگان نیست.",
+      "held_locked": "ضبط با قفل شدن Ecency متوقف شد. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
+      "held_no_background": "ضبط با خروج Ecency از صفحه متوقف شد (نتوانست اعلان ضبط را نشان دهد). چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
+      "held_stopped": "ضبط از طریق اعلان متوقف شد. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
+      "held_focus_lost": "ضبط به‌دلیل تماس یا صدای برنامه‌ای دیگر متوقف شد. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
+      "held_interrupted": "ضبط متوقف شد، زیرا برنامه‌ای دیگر میکروفون را گرفت. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
+      "unavailable": "ضبط در این دستگاه در دسترس نیست.",
+      "not_read": "این ضبط خوانده نشد یا بیش از حد بزرگ است. چیزی ارسال نشد و هزینه‌ای کسر نشد.",
+      "give_up_not_sent": "این ضبط ارسال نشد، پس هزینه‌ای کسر نشد. حذف خواهد شد.",
+      "give_up_not_charged": "برای این ضبط هزینه‌ای کسر نشد. حذف خواهد شد.",
+      "clip_lost": "ضبط یک درخواست قبلی دیگر روی این دستگاه نیست. اگر آن درخواست انجام شده باشد، امتیازهای شما خرج شده‌اند و متن آن قابل دریافت نیست."
+    },
+    "register": {
+      "error_code_28": "درخواست شما پردازش نشد. صف ثبت‌نام احتمالاً پر است. لطفاً چند دقیقه دیگر دوباره تلاش کنید."
+    },
+    "perks": {
+      "quests_empty": "هنوز مأموریتی اینجا نیست، به‌زودی سر بزنید.",
+      "freeze_confirm_title": "از پیوستگی خود محافظت کنید",
+      "spend_points_on_a": "{price} Points برای یخ‌زدن پیوستگی خرج شود؟ در روزی که غایب باشید، برای حفظ پیوستگی شما مصرف می‌شود."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "از Ecency حمایت کنید، وبلاگ رایگان بگیرید و با نشان تأییدشده Pro متمایز شوید.",
+      "card_description": "با {price} در سال Pro شوید. نشان تأییدشده، وبلاگ رایگان و حمایت از Ecency.",
+      "card_description_plain": "یک‌ساله Pro شوید. نشان تأییدشده، وبلاگ رایگان و حمایت از Ecency.",
+      "member": "شما عضو Pro هستید.",
+      "benefit_badge": "یک نشان تأییدشده Pro کنار نام شما.",
+      "benefit_blog": "یک وبلاگ رایگان در yourname.blogs.ecency.com.",
+      "benefit_support": "حمایت مستقیم از توسعه Ecency.",
+      "benefit_early": "دسترسی زودهنگام به قابلیت‌های جدید.",
+      "buy": "دریافت Pro با {price} در سال",
+      "extend": "تمدید ۱۲ ماهه با {price}",
+      "extend_note": "خرید دوباره ۱۲ ماه به عضویت شما می‌افزاید.",
+      "unavailable": "Ecency Pro در حال حاضر از فروشگاه در دسترس نیست.",
+      "activating": "پرداخت دریافت شد. در حال فعال‌سازی عضویت شما.",
+      "success_title": "به Ecency Pro خوش آمدید",
+      "success_body": "عضویت Pro شما فعال است. نشان شما به‌زودی در پروفایل‌تان ظاهر می‌شود.",
+      "extending": "پرداخت دریافت شد. عضویت Pro شما ۱۲ ماه تمدید می‌شود.",
+      "open_a11y": "باز کردن Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "در حال ذخیره پیش‌نویس...",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید.",
+      "fetch_failed": "دریافت ناموفق بود.",
+      "you_can_only_edit": "فقط می‌توانید محتوای خودتان را ویرایش کنید.",
+      "invalid_percent": "درصد نامعتبر",
+      "beneficiary_exists_already": "ذینفع از قبل وجود دارد",
+      "this_draft_belongs_to": "این پیش‌نویس متعلق به @{owner} است. برای انتشار آن به آن حساب برگردید.",
+      "could_not_make_a": "پیوند جدیدی برای این پست ساخته نشد. عنوان را کمی تغییر دهید و دوباره تلاش کنید.",
+      "an_earlier_attempt_was": "تلاشی قبلی پس از این تلاش منتشر شد. بررسی کنید کدام نسخه را می‌خواهید نگه دارید.",
+      "could_not_check_your": "اختیار posting حساب شما بررسی نشد. اتصال خود را بررسی و دوباره تلاش کنید.",
+      "this_post_was_changed": "این پست از زمان باز کردن شما در جای دیگری تغییر کرده است. متن خود را کپی کنید، برگردید و دوباره باز کنید تا آخرین نسخه را ویرایش کنید.",
+      "link_text_placeholder": "متن اینجا"
+    },
+    "app_error": {
+      "this_reply_is_too": "این پاسخ بیش از حد طولانی است.",
+      "the_network_refused_this": "شبکه این اقدام را نپذیرفت.",
+      "invalid_input": "ورودی نامعتبر.",
+      "secure_storage_is_unavailable": "حافظه امن در دسترس نیست. لطفاً دوباره وارد شوید.",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید.",
+      "these_credentials_belong_to": "این اعتبارنامه‌ها متعلق به @{actual} است، نه @{expected}.",
+      "is_not_signed_in": "@{username} در این دستگاه وارد نشده است.",
+      "key_required": "برای انجام این تراکنش کلید {role} لازم است. {hint}",
+      "cancelled": "لغو شد.",
+      "the_request_was_rejected": "درخواست در برنامه کیف پول رد شد.",
+      "the_request_expired_before": "درخواست پیش از پاسخ برنامه کیف پول منقضی شد. لطفاً دوباره تلاش کنید.",
+      "could_not_reach_the": "اتصال به سرور HiveAuth برقرار نشد. لطفاً دوباره تلاش کنید.",
+      "unexpected_redirect": "سرور تغییر مسیر غیرمنتظره‌ای فرستاد. چیزی تغییر نکرد. لطفاً بعداً دوباره تلاش کنید.",
+      "missing_key_hint": "آن را در تنظیمات، مدیریت اختیارات (وارد کردن کلید خصوصی) اضافه کنید، یا دوباره با آن وارد شوید.",
+      "this_key_is_also": "این کلید همچنین کلید owner این حساب است. Ecency کلیدی را که نقش owner را کنترل می‌کند نگه نمی‌دارد: برای نقش‌های active و posting کلیدهای جداگانه بسازید، سپس با آن‌ها وارد شوید.",
+      "this_is_the_owner": "این کلید owner است. Ecency هرگز کلید owner را ذخیره یا استفاده نمی‌کند: با رمز اصلی یا کلید posting یا active وارد شوید.",
+      "this_password_only_matches": "این رمز فقط با کلید owner حساب مطابقت دارد. Ecency هرگز کلید owner را ذخیره یا استفاده نمی‌کند: با کلید posting یا active وارد شوید.",
+      "this_key_cannot_sign": "این کلید به‌تنهایی نمی‌تواند برای حساب امضا کند: حساب به بیش از یک امضا نیاز دارد (وزن آن کمتر از آستانه است).",
+      "public_key_given": "این کلید عمومی شماست. کلید خصوصی (با 5 شروع می‌شود) یا رمز اصلی خود را جای‌گذاری کنید.",
+      "memo_key_only": "کلید memo را نمی‌توان برای ورود استفاده کرد. از کلید posting، کلید active یا رمز اصلی استفاده کنید.",
+      "network_message": "خطای شبکه. لطفاً اتصال خود را بررسی و دوباره تلاش کنید.",
+      "network_error_this_may": "خطای شبکه. ممکن است از قبل انجام شده باشد؛ تلاش مجدد ایمن است و دو بار پست نمی‌شود."
+    },
+    "purchases": {
+      "deal_best": "بهترین پیشنهاد!",
+      "deal_popular": "محبوب!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "فروشگاه پاسخ نداد."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "برای مصرف 999accounts ایمیل و نام کاربری لازم است",
+      "stuck": "خریدی قبلی از این محصول تکمیل نشد. لطفاً با رسید فروشگاه خود با support@ecency.com تماس بگیرید؛ برای همین نگه داشته شده است.",
+      "held": "این خرید برای بررسی نگه داشته شده است. با شماره سفارش #{order} با support@ecency.com تماس بگیرید.",
+      "earlier_purchase": "خریدی قبلی از این محصول ابتدا برای @{target} در حال تکمیل است.",
+      "earlier_pending": "پرداختی قبلی برای این محصول برای @{target} هنوز در انتظار است. پس از تأیید پرداخت توسط فروشگاه تکمیل می‌شود.",
+      "pending": "پرداخت شما در انتظار است. خرید پس از تأیید پرداخت توسط فروشگاه تکمیل می‌شود.",
+      "processing": "خرید شما در حال پردازش است. به‌زودی تکمیل می‌شود."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "انتقال‌های دوره‌ای",
+      "delegate_hive_power": "واگذاری Hive Power",
+      "power_up": "افزایش قدرت",
+      "set_withdraw_vesting_route": "تعیین مسیر برداشت وستینگ",
+      "power_down": "کاهش قدرت",
+      "transfer_to_saving": "انتقال به پس‌انداز",
+      "transfer_from_saving": "انتقال از پس‌انداز",
+      "cancel_transfer_from_saving": "لغو انتقال از پس‌انداز",
+      "collateralized_convert": "تبدیل وثیقه‌دار",
+      "witness_vote": "رأی به witness",
+      "witness_update": "به‌روزرسانی witness",
+      "witness_set_properties": "تعیین ویژگی‌های witness",
+      "governance_proxy": "پروکسی حاکمیتی",
+      "claim_account": "دریافت حساب",
+      "create_account": "ایجاد حساب",
+      "create_account_with_account": "ایجاد حساب با اعتبار حساب",
+      "create_limit_order": "ایجاد سفارش محدود",
+      "cancel_limit_order": "لغو سفارش محدود",
+      "redeem_rewards": "بازخرید پاداش‌ها",
+      "post_or_comment": "پست یا نظر",
+      "post_or_comment_options": "گزینه‌های پست یا نظر",
+      "custom_operation": "عملیات سفارشی",
+      "update_account_active": "به‌روزرسانی حساب (active)",
+      "update_account_posting": "به‌روزرسانی حساب (posting)",
+      "change_recovery_account": "تغییر حساب بازیابی",
+      "create_proposal": "ایجاد پیشنهاد",
+      "remove_proposal": "حذف پیشنهاد",
+      "update_proposal_votes": "به‌روزرسانی رأی‌های پیشنهاد",
+      "update_proposal": "به‌روزرسانی پیشنهاد"
+    },
+    "auth_link": {
+      "must_be_signed_by": "این پیوند باید توسط @{account} امضا شود. به آن حساب بروید و دوباره باز کنید.",
+      "ecency_can_only_sign": "Ecency فقط می‌تواند تراکنش‌های پیوندها را امضا و پخش کند.",
+      "requester_page": "صفحه {host}",
+      "owner_refused": "عملیاتی که به کلید owner نیاز دارند از طریق پیوند امضا نمی‌شوند.",
+      "busy": "لطفاً صبر کنید: درخواست دیگری هنوز در حال پردازش است.",
+      "not_supported": "Ecency هنوز در این نسخه نمی‌تواند این عملیات را امضا کند."
+    },
+    "chats": {
+      "group_members": "اعضای گروه",
+      "rename_group": "تغییر نام گروه",
+      "failed_to_load_chats": "گفتگوها بارگیری نشدند",
+      "unknown": "ناشناس",
+      "unable_to_mark_channel": "علامت‌گذاری کانال به‌عنوان خوانده‌شده انجام نشد",
+      "unable_to_update_favorites": "به‌روزرسانی دلخواه‌ها انجام نشد",
+      "unable_to_update_mute": "به‌روزرسانی بی‌صدا انجام نشد",
+      "group": "گروه",
+      "unable_to_search": "جستجو انجام نشد",
+      "unable_to_start_chat": "شروع گفتگو انجام نشد",
+      "no_internet": "اتصال اینترنت وجود ندارد"
+    },
+    "stake": {
+      "confirm_summary": "واگذاری {hp} HP ({vests} VESTS) به @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "قبلاً به @{recipient} واگذار شده است"
+    },
+    "backup_keys": {
+      "owner_not_stored": "فقط عمومی. Ecency هرگز کلید owner را ذخیره نمی‌کند.",
+      "shared_owner": "این حساب برای نقش owner و نقش {names} از یک کلید استفاده می‌کند. هر کس این کلید را داشته باشد کل حساب را کنترل می‌کند. برای نقش {names} کلیدی جداگانه بسازید و کلید owner را آفلاین نگه دارید.",
+      "copy_warning": "هر کس این کلید خصوصی را داشته باشد این بخش از حساب شما را کنترل می‌کند. برنامه‌های دیگر می‌توانند کلیپ‌بورد را بخوانند؛ آن را فقط جایی جای‌گذاری کنید که به آن اعتماد دارید. پس از ۲ دقیقه از کلیپ‌بورد پاک می‌شود."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "قفل PIN روشن است.",
+      "pin_changed": "PIN تغییر کرد.",
+      "pin_lock_is_off": "قفل PIN خاموش است.",
+      "wiped_notice": "همه حساب‌ها، کلیدها و اعتبارنامه‌ها از این دستگاه حذف شدند.",
+      "we_could_not_bring": "نتوانستیم حساب‌های شما را از نسخه قبلی برنامه منتقل کنیم. لطفاً دوباره وارد شوید.",
+      "your_pin_lock_could": "قفل PIN شما از نسخه قبلی منتقل نشد. برای روشن کردن دوباره قفل برنامه، از منوی حساب یک PIN تعیین کنید.",
+      "biometric_unlock_was_turned": "قفل‌گشایی زیستی خاموش شد، زیرا اطلاعات زیستی این دستگاه تغییر کرده است. با PIN قفل را باز کنید، سپس از منوی حساب دوباره روشن کنید.",
+      "biometric_unavailable_notice": "قفل‌گشایی زیستی روشن نشد: هیچ اطلاعات زیستی در این دستگاه تنظیم نشده است.",
+      "set_backup": "برای پشتیبان قفل‌گشایی زیستی یک PIN تعیین کنید",
+      "biometric_on_notice": "قفل PIN روشن است. با اطلاعات زیستی یا PIN قفل را باز کنید.",
+      "offer_title": "قفل‌گشایی با اطلاعات زیستی",
+      "offer_body": "Ecency را با چهره یا اثر انگشت باز کنید. همچنین یک PIN تعیین کردید که وقتی اطلاعات زیستی در دسترس نباشد، برنامه را باز می‌کند.",
+      "offer_use": "استفاده از اطلاعات زیستی",
+      "offer_use_pin": "به‌جای آن از PIN استفاده کنید"
+    },
+    "common": {
+      "list_and": "{first} و {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "پاسخ‌های ۲۵ نویسه یا کمتر امتیاز نمی‌گیرند (پیوندها شمرده نمی‌شوند)",
+      "short_content_hint": "برای کسب امتیاز بیش از حد کوتاه است (۲۵ نویسه یا کمتر، بدون احتساب پیوندها)",
+      "daily_post": "پست روزانه {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# روز پیاپی} other {# روز پیاپی}}",
+      "grant_description": "به حساب Ecency با نام @ecency.app اجازه posting در حساب خود بدهید تا بتوانید بدون باز کردن Keychain در هر بار پست بگذارید. اعطای آن اختیار posting حساب شما را تغییر می‌دهد و به کلید active شما نیاز دارد."
+    },
+    "wallet_history": {
+      "from_to": "@{from} به @{to}",
+      "from_user_id": "از @{from}، شناسه: {id}",
+      "user_id": "@{user}، شناسه: {id}",
+      "from_to_id": "@{from} به @{to}، شناسه: {id}",
+      "from_to_account": "@{from} به {to}",
+      "from_user": "از @{user}",
+      "to_user": "به @{user}",
+      "interest": "سود",
+      "proposal_pay": "پرداخت پیشنهاد",
+      "categories": "انواع فعالیت",
+      "category_all": "همه",
+      "category_transfers": "انتقال‌ها",
+      "category_market": "سفارش‌های بازار",
+      "category_interest": "سودها",
+      "category_stake": "عملیات استیک",
+      "category_rewards": "پاداش‌ها",
+      "point_type_checkin": "ضربان‌ها",
+      "point_type_login": "ورود",
+      "point_type_post": "پست",
+      "point_type_comment": "نظر",
+      "point_type_vote": "رأی",
+      "point_type_reblog": "بازنشر",
+      "point_type_transfer_sent": "انتقال‌های ارسالی",
+      "point_type_transfer_received": "انتقال‌های دریافتی"
+    },
+    "video_upload": {
+      "continue_upload": "ادامه بارگذاری",
+      "source_gone": "این ضبط دیگر در دستگاه در دسترس نیست. ویدیو را دوباره ضبط یا انتخاب کنید.",
+      "no_camera": "دوربین در این دستگاه در دسترس نیست."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "کاهش قدرت بعدی تا {hours, plural, one {# ساعت} other {# ساعت}} دیگر است",
+      "account_not_found": "حساب پیدا نشد"
+    },
+    "wave_compose": {
+      "clipboard_chip": "تصویر در کلیپ‌بورد · جای‌گذاری تصویر",
+      "no_container": "آخرین ظرف Waves دریافت نشد",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید.",
+      "write_something_first": "ابتدا چیزی بنویسید.",
+      "account_changed": "این Wave با حسابی دیگر نوشته شده بود. آن را ببندید و دوباره بنویسید.",
+      "no_upload": "بارگذاری تصویر هنوز در این نسخه در دسترس نیست. به‌جای آن پیوند تصویر را در متن جای‌گذاری کنید.",
+      "fail": "ناموفق"
+    },
+    "delete_account": {
+      "sign_out_failed": "درخواست شما ارسال شد، اما خروج ناموفق بود. لطفاً از منو خارج شوید.",
+      "not_sent": "درخواست حذف شما ارسال نشد. لطفاً دوباره تلاش کنید."
+    },
+    "chat_sheets": {
+      "group_limit": "یک گروه حداکثر {max, plural, one {# نفر دیگر} other {# نفر دیگر}} می‌تواند داشته باشد.",
+      "search_people_by_username": "جستجوی افراد با نام کاربری",
+      "new_group_title": "گروه جدید",
+      "new_group_hint": "برای شروع گفتگوی گروهی، {min} تا {max, plural, one {# نفر} other {# نفر}} اضافه کنید.",
+      "no_results": "کسی با این نام در گفتگو پیدا نشد.",
+      "search_failed": "جستجو انجام نشد. اتصال خود را بررسی و دوباره تلاش کنید.",
+      "create": "شروع گروه",
+      "new_group_failed": "گروه شروع نشد. لطفاً دوباره تلاش کنید.",
+      "name_limit": "نام گروه حداکثر {max, plural, one {# نویسه} other {# نویسه}} می‌تواند باشد.",
+      "rename_title": "تغییر نام گروه",
+      "rename_hint": "برای این گروه نامی بگذارید که همه اعضا ببینند. خالی بگذارید تا نام اعضا نمایش داده شود.",
+      "placeholder": "نام گروه",
+      "not_owner": "فقط کسی که این گروه را ساخته می‌تواند نام آن را تغییر دهد.",
+      "rename_failed": "نام گروه تغییر نکرد. لطفاً دوباره تلاش کنید."
+    },
+    "editor_side": {
+      "copy_of": "نسخه‌ای از {title}",
+      "deletions_failed": "مشکلی پیش آمد\n{failed} از {total, plural, one {# حذف} other {# حذف}} ناموفق بود",
+      "uploads_failed": "{count, plural, one {# بارگذاری ناموفق بود} other {# بارگذاری ناموفق بود}}:\n\n{messages}",
+      "failed_to_delete": "حذف ناموفق بود"
+    },
+    "uploads": {
+      "add_to_gallery": "افزودن به گالری"
+    },
+    "account_notice": {
+      "manage_keys": "تنظیمات، مدیریت اختیارات",
+      "no_signing_key_title": "دوباره به‌عنوان @{account} وارد شوید",
+      "no_signing_key": "Ecency دیگر کلید owner یا رمز اصلی را روی این دستگاه نگه نمی‌دارد و @{account} در اینجا کلید posting یا active ذخیره‌شده ندارد. دوباره با رمز اصلی یا کلید posting یا active وارد شوید، یا کلیدی را در {manageKeys} (وارد کردن کلید خصوصی) اضافه کنید.",
+      "missing_roles_title": "برخی کلیدها اضافه نشدند",
+      "cannot_post": "پست گذاشتن، رأی دادن یا نظر دادن",
+      "cannot_transfer": "ارسال انتقال یا تغییر تنظیمات حساب",
+      "missing_roles": "رمز شما دیگر با کلید {missing} حساب @{account} مطابقت ندارد: از زمان تعیین رمز، روی حساب تغییر کرده است. ذخیره‌شده روی این دستگاه: کلید {kept}. تا زمانی که کلید {missing} را در {manageKeys} (وارد کردن کلید خصوصی) اضافه نکنید، این برنامه با کلیدهای @{account} نمی‌تواند {cannot}.",
+      "shared_owner_title": "این کلید نقش owner را هم کنترل می‌کند",
+      "shared_owner": "@{account} برای نقش owner و نقش {names} از یک کلید استفاده می‌کند. هر کس این کلید را داشته باشد کل حساب را کنترل می‌کند. Ecency آن را فقط به‌عنوان کلید {names} نگه می‌دارد و هرگز برای عملیات owner استفاده نمی‌کند. برای نقش {names} کلیدی جداگانه بسازید و کلید owner را آفلاین نگه دارید."
+    },
+    "dapp_browser": {
+      "message_from": "پیام از {host}",
+      "home_title": "خانه",
+      "loading_title": "در حال بارگیری...",
+      "blank_run": "[{count, plural, one {# نویسه خالی} other {# نویسه خالی}}]",
+      "too_large": "این صفحه درخواست امضای چیزی را داد که برای نمایش بیش از حد بزرگ بود، بنابراین Ecency آن را رد کرد."
+    },
+    "community_service": {
+      "the_account_changed": "حساب تغییر کرد."
+    },
+    "profile_edit": {
+      "enter_link": "پیوند تصویر را وارد کنید",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید.",
+      "account_not_found": "حساب پیدا نشد",
+      "please_enter_an_image": "لطفاً پیوند تصویری وارد کنید که با https:// شروع شود"
+    },
+    "background_media": {
+      "post_by": "پست از @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "قبلاً با همین وزن رأی داده‌اید.",
+      "insufficient_rc": "اعتبار منابع کافی نیست. لطفاً صبر کنید یا قدرت را افزایش دهید.",
+      "missing_authority": "اختیار posting موجود نیست. لطفاً روش ورود خود را بررسی کنید.",
+      "comment_too_soon": "لطفاً پیش از پست بعدی کمی صبر کنید.",
+      "paid_out": "پاداش این پست قبلاً پرداخت شده است.",
+      "too_large": "تراکنش {size, plural, one {# بایت} other {# بایت}} است و از حد {max} بایت بیشتر است.",
+      "network_error_please_check": "خطای شبکه. لطفاً اتصال خود را بررسی و دوباره تلاش کنید.",
+      "unconfirmed_message": "تأیید نشد که این انجام شده است یا نه. لطفاً کیف پول یا تاریخچه خود را بررسی کنید؛ فقط اگر آنجا نبود دوباره شروع کنید.",
+      "undecided_message": "ممکن است این از قبل انجام شده باشد. پیش از تلاش دوباره، کیف پول یا تاریخچه خود را بررسی کنید."
+    },
+    "chat_api": {
+      "request_failed": "درخواست ناموفق بود ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} در حال نوشتن است...",
+      "typing_two": "{first} و {second} در حال نوشتن هستند...",
+      "typing_three": "{first}، {second} و {third} در حال نوشتن هستند...",
+      "typing_many": "{first}، {second} و {count, plural, one {# نفر دیگر} other {# نفر دیگر}} در حال نوشتن هستند...",
+      "banned": "{reason} همچنان می‌توانید گفتگو را بخوانید. ارسال {until} باز می‌شود.",
+      "joined_when": "عضویت از {time}",
+      "joined": "عضو شد",
+      "official_badge": "رسمی",
+      "official_badge_label": "حساب رسمی Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "از Esie بپرسید"
+    },
+    "chat_service": {
+      "missing_token": "توکن دسترسی Hive موجود نیست. لطفاً خارج شوید و دوباره وارد شوید.",
+      "dm_error": "کاربر به گفتگوها نپیوسته است"
+    },
+    "compose_reply": {
+      "account_changed": "این پاسخ با حسابی دیگر نوشته شده بود. آن را ببندید و دوباره بنویسید.",
+      "write_something_first": "ابتدا چیزی بنویسید.",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "تعداد ذینفعان بیش از حد است: حداکثر {max}.",
+      "a_beneficiary_s_share": "سهم ذینفع باید بین ۰٫۰۱٪ و ۱۰۰٪ باشد.",
+      "beneficiaries_add_up_to": "مجموع ذینفعان بیش از ۱۰۰٪ است.",
+      "a_beneficiary_is_listed": "یک ذینفع دو بار فهرست شده است.",
+      "you_cannot_be_a": "نمی‌توانید ذینفع پست خودتان باشید.",
+      "a_beneficiary_has_an": "نام حساب یکی از ذینفعان نامعتبر است."
+    },
+    "follows": {
+      "fail": "ناموفق!: {message}",
+      "follower_count": "دنبال‌کنندگان ({count})",
+      "following_count": "دنبال‌شده‌ها ({count})"
+    },
+    "link": {
+      "unsupported": "این پیوند هنوز پشتیبانی نمی‌شود.",
+      "cannot_open": "پیوند باز نمی‌شود",
+      "unsupported_version": "این پیوند در این نسخه پشتیبانی نمی‌شود."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "مرورگر کاوش می‌تواند برای امضای تراکنش‌ها به کیف پول Hive شما دسترسی پیدا کند. این پیوند از محتوای پست آمده و توسط Ecency تأیید نشده است. فقط در صورت اعتماد ادامه دهید:\n\n{url}"
+    },
+    "listen": {
+      "message": "گوش دادن به {required} Points نیاز دارد و شما {available} دارید.",
+      "unlock_label": "بازگشایی · {cost} Points",
+      "preparing_audio": "در حال آماده‌سازی صوت · {preparingPercent}%",
+      "waiting_in_line_ahead": "در صف انتظار، {ahead} نفر جلوتر…",
+      "next_in_line": "نفر بعدی در صف…",
+      "preparing_about_minutes": "در حال آماده‌سازی صوت، حدود {minutes} دقیقه…",
+      "preparing_audio_2": "در حال آماده‌سازی صوت…",
+      "spend_confirm": "برای گوش دادن به این پست {cost} Points خرج شود؟ صوت هر زمان برای پخش دوباره از آنِ شماست.",
+      "about_minutes": "~{minutes} دقیقه",
+      "failed_refunded": "صوت ساخته نشد، Points شما بازگردانده شد"
+    },
+    "media_pick": {
+      "preparing_video": "در حال آماده‌سازی ویدیو...",
+      "library_hint": "انتخاب از عکس‌های شما",
+      "camera_hint": "همین حالا یک عکس جدید بگیرید",
+      "files_hint": "مرور فایل‌های این دستگاه و فضای ابری",
+      "paste_hint": "از تصویری که کپی کرده‌اید استفاده کنید",
+      "link_hint": "از یک تصویر وب استفاده کنید"
+    },
+    "media_picking": {
+      "image_types_message": "این نوع فایل پشتیبانی نمی‌شود. تصویر JPEG، PNG، GIF، WebP یا HEIC انتخاب کنید.",
+      "video_types_message": "این نوع فایل پشتیبانی نمی‌شود. ویدیوی MP4 یا MOV انتخاب کنید.",
+      "gif_too_large": "این GIF از {mb} MB بزرگ‌تر است."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "این عملیات هم امضای active و هم امضای posting می‌خواهد که Ecency هنوز نمی‌تواند با هم امضا کند."
+    },
+    "poll": {
+      "fail": "ناموفق!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "اختیار posting حساب شما بررسی نشد. اتصال خود را بررسی و دوباره تلاش کنید."
+    },
+    "post_lists": {
+      "voters_title": "اطلاعات رأی‌دهندگان ({total})",
+      "reblogs_title": "اطلاعات بازنشرها ({total})",
+      "no_history_found": "تاریخچه‌ای پیدا نشد!",
+      "no_edit_history_available": "تاریخچه ویرایشی برای این محتوا موجود نیست.",
+      "version_label": "نسخه {version}"
+    },
+    "stats": {
+      "other_device": "سایر"
+    },
+    "profile": {
+      "account_not_found": "حساب پیدا نشد",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • پر شدن تا {hours, plural, one {# ساعت} other {# ساعت}} دیگر"
+    },
+    "profile_metadata_guard": {
+      "refused": "پروفایل فعلی شما خوانده نشد، دوباره تلاش کنید"
+    },
+    "profile_sheet": {
+      "fail": "ناموفق! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "حساب پیدا نشد"
+    },
+    "push_payload": {
+      "mentioned": "@{source} @{target} را نام برد",
+      "replied": "@{source} به @{target} پاسخ داد",
+      "transferred": "@{source} به @{target} انتقال داد",
+      "delegated": "@{source} به @{target} واگذار کرد",
+      "rewards_received": "پاداش‌ها دریافت شد",
+      "account_updated": "حساب به‌روزرسانی شد",
+      "account_updated_body": "جزئیات حساب شما به‌روزرسانی شد",
+      "followed": "@{source} @{target} را دنبال کرد",
+      "unfollowed": "@{source} دنبال کردن @{target} را لغو کرد",
+      "ignored": "@{source} @{target} را نادیده گرفت",
+      "blacklisted": "@{source} @{target} را در فهرست سیاه قرار داد",
+      "posted_in": "@{source} در #{firstTag} پست گذاشت"
+    },
+    "qr_scan": {
+      "permission_title": "اجازه دوربین دریافت نشد",
+      "permission_message": "لطفاً در تنظیمات ecency اجازه دوربین بدهید.",
+      "permission_allow": "اجازه دادن"
+    },
+    "reply_account": {
+      "switch": "پاسخ با حسابی دیگر"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} شما از @{account} انجام شد.",
+      "not_sent": "{label} شما از @{account} انجام نشد. چیزی ارسال نشد؛ می‌توانید دوباره شروع کنید.",
+      "checking_whether_your_from": "در حال بررسی اینکه {label} شما از @{account} انجام شده است یا نه. پیش از ارسال دوباره، کیف پول خود را بررسی کنید."
+    },
+    "signing": {
+      "hot_page_closed": "صفحه HiveSigner بسته شد",
+      "wrong_role": "این کلید {given} شماست؛ این عملیات به کلید {needed} شما نیاز دارد.",
+      "action_id_required": "این اقدام برای تلاش مجدد ایمن به شناسه اقدام نیاز دارد."
+    },
+    "signing_router": {
+      "owner_never": "عملیات owner هرگز در برنامه امضا نمی‌شود."
+    },
+    "spin": {
+      "key_missing": "کلید بازی موجود نیست",
+      "score": "{score, plural, one {# امتیاز} other {# امتیاز}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "امروز (UTC)، بازنشانی تا {time} دیگر",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "هر روز ساعت 00:00 UTC بازنشانی می‌شود"
+    },
+    "storage_reset": {
+      "title": "دوباره وارد شوید",
+      "message": "حافظه امن در این دستگاه بازنشانی شد. دوباره وارد شوید.",
+      "failed": "حساب‌های این دستگاه حذف نشدند. لطفاً دوباره تلاش کنید."
+    },
+    "store": {
+      "in_app_purchases_are": "خریدهای درون‌برنامه‌ای در این نسخه در دسترس نیست."
+    },
+    "wallet_sends": {
+      "journal_full": "ارسال‌های قبلی بیش از حد هنوز در حال بررسی با شبکه هستند. لطفاً پیش از ارسال بیشتر صبر کنید تا تأیید شوند.",
+      "check_later": "شبکه این را به‌موقع تأیید نکرد. لطفاً پیش از ارسال دوباره، کیف پول یا تاریخچه خود را بررسی کنید؛ برنامه در شروع بعدی دوباره بررسی می‌کند."
+    },
+    "waves": {
+      "shorts": "کوتاه‌ها"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# خوانده‌نشده} other {# خوانده‌نشده}}",
+      "locked_text": "برای دیدن، Ecency را باز کنید",
+      "signed_out_text": "وارد Ecency شوید"
+    },
+    "posting_grant": {
+      "unreadable": "اختیارات فعلی حساب شما خوانده نشد. چیزی تغییر نکرد؛ لطفاً دوباره تلاش کنید.",
+      "reads_disagree": "دو بار خواندن اختیار posting حساب شما با هم نمی‌خواند. چیزی تغییر نکرد؛ لطفاً دوباره تلاش کنید."
+    },
+    "vote": {
+      "vote_weight_must_be": "وزن رأی باید بین ‎-۱۰۰٪ و ۱۰۰٪ باشد.",
+      "please_sign_in_first": "لطفاً ابتدا وارد شوید."
+    },
+    "widget": {
+      "streak_name": "پیوستگی مأموریت",
+      "write": "نوشتن",
+      "new_wave": "Wave جدید",
+      "notifications_description": "اعلان‌های خوانده‌نشده شما. هنگام روشن بودن قفل PIN پنهان است.",
+      "streak_description": "پیوستگی مأموریت روزانه شما. هنگام روشن بودن قفل PIN پنهان است.",
+      "compose_description": "یک پست یا یک Wave جدید بنویسید.",
+      "streak_title": "پیوستگی",
+      "daily_quests": "مأموریت‌های روزانه",
+      "streak_hint": "برای دیدن پیوستگی، Perks را باز کنید",
+      "open_perks": "باز کردن Perks",
+      "open_app": "باز کردن Ecency",
+      "unread_caption": "{count, plural, one {خوانده‌نشده} other {خوانده‌نشده}}",
+      "streak_caption": "{count, plural, one {روز پیاپی} other {روز پیاپی}}"
+    },
+    "system": {
+      "dictation_channel": "دیکته",
+      "listen_channel": "گوش دادن",
+      "dictation_channel_description": "هنگامی که ضبط دیکته در پس‌زمینه ادامه دارد نمایش داده می‌شود، همراه با اقدام توقف.",
+      "dictation_title": "ضبط برای دیکته",
+      "dictation_text": "Ecency در حال ضبط دیکته شماست. با «توقف» تا تأیید شما در برنامه ارسال نمی‌شود.",
+      "listen_channel_description": "اگر «گوش دادن» نتوانست در پس‌زمینه ادامه یابد، به شما اطلاع می‌دهد.",
+      "listen_paused": "گوش دادن متوقف شد",
+      "listen_paused_text": "برای ادامه گوش دادن Ecency را باز کنید.",
+      "skip_back": "۱۵ ثانیه به عقب",
+      "skip_forward": "۱۵ ثانیه به جلو"
+    },
+    "permission": {
+      "face_id": "Ecency را به‌جای PIN با Face ID باز کنید.",
+      "camera": "کدهای QR را اسکن کنید و برای افزودن به پست خود عکس بگیرید یا ویدیو ضبط کنید.",
+      "photo_library_add": "Ecency تصاویری را که از پست‌ها دانلود می‌کنید در کتابخانه عکس شما ذخیره می‌کند.",
+      "photo_library": "Ecency تصاویری را که از پست‌ها دانلود می‌کنید در یک آلبوم Ecency در کتابخانه عکس شما کنار هم نگه می‌دارد.",
+      "microphone": "Ecency از میکروفون شما استفاده می‌کند تا بتوانید پست‌ها و نظرها را دیکته کنید (این ضبط‌ها برای تبدیل به متن به Ecency ارسال می‌شوند) و همراه ویدیویی که به پست اضافه می‌کنید صدا ضبط کنید."
+    },
+    "android": {
+      "no_browser": "مرورگری در دسترس نیست",
+      "biometric_unlock_title": "Ecency را با اطلاعات زیستی باز کنید",
+      "biometric_confirm": "با اثر انگشت یا چهره تأیید کنید",
+      "image_unsupported_address": "نشانی تصویر پشتیبانی نمی‌شود",
+      "image_create_failed": "فایل ساخته نشد",
+      "image_write_failed": "فایل نوشته نشد",
+      "image_too_large": "تصویر بیش از حد بزرگ است",
+      "image_download_failed": "دانلود با وضعیت {status} ناموفق بود",
+      "billing_disconnected": "اتصال Google Play Billing قطع شد.",
+      "billing_no_screen": "صفحه‌ای برای نمایش خرید وجود ندارد.",
+      "billing_error": "خطای Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "این ماه {count, plural, one {# پست} other {# پست}} منتشر کردید. ادامه دهید!",
-        "checkin": "این هفته {count, plural, one {# روز} other {# روز}} ثبت حضور کردید. ادامه دهید!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# پست جدید} other {# پست جدید}} در #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# تلاش ناموفق} other {# تلاش ناموفق}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "زنجیره {n} روزه"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• فقط حساب‌های قدیمی‌تر از {days} روز مجاز هستند",
-        "max_choices": "• می‌توانید تا {choices} گزینه انتخاب کنید"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} انتقال باقی‌مانده",
-        "schedule_summary": "{executions} انتقال، هر کدام هر {hours} ساعت"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "برای کسب امتیاز بیش از حد کوتاه است ({n, plural, one {# نویسه} other {# نویسه}} یا کمتر، بدون احتساب پیوندها)"
       },
       "chats": {
-        "people_joined": "{count} نفر پیوستند"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "حدود {count, plural, one {# دقیقه} other {# دقیقه}} دیگر",
+        "ban-remaining-hours": "حدود {count, plural, one {# ساعت} other {# ساعت}} دیگر",
+        "ban-remaining-days": "حدود {count, plural, one {# روز} other {# روز}} دیگر"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "حداکثر {n, plural, one {# برچسب} other {# برچسب}} استفاده کنید",
+          "too_long": "جستجو بیش از حد طولانی است. حداکثر {n, plural, one {# نویسه} other {# نویسه}} استفاده کنید"
+        }
       },
       "ai_assist": {
-        "min_chars": "حداقل {count} نویسه لازم است",
-        "chars_remaining": "{count} نویسه باقی‌مانده"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "می‌توانید در هر بار حداکثر {count, plural, one {# تصویر} other {# تصویر}} انتخاب کنید"
+      },
+      "dictation": {
+        "stop_hint": "برای تبدیل به متن و افزودن به پست، متوقف کنید. تا {m, plural, one {# دقیقه} other {# دقیقه}}.",
+        "rate": "{n} Points برای هر {s, plural, one {# ثانیه} other {# ثانیه}}"
       },
       "transfer": {
-        "powering_down_info": "لغو استیک بعدی در {days} روز، {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "بین {min} تا {max, plural, one {# نویسه} other {# نویسه}}"
       }
     }
   }

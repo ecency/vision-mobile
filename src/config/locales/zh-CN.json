@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro 会员"
   },
   "perks": {
     "header": "权益",
@@ -31,42 +31,42 @@
     "promote_desc": "让更多人看到你的帖子",
     "account_boost": "账户加速",
     "account_boost_desc": "为任意账户加速",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "补充 RC",
+    "rc_topup_desc": "资源点不足时也能继续发帖",
+    "streak_freeze_owned": "库存 {n} 个",
+    "streak_freeze_buy": "保护连续记录（{price} Points）",
+    "streak_freeze_buying": "保护中",
+    "streak_freeze_error": "无法购买连续记录保护，请重试。"
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "每日发帖",
+    "streak": "连续 {n} 天",
+    "keep_streak": "保持你的连续记录"
   },
   "waves": {
     "for_you": "为你推荐",
     "following": "关注中",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "自定义信息流",
+    "custom_feeds_subtitle": "固定来源和标签，即可将它们添加为信息流标签页。",
+    "add_tag_placeholder": "添加标签",
+    "sources": "来源",
+    "your_feeds": "你的信息流",
+    "trending_tags": "热门标签",
+    "shorts_empty": "暂无短视频可显示",
+    "mute": "屏蔽",
+    "unmute": "取消屏蔽"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "新手入门",
+    "subtitle": "刚来？Waves 是简短的帖子，也是最容易上手的方式。",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "关闭",
+    "item_wave": "发布你的第一条 Wave",
+    "item_vote": "为你喜欢的 Wave 投票",
+    "item_reply": "回复某个人",
+    "item_checkin": "签到以开始连续记录",
+    "all_done_title": "全部完成 🎉",
+    "all_done_subtitle": "一切就绪，继续发布 Waves 吧！"
   },
   "profile": {
     "havent_commented": "还没有任何评论",
@@ -82,7 +82,7 @@
     "comments": "评论",
     "waves": "Waves",
     "details": "个人资料详情",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "资源点",
     "voting_power": "Voting Power(VP)",
     "follow_people": "当你关注他人后，将在这里看到他们的帖子。",
     "hours": "小时",
@@ -147,6 +147,16 @@
     "wizard_config_val": "年龄  |  可见性  |  计算方式",
     "attach_poll": "附加投票"
   },
+  "favorite_tags": {
+    "title": "标签",
+    "hint": "关注后，该标签有新帖子时会通知你",
+    "following_hint": "该标签有新帖子时会通知你",
+    "follow": "关注",
+    "following": "已关注",
+    "added": "已关注标签",
+    "removed": "已取消关注标签",
+    "empty_list": "这里什么都没有"
+  },
   "favorites": {
     "add": "添加收藏",
     "add_error": "无法添加收藏",
@@ -181,7 +191,33 @@
     "payout": "收益",
     "details": "详细信息",
     "community": "社区",
-    "new_post": "新的文章"
+    "new_post": "新的文章",
+    "mute_post_title": "屏蔽此帖",
+    "unmute_post_title": "取消屏蔽此帖",
+    "mute_post_reason": "为什么要屏蔽？",
+    "unmute_post_reason": "为什么要恢复？",
+    "manage": "管理社区",
+    "manage_members": "成员与角色",
+    "manage_settings": "社区设置",
+    "manage_activities": "活动日志",
+    "activities": "活动",
+    "no_activities": "暂无活动",
+    "activities_load_failed": "无法加载活动。下拉刷新。",
+    "set_role": "设置角色",
+    "assign_role": "分配角色",
+    "assign_role_hint": "搜索任意账户（包括未订阅的账户），然后选择角色。",
+    "username_placeholder": "用户名",
+    "invalid_username": "请从结果中选择已存在的账户",
+    "members": "成员",
+    "no_members": "未找到成员",
+    "members_incomplete": "部分成员无法加载。下拉刷新。",
+    "members_load_failed": "无法加载成员。下拉刷新。",
+    "role_owner": "所有者",
+    "role_admin": "管理员",
+    "role_mod": "版主",
+    "role_member": "成员",
+    "role_guest": "访客",
+    "role_muted": "已屏蔽"
   },
   "trade": {
     "swap_for": "正在将 {fromAmount} 兑换为 {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "交叉发布",
     "pin-blog": "置顶到博客",
     "copy": "复制链接",
+    "copy-text": "复制文本",
+    "open-thread": "打开讨论串",
     "unpin-community": "从社区取消置顶",
+    "mute-post": "屏蔽帖子",
+    "unmute-post": "取消屏蔽帖子",
     "mute": "屏蔽 / 拉黑",
     "reblog": "转发",
     "undo-reblog": "撤销转发",
@@ -232,24 +272,24 @@
     "unpin-reply": "取消置顶评论"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "这篇帖子是{lang}。要翻译成{target}吗？",
+    "translate_to": "翻译成{lang}",
+    "show_original": "显示原文",
+    "translated_from": "译自{lang}",
+    "change_language": "更改语言"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "翻译帖子",
+    "source": "源语言",
+    "target": "目标语言",
+    "detected": "检测到：{lang}",
+    "translate": "翻译",
+    "apply": "应用",
+    "review_note": "会将你自己所写内容的机器翻译添加到帖子末尾。发布前请检查并编辑。",
+    "too_short": "请先多写一些。翻译至少需要几句话。",
+    "progress": "正在翻译 {done}/{total}...",
+    "error": "翻译失败，请重试。",
+    "add_title_marker": "在标题中添加语言标记"
   },
   "side_menu": {
     "profile": "个人资料",
@@ -296,7 +336,7 @@
     "hot": "热门",
     "popular": "热门",
     "new": "最新",
-    "friends": "Following",
+    "friends": "关注",
     "my_blog": "我的博客"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "此处无内容"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "模板",
+    "untitled": "未命名模板",
+    "empty_list": "在编辑器中将帖子保存为模板，即可在此重复使用。",
+    "delete_confirm": "确定要删除此模板吗？",
+    "applied": "已将模板应用为新帖子",
+    "save_as_template": "保存为模板",
+    "name_placeholder": "模板名称",
+    "saved": "模板已保存"
   },
   "selection_list": {
     "available": "可用{postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "全部",
+      "replies": "回复",
+      "mentions": "提及",
+      "rvotes": "投票",
+      "follows": "关注",
+      "reblogs": "转发",
+      "transfers": "转账",
+      "delegations": "委托",
+      "nfavorites": "收藏",
+      "tags": "标签",
+      "nbookmarks": "书签",
+      "payouts": "收益结算",
+      "scheduled_published": "定时发布的帖子",
+      "account_updates": "账户更新",
+      "weekly_earnings": "每周收益"
     },
     "this_week": "本周",
     "reblog": "已转发",
@@ -417,11 +458,15 @@
     "yesterday": "昨天",
     "mention": "被提及，在",
     "favorites": "发布了新帖子",
+    "tags": "在 #{tag} 发布了帖子",
+    "tags_bundle": "#{tag} 有 {count} 条新帖子",
+    "tags_title": "你关注的标签有新帖子",
     "mentions": "提及",
     "spin": "是时候赚取更多 Points 了",
     "last_week": "上周",
     "recent": "最近",
     "ignore": "屏蔽了您",
+    "blacklist": "将你加入了黑名单",
     "follow": "关注了您",
     "notification": "通知",
     "this_month": "本月",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} 现在可以代表你发帖和点赞。如未经你授权，请撤销该权限。",
     "weekly_earnings": "你本周赚取了 ${amount}{breakdown}",
     "payouts": "已收到收益：${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "发布了一篇定时帖子",
+    "scheduled_published_title": "定时帖子已发布",
+    "scheduled_published_body": "你的定时帖子已上线，点按查看"
   },
   "recurrent": {
     "delete_failed": "删除定期转账失败，{error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "打开最近的草稿或创建新帖子",
     "reward_power_up": "100% 质押",
     "open_gallery": "打开图库",
+    "open_files": "从文件选择",
     "clipboard_no_image": "剪贴板中未找到图片",
     "clipboard_image_detected": "剪贴板中有图片",
     "paste_image": "粘贴图片",
@@ -539,8 +585,10 @@
     "video": "视频",
     "scheduled_later": "稍后",
     "settings_title": "帖子选项",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "否"
+    "support_ecency": "支持 Ecency {percent}%",
+    "alert_btn_no": "否",
+    "short_reply_hint": "{n} 个字符及以下的回复不会获得积分（不含链接）",
+    "short_content_hint": "内容太短，无法获得积分（{n} 个字符及以下，不含链接）"
   },
   "time": {
     "week": "周",
@@ -655,7 +703,41 @@
     "select_emoji": "选择表情",
     "more_emojis": "更多",
     "search_emojis": "搜索表情…",
-    "no_emoji_found": "未找到表情"
+    "no_emoji_found": "未找到表情",
+    "ban-reason-spray": "由于同一条消息同时发到了多个频道，你已被暂停发言。",
+    "ban-reason-mass-dm": "由于一条消息同时发给了很多人，你已被暂停发言。",
+    "ban-reason-generic": "你已被暂停在聊天中发言。",
+    "ban-can-still-read": "你仍然可以查看聊天内容。",
+    "ban-unlocks": "{when}可恢复发言。",
+    "ban-remaining-soon": "不到 1 分钟后",
+    "ban-remaining-minutes": "约 {count} 分钟后",
+    "ban-remaining-hours": "约 {count} 小时后",
+    "ban-remaining-days": "约 {count} 天后",
+    "new_group": "新建群组",
+    "new_group_hint": "添加 {min} 至 {max} 人即可开始群聊。",
+    "new_group_search": "按用户名搜索",
+    "new_group_full": "一个群组最多可再添加 {max} 人。",
+    "new_group_no_results": "聊天中未找到该名称的用户。",
+    "new_group_search_failed": "搜索失败。请检查网络连接后重试。",
+    "new_group_remove": "移除 @{username}",
+    "new_group_create": "创建群组",
+    "new_group_failed": "无法创建群组。请重试。",
+    "rename_group": "重命名群组",
+    "rename_group_hint": "为群组设置一个所有成员都能看到的名称。留空则显示成员名称。",
+    "group_name": "群组名称",
+    "rename_group_too_long": "群组名称最多 {max} 个字符。",
+    "rename_group_not_owner": "只有创建群组的人才能重命名。",
+    "rename_group_failed": "无法重命名群组。请重试。",
+    "group_renamed": "{user} 将群组名称改为“{name}”",
+    "group_name_cleared": "{user} 移除了群组名称",
+    "group_members": "群组成员",
+    "save": "保存",
+    "cancel": "取消",
+    "reactions_title": "回应",
+    "reactor_you": "你",
+    "reactor_unknown": "某人",
+    "see_who_reacted": "长按查看谁做出了回应",
+    "group": "群组"
   },
   "free_estm": {
     "timer_text": "下次转盘抽奖机会出现在",
@@ -684,6 +766,32 @@
     "transaction_fail": "交易失败"
   },
   "search_result": {
+    "error": "无法完成搜索。请重试",
+    "filters": {
+      "title": "筛选",
+      "open": "筛选",
+      "author": "作者",
+      "author_placeholder": "用户名",
+      "category": "分类",
+      "category_placeholder": "社区或分类",
+      "tags": "标签",
+      "tags_placeholder": "以逗号分隔",
+      "type": "类型",
+      "type_all": "全部",
+      "type_post": "帖子",
+      "type_comment": "评论",
+      "date": "日期",
+      "date_week": "最近一周",
+      "date_month": "最近一个月",
+      "date_year": "最近一年",
+      "date_all": "全部时间",
+      "sort": "排序",
+      "apply": "应用",
+      "active": "已启用 {n} 项",
+      "too_many_tags": "最多使用 {n} 个标签",
+      "too_long": "搜索内容过长。最多 {n} 个字符",
+      "needs_criteria": "请输入搜索词，或按作者、分类、标签筛选"
+    },
     "communities_filter": {
       "new": "最新",
       "my": "我的社区",
@@ -727,7 +835,7 @@
     "title": "转贴"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "作者已声明使用了 AI"
   },
   "ai_assist": {
     "title": "AI 写作助手",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "为您的帖子获取相关标签",
     "action_generate_title": "生成标题",
     "action_generate_title_desc": "创建吸引人的标题选项",
-    "action_summarize": "Recap",
+    "action_summarize": "摘要",
     "action_summarize_desc": "创建简洁的摘要",
     "action_check_grammar": "检查语法",
     "action_check_grammar_desc": "修正语法和拼写问题",
+    "action_generate_image": "生成图片",
+    "action_generate_image_desc": "为你的帖子创建 AI 图片",
+    "cost_from": "{cost} {unit} 起",
     "text_label": "您的文本",
     "text_placeholder": "在此粘贴或输入您的内容…",
     "min_chars": "至少需要 {count} 个字符",
@@ -797,16 +908,26 @@
     "remind_later": "稍后提醒",
     "success_subscribe": "订阅成功！",
     "payloadTooLarge": "文件过大，请调整尺寸或上传更小的图片",
+    "too_many_images": "一次最多可选择 {count} 张图片",
     "fail_follow": "关注失败！",
     "clear_user_alert": "您确定要清除所有用户数据吗？",
     "cancel": "取消",
     "connection_success": "连接成功！",
     "rc_down": "Resource Credits 不足，无法执行操作！\n\n提升您的账户以继续享受体验。您想现在提升账户吗？",
+    "rc_down_title": "Resource Credits 不足",
+    "rc_precheck_title": "此帖可能过大，无法发布",
+    "rc_precheck_body": "你的 Resource Credits 似乎不足以发布这么大的帖子。",
+    "rc_down_body": "你的 Resource Credits 不足，无法执行此操作。\n\n立即用 Points 充值以继续，或永久提升你的账户。",
+    "rc_down_topup": "用 Points 充值 RC",
+    "rc_down_boost": "提升账户",
     "done": "完成",
     "something_wrong_alt": "与此同时，可在浏览器中尝试访问 Ecency.com",
     "same_user": "此用户已添加到列表",
     "fail": "失败！",
     "operation_failed_with_reason": "{operation} 失败：{reason}",
+    "request_timed_out": "连接耗时过长。请检查网络后重试。",
+    "load_failed_retry": "无法加载。请重试。",
+    "retrying": "正在重试……",
     "wallet_refresh_failed": "钱包刷新失败。请重试。",
     "wallet_refresh_missing_account": "钱包刷新失败：缺少账户。",
     "boost_failed": "Boost+ 失败。",
@@ -949,31 +1070,31 @@
     "video_attached": "已附加视频"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "点赞投票",
+    "upvoted": "已投票",
+    "downvoted": "已踩",
+    "upvote_hint": "双击打开投票选项",
+    "payout_details": "收益详情",
+    "a11y_votes": "{count, plural, other {# 次投票}}",
+    "a11y_voters_hint": "查看投票者",
+    "a11y_reblogs": "{count, plural, other {# 次转发}}",
+    "a11y_reblogs_hint": "查看转发",
+    "a11y_comments": "{count, plural, other {# 条评论}}",
+    "a11y_comments_hint": "查看评论",
+    "a11y_reply_hint": "回复",
+    "a11y_tip": "发送打赏",
+    "a11y_tips": "{count, plural, other {# 次打赏}}",
+    "a11y_edit": "编辑评论",
+    "a11y_delete": "删除评论",
+    "a11y_show_replies": "显示回复",
+    "a11y_hide_replies": "隐藏回复",
+    "a11y_post_options": "帖子选项",
+    "a11y_views": "{count, plural, other {# 次浏览}}",
+    "source_ecency": "通过 Ecency 发布",
+    "a11y_stats_hint": "查看帖子统计",
     "image": "图片",
     "reveal_muted": "已静音\n点按以显示内容",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "点按加载图片",
     "in": "于",
     "poll": "投票",
     "copy_link": "复制链接",
@@ -998,19 +1119,20 @@
     "save_to_local": "下载到设备",
     "muted": "内容因违规已被静音",
     "community_muted": "内容因违反社区准则已被静音",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "来自低声望账户的内容",
+    "muted_downvoted": "被用户踩的内容",
+    "muted_low_trust": "低信誉账户，含未经验证的外部链接",
+    "muted_reveal": "点按显示",
     "promoted": "推广",
     "image_saved": "图片已存到图库",
     "words": "字数",
     "reading": "阅读",
-    "listen": "收听",
     "min": "分钟",
     "summarize_start": "开始"
   },
   "promote": {
     "information": "您确定要推广吗？",
-    "permlinkPlaceholder": "username/permlink",
+    "permlinkPlaceholder": "用户名/permlink",
     "title": "推广",
     "days": "天",
     "user": "用户",
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "文章不存在",
     "invalid_link": "网址无效，您可以使用有效网址重试，或尝试在网页浏览器中打开",
-    "no_existing_user": "用户不存在"
+    "no_existing_user": "用户不存在",
+    "posting_key_request": "{requester} 正在请求 @{username} 的发帖私钥。\n\n仅在信任此请求时才继续。",
+    "posting_key_request_unnamed": "另一个应用正在请求 @{username} 的发帖私钥。\n\n仅在信任此请求时才继续。",
+    "auth_request_as_user": "{requester} 想让你以 @{username} 的身份登录。\n\n只会共享你的用户名和登录凭证，密钥不会离开 Ecency。",
+    "auth_request_as_current": "{requester} 想让你用 Ecency 账户登录。\n\n只会共享你的用户名和登录凭证，密钥不会离开 Ecency。"
   },
   "payout": {
     "breakdown": "明细",
@@ -1065,7 +1191,7 @@
     "open": "打开网址",
     "invalid_key_desc": "请使用 {key} 密钥或主密钥登录以执行此交易",
     "auth_transfer_confirm": "确认向 {username} 转账？",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "仅在你信任此链接来源时才批准。批准后，下方操作将使用你的 {authority} 密钥从你的账户广播。"
   },
   "voters_dropdown": {
     "rewards": "奖励",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "只能包含字母、数字和连字符",
       "username_no_ascii_first_letter_error": "需以字母开头",
       "username_contains_double_hyphens": "不能包含连续的连字符",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "此用户名与加密货币交易所账户过于相似，可能会让他人混淆。请选择更独特的名称。",
+      "username_restricted_prefix": "不允许使用以“uid”开头并后接数字的用户名，因为这类名称常被用来冒充他人。请换一个名称。",
       "username_contains_underscore": "不能包含下划线"
     },
     "500_error": "您的请求无法处理，注册队列可能已满！请几分钟后再试……",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "用户名已被占用",
+      "14": "该邮箱地址已注册",
+      "15": "请输入有效的邮箱地址",
+      "16": "请输入有效的用户名",
+      "17": "用户名太长，请选择更短的名称",
+      "19": "请使用长期有效的邮箱地址，或改为获取 Premium 账户",
+      "21": "此推荐无效",
+      "28": "无法处理你的请求，注册队列可能已满。请几分钟后重试。",
+      "107": "检测到 VPN 连接。请关闭 VPN 后重试，或改为获取 Premium 账户。",
+      "110": "为防止滥用，我们限制每人/每个网络可创建的账户数量。请换一个网络重试。",
+      "111": "检测到 Tor 连接。注册时请禁用 Tor。",
+      "112": "目前无法验证你的连接。请几分钟后重试。"
     },
     "have_account_text": "已经有账户了？"
   },
@@ -1140,6 +1266,30 @@
     "desc": "获取功能完整的 Hive 账户，此方式会进行基本验证，以确保僵尸网络不会滥用我们的注册水龙头。",
     "btn_register": "免费注册",
     "title": "免费账户"
+  },
+  "dictation": {
+    "title": "语音输入",
+    "start": "录音",
+    "stop": "停止",
+    "record_more": "继续录音",
+    "done": "完成",
+    "recording": "录音中",
+    "stop_hint": "停止后将转写并添加到你的帖子。最长 {m} 分钟。",
+    "inserted": "已添加到你的帖子。继续录音，或点按“完成”。",
+    "transcribing": "转写中",
+    "rate": "每 {s} 秒 {n} Points",
+    "cost_running": "目前 {n} Points",
+    "cost_running_free": "目前免费",
+    "free_remaining": "今天接下来的 {n} x {s} 秒免费",
+    "price_loading": "正在查询价格",
+    "price_error": "无法加载转写价格。",
+    "denied": "Ecency 需要麦克风权限才能语音输入。请在设置中允许后重试。",
+    "error_empty": "此录音中未检测到语音。",
+    "error_insufficient_points": "Points 不足，无法转写此录音。",
+    "error_rate_limited": "录音次数过多。请稍后重试。",
+    "error_too_long": "此录音太长，无法转写。",
+    "error_failed": "无法转写此录音。请重试。",
+    "error_recorder": "无法开始录音。请重试。"
   },
   "wallet": {
     "delegations_out": "委托出",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "定时签到奖励您 0.25 个 esteem 点数(ESTM)。",
     "fill_transfer_from_savings": "储蓄已执行",
     "activities": "动态",
+    "no_activities": "暂无交易",
+    "activities_failed": "无法加载交易。下拉重试。",
     "tap_update": "点按更新",
     "mining_lottery": "中奖",
     "checkin": "签到",
     "tokens_transfer": "代币已转账",
     "outgoing_transfer_title": "转账/赠送",
+    "burned_title": "AI 使用",
+    "burned_description": "用于 AI 功能的 Points",
+    "burn_refund_title": "AI 退款",
+    "burn_refund_description": "AI 请求失败后退回的 Points",
     "manage_assets": "添加/移除资产",
     "selected_assets": "已选资产",
     "nft_setPropertyPermissions": "已为 NFT 符号设置属性权限",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "代币更新精度",
     "tokens_transferOwnership": "代币所有权已转移",
     "withdraw_vesting": "解除质押",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "提取账户",
     "delegate_engine": "委托",
     "market_close": "订单已关闭",
     "nftmarket_transferFee": "买单手续费",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "获取积分",
     "escrow_approve": "托管批准",
     "expires": "到期",
+    "transaction_id": "交易 ID",
+    "copy_transaction_id": "复制交易链接",
+    "filter_activities": "筛选活动",
+    "filter_activities_desc": "选择此记录要获取的操作类型",
+    "filter_all": "全选",
+    "filter_none": "全部清除",
+    "filter_apply": "应用",
     "author_reward": "作者奖励",
     "withdraw_hbd": "提取储蓄",
     "convert_request": "兑换请求",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "补充 RC",
+    "desc": "短期 RC 提升，让你可以继续发帖。",
+    "confirm": "花费 Points 补充你的资源点吗？",
+    "insufficient": "你的 Points 不足。",
+    "buy_points": "购买 Points"
   },
   "ai_image_generator": {
     "title": "AI 图像生成器",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "自定义（{hours} 小时）",
+    "balance_load_failed": "无法加载你的余额。点按重试。",
+    "precision_load_failed": "无法加载此代币的详细信息，因此只能发送整数金额。点按重试。",
     "close": "关闭",
     "favorite_username_placeholder": "用户名",
     "invalid_recipient_qr": "在此二维码中未找到用户名。",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "管理授权",
     "pincode": "PIN 码",
     "general": "通用",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "支持 Ecency",
+    "support_beneficiary": "与 Ecency 分享帖子奖励",
+    "support_beneficiary_percent": "帖子奖励分成比例",
+    "support_curation": "扣留部分策展奖励",
+    "support_curation_percent": "策展奖励扣留比例",
     "feedback_body": "在此处填写您的留言！\n\nHive 用户名：{username}\n应用版本：{appVersion}\n平台：{platform}\n",
     "show_imgs": "显示图片",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "评论",
       "bookmark": "书签",
+      "tags": "标签",
       "reblog": "转发",
       "favorite": "收藏",
       "mention": "提到",
@@ -1599,10 +1765,10 @@
       "transfers": "转账",
       "vote": "投票",
       "follow": "关注",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "定时帖子已发布",
+      "payouts": "收益结算",
+      "account_update": "账户更新",
+      "weekly_earnings": "每周收益",
       "fcm_unavailable": "此设备不支持推送通知。您只能在应用打开时收到通知。"
     },
     "keys_warning": "敏感账户信息！\n查看私钥前，Ecency 必须使用 PIN 码进行保护。",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "发送反馈",
     "rate_app": "为 Ecency 评分",
+    "email_digests": "邮件摘要",
     "rate": "评分",
     "dm-privacy-updated": "私信隐私设置更新成功",
     "dm-privacy-failed": "更新私信隐私设置失败",
@@ -1685,19 +1852,29 @@
     "request_sent": "您的删除请求已发送",
     "confirm_delete_body": "确定要删除账户吗？这将清除您的所有数据"
   },
-  "tts": {
-    "settings_title": "文本转语音设置",
-    "voice": "语音",
-    "voice_hint": "将使用系统默认语音",
-    "speed": "语速",
-    "pitch": "音调",
-    "test_voice": "测试语音",
-    "settings_info": "朗读帖子时将使用这些设置",
+  "listen": {
+    "title": "收听此帖",
+    "minutes": "约 {n} 分钟",
+    "login": "登录",
+    "unlock": "解锁 · {n} Points",
+    "confirm": "花费 {n} Points 收听此帖？音频归你所有，可随时重播。",
+    "not_enough_title": "Points 不足",
+    "not_enough": "收听需要 {required} Points，你有 {available} Points。",
+    "get_points": "获取 Points",
+    "unlock_failed": "无法解锁音频，请重试",
+    "failed_refunded": "音频生成失败，你的 Points 已退还",
+    "preparing": "正在准备音频…",
+    "preparing_eta": "正在准备音频，约 {n} 分钟…",
+    "preparing_progress": "正在准备音频 · {n}%",
+    "waiting": "排队中，前面还有 {n} 个…",
+    "next_in_line": "下一个就是你…",
     "play": "播放",
     "pause": "暂停",
-    "language": "语言",
-    "language_auto": "自动检测",
-    "language_hint": "自动检测会根据帖子内容选择语言"
+    "seek": "跳转",
+    "speed": "播放速度",
+    "language": "音频语言",
+    "unavailable": "无法加载音频。",
+    "retry": "重试"
   },
   "posting_authority": {
     "title": "启用快速发帖",
@@ -1732,7 +1909,7 @@
     "error-auth": "身份验证失败。请重新登录。",
     "error-generic": "视频上传失败。请重试。",
     "error-too-long-short": "短视频时长不得超过 60 秒。",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "一篇帖子只能包含一个视频。请先移除当前视频，再添加其他视频。",
     "select_source": "添加视频",
     "record": "录制视频",
     "choose_library": "从相册选择"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "分享快讯动态"
   },
+  "newsletter": {
+    "screen_title": "邮件摘要",
+    "title": "{list}",
+    "body_own": "每周或每月通过邮件汇总你的通知。",
+    "body_creator": "将 {list} 的新帖子发送到你的收件箱。",
+    "body_community": "通过邮件接收 {list} 中新帖子的摘要。",
+    "body_site": "将 Ecency 的精华内容发送到你的收件箱。",
+    "first_publish_title": "恭喜发布第一篇帖子！",
+    "first_publish_body": "想收到通知的邮件摘要吗？每周或每月一次，可随时在设置中更改或退订。",
+    "list_own": "我的通知摘要",
+    "list_site": "Ecency 简报",
+    "status_active": "你已订阅。",
+    "status_pending": "等待邮件确认。",
+    "status_short_active": "有效",
+    "status_short_pending_confirmation": "待确认",
+    "status_short_suppressed": "已停止",
+    "status_short_ended": "已结束",
+    "cadence_weekly": "每周",
+    "cadence_monthly": "每月",
+    "email_placeholder": "you@example.com",
+    "subscribe": "订阅",
+    "update": "更新",
+    "resend": "重新发送确认邮件",
+    "leave": "退订摘要",
+    "cancel": "取消",
+    "ok": "好",
+    "manage": "管理",
+    "check_inbox_title": "请查收邮件",
+    "check_inbox_body": "我们已向 {email} 发送了确认链接。确认后订阅才会生效。",
+    "subscribed": "已订阅邮件摘要",
+    "left": "已退订摘要",
+    "refused": "此地址无法订阅。",
+    "unavailable": "邮件摘要暂时不可用。",
+    "too_many": "尝试次数过多，请稍后再试。",
+    "fail": "出错了，请重试。",
+    "empty": "还没有邮件摘要。在下方订阅即可开始。",
+    "discover": "通过邮件获取更多",
+    "stop_all": "全部停止",
+    "stop_all_title": "停止所有邮件？",
+    "stop_all_body": "今后不会再向 {email} 发送任何 Ecency 邮件。其他地址的订阅不受影响。",
+    "stop_all_ok": "全部停止",
+    "stop_all_done": "该地址已退订所有邮件",
+    "profile_option": "邮件摘要",
+    "subscriber_count": "每周 {weekly} 位 • 每月 {monthly} 位邮件订阅者",
+    "community_button": "简报"
+  },
+  "mod_notes": {
+    "title": "添加理由",
+    "placeholder": "理由（其他版主可见）",
+    "confirm": "确认",
+    "cancel": "取消"
+  },
+  "community_settings": {
+    "title_header": "社区设置",
+    "title_label": "标题",
+    "about": "简介",
+    "lang": "语言",
+    "description": "描述",
+    "rules": "规则",
+    "nsfw": "不适宜工作场所浏览（NSFW）",
+    "save": "保存",
+    "required": "必填",
+    "title_length": "{min} 至 {max} 个字符",
+    "owner_admin_only": "只有所有者和管理员可以更改这些设置。"
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "已展开",
+        "collapsed": "已折叠"
+      },
+      "a11y_chat": {
+        "quote": "回复 {author}：{text}"
+      },
+      "a11y_forms": {
+        "select": "选择",
+        "deselect": "取消选择"
+      },
+      "store": {
+        "billing_unavailable": "此设备不允许应用内购买。",
+        "verification_failed": "App Store 无法验证此次购买。",
+        "cancelled": "购买已取消",
+        "unknown_result": "未知的购买结果"
+      },
+      "navigation": {
+        "feed_unavailable": "此信息流暂不可用。",
+        "link_cannot_open": "无法打开此链接。",
+        "video_cannot_play": "无法播放此视频。"
+      },
+      "media": {
+        "load_failed": "无法加载此项目。请检查网络连接后重试。",
+        "loading": "正在加载媒体",
+        "download_failed": "下载失败，状态码 {status}"
+      },
+      "sign_in": {
+        "required": "需要登录",
+        "to_reply": "请登录后回复。",
+        "to_vote": "请登录后点赞。",
+        "button": "登录"
+      },
+      "account": {
+        "logout_user": "登出 @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# 个赞}}  •  {replies, plural, other {# 条回复}}",
+        "voting_power": "Voting Power {percent}",
+        "remove_favourite": "从收藏中移除",
+        "add_favourite": "添加到收藏"
+      },
+      "waves": {
+        "clear_tag_filter": "清除标签筛选 {tag}",
+        "new_wave": "新建 Wave",
+        "replies_open_thread": "{count, plural, other {# 条回复，打开讨论串}}",
+        "characters": "{count} / {max} 个字符",
+        "retry": "{message}\n重试",
+        "playing": "正在播放 {permlink}",
+        "video_attached_remove": "已附加视频，点按移除",
+        "image_attached_remove": "已附加图片，点按移除",
+        "take_photo": "拍照",
+        "edit_poll": "编辑投票",
+        "add_poll": "添加投票",
+        "add_video": "添加视频"
+      },
+      "reading": {
+        "reply_to": "回复 {username}",
+        "opens_post": "打开帖子",
+        "sort_comments": "评论排序",
+        "sort_comments_value": "评论排序，{sort}",
+        "no_comments": "暂无评论。",
+        "loading_post": "正在加载帖子",
+        "show_version": "显示版本",
+        "show_changes": "显示更改",
+        "replying_to": "正在回复 @{username}",
+        "reply_text": "回复内容",
+        "translate_from": "从",
+        "translate_to": "到"
+      },
+      "feed": {
+        "tab_pinned": "{label}，已置顶",
+        "tab_add": "{label}，添加",
+        "customise": "自定义"
+      },
+      "card": {
+        "in_category": "在 {category}",
+        "pinned": "已置顶",
+        "by_author": "作者 {username}",
+        "payout": "收益 {payout}",
+        "payout_declined": "收益 {payout}，已拒绝",
+        "reblogged_by": "{username} 转发"
+      },
+      "shell": {
+        "close_menu": "关闭菜单"
+      },
+      "editor": {
+        "thumbnail_pick_another": "缩略图，选择其他图片",
+        "words": "{count, plural, other {# 个词}}",
+        "poll_min_age": "最低账户年龄（天）：{days}",
+        "poll_max_options": "最多选项数：{count}",
+        "thumbnail_selected": "已选缩略图",
+        "thumbnail": "缩略图",
+        "uploaded_image": "已上传的图片",
+        "community_search": "搜索"
+      },
+      "vote": {
+        "not_voted": "未点赞",
+        "voting": "正在点赞",
+        "failed_with": "点赞失败：{message}",
+        "failed": "点赞失败",
+        "payout": "收益 {payout}",
+        "payout_declined": "收益 {payout}，已拒绝",
+        "percent": "{percent} %",
+        "upvote_percent": "点赞 {percent}%"
+      },
+      "settings": {
+        "on": "开",
+        "off": "关"
+      },
+      "lock": {
+        "biometric_reason": "开启 Ecency 的生物识别解锁",
+        "offer_title": "使用{method}解锁",
+        "offer_use": "使用{method}"
+      },
+      "keys": {
+        "hidden_while_captured": "录屏或投屏时，密钥会被隐藏。",
+        "screenshot_notice": "已截取屏幕截图。私钥已重新隐藏；如果截图中显示了密钥，请将其删除。",
+        "hold_hint": "按住密钥即可显示。",
+        "hold_to_show": "按住显示"
+      },
+      "wallet": {
+        "cancel_order": "取消此订单？",
+        "days": "{count, plural, other {# 天}}"
+      },
+      "chat": {
+        "reactors_hint": "长按查看谁做出了回应",
+        "see_reactors": "查看谁做出了回应"
+      },
+      "esie": {
+        "still": "{mood}，静止"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} 的个人资料",
+      "preview": "预览（{index}/{count}）",
+      "balance": "余额：{amount}",
+      "expires_in": "{time}后过期",
+      "expired": "已过期。请关闭后重试。",
+      "user_has_no_posts": "@{username} 还没有发布任何内容",
+      "attach_image": "附加图片",
+      "auto": "自动",
+      "back": "返回",
+      "hot": "热门",
+      "image_of": "第 {index} 张，共 {count} 张",
+      "new": "最新",
+      "nsfw_tap_to_reveal": "NSFW 点按显示",
+      "new_reply": "新回复",
+      "remove": "移除",
+      "unlock_ecency": "解锁 Ecency",
+      "update_it": "更新",
+      "update_it_or_post_this_as": "更新它，还是作为新回复发布？",
+      "use_pin": "使用 PIN",
+      "your_reply_was_already_posted": "你的回复已发布",
+      "error_try_again": "{message} 要重试吗？",
+      "auth": {
+        "account_label": "账户：@{username}",
+        "approve_the_request_in_your_wallet": "请在钱包应用中批准该请求。",
+        "copy_key": "复制{title}",
+        "current_account": "当前账户",
+        "qr_code": "二维码",
+        "requested_by": "请求方：{requester}",
+        "pin_digits": "共 {total, plural, other {# 位}}，已输入 {filled} 位",
+        "private_key_shown": "{title}，私钥已显示",
+        "open_wallet_app": "打开钱包应用",
+        "hiveauth_scan": "请在 Hive Keychain 或其他 HiveAuth 钱包中批准：在此设备上打开它，或用它扫描此二维码。",
+        "switching": "正在切换……",
+        "logout_all": "登出所有账户",
+        "logout_all_title": "登出此设备上的所有账户？",
+        "stored_key": "@{username} 已在此设备上登录。已存储的密钥保持不变，仅刷新其会话。",
+        "stored_hivesigner": "@{username} 已在此设备上通过 HiveSigner 登录。其会话将被替换。",
+        "stored_hiveauth": "@{username} 已在此设备上通过 HiveAuth 登录。将改用 HiveSigner 签名。",
+        "method_key": "密钥",
+        "logout_failed": "登出失败"
+      },
+      "browser": {
+        "account": "账户",
+        "authority": "权限",
+        "phishing": "警告：该域名已被标记为已知的钓鱼网站。请务必极其谨慎。"
+      },
+      "chat": {
+        "cancel_edit": "取消编辑",
+        "cancel_reply": "取消回复",
+        "copied_to_clipboard": "已复制到剪贴板",
+        "edited_at": "编辑于{time}",
+        "group_options": "群组选项",
+        "pinned_messages": "置顶消息",
+        "remove_user": "移除 @{username}",
+        "sort_by_name": "按名称排序",
+        "more": "更多",
+        "reaction_label": "{emoji} {count}。长按查看谁做出了回应",
+        "members": "成员"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "此链接上已存在一篇帖子，且与你发送的内容不同。要更新它，还是作为新帖发布？",
+        "a_scheduled_post_is_published_by": "定时发布的帖子由 Ecency 在选定时间发布。这需要你的账户向 ecency.app 授予发帖权限。你的密钥和其他权限保持不变。授予该权限需要你的 active 密钥。",
+        "ai_assist": "AI 助手",
+        "ai_tools": "AI 工具",
+        "allow_ecency_to_publish_for_you": "允许 Ecency 代你发布？",
+        "bold": "粗体",
+        "clone": "克隆",
+        "cost": "费用：{cost}",
+        "could_not_store_the_draft_on": "无法将草稿存储到此设备。请保持应用开启并保存草稿。",
+        "draft": "草稿",
+        "delete_count": "删除（{count}）",
+        "dictate_desc": "说话，转写内容会进入你的帖子",
+        "discard": "放弃",
+        "discard_changes": "放弃更改？",
+        "grant": "授予",
+        "italic": "斜体",
+        "keep_editing": "继续编辑",
+        "my_blog": "我的博客",
+        "my_communities": "我的社区",
+        "new_post": "新帖子",
+        "notice": "提示",
+        "restore": "恢复",
+        "restore_unsaved_changes": "恢复未保存的更改？",
+        "saved": "已保存",
+        "top_communities": "热门社区",
+        "table": "表格",
+        "text_format": "文本格式",
+        "this_link_is_already_in_use": "此链接已被使用",
+        "untitled": "无标题",
+        "update_it_or_publish_this_as": "更新它，还是将其作为新帖发布？",
+        "you_have_unsaved_changes_from_an": "你有一次较早编辑留下的未保存更改。此后帖子已发生变化；恢复这些更改会替换下方的文本。",
+        "your_edits_were_not_published": "你的编辑未发布。",
+        "your_post_was_already_published": "你的帖子已发布",
+        "file_size": "{name}（{size} MB）",
+        "thumbnail_pick": "缩略图，点按选择其他图片",
+        "thumbnail_number": "缩略图 {number}",
+        "recording_busy": "已有录制正在进行。请先在相机中完成。",
+        "photo_lost": "相机打开期间照片丢失。请重新拍摄。",
+        "add_snippet_button": "+ 片段",
+        "words_count": "{count, plural, other {# 个词}}",
+        "community_search": "搜索"
+      },
+      "profile": {
+        "open_wallet": "打开钱包",
+        "your_wallet_is_on_the_wallet": "你的钱包在“钱包”标签页中。",
+        "user_has_no_comments": "@{username} 还没有发表任何评论",
+        "votes_count": "{count, plural, other {# 个赞}}",
+        "replies_count": "{count, plural, other {# 条回复}}",
+        "menu": "更多",
+        "users": "用户"
+      },
+      "reading": {
+        "apply": "应用",
+        "add_tag": "添加标签",
+        "age": "年龄",
+        "audio_language": "音频语言",
+        "available_filters": "可用筛选",
+        "could_not_unlock_the_audio_please": "无法解锁音频，请重试",
+        "downvote": "踩",
+        "downvote_percent": "踩 {percent}%",
+        "listen_to_this_post": "收听此帖",
+        "log_in": "登录",
+        "mark_all_as_read": "全部标为已读",
+        "mark_as_read": "标为已读",
+        "more_replies": "更多回复",
+        "not_enough_points": "Points 不足",
+        "nothing_here_yet": "这里暂时什么都没有。",
+        "open_editor": "打开编辑器",
+        "pause_voice": "暂停语音",
+        "play_voice": "播放语音",
+        "playback_speed": "播放速度",
+        "publishing_in_waves": "正在发布到 Waves",
+        "quests_done": "已完成任务",
+        "read": "阅读",
+        "remove_vote": "取消点赞",
+        "seek": "跳转",
+        "select_community": "选择社区",
+        "selected_filters": "已选筛选",
+        "the_audio_could_not_be_loaded": "无法加载音频。",
+        "this_post_does_not_exist_or": "此帖不存在或已被删除。",
+        "unread": "未读",
+        "voice_position": "语音位置",
+        "vote_weight": "点赞权重",
+        "reblogged_by": "{username} 转发",
+        "no_more_posts": "没有更多帖子了。",
+        "favourite": "收藏",
+        "no_votes_yet": "暂无点赞",
+        "no_comments_yet": "暂无评论。来抢沙发吧！",
+        "comments_count": "评论（{count}）",
+        "sending_to_chain": "正在发送到区块链",
+        "compare": "对比",
+        "your_vote": "你的点赞",
+        "reply_to": "回复 @{username}",
+        "what_do_you_think": "你怎么看？",
+        "clear_tag_filter": "清除标签筛选",
+        "tab_selected": "{title}，已选中",
+        "add_tag_feed": "添加标签信息流",
+        "feed_pinned": "{label}，已置顶",
+        "attached_image_remove": "已附加图片，点按移除",
+        "camera": "相机",
+        "files": "文件",
+        "paused": "已暂停",
+        "in_topic": "在 {topic}",
+        "poll_vote": "投票",
+        "reply": "回复",
+        "mute_sound": "静音",
+        "unmute_sound": "取消静音",
+        "leaderboard_activities": "活动",
+        "leaderboard_reward": "奖励",
+        "sort_votes": "点赞"
+      },
+      "shell": {
+        "account_of": "账户 @{username}",
+        "account_signed_out": "账户，未登录",
+        "close_tab": "关闭标签页",
+        "coming_soon_to_the_native_app": "原生应用即将支持。",
+        "create": "创建",
+        "expand": "展开",
+        "forward": "前进",
+        "loading": "加载中",
+        "new_tab": "新标签页",
+        "reload": "重新加载",
+        "sent": "已发送",
+        "tab_unread": "{title}，{count} 条未读",
+        "no_app_for_link": "没有可打开此链接的应用。"
+      },
+      "wallet": {
+        "product_not_available": "商品不可用。",
+        "repeat": "重复"
+      },
+      "copied": "已复制",
+      "trending_caps": "趋势",
+      "move_up": "上移",
+      "move_down": "下移",
+      "scroll_to_top": "滚动到顶部",
+      "load_more": "更多"
+    },
+    "wallet": {
+      "checking": "正在向网络确认",
+      "leave_title": "仍在发送",
+      "leave_message": "仍在发送或向网络确认中。你可以离开此页面：完成后应用会通知你。",
+      "stay": "留下",
+      "collateralized_convert_request": "抵押转换请求",
+      "op_transfer": "转账",
+      "op_power_up": "质押",
+      "op_power_down_change": "解除质押变更",
+      "op_delegation": "委托",
+      "op_savings_deposit": "储蓄存入",
+      "op_savings_withdrawal": "储蓄取出",
+      "op_conversion": "转换",
+      "op_swap": "兑换",
+      "op_order_cancel": "取消订单",
+      "op_reward_claim": "领取奖励",
+      "op_withdraw_route_change": "提取路径变更",
+      "op_token_operation": "代币操作"
+    },
+    "notification": {
+      "amount_unknown": "金额不可用",
+      "weekly_earnings_breakdown": "本周你赚了 ${amount}：发帖 ${authorUsd}，策展 ${curationUsd}。",
+      "weekly_earnings_total": "本周你通过发帖和策展赚了 ${amount}。"
+    },
+    "settings": {
+      "open": "打开",
+      "feedback_subject": "反馈/错误报告",
+      "unknown_user": "未知用户"
+    },
+    "navigation": {
+      "editor": "编辑器",
+      "followers": "粉丝",
+      "spin_game": "转盘游戏",
+      "edit_profile": "编辑个人资料",
+      "redeem_points": "兑换积分",
+      "community": "社区",
+      "community_members": "社区成员",
+      "community_activities": "社区动态",
+      "browser": "浏览器",
+      "asset_details": "资产详情",
+      "edit_history": "编辑历史",
+      "welcome": "欢迎",
+      "chat": "聊天",
+      "backup_keys": "备份密钥",
+      "trade": "交易",
+      "ai_image_generator": "AI 图片生成器",
+      "select_assets": "选择资产",
+      "poll": "投票",
+      "bot_comments": "机器人评论"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "需要 owner 密钥的操作无法在 Ecency 中签名。",
+      "post": "发帖/评论",
+      "custom": "自定义 JSON",
+      "sign_buffer": "签署消息",
+      "send_token": "发送代币",
+      "witness_vote": "见证人投票",
+      "proxy": "设置代理",
+      "power_up": "质押",
+      "power_down": "解除质押",
+      "broadcast": "广播",
+      "sign_tx": "签署交易",
+      "encode": "编码消息",
+      "decode": "验证密钥",
+      "add_account_authority": "添加账户权限",
+      "remove_account_authority": "移除账户权限",
+      "add_key_authority": "添加密钥权限",
+      "remove_key_authority": "移除密钥权限",
+      "create_claimed_account": "创建账户",
+      "create_proposal": "创建提案",
+      "remove_proposal": "移除提案",
+      "update_proposal_vote": "提案投票",
+      "signed_call": "已签名调用"
+    },
+    "translate_language": {
+      "ar": "阿拉伯语",
+      "az": "阿塞拜疆语",
+      "bg": "保加利亚语",
+      "bn": "孟加拉语",
+      "ca": "加泰罗尼亚语",
+      "cs": "捷克语",
+      "da": "丹麦语",
+      "de": "德语",
+      "el": "希腊语",
+      "en": "英语",
+      "eo": "世界语",
+      "es": "西班牙语",
+      "et": "爱沙尼亚语",
+      "fa": "波斯语",
+      "fi": "芬兰语",
+      "fr": "法语",
+      "ga": "爱尔兰语",
+      "he": "希伯来语",
+      "hi": "印地语",
+      "hu": "匈牙利语",
+      "id": "印度尼西亚语",
+      "it": "意大利语",
+      "ja": "日语",
+      "ko": "韩语",
+      "lt": "立陶宛语",
+      "lv": "拉脱维亚语",
+      "ms": "马来语",
+      "nb": "挪威语",
+      "nl": "荷兰语",
+      "pl": "波兰语",
+      "pt": "葡萄牙语",
+      "ro": "罗马尼亚语",
+      "ru": "俄语",
+      "sk": "斯洛伐克语",
+      "sl": "斯洛文尼亚语",
+      "sq": "阿尔巴尼亚语",
+      "sv": "瑞典语",
+      "th": "泰语",
+      "tl": "他加禄语",
+      "tr": "土耳其语",
+      "uk": "乌克兰语",
+      "zh": "中文",
+      "zt": "中文（繁体）"
+    },
+    "reading": {
+      "banner_text": "此帖使用{source}。要翻译成{target}吗？",
+      "translated_from_text": "译自{source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# 位成员}} • {authors, plural, other {# 位发帖者}} • {posts, plural, other {# 篇帖子}}",
+      "community_title": "{title} 社区",
+      "members_title": "{title} 成员",
+      "activities_title": "{title} 动态",
+      "cannot_start_with_or": "不能以 @ 或 # 开头",
+      "use_a_two_letter": "请使用两个字母的语言代码，例如 en",
+      "at_most_characters": "最多 {max, plural, other {# 个字符}}",
+      "council": "理事会",
+      "journal": "日志",
+      "topic": "话题",
+      "community_not_found": "未找到社区。"
+    },
+    "transfer": {
+      "one_recipient": "此转账只能有一个收款人。",
+      "is_an_exchange_and": "{exchange} 是交易所，可能不支持定期转账：按计划发送的资金可能丢失。请改用一次性转账。"
+    },
+    "dapps": {
+      "signing_info": "Ecency 可作为你的 Hive 签名扩展。当 dApp 要求你使用 Keychain、Keeper 或 Peak Vault 等浏览器扩展登录时，请选择该选项，Ecency 会安全地处理签名。",
+      "category_social": "社交",
+      "category_gaming": "游戏",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "群组",
+      "unable_to_load_messages": "无法加载消息。",
+      "someone": "某人",
+      "renamed_the_group_to": "{actor} 将群组名称改为“{name}”",
+      "removed_the_group_name": "{actor} 移除了群组名称",
+      "unable_to_send_your": "无法发送你的消息。",
+      "unable_to_remove_message": "无法删除消息。",
+      "unknown": "未知",
+      "members_online": "{members, plural, other {# 位成员}} • {online} 人在线",
+      "failed_to_load_pinned": "无法加载置顶消息",
+      "you": "你",
+      "title": "回应"
+    },
+    "tip": {
+      "login_required": "请登录后发送打赏",
+      "max_decimals": "最多 {n, plural, other {# 位小数}}"
+    },
+    "paid": {
+      "check_again": "再次检查",
+      "give_up": "放弃",
+      "unknown": "暂无回应。请求可能仍在运行。请再次检查以获取结果：不会重复收费。",
+      "pending": "你的请求仍在处理中。请稍后再检查：不会重复收费。",
+      "restored": "之前的请求暂无回应。请再次检查以获取结果：不会重复收费。",
+      "give_up_confirm": "如果请求已成功，Points 已被花费，结果将会丢失。",
+      "not_stored": "无法将此请求存储到设备上。请保持此页面开启直到完成。",
+      "sign_in_again": "你的会话已过期。请重新登录，然后再次检查。",
+      "other_account": "这属于 @{owner}。请切换回该账户继续。"
+    },
+    "ai": {
+      "run_ai_assist": "运行 AI 助手（{costText}）",
+      "no_longer_free_cost": "今天此次运行不再免费。费用为 {cost} {unit}。",
+      "no_longer_free": "今天此次运行不再免费。",
+      "content_violates_our_content": "内容违反了我们的内容政策。请修改你的文本。Points 不予退还。",
+      "generate_image": "生成图片（{costLabel}）",
+      "use_prompt": "使用：“{prompt}”"
+    },
+    "post_actions": {
+      "busy": "请稍候，另一项操作正在进行",
+      "not_a_community_post": "不是社区帖子。",
+      "parent_post_not_found": "未找到父帖",
+      "the_account_changed": "账户已更改。"
+    },
+    "dictation": {
+      "balance": "余额：{balance} {unit}",
+      "stop_points": "停止（{cost} Points）",
+      "stop_free": "停止（免费）",
+      "transcribe_points": "转写（{cost} Points）",
+      "transcribe": "转写",
+      "no_longer_free_cost": "今天此次录音不再免费。费用为 {cost} Points。",
+      "no_longer_free": "今天此次录音不再免费。",
+      "held_locked": "Ecency 锁定时录音已停止。未发送任何内容。点按“转写”发送，或放弃。",
+      "held_no_background": "Ecency 离开屏幕时录音已停止（无法显示录音通知）。未发送任何内容。点按“转写”发送，或放弃。",
+      "held_stopped": "已从通知中停止录音。未发送任何内容。点按“转写”发送，或放弃。",
+      "held_focus_lost": "录音因通话或其他应用的声音而停止。未发送任何内容。点按“转写”发送，或放弃。",
+      "held_interrupted": "录音已停止，因为其他应用占用了麦克风。未发送任何内容。点按“转写”发送，或放弃。",
+      "unavailable": "此设备不支持录音。",
+      "not_read": "无法读取该录音，或录音过大。未发送任何内容，也未收费。",
+      "give_up_not_sent": "此录音未发送，因此未收费。它将被删除。",
+      "give_up_not_charged": "此录音未收费。它将被删除。",
+      "clip_lost": "较早请求的录音已不在此设备上。如果该请求已成功，你的 Points 已被花费，且无法获取其转写内容。"
+    },
+    "register": {
+      "error_code_28": "无法处理你的请求。注册队列可能已满。请几分钟后重试。"
+    },
+    "perks": {
+      "quests_empty": "这里暂时还没有任务，请稍后再来。",
+      "freeze_confirm_title": "保护你的连续记录",
+      "spend_points_on_a": "花费 {price} Points 购买连续记录保护？当你某天漏签时会自动用掉它来保护连续记录。"
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "支持 Ecency，获得免费博客，并以认证 Pro 徽章脱颖而出。",
+      "card_description": "每年 {price} 升级 Pro。认证徽章、免费博客，并支持 Ecency。",
+      "card_description_plain": "升级 Pro 一年。认证徽章、免费博客，并支持 Ecency。",
+      "member": "你是 Pro 会员。",
+      "benefit_badge": "名字旁显示认证 Pro 徽章。",
+      "benefit_blog": "yourname.blogs.ecency.com 免费博客。",
+      "benefit_support": "直接支持 Ecency 的开发。",
+      "benefit_early": "抢先体验新功能。",
+      "buy": "每年 {price} 获取 Pro",
+      "extend": "{price} 延长 12 个月",
+      "extend_note": "再次购买会为你的会员资格增加 12 个月。",
+      "unavailable": "商店目前无法提供 Ecency Pro。",
+      "activating": "已收到付款。正在激活你的会员资格。",
+      "success_title": "欢迎加入 Ecency Pro",
+      "success_body": "你的 Pro 会员资格已生效。徽章很快会显示在你的个人资料上。",
+      "extending": "已收到付款。正在为你的 Pro 会员资格延长 12 个月。",
+      "open_a11y": "打开 Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "正在保存草稿……",
+      "please_sign_in_first": "请先登录。",
+      "fetch_failed": "获取失败。",
+      "you_can_only_edit": "你只能编辑自己的内容。",
+      "invalid_percent": "百分比无效",
+      "beneficiary_exists_already": "受益人已存在",
+      "this_draft_belongs_to": "此草稿属于 @{owner}。请切换回该账户来发布。",
+      "could_not_make_a": "无法为此帖生成新链接。请稍微修改标题后重试。",
+      "an_earlier_attempt_was": "较早的一次尝试在本次之后才发布。请确认要保留哪个版本。",
+      "could_not_check_your": "无法检查你账户的发帖权限。请检查网络连接后重试。",
+      "this_post_was_changed": "自你打开后，此帖已在别处被修改。请复制你的文本，返回后重新打开以编辑最新版本。",
+      "link_text_placeholder": "在此输入文本"
+    },
+    "app_error": {
+      "this_reply_is_too": "此回复过长。",
+      "the_network_refused_this": "网络拒绝了此操作。",
+      "invalid_input": "输入无效。",
+      "secure_storage_is_unavailable": "安全存储不可用。请重新登录。",
+      "please_sign_in_first": "请先登录。",
+      "these_credentials_belong_to": "这些凭据属于 @{actual}，而不是 @{expected}。",
+      "is_not_signed_in": "@{username} 未在此设备上登录。",
+      "key_required": "执行此交易需要 {role} 密钥。{hint}",
+      "cancelled": "已取消。",
+      "the_request_was_rejected": "请求在钱包应用中被拒绝。",
+      "the_request_expired_before": "钱包应用响应前请求已过期。请重试。",
+      "could_not_reach_the": "无法连接 HiveAuth 服务器。请重试。",
+      "unexpected_redirect": "服务器返回了意外的重定向。未做任何更改。请稍后重试。",
+      "missing_key_hint": "请在“设置”的“管理权限”（导入私钥）中添加，或用它重新登录。",
+      "this_key_is_also": "此密钥同时也是该账户的 owner 密钥。Ecency 不会保存控制 owner 角色的密钥：请为 active 和 posting 角色设置各自独立的密钥，然后用它们登录。",
+      "this_is_the_owner": "这是 owner 密钥。Ecency 从不存储或使用 owner 密钥：请用主密码，或用 posting 或 active 密钥登录。",
+      "this_password_only_matches": "此密码仅匹配该账户的 owner 密钥。Ecency 从不存储或使用 owner 密钥：请用 posting 或 active 密钥登录。",
+      "this_key_cannot_sign": "此密钥无法单独为该账户签名：该账户需要多个签名（其权重低于阈值）。",
+      "public_key_given": "这是你的公钥。请粘贴私钥（以 5 开头）或主密码。",
+      "memo_key_only": "备忘密钥不能用于登录。请使用 posting 密钥、active 密钥或主密码。",
+      "network_message": "网络错误。请检查网络连接后重试。",
+      "network_error_this_may": "网络错误。此操作可能已经成功；重试是安全的，不会重复发布。"
+    },
+    "purchases": {
+      "deal_best": "超值之选！",
+      "deal_popular": "热门！",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "商店没有响应。"
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "使用 999accounts 需要提供电子邮箱和用户名",
+      "stuck": "此商品的先前购买未能完成。请携带你的商店收据联系 support@ecency.com，收据已为此保留。",
+      "held": "此购买已被扣留审核。请提供订单 #{order} 联系 support@ecency.com。",
+      "earlier_purchase": "此商品的先前购买正在优先为 @{target} 完成。",
+      "earlier_pending": "此商品先前为 @{target} 的付款仍在处理中。商店确认付款后即可完成。",
+      "pending": "你的付款正在处理中。商店确认付款后购买即完成。",
+      "processing": "你的购买正在处理中，很快就会完成。"
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "定期转账",
+      "delegate_hive_power": "委托 Hive Power",
+      "power_up": "质押",
+      "set_withdraw_vesting_route": "设置提取路径",
+      "power_down": "解除质押",
+      "transfer_to_saving": "转入储蓄",
+      "transfer_from_saving": "从储蓄转出",
+      "cancel_transfer_from_saving": "取消从储蓄转出",
+      "collateralized_convert": "抵押转换",
+      "witness_vote": "见证人投票",
+      "witness_update": "见证人更新",
+      "witness_set_properties": "见证人设置属性",
+      "governance_proxy": "治理代理",
+      "claim_account": "领取账户",
+      "create_account": "创建账户",
+      "create_account_with_account": "使用账户额度创建账户",
+      "create_limit_order": "创建限价单",
+      "cancel_limit_order": "取消限价单",
+      "redeem_rewards": "兑现奖励",
+      "post_or_comment": "发帖或评论",
+      "post_or_comment_options": "发帖或评论选项",
+      "custom_operation": "自定义操作",
+      "update_account_active": "更新账户（active）",
+      "update_account_posting": "更新账户（posting）",
+      "change_recovery_account": "更改恢复账户",
+      "create_proposal": "创建提案",
+      "remove_proposal": "移除提案",
+      "update_proposal_votes": "更新提案投票",
+      "update_proposal": "更新提案"
+    },
+    "auth_link": {
+      "must_be_signed_by": "此链接必须由 @{account} 签名。请切换到该账户后重新打开。",
+      "ecency_can_only_sign": "Ecency 只能对链接中的交易进行签名和广播。",
+      "requester_page": "页面 {host}",
+      "owner_refused": "需要 owner 密钥的操作无法通过链接签名。",
+      "busy": "请稍候：另一个请求仍在处理中。",
+      "not_supported": "Ecency 在此版本中暂不支持签署此操作。"
+    },
+    "chats": {
+      "group_members": "群组成员",
+      "rename_group": "重命名群组",
+      "failed_to_load_chats": "无法加载聊天",
+      "unknown": "未知",
+      "unable_to_mark_channel": "无法将频道标为已读",
+      "unable_to_update_favorites": "无法更新收藏",
+      "unable_to_update_mute": "无法更新静音设置",
+      "group": "群组",
+      "unable_to_search": "无法搜索",
+      "unable_to_start_chat": "无法开始聊天",
+      "no_internet": "无网络连接"
+    },
+    "stake": {
+      "confirm_summary": "将 {hp} HP（{vests} VESTS）委托给 @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "已委托给 @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "仅公钥。Ecency 从不存储 owner 密钥。",
+      "shared_owner": "此账户的 owner 角色和{names} 角色使用同一个密钥。拥有该密钥的人可控制整个账户。请为{names} 角色设置独立的密钥，并将 owner 密钥离线保存。",
+      "copy_warning": "任何拥有此私钥的人都能控制你账户的这一部分。其他应用可能读取剪贴板；请只在你信任的地方粘贴。2 分钟后会从剪贴板清除。"
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN 锁已开启。",
+      "pin_changed": "PIN 已更改。",
+      "pin_lock_is_off": "PIN 锁已关闭。",
+      "wiped_notice": "所有账户、密钥和凭据已从此设备中移除。",
+      "we_could_not_bring": "我们无法迁移你在旧版应用中的账户。请重新登录。",
+      "your_pin_lock_could": "无法从旧版本迁移你的 PIN 锁。请在账户菜单中重新设置 PIN 以重新开启应用锁。",
+      "biometric_unlock_was_turned": "由于此设备上的生物识别信息已变更，生物识别解锁已关闭。请用 PIN 解锁，然后在账户菜单中重新开启。",
+      "biometric_unavailable_notice": "无法开启生物识别解锁：此设备上未设置生物识别。",
+      "set_backup": "设置 PIN 作为生物识别解锁的备份",
+      "biometric_on_notice": "PIN 锁已开启。可使用生物识别或 PIN 解锁。",
+      "offer_title": "使用生物识别解锁",
+      "offer_body": "用面容或指纹打开 Ecency。你还需设置 PIN，在无法使用生物识别时用它解锁应用。",
+      "offer_use": "使用生物识别",
+      "offer_use_pin": "改用 PIN"
+    },
+    "common": {
+      "list_and": "{first}和{second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "备忘"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 个字符及以下的回复不会获得积分（不含链接）",
+      "short_content_hint": "内容太短，无法获得积分（25 个字符及以下，不含链接）",
+      "daily_post": "每日发帖 {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {连续 # 天}}",
+      "grant_description": "授予 Ecency 账户 @ecency.app 对你账户的发帖权限，这样你无需每次都打开 Keychain 即可发帖。授予后会更改你账户的发帖权限，并需要你的 active 密钥。"
+    },
+    "wallet_history": {
+      "from_to": "@{from} 至 @{to}",
+      "from_user_id": "来自 @{from}，ID：{id}",
+      "user_id": "@{user}，ID：{id}",
+      "from_to_id": "@{from} 至 @{to}，ID：{id}",
+      "from_to_account": "@{from} 至 {to}",
+      "from_user": "来自 @{user}",
+      "to_user": "发给 @{user}",
+      "interest": "利息",
+      "proposal_pay": "提案付款",
+      "categories": "活动类型",
+      "category_all": "全部",
+      "category_transfers": "转账",
+      "category_market": "市场订单",
+      "category_interest": "利息",
+      "category_stake": "质押操作",
+      "category_rewards": "奖励",
+      "point_type_checkin": "心跳",
+      "point_type_login": "登录",
+      "point_type_post": "发帖",
+      "point_type_comment": "评论",
+      "point_type_vote": "点赞",
+      "point_type_reblog": "转发",
+      "point_type_transfer_sent": "已发转账",
+      "point_type_transfer_received": "已收转账"
+    },
+    "video_upload": {
+      "continue_upload": "继续上传",
+      "source_gone": "此录制内容已不在设备上。请重新录制或选择视频。",
+      "no_camera": "此设备上无法使用相机。"
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "下次解除质押在 {hours, plural, other {# 小时}}后",
+      "account_not_found": "未找到账户"
+    },
+    "wave_compose": {
+      "clipboard_chip": "剪贴板中的图片 · 粘贴图片",
+      "no_container": "无法获取最新的 Waves 容器",
+      "please_sign_in_first": "请先登录。",
+      "write_something_first": "请先写点内容。",
+      "account_changed": "这条 Wave 是以另一个账户撰写的。请关闭后重新撰写。",
+      "no_upload": "此版本暂不支持上传图片。请改为将图片链接粘贴到文本中。",
+      "fail": "失败"
+    },
+    "delete_account": {
+      "sign_out_failed": "你的请求已发送，但登出失败。请从菜单中登出。",
+      "not_sent": "无法发送你的删除请求。请重试。"
+    },
+    "chat_sheets": {
+      "group_limit": "一个群组最多可再添加 {max, plural, other {# 人}}。",
+      "search_people_by_username": "按用户名搜索",
+      "new_group_title": "新建群组",
+      "new_group_hint": "添加 {min} 至 {max, plural, other {# 人}}即可开始群聊。",
+      "no_results": "聊天中未找到该名称的用户。",
+      "search_failed": "搜索失败。请检查网络连接后重试。",
+      "create": "创建群组",
+      "new_group_failed": "无法创建群组。请重试。",
+      "name_limit": "群组名称最多 {max, plural, other {# 个字符}}。",
+      "rename_title": "重命名群组",
+      "rename_hint": "为群组设置一个所有成员都能看到的名称。留空则显示成员名称。",
+      "placeholder": "群组名称",
+      "not_owner": "只有创建群组的人才能重命名。",
+      "rename_failed": "无法重命名群组。请重试。"
+    },
+    "editor_side": {
+      "copy_of": "{title} 的副本",
+      "deletions_failed": "出错了\n{total, plural, other {# 项删除}}中有 {failed} 项失败",
+      "uploads_failed": "{count, plural, other {# 个上传失败}}：\n\n{messages}",
+      "failed_to_delete": "删除失败"
+    },
+    "uploads": {
+      "add_to_gallery": "添加到图库"
+    },
+    "account_notice": {
+      "manage_keys": "设置，管理权限",
+      "no_signing_key_title": "请以 @{account} 重新登录",
+      "no_signing_key": "Ecency 不再在此设备上保存 owner 密钥或主密码，且此处没有存储 @{account} 的 posting 或 active 密钥。请用主密码，或用 posting 或 active 密钥重新登录，或在{manageKeys}（导入私钥）下添加密钥。",
+      "missing_roles_title": "部分密钥未添加",
+      "cannot_post": "发帖、点赞或评论",
+      "cannot_transfer": "发送转账或更改账户设置",
+      "missing_roles": "你的密码已不再匹配 @{account} 的 {missing} 密钥：自设置密码以来，该账户上的密钥已被更改。此设备上存储的是 {kept} 密钥。在你于{manageKeys}（导入私钥）下添加 {missing} 密钥之前，此应用无法使用 @{account} 的密钥{cannot}。",
+      "shared_owner_title": "此密钥同时控制 owner 角色",
+      "shared_owner": "@{account} 的 owner 角色和{names} 角色使用同一个密钥。拥有该密钥的人可控制整个账户。Ecency 仅将其保存为{names} 密钥，绝不用于 owner 操作。请为{names} 角色设置独立的密钥，并将 owner 密钥离线保存。"
+    },
+    "dapp_browser": {
+      "message_from": "来自 {host} 的消息",
+      "home_title": "主页",
+      "loading_title": "加载中……",
+      "blank_run": "[{count, plural, other {# 个空白字符}}]",
+      "too_large": "此页面请求签署的内容过大，无法显示，因此 Ecency 拒绝了该请求。"
+    },
+    "community_service": {
+      "the_account_changed": "账户已更改。"
+    },
+    "profile_edit": {
+      "enter_link": "输入图片链接",
+      "please_sign_in_first": "请先登录。",
+      "account_not_found": "未找到账户",
+      "please_enter_an_image": "请输入以 https:// 开头的图片链接"
+    },
+    "background_media": {
+      "post_by": "@{author} 的帖子"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "请先登录。"
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "你已用相同权重点过赞。",
+      "insufficient_rc": "Resource Credits 不足。请等待或质押。",
+      "missing_authority": "缺少发帖权限。请检查你的登录方式。",
+      "comment_too_soon": "请稍候再发帖。",
+      "paid_out": "此帖已结算收益。",
+      "too_large": "交易大小为 {size, plural, other {# 字节}}，超过 {max} 字节的限制。",
+      "network_error_please_check": "网络错误。请检查网络连接后重试。",
+      "unconfirmed_message": "无法确认此操作是否已完成。请查看你的钱包或历史记录；仅在没有记录时再重新发起。",
+      "undecided_message": "此操作可能已经完成。重试前请先查看你的钱包或历史记录。"
+    },
+    "chat_api": {
+      "request_failed": "请求失败（{status}）"
+    },
+    "chat": {
+      "typing_one": "{name} 正在输入……",
+      "typing_two": "{first} 和 {second} 正在输入……",
+      "typing_three": "{first}、{second} 和 {third} 正在输入……",
+      "typing_many": "{first}、{second} 和另外 {count, plural, other {# 人}}正在输入……",
+      "banned": "{reason} 你仍然可以查看聊天内容。{until}可恢复发言。",
+      "joined_when": "{time}加入",
+      "joined": "已加入",
+      "official_badge": "官方",
+      "official_badge_label": "Ecency 官方账户"
+    },
+    "side_menu": {
+      "ask_esie": "问问 Esie"
+    },
+    "chat_service": {
+      "missing_token": "缺少 Hive 访问令牌。请登出后重新登录。",
+      "dm_error": "该用户尚未加入聊天"
+    },
+    "compose_reply": {
+      "account_changed": "这条回复是以另一个账户撰写的。请关闭后重新撰写。",
+      "write_something_first": "请先写点内容。",
+      "please_sign_in_first": "请先登录。"
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "受益人过多：最多 {max} 个。",
+      "a_beneficiary_s_share": "受益人的比例必须在 0.01% 到 100% 之间。",
+      "beneficiaries_add_up_to": "受益人比例之和超过 100%。",
+      "a_beneficiary_is_listed": "有受益人被重复列出。",
+      "you_cannot_be_a": "你不能成为自己帖子的受益人。",
+      "a_beneficiary_has_an": "有受益人的账户名无效。"
+    },
+    "follows": {
+      "fail": "失败！：{message}",
+      "follower_count": "粉丝（{count}）",
+      "following_count": "关注（{count}）"
+    },
+    "link": {
+      "unsupported": "暂不支持此链接。",
+      "cannot_open": "无法打开链接",
+      "unsupported_version": "此版本不支持该链接。"
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore 浏览器可以访问你的 Hive 钱包来签署交易。此链接来自帖子内容，未经 Ecency 验证。仅在你信任它时才继续：\n\n{url}"
+    },
+    "listen": {
+      "message": "收听需要 {required} Points，你有 {available} Points。",
+      "unlock_label": "解锁 · {cost} Points",
+      "preparing_audio": "正在准备音频 · {preparingPercent}%",
+      "waiting_in_line_ahead": "排队中，前面还有 {ahead} 个……",
+      "next_in_line": "下一个就是你……",
+      "preparing_about_minutes": "正在准备音频，约 {minutes} 分钟……",
+      "preparing_audio_2": "正在准备音频……",
+      "spend_confirm": "花费 {cost} Points 收听此帖？音频归你所有，可随时重播。",
+      "about_minutes": "约 {minutes} 分钟",
+      "failed_refunded": "音频生成失败，你的 Points 已退还"
+    },
+    "media_pick": {
+      "preparing_video": "正在准备视频……",
+      "library_hint": "从相册选择",
+      "camera_hint": "立即拍摄新照片",
+      "files_hint": "浏览此设备和云端的文件",
+      "paste_hint": "使用你复制的图片",
+      "link_hint": "使用网上的图片"
+    },
+    "media_picking": {
+      "image_types_message": "不支持此文件类型。请选择 JPEG、PNG、GIF、WebP 或 HEIC 图片。",
+      "video_types_message": "不支持此文件类型。请选择 MP4 或 MOV 视频。",
+      "gif_too_large": "此 GIF 超过 {mb} MB。"
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "此操作需要 active 和 posting 两种签名，而 Ecency 暂时还无法同时签署。"
+    },
+    "poll": {
+      "fail": "失败！{message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "无法检查你账户的发帖权限。请检查网络连接后重试。"
+    },
+    "post_lists": {
+      "voters_title": "投票者信息（{total}）",
+      "reblogs_title": "转发信息（{total}）",
+      "no_history_found": "未找到历史记录！",
+      "no_edit_history_available": "此内容没有可用的编辑历史。",
+      "version_label": "版本 {version}"
+    },
+    "stats": {
+      "other_device": "其他"
+    },
+    "profile": {
+      "account_not_found": "未找到账户",
+      "bar": "{label}：{percent}",
+      "bar_full": "{label}：{percent} • {hours, plural, other {# 小时}}后充满"
+    },
+    "profile_metadata_guard": {
+      "refused": "无法读取你当前的个人资料，请重试"
+    },
+    "profile_sheet": {
+      "fail": "失败！{message}"
+    },
+    "profile_writes": {
+      "account_not_found": "未找到账户"
+    },
+    "push_payload": {
+      "mentioned": "@{source} 提到了 @{target}",
+      "replied": "@{source} 回复了 @{target}",
+      "transferred": "@{source} 向 @{target} 转账",
+      "delegated": "@{source} 委托给了 @{target}",
+      "rewards_received": "已收到奖励",
+      "account_updated": "账户已更新",
+      "account_updated_body": "你的账户信息已更新",
+      "followed": "@{source} 关注了 @{target}",
+      "unfollowed": "@{source} 取消关注了 @{target}",
+      "ignored": "@{source} 忽略了 @{target}",
+      "blacklisted": "@{source} 将 @{target} 加入了黑名单",
+      "posted_in": "@{source} 在 #{firstTag} 发布了帖子"
+    },
+    "qr_scan": {
+      "permission_title": "无法获取相机权限",
+      "permission_message": "请在 Ecency 设置中授予相机权限。",
+      "permission_allow": "允许"
+    },
+    "reply_account": {
+      "switch": "以其他账户回复"
+    },
+    "send_journal": {
+      "your_from_went_through": "你从 @{account} 发起的{label}已完成。",
+      "not_sent": "你从 @{account} 发起的{label}未完成。未发送任何内容；你可以重新发起。",
+      "checking_whether_your_from": "正在确认你从 @{account} 发起的{label}是否已完成。重新发送前请先查看你的钱包。"
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner 页面已关闭",
+      "wrong_role": "这是你的 {given} 密钥；此操作需要你的 {needed} 密钥。",
+      "action_id_required": "此操作需要一个操作 ID，才能安全地重试。"
+    },
+    "signing_router": {
+      "owner_never": "owner 操作绝不会在应用中签名。"
+    },
+    "spin": {
+      "key_missing": "缺少游戏密钥",
+      "score": "{score, plural, other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "今天（UTC），{time}后重置",
+      "hours_minutes": "{hours}{minutes}",
+      "resets_daily": "每天 00:00 UTC 重置"
+    },
+    "storage_reset": {
+      "title": "请重新登录",
+      "message": "此设备上的安全存储已被重置。请重新登录。",
+      "failed": "无法移除此设备上的账户。请重试。"
+    },
+    "store": {
+      "in_app_purchases_are": "此版本不支持应用内购买。"
+    },
+    "wallet_sends": {
+      "journal_full": "有太多较早的转账仍在向网络确认中。请等它们确认后再继续发送。",
+      "check_later": "网络未能及时确认此操作。重新发送前请先查看你的钱包或历史记录；应用会在下次启动时再次检查。"
+    },
+    "waves": {
+      "shorts": "短视频"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {# 条未读}}",
+      "locked_text": "解锁 Ecency 后查看",
+      "signed_out_text": "登录 Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "无法读取你账户当前的权限。未做任何更改，请重试。",
+      "reads_disagree": "两次读取你账户的发帖权限结果不一致。未做任何更改，请重试。"
+    },
+    "vote": {
+      "vote_weight_must_be": "点赞权重必须在 -100% 到 100% 之间。",
+      "please_sign_in_first": "请先登录。"
+    },
+    "widget": {
+      "streak_name": "任务连续记录",
+      "write": "写作",
+      "new_wave": "新建 Wave",
+      "notifications_description": "你的未读通知。PIN 锁开启时隐藏。",
+      "streak_description": "你的每日任务连续记录。PIN 锁开启时隐藏。",
+      "compose_description": "撰写帖子或新的 Wave。",
+      "streak_title": "连续记录",
+      "daily_quests": "每日任务",
+      "streak_hint": "打开 Perks 查看你的连续记录",
+      "open_perks": "打开 Perks",
+      "open_app": "打开 Ecency",
+      "unread_caption": "{count, plural, other {未读}}",
+      "streak_caption": "{count, plural, other {天连续}}"
+    },
+    "system": {
+      "dictation_channel": "语音输入",
+      "listen_channel": "收听",
+      "dictation_channel_description": "语音输入的录音在后台进行时显示，并带有停止操作。",
+      "dictation_title": "正在为语音输入录音",
+      "dictation_text": "Ecency 正在录制你的语音输入。停止后在你于应用中确认前不会发送。",
+      "listen_channel_description": "在收听无法在后台继续时通知你。",
+      "listen_paused": "收听已暂停",
+      "listen_paused_text": "打开 Ecency 以继续收听。",
+      "skip_back": "后退 15 秒",
+      "skip_forward": "前进 15 秒"
+    },
+    "permission": {
+      "face_id": "用 Face ID 代替 PIN 解锁 Ecency。",
+      "camera": "扫描二维码，以及拍照或录制视频以添加到你的帖子。",
+      "photo_library_add": "Ecency 会将你从帖子下载的图片保存到你的相册。",
+      "photo_library": "Ecency 会将你从帖子下载的图片集中保存在相册中的 Ecency 相簿里。",
+      "microphone": "Ecency 使用你的麦克风，让你可以语音输入帖子和评论（这些录音会发送给 Ecency 进行转写），也用于为添加到帖子的视频录制声音。"
+    },
+    "android": {
+      "no_browser": "没有可用的浏览器",
+      "biometric_unlock_title": "使用生物识别解锁 Ecency",
+      "biometric_confirm": "请用指纹或面容确认",
+      "image_unsupported_address": "不支持的图片地址",
+      "image_create_failed": "无法创建文件",
+      "image_write_failed": "无法写入文件",
+      "image_too_large": "图片过大",
+      "image_download_failed": "下载失败，状态码 {status}",
+      "billing_disconnected": "Google Play Billing 已断开连接。",
+      "billing_no_screen": "没有可显示购买界面的屏幕。",
+      "billing_error": "Google Play Billing 错误 {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "你本月创建了 {count, plural, other {# 篇帖子}}。继续加油！",
-        "checkin": "你本周签到了 {count, plural, other {# 天}}。继续加油！"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} 有 {count, plural, other {# 条新帖子}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# 次失败尝试}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "连续 {n} 天"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• 仅允许注册超过 {days} 天的账户",
-        "max_choices": "• 你最多可选择 {choices} 个选项"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "剩余 {executions} 次转账",
-        "schedule_summary": "{executions} 笔转账，每 {hours} 小时一次"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "内容太短，无法获得积分（{n, plural, other {# 个字符}}及以下，不含链接）"
       },
       "chats": {
-        "people_joined": "{count} 人已加入"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "约 {count, plural, other {# 分钟}}后",
+        "ban-remaining-hours": "约 {count, plural, other {# 小时}}后",
+        "ban-remaining-days": "约 {count, plural, other {# 天}}后"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "最多使用 {n, plural, other {# 个标签}}",
+          "too_long": "搜索内容过长。最多 {n, plural, other {# 个字符}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "至少需要 {count} 个字符",
-        "chars_remaining": "剩余 {count} 个字符"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "一次最多可选择 {count, plural, other {# 张图片}}"
+      },
+      "dictation": {
+        "stop_hint": "停止后将转写并添加到你的帖子。最长 {m, plural, other {# 分钟}}。",
+        "rate": "每 {s, plural, other {# 秒}} {n} Points"
       },
       "transfer": {
-        "powering_down_info": "下次解除质押将在 {days} 天后，{hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} 至 {max, plural, other {# 个字符}}"
       }
     }
   }

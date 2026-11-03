@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro a’zosi"
   },
   "perks": {
     "header": "Imtiyozlar",
@@ -31,42 +31,42 @@
     "promote_desc": "Postingizga ko'proq e'tibor jalb qiling",
     "account_boost": "Hisobni kuchaytirish",
     "account_boost_desc": "Istalgan hisobni kuchaytiring",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC ni to‘ldirish",
+    "rc_topup_desc": "Resurs kreditlari kamayganda ham post joylashda davom eting",
+    "streak_freeze_owned": "Zaxirada: {n}",
+    "streak_freeze_buy": "Seriyani himoya qilish ({price} Points)",
+    "streak_freeze_buying": "Himoya qilinmoqda",
+    "streak_freeze_error": "Seriyani muzlatishni sotib olib bo‘lmadi. Qayta urinib ko‘ring."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Kunlik post",
+    "streak": "{n} kunlik seriya",
+    "keep_streak": "Seriyangizni saqlab qoling"
   },
   "waves": {
     "for_you": "Siz uchun",
     "following": "Kuzatilayotgan",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Maxsus lentalar",
+    "custom_feeds_subtitle": "Manbalar va teglarni lenta ichidagi yorliqlar sifatida qo‘shish uchun mahkamlang.",
+    "add_tag_placeholder": "Teg qo‘shish",
+    "sources": "Manbalar",
+    "your_feeds": "Sizning lentalaringiz",
+    "trending_tags": "Trenddagi teglar",
+    "shorts_empty": "Hozircha qisqa videolar yo‘q",
+    "mute": "Ovozsiz qilish",
+    "unmute": "Ovozni yoqish"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Boshlash",
+    "subtitle": "Bu yerda yangimisiz? Waves qisqa postlar bo‘lib, qo‘shilishning eng oson yo‘lidir.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Yopish",
+    "item_wave": "Birinchi Wave’ingizni joylang",
+    "item_vote": "Yoqqan Wave’ga ovoz bering",
+    "item_reply": "Kimgadir javob bering",
+    "item_checkin": "Seriyani boshlash uchun check-in qiling",
+    "all_done_title": "Hammasi bajarildi 🎉",
+    "all_done_subtitle": "Hammasi tayyor. Waves yaratishda davom eting!"
   },
   "profile": {
     "havent_commented": "hali izoh qoldirilmagan",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Yosh  |  Ko'rinish  |  Talqin",
     "attach_poll": "So'rovnoma biriktirish"
   },
+  "favorite_tags": {
+    "title": "Teglar",
+    "hint": "Bu tegdagi yangi postlar haqida xabar olish uchun kuzating",
+    "following_hint": "Bu tegdagi yangi postlar haqida xabar olasiz",
+    "follow": "Kuzatish",
+    "following": "Kuzatilmoqda",
+    "added": "Teg kuzatilmoqda",
+    "removed": "Teg kuzatuvdan chiqarildi",
+    "empty_list": "Bu yerda hech narsa yo‘q"
+  },
   "favorites": {
     "add": "Sevimlilarga qo‘shish",
     "add_error": "Sevimlilarga qo‘shib bo‘lmadi",
@@ -181,7 +191,33 @@
     "payout": "To'lov",
     "details": "Tafsilotlar",
     "community": "guruh",
-    "new_post": "Yangi post"
+    "new_post": "Yangi post",
+    "mute_post_title": "Bu postni ovozsiz qilish",
+    "unmute_post_title": "Bu postni ovozsizlikdan chiqarish",
+    "mute_post_reason": "Bu post nima uchun ovozsiz qilinmoqda?",
+    "unmute_post_reason": "Bu post nima uchun tiklanmoqda?",
+    "manage": "Guruhni boshqarish",
+    "manage_members": "A‘zolar va rollar",
+    "manage_settings": "Guruh sozlamalari",
+    "manage_activities": "Faollik jurnali",
+    "activities": "faollik",
+    "no_activities": "Hozircha faollik yo‘q",
+    "activities_load_failed": "Faollik yuklanmadi. Yangilash uchun pastga torting.",
+    "set_role": "Rolni belgilash",
+    "assign_role": "Rol berish",
+    "assign_role_hint": "Obuna bo‘lmaganlarni ham qo‘shgan holda istalgan hisobni qidiring, so‘ng rolni tanlang.",
+    "username_placeholder": "Foydalanuvchi nomi",
+    "invalid_username": "Natijalardan mavjud hisobni tanlang",
+    "members": "a‘zo",
+    "no_members": "A‘zolar topilmadi",
+    "members_incomplete": "Ba‘zi a‘zolar yuklanmadi. Yangilash uchun pastga torting.",
+    "members_load_failed": "A‘zolar yuklanmadi. Yangilash uchun pastga torting.",
+    "role_owner": "Egasi",
+    "role_admin": "Admin",
+    "role_mod": "Moderator",
+    "role_member": "A‘zo",
+    "role_guest": "Mehmon",
+    "role_muted": "Ovozsiz qilingan"
   },
   "trade": {
     "swap_for": "{fromAmount} {toAmount} ga almashtirilmoqda",
@@ -212,7 +248,11 @@
     "cross-post": "O'zaro post",
     "pin-blog": "Blogga qadash",
     "copy": "linkni nusxalash",
+    "copy-text": "matnni nusxalash",
+    "open-thread": "muhokamani ochish",
     "unpin-community": "Guruhdan olish",
+    "mute-post": "Postni ovozsiz qilish",
+    "unmute-post": "Postni ovozsizlikdan chiqarish",
     "mute": "Ovozsiz qilish / Bloklash",
     "reblog": "qayta bloglash",
     "undo-reblog": "qayta joylashni bekor qilish",
@@ -232,24 +272,24 @@
     "unpin-reply": "Izohni qadashdan chiqarish"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Bu post {lang} tilida. {target} tiliga tarjima qilinsinmi?",
+    "translate_to": "{lang} tiliga tarjima qilish",
+    "show_original": "Asl nusxani ko‘rsatish",
+    "translated_from": "{lang} tilidan tarjima qilingan",
+    "change_language": "Tilni o‘zgartirish"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Postni tarjima qilish",
+    "source": "Asl til",
+    "target": "Maqsadli til",
+    "detected": "Aniqlandi: {lang}",
+    "translate": "Tarjima qilish",
+    "apply": "Qo‘llash",
+    "review_note": "Postning oxiriga o‘zingiz yozgan matnning mashina tarjimasini qo‘shadi. Nashr etishdan oldin ko‘rib chiqing va tahrirlang.",
+    "too_short": "Avval biroz ko‘proq yozing. Tarjima uchun kamida bir necha gap kerak.",
+    "progress": "Tarjima qilinmoqda: {done} / {total}...",
+    "error": "Tarjima amalga oshmadi. Qayta urinib ko‘ring.",
+    "add_title_marker": "Sarlavhaga til belgisini qo‘shish"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Qaynoq",
     "popular": "Mashhur",
     "new": "Yangi",
-    "friends": "Following",
+    "friends": "Kuzatilmoqda",
     "my_blog": "Mening blogim"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Hech narsa yo'q"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Shablonlar",
+    "untitled": "Nomsiz shablon",
+    "empty_list": "Shablonni shu yerda qayta ishlatish uchun postni muharrirdan shablon sifatida saqlang.",
+    "delete_confirm": "Bu shablonni o‘chirishga ishonchingiz komilmi?",
+    "applied": "Shablon yangi post sifatida qo‘llandi",
+    "save_as_template": "Shablon sifatida saqlash",
+    "name_placeholder": "Shablon nomi",
+    "saved": "Shablon saqlandi"
   },
   "selection_list": {
     "available": "Mavjud {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Barchasi",
+      "replies": "Javoblar",
+      "mentions": "Eslatmalar",
+      "rvotes": "Ovozlar",
+      "follows": "Kuzatuvlar",
+      "reblogs": "Reblog’lar",
+      "transfers": "O‘tkazmalar",
+      "delegations": "Delegatsiyalar",
+      "nfavorites": "Sevimlilar",
+      "tags": "Teglar",
+      "nbookmarks": "Xatcho‘plar",
+      "payouts": "To‘lovlar",
+      "scheduled_published": "Rejalashtirilgan postlar",
+      "account_updates": "Hisob yangilanishlari",
+      "weekly_earnings": "Haftalik daromad"
     },
     "this_week": "Shu hafta",
     "reblog": "qayta bloglandi",
@@ -417,11 +458,15 @@
     "yesterday": "Kecha",
     "mention": "eslatib o'tdi",
     "favorites": "yangi post yaratdi",
+    "tags": "#{tag} tegida post joyladi",
+    "tags_bundle": "#{tag} tegida {count} ta yangi post",
+    "tags_title": "Siz kuzatayotgan tegdagi yangi postlar",
     "mentions": "Eslatmalar",
     "spin": "Ko'proq ball ishlash vaqti",
     "last_week": "O'tgan hafta",
     "recent": "Yaqinda",
     "ignore": "sizni rad etdi",
+    "blacklist": "sizni qora ro‘yxatga qo‘shdi",
     "follow": "sizni kuzatdi",
     "notification": "E'lonlar",
     "this_month": "Shu Oy",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} endi sizning nomingizdan post chop etishi va ovoz berishi mumkin. Agar bunga ruxsat bermagan bo'lsangiz, uni bekor qiling.",
     "weekly_earnings": "Siz bu hafta ${amount} ishlab topdingiz{breakdown}",
     "payouts": "To'lov qabul qilindi: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "rejalashtirilgan postni nashr etdi",
+    "scheduled_published_title": "Rejalashtirilgan post nashr etildi",
+    "scheduled_published_body": "Rejalashtirilgan postingiz endi e’lon qilindi, ko‘rish uchun bosing"
   },
   "recurrent": {
     "delete_failed": "Takroriy o'tkazmani o'chirib bo'lmadi, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Oxirgi qoralamani oching yoki yangi post yarating",
     "reward_power_up": "100% bog'lash",
     "open_gallery": "Galereyani ochish",
+    "open_files": "Fayllardan tanlash",
     "clipboard_no_image": "Vaqtinchalik xotirada rasm topilmadi",
     "clipboard_image_detected": "Vaqtinchalik xotirada rasm bor",
     "paste_image": "Rasm joylash",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Keyinroq",
     "settings_title": "Post variantlari",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Yo'q"
+    "support_ecency": "Ecency’ni qo‘llab-quvvatlash {percent}%",
+    "alert_btn_no": "Yo'q",
+    "short_reply_hint": "{n} ta yoki undan kam belgili javoblar Points keltirmaydi (havolalar hisoblanmaydi)",
+    "short_content_hint": "Points ishlash uchun juda qisqa ({n} ta yoki undan kam belgi, havolalar hisobga olinmaydi)"
   },
   "time": {
     "week": "haftalar",
@@ -655,7 +703,41 @@
     "select_emoji": "Emoji tanlash",
     "more_emojis": "Yana",
     "search_emojis": "Emojilarni qidiring...",
-    "no_emoji_found": "Emoji topilmadi"
+    "no_emoji_found": "Emoji topilmadi",
+    "ban-reason-spray": "Bir xil xabar bir vaqtda bir nechta kanalga yuborilgani uchun post joylashingiz to‘xtatildi.",
+    "ban-reason-mass-dm": "Xabar bir vaqtda ko‘p odamga yuborilgani uchun post joylashingiz to‘xtatildi.",
+    "ban-reason-generic": "Chatda post joylashingiz to‘xtatildi.",
+    "ban-can-still-read": "Chatni baribir o‘qiy olasiz.",
+    "ban-unlocks": "Post joylash {when} ochiladi.",
+    "ban-remaining-soon": "bir daqiqadan kamroq vaqtda",
+    "ban-remaining-minutes": "taxminan {count} daqiqadan keyin",
+    "ban-remaining-hours": "taxminan {count} soatdan keyin",
+    "ban-remaining-days": "taxminan {count} kundan keyin",
+    "new_group": "Yangi guruh",
+    "new_group_hint": "Guruh suhbatini boshlash uchun {min} tadan {max} tagacha odam qo‘shing.",
+    "new_group_search": "Odamlarni foydalanuvchi nomi bo‘yicha qidiring",
+    "new_group_full": "Guruhda yana ko‘pi bilan {max} kishi bo‘lishi mumkin.",
+    "new_group_no_results": "Bu nom bilan chatda hech kim topilmadi.",
+    "new_group_search_failed": "Qidiruv ishlamadi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+    "new_group_remove": "@{username} ni olib tashlash",
+    "new_group_create": "Guruhni boshlash",
+    "new_group_failed": "Guruhni boshlab bo‘lmadi. Qayta urinib ko‘ring.",
+    "rename_group": "Guruh nomini o‘zgartirish",
+    "rename_group_hint": "Guruhga undagi hamma ko‘radigan nom bering. Bo‘sh qoldirsangiz, a‘zolarning ismlari ko‘rsatiladi.",
+    "group_name": "Guruh nomi",
+    "rename_group_too_long": "Guruh nomi ko‘pi bilan {max} belgidan iborat bo‘lishi mumkin.",
+    "rename_group_not_owner": "Guruh nomini faqat uni boshlagan odam o‘zgartira oladi.",
+    "rename_group_failed": "Guruh nomini o‘zgartirib bo‘lmadi. Qayta urinib ko‘ring.",
+    "group_renamed": "{user} guruh nomini \"{name}\" ga o‘zgartirdi",
+    "group_name_cleared": "{user} guruh nomini olib tashladi",
+    "group_members": "Guruh a‘zolari",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "reactions_title": "Reaksiyalar",
+    "reactor_you": "Siz",
+    "reactor_unknown": "Kimdir",
+    "see_who_reacted": "Kim reaksiya bildirganini ko‘rish uchun bosib turing",
+    "group": "Guruh"
   },
   "free_estm": {
     "timer_text": "Keyingi bepul aylantirish",
@@ -684,6 +766,32 @@
     "transaction_fail": "Tranzaksiya muvaffaqiyatsiz"
   },
   "search_result": {
+    "error": "Qidiruvni yakunlab bo‘lmadi. Qayta urinib ko‘ring",
+    "filters": {
+      "title": "Filtrlar",
+      "open": "Filtrlar",
+      "author": "Muallif",
+      "author_placeholder": "foydalanuvchi nomi",
+      "category": "Toifa",
+      "category_placeholder": "guruh yoki toifa",
+      "tags": "Teglar",
+      "tags_placeholder": "vergul bilan ajrating",
+      "type": "Turi",
+      "type_all": "Hammasi",
+      "type_post": "Postlar",
+      "type_comment": "Izohlar",
+      "date": "Sana",
+      "date_week": "O‘tgan hafta",
+      "date_month": "O‘tgan oy",
+      "date_year": "O‘tgan yil",
+      "date_all": "Butun davr",
+      "sort": "Saralash",
+      "apply": "Qo‘llash",
+      "active": "{n} ta faol",
+      "too_many_tags": "Ko‘pi bilan {n} ta teg ishlating",
+      "too_long": "Qidiruv juda uzun. Ko‘pi bilan {n} ta belgi ishlating",
+      "needs_criteria": "Filtrlash uchun qidiruv so‘zini yoki muallif, toifa yoki tegni kiriting"
+    },
     "communities_filter": {
       "new": "Yangi",
       "my": "Mening Guruhlarim",
@@ -727,7 +835,7 @@
     "title": "O'zaro post"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Muallif AI ishlatganini ma’lum qildi"
   },
   "ai_assist": {
     "title": "AI yozuv yordamchisi",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Postingiz uchun tegishli teglarni oling",
     "action_generate_title": "Sarlavha yaratish",
     "action_generate_title_desc": "Jozibali sarlavha variantlarini yarating",
-    "action_summarize": "Recap",
+    "action_summarize": "Qisqacha mazmun",
     "action_summarize_desc": "Ixcham qisqacha mazmun yarating",
     "action_check_grammar": "Grammatikani tekshirish",
     "action_check_grammar_desc": "Grammatika va imlo xatolarini tuzating",
+    "action_generate_image": "Rasm yaratish",
+    "action_generate_image_desc": "Postingiz uchun sun‘iy intellekt rasmini yarating",
+    "cost_from": "{cost} {unit} dan boshlab",
     "text_label": "Sizning matningiz",
     "text_placeholder": "Kontentingizni shu yerga joylang yoki yozing...",
     "min_chars": "Kamida {count} ta belgi talab qilinadi",
@@ -797,16 +908,26 @@
     "remind_later": "Keyinroq eslatish",
     "success_subscribe": "Muvaffaqiyatli obuna bo'ling!",
     "payloadTooLarge": "Fayl hajmi juda katta, oʻlchamini oʻzgartiring yoki kichikroq rasmni yuklang",
+    "too_many_images": "Bir vaqtda ko‘pi bilan {count} ta rasm tanlashingiz mumkin",
     "fail_follow": "Obuna boʻlmadi!",
     "clear_user_alert": "Haqiqatan ham barcha foydalanuvchi maʼlumotlarini oʻchirib tashlamoqchimisiz?",
     "cancel": "Bekor qilish",
     "connection_success": "Muvaffaqiyatli ulanish!",
     "rc_down": "Harakatni bajarish uchun resurs kreditlari yetarli emas!\n\nTajribadan zavqlanishda davom etish uchun hisobingizni kuchaytiring. Hisobingizni hoziroq kuchaytirmoqchimisiz?",
+    "rc_down_title": "Resurs kreditlari yetarli emas",
+    "rc_precheck_title": "Bu post nashr qilish uchun juda katta bo‘lishi mumkin",
+    "rc_precheck_body": "Resurs kreditlaringiz bunday hajmdagi post uchun kam ko‘rinmoqda.",
+    "rc_down_body": "Bu amal uchun resurs kreditlaringiz yetarli emas.\n\nDavom etish uchun hozir Points bilan to‘ldiring yoki hisobingizni doimiy kuchaytiring.",
+    "rc_down_topup": "RC ni Points bilan to‘ldirish",
+    "rc_down_boost": "Hisobni kuchaytirish",
     "done": "Tayyor",
     "something_wrong_alt": "Shu bilan birga, brauzeringizdan Ecency.com ni sinab ko'ring",
     "same_user": "Bu foydalanuvchi allaqachon roʻyxatga qoʻshilgan",
     "fail": "Muvaffaqiyatsiz!",
     "operation_failed_with_reason": "{operation} muvaffaqiyatsiz tugadi: {reason}",
+    "request_timed_out": "Ulanish juda uzoq davom etmoqda. Tarmoqni tekshirib, qayta urinib ko‘ring.",
+    "load_failed_retry": "Buni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
+    "retrying": "Qayta urinilmoqda...",
     "wallet_refresh_failed": "Hamyonni yangilab bo'lmadi. Iltimos qayta urinib ko'ring.",
     "wallet_refresh_missing_account": "Hamyonni yangilab bo'lmadi: hisob topilmadi.",
     "boost_failed": "Kuchaytirish muvaffaqiyatsiz tugadi.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video biriktirildi"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Ovoz berish",
+    "upvoted": "Ovoz berildi",
+    "downvoted": "Qarshi ovoz berildi",
+    "upvote_hint": "Ovoz berish variantlarini ochish uchun ikki marta bosing",
+    "payout_details": "To‘lov tafsilotlari",
+    "a11y_votes": "{count, plural, one {# ovoz} other {# ovoz}}",
+    "a11y_voters_hint": "Ovoz berganlarni ko‘rish",
+    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblog}}",
+    "a11y_reblogs_hint": "Reblog’larni ko‘rish",
+    "a11y_comments": "{count, plural, one {# izoh} other {# izoh}}",
+    "a11y_comments_hint": "Izohlarni ko‘rish",
+    "a11y_reply_hint": "Javob berish",
+    "a11y_tip": "Choychaqa yuborish",
+    "a11y_tips": "{count, plural, one {# choychaqa} other {# choychaqa}}",
+    "a11y_edit": "Izohni tahrirlash",
+    "a11y_delete": "Izohni o‘chirish",
+    "a11y_show_replies": "Javoblarni ko‘rsatish",
+    "a11y_hide_replies": "Javoblarni yashirish",
+    "a11y_post_options": "Post parametrlari",
+    "a11y_views": "{count, plural, one {# ko‘rish} other {# ko‘rish}}",
+    "source_ecency": "Ecency orqali nashr etilgan",
+    "a11y_stats_hint": "Post statistikasini ko‘rish",
     "image": "Rasm",
     "reveal_muted": "O'CHIRILGAN\nKontentni ochish uchun bosing",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Rasmni yuklash uchun bosing",
     "in": "ichida",
     "poll": "SO‘ROVNOMA",
     "copy_link": "Linkni nusxalash",
@@ -998,13 +1119,14 @@
     "save_to_local": "Qurilmaga yuklab oling",
     "muted": "Qoidabuzarlik tufayli kontent o‘chirilgan",
     "community_muted": "Hamjamiyat qoidalarini buzgani uchun kontent o‘chirilgan",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Obro‘si past hisobdan kontent",
+    "muted_downvoted": "Foydalanuvchilar qarshi ovoz bergan kontent",
+    "muted_low_trust": "Tasdiqlanmagan tashqi havolali past obro‘li hisob",
+    "muted_reveal": "Ko‘rsatish uchun bosing",
     "promoted": "REKLAMA QILINGAN",
     "image_saved": "Rasm Fotogalereyaga saqlandi",
     "words": "So‘zlar",
     "reading": "O‘qish",
-    "listen": "Tinglash",
     "min": "daq",
     "summarize_start": "Boshlash"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Mavjud bo'lmagan post",
     "invalid_link": "Url noto‘g‘ri, siz yaroqli url bilan qayta urinib ko‘rishingiz yoki veb-brauzerda ochishga urinib ko‘rishingiz mumkin",
-    "no_existing_user": "Mavjud bo'lmagan foydalanuvchi"
+    "no_existing_user": "Mavjud bo'lmagan foydalanuvchi",
+    "posting_key_request": "{requester} @{username} uchun posting maxfiy kalitini so‘ramoqda.\n\nFaqat bu so‘rovga ishonsangiz davom eting.",
+    "posting_key_request_unnamed": "Boshqa ilova @{username} uchun posting maxfiy kalitini so‘ramoqda.\n\nFaqat bu so‘rovga ishonsangiz davom eting.",
+    "auth_request_as_user": "{requester} sizni @{username} sifatida tizimga kiritmoqchi.\n\nFaqat foydalanuvchi nomingiz va kirish isboti ulashiladi. Hech qanday kalit Ecency dan chiqmaydi.",
+    "auth_request_as_current": "{requester} sizni Ecency hisobingiz bilan tizimga kiritmoqchi.\n\nFaqat foydalanuvchi nomingiz va kirish isboti ulashiladi. Hech qanday kalit Ecency dan chiqmaydi."
   },
   "payout": {
     "breakdown": "Bo'linish",
@@ -1065,7 +1191,7 @@
     "open": "URL‘ni ochish",
     "invalid_key_desc": "bu tranzaksiyani amalga oshirish uchun {key} kalit yoki bosh kalit bilan kiring",
     "auth_transfer_confirm": "{username} foydalanuvchisiga o‘tkazma tasdiqlansinmi?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Faqat bu havola manbasiga ishonsangiz tasdiqlang. Tasdiqlash quyidagi amalni hisobingizdan {authority} kalitingiz yordamida yuboradi."
   },
   "voters_dropdown": {
     "rewards": "MUKOFOTLAR",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Faqat harflar, raqamlar va defis bo‘lishi kerak",
       "username_no_ascii_first_letter_error": "Harf bilan boshlanishi kerak",
       "username_contains_double_hyphens": "Ikkita ketma-ket defis bo‘lmasligi kerak",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Bu foydalanuvchi nomi kripto birja hisobiga juda o‘xshash va boshqalarni chalg‘itishi mumkin. Iltimos, noyobroq nom tanlang.",
+      "username_restricted_prefix": "“uid” bilan boshlanib, raqamlar keladigan foydalanuvchi nomlariga ruxsat berilmaydi, chunki ular ko‘pincha boshqalarning nomidan o‘zini ko‘rsatish uchun ishlatiladi. Iltimos, boshqa nom tanlang.",
       "username_contains_underscore": "Tag chiziq bo‘lmasligi kerak"
     },
     "500_error": "So‘rovingizni ko‘rib bo‘lmadi, katta ehtimol bilan ro‘yxatdan o‘tish navbati to‘lgan! Bir necha daqiqadan so‘ng qayta urinib ko‘ring...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Foydalanuvchi nomi band",
+      "14": "Elektron pochta manzili allaqachon ro‘yxatdan o‘tgan",
+      "15": "Iltimos, to‘g‘ri elektron pochta manzilini kiriting",
+      "16": "Iltimos, to‘g‘ri foydalanuvchi nomini kiriting",
+      "17": "Foydalanuvchi nomi juda uzun, qisqaroq nom tanlang",
+      "19": "Iltimos, doimiy elektron pochta manzilidan foydalaning yoki Premium hisob oling",
+      "21": "Bu taklif yaroqsiz",
+      "28": "So‘rovingizni qayta ishlab bo‘lmadi, ro‘yxatdan o‘tish navbati to‘la bo‘lishi mumkin. Iltimos, bir necha daqiqadan keyin qayta urinib ko‘ring.",
+      "107": "VPN ulanishi aniqlandi. Iltimos, VPN’ni o‘chirib, qayta urinib ko‘ring yoki Premium hisob oling.",
+      "110": "Suiiste’molning oldini olish uchun bir kishi/tarmoq uchun hisoblar sonini cheklaymiz. Iltimos, boshqa tarmoqdan qayta urinib ko‘ring.",
+      "111": "Tor ulanishi aniqlandi. Ro‘yxatdan o‘tishda Tor’ni o‘chirib qo‘ying.",
+      "112": "Hozir ulanishingizni tekshirib bo‘lmadi. Iltimos, bir necha daqiqadan keyin qayta urinib ko‘ring."
     },
     "have_account_text": "Hisobingiz bormi?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "To‘liq huquqli Hive hisobiga ega bo‘ling, bu usulda botnet bizning ro‘yxatdan o‘tish faucetimizdan suiiste’mol qilmasligini ta’minlash uchun asosiy tekshiruvlar mavjud.",
     "btn_register": "Bepul ro‘yxatdan o‘tish",
     "title": "Bepul hisob"
+  },
+  "dictation": {
+    "title": "Ovozdan matn",
+    "start": "Yozib olish",
+    "stop": "To‘xtatish",
+    "record_more": "Yana yozib olish",
+    "done": "Tayyor",
+    "recording": "Yozib olinmoqda",
+    "stop_hint": "Matnga aylantirib, postingizga qo‘shish uchun to‘xtating. {m} daqiqagacha.",
+    "inserted": "Postingizga qo‘shildi. Yana yozib oling yoki Tayyor tugmasini bosing.",
+    "transcribing": "Matnga aylantirilmoqda",
+    "rate": "{s} soniya uchun {n} Points",
+    "cost_running": "Hozircha {n} Points",
+    "cost_running_free": "Hozircha bepul",
+    "free_remaining": "Bugun keyingi {n} x {s} soniya bepul",
+    "price_loading": "Narx tekshirilmoqda",
+    "price_error": "Matnga aylantirish narxini yuklab bo‘lmadi.",
+    "denied": "Ecency ga ovozdan matn uchun mikrofonga ruxsat kerak. Sozlamalarda ruxsat bering va qayta urinib ko‘ring.",
+    "error_empty": "Bu yozuvda nutq aniqlanmadi.",
+    "error_insufficient_points": "Bu yozuvni matnga aylantirish uchun Points yetarli emas.",
+    "error_rate_limited": "Hozircha yozuvlar juda ko‘p. Birozdan keyin qayta urinib ko‘ring.",
+    "error_too_long": "Bu yozuv matnga aylantirish uchun juda uzun.",
+    "error_failed": "Bu yozuvni matnga aylantirib bo‘lmadi. Qayta urinib ko‘ring.",
+    "error_recorder": "Yozib olishni boshlab bo‘lmadi. Qayta urinib ko‘ring."
   },
   "wallet": {
     "delegations_out": "Chiquvchi delegatsiyalar",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Doimiy aktiv bo'lish sizga 0.25 ball beradi.",
     "fill_transfer_from_savings": "Jamg'arma Saqlandi",
     "activities": "Faoliyatlar",
+    "no_activities": "Hozircha tranzaksiyalar yo‘q",
+    "activities_failed": "Tranzaksiyalar yuklanmadi. Qayta urinish uchun pastga torting.",
     "tap_update": "Yangilash uchun bosing",
     "mining_lottery": "Lotereya yutildi",
     "checkin": "Kirish",
     "tokens_transfer": "Tokenlar o‘tkazildi",
     "outgoing_transfer_title": "O‘tkazma/Sovg‘a",
+    "burned_title": "Sun‘iy intellekt ishlatilishi",
+    "burned_description": "Sun‘iy intellekt funksiyasiga sarflangan Points",
+    "burn_refund_title": "Sun‘iy intellekt uchun qaytarilgan mablag‘",
+    "burn_refund_description": "Muvaffaqiyatsiz sun‘iy intellekt so‘rovidan keyin qaytarilgan Points",
     "manage_assets": "Aktivlarni qo‘shish / olib tashlash",
     "selected_assets": "Tanlangan aktivlar",
     "nft_setPropertyPermissions": "NFT belgisi uchun xususiyat ruxsatlari o‘rnatildi",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Tokenlar aniqligini yangilash",
     "tokens_transferOwnership": "Token egaligi o‘tkazildi",
     "withdraw_vesting": "Staking yechish",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Yechib olish hisoblari",
     "delegate_engine": "Delegatsiya qilish",
     "market_close": "Buyurtma yopildi",
     "nftmarket_transferFee": "Sotib olish buyurtmasi to‘lovi",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "BALLARNI OLISH",
     "escrow_approve": "Depozitni Tasdiqlash",
     "expires": "muddati tugaydi",
+    "transaction_id": "Tranzaksiya ID si",
+    "copy_transaction_id": "Tranzaksiya havolasini nusxalash",
+    "filter_activities": "Faoliyatlarni filtrlash",
+    "filter_activities_desc": "Bu tarix qaysi amallarni so‘rashini tanlang",
+    "filter_all": "Hammasini tanlash",
+    "filter_none": "Hammasini tozalash",
+    "filter_apply": "Qo‘llash",
     "author_reward": "Avtorlik mukofoti",
     "withdraw_hbd": "J'amg'armadan yechib olish",
     "convert_request": "Konvertatsiya So'rovlari",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC ni to‘ldirish",
+    "desc": "Post joylashda davom etishingiz uchun RC ni qisqa muddatga oshirish.",
+    "confirm": "Resurs kreditlarini to‘ldirish uchun Points sarflansinmi?",
+    "insufficient": "Sizda yetarli Points yo‘q.",
+    "buy_points": "Points sotib olish"
   },
   "ai_image_generator": {
     "title": "AI rasm generatori",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Maxsus ({hours} soat)",
+    "balance_load_failed": "Balansingizni yuklab bo‘lmadi. Qayta urinish uchun bosing.",
+    "precision_load_failed": "Bu tokenning tafsilotlarini yuklab bo‘lmadi, shuning uchun faqat butun miqdorlarni yuborish mumkin. Qayta urinish uchun bosing.",
     "close": "Yopish",
     "favorite_username_placeholder": "Foydalanuvchi nomi",
     "invalid_recipient_qr": "Ushbu QR kodda foydalanuvchi nomi topilmadi.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Vakolatlarni boshqarish",
     "pincode": "Pincode",
     "general": "Umumiy",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecency’ni qo‘llab-quvvatlash",
+    "support_beneficiary": "Post mukofotlarini Ecency bilan bo‘lishish",
+    "support_beneficiary_percent": "Post mukofotlari ulushi",
+    "support_curation": "Kuratorlik mukofotining bir qismini ushlab qolish",
+    "support_curation_percent": "Kuratorlik mukofotini ushlab qolish",
     "feedback_body": "Xabaringizni shu yerga yozing!\n\nHive foydalanuvchi nomi: {username}\nIlova versiyasi: {appVersion}\nPlatforma: {platform}\n",
     "show_imgs": "Rasmlarni Ko'rsatish",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Izoh",
       "bookmark": "Xatcho'plar",
+      "tags": "Teglar",
       "reblog": "Qayta bloglash",
       "favorite": "Sevimlilar",
       "mention": "Eslatma",
@@ -1599,10 +1765,10 @@
       "transfers": "O'tkazmalar",
       "vote": "Ovoz berish",
       "follow": "Kuzatish",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Rejalashtirilgan post nashr etildi",
+      "payouts": "To‘lovlar",
+      "account_update": "Hisob yangilanishlari",
+      "weekly_earnings": "Haftalik daromad",
       "fcm_unavailable": "Bu qurilmada push bildirishnomalar qo'llab-quvvatlanmaydi. Siz faqat ilova ochiq bo'lganda bildirishnomalarni olasiz."
     },
     "keys_warning": "Hisobning maxfiy ma'lumotlari!\nMaxfiy kalitlarni ko'rishdan oldin Ecency PIN kod bilan himoyalanishi kerak.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Fikr-mulohaza yuborish",
     "rate_app": "Ecency’ni baholang",
+    "email_digests": "Email dayjestlari",
     "rate": "Baholash",
     "dm-privacy-updated": "DM maxfiyligi sozlamalari muvaffaqiyatli yangilandi",
     "dm-privacy-failed": "DM maxfiyligi sozlamalarini yangilab bo'lmadi",
@@ -1685,19 +1852,29 @@
     "request_sent": "O'chirish bo'yicha so'rovingiz yuborildi",
     "confirm_delete_body": "Hisobni o'chirishni rostdan ham xohlaysizmi? Bu barcha ma'lumotlaringizni o'chirib tashlaydi"
   },
-  "tts": {
-    "settings_title": "Matnni nutqqa aylantirish sozlamalari",
-    "voice": "Ovoz",
-    "voice_hint": "Tizimning standart ovozi ishlatiladi",
-    "speed": "Tezlik",
-    "pitch": "Tovush balandligi",
-    "test_voice": "Ovozni sinab ko'rish",
-    "settings_info": "Bu sozlamalar postlarni ovoz chiqarib o'qishda ishlatiladi",
+  "listen": {
+    "title": "Bu postni tinglash",
+    "minutes": "~{n} daq",
+    "login": "Kirish",
+    "unlock": "Ochish · {n} Points",
+    "confirm": "Bu postni tinglash uchun {n} Points sarflansinmi? Audio sizniki bo‘lib qoladi, istalgan vaqtda qayta tinglashingiz mumkin.",
+    "not_enough_title": "Points yetarli emas",
+    "not_enough": "Tinglash uchun {required} Points kerak, sizda {available} bor.",
+    "get_points": "Points olish",
+    "unlock_failed": "Audioni ochib bo‘lmadi, qayta urinib ko‘ring",
+    "failed_refunded": "Audio yaratilmadi, Points qaytarildi",
+    "preparing": "Audio tayyorlanmoqda…",
+    "preparing_eta": "Audio tayyorlanmoqda, taxminan {n} daq…",
+    "preparing_progress": "Audio tayyorlanmoqda · {n}%",
+    "waiting": "Navbatda kutilmoqda, oldingizda {n} kishi bor…",
+    "next_in_line": "Navbat sizda…",
     "play": "Ijro etish",
-    "pause": "To'xtatib turish",
-    "language": "Til",
-    "language_auto": "Avtomatik aniqlash",
-    "language_hint": "Avtomatik aniqlash tilni post mazmuniga qarab tanlaydi"
+    "pause": "To‘xtatib turish",
+    "seek": "Surish",
+    "speed": "Ijro tezligi",
+    "language": "Audio tili",
+    "unavailable": "Audioni yuklab bo‘lmadi.",
+    "retry": "Qayta urinish"
   },
   "posting_authority": {
     "title": "Tezroq nashr qilishni yoqing",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentifikatsiya amalga oshmadi. Iltimos, qaytadan tizimga kiring.",
     "error-generic": "Video yuklash amalga oshmadi. Iltimos, qaytadan urinib ko'ring.",
     "error-too-long-short": "Qisqa videolar 60 soniya yoki undan kam bo'lishi kerak.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Bitta postda faqat bitta video bo‘lishi mumkin. Boshqasini qo‘shishdan oldin joriy videoni olib tashlang.",
     "select_source": "Video qo'shish",
     "record": "Video yozib olish",
     "choose_library": "Kutubxonadan tanlash"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Tezkor yangilanish ulashing"
   },
+  "newsletter": {
+    "screen_title": "Email dayjestlari",
+    "title": "{list}",
+    "body_own": "Bildirishnomalaringizning haftalik yoki oylik email xulosasi.",
+    "body_creator": "{list} ning yangi postlari pochtangizda.",
+    "body_community": "{list} guruhidagi yangi postlarning email orqali dayjesti.",
+    "body_site": "Ecency ning eng yaxshilari pochtangizda.",
+    "first_publish_title": "Birinchi postingiz bilan tabriklaymiz!",
+    "first_publish_body": "Bildirishnomalaringizning email dayjestini xohlaysizmi? Haftalik yoki oylik, istalgan vaqtda Sozlamalarda o‘zgartiring yoki chiqing.",
+    "list_own": "Bildirishnomalarim dayjesti",
+    "list_site": "Ecency axborot byulleteni",
+    "status_active": "Siz obuna bo‘lgansiz.",
+    "status_pending": "Email tasdig‘i kutilmoqda.",
+    "status_short_active": "faol",
+    "status_short_pending_confirmation": "kutilmoqda",
+    "status_short_suppressed": "to‘xtatilgan",
+    "status_short_ended": "tugagan",
+    "cadence_weekly": "Haftalik",
+    "cadence_monthly": "Oylik",
+    "email_placeholder": "siz@misol.com",
+    "subscribe": "Obuna bo‘lish",
+    "update": "Yangilash",
+    "resend": "Tasdiqni qayta yuborish",
+    "leave": "Dayjestdan chiqish",
+    "cancel": "Bekor qilish",
+    "ok": "OK",
+    "manage": "Boshqarish",
+    "check_inbox_title": "Pochtangizni tekshiring",
+    "check_inbox_body": "{email} manziliga tasdiqlash havolasini yubordik. Obuna tasdiqlaganingizdan so‘ng boshlanadi.",
+    "subscribed": "Email dayjestiga obuna bo‘ldingiz",
+    "left": "Dayjestdan chiqdingiz",
+    "refused": "Bu manzil obuna bo‘la olmaydi.",
+    "unavailable": "Email dayjestlari hozir mavjud emas.",
+    "too_many": "Urinishlar juda ko‘p, keyinroq qayta urinib ko‘ring.",
+    "fail": "Nimadir xato ketdi, qayta urinib ko‘ring.",
+    "empty": "Hozircha email dayjestlari yo‘q. Boshlash uchun quyida obuna bo‘ling.",
+    "discover": "Email orqali ko‘proq oling",
+    "stop_all": "Hammasini to‘xtatish",
+    "stop_all_title": "Barcha emaillar to‘xtatilsinmi?",
+    "stop_all_body": "{email} manziliga boshqa Ecency xati yuborilmaydi. Boshqa manzillardagi obunalar qoladi.",
+    "stop_all_ok": "Hammasini to‘xtatish",
+    "stop_all_done": "Manzil barcha xatlardan chiqarildi",
+    "profile_option": "EMAIL DAYJESTI",
+    "subscriber_count": "{weekly} haftalik • {monthly} oylik email obunachilari",
+    "community_button": "Axborot byulleteni"
+  },
+  "mod_notes": {
+    "title": "Sabab qo‘shing",
+    "placeholder": "Sabab (boshqa moderatorlarga ko‘rinadi)",
+    "confirm": "Tasdiqlash",
+    "cancel": "Bekor qilish"
+  },
+  "community_settings": {
+    "title_header": "Guruh sozlamalari",
+    "title_label": "Sarlavha",
+    "about": "Haqida",
+    "lang": "Til",
+    "description": "Tavsif",
+    "rules": "Qoidalar",
+    "nsfw": "Ish joyi uchun mos emas",
+    "save": "Saqlash",
+    "required": "Majburiy",
+    "title_length": "{min} va {max} belgi orasida",
+    "owner_admin_only": "Bu sozlamalarni faqat egasi va adminlar o‘zgartira oladi."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Ochiq",
+        "collapsed": "Yig‘ilgan"
+      },
+      "a11y_chat": {
+        "quote": "{author} ga javob: {text}"
+      },
+      "a11y_forms": {
+        "select": "Tanlash",
+        "deselect": "Tanlovni bekor qilish"
+      },
+      "store": {
+        "billing_unavailable": "Bu qurilmada ilova ichidagi xaridlarga ruxsat berilmagan.",
+        "verification_failed": "App Store bu xaridni tasdiqlay olmadi.",
+        "cancelled": "Xarid bekor qilindi",
+        "unknown_result": "Noma‘lum xarid natijasi"
+      },
+      "navigation": {
+        "feed_unavailable": "Bu lenta hali mavjud emas.",
+        "link_cannot_open": "Bu havolani ochib bo‘lmaydi.",
+        "video_cannot_play": "Bu videoni ijro etib bo‘lmaydi."
+      },
+      "media": {
+        "load_failed": "Bu elementni yuklab bo‘lmadi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+        "loading": "Media yuklanmoqda",
+        "download_failed": "Yuklab olish {status} holati bilan muvaffaqiyatsiz tugadi"
+      },
+      "sign_in": {
+        "required": "Tizimga kirish talab qilinadi",
+        "to_reply": "Javob berish uchun tizimga kiring.",
+        "to_vote": "Ovoz berish uchun tizimga kiring.",
+        "button": "Tizimga kirish"
+      },
+      "account": {
+        "logout_user": "@{username} hisobidan chiqish"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# ovoz} other {# ovoz}}  •  {replies, plural, one {# javob} other {# javob}}",
+        "voting_power": "Ovoz kuchi {percent}",
+        "remove_favourite": "Sevimlilardan olib tashlash",
+        "add_favourite": "Sevimlilarga qo‘shish"
+      },
+      "waves": {
+        "clear_tag_filter": "{tag} teg filtrini tozalash",
+        "new_wave": "Yangi wave",
+        "replies_open_thread": "{count, plural, one {# javob, muhokamani ochish} other {# javob, muhokamani ochish}}",
+        "characters": "{count} / {max} belgi",
+        "retry": "{message}\nQayta urinib ko‘ring",
+        "playing": "{permlink} ijro etilmoqda",
+        "video_attached_remove": "Video biriktirildi, olib tashlash",
+        "image_attached_remove": "Rasm biriktirildi, olib tashlash",
+        "take_photo": "Rasmga olish",
+        "edit_poll": "So‘rovnomani tahrirlash",
+        "add_poll": "So‘rovnoma qo‘shish",
+        "add_video": "Video qo‘shish"
+      },
+      "reading": {
+        "reply_to": "{username} ga javob berish",
+        "opens_post": "Postni ochadi",
+        "sort_comments": "Izohlarni saralash",
+        "sort_comments_value": "Izohlarni saralash, {sort}",
+        "no_comments": "Hozircha izohlar yo‘q.",
+        "loading_post": "Post yuklanmoqda",
+        "show_version": "Versiyani ko‘rsatish",
+        "show_changes": "O‘zgarishlarni ko‘rsatish",
+        "replying_to": "@{username} ga javob yozilmoqda",
+        "reply_text": "Javob matni",
+        "translate_from": "Manba til",
+        "translate_to": "Tarjima tili"
+      },
+      "feed": {
+        "tab_pinned": "{label}, mahkamlangan",
+        "tab_add": "{label}, qo‘shish",
+        "customise": "Moslashtirish"
+      },
+      "card": {
+        "in_category": "{category} ichida",
+        "pinned": "Mahkamlangan",
+        "by_author": "Muallif: {username}",
+        "payout": "to‘lov {payout}",
+        "payout_declined": "to‘lov {payout}, rad etilgan",
+        "reblogged_by": "{username} qayta bloglagan"
+      },
+      "shell": {
+        "close_menu": "Menyuni yopish"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Eskiz, boshqa rasm tanlash",
+        "words": "{count, plural, one {# so‘z} other {# so‘z}}",
+        "poll_min_age": "Min. hisob yoshi (kun): {days}",
+        "poll_max_options": "Maks. variantlar: {count}",
+        "thumbnail_selected": "Tanlangan eskiz",
+        "thumbnail": "Eskiz",
+        "uploaded_image": "Yuklangan rasm",
+        "community_search": "qidirish"
+      },
+      "vote": {
+        "not_voted": "Ovoz berilmagan",
+        "voting": "Ovoz berilmoqda",
+        "failed_with": "Ovoz berilmadi: {message}",
+        "failed": "Ovoz berilmadi",
+        "payout": "To‘lov {payout}",
+        "payout_declined": "To‘lov {payout}, rad etilgan",
+        "percent": "{percent} foiz",
+        "upvote_percent": "{percent}% ijobiy ovoz"
+      },
+      "settings": {
+        "on": "Yoqilgan",
+        "off": "O‘chirilgan"
+      },
+      "lock": {
+        "biometric_reason": "Ecency uchun biometrik qulfni yoqish",
+        "offer_title": "{method} bilan qulfni ochish",
+        "offer_use": "{method} dan foydalanish"
+      },
+      "keys": {
+        "hidden_while_captured": "Ekran yozib olinayotganda yoki aks ettirilayotganda kalitlar yashiriladi.",
+        "screenshot_notice": "Skrinshot olindi. Maxfiy kalitlar qayta yashirildi; agar skrinshotda kalit ko‘rinsa, uni o‘chiring.",
+        "hold_hint": "Kalitni ko‘rsatish uchun bosib turing.",
+        "hold_to_show": "Ko‘rsatish uchun bosib turing"
+      },
+      "wallet": {
+        "cancel_order": "Bu buyurtma bekor qilinsinmi?",
+        "days": "{count, plural, one {# kun} other {# kun}}"
+      },
+      "chat": {
+        "reactors_hint": "Kim reaksiya bildirganini ko‘rish uchun bosib turing",
+        "see_reactors": "Kim reaksiya bildirganini ko‘rish"
+      },
+      "esie": {
+        "still": "{mood}, harakatsiz"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} profili",
+      "preview": "Ko‘rib chiqish ({index}/{count})",
+      "balance": "Balans: {amount}",
+      "expires_in": "Tugashiga: {time}",
+      "expired": "Muddati tugadi. Yoping va qayta urinib ko‘ring.",
+      "user_has_no_posts": "@{username} hali hech narsa joylamagan",
+      "attach_image": "Rasm biriktirish",
+      "auto": "Avto",
+      "back": "Orqaga",
+      "hot": "QAYNOQ",
+      "image_of": "Rasm {index} / {count}",
+      "new": "YANGI",
+      "nsfw_tap_to_reveal": "NSFW Ko‘rsatish uchun bosing",
+      "new_reply": "Yangi javob",
+      "remove": "Olib tashlash",
+      "unlock_ecency": "Ecency qulfini ochish",
+      "update_it": "Yangilash",
+      "update_it_or_post_this_as": "Yangilansinmi yoki yangi javob sifatida joylansinmi?",
+      "use_pin": "PIN ishlatish",
+      "your_reply_was_already_posted": "Javobingiz allaqachon joylangan",
+      "error_try_again": "{message} Qayta urinilsinmi?",
+      "auth": {
+        "account_label": "Hisob: @{username}",
+        "approve_the_request_in_your_wallet": "So‘rovni hamyon ilovasida tasdiqlang.",
+        "copy_key": "{title} nusxalash",
+        "current_account": "Joriy hisob",
+        "qr_code": "QR kod",
+        "requested_by": "So‘ragan: {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# raqam} other {# raqam}}",
+        "private_key_shown": "{title}, maxfiy kalit ko‘rsatilgan",
+        "open_wallet_app": "Hamyon ilovasini ochish",
+        "hiveauth_scan": "Hive Keychain yoki boshqa HiveAuth hamyonida tasdiqlang: uni shu qurilmada oching yoki shu kodni u bilan skanerlang.",
+        "switching": "Almashtirilmoqda...",
+        "logout_all": "Barcha hisoblardan chiqish",
+        "logout_all_title": "Bu qurilmadagi barcha hisoblardan chiqilsinmi?",
+        "stored_key": "@{username} bu qurilmada allaqachon tizimga kirgan. Saqlangan kalitlari qoladi; faqat seansi yangilanadi.",
+        "stored_hivesigner": "@{username} bu qurilmada HiveSigner bilan allaqachon tizimga kirgan. Seansi almashtiriladi.",
+        "stored_hiveauth": "@{username} bu qurilmada HiveAuth bilan tizimga kirgan. U buning o‘rniga HiveSigner bilan imzolaydi.",
+        "method_key": "Kalit",
+        "logout_failed": "Chiqib bo‘lmadi"
+      },
+      "browser": {
+        "account": "Hisob",
+        "authority": "Vakolat",
+        "phishing": "Ogohlantirish: Bu domen ma‘lum fishing sayt sifatida belgilangan. Juda ehtiyot bo‘ling."
+      },
+      "chat": {
+        "cancel_edit": "Tahrirni bekor qilish",
+        "cancel_reply": "Javobni bekor qilish",
+        "copied_to_clipboard": "Buferga nusxalandi",
+        "edited_at": "Tahrirlangan: {time}",
+        "group_options": "Guruh sozlamalari",
+        "pinned_messages": "Mahkamlangan xabarlar",
+        "remove_user": "@{username} ni olib tashlash",
+        "sort_by_name": "Nom bo‘yicha saralash",
+        "more": "Yana",
+        "reaction_label": "{emoji} {count}. Kim reaksiya bildirganini ko‘rish uchun bosib turing",
+        "members": "A‘zolar"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Bu havolada post allaqachon mavjud va yuborganingizdan farq qiladi. Yangilansinmi yoki yangi post sifatida nashr qilinsinmi?",
+        "a_scheduled_post_is_published_by": "Rejalashtirilgan postni Ecency tanlangan vaqtda nashr qiladi. Buning uchun hisobingizda ecency.app uchun posting vakolati kerak. Kalitlaringiz va boshqa vakolatlar o‘zgarishsiz qoladi. Uni berish uchun faol kalitingiz kerak.",
+        "ai_assist": "Sun‘iy intellekt yordamchisi",
+        "ai_tools": "Sun‘iy intellekt vositalari",
+        "allow_ecency_to_publish_for_you": "Ecency sizning nomingizdan nashr qilishiga ruxsat berilsinmi?",
+        "bold": "Qalin",
+        "clone": "Klonlash",
+        "cost": "Narxi: {cost}",
+        "could_not_store_the_draft_on": "Qoralamani bu qurilmada saqlab bo‘lmadi. Ilovani ochiq qoldiring va qoralamani saqlang.",
+        "draft": "QORALAMA",
+        "delete_count": "O‘chirish ({count})",
+        "dictate_desc": "Gapiring, matn postingizga qo‘shiladi",
+        "discard": "Bekor qilish",
+        "discard_changes": "O‘zgarishlar bekor qilinsinmi?",
+        "grant": "Berish",
+        "italic": "Kursiv",
+        "keep_editing": "Tahrirni davom ettirish",
+        "my_blog": "BLOGIM",
+        "my_communities": "GURUHLARIM",
+        "new_post": "Yangi post",
+        "notice": "Eslatma",
+        "restore": "Tiklash",
+        "restore_unsaved_changes": "Saqlanmagan o‘zgarishlar tiklansinmi?",
+        "saved": "Saqlandi",
+        "top_communities": "ENG YAXSHI GURUHLAR",
+        "table": "Jadval",
+        "text_format": "Matn formati",
+        "this_link_is_already_in_use": "Bu havola allaqachon ishlatilmoqda",
+        "untitled": "Nomsiz",
+        "update_it_or_publish_this_as": "Yangilansinmi yoki yangi post sifatida nashr qilinsinmi?",
+        "you_have_unsaved_changes_from_an": "Oldingi tahrirdan saqlanmagan o‘zgarishlaringiz bor. Post o‘shandan beri o‘zgargan; tiklasangiz, quyidagi matn almashtiriladi.",
+        "your_edits_were_not_published": "Tahrirlaringiz nashr qilinmadi.",
+        "your_post_was_already_published": "Postingiz allaqachon nashr qilingan",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Eskiz, boshqa rasm tanlash uchun bosing",
+        "thumbnail_number": "Eskiz {number}",
+        "recording_busy": "Yozib olish allaqachon davom etmoqda. Avval uni kamerada tugating.",
+        "photo_lost": "Kamera ochiq paytda foto yo‘qoldi. Qayta suratga oling.",
+        "add_snippet_button": "+ Andoza",
+        "words_count": "{count, plural, one {# so‘z} other {# so‘z}}",
+        "community_search": "qidirish"
+      },
+      "profile": {
+        "open_wallet": "Hamyonni ochish",
+        "your_wallet_is_on_the_wallet": "Hamyoningiz Hamyon bo‘limida.",
+        "user_has_no_comments": "@{username} hali izoh yozmagan",
+        "votes_count": "{count, plural, one {# ovoz} other {# ovoz}}",
+        "replies_count": "{count, plural, one {# javob} other {# javob}}",
+        "menu": "Yana",
+        "users": "Foydalanuvchilar"
+      },
+      "reading": {
+        "apply": "QO‘LLASH",
+        "add_tag": "Teg qo‘shish",
+        "age": "Yosh",
+        "audio_language": "Audio tili",
+        "available_filters": "Mavjud filtrlar",
+        "could_not_unlock_the_audio_please": "Audioni ochib bo‘lmadi, qayta urinib ko‘ring",
+        "downvote": "Salbiy ovoz",
+        "downvote_percent": "{percent}% salbiy ovoz",
+        "listen_to_this_post": "Bu postni tinglash",
+        "log_in": "Kirish",
+        "mark_all_as_read": "Hammasini o‘qilgan deb belgilash",
+        "mark_as_read": "O‘qilgan deb belgilash",
+        "more_replies": "Yana javoblar",
+        "not_enough_points": "Points yetarli emas",
+        "nothing_here_yet": "Hozircha hech narsa yo‘q.",
+        "open_editor": "Muharrirni ochish",
+        "pause_voice": "Ovozni to‘xtatib turish",
+        "play_voice": "Ovozni ijro etish",
+        "playback_speed": "Ijro tezligi",
+        "publishing_in_waves": "Waves da nashr qilinmoqda",
+        "quests_done": "Topshiriqlar bajarildi",
+        "read": "O‘qish",
+        "remove_vote": "Ovozni olib tashlash",
+        "seek": "Surish",
+        "select_community": "Guruhni tanlash",
+        "selected_filters": "Tanlangan filtrlar",
+        "the_audio_could_not_be_loaded": "Audioni yuklab bo‘lmadi.",
+        "this_post_does_not_exist_or": "Bu post mavjud emas yoki o‘chirilgan.",
+        "unread": "O‘qilmagan",
+        "voice_position": "Audio pozitsiyasi",
+        "vote_weight": "Ovoz og‘irligi",
+        "reblogged_by": "{username} qayta bloglagan",
+        "no_more_posts": "Boshqa postlar yo‘q.",
+        "favourite": "Sevimli",
+        "no_votes_yet": "Hozircha ovozlar yo‘q",
+        "no_comments_yet": "Hozircha izohlar yo‘q. Birinchi bo‘ling!",
+        "comments_count": "Izohlar ({count})",
+        "sending_to_chain": "zanjirga yuborilmoqda",
+        "compare": "Taqqoslash",
+        "your_vote": "Sizning ovozingiz",
+        "reply_to": "@{username} ga javob berish",
+        "what_do_you_think": "Nima deb o‘ylaysiz?",
+        "clear_tag_filter": "Teg filtrini tozalash",
+        "tab_selected": "{title}, tanlangan",
+        "add_tag_feed": "Teg lentasini qo‘shish",
+        "feed_pinned": "{label}, mahkamlangan",
+        "attached_image_remove": "Biriktirilgan rasm, olib tashlash uchun bosing",
+        "camera": "Kamera",
+        "files": "Fayllar",
+        "paused": "To‘xtatilgan",
+        "in_topic": "{topic} ichida",
+        "poll_vote": "Ovoz berish",
+        "reply": "Javob berish",
+        "mute_sound": "Ovozsiz",
+        "unmute_sound": "Ovozni yoqish",
+        "leaderboard_activities": "Faoliyatlar",
+        "leaderboard_reward": "Mukofot",
+        "sort_votes": "Ovozlar"
+      },
+      "shell": {
+        "account_of": "@{username} hisobi",
+        "account_signed_out": "Hisob, tizimdan chiqilgan",
+        "close_tab": "Yorliqni yopish",
+        "coming_soon_to_the_native_app": "Mahalliy ilovada tez orada.",
+        "create": "Yaratish",
+        "expand": "Yoyish",
+        "forward": "Oldinga",
+        "loading": "Yuklanmoqda",
+        "new_tab": "Yangi yorliq",
+        "reload": "Qayta yuklash",
+        "sent": "Yuborildi",
+        "tab_unread": "{title}, {count} ta o‘qilmagan",
+        "no_app_for_link": "Bu havolani ocha oladigan ilova yo‘q."
+      },
+      "wallet": {
+        "product_not_available": "Mahsulot mavjud emas.",
+        "repeat": "Takrorlash"
+      },
+      "copied": "Nusxalandi",
+      "trending_caps": "MASHHUR",
+      "move_up": "Yuqoriga siljitish",
+      "move_down": "Pastga siljitish",
+      "scroll_to_top": "Tepaga o‘tish",
+      "load_more": "Yana"
+    },
+    "wallet": {
+      "checking": "Tarmoq bilan tekshirilmoqda",
+      "leave_title": "Hali yuborilmoqda",
+      "leave_message": "Bu hali yuborilmoqda yoki tarmoq bilan tekshirilmoqda. Bu ekrandan chiqishingiz mumkin: tugagach ilova xabar beradi.",
+      "stay": "Qolish",
+      "collateralized_convert_request": "Garovli konvertatsiya so‘rovi",
+      "op_transfer": "o‘tkazma",
+      "op_power_up": "bog‘lash",
+      "op_power_down_change": "bog‘lashdan chiqarish o‘zgarishi",
+      "op_delegation": "delegatsiya",
+      "op_savings_deposit": "jamg‘arma depoziti",
+      "op_savings_withdrawal": "jamg‘armadan yechish",
+      "op_conversion": "konvertatsiya",
+      "op_swap": "almashtirish",
+      "op_order_cancel": "buyurtmani bekor qilish",
+      "op_reward_claim": "mukofotni olish",
+      "op_withdraw_route_change": "yechish yo‘nalishi o‘zgarishi",
+      "op_token_operation": "token amali"
+    },
+    "notification": {
+      "amount_unknown": "Miqdor mavjud emas",
+      "weekly_earnings_breakdown": "Bu hafta ${amount} ishladingiz: ${authorUsd} postlardan, ${curationUsd} kuratsiyadan.",
+      "weekly_earnings_total": "Bu hafta postlaringiz va kuratsiyadan ${amount} ishladingiz."
+    },
+    "settings": {
+      "open": "Ochish",
+      "feedback_subject": "Fikr-mulohaza/Xato haqida hisobot",
+      "unknown_user": "Noma‘lum foydalanuvchi"
+    },
+    "navigation": {
+      "editor": "Muharrir",
+      "followers": "Kuzatuvchilar",
+      "spin_game": "Omad g‘ildiragi",
+      "edit_profile": "Profilni tahrirlash",
+      "redeem_points": "Points ishlatish",
+      "community": "Guruh",
+      "community_members": "Guruh a‘zolari",
+      "community_activities": "Guruh faolligi",
+      "browser": "Brauzer",
+      "asset_details": "Aktiv tafsilotlari",
+      "edit_history": "Tahrirlar tarixi",
+      "welcome": "Xush kelibsiz",
+      "chat": "Chat",
+      "backup_keys": "Kalitlarni zaxiralash",
+      "trade": "Savdo",
+      "ai_image_generator": "Sun‘iy intellekt rasm generatori",
+      "select_assets": "Aktivlarni tanlash",
+      "poll": "So‘rovnoma",
+      "bot_comments": "Bot izohlari"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Egasi kalitini talab qiladigan amallarni Ecency da imzolab bo‘lmaydi.",
+      "post": "Post/Izoh",
+      "custom": "Maxsus JSON",
+      "sign_buffer": "Xabarni imzolash",
+      "send_token": "Token yuborish",
+      "witness_vote": "Witness ovozi",
+      "proxy": "Proksi belgilash",
+      "power_up": "Sarmoya kiritish",
+      "power_down": "Sarmoyani yechish",
+      "broadcast": "Efirga uzatish",
+      "sign_tx": "Tranzaksiyani imzolash",
+      "encode": "Xabarni kodlash",
+      "decode": "Kalitni tekshirish",
+      "add_account_authority": "Hisob vakolatini qo‘shish",
+      "remove_account_authority": "Hisob vakolatini olib tashlash",
+      "add_key_authority": "Kalit vakolatini qo‘shish",
+      "remove_key_authority": "Kalit vakolatini olib tashlash",
+      "create_claimed_account": "Hisob yaratish",
+      "create_proposal": "Taklif yaratish",
+      "remove_proposal": "Taklifni olib tashlash",
+      "update_proposal_vote": "Taklif uchun ovoz",
+      "signed_call": "Imzolangan chaqiruv"
+    },
+    "translate_language": {
+      "ar": "Arabcha",
+      "az": "Ozarbayjoncha",
+      "bg": "Bolgarcha",
+      "bn": "Bengalcha",
+      "ca": "Katalancha",
+      "cs": "Chexcha",
+      "da": "Daniyacha",
+      "de": "Nemischa",
+      "el": "Yunoncha",
+      "en": "Inglizcha",
+      "eo": "Esperanto",
+      "es": "Ispancha",
+      "et": "Estoncha",
+      "fa": "Forscha",
+      "fi": "Finlandcha",
+      "fr": "Fransuzcha",
+      "ga": "Irlandcha",
+      "he": "Ivritcha",
+      "hi": "Hindcha",
+      "hu": "Vengercha",
+      "id": "Indoneziyacha",
+      "it": "Italyancha",
+      "ja": "Yaponcha",
+      "ko": "Koreyscha",
+      "lt": "Litvacha",
+      "lv": "Latishcha",
+      "ms": "Malaycha",
+      "nb": "Norvegcha",
+      "nl": "Niderlandcha",
+      "pl": "Polyakcha",
+      "pt": "Portugalcha",
+      "ro": "Ruminiyacha",
+      "ru": "Ruscha",
+      "sk": "Slovakcha",
+      "sl": "Slovencha",
+      "sq": "Albancha",
+      "sv": "Shvedcha",
+      "th": "Tailandcha",
+      "tl": "Tagalogcha",
+      "tr": "Turkcha",
+      "uk": "Ukraincha",
+      "zh": "Xitoycha",
+      "zt": "Xitoycha (an‘anaviy)"
+    },
+    "reading": {
+      "banner_text": "Bu post {source} tilida. {target} tiliga tarjima qilinsinmi?",
+      "translated_from_text": "{source} tilidan tarjima qilingan"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# a‘zo} other {# a‘zo}} • {authors, plural, one {# muallif} other {# muallif}} • {posts, plural, one {# post} other {# post}}",
+      "community_title": "{title} guruhi",
+      "members_title": "{title} a‘zolari",
+      "activities_title": "{title} faolligi",
+      "cannot_start_with_or": "@ yoki # bilan boshlanishi mumkin emas",
+      "use_a_two_letter": "Ikki harfli til kodini ishlating, masalan en",
+      "at_most_characters": "Ko‘pi bilan {max, plural, one {# belgi} other {# belgi}}",
+      "council": "Kengash",
+      "journal": "Jurnal",
+      "topic": "Mavzu",
+      "community_not_found": "Guruh topilmadi."
+    },
+    "transfer": {
+      "one_recipient": "Bu o‘tkazma uchun faqat bitta qabul qiluvchi ishlatilishi mumkin.",
+      "is_an_exchange_and": "{exchange} birja bo‘lib, takroriy o‘tkazmalarni qo‘llab-quvvatlamasligi mumkin: jadval bo‘yicha yuborilgan mablag‘lar yo‘qolishi mumkin. Buning o‘rniga bir martalik o‘tkazmadan foydalaning."
+    },
+    "dapps": {
+      "signing_info": "Ecency Hive imzo kengaytmangiz sifatida ishlaydi. dApp sizdan Keychain, Keeper yoki Peak Vault kabi brauzer kengaytmasi bilan kirishni so‘rasa, shu variantni tanlang. Imzolashni Ecency xavfsiz tarzda bajaradi.",
+      "category_social": "Ijtimoiy",
+      "category_gaming": "O‘yin",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Guruh",
+      "unable_to_load_messages": "Xabarlarni yuklab bo‘lmadi.",
+      "someone": "Kimdir",
+      "renamed_the_group_to": "{actor} guruh nomini \"{name}\" ga o‘zgartirdi",
+      "removed_the_group_name": "{actor} guruh nomini olib tashladi",
+      "unable_to_send_your": "Xabaringizni yuborib bo‘lmadi.",
+      "unable_to_remove_message": "Xabarni o‘chirib bo‘lmadi.",
+      "unknown": "Noma‘lum",
+      "members_online": "{members, plural, one {# a‘zo} other {# a‘zo}} • {online} onlayn",
+      "failed_to_load_pinned": "Mahkamlangan xabarlarni yuklab bo‘lmadi",
+      "you": "Siz",
+      "title": "Reaksiyalar"
+    },
+    "tip": {
+      "login_required": "Chaqa yuborish uchun tizimga kiring",
+      "max_decimals": "Ko‘pi bilan {n, plural, one {# kasr raqam} other {# kasr raqam}}"
+    },
+    "paid": {
+      "check_again": "Qayta tekshirish",
+      "give_up": "Voz kechish",
+      "unknown": "Hozircha javob yo‘q. So‘rov hali bajarilayotgan bo‘lishi mumkin. Natijani olish uchun qayta tekshiring: ikkinchi marta haq olinmaydi.",
+      "pending": "So‘rovingiz hali qayta ishlanmoqda. Birozdan keyin qayta tekshiring: ikkinchi marta haq olinmaydi.",
+      "restored": "Oldingi so‘rovning hali javobi yo‘q. Natijasini olish uchun qayta tekshiring: ikkinchi marta haq olinmaydi.",
+      "give_up_confirm": "So‘rov o‘tgan bo‘lsa, Points sarflangan va natija yo‘qoladi.",
+      "not_stored": "Bu so‘rovni qurilmada saqlab bo‘lmadi. Tugaguncha bu ekranni ochiq qoldiring.",
+      "sign_in_again": "Seansingiz tugadi. Qayta kiring, so‘ng qayta tekshiring.",
+      "other_account": "Bu @{owner} hisobiga tegishli. Davom etish uchun o‘sha hisobga qayting."
+    },
+    "ai": {
+      "run_ai_assist": "Sun‘iy intellekt yordamchisini ishga tushirish ({costText})",
+      "no_longer_free_cost": "Bu ishga tushirish bugun endi bepul emas. Narxi {cost} {unit}.",
+      "no_longer_free": "Bu ishga tushirish bugun endi bepul emas.",
+      "content_violates_our_content": "Kontent kontent siyosatimizni buzadi. Matningizni o‘zgartiring. Points qaytarilmadi.",
+      "generate_image": "Rasm yaratish ({costLabel})",
+      "use_prompt": "Ishlatish: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Iltimos, kuting, boshqa amal davom etmoqda",
+      "not_a_community_post": "Guruh posti emas.",
+      "parent_post_not_found": "Asosiy post topilmadi",
+      "the_account_changed": "Hisob o‘zgardi."
+    },
+    "dictation": {
+      "balance": "Balans: {balance} {unit}",
+      "stop_points": "To‘xtatish ({cost} Points)",
+      "stop_free": "To‘xtatish (Bepul)",
+      "transcribe_points": "Matnga aylantirish ({cost} Points)",
+      "transcribe": "Matnga aylantirish",
+      "no_longer_free_cost": "Bu yozuv bugun endi bepul emas. Narxi {cost} Points.",
+      "no_longer_free": "Bu yozuv bugun endi bepul emas.",
+      "held_locked": "Ecency qulflanganda yozib olish to‘xtadi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
+      "held_no_background": "Ecency ekrandan chiqqanda yozib olish to‘xtadi (yozib olish bildirishnomasini ko‘rsata olmadi). Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
+      "held_stopped": "Yozib olish bildirishnomadan to‘xtatildi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
+      "held_focus_lost": "Qo‘ng‘iroq yoki boshqa ilovaning tovushi sababli yozib olish to‘xtadi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
+      "held_interrupted": "Boshqa ilova mikrofonni olgani uchun yozib olish to‘xtadi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
+      "unavailable": "Bu qurilmada yozib olish mavjud emas.",
+      "not_read": "Bu yozuvni o‘qib bo‘lmadi yoki u juda katta. Hech narsa yuborilmadi va haq olinmadi.",
+      "give_up_not_sent": "Bu yozuv yuborilmadi, shuning uchun haq olinmadi. U o‘chiriladi.",
+      "give_up_not_charged": "Bu yozuv uchun haq olinmadi. U o‘chiriladi.",
+      "clip_lost": "Oldingi so‘rovning yozuvi endi bu qurilmada yo‘q. So‘rov o‘tgan bo‘lsa, Points sarflangan va uning matnini olib bo‘lmaydi."
+    },
+    "register": {
+      "error_code_28": "So‘rovingizni qayta ishlab bo‘lmadi. Ro‘yxatdan o‘tish navbati to‘lgan bo‘lishi mumkin. Bir necha daqiqadan keyin qayta urinib ko‘ring."
+    },
+    "perks": {
+      "quests_empty": "Bu yerda hozircha topshiriqlar yo‘q, tez orada qayta ko‘ring.",
+      "freeze_confirm_title": "Seriyangizni himoya qiling",
+      "spend_points_on_a": "Seriyani muzlatish uchun {price} Points sarflansinmi? U o‘tkazib yuborgan kuningizda seriyangizni himoya qilish uchun ishlatiladi."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ecency ni qo‘llab-quvvatlang, bepul blog oling va tasdiqlangan Pro nishoni bilan ajralib turing.",
+      "card_description": "Yiliga {price} evaziga Pro bo‘ling. Tasdiqlangan nishon, bepul blog va Ecency ga yordam.",
+      "card_description_plain": "Bir yilga Pro bo‘ling. Tasdiqlangan nishon, bepul blog va Ecency ga yordam.",
+      "member": "Siz Pro a‘zosisiz.",
+      "benefit_badge": "Ismingiz yonida tasdiqlangan Pro nishoni.",
+      "benefit_blog": "yourname.blogs.ecency.com manzilida bepul blog.",
+      "benefit_support": "Ecency rivojiga bevosita yordam.",
+      "benefit_early": "Yangi funksiyalarga erta kirish.",
+      "buy": "Yiliga {price} evaziga Pro bo‘ling",
+      "extend": "{price} evaziga 12 oyga uzaytirish",
+      "extend_note": "Qayta xarid qilish a‘zoligingizga 12 oy qo‘shadi.",
+      "unavailable": "Ecency Pro hozir do‘kondan mavjud emas.",
+      "activating": "To‘lov qabul qilindi. A‘zoligingiz faollashtirilmoqda.",
+      "success_title": "Ecency Pro ga xush kelibsiz",
+      "success_body": "Pro a‘zoligingiz faol. Nishoningiz tez orada profilingizda paydo bo‘ladi.",
+      "extending": "To‘lov qabul qilindi. Pro a‘zoligingiz 12 oyga uzaytirilmoqda.",
+      "open_a11y": "Ecency Pro ni ochish"
+    },
+    "editor": {
+      "saving_draft": "Qoralama saqlanmoqda...",
+      "please_sign_in_first": "Avval tizimga kiring.",
+      "fetch_failed": "Olib kelish muvaffaqiyatsiz tugadi.",
+      "you_can_only_edit": "Faqat o‘z kontentingizni tahrirlashingiz mumkin.",
+      "invalid_percent": "Noto‘g‘ri foiz",
+      "beneficiary_exists_already": "Naf oluvchi allaqachon mavjud",
+      "this_draft_belongs_to": "Bu qoralama @{owner} hisobiga tegishli. Nashr qilish uchun o‘sha hisobga qayting.",
+      "could_not_make_a": "Bu post uchun yangi havola yaratib bo‘lmadi. Sarlavhani biroz o‘zgartirib, qayta urinib ko‘ring.",
+      "an_earlier_attempt_was": "Oldingi urinish bundan keyin nashr qilindi. Qaysi versiyani qoldirishni tekshiring.",
+      "could_not_check_your": "Hisobingizning posting vakolatini tekshirib bo‘lmadi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+      "this_post_was_changed": "Bu post siz ochganingizdan keyin boshqa joyda o‘zgartirilgan. Matningizni nusxalang, orqaga qayting va so‘nggi versiyani tahrirlash uchun qayta oching.",
+      "link_text_placeholder": "Matn shu yerda"
+    },
+    "app_error": {
+      "this_reply_is_too": "Bu javob juda uzun.",
+      "the_network_refused_this": "Tarmoq bu amalni rad etdi.",
+      "invalid_input": "Noto‘g‘ri kiritish.",
+      "secure_storage_is_unavailable": "Xavfsiz xotira mavjud emas. Qayta tizimga kiring.",
+      "please_sign_in_first": "Avval tizimga kiring.",
+      "these_credentials_belong_to": "Bu hisob ma‘lumotlari @{expected} ga emas, @{actual} ga tegishli.",
+      "is_not_signed_in": "@{username} bu qurilmada tizimga kirmagan.",
+      "key_required": "Bu tranzaksiyani bajarish uchun {role} kaliti kerak. {hint}",
+      "cancelled": "Bekor qilindi.",
+      "the_request_was_rejected": "So‘rov hamyon ilovasida rad etildi.",
+      "the_request_expired_before": "So‘rovning muddati hamyon ilovasi javob berishidan oldin tugadi. Qayta urinib ko‘ring.",
+      "could_not_reach_the": "HiveAuth serveriga ulanib bo‘lmadi. Qayta urinib ko‘ring.",
+      "unexpected_redirect": "Server kutilmagan yo‘naltirish yubordi. Hech narsa o‘zgarmadi. Keyinroq qayta urinib ko‘ring.",
+      "missing_key_hint": "Uni Sozlamalar, Vakolatlarni boshqarish (Maxfiy kalitni import qilish) bo‘limida qo‘shing yoki u bilan qayta tizimga kiring.",
+      "this_key_is_also": "Bu kalit shu bilan birga hisobning egasi kaliti. Ecency egasi rolini boshqaradigan kalitni saqlamaydi: faol va posting rollariga o‘z kalitlaringizni bering, so‘ng ular bilan tizimga kiring.",
+      "this_is_the_owner": "Bu egasi kaliti. Ecency egasi kalitini hech qachon saqlamaydi yoki ishlatmaydi: asosiy parol bilan yoki posting yoki faol kalit bilan tizimga kiring.",
+      "this_password_only_matches": "Bu parol faqat hisobning egasi kaliti bilan mos keladi. Ecency egasi kalitini hech qachon saqlamaydi yoki ishlatmaydi: posting yoki faol kalit bilan tizimga kiring.",
+      "this_key_cannot_sign": "Bu kalit hisob uchun yolg‘iz imzolay olmaydi: hisobga bir nechta imzo kerak (uning og‘irligi chegaradan past).",
+      "public_key_given": "Bu sizning ochiq kalitingiz. Maxfiy kalitni (5 bilan boshlanadi) yoki asosiy parolni joylashtiring.",
+      "memo_key_only": "Memo kaliti bilan tizimga kirib bo‘lmaydi. Posting kaliti, faol kalit yoki asosiy paroldan foydalaning.",
+      "network_message": "Tarmoq xatosi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+      "network_error_this_may": "Tarmoq xatosi. Bu allaqachon o‘tgan bo‘lishi mumkin; qayta urinish xavfsiz va ikki marta joylanmaydi."
+    },
+    "purchases": {
+      "deal_best": "ENG YAXSHI TAKLIF!",
+      "deal_popular": "OMMABOP!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Do‘kon javob bermadi."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts iste‘moli uchun email va foydalanuvchi nomi kerak",
+      "stuck": "Bu mahsulotning oldingi xaridi yakunlanmadi. Do‘kon kvitansiyangiz bilan support@ecency.com ga murojaat qiling, kvitansiya shu uchun saqlanadi.",
+      "held": "Bu xarid ko‘rib chiqish uchun ushlab turilibdi. #{order} buyurtma raqami bilan support@ecency.com ga murojaat qiling.",
+      "earlier_purchase": "Bu mahsulotning oldingi xaridi avval @{target} uchun yakunlanmoqda.",
+      "earlier_pending": "Bu mahsulot uchun oldingi to‘lov @{target} uchun hali kutilmoqda. Do‘kon to‘lovni tasdiqlagach yakunlanadi.",
+      "pending": "To‘lovingiz kutilmoqda. Do‘kon to‘lovni tasdiqlagach xarid yakunlanadi.",
+      "processing": "Xaridingiz qayta ishlanmoqda. Tez orada yakunlanadi."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Takroriy o‘tkazmalar",
+      "delegate_hive_power": "Hive Power ni delegatsiyalash",
+      "power_up": "Sarmoya kiritish",
+      "set_withdraw_vesting_route": "Yechish yo‘nalishini belgilash",
+      "power_down": "Sarmoyani yechish",
+      "transfer_to_saving": "Jamg‘armaga o‘tkazish",
+      "transfer_from_saving": "Jamg‘armadan o‘tkazish",
+      "cancel_transfer_from_saving": "Jamg‘armadan o‘tkazishni bekor qilish",
+      "collateralized_convert": "Garovli konvertatsiya",
+      "witness_vote": "Witness ovozi",
+      "witness_update": "Witness yangilash",
+      "witness_set_properties": "Witness xususiyatlarini belgilash",
+      "governance_proxy": "Boshqaruv proksisi",
+      "claim_account": "Hisobni olish",
+      "create_account": "Hisob yaratish",
+      "create_account_with_account": "Hisob krediti bilan hisob yaratish",
+      "create_limit_order": "Limit buyurtmasini yaratish",
+      "cancel_limit_order": "Limit buyurtmasini bekor qilish",
+      "redeem_rewards": "Mukofotlarni olish",
+      "post_or_comment": "Post yoki izoh",
+      "post_or_comment_options": "Post yoki izoh sozlamalari",
+      "custom_operation": "Maxsus amal",
+      "update_account_active": "Hisobni yangilash (faol)",
+      "update_account_posting": "Hisobni yangilash (posting)",
+      "change_recovery_account": "Tiklash hisobini o‘zgartirish",
+      "create_proposal": "Taklif yaratish",
+      "remove_proposal": "Taklifni olib tashlash",
+      "update_proposal_votes": "Taklif ovozlarini yangilash",
+      "update_proposal": "Taklifni yangilash"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Bu havola @{account} tomonidan imzolanishi kerak. O‘sha hisobga o‘ting va qayta oching.",
+      "ecency_can_only_sign": "Ecency faqat havolalardagi tranzaksiyalarni imzolab, uzata oladi.",
+      "requester_page": "{host} sahifasi",
+      "owner_refused": "Egasi kalitini talab qiladigan amallarni havoladan imzolab bo‘lmaydi.",
+      "busy": "Iltimos, kuting: boshqa so‘rov hali qayta ishlanmoqda.",
+      "not_supported": "Ecency bu amalni bu versiyada hali imzolay olmaydi."
+    },
+    "chats": {
+      "group_members": "Guruh a‘zolari",
+      "rename_group": "Guruh nomini o‘zgartirish",
+      "failed_to_load_chats": "Chatlarni yuklab bo‘lmadi",
+      "unknown": "Noma‘lum",
+      "unable_to_mark_channel": "Kanalni o‘qilgan deb belgilab bo‘lmadi",
+      "unable_to_update_favorites": "Sevimlilarni yangilab bo‘lmadi",
+      "unable_to_update_mute": "Ovozsiz rejimni yangilab bo‘lmadi",
+      "group": "Guruh",
+      "unable_to_search": "Qidirib bo‘lmadi",
+      "unable_to_start_chat": "Chatni boshlab bo‘lmadi",
+      "no_internet": "Internet aloqasi yo‘q"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) @{to} ga delegatsiya qilinsin",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "@{recipient} ga allaqachon delegatsiya qilingan"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Faqat ochiq. Ecency egasi kalitini hech qachon saqlamaydi.",
+      "shared_owner": "Bu hisob egasi roli va {names} roli uchun bir xil kalitdan foydalanadi. Bu kalit egasi butun hisobni boshqaradi. {names} roliga o‘z kalitini bering va egasi kalitini oflayn saqlang.",
+      "copy_warning": "Bu maxfiy kalit egasi hisobingizning shu qismini boshqaradi. Boshqa ilovalar buferni o‘qiy oladi; faqat ishongan joyingizga joylashtiring. U 2 daqiqadan keyin buferdan tozalanadi."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN qulfi yoqilgan.",
+      "pin_changed": "PIN o‘zgartirildi.",
+      "pin_lock_is_off": "PIN qulfi o‘chirilgan.",
+      "wiped_notice": "Barcha hisoblar, kalitlar va hisob ma‘lumotlari bu qurilmadan olib tashlandi.",
+      "we_could_not_bring": "Hisoblaringizni ilovaning oldingi versiyasidan o‘tkazib bo‘lmadi. Qayta tizimga kiring.",
+      "your_pin_lock_could": "PIN qulfingizni oldingi versiyadan o‘tkazib bo‘lmadi. Ilova qulfini qayta yoqish uchun hisob menyusidan PIN ni qayta o‘rnating.",
+      "biometric_unlock_was_turned": "Bu qurilmadagi biometrik ma‘lumotlar o‘zgargani uchun biometrik qulf o‘chirildi. PIN bilan qulfni oching, so‘ng hisob menyusidan qayta yoqing.",
+      "biometric_unavailable_notice": "Biometrik qulfni yoqib bo‘lmadi: bu qurilmada biometrik ma‘lumot sozlanmagan.",
+      "set_backup": "Biometrik qulf uchun zaxira PIN o‘rnating",
+      "biometric_on_notice": "PIN qulfi yoqilgan. Biometrik ma‘lumot yoki PIN bilan qulfni oching.",
+      "offer_title": "Biometrik ma‘lumot bilan qulfni ochish",
+      "offer_body": "Ecency ni yuzingiz yoki barmoq izingiz bilan oching. Biometrik ma‘lumot mavjud bo‘lmaganda ilovani ochadigan PIN ham o‘rnatgansiz.",
+      "offer_use": "Biometrikadan foydalanish",
+      "offer_use_pin": "Buning o‘rniga PIN ishlatish"
+    },
+    "common": {
+      "list_and": "{first} va {second}",
+      "role_owner": "egasi",
+      "role_active": "faol",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 ta yoki undan kam belgili javoblar Points keltirmaydi (havolalar hisoblanmaydi)",
+      "short_content_hint": "Points ishlash uchun juda qisqa (25 ta yoki undan kam belgi, havolalar hisobga olinmaydi)",
+      "daily_post": "Kunlik post {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# kunlik seriya} other {# kunlik seriya}}",
+      "grant_description": "Ecency hisobi @ecency.app ga hisobingizda posting ruxsatini bering, shunda har safar Keychain ni ochmasdan post joylay olasiz. Bu ruxsat hisobingizning posting vakolatini o‘zgartiradi va faol kalitingizni talab qiladi."
+    },
+    "wallet_history": {
+      "from_to": "@{from} - @{to}",
+      "from_user_id": "@{from} dan, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} - @{to}, id: {id}",
+      "from_to_account": "@{from} - {to}",
+      "from_user": "@{user} dan",
+      "to_user": "@{user} ga",
+      "interest": "Foiz",
+      "proposal_pay": "Taklif to‘lovi",
+      "categories": "Faoliyat turlari",
+      "category_all": "Hammasi",
+      "category_transfers": "O‘tkazmalar",
+      "category_market": "Bozor buyurtmalari",
+      "category_interest": "Foizlar",
+      "category_stake": "Bog‘lash amallari",
+      "category_rewards": "Mukofotlar",
+      "point_type_checkin": "Yurak urishlari",
+      "point_type_login": "Kirish",
+      "point_type_post": "Post",
+      "point_type_comment": "Izoh",
+      "point_type_vote": "Ovoz",
+      "point_type_reblog": "Qayta bloglash",
+      "point_type_transfer_sent": "Yuborilgan o‘tkazmalar",
+      "point_type_transfer_received": "Qabul qilingan o‘tkazmalar"
+    },
+    "video_upload": {
+      "continue_upload": "YUKLASHNI DAVOM ETTIRISH",
+      "source_gone": "Bu yozuv endi qurilmada yo‘q. Videoni qayta yozing yoki tanlang.",
+      "no_camera": "Bu qurilmada kamera mavjud emas."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Keyingi bog‘lashdan chiqarish {hours, plural, one {# soatdan} other {# soatdan}} keyin",
+      "account_not_found": "Hisob topilmadi"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Buferda rasm bor · Rasmni joylashtirish",
+      "no_container": "Eng so‘nggi waves konteynerini olib bo‘lmadi",
+      "please_sign_in_first": "Avval tizimga kiring.",
+      "write_something_first": "Avval biror narsa yozing.",
+      "account_changed": "Bu wave boshqa hisob sifatida yozilgan. Uni yoping va qayta yozing.",
+      "no_upload": "Rasm yuklash bu buildda hali mavjud emas. Buning o‘rniga matnga rasm havolasini joylashtiring.",
+      "fail": "Muvaffaqiyatsiz"
+    },
+    "delete_account": {
+      "sign_out_failed": "So‘rovingiz yuborildi, ammo tizimdan chiqib bo‘lmadi. Menyudan chiqing.",
+      "not_sent": "O‘chirish so‘rovingizni yuborib bo‘lmadi. Qayta urinib ko‘ring."
+    },
+    "chat_sheets": {
+      "group_limit": "Guruhda yana ko‘pi bilan {max, plural, one {# kishi} other {# kishi}} bo‘lishi mumkin.",
+      "search_people_by_username": "Odamlarni foydalanuvchi nomi bo‘yicha qidiring",
+      "new_group_title": "Yangi guruh",
+      "new_group_hint": "Guruh suhbatini boshlash uchun {min} tadan {max, plural, one {# tagacha} other {# tagacha}} odam qo‘shing.",
+      "no_results": "Bu nom bilan chatda hech kim topilmadi.",
+      "search_failed": "Qidiruv ishlamadi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+      "create": "Guruhni boshlash",
+      "new_group_failed": "Guruhni boshlab bo‘lmadi. Qayta urinib ko‘ring.",
+      "name_limit": "Guruh nomi ko‘pi bilan {max, plural, one {# belgi} other {# belgi}} bo‘lishi mumkin.",
+      "rename_title": "Guruh nomini o‘zgartirish",
+      "rename_hint": "Guruhga undagi hamma ko‘radigan nom bering. Bo‘sh qoldirsangiz, a‘zolarning ismlari ko‘rsatiladi.",
+      "placeholder": "Guruh nomi",
+      "not_owner": "Guruh nomini faqat uni boshlagan odam o‘zgartira oladi.",
+      "rename_failed": "Guruh nomini o‘zgartirib bo‘lmadi. Qayta urinib ko‘ring."
+    },
+    "editor_side": {
+      "copy_of": "{title} nusxasi",
+      "deletions_failed": "Nimadir xato ketdi\n{failed} / {total, plural, one {# o‘chirish} other {# o‘chirish}} muvaffaqiyatsiz",
+      "uploads_failed": "{count, plural, one {# yuklash muvaffaqiyatsiz} other {# yuklash muvaffaqiyatsiz}}:\n\n{messages}",
+      "failed_to_delete": "O‘chirib bo‘lmadi"
+    },
+    "uploads": {
+      "add_to_gallery": "Galereyaga qo‘shish"
+    },
+    "account_notice": {
+      "manage_keys": "Sozlamalar, Vakolatlarni boshqarish",
+      "no_signing_key_title": "@{account} sifatida qayta kiring",
+      "no_signing_key": "Ecency endi egasi kalitini yoki asosiy parolni bu qurilmada saqlamaydi va @{account} uchun bu yerda saqlangan posting yoki faol kalit yo‘q. Asosiy parol yoki posting yoki faol kalit bilan qayta kiring yoki {manageKeys} bo‘limida (Maxfiy kalitni import qilish) kalit qo‘shing.",
+      "missing_roles_title": "Ba‘zi kalitlar qo‘shilmadi",
+      "cannot_post": "post joylash, ovoz berish yoki izoh yozish",
+      "cannot_transfer": "o‘tkazma yuborish yoki hisob sozlamalarini o‘zgartirish",
+      "missing_roles": "Parolingiz endi @{account} hisobining {missing} kalitiga mos kelmaydi: parol o‘rnatilganidan beri hisobda o‘zgartirilgan. Bu qurilmada saqlangan: {kept} kaliti. {manageKeys} bo‘limida (Maxfiy kalitni import qilish) {missing} kalitini qo‘shmaguningizcha, bu ilova @{account} uchun kalitlar bilan {cannot} amalini bajara olmaydi.",
+      "shared_owner_title": "Bu kalit egasi rolini ham boshqaradi",
+      "shared_owner": "@{account} egasi roli va {names} roli uchun bir xil kalitdan foydalanadi. Bu kalit egasi butun hisobni boshqaradi. Ecency uni faqat {names} kaliti sifatida saqlaydi va egasi amallari uchun hech qachon ishlatmaydi. {names} roliga o‘z kalitini bering va egasi kalitini oflayn saqlang."
+    },
+    "dapp_browser": {
+      "message_from": "{host} saytidan xabar",
+      "home_title": "Bosh sahifa",
+      "loading_title": "Yuklanmoqda...",
+      "blank_run": "[{count, plural, one {# bo‘sh belgi} other {# bo‘sh belgi}}]",
+      "too_large": "Bu sahifa ko‘rsatib bo‘lmaydigan darajada katta imzo so‘rovini yubordi, shuning uchun Ecency uni rad etdi."
+    },
+    "community_service": {
+      "the_account_changed": "Hisob o‘zgardi."
+    },
+    "profile_edit": {
+      "enter_link": "Rasm havolasini kiriting",
+      "please_sign_in_first": "Avval tizimga kiring.",
+      "account_not_found": "Hisob topilmadi",
+      "please_enter_an_image": "https:// bilan boshlanadigan rasm havolasini kiriting"
+    },
+    "background_media": {
+      "post_by": "@{author} posti"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Avval tizimga kiring."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Siz allaqachon shu og‘irlikda ovoz bergansiz.",
+      "insufficient_rc": "Resurs kreditlari yetarli emas. Kuting yoki sarmoya kiriting.",
+      "missing_authority": "Posting vakolati yetishmayapti. Kirish usulini tekshiring.",
+      "comment_too_soon": "Yana post joylashdan oldin kuting.",
+      "paid_out": "Bu postning mukofoti allaqachon to‘langan.",
+      "too_large": "Tranzaksiya {size, plural, one {# bayt} other {# bayt}}, {max} bayt chegarasidan oshadi.",
+      "network_error_please_check": "Tarmoq xatosi. Ulanishni tekshirib, qayta urinib ko‘ring.",
+      "unconfirmed_message": "Bu o‘tgan-o‘tmaganini tasdiqlab bo‘lmadi. Hamyon yoki tarixni tekshiring; faqat u yerda bo‘lmasa qayta boshlang.",
+      "undecided_message": "Bu allaqachon o‘tgan bo‘lishi mumkin. Qayta urinishdan oldin hamyon yoki tarixni tekshiring."
+    },
+    "chat_api": {
+      "request_failed": "So‘rov muvaffaqiyatsiz tugadi ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} yozmoqda...",
+      "typing_two": "{first} va {second} yozmoqda...",
+      "typing_three": "{first}, {second} va {third} yozmoqda...",
+      "typing_many": "{first}, {second} va {count, plural, one {yana # kishi} other {yana # kishi}} yozmoqda...",
+      "banned": "{reason} Chatni baribir o‘qiy olasiz. Post joylash {until} ochiladi.",
+      "joined_when": "qo‘shilgan: {time}",
+      "joined": "qo‘shilgan",
+      "official_badge": "Rasmiy",
+      "official_badge_label": "Rasmiy Ecency hisobi"
+    },
+    "side_menu": {
+      "ask_esie": "Esie dan so‘rang"
+    },
+    "chat_service": {
+      "missing_token": "Hive kirish tokeni yo‘q. Chiqib, qayta kiring.",
+      "dm_error": "Foydalanuvchi chatlarga qo‘shilmagan"
+    },
+    "compose_reply": {
+      "account_changed": "Bu javob boshqa hisob sifatida yozilgan. Uni yoping va qayta yozing.",
+      "write_something_first": "Avval biror narsa yozing.",
+      "please_sign_in_first": "Avval tizimga kiring."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Naf oluvchilar juda ko‘p: ko‘pi bilan {max}.",
+      "a_beneficiary_s_share": "Naf oluvchining ulushi 0,01% va 100% orasida bo‘lishi kerak.",
+      "beneficiaries_add_up_to": "Naf oluvchilar ulushi 100% dan oshadi.",
+      "a_beneficiary_is_listed": "Bitta naf oluvchi ikki marta ko‘rsatilgan.",
+      "you_cannot_be_a": "O‘z postingizning naf oluvchisi bo‘la olmaysiz.",
+      "a_beneficiary_has_an": "Bir naf oluvchining hisob nomi noto‘g‘ri."
+    },
+    "follows": {
+      "fail": "Muvaffaqiyatsiz!: {message}",
+      "follower_count": "Kuzatuvchi ({count})",
+      "following_count": "Kuzatilayotgan ({count})"
+    },
+    "link": {
+      "unsupported": "Bu havola hali qo‘llab-quvvatlanmaydi.",
+      "cannot_open": "Havolani ochib bo‘lmaydi",
+      "unsupported_version": "Bu havola bu versiyada qo‘llab-quvvatlanmaydi."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore brauzeri tranzaksiyalarni imzolash uchun Hive hamyoningizga kira oladi. Bu havola post kontentidan olingan va Ecency tomonidan tasdiqlanmagan. Faqat ishonsangiz davom eting:\n\n{url}"
+    },
+    "listen": {
+      "message": "Tinglash uchun {required} Points kerak, sizda {available} bor.",
+      "unlock_label": "Ochish · {cost} Points",
+      "preparing_audio": "Audio tayyorlanmoqda · {preparingPercent}%",
+      "waiting_in_line_ahead": "Navbatda kutilmoqda, oldingizda {ahead} kishi bor…",
+      "next_in_line": "Navbat sizda…",
+      "preparing_about_minutes": "Audio tayyorlanmoqda, taxminan {minutes} daq…",
+      "preparing_audio_2": "Audio tayyorlanmoqda…",
+      "spend_confirm": "Bu postni tinglash uchun {cost} Points sarflansinmi? Audio sizniki bo‘lib qoladi, istalgan vaqtda qayta tinglashingiz mumkin.",
+      "about_minutes": "~{minutes} daq",
+      "failed_refunded": "Audio yaratilmadi, Points qaytarildi"
+    },
+    "media_pick": {
+      "preparing_video": "Video tayyorlanmoqda...",
+      "library_hint": "Suratlaringizdan tanlang",
+      "camera_hint": "Hozir yangi surat oling",
+      "files_hint": "Bu qurilma va bulutdagi fayllarni ko‘rib chiqing",
+      "paste_hint": "Nusxalagan rasmingizdan foydalaning",
+      "link_hint": "Internetdan rasm ishlating"
+    },
+    "media_picking": {
+      "image_types_message": "Bu fayl turi qo‘llab-quvvatlanmaydi. JPEG, PNG, GIF, WebP yoki HEIC rasmini tanlang.",
+      "video_types_message": "Bu fayl turi qo‘llab-quvvatlanmaydi. MP4 yoki MOV videosini tanlang.",
+      "gif_too_large": "Bu GIF {mb} MB chegarasidan katta."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Bu amal ham faol, ham posting imzosini talab qiladi, Ecency esa ularni hali birga imzolay olmaydi."
+    },
+    "poll": {
+      "fail": "Muvaffaqiyatsiz!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Hisobingizning posting vakolatini tekshirib bo‘lmadi. Ulanishni tekshirib, qayta urinib ko‘ring."
+    },
+    "post_lists": {
+      "voters_title": "Ovoz berganlar ({total})",
+      "reblogs_title": "Qayta bloglash ma‘lumoti ({total})",
+      "no_history_found": "Tarix topilmadi!",
+      "no_edit_history_available": "Bu kontent uchun tahrirlar tarixi yo‘q.",
+      "version_label": "Versiya {version}"
+    },
+    "stats": {
+      "other_device": "Boshqa"
+    },
+    "profile": {
+      "account_not_found": "Hisob topilmadi",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • {hours, plural, one {# soatda} other {# soatda}} to‘ladi"
+    },
+    "profile_metadata_guard": {
+      "refused": "Joriy profilingizni o‘qib bo‘lmadi, qayta urinib ko‘ring"
+    },
+    "profile_sheet": {
+      "fail": "Muvaffaqiyatsiz! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Hisob topilmadi"
+    },
+    "push_payload": {
+      "mentioned": "@{source} @{target} ni eslatdi",
+      "replied": "@{source} @{target} ga javob berdi",
+      "transferred": "@{source} @{target} ga o‘tkazma qildi",
+      "delegated": "@{source} @{target} ga delegatsiya qildi",
+      "rewards_received": "Mukofotlar olindi",
+      "account_updated": "Hisob yangilandi",
+      "account_updated_body": "Hisobingiz ma‘lumotlari yangilandi",
+      "followed": "@{source} @{target} ni kuzata boshladi",
+      "unfollowed": "@{source} @{target} ni kuzatishni to‘xtatdi",
+      "ignored": "@{source} @{target} ni e‘tiborsiz qoldirdi",
+      "blacklisted": "@{source} @{target} ni qora ro‘yxatga qo‘shdi",
+      "posted_in": "@{source} #{firstTag} tegida post joyladi"
+    },
+    "qr_scan": {
+      "permission_title": "Kamera ruxsatini olib bo‘lmadi",
+      "permission_message": "Ecency sozlamalarida kameraga ruxsat bering.",
+      "permission_allow": "Ruxsat berish"
+    },
+    "reply_account": {
+      "switch": "Boshqa hisob sifatida javob berish"
+    },
+    "send_journal": {
+      "your_from_went_through": "@{account} hisobidan {label} amalingiz o‘tdi.",
+      "not_sent": "@{account} hisobidan {label} amalingiz o‘tmadi. Hech narsa yuborilmadi; uni qayta boshlashingiz mumkin.",
+      "checking_whether_your_from": "@{account} hisobidan {label} amalingiz o‘tgan-o‘tmagani tekshirilmoqda. Qayta yuborishdan oldin hamyoningizni tekshiring."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner sahifasi yopildi",
+      "wrong_role": "Bu sizning {given} kalitingiz; bu amal {needed} kalitingizni talab qiladi.",
+      "action_id_required": "Bu amalni xavfsiz qayta urinish uchun amal identifikatori kerak."
+    },
+    "signing_router": {
+      "owner_never": "Egasi amallari ilovada hech qachon imzolanmaydi."
+    },
+    "spin": {
+      "key_missing": "O‘yin kaliti yo‘q",
+      "score": "{score, plural, one {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Bugun (UTC), tiklanishiga {time} qoldi",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Har kuni 00:00 UTC da tiklanadi"
+    },
+    "storage_reset": {
+      "title": "Qayta tizimga kiring",
+      "message": "Xavfsiz xotira bu qurilmada tiklandi. Qayta tizimga kiring.",
+      "failed": "Bu qurilmadagi hisoblarni olib tashlab bo‘lmadi. Qayta urinib ko‘ring."
+    },
+    "store": {
+      "in_app_purchases_are": "Ilova ichidagi xaridlar bu buildda mavjud emas."
+    },
+    "wallet_sends": {
+      "journal_full": "Oldingi ko‘p yuborishlar hali tarmoq bilan tekshirilmoqda. Ko‘proq yuborishdan oldin ularning tasdiqlanishini kuting.",
+      "check_later": "Tarmoq buni o‘z vaqtida tasdiqlamadi. Qayta yuborishdan oldin hamyon yoki tarixni tekshiring; ilova keyingi ishga tushganda yana tekshiradi."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# o‘qilmagan} other {# o‘qilmagan}}",
+      "locked_text": "Ko‘rish uchun Ecency qulfini oching",
+      "signed_out_text": "Ecency ga kirish"
+    },
+    "posting_grant": {
+      "unreadable": "Hisobingizning joriy vakolatlarini o‘qib bo‘lmadi. Hech narsa o‘zgarmadi; qayta urinib ko‘ring.",
+      "reads_disagree": "Hisobingiz posting vakolatining ikki o‘qilishi mos kelmaydi. Hech narsa o‘zgarmadi; qayta urinib ko‘ring."
+    },
+    "vote": {
+      "vote_weight_must_be": "Ovoz og‘irligi -100% va 100% orasida bo‘lishi kerak.",
+      "please_sign_in_first": "Avval tizimga kiring."
+    },
+    "widget": {
+      "streak_name": "Topshiriq seriyasi",
+      "write": "Yozish",
+      "new_wave": "Yangi wave",
+      "notifications_description": "O‘qilmagan bildirishnomalaringiz. PIN qulfi yoqilganda yashiriladi.",
+      "streak_description": "Kunlik topshiriq seriyangiz. PIN qulfi yoqilganda yashiriladi.",
+      "compose_description": "Post yoki yangi wave yozing.",
+      "streak_title": "Seriya",
+      "daily_quests": "Kunlik topshiriqlar",
+      "streak_hint": "Seriyangizni ko‘rish uchun Imtiyozlarni oching",
+      "open_perks": "Imtiyozlarni ochish",
+      "open_app": "Ecency ni ochish",
+      "unread_caption": "{count, plural, one {o‘qilmagan} other {o‘qilmagan}}",
+      "streak_caption": "{count, plural, one {kunlik seriya} other {kunlik seriya}}"
+    },
+    "system": {
+      "dictation_channel": "Ovozdan matn",
+      "listen_channel": "Tinglash",
+      "dictation_channel_description": "Ovozdan matn yozuvi fonda davom etayotganda To‘xtatish amali bilan ko‘rsatiladi.",
+      "dictation_title": "Ovozdan matn uchun yozib olinmoqda",
+      "dictation_text": "Ecency ovozdan matningizni yozib olmoqda. To‘xtatish tugmasi ilovada tasdiqlamaguningizcha yubormaydi.",
+      "listen_channel_description": "Tinglash fonda davom eta olmaganda sizga xabar beradi.",
+      "listen_paused": "Tinglash to‘xtatildi",
+      "listen_paused_text": "Tinglashni davom ettirish uchun Ecency ni oching.",
+      "skip_back": "15 soniya orqaga",
+      "skip_forward": "15 soniya oldinga"
+    },
+    "permission": {
+      "face_id": "PIN o‘rniga Face ID bilan Ecency qulfini oching.",
+      "camera": "QR kodlarni skanerlang, surat oling yoki video yozib postingizga qo‘shing.",
+      "photo_library_add": "Ecency postlardan yuklab olgan rasmlaringizni suratlar kutubxonangizga saqlaydi.",
+      "photo_library": "Ecency postlardan yuklab olgan rasmlaringizni suratlar kutubxonangizdagi Ecency albomida birga saqlaydi.",
+      "microphone": "Ecency mikrofoningizdan post va izohlarni ovozdan yozish (bu yozuvlar matnga aylantirish uchun Ecency ga yuboriladi) va postingizga qo‘shgan videongiz bilan tovush yozish uchun foydalanadi."
+    },
+    "android": {
+      "no_browser": "Brauzer mavjud emas",
+      "biometric_unlock_title": "Ecency qulfini biometrik ma‘lumot bilan oching",
+      "biometric_confirm": "Barmoq izi yoki yuzingiz bilan tasdiqlang",
+      "image_unsupported_address": "Qo‘llab-quvvatlanmaydigan rasm manzili",
+      "image_create_failed": "Faylni yaratib bo‘lmadi",
+      "image_write_failed": "Faylga yozib bo‘lmadi",
+      "image_too_large": "Rasm juda katta",
+      "image_download_failed": "Yuklab olish {status} holati bilan muvaffaqiyatsiz tugadi",
+      "billing_disconnected": "Google Play Billing aloqasi uzildi.",
+      "billing_no_screen": "Xaridni ko‘rsatadigan ekran yo‘q.",
+      "billing_error": "Google Play Billing xatosi {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Siz bu oy {count, plural, one {# ta post} other {# ta post}} yaratdingiz. Shu zaylda davom eting!",
-        "checkin": "Siz bu hafta {count, plural, one {# kun} other {# kun}} belgilab o'tdingiz. Shu zaylda davom eting!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} tegida {count, plural, one {# ta yangi post} other {# ta yangi post}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# muvaffaqiyatsiz urinish(lar)} other {# muvaffaqiyatsiz urinish(lar)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} kunlik seriya"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Faqat {days} kundan eski hisoblar uchun ruxsat berilgan",
-        "max_choices": "• Siz {choices} tagacha variant tanlashingiz mumkin"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Qolgan {executions} ta o'tkazma",
-        "schedule_summary": "{executions} ta o‘tkazma, har biri har {hours} soatda"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Points ishlash uchun juda qisqa ({n, plural, one {# ta belgi} other {# ta belgi}} yoki undan kam, havolalar hisobga olinmaydi)"
       },
       "chats": {
-        "people_joined": "{count} kishi qo'shildi"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "taxminan {count, plural, one {# daqiqadan} other {# daqiqadan}} keyin",
+        "ban-remaining-hours": "taxminan {count, plural, one {# soatdan} other {# soatdan}} keyin",
+        "ban-remaining-days": "taxminan {count, plural, one {# kundan} other {# kundan}} keyin"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Ko‘pi bilan {n, plural, one {# ta teg} other {# ta teg}} ishlating",
+          "too_long": "Qidiruv juda uzun. Ko‘pi bilan {n, plural, one {# ta belgi} other {# ta belgi}} ishlating"
+        }
       },
       "ai_assist": {
-        "min_chars": "Kamida {count} ta belgi talab qilinadi",
-        "chars_remaining": "{count} ta belgi qoldi"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Bir vaqtda ko‘pi bilan {count, plural, one {# ta rasm} other {# ta rasm}} tanlashingiz mumkin"
+      },
+      "dictation": {
+        "stop_hint": "Matnga aylantirib, postingizga qo‘shish uchun to‘xtating. {m, plural, one {# daqiqagacha} other {# daqiqagacha}}.",
+        "rate": "{s, plural, one {# soniya} other {# soniya}} uchun {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Keyingi staking bekor qilish {days} kundan keyin, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} va {max, plural, one {# belgi} other {# belgi}} orasida"
       }
     }
   }

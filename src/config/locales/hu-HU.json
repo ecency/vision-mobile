@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro tag"
   },
   "perks": {
     "header": "Előnyök",
@@ -31,42 +31,42 @@
     "promote_desc": "Szerezz több figyelmet a bejegyzésednek",
     "account_boost": "Fiók felturbózása",
     "account_boost_desc": "Bármely fiók felturbózása",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC feltöltése",
+    "rc_topup_desc": "Posztolj tovább, ha fogyóban vannak az Erőforrás-kreditek",
+    "streak_freeze_owned": "{n} tartalékban",
+    "streak_freeze_buy": "Sorozat védelme ({price} Points)",
+    "streak_freeze_buying": "Védelem folyamatban",
+    "streak_freeze_error": "Nem sikerült megvenni a sorozatfagyasztást. Kérjük, próbáld újra."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Napi poszt",
+    "streak": "{n} napos sorozat",
+    "keep_streak": "Tartsd életben a sorozatod"
   },
   "waves": {
     "for_you": "Neked",
     "following": "Követettek",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Egyéni hírfolyamok",
+    "custom_feeds_subtitle": "Tűzz ki forrásokat és címkéket, hogy hírfolyam-fülként hozzáadhasd őket.",
+    "add_tag_placeholder": "Címke hozzáadása",
+    "sources": "Források",
+    "your_feeds": "Hírfolyamaid",
+    "trending_tags": "Népszerű címkék",
+    "shorts_empty": "Még nincs megjeleníthető rövid videó",
+    "mute": "Némítás",
+    "unmute": "Némítás feloldása"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Első lépések",
+    "subtitle": "Új vagy itt? A Waves rövid posztok, és ez a legegyszerűbb módja a bekapcsolódásnak.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Elrejtés",
+    "item_wave": "Tedd közzé az első Wave-edet",
+    "item_vote": "Szavazz egy Wave-re, ami tetszik",
+    "item_reply": "Válaszolj valakinek",
+    "item_checkin": "Jelentkezz be, hogy elindítsd a sorozatod",
+    "all_done_title": "Minden kész 🎉",
+    "all_done_subtitle": "Mindennel megvagy. Hozd tovább a Waves-eket!"
   },
   "profile": {
     "havent_commented": "még nem szólt hozzá semmihez",
@@ -82,7 +82,7 @@
     "comments": "Hozzászólások",
     "waves": "Waves",
     "details": "Profil Adatok",
-    "resource_credits": "Resource Credits",
+    "resource_credits": "Erőforrás-kreditek",
     "voting_power": "Szavazóerő",
     "follow_people": "Amikor követsz másokat, itt fogod látni a bejegyzéseiket.",
     "hours": "órák",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Kor  |  Láthatóság  |  Értelmezés",
     "attach_poll": "Szavazás csatolása"
   },
+  "favorite_tags": {
+    "title": "Címkék",
+    "hint": "Kövesd, hogy értesítést kapj az ezzel a címkével ellátott új bejegyzésekről",
+    "following_hint": "Értesítést kapsz az ezzel a címkével ellátott új bejegyzésekről",
+    "follow": "Követés",
+    "following": "Követed",
+    "added": "Követed a címkét",
+    "removed": "A címke követése megszűnt",
+    "empty_list": "Itt még nincs semmi"
+  },
   "favorites": {
     "add": "Kedvenc hozzáadása",
     "add_error": "A kedvenc hozzáadása nem sikerült",
@@ -181,7 +191,33 @@
     "payout": "Kifizetés",
     "details": "Részletek",
     "community": "közösség",
-    "new_post": "Új bejegyzés"
+    "new_post": "Új bejegyzés",
+    "mute_post_title": "A bejegyzés némítása",
+    "unmute_post_title": "A bejegyzés némításának feloldása",
+    "mute_post_reason": "Miért kerül némításra ez a bejegyzés?",
+    "unmute_post_reason": "Miért kerül visszaállításra ez a bejegyzés?",
+    "manage": "Közösség kezelése",
+    "manage_members": "Tagok és szerepkörök",
+    "manage_settings": "Közösségi beállítások",
+    "manage_activities": "Tevékenységnapló",
+    "activities": "tevékenység",
+    "no_activities": "Még nincs tevékenység",
+    "activities_load_failed": "A tevékenység nem tölthető be. Húzd lefelé a frissítéshez.",
+    "set_role": "Szerepkör beállítása",
+    "assign_role": "Szerepkör kiosztása",
+    "assign_role_hint": "Keress bármilyen fiókot, akkor is, ha még nem iratkozott fel, majd válassz szerepkört.",
+    "username_placeholder": "Felhasználónév",
+    "invalid_username": "Válassz egy létező fiókot az eredmények közül",
+    "members": "tag",
+    "no_members": "Nem található tag",
+    "members_incomplete": "Néhány tag nem tölthető be. Húzd lefelé a frissítéshez.",
+    "members_load_failed": "A tagok nem tölthetők be. Húzd lefelé a frissítéshez.",
+    "role_owner": "Tulajdonos",
+    "role_admin": "Adminisztrátor",
+    "role_mod": "Moderátor",
+    "role_member": "Tag",
+    "role_guest": "Vendég",
+    "role_muted": "Némítva"
   },
   "trade": {
     "swap_for": "{fromAmount} cseréje erre: {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Keresztposztolás",
     "pin-blog": "Rögzítés a blogon",
     "copy": "link másolása",
+    "copy-text": "szöveg másolása",
+    "open-thread": "szál megnyitása",
     "unpin-community": "Rögzítés feloldása a közösségben",
+    "mute-post": "Bejegyzés némítása",
+    "unmute-post": "Bejegyzés némításának feloldása",
     "mute": "Némítás / Letiltás",
     "reblog": "megosztás",
     "undo-reblog": "újraosztás visszavonása",
@@ -232,24 +272,24 @@
     "unpin-reply": "Hozzászólás rögzítésének feloldása"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Ez a poszt a következő nyelven íródott: {lang}. Fordítsuk le erre: {target}?",
+    "translate_to": "Fordítás erre: {lang}",
+    "show_original": "Eredeti megjelenítése",
+    "translated_from": "Lefordítva erről a nyelvről: {lang}",
+    "change_language": "Nyelv módosítása"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Poszt fordítása",
+    "source": "Forrásnyelv",
+    "target": "Célnyelv",
+    "detected": "Felismert nyelv: {lang}",
+    "translate": "Fordítás",
+    "apply": "Alkalmaz",
+    "review_note": "Hozzáfűzi a saját szöveged gépi fordítását a poszt végéhez. Közzététel előtt nézd át és szerkeszd.",
+    "too_short": "Írj még egy kicsit. A fordításhoz legalább néhány mondat kell.",
+    "progress": "Fordítás: {done} / {total}...",
+    "error": "A fordítás nem sikerült. Kérjük, próbáld újra.",
+    "add_title_marker": "Nyelvjelölés hozzáadása a címhez"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Forró",
     "popular": "Népszerű",
     "new": "Új",
-    "friends": "Following",
+    "friends": "Követettek",
     "my_blog": "Saját blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Itt nincs semmi"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Sablonok",
+    "untitled": "Névtelen sablon",
+    "empty_list": "Mentsd el a posztot sablonként a szerkesztőből, hogy itt újra felhasználhasd.",
+    "delete_confirm": "Biztosan törlöd ezt a sablont?",
+    "applied": "Sablon alkalmazva új posztként",
+    "save_as_template": "Mentés sablonként",
+    "name_placeholder": "Sablon neve",
+    "saved": "Sablon mentve"
   },
   "selection_list": {
     "available": "Elérhető {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Összes",
+      "replies": "Válaszok",
+      "mentions": "Említések",
+      "rvotes": "Szavazatok",
+      "follows": "Követések",
+      "reblogs": "Rebloggolások",
+      "transfers": "Átutalások",
+      "delegations": "Delegálások",
+      "nfavorites": "Kedvencek",
+      "tags": "Címkék",
+      "nbookmarks": "Könyvjelzők",
+      "payouts": "Kifizetések",
+      "scheduled_published": "Ütemezett posztok",
+      "account_updates": "Fiókfrissítések",
+      "weekly_earnings": "Heti bevétel"
     },
     "this_week": "Ezen a héten",
     "reblog": "megosztotta",
@@ -417,11 +458,15 @@
     "yesterday": "Tegnap",
     "mention": "megemlített",
     "favorites": "új bejegyzést tett közzé",
+    "tags": "bejegyzést tett közzé itt: #{tag}",
+    "tags_bundle": "{count} új bejegyzés itt: #{tag}",
+    "tags_title": "Új bejegyzések egy általad követett címkében",
     "mentions": "Említések",
     "spin": "Pontszerzés ideje",
     "last_week": "Múlt hét",
     "recent": "Friss",
     "ignore": "mellőzött téged",
+    "blacklist": "feketelistára tett téged",
     "follow": "követ téged",
     "notification": "Értesítések",
     "this_month": "Ebben a hónapban",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "A(z) {accounts} mostantól a nevedben posztolhat és szavazhat. Ha ezt nem te engedélyezted, vond vissza.",
     "weekly_earnings": "Ezen a héten ${amount} bevételed volt{breakdown}",
     "payouts": "Kifizetés érkezett: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "közzétett egy ütemezett posztot",
+    "scheduled_published_title": "Ütemezett poszt közzétéve",
+    "scheduled_published_body": "Az ütemezett posztod élesben van, koppints a megtekintéséhez"
   },
   "recurrent": {
     "delete_failed": "Az ismétlődő utalás törlése sikertelen, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Nyiss meg egy korábbi piszkozatot, vagy hozz létre új bejegyzést",
     "reward_power_up": "100% stake-elés",
     "open_gallery": "Galéria Megnyitása",
+    "open_files": "Választás a Fájlokból",
     "clipboard_no_image": "Nem található kép a vágólapon",
     "clipboard_image_detected": "Kép a vágólapon",
     "paste_image": "Kép beillesztése",
@@ -539,8 +585,10 @@
     "video": "Videó",
     "scheduled_later": "Később",
     "settings_title": "Bejegyzés beállításai",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Nem"
+    "support_ecency": "Ecency támogatása {percent}%",
+    "alert_btn_no": "Nem",
+    "short_reply_hint": "A legfeljebb {n} karakteres válaszok nem kapnak pontot (a hivatkozások nem számítanak)",
+    "short_content_hint": "Túl rövid a pontszerzéshez (legfeljebb {n} karakter, hivatkozások nélkül)"
   },
   "time": {
     "week": "hét",
@@ -655,7 +703,41 @@
     "select_emoji": "Emodzsi kiválasztása",
     "more_emojis": "Több",
     "search_emojis": "Emodzsik keresése...",
-    "no_emoji_found": "Nem található emodzsi"
+    "no_emoji_found": "Nem található emodzsi",
+    "ban-reason-spray": "Fel vagy függesztve a közzétételből, mert ugyanaz az üzenet egyszerre több csatornára ment.",
+    "ban-reason-mass-dm": "Fel vagy függesztve a közzétételből, mert egy üzenetet egyszerre sok embernek küldtek el.",
+    "ban-reason-generic": "Fel vagy függesztve a csevegésben való közzétételből.",
+    "ban-can-still-read": "A csevegést továbbra is olvashatod.",
+    "ban-unlocks": "A közzététel {when} oldódik fel.",
+    "ban-remaining-soon": "kevesebb mint egy perc múlva",
+    "ban-remaining-minutes": "körülbelül {count} perc múlva",
+    "ban-remaining-hours": "körülbelül {count} óra múlva",
+    "ban-remaining-days": "körülbelül {count} nap múlva",
+    "new_group": "Új csoport",
+    "new_group_hint": "Adj hozzá {min}–{max} embert egy csoportos beszélgetés indításához.",
+    "new_group_search": "Emberek keresése felhasználónév alapján",
+    "new_group_full": "Egy csoportban legfeljebb {max} másik ember lehet.",
+    "new_group_no_results": "Nem található ilyen nevű felhasználó a csevegésben.",
+    "new_group_search_failed": "A keresés nem sikerült. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "new_group_remove": "@{username} eltávolítása",
+    "new_group_create": "Csoport indítása",
+    "new_group_failed": "A csoport nem indítható el. Próbáld újra.",
+    "rename_group": "Csoport átnevezése",
+    "rename_group_hint": "Adj a csoportnak egy nevet, amelyet mindenki lát benne. Hagyd üresen, ha a tagok nevét szeretnéd megjeleníteni.",
+    "group_name": "Csoport neve",
+    "rename_group_too_long": "A csoport neve legfeljebb {max} karakter lehet.",
+    "rename_group_not_owner": "Csak a csoport létrehozója nevezheti át.",
+    "rename_group_failed": "A csoport nem nevezhető át. Próbáld újra.",
+    "group_renamed": "{user} átnevezte a csoportot: „{name}”",
+    "group_name_cleared": "{user} törölte a csoport nevét",
+    "group_members": "Csoporttagok",
+    "save": "Mentés",
+    "cancel": "Mégse",
+    "reactions_title": "Reakciók",
+    "reactor_you": "Te",
+    "reactor_unknown": "Valaki",
+    "see_who_reacted": "Nyomd hosszan, hogy lásd, ki reagált",
+    "group": "Csoport"
   },
   "free_estm": {
     "timer_text": "Következő ingyenes pörgetésig még van",
@@ -684,6 +766,32 @@
     "transaction_fail": "Sikertelen tranzakció"
   },
   "search_result": {
+    "error": "A keresést nem sikerült befejezni. Próbáld újra",
+    "filters": {
+      "title": "Szűrők",
+      "open": "Szűrők",
+      "author": "Szerző",
+      "author_placeholder": "felhasználónév",
+      "category": "Kategória",
+      "category_placeholder": "közösség vagy kategória",
+      "tags": "Címkék",
+      "tags_placeholder": "vesszővel elválasztva",
+      "type": "Típus",
+      "type_all": "Összes",
+      "type_post": "Bejegyzések",
+      "type_comment": "Hozzászólások",
+      "date": "Dátum",
+      "date_week": "Elmúlt hét",
+      "date_month": "Elmúlt hónap",
+      "date_year": "Elmúlt év",
+      "date_all": "Bármikor",
+      "sort": "Rendezés",
+      "apply": "Alkalmaz",
+      "active": "{n} aktív",
+      "too_many_tags": "Legfeljebb {n} címkét használj",
+      "too_long": "A keresés túl hosszú. Legfeljebb {n} karaktert használj",
+      "needs_criteria": "Adj meg keresőszót, vagy szerzőt, kategóriát, címkét a szűréshez"
+    },
     "communities_filter": {
       "new": "Új",
       "my": "Közösségeim",
@@ -727,7 +835,7 @@
     "title": "Keresztposzt"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "A szerző jelezte a mesterséges intelligencia használatát"
   },
   "ai_assist": {
     "title": "AI írássegéd",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Kapj releváns címkéket a bejegyzésedhez",
     "action_generate_title": "Cím generálása",
     "action_generate_title_desc": "Készíts vonzó címlehetőségeket",
-    "action_summarize": "Recap",
+    "action_summarize": "Összefoglaló",
     "action_summarize_desc": "Készíts tömör összefoglalót",
     "action_check_grammar": "Nyelvtan ellenőrzése",
     "action_check_grammar_desc": "Nyelvtani és helyesírási hibák javítása",
+    "action_generate_image": "Kép létrehozása",
+    "action_generate_image_desc": "AI-kép készítése a bejegyzésedhez",
+    "cost_from": "{cost} {unit}-tól",
     "text_label": "A szöveged",
     "text_placeholder": "Illeszd be vagy gépeld be ide a tartalmadat...",
     "min_chars": "Legalább {count} karakter szükséges",
@@ -797,16 +908,26 @@
     "remind_later": "Emlékeztess később",
     "success_subscribe": "Sikeres feliratkozás!",
     "payloadTooLarge": "A fájlméret túl nagy, kérlek méretezd át, vagy tölts fel kisebb képet",
+    "too_many_images": "Egyszerre legfeljebb {count} képet választhatsz ki",
     "fail_follow": "A követés nem sikerült!",
     "clear_user_alert": "Biztos, hogy törölsz minden adatot?",
     "cancel": "Elvet",
     "connection_success": "A kapcsolat sikerült!",
     "rc_down": "Nincs elegendő erőforrás-jóváírásod ezen művelet végrehajtásához!\n\nPörgesd fel a fiókod, hogy továbbra is élvezhessd az élményt. Most szeretnéd belpörgetni a fiókodat?",
+    "rc_down_title": "Nincs elég Resource Credits",
+    "rc_precheck_title": "Ez a bejegyzés túl nagy lehet a közzétételhez",
+    "rc_precheck_body": "A Resource Credits értéked túl alacsonynak tűnik ekkora bejegyzéshez.",
+    "rc_down_body": "Nincs elég Resource Credits ehhez a művelethez.\n\nTöltsd fel most Pontokkal a folytatáshoz, vagy erősítsd meg végleg a fiókodat.",
+    "rc_down_topup": "RC feltöltése Pontokkal",
+    "rc_down_boost": "Fiók megerősítése",
     "done": "Kész",
     "something_wrong_alt": "Addig is próbáld ki az Ecency.com-ot a böngésződből",
     "same_user": "Ez a felhasználó már szerepel a listán",
     "fail": "Sikertelen!",
     "operation_failed_with_reason": "{operation} sikertelen: {reason}",
+    "request_timed_out": "A kapcsolat túl sokáig tart. Ellenőrizd a hálózatot, és próbáld újra.",
+    "load_failed_retry": "Ezt nem sikerült betölteni. Próbáld újra.",
+    "retrying": "Újrapróbálkozás...",
     "wallet_refresh_failed": "A tárca frissítése nem sikerült. Kérjük, próbáld újra.",
     "wallet_refresh_missing_account": "A tárca frissítése nem sikerült: hiányzó fiók.",
     "boost_failed": "A Boost+ nem sikerült.",
@@ -949,31 +1070,31 @@
     "video_attached": "Videó csatolva"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Támogató szavazat",
+    "upvoted": "Támogató szavazat leadva",
+    "downvoted": "Elutasító szavazat leadva",
+    "upvote_hint": "Koppints duplán a szavazási lehetőségek megnyitásához",
+    "payout_details": "Kifizetés részletei",
+    "a11y_votes": "{count, plural, one {# szavazat} other {# szavazat}}",
+    "a11y_voters_hint": "Szavazók megtekintése",
+    "a11y_reblogs": "{count, plural, one {# rebloggolás} other {# rebloggolás}}",
+    "a11y_reblogs_hint": "Rebloggolások megtekintése",
+    "a11y_comments": "{count, plural, one {# hozzászólás} other {# hozzászólás}}",
+    "a11y_comments_hint": "Hozzászólások megtekintése",
+    "a11y_reply_hint": "Válasz",
+    "a11y_tip": "Borravaló küldése",
+    "a11y_tips": "{count, plural, one {# borravaló} other {# borravaló}}",
+    "a11y_edit": "Hozzászólás szerkesztése",
+    "a11y_delete": "Hozzászólás törlése",
+    "a11y_show_replies": "Válaszok megjelenítése",
+    "a11y_hide_replies": "Válaszok elrejtése",
+    "a11y_post_options": "Poszt beállításai",
+    "a11y_views": "{count, plural, one {# megtekintés} other {# megtekintés}}",
+    "source_ecency": "Közzétéve az Ecency-vel",
+    "a11y_stats_hint": "Poszt statisztikáinak megtekintése",
     "image": "Kép",
     "reveal_muted": "NÉMÍTVA\nKoppints a tartalom megjelenítéséhez",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Koppints a kép betöltéséhez",
     "in": "itt:",
     "poll": "SZAVAZÁS",
     "copy_link": "Link másolása",
@@ -998,13 +1119,14 @@
     "save_to_local": "Letöltés a készülékre",
     "muted": "A tartalom szabályszegés miatt némítva",
     "community_muted": "A tartalom a közösségi irányelvek megsértése miatt némítva",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Alacsony hírnevű fiók tartalma",
+    "muted_downvoted": "A felhasználók által lealacsonyított tartalom",
+    "muted_low_trust": "Alacsony hírnevű fiók ellenőrizetlen kimenő hivatkozással",
+    "muted_reveal": "Koppints a megjelenítéshez",
     "promoted": "NÉPSZERŰSÍTETT",
     "image_saved": "Kép a galériába mentve",
     "words": "Szó",
     "reading": "Olvasás",
-    "listen": "Meghallgatás",
     "min": "perc",
     "summarize_start": "Indítás"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Nem létező bejegyzés",
     "invalid_link": "Az URL érvénytelen, próbáld újra érvényes URL-lel, vagy próbáld megnyitni webböngészőben",
-    "no_existing_user": "Nem létező felhasználó"
+    "no_existing_user": "Nem létező felhasználó",
+    "posting_key_request": "{requester} kéri a(z) @{username} privát posting kulcsát.\n\nCsak akkor folytasd, ha megbízol ebben a kérésben.",
+    "posting_key_request_unnamed": "Egy másik alkalmazás kéri a(z) @{username} privát posting kulcsát.\n\nCsak akkor folytasd, ha megbízol ebben a kérésben.",
+    "auth_request_as_user": "{requester} be szeretne léptetni téged mint @{username}.\n\nCsak a felhasználónevedet és egy bejelentkezési igazolást osztunk meg. Kulcs nem hagyja el az Ecency-t.",
+    "auth_request_as_current": "{requester} be szeretne léptetni az Ecency-fiókoddal.\n\nCsak a felhasználónevedet és egy bejelentkezési igazolást osztunk meg. Kulcs nem hagyja el az Ecency-t."
   },
   "payout": {
     "breakdown": "Lebontás",
@@ -1065,7 +1191,7 @@
     "open": "URL megnyitása",
     "invalid_key_desc": "kérjük, jelentkezz be a(z) {key} kulccsal vagy a fő kulccsal a tranzakció végrehajtásához",
     "auth_transfer_confirm": "Megerősíted az átutalást ide: {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Csak akkor hagyd jóvá, ha megbízol a link forrásában. A jóváhagyással az alábbi művelet a fiókodból kerül elküldésre a(z) {authority} kulcsoddal."
   },
   "voters_dropdown": {
     "rewards": "JUTALMAK",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Csak betűket, számokat és kötőjelet tartalmazhat",
       "username_no_ascii_first_letter_error": "Betűvel kell kezdődnie",
       "username_contains_double_hyphens": "Nem tartalmazhat dupla kötőjelet",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Ez a felhasználónév túl hasonlít egy kriptotőzsde fiókjához, és összezavarhat másokat. Kérjük, válassz egyedibb nevet.",
+      "username_restricted_prefix": "Az „uid” előtaggal kezdődő, számokat követő felhasználónevek nem engedélyezettek, mert gyakran használják őket mások megszemélyesítésére. Kérjük, válassz másik nevet.",
       "username_contains_underscore": "Nem tartalmazhat aláhúzásjelet"
     },
     "500_error": "Kérésedet nem sikerült feldolgozni, a regisztrációs sor valószínűleg megtelt! Próbálkozzon újra néhány perc múlva...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "A felhasználónév már foglalt",
+      "14": "Ez az e-mail-cím már regisztrálva van",
+      "15": "Kérjük, adj meg érvényes e-mail-címet",
+      "16": "Kérjük, adj meg érvényes felhasználónevet",
+      "17": "A felhasználónév túl hosszú, válassz rövidebbet",
+      "19": "Használj állandó e-mail-címet, vagy válassz inkább Premium fiókot",
+      "21": "Ez az ajánlás érvénytelen",
+      "28": "A kérésed nem dolgozható fel, valószínűleg tele van a regisztrációs sor. Kérjük, próbáld újra néhány perc múlva.",
+      "107": "VPN-kapcsolatot észleltünk. Kapcsold ki a VPN-t, és próbáld újra, vagy válassz inkább Premium fiókot.",
+      "110": "A visszaélések megelőzése érdekében korlátozzuk a személyenkénti/hálózatonkénti fiókok számát. Kérjük, próbáld újra másik hálózatról.",
+      "111": "Tor-kapcsolatot észleltünk. Kérjük, a regisztráció idejére kapcsold ki a Tort.",
+      "112": "Most nem tudtuk ellenőrizni a kapcsolatodat. Kérjük, próbáld újra néhány perc múlva."
     },
     "have_account_text": "Már van fiókod?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Szerezz teljes értékű Hive fiókot; ez a módszer alapvető ellenőrzéseket végez, hogy a botnetek ne élhessenek vissza a regisztrációs csapunkkal.",
     "btn_register": "Ingyenes regisztráció",
     "title": "Ingyenes fiók"
+  },
+  "dictation": {
+    "title": "Diktálás",
+    "start": "Felvétel",
+    "stop": "Leállítás",
+    "record_more": "További felvétel",
+    "done": "Kész",
+    "recording": "Felvétel folyamatban",
+    "stop_hint": "Állítsd le az átíráshoz és a bejegyzéshez adáshoz. Legfeljebb {m} perc.",
+    "inserted": "Hozzáadva a bejegyzéshez. Rögzíts még, vagy koppints a Kész gombra.",
+    "transcribing": "Átírás folyamatban",
+    "rate": "{n} Pont {s} másodpercenként",
+    "cost_running": "Eddig {n} Pont",
+    "cost_running_free": "Eddig ingyenes",
+    "free_remaining": "A következő {n} x {s} mp ma ingyenes",
+    "price_loading": "Ár ellenőrzése",
+    "price_error": "Az átírás árai nem tölthetők be.",
+    "denied": "Az Ecency-nek mikrofon-hozzáférésre van szüksége a diktáláshoz. Engedélyezd a Beállításokban, és próbáld újra.",
+    "error_empty": "Ebben a felvételben nem észleltünk beszédet.",
+    "error_insufficient_points": "Nincs elég Pont a felvétel átírásához.",
+    "error_rate_limited": "Most túl sok a felvétel. Próbáld újra egy kis idő múlva.",
+    "error_too_long": "Ez a felvétel túl hosszú az átíráshoz.",
+    "error_failed": "A felvételt nem sikerült átírni. Próbáld újra.",
+    "error_recorder": "A felvételt nem sikerült elindítani. Próbáld újra."
   },
   "wallet": {
     "delegations_out": "Kimenő delegálások",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Rendszeres bejelentkezés 0,25 pontot ér.",
     "fill_transfer_from_savings": "A megtakarításoktól végrehajtva",
     "activities": "Tevékenységek",
+    "no_activities": "Még nincs tranzakció",
+    "activities_failed": "A tranzakciók nem tölthetők be. Húzd lefelé az újrapróbálkozáshoz.",
     "tap_update": "Koppintson a frissítéshez",
     "mining_lottery": "Lottónyeremény",
     "checkin": "Bejelentkezés",
     "tokens_transfer": "Tokenek átutalva",
     "outgoing_transfer_title": "Átutalás/ajándékozás",
+    "burned_title": "AI-használat",
+    "burned_description": "AI-funkcióra elköltött Pontok",
+    "burn_refund_title": "AI-visszatérítés",
+    "burn_refund_description": "Sikertelen AI-kérés után visszaadott Pontok",
     "manage_assets": "Eszközök hozzáadása / eltávolítása",
     "selected_assets": "Kiválasztott eszközök",
     "nft_setPropertyPermissions": "Tulajdonságjogosultságok beállítva az NFT szimbólumhoz",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Token pontosság frissítve",
     "tokens_transferOwnership": "Token tulajdonjog átruházva",
     "withdraw_vesting": "Letét feloldása",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Kifizetési fiókok",
     "delegate_engine": "Delegálás",
     "market_close": "Megbízás lezárva",
     "nftmarket_transferFee": "Vételi megbízás díja",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "SZEREZZ PONTOKAT",
     "escrow_approve": "Letéti jóváhagyás",
     "expires": "lejár",
+    "transaction_id": "Tranzakcióazonosító",
+    "copy_transaction_id": "Tranzakció hivatkozásának másolása",
+    "filter_activities": "Tevékenységek szűrése",
+    "filter_activities_desc": "Válaszd ki, mely műveleteket kéri ez az előzmény",
+    "filter_all": "Összes kijelölése",
+    "filter_none": "Összes törlése",
+    "filter_apply": "Alkalmaz",
     "author_reward": "Szerzői Jutalom",
     "withdraw_hbd": "Megtakarítás kivétele",
     "convert_request": "Átváltási kérés",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC feltöltése",
+    "desc": "Rövid távú RC-növelés, hogy tovább posztolhass.",
+    "confirm": "Points-ot költesz az Erőforrás-kreditek feltöltésére?",
+    "insufficient": "Nincs elég Points-od.",
+    "buy_points": "Points vásárlása"
   },
   "ai_image_generator": {
     "title": "AI-képgenerátor",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Egyéni ({hours} óra)",
+    "balance_load_failed": "Az egyenleged nem tölthető be. Koppints az újrapróbálkozáshoz.",
+    "precision_load_failed": "Ennek a tokennek az adatai nem tölthetők be, ezért csak egész összegeket lehet küldeni. Koppints az újrapróbálkozáshoz.",
     "close": "Bezárás",
     "favorite_username_placeholder": "Felhasználónév",
     "invalid_recipient_qr": "Nem található felhasználónév ebben a QR-kódban.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Jogosultságok kezelése",
     "pincode": "PIN kód",
     "general": "Általános",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecency támogatása",
+    "support_beneficiary": "Poszt-jutalmak megosztása az Ecency-vel",
+    "support_beneficiary_percent": "Poszt-jutalmak megosztott része",
+    "support_curation": "A kurátori jutalom egy részének visszatartása",
+    "support_curation_percent": "Kurátori jutalom visszatartása",
     "feedback_body": "Írja ide az üzenetét!\n\nHive felhasználónév: {username}\nAlkalmazás verziója: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Képek megjelenítése",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Hozzászólás",
       "bookmark": "Könyvjelzők",
+      "tags": "Címkék",
       "reblog": "Megosztás",
       "favorite": "Kedvencek",
       "mention": "Említés",
@@ -1599,10 +1765,10 @@
       "transfers": "Átutalások",
       "vote": "Szavazás",
       "follow": "Követés",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Ütemezett poszt közzétéve",
+      "payouts": "Kifizetések",
+      "account_update": "Fiókfrissítések",
+      "weekly_earnings": "Heti bevétel",
       "fcm_unavailable": "A push értesítések nem támogatottak ezen az eszközön. Csak akkor kap értesítéseket, amikor az alkalmazás meg van nyitva."
     },
     "keys_warning": "Érzékeny fiókadatok!\nA privát kulcsok megtekintése előtt az Ecency-t PIN-kóddal kell védeni.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Visszajelzés küldése",
     "rate_app": "Ecency értékelése",
+    "email_digests": "E-mailes összefoglalók",
     "rate": "Értékelés",
     "dm-privacy-updated": "A közvetlen üzenetek adatvédelmi beállításai sikeresen frissültek",
     "dm-privacy-failed": "Nem sikerült frissíteni a közvetlen üzenetek adatvédelmi beállításait",
@@ -1685,19 +1852,29 @@
     "request_sent": "A törlési kérelmedet elküldtük",
     "confirm_delete_body": "Biztosan törölni szeretnéd a fiókot? Ezzel az összes adatod törlődik"
   },
-  "tts": {
-    "settings_title": "Szövegfelolvasás beállításai",
-    "voice": "Hang",
-    "voice_hint": "A rendszer alapértelmezett hangja lesz használva",
-    "speed": "Sebesség",
-    "pitch": "Hangmagasság",
-    "test_voice": "Hang tesztelése",
-    "settings_info": "Ezek a beállítások lesznek használva a bejegyzések hangos felolvasásakor",
+  "listen": {
+    "title": "Hallgasd meg ezt a bejegyzést",
+    "minutes": "~{n} perc",
+    "login": "Bejelentkezés",
+    "unlock": "Feloldás · {n} Pont",
+    "confirm": "Elköltesz {n} Pontot a bejegyzés meghallgatására? A hanganyag a tiéd, bármikor újra lejátszhatod.",
+    "not_enough_title": "Nincs elég Pont",
+    "not_enough": "A hallgatáshoz {required} Pont kell, neked {available} van.",
+    "get_points": "Pontok szerzése",
+    "unlock_failed": "A hanganyagot nem sikerült feloldani, próbáld újra",
+    "failed_refunded": "A hanganyag nem készíthető el, a Pontjaidat visszatérítettük",
+    "preparing": "Hanganyag előkészítése…",
+    "preparing_eta": "Hanganyag előkészítése, kb. {n} perc…",
+    "preparing_progress": "Hanganyag előkészítése · {n}%",
+    "waiting": "Sorban állsz, előtted: {n}…",
+    "next_in_line": "Te vagy a következő…",
     "play": "Lejátszás",
     "pause": "Szünet",
-    "language": "Nyelv",
-    "language_auto": "Automatikus felismerés",
-    "language_hint": "Az automatikus felismerés a bejegyzés tartalma alapján választja ki a nyelvet"
+    "seek": "Keresés",
+    "speed": "Lejátszási sebesség",
+    "language": "Hanganyag nyelve",
+    "unavailable": "A hanganyagot nem sikerült betölteni.",
+    "retry": "Próbáld újra"
   },
   "posting_authority": {
     "title": "Gyorsabb közzététel engedélyezése",
@@ -1732,7 +1909,7 @@
     "error-auth": "A hitelesítés sikertelen. Kérjük, jelentkezz be újra.",
     "error-generic": "A videófeltöltés sikertelen. Kérjük, próbáld újra.",
     "error-too-long-short": "A rövid videók legfeljebb 60 másodpercesek lehetnek.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Egy poszt csak egy videót tartalmazhat. Egy újabb hozzáadása előtt távolítsd el a jelenlegit.",
     "select_source": "Videó hozzáadása",
     "record": "Videó rögzítése",
     "choose_library": "Választás a könyvtárból"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Ossz meg egy gyors frissítést"
   },
+  "newsletter": {
+    "screen_title": "E-mailes összefoglalók",
+    "title": "{list}",
+    "body_own": "Heti vagy havi e-mailes összefoglaló az értesítéseidről.",
+    "body_creator": "Új bejegyzések tőle: {list}, a postaládádba.",
+    "body_community": "E-mailes összefoglaló az új bejegyzésekről itt: {list}.",
+    "body_site": "Az Ecency legjobbjai a postaládádban.",
+    "first_publish_title": "Gratulálunk az első bejegyzésedhez!",
+    "first_publish_body": "Szeretnél e-mailes összefoglalót az értesítéseidről? Hetente vagy havonta, a Beállításokban bármikor módosíthatod vagy leiratkozhatsz.",
+    "list_own": "Az értesítéseim összefoglalója",
+    "list_site": "Ecency hírlevél",
+    "status_active": "Fel vagy iratkozva.",
+    "status_pending": "E-mail-megerősítésre várunk.",
+    "status_short_active": "aktív",
+    "status_short_pending_confirmation": "függőben",
+    "status_short_suppressed": "leállítva",
+    "status_short_ended": "befejezve",
+    "cadence_weekly": "Hetente",
+    "cadence_monthly": "Havonta",
+    "email_placeholder": "te@example.com",
+    "subscribe": "Feliratkozás",
+    "update": "Frissítés",
+    "resend": "Megerősítés újraküldése",
+    "leave": "Összefoglaló elhagyása",
+    "cancel": "Mégse",
+    "ok": "OK",
+    "manage": "Kezelés",
+    "check_inbox_title": "Nézd meg a postaládádat",
+    "check_inbox_body": "Megerősítő hivatkozást küldtünk erre a címre: {email}. A feliratkozás a megerősítés után indul.",
+    "subscribed": "Feliratkoztál az e-mailes összefoglalóra",
+    "left": "Kiléptél az összefoglalóból",
+    "refused": "Erre a címre nem lehet feliratkozni.",
+    "unavailable": "Az e-mailes összefoglalók jelenleg nem érhetők el.",
+    "too_many": "Túl sok próbálkozás, próbáld újra később.",
+    "fail": "Hiba történt, próbáld újra.",
+    "empty": "Még nincs e-mailes összefoglaló. Iratkozz fel lent a kezdéshez.",
+    "discover": "Több e-mailben",
+    "stop_all": "Összes leállítása",
+    "stop_all_title": "Leállítod az összes e-mailt?",
+    "stop_all_body": "Erre a címre többé nem küldünk Ecency-leveleket: {email}. A más címeken lévő feliratkozások megmaradnak.",
+    "stop_all_ok": "Összes leállítása",
+    "stop_all_done": "A cím leiratkozott minden levélről",
+    "profile_option": "E-MAILES ÖSSZEFOGLALÓ",
+    "subscriber_count": "{weekly} heti • {monthly} havi e-mail-feliratkozó",
+    "community_button": "Hírlevél"
+  },
+  "mod_notes": {
+    "title": "Indoklás hozzáadása",
+    "placeholder": "Indoklás (a többi moderátor látja)",
+    "confirm": "Megerősítés",
+    "cancel": "Mégse"
+  },
+  "community_settings": {
+    "title_header": "Közösségi beállítások",
+    "title_label": "Cím",
+    "about": "Rólunk",
+    "lang": "Nyelv",
+    "description": "Leírás",
+    "rules": "Szabályok",
+    "nsfw": "Munkahelyen nem biztonságos (NSFW)",
+    "save": "Mentés",
+    "required": "Kötelező",
+    "title_length": "{min} és {max} karakter között",
+    "owner_admin_only": "Ezeket a beállításokat csak a tulajdonos és az adminisztrátorok módosíthatják."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Kibontva",
+        "collapsed": "Összecsukva"
+      },
+      "a11y_chat": {
+        "quote": "{author} üzenetére válaszolsz: {text}"
+      },
+      "a11y_forms": {
+        "select": "Kijelölés",
+        "deselect": "Kijelölés törlése"
+      },
+      "store": {
+        "billing_unavailable": "Az alkalmazáson belüli vásárlások nem engedélyezettek ezen az eszközön.",
+        "verification_failed": "Az App Store nem tudta ellenőrizni ezt a vásárlást.",
+        "cancelled": "Vásárlás megszakítva",
+        "unknown_result": "Ismeretlen vásárlási eredmény"
+      },
+      "navigation": {
+        "feed_unavailable": "Ez a hírfolyam még nem érhető el.",
+        "link_cannot_open": "Ez a hivatkozás nem nyitható meg.",
+        "video_cannot_play": "Ez a videó nem játszható le."
+      },
+      "media": {
+        "load_failed": "Ezt az elemet nem sikerült betölteni. Ellenőrizd a kapcsolatot, és próbáld újra.",
+        "loading": "Média betöltése",
+        "download_failed": "A letöltés sikertelen, állapot: {status}"
+      },
+      "sign_in": {
+        "required": "Bejelentkezés szükséges",
+        "to_reply": "Jelentkezz be a válaszhoz.",
+        "to_vote": "Jelentkezz be a szavazáshoz.",
+        "button": "Bejelentkezés"
+      },
+      "account": {
+        "logout_user": "@{username} kijelentkeztetése"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# szavazat} other {# szavazat}}  •  {replies, plural, one {# válasz} other {# válasz}}",
+        "voting_power": "Szavazóerő: {percent}",
+        "remove_favourite": "Eltávolítás a kedvencek közül",
+        "add_favourite": "Hozzáadás a kedvencekhez"
+      },
+      "waves": {
+        "clear_tag_filter": "A(z) {tag} címkeszűrő törlése",
+        "new_wave": "Új Wave",
+        "replies_open_thread": "{count, plural, one {# válasz, szál megnyitása} other {# válasz, szál megnyitása}}",
+        "characters": "{count} / {max} karakter",
+        "retry": "{message}\nPróbáld újra",
+        "playing": "Lejátszás: {permlink}",
+        "video_attached_remove": "Videó csatolva, eltávolítás",
+        "image_attached_remove": "Csatolt kép, eltávolítás",
+        "take_photo": "Fotó készítése",
+        "edit_poll": "Szavazás szerkesztése",
+        "add_poll": "Szavazás hozzáadása",
+        "add_video": "Videó hozzáadása"
+      },
+      "reading": {
+        "reply_to": "Válasz neki: {username}",
+        "opens_post": "Megnyitja a bejegyzést",
+        "sort_comments": "Hozzászólások rendezése",
+        "sort_comments_value": "Hozzászólások rendezése, {sort}",
+        "no_comments": "Még nincs hozzászólás.",
+        "loading_post": "Bejegyzés betöltése",
+        "show_version": "Verzió megjelenítése",
+        "show_changes": "Változtatások megjelenítése",
+        "replying_to": "Válasz neki: @{username}",
+        "reply_text": "Válasz szövege",
+        "translate_from": "Forrás",
+        "translate_to": "Cél"
+      },
+      "feed": {
+        "tab_pinned": "{label}, kitűzve",
+        "tab_add": "{label}, hozzáadás",
+        "customise": "Testreszabás"
+      },
+      "card": {
+        "in_category": "itt: {category}",
+        "pinned": "Kitűzve",
+        "by_author": "szerző: {username}",
+        "payout": "kifizetés: {payout}",
+        "payout_declined": "kifizetés: {payout}, elutasítva",
+        "reblogged_by": "Megosztotta: {username}"
+      },
+      "shell": {
+        "close_menu": "Menü bezárása"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Bélyegkép, válassz másik képet",
+        "words": "{count, plural, one {# szó} other {# szó}}",
+        "poll_min_age": "Fiók min. kora (nap): {days}",
+        "poll_max_options": "Max. lehetőségek: {count}",
+        "thumbnail_selected": "Kiválasztott bélyegkép",
+        "thumbnail": "Bélyegkép",
+        "uploaded_image": "Feltöltött kép",
+        "community_search": "keresés"
+      },
+      "vote": {
+        "not_voted": "Nincs szavazat",
+        "voting": "Szavazás folyamatban",
+        "failed_with": "A szavazás sikertelen: {message}",
+        "failed": "A szavazás sikertelen",
+        "payout": "Kifizetés: {payout}",
+        "payout_declined": "Kifizetés: {payout}, elutasítva",
+        "percent": "{percent} százalék",
+        "upvote_percent": "Támogató szavazat {percent}%"
+      },
+      "settings": {
+        "on": "Be",
+        "off": "Ki"
+      },
+      "lock": {
+        "biometric_reason": "Biometrikus feloldás bekapcsolása az Ecency-hez",
+        "offer_title": "Feloldás ezzel: {method}",
+        "offer_use": "Használat: {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "A kulcsok rejtve maradnak, amíg a képernyőt rögzítik vagy tükrözik.",
+        "screenshot_notice": "Képernyőkép készült. A privát kulcsok újra el lettek rejtve; ha a képernyőkép tartalmaz kulcsot, töröld.",
+        "hold_hint": "Tartsd nyomva a kulcsot a megjelenítéséhez.",
+        "hold_to_show": "Tartsd nyomva a megjelenítéshez"
+      },
+      "wallet": {
+        "cancel_order": "Megszakítod ezt a megbízást?",
+        "days": "{count, plural, one {# nap} other {# nap}}"
+      },
+      "chat": {
+        "reactors_hint": "Nyomd hosszan, hogy lásd, ki reagált",
+        "see_reactors": "Reagálók megtekintése"
+      },
+      "esie": {
+        "still": "{mood}, mozdulatlan"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} profilja",
+      "preview": "Előnézet ({index}/{count})",
+      "balance": "Egyenleg: {amount}",
+      "expires_in": "Lejár: {time} múlva",
+      "expired": "Lejárt. Zárd be, és próbáld újra.",
+      "user_has_no_posts": "@{username} még nem tett közzé semmit",
+      "attach_image": "Kép csatolása",
+      "auto": "Automatikus",
+      "back": "Vissza",
+      "hot": "HOT",
+      "image_of": "{index}. kép / {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW Koppints a megjelenítéshez",
+      "new_reply": "Új válasz",
+      "remove": "Eltávolítás",
+      "unlock_ecency": "Ecency feloldása",
+      "update_it": "Frissítés",
+      "update_it_or_post_this_as": "Frissíted, vagy új válaszként teszed közzé?",
+      "use_pin": "PIN használata",
+      "your_reply_was_already_posted": "A válaszod már közzé lett téve",
+      "error_try_again": "{message} Próbálod újra?",
+      "auth": {
+        "account_label": "Fiók: @{username}",
+        "approve_the_request_in_your_wallet": "Hagyd jóvá a kérést a pénztárca alkalmazásban.",
+        "copy_key": "{title} másolása",
+        "current_account": "Jelenlegi fiók",
+        "qr_code": "QR-kód",
+        "requested_by": "Kérte: {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# számjegy} other {# számjegy}}",
+        "private_key_shown": "{title}, privát kulcs megjelenítve",
+        "open_wallet_app": "Pénztárca alkalmazás megnyitása",
+        "hiveauth_scan": "Hagyd jóvá a Hive Keychainben vagy egy másik HiveAuth pénztárcában: nyisd meg ezen az eszközön, vagy olvasd be vele ezt a kódot.",
+        "switching": "Váltás...",
+        "logout_all": "Kijelentkezés az összes fiókból",
+        "logout_all_title": "Kijelentkezel az eszköz összes fiókjából?",
+        "stored_key": "@{username} már be van jelentkezve ezen az eszközön. A tárolt kulcsok megmaradnak; csak a munkamenet újul meg.",
+        "stored_hivesigner": "@{username} már be van jelentkezve HiveSignerrel ezen az eszközön. A munkamenet le lesz cserélve.",
+        "stored_hiveauth": "@{username} HiveAuthtal van bejelentkezve ezen az eszközön. Ehelyett HiveSignerrel fog aláírni.",
+        "method_key": "Kulcs",
+        "logout_failed": "A kijelentkezés sikertelen"
+      },
+      "browser": {
+        "account": "Fiók",
+        "authority": "Jogosultság",
+        "phishing": "Figyelem: ez a tartomány ismert adathalász oldalként van megjelölve. Fokozott óvatossággal járj el."
+      },
+      "chat": {
+        "cancel_edit": "Szerkesztés megszakítása",
+        "cancel_reply": "Válasz megszakítása",
+        "copied_to_clipboard": "Vágólapra másolva",
+        "edited_at": "Szerkesztve: {time}",
+        "group_options": "Csoportbeállítások",
+        "pinned_messages": "Kitűzött üzenetek",
+        "remove_user": "@{username} eltávolítása",
+        "sort_by_name": "Rendezés név szerint",
+        "more": "Továbbiak",
+        "reaction_label": "{emoji} {count}. Nyomd hosszan, hogy lásd, ki reagált",
+        "members": "Tagok"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Ezen a hivatkozáson már van bejegyzés, és eltér attól, amit küldtél. Frissíted, vagy újként teszed közzé?",
+        "a_scheduled_post_is_published_by": "Az ütemezett bejegyzést az Ecency teszi közzé a megadott időpontban. Ehhez a fiókodon az ecency.app posting jogosultsága kell. A kulcsaid és a többi jogosultság változatlan marad. Megadásához az active kulcsod szükséges.",
+        "ai_assist": "AI-asszisztens",
+        "ai_tools": "AI-eszközök",
+        "allow_ecency_to_publish_for_you": "Engedélyezed, hogy az Ecency közzétegyen helyetted?",
+        "bold": "Félkövér",
+        "clone": "Másolat készítése",
+        "cost": "Költség: {cost}",
+        "could_not_store_the_draft_on": "A piszkozatot nem sikerült az eszközön tárolni. Tartsd nyitva az alkalmazást, és mentsd a piszkozatot.",
+        "draft": "PISZKOZAT",
+        "delete_count": "Törlés ({count})",
+        "dictate_desc": "Beszélj, és az átirat bekerül a bejegyzésedbe",
+        "discard": "Elvetés",
+        "discard_changes": "Elveted a módosításokat?",
+        "grant": "Megadás",
+        "italic": "Dőlt",
+        "keep_editing": "Szerkesztés folytatása",
+        "my_blog": "SAJÁT BLOGOM",
+        "my_communities": "KÖZÖSSÉGEIM",
+        "new_post": "Új bejegyzés",
+        "notice": "Megjegyzés",
+        "restore": "Visszaállítás",
+        "restore_unsaved_changes": "Visszaállítod a nem mentett módosításokat?",
+        "saved": "Mentve",
+        "top_communities": "TOP KÖZÖSSÉGEK",
+        "table": "Táblázat",
+        "text_format": "Szövegformátum",
+        "this_link_is_already_in_use": "Ez a hivatkozás már használatban van",
+        "untitled": "Cím nélkül",
+        "update_it_or_publish_this_as": "Frissíted, vagy új bejegyzésként teszed közzé?",
+        "you_have_unsaved_changes_from_an": "Van nem mentett módosításod egy korábbi szerkesztésből. A bejegyzés azóta megváltozott; a visszaállítás lecseréli az alábbi szöveget.",
+        "your_edits_were_not_published": "A szerkesztéseid nem lettek közzétéve.",
+        "your_post_was_already_published": "A bejegyzésed már közzé lett téve",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Bélyegkép, koppints egy másik kép kiválasztásához",
+        "thumbnail_number": "{number}. bélyegkép",
+        "recording_busy": "Már folyamatban van egy felvétel. Előbb fejezd be a kamerában.",
+        "photo_lost": "A fotó elveszett, amíg a kamera nyitva volt. Készítsd el újra.",
+        "add_snippet_button": "+ Szövegrészlet",
+        "words_count": "{count, plural, one {# szó} other {# szó}}",
+        "community_search": "keresés"
+      },
+      "profile": {
+        "open_wallet": "Pénztárca megnyitása",
+        "your_wallet_is_on_the_wallet": "A pénztárcád a Pénztárca lapon van.",
+        "user_has_no_comments": "@{username} még nem szólt hozzá semmihez",
+        "votes_count": "{count, plural, one {# szavazat} other {# szavazat}}",
+        "replies_count": "{count, plural, one {# válasz} other {# válasz}}",
+        "menu": "Továbbiak",
+        "users": "Felhasználók"
+      },
+      "reading": {
+        "apply": "ALKALMAZ",
+        "add_tag": "Címke hozzáadása",
+        "age": "Kor",
+        "audio_language": "Hanganyag nyelve",
+        "available_filters": "Elérhető szűrők",
+        "could_not_unlock_the_audio_please": "A hanganyagot nem sikerült feloldani, próbáld újra",
+        "downvote": "Ellenszavazat",
+        "downvote_percent": "Ellenszavazat {percent}%",
+        "listen_to_this_post": "Hallgasd meg ezt a bejegyzést",
+        "log_in": "Bejelentkezés",
+        "mark_all_as_read": "Összes megjelölése olvasottként",
+        "mark_as_read": "Megjelölés olvasottként",
+        "more_replies": "További válaszok",
+        "not_enough_points": "Nincs elég Pont",
+        "nothing_here_yet": "Itt még nincs semmi.",
+        "open_editor": "Szerkesztő megnyitása",
+        "pause_voice": "Hang szüneteltetése",
+        "play_voice": "Hang lejátszása",
+        "playback_speed": "Lejátszási sebesség",
+        "publishing_in_waves": "Közzététel a Wavesben",
+        "quests_done": "Teljesített küldetések",
+        "read": "Olvasás",
+        "remove_vote": "Szavazat visszavonása",
+        "seek": "Keresés",
+        "select_community": "Közösség kiválasztása",
+        "selected_filters": "Kiválasztott szűrők",
+        "the_audio_could_not_be_loaded": "A hanganyagot nem sikerült betölteni.",
+        "this_post_does_not_exist_or": "Ez a bejegyzés nem létezik, vagy törölték.",
+        "unread": "Olvasatlan",
+        "voice_position": "Hang pozíciója",
+        "vote_weight": "Szavazat súlya",
+        "reblogged_by": "megosztotta: {username}",
+        "no_more_posts": "Nincs több bejegyzés.",
+        "favourite": "Kedvenc",
+        "no_votes_yet": "Még nincs szavazat",
+        "no_comments_yet": "Még nincs hozzászólás. Légy te az első!",
+        "comments_count": "Hozzászólások ({count})",
+        "sending_to_chain": "küldés a láncra",
+        "compare": "Összehasonlítás",
+        "your_vote": "Szavazatod",
+        "reply_to": "Válasz neki: @{username}",
+        "what_do_you_think": "Mi a véleményed?",
+        "clear_tag_filter": "Címkeszűrő törlése",
+        "tab_selected": "{title}, kiválasztva",
+        "add_tag_feed": "Címkehírfolyam hozzáadása",
+        "feed_pinned": "{label}, kitűzve",
+        "attached_image_remove": "Csatolt kép, koppints az eltávolításhoz",
+        "camera": "Kamera",
+        "files": "Fájlok",
+        "paused": "Szüneteltetve",
+        "in_topic": "itt: {topic}",
+        "poll_vote": "Szavazás",
+        "reply": "Válasz",
+        "mute_sound": "Némítás",
+        "unmute_sound": "Némítás feloldása",
+        "leaderboard_activities": "Tevékenységek",
+        "leaderboard_reward": "Jutalom",
+        "sort_votes": "Szavazatok"
+      },
+      "shell": {
+        "account_of": "@{username} fiókja",
+        "account_signed_out": "Fiók, kijelentkezve",
+        "close_tab": "Lap bezárása",
+        "coming_soon_to_the_native_app": "Hamarosan a natív alkalmazásban.",
+        "create": "Létrehozás",
+        "expand": "Kibontás",
+        "forward": "Előre",
+        "loading": "Betöltés",
+        "new_tab": "Új lap",
+        "reload": "Újratöltés",
+        "sent": "Elküldve",
+        "tab_unread": "{title}, {count} olvasatlan",
+        "no_app_for_link": "Egyetlen alkalmazás sem tudja megnyitni ezt a hivatkozást."
+      },
+      "wallet": {
+        "product_not_available": "A termék nem érhető el.",
+        "repeat": "Ismétlés"
+      },
+      "copied": "Másolva",
+      "trending_caps": "TRENDING",
+      "move_up": "Mozgatás felfelé",
+      "move_down": "Mozgatás lefelé",
+      "scroll_to_top": "Vissza a tetejére",
+      "load_more": "Továbbiak"
+    },
+    "wallet": {
+      "checking": "Ellenőrzés a hálózattal",
+      "leave_title": "Még küldés alatt",
+      "leave_message": "Ez még küldés vagy a hálózattal való ellenőrzés alatt van. Elhagyhatod ezt a képernyőt: az alkalmazás szól, ha kész.",
+      "stay": "Maradok",
+      "collateralized_convert_request": "Fedezett átváltási kérelem",
+      "op_transfer": "átutalás",
+      "op_power_up": "power up",
+      "op_power_down_change": "power down módosítása",
+      "op_delegation": "delegálás",
+      "op_savings_deposit": "megtakarítási befizetés",
+      "op_savings_withdrawal": "megtakarítási kifizetés",
+      "op_conversion": "átváltás",
+      "op_swap": "csere",
+      "op_order_cancel": "megbízás törlése",
+      "op_reward_claim": "jutalom igénylése",
+      "op_withdraw_route_change": "kifizetési útvonal módosítása",
+      "op_token_operation": "tokenművelet"
+    },
+    "notification": {
+      "amount_unknown": "Az összeg nem érhető el",
+      "weekly_earnings_breakdown": "Ezen a héten ${amount}-ot kerestél: ${authorUsd} bejegyzésekből, ${curationUsd} kurálásból.",
+      "weekly_earnings_total": "Ezen a héten ${amount}-ot kerestél a bejegyzéseidből és a kurálásból."
+    },
+    "settings": {
+      "open": "Megnyitás",
+      "feedback_subject": "Visszajelzés/Hibajelentés",
+      "unknown_user": "Ismeretlen felhasználó"
+    },
+    "navigation": {
+      "editor": "Szerkesztő",
+      "followers": "Követők",
+      "spin_game": "Spin játék",
+      "edit_profile": "Profil szerkesztése",
+      "redeem_points": "Pontok beváltása",
+      "community": "Közösség",
+      "community_members": "Közösségi tagok",
+      "community_activities": "Közösségi tevékenységek",
+      "browser": "Böngésző",
+      "asset_details": "Eszköz adatai",
+      "edit_history": "Szerkesztési előzmények",
+      "welcome": "Üdvözlünk",
+      "chat": "Csevegés",
+      "backup_keys": "Kulcsok biztonsági mentése",
+      "trade": "Kereskedés",
+      "ai_image_generator": "AI-képgenerátor",
+      "select_assets": "Eszközök kiválasztása",
+      "poll": "Szavazás",
+      "bot_comments": "Botok hozzászólásai"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Az owner kulcsot igénylő műveletek nem írhatók alá az Ecency-ben.",
+      "post": "Bejegyzés/Hozzászólás",
+      "custom": "Custom JSON",
+      "sign_buffer": "Üzenet aláírása",
+      "send_token": "Token küldése",
+      "witness_vote": "Witness-szavazat",
+      "proxy": "Proxy beállítása",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Közvetítés",
+      "sign_tx": "Tranzakció aláírása",
+      "encode": "Üzenet kódolása",
+      "decode": "Kulcs ellenőrzése",
+      "add_account_authority": "Fiókjogosultság hozzáadása",
+      "remove_account_authority": "Fiókjogosultság eltávolítása",
+      "add_key_authority": "Kulcsjogosultság hozzáadása",
+      "remove_key_authority": "Kulcsjogosultság eltávolítása",
+      "create_claimed_account": "Fiók létrehozása",
+      "create_proposal": "Javaslat létrehozása",
+      "remove_proposal": "Javaslat eltávolítása",
+      "update_proposal_vote": "Javaslatra szavazás",
+      "signed_call": "Aláírt hívás"
+    },
+    "translate_language": {
+      "ar": "arab",
+      "az": "azeri",
+      "bg": "bolgár",
+      "bn": "bengáli",
+      "ca": "katalán",
+      "cs": "cseh",
+      "da": "dán",
+      "de": "német",
+      "el": "görög",
+      "en": "angol",
+      "eo": "eszperantó",
+      "es": "spanyol",
+      "et": "észt",
+      "fa": "perzsa",
+      "fi": "finn",
+      "fr": "francia",
+      "ga": "ír",
+      "he": "héber",
+      "hi": "hindi",
+      "hu": "magyar",
+      "id": "indonéz",
+      "it": "olasz",
+      "ja": "japán",
+      "ko": "koreai",
+      "lt": "litván",
+      "lv": "lett",
+      "ms": "maláj",
+      "nb": "norvég",
+      "nl": "holland",
+      "pl": "lengyel",
+      "pt": "portugál",
+      "ro": "román",
+      "ru": "orosz",
+      "sk": "szlovák",
+      "sl": "szlovén",
+      "sq": "albán",
+      "sv": "svéd",
+      "th": "thai",
+      "tl": "tagalog",
+      "tr": "török",
+      "uk": "ukrán",
+      "zh": "kínai",
+      "zt": "kínai (hagyományos)"
+    },
+    "reading": {
+      "banner_text": "Ez a bejegyzés ezen a nyelven íródott: {source}. Lefordítod erre: {target}?",
+      "translated_from_text": "Fordítva innen: {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# tag} other {# tag}} • {authors, plural, one {# szerző} other {# szerző}} • {posts, plural, one {# bejegyzés} other {# bejegyzés}}",
+      "community_title": "{title} közösség",
+      "members_title": "{title} tagjai",
+      "activities_title": "{title} tevékenysége",
+      "cannot_start_with_or": "Nem kezdődhet @ vagy # jellel",
+      "use_a_two_letter": "Használj kétbetűs nyelvkódot, például: en",
+      "at_most_characters": "Legfeljebb {max, plural, one {# karakter} other {# karakter}}",
+      "council": "Tanács",
+      "journal": "Napló",
+      "topic": "Téma",
+      "community_not_found": "A közösség nem található."
+    },
+    "transfer": {
+      "one_recipient": "Ehhez az átutaláshoz csak egy címzett adható meg.",
+      "is_an_exchange_and": "A(z) {exchange} tőzsde, és lehet, hogy nem támogatja az ismétlődő átutalásokat: az ütemezetten küldött összeg elveszhet. Használj inkább egyszeri átutalást."
+    },
+    "dapps": {
+      "signing_info": "Az Ecency a Hive aláíró bővítményedként működik. Amikor egy dApp böngészőbővítménnyel, például Keychainnel, Keeperrel vagy Peak Vaulttal kéri a bejelentkezést, válaszd ezt a lehetőséget. Az Ecency biztonságosan elvégzi az aláírást.",
+      "category_social": "Közösségi",
+      "category_gaming": "Játék",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Csoport",
+      "unable_to_load_messages": "Az üzenetek nem tölthetők be.",
+      "someone": "Valaki",
+      "renamed_the_group_to": "{actor} átnevezte a csoportot: „{name}”",
+      "removed_the_group_name": "{actor} törölte a csoport nevét",
+      "unable_to_send_your": "Az üzeneted nem küldhető el.",
+      "unable_to_remove_message": "Az üzenet nem távolítható el.",
+      "unknown": "Ismeretlen",
+      "members_online": "{members, plural, one {# tag} other {# tag}} • {online} online",
+      "failed_to_load_pinned": "A kitűzött üzenetek betöltése sikertelen",
+      "you": "Te",
+      "title": "Reakciók"
+    },
+    "tip": {
+      "login_required": "Jelentkezz be borravaló küldéséhez",
+      "max_decimals": "Legfeljebb {n, plural, one {# tizedesjegy} other {# tizedesjegy}}"
+    },
+    "paid": {
+      "check_again": "Ellenőrzés újra",
+      "give_up": "Feladás",
+      "unknown": "Még nincs válasz. A kérés lehet, hogy még fut. Ellenőrizd újra az eredmény lekéréséhez: másodszor nem számítunk fel díjat.",
+      "pending": "A kérésed még feldolgozás alatt van. Ellenőrizd újra egy pillanat múlva: másodszor nem számítunk fel díjat.",
+      "restored": "Egy korábbi kérésre még nincs válasz. Ellenőrizd újra az eredmény lekéréséhez: másodszor nem számítunk fel díjat.",
+      "give_up_confirm": "Ha a kérés lefutott, a Pontok elköltődtek, és az eredmény elvész.",
+      "not_stored": "Ezt a kérést nem sikerült az eszközön tárolni. Tartsd nyitva ezt a képernyőt, amíg be nem fejeződik.",
+      "sign_in_again": "A munkameneted lejárt. Jelentkezz be újra, majd ellenőrizd újra.",
+      "other_account": "Ez @{owner} fiókjához tartozik. Váltsd vissza azt a fiókot a folytatáshoz."
+    },
+    "ai": {
+      "run_ai_assist": "AI-asszisztens futtatása ({costText})",
+      "no_longer_free_cost": "Ez a futtatás ma már nem ingyenes. Költsége {cost} {unit}.",
+      "no_longer_free": "Ez a futtatás ma már nem ingyenes.",
+      "content_violates_our_content": "A tartalom sérti a tartalmi irányelveinket. Módosítsd a szöveget. A Pontokat nem térítettük vissza.",
+      "generate_image": "Kép létrehozása ({costLabel})",
+      "use_prompt": "Használat: „{prompt}”"
+    },
+    "post_actions": {
+      "busy": "Kérlek, várj, másik művelet van folyamatban",
+      "not_a_community_post": "Nem közösségi bejegyzés.",
+      "parent_post_not_found": "A szülő bejegyzés nem található",
+      "the_account_changed": "A fiók megváltozott."
+    },
+    "dictation": {
+      "balance": "Egyenleg: {balance} {unit}",
+      "stop_points": "Leállítás ({cost} Pont)",
+      "stop_free": "Leállítás (ingyenes)",
+      "transcribe_points": "Átírás ({cost} Pont)",
+      "transcribe": "Átírás",
+      "no_longer_free_cost": "Ez a felvétel ma már nem ingyenes. Költsége {cost} Pont.",
+      "no_longer_free": "Ez a felvétel ma már nem ingyenes.",
+      "held_locked": "A felvétel leállt, amikor az Ecency zárolt. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
+      "held_no_background": "A felvétel leállt, amikor az Ecency elhagyta a képernyőt (nem tudta megjeleníteni a felvételi értesítést). Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
+      "held_stopped": "A felvételt az értesítésből állították le. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
+      "held_focus_lost": "A felvétel egy hívás vagy egy másik alkalmazás hangja miatt leállt. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
+      "held_interrupted": "A felvétel leállt, mert egy másik alkalmazás átvette a mikrofont. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
+      "unavailable": "A felvétel nem érhető el ezen az eszközön.",
+      "not_read": "A felvétel nem olvasható, vagy túl nagy. Semmi sem lett elküldve, és nem számítottunk fel díjat.",
+      "give_up_not_sent": "Ez a felvétel nem lett elküldve, ezért nem számítottunk fel díjat. Törölve lesz.",
+      "give_up_not_charged": "Ezért a felvételért nem számítottunk fel díjat. Törölve lesz.",
+      "clip_lost": "Egy korábbi kérés felvétele már nincs az eszközön. Ha a kérés lefutott, a Pontjaid elköltődtek, az átirat pedig nem kérhető le."
+    },
+    "register": {
+      "error_code_28": "A kérésedet nem sikerült feldolgozni. A regisztrációs sor valószínűleg megtelt. Próbáld újra néhány perc múlva."
+    },
+    "perks": {
+      "quests_empty": "Itt még nincsenek küldetések, nézz vissza hamarosan.",
+      "freeze_confirm_title": "Védd a sorozatodat",
+      "spend_points_on_a": "{price} Pontot költesz egy sorozatfagyasztásra? Ez védi meg a sorozatodat egy kihagyott napon."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Támogasd az Ecency-t, kapj ingyenes blogot, és tűnj ki egy hitelesített Pro jelvénnyel.",
+      "card_description": "Válts Pro-ra évi {price} áron. Hitelesített jelvény, ingyenes blog és az Ecency támogatása.",
+      "card_description_plain": "Válts Pro-ra egy évre. Hitelesített jelvény, ingyenes blog és az Ecency támogatása.",
+      "member": "Pro tag vagy.",
+      "benefit_badge": "Hitelesített Pro jelvény a neved mellett.",
+      "benefit_blog": "Ingyenes blog felhasznalonev.blogs.ecency.com címen.",
+      "benefit_support": "Az Ecency fejlesztésének közvetlen támogatása.",
+      "benefit_early": "Korai hozzáférés az új funkciókhoz.",
+      "buy": "Pro megvásárlása évi {price} áron",
+      "extend": "Meghosszabbítás 12 hónappal: {price}",
+      "extend_note": "Az újabb vásárlás 12 hónapot ad a tagságodhoz.",
+      "unavailable": "Az Ecency Pro jelenleg nem érhető el az áruházból.",
+      "activating": "A fizetés megérkezett. A tagságod aktiválása folyamatban.",
+      "success_title": "Üdvözlünk az Ecency Pro szolgáltatásban",
+      "success_body": "A Pro tagságod aktív. A jelvényed hamarosan megjelenik a profilodon.",
+      "extending": "A fizetés megérkezett. A Pro tagságod meghosszabbítása 12 hónappal folyamatban.",
+      "open_a11y": "Ecency Pro megnyitása"
+    },
+    "editor": {
+      "saving_draft": "Piszkozat mentése...",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be.",
+      "fetch_failed": "A lekérés sikertelen.",
+      "you_can_only_edit": "Csak a saját tartalmadat szerkesztheted.",
+      "invalid_percent": "Érvénytelen százalék",
+      "beneficiary_exists_already": "A kedvezményezett már létezik",
+      "this_draft_belongs_to": "Ez a piszkozat @{owner} fiókjához tartozik. Váltsd vissza azt a fiókot a közzétételhez.",
+      "could_not_make_a": "Nem sikerült új hivatkozást készíteni ehhez a bejegyzéshez. Módosítsd kicsit a címet, és próbáld újra.",
+      "an_earlier_attempt_was": "Egy korábbi próbálkozás ez után lett közzétéve. Ellenőrizd, melyik verziót szeretnéd megtartani.",
+      "could_not_check_your": "A fiókod posting jogosultsága nem ellenőrizhető. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "this_post_was_changed": "Ez a bejegyzés a megnyitás óta máshol megváltozott. Másold ki a szöveget, lépj vissza, és nyisd meg újra a legfrissebb verzió szerkesztéséhez.",
+      "link_text_placeholder": "Szöveg ide"
+    },
+    "app_error": {
+      "this_reply_is_too": "Ez a válasz túl hosszú.",
+      "the_network_refused_this": "A hálózat elutasította ezt a műveletet.",
+      "invalid_input": "Érvénytelen bemenet.",
+      "secure_storage_is_unavailable": "A biztonságos tároló nem érhető el. Jelentkezz be újra.",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be.",
+      "these_credentials_belong_to": "Ezek a hitelesítő adatok @{actual} fiókjához tartoznak, nem @{expected} fiókjához.",
+      "is_not_signed_in": "@{username} nincs bejelentkezve ezen az eszközön.",
+      "key_required": "A tranzakció végrehajtásához {role} kulcs szükséges. {hint}",
+      "cancelled": "Megszakítva.",
+      "the_request_was_rejected": "A kérést elutasították a pénztárca alkalmazásban.",
+      "the_request_expired_before": "A kérés lejárt, mielőtt a pénztárca alkalmazás válaszolt volna. Próbáld újra.",
+      "could_not_reach_the": "A HiveAuth szerver nem érhető el. Próbáld újra.",
+      "unexpected_redirect": "A szerver váratlan átirányítást küldött. Semmi sem változott. Próbáld újra később.",
+      "missing_key_hint": "Add hozzá a Beállítások, Jogosultságok kezelése (Privát kulcs importálása) alatt, vagy jelentkezz be újra vele.",
+      "this_key_is_also": "Ez a kulcs egyben a fiók owner kulcsa is. Az Ecency nem tárol olyan kulcsot, amely az owner szerepkört vezérli: adj az active és posting szerepkörnek saját kulcsot, majd azokkal jelentkezz be.",
+      "this_is_the_owner": "Ez az owner kulcs. Az Ecency soha nem tárolja és nem használja az owner kulcsot: jelentkezz be a főjelszóddal, vagy a posting vagy active kulccsal.",
+      "this_password_only_matches": "Ez a jelszó csak a fiók owner kulcsához illik. Az Ecency soha nem tárolja és nem használja az owner kulcsot: jelentkezz be a posting vagy active kulccsal.",
+      "this_key_cannot_sign": "Ez a kulcs önmagában nem írhat alá a fiók nevében: a fiókhoz több aláírás kell (a súlya a küszöb alatt van).",
+      "public_key_given": "Ez a nyilvános kulcsod. Illeszd be a privát kulcsot (5-tel kezdődik) vagy a főjelszavadat.",
+      "memo_key_only": "A memo kulcs nem használható bejelentkezésre. Használd a posting kulcsot, az active kulcsot vagy a főjelszót.",
+      "network_message": "Hálózati hiba. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "network_error_this_may": "Hálózati hiba. Lehet, hogy már lefutott; az újrapróbálás biztonságos, és nem tesz közzé kétszer."
+    },
+    "purchases": {
+      "deal_best": "LEGJOBB AJÁNLAT!",
+      "deal_popular": "NÉPSZERŰ!",
+      "points_title": "{points} PONT",
+      "the_store_did_not": "Az áruház nem válaszolt."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "A 999accounts felhasználásához e-mail-cím és felhasználónév szükséges",
+      "stuck": "Ennek a terméknek egy korábbi vásárlását nem sikerült befejezni. Írj a support@ecency.com címre az áruházi nyugtával, erre a célra megőrizzük.",
+      "held": "Ez a vásárlás ellenőrzés miatt várakozik. Írj a support@ecency.com címre a(z) #{order} rendelésszámmal.",
+      "earlier_purchase": "Ennek a terméknek egy korábbi vásárlása előbb befejeződik @{target} számára.",
+      "earlier_pending": "Ennek a terméknek egy korábbi fizetése még függőben van @{target} számára. Akkor fejeződik be, ha az áruház megerősíti a fizetést.",
+      "pending": "A fizetésed függőben van. A vásárlás akkor fejeződik be, ha az áruház megerősíti a fizetést.",
+      "processing": "A vásárlásod feldolgozás alatt van. Hamarosan befejeződik."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Ismétlődő átutalások",
+      "delegate_hive_power": "Hive Power delegálása",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Vesting kifizetési útvonal beállítása",
+      "power_down": "Power down",
+      "transfer_to_saving": "Átutalás megtakarításba",
+      "transfer_from_saving": "Átutalás megtakarításból",
+      "cancel_transfer_from_saving": "Megtakarításból történő átutalás törlése",
+      "collateralized_convert": "Fedezett átváltás",
+      "witness_vote": "Witness-szavazat",
+      "witness_update": "Witness frissítése",
+      "witness_set_properties": "Witness tulajdonságainak beállítása",
+      "governance_proxy": "Kormányzási proxy",
+      "claim_account": "Fiók igénylése",
+      "create_account": "Fiók létrehozása",
+      "create_account_with_account": "Fiók létrehozása fiókkredittel",
+      "create_limit_order": "Limitmegbízás létrehozása",
+      "cancel_limit_order": "Limitmegbízás törlése",
+      "redeem_rewards": "Jutalmak beváltása",
+      "post_or_comment": "Bejegyzés vagy hozzászólás",
+      "post_or_comment_options": "Bejegyzés- vagy hozzászólás-beállítások",
+      "custom_operation": "Egyéni művelet",
+      "update_account_active": "Fiók frissítése (active)",
+      "update_account_posting": "Fiók frissítése (posting)",
+      "change_recovery_account": "Helyreállítási fiók módosítása",
+      "create_proposal": "Javaslat létrehozása",
+      "remove_proposal": "Javaslat eltávolítása",
+      "update_proposal_votes": "Javaslatszavazatok frissítése",
+      "update_proposal": "Javaslat frissítése"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Ezt a hivatkozást @{account} fiókjának kell aláírnia. Válts arra a fiókra, és nyisd meg újra.",
+      "ecency_can_only_sign": "Az Ecency hivatkozásokból csak tranzakciókat tud aláírni és közvetíteni.",
+      "requester_page": "a(z) {host} oldal",
+      "owner_refused": "Az owner kulcsot igénylő műveletek hivatkozásból nem írhatók alá.",
+      "busy": "Kérlek, várj: másik kérés még feldolgozás alatt van.",
+      "not_supported": "Az Ecency ezt a műveletet ebben a verzióban még nem tudja aláírni."
+    },
+    "chats": {
+      "group_members": "Csoporttagok",
+      "rename_group": "Csoport átnevezése",
+      "failed_to_load_chats": "A csevegések betöltése sikertelen",
+      "unknown": "Ismeretlen",
+      "unable_to_mark_channel": "A csatorna nem jelölhető olvasottnak",
+      "unable_to_update_favorites": "A kedvencek nem frissíthetők",
+      "unable_to_update_mute": "A némítás nem frissíthető",
+      "group": "Csoport",
+      "unable_to_search": "A keresés nem sikerült",
+      "unable_to_start_chat": "A csevegés nem indítható el",
+      "no_internet": "Nincs internetkapcsolat"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) delegálása neki: @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Már delegálva neki: @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Csak nyilvános. Az Ecency soha nem tárolja az owner kulcsot.",
+      "shared_owner": "Ez a fiók ugyanazt a kulcsot használja az owner és a(z) {names} szerepkörhöz. Aki ezt a kulcsot birtokolja, az egész fiókot irányítja. Adj a(z) {names} szerepkörnek saját kulcsot, az owner kulcsot pedig tartsd offline.",
+      "copy_warning": "Bárki, aki ismeri ezt a privát kulcsot, a fiókod ezen részét irányítja. Más alkalmazások olvashatják a vágólapot; csak olyan helyre illeszd be, ahol megbízol. 2 perc múlva törlődik a vágólapról."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "A PIN-zár be van kapcsolva.",
+      "pin_changed": "PIN módosítva.",
+      "pin_lock_is_off": "A PIN-zár ki van kapcsolva.",
+      "wiped_notice": "Minden fiók, kulcs és hitelesítő adat el lett távolítva erről az eszközről.",
+      "we_could_not_bring": "A fiókjaidat nem sikerült átvenni az alkalmazás előző verziójából. Jelentkezz be újra.",
+      "your_pin_lock_could": "A PIN-zárat nem sikerült átvenni az előző verzióból. Állíts be újra PIN-t a fiókmenüben az alkalmazászár visszakapcsolásához.",
+      "biometric_unlock_was_turned": "A biometrikus feloldás ki lett kapcsolva, mert az eszköz biometrikus adatai megváltoztak. Oldd fel PIN-nel, majd kapcsold vissza a fiókmenüben.",
+      "biometric_unavailable_notice": "A biometrikus feloldást nem sikerült bekapcsolni: az eszközön nincs beállítva biometrikus azonosítás.",
+      "set_backup": "Állíts be PIN-t a biometrikus feloldás tartalékaként",
+      "biometric_on_notice": "A PIN-zár be van kapcsolva. Oldd fel biometrikus azonosítással vagy PIN-nel.",
+      "offer_title": "Feloldás biometrikus azonosítással",
+      "offer_body": "Nyisd meg az Ecency-t arccal vagy ujjlenyomattal. PIN-t is beállítasz, amely feloldja az alkalmazást, ha a biometrikus azonosítás nem érhető el.",
+      "offer_use": "Biometrikus azonosítás használata",
+      "offer_use_pin": "PIN használata helyette"
+    },
+    "common": {
+      "list_and": "{first} és {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "A legfeljebb 25 karakteres válaszok nem kapnak pontot (a hivatkozások nem számítanak)",
+      "short_content_hint": "Túl rövid a pontszerzéshez (legfeljebb 25 karakter, hivatkozások nélkül)",
+      "daily_post": "Napi bejegyzés {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# napos sorozat} other {# napos sorozat}}",
+      "grant_description": "Adj posting jogosultságot az @ecency.app Ecency-fióknak a fiókodon, hogy a Keychain minden alkalommal történő megnyitása nélkül tehess közzé bejegyzést. Megadása módosítja a fiókod posting jogosultságát, és az active kulcsodat igényli."
+    },
+    "wallet_history": {
+      "from_to": "@{from} → @{to}",
+      "from_user_id": "tőle: @{from}, azonosító: {id}",
+      "user_id": "@{user}, azonosító: {id}",
+      "from_to_id": "@{from} → @{to}, azonosító: {id}",
+      "from_to_account": "@{from} → {to}",
+      "from_user": "tőle: @{user}",
+      "to_user": "neki: @{user}",
+      "interest": "Kamat",
+      "proposal_pay": "Javaslat kifizetése",
+      "categories": "Tevékenységtípusok",
+      "category_all": "Összes",
+      "category_transfers": "Átutalások",
+      "category_market": "Piaci megbízások",
+      "category_interest": "Kamatok",
+      "category_stake": "Stake-műveletek",
+      "category_rewards": "Jutalmak",
+      "point_type_checkin": "Napi aktivitás",
+      "point_type_login": "Bejelentkezés",
+      "point_type_post": "Bejegyzés",
+      "point_type_comment": "Hozzászólás",
+      "point_type_vote": "Szavazás",
+      "point_type_reblog": "Megosztás",
+      "point_type_transfer_sent": "Elküldött átutalások",
+      "point_type_transfer_received": "Fogadott átutalások"
+    },
+    "video_upload": {
+      "continue_upload": "FELTÖLTÉS FOLYTATÁSA",
+      "source_gone": "Ez a felvétel már nem érhető el az eszközön. Rögzítsd vagy válaszd ki újra a videót.",
+      "no_camera": "A kamera nem érhető el ezen az eszközön."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "A következő unstake {hours, plural, one {# óra} other {# óra}} múlva lesz",
+      "account_not_found": "A fiók nem található"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Kép a vágólapon · Kép beillesztése",
+      "no_container": "A legfrissebb waves-tároló nem kérhető le",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be.",
+      "write_something_first": "Előbb írj valamit.",
+      "account_changed": "Ez a wave másik fiókként lett megírva. Zárd be, és írd meg újra.",
+      "no_upload": "A képfeltöltés ebben a buildben még nem érhető el. Illessz be inkább egy képhivatkozást a szövegbe.",
+      "fail": "Hiba"
+    },
+    "delete_account": {
+      "sign_out_failed": "A kérésed el lett küldve, de a kijelentkezés nem sikerült. Jelentkezz ki a menüből.",
+      "not_sent": "A törlési kérésedet nem sikerült elküldeni. Próbáld újra."
+    },
+    "chat_sheets": {
+      "group_limit": "Egy csoportban legfeljebb {max, plural, one {# másik ember} other {# másik ember}} lehet.",
+      "search_people_by_username": "Emberek keresése felhasználónév alapján",
+      "new_group_title": "Új csoport",
+      "new_group_hint": "Adj hozzá {min}–{max, plural, one {# embert} other {# embert}} egy csoportos beszélgetés indításához.",
+      "no_results": "Nem található ilyen nevű felhasználó a csevegésben.",
+      "search_failed": "A keresés nem sikerült. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "create": "Csoport indítása",
+      "new_group_failed": "A csoport nem indítható el. Próbáld újra.",
+      "name_limit": "A csoport neve legfeljebb {max, plural, one {# karakter} other {# karakter}} lehet.",
+      "rename_title": "Csoport átnevezése",
+      "rename_hint": "Adj a csoportnak egy nevet, amelyet mindenki lát benne. Hagyd üresen, ha a tagok nevét szeretnéd megjeleníteni.",
+      "placeholder": "Csoport neve",
+      "not_owner": "Csak a csoport létrehozója nevezheti át.",
+      "rename_failed": "A csoport nem nevezhető át. Próbáld újra."
+    },
+    "editor_side": {
+      "copy_of": "{title} másolata",
+      "deletions_failed": "Hiba történt\n{failed} / {total, plural, one {# törlés} other {# törlés}} sikertelen",
+      "uploads_failed": "{count, plural, one {# feltöltés sikertelen} other {# feltöltés sikertelen}}:\n\n{messages}",
+      "failed_to_delete": "A törlés sikertelen"
+    },
+    "uploads": {
+      "add_to_gallery": "Hozzáadás a galériához"
+    },
+    "account_notice": {
+      "manage_keys": "Beállítások, Jogosultságok kezelése",
+      "no_signing_key_title": "Jelentkezz be újra mint @{account}",
+      "no_signing_key": "Az Ecency már nem őrzi az owner kulcsot vagy a főjelszót ezen az eszközön, és @{account} fiókhoz nincs itt tárolt posting vagy active kulcs. Jelentkezz be újra a főjelszóval vagy egy posting vagy active kulccsal, vagy adj hozzá kulcsot itt: {manageKeys} (Privát kulcs importálása).",
+      "missing_roles_title": "Néhány kulcs nem lett hozzáadva",
+      "cannot_post": "közzétenni, szavazni vagy hozzászólni",
+      "cannot_transfer": "átutalásokat küldeni vagy a fiókbeállításokat módosítani",
+      "missing_roles": "A jelszavad már nem egyezik @{account} fiók {missing} kulcsával: a jelszó beállítása óta módosult a fiókon. Ezen az eszközön tárolva: a(z) {kept} kulcs. Amíg nem adod hozzá a(z) {missing} kulcsot itt: {manageKeys} (Privát kulcs importálása), az alkalmazás nem tud @{account} kulcsaival {cannot}.",
+      "shared_owner_title": "Ez a kulcs az owner szerepkört is vezérli",
+      "shared_owner": "@{account} ugyanazt a kulcsot használja az owner és a(z) {names} szerepkörhöz. Aki ezt a kulcsot birtokolja, az egész fiókot irányítja. Az Ecency csak {names} kulcsként őrzi, és soha nem használja owner műveletekhez. Adj a(z) {names} szerepkörnek saját kulcsot, az owner kulcsot pedig tartsd offline."
+    },
+    "dapp_browser": {
+      "message_from": "Üzenet innen: {host}",
+      "home_title": "Kezdőlap",
+      "loading_title": "Betöltés...",
+      "blank_run": "[{count, plural, one {# üres karakter} other {# üres karakter}}]",
+      "too_large": "Ez az oldal túl nagy aláírási kérést küldött a megjelenítéshez, ezért az Ecency elutasította."
+    },
+    "community_service": {
+      "the_account_changed": "A fiók megváltozott."
+    },
+    "profile_edit": {
+      "enter_link": "Add meg a kép hivatkozását",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be.",
+      "account_not_found": "A fiók nem található",
+      "please_enter_an_image": "Adj meg egy https://-sel kezdődő képhivatkozást"
+    },
+    "background_media": {
+      "post_by": "Bejegyzés tőle: @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Már szavaztál ugyanezzel a súllyal.",
+      "insufficient_rc": "Nincs elég Resource Credits. Várj, vagy végezz power upot.",
+      "missing_authority": "Hiányzik a posting jogosultság. Ellenőrizd a bejelentkezési módot.",
+      "comment_too_soon": "Várj egy kicsit, mielőtt újra közzéteszel.",
+      "paid_out": "Ez a bejegyzés már ki lett fizetve.",
+      "too_large": "A tranzakció {size, plural, one {# bájt} other {# bájt}}, meghaladja a(z) {max} bájtos korlátot.",
+      "network_error_please_check": "Hálózati hiba. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "unconfirmed_message": "Nem sikerült megerősíteni, hogy lefutott-e. Nézd meg a pénztárcádat vagy az előzményeket; csak akkor indítsd újra, ha nincs ott.",
+      "undecided_message": "Lehet, hogy ez már lefutott. Újrapróbálás előtt nézd meg a pénztárcádat vagy az előzményeket."
+    },
+    "chat_api": {
+      "request_failed": "A kérés sikertelen ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} éppen ír...",
+      "typing_two": "{first} és {second} éppen ír...",
+      "typing_three": "{first}, {second} és {third} éppen ír...",
+      "typing_many": "{first}, {second} és még {count, plural, one {# másik ember} other {# másik ember}} éppen ír...",
+      "banned": "{reason} A csevegést továbbra is olvashatod. A közzététel {until} oldódik fel.",
+      "joined_when": "csatlakozott: {time}",
+      "joined": "csatlakozott",
+      "official_badge": "Hivatalos",
+      "official_badge_label": "Hivatalos Ecency-fiók"
+    },
+    "side_menu": {
+      "ask_esie": "Kérdezd Esie-t"
+    },
+    "chat_service": {
+      "missing_token": "Hiányzik a Hive hozzáférési token. Jelentkezz ki, majd be újra.",
+      "dm_error": "A felhasználó nem csatlakozott a csevegésekhez"
+    },
+    "compose_reply": {
+      "account_changed": "Ez a válasz másik fiókként lett megírva. Zárd be, és írd meg újra.",
+      "write_something_first": "Előbb írj valamit.",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Túl sok kedvezményezett: legfeljebb {max}.",
+      "a_beneficiary_s_share": "A kedvezményezett részesedésének 0,01% és 100% között kell lennie.",
+      "beneficiaries_add_up_to": "A kedvezményezettek részesedése együtt meghaladja a 100%-ot.",
+      "a_beneficiary_is_listed": "Egy kedvezményezett kétszer szerepel.",
+      "you_cannot_be_a": "Nem lehetsz a saját bejegyzésed kedvezményezettje.",
+      "a_beneficiary_has_an": "Egy kedvezményezett fiókneve érvénytelen."
+    },
+    "follows": {
+      "fail": "Hiba!: {message}",
+      "follower_count": "Követők ({count})",
+      "following_count": "Követések ({count})"
+    },
+    "link": {
+      "unsupported": "Ez a hivatkozás még nem támogatott.",
+      "cannot_open": "A hivatkozás nem nyitható meg",
+      "unsupported_version": "Ez a hivatkozás ebben a verzióban nem támogatott."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Az Explore böngésző hozzáférhet a Hive pénztárcádhoz a tranzakciók aláírásához. Ez a hivatkozás a bejegyzés tartalmából származik, és az Ecency nem ellenőrizte. Csak akkor folytasd, ha megbízol benne:\n\n{url}"
+    },
+    "listen": {
+      "message": "A hallgatáshoz {required} Pont kell, neked {available} van.",
+      "unlock_label": "Feloldás · {cost} Pont",
+      "preparing_audio": "Hanganyag előkészítése · {preparingPercent}%",
+      "waiting_in_line_ahead": "Sorban állsz, előtted: {ahead}…",
+      "next_in_line": "Te vagy a következő…",
+      "preparing_about_minutes": "Hanganyag előkészítése, kb. {minutes} perc…",
+      "preparing_audio_2": "Hanganyag előkészítése…",
+      "spend_confirm": "Elköltesz {cost} Pontot a bejegyzés meghallgatására? A hanganyag a tiéd, bármikor újra lejátszhatod.",
+      "about_minutes": "~{minutes} perc",
+      "failed_refunded": "A hanganyag nem készíthető el, a Pontjaidat visszatérítettük"
+    },
+    "media_pick": {
+      "preparing_video": "Videó előkészítése...",
+      "library_hint": "Választás a fotóid közül",
+      "camera_hint": "Új fotó készítése most",
+      "files_hint": "Fájlok böngészése ezen az eszközön és a felhőben",
+      "paste_hint": "A kimásolt kép használata",
+      "link_hint": "Kép használata a webről"
+    },
+    "media_picking": {
+      "image_types_message": "Ez a fájltípus nem támogatott. Válassz JPEG, PNG, GIF, WebP vagy HEIC képet.",
+      "video_types_message": "Ez a fájltípus nem támogatott. Válassz MP4 vagy MOV videót.",
+      "gif_too_large": "Ez a GIF nagyobb, mint {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Ehhez a művelethez active és posting aláírás is kell, amelyeket az Ecency még nem tud együtt aláírni."
+    },
+    "poll": {
+      "fail": "Hiba!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "A fiókod posting jogosultsága nem ellenőrizhető. Ellenőrizd a kapcsolatot, és próbáld újra."
+    },
+    "post_lists": {
+      "voters_title": "Szavazók adatai ({total})",
+      "reblogs_title": "Megosztások adatai ({total})",
+      "no_history_found": "Nem található előzmény!",
+      "no_edit_history_available": "Ehhez a tartalomhoz nincs szerkesztési előzmény.",
+      "version_label": "{version}. verzió"
+    },
+    "stats": {
+      "other_device": "Egyéb"
+    },
+    "profile": {
+      "account_not_found": "A fiók nem található",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Megtelik: {hours, plural, one {# óra} other {# óra}} múlva"
+    },
+    "profile_metadata_guard": {
+      "refused": "A jelenlegi profilod nem olvasható, próbáld újra"
+    },
+    "profile_sheet": {
+      "fail": "Hiba! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "A fiók nem található"
+    },
+    "push_payload": {
+      "mentioned": "@{source} megemlítette: @{target}",
+      "replied": "@{source} válaszolt neki: @{target}",
+      "transferred": "@{source} átutalt neki: @{target}",
+      "delegated": "@{source} delegált neki: @{target}",
+      "rewards_received": "Jutalom érkezett",
+      "account_updated": "Fiók frissítve",
+      "account_updated_body": "A fiókod adatai frissültek",
+      "followed": "@{source} követni kezdte: @{target}",
+      "unfollowed": "@{source} megszüntette @{target} követését",
+      "ignored": "@{source} figyelmen kívül hagyta: @{target}",
+      "blacklisted": "@{source} feketelistára tette: @{target}",
+      "posted_in": "@{source} bejegyzést tett közzé itt: #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "A kamera engedélye nem szerezhető meg",
+      "permission_message": "Add meg a kamera engedélyét az Ecency beállításaiban.",
+      "permission_allow": "Engedélyezés"
+    },
+    "reply_account": {
+      "switch": "Válasz másik fiókkal"
+    },
+    "send_journal": {
+      "your_from_went_through": "A(z) @{account} fiókból küldött {label} lefutott.",
+      "not_sent": "A(z) @{account} fiókból küldött {label} nem futott le. Semmi sem lett elküldve; újra elindíthatod.",
+      "checking_whether_your_from": "Ellenőrzés folyamatban, hogy a(z) @{account} fiókból küldött {label} lefutott-e. Újraküldés előtt nézd meg a pénztárcádat."
+    },
+    "signing": {
+      "hot_page_closed": "A HiveSigner oldal bezárult",
+      "wrong_role": "Ez a(z) {given} kulcsod; ehhez a művelethez a(z) {needed} kulcsod kell.",
+      "action_id_required": "Ehhez a művelethez műveletazonosító kell a biztonságos újrapróbáláshoz."
+    },
+    "signing_router": {
+      "owner_never": "Az owner műveleteket az alkalmazásban soha nem írják alá."
+    },
+    "spin": {
+      "key_missing": "Hiányzik a játékkulcs",
+      "score": "{score, plural, one {# pont} other {# pont}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Ma (UTC), nullázódik: {time} múlva",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Naponta 00:00-kor nullázódik (UTC)"
+    },
+    "storage_reset": {
+      "title": "Jelentkezz be újra",
+      "message": "A biztonságos tároló alaphelyzetbe állt ezen az eszközön. Jelentkezz be újra.",
+      "failed": "Az eszközön lévő fiókok nem távolíthatók el. Próbáld újra."
+    },
+    "store": {
+      "in_app_purchases_are": "Az alkalmazáson belüli vásárlások ebben a buildben nem érhetők el."
+    },
+    "wallet_sends": {
+      "journal_full": "Túl sok korábbi küldés ellenőrzése folyik még a hálózattal. Várd meg a megerősítésüket, mielőtt újabbat küldesz.",
+      "check_later": "A hálózat nem erősítette meg időben. Újraküldés előtt nézd meg a pénztárcádat vagy az előzményeket; az alkalmazás a következő indításkor újra ellenőrzi."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# olvasatlan} other {# olvasatlan}}",
+      "locked_text": "Oldd fel az Ecency-t a megtekintéshez",
+      "signed_out_text": "Jelentkezz be az Ecency-be"
+    },
+    "posting_grant": {
+      "unreadable": "A fiókod jelenlegi jogosultságai nem olvashatók. Semmi sem változott; próbáld újra.",
+      "reads_disagree": "A fiókod posting jogosultságának két lekérdezése eltér. Semmi sem változott; próbáld újra."
+    },
+    "vote": {
+      "vote_weight_must_be": "A szavazat súlya -100% és 100% között lehet.",
+      "please_sign_in_first": "Kérlek, előbb jelentkezz be."
+    },
+    "widget": {
+      "streak_name": "Küldetéssorozat",
+      "write": "Írás",
+      "new_wave": "Új Wave",
+      "notifications_description": "Az olvasatlan értesítéseid. Rejtve, amíg a PIN-zár be van kapcsolva.",
+      "streak_description": "A napi küldetéssorozatod. Rejtve, amíg a PIN-zár be van kapcsolva.",
+      "compose_description": "Írj egy bejegyzést vagy egy új Wave-et.",
+      "streak_title": "Sorozat",
+      "daily_quests": "Napi küldetések",
+      "streak_hint": "Nyisd meg a Perks részt a sorozatod megtekintéséhez",
+      "open_perks": "Perks megnyitása",
+      "open_app": "Ecency megnyitása",
+      "unread_caption": "{count, plural, one {olvasatlan} other {olvasatlan}}",
+      "streak_caption": "{count, plural, one {napos sorozat} other {napos sorozat}}"
+    },
+    "system": {
+      "dictation_channel": "Diktálás",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "Akkor látszik, amikor a háttérben diktálási felvétel készül, Leállítás művelettel.",
+      "dictation_title": "Felvétel diktáláshoz",
+      "dictation_text": "Az Ecency rögzíti a diktálásodat. A leállítás elküldetlenül tartja, amíg nem erősíted meg az alkalmazásban.",
+      "listen_channel_description": "Értesít, ha a Listen nem tudott a háttérben tovább menni.",
+      "listen_paused": "Listen szüneteltetve",
+      "listen_paused_text": "Nyisd meg az Ecency-t a hallgatás folytatásához.",
+      "skip_back": "15 másodperc vissza",
+      "skip_forward": "15 másodperc előre"
+    },
+    "permission": {
+      "face_id": "Oldd fel az Ecency-t Face ID-vel a PIN helyett.",
+      "camera": "QR-kódok beolvasása, valamint fotó vagy videó készítése a bejegyzéshez adáshoz.",
+      "photo_library_add": "Az Ecency a bejegyzésekből letöltött képeket a fotótáradba menti.",
+      "photo_library": "Az Ecency a bejegyzésekből letöltött képeket egy Ecency albumban tartja együtt a fotótáradban.",
+      "microphone": "Az Ecency a mikrofonodat használja, hogy bejegyzéseket és hozzászólásokat diktálhass (ezeket a felvételeket átírásra elküldjük az Ecency-nek), és hogy hangot rögzíthess a bejegyzéshez adott videóhoz."
+    },
+    "android": {
+      "no_browser": "Nincs elérhető böngésző",
+      "biometric_unlock_title": "Ecency feloldása biometrikus azonosítással",
+      "biometric_confirm": "Erősítsd meg ujjlenyomattal vagy arccal",
+      "image_unsupported_address": "Nem támogatott képcím",
+      "image_create_failed": "A fájl nem hozható létre",
+      "image_write_failed": "A fájl nem írható",
+      "image_too_large": "A kép túl nagy",
+      "image_download_failed": "A letöltés sikertelen, állapot: {status}",
+      "billing_disconnected": "A Google Play Billing kapcsolata megszakadt.",
+      "billing_no_screen": "Nincs képernyő a vásárlás megjelenítéséhez.",
+      "billing_error": "Google Play Billing hiba: {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Ebben a hónapban {count, plural, one {# bejegyzést} other {# bejegyzést}} hoztál létre. Csak így tovább!",
-        "checkin": "Ezen a héten {count, plural, one {# napon} other {# napon}} jelentkeztél be. Csak így tovább!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# új bejegyzés} other {# új bejegyzés}} itt: #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# sikertelen próbálkozás} other {# sikertelen próbálkozás}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} napos sorozat"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Csak a {days} napnál régebbi fiókok engedélyezettek",
-        "max_choices": "• Legfeljebb {choices} lehetőséget választhatsz"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Hátralévő {executions} utalás",
-        "schedule_summary": "{executions} átutalás, mindegyik {hours} óránként"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Túl rövid a pontszerzéshez (legfeljebb {n, plural, one {# karakter} other {# karakter}}, hivatkozások nélkül)"
       },
       "chats": {
-        "people_joined": "{count} ember csatlakozott"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "körülbelül {count, plural, one {# perc} other {# perc}} múlva",
+        "ban-remaining-hours": "körülbelül {count, plural, one {# óra} other {# óra}} múlva",
+        "ban-remaining-days": "körülbelül {count, plural, one {# nap} other {# nap}} múlva"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Legfeljebb {n, plural, one {# címkét} other {# címkét}} használj",
+          "too_long": "A keresés túl hosszú. Legfeljebb {n, plural, one {# karaktert} other {# karaktert}} használj"
+        }
       },
       "ai_assist": {
-        "min_chars": "Legalább {count} karakter szükséges",
-        "chars_remaining": "{count} karakter maradt"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Egyszerre legfeljebb {count, plural, one {# képet} other {# képet}} választhatsz ki"
+      },
+      "dictation": {
+        "stop_hint": "Állítsd le az átíráshoz és a bejegyzéshez adáshoz. Legfeljebb {m, plural, one {# perc} other {# perc}}.",
+        "rate": "{n} Pont {s, plural, one {# másodpercenként} other {# másodpercenként}}"
       },
       "transfer": {
-        "powering_down_info": "A következő letétfeloldás {days} nap múlva esedékes, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} és {max, plural, one {# karakter} other {# karakter}} között"
       }
     }
   }

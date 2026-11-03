@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro-lid"
   },
   "perks": {
     "header": "Voordelen",
@@ -31,42 +31,42 @@
     "promote_desc": "Krijg meer aandacht voor je bericht",
     "account_boost": "Account boosten",
     "account_boost_desc": "Boost elk account",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC opwaarderen",
+    "rc_topup_desc": "Blijf posten als je weinig Resource Credits hebt",
+    "streak_freeze_owned": "{n} in voorraad",
+    "streak_freeze_buy": "Streak beschermen ({price} Points)",
+    "streak_freeze_buying": "Beschermen",
+    "streak_freeze_error": "Kon geen streakbescherming kopen. Probeer het opnieuw."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Dagelijkse post",
+    "streak": "Streak van {n} dagen",
+    "keep_streak": "Houd je streak in leven"
   },
   "waves": {
     "for_you": "Voor jou",
     "following": "Volgend",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
+    "custom_feeds_title": "Eigen feeds",
+    "custom_feeds_subtitle": "Zet bronnen en tags vast om ze als feedtabs toe te voegen.",
+    "add_tag_placeholder": "Tag toevoegen",
+    "sources": "Bronnen",
+    "your_feeds": "Jouw feeds",
     "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "shorts_empty": "Nog geen shorts om te tonen",
+    "mute": "Dempen",
+    "unmute": "Dempen opheffen"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Aan de slag",
+    "subtitle": "Nieuw hier? Waves zijn korte posts en de makkelijkste manier om te beginnen.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Sluiten",
+    "item_wave": "Plaats je eerste Wave",
+    "item_vote": "Stem op een Wave die je leuk vindt",
+    "item_reply": "Reageer op iemand",
+    "item_checkin": "Check in om je streak te starten",
+    "all_done_title": "Alles gedaan 🎉",
+    "all_done_subtitle": "Je bent klaar. Blijf Waves maken!"
   },
   "profile": {
     "havent_commented": "heeft nog niets gereageerd",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Leeftijd  |  Zichtbaarheid  |  Interpretatie",
     "attach_poll": "Poll toevoegen"
   },
+  "favorite_tags": {
+    "title": "Tags",
+    "hint": "Volg om meldingen te krijgen over nieuwe berichten met deze tag",
+    "following_hint": "Je krijgt meldingen over nieuwe berichten met deze tag",
+    "follow": "Volgen",
+    "following": "Aan het volgen",
+    "added": "Tag gevolgd",
+    "removed": "Tag ontvolgd",
+    "empty_list": "Hier is niets"
+  },
   "favorites": {
     "add": "Favoriet toevoegen",
     "add_error": "Kon favoriet niet toevoegen",
@@ -181,7 +191,33 @@
     "payout": "Uitbetaling",
     "details": "Details",
     "community": "community",
-    "new_post": "Nieuw bericht"
+    "new_post": "Nieuw bericht",
+    "mute_post_title": "Dit bericht dempen",
+    "unmute_post_title": "Dempen van dit bericht opheffen",
+    "mute_post_reason": "Waarom wordt dit gedempt?",
+    "unmute_post_reason": "Waarom wordt dit hersteld?",
+    "manage": "Community beheren",
+    "manage_members": "Leden en rollen",
+    "manage_settings": "Community-instellingen",
+    "manage_activities": "Activiteitenlogboek",
+    "activities": "activiteit",
+    "no_activities": "Nog geen activiteit",
+    "activities_load_failed": "Kan activiteit niet laden. Trek omlaag om te vernieuwen.",
+    "set_role": "Rol instellen",
+    "assign_role": "Rol toewijzen",
+    "assign_role_hint": "Zoek elk account, ook als het zich niet heeft aangemeld, en kies een rol.",
+    "username_placeholder": "Gebruikersnaam",
+    "invalid_username": "Kies een bestaand account uit de resultaten",
+    "members": "leden",
+    "no_members": "Geen leden gevonden",
+    "members_incomplete": "Sommige leden konden niet worden geladen. Trek omlaag om te vernieuwen.",
+    "members_load_failed": "Kan leden niet laden. Trek omlaag om te vernieuwen.",
+    "role_owner": "Eigenaar",
+    "role_admin": "Beheerder",
+    "role_mod": "Moderator",
+    "role_member": "Lid",
+    "role_guest": "Gast",
+    "role_muted": "Gedempt"
   },
   "trade": {
     "swap_for": "{fromAmount} wisselen voor {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Cross-post",
     "pin-blog": "Vastmaken aan blog",
     "copy": "link kopiëren",
+    "copy-text": "tekst kopiëren",
+    "open-thread": "gesprek openen",
     "unpin-community": "Losmaken van community",
+    "mute-post": "Bericht dempen",
+    "unmute-post": "Dempen opheffen",
     "mute": "Dempen / Blokkeren",
     "reblog": "delen",
     "undo-reblog": "herblog ongedaan maken",
@@ -232,24 +272,24 @@
     "unpin-reply": "Reactie losmaken"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Deze post is in {lang}. Vertalen naar {target}?",
+    "translate_to": "Vertaal naar {lang}",
+    "show_original": "Origineel tonen",
+    "translated_from": "Vertaald uit {lang}",
+    "change_language": "Taal wijzigen"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Post vertalen",
+    "source": "Brontaal",
+    "target": "Doeltaal",
+    "detected": "Gedetecteerd: {lang}",
+    "translate": "Vertalen",
+    "apply": "Toepassen",
+    "review_note": "Voegt een machinevertaling van je eigen tekst toe aan het einde van de post. Controleer en bewerk deze voor het publiceren.",
+    "too_short": "Schrijf eerst wat meer. Vertalen heeft minstens een paar zinnen nodig.",
+    "progress": "Vertalen {done} van {total}...",
+    "error": "Vertalen mislukt. Probeer het opnieuw.",
+    "add_title_marker": "Taalmarkering aan titel toevoegen"
   },
   "side_menu": {
     "profile": "Profiel",
@@ -296,7 +336,7 @@
     "hot": "Hot",
     "popular": "Populair",
     "new": "Nieuw",
-    "friends": "Following",
+    "friends": "Volgend",
     "my_blog": "Mijn blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Niets hier"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Sjablonen",
+    "untitled": "Naamloos sjabloon",
+    "empty_list": "Sla een post op als sjabloon vanuit de editor om hem hier opnieuw te gebruiken.",
+    "delete_confirm": "Weet je zeker dat je dit sjabloon wilt verwijderen?",
+    "applied": "Sjabloon toegepast als nieuwe post",
+    "save_as_template": "Opslaan als sjabloon",
+    "name_placeholder": "Naam van sjabloon",
+    "saved": "Sjabloon opgeslagen"
   },
   "selection_list": {
     "available": "Beschikbaar {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
+      "activities": "Alles",
+      "replies": "Reacties",
+      "mentions": "Vermeldingen",
+      "rvotes": "Stemmen",
+      "follows": "Nieuwe volgers",
       "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "transfers": "Overboekingen",
+      "delegations": "Delegaties",
+      "nfavorites": "Favorieten",
+      "tags": "Tags",
+      "nbookmarks": "Bladwijzers",
+      "payouts": "Uitbetalingen",
+      "scheduled_published": "Geplande posts",
+      "account_updates": "Accountupdates",
+      "weekly_earnings": "Wekelijkse inkomsten"
     },
     "this_week": "Deze week",
     "reblog": "herbloggde",
@@ -417,11 +458,15 @@
     "yesterday": "Gisteren",
     "mention": "vermeld in",
     "favorites": "maakte een nieuw bericht",
+    "tags": "plaatste in #{tag}",
+    "tags_bundle": "{count} nieuwe berichten in #{tag}",
+    "tags_title": "Nieuwe berichten in een tag die je volgt",
     "mentions": "Vermeldingen",
     "spin": "Tijd om meer Points te verdienen",
     "last_week": "Vorige week",
     "recent": "Recent(e)",
     "ignore": "heeft je genegeerd",
+    "blacklist": "heeft je op de zwarte lijst gezet",
     "follow": "volgt je",
     "notification": "Notificaties",
     "this_month": "Deze maand",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} kan nu namens jou berichten plaatsen en stemmen. Als je dit niet hebt geautoriseerd, trek het dan in.",
     "weekly_earnings": "Je hebt deze week ${amount} verdiend{breakdown}",
     "payouts": "Uitbetaling ontvangen: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "heeft een geplande post gepubliceerd",
+    "scheduled_published_title": "Geplande post gepubliceerd",
+    "scheduled_published_body": "Je geplande post staat nu online, tik om hem te bekijken"
   },
   "recurrent": {
     "delete_failed": "Verwijderen van terugkerende overboeking mislukt, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Open een recent concept of maak een nieuw bericht",
     "reward_power_up": "100% staken",
     "open_gallery": "Galerij openen",
+    "open_files": "Kies uit Bestanden",
     "clipboard_no_image": "Geen afbeelding gevonden op het klembord",
     "clipboard_image_detected": "Afbeelding op het klembord",
     "paste_image": "Afbeelding plakken",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Later",
     "settings_title": "Berichtopties",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Nee"
+    "support_ecency": "Steun Ecency {percent}%",
+    "alert_btn_no": "Nee",
+    "short_reply_hint": "Reacties van {n} tekens of minder verdienen geen punten (links tellen niet mee)",
+    "short_content_hint": "Te kort om punten te verdienen ({n} tekens of minder, links niet meegeteld)"
   },
   "time": {
     "week": "weken",
@@ -655,7 +703,41 @@
     "select_emoji": "Emoji selecteren",
     "more_emojis": "Meer",
     "search_emojis": "Emoji's zoeken...",
-    "no_emoji_found": "Geen emoji gevonden"
+    "no_emoji_found": "Geen emoji gevonden",
+    "ban-reason-spray": "Je kunt even niet posten omdat hetzelfde bericht tegelijk naar meerdere kanalen is gestuurd.",
+    "ban-reason-mass-dm": "Je kunt even niet posten omdat een bericht tegelijk naar veel mensen is gestuurd.",
+    "ban-reason-generic": "Je kunt even niet posten in de chat.",
+    "ban-can-still-read": "Je kunt de chat nog wel lezen.",
+    "ban-unlocks": "Posten wordt weer mogelijk {when}.",
+    "ban-remaining-soon": "over minder dan een minuut",
+    "ban-remaining-minutes": "over ongeveer {count} minuten",
+    "ban-remaining-hours": "over ongeveer {count} uur",
+    "ban-remaining-days": "over ongeveer {count} dagen",
+    "new_group": "Nieuwe groep",
+    "new_group_hint": "Voeg {min} tot {max} mensen toe om een groepsgesprek te starten.",
+    "new_group_search": "Zoek mensen op gebruikersnaam",
+    "new_group_full": "Een groep kan maximaal {max} andere mensen hebben.",
+    "new_group_no_results": "Niemand gevonden in de chat met die naam.",
+    "new_group_search_failed": "Zoeken is mislukt. Controleer je verbinding en probeer het opnieuw.",
+    "new_group_remove": "@{username} verwijderen",
+    "new_group_create": "Groep starten",
+    "new_group_failed": "Kan de groep niet starten. Probeer het opnieuw.",
+    "rename_group": "Groep hernoemen",
+    "rename_group_hint": "Geef deze groep een naam die iedereen erin ziet. Laat leeg om in plaats daarvan de namen van de leden te tonen.",
+    "group_name": "Groepsnaam",
+    "rename_group_too_long": "Een groepsnaam mag maximaal {max} tekens lang zijn.",
+    "rename_group_not_owner": "Alleen degene die deze groep heeft gestart, kan hem hernoemen.",
+    "rename_group_failed": "Kan de groep niet hernoemen. Probeer het opnieuw.",
+    "group_renamed": "{user} heeft de groep hernoemd naar \"{name}\"",
+    "group_name_cleared": "{user} heeft de groepsnaam verwijderd",
+    "group_members": "Groepsleden",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "reactions_title": "Reacties",
+    "reactor_you": "Jij",
+    "reactor_unknown": "Iemand",
+    "see_who_reacted": "Houd ingedrukt om te zien wie heeft gereageerd",
+    "group": "Groep"
   },
   "free_estm": {
     "timer_text": "Volgende gratis Spin over",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transactie mislukt"
   },
   "search_result": {
+    "error": "Zoeken kon niet worden voltooid. Probeer het opnieuw",
+    "filters": {
+      "title": "Filters",
+      "open": "Filters",
+      "author": "Auteur",
+      "author_placeholder": "gebruikersnaam",
+      "category": "Categorie",
+      "category_placeholder": "community of categorie",
+      "tags": "Tags",
+      "tags_placeholder": "gescheiden door komma's",
+      "type": "Type",
+      "type_all": "Alles",
+      "type_post": "Berichten",
+      "type_comment": "Reacties",
+      "date": "Datum",
+      "date_week": "Afgelopen week",
+      "date_month": "Afgelopen maand",
+      "date_year": "Afgelopen jaar",
+      "date_all": "Altijd",
+      "sort": "Sorteren",
+      "apply": "Toepassen",
+      "active": "{n} actief",
+      "too_many_tags": "Gebruik maximaal {n} tags",
+      "too_long": "De zoekopdracht is te lang. Gebruik maximaal {n} tekens",
+      "needs_criteria": "Voer een zoekterm in, of een auteur, categorie of tag om op te filteren"
+    },
     "communities_filter": {
       "new": "Nieuw",
       "my": "Mijn communities",
@@ -727,7 +835,7 @@
     "title": "Cross-post"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Auteur heeft AI-gebruik gemeld"
   },
   "ai_assist": {
     "title": "AI-schrijfassistent",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Krijg relevante tags voor je bericht",
     "action_generate_title": "Titel genereren",
     "action_generate_title_desc": "Maak aansprekende titelopties",
-    "action_summarize": "Recap",
+    "action_summarize": "Samenvatting",
     "action_summarize_desc": "Maak een beknopte samenvatting",
     "action_check_grammar": "Grammatica controleren",
     "action_check_grammar_desc": "Los grammatica- en spelfouten op",
+    "action_generate_image": "Afbeelding genereren",
+    "action_generate_image_desc": "Maak een AI-afbeelding voor je bericht",
+    "cost_from": "vanaf {cost} {unit}",
     "text_label": "Jouw tekst",
     "text_placeholder": "Plak of typ hier je inhoud...",
     "min_chars": "Minimaal {count} tekens vereist",
@@ -797,16 +908,26 @@
     "remind_later": "Later herinneren",
     "success_subscribe": "Abonneren geslaagd!",
     "payloadTooLarge": "Bestand te groot, verklein de afbeelding of upload een kleinere",
+    "too_many_images": "Je kunt maximaal {count} afbeeldingen tegelijk selecteren",
     "fail_follow": "Volgen mislukt!",
     "clear_user_alert": "Weet je zeker dat je alle gebruikersgegevens wilt wissen?",
     "cancel": "Annuleren",
     "connection_success": "Succesvol verbonden!",
     "rc_down": "Niet genoeg Resource Credits om een actie uit te voeren! \n\nBoost je account om de ervaring te blijven genieten. Wil je je account nu boosten?",
+    "rc_down_title": "Onvoldoende Resource Credits",
+    "rc_precheck_title": "Dit bericht is mogelijk te groot om te publiceren",
+    "rc_precheck_body": "Je Resource Credits lijken te laag voor een bericht van deze grootte.",
+    "rc_down_body": "Je hebt niet genoeg Resource Credits voor deze actie.\n\nVul nu aan met Points om door te gaan, of boost je account voor altijd.",
+    "rc_down_topup": "RC aanvullen met Points",
+    "rc_down_boost": "Account boosten",
     "done": "Klaar",
     "something_wrong_alt": "Probeer ondertussen Ecency.com vanuit je browser",
     "same_user": "Deze gebruiker is al toegevoegd aan de lijst",
     "fail": "Mislukt!",
     "operation_failed_with_reason": "{operation} mislukt: {reason}",
+    "request_timed_out": "De verbinding duurt te lang. Controleer je netwerk en probeer het opnieuw.",
+    "load_failed_retry": "We konden dit niet laden. Probeer het opnieuw.",
+    "retrying": "Opnieuw proberen...",
     "wallet_refresh_failed": "Vernieuwen van portemonnee mislukt. Probeer het opnieuw.",
     "wallet_refresh_missing_account": "Vernieuwen van portemonnee mislukt: account ontbreekt.",
     "boost_failed": "Boosten mislukt.",
@@ -950,30 +1071,30 @@
   },
   "post": {
     "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
+    "upvoted": "Geupvote",
+    "downvoted": "Gedownvote",
+    "upvote_hint": "Tik twee keer om de stemopties te openen",
+    "payout_details": "Uitbetalingsdetails",
+    "a11y_votes": "{count, plural, one {# stem} other {# stemmen}}",
+    "a11y_voters_hint": "Stemmers bekijken",
     "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "a11y_reblogs_hint": "Reblogs bekijken",
+    "a11y_comments": "{count, plural, one {# reactie} other {# reacties}}",
+    "a11y_comments_hint": "Reacties bekijken",
+    "a11y_reply_hint": "Reageren",
+    "a11y_tip": "Fooi sturen",
+    "a11y_tips": "{count, plural, one {# fooi} other {# fooien}}",
+    "a11y_edit": "Reactie bewerken",
+    "a11y_delete": "Reactie verwijderen",
+    "a11y_show_replies": "Reacties tonen",
+    "a11y_hide_replies": "Reacties verbergen",
+    "a11y_post_options": "Postopties",
+    "a11y_views": "{count, plural, one {# weergave} other {# weergaven}}",
+    "source_ecency": "Gepubliceerd met Ecency",
+    "a11y_stats_hint": "Poststatistieken bekijken",
     "image": "Afbeelding",
     "reveal_muted": "GEDEMPT\nTik om inhoud weer te geven",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Tik om de afbeelding te laden",
     "in": "in",
     "poll": "PEILING",
     "copy_link": "Link kopiëren",
@@ -998,13 +1119,14 @@
     "save_to_local": "Downloaden naar apparaat",
     "muted": "Inhoud is gedempt wegens overtreding",
     "community_muted": "Inhoud gedempt wegens overtreding van communityrichtlijnen",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Inhoud van een account met lage reputatie",
+    "muted_downvoted": "Inhoud gedownvote door gebruikers",
+    "muted_low_trust": "Account met lage reputatie met een niet-geverifieerde externe link",
+    "muted_reveal": "Tik om te tonen",
     "promoted": "GEPROMOOT",
     "image_saved": "Afbeelding opgeslagen in fotogalerij",
     "words": "Woorden",
     "reading": "Lezen",
-    "listen": "Luisteren",
     "min": "min",
     "summarize_start": "Starten"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Geen bestaand artikel",
     "invalid_link": "URL is ongeldig, probeer het opnieuw met een geldige URL of probeer deze in een webbrowser te openen",
-    "no_existing_user": "Geen bestaande gebruiker"
+    "no_existing_user": "Geen bestaande gebruiker",
+    "posting_key_request": "{requester} vraagt om de private posting-sleutel van @{username}.\n\nGa alleen verder als je dit verzoek vertrouwt.",
+    "posting_key_request_unnamed": "Een andere app vraagt om de private posting-sleutel van @{username}.\n\nGa alleen verder als je dit verzoek vertrouwt.",
+    "auth_request_as_user": "{requester} wil je inloggen als @{username}.\n\nAlleen je gebruikersnaam en een inlogbewijs worden gedeeld. Er verlaat geen sleutel Ecency.",
+    "auth_request_as_current": "{requester} wil je inloggen met je Ecency-account.\n\nAlleen je gebruikersnaam en een inlogbewijs worden gedeeld. Er verlaat geen sleutel Ecency."
   },
   "payout": {
     "breakdown": "Uitsplitsing",
@@ -1065,7 +1191,7 @@
     "open": "URL openen",
     "invalid_key_desc": "log in met de {key}-sleutel of hoofdsleutel om deze transactie uit te voeren",
     "auth_transfer_confirm": "Overdracht naar {username} bevestigen?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Keur alleen goed als je de bron van deze link vertrouwt. Bij goedkeuring wordt de onderstaande bewerking vanaf je account uitgezonden met je {authority}-sleutel."
   },
   "voters_dropdown": {
     "rewards": "BELONINGEN",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Mag alleen letters, cijfers en koppeltekens bevatten",
       "username_no_ascii_first_letter_error": "Moet met een letter beginnen",
       "username_contains_double_hyphens": "Mag geen dubbele koppeltekens bevatten",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Deze gebruikersnaam lijkt te veel op een account van een cryptobeurs en kan anderen verwarren. Kies een unieker naam.",
+      "username_restricted_prefix": "Gebruikersnamen die beginnen met 'uid' gevolgd door cijfers zijn niet toegestaan, omdat ze vaak worden gebruikt om anderen na te bootsen. Kies een andere naam.",
       "username_contains_underscore": "Mag geen underscore bevatten"
     },
     "500_error": "Je verzoek kon niet worden verwerkt, de aanmeldwachtrij is waarschijnlijk vol! Probeer het over enkele minuten opnieuw...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Gebruikersnaam is al in gebruik",
+      "14": "E-mailadres is al geregistreerd",
+      "15": "Voer een geldig e-mailadres in",
+      "16": "Voer een geldige gebruikersnaam in",
+      "17": "Gebruikersnaam is te lang, kies een kortere",
+      "19": "Gebruik een permanent e-mailadres of neem in plaats daarvan een Premium-account",
+      "21": "Deze referral is niet geldig",
+      "28": "Je verzoek kon niet worden verwerkt: de aanmeldwachtrij zit waarschijnlijk vol. Probeer het over een paar minuten opnieuw.",
+      "107": "VPN-verbinding gedetecteerd. Schakel je VPN uit en probeer het opnieuw, of neem in plaats daarvan een Premium-account.",
+      "110": "Om misbruik te voorkomen beperken we het aantal accounts per persoon/netwerk. Probeer het opnieuw vanaf een ander netwerk.",
+      "111": "Tor-verbinding gedetecteerd. Schakel Tor uit tijdens het aanmelden.",
+      "112": "We konden je verbinding nu niet verifiëren. Probeer het over een paar minuten opnieuw."
     },
     "have_account_text": "Heb je al een account?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Krijg een volwaardig Hive-account; deze methode heeft basiscontroles om te voorkomen dat een botnet onze aanmeldfaucet misbruikt.",
     "btn_register": "Gratis registreren",
     "title": "Gratis account"
+  },
+  "dictation": {
+    "title": "Dicteren",
+    "start": "Opnemen",
+    "stop": "Stoppen",
+    "record_more": "Meer opnemen",
+    "done": "Klaar",
+    "recording": "Opnemen",
+    "stop_hint": "Stop om te transcriberen en toe te voegen aan je bericht. Maximaal {m} minuten.",
+    "inserted": "Toegevoegd aan je bericht. Neem meer op, of tik op Klaar.",
+    "transcribing": "Transcriberen",
+    "rate": "{n} Points per {s} seconden",
+    "cost_running": "{n} Points tot nu toe",
+    "cost_running_free": "Tot nu toe gratis",
+    "free_remaining": "Je volgende {n} x {s}s is vandaag gratis",
+    "price_loading": "Prijs controleren",
+    "price_error": "Kan de transcriptieprijs niet laden.",
+    "denied": "Ecency heeft toegang tot de microfoon nodig om te dicteren. Sta dit toe in Instellingen en probeer het opnieuw.",
+    "error_empty": "Er is geen spraak gedetecteerd in die opname.",
+    "error_insufficient_points": "Niet genoeg Points om die opname te transcriberen.",
+    "error_rate_limited": "Te veel opnames voor nu. Probeer het zo meteen opnieuw.",
+    "error_too_long": "Die opname is te lang om te transcriberen.",
+    "error_failed": "Kan die opname niet transcriberen. Probeer het opnieuw.",
+    "error_recorder": "Kan de opname niet starten. Probeer het opnieuw."
   },
   "wallet": {
     "delegations_out": "Uitgaande delegaties",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Regelmatig inchecken geeft je 0,25 points.",
     "fill_transfer_from_savings": "Spaaropname uitgevoerd",
     "activities": "Activiteiten",
+    "no_activities": "Nog geen transacties",
+    "activities_failed": "Kan transacties niet laden. Trek omlaag om opnieuw te proberen.",
     "tap_update": "Tik om bij te werken",
     "mining_lottery": "Loterij gewonnen",
     "checkin": "Inchecken",
     "tokens_transfer": "Tokens overgedragen",
     "outgoing_transfer_title": "Overdracht/Schenking",
+    "burned_title": "AI-gebruik",
+    "burned_description": "Points uitgegeven aan een AI-functie",
+    "burn_refund_title": "AI-terugbetaling",
+    "burn_refund_description": "Points teruggegeven na een mislukt AI-verzoek",
     "manage_assets": "Assets toevoegen/verwijderen",
     "selected_assets": "Geselecteerde assets",
     "nft_setPropertyPermissions": "Eigenschapsrechten ingesteld voor NFT-symbool",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Tokenprecisie bijgewerkt",
     "tokens_transferOwnership": "Tokeneigendom overgedragen",
     "withdraw_vesting": "Unstaken",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Opnameaccounts",
     "delegate_engine": "Delegeren",
     "market_close": "Order gesloten",
     "nftmarket_transferFee": "Kooporderkosten",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "POINTS VERKRIJGEN",
     "escrow_approve": "Escrow goedkeuren",
     "expires": "verloopt",
+    "transaction_id": "Transactie-ID",
+    "copy_transaction_id": "Transactielink kopiëren",
+    "filter_activities": "Activiteiten filteren",
+    "filter_activities_desc": "Kies welke bewerkingen deze geschiedenis opvraagt",
+    "filter_all": "Alles selecteren",
+    "filter_none": "Alles wissen",
+    "filter_apply": "Toepassen",
     "author_reward": "Auteurs-beloning",
     "withdraw_hbd": "Spaargeld opnemen",
     "convert_request": "Conversieverzoek",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC opwaarderen",
+    "desc": "Een tijdelijke RC-boost zodat je kunt blijven posten.",
+    "confirm": "Points uitgeven om je Resource Credits op te waarderen?",
+    "insufficient": "Je hebt niet genoeg Points.",
+    "buy_points": "Points kopen"
   },
   "ai_image_generator": {
     "title": "AI-afbeeldingsgenerator",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Aangepast ({hours}u)",
+    "balance_load_failed": "Kan je saldo niet laden. Tik om opnieuw te proberen.",
+    "precision_load_failed": "Kan de gegevens van dit token niet laden, daarom kunnen alleen hele bedragen worden verzonden. Tik om opnieuw te proberen.",
     "close": "Sluiten",
     "favorite_username_placeholder": "Gebruikersnaam",
     "invalid_recipient_qr": "Kon geen gebruikersnaam vinden in deze QR-code.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Bevoegdheden beheren",
     "pincode": "Pincode",
     "general": "Algemeen",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Steun Ecency",
+    "support_beneficiary": "Postbeloningen delen met Ecency",
+    "support_beneficiary_percent": "Aandeel in postbeloningen",
+    "support_curation": "Een deel van de curatiebeloningen inhouden",
+    "support_curation_percent": "Inhouding op curatiebeloningen",
     "feedback_body": "Schrijf hier je bericht!\n\nHive-gebruikersnaam: {username}\nApp-versie: {appVersion}\nPlatform: {platform}\n",
     "show_imgs": "Afbeeldingen tonen",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Reageer",
       "bookmark": "Bladwijzers",
+      "tags": "Tags",
       "reblog": "Hersteem",
       "favorite": "Favorieten",
       "mention": "Vermelding",
@@ -1599,10 +1765,10 @@
       "transfers": "Overboekingen",
       "vote": "Stem",
       "follow": "Volgen",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Geplande post gepubliceerd",
+      "payouts": "Uitbetalingen",
+      "account_update": "Accountupdates",
+      "weekly_earnings": "Wekelijkse inkomsten",
       "fcm_unavailable": "Pushmeldingen worden niet ondersteund op dit apparaat. Je ontvangt alleen meldingen terwijl de app geopend is."
     },
     "keys_warning": "Gevoelige accountinformatie!\nEcency moet met een pincode beveiligd zijn voordat je privésleutels kunt bekijken.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Feedback Versturen",
     "rate_app": "Ecency beoordelen",
+    "email_digests": "E-mailoverzichten",
     "rate": "Beoordelen",
     "dm-privacy-updated": "DM-privacy-instellingen succesvol bijgewerkt",
     "dm-privacy-failed": "Bijwerken van DM-privacy-instellingen mislukt",
@@ -1685,19 +1852,29 @@
     "request_sent": "Je verzoek tot verwijdering is verzonden",
     "confirm_delete_body": "Weet je zeker dat je het account wilt verwijderen? Hiermee worden al je gegevens gewist"
   },
-  "tts": {
-    "settings_title": "Tekst-naar-spraak-instellingen",
-    "voice": "Stem",
-    "voice_hint": "De standaardstem van het systeem wordt gebruikt",
-    "speed": "Snelheid",
-    "pitch": "Toonhoogte",
-    "test_voice": "Stem testen",
-    "settings_info": "Deze instellingen worden gebruikt bij het hardop voorlezen van posts",
+  "listen": {
+    "title": "Luister naar dit bericht",
+    "minutes": "~{n} min",
+    "login": "Inloggen",
+    "unlock": "Ontgrendelen · {n} Points",
+    "confirm": "{n} Points uitgeven om naar dit bericht te luisteren? De audio is van jou en kun je altijd opnieuw afspelen.",
+    "not_enough_title": "Niet genoeg Points",
+    "not_enough": "Luisteren kost {required} Points en je hebt er {available}.",
+    "get_points": "Points kopen",
+    "unlock_failed": "Kan de audio niet ontgrendelen, probeer het opnieuw",
+    "failed_refunded": "De audio kon niet worden gemaakt, je Points zijn terugbetaald",
+    "preparing": "Audio voorbereiden…",
+    "preparing_eta": "Audio voorbereiden, ongeveer {n} min…",
+    "preparing_progress": "Audio voorbereiden · {n}%",
+    "waiting": "In de wachtrij, nog {n} voor je…",
+    "next_in_line": "Jij bent de volgende…",
     "play": "Afspelen",
     "pause": "Pauzeren",
-    "language": "Taal",
-    "language_auto": "Automatisch detecteren",
-    "language_hint": "Automatisch detecteren kiest de taal op basis van de inhoud van de post"
+    "seek": "Zoeken",
+    "speed": "Afspeelsnelheid",
+    "language": "Audiotaal",
+    "unavailable": "De audio kon niet worden geladen.",
+    "retry": "Opnieuw proberen"
   },
   "posting_authority": {
     "title": "Sneller posten inschakelen",
@@ -1732,7 +1909,7 @@
     "error-auth": "Authenticatie mislukt. Log opnieuw in.",
     "error-generic": "Video uploaden mislukt. Probeer het opnieuw.",
     "error-too-long-short": "Korte video's mogen maximaal 60 seconden duren.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Een post kan maar één video bevatten. Verwijder de huidige video voordat je een andere toevoegt.",
     "select_source": "Video toevoegen",
     "record": "Video opnemen",
     "choose_library": "Kies uit bibliotheek"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Deel een snelle update"
   },
+  "newsletter": {
+    "screen_title": "E-mailoverzichten",
+    "title": "{list}",
+    "body_own": "Een wekelijks of maandelijks e-mailoverzicht van je meldingen.",
+    "body_creator": "Nieuwe berichten van {list} in je inbox.",
+    "body_community": "Een overzicht van nieuwe berichten in {list} per e-mail.",
+    "body_site": "Het beste van Ecency in je inbox.",
+    "first_publish_title": "Gefeliciteerd met je eerste bericht!",
+    "first_publish_body": "Wil je een e-mailoverzicht van je meldingen? Wekelijks of maandelijks, wijzig of stop het altijd in Instellingen.",
+    "list_own": "Overzicht van mijn meldingen",
+    "list_site": "Ecency-nieuwsbrief",
+    "status_active": "Je bent aangemeld.",
+    "status_pending": "Wacht op bevestiging per e-mail.",
+    "status_short_active": "actief",
+    "status_short_pending_confirmation": "in afwachting",
+    "status_short_suppressed": "gestopt",
+    "status_short_ended": "beëindigd",
+    "cadence_weekly": "Wekelijks",
+    "cadence_monthly": "Maandelijks",
+    "email_placeholder": "jij@voorbeeld.nl",
+    "subscribe": "Aanmelden",
+    "update": "Bijwerken",
+    "resend": "Bevestiging opnieuw sturen",
+    "leave": "Overzicht verlaten",
+    "cancel": "Annuleren",
+    "ok": "OK",
+    "manage": "Beheren",
+    "check_inbox_title": "Controleer je inbox",
+    "check_inbox_body": "We hebben een bevestigingslink gestuurd naar {email}. Het abonnement start zodra je bevestigt.",
+    "subscribed": "Aangemeld voor het e-mailoverzicht",
+    "left": "Overzicht verlaten",
+    "refused": "Dit adres kan niet worden aangemeld.",
+    "unavailable": "E-mailoverzichten zijn nu niet beschikbaar.",
+    "too_many": "Te veel pogingen, probeer het later opnieuw.",
+    "fail": "Er is iets misgegaan, probeer het opnieuw.",
+    "empty": "Nog geen e-mailoverzichten. Meld je hieronder aan om te beginnen.",
+    "discover": "Ontvang meer per e-mail",
+    "stop_all": "Alles stoppen",
+    "stop_all_title": "Alle e-mail stoppen?",
+    "stop_all_body": "Er wordt nooit meer Ecency-mail naar {email} gestuurd. Abonnementen onder andere adressen blijven bestaan.",
+    "stop_all_ok": "Alles stoppen",
+    "stop_all_done": "Adres afgemeld voor alle mail",
+    "profile_option": "E-MAILOVERZICHT",
+    "subscriber_count": "{weekly} wekelijkse • {monthly} maandelijkse e-mailabonnees",
+    "community_button": "Nieuwsbrief"
+  },
+  "mod_notes": {
+    "title": "Reden toevoegen",
+    "placeholder": "Reden (zichtbaar voor andere moderators)",
+    "confirm": "Bevestigen",
+    "cancel": "Annuleren"
+  },
+  "community_settings": {
+    "title_header": "Community-instellingen",
+    "title_label": "Titel",
+    "about": "Over",
+    "lang": "Taal",
+    "description": "Beschrijving",
+    "rules": "Regels",
+    "nsfw": "Niet geschikt voor werk",
+    "save": "Opslaan",
+    "required": "Verplicht",
+    "title_length": "Tussen {min} en {max} tekens",
+    "owner_admin_only": "Alleen de eigenaar en beheerders kunnen deze instellingen wijzigen."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Uitgeklapt",
+        "collapsed": "Ingeklapt"
+      },
+      "a11y_chat": {
+        "quote": "Reageren op {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Selecteren",
+        "deselect": "Deselecteren"
+      },
+      "store": {
+        "billing_unavailable": "Aankopen in de app zijn niet toegestaan op dit apparaat.",
+        "verification_failed": "De App Store kon deze aankoop niet verifiëren.",
+        "cancelled": "Aankoop geannuleerd",
+        "unknown_result": "Onbekend aankoopresultaat"
+      },
+      "navigation": {
+        "feed_unavailable": "Deze feed is nog niet beschikbaar.",
+        "link_cannot_open": "Deze link kan niet worden geopend.",
+        "video_cannot_play": "Deze video kan niet worden afgespeeld."
+      },
+      "media": {
+        "load_failed": "Dit item kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.",
+        "loading": "Media laden",
+        "download_failed": "Downloaden mislukt met status {status}"
+      },
+      "sign_in": {
+        "required": "Inloggen vereist",
+        "to_reply": "Log in om te reageren.",
+        "to_vote": "Log in om te stemmen.",
+        "button": "Inloggen"
+      },
+      "account": {
+        "logout_user": "@{username} uitloggen"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# stem} other {# stemmen}}  •  {replies, plural, one {# reactie} other {# reacties}}",
+        "voting_power": "Stemkracht {percent}",
+        "remove_favourite": "Verwijderen uit favorieten",
+        "add_favourite": "Toevoegen aan favorieten"
+      },
+      "waves": {
+        "clear_tag_filter": "Tagfilter {tag} wissen",
+        "new_wave": "Nieuwe wave",
+        "replies_open_thread": "{count, plural, one {# reactie, gesprek openen} other {# reacties, gesprek openen}}",
+        "characters": "{count} van {max} tekens",
+        "retry": "{message}\nOpnieuw proberen",
+        "playing": "{permlink} wordt afgespeeld",
+        "video_attached_remove": "Video bijgevoegd, verwijderen",
+        "image_attached_remove": "Bijgevoegde afbeelding, verwijderen",
+        "take_photo": "Foto maken",
+        "edit_poll": "Poll bewerken",
+        "add_poll": "Poll toevoegen",
+        "add_video": "Video toevoegen"
+      },
+      "reading": {
+        "reply_to": "Reageren op {username}",
+        "opens_post": "Opent het bericht",
+        "sort_comments": "Reacties sorteren",
+        "sort_comments_value": "Reacties sorteren, {sort}",
+        "no_comments": "Nog geen reacties.",
+        "loading_post": "Bericht laden",
+        "show_version": "Versie tonen",
+        "show_changes": "Wijzigingen tonen",
+        "replying_to": "Reageren op @{username}",
+        "reply_text": "Reactietekst",
+        "translate_from": "Van",
+        "translate_to": "Naar"
+      },
+      "feed": {
+        "tab_pinned": "{label}, vastgemaakt",
+        "tab_add": "{label}, toevoegen",
+        "customise": "Aanpassen"
+      },
+      "card": {
+        "in_category": "in {category}",
+        "pinned": "Vastgemaakt",
+        "by_author": "door {username}",
+        "payout": "uitbetaling {payout}",
+        "payout_declined": "uitbetaling {payout}, geweigerd",
+        "reblogged_by": "Geherblogd door {username}"
+      },
+      "shell": {
+        "close_menu": "Menu sluiten"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatuur, kies een andere afbeelding",
+        "words": "{count, plural, one {# woord} other {# woorden}}",
+        "poll_min_age": "Min. accountleeftijd (dagen): {days}",
+        "poll_max_options": "Max. opties: {count}",
+        "thumbnail_selected": "Geselecteerde miniatuur",
+        "thumbnail": "Miniatuur",
+        "uploaded_image": "Geüploade afbeelding",
+        "community_search": "zoeken"
+      },
+      "vote": {
+        "not_voted": "Niet gestemd",
+        "voting": "Stemmen",
+        "failed_with": "Stemmen mislukt: {message}",
+        "failed": "Stemmen mislukt",
+        "payout": "Uitbetaling {payout}",
+        "payout_declined": "Uitbetaling {payout}, geweigerd",
+        "percent": "{percent} procent",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "Aan",
+        "off": "Uit"
+      },
+      "lock": {
+        "biometric_reason": "Biometrisch ontgrendelen inschakelen voor Ecency",
+        "offer_title": "Ontgrendelen met {method}",
+        "offer_use": "{method} gebruiken"
+      },
+      "keys": {
+        "hidden_while_captured": "Sleutels zijn verborgen terwijl het scherm wordt opgenomen of gespiegeld.",
+        "screenshot_notice": "Er is een schermafbeelding gemaakt. Privésleutels zijn weer verborgen; als de schermafbeelding een sleutel toont, verwijder die dan.",
+        "hold_hint": "Houd een sleutel ingedrukt om hem te tonen.",
+        "hold_to_show": "Houd ingedrukt om te tonen"
+      },
+      "wallet": {
+        "cancel_order": "Deze order annuleren?",
+        "days": "{count, plural, one {# dag} other {# dagen}}"
+      },
+      "chat": {
+        "reactors_hint": "Houd ingedrukt om te zien wie heeft gereageerd",
+        "see_reactors": "Zien wie heeft gereageerd"
+      },
+      "esie": {
+        "still": "{mood}, stil"
+      }
+    },
+    "ui": {
+      "profile_of": "Profiel van @{username}",
+      "preview": "Voorbeeld ({index}/{count})",
+      "balance": "Saldo: {amount}",
+      "expires_in": "Verloopt over {time}",
+      "expired": "Verlopen. Sluit en probeer het opnieuw.",
+      "user_has_no_posts": "@{username} heeft nog niets geplaatst",
+      "attach_image": "Afbeelding bijvoegen",
+      "auto": "Auto",
+      "back": "Terug",
+      "hot": "HOT",
+      "image_of": "Afbeelding {index} van {count}",
+      "new": "NIEUW",
+      "nsfw_tap_to_reveal": "NSFW Tik om te tonen",
+      "new_reply": "Nieuwe reactie",
+      "remove": "Verwijderen",
+      "unlock_ecency": "Ecency ontgrendelen",
+      "update_it": "Bijwerken",
+      "update_it_or_post_this_as": "Bijwerken, of dit als nieuwe reactie plaatsen?",
+      "use_pin": "PIN gebruiken",
+      "your_reply_was_already_posted": "Je reactie is al geplaatst",
+      "error_try_again": "{message} Opnieuw proberen?",
+      "auth": {
+        "account_label": "Account: @{username}",
+        "approve_the_request_in_your_wallet": "Keur het verzoek goed in je wallet-app.",
+        "copy_key": "{title} kopiëren",
+        "current_account": "Huidig account",
+        "qr_code": "QR-code",
+        "requested_by": "Aangevraagd door {requester}",
+        "pin_digits": "{filled} van {total, plural, one {# cijfer} other {# cijfers}}",
+        "private_key_shown": "{title}, privésleutel getoond",
+        "open_wallet_app": "Wallet-app openen",
+        "hiveauth_scan": "Keur goed in Hive Keychain of een andere HiveAuth-wallet: open die op dit apparaat, of scan deze code ermee.",
+        "switching": "Wisselen...",
+        "logout_all": "Uitloggen bij alle accounts",
+        "logout_all_title": "Uitloggen bij elk account op dit apparaat?",
+        "stored_key": "@{username} is al ingelogd op dit apparaat. De opgeslagen sleutels blijven; alleen de sessie wordt vernieuwd.",
+        "stored_hivesigner": "@{username} is al ingelogd met HiveSigner op dit apparaat. De sessie wordt vervangen.",
+        "stored_hiveauth": "@{username} is ingelogd met HiveAuth op dit apparaat. Er wordt voortaan met HiveSigner ondertekend.",
+        "method_key": "Sleutel",
+        "logout_failed": "Uitloggen mislukt"
+      },
+      "browser": {
+        "account": "Account",
+        "authority": "Autoriteit",
+        "phishing": "Waarschuwing: dit domein is gemarkeerd als bekende phishingsite. Ga uiterst voorzichtig te werk."
+      },
+      "chat": {
+        "cancel_edit": "Bewerken annuleren",
+        "cancel_reply": "Reactie annuleren",
+        "copied_to_clipboard": "Gekopieerd naar klembord",
+        "edited_at": "Bewerkt {time}",
+        "group_options": "Groepsopties",
+        "pinned_messages": "Vastgemaakte berichten",
+        "remove_user": "@{username} verwijderen",
+        "sort_by_name": "Sorteren op naam",
+        "more": "Meer",
+        "reaction_label": "{emoji} {count}. Houd ingedrukt om te zien wie heeft gereageerd",
+        "members": "Leden"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Er bestaat al een bericht op deze link dat afwijkt van wat je hebt verstuurd. Bijwerken, of als nieuw publiceren?",
+        "a_scheduled_post_is_published_by": "Een ingepland bericht wordt door Ecency op het gekozen tijdstip gepubliceerd. Daarvoor is de posting-bevoegdheid voor ecency.app op je account nodig. Je sleutels en andere bevoegdheden blijven zoals ze zijn. Voor het verlenen is je active-sleutel nodig.",
+        "ai_assist": "AI-assistent",
+        "ai_tools": "AI-tools",
+        "allow_ecency_to_publish_for_you": "Ecency toestemming geven om voor je te publiceren?",
+        "bold": "Vet",
+        "clone": "Dupliceren",
+        "cost": "Kosten: {cost}",
+        "could_not_store_the_draft_on": "Kan het concept niet op dit apparaat opslaan. Houd de app open en sla het concept op.",
+        "draft": "CONCEPT",
+        "delete_count": "Verwijderen ({count})",
+        "dictate_desc": "Spreek, en de transcriptie komt in je bericht",
+        "discard": "Verwerpen",
+        "discard_changes": "Wijzigingen verwerpen?",
+        "grant": "Verlenen",
+        "italic": "Cursief",
+        "keep_editing": "Verder bewerken",
+        "my_blog": "MIJN BLOG",
+        "my_communities": "MIJN COMMUNITY'S",
+        "new_post": "Nieuw bericht",
+        "notice": "Let op",
+        "restore": "Herstellen",
+        "restore_unsaved_changes": "Niet-opgeslagen wijzigingen herstellen?",
+        "saved": "Opgeslagen",
+        "top_communities": "TOPCOMMUNITY'S",
+        "table": "Tabel",
+        "text_format": "Tekstopmaak",
+        "this_link_is_already_in_use": "Deze link is al in gebruik",
+        "untitled": "Zonder titel",
+        "update_it_or_publish_this_as": "Bijwerken, of dit als nieuw bericht publiceren?",
+        "you_have_unsaved_changes_from_an": "Je hebt niet-opgeslagen wijzigingen van een eerdere bewerking. Het bericht is sindsdien veranderd; herstellen vervangt de tekst hieronder.",
+        "your_edits_were_not_published": "Je bewerkingen zijn niet gepubliceerd.",
+        "your_post_was_already_published": "Je bericht is al gepubliceerd",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatuur, tik om een andere afbeelding te kiezen",
+        "thumbnail_number": "Miniatuur {number}",
+        "recording_busy": "Er loopt al een opname. Rond die eerst af in de camera.",
+        "photo_lost": "De foto ging verloren terwijl de camera open was. Maak hem opnieuw.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# woord} other {# woorden}}",
+        "community_search": "zoeken"
+      },
+      "profile": {
+        "open_wallet": "Wallet openen",
+        "your_wallet_is_on_the_wallet": "Je wallet staat op het tabblad Wallet.",
+        "user_has_no_comments": "@{username} heeft nog niet gereageerd",
+        "votes_count": "{count, plural, one {# stem} other {# stemmen}}",
+        "replies_count": "{count, plural, one {# reactie} other {# reacties}}",
+        "menu": "Meer",
+        "users": "Gebruikers"
+      },
+      "reading": {
+        "apply": "TOEPASSEN",
+        "add_tag": "Tag toevoegen",
+        "age": "Leeftijd",
+        "audio_language": "Audiotaal",
+        "available_filters": "Beschikbare filters",
+        "could_not_unlock_the_audio_please": "Kan de audio niet ontgrendelen, probeer het opnieuw",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Luister naar dit bericht",
+        "log_in": "Inloggen",
+        "mark_all_as_read": "Alles als gelezen markeren",
+        "mark_as_read": "Als gelezen markeren",
+        "more_replies": "Meer reacties",
+        "not_enough_points": "Niet genoeg Points",
+        "nothing_here_yet": "Hier is nog niets.",
+        "open_editor": "Editor openen",
+        "pause_voice": "Stem pauzeren",
+        "play_voice": "Stem afspelen",
+        "playback_speed": "Afspeelsnelheid",
+        "publishing_in_waves": "Publiceren in Waves",
+        "quests_done": "Voltooide opdrachten",
+        "read": "Lezen",
+        "remove_vote": "Stem verwijderen",
+        "seek": "Zoeken",
+        "select_community": "Community selecteren",
+        "selected_filters": "Geselecteerde filters",
+        "the_audio_could_not_be_loaded": "De audio kon niet worden geladen.",
+        "this_post_does_not_exist_or": "Dit bericht bestaat niet of is verwijderd.",
+        "unread": "Ongelezen",
+        "voice_position": "Positie van de stem",
+        "vote_weight": "Stemgewicht",
+        "reblogged_by": "geherblogd door {username}",
+        "no_more_posts": "Geen berichten meer.",
+        "favourite": "Favoriet",
+        "no_votes_yet": "Nog geen stemmen",
+        "no_comments_yet": "Nog geen reacties. Wees de eerste!",
+        "comments_count": "Reacties ({count})",
+        "sending_to_chain": "wordt naar de keten verzonden",
+        "compare": "Vergelijken",
+        "your_vote": "Jouw stem",
+        "reply_to": "Reageren op @{username}",
+        "what_do_you_think": "Wat vind je ervan?",
+        "clear_tag_filter": "Tagfilter wissen",
+        "tab_selected": "{title}, geselecteerd",
+        "add_tag_feed": "Tagfeed toevoegen",
+        "feed_pinned": "{label}, vastgemaakt",
+        "attached_image_remove": "Bijgevoegde afbeelding, tik om te verwijderen",
+        "camera": "Camera",
+        "files": "Bestanden",
+        "paused": "Gepauzeerd",
+        "in_topic": "in {topic}",
+        "poll_vote": "Stemmen",
+        "reply": "Reageren",
+        "mute_sound": "Dempen",
+        "unmute_sound": "Dempen opheffen",
+        "leaderboard_activities": "Activiteiten",
+        "leaderboard_reward": "Beloning",
+        "sort_votes": "Stemmen"
+      },
+      "shell": {
+        "account_of": "Account @{username}",
+        "account_signed_out": "Account, uitgelogd",
+        "close_tab": "Tabblad sluiten",
+        "coming_soon_to_the_native_app": "Binnenkort in de native app.",
+        "create": "Maken",
+        "expand": "Uitklappen",
+        "forward": "Vooruit",
+        "loading": "Laden",
+        "new_tab": "Nieuw tabblad",
+        "reload": "Opnieuw laden",
+        "sent": "Verzonden",
+        "tab_unread": "{title}, {count} ongelezen",
+        "no_app_for_link": "Geen enkele app kan deze link openen."
+      },
+      "wallet": {
+        "product_not_available": "Product niet beschikbaar.",
+        "repeat": "Herhalen"
+      },
+      "copied": "Gekopieerd",
+      "trending_caps": "TRENDING",
+      "move_up": "Omhoog",
+      "move_down": "Omlaag",
+      "scroll_to_top": "Naar boven",
+      "load_more": "Meer"
+    },
+    "wallet": {
+      "checking": "Controleren bij het netwerk",
+      "leave_title": "Nog bezig met verzenden",
+      "leave_message": "Dit wordt nog verzonden of bij het netwerk gecontroleerd. Je kunt dit scherm verlaten: de app laat het weten als het klaar is.",
+      "stay": "Blijven",
+      "collateralized_convert_request": "Verzoek voor gecollateraliseerde conversie",
+      "op_transfer": "overboeking",
+      "op_power_up": "power up",
+      "op_power_down_change": "wijziging power down",
+      "op_delegation": "delegatie",
+      "op_savings_deposit": "spaardeposito",
+      "op_savings_withdrawal": "spaaropname",
+      "op_conversion": "conversie",
+      "op_swap": "swap",
+      "op_order_cancel": "order annuleren",
+      "op_reward_claim": "beloning claimen",
+      "op_withdraw_route_change": "wijziging opnameroute",
+      "op_token_operation": "tokenbewerking"
+    },
+    "notification": {
+      "amount_unknown": "Bedrag niet beschikbaar",
+      "weekly_earnings_breakdown": "Je hebt deze week ${amount} verdiend - ${authorUsd} met berichten, ${curationUsd} met curatie.",
+      "weekly_earnings_total": "Je hebt deze week ${amount} verdiend met je berichten en curatie."
+    },
+    "settings": {
+      "open": "Openen",
+      "feedback_subject": "Feedback/Bugmelding",
+      "unknown_user": "Onbekende gebruiker"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Volgers",
+      "spin_game": "Spinspel",
+      "edit_profile": "Profiel bewerken",
+      "redeem_points": "Points inwisselen",
+      "community": "Community",
+      "community_members": "Communityleden",
+      "community_activities": "Communityactiviteit",
+      "browser": "Browser",
+      "asset_details": "Assetdetails",
+      "edit_history": "Bewerkingsgeschiedenis",
+      "welcome": "Welkom",
+      "chat": "Chat",
+      "backup_keys": "Back-up van sleutels",
+      "trade": "Handelen",
+      "ai_image_generator": "AI-afbeeldingsgenerator",
+      "select_assets": "Assets selecteren",
+      "poll": "Poll",
+      "bot_comments": "Botreacties"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Bewerkingen die de owner-sleutel nodig hebben, kunnen niet in Ecency worden ondertekend.",
+      "post": "Bericht/Reactie",
+      "custom": "Aangepaste JSON",
+      "sign_buffer": "Bericht ondertekenen",
+      "send_token": "Token verzenden",
+      "witness_vote": "Witness-stem",
+      "proxy": "Proxy instellen",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Uitzenden",
+      "sign_tx": "Transactie ondertekenen",
+      "encode": "Bericht coderen",
+      "decode": "Sleutel verifiëren",
+      "add_account_authority": "Accountbevoegdheid toevoegen",
+      "remove_account_authority": "Accountbevoegdheid verwijderen",
+      "add_key_authority": "Sleutelbevoegdheid toevoegen",
+      "remove_key_authority": "Sleutelbevoegdheid verwijderen",
+      "create_claimed_account": "Account aanmaken",
+      "create_proposal": "Voorstel aanmaken",
+      "remove_proposal": "Voorstel verwijderen",
+      "update_proposal_vote": "Voorstelstem",
+      "signed_call": "Ondertekende aanroep"
+    },
+    "translate_language": {
+      "ar": "Arabisch",
+      "az": "Azerbeidzjaans",
+      "bg": "Bulgaars",
+      "bn": "Bengaals",
+      "ca": "Catalaans",
+      "cs": "Tsjechisch",
+      "da": "Deens",
+      "de": "Duits",
+      "el": "Grieks",
+      "en": "Engels",
+      "eo": "Esperanto",
+      "es": "Spaans",
+      "et": "Estisch",
+      "fa": "Perzisch",
+      "fi": "Fins",
+      "fr": "Frans",
+      "ga": "Iers",
+      "he": "Hebreeuws",
+      "hi": "Hindi",
+      "hu": "Hongaars",
+      "id": "Indonesisch",
+      "it": "Italiaans",
+      "ja": "Japans",
+      "ko": "Koreaans",
+      "lt": "Litouws",
+      "lv": "Lets",
+      "ms": "Maleis",
+      "nb": "Noors",
+      "nl": "Nederlands",
+      "pl": "Pools",
+      "pt": "Portugees",
+      "ro": "Roemeens",
+      "ru": "Russisch",
+      "sk": "Slowaaks",
+      "sl": "Sloveens",
+      "sq": "Albanees",
+      "sv": "Zweeds",
+      "th": "Thai",
+      "tl": "Tagalog",
+      "tr": "Turks",
+      "uk": "Oekraïens",
+      "zh": "Chinees",
+      "zt": "Chinees (traditioneel)"
+    },
+    "reading": {
+      "banner_text": "Dit bericht is in het {source}. Vertalen naar het {target}?",
+      "translated_from_text": "Vertaald uit het {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# lid} other {# leden}} • {authors, plural, one {# auteur} other {# auteurs}} • {posts, plural, one {# bericht} other {# berichten}}",
+      "community_title": "Community {title}",
+      "members_title": "Leden van {title}",
+      "activities_title": "Activiteit van {title}",
+      "cannot_start_with_or": "Mag niet beginnen met @ of #",
+      "use_a_two_letter": "Gebruik een taalcode van twee letters, zoals en",
+      "at_most_characters": "Maximaal {max, plural, one {# teken} other {# tekens}}",
+      "council": "Raad",
+      "journal": "Dagboek",
+      "topic": "Onderwerp",
+      "community_not_found": "Community niet gevonden."
+    },
+    "transfer": {
+      "one_recipient": "Voor deze overboeking kan slechts één ontvanger worden gebruikt.",
+      "is_an_exchange_and": "{exchange} is een beurs en ondersteunt mogelijk geen terugkerende overboekingen: geld dat volgens schema wordt verzonden, kan verloren gaan. Gebruik in plaats daarvan een eenmalige overboeking."
+    },
+    "dapps": {
+      "signing_info": "Ecency fungeert als je Hive-ondertekeningsextensie. Wanneer een dApp je vraagt in te loggen met een browserextensie zoals Keychain, Keeper of Peak Vault, kies je die optie. Ecency regelt het ondertekenen veilig.",
+      "category_social": "Sociaal",
+      "category_gaming": "Gaming",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Groep",
+      "unable_to_load_messages": "Kan berichten niet laden.",
+      "someone": "Iemand",
+      "renamed_the_group_to": "{actor} heeft de groep hernoemd naar \"{name}\"",
+      "removed_the_group_name": "{actor} heeft de groepsnaam verwijderd",
+      "unable_to_send_your": "Kan je bericht niet versturen.",
+      "unable_to_remove_message": "Kan bericht niet verwijderen.",
+      "unknown": "Onbekend",
+      "members_online": "{members, plural, one {# lid} other {# leden}} • {online} online",
+      "failed_to_load_pinned": "Vastgemaakte berichten laden mislukt",
+      "you": "Jij",
+      "title": "Reacties"
+    },
+    "tip": {
+      "login_required": "Log in om tips te sturen",
+      "max_decimals": "Maximaal {n, plural, one {# decimaal} other {# decimalen}}"
+    },
+    "paid": {
+      "check_again": "Opnieuw controleren",
+      "give_up": "Opgeven",
+      "unknown": "Nog geen antwoord. Het verzoek loopt mogelijk nog. Controleer opnieuw om het resultaat op te halen: er wordt niet een tweede keer voor betaald.",
+      "pending": "Je verzoek wordt nog verwerkt. Controleer zo meteen opnieuw: er wordt niet een tweede keer voor betaald.",
+      "restored": "Een eerder verzoek heeft nog geen antwoord. Controleer opnieuw om het resultaat op te halen: er wordt niet een tweede keer voor betaald.",
+      "give_up_confirm": "Als het verzoek is doorgegaan, zijn de punten uitgegeven en gaat het resultaat verloren.",
+      "not_stored": "Dit verzoek kon niet op het apparaat worden opgeslagen. Houd dit scherm open tot het klaar is.",
+      "sign_in_again": "Je sessie is verlopen. Log opnieuw in en controleer dan opnieuw.",
+      "other_account": "Dit hoort bij @{owner}. Schakel terug naar dat account om door te gaan."
+    },
+    "ai": {
+      "run_ai_assist": "AI-assistent uitvoeren ({costText})",
+      "no_longer_free_cost": "Deze uitvoering is vandaag niet meer gratis. Het kost {cost} {unit}.",
+      "no_longer_free": "Deze uitvoering is vandaag niet meer gratis.",
+      "content_violates_our_content": "De inhoud schendt ons inhoudsbeleid. Pas je tekst aan. Points zijn niet terugbetaald.",
+      "generate_image": "Afbeelding genereren ({costLabel})",
+      "use_prompt": "Gebruik: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Even geduld, er is al een andere actie bezig",
+      "not_a_community_post": "Geen communitybericht.",
+      "parent_post_not_found": "Oorspronkelijk bericht niet gevonden",
+      "the_account_changed": "Het account is gewijzigd."
+    },
+    "dictation": {
+      "balance": "Saldo: {balance} {unit}",
+      "stop_points": "Stoppen ({cost} Points)",
+      "stop_free": "Stoppen (gratis)",
+      "transcribe_points": "Transcriberen ({cost} Points)",
+      "transcribe": "Transcriberen",
+      "no_longer_free_cost": "Deze opname is vandaag niet meer gratis. Het kost {cost} Points.",
+      "no_longer_free": "Deze opname is vandaag niet meer gratis.",
+      "held_locked": "De opname is gestopt toen Ecency werd vergrendeld. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
+      "held_no_background": "De opname is gestopt toen Ecency het scherm verliet (de opnamemelding kon niet worden getoond). Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
+      "held_stopped": "De opname is gestopt via de melding. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
+      "held_focus_lost": "De opname is gestopt door een gesprek of het geluid van een andere app. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
+      "held_interrupted": "De opname is gestopt omdat een andere app de microfoon overnam. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
+      "unavailable": "Opnemen is niet beschikbaar op dit apparaat.",
+      "not_read": "Die opname kon niet worden gelezen of is te groot. Er is niets verzonden en niets in rekening gebracht.",
+      "give_up_not_sent": "Deze opname is niet verzonden, dus er is niets in rekening gebracht. Ze wordt verwijderd.",
+      "give_up_not_charged": "Voor deze opname is niets in rekening gebracht. Ze wordt verwijderd.",
+      "clip_lost": "De opname van een eerder verzoek staat niet meer op dit apparaat. Als dat verzoek is doorgegaan, zijn je punten uitgegeven en kan de transcriptie niet worden opgehaald."
+    },
+    "register": {
+      "error_code_28": "Je verzoek kon niet worden verwerkt. De aanmeldwachtrij is waarschijnlijk vol. Probeer het over een paar minuten opnieuw."
+    },
+    "perks": {
+      "quests_empty": "Hier zijn nog geen opdrachten, kom binnenkort terug.",
+      "freeze_confirm_title": "Bescherm je reeks",
+      "spend_points_on_a": "{price} Points uitgeven aan een reeksbescherming? Die wordt gebruikt om je reeks te beschermen op een dag dat je er niet bent."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Steun Ecency, krijg een gratis blog en val op met een geverifieerde Pro-badge.",
+      "card_description": "Word Pro voor {price} per jaar. Geverifieerde badge, een gratis blog en steun voor Ecency.",
+      "card_description_plain": "Word Pro voor een jaar. Geverifieerde badge, een gratis blog en steun voor Ecency.",
+      "member": "Je bent Pro-lid.",
+      "benefit_badge": "Een geverifieerde Pro-badge naast je naam.",
+      "benefit_blog": "Een gratis blog op jounaam.blogs.ecency.com.",
+      "benefit_support": "Steun de ontwikkeling van Ecency rechtstreeks.",
+      "benefit_early": "Vroege toegang tot nieuwe functies.",
+      "buy": "Pro nemen voor {price} per jaar",
+      "extend": "Verlengen met 12 maanden voor {price}",
+      "extend_note": "Opnieuw kopen voegt 12 maanden toe aan je lidmaatschap.",
+      "unavailable": "Ecency Pro is nu niet beschikbaar in de store.",
+      "activating": "Betaling ontvangen. Je lidmaatschap wordt geactiveerd.",
+      "success_title": "Welkom bij Ecency Pro",
+      "success_body": "Je Pro-lidmaatschap is actief. Je badge verschijnt binnenkort op je profiel.",
+      "extending": "Betaling ontvangen. Je Pro-lidmaatschap wordt met 12 maanden verlengd.",
+      "open_a11y": "Ecency Pro openen"
+    },
+    "editor": {
+      "saving_draft": "Concept opslaan...",
+      "please_sign_in_first": "Log eerst in.",
+      "fetch_failed": "Ophalen mislukt.",
+      "you_can_only_edit": "Je kunt alleen je eigen inhoud bewerken.",
+      "invalid_percent": "Ongeldig percentage",
+      "beneficiary_exists_already": "Begunstigde bestaat al",
+      "this_draft_belongs_to": "Dit concept hoort bij @{owner}. Schakel terug naar dat account om het te publiceren.",
+      "could_not_make_a": "Kan geen nieuwe link voor dit bericht maken. Wijzig de titel een beetje en probeer het opnieuw.",
+      "an_earlier_attempt_was": "Een eerdere poging is na deze gepubliceerd. Kijk welke versie je wilt behouden.",
+      "could_not_check_your": "Kan de posting-bevoegdheid van je account niet controleren. Controleer je verbinding en probeer het opnieuw.",
+      "this_post_was_changed": "Dit bericht is elders gewijzigd sinds je het opende. Kopieer je tekst, ga terug en open het opnieuw om de nieuwste versie te bewerken.",
+      "link_text_placeholder": "Tekst hier"
+    },
+    "app_error": {
+      "this_reply_is_too": "Deze reactie is te lang.",
+      "the_network_refused_this": "Het netwerk heeft deze actie geweigerd.",
+      "invalid_input": "Ongeldige invoer.",
+      "secure_storage_is_unavailable": "Beveiligde opslag is niet beschikbaar. Log opnieuw in.",
+      "please_sign_in_first": "Log eerst in.",
+      "these_credentials_belong_to": "Deze inloggegevens horen bij @{actual}, niet bij @{expected}.",
+      "is_not_signed_in": "@{username} is niet ingelogd op dit apparaat.",
+      "key_required": "De {role}-sleutel is nodig voor deze transactie. {hint}",
+      "cancelled": "Geannuleerd.",
+      "the_request_was_rejected": "Het verzoek is afgewezen in de wallet-app.",
+      "the_request_expired_before": "Het verzoek is verlopen voordat de wallet-app antwoordde. Probeer het opnieuw.",
+      "could_not_reach_the": "Kan de HiveAuth-server niet bereiken. Probeer het opnieuw.",
+      "unexpected_redirect": "De server stuurde een onverwachte omleiding. Er is niets gewijzigd. Probeer het later opnieuw.",
+      "missing_key_hint": "Voeg hem toe onder Instellingen, Autoriteiten beheren (Privé importeren), of log opnieuw in met die sleutel.",
+      "this_key_is_also": "Deze sleutel is ook de owner-sleutel van dit account. Ecency bewaart geen sleutel die de owner-rol beheert: geef je active- en posting-rol eigen sleutels en log dan met die in.",
+      "this_is_the_owner": "Dit is de owner-sleutel. Ecency bewaart of gebruikt de owner-sleutel nooit: log in met je hoofdwachtwoord, of met je posting- of active-sleutel.",
+      "this_password_only_matches": "Dit wachtwoord past alleen bij de owner-sleutel van het account. Ecency bewaart of gebruikt de owner-sleutel nooit: log in met je posting- of active-sleutel.",
+      "this_key_cannot_sign": "Deze sleutel kan niet alleen voor het account ondertekenen: het account heeft meer dan één handtekening nodig (het gewicht ligt onder de drempel).",
+      "public_key_given": "Dit is je publieke sleutel. Plak de privésleutel (begint met 5) of je hoofdwachtwoord.",
+      "memo_key_only": "De memosleutel kan niet worden gebruikt om in te loggen. Gebruik je posting-sleutel, active-sleutel of hoofdwachtwoord.",
+      "network_message": "Netwerkfout. Controleer je verbinding en probeer het opnieuw.",
+      "network_error_this_may": "Netwerkfout. Dit is mogelijk al doorgegaan; opnieuw proberen is veilig en plaatst niet twee keer."
+    },
+    "purchases": {
+      "deal_best": "BESTE AANBIEDING!",
+      "deal_popular": "POPULAIR!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "De store antwoordde niet."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "E-mail en gebruikersnaam zijn nodig voor 999accounts-verbruik",
+      "stuck": "Een eerdere aankoop van dit product kon niet worden voltooid. Neem contact op met support@ecency.com met je store-bon, die wordt hiervoor bewaard.",
+      "held": "Deze aankoop wordt vastgehouden voor controle. Neem contact op met support@ecency.com met bestelling #{order}.",
+      "earlier_purchase": "Een eerdere aankoop van dit product wordt eerst voltooid voor @{target}.",
+      "earlier_pending": "Een eerdere betaling voor dit product is nog in behandeling voor @{target}. Deze wordt voltooid zodra de store de betaling bevestigt.",
+      "pending": "Je betaling is in behandeling. De aankoop wordt voltooid zodra de store de betaling bevestigt.",
+      "processing": "Je aankoop wordt verwerkt. Hij wordt zo meteen voltooid."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Terugkerende overboekingen",
+      "delegate_hive_power": "Hive Power delegeren",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Opnameroute voor vesting instellen",
+      "power_down": "Power down",
+      "transfer_to_saving": "Overboeken naar spaarrekening",
+      "transfer_from_saving": "Overboeken van spaarrekening",
+      "cancel_transfer_from_saving": "Overboeking van spaarrekening annuleren",
+      "collateralized_convert": "Gecollateraliseerde conversie",
+      "witness_vote": "Witness-stem",
+      "witness_update": "Witness-update",
+      "witness_set_properties": "Witness-eigenschappen instellen",
+      "governance_proxy": "Governance-proxy",
+      "claim_account": "Account claimen",
+      "create_account": "Account aanmaken",
+      "create_account_with_account": "Account aanmaken met accounttegoed",
+      "create_limit_order": "Limietorder aanmaken",
+      "cancel_limit_order": "Limietorder annuleren",
+      "redeem_rewards": "Beloningen inwisselen",
+      "post_or_comment": "Bericht of reactie",
+      "post_or_comment_options": "Opties voor bericht of reactie",
+      "custom_operation": "Aangepaste bewerking",
+      "update_account_active": "Account bijwerken (active)",
+      "update_account_posting": "Account bijwerken (posting)",
+      "change_recovery_account": "Herstelaccount wijzigen",
+      "create_proposal": "Voorstel aanmaken",
+      "remove_proposal": "Voorstel verwijderen",
+      "update_proposal_votes": "Voorstelstemmen bijwerken",
+      "update_proposal": "Voorstel bijwerken"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Deze link moet worden ondertekend door @{account}. Schakel naar dat account en open hem opnieuw.",
+      "ecency_can_only_sign": "Ecency kan alleen transacties uit links ondertekenen en uitzenden.",
+      "requester_page": "de pagina {host}",
+      "owner_refused": "Bewerkingen die de owner-sleutel nodig hebben, kunnen niet vanuit een link worden ondertekend.",
+      "busy": "Even geduld: een ander verzoek wordt nog verwerkt.",
+      "not_supported": "Ecency kan deze bewerking in deze versie nog niet ondertekenen."
+    },
+    "chats": {
+      "group_members": "Groepsleden",
+      "rename_group": "Groep hernoemen",
+      "failed_to_load_chats": "Chats laden mislukt",
+      "unknown": "Onbekend",
+      "unable_to_mark_channel": "Kan kanaal niet als gelezen markeren",
+      "unable_to_update_favorites": "Kan favorieten niet bijwerken",
+      "unable_to_update_mute": "Kan dempen niet bijwerken",
+      "group": "Groep",
+      "unable_to_search": "Kan niet zoeken",
+      "unable_to_start_chat": "Kan chat niet starten",
+      "no_internet": "Geen internetverbinding"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) delegeren aan @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Al gedelegeerd aan @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Alleen publiek. Ecency bewaart de owner-sleutel nooit.",
+      "shared_owner": "Dit account gebruikt dezelfde sleutel voor de owner-rol en de {names}-rol. Wie die sleutel heeft, beheert het hele account. Geef de {names}-rol een eigen sleutel en bewaar de owner-sleutel offline.",
+      "copy_warning": "Iedereen met deze privésleutel beheert dit deel van je account. Andere apps kunnen het klembord lezen; plak hem alleen waar je hem vertrouwt. Hij wordt na 2 minuten van het klembord gewist."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN-vergrendeling staat aan.",
+      "pin_changed": "PIN gewijzigd.",
+      "pin_lock_is_off": "PIN-vergrendeling staat uit.",
+      "wiped_notice": "Alle accounts, sleutels en inloggegevens zijn van dit apparaat verwijderd.",
+      "we_could_not_bring": "We konden je accounts uit de vorige versie van de app niet overzetten. Log opnieuw in.",
+      "your_pin_lock_could": "Je PIN-vergrendeling kon niet uit de vorige versie worden overgenomen. Stel via het accountmenu opnieuw een PIN in om de app-vergrendeling weer aan te zetten.",
+      "biometric_unlock_was_turned": "Biometrisch ontgrendelen is uitgezet omdat de biometrie op dit apparaat is gewijzigd. Ontgrendel met je PIN en zet het daarna via het accountmenu weer aan.",
+      "biometric_unavailable_notice": "Biometrisch ontgrendelen kon niet worden ingeschakeld: er is geen biometrie ingesteld op dit apparaat.",
+      "set_backup": "Stel een PIN in als back-up voor biometrisch ontgrendelen",
+      "biometric_on_notice": "PIN-vergrendeling staat aan. Ontgrendel met biometrie of met je PIN.",
+      "offer_title": "Ontgrendelen met biometrie",
+      "offer_body": "Open Ecency met je gezicht of vingerafdruk. Je hebt ook een PIN ingesteld, waarmee de app ontgrendelt als biometrie niet beschikbaar is.",
+      "offer_use": "Biometrie gebruiken",
+      "offer_use_pin": "In plaats daarvan PIN gebruiken"
+    },
+    "common": {
+      "list_and": "{first} en {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Reacties van 25 tekens of minder verdienen geen punten (links tellen niet mee)",
+      "short_content_hint": "Te kort om punten te verdienen (25 tekens of minder, links niet meegeteld)",
+      "daily_post": "Dagelijks bericht {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# dag reeks} other {# dagen reeks}}",
+      "grant_description": "Geef het Ecency-account @ecency.app posting-rechten op je account, zodat je kunt posten zonder elke keer Keychain te openen. Het verlenen wijzigt de posting-bevoegdheid van je account en vereist je active-sleutel."
+    },
+    "wallet_history": {
+      "from_to": "@{from} naar @{to}",
+      "from_user_id": "van @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} naar @{to}, id: {id}",
+      "from_to_account": "@{from} naar {to}",
+      "from_user": "van @{user}",
+      "to_user": "naar @{user}",
+      "interest": "Rente",
+      "proposal_pay": "Voorstelbetaling",
+      "categories": "Activiteitstypen",
+      "category_all": "Alles",
+      "category_transfers": "Overboekingen",
+      "category_market": "Marktorders",
+      "category_interest": "Rente",
+      "category_stake": "Stakebewerkingen",
+      "category_rewards": "Beloningen",
+      "point_type_checkin": "Heartbeats",
+      "point_type_login": "Inloggen",
+      "point_type_post": "Bericht",
+      "point_type_comment": "Reactie",
+      "point_type_vote": "Stem",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Verzonden overboekingen",
+      "point_type_transfer_received": "Ontvangen overboekingen"
+    },
+    "video_upload": {
+      "continue_upload": "UPLOAD VERVOLGEN",
+      "source_gone": "Deze opname is niet meer beschikbaar op het apparaat. Neem de video opnieuw op of kies hem opnieuw.",
+      "no_camera": "De camera is niet beschikbaar op dit apparaat."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Volgende unstake over {hours, plural, one {# uur} other {# uur}}",
+      "account_not_found": "Account niet gevonden"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Afbeelding op klembord · Afbeelding plakken",
+      "no_container": "Kan de nieuwste wave-container niet ophalen",
+      "please_sign_in_first": "Log eerst in.",
+      "write_something_first": "Schrijf eerst iets.",
+      "account_changed": "Deze wave is als ander account geschreven. Sluit hem en schrijf hem opnieuw.",
+      "no_upload": "Afbeeldingen uploaden is in deze versie nog niet beschikbaar. Plak in plaats daarvan een afbeeldingslink in de tekst.",
+      "fail": "Mislukt"
+    },
+    "delete_account": {
+      "sign_out_failed": "Je verzoek is verzonden, maar uitloggen is mislukt. Log uit via het menu.",
+      "not_sent": "Je verzoek tot verwijdering kon niet worden verzonden. Probeer het opnieuw."
+    },
+    "chat_sheets": {
+      "group_limit": "Een groep kan maximaal {max, plural, one {# andere persoon} other {# andere mensen}} hebben.",
+      "search_people_by_username": "Zoek mensen op gebruikersnaam",
+      "new_group_title": "Nieuwe groep",
+      "new_group_hint": "Voeg {min} tot {max, plural, one {# persoon} other {# mensen}} toe om een groepsgesprek te starten.",
+      "no_results": "Niemand gevonden in de chat met die naam.",
+      "search_failed": "Zoeken is mislukt. Controleer je verbinding en probeer het opnieuw.",
+      "create": "Groep starten",
+      "new_group_failed": "Kan de groep niet starten. Probeer het opnieuw.",
+      "name_limit": "Een groepsnaam mag maximaal {max, plural, one {# teken} other {# tekens}} lang zijn.",
+      "rename_title": "Groep hernoemen",
+      "rename_hint": "Geef deze groep een naam die iedereen erin ziet. Laat leeg om in plaats daarvan de namen van de leden te tonen.",
+      "placeholder": "Groepsnaam",
+      "not_owner": "Alleen degene die deze groep heeft gestart, kan hem hernoemen.",
+      "rename_failed": "Kan de groep niet hernoemen. Probeer het opnieuw."
+    },
+    "editor_side": {
+      "copy_of": "Kopie van {title}",
+      "deletions_failed": "Er is iets misgegaan\n{failed} van {total, plural, one {# verwijdering} other {# verwijderingen}} mislukt",
+      "uploads_failed": "{count, plural, one {# upload mislukt} other {# uploads mislukt}}:\n\n{messages}",
+      "failed_to_delete": "Verwijderen mislukt"
+    },
+    "uploads": {
+      "add_to_gallery": "Toevoegen aan galerij"
+    },
+    "account_notice": {
+      "manage_keys": "Instellingen, Autoriteiten beheren",
+      "no_signing_key_title": "Log opnieuw in als @{account}",
+      "no_signing_key": "Ecency bewaart de owner-sleutel of het hoofdwachtwoord niet meer op dit apparaat, en @{account} heeft hier geen posting- of active-sleutel opgeslagen. Log opnieuw in met je hoofdwachtwoord of met een posting- of active-sleutel, of voeg een sleutel toe onder {manageKeys} (Privé importeren).",
+      "missing_roles_title": "Sommige sleutels zijn niet toegevoegd",
+      "cannot_post": "posten, stemmen of reageren",
+      "cannot_transfer": "overboekingen verzenden of accountinstellingen wijzigen",
+      "missing_roles": "Je wachtwoord komt niet meer overeen met de {missing}-sleutel van @{account}: die is op het account gewijzigd sinds het wachtwoord is ingesteld. Opgeslagen op dit apparaat: de {kept}-sleutel. Tot je de {missing}-sleutel toevoegt onder {manageKeys} (Privé importeren), kan deze app niet {cannot} met sleutels voor @{account}.",
+      "shared_owner_title": "Deze sleutel beheert ook de owner-rol",
+      "shared_owner": "@{account} gebruikt dezelfde sleutel voor de owner-rol en de {names}-rol. Wie deze sleutel heeft, beheert het hele account. Ecency bewaart hem alleen als {names}-sleutel en gebruikt hem nooit voor owner-bewerkingen. Geef de {names}-rol een eigen sleutel en bewaar de owner-sleutel offline."
+    },
+    "dapp_browser": {
+      "message_from": "Bericht van {host}",
+      "home_title": "Home",
+      "loading_title": "Laden...",
+      "blank_run": "[{count, plural, one {# leeg teken} other {# lege tekens}}]",
+      "too_large": "Deze pagina vroeg om een verzoek te ondertekenen dat te groot is om te tonen, dus Ecency heeft het geweigerd."
+    },
+    "community_service": {
+      "the_account_changed": "Het account is gewijzigd."
+    },
+    "profile_edit": {
+      "enter_link": "Voer afbeeldingslink in",
+      "please_sign_in_first": "Log eerst in.",
+      "account_not_found": "Account niet gevonden",
+      "please_enter_an_image": "Voer een afbeeldingslink in die met https:// begint"
+    },
+    "background_media": {
+      "post_by": "Bericht van @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Log eerst in."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Je hebt al met hetzelfde gewicht gestemd.",
+      "insufficient_rc": "Onvoldoende Resource Credits. Wacht even of doe een power up.",
+      "missing_authority": "Posting-bevoegdheid ontbreekt. Controleer je inlogmethode.",
+      "comment_too_soon": "Wacht even voordat je opnieuw post.",
+      "paid_out": "Dit bericht is al uitbetaald.",
+      "too_large": "De transactie is {size, plural, one {# byte} other {# bytes}}, boven de limiet van {max} bytes.",
+      "network_error_please_check": "Netwerkfout. Controleer je verbinding en probeer het opnieuw.",
+      "unconfirmed_message": "Kan niet bevestigen of dit is doorgegaan. Controleer je wallet of geschiedenis; begin opnieuw alleen als het er niet staat.",
+      "undecided_message": "Dit is mogelijk al doorgegaan. Controleer je wallet of geschiedenis voordat je het opnieuw probeert."
+    },
+    "chat_api": {
+      "request_failed": "Verzoek mislukt ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} is aan het typen...",
+      "typing_two": "{first} en {second} zijn aan het typen...",
+      "typing_three": "{first}, {second} en {third} zijn aan het typen...",
+      "typing_many": "{first}, {second} en {count, plural, one {# andere is} other {# anderen zijn}} aan het typen...",
+      "banned": "{reason} Je kunt de chat nog wel lezen. Posten wordt weer mogelijk {until}.",
+      "joined_when": "lid sinds {time}",
+      "joined": "lid",
+      "official_badge": "Officieel",
+      "official_badge_label": "Officieel Ecency-account"
+    },
+    "side_menu": {
+      "ask_esie": "Vraag het aan Esie"
+    },
+    "chat_service": {
+      "missing_token": "Hive-toegangstoken ontbreekt. Log uit en log opnieuw in.",
+      "dm_error": "Gebruiker heeft zich niet bij chats aangesloten"
+    },
+    "compose_reply": {
+      "account_changed": "Deze reactie is als ander account geschreven. Sluit hem en schrijf hem opnieuw.",
+      "write_something_first": "Schrijf eerst iets.",
+      "please_sign_in_first": "Log eerst in."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Te veel begunstigden: maximaal {max}.",
+      "a_beneficiary_s_share": "Het aandeel van een begunstigde moet tussen 0,01% en 100% liggen.",
+      "beneficiaries_add_up_to": "De begunstigden tellen op tot meer dan 100%.",
+      "a_beneficiary_is_listed": "Een begunstigde staat twee keer in de lijst.",
+      "you_cannot_be_a": "Je kunt geen begunstigde van je eigen bericht zijn.",
+      "a_beneficiary_has_an": "Een begunstigde heeft een ongeldige accountnaam."
+    },
+    "follows": {
+      "fail": "Mislukt!: {message}",
+      "follower_count": "Volgers ({count})",
+      "following_count": "Aan het volgen ({count})"
+    },
+    "link": {
+      "unsupported": "Deze link wordt nog niet ondersteund.",
+      "cannot_open": "Kan link niet openen",
+      "unsupported_version": "Deze link wordt in deze versie niet ondersteund."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "De Explore-browser heeft toegang tot je Hive-wallet om transacties te ondertekenen. Deze link komt uit de inhoud van een bericht en is niet geverifieerd door Ecency. Ga alleen verder als je hem vertrouwt:\n\n{url}"
+    },
+    "listen": {
+      "message": "Luisteren kost {required} Points en je hebt er {available}.",
+      "unlock_label": "Ontgrendelen · {cost} Points",
+      "preparing_audio": "Audio voorbereiden · {preparingPercent}%",
+      "waiting_in_line_ahead": "In de wachtrij, nog {ahead} voor je…",
+      "next_in_line": "Jij bent de volgende…",
+      "preparing_about_minutes": "Audio voorbereiden, ongeveer {minutes} min…",
+      "preparing_audio_2": "Audio voorbereiden…",
+      "spend_confirm": "{cost} Points uitgeven om naar dit bericht te luisteren? De audio is van jou en kun je altijd opnieuw afspelen.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "De audio kon niet worden gemaakt, je Points zijn terugbetaald"
+    },
+    "media_pick": {
+      "preparing_video": "Video voorbereiden...",
+      "library_hint": "Kies uit je foto's",
+      "camera_hint": "Maak nu een nieuwe foto",
+      "files_hint": "Blader door bestanden op dit apparaat en in de cloud",
+      "paste_hint": "Gebruik de afbeelding die je hebt gekopieerd",
+      "link_hint": "Gebruik een afbeelding van het web"
+    },
+    "media_picking": {
+      "image_types_message": "Dit bestandstype wordt niet ondersteund. Kies een JPEG-, PNG-, GIF-, WebP- of HEIC-afbeelding.",
+      "video_types_message": "Dit bestandstype wordt niet ondersteund. Kies een MP4- of MOV-video.",
+      "gif_too_large": "Deze GIF is groter dan {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Voor deze bewerking zijn zowel een active- als een posting-handtekening nodig, wat Ecency nog niet samen kan ondertekenen."
+    },
+    "poll": {
+      "fail": "Mislukt!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Kan de posting-bevoegdheid van je account niet controleren. Controleer je verbinding en probeer het opnieuw."
+    },
+    "post_lists": {
+      "voters_title": "Info over stemmers ({total})",
+      "reblogs_title": "Reblog-info ({total})",
+      "no_history_found": "Geen geschiedenis gevonden!",
+      "no_edit_history_available": "Geen bewerkingsgeschiedenis beschikbaar voor deze inhoud.",
+      "version_label": "Versie {version}"
+    },
+    "stats": {
+      "other_device": "Overig"
+    },
+    "profile": {
+      "account_not_found": "Account niet gevonden",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Vol over {hours, plural, one {# uur} other {# uur}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Kan je huidige profiel niet lezen, probeer het opnieuw"
+    },
+    "profile_sheet": {
+      "fail": "Mislukt! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Account niet gevonden"
+    },
+    "push_payload": {
+      "mentioned": "@{source} noemde @{target}",
+      "replied": "@{source} reageerde op @{target}",
+      "transferred": "@{source} maakte over aan @{target}",
+      "delegated": "@{source} delegeerde aan @{target}",
+      "rewards_received": "Beloningen ontvangen",
+      "account_updated": "Account bijgewerkt",
+      "account_updated_body": "Je accountgegevens zijn bijgewerkt",
+      "followed": "@{source} volgt @{target} nu",
+      "unfollowed": "@{source} volgt @{target} niet meer",
+      "ignored": "@{source} negeerde @{target}",
+      "blacklisted": "@{source} zette @{target} op de zwarte lijst",
+      "posted_in": "@{source} plaatste in #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Kan geen cameratoestemming krijgen",
+      "permission_message": "Geef cameratoestemming in de Ecency-instellingen.",
+      "permission_allow": "Toestaan"
+    },
+    "reply_account": {
+      "switch": "Reageren als ander account"
+    },
+    "send_journal": {
+      "your_from_went_through": "Je {label} van @{account} is doorgegaan.",
+      "not_sent": "Je {label} van @{account} is niet doorgegaan. Er is niets verzonden; je kunt opnieuw beginnen.",
+      "checking_whether_your_from": "Controleren of je {label} van @{account} is doorgegaan. Controleer je wallet voordat je het opnieuw verzendt."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner-pagina gesloten",
+      "wrong_role": "Dit is je {given}-sleutel; deze bewerking heeft je {needed}-sleutel nodig.",
+      "action_id_required": "Deze actie heeft een actie-ID nodig om veilig opnieuw te kunnen worden geprobeerd."
+    },
+    "signing_router": {
+      "owner_never": "Owner-bewerkingen worden nooit in de app ondertekend."
+    },
+    "spin": {
+      "key_missing": "Spelsleutel ontbreekt",
+      "score": "{score, plural, one {# Point} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Vandaag (UTC), reset over {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Reset dagelijks om 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Log opnieuw in",
+      "message": "De beveiligde opslag op dit apparaat is gereset. Log opnieuw in.",
+      "failed": "De accounts op dit apparaat konden niet worden verwijderd. Probeer het opnieuw."
+    },
+    "store": {
+      "in_app_purchases_are": "Aankopen in de app zijn in deze versie niet beschikbaar."
+    },
+    "wallet_sends": {
+      "journal_full": "Te veel eerdere verzendingen worden nog bij het netwerk gecontroleerd. Wacht tot ze zijn bevestigd voordat je meer verstuurt.",
+      "check_later": "Het netwerk heeft dit niet op tijd bevestigd. Controleer je wallet of geschiedenis voordat je het opnieuw verzendt; de app controleert opnieuw bij de volgende start."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# ongelezen} other {# ongelezen}}",
+      "locked_text": "Ontgrendel Ecency om te zien",
+      "signed_out_text": "Log in bij Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Kan de huidige bevoegdheden van je account niet lezen. Er is niets gewijzigd; probeer het opnieuw.",
+      "reads_disagree": "Twee uitlezingen van de posting-bevoegdheid van je account komen niet overeen. Er is niets gewijzigd; probeer het opnieuw."
+    },
+    "vote": {
+      "vote_weight_must_be": "Het stemgewicht moet tussen -100% en 100% liggen.",
+      "please_sign_in_first": "Log eerst in."
+    },
+    "widget": {
+      "streak_name": "Opdrachtenreeks",
+      "write": "Schrijven",
+      "new_wave": "Nieuwe wave",
+      "notifications_description": "Je ongelezen meldingen. Verborgen zolang PIN-vergrendeling aan staat.",
+      "streak_description": "Je reeks van dagelijkse opdrachten. Verborgen zolang PIN-vergrendeling aan staat.",
+      "compose_description": "Schrijf een bericht of een nieuwe wave.",
+      "streak_title": "Reeks",
+      "daily_quests": "Dagelijkse opdrachten",
+      "streak_hint": "Open Perks om je reeks te zien",
+      "open_perks": "Perks openen",
+      "open_app": "Ecency openen",
+      "unread_caption": "{count, plural, one {ongelezen} other {ongelezen}}",
+      "streak_caption": "{count, plural, one {dag reeks} other {dagen reeks}}"
+    },
+    "system": {
+      "dictation_channel": "Dicteren",
+      "listen_channel": "Luisteren",
+      "dictation_channel_description": "Wordt getoond terwijl een opname voor dicteren op de achtergrond loopt, met een Stop-actie.",
+      "dictation_title": "Opname voor dicteren",
+      "dictation_text": "Ecency neemt je dictaat op. Stop houdt het onverzonden totdat je het in de app bevestigt.",
+      "listen_channel_description": "Meldt wanneer Luisteren niet op de achtergrond kon doorgaan.",
+      "listen_paused": "Luisteren gepauzeerd",
+      "listen_paused_text": "Open Ecency om verder te luisteren.",
+      "skip_back": "15 seconden terug",
+      "skip_forward": "15 seconden vooruit"
+    },
+    "permission": {
+      "face_id": "Ontgrendel Ecency met Face ID in plaats van je PIN.",
+      "camera": "Scan QR-codes, en maak een foto of neem een video op om die aan je bericht toe te voegen.",
+      "photo_library_add": "Ecency slaat de afbeeldingen die je uit berichten downloadt op in je fotobibliotheek.",
+      "photo_library": "Ecency bewaart de afbeeldingen die je uit berichten downloadt bij elkaar in een Ecency-album in je fotobibliotheek.",
+      "microphone": "Ecency gebruikt je microfoon zodat je berichten en reacties kunt dicteren (die opnames worden naar Ecency gestuurd om te worden getranscribeerd) en om geluid op te nemen bij een video die je aan een bericht toevoegt."
+    },
+    "android": {
+      "no_browser": "Geen browser beschikbaar",
+      "biometric_unlock_title": "Ecency ontgrendelen met biometrie",
+      "biometric_confirm": "Bevestig met je vingerafdruk of gezicht",
+      "image_unsupported_address": "Niet-ondersteund afbeeldingsadres",
+      "image_create_failed": "Kan het bestand niet maken",
+      "image_write_failed": "Kan het bestand niet schrijven",
+      "image_too_large": "Afbeelding te groot",
+      "image_download_failed": "Downloaden mislukt met status {status}",
+      "billing_disconnected": "Google Play Billing is losgekoppeld.",
+      "billing_no_screen": "Geen scherm om de aankoop op te tonen.",
+      "billing_error": "Google Play Billing-fout {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Je hebt deze maand {count, plural, one {# bericht} other {# bericht}} gemaakt. Ga zo door!",
-        "checkin": "Je hebt deze week {count, plural, one {# dag} other {# dag}} ingecheckt. Ga zo door!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# nieuw bericht} other {# nieuwe berichten}} in #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# mislukte poging(en)} other {# mislukte poging(en)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Reeks van {n} dagen"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Alleen accounts ouder dan {days} dagen toegestaan",
-        "max_choices": "• Je mag maximaal {choices} keuzes selecteren"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Resterend: {executions} overboekingen",
-        "schedule_summary": "{executions} overboekingen, telkens elke {hours} uur"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Te kort om punten te verdienen ({n, plural, one {# teken} other {# tekens}} of minder, links niet meegeteld)"
       },
       "chats": {
-        "people_joined": "{count} personen toegevoegd"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "over ongeveer {count, plural, one {# minuut} other {# minuten}}",
+        "ban-remaining-hours": "over ongeveer {count, plural, one {# uur} other {# uur}}",
+        "ban-remaining-days": "over ongeveer {count, plural, one {# dag} other {# dagen}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Gebruik maximaal {n, plural, one {# tag} other {# tags}}",
+          "too_long": "De zoekopdracht is te lang. Gebruik maximaal {n, plural, one {# teken} other {# tekens}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Minimaal {count} tekens vereist",
-        "chars_remaining": "{count} tekens resterend"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Je kunt maximaal {count, plural, one {# afbeelding} other {# afbeeldingen}} tegelijk selecteren"
+      },
+      "dictation": {
+        "stop_hint": "Stop om te transcriberen en toe te voegen aan je bericht. Maximaal {m, plural, one {# minuut} other {# minuten}}.",
+        "rate": "{n} Points per {s, plural, one {# seconde} other {# seconden}}"
       },
       "transfer": {
-        "powering_down_info": "Volgende ontstaken is over {days} dagen, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Tussen {min} en {max, plural, one {# teken} other {# tekens}}"
       }
     }
   }

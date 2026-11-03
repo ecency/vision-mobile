@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Člen Ecency Pro"
   },
   "perks": {
     "header": "Výhody",
@@ -31,42 +31,42 @@
     "promote_desc": "Získejte více pozornosti na svůj příspěvek",
     "account_boost": "Boost účtu",
     "account_boost_desc": "Boostněte libovolný účet",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Dobít RC",
+    "rc_topup_desc": "Pište dál, i když dochází Resource Credits",
+    "streak_freeze_owned": "{n} v zásobě",
+    "streak_freeze_buy": "Chránit sérii ({price} Points)",
+    "streak_freeze_buying": "Chráním",
+    "streak_freeze_error": "Ochranu série se nepodařilo koupit. Zkuste to prosím znovu."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Denní příspěvek",
+    "streak": "Série {n} dní",
+    "keep_streak": "Udržte svou sérii"
   },
   "waves": {
     "for_you": "Pro vás",
     "following": "Sledované",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Vlastní kanály",
+    "custom_feeds_subtitle": "Připněte zdroje a tagy a přidejte je jako karty kanálu.",
+    "add_tag_placeholder": "Přidat tag",
+    "sources": "Zdroje",
+    "your_feeds": "Vaše kanály",
+    "trending_tags": "Populární tagy",
+    "shorts_empty": "Zatím nejsou žádná krátká videa",
+    "mute": "Ztlumit",
+    "unmute": "Zrušit ztlumení"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Začínáme",
+    "subtitle": "Jste tu nový? Waves jsou krátké příspěvky a nejsnazší způsob, jak začít.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Zavřít",
+    "item_wave": "Zveřejněte svůj první Wave",
+    "item_vote": "Hlasujte pro Wave, který se vám líbí",
+    "item_reply": "Odpovězte někomu",
+    "item_checkin": "Přihlaste se k denní docházce a začněte sérii",
+    "all_done_title": "Vše hotovo 🎉",
+    "all_done_subtitle": "Máte hotovo. Jen tak dál s Waves!"
   },
   "profile": {
     "havent_commented": "ještě nic neokomentoval/a",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Stáří  |  Viditelnost  |  Interpretace",
     "attach_poll": "Připojit anketu"
   },
+  "favorite_tags": {
+    "title": "Tagy",
+    "hint": "Sleduj a dostávej oznámení o nových příspěvcích s tímto tagem",
+    "following_hint": "Dostáváš oznámení o nových příspěvcích s tímto tagem",
+    "follow": "Sledovat",
+    "following": "Sleduješ",
+    "added": "Sleduješ tag",
+    "removed": "Tag už nesleduješ",
+    "empty_list": "Nic tu není"
+  },
   "favorites": {
     "add": "Přidat oblíbenou položku",
     "add_error": "Oblíbenou položku se nepodařilo přidat",
@@ -181,7 +191,33 @@
     "payout": "Výplata",
     "details": "Podrobnosti",
     "community": "komunita",
-    "new_post": "Nový příspěvek"
+    "new_post": "Nový příspěvek",
+    "mute_post_title": "Ztlumit tento příspěvek",
+    "unmute_post_title": "Zrušit ztlumení tohoto příspěvku",
+    "mute_post_reason": "Proč se tento příspěvek ztlumuje?",
+    "unmute_post_reason": "Proč se tento příspěvek obnovuje?",
+    "manage": "Spravovat komunitu",
+    "manage_members": "Členové a role",
+    "manage_settings": "Nastavení komunity",
+    "manage_activities": "Protokol aktivity",
+    "activities": "aktivita",
+    "no_activities": "Zatím žádná aktivita",
+    "activities_load_failed": "Aktivitu se nepodařilo načíst. Obnov přetažením dolů.",
+    "set_role": "Nastavit roli",
+    "assign_role": "Přiřadit roli",
+    "assign_role_hint": "Vyhledej libovolný účet, i takový, který komunitu neodebírá, a pak vyber roli.",
+    "username_placeholder": "Uživatelské jméno",
+    "invalid_username": "Vyber existující účet z výsledků",
+    "members": "členů",
+    "no_members": "Nenalezeni žádní členové",
+    "members_incomplete": "Některé členy se nepodařilo načíst. Obnov přetažením dolů.",
+    "members_load_failed": "Členy se nepodařilo načíst. Obnov přetažením dolů.",
+    "role_owner": "Vlastník",
+    "role_admin": "Správce",
+    "role_mod": "Moderátor",
+    "role_member": "Člen",
+    "role_guest": "Host",
+    "role_muted": "Ztlumený"
   },
   "trade": {
     "swap_for": "Směňuje se {fromAmount} za {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Přesdílet jinam",
     "pin-blog": "Připnout na blog",
     "copy": "kopírovat odkaz",
+    "copy-text": "kopírovat text",
+    "open-thread": "otevřít vlákno",
     "unpin-community": "Odepnout z komunity",
+    "mute-post": "Ztlumit příspěvek",
+    "unmute-post": "Zrušit ztlumení příspěvku",
     "mute": "Ztlumit / Blokovat",
     "reblog": "sdílet",
     "undo-reblog": "zrušit sdílení",
@@ -232,24 +272,24 @@
     "unpin-reply": "Odepnout komentář"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Tento příspěvek je v jazyce: {lang}. Přeložit do jazyka: {target}?",
+    "translate_to": "Přeložit do jazyka: {lang}",
+    "show_original": "Zobrazit originál",
+    "translated_from": "Přeloženo z jazyka: {lang}",
+    "change_language": "Změnit jazyk"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Přeložit příspěvek",
+    "source": "Zdrojový jazyk",
+    "target": "Cílový jazyk",
+    "detected": "Zjištěno: {lang}",
+    "translate": "Přeložit",
+    "apply": "Použít",
+    "review_note": "Na konec příspěvku přidá strojový překlad vašeho vlastního textu. Před zveřejněním zkontrolujte a upravte.",
+    "too_short": "Napište nejdřív trochu víc. Překlad potřebuje alespoň několik vět.",
+    "progress": "Překládám {done} z {total}...",
+    "error": "Překlad se nezdařil. Zkuste to prosím znovu.",
+    "add_title_marker": "Přidat do názvu jazykovou značku"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "Na vzestupu",
     "popular": "Oblíbené",
     "new": "Nové",
-    "friends": "Following",
+    "friends": "Sledované",
     "my_blog": "Můj blog"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Tady nic není"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Šablony",
+    "untitled": "Šablona bez názvu",
+    "empty_list": "Uložte příspěvek jako šablonu v editoru, abyste ji mohli znovu použít zde.",
+    "delete_confirm": "Opravdu chcete tuto šablonu smazat?",
+    "applied": "Šablona použita jako nový příspěvek",
+    "save_as_template": "Uložit jako šablonu",
+    "name_placeholder": "Název šablony",
+    "saved": "Šablona uložena"
   },
   "selection_list": {
     "available": "Dostupné {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Vše",
+      "replies": "Odpovědi",
+      "mentions": "Zmínky",
+      "rvotes": "Hlasy",
+      "follows": "Sledování",
+      "reblogs": "Reblogy",
+      "transfers": "Převody",
+      "delegations": "Delegování",
+      "nfavorites": "Oblíbené",
+      "tags": "Tagy",
+      "nbookmarks": "Záložky",
+      "payouts": "Výplaty",
+      "scheduled_published": "Naplánované příspěvky",
+      "account_updates": "Aktualizace účtu",
+      "weekly_earnings": "Týdenní výdělky"
     },
     "this_week": "Tento týden",
     "reblog": "sdílel/a článek",
@@ -417,11 +458,15 @@
     "yesterday": "Včera",
     "mention": "zmíněný",
     "favorites": "publikoval/a nový článek",
+    "tags": "přispěl/a do #{tag}",
+    "tags_bundle": "{count} nových příspěvků v #{tag}",
+    "tags_title": "Nové příspěvky v tagu, který sleduješ",
     "mentions": "Zmínky",
     "spin": "Čas vydělat si další body",
     "last_week": "Minulý týden",
     "recent": "Nedávné",
     "ignore": "tě ignoruje",
+    "blacklist": "tě dal/a na černou listinu",
     "follow": "vás sleduje",
     "notification": "Oznámení",
     "this_month": "Tento měsíc",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} nyní může publikovat a hlasovat vaším jménem. Pokud jste to nepovolili, odvolejte to.",
     "weekly_earnings": "Tento týden jste vydělali ${amount}{breakdown}",
     "payouts": "Přijata výplata: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "zveřejnil(a) naplánovaný příspěvek",
+    "scheduled_published_title": "Naplánovaný příspěvek zveřejněn",
+    "scheduled_published_body": "Váš naplánovaný příspěvek je nyní zveřejněn, klepnutím jej zobrazíte"
   },
   "recurrent": {
     "delete_failed": "Opakovaný převod se nepodařilo smazat, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Otevřete nedávný koncept nebo vytvořte nový příspěvek",
     "reward_power_up": "Stakovat 100 %",
     "open_gallery": "Otevřít galerii",
+    "open_files": "Vybrat ze Souborů",
     "clipboard_no_image": "Ve schránce nebyl nalezen žádný obrázek",
     "clipboard_image_detected": "Obrázek ve schránce",
     "paste_image": "Vložit obrázek",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Později",
     "settings_title": "Možnosti příspěvku",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Ne"
+    "support_ecency": "Podpořit Ecency {percent} %",
+    "alert_btn_no": "Ne",
+    "short_reply_hint": "Odpovědi s {n} znaky nebo méně nedostávají body (odkazy se nepočítají)",
+    "short_content_hint": "Příliš krátké pro získání bodů ({n} znaků nebo méně, bez odkazů)"
   },
   "time": {
     "week": "týdny",
@@ -655,7 +703,41 @@
     "select_emoji": "Vybrat emoji",
     "more_emojis": "Více",
     "search_emojis": "Hledat emoji...",
-    "no_emoji_found": "Žádné emoji nenalezeno"
+    "no_emoji_found": "Žádné emoji nenalezeno",
+    "ban-reason-spray": "Přispívání ti bylo pozastaveno, protože stejná zpráva šla najednou do několika kanálů.",
+    "ban-reason-mass-dm": "Přispívání ti bylo pozastaveno, protože zpráva byla odeslána najednou mnoha lidem.",
+    "ban-reason-generic": "Přispívání v chatu ti bylo pozastaveno.",
+    "ban-can-still-read": "Chat si stále můžeš číst.",
+    "ban-unlocks": "Přispívání se odemkne {when}.",
+    "ban-remaining-soon": "za méně než minutu",
+    "ban-remaining-minutes": "přibližně za {count} min",
+    "ban-remaining-hours": "přibližně za {count} hod",
+    "ban-remaining-days": "přibližně za {count} dní",
+    "new_group": "Nová skupina",
+    "new_group_hint": "Přidej {min} až {max} lidí a začni skupinovou konverzaci.",
+    "new_group_search": "Hledat lidi podle uživatelského jména",
+    "new_group_full": "Ve skupině může být nejvýše {max} dalších lidí.",
+    "new_group_no_results": "V chatu nikdo s tímto jménem nebyl nalezen.",
+    "new_group_search_failed": "Hledání se nezdařilo. Zkontroluj připojení a zkus to znovu.",
+    "new_group_remove": "Odebrat @{username}",
+    "new_group_create": "Založit skupinu",
+    "new_group_failed": "Skupinu se nepodařilo založit. Zkus to prosím znovu.",
+    "rename_group": "Přejmenovat skupinu",
+    "rename_group_hint": "Dej skupině jméno, které uvidí všichni v ní. Nech prázdné, aby se zobrazovala jména členů.",
+    "group_name": "Název skupiny",
+    "rename_group_too_long": "Název skupiny může mít nejvýše {max} znaků.",
+    "rename_group_not_owner": "Skupinu může přejmenovat jen ten, kdo ji založil.",
+    "rename_group_failed": "Skupinu se nepodařilo přejmenovat. Zkus to prosím znovu.",
+    "group_renamed": "{user} přejmenoval/a skupinu na „{name}“",
+    "group_name_cleared": "{user} odstranil/a název skupiny",
+    "group_members": "Členové skupiny",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "reactions_title": "Reakce",
+    "reactor_you": "Ty",
+    "reactor_unknown": "Někdo",
+    "see_who_reacted": "Dlouhým stisknutím zobrazíš, kdo reagoval",
+    "group": "Skupina"
   },
   "free_estm": {
     "timer_text": "Další roztočení zdarma za",
@@ -684,6 +766,32 @@
     "transaction_fail": "Transakce selhala"
   },
   "search_result": {
+    "error": "Hledání se nepodařilo dokončit. Zkus to prosím znovu",
+    "filters": {
+      "title": "Filtry",
+      "open": "Filtry",
+      "author": "Autor",
+      "author_placeholder": "uživatelské jméno",
+      "category": "Kategorie",
+      "category_placeholder": "komunita nebo kategorie",
+      "tags": "Tagy",
+      "tags_placeholder": "oddělené čárkami",
+      "type": "Typ",
+      "type_all": "Vše",
+      "type_post": "Příspěvky",
+      "type_comment": "Komentáře",
+      "date": "Datum",
+      "date_week": "Poslední týden",
+      "date_month": "Poslední měsíc",
+      "date_year": "Poslední rok",
+      "date_all": "Za celou dobu",
+      "sort": "Řadit",
+      "apply": "Použít",
+      "active": "Aktivní: {n}",
+      "too_many_tags": "Použij nejvýše {n} tagů",
+      "too_long": "Hledaný výraz je příliš dlouhý. Použij nejvýše {n} znaků",
+      "needs_criteria": "Zadej hledaný výraz nebo autora, kategorii či tag k filtrování"
+    },
     "communities_filter": {
       "new": "Nové",
       "my": "Mé komunity",
@@ -727,7 +835,7 @@
     "title": "Cross-post"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Autor uvedl použití AI"
   },
   "ai_assist": {
     "title": "Asistent AI pro psaní",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Získejte relevantní štítky pro svůj příspěvek",
     "action_generate_title": "Vygenerovat titulek",
     "action_generate_title_desc": "Vytvořte poutavé varianty titulku",
-    "action_summarize": "Recap",
+    "action_summarize": "Shrnutí",
     "action_summarize_desc": "Vytvořte stručné shrnutí",
     "action_check_grammar": "Zkontrolovat gramatiku",
     "action_check_grammar_desc": "Opravte gramatické a pravopisné chyby",
+    "action_generate_image": "Vygenerovat obrázek",
+    "action_generate_image_desc": "Vytvoř obrázek pomocí AI k příspěvku",
+    "cost_from": "od {cost} {unit}",
     "text_label": "Váš text",
     "text_placeholder": "Vložte nebo napište svůj obsah sem...",
     "min_chars": "Vyžadováno minimálně {count} znaků",
@@ -797,16 +908,26 @@
     "remind_later": "Připomenout později",
     "success_subscribe": "Odběr proběhl úspěšně!",
     "payloadTooLarge": "Soubor je příliš velký, zmenšete prosím obrázek nebo nahrajte menší",
+    "too_many_images": "Najednou můžeš vybrat nejvýše {count} obrázků",
     "fail_follow": "Sledování selhalo!",
     "clear_user_alert": "Opravdu chcete vymazat všechna data uživatele?",
     "cancel": "Zrušit",
     "connection_success": "Úspěšně připojeno!",
     "rc_down": "Nedostatek Resource Credits k provedení akce! \n\nPosilte svůj účet a pokračujte v užívání aplikace. Chcete svůj účet posílit nyní?",
+    "rc_down_title": "Nedostatek Resource Credits",
+    "rc_precheck_title": "Tento příspěvek může být příliš velký k publikování",
+    "rc_precheck_body": "Tvé Resource Credits vypadají na příspěvek této velikosti příliš nízké.",
+    "rc_down_body": "Nemáš dost Resource Credits na tuto akci.\n\nDobij je hned za Points, abys mohl/a pokračovat, nebo trvale posil svůj účet.",
+    "rc_down_topup": "Dobít RC za Points",
+    "rc_down_boost": "Posílit účet",
     "done": "Hotovo",
     "something_wrong_alt": "Mezitím zkuste Ecency.com ze svého prohlížeče",
     "same_user": "Tento uživatel je již v seznamu",
     "fail": "Selhalo!",
     "operation_failed_with_reason": "Operace {operation} selhala: {reason}",
+    "request_timed_out": "Připojení trvá příliš dlouho. Zkontroluj síť a zkus to znovu.",
+    "load_failed_retry": "Nepodařilo se to načíst. Zkus to prosím znovu.",
+    "retrying": "Opakuji...",
     "wallet_refresh_failed": "Obnovení peněženky selhalo. Zkuste to prosím znovu.",
     "wallet_refresh_missing_account": "Obnovení peněženky selhalo: chybí účet.",
     "boost_failed": "Boost selhal.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video připojeno"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Hlasovat pro",
+    "upvoted": "Hlasováno pro",
+    "downvoted": "Hlasováno proti",
+    "upvote_hint": "Dvojitým klepnutím otevřete možnosti hlasování",
+    "payout_details": "Podrobnosti o výplatě",
+    "a11y_votes": "{count, plural, one {# hlas} few {# hlasy} many {# hlasu} other {# hlasů}}",
+    "a11y_voters_hint": "Zobrazit hlasující",
+    "a11y_reblogs": "{count, plural, one {# reblog} few {# reblogy} many {# reblogu} other {# reblogů}}",
+    "a11y_reblogs_hint": "Zobrazit reblogy",
+    "a11y_comments": "{count, plural, one {# komentář} few {# komentáře} many {# komentáře} other {# komentářů}}",
+    "a11y_comments_hint": "Zobrazit komentáře",
+    "a11y_reply_hint": "Odpovědět",
+    "a11y_tip": "Poslat spropitné",
+    "a11y_tips": "{count, plural, one {Spropitné: #} few {Spropitné: #} many {Spropitné: #} other {Spropitné: #}}",
+    "a11y_edit": "Upravit komentář",
+    "a11y_delete": "Smazat komentář",
+    "a11y_show_replies": "Zobrazit odpovědi",
+    "a11y_hide_replies": "Skrýt odpovědi",
+    "a11y_post_options": "Možnosti příspěvku",
+    "a11y_views": "{count, plural, one {# zobrazení} few {# zobrazení} many {# zobrazení} other {# zobrazení}}",
+    "source_ecency": "Zveřejněno přes Ecency",
+    "a11y_stats_hint": "Zobrazit statistiky příspěvku",
     "image": "Obrázek",
     "reveal_muted": "ZTLUMENO\nKlepnutím zobrazíte obsah",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Klepnutím načtete obrázek",
     "in": "v",
     "poll": "ANKETA",
     "copy_link": "Kopírovat odkaz",
@@ -998,13 +1119,14 @@
     "save_to_local": "Stáhnout do zařízení",
     "muted": "Obsah je skrytý kvůli porušení pravidel",
     "community_muted": "Obsah skrytý kvůli porušení pravidel komunity",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Obsah z účtu s nízkou reputací",
+    "muted_downvoted": "Obsah, proti kterému uživatelé hlasovali",
+    "muted_low_trust": "Účet s nízkou reputací s neověřeným odchozím odkazem",
+    "muted_reveal": "Klepnutím zobrazíš",
     "promoted": "PROPAGOVÁNO",
     "image_saved": "Obrázek uložen do galerie",
     "words": "Slova",
     "reading": "Čtení",
-    "listen": "Poslouchat",
     "min": "min",
     "summarize_start": "Začít"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Žádný existující příspěvek",
     "invalid_link": "Adresa URL je neplatná, zkuste to znovu s platnou adresou nebo ji otevřete ve webovém prohlížeči",
-    "no_existing_user": "Žádný existující uživatel"
+    "no_existing_user": "Žádný existující uživatel",
+    "posting_key_request": "{requester} žádá o soukromý klíč posting pro @{username}.\n\nPokračuj jen tehdy, pokud této žádosti věříš.",
+    "posting_key_request_unnamed": "Jiná aplikace žádá o soukromý klíč posting pro @{username}.\n\nPokračuj jen tehdy, pokud této žádosti věříš.",
+    "auth_request_as_user": "{requester} tě chce přihlásit jako @{username}.\n\nSdílí se jen tvé uživatelské jméno a doklad o přihlášení. Žádný klíč Ecency neopouští.",
+    "auth_request_as_current": "{requester} tě chce přihlásit tvým účtem Ecency.\n\nSdílí se jen tvé uživatelské jméno a doklad o přihlášení. Žádný klíč Ecency neopouští."
   },
   "payout": {
     "breakdown": "Rozpis",
@@ -1065,7 +1191,7 @@
     "open": "Otevřít URL",
     "invalid_key_desc": "pro provedení této transakce se přihlaste pomocí klíče {key} nebo hlavního klíče",
     "auth_transfer_confirm": "Potvrdit převod uživateli {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Schvalte, jen pokud důvěřujete zdroji tohoto odkazu. Schválením se níže uvedená operace odešle z vašeho účtu pomocí vašeho klíče {authority}."
   },
   "voters_dropdown": {
     "rewards": "ODMĚNY",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Mělo by obsahovat pouze písmena, čísla a pomlčky",
       "username_no_ascii_first_letter_error": "Musí začínat písmenem",
       "username_contains_double_hyphens": "Nemělo by obsahovat dvojité pomlčky",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Toto uživatelské jméno je příliš podobné účtu kryptoměnové burzy a mohlo by ostatní uvést v omyl. Zvolte prosím jedinečnější jméno.",
+      "username_restricted_prefix": "Uživatelská jména začínající na „uid“ následované čísly nejsou povolena, protože se často používají k vydávání se za jiné. Zvolte prosím jiné jméno.",
       "username_contains_underscore": "Nemělo by obsahovat podtržítko"
     },
     "500_error": "Váš požadavek nebylo možné zpracovat, fronta registrací je pravděpodobně plná! Zkuste to znovu za pár minut...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Uživatelské jméno je již obsazené",
+      "14": "E-mailová adresa je již registrována",
+      "15": "Zadejte prosím platnou e-mailovou adresu",
+      "16": "Zadejte prosím platné uživatelské jméno",
+      "17": "Uživatelské jméno je příliš dlouhé, zvolte kratší",
+      "19": "Použijte prosím trvalou e-mailovou adresu, nebo si pořiďte účet Premium",
+      "21": "Toto doporučení není platné",
+      "28": "Váš požadavek se nepodařilo zpracovat, pravděpodobně je plná fronta registrací. Zkuste to prosím znovu za několik minut.",
+      "107": "Zjištěno připojení přes VPN. Vypněte prosím VPN a zkuste to znovu, nebo si pořiďte účet Premium.",
+      "110": "Abychom předešli zneužití, omezujeme počet účtů na osobu či síť. Zkuste to prosím z jiné sítě.",
+      "111": "Zjištěno připojení přes Tor. Při registraci Tor prosím vypněte.",
+      "112": "Vaše připojení se právě nepodařilo ověřit. Zkuste to prosím znovu za několik minut."
     },
     "have_account_text": "Již máte účet?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Získejte plnohodnotný účet Hive, tato metoda obsahuje základní kontroly, které zajišťují, že botnety nezneužijí náš registrační kohoutek.",
     "btn_register": "Registrovat zdarma",
     "title": "Účet zdarma"
+  },
+  "dictation": {
+    "title": "Diktování",
+    "start": "Nahrát",
+    "stop": "Zastavit",
+    "record_more": "Nahrát další",
+    "done": "Hotovo",
+    "recording": "Nahrávání",
+    "stop_hint": "Zastav, aby se nahrávka přepsala a přidala do příspěvku. Nejvýše {m} min.",
+    "inserted": "Přidáno do příspěvku. Nahraj další, nebo klepni na Hotovo.",
+    "transcribing": "Přepisování",
+    "rate": "{n} Points za {s} s",
+    "cost_running": "Zatím {n} Points",
+    "cost_running_free": "Zatím zdarma",
+    "free_remaining": "Dnes máš dalších {n} x {s} s zdarma",
+    "price_loading": "Zjišťuji cenu",
+    "price_error": "Ceník přepisu se nepodařilo načíst.",
+    "denied": "Ecency potřebuje k diktování přístup k mikrofonu. Povol ho v Nastavení a zkus to znovu.",
+    "error_empty": "V této nahrávce nebyla zjištěna žádná řeč.",
+    "error_insufficient_points": "Nedostatek Points pro přepis této nahrávky.",
+    "error_rate_limited": "Příliš mnoho nahrávek. Zkus to prosím za chvíli znovu.",
+    "error_too_long": "Tato nahrávka je příliš dlouhá k přepisu.",
+    "error_failed": "Nahrávku se nepodařilo přepsat. Zkus to prosím znovu.",
+    "error_recorder": "Nahrávání se nepodařilo spustit. Zkus to prosím znovu."
   },
   "wallet": {
     "delegations_out": "Odchozí delegace",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Za pravidelné používání aplikace dostanete 0,25 bodu.",
     "fill_transfer_from_savings": "Výběr ze spořícího účtu dokončen",
     "activities": "Aktivity",
+    "no_activities": "Zatím žádné transakce",
+    "activities_failed": "Transakce se nepodařilo načíst. Zkus to znovu přetažením dolů.",
     "tap_update": "Aktualizujte klepnutím",
     "mining_lottery": "Výhra v loterii",
     "checkin": "Kontrola",
     "tokens_transfer": "Tokeny byly převedeny",
     "outgoing_transfer_title": "Převod / dárek",
+    "burned_title": "Využití AI",
+    "burned_description": "Points utracené za funkci AI",
+    "burn_refund_title": "Vrácení za AI",
+    "burn_refund_description": "Points vrácené po neúspěšném požadavku AI",
     "manage_assets": "Přidat nebo odebrat aktiva",
     "selected_assets": "Vybraná aktiva",
     "nft_setPropertyPermissions": "Nastavení oprávnění sad NFT symbolu",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Upráva zaokrouhlení tokenů",
     "tokens_transferOwnership": "Vlastnictví tokenu bylo převedeno",
     "withdraw_vesting": "Odstakovat",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Účty pro výběr",
     "delegate_engine": "Delegovat",
     "market_close": "Pozice uzavřena",
     "nftmarket_transferFee": "Poplatek za nákupní objednávku",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "ZÍSKAT BODY",
     "escrow_approve": "Schválit uvolnění prostředků ze zástavy",
     "expires": "vyprší",
+    "transaction_id": "ID transakce",
+    "copy_transaction_id": "Kopírovat odkaz na transakci",
+    "filter_activities": "Filtrovat aktivity",
+    "filter_activities_desc": "Vyber, které operace má tato historie načítat",
+    "filter_all": "Vybrat vše",
+    "filter_none": "Zrušit vše",
+    "filter_apply": "Použít",
     "author_reward": "Autorská odměna",
     "withdraw_hbd": "Vybrat ze spořícího účtu",
     "convert_request": "Konverze",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Dobít RC",
+    "desc": "Krátkodobé posílení RC, abyste mohli dál psát.",
+    "confirm": "Utratit Points za dobití Resource Credits?",
+    "insufficient": "Nemáte dostatek Points.",
+    "buy_points": "Koupit Points"
   },
   "ai_image_generator": {
     "title": "Generátor AI obrázků",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Vlastní ({hours} h)",
+    "balance_load_failed": "Zůstatek se nepodařilo načíst. Klepnutím to zkusíš znovu.",
+    "precision_load_failed": "Údaje o tomto tokenu se nepodařilo načíst, takže lze posílat jen celé částky. Klepnutím to zkusíš znovu.",
     "close": "Zavřít",
     "favorite_username_placeholder": "Uživatelské jméno",
     "invalid_recipient_qr": "V tomto QR kódu se nepodařilo najít uživatelské jméno.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Nastavení oprávnění",
     "pincode": "Pincode",
     "general": "Obecné",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Podpořit Ecency",
+    "support_beneficiary": "Sdílet odměny z příspěvků s Ecency",
+    "support_beneficiary_percent": "Podíl na odměnách z příspěvků",
+    "support_curation": "Zadržet část kurátorských odměn",
+    "support_curation_percent": "Zadržení kurátorských odměn",
     "feedback_body": "Sem napište svou zprávu!\n\nUživatelské jméno Hive: {username}\nVerze aplikace: {appVersion}\nPlatforma: {platform}\n",
     "show_imgs": "Zobrazit obrázky",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Komentáře",
       "bookmark": "Záložky",
+      "tags": "Tagy",
       "reblog": "Sdílení článků",
       "favorite": "Oblíbení",
       "mention": "Zmínky",
@@ -1599,10 +1765,10 @@
       "transfers": "Převody",
       "vote": "Hlasy",
       "follow": "Sledování",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Naplánovaný příspěvek zveřejněn",
+      "payouts": "Výplaty",
+      "account_update": "Aktualizace účtu",
+      "weekly_earnings": "Týdenní výdělky",
       "fcm_unavailable": "Push notifikace nejsou na tomto zařízení podporovány. Notifikace budete dostávat pouze tehdy, když je aplikace otevřená."
     },
     "keys_warning": "Toto jsou citlivé údaje!\nK zobrazování soukromých klíčů je potřeba Ecency zabezpečit pomocí PIN kódu.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Odeslat zpětnou vazbu",
     "rate_app": "Ohodnotit Ecency",
+    "email_digests": "E-mailové souhrny",
     "rate": "Hodnotit",
     "dm-privacy-updated": "Nastavení soukromí přímých zpráv bylo úspěšně aktualizováno",
     "dm-privacy-failed": "Nepodařilo se aktualizovat nastavení soukromí přímých zpráv",
@@ -1685,19 +1852,29 @@
     "request_sent": "Vaše žádost o smazání byla odeslána",
     "confirm_delete_body": "Opravdu chcete smazat účet? Vymažou se všechna vaše data"
   },
-  "tts": {
-    "settings_title": "Nastavení převodu textu na řeč",
-    "voice": "Hlas",
-    "voice_hint": "Použije se výchozí hlas systému",
-    "speed": "Rychlost",
-    "pitch": "Výška tónu",
-    "test_voice": "Vyzkoušet hlas",
-    "settings_info": "Tato nastavení se použijí při nahlas předčítání příspěvků",
+  "listen": {
+    "title": "Poslechni si tento příspěvek",
+    "minutes": "~{n} min",
+    "login": "Přihlásit se",
+    "unlock": "Odemknout · {n} Points",
+    "confirm": "Utratit {n} Points za poslech tohoto příspěvku? Zvuk je tvůj a můžeš si ho kdykoli znovu přehrát.",
+    "not_enough_title": "Nedostatek Points",
+    "not_enough": "Poslech vyžaduje {required} Points a ty máš {available}.",
+    "get_points": "Získat Points",
+    "unlock_failed": "Zvuk se nepodařilo odemknout, zkus to prosím znovu",
+    "failed_refunded": "Zvuk se nepodařilo vytvořit, tvé Points byly vráceny",
+    "preparing": "Připravuji zvuk…",
+    "preparing_eta": "Připravuji zvuk, přibližně {n} min…",
+    "preparing_progress": "Připravuji zvuk · {n} %",
+    "waiting": "Čekáš ve frontě, před tebou: {n}…",
+    "next_in_line": "Jsi na řadě jako další…",
     "play": "Přehrát",
     "pause": "Pozastavit",
-    "language": "Jazyk",
-    "language_auto": "Automatická detekce",
-    "language_hint": "Automatická detekce volí jazyk podle obsahu příspěvku"
+    "seek": "Přetáčet",
+    "speed": "Rychlost přehrávání",
+    "language": "Jazyk zvuku",
+    "unavailable": "Zvuk se nepodařilo načíst.",
+    "retry": "Zkusit znovu"
   },
   "posting_authority": {
     "title": "Zapnout rychlejší publikování",
@@ -1732,7 +1909,7 @@
     "error-auth": "Ověření selhalo. Přihlaste se prosím znovu.",
     "error-generic": "Nahrání videa selhalo. Zkuste to prosím znovu.",
     "error-too-long-short": "Krátká videa musí mít 60 sekund nebo méně.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Příspěvek může obsahovat jen jedno video. Před přidáním dalšího odeberte současné video.",
     "select_source": "Přidat video",
     "record": "Nahrát video",
     "choose_library": "Vybrat z knihovny"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Sdílet rychlou aktualizaci"
   },
+  "newsletter": {
+    "screen_title": "E-mailové souhrny",
+    "title": "{list}",
+    "body_own": "Týdenní nebo měsíční e-mailový souhrn tvých oznámení.",
+    "body_creator": "Nové příspěvky od {list} ve tvé schránce.",
+    "body_community": "Souhrn nových příspěvků v {list} e-mailem.",
+    "body_site": "To nejlepší z Ecency ve tvé schránce.",
+    "first_publish_title": "Gratulujeme k prvnímu příspěvku!",
+    "first_publish_body": "Chceš dostávat e-mailem souhrn oznámení? Týdně nebo měsíčně, v Nastavení to můžeš kdykoli změnit nebo odhlásit.",
+    "list_own": "Souhrn mých oznámení",
+    "list_site": "Newsletter Ecency",
+    "status_active": "Odebíráš.",
+    "status_pending": "Čeká se na potvrzení e-mailu.",
+    "status_short_active": "aktivní",
+    "status_short_pending_confirmation": "čeká",
+    "status_short_suppressed": "zastaveno",
+    "status_short_ended": "ukončeno",
+    "cadence_weekly": "Týdně",
+    "cadence_monthly": "Měsíčně",
+    "email_placeholder": "ty@example.com",
+    "subscribe": "Odebírat",
+    "update": "Aktualizovat",
+    "resend": "Znovu odeslat potvrzení",
+    "leave": "Odhlásit souhrn",
+    "cancel": "Zrušit",
+    "ok": "OK",
+    "manage": "Spravovat",
+    "check_inbox_title": "Zkontroluj schránku",
+    "check_inbox_body": "Poslali jsme potvrzovací odkaz na {email}. Odběr začne po potvrzení.",
+    "subscribed": "E-mailový souhrn je odebírán",
+    "left": "Souhrn byl odhlášen",
+    "refused": "Tuto adresu nelze přihlásit k odběru.",
+    "unavailable": "E-mailové souhrny teď nejsou k dispozici.",
+    "too_many": "Příliš mnoho pokusů, zkus to prosím později.",
+    "fail": "Něco se pokazilo, zkus to prosím znovu.",
+    "empty": "Zatím žádné e-mailové souhrny. Začni odběrem níže.",
+    "discover": "Více e-mailem",
+    "stop_all": "Zastavit vše",
+    "stop_all_title": "Zastavit všechny e-maily?",
+    "stop_all_body": "Na {email} už nebude odeslán žádný e-mail z Ecency. Odběry pod jinými adresami zůstanou.",
+    "stop_all_ok": "Zastavit vše",
+    "stop_all_done": "Adresa byla odhlášena ze všech e-mailů",
+    "profile_option": "E-MAILOVÝ SOUHRN",
+    "subscriber_count": "{weekly} týdně • {monthly} měsíčně odběratelů e-mailu",
+    "community_button": "Newsletter"
+  },
+  "mod_notes": {
+    "title": "Přidat důvod",
+    "placeholder": "Důvod (viditelný pro ostatní moderátory)",
+    "confirm": "Potvrdit",
+    "cancel": "Zrušit"
+  },
+  "community_settings": {
+    "title_header": "Nastavení komunity",
+    "title_label": "Název",
+    "about": "O komunitě",
+    "lang": "Jazyk",
+    "description": "Popis",
+    "rules": "Pravidla",
+    "nsfw": "Nevhodné do práce (NSFW)",
+    "save": "Uložit",
+    "required": "Povinné",
+    "title_length": "Mezi {min} a {max} znaky",
+    "owner_admin_only": "Tato nastavení může měnit jen vlastník a správci."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Rozbaleno",
+        "collapsed": "Sbaleno"
+      },
+      "a11y_chat": {
+        "quote": "Odpověď uživateli {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Vybrat",
+        "deselect": "Zrušit výběr"
+      },
+      "store": {
+        "billing_unavailable": "Nákupy v aplikaci nejsou na tomto zařízení povoleny.",
+        "verification_failed": "App Store tento nákup nemohl ověřit.",
+        "cancelled": "Nákup zrušen",
+        "unknown_result": "Neznámý výsledek nákupu"
+      },
+      "navigation": {
+        "feed_unavailable": "Tento kanál zatím není k dispozici.",
+        "link_cannot_open": "Tento odkaz nelze otevřít.",
+        "video_cannot_play": "Toto video nelze přehrát."
+      },
+      "media": {
+        "load_failed": "Tuto položku se nepodařilo načíst. Zkontroluj připojení a zkus to znovu.",
+        "loading": "Načítání médií",
+        "download_failed": "Stažení selhalo, stav {status}"
+      },
+      "sign_in": {
+        "required": "Vyžadováno přihlášení",
+        "to_reply": "Pro odpověď se přihlas.",
+        "to_vote": "Pro hlasování se přihlas.",
+        "button": "Přihlásit se"
+      },
+      "account": {
+        "logout_user": "Odhlásit @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# hlas} few {# hlasy} many {# hlasu} other {# hlasů}}  •  {replies, plural, one {# odpověď} few {# odpovědi} many {# odpovědi} other {# odpovědí}}",
+        "voting_power": "Hlasovací síla {percent}",
+        "remove_favourite": "Odebrat z oblíbených",
+        "add_favourite": "Přidat do oblíbených"
+      },
+      "waves": {
+        "clear_tag_filter": "Zrušit filtr tagu {tag}",
+        "new_wave": "Nový Wave",
+        "replies_open_thread": "{count, plural, one {# odpověď, otevřít vlákno} few {# odpovědi, otevřít vlákno} many {# odpovědi, otevřít vlákno} other {# odpovědí, otevřít vlákno}}",
+        "characters": "{count} z {max} znaků",
+        "retry": "{message}\nZkusit znovu",
+        "playing": "Přehrává se {permlink}",
+        "video_attached_remove": "Video připojeno, odebrat",
+        "image_attached_remove": "Připojený obrázek, odebrat",
+        "take_photo": "Pořídit fotku",
+        "edit_poll": "Upravit anketu",
+        "add_poll": "Přidat anketu",
+        "add_video": "Přidat video"
+      },
+      "reading": {
+        "reply_to": "Odpovědět uživateli {username}",
+        "opens_post": "Otevře příspěvek",
+        "sort_comments": "Řadit komentáře",
+        "sort_comments_value": "Řadit komentáře, {sort}",
+        "no_comments": "Zatím žádné komentáře.",
+        "loading_post": "Načítání příspěvku",
+        "show_version": "Zobrazit verzi",
+        "show_changes": "Zobrazit změny",
+        "replying_to": "Odpovídáš uživateli @{username}",
+        "reply_text": "Text odpovědi",
+        "translate_from": "Z",
+        "translate_to": "Do"
+      },
+      "feed": {
+        "tab_pinned": "{label}, připnuto",
+        "tab_add": "{label}, přidat",
+        "customise": "Přizpůsobit"
+      },
+      "card": {
+        "in_category": "v {category}",
+        "pinned": "Připnuto",
+        "by_author": "od {username}",
+        "payout": "výplata {payout}",
+        "payout_declined": "výplata {payout}, odmítnuta",
+        "reblogged_by": "Rebloggováno uživatelem {username}"
+      },
+      "shell": {
+        "close_menu": "Zavřít nabídku"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Náhled, vyber jiný obrázek",
+        "words": "{count, plural, one {# slovo} few {# slova} many {# slova} other {# slov}}",
+        "poll_min_age": "Min. stáří účtu (dny): {days}",
+        "poll_max_options": "Max. počet možností: {count}",
+        "thumbnail_selected": "Vybraný náhled",
+        "thumbnail": "Náhled",
+        "uploaded_image": "Nahraný obrázek",
+        "community_search": "hledat"
+      },
+      "vote": {
+        "not_voted": "Nehlasováno",
+        "voting": "Hlasování",
+        "failed_with": "Hlasování selhalo: {message}",
+        "failed": "Hlasování selhalo",
+        "payout": "Výplata {payout}",
+        "payout_declined": "Výplata {payout}, odmítnuta",
+        "percent": "{percent} procent",
+        "upvote_percent": "Hlas pro {percent} %"
+      },
+      "settings": {
+        "on": "Zapnuto",
+        "off": "Vypnuto"
+      },
+      "lock": {
+        "biometric_reason": "Zapnout biometrické odemykání Ecency",
+        "offer_title": "Odemknout pomocí {method}",
+        "offer_use": "Použít {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Klíče jsou skryté, když se obrazovka nahrává nebo zrcadlí.",
+        "screenshot_notice": "Byl pořízen snímek obrazovky. Soukromé klíče byly znovu skryty; pokud je na snímku klíč, smaž ho.",
+        "hold_hint": "Klíč zobrazíš dlouhým stisknutím.",
+        "hold_to_show": "Podrž pro zobrazení"
+      },
+      "wallet": {
+        "cancel_order": "Zrušit tento příkaz?",
+        "days": "{count, plural, one {# den} few {# dny} many {# dne} other {# dní}}"
+      },
+      "chat": {
+        "reactors_hint": "Dlouhým stisknutím zobrazíš, kdo reagoval",
+        "see_reactors": "Zobrazit, kdo reagoval"
+      },
+      "esie": {
+        "still": "{mood}, nehybný"
+      }
+    },
+    "ui": {
+      "profile_of": "Profil uživatele @{username}",
+      "preview": "Náhled ({index}/{count})",
+      "balance": "Zůstatek: {amount}",
+      "expires_in": "Vyprší za {time}",
+      "expired": "Vypršelo. Zavři a zkus to znovu.",
+      "user_has_no_posts": "@{username} zatím nic nepublikoval/a",
+      "attach_image": "Připojit obrázek",
+      "auto": "Auto",
+      "back": "Zpět",
+      "hot": "HOT",
+      "image_of": "Obrázek {index} z {count}",
+      "new": "NEW",
+      "nsfw_tap_to_reveal": "NSFW Klepnutím zobrazíš",
+      "new_reply": "Nová odpověď",
+      "remove": "Odebrat",
+      "unlock_ecency": "Odemknout Ecency",
+      "update_it": "Aktualizovat",
+      "update_it_or_post_this_as": "Aktualizovat ji, nebo publikovat jako novou odpověď?",
+      "use_pin": "Použít PIN",
+      "your_reply_was_already_posted": "Tvoje odpověď už byla publikována",
+      "error_try_again": "{message} Zkusit znovu?",
+      "auth": {
+        "account_label": "Účet: @{username}",
+        "approve_the_request_in_your_wallet": "Schval žádost v peněžence.",
+        "copy_key": "Kopírovat {title}",
+        "current_account": "Aktuální účet",
+        "qr_code": "QR kód",
+        "requested_by": "Vyžádal {requester}",
+        "pin_digits": "{filled} z {total, plural, one {# číslice} few {# číslic} many {# číslice} other {# číslic}}",
+        "private_key_shown": "{title}, soukromý klíč zobrazen",
+        "open_wallet_app": "Otevřít aplikaci peněženky",
+        "hiveauth_scan": "Schval v Hive Keychain nebo jiné peněžence HiveAuth: otevři ji na tomto zařízení, nebo jí naskenuj tento kód.",
+        "switching": "Přepínám...",
+        "logout_all": "Odhlásit ze všech účtů",
+        "logout_all_title": "Odhlásit ze všech účtů na tomto zařízení?",
+        "stored_key": "@{username} je na tomto zařízení už přihlášen/a. Uložené klíče zůstanou; obnoví se jen relace.",
+        "stored_hivesigner": "@{username} je na tomto zařízení už přihlášen/a přes HiveSigner. Relace bude nahrazena.",
+        "stored_hiveauth": "@{username} je na tomto zařízení přihlášen/a přes HiveAuth. Podepisovat se bude přes HiveSigner.",
+        "method_key": "Klíč",
+        "logout_failed": "Odhlášení selhalo"
+      },
+      "browser": {
+        "account": "Účet",
+        "authority": "Oprávnění",
+        "phishing": "Varování: Tato doména byla označena jako známý phishingový web. Buď maximálně opatrný/á."
+      },
+      "chat": {
+        "cancel_edit": "Zrušit úpravu",
+        "cancel_reply": "Zrušit odpověď",
+        "copied_to_clipboard": "Zkopírováno do schránky",
+        "edited_at": "Upraveno {time}",
+        "group_options": "Možnosti skupiny",
+        "pinned_messages": "Připnuté zprávy",
+        "remove_user": "Odebrat @{username}",
+        "sort_by_name": "Řadit podle jména",
+        "more": "Více",
+        "reaction_label": "{emoji} {count}. Dlouhým stisknutím zobrazíš, kdo reagoval",
+        "members": "Členové"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Na tomto odkazu už příspěvek existuje a liší se od toho, co jsi odeslal/a. Aktualizovat ho, nebo publikovat jako nový?",
+        "a_scheduled_post_is_published_by": "Naplánovaný příspěvek publikuje Ecency ve zvolený čas. K tomu je na tvém účtu potřeba oprávnění posting pro ecency.app. Tvé klíče a další oprávnění zůstanou beze změny. K udělení je potřeba tvůj klíč active.",
+        "ai_assist": "AI asistent",
+        "ai_tools": "Nástroje AI",
+        "allow_ecency_to_publish_for_you": "Povolit Ecency publikovat za tebe?",
+        "bold": "Tučně",
+        "clone": "Duplikovat",
+        "cost": "Cena: {cost}",
+        "could_not_store_the_draft_on": "Koncept se nepodařilo uložit na tomto zařízení. Nech aplikaci otevřenou a ulož koncept.",
+        "draft": "KONCEPT",
+        "delete_count": "Smazat ({count})",
+        "dictate_desc": "Mluv a přepis se vloží do tvého příspěvku",
+        "discard": "Zahodit",
+        "discard_changes": "Zahodit změny?",
+        "grant": "Udělit",
+        "italic": "Kurzíva",
+        "keep_editing": "Pokračovat v úpravách",
+        "my_blog": "MŮJ BLOG",
+        "my_communities": "MOJE KOMUNITY",
+        "new_post": "Nový příspěvek",
+        "notice": "Upozornění",
+        "restore": "Obnovit",
+        "restore_unsaved_changes": "Obnovit neuložené změny?",
+        "saved": "Uloženo",
+        "top_communities": "TOP KOMUNITY",
+        "table": "Tabulka",
+        "text_format": "Formát textu",
+        "this_link_is_already_in_use": "Tento odkaz se už používá",
+        "untitled": "Bez názvu",
+        "update_it_or_publish_this_as": "Aktualizovat ho, nebo publikovat jako nový příspěvek?",
+        "you_have_unsaved_changes_from_an": "Máš neuložené změny z dřívější úpravy. Příspěvek se od té doby změnil; jejich obnovením se nahradí text níže.",
+        "your_edits_were_not_published": "Tvé úpravy nebyly publikovány.",
+        "your_post_was_already_published": "Tvůj příspěvek už byl publikován",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Náhled, klepnutím vyber jiný obrázek",
+        "thumbnail_number": "Náhled {number}",
+        "recording_busy": "Nahrávání už probíhá. Nejdřív ho dokonči ve fotoaparátu.",
+        "photo_lost": "Fotka se ztratila, když byl fotoaparát otevřený. Vyfoť ji prosím znovu.",
+        "add_snippet_button": "+ Úryvek",
+        "words_count": "{count, plural, one {# slovo} few {# slova} many {# slova} other {# slov}}",
+        "community_search": "hledat"
+      },
+      "profile": {
+        "open_wallet": "Otevřít peněženku",
+        "your_wallet_is_on_the_wallet": "Tvá peněženka je na kartě Peněženka.",
+        "user_has_no_comments": "@{username} zatím nic nekomentoval/a",
+        "votes_count": "{count, plural, one {# hlas} few {# hlasy} many {# hlasu} other {# hlasů}}",
+        "replies_count": "{count, plural, one {# odpověď} few {# odpovědi} many {# odpovědi} other {# odpovědí}}",
+        "menu": "Více",
+        "users": "Uživatelé"
+      },
+      "reading": {
+        "apply": "POUŽÍT",
+        "add_tag": "Přidat tag",
+        "age": "Stáří",
+        "audio_language": "Jazyk zvuku",
+        "available_filters": "Dostupné filtry",
+        "could_not_unlock_the_audio_please": "Zvuk se nepodařilo odemknout, zkus to prosím znovu",
+        "downvote": "Nesouhlasný hlas",
+        "downvote_percent": "Nesouhlasný hlas {percent} %",
+        "listen_to_this_post": "Poslechni si tento příspěvek",
+        "log_in": "Přihlásit se",
+        "mark_all_as_read": "Označit vše jako přečtené",
+        "mark_as_read": "Označit jako přečtené",
+        "more_replies": "Další odpovědi",
+        "not_enough_points": "Nedostatek Points",
+        "nothing_here_yet": "Zatím tu nic není.",
+        "open_editor": "Otevřít editor",
+        "pause_voice": "Pozastavit hlas",
+        "play_voice": "Přehrát hlas",
+        "playback_speed": "Rychlost přehrávání",
+        "publishing_in_waves": "Publikování ve Waves",
+        "quests_done": "Splněné úkoly",
+        "read": "Číst",
+        "remove_vote": "Odebrat hlas",
+        "seek": "Přetáčet",
+        "select_community": "Vybrat komunitu",
+        "selected_filters": "Vybrané filtry",
+        "the_audio_could_not_be_loaded": "Zvuk se nepodařilo načíst.",
+        "this_post_does_not_exist_or": "Tento příspěvek neexistuje nebo byl smazán.",
+        "unread": "Nepřečtené",
+        "voice_position": "Pozice hlasu",
+        "vote_weight": "Síla hlasu",
+        "reblogged_by": "rebloggováno uživatelem {username}",
+        "no_more_posts": "Žádné další příspěvky.",
+        "favourite": "Oblíbené",
+        "no_votes_yet": "Zatím žádné hlasy",
+        "no_comments_yet": "Zatím žádné komentáře. Buď první!",
+        "comments_count": "Komentáře ({count})",
+        "sending_to_chain": "odesílá se do blockchainu",
+        "compare": "Porovnat",
+        "your_vote": "Tvůj hlas",
+        "reply_to": "Odpovědět uživateli @{username}",
+        "what_do_you_think": "Co si o tom myslíš?",
+        "clear_tag_filter": "Zrušit filtr tagu",
+        "tab_selected": "{title}, vybráno",
+        "add_tag_feed": "Přidat kanál tagu",
+        "feed_pinned": "{label}, připnuto",
+        "attached_image_remove": "Připojený obrázek, klepnutím odebereš",
+        "camera": "Fotoaparát",
+        "files": "Soubory",
+        "paused": "Pozastaveno",
+        "in_topic": "v {topic}",
+        "poll_vote": "Hlasovat",
+        "reply": "Odpovědět",
+        "mute_sound": "Ztlumit",
+        "unmute_sound": "Zrušit ztlumení",
+        "leaderboard_activities": "Aktivity",
+        "leaderboard_reward": "Odměna",
+        "sort_votes": "Hlasy"
+      },
+      "shell": {
+        "account_of": "Účet @{username}",
+        "account_signed_out": "Účet, odhlášen",
+        "close_tab": "Zavřít kartu",
+        "coming_soon_to_the_native_app": "Brzy v nativní aplikaci.",
+        "create": "Vytvořit",
+        "expand": "Rozbalit",
+        "forward": "Vpřed",
+        "loading": "Načítání",
+        "new_tab": "Nová karta",
+        "reload": "Znovu načíst",
+        "sent": "Odesláno",
+        "tab_unread": "{title}, nepřečtených: {count}",
+        "no_app_for_link": "Tento odkaz nemůže otevřít žádná aplikace."
+      },
+      "wallet": {
+        "product_not_available": "Produkt není k dispozici.",
+        "repeat": "Opakovat"
+      },
+      "copied": "Zkopírováno",
+      "trending_caps": "TRENDING",
+      "move_up": "Posunout nahoru",
+      "move_down": "Posunout dolů",
+      "scroll_to_top": "Posunout nahoru na začátek",
+      "load_more": "Více"
+    },
+    "wallet": {
+      "checking": "Ověřování v síti",
+      "leave_title": "Stále se odesílá",
+      "leave_message": "Stále se odesílá nebo ověřuje v síti. Tuto obrazovku můžeš opustit: aplikace ti řekne, až bude hotovo.",
+      "stay": "Zůstat",
+      "collateralized_convert_request": "Žádost o kolateralizovaný převod",
+      "op_transfer": "převod",
+      "op_power_up": "power up",
+      "op_power_down_change": "změna power down",
+      "op_delegation": "delegování",
+      "op_savings_deposit": "vklad do úspor",
+      "op_savings_withdrawal": "výběr z úspor",
+      "op_conversion": "konverze",
+      "op_swap": "výměna",
+      "op_order_cancel": "zrušení příkazu",
+      "op_reward_claim": "vyzvednutí odměn",
+      "op_withdraw_route_change": "změna trasy výběru",
+      "op_token_operation": "operace s tokenem"
+    },
+    "notification": {
+      "amount_unknown": "Částka není k dispozici",
+      "weekly_earnings_breakdown": "Tento týden jsi vydělal/a ${amount} - ${authorUsd} z příspěvků, ${curationUsd} z kurátorství.",
+      "weekly_earnings_total": "Tento týden jsi vydělal/a ${amount} ze svých příspěvků a kurátorství."
+    },
+    "settings": {
+      "open": "Otevřít",
+      "feedback_subject": "Zpětná vazba/Hlášení chyby",
+      "unknown_user": "Neznámý uživatel"
+    },
+    "navigation": {
+      "editor": "Editor",
+      "followers": "Sledující",
+      "spin_game": "Hra Spin",
+      "edit_profile": "Upravit profil",
+      "redeem_points": "Uplatnit body",
+      "community": "Komunita",
+      "community_members": "Členové komunity",
+      "community_activities": "Aktivity komunity",
+      "browser": "Prohlížeč",
+      "asset_details": "Podrobnosti aktiva",
+      "edit_history": "Historie úprav",
+      "welcome": "Vítej",
+      "chat": "Chat",
+      "backup_keys": "Záloha klíčů",
+      "trade": "Obchodování",
+      "ai_image_generator": "Generátor obrázků AI",
+      "select_assets": "Vybrat aktiva",
+      "poll": "Anketa",
+      "bot_comments": "Komentáře botů"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operace vyžadující klíč owner nelze v Ecency podepsat.",
+      "post": "Příspěvek/Komentář",
+      "custom": "Custom JSON",
+      "sign_buffer": "Podepsat zprávu",
+      "send_token": "Odeslat token",
+      "witness_vote": "Hlas pro witnessa",
+      "proxy": "Nastavit proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Odvysílat",
+      "sign_tx": "Podepsat transakci",
+      "encode": "Zakódovat zprávu",
+      "decode": "Ověřit klíč",
+      "add_account_authority": "Přidat oprávnění účtu",
+      "remove_account_authority": "Odebrat oprávnění účtu",
+      "add_key_authority": "Přidat oprávnění klíče",
+      "remove_key_authority": "Odebrat oprávnění klíče",
+      "create_claimed_account": "Vytvořit účet",
+      "create_proposal": "Vytvořit návrh",
+      "remove_proposal": "Odebrat návrh",
+      "update_proposal_vote": "Hlas pro návrh",
+      "signed_call": "Podepsané volání"
+    },
+    "translate_language": {
+      "ar": "arabština",
+      "az": "ázerbájdžánština",
+      "bg": "bulharština",
+      "bn": "bengálština",
+      "ca": "katalánština",
+      "cs": "čeština",
+      "da": "dánština",
+      "de": "němčina",
+      "el": "řečtina",
+      "en": "angličtina",
+      "eo": "esperanto",
+      "es": "španělština",
+      "et": "estonština",
+      "fa": "perština",
+      "fi": "finština",
+      "fr": "francouzština",
+      "ga": "irština",
+      "he": "hebrejština",
+      "hi": "hindština",
+      "hu": "maďarština",
+      "id": "indonéština",
+      "it": "italština",
+      "ja": "japonština",
+      "ko": "korejština",
+      "lt": "litevština",
+      "lv": "lotyština",
+      "ms": "malajština",
+      "nb": "norština",
+      "nl": "nizozemština",
+      "pl": "polština",
+      "pt": "portugalština",
+      "ro": "rumunština",
+      "ru": "ruština",
+      "sk": "slovenština",
+      "sl": "slovinština",
+      "sq": "albánština",
+      "sv": "švédština",
+      "th": "thajština",
+      "tl": "tagalština",
+      "tr": "turečtina",
+      "uk": "ukrajinština",
+      "zh": "čínština",
+      "zt": "čínština (tradiční)"
+    },
+    "reading": {
+      "banner_text": "Tento příspěvek je v jazyce: {source}. Přeložit do jazyka: {target}?",
+      "translated_from_text": "Přeloženo z jazyka: {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# člen} few {# členové} many {# člena} other {# členů}} • {authors, plural, one {# autor} few {# autoři} many {# autora} other {# autorů}} • {posts, plural, one {# příspěvek} few {# příspěvky} many {# příspěvku} other {# příspěvků}}",
+      "community_title": "Komunita {title}",
+      "members_title": "Členové komunity {title}",
+      "activities_title": "Aktivita komunity {title}",
+      "cannot_start_with_or": "Nesmí začínat znakem @ ani #",
+      "use_a_two_letter": "Použij dvoupísmenný kód jazyka, např. en",
+      "at_most_characters": "Nejvýše {max, plural, one {# znak} few {# znaky} many {# znaku} other {# znaků}}",
+      "council": "Rada",
+      "journal": "Deník",
+      "topic": "Téma",
+      "community_not_found": "Komunita nenalezena."
+    },
+    "transfer": {
+      "one_recipient": "Pro tento převod lze použít jen jednoho příjemce.",
+      "is_an_exchange_and": "{exchange} je burza a nemusí podporovat opakované převody: prostředky odeslané podle plánu se mohou ztratit. Použij místo toho jednorázový převod."
+    },
+    "dapps": {
+      "signing_info": "Ecency funguje jako tvé rozšíření pro podepisování v Hive. Když tě dApp požádá o přihlášení pomocí rozšíření prohlížeče, jako je Keychain, Keeper nebo Peak Vault, vyber tuto možnost. Ecency se postará o bezpečné podepsání.",
+      "category_social": "Sociální",
+      "category_gaming": "Hry",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Skupina",
+      "unable_to_load_messages": "Zprávy se nepodařilo načíst.",
+      "someone": "Někdo",
+      "renamed_the_group_to": "{actor} přejmenoval/a skupinu na „{name}“",
+      "removed_the_group_name": "{actor} odstranil/a název skupiny",
+      "unable_to_send_your": "Zprávu se nepodařilo odeslat.",
+      "unable_to_remove_message": "Zprávu se nepodařilo odstranit.",
+      "unknown": "Neznámý",
+      "members_online": "{members, plural, one {# člen} few {# členové} many {# člena} other {# členů}} • {online} online",
+      "failed_to_load_pinned": "Připnuté zprávy se nepodařilo načíst",
+      "you": "Ty",
+      "title": "Reakce"
+    },
+    "tip": {
+      "login_required": "Pro posílání tipů se přihlas",
+      "max_decimals": "Nejvýše {n, plural, one {# desetinné místo} few {# desetinná místa} many {# desetinného místa} other {# desetinných míst}}"
+    },
+    "paid": {
+      "check_again": "Zkontrolovat znovu",
+      "give_up": "Vzdát to",
+      "unknown": "Zatím bez odpovědi. Požadavek může ještě probíhat. Zkontroluj znovu a získáš výsledek: znovu se neúčtuje.",
+      "pending": "Tvůj požadavek se stále zpracovává. Zkontroluj znovu za chvíli: znovu se neúčtuje.",
+      "restored": "Dřívější požadavek zatím nemá odpověď. Zkontroluj znovu a získáš jeho výsledek: znovu se neúčtuje.",
+      "give_up_confirm": "Pokud požadavek proběhl, body byly utraceny a výsledek se ztratí.",
+      "not_stored": "Tento požadavek se nepodařilo uložit v zařízení. Nech tuto obrazovku otevřenou, dokud neskončí.",
+      "sign_in_again": "Tvoje relace vypršela. Přihlas se znovu a pak zkontroluj znovu.",
+      "other_account": "Toto patří uživateli @{owner}. Pro pokračování se přepni zpět na tento účet."
+    },
+    "ai": {
+      "run_ai_assist": "Spustit AI asistenta ({costText})",
+      "no_longer_free_cost": "Toto spuštění už dnes není zdarma. Stojí {cost} {unit}.",
+      "no_longer_free": "Toto spuštění už dnes není zdarma.",
+      "content_violates_our_content": "Obsah porušuje naše zásady obsahu. Uprav prosím svůj text. Points nebyly vráceny.",
+      "generate_image": "Vygenerovat obrázek ({costLabel})",
+      "use_prompt": "Použít: „{prompt}“"
+    },
+    "post_actions": {
+      "busy": "Počkej prosím, probíhá jiná akce",
+      "not_a_community_post": "Nejde o příspěvek v komunitě.",
+      "parent_post_not_found": "Nadřazený příspěvek nenalezen",
+      "the_account_changed": "Účet se změnil."
+    },
+    "dictation": {
+      "balance": "Zůstatek: {balance} {unit}",
+      "stop_points": "Zastavit ({cost} Points)",
+      "stop_free": "Zastavit (zdarma)",
+      "transcribe_points": "Přepsat ({cost} Points)",
+      "transcribe": "Přepsat",
+      "no_longer_free_cost": "Tato nahrávka už dnes není zdarma. Stojí {cost} Points.",
+      "no_longer_free": "Tato nahrávka už dnes není zdarma.",
+      "held_locked": "Nahrávání se zastavilo, když se Ecency zamklo. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
+      "held_no_background": "Nahrávání se zastavilo, když Ecency opustilo obrazovku (nemohlo zobrazit oznámení o nahrávání). Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
+      "held_stopped": "Nahrávání bylo zastaveno z oznámení. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
+      "held_focus_lost": "Nahrávání se zastavilo kvůli hovoru nebo zvuku jiné aplikace. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
+      "held_interrupted": "Nahrávání se zastavilo, protože mikrofon převzala jiná aplikace. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
+      "unavailable": "Nahrávání není na tomto zařízení k dispozici.",
+      "not_read": "Tuto nahrávku se nepodařilo přečíst, nebo je příliš velká. Nic nebylo odesláno ani účtováno.",
+      "give_up_not_sent": "Tato nahrávka nebyla odeslána, takže nic nebylo účtováno. Bude smazána.",
+      "give_up_not_charged": "Za tuto nahrávku nebylo nic účtováno. Bude smazána.",
+      "clip_lost": "Nahrávka dřívějšího požadavku už na tomto zařízení není. Pokud ten požadavek proběhl, tvé body byly utraceny a jeho přepis nelze získat."
+    },
+    "register": {
+      "error_code_28": "Tvůj požadavek se nepodařilo zpracovat. Fronta registrací je pravděpodobně plná. Zkus to znovu za pár minut."
+    },
+    "perks": {
+      "quests_empty": "Zatím tu nejsou žádné úkoly, zastav se brzy.",
+      "freeze_confirm_title": "Chraň svou sérii",
+      "spend_points_on_a": "Utratit {price} Points za zmrazení série? Spotřebuje se na ochranu tvé série ve dnech, kdy vynecháš."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Podpoř Ecency, získej blog zdarma a vyniknej s ověřeným odznakem Pro.",
+      "card_description": "Přejdi na Pro za {price} ročně. Ověřený odznak, blog zdarma a podpora Ecency.",
+      "card_description_plain": "Přejdi na Pro na rok. Ověřený odznak, blog zdarma a podpora Ecency.",
+      "member": "Jsi člen Pro.",
+      "benefit_badge": "Ověřený odznak Pro vedle tvého jména.",
+      "benefit_blog": "Blog zdarma na adrese tvejmeno.blogs.ecency.com.",
+      "benefit_support": "Přímá podpora vývoje Ecency.",
+      "benefit_early": "Předběžný přístup k novým funkcím.",
+      "buy": "Pořídit Pro za {price} ročně",
+      "extend": "Prodloužit o 12 měsíců za {price}",
+      "extend_note": "Další nákup přidá k tvému členství 12 měsíců.",
+      "unavailable": "Ecency Pro teď není v obchodě k dispozici.",
+      "activating": "Platba přijata. Aktivuje se tvé členství.",
+      "success_title": "Vítej v Ecency Pro",
+      "success_body": "Tvé členství Pro je aktivní. Odznak se brzy objeví na tvém profilu.",
+      "extending": "Platba přijata. Tvé členství Pro se prodlužuje o 12 měsíců.",
+      "open_a11y": "Otevřít Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Ukládám koncept...",
+      "please_sign_in_first": "Nejdřív se prosím přihlas.",
+      "fetch_failed": "Načtení selhalo.",
+      "you_can_only_edit": "Upravovat můžeš jen vlastní obsah.",
+      "invalid_percent": "Neplatné procento",
+      "beneficiary_exists_already": "Příjemce odměny už existuje",
+      "this_draft_belongs_to": "Tento koncept patří uživateli @{owner}. Pro jeho publikování se přepni zpět na tento účet.",
+      "could_not_make_a": "Pro tento příspěvek se nepodařilo vytvořit nový odkaz. Trochu změň název a zkus to znovu.",
+      "an_earlier_attempt_was": "Dřívější pokus byl publikován po tomto. Zkontroluj, kterou verzi chceš ponechat.",
+      "could_not_check_your": "Oprávnění posting tvého účtu se nepodařilo ověřit. Zkontroluj připojení a zkus to znovu.",
+      "this_post_was_changed": "Tento příspěvek byl od otevření změněn jinde. Zkopíruj svůj text, vrať se a otevři ho znovu, abys upravoval/a nejnovější verzi.",
+      "link_text_placeholder": "Text zde"
+    },
+    "app_error": {
+      "this_reply_is_too": "Tato odpověď je příliš dlouhá.",
+      "the_network_refused_this": "Síť tuto akci odmítla.",
+      "invalid_input": "Neplatný vstup.",
+      "secure_storage_is_unavailable": "Zabezpečené úložiště není k dispozici. Přihlas se prosím znovu.",
+      "please_sign_in_first": "Nejdřív se prosím přihlas.",
+      "these_credentials_belong_to": "Tyto přihlašovací údaje patří uživateli @{actual}, ne @{expected}.",
+      "is_not_signed_in": "@{username} není na tomto zařízení přihlášen/a.",
+      "key_required": "K provedení této transakce je potřeba klíč {role}. {hint}",
+      "cancelled": "Zrušeno.",
+      "the_request_was_rejected": "Žádost byla v aplikaci peněženky zamítnuta.",
+      "the_request_expired_before": "Žádost vypršela dřív, než aplikace peněženky odpověděla. Zkus to prosím znovu.",
+      "could_not_reach_the": "Server HiveAuth se nepodařilo kontaktovat. Zkus to prosím znovu.",
+      "unexpected_redirect": "Server poslal neočekávané přesměrování. Nic se nezměnilo. Zkus to prosím později.",
+      "missing_key_hint": "Přidej ho v Nastavení, Správa oprávnění (Importovat soukromý klíč), nebo se s ním přihlas znovu.",
+      "this_key_is_also": "Tento klíč je zároveň klíčem owner tohoto účtu. Ecency neukládá klíč, který ovládá roli owner: dej rolím active a posting vlastní klíče a přihlas se jimi.",
+      "this_is_the_owner": "Toto je klíč owner. Ecency klíč owner nikdy neukládá ani nepoužívá: přihlas se hlavním heslem nebo klíčem posting či active.",
+      "this_password_only_matches": "Toto heslo odpovídá jen klíči owner tohoto účtu. Ecency klíč owner nikdy neukládá ani nepoužívá: přihlas se klíčem posting nebo active.",
+      "this_key_cannot_sign": "Tento klíč nemůže za účet podepisovat sám: účet potřebuje více než jeden podpis (jeho váha je pod prahem).",
+      "public_key_given": "Toto je tvůj veřejný klíč. Vlož soukromý klíč (začíná číslicí 5) nebo hlavní heslo.",
+      "memo_key_only": "Klíč memo nelze pro přihlášení použít. Použij klíč posting, klíč active nebo hlavní heslo.",
+      "network_message": "Chyba sítě. Zkontroluj připojení a zkus to znovu.",
+      "network_error_this_may": "Chyba sítě. Mohlo to už proběhnout; opakování je bezpečné a nezveřejní to dvakrát."
+    },
+    "purchases": {
+      "deal_best": "NEJLEPŠÍ NABÍDKA!",
+      "deal_popular": "OBLÍBENÉ!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Obchod neodpověděl."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Pro spotřebu 999accounts jsou vyžadovány e-mail a uživatelské jméno",
+      "stuck": "Dřívější nákup tohoto produktu se nepodařilo dokončit. Kontaktuj prosím support@ecency.com a uveď doklad z obchodu, uchovává se pro tento účel.",
+      "held": "Tento nákup je pozdržen ke kontrole. Kontaktuj support@ecency.com a uveď objednávku #{order}.",
+      "earlier_purchase": "Nejdřív se dokončuje dřívější nákup tohoto produktu pro @{target}.",
+      "earlier_pending": "Dřívější platba za tento produkt pro @{target} stále čeká. Dokončí se, jakmile obchod platbu potvrdí.",
+      "pending": "Tvá platba čeká. Nákup se dokončí, jakmile obchod platbu potvrdí.",
+      "processing": "Tvůj nákup se zpracovává. Brzy bude dokončen."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Opakované převody",
+      "delegate_hive_power": "Delegovat Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Nastavit trasu výběru vestingu",
+      "power_down": "Power down",
+      "transfer_to_saving": "Převod do úspor",
+      "transfer_from_saving": "Převod z úspor",
+      "cancel_transfer_from_saving": "Zrušit převod z úspor",
+      "collateralized_convert": "Kolateralizovaný převod",
+      "witness_vote": "Hlas pro witnessa",
+      "witness_update": "Aktualizace witnessa",
+      "witness_set_properties": "Nastavení vlastností witnessa",
+      "governance_proxy": "Proxy správy",
+      "claim_account": "Získat účet",
+      "create_account": "Vytvořit účet",
+      "create_account_with_account": "Vytvořit účet pomocí kreditů účtu",
+      "create_limit_order": "Vytvořit limitní příkaz",
+      "cancel_limit_order": "Zrušit limitní příkaz",
+      "redeem_rewards": "Vyzvednout odměny",
+      "post_or_comment": "Příspěvek nebo komentář",
+      "post_or_comment_options": "Možnosti příspěvku nebo komentáře",
+      "custom_operation": "Vlastní operace",
+      "update_account_active": "Aktualizace účtu (active)",
+      "update_account_posting": "Aktualizace účtu (posting)",
+      "change_recovery_account": "Změnit účet pro obnovení",
+      "create_proposal": "Vytvořit návrh",
+      "remove_proposal": "Odebrat návrh",
+      "update_proposal_votes": "Aktualizovat hlasy pro návrh",
+      "update_proposal": "Aktualizovat návrh"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Tento odkaz musí podepsat @{account}. Přepni se na tento účet a otevři ho znovu.",
+      "ecency_can_only_sign": "Ecency může z odkazů podepisovat a odesílat jen transakce.",
+      "requester_page": "stránka {host}",
+      "owner_refused": "Operace vyžadující klíč owner nelze podepsat z odkazu.",
+      "busy": "Počkej prosím: jiný požadavek se stále zpracovává.",
+      "not_supported": "Ecency tuto operaci v této verzi zatím podepsat nedokáže."
+    },
+    "chats": {
+      "group_members": "Členové skupiny",
+      "rename_group": "Přejmenovat skupinu",
+      "failed_to_load_chats": "Chaty se nepodařilo načíst",
+      "unknown": "Neznámý",
+      "unable_to_mark_channel": "Kanál se nepodařilo označit jako přečtený",
+      "unable_to_update_favorites": "Oblíbené se nepodařilo aktualizovat",
+      "unable_to_update_mute": "Ztlumení se nepodařilo aktualizovat",
+      "group": "Skupina",
+      "unable_to_search": "Hledání se nezdařilo",
+      "unable_to_start_chat": "Chat se nepodařilo zahájit",
+      "no_internet": "Žádné připojení k internetu"
+    },
+    "stake": {
+      "confirm_summary": "Delegovat {hp} HP ({vests} VESTS) uživateli @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Už delegováno uživateli @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Pouze veřejný. Ecency klíč owner nikdy neukládá.",
+      "shared_owner": "Tento účet používá stejný klíč pro roli owner a roli {names}. Kdo tento klíč má, ovládá celý účet. Dej roli {names} vlastní klíč a klíč owner uchovávej offline.",
+      "copy_warning": "Kdokoli s tímto soukromým klíčem ovládá tuto část tvého účtu. Jiné aplikace mohou číst schránku; vkládej ho jen tam, kde důvěřuješ. Ze schránky se vymaže po 2 minutách."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Zámek PIN je zapnutý.",
+      "pin_changed": "PIN změněn.",
+      "pin_lock_is_off": "Zámek PIN je vypnutý.",
+      "wiped_notice": "Všechny účty, klíče a přihlašovací údaje byly z tohoto zařízení odstraněny.",
+      "we_could_not_bring": "Nepodařilo se převzít tvé účty z předchozí verze aplikace. Přihlas se prosím znovu.",
+      "your_pin_lock_could": "Tvůj zámek PIN se nepodařilo převzít z předchozí verze. Nastav PIN znovu v nabídce účtu, aby se zámek aplikace zase zapnul.",
+      "biometric_unlock_was_turned": "Biometrické odemykání bylo vypnuto, protože se změnily biometrické údaje na tomto zařízení. Odemkni pomocí PIN a pak ho znovu zapni v nabídce účtu.",
+      "biometric_unavailable_notice": "Biometrické odemykání se nepodařilo zapnout: na tomto zařízení nejsou nastaveny žádné biometrické údaje.",
+      "set_backup": "Nastav PIN jako zálohu biometrického odemykání",
+      "biometric_on_notice": "Zámek PIN je zapnutý. Odemkni biometrií nebo PINem.",
+      "offer_title": "Odemknout biometrií",
+      "offer_body": "Otevři Ecency obličejem nebo otiskem prstu. Nastavuješ také PIN, který aplikaci odemkne, když biometrie není dostupná.",
+      "offer_use": "Použít biometrii",
+      "offer_use_pin": "Použít místo toho PIN"
+    },
+    "common": {
+      "list_and": "{first} a {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Odpovědi s 25 znaky nebo méně nedostávají body (odkazy se nepočítají)",
+      "short_content_hint": "Příliš krátké pro získání bodů (25 znaků nebo méně, bez odkazů)",
+      "daily_post": "Denní příspěvek {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# den v řadě} few {# dny v řadě} many {# dne v řadě} other {# dní v řadě}}",
+      "grant_description": "Udělit účtu Ecency @ecency.app oprávnění posting na tvém účtu, abys mohl/a přispívat bez otevírání Keychain pokaždé. Udělení mění oprávnění posting tvého účtu a vyžaduje tvůj klíč active."
+    },
+    "wallet_history": {
+      "from_to": "@{from} uživateli @{to}",
+      "from_user_id": "od @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} uživateli @{to}, id: {id}",
+      "from_to_account": "@{from} uživateli {to}",
+      "from_user": "od @{user}",
+      "to_user": "uživateli @{user}",
+      "interest": "Úrok",
+      "proposal_pay": "Platba za návrh",
+      "categories": "Typy aktivit",
+      "category_all": "Vše",
+      "category_transfers": "Převody",
+      "category_market": "Tržní příkazy",
+      "category_interest": "Úroky",
+      "category_stake": "Operace stakingu",
+      "category_rewards": "Odměny",
+      "point_type_checkin": "Denní aktivita",
+      "point_type_login": "Přihlášení",
+      "point_type_post": "Příspěvek",
+      "point_type_comment": "Komentář",
+      "point_type_vote": "Hlas",
+      "point_type_reblog": "Reblog",
+      "point_type_transfer_sent": "Odeslané převody",
+      "point_type_transfer_received": "Přijaté převody"
+    },
+    "video_upload": {
+      "continue_upload": "POKRAČOVAT V NAHRÁVÁNÍ",
+      "source_gone": "Tato nahrávka už na zařízení není k dispozici. Nahraj nebo vyber video znovu.",
+      "no_camera": "Fotoaparát není na tomto zařízení k dispozici."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Další unstaking za {hours, plural, one {# hodinu} few {# hodiny} many {# hodiny} other {# hodin}}",
+      "account_not_found": "Účet nenalezen"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Obrázek ve schránce · Vložit obrázek",
+      "no_container": "Nejnovější kontejner waves se nepodařilo načíst",
+      "please_sign_in_first": "Nejdřív se prosím přihlas.",
+      "write_something_first": "Nejdřív něco napiš.",
+      "account_changed": "Tento wave byl napsán jako jiný účet. Zavři ho a napiš znovu.",
+      "no_upload": "Nahrávání obrázků zatím v tomto sestavení není k dispozici. Vlož místo toho do textu odkaz na obrázek.",
+      "fail": "Chyba"
+    },
+    "delete_account": {
+      "sign_out_failed": "Tvá žádost byla odeslána, ale odhlášení selhalo. Odhlas se prosím z nabídky.",
+      "not_sent": "Žádost o smazání se nepodařilo odeslat. Zkus to prosím znovu."
+    },
+    "chat_sheets": {
+      "group_limit": "Ve skupině může být nejvýše {max, plural, one {# další osoba} few {# další osoby} many {# další osoby} other {# dalších osob}}.",
+      "search_people_by_username": "Hledat lidi podle uživatelského jména",
+      "new_group_title": "Nová skupina",
+      "new_group_hint": "Přidej {min} až {max, plural, one {# osobu} few {# osoby} many {# osoby} other {# osob}} a začni skupinovou konverzaci.",
+      "no_results": "V chatu nikdo s tímto jménem nebyl nalezen.",
+      "search_failed": "Hledání se nezdařilo. Zkontroluj připojení a zkus to znovu.",
+      "create": "Založit skupinu",
+      "new_group_failed": "Skupinu se nepodařilo založit. Zkus to prosím znovu.",
+      "name_limit": "Název skupiny může mít nejvýše {max, plural, one {# znak} few {# znaky} many {# znaku} other {# znaků}}.",
+      "rename_title": "Přejmenovat skupinu",
+      "rename_hint": "Dej skupině jméno, které uvidí všichni v ní. Nech prázdné, aby se zobrazovala jména členů.",
+      "placeholder": "Název skupiny",
+      "not_owner": "Skupinu může přejmenovat jen ten, kdo ji založil.",
+      "rename_failed": "Skupinu se nepodařilo přejmenovat. Zkus to prosím znovu."
+    },
+    "editor_side": {
+      "copy_of": "Kopie {title}",
+      "deletions_failed": "Něco se pokazilo\nSelhalo {failed} z {total, plural, one {# smazání} few {# smazání} many {# smazání} other {# smazání}}",
+      "uploads_failed": "{count, plural, one {# nahrání selhalo} few {# nahrání selhala} many {# nahrání selhalo} other {# nahrání selhalo}}:\n\n{messages}",
+      "failed_to_delete": "Smazání selhalo"
+    },
+    "uploads": {
+      "add_to_gallery": "Přidat do galerie"
+    },
+    "account_notice": {
+      "manage_keys": "Nastavení, Správa oprávnění",
+      "no_signing_key_title": "Přihlas se znovu jako @{account}",
+      "no_signing_key": "Ecency už na tomto zařízení neuchovává klíč owner ani hlavní heslo a @{account} tu nemá uložený klíč posting ani active. Přihlas se znovu hlavním heslem nebo klíčem posting či active, nebo přidej klíč v části {manageKeys} (Importovat soukromý klíč).",
+      "missing_roles_title": "Některé klíče nebyly přidány",
+      "cannot_post": "přispívat, hlasovat nebo komentovat",
+      "cannot_transfer": "odesílat převody ani měnit nastavení účtu",
+      "missing_roles": "Tvé heslo už neodpovídá klíči {missing} účtu @{account}: na účtu byl od nastavení hesla změněn. Uloženo na tomto zařízení: klíč {kept}. Dokud nepřidáš klíč {missing} v části {manageKeys} (Importovat soukromý klíč), nemůže tato aplikace s klíči pro @{account} {cannot}.",
+      "shared_owner_title": "Tento klíč ovládá také roli owner",
+      "shared_owner": "@{account} používá stejný klíč pro roli owner a roli {names}. Kdo tento klíč má, ovládá celý účet. Ecency ho uchovává jen jako klíč {names} a nikdy ho nepoužívá k operacím owner. Dej roli {names} vlastní klíč a klíč owner uchovávej offline."
+    },
+    "dapp_browser": {
+      "message_from": "Zpráva od {host}",
+      "home_title": "Domů",
+      "loading_title": "Načítání...",
+      "blank_run": "[{count, plural, one {# prázdný znak} few {# prázdné znaky} many {# prázdného znaku} other {# prázdných znaků}}]",
+      "too_large": "Tato stránka požádala o podepsání žádosti příliš velké na zobrazení, proto ji Ecency odmítlo."
+    },
+    "community_service": {
+      "the_account_changed": "Účet se změnil."
+    },
+    "profile_edit": {
+      "enter_link": "Zadej odkaz na obrázek",
+      "please_sign_in_first": "Nejdřív se prosím přihlas.",
+      "account_not_found": "Účet nenalezen",
+      "please_enter_an_image": "Zadej prosím odkaz na obrázek začínající https://"
+    },
+    "background_media": {
+      "post_by": "Příspěvek od @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Nejdřív se prosím přihlas."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Už jsi hlasoval/a se stejnou silou.",
+      "insufficient_rc": "Nedostatek Resource Credits. Počkej, nebo proveď power up.",
+      "missing_authority": "Chybí oprávnění posting. Zkontroluj způsob přihlášení.",
+      "comment_too_soon": "Před dalším příspěvkem prosím počkej.",
+      "paid_out": "Tento příspěvek už byl vyplacen.",
+      "too_large": "Transakce má {size, plural, one {# bajt} few {# bajty} many {# bajtu} other {# bajtů}}, což přesahuje limit {max} bajtů.",
+      "network_error_please_check": "Chyba sítě. Zkontroluj připojení a zkus to znovu.",
+      "unconfirmed_message": "Nepodařilo se potvrdit, zda to proběhlo. Zkontroluj peněženku nebo historii; začni znovu, jen pokud tam není.",
+      "undecided_message": "Mohlo to už proběhnout. Než to zkusíš znovu, zkontroluj peněženku nebo historii."
+    },
+    "chat_api": {
+      "request_failed": "Požadavek selhal ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} píše...",
+      "typing_two": "{first} a {second} píšou...",
+      "typing_three": "{first}, {second} a {third} píšou...",
+      "typing_many": "{first}, {second} a ještě {count, plural, one {# další osoba} few {# další osoby} many {# další osoby} other {# dalších osob}} píše...",
+      "banned": "{reason} Chat si stále můžeš číst. Přispívání se odemkne {until}.",
+      "joined_when": "připojil/a se {time}",
+      "joined": "připojil/a se",
+      "official_badge": "Oficiální",
+      "official_badge_label": "Oficiální účet Ecency"
+    },
+    "side_menu": {
+      "ask_esie": "Zeptat se Esie"
+    },
+    "chat_service": {
+      "missing_token": "Chybí přístupový token Hive. Odhlas se prosím a přihlas znovu.",
+      "dm_error": "Uživatel se do chatů nepřipojil"
+    },
+    "compose_reply": {
+      "account_changed": "Tato odpověď byla napsána jako jiný účet. Zavři ji a napiš znovu.",
+      "write_something_first": "Nejdřív něco napiš.",
+      "please_sign_in_first": "Nejdřív se prosím přihlas."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Příliš mnoho příjemců odměn: nejvýše {max}.",
+      "a_beneficiary_s_share": "Podíl příjemce odměny musí být mezi 0,01 % a 100 %.",
+      "beneficiaries_add_up_to": "Podíly příjemců odměn dávají dohromady více než 100 %.",
+      "a_beneficiary_is_listed": "Jeden z příjemců odměn je uveden dvakrát.",
+      "you_cannot_be_a": "Nemůžeš být příjemcem odměny z vlastního příspěvku.",
+      "a_beneficiary_has_an": "Jeden z příjemců odměn má neplatné jméno účtu."
+    },
+    "follows": {
+      "fail": "Chyba!: {message}",
+      "follower_count": "Sledující ({count})",
+      "following_count": "Sleduje ({count})"
+    },
+    "link": {
+      "unsupported": "Tento odkaz zatím není podporován.",
+      "cannot_open": "Odkaz nelze otevřít",
+      "unsupported_version": "Tento odkaz není v této verzi podporován."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Prohlížeč Explore má přístup k tvé peněžence Hive kvůli podepisování transakcí. Tento odkaz pochází z obsahu příspěvku a Ecency ho neověřilo. Pokračuj jen tehdy, pokud mu důvěřuješ:\n\n{url}"
+    },
+    "listen": {
+      "message": "Poslech vyžaduje {required} Points a ty máš {available}.",
+      "unlock_label": "Odemknout · {cost} Points",
+      "preparing_audio": "Připravuji zvuk · {preparingPercent} %",
+      "waiting_in_line_ahead": "Čekáš ve frontě, před tebou: {ahead}…",
+      "next_in_line": "Jsi na řadě jako další…",
+      "preparing_about_minutes": "Připravuji zvuk, přibližně {minutes} min…",
+      "preparing_audio_2": "Připravuji zvuk…",
+      "spend_confirm": "Utratit {cost} Points za poslech tohoto příspěvku? Zvuk je tvůj a můžeš si ho kdykoli znovu přehrát.",
+      "about_minutes": "~{minutes} min",
+      "failed_refunded": "Zvuk se nepodařilo vytvořit, tvé Points byly vráceny"
+    },
+    "media_pick": {
+      "preparing_video": "Připravuji video...",
+      "library_hint": "Vyber ze svých fotek",
+      "camera_hint": "Vyfoť teď novou fotku",
+      "files_hint": "Procházej soubory v tomto zařízení a v cloudu",
+      "paste_hint": "Použít zkopírovaný obrázek",
+      "link_hint": "Použít obrázek z webu"
+    },
+    "media_picking": {
+      "image_types_message": "Tento typ souboru není podporován. Vyber obrázek JPEG, PNG, GIF, WebP nebo HEIC.",
+      "video_types_message": "Tento typ souboru není podporován. Vyber video MP4 nebo MOV.",
+      "gif_too_large": "Tento GIF je větší než {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Tato operace vyžaduje podpis active i posting, což Ecency zatím společně podepsat neumí."
+    },
+    "poll": {
+      "fail": "Chyba!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Oprávnění posting tvého účtu se nepodařilo ověřit. Zkontroluj připojení a zkus to znovu."
+    },
+    "post_lists": {
+      "voters_title": "Informace o hlasujících ({total})",
+      "reblogs_title": "Informace o reblozích ({total})",
+      "no_history_found": "Žádná historie nenalezena!",
+      "no_edit_history_available": "Pro tento obsah není k dispozici žádná historie úprav.",
+      "version_label": "Verze {version}"
+    },
+    "stats": {
+      "other_device": "Jiné"
+    },
+    "profile": {
+      "account_not_found": "Účet nenalezen",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Plné za {hours, plural, one {# hodinu} few {# hodiny} many {# hodiny} other {# hodin}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Tvůj aktuální profil se nepodařilo přečíst, zkus to znovu"
+    },
+    "profile_sheet": {
+      "fail": "Chyba! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Účet nenalezen"
+    },
+    "push_payload": {
+      "mentioned": "@{source} zmínil/a @{target}",
+      "replied": "@{source} odpověděl/a uživateli @{target}",
+      "transferred": "@{source} poslal/a převod uživateli @{target}",
+      "delegated": "@{source} delegoval/a uživateli @{target}",
+      "rewards_received": "Odměny přijaty",
+      "account_updated": "Účet aktualizován",
+      "account_updated_body": "Údaje tvého účtu byly aktualizovány",
+      "followed": "@{source} začal/a sledovat @{target}",
+      "unfollowed": "@{source} přestal/a sledovat @{target}",
+      "ignored": "@{source} ignoroval/a @{target}",
+      "blacklisted": "@{source} dal/a @{target} na černou listinu",
+      "posted_in": "@{source} přispěl/a do #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Nelze získat oprávnění k fotoaparátu",
+      "permission_message": "Udělej prosím oprávnění k fotoaparátu v nastavení Ecency.",
+      "permission_allow": "Povolit"
+    },
+    "reply_account": {
+      "switch": "Odpovědět jiným účtem"
+    },
+    "send_journal": {
+      "your_from_went_through": "Tvůj {label} z účtu @{account} proběhl.",
+      "not_sent": "Tvůj {label} z účtu @{account} neproběhl. Nic nebylo odesláno; můžeš začít znovu.",
+      "checking_whether_your_from": "Ověřuji, zda tvůj {label} z účtu @{account} proběhl. Než ho odešleš znovu, zkontroluj peněženku."
+    },
+    "signing": {
+      "hot_page_closed": "Stránka HiveSigner byla zavřena",
+      "wrong_role": "Toto je tvůj klíč {given}; tato operace vyžaduje tvůj klíč {needed}.",
+      "action_id_required": "Tato akce potřebuje ID akce, aby ji bylo možné bezpečně zopakovat."
+    },
+    "signing_router": {
+      "owner_never": "Operace owner se v aplikaci nikdy nepodepisují."
+    },
+    "spin": {
+      "key_missing": "Chybí klíč hry",
+      "score": "{score, plural, one {# bod} few {# body} many {# bodu} other {# bodů}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Dnes (UTC), reset za {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Reset každý den v 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Přihlas se znovu",
+      "message": "Zabezpečené úložiště na tomto zařízení bylo resetováno. Přihlas se znovu.",
+      "failed": "Účty na tomto zařízení se nepodařilo odebrat. Zkus to prosím znovu."
+    },
+    "store": {
+      "in_app_purchases_are": "Nákupy v aplikaci nejsou v tomto sestavení k dispozici."
+    },
+    "wallet_sends": {
+      "journal_full": "Příliš mnoho dřívějších odeslání se stále ověřuje v síti. Počkej na jejich potvrzení, než odešleš další.",
+      "check_later": "Síť to včas nepotvrdila. Než to odešleš znovu, zkontroluj peněženku nebo historii; aplikace to zkontroluje znovu při dalším spuštění."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# nepřečtené} few {# nepřečtené} many {# nepřečtené} other {# nepřečtených}}",
+      "locked_text": "Odemkni Ecency a zobraz",
+      "signed_out_text": "Přihlásit se do Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Aktuální oprávnění tvého účtu se nepodařilo přečíst. Nic se nezměnilo; zkus to prosím znovu.",
+      "reads_disagree": "Dvě načtení oprávnění posting tvého účtu se liší. Nic se nezměnilo; zkus to prosím znovu."
+    },
+    "vote": {
+      "vote_weight_must_be": "Síla hlasu musí být mezi -100 % a 100 %.",
+      "please_sign_in_first": "Nejdřív se prosím přihlas."
+    },
+    "widget": {
+      "streak_name": "Série úkolů",
+      "write": "Napsat",
+      "new_wave": "Nový Wave",
+      "notifications_description": "Tvá nepřečtená oznámení. Skryto, když je zapnutý zámek PIN.",
+      "streak_description": "Tvá denní série úkolů. Skryto, když je zapnutý zámek PIN.",
+      "compose_description": "Napiš příspěvek nebo nový wave.",
+      "streak_title": "Série",
+      "daily_quests": "Denní úkoly",
+      "streak_hint": "Otevři Perks a uvidíš svou sérii",
+      "open_perks": "Otevřít Perks",
+      "open_app": "Otevřít Ecency",
+      "unread_caption": "{count, plural, one {nepřečtené} few {nepřečtené} many {nepřečtené} other {nepřečtených}}",
+      "streak_caption": "{count, plural, one {den v řadě} few {dny v řadě} many {dne v řadě} other {dní v řadě}}"
+    },
+    "system": {
+      "dictation_channel": "Diktování",
+      "listen_channel": "Listen",
+      "dictation_channel_description": "Zobrazuje se, když na pozadí probíhá nahrávání pro diktování, s akcí Zastavit.",
+      "dictation_title": "Nahrávání pro diktování",
+      "dictation_text": "Ecency nahrává tvé diktování. Zastavení ho nechá neodeslané, dokud to v aplikaci nepotvrdíš.",
+      "listen_channel_description": "Dá ti vědět, když Listen nemohl pokračovat na pozadí.",
+      "listen_paused": "Listen pozastaven",
+      "listen_paused_text": "Otevři Ecency a poslouchej dál.",
+      "skip_back": "Zpět o 15 sekund",
+      "skip_forward": "Vpřed o 15 sekund"
+    },
+    "permission": {
+      "face_id": "Odemkni Ecency pomocí Face ID místo PIN.",
+      "camera": "Skenuj QR kódy a pořizuj fotky nebo nahrávej videa, abys je přidal/a do příspěvku.",
+      "photo_library_add": "Ecency ukládá obrázky stažené z příspěvků do tvé knihovny fotek.",
+      "photo_library": "Ecency uchovává obrázky stažené z příspěvků pohromadě v albu Ecency v tvé knihovně fotek.",
+      "microphone": "Ecency používá tvůj mikrofon, abys mohl/a diktovat příspěvky a komentáře (tyto nahrávky se odesílají do Ecency k přepisu) a nahrávat zvuk k videu přidávanému do příspěvku."
+    },
+    "android": {
+      "no_browser": "Není k dispozici žádný prohlížeč",
+      "biometric_unlock_title": "Odemknout Ecency biometrií",
+      "biometric_confirm": "Potvrď otiskem prstu nebo obličejem",
+      "image_unsupported_address": "Nepodporovaná adresa obrázku",
+      "image_create_failed": "Soubor se nepodařilo vytvořit",
+      "image_write_failed": "Soubor se nepodařilo zapsat",
+      "image_too_large": "Obrázek je příliš velký",
+      "image_download_failed": "Stažení selhalo, stav {status}",
+      "billing_disconnected": "Google Play Billing odpojen.",
+      "billing_no_screen": "Není obrazovka, na které by se nákup zobrazil.",
+      "billing_error": "Chyba Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Tento měsíc jste vytvořili {count, plural, one {# příspěvek} few {# příspěvek} many {# příspěvek} other {# příspěvek}}. Tak dál!",
-        "checkin": "Tento týden jste se přihlásili {count, plural, one {# den} few {# den} many {# den} other {# den}}. Tak dál!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# nový příspěvek} few {# nové příspěvky} many {# nového příspěvku} other {# nových příspěvků}} v #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# neúspěšných pokusů} few {# neúspěšných pokusů} many {# neúspěšných pokusů} other {# neúspěšných pokusů}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n}denní série"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Hlasovat mohou jen uživatelé s účtem starším než {days} dní",
-        "max_choices": "• Můžeš zvolit až {choices} odpovědí"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Zbývá {executions} převodů",
-        "schedule_summary": "{executions} převodů, každý jednou za {hours} hodin"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Příliš krátké pro získání bodů ({n, plural, one {# znak} few {# znaky} many {# znaku} other {# znaků}} nebo méně, bez odkazů)"
       },
       "chats": {
-        "people_joined": "Připojilo se {count} lidí"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "přibližně za {count, plural, one {# minutu} few {# minuty} many {# minuty} other {# minut}}",
+        "ban-remaining-hours": "přibližně za {count, plural, one {# hodinu} few {# hodiny} many {# hodiny} other {# hodin}}",
+        "ban-remaining-days": "přibližně za {count, plural, one {# den} few {# dny} many {# dne} other {# dní}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Použij nejvýše {n, plural, one {# tag} few {# tagy} many {# tagu} other {# tagů}}",
+          "too_long": "Hledaný výraz je příliš dlouhý. Použij nejvýše {n, plural, one {# znak} few {# znaky} many {# znaku} other {# znaků}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Vyžadováno minimálně {count} znaků",
-        "chars_remaining": "Zbývá {count} znaků"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Najednou můžeš vybrat nejvýše {count, plural, one {# obrázek} few {# obrázky} many {# obrázku} other {# obrázků}}"
+      },
+      "dictation": {
+        "stop_hint": "Zastav, aby se nahrávka přepsala a přidala do příspěvku. Nejvýše {m, plural, one {# minuta} few {# minuty} many {# minuty} other {# minut}}.",
+        "rate": "{n} Points za {s, plural, one {# sekundu} few {# sekundy} many {# sekundy} other {# sekund}}"
       },
       "transfer": {
-        "powering_down_info": "Další odebrání je za {days} dní, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Mezi {min} a {max, plural, one {# znakem} few {# znaky} many {# znaku} other {# znaky}}"
       }
     }
   }

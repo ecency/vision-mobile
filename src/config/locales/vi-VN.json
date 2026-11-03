@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Thành viên Ecency Pro"
   },
   "perks": {
     "header": "Đặc quyền",
@@ -31,42 +31,42 @@
     "promote_desc": "Tăng lượt xem cho bài viết của bạn",
     "account_boost": "Boost tài khoản",
     "account_boost_desc": "Boost bất kỳ tài khoản nào",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Nạp thêm RC",
+    "rc_topup_desc": "Tiếp tục đăng bài khi Resource Credits sắp hết",
+    "streak_freeze_owned": "Còn {n} cái dự trữ",
+    "streak_freeze_buy": "Bảo vệ chuỗi ({price} Points)",
+    "streak_freeze_buying": "Đang bảo vệ",
+    "streak_freeze_error": "Không thể mua thẻ bảo vệ chuỗi. Vui lòng thử lại."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Bài đăng hằng ngày",
+    "streak": "Chuỗi {n} ngày",
+    "keep_streak": "Giữ chuỗi của bạn"
   },
   "waves": {
     "for_you": "Dành cho bạn",
     "following": "Đang theo dõi",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Bảng tin tùy chỉnh",
+    "custom_feeds_subtitle": "Ghim nguồn và thẻ để thêm chúng thành các tab bảng tin.",
+    "add_tag_placeholder": "Thêm thẻ",
+    "sources": "Nguồn",
+    "your_feeds": "Bảng tin của bạn",
+    "trending_tags": "Thẻ thịnh hành",
+    "shorts_empty": "Chưa có video ngắn nào để hiển thị",
+    "mute": "Tắt tiếng",
+    "unmute": "Bật tiếng"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Bắt đầu",
+    "subtitle": "Bạn mới đến? Waves là các bài đăng ngắn và là cách dễ nhất để tham gia.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Đóng",
+    "item_wave": "Đăng Wave đầu tiên của bạn",
+    "item_vote": "Bình chọn cho một Wave bạn thích",
+    "item_reply": "Trả lời một ai đó",
+    "item_checkin": "Điểm danh để bắt đầu chuỗi",
+    "all_done_title": "Hoàn tất 🎉",
+    "all_done_subtitle": "Bạn đã sẵn sàng. Hãy tiếp tục đăng Waves nhé!"
   },
   "profile": {
     "havent_commented": "chưa bình luận gì cả",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Tuổi  |  Hiển thị  |  Diễn giải",
     "attach_poll": "Đính kèm khảo sát"
   },
+  "favorite_tags": {
+    "title": "Thẻ",
+    "hint": "Theo dõi để nhận thông báo về bài viết mới có thẻ này",
+    "following_hint": "Bạn được thông báo về bài viết mới có thẻ này",
+    "follow": "Theo dõi",
+    "following": "Đang theo dõi",
+    "added": "Đang theo dõi thẻ",
+    "removed": "Đã bỏ theo dõi thẻ",
+    "empty_list": "Chưa có gì ở đây"
+  },
   "favorites": {
     "add": "Thêm mục yêu thích",
     "add_error": "Không thể thêm mục yêu thích",
@@ -181,7 +191,33 @@
     "payout": "Khoản chi trả",
     "details": "Chi tiết",
     "community": "cộng đồng",
-    "new_post": "Bài viết mới"
+    "new_post": "Bài viết mới",
+    "mute_post_title": "Tắt tiếng bài viết này",
+    "unmute_post_title": "Bật tiếng bài viết này",
+    "mute_post_reason": "Vì sao bài viết này bị tắt tiếng?",
+    "unmute_post_reason": "Vì sao bài viết này được khôi phục?",
+    "manage": "Quản lý cộng đồng",
+    "manage_members": "Thành viên và vai trò",
+    "manage_settings": "Cài đặt cộng đồng",
+    "manage_activities": "Nhật ký hoạt động",
+    "activities": "hoạt động",
+    "no_activities": "Chưa có hoạt động nào",
+    "activities_load_failed": "Không tải được hoạt động. Kéo xuống để làm mới.",
+    "set_role": "Đặt vai trò",
+    "assign_role": "Gán vai trò",
+    "assign_role_hint": "Tìm bất kỳ tài khoản nào, kể cả tài khoản chưa đăng ký, rồi chọn một vai trò.",
+    "username_placeholder": "Tên người dùng",
+    "invalid_username": "Chọn một tài khoản có sẵn trong kết quả",
+    "members": "thành viên",
+    "no_members": "Không tìm thấy thành viên nào",
+    "members_incomplete": "Không tải được một số thành viên. Kéo xuống để làm mới.",
+    "members_load_failed": "Không tải được thành viên. Kéo xuống để làm mới.",
+    "role_owner": "Chủ sở hữu",
+    "role_admin": "Quản trị viên",
+    "role_mod": "Điều hành viên",
+    "role_member": "Thành viên",
+    "role_guest": "Khách",
+    "role_muted": "Bị tắt tiếng"
   },
   "trade": {
     "swap_for": "Đang đổi {fromAmount} lấy {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Đăng chéo",
     "pin-blog": "Ghim lên blog",
     "copy": "sao chép liên kết",
+    "copy-text": "sao chép văn bản",
+    "open-thread": "mở chuỗi",
     "unpin-community": "Bỏ ghim khỏi cộng đồng",
+    "mute-post": "Tắt tiếng bài viết",
+    "unmute-post": "Bật tiếng bài viết",
     "mute": "Tắt tiếng / Chặn",
     "reblog": "đăng lại",
     "undo-reblog": "hoàn tác đăng lại",
@@ -232,24 +272,24 @@
     "unpin-reply": "Bỏ ghim bình luận"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Bài viết này bằng {lang}. Dịch sang {target}?",
+    "translate_to": "Dịch sang {lang}",
+    "show_original": "Hiện bản gốc",
+    "translated_from": "Dịch từ {lang}",
+    "change_language": "Đổi ngôn ngữ"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Dịch bài viết",
+    "source": "Ngôn ngữ nguồn",
+    "target": "Ngôn ngữ đích",
+    "detected": "Phát hiện: {lang}",
+    "translate": "Dịch",
+    "apply": "Áp dụng",
+    "review_note": "Thêm bản dịch máy của phần bạn tự viết vào cuối bài. Hãy xem lại và chỉnh sửa trước khi đăng.",
+    "too_short": "Hãy viết thêm một chút. Cần ít nhất vài câu để dịch.",
+    "progress": "Đang dịch {done}/{total}...",
+    "error": "Dịch không thành công. Vui lòng thử lại.",
+    "add_title_marker": "Thêm ký hiệu ngôn ngữ vào tiêu đề"
   },
   "side_menu": {
     "profile": "Hồ sơ",
@@ -296,7 +336,7 @@
     "hot": "Nổi bật",
     "popular": "Phổ biến",
     "new": "Mới",
-    "friends": "Following",
+    "friends": "Đang theo dõi",
     "my_blog": "Blog của tôi"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Không có gì ở đây"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Mẫu",
+    "untitled": "Mẫu chưa đặt tên",
+    "empty_list": "Lưu bài viết thành mẫu từ trình soạn thảo để dùng lại tại đây.",
+    "delete_confirm": "Bạn có chắc muốn xóa mẫu này không?",
+    "applied": "Đã áp dụng mẫu thành bài viết mới",
+    "save_as_template": "Lưu thành mẫu",
+    "name_placeholder": "Tên mẫu",
+    "saved": "Đã lưu mẫu"
   },
   "selection_list": {
     "available": "Khả dụng {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Tất cả",
+      "replies": "Trả lời",
+      "mentions": "Lượt nhắc",
+      "rvotes": "Bình chọn",
+      "follows": "Theo dõi",
+      "reblogs": "Đăng lại",
+      "transfers": "Chuyển khoản",
+      "delegations": "Ủy quyền",
+      "nfavorites": "Yêu thích",
+      "tags": "Thẻ",
+      "nbookmarks": "Dấu trang",
+      "payouts": "Thanh toán thưởng",
+      "scheduled_published": "Bài hẹn giờ",
+      "account_updates": "Cập nhật tài khoản",
+      "weekly_earnings": "Thu nhập hằng tuần"
     },
     "this_week": "Tuần này",
     "reblog": "đã đăng lại",
@@ -417,11 +458,15 @@
     "yesterday": "Hôm qua",
     "mention": "được nhắc đến trong",
     "favorites": "đã đăng bài viết mới",
+    "tags": "đã đăng trong #{tag}",
+    "tags_bundle": "{count} bài viết mới trong #{tag}",
+    "tags_title": "Bài viết mới trong thẻ bạn theo dõi",
     "mentions": "Lượt nhắc",
     "spin": "Đã đến lúc kiếm thêm Points",
     "last_week": "Tuần trước",
     "recent": "Gần đây",
     "ignore": "đã bỏ qua bạn",
+    "blacklist": "đã đưa bạn vào danh sách đen",
     "follow": "đã theo dõi bạn",
     "notification": "Thông báo",
     "this_month": "Tháng này",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} hiện có thể đăng bài và bình chọn thay mặt bạn. Nếu bạn không cho phép điều này, hãy thu hồi nó.",
     "weekly_earnings": "Bạn đã kiếm được ${amount} trong tuần này{breakdown}",
     "payouts": "Đã nhận khoản chi trả: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "đã đăng một bài hẹn giờ",
+    "scheduled_published_title": "Đã đăng bài hẹn giờ",
+    "scheduled_published_body": "Bài hẹn giờ của bạn đã lên sóng, chạm để xem"
   },
   "recurrent": {
     "delete_failed": "Không thể xóa giao dịch chuyển định kỳ, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Mở bản nháp gần đây hoặc Tạo bài viết mới",
     "reward_power_up": "Stake 100%",
     "open_gallery": "Thư viện mở",
+    "open_files": "Chọn từ Tệp",
     "clipboard_no_image": "Không tìm thấy hình ảnh trong bộ nhớ tạm",
     "clipboard_image_detected": "Có hình ảnh trong bộ nhớ tạm",
     "paste_image": "Dán hình ảnh",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Để sau",
     "settings_title": "Tùy chọn bài viết",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Không"
+    "support_ecency": "Ủng hộ Ecency {percent}%",
+    "alert_btn_no": "Không",
+    "short_reply_hint": "Câu trả lời từ {n} ký tự trở xuống không nhận được Points (liên kết không tính)",
+    "short_content_hint": "Quá ngắn để nhận Points ({n} ký tự trở xuống, không tính liên kết)"
   },
   "time": {
     "week": "tuần",
@@ -655,7 +703,41 @@
     "select_emoji": "Chọn biểu tượng cảm xúc",
     "more_emojis": "Thêm",
     "search_emojis": "Tìm biểu tượng cảm xúc...",
-    "no_emoji_found": "Không tìm thấy biểu tượng cảm xúc"
+    "no_emoji_found": "Không tìm thấy biểu tượng cảm xúc",
+    "ban-reason-spray": "Bạn tạm thời bị chặn đăng vì cùng một tin nhắn được gửi tới nhiều kênh cùng lúc.",
+    "ban-reason-mass-dm": "Bạn tạm thời bị chặn đăng vì một tin nhắn được gửi tới nhiều người cùng lúc.",
+    "ban-reason-generic": "Bạn tạm thời bị chặn đăng trong trò chuyện.",
+    "ban-can-still-read": "Bạn vẫn có thể đọc trò chuyện.",
+    "ban-unlocks": "Có thể đăng lại {when}.",
+    "ban-remaining-soon": "sau chưa đầy một phút",
+    "ban-remaining-minutes": "sau khoảng {count} phút",
+    "ban-remaining-hours": "sau khoảng {count} giờ",
+    "ban-remaining-days": "sau khoảng {count} ngày",
+    "new_group": "Nhóm mới",
+    "new_group_hint": "Thêm từ {min} đến {max} người để bắt đầu cuộc trò chuyện nhóm.",
+    "new_group_search": "Tìm người theo tên người dùng",
+    "new_group_full": "Một nhóm có thể có tối đa {max} người khác.",
+    "new_group_no_results": "Không tìm thấy ai có tên đó trong trò chuyện.",
+    "new_group_search_failed": "Tìm kiếm không thành công. Kiểm tra kết nối và thử lại.",
+    "new_group_remove": "Xóa @{username}",
+    "new_group_create": "Bắt đầu nhóm",
+    "new_group_failed": "Không thể bắt đầu nhóm. Vui lòng thử lại.",
+    "rename_group": "Đổi tên nhóm",
+    "rename_group_hint": "Đặt cho nhóm này một cái tên mà mọi người trong nhóm đều thấy. Để trống để hiện tên các thành viên.",
+    "group_name": "Tên nhóm",
+    "rename_group_too_long": "Tên nhóm có thể dài tối đa {max} ký tự.",
+    "rename_group_not_owner": "Chỉ người đã tạo nhóm này mới đổi được tên.",
+    "rename_group_failed": "Không thể đổi tên nhóm. Vui lòng thử lại.",
+    "group_renamed": "{user} đã đổi tên nhóm thành \"{name}\"",
+    "group_name_cleared": "{user} đã xóa tên nhóm",
+    "group_members": "Thành viên nhóm",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "reactions_title": "Biểu cảm",
+    "reactor_you": "Bạn",
+    "reactor_unknown": "Ai đó",
+    "see_who_reacted": "Nhấn giữ để xem ai đã bày tỏ biểu cảm",
+    "group": "Nhóm"
   },
   "free_estm": {
     "timer_text": "Lượt quay miễn phí tiếp theo sau",
@@ -684,6 +766,32 @@
     "transaction_fail": "Giao dịch thất bại"
   },
   "search_result": {
+    "error": "Không thể hoàn tất tìm kiếm. Vui lòng thử lại",
+    "filters": {
+      "title": "Bộ lọc",
+      "open": "Bộ lọc",
+      "author": "Tác giả",
+      "author_placeholder": "tên người dùng",
+      "category": "Danh mục",
+      "category_placeholder": "cộng đồng hoặc danh mục",
+      "tags": "Thẻ",
+      "tags_placeholder": "phân tách bằng dấu phẩy",
+      "type": "Loại",
+      "type_all": "Tất cả",
+      "type_post": "Bài viết",
+      "type_comment": "Bình luận",
+      "date": "Ngày",
+      "date_week": "Tuần trước",
+      "date_month": "Tháng trước",
+      "date_year": "Năm ngoái",
+      "date_all": "Mọi lúc",
+      "sort": "Sắp xếp",
+      "apply": "Áp dụng",
+      "active": "{n} đang dùng",
+      "too_many_tags": "Dùng tối đa {n} thẻ",
+      "too_long": "Tìm kiếm quá dài. Dùng tối đa {n} ký tự",
+      "needs_criteria": "Nhập từ khóa, hoặc tác giả, danh mục hay thẻ để lọc"
+    },
     "communities_filter": {
       "new": "Mới",
       "my": "Cộng đồng của tôi",
@@ -727,7 +835,7 @@
     "title": "Đăng chéo"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Tác giả đã công khai việc dùng AI"
   },
   "ai_assist": {
     "title": "Trợ lý viết AI",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Nhận các thẻ phù hợp cho bài viết của bạn",
     "action_generate_title": "Tạo tiêu đề",
     "action_generate_title_desc": "Tạo các phương án tiêu đề hấp dẫn",
-    "action_summarize": "Recap",
+    "action_summarize": "Tóm tắt",
     "action_summarize_desc": "Tạo bản tóm tắt ngắn gọn",
     "action_check_grammar": "Kiểm tra ngữ pháp",
     "action_check_grammar_desc": "Sửa lỗi ngữ pháp và chính tả",
+    "action_generate_image": "Tạo hình ảnh",
+    "action_generate_image_desc": "Tạo hình ảnh AI cho bài viết của bạn",
+    "cost_from": "từ {cost} {unit}",
     "text_label": "Văn bản của bạn",
     "text_placeholder": "Dán hoặc nhập nội dung của bạn tại đây...",
     "min_chars": "Yêu cầu tối thiểu {count} ký tự",
@@ -797,16 +908,26 @@
     "remind_later": "Nhắc lại sau",
     "success_subscribe": "Theo dõi thành công!",
     "payloadTooLarge": "Kích thước tệp quá lớn, vui lòng thay đổi kích thước hoặc tải lên hình ảnh nhỏ hơn",
+    "too_many_images": "Bạn có thể chọn tối đa {count} hình ảnh mỗi lần",
     "fail_follow": "Theo dõi thất bại!",
     "clear_user_alert": "Bạn có chắc chắn muốn xóa tất cả dữ liệu của bạn?",
     "cancel": "Huỷ",
     "connection_success": "Kết nối thành công!",
     "rc_down": "Không đủ Resource Credits để thực hiện một hành động! \n\nHãy tăng cường tài khoản của bạn để tiếp tục tận hưởng trải nghiệm. Bạn có muốn tăng cường tài khoản ngay bây giờ không?",
+    "rc_down_title": "Không đủ Resource Credits",
+    "rc_precheck_title": "Bài viết này có thể quá lớn để đăng",
+    "rc_precheck_body": "Resource Credits của bạn có vẻ quá thấp cho bài viết cỡ này.",
+    "rc_down_body": "Bạn không đủ Resource Credits cho thao tác này.\n\nNạp thêm bằng Points ngay để tiếp tục, hoặc tăng cường tài khoản vĩnh viễn.",
+    "rc_down_topup": "Nạp RC bằng Points",
+    "rc_down_boost": "Tăng cường tài khoản",
     "done": "Xong",
     "something_wrong_alt": "Trong khi đó, hãy thử Ecency.com từ trình duyệt của bạn",
     "same_user": "Người dùng này đã được thêm vào danh sách",
     "fail": "Thất bại!",
     "operation_failed_with_reason": "{operation} thất bại: {reason}",
+    "request_timed_out": "Kết nối đang mất quá nhiều thời gian. Kiểm tra mạng và thử lại.",
+    "load_failed_retry": "Chúng tôi không tải được nội dung này. Vui lòng thử lại.",
+    "retrying": "Đang thử lại...",
     "wallet_refresh_failed": "Làm mới ví thất bại. Vui lòng thử lại.",
     "wallet_refresh_missing_account": "Làm mới ví thất bại: thiếu tài khoản.",
     "boost_failed": "Tăng cường thất bại.",
@@ -950,30 +1071,30 @@
   },
   "post": {
     "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvoted": "Đã upvote",
+    "downvoted": "Đã downvote",
+    "upvote_hint": "Chạm hai lần để mở tùy chọn bình chọn",
+    "payout_details": "Chi tiết thanh toán thưởng",
+    "a11y_votes": "{count, plural, other {# lượt bình chọn}}",
+    "a11y_voters_hint": "Xem người bình chọn",
+    "a11y_reblogs": "{count, plural, other {# lượt đăng lại}}",
+    "a11y_reblogs_hint": "Xem lượt đăng lại",
+    "a11y_comments": "{count, plural, other {# bình luận}}",
+    "a11y_comments_hint": "Xem bình luận",
+    "a11y_reply_hint": "Trả lời",
+    "a11y_tip": "Gửi tiền tip",
+    "a11y_tips": "{count, plural, other {# lượt tip}}",
+    "a11y_edit": "Sửa bình luận",
+    "a11y_delete": "Xóa bình luận",
+    "a11y_show_replies": "Hiện câu trả lời",
+    "a11y_hide_replies": "Ẩn câu trả lời",
+    "a11y_post_options": "Tùy chọn bài viết",
+    "a11y_views": "{count, plural, other {# lượt xem}}",
+    "source_ecency": "Đăng bằng Ecency",
+    "a11y_stats_hint": "Xem thống kê bài viết",
     "image": "Hình ảnh",
     "reveal_muted": "ĐÃ ẨN\nChạm để hiện nội dung",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Chạm để tải ảnh",
     "in": "trong",
     "poll": "BÌNH CHỌN",
     "copy_link": "Sao chép liên kết",
@@ -998,19 +1119,20 @@
     "save_to_local": "Tải về thiết bị",
     "muted": "Nội dung bị ẩn do vi phạm",
     "community_muted": "Nội dung bị ẩn do vi phạm quy tắc cộng đồng",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Nội dung từ tài khoản có uy tín thấp",
+    "muted_downvoted": "Nội dung bị người dùng downvote",
+    "muted_low_trust": "Tài khoản uy tín thấp có liên kết ngoài chưa xác minh",
+    "muted_reveal": "Chạm để hiện",
     "promoted": "ĐƯỢC QUẢNG BÁ",
     "image_saved": "Đã lưu hình ảnh vào Thư viện ảnh",
     "words": "Từ",
     "reading": "Đang đọc",
-    "listen": "Nghe",
     "min": "phút",
     "summarize_start": "Bắt đầu"
   },
   "promote": {
     "information": "Bạn có chắc chắn muốn quảng bá không?",
-    "permlinkPlaceholder": "username/permlink",
+    "permlinkPlaceholder": "tên người dùng/permlink",
     "title": "Quảng bá",
     "days": "những ngày",
     "user": "Người dùng",
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Hiện tại không có bài viết nào",
     "invalid_link": "Url không hợp lệ, bạn có thể thử lại với url hợp lệ hoặc thử mở nó trong trình duyệt web",
-    "no_existing_user": "Không có người dùng hiện tại"
+    "no_existing_user": "Không có người dùng hiện tại",
+    "posting_key_request": "{requester} đang yêu cầu khóa riêng tư đăng bài của @{username}.\n\nChỉ tiếp tục nếu bạn tin tưởng yêu cầu này.",
+    "posting_key_request_unnamed": "Một ứng dụng khác đang yêu cầu khóa riêng tư đăng bài của @{username}.\n\nChỉ tiếp tục nếu bạn tin tưởng yêu cầu này.",
+    "auth_request_as_user": "{requester} muốn đăng nhập cho bạn với tư cách @{username}.\n\nChỉ tên người dùng và bằng chứng đăng nhập được chia sẻ. Không có khóa nào rời khỏi Ecency.",
+    "auth_request_as_current": "{requester} muốn đăng nhập cho bạn bằng tài khoản Ecency của bạn.\n\nChỉ tên người dùng và bằng chứng đăng nhập được chia sẻ. Không có khóa nào rời khỏi Ecency."
   },
   "payout": {
     "breakdown": "Chi tiết",
@@ -1065,7 +1191,7 @@
     "open": "Mở URL",
     "invalid_key_desc": "vui lòng đăng nhập bằng khóa {key} hoặc khóa chính để thực hiện giao dịch này",
     "auth_transfer_confirm": "Xác nhận chuyển cho {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Chỉ phê duyệt nếu bạn tin tưởng nguồn của liên kết này. Khi phê duyệt, thao tác bên dưới sẽ được phát từ tài khoản của bạn bằng khóa {authority}."
   },
   "voters_dropdown": {
     "rewards": "PHẦN THƯỞNG",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Chỉ được chứa chữ cái, số và dấu gạch nối",
       "username_no_ascii_first_letter_error": "Phải bắt đầu bằng một chữ cái",
       "username_contains_double_hyphens": "Không được chứa dấu gạch nối kép",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Tên người dùng này quá giống tài khoản của một sàn giao dịch tiền mã hóa và có thể gây nhầm lẫn cho người khác. Vui lòng chọn một tên độc đáo hơn.",
+      "username_restricted_prefix": "Không cho phép tên người dùng bắt đầu bằng 'uid' theo sau là chữ số, vì chúng thường được dùng để mạo danh người khác. Vui lòng chọn tên khác.",
       "username_contains_underscore": "Không được chứa dấu gạch dưới"
     },
     "500_error": "Yêu cầu của bạn không thể được xử lý, hàng đợi đăng ký có thể đã đầy! Hãy thử lại sau vài phút...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Tên người dùng đã có người sử dụng",
+      "14": "Địa chỉ email đã được đăng ký",
+      "15": "Vui lòng nhập địa chỉ email hợp lệ",
+      "16": "Vui lòng nhập tên người dùng hợp lệ",
+      "17": "Tên người dùng quá dài, vui lòng chọn tên ngắn hơn",
+      "19": "Vui lòng dùng địa chỉ email thường trực, hoặc hãy lấy tài khoản Premium",
+      "21": "Mã giới thiệu này không hợp lệ",
+      "28": "Không thể xử lý yêu cầu của bạn, có thể hàng chờ đăng ký đang đầy. Vui lòng thử lại sau vài phút.",
+      "107": "Phát hiện kết nối VPN. Vui lòng tắt VPN rồi thử lại, hoặc hãy lấy tài khoản Premium.",
+      "110": "Để chống lạm dụng, chúng tôi giới hạn số tài khoản cho mỗi người/mạng. Vui lòng thử lại từ một mạng khác.",
+      "111": "Phát hiện kết nối Tor. Vui lòng tắt Tor khi đăng ký.",
+      "112": "Hiện chúng tôi chưa xác minh được kết nối của bạn. Vui lòng thử lại sau vài phút."
     },
     "have_account_text": "Đã có tài khoản?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Nhận một tài khoản Hive đầy đủ tính năng, phương thức này có các bước kiểm tra cơ bản để đảm bảo botnet không lạm dụng cổng đăng ký của chúng tôi.",
     "btn_register": "Đăng ký miễn phí",
     "title": "Tài khoản miễn phí"
+  },
+  "dictation": {
+    "title": "Đọc để nhập",
+    "start": "Ghi âm",
+    "stop": "Dừng",
+    "record_more": "Ghi âm thêm",
+    "done": "Xong",
+    "recording": "Đang ghi âm",
+    "stop_hint": "Dừng để chuyển thành văn bản và thêm vào bài viết. Tối đa {m} phút.",
+    "inserted": "Đã thêm vào bài viết của bạn. Ghi âm thêm, hoặc chạm Xong.",
+    "transcribing": "Đang chuyển thành văn bản",
+    "rate": "{n} Points mỗi {s} giây",
+    "cost_running": "Đã dùng {n} Points",
+    "cost_running_free": "Miễn phí cho đến giờ",
+    "free_remaining": "Hôm nay {n} x {s} giây tiếp theo của bạn là miễn phí",
+    "price_loading": "Đang kiểm tra giá",
+    "price_error": "Không tải được giá chuyển giọng nói thành văn bản.",
+    "denied": "Ecency cần quyền truy cập micro để đọc nhập. Hãy cho phép trong Cài đặt rồi thử lại.",
+    "error_empty": "Không phát hiện giọng nói nào trong bản ghi âm đó.",
+    "error_insufficient_points": "Không đủ Points để chuyển bản ghi âm đó thành văn bản.",
+    "error_rate_limited": "Hiện có quá nhiều bản ghi âm. Vui lòng thử lại sau ít phút.",
+    "error_too_long": "Bản ghi âm đó quá dài để chuyển thành văn bản.",
+    "error_failed": "Không thể chuyển bản ghi âm đó thành văn bản. Vui lòng thử lại.",
+    "error_recorder": "Không thể bắt đầu ghi âm. Vui lòng thử lại."
   },
   "wallet": {
     "delegations_out": "Ủy quyền đi",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Điểm danh thường xuyên giúp bạn nhận 0,25 Points.",
     "fill_transfer_from_savings": "Đã thực hiện tiết kiệm",
     "activities": "Hoạt động",
+    "no_activities": "Chưa có giao dịch nào",
+    "activities_failed": "Không tải được giao dịch. Kéo xuống để thử lại.",
     "tap_update": "Chạm để cập nhật",
     "mining_lottery": "Đã thắng xổ số",
     "checkin": "Đăng ký vào",
     "tokens_transfer": "Đã chuyển token",
     "outgoing_transfer_title": "Chuyển/Tặng",
+    "burned_title": "Sử dụng AI",
+    "burned_description": "Points đã dùng cho một tính năng AI",
+    "burn_refund_title": "Hoàn tiền AI",
+    "burn_refund_description": "Points được hoàn lại sau yêu cầu AI không thành công",
     "manage_assets": "Thêm / Xóa tài sản",
     "selected_assets": "Tài sản đã chọn",
     "nft_setPropertyPermissions": "Đã thiết lập quyền thuộc tính cho biểu tượng NFT",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Cập nhật độ chính xác token",
     "tokens_transferOwnership": "Đã chuyển quyền sở hữu token",
     "withdraw_vesting": "Rút cọc",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Tài khoản rút",
     "delegate_engine": "Ủy quyền",
     "market_close": "Đã đóng lệnh",
     "nftmarket_transferFee": "Phí lệnh mua",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "NHẬN POINTS",
     "escrow_approve": "Phê duyệt ký quỹ",
     "expires": "hết hạn",
+    "transaction_id": "ID giao dịch",
+    "copy_transaction_id": "Sao chép liên kết giao dịch",
+    "filter_activities": "Lọc hoạt động",
+    "filter_activities_desc": "Chọn các thao tác mà lịch sử này yêu cầu",
+    "filter_all": "Chọn tất cả",
+    "filter_none": "Bỏ chọn tất cả",
+    "filter_apply": "Áp dụng",
     "author_reward": "Phần thưởng cho tác giả",
     "withdraw_hbd": "Rút khỏi tài khoản tiết kiệm",
     "convert_request": "Yêu cầu chuyển đổi",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Nạp thêm RC",
+    "desc": "Tăng RC ngắn hạn để bạn tiếp tục đăng bài.",
+    "confirm": "Dùng Points để nạp thêm Resource Credits?",
+    "insufficient": "Bạn không đủ Points.",
+    "buy_points": "Mua Points"
   },
   "ai_image_generator": {
     "title": "Trình tạo ảnh AI",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Tùy chỉnh ({hours} giờ)",
+    "balance_load_failed": "Không tải được số dư của bạn. Chạm để thử lại.",
+    "precision_load_failed": "Không tải được chi tiết của token này nên chỉ có thể gửi số nguyên. Chạm để thử lại.",
     "close": "Đóng",
     "favorite_username_placeholder": "Tên người dùng",
     "invalid_recipient_qr": "Không tìm thấy tên người dùng trong mã QR này.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Quản lý quyền hạn",
     "pincode": "Mã PIN",
     "general": "Tổng quan",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ủng hộ Ecency",
+    "support_beneficiary": "Chia sẻ thưởng bài viết với Ecency",
+    "support_beneficiary_percent": "Tỷ lệ chia sẻ thưởng bài viết",
+    "support_curation": "Giữ lại một phần thưởng curation",
+    "support_curation_percent": "Tỷ lệ giữ lại thưởng curation",
     "feedback_body": "Viết tin nhắn của bạn ở đây!\n\nTên người dùng Hive: {username}\nPhiên bản ứng dụng: {appVersion}\nNền tảng: {platform}\n",
     "show_imgs": "Hiển thị hình ảnh",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Câu bình luận",
       "bookmark": "Dấu trang",
+      "tags": "Thẻ",
       "reblog": "Đăng lại",
       "favorite": "Yêu thích",
       "mention": "Nhắc đến",
@@ -1599,10 +1765,10 @@
       "transfers": "Những phần chuyển khoản",
       "vote": "Bình chọn",
       "follow": "Theo dõi",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Đã đăng bài hẹn giờ",
+      "payouts": "Thanh toán thưởng",
+      "account_update": "Cập nhật tài khoản",
+      "weekly_earnings": "Thu nhập hằng tuần",
       "fcm_unavailable": "Thông báo đẩy không được hỗ trợ trên thiết bị này. Bạn sẽ chỉ nhận được thông báo khi ứng dụng đang mở."
     },
     "keys_warning": "Thông tin tài khoản nhạy cảm!\nEcency phải được bảo mật bằng mã PIN trước khi xem các khóa riêng tư.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Gửi phản hồi",
     "rate_app": "Đánh giá Ecency",
+    "email_digests": "Bản tin email",
     "rate": "Đánh giá",
     "dm-privacy-updated": "Đã cập nhật cài đặt quyền riêng tư tin nhắn trực tiếp thành công",
     "dm-privacy-failed": "Cập nhật cài đặt quyền riêng tư tin nhắn trực tiếp thất bại",
@@ -1685,19 +1852,29 @@
     "request_sent": "Yêu cầu xóa của bạn đã được gửi",
     "confirm_delete_body": "Bạn có chắc chắn muốn xóa tài khoản không? Thao tác này sẽ xóa toàn bộ dữ liệu của bạn"
   },
-  "tts": {
-    "settings_title": "Cài đặt chuyển văn bản thành giọng nói",
-    "voice": "Giọng nói",
-    "voice_hint": "Giọng nói mặc định của hệ thống sẽ được sử dụng",
-    "speed": "Tốc độ",
-    "pitch": "Cao độ",
-    "test_voice": "Thử giọng nói",
-    "settings_info": "Các cài đặt này sẽ được sử dụng khi đọc to bài viết",
+  "listen": {
+    "title": "Nghe bài viết này",
+    "minutes": "~{n} phút",
+    "login": "Đăng nhập",
+    "unlock": "Mở khóa · {n} Points",
+    "confirm": "Dùng {n} Points để nghe bài viết này? Bạn có thể phát lại âm thanh bất cứ lúc nào.",
+    "not_enough_title": "Không đủ Points",
+    "not_enough": "Nghe cần {required} Points và bạn có {available}.",
+    "get_points": "Lấy Points",
+    "unlock_failed": "Không thể mở khóa âm thanh, vui lòng thử lại",
+    "failed_refunded": "Không tạo được âm thanh, Points của bạn đã được hoàn lại",
+    "preparing": "Đang chuẩn bị âm thanh…",
+    "preparing_eta": "Đang chuẩn bị âm thanh, khoảng {n} phút…",
+    "preparing_progress": "Đang chuẩn bị âm thanh · {n}%",
+    "waiting": "Đang xếp hàng, còn {n} người trước…",
+    "next_in_line": "Tiếp theo…",
     "play": "Phát",
     "pause": "Tạm dừng",
-    "language": "Ngôn ngữ",
-    "language_auto": "Tự động phát hiện",
-    "language_hint": "Tự động phát hiện sẽ chọn ngôn ngữ dựa trên nội dung bài viết"
+    "seek": "Tua",
+    "speed": "Tốc độ phát",
+    "language": "Ngôn ngữ âm thanh",
+    "unavailable": "Không tải được âm thanh.",
+    "retry": "Thử lại"
   },
   "posting_authority": {
     "title": "Bật đăng bài nhanh hơn",
@@ -1732,7 +1909,7 @@
     "error-auth": "Xác thực thất bại. Vui lòng đăng nhập lại.",
     "error-generic": "Tải video lên thất bại. Vui lòng thử lại.",
     "error-too-long-short": "Video ngắn phải có độ dài 60 giây hoặc ít hơn.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Một bài viết chỉ có thể chứa một video. Hãy xóa video hiện tại trước khi thêm video khác.",
     "select_source": "Thêm video",
     "record": "Quay video",
     "choose_library": "Chọn từ thư viện"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Chia sẻ một cập nhật nhanh"
   },
+  "newsletter": {
+    "screen_title": "Bản tin email",
+    "title": "{list}",
+    "body_own": "Bản tóm tắt thông báo của bạn qua email hằng tuần hoặc hằng tháng.",
+    "body_creator": "Bài viết mới của {list} trong hộp thư của bạn.",
+    "body_community": "Bản tin các bài viết mới trong {list} qua email.",
+    "body_site": "Những điều hay nhất của Ecency trong hộp thư của bạn.",
+    "first_publish_title": "Chúc mừng bài viết đầu tiên của bạn!",
+    "first_publish_body": "Muốn nhận bản tin email về thông báo? Hằng tuần hoặc hằng tháng, đổi hoặc hủy bất cứ lúc nào trong Cài đặt.",
+    "list_own": "Bản tin thông báo của tôi",
+    "list_site": "Bản tin Ecency",
+    "status_active": "Bạn đã đăng ký.",
+    "status_pending": "Đang chờ xác nhận email.",
+    "status_short_active": "đang hoạt động",
+    "status_short_pending_confirmation": "đang chờ",
+    "status_short_suppressed": "đã dừng",
+    "status_short_ended": "đã kết thúc",
+    "cadence_weekly": "Hằng tuần",
+    "cadence_monthly": "Hằng tháng",
+    "email_placeholder": "you@example.com",
+    "subscribe": "Đăng ký",
+    "update": "Cập nhật",
+    "resend": "Gửi lại xác nhận",
+    "leave": "Thôi nhận bản tin",
+    "cancel": "Hủy",
+    "ok": "OK",
+    "manage": "Quản lý",
+    "check_inbox_title": "Kiểm tra hộp thư của bạn",
+    "check_inbox_body": "Chúng tôi đã gửi liên kết xác nhận tới {email}. Đăng ký bắt đầu khi bạn xác nhận.",
+    "subscribed": "Đã đăng ký bản tin email",
+    "left": "Đã thôi nhận bản tin",
+    "refused": "Địa chỉ này không thể đăng ký.",
+    "unavailable": "Bản tin email hiện không khả dụng.",
+    "too_many": "Quá nhiều lần thử, vui lòng thử lại sau.",
+    "fail": "Đã xảy ra lỗi, vui lòng thử lại.",
+    "empty": "Chưa có bản tin email nào. Đăng ký bên dưới để bắt đầu.",
+    "discover": "Nhận thêm qua email",
+    "stop_all": "Dừng tất cả",
+    "stop_all_title": "Dừng tất cả email?",
+    "stop_all_body": "Sẽ không gửi thư Ecency nào tới {email} nữa. Các đăng ký bằng địa chỉ khác vẫn giữ nguyên.",
+    "stop_all_ok": "Dừng tất cả",
+    "stop_all_done": "Địa chỉ đã hủy đăng ký mọi thư",
+    "profile_option": "BẢN TIN EMAIL",
+    "subscriber_count": "{weekly} hằng tuần • {monthly} hằng tháng người đăng ký email",
+    "community_button": "Bản tin"
+  },
+  "mod_notes": {
+    "title": "Thêm lý do",
+    "placeholder": "Lý do (hiển thị cho các điều hành viên khác)",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy"
+  },
+  "community_settings": {
+    "title_header": "Cài đặt cộng đồng",
+    "title_label": "Tiêu đề",
+    "about": "Giới thiệu",
+    "lang": "Ngôn ngữ",
+    "description": "Mô tả",
+    "rules": "Quy tắc",
+    "nsfw": "NSFW (không phù hợp nơi làm việc)",
+    "save": "Lưu",
+    "required": "Bắt buộc",
+    "title_length": "Từ {min} đến {max} ký tự",
+    "owner_admin_only": "Chỉ chủ sở hữu và quản trị viên mới đổi được các cài đặt này."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Đã mở rộng",
+        "collapsed": "Đã thu gọn"
+      },
+      "a11y_chat": {
+        "quote": "Đang trả lời {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Chọn",
+        "deselect": "Bỏ chọn"
+      },
+      "store": {
+        "billing_unavailable": "Thiết bị này không cho phép mua hàng trong ứng dụng.",
+        "verification_failed": "App Store không thể xác minh giao dịch mua này.",
+        "cancelled": "Đã hủy giao dịch mua",
+        "unknown_result": "Kết quả giao dịch mua không xác định"
+      },
+      "navigation": {
+        "feed_unavailable": "Bảng tin này chưa khả dụng.",
+        "link_cannot_open": "Không thể mở liên kết này.",
+        "video_cannot_play": "Không thể phát video này."
+      },
+      "media": {
+        "load_failed": "Không tải được mục này. Kiểm tra kết nối và thử lại.",
+        "loading": "Đang tải phương tiện",
+        "download_failed": "Tải xuống thất bại với trạng thái {status}"
+      },
+      "sign_in": {
+        "required": "Cần đăng nhập",
+        "to_reply": "Đăng nhập để trả lời.",
+        "to_vote": "Đăng nhập để bình chọn.",
+        "button": "Đăng nhập"
+      },
+      "account": {
+        "logout_user": "Đăng xuất @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# bình chọn}}  •  {replies, plural, other {# câu trả lời}}",
+        "voting_power": "Sức mạnh bình chọn {percent}",
+        "remove_favourite": "Xóa khỏi mục yêu thích",
+        "add_favourite": "Thêm vào mục yêu thích"
+      },
+      "waves": {
+        "clear_tag_filter": "Xóa bộ lọc thẻ {tag}",
+        "new_wave": "Wave mới",
+        "replies_open_thread": "{count, plural, other {# câu trả lời, mở chuỗi}}",
+        "characters": "{count} trên {max} ký tự",
+        "retry": "{message}\nThử lại",
+        "playing": "Đang phát {permlink}",
+        "video_attached_remove": "Đã đính kèm video, xóa",
+        "image_attached_remove": "Đã đính kèm hình ảnh, xóa",
+        "take_photo": "Chụp ảnh",
+        "edit_poll": "Sửa khảo sát",
+        "add_poll": "Thêm khảo sát",
+        "add_video": "Thêm video"
+      },
+      "reading": {
+        "reply_to": "Trả lời {username}",
+        "opens_post": "Mở bài viết",
+        "sort_comments": "Sắp xếp bình luận",
+        "sort_comments_value": "Sắp xếp bình luận, {sort}",
+        "no_comments": "Chưa có bình luận nào.",
+        "loading_post": "Đang tải bài viết",
+        "show_version": "Hiện phiên bản",
+        "show_changes": "Hiện thay đổi",
+        "replying_to": "Đang trả lời @{username}",
+        "reply_text": "Nội dung trả lời",
+        "translate_from": "Từ",
+        "translate_to": "Sang"
+      },
+      "feed": {
+        "tab_pinned": "{label}, đã ghim",
+        "tab_add": "{label}, thêm",
+        "customise": "Tùy chỉnh"
+      },
+      "card": {
+        "in_category": "trong {category}",
+        "pinned": "Đã ghim",
+        "by_author": "bởi {username}",
+        "payout": "khoản chi trả {payout}",
+        "payout_declined": "khoản chi trả {payout}, đã từ chối",
+        "reblogged_by": "Được {username} đăng lại"
+      },
+      "shell": {
+        "close_menu": "Đóng menu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Ảnh thu nhỏ, chọn hình ảnh khác",
+        "words": "{count, plural, other {# từ}}",
+        "poll_min_age": "Tuổi tài khoản tối thiểu (ngày): {days}",
+        "poll_max_options": "Số lựa chọn tối đa: {count}",
+        "thumbnail_selected": "Ảnh thu nhỏ đã chọn",
+        "thumbnail": "Ảnh thu nhỏ",
+        "uploaded_image": "Hình ảnh đã tải lên",
+        "community_search": "tìm kiếm"
+      },
+      "vote": {
+        "not_voted": "Chưa bình chọn",
+        "voting": "Đang bình chọn",
+        "failed_with": "Bình chọn thất bại: {message}",
+        "failed": "Bình chọn thất bại",
+        "payout": "Chi trả {payout}",
+        "payout_declined": "Chi trả {payout}, đã từ chối",
+        "percent": "{percent} phần trăm",
+        "upvote_percent": "Bình chọn lên {percent}%"
+      },
+      "settings": {
+        "on": "Bật",
+        "off": "Tắt"
+      },
+      "lock": {
+        "biometric_reason": "Bật mở khóa sinh trắc học cho Ecency",
+        "offer_title": "Mở khóa bằng {method}",
+        "offer_use": "Dùng {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Các khóa bị ẩn khi màn hình đang được ghi hoặc phản chiếu.",
+        "screenshot_notice": "Đã chụp ảnh màn hình. Các khóa riêng tư đã được ẩn lại; nếu ảnh màn hình có hiện khóa, hãy xóa nó.",
+        "hold_hint": "Nhấn giữ một khóa để hiện nó.",
+        "hold_to_show": "Giữ để hiện"
+      },
+      "wallet": {
+        "cancel_order": "Hủy lệnh này?",
+        "days": "{count, plural, other {# ngày}}"
+      },
+      "chat": {
+        "reactors_hint": "Nhấn giữ để xem ai đã bày tỏ biểu cảm",
+        "see_reactors": "Xem ai đã bày tỏ biểu cảm"
+      },
+      "esie": {
+        "still": "{mood}, đứng yên"
+      }
+    },
+    "ui": {
+      "profile_of": "Hồ sơ của @{username}",
+      "preview": "Xem trước ({index}/{count})",
+      "balance": "Số dư: {amount}",
+      "expires_in": "Hết hạn sau {time}",
+      "expired": "Đã hết hạn. Hãy đóng và thử lại.",
+      "user_has_no_posts": "@{username} chưa đăng gì",
+      "attach_image": "Đính kèm hình ảnh",
+      "auto": "Tự động",
+      "back": "Quay lại",
+      "hot": "HOT",
+      "image_of": "Hình ảnh {index} trên {count}",
+      "new": "MỚI",
+      "nsfw_tap_to_reveal": "NSFW Chạm để hiện",
+      "new_reply": "Câu trả lời mới",
+      "remove": "Xóa",
+      "unlock_ecency": "Mở khóa Ecency",
+      "update_it": "Cập nhật",
+      "update_it_or_post_this_as": "Cập nhật nó, hay đăng thành câu trả lời mới?",
+      "use_pin": "Dùng PIN",
+      "your_reply_was_already_posted": "Câu trả lời của bạn đã được đăng",
+      "error_try_again": "{message} Thử lại?",
+      "auth": {
+        "account_label": "Tài khoản: @{username}",
+        "approve_the_request_in_your_wallet": "Hãy phê duyệt yêu cầu trong ứng dụng ví của bạn.",
+        "copy_key": "Sao chép {title}",
+        "current_account": "Tài khoản hiện tại",
+        "qr_code": "Mã QR",
+        "requested_by": "Được yêu cầu bởi {requester}",
+        "pin_digits": "{filled} trên {total, plural, other {# chữ số}}",
+        "private_key_shown": "{title}, khóa riêng tư đang hiện",
+        "open_wallet_app": "Mở ứng dụng ví",
+        "hiveauth_scan": "Phê duyệt trong Hive Keychain hoặc ví HiveAuth khác: mở nó trên thiết bị này, hoặc quét mã này bằng nó.",
+        "switching": "Đang chuyển đổi...",
+        "logout_all": "Đăng xuất khỏi mọi tài khoản",
+        "logout_all_title": "Đăng xuất khỏi mọi tài khoản trên thiết bị này?",
+        "stored_key": "@{username} đã đăng nhập trên thiết bị này. Các khóa đã lưu được giữ nguyên; chỉ phiên đăng nhập được làm mới.",
+        "stored_hivesigner": "@{username} đã đăng nhập bằng HiveSigner trên thiết bị này. Phiên đăng nhập của nó sẽ được thay thế.",
+        "stored_hiveauth": "@{username} đang đăng nhập bằng HiveAuth trên thiết bị này. Nó sẽ ký bằng HiveSigner thay thế.",
+        "method_key": "Khóa",
+        "logout_failed": "Đăng xuất thất bại"
+      },
+      "browser": {
+        "account": "Tài khoản",
+        "authority": "Quyền hạn",
+        "phishing": "Cảnh báo: Tên miền này đã bị gắn cờ là trang lừa đảo đã biết. Hãy hết sức thận trọng khi tiếp tục."
+      },
+      "chat": {
+        "cancel_edit": "Hủy chỉnh sửa",
+        "cancel_reply": "Hủy trả lời",
+        "copied_to_clipboard": "Đã sao chép vào bộ nhớ tạm",
+        "edited_at": "Đã chỉnh sửa {time}",
+        "group_options": "Tùy chọn nhóm",
+        "pinned_messages": "Tin nhắn đã ghim",
+        "remove_user": "Xóa @{username}",
+        "sort_by_name": "Sắp xếp theo tên",
+        "more": "Thêm",
+        "reaction_label": "{emoji} {count}. Nhấn giữ để xem ai đã bày tỏ biểu cảm",
+        "members": "Thành viên"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Đã có một bài viết tại liên kết này và nó khác với những gì bạn gửi. Cập nhật nó, hay đăng thành bài mới?",
+        "a_scheduled_post_is_published_by": "Bài viết đã lên lịch được Ecency đăng vào thời điểm đã chọn. Việc đó cần quyền đăng bài của ecency.app trên tài khoản của bạn. Các khóa và quyền hạn khác của bạn giữ nguyên. Cấp quyền này cần khóa active của bạn.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "Công cụ AI",
+        "allow_ecency_to_publish_for_you": "Cho phép Ecency đăng bài thay bạn?",
+        "bold": "In đậm",
+        "clone": "Nhân bản",
+        "cost": "Chi phí: {cost}",
+        "could_not_store_the_draft_on": "Không thể lưu bản nháp trên thiết bị này. Hãy giữ ứng dụng mở và lưu bản nháp.",
+        "draft": "BẢN NHÁP",
+        "delete_count": "Xóa ({count})",
+        "dictate_desc": "Hãy nói, và bản chuyển văn bản sẽ vào bài viết của bạn",
+        "discard": "Bỏ",
+        "discard_changes": "Bỏ các thay đổi?",
+        "grant": "Cấp",
+        "italic": "In nghiêng",
+        "keep_editing": "Tiếp tục chỉnh sửa",
+        "my_blog": "BLOG CỦA TÔI",
+        "my_communities": "CỘNG ĐỒNG CỦA TÔI",
+        "new_post": "Bài viết mới",
+        "notice": "Lưu ý",
+        "restore": "Khôi phục",
+        "restore_unsaved_changes": "Khôi phục các thay đổi chưa lưu?",
+        "saved": "Đã lưu",
+        "top_communities": "CỘNG ĐỒNG HÀNG ĐẦU",
+        "table": "Bảng",
+        "text_format": "Định dạng văn bản",
+        "this_link_is_already_in_use": "Liên kết này đã được sử dụng",
+        "untitled": "Không có tiêu đề",
+        "update_it_or_publish_this_as": "Cập nhật nó, hay đăng thành bài viết mới?",
+        "you_have_unsaved_changes_from_an": "Bạn có các thay đổi chưa lưu từ lần chỉnh sửa trước. Bài viết đã thay đổi kể từ đó; khôi phục chúng sẽ thay thế văn bản bên dưới.",
+        "your_edits_were_not_published": "Các chỉnh sửa của bạn chưa được đăng.",
+        "your_post_was_already_published": "Bài viết của bạn đã được đăng",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Ảnh thu nhỏ, chạm để chọn hình ảnh khác",
+        "thumbnail_number": "Ảnh thu nhỏ {number}",
+        "recording_busy": "Một bản ghi đang diễn ra. Hãy hoàn tất nó trong máy ảnh trước.",
+        "photo_lost": "Ảnh bị mất khi máy ảnh đang mở. Vui lòng chụp lại.",
+        "add_snippet_button": "+ Đoạn mẫu",
+        "words_count": "{count, plural, other {# từ}}",
+        "community_search": "tìm kiếm"
+      },
+      "profile": {
+        "open_wallet": "Mở Ví",
+        "your_wallet_is_on_the_wallet": "Ví của bạn nằm ở tab Ví.",
+        "user_has_no_comments": "@{username} chưa bình luận gì",
+        "votes_count": "{count, plural, other {# bình chọn}}",
+        "replies_count": "{count, plural, other {# câu trả lời}}",
+        "menu": "Thêm",
+        "users": "Người dùng"
+      },
+      "reading": {
+        "apply": "ÁP DỤNG",
+        "add_tag": "Thêm thẻ",
+        "age": "Tuổi",
+        "audio_language": "Ngôn ngữ âm thanh",
+        "available_filters": "Bộ lọc khả dụng",
+        "could_not_unlock_the_audio_please": "Không thể mở khóa âm thanh, vui lòng thử lại",
+        "downvote": "Bình chọn xuống",
+        "downvote_percent": "Bình chọn xuống {percent}%",
+        "listen_to_this_post": "Nghe bài viết này",
+        "log_in": "Đăng nhập",
+        "mark_all_as_read": "Đánh dấu tất cả là đã đọc",
+        "mark_as_read": "Đánh dấu là đã đọc",
+        "more_replies": "Thêm câu trả lời",
+        "not_enough_points": "Không đủ Points",
+        "nothing_here_yet": "Chưa có gì ở đây.",
+        "open_editor": "Mở trình soạn thảo",
+        "pause_voice": "Tạm dừng giọng đọc",
+        "play_voice": "Phát giọng đọc",
+        "playback_speed": "Tốc độ phát",
+        "publishing_in_waves": "Đang đăng trong Waves",
+        "quests_done": "Nhiệm vụ đã xong",
+        "read": "Đã đọc",
+        "remove_vote": "Xóa bình chọn",
+        "seek": "Tua",
+        "select_community": "Chọn cộng đồng",
+        "selected_filters": "Bộ lọc đã chọn",
+        "the_audio_could_not_be_loaded": "Không tải được âm thanh.",
+        "this_post_does_not_exist_or": "Bài viết này không tồn tại hoặc đã bị xóa.",
+        "unread": "Chưa đọc",
+        "voice_position": "Vị trí giọng đọc",
+        "vote_weight": "Trọng số bình chọn",
+        "reblogged_by": "được {username} đăng lại",
+        "no_more_posts": "Không còn bài viết nào.",
+        "favourite": "Yêu thích",
+        "no_votes_yet": "Chưa có bình chọn nào",
+        "no_comments_yet": "Chưa có bình luận nào. Hãy là người đầu tiên!",
+        "comments_count": "Bình luận ({count})",
+        "sending_to_chain": "đang gửi lên chuỗi",
+        "compare": "So sánh",
+        "your_vote": "Bình chọn của bạn",
+        "reply_to": "Trả lời @{username}",
+        "what_do_you_think": "Bạn nghĩ sao?",
+        "clear_tag_filter": "Xóa bộ lọc thẻ",
+        "tab_selected": "{title}, đã chọn",
+        "add_tag_feed": "Thêm bảng tin thẻ",
+        "feed_pinned": "{label}, đã ghim",
+        "attached_image_remove": "Đã đính kèm hình ảnh, chạm để xóa",
+        "camera": "Máy ảnh",
+        "files": "Tệp",
+        "paused": "Đã tạm dừng",
+        "in_topic": "trong {topic}",
+        "poll_vote": "Bình chọn",
+        "reply": "Trả lời",
+        "mute_sound": "Tắt tiếng",
+        "unmute_sound": "Bật tiếng",
+        "leaderboard_activities": "Hoạt động",
+        "leaderboard_reward": "Phần thưởng",
+        "sort_votes": "Bình chọn"
+      },
+      "shell": {
+        "account_of": "Tài khoản @{username}",
+        "account_signed_out": "Tài khoản, đã đăng xuất",
+        "close_tab": "Đóng tab",
+        "coming_soon_to_the_native_app": "Sắp có trên ứng dụng gốc.",
+        "create": "Tạo",
+        "expand": "Mở rộng",
+        "forward": "Tiến",
+        "loading": "Đang tải",
+        "new_tab": "Tab mới",
+        "reload": "Tải lại",
+        "sent": "Đã gửi",
+        "tab_unread": "{title}, {count} chưa đọc",
+        "no_app_for_link": "Không có ứng dụng nào mở được liên kết này."
+      },
+      "wallet": {
+        "product_not_available": "Sản phẩm không khả dụng.",
+        "repeat": "Lặp lại"
+      },
+      "copied": "Đã sao chép",
+      "trending_caps": "THỊNH HÀNH",
+      "move_up": "Di chuyển lên",
+      "move_down": "Di chuyển xuống",
+      "scroll_to_top": "Cuộn lên đầu",
+      "load_more": "Thêm"
+    },
+    "wallet": {
+      "checking": "Đang kiểm tra với mạng",
+      "leave_title": "Vẫn đang gửi",
+      "leave_message": "Giao dịch này vẫn đang được gửi hoặc kiểm tra với mạng. Bạn có thể rời màn hình này: ứng dụng sẽ báo khi xong.",
+      "stay": "Ở lại",
+      "collateralized_convert_request": "Yêu cầu chuyển đổi có thế chấp",
+      "op_transfer": "chuyển khoản",
+      "op_power_up": "power up",
+      "op_power_down_change": "thay đổi power down",
+      "op_delegation": "ủy quyền",
+      "op_savings_deposit": "gửi tiết kiệm",
+      "op_savings_withdrawal": "rút tiết kiệm",
+      "op_conversion": "chuyển đổi",
+      "op_swap": "hoán đổi",
+      "op_order_cancel": "hủy lệnh",
+      "op_reward_claim": "nhận phần thưởng",
+      "op_withdraw_route_change": "đổi tuyến rút",
+      "op_token_operation": "thao tác token"
+    },
+    "notification": {
+      "amount_unknown": "Không có số tiền",
+      "weekly_earnings_breakdown": "Tuần này bạn kiếm được ${amount} - ${authorUsd} từ bài viết, ${curationUsd} từ tuyển chọn.",
+      "weekly_earnings_total": "Tuần này bạn kiếm được ${amount} từ bài viết và tuyển chọn."
+    },
+    "settings": {
+      "open": "Mở",
+      "feedback_subject": "Phản hồi/Báo lỗi",
+      "unknown_user": "Người dùng không xác định"
+    },
+    "navigation": {
+      "editor": "Trình soạn thảo",
+      "followers": "Người theo dõi",
+      "spin_game": "Trò chơi quay thưởng",
+      "edit_profile": "Sửa hồ sơ",
+      "redeem_points": "Đổi Points",
+      "community": "Cộng đồng",
+      "community_members": "Thành viên cộng đồng",
+      "community_activities": "Hoạt động cộng đồng",
+      "browser": "Trình duyệt",
+      "asset_details": "Chi tiết tài sản",
+      "edit_history": "Lịch sử chỉnh sửa",
+      "welcome": "Chào mừng",
+      "chat": "Trò chuyện",
+      "backup_keys": "Sao lưu khóa",
+      "trade": "Giao dịch",
+      "ai_image_generator": "Trình tạo hình ảnh AI",
+      "select_assets": "Chọn tài sản",
+      "poll": "Khảo sát",
+      "bot_comments": "Bình luận của bot"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Các thao tác cần khóa owner không thể được ký trong Ecency.",
+      "post": "Bài viết/Bình luận",
+      "custom": "JSON tùy chỉnh",
+      "sign_buffer": "Ký tin nhắn",
+      "send_token": "Gửi token",
+      "witness_vote": "Bình chọn witness",
+      "proxy": "Đặt proxy",
+      "power_up": "Power Up",
+      "power_down": "Power Down",
+      "broadcast": "Phát sóng",
+      "sign_tx": "Ký giao dịch",
+      "encode": "Mã hóa tin nhắn",
+      "decode": "Xác minh khóa",
+      "add_account_authority": "Thêm quyền hạn tài khoản",
+      "remove_account_authority": "Xóa quyền hạn tài khoản",
+      "add_key_authority": "Thêm quyền hạn khóa",
+      "remove_key_authority": "Xóa quyền hạn khóa",
+      "create_claimed_account": "Tạo tài khoản",
+      "create_proposal": "Tạo đề xuất",
+      "remove_proposal": "Xóa đề xuất",
+      "update_proposal_vote": "Bình chọn đề xuất",
+      "signed_call": "Lệnh gọi đã ký"
+    },
+    "translate_language": {
+      "ar": "Tiếng Ả Rập",
+      "az": "Tiếng Azerbaijan",
+      "bg": "Tiếng Bulgaria",
+      "bn": "Tiếng Bengal",
+      "ca": "Tiếng Catalan",
+      "cs": "Tiếng Séc",
+      "da": "Tiếng Đan Mạch",
+      "de": "Tiếng Đức",
+      "el": "Tiếng Hy Lạp",
+      "en": "Tiếng Anh",
+      "eo": "Tiếng Esperanto",
+      "es": "Tiếng Tây Ban Nha",
+      "et": "Tiếng Estonia",
+      "fa": "Tiếng Ba Tư",
+      "fi": "Tiếng Phần Lan",
+      "fr": "Tiếng Pháp",
+      "ga": "Tiếng Ireland",
+      "he": "Tiếng Do Thái",
+      "hi": "Tiếng Hindi",
+      "hu": "Tiếng Hungary",
+      "id": "Tiếng Indonesia",
+      "it": "Tiếng Ý",
+      "ja": "Tiếng Nhật",
+      "ko": "Tiếng Hàn",
+      "lt": "Tiếng Litva",
+      "lv": "Tiếng Latvia",
+      "ms": "Tiếng Mã Lai",
+      "nb": "Tiếng Na Uy",
+      "nl": "Tiếng Hà Lan",
+      "pl": "Tiếng Ba Lan",
+      "pt": "Tiếng Bồ Đào Nha",
+      "ro": "Tiếng Romania",
+      "ru": "Tiếng Nga",
+      "sk": "Tiếng Slovak",
+      "sl": "Tiếng Slovenia",
+      "sq": "Tiếng Albania",
+      "sv": "Tiếng Thụy Điển",
+      "th": "Tiếng Thái",
+      "tl": "Tiếng Tagalog",
+      "tr": "Tiếng Thổ Nhĩ Kỳ",
+      "uk": "Tiếng Ukraina",
+      "zh": "Tiếng Trung",
+      "zt": "Tiếng Trung (phồn thể)"
+    },
+    "reading": {
+      "banner_text": "Bài viết này bằng {source}. Dịch sang {target}?",
+      "translated_from_text": "Được dịch từ {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# thành viên}} • {authors, plural, other {# người đăng}} • {posts, plural, other {# bài viết}}",
+      "community_title": "Cộng đồng {title}",
+      "members_title": "Thành viên {title}",
+      "activities_title": "Hoạt động của {title}",
+      "cannot_start_with_or": "Không được bắt đầu bằng @ hoặc #",
+      "use_a_two_letter": "Dùng mã ngôn ngữ hai chữ cái, như en",
+      "at_most_characters": "Tối đa {max, plural, other {# ký tự}}",
+      "council": "Hội đồng",
+      "journal": "Nhật ký",
+      "topic": "Chủ đề",
+      "community_not_found": "Không tìm thấy cộng đồng."
+    },
+    "transfer": {
+      "one_recipient": "Chỉ có thể dùng một người nhận cho lần chuyển này.",
+      "is_an_exchange_and": "{exchange} là một sàn giao dịch và có thể không hỗ trợ chuyển khoản định kỳ: tiền gửi theo lịch có thể bị mất. Hãy dùng chuyển khoản một lần thay thế."
+    },
+    "dapps": {
+      "signing_info": "Ecency đóng vai trò tiện ích mở rộng ký Hive của bạn. Khi một dApp yêu cầu đăng nhập bằng tiện ích mở rộng trình duyệt như Keychain, Keeper hoặc Peak Vault, hãy chọn tùy chọn đó. Ecency sẽ xử lý việc ký một cách an toàn.",
+      "category_social": "Xã hội",
+      "category_gaming": "Trò chơi",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Nhóm",
+      "unable_to_load_messages": "Không thể tải tin nhắn.",
+      "someone": "Ai đó",
+      "renamed_the_group_to": "{actor} đã đổi tên nhóm thành \"{name}\"",
+      "removed_the_group_name": "{actor} đã xóa tên nhóm",
+      "unable_to_send_your": "Không thể gửi tin nhắn của bạn.",
+      "unable_to_remove_message": "Không thể xóa tin nhắn.",
+      "unknown": "Không rõ",
+      "members_online": "{members, plural, other {# thành viên}} • {online} đang trực tuyến",
+      "failed_to_load_pinned": "Không tải được tin nhắn đã ghim",
+      "you": "Bạn",
+      "title": "Biểu cảm"
+    },
+    "tip": {
+      "login_required": "Vui lòng đăng nhập để gửi tiền boa",
+      "max_decimals": "Tối đa {n, plural, other {# chữ số thập phân}}"
+    },
+    "paid": {
+      "check_again": "Kiểm tra lại",
+      "give_up": "Bỏ qua",
+      "unknown": "Chưa có phản hồi. Yêu cầu có thể vẫn đang chạy. Hãy kiểm tra lại để lấy kết quả: sẽ không bị tính phí lần thứ hai.",
+      "pending": "Yêu cầu của bạn vẫn đang được xử lý. Hãy kiểm tra lại sau giây lát: sẽ không bị tính phí lần thứ hai.",
+      "restored": "Một yêu cầu trước đó chưa có phản hồi. Hãy kiểm tra lại để lấy kết quả của nó: sẽ không bị tính phí lần thứ hai.",
+      "give_up_confirm": "Nếu yêu cầu đã được thực hiện thì Points đã bị tiêu và kết quả sẽ mất.",
+      "not_stored": "Không thể lưu yêu cầu này trên thiết bị. Hãy giữ màn hình này mở cho đến khi hoàn tất.",
+      "sign_in_again": "Phiên đăng nhập của bạn đã hết hạn. Hãy đăng nhập lại, rồi kiểm tra lại.",
+      "other_account": "Mục này thuộc về @{owner}. Hãy chuyển lại tài khoản đó để tiếp tục."
+    },
+    "ai": {
+      "run_ai_assist": "Chạy AI Assist ({costText})",
+      "no_longer_free_cost": "Lượt chạy này không còn miễn phí hôm nay. Chi phí {cost} {unit}.",
+      "no_longer_free": "Lượt chạy này không còn miễn phí hôm nay.",
+      "content_violates_our_content": "Nội dung vi phạm chính sách nội dung của chúng tôi. Vui lòng sửa văn bản của bạn. Points không được hoàn lại.",
+      "generate_image": "Tạo hình ảnh ({costLabel})",
+      "use_prompt": "Dùng: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Vui lòng chờ, một thao tác khác đang diễn ra",
+      "not_a_community_post": "Không phải bài viết cộng đồng.",
+      "parent_post_not_found": "Không tìm thấy bài viết gốc",
+      "the_account_changed": "Tài khoản đã thay đổi."
+    },
+    "dictation": {
+      "balance": "Số dư: {balance} {unit}",
+      "stop_points": "Dừng ({cost} Points)",
+      "stop_free": "Dừng (Miễn phí)",
+      "transcribe_points": "Chuyển thành văn bản ({cost} Points)",
+      "transcribe": "Chuyển thành văn bản",
+      "no_longer_free_cost": "Bản ghi âm này không còn miễn phí hôm nay. Chi phí {cost} Points.",
+      "no_longer_free": "Bản ghi âm này không còn miễn phí hôm nay.",
+      "held_locked": "Bản ghi âm đã dừng khi Ecency bị khóa. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
+      "held_no_background": "Bản ghi âm đã dừng khi Ecency rời khỏi màn hình (không thể hiện thông báo ghi âm). Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
+      "held_stopped": "Bản ghi âm đã dừng từ thông báo. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
+      "held_focus_lost": "Bản ghi âm đã dừng vì có cuộc gọi hoặc âm thanh của ứng dụng khác. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
+      "held_interrupted": "Bản ghi âm đã dừng vì ứng dụng khác đã dùng micro. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
+      "unavailable": "Thiết bị này không hỗ trợ ghi âm.",
+      "not_read": "Không đọc được bản ghi âm đó hoặc nó quá lớn. Chưa gửi gì và chưa tính phí.",
+      "give_up_not_sent": "Bản ghi âm này chưa được gửi nên không bị tính phí. Nó sẽ bị xóa.",
+      "give_up_not_charged": "Bản ghi âm này không bị tính phí. Nó sẽ bị xóa.",
+      "clip_lost": "Bản ghi âm của một yêu cầu trước đó không còn trên thiết bị này. Nếu yêu cầu đó đã được thực hiện thì Points của bạn đã bị tiêu và không thể lấy bản chuyển văn bản của nó."
+    },
+    "register": {
+      "error_code_28": "Không thể xử lý yêu cầu của bạn. Hàng đợi đăng ký có thể đã đầy. Vui lòng thử lại sau vài phút."
+    },
+    "perks": {
+      "quests_empty": "Chưa có nhiệm vụ nào ở đây, hãy quay lại sớm.",
+      "freeze_confirm_title": "Bảo vệ chuỗi ngày của bạn",
+      "spend_points_on_a": "Dùng {price} Points cho một lần đóng băng chuỗi ngày? Nó được dùng để bảo vệ chuỗi ngày của bạn vào ngày bạn bỏ lỡ."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ủng hộ Ecency, nhận blog miễn phí và nổi bật với huy hiệu Pro đã xác minh.",
+      "card_description": "Nâng cấp Pro với {price} một năm. Huy hiệu đã xác minh, blog miễn phí và ủng hộ Ecency.",
+      "card_description_plain": "Nâng cấp Pro một năm. Huy hiệu đã xác minh, blog miễn phí và ủng hộ Ecency.",
+      "member": "Bạn là thành viên Pro.",
+      "benefit_badge": "Huy hiệu Pro đã xác minh bên cạnh tên của bạn.",
+      "benefit_blog": "Một blog miễn phí tại yourname.blogs.ecency.com.",
+      "benefit_support": "Trực tiếp ủng hộ việc phát triển Ecency.",
+      "benefit_early": "Truy cập sớm các tính năng mới.",
+      "buy": "Nhận Pro với {price} một năm",
+      "extend": "Gia hạn thêm 12 tháng với {price}",
+      "extend_note": "Mua lần nữa sẽ cộng thêm 12 tháng vào tư cách thành viên của bạn.",
+      "unavailable": "Ecency Pro hiện không khả dụng từ cửa hàng.",
+      "activating": "Đã nhận thanh toán. Đang kích hoạt tư cách thành viên của bạn.",
+      "success_title": "Chào mừng đến với Ecency Pro",
+      "success_body": "Tư cách thành viên Pro của bạn đã kích hoạt. Huy hiệu sẽ sớm xuất hiện trên hồ sơ của bạn.",
+      "extending": "Đã nhận thanh toán. Tư cách thành viên Pro của bạn đang được gia hạn thêm 12 tháng.",
+      "open_a11y": "Mở Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Đang lưu bản nháp...",
+      "please_sign_in_first": "Vui lòng đăng nhập trước.",
+      "fetch_failed": "Tải thất bại.",
+      "you_can_only_edit": "Bạn chỉ có thể chỉnh sửa nội dung của chính mình.",
+      "invalid_percent": "Phần trăm không hợp lệ",
+      "beneficiary_exists_already": "Người thụ hưởng đã tồn tại",
+      "this_draft_belongs_to": "Bản nháp này thuộc về @{owner}. Hãy chuyển lại tài khoản đó để đăng.",
+      "could_not_make_a": "Không thể tạo liên kết mới cho bài viết này. Hãy đổi tiêu đề một chút rồi thử lại.",
+      "an_earlier_attempt_was": "Một lần thử trước đó đã được đăng sau lần này. Hãy kiểm tra phiên bản bạn muốn giữ.",
+      "could_not_check_your": "Không kiểm tra được quyền đăng bài của tài khoản bạn. Kiểm tra kết nối và thử lại.",
+      "this_post_was_changed": "Bài viết này đã được thay đổi ở nơi khác kể từ khi bạn mở. Hãy sao chép văn bản của bạn, quay lại và mở lại để chỉnh sửa phiên bản mới nhất.",
+      "link_text_placeholder": "Văn bản ở đây"
+    },
+    "app_error": {
+      "this_reply_is_too": "Câu trả lời này quá dài.",
+      "the_network_refused_this": "Mạng đã từ chối thao tác này.",
+      "invalid_input": "Dữ liệu nhập không hợp lệ.",
+      "secure_storage_is_unavailable": "Bộ nhớ bảo mật không khả dụng. Vui lòng đăng nhập lại.",
+      "please_sign_in_first": "Vui lòng đăng nhập trước.",
+      "these_credentials_belong_to": "Các thông tin xác thực này thuộc về @{actual}, không phải @{expected}.",
+      "is_not_signed_in": "@{username} chưa đăng nhập trên thiết bị này.",
+      "key_required": "Cần khóa {role} để thực hiện giao dịch này. {hint}",
+      "cancelled": "Đã hủy.",
+      "the_request_was_rejected": "Yêu cầu đã bị từ chối trong ứng dụng ví.",
+      "the_request_expired_before": "Yêu cầu đã hết hạn trước khi ứng dụng ví trả lời. Vui lòng thử lại.",
+      "could_not_reach_the": "Không kết nối được máy chủ HiveAuth. Vui lòng thử lại.",
+      "unexpected_redirect": "Máy chủ đã gửi một chuyển hướng không mong đợi. Chưa có gì thay đổi. Vui lòng thử lại sau.",
+      "missing_key_hint": "Hãy thêm nó trong Cài đặt, Quản lý quyền hạn (Import Private), hoặc đăng nhập lại bằng nó.",
+      "this_key_is_also": "Khóa này cũng là khóa owner của tài khoản. Ecency không giữ khóa điều khiển vai trò owner: hãy cho vai trò active và posting khóa riêng, rồi đăng nhập bằng chúng.",
+      "this_is_the_owner": "Đây là khóa owner. Ecency không bao giờ lưu hoặc dùng khóa owner: hãy đăng nhập bằng mật khẩu chính, hoặc khóa posting hay active của bạn.",
+      "this_password_only_matches": "Mật khẩu này chỉ khớp với khóa owner của tài khoản. Ecency không bao giờ lưu hoặc dùng khóa owner: hãy đăng nhập bằng khóa posting hoặc active của bạn.",
+      "this_key_cannot_sign": "Khóa này không thể tự ký cho tài khoản: tài khoản cần nhiều hơn một chữ ký (trọng số của nó thấp hơn ngưỡng).",
+      "public_key_given": "Đây là khóa công khai của bạn. Hãy dán khóa riêng tư (bắt đầu bằng 5) hoặc mật khẩu chính của bạn.",
+      "memo_key_only": "Không thể dùng khóa memo để đăng nhập. Hãy dùng khóa posting, khóa active hoặc mật khẩu chính.",
+      "network_message": "Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.",
+      "network_error_this_may": "Lỗi mạng. Có thể giao dịch đã được thực hiện; thử lại là an toàn và sẽ không đăng hai lần."
+    },
+    "purchases": {
+      "deal_best": "ƯU ĐÃI TỐT NHẤT!",
+      "deal_popular": "PHỔ BIẾN!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Cửa hàng không phản hồi."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "Cần email và tên người dùng để sử dụng 999accounts",
+      "stuck": "Một giao dịch mua trước đó của sản phẩm này không thể hoàn tất. Vui lòng liên hệ support@ecency.com kèm biên nhận cửa hàng của bạn, nó được lưu giữ cho việc này.",
+      "held": "Giao dịch mua này đang được giữ để xem xét. Liên hệ support@ecency.com kèm đơn hàng #{order}.",
+      "earlier_purchase": "Một giao dịch mua trước đó của sản phẩm này đang được hoàn tất cho @{target} trước.",
+      "earlier_pending": "Một khoản thanh toán trước đó cho sản phẩm này vẫn đang chờ cho @{target}. Nó hoàn tất khi cửa hàng xác nhận thanh toán.",
+      "pending": "Thanh toán của bạn đang chờ. Giao dịch mua hoàn tất khi cửa hàng xác nhận thanh toán.",
+      "processing": "Giao dịch mua của bạn đang được xử lý. Nó sẽ sớm hoàn tất."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Chuyển khoản định kỳ",
+      "delegate_hive_power": "Ủy quyền Hive Power",
+      "power_up": "Power up",
+      "set_withdraw_vesting_route": "Đặt tuyến rút vesting",
+      "power_down": "Power down",
+      "transfer_to_saving": "Chuyển vào tiết kiệm",
+      "transfer_from_saving": "Chuyển từ tiết kiệm",
+      "cancel_transfer_from_saving": "Hủy chuyển từ tiết kiệm",
+      "collateralized_convert": "Chuyển đổi có thế chấp",
+      "witness_vote": "Bình chọn witness",
+      "witness_update": "Cập nhật witness",
+      "witness_set_properties": "Đặt thuộc tính witness",
+      "governance_proxy": "Proxy quản trị",
+      "claim_account": "Nhận tài khoản",
+      "create_account": "Tạo tài khoản",
+      "create_account_with_account": "Tạo tài khoản bằng tín dụng tài khoản",
+      "create_limit_order": "Tạo lệnh giới hạn",
+      "cancel_limit_order": "Hủy lệnh giới hạn",
+      "redeem_rewards": "Đổi phần thưởng",
+      "post_or_comment": "Bài viết hoặc bình luận",
+      "post_or_comment_options": "Tùy chọn bài viết hoặc bình luận",
+      "custom_operation": "Thao tác tùy chỉnh",
+      "update_account_active": "Cập nhật tài khoản (active)",
+      "update_account_posting": "Cập nhật tài khoản (posting)",
+      "change_recovery_account": "Đổi tài khoản khôi phục",
+      "create_proposal": "Tạo đề xuất",
+      "remove_proposal": "Xóa đề xuất",
+      "update_proposal_votes": "Cập nhật bình chọn đề xuất",
+      "update_proposal": "Cập nhật đề xuất"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Liên kết này phải được ký bởi @{account}. Hãy chuyển sang tài khoản đó và mở lại.",
+      "ecency_can_only_sign": "Ecency chỉ có thể ký và phát sóng các giao dịch từ liên kết.",
+      "requester_page": "trang {host}",
+      "owner_refused": "Các thao tác cần khóa owner không thể được ký từ liên kết.",
+      "busy": "Vui lòng chờ: một yêu cầu khác vẫn đang được xử lý.",
+      "not_supported": "Ecency chưa thể ký thao tác này trong phiên bản này."
+    },
+    "chats": {
+      "group_members": "Thành viên nhóm",
+      "rename_group": "Đổi tên nhóm",
+      "failed_to_load_chats": "Không tải được các cuộc trò chuyện",
+      "unknown": "Không rõ",
+      "unable_to_mark_channel": "Không thể đánh dấu kênh là đã đọc",
+      "unable_to_update_favorites": "Không thể cập nhật mục yêu thích",
+      "unable_to_update_mute": "Không thể cập nhật chế độ tắt tiếng",
+      "group": "Nhóm",
+      "unable_to_search": "Không thể tìm kiếm",
+      "unable_to_start_chat": "Không thể bắt đầu trò chuyện",
+      "no_internet": "Không có kết nối Internet"
+    },
+    "stake": {
+      "confirm_summary": "Ủy quyền {hp} HP ({vests} VESTS) cho @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Đã ủy quyền cho @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Chỉ khóa công khai. Ecency không bao giờ lưu khóa owner.",
+      "shared_owner": "Tài khoản này dùng cùng một khóa cho vai trò owner và vai trò {names}. Ai có khóa đó sẽ điều khiển toàn bộ tài khoản. Hãy cho vai trò {names} một khóa riêng và giữ khóa owner ngoại tuyến.",
+      "copy_warning": "Bất kỳ ai có khóa riêng tư này đều điều khiển phần này của tài khoản bạn. Các ứng dụng khác có thể đọc bộ nhớ tạm; chỉ dán nó ở nơi bạn tin tưởng. Nó sẽ bị xóa khỏi bộ nhớ tạm sau 2 phút."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "Khóa PIN đang bật.",
+      "pin_changed": "Đã đổi PIN.",
+      "pin_lock_is_off": "Khóa PIN đang tắt.",
+      "wiped_notice": "Tất cả tài khoản, khóa và thông tin xác thực đã bị xóa khỏi thiết bị này.",
+      "we_could_not_bring": "Chúng tôi không thể chuyển các tài khoản của bạn từ phiên bản ứng dụng trước. Vui lòng đăng nhập lại.",
+      "your_pin_lock_could": "Không thể chuyển khóa PIN của bạn từ phiên bản trước. Hãy đặt lại PIN từ menu tài khoản để bật lại khóa ứng dụng.",
+      "biometric_unlock_was_turned": "Mở khóa sinh trắc học đã bị tắt vì dữ liệu sinh trắc học trên thiết bị này đã thay đổi. Hãy mở khóa bằng PIN, rồi bật lại từ menu tài khoản.",
+      "biometric_unavailable_notice": "Không thể bật mở khóa sinh trắc học: thiết bị này chưa thiết lập sinh trắc học.",
+      "set_backup": "Đặt PIN để dự phòng cho mở khóa sinh trắc học",
+      "biometric_on_notice": "Khóa PIN đang bật. Mở khóa bằng sinh trắc học hoặc PIN của bạn.",
+      "offer_title": "Mở khóa bằng sinh trắc học",
+      "offer_body": "Mở Ecency bằng khuôn mặt hoặc vân tay. Bạn cũng đã đặt PIN, dùng để mở khóa ứng dụng khi không có sinh trắc học.",
+      "offer_use": "Dùng sinh trắc học",
+      "offer_use_pin": "Dùng PIN thay thế"
+    },
+    "common": {
+      "list_and": "{first} và {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Câu trả lời từ 25 ký tự trở xuống không nhận được Points (liên kết không tính)",
+      "short_content_hint": "Quá ngắn để nhận Points (25 ký tự trở xuống, không tính liên kết)",
+      "daily_post": "Bài viết hằng ngày {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {chuỗi # ngày}}",
+      "grant_description": "Cấp cho tài khoản Ecency @ecency.app quyền đăng bài trên tài khoản của bạn, để bạn đăng mà không cần mở Keychain mỗi lần. Việc cấp quyền thay đổi quyền đăng bài của tài khoản và cần khóa active của bạn."
+    },
+    "wallet_history": {
+      "from_to": "@{from} tới @{to}",
+      "from_user_id": "từ @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} tới @{to}, id: {id}",
+      "from_to_account": "@{from} tới {to}",
+      "from_user": "từ @{user}",
+      "to_user": "tới @{user}",
+      "interest": "Lãi",
+      "proposal_pay": "Thanh toán đề xuất",
+      "categories": "Loại hoạt động",
+      "category_all": "Tất cả",
+      "category_transfers": "Chuyển khoản",
+      "category_market": "Lệnh thị trường",
+      "category_interest": "Lãi",
+      "category_stake": "Thao tác stake",
+      "category_rewards": "Phần thưởng",
+      "point_type_checkin": "Nhịp tim",
+      "point_type_login": "Đăng nhập",
+      "point_type_post": "Bài viết",
+      "point_type_comment": "Bình luận",
+      "point_type_vote": "Bình chọn",
+      "point_type_reblog": "Đăng lại",
+      "point_type_transfer_sent": "Chuyển khoản đã gửi",
+      "point_type_transfer_received": "Chuyển khoản đã nhận"
+    },
+    "video_upload": {
+      "continue_upload": "TIẾP TỤC TẢI LÊN",
+      "source_gone": "Bản ghi này không còn trên thiết bị. Hãy quay hoặc chọn lại video.",
+      "no_camera": "Máy ảnh không khả dụng trên thiết bị này."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Lần unstake tiếp theo sau {hours, plural, other {# giờ}}",
+      "account_not_found": "Không tìm thấy tài khoản"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Hình ảnh trong bộ nhớ tạm · Dán hình ảnh",
+      "no_container": "Không lấy được vùng chứa waves mới nhất",
+      "please_sign_in_first": "Vui lòng đăng nhập trước.",
+      "write_something_first": "Hãy viết gì đó trước.",
+      "account_changed": "Wave này được viết bằng tài khoản khác. Hãy đóng nó và viết lại.",
+      "no_upload": "Bản dựng này chưa hỗ trợ tải hình ảnh lên. Thay vào đó, hãy dán liên kết hình ảnh vào văn bản.",
+      "fail": "Thất bại"
+    },
+    "delete_account": {
+      "sign_out_failed": "Yêu cầu của bạn đã được gửi, nhưng đăng xuất thất bại. Vui lòng đăng xuất từ menu.",
+      "not_sent": "Không thể gửi yêu cầu xóa của bạn. Vui lòng thử lại."
+    },
+    "chat_sheets": {
+      "group_limit": "Một nhóm có thể có tối đa {max, plural, other {# người khác}}.",
+      "search_people_by_username": "Tìm người theo tên người dùng",
+      "new_group_title": "Nhóm mới",
+      "new_group_hint": "Thêm từ {min} đến {max, plural, other {# người}} để bắt đầu cuộc trò chuyện nhóm.",
+      "no_results": "Không tìm thấy ai có tên đó trong trò chuyện.",
+      "search_failed": "Tìm kiếm không thành công. Kiểm tra kết nối và thử lại.",
+      "create": "Bắt đầu nhóm",
+      "new_group_failed": "Không thể bắt đầu nhóm. Vui lòng thử lại.",
+      "name_limit": "Tên nhóm có thể dài tối đa {max, plural, other {# ký tự}}.",
+      "rename_title": "Đổi tên nhóm",
+      "rename_hint": "Đặt cho nhóm này một cái tên mà mọi người trong nhóm đều thấy. Để trống để hiện tên các thành viên.",
+      "placeholder": "Tên nhóm",
+      "not_owner": "Chỉ người đã tạo nhóm này mới đổi được tên.",
+      "rename_failed": "Không thể đổi tên nhóm. Vui lòng thử lại."
+    },
+    "editor_side": {
+      "copy_of": "Bản sao của {title}",
+      "deletions_failed": "Đã xảy ra lỗi\n{failed} trên {total, plural, other {# lần xóa}} thất bại",
+      "uploads_failed": "{count, plural, other {# lần tải lên thất bại}}:\n\n{messages}",
+      "failed_to_delete": "Xóa thất bại"
+    },
+    "uploads": {
+      "add_to_gallery": "Thêm vào thư viện"
+    },
+    "account_notice": {
+      "manage_keys": "Cài đặt, Quản lý quyền hạn",
+      "no_signing_key_title": "Đăng nhập lại với tư cách @{account}",
+      "no_signing_key": "Ecency không còn giữ khóa owner hay mật khẩu chính trên thiết bị này, và @{account} không có khóa posting hoặc active nào được lưu ở đây. Hãy đăng nhập lại bằng mật khẩu chính hoặc khóa posting hay active, hoặc thêm một khóa trong {manageKeys} (Import Private).",
+      "missing_roles_title": "Một số khóa chưa được thêm",
+      "cannot_post": "đăng bài, bình chọn hoặc bình luận",
+      "cannot_transfer": "gửi chuyển khoản hoặc đổi cài đặt tài khoản",
+      "missing_roles": "Mật khẩu của bạn không còn khớp với khóa {missing} của @{account}: nó đã bị đổi trên tài khoản kể từ khi mật khẩu được đặt. Đã lưu trên thiết bị này: khóa {kept}. Cho đến khi bạn thêm khóa {missing} trong {manageKeys} (Import Private), ứng dụng này không thể {cannot} bằng các khóa của @{account}.",
+      "shared_owner_title": "Khóa này cũng điều khiển vai trò owner",
+      "shared_owner": "@{account} dùng cùng một khóa cho vai trò owner và vai trò {names}. Ai có khóa này sẽ điều khiển toàn bộ tài khoản. Ecency chỉ giữ nó làm khóa {names} và không bao giờ dùng cho thao tác owner. Hãy cho vai trò {names} một khóa riêng và giữ khóa owner ngoại tuyến."
+    },
+    "dapp_browser": {
+      "message_from": "Tin nhắn từ {host}",
+      "home_title": "Trang chủ",
+      "loading_title": "Đang tải...",
+      "blank_run": "[{count, plural, other {# ký tự trống}}]",
+      "too_large": "Trang này yêu cầu ký một yêu cầu quá lớn để hiển thị, nên Ecency đã từ chối."
+    },
+    "community_service": {
+      "the_account_changed": "Tài khoản đã thay đổi."
+    },
+    "profile_edit": {
+      "enter_link": "Nhập liên kết hình ảnh",
+      "please_sign_in_first": "Vui lòng đăng nhập trước.",
+      "account_not_found": "Không tìm thấy tài khoản",
+      "please_enter_an_image": "Vui lòng nhập liên kết hình ảnh bắt đầu bằng https://"
+    },
+    "background_media": {
+      "post_by": "Bài viết của @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Vui lòng đăng nhập trước."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Bạn đã bình chọn với cùng trọng số rồi.",
+      "insufficient_rc": "Không đủ Resource Credits. Vui lòng chờ hoặc power up.",
+      "missing_authority": "Thiếu quyền đăng bài. Vui lòng kiểm tra cách đăng nhập của bạn.",
+      "comment_too_soon": "Vui lòng chờ trước khi đăng lại.",
+      "paid_out": "Bài viết này đã được chi trả.",
+      "too_large": "Giao dịch có {size, plural, other {# byte}}, vượt giới hạn {max} byte.",
+      "network_error_please_check": "Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.",
+      "unconfirmed_message": "Không xác nhận được giao dịch này đã thực hiện hay chưa. Vui lòng kiểm tra ví hoặc lịch sử của bạn; chỉ bắt đầu lại nếu không thấy nó ở đó.",
+      "undecided_message": "Giao dịch này có thể đã được thực hiện. Vui lòng kiểm tra ví hoặc lịch sử trước khi thử lại."
+    },
+    "chat_api": {
+      "request_failed": "Yêu cầu thất bại ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} đang nhập...",
+      "typing_two": "{first} và {second} đang nhập...",
+      "typing_three": "{first}, {second} và {third} đang nhập...",
+      "typing_many": "{first}, {second} và {count, plural, other {# người khác}} đang nhập...",
+      "banned": "{reason} Bạn vẫn có thể đọc trò chuyện. Có thể đăng lại {until}.",
+      "joined_when": "đã tham gia {time}",
+      "joined": "đã tham gia",
+      "official_badge": "Chính thức",
+      "official_badge_label": "Tài khoản Ecency chính thức"
+    },
+    "side_menu": {
+      "ask_esie": "Hỏi Esie"
+    },
+    "chat_service": {
+      "missing_token": "Thiếu token truy cập Hive. Vui lòng đăng xuất rồi đăng nhập lại.",
+      "dm_error": "Người dùng chưa tham gia trò chuyện"
+    },
+    "compose_reply": {
+      "account_changed": "Câu trả lời này được viết bằng tài khoản khác. Hãy đóng nó và viết lại.",
+      "write_something_first": "Hãy viết gì đó trước.",
+      "please_sign_in_first": "Vui lòng đăng nhập trước."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Quá nhiều người thụ hưởng: tối đa {max}.",
+      "a_beneficiary_s_share": "Phần chia của người thụ hưởng phải nằm giữa 0.01% và 100%.",
+      "beneficiaries_add_up_to": "Tổng phần chia của những người thụ hưởng vượt quá 100%.",
+      "a_beneficiary_is_listed": "Có một người thụ hưởng bị liệt kê hai lần.",
+      "you_cannot_be_a": "Bạn không thể là người thụ hưởng bài viết của chính mình.",
+      "a_beneficiary_has_an": "Một người thụ hưởng có tên tài khoản không hợp lệ."
+    },
+    "follows": {
+      "fail": "Thất bại!: {message}",
+      "follower_count": "Người theo dõi ({count})",
+      "following_count": "Đang theo dõi ({count})"
+    },
+    "link": {
+      "unsupported": "Liên kết này chưa được hỗ trợ.",
+      "cannot_open": "Không thể mở liên kết",
+      "unsupported_version": "Liên kết này không được hỗ trợ trong phiên bản này."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Trình duyệt Khám phá có thể truy cập ví Hive của bạn để ký giao dịch. Liên kết này đến từ nội dung bài viết và chưa được Ecency xác minh. Chỉ tiếp tục nếu bạn tin tưởng nó:\n\n{url}"
+    },
+    "listen": {
+      "message": "Nghe cần {required} Points và bạn có {available}.",
+      "unlock_label": "Mở khóa · {cost} Points",
+      "preparing_audio": "Đang chuẩn bị âm thanh · {preparingPercent}%",
+      "waiting_in_line_ahead": "Đang xếp hàng, còn {ahead} người trước…",
+      "next_in_line": "Tiếp theo…",
+      "preparing_about_minutes": "Đang chuẩn bị âm thanh, khoảng {minutes} phút…",
+      "preparing_audio_2": "Đang chuẩn bị âm thanh…",
+      "spend_confirm": "Dùng {cost} Points để nghe bài viết này? Bạn có thể phát lại âm thanh bất cứ lúc nào.",
+      "about_minutes": "~{minutes} phút",
+      "failed_refunded": "Không tạo được âm thanh, Points của bạn đã được hoàn lại"
+    },
+    "media_pick": {
+      "preparing_video": "Đang chuẩn bị video...",
+      "library_hint": "Chọn từ ảnh của bạn",
+      "camera_hint": "Chụp ảnh mới ngay",
+      "files_hint": "Duyệt tệp trên thiết bị này và trên đám mây",
+      "paste_hint": "Dùng hình ảnh bạn đã sao chép",
+      "link_hint": "Dùng hình ảnh từ web"
+    },
+    "media_picking": {
+      "image_types_message": "Loại tệp này không được hỗ trợ. Hãy chọn hình ảnh JPEG, PNG, GIF, WebP hoặc HEIC.",
+      "video_types_message": "Loại tệp này không được hỗ trợ. Hãy chọn video MP4 hoặc MOV.",
+      "gif_too_large": "GIF này lớn hơn {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Thao tác này cần cả chữ ký active và posting, mà Ecency chưa thể ký cùng lúc."
+    },
+    "poll": {
+      "fail": "Thất bại!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Không kiểm tra được quyền đăng bài của tài khoản bạn. Kiểm tra kết nối và thử lại."
+    },
+    "post_lists": {
+      "voters_title": "Thông tin người bình chọn ({total})",
+      "reblogs_title": "Thông tin đăng lại ({total})",
+      "no_history_found": "Không tìm thấy lịch sử!",
+      "no_edit_history_available": "Không có lịch sử chỉnh sửa cho nội dung này.",
+      "version_label": "Phiên bản {version}"
+    },
+    "stats": {
+      "other_device": "Khác"
+    },
+    "profile": {
+      "account_not_found": "Không tìm thấy tài khoản",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Đầy sau {hours, plural, other {# giờ}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Không đọc được hồ sơ hiện tại của bạn, hãy thử lại"
+    },
+    "profile_sheet": {
+      "fail": "Thất bại! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Không tìm thấy tài khoản"
+    },
+    "push_payload": {
+      "mentioned": "@{source} đã nhắc đến @{target}",
+      "replied": "@{source} đã trả lời @{target}",
+      "transferred": "@{source} đã chuyển cho @{target}",
+      "delegated": "@{source} đã ủy quyền cho @{target}",
+      "rewards_received": "Đã nhận phần thưởng",
+      "account_updated": "Tài khoản đã cập nhật",
+      "account_updated_body": "Thông tin tài khoản của bạn đã được cập nhật",
+      "followed": "@{source} đã theo dõi @{target}",
+      "unfollowed": "@{source} đã bỏ theo dõi @{target}",
+      "ignored": "@{source} đã bỏ qua @{target}",
+      "blacklisted": "@{source} đã đưa @{target} vào danh sách đen",
+      "posted_in": "@{source} đã đăng trong #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Không thể lấy quyền truy cập Máy ảnh",
+      "permission_message": "Vui lòng cấp quyền máy ảnh trong cài đặt ecency.",
+      "permission_allow": "Cho phép"
+    },
+    "reply_account": {
+      "switch": "Trả lời bằng tài khoản khác"
+    },
+    "send_journal": {
+      "your_from_went_through": "{label} của bạn từ @{account} đã thực hiện xong.",
+      "not_sent": "{label} của bạn từ @{account} chưa thực hiện được. Chưa gửi gì; bạn có thể bắt đầu lại.",
+      "checking_whether_your_from": "Đang kiểm tra xem {label} của bạn từ @{account} đã thực hiện chưa. Vui lòng kiểm tra ví của bạn trước khi gửi lại."
+    },
+    "signing": {
+      "hot_page_closed": "Trang HiveSigner đã đóng",
+      "wrong_role": "Đây là khóa {given} của bạn; thao tác này cần khóa {needed} của bạn.",
+      "action_id_required": "Hành động này cần một id hành động để thử lại an toàn."
+    },
+    "signing_router": {
+      "owner_never": "Các thao tác owner không bao giờ được ký trong ứng dụng."
+    },
+    "spin": {
+      "key_missing": "Thiếu khóa trò chơi",
+      "score": "{score, plural, other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Hôm nay (UTC), đặt lại sau {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Đặt lại hằng ngày lúc 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Đăng nhập lại",
+      "message": "Bộ nhớ bảo mật trên thiết bị này đã được đặt lại. Hãy đăng nhập lại.",
+      "failed": "Không thể xóa các tài khoản trên thiết bị này. Vui lòng thử lại."
+    },
+    "store": {
+      "in_app_purchases_are": "Bản dựng này không hỗ trợ mua hàng trong ứng dụng."
+    },
+    "wallet_sends": {
+      "journal_full": "Còn quá nhiều lần gửi trước đó đang được kiểm tra với mạng. Vui lòng chờ chúng được xác nhận trước khi gửi thêm.",
+      "check_later": "Mạng không xác nhận kịp thời. Vui lòng kiểm tra ví hoặc lịch sử của bạn trước khi gửi lại; ứng dụng sẽ kiểm tra lại ở lần khởi động tiếp theo."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {# chưa đọc}}",
+      "locked_text": "Mở khóa Ecency để xem",
+      "signed_out_text": "Đăng nhập vào Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Không đọc được các quyền hạn hiện tại của tài khoản bạn. Chưa có gì thay đổi; vui lòng thử lại.",
+      "reads_disagree": "Hai lần đọc quyền đăng bài của tài khoản bạn không khớp nhau. Chưa có gì thay đổi; vui lòng thử lại."
+    },
+    "vote": {
+      "vote_weight_must_be": "Trọng số bình chọn phải nằm giữa -100% và 100%.",
+      "please_sign_in_first": "Vui lòng đăng nhập trước."
+    },
+    "widget": {
+      "streak_name": "Chuỗi nhiệm vụ",
+      "write": "Viết",
+      "new_wave": "Wave mới",
+      "notifications_description": "Thông báo chưa đọc của bạn. Bị ẩn khi khóa PIN đang bật.",
+      "streak_description": "Chuỗi nhiệm vụ hằng ngày của bạn. Bị ẩn khi khóa PIN đang bật.",
+      "compose_description": "Viết một bài viết hoặc một wave mới.",
+      "streak_title": "Chuỗi ngày",
+      "daily_quests": "Nhiệm vụ hằng ngày",
+      "streak_hint": "Mở Perks để xem chuỗi ngày của bạn",
+      "open_perks": "Mở Perks",
+      "open_app": "Mở Ecency",
+      "unread_caption": "{count, plural, other {chưa đọc}}",
+      "streak_caption": "{count, plural, other {ngày liên tiếp}}"
+    },
+    "system": {
+      "dictation_channel": "Đọc để nhập",
+      "listen_channel": "Nghe",
+      "dictation_channel_description": "Hiện khi bản ghi âm để đọc nhập đang chạy nền, kèm hành động Dừng.",
+      "dictation_title": "Ghi âm để đọc nhập",
+      "dictation_text": "Ecency đang ghi âm phần đọc nhập của bạn. Dừng sẽ giữ nó chưa gửi cho đến khi bạn xác nhận trong ứng dụng.",
+      "listen_channel_description": "Cho bạn biết khi Nghe không thể tiếp tục chạy nền.",
+      "listen_paused": "Đã tạm dừng Nghe",
+      "listen_paused_text": "Mở Ecency để tiếp tục nghe.",
+      "skip_back": "Lùi 15 giây",
+      "skip_forward": "Tiến 15 giây"
+    },
+    "permission": {
+      "face_id": "Mở khóa Ecency bằng Face ID thay cho PIN.",
+      "camera": "Quét mã QR, và chụp ảnh hoặc quay video để thêm vào bài viết của bạn.",
+      "photo_library_add": "Ecency lưu các hình ảnh bạn tải xuống từ bài viết vào thư viện ảnh của bạn.",
+      "photo_library": "Ecency gom các hình ảnh bạn tải xuống từ bài viết vào một album Ecency trong thư viện ảnh của bạn.",
+      "microphone": "Ecency dùng micro của bạn để bạn đọc nhập bài viết và bình luận (các bản ghi âm đó được gửi tới Ecency để chuyển thành văn bản) và để ghi âm thanh cùng video bạn thêm vào bài viết."
+    },
+    "android": {
+      "no_browser": "Không có trình duyệt",
+      "biometric_unlock_title": "Mở khóa Ecency bằng sinh trắc học",
+      "biometric_confirm": "Xác nhận bằng vân tay hoặc khuôn mặt của bạn",
+      "image_unsupported_address": "Địa chỉ hình ảnh không được hỗ trợ",
+      "image_create_failed": "Không thể tạo tệp",
+      "image_write_failed": "Không thể ghi tệp",
+      "image_too_large": "Hình ảnh quá lớn",
+      "image_download_failed": "Tải xuống thất bại với trạng thái {status}",
+      "billing_disconnected": "Google Play Billing đã ngắt kết nối.",
+      "billing_no_screen": "Không có màn hình để hiển thị giao dịch mua.",
+      "billing_error": "Lỗi Google Play Billing {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Bạn đã tạo {count, plural, other {# bài viết}} trong tháng này. Cố gắng phát huy nhé!",
-        "checkin": "Bạn đã điểm danh {count, plural, other {# ngày}} trong tuần này. Cố gắng phát huy nhé!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, other {# bài viết mới}} trong #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# lần thử thất bại}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "Chuỗi {n} ngày"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Chỉ cho phép tài khoản cũ hơn {days} ngày",
-        "max_choices": "• Bạn có thể chọn tối đa {choices} lựa chọn"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Còn lại {executions} lần chuyển",
-        "schedule_summary": "{executions} lần chuyển, mỗi lần cách nhau {hours} giờ"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Quá ngắn để nhận Points ({n, plural, other {# ký tự}} trở xuống, không tính liên kết)"
       },
       "chats": {
-        "people_joined": "{count} người đã tham gia"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "sau khoảng {count, plural, other {# phút}}",
+        "ban-remaining-hours": "sau khoảng {count, plural, other {# giờ}}",
+        "ban-remaining-days": "sau khoảng {count, plural, other {# ngày}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Dùng tối đa {n, plural, other {# thẻ}}",
+          "too_long": "Tìm kiếm quá dài. Dùng tối đa {n, plural, other {# ký tự}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Yêu cầu tối thiểu {count} ký tự",
-        "chars_remaining": "Còn lại {count} ký tự"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Bạn có thể chọn tối đa {count, plural, other {# hình ảnh}} mỗi lần"
+      },
+      "dictation": {
+        "stop_hint": "Dừng để chuyển thành văn bản và thêm vào bài viết. Tối đa {m, plural, other {# phút}}.",
+        "rate": "{n} Points mỗi {s, plural, other {# giây}}"
       },
       "transfer": {
-        "powering_down_info": "Lần hủy đặt cọc tiếp theo sau {days} ngày, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Từ {min} đến {max, plural, other {# ký tự}}"
       }
     }
   }

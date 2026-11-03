@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro 會員"
   },
   "perks": {
     "header": "福利",
@@ -31,42 +31,42 @@
     "promote_desc": "讓更多人看見你的文章",
     "account_boost": "帳號加速",
     "account_boost_desc": "為任何帳號加速",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "補充 RC",
+    "rc_topup_desc": "資源點不足時也能繼續發文",
+    "streak_freeze_owned": "庫存 {n} 個",
+    "streak_freeze_buy": "保護連續紀錄（{price} Points）",
+    "streak_freeze_buying": "保護中",
+    "streak_freeze_error": "無法購買連續紀錄保護，請再試一次。"
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "每日發文",
+    "streak": "連續 {n} 天",
+    "keep_streak": "保持你的連續紀錄"
   },
   "waves": {
     "for_you": "為你推薦",
     "following": "追蹤中",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "自訂動態",
+    "custom_feeds_subtitle": "釘選來源和標籤，即可將它們新增為動態分頁。",
+    "add_tag_placeholder": "新增標籤",
+    "sources": "來源",
+    "your_feeds": "你的動態",
+    "trending_tags": "熱門標籤",
+    "shorts_empty": "目前沒有可顯示的短片",
+    "mute": "靜音",
+    "unmute": "取消靜音"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "新手上路",
+    "subtitle": "第一次來嗎？Waves 是簡短的貼文，也是最容易上手的方式。",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "關閉",
+    "item_wave": "發佈你的第一則 Wave",
+    "item_vote": "為你喜歡的 Wave 投票",
+    "item_reply": "回覆某個人",
+    "item_checkin": "簽到以開始連續紀錄",
+    "all_done_title": "全部完成 🎉",
+    "all_done_subtitle": "一切就緒，繼續發佈 Waves 吧！"
   },
   "profile": {
     "havent_commented": "還沒有任何評論",
@@ -147,6 +147,16 @@
     "wizard_config_val": "註冊天數  |  可見性  |  計算方式",
     "attach_poll": "附加投票"
   },
+  "favorite_tags": {
+    "title": "標籤",
+    "hint": "追蹤後，此標籤有新文章時會通知你",
+    "following_hint": "此標籤有新文章時會通知你",
+    "follow": "追蹤",
+    "following": "追蹤中",
+    "added": "已追蹤標籤",
+    "removed": "已取消追蹤標籤",
+    "empty_list": "這裡什麼都沒有"
+  },
   "favorites": {
     "add": "新增收藏",
     "add_error": "無法新增收藏",
@@ -181,7 +191,33 @@
     "payout": "收益",
     "details": "詳細資訊",
     "community": "社區",
-    "new_post": "新增文章"
+    "new_post": "新增文章",
+    "mute_post_title": "靜音此文章",
+    "unmute_post_title": "取消靜音此文章",
+    "mute_post_reason": "為什麼要靜音？",
+    "unmute_post_reason": "為什麼要恢復？",
+    "manage": "管理社群",
+    "manage_members": "成員與角色",
+    "manage_settings": "社群設定",
+    "manage_activities": "活動紀錄",
+    "activities": "活動",
+    "no_activities": "目前沒有活動",
+    "activities_load_failed": "無法載入活動。下拉重新整理。",
+    "set_role": "設定角色",
+    "assign_role": "指派角色",
+    "assign_role_hint": "搜尋任何帳號（包含尚未訂閱的帳號），然後選擇角色。",
+    "username_placeholder": "使用者名稱",
+    "invalid_username": "請從結果中選擇已存在的帳號",
+    "members": "成員",
+    "no_members": "找不到成員",
+    "members_incomplete": "部分成員無法載入。下拉重新整理。",
+    "members_load_failed": "無法載入成員。下拉重新整理。",
+    "role_owner": "擁有者",
+    "role_admin": "管理員",
+    "role_mod": "版主",
+    "role_member": "成員",
+    "role_guest": "訪客",
+    "role_muted": "已靜音"
   },
   "trade": {
     "swap_for": "正在以 {fromAmount} 兌換 {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "交叉發文",
     "pin-blog": "釘選至部落格",
     "copy": "複製連結",
+    "copy-text": "複製文字",
+    "open-thread": "開啟討論串",
     "unpin-community": "取消社區置頂",
+    "mute-post": "靜音文章",
+    "unmute-post": "取消靜音文章",
     "mute": "靜音／封鎖",
     "reblog": "轉發",
     "undo-reblog": "取消轉發",
@@ -232,24 +272,24 @@
     "unpin-reply": "取消釘選留言"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "這篇貼文是{lang}。要翻譯成{target}嗎？",
+    "translate_to": "翻譯成{lang}",
+    "show_original": "顯示原文",
+    "translated_from": "譯自{lang}",
+    "change_language": "變更語言"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "翻譯貼文",
+    "source": "來源語言",
+    "target": "目標語言",
+    "detected": "偵測到：{lang}",
+    "translate": "翻譯",
+    "apply": "套用",
+    "review_note": "會將你自己所寫內容的機器翻譯加在貼文結尾。發佈前請檢查並編輯。",
+    "too_short": "請先多寫一些。翻譯至少需要幾個句子。",
+    "progress": "正在翻譯 {done}/{total}...",
+    "error": "翻譯失敗，請再試一次。",
+    "add_title_marker": "在標題加入語言標記"
   },
   "side_menu": {
     "profile": "個人檔案",
@@ -296,7 +336,7 @@
     "hot": "熱門",
     "popular": "熱門",
     "new": "最新",
-    "friends": "Following",
+    "friends": "追蹤中",
     "my_blog": "我的部落格"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "暫無内容！"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "範本",
+    "untitled": "未命名範本",
+    "empty_list": "在編輯器中將貼文儲存為範本，即可在這裡重複使用。",
+    "delete_confirm": "確定要刪除此範本嗎？",
+    "applied": "已將範本套用為新貼文",
+    "save_as_template": "儲存為範本",
+    "name_placeholder": "範本名稱",
+    "saved": "範本已儲存"
   },
   "selection_list": {
     "available": "可用的{postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "全部",
+      "replies": "回覆",
+      "mentions": "提及",
+      "rvotes": "投票",
+      "follows": "追蹤",
+      "reblogs": "轉發",
+      "transfers": "轉帳",
+      "delegations": "委託",
+      "nfavorites": "收藏",
+      "tags": "標籤",
+      "nbookmarks": "書籤",
+      "payouts": "收益結算",
+      "scheduled_published": "排程貼文",
+      "account_updates": "帳號更新",
+      "weekly_earnings": "每週收益"
     },
     "this_week": "本週",
     "reblog": "已轉發",
@@ -417,11 +458,15 @@
     "yesterday": "昨天",
     "mention": "提及您，在",
     "favorites": "發表了新文章",
+    "tags": "在 #{tag} 發表了文章",
+    "tags_bundle": "#{tag} 有 {count} 篇新文章",
+    "tags_title": "你追蹤的標籤有新文章",
     "mentions": "提及",
     "spin": "旋轉",
     "last_week": "最後一周",
     "recent": "最新",
     "ignore": "屏蔽了您",
+    "blacklist": "已將你加入黑名單",
     "follow": "關注了您",
     "notification": "通知",
     "this_month": "本月",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} 現在可以代表你發文與投票。如果你未授權此操作，請撤銷它。",
     "weekly_earnings": "你本週賺取了 ${amount}{breakdown}",
     "payouts": "已收到收益：${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "發佈了一則排程貼文",
+    "scheduled_published_title": "排程貼文已發佈",
+    "scheduled_published_body": "你的排程貼文已上線，點一下即可查看"
   },
   "recurrent": {
     "delete_failed": "刪除定期轉帳失敗，{error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "打開最後儲存 或 建立新內容",
     "reward_power_up": "質押 100%",
     "open_gallery": "打開圖庫",
+    "open_files": "從檔案選擇",
     "clipboard_no_image": "剪貼簿中找不到圖片",
     "clipboard_image_detected": "剪貼簿中有圖片",
     "paste_image": "貼上圖片",
@@ -539,8 +585,10 @@
     "video": "影片",
     "scheduled_later": "稍後",
     "settings_title": "文章選項",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "取消"
+    "support_ecency": "支持 Ecency {percent}%",
+    "alert_btn_no": "取消",
+    "short_reply_hint": "{n} 個字元以下的回覆無法獲得積分（不含連結）",
+    "short_content_hint": "內容太短，無法獲得積分（{n} 個字元以下，不含連結）"
   },
   "time": {
     "week": "周",
@@ -655,7 +703,41 @@
     "select_emoji": "選擇表情符號",
     "more_emojis": "更多",
     "search_emojis": "搜尋表情符號…",
-    "no_emoji_found": "找不到表情符號"
+    "no_emoji_found": "找不到表情符號",
+    "ban-reason-spray": "由於同一則訊息同時傳送到多個頻道，你已被暫停發言。",
+    "ban-reason-mass-dm": "由於一則訊息同時傳送給許多人，你已被暫停發言。",
+    "ban-reason-generic": "你已被暫停在聊天中發言。",
+    "ban-can-still-read": "你仍然可以閱讀聊天內容。",
+    "ban-unlocks": "{when}可恢復發言。",
+    "ban-remaining-soon": "不到 1 分鐘後",
+    "ban-remaining-minutes": "約 {count} 分鐘後",
+    "ban-remaining-hours": "約 {count} 小時後",
+    "ban-remaining-days": "約 {count} 天後",
+    "new_group": "新增群組",
+    "new_group_hint": "新增 {min} 至 {max} 人即可開始群組對話。",
+    "new_group_search": "依使用者名稱搜尋",
+    "new_group_full": "群組最多可再加入 {max} 人。",
+    "new_group_no_results": "聊天中找不到該名稱的使用者。",
+    "new_group_search_failed": "搜尋失敗。請檢查網路連線後再試一次。",
+    "new_group_remove": "移除 @{username}",
+    "new_group_create": "建立群組",
+    "new_group_failed": "無法建立群組。請再試一次。",
+    "rename_group": "重新命名群組",
+    "rename_group_hint": "為群組取一個所有成員都看得到的名稱。留空則會改為顯示成員名稱。",
+    "group_name": "群組名稱",
+    "rename_group_too_long": "群組名稱最多 {max} 個字元。",
+    "rename_group_not_owner": "只有建立群組的人才能重新命名。",
+    "rename_group_failed": "無法重新命名群組。請再試一次。",
+    "group_renamed": "{user} 將群組名稱改為「{name}」",
+    "group_name_cleared": "{user} 移除了群組名稱",
+    "group_members": "群組成員",
+    "save": "儲存",
+    "cancel": "取消",
+    "reactions_title": "回應",
+    "reactor_you": "你",
+    "reactor_unknown": "某人",
+    "see_who_reacted": "長按查看誰做出了回應",
+    "group": "群組"
   },
   "free_estm": {
     "timer_text": "下次轉盤抽獎機會出現在",
@@ -684,6 +766,32 @@
     "transaction_fail": "交易失敗"
   },
   "search_result": {
+    "error": "無法完成搜尋。請再試一次",
+    "filters": {
+      "title": "篩選",
+      "open": "篩選",
+      "author": "作者",
+      "author_placeholder": "使用者名稱",
+      "category": "分類",
+      "category_placeholder": "社群或分類",
+      "tags": "標籤",
+      "tags_placeholder": "以逗號分隔",
+      "type": "類型",
+      "type_all": "全部",
+      "type_post": "文章",
+      "type_comment": "評論",
+      "date": "日期",
+      "date_week": "最近一週",
+      "date_month": "最近一個月",
+      "date_year": "最近一年",
+      "date_all": "所有時間",
+      "sort": "排序",
+      "apply": "套用",
+      "active": "已啟用 {n} 項",
+      "too_many_tags": "最多使用 {n} 個標籤",
+      "too_long": "搜尋內容過長。最多 {n} 個字元",
+      "needs_criteria": "請輸入搜尋詞，或依作者、分類、標籤篩選"
+    },
     "communities_filter": {
       "new": "最新",
       "my": "我的社區",
@@ -727,7 +835,7 @@
     "title": "交叉發文"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "作者已揭露使用 AI"
   },
   "ai_assist": {
     "title": "AI 寫作助手",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "為你的文章取得相關標籤",
     "action_generate_title": "產生標題",
     "action_generate_title_desc": "建立吸引人的標題選項",
-    "action_summarize": "Recap",
+    "action_summarize": "摘要",
     "action_summarize_desc": "建立簡潔的摘要",
     "action_check_grammar": "檢查文法",
     "action_check_grammar_desc": "修正文法與拼字問題",
+    "action_generate_image": "生成圖片",
+    "action_generate_image_desc": "為你的文章建立 AI 圖片",
+    "cost_from": "{cost} {unit} 起",
     "text_label": "你的文字",
     "text_placeholder": "在此貼上或輸入你的內容…",
     "min_chars": "至少需要 {count} 個字元",
@@ -797,16 +908,26 @@
     "remind_later": "稍後提醒",
     "success_subscribe": "成功訂閱",
     "payloadTooLarge": "文件太大，請縮小或者用比較低像素的檔案上傳",
+    "too_many_images": "一次最多可選擇 {count} 張圖片",
     "fail_follow": "加粉失敗",
     "clear_user_alert": "您確定要清除所有用戶數據嗎？",
     "cancel": "取消",
     "connection_success": "連接成功！",
     "rc_down": "信用資源不夠，未能執行該指令。\n\n增加您的資源以繼續體驗平台。需要立刻增加資源嗎？",
+    "rc_down_title": "Resource Credits 不足",
+    "rc_precheck_title": "這篇文章可能太大，無法發佈",
+    "rc_precheck_body": "你的 Resource Credits 似乎不足以發佈這麼大的文章。",
+    "rc_down_body": "你的 Resource Credits 不足，無法執行此操作。\n\n立即使用 Points 儲值以繼續，或永久提升你的帳號。",
+    "rc_down_topup": "使用 Points 儲值 RC",
+    "rc_down_boost": "提升帳號",
     "done": "完成",
     "something_wrong_alt": "在此期間，請從瀏覽器嘗試 Ecency.com",
     "same_user": "此用戶已添加到清單",
     "fail": "失敗！",
     "operation_failed_with_reason": "{operation} 失敗：{reason}",
+    "request_timed_out": "連線時間過長。請檢查網路後再試一次。",
+    "load_failed_retry": "無法載入。請再試一次。",
+    "retrying": "重試中…",
     "wallet_refresh_failed": "錢包重新整理失敗，請再試一次。",
     "wallet_refresh_missing_account": "錢包重新整理失敗：缺少帳戶。",
     "boost_failed": "Boost 失敗。",
@@ -949,31 +1070,31 @@
     "video_attached": "已附加影片"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "點讚投票",
+    "upvoted": "已投票",
+    "downvoted": "已踩",
+    "upvote_hint": "點兩下以開啟投票選項",
+    "payout_details": "收益詳情",
+    "a11y_votes": "{count, plural, other {# 次投票}}",
+    "a11y_voters_hint": "查看投票者",
+    "a11y_reblogs": "{count, plural, other {# 次轉發}}",
+    "a11y_reblogs_hint": "查看轉發",
+    "a11y_comments": "{count, plural, other {# 則留言}}",
+    "a11y_comments_hint": "查看留言",
+    "a11y_reply_hint": "回覆",
+    "a11y_tip": "傳送打賞",
+    "a11y_tips": "{count, plural, other {# 次打賞}}",
+    "a11y_edit": "編輯留言",
+    "a11y_delete": "刪除留言",
+    "a11y_show_replies": "顯示回覆",
+    "a11y_hide_replies": "隱藏回覆",
+    "a11y_post_options": "貼文選項",
+    "a11y_views": "{count, plural, other {# 次瀏覽}}",
+    "source_ecency": "透過 Ecency 發佈",
+    "a11y_stats_hint": "查看貼文統計",
     "image": "圖片",
     "reveal_muted": "已靜音\n點按以顯示內容",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "點一下以載入圖片",
     "in": "於",
     "poll": "投票",
     "copy_link": "複製連結",
@@ -998,13 +1119,14 @@
     "save_to_local": "下載到設備",
     "muted": "內容因違規而被靜音",
     "community_muted": "內容因違反社群準則而被靜音",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "來自低聲望帳號的內容",
+    "muted_downvoted": "被使用者踩的內容",
+    "muted_low_trust": "低信譽帳號，且含有未經驗證的外部連結",
+    "muted_reveal": "點一下顯示",
     "promoted": "已推廣",
     "image_saved": "圖片已存到圖庫",
     "words": "字數",
     "reading": "閱讀",
-    "listen": "聆聽",
     "min": "分鐘",
     "summarize_start": "開始"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "文章不存在",
     "invalid_link": "鏈接錯誤。請嘗試用網頁版本或輸入正確的鏈接",
-    "no_existing_user": "用户不存在"
+    "no_existing_user": "用户不存在",
+    "posting_key_request": "{requester} 正在要求 @{username} 的發文私密金鑰。\n\n僅在你信任此要求時才繼續。",
+    "posting_key_request_unnamed": "另一個應用程式正在要求 @{username} 的發文私密金鑰。\n\n僅在你信任此要求時才繼續。",
+    "auth_request_as_user": "{requester} 想讓你以 @{username} 的身分登入。\n\n只會分享你的使用者名稱與登入憑證，金鑰不會離開 Ecency。",
+    "auth_request_as_current": "{requester} 想讓你使用 Ecency 帳號登入。\n\n只會分享你的使用者名稱與登入憑證，金鑰不會離開 Ecency。"
   },
   "payout": {
     "breakdown": "明细",
@@ -1065,7 +1191,7 @@
     "open": "開啟 URL",
     "invalid_key_desc": "請使用 {key} 金鑰或主金鑰登入以執行此交易",
     "auth_transfer_confirm": "確認轉帳給 {username}？",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "請只在你信任此連結來源時才核准。核准後，下方操作將使用你的 {authority} 金鑰從你的帳號廣播。"
   },
   "voters_dropdown": {
     "rewards": "獎勵",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "只能包含字母、數字與連字號",
       "username_no_ascii_first_letter_error": "開頭必須是英文字母",
       "username_contains_double_hyphens": "不應包含連續兩個連字號",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "此使用者名稱與加密貨幣交易所帳號過於相似，可能會讓他人混淆。請選擇更獨特的名稱。",
+      "username_restricted_prefix": "不允許使用以「uid」開頭並接著數字的使用者名稱，因為這類名稱常被用來冒充他人。請換一個名稱。",
       "username_contains_underscore": "不應包含底線"
     },
     "500_error": "您的申請暫時未能通過，很可能是滿了。請稍候重試…",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "使用者名稱已被使用",
+      "14": "此電子郵件地址已註冊",
+      "15": "請輸入有效的電子郵件地址",
+      "16": "請輸入有效的使用者名稱",
+      "17": "使用者名稱太長，請選擇較短的名稱",
+      "19": "請使用長期有效的電子郵件地址，或改為取得 Premium 帳號",
+      "21": "此推薦無效",
+      "28": "無法處理你的請求，註冊佇列可能已滿。請幾分鐘後再試一次。",
+      "107": "偵測到 VPN 連線。請關閉 VPN 後再試一次，或改為取得 Premium 帳號。",
+      "110": "為防止濫用，我們限制每人/每個網路可建立的帳號數量。請換一個網路再試一次。",
+      "111": "偵測到 Tor 連線。註冊時請停用 Tor。",
+      "112": "目前無法驗證你的連線。請幾分鐘後再試一次。"
     },
     "have_account_text": "已經有帳戶了嗎？"
   },
@@ -1140,6 +1266,30 @@
     "desc": "取得功能完整的 Hive 帳戶，此方式設有基本檢查，以確保機器人網路不會濫用我們的註冊水龍頭。",
     "btn_register": "免費註冊",
     "title": "免費帳戶"
+  },
+  "dictation": {
+    "title": "語音輸入",
+    "start": "錄音",
+    "stop": "停止",
+    "record_more": "繼續錄音",
+    "done": "完成",
+    "recording": "錄音中",
+    "stop_hint": "停止後會轉錄並加入你的文章。最長 {m} 分鐘。",
+    "inserted": "已加入你的文章。繼續錄音，或點一下「完成」。",
+    "transcribing": "轉錄中",
+    "rate": "每 {s} 秒 {n} Points",
+    "cost_running": "目前 {n} Points",
+    "cost_running_free": "目前免費",
+    "free_remaining": "今天接下來的 {n} x {s} 秒免費",
+    "price_loading": "正在查詢價格",
+    "price_error": "無法載入轉錄價格。",
+    "denied": "Ecency 需要麥克風權限才能語音輸入。請在設定中允許後再試一次。",
+    "error_empty": "此錄音中未偵測到語音。",
+    "error_insufficient_points": "Points 不足，無法轉錄此錄音。",
+    "error_rate_limited": "錄音次數過多。請稍後再試。",
+    "error_too_long": "此錄音太長，無法轉錄。",
+    "error_failed": "無法轉錄此錄音。請再試一次。",
+    "error_recorder": "無法開始錄音。請再試一次。"
   },
   "wallet": {
     "delegations_out": "委派出去",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "定時簽到獎勵您0.25個Ecency積分。",
     "fill_transfer_from_savings": "成功從儲蓄中提出",
     "activities": "動態",
+    "no_activities": "目前沒有交易",
+    "activities_failed": "無法載入交易。下拉重試。",
     "tap_update": "點按以更新",
     "mining_lottery": "中獎",
     "checkin": "簽到",
     "tokens_transfer": "已轉移代幣",
     "outgoing_transfer_title": "轉帳／贈送",
+    "burned_title": "AI 使用",
+    "burned_description": "用於 AI 功能的 Points",
+    "burn_refund_title": "AI 退款",
+    "burn_refund_description": "AI 請求失敗後退回的 Points",
     "manage_assets": "新增／移除資產",
     "selected_assets": "已選取的資產",
     "nft_setPropertyPermissions": "已為 NFT 符號設定屬性權限",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "代幣更新精度",
     "tokens_transferOwnership": "已轉移代幣所有權",
     "withdraw_vesting": "解除質押",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "提領帳號",
     "delegate_engine": "委派",
     "market_close": "已結束訂單",
     "nftmarket_transferFee": "買單手續費",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "購買Ecency積分",
     "escrow_approve": "托管轉賬（批准）",
     "expires": "已過期",
+    "transaction_id": "交易 ID",
+    "copy_transaction_id": "複製交易連結",
+    "filter_activities": "篩選活動",
+    "filter_activities_desc": "選擇此紀錄要取得的操作類型",
+    "filter_all": "全選",
+    "filter_none": "全部清除",
+    "filter_apply": "套用",
     "author_reward": "作者獎勵",
     "withdraw_hbd": "從儲存提款HBD出來",
     "convert_request": "提出兌換要求",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "補充 RC",
+    "desc": "短期 RC 提升，讓你可以繼續發文。",
+    "confirm": "要花費 Points 補充你的資源點嗎？",
+    "insufficient": "你的 Points 不足。",
+    "buy_points": "購買 Points"
   },
   "ai_image_generator": {
     "title": "AI 圖片產生器",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "自訂（{hours} 小時）",
+    "balance_load_failed": "無法載入你的餘額。點一下重試。",
+    "precision_load_failed": "無法載入此代幣的詳細資料，因此只能傳送整數金額。點一下重試。",
     "close": "關閉",
     "favorite_username_placeholder": "使用者名稱",
     "invalid_recipient_qr": "在此 QR code 中找不到使用者名稱。",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "管理權限",
     "pincode": "PIN 碼",
     "general": "通用",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "支持 Ecency",
+    "support_beneficiary": "與 Ecency 分享貼文獎勵",
+    "support_beneficiary_percent": "貼文獎勵分成比例",
+    "support_curation": "保留部分策展獎勵",
+    "support_curation_percent": "策展獎勵保留比例",
     "feedback_body": "在此撰寫你的訊息！\n\nHive 使用者名稱：{username}\n應用程式版本：{appVersion}\n平台：{platform}\n",
     "show_imgs": "顯示圖片",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "評論",
       "bookmark": "書籤",
+      "tags": "標籤",
       "reblog": "轉發",
       "favorite": "我的最愛",
       "mention": "提到",
@@ -1599,10 +1765,10 @@
       "transfers": "轉帳",
       "vote": "投票",
       "follow": "关注",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "排程貼文已發佈",
+      "payouts": "收益結算",
+      "account_update": "帳號更新",
+      "weekly_earnings": "每週收益",
       "fcm_unavailable": "此裝置不支援推播通知。你只會在應用程式開啟時收到通知。"
     },
     "keys_warning": "敏感帳號資訊！\n查看私密金鑰前，Ecency 必須先以 PIN 碼保護。",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "發送迴響",
     "rate_app": "為 Ecency 評分",
+    "email_digests": "電子郵件摘要",
     "rate": "評分",
     "dm-privacy-updated": "私訊隱私設定已成功更新",
     "dm-privacy-failed": "更新私訊隱私設定失敗",
@@ -1685,19 +1852,29 @@
     "request_sent": "你的刪除請求已送出",
     "confirm_delete_body": "確定要刪除帳號嗎？這將清除你所有的資料"
   },
-  "tts": {
-    "settings_title": "文字轉語音設定",
-    "voice": "語音",
-    "voice_hint": "將使用系統預設語音",
-    "speed": "語速",
-    "pitch": "音調",
-    "test_voice": "測試語音",
-    "settings_info": "朗讀貼文時將使用這些設定",
+  "listen": {
+    "title": "收聽這篇文章",
+    "minutes": "約 {n} 分鐘",
+    "login": "登入",
+    "unlock": "解鎖 · {n} Points",
+    "confirm": "要花費 {n} Points 收聽這篇文章嗎？音訊歸你所有，隨時可以重播。",
+    "not_enough_title": "Points 不足",
+    "not_enough": "收聽需要 {required} Points，你有 {available} Points。",
+    "get_points": "取得 Points",
+    "unlock_failed": "無法解鎖音訊，請再試一次",
+    "failed_refunded": "音訊產生失敗，你的 Points 已退還",
+    "preparing": "正在準備音訊…",
+    "preparing_eta": "正在準備音訊，約 {n} 分鐘…",
+    "preparing_progress": "正在準備音訊 · {n}%",
+    "waiting": "排隊中，前面還有 {n} 個…",
+    "next_in_line": "下一個就是你…",
     "play": "播放",
     "pause": "暫停",
-    "language": "語言",
-    "language_auto": "自動偵測",
-    "language_hint": "自動偵測會根據貼文內容選擇語言"
+    "seek": "跳轉",
+    "speed": "播放速度",
+    "language": "音訊語言",
+    "unavailable": "無法載入音訊。",
+    "retry": "重試"
   },
   "posting_authority": {
     "title": "啟用更快速的發文",
@@ -1732,7 +1909,7 @@
     "error-auth": "驗證失敗，請重新登入。",
     "error-generic": "影片上傳失敗，請再試一次。",
     "error-too-long-short": "短影片長度必須為 60 秒以內。",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "一篇貼文只能包含一部影片。請先移除目前的影片，再新增其他影片。",
     "select_source": "新增影片",
     "record": "錄製影片",
     "choose_library": "從圖庫選擇"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "分享簡短動態"
   },
+  "newsletter": {
+    "screen_title": "電子郵件摘要",
+    "title": "{list}",
+    "body_own": "每週或每月以電子郵件彙整你的通知。",
+    "body_creator": "將 {list} 的新文章寄到你的收件匣。",
+    "body_community": "以電子郵件接收 {list} 中新文章的摘要。",
+    "body_site": "將 Ecency 的精華內容寄到你的收件匣。",
+    "first_publish_title": "恭喜發表第一篇文章！",
+    "first_publish_body": "想收到通知的電子郵件摘要嗎？每週或每月一次，可隨時在設定中變更或退訂。",
+    "list_own": "我的通知摘要",
+    "list_site": "Ecency 電子報",
+    "status_active": "你已訂閱。",
+    "status_pending": "等待電子郵件確認。",
+    "status_short_active": "有效",
+    "status_short_pending_confirmation": "待確認",
+    "status_short_suppressed": "已停止",
+    "status_short_ended": "已結束",
+    "cadence_weekly": "每週",
+    "cadence_monthly": "每月",
+    "email_placeholder": "you@example.com",
+    "subscribe": "訂閱",
+    "update": "更新",
+    "resend": "重新寄送確認信",
+    "leave": "退訂摘要",
+    "cancel": "取消",
+    "ok": "好",
+    "manage": "管理",
+    "check_inbox_title": "請查看你的收件匣",
+    "check_inbox_body": "我們已將確認連結寄到 {email}。確認後訂閱才會生效。",
+    "subscribed": "已訂閱電子郵件摘要",
+    "left": "已退訂摘要",
+    "refused": "此地址無法訂閱。",
+    "unavailable": "電子郵件摘要目前無法使用。",
+    "too_many": "嘗試次數過多，請稍後再試。",
+    "fail": "發生錯誤，請再試一次。",
+    "empty": "尚無電子郵件摘要。在下方訂閱即可開始。",
+    "discover": "透過電子郵件獲得更多",
+    "stop_all": "全部停止",
+    "stop_all_title": "停止所有郵件？",
+    "stop_all_body": "之後不會再寄任何 Ecency 郵件到 {email}。其他地址的訂閱不受影響。",
+    "stop_all_ok": "全部停止",
+    "stop_all_done": "此地址已退訂所有郵件",
+    "profile_option": "電子郵件摘要",
+    "subscriber_count": "每週 {weekly} 位 • 每月 {monthly} 位電子郵件訂閱者",
+    "community_button": "電子報"
+  },
+  "mod_notes": {
+    "title": "新增理由",
+    "placeholder": "理由（其他版主可見）",
+    "confirm": "確認",
+    "cancel": "取消"
+  },
+  "community_settings": {
+    "title_header": "社群設定",
+    "title_label": "標題",
+    "about": "簡介",
+    "lang": "語言",
+    "description": "描述",
+    "rules": "規則",
+    "nsfw": "不適合工作場合瀏覽（NSFW）",
+    "save": "儲存",
+    "required": "必填",
+    "title_length": "{min} 至 {max} 個字元",
+    "owner_admin_only": "只有擁有者和管理員可以變更這些設定。"
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "已展開",
+        "collapsed": "已收合"
+      },
+      "a11y_chat": {
+        "quote": "回覆 {author}：{text}"
+      },
+      "a11y_forms": {
+        "select": "選取",
+        "deselect": "取消選取"
+      },
+      "store": {
+        "billing_unavailable": "此裝置不允許應用程式內購買。",
+        "verification_failed": "App Store 無法驗證此次購買。",
+        "cancelled": "購買已取消",
+        "unknown_result": "未知的購買結果"
+      },
+      "navigation": {
+        "feed_unavailable": "此動態消息目前無法使用。",
+        "link_cannot_open": "無法開啟此連結。",
+        "video_cannot_play": "無法播放此影片。"
+      },
+      "media": {
+        "load_failed": "無法載入此項目。請檢查網路連線後再試一次。",
+        "loading": "正在載入媒體",
+        "download_failed": "下載失敗，狀態碼 {status}"
+      },
+      "sign_in": {
+        "required": "需要登入",
+        "to_reply": "請登入後回覆。",
+        "to_vote": "請登入後點讚。",
+        "button": "登入"
+      },
+      "account": {
+        "logout_user": "登出 @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, other {# 個讚}}  •  {replies, plural, other {# 則回覆}}",
+        "voting_power": "Voting Power {percent}",
+        "remove_favourite": "從收藏中移除",
+        "add_favourite": "加入收藏"
+      },
+      "waves": {
+        "clear_tag_filter": "清除標籤篩選 {tag}",
+        "new_wave": "新增 Wave",
+        "replies_open_thread": "{count, plural, other {# 則回覆，開啟討論串}}",
+        "characters": "{count} / {max} 個字元",
+        "retry": "{message}\n重試",
+        "playing": "正在播放 {permlink}",
+        "video_attached_remove": "已附加影片，點一下移除",
+        "image_attached_remove": "已附加圖片，點一下移除",
+        "take_photo": "拍照",
+        "edit_poll": "編輯投票",
+        "add_poll": "新增投票",
+        "add_video": "新增影片"
+      },
+      "reading": {
+        "reply_to": "回覆 {username}",
+        "opens_post": "開啟文章",
+        "sort_comments": "評論排序",
+        "sort_comments_value": "評論排序，{sort}",
+        "no_comments": "目前沒有評論。",
+        "loading_post": "正在載入文章",
+        "show_version": "顯示版本",
+        "show_changes": "顯示變更",
+        "replying_to": "正在回覆 @{username}",
+        "reply_text": "回覆內容",
+        "translate_from": "從",
+        "translate_to": "到"
+      },
+      "feed": {
+        "tab_pinned": "{label}，已置頂",
+        "tab_add": "{label}，新增",
+        "customise": "自訂"
+      },
+      "card": {
+        "in_category": "在 {category}",
+        "pinned": "已置頂",
+        "by_author": "作者 {username}",
+        "payout": "收益 {payout}",
+        "payout_declined": "收益 {payout}，已拒絕",
+        "reblogged_by": "{username} 轉發"
+      },
+      "shell": {
+        "close_menu": "關閉選單"
+      },
+      "editor": {
+        "thumbnail_pick_another": "縮圖，選擇其他圖片",
+        "words": "{count, plural, other {# 個字}}",
+        "poll_min_age": "最低帳號年齡（天）：{days}",
+        "poll_max_options": "最多選項數：{count}",
+        "thumbnail_selected": "已選縮圖",
+        "thumbnail": "縮圖",
+        "uploaded_image": "已上傳的圖片",
+        "community_search": "搜尋"
+      },
+      "vote": {
+        "not_voted": "未點讚",
+        "voting": "正在點讚",
+        "failed_with": "點讚失敗：{message}",
+        "failed": "點讚失敗",
+        "payout": "收益 {payout}",
+        "payout_declined": "收益 {payout}，已拒絕",
+        "percent": "{percent} %",
+        "upvote_percent": "點讚 {percent}%"
+      },
+      "settings": {
+        "on": "開",
+        "off": "關"
+      },
+      "lock": {
+        "biometric_reason": "開啟 Ecency 的生物辨識解鎖",
+        "offer_title": "使用{method}解鎖",
+        "offer_use": "使用{method}"
+      },
+      "keys": {
+        "hidden_while_captured": "螢幕錄製或鏡像投放時，金鑰會被隱藏。",
+        "screenshot_notice": "已擷取螢幕截圖。私密金鑰已重新隱藏；如果截圖中顯示了金鑰，請將其刪除。",
+        "hold_hint": "按住金鑰即可顯示。",
+        "hold_to_show": "按住顯示"
+      },
+      "wallet": {
+        "cancel_order": "取消此訂單？",
+        "days": "{count, plural, other {# 天}}"
+      },
+      "chat": {
+        "reactors_hint": "長按查看誰做出了回應",
+        "see_reactors": "查看誰做出了回應"
+      },
+      "esie": {
+        "still": "{mood}，靜止"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} 的個人檔案",
+      "preview": "預覽（{index}/{count}）",
+      "balance": "餘額：{amount}",
+      "expires_in": "{time}後到期",
+      "expired": "已到期。請關閉後再試一次。",
+      "user_has_no_posts": "@{username} 還沒有發表任何內容",
+      "attach_image": "附加圖片",
+      "auto": "自動",
+      "back": "返回",
+      "hot": "熱門",
+      "image_of": "第 {index} 張，共 {count} 張",
+      "new": "最新",
+      "nsfw_tap_to_reveal": "NSFW 點一下顯示",
+      "new_reply": "新回覆",
+      "remove": "移除",
+      "unlock_ecency": "解鎖 Ecency",
+      "update_it": "更新",
+      "update_it_or_post_this_as": "要更新它，還是作為新回覆發佈？",
+      "use_pin": "使用 PIN",
+      "your_reply_was_already_posted": "你的回覆已發佈",
+      "error_try_again": "{message} 要重試嗎？",
+      "auth": {
+        "account_label": "帳號：@{username}",
+        "approve_the_request_in_your_wallet": "請在錢包應用程式中核准該要求。",
+        "copy_key": "複製{title}",
+        "current_account": "目前帳號",
+        "qr_code": "QR 碼",
+        "requested_by": "要求者：{requester}",
+        "pin_digits": "共 {total, plural, other {# 位}}，已輸入 {filled} 位",
+        "private_key_shown": "{title}，私密金鑰已顯示",
+        "open_wallet_app": "開啟錢包應用程式",
+        "hiveauth_scan": "請在 Hive Keychain 或其他 HiveAuth 錢包中核准：在此裝置上開啟它，或用它掃描此 QR 碼。",
+        "switching": "切換中…",
+        "logout_all": "登出所有帳號",
+        "logout_all_title": "要登出此裝置上的所有帳號嗎？",
+        "stored_key": "@{username} 已在此裝置上登入。已儲存的金鑰維持不變，僅更新其工作階段。",
+        "stored_hivesigner": "@{username} 已在此裝置上透過 HiveSigner 登入。其工作階段將被取代。",
+        "stored_hiveauth": "@{username} 已在此裝置上透過 HiveAuth 登入。將改用 HiveSigner 簽署。",
+        "method_key": "金鑰",
+        "logout_failed": "登出失敗"
+      },
+      "browser": {
+        "account": "帳號",
+        "authority": "權限",
+        "phishing": "警告：此網域已被標記為已知的釣魚網站。請務必格外小心。"
+      },
+      "chat": {
+        "cancel_edit": "取消編輯",
+        "cancel_reply": "取消回覆",
+        "copied_to_clipboard": "已複製到剪貼簿",
+        "edited_at": "編輯於{time}",
+        "group_options": "群組選項",
+        "pinned_messages": "置頂訊息",
+        "remove_user": "移除 @{username}",
+        "sort_by_name": "依名稱排序",
+        "more": "更多",
+        "reaction_label": "{emoji} {count}。長按查看誰做出了回應",
+        "members": "成員"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "此連結上已有一篇文章，且與你送出的內容不同。要更新它，還是作為新文章發佈？",
+        "a_scheduled_post_is_published_by": "排程文章由 Ecency 在選定的時間發佈。這需要你的帳號授予 ecency.app 發文權限。你的金鑰和其他權限維持不變。授予該權限需要你的 active 金鑰。",
+        "ai_assist": "AI 助手",
+        "ai_tools": "AI 工具",
+        "allow_ecency_to_publish_for_you": "允許 Ecency 代你發佈？",
+        "bold": "粗體",
+        "clone": "複製為新項目",
+        "cost": "費用：{cost}",
+        "could_not_store_the_draft_on": "無法將草稿儲存到此裝置。請保持應用程式開啟並儲存草稿。",
+        "draft": "草稿",
+        "delete_count": "刪除（{count}）",
+        "dictate_desc": "說話，轉錄內容會進入你的文章",
+        "discard": "捨棄",
+        "discard_changes": "要捨棄變更嗎？",
+        "grant": "授予",
+        "italic": "斜體",
+        "keep_editing": "繼續編輯",
+        "my_blog": "我的部落格",
+        "my_communities": "我的社群",
+        "new_post": "新文章",
+        "notice": "提示",
+        "restore": "恢復",
+        "restore_unsaved_changes": "要恢復未儲存的變更嗎？",
+        "saved": "已儲存",
+        "top_communities": "熱門社群",
+        "table": "表格",
+        "text_format": "文字格式",
+        "this_link_is_already_in_use": "此連結已被使用",
+        "untitled": "無標題",
+        "update_it_or_publish_this_as": "要更新它，還是將其作為新文章發佈？",
+        "you_have_unsaved_changes_from_an": "你有一次較早編輯留下的未儲存變更。此後文章已有變動；恢復這些變更會取代下方的文字。",
+        "your_edits_were_not_published": "你的編輯尚未發佈。",
+        "your_post_was_already_published": "你的文章已發佈",
+        "file_size": "{name}（{size} MB）",
+        "thumbnail_pick": "縮圖，點一下選擇其他圖片",
+        "thumbnail_number": "縮圖 {number}",
+        "recording_busy": "已有錄製正在進行。請先在相機中完成。",
+        "photo_lost": "相機開啟期間照片遺失了。請重新拍攝。",
+        "add_snippet_button": "+ 片段",
+        "words_count": "{count, plural, other {# 個字}}",
+        "community_search": "搜尋"
+      },
+      "profile": {
+        "open_wallet": "開啟錢包",
+        "your_wallet_is_on_the_wallet": "你的錢包在「錢包」分頁中。",
+        "user_has_no_comments": "@{username} 還沒有發表任何評論",
+        "votes_count": "{count, plural, other {# 個讚}}",
+        "replies_count": "{count, plural, other {# 則回覆}}",
+        "menu": "更多",
+        "users": "使用者"
+      },
+      "reading": {
+        "apply": "套用",
+        "add_tag": "新增標籤",
+        "age": "年齡",
+        "audio_language": "音訊語言",
+        "available_filters": "可用篩選",
+        "could_not_unlock_the_audio_please": "無法解鎖音訊，請再試一次",
+        "downvote": "踩",
+        "downvote_percent": "踩 {percent}%",
+        "listen_to_this_post": "收聽這篇文章",
+        "log_in": "登入",
+        "mark_all_as_read": "全部標為已讀",
+        "mark_as_read": "標為已讀",
+        "more_replies": "更多回覆",
+        "not_enough_points": "Points 不足",
+        "nothing_here_yet": "這裡暫時什麼都沒有。",
+        "open_editor": "開啟編輯器",
+        "pause_voice": "暫停語音",
+        "play_voice": "播放語音",
+        "playback_speed": "播放速度",
+        "publishing_in_waves": "正在發佈到 Waves",
+        "quests_done": "已完成任務",
+        "read": "閱讀",
+        "remove_vote": "取消點讚",
+        "seek": "跳轉",
+        "select_community": "選擇社群",
+        "selected_filters": "已選篩選",
+        "the_audio_could_not_be_loaded": "無法載入音訊。",
+        "this_post_does_not_exist_or": "此文章不存在或已被刪除。",
+        "unread": "未讀",
+        "voice_position": "語音位置",
+        "vote_weight": "點讚權重",
+        "reblogged_by": "{username} 轉發",
+        "no_more_posts": "沒有更多文章了。",
+        "favourite": "收藏",
+        "no_votes_yet": "尚無點讚",
+        "no_comments_yet": "目前沒有評論。來搶頭香吧！",
+        "comments_count": "評論（{count}）",
+        "sending_to_chain": "正在傳送到區塊鏈",
+        "compare": "比較",
+        "your_vote": "你的點讚",
+        "reply_to": "回覆 @{username}",
+        "what_do_you_think": "你覺得呢？",
+        "clear_tag_filter": "清除標籤篩選",
+        "tab_selected": "{title}，已選取",
+        "add_tag_feed": "新增標籤動態消息",
+        "feed_pinned": "{label}，已置頂",
+        "attached_image_remove": "已附加圖片，點一下移除",
+        "camera": "相機",
+        "files": "檔案",
+        "paused": "已暫停",
+        "in_topic": "在 {topic}",
+        "poll_vote": "投票",
+        "reply": "回覆",
+        "mute_sound": "靜音",
+        "unmute_sound": "取消靜音",
+        "leaderboard_activities": "活動",
+        "leaderboard_reward": "獎勵",
+        "sort_votes": "點讚"
+      },
+      "shell": {
+        "account_of": "帳號 @{username}",
+        "account_signed_out": "帳號，已登出",
+        "close_tab": "關閉分頁",
+        "coming_soon_to_the_native_app": "原生應用程式即將支援。",
+        "create": "建立",
+        "expand": "展開",
+        "forward": "前進",
+        "loading": "載入中",
+        "new_tab": "新分頁",
+        "reload": "重新載入",
+        "sent": "已傳送",
+        "tab_unread": "{title}，{count} 則未讀",
+        "no_app_for_link": "沒有可開啟此連結的應用程式。"
+      },
+      "wallet": {
+        "product_not_available": "商品無法使用。",
+        "repeat": "重複"
+      },
+      "copied": "已複製",
+      "trending_caps": "趨勢",
+      "move_up": "上移",
+      "move_down": "下移",
+      "scroll_to_top": "捲動到頂端",
+      "load_more": "更多"
+    },
+    "wallet": {
+      "checking": "正在向網路確認",
+      "leave_title": "仍在傳送",
+      "leave_message": "仍在傳送或向網路確認中。你可以離開此畫面：完成後應用程式會通知你。",
+      "stay": "留下",
+      "collateralized_convert_request": "抵押轉換請求",
+      "op_transfer": "轉帳",
+      "op_power_up": "質押",
+      "op_power_down_change": "解除質押變更",
+      "op_delegation": "代理",
+      "op_savings_deposit": "儲蓄存入",
+      "op_savings_withdrawal": "儲蓄提領",
+      "op_conversion": "兌換",
+      "op_swap": "交換",
+      "op_order_cancel": "取消訂單",
+      "op_reward_claim": "領取獎勵",
+      "op_withdraw_route_change": "提領路徑變更",
+      "op_token_operation": "代幣操作"
+    },
+    "notification": {
+      "amount_unknown": "無法取得金額",
+      "weekly_earnings_breakdown": "本週你賺了 ${amount}：發文 ${authorUsd}，策展 ${curationUsd}。",
+      "weekly_earnings_total": "本週你透過發文和策展賺了 ${amount}。"
+    },
+    "settings": {
+      "open": "開啟",
+      "feedback_subject": "意見回饋／錯誤回報",
+      "unknown_user": "未知使用者"
+    },
+    "navigation": {
+      "editor": "編輯器",
+      "followers": "粉絲",
+      "spin_game": "轉盤遊戲",
+      "edit_profile": "編輯個人檔案",
+      "redeem_points": "兌換積分",
+      "community": "社群",
+      "community_members": "社群成員",
+      "community_activities": "社群動態",
+      "browser": "瀏覽器",
+      "asset_details": "資產詳情",
+      "edit_history": "編輯紀錄",
+      "welcome": "歡迎",
+      "chat": "聊天",
+      "backup_keys": "備份金鑰",
+      "trade": "交易",
+      "ai_image_generator": "AI 圖片產生器",
+      "select_assets": "選擇資產",
+      "poll": "投票",
+      "bot_comments": "機器人評論"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "需要 owner 金鑰的操作無法在 Ecency 中簽署。",
+      "post": "文章／評論",
+      "custom": "自訂 JSON",
+      "sign_buffer": "簽署訊息",
+      "send_token": "傳送代幣",
+      "witness_vote": "見證人投票",
+      "proxy": "設定代理",
+      "power_up": "質押",
+      "power_down": "解除質押",
+      "broadcast": "廣播",
+      "sign_tx": "簽署交易",
+      "encode": "編碼訊息",
+      "decode": "驗證金鑰",
+      "add_account_authority": "新增帳號權限",
+      "remove_account_authority": "移除帳號權限",
+      "add_key_authority": "新增金鑰權限",
+      "remove_key_authority": "移除金鑰權限",
+      "create_claimed_account": "建立帳號",
+      "create_proposal": "建立提案",
+      "remove_proposal": "移除提案",
+      "update_proposal_vote": "提案投票",
+      "signed_call": "已簽署呼叫"
+    },
+    "translate_language": {
+      "ar": "阿拉伯語",
+      "az": "亞塞拜然語",
+      "bg": "保加利亞語",
+      "bn": "孟加拉語",
+      "ca": "加泰隆尼亞語",
+      "cs": "捷克語",
+      "da": "丹麥語",
+      "de": "德語",
+      "el": "希臘語",
+      "en": "英語",
+      "eo": "世界語",
+      "es": "西班牙語",
+      "et": "愛沙尼亞語",
+      "fa": "波斯語",
+      "fi": "芬蘭語",
+      "fr": "法語",
+      "ga": "愛爾蘭語",
+      "he": "希伯來語",
+      "hi": "印地語",
+      "hu": "匈牙利語",
+      "id": "印尼語",
+      "it": "義大利語",
+      "ja": "日語",
+      "ko": "韓語",
+      "lt": "立陶宛語",
+      "lv": "拉脫維亞語",
+      "ms": "馬來語",
+      "nb": "挪威語",
+      "nl": "荷蘭語",
+      "pl": "波蘭語",
+      "pt": "葡萄牙語",
+      "ro": "羅馬尼亞語",
+      "ru": "俄語",
+      "sk": "斯洛伐克語",
+      "sl": "斯洛維尼亞語",
+      "sq": "阿爾巴尼亞語",
+      "sv": "瑞典語",
+      "th": "泰語",
+      "tl": "他加祿語",
+      "tr": "土耳其語",
+      "uk": "烏克蘭語",
+      "zh": "中文",
+      "zt": "中文（繁體）"
+    },
+    "reading": {
+      "banner_text": "這篇文章使用{source}。要翻譯成{target}嗎？",
+      "translated_from_text": "譯自{source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, other {# 位成員}} • {authors, plural, other {# 位發文者}} • {posts, plural, other {# 篇文章}}",
+      "community_title": "{title} 社群",
+      "members_title": "{title} 成員",
+      "activities_title": "{title} 動態",
+      "cannot_start_with_or": "不能以 @ 或 # 開頭",
+      "use_a_two_letter": "請使用兩個字母的語言代碼，例如 en",
+      "at_most_characters": "最多 {max, plural, other {# 個字元}}",
+      "council": "理事會",
+      "journal": "日誌",
+      "topic": "主題",
+      "community_not_found": "找不到社群。"
+    },
+    "transfer": {
+      "one_recipient": "此轉帳只能有一位收款人。",
+      "is_an_exchange_and": "{exchange} 是交易所，可能不支援定期轉帳：依排程傳送的資金可能會遺失。請改用單次轉帳。"
+    },
+    "dapps": {
+      "signing_info": "Ecency 可作為你的 Hive 簽署擴充功能。當 dApp 要求你使用 Keychain、Keeper 或 Peak Vault 等瀏覽器擴充功能登入時，請選擇該選項，Ecency 會安全地處理簽署。",
+      "category_social": "社交",
+      "category_gaming": "遊戲",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "群組",
+      "unable_to_load_messages": "無法載入訊息。",
+      "someone": "某人",
+      "renamed_the_group_to": "{actor} 將群組名稱改為「{name}」",
+      "removed_the_group_name": "{actor} 移除了群組名稱",
+      "unable_to_send_your": "無法傳送你的訊息。",
+      "unable_to_remove_message": "無法刪除訊息。",
+      "unknown": "未知",
+      "members_online": "{members, plural, other {# 位成員}} • {online} 人在線",
+      "failed_to_load_pinned": "無法載入置頂訊息",
+      "you": "你",
+      "title": "回應"
+    },
+    "tip": {
+      "login_required": "請登入後傳送打賞",
+      "max_decimals": "最多 {n, plural, other {# 位小數}}"
+    },
+    "paid": {
+      "check_again": "再次檢查",
+      "give_up": "放棄",
+      "unknown": "尚無回應。請求可能仍在執行。請再次檢查以取得結果：不會重複收費。",
+      "pending": "你的請求仍在處理中。請稍後再檢查：不會重複收費。",
+      "restored": "先前的請求尚無回應。請再次檢查以取得結果：不會重複收費。",
+      "give_up_confirm": "如果請求已成功，Points 已被花費，結果將會遺失。",
+      "not_stored": "無法將此請求儲存到裝置上。請保持此畫面開啟直到完成。",
+      "sign_in_again": "你的工作階段已過期。請重新登入，然後再次檢查。",
+      "other_account": "這屬於 @{owner}。請切換回該帳號繼續。"
+    },
+    "ai": {
+      "run_ai_assist": "執行 AI 助手（{costText}）",
+      "no_longer_free_cost": "今天這次執行不再免費。費用為 {cost} {unit}。",
+      "no_longer_free": "今天這次執行不再免費。",
+      "content_violates_our_content": "內容違反了我們的內容政策。請修改你的文字。Points 不予退還。",
+      "generate_image": "生成圖片（{costLabel}）",
+      "use_prompt": "使用：「{prompt}」"
+    },
+    "post_actions": {
+      "busy": "請稍候，另一項操作正在進行",
+      "not_a_community_post": "不是社群文章。",
+      "parent_post_not_found": "找不到原文章",
+      "the_account_changed": "帳號已變更。"
+    },
+    "dictation": {
+      "balance": "餘額：{balance} {unit}",
+      "stop_points": "停止（{cost} Points）",
+      "stop_free": "停止（免費）",
+      "transcribe_points": "轉錄（{cost} Points）",
+      "transcribe": "轉錄",
+      "no_longer_free_cost": "今天這次錄音不再免費。費用為 {cost} Points。",
+      "no_longer_free": "今天這次錄音不再免費。",
+      "held_locked": "Ecency 鎖定時錄音已停止。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
+      "held_no_background": "Ecency 離開畫面時錄音已停止（無法顯示錄音通知）。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
+      "held_stopped": "已從通知中停止錄音。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
+      "held_focus_lost": "錄音因通話或其他應用程式的聲音而停止。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
+      "held_interrupted": "錄音已停止，因為其他應用程式佔用了麥克風。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
+      "unavailable": "此裝置不支援錄音。",
+      "not_read": "無法讀取該錄音，或錄音檔過大。未傳送任何內容，也未收費。",
+      "give_up_not_sent": "此錄音未傳送，因此未收費。它將被刪除。",
+      "give_up_not_charged": "此錄音未收費。它將被刪除。",
+      "clip_lost": "先前請求的錄音已不在此裝置上。如果該請求已成功，你的 Points 已被花費，且無法取得其轉錄內容。"
+    },
+    "register": {
+      "error_code_28": "無法處理你的請求。註冊佇列可能已滿。請幾分鐘後再試一次。"
+    },
+    "perks": {
+      "quests_empty": "這裡暫時還沒有任務，請稍後再來。",
+      "freeze_confirm_title": "保護你的連續紀錄",
+      "spend_points_on_a": "要花費 {price} Points 購買連續紀錄保護嗎？當你某天漏掉時，會自動用掉它來保護連續紀錄。"
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "支持 Ecency，獲得免費部落格，並以認證 Pro 徽章脫穎而出。",
+      "card_description": "每年 {price} 升級 Pro。認證徽章、免費部落格，並支持 Ecency。",
+      "card_description_plain": "升級 Pro 一年。認證徽章、免費部落格，並支持 Ecency。",
+      "member": "你是 Pro 會員。",
+      "benefit_badge": "名字旁顯示認證 Pro 徽章。",
+      "benefit_blog": "yourname.blogs.ecency.com 免費部落格。",
+      "benefit_support": "直接支持 Ecency 的開發。",
+      "benefit_early": "搶先體驗新功能。",
+      "buy": "每年 {price} 取得 Pro",
+      "extend": "{price} 延長 12 個月",
+      "extend_note": "再次購買會為你的會員資格增加 12 個月。",
+      "unavailable": "商店目前無法提供 Ecency Pro。",
+      "activating": "已收到付款。正在啟用你的會員資格。",
+      "success_title": "歡迎加入 Ecency Pro",
+      "success_body": "你的 Pro 會員資格已生效。徽章很快會顯示在你的個人檔案上。",
+      "extending": "已收到付款。正在為你的 Pro 會員資格延長 12 個月。",
+      "open_a11y": "開啟 Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "正在儲存草稿…",
+      "please_sign_in_first": "請先登入。",
+      "fetch_failed": "取得失敗。",
+      "you_can_only_edit": "你只能編輯自己的內容。",
+      "invalid_percent": "百分比無效",
+      "beneficiary_exists_already": "受益人已存在",
+      "this_draft_belongs_to": "此草稿屬於 @{owner}。請切換回該帳號來發佈。",
+      "could_not_make_a": "無法為這篇文章產生新連結。請稍微修改標題後再試一次。",
+      "an_earlier_attempt_was": "較早的一次嘗試在本次之後才發佈。請確認要保留哪個版本。",
+      "could_not_check_your": "無法檢查你帳號的發文權限。請檢查網路連線後再試一次。",
+      "this_post_was_changed": "自你開啟後，這篇文章已在別處被修改。請複製你的文字，返回後重新開啟以編輯最新版本。",
+      "link_text_placeholder": "在此輸入文字"
+    },
+    "app_error": {
+      "this_reply_is_too": "此回覆過長。",
+      "the_network_refused_this": "網路拒絕了此操作。",
+      "invalid_input": "輸入無效。",
+      "secure_storage_is_unavailable": "安全儲存空間無法使用。請重新登入。",
+      "please_sign_in_first": "請先登入。",
+      "these_credentials_belong_to": "這些憑證屬於 @{actual}，而不是 @{expected}。",
+      "is_not_signed_in": "@{username} 未在此裝置上登入。",
+      "key_required": "執行此交易需要{role}金鑰。{hint}",
+      "cancelled": "已取消。",
+      "the_request_was_rejected": "請求在錢包應用程式中被拒絕。",
+      "the_request_expired_before": "錢包應用程式回應前請求已過期。請再試一次。",
+      "could_not_reach_the": "無法連線到 HiveAuth 伺服器。請再試一次。",
+      "unexpected_redirect": "伺服器傳回了非預期的重新導向。未做任何變更。請稍後再試。",
+      "missing_key_hint": "請在「設定」的「管理權限」（匯入私密金鑰）中新增，或用它重新登入。",
+      "this_key_is_also": "此金鑰同時也是該帳號的 owner 金鑰。Ecency 不會保存控制 owner 角色的金鑰：請為 active 和 posting 角色設定各自獨立的金鑰，然後用它們登入。",
+      "this_is_the_owner": "這是 owner 金鑰。Ecency 從不儲存或使用 owner 金鑰：請用主密碼，或用 posting 或 active 金鑰登入。",
+      "this_password_only_matches": "此密碼僅符合該帳號的 owner 金鑰。Ecency 從不儲存或使用 owner 金鑰：請用 posting 或 active 金鑰登入。",
+      "this_key_cannot_sign": "此金鑰無法單獨為該帳號簽署：該帳號需要多個簽署（其權重低於門檻）。",
+      "public_key_given": "這是你的公開金鑰。請貼上私密金鑰（以 5 開頭）或主密碼。",
+      "memo_key_only": "備忘金鑰不能用於登入。請使用 posting 金鑰、active 金鑰或主密碼。",
+      "network_message": "網路錯誤。請檢查網路連線後再試一次。",
+      "network_error_this_may": "網路錯誤。此操作可能已經成功；重試是安全的，不會重複發佈。"
+    },
+    "purchases": {
+      "deal_best": "超值之選！",
+      "deal_popular": "熱門！",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "商店沒有回應。"
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "使用 999accounts 需要提供電子郵件和使用者名稱",
+      "stuck": "此商品先前的購買未能完成。請附上你的商店收據聯絡 support@ecency.com，收據已為此保留。",
+      "held": "此購買已被扣留審核。請提供訂單 #{order} 聯絡 support@ecency.com。",
+      "earlier_purchase": "此商品先前的購買正在優先為 @{target} 完成。",
+      "earlier_pending": "此商品先前為 @{target} 的付款仍在處理中。商店確認付款後即可完成。",
+      "pending": "你的付款正在處理中。商店確認付款後購買即完成。",
+      "processing": "你的購買正在處理中，很快就會完成。"
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "定期轉帳",
+      "delegate_hive_power": "代理 Hive Power",
+      "power_up": "質押",
+      "set_withdraw_vesting_route": "設定提領路徑",
+      "power_down": "解除質押",
+      "transfer_to_saving": "轉入儲蓄",
+      "transfer_from_saving": "從儲蓄轉出",
+      "cancel_transfer_from_saving": "取消從儲蓄轉出",
+      "collateralized_convert": "抵押轉換",
+      "witness_vote": "見證人投票",
+      "witness_update": "見證人更新",
+      "witness_set_properties": "見證人設定屬性",
+      "governance_proxy": "治理代理",
+      "claim_account": "領取帳號",
+      "create_account": "建立帳號",
+      "create_account_with_account": "使用帳號額度建立帳號",
+      "create_limit_order": "建立限價單",
+      "cancel_limit_order": "取消限價單",
+      "redeem_rewards": "兌現獎勵",
+      "post_or_comment": "發文或評論",
+      "post_or_comment_options": "發文或評論選項",
+      "custom_operation": "自訂操作",
+      "update_account_active": "更新帳號（active）",
+      "update_account_posting": "更新帳號（posting）",
+      "change_recovery_account": "變更恢復帳號",
+      "create_proposal": "建立提案",
+      "remove_proposal": "移除提案",
+      "update_proposal_votes": "更新提案投票",
+      "update_proposal": "更新提案"
+    },
+    "auth_link": {
+      "must_be_signed_by": "此連結必須由 @{account} 簽署。請切換到該帳號後重新開啟。",
+      "ecency_can_only_sign": "Ecency 只能對連結中的交易進行簽署和廣播。",
+      "requester_page": "頁面 {host}",
+      "owner_refused": "需要 owner 金鑰的操作無法透過連結簽署。",
+      "busy": "請稍候：另一個請求仍在處理中。",
+      "not_supported": "Ecency 在此版本中尚不支援簽署此操作。"
+    },
+    "chats": {
+      "group_members": "群組成員",
+      "rename_group": "重新命名群組",
+      "failed_to_load_chats": "無法載入聊天",
+      "unknown": "未知",
+      "unable_to_mark_channel": "無法將頻道標為已讀",
+      "unable_to_update_favorites": "無法更新收藏",
+      "unable_to_update_mute": "無法更新靜音設定",
+      "group": "群組",
+      "unable_to_search": "無法搜尋",
+      "unable_to_start_chat": "無法開始聊天",
+      "no_internet": "沒有網路連線"
+    },
+    "stake": {
+      "confirm_summary": "將 {hp} HP（{vests} VESTS）代理給 @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "已代理給 @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "僅公開金鑰。Ecency 從不儲存 owner 金鑰。",
+      "shared_owner": "此帳號的 owner 角色和 {names} 角色使用同一把金鑰。擁有該金鑰的人可控制整個帳號。請為 {names} 角色設定獨立的金鑰，並將 owner 金鑰離線保存。",
+      "copy_warning": "任何擁有此私密金鑰的人都能控制你帳號的這一部分。其他應用程式可能讀取剪貼簿；請只在你信任的地方貼上。2 分鐘後會從剪貼簿清除。"
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN 鎖已開啟。",
+      "pin_changed": "PIN 已變更。",
+      "pin_lock_is_off": "PIN 鎖已關閉。",
+      "wiped_notice": "所有帳號、金鑰和憑證已從此裝置中移除。",
+      "we_could_not_bring": "我們無法移轉你在舊版應用程式中的帳號。請重新登入。",
+      "your_pin_lock_could": "無法從舊版本移轉你的 PIN 鎖。請在帳號選單中重新設定 PIN 以重新開啟應用程式鎖。",
+      "biometric_unlock_was_turned": "由於此裝置上的生物辨識資料已變更，生物辨識解鎖已關閉。請用 PIN 解鎖，然後在帳號選單中重新開啟。",
+      "biometric_unavailable_notice": "無法開啟生物辨識解鎖：此裝置上未設定生物辨識。",
+      "set_backup": "設定 PIN 作為生物辨識解鎖的備援",
+      "biometric_on_notice": "PIN 鎖已開啟。可使用生物辨識或 PIN 解鎖。",
+      "offer_title": "使用生物辨識解鎖",
+      "offer_body": "用臉部或指紋開啟 Ecency。你也需設定 PIN，在無法使用生物辨識時用它解鎖應用程式。",
+      "offer_use": "使用生物辨識",
+      "offer_use_pin": "改用 PIN"
+    },
+    "common": {
+      "list_and": "{first}和{second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "備忘"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 個字元以下的回覆無法獲得積分（不含連結）",
+      "short_content_hint": "內容太短，無法獲得積分（25 個字元以下，不含連結）",
+      "daily_post": "每日發文 {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, other {連續 # 天}}",
+      "grant_description": "授予 Ecency 帳號 @ecency.app 對你帳號的發文權限，這樣你就不必每次都開啟 Keychain 即可發文。授予後會變更你帳號的發文權限，並需要你的 active 金鑰。"
+    },
+    "wallet_history": {
+      "from_to": "@{from} 至 @{to}",
+      "from_user_id": "來自 @{from}，ID：{id}",
+      "user_id": "@{user}，ID：{id}",
+      "from_to_id": "@{from} 至 @{to}，ID：{id}",
+      "from_to_account": "@{from} 至 {to}",
+      "from_user": "來自 @{user}",
+      "to_user": "給 @{user}",
+      "interest": "利息",
+      "proposal_pay": "提案付款",
+      "categories": "活動類型",
+      "category_all": "全部",
+      "category_transfers": "轉帳",
+      "category_market": "市場訂單",
+      "category_interest": "利息",
+      "category_stake": "質押操作",
+      "category_rewards": "獎勵",
+      "point_type_checkin": "心跳",
+      "point_type_login": "登入",
+      "point_type_post": "發文",
+      "point_type_comment": "評論",
+      "point_type_vote": "點讚",
+      "point_type_reblog": "轉發",
+      "point_type_transfer_sent": "已傳送轉帳",
+      "point_type_transfer_received": "已收到轉帳"
+    },
+    "video_upload": {
+      "continue_upload": "繼續上傳",
+      "source_gone": "此錄製內容已不在裝置上。請重新錄製或選擇影片。",
+      "no_camera": "此裝置無法使用相機。"
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "下次解除質押在 {hours, plural, other {# 小時}}後",
+      "account_not_found": "找不到帳號"
+    },
+    "wave_compose": {
+      "clipboard_chip": "剪貼簿中的圖片 · 貼上圖片",
+      "no_container": "無法取得最新的 Waves 容器",
+      "please_sign_in_first": "請先登入。",
+      "write_something_first": "請先寫點內容。",
+      "account_changed": "這則 Wave 是以另一個帳號撰寫的。請關閉後重新撰寫。",
+      "no_upload": "此版本尚不支援上傳圖片。請改為將圖片連結貼到文字中。",
+      "fail": "失敗"
+    },
+    "delete_account": {
+      "sign_out_failed": "你的請求已送出，但登出失敗。請從選單中登出。",
+      "not_sent": "無法送出你的刪除請求。請再試一次。"
+    },
+    "chat_sheets": {
+      "group_limit": "群組最多可再加入 {max, plural, other {# 人}}。",
+      "search_people_by_username": "依使用者名稱搜尋",
+      "new_group_title": "新增群組",
+      "new_group_hint": "新增 {min} 至 {max, plural, other {# 人}}即可開始群組對話。",
+      "no_results": "聊天中找不到該名稱的使用者。",
+      "search_failed": "搜尋失敗。請檢查網路連線後再試一次。",
+      "create": "建立群組",
+      "new_group_failed": "無法建立群組。請再試一次。",
+      "name_limit": "群組名稱最多 {max, plural, other {# 個字元}}。",
+      "rename_title": "重新命名群組",
+      "rename_hint": "為群組取一個所有成員都看得到的名稱。留空則會改為顯示成員名稱。",
+      "placeholder": "群組名稱",
+      "not_owner": "只有建立群組的人才能重新命名。",
+      "rename_failed": "無法重新命名群組。請再試一次。"
+    },
+    "editor_side": {
+      "copy_of": "{title} 的副本",
+      "deletions_failed": "發生錯誤\n{total, plural, other {# 項刪除}}中有 {failed} 項失敗",
+      "uploads_failed": "{count, plural, other {# 個上傳失敗}}：\n\n{messages}",
+      "failed_to_delete": "刪除失敗"
+    },
+    "uploads": {
+      "add_to_gallery": "加入圖庫"
+    },
+    "account_notice": {
+      "manage_keys": "設定，管理權限",
+      "no_signing_key_title": "請以 @{account} 重新登入",
+      "no_signing_key": "Ecency 不再在此裝置上保留 owner 金鑰或主密碼，且此處沒有儲存 @{account} 的 posting 或 active 金鑰。請用主密碼，或用 posting 或 active 金鑰重新登入，或在{manageKeys}（匯入私密金鑰）下新增金鑰。",
+      "missing_roles_title": "部分金鑰未新增",
+      "cannot_post": "發文、點讚或評論",
+      "cannot_transfer": "傳送轉帳或變更帳號設定",
+      "missing_roles": "你的密碼已不再符合 @{account} 的 {missing} 金鑰：自設定密碼以來，該帳號上的金鑰已被變更。此裝置上儲存的是 {kept} 金鑰。在你於{manageKeys}（匯入私密金鑰）下新增 {missing} 金鑰之前，此應用程式無法使用 @{account} 的金鑰{cannot}。",
+      "shared_owner_title": "此金鑰同時控制 owner 角色",
+      "shared_owner": "@{account} 的 owner 角色和 {names} 角色使用同一把金鑰。擁有該金鑰的人可控制整個帳號。Ecency 僅將其保存為 {names} 金鑰，絕不用於 owner 操作。請為 {names} 角色設定獨立的金鑰，並將 owner 金鑰離線保存。"
+    },
+    "dapp_browser": {
+      "message_from": "來自 {host} 的訊息",
+      "home_title": "首頁",
+      "loading_title": "載入中…",
+      "blank_run": "[{count, plural, other {# 個空白字元}}]",
+      "too_large": "此頁面要求簽署的內容過大，無法顯示，因此 Ecency 拒絕了該要求。"
+    },
+    "community_service": {
+      "the_account_changed": "帳號已變更。"
+    },
+    "profile_edit": {
+      "enter_link": "輸入圖片連結",
+      "please_sign_in_first": "請先登入。",
+      "account_not_found": "找不到帳號",
+      "please_enter_an_image": "請輸入以 https:// 開頭的圖片連結"
+    },
+    "background_media": {
+      "post_by": "@{author} 的文章"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "請先登入。"
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "你已用相同權重點過讚。",
+      "insufficient_rc": "Resource Credits 不足。請等待或質押。",
+      "missing_authority": "缺少發文權限。請檢查你的登入方式。",
+      "comment_too_soon": "請稍候再發文。",
+      "paid_out": "這篇文章已結算收益。",
+      "too_large": "交易大小為 {size, plural, other {# 位元組}}，超過 {max} 位元組的上限。",
+      "network_error_please_check": "網路錯誤。請檢查網路連線後再試一次。",
+      "unconfirmed_message": "無法確認此操作是否已完成。請查看你的錢包或歷史紀錄；僅在沒有紀錄時再重新發起。",
+      "undecided_message": "此操作可能已經完成。重試前請先查看你的錢包或歷史紀錄。"
+    },
+    "chat_api": {
+      "request_failed": "請求失敗（{status}）"
+    },
+    "chat": {
+      "typing_one": "{name} 正在輸入…",
+      "typing_two": "{first} 和 {second} 正在輸入…",
+      "typing_three": "{first}、{second} 和 {third} 正在輸入…",
+      "typing_many": "{first}、{second} 和另外 {count, plural, other {# 人}}正在輸入…",
+      "banned": "{reason} 你仍然可以閱讀聊天內容。{until}可恢復發言。",
+      "joined_when": "{time}加入",
+      "joined": "已加入",
+      "official_badge": "官方",
+      "official_badge_label": "Ecency 官方帳號"
+    },
+    "side_menu": {
+      "ask_esie": "問問 Esie"
+    },
+    "chat_service": {
+      "missing_token": "缺少 Hive 存取權杖。請登出後重新登入。",
+      "dm_error": "該使用者尚未加入聊天"
+    },
+    "compose_reply": {
+      "account_changed": "這則回覆是以另一個帳號撰寫的。請關閉後重新撰寫。",
+      "write_something_first": "請先寫點內容。",
+      "please_sign_in_first": "請先登入。"
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "受益人過多：最多 {max} 位。",
+      "a_beneficiary_s_share": "受益人的比例必須在 0.01% 到 100% 之間。",
+      "beneficiaries_add_up_to": "受益人比例加總超過 100%。",
+      "a_beneficiary_is_listed": "有受益人被重複列出。",
+      "you_cannot_be_a": "你不能成為自己文章的受益人。",
+      "a_beneficiary_has_an": "有受益人的帳號名稱無效。"
+    },
+    "follows": {
+      "fail": "失敗！：{message}",
+      "follower_count": "粉絲（{count}）",
+      "following_count": "追蹤中（{count}）"
+    },
+    "link": {
+      "unsupported": "尚不支援此連結。",
+      "cannot_open": "無法開啟連結",
+      "unsupported_version": "此版本不支援該連結。"
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore 瀏覽器可以存取你的 Hive 錢包來簽署交易。此連結來自文章內容，未經 Ecency 驗證。僅在你信任它時才繼續：\n\n{url}"
+    },
+    "listen": {
+      "message": "收聽需要 {required} Points，你有 {available} Points。",
+      "unlock_label": "解鎖 · {cost} Points",
+      "preparing_audio": "正在準備音訊 · {preparingPercent}%",
+      "waiting_in_line_ahead": "排隊中，前面還有 {ahead} 個…",
+      "next_in_line": "下一個就是你…",
+      "preparing_about_minutes": "正在準備音訊，約 {minutes} 分鐘…",
+      "preparing_audio_2": "正在準備音訊…",
+      "spend_confirm": "要花費 {cost} Points 收聽這篇文章嗎？音訊歸你所有，隨時可以重播。",
+      "about_minutes": "約 {minutes} 分鐘",
+      "failed_refunded": "音訊產生失敗，你的 Points 已退還"
+    },
+    "media_pick": {
+      "preparing_video": "正在準備影片…",
+      "library_hint": "從相簿選擇",
+      "camera_hint": "立即拍攝新照片",
+      "files_hint": "瀏覽此裝置和雲端的檔案",
+      "paste_hint": "使用你複製的圖片",
+      "link_hint": "使用網路上的圖片"
+    },
+    "media_picking": {
+      "image_types_message": "不支援此檔案類型。請選擇 JPEG、PNG、GIF、WebP 或 HEIC 圖片。",
+      "video_types_message": "不支援此檔案類型。請選擇 MP4 或 MOV 影片。",
+      "gif_too_large": "此 GIF 超過 {mb} MB。"
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "此操作需要 active 和 posting 兩種簽署，而 Ecency 目前還無法同時簽署。"
+    },
+    "poll": {
+      "fail": "失敗！{message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "無法檢查你帳號的發文權限。請檢查網路連線後再試一次。"
+    },
+    "post_lists": {
+      "voters_title": "投票者資訊（{total}）",
+      "reblogs_title": "轉發資訊（{total}）",
+      "no_history_found": "找不到歷史紀錄！",
+      "no_edit_history_available": "此內容沒有可用的編輯紀錄。",
+      "version_label": "版本 {version}"
+    },
+    "stats": {
+      "other_device": "其他"
+    },
+    "profile": {
+      "account_not_found": "找不到帳號",
+      "bar": "{label}：{percent}",
+      "bar_full": "{label}：{percent} • {hours, plural, other {# 小時}}後充滿"
+    },
+    "profile_metadata_guard": {
+      "refused": "無法讀取你目前的個人檔案，請再試一次"
+    },
+    "profile_sheet": {
+      "fail": "失敗！{message}"
+    },
+    "profile_writes": {
+      "account_not_found": "找不到帳號"
+    },
+    "push_payload": {
+      "mentioned": "@{source} 提到了 @{target}",
+      "replied": "@{source} 回覆了 @{target}",
+      "transferred": "@{source} 向 @{target} 轉帳",
+      "delegated": "@{source} 代理給了 @{target}",
+      "rewards_received": "已收到獎勵",
+      "account_updated": "帳號已更新",
+      "account_updated_body": "你的帳號資料已更新",
+      "followed": "@{source} 追蹤了 @{target}",
+      "unfollowed": "@{source} 取消追蹤了 @{target}",
+      "ignored": "@{source} 忽略了 @{target}",
+      "blacklisted": "@{source} 將 @{target} 加入了黑名單",
+      "posted_in": "@{source} 在 #{firstTag} 發表了文章"
+    },
+    "qr_scan": {
+      "permission_title": "無法取得相機權限",
+      "permission_message": "請在 Ecency 設定中授予相機權限。",
+      "permission_allow": "允許"
+    },
+    "reply_account": {
+      "switch": "以其他帳號回覆"
+    },
+    "send_journal": {
+      "your_from_went_through": "你從 @{account} 發起的{label}已完成。",
+      "not_sent": "你從 @{account} 發起的{label}未完成。未傳送任何內容；你可以重新發起。",
+      "checking_whether_your_from": "正在確認你從 @{account} 發起的{label}是否已完成。重新傳送前請先查看你的錢包。"
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner 頁面已關閉",
+      "wrong_role": "這是你的 {given} 金鑰；此操作需要你的 {needed} 金鑰。",
+      "action_id_required": "此操作需要一個操作 ID，才能安全地重試。"
+    },
+    "signing_router": {
+      "owner_never": "owner 操作絕不會在應用程式中簽署。"
+    },
+    "spin": {
+      "key_missing": "缺少遊戲金鑰",
+      "score": "{score, plural, other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "今天（UTC），{time}後重設",
+      "hours_minutes": "{hours}{minutes}",
+      "resets_daily": "每天 00:00 UTC 重設"
+    },
+    "storage_reset": {
+      "title": "請重新登入",
+      "message": "此裝置上的安全儲存空間已被重設。請重新登入。",
+      "failed": "無法移除此裝置上的帳號。請再試一次。"
+    },
+    "store": {
+      "in_app_purchases_are": "此版本不支援應用程式內購買。"
+    },
+    "wallet_sends": {
+      "journal_full": "有太多較早的傳送仍在向網路確認中。請等它們確認後再繼續傳送。",
+      "check_later": "網路未能及時確認此操作。重新傳送前請先查看你的錢包或歷史紀錄；應用程式會在下次啟動時再次檢查。"
+    },
+    "waves": {
+      "shorts": "短影片"
+    },
+    "widgets": {
+      "unread": "{count, plural, other {# 則未讀}}",
+      "locked_text": "解鎖 Ecency 後查看",
+      "signed_out_text": "登入 Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "無法讀取你帳號目前的權限。未做任何變更，請再試一次。",
+      "reads_disagree": "兩次讀取你帳號的發文權限結果不一致。未做任何變更，請再試一次。"
+    },
+    "vote": {
+      "vote_weight_must_be": "點讚權重必須在 -100% 到 100% 之間。",
+      "please_sign_in_first": "請先登入。"
+    },
+    "widget": {
+      "streak_name": "任務連續紀錄",
+      "write": "撰寫",
+      "new_wave": "新增 Wave",
+      "notifications_description": "你的未讀通知。PIN 鎖開啟時隱藏。",
+      "streak_description": "你的每日任務連續紀錄。PIN 鎖開啟時隱藏。",
+      "compose_description": "撰寫文章或新的 Wave。",
+      "streak_title": "連續紀錄",
+      "daily_quests": "每日任務",
+      "streak_hint": "開啟 Perks 查看你的連續紀錄",
+      "open_perks": "開啟 Perks",
+      "open_app": "開啟 Ecency",
+      "unread_caption": "{count, plural, other {未讀}}",
+      "streak_caption": "{count, plural, other {天連續}}"
+    },
+    "system": {
+      "dictation_channel": "語音輸入",
+      "listen_channel": "收聽",
+      "dictation_channel_description": "語音輸入的錄音在背景進行時顯示，並帶有停止操作。",
+      "dictation_title": "正在為語音輸入錄音",
+      "dictation_text": "Ecency 正在錄製你的語音輸入。停止後在你於應用程式中確認前不會傳送。",
+      "listen_channel_description": "在收聽無法在背景繼續時通知你。",
+      "listen_paused": "收聽已暫停",
+      "listen_paused_text": "開啟 Ecency 以繼續收聽。",
+      "skip_back": "倒退 15 秒",
+      "skip_forward": "快轉 15 秒"
+    },
+    "permission": {
+      "face_id": "使用 Face ID 取代 PIN 解鎖 Ecency。",
+      "camera": "掃描 QR 碼，以及拍照或錄製影片以加入你的文章。",
+      "photo_library_add": "Ecency 會將你從文章下載的圖片儲存到你的相簿。",
+      "photo_library": "Ecency 會將你從文章下載的圖片集中儲存在相簿中的 Ecency 相簿裡。",
+      "microphone": "Ecency 使用你的麥克風，讓你可以語音輸入文章和評論（這些錄音會傳送給 Ecency 進行轉錄），也用於為加入文章的影片錄製聲音。"
+    },
+    "android": {
+      "no_browser": "沒有可用的瀏覽器",
+      "biometric_unlock_title": "使用生物辨識解鎖 Ecency",
+      "biometric_confirm": "請用指紋或臉部確認",
+      "image_unsupported_address": "不支援的圖片位址",
+      "image_create_failed": "無法建立檔案",
+      "image_write_failed": "無法寫入檔案",
+      "image_too_large": "圖片過大",
+      "image_download_failed": "下載失敗，狀態碼 {status}",
+      "billing_disconnected": "Google Play Billing 已中斷連線。",
+      "billing_no_screen": "沒有可顯示購買畫面的螢幕。",
+      "billing_error": "Google Play Billing 錯誤 {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "你本月發表了 {count, plural, other {# 篇文章}}。繼續加油！",
-        "checkin": "你本週簽到了 {count, plural, other {# 天}}。繼續加油！"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} 有 {count, plural, other {# 篇新文章}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, other {# 失敗嘗試}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "連續 {n} 天"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• 僅允許註冊超過 {days} 天的帳號",
-        "max_choices": "• 你最多可選擇 {choices} 個選項"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "剩餘 {executions} 次轉帳",
-        "schedule_summary": "{executions} 筆轉帳，每 {hours} 小時一次"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "內容太短，無法獲得積分（{n, plural, other {# 個字元}}以下，不含連結）"
       },
       "chats": {
-        "people_joined": "{count} 人已加入"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "約 {count, plural, other {# 分鐘}}後",
+        "ban-remaining-hours": "約 {count, plural, other {# 小時}}後",
+        "ban-remaining-days": "約 {count, plural, other {# 天}}後"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "最多使用 {n, plural, other {# 個標籤}}",
+          "too_long": "搜尋內容過長。最多 {n, plural, other {# 個字元}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "至少需要 {count} 個字元",
-        "chars_remaining": "尚餘 {count} 個字元"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "一次最多可選擇 {count, plural, other {# 張圖片}}"
+      },
+      "dictation": {
+        "stop_hint": "停止後會轉錄並加入你的文章。最長 {m, plural, other {# 分鐘}}。",
+        "rate": "每 {s, plural, other {# 秒}} {n} Points"
       },
       "transfer": {
-        "powering_down_info": "下次解除質押將於 {days} 天後進行，{hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} 至 {max, plural, other {# 個字元}}"
       }
     }
   }

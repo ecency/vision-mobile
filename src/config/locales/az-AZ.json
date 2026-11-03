@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro üzvü"
   },
   "perks": {
     "header": "Üstünlüklər",
@@ -31,42 +31,42 @@
     "promote_desc": "Paylaşımına daha çox baxış qazandır",
     "account_boost": "Hesab gücləndirməsi",
     "account_boost_desc": "İstənilən hesabı gücləndir",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "RC artır",
+    "rc_topup_desc": "Resource Credits azaldıqda paylaşım etməyə davam et",
+    "streak_freeze_owned": "Ehtiyatda: {n}",
+    "streak_freeze_buy": "Seriyanı qoru ({price} Points)",
+    "streak_freeze_buying": "Qorunur",
+    "streak_freeze_error": "Seriya dondurma alına bilmədi. Yenidən cəhd et."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Günün paylaşımı",
+    "streak": "{n} günlük seriya",
+    "keep_streak": "Seriyanı davam etdir"
   },
   "waves": {
     "for_you": "Sənin üçün",
     "following": "İzlədiklərin",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Fərdi lentlər",
+    "custom_feeds_subtitle": "Mənbələri və teqləri sancaqlayaraq lent səhifələri kimi əlavə et.",
+    "add_tag_placeholder": "Teq əlavə et",
+    "sources": "Mənbələr",
+    "your_feeds": "Lentlərin",
+    "trending_tags": "Trend teqlər",
+    "shorts_empty": "Hələ göstərilən qısa video yoxdur",
+    "mute": "Səsi bağla",
+    "unmute": "Səsi aç"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Başlayarkən",
+    "subtitle": "Burada yenisən? Waves qısa paylaşımlardır və qoşulmağın ən asan yoludur.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Bağla",
+    "item_wave": "İlk Wave-ni paylaş",
+    "item_vote": "Xoşuna gələn Wave-ə səs ver",
+    "item_reply": "Kiməsə cavab yaz",
+    "item_checkin": "Seriyanı başlatmaq üçün giriş et",
+    "all_done_title": "Hamısı hazırdır 🎉",
+    "all_done_subtitle": "Hər şey hazırdır. Waves paylaşmağa davam et!"
   },
   "profile": {
     "havent_commented": "hələ ki, rəy bildirmədi",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Yaş  |  Görünürlük  |  Hesablama",
     "attach_poll": "Sorğu əlavə et"
   },
+  "favorite_tags": {
+    "title": "Teqlər",
+    "hint": "Bu teqlə yeni göndərişlərdən xəbərdar olmaq üçün izlə",
+    "following_hint": "Bu teqlə yeni göndərişlərdən xəbərdar olursan",
+    "follow": "İzlə",
+    "following": "İzlənilir",
+    "added": "Teq izlənilir",
+    "removed": "Teqin izlənməsi dayandırıldı",
+    "empty_list": "Burada heç nə yoxdur"
+  },
   "favorites": {
     "add": "Sevimli əlavə et",
     "add_error": "Sevimli əlavə edilə bilmədi",
@@ -181,7 +191,33 @@
     "payout": "Ödəmə",
     "details": "Təfsilatlar",
     "community": "cəmiyyət",
-    "new_post": "Yeni Göndəriş"
+    "new_post": "Yeni Göndəriş",
+    "mute_post_title": "Bu göndərişi səssizə al",
+    "unmute_post_title": "Bu göndərişi səssizdən çıxar",
+    "mute_post_reason": "Bu göndəriş niyə səssizə alınır?",
+    "unmute_post_reason": "Bu göndəriş niyə bərpa olunur?",
+    "manage": "Cəmiyyəti idarə et",
+    "manage_members": "Üzvlər və rollar",
+    "manage_settings": "Cəmiyyət tənzimləmələri",
+    "manage_activities": "Fəaliyyət jurnalı",
+    "activities": "fəaliyyət",
+    "no_activities": "Hələ fəaliyyət yoxdur",
+    "activities_load_failed": "Fəaliyyət yüklənmədi. Yeniləmək üçün aşağı çək.",
+    "set_role": "Rol təyin et",
+    "assign_role": "Rol ver",
+    "assign_role_hint": "Abunə olmamış hesablar daxil olmaqla istənilən hesabı axtar, sonra rol seç.",
+    "username_placeholder": "İstifadəçi adı",
+    "invalid_username": "Nəticələrdən mövcud hesabı seç",
+    "members": "üzv",
+    "no_members": "Üzv tapılmadı",
+    "members_incomplete": "Bəzi üzvlər yüklənmədi. Yeniləmək üçün aşağı çək.",
+    "members_load_failed": "Üzvlər yüklənmədi. Yeniləmək üçün aşağı çək.",
+    "role_owner": "Sahib",
+    "role_admin": "Admin",
+    "role_mod": "Moderator",
+    "role_member": "Üzv",
+    "role_guest": "Qonaq",
+    "role_muted": "Səssizə alınıb"
   },
   "trade": {
     "swap_for": "{fromAmount} → {toAmount} dəyişdirilir",
@@ -212,7 +248,11 @@
     "cross-post": "Çarpaz paylaşım",
     "pin-blog": "Bloqa sancaqla",
     "copy": "bağlantını kopyala",
+    "copy-text": "mətni kopyala",
+    "open-thread": "müzakirəni aç",
     "unpin-community": "İcmadan sancağı götür",
+    "mute-post": "Göndərişi səssizə al",
+    "unmute-post": "Göndərişi səssizdən çıxar",
     "mute": "Səssizə al / Blokla",
     "reblog": "təkrar paylaş",
     "undo-reblog": "yenidən paylaşmanı geri al",
@@ -232,24 +272,24 @@
     "unpin-reply": "Şərhdən sancağı götür"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Bu paylaşım bu dildədir: {lang}. {target} dilinə tərcümə edilsin?",
+    "translate_to": "{lang} dilinə tərcümə et",
+    "show_original": "Orijinalı göstər",
+    "translated_from": "Bu dildən tərcümə edilib: {lang}",
+    "change_language": "Dili dəyiş"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Paylaşımı tərcümə et",
+    "source": "Mənbə dili",
+    "target": "Hədəf dil",
+    "detected": "Aşkarlandı: {lang}",
+    "translate": "Tərcümə et",
+    "apply": "Tətbiq et",
+    "review_note": "Öz yazının maşın tərcüməsini paylaşımın sonuna əlavə edir. Dərc etməzdən əvvəl yoxla və redaktə et.",
+    "too_short": "Əvvəlcə bir az daha yaz. Tərcümə üçün ən azı bir neçə cümlə lazımdır.",
+    "progress": "{done} / {total} tərcümə edilir...",
+    "error": "Tərcümə alınmadı. Yenidən cəhd et.",
+    "add_title_marker": "Başlığa dil işarəsi əlavə et"
   },
   "side_menu": {
     "profile": "Profil",
@@ -296,7 +336,7 @@
     "hot": "İsti",
     "popular": "Məşhur",
     "new": "Yeni",
-    "friends": "Following",
+    "friends": "İzlədiklərin",
     "my_blog": "Bloqum"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Burada heç nə yoxdur"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Şablonlar",
+    "untitled": "Adsız şablon",
+    "empty_list": "Burada təkrar istifadə etmək üçün redaktorda paylaşımı şablon kimi yadda saxla.",
+    "delete_confirm": "Bu şablonu silmək istədiyinə əminsən?",
+    "applied": "Şablon yeni paylaşım kimi tətbiq edildi",
+    "save_as_template": "Şablon kimi yadda saxla",
+    "name_placeholder": "Şablon adı",
+    "saved": "Şablon yadda saxlandı"
   },
   "selection_list": {
     "available": "Mövcud {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Hamısı",
+      "replies": "Cavablar",
+      "mentions": "Qeyd etmələr",
+      "rvotes": "Səslər",
+      "follows": "İzləmələr",
+      "reblogs": "Yenidən paylaşımlar",
+      "transfers": "Köçürmələr",
+      "delegations": "Delegasiyalar",
+      "nfavorites": "Sevimlilər",
+      "tags": "Teqlər",
+      "nbookmarks": "Əlfəcinlər",
+      "payouts": "Ödənişlər",
+      "scheduled_published": "Planlaşdırılmış paylaşımlar",
+      "account_updates": "Hesab yeniləmələri",
+      "weekly_earnings": "Həftəlik qazanc"
     },
     "this_week": "Bu Həftə",
     "reblog": "yenidən paylaşdı",
@@ -417,11 +458,15 @@
     "yesterday": "Dünən",
     "mention": "adı çəkildi",
     "favorites": "yeni paylaşım etdi",
+    "tags": "#{tag} teqində paylaşdı",
+    "tags_bundle": "#{tag} teqində {count} yeni göndəriş",
+    "tags_title": "İzlədiyin teqdə yeni göndərişlər",
     "mentions": "Ad çəkmələr",
     "spin": "Daha çox Xal qazanma vaxtıdır",
     "last_week": "Keçən həftə",
     "recent": "Təzəlikcə",
     "ignore": "səni əngəllədi",
+    "blacklist": "səni qara siyahıya saldı",
     "follow": "səni izlədi",
     "notification": "Bildirişlər",
     "this_month": "Bu Ay",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} indi sənin adından paylaşım edə və səs verə bilər. Əgər buna icazə vermədinsə, onu ləğv et.",
     "weekly_earnings": "Bu həftə ${amount} qazandın{breakdown}",
     "payouts": "Ödəniş alındı: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "planlaşdırılmış paylaşım dərc etdi",
+    "scheduled_published_title": "Planlaşdırılmış paylaşım dərc edildi",
+    "scheduled_published_body": "Planlaşdırılmış paylaşımın artıq yayımdadır, görmək üçün toxun"
   },
   "recurrent": {
     "delete_failed": "Təkrarlanan köçürmə silinmədi, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Son qaralamanı açın və ya yeni göndəriş yaradın",
     "reward_power_up": "100% stake et",
     "open_gallery": "Qalereyanı Aç",
+    "open_files": "Fayllardan seç",
     "clipboard_no_image": "Mübadilə buferində şəkil tapılmadı",
     "clipboard_image_detected": "Mübadilə buferində şəkil var",
     "paste_image": "Şəkli yapışdır",
@@ -539,8 +585,10 @@
     "video": "Video",
     "scheduled_later": "Sonra",
     "settings_title": "Paylaşım seçimləri",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Xeyr"
+    "support_ecency": "Ecency-ni dəstəklə {percent}%",
+    "alert_btn_no": "Xeyr",
+    "short_reply_hint": "{n} və ya daha az simvollu cavablar Points qazandırmır (keçidlər sayılmır)",
+    "short_content_hint": "Points qazanmaq üçün çox qısadır ({n} və ya daha az simvol, keçidlər istisna olmaqla)"
   },
   "time": {
     "week": "həftə",
@@ -655,7 +703,41 @@
     "select_emoji": "Emoji Seç",
     "more_emojis": "Daha çox",
     "search_emojis": "Emoji axtar...",
-    "no_emoji_found": "Emoji tapılmadı"
+    "no_emoji_found": "Emoji tapılmadı",
+    "ban-reason-spray": "Eyni mesaj bir anda bir neçə kanala göndərildiyi üçün paylaşımın dayandırıldı.",
+    "ban-reason-mass-dm": "Mesaj bir anda çoxlu adama göndərildiyi üçün paylaşımın dayandırıldı.",
+    "ban-reason-generic": "Söhbətdə paylaşımın dayandırıldı.",
+    "ban-can-still-read": "Söhbəti yenə də oxuya bilərsən.",
+    "ban-unlocks": "Paylaşım {when} açılacaq.",
+    "ban-remaining-soon": "bir dəqiqədən az müddətə",
+    "ban-remaining-minutes": "təxminən {count} dəqiqəyə",
+    "ban-remaining-hours": "təxminən {count} saata",
+    "ban-remaining-days": "təxminən {count} günə",
+    "new_group": "Yeni qrup",
+    "new_group_hint": "Qrup söhbəti başlatmaq üçün {min} ilə {max} nəfər arasında əlavə et.",
+    "new_group_search": "İnsanları istifadəçi adı ilə axtar",
+    "new_group_full": "Qrupda ən çox {max} nəfər daha ola bilər.",
+    "new_group_no_results": "Bu adla söhbətdə heç kim tapılmadı.",
+    "new_group_search_failed": "Axtarış işləmədi. Bağlantını yoxlayıb yenidən cəhd et.",
+    "new_group_remove": "@{username} istifadəçisini çıxar",
+    "new_group_create": "Qrupu başlat",
+    "new_group_failed": "Qrup başladıla bilmədi. Yenidən cəhd et.",
+    "rename_group": "Qrupun adını dəyiş",
+    "rename_group_hint": "Qrupa içindəki hər kəsin görəcəyi ad ver. Boş buraxsan, üzvlərin adları göstəriləcək.",
+    "group_name": "Qrup adı",
+    "rename_group_too_long": "Qrup adı ən çox {max} simvol ola bilər.",
+    "rename_group_not_owner": "Qrupun adını yalnız onu başladan şəxs dəyişə bilər.",
+    "rename_group_failed": "Qrupun adı dəyişdirilmədi. Yenidən cəhd et.",
+    "group_renamed": "{user} qrupun adını \"{name}\" etdi",
+    "group_name_cleared": "{user} qrup adını sildi",
+    "group_members": "Qrup üzvləri",
+    "save": "Saxla",
+    "cancel": "Ləğv et",
+    "reactions_title": "Reaksiyalar",
+    "reactor_you": "Sən",
+    "reactor_unknown": "Kimsə",
+    "see_who_reacted": "Kimin reaksiya verdiyini görmək üçün uzun bas",
+    "group": "Qrup"
   },
   "free_estm": {
     "timer_text": "Növbəti pulsuz Spin-ə qalıb",
@@ -684,6 +766,32 @@
     "transaction_fail": "Əməliyyat Uğursuz Oldu"
   },
   "search_result": {
+    "error": "Axtarış tamamlanmadı. Yenidən cəhd et",
+    "filters": {
+      "title": "Filtrlər",
+      "open": "Filtrlər",
+      "author": "Müəllif",
+      "author_placeholder": "istifadəçi adı",
+      "category": "Kateqoriya",
+      "category_placeholder": "cəmiyyət və ya kateqoriya",
+      "tags": "Teqlər",
+      "tags_placeholder": "vergüllə ayır",
+      "type": "Növ",
+      "type_all": "Hamısı",
+      "type_post": "Göndərişlər",
+      "type_comment": "Şərhlər",
+      "date": "Tarix",
+      "date_week": "Keçən həftə",
+      "date_month": "Keçən ay",
+      "date_year": "Keçən il",
+      "date_all": "Bütün vaxt",
+      "sort": "Sırala",
+      "apply": "Tətbiq et",
+      "active": "{n} aktiv",
+      "too_many_tags": "Ən çox {n} teq istifadə et",
+      "too_long": "Axtarış çox uzundur. Ən çox {n} simvol istifadə et",
+      "needs_criteria": "Filtrləmək üçün axtarış sözü və ya müəllif, kateqoriya, teq daxil et"
+    },
     "communities_filter": {
       "new": "Yeni",
       "my": "Cəmiyyətlərim",
@@ -727,7 +835,7 @@
     "title": "Çarpaz Paylaşım"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Müəllif süni intellekt istifadə etdiyini bildirib"
   },
   "ai_assist": {
     "title": "AI Yazı Köməkçisi",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Yazınız üçün uyğun teqlər əldə edin",
     "action_generate_title": "Başlıq Yarat",
     "action_generate_title_desc": "Cəlbedici başlıq variantları yaradın",
-    "action_summarize": "Recap",
+    "action_summarize": "Xülasə",
     "action_summarize_desc": "Qısa bir xülasə yaradın",
     "action_check_grammar": "Qrammatikanı Yoxla",
     "action_check_grammar_desc": "Qrammatika və orfoqrafiya problemlərini düzəldin",
+    "action_generate_image": "Şəkil yarat",
+    "action_generate_image_desc": "Göndərişin üçün süni intellekt şəkli yarat",
+    "cost_from": "{cost} {unit} qiymətindən başlayır",
     "text_label": "Mətniniz",
     "text_placeholder": "Məzmununuzu buraya yapışdırın və ya yazın...",
     "min_chars": "Minimum {count} simvol tələb olunur",
@@ -797,16 +908,26 @@
     "remind_later": "Sonra Xatırlat",
     "success_subscribe": "Uğurla abunə olundu!",
     "payloadTooLarge": "Fayl həcmi çox böyükdür, yenidən ölçüləndirin və ya kiçik təsvir yükləyin",
+    "too_many_images": "Bir dəfəyə ən çox {count} şəkil seçə bilərsən",
     "fail_follow": "İzləmə uğursuz oldu!",
     "clear_user_alert": "Bütün istifadəçi verilənlərini təmizləmək istədiyinizə əminsiniz?",
     "cancel": "İmtina",
     "connection_success": "Bağlantı uğurla quruldu!",
     "rc_down": "Bir əməliyyat yerinə yetirmək üçün kifayət qədər Resource Credits yoxdur! \n\nTəcrübədən həzz almağa davam etmək üçün hesabınızı boost edin. İndi hesabınızı boost etmək istəyirsiniz?",
+    "rc_down_title": "Kifayət qədər Resurs Krediti yoxdur",
+    "rc_precheck_title": "Bu göndəriş dərc üçün çox böyük ola bilər",
+    "rc_precheck_body": "Resurs Kreditlərin bu ölçüdə göndəriş üçün az görünür.",
+    "rc_down_body": "Bu əməliyyat üçün kifayət qədər Resurs Kreditin yoxdur.\n\nDavam etmək üçün indi Points ilə artır və ya hesabını həmişəlik gücləndir.",
+    "rc_down_topup": "RC-ni Points ilə artır",
+    "rc_down_boost": "Hesabı gücləndir",
     "done": "Hazırdır",
     "something_wrong_alt": "Bu arada, brauzerinizdən Ecency.com-u sınayın",
     "same_user": "Bu istifadəçi artıq siyahıya əlavə edildi",
     "fail": "Uğursuz!",
     "operation_failed_with_reason": "{operation} uğursuz oldu: {reason}",
+    "request_timed_out": "Bağlantı çox uzun çəkir. Şəbəkəni yoxlayıb yenidən cəhd et.",
+    "load_failed_retry": "Bunu yükləmək mümkün olmadı. Yenidən cəhd et.",
+    "retrying": "Yenidən cəhd edilir...",
     "wallet_refresh_failed": "Pulqabının yenilənməsi uğursuz oldu. Yenidən cəhd edin.",
     "wallet_refresh_missing_account": "Pulqabının yenilənməsi uğursuz oldu: hesab tapılmadı.",
     "boost_failed": "Boost uğursuz oldu.",
@@ -949,31 +1070,31 @@
     "video_attached": "Video əlavə edildi"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Səs ver",
+    "upvoted": "Səs verildi",
+    "downvoted": "Əleyhinə səs verildi",
+    "upvote_hint": "Səs seçimlərini açmaq üçün iki dəfə toxun",
+    "payout_details": "Ödəniş təfərrüatları",
+    "a11y_votes": "{count, plural, one {# səs} other {# səs}}",
+    "a11y_voters_hint": "Səs verənlərə bax",
+    "a11y_reblogs": "{count, plural, one {# yenidən paylaşım} other {# yenidən paylaşım}}",
+    "a11y_reblogs_hint": "Yenidən paylaşımlara bax",
+    "a11y_comments": "{count, plural, one {# rəy} other {# rəy}}",
+    "a11y_comments_hint": "Rəylərə bax",
+    "a11y_reply_hint": "Cavab yaz",
+    "a11y_tip": "Bəxşiş göndər",
+    "a11y_tips": "{count, plural, one {# bəxşiş} other {# bəxşiş}}",
+    "a11y_edit": "Rəyi redaktə et",
+    "a11y_delete": "Rəyi sil",
+    "a11y_show_replies": "Cavabları göstər",
+    "a11y_hide_replies": "Cavabları gizlət",
+    "a11y_post_options": "Paylaşım seçimləri",
+    "a11y_views": "{count, plural, one {# baxış} other {# baxış}}",
+    "source_ecency": "Ecency ilə dərc edilib",
+    "a11y_stats_hint": "Paylaşım statistikasına bax",
     "image": "Təsvir",
     "reveal_muted": "SƏSSİZ EDİLİB\nMəzmunu göstərmək üçün toxunun",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Şəkli yükləmək üçün toxun",
     "in": "içində",
     "poll": "SORĞU",
     "copy_link": "Bağlantını kopyala",
@@ -998,13 +1119,14 @@
     "save_to_local": "Cihaza endir",
     "muted": "Məzmun pozuntuya görə səssiz edilib",
     "community_muted": "Məzmun icma qaydalarının pozulmasına görə səssiz edilib",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Aşağı reputasiyalı hesabdan məzmun",
+    "muted_downvoted": "İstifadəçilər tərəfindən əleyhinə səs verilmiş məzmun",
+    "muted_low_trust": "Təsdiqlənməmiş xarici keçidi olan aşağı reputasiyalı hesab",
+    "muted_reveal": "Göstərmək üçün toxun",
     "promoted": "TƏŞVİQ EDİLİB",
     "image_saved": "Təsvir Foto Qalereya saxlanıldı",
     "words": "Söz",
     "reading": "Oxunur",
-    "listen": "Dinlə",
     "min": "dəq",
     "summarize_start": "Başla"
   },
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Heç bir göndəriş yoxdur",
     "invalid_link": "URL yanlışdır, düzgün URL ilə yenidən cəhd edə və ya onu veb brauzerdə açmağa cəhd edə bilərsiniz",
-    "no_existing_user": "Heç bir istifadəçi yoxdur"
+    "no_existing_user": "Heç bir istifadəçi yoxdur",
+    "posting_key_request": "{requester} @{username} üçün posting şəxsi açarını tələb edir.\n\nYalnız bu tələbə güvənirsənsə davam et.",
+    "posting_key_request_unnamed": "Başqa tətbiq @{username} üçün posting şəxsi açarını tələb edir.\n\nYalnız bu tələbə güvənirsənsə davam et.",
+    "auth_request_as_user": "{requester} səni @{username} kimi daxil etmək istəyir.\n\nYalnız istifadəçi adın və giriş sübutu paylaşılır. Heç bir açar Ecency-dən çıxmır.",
+    "auth_request_as_current": "{requester} səni Ecency hesabınla daxil etmək istəyir.\n\nYalnız istifadəçi adın və giriş sübutu paylaşılır. Heç bir açar Ecency-dən çıxmır."
   },
   "payout": {
     "breakdown": "Təfərrüat",
@@ -1065,7 +1191,7 @@
     "open": "URL-i aç",
     "invalid_key_desc": "Bu əməliyyatı yerinə yetirmək üçün {key} açarı və ya master açar ilə daxil olun",
     "auth_transfer_confirm": "{username} hesabına köçürmə təsdiqlənsin?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Yalnız bu linkin mənbəyinə etibar edirsənsə təsdiqlə. Təsdiq etmək aşağıdakı əməliyyatı {authority} açarınla hesabından göndərir."
   },
   "voters_dropdown": {
     "rewards": "MÜKAFATLAR",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Yalnız hərflər, rəqəmlər və defis ehtiva etməlidir",
       "username_no_ascii_first_letter_error": "Hərflə başlamalıdır",
       "username_contains_double_hyphens": "İkiqat defis ehtiva etməməlidir",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Bu istifadəçi adı kriptobirja hesabına çox bənzəyir və başqalarını çaşdıra bilər. Zəhmət olmasa daha unikal ad seç.",
+      "username_restricted_prefix": "“uid” ilə başlayıb ardınca rəqəmlər gələn istifadəçi adlarına icazə verilmir, çünki onlar çox vaxt başqalarını təqlid etmək üçün istifadə olunur. Zəhmət olmasa başqa ad seç.",
       "username_contains_underscore": "Alt xətt ehtiva etməməlidir"
     },
     "500_error": "Sorğunuz emal edilə bilmədi, qeydiyyat növbəsi çox güman ki, doludur! Bir neçə dəqiqədən sonra yenidən cəhd edin...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "İstifadəçi adı artıq götürülüb",
+      "14": "E-poçt ünvanı artıq qeydiyyatdadır",
+      "15": "Zəhmət olmasa düzgün e-poçt ünvanı daxil et",
+      "16": "Zəhmət olmasa düzgün istifadəçi adı daxil et",
+      "17": "İstifadəçi adı çox uzundur, zəhmət olmasa daha qısa ad seç",
+      "19": "Zəhmət olmasa daimi e-poçt ünvanından istifadə et və ya Premium hesab əldə et",
+      "21": "Bu referal etibarlı deyil",
+      "28": "Sorğun emal edilə bilmədi: qeydiyyat növbəsi çox güman ki, doludur. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd et.",
+      "107": "VPN bağlantısı aşkarlandı. Zəhmət olmasa VPN-i söndür və yenidən cəhd et və ya Premium hesab əldə et.",
+      "110": "Sui-istifadənin qarşısını almaq üçün hər şəxs/şəbəkə üzrə hesab sayını məhdudlaşdırırıq. Zəhmət olmasa başqa şəbəkədən yenidən cəhd et.",
+      "111": "Tor bağlantısı aşkarlandı. Zəhmət olmasa qeydiyyat zamanı Tor-u söndür.",
+      "112": "Bağlantını hazırda yoxlaya bilmədik. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd et."
     },
     "have_account_text": "Artıq hesabınız var?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Tam hüquqlu Hive hesabı əldə edin, bu metod botnetin qeydiyyat çeşməmizdən sui-istifadə etməməsini təmin etmək üçün əsas yoxlamalara malikdir.",
     "btn_register": "Pulsuz Qeydiyyat",
     "title": "Pulsuz Hesab"
+  },
+  "dictation": {
+    "title": "Səslə yaz",
+    "start": "Səs yaz",
+    "stop": "Dayandır",
+    "record_more": "Daha çox yaz",
+    "done": "Hazırdır",
+    "recording": "Yazılır",
+    "stop_hint": "Mətnə çevirib göndərişinə əlavə etmək üçün dayandır. Ən çox {m} dəqiqə.",
+    "inserted": "Göndərişinə əlavə olundu. Daha çox yaz və ya Hazırdır düyməsinə toxun.",
+    "transcribing": "Mətnə çevrilir",
+    "rate": "{s} saniyə üçün {n} Points",
+    "cost_running": "İndiyədək {n} Points",
+    "cost_running_free": "İndiyədək pulsuz",
+    "free_remaining": "Bu gün növbəti {n} x {s} san pulsuzdur",
+    "price_loading": "Qiymət yoxlanılır",
+    "price_error": "Mətnə çevirmə qiyməti yüklənmədi.",
+    "denied": "Ecency-nin səslə yazmaq üçün mikrofona girişi lazımdır. Tənzimləmələrdə icazə ver və yenidən cəhd et.",
+    "error_empty": "Bu yazıda nitq aşkarlanmadı.",
+    "error_insufficient_points": "Bu yazını mətnə çevirmək üçün kifayət qədər Points yoxdur.",
+    "error_rate_limited": "Hələlik çox yazı var. Bir azdan yenidən cəhd et.",
+    "error_too_long": "Bu yazı mətnə çevirmək üçün çox uzundur.",
+    "error_failed": "Bu yazı mətnə çevrilmədi. Yenidən cəhd et.",
+    "error_recorder": "Yazı başlamadı. Yenidən cəhd et."
   },
   "wallet": {
     "delegations_out": "Verilən Deleqasiyalar",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Müntəzəm yoxlama 0.25 xal verər.",
     "fill_transfer_from_savings": "Yığım İcra Edildi",
     "activities": "Fəaliyyətlər",
+    "no_activities": "Hələ əməliyyat yoxdur",
+    "activities_failed": "Əməliyyatlar yüklənmədi. Yenidən cəhd üçün aşağı çək.",
     "tap_update": "Yeniləmək üçün toxunun",
     "mining_lottery": "Lotereya Qazanıldı",
     "checkin": "Qeydiyyat",
     "tokens_transfer": "Tokenlər Köçürüldü",
     "outgoing_transfer_title": "Köçürmə/Hədiyyə",
+    "burned_title": "Süni intellekt istifadəsi",
+    "burned_description": "Süni intellekt funksiyasına xərclənən Points",
+    "burn_refund_title": "Süni intellekt geri ödənişi",
+    "burn_refund_description": "Uğursuz süni intellekt sorğusundan sonra qaytarılan Points",
     "manage_assets": "Aktiv Əlavə Et / Çıxar",
     "selected_assets": "Seçilmiş Aktivlər",
     "nft_setPropertyPermissions": "NFT Simvolu üçün Xüsusiyyət İcazələri Təyin Edildi",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Token dəqiqliyi yeniləndi",
     "tokens_transferOwnership": "Token sahibliyi köçürüldü",
     "withdraw_vesting": "Steyki çıxar",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Çıxarış hesabları",
     "delegate_engine": "Deleqasiya et",
     "market_close": "Sifariş bağlandı",
     "nftmarket_transferFee": "Alış sifarişi haqqı",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "XAL ALIN",
     "escrow_approve": "Escrow Təsdiqləmə",
     "expires": "vaxtı bitir",
+    "transaction_id": "Əməliyyat ID-si",
+    "copy_transaction_id": "Əməliyyat keçidini kopyala",
+    "filter_activities": "Fəaliyyətləri filtrlə",
+    "filter_activities_desc": "Bu tarixçənin hansı əməliyyatları istəyəcəyini seç",
+    "filter_all": "Hamısını seç",
+    "filter_none": "Hamısını təmizlə",
+    "filter_apply": "Tətbiq et",
     "author_reward": "Müəllif Mükafatı",
     "withdraw_hbd": "Əmanəti çıxar",
     "convert_request": "Çevrilmə sorğusu",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "RC artır",
+    "desc": "Paylaşım etməyə davam edə bilməyin üçün qısamüddətli RC artımı.",
+    "confirm": "Resource Credits artırmaq üçün Points xərclənsin?",
+    "insufficient": "Kifayət qədər Points-in yoxdur.",
+    "buy_points": "Points al"
   },
   "ai_image_generator": {
     "title": "AI Şəkil Generatoru",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Fərdi ({hours}s)",
+    "balance_load_failed": "Balansın yüklənmədi. Yenidən cəhd üçün toxun.",
+    "precision_load_failed": "Bu tokenin təfərrüatları yüklənmədi, ona görə yalnız tam məbləğlər göndərilə bilər. Yenidən cəhd üçün toxun.",
     "close": "Bağla",
     "favorite_username_placeholder": "İstifadəçi adı",
     "invalid_recipient_qr": "Bu QR kodda istifadəçi adı tapılmadı.",
@@ -1527,7 +1692,7 @@
     "powering_down_info": "Növbəti steyk çıxarması {days} gün sonradır, {hp} HIVE",
     "convert": "HBD-nı HIVE-ə çevir",
     "auto_vests": "Avtomatik Vests",
-    "vests": "Vests",
+    "vests": "VESTS",
     "stop_information": "Dayandırmaq istədiyinizə əminsiniz?",
     "amount": "Məbləğ",
     "memo_desc": "Bu qeyd ictimaidir",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Səlahiyyətləri idarə et",
     "pincode": "PIN kod",
     "general": "Ümumi",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Ecency-ni dəstəklə",
+    "support_beneficiary": "Paylaşım mükafatlarını Ecency ilə böl",
+    "support_beneficiary_percent": "Paylaşım mükafatı payı",
+    "support_curation": "Kuratorluq mükafatlarının bir hissəsini saxla",
+    "support_curation_percent": "Kuratorluq mükafatı saxlanma payı",
     "feedback_body": "Mesajınızı buraya yazın!\n\nHive istifadəçi adı: {username}\nTətbiq versiyası: {appVersion}\nPlatforma: {platform}\n",
     "show_imgs": "Şəkilləri göstər",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Rəy",
       "bookmark": "Əlfəcinlər",
+      "tags": "Teqlər",
       "reblog": "Paylaşma",
       "favorite": "Sevimlilər",
       "mention": "Adını çəkmə",
@@ -1599,10 +1765,10 @@
       "transfers": "Köçürmə",
       "vote": "Səsvermə",
       "follow": "İzləmə",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Planlaşdırılmış paylaşım dərc edildi",
+      "payouts": "Ödənişlər",
+      "account_update": "Hesab yeniləmələri",
+      "weekly_earnings": "Həftəlik qazanc",
       "fcm_unavailable": "Push bildirişləri bu cihazda dəstəklənmir. Bildirişləri yalnız tətbiq açıq olduqda alacaqsınız."
     },
     "keys_warning": "Həssas hesab məlumatı!\nGizli açarları görməzdən əvvəl Ecency PIN kodu ilə qorunmalıdır.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Əks Əlaqə Göndər",
     "rate_app": "Ecency-ni qiymətləndir",
+    "email_digests": "E-poçt xülasələri",
     "rate": "Qiymətləndir",
     "dm-privacy-updated": "DM məxfilik parametrləri uğurla yeniləndi",
     "dm-privacy-failed": "DM məxfilik parametrlərini yeniləmək alınmadı",
@@ -1685,19 +1852,29 @@
     "request_sent": "Silmə sorğunuz göndərildi",
     "confirm_delete_body": "Hesabı silmək istədiyinizə əminsiniz? Bu, bütün məlumatlarınızı siləcək"
   },
-  "tts": {
-    "settings_title": "Mətndən-Nitqə Ayarları",
-    "voice": "Səs",
-    "voice_hint": "Sistemin standart səsi istifadə olunacaq",
-    "speed": "Sürət",
-    "pitch": "Ton",
-    "test_voice": "Səsi Sına",
-    "settings_info": "Bu ayarlar paylaşımlar ucadan oxunarkən istifadə olunacaq",
+  "listen": {
+    "title": "Bu göndərişi dinlə",
+    "minutes": "~{n} dəq",
+    "login": "Daxil ol",
+    "unlock": "Aç · {n} Points",
+    "confirm": "Bu göndərişi dinləmək üçün {n} Points xərclənsin? Audio istədiyin vaxt təkrar dinləməyin üçün sənindir.",
+    "not_enough_title": "Kifayət qədər Points yoxdur",
+    "not_enough": "Dinləmək üçün {required} Points lazımdır, səndə {available} var.",
+    "get_points": "Points əldə et",
+    "unlock_failed": "Audio açılmadı, yenidən cəhd et",
+    "failed_refunded": "Audio yaradıla bilmədi, Points geri qaytarıldı",
+    "preparing": "Audio hazırlanır…",
+    "preparing_eta": "Audio hazırlanır, təxminən {n} dəq…",
+    "preparing_progress": "Audio hazırlanır · {n}%",
+    "waiting": "Növbə gözlənilir, qarşında {n} nəfər var…",
+    "next_in_line": "Növbəti sənsən…",
     "play": "Oxut",
     "pause": "Fasilə",
-    "language": "Dil",
-    "language_auto": "Avtomatik aşkarla",
-    "language_hint": "Avtomatik aşkarlama dili paylaşımın məzmununa əsasən seçir"
+    "seek": "Mövqe",
+    "speed": "Oxutma sürəti",
+    "language": "Audio dili",
+    "unavailable": "Audio yüklənmədi.",
+    "retry": "Yenidən cəhd et"
   },
   "posting_authority": {
     "title": "Daha Sürətli Paylaşımı Aktivləşdir",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentifikasiya alınmadı. Zəhmət olmasa yenidən daxil olun.",
     "error-generic": "Video yüklənmədi. Zəhmət olmasa yenidən cəhd edin.",
     "error-too-long-short": "Qısa videolar 60 saniyə və ya daha az olmalıdır.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Paylaşımda yalnız bir video ola bilər. Başqasını əlavə etməzdən əvvəl cari videonu sil.",
     "select_source": "Video Əlavə Et",
     "record": "Video Çək",
     "choose_library": "Kitabxanadan Seç"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Sürətli bir yeniləmə paylaşın"
   },
+  "newsletter": {
+    "screen_title": "E-poçt xülasələri",
+    "title": "{list}",
+    "body_own": "Bildirişlərinin həftəlik və ya aylıq e-poçt xülasəsi.",
+    "body_creator": "{list} müəllifinin yeni göndərişləri gələn qutunda.",
+    "body_community": "{list} cəmiyyətindəki yeni göndərişlərin e-poçtla xülasəsi.",
+    "body_site": "Ecency-nin ən yaxşıları gələn qutunda.",
+    "first_publish_title": "İlk göndərişin mübarək!",
+    "first_publish_body": "Bildirişlərinin e-poçt xülasəsini istəyirsən? Həftəlik və ya aylıq, istədiyin vaxt Tənzimləmələrdə dəyiş və ya burax.",
+    "list_own": "Bildiriş xülasəm",
+    "list_site": "Ecency xəbər bülleteni",
+    "status_active": "Abunəsən.",
+    "status_pending": "E-poçt təsdiqi gözlənilir.",
+    "status_short_active": "aktiv",
+    "status_short_pending_confirmation": "gözləyir",
+    "status_short_suppressed": "dayandırılıb",
+    "status_short_ended": "bitib",
+    "cadence_weekly": "Həftəlik",
+    "cadence_monthly": "Aylıq",
+    "email_placeholder": "sen@numune.com",
+    "subscribe": "Abunə ol",
+    "update": "Yenilə",
+    "resend": "Təsdiqi yenidən göndər",
+    "leave": "Xülasədən çıx",
+    "cancel": "Ləğv et",
+    "ok": "OK",
+    "manage": "İdarə et",
+    "check_inbox_title": "Gələn qutunu yoxla",
+    "check_inbox_body": "{email} ünvanına təsdiq keçidi göndərdik. Abunəlik təsdiq etdikdən sonra başlayır.",
+    "subscribed": "E-poçt xülasəsinə abunə olundu",
+    "left": "Xülasədən çıxdın",
+    "refused": "Bu ünvan abunə ola bilməz.",
+    "unavailable": "E-poçt xülasələri hazırda əlçatan deyil.",
+    "too_many": "Çox cəhd edildi, sonra yenidən cəhd et.",
+    "fail": "Nəsə səhv getdi, yenidən cəhd et.",
+    "empty": "Hələ e-poçt xülasəsi yoxdur. Başlamaq üçün aşağıdan abunə ol.",
+    "discover": "E-poçtla daha çoxunu al",
+    "stop_all": "Hamısını dayandır",
+    "stop_all_title": "Bütün e-poçtlar dayandırılsın?",
+    "stop_all_body": "{email} ünvanına bir daha Ecency poçtu göndərilməyəcək. Digər ünvanlardakı abunəliklər qalır.",
+    "stop_all_ok": "Hamısını dayandır",
+    "stop_all_done": "Ünvan bütün poçtlardan çıxarıldı",
+    "profile_option": "E-POÇT XÜLASƏSİ",
+    "subscriber_count": "{weekly} həftəlik • {monthly} aylıq e-poçt abunəçisi",
+    "community_button": "Xəbər bülleteni"
+  },
+  "mod_notes": {
+    "title": "Səbəb əlavə et",
+    "placeholder": "Səbəb (digər moderatorlara görünür)",
+    "confirm": "Təsdiqlə",
+    "cancel": "Ləğv et"
+  },
+  "community_settings": {
+    "title_header": "Cəmiyyət tənzimləmələri",
+    "title_label": "Başlıq",
+    "about": "Haqqında",
+    "lang": "Dil",
+    "description": "Təsvir",
+    "rules": "Qaydalar",
+    "nsfw": "İş yeri üçün uyğun deyil",
+    "save": "Saxla",
+    "required": "Məcburidir",
+    "title_length": "{min} ilə {max} simvol arasında",
+    "owner_admin_only": "Bu tənzimləmələri yalnız sahib və adminlər dəyişə bilər."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Açıq",
+        "collapsed": "Yığılıb"
+      },
+      "a11y_chat": {
+        "quote": "{author} istifadəçisinə cavab: {text}"
+      },
+      "a11y_forms": {
+        "select": "Seç",
+        "deselect": "Seçimi ləğv et"
+      },
+      "store": {
+        "billing_unavailable": "Bu cihazda tətbiqdaxili alışlara icazə verilmir.",
+        "verification_failed": "App Store bu alışı təsdiqləyə bilmədi.",
+        "cancelled": "Alış ləğv edildi",
+        "unknown_result": "Naməlum alış nəticəsi"
+      },
+      "navigation": {
+        "feed_unavailable": "Bu lent hələ əlçatan deyil.",
+        "link_cannot_open": "Bu keçid açıla bilmir.",
+        "video_cannot_play": "Bu video oxudula bilmir."
+      },
+      "media": {
+        "load_failed": "Bu element yüklənmədi. Bağlantını yoxlayıb yenidən cəhd et.",
+        "loading": "Media yüklənir",
+        "download_failed": "Yükləmə {status} statusu ilə uğursuz oldu"
+      },
+      "sign_in": {
+        "required": "Daxil olmaq tələb olunur",
+        "to_reply": "Cavab vermək üçün daxil ol.",
+        "to_vote": "Səs vermək üçün daxil ol.",
+        "button": "Daxil ol"
+      },
+      "account": {
+        "logout_user": "@{username} hesabından çıx"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# səs} other {# səs}}  •  {replies, plural, one {# cavab} other {# cavab}}",
+        "voting_power": "Səs gücü {percent}",
+        "remove_favourite": "Sevimlilərdən çıxar",
+        "add_favourite": "Sevimlilərə əlavə et"
+      },
+      "waves": {
+        "clear_tag_filter": "{tag} teq filtrini təmizlə",
+        "new_wave": "Yeni wave",
+        "replies_open_thread": "{count, plural, one {# cavab, müzakirəni aç} other {# cavab, müzakirəni aç}}",
+        "characters": "{count} / {max} simvol",
+        "retry": "{message}\nYenidən cəhd et",
+        "playing": "{permlink} oxudulur",
+        "video_attached_remove": "Video əlavə olundu, sil",
+        "image_attached_remove": "Şəkil əlavə olundu, sil",
+        "take_photo": "Foto çək",
+        "edit_poll": "Sorğunu redaktə et",
+        "add_poll": "Sorğu əlavə et",
+        "add_video": "Video əlavə et"
+      },
+      "reading": {
+        "reply_to": "{username} istifadəçisinə cavab ver",
+        "opens_post": "Göndərişi açır",
+        "sort_comments": "Şərhləri sırala",
+        "sort_comments_value": "Şərhləri sırala, {sort}",
+        "no_comments": "Hələ şərh yoxdur.",
+        "loading_post": "Göndəriş yüklənir",
+        "show_version": "Versiyanı göstər",
+        "show_changes": "Dəyişiklikləri göstər",
+        "replying_to": "@{username} istifadəçisinə cavab verilir",
+        "reply_text": "Cavab mətni",
+        "translate_from": "Mənbə dil",
+        "translate_to": "Hədəf dil"
+      },
+      "feed": {
+        "tab_pinned": "{label}, sancılıb",
+        "tab_add": "{label}, əlavə et",
+        "customise": "Fərdiləşdir"
+      },
+      "card": {
+        "in_category": "{category} daxilində",
+        "pinned": "Sancılıb",
+        "by_author": "{username} tərəfindən",
+        "payout": "mükafat {payout}",
+        "payout_declined": "mükafat {payout}, rədd edilib",
+        "reblogged_by": "{username} yenidən paylaşdı"
+      },
+      "shell": {
+        "close_menu": "Menyunu bağla"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatür, başqa şəkil seç",
+        "words": "{count, plural, one {# söz} other {# söz}}",
+        "poll_min_age": "Min. hesab yaşı (gün): {days}",
+        "poll_max_options": "Maks. seçim: {count}",
+        "thumbnail_selected": "Seçilmiş miniatür",
+        "thumbnail": "Miniatür",
+        "uploaded_image": "Yüklənmiş şəkil",
+        "community_search": "axtar"
+      },
+      "vote": {
+        "not_voted": "Səs verilməyib",
+        "voting": "Səs verilir",
+        "failed_with": "Səs verilmədi: {message}",
+        "failed": "Səs verilmədi",
+        "payout": "Mükafat {payout}",
+        "payout_declined": "Mükafat {payout}, rədd edilib",
+        "percent": "{percent} faiz",
+        "upvote_percent": "{percent}% müsbət səs"
+      },
+      "settings": {
+        "on": "Aktiv",
+        "off": "Deaktiv"
+      },
+      "lock": {
+        "biometric_reason": "Ecency üçün biometrik kilidaçmanı aktiv et",
+        "offer_title": "{method} ilə kilidi aç",
+        "offer_use": "{method} istifadə et"
+      },
+      "keys": {
+        "hidden_while_captured": "Ekran yazılarkən və ya əks etdirilərkən açarlar gizlədilir.",
+        "screenshot_notice": "Ekran görüntüsü çəkildi. Şəxsi açarlar yenidən gizlədildi; ekran görüntüsündə açar görünürsə, sil.",
+        "hold_hint": "Açarı göstərmək üçün basıb saxla.",
+        "hold_to_show": "Göstərmək üçün basıb saxla"
+      },
+      "wallet": {
+        "cancel_order": "Bu sifariş ləğv edilsin?",
+        "days": "{count, plural, one {# gün} other {# gün}}"
+      },
+      "chat": {
+        "reactors_hint": "Kimin reaksiya verdiyini görmək üçün uzun bas",
+        "see_reactors": "Kimin reaksiya verdiyini gör"
+      },
+      "esie": {
+        "still": "{mood}, hərəkətsiz"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} profili",
+      "preview": "Önizləmə ({index}/{count})",
+      "balance": "Balans: {amount}",
+      "expires_in": "Bitməsinə qalıb: {time}",
+      "expired": "Müddəti bitib. Bağla və yenidən cəhd et.",
+      "user_has_no_posts": "@{username} hələ heç nə paylaşmayıb",
+      "attach_image": "Şəkil əlavə et",
+      "auto": "Avto",
+      "back": "Geri",
+      "hot": "İSTİ",
+      "image_of": "Şəkil {index} / {count}",
+      "new": "YENİ",
+      "nsfw_tap_to_reveal": "NSFW Göstərmək üçün toxun",
+      "new_reply": "Yeni cavab",
+      "remove": "Sil",
+      "unlock_ecency": "Ecency kilidini aç",
+      "update_it": "Yenilə",
+      "update_it_or_post_this_as": "Yenilənsin, yoxsa yeni cavab kimi paylaşılsın?",
+      "use_pin": "PIN istifadə et",
+      "your_reply_was_already_posted": "Cavabın artıq paylaşılıb",
+      "error_try_again": "{message} Yenidən cəhd edilsin?",
+      "auth": {
+        "account_label": "Hesab: @{username}",
+        "approve_the_request_in_your_wallet": "Sorğunu pulqabı tətbiqində təsdiqlə.",
+        "copy_key": "{title} kopyala",
+        "current_account": "Cari hesab",
+        "qr_code": "QR kod",
+        "requested_by": "Sorğu edən: {requester}",
+        "pin_digits": "{filled} / {total, plural, one {# rəqəm} other {# rəqəm}}",
+        "private_key_shown": "{title}, şəxsi açar göstərilir",
+        "open_wallet_app": "Pulqabı tətbiqini aç",
+        "hiveauth_scan": "Hive Keychain-də və ya başqa HiveAuth pulqabında təsdiqlə: onu bu cihazda aç və ya bu kodu onunla skan et.",
+        "switching": "Keçid edilir...",
+        "logout_all": "Bütün hesablardan çıx",
+        "logout_all_title": "Bu cihazdakı bütün hesablardan çıxılsın?",
+        "stored_key": "@{username} artıq bu cihazda daxil olub. Saxlanılan açarları qalır; yalnız sessiyası yenilənir.",
+        "stored_hivesigner": "@{username} artıq bu cihazda HiveSigner ilə daxil olub. Sessiyası əvəz edilir.",
+        "stored_hiveauth": "@{username} bu cihazda HiveAuth ilə daxil olub. Əvəzində HiveSigner ilə imzalayacaq.",
+        "method_key": "Açar",
+        "logout_failed": "Çıxış alınmadı"
+      },
+      "browser": {
+        "account": "Hesab",
+        "authority": "Səlahiyyət",
+        "phishing": "Xəbərdarlıq: Bu domen məlum fişinq sayt kimi işarələnib. Son dərəcə ehtiyatlı ol."
+      },
+      "chat": {
+        "cancel_edit": "Redaktəni ləğv et",
+        "cancel_reply": "Cavabı ləğv et",
+        "copied_to_clipboard": "Buferə kopyalandı",
+        "edited_at": "Redaktə edildi {time}",
+        "group_options": "Qrup seçimləri",
+        "pinned_messages": "Sancılmış mesajlar",
+        "remove_user": "@{username} istifadəçisini çıxar",
+        "sort_by_name": "Ada görə sırala",
+        "more": "Daha çox",
+        "reaction_label": "{emoji} {count}. Kimin reaksiya verdiyini görmək üçün uzun bas",
+        "members": "Üzvlər"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Bu keçiddə artıq göndəriş var və göndərdiyindən fərqlənir. Yenilənsin, yoxsa yeni kimi dərc edilsin?",
+        "a_scheduled_post_is_published_by": "Planlaşdırılmış göndəriş seçilən vaxtda Ecency tərəfindən dərc olunur. Bunun üçün hesabında ecency.app üçün posting səlahiyyəti lazımdır. Açarların və digər səlahiyyətlər olduğu kimi qalır. Bu səlahiyyəti vermək üçün aktiv açarın lazımdır.",
+        "ai_assist": "Süni intellekt köməkçisi",
+        "ai_tools": "Süni intellekt alətləri",
+        "allow_ecency_to_publish_for_you": "Ecency-nin sənin adından dərc etməsinə icazə verilsin?",
+        "bold": "Qalın",
+        "clone": "Klonla",
+        "cost": "Qiymət: {cost}",
+        "could_not_store_the_draft_on": "Qaralama bu cihazda saxlanılmadı. Tətbiqi açıq saxla və qaralamanı yadda saxla.",
+        "draft": "QARALAMA",
+        "delete_count": "Sil ({count})",
+        "dictate_desc": "Danış, mətn göndərişinə əlavə olunsun",
+        "discard": "Ləğv et",
+        "discard_changes": "Dəyişikliklər ləğv edilsin?",
+        "grant": "Ver",
+        "italic": "Kursiv",
+        "keep_editing": "Redaktəyə davam et",
+        "my_blog": "BLOQUM",
+        "my_communities": "CƏMİYYƏTLƏRİM",
+        "new_post": "Yeni göndəriş",
+        "notice": "Qeyd",
+        "restore": "Bərpa et",
+        "restore_unsaved_changes": "Saxlanılmamış dəyişikliklər bərpa edilsin?",
+        "saved": "Saxlanıldı",
+        "top_communities": "ƏN YAXŞI CƏMİYYƏTLƏR",
+        "table": "Cədvəl",
+        "text_format": "Mətn formatı",
+        "this_link_is_already_in_use": "Bu keçid artıq istifadə olunur",
+        "untitled": "Adsız",
+        "update_it_or_publish_this_as": "Yenilənsin, yoxsa yeni göndəriş kimi dərc edilsin?",
+        "you_have_unsaved_changes_from_an": "Əvvəlki redaktədən saxlanılmamış dəyişikliklərin var. Göndəriş o vaxtdan dəyişib; bərpa etsən, aşağıdakı mətn əvəz olunacaq.",
+        "your_edits_were_not_published": "Redaktələrin dərc edilmədi.",
+        "your_post_was_already_published": "Göndərişin artıq dərc edilib",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatür, başqa şəkil seçmək üçün toxun",
+        "thumbnail_number": "Miniatür {number}",
+        "recording_busy": "Artıq davam edən yazı var. Əvvəlcə kamerada bitir.",
+        "photo_lost": "Kamera açıq olarkən foto itdi. Yenidən çək.",
+        "add_snippet_button": "+ Snippet",
+        "words_count": "{count, plural, one {# söz} other {# söz}}",
+        "community_search": "axtar"
+      },
+      "profile": {
+        "open_wallet": "Pulqabını aç",
+        "your_wallet_is_on_the_wallet": "Pulqabın Pulqabı tabındadır.",
+        "user_has_no_comments": "@{username} hələ şərh yazmayıb",
+        "votes_count": "{count, plural, one {# səs} other {# səs}}",
+        "replies_count": "{count, plural, one {# cavab} other {# cavab}}",
+        "menu": "Daha çox",
+        "users": "İstifadəçilər"
+      },
+      "reading": {
+        "apply": "TƏTBİQ ET",
+        "add_tag": "Teq əlavə et",
+        "age": "Yaş",
+        "audio_language": "Audio dili",
+        "available_filters": "Mövcud filtrlər",
+        "could_not_unlock_the_audio_please": "Audio açılmadı, yenidən cəhd et",
+        "downvote": "Mənfi səs",
+        "downvote_percent": "{percent}% mənfi səs",
+        "listen_to_this_post": "Bu göndərişi dinlə",
+        "log_in": "Daxil ol",
+        "mark_all_as_read": "Hamısını oxunmuş et",
+        "mark_as_read": "Oxunmuş et",
+        "more_replies": "Daha çox cavab",
+        "not_enough_points": "Kifayət qədər Points yoxdur",
+        "nothing_here_yet": "Hələ heç nə yoxdur.",
+        "open_editor": "Redaktoru aç",
+        "pause_voice": "Səsi dayandır",
+        "play_voice": "Səsi oxut",
+        "playback_speed": "Oxutma sürəti",
+        "publishing_in_waves": "Waves-də dərc edilir",
+        "quests_done": "Tapşırıqlar tamamlandı",
+        "read": "Oxu",
+        "remove_vote": "Səsi geri götür",
+        "seek": "Mövqe",
+        "select_community": "Cəmiyyət seç",
+        "selected_filters": "Seçilmiş filtrlər",
+        "the_audio_could_not_be_loaded": "Audio yüklənmədi.",
+        "this_post_does_not_exist_or": "Bu göndəriş mövcud deyil və ya silinib.",
+        "unread": "Oxunmamış",
+        "voice_position": "Səs mövqeyi",
+        "vote_weight": "Səs çəkisi",
+        "reblogged_by": "{username} yenidən paylaşdı",
+        "no_more_posts": "Başqa göndəriş yoxdur.",
+        "favourite": "Sevimli",
+        "no_votes_yet": "Hələ səs yoxdur",
+        "no_comments_yet": "Hələ şərh yoxdur. İlk şərhi sən yaz!",
+        "comments_count": "Şərhlər ({count})",
+        "sending_to_chain": "zəncirə göndərilir",
+        "compare": "Müqayisə et",
+        "your_vote": "Sənin səsin",
+        "reply_to": "@{username} istifadəçisinə cavab ver",
+        "what_do_you_think": "Nə düşünürsən?",
+        "clear_tag_filter": "Teq filtrini təmizlə",
+        "tab_selected": "{title}, seçilib",
+        "add_tag_feed": "Teq lenti əlavə et",
+        "feed_pinned": "{label}, sancılıb",
+        "attached_image_remove": "Əlavə olunmuş şəkil, silmək üçün toxun",
+        "camera": "Kamera",
+        "files": "Fayllar",
+        "paused": "Dayandırılıb",
+        "in_topic": "{topic} daxilində",
+        "poll_vote": "Səs ver",
+        "reply": "Cavab ver",
+        "mute_sound": "Səssiz",
+        "unmute_sound": "Səsi aç",
+        "leaderboard_activities": "Fəaliyyətlər",
+        "leaderboard_reward": "Mükafat",
+        "sort_votes": "Səslər"
+      },
+      "shell": {
+        "account_of": "@{username} hesabı",
+        "account_signed_out": "Hesab, daxil olunmayıb",
+        "close_tab": "Tabı bağla",
+        "coming_soon_to_the_native_app": "Yerli tətbiqdə tezliklə.",
+        "create": "Yarat",
+        "expand": "Genişləndir",
+        "forward": "İrəli",
+        "loading": "Yüklənir",
+        "new_tab": "Yeni tab",
+        "reload": "Yenidən yüklə",
+        "sent": "Göndərildi",
+        "tab_unread": "{title}, {count} oxunmamış",
+        "no_app_for_link": "Bu keçidi açacaq tətbiq yoxdur."
+      },
+      "wallet": {
+        "product_not_available": "Məhsul əlçatan deyil.",
+        "repeat": "Təkrarla"
+      },
+      "copied": "Kopyalandı",
+      "trending_caps": "TRENDDƏ",
+      "move_up": "Yuxarı apar",
+      "move_down": "Aşağı apar",
+      "scroll_to_top": "Yuxarı qayıt",
+      "load_more": "Daha çox"
+    },
+    "wallet": {
+      "checking": "Şəbəkə ilə yoxlanılır",
+      "leave_title": "Hələ göndərilir",
+      "leave_message": "Bu əməliyyat hələ göndərilir və ya şəbəkə ilə yoxlanılır. Bu ekrandan çıxa bilərsən: bitəndə tətbiq sənə xəbər verəcək.",
+      "stay": "Qal",
+      "collateralized_convert_request": "Girovlu konvertasiya sorğusu",
+      "op_transfer": "köçürmə",
+      "op_power_up": "stake etmə",
+      "op_power_down_change": "stake çıxarma dəyişikliyi",
+      "op_delegation": "deleqasiya",
+      "op_savings_deposit": "yığım depoziti",
+      "op_savings_withdrawal": "yığımdan çıxarma",
+      "op_conversion": "konvertasiya",
+      "op_swap": "mübadilə",
+      "op_order_cancel": "sifariş ləğvi",
+      "op_reward_claim": "mükafat tələbi",
+      "op_withdraw_route_change": "çıxarma marşrutu dəyişikliyi",
+      "op_token_operation": "token əməliyyatı"
+    },
+    "notification": {
+      "amount_unknown": "Məbləğ əlçatan deyil",
+      "weekly_earnings_breakdown": "Bu həftə ${amount} qazandın: ${authorUsd} göndərişlərdən, ${curationUsd} kurasiyadan.",
+      "weekly_earnings_total": "Bu həftə göndərişlərindən və kurasiyadan ${amount} qazandın."
+    },
+    "settings": {
+      "open": "Aç",
+      "feedback_subject": "Rəy/Xəta hesabatı",
+      "unknown_user": "Naməlum istifadəçi"
+    },
+    "navigation": {
+      "editor": "Redaktor",
+      "followers": "İzləyicilər",
+      "spin_game": "Fırlanma oyunu",
+      "edit_profile": "Profili redaktə et",
+      "redeem_points": "Points istifadə et",
+      "community": "Cəmiyyət",
+      "community_members": "Cəmiyyət üzvləri",
+      "community_activities": "Cəmiyyət fəaliyyətləri",
+      "browser": "Brauzer",
+      "asset_details": "Aktiv təfərrüatları",
+      "edit_history": "Redaktə tarixçəsi",
+      "welcome": "Xoş gəldin",
+      "chat": "Söhbət",
+      "backup_keys": "Açarları ehtiyat nüsxələ",
+      "trade": "Ticarət",
+      "ai_image_generator": "Süni intellekt şəkil generatoru",
+      "select_assets": "Aktivləri seç",
+      "poll": "Sorğu",
+      "bot_comments": "Bot şərhləri"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Sahib açarı tələb edən əməliyyatlar Ecency-də imzalana bilməz.",
+      "post": "Göndəriş/Şərh",
+      "custom": "Xüsusi JSON",
+      "sign_buffer": "Mesajı imzala",
+      "send_token": "Token göndər",
+      "witness_vote": "Witness səsi",
+      "proxy": "Proxy təyin et",
+      "power_up": "Stake et",
+      "power_down": "Stake çıxar",
+      "broadcast": "Yayımla",
+      "sign_tx": "Əməliyyatı imzala",
+      "encode": "Mesajı kodla",
+      "decode": "Açarı yoxla",
+      "add_account_authority": "Hesab səlahiyyəti əlavə et",
+      "remove_account_authority": "Hesab səlahiyyətini sil",
+      "add_key_authority": "Açar səlahiyyəti əlavə et",
+      "remove_key_authority": "Açar səlahiyyətini sil",
+      "create_claimed_account": "Hesab yarat",
+      "create_proposal": "Təklif yarat",
+      "remove_proposal": "Təklifi sil",
+      "update_proposal_vote": "Təklif səsi",
+      "signed_call": "İmzalı çağırış"
+    },
+    "translate_language": {
+      "ar": "Ərəbcə",
+      "az": "Azərbaycanca",
+      "bg": "Bolqarca",
+      "bn": "Benqalca",
+      "ca": "Katalanca",
+      "cs": "Çexcə",
+      "da": "Danimarkaca",
+      "de": "Almanca",
+      "el": "Yunanca",
+      "en": "İngiliscə",
+      "eo": "Esperanto",
+      "es": "İspanca",
+      "et": "Estonca",
+      "fa": "Farsca",
+      "fi": "Fincə",
+      "fr": "Fransızca",
+      "ga": "İrlandca",
+      "he": "İbranicə",
+      "hi": "Hindcə",
+      "hu": "Macarca",
+      "id": "İndoneziyaca",
+      "it": "İtalyanca",
+      "ja": "Yaponca",
+      "ko": "Koreyaca",
+      "lt": "Litvaca",
+      "lv": "Latışca",
+      "ms": "Malayca",
+      "nb": "Norveçcə",
+      "nl": "Niderlandca",
+      "pl": "Polyakca",
+      "pt": "Portuqalca",
+      "ro": "Rumınca",
+      "ru": "Rusca",
+      "sk": "Slovakca",
+      "sl": "Slovenca",
+      "sq": "Albanca",
+      "sv": "İsveçcə",
+      "th": "Taylandca",
+      "tl": "Taqaloqca",
+      "tr": "Türkcə",
+      "uk": "Ukraynaca",
+      "zh": "Çincə",
+      "zt": "Çincə (ənənəvi)"
+    },
+    "reading": {
+      "banner_text": "Bu göndəriş {source} dilindədir. {target} diline tərcümə edilsin?",
+      "translated_from_text": "{source} dilindən tərcümə edilib"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# üzv} other {# üzv}} • {authors, plural, one {# müəllif} other {# müəllif}} • {posts, plural, one {# göndəriş} other {# göndəriş}}",
+      "community_title": "{title} cəmiyyəti",
+      "members_title": "{title} üzvləri",
+      "activities_title": "{title} fəaliyyəti",
+      "cannot_start_with_or": "@ və ya # ilə başlaya bilməz",
+      "use_a_two_letter": "İki hərfli dil kodu istifadə et, məsələn en",
+      "at_most_characters": "Ən çox {max, plural, one {# simvol} other {# simvol}}",
+      "council": "Şura",
+      "journal": "Jurnal",
+      "topic": "Mövzu",
+      "community_not_found": "Cəmiyyət tapılmadı."
+    },
+    "transfer": {
+      "one_recipient": "Bu köçürmə üçün yalnız bir alıcı istifadə oluna bilər.",
+      "is_an_exchange_and": "{exchange} birjadır və təkrarlanan köçürmələri dəstəkləməyə bilər: cədvəl üzrə göndərilən vəsait itə bilər. Əvəzində birdəfəlik köçürmə istifadə et."
+    },
+    "dapps": {
+      "signing_info": "Ecency Hive imza əlavəsi kimi çıxış edir. dApp səndən Keychain, Keeper və ya Peak Vault kimi brauzer əlavəsi ilə daxil olmağı istədikdə həmin seçimi seç. İmzalamanı Ecency təhlükəsiz şəkildə həll edəcək.",
+      "category_social": "Sosial",
+      "category_gaming": "Oyun",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Qrup",
+      "unable_to_load_messages": "Mesajlar yüklənə bilmir.",
+      "someone": "Kimsə",
+      "renamed_the_group_to": "{actor} qrupun adını \"{name}\" etdi",
+      "removed_the_group_name": "{actor} qrup adını sildi",
+      "unable_to_send_your": "Mesajın göndərilə bilmir.",
+      "unable_to_remove_message": "Mesaj silinə bilmir.",
+      "unknown": "Naməlum",
+      "members_online": "{members, plural, one {# üzv} other {# üzv}} • {online} onlayn",
+      "failed_to_load_pinned": "Sancılmış mesajlar yüklənmədi",
+      "you": "Sən",
+      "title": "Reaksiyalar"
+    },
+    "tip": {
+      "login_required": "Bəxşiş göndərmək üçün daxil ol",
+      "max_decimals": "Ən çox {n, plural, one {# onluq rəqəm} other {# onluq rəqəm}}"
+    },
+    "paid": {
+      "check_again": "Yenidən yoxla",
+      "give_up": "Əl çək",
+      "unknown": "Hələ cavab yoxdur. Sorğu hələ də icra olunur ola bilər. Nəticəni almaq üçün yenidən yoxla: ikinci dəfə ödəniş tutulmur.",
+      "pending": "Sorğun hələ də emal olunur. Bir azdan yenidən yoxla: ikinci dəfə ödəniş tutulmur.",
+      "restored": "Əvvəlki sorğunun hələ cavabı yoxdur. Nəticəsini almaq üçün yenidən yoxla: ikinci dəfə ödəniş tutulmur.",
+      "give_up_confirm": "Sorğu keçibsə, Points xərclənib və nəticə itəcək.",
+      "not_stored": "Bu sorğu cihazda saxlanıla bilmədi. Bitənə qədər bu ekranı açıq saxla.",
+      "sign_in_again": "Sessiyanın bitib. Yenidən daxil ol, sonra yenidən yoxla.",
+      "other_account": "Bu @{owner} hesabına aiddir. Davam etmək üçün həmin hesaba qayıt."
+    },
+    "ai": {
+      "run_ai_assist": "Süni intellekt köməkçisini işə sal ({costText})",
+      "no_longer_free_cost": "Bu işə salma bu gün artıq pulsuz deyil. Qiyməti {cost} {unit}.",
+      "no_longer_free": "Bu işə salma bu gün artıq pulsuz deyil.",
+      "content_violates_our_content": "Məzmun məzmun siyasətimizi pozur. Mətnini dəyişdir. Points geri qaytarılmadı.",
+      "generate_image": "Şəkil yarat ({costLabel})",
+      "use_prompt": "İstifadə et: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Gözlə, başqa əməliyyat davam edir",
+      "not_a_community_post": "Cəmiyyət göndərişi deyil.",
+      "parent_post_not_found": "Ana göndəriş tapılmadı",
+      "the_account_changed": "Hesab dəyişdi."
+    },
+    "dictation": {
+      "balance": "Balans: {balance} {unit}",
+      "stop_points": "Dayandır ({cost} Points)",
+      "stop_free": "Dayandır (Pulsuz)",
+      "transcribe_points": "Mətnə çevir ({cost} Points)",
+      "transcribe": "Mətnə çevir",
+      "no_longer_free_cost": "Bu yazı bu gün artıq pulsuz deyil. Qiyməti {cost} Points.",
+      "no_longer_free": "Bu yazı bu gün artıq pulsuz deyil.",
+      "held_locked": "Ecency kilidləndikdə yazı dayandı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
+      "held_no_background": "Ecency ekrandan çıxdıqda yazı dayandı (yazı bildirişini göstərə bilmədi). Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
+      "held_stopped": "Yazı bildirişdən dayandırıldı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
+      "held_focus_lost": "Yazı zəng və ya başqa tətbiqin səsi səbəbindən dayandı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
+      "held_interrupted": "Başqa tətbiq mikrofonu götürdüyü üçün yazı dayandı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
+      "unavailable": "Bu cihazda yazı mövcud deyil.",
+      "not_read": "Bu yazı oxuna bilmədi və ya çox böyükdür. Heç nə göndərilmədi və ödəniş tutulmadı.",
+      "give_up_not_sent": "Bu yazı göndərilmədi, ona görə ödəniş tutulmadı. Silinəcək.",
+      "give_up_not_charged": "Bu yazı üçün ödəniş tutulmadı. Silinəcək.",
+      "clip_lost": "Əvvəlki sorğunun yazısı artıq bu cihazda yoxdur. Sorğu keçibsə, Points xərclənib və mətni alına bilməz."
+    },
+    "register": {
+      "error_code_28": "Sorğun emal oluna bilmədi. Qeydiyyat növbəsi çox güman ki, doludur. Bir neçə dəqiqə sonra yenidən cəhd et."
+    },
+    "perks": {
+      "quests_empty": "Burada hələ tapşırıq yoxdur, tezliklə yenidən bax.",
+      "freeze_confirm_title": "Seriyanı qoru",
+      "spend_points_on_a": "Seriya dondurmaq üçün {price} Points xərclənsin? Qaçırdığın gündə seriyanı qorumaq üçün istifadə olunur."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Ecency-ni dəstəklə, pulsuz bloq əldə et və təsdiqlənmiş Pro nişanı ilə seçil.",
+      "card_description": "İllik {price} qarşılığında Pro ol. Təsdiqlənmiş nişan, pulsuz bloq və Ecency-yə dəstək.",
+      "card_description_plain": "Bir illik Pro ol. Təsdiqlənmiş nişan, pulsuz bloq və Ecency-yə dəstək.",
+      "member": "Sən Pro üzvüsən.",
+      "benefit_badge": "Adının yanında təsdiqlənmiş Pro nişanı.",
+      "benefit_blog": "yourname.blogs.ecency.com ünvanında pulsuz bloq.",
+      "benefit_support": "Ecency inkişafına birbaşa dəstək.",
+      "benefit_early": "Yeni funksiyalara erkən giriş.",
+      "buy": "İllik {price} qarşılığında Pro ol",
+      "extend": "{price} qarşılığında 12 ay uzat",
+      "extend_note": "Yenidən almaq üzvlüyünə 12 ay əlavə edir.",
+      "unavailable": "Ecency Pro hazırda mağazadan əlçatan deyil.",
+      "activating": "Ödəniş alındı. Üzvlüyün aktivləşdirilir.",
+      "success_title": "Ecency Pro-ya xoş gəldin",
+      "success_body": "Pro üzvlüyün aktivdir. Nişanın tezliklə profilində görünəcək.",
+      "extending": "Ödəniş alındı. Pro üzvlüyün 12 ay uzadılır.",
+      "open_a11y": "Ecency Pro-nu aç"
+    },
+    "editor": {
+      "saving_draft": "Qaralama saxlanılır...",
+      "please_sign_in_first": "Əvvəlcə daxil ol.",
+      "fetch_failed": "Gətirmə uğursuz oldu.",
+      "you_can_only_edit": "Yalnız öz məzmununu redaktə edə bilərsən.",
+      "invalid_percent": "Yanlış faiz",
+      "beneficiary_exists_already": "Faydalanan artıq mövcuddur",
+      "this_draft_belongs_to": "Bu qaralama @{owner} hesabına aiddir. Dərc etmək üçün həmin hesaba qayıt.",
+      "could_not_make_a": "Bu göndəriş üçün yeni keçid yaradıla bilmədi. Başlığı bir az dəyişib yenidən cəhd et.",
+      "an_earlier_attempt_was": "Əvvəlki cəhd bundan sonra dərc edildi. Hansı versiyanı saxlamaq istədiyini yoxla.",
+      "could_not_check_your": "Hesabının posting səlahiyyəti yoxlanıla bilmədi. Bağlantını yoxlayıb yenidən cəhd et.",
+      "this_post_was_changed": "Bu göndəriş sən açdıqdan sonra başqa yerdə dəyişdirilib. Mətnini kopyala, geri qayıt və ən son versiyanı redaktə etmək üçün yenidən aç.",
+      "link_text_placeholder": "Mətn burada"
+    },
+    "app_error": {
+      "this_reply_is_too": "Bu cavab çox uzundur.",
+      "the_network_refused_this": "Şəbəkə bu əməliyyatı rədd etdi.",
+      "invalid_input": "Yanlış giriş.",
+      "secure_storage_is_unavailable": "Təhlükəsiz yaddaş əlçatan deyil. Yenidən daxil ol.",
+      "please_sign_in_first": "Əvvəlcə daxil ol.",
+      "these_credentials_belong_to": "Bu etimadnamələr @{expected} hesabına deyil, @{actual} hesabına aiddir.",
+      "is_not_signed_in": "@{username} bu cihazda daxil olmayıb.",
+      "key_required": "Bu əməliyyatı yerinə yetirmək üçün {role} açarı lazımdır. {hint}",
+      "cancelled": "Ləğv edildi.",
+      "the_request_was_rejected": "Sorğu pulqabı tətbiqində rədd edildi.",
+      "the_request_expired_before": "Sorğunun vaxtı pulqabı tətbiqi cavab verməzdən əvvəl bitdi. Yenidən cəhd et.",
+      "could_not_reach_the": "HiveAuth serverinə çatmaq mümkün olmadı. Yenidən cəhd et.",
+      "unexpected_redirect": "Server gözlənilməz yönləndirmə göndərdi. Heç nə dəyişmədi. Sonra yenidən cəhd et.",
+      "missing_key_hint": "Tənzimləmələr, Səlahiyyətləri idarə et (Şəxsi açarı idxal et) bölməsindən əlavə et və ya onunla yenidən daxil ol.",
+      "this_key_is_also": "Bu açar eyni zamanda bu hesabın sahib açarıdır. Ecency sahib rolunu idarə edən açarı saxlamır: aktiv və posting rollarına öz açarlarını ver, sonra onlarla daxil ol.",
+      "this_is_the_owner": "Bu sahib açarıdır. Ecency sahib açarını heç vaxt saxlamır və ya istifadə etmir: master parolla, ya da posting və ya aktiv açarla daxil ol.",
+      "this_password_only_matches": "Bu parol yalnız hesabın sahib açarına uyğun gəlir. Ecency sahib açarını heç vaxt saxlamır və ya istifadə etmir: posting və ya aktiv açarla daxil ol.",
+      "this_key_cannot_sign": "Bu açar hesab üçün tək başına imzalaya bilməz: hesabın birdən çox imzaya ehtiyacı var (çəkisi həddən aşağıdır).",
+      "public_key_given": "Bu sənin açıq açarındır. Şəxsi açarı (5 ilə başlayır) və ya master parolu yapışdır.",
+      "memo_key_only": "Memo açarı ilə daxil olmaq olmaz. Posting açarını, aktiv açarı və ya master parolu istifadə et.",
+      "network_message": "Şəbəkə xətası. Bağlantını yoxlayıb yenidən cəhd et.",
+      "network_error_this_may": "Şəbəkə xətası. Bu artıq keçmiş ola bilər; yenidən cəhd etmək təhlükəsizdir və iki dəfə paylaşılmayacaq."
+    },
+    "purchases": {
+      "deal_best": "ƏN YAXŞI TƏKLİF!",
+      "deal_popular": "POPULYAR!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Mağaza cavab vermədi."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts istehlakı üçün e-poçt və istifadəçi adı lazımdır",
+      "stuck": "Bu məhsulun əvvəlki alışı tamamlana bilmədi. Mağaza qəbzinlə support@ecency.com ünvanına yaz, qəbz bunun üçün saxlanılır.",
+      "held": "Bu alış yoxlama üçün saxlanılır. #{order} sifariş nömrəsi ilə support@ecency.com ünvanına yaz.",
+      "earlier_purchase": "Bu məhsulun əvvəlki alışı əvvəlcə @{target} üçün tamamlanır.",
+      "earlier_pending": "Bu məhsul üçün əvvəlki ödəniş @{target} üçün hələ gözləyir. Mağaza ödənişi təsdiqlədikdə tamamlanır.",
+      "pending": "Ödənişin gözləyir. Mağaza ödənişi təsdiqlədikdə alış tamamlanır.",
+      "processing": "Alışın emal olunur. Tezliklə tamamlanacaq."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Təkrarlanan köçürmələr",
+      "delegate_hive_power": "Hive Power delegasiya et",
+      "power_up": "Stake et",
+      "set_withdraw_vesting_route": "Çıxarma marşrutunu təyin et",
+      "power_down": "Stake çıxar",
+      "transfer_to_saving": "Yığıma köçür",
+      "transfer_from_saving": "Yığımdan köçür",
+      "cancel_transfer_from_saving": "Yığımdan köçürməni ləğv et",
+      "collateralized_convert": "Girovlu konvertasiya",
+      "witness_vote": "Witness səsi",
+      "witness_update": "Witness yeniləməsi",
+      "witness_set_properties": "Witness xassələrini təyin et",
+      "governance_proxy": "İdarəetmə proksisi",
+      "claim_account": "Hesab tələb et",
+      "create_account": "Hesab yarat",
+      "create_account_with_account": "Hesab krediti ilə hesab yarat",
+      "create_limit_order": "Limit sifarişi yarat",
+      "cancel_limit_order": "Limit sifarişini ləğv et",
+      "redeem_rewards": "Mükafatları al",
+      "post_or_comment": "Göndəriş və ya şərh",
+      "post_or_comment_options": "Göndəriş və ya şərh seçimləri",
+      "custom_operation": "Xüsusi əməliyyat",
+      "update_account_active": "Hesabı yenilə (aktiv)",
+      "update_account_posting": "Hesabı yenilə (posting)",
+      "change_recovery_account": "Bərpa hesabını dəyiş",
+      "create_proposal": "Təklif yarat",
+      "remove_proposal": "Təklifi sil",
+      "update_proposal_votes": "Təklif səslərini yenilə",
+      "update_proposal": "Təklifi yenilə"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Bu keçid @{account} tərəfindən imzalanmalıdır. O hesaba keç və yenidən aç.",
+      "ecency_can_only_sign": "Ecency yalnız keçidlərdən gələn əməliyyatları imzalaya və yayımlaya bilər.",
+      "requester_page": "{host} səhifəsi",
+      "owner_refused": "Sahib açarı tələb edən əməliyyatlar keçiddən imzalana bilməz.",
+      "busy": "Gözlə: başqa sorğu hələ də emal olunur.",
+      "not_supported": "Ecency bu əməliyyatı bu versiyada hələ imzalaya bilmir."
+    },
+    "chats": {
+      "group_members": "Qrup üzvləri",
+      "rename_group": "Qrupun adını dəyiş",
+      "failed_to_load_chats": "Söhbətlər yüklənmədi",
+      "unknown": "Naməlum",
+      "unable_to_mark_channel": "Kanalı oxunmuş kimi işarələmək mümkün olmadı",
+      "unable_to_update_favorites": "Sevimliləri yeniləmək mümkün olmadı",
+      "unable_to_update_mute": "Səssiz rejimini yeniləmək mümkün olmadı",
+      "group": "Qrup",
+      "unable_to_search": "Axtarış mümkün olmadı",
+      "unable_to_start_chat": "Söhbəti başlatmaq mümkün olmadı",
+      "no_internet": "İnternet bağlantısı yoxdur"
+    },
+    "stake": {
+      "confirm_summary": "{hp} HP ({vests} VESTS) @{to} istifadəçisinə deleqasiya edilsin",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "@{recipient} istifadəçisinə artıq deleqasiya edilib"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Yalnız açıq. Ecency sahib açarını heç vaxt saxlamır.",
+      "shared_owner": "Bu hesab sahib rolu və {names} rolu üçün eyni açardan istifadə edir. Həmin açara sahib olan bütün hesabı idarə edir. {names} roluna öz açarını ver və sahib açarını oflayn saxla.",
+      "copy_warning": "Bu şəxsi açara sahib olan hesabının bu hissəsini idarə edir. Digər tətbiqlər buferi oxuya bilər; yalnız etibar etdiyin yerə yapışdır. 2 dəqiqədən sonra buferdən silinir."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN kilidi aktivdir.",
+      "pin_changed": "PIN dəyişdirildi.",
+      "pin_lock_is_off": "PIN kilidi deaktivdir.",
+      "wiped_notice": "Bütün hesablar, açarlar və etimadnamələr bu cihazdan silindi.",
+      "we_could_not_bring": "Hesabların tətbiqin əvvəlki versiyasından köçürülə bilmədi. Yenidən daxil ol.",
+      "your_pin_lock_could": "PIN kilidin əvvəlki versiyadan köçürülə bilmədi. Tətbiq kilidini yenidən aktiv etmək üçün hesab menyusundan yenidən PIN təyin et.",
+      "biometric_unlock_was_turned": "Bu cihazdakı biometrik məlumatlar dəyişdiyi üçün biometrik kilid söndürüldü. PIN ilə kilidi aç, sonra hesab menyusundan yenidən aktiv et.",
+      "biometric_unavailable_notice": "Biometrik kilid aktiv edilmədi: bu cihazda biometrik məlumat qurulmayıb.",
+      "set_backup": "Biometrik kilid üçün ehtiyat PIN təyin et",
+      "biometric_on_notice": "PIN kilidi aktivdir. Biometrik məlumat və ya PIN ilə kilidi aç.",
+      "offer_title": "Biometrik məlumatla kilidi aç",
+      "offer_body": "Ecency-ni üzünlə və ya barmaq izinlə aç. Biometrik məlumat əlçatan olmadıqda tətbiqin kilidini açan PIN də təyin etmisən.",
+      "offer_use": "Biometrikadan istifadə et",
+      "offer_use_pin": "Əvəzində PIN istifadə et"
+    },
+    "common": {
+      "list_and": "{first} və {second}",
+      "role_owner": "sahib",
+      "role_active": "aktiv",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "25 və ya daha az simvollu cavablar Points qazandırmır (keçidlər sayılmır)",
+      "short_content_hint": "Points qazanmaq üçün çox qısadır (25 və ya daha az simvol, keçidlər istisna olmaqla)",
+      "daily_post": "Gündəlik göndəriş {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# günlük seriya} other {# günlük seriya}}",
+      "grant_description": "Ecency hesabı @ecency.app-a hesabında posting icazəsi ver ki, hər dəfə Keychain açmadan göndəriş paylaşa biləsən. Bu icazə hesabının posting səlahiyyətini dəyişir və aktiv açarını tələb edir."
+    },
+    "wallet_history": {
+      "from_to": "@{from} - @{to}",
+      "from_user_id": "@{from} tərəfindən, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} - @{to}, id: {id}",
+      "from_to_account": "@{from} - {to}",
+      "from_user": "@{user} tərəfindən",
+      "to_user": "@{user} istifadəçisinə",
+      "interest": "Faiz",
+      "proposal_pay": "Təklif ödənişi",
+      "categories": "Fəaliyyət növləri",
+      "category_all": "Hamısı",
+      "category_transfers": "Köçürmələr",
+      "category_market": "Bazar sifarişləri",
+      "category_interest": "Faizlər",
+      "category_stake": "Stake əməliyyatları",
+      "category_rewards": "Mükafatlar",
+      "point_type_checkin": "Ürək döyüntüləri",
+      "point_type_login": "Giriş",
+      "point_type_post": "Göndəriş",
+      "point_type_comment": "Şərh",
+      "point_type_vote": "Səs",
+      "point_type_reblog": "Yenidən paylaşma",
+      "point_type_transfer_sent": "Göndərilən köçürmələr",
+      "point_type_transfer_received": "Alınan köçürmələr"
+    },
+    "video_upload": {
+      "continue_upload": "YÜKLƏMƏYƏ DAVAM ET",
+      "source_gone": "Bu yazı artıq cihazda yoxdur. Videonu yenidən çək və ya seç.",
+      "no_camera": "Bu cihazda kamera əlçatan deyil."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Növbəti stake çıxarılması {hours, plural, one {# saat} other {# saat}} sonradır",
+      "account_not_found": "Hesab tapılmadı"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Buferdə şəkil var · Şəkli yapışdır",
+      "no_container": "Ən son waves konteyneri gətirilə bilmədi",
+      "please_sign_in_first": "Əvvəlcə daxil ol.",
+      "write_something_first": "Əvvəlcə nəsə yaz.",
+      "account_changed": "Bu wave başqa hesab kimi yazılıb. Bağla və yenidən yaz.",
+      "no_upload": "Şəkil yükləmə bu buildə hələ əlçatan deyil. Əvəzində mətnə şəkil keçidi yapışdır.",
+      "fail": "Uğursuz"
+    },
+    "delete_account": {
+      "sign_out_failed": "Sorğun göndərildi, lakin çıxış alınmadı. Menyudan çıx.",
+      "not_sent": "Silmə sorğun göndərilə bilmədi. Yenidən cəhd et."
+    },
+    "chat_sheets": {
+      "group_limit": "Qrupda ən çox {max, plural, one {# nəfər} other {# nəfər}} daha ola bilər.",
+      "search_people_by_username": "İnsanları istifadəçi adı ilə axtar",
+      "new_group_title": "Yeni qrup",
+      "new_group_hint": "Qrup söhbəti başlatmaq üçün {min} ilə {max, plural, one {# nəfər} other {# nəfər}} arasında əlavə et.",
+      "no_results": "Bu adla söhbətdə heç kim tapılmadı.",
+      "search_failed": "Axtarış işləmədi. Bağlantını yoxlayıb yenidən cəhd et.",
+      "create": "Qrupu başlat",
+      "new_group_failed": "Qrup başladıla bilmədi. Yenidən cəhd et.",
+      "name_limit": "Qrup adı ən çox {max, plural, one {# simvol} other {# simvol}} ola bilər.",
+      "rename_title": "Qrupun adını dəyiş",
+      "rename_hint": "Qrupa içindəki hər kəsin görəcəyi ad ver. Boş buraxsan, üzvlərin adları göstəriləcək.",
+      "placeholder": "Qrup adı",
+      "not_owner": "Qrupun adını yalnız onu başladan şəxs dəyişə bilər.",
+      "rename_failed": "Qrupun adı dəyişdirilmədi. Yenidən cəhd et."
+    },
+    "editor_side": {
+      "copy_of": "{title} nüsxəsi",
+      "deletions_failed": "Nəsə səhv getdi\n{failed} / {total, plural, one {# silmə} other {# silmə}} uğursuz oldu",
+      "uploads_failed": "{count, plural, one {# yükləmə uğursuz oldu} other {# yükləmə uğursuz oldu}}:\n\n{messages}",
+      "failed_to_delete": "Silmək mümkün olmadı"
+    },
+    "uploads": {
+      "add_to_gallery": "Qalereyaya əlavə et"
+    },
+    "account_notice": {
+      "manage_keys": "Tənzimləmələr, Səlahiyyətləri idarə et",
+      "no_signing_key_title": "@{account} kimi yenidən daxil ol",
+      "no_signing_key": "Ecency artıq sahib açarını və ya master parolu bu cihazda saxlamır və @{account} üçün burada saxlanılan posting və ya aktiv açar yoxdur. Master parolla və ya posting və ya aktiv açarla yenidən daxil ol, ya da {manageKeys} bölməsindən (Şəxsi açarı idxal et) açar əlavə et.",
+      "missing_roles_title": "Bəzi açarlar əlavə edilmədi",
+      "cannot_post": "göndəriş paylaşmaq, səs vermək və ya şərh yazmaq",
+      "cannot_transfer": "köçürmə göndərmək və ya hesab tənzimləmələrini dəyişmək",
+      "missing_roles": "Parolun artıq @{account} hesabının {missing} açarına uyğun gəlmir: parol təyin ediləndən sonra hesabda dəyişdirilib. Bu cihazda saxlanılan: {kept} açarı. {manageKeys} bölməsindən (Şəxsi açarı idxal et) {missing} açarını əlavə edənə qədər bu tətbiq @{account} üçün açarlarla {cannot} əməliyyatını edə bilməz.",
+      "shared_owner_title": "Bu açar sahib rolunu da idarə edir",
+      "shared_owner": "@{account} sahib rolu və {names} rolu üçün eyni açardan istifadə edir. Bu açara sahib olan bütün hesabı idarə edir. Ecency onu yalnız {names} açarı kimi saxlayır və sahib əməliyyatları üçün heç vaxt istifadə etmir. {names} roluna öz açarını ver və sahib açarını oflayn saxla."
+    },
+    "dapp_browser": {
+      "message_from": "{host} saytından mesaj",
+      "home_title": "Ana səhifə",
+      "loading_title": "Yüklənir...",
+      "blank_run": "[{count, plural, one {# boş simvol} other {# boş simvol}}]",
+      "too_large": "Bu səhifə göstərilə bilməyəcək qədər böyük imza sorğusu göndərdi, ona görə Ecency rədd etdi."
+    },
+    "community_service": {
+      "the_account_changed": "Hesab dəyişdi."
+    },
+    "profile_edit": {
+      "enter_link": "Şəkil keçidini daxil et",
+      "please_sign_in_first": "Əvvəlcə daxil ol.",
+      "account_not_found": "Hesab tapılmadı",
+      "please_enter_an_image": "https:// ilə başlayan şəkil keçidini daxil et"
+    },
+    "background_media": {
+      "post_by": "@{author} tərəfindən göndəriş"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Əvvəlcə daxil ol."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Eyni çəki ilə artıq səs vermisən.",
+      "insufficient_rc": "Resurs Krediti çatışmır. Gözlə və ya stake et.",
+      "missing_authority": "Posting səlahiyyəti çatışmır. Giriş metodunu yoxla.",
+      "comment_too_soon": "Yenidən göndəriş paylaşmazdan əvvəl gözlə.",
+      "paid_out": "Bu göndərişin mükafatı artıq ödənilib.",
+      "too_large": "Əməliyyat {size, plural, one {# bayt} other {# bayt}} həcmindədir, {max} bayt limitini aşır.",
+      "network_error_please_check": "Şəbəkə xətası. Bağlantını yoxlayıb yenidən cəhd et.",
+      "unconfirmed_message": "Bunun keçib-keçmədiyi təsdiqlənmədi. Pulqabını və ya tarixçəni yoxla; yalnız orada yoxdursa yenidən başlat.",
+      "undecided_message": "Bu artıq keçmiş ola bilər. Yenidən cəhd etməzdən əvvəl pulqabını və ya tarixçəni yoxla."
+    },
+    "chat_api": {
+      "request_failed": "Sorğu uğursuz oldu ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} yazır...",
+      "typing_two": "{first} və {second} yazır...",
+      "typing_three": "{first}, {second} və {third} yazır...",
+      "typing_many": "{first}, {second} və {count, plural, one {# nəfər daha} other {# nəfər daha}} yazır...",
+      "banned": "{reason} Söhbəti yenə də oxuya bilərsən. Paylaşım {until} açılacaq.",
+      "joined_when": "qoşulub {time}",
+      "joined": "qoşulub",
+      "official_badge": "Rəsmi",
+      "official_badge_label": "Rəsmi Ecency hesabı"
+    },
+    "side_menu": {
+      "ask_esie": "Esie-dən soruş"
+    },
+    "chat_service": {
+      "missing_token": "Hive giriş tokeni yoxdur. Çıxış edib yenidən daxil ol.",
+      "dm_error": "İstifadəçi söhbətlərə qoşulmayıb"
+    },
+    "compose_reply": {
+      "account_changed": "Bu cavab başqa hesab kimi yazılıb. Bağla və yenidən yaz.",
+      "write_something_first": "Əvvəlcə nəsə yaz.",
+      "please_sign_in_first": "Əvvəlcə daxil ol."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Çox faydalanan var: ən çox {max}.",
+      "a_beneficiary_s_share": "Faydalananın payı 0,01% ilə 100% arasında olmalıdır.",
+      "beneficiaries_add_up_to": "Faydalananların payları cəmi 100%-i aşır.",
+      "a_beneficiary_is_listed": "Bir faydalanan iki dəfə siyahıdadır.",
+      "you_cannot_be_a": "Öz göndərişinin faydalananı ola bilməzsən.",
+      "a_beneficiary_has_an": "Bir faydalananın hesab adı yanlışdır."
+    },
+    "follows": {
+      "fail": "Uğursuz!: {message}",
+      "follower_count": "İzləyici ({count})",
+      "following_count": "İzlənilən ({count})"
+    },
+    "link": {
+      "unsupported": "Bu keçid hələ dəstəklənmir.",
+      "cannot_open": "Keçid açıla bilmir",
+      "unsupported_version": "Bu keçid bu versiyada dəstəklənmir."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Kəşf brauzeri əməliyyatları imzalamaq üçün Hive pulqabına daxil ola bilər. Bu keçid göndəriş məzmunundan gəlir və Ecency tərəfindən təsdiqlənməyib. Yalnız etibar edirsənsə davam et:\n\n{url}"
+    },
+    "listen": {
+      "message": "Dinləmək üçün {required} Points lazımdır, səndə {available} var.",
+      "unlock_label": "Aç · {cost} Points",
+      "preparing_audio": "Audio hazırlanır · {preparingPercent}%",
+      "waiting_in_line_ahead": "Növbə gözlənilir, qarşında {ahead} nəfər var…",
+      "next_in_line": "Növbəti sənsən…",
+      "preparing_about_minutes": "Audio hazırlanır, təxminən {minutes} dəq…",
+      "preparing_audio_2": "Audio hazırlanır…",
+      "spend_confirm": "Bu göndərişi dinləmək üçün {cost} Points xərclənsin? Audio istədiyin vaxt təkrar dinləməyin üçün sənindir.",
+      "about_minutes": "~{minutes} dəq",
+      "failed_refunded": "Audio yaradıla bilmədi, Points geri qaytarıldı"
+    },
+    "media_pick": {
+      "preparing_video": "Video hazırlanır...",
+      "library_hint": "Fotolarından seç",
+      "camera_hint": "İndi yeni foto çək",
+      "files_hint": "Bu cihazdakı və buluddakı fayllara bax",
+      "paste_hint": "Kopyaladığın şəkildən istifadə et",
+      "link_hint": "Vebdən şəkil istifadə et"
+    },
+    "media_picking": {
+      "image_types_message": "Bu fayl növü dəstəklənmir. JPEG, PNG, GIF, WebP və ya HEIC şəkli seç.",
+      "video_types_message": "Bu fayl növü dəstəklənmir. MP4 və ya MOV videosu seç.",
+      "gif_too_large": "Bu GIF {mb} MB limitindən böyükdür."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Bu əməliyyat həm aktiv, həm də posting imzası tələb edir, Ecency isə onları hələ birlikdə imzalaya bilmir."
+    },
+    "poll": {
+      "fail": "Uğursuz!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Hesabının posting səlahiyyəti yoxlanıla bilmədi. Bağlantını yoxlayıb yenidən cəhd et."
+    },
+    "post_lists": {
+      "voters_title": "Səs verənlər ({total})",
+      "reblogs_title": "Yenidən paylaşma məlumatı ({total})",
+      "no_history_found": "Tarixçə tapılmadı!",
+      "no_edit_history_available": "Bu məzmun üçün redaktə tarixçəsi yoxdur.",
+      "version_label": "Versiya {version}"
+    },
+    "stats": {
+      "other_device": "Digər"
+    },
+    "profile": {
+      "account_not_found": "Hesab tapılmadı",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • {hours, plural, one {# saat} other {# saat}} ərzində dolacaq"
+    },
+    "profile_metadata_guard": {
+      "refused": "Cari profilin oxuna bilmədi, yenidən cəhd et"
+    },
+    "profile_sheet": {
+      "fail": "Uğursuz! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Hesab tapılmadı"
+    },
+    "push_payload": {
+      "mentioned": "@{source} @{target} istifadəçisini xatırlatdı",
+      "replied": "@{source} @{target} istifadəçisinə cavab verdi",
+      "transferred": "@{source} @{target} istifadəçisinə köçürmə etdi",
+      "delegated": "@{source} @{target} istifadəçisinə deleqasiya etdi",
+      "rewards_received": "Mükafatlar alındı",
+      "account_updated": "Hesab yeniləndi",
+      "account_updated_body": "Hesab məlumatların yeniləndi",
+      "followed": "@{source} @{target} istifadəçisini izləməyə başladı",
+      "unfollowed": "@{source} @{target} istifadəçisini izləməyi dayandırdı",
+      "ignored": "@{source} @{target} istifadəçisini nəzərə almadı",
+      "blacklisted": "@{source} @{target} istifadəçisini qara siyahıya saldı",
+      "posted_in": "@{source} #{firstTag} teqində paylaşdı"
+    },
+    "qr_scan": {
+      "permission_title": "Kamera icazəsi alına bilmədi",
+      "permission_message": "Ecency tənzimləmələrində kamera icazəsi ver.",
+      "permission_allow": "İcazə ver"
+    },
+    "reply_account": {
+      "switch": "Başqa hesab kimi cavab ver"
+    },
+    "send_journal": {
+      "your_from_went_through": "@{account} hesabından {label} əməliyyatın keçdi.",
+      "not_sent": "@{account} hesabından {label} əməliyyatın keçmədi. Heç nə göndərilmədi; yenidən başlada bilərsən.",
+      "checking_whether_your_from": "@{account} hesabından {label} əməliyyatının keçib-keçmədiyi yoxlanılır. Yenidən göndərməzdən əvvəl pulqabını yoxla."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner səhifəsi bağlandı",
+      "wrong_role": "Bu sənin {given} açarındır; bu əməliyyat {needed} açarını tələb edir.",
+      "action_id_required": "Bu əməliyyatın təhlükəsiz təkrar cəhdi üçün əməliyyat ID-si lazımdır."
+    },
+    "signing_router": {
+      "owner_never": "Sahib əməliyyatları tətbiqdə heç vaxt imzalanmır."
+    },
+    "spin": {
+      "key_missing": "Oyun açarı yoxdur",
+      "score": "{score, plural, one {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Bu gün (UTC), {time} sonra sıfırlanır",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Hər gün 00:00 UTC-də sıfırlanır"
+    },
+    "storage_reset": {
+      "title": "Yenidən daxil ol",
+      "message": "Təhlükəsiz yaddaş bu cihazda sıfırlandı. Yenidən daxil ol.",
+      "failed": "Bu cihazdakı hesablar silinə bilmədi. Yenidən cəhd et."
+    },
+    "store": {
+      "in_app_purchases_are": "Tətbiqdaxili alışlar bu buildə əlçatan deyil."
+    },
+    "wallet_sends": {
+      "journal_full": "Əvvəlki çoxlu göndərmə hələ şəbəkə ilə yoxlanılır. Daha çox göndərməzdən əvvəl təsdiqlənmələrini gözlə.",
+      "check_later": "Şəbəkə bunu vaxtında təsdiqləmədi. Yenidən göndərməzdən əvvəl pulqabını və ya tarixçəni yoxla; tətbiq növbəti açılışda yenidən yoxlayır."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# oxunmamış} other {# oxunmamış}}",
+      "locked_text": "Görmək üçün Ecency kilidini aç",
+      "signed_out_text": "Ecency-yə daxil ol"
+    },
+    "posting_grant": {
+      "unreadable": "Hesabının cari səlahiyyətləri oxuna bilmədi. Heç nə dəyişmədi; yenidən cəhd et.",
+      "reads_disagree": "Hesabının posting səlahiyyətinin iki oxunuşu uyğun gəlmir. Heç nə dəyişmədi; yenidən cəhd et."
+    },
+    "vote": {
+      "vote_weight_must_be": "Səs çəkisi -100% ilə 100% arasında olmalıdır.",
+      "please_sign_in_first": "Əvvəlcə daxil ol."
+    },
+    "widget": {
+      "streak_name": "Tapşırıq seriyası",
+      "write": "Yaz",
+      "new_wave": "Yeni wave",
+      "notifications_description": "Oxunmamış bildirişlərin. PIN kilidi aktiv olduqda gizlədilir.",
+      "streak_description": "Gündəlik tapşırıq seriyan. PIN kilidi aktiv olduqda gizlədilir.",
+      "compose_description": "Göndəriş və ya yeni wave yaz.",
+      "streak_title": "Seriya",
+      "daily_quests": "Gündəlik tapşırıqlar",
+      "streak_hint": "Seriyanı görmək üçün Üstünlüklər bölməsini aç",
+      "open_perks": "Üstünlükləri aç",
+      "open_app": "Ecency-ni aç",
+      "unread_caption": "{count, plural, one {oxunmamış} other {oxunmamış}}",
+      "streak_caption": "{count, plural, one {günlük seriya} other {günlük seriya}}"
+    },
+    "system": {
+      "dictation_channel": "Səslə yazma",
+      "listen_channel": "Dinlə",
+      "dictation_channel_description": "Səslə yazma üçün yazı arxa planda davam edərkən Dayandır əməliyyatı ilə göstərilir.",
+      "dictation_title": "Səslə yazma üçün yazılır",
+      "dictation_text": "Ecency səslə yazmanı qeyd edir. Dayandır tətbiqdə təsdiqləyənə qədər göndərmir.",
+      "listen_channel_description": "Dinləmə arxa planda davam edə bilmədikdə sənə xəbər verir.",
+      "listen_paused": "Dinləmə dayandırıldı",
+      "listen_paused_text": "Dinləməyə davam etmək üçün Ecency-ni aç.",
+      "skip_back": "15 saniyə geri",
+      "skip_forward": "15 saniyə irəli"
+    },
+    "permission": {
+      "face_id": "PIN əvəzinə Face ID ilə Ecency kilidini aç.",
+      "camera": "QR kodları skan et, foto çək və ya video yaz və göndərişinə əlavə et.",
+      "photo_library_add": "Ecency göndərişlərdən yüklədiyin şəkilləri foto kitabxanana saxlayır.",
+      "photo_library": "Ecency göndərişlərdən yüklədiyin şəkilləri foto kitabxanandakı Ecency albomunda bir yerdə saxlayır.",
+      "microphone": "Ecency mikrofonundan göndəriş və şərhləri səslə yazmağın (bu yazılar mətnə çevrilmək üçün Ecency-yə göndərilir) və göndərişinə əlavə etdiyin videoya səs yazmağın üçün istifadə edir."
+    },
+    "android": {
+      "no_browser": "Brauzer əlçatan deyil",
+      "biometric_unlock_title": "Ecency kilidini biometrik məlumatla aç",
+      "biometric_confirm": "Barmaq izi və ya üzünlə təsdiqlə",
+      "image_unsupported_address": "Dəstəklənməyən şəkil ünvanı",
+      "image_create_failed": "Fayl yaradıla bilmədi",
+      "image_write_failed": "Fayla yazıla bilmədi",
+      "image_too_large": "Şəkil çox böyükdür",
+      "image_download_failed": "Yükləmə {status} statusu ilə uğursuz oldu",
+      "billing_disconnected": "Google Play Billing bağlantısı kəsildi.",
+      "billing_no_screen": "Alışı göstərmək üçün ekran yoxdur.",
+      "billing_error": "Google Play Billing xətası {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Bu ay {count, plural, one {# paylaşım} other {# paylaşım}} yaratdın. Belə davam et!",
-        "checkin": "Bu həftə {count, plural, one {# gün} other {# gün}} qeydiyyatdan keçdin. Belə davam et!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "#{tag} teqində {count, plural, one {# yeni göndəriş} other {# yeni göndəriş}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# uğursuz cəhd(lər)} other {# uğursuz cəhd(lər)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} günlük seriya"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Yalnız {days} gündən köhnə hesablara icazə verilir",
-        "max_choices": "• Ən çoxu {choices} seçim edə bilərsən"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Qalan {executions} köçürmə",
-        "schedule_summary": "{executions} köçürmə, hər biri hər {hours} saatdan bir"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Points qazanmaq üçün çox qısadır ({n, plural, one {# simvol} other {# simvol}} və ya daha az, keçidlər istisna olmaqla)"
       },
       "chats": {
-        "people_joined": "{count} nəfər qoşuldu"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "təxminən {count, plural, one {# dəqiqəyə} other {# dəqiqəyə}}",
+        "ban-remaining-hours": "təxminən {count, plural, one {# saata} other {# saata}}",
+        "ban-remaining-days": "təxminən {count, plural, one {# günə} other {# günə}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Ən çox {n, plural, one {# teq} other {# teq}} istifadə et",
+          "too_long": "Axtarış çox uzundur. Ən çox {n, plural, one {# simvol} other {# simvol}} istifadə et"
+        }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count} simvol tələb olunur",
-        "chars_remaining": "{count} simvol qalıb"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Bir dəfəyə ən çox {count, plural, one {# şəkil} other {# şəkil}} seçə bilərsən"
+      },
+      "dictation": {
+        "stop_hint": "Mətnə çevirib göndərişinə əlavə etmək üçün dayandır. Ən çox {m, plural, one {# dəqiqə} other {# dəqiqə}}.",
+        "rate": "{s, plural, one {# saniyə} other {# saniyə}} üçün {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Növbəti steyk çıxarması {days} gün sonradır, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "{min} ilə {max, plural, one {# simvol} other {# simvol}} arasında"
       }
     }
   }

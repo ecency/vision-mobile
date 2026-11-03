@@ -6,7 +6,7 @@
     }
   },
   "pro": {
-    "badge_a11y": "Ecency Pro member"
+    "badge_a11y": "Ecency Pro narys"
   },
   "perks": {
     "header": "Privalumai",
@@ -31,42 +31,42 @@
     "promote_desc": "Pritraukite daugiau dėmesio savo įrašui",
     "account_boost": "Paskyros stiprinimas",
     "account_boost_desc": "Sustiprinkite bet kurią paskyrą",
-    "rc_topup": "Top up RC",
-    "rc_topup_desc": "Keep posting when low on Resource Credits",
-    "streak_freeze_owned": "{n} in reserve",
-    "streak_freeze_buy": "Protect streak ({price} Points)",
-    "streak_freeze_buying": "Protecting",
-    "streak_freeze_error": "Could not buy a streak freeze. Please try again."
+    "rc_topup": "Papildyti RC",
+    "rc_topup_desc": "Skelbkite toliau, kai trūksta Išteklių Kreditų",
+    "streak_freeze_owned": "{n} atsargoje",
+    "streak_freeze_buy": "Apsaugoti seriją ({price} Points)",
+    "streak_freeze_buying": "Apsaugoma",
+    "streak_freeze_error": "Nepavyko nusipirkti serijos užšaldymo. Bandykite dar kartą."
   },
   "quest_chip": {
-    "daily_post": "Daily post",
-    "streak": "{n} day streak",
-    "keep_streak": "Keep your streak alive"
+    "daily_post": "Kasdienis įrašas",
+    "streak": "{n} d. serija",
+    "keep_streak": "Išlaikykite savo seriją"
   },
   "waves": {
     "for_you": "Jums",
     "following": "Sekami",
-    "custom_feeds_title": "Custom feeds",
-    "custom_feeds_subtitle": "Pin sources and tags to add them as feed tabs.",
-    "add_tag_placeholder": "Add a tag",
-    "sources": "Sources",
-    "your_feeds": "Your feeds",
-    "trending_tags": "Trending tags",
-    "shorts_empty": "No shorts to show yet",
-    "mute": "Mute",
-    "unmute": "Unmute"
+    "custom_feeds_title": "Pasirinktiniai srautai",
+    "custom_feeds_subtitle": "Prisekite šaltinius ir žymas, kad pridėtumėte juos kaip srauto skirtukus.",
+    "add_tag_placeholder": "Pridėti žymą",
+    "sources": "Šaltiniai",
+    "your_feeds": "Jūsų srautai",
+    "trending_tags": "Populiarios žymos",
+    "shorts_empty": "Kol kas nėra trumpų vaizdo įrašų",
+    "mute": "Nutildyti",
+    "unmute": "Įjungti garsą"
   },
   "waves_onboarding": {
-    "title": "Getting started",
-    "subtitle": "New here? Waves are short posts and the easiest way to jump in.",
+    "title": "Kaip pradėti",
+    "subtitle": "Naujas čia? Waves yra trumpi įrašai ir lengviausias būdas įsijungti.",
     "progress": "{completed}/{total}",
-    "dismiss": "Dismiss",
-    "item_wave": "Post your first Wave",
-    "item_vote": "Vote on a Wave you like",
-    "item_reply": "Reply to someone",
-    "item_checkin": "Check in to start your streak",
-    "all_done_title": "All done 🎉",
-    "all_done_subtitle": "You're all set. Keep the waves coming!"
+    "dismiss": "Atmesti",
+    "item_wave": "Paskelbkite savo pirmąjį Wave",
+    "item_vote": "Balsuokite už patikusį Wave",
+    "item_reply": "Atsakykite kam nors",
+    "item_checkin": "Pažymėkite apsilankymą, kad pradėtumėte seriją",
+    "all_done_title": "Viskas padaryta 🎉",
+    "all_done_subtitle": "Viskas paruošta. Skelbkite Waves toliau!"
   },
   "profile": {
     "havent_commented": "kolkas dar nieko nepakomentavo",
@@ -147,6 +147,16 @@
     "wizard_config_val": "Amžius  |  Matomumas  |  Vertinimas",
     "attach_poll": "Pridėti apklausą"
   },
+  "favorite_tags": {
+    "title": "Žymos",
+    "hint": "Sekite, kad gautumėte pranešimus apie naujus įrašus su šia žyma",
+    "following_hint": "Gaunate pranešimus apie naujus įrašus su šia žyma",
+    "follow": "Sekti",
+    "following": "Sekama",
+    "added": "Žyma sekama",
+    "removed": "Žymos sekimas nutrauktas",
+    "empty_list": "Čia nieko nėra"
+  },
   "favorites": {
     "add": "Pridėti į parankinius",
     "add_error": "Nepavyko pridėti į parankinius",
@@ -181,7 +191,33 @@
     "payout": "Išmoka",
     "details": "Detalės",
     "community": "bendruomenė",
-    "new_post": "Naujas įrašas"
+    "new_post": "Naujas įrašas",
+    "mute_post_title": "Nutildyti šį įrašą",
+    "unmute_post_title": "Panaikinti šio įrašo nutildymą",
+    "mute_post_reason": "Kodėl tai nutildoma?",
+    "unmute_post_reason": "Kodėl tai atkuriama?",
+    "manage": "Tvarkyti bendruomenę",
+    "manage_members": "Nariai ir vaidmenys",
+    "manage_settings": "Bendruomenės nustatymai",
+    "manage_activities": "Veiklos žurnalas",
+    "activities": "veikla",
+    "no_activities": "Veiklos dar nėra",
+    "activities_load_failed": "Nepavyko įkelti veiklos. Patraukite žemyn, kad atnaujintumėte.",
+    "set_role": "Nustatyti vaidmenį",
+    "assign_role": "Priskirti vaidmenį",
+    "assign_role_hint": "Ieškokite bet kurios paskyros, taip pat ir tos, kuri neprenumeravo, ir pasirinkite vaidmenį.",
+    "username_placeholder": "Naudotojo vardas",
+    "invalid_username": "Pasirinkite esamą paskyrą iš rezultatų",
+    "members": "nariai",
+    "no_members": "Narių nerasta",
+    "members_incomplete": "Nepavyko įkelti kai kurių narių. Patraukite žemyn, kad atnaujintumėte.",
+    "members_load_failed": "Nepavyko įkelti narių. Patraukite žemyn, kad atnaujintumėte.",
+    "role_owner": "Savininkas",
+    "role_admin": "Administratorius",
+    "role_mod": "Moderatorius",
+    "role_member": "Narys",
+    "role_guest": "Svečias",
+    "role_muted": "Nutildytas"
   },
   "trade": {
     "swap_for": "Keičiama {fromAmount} į {toAmount}",
@@ -212,7 +248,11 @@
     "cross-post": "Kryžminis įrašas",
     "pin-blog": "Prisegti prie tinklaraščio",
     "copy": "kopijuoti nuorodą",
+    "copy-text": "kopijuoti tekstą",
+    "open-thread": "atidaryti giją",
     "unpin-community": "Atsegti nuo bendruomenės",
+    "mute-post": "Nutildyti įrašą",
+    "unmute-post": "Panaikinti įrašo nutildymą",
     "mute": "Nutildyti / blokuoti",
     "reblog": "pasidalinti",
     "undo-reblog": "atšaukti persiuntimą",
@@ -232,24 +272,24 @@
     "unpin-reply": "Atsegti komentarą"
   },
   "post_translate": {
-    "banner_detected": "This post is in {lang}. Translate to {target}?",
-    "translate_to": "Translate to {lang}",
-    "show_original": "Show original",
-    "translated_from": "Translated from {lang}",
-    "change_language": "Change language"
+    "banner_detected": "Šio įrašo kalba: {lang}. Išversti į: {target}?",
+    "translate_to": "Išversti į: {lang}",
+    "show_original": "Rodyti originalą",
+    "translated_from": "Išversta iš: {lang}",
+    "change_language": "Keisti kalbą"
   },
   "compose_translate": {
-    "title": "Translate post",
-    "source": "Source language",
-    "target": "Target language",
-    "detected": "Detected: {lang}",
-    "translate": "Translate",
-    "apply": "Apply",
-    "review_note": "Adds a machine translation of your own writing to the end of the post. Review and edit before publishing.",
-    "too_short": "Write a bit more first. Translation needs at least a few sentences.",
-    "progress": "Translating {done} of {total}...",
-    "error": "Translation failed. Please try again.",
-    "add_title_marker": "Add language marker to title"
+    "title": "Įrašo vertimas",
+    "source": "Originalo kalba",
+    "target": "Tikslinė kalba",
+    "detected": "Aptikta: {lang}",
+    "translate": "Versti",
+    "apply": "Taikyti",
+    "review_note": "Prie įrašo pabaigos pridedamas jūsų paties parašyto teksto mašininis vertimas. Prieš skelbdami peržiūrėkite ir redaguokite.",
+    "too_short": "Pirmiausia parašykite šiek tiek daugiau. Vertimui reikia bent kelių sakinių.",
+    "progress": "Verčiama {done} iš {total}...",
+    "error": "Vertimas nepavyko. Bandykite dar kartą.",
+    "add_title_marker": "Pridėti kalbos žymą prie pavadinimo"
   },
   "side_menu": {
     "profile": "Profilis",
@@ -296,7 +336,7 @@
     "hot": "Populiaru dabar",
     "popular": "Populiarūs",
     "new": "Nauja",
-    "friends": "Following",
+    "friends": "Sekami",
     "my_blog": "Mano tinklaraštis"
   },
   "bookmarks": {
@@ -356,14 +396,14 @@
     "empty_list": "Nieko nėra"
   },
   "templates": {
-    "title": "Templates",
-    "untitled": "Untitled template",
-    "empty_list": "Save a post as template from the editor to reuse it here.",
-    "delete_confirm": "Are you sure you want to delete this template?",
-    "applied": "Template applied as new post",
-    "save_as_template": "Save as template",
-    "name_placeholder": "Template name",
-    "saved": "Template saved"
+    "title": "Šablonai",
+    "untitled": "Šablonas be pavadinimo",
+    "empty_list": "Išsaugokite įrašą kaip šabloną redaktoriuje, kad galėtumėte jį čia naudoti pakartotinai.",
+    "delete_confirm": "Ar tikrai norite ištrinti šį šabloną?",
+    "applied": "Šablonas pritaikytas kaip naujas įrašas",
+    "save_as_template": "Išsaugoti kaip šabloną",
+    "name_placeholder": "Šablono pavadinimas",
+    "saved": "Šablonas išsaugotas"
   },
   "selection_list": {
     "available": "Galima {postfix}",
@@ -374,20 +414,21 @@
   },
   "notification": {
     "filters": {
-      "activities": "All",
-      "replies": "Replies",
-      "mentions": "Mentions",
-      "rvotes": "Votes",
-      "follows": "Follows",
-      "reblogs": "Reblogs",
-      "transfers": "Transfers",
-      "delegations": "Delegations",
-      "nfavorites": "Favorites",
-      "nbookmarks": "Bookmarks",
-      "payouts": "Payouts",
-      "scheduled_published": "Scheduled posts",
-      "account_updates": "Account updates",
-      "weekly_earnings": "Weekly earnings"
+      "activities": "Visi",
+      "replies": "Atsakymai",
+      "mentions": "Paminėjimai",
+      "rvotes": "Balsai",
+      "follows": "Sekimai",
+      "reblogs": "Reblogai",
+      "transfers": "Pervedimai",
+      "delegations": "Delegavimai",
+      "nfavorites": "Mėgstamiausi",
+      "tags": "Žymos",
+      "nbookmarks": "Žymelės",
+      "payouts": "Išmokos",
+      "scheduled_published": "Suplanuoti įrašai",
+      "account_updates": "Paskyros atnaujinimai",
+      "weekly_earnings": "Savaitės uždarbis"
     },
     "this_week": "Šią savaitę",
     "reblog": "pasidalinta",
@@ -417,11 +458,15 @@
     "yesterday": "Vakar",
     "mention": "paminėjo",
     "favorites": "paskelbė naują įrašą",
+    "tags": "paskelbė žymoje #{tag}",
+    "tags_bundle": "{count} nauji įrašai žymoje #{tag}",
+    "tags_title": "Nauji įrašai žymoje, kurią sekate",
     "mentions": "Paminėjimai",
     "spin": "Laikas uždirbti daugiau taškų",
     "last_week": "Praėjusią savaitę",
     "recent": "Naujausi",
     "ignore": "jus ignoravo",
+    "blacklist": "įtraukė jus į juodąjį sąrašą",
     "follow": "jus seka",
     "notification": "Pranešimai",
     "this_month": "Šį mėnesį",
@@ -435,9 +480,9 @@
     "account_update_posting_authority": "{accounts} dabar gali skelbti ir balsuoti jūsų vardu. Jei to neleidote, panaikinkite šiuos įgaliojimus.",
     "weekly_earnings": "Šią savaitę uždirbote ${amount}{breakdown}",
     "payouts": "Gautas išmokėjimas: ${amount}",
-    "scheduled_published": "published a scheduled post",
-    "scheduled_published_title": "Scheduled post published",
-    "scheduled_published_body": "Your scheduled post is now live, tap to view it"
+    "scheduled_published": "paskelbė suplanuotą įrašą",
+    "scheduled_published_title": "Suplanuotas įrašas paskelbtas",
+    "scheduled_published_body": "Jūsų suplanuotas įrašas jau paskelbtas, bakstelėkite, kad jį peržiūrėtumėte"
   },
   "recurrent": {
     "delete_failed": "Nepavyko ištrinti pasikartojančio pervedimo, {error}",
@@ -471,6 +516,7 @@
     "alert_init_body": "Atidaryti sukurtą juodraštį ar sukurti naują įrašą",
     "reward_power_up": "Įstatyti 100 %",
     "open_gallery": "Atidaryti Galeriją",
+    "open_files": "Pasirinkti iš failų",
     "clipboard_no_image": "Iškarpinėje paveikslėlių nerasta",
     "clipboard_image_detected": "Paveikslėlis iškarpinėje",
     "paste_image": "Įklijuoti paveikslėlį",
@@ -539,8 +585,10 @@
     "video": "Vaizdo įrašai",
     "scheduled_later": "Vėliau",
     "settings_title": "Įrašo nustatymai",
-    "support_ecency": "Support Ecency {percent}%",
-    "alert_btn_no": "Ne"
+    "support_ecency": "Paremti Ecency {percent}%",
+    "alert_btn_no": "Ne",
+    "short_reply_hint": "Už {n} simbolių ar trumpesnius atsakymus taškai neskiriami (nuorodos neįskaičiuojamos)",
+    "short_content_hint": "Per trumpa, kad uždirbtumėte taškų ({n} simbolių ar mažiau, nuorodos neįskaičiuojamos)"
   },
   "time": {
     "week": "savaitės",
@@ -655,7 +703,41 @@
     "select_emoji": "Pasirinkti jaustuką",
     "more_emojis": "Daugiau",
     "search_emojis": "Ieškoti jaustukų...",
-    "no_emoji_found": "Jaustukų nerasta"
+    "no_emoji_found": "Jaustukų nerasta",
+    "ban-reason-spray": "Jūsų skelbimas sustabdytas, nes ta pati žinutė buvo išsiųsta į kelis kanalus vienu metu.",
+    "ban-reason-mass-dm": "Jūsų skelbimas sustabdytas, nes žinutė buvo išsiųsta daugeliui žmonių vienu metu.",
+    "ban-reason-generic": "Jūsų skelbimas pokalbiuose sustabdytas.",
+    "ban-can-still-read": "Pokalbius vis tiek galite skaityti.",
+    "ban-unlocks": "Skelbti bus galima {when}.",
+    "ban-remaining-soon": "po mažiau nei minutės",
+    "ban-remaining-minutes": "po maždaug {count} min.",
+    "ban-remaining-hours": "po maždaug {count} val.",
+    "ban-remaining-days": "po maždaug {count} d.",
+    "new_group": "Nauja grupė",
+    "new_group_hint": "Pridėkite nuo {min} iki {max} žmonių, kad pradėtumėte grupinį pokalbį.",
+    "new_group_search": "Ieškoti žmonių pagal naudotojo vardą",
+    "new_group_full": "Grupėje gali būti iki {max} kitų žmonių.",
+    "new_group_no_results": "Pokalbiuose su tokiu vardu nieko nerasta.",
+    "new_group_search_failed": "Paieška nepavyko. Patikrinkite ryšį ir bandykite dar kartą.",
+    "new_group_remove": "Pašalinti @{username}",
+    "new_group_create": "Pradėti grupę",
+    "new_group_failed": "Nepavyko pradėti grupės. Bandykite dar kartą.",
+    "rename_group": "Pervadinti grupę",
+    "rename_group_hint": "Suteikite grupei pavadinimą, kurį matys visi jos nariai. Palikite tuščią, kad būtų rodomi narių vardai.",
+    "group_name": "Grupės pavadinimas",
+    "rename_group_too_long": "Grupės pavadinimas gali būti iki {max} simbolių.",
+    "rename_group_not_owner": "Grupę gali pervadinti tik ją pradėjęs žmogus.",
+    "rename_group_failed": "Nepavyko pervadinti grupės. Bandykite dar kartą.",
+    "group_renamed": "{user} pervadino grupę į \"{name}\"",
+    "group_name_cleared": "{user} pašalino grupės pavadinimą",
+    "group_members": "Grupės nariai",
+    "save": "Išsaugoti",
+    "cancel": "Atšaukti",
+    "reactions_title": "Reakcijos",
+    "reactor_you": "Jūs",
+    "reactor_unknown": "Kažkas",
+    "see_who_reacted": "Palaikykite paspaudę, kad pamatytumėte, kas reagavo",
+    "group": "Grupė"
   },
   "free_estm": {
     "timer_text": "Kitas nemokamas sukimas",
@@ -684,6 +766,32 @@
     "transaction_fail": "Operacija nepavyko"
   },
   "search_result": {
+    "error": "Paieškos nepavyko užbaigti. Bandykite dar kartą",
+    "filters": {
+      "title": "Filtrai",
+      "open": "Filtrai",
+      "author": "Autorius",
+      "author_placeholder": "naudotojo vardas",
+      "category": "Kategorija",
+      "category_placeholder": "bendruomenė arba kategorija",
+      "tags": "Žymos",
+      "tags_placeholder": "atskirta kableliais",
+      "type": "Tipas",
+      "type_all": "Viskas",
+      "type_post": "Įrašai",
+      "type_comment": "Komentarai",
+      "date": "Data",
+      "date_week": "Praėjusi savaitė",
+      "date_month": "Praėjęs mėnuo",
+      "date_year": "Praėję metai",
+      "date_all": "Visas laikas",
+      "sort": "Rikiuoti",
+      "apply": "Taikyti",
+      "active": "Aktyvių: {n}",
+      "too_many_tags": "Naudokite ne daugiau kaip {n} žymų",
+      "too_long": "Paieška per ilga. Naudokite ne daugiau kaip {n} simbolių",
+      "needs_criteria": "Įveskite paieškos frazę arba autorių, kategoriją ar žymą filtravimui"
+    },
     "communities_filter": {
       "new": "Nauja",
       "my": "Mano Bendruomenės",
@@ -727,7 +835,7 @@
     "title": "Kryžminis įrašas"
   },
   "ai_usage": {
-    "disclosed": "Author disclosed AI usage"
+    "disclosed": "Autorius nurodė naudojęs DI"
   },
   "ai_assist": {
     "title": "DI rašymo asistentas",
@@ -744,10 +852,13 @@
     "action_suggest_tags_desc": "Gaukite tinkamų žymų savo įrašui",
     "action_generate_title": "Generuoti antraštę",
     "action_generate_title_desc": "Sukurkite patrauklių antraščių variantų",
-    "action_summarize": "Recap",
+    "action_summarize": "Santrauka",
     "action_summarize_desc": "Sukurkite glaustą santrauką",
     "action_check_grammar": "Tikrinti gramatiką",
     "action_check_grammar_desc": "Ištaisykite gramatikos ir rašybos klaidas",
+    "action_generate_image": "Generuoti paveikslėlį",
+    "action_generate_image_desc": "Sukurkite DI paveikslėlį savo įrašui",
+    "cost_from": "nuo {cost} {unit}",
     "text_label": "Jūsų tekstas",
     "text_placeholder": "Įklijuokite arba įveskite savo turinį čia...",
     "min_chars": "Reikalingi mažiausiai {count} simboliai",
@@ -797,16 +908,26 @@
     "remind_later": "Priminti vėliau",
     "success_subscribe": "Prenumerata sėkminga!",
     "payloadTooLarge": "Bylos dydis per didelis, prašome pakeiskite dydį ir įkelkite mažesnį vaizdą",
+    "too_many_images": "Vienu metu galite pasirinkti iki {count} paveikslėlių",
     "fail_follow": "Sekti nepavyko!",
     "clear_user_alert": "Ar tikrai norite panaikinti visą naudotojo informaciją?",
     "cancel": "Atšaukti",
     "connection_success": "Sėkmingai prisijungė!",
     "rc_down": "Nepakanka išteklių kreditų veiksmui atlikti! \n\nSustiprinkite savo paskyrą, kad toliau mėgautumėtes programėle. Ar norite sustiprinti savo paskyrą dabar?",
+    "rc_down_title": "Nepakanka Resource Credits",
+    "rc_precheck_title": "Šis įrašas gali būti per didelis paskelbti",
+    "rc_precheck_body": "Atrodo, kad jūsų Resource Credits per mažai tokio dydžio įrašui.",
+    "rc_down_body": "Jums nepakanka Resource Credits šiam veiksmui.\n\nPapildykite dabar su Points, kad tęstumėte, arba visam laikui sustiprinkite savo paskyrą.",
+    "rc_down_topup": "Papildyti RC su Points",
+    "rc_down_boost": "Sustiprinti paskyrą",
     "done": "Atlikta",
     "something_wrong_alt": "Tuo metu, išbandykite Eceny.com savo naršyklėje",
     "same_user": "Šis naudotojas jau pridėtas prie sąrašo",
     "fail": "Nepavyko!",
     "operation_failed_with_reason": "{operation} nepavyko: {reason}",
+    "request_timed_out": "Ryšys trunka per ilgai. Patikrinkite tinklą ir bandykite dar kartą.",
+    "load_failed_retry": "Nepavyko to įkelti. Bandykite dar kartą.",
+    "retrying": "Bandoma dar kartą...",
     "wallet_refresh_failed": "Nepavyko atnaujinti piniginės. Bandykite dar kartą.",
     "wallet_refresh_missing_account": "Nepavyko atnaujinti piniginės: trūksta paskyros.",
     "boost_failed": "Boost nepavyko.",
@@ -949,31 +1070,31 @@
     "video_attached": "Vaizdo įrašas pridėtas"
   },
   "post": {
-    "upvote": "Upvote",
-    "upvoted": "Upvoted",
-    "downvoted": "Downvoted",
-    "upvote_hint": "Double tap to open vote options",
-    "payout_details": "Payout details",
-    "a11y_votes": "{count, plural, one {# vote} other {# votes}}",
-    "a11y_voters_hint": "View voters",
-    "a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",
-    "a11y_reblogs_hint": "View reblogs",
-    "a11y_comments": "{count, plural, one {# comment} other {# comments}}",
-    "a11y_comments_hint": "View comments",
-    "a11y_reply_hint": "Reply",
-    "a11y_tip": "Send tip",
-    "a11y_tips": "{count, plural, one {# tip} other {# tips}}",
-    "a11y_edit": "Edit comment",
-    "a11y_delete": "Delete comment",
-    "a11y_show_replies": "Show replies",
-    "a11y_hide_replies": "Hide replies",
-    "a11y_post_options": "Post options",
-    "a11y_views": "{count, plural, one {# view} other {# views}}",
-    "source_ecency": "Published with Ecency",
-    "a11y_stats_hint": "View post stats",
+    "upvote": "Balsuoti už",
+    "upvoted": "Balsuota už",
+    "downvoted": "Balsuota prieš",
+    "upvote_hint": "Bakstelėkite dukart, kad atidarytumėte balsavimo parinktis",
+    "payout_details": "Išmokos informacija",
+    "a11y_votes": "{count, plural, one {# balsas} few {# balsai} many {# balso} other {# balsų}}",
+    "a11y_voters_hint": "Peržiūrėti balsavusius",
+    "a11y_reblogs": "{count, plural, one {# reblogas} few {# reblogai} many {# reblogo} other {# reblogų}}",
+    "a11y_reblogs_hint": "Peržiūrėti reblogus",
+    "a11y_comments": "{count, plural, one {# komentaras} few {# komentarai} many {# komentaro} other {# komentarų}}",
+    "a11y_comments_hint": "Peržiūrėti komentarus",
+    "a11y_reply_hint": "Atsakyti",
+    "a11y_tip": "Siųsti arbatpinigius",
+    "a11y_tips": "{count, plural, one {# arbatpinigių suma} few {# arbatpinigių sumos} many {# arbatpinigių sumos} other {# arbatpinigių sumų}}",
+    "a11y_edit": "Redaguoti komentarą",
+    "a11y_delete": "Ištrinti komentarą",
+    "a11y_show_replies": "Rodyti atsakymus",
+    "a11y_hide_replies": "Slėpti atsakymus",
+    "a11y_post_options": "Įrašo parinktys",
+    "a11y_views": "{count, plural, one {# peržiūra} few {# peržiūros} many {# peržiūros} other {# peržiūrų}}",
+    "source_ecency": "Paskelbta per Ecency",
+    "a11y_stats_hint": "Peržiūrėti įrašo statistiką",
     "image": "Vaizdas",
     "reveal_muted": "UŽTILDYTA\nPaspauskite, kad atidarytumėte turinį",
-    "tap_to_load_image": "Tap to load image",
+    "tap_to_load_image": "Bakstelėkite, kad įkeltumėte paveikslėlį",
     "in": "į",
     "poll": "APKLAUSA",
     "copy_link": "Kopijuoti nuorodą",
@@ -998,14 +1119,15 @@
     "save_to_local": "Atsiųsti į įrenginį",
     "muted": "Turinys nutildytas dėl pažeidimo",
     "community_muted": "Turinys nutildytas dėl bendruomenės gairių pažeidimo",
-    "muted_low_reputation": "Content from a low reputation account",
-    "muted_downvoted": "Content downvoted by users",
+    "muted_low_reputation": "Mažos reputacijos paskyros turinys",
+    "muted_downvoted": "Naudotojų nubalsuotas prieš turinys",
+    "muted_low_trust": "Žemos reputacijos paskyra su nepatikrinta išorine nuoroda",
+    "muted_reveal": "Bakstelėkite, kad parodytumėte",
     "promoted": "REKLAMUOJAMA",
     "image_saved": "Vaizdas išsaugotas fotogalerijoje",
     "words": "Žodžiai",
     "reading": "Skaitymas",
-    "listen": "Klausyti",
-    "min": "min",
+    "min": "min.",
     "summarize_start": "Pradėti"
   },
   "promote": {
@@ -1029,7 +1151,11 @@
   "deep_link": {
     "no_existing_post": "Nėra tokio įrašo",
     "invalid_link": "URL netinkamas, galite bandyti dar kartą su tinkamu URL arba pabandyti jį atidaryti interneto naršyklėje",
-    "no_existing_user": "Nėra tokio vartotojo"
+    "no_existing_user": "Nėra tokio vartotojo",
+    "posting_key_request": "{requester} prašo @{username} posting privataus rakto.\n\nTęskite tik jei pasitikite šia užklausa.",
+    "posting_key_request_unnamed": "Kita programa prašo @{username} posting privataus rakto.\n\nTęskite tik jei pasitikite šia užklausa.",
+    "auth_request_as_user": "{requester} nori jus prijungti kaip @{username}.\n\nBendrinamas tik jūsų naudotojo vardas ir prisijungimo įrodymas. Joks raktas nepalieka Ecency.",
+    "auth_request_as_current": "{requester} nori jus prijungti su jūsų Ecency paskyra.\n\nBendrinamas tik jūsų naudotojo vardas ir prisijungimo įrodymas. Joks raktas nepalieka Ecency."
   },
   "payout": {
     "breakdown": "Išskaidyti",
@@ -1065,7 +1191,7 @@
     "open": "Atidaryti URL",
     "invalid_key_desc": "prisijunkite naudodami {key} raktą arba pagrindinį raktą, kad atliktumėte šią operaciją",
     "auth_transfer_confirm": "Patvirtinti pavedimą gavėjui {username}?",
-    "sign_warning": "Only approve if you trust the source of this link. Approving broadcasts the operation below from your account using your {authority} key."
+    "sign_warning": "Patvirtinkite tik jei pasitikite šios nuorodos šaltiniu. Patvirtinus, toliau nurodyta operacija bus išsiųsta iš jūsų paskyros naudojant jūsų {authority} raktą."
   },
   "voters_dropdown": {
     "rewards": "ATLYGIAI",
@@ -1112,24 +1238,24 @@
       "username_contains_symbols_error": "Gali būti tik raidės, skaičiai ir brūkšnelis",
       "username_no_ascii_first_letter_error": "Turi prasidėti raide",
       "username_contains_double_hyphens": "Negali būti dvigubų brūkšnelių",
-      "username_resembles_exchange": "This username is too similar to a crypto exchange account and may confuse others. Please choose a more unique name.",
-      "username_restricted_prefix": "Usernames that start with 'uid' followed by numbers are not allowed, as they are commonly used to impersonate others. Please choose a different name.",
+      "username_resembles_exchange": "Šis naudotojo vardas pernelyg panašus į kriptovaliutų biržos paskyrą ir gali klaidinti kitus. Pasirinkite unikalesnį vardą.",
+      "username_restricted_prefix": "Naudotojų vardai, prasidedantys „uid“ ir skaičiais, neleidžiami, nes dažnai naudojami apsimetant kitais. Pasirinkite kitą vardą.",
       "username_contains_underscore": "Negali būti pabraukimo brūkšnio"
     },
     "500_error": "Jūsų užklausa negali būti įvykdyta, greičiausiai registracijos eilėje nėra vietos! Pabandykite vėl už kelių minučių...",
     "error_codes": {
-      "13": "Username has already been taken",
-      "14": "Email address already registered",
-      "15": "Please enter a valid email address",
-      "16": "Please enter a valid username",
-      "17": "Username is too long, please choose a shorter one",
-      "19": "Please use a permanent email address, or get a Premium account instead",
-      "21": "This referral isn't valid",
-      "28": "Your request couldn't be processed — the signup queue is likely full. Please try again in a few minutes.",
-      "107": "VPN connection detected. Please turn off your VPN and try again, or get a Premium account instead.",
-      "110": "To prevent abuse, we limit the number of accounts per person/network. Please try again from a different network.",
-      "111": "Tor connection detected. Please disable Tor while signing up.",
-      "112": "We couldn't verify your connection right now. Please try again in a few minutes."
+      "13": "Naudotojo vardas jau užimtas",
+      "14": "El. pašto adresas jau užregistruotas",
+      "15": "Įveskite galiojantį el. pašto adresą",
+      "16": "Įveskite galiojantį naudotojo vardą",
+      "17": "Naudotojo vardas per ilgas, pasirinkite trumpesnį",
+      "19": "Naudokite nuolatinį el. pašto adresą arba įsigykite Premium paskyrą",
+      "21": "Ši rekomendacija negalioja",
+      "28": "Jūsų užklausos nepavyko apdoroti, tikėtina, kad registracijos eilė pilna. Bandykite dar kartą po kelių minučių.",
+      "107": "Aptiktas VPN ryšys. Išjunkite VPN ir bandykite dar kartą arba įsigykite Premium paskyrą.",
+      "110": "Siekiant išvengti piktnaudžiavimo, ribojame paskyrų skaičių vienam asmeniui ar tinklui. Bandykite dar kartą iš kito tinklo.",
+      "111": "Aptiktas Tor ryšys. Registruodamiesi išjunkite Tor.",
+      "112": "Šiuo metu nepavyko patikrinti jūsų ryšio. Bandykite dar kartą po kelių minučių."
     },
     "have_account_text": "Jau turite paskyrą?"
   },
@@ -1140,6 +1266,30 @@
     "desc": "Gaukite visavertę Hive paskyrą; šis metodas atlieka pagrindinius patikrinimus, kad botų tinklas nepiktnaudžiautų mūsų registracijos kanalu.",
     "btn_register": "Registruotis nemokamai",
     "title": "Nemokama paskyra"
+  },
+  "dictation": {
+    "title": "Diktuoti",
+    "start": "Pradėti įrašymą",
+    "stop": "Stop",
+    "record_more": "Įrašyti daugiau",
+    "done": "Atlikta",
+    "recording": "Įrašoma",
+    "stop_hint": "Sustabdykite, kad būtų transkribuota ir pridėta prie įrašo. Iki {m} min.",
+    "inserted": "Pridėta prie jūsų įrašo. Įrašykite daugiau arba bakstelėkite Atlikta.",
+    "transcribing": "Transkribuojama",
+    "rate": "{n} Points už {s} sek.",
+    "cost_running": "Iki šiol {n} Points",
+    "cost_running_free": "Iki šiol nemokamai",
+    "free_remaining": "Jūsų kiti {n} x {s} sek. šiandien nemokami",
+    "price_loading": "Tikrinama kaina",
+    "price_error": "Nepavyko įkelti transkripcijos kainų.",
+    "denied": "Ecency reikia prieigos prie mikrofono diktavimui. Leiskite ją Nustatymuose ir bandykite dar kartą.",
+    "error_empty": "Šiame įraše kalbos neaptikta.",
+    "error_insufficient_points": "Nepakanka Points šiam įrašui transkribuoti.",
+    "error_rate_limited": "Šiuo metu per daug įrašų. Netrukus bandykite dar kartą.",
+    "error_too_long": "Šis įrašas per ilgas transkribuoti.",
+    "error_failed": "Nepavyko transkribuoti šio įrašo. Bandykite dar kartą.",
+    "error_recorder": "Nepavyko pradėti įrašymo. Bandykite dar kartą."
   },
   "wallet": {
     "delegations_out": "Paskyrimas iš",
@@ -1175,11 +1325,17 @@
     "checkin_desc": "Reguliarus prisijungimas jums duos 0.25 taško.",
     "fill_transfer_from_savings": "Santaupos nuimtos",
     "activities": "Veikla",
+    "no_activities": "Operacijų dar nėra",
+    "activities_failed": "Nepavyko įkelti operacijų. Patraukite žemyn, kad bandytumėte dar kartą.",
     "tap_update": "Bakstelėkite, kad atnaujintumėte",
     "mining_lottery": "Laimėta loterija",
     "checkin": "Įsiregistruoti",
     "tokens_transfer": "Žetonai pervesti",
     "outgoing_transfer_title": "Pavedimas/Dovanojimas",
+    "burned_title": "DI naudojimas",
+    "burned_description": "Points, išleisti DI funkcijai",
+    "burn_refund_title": "DI grąžinimas",
+    "burn_refund_description": "Points, grąžinti po nepavykusios DI užklausos",
     "manage_assets": "Pridėti / Pašalinti turtą",
     "selected_assets": "Pasirinktas turtas",
     "nft_setPropertyPermissions": "Nustatytos NFT simbolio savybės teisės",
@@ -1239,7 +1395,7 @@
     "tokens_updatePrecision": "Žetonų tikslumo atnaujinimas",
     "tokens_transferOwnership": "Žetono nuosavybė perduota",
     "withdraw_vesting": "Išimti iš įstatymo",
-    "set_withdraw_vesting_route": "Withdraw Accounts",
+    "set_withdraw_vesting_route": "Išėmimo paskyros",
     "delegate_engine": "Deleguoti",
     "market_close": "Užsakymas uždarytas",
     "nftmarket_transferFee": "Pirkimo užsakymo mokestis",
@@ -1387,6 +1543,13 @@
     "purchase_estm": "GAUTI TAŠKŲ",
     "escrow_approve": "Escrow patvirtinimas",
     "expires": "galioja iki",
+    "transaction_id": "Operacijos ID",
+    "copy_transaction_id": "Kopijuoti operacijos nuorodą",
+    "filter_activities": "Filtruoti veiklą",
+    "filter_activities_desc": "Pasirinkite, kokių operacijų šis istorija prašo",
+    "filter_all": "Pasirinkti visus",
+    "filter_none": "Išvalyti viską",
+    "filter_apply": "Taikyti",
     "author_reward": "Autorius Atlygis",
     "withdraw_hbd": "Išsiimti santaupas",
     "convert_request": "Konvertuoti užklausą",
@@ -1426,11 +1589,11 @@
     "title": "Boost+"
   },
   "rc_topup": {
-    "title": "Top up RC",
-    "desc": "A short-term RC boost so you can keep posting.",
-    "confirm": "Spend Points to top up your Resource Credits?",
-    "insufficient": "You do not have enough Points.",
-    "buy_points": "Buy Points"
+    "title": "Papildyti RC",
+    "desc": "Trumpalaikis RC padidinimas, kad galėtumėte skelbti toliau.",
+    "confirm": "Išleisti Points, kad papildytumėte Išteklių Kreditus?",
+    "insufficient": "Neturite pakankamai Points.",
+    "buy_points": "Pirkti Points"
   },
   "ai_image_generator": {
     "title": "DI vaizdų generatorius",
@@ -1460,6 +1623,8 @@
   },
   "transfer": {
     "custom_schedule": "Pasirinktinis ({hours} val.)",
+    "balance_load_failed": "Nepavyko įkelti jūsų likučio. Bakstelėkite, kad bandytumėte dar kartą.",
+    "precision_load_failed": "Nepavyko įkelti šio žetono duomenų, todėl galima siųsti tik sveikas sumas. Bakstelėkite, kad bandytumėte dar kartą.",
     "close": "Uždaryti",
     "favorite_username_placeholder": "Naudotojo vardas",
     "invalid_recipient_qr": "Šiame QR kode nepavyko rasti naudotojo vardo.",
@@ -1576,11 +1741,11 @@
     "backup_private_keys": "Tvarkyti įgaliojimus",
     "pincode": "PIN kodas",
     "general": "Bendra",
-    "support_ecency": "Support Ecency",
-    "support_beneficiary": "Share post rewards with Ecency",
-    "support_beneficiary_percent": "Post rewards share",
-    "support_curation": "Hold back part of curation rewards",
-    "support_curation_percent": "Curation rewards holdback",
+    "support_ecency": "Paremti Ecency",
+    "support_beneficiary": "Dalytis įrašų atlygiu su Ecency",
+    "support_beneficiary_percent": "Įrašų atlygio dalis",
+    "support_curation": "Sulaikyti dalį kuravimo atlygio",
+    "support_curation_percent": "Kuravimo atlygio sulaikymas",
     "feedback_body": "Rašykite savo žinutę čia!\n\nHive naudotojo vardas: {username}\nProgramėlės versija: {appVersion}\nPlatforma: {platform}\n",
     "show_imgs": "Rodyti vaizdus",
     "nsfw": {
@@ -1592,6 +1757,7 @@
     "notification": {
       "comment": "Komentarai",
       "bookmark": "Žymės",
+      "tags": "Žymos",
       "reblog": "Pasidalinimai",
       "favorite": "Mėgstami",
       "mention": "Paminėjimai",
@@ -1599,10 +1765,10 @@
       "transfers": "Pervedimai",
       "vote": "Balsai",
       "follow": "Sekti",
-      "scheduled_published": "Scheduled post published",
-      "payouts": "Payouts",
-      "account_update": "Account updates",
-      "weekly_earnings": "Weekly earnings",
+      "scheduled_published": "Suplanuotas įrašas paskelbtas",
+      "payouts": "Išmokos",
+      "account_update": "Paskyros atnaujinimai",
+      "weekly_earnings": "Savaitės uždarbis",
       "fcm_unavailable": "Tiesioginiai pranešimai šiame įrenginyje nepalaikomi. Pranešimus gausite tik kai programėlė bus atidaryta."
     },
     "keys_warning": "Slapta paskyros informacija!\nPrieš peržiūrint privačius raktus, Ecency turi būti apsaugota PIN kodu.",
@@ -1624,6 +1790,7 @@
     },
     "send_feedback": "Siųsti Atsiliepimus",
     "rate_app": "Įvertinti Ecency",
+    "email_digests": "El. pašto santraukos",
     "rate": "Įvertinti",
     "dm-privacy-updated": "Tiesioginių žinučių privatumo nustatymai sėkmingai atnaujinti",
     "dm-privacy-failed": "Nepavyko atnaujinti tiesioginių žinučių privatumo nustatymų",
@@ -1685,19 +1852,29 @@
     "request_sent": "Jūsų ištrynimo prašymas išsiųstas",
     "confirm_delete_body": "Ar tikrai norite ištrinti paskyrą? Tai ištrins visus jūsų duomenis"
   },
-  "tts": {
-    "settings_title": "Teksto į kalbą nustatymai",
-    "voice": "Balsas",
-    "voice_hint": "Bus naudojamas numatytasis sistemos balsas",
-    "speed": "Greitis",
-    "pitch": "Tono aukštis",
-    "test_voice": "Išbandyti balsą",
-    "settings_info": "Šie nustatymai bus naudojami garsiai skaitant įrašus",
-    "play": "Leisti",
+  "listen": {
+    "title": "Klausyti šio įrašo",
+    "minutes": "~{n} min.",
+    "login": "Prisijungti",
+    "unlock": "Atrakinti · {n} Points",
+    "confirm": "Išleisti {n} Points šiam įrašui klausyti? Garso įrašą galėsite paleisti iš naujo bet kada.",
+    "not_enough_title": "Nepakanka Points",
+    "not_enough": "Klausymui reikia {required} Points, o jūs turite {available}.",
+    "get_points": "Gauti Points",
+    "unlock_failed": "Nepavyko atrakinti garso įrašo, bandykite dar kartą",
+    "failed_refunded": "Nepavyko sukurti garso įrašo, jūsų Points grąžinti",
+    "preparing": "Ruošiamas garso įrašas…",
+    "preparing_eta": "Ruošiamas garso įrašas, maždaug {n} min.…",
+    "preparing_progress": "Ruošiamas garso įrašas · {n}%",
+    "waiting": "Laukiama eilėje, prieš jus {n}…",
+    "next_in_line": "Esate kitas eilėje…",
+    "play": "Paleisti",
     "pause": "Pristabdyti",
-    "language": "Kalba",
-    "language_auto": "Automatinis aptikimas",
-    "language_hint": "Automatinis aptikimas parenka kalbą pagal įrašo turinį"
+    "seek": "Persukti",
+    "speed": "Atkūrimo greitis",
+    "language": "Garso kalba",
+    "unavailable": "Nepavyko įkelti garso įrašo.",
+    "retry": "Bandyti dar kartą"
   },
   "posting_authority": {
     "title": "Įjungti greitesnį skelbimą",
@@ -1732,7 +1909,7 @@
     "error-auth": "Autentifikavimas nepavyko. Prisijunkite iš naujo.",
     "error-generic": "Vaizdo įrašo įkelti nepavyko. Bandykite dar kartą.",
     "error-too-long-short": "Trumpi vaizdo įrašai turi būti ne ilgesni nei 60 sekundžių.",
-    "error-one-per-post": "A post can contain only one video. Remove the current video before adding another.",
+    "error-one-per-post": "Įraše gali būti tik vienas vaizdo įrašas. Pašalinkite esamą vaizdo įrašą prieš pridėdami kitą.",
     "select_source": "Pridėti vaizdo įrašą",
     "record": "Įrašyti vaizdo įrašą",
     "choose_library": "Pasirinkti iš bibliotekos"
@@ -1744,35 +1921,1179 @@
     "wave": "Wave",
     "wave_desc": "Pasidalinkite greitu atnaujinimu"
   },
+  "newsletter": {
+    "screen_title": "El. pašto santraukos",
+    "title": "{list}",
+    "body_own": "Savaitinė arba mėnesinė jūsų pranešimų santrauka el. paštu.",
+    "body_creator": "Nauji {list} įrašai jūsų pašto dėžutėje.",
+    "body_community": "Naujų {list} įrašų santrauka el. paštu.",
+    "body_site": "Geriausia iš Ecency jūsų pašto dėžutėje.",
+    "first_publish_title": "Sveikiname paskelbus pirmą įrašą!",
+    "first_publish_body": "Norite gauti savo pranešimų santrauką el. paštu? Kas savaitę ar mėnesį, pakeiskite ar atsisakykite bet kada Nustatymuose.",
+    "list_own": "Mano pranešimų santrauka",
+    "list_site": "Ecency naujienlaiškis",
+    "status_active": "Esate prenumeratorius.",
+    "status_pending": "Laukiama el. pašto patvirtinimo.",
+    "status_short_active": "aktyvi",
+    "status_short_pending_confirmation": "laukiama",
+    "status_short_suppressed": "sustabdyta",
+    "status_short_ended": "pasibaigusi",
+    "cadence_weekly": "Kas savaitę",
+    "cadence_monthly": "Kas mėnesį",
+    "email_placeholder": "jus@example.com",
+    "subscribe": "Prenumeruoti",
+    "update": "Atnaujinti",
+    "resend": "Siųsti patvirtinimą iš naujo",
+    "leave": "Atsisakyti santraukos",
+    "cancel": "Atšaukti",
+    "ok": "Gerai",
+    "manage": "Tvarkyti",
+    "check_inbox_title": "Patikrinkite pašto dėžutę",
+    "check_inbox_body": "Išsiuntėme patvirtinimo nuorodą į {email}. Prenumerata prasidės, kai patvirtinsite.",
+    "subscribed": "Užprenumeruota el. pašto santrauka",
+    "left": "Atsisakyta santraukos",
+    "refused": "Šio adreso negalima užprenumeruoti.",
+    "unavailable": "El. pašto santraukos šiuo metu nepasiekiamos.",
+    "too_many": "Per daug bandymų, pabandykite vėliau.",
+    "fail": "Kažkas nutiko, bandykite dar kartą.",
+    "empty": "El. pašto santraukų dar nėra. Užsiprenumeruokite žemiau.",
+    "discover": "Gaukite daugiau el. paštu",
+    "stop_all": "Sustabdyti viską",
+    "stop_all_title": "Sustabdyti visą el. paštą?",
+    "stop_all_body": "Ecency laiškai daugiau nebus siunčiami į {email}. Prenumeratos kitais adresais išlieka.",
+    "stop_all_ok": "Sustabdyti viską",
+    "stop_all_done": "Adresas atsisakė visų laiškų",
+    "profile_option": "EL. PAŠTO SANTRAUKA",
+    "subscriber_count": "{weekly} savaitinių • {monthly} mėnesinių el. pašto prenumeratorių",
+    "community_button": "Naujienlaiškis"
+  },
+  "mod_notes": {
+    "title": "Pridėti priežastį",
+    "placeholder": "Priežastis (matoma kitiems moderatoriams)",
+    "confirm": "Patvirtinti",
+    "cancel": "Atšaukti"
+  },
+  "community_settings": {
+    "title_header": "Bendruomenės nustatymai",
+    "title_label": "Pavadinimas",
+    "about": "Apie",
+    "lang": "Kalba",
+    "description": "Aprašymas",
+    "rules": "Taisyklės",
+    "nsfw": "Netinka darbe",
+    "save": "Išsaugoti",
+    "required": "Privaloma",
+    "title_length": "Nuo {min} iki {max} simbolių",
+    "owner_admin_only": "Šiuos nustatymus gali keisti tik savininkas ir administratoriai."
+  },
   "native": {
+    "ios": {
+      "a11y_shell": {
+        "expanded": "Išskleista",
+        "collapsed": "Suskleista"
+      },
+      "a11y_chat": {
+        "quote": "Atsakoma {author}: {text}"
+      },
+      "a11y_forms": {
+        "select": "Pasirinkti",
+        "deselect": "Atšaukti pasirinkimą"
+      },
+      "store": {
+        "billing_unavailable": "Pirkiniai programoje šiame įrenginyje neleidžiami.",
+        "verification_failed": "App Store nepavyko patvirtinti šio pirkimo.",
+        "cancelled": "Pirkimas atšauktas",
+        "unknown_result": "Nežinomas pirkimo rezultatas"
+      },
+      "navigation": {
+        "feed_unavailable": "Šis srautas dar nepasiekiamas.",
+        "link_cannot_open": "Šios nuorodos negalima atidaryti.",
+        "video_cannot_play": "Šio vaizdo įrašo negalima paleisti."
+      },
+      "media": {
+        "load_failed": "Nepavyko įkelti šio elemento. Patikrinkite ryšį ir bandykite dar kartą.",
+        "loading": "Įkeliama medija",
+        "download_failed": "Atsisiuntimas nepavyko, būsena {status}"
+      },
+      "sign_in": {
+        "required": "Reikia prisijungti",
+        "to_reply": "Prisijunkite, kad atsakytumėte.",
+        "to_vote": "Prisijunkite, kad balsuotumėte.",
+        "button": "Prisijungti"
+      },
+      "account": {
+        "logout_user": "Atsijungti @{username}"
+      },
+      "profile": {
+        "comment_stats": "{payout}  •  {votes, plural, one {# balsas} few {# balsai} many {# balso} other {# balsų}}  •  {replies, plural, one {# atsakymas} few {# atsakymai} many {# atsakymo} other {# atsakymų}}",
+        "voting_power": "Balsavimo galia {percent}",
+        "remove_favourite": "Pašalinti iš mėgstamiausių",
+        "add_favourite": "Pridėti prie mėgstamiausių"
+      },
+      "waves": {
+        "clear_tag_filter": "Išvalyti žymos filtrą {tag}",
+        "new_wave": "Naujas wave",
+        "replies_open_thread": "{count, plural, one {# atsakymas, atidaryti giją} few {# atsakymai, atidaryti giją} many {# atsakymo, atidaryti giją} other {# atsakymų, atidaryti giją}}",
+        "characters": "{count} iš {max} simbolių",
+        "retry": "{message}\nBandyti dar kartą",
+        "playing": "Leidžiama {permlink}",
+        "video_attached_remove": "Vaizdo įrašas pridėtas, pašalinti",
+        "image_attached_remove": "Pridėtas paveikslėlis, pašalinti",
+        "take_photo": "Fotografuoti",
+        "edit_poll": "Redaguoti apklausą",
+        "add_poll": "Pridėti apklausą",
+        "add_video": "Pridėti vaizdo įrašą"
+      },
+      "reading": {
+        "reply_to": "Atsakyti {username}",
+        "opens_post": "Atidaro įrašą",
+        "sort_comments": "Rikiuoti komentarus",
+        "sort_comments_value": "Rikiuoti komentarus, {sort}",
+        "no_comments": "Komentarų dar nėra.",
+        "loading_post": "Įkeliamas įrašas",
+        "show_version": "Rodyti versiją",
+        "show_changes": "Rodyti pakeitimus",
+        "replying_to": "Atsakoma @{username}",
+        "reply_text": "Atsakymo tekstas",
+        "translate_from": "Iš",
+        "translate_to": "Į"
+      },
+      "feed": {
+        "tab_pinned": "{label}, prisegta",
+        "tab_add": "{label}, pridėti",
+        "customise": "Tinkinti"
+      },
+      "card": {
+        "in_category": "kategorijoje {category}",
+        "pinned": "Prisegta",
+        "by_author": "autorius {username}",
+        "payout": "išmoka {payout}",
+        "payout_declined": "išmoka {payout}, atsisakyta",
+        "reblogged_by": "Pasidalino {username}"
+      },
+      "shell": {
+        "close_menu": "Uždaryti meniu"
+      },
+      "editor": {
+        "thumbnail_pick_another": "Miniatiūra, pasirinkite kitą paveikslėlį",
+        "words": "{count, plural, one {# žodis} few {# žodžiai} many {# žodžio} other {# žodžių}}",
+        "poll_min_age": "Min. paskyros amžius (dienomis): {days}",
+        "poll_max_options": "Maks. pasirinkimų: {count}",
+        "thumbnail_selected": "Pasirinkta miniatiūra",
+        "thumbnail": "Miniatiūra",
+        "uploaded_image": "Įkeltas paveikslėlis",
+        "community_search": "ieškoti"
+      },
+      "vote": {
+        "not_voted": "Nebalsuota",
+        "voting": "Balsuojama",
+        "failed_with": "Balsavimas nepavyko: {message}",
+        "failed": "Balsavimas nepavyko",
+        "payout": "Išmoka {payout}",
+        "payout_declined": "Išmoka {payout}, atsisakyta",
+        "percent": "{percent} procentų",
+        "upvote_percent": "Upvote {percent}%"
+      },
+      "settings": {
+        "on": "Įjungta",
+        "off": "Išjungta"
+      },
+      "lock": {
+        "biometric_reason": "Įjunkite Ecency biometrinį atrakinimą",
+        "offer_title": "Atrakinti su {method}",
+        "offer_use": "Naudoti {method}"
+      },
+      "keys": {
+        "hidden_while_captured": "Raktai paslėpti, kol ekranas įrašomas ar transliuojamas.",
+        "screenshot_notice": "Padaryta ekrano nuotrauka. Privatūs raktai vėl paslėpti; jei nuotraukoje matyti raktas, ištrinkite ją.",
+        "hold_hint": "Paspauskite ir palaikykite raktą, kad jį parodytumėte.",
+        "hold_to_show": "Laikykite, kad parodytumėte"
+      },
+      "wallet": {
+        "cancel_order": "Atšaukti šį pavedimą?",
+        "days": "{count, plural, one {# diena} few {# dienos} many {# dienos} other {# dienų}}"
+      },
+      "chat": {
+        "reactors_hint": "Palaikykite paspaudę, kad pamatytumėte, kas reagavo",
+        "see_reactors": "Žiūrėti, kas reagavo"
+      },
+      "esie": {
+        "still": "{mood}, nejuda"
+      }
+    },
+    "ui": {
+      "profile_of": "@{username} profilis",
+      "preview": "Peržiūra ({index}/{count})",
+      "balance": "Likutis: {amount}",
+      "expires_in": "Baigsis už {time}",
+      "expired": "Nebegalioja. Uždarykite ir bandykite dar kartą.",
+      "user_has_no_posts": "@{username} dar nieko neparašė",
+      "attach_image": "Pridėti paveikslėlį",
+      "auto": "Auto",
+      "back": "Atgal",
+      "hot": "POPULIARU",
+      "image_of": "Paveikslėlis {index} iš {count}",
+      "new": "NAUJA",
+      "nsfw_tap_to_reveal": "NSFW Bakstelėkite, kad parodytumėte",
+      "new_reply": "Naujas atsakymas",
+      "remove": "Pašalinti",
+      "unlock_ecency": "Atrakinti Ecency",
+      "update_it": "Atnaujinti",
+      "update_it_or_post_this_as": "Atnaujinti ar paskelbti tai kaip naują atsakymą?",
+      "use_pin": "Naudoti PIN",
+      "your_reply_was_already_posted": "Jūsų atsakymas jau paskelbtas",
+      "error_try_again": "{message} Bandyti dar kartą?",
+      "auth": {
+        "account_label": "Paskyra: @{username}",
+        "approve_the_request_in_your_wallet": "Patvirtinkite užklausą savo piniginės programoje.",
+        "copy_key": "Kopijuoti {title}",
+        "current_account": "Dabartinė paskyra",
+        "qr_code": "QR kodas",
+        "requested_by": "Paprašė {requester}",
+        "pin_digits": "{filled} iš {total, plural, one {# skaitmens} few {# skaitmenų} many {# skaitmens} other {# skaitmenų}}",
+        "private_key_shown": "{title}, privatus raktas rodomas",
+        "open_wallet_app": "Atidaryti piniginės programą",
+        "hiveauth_scan": "Patvirtinkite Hive Keychain ar kitoje HiveAuth piniginėje: atidarykite ją šiame įrenginyje arba nuskaitykite šį kodą.",
+        "switching": "Perjungiama...",
+        "logout_all": "Atsijungti nuo visų paskyrų",
+        "logout_all_title": "Atsijungti nuo visų šiame įrenginyje esančių paskyrų?",
+        "stored_key": "@{username} jau prisijungęs šiame įrenginyje. Išsaugoti raktai lieka; atnaujinama tik sesija.",
+        "stored_hivesigner": "@{username} jau prisijungęs per HiveSigner šiame įrenginyje. Jo sesija bus pakeista.",
+        "stored_hiveauth": "@{username} prisijungęs per HiveAuth šiame įrenginyje. Vietoj to pasirašys per HiveSigner.",
+        "method_key": "Raktas",
+        "logout_failed": "Atsijungti nepavyko"
+      },
+      "browser": {
+        "account": "Paskyra",
+        "authority": "Įgaliojimas",
+        "phishing": "Įspėjimas: šis domenas pažymėtas kaip žinoma sukčiavimo svetainė. Elkitės itin atsargiai."
+      },
+      "chat": {
+        "cancel_edit": "Atšaukti redagavimą",
+        "cancel_reply": "Atšaukti atsakymą",
+        "copied_to_clipboard": "Nukopijuota į iškarpinę",
+        "edited_at": "Redaguota {time}",
+        "group_options": "Grupės parinktys",
+        "pinned_messages": "Prisegtos žinutės",
+        "remove_user": "Pašalinti @{username}",
+        "sort_by_name": "Rikiuoti pagal vardą",
+        "more": "Daugiau",
+        "reaction_label": "{emoji} {count}. Palaikykite paspaudę, kad pamatytumėte, kas reagavo",
+        "members": "Nariai"
+      },
+      "editor": {
+        "a_post_already_exists_at_this": "Šioje nuorodoje jau yra įrašas, kuris skiriasi nuo to, ką išsiuntėte. Atnaujinti ar skelbti kaip naują?",
+        "a_scheduled_post_is_published_by": "Suplanuotą įrašą pasirinktu laiku paskelbia Ecency. Tam jūsų paskyroje reikia posting įgaliojimo ecency.app. Jūsų raktai ir kiti įgaliojimai nesikeičia. Jam suteikti reikia jūsų active rakto.",
+        "ai_assist": "AI Assist",
+        "ai_tools": "DI įrankiai",
+        "allow_ecency_to_publish_for_you": "Leisti Ecency skelbti jūsų vardu?",
+        "bold": "Pusjuodis",
+        "clone": "Klonuoti",
+        "cost": "Kaina: {cost}",
+        "could_not_store_the_draft_on": "Nepavyko išsaugoti juodraščio šiame įrenginyje. Laikykite programą atidarytą ir išsaugokite juodraštį.",
+        "draft": "JUODRAŠTIS",
+        "delete_count": "Ištrinti ({count})",
+        "dictate_desc": "Kalbėkite, o transkripcija pateks į jūsų įrašą",
+        "discard": "Atmesti",
+        "discard_changes": "Atmesti pakeitimus?",
+        "grant": "Suteikti",
+        "italic": "Kursyvas",
+        "keep_editing": "Tęsti redagavimą",
+        "my_blog": "MANO BLOGAS",
+        "my_communities": "MANO BENDRUOMENĖS",
+        "new_post": "Naujas įrašas",
+        "notice": "Pastaba",
+        "restore": "Atkurti",
+        "restore_unsaved_changes": "Atkurti neišsaugotus pakeitimus?",
+        "saved": "Išsaugota",
+        "top_communities": "POPULIARIAUSIOS BENDRUOMENĖS",
+        "table": "Lentelė",
+        "text_format": "Teksto formatas",
+        "this_link_is_already_in_use": "Ši nuoroda jau naudojama",
+        "untitled": "Be pavadinimo",
+        "update_it_or_publish_this_as": "Atnaujinti ar paskelbti tai kaip naują įrašą?",
+        "you_have_unsaved_changes_from_an": "Turite neišsaugotų ankstesnio redagavimo pakeitimų. Įrašas nuo tada pasikeitė; juos atkūrus bus pakeistas žemiau esantis tekstas.",
+        "your_edits_were_not_published": "Jūsų pakeitimai nebuvo paskelbti.",
+        "your_post_was_already_published": "Jūsų įrašas jau paskelbtas",
+        "file_size": "{name} ({size} MB)",
+        "thumbnail_pick": "Miniatiūra, bakstelėkite kitam paveikslėliui pasirinkti",
+        "thumbnail_number": "Miniatiūra {number}",
+        "recording_busy": "Įrašymas jau vyksta. Pirmiausia užbaikite jį kameroje.",
+        "photo_lost": "Nuotrauka dingo, kol kamera buvo atidaryta. Nufotografuokite iš naujo.",
+        "add_snippet_button": "+ Fragmentas",
+        "words_count": "{count, plural, one {# žodis} few {# žodžiai} many {# žodžio} other {# žodžių}}",
+        "community_search": "ieškoti"
+      },
+      "profile": {
+        "open_wallet": "Atidaryti piniginę",
+        "your_wallet_is_on_the_wallet": "Jūsų piniginė yra Piniginės skirtuke.",
+        "user_has_no_comments": "@{username} dar nieko nekomentavo",
+        "votes_count": "{count, plural, one {# balsas} few {# balsai} many {# balso} other {# balsų}}",
+        "replies_count": "{count, plural, one {# atsakymas} few {# atsakymai} many {# atsakymo} other {# atsakymų}}",
+        "menu": "Daugiau",
+        "users": "Naudotojai"
+      },
+      "reading": {
+        "apply": "TAIKYTI",
+        "add_tag": "Pridėti žymą",
+        "age": "Amžius",
+        "audio_language": "Garso kalba",
+        "available_filters": "Galimi filtrai",
+        "could_not_unlock_the_audio_please": "Nepavyko atrakinti garso įrašo, bandykite dar kartą",
+        "downvote": "Downvote",
+        "downvote_percent": "Downvote {percent}%",
+        "listen_to_this_post": "Klausyti šio įrašo",
+        "log_in": "Prisijungti",
+        "mark_all_as_read": "Pažymėti viską kaip perskaitytą",
+        "mark_as_read": "Pažymėti kaip perskaitytą",
+        "more_replies": "Daugiau atsakymų",
+        "not_enough_points": "Nepakanka Points",
+        "nothing_here_yet": "Kol kas nieko nėra.",
+        "open_editor": "Atidaryti redaktorių",
+        "pause_voice": "Pristabdyti balsą",
+        "play_voice": "Paleisti balsą",
+        "playback_speed": "Atkūrimo greitis",
+        "publishing_in_waves": "Skelbiama Waves",
+        "quests_done": "Atliktos užduotys",
+        "read": "Skaityti",
+        "remove_vote": "Pašalinti balsą",
+        "seek": "Persukti",
+        "select_community": "Pasirinkti bendruomenę",
+        "selected_filters": "Pasirinkti filtrai",
+        "the_audio_could_not_be_loaded": "Nepavyko įkelti garso įrašo.",
+        "this_post_does_not_exist_or": "Šio įrašo nėra arba jis ištrintas.",
+        "unread": "Neperskaityta",
+        "voice_position": "Balso pozicija",
+        "vote_weight": "Balso svoris",
+        "reblogged_by": "pasidalino {username}",
+        "no_more_posts": "Daugiau įrašų nėra.",
+        "favourite": "Mėgstamiausias",
+        "no_votes_yet": "Balsų dar nėra",
+        "no_comments_yet": "Komentarų dar nėra. Būkite pirmas!",
+        "comments_count": "Komentarai ({count})",
+        "sending_to_chain": "siunčiama į grandinę",
+        "compare": "Palyginti",
+        "your_vote": "Jūsų balsas",
+        "reply_to": "Atsakyti @{username}",
+        "what_do_you_think": "Ką manote?",
+        "clear_tag_filter": "Išvalyti žymos filtrą",
+        "tab_selected": "{title}, pasirinkta",
+        "add_tag_feed": "Pridėti žymos srautą",
+        "feed_pinned": "{label}, prisegta",
+        "attached_image_remove": "Pridėtas paveikslėlis, bakstelėkite pašalinti",
+        "camera": "Kamera",
+        "files": "Failai",
+        "paused": "Pristabdyta",
+        "in_topic": "temoje {topic}",
+        "poll_vote": "Balsuoti",
+        "reply": "Atsakyti",
+        "mute_sound": "Nutildyti garsą",
+        "unmute_sound": "Įjungti garsą",
+        "leaderboard_activities": "Veikla",
+        "leaderboard_reward": "Atlygis",
+        "sort_votes": "Balsai"
+      },
+      "shell": {
+        "account_of": "Paskyra @{username}",
+        "account_signed_out": "Paskyra, atsijungta",
+        "close_tab": "Uždaryti skirtuką",
+        "coming_soon_to_the_native_app": "Netrukus natyvioje programoje.",
+        "create": "Sukurti",
+        "expand": "Išskleisti",
+        "forward": "Pirmyn",
+        "loading": "Įkeliama",
+        "new_tab": "Naujas skirtukas",
+        "reload": "Įkelti iš naujo",
+        "sent": "Išsiųsta",
+        "tab_unread": "{title}, neperskaityta: {count}",
+        "no_app_for_link": "Jokia programa negali atidaryti šios nuorodos."
+      },
+      "wallet": {
+        "product_not_available": "Produktas nepasiekiamas.",
+        "repeat": "Kartoti"
+      },
+      "copied": "Nukopijuota",
+      "trending_caps": "POPULIARU",
+      "move_up": "Perkelti aukštyn",
+      "move_down": "Perkelti žemyn",
+      "scroll_to_top": "Slinkti į viršų",
+      "load_more": "Daugiau"
+    },
+    "wallet": {
+      "checking": "Tikrinama tinkle",
+      "leave_title": "Vis dar siunčiama",
+      "leave_message": "Tai vis dar siunčiama arba tikrinama tinkle. Galite palikti šį ekraną: programa praneš, kai baigsis.",
+      "stay": "Likti",
+      "collateralized_convert_request": "Užtikrinto konvertavimo užklausa",
+      "op_transfer": "pervedimas",
+      "op_power_up": "įstatymas",
+      "op_power_down_change": "išėmimo iš įstatymo pakeitimas",
+      "op_delegation": "delegavimas",
+      "op_savings_deposit": "santaupų įnašas",
+      "op_savings_withdrawal": "santaupų išėmimas",
+      "op_conversion": "konvertavimas",
+      "op_swap": "apkeitimas",
+      "op_order_cancel": "pavedimo atšaukimas",
+      "op_reward_claim": "atlygio atsiėmimas",
+      "op_withdraw_route_change": "išėmimo maršruto pakeitimas",
+      "op_token_operation": "žetono operacija"
+    },
+    "notification": {
+      "amount_unknown": "Suma nepasiekiama",
+      "weekly_earnings_breakdown": "Šią savaitę uždirbote ${amount} - ${authorUsd} iš įrašų, ${curationUsd} iš kuravimo.",
+      "weekly_earnings_total": "Šią savaitę uždirbote ${amount} iš savo įrašų ir kuravimo."
+    },
+    "settings": {
+      "open": "Atidaryti",
+      "feedback_subject": "Atsiliepimas/Pranešimas apie klaidą",
+      "unknown_user": "Nežinomas naudotojas"
+    },
+    "navigation": {
+      "editor": "Redaktorius",
+      "followers": "Sekėjai",
+      "spin_game": "Spin žaidimas",
+      "edit_profile": "Redaguoti profilį",
+      "redeem_points": "Išpirkti Points",
+      "community": "Bendruomenė",
+      "community_members": "Bendruomenės nariai",
+      "community_activities": "Bendruomenės veikla",
+      "browser": "Naršyklė",
+      "asset_details": "Turto informacija",
+      "edit_history": "Redagavimo istorija",
+      "welcome": "Sveiki",
+      "chat": "Pokalbiai",
+      "backup_keys": "Raktų atsarginė kopija",
+      "trade": "Prekiauti",
+      "ai_image_generator": "DI paveikslėlių generatorius",
+      "select_assets": "Pasirinkti turtą",
+      "poll": "Apklausa",
+      "bot_comments": "Botų komentarai"
+    },
+    "dapp_bridge_ops": {
+      "owner_refused": "Operacijų, kurioms reikia owner rakto, Ecency pasirašyti negalima.",
+      "post": "Įrašas/Komentaras",
+      "custom": "Custom JSON",
+      "sign_buffer": "Pasirašyti žinutę",
+      "send_token": "Siųsti žetoną",
+      "witness_vote": "Witness balsas",
+      "proxy": "Nustatyti proxy",
+      "power_up": "Įstatyti",
+      "power_down": "Išimti iš įstatymo",
+      "broadcast": "Transliuoti",
+      "sign_tx": "Pasirašyti operaciją",
+      "encode": "Užkoduoti žinutę",
+      "decode": "Patikrinti raktą",
+      "add_account_authority": "Pridėti paskyros įgaliojimą",
+      "remove_account_authority": "Pašalinti paskyros įgaliojimą",
+      "add_key_authority": "Pridėti rakto įgaliojimą",
+      "remove_key_authority": "Pašalinti rakto įgaliojimą",
+      "create_claimed_account": "Sukurti paskyrą",
+      "create_proposal": "Sukurti pasiūlymą",
+      "remove_proposal": "Pašalinti pasiūlymą",
+      "update_proposal_vote": "Balsas už pasiūlymą",
+      "signed_call": "Pasirašytas iškvietimas"
+    },
+    "translate_language": {
+      "ar": "arabų",
+      "az": "azerbaidžaniečių",
+      "bg": "bulgarų",
+      "bn": "bengalų",
+      "ca": "katalonų",
+      "cs": "čekų",
+      "da": "danų",
+      "de": "vokiečių",
+      "el": "graikų",
+      "en": "anglų",
+      "eo": "esperanto",
+      "es": "ispanų",
+      "et": "estų",
+      "fa": "persų",
+      "fi": "suomių",
+      "fr": "prancūzų",
+      "ga": "airių",
+      "he": "hebrajų",
+      "hi": "hindi",
+      "hu": "vengrų",
+      "id": "indoneziečių",
+      "it": "italų",
+      "ja": "japonų",
+      "ko": "korėjiečių",
+      "lt": "lietuvių",
+      "lv": "latvių",
+      "ms": "malajiečių",
+      "nb": "norvegų",
+      "nl": "olandų",
+      "pl": "lenkų",
+      "pt": "portugalų",
+      "ro": "rumunų",
+      "ru": "rusų",
+      "sk": "slovakų",
+      "sl": "slovėnų",
+      "sq": "albanų",
+      "sv": "švedų",
+      "th": "tajų",
+      "tl": "tagalogų",
+      "tr": "turkų",
+      "uk": "ukrainiečių",
+      "zh": "kinų",
+      "zt": "kinų (tradicinė)"
+    },
+    "reading": {
+      "banner_text": "Šis įrašas yra kalba: {source}. Išversti į {target}?",
+      "translated_from_text": "Išversta iš {source}"
+    },
+    "community": {
+      "stats": "{subscribers, plural, one {# narys} few {# nariai} many {# nario} other {# narių}} • {authors, plural, one {# autorius} few {# autoriai} many {# autoriaus} other {# autorių}} • {posts, plural, one {# įrašas} few {# įrašai} many {# įrašo} other {# įrašų}}",
+      "community_title": "Bendruomenė {title}",
+      "members_title": "Bendruomenės {title} nariai",
+      "activities_title": "Bendruomenės {title} veikla",
+      "cannot_start_with_or": "Negali prasidėti @ arba #",
+      "use_a_two_letter": "Naudokite dviejų raidžių kalbos kodą, pvz., en",
+      "at_most_characters": "Daugiausia {max, plural, one {# simbolis} few {# simboliai} many {# simbolio} other {# simbolių}}",
+      "council": "Taryba",
+      "journal": "Žurnalas",
+      "topic": "Tema",
+      "community_not_found": "Bendruomenė nerasta."
+    },
+    "transfer": {
+      "one_recipient": "Šiam pervedimui galima naudoti tik vieną gavėją.",
+      "is_an_exchange_and": "{exchange} yra birža ir gali nepalaikyti pasikartojančių pervedimų: pagal grafiką siųstos lėšos gali būti prarastos. Vietoj to naudokite vienkartinį pervedimą."
+    },
+    "dapps": {
+      "signing_info": "Ecency veikia kaip jūsų Hive pasirašymo plėtinys. Kai dApp prašo prisijungti naršyklės plėtiniu, pvz., Keychain, Keeper ar Peak Vault, pasirinkite šią parinktį. Ecency pasirašys saugiai.",
+      "category_social": "Socialiniai",
+      "category_gaming": "Žaidimai",
+      "category_defi": "DeFi"
+    },
+    "chat_thread": {
+      "group": "Grupė",
+      "unable_to_load_messages": "Nepavyko įkelti žinučių.",
+      "someone": "Kažkas",
+      "renamed_the_group_to": "{actor} pervadino grupę į \"{name}\"",
+      "removed_the_group_name": "{actor} pašalino grupės pavadinimą",
+      "unable_to_send_your": "Nepavyko išsiųsti jūsų žinutės.",
+      "unable_to_remove_message": "Nepavyko pašalinti žinutės.",
+      "unknown": "Nežinomas",
+      "members_online": "{members, plural, one {# narys} few {# nariai} many {# nario} other {# narių}} • {online} prisijungę",
+      "failed_to_load_pinned": "Nepavyko įkelti prisegtų žinučių",
+      "you": "Jūs",
+      "title": "Reakcijos"
+    },
+    "tip": {
+      "login_required": "Prisijunkite, kad siųstumėte arbatpinigius",
+      "max_decimals": "Daugiausia {n, plural, one {# skaitmuo po kablelio} few {# skaitmenys po kablelio} many {# skaitmens po kablelio} other {# skaitmenų po kablelio}}"
+    },
+    "paid": {
+      "check_again": "Tikrinti dar kartą",
+      "give_up": "Atsisakyti",
+      "unknown": "Atsakymo dar nėra. Užklausa gali vis dar vykti. Patikrinkite dar kartą, kad gautumėte rezultatą: antrą kartą už tai neapmokestinama.",
+      "pending": "Jūsų užklausa vis dar apdorojama. Po akimirkos patikrinkite dar kartą: antrą kartą už tai neapmokestinama.",
+      "restored": "Ankstesnė užklausa dar neturi atsakymo. Patikrinkite dar kartą, kad gautumėte rezultatą: antrą kartą už tai neapmokestinama.",
+      "give_up_confirm": "Jei užklausa pavyko, Points išleisti, o rezultatas bus prarastas.",
+      "not_stored": "Šios užklausos nepavyko išsaugoti įrenginyje. Laikykite šį ekraną atidarytą, kol viskas baigsis.",
+      "sign_in_again": "Jūsų sesija baigėsi. Prisijunkite iš naujo ir patikrinkite dar kartą.",
+      "other_account": "Tai priklauso @{owner}. Norėdami tęsti, grįžkite į tą paskyrą."
+    },
+    "ai": {
+      "run_ai_assist": "Paleisti AI Assist ({costText})",
+      "no_longer_free_cost": "Šis paleidimas šiandien nebėra nemokamas. Kainuoja {cost} {unit}.",
+      "no_longer_free": "Šis paleidimas šiandien nebėra nemokamas.",
+      "content_violates_our_content": "Turinys pažeidžia mūsų turinio politiką. Pakeiskite tekstą. Points negrąžinti.",
+      "generate_image": "Generuoti paveikslėlį ({costLabel})",
+      "use_prompt": "Naudoti: \"{prompt}\""
+    },
+    "post_actions": {
+      "busy": "Palaukite, vykdomas kitas veiksmas",
+      "not_a_community_post": "Tai ne bendruomenės įrašas.",
+      "parent_post_not_found": "Pirminis įrašas nerastas",
+      "the_account_changed": "Paskyra pasikeitė."
+    },
+    "dictation": {
+      "balance": "Likutis: {balance} {unit}",
+      "stop_points": "Stop ({cost} Points)",
+      "stop_free": "Stop (nemokamai)",
+      "transcribe_points": "Transkribuoti ({cost} Points)",
+      "transcribe": "Transkribuoti",
+      "no_longer_free_cost": "Šis įrašas šiandien nebėra nemokamas. Kainuoja {cost} Points.",
+      "no_longer_free": "Šis įrašas šiandien nebėra nemokamas.",
+      "held_locked": "Įrašymas sustojo, kai Ecency užsirakino. Nieko neišsiųsta. Bakstelėkite Transkribuoti, kad išsiųstumėte, arba jo atsisakykite.",
+      "held_no_background": "Įrašymas sustojo, kai Ecency paliko ekraną (negalėjo parodyti įrašymo pranešimo). Nieko neišsiųsta. Bakstelėkite Transkribuoti, kad išsiųstumėte, arba jo atsisakykite.",
+      "held_stopped": "Įrašymas sustabdytas iš pranešimo. Nieko neišsiųsta. Bakstelėkite Transkribuoti, kad išsiųstumėte, arba jo atsisakykite.",
+      "held_focus_lost": "Įrašymas sustojo dėl skambučio ar kitos programos garso. Nieko neišsiųsta. Bakstelėkite Transkribuoti, kad išsiųstumėte, arba jo atsisakykite.",
+      "held_interrupted": "Įrašymas sustojo, nes kita programa perėmė mikrofoną. Nieko neišsiųsta. Bakstelėkite Transkribuoti, kad išsiųstumėte, arba jo atsisakykite.",
+      "unavailable": "Įrašymas šiame įrenginyje nepasiekiamas.",
+      "not_read": "Šio įrašo nepavyko nuskaityti arba jis per didelis. Nieko neišsiųsta ir nieko neapmokestinta.",
+      "give_up_not_sent": "Šis įrašas nebuvo išsiųstas, todėl nieko neapmokestinta. Jis bus ištrintas.",
+      "give_up_not_charged": "Už šį įrašą nieko neapmokestinta. Jis bus ištrintas.",
+      "clip_lost": "Ankstesnės užklausos įrašo šiame įrenginyje nebėra. Jei ta užklausa pavyko, jūsų Points išleisti, o jos transkripcijos gauti nepavyks."
+    },
+    "register": {
+      "error_code_28": "Jūsų užklausos nepavyko apdoroti. Greičiausiai registracijos eilė pilna. Pabandykite po kelių minučių."
+    },
+    "perks": {
+      "quests_empty": "Čia dar nėra užduočių, užsukite netrukus.",
+      "freeze_confirm_title": "Apsaugokite savo seriją",
+      "spend_points_on_a": "Išleisti {price} Points serijos užšaldymui? Jis panaudojamas jūsų serijai apsaugoti dieną, kurią praleisite."
+    },
+    "pro": {
+      "title": "Ecency Pro",
+      "subtitle": "Paremkite Ecency, gaukite nemokamą tinklaraštį ir išsiskirkite su patvirtintu Pro ženkleliu.",
+      "card_description": "Pasirinkite Pro metams už {price}. Patvirtintas ženklelis, nemokamas tinklaraštis ir Ecency parama.",
+      "card_description_plain": "Pasirinkite Pro metams. Patvirtintas ženklelis, nemokamas tinklaraštis ir Ecency parama.",
+      "member": "Esate Pro narys.",
+      "benefit_badge": "Patvirtintas Pro ženklelis šalia jūsų vardo.",
+      "benefit_blog": "Nemokamas tinklaraštis adresu yourname.blogs.ecency.com.",
+      "benefit_support": "Tiesiogiai remkite Ecency kūrimą.",
+      "benefit_early": "Ankstyva prieiga prie naujų funkcijų.",
+      "buy": "Gauti Pro metams už {price}",
+      "extend": "Pratęsti 12 mėnesių už {price}",
+      "extend_note": "Pirkdami dar kartą pridedate 12 mėnesių prie savo narystės.",
+      "unavailable": "Ecency Pro dabar parduotuvėje nepasiekiamas.",
+      "activating": "Mokėjimas gautas. Aktyvuojama jūsų narystė.",
+      "success_title": "Sveiki atvykę į Ecency Pro",
+      "success_body": "Jūsų Pro narystė aktyvi. Jūsų ženklelis netrukus pasirodys profilyje.",
+      "extending": "Mokėjimas gautas. Jūsų Pro narystė pratęsiama 12 mėnesių.",
+      "open_a11y": "Atidaryti Ecency Pro"
+    },
+    "editor": {
+      "saving_draft": "Išsaugomas juodraštis...",
+      "please_sign_in_first": "Pirmiausia prisijunkite.",
+      "fetch_failed": "Gauti nepavyko.",
+      "you_can_only_edit": "Galite redaguoti tik savo turinį.",
+      "invalid_percent": "Neteisingas procentas",
+      "beneficiary_exists_already": "Pelno gavėjas jau yra",
+      "this_draft_belongs_to": "Šis juodraštis priklauso @{owner}. Norėdami jį paskelbti, grįžkite į tą paskyrą.",
+      "could_not_make_a": "Nepavyko sukurti naujos nuorodos šiam įrašui. Šiek tiek pakeiskite pavadinimą ir bandykite dar kartą.",
+      "an_earlier_attempt_was": "Ankstesnis bandymas buvo paskelbtas po šio. Patikrinkite, kurią versiją norite palikti.",
+      "could_not_check_your": "Nepavyko patikrinti jūsų paskyros posting įgaliojimo. Patikrinkite ryšį ir bandykite dar kartą.",
+      "this_post_was_changed": "Šis įrašas buvo pakeistas kitur nuo tada, kai jį atidarėte. Nukopijuokite tekstą, grįžkite ir atidarykite jį iš naujo, kad redaguotumėte naujausią versiją.",
+      "link_text_placeholder": "Tekstas čia"
+    },
+    "app_error": {
+      "this_reply_is_too": "Šis atsakymas per ilgas.",
+      "the_network_refused_this": "Tinklas atmetė šį veiksmą.",
+      "invalid_input": "Neteisinga įvestis.",
+      "secure_storage_is_unavailable": "Saugi saugykla nepasiekiama. Prisijunkite iš naujo.",
+      "please_sign_in_first": "Pirmiausia prisijunkite.",
+      "these_credentials_belong_to": "Šie prisijungimo duomenys priklauso @{actual}, o ne @{expected}.",
+      "is_not_signed_in": "@{username} šiame įrenginyje neprisijungęs.",
+      "key_required": "Šiai operacijai atlikti reikia {role} rakto. {hint}",
+      "cancelled": "Atšaukta.",
+      "the_request_was_rejected": "Užklausa buvo atmesta piniginės programoje.",
+      "the_request_expired_before": "Užklausa baigėsi, kol piniginės programa neatsakė. Bandykite dar kartą.",
+      "could_not_reach_the": "Nepavyko pasiekti HiveAuth serverio. Bandykite dar kartą.",
+      "unexpected_redirect": "Serveris atsiuntė netikėtą nukreipimą. Nieko nepakeista. Bandykite vėliau.",
+      "missing_key_hint": "Pridėkite jį Nustatymuose, Tvarkyti įgaliojimus (Importuoti privatų), arba prisijunkite iš naujo su juo.",
+      "this_key_is_also": "Šis raktas yra ir šios paskyros owner raktas. Ecency nesaugo rakto, valdančio owner vaidmenį: suteikite active ir posting vaidmenims atskirus raktus, tada prisijunkite jais.",
+      "this_is_the_owner": "Tai owner raktas. Ecency niekada nesaugo ir nenaudoja owner rakto: prisijunkite su master slaptažodžiu arba posting ar active raktu.",
+      "this_password_only_matches": "Šis slaptažodis atitinka tik paskyros owner raktą. Ecency niekada nesaugo ir nenaudoja owner rakto: prisijunkite su posting ar active raktu.",
+      "this_key_cannot_sign": "Šis raktas pats negali pasirašyti už paskyrą: paskyrai reikia daugiau nei vieno parašo (jos svoris mažesnis už slenkstį).",
+      "public_key_given": "Tai jūsų viešasis raktas. Įklijuokite privatų raktą (prasideda 5) arba master slaptažodį.",
+      "memo_key_only": "Memo rakto negalima naudoti prisijungti. Naudokite posting raktą, active raktą arba master slaptažodį.",
+      "network_message": "Tinklo klaida. Patikrinkite ryšį ir bandykite dar kartą.",
+      "network_error_this_may": "Tinklo klaida. Tai galėjo jau pavykti; bandyti dar kartą saugu ir nebus paskelbta du kartus."
+    },
+    "purchases": {
+      "deal_best": "GERIAUSIAS PASIŪLYMAS!",
+      "deal_popular": "POPULIARU!",
+      "points_title": "{points} POINTS",
+      "the_store_did_not": "Parduotuvė neatsakė."
+    },
+    "purchase": {
+      "boost_row": "Boost+  |  {hp} HP",
+      "account_meta_missing": "999accounts naudojimui reikalingas el. paštas ir naudotojo vardas",
+      "stuck": "Ankstesnio šio produkto pirkimo nepavyko užbaigti. Rašykite support@ecency.com ir pridėkite parduotuvės kvitą, jis tam saugomas.",
+      "held": "Šis pirkimas sulaikytas peržiūrai. Rašykite support@ecency.com nurodydami užsakymą #{order}.",
+      "earlier_purchase": "Ankstesnis šio produkto pirkimas pirmiausia užbaigiamas @{target}.",
+      "earlier_pending": "Ankstesnis šio produkto mokėjimas vis dar laukiamas @{target}. Jis bus užbaigtas, kai parduotuvė patvirtins mokėjimą.",
+      "pending": "Jūsų mokėjimas laukiamas. Pirkimas bus užbaigtas, kai parduotuvė patvirtins mokėjimą.",
+      "processing": "Jūsų pirkimas apdorojamas. Netrukus jis bus užbaigtas."
+    },
+    "hive_uri_op": {
+      "recurring_transfers": "Pasikartojantys pervedimai",
+      "delegate_hive_power": "Deleguoti Hive Power",
+      "power_up": "Įstatyti",
+      "set_withdraw_vesting_route": "Nustatyti išėmimo iš įstatymo maršrutą",
+      "power_down": "Išimti iš įstatymo",
+      "transfer_to_saving": "Pervesti į santaupas",
+      "transfer_from_saving": "Pervesti iš santaupų",
+      "cancel_transfer_from_saving": "Atšaukti pervedimą iš santaupų",
+      "collateralized_convert": "Užtikrintas konvertavimas",
+      "witness_vote": "Witness balsas",
+      "witness_update": "Witness atnaujinimas",
+      "witness_set_properties": "Witness savybių nustatymas",
+      "governance_proxy": "Valdymo proxy",
+      "claim_account": "Pretenduoti į paskyrą",
+      "create_account": "Sukurti paskyrą",
+      "create_account_with_account": "Sukurti paskyrą su paskyros kreditais",
+      "create_limit_order": "Sukurti limitinį pavedimą",
+      "cancel_limit_order": "Atšaukti limitinį pavedimą",
+      "redeem_rewards": "Išpirkti atlygį",
+      "post_or_comment": "Įrašas ar komentaras",
+      "post_or_comment_options": "Įrašo ar komentaro parinktys",
+      "custom_operation": "Pasirinktinė operacija",
+      "update_account_active": "Atnaujinti paskyrą (active)",
+      "update_account_posting": "Atnaujinti paskyrą (posting)",
+      "change_recovery_account": "Pakeisti atkūrimo paskyrą",
+      "create_proposal": "Sukurti pasiūlymą",
+      "remove_proposal": "Pašalinti pasiūlymą",
+      "update_proposal_votes": "Atnaujinti pasiūlymo balsus",
+      "update_proposal": "Atnaujinti pasiūlymą"
+    },
+    "auth_link": {
+      "must_be_signed_by": "Šią nuorodą turi pasirašyti @{account}. Persijunkite į tą paskyrą ir atidarykite ją dar kartą.",
+      "ecency_can_only_sign": "Ecency gali pasirašyti ir transliuoti tik operacijas iš nuorodų.",
+      "requester_page": "puslapis {host}",
+      "owner_refused": "Operacijų, kurioms reikia owner rakto, iš nuorodos pasirašyti negalima.",
+      "busy": "Palaukite: kita užklausa vis dar apdorojama.",
+      "not_supported": "Ecency šioje versijoje dar negali pasirašyti šios operacijos."
+    },
+    "chats": {
+      "group_members": "Grupės nariai",
+      "rename_group": "Pervadinti grupę",
+      "failed_to_load_chats": "Nepavyko įkelti pokalbių",
+      "unknown": "Nežinomas",
+      "unable_to_mark_channel": "Nepavyko pažymėti kanalo kaip perskaityto",
+      "unable_to_update_favorites": "Nepavyko atnaujinti mėgstamiausių",
+      "unable_to_update_mute": "Nepavyko atnaujinti nutildymo",
+      "group": "Grupė",
+      "unable_to_search": "Nepavyko ieškoti",
+      "unable_to_start_chat": "Nepavyko pradėti pokalbio",
+      "no_internet": "Nėra interneto ryšio"
+    },
+    "stake": {
+      "confirm_summary": "Deleguoti {hp} HP ({vests} VESTS) @{to}",
+      "weekly": "+ {hive} HIVE",
+      "already_delegated_to": "Jau deleguota @{recipient}"
+    },
+    "backup_keys": {
+      "owner_not_stored": "Tik viešas. Ecency niekada nesaugo owner rakto.",
+      "shared_owner": "Ši paskyra naudoja tą patį raktą owner vaidmeniui ir {names} vaidmeniui. Kas turi tą raktą, valdo visą paskyrą. Suteikite {names} vaidmeniui atskirą raktą, o owner raktą laikykite neprisijungus prie tinklo.",
+      "copy_warning": "Kas turi šį privatų raktą, valdo šią jūsų paskyros dalį. Kitos programos gali skaityti iškarpinę; įklijuokite jį tik ten, kur pasitikite. Iškarpinėje jis išvalomas po 2 minučių."
+    },
+    "app_lock": {
+      "pin_lock_is_on": "PIN užraktas įjungtas.",
+      "pin_changed": "PIN pakeistas.",
+      "pin_lock_is_off": "PIN užraktas išjungtas.",
+      "wiped_notice": "Visos paskyros, raktai ir prisijungimo duomenys pašalinti iš šio įrenginio.",
+      "we_could_not_bring": "Nepavyko perkelti jūsų paskyrų iš ankstesnės programos versijos. Prisijunkite iš naujo.",
+      "your_pin_lock_could": "Nepavyko perkelti jūsų PIN užrakto iš ankstesnės versijos. Nustatykite PIN iš naujo paskyros meniu, kad vėl įjungtumėte programos užraktą.",
+      "biometric_unlock_was_turned": "Biometrinis atrakinimas išjungtas, nes pasikeitė šio įrenginio biometriniai duomenys. Atrakinkite su PIN, tada vėl įjunkite paskyros meniu.",
+      "biometric_unavailable_notice": "Nepavyko įjungti biometrinio atrakinimo: šiame įrenginyje nenustatyta biometrija.",
+      "set_backup": "Nustatykite PIN, kad turėtumėte biometrinio atrakinimo atsarginį variantą",
+      "biometric_on_notice": "PIN užraktas įjungtas. Atrakinkite biometrija arba PIN.",
+      "offer_title": "Atrakinti biometrija",
+      "offer_body": "Atidarykite Ecency veidu ar piršto atspaudu. Taip pat nustatėte PIN, kuris atrakina programą, kai biometrija nepasiekiama.",
+      "offer_use": "Naudoti biometriją",
+      "offer_use_pin": "Naudoti PIN"
+    },
+    "common": {
+      "list_and": "{first} ir {second}",
+      "role_owner": "owner",
+      "role_active": "active",
+      "role_posting": "posting",
+      "role_memo": "memo"
+    },
+    "editor_extras": {
+      "short_reply_hint": "Už 25 simbolių ar trumpesnius atsakymus taškai neskiriami (nuorodos neįskaičiuojamos)",
+      "short_content_hint": "Per trumpa, kad uždirbtumėte taškų (25 simboliai ar mažiau, nuorodos neįskaičiuojamos)",
+      "daily_post": "Dienos įrašas {postProgress}/{postGoal}",
+      "day_streak": "🔥 {streak, plural, one {# dienos serija} few {# dienų serija} many {# dienos serija} other {# dienų serija}}",
+      "grant_description": "Suteikite Ecency paskyrai @ecency.app posting leidimą savo paskyroje, kad galėtumėte skelbti neatidarę Keychain kaskart. Suteikimas keičia jūsų paskyros posting įgaliojimą ir reikalauja jūsų active rakto."
+    },
+    "wallet_history": {
+      "from_to": "@{from} @{to}",
+      "from_user_id": "nuo @{from}, id: {id}",
+      "user_id": "@{user}, id: {id}",
+      "from_to_id": "@{from} @{to}, id: {id}",
+      "from_to_account": "@{from} {to}",
+      "from_user": "nuo @{user}",
+      "to_user": "@{user}",
+      "interest": "Palūkanos",
+      "proposal_pay": "Pasiūlymo išmoka",
+      "categories": "Veiklos tipai",
+      "category_all": "Viskas",
+      "category_transfers": "Pervedimai",
+      "category_market": "Rinkos pavedimai",
+      "category_interest": "Palūkanos",
+      "category_stake": "Įstatymo operacijos",
+      "category_rewards": "Atlygiai",
+      "point_type_checkin": "Širdies dūžiai",
+      "point_type_login": "Prisijungimas",
+      "point_type_post": "Įrašas",
+      "point_type_comment": "Komentaras",
+      "point_type_vote": "Balsas",
+      "point_type_reblog": "Pasidalinimas",
+      "point_type_transfer_sent": "Išsiųsti pervedimai",
+      "point_type_transfer_received": "Gauti pervedimai"
+    },
+    "video_upload": {
+      "continue_upload": "TĘSTI ĮKĖLIMĄ",
+      "source_gone": "Šio įrašo įrenginyje nebėra. Įrašykite arba pasirinkite vaizdo įrašą iš naujo.",
+      "no_camera": "Kamera šiame įrenginyje nepasiekiama."
+    },
+    "profile_wallet": {
+      "hive": "Hive",
+      "next_power_down": "Kitas išėmimas iš įstatymo po {hours, plural, one {# val.} few {# val.} many {# val.} other {# val.}}",
+      "account_not_found": "Paskyra nerasta"
+    },
+    "wave_compose": {
+      "clipboard_chip": "Paveikslėlis iškarpinėje · Įklijuoti paveikslėlį",
+      "no_container": "Nepavyko gauti naujausio waves konteinerio",
+      "please_sign_in_first": "Pirmiausia prisijunkite.",
+      "write_something_first": "Pirmiausia ką nors parašykite.",
+      "account_changed": "Šis wave buvo parašytas kita paskyra. Uždarykite jį ir parašykite iš naujo.",
+      "no_upload": "Paveikslėlių įkėlimas šioje versijoje dar nepasiekiamas. Vietoj to tekste įklijuokite paveikslėlio nuorodą.",
+      "fail": "Nepavyko"
+    },
+    "delete_account": {
+      "sign_out_failed": "Jūsų užklausa išsiųsta, bet atsijungti nepavyko. Atsijunkite iš meniu.",
+      "not_sent": "Nepavyko išsiųsti jūsų ištrynimo užklausos. Bandykite dar kartą."
+    },
+    "chat_sheets": {
+      "group_limit": "Grupėje gali būti iki {max, plural, one {# kito žmogaus} few {# kitų žmonių} many {# kito žmogaus} other {# kitų žmonių}}.",
+      "search_people_by_username": "Ieškoti žmonių pagal naudotojo vardą",
+      "new_group_title": "Nauja grupė",
+      "new_group_hint": "Pridėkite nuo {min} iki {max, plural, one {# žmogaus} few {# žmonių} many {# žmogaus} other {# žmonių}}, kad pradėtumėte grupinį pokalbį.",
+      "no_results": "Pokalbiuose su tokiu vardu nieko nerasta.",
+      "search_failed": "Paieška nepavyko. Patikrinkite ryšį ir bandykite dar kartą.",
+      "create": "Pradėti grupę",
+      "new_group_failed": "Nepavyko pradėti grupės. Bandykite dar kartą.",
+      "name_limit": "Grupės pavadinimas gali būti iki {max, plural, one {# simbolio} few {# simbolių} many {# simbolio} other {# simbolių}}.",
+      "rename_title": "Pervadinti grupę",
+      "rename_hint": "Suteikite grupei pavadinimą, kurį matys visi jos nariai. Palikite tuščią, kad būtų rodomi narių vardai.",
+      "placeholder": "Grupės pavadinimas",
+      "not_owner": "Grupę gali pervadinti tik ją pradėjęs žmogus.",
+      "rename_failed": "Nepavyko pervadinti grupės. Bandykite dar kartą."
+    },
+    "editor_side": {
+      "copy_of": "{title} kopija",
+      "deletions_failed": "Kažkas nutiko\nNepavyko: {failed} iš {total, plural, one {# ištrynimo} few {# ištrynimų} many {# ištrynimo} other {# ištrynimų}}",
+      "uploads_failed": "{count, plural, one {# įkėlimas nepavyko} few {# įkėlimai nepavyko} many {# įkėlimo nepavyko} other {# įkėlimų nepavyko}}:\n\n{messages}",
+      "failed_to_delete": "Nepavyko ištrinti"
+    },
+    "uploads": {
+      "add_to_gallery": "Pridėti į galeriją"
+    },
+    "account_notice": {
+      "manage_keys": "Nustatymai, Tvarkyti įgaliojimus",
+      "no_signing_key_title": "Prisijunkite iš naujo kaip @{account}",
+      "no_signing_key": "Ecency šiame įrenginyje nebelaiko owner rakto ar master slaptažodžio, o @{account} čia neišsaugotas posting ar active raktas. Prisijunkite iš naujo su master slaptažodžiu arba posting ar active raktu, arba pridėkite raktą skiltyje {manageKeys} (Importuoti privatų).",
+      "missing_roles_title": "Kai kurie raktai nebuvo pridėti",
+      "cannot_post": "skelbti, balsuoti ar komentuoti",
+      "cannot_transfer": "siųsti pervedimus ar keisti paskyros nustatymus",
+      "missing_roles": "Jūsų slaptažodis nebeatitinka @{account} {missing} rakto: jis buvo pakeistas paskyroje nuo slaptažodžio nustatymo. Šiame įrenginyje išsaugota: {kept} raktas. Kol nepridėsite {missing} rakto skiltyje {manageKeys} (Importuoti privatų), ši programa su @{account} raktais negali {cannot}.",
+      "shared_owner_title": "Šis raktas taip pat valdo owner vaidmenį",
+      "shared_owner": "@{account} naudoja tą patį raktą owner vaidmeniui ir {names} vaidmeniui. Kas turi šį raktą, valdo visą paskyrą. Ecency laiko jį tik kaip {names} raktą ir niekada nenaudoja owner operacijoms. Suteikite {names} vaidmeniui atskirą raktą, o owner raktą laikykite neprisijungus prie tinklo."
+    },
+    "dapp_browser": {
+      "message_from": "Žinutė iš {host}",
+      "home_title": "Pradžia",
+      "loading_title": "Įkeliama...",
+      "blank_run": "[{count, plural, one {# tuščias simbolis} few {# tušti simboliai} many {# tuščio simbolio} other {# tuščių simbolių}}]",
+      "too_large": "Šis puslapis paprašė pasirašyti per didelę rodyti užklausą, todėl Ecency ją atmetė."
+    },
+    "community_service": {
+      "the_account_changed": "Paskyra pasikeitė."
+    },
+    "profile_edit": {
+      "enter_link": "Įveskite paveikslėlio nuorodą",
+      "please_sign_in_first": "Pirmiausia prisijunkite.",
+      "account_not_found": "Paskyra nerasta",
+      "please_enter_an_image": "Įveskite paveikslėlio nuorodą, prasidedančią https://"
+    },
+    "background_media": {
+      "post_by": "Įrašas, autorius @{author}"
+    },
+    "bookmarks": {
+      "please_sign_in_first": "Pirmiausia prisijunkite."
+    },
+    "broadcast_errors": {
+      "duplicate_vote": "Jau balsavote tokiu pačiu svoriu.",
+      "insufficient_rc": "Nepakanka Resource Credits. Palaukite arba įstatykite.",
+      "missing_authority": "Trūksta posting įgaliojimo. Patikrinkite prisijungimo būdą.",
+      "comment_too_soon": "Palaukite prieš skelbdami dar kartą.",
+      "paid_out": "Šis įrašas jau išmokėtas.",
+      "too_large": "Operacija yra {size, plural, one {# baitas} few {# baitai} many {# baito} other {# baitų}}, viršija {max} baitų ribą.",
+      "network_error_please_check": "Tinklo klaida. Patikrinkite ryšį ir bandykite dar kartą.",
+      "unconfirmed_message": "Nepavyko patvirtinti, ar tai pavyko. Patikrinkite savo piniginę ar istoriją; pradėkite iš naujo tik jei jos ten nėra.",
+      "undecided_message": "Tai galėjo jau pavykti. Prieš bandydami dar kartą patikrinkite savo piniginę ar istoriją."
+    },
+    "chat_api": {
+      "request_failed": "Užklausa nepavyko ({status})"
+    },
+    "chat": {
+      "typing_one": "{name} rašo...",
+      "typing_two": "{first} ir {second} rašo...",
+      "typing_three": "{first}, {second} ir {third} rašo...",
+      "typing_many": "{first}, {second} ir dar {count, plural, one {# žmogus rašo} few {# žmonės rašo} many {# žmogaus rašo} other {# žmonių rašo}}...",
+      "banned": "{reason} Pokalbius vis tiek galite skaityti. Skelbti bus galima {until}.",
+      "joined_when": "prisijungė {time}",
+      "joined": "prisijungė",
+      "official_badge": "Oficialus",
+      "official_badge_label": "Oficiali Ecency paskyra"
+    },
+    "side_menu": {
+      "ask_esie": "Klausti Esie"
+    },
+    "chat_service": {
+      "missing_token": "Trūksta Hive prieigos žetono. Atsijunkite ir prisijunkite iš naujo.",
+      "dm_error": "Naudotojas neprisijungė prie pokalbių"
+    },
+    "compose_reply": {
+      "account_changed": "Šis atsakymas buvo parašytas kita paskyra. Uždarykite jį ir parašykite iš naujo.",
+      "write_something_first": "Pirmiausia ką nors parašykite.",
+      "please_sign_in_first": "Pirmiausia prisijunkite."
+    },
+    "editor_meta": {
+      "too_many_beneficiaries": "Per daug pelno gavėjų: daugiausia {max}.",
+      "a_beneficiary_s_share": "Pelno gavėjo dalis turi būti nuo 0,01% iki 100%.",
+      "beneficiaries_add_up_to": "Pelno gavėjų dalys viršija 100%.",
+      "a_beneficiary_is_listed": "Pelno gavėjas nurodytas du kartus.",
+      "you_cannot_be_a": "Negalite būti savo įrašo pelno gavėju.",
+      "a_beneficiary_has_an": "Pelno gavėjo paskyros vardas neteisingas."
+    },
+    "follows": {
+      "fail": "Nepavyko!: {message}",
+      "follower_count": "Sekėjai ({count})",
+      "following_count": "Sekama ({count})"
+    },
+    "link": {
+      "unsupported": "Ši nuoroda dar nepalaikoma.",
+      "cannot_open": "Nepavyksta atidaryti nuorodos",
+      "unsupported_version": "Ši nuoroda šioje versijoje nepalaikoma."
+    },
+    "link_sheet": {
+      "the_explore_browser_can": "Explore naršyklė gali pasiekti jūsų Hive piniginę operacijoms pasirašyti. Ši nuoroda gauta iš įrašo turinio ir Ecency jos nepatikrino. Tęskite tik jei pasitikite:\n\n{url}"
+    },
+    "listen": {
+      "message": "Klausymui reikia {required} Points, o jūs turite {available}.",
+      "unlock_label": "Atrakinti · {cost} Points",
+      "preparing_audio": "Ruošiamas garso įrašas · {preparingPercent}%",
+      "waiting_in_line_ahead": "Laukiama eilėje, prieš jus {ahead}…",
+      "next_in_line": "Esate kitas eilėje…",
+      "preparing_about_minutes": "Ruošiamas garso įrašas, maždaug {minutes} min.…",
+      "preparing_audio_2": "Ruošiamas garso įrašas…",
+      "spend_confirm": "Išleisti {cost} Points šiam įrašui klausyti? Garso įrašą galėsite paleisti iš naujo bet kada.",
+      "about_minutes": "~{minutes} min.",
+      "failed_refunded": "Nepavyko sukurti garso įrašo, jūsų Points grąžinti"
+    },
+    "media_pick": {
+      "preparing_video": "Ruošiamas vaizdo įrašas...",
+      "library_hint": "Pasirinkite iš savo nuotraukų",
+      "camera_hint": "Dabar nufotografuokite naują",
+      "files_hint": "Naršykite failus šiame įrenginyje ir debesyje",
+      "paste_hint": "Naudoti nukopijuotą paveikslėlį",
+      "link_hint": "Naudoti paveikslėlį iš interneto"
+    },
+    "media_picking": {
+      "image_types_message": "Šio failo tipo nepalaikome. Pasirinkite JPEG, PNG, GIF, WebP arba HEIC paveikslėlį.",
+      "video_types_message": "Šio failo tipo nepalaikome. Pasirinkite MP4 arba MOV vaizdo įrašą.",
+      "gif_too_large": "Šis GIF didesnis nei {mb} MB."
+    },
+    "operation_authority": {
+      "this_operation_needs_both": "Ši operacija reikalauja ir active, ir posting parašo, kurių Ecency dar negali pasirašyti kartu."
+    },
+    "poll": {
+      "fail": "Nepavyko!. {message}"
+    },
+    "posting_authority_flow": {
+      "check_failed": "Nepavyko patikrinti jūsų paskyros posting įgaliojimo. Patikrinkite ryšį ir bandykite dar kartą."
+    },
+    "post_lists": {
+      "voters_title": "Balsavusieji ({total})",
+      "reblogs_title": "Pasidalinimai ({total})",
+      "no_history_found": "Istorijos nerasta!",
+      "no_edit_history_available": "Šio turinio redagavimo istorijos nėra.",
+      "version_label": "Versija {version}"
+    },
+    "stats": {
+      "other_device": "Kita"
+    },
+    "profile": {
+      "account_not_found": "Paskyra nerasta",
+      "bar": "{label}: {percent}",
+      "bar_full": "{label}: {percent} • Pilna po {hours, plural, one {# val.} few {# val.} many {# val.} other {# val.}}"
+    },
+    "profile_metadata_guard": {
+      "refused": "Nepavyko nuskaityti dabartinio profilio, bandykite dar kartą"
+    },
+    "profile_sheet": {
+      "fail": "Nepavyko! {message}"
+    },
+    "profile_writes": {
+      "account_not_found": "Paskyra nerasta"
+    },
+    "push_payload": {
+      "mentioned": "@{source} paminėjo @{target}",
+      "replied": "@{source} atsakė @{target}",
+      "transferred": "@{source} pervedė @{target}",
+      "delegated": "@{source} deleguoja @{target}",
+      "rewards_received": "Atlygis gautas",
+      "account_updated": "Paskyra atnaujinta",
+      "account_updated_body": "Jūsų paskyros duomenys atnaujinti",
+      "followed": "@{source} pradėjo sekti @{target}",
+      "unfollowed": "@{source} nustojo sekti @{target}",
+      "ignored": "@{source} ignoravo @{target}",
+      "blacklisted": "@{source} įtraukė @{target} į juodąjį sąrašą",
+      "posted_in": "@{source} paskelbė žymoje #{firstTag}"
+    },
+    "qr_scan": {
+      "permission_title": "Nepavyko gauti kameros leidimo",
+      "permission_message": "Suteikite kameros leidimą Ecency nustatymuose.",
+      "permission_allow": "Leisti"
+    },
+    "reply_account": {
+      "switch": "Atsakyti kita paskyra"
+    },
+    "send_journal": {
+      "your_from_went_through": "Jūsų {label} iš @{account} pavyko.",
+      "not_sent": "Jūsų {label} iš @{account} nepavyko. Nieko neišsiųsta; galite pradėti iš naujo.",
+      "checking_whether_your_from": "Tikrinama, ar jūsų {label} iš @{account} pavyko. Prieš siųsdami dar kartą patikrinkite savo piniginę."
+    },
+    "signing": {
+      "hot_page_closed": "HiveSigner puslapis uždarytas",
+      "wrong_role": "Tai jūsų {given} raktas; šiai operacijai reikia jūsų {needed} rakto.",
+      "action_id_required": "Šiam veiksmui reikia veiksmo id, kad jį būtų galima saugiai kartoti."
+    },
+    "signing_router": {
+      "owner_never": "Owner operacijos programoje niekada nepasirašomos."
+    },
+    "spin": {
+      "key_missing": "Trūksta žaidimo rakto",
+      "score": "{score, plural, one {# Point} few {# Points} many {# Points} other {# Points}}"
+    },
+    "daily_reset": {
+      "today_resets_in": "Šiandien (UTC), atsinaujina po {time}",
+      "hours_minutes": "{hours} {minutes}",
+      "resets_daily": "Atsinaujina kasdien 00:00 UTC"
+    },
+    "storage_reset": {
+      "title": "Prisijunkite iš naujo",
+      "message": "Saugi saugykla šiame įrenginyje buvo atstatyta. Prisijunkite iš naujo.",
+      "failed": "Nepavyko pašalinti šiame įrenginyje esančių paskyrų. Bandykite dar kartą."
+    },
+    "store": {
+      "in_app_purchases_are": "Pirkiniai programoje šioje versijoje nepasiekiami."
+    },
+    "wallet_sends": {
+      "journal_full": "Per daug ankstesnių siuntimų vis dar tikrinama tinkle. Palaukite, kol jie bus patvirtinti, prieš siųsdami daugiau.",
+      "check_later": "Tinklas laiku to nepatvirtino. Prieš siųsdami dar kartą patikrinkite savo piniginę ar istoriją; programa patikrins dar kartą kitą kartą pasileidusi."
+    },
+    "waves": {
+      "shorts": "Shorts"
+    },
+    "widgets": {
+      "unread": "{count, plural, one {# neperskaityta} few {# neperskaityti} many {# neperskaityta} other {# neperskaitytų}}",
+      "locked_text": "Atrakinkite Ecency, kad pamatytumėte",
+      "signed_out_text": "Prisijunkite prie Ecency"
+    },
+    "posting_grant": {
+      "unreadable": "Nepavyko nuskaityti dabartinių jūsų paskyros įgaliojimų. Nieko nepakeista; bandykite dar kartą.",
+      "reads_disagree": "Du jūsų paskyros posting įgaliojimo nuskaitymai nesutampa. Nieko nepakeista; bandykite dar kartą."
+    },
+    "vote": {
+      "vote_weight_must_be": "Balso svoris turi būti nuo -100% iki 100%.",
+      "please_sign_in_first": "Pirmiausia prisijunkite."
+    },
+    "widget": {
+      "streak_name": "Užduočių serija",
+      "write": "Rašyti",
+      "new_wave": "Naujas wave",
+      "notifications_description": "Jūsų neperskaityti pranešimai. Paslėpta, kai PIN užraktas įjungtas.",
+      "streak_description": "Jūsų dienos užduočių serija. Paslėpta, kai PIN užraktas įjungtas.",
+      "compose_description": "Parašykite įrašą arba naują wave.",
+      "streak_title": "Serija",
+      "daily_quests": "Dienos užduotys",
+      "streak_hint": "Atidarykite Perks, kad pamatytumėte savo seriją",
+      "open_perks": "Atidaryti Perks",
+      "open_app": "Atidaryti Ecency",
+      "unread_caption": "{count, plural, one {neperskaityta} few {neperskaityti} many {neperskaityta} other {neperskaitytų}}",
+      "streak_caption": "{count, plural, one {dienos serija} few {dienų serija} many {dienos serija} other {dienų serija}}"
+    },
+    "system": {
+      "dictation_channel": "Diktavimas",
+      "listen_channel": "Klausymas",
+      "dictation_channel_description": "Rodoma, kol fone vyksta diktavimo įrašymas, su Stop veiksmu.",
+      "dictation_title": "Diktavimo įrašymas",
+      "dictation_text": "Ecency įrašo jūsų diktavimą. Sustabdžius jis lieka neišsiųstas, kol patvirtinsite programoje.",
+      "listen_channel_description": "Praneša, kai klausymas negalėjo tęstis fone.",
+      "listen_paused": "Klausymas pristabdytas",
+      "listen_paused_text": "Atidarykite Ecency, kad tęstumėte klausymą.",
+      "skip_back": "Atgal 15 sekundžių",
+      "skip_forward": "Pirmyn 15 sekundžių"
+    },
+    "permission": {
+      "face_id": "Atrakinkite Ecency su Face ID vietoje PIN.",
+      "camera": "Nuskaitykite QR kodus, nufotografuokite ar įrašykite vaizdo įrašą, kad pridėtumėte jį prie įrašo.",
+      "photo_library_add": "Ecency išsaugo iš įrašų atsisiųstus paveikslėlius jūsų nuotraukų bibliotekoje.",
+      "photo_library": "Ecency laiko iš įrašų atsisiųstus paveikslėlius kartu Ecency albume jūsų nuotraukų bibliotekoje.",
+      "microphone": "Ecency naudoja jūsų mikrofoną, kad galėtumėte diktuoti įrašus ir komentarus (šie įrašai siunčiami Ecency transkribuoti) ir įrašyti garsą su prie įrašo pridedamu vaizdo įrašu."
+    },
+    "android": {
+      "no_browser": "Naršyklės nėra",
+      "biometric_unlock_title": "Atrakinkite Ecency biometrija",
+      "biometric_confirm": "Patvirtinkite piršto atspaudu arba veidu",
+      "image_unsupported_address": "Nepalaikomas paveikslėlio adresas",
+      "image_create_failed": "Nepavyko sukurti failo",
+      "image_write_failed": "Nepavyko įrašyti failo",
+      "image_too_large": "Paveikslėlis per didelis",
+      "image_download_failed": "Atsisiuntimas nepavyko, būsena {status}",
+      "billing_disconnected": "Google Play Billing atsijungė.",
+      "billing_no_screen": "Nėra ekrano pirkimui parodyti.",
+      "billing_error": "Google Play Billing klaida {code}"
+    },
     "plurals": {
       "notification": {
-        "monthly_posts": "Šį mėnesį sukūrėte {count, plural, one {# įrašą} few {# įrašą} many {# įrašą} other {# įrašą}}. Taip ir toliau!",
-        "checkin": "Šią savaitę pažymėjote {count, plural, one {# dieną} few {# dieną} many {# dieną} other {# dieną}}. Taip ir toliau!"
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "tags_bundle": "{count, plural, one {# naujas įrašas} few {# nauji įrašai} many {# naujo įrašo} other {# naujų įrašų}} žymoje #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# nepavykę bandymas(ai)} few {# nepavykę bandymas(ai)} many {# nepavykę bandymas(ai)} other {# nepavykę bandymas(ai)}}"
+        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
       },
       "perks": {
-        "streak": "{n} d. serija"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Leidžiama tik senesnėms nei {days} d. paskyroms",
-        "max_choices": "• Galite pasirinkti iki {choices} variantų"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Liko {executions} pervedimų",
-        "schedule_summary": "{executions} pavedimų, kas {hours} val."
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+      },
+      "editor": {
+        "short_content_hint": "Per trumpa, kad uždirbtumėte taškų ({n, plural, one {# simbolis} few {# simboliai} many {# simbolio} other {# simbolių}} ar mažiau, nuorodos neįskaičiuojamos)"
       },
       "chats": {
-        "people_joined": "Prisijungė {count} žmonių"
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "ban-remaining-minutes": "po maždaug {count, plural, one {# min.} few {# min.} many {# min.} other {# min.}}",
+        "ban-remaining-hours": "po maždaug {count, plural, one {# val.} few {# val.} many {# val.} other {# val.}}",
+        "ban-remaining-days": "po maždaug {count, plural, one {# d.} few {# d.} many {# d.} other {# d.}}"
+      },
+      "search_result": {
+        "filters": {
+          "too_many_tags": "Naudokite ne daugiau kaip {n, plural, one {# žymą} few {# žymas} many {# žymos} other {# žymų}}",
+          "too_long": "Paieška per ilga. Naudokite ne daugiau kaip {n, plural, one {# simbolį} few {# simbolius} many {# simbolio} other {# simbolių}}"
+        }
       },
       "ai_assist": {
-        "min_chars": "Reikalingi mažiausiai {count} simboliai",
-        "chars_remaining": "Liko {count} simbolių"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+      },
+      "alert": {
+        "too_many_images": "Vienu metu galite pasirinkti iki {count, plural, one {# paveikslėlio} few {# paveikslėlių} many {# paveikslėlio} other {# paveikslėlių}}"
+      },
+      "dictation": {
+        "stop_hint": "Sustabdykite, kad būtų transkribuota ir pridėta prie įrašo. Iki {m, plural, one {# minutės} few {# minučių} many {# minutės} other {# minučių}}.",
+        "rate": "{n} Points už {s, plural, one {# sekundę} few {# sekundes} many {# sekundės} other {# sekundžių}}"
       },
       "transfer": {
-        "powering_down_info": "Kitas įkrovimo atšaukimas po {days} d., {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+      },
+      "community_settings": {
+        "title_length": "Nuo {min} iki {max, plural, one {# simbolio} few {# simbolių} many {# simbolio} other {# simbolių}}"
       }
     }
   }
