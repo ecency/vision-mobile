@@ -224,16 +224,16 @@ class LocaleFormatGoldenTest {
         assertEquals("١١ كثيرة", ar(11.0))
         assertEquals("١٬١٠٠ أخرى", ar(1100.0))
 
-        // the catalog: these plural messages are still English in every translation, so English picks the form
-        // and the app language writes the number
+        // the catalog: each translation picks its own plural form and the app language writes the number
         assertEquals("1,234 votes", L.post.a11yVotes(count = 1234))
         L10n.setLanguage("de-DE")
-        assertEquals("1.234 votes", L.post.a11yVotes(count = 1234))
-        assertEquals("1 vote", L.post.a11yVotes(count = 1))
+        assertEquals("1.234 Votes", L.post.a11yVotes(count = 1234))
+        assertEquals("1 Vote", L.post.a11yVotes(count = 1))
         L10n.setLanguage("hi-IN")
-        assertEquals("12,34,567 votes", L.post.a11yVotes(count = 1_234_567))
+        assertEquals("12,34,567 वोट", L.post.a11yVotes(count = 1_234_567))
         L10n.setLanguage("ar-SA")
-        assertEquals("١٢ votes", L.post.a11yVotes(count = 12))
+        assertEquals("\u200f١٢ صوتًا", L.post.a11yVotes(count = 12))
+        assertEquals("\u200fصوتان", L.post.a11yVotes(count = 2))
     }
 
     @Test
