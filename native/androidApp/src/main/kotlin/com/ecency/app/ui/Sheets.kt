@@ -457,6 +457,9 @@ private fun GalleryButton(icon: AppIcon, label: String, tag: String, onClick: ()
     }
 }
 
+/** The image viewer zooms from 1x up to this. */
+private const val MAX_ZOOM = 5f
+
 /**
  * One image of the viewer: two fingers zoom (1x to 5x) and pan; a double tap toggles 1.5x (RN doubleTapScale). At 1x
  * a one-finger drag is left to the pager, so swiping between images still works; [onZoom] says when it is zoomed.
@@ -483,7 +486,7 @@ fun ZoomableImage(url: String, description: String, modifier: Modifier = Modifie
                         if (pressed >= 2 || scale > 1f) {
                             val zoom = event.calculateZoom()
                             val pan = event.calculatePan()
-                            scale = (scale * zoom).coerceIn(1f, 5f)
+                            scale = (scale * zoom).coerceIn(1f, MAX_ZOOM)
                             val maxX = size.width * (scale - 1) / 2
                             val maxY = size.height * (scale - 1) / 2
                             offset = if (scale <= 1f) androidx.compose.ui.geometry.Offset.Zero
@@ -494,9 +497,18 @@ fun ZoomableImage(url: String, description: String, modifier: Modifier = Modifie
                 }
             },
     ) {
-        // the full file through the proxy, not a sized body variant: zoomed 5x, a 1280 px one would blur
+        // the full file through the proxy, not a sized body variant, decoded for the widest zoom: a screen sized
+        // decode scaled up 5x would blur (Coil's maxBitmapSize, 4096 px a side by default, bounds the memory)
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val screen = androidx.compose.ui.platform.LocalConfiguration.current
+        val density = androidx.compose.ui.platform.LocalDensity.current.density
+        val side = (maxOf(screen.screenWidthDp, screen.screenHeightDp) * density * MAX_ZOOM).toInt().coerceAtLeast(1)
+        val request = remember(url, side) {
+            coil3.request.ImageRequest.Builder(context).data(url).size(side, side)
+                .precision(coil3.size.Precision.INEXACT).build()
+        }
         AsyncImage(
-            model = url,
+            model = request,
             contentDescription = description,
             contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize().graphicsLayer {

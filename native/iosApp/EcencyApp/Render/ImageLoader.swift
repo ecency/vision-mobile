@@ -33,6 +33,8 @@ final class ImageLoader: @unchecked Sendable {
     static let retryAfter: TimeInterval = 60
     /// Upper bound for one animated image's decoded frames.
     static let maxAnimationBytes = 24 << 20
+    /// The most pixels one decode keeps (about 96 MB at 4 bytes a pixel), so a zoomable huge file stays in memory.
+    static let maxDecodeArea: CGFloat = 24_000_000
 
     private static let session: URLSession = {
         let config = URLSessionConfiguration.default
@@ -116,15 +118,19 @@ final class ImageLoader: @unchecked Sendable {
 
     /// Decodes at no more than `maxPixel` wide (never upscaled). Animated images keep frames until
     /// `maxAnimationBytes` is reached; a single surviving frame shows as a still image.
-    static func decode(_ data: Data, maxPixel: CGFloat) -> LoadedImage? {
+    static func decode(_ data: Data, maxPixel: CGFloat, maxArea: CGFloat = maxDecodeArea) -> LoadedImage? {
         guard let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary),
               CGImageSourceGetCount(source) > 0 else { return nil }
         let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
         let width = (props?[kCGImagePropertyPixelWidth] as? CGFloat) ?? 0
         let height = (props?[kCGImagePropertyPixelHeight] as? CGFloat) ?? 0
         guard width > 0, height > 0 else { return nil }
-        // Thumbnail size limits the longer side; scale it so the width lands on maxPixel.
-        let maxSide = max(1, maxPixel) * max(1, height / width)
+        // Never wider than the file, and never more than maxArea pixels in all (the aspect is kept).
+        var targetWidth = min(max(1, maxPixel), width)
+        let area = targetWidth * targetWidth * height / width
+        if area > maxArea { targetWidth *= (maxArea / area).squareRoot() }
+        // Thumbnail size limits the longer side; scale it so the width lands on targetWidth.
+        let maxSide = max(1, targetWidth) * max(1, height / width)
         let options = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
