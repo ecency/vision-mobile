@@ -70,6 +70,9 @@ class TestNode {
     /** More `json_metadata` fields for every entry (`"app":"ecency/4"` ...), comma first. */
     @Volatile var metadataExtra = ""
 
+    /** `json_metadata.tags` of every entry, as JSON. */
+    @Volatile var metadataTags = """["test"]"""
+
     /** A `json_metadata.image` for every entry (the card image; `{permlink}` is replaced), none by default. */
     @Volatile var metadataImage: String? = null
 
@@ -80,7 +83,7 @@ class TestNode {
         "author":"$author","permlink":"$permlink",
         ${parent?.let { """"parent_author":"${it.first}","parent_permlink":"${it.second}",""" } ?: ""}
         "category":"hive-100001","title":"Title $permlink","body":"Body of $permlink with **bold** text$extra",
-        "json_metadata":{"tags":["test"],"description":"Summary of $permlink"${metadataImage?.let { ""","image":["${it.replace("{permlink}", permlink)}"]""" } ?: ""}$metadataExtra},
+        "json_metadata":{"tags":$metadataTags,"description":"Summary of $permlink"${metadataImage?.let { ""","image":["${it.replace("{permlink}", permlink)}"]""" } ?: ""}$metadataExtra},
         "created":"2026-10-06T10:00:00","updated":"2026-10-06T10:00:00","depth":${if (parent == null) 0 else 1},"children":$children,
         "net_rshares":1000,"author_reputation":60.0,"payout":1.5,"is_paidout":false,"payout_at":"2026-10-13T10:00:00",
         "pending_payout_value":"1.500 HBD","author_payout_value":"0.000 HBD","curator_payout_value":"0.000 HBD",

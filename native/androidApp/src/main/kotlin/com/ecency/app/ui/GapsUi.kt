@@ -6,6 +6,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.semantics.Role
 
 import com.ecency.core.app.AppIcon
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ripple
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -427,6 +433,39 @@ fun EcencySourceBadge(modifier: Modifier = Modifier, tag: String = "ecencySource
 @Composable
 fun AiDisclosedBadge(modifier: Modifier = Modifier) {
     Glyph(AppIcon.AI, LocalEcencyColors.current.icon, 14.dp, modifier.testTag("aiDisclosed"), description = if (LocalMergedRow.current) null else com.ecency.core.app.PostBadges.AI_DISCLOSED)
+}
+
+/**
+ * RN postElements Tags in postDisplayView's footer: one scrolling row of pills above the "Posted by" line, the first
+ * (pinned) one blue. A community pill shows its title and opens the community, any other tag opens its results.
+ * Colours are AA pairs of the theme (white on blue, darkGray on lightBackground); RN's white on `$iconColor` was 1.7:1.
+ */
+@Composable
+fun PostTagsRow(tags: List<com.ecency.core.app.PostTag>, onOpen: (com.ecency.core.app.AppScreen) -> Unit) {
+    val colors = LocalEcencyColors.current
+    Row(
+        Modifier.fillMaxWidth().padding(top = 8.dp).horizontalScroll(rememberScrollState()).testTag("postTags"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        tags.forEach { tag ->
+            val interaction = remember { MutableInteractionSource() }
+            // a 48 dp touch target around the 22 dp pill; the ripple stays on the pill
+            Box(
+                Modifier.heightIn(min = 48.dp)
+                    .clickable(interactionSource = interaction, indication = null, role = Role.Button) { onOpen(tag.screen) }
+                    .semantics { contentDescription = tag.accessibilityLabel }
+                    .testTag("postTag:${tag.name}"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    tag.label, color = if (tag.pinned) Color.White else colors.darkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).indication(interaction, ripple())
+                        .background(if (tag.pinned) colors.blue else colors.lightBackground)
+                        .heightIn(min = 22.dp).wrapContentHeight(Alignment.CenterVertically).padding(horizontal = 10.dp, vertical = 3.dp),
+                )
+            }
+        }
+    }
 }
 
 /** RN postDisplayView's footer source row: "Posted by {author} via {App} {age}", then the badges. */

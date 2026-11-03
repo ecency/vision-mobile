@@ -304,6 +304,8 @@ fun PostScreen(
                     }
                     postBody(body, contentWidth, actions.body)
                 }
+                // RN postDisplayView footer <Tags> above "Posted by", once the body is in (RN keeps it beside a translation)
+                if (post != null && state.body != null && state.tags.isNotEmpty()) item(key = "postTags") { PostTagsRow(state.tags, actions.onScreen) }
                 // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges, once the body is in
                 if (post != null && state.body != null && translation?.translated == null) item(key = "postedBy") { PostedByRow(post, nowMillis) }
                 // RN NewsletterPostPrompt, once the body is in
