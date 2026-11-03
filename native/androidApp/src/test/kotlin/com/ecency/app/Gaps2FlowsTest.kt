@@ -280,6 +280,38 @@ class Gaps2FlowsTest {
     }
 
     @Test
+    fun thePostFooterShowsItsTagsAndATapOpensTheTagOrTheCommunity() {
+        node.metadataTags = """["photography","hive-200002"]"""
+        node.extra = { method, req ->
+            val name = req["params"]?.jsonObject?.get("name")?.jsonPrimitive?.content
+            if (method == "bridge.get_community" && name == "hive-200002") """{"id":2,"name":"hive-200002","title":"Photo Hub"}""" else null
+        }
+        val navigator = com.ecency.app.ui.Navigator(com.ecency.core.app.NavState().push(com.ecency.core.app.AppScreen.Post("alice", "trending-one")))
+        compose.setContent { EcencyTheme(dark = false) { EcencyApp(env, host, navigator) } }
+        waitFor("postActions")
+        compose.scrollListTo("postList", hasTestTag("postTags"))
+        // above the "Posted by" line, the category first and pinned, a community by its title
+        compose.scrollListTo("postList", hasTestTag("postedBy"))
+        val row = compose.onNodeWithTag("postTags").fetchSemanticsNode().boundsInRoot
+        val postedBy = compose.onNodeWithTag("postedBy").fetchSemanticsNode().boundsInRoot
+        assertTrue("tags $row above posted by $postedBy", row.bottom <= postedBy.top + 0.5f)
+        compose.await("the fetched title") { exists("postTag:hive-200002") && compose.onNodeWithTag("postTag:hive-200002").fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.ContentDescription].first() == "Photo Hub, community" }
+        val pills = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("a tag pill") { n -> n.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsProperties.TestTag) { null }?.startsWith("postTag:") == true }).fetchSemanticsNodes()
+        assertEquals(listOf("postTag:hive-100001", "postTag:photography", "postTag:hive-200002"), pills.map { it.config[androidx.compose.ui.semantics.SemanticsProperties.TestTag] })
+        assertEquals(listOf("Test Community, community", "photography, tag", "Photo Hub, community"), pills.map { it.config[androidx.compose.ui.semantics.SemanticsProperties.ContentDescription].first() })
+        assertTrue(pills.all { it.config[androidx.compose.ui.semantics.SemanticsProperties.Role] == androidx.compose.ui.semantics.Role.Button })
+        assertTrue("48 dp touch targets", pills.all { it.size.height >= with(compose.density) { 48.dp.roundToPx() } })
+        assertTrue(compose.onAllNodes(androidx.compose.ui.test.hasText("Test Community"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodes(androidx.compose.ui.test.hasText("photography"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        compose.onNodeWithTag("postTag:photography").performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the tag's results") { navigator.state.top == com.ecency.core.app.AppScreen.TagResult("photography") }
+        compose.runOnIdle { navigator.pop() }
+        compose.scrollListTo("postList", hasTestTag("postTags"))
+        compose.onNodeWithTag("postTag:hive-100001").performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the community") { navigator.state.top == com.ecency.core.app.AppScreen.Community("hive-100001") }
+    }
+
+    @Test
     fun theSourceBadgeIsTheLabelledLogoMarkWithNoText() {
         compose.setContent { EcencyTheme(dark = true) { com.ecency.app.ui.EcencySourceBadge() } }
         val badge = compose.onNodeWithTag("ecencySource").fetchSemanticsNode()

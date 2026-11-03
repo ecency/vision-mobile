@@ -14,7 +14,7 @@ struct AccountSwitcherSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            ThemedForm {
                 Section {
                     ForEach(session.state.accounts, id: \.username) { account in
                         // the current mark and log out go under the name at accessibility text sizes
@@ -148,7 +148,7 @@ struct WelcomeView: View {
         }
         .padding(24)
         .background(theme.background)
-        .sheet(isPresented: $terms) { SafariView(url: URL(string: LoginCopy.shared.TERMS_URL)!).ignoresSafeArea() }
+        .themedSheet(isPresented: $terms) { SafariView(url: URL(string: LoginCopy.shared.TERMS_URL)!).ignoresSafeArea() }
         .onAppear { if previouslyAccepted { accepted = true } }
     }
 }

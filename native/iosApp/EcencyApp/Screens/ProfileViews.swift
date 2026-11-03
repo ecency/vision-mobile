@@ -15,6 +15,30 @@ struct ProBadge: View {
     }
 }
 
+/// Hands its content whether `username` is on the Pro roster, for rows whose VoiceOver label is written out;
+/// redrawn when the roster loads (a set lookup).
+struct ProMemberReader<Content: View>: View {
+    let username: String
+    @ViewBuilder let content: (Bool) -> Content
+    @EnvironmentObject private var app: AppContainer
+
+    var body: some View { Inner(members: app.proMembers, username: username, content: content) }
+
+    private struct Inner: View {
+        @ObservedObject var members: Observed<NSSet>
+        let username: String
+        let content: (Bool) -> Content
+
+        var body: some View {
+            content(members.state.contains(username.lowercased()))
+                .onAppear { (members.model as? ProMembersModel)?.ensureLoaded() }
+        }
+    }
+}
+
+/// `name`, then "Ecency Pro member" for a member: the badge said in a written out label.
+func proLabel(_ name: String, _ pro: Bool) -> String { pro ? "\(name), \(ProfileUiCopy.shared.ECENCY_PRO_MEMBER)" : name }
+
 private struct ProBadgeContent: View {
     @ObservedObject var members: Observed<NSSet>
     let username: String
@@ -28,6 +52,7 @@ private struct ProBadgeContent: View {
                     .accessibilityLabel(ProfileUiCopy.shared.ECENCY_PRO_MEMBER).accessibilityIdentifier("pro-badge")
             }
         }
+        // only reached for a visible badge (an empty Group never appears); AppContainer loads the roster at start
         .onAppear { (members.model as? ProMembersModel)?.ensureLoaded() }
     }
 }
@@ -96,7 +121,7 @@ final class ProfileFeeds: ObservableObject {
 
 /// RN profile: summary (cover, avatar, Follow / Message / email digest / menu or Edit, name, bio, date, website,
 /// location, follower counts, voting power and RC), then the tabs over the list. The summary sits above the list and
-/// closes as it scrolls down, opening near the top, after a drag up or on a tap on the user in the bar (RN profileView,
+/// closes as it scrolls down, opening back at the top or on a tap on the user in the bar (RN profileView,
 /// `SummaryCollapseDriver`); the tabs stay.
 struct ProfileScreen: View {
     @StateObject private var profile: Observed<ProfileState>
@@ -106,6 +131,9 @@ struct ProfileScreen: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
     @State private var confirmReport = false
+    /// Bumped by a tap on the selected tab (RN TabbedPosts onTabPress): the list goes to the top.
+    @State private var scrollTop = 0
+    @State private var momentum = ScrollMomentum()
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
@@ -133,10 +161,10 @@ struct ProfileScreen: View {
                     }
                     if !state.isMuted {
                         // another tab's list: the summary opens over it (the three ways in agree)
-                        ProfileTabsView(state: state) { i in
-                            if i != Int(state.selectedTab) { collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass)) }
+                        ProfileTabsView(state: state, onSelect: { i in
+                            collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass))
                             model.selectTab(index: Int32(i))
-                        }
+                        }, onReselect: { scrollTop += 1 })
                     }
                     list(state, width: geo.size.width)
                 } else if let error = state.error {
@@ -169,6 +197,7 @@ struct ProfileScreen: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
         // at accessibility text sizes the open summary and the tabs would leave the list no room (SummarySizeRule)
         .closesSummaryForSize(collapse)
         .accessibilityElement(children: .contain)
@@ -197,16 +226,22 @@ struct ProfileScreen: View {
                     }
                 }
                 .reportsScrollOffset("profile-scroll")
+                .tracksScrollMomentum(momentum)
             }
             .refreshable { model.refresh() }
             .collapsesSummary(collapse, space: "profile-scroll")
             // RN postsTabContent's ScrollTopPopup (the profile's post tabs); the top opens the summary
-            .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") {
-                collapse.expand()
-                proxy.scrollTo("profile-top", anchor: .top)
-            }
+            .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") { toTop(proxy) }
+            .onChange(of: scrollTop) { _, _ in toTop(proxy) }
             .accessibilityIdentifier("profile-list")
         }
+    }
+
+    /// The scroll to top (popup or tab reselect), mid-fling too; the top opens the summary.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        collapse.expand()
+        proxy.scrollTo("profile-top", anchor: .top)
     }
 
     @ViewBuilder private func tabContent(_ state: ProfileState, width: CGFloat) -> some View {
@@ -262,11 +297,13 @@ private struct ProfileTabFeed: View {
             if state.items.isEmpty {
                 if let error = state.error {
                     ErrorStateView(error: error) { model.retry() }.padding(.top, 32)
-                } else if state.loaded {
+                } else if state.loaded && !state.isLoadingMore {
                     Text(tab.isComments ? ProfileUiCopy.shared.userHasNoComments(username: username) : UiCopy.shared.userHasNoPosts(username: username))
                         .foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 32)
+                    // the pages read so far may all be filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
+                    if FeedPaging.shouldLoadMoreAtEnd(state) { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.padding(.top, 12) }
                 } else {
-                    ProgressView().padding(.top, 32)
+                    PageLoading()
                 }
             }
             ForEach(state.items, id: \.key) { card in
@@ -291,6 +328,7 @@ private struct ProfileTabFeed: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
     }
 }
 
@@ -328,13 +366,15 @@ private struct ProfileCommentRow: View {
 private struct ProfileTabsView: View {
     let state: ProfileState
     let onSelect: (Int) -> Void
+    /// A tap on the selected tab (RN TabbedPosts: its list scrolls to the top).
+    let onReselect: () -> Void
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         FittingSegments {
             ForEach(Array(state.tabs.enumerated()), id: \.offset) { i, tab in
                 let selected = i == Int(state.selectedTab)
-                Button { onSelect(i) } label: {
+                Button { if selected { onReselect() } else { onSelect(i) } } label: {
                     VStack(spacing: 0) {
                         Text(tab.label).font(.subheadline.weight(selected ? .bold : .regular))
                             .foregroundStyle(selected ? theme.accentText : theme.secondary).fixedSize()
@@ -590,7 +630,7 @@ struct FollowsScreen: View {
         let state = follows.state
         ScrollView {
             LazyVStack(spacing: 0) {
-                if state.isLoading { ProgressView().padding(.top, 32) }
+                if state.isLoading { PageLoading() }
                 if let empty = state.emptyText {
                     VStack(spacing: 8) {
                         EsieView(state.error != nil && state.rows.isEmpty ? .error : .empty)
@@ -659,7 +699,7 @@ struct ProfileEditScreen: View {
         let state = edit.state
         ZStack(alignment: .bottomTrailing) {
             if state.isLoading {
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let error = state.loadError {
                 ErrorStateView(error: error) { model.retry() }
             } else if state.loaded {
@@ -696,6 +736,7 @@ struct ProfileEditScreen: View {
                         .disabled(state.uploading != nil || state.isSaving)
                         .accessibilityLabel(ProfileUiCopy.shared.COVER_IMAGE).accessibilityIdentifier("edit-cover")
                     }
+                    .themedCardRow()
                     ForEach(ProfileField.companion.form, id: \.self) { field in
                         Section(field.label) {
                             TextField(field.label, text: Binding(get: { edit.state.value(field: field) }, set: { model.setValue(field: field, value: $0) }),
@@ -703,9 +744,10 @@ struct ProfileEditScreen: View {
                                 .disabled(state.isSaving)
                                 .accessibilityIdentifier("field-\(field.name)")
                         }
+                        .themedCardRow()
                     }
                 }
-                .scrollContentBackground(.hidden)
+                .themedList()
             }
             if state.saveEnabled || state.isSaving {
                 Button { model.save(close: true) } label: {
@@ -755,7 +797,7 @@ struct ProfileEditScreen: View {
                 }
             }
         }
-        .sheet(item: $picker) { pick in
+        .themedSheet(item: $picker) { pick in
             let picked: ([PickedImage]) -> Void = { images in
                 picker = nil
                 guard let first = images.first else {
@@ -836,7 +878,7 @@ struct BookmarksScreen: View {
             .accessibilityIdentifier("bookmarks-tabs")
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    if state.isLoading(tab: tab) && count(state, tab) == 0 { ProgressView().padding(.top, 32) }
+                    if state.isLoading(tab: tab) && count(state, tab) == 0 { PageLoading() }
                     if let error = state.error(tab: tab), count(state, tab) == 0 {
                         ErrorStateView(error: error) { model.retry(tab: tab) }.padding(.top, 32)
                     }

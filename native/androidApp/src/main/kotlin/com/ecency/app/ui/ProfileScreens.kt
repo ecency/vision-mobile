@@ -39,13 +39,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -100,11 +98,20 @@ import com.ecency.core.app.ReadingUiCopy
 
 /** RN ProBadge: the blue check-decagram next to an Ecency Pro member's name; nothing for others. */
 @Composable
-fun ProBadge(env: AppEnvironment, username: String, size: Dp = 15.dp) {
-    val members by env.proMembers.state.collectAsState()
-    LaunchedEffect(Unit) { env.proMembers.ensureLoaded() }
-    if (username.lowercase() !in members) return
-    Glyph(AppIcon.VERIFIED, LocalEcencyColors.current.blueText, size, Modifier.padding(start = 4.dp).testTag("proBadge"), ProfileUiCopy.ECENCY_PRO_MEMBER, filled = true)
+fun ProBadge(env: AppEnvironment?, username: String, size: Dp = 15.dp) {
+    if (!isProMember(env, username)) return
+    // inside a merged row the row's own label says it
+    val label = if (LocalMergedRow.current) null else ProfileUiCopy.ECENCY_PRO_MEMBER
+    Glyph(AppIcon.VERIFIED, LocalEcencyColors.current.blueText, size, Modifier.padding(start = 4.dp).testTag("proBadge"), label, filled = true)
+}
+
+/** Whether [username] is on the Pro roster (loaded once, on first use); a set lookup, nothing per row. */
+@Composable
+fun isProMember(env: AppEnvironment?, username: String): Boolean {
+    val model = env?.proMembers ?: return false
+    val members by model.state.collectAsState()
+    LaunchedEffect(model) { model.ensureLoaded() }
+    return username.lowercase() in members
 }
 
 /** RN userRibbon: avatar and @username in one row. */
@@ -186,16 +193,17 @@ fun ProfileScreen(
 ) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
-    LaunchedEffect(model) { model.start() }
+    // README "Foreground refresh": the header, the open tab's posts or waves, shown and back in front
+    OnShow(model) { model.start() }
     val tab = state.tab
     // RN wavesTabContent: the author's waves, loaded when the tab is first shown
     val waves = remember(tab, model) { if (tab == ProfileTab.WAVES) model.waves() else null }
     val wavesState = waves?.state?.collectAsState()?.value
-    LaunchedEffect(waves) { waves?.start() }
+    OnShow(waves) { waves?.start() }
     val wavesWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp - 32.dp
     val feed: FeedModel? = remember(tab) { model.feed(tab) }
     val feedState = feed?.state?.collectAsState()?.value
-    LaunchedEffect(feed) { feed?.start() }
+    OnShow(feed) { feed?.start() }
     val nearEnd by remember(listState) {
         derivedStateOf {
             val info = listState.layoutInfo
@@ -203,7 +211,8 @@ fun ProfileScreen(
             info.totalItemsCount > 0 && last >= info.totalItemsCount - 3
         }
     }
-    LaunchedEffect(nearEnd, feedState?.pages, feed) { if (nearEnd) feed?.loadMore() }
+    // not from the empty state: its "Load more" goes on (FeedModel.MAX_AUTO_ADVANCE)
+    LaunchedEffect(nearEnd, feedState?.pages, feed) { if (nearEnd && feedState?.items?.isNotEmpty() == true) feed?.loadMore() }
     LaunchedEffect(nearEnd, wavesState?.pages, waves) { if (nearEnd) waves?.loadMore() }
     var confirmReport by remember { mutableStateOf(false) }
 
@@ -221,7 +230,7 @@ fun ProfileScreen(
                 return@Column
             }
             // RN profileView: the summary closes as the list scrolls down and RN's Header (back, avatar, name) takes its
-            // place; it opens again near the top, after a drag up, or on a tap on that header
+            // place; it opens again back at the top or on a tap on that header
             if (!collapse.open) ProfileCompactHeader(env, header, actions.onBack, collapse::expand)
             CollapsingSummary(collapse) {
                 ProfileSummary(env, state, header, model, actions, onReport = { confirmReport = true })
@@ -229,7 +238,7 @@ fun ProfileScreen(
                 if (state.isOwn) DigestSenderRow(env, state.username, actions.onManageDigests)
             }
             // another tab's list: the summary opens over it (the three ways in agree)
-            if (!state.isMuted) ProfileTabs(state) { i -> if (i != state.selectedTab) collapse.reset(); model.selectTab(i) }
+            if (!state.isMuted) ProfileTabs(state, rememberTabTap(state.selectedTab, { listState }) { i -> collapse.reset(); model.selectTab(i) })
             PullToRefreshBox(
                 isRefreshing = feedState?.isRefreshing == true || wavesState?.isRefreshing == true, onRefresh = model::refresh,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -281,11 +290,13 @@ fun ProfileScreen(
                                 feedState.items.isEmpty() && feedState.error != null -> item(key = "error") {
                                     ErrorBlock(feedState.error!!, Modifier.padding(top = 32.dp), com.ecency.core.esie.EsiePlacement.ERROR, feed!!::retry)
                                 }
+                                feedState.items.isEmpty() && feedState.isLoadingMore -> item(key = "loading") { FeedSkeleton(2) }
                                 feedState.items.isEmpty() && feedState.loaded -> item(key = "empty") {
-                                    // RN profile.havent_posted / havent_commented
+                                    // RN profile.havent_posted / havent_commented; the pages read so far may all be filtered out
                                     EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY,
                                         if (tab.isComments) ProfileUiCopy.userHasNoComments(state.username) else UiCopy.userHasNoPosts(state.username),
                                         Modifier.padding(top = 32.dp),
+                                        actionLabel = if (feedState.endReached) null else UiCopy.LOAD_MORE, onAction = feed!!::loadMore,
                                     )
                                 }
                             }
@@ -406,7 +417,7 @@ private fun ProfileSummary(
                                 .padding(6.dp).testTag("emailDigest"),
                         ) { Glyph(AppIcon.EMAIL, colors.blueText, 26.dp, description = ProfileUiCopy.EMAIL_DIGEST) }
                         if (state.busy) {
-                            CircularProgressIndicator(Modifier.padding(start = 8.dp).size(24.dp).testTag("profileBusy"), color = colors.blueText, strokeWidth = 2.dp)
+                            Spinner(Modifier.padding(start = 8.dp).testTag("profileBusy"), size = 24.dp)
                         } else {
                             ProfileMenu(state, onSelect = { item ->
                                 when (item) {
@@ -743,7 +754,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
                     .clickable(enabled = !state.isSaving, onClick = model::save, role = Role.Button).padding(horizontal = 24.dp, vertical = 12.dp).testTag("saveProfile"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (state.isSaving) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                if (state.isSaving) Spinner(size = 18.dp, color = Color.White)
                 else Text(UiCopy.SAVE_CAPS, color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
@@ -782,7 +793,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
 @Composable
 private fun UploadingCover(modifier: Modifier = Modifier) {
     Box(modifier.background(Color.Black.copy(alpha = 0.4f)).testTag("imageUploading"), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(Modifier.size(28.dp), color = Color.White, strokeWidth = 2.dp)
+        Spinner(color = Color.White)
     }
 }
 

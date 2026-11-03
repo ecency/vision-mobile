@@ -325,6 +325,27 @@ class ChatsListTest {
     }
 
     @Test
+    fun aConversationReadOnScreenClearsItsRowOnReturn() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = list(f)
+        for ((title, id, type) in listOf(Triple("Ecency", "ch-ecency", "O"), Triple("spike-alice", "ch-dm-alice", "D"), Triple("Book club", "ch-group", "G"))) {
+            val row = m.current.rows.first { it.title == title }
+            assertTrue(row.unread > 0, "$title starts unread")
+            m.open(row)
+            val t = f.env.chat.threadModel(id, type).also { it.start(); f.idle() }
+            t.setActive(true)
+            f.run(1)
+            assertTrue("POST channels/$id/view" in f.paths(), "$title is marked read with its own channel id")
+            t.setActive(false)
+            t.close()
+            f.run(1)
+            assertEquals(0, m.current.rows.first { it.title == title }.unread, "$title shows no unread count on return, without a refresh")
+        }
+        assertEquals(listOf(0L, 0L, 0L, 0L, 0L), m.current.rows.map { it.unread })
+    }
+
+    @Test
     fun searchJoinAndDirectMessagesOpenTheConversation() = runTest {
         val f = ChatFixture(this)
         f.start()

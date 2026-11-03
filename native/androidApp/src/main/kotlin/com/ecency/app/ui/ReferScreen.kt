@@ -20,11 +20,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -95,7 +93,7 @@ fun ReferScreen(
                 item(key = "footer") {
                     Box(Modifier.fillMaxWidth().height(72.dp), contentAlignment = Alignment.Center) {
                         when {
-                            state.isLoading || state.isLoadingMore -> CircularProgressIndicator(color = colors.blueText, modifier = Modifier.testTag("referLoading"))
+                            state.isLoading || state.isLoadingMore -> Spinner(Modifier.testTag("referLoading"))
                             state.error != null -> TextButton(onClick = { if (state.loaded) model.loadMore() else model.retry() }, modifier = Modifier.testTag("referRetry")) {
                                 Text(UiCopy.errorTryAgain(state.error?.message.orEmpty()), color = colors.blueText, textAlign = TextAlign.Center)
                             }
@@ -131,7 +129,10 @@ private fun ReferralRowView(env: AppEnvironment, row: ReferralRow, onUser: () ->
         )
         Avatar(PostCard.avatarUrl(row.username, env.proxyBase), 36.dp, Modifier.padding(horizontal = 10.dp))
         Column(Modifier.weight(1f)) {
-            Text(row.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(row.username, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                ProBadge(env, row.username)
+            }
             row.createdMillis?.let { Text(com.ecency.core.l10n.LocaleFormat.dateShort(it), color = colors.darkGray, fontSize = 12.sp) }
         }
         Text(

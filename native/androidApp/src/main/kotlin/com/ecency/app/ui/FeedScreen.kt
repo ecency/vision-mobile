@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import com.ecency.core.app.MotionTokens
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +66,36 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import com.ecency.core.app.ReadingUiCopy
+
+/**
+ * [onShow] when the screen appears and again on every return to the foreground (README "Foreground refresh"): the
+ * shared model's `start()` loads the first time and, after a long trip away, refreshes quietly; otherwise it does nothing.
+ */
+@Composable
+internal fun OnShow(key: Any?, onShow: () -> Unit) {
+    val action by rememberUpdatedState(onShow)
+    androidx.lifecycle.compose.LifecycleStartEffect(key) {
+        action()
+        onStopOrDispose { }
+    }
+}
+
+/**
+ * New cards on top (a quiet refresh after a long trip away): a list at its very top shows them, a list scrolled down
+ * keeps the card it shows (the lazy list keeps its first visible item by key), so nothing jumps under the reader.
+ */
+@Composable
+internal fun NewCardsOnTop(listState: LazyListState, firstKey: Any?, firstCardIndex: Int) {
+    val shown = remember(listState) { arrayOfNulls<Any>(1) }
+    // in composition, before the list measures the new cards (the first page replacing the skeleton is FirstPageAnchor's)
+    if (firstKey != shown[0]) {
+        // the top: nothing but header rows above the first card (a header of no height is never the first visible item)
+        val index = listState.firstVisibleItemIndex
+        val atTop = index < firstCardIndex || (index == firstCardIndex && listState.firstVisibleItemScrollOffset == 0)
+        if (shown[0] != null && firstKey != null && atTop) listState.requestScrollToItem(0)
+        shown[0] = firstKey
+    }
+}
 
 /**
  * Where a feed stays when its first page replaces the skeleton. A list the user did not scroll during the load is
@@ -158,7 +187,7 @@ fun FeedList(
 ) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
-    LaunchedEffect(model) { model.start() }
+    OnShow(model) { model.start() }
     // the options menu needs the card's post, which this feed holds
     val feedx = LocalFeedx.current
     val cardActions = remember(actions, model, feedx) {
@@ -178,12 +207,14 @@ fun FeedList(
         }
     }
     // keyed on the page counter, not the item count: a page of duplicates adds no items but must
-    // still let the next page start while the end of the list stays in view
-    LaunchedEffect(nearEnd, state.pages) { if (nearEnd) model.loadMore() }
+    // still let the next page start while the end of the list stays in view. Not from the empty state: a feed
+    // filtered down to nothing would read page after page by itself; its "Load more" goes on instead
+    LaunchedEffect(nearEnd, state.pages) { if (nearEnd && state.items.isNotEmpty()) model.loadMore() }
 
     val haptics = rememberHaptics()
     val motion = LocalMotion.current
     FirstPageAnchor(listState, hasItems = state.items.isNotEmpty(), key = model)
+    NewCardsOnTop(listState, state.items.firstOrNull()?.key, firstCardIndex = if (header != null) 1 else 0)
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
         onRefresh = { haptics(com.ecency.core.app.HapticEvent.REFRESH); model.refresh() },
@@ -196,7 +227,14 @@ fun FeedList(
                 state.items.isEmpty() && state.error != null -> item(key = "error") {
                     ErrorBlock(state.error!!, Modifier.padding(top = 48.dp), com.ecency.core.esie.EsiePlacement.ERROR, model::retry)
                 }
-                state.items.isEmpty() && state.loaded -> item(key = "empty") { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NOTHING_HERE_YET, Modifier.padding(top = 48.dp)) }
+                state.items.isEmpty() && state.isLoadingMore -> item(key = "loading") { FeedSkeleton() }
+                // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
+                state.items.isEmpty() && state.loaded -> item(key = "empty") {
+                    EsieMessageBlock(
+                        com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NOTHING_HERE_YET, Modifier.padding(top = 48.dp),
+                        actionLabel = if (state.endReached) null else com.ecency.core.app.UiCopy.LOAD_MORE, onAction = model::loadMore,
+                    )
+                }
             }
             items(state.items, key = { it.key.toString() }, contentType = { "card" }) { card ->
                 // cards fade in as they replace the skeleton or a page lands; opacity only, no placement animation
@@ -244,6 +282,7 @@ fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions
     // Built once per card, state and language (not on every recomposition); the summary is read when asked for.
     val payoutDetails = rememberPayoutDetails()
     val language = LocalAppLanguage.current
+    val pro = isProMember(LocalFeedx.current?.env, card.author)
     val a11yActions = androidx.compose.runtime.remember(card, dimmed, actions, language) {
         buildList {
             if (dimmed) add(a11yAction(com.ecency.core.app.MutedReveals.REVEAL) { reveals?.reveal(card.key); revealed = true })
@@ -263,7 +302,7 @@ fun PostCardView(card: PostCard, nowMillis: Long, voteInFlight: Boolean, actions
     Column(
         modifier.fillMaxWidth().background(colors.background)
             .semantics(mergeDescendants = true) {
-                contentDescription = postCardSummary(card, nowMillis)
+                contentDescription = postCardSummary(card, nowMillis, pro)
                 role = Role.Button
                 onClick { actions.onOpen(card); true }
                 customActions = a11yActions
@@ -382,6 +421,7 @@ fun PostHeader(
                 card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text,
                 modifier = Modifier.padding(start = 10.dp).clickable(onClick = onAuthor, role = Role.Button).inMergedRow(merged).testTag("author"),
             )
+            ProBadge(LocalFeedx.current?.env, card.author)
             Text(
                 " " + TimeAgo.short(card.createdEpochMillis, nowMillis),
                 fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray, modifier = Modifier.testTag("age"),
@@ -404,6 +444,7 @@ fun PostHeader(
                     card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text,
                     modifier = Modifier.clickable(onClick = onAuthor, role = Role.Button).inMergedRow(merged).testTag("author"),
                 )
+                ProBadge(LocalFeedx.current?.env, card.author)
                 if (card.isPinned || card.isPinnedBlog) Glyph(AppIcon.PIN, colors.redText, 16.dp, Modifier.padding(start = 8.dp).testTag("pinned"), filled = true)
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {

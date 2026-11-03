@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -368,7 +367,7 @@ fun PowerDownForm(model: PowerDownModel, onBack: () -> Unit) {
                     Checkbox(checked = autoVest, onCheckedChange = { autoVest = it }, modifier = Modifier.testTag("routeAutoVest"))
                     Text(StakeCopy.AUTO_VESTS, color = colors.text)
                 }
-                if (s.routeBusy) CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText)
+                if (s.routeBusy) Spinner(size = 20.dp)
                 else PrimaryButton(UiCopy.SAVE_CAPS, routeName.isNotBlank() && (routePercent.toIntOrNull() ?: 0) in 1..100, "routeSave") {
                     model.addRoute(routeName, routePercent.toInt(), autoVest); routeName = ""
                 }
@@ -506,7 +505,7 @@ fun ManageAssetsScreen(model: ManageAssetsModel, onBack: () -> Unit) {
             s.selected.forEachIndexed { i, a ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("selected:${a.symbol}"), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = true, onCheckedChange = { model.toggle(a.symbol) })
-                    Avatar(a.iconUrl.orEmpty(), 24.dp)
+                    AssetIcon(a.iconUrl, 24.dp, "pick:${a.symbol}")
                     Text(a.symbol, color = colors.text, modifier = Modifier.weight(1f).padding(start = 8.dp))
                     IconButton(onClick = { model.move(i, i - 1) }, enabled = i > 0) {
                         Glyph(AppIcon.ARROW_UP, if (i > 0) colors.blueText else colors.icon, 20.dp, description = UiCopy.MOVE_UP)
@@ -520,13 +519,13 @@ fun ManageAssetsScreen(model: ManageAssetsModel, onBack: () -> Unit) {
             s.visibleAvailable.forEach { a ->
                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.toggle(a.symbol) }.padding(vertical = 4.dp).testTag("available:${a.symbol}"), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = false, onCheckedChange = { model.toggle(a.symbol) })
-                    Avatar(a.iconUrl.orEmpty(), 24.dp)
+                    AssetIcon(a.iconUrl, 24.dp, "pick:${a.symbol}")
                     Text(a.symbol, color = colors.text, modifier = Modifier.padding(start = 8.dp))
                 }
             }
         }
         Box(Modifier.padding(16.dp).navigationBarsPadding()) {
-            if (s.saving) CircularProgressIndicator(color = colors.blueText) else PrimaryButton(WalletCopy.CONFIRM, s.user != null && !s.isLoading, "assetsConfirm", model::confirm)
+            if (s.saving) Spinner() else PrimaryButton(WalletCopy.CONFIRM, s.user != null && !s.isLoading, "assetsConfirm", model::confirm)
         }
     }
     s.error?.let { e -> AlertDialog(onDismissRequest = model::dismissError, text = { Text(e) }, confirmButton = { TextButton(onClick = model::dismissError) { Text(UiCopy.OK) } }) }

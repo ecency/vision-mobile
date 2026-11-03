@@ -105,7 +105,7 @@ struct GetPointsScreen: View {
                 // RN shows the ribbon only for a username parameter (a link or the QR flow)
                 if model.forSomeoneElse { UserRibbon(username: s.username).padding(.leading, 32).padding(.top, 8) }
                 if s.loading {
-                    ProgressView().frame(maxWidth: .infinity).padding(48).accessibilityIdentifier("store-loading")
+                    PageLoading(identifier: "store-loading")
                 } else {
                     ForEach(s.rows, id: \.productId) { row in ProductItemLine(row: row, enabled: !s.processing) { model.buy(productId: $0) } }
                 }
@@ -138,7 +138,7 @@ struct AccountBoostScreen: View {
         let s = observed.state
         ScrollView {
             if s.loading {
-                ProgressView().frame(maxWidth: .infinity).padding(48).accessibilityIdentifier("store-loading")
+                PageLoading(identifier: "store-loading")
             } else {
                 VStack(spacing: 24) {
                     if !s.username.isEmpty { UserRibbon(username: s.username).frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 32).padding(.top, 8) }

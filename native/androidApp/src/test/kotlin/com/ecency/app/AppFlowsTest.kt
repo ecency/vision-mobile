@@ -262,7 +262,7 @@ class AppFlowsTest {
         compose.onAllNodes(hasTestTag("vote"))[0].performClick()
         waitFor("voteSheet")
         settle()
-        compose.onNodeWithTag("upvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
         compose.await("the vote broadcast") { sent.any { "broadcast_transaction" in it } }
         val tx = sent.single { "broadcast_transaction" in it }

@@ -251,7 +251,8 @@ extension View {
             EsieView(placement)
             self
         }
-        .frame(maxWidth: .infinity)
+        // an empty or error state as a List row: on the list's background, no separator under it
+        .listStateRow()
     }
 }
 

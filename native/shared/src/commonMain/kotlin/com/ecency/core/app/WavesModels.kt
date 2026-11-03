@@ -165,6 +165,10 @@ class WavesFeedModel internal constructor(
     private var pager: WavesPager? = null
     private var job: Job? = null
     private var pollJob: Job? = null
+    private var refetchJob: Job? = null
+
+    /** When the first page on screen began to be read ([Freshness.stamp]). */
+    private var readAt = Long.MIN_VALUE
 
     /** Bumped on every account change; work started before it never lands. */
     private var generation = 0
@@ -228,6 +232,8 @@ class WavesFeedModel internal constructor(
                 }
             }
         }
+        // README "Foreground refresh": back after a long trip with the list on screen, its first page at once
+        scope.launch { env.freshness.staleReturns.collect { if (pollJob?.isActive == true) refetchIfStale() } }
     }
 
     /** The account changed: nothing of the previous one stays on screen, and the feed loads again if it was in use. */
@@ -242,11 +248,14 @@ class WavesFeedModel internal constructor(
         if (started) load(reset = true, refreshing = false)
     }
 
-    /** Loads the first page unless already loaded or loading. */
+    /**
+     * The list is shown: loads the first page unless already loaded or loading; after a long trip away the first page
+     * is read again and merged on top, as the minute's refetch does (README "Foreground refresh").
+     */
     fun start() {
         started = true
-        if (current.loaded || job?.isActive == true) return
-        load(reset = true, refreshing = false)
+        if (job?.isActive == true) return
+        if (!current.loaded) load(reset = true, refreshing = false) else refetchIfStale()
     }
 
     /** Loads the first page again; the list stays visible meanwhile (pull to refresh). */
@@ -284,6 +293,7 @@ class WavesFeedModel internal constructor(
             return
         }
         if (pollJob?.isActive == true) return
+        refetchIfStale()
         pollJob = scope.launch {
             while (true) {
                 delay(REFETCH_MILLIS)
@@ -292,11 +302,17 @@ class WavesFeedModel internal constructor(
         }
     }
 
+    private fun refetchIfStale() {
+        if (!current.loaded || job?.isActive == true || refetchJob?.isActive == true || !env.freshness.isStale(readAt)) return
+        refetchJob = scope.launch { refetchFirstPage() }
+    }
+
     private suspend fun refetchFirstPage() {
         if (!current.loaded || job?.isActive == true) return
         val user = env.session.current.username
         val params = kind.params(user) ?: return
         val startedIn = generation
+        val stamp = env.freshness.stamp()
         val fresh = try {
             build(visible(env.waves.api.feed(params)), user, promoted = false)
         } catch (e: CancellationException) {
@@ -305,10 +321,12 @@ class WavesFeedModel internal constructor(
             return // the list stays as it is; the next tick tries again
         }
         if (startedIn != generation || job?.isActive == true) return
+        readAt = stamp
         val byKey = fresh.associateBy { it.key }
         val known = organic.map { it.key }.toHashSet()
         organic = fresh.filter { it.key !in known } + organic.map { byKey[it.key] ?: it }
         redisplay()
+        env.localVotes.retireConfirmed(fresh.map { it.post }, user)
     }
 
     /**
@@ -347,6 +365,7 @@ class WavesFeedModel internal constructor(
             if (startedIn != generation) return@launch
             promoted = items
             redisplay()
+            env.localVotes.retireConfirmed(items.map { it.post }, user)
         }
     }
 
@@ -374,6 +393,7 @@ class WavesFeedModel internal constructor(
             )
         }
         val startedIn = generation
+        val stamp = env.freshness.stamp()
         job = scope.launch {
             try {
                 val items = build(visible(activePager.loadMore()), user, promoted = false)
@@ -382,6 +402,7 @@ class WavesFeedModel internal constructor(
                 organic = if (reset) items else organic + items.filter { it.key !in known }
                 if (reset && kind.injectsPromoted) loadPromoted(startedIn, user)
                 if (reset) env.waves.forgetIndexed(organic.map { it.key })
+                if (reset) readAt = stamp
                 setState {
                     it.copy(
                         items = display(),
@@ -393,6 +414,7 @@ class WavesFeedModel internal constructor(
                         pages = if (reset) 1 else it.pages + 1,
                     )
                 }
+                env.localVotes.retireConfirmed(items.map { it.post }, user)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

@@ -50,11 +50,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +67,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -124,17 +123,11 @@ import com.ecency.core.app.ChatUiCopy
 import com.ecency.core.app.OfficialAccounts
 import com.ecency.core.app.UiCopy
 
-/** RN `#28a745` / `#dc3545`: the status pill's dot. */
-private val ConnectedGreen = Color(0xFF28A745)
+/** RN `#dc3545`: the dot of the connecting notice. */
 private val ConnectingRed = Color(0xFFDC3545)
 
 /** RN `#FFB300`: a favourite's star. */
 private val FavoriteStar = Color(0xFFFFB300)
-
-/** RN dmWarningContainer: `#FFF6DF` with a `#F4C26B` border, text `#8A5B00`. */
-private val WarningBackground = Color(0xFFFFF6DF)
-private val WarningBorder = Color(0xFFF4C26B)
-private val WarningText = Color(0xFF8A5B00)
 
 /** RN `#4CAF50`: the online dot in the members list. */
 private val OnlineGreen = Color(0xFF4CAF50)
@@ -170,18 +163,20 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
                 Text(state.error!!, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(horizontal = 16.dp, vertical = 4.dp).testTag("chatsError"))
             }
             ChatSearchBar(state.query, state.sortByName, onQuery = model::setQuery, onSort = model::toggleSort, onNewGroup = if (state.canStartGroup) ({ newGroup = true }) else null)
+            // a connected chat says nothing; only a missing connection shows, in line
+            if (mine && !state.connected) ConnectingNotice(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             // the first load draws the rows' shape; a search or a reload over rows keeps the spinner
             if (mine && state.isLoading && state.rows.isEmpty() && !state.searching) {
                 RowsSkeleton(6, tag = "chatsLoading")
             } else if (mine && (state.isLoading || state.searching)) {
-                CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp).size(28.dp).testTag("chatsLoading"), color = colors.blueText)
+                Spinner(Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp).testTag("chatsLoading"))
             }
             PullToRefreshBox(
                 isRefreshing = mine && state.isRefreshing,
                 onRefresh = { scope.launch { model.refreshAndWait() } },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                LazyColumn(Modifier.fillMaxSize().testTag("chatsList"), state = listState, contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 56.dp)) {
+                LazyColumn(Modifier.fillMaxSize().testTag("chatsList"), state = listState, contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = FabTokens.SIZE + FabTokens.MARGIN * 2)) {
                     if (mine) {
                         state.searchError?.let { item { Text(it, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(vertical = 4.dp)) } }
                         if (state.channelResults.isNotEmpty()) {
@@ -217,7 +212,7 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
                 }
             }
         }
-        StatusPill(state.connected && mine, Modifier.align(Alignment.BottomStart).padding(16.dp))
+        if (mine && state.connected) EsieFab(onClick = { openDirectMessage(env, scope, OfficialAccounts.ESIE_USERNAME, push) }, modifier = Modifier.align(Alignment.BottomEnd))
     }
     options?.let { row ->
         OptionsSheet(model.actionsTitle(row), model.actions(row).map { it.label to it.destructive }, model.actions(row).map { it.name }, onDismiss = { options = null }) { index ->
@@ -364,16 +359,31 @@ private fun SearchRow(env: AppEnvironment, avatar: ChatAvatar, title: String, me
     }
 }
 
+/** The chat is not connected (yet, or any more): a dot and "Connecting", in line under the search bar. */
 @Composable
-private fun StatusPill(connected: Boolean, modifier: Modifier) {
+private fun ConnectingNotice(modifier: Modifier) {
     val colors = LocalEcencyColors.current
     Row(
-        modifier.clip(RoundedCornerShape(20.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 8.dp).testTag("chatsStatus"),
+        modifier.clip(RoundedCornerShape(20.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("chatsOffline"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(8.dp).clip(CircleShape).background(if (connected) ConnectedGreen else ConnectingRed))
-        Text(if (connected) ChatsModel.CONNECTED else ChatsModel.CONNECTING, fontSize = 12.sp, color = colors.text, modifier = Modifier.padding(start = 6.dp))
+        Box(Modifier.size(8.dp).clip(CircleShape).background(ConnectingRed))
+        Text(ChatsModel.CONNECTING, fontSize = 12.sp, color = colors.text, modifier = Modifier.padding(start = 6.dp))
     }
+}
+
+/** The round button over the chats list that opens the direct message with Esie (as "Ask Esie" does), in the FAB's place and size. */
+@Composable
+private fun EsieFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    Box(
+        modifier.padding(FabTokens.MARGIN).pressScale(interaction, MotionPressScale.FAB).size(FabTokens.SIZE).shadow(FabTokens.ELEVATION, CircleShape).clip(CircleShape)
+            .background(LocalEcencyColors.current.lightBackground)
+            .clickable(interactionSource = interaction, indication = androidx.compose.material3.ripple(), onClick = onClick, role = Role.Button)
+            .semantics { contentDescription = ChatUiCopy.CHAT_WITH_ESIE }.testTag("chatsEsieFab"),
+        contentAlignment = Alignment.Center,
+    ) { EsieView(com.ecency.core.esie.EsieMood.REST, height = 44.dp) }
 }
 
 /** RN chatChannelOptionsSheet / chatOptionsSheet's list: a title and one row per option (destructive in red). */
@@ -447,7 +457,7 @@ private fun NewGroupSheet(env: AppEnvironment, model: ChatNewGroupModel, onCreat
                 val visible = model.visible
                 Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).padding(top = 6.dp)) {
                     when {
-                        s.searching && visible.isEmpty() -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(12.dp).size(24.dp), color = colors.blueText)
+                        s.searching && visible.isEmpty() -> Spinner(Modifier.align(Alignment.CenterHorizontally).padding(12.dp), size = 24.dp)
                         visible.isEmpty() -> Text(s.emptyText, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(vertical = 8.dp).testTag("groupEmpty"))
                         else -> LazyColumn {
                             items(visible, key = { it.username }) { p ->
@@ -489,7 +499,7 @@ private fun SheetButton(text: String, enabled: Boolean, busy: Boolean, tag: Stri
             .background(if (enabled) colors.blue else colors.blue.copy(alpha = 0.4f)).clickable(enabled = enabled, onClick = onClick, role = Role.Button).testTag(tag),
         contentAlignment = Alignment.Center,
     ) {
-        if (busy) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+        if (busy) Spinner(size = 20.dp, color = Color.White)
         else Text(text, color = Color.White, fontWeight = FontWeight.Bold)
     }
 }
@@ -603,16 +613,22 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
                                 }
                             }
                         }
-                        item(key = "footer") {
+                        // only under messages: alone in the list on the first load, it was the item the list kept in
+                        // place when the first page came in, so the conversation opened at its oldest end and asked at
+                        // once for the page before (README "Chats")
+                        if (s.items.isNotEmpty()) item(key = "footer") {
                             Box(Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                                 when {
-                                    s.isLoading -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText)
-                                    !s.hasMore && s.items.isNotEmpty() -> Text(ChatThreadModel.NO_MORE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("noMore"))
+                                    s.isLoading -> Spinner(size = 24.dp)
+                                    !s.hasMore -> Text(ChatThreadModel.NO_MORE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("noMore"))
                                 }
                             }
                         }
                     }
                 }
+            }
+            if (mine && s.items.isEmpty() && s.isLoading) {
+                Spinner(Modifier.align(Alignment.Center), size = 24.dp)
             }
             if (mine && s.items.isEmpty() && s.loaded && !s.isLoading) {
                 Text(
@@ -719,13 +735,14 @@ private fun HeaderChip(icon: AppIcon, count: String?, description: String, tag: 
 
 @Composable
 private fun DmWarning(onDismiss: () -> Unit, onSettings: () -> Unit) {
+    val colors = LocalEcencyColors.current
     Row(
-        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp).clip(RoundedCornerShape(10.dp)).background(WarningBackground)
-            .border(1.dp, WarningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("dmWarning"),
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.warningBackground)
+            .border(1.dp, colors.warningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("dmWarning"),
     ) {
-        Glyph(AppIcon.WARNING, WarningText, 20.dp, Modifier.padding(end = 8.dp))
+        Glyph(AppIcon.WARNING, colors.warningText, 20.dp, Modifier.padding(end = 8.dp))
         Column(Modifier.weight(1f)) {
-            Text(ChatThreadModel.DM_WARNING_TITLE, fontWeight = FontWeight.Bold, color = WarningText, fontSize = 14.sp)
+            Text(ChatThreadModel.DM_WARNING_TITLE, fontWeight = FontWeight.Bold, color = colors.warningText, fontSize = 14.sp)
             Text(
                 buildAnnotatedString {
                     append(ChatThreadModel.DM_WARNING_BODY + " ")
@@ -733,21 +750,22 @@ private fun DmWarning(onDismiss: () -> Unit, onSettings: () -> Unit) {
                         append(ChatThreadModel.DM_WARNING_SETTINGS)
                     }
                 },
-                color = WarningText, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp),
+                color = colors.warningText, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp),
             )
         }
-        Glyph(AppIcon.CLOSE, WarningText, 18.dp, Modifier.clickable(onClick = onDismiss, role = Role.Button).padding(start = 8.dp).testTag("dmWarningClose"), description = UiCopy.DISMISS)
+        Glyph(AppIcon.CLOSE, colors.warningText, 18.dp, Modifier.clickable(onClick = onDismiss, role = Role.Button).padding(start = 8.dp).testTag("dmWarningClose"), description = UiCopy.DISMISS)
     }
 }
 
 @Composable
 private fun BanNotice(text: String) {
+    val colors = LocalEcencyColors.current
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clip(RoundedCornerShape(10.dp)).background(WarningBackground)
-            .border(1.dp, WarningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("banNotice"),
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clip(RoundedCornerShape(10.dp)).background(colors.warningBackground)
+            .border(1.dp, colors.warningBorder, RoundedCornerShape(10.dp)).padding(12.dp).testTag("banNotice"),
     ) {
         Text("⏳", fontSize = 16.sp, modifier = Modifier.padding(end = 8.dp))
-        Text(text, color = WarningText, fontSize = 13.sp)
+        Text(text, color = colors.warningText, fontSize = 13.sp)
     }
 }
 
@@ -949,7 +967,7 @@ private fun Composer(env: AppEnvironment, model: ChatThreadModel, s: com.ecency.
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.Bottom) {
             Box(Modifier.size(44.dp).clip(CircleShape).clickable(enabled = !s.uploading && !s.sending, onClick = onAttach, role = Role.Button).testTag("attach"), contentAlignment = Alignment.Center) {
-                if (s.uploading) CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText, strokeWidth = 2.dp) else Glyph(AppIcon.ADD, colors.icon, 24.dp, description = UiCopy.ATTACH_IMAGE)
+                if (s.uploading) Spinner(size = 20.dp) else Glyph(AppIcon.ADD, colors.icon, 24.dp, description = UiCopy.ATTACH_IMAGE)
             }
             Column(Modifier.weight(1f).padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 10.dp)) {
                 if (s.editingId != null) {
@@ -1065,7 +1083,7 @@ private fun PinnedSheet(model: ChatPinnedModel, canUnpin: Boolean, onDismiss: ()
                 Text(ChatPinnedModel.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(start = 8.dp))
             }
             when {
-                s.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(32.dp), color = colors.blueText)
+                s.isLoading -> Spinner(Modifier.align(Alignment.CenterHorizontally).padding(32.dp))
                 s.error != null -> Text(s.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(32.dp))
                 s.items.isEmpty() -> Text(ChatPinnedModel.EMPTY, color = colors.darkGray, modifier = Modifier.padding(32.dp))
                 else -> LazyColumn(Modifier.heightIn(max = 420.dp).padding(top = 8.dp)) {
@@ -1142,7 +1160,7 @@ private fun ChatTranslationSheet(thread: ChatThreadModel, item: ChatMessageItem,
             Text(state.original, maxLines = 3, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray)
             Box(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 80.dp)) {
                 when {
-                    state.isLoading -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText)
+                    state.isLoading -> Spinner(size = 24.dp)
                     state.error != null -> Text(state.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                     else -> Text(state.translated ?: "", color = colors.text)
                 }

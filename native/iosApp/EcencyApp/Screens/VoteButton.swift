@@ -31,18 +31,6 @@ enum VoteButtonState: Equatable {
     }
 }
 
-/// Vote weights in basis points for the shared VoteModel. Pure, unit tested.
-enum VoteWeight {
-    /// `percent` 1...100, `down` for a downvote.
-    /// The sheet opens in downvote mode for a post the reader already downvoted (RN and Android).
-    static func startsDown(votedByMe: Bool, downvotedByMe: Bool) -> Bool { downvotedByMe && !votedByMe }
-
-    static func basisPoints(percent: Double, down: Bool) -> Int32 {
-        let clamped = min(100, max(1, percent.rounded()))
-        return Int32(clamped * 100) * (down ? -1 : 1)
-    }
-}
-
 /// RN UpvoteButton: the circled chevron plus payout. Tap opens the weight sheet (RN's upvote popover);
 /// signed out it shows the sign-in prompt; after a failure it offers retry.
 struct VoteButton: View {
@@ -65,11 +53,6 @@ struct VoteButton: View {
     @Environment(\.motion) private var motion
     /// Each time the vote lands (filled), the symbol bounces once.
     @State private var bounces = 0
-    @Environment(\.dynamicTypeSize) private var typeSize
-
-    private var voteSheetDetents: Set<PresentationDetent> {
-        typeSize > .xxxLarge ? [.large] : typeSize > .large ? [.medium, .large] : [.height(340), .large]
-    }
 
     private var state: VoteButtonState {
         VoteButtonState.of(votedByMe: votedByMe, downvotedByMe: downvotedByMe,
@@ -101,22 +84,23 @@ struct VoteButton: View {
                     PayoutPopoverView(post: ref.post, env: app.env).presentationCompactAdaptation(.popover)
                 }
         }
-        .sheet(isPresented: $showWeights) {
+        .themedSheet(isPresented: $showWeights) {
             // RN keeps the last weight for waves apart from posts and comments (waveUpvotePercent)
             let wave = app.env.waves.isWave(key: key)
-            VoteWeightSheet(isVoted: votedByMe || downvotedByMe, initialPercent: wave ? app.env.waves.voteWeightPercent : app.voteWeightPercent, startsDown: VoteWeight.startsDown(votedByMe: votedByMe, downvotedByMe: downvotedByMe)) { percent, down in
+            let start = VoteSheetState.companion.open(rememberedPercent: wave ? app.env.waves.voteWeightPercent : app.voteWeightPercent,
+                                                     votedByMe: votedByMe, downvotedByMe: downvotedByMe)
+            VoteWeightSheet(isVoted: votedByMe || downvotedByMe, start: start) { choice in
                 showWeights = false
-                if let percent {
+                if let choice {
                     Haptics.play(.vote)
-                    if wave { app.env.waves.voteWeightPercent = percent } else { app.voteWeightPercent = percent }
-                    app.env.votes.vote(author: key.author, permlink: key.permlink, weight: VoteWeight.basisPoints(percent: percent, down: down))
+                    // one remembered weight for both directions (RN)
+                    if wave { app.env.waves.voteWeightPercent = Double(choice.percent) } else { app.voteWeightPercent = Double(choice.percent) }
+                    app.env.votes.vote(author: key.author, permlink: key.permlink, weight: choice.weight)
                 } else {
                     app.env.votes.vote(author: key.author, permlink: key.permlink, weight: 0)
                 }
             }
             .environmentObject(app)
-            // RN's compact popover height; large text gets the larger detent and the sheet scrolls
-            .presentationDetents(voteSheetDetents)
         }
         .alert(L.Native.Ios.Vote.failed, isPresented: $showFailure) {
             if case let .failed(_, retryable) = state, retryable {
@@ -171,81 +155,166 @@ struct VoteButton: View {
     }
 }
 
-/// RN upvote popover as a sheet: weight slider, the vote's value ("$x"), Upvote; Downvote switches to the red
-/// downvote mode on the first tap and votes on the second (RN has no other confirmation); "Remove vote" when voted.
+/// The compact vote sheet: an Up / Down toggle with the `$` estimate, the weight, a slider with 25/50/75 ticks, four
+/// presets and one vote button whose label follows the direction (shared VoteSheetState); "Remove vote" when voted.
+/// The sheet is as tall as its content and scrolls at the largest text sizes.
 struct VoteWeightSheet: View {
     let isVoted: Bool
-    let onDone: (_ percent: Double?, _ down: Bool) -> Void
+    /// The choice to vote with, nil to remove the vote.
+    let onDone: (_ choice: VoteSheetState?) -> Void
     @EnvironmentObject private var app: AppContainer
-    @State private var percent: Double
-    @State private var down = false
+    @State private var sheet: VoteSheetState
     @State private var preview: VotePreview?
+    /// The content's measured height: the sheet's detent.
+    @State private var measured: CGFloat?
+    @ScaledMetric(relativeTo: .body) private var estimate: CGFloat = 400
     @Environment(\.appTheme) private var theme
+    @Environment(\.layoutDirection) private var layout
 
-    /// RN and Android: a post the reader already downvoted opens in downvote mode.
-    init(isVoted: Bool, initialPercent: Double, startsDown: Bool = false, onDone: @escaping (Double?, Bool) -> Void) {
+    init(isVoted: Bool, start: VoteSheetState, onDone: @escaping (VoteSheetState?) -> Void) {
         self.isVoted = isVoted
-        _down = State(initialValue: startsDown)
         self.onDone = onDone
-        _percent = State(initialValue: min(100, max(1, initialPercent)))
+        _sheet = State(initialValue: start)
     }
 
-    /// RN downvote colour.
-    static let downColor = Color(red: 0xEC / 255.0, green: 0x8B / 255.0, blue: 0x88 / 255.0)
+    private var fill: Color { sheet.down ? theme.danger : theme.accent }
+    private var tint: Color { sheet.down ? theme.dangerText : theme.accentText }
 
     var body: some View {
         ScrollView {
-        VStack(spacing: 16) {
-            AdaptiveStack {
-                Text(down ? ReadingUiCopy.shared.DOWNVOTE : UiCopy.shared.UPVOTE).font(.headline).foregroundStyle(down ? theme.dangerText : theme.accentText)
-                    .accessibilityAddTraits(.isHeader)
-                Spacer(minLength: 0)
-                if let preview {
-                    Text(VoteSheetText.amount(preview.text(weightBasisPoints: VoteWeight.basisPoints(percent: percent, down: false)), down: down))
-                        .monospacedDigit().foregroundStyle(theme.secondary)
-                        .accessibilityIdentifier("vote-value")
+            VStack(alignment: .leading, spacing: 14) {
+                AdaptiveStack(spacing: 12) {
+                    toggle
+                    Spacer(minLength: 0)
+                    if let preview {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(sheet.valueText(preview: preview)).scaledFont(24, weight: .bold, relativeTo: .title2)
+                                .monospacedDigit().foregroundStyle(theme.text)
+                                .accessibilityIdentifier("vote-value")
+                            Text(ReadingUiCopy.shared.ESTIMATED_VALUE).font(.caption).foregroundStyle(theme.secondary)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(sheet.percentText).scaledFont(40, weight: .bold, relativeTo: .largeTitle).monospacedDigit()
+                        .foregroundStyle(tint).accessibilityIdentifier("vote-percent")
+                    Text(ReadingUiCopy.shared.VOTE_WEIGHT).font(.caption).foregroundStyle(theme.secondary)
+                }
+                // the slider reads the weight
+                .accessibilityHidden(true)
+                slider
+                presets
+                Button { onDone(sheet) } label: {
+                    Text(sheet.buttonLabel).font(.body.weight(.semibold)).foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("vote-submit")
+                if isVoted {
+                    Button(ReadingUiCopy.shared.REMOVE_VOTE, role: .destructive) { onDone(nil) }
+                        .frame(maxWidth: .infinity, minHeight: minTapTarget)
+                        .accessibilityIdentifier("vote-remove")
+                }
+                if let power = preview?.votingPowerText {
+                    Text(power).font(.caption).foregroundStyle(theme.secondary).frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center).accessibilityIdentifier("vote-power")
                 }
             }
-            HStack {
-                Slider(value: $percent, in: 1...100, step: 1)
-                    .tint(down ? Self.downColor : theme.accent)
-                    .accessibilityLabel(ReadingUiCopy.shared.VOTE_WEIGHT)
-                    .accessibilityValue(L.Native.Ios.Vote.percent(percent: Fmt.int(Int(percent))))
-                    .accessibilityIdentifier("vote-weight")
-                Text(Fmt.percent(down ? -Int(percent) : Int(percent))).monospacedDigit().fixedSize()
-                    .frame(minWidth: 56, alignment: .trailing).accessibilityHidden(true)
-            }
-            AdaptiveStack(spacing: 12) {
-                Button {
-                    if down { down = false } else { onDone(percent, false) }
-                } label: {
-                    Label(down ? UiCopy.shared.UPVOTE : L.Native.Ios.Vote.upvotePercent(percent: Fmt.int(Int(percent))), appIcon: .voteUp).frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(theme.accent)
-                .accessibilityIdentifier("vote-confirm")
-                Button {
-                    if down { onDone(percent, true) } else { down = true }
-                } label: {
-                    Label(down ? ReadingUiCopy.shared.downvotePercent(percent: Int32(percent)) : ReadingUiCopy.shared.DOWNVOTE, appIcon: .voteDown).frame(maxWidth: .infinity)
-                }
-                // the downvote's red, as text: the AA red on the gray fill
-                .buttonStyle(.subtleFill(\.dangerText))
-                .accessibilityIdentifier("vote-down")
-            }
-            if isVoted {
-                Button(ReadingUiCopy.shared.REMOVE_VOTE, role: .destructive) { onDone(nil, false) }
-                    .accessibilityIdentifier("vote-remove")
-            }
-        }
-        .padding(20)
+            .padding(.horizontal, 20).padding(.top, 24).padding(.bottom, 12)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if $0 > 0, abs($0 - (measured ?? 0)) > 0.5 { measured = $0 } }
+            .opacity(measured == nil ? 0 : 1)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .presentationDetents([.height(measured ?? estimate)])
+        .presentationDragIndicator(.visible)
         .task { preview = try? await app.env.votePreview() }
     }
-}
 
-/// The vote sheet's value text, pure for tests: RN prefixes "-" in downvote mode.
-enum VoteSheetText {
-    static func amount(_ text: String, down: Bool) -> String { down ? "-" + text : text }
+    /// Up / Down, the selected half filled in the direction's colour.
+    private var toggle: some View {
+        // side by side, stacked when the text is too large for one row
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 2) { directions }
+            VStack(alignment: .leading, spacing: 2) { directions }
+        }
+        .padding(3)
+        .background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    @ViewBuilder private var directions: some View {
+        direction(ReadingUiCopy.shared.VOTE_UP, a11y: UiCopy.shared.UPVOTE, icon: .collapse, down: false, id: "vote-dir-up")
+        direction(ReadingUiCopy.shared.VOTE_DOWN, a11y: ReadingUiCopy.shared.DOWNVOTE, icon: .expand, down: true, id: "vote-dir-down")
+    }
+
+    private func direction(_ title: String, a11y: String, icon: AppIcon, down: Bool, id: String) -> some View {
+        let selected = sheet.down == down
+        return Button { sheet = sheet.withDirection(down: down) } label: {
+            Label(title, appIcon: icon).font(.subheadline.weight(.semibold))
+                .foregroundStyle(selected ? Color.white : theme.text)
+                .padding(.horizontal, 14).frame(minHeight: minTapTarget)
+                .background(selected ? (down ? theme.danger : theme.accent) : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(a11y)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier(id)
+    }
+
+    private var slider: some View {
+        Slider(value: Binding(get: { Double(sheet.percent) }, set: { sheet = sheet.withPercent(value: $0) }), in: 1...100, step: 1)
+            .tint(tint)
+            .accessibilityLabel(ReadingUiCopy.shared.VOTE_WEIGHT)
+            .accessibilityValue(sheet.percentText)
+            .accessibilityIdentifier("vote-weight")
+            .padding(.bottom, 6)
+            .background(alignment: .bottom) { ticks.frame(height: 6) }
+    }
+
+    /// Marks under the track at 25, 50 and 75 percent, mirrored right to left.
+    private var ticks: some View {
+        GeometryReader { g in
+            // the thumb's half width insets the track at both ends
+            let inset: CGFloat = 14
+            let track = g.size.width - 2 * inset
+            ForEach([25, 50, 75], id: \.self) { p in
+                let f = CGFloat(p - 1) / 99
+                Capsule().fill(theme.secondary).frame(width: 2, height: 6)
+                    .position(x: inset + track * (layout == .rightToLeft ? 1 - f : f), y: 3)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    /// 25 / 50 / 75 / 100 in a row, two rows when the text is too large for one.
+    private var presets: some View {
+        let items = VoteSheetState.companion.PRESETS.map { $0.int32Value }
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { ForEach(items, id: \.self) { preset($0) } }
+            Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                GridRow { preset(items[0]); preset(items[1]) }
+                GridRow { preset(items[2]); preset(items[3]) }
+            }
+        }
+    }
+
+    private func preset(_ p: Int32) -> some View {
+        let selected = sheet.selectedPreset?.int32Value == p
+        return Button { sheet = sheet.withPreset(preset: p) } label: {
+            Text(Fmt.percent(Int(p))).font(.subheadline.weight(selected ? .bold : .regular)).monospacedDigit()
+                .lineLimit(1).fixedSize()
+                .foregroundStyle(selected ? tint : theme.text)
+                .frame(maxWidth: .infinity, minHeight: minTapTarget)
+                .background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay { if selected { RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(tint, lineWidth: 2) } }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("vote-preset-\(p)")
+    }
 }

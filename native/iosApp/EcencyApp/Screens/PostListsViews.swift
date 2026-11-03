@@ -34,8 +34,9 @@ struct VotersView: View {
                 }
                 .listRowSeparator(.hidden)
             }
+            .themedRow()
             if s.isLoading && s.rows.isEmpty {
-                ProgressView().frame(maxWidth: .infinity)
+                ListLoadingRow()
             } else if let error = s.error, s.rows.isEmpty {
                 ErrorStateView(error: error) { voters.refresh() }
             } else if s.rows.isEmpty {
@@ -48,7 +49,10 @@ struct VotersView: View {
                         // name and amounts side by side; stacked at accessibility text sizes
                         AdaptiveStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(row.voter).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                            HStack(spacing: 4) {
+                                Text(row.voter).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                                ProBadge(username: row.voter)
+                            }
                             if let time = row.timeAgo { Text(time).scaledFont(12).foregroundStyle(theme.secondary) }
                         }
                         Spacer(minLength: 0)
@@ -61,11 +65,13 @@ struct VotersView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .themedRow()
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("voter-\(row.voter)")
             }
         }
         .listStyle(.plain)
+        .themedList()
         .searchable(text: $query)
         .onChange(of: query) { _, q in voters.search(query: q) }
         .refreshable { voters.refresh() }
@@ -96,20 +102,25 @@ struct ReblogsView: View {
     var body: some View {
         let s = model.state
         List {
-            if s.isLoading && s.accounts.isEmpty { ProgressView().frame(maxWidth: .infinity) }
+            if s.isLoading && s.accounts.isEmpty { ListLoadingRow() }
             if let error = s.error, s.accounts.isEmpty { ErrorStateView(error: error) { reblogs.refresh() } }
             ForEach(s.accounts, id: \.self) { name in
-                Button { app.open(.profile(author: name)) } label: {
-                    HStack(spacing: 10) {
-                        AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 40)
-                        Text(name).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                ProMemberReader(username: name) { pro in
+                    Button { app.open(.profile(author: name)) } label: {
+                        HStack(spacing: 10) {
+                            AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 40)
+                            Text(name).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                            ProBadge(username: name)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(proLabel(UiCopy.shared.profileOf(username: name), pro))
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(UiCopy.shared.profileOf(username: name))
+                .themedRow()
             }
         }
         .listStyle(.plain)
+        .themedList()
         .searchable(text: $query)
         .onChange(of: query) { _, q in reblogs.search(query: q) }
         .refreshable { reblogs.refresh() }
@@ -166,7 +177,7 @@ struct EditHistoryView: View {
             }
             Divider()
             if s.isLoading {
-                ProgressView().frame(maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let message = s.message {
                 Text(message).foregroundStyle(theme.secondary).padding(24).frame(maxHeight: .infinity)
             } else if Int(s.selected) < s.versions.count {

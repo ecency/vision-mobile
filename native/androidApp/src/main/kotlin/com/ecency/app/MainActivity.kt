@@ -448,6 +448,9 @@ class MainActivity : FragmentActivity() {
             // `--ez demoNoPro true`: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots)
             if (intent.getBooleanExtra("demoNoPro", false)) com.ecency.core.app.DemoAuthServices.clearDemoPro()
             com.ecency.core.app.DemoAuthServices.demoReleaseTag = if (intent.getBooleanExtra("demoUpdate", false)) "99.1.0" else null
+            // `--ei demoChatHistory <n>`: n older messages and one long one in the demo channel, DM and group
+            val history = intent.getIntExtra("demoChatHistory", 0)
+            if (history > 0 && savedInstanceState == null) listOf("ch-ecency", "ch-dm-alice", "ch-group").forEach { com.ecency.core.app.DemoAuthServices.chat?.seedHistory(it, history) }
         }
         EcencyGraph.playReview.attach(this)
         // `--ez seedAccounts true` (debug only, with demoAuth): two throwaway accounts signed in, for screenshots.

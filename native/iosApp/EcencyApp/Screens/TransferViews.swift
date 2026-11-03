@@ -72,7 +72,7 @@ struct TransferFormView: View {
 
     var body: some View {
         let s = observed.state
-        Form {
+        ThemedForm {
             recipientSection(s)
             amountSection(s)
             if s.canSchedule { scheduleSection(s) }
@@ -99,8 +99,8 @@ struct TransferFormView: View {
         } message: {
             if let a = s.prompt as? TransferPromptAlert { Text(a.message) }
         }
-        .sheet(isPresented: $favorites) { FavoritesSheet(env: app.env) { model.setRecipient(text: $0); favorites = false } }
-        .fullScreenCover(isPresented: $scanning) {
+        .themedSheet(isPresented: $favorites) { FavoritesSheet(env: app.env) { model.setRecipient(text: $0); favorites = false } }
+        .themedFullScreenCover(isPresented: $scanning) {
             RecipientScanner(env: app.env, onValue: { model.scanned(value: $0); scanning = false }, onClose: { scanning = false })
         }
         .modifier(LeaveGuard(busy: s.busy))
@@ -235,7 +235,7 @@ struct DelegateFormView: View {
 
     var body: some View {
         let s = observed.state
-        Form {
+        ThemedForm {
             Section {
                 WalletField(label: tcopy.TO_PLACEHOLDER, text: binding(s.recipient) { model.setRecipient(text: $0) }, disabled: s.busy, id: "delegate-to")
                 ForEach(s.suggestions, id: \.self) { n in Button("@\(n)") { model.pickSuggestion(name: n) } }
@@ -279,7 +279,7 @@ struct PowerDownFormView: View {
 
     var body: some View {
         let s = observed.state
-        Form {
+        ThemedForm {
             if !s.routesOnly {
                 Section {
                     if s.poweringDown {
@@ -371,7 +371,7 @@ struct TradeView: View {
 
     var body: some View {
         let s = observed.state
-        Form {
+        ThemedForm {
             Section {
                 WalletField(label: "\(tcopy.FROM) (\(s.from))", text: binding(s.fromAmount) { model.setAmount(text: $0) }, number: true, disabled: s.busy, id: "trade-from")
                 Button(UiCopy.shared.balance(amount: "\(LocaleFormat.shared.toFixed(value: s.balance, decimals: 3)) \(s.from)")) { model.useBalance() }.font(.footnote).accessibilityIdentifier("trade-balance")
@@ -440,7 +440,7 @@ struct RedeemView: View {
 
     var body: some View {
         let s = observed.state
-        Form {
+        ThemedForm {
             Section {
                 Text("\(rc.USER): \(bidiValue("@" + (s.user ?? "")))")
                 Text(s.balance.map { rc.points(value: LocaleFormat.shared.toFixed(value: $0.doubleValue, decimals: 3)) } ?? "--").bold().foregroundStyle(theme.accentText).accessibilityIdentifier("redeem-balance")
@@ -490,22 +490,25 @@ struct ManageAssetsView: View {
                 if s.selected.isEmpty { Text(copy.NO_SELECTED_ASSETS).font(.footnote).foregroundStyle(theme.secondary) }
                 ForEach(s.selected, id: \.symbol) { a in
                     Button { model.toggle(symbol: a.symbol) } label: {
-                        HStack { Image(appIcon: .checkbox, filled: true).accessibilityHidden(true); AvatarView(url: a.iconUrl ?? "", size: 24); Text(a.symbol) }
+                        HStack { Image(appIcon: .checkbox, filled: true).accessibilityHidden(true); AssetIconView(url: a.iconUrl, size: 24); Text(a.symbol) }
                     }
                     .accessibilityAddTraits(.isSelected)
                     .accessibilityIdentifier("selected-\(a.symbol)")
                 }
                 .onMove { from, to in if let f = from.first { model.move(from: Int32(f), to: Int32(to > f ? to - 1 : to)) } }
             }
+            .themedCardRow()
             Section(copy.AVAILABLE_ASSETS) {
                 ForEach(s.visibleAvailable, id: \.symbol) { a in
                     Button { model.toggle(symbol: a.symbol) } label: {
-                        HStack { Image(appIcon: .checkbox).accessibilityHidden(true); AvatarView(url: a.iconUrl ?? "", size: 24); Text(a.symbol) }
+                        HStack { Image(appIcon: .checkbox).accessibilityHidden(true); AssetIconView(url: a.iconUrl, size: 24); Text(a.symbol) }
                     }
                     .accessibilityIdentifier("available-\(a.symbol)")
                 }
             }
+            .themedCardRow()
         }
+        .themedList()
         .searchable(text: Binding(get: { s.query }, set: { model.setQuery(q: $0) }), prompt: copy.SEARCH)
         .overlay { if s.isLoading { ProgressView() } }
         .navigationTitle(copy.MANAGE_ASSETS).navigationBarTitleDisplayMode(.inline)
@@ -536,7 +539,7 @@ struct TipSheet: View {
     var body: some View {
         let s = observed.state
         NavigationStack {
-            Form {
+            ThemedForm {
                 Section {
                     Text(tc.supportAuthor(author: s.author)).foregroundStyle(theme.secondary)
                     Text("\(tc.EXISTING) (\(Fmt.int(s.tipsCount)))").font(.caption).foregroundStyle(theme.secondary)
@@ -601,7 +604,8 @@ struct FavoritesSheet: View {
     var body: some View {
         let s = observed.state
         NavigationStack {
-            List(s.visible, id: \.self) { name in Button("@\(name)") { onPick(name) }.accessibilityIdentifier("favorite-\(name)") }
+            List(s.visible, id: \.self) { name in Button("@\(name)") { onPick(name) }.themedCardRow().accessibilityIdentifier("favorite-\(name)") }
+                .themedList()
                 .overlay { if s.isLoading { ProgressView() } }
                 .searchable(text: Binding(get: { s.query }, set: { model.setQuery(q: $0) }), prompt: tcopy.TO_PLACEHOLDER)
                 .navigationTitle(copy.PICK_FAVORITE).navigationBarTitleDisplayMode(.inline)
@@ -657,7 +661,7 @@ private struct RecipientScanner: View {
             .accessibilityIdentifier("transfer-qr-close")
             .padding(12)
         }
-        .background(Color.black)
+        .background(Color.black) // media: the camera preview of the QR scanner
         .onEscape(onClose)
         .accessibilityIdentifier("transfer-qr")
         .onChange(of: observed.state.outcome as? NSObject) { _, _ in

@@ -232,12 +232,16 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
     /** The app went to the background (Android onStop, iOS scene phase .background). */
     fun onBackground() {
         if (backgroundedAt == null) backgroundedAt = config.monotonicMillis()
+        // the screens' data ages from here (README "Foreground refresh")
+        env.freshness.onBackground()
         // screens that show secrets (the keys screen) close the moment the app leaves the foreground
         env.emit(AppEvent.Backgrounded)
     }
 
     /** The app is in front again: locks when it was away at least the timeout. */
     fun onForeground() {
+        // after a long trip the screens refresh quietly (README "Foreground refresh")
+        env.freshness.onForeground()
         val since = backgroundedAt ?: return
         backgroundedAt = null
         val away = config.monotonicMillis() - since

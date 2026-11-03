@@ -52,7 +52,7 @@ struct RegisterSheet: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(UiCopy.shared.CANCEL) { dismiss() }.accessibilityIdentifier("register-cancel") } }
         }
         .accessibilityIdentifier("register")
-        .fullScreenCover(isPresented: Binding(get: { state.optionsOpen }, set: { if !$0 { model.closeOptions() } })) {
+        .themedFullScreenCover(isPresented: Binding(get: { state.optionsOpen }, set: { if !$0 { model.closeOptions() } })) {
             RegisterOptionsView(state: observed.state, model: model, standIn: app.env.captchaStandIn) {
                 RegisterSheet.openInbox()
                 dismiss()
@@ -319,7 +319,7 @@ struct ReferScreen: View {
                 }
                 .buttonStyle(.borderedProminent).tint(theme.accent).disabled(!mine).accessibilityIdentifier("refer-share")
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 12).listRowSeparator(.hidden)
+            .frame(maxWidth: .infinity).padding(.vertical, 12).listRowSeparator(.hidden).themedRow()
 
             ForEach(rows, id: \.id) { row in
                 AdaptiveStack(spacing: 10) {
@@ -331,7 +331,10 @@ struct ReferScreen: View {
                         HStack {
                             AvatarView(url: PostCard.companion.avatarUrl(account: row.username, proxyBase: app.env.proxyBase, size: "small"), size: 36)
                             VStack(alignment: .leading) {
-                                Text(row.username).bold().foregroundStyle(theme.text)
+                                HStack(spacing: 4) {
+                                    Text(row.username).bold().foregroundStyle(theme.text)
+                                    ProBadge(username: row.username)
+                                }
                                 if let millis = row.createdMillis?.int64Value {
                                     Text(LocaleFormat.shared.date(epochMillis: millis)).font(.caption).foregroundStyle(theme.secondary)
                                 }
@@ -343,23 +346,28 @@ struct ReferScreen: View {
                     Button(copy.DELEGATE_HP) { app.push(AppScreenCompanion.shared.of(route: .transfer, arg: row.username)) }
                         .buttonStyle(.borderless).font(.footnote.bold()).accessibilityIdentifier("referral-delegate-\(row.username)")
                 }
+                .themedRow()
                 .onAppear { if row.id == rows.last?.id { model.loadMore() } }
             }
 
-            Group {
-                if state.isLoading || state.isLoadingMore {
-                    ProgressView().frame(maxWidth: .infinity)
-                } else if let error = state.error {
-                    Button(UiCopy.shared.errorTryAgain(message: error.message)) { if state.loaded { model.loadMore() } else { model.retry() } }
-                        .frame(maxWidth: .infinity).accessibilityIdentifier("refer-retry")
-                } else if mine && state.isEmpty {
-                    Text(copy.EMPTY).foregroundStyle(theme.secondary).multilineTextAlignment(.center).frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("refer-empty")
+            if state.isLoading || state.isLoadingMore {
+                // the shared list spinner: the first page's under the header, the next page's as a footer
+                ListLoadingRow(topPadding: rows.isEmpty ? 48 : 0)
+            } else {
+                Group {
+                    if let error = state.error {
+                        Button(UiCopy.shared.errorTryAgain(message: error.message)) { if state.loaded { model.loadMore() } else { model.retry() } }
+                            .frame(maxWidth: .infinity).accessibilityIdentifier("refer-retry")
+                    } else if mine && state.isEmpty {
+                        Text(copy.EMPTY).foregroundStyle(theme.secondary).multilineTextAlignment(.center).frame(maxWidth: .infinity)
+                            .accessibilityIdentifier("refer-empty")
+                    }
                 }
+                .frame(minHeight: 72).listStateRow()
             }
-            .frame(minHeight: 72).listRowSeparator(.hidden)
         }
         .listStyle(.plain)
+        .themedList()
         .refreshable { model.refresh() }
         .navigationTitle(copy.TITLE)
         .navigationBarTitleDisplayMode(.inline)

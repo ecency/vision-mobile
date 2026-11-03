@@ -41,20 +41,17 @@ class SummaryCollapseTest {
     }
 
     @Test
-    fun opensNearTheTopOrAfterAnUpwardRunMidList() {
+    fun opensOnlyBackAtTheTopNeverOnAnUpwardScrollMidList() {
         val c = SummaryCollapse()
         c.scrollTo(0.0, 2000.0, 0)
         assertFalse(c.isOpen)
-        c.scrollTo(2000.0, 1950.0, 1000)
-        assertFalse(c.isOpen, "50 up is not a reveal")
-        c.onScroll(1940.0, 1000)
-        assertTrue(c.isOpen, "60 up mid-list reveals it")
-        c.scrollTo(1940.0, 1930.0, 2000)
-        c.scrollTo(1930.0, 1945.0, 2000)
-        assertTrue(c.isOpen, "a direction flip restarts the run: 15 down does not close")
-        c.scrollTo(1945.0, 1965.0, 2000)
-        assertFalse(c.isOpen, "a run of 20 down does")
-        c.scrollTo(1965.0, 8.0, 3000, step = 300.0)
+        c.scrollTo(2000.0, 1940.0, 1000)
+        assertFalse(c.isOpen, "60 up mid-list does not open it")
+        c.scrollTo(1940.0, 200.0, 2000)
+        assertFalse(c.isOpen, "a long scroll up that stops short of the top does not open it")
+        c.scrollTo(200.0, 400.0, 3000)
+        assertFalse(c.isOpen)
+        c.scrollTo(400.0, 8.0, 4000)
         assertTrue(c.isOpen, "back at the top")
     }
 

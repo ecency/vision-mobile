@@ -6,15 +6,10 @@ import SwiftUI
 
 /// RN chat colours that are not theme tokens.
 enum ChatColors {
-    /// RN `#28a745` / `#dc3545`: the status pill's dot.
-    static let connected = Color(hex: 0x28A745)
+    /// RN `#dc3545`: the dot of the connecting notice.
     static let connecting = Color(hex: 0xDC3545)
     /// RN `#FFB300`: a favourite's star.
     static let star = Color(hex: 0xFFB300)
-    /// RN dmWarningContainer.
-    static let warningBackground = Color(hex: 0xFFF6DF)
-    static let warningBorder = Color(hex: 0xF4C26B)
-    static let warningText = Color(hex: 0x8A5B00)
     /// RN `#4CAF50`: online in the members list.
     static let online = Color(hex: 0x4CAF50)
 }
@@ -150,8 +145,6 @@ struct ChatsTabView: View {
     @State private var rename: RenameTarget?
     @State private var newGroup = false
     @Environment(\.dynamicTypeSize) private var typeSize
-    /// Room under the last row for the floating status pill, growing with the text size.
-    @ScaledMetric(relativeTo: .caption) private var pillClearance: CGFloat = 48
 
     struct RenameTarget: Identifiable {
         let id: String
@@ -163,12 +156,16 @@ struct ChatsTabView: View {
     var body: some View {
         let s = observed.state
         let mine = s.account != nil && s.account == session.state.username
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 if mine, let error = s.error, !s.isLoading, !s.rows.isEmpty {
                     Text(error).scaledFont(13).foregroundStyle(theme.dangerText).padding(.horizontal, 16).announces(error).accessibilityIdentifier("chats-error")
                 }
                 searchBar(s)
+                // a connected chat says nothing; only a missing connection shows, in line
+                if mine && !s.connected {
+                    connectingNotice.padding(.horizontal, 16).padding(.vertical, 4).frame(maxWidth: .infinity, alignment: .leading)
+                }
                 // the first load draws the rows' shape; a search or a reload over rows keeps the spinner
                 if mine && s.isLoading && s.rows.isEmpty && !s.searching {
                     RowsSkeleton(count: 6, identifier: "chats-loading")
@@ -176,6 +173,8 @@ struct ChatsTabView: View {
                     ProgressView().padding(.top, 12).accessibilityIdentifier("chats-loading")
                 }
                 List {
+                    // the theme behind every row (no row sets its own colour)
+                    Group {
                     if mine {
                         if let e = s.searchError { Text(e).scaledFont(13).foregroundStyle(theme.dangerText).announces(e, debounce: true, sticky: true).listRowSeparator(.hidden) }
                         if !s.channelResults.isEmpty {
@@ -202,23 +201,19 @@ struct ChatsTabView: View {
                                 .listRowSeparator(.hidden)
                         }
                     }
-                    if !typeSize.isAccessibilitySize {
-                        Color.clear.frame(height: pillClearance).listRowSeparator(.hidden).accessibilityHidden(true)
+                    // room under the last row for the Esie button (a fixed size, as every FAB)
+                    Color.clear.frame(height: FabMetrics.size + FabMetrics.margin * 2).listRowSeparator(.hidden).accessibilityHidden(true)
                     }
+                    .themedRow()
                 }
                 .listStyle(.plain)
+                .themedList()
                 .refreshable { try? await model.refreshAndWait() }
                 .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chats-list")
-                // at accessibility sizes the pill takes its own line under the list instead of floating over the
-                // rows (it covered the last row's text while scrolling)
-                if typeSize.isAccessibilitySize {
-                    statusPill(connected: s.connected && mine).padding(.horizontal, 16).padding(.vertical, 8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
             }
-            if !typeSize.isAccessibilitySize {
-                statusPill(connected: s.connected && mine).padding(16)
+            if mine && s.connected {
+                EsieFab { app.openDirectMessage(OfficialAccounts.shared.ESIE_USERNAME) }
             }
         }
         .onAppear {
@@ -244,8 +239,8 @@ struct ChatsTabView: View {
                 .accessibilityIdentifier("channel-option-\(action.name)")
             }
         }
-        .sheet(item: $rename) { r in RenameGroupSheet(env: app.env, channelId: r.id, name: r.name) }
-        .sheet(isPresented: $newGroup) {
+        .themedSheet(item: $rename) { r in RenameGroupSheet(env: app.env, channelId: r.id, name: r.name) }
+        .themedSheet(isPresented: $newGroup) {
             NewGroupSheet(env: app.env) { id in
                 newGroup = false
                 model.groupCreated(channelId: id)
@@ -371,16 +366,37 @@ struct ChatsTabView: View {
         .listRowSeparator(.hidden)
     }
 
-    private func statusPill(connected: Bool) -> some View {
+    /// The chat is not connected (yet, or any more): a dot and the connecting copy, in line under the search bar.
+    private var connectingNotice: some View {
         HStack(spacing: 6) {
-            Circle().fill(connected ? ChatColors.connected : ChatColors.connecting).frame(width: 8, height: 8).accessibilityHidden(true)
-            Text(connected ? ChatsModel.companion.CONNECTED : ChatsModel.companion.CONNECTING).scaledFont(12).foregroundStyle(theme.text)
+            Circle().fill(ChatColors.connecting).frame(width: 8, height: 8).accessibilityHidden(true)
+            Text(ChatsModel.companion.CONNECTING).scaledFont(12).foregroundStyle(theme.text)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(Capsule().fill(theme.lightBackground))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.updatesFrequently)
-        .accessibilityIdentifier("chats-status")
+        .accessibilityIdentifier("chats-offline")
+    }
+}
+
+/// The round button over the chats list that opens the direct message with Esie (as "Ask Esie" does), in the FAB's
+/// place and size ([FabMetrics]) on the theme's card colour.
+private struct EsieFab: View {
+    let action: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            EsieView(mood: .rest, height: 44)
+                .frame(width: FabMetrics.size, height: FabMetrics.size)
+                .clipShape(Circle())
+                .background(Circle().fill(theme.lightBackground).shadow(color: .black.opacity(0.3), radius: 8, y: 4))
+        }
+        .buttonStyle(PressScaleStyle(scale: 0.92))
+        .padding(FabMetrics.margin)
+        .accessibilityLabel(ChatUiCopy.shared.CHAT_WITH_ESIE)
+        .accessibilityIdentifier("chats-esie-fab")
     }
 }
 
@@ -597,7 +613,7 @@ struct ChatThreadView: View {
             thread.setActive(on: false)
         }
         .onChange(of: scenePhase) { _, phase in thread.setActive(on: onScreen && phase == .active) }
-        .sheet(item: $sheet) { sheet in sheetView(sheet, s) }
+        .themedSheet(item: $sheet) { sheet in sheetView(sheet, s) }
         .alert(ChatThreadModel.companion.REMOVE_TITLE, isPresented: Binding(get: { removeTarget != nil }, set: { if !$0 { removeTarget = nil } }), presenting: removeTarget) { item in
             Button(UiCopy.shared.CANCEL, role: .cancel) {}
             Button(ChatUiCopy.shared.DELETE_MESSAGE, role: .destructive) { thread.remove(item: item) }.accessibilityIdentifier("chat-confirm-remove")
@@ -653,7 +669,7 @@ struct ChatThreadView: View {
 
     private var dmWarning: some View {
         HStack(alignment: .top, spacing: 8) {
-            Image(appIcon: .warning).foregroundStyle(ChatColors.warningText).accessibilityHidden(true)
+            Image(appIcon: .warning).foregroundStyle(theme.warningText).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(ChatThreadModel.companion.DM_WARNING_TITLE).scaledFont(14, weight: .bold).accessibilityAddTraits(.isHeader)
                 Text(ChatThreadModel.companion.DM_WARNING_BODY).scaledFont(13)
@@ -662,14 +678,14 @@ struct ChatThreadView: View {
                 }
                 .accessibilityIdentifier("dm-warning-settings")
             }
-            .foregroundStyle(ChatColors.warningText)
+            .foregroundStyle(theme.warningText)
             Spacer(minLength: 0)
-            Button { thread.dismissDmWarning() } label: { Image(appIcon: .close).foregroundStyle(ChatColors.warningText).tapTarget() }
+            Button { thread.dismissDmWarning() } label: { Image(appIcon: .close).foregroundStyle(theme.warningText).tapTarget() }
                 .accessibilityLabel(UiCopy.shared.CLOSE).accessibilityIdentifier("dm-warning-close")
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(ChatColors.warningBackground))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(ChatColors.warningBorder))
+        .background(RoundedRectangle(cornerRadius: 10).fill(theme.warningBackground))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.warningBorder))
         .padding(.horizontal, 16).padding(.top, 12)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("dm-warning")
@@ -678,41 +694,47 @@ struct ChatThreadView: View {
     private func notice(_ icon: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(icon).accessibilityHidden(true)
-            Text(text).scaledFont(13).foregroundStyle(ChatColors.warningText)
+            Text(text).scaledFont(13).foregroundStyle(theme.warningText)
             Spacer(minLength: 0)
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(ChatColors.warningBackground))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(ChatColors.warningBorder))
+        .background(RoundedRectangle(cornerRadius: 10).fill(theme.warningBackground))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.warningBorder))
         .padding(.horizontal, 16).padding(.vertical, 6)
     }
 
     private func messages(_ s: ChatThreadState) -> some View {
-        // RN's list is inverted: the newest message at the bottom, older pages above
-        let items = Array(s.items.reversed())
-        return ScrollViewReader { proxy in
+        // RN's list is inverted (FlatList `inverted`, Android `reverseLayout`), and so is this one: the scroll view is
+        // flipped and its rows flipped back, so the newest message is the scroll view's start. It opens there with no
+        // bottom anchor to resolve against rows not laid out yet, and an older page is added at the end (on screen,
+        // above) without moving what is shown. A bottom-anchored stack in reading order instead opened at its top for
+        // a moment: the oldest row's appearance loaded the page before, which went in above and pushed the view up
+        // into old history (or blank space) page after page.
+        ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 0) {
                     if s.account != nil {
+                        ForEach(s.items, id: \.rowId) { item in
+                            VStack(spacing: 0) {
+                                if item.rowId == s.unreadItemId { unreadMarker }
+                                row(item)
+                            }
+                            .chatFlipped()
+                            .id(item.rowId)
+                            .onAppear { if item.rowId == s.items.last?.rowId { thread.loadMore() } }
+                        }
                         Group {
                             if s.isLoading { ProgressView().padding(16) } else if !s.hasMore && !s.items.isEmpty {
                                 Text(ChatThreadModel.companion.NO_MORE).scaledFont(12).foregroundStyle(theme.secondary).padding(16)
                                     .accessibilityIdentifier("chat-no-more")
                             }
                         }
-                        ForEach(items, id: \.rowId) { item in
-                            VStack(spacing: 0) {
-                                if item.rowId == s.unreadItemId { unreadMarker }
-                                row(item)
-                            }
-                            .id(item.rowId)
-                            .onAppear { if item.rowId == items.first?.rowId { thread.loadMore() } }
-                        }
+                        .chatFlipped()
                     }
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
             }
-            .defaultScrollAnchor(.bottom)
+            .chatFlipped()
             .refreshable { try? await thread.refreshAndWait() }
             .overlay {
                 if s.account != nil, s.items.isEmpty, s.loaded, !s.isLoading {
@@ -942,6 +964,9 @@ struct ChatMessageBubble: View {
                 if !item.spans.isEmpty {
                     Text(ChatAttributed.make(item.spans, linkColor: own ? .white : theme.accentText))
                         .scaledFont(15).foregroundStyle(text)
+                        // the whole message, always: under a quote (whose bar takes any height it is offered) a long
+                        // reply gave its height to the quote and was cut after a few lines
+                        .fixedSize(horizontal: false, vertical: true)
                         .environment(\.openURL, OpenURLAction { url in
                             app.openChatLink(url.absoluteString)
                             return .handled
@@ -1505,4 +1530,9 @@ struct ReactionPillView: View {
         .accessibilityAction(named: L.Native.Ios.Chat.seeReactors) { onReactors(name) }
         .accessibilityIdentifier(id)
     }
+}
+
+private extension View {
+    /// Upside down: the conversation's scroll view, and each of its rows again so they read the right way up.
+    func chatFlipped() -> some View { scaleEffect(x: 1, y: -1) }
 }

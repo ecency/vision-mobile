@@ -236,4 +236,75 @@ final class ImagePipelineTests: XCTestCase {
         RevealedImages.shared.reveal("https://example.com/2.png")
         XCTAssertEqual(gallery.visible(showImages: false), ["https://example.com/2.png"])
     }
+
+    // MARK: body images load the proxy size web's srcset picks (README "Body images")
+
+    private let raw = "https://files.peakd.com/file/peakd-hive/alice/photo.jpg"
+    private var src: String { ImageProxy(base: ImageProxy.companion.DEFAULT_BASE).proxify(url: raw, width: 0, height: 0, blur: false, forceProxy: true) }
+    private func sized(_ src: String, _ format: String, _ width: Int) -> String {
+        src.replacingOccurrences(of: "?format=match&mode=fit", with: "?format=\(format)&mode=fit&width=\(width)")
+    }
+    private func pick(_ px: CGFloat) -> Int { [320, 600, 800, 1024, 1280].first { CGFloat($0) >= px } ?? 1280 }
+
+    func testBodyImageRequestsWebsAvifSizeForItsWidthInPixels() throws {
+        _ = host(PostBodyView(blocks: [BlockImage(src: src, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        let expected = sized(src, "avif", pick(320 * UIScreen.main.scale))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [expected])
+    }
+
+    func testGridTilesRequestTheirOwnSize() throws {
+        let grid = BlockImageGrid(images: [BlockImage(src: src, alt: nil, link: nil), BlockImage(src: src, alt: nil, link: nil)])
+        _ = host(PostBodyView(blocks: [grid], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(Set(counter.all), [sized(src, "avif", pick(159 * UIScreen.main.scale))])
+    }
+
+    func testAnimatedSourceKeepsWebsMatchSize() throws {
+        let gif = ImageProxy(base: ImageProxy.companion.DEFAULT_BASE).proxify(url: "https://media.giphy.com/media/abc/giphy.gif", width: 0, height: 0, blur: false, forceProxy: true)
+        _ = host(PostBodyView(blocks: [BlockImage(src: gif, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [sized(gif, "match", pick(320 * UIScreen.main.scale))])
+    }
+
+    func testAnAvifThatFailsFallsBackToWebp() throws {
+        let png = counter.png
+        let failAvif: ImageLoader.Fetch = { [counter] url in
+            _ = await counter.fetch(url)
+            return url.absoluteString.contains("format=avif") ? nil : png
+        }
+        ImageLoader.shared.setFetch(failAvif)
+        let width = pick(320 * UIScreen.main.scale)
+        let page = host(PostBodyView(blocks: [BlockImage(src: src, alt: nil, link: nil)], contentWidth: 320, actions: PostActions()))
+        for _ in 0..<30 where counter.all.count < 2 { spin(0.1) }
+        XCTAssertEqual(counter.all, [sized(src, "avif", width), sized(src, "webp", width)])
+        for _ in 0..<30 where find(UIImageView.self, in: page.view)?.image == nil { spin(0.1) }
+        XCTAssertNotNil(find(UIImageView.self, in: page.view)?.image, "the WebP is shown")
+    }
+
+    /// The viewer zooms up to 5x, so a capped width would blur: it loads the full file, still through the proxy.
+    func testGalleryImageLoadsTheFullResolutionProxyUrlForZoom() throws {
+        _ = host(ZoomableImageView(src: src, size: CGSize(width: 390, height: 520)) { _ in })
+        for _ in 0..<30 where counter.all.isEmpty { spin(0.1) }
+        XCTAssertEqual(counter.all, [src])
+    }
+
+    /// Decoded at only the screen width, a 5x zoom scales a thumbnail up: the viewer decodes for its widest zoom.
+    func testGalleryImageDecodesForItsZoomNotTheScreenWidth() throws {
+        let photo = UIGraphicsImageRenderer(size: CGSize(width: 2400, height: 1800), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
+            .image { ctx in UIColor.blue.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 2400, height: 1800)) }.pngData()!
+        ImageLoader.shared.setFetch { _ in photo }
+        let page = host(ZoomableImageView(src: src, size: CGSize(width: 390, height: 520)) { _ in })
+        for _ in 0..<50 where find(UIImageView.self, in: page.view)?.image == nil { spin(0.1) }
+        let image = try XCTUnwrap(find(UIImageView.self, in: page.view)?.image)
+        XCTAssertEqual(image.size.width * image.scale, 2400, accuracy: 1, "the whole file, not \(390 * UIScreen.main.scale) px")
+    }
+
+    func testDecodeKeepsAHugeImageUnderThePixelBudget() throws {
+        let big = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 600), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
+            .image { ctx in UIColor.blue.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 1200, height: 600)) }.pngData()!
+        let loaded = try XCTUnwrap(ImageLoader.decode(big, maxPixel: 5000, maxArea: 20_000))
+        XCTAssertLessThanOrEqual(loaded.image.size.width * loaded.image.size.height, 20_000 * 1.05)
+        XCTAssertEqual(loaded.image.size.width, 200, accuracy: 2, "the aspect is kept")
+    }
 }

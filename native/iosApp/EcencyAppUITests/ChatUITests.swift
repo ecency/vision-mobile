@@ -28,7 +28,9 @@ final class ChatUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Book club"].exists)
         XCTAssertTrue(app.staticTexts["Photography"].exists)
         XCTAssertTrue(element(app, "chat-unread-ch-ecency").exists, "the unread badge")
-        XCTAssertTrue(app.staticTexts["Connected"].waitForExistence(timeout: 10))
+        // connected says nothing: no "Connected" pill, no offline notice
+        XCTAssertFalse(app.staticTexts["Connected"].exists)
+        XCTAssertFalse(element(app, "chats-offline").exists)
         // the options of a channel
         element(app, "chat-options-ch-ecency").tap()
         XCTAssertTrue(app.buttons["Mark as read"].waitForExistence(timeout: 5))
@@ -68,6 +70,30 @@ final class ChatUITests: XCTestCase {
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the
     /// quick profile only (the long press's release never also taps).
+    /// The chat server refuses the sign-in: a notice in the list instead of the floating pill, and no Esie button.
+    func testARefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
+        let app = launch(["-startTab", "CHATS", "-demoChat", "offline"])
+        XCTAssertTrue(element(app, "chats-offline").waitForExistence(timeout: 20), "the offline notice")
+        XCTAssertTrue(element(app, "chats-offline").label.contains("Preparing your chat session"), "the connecting copy")
+        XCTAssertFalse(app.buttons["chats-esie-fab"].exists)
+    }
+
+    /// The round Esie button over the list opens her direct message, as "Ask Esie" does.
+    func testTheEsieButtonOpensHerConversation() {
+        let app = launch(["-startTab", "CHATS"])
+        XCTAssertTrue(element(app, "chat-row-ch-ecency").waitForExistence(timeout: 20))
+        let fab = app.buttons["chats-esie-fab"]
+        XCTAssertTrue(fab.waitForExistence(timeout: 10))
+        XCTAssertEqual(fab.label, "Chat with Esie")
+        let env = ProcessInfo.processInfo.environment
+        if let dir = env["BG_SHOT_DIR"], !dir.isEmpty {
+            try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("esie-list.png"))
+        }
+        fab.tap()
+        XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["chat-title"].label, "esie")
+    }
+
     func testTheAuthorNameLongPressesToOptionsAndTapsToTheProfile() {
         let app = launch(["-startTab", "CHATS"])
         let row = element(app, "chat-row-ch-ecency")
@@ -121,6 +147,79 @@ final class ChatUITests: XCTestCase {
         let alice = element(app, "chat-row-ch-dm-alice")
         XCTAssertTrue(alice.exists)
         XCTAssertEqual(alice.descendants(matching: .any).matching(official).count, 0)
+    }
+
+    private func message(_ app: XCUIApplication, containing text: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
+    }
+
+    /// A long public channel (-demoChatHistory: 60 older messages) opens where its unread messages start, as RN does,
+    /// without paging back on its own; scrolling up loads the older pages above, down to "No more messages".
+    func testALongChannelOpensAtItsUnreadMessagesAndPagesBackOnScroll() {
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "60"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let marker = element(app, "chat-unread-marker")
+        XCTAssertTrue(marker.waitForExistence(timeout: 10))
+        sleep(2)
+        XCTAssertTrue(marker.isHittable, "the first unread message is on screen without scrolling")
+        XCTAssertTrue(message(app, containing: "Yes, works well for me").isHittable, "the first unread message")
+        XCTAssertFalse(message(app, containing: "Older message 1:").exists, "the oldest page waits for a scroll up")
+        let list = element(app, "chat-messages")
+        for _ in 0..<30 where !element(app, "chat-no-more").exists { list.swipeDown(velocity: .fast) }
+        XCTAssertTrue(element(app, "chat-no-more").exists, "the older pages loaded above")
+        XCTAssertTrue(message(app, containing: "Older message 1:").exists)
+    }
+
+    /// A direct message with a long history opens at its newest message, and a message of many lines shows whole.
+    func testADirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
+        // the large text size the owner's device showed it at
+        let app = launch(["-demoChatHistory", "60", "-openScreen", "chat:ch-dm-alice:D", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"])
+        let newest = message(app, containing: "Do you have a minute?")
+        XCTAssertTrue(newest.waitForExistence(timeout: 20))
+        sleep(2)
+        XCTAssertTrue(newest.isHittable, "the newest message is on screen without scrolling")
+        XCTAssertLessThanOrEqual(newest.frame.maxY, element(app, "chat-messages").frame.maxY + 1)
+        XCTAssertFalse(message(app, containing: "Older message 1:").exists, "the oldest page waits for a scroll up")
+        // a reply from someone else: the author, a two line quote and a body of about ten lines (cut after about four
+        // lines on a device, owner report); then the message it quotes, about thirteen lines
+        let list = element(app, "chat-messages")
+        let reply = message(app, containing: "the final words of the long reply")
+        for _ in 0..<4 where !reply.isHittable { list.swipeDown() }
+        XCTAssertTrue(reply.isHittable)
+        XCTAssertGreaterThan(reply.frame.height, 240, "the long reply shows whole under its quote")
+        // cut, the body gave its height to the quote above it: the quote's bar ran down past the quote's two lines
+        XCTAssertLessThan(quoteBarHeight(app, in: reply.frame), 90, "the quote keeps its two lines and the body the rest")
+        let long = message(app, containing: "the last line of the long message")
+        for _ in 0..<4 where !long.isHittable { list.swipeDown() }
+        XCTAssertTrue(long.isHittable)
+        XCTAssertGreaterThan(long.frame.height, 200, "the long message shows whole")
+    }
+
+    /// The tallest run of the quote's accent bar (strong blue) in the first 60 pt of [frame], in points.
+    private func quoteBarHeight(_ app: XCUIApplication, in frame: CGRect) -> CGFloat {
+        let image = app.screenshot().image
+        guard let cg = image.cgImage, let data = cg.dataProvider?.data, let bytes = CFDataGetBytePtr(data) else { return .infinity }
+        let scale = CGFloat(cg.width) / image.size.width
+        let perPixel = cg.bitsPerPixel / 8
+        func blue(_ x: Int, _ y: Int) -> Bool {
+            let i = y * cg.bytesPerRow + x * perPixel
+            // BGRA or RGBA: the bar is the only pixel run with one channel high and the other two low
+            let a = Int(bytes[i]), c = Int(bytes[i + 2])
+            let (r, b) = cg.bitmapInfo.contains(.byteOrder32Little) ? (c, a) : (a, c)
+            return b > 170 && r < 90 && Int(bytes[i + 1]) < 140
+        }
+        var best = 0
+        let top = Int(frame.minY * scale), bottom = min(Int(frame.maxY * scale), cg.height - 1)
+        for x in Int(frame.minX * scale)..<min(Int((frame.minX + 60) * scale), cg.width) {
+            var run = 0
+            for y in top...bottom {
+                run = blue(x, y) ? run + 1 : 0
+                best = max(best, run)
+            }
+        }
+        return CGFloat(best) / scale
     }
 
     func testADirectMessageWarnsUntilClosed() {

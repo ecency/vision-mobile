@@ -384,6 +384,50 @@ class WavesModelsTest {
         feed.close()
     }
 
+    /** README "Foreground refresh": the list on screen reads its first page at once on a long return, not a minute later. */
+    @Test
+    fun theListOnScreenRefetchesAtOnceOnALongReturnOnly() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row("a", "w1")}]" }
+        val app = app(backend)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        // the list polls while active: closed whatever happens, or the test never goes idle
+        try {
+        feed.start()
+        feed.setActive(true)
+        testScheduler.runCurrent()
+        assertEquals(1, backend.feedCalls().size)
+        backend.feed = { "[${row("b", "w2")},${row("a", "w1")}]" }
+        app.env.appLock.onBackground()
+        app.monotonic += Freshness.STALE_AFTER_MILLIS - 1
+        app.env.appLock.onForeground()
+        testScheduler.runCurrent()
+        assertEquals(1, backend.feedCalls().size, "a short trip waits for the minute")
+        app.env.appLock.onBackground()
+        app.monotonic += Freshness.STALE_AFTER_MILLIS
+        app.env.appLock.onForeground()
+        testScheduler.runCurrent()
+        assertEquals(2, backend.feedCalls().size)
+        assertEquals(listOf("w2", "w1"), feed.permlinks())
+        assertFalse(feed.current.isRefreshing)
+
+        // off screen: nothing then, the first page once it is on screen again
+        feed.setActive(false)
+        backend.feed = { "[${row("c", "w3")},${row("b", "w2")},${row("a", "w1")}]" }
+        app.env.appLock.onBackground()
+        app.monotonic += Freshness.STALE_AFTER_MILLIS
+        app.env.appLock.onForeground()
+        testScheduler.runCurrent()
+        assertEquals(2, backend.feedCalls().size)
+        feed.setActive(true)
+        testScheduler.runCurrent()
+        assertEquals(3, backend.feedCalls().size)
+        assertEquals(listOf("w3", "w2", "w1"), feed.permlinks())
+        } finally {
+            feed.close()
+        }
+    }
+
     @Test
     fun theListRefetchesEveryMinuteOnlyWhileActive() = runTest {
         val backend = Backend()

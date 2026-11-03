@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -89,7 +88,7 @@ private fun ProSheet(model: ProModel) {
                     Modifier.padding(top = 12.dp).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("proActivating"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CircularProgressIndicator(color = colors.blueText, modifier = Modifier.size(20.dp))
+                    Spinner(size = 20.dp)
                     Text(ProCopy.ACTIVATING, color = colors.text, modifier = Modifier.padding(start = 10.dp))
                 }
                 else -> {
@@ -115,11 +114,11 @@ private fun ProSheet(model: ProModel) {
                     colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = colors.blue),
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp).heightIn(min = 48.dp).testTag("proBuy"),
                 ) {
-                    if (s.buying) CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(18.dp).testTag("proBuying"))
+                    if (s.buying) Spinner(Modifier.testTag("proBuying"), size = 18.dp, color = Color.White)
                     else Text(s.buyLabel.orEmpty(), color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 s.loadingPrice -> Box(Modifier.fillMaxWidth().padding(top = 16.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = colors.blueText, modifier = Modifier.size(24.dp))
+                    Spinner(size = 24.dp)
                 }
                 s.unavailable && !s.purchased -> Text(ProCopy.UNAVAILABLE, color = colors.darkGray, modifier = Modifier.padding(top = 16.dp).testTag("proUnavailable"))
             }

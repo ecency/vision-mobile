@@ -445,10 +445,11 @@ final class LockOverlay {
         hosting = UIHostingController(rootView: LockOverlayView(state: model.current, model: model, proxyBase: proxyBase,
                                                                 biometricAvailable: Biometrics.isAvailable))
         hosting.view.backgroundColor = .clear
-        cover.backgroundColor = .systemBackground
+        // the app theme, not the system's (black in dark mode); the lock window's traits follow the in-app choice
+        cover.backgroundColor = AppTheme.uiColor(\.background)
         cover.accessibilityIdentifier = "privacy-cover"
         let icon = UIImageView(image: UIImage(appIcon: .lock, filled: true))
-        icon.tintColor = .secondaryLabel
+        icon.tintColor = AppTheme.uiColor(\.icon)
         icon.translatesAutoresizingMaskIntoConstraints = false
         cover.addSubview(icon)
         NSLayoutConstraint.activate([icon.centerXAnchor.constraint(equalTo: cover.centerXAnchor),

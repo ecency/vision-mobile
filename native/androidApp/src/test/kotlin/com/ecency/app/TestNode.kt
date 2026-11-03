@@ -58,6 +58,9 @@ class TestNode {
     @Volatile var broadcastDown = false
     @Volatile var broadcastGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
+    /** Holds every node call until completed (each screen's loading state, `UniformBackgroundTest`). */
+    @Volatile var holdAll: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     /** Answers a method before the fixtures below (wallet reads); null falls through. */
     @Volatile var extra: ((String, kotlinx.serialization.json.JsonObject) -> String?)? = null
 
@@ -70,6 +73,9 @@ class TestNode {
     /** More `json_metadata` fields for every entry (`"app":"ecency/4"` ...), comma first. */
     @Volatile var metadataExtra = ""
 
+    /** `json_metadata.tags` of every entry, as JSON. */
+    @Volatile var metadataTags = """["test"]"""
+
     /** A `json_metadata.image` for every entry (the card image; `{permlink}` is replaced), none by default. */
     @Volatile var metadataImage: String? = null
 
@@ -80,7 +86,7 @@ class TestNode {
         "author":"$author","permlink":"$permlink",
         ${parent?.let { """"parent_author":"${it.first}","parent_permlink":"${it.second}",""" } ?: ""}
         "category":"hive-100001","title":"Title $permlink","body":"Body of $permlink with **bold** text$extra",
-        "json_metadata":{"tags":["test"],"description":"Summary of $permlink"${metadataImage?.let { ""","image":["${it.replace("{permlink}", permlink)}"]""" } ?: ""}$metadataExtra},
+        "json_metadata":{"tags":$metadataTags,"description":"Summary of $permlink"${metadataImage?.let { ""","image":["${it.replace("{permlink}", permlink)}"]""" } ?: ""}$metadataExtra},
         "created":"2026-10-06T10:00:00","updated":"2026-10-06T10:00:00","depth":${if (parent == null) 0 else 1},"children":$children,
         "net_rshares":1000,"author_reputation":60.0,"payout":1.5,"is_paidout":false,"payout_at":"2026-10-13T10:00:00",
         "pending_payout_value":"1.500 HBD","author_payout_value":"0.000 HBD","curator_payout_value":"0.000 HBD",
@@ -93,6 +99,7 @@ class TestNode {
     private fun root() = entry("alice", "trending-one", votes = listOf("x"), children = 1, extra = postBodyExtra)
 
     val transport = RpcTransport { _, body ->
+        holdAll?.await()
         sent += body
         val req = Json.parseToJsonElement(body).jsonObject
         val method = req["method"]!!.jsonPrimitive.content
@@ -142,7 +149,8 @@ class TestNode {
 
     val auth = TestAuth()
 
-    fun env() = AppEnvironment(
+    /** [monotonic]: the app lock's clock, moved by tests that send the app away (README "Foreground refresh"). */
+    fun env(monotonic: (() -> Long)? = null) = AppEnvironment(
         api = EcencyApi(listOf("https://node-a.example"), transport),
         vault = KeyVaultAsync(KeyVault(store), Dispatchers.IO),
         renderer = InterimPostBodyRenderer("https://i.ecency.com"),
@@ -150,6 +158,7 @@ class TestNode {
         proxyBase = "https://i.ecency.com",
         debugKeyImport = true,
         nowMillis = { 1_791_288_000_000L },
+        security = monotonic?.let { com.ecency.core.app.SecurityConfig(monotonicMillis = it) } ?: com.ecency.core.app.SecurityConfig.DEFAULT,
         auth = auth.services,
     ).also {
         // signed-in readers get RN's feed tabs (Following first); these flows read the trending feed, so it leads

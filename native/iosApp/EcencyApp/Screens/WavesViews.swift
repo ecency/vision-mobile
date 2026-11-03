@@ -122,8 +122,8 @@ struct WavesTabView: View {
             .frame(maxHeight: .infinity)
         }
         .background(theme.background)
-        .sheet(isPresented: $picker) { WavesPickerSheet(tabs: tabs, model: store.model).environment(\.appTheme, theme) }
-        .sheet(item: $composer) { ref in
+        .themedSheet(isPresented: $picker) { WavesPickerSheet(tabs: tabs, model: store.model).environment(\.appTheme, theme) }
+        .themedSheet(item: $composer) { ref in
             WaveComposerSheet(composer: Observed<WaveComposeState>(ref.model, ownsModel: false), proxyBase: app.env.proxyBase, attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui, env: app.env) { composer = nil }
                 .environment(\.appTheme, theme)
         }
@@ -192,11 +192,18 @@ struct WavesListView: View {
     @ObservedObject var feed: Observed<WavesFeedState>
     let scrollTop: Int
     let onTag: (String) -> Void
+    @State private var momentum = ScrollMomentum()
     @Environment(\.motion) private var motion
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
 
     private var model: WavesFeedModel { feed.model as! WavesFeedModel }
+
+    /// The scroll to top (popup or a tap on the selected tab), mid-fling too.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) }
+    }
 
     var body: some View {
         let state = feed.state
@@ -213,7 +220,7 @@ struct WavesListView: View {
                             } else if state.loaded {
                                 Text(UiCopy.shared.NOTHING_HERE).foregroundStyle(theme.secondary).accessibilityIdentifier("waves-empty").esieAbove(.empty).padding(.top, 80)
                             } else {
-                                ProgressView().padding(.top, 80).accessibilityIdentifier("waves-loading")
+                                PageLoading(identifier: "waves-loading")
                             }
                         }
                         ForEach(state.items, id: \.key) { item in
@@ -233,11 +240,12 @@ struct WavesListView: View {
                         }
                     }
                     .reportsScrollOffset("waves-scroll")
+                    .tracksScrollMomentum(momentum)
                 }
                 .refreshable { try? await model.refreshAndWait() }
                 // RN wavesScreen's ScrollTopPopup: also hidden on scroll down
-                .scrollTopPopup(space: "waves-scroll", hidesOnScrollDown: true, id: "waves-scroll-top") { withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) } }
-                .onChange(of: scrollTop) { _, _ in withAnimation(motion.scroll) { proxy.scrollTo("waves-top", anchor: .top) } }
+                .scrollTopPopup(space: "waves-scroll", hidesOnScrollDown: true, id: "waves-scroll-top") { toTop(proxy) }
+                .onChange(of: scrollTop) { _, _ in toTop(proxy) }
                 // a wave just published from here goes on top: show it
                 .onChange(of: state.items.first?.isLocal == true ? state.items.first?.key : nil) { _, key in
                     if key != nil { proxy.scrollTo("waves-top", anchor: .top) }
@@ -281,7 +289,7 @@ struct ProfileWavesTab: View {
                     Text(UiCopy.shared.userHasNoPosts(username: username)).foregroundStyle(theme.secondary)
                         .accessibilityIdentifier("profile-waves-empty").esieAbove(.empty).padding(.top, 32)
                 } else {
-                    ProgressView().padding(.top, 32)
+                    PageLoading()
                 }
             }
             ForEach(state.items, id: \.key) { item in
@@ -300,6 +308,7 @@ struct ProfileWavesTab: View {
             }
         }
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
     }
 }
 
@@ -365,13 +374,14 @@ struct WaveRowView: View {
                     .accessibilityIdentifier("wave-avatar")
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
+                        ProMemberReader(username: card.author) { pro in
                         Button { app.openQuickProfile(card.author) } label: {
                             Text(card.author).scaledFont(15, weight: .bold).foregroundStyle(theme.text).lineLimit(1)
                                 .frame(minHeight: minTapTarget).contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         // VoiceOver: one stop for the author and age, the wave's actions in its actions rotor
-                        .accessibilityLabel([card.author, CardText.age(card)].joined(separator: ", "))
+                        .accessibilityLabel([proLabel(card.author, pro), CardText.age(card)].joined(separator: ", "))
                         .accessibilityAction(named: Text(L.Native.Ios.Waves.repliesOpenThread(count: Int(card.comments)))) { app.openPost(item.key) }
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.REPLY)) {
                             if app.requireSignIn(to: .reply) { app.sheet = .reply(ReplyRequest(root: item.key, parent: item.post)) }
@@ -379,6 +389,8 @@ struct WaveRowView: View {
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.POST_OPTIONS)) {
                             app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: false, ownProfile: false), root: item.key)
                         }
+                        }
+                        ProBadge(username: card.author).accessibilityHidden(true)
                     }
                     HStack(spacing: 6) {
                         Text(CardText.age(card)).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary).accessibilityIdentifier("wave-age")
@@ -611,21 +623,10 @@ struct WaveComposerSheet: View {
     /// The editor's upload behind the image buttons (nil: not wired, the model says so).
     let attacher: WaveUploadAttacher?
     let ui: UiMessages?
-    /// The picker the shared attacher asked for; one image a wave, as RN.
-    @State private var picker: WavePicker?
-    /// A picked image is still being read and prepared: closing the picker sheet is not a cancel.
-    @State private var readingPick = false
-    /// The Files importer while it is open for the wave's image (RN #3561: waves had no files route).
-    @State private var files: MediaSurface?
     @State private var pollSheet = false
     /// RN SpeakUploaderModal isShort: the editor's upload sheet over the composer's own upload model (which the
     /// composer keeps, so a failed upload can be continued after the sheet was closed).
     @State private var videoUpload: Observed<VideoUploadState>?
-
-    private enum WavePicker: String, Identifiable {
-        case photos, camera
-        var id: String { rawValue }
-    }
 
     /// RN quick post: dictation and AI assist, the editor's sheets over this composer.
     private enum AiSheet: String, Identifiable {
@@ -714,54 +715,21 @@ struct WaveComposerSheet: View {
                 .disabled(state.isSending || state.isVideoUploading)
                 .accessibilityLabel(L.Native.Ios.Waves.videoAttachedRemove)
                 .accessibilityIdentifier("wave-video")
-            } else if state.isAttaching {
-                ProgressView().frame(width: 72, height: 72).background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 8))
-            } else if let image = state.imageUrl {
-                Button { model.removeImage() } label: {
-                    RemoteImage(url: image).frame(width: 72, height: 72).clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(alignment: .topTrailing) {
-                            Image(appIcon: .remove, filled: true).foregroundStyle(.white, .red).padding(2)
-                        }
-                }
-                .buttonStyle(.plain)
-                .disabled(state.isSending)
-                .accessibilityLabel(L.Native.Ios.Waves.imageAttachedRemove)
-                .accessibilityIdentifier("wave-image")
+            } else {
+                AttachedImageThumb(url: state.imageUrl, attaching: state.isAttaching, id: "wave-image") { model.removeImage() }
+                    .disabled(state.isSending)
             }
             if state.clipboardChip {
-                // RN clipboard chip: "Image in clipboard · Paste image" and its close button
-                HStack(spacing: 0) {
-                    Button { model.pasteClipboardImage() } label: {
-                        Text(WaveComposeCopy.shared.CLIPBOARD_CHIP).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.text)
-                            .padding(.leading, 12).padding(.trailing, 4).padding(.vertical, 6)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(state.isSending || state.isAttaching)
-                    .accessibilityIdentifier("wave-paste-image")
-                    Button { model.dismissClipboardChip() } label: {
-                        Image(appIcon: .close).scaledFont(13, weight: .semibold).foregroundStyle(theme.text).padding(.horizontal, 10).padding(.vertical, 6)
-                            .frame(minWidth: minTapTarget, minHeight: minTapTarget).contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(WaveComposeCopy.shared.CLIPBOARD_DISMISS)
-                    .accessibilityIdentifier("wave-clipboard-close")
-                }
-                .background(theme.lightBackground, in: Capsule())
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("wave-clipboard-chip")
+                ClipboardImageChip(idPrefix: "wave", pasteDisabled: state.isSending || state.isAttaching,
+                                   onPaste: { model.pasteClipboardImage() }, onDismiss: { model.dismissClipboardChip() })
             }
             HStack(spacing: 8) {
               // the content buttons scroll sideways when they do not fit next to PUBLISH (as on Android)
               ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 0) {
-                Button { model.attach(source: .gallery) } label: { Image(appIcon: .image).scaledFont(20).tapTarget() }
-                    .accessibilityLabel(UiCopy.shared.ATTACH_IMAGE)
-                    .accessibilityIdentifier("wave-attach")
-                Button { model.attach(source: .camera) } label: { Image(appIcon: .camera).scaledFont(20).tapTarget() }
-                    .accessibilityLabel(L.Native.Ios.Waves.takePhoto)
-                Button { model.attach(source: .files) } label: { Image(appIcon: .folder).scaledFont(20).tapTarget() }
-                    .accessibilityLabel(MediaPickCopy.shared.FILES)
-                    .accessibilityIdentifier("wave-files")
+                QuickComposeTools(idPrefix: "wave", onAttach: { model.attach(source: $0) },
+                                  onDictate: env == nil ? nil : { aiSheet = .dictation },
+                                  onAiAssist: env == nil ? nil : { aiSheet = .assist }) {
                 // RN's poll button (the editor's poll wizard); tinted once a poll is attached
                 Button { pollSheet = true } label: {
                     Image(appIcon: .chartBar).scaledFont(20).foregroundStyle(state.poll != nil ? theme.accent : theme.text).tapTarget()
@@ -775,17 +743,9 @@ struct WaveComposerSheet: View {
                     .disabled(!state.canAddVideo)
                     .accessibilityLabel(L.Native.Ios.Waves.addVideo)
                     .accessibilityIdentifier("wave-video-button")
-                    .sheet(isPresented: Binding(get: { videoUpload != nil }, set: { if !$0 { videoUpload = nil } })) {
+                    .themedSheet(isPresented: Binding(get: { videoUpload != nil }, set: { if !$0 { videoUpload = nil } })) {
                         if let videoUpload { VideoUploadSheet(video: videoUpload) }
                     }
-                if env != nil {
-                    // RN: dictation with the content buttons, then the AI pair
-                    Button { aiSheet = .dictation } label: { Image(appIcon: .mic).scaledFont(20).tapTarget() }
-                        .accessibilityLabel(WaveComposeCopy.shared.DICTATE)
-                        .accessibilityIdentifier("wave-dictate")
-                    Button { aiSheet = .assist } label: { Image(appIcon: .aiAssist).scaledFont(20).tapTarget() }
-                        .accessibilityLabel(WaveComposeCopy.shared.AI_ASSIST)
-                        .accessibilityIdentifier("wave-ai-assist")
                 }
                 }
                 .padding(.vertical, 0)
@@ -811,12 +771,11 @@ struct WaveComposerSheet: View {
         .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 8)
         // the sheet's own background, keyboard area included: no see-through stripe above the keyboard
         .background(theme.background.ignoresSafeArea())
-        .presentationBackground(theme.background)
         .presentationDetents([.medium, .large])
         .interactiveDismissDisabled(state.isSending)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-composer")
-        .sheet(item: $aiSheet) { which in
+        .themedSheet(item: $aiSheet) { which in
             if let env {
                 switch which {
                 case .assist: AiAssistSheet(editor: model, env: env).environment(\.appTheme, theme)
@@ -825,47 +784,12 @@ struct WaveComposerSheet: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active { checkClipboard() } }
+        .modifier(ImageAttachPickers(attacher: attacher, ui: ui))
         .onAppear {
             focused = true
             checkClipboard()
-            attacher?.onPick = { source in
-                // the camera only where there is one (not on the simulator): otherwise the attach just ends
-                if source == .clipboard {
-                    // RN _handlePasteImageBtn: the clipboard's image, prepared like a picked one
-                    guard let data = UIPasteboard.general.image?.jpegData(compressionQuality: 1) else {
-                        _ = ui?.toast(text: WaveComposeCopy.shared.CLIPBOARD_EMPTY)
-                        attacher?.picked(image: nil)
-                        return
-                    }
-                    Task.detached(priority: .userInitiated) {
-                        let image = EditorImages.prepare(data: data, name: "clipboard.jpg", index: 0)
-                        await MainActor.run { attacher?.picked(image: image) }
-                    }
-                } else if source == .files {
-                    files = .wave
-                } else if source == .camera, !CameraPicker.isAvailable { attacher?.picked(image: nil) } else { picker = source == .camera ? .camera : .photos }
-            }
         }
-        .onDisappear {
-            attacher?.onPick = nil
-            attacher?.picked(image: nil)
-        }
-        .sheet(item: $picker, onDismiss: { if !readingPick { attacher?.picked(image: nil) } }) { which in
-            let results: (Int) -> Void = { count in readingPick = count > 0 }
-            let picked: ([PickedImage]) -> Void = { images in
-                readingPick = false
-                picker = nil
-                if images.isEmpty { _ = ui?.toast(text: UiCopy.shared.INVALID_IMAGE) }
-                attacher?.picked(image: images.first)
-            }
-            switch which {
-            case .photos: PhotoPicker(limit: 1, onResults: results, onPicked: picked).ignoresSafeArea()
-            case .camera: CameraPicker(onResults: results, onPicked: picked).ignoresSafeArea()
-            }
-        }
-        // an unsupported file is said by the importer; nothing picked ends the attach
-        .mediaFileImporter(surface: $files) { _, images in attacher?.picked(image: images.first) }
-        .sheet(isPresented: $pollSheet) {
+        .themedSheet(isPresented: $pollSheet) {
             PollSheet(current: state.poll, onAttach: { model.setPoll(poll: $0); pollSheet = false }, onReset: { model.setPoll(poll: nil); pollSheet = false })
                 .environment(\.appTheme, theme)
         }
@@ -923,7 +847,7 @@ struct ShortsReelsView: View {
         let state = shorts.state
         GeometryReader { geo in
             ZStack {
-                Color.black
+                Color.black // media: the shorts player, video full screen
                 if state.items.isEmpty {
                     if let error = state.error {
                         Button(L.Native.Ios.Waves.retry(message: error.message)) { model.retry() }.foregroundStyle(.white)
@@ -988,7 +912,7 @@ struct ReelView: View {
         let playing = state.playingKey == item.key
         let playback = state.playbackOf(key: item.key)
         ZStack {
-            Color.black
+            Color.black // media: behind a short's video
             if playing, let stream = playback as? ShortPlaybackStream, let url = URL(string: stream.url) {
                 if ReelPlayers.useStandIn {
                     Text(L.Native.Ios.Waves.playing(permlink: item.key.permlink)).foregroundStyle(.white).accessibilityIdentifier("reel-player")
@@ -1026,6 +950,7 @@ struct ReelView: View {
                     HStack(spacing: 8) {
                         AvatarView(url: item.card.avatarUrl, size: 36)
                         Text("@\(item.card.author)").scaledFont(15, weight: .bold).foregroundStyle(.white)
+                        ProBadge(username: item.card.author)
                     }
                 }
                 .buttonStyle(.plain)
@@ -1074,7 +999,7 @@ struct ReelPlayerView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
-        view.backgroundColor = .black
+        view.backgroundColor = .black // media: the shorts video letterbox
         context.coordinator.start(url: url, muted: muted, in: view)
         return view
     }
@@ -1207,5 +1132,163 @@ struct WavesOnboardingCard: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier(idPrefix)
         }
+    }
+}
+
+/// RN quick post's content buttons (quickPostModalContent `_renderExpandBtn`) for both of its modes: the wave
+/// composer (its poll and video in `middle`) and the reply composer (RN comment mode). Image, camera and files go
+/// through the composer's image attach; dictation and AI assist open the editor's sheets (only with both handlers).
+/// Identifiers are `idPrefix` + -attach, -camera, -files, -dictate, -ai-assist.
+struct QuickComposeTools<Middle: View>: View {
+    let idPrefix: String
+    let onAttach: (WaveImageSource) -> Void
+    var onDictate: (() -> Void)?
+    var onAiAssist: (() -> Void)?
+    @ViewBuilder var middle: () -> Middle
+
+    var body: some View {
+        Button { onAttach(.gallery) } label: { Image(appIcon: .image).scaledFont(20).tapTarget() }
+            .accessibilityLabel(UiCopy.shared.ATTACH_IMAGE)
+            .accessibilityIdentifier("\(idPrefix)-attach")
+        Button { onAttach(.camera) } label: { Image(appIcon: .camera).scaledFont(20).tapTarget() }
+            .accessibilityLabel(L.Native.Ios.Waves.takePhoto)
+            .accessibilityIdentifier("\(idPrefix)-camera")
+        Button { onAttach(.files) } label: { Image(appIcon: .folder).scaledFont(20).tapTarget() }
+            .accessibilityLabel(MediaPickCopy.shared.FILES)
+            .accessibilityIdentifier("\(idPrefix)-files")
+        middle()
+        if let onDictate, let onAiAssist {
+            // RN: dictation with the content buttons, then the AI pair
+            Button(action: onDictate) { Image(appIcon: .mic).scaledFont(20).tapTarget() }
+                .accessibilityLabel(WaveComposeCopy.shared.DICTATE)
+                .accessibilityIdentifier("\(idPrefix)-dictate")
+            Button(action: onAiAssist) { Image(appIcon: .aiAssist).scaledFont(20).tapTarget() }
+                .accessibilityLabel(WaveComposeCopy.shared.AI_ASSIST)
+                .accessibilityIdentifier("\(idPrefix)-ai-assist")
+        }
+    }
+}
+
+extension QuickComposeTools where Middle == EmptyView {
+    init(idPrefix: String, onAttach: @escaping (WaveImageSource) -> Void, onDictate: (() -> Void)? = nil, onAiAssist: (() -> Void)? = nil) {
+        self.init(idPrefix: idPrefix, onAttach: onAttach, onDictate: onDictate, onAiAssist: onAiAssist) { EmptyView() }
+    }
+}
+
+/// The pickers behind a composer's image attach (the shared `WaveUploadAttacher` asks, one image): photos, the
+/// camera where there is one, files and the clipboard, each prepared like an editor upload. Installed while the
+/// composer is on screen; leaving it ends a waiting attach.
+struct ImageAttachPickers: ViewModifier {
+    let attacher: WaveUploadAttacher?
+    let ui: UiMessages?
+    @State private var picker: Picker?
+    /// A picked image is still being read and prepared: closing the picker sheet is not a cancel.
+    @State private var readingPick = false
+    /// The Files importer while it is open for the image (RN #3561: waves had no files route).
+    @State private var files: MediaSurface?
+
+    private enum Picker: String, Identifiable {
+        case photos, camera
+        var id: String { rawValue }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                attacher?.onPick = { source in
+                    // the camera only where there is one (not on the simulator): otherwise the attach just ends
+                    if source == .clipboard {
+                        // RN _handlePasteImageBtn: the clipboard's image, prepared like a picked one
+                        guard let data = UIPasteboard.general.image?.jpegData(compressionQuality: 1) else {
+                            _ = ui?.toast(text: WaveComposeCopy.shared.CLIPBOARD_EMPTY)
+                            attacher?.picked(image: nil)
+                            return
+                        }
+                        Task.detached(priority: .userInitiated) {
+                            let image = EditorImages.prepare(data: data, name: "clipboard.jpg", index: 0)
+                            await MainActor.run { attacher?.picked(image: image) }
+                        }
+                    } else if source == .files {
+                        files = .wave
+                    } else if source == .camera, !CameraPicker.isAvailable { attacher?.picked(image: nil) } else { picker = source == .camera ? .camera : .photos }
+                }
+            }
+            .onDisappear {
+                attacher?.onPick = nil
+                attacher?.picked(image: nil)
+            }
+            .themedSheet(item: $picker, onDismiss: { if !readingPick { attacher?.picked(image: nil) } }) { which in
+                let results: (Int) -> Void = { count in readingPick = count > 0 }
+                let picked: ([PickedImage]) -> Void = { images in
+                    readingPick = false
+                    picker = nil
+                    if images.isEmpty { _ = ui?.toast(text: UiCopy.shared.INVALID_IMAGE) }
+                    attacher?.picked(image: images.first)
+                }
+                switch which {
+                case .photos: PhotoPicker(limit: 1, onResults: results, onPicked: picked).ignoresSafeArea()
+                case .camera: CameraPicker(onResults: results, onPicked: picked).ignoresSafeArea()
+                }
+            }
+            // an unsupported file is said by the importer; nothing picked ends the attach
+            .mediaFileImporter(surface: $files) { _, images in attacher?.picked(image: images.first) }
+    }
+}
+
+/// RN: the attached image's thumbnail with a minus badge (a tap removes it), or the upload's progress.
+struct AttachedImageThumb: View {
+    let url: String?
+    let attaching: Bool
+    let id: String
+    let onRemove: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        if attaching {
+            ProgressView().frame(width: 72, height: 72).background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 8))
+                .accessibilityIdentifier("\(id)-uploading")
+        } else if let url {
+            Button(action: onRemove) {
+                RemoteImage(url: url).frame(width: 72, height: 72).clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(alignment: .topTrailing) {
+                        Image(appIcon: .remove, filled: true).foregroundStyle(.white, .red).padding(2)
+                    }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L.Native.Ios.Waves.imageAttachedRemove)
+            .accessibilityIdentifier(id)
+        }
+    }
+}
+
+/// RN clipboard chip: "Image in clipboard · Paste image" and its close button (`idPrefix` + -paste-image,
+/// -clipboard-close, -clipboard-chip).
+struct ClipboardImageChip: View {
+    let idPrefix: String
+    let pasteDisabled: Bool
+    let onPaste: () -> Void
+    let onDismiss: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Button(action: onPaste) {
+                Text(WaveComposeCopy.shared.CLIPBOARD_CHIP).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.text)
+                    .padding(.leading, 12).padding(.trailing, 4).padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
+            .disabled(pasteDisabled)
+            .accessibilityIdentifier("\(idPrefix)-paste-image")
+            Button(action: onDismiss) {
+                Image(appIcon: .close).scaledFont(13, weight: .semibold).foregroundStyle(theme.text).padding(.horizontal, 10).padding(.vertical, 6)
+                    .frame(minWidth: minTapTarget, minHeight: minTapTarget).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(WaveComposeCopy.shared.CLIPBOARD_DISMISS)
+            .accessibilityIdentifier("\(idPrefix)-clipboard-close")
+        }
+        .background(theme.lightBackground, in: Capsule())
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("\(idPrefix)-clipboard-chip")
     }
 }

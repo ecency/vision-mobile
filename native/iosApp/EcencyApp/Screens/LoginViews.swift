@@ -93,7 +93,7 @@ struct LoginSheet: View {
         } message: {
             Text(" \(failure ?? "")\n\(LoginCopy.shared.FAILED_BODY)")
         }
-        .fullScreenCover(isPresented: $hiveSigner) {
+        .themedFullScreenCover(isPresented: $hiveSigner) {
             HiveSignerLoginView { code in
                 hiveSigner = false
                 guard let code else { return }
@@ -102,7 +102,7 @@ struct LoginSheet: View {
                 }
             }
         }
-        .sheet(isPresented: $hiveAuth) {
+        .themedSheet(isPresented: $hiveAuth) {
             HiveAuthLoginView(initialUsername: username) { hiveAuth = false; dismiss() }
                 .environmentObject(app).environmentObject(session)
         }

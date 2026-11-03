@@ -155,7 +155,11 @@ fun SearchScreen(model: SearchModel, env: AppEnvironment, entry: StackEntry, now
             Glyph(AppIcon.TUNE, if (state.activeFilterCount > 0) colors.blueText else colors.icon, 22.dp, description = SearchCopy.FILTERS)
         }
     }
-    UnderlineTabs(SearchTab.entries.map { it.label }, SearchTab.entries.map { it.name }, state.tab.ordinal, { model.selectTab(SearchTab.entries[it]) }, tagPrefix = "searchTab")
+    val listKey = when (state.tab) { SearchTab.POSTS -> "posts"; SearchTab.PEOPLE -> "people"; SearchTab.COMMUNITIES -> "communities" }
+    UnderlineTabs(
+        SearchTab.entries.map { it.label }, SearchTab.entries.map { it.name }, state.tab.ordinal,
+        rememberTabTap(state.tab.ordinal, { entry.get(listKey) { LazyListState() } }) { model.selectTab(SearchTab.entries[it]) }, tagPrefix = "searchTab",
+    )
     Box(Modifier.fillMaxSize()) {
         when (state.tab) {
             SearchTab.POSTS -> SearchPosts(model, state.posts, state.clipped, env.proxyBase, now, entry.get("posts") { LazyListState() }, nav)
@@ -170,6 +174,7 @@ fun SearchScreen(model: SearchModel, env: AppEnvironment, entry: StackEntry, now
                     ) {
                         Avatar(PostCard.avatarUrl(name, env.proxyBase), 36.dp)
                         Text("@$name", color = colors.text, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp))
+                        ProBadge(env, name)
                     }
                 }
             }
@@ -294,7 +299,8 @@ fun SearchFiltersSheet(initial: SearchFilters, validate: (SearchFilters) -> Stri
 fun TagResultScreen(model: TagResultModel, env: AppEnvironment, entry: StackEntry, now: Long, feedActions: FeedActions, nav: ScreenNav) {
     val state by model.state.collectAsState()
     SearchBar(state.input, model::setInput, nav.pop, Modifier.fillMaxWidth(), prefix = "#", placeholder = "")
-    PillTabs(TagTab.entries.map { it.label }, TagTab.entries.map { it.name }, state.tab.ordinal, { model.selectTab(TagTab.entries[it]) })
+    PillTabs(TagTab.entries.map { it.label }, TagTab.entries.map { it.name }, state.tab.ordinal,
+        rememberTabTap(state.tab.ordinal, { entry.get("list:${state.tab.name}:${state.tag}") { LazyListState() } }) { model.selectTab(TagTab.entries[it]) })
     val tab = state.tab
     val tag = state.tag
     key(tab, tag) {

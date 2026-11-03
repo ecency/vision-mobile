@@ -28,6 +28,12 @@ struct AppTheme {
     var isDark = false
     /// Text in the success green (gains, scheduled and done states) on `background`: AA in both themes.
     var successText = Color(hex: ContrastPalette.lightSuccessText)
+    /// The chat warning box (RN dmWarningContainer: the DM warning, the ban notice), RN's cream in light with a darker
+    /// amber border than RN's (3:1 on the fill, RN's was 1.5:1); the same values as Android's `EcencyColors`.
+    var warningBackground = Color(hex: 0xFFF6DF)
+    var warningBorder = Color(hex: 0xB07800)
+    /// Text and icons on `warningBackground`: AA in every theme.
+    var warningText = Color(hex: 0x8A5B00)
 
     static let light = AppTheme(
         background: Color(hex: 0xFFFFFF), lightBackground: Color(hex: 0xF6F6F6), text: Color(hex: 0x3C4449),
@@ -41,7 +47,9 @@ struct AppTheme {
         secondary: Color(hex: 0xC1C5C7), icon: Color(hex: 0x788187), accent: Color(hex: ContrastPalette.darkAccentFill),
         danger: Color(hex: ContrastPalette.darkDangerFill), border: Color(hex: 0x526D91),
         accentText: Color(hex: ContrastPalette.darkAccentText), dangerText: Color(hex: ContrastPalette.darkDangerText), isDark: true,
-        successText: Color(hex: 0x4FD688)
+        successText: Color(hex: 0x4FD688),
+        // an amber dark surface: border 4.8:1, text 9.4:1 on it
+        warningBackground: Color(hex: 0x3A3223), warningBorder: Color(hex: 0xC9963A), warningText: Color(hex: 0xFFD98A)
     )
 
     /// Increase Contrast: text colors reach about 7:1 in light; in dark AA on `lightBackground` too; icons 3:1.
@@ -54,6 +62,8 @@ struct AppTheme {
             t.dangerText = Color(hex: 0xFFB0B0)
             t.successText = Color(hex: 0x86E5B0)
             t.border = Color(hex: 0x7A93B5)
+            t.warningBorder = Color(hex: 0xE8B04F)
+            t.warningText = Color(hex: 0xFFE7B3)
         } else {
             t.secondary = Color(hex: 0x4E5458)
             t.icon = Color(hex: 0x919495)
@@ -63,6 +73,7 @@ struct AppTheme {
             t.dangerText = Color(hex: 0x9F2525)
             t.successText = Color(hex: 0x086346)
             t.border = Color(hex: 0x8A8A8A)
+            t.warningText = Color(hex: 0x6B4500)
         }
         return t
     }
@@ -73,6 +84,15 @@ struct AppTheme {
     static func of(_ scheme: ColorScheme, contrast: ColorSchemeContrast = .standard) -> AppTheme {
         let base: AppTheme = scheme == .dark ? .dark : .light
         return contrast == .increased ? base.highContrast : base
+    }
+
+    /// A theme color for UIKit views (the privacy cover): resolved from the view's traits as `ThemedRoot` picks the
+    /// theme from SwiftUI's color scheme and contrast.
+    static func uiColor(_ color: KeyPath<AppTheme, Color>) -> UIColor {
+        UIColor { traits in
+            UIColor(of(traits.userInterfaceStyle == .dark ? .dark : .light,
+                       contrast: traits.accessibilityContrast == .high ? .increased : .standard)[keyPath: color])
+        }
     }
 }
 

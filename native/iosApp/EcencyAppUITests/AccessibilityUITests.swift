@@ -213,6 +213,45 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    /// The post footer's tags row (below the fold, so the screen audit above misses it) at the largest text. Only the
+    /// pills' findings count: once scrolled, rows left under the translucent top bar read as low contrast whatever
+    /// their colours, and the screen audit covers those unscrolled.
+    func testPostTagsAuditAtTheLargestText() throws {
+        let app = launch(["-openPost", "spike-alice/fake-post-1"] + Self.ax5)
+        XCTAssertTrue(element(app, "post-title").waitForExistence(timeout: 25))
+        let pill = app.buttons["post-tag-spike"]
+        // short drags: a swipe at this text size can fling the row past the screen
+        let window = app.windows.firstMatch
+        for _ in 0..<40 where !(pill.exists && pill.isHittable) {
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)))
+        }
+        XCTAssertTrue(pill.isHittable, app.debugDescription)
+        XCTAssertGreaterThanOrEqual(pill.frame.height, 44)
+        _ = waitUntilStill(app, "post tags (AX5)")
+        var found: [String] = []
+        try app.performAccessibilityAudit(for: .all) { issue in
+            guard let e = issue.element, e.identifier.hasPrefix("post-tag") else { return true }
+            if AuditExclusions.excuses(issue) { return true }
+            found.append("[\(issue.auditType)] \(issue.compactDescription) on '\(e.identifier)' '\(e.label)'")
+            return true
+        }
+        XCTAssertEqual(found, [], "post tags (AX5)")
+    }
+
+    /// The vote sheet at the largest text: the audit passes and the vote button stays reachable (the sheet scrolls).
+    func testVoteSheetAuditAtTheLargestText() {
+        let app = launch(["-seedAccounts", "YES"] + Self.ax5)
+        let vote = app.buttons["vote-button"].firstMatch
+        XCTAssertTrue(vote.waitForExistence(timeout: 25))
+        vote.tap()
+        audit(app, "vote sheet (AX5)", ready: "vote-dir-up")
+        let submit = app.buttons["vote-submit"]
+        for _ in 0..<4 where !submit.isHittable { app.swipeUp() }
+        XCTAssertTrue(submit.isHittable, "the vote button is reachable")
+        XCTAssertTrue(submit.label.hasPrefix("Upvote"), submit.label)
+    }
+
     /// Tabs are buttons with their names, the selected one says so, and the bar never grows with the text.
     func testTabBarLabelsTraitsAndSizeAtTheLargestText() {
         let app = launch(Self.ax5)
@@ -290,6 +329,10 @@ enum AuditExclusions {
         "profile (AX5)": [clipped: 3], "communities (AX5)": [clipped: 2], "settings (AX5)": [clipped: 3],
         // 2026-10-29: the closed profile's compact header, one line in the navigation bar
         "profile closed (AX5)": [clipped: 1],
+        // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one), and
+        // the sheet's estimate and voting power lines, shown whole at AX5 (checked on screenshots) since the demo data
+        // answers the reward fund
+        "vote sheet (AX5)": [clipped: 3],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).

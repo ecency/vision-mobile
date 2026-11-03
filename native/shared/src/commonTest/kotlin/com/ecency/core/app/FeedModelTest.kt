@@ -70,6 +70,73 @@ class FeedModelTest {
         feed.close()
     }
 
+    /**
+     * A first page whose every post is filtered out (muted author, or NSFW under "Always hide") is not the end of
+     * the feed: the model asks for the next page itself. The list only pages from a card on screen, so it used to
+     * stay on the loading skeleton for good, pull to refresh included.
+     */
+    @Test
+    fun aFirstPageFilteredAwayLoadsTheNextPage() = runTest {
+        val muted = array(*Array(10) { entry("spammer", "s-$it") })
+        val pages = ArrayDeque(listOf(muted, page("p2", 4)))
+        val app = TestApp(this) { FakeTransport.result(it, pages.removeFirstOrNull() ?: "[]") }
+        app.env.setAuthorMuted("spammer", true)
+        val feed = app.env.feedModel(FeedSource.Account("alice", com.ecency.core.api.AccountPostsSort.FEED))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(4, feed.current.items.size, "the next page was loaded: ${feed.current}")
+        assertTrue(feed.current.endReached)
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.loaded)
+        feed.close()
+    }
+
+    /**
+     * Review of #3617: a feed where nearly everything is filtered (an nsfw tag under "Always hide", a muted author's
+     * blog) read its whole history back to back with the skeleton up. The model reads the page asked for and at most
+     * [FeedModel.MAX_AUTO_ADVANCE] more, then shows the empty state; loading more goes on from where the pager is,
+     * and every page read counts in [FeedState.pages].
+     */
+    @Test
+    fun aFeedWhoseEveryPageIsFilteredStopsAfterTheCapAndLoadsOnWhenAsked() = runTest {
+        var reads = 0
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            reads++
+            // twelve pages of the muted author, then visible posts, then the end (well before 50 pages)
+            val body = when {
+                reads <= 12 -> array(*Array(10) { entry("spammer", "s-$reads-$it") })
+                reads <= 50 -> page("v$reads", 3)
+                else -> "[]"
+            }
+            FakeTransport.result(req, body)
+        }
+        app.env.setAuthorMuted("spammer", true)
+        val feed = app.env.feedModel(source)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(6, reads, "the page asked for and 5 more, not the whole history")
+        val s = feed.current
+        assertTrue(s.loaded && !s.isLoading && !s.isLoadingMore, "the skeleton gives way to the empty state: $s")
+        assertTrue(s.items.isEmpty())
+        assertFalse(s.endReached, "more may follow: loading more goes on")
+        assertEquals(6, s.pages, "every page read counts")
+
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertEquals(12, reads, "load more reads on from where the pager is, with the same cap")
+        assertTrue(feed.current.items.isEmpty())
+        assertEquals(12, feed.current.pages)
+
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertEquals(13, reads)
+        assertEquals((0 until 3).map { "v13-$it" }, feed.current.items.map { it.key.permlink })
+        assertEquals(13, feed.current.pages)
+        feed.close()
+    }
+
     @Test
     fun cardData() = runTest {
         val app = TestApp(this) { FakeTransport.result(it, page("p", 1)) }

@@ -1,6 +1,5 @@
 package com.ecency.app.ui
 
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,7 +36,7 @@ fun ShellPrompts(env: AppEnvironment, host: AppHost, onEntry: (NavEntry) -> Unit
             title = { Text(DeleteAccountCopy.CONFIRM_TITLE) },
             text = { Text(DeleteAccountCopy.CONFIRM_BODY, modifier = Modifier.testTag("deleteConfirm")) },
             confirmButton = {
-                if (delete.isSending) CircularProgressIndicator(Modifier.size(24.dp))
+                if (delete.isSending) Spinner(size = 24.dp)
                 else TextButton(onClick = env.deleteAccount::confirm, modifier = Modifier.testTag("deleteConfirmYes")) { Text(DeleteAccountCopy.DELETE, color = colors.redText) }
             },
             dismissButton = {

@@ -19,6 +19,8 @@ object Fixtures {
         pending: String = "0.000 HBD",
         reputation: Double = 50.0,
         votes: List<String> = emptyList(),
+        /** Each voter's rshares (100 when not given). */
+        voteRshares: Map<String, Long> = emptyMap(),
         metadata: String = """{"tags":["hive-100001","test"],"app":"ecency/4.0.0-mobile","format":"markdown+html"}""",
         pinned: Boolean = false,
     ): String {
@@ -33,7 +35,7 @@ object Fixtures {
             "author_payout_value":"0.000 HBD","curator_payout_value":"0.000 HBD",
             "promoted":"0.000 HBD","max_accepted_payout":"1000000.000 HBD","percent_hbd":10000,
             "replies":${Json.encodeToString(replies)},
-            "active_votes":[${votes.joinToString(",") { """{"voter":"$it","rshares":100}""" }}],
+            "active_votes":[${votes.joinToString(",") { """{"voter":"$it","rshares":${voteRshares[it] ?: 100}}""" }}],
             "community":"hive-100001","community_title":"Test Community","author_role":"guest","author_title":"",
             "stats":{"hide":false,"gray":false,"total_votes":${votes.size},"flag_weight":0.0${if (pinned) ""","is_pinned":true""" else ""}},
             "reblogs":0,"beneficiaries":[],"blacklists":[],

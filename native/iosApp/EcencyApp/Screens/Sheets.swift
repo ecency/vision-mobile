@@ -3,8 +3,11 @@ import SafariServices
 import SwiftUI
 import WebKit
 
-/// Reply composer over a `ComposeReplyModel`. The text lives in the model, so closing the sheet after a
-/// failure keeps the draft (and its permlink) for the next attempt; only a success clears it.
+/// Reply composer over a `ComposeReplyModel` (RN quick reply, quickPostModalContent in comment mode): the text, the
+/// attached image, the clipboard chip and RN's toolbar under the text (image, camera, files, dictation, AI assist:
+/// the wave composer's `QuickComposeTools` without poll and video); expand and Send in the bar. The text lives in
+/// the model, so closing the sheet after a failure keeps the draft (and its permlink) for the next attempt; only a
+/// success clears it.
 struct ReplyComposer: View {
     let parent: Post
     let draft: ReplyDrafts.Draft
@@ -14,7 +17,17 @@ struct ReplyComposer: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
     @Environment(\.motion) private var motion
+    @EnvironmentObject private var app: AppContainer
+    @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focused: Bool
+    /// RN quick reply: dictation and AI assist, the editor's sheets over this reply.
+    @State private var aiSheet: AiSheet?
+
+    private enum AiSheet: String, Identifiable {
+        case assist, dictation
+        var id: String { rawValue }
+    }
+
     /// The editor's own text. Reading it back from `reply.state` lost keystrokes: the watched state arrives a
     /// main-queue turn after `setText`, so the editor was reset to a stale value while the user kept typing.
     @State private var text: String
@@ -27,6 +40,9 @@ struct ReplyComposer: View {
         _reply = ObservedObject(wrappedValue: draft.observed)
         _text = State(initialValue: draft.observed.state.text)
     }
+
+    /// RN hasClipboardImage: `hasImages` reads no content, so iOS shows no paste notice for the check.
+    private func checkClipboard() { draft.model.setClipboardHasImage(has: UIPasteboard.general.hasImages) }
 
     var body: some View {
         let state = reply.state
@@ -46,6 +62,21 @@ struct ReplyComposer: View {
                 if Quests.shared.showsShortHint(username: "me", isEditing: false, body: text) {
                     Text(Quests.shared.SHORT_CONTENT_HINT).scaledFont(12, relativeTo: .caption).foregroundStyle(theme.secondary).accessibilityIdentifier("short-content-hint")
                 }
+                AttachedImageThumb(url: state.imageUrl, attaching: state.isAttaching, id: "reply-image") { draft.model.removeImage() }
+                    .disabled(state.isSending)
+                if state.clipboardChip {
+                    ClipboardImageChip(idPrefix: "reply", pasteDisabled: state.isSending || state.isAttaching,
+                                       onPaste: { draft.model.pasteClipboardImage() }, onDismiss: { draft.model.dismissClipboardChip() })
+                }
+                // RN quick reply's toolbar, under the text (it scrolls sideways when it does not fit)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 0) {
+                        QuickComposeTools(idPrefix: "reply", onAttach: { draft.model.attach(source: $0) },
+                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist })
+                    }
+                }
+                .foregroundStyle(theme.text)
+                .disabled(state.isSending || state.isAttaching)
                 if let error = state.error {
                     AdaptiveStack(verticalAlignment: .top) {
                         HStack(alignment: .top) {
@@ -82,6 +113,8 @@ struct ReplyComposer: View {
                 ToolbarItem(placement: .primaryAction) {
                     if !state.isSending, let onExpand {
                         Button { draft.model.expand { args in dismiss(); onExpand(args) } } label: { Image(appIcon: .fullscreen) }
+                            // as Android: the editor waits for an image being picked or uploaded (the model refuses too)
+                            .disabled(state.isAttaching)
                             .accessibilityLabel(ReadingUiCopy.shared.OPEN_EDITOR).largeContent(ReadingUiCopy.shared.OPEN_EDITOR, appIcon: .fullscreen)
                             .accessibilityIdentifier("reply-expand")
                     }
@@ -99,7 +132,20 @@ struct ReplyComposer: View {
                 }
             }
         }
-        .onAppear { focused = true }
+        .modifier(ImageAttachPickers(attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui))
+        .themedSheet(item: $aiSheet) { which in
+            switch which {
+            case .assist: AiAssistSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
+            case .dictation: DictationSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
+            }
+        }
+        .onAppear {
+            focused = true
+            checkClipboard()
+        }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { checkClipboard() } }
+        // dictation, AI assist and expand replace the model's text: the editor follows
+        .onChange(of: state.prefillSeq) { _, _ in text = reply.state.text }
         .onChange(of: state.sent) { if state.sent != nil { Haptics.play(.success); onSent() } }
         .interactiveDismissDisabled(state.isSending)
     }
@@ -129,7 +175,7 @@ struct VideoPlayerSheet: View {
             EmbedWebView(url: url)
                 .aspectRatio(16.0 / 9.0, contentMode: .fit)
                 .frame(maxHeight: .infinity)
-                .background(Color.black)
+                .background(Color.black) // media: the video player letterbox
                 .accessibilityIdentifier("video-player")
                 .navigationTitle(url.host ?? UiCopy.shared.VIDEO)
                 .navigationBarTitleDisplayMode(.inline)
@@ -153,7 +199,7 @@ struct EmbedWebView: UIViewRepresentable {
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator
         view.isOpaque = false
-        view.backgroundColor = .black
+        view.backgroundColor = .black // media: the embedded video before it loads
         var request = URLRequest(url: url)
         // Embedded players reject requests without an embedding origin.
         request.setValue("https://ecency.com/", forHTTPHeaderField: "Referer")
@@ -201,7 +247,7 @@ struct GallerySheet: View {
                 .tabViewStyle(.page)
                 .scrollDisabled(zoomed)
             }
-            .background(Color.black)
+            .background(Color.black) // media: the image viewer, pictures on black
             .navigationTitle(UiCopy.shared.preview(index: Int32(index + 1), count: Int32(urls.count)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -258,13 +304,16 @@ struct ZoomableImageView: View {
     let src: String
     let size: CGSize
     let onZoom: (Bool) -> Void
+    static let maxScale: CGFloat = 5
     @State private var scale: CGFloat = 1
     @State private var base: CGFloat = 1
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 
     var body: some View {
-        LoadedImageView(src: src, maxWidth: size.width, contentMode: .scaleAspectFit) { _ in }
+        // the full file through the proxy, not a sized body variant, decoded for the widest zoom: a screen width
+        // decode scaled up 5x would blur (ImageLoader keeps it within its pixel budget)
+        LoadedImageView(src: src, maxWidth: size.width * Self.maxScale, contentMode: .scaleAspectFit) { _ in }
             .frame(width: size.width, height: size.height)
             .scaleEffect(scale)
             .offset(offset)
@@ -272,7 +321,7 @@ struct ZoomableImageView: View {
             .contentShape(Rectangle())
             .gesture(
                 MagnifyGesture()
-                    .onChanged { v in scale = min(5, max(1, base * v.magnification)) }
+                    .onChanged { v in scale = min(Self.maxScale, max(1, base * v.magnification)) }
                     .onEnded { _ in
                         base = scale
                         if scale <= 1 { reset() }

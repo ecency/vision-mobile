@@ -1079,6 +1079,7 @@ class ShortsModel internal constructor(private val env: AppEnvironment) : StateM
             // new reels go below the one being watched, never above it: the pager must not jump
             s.copy(items = s.items.map { byKey[it.key] ?: it } + fresh.filter { it.key !in known })
         }
+        env.localVotes.retireConfirmed(fresh.map { it.post }, user)
     }
 
     private fun load(reset: Boolean, refreshing: Boolean) {
@@ -1110,6 +1111,7 @@ class ShortsModel internal constructor(private val env: AppEnvironment) : StateM
                         ),
                     )
                 }
+                env.localVotes.retireConfirmed(items.map { it.post }, user)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

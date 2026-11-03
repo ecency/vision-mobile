@@ -9,6 +9,7 @@ struct RootView: View {
     /// Zoom navigation sources and destinations (iOS 18; Motion.swift).
     @Namespace private var hero
     @Environment(\.motion) private var motion
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +19,9 @@ struct RootView: View {
                     TabsRoot(badges: app.badges)
                         .navigationDestination(for: NavItem.self) { item in
                             DestinationView(screen: item.screen)
+                                // every pushed screen on the theme, also while it slides in (no system colour behind it)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(theme.background)
                                 .heroDestination(app.heroSources[item.id], namespace: hero, motion: motion)
                         }
                 }
@@ -32,7 +36,7 @@ struct RootView: View {
         .environmentObject(app.session)
         .environmentObject(app.votes)
         .environmentObject(app.lock)
-        .sheet(item: $app.sheet, onDismiss: {
+        .themedSheet(item: $app.sheet, onDismiss: {
             // a sheet asked for another one (accounts, then sign-in): show it once this one is gone
             if let next = app.nextSheet {
                 app.nextSheet = nil
@@ -95,7 +99,7 @@ struct RootView: View {
                 app.sheet = .login
             }
         } message: { Text(AccountCopy.shared.AUTH_EXPIRED) }
-        .fullScreenCover(isPresented: Binding(get: { !app.termsAccepted }, set: { _ in })) {
+        .themedFullScreenCover(isPresented: Binding(get: { !app.termsAccepted }, set: { _ in })) {
             WelcomeView(previouslyAccepted: app.termsPreviouslyAccepted) { app.acceptTerms() }
         }
         .onAppear {

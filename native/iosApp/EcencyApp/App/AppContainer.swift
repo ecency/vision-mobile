@@ -295,9 +295,23 @@ final class AppContainer: ObservableObject {
             DemoAuthServices.shared.demoDigests = UserDefaults.standard.bool(forKey: "demoDigests") ? DemoAuthServices.shared.SAMPLE_DIGESTS : "[]"
             // -demoStreak YES: quests with a streak and a freeze (perks screenshots, UI tests)
             if UserDefaults.standard.bool(forKey: "demoStreak") { DemoAuthServices.shared.demoQuests = DemoAuthServices.shared.SAMPLE_QUESTS }
+            // -demoChat offline: the chat sign-in fails, so the chats stay disconnected (chats UI tests)
+            if UserDefaults.standard.string(forKey: "demoChat") == "offline" { DemoAuthServices.shared.chat?.refuseSignIn() }
+            // -demoChat loading: the chat sign-in never answers, so the chats list stays on its first load (UI tests)
+            if UserDefaults.standard.string(forKey: "demoChat") == "loading" { DemoAuthServices.shared.chat?.holdSignIn = true }
             // -demoNoPro YES: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots, UI tests)
             if UserDefaults.standard.bool(forKey: "demoNoPro") { DemoAuthServices.shared.clearDemoPro() }
+            // -demoProMember <name>: one more account on the Pro roster (badge UI tests)
+            if let name = UserDefaults.standard.string(forKey: "demoProMember") { DemoAuthServices.shared.demoProMembers.add(name) }
             DemoAuthServices.shared.demoReleaseTag = UserDefaults.standard.bool(forKey: "demoUpdate") ? "99.1.0" : nil
+            // -demoChatHistory <n>: n older messages and one long one in the demo channel, DM and group (long
+            // conversations: where a conversation opens, paging back, long messages)
+            let history = UserDefaults.standard.integer(forKey: "demoChatHistory")
+            if history > 0 {
+                for id in ["ch-ecency", "ch-dm-alice", "ch-group"] {
+                    DemoAuthServices.shared.chat?.seedHistory(channelId: id, read: Int32(history), unread: 0)
+                }
+            }
             // -demoToast "<text>": a toast through the shared channel at launch (toast layout UI tests)
             if let text = UserDefaults.standard.string(forKey: "demoToast") {
                 // -demoToastDelay <s>: later, so a test can open a sheet first
@@ -498,6 +512,8 @@ final class AppContainer: ObservableObject {
         // the chat badge (README "Chats"): read at start, unlock and foreground
         env.chat.start()
         env.push.start()
+        // the Pro roster for the badges, once at start (an empty badge never appears, so it cannot ask itself)
+        env.proMembers.ensureLoaded()
         PushBridge.attach(env)
         // a tapped notification, released by the shared model once the accounts were read and the lock is open
         pushOpens = push.$state.sink { [weak self] state in
@@ -517,6 +533,8 @@ final class AppContainer: ObservableObject {
                     self?.env.chat.onForeground()
                     self?.env.push.onForeground()
                     self?.env.purchases.onForeground()
+                    // a failed roster read is tried again (no-op once loaded)
+                    self?.env.proMembers.ensureLoaded()
                     // RN lazyMutatePendingActivities on every return to the foreground (the launch's own replay is
                     // shellStarted's: the first activation is skipped)
                     if let self {
@@ -675,9 +693,14 @@ final class AppContainer: ObservableObject {
 
     /// The lock window follows the theme choice too (it is a separate window).
     func applyThemeToLockWindow() {
-        let style: UIUserInterfaceStyle = themeMode == .light ? .light : themeMode == .dark ? .dark : .unspecified
+        let style = Self.lockWindowStyle(themeMode, forcedDark: ThemeChoice<EmptyView>.forcedDark)
         lockOverlay.window?.overrideUserInterfaceStyle = style
         toastOverlay.window?.overrideUserInterfaceStyle = style
+    }
+
+    /// The in-app theme choice over the system's, as `ThemeChoice` sets it on the app window (the debug dark run too).
+    static func lockWindowStyle(_ mode: ThemeMode, forcedDark: Bool) -> UIUserInterfaceStyle {
+        forcedDark || mode == .dark ? .dark : mode == .light ? .light : .unspecified
     }
 
     func logoutAll() {

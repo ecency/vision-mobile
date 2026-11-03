@@ -13,6 +13,7 @@ import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -61,6 +62,8 @@ class CommunityFlowsTest {
 
     private val node = TestNode()
     @Volatile private var role = "admin"
+    /** Discover rows after "Second Place". */
+    @Volatile private var moreCommunities = 0
     private val searches: MutableList<AuthHttpRequest> = Collections.synchronizedList(mutableListOf())
 
     private fun community() =
@@ -76,7 +79,8 @@ class CommunityFlowsTest {
             "bridge.get_community" -> ok(community())
             "bridge.list_all_subscriptions" -> ok("""[["hive-100001","Test Community","guest",""]]""")
             "bridge.list_communities" -> ok(
-                """[{"id":2,"name":"hive-200002","title":"Second Place","about":"Another one","context":{},"is_nsfw":false,"type_id":1,"num_authors":3,"num_pending":7,"subscribers":12}]""",
+                """[{"id":2,"name":"hive-200002","title":"Second Place","about":"Another one","context":{},"is_nsfw":false,"type_id":1,"num_authors":3,"num_pending":7,"subscribers":12}""" +
+                    (3 until 3 + moreCommunities).joinToString("") { """,{"id":$it,"name":"hive-30000$it","title":"More $it","about":"","context":{},"is_nsfw":false,"type_id":1,"num_authors":1,"num_pending":1,"subscribers":1}""" } + "]",
             )
             "bridge.list_subscribers" -> ok("""[["spike-alice","guest",null,""],["spike-bob","member","Writer",""]]""")
             "bridge.account_notifications" -> ok("""[{"id":"9","msg":"@spike-alice subscribed to Test Community","url":"","date":"2026-10-06T11:00:00","type":"subscribe","score":5}]""")
@@ -220,6 +224,36 @@ class CommunityFlowsTest {
         compose.await("!exists(\"communityDetailsBody\")") { idleMain(); !exists("communityDetailsBody") }
         tap("tab:HOT")
         waitFor("communityDetailsBody")
+    }
+
+    @Test
+    fun aTapOnTheSelectedCommunityTabScrollsItsFeedToTheTop() {
+        launchSignedIn()
+        node.extra = { method, req ->
+            if (method != "bridge.get_ranked_posts") null
+            else if (req["params"].toString().contains("start_author")) "[]"
+            else (1..40).joinToString(",", "[", "]") { node.entry("alice", "long-$it") }
+        }
+        push(AppScreen.Community("hive-100001"))
+        waitFor("communityDetails")
+        waitFor("card:alice/long-1")
+        compose.onNode(androidx.compose.ui.test.hasScrollToIndexAction() and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("feed"))).performScrollToIndex(30)
+        compose.await("the first card scrolled away") { idleMain(); !exists("card:alice/long-1") }
+        tap("tab:TRENDING")
+        waitFor("card:alice/long-1")
+    }
+
+    @Test
+    fun aTapOnTheSelectedCommunitiesTabScrollsItsListToTheTop() {
+        moreCommunities = 40
+        launchSignedIn()
+        push(AppScreen.Communities)
+        compose.onNodeWithTag("tab:discover").performClick()
+        waitFor("community:hive-200002")
+        compose.onNodeWithTag("discoverList").performScrollToIndex(38)
+        compose.await("the first row scrolled away") { idleMain(); !exists("community:hive-200002") }
+        compose.onNodeWithTag("tab:discover").performClick()
+        waitFor("community:hive-200002")
     }
 
     @Test

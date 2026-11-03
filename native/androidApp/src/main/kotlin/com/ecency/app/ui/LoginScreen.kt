@@ -32,7 +32,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
@@ -140,7 +139,7 @@ fun LoginScreen(env: AppEnvironment, host: AppHost, onBack: () -> Unit, onSigned
                 colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                 modifier = Modifier.fillMaxWidth().padding(top = 20.dp).heightIn(min = 48.dp).testTag("loginSubmit"),
             ) {
-                if (state.isSigningIn) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                if (state.isSigningIn) Spinner(size = 20.dp, color = Color.White)
                 else Text(LoginCopy.LOGIN, color = Color.White, fontWeight = FontWeight.Bold)
             }
             Row(Modifier.fillMaxWidth().padding(vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -308,7 +307,7 @@ fun HiveAuthLoginSheet(env: AppEnvironment, host: AppHost, initialUsername: Stri
                     ) { Text(UiCopy.TRY_AGAIN, color = Color.White) }
                 }
                 else -> {
-                    CircularProgressIndicator(color = colors.blueText)
+                    Spinner()
                     Text(
                         if (progress.step == HiveAuthStep.LOGGING_IN) HiveAuthCopy.LOGGING_IN else HiveAuthCopy.INITIATING,
                         color = colors.darkGray, modifier = Modifier.padding(top = 12.dp).testTag("hiveAuthProgress"),

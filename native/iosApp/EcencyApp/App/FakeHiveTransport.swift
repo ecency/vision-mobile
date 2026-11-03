@@ -23,6 +23,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
     """
 
     func post(url: String, body: String, completionHandler: @escaping (HttpResult?, Error?) -> Void) {
+        if DemoNetwork.intercept(completionHandler) { return }
         completionHandler(answerSync(body), nil)
     }
 
@@ -175,8 +176,9 @@ final class FakeHiveTransport: NSObject, RpcTransport {
          "stats": ["followers": 1234, "following": 56], "metadata": ["profile": ["name": user]]]
     }
 
+    /// Debug `-fakeFeedSize N`: a first page of N posts (at least 6), for the scroll tests that need a long list.
     static func feed(tag: String? = nil, author: String? = nil) -> [[String: Any]] {
-        (1...6).map { i in
+        (1...max(6, UserDefaults.standard.integer(forKey: "fakeFeedSize"))).map { i in
             let a = author ?? authors[(i - 1) % authors.count]
             return entry(author: a, permlink: "fake-post-\(i)", title: "Fixture post number \(i)", children: 4, votes: i * 3)
         }
@@ -228,6 +230,26 @@ final class FakeHiveTransport: NSObject, RpcTransport {
     }
 }
 
+/// `-demoNetwork hold` keeps every fake Hive and REST call waiting (2 minutes), `-demoNetwork fail` answers each with a
+/// 503: every screen's first load stays in its loading state, or shows its error state (ThemedBackgroundUITests).
+enum DemoNetwork {
+    static let mode = UserDefaults.standard.string(forKey: "demoNetwork")
+
+    /// True when the mode answered (or will answer) the call instead of the fake data.
+    static func intercept(_ completionHandler: @escaping (HttpResult?, Error?) -> Void) -> Bool {
+        switch mode {
+        case "hold":
+            DispatchQueue.global().asyncAfter(deadline: .now() + 120) { completionHandler(HttpResult(status: 503, body: "offline"), nil) }
+            return true
+        case "fail":
+            completionHandler(HttpResult(status: 503, body: "offline"), nil)
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 /// Debug-only Ecency REST answers for fake-data launches (edit history, translation, polls, bots, follow state);
 /// anything else goes to [fallback]: the shared demo services, which answer the token endpoint, search and the
 /// account's private API calls (bookmarks, favourites, followed tags).
@@ -237,6 +259,7 @@ final class FakeRestHttp: NSObject, AuthHttp {
     init(fallback: AuthHttp) { self.fallback = fallback }
 
     func send(request: AuthHttpRequest, completionHandler: @escaping (HttpResult?, Error?) -> Void) {
+        if DemoNetwork.intercept(completionHandler) { return }
         if let body = Self.answer(request.url) {
             completionHandler(HttpResult(status: 200, body: body), nil)
         } else {

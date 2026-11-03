@@ -90,7 +90,7 @@ struct TranslationSheet: View {
     var body: some View {
         let s = model.state
         NavigationStack {
-            Form {
+            ThemedForm {
                 Picker(L.Native.Ios.Reading.translateFrom, selection: Binding(get: { s.source }, set: { sheet.setSource(code: $0) })) {
                     Text(UiCopy.shared.AUTO).tag("auto")
                     ForEach(s.languages, id: \.first) { pair in Text(pair.second as String? ?? "").tag(pair.first as String? ?? "") }
@@ -206,6 +206,7 @@ struct SimilarEntriesView: View {
                 Text(ReadingUiCopy.shared.READ_NEXT).scaledFont(16, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
                 AdaptiveStack(verticalAlignment: .top, spacing: 10) {
                     ForEach(model.state.entries, id: \.permlink) { e in
+                        ProMemberReader(username: e.author) { pro in
                         Button { app.open(.post(author: e.author, permlink: e.permlink)) } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 ZStack {
@@ -225,14 +226,18 @@ struct SimilarEntriesView: View {
                                 }
                                 .frame(height: 90).clipShape(RoundedRectangle(cornerRadius: 6))
                                 Text(e.title).scaledFont(13, weight: .semibold).foregroundStyle(theme.text).lineLimit(2)
-                                Text("@\(e.author)").scaledFont(11).foregroundStyle(theme.secondary)
+                                HStack(spacing: 2) {
+                                    Text("@\(e.author)").scaledFont(11).foregroundStyle(theme.secondary)
+                                    ProBadge(username: e.author, size: 11)
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .buttonStyle(.plain)
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel([e.title, L.Native.Ios.Card.byAuthor(username: e.author)].joined(separator: ", "))
+                        .accessibilityLabel([e.title, proLabel(L.Native.Ios.Card.byAuthor(username: e.author), pro)].joined(separator: ", "))
                         .accessibilityAddTraits(.isButton)
+                        }
                     }
                 }
             }

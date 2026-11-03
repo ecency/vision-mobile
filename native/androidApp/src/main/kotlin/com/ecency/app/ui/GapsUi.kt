@@ -6,6 +6,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.semantics.Role
 
 import com.ecency.core.app.AppIcon
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ripple
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,7 +26,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -72,7 +77,7 @@ fun ReadingBar(info: ReadingInfo, recap: RecapModel? = null) {
                         Text(UiCopy.AI_BADGE, color = Color.White, fontSize = 8.sp, lineHeight = 10.sp, fontWeight = FontWeight.ExtraBold)
                     }
                     when {
-                        r.running -> CircularProgressIndicator(Modifier.size(18.dp).testTag("recapRunning"), strokeWidth = 2.dp)
+                        r.running -> Spinner(Modifier.testTag("recapRunning"), size = 18.dp)
                         r.summary != null -> Text(
                             UiCopy.TRY_AGAIN, color = colors.blueText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.clickable(onClick = recap::tryAgain, role = Role.Button).testTag("recapTryAgain"),
@@ -109,7 +114,7 @@ private fun RecapBox(recap: RecapModel, text: String, translating: Boolean, busy
             .padding(horizontal = 16.dp, vertical = 12.dp).testTag("recapBox"),
     ) {
         Text(text, color = colors.text, fontSize = 14.sp, lineHeight = 20.sp, modifier = Modifier.testTag("recapText"))
-        if (translating && busy) CircularProgressIndicator(Modifier.padding(top = 8.dp).size(18.dp), strokeWidth = 2.dp)
+        if (translating && busy) Spinner(Modifier.padding(top = 8.dp), size = 18.dp)
         Box(Modifier.fillMaxWidth().padding(top = 10.dp).height(1.dp).background(colors.icon))
         Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
@@ -210,6 +215,16 @@ fun androidx.compose.foundation.layout.BoxScope.ScrollTopPopup(
         onTap()
         scope.launch { listState.scrollToItem(0) }
     }
+}
+
+/**
+ * RN TabBar onTabPress (TabbedPosts on the feed, tag, community and profile; the communities and search tabs): a tap
+ * on the tab that is already selected scrolls its list (from [list]) to the top, a tap on another goes to [select].
+ */
+@Composable
+fun rememberTabTap(selected: Int, list: () -> androidx.compose.foundation.lazy.LazyListState?, select: (Int) -> Unit): (Int) -> Unit {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    return { i -> if (i == selected) list()?.let { scope.launch { it.animateScrollToItem(0) } } else select(i) }
 }
 
 /**
@@ -348,7 +363,7 @@ fun PostViewCount(env: com.ecency.core.app.AppEnvironment, post: com.ecency.core
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Glyph(AppIcon.PREVIEW, colors.darkGray.copy(alpha = 0.6f), 14.dp)
-        if (s.loading) CircularProgressIndicator(Modifier.padding(start = 4.dp).size(10.dp), strokeWidth = 1.dp)
+        if (s.loading) Spinner(Modifier.padding(start = 4.dp), size = 10.dp)
         else Text(s.viewsText, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp).testTag("postViewsCount"))
     }
     if (open) PostStatsSheet(model, onPromote = { open = false; onScreen(model.promoteScreen) }) { open = false }
@@ -417,6 +432,39 @@ fun EcencySourceBadge(modifier: Modifier = Modifier, tag: String = "ecencySource
 @Composable
 fun AiDisclosedBadge(modifier: Modifier = Modifier) {
     Glyph(AppIcon.AI, LocalEcencyColors.current.icon, 14.dp, modifier.testTag("aiDisclosed"), description = if (LocalMergedRow.current) null else com.ecency.core.app.PostBadges.AI_DISCLOSED)
+}
+
+/**
+ * RN postElements Tags in postDisplayView's footer: one scrolling row of pills above the "Posted by" line, the first
+ * (pinned) one blue. A community pill shows its title and opens the community, any other tag opens its results.
+ * Colours are AA pairs of the theme (white on blue, darkGray on lightBackground); RN's white on `$iconColor` was 1.7:1.
+ */
+@Composable
+fun PostTagsRow(tags: List<com.ecency.core.app.PostTag>, onOpen: (com.ecency.core.app.AppScreen) -> Unit) {
+    val colors = LocalEcencyColors.current
+    Row(
+        Modifier.fillMaxWidth().padding(top = 8.dp).horizontalScroll(rememberScrollState()).testTag("postTags"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        tags.forEach { tag ->
+            val interaction = remember { MutableInteractionSource() }
+            // a 48 dp touch target around the 22 dp pill; the ripple stays on the pill
+            Box(
+                Modifier.heightIn(min = 48.dp)
+                    .clickable(interactionSource = interaction, indication = null, role = Role.Button) { onOpen(tag.screen) }
+                    .semantics { contentDescription = tag.accessibilityLabel }
+                    .testTag("postTag:${tag.name}"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    tag.label, color = if (tag.pinned) Color.White else colors.darkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).indication(interaction, ripple())
+                        .background(if (tag.pinned) colors.blue else colors.lightBackground)
+                        .heightIn(min = 22.dp).wrapContentHeight(Alignment.CenterVertically).padding(horizontal = 10.dp, vertical = 3.dp),
+                )
+            }
+        }
+    }
 }
 
 /** RN postDisplayView's footer source row: "Posted by {author} via {App} {age}", then the badges. */

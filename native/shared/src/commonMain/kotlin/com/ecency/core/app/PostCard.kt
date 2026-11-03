@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.math.abs
 import kotlin.math.round
 
 /** Everything a feed card shows, precomputed off the main thread. */
@@ -117,11 +118,24 @@ data class PostCard(
     }
 }
 
-/** A vote this device broadcast (or is broadcasting); overrides the server's view until it catches up. */
-data class LocalVote(val weight: Int, val pending: Boolean)
+/**
+ * A vote this device broadcast (or is broadcasting); overrides the server's view until it catches up.
+ * [estimate] moves the shown payout (RN voteCacheUtils); null when the vote sheet's estimate was not read.
+ */
+data class LocalVote(val weight: Int, val pending: Boolean, val estimate: VoteEstimate? = null) {
+    /** Without an estimate (Swift sees no default arguments). */
+    constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
+}
 
-/** How a vote changes what a card or post shows. */
-data class VoteView(val votedByMe: Boolean, val downvotedByMe: Boolean, val votes: Int)
+/** What a vote is worth: [value] in HBD and [rshares], both negative for a downvote and zero for an unvote. */
+data class VoteEstimate(val value: Double, val rshares: Long) {
+    companion object {
+        val NONE = VoteEstimate(0.0, 0)
+    }
+}
+
+/** How a vote changes what a card or post shows. [payout] is the post's total payout with the vote applied. */
+data class VoteView(val votedByMe: Boolean, val downvotedByMe: Boolean, val votes: Int, val payout: Double)
 
 /**
  * Votes made on this device, keyed by post. Feeds and posts combine them with what the API
@@ -141,6 +155,25 @@ class LocalVotes {
         votes.value = emptyMap()
     }
 
+    /**
+     * Retires the estimate of each landed vote that [posts] (fresh server data, already stored by the caller) hold on
+     * chain: the server's payout counts the vote from then on, so a later change of it from another client shows as
+     * the server has it instead of the spent estimate being added again.
+     */
+    fun retireConfirmed(posts: Collection<Post>, username: String?) {
+        if (username == null) return
+        votes.update { map ->
+            var out = map
+            for (post in posts) {
+                val local = map[post.key] ?: continue
+                val estimate = local.estimate ?: continue
+                if (local.pending || !sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
+                out = out + (post.key to local.copy(estimate = null))
+            }
+            out
+        }
+    }
+
     companion object {
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {
@@ -148,7 +181,7 @@ class LocalVotes {
             val serverUp = server != null && server.rshares > 0
             val serverDown = server != null && server.rshares < 0
             val count = post.stats.totalVotes.coerceAtLeast(post.activeVotes.size)
-            if (local == null) return VoteView(serverUp, serverDown, count)
+            if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
             val hadVote = server != null
             val hasVote = local.weight != 0
             val adjusted = count + when {
@@ -156,7 +189,31 @@ class LocalVotes {
                 !hasVote && hadVote -> -1
                 else -> 0
             }
-            return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0))
+            val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
+            return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0), payout)
+        }
+
+        /**
+         * RN applyVoteToPost: what the local vote adds to the server's payout, the estimate less the share of the
+         * reader's vote the server already counts ([serverRshares], RN calculateVoteReward). Nothing once the
+         * server holds the vote itself (its rshares are the estimate's, or none for an unvote: RN skips a voter
+         * record without its optimistic marker), so fresh chain data is never counted twice ([retireConfirmed] then
+         * drops the estimate for good); nothing for a post already paid out or one that declined rewards (a vote
+         * adds nothing it pays).
+         */
+        internal fun payoutDelta(post: Post, serverRshares: Long, estimate: VoteEstimate?): Double {
+            if (estimate == null || post.isPaidout || post.isDeclinedPayout) return 0.0
+            if (sameVote(serverRshares, estimate.rshares)) return 0.0
+            val total = post.activeVotes.sumOf { it.rshares.toDouble() }
+            val share = if (serverRshares == 0L || total == 0.0) 0.0 else serverRshares * post.totalPayout / total
+            return estimate.value - share
+        }
+
+        /** The chain's rshares for the vote match the estimate (within 1 %: vests can move between read and vote). */
+        internal fun sameVote(server: Long, estimate: Long): Boolean {
+            if (estimate == 0L) return server == 0L
+            if ((server > 0) != (estimate > 0) || server == 0L) return false
+            return abs(server - estimate) <= abs(estimate) / 100
         }
     }
 }
@@ -172,8 +229,7 @@ internal object Cards {
         nsfwWarn: Boolean = false,
     ): PostCard {
         val vote = LocalVotes.view(post, username, local)
-        val maxPayout = Post.assetAmount(post.maxAcceptedPayout)
-        val shown = if (maxPayout > 0 && post.totalPayout >= maxPayout) maxPayout else post.totalPayout
+        val shown = shownPayout(post, vote.payout)
         val original = post.crossPostOriginal
         val display = original ?: post
         return PostCard(
@@ -242,7 +298,17 @@ internal object Cards {
     /** Re-applies votes to an existing card without re-rendering its summary. */
     fun withVote(card: PostCard, post: Post, username: String?, local: LocalVote?): PostCard {
         val vote = LocalVotes.view(post, username, local)
-        return card.copy(votes = vote.votes, votedByMe = vote.votedByMe, downvotedByMe = vote.downvotedByMe)
+        val shown = shownPayout(post, vote.payout)
+        return card.copy(
+            votes = vote.votes, votedByMe = vote.votedByMe, downvotedByMe = vote.downvotedByMe,
+            payout = shown, payoutText = PostCard.formatPayout(shown),
+        )
+    }
+
+    /** [payout] capped at max_accepted_payout, as the RN app shows it. */
+    private fun shownPayout(post: Post, payout: Double): Double {
+        val maxPayout = Post.assetAmount(post.maxAcceptedPayout)
+        return if (maxPayout > 0 && payout >= maxPayout) maxPayout else payout
     }
 }
 

@@ -5,6 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasAnyAncestor
@@ -277,11 +281,86 @@ class SliceFlowsTest {
         waitFor("voteSheet")
         settle()
         compose.onNodeWithTag("votePercent").assertTextEquals("40%")
-        compose.onNodeWithTag("upvote").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
         compose.await("the vote reaches the node") { node.broadcasts().isNotEmpty() }
         assertTrue(node.broadcasts().single().contains("\"weight\":4000"))
         assertEquals(listOf(40f), savedWeights)
+    }
+
+    /** Owner feedback: the compact sheet, a direction toggle, four presets and ONE vote button, no empty space. */
+    @Test
+    fun theCompactVoteSheetHasADirectionTogglePresetsAndOneVoteButton() {
+        node.signIn()
+        weight = 12f
+        launch()
+        waitFor("card:alice/trending-one")
+        compose.onAllNodes(hasTestTag("vote"))[0].performClick()
+        waitFor("voteSheet")
+        settle()
+        for (tag in listOf("voteDirUp", "voteDirDown", "votePreset:25", "votePreset:50", "votePreset:75", "votePreset:100", "voteSubmit")) {
+            assertTrue("$tag in the sheet", exists(tag))
+        }
+        assertFalse("no separate upvote button", exists("upvote"))
+        assertFalse("no separate downvote button", exists("downvote"))
+        compose.onNodeWithTag("votePercent").assertTextEquals("12%")
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Upvote 12%")
+        compose.onNodeWithTag("voteDirUp").assertIsSelected()
+        compose.onNodeWithTag("voteDirDown").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteDirDown").assertIsSelected()
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Downvote 12%")
+        compose.onNodeWithTag("votePreset:50").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("votePreset:50").assertIsSelected()
+        compose.onNodeWithTag("votePreset:25").assertIsNotSelected()
+        compose.onNodeWithTag("voteSubmit").assertTextEquals("Downvote 50%")
+        assertTrue("nothing voted yet", node.broadcasts().isEmpty())
+        // the sheet ends right under its content: the vote button is near the sheet's bottom
+        val sheet = compose.onNodeWithTag("voteSheet").getBoundsInRoot()
+        val button = compose.onNodeWithTag("voteSubmit").getBoundsInRoot()
+        assertTrue("button bottom ${button.bottom} vs sheet bottom ${sheet.bottom}", sheet.bottom - button.bottom <= 72.dp)
+        assertTrue("button at least 50 dp high: ${button.bottom - button.top}", button.bottom - button.top >= 50.dp)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the vote reaches the node") { node.broadcasts().isNotEmpty() }
+        assertTrue(node.broadcasts().single(), node.broadcasts().single().contains("\"weight\":-5000"))
+        assertEquals(listOf(50f), savedWeights)
+    }
+
+    /** Owner (TestFlight): the payout moves by the vote's estimate at once, as RN; a failed vote puts it back. */
+    @Test
+    fun aVoteMovesTheCardsPayoutAtOnceAndAFailurePutsItBack() {
+        node.signIn()
+        // the reader's stake (10000 VESTS, mana long since full) and the reserve rate: a full upvote is worth $0.200 here
+        node.extra = { method, _ ->
+            when (method) {
+                "condenser_api.get_accounts" -> """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},""" +
+                    """"memo_key":"${node.key.publicKey()}","vesting_shares":"10000.000000 VESTS","voting_manabar":{"current_mana":"0","last_update_time":0}}]"""
+                "condenser_api.get_dynamic_global_properties" ->
+                    """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00","vote_power_reserve_rate":10}"""
+                "condenser_api.get_reward_fund" -> """{"recent_claims":"150000000000000","reward_balance":"800000.000 HIVE"}"""
+                else -> null
+            }
+        }
+        val gate = CompletableDeferred<Unit>()
+        node.broadcastGate = gate
+        node.broadcastDown = true
+        launch()
+        waitFor("card:alice/trending-one")
+        val payout = compose.onAllNodes(hasTestTag("payout") and hasAnyAncestor(hasTestTag("card:alice/trending-one")), useUnmergedTree = true)[0]
+        payout.assertTextEquals("$ 1.500")
+        compose.onAllNodes(hasTestTag("vote"))[0].performClick()
+        waitFor("voteSheet")
+        // the estimate sits in a merged group: its tag is in the unmerged tree
+        compose.await("the vote estimate") { compose.onAllNodes(hasTestTag("voteValue"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("voteValue", useUnmergedTree = true).assertTextEquals("$0.200")
+        compose.onNodeWithTag("votePreset:100").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("voteSubmit").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        // optimistic: the broadcast is still held
+        payout.assertTextEquals("$ 1.700")
+        gate.complete(Unit)
+        compose.await("the vote failed") { env.votes.current.statuses.values.any { it.error != null } }
+        compose.waitForIdle()
+        payout.assertTextEquals("$ 1.500")
     }
 
     @Test

@@ -9,7 +9,13 @@ struct FeedListView: View {
     var header: AnyView? = nil
     /// A header above the list that closes as it scrolls (community Details).
     var collapse: SummaryCollapseDriver? = nil
+    /// Bumped by a tap on the selected tab or filter above (RN TabbedPosts onTabPress): back to the top.
+    var scrollToTop = 0
     @Environment(\.appTheme) private var theme
+    @State private var momentum = ScrollMomentum()
+    /// Where the drawn cards are (README "Foreground refresh"): the card at the top of the screen stays there when a
+    /// quiet refresh puts new cards above it, so nothing moves under a reader who scrolled down.
+    @State private var frames = CardFrames()
 
     private var model: FeedModel { feed.model as! FeedModel }
 
@@ -24,8 +30,12 @@ struct FeedListView: View {
                     if state.items.isEmpty {
                         if let error = state.error {
                             ErrorStateView(error: error) { model.retry() }.padding(.top, 80)
-                        } else if state.loaded && state.endReached {
+                        } else if state.loaded && !state.isLoadingMore {
                             Text(ReadingUiCopy.shared.NOTHING_HERE_YET).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 80)
+                            // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
+                            if FeedPaging.shouldLoadMoreAtEnd(state) {
+                                Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.padding(.top, 12).accessibilityIdentifier("feed-load-more")
+                            }
                         } else {
                             // the first page draws the cards' shape (Motion.swift skeleton)
                             FeedSkeleton().accessibilityIdentifier("feed-loading")
@@ -39,6 +49,10 @@ struct FeedListView: View {
                             _ = PerfMarks.shared.markOnce(event: PerfEvent.shared.FEED_FIRST_CONTENT)
                         }, payoutPost: { model.post(key: card.key) })
                         .onAppear { if FeedPaging.shouldLoadMore(appearing: card, in: state) { model.loadMore() } }
+                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("feed-scroll")).minY } action: { y in
+                            if let dy = frames.drawn(card.key, at: y, firstKey: feed.state.items.first?.key, atTop: momentum.isAtTop) { momentum.shift(by: dy) }
+                        }
+                        .onDisappear { frames.gone(card.key) }
                         Rectangle().fill(theme.lightBackground).frame(height: 4)
                     }
                     if !state.items.isEmpty {
@@ -55,18 +69,28 @@ struct FeedListView: View {
                     }
                 }
                 .reportsScrollOffset("feed-scroll")
+                .tracksScrollMomentum(momentum)
             }
+            // new cards on top: shown at the top; further down the card being read is kept in place (CardFrames)
+            .onChange(of: state.items.first?.key) { _, _ in if momentum.isAtTop { proxy.scrollTo("feed-top", anchor: .top) } }
+            .accessibilityIdentifier("feed-list")
             .refreshable { await refresh() }
             .collapsesSummary(collapse, space: "feed-scroll")
             // RN postsTabContent's ScrollTopPopup (feed, tag and community lists); the top opens a header above
-            .scrollTopPopup(space: "feed-scroll", id: "feed-scroll-top") {
-                collapse?.expand()
-                proxy.scrollTo("feed-top", anchor: .top)
-            }
+            .scrollTopPopup(space: "feed-scroll", id: "feed-scroll-top") { toTop(proxy) }
+            .onChange(of: scrollToTop) { _, _ in toTop(proxy) }
             }
         }
         .background(theme.background)
         .onAppear { model.start() }
+        .onReturnToForeground { model.start() }
+    }
+
+    /// The scroll to top (popup or tab reselect): mid-fling too; the top opens a header above.
+    private func toTop(_ proxy: ScrollViewProxy) {
+        momentum.stop()
+        collapse?.expand()
+        proxy.scrollTo("feed-top", anchor: .top)
     }
 
     /// Pull to refresh: keeps the spinner until the model finishes (or is closed with the screen).
@@ -96,6 +120,53 @@ enum FeedPaging {
     }
 }
 
+/// The drawn cards' tops in the list's viewport, by post, and the card at the top of the screen (not observed).
+@MainActor final class CardFrames {
+    private var minY: [PostKey: CGFloat] = [:]
+    /// The list's first card when the frames were last read: another one means new cards went in.
+    private var first: PostKey?
+    /// The card at the top of the screen in the last layout of the same list.
+    private var top: (key: PostKey, y: CGFloat)?
+    /// The card that was read before new cards went in above and where it was, while the new layout settles.
+    private var held: (key: PostKey, y: CGFloat, until: Date)?
+
+    /// The card [key] is drawn at [y] in a list whose first card is [firstKey]; returns by how much to move the content
+    /// so that the card at the top of the screen before new cards went in stays where it was while the layout settles.
+    func drawn(_ key: PostKey, at y: CGFloat, firstKey: PostKey?, atTop: Bool) -> CGFloat? {
+        if firstKey != first {
+            // the first layout of a changed list: hold the card read before it (at the top the new cards show instead)
+            held = first != nil && !atTop ? top.map { ($0.key, $0.y, Date().addingTimeInterval(Self.settleSeconds)) } : nil
+            first = firstKey
+            top = nil
+        }
+        minY[key] = y
+        if let until = held?.until, until < Date() { held = nil }
+        if let h = held, h.key == key {
+            // every move of that card while the rows above take their real heights is undone
+            let dy = y - h.y
+            return abs(dy) > 0.5 ? dy : nil
+        }
+        if held == nil {
+            let t = minY.filter { $0.value <= 1 }.max { $0.value < $1.value } ?? minY.min { $0.value < $1.value }
+            top = t.map { ($0.key, $0.value) }
+        }
+        return nil
+    }
+
+    func gone(_ key: PostKey) { minY[key] = nil }
+
+    static let settleSeconds: TimeInterval = 1
+}
+
+extension View {
+    /// README "Foreground refresh": [action] again when the app comes back from the background (the screen's model
+    /// `start()`: after a long trip away it refreshes quietly, otherwise it does nothing). Views kept below the top of
+    /// a navigation stack hear it too, so they are fresh when the reader goes back.
+    func onReturnToForeground(_ action: @escaping () -> Void) -> some View {
+        onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in action() }
+    }
+}
+
 /// Feed models for the home tabs, created on first use and kept while the app runs, so switching
 /// tabs keeps each list and its scroll data. Keyed by filter and account (another account, another feed).
 @MainActor
@@ -120,15 +191,20 @@ struct HomeView: View {
     @StateObject private var walkthrough: Observed<WalkthroughState>
     /// Whether there is a spotlight: an empty header row would leave a zero-height row at the top of the lazy list.
     @StateObject private var spotlight: Observed<SpotlightState>
+    /// Whether the proposal card shows: a hidden one (voted, dismissed) left an empty header row on the first tab,
+    /// and the lazy list under it drew no rows at all, so that tab never showed its posts.
+    @StateObject private var proposalCard: Observed<ProposalCardState>
     private var feeds: HomeFeeds { app.homeFeeds }
     @AppStorage("homeFilter") private var selectedKey = ""
     /// Bumped when the customise sheet saved, so the pills re-read the tabs.
     @AppStorage("homeTabsVersion") private var tabsVersion = 0
+    @State private var scrollTop = 0
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
         _walkthrough = StateObject(wrappedValue: Observed(env.walkthrough, ownsModel: false))
         _spotlight = StateObject(wrappedValue: Observed(env.spotlight, ownsModel: false))
+        _proposalCard = StateObject(wrappedValue: Observed(env.proposalVote, ownsModel: false))
     }
 
     var body: some View {
@@ -141,6 +217,7 @@ struct HomeView: View {
             if let username = session.state.username { FeedWavesCard(username: username) }
             FilterPills(titles: tabs.map(\.title), selected: tabs.firstIndex(of: selected) ?? 0,
                         onSelect: { selectedKey = tabs[$0].key },
+                        onReselect: { scrollTop += 1 },
                         onCustomise: {
                             app.env.walkthrough.intercept(step: step, hidden: signedOut)
                             if session.state.isLoggedIn { app.sheet = .customiseFilters } else { app.sheet = .login }
@@ -151,13 +228,13 @@ struct HomeView: View {
                 // A session change reloads each feed in place (the shared models refresh themselves).
                 // RN postsTabContent: on the main feed's first tab, the proposal card (signed in) then the spotlight
                 let first = tabs.first == selected
-                let proposal = first && session.state.isLoggedIn
+                let proposal = first && session.state.isLoggedIn && proposalCard.state.visible
                 let spotlit = first && spotlight.state.card != nil
                 // no header row at all when there is nothing to head the list with
                 FeedListView(feed: feed, header: proposal || spotlit ? AnyView(VStack(spacing: 0) {
                     if proposal { ProposalCardView(env: app.env) }
                     if spotlit { SpotlightCardView(env: app.env) }
-                }) : nil)
+                }) : nil, scrollToTop: scrollTop)
                     .id("\(selected.key)|\(session.state.username ?? "")")
             } else {
                 LoginPromptView(text: ReadingUiCopy.shared.LOGIN_TO_SEE) { app.sheet = .login }
@@ -218,6 +295,8 @@ struct FilterPills: View {
     let titles: [String]
     let selected: Int
     let onSelect: (Int) -> Void
+    /// A tap on the selected pill (RN TabbedPosts: its list scrolls to the top); without it the tap goes to [onSelect].
+    var onReselect: (() -> Void)?
     var onCustomise: (() -> Void)?
     /// RN WalkthroughMarker: a red dot on "+" until its first use.
     var customiseMarker = false
@@ -230,7 +309,7 @@ struct FilterPills: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(Array(titles.enumerated()), id: \.offset) { index, title in
-                        Button { onSelect(index) } label: {
+                        Button { if index == selected, let onReselect { onReselect() } else { onSelect(index) } } label: {
                             Text(title).scaledFont(13, weight: .bold)
                                 .padding(.horizontal, 14).padding(.vertical, 5)
                                 .foregroundStyle(index == selected ? .white : theme.secondary)
@@ -284,10 +363,13 @@ struct CustomiseFiltersSheet: View {
                     ForEach(selected, id: \.self) { f in row(f, on: true) }
                         .onMove { selected.move(fromOffsets: $0, toOffset: $1) }
                 }
+                .themedCardRow()
                 Section(ReadingUiCopy.shared.AVAILABLE_FILTERS) {
                     ForEach(FeedFilter.entries.filter { !selected.contains($0) }, id: \.self) { f in row(f, on: false) }
                 }
+                .themedCardRow()
             }
+            .themedList()
             .environment(\.editMode, .constant(.active))
             .navigationTitle(ReadingUiCopy.shared.CUSTOMISE_FILTERS)
             .navigationBarTitleDisplayMode(.inline)
@@ -348,6 +430,7 @@ struct TagFeedScreen: View {
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
     @State private var selected: Int
+    @State private var scrollTop = 0
     @StateObject private var feeds = TagFeeds()
     @StateObject private var follow: Observed<TagFollowState>
 
@@ -375,8 +458,8 @@ struct TagFeedScreen: View {
                 }
                 .padding(.horizontal, 16).padding(.vertical, 8)
             }
-            FilterPills(titles: Self.sorts.map(\.1), selected: selected, onSelect: { selected = $0 })
-            FeedListView(feed: feed(selected)).id(selected)
+            FilterPills(titles: Self.sorts.map(\.1), selected: selected, onSelect: { selected = $0 }, onReselect: { scrollTop += 1 })
+            FeedListView(feed: feed(selected), scrollToTop: scrollTop).id(selected)
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)

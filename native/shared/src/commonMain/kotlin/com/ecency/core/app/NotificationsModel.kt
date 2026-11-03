@@ -79,6 +79,9 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
     /** Every id loaded since the last reload, rows that left the window included: a server that starts over cannot page forever. */
     private val seenIds = mutableSetOf<String>()
 
+    /** When the rows on screen began to be read ([Freshness.stamp]). */
+    private var readAt = Long.MIN_VALUE
+
     /** Call once at app start (with [SessionModel.start] and [AppLockModel.start]); safe to call again. */
     fun start() {
         if (started) return
@@ -106,6 +109,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         val becameActive = nowActive && !active
         active = nowActive
         if (becameActive) {
+            // back from the lock after a long trip: the rows refresh too (README "Foreground refresh")
+            refreshIfStale()
             refreshUnread()
             if (wanted && !current.loaded) load(reset = true)
         }
@@ -197,6 +202,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         val filter = current.filter
         val since = if (reset) "" else current.items.lastOrNull()?.id ?: return
         listJob?.cancel()
+        if (reset) readAt = env.freshness.stamp()
         setState { it.copy(isLoading = reset && it.items.isEmpty(), isRefreshing = reset && it.items.isNotEmpty(), isLoadingMore = !reset, error = null) }
         listJob = scope.launch {
             try {
@@ -276,12 +282,64 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
             val before = current.unread
             setUnread(count)
             val s = current
-            if (count > before && s.loaded && !s.isLoading && !s.isRefreshing && !s.isLoadingMore) load(reset = true)
+            if (count > before && s.loaded && listJob?.isActive != true) load(reset = true)
         }
     }
 
-    /** Back in front (RN `_handleAppStateChange`). */
-    fun onForeground() = refreshUnread()
+    /** Back in front (RN `_handleAppStateChange`): the count, and after a long trip the rows (README "Foreground refresh"). */
+    fun onForeground() {
+        sync()
+        refreshIfStale()
+        refreshUnread()
+    }
+
+    private fun refreshIfStale() {
+        if (active && current.loaded && listJob?.isActive != true && env.freshness.isStale(readAt)) refreshQuietly()
+    }
+
+    /**
+     * The pages shown read again from the first (at most the window RN keeps), swapped in when all arrived: no spinner,
+     * the list stays; a failure keeps the rows and says nothing.
+     */
+    private fun refreshQuietly() {
+        val user = current.account ?: return
+        val gen = generation
+        val filter = current.filter
+        val wanted = current.pages.coerceIn(1, WINDOW_PAGES)
+        val stamp = env.freshness.stamp()
+        listJob = scope.launch {
+            try {
+                val sizes = ArrayDeque<Int>()
+                val seen = mutableSetOf<String>()
+                val rows = mutableListOf<NotificationRow>()
+                var pages = 0
+                var end = false
+                while (pages < wanted) {
+                    val page = env.notificationsApi.notifications(user, filter.apiValue, rows.lastOrNull()?.id.orEmpty())
+                    val rate = if (page.any { it.type == "delegations" && "VESTS" in it.amount }) hivePerMVests() else 0.0
+                    if (gen != generation || filter != current.filter) return@launch
+                    val fresh = page.map { NotificationFormat.row(it, rate, env.proxyBase) }.distinctBy { it.id }.filter { seen.add(it.id) }
+                    pages++
+                    if (fresh.isEmpty()) {
+                        end = true
+                        break
+                    }
+                    sizes.addLast(fresh.size)
+                    rows += fresh
+                }
+                pageSizes.clear()
+                pageSizes.addAll(sizes)
+                seenIds.clear()
+                seenIds.addAll(seen)
+                readAt = stamp
+                setState { it.copy(items = rows, endReached = end, pages = pages, loaded = true, error = null) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the rows on screen stay as they are
+            }
+        }
+    }
 
     private fun setUnread(count: Int) {
         setState { it.copy(unread = count.coerceAtLeast(0)) }

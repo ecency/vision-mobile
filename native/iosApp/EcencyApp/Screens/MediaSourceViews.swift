@@ -158,7 +158,6 @@ struct MediaSourceSheet: View {
         .onPreferenceChange(MediaSourceHeightKey.self) { if $0 > 0, abs($0 - (measured ?? 0)) > 0.5 { measured = $0 } }
         .presentationDetents([.height(measured ?? estimate)])
         .presentationDragIndicator(.visible)
-        .presentationBackground(theme.background)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("media-source-sheet")
     }
@@ -185,7 +184,7 @@ private struct MediaSourceChooser<Item>: ViewModifier {
     @State private var measured: CGFloat?
 
     func body(content: Content) -> some View {
-        content.sheet(
+        content.themedSheet(
             isPresented: Binding(get: { item != nil }, set: { if !$0 { item = nil } }),
             onDismiss: {
                 shown = nil

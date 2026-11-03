@@ -121,7 +121,8 @@ fun FilterHomeFeeds(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
-                tabs.forEachIndexed { index, filter -> Pill(filter.title, index == selected.intValue, tag = filter.name) { selected.intValue = index } }
+                val tap = rememberTabTap(selected.intValue, { entry.get("list:${tabs[selected.intValue].key}:$username") { LazyListState() } }) { selected.intValue = it }
+                tabs.forEachIndexed { index, filter -> Pill(filter.title, index == selected.intValue, tag = filter.name) { tap(index) } }
             }
             // RN WalkthroughMarker: a red dot on "+" until it was first used (signed in only)
             val walkthrough by env.walkthrough.state.collectAsState()
@@ -231,8 +232,9 @@ fun TagFeedScreen(env: AppEnvironment, entry: StackEntry, tag: String, title: St
                 )
             }
         }
-        Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(8.dp)) {
-            sorts.forEachIndexed { i, (_, id) -> Pill(sortLabels[i], i == selected.intValue, tag = id) { selected.intValue = i } }
+        Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(8.dp).testTag("filterStrip")) {
+            val tap = rememberTabTap(selected.intValue, { entry.get("list:${sorts[selected.intValue].first.name}") { LazyListState() } }) { selected.intValue = it }
+            sorts.forEachIndexed { i, (_, id) -> Pill(sortLabels[i], i == selected.intValue, tag = id) { tap(i) } }
         }
         val sort = sorts[selected.intValue].first
         androidx.compose.runtime.key(sort) {
@@ -270,7 +272,10 @@ fun VotersScreen(env: AppEnvironment, entry: StackEntry, key: PostKey, onBack: (
                 ) {
                     Avatar(row.avatarUrl, 40.dp)
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                        Text(row.voter, fontWeight = FontWeight.Bold, color = colors.text)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(row.voter, fontWeight = FontWeight.Bold, color = colors.text)
+                            ProBadge(env, row.voter)
+                        }
                         row.timeAgo?.let { Text(it, fontSize = 12.sp, color = colors.darkGray) }
                     }
                     Column(horizontalAlignment = Alignment.End) {
@@ -303,6 +308,7 @@ fun ReblogsScreen(env: AppEnvironment, entry: StackEntry, key: PostKey, loggedIn
                     Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { onProfile(name) }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("reblogger:$name"), verticalAlignment = Alignment.CenterVertically) {
                         Avatar(PostCard.avatarUrl(name, env.proxyBase), 40.dp)
                         Text(name, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(start = 12.dp))
+                        ProBadge(env, name)
                     }
                 }
             }
@@ -528,10 +534,11 @@ fun SimilarEntries(model: SimilarEntriesModel, post: Post, now: Long, showImages
                         }
                     }
                     Text(e.title, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = colors.text, modifier = Modifier.padding(top = 4.dp))
-                    Text(
-                        "@${e.author} " + FromNow.ofTime(e.created, now),
-                        fontSize = 11.sp, color = colors.darkGray, maxLines = 1,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("@${e.author}", fontSize = 11.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        ProBadge(LocalFeedx.current?.env, e.author, 11.dp)
+                        Text(" " + FromNow.ofTime(e.created, now), fontSize = 11.sp, color = colors.darkGray, maxLines = 1)
+                    }
                 }
             }
         }

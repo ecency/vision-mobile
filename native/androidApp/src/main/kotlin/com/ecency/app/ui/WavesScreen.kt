@@ -51,14 +51,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -292,7 +290,7 @@ fun WavesTabScreen(env: AppEnvironment, entry: StackEntry, username: String?, no
 @Composable
 private fun WavesTabBar(tabs: WavesTabsState, onTab: (String) -> Unit, onAdd: () -> Unit) {
     val colors = LocalEcencyColors.current
-    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(vertical = 8.dp).testTag("filterStrip"), verticalAlignment = Alignment.CenterVertically) {
         Row(
             Modifier.weight(1f).horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
             horizontalArrangement = if (tabs.tabs.size <= 2) Arrangement.SpaceEvenly else Arrangement.spacedBy(4.dp),
@@ -382,7 +380,7 @@ fun WavesList(
                         item(key = "footer") {
                             Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
                                 when {
-                                    state.isLoadingMore -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText, strokeWidth = 2.dp)
+                                    state.isLoadingMore -> Spinner(size = 24.dp)
                                     state.error != null -> TextButton(onClick = model::retry) { Text(UiCopy.TRY_AGAIN, color = colors.blueText) }
                                 }
                             }
@@ -428,8 +426,10 @@ internal fun WaveView(
         if (feedx != null) add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, PostMenuContext(translate = true), item.key) })
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
     } }
+    val pro = isProMember(env, card.author)
     fun header() = buildList {
         add(card.author)
+        if (pro) add(com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER)
         add(TimeAgo.short(card.createdEpochMillis, nowMillis))
         if (item.isFromEcency) add(com.ecency.core.app.PostBadges.SOURCE_ECENCY)
         if (item.isPromoted) add(ReadingUiCopy.PROMOTED)
@@ -451,6 +451,7 @@ internal fun WaveView(
                         card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false).clickable(role = Role.Button) { actions.onAuthor(card.author) }.then(HiddenFromA11y),
                     )
+                    ProBadge(env, card.author)
                     Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray)
                     if (item.isFromEcency) EcencySourceBadge(Modifier.padding(start = 6.dp), tag = "wave:ecency")
                     if (item.isLocal) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("wave:local"))
@@ -590,7 +591,7 @@ private fun PickerChip(label: String, active: Boolean, tag: String, onClick: () 
  * composer's owner. A cancelled picker, an unreadable file or leaving the sheet all end the attach.
  */
 @Composable
-private fun WaveImagePickers(env: AppEnvironment, attacher: com.ecency.core.app.WaveUploadAttacher) {
+internal fun WaveImagePickers(env: AppEnvironment, attacher: com.ecency.core.app.WaveUploadAttacher) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     fun done(uri: android.net.Uri?) {
@@ -675,14 +676,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
     // RN quick post: dictation and AI assist, the editor's sheets over this composer
     var aiSheet by remember { mutableStateOf<String?>(null) }
     // RN hasClipboardImage: checked when the composer opens and whenever the app comes back to the front
-    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
-    androidx.compose.runtime.DisposableEffect(lifecycle, model) {
-        val check = { model.setClipboardHasImage(com.ecency.app.EditorImages.clipboardHasImage(context)) }
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event -> if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) check() }
-        check()
-        lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer) }
-    }
+    ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
     ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }, sheetState = sheetState, containerColor = colors.background) {
         // the whole sheet height: the text fills down to the toolbar, and the toolbar sits on the keyboard (or on
         // the navigation bar without one), with no empty stripe between them
@@ -717,7 +711,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
             }
             if (state.isVideoUploading) {
                 Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("waveVideoUploading"), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
+                    Spinner(size = 22.dp)
                 }
             }
             if (state.videoEmbedUrl != null) {
@@ -732,81 +726,23 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
                         Text("-", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-            } else if (state.isAttaching) {
-                Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
-                }
             } else {
-                state.imageUrl?.let { url ->
-                    // RN: the thumbnail with a minus badge; a tap removes the image
-                    Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending, role = Role.Button) { model.removeImage() }.testTag("waveImage")) {
-                        AsyncImage(model = url, contentDescription = ReadingUiCopy.ATTACHED_IMAGE_REMOVE, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                        Box(Modifier.align(Alignment.TopEnd).padding(2.dp).size(18.dp).clip(CircleShape).background(colors.red), contentAlignment = Alignment.Center) {
-                            Text("-", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
+                AttachedImageThumb(state.imageUrl, state.isAttaching, "waveImage", enabled = !state.isSending, onRemove = model::removeImage)
             }
             if (state.clipboardChip) {
-                // RN clipboard chip: "Image in clipboard · Paste image" and its close button
-                Row(
-                    Modifier.padding(top = 8.dp).clip(RoundedCornerShape(16.dp)).background(colors.lightBackground).testTag("waveClipboardChip"),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        com.ecency.core.app.WaveComposeCopy.CLIPBOARD_CHIP, color = colors.text, fontSize = 13.sp,
-                        modifier = Modifier.clickable(enabled = !state.isSending && !state.isAttaching, onClick = model::pasteClipboardImage, role = Role.Button)
-                            .padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 4.dp).testTag("wavePasteImage"),
-                    )
-                    Glyph(
-                        AppIcon.CLOSE, colors.text, 16.dp,
-                        Modifier.clickable(onClick = model::dismissClipboardChip, role = Role.Button).padding(horizontal = 10.dp, vertical = 6.dp).testTag("waveClipboardClose"),
-                        description = com.ecency.core.app.WaveComposeCopy.CLIPBOARD_DISMISS,
-                    )
-                }
+                ClipboardImageChip("wave", enabled = !state.isSending && !state.isAttaching, onPaste = model::pasteClipboardImage, onDismiss = model::dismissClipboardChip)
             }
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-              Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    UiCopy.IMAGE, color = colors.text, fontSize = 14.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending && !state.isAttaching, role = Role.Button) { model.attach(WaveImageSource.GALLERY) }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveAttach"),
+                QuickComposeTools(
+                    "wave", state.isSending, state.isAttaching, onAttach = model::attach,
+                    onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.weight(1f),
+                    middle = {
+                        // RN's poll button (the editor's poll wizard); blue once a poll is attached
+                        QuickTool(UiCopy.POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null, bold = state.poll != null) { pollSheet = true }
+                        // RN video-outline: blue and off while a video is attached or on its way
+                        QuickTool(UiCopy.VIDEO, "waveVideoButton", enabled = state.canAddVideo, color = if (state.videoEmbedUrl != null) colors.blueText else if (state.canAddVideo) colors.text else colors.icon) { showVideo = true }
+                    },
                 )
-                Text(
-                    ReadingUiCopy.CAMERA, color = colors.text, fontSize = 14.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending && !state.isAttaching, role = Role.Button) { model.attach(WaveImageSource.CAMERA) }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveCamera"),
-                )
-                Text(
-                    ReadingUiCopy.FILES, color = colors.text, fontSize = 14.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending && !state.isAttaching, role = Role.Button) { model.attach(WaveImageSource.FILES) }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveFiles"),
-                )
-                // RN's poll button (the editor's poll wizard); blue once a poll is attached
-                Text(
-                    UiCopy.POLL, color = if (state.poll != null) colors.blueText else colors.text, fontSize = 14.sp, fontWeight = if (state.poll != null) FontWeight.Bold else FontWeight.Normal,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending, role = Role.Button) { pollSheet = true }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("wavePoll"),
-                )
-                // RN video-outline: blue and off while a video is attached or on its way
-                Text(
-                    UiCopy.VIDEO, color = if (state.videoEmbedUrl != null) colors.blueText else if (state.canAddVideo) colors.text else colors.icon, fontSize = 14.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = state.canAddVideo, role = Role.Button) { showVideo = true }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveVideoButton"),
-                )
-                // RN: dictation with the content buttons, then the AI pair
-                Text(
-                    com.ecency.core.app.WaveComposeCopy.DICTATE, color = colors.text, fontSize = 14.sp,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending, role = Role.Button) { aiSheet = "dictation" }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveDictate"),
-                )
-                Text(
-                    UiCopy.AI_BADGE, color = colors.text, fontSize = 14.sp, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = !state.isSending, role = Role.Button) { aiSheet = "aiAssist" }
-                        .semantics { contentDescription = com.ecency.core.app.WaveComposeCopy.AI_ASSIST }
-                        .padding(horizontal = 8.dp, vertical = 8.dp).testTag("waveAiAssist"),
-                )
-              }
                 Spacer(Modifier.width(8.dp))
                 // PUBLISH turns into its own progress while the wave goes out (Motion.kt)
                 val phase = rememberSendPhase(state.isSending, sent = state.sent, holdsDone = false)
@@ -823,19 +759,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
     if (pollSheet) {
         PollSheet(state.poll, onAttach = { model.setPoll(it); pollSheet = false }, onReset = { model.setPoll(null); pollSheet = false }, onDismiss = { pollSheet = false })
     }
-    when (aiSheet) {
-        "aiAssist" -> {
-            val assist = remember(model) { env.aiAssistModel(model) }
-            DisposableEffect(assist) { onDispose { assist.close() } }
-            AiAssistSheet(assist) { aiSheet = null }
-        }
-        "dictation" -> {
-            // leaving composition (the sheet closed, the composer gone, the app lock) closes the model, which stops the microphone
-            val dictation = remember(model) { env.dictationModel(model) }
-            DisposableEffect(dictation) { onDispose { dictation.close() } }
-            DictationSheet(dictation) { aiSheet = null }
-        }
-    }
+    QuickComposeAiSheet(env, model, aiSheet) { aiSheet = null }
     val recordVideo = rememberVideoRecord(env, model.owner, "wave") { uri ->
         val appContext = context.applicationContext
         val video = model.video()
@@ -881,7 +805,7 @@ fun ShortsReels(env: AppEnvironment, model: ShortsModel, actions: FeedActions, o
     PullToRefreshBox(isRefreshing = state.isRefreshing, onRefresh = model::refresh, modifier = Modifier.fillMaxSize().background(Color.Black).testTag("shorts")) {
         when {
             state.items.isEmpty() && (state.isLoading || !state.loaded && state.error == null) ->
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Color.White) }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Spinner(color = Color.White) }
             state.items.isEmpty() && state.error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 TextButton(onClick = model::retry) { Text(state.error!!.message + "\n" + UiCopy.TRY_AGAIN, color = Color.White) }
             }
@@ -922,6 +846,7 @@ private fun ReelView(env: AppEnvironment, item: ShortItem, state: ShortsState, m
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(role = Role.Button) { actions.onAuthor(item.card.author) }.testTag("reel:author")) {
                 Avatar(item.card.avatarUrl, 36.dp)
                 Text("@${item.card.author}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp))
+                ProBadge(env, item.card.author)
             }
             if (item.caption.isNotEmpty()) {
                 Text(item.caption, color = Color.White, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp).testTag("reel:caption"))
@@ -1044,6 +969,121 @@ fun WavesOnboardingCard(env: AppEnvironment, username: String, onWave: () -> Uni
                     },
                     textDecoration = if (item.completed) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * RN quick post's content buttons (quickPostModalContent `_renderExpandBtn`), one row for both of its modes: the
+ * wave composer (with its poll and video in [middle]) and the reply sheet (RN comment mode, with expand in
+ * [trailing]). Image, camera and files go through the composer's image attach; dictation and AI assist open the
+ * editor's sheets over the composer ([QuickComposeAiSheet]). The row scrolls sideways when it does not fit. Tags
+ * are [tagPrefix] + Attach, Camera, Files, Dictate, AiAssist.
+ */
+@Composable
+internal fun QuickComposeTools(
+    tagPrefix: String,
+    sending: Boolean,
+    attaching: Boolean,
+    onAttach: (WaveImageSource) -> Unit,
+    onDictate: () -> Unit,
+    onAiAssist: () -> Unit,
+    modifier: Modifier = Modifier,
+    middle: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    trailing: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+) {
+    Row(modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
+        QuickTool(UiCopy.IMAGE, "${tagPrefix}Attach", enabled = !sending && !attaching) { onAttach(WaveImageSource.GALLERY) }
+        QuickTool(ReadingUiCopy.CAMERA, "${tagPrefix}Camera", enabled = !sending && !attaching) { onAttach(WaveImageSource.CAMERA) }
+        QuickTool(ReadingUiCopy.FILES, "${tagPrefix}Files", enabled = !sending && !attaching) { onAttach(WaveImageSource.FILES) }
+        middle()
+        // RN: dictation with the content buttons, then the AI pair
+        QuickTool(com.ecency.core.app.WaveComposeCopy.DICTATE, "${tagPrefix}Dictate", enabled = !sending, onClick = onDictate)
+        QuickTool(UiCopy.AI_BADGE, "${tagPrefix}AiAssist", enabled = !sending, bold = true, description = com.ecency.core.app.WaveComposeCopy.AI_ASSIST, onClick = onAiAssist)
+        trailing()
+    }
+}
+
+/** One text button of [QuickComposeTools]. */
+@Composable
+internal fun QuickTool(label: String, tag: String, enabled: Boolean, color: Color? = null, bold: Boolean = false, description: String? = null, onClick: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    Text(
+        label, color = color ?: colors.text, fontSize = 14.sp, fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+        modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .let { m -> if (description != null) m.semantics { contentDescription = description } else m }
+            .padding(horizontal = 8.dp, vertical = 8.dp).testTag(tag),
+    )
+}
+
+/** RN quick post: dictation ("dictation") or AI assist ("aiAssist"), the editor's sheets over [target]. */
+@Composable
+internal fun QuickComposeAiSheet(env: AppEnvironment, target: com.ecency.core.app.AiTextTarget, which: String?, onDismiss: () -> Unit) {
+    when (which) {
+        "aiAssist" -> {
+            val assist = remember(target) { env.aiAssistModel(target) }
+            DisposableEffect(assist) { onDispose { assist.close() } }
+            AiAssistSheet(assist, onDismiss = onDismiss)
+        }
+        "dictation" -> {
+            // leaving composition (the sheet closed, the composer gone, the app lock) closes the model, which stops the microphone
+            val dictation = remember(target) { env.dictationModel(target) }
+            DisposableEffect(dictation) { onDispose { dictation.close() } }
+            DictationSheet(dictation, onDismiss = onDismiss)
+        }
+    }
+}
+
+/** RN hasClipboardImage: [onCheck] when the composer opens and whenever the app comes back to the front. */
+@Composable
+internal fun ClipboardImageWatch(key: Any, onCheck: (Boolean) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val check by rememberUpdatedState(onCheck)
+    DisposableEffect(lifecycle, key) {
+        val run = { check(com.ecency.app.EditorImages.clipboardHasImage(context)) }
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event -> if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) run() }
+        run()
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+}
+
+/** RN clipboard chip: "Image in clipboard · Paste image" and its close button. Tags [tagPrefix] + ClipboardChip, PasteImage, ClipboardClose. */
+@Composable
+internal fun ClipboardImageChip(tagPrefix: String, enabled: Boolean, onPaste: () -> Unit, onDismiss: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    Row(
+        Modifier.padding(top = 8.dp).clip(RoundedCornerShape(16.dp)).background(colors.lightBackground).testTag("${tagPrefix}ClipboardChip"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            com.ecency.core.app.WaveComposeCopy.CLIPBOARD_CHIP, color = colors.text, fontSize = 13.sp,
+            modifier = Modifier.clickable(enabled = enabled, onClick = onPaste, role = Role.Button)
+                .padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 4.dp).testTag("${tagPrefix}PasteImage"),
+        )
+        Glyph(
+            AppIcon.CLOSE, colors.text, 16.dp,
+            Modifier.clickable(onClick = onDismiss, role = Role.Button).padding(horizontal = 10.dp, vertical = 6.dp).testTag("${tagPrefix}ClipboardClose"),
+            description = com.ecency.core.app.WaveComposeCopy.CLIPBOARD_DISMISS,
+        )
+    }
+}
+
+/** RN: the attached image's thumbnail with a minus badge (a tap removes it), or the upload's progress. */
+@Composable
+internal fun AttachedImageThumb(url: String?, attaching: Boolean, tag: String, enabled: Boolean, onRemove: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    if (attaching) {
+        Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("${tag}Uploading"), contentAlignment = Alignment.Center) {
+            Spinner(size = 22.dp)
+        }
+    } else if (url != null) {
+        Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).clickable(enabled = enabled, role = Role.Button, onClick = onRemove).testTag(tag)) {
+            AsyncImage(model = url, contentDescription = ReadingUiCopy.ATTACHED_IMAGE_REMOVE, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            Box(Modifier.align(Alignment.TopEnd).padding(2.dp).size(18.dp).clip(CircleShape).background(colors.red), contentAlignment = Alignment.Center) {
+                Text("-", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

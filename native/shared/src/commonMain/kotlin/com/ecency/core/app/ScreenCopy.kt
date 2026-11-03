@@ -246,6 +246,14 @@ object ReadingUiCopy {
     /** The comment sort by votes. */
     val VOTES: String get() = L.native.ui.reading.sortVotes
     val VOTE_WEIGHT: String get() = L.native.ui.reading.voteWeight
+    /** The vote sheet's direction toggle. */
+    val VOTE_UP: String get() = L.native.ui.reading.voteUp
+    val VOTE_DOWN: String get() = L.native.ui.reading.voteDown
+    /** The caption under the vote sheet's `$` estimate. */
+    val ESTIMATED_VALUE: String get() = L.wallet.estimatedValue
+    fun upvotePercent(percent: Int): String = L.native.ui.reading.upvotePercent(percent = LocaleFormat.integer(percent.toLong()))
+    /** [percent] is already formatted ("93%"). */
+    fun votingPower(percent: String): String = L.native.ui.reading.votingPower(percent = percent)
     val WHATS_HAPPENING: String get() = L.quickReply.placeholderWave
     val YOUR_FEEDS: String get() = L.waves.yourFeeds
     fun downvotePercent(percent: Int): String = L.native.ui.reading.downvotePercent(percent = LocaleFormat.integer(percent.toLong()))
@@ -271,6 +279,10 @@ object ReadingUiCopy {
     fun tabSelected(title: String): String = L.native.ui.reading.tabSelected(title = title)
     fun feedPinned(label: String): String = L.native.ui.reading.feedPinned(label = label)
     fun inTopic(topic: String): String = L.native.ui.reading.inTopic(topic = topic)
+    /** A community pill of the post's tags row, read by screen readers. */
+    fun tagCommunity(name: String): String = L.native.ui.reading.tagCommunity(name = name)
+    /** A plain tag pill of the post's tags row, read by screen readers. */
+    fun tagTopic(name: String): String = L.native.ui.reading.tagTopic(name = name)
 }
 
 /** Chat screens and sheets. */
@@ -280,6 +292,7 @@ object ChatUiCopy {
     val CHANNELS: String get() = L.chats.channels
     val CHANNEL_MEMBERS: String get() = L.chats.channelMembers
     val CHANNEL_OPTIONS: String get() = L.chats.channelOptions
+    val CHAT_WITH_ESIE: String get() = L.native.ui.chat.chatWithEsie
     val COPIED_TO_CLIPBOARD: String get() = L.native.ui.chat.copiedToClipboard
     val DELETE_MESSAGE: String get() = L.chats.remove
     val FAVORITE: String get() = L.chats.favorite

@@ -185,6 +185,8 @@ struct PostScreen: View {
                         } else {
                             bodySection(state, width: contentWidth)
                         }
+                        // RN postDisplayView footer <Tags> above "Posted by", once the body is in (RN keeps it beside a translation)
+                        if state.post != nil, state.body != nil, !state.tags.isEmpty { PostTagsRow(tags: state.tags) { app.push($0) } }
                         // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges
                         if let p = state.post, state.body != nil, extras.translate.state.translated == nil { PostedByRow(post: p) }
                         // RN NewsletterPostPrompt, once the body is in
@@ -274,7 +276,7 @@ struct PostScreen: View {
             // RN popScreenOnDelete: the post this screen shows was deleted from the menu
             if s.deleted.contains(key) { dismiss() }
         }
-        .sheet(item: $replyTarget) { target in
+        .themedSheet(item: $replyTarget) { target in
             let draft = drafts.draft(root: key, parent: target.parent, env: app.env)
             ReplyComposer(parent: target.parent, draft: draft, onSent: {
                 drafts.finish(target.parent)

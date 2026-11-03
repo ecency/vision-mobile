@@ -33,10 +33,12 @@ fun a11yAction(label: String, run: () -> Unit) = CustomAccessibilityAction(label
  * What TalkBack reads for a post card: who reblogged it, the title, the author, the community, the age, the source
  * and AI badges, the summary, the votes, the comments and the payout, each part localized on its own.
  */
-fun postCardSummary(card: PostCard, nowMillis: Long): String = buildList {
+fun postCardSummary(card: PostCard, nowMillis: Long, pro: Boolean = false): String = buildList {
     card.rebloggedBy.firstOrNull()?.let { add(ReadingUiCopy.rebloggedBy(it)) }
     if (card.title.isNotEmpty()) add(card.title)
     add(card.author)
+    // the Pro badge beside the name, which the merged card hides
+    if (pro) add(com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER)
     (card.communityTitle ?: card.category).takeIf { it.isNotEmpty() }?.let { add(ReadingUiCopy.inTopic(it)) }
     add(TimeAgo.short(card.createdEpochMillis, nowMillis))
     if (card.isFromEcency) add(com.ecency.core.app.PostBadges.SOURCE_ECENCY)

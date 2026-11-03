@@ -108,6 +108,42 @@ final class SliceUITests: XCTestCase {
         XCTAssertFalse(app.buttons["login-submit"].isEnabled, "nothing to submit yet")
     }
 
+    /// Owner feedback: a compact sheet (no empty space) with an Up / Down toggle, four presets and ONE vote button
+    /// whose label follows the direction and weight. Fake data: nothing broadcasts.
+    func testVoteSheetIsCompactWithTogglePresetsAndOneVoteButton() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments += ["-fakeData", "YES", "-homeFilter", "trending", "-seedAccounts", "YES"]
+        app.launch()
+        let vote = app.buttons["vote-button"].firstMatch
+        XCTAssertTrue(vote.waitForExistence(timeout: 15))
+        vote.tap()
+        let submit = app.buttons["vote-submit"]
+        XCTAssertTrue(submit.waitForExistence(timeout: 5), "one vote button")
+        for id in ["vote-dir-up", "vote-dir-down", "vote-preset-25", "vote-preset-50", "vote-preset-75", "vote-preset-100"] {
+            XCTAssertTrue(app.buttons[id].exists, id)
+        }
+        XCTAssertFalse(app.buttons["vote-confirm"].exists, "no separate upvote button")
+        XCTAssertFalse(app.buttons["vote-down"].exists, "no separate downvote button")
+        XCTAssertTrue(app.buttons["vote-dir-up"].isSelected)
+        app.buttons["vote-preset-75"].tap()
+        XCTAssertEqual(submit.label, "Upvote 75%")
+        XCTAssertTrue(app.buttons["vote-preset-75"].isSelected)
+        app.buttons["vote-dir-down"].tap()
+        XCTAssertTrue(app.buttons["vote-dir-down"].isSelected)
+        XCTAssertEqual(submit.label, "Downvote 75%", "the toggle keeps the weight")
+        app.buttons["vote-preset-50"].tap()
+        XCTAssertEqual(submit.label, "Downvote 50%")
+        XCTAssertFalse(app.buttons["vote-preset-75"].isSelected)
+        XCTAssertGreaterThanOrEqual(submit.frame.height, minTouch, "the vote button's touch target")
+        // the sheet fits its content: little below the vote button but the footer and the home indicator
+        let window = app.windows.firstMatch.frame
+        XCTAssertLessThanOrEqual(window.maxY - submit.frame.maxY, 110, "space under the vote button \(window.maxY - submit.frame.maxY)")
+        XCTAssertGreaterThan(app.buttons["vote-dir-up"].frame.minY, window.height * 0.35, "the sheet is compact, not half the screen")
+    }
+
+    private let minTouch: CGFloat = 44
+
     func testReplyWhileSignedOutAsksToSignIn() {
         let app = launch()
         openFirstPost(app)

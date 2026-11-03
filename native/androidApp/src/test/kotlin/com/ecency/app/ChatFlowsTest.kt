@@ -7,12 +7,14 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.semantics.getOrNull
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
@@ -210,7 +212,9 @@ class ChatFlowsTest {
         waitFor("chatRow:ch-ecency")
         assertTrue(hasTextNode("Photography") && hasTextNode("Book club"))
         compose.onNodeWithTag("chatUnread:ch-ecency", useUnmergedTree = true).assertTextContains("3")
-        assertTrue(hasTextNode("Connected"))
+        // connected says nothing: no "Connected" pill, no offline notice
+        assertFalse(hasTextNode("Connected"))
+        assertFalse(exists("chatsOffline"))
         // mark as read from the row's options
         tap("chatOptions:ch-ecency")
         waitFor("option:MARK_READ")
@@ -219,6 +223,80 @@ class ChatFlowsTest {
         waitUntil { !exists("chatUnread:ch-ecency") }
         assertTrue("POST channels/ch-ecency/view" in node.chatCalls())
         waitUntil { env.badges.current.chats == 2 }
+    }
+
+    /** The node's bounds lie inside the message list's (laid out and on screen, not only composed). */
+    private fun onScreen(matcher: androidx.compose.ui.test.SemanticsMatcher): Boolean {
+        val list = compose.onNodeWithTag("messages").fetchSemanticsNode().boundsInRoot
+        return compose.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().any {
+            val b = it.boundsInRoot
+            b.height > 0 && b.top >= list.top - 1 && b.bottom <= list.bottom + 1
+        }
+    }
+
+    /** The pages of [channelId] read so far (`GET /channels/{id}/posts[?before=...]`, not a single post's calls). */
+    private fun postReads(channelId: String) = node.chat.sent.count { it.method == "GET" && Regex("/channels/$channelId/posts(\\?|$)").containsMatchIn(it.url) }
+
+    @Test
+    fun aLongChannelOpensAtItsUnreadMessagesAndPagesBackOnScroll() {
+        node.chat.seedHistory("ch-ecency", 60)
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("unreadMarker")
+        idleMain()
+        compose.waitForIdle()
+        assertTrue("the first unread message is on screen", onScreen(hasTestTag("unreadMarker")))
+        assertEquals("only the newest page is read on opening", 1, postReads("ch-ecency"))
+        assertFalse(hasTextNode("Older message 1:"))
+        // scrolling up (to the oldest end) loads the pages before, down to "No more messages"
+        compose.await("the oldest page") {
+            compose.onNodeWithTag("messages").performScrollToKey("footer")
+            idleMain()
+            exists("noMore")
+        }
+        assertTrue(hasTextNode("Older message 1:"))
+    }
+
+    @Test
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE) // real text layout
+    fun aDirectMessageOpensAtItsNewestMessageAndShowsLongOnesWhole() {
+        node.chat.seedHistory("ch-dm-alice", 60)
+        node.signIn()
+        launch(fontScale = 1.15f)
+        waitFor("chatRow:ch-dm-alice")
+        compose.onNodeWithTag("chatRow:ch-dm-alice").performClick()
+        waitUntil { hasTextNode("Do you have a minute?") }
+        assertTrue("the newest message is on screen", onScreen(hasText("Do you have a minute?", substring = true)))
+        assertEquals(1, postReads("ch-dm-alice"))
+        // a long message, and a reply from someone else with its quote above a long body (cut on iOS, owner report)
+        val messageText = androidx.compose.ui.test.SemanticsMatcher("message text") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("messageText:") == true }
+        for (ending in listOf("the final words of the long reply", "the last line of the long message")) {
+            val text = hasText(ending, substring = true)
+            compose.scrollListTo("messages", text)
+            val node = compose.onAllNodes(text and messageText, useUnmergedTree = true).onFirst()
+            val layout = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            node.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layout) }
+            assertFalse("$ending: the whole text is laid out", layout.single().hasVisualOverflow)
+            assertTrue("$ending: on many lines", layout.single().lineCount > 4)
+            assertTrue("$ending: given its full height", node.fetchSemanticsNode().size.height >= layout.single().size.height)
+        }
+    }
+
+    @Test
+    fun aConversationReadOnScreenShowsReadInTheListOnReturn() {
+        node.signIn()
+        launch()
+        for (id in listOf("ch-ecency", "ch-dm-alice", "ch-group")) {
+            waitFor("chatUnread:$id")
+            compose.onNodeWithTag("chatRow:$id").performClick()
+            waitFor("composer")
+            waitUntil { "POST channels/$id/view" in node.chatCalls() }
+            compose.onNodeWithTag("back").performClick()
+            waitFor("chatRow:$id")
+            waitUntil { !exists("chatUnread:$id") }
+        }
     }
 
     @Test
@@ -346,6 +424,35 @@ class ChatFlowsTest {
         // only Esie's row is official: spike-alice's direct message is not
         assertEquals(1, compose.onAllNodes(hasTestTag("officialBadge"), useUnmergedTree = true).fetchSemanticsNodes().size)
         assertTrue(compose.onAllNodes(hasTestTag("chatRow:ch-dm-alice").and(androidx.compose.ui.test.hasAnyDescendant(hasTestTag("officialBadge"))), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+    }
+
+    /** The chat server refuses the sign-in: a notice in the list (not floating), and no Esie button. */
+    @Test
+    fun aRefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
+        node.chat.refuseSignIn()
+        node.signIn()
+        launch()
+        waitFor("chatsOffline")
+        assertTrue(hasTextNode(com.ecency.core.app.ChatsModel.CONNECTING))
+        assertFalse(exists("chatsStatus"))
+        assertFalse(exists("chatsEsieFab"))
+    }
+
+    /** The round Esie button over the list opens her direct message, as "Ask Esie" does. */
+    @Test
+    fun theEsieButtonOpensHerConversation() {
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        waitFor("chatsEsieFab")
+        val fab = compose.onNodeWithTag("chatsEsieFab")
+        fab.assert(androidx.compose.ui.test.hasContentDescription("Chat with Esie"))
+        val box = fab.fetchSemanticsNode().boundsInRoot
+        val density = compose.activity.resources.displayMetrics.density
+        assertEquals(56f, box.width / density, 0.5f)
+        fab.performClick()
+        waitUntil { navigator.state.top == AppScreen.ChatThread("ch-dm-esie", "D") }
+        assertTrue(node.chatCalls().contains("POST direct"))
     }
 
     @Test

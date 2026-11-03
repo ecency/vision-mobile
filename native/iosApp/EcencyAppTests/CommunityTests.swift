@@ -103,6 +103,20 @@ final class CommunityTests: XCTestCase {
         XCTAssertTrue(driver.open)
     }
 
+    /// The owner's rule: back at the top only; a scroll up through a long list keeps it closed.
+    func testTheSummaryOpensOnlyBackAtTheTopNotOnAScrollUpMidList() {
+        let driver = SummaryCollapseDriver()
+        for y in stride(from: 10, through: 2000, by: 10) { driver.scrolled(to: CGFloat(y)) }
+        XCTAssertFalse(driver.open)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.7))
+        for y in stride(from: 1990, through: 200, by: -10) { driver.scrolled(to: CGFloat(y)) }
+        RunLoop.main.run(until: Date().addingTimeInterval(0.7))
+        XCTAssertFalse(driver.open, "a scroll up mid-list keeps it closed")
+        for y in stride(from: 190, through: 0, by: -10) { driver.scrolled(to: CGFloat(y)) }
+        waitUntil(3) { driver.open }
+        XCTAssertTrue(driver.open, "back at the top")
+    }
+
     func testLayoutHoldsAClosedSummaryAndATabSwitchOpensIt() {
         let driver = SummaryCollapseDriver()
         for y in stride(from: 10, through: 150, by: 10) { driver.scrolled(to: CGFloat(y)) }

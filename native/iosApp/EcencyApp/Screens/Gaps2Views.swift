@@ -353,6 +353,73 @@ extension View {
     }
 }
 
+/// The UIScrollView under a SwiftUI ScrollView, found by `tracksScrollMomentum` in its content. A scroll to the top asked
+/// for while the list still decelerates (a fling) stops it first: `ScrollViewReader.scrollTo` alone is lost under the
+/// running deceleration, which keeps moving the list (owner note 10-30: the scroll to top did nothing mid-fling).
+@MainActor final class ScrollMomentum {
+    fileprivate weak var scrollView: UIScrollView?
+
+    /// Stops a fling where it is, so the scroll that follows sticks.
+    func stop() {
+        guard let view = scrollView, view.isDecelerating else { return }
+        view.setContentOffset(view.contentOffset, animated: false)
+    }
+
+    /// The list shows its very top (no scroll view found yet counts as the top).
+    var isAtTop: Bool {
+        guard let view = scrollView else { return true }
+        return view.contentOffset.y <= -view.adjustedContentInset.top + 1
+    }
+
+    /// Moves the content by [dy] without animation (README "Foreground refresh": rows that went in above the card
+    /// being read). Never past the top.
+    func shift(by dy: CGFloat) {
+        guard let view = scrollView, !view.isTracking else { return }
+        let top = -view.adjustedContentInset.top
+        view.setContentOffset(CGPoint(x: view.contentOffset.x, y: max(top, view.contentOffset.y + dy)), animated: false)
+    }
+}
+
+private struct ScrollMomentumProbe: UIViewRepresentable {
+    let momentum: ScrollMomentum
+
+    func makeUIView(context: Context) -> Probe { Probe(momentum: momentum) }
+    func updateUIView(_ view: Probe, context: Context) {
+        view.momentum = momentum
+        view.attach()
+    }
+
+    final class Probe: UIView {
+        weak var momentum: ScrollMomentum?
+
+        init(momentum: ScrollMomentum) {
+            self.momentum = momentum
+            super.init(frame: .zero)
+            isUserInteractionEnabled = false
+        }
+
+        required init?(coder: NSCoder) { nil }
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            attach()
+        }
+
+        func attach() {
+            var view = superview
+            while let v = view, !(v is UIScrollView) { view = v.superview }
+            if let scroll = view as? UIScrollView { momentum?.scrollView = scroll }
+        }
+    }
+}
+
+extension View {
+    /// Put on a ScrollView's content (its stack, which stays while rows come and go): lets [momentum] stop a fling.
+    func tracksScrollMomentum(_ momentum: ScrollMomentum) -> some View {
+        background(ScrollMomentumProbe(momentum: momentum).frame(width: 0, height: 0).accessibilityHidden(true))
+    }
+}
+
 private struct ScrollTopPopupModifier: ViewModifier {
     let space: String
     let onTap: () -> Void
@@ -419,7 +486,7 @@ struct FeedWavesCard: View {
                 composer = WaveComposerRef(model: app.env.waves.composer())
             }, onCheckIn: { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) })
         }
-        .sheet(item: $composer) { ref in
+        .themedSheet(item: $composer) { ref in
             WaveComposerSheet(composer: Observed<WaveComposeState>(ref.model, ownsModel: false), proxyBase: app.env.proxyBase,
                               attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui) { composer = nil }
                 .environment(\.appTheme, theme)
@@ -564,7 +631,7 @@ struct PostViewCountView: View {
         .accessibilityLabel(StatsCopy.shared.views(count: model.state.stats.visits))
         .accessibilityHint(StatsCopy.shared.STATS_HINT)
         .accessibilityIdentifier("post-views")
-        .sheet(isPresented: $open) {
+        .themedSheet(isPresented: $open) {
             PostStatsSheet(model: model) {
                 open = false
                 app.push(stats.promoteScreen)
@@ -666,6 +733,41 @@ struct AiDisclosedBadge: View {
         Image(appIcon: .ai).scaledFont(12).foregroundStyle(theme.icon)
             .accessibilityLabel(PostBadges.shared.AI_DISCLOSED)
             .accessibilityIdentifier("ai-disclosed")
+    }
+}
+
+/// RN postElements Tags in postDisplayView's footer: one scrolling row of pills above the "Posted by" line, the first
+/// (pinned) one blue. A community pill shows its title and opens the community, any other tag opens its results.
+/// Colours are AA pairs of the theme (white on accent, secondary on lightBackground); RN's white on `$iconColor` was 1.7:1.
+struct PostTagsRow: View {
+    let tags: [PostTag]
+    let onOpen: (AppScreen) -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(tags, id: \.name) { tag in
+                    Button { onOpen(tag.screen) } label: {
+                        Text(tag.label)
+                            .scaledFont(12, weight: .bold)
+                            .lineLimit(1)
+                            .foregroundStyle(tag.pinned ? Color.white : theme.secondary)
+                            .padding(.horizontal, 10).padding(.vertical, 3)
+                            .frame(minHeight: 22)
+                            .background(Capsule().fill(tag.pinned ? theme.accent : theme.lightBackground))
+                            // a 44 point target around the 22 point pill
+                            .tapTarget()
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tag.accessibilityLabel)
+                    .accessibilityIdentifier("post-tag-\(tag.name)")
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.top, 8)
+        .accessibilityIdentifier("post-tags")
     }
 }
 

@@ -19,7 +19,7 @@ struct SettingsView: View {
     var body: some View {
         let state = observed.state
         let loggedIn = session.state.isLoggedIn
-        List {
+        ThemedForm {
             Section {
                 picker(copy.CURRENCY, options.CURRENCIES, selected: state.currency, id: "settings-currency") { settings.setCurrency(code: $0) }
                 picker(L.Settings.language, options.LANGUAGES, selected: state.language, id: "settings-language") { settings.setLanguage(code: $0) }
@@ -212,7 +212,7 @@ struct EmailDigestsScreen: View {
                 if !mine {
                     EmptyView()
                 } else if state.loading {
-                    ProgressView().frame(maxWidth: .infinity).padding(.top, 32).accessibilityIdentifier("digests-loading")
+                    PageLoading(identifier: "digests-loading")
                 } else if let error = state.error {
                     message(error, id: "digests-error")
                 } else {

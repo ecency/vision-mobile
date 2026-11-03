@@ -158,6 +158,9 @@ class ProfileModel internal constructor(
     private var account: Account? = null
     private var rc: RcAccount? = null
 
+    /** When the header on screen began to be read ([Freshness.stamp]). */
+    private var readAt = Long.MIN_VALUE
+
     init {
         // the observer: the signed-in account once the session was read, and every change after that
         scope.launch {
@@ -200,9 +203,14 @@ class ProfileModel internal constructor(
         if (index in current.tabs.indices) setState { it.copy(selectedTab = index) }
     }
 
+    /**
+     * The profile is shown (the apps call it on show and on every return to the foreground): loads once, and after a
+     * long trip away reads the account again behind the header on screen (README "Foreground refresh").
+     */
     fun start() {
-        if (current.loaded || job?.isActive == true) return
-        load(refresh = false)
+        if (job?.isActive == true) return
+        if (!current.loaded) load(refresh = false)
+        else if (current.header != null && env.freshness.isStale(readAt)) load(refresh = true, quiet = true)
     }
 
     /** Pull to refresh: the header and the open tab. */
@@ -214,9 +222,11 @@ class ProfileModel internal constructor(
 
     fun retry() = load(refresh = true)
 
-    private fun load(refresh: Boolean) {
+    /** [quiet]: a failure keeps the header on screen and says nothing (README "Foreground refresh"). */
+    private fun load(refresh: Boolean, quiet: Boolean = false) {
         job?.cancel()
-        setState { it.copy(isLoading = it.header == null, error = null) }
+        val stamp = env.freshness.stamp()
+        setState { it.copy(isLoading = it.header == null, error = if (quiet) it.error else null) }
         job = scope.launch {
             try {
                 env.session.awaitLoaded()
@@ -238,6 +248,7 @@ class ProfileModel internal constructor(
                 }
                 account = acc
                 rc = loaded.rc
+                readAt = stamp
                 val header = header(acc, loaded.profile, loaded.counts, loaded.rc)
                 setState {
                     it.copy(
@@ -256,7 +267,7 @@ class ProfileModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, loaded = true, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, loaded = true, error = if (quiet && it.header != null) it.error else AppError.from(e)) }
             }
         }
     }

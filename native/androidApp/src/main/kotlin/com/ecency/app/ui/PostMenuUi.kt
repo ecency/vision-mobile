@@ -37,7 +37,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -292,7 +291,7 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
                     colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                     modifier = Modifier.testTag("publish"),
                 ) {
-                    if (state.isPublishing) CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                    if (state.isPublishing) Spinner(size = 16.dp, color = Color.White)
                     else Text(ReadingUiCopy.PUBLISH, color = Color.White)
                 }
             }
@@ -371,7 +370,10 @@ private fun QuickProfileSheet(ui: FeedxUi, username: String) {
                 )
                 Avatar(s.avatarUrl, 96.dp)
             }
-            Text("@${s.username}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(top = 10.dp).testTag("qpName"))
+            Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("@${s.username}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.testTag("qpName"))
+                ProBadge(ui.env, s.username, 16.dp)
+            }
             s.about?.let { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(top = 4.dp)) }
             Text(s.joined, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 4.dp))
             Row(Modifier.fillMaxWidth().padding(top = 14.dp), horizontalArrangement = Arrangement.SpaceEvenly) {

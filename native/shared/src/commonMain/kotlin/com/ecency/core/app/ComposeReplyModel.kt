@@ -32,8 +32,17 @@ data class ReplyState(
      * Posting" and answers with [ComposeReplyModel.answerAuthorityPrompt].
      */
     val authorityPrompt: Boolean = false,
+    /** RN quick reply's one image ([ComposeReplyModel.attach]), sent after the text as ` ![](url)`. */
+    val imageUrl: String? = null,
+    /** The image is being picked or uploaded: Reply waits for it. */
+    val isAttaching: Boolean = false,
+    /** RN "Image in clipboard · Paste image" chip. */
+    val clipboardChip: Boolean = false,
+    /** Bumped when the model replaced the text (dictation, AI assist, expand): the text field takes it. */
+    val prefillSeq: Int = 0,
 ) {
-    val canSend: Boolean get() = text.isNotBlank() && !isSending
+    /** RN: an image alone is a reply too (its body is the image line). */
+    val canSend: Boolean get() = (text.isNotBlank() || imageUrl != null) && !isSending && !isAttaching
 }
 
 /**
@@ -56,10 +65,105 @@ class ComposeReplyModel internal constructor(
     val root: PostKey,
     val parent: Post,
     private val payout: PayoutType = PayoutType.DEFAULT,
-) : StateModel<ReplyState>(ReplyState(), env.dispatchers) {
+) : StateModel<ReplyState>(ReplyState(), env.dispatchers), AiTextTarget {
 
     private var pending: PendingPublish? = null
     private var conflictChoice: Boolean? = null
+
+    // ---- RN quick reply's toolbar: dictation and AI assist (the editor's models), image and clipboard (the wave composer's upload) ----
+
+    override val aiOwner: String? get() = owner
+
+    /** The editor's reply mode pays in the same scope: both write the same reply. */
+    override val paidScope: String get() = slot
+
+    override val aiText: String get() = current.text
+
+    /** RN quick reply: `supportedActions: ['improve', 'check_grammar', 'summarize']`, as the wave composer. */
+    override val aiActions: List<String> get() = WaveComposeModel.AI_ACTIONS
+
+    private fun acceptsAiWrite(): Boolean = owner != null && env.session.current.username == owner && !current.isSending
+
+    /** RN onApply: the output replaces the text. A Recap is copy only (#3599). */
+    override fun applyAiResult(action: String, text: String, tags: List<String>): Boolean {
+        if (action !in aiActions || action == AiAssistModel.RECAP_ACTION || !acceptsAiWrite()) return false
+        setText(text)
+        setState { it.copy(prefillSeq = it.prefillSeq + 1) }
+        return true
+    }
+
+    /** RN _handleDictationResult: the transcript after one space unless the text is empty or ends in whitespace. */
+    override fun insertDictation(text: String): Boolean {
+        if (text.isEmpty() || !acceptsAiWrite()) return false
+        val now = current.text
+        val sep = if (now.isEmpty() || com.ecency.core.render.js.Js.isSpace(now.last())) "" else " "
+        setText(now + sep + text)
+        setState { it.copy(prefillSeq = it.prefillSeq + 1) }
+        return true
+    }
+
+    private var clipboardDismissed = false
+
+    /** The platform's clipboard check (on open and whenever the app comes back to the front). */
+    fun setClipboardHasImage(has: Boolean) {
+        if (clipboardDismissed) return
+        setState { if (it.clipboardChip == has) it else it.copy(clipboardChip = has) }
+    }
+
+    /** The chip's close button. */
+    fun dismissClipboardChip() {
+        clipboardDismissed = true
+        setState { it.copy(clipboardChip = false) }
+    }
+
+    /** RN _handlePasteImageBtn: the chip goes for good and the clipboard's image is attached like a picked one. */
+    fun pasteClipboardImage() {
+        dismissClipboardChip()
+        attach(WaveImageSource.CLIPBOARD)
+    }
+
+    /**
+     * RN's image button (UploadsGalleryModal, `allowMultiple={false}`): pick, upload for [owner] through the app's
+     * image upload (the wave composer's [WaveImageAttacher]), attach one image; a second one replaces it, as RN.
+     * Saved with the draft, apart from the text, as RN's reply cache kept it.
+     */
+    fun attach(source: WaveImageSource) {
+        val s = current
+        if (s.isAttaching || s.isSending) return
+        val user = owner
+        if (user == null || env.session.current.username != user) {
+            setState { it.copy(error = AppError(ErrorKind.AUTH, if (user == null) L.native.composeReply.pleaseSignInFirst else ACCOUNT_CHANGED, false)) }
+            return
+        }
+        val attacher = env.waves.attacher
+        if (attacher == null) {
+            setState { it.copy(error = AppError(ErrorKind.INVALID_INPUT, WaveComposeModel.NO_UPLOAD, false)) }
+            return
+        }
+        setState { it.copy(isAttaching = true, error = null) }
+        scope.launch {
+            try {
+                val url = attacher.attach(user, source)
+                setState { it.copy(isAttaching = false, imageUrl = url ?: it.imageUrl, sent = null) }
+                if (url != null) saveNow()
+            } catch (e: CancellationException) {
+                setState { it.copy(isAttaching = false) }
+                throw e
+            } catch (e: Exception) {
+                setState { it.copy(isAttaching = false, error = AppError.from(e)) }
+            }
+        }
+    }
+
+    /** RN: a tap on the thumbnail takes the image off. */
+    fun removeImage() {
+        if (current.isSending) return
+        setState { it.copy(imageUrl = null) }
+        saveNow()
+    }
+
+    /** What goes on chain: RN _submitPost's `text\n\n ![](url)` with an image. */
+    private fun bodyOf(s: ReplyState): String = com.ecency.core.api.waves.WavePublish.body(s.text, s.imageUrl)
 
     companion object {
         val ACCOUNT_CHANGED: String get() = L.native.composeReply.accountChanged
@@ -88,18 +192,27 @@ class ComposeReplyModel internal constructor(
             val user = owner ?: return@launch
             val local = env.localDrafts.load(user, slot) ?: return@launch
             if (pending == null) pending = local.pending
-            if (local.body.isNotEmpty() && current.text.isEmpty() && !current.isSending) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
+            if (current.isSending) return@launch
+            if (local.body.isNotEmpty() && current.text.isEmpty()) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
+            if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
         }
     }
 
-    /** The slot's draft with [text]; the pending publish is always carried along. */
-    private suspend fun store(user: String, text: String) {
-        if (text.isEmpty() && pending == null) {
+    /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
+    private suspend fun store(user: String, text: String, image: String?) {
+        if (text.isEmpty() && image == null && pending == null) {
             env.localDrafts.delete(user, slot)
         } else {
             val base = env.localDrafts.load(user, slot) ?: LocalDraft()
-            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending))
+            env.localDrafts.save(user, slot, base.copy(body = text, updated = env.nowMillis(), pending = pending, replyImage = image))
         }
+    }
+
+    /** The image changed: the draft is written at once, with the latest text. */
+    private fun saveNow() {
+        val user = owner ?: return
+        saveJob?.cancel()
+        saveJob = scope.launch { store(user, current.text, current.imageUrl) }
     }
 
     fun setText(text: String) {
@@ -108,20 +221,24 @@ class ComposeReplyModel internal constructor(
         saveJob?.cancel()
         saveJob = scope.launch {
             kotlinx.coroutines.delay(EditorModel.LOCAL_SAVE_DELAY_MILLIS)
-            store(user, text)
+            store(user, text, current.imageUrl)
         }
     }
 
     /**
      * RN's quick reply "expand" button: the full editor continues this reply. The text is written to the shared
-     * slot first, then [onReady] gets the editor's arguments (main thread).
+     * slot first, then [onReady] gets the editor's arguments (main thread). Nothing happens while an image is
+     * being picked or uploaded: the editor would open without it.
      */
     fun expand(onReady: (EditorArgs) -> Unit) {
+        if (current.isAttaching) return
         val user = owner
-        val text = current.text
+        // RN editorContainer: the quick reply's image (replyMediaUrls) continues in the editor's body
+        val text = bodyOf(current)
+        if (current.imageUrl != null) setState { it.copy(text = text, imageUrl = null, prefillSeq = it.prefillSeq + 1) }
         scope.launch {
             saveJob?.cancel()
-            if (user != null) store(user, text)
+            if (user != null) store(user, text, null)
             onReady(EditorArgs(EditorKind.REPLY, parent.author, parent.permlink, rootAuthor = root.author, rootPermlink = root.permlink))
         }
     }
@@ -138,8 +255,8 @@ class ComposeReplyModel internal constructor(
 
     fun send() {
         val state = current
-        if (state.isSending) return
-        if (state.text.isBlank()) {
+        if (state.isSending || state.isAttaching) return
+        if (state.text.isBlank() && state.imageUrl == null) {
             setState { it.copy(error = AppError(ErrorKind.INVALID_INPUT, L.native.composeReply.writeSomethingFirst, false)) }
             return
         }
@@ -152,7 +269,7 @@ class ComposeReplyModel internal constructor(
         }
         setState { it.copy(isSending = true, error = null, sent = null, conflict = false, authorityPrompt = false) }
         val authorityRetry = authority.takeRetry()
-        val text = state.text
+        val text = bodyOf(state)
         val choice = conflictChoice
         conflictChoice = null
         scope.launch {
@@ -199,7 +316,8 @@ class ComposeReplyModel internal constructor(
                         }
                     }
                     pending = pending?.takeIf { it.permlink == link }?.alsoSent(hash, now) ?: PendingPublish(link, listOf(hash), now)
-                    store(author, text)
+                    // the body as sent (the image in it), so the editor's reply mode sees what the pending hash covers
+                    store(author, text, null)
                     // the same text gives the same operations, so a key account's retry resends the same transaction
                     val signed = env.signing.broadcast(author, JsonArray(ops.map(OperationJson::encode)))
                     // SDK useComment: a new reply earns points, an edit of the one that is out does not

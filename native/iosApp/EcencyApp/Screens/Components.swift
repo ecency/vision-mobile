@@ -23,6 +23,24 @@ struct AvatarView: View {
     }
 }
 
+/// An asset's logo (RN AssetIcon): contained in a square box, no disc or crop (logos have their own shapes).
+struct AssetIconView: View {
+    let url: String?
+    let size: CGFloat
+
+    var body: some View {
+        Group {
+            if let url, !url.isEmpty {
+                LoadedImageView(src: url, maxWidth: size, contentMode: .scaleAspectFit) { _ in }
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
 /// Author line used by cards, the post header and comments: name, community or tag and age.
 struct AuthorLine: View {
     /// The author's name color (AccessibilityTests checks it against the card background).
@@ -43,11 +61,18 @@ struct AuthorLine: View {
             .buttonStyle(.plain)
             .accessibilityLabel(UiCopy.shared.profileOf(username: card.author))
             VStack(alignment: .leading, spacing: 2) {
-                Button(action: onAuthor) {
-                    Text(card.author).scaledFont(nameSize, weight: .bold).foregroundStyle(Self.nameColor(theme)).lineLimit(2)
+                // RN postHeaderDescription: the Pro badge after the name; the name button says it ("author, Ecency Pro member")
+                ProMemberReader(username: card.author) { pro in
+                    HStack(spacing: 4) {
+                        Button(action: onAuthor) {
+                            Text(card.author).scaledFont(nameSize, weight: .bold).foregroundStyle(Self.nameColor(theme)).lineLimit(2)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(proLabel(card.author, pro))
+                        .accessibilityIdentifier("card-author-name")
+                        ProBadge(username: card.author).accessibilityHidden(true)
+                    }
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("card-author-name")
                 // category and age on one line while they fit, else the category takes its own line(s)
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: 4) {
@@ -173,6 +198,8 @@ struct ErrorStateView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
+        // as a List row: on the list's background, no separator under it
+        .listStateRow()
     }
 }
 
@@ -224,4 +251,135 @@ struct FabButton: View {
         .largeContent(label, appIcon: appIcon)
         .accessibilityIdentifier(id)
     }
+}
+
+// MARK: Themed lists
+
+/// Lists and forms on the theme background. Without it the system list colours show: black rows and black
+/// grouped backgrounds in dark mode, grey in light.
+private struct ThemedListModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        content.scrollContentBackground(.hidden).background(theme.background)
+    }
+}
+
+/// A plain list row on the theme background (the system row colour is black in dark mode).
+private struct ThemedRowModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View { content.listRowBackground(theme.background) }
+}
+
+/// A grouped list (form) row on the theme's card colour.
+private struct ThemedCardRowModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View { content.listRowBackground(theme.lightBackground) }
+}
+
+extension View {
+    /// On every List and Form: the theme background behind and between the rows.
+    func themedList() -> some View { modifier(ThemedListModifier()) }
+    /// Plain list rows (or a ForEach of them) that set no row colour of their own.
+    func themedRow() -> some View { modifier(ThemedRowModifier()) }
+    /// Grouped list rows, or a Section of them: the card colour.
+    func themedCardRow() -> some View { modifier(ThemedCardRowModifier()) }
+    /// A loading, empty or error state shown as a List row: full width, no row colour and no separator under it,
+    /// so it sits on the list's theme background like the space around it. No effect outside a List.
+    func listStateRow() -> some View {
+        frame(maxWidth: .infinity).listRowBackground(Color.clear).listRowSeparator(.hidden)
+    }
+}
+
+// MARK: Themed sheets
+
+/// The presented content on the theme: the sheet (or cover) background, also under its grabber, its corners and the
+/// keyboard area, with the presenter's theme. The system sheet colour is black or dark grey in dark mode. Every sheet
+/// and full screen cover goes through `themedSheet` / `themedFullScreenCover` (ThemedBackgroundLintTests forbids
+/// the raw modifiers).
+private struct ThemedPresentation<Item: Identifiable, Presented: View>: ViewModifier {
+    let isPresented: Binding<Bool>?
+    let item: Binding<Item?>?
+    let fullScreen: Bool
+    let onDismiss: (() -> Void)?
+    let presented: (Item?) -> Presented
+    @Environment(\.appTheme) private var theme
+
+    private func themed(_ item: Item?) -> some View {
+        presented(item).environment(\.appTheme, theme).presentationBackground(theme.background)
+    }
+
+    func body(content: Content) -> some View {
+        if let isPresented {
+            if fullScreen {
+                content.fullScreenCover(isPresented: isPresented, onDismiss: onDismiss) { themed(nil) }
+            } else {
+                content.sheet(isPresented: isPresented, onDismiss: onDismiss) { themed(nil) }
+            }
+        } else if let item {
+            if fullScreen {
+                content.fullScreenCover(item: item, onDismiss: onDismiss) { themed($0) }
+            } else {
+                content.sheet(item: item, onDismiss: onDismiss) { themed($0) }
+            }
+        }
+    }
+}
+
+/// `isPresented` presentations carry no item.
+private struct NoItem: Identifiable { var id: Int { 0 } }
+
+extension View {
+    /// `.sheet(isPresented:)` on the theme background.
+    func themedSheet<C: View>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> C) -> some View {
+        modifier(ThemedPresentation<NoItem, C>(isPresented: isPresented, item: nil, fullScreen: false, onDismiss: onDismiss) { _ in content() })
+    }
+
+    /// `.sheet(item:)` on the theme background.
+    func themedSheet<Item: Identifiable, C: View>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil,
+                                                  @ViewBuilder content: @escaping (Item) -> C) -> some View {
+        modifier(ThemedPresentation<Item, C?>(isPresented: nil, item: item, fullScreen: false, onDismiss: onDismiss) { $0.map(content) })
+    }
+
+    /// `.fullScreenCover(isPresented:)` on the theme background.
+    func themedFullScreenCover<C: View>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> C) -> some View {
+        modifier(ThemedPresentation<NoItem, C>(isPresented: isPresented, item: nil, fullScreen: true, onDismiss: onDismiss) { _ in content() })
+    }
+
+    /// `.fullScreenCover(item:)` on the theme background.
+    func themedFullScreenCover<Item: Identifiable, C: View>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil,
+                                                            @ViewBuilder content: @escaping (Item) -> C) -> some View {
+        modifier(ThemedPresentation<Item, C?>(isPresented: nil, item: item, fullScreen: true, onDismiss: onDismiss) { $0.map(content) })
+    }
+}
+
+/// A Form whose rows are theme cards on the theme background (the system grouped colours are black in dark mode).
+struct ThemedForm<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        Form { Group { content }.themedCardRow() }.themedList()
+    }
+}
+
+/// The one spinner of a page still loading its first content when the layout is not known (lists of rows use
+/// `RowsSkeleton`, feeds `FeedSkeleton`, the post `PostBodySkeleton`): the same size and place on every screen,
+/// 48 pt under the top, on the page's theme background. In a List it is a state row (`listStateRow`).
+struct PageLoading: View {
+    var identifier: String? = nil
+    var topPadding: CGFloat = 48
+
+    var body: some View {
+        ProgressView().frame(maxWidth: .infinity).padding(.top, topPadding).listStateRow()
+            .accessibilityIdentifier(identifier ?? "page-loading")
+    }
+}
+
+/// The spinner of a list still loading its first page (`PageLoading`), or its next page (`topPadding: 0`).
+struct ListLoadingRow: View {
+    var topPadding: CGFloat = 48
+
+    var body: some View { PageLoading(topPadding: topPadding) }
 }

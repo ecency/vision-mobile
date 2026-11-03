@@ -34,6 +34,7 @@ struct SearchScreen: View {
     @EnvironmentObject private var app: AppContainer
     @StateObject private var model: Observed<SearchState>
     @State private var filtersOpen = false
+    @State private var scrollTop = 0
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
@@ -57,7 +58,8 @@ struct SearchScreen: View {
                 .accessibilityIdentifier("search-filters")
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
-            UnderlineTabs(labels: SearchTab.entries.map { $0.label }, selected: Binding(get: { Int(model.state.tab.ordinal) }, set: { search.selectTab(tab: SearchTab.entries[$0]) }), idPrefix: "search-tab")
+            UnderlineTabs(labels: SearchTab.entries.map { $0.label }, selected: Binding(get: { Int(model.state.tab.ordinal) }, set: { search.selectTab(tab: SearchTab.entries[$0]) }), idPrefix: "search-tab") { scrollTop += 1 }
+            ScrollViewReader { proxy in
             List {
                 switch state.tab {
                 case .people: people(state.people)
@@ -66,11 +68,22 @@ struct SearchScreen: View {
                 }
             }
             .listStyle(.plain)
+            .themedList()
+            .onChange(of: scrollTop) { _, _ in
+                // the rows' ForEach ids
+                let first: AnyHashable? = switch state.tab {
+                case .people: state.people.items.first.map(AnyHashable.init)
+                case .communities: state.communities.rows.first.map { AnyHashable($0.name) }
+                default: state.posts.items.first.map { AnyHashable($0.key) }
+                }
+                if let first { withAnimation { proxy.scrollTo(first, anchor: .top) } }
+            }
+            }
         }
         .background(theme.background)
         .navigationTitle(SearchCopy.shared.PLACEHOLDER)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $filtersOpen) {
+        .themedSheet(isPresented: $filtersOpen) {
             SearchFiltersSheet(initial: state.filters, validate: { search.validateFilters(filters: $0) }) { filters in
                 filtersOpen = false
                 search.applyFilters(filters: filters)
@@ -81,7 +94,7 @@ struct SearchScreen: View {
     }
 
     @ViewBuilder private func posts(_ posts: SearchPostsState, query: String) -> some View {
-        if posts.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if posts.loading { ListLoadingRow() }
         if let empty = posts.emptyText {
             VStack(spacing: 8) {
                 EsieView(posts.error != nil ? .error : .empty)
@@ -89,7 +102,7 @@ struct SearchScreen: View {
                     .announces(posts.error != nil ? empty : nil)
                 if posts.error != nil { Button(UiCopy.shared.RETRY) { search.retry() } }
             }
-            .frame(maxWidth: .infinity).padding(.top, 48)
+            .padding(.top, 48).listStateRow()
             .accessibilityIdentifier("search-empty")
         }
         ForEach(Array(posts.items.enumerated()), id: \.element.key) { index, row in
@@ -101,20 +114,22 @@ struct SearchScreen: View {
             .accessibilityIdentifier("result-\(row.key)")
             .onAppear { if index >= posts.items.count - 3 { search.loadMorePosts() } }
         }
-        if posts.loadingMore { ProgressView().frame(maxWidth: .infinity) }
+        if posts.loadingMore { ListLoadingRow(topPadding: 0) }
         if let more = posts.moreError {
             AdaptiveStack { Text(more).foregroundStyle(theme.secondary).announces(more, sticky: true); Spacer(minLength: 0); Button(UiCopy.shared.RETRY) { search.retry() } }
+                .listStateRow()
         }
     }
 
     @ViewBuilder private func people(_ people: SearchPeopleState) -> some View {
-        if people.loading { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if people.loading { ListLoadingRow() }
         if let empty = people.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48) }
         ForEach(Array(people.items.enumerated()), id: \.element) { index, name in
             Button { app.push(AppScreenProfile(author: name)) } label: {
                 HStack(spacing: 12) {
                     AvatarView(url: PostCard.companion.avatarUrl(account: name, proxyBase: app.env.proxyBase, size: "small"), size: 36)
                     Text("@\(name)").scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                    ProBadge(username: name)
                     Spacer()
                 }
             }
@@ -126,7 +141,7 @@ struct SearchScreen: View {
 
     @ViewBuilder private func communities(_ state: SearchState) -> some View {
         let c = state.communities
-        if c.loading && c.rows.isEmpty { ProgressView().frame(maxWidth: .infinity).padding(.top, 48) }
+        if c.loading && c.rows.isEmpty { ListLoadingRow() }
         if let empty = c.emptyText { Text(empty).foregroundStyle(theme.secondary).esieAbove(c.error != nil ? .error : .empty).padding(.top, 48) }
         ForEach(Array(c.rows.enumerated()), id: \.element.name) { index, row in
             CommunityListRow(row: row, index: index, showJoin: state.loggedIn, onOpen: { app.push(AppScreenCommunity(name: row.name, filter: "")) }) {
@@ -286,6 +301,7 @@ struct TagResultScreen: View {
     @EnvironmentObject private var app: AppContainer
     @StateObject private var model: Observed<TagResultState>
     @StateObject private var feeds = TabFeeds()
+    @State private var scrollTop = 0
     @Environment(\.appTheme) private var theme
 
     init(tag: String, filter: String, env: AppEnvironment) {
@@ -300,9 +316,9 @@ struct TagResultScreen: View {
         VStack(spacing: 0) {
             SearchField(text: Binding(get: { model.state.input }, set: { tagModel.setInput(text: $0) }), prefix: "#", placeholder: "")
                 .padding(.horizontal, 12).padding(.vertical, 8)
-            PillTabs(labels: tabs.map { $0.label }, selected: Binding(get: { Int(model.state.tab.ordinal) }, set: { tagModel.selectTab(tab: tabs[$0]) }))
+            PillTabs(labels: tabs.map { $0.label }, selected: Binding(get: { Int(model.state.tab.ordinal) }, set: { tagModel.selectTab(tab: tabs[$0]) })) { scrollTop += 1 }
             let key = "\(state.tab.name):\(state.tag)"
-            FeedListView(feed: feeds.feed(key, source: tagModel.feedSource(tab: state.tab, tag: state.tag), env: app.env)).id(key)
+            FeedListView(feed: feeds.feed(key, source: tagModel.feedSource(tab: state.tab, tag: state.tag), env: app.env), scrollToTop: scrollTop).id(key)
         }
         .background(theme.background)
         .navigationTitle("#\(state.tag)")

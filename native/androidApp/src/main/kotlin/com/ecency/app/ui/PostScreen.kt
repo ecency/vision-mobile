@@ -256,7 +256,7 @@ fun PostScreen(
                         )
                     }
                     item(key = "header") {
-                        Row(verticalAlignment = Alignment.Top) {
+                        Row(Modifier.testTag("postHeader"), verticalAlignment = Alignment.Top) {
                             PostHeader(
                                 card, nowMillis, avatarSize = 40,
                                 onAuthor = { actions.onAuthor(card.author) },
@@ -304,6 +304,8 @@ fun PostScreen(
                     }
                     postBody(body, contentWidth, actions.body)
                 }
+                // RN postDisplayView footer <Tags> above "Posted by", once the body is in (RN keeps it beside a translation)
+                if (post != null && state.body != null && state.tags.isNotEmpty()) item(key = "postTags") { PostTagsRow(state.tags, actions.onScreen) }
                 // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges, once the body is in
                 if (post != null && state.body != null && translation?.translated == null) item(key = "postedBy") { PostedByRow(post, nowMillis) }
                 // RN NewsletterPostPrompt, once the body is in
@@ -448,8 +450,10 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
         }
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
     } }
+    val pro = isProMember(feedx?.env, item.card.author)
     fun header() = buildList {
         add(item.card.author)
+        if (pro) add(com.ecency.core.app.ProfileUiCopy.ECENCY_PRO_MEMBER)
         add(TimeAgo.short(item.card.createdEpochMillis, nowMillis))
         add(com.ecency.core.l10n.L.post.a11yVotes(count = item.card.votes))
         // the reply count lives on the comments icon, which the merged row hides from TalkBack
@@ -469,6 +473,7 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
                     item.card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text,
                     modifier = Modifier.clickable(role = Role.Button) { actions.onAuthor(item.card.author) }.then(HiddenFromA11y),
                 )
+                ProBadge(feedx?.env, item.card.author)
                 Text(
                     " " + TimeAgo.short(item.card.createdEpochMillis, nowMillis),
                     fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray,

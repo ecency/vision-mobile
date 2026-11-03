@@ -156,6 +156,52 @@ class WalletFlowsTest {
         }
     }
 
+    // RN AssetIcon: the logo is contained (aspect fit) and centred in its box at RN's size, never cropped
+    private fun assertIconFits(tag: String, sizeDp: Int) {
+        until { exists("assetIconImage:$tag") }
+        val box = compose.onNodeWithTag("assetIcon:$tag", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val image = compose.onNodeWithTag("assetIconImage:$tag", useUnmergedTree = true).fetchSemanticsNode()
+        val scale = image.config.getOrNull(com.ecency.app.ui.AssetIconScale)
+        assertEquals("$tag: content scale", androidx.compose.ui.layout.ContentScale.Fit, scale)
+        val oneDp = with(compose.density) { 1.dp.toPx() }
+        val size = with(compose.density) { sizeDp.dp.toPx() }
+        assertTrue("$tag: box ${box.width} x ${box.height} px, RN size $size", kotlin.math.abs(box.width - size) <= oneDp && kotlin.math.abs(box.height - size) <= oneDp)
+        val b = image.boundsInRoot
+        assertTrue("$tag: image $b inside box $box", b.left >= box.left - 0.5f && b.top >= box.top - 0.5f && b.right <= box.right + 0.5f && b.bottom <= box.bottom + 0.5f)
+        assertTrue("$tag: image centred in $box, at ${b.center}", (b.center - box.center).getDistance() <= oneDp)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h1600dp")
+    fun theWalletRowIconsFitTheirBox() {
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)))
+        until { exists("asset:HBD") }
+        for (symbol in listOf("POINTS", "HP", "HIVE", "HBD")) assertIconFits("row:$symbol", 32)
+    }
+
+    @Test
+    fun theAssetDetailsIconFitsItsBox() {
+        launch(Navigator(NavState().push(AppScreen.AssetDetails("HBD"))))
+        assertIconFits("details:HBD", 40)
+    }
+
+    @Test
+    fun theAssetPickerIconsFitTheirBox() {
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.endsWith("/wallet-api/portfolio-v2")) {
+                HttpResult(200, portfolio.dropLast(2) + """,
+                    {"name":"BNB Chain","symbol":"BNB","layer":"chain","balance":0,"precision":18},
+                    {"name":"Leo","symbol":"LEO","layer":"engine","balance":1,"precision":3,"iconUrl":"https://images.hive.blog/DQmTcMRb769g2g5qfbsAVEGumuFj5gmo4oKpnqMQAp6QLNY/image.png"}]}""")
+            } else {
+                base?.invoke(r)
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.AssetsSelect)))
+        until { exists("available:LEO") }
+        for (symbol in listOf("BNB", "LEO")) assertIconFits("pick:$symbol", 24)
+    }
+
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
     private fun until(condition: () -> Boolean) {

@@ -34,12 +34,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -145,7 +143,7 @@ private fun WalletHeader(
                 Text(updated, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("walletUpdated"))
             }
             Box(Modifier.size(40.dp).clip(CircleShape).clickable(onClick = onRefresh, role = Role.Button).testTag("walletRefresh"), contentAlignment = Alignment.Center) {
-                if (updating) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = colors.blueText)
+                if (updating) Spinner(size = 18.dp)
                 else Glyph(AppIcon.REFRESH, colors.icon, 20.dp, description = WalletUiCopy.REFRESH)
             }
             Box(Modifier.size(40.dp).clip(CircleShape).clickable(onClick = onManage, role = Role.Button).testTag("walletManage"), contentAlignment = Alignment.Center) {
@@ -179,7 +177,7 @@ fun JournalNotice(entry: JournalEntry, onDismiss: () -> Unit) {
             .testTag("journal:${entry.actionId}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (entry.outcome == null) CircularProgressIndicator(Modifier.size(18.dp).testTag("journalSpinner"), strokeWidth = 2.dp, color = colors.blueText)
+        if (entry.outcome == null) Spinner(Modifier.testTag("journalSpinner"), size = 18.dp)
         Text(entry.message, color = colors.text, fontSize = 13.sp, modifier = Modifier.weight(1f).padding(horizontal = 10.dp))
         if (entry.outcome != null) TextButton(onClick = onDismiss, modifier = Modifier.testTag("journalDismiss")) { Text(UiCopy.OK, color = colors.blueText) }
     }
@@ -194,7 +192,7 @@ private fun AssetCard(row: AssetRow, onOpen: () -> Unit, onClaim: () -> Unit) {
             .clickable(onClick = onOpen, role = Role.Button).padding(14.dp).testTag("asset:${row.symbol}"),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Avatar(row.item.iconUrl.orEmpty(), 32.dp)
+            AssetIcon(row.item.iconUrl, 32.dp, "row:${row.symbol}")
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(row.symbol, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 Text(row.name, color = colors.darkGray, fontSize = 12.sp)
@@ -212,7 +210,7 @@ private fun AssetCard(row: AssetRow, onOpen: () -> Unit, onClaim: () -> Unit) {
                     .clickable(enabled = !row.claiming, onClick = onClaim, role = Role.Button).padding(horizontal = 12.dp, vertical = 6.dp).testTag("claim:${row.symbol}"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (row.claiming) CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp, color = colors.blueText)
+                if (row.claiming) Spinner(size = 14.dp)
                 else Glyph(AppIcon.ADD, colors.blueText, 16.dp)
                 Text(pending ?: WalletCopy.GET_POINTS, color = colors.blueText, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
             }
@@ -241,11 +239,11 @@ fun SendPhasePanel(phase: SendPhase?, onClose: () -> Unit) {
     val colors = LocalEcencyColors.current
     when (phase) {
         is SendPhase.Sending -> Row(Modifier.fillMaxWidth().padding(16.dp).testTag("sending"), verticalAlignment = Alignment.CenterVertically) {
-            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = colors.blueText)
+            Spinner(size = 20.dp)
         }
         is SendPhase.Checking -> Column(Modifier.fillMaxWidth().padding(16.dp).clip(RoundedCornerShape(10.dp)).background(colors.grayBackground).padding(16.dp).testTag("checkWallet")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(Modifier.size(20.dp).testTag("checkSpinner"), strokeWidth = 2.dp, color = colors.blueText)
+                Spinner(Modifier.testTag("checkSpinner"), size = 20.dp)
                 Text(WalletCopy.CHECKING, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
             }
             Text(phase.message, color = colors.text, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
@@ -264,7 +262,8 @@ fun SendPhasePanel(phase: SendPhase?, onClose: () -> Unit) {
 fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsModel, list: LazyListState, onBack: () -> Unit, push: (AppScreen) -> Unit) {
     val colors = LocalEcencyColors.current
     val state by model.state.collectAsState()
-    LaunchedEffect(model) { model.start() }
+    // README "Foreground refresh": shown and back in front, the model refreshes after a long trip away
+    OnShow(model) { model.start() }
     var sheet by remember { mutableStateOf<DetailsSheet?>(null) }
     var filter by remember { mutableStateOf(false) }
     var analytics by remember { mutableStateOf(false) }
@@ -286,7 +285,7 @@ fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsMo
                 item(key = "summary") {
                     Column(Modifier.fillMaxWidth().padding(16.dp).clip(RoundedCornerShape(12.dp)).background(colors.lightBackground).padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Avatar(state.asset?.iconUrl.orEmpty(), 36.dp)
+                            AssetIcon(state.asset?.iconUrl, 40.dp, "details:${state.symbol}")
                             Text(state.symbol, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.padding(start = 10.dp).weight(1f))
                             state.aprText?.let { Text(it, color = colors.blueText, fontSize = 13.sp, modifier = Modifier.testTag("assetApr")) }
                             // RN coinBasics: the chart-line button opens the balance analytics (HIVE, HBD, HP)
@@ -344,7 +343,7 @@ fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsMo
                     item(key = "footer") {
                         Box(Modifier.fillMaxWidth().height(72.dp), contentAlignment = Alignment.Center) {
                             when {
-                                state.isLoading || state.isLoadingMore -> CircularProgressIndicator(color = colors.blueText)
+                                state.isLoading || state.isLoadingMore -> Spinner()
                                 state.historyFailed -> Text(WalletCopy.ACTIVITIES_FAILED, color = colors.darkGray, textAlign = TextAlign.Center, modifier = Modifier.testTag("historyFailed"))
                                 state.isEmpty -> Text(WalletCopy.NO_ACTIVITIES, color = colors.darkGray, modifier = Modifier.testTag("historyEmpty"))
                             }
@@ -411,7 +410,7 @@ private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, e
             }
             Text(row.displayValue, color = colors.text, fontSize = 13.sp, textAlign = TextAlign.End, modifier = Modifier.testTag("activityAmount:${row.key}"))
             if (row.cancelable) {
-                if (busy) CircularProgressIndicator(Modifier.padding(start = 8.dp).size(16.dp), strokeWidth = 2.dp, color = colors.blueText)
+                if (busy) Spinner(Modifier.padding(start = 8.dp), size = 16.dp)
                 else Box(Modifier.padding(start = 12.dp).clickable(role = Role.Button) { row.trxIndex?.let(model::cancelOrder) }.padding(6.dp).testTag("cancelOrder:${row.trxIndex}")) { Glyph(AppIcon.CLOSE, colors.redText, 18.dp, description = UiCopy.CANCEL) }
             }
             if (row.repeatable && !pending) {
@@ -473,7 +472,10 @@ private fun RecurrentSheet(list: List<RecurrentSchedule>, onUser: (String) -> Un
             list.forEach { r ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f).clickable(role = Role.Button) { onUser(r.to) }) {
-                        Text(r.to, color = colors.text, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(r.to, color = colors.text, fontWeight = FontWeight.Bold)
+                            ProBadge(LocalFeedx.current?.env, r.to)
+                        }
                         Text(RecurrentCopy.transferIn(relativeTime(r.triggerDate)), color = colors.darkGray, fontSize = 12.sp)
                     }
                     Column(horizontalAlignment = Alignment.End) {
@@ -503,7 +505,10 @@ private fun DelegationsSheet(model: DelegationsModel, onUser: (String) -> Unit, 
                 items(state.visible, key = { it.account }) { d ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("delegation:${d.account}"), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f).clickable(enabled = !d.expiring, role = Role.Button) { onUser(d.account) }) {
-                            Text(if (d.expiring) WalletCopy.EXPIRING else d.account, color = if (d.expiring) colors.redText else colors.text, fontWeight = FontWeight.Bold)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(if (d.expiring) WalletCopy.EXPIRING else d.account, color = if (d.expiring) colors.redText else colors.text, fontWeight = FontWeight.Bold)
+                                if (!d.expiring) ProBadge(LocalFeedx.current?.env, d.account)
+                            }
                             (d.timeLeft ?: d.date?.take(10))?.let { Text(it, color = colors.darkGray, fontSize = 12.sp) }
                         }
                         Column(Modifier.clickable(enabled = d.updatable, role = Role.Button) { onUpdate(d.account) }, horizontalAlignment = Alignment.End) {
