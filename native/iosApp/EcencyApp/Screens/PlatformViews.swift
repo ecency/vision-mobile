@@ -276,7 +276,7 @@ struct DappBrowserScreen: View {
         .onChange(of: state.notice) { _, notice in
             if let notice { _ = app.env.ui.toast(text: notice); model.consumeNotice() }
         }
-        .sheet(item: Binding(get: { state.prompt.map(PromptItem.init) }, set: { if $0 == nil { model.reject() } })) { item in
+        .themedSheet(item: Binding(get: { state.prompt.map(PromptItem.init) }, set: { if $0 == nil { model.reject() } })) { item in
             BridgeConfirmSheet(prompt: item.prompt, onConfirm: { model.confirm() }, onReject: { model.reject() })
                 .presentationDetents([.medium, .large])
         }
@@ -548,7 +548,7 @@ struct QrScanScreen: View {
             .accessibilityIdentifier("qr-close")
             .padding(12)
         }
-        .background(Color.black)
+        .background(Color.black) // media: the camera preview of the QR scanner
         .toolbar(.hidden, for: .navigationBar)
         .accessibilityElement(children: .contain)
         .onEscape(close)
@@ -602,7 +602,7 @@ struct QrScannerView: View {
             if authorized && !observed.state.handled {
                 CameraPreview { model.scanned(value: $0) }
             } else {
-                Color.black
+                Color.black // media: the camera preview before access
             }
         }
         .accessibilityIdentifier("qr-preview")
@@ -703,7 +703,7 @@ struct ShareSheetHost: View {
 
     var body: some View {
         Color.clear.frame(width: 0, height: 0).allowsHitTesting(false)
-            .sheet(isPresented: Binding(get: { share.state.choosing }, set: { if !$0 && share.state.choosing { model.choose(target: nil) } })) {
+            .themedSheet(isPresented: Binding(get: { share.state.choosing }, set: { if !$0 && share.state.choosing { model.choose(target: nil) } })) {
                 // RN's short sheet at the usual text sizes; it grows (and scrolls) with large text
                 ShareChooserSheet { model.choose(target: $0) }.presentationDetents(typeSize > .large ? [.medium, .large] : [.height(260), .large])
             }

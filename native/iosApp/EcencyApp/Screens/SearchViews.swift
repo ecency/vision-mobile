@@ -83,7 +83,7 @@ struct SearchScreen: View {
         .background(theme.background)
         .navigationTitle(SearchCopy.shared.PLACEHOLDER)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $filtersOpen) {
+        .themedSheet(isPresented: $filtersOpen) {
             SearchFiltersSheet(initial: state.filters, validate: { search.validateFilters(filters: $0) }) { filters in
                 filtersOpen = false
                 search.applyFilters(filters: filters)

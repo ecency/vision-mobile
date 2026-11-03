@@ -52,7 +52,7 @@ struct RegisterSheet: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button(UiCopy.shared.CANCEL) { dismiss() }.accessibilityIdentifier("register-cancel") } }
         }
         .accessibilityIdentifier("register")
-        .fullScreenCover(isPresented: Binding(get: { state.optionsOpen }, set: { if !$0 { model.closeOptions() } })) {
+        .themedFullScreenCover(isPresented: Binding(get: { state.optionsOpen }, set: { if !$0 { model.closeOptions() } })) {
             RegisterOptionsView(state: observed.state, model: model, standIn: app.env.captchaStandIn) {
                 RegisterSheet.openInbox()
                 dismiss()

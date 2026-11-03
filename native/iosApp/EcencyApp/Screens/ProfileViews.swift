@@ -797,7 +797,7 @@ struct ProfileEditScreen: View {
                 }
             }
         }
-        .sheet(item: $picker) { pick in
+        .themedSheet(item: $picker) { pick in
             let picked: ([PickedImage]) -> Void = { images in
                 picker = nil
                 guard let first = images.first else {

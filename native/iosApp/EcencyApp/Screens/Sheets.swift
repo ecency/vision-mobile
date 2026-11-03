@@ -133,7 +133,7 @@ struct ReplyComposer: View {
             }
         }
         .modifier(ImageAttachPickers(attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui))
-        .sheet(item: $aiSheet) { which in
+        .themedSheet(item: $aiSheet) { which in
             switch which {
             case .assist: AiAssistSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
             case .dictation: DictationSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
@@ -175,7 +175,7 @@ struct VideoPlayerSheet: View {
             EmbedWebView(url: url)
                 .aspectRatio(16.0 / 9.0, contentMode: .fit)
                 .frame(maxHeight: .infinity)
-                .background(Color.black)
+                .background(Color.black) // media: the video player letterbox
                 .accessibilityIdentifier("video-player")
                 .navigationTitle(url.host ?? UiCopy.shared.VIDEO)
                 .navigationBarTitleDisplayMode(.inline)
@@ -199,7 +199,7 @@ struct EmbedWebView: UIViewRepresentable {
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator
         view.isOpaque = false
-        view.backgroundColor = .black
+        view.backgroundColor = .black // media: the embedded video before it loads
         var request = URLRequest(url: url)
         // Embedded players reject requests without an embedding origin.
         request.setValue("https://ecency.com/", forHTTPHeaderField: "Referer")
@@ -247,7 +247,7 @@ struct GallerySheet: View {
                 .tabViewStyle(.page)
                 .scrollDisabled(zoomed)
             }
-            .background(Color.black)
+            .background(Color.black) // media: the image viewer, pictures on black
             .navigationTitle(UiCopy.shared.preview(index: Int32(index + 1), count: Int32(urls.count)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

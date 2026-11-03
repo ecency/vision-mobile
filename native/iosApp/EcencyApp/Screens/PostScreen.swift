@@ -274,7 +274,7 @@ struct PostScreen: View {
             // RN popScreenOnDelete: the post this screen shows was deleted from the menu
             if s.deleted.contains(key) { dismiss() }
         }
-        .sheet(item: $replyTarget) { target in
+        .themedSheet(item: $replyTarget) { target in
             let draft = drafts.draft(root: key, parent: target.parent, env: app.env)
             ReplyComposer(parent: target.parent, draft: draft, onSent: {
                 drafts.finish(target.parent)

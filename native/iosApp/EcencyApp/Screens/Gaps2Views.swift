@@ -486,7 +486,7 @@ struct FeedWavesCard: View {
                 composer = WaveComposerRef(model: app.env.waves.composer())
             }, onCheckIn: { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) })
         }
-        .sheet(item: $composer) { ref in
+        .themedSheet(item: $composer) { ref in
             WaveComposerSheet(composer: Observed<WaveComposeState>(ref.model, ownsModel: false), proxyBase: app.env.proxyBase,
                               attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui) { composer = nil }
                 .environment(\.appTheme, theme)
@@ -631,7 +631,7 @@ struct PostViewCountView: View {
         .accessibilityLabel(StatsCopy.shared.views(count: model.state.stats.visits))
         .accessibilityHint(StatsCopy.shared.STATS_HINT)
         .accessibilityIdentifier("post-views")
-        .sheet(isPresented: $open) {
+        .themedSheet(isPresented: $open) {
             PostStatsSheet(model: model) {
                 open = false
                 app.push(stats.promoteScreen)

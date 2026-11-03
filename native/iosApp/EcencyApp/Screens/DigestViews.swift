@@ -26,7 +26,7 @@ struct DigestSheetHost: View {
 
     var body: some View {
         Color.clear.frame(width: 0, height: 0).allowsHitTesting(false)
-            .sheet(isPresented: Binding(get: { isOpen }, set: { if !$0 { model.dismiss() } })) {
+            .themedSheet(isPresented: Binding(get: { isOpen }, set: { if !$0 { model.dismiss() } })) {
                 DigestSheet(state: digest.state, model: model)
             }
     }

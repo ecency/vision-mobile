@@ -293,6 +293,68 @@ extension View {
     }
 }
 
+// MARK: Themed sheets
+
+/// The presented content on the theme: the sheet (or cover) background, also under its grabber, its corners and the
+/// keyboard area, with the presenter's theme. The system sheet colour is black or dark grey in dark mode. Every sheet
+/// and full screen cover goes through `themedSheet` / `themedFullScreenCover` (ThemedBackgroundLintTests forbids
+/// the raw modifiers).
+private struct ThemedPresentation<Item: Identifiable, Presented: View>: ViewModifier {
+    let isPresented: Binding<Bool>?
+    let item: Binding<Item?>?
+    let fullScreen: Bool
+    let onDismiss: (() -> Void)?
+    let presented: (Item?) -> Presented
+    @Environment(\.appTheme) private var theme
+
+    private func themed(_ item: Item?) -> some View {
+        presented(item).environment(\.appTheme, theme).presentationBackground(theme.background)
+    }
+
+    func body(content: Content) -> some View {
+        if let isPresented {
+            if fullScreen {
+                content.fullScreenCover(isPresented: isPresented, onDismiss: onDismiss) { themed(nil) }
+            } else {
+                content.sheet(isPresented: isPresented, onDismiss: onDismiss) { themed(nil) }
+            }
+        } else if let item {
+            if fullScreen {
+                content.fullScreenCover(item: item, onDismiss: onDismiss) { themed($0) }
+            } else {
+                content.sheet(item: item, onDismiss: onDismiss) { themed($0) }
+            }
+        }
+    }
+}
+
+/// `isPresented` presentations carry no item.
+private struct NoItem: Identifiable { var id: Int { 0 } }
+
+extension View {
+    /// `.sheet(isPresented:)` on the theme background.
+    func themedSheet<C: View>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> C) -> some View {
+        modifier(ThemedPresentation<NoItem, C>(isPresented: isPresented, item: nil, fullScreen: false, onDismiss: onDismiss) { _ in content() })
+    }
+
+    /// `.sheet(item:)` on the theme background.
+    func themedSheet<Item: Identifiable, C: View>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil,
+                                                  @ViewBuilder content: @escaping (Item) -> C) -> some View {
+        modifier(ThemedPresentation<Item, C?>(isPresented: nil, item: item, fullScreen: false, onDismiss: onDismiss) { $0.map(content) })
+    }
+
+    /// `.fullScreenCover(isPresented:)` on the theme background.
+    func themedFullScreenCover<C: View>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> C) -> some View {
+        modifier(ThemedPresentation<NoItem, C>(isPresented: isPresented, item: nil, fullScreen: true, onDismiss: onDismiss) { _ in content() })
+    }
+
+    /// `.fullScreenCover(item:)` on the theme background.
+    func themedFullScreenCover<Item: Identifiable, C: View>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil,
+                                                            @ViewBuilder content: @escaping (Item) -> C) -> some View {
+        modifier(ThemedPresentation<Item, C?>(isPresented: nil, item: item, fullScreen: true, onDismiss: onDismiss) { $0.map(content) })
+    }
+}
+
 /// A Form whose rows are theme cards on the theme background (the system grouped colours are black in dark mode).
 struct ThemedForm<Content: View>: View {
     @ViewBuilder let content: Content
@@ -310,3 +372,4 @@ struct ListLoadingRow: View {
         ProgressView().frame(maxWidth: .infinity).padding(.top, topPadding).listStateRow()
     }
 }
+

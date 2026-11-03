@@ -356,7 +356,7 @@ struct EditorScreen: View {
         .alert(EditorUiCopy.shared.NOTICE, isPresented: Binding(get: { videoNotice != nil }, set: { if !$0 { videoNotice = nil } })) {
             Button(UiCopy.shared.OK, role: .cancel) { videoNotice = nil }
         } message: { Text(videoNotice ?? "") }
-        .sheet(item: $sheet) { which in sheetView(which, state: editor.state) }
+        .themedSheet(item: $sheet) { which in sheetView(which, state: editor.state) }
         #if DEBUG
         // -editorSheet aiAssist | aiImage | dictation | translate | video (screenshots of fake-data runs)
         .task {
@@ -814,7 +814,7 @@ private struct SnippetsSheet: View {
                 }
             }
             .onAppear { model.start() }
-            .sheet(isPresented: $editorShown) {
+            .themedSheet(isPresented: $editorShown) {
                 NavigationStack {
                     ThemedForm {
                         TextField(EditorUiCopy.shared.SNIPPET_TITLE, text: $title, axis: .vertical).accessibilityIdentifier("snippet-title")
