@@ -215,6 +215,26 @@ final class ThemedBackgroundUITests: XCTestCase {
         }
     }
 
+    /// The Chats tab on its first load: beside the skeleton rows and in the empty list area under them, down to the
+    /// tab bar (TestFlight showed a black band there).
+    func testChatsLoadingBackground() {
+        for dark in [true, false] {
+            let app = launch(dark: dark, ["-seedAccounts", "YES", "-startTab", "CHATS", "-demoChat", "loading"])
+            let skeleton = element(app, "chats-loading")
+            XCTAssertTrue(skeleton.waitForExistence(timeout: 30))
+            let s = shot("chats-loading-\(dark ? "dark" : "light")", app)
+            assertTheme(s, app, dark: dark, at: rowEdge(app, skeleton), "beside the skeleton rows")
+            let tabBar = app.tabBars.firstMatch
+            let bottom = min(below(app).y, tabBar.exists ? tabBar.frame.minY - 20 : .infinity)
+            let top = skeleton.frame.maxY
+            for f in [0.15, 0.5, 0.85] where bottom - top > 40 {
+                assertTheme(s, app, dark: dark, at: CGPoint(x: app.windows.firstMatch.frame.midX, y: top + (bottom - top) * f),
+                            "under the skeleton rows (\(Int(f * 100))% down)")
+            }
+            app.terminate()
+        }
+    }
+
     /// A channel: the message area, beside the header and beside the composer bar.
     func testChatThreadBackground() {
         for dark in [true, false] {

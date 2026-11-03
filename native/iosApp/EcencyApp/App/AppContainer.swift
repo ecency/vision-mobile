@@ -297,6 +297,8 @@ final class AppContainer: ObservableObject {
             if UserDefaults.standard.bool(forKey: "demoStreak") { DemoAuthServices.shared.demoQuests = DemoAuthServices.shared.SAMPLE_QUESTS }
             // -demoChat offline: the chat sign-in fails, so the chats stay disconnected (chats UI tests)
             if UserDefaults.standard.string(forKey: "demoChat") == "offline" { DemoAuthServices.shared.chat?.refuseSignIn() }
+            // -demoChat loading: the chat sign-in never answers, so the chats list stays on its first load (UI tests)
+            if UserDefaults.standard.string(forKey: "demoChat") == "loading" { DemoAuthServices.shared.chat?.holdSignIn = true }
             // -demoNoPro YES: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots, UI tests)
             if UserDefaults.standard.bool(forKey: "demoNoPro") { DemoAuthServices.shared.clearDemoPro() }
             // -demoProMember <name>: one more account on the Pro roster (badge UI tests)
