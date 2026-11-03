@@ -309,7 +309,7 @@ struct CommunityScreen: View {
         // another tab's list: the card opens over it (the three ways in agree)
         .onChange(of: tab) { collapse.resetForSize(SummarySizeRule.holds(typeSize, verticalSizeClass)) }
         .background(theme.background)
-        .navigationTitle(state.headerTitle)
+        .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if state.isModerator {
@@ -463,7 +463,7 @@ struct CommunityMembersScreen: View {
         .listStyle(.plain)
         .themedList()
         .refreshable { members.refresh() }
-        .navigationTitle(state.headerTitle)
+        .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !state.assignableRoles.isEmpty {

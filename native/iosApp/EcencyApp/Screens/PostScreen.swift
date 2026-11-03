@@ -237,7 +237,7 @@ struct PostScreen: View {
             }
         }
         .background(theme.background)
-        .navigationTitle(state.card.map { "@\($0.author)" } ?? "")
+        .screenTitle(state.card.map { "@\($0.author)" } ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.trailing) {
             if let p = state.post {

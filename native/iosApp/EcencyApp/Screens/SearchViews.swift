@@ -321,7 +321,7 @@ struct TagResultScreen: View {
             FeedListView(feed: feeds.feed(key, source: tagModel.feedSource(tab: state.tab, tag: state.tag), env: app.env), scrollToTop: scrollTop).id(key)
         }
         .background(theme.background)
-        .navigationTitle("#\(state.tag)")
+        .screenTitle("#\(state.tag)")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

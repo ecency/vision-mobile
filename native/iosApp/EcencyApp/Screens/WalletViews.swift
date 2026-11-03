@@ -387,8 +387,8 @@ struct AssetDetailsView: View {
         .listStyle(.plain)
         .themedList()
         .refreshable { model.refresh() }
-        .navigationTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .screenTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
+        .screenBarItem(.trailing) {
             if s.filterable {
                 Button { filter = true } label: { Image(appIcon: .filter) }
                     .accessibilityLabel(copy.FILTER_TITLE).accessibilityIdentifier("history-filter")

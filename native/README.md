@@ -524,8 +524,19 @@ https://developer.apple.com/iphone-duo/prepare/ (Xcode 27 also exports its `app-
   in the pane shares the app's bar with the list, so its own bar items go through `screenBarItem` (the navigation bar
   on a phone, the pane's header beside a list). `PanesTest` (core) and `TwoPaneUITests` (skips on a phone-sized
   window; run it on the Duo simulator unfolded and held sideways).
-- Still open in #3601: iPhone Duo App Store screenshots, CI on Xcode 27.1, screen titles in the pane header (the
-  pane shows each screen's content title, not its navigation title).
+- A pane screen's title and bar items go through `screenTitle` and `screenBarItem` (PaneViews.swift): the navigation
+  bar on a phone, the pane's header beside a list (the title in the middle, the actions at the trailing end).
+- App Store screenshots: `scripts/duo-screenshots.sh inner|outer <folder>` launches six screens on the synthetic data
+  and saves the display's own size, which is App Store Connect's iPhone Duo size (outer 1398 x 2034 px, inner
+  2853 x 2007 px sideways or 2007 x 2853 upright), without an alpha channel. Fold or unfold in Device Hub first; the
+  script never switches displays.
+- CI: release builds stay on Xcode 26.x (`build-ios.yml`), since GitHub has no macOS 27 runner yet (macos-26 tops out
+  at Xcode 26.6). They build this code (no API newer than the iOS 26 SDK), but iPhone Duo only lays an app out edge
+  to edge with the vertical bars when it was built with the iOS 27.1 SDK: move `XCODE_VERSION` and `runs-on` once a
+  macOS 27 image ships, or build releases on a self-hosted Mac with Xcode 27.1.
+- Still open in #3601: list screens in the pane that rely on the list's default row margins (asset details' history
+  rows) sit flush against the divider there, since a list takes its default margins from the window's edge; the
+  wallet's asset cards set theirs.
 
 ## App shell
 

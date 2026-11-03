@@ -48,6 +48,8 @@ final class TwoPaneUITests: XCTestCase {
         XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 20))
         XCTAssertTrue(element(app, "detail-pane").exists, "a link opens beside the feed as a tap does")
         XCTAssertFalse(element(app, "pane-back").exists, "nothing to go back to: the feed is beside it")
+        // the post's title, which a phone shows in its navigation bar, heads the pane
+        XCTAssertEqual(element(app, "pane-title").label, "@spike-alice")
         // the post header's author name, inside the pane (the feed card beside it has one too)
         let author = element(app, "detail-pane").buttons.matching(identifier: "card-author-name").firstMatch
         XCTAssertTrue(author.waitForExistence(timeout: 10))

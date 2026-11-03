@@ -52,6 +52,28 @@ private struct ScreenBarItem<Item: View>: ViewModifier {
     }
 }
 
+/// A pane screen's title for the pane's header (the navigation title is the app bar's, which the list owns there).
+private struct PaneTitleKey: PreferenceKey {
+    static let defaultValue: String? = nil
+    static func reduce(value: inout String?, nextValue: () -> String?) { value = nextValue() ?? value }
+}
+
+extension View {
+    /// A screen's title: the navigation title on a phone, and also the pane header's title beside a list.
+    func screenTitle(_ title: String) -> some View {
+        navigationTitle(title).modifier(PaneTitle(title: title))
+    }
+}
+
+private struct PaneTitle: ViewModifier {
+    let title: String
+    @Environment(\.isInPane) private var isInPane
+
+    func body(content: Content) -> some View {
+        if isInPane { content.preference(key: PaneTitleKey.self, value: title) } else { content }
+    }
+}
+
 /// A tab's list with one column beside it (NavState.menuBesideList): the user menu before it while nothing is open,
 /// then the list and the pane with what it opened, the menu closed. The account button or the pane's sidebar
 /// button brings the menu back over the pane, which keeps its screen.
@@ -103,6 +125,8 @@ private struct DetailPane: View {
     @EnvironmentObject private var session: Observed<SessionState>
     @Environment(\.appTheme) private var theme
     @State private var headerHeight: CGFloat = 44
+    /// The pane screen's title (screenTitle).
+    @State private var title: String?
 
     var body: some View {
         if let top = app.nav.pane.last {
@@ -114,8 +138,9 @@ private struct DetailPane: View {
                 // room for the header, which shows the screen's own bar items (screenBarItem)
                 .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: headerHeight) }
                 .overlayPreferenceValue(PaneBarKey.self, alignment: .top) { items in
-                    header(items).onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
+                    header(items, title: title).onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                 }
+                .onPreferenceChange(PaneTitleKey.self) { title = $0 }
                 .background(theme.background)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("detail-pane")
@@ -131,8 +156,8 @@ private struct DetailPane: View {
     }
 
     /// The user menu again (the pane keeps its screen behind it), back while the pane is deeper than its first
-    /// screen, then the screen's own bar items: its title's place in the middle, its actions at the trailing end.
-    private func header(_ items: [ScreenBarPlacement: AnyView]) -> some View {
+    /// screen, then the screen's title (or its own title item) in the middle and its actions at the trailing end.
+    private func header(_ items: [ScreenBarPlacement: AnyView], title: String?) -> some View {
         HStack(spacing: 4) {
             Button { app.openDrawer() } label: { SwiftUI.Image(systemName: "sidebar.left").scaledFont(18).foregroundStyle(theme.icon).tapTarget() }
                 .accessibilityLabel(menuLabel)
@@ -147,7 +172,14 @@ private struct DetailPane: View {
                 .accessibilityIdentifier("pane-back")
             }
             Spacer(minLength: 8)
-            if let principal = items[.principal] { principal }
+            // the screen's own title item (a profile's compact header), else its title, as the navigation bar does
+            if let principal = items[.principal] {
+                principal
+            } else if let title, !title.isEmpty {
+                Text(title).scaledFont(16, weight: .semibold).foregroundStyle(theme.text).lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("pane-title")
+            }
             Spacer(minLength: 8)
             if let trailing = items[.trailing] {
                 HStack(spacing: 16) { trailing }.foregroundStyle(theme.accentText)

@@ -75,7 +75,7 @@ struct VotersView: View {
         .searchable(text: $query)
         .onChange(of: query) { _, q in voters.search(query: q) }
         .refreshable { voters.refresh() }
-        .navigationTitle(s.title)
+        .screenTitle(s.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { voters.start() }
         .accessibilityIdentifier("voters-screen")
@@ -132,7 +132,7 @@ struct ReblogsView: View {
                     .accessibilityIdentifier("reblog-toggle")
             }
         }
-        .navigationTitle(s.title)
+        .screenTitle(s.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { reblogs.start() }
         .task { post = try? await app.env.api.posts.getPost(author: key.author, permlink: key.permlink, observer: session.state.username, refresh: false) }
@@ -203,7 +203,7 @@ struct EditHistoryView: View {
                 }
             }
         }
-        .navigationTitle(ReadingUiCopy.shared.EDIT_HISTORY)
+        .screenTitle(ReadingUiCopy.shared.EDIT_HISTORY)
         .navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.trailing) {
             Group {
@@ -294,7 +294,7 @@ struct BotCommentsView: View {
                 }
             }
         }
-        .navigationTitle(ReadingUiCopy.shared.COMMENTS)
+        .screenTitle(ReadingUiCopy.shared.COMMENTS)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { (post.model as! PostModel).start() }
         .accessibilityIdentifier("bot-comments")

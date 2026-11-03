@@ -178,7 +178,7 @@ struct ProfileScreen: View {
             .animation(motion.reveal, value: collapse.open)
         }
         .background(theme.background)
-        .navigationTitle(state.header?.displayName ?? "@\(state.username)")
+        .screenTitle(state.header?.displayName ?? "@\(state.username)")
         .navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.principal) {
             // RN Header with the selected user while the summary is closed; a tap opens it again
@@ -660,7 +660,7 @@ struct FollowsScreen: View {
         .background(theme.background)
         .searchable(text: $query)
         .onChange(of: query) { _, q in model.search(query: q) }
-        .navigationTitle(state.title)
+        .screenTitle(state.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { model.start() }
         .accessibilityElement(children: .contain)
@@ -995,7 +995,7 @@ struct AccountListScreen: View {
         }
         .background(theme.background)
         .searchable(text: $query, prompt: "\(header) (\(users.count))")
-        .navigationTitle(header)
+        .screenTitle(header)
         .navigationBarTitleDisplayMode(.inline)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("account-list")
