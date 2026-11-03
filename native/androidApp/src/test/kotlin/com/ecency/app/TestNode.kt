@@ -58,6 +58,9 @@ class TestNode {
     @Volatile var broadcastDown = false
     @Volatile var broadcastGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
+    /** Holds every node call until completed (each screen's loading state, `UniformBackgroundTest`). */
+    @Volatile var holdAll: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     /** Answers a method before the fixtures below (wallet reads); null falls through. */
     @Volatile var extra: ((String, kotlinx.serialization.json.JsonObject) -> String?)? = null
 
@@ -93,6 +96,7 @@ class TestNode {
     private fun root() = entry("alice", "trending-one", votes = listOf("x"), children = 1, extra = postBodyExtra)
 
     val transport = RpcTransport { _, body ->
+        holdAll?.await()
         sent += body
         val req = Json.parseToJsonElement(body).jsonObject
         val method = req["method"]!!.jsonPrimitive.content

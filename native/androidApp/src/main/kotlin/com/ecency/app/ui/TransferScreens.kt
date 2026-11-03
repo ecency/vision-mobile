@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -368,7 +367,7 @@ fun PowerDownForm(model: PowerDownModel, onBack: () -> Unit) {
                     Checkbox(checked = autoVest, onCheckedChange = { autoVest = it }, modifier = Modifier.testTag("routeAutoVest"))
                     Text(StakeCopy.AUTO_VESTS, color = colors.text)
                 }
-                if (s.routeBusy) CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText)
+                if (s.routeBusy) Spinner(size = 20.dp)
                 else PrimaryButton(UiCopy.SAVE_CAPS, routeName.isNotBlank() && (routePercent.toIntOrNull() ?: 0) in 1..100, "routeSave") {
                     model.addRoute(routeName, routePercent.toInt(), autoVest); routeName = ""
                 }
@@ -526,7 +525,7 @@ fun ManageAssetsScreen(model: ManageAssetsModel, onBack: () -> Unit) {
             }
         }
         Box(Modifier.padding(16.dp).navigationBarsPadding()) {
-            if (s.saving) CircularProgressIndicator(color = colors.blueText) else PrimaryButton(WalletCopy.CONFIRM, s.user != null && !s.isLoading, "assetsConfirm", model::confirm)
+            if (s.saving) Spinner() else PrimaryButton(WalletCopy.CONFIRM, s.user != null && !s.isLoading, "assetsConfirm", model::confirm)
         }
     }
     s.error?.let { e -> AlertDialog(onDismissRequest = model::dismissError, text = { Text(e) }, confirmButton = { TextButton(onClick = model::dismissError) { Text(UiCopy.OK) } }) }

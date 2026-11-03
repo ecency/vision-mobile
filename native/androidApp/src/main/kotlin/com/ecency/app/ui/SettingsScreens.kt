@@ -34,7 +34,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Switch
@@ -102,7 +101,9 @@ fun SettingsScreen(env: AppEnvironment, host: AppHost, lock: AppLockState, logge
         TopBar(SettingsCopy.TITLE, onBack = actions.onBack)
         // RN's RefreshControl spins while a server is checked
         if (state.checkingServer) LinearProgressIndicator(Modifier.fillMaxWidth().testTag("serverChecking"), color = colors.blueText)
-        Column(Modifier.fillMaxSize().background(colors.lightBackground).verticalScroll(rememberScrollState()).padding(bottom = 72.dp)) {
+        // one page colour from the top bar down (README "Themed backgrounds"): RN's gray gaps between the cards were a
+        // lighter band in dark mode; the cards' blue titles mark the sections
+        Column(Modifier.fillMaxSize().background(colors.background).verticalScroll(rememberScrollState()).padding(bottom = 72.dp)) {
             SettingsCard {
                 CardTitle(SettingsCopy.GENERAL)
                 DropdownRow(
@@ -304,7 +305,7 @@ fun EmailDigestsScreen(model: EmailDigestsModel, username: String?, onBack: () -
         when {
             state.account == null || state.account != username -> Unit
             state.loading -> Box(Modifier.fillMaxWidth().padding(top = 32.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = colors.blueText, modifier = Modifier.testTag("digestsLoading"))
+                Spinner(Modifier.testTag("digestsLoading"))
             }
             state.error != null -> DigestsMessage(state.error!!, "digestsError")
             else -> DigestsList(state, model) { confirm = it }

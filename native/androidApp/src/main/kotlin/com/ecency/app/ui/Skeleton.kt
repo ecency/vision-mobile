@@ -47,6 +47,50 @@ import com.ecency.core.app.MotionTokens
 import com.ecency.core.app.ShellUiCopy
 
 /**
+ * The one spinner, for work of unknown size or that blocks: the theme's blue on whatever is behind it (the page,
+ * a sheet), or [color] white on a filled button or over media. [size] by place: 28 dp for a page or a list
+ * (`LoadingBlock`), 24 dp in a toolbar or a list footer, 16 to 20 dp beside text or in a button. The stroke follows
+ * the size. build-logic `ThemedBackgroundLintTest` fails on an ad hoc `CircularProgressIndicator`.
+ */
+@Composable
+fun Spinner(modifier: Modifier = Modifier, size: Dp = 28.dp, color: Color = LocalEcencyColors.current.blueText) {
+    androidx.compose.material3.CircularProgressIndicator(
+        modifier.size(size), color = color, strokeWidth = if (size >= 28.dp) 2.5.dp else if (size >= 14.dp) 2.dp else 1.dp,
+        trackColor = Color.Transparent,
+    )
+}
+
+/**
+ * Pull to refresh with the app's indicator: the [Spinner]'s blue on a disc of the theme background (Material's own
+ * is a gray arc on a lighter disc in dark mode). Screens in this package call it by the plain name (a same package
+ * declaration wins over the star imports); `ThemedBackgroundLintTest` fails on an import of Material's.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun PullToRefreshBox(
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit,
+) {
+    val colors = LocalEcencyColors.current
+    val state = androidx.compose.material3.pulltorefresh.rememberPullToRefreshState()
+    androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier,
+        state = state,
+        indicator = {
+            androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator(
+                state = state, isRefreshing = isRefreshing, modifier = Modifier.align(Alignment.TopCenter),
+                containerColor = colors.background, color = colors.blueText,
+            )
+        },
+        content = content,
+    )
+}
+
+/**
  * The one skeleton (moving gradient) for loading states whose layout is known: feed cards, the post body, the
  * profile header, wallet rows, notifications and the chat list. Spinners stay for work of unknown size or that
  * blocks the screen.

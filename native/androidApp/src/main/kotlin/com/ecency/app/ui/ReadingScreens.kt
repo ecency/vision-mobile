@@ -232,7 +232,7 @@ fun TagFeedScreen(env: AppEnvironment, entry: StackEntry, tag: String, title: St
                 )
             }
         }
-        Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(8.dp)) {
+        Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(8.dp).testTag("filterStrip")) {
             val tap = rememberTabTap(selected.intValue, { entry.get("list:${sorts[selected.intValue].first.name}") { LazyListState() } }) { selected.intValue = it }
             sorts.forEachIndexed { i, (_, id) -> Pill(sortLabels[i], i == selected.intValue, tag = id) { tap(i) } }
         }

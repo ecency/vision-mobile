@@ -35,7 +35,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -137,7 +136,7 @@ fun PerksScreen(
                     DailyResetLine(nowMillis, s::resetLine, "perksReset", Modifier.padding(top = 8.dp))
                     when {
                         !mine || (s.loading && s.quests == null) -> Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = colors.blueText, modifier = Modifier.size(24.dp).testTag("perksLoading"))
+                            Spinner(Modifier.testTag("perksLoading"), size = 24.dp)
                         }
                         s.rows.isEmpty() -> Text(PerksCopy.QUESTS_EMPTY, fontSize = 13.sp, color = colors.darkGray, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp))
                         else -> {

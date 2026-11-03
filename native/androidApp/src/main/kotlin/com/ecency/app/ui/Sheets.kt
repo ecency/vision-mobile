@@ -50,7 +50,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -423,7 +422,7 @@ fun GallerySheet(urls: List<String>, index: Int, onDismiss: () -> Unit) {
                         feedx.env.ui.toast(com.ecency.core.app.UiCopy.COPIED)
                     }
                     if (saving) {
-                        androidx.compose.material3.CircularProgressIndicator(Modifier.padding(10.dp).size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                        Spinner(Modifier.padding(10.dp), size = 24.dp, color = Color.White)
                     } else {
                         GalleryButton(AppIcon.DOWNLOAD, com.ecency.core.app.UiCopy.SAVE_IMAGE, "gallerySave") {
                             saving = true

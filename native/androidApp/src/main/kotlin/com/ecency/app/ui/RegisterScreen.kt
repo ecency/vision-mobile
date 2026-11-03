@@ -47,7 +47,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -174,7 +173,7 @@ private fun RegisterOptions(env: AppEnvironment, state: RegisterState, model: Re
         }
         if (state.isRegistering || state.isRegistered) {
             Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                if (state.isRegistered) Glyph(AppIcon.CHECK_CIRCLE, Color(0xFF4FD688), 64.dp, filled = true) else CircularProgressIndicator(color = colors.text)
+                if (state.isRegistered) Glyph(AppIcon.CHECK_CIRCLE, Color(0xFF4FD688), 64.dp, filled = true) else Spinner()
                 Text(
                     if (state.isRegistered) RegisterCopy.REGISTERED else RegisterCopy.REGISTERING, color = colors.text, fontSize = 16.sp,
                     textAlign = TextAlign.Center, modifier = Modifier.padding(top = 16.dp).testTag("registerProgress"),
@@ -189,7 +188,7 @@ private fun RegisterOptions(env: AppEnvironment, state: RegisterState, model: Re
             return
         }
         if (state.productsLoading) {
-            Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = colors.blueText) }
+            Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { Spinner() }
             return
         }
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {

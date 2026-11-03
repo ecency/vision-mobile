@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -89,7 +88,7 @@ fun ProductItemLine(row: StoreRow, enabled: Boolean, onBuy: (String) -> Unit, mo
 @Composable
 private fun StoreLoading() {
     Box(Modifier.fillMaxWidth().padding(48.dp).testTag("storeLoading"), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = LocalEcencyColors.current.blueText)
+        Spinner()
     }
 }
 

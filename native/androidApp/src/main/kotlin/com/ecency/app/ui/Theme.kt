@@ -114,22 +114,36 @@ internal val DarkOnPrimary = Color(0xFF0B1A2E)
 
 val LocalEcencyColors = staticCompositionLocalOf { EcencyColors.Light }
 
-/** Material colors, the screen tokens and the post body theme, light or dark from the system. */
+/**
+ * Material colors, the screen tokens and the post body theme, light or dark from the system.
+ *
+ * Every Material surface a page, sheet, dialog or loader can show is the theme background (README "Themed
+ * backgrounds"): Material's own surfaces are purple grays, and its dark dialogs and refresh disc were a lighter
+ * shade than the page. Tracks and filled fields (`surfaceContainerHighest`, `surfaceVariant`) take the light
+ * background, so a switch or progress track still shows. Menus (`surfaceContainer`) keep the light background in
+ * dark mode, a popup that lifts off the page. The surface tint is the background too, so tonal elevation mixes
+ * nothing in. `UniformBackgroundTest.materialSurfaces*` holds this.
+ */
 @Composable
 fun EcencyTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (dark) EcencyColors.Dark else EcencyColors.Light
+    val page = colors.background
     val scheme = if (dark) {
         darkColorScheme(
             // TextButtons and other Material text take the primary: the readable blue on dark backgrounds
-            primary = colors.blueText, onPrimary = DarkOnPrimary, background = colors.background, surface = colors.background,
-            onBackground = colors.text, onSurface = colors.text, surfaceContainerLow = colors.background,
-            surfaceContainer = colors.lightBackground, surfaceContainerHigh = colors.lightBackground,
+            primary = colors.blueText, onPrimary = DarkOnPrimary, background = page, surface = page,
+            onBackground = colors.text, onSurface = colors.text, surfaceTint = page,
+            surfaceContainerLowest = page, surfaceContainerLow = page, surfaceContainer = colors.lightBackground,
+            surfaceContainerHigh = page, surfaceContainerHighest = colors.lightBackground,
+            surfaceBright = page, surfaceDim = page, surfaceVariant = colors.lightBackground,
         )
     } else {
         lightColorScheme(
-            primary = colors.blue, background = colors.background, surface = colors.background,
-            onBackground = colors.text, onSurface = colors.text, surfaceContainerLow = colors.background,
-            surfaceContainer = colors.background, surfaceContainerHigh = colors.background,
+            primary = colors.blue, background = page, surface = page,
+            onBackground = colors.text, onSurface = colors.text, surfaceTint = page,
+            surfaceContainerLowest = page, surfaceContainerLow = page, surfaceContainer = page,
+            surfaceContainerHigh = page, surfaceContainerHighest = colors.lightBackground,
+            surfaceBright = page, surfaceDim = page, surfaceVariant = colors.lightBackground,
         )
     }
     MaterialTheme(colorScheme = scheme, typography = ContentDirectedTypography) {

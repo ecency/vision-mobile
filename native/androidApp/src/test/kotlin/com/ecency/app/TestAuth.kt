@@ -27,7 +27,11 @@ class TestAuth {
     /** Answers Ecency REST calls first (signup, referrals, announcements, HiveSigner's `/api/broadcast`...); null falls through to the token fake. */
     @Volatile var rest: ((AuthHttpRequest) -> HttpResult?)? = null
 
+    /** Holds every Ecency REST call until completed (each screen's loading state). */
+    @Volatile var holdAll: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     private val http = AuthHttp { request ->
+        holdAll?.await()
         requests += request
         rest?.invoke(request)?.let { return@AuthHttp it }
         val code = Json.parseToJsonElement(request.body ?: "{}").jsonObject["code"]?.jsonPrimitive?.content.orEmpty()

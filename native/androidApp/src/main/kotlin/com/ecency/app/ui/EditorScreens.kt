@@ -69,7 +69,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
@@ -185,11 +184,14 @@ internal fun shownDraftDate(iso: String): String? {
     return com.ecency.core.l10n.LocaleFormat.dateTime(millis)
 }
 
-/** A date then a time, never before now (RN minimumDate). */
-private fun pickDateTime(context: android.content.Context, initial: Long, onPicked: (Long) -> Unit) {
+/** The platform pickers' theme: the app's page colour and blue, light or [dark] as the app (not the window's). */
+internal fun pickerTheme(dark: Boolean): Int = if (dark) com.ecency.app.R.style.Theme_Ecency_Picker_Dark else com.ecency.app.R.style.Theme_Ecency_Picker_Light
+
+/** A date then a time, never before now (RN minimumDate), in the app's theme ([dark]). */
+private fun pickDateTime(context: android.content.Context, dark: Boolean, initial: Long, onPicked: (Long) -> Unit) {
     val c = Calendar.getInstance().apply { timeInMillis = maxOf(initial, System.currentTimeMillis()) }
-    DatePickerDialog(context, { _, y, m, d ->
-        TimePickerDialog(context, { _, h, min ->
+    DatePickerDialog(context, pickerTheme(dark), { _, y, m, d ->
+        TimePickerDialog(context, pickerTheme(dark), { _, h, min ->
             c.set(y, m, d, h, min, 0)
             onPicked(maxOf(c.timeInMillis, System.currentTimeMillis()))
         }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), com.ecency.core.l10n.LocaleFormat.uses24Hour()).show()
@@ -414,7 +416,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
         Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.clip(RoundedCornerShape(50)).clickable(role = Role.Button) { leave() }.padding(12.dp).testTag("editorBack")) { Glyph(AppIcon.BACK, colors.darkGray, 24.dp, description = UiCopy.BACK) }
             Text(if (state.wordsCount > 0) EditorUiCopy.wordsCount(state.wordsCount) else "", color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.weight(1f).testTag("wordsCount"))
-            if (state.isDraftSaving) CircularProgressIndicator(Modifier.size(18.dp), color = colors.blueText, strokeWidth = 2.dp)
+            if (state.isDraftSaving) Spinner(size = 18.dp)
             if (!state.isReply && !state.isEdit) {
                 LabelOrIcon(
                     if (state.isDraftSaved) EditorUiCopy.SAVED else UiCopy.SAVE, if (state.isDraftSaved) AppIcon.CHECK else AppIcon.DRAFTS,
@@ -428,7 +430,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
             if (!state.isReply) {
                 Box(Modifier.clip(RoundedCornerShape(50)).clickable(role = Role.Button) { sheet = "options" }.padding(10.dp).testTag("postOptions")) { Glyph(AppIcon.SETTINGS, colors.darkGray, 22.dp, description = EditorUiCopy.POST_OPTIONS) }
             }
-            if (state.isSending || state.uploading > 0) CircularProgressIndicator(Modifier.padding(horizontal = 12.dp).size(22.dp).testTag("editorBusy"), color = colors.blueText, strokeWidth = 2.dp)
+            if (state.isSending || state.uploading > 0) Spinner(Modifier.padding(horizontal = 12.dp).testTag("editorBusy"), size = 22.dp)
             else Button(
                 onClick = { if (state.kind == com.ecency.core.app.EditorKind.REPLY) model.submit() else confirmSubmit = true },
                 enabled = state.canSubmit, colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
@@ -893,7 +895,7 @@ internal fun PollSheet(current: PollDraft?, onAttach: (PollDraft) -> Unit, onRes
                 }
             }
             TextButton(onClick = { poll = poll.copy(choices = poll.choices + "") }, modifier = Modifier.testTag("pollAddChoice")) { Text(EditorUiCopy.ADD_CHOICE, color = colors.blueText) }
-            Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { pickDateTime(context, EditorMeta.isoMillis(poll.endTime) ?: System.currentTimeMillis()) { poll = poll.copy(endTime = isoString(it)) } }.padding(vertical = 12.dp).testTag("pollEnd")) {
+            Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { pickDateTime(context, colors.isDark, EditorMeta.isoMillis(poll.endTime) ?: System.currentTimeMillis()) { poll = poll.copy(endTime = isoString(it)) } }.padding(vertical = 12.dp).testTag("pollEnd")) {
                 Text(EditorUiCopy.END_TIME, color = colors.darkGray, modifier = Modifier.weight(1f))
                 Text(EditorMeta.isoMillis(poll.endTime)?.let(::display).orEmpty(), color = colors.text)
             }
@@ -966,7 +968,7 @@ private fun OptionsSheet(env: AppEnvironment, model: EditorModel, state: EditorS
                     }
                 }
                 if (later) {
-                    TextButton(onClick = { pickDateTime(context, System.currentTimeMillis()) { model.setSchedule(scheduleString(it)) } }, modifier = Modifier.testTag("schedulePick")) {
+                    TextButton(onClick = { pickDateTime(context, colors.isDark, System.currentTimeMillis()) { model.setSchedule(scheduleString(it)) } }, modifier = Modifier.testTag("schedulePick")) {
                         Text(state.scheduledFor?.let { EditorMeta.isoMillis(it) }?.let(::display) ?: EditorUiCopy.SCHEDULING_TIME, color = colors.blueText)
                     }
                 }
@@ -1141,7 +1143,7 @@ private fun UploadsSheet(
                     Modifier.clip(CircleShape).clickable(onClick = onAdd, role = Role.Button).semantics { contentDescription = com.ecency.core.app.UploadsCopy.ADD_TO_GALLERY }
                         .padding(6.dp).testTag("addToGallery"),
                 ) { Glyph(AppIcon.ADD, colors.text, 24.dp, description = null) }
-                if (state.uploading > 0) CircularProgressIndicator(Modifier.padding(horizontal = 6.dp).size(18.dp), color = colors.blueText, strokeWidth = 2.dp)
+                if (state.uploading > 0) Spinner(Modifier.padding(horizontal = 6.dp), size = 18.dp)
                 if (state.selected.isNotEmpty()) TextButton(onClick = model::deleteSelected, modifier = Modifier.testTag("deleteImages")) { Text(EditorUiCopy.deleteCount(state.selected.size), color = colors.redText) }
             }
             if (!state.loaded) LoadingBlock(Modifier.padding(vertical = 24.dp))
@@ -1197,7 +1199,7 @@ fun DraftsScreen(env: AppEnvironment, model: com.ecency.core.app.DraftsModel, na
                         Text(title, color = colors.text, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Text(body.take(100), color = colors.darkGray, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
-                    if (id in state.busy) CircularProgressIndicator(Modifier.size(18.dp), color = colors.blueText, strokeWidth = 2.dp) else trailing()
+                    if (id in state.busy) Spinner(size = 18.dp) else trailing()
                 }
             @Composable fun Icon(tag: String, description: String, glyph: AppIcon, onClick: () -> Unit) =
                 // 36 dp with 12 dp between neighbours: each reaches a 48 dp touch area

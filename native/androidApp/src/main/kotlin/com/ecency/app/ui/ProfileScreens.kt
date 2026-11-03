@@ -39,13 +39,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -419,7 +417,7 @@ private fun ProfileSummary(
                                 .padding(6.dp).testTag("emailDigest"),
                         ) { Glyph(AppIcon.EMAIL, colors.blueText, 26.dp, description = ProfileUiCopy.EMAIL_DIGEST) }
                         if (state.busy) {
-                            CircularProgressIndicator(Modifier.padding(start = 8.dp).size(24.dp).testTag("profileBusy"), color = colors.blueText, strokeWidth = 2.dp)
+                            Spinner(Modifier.padding(start = 8.dp).testTag("profileBusy"), size = 24.dp)
                         } else {
                             ProfileMenu(state, onSelect = { item ->
                                 when (item) {
@@ -756,7 +754,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
                     .clickable(enabled = !state.isSaving, onClick = model::save, role = Role.Button).padding(horizontal = 24.dp, vertical = 12.dp).testTag("saveProfile"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (state.isSaving) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                if (state.isSaving) Spinner(size = 18.dp, color = Color.White)
                 else Text(UiCopy.SAVE_CAPS, color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
@@ -795,7 +793,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
 @Composable
 private fun UploadingCover(modifier: Modifier = Modifier) {
     Box(modifier.background(Color.Black.copy(alpha = 0.4f)).testTag("imageUploading"), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(Modifier.size(28.dp), color = Color.White, strokeWidth = 2.dp)
+        Spinner(color = Color.White)
     }
 }
 

@@ -33,7 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -136,7 +135,7 @@ internal fun ComposeTranslateSheet(model: ComposeTranslateModel, onDismiss: () -
                     }
                     if (state.translating) {
                         Row(Modifier.padding(vertical = 8.dp).testTag("translateProgress"), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText, strokeWidth = 2.dp)
+                            Spinner(size = 20.dp)
                             state.progressText?.let { Text(it, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(start = 8.dp)) }
                         }
                     }
@@ -266,7 +265,7 @@ internal fun AiAssistSheet(model: AiAssistModel, onImage: (() -> Unit)? = null, 
                 state.insufficientText?.let { Text(it, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(top = 4.dp).testTag("aiInsufficient")) }
                 UnresolvedNotice(state.notice, state.unresolved, state.running, "ai", onGiveUp = model::giveUp)
                 Button(onClick = model::submit, enabled = state.canSubmit, colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue), modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).testTag("aiSubmit")) {
-                    if (state.running) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp) else Text(state.submitLabel)
+                    if (state.running) Spinner(size = 20.dp, color = Color.White) else Text(state.submitLabel)
                 }
             }
         }
@@ -359,7 +358,7 @@ internal fun AiImageBody(model: AiImageModel, showTitle: Boolean = true, onDismi
                 UnresolvedNotice(state.notice, state.unresolved, state.running, "aiImage", onGiveUp = model::giveUp)
                 if (state.running) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 16.dp).testTag("aiImageGenerating"), verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
+                        Spinner(size = 22.dp)
                         Text(AiImageModel.GENERATING, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.padding(start = 12.dp))
                     }
                 } else {
@@ -442,7 +441,7 @@ internal fun DictationSheet(model: DictationModel, onDismiss: () -> Unit) {
             }
             if (state.phase == DictationPhase.TRANSCRIBING) {
                 Row(Modifier.padding(bottom = 12.dp).testTag("dictationTranscribing"), verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText, strokeWidth = 2.dp)
+                    Spinner(size = 20.dp)
                     Text(EditorUiCopy.TRANSCRIBING, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(start = 8.dp))
                 }
             }
@@ -604,7 +603,7 @@ internal fun VideoUploadSheet(model: VideoUploadModel, onRecord: (() -> com.ecen
                 TextButton(onClick = picker::pickFromFiles, modifier = Modifier.testTag("videoFiles")) { Text(MediaPickCopy.FILES, color = colors.blueText) }
                 if (copying) {
                     Row(Modifier.padding(vertical = 8.dp).testTag("videoCopying"), verticalAlignment = Alignment.CenterVertically) {
-                        androidx.compose.material3.CircularProgressIndicator(Modifier.size(18.dp), color = colors.blueText, strokeWidth = 2.dp)
+                        Spinner(size = 18.dp)
                         Text(MediaPickCopy.PREPARING_VIDEO, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(start = 8.dp))
                     }
                 }

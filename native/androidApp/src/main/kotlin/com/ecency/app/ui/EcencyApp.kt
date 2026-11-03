@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -205,6 +206,13 @@ fun EcencyApp(env: AppEnvironment, host: AppHost, navigator: Navigator = remembe
     // light status bar icons over the blue side menu header too
     val drawerOpen = navigator.state.drawerOpen
     LaunchedEffect(dark, drawerOpen) { host.setSystemBarsDark(dark || drawerOpen) }
+    // the window behind the app takes the theme background too: it shows before the first frame, around the keyboard
+    // and in system animations (README "Themed backgrounds"), and follows a theme change like the screens
+    val view = androidx.compose.ui.platform.LocalView.current
+    LaunchedEffect(dark) {
+        val page = (if (dark) EcencyColors.Dark else EcencyColors.Light).background.toArgb()
+        view.context.findActivity()?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(page))
+    }
     // the app language and its direction, live (AppLanguage.kt); the settings start above set it before this frame
     AppLanguageRoot {
         EcencyTheme(dark = dark) {
@@ -942,7 +950,7 @@ private fun HomeFeeds(env: AppEnvironment, entry: StackEntry, now: Long, actions
     val tabs = listOf(RankedSort.TRENDING to UiCopy.TRENDING, RankedSort.HOT to UiCopy.HOT, RankedSort.CREATED to UiCopy.NEW)
     Column(Modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().background(colors.grayBackground).padding(horizontal = 12.dp, vertical = 8.dp),
+            Modifier.fillMaxWidth().background(colors.grayBackground).padding(horizontal = 12.dp, vertical = 8.dp).testTag("filterStrip"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             tabs.forEachIndexed { index, (_, label) ->

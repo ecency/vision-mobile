@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -408,7 +407,7 @@ private fun ListenBarRow(s: ListenBarState, model: ListenModel, onLogin: () -> U
         if (s.preparing) Preparing(s)
         when (s.button) {
             ListenButton.LOGIN -> PillButton(ReadingUiCopy.LOG_IN, "listenLogin", onClick = onLogin)
-            ListenButton.LOADING -> CircularProgressIndicator(Modifier.size(20.dp).testTag("listenLoading"), color = colors.blueText, strokeWidth = 2.dp)
+            ListenButton.LOADING -> Spinner(Modifier.testTag("listenLoading"), size = 20.dp)
             ListenButton.UNLOCK -> PillButton(s.unlockLabel, "listenUnlock", busy = s.busy, onClick = model::requestUnlock)
             ListenButton.NONE -> Unit
         }
@@ -429,7 +428,7 @@ private fun Preparing(s: ListenBarState) {
         }
     } else {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("listenPreparing")) {
-            CircularProgressIndicator(Modifier.size(16.dp), color = colors.blueText, strokeWidth = 2.dp)
+            Spinner(size = 16.dp)
             Text(s.preparingText, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(start = 6.dp))
         }
     }
@@ -443,7 +442,7 @@ private fun PillButton(label: String, tag: String, busy: Boolean = false, onClic
             .widthIn(min = 72.dp).padding(horizontal = 14.dp, vertical = 7.dp).testTag(tag),
         contentAlignment = Alignment.Center,
     ) {
-        if (busy) CircularProgressIndicator(Modifier.size(16.dp).testTag("$tag:busy"), color = androidx.compose.ui.graphics.Color.White, strokeWidth = 2.dp)
+        if (busy) Spinner(Modifier.testTag("$tag:busy"), size = 16.dp, color = androidx.compose.ui.graphics.Color.White)
         else Text(label, color = androidx.compose.ui.graphics.Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
@@ -467,7 +466,7 @@ private fun ListenPlayerRow(controller: ListenController, s: ListenPlayerState) 
                     .semantics { contentDescription = if (s.paused) ReadingUiCopy.PLAY else ReadingUiCopy.PAUSE }.testTag("listenPlay"),
                 contentAlignment = Alignment.Center,
             ) {
-                if (s.showSpinner) CircularProgressIndicator(Modifier.size(20.dp).testTag("listenBuffering"), color = androidx.compose.ui.graphics.Color.White, strokeWidth = 2.dp)
+                if (s.showSpinner) Spinner(Modifier.testTag("listenBuffering"), size = 20.dp, color = androidx.compose.ui.graphics.Color.White)
                 else Glyph(if (s.paused) AppIcon.PLAY else AppIcon.PAUSE, androidx.compose.ui.graphics.Color.White, 24.dp, filled = true)
             }
             Text(s.timeLabel, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.testTag("listenTime"))
