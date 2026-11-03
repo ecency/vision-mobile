@@ -532,11 +532,26 @@ class ChatThreadTest {
         assertEquals(listOf("+1" to 2, "heart" to 1), reply.reactions.map { it.emojiName to it.count })
         val linked = s.items.filterIsInstance<ChatMessageItem>().first { it.card != null }
         assertEquals("Fixture post", linked.card!!.title)
-        // the oldest message after the last read time carries "New messages", scrolled to once
+        // the oldest message after the last read time carries "New messages"; the thread stays at the newest message
         assertEquals(reply.id, s.unreadItemId)
-        assertEquals(reply.id, s.scrollTo)
-        m.consumeScroll()
+        assertNull(s.scrollTo)
         assertTrue("POST channels/ch-ecency/view" in f.paths())
+    }
+
+    @Test
+    fun aThreadWithManyUnreadMessagesOpensAtTheNewestOne() = runTest {
+        // opened by name (the Esie button): every loaded message is newer than the read time, so the first unread is
+        // the oldest loaded row. RN jumped there, up into the history; the thread now stays at the newest message.
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        val s = m.current
+        assertTrue(s.items.isNotEmpty())
+        assertNotNull(s.unreadItemId, "the marker is still shown, above")
+        assertNull(s.scrollTo, "opens at the newest message")
+        // an older page later never jumps either
+        m.loadMore(); f.idle()
+        assertNull(m.current.scrollTo)
     }
 
     @Test

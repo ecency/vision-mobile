@@ -306,6 +306,9 @@ class ChatFlowsTest {
         waitFor("chatRow:ch-ecency")
         compose.onNodeWithTag("chatRow:ch-ecency").performClick()
         waitUntil { navigator.state.top == AppScreen.ChatThread("ch-ecency", "O") }
+        waitFor("messages")
+        // the thread opens at the newest message; the oldest rows (the join notices, the unread marker) are above
+        compose.onNodeWithTag("messages").performScrollToKey("group_p2")
         waitFor("joins:group_p2")
         assertTrue(hasTextNode("2 people joined"))
         assertTrue(exists("unreadMarker"))

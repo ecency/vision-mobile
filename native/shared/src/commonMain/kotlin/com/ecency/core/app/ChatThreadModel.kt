@@ -189,7 +189,6 @@ class ChatThreadModel internal constructor(
     private var onlineIds: List<String> = emptyList()
     private var before: String? = null
     private var anchor: Long? = null
-    private var scrolledToUnread = false
     private var lastMarked = 0L
     private var markedAny = false
     private var groupRenamedLive = false
@@ -461,15 +460,15 @@ class ChatThreadModel internal constructor(
         }
     }
 
-    /** RN: fewer than 15 rows asks for the page before; the unread marker is scrolled to once; the channel is marked read. */
+    /**
+     * RN: fewer than 15 rows asks for the page before; the channel is marked read. Unlike RN, the thread is not
+     * scrolled to the unread marker: it opens at the newest message (owner 11-03), the marker shows above it. RN's jump
+     * to the oldest unread row sent a thread with many unread messages (Esie's) up into its history.
+     */
     private fun afterLoad() {
         val s = current
         if (s.items.size < AUTO_FILL_ROWS && s.hasMore && posts.isNotEmpty()) {
             scope.launch { load(refresh = false) }
-        }
-        if (!scrolledToUnread && s.unreadItemId != null) {
-            scrolledToUnread = true
-            setState { it.copy(scrollTo = it.unreadItemId) }
         }
         markViewed()
     }
@@ -583,10 +582,11 @@ class ChatThreadModel internal constructor(
             out += if (current.isGroup && p.type == ChatPost.HEADER_CHANGE) notice(p) else message(p, viewer, now, proxy)
         }
         flush()
-        // RN firstUnreadIndex: the oldest of the rows above the last read time (counted from the newest)
-        val last = anchor ?: 0L
+        // RN firstUnreadIndex: the oldest of the rows above the last read time (counted from the newest). No read time
+        // (a thread opened by name, before its members arrive): no marker. RN counted every row as unread then and
+        // jumped to the oldest loaded message.
         var unread: String? = null
-        for (item in out) if (item.timestamp > last) unread = item.id else break
+        anchor?.let { last -> for (item in out) if (item.timestamp > last) unread = item.id else break }
         setState { it.copy(items = out, unreadItemId = unread, showDmWarning = dmWarning(viewer)) }
     }
 
