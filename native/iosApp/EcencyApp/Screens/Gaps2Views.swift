@@ -736,6 +736,41 @@ struct AiDisclosedBadge: View {
     }
 }
 
+/// RN postElements Tags in postDisplayView's footer: one scrolling row of pills above the "Posted by" line, the first
+/// (pinned) one blue. A community pill shows its title and opens the community, any other tag opens its results.
+/// Colours are AA pairs of the theme (white on accent, secondary on lightBackground); RN's white on `$iconColor` was 1.7:1.
+struct PostTagsRow: View {
+    let tags: [PostTag]
+    let onOpen: (AppScreen) -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(tags, id: \.name) { tag in
+                    Button { onOpen(tag.screen) } label: {
+                        Text(tag.label)
+                            .scaledFont(12, weight: .bold)
+                            .lineLimit(1)
+                            .foregroundStyle(tag.pinned ? Color.white : theme.secondary)
+                            .padding(.horizontal, 10).padding(.vertical, 3)
+                            .frame(minHeight: 22)
+                            .background(Capsule().fill(tag.pinned ? theme.accent : theme.lightBackground))
+                            // a 44 point target around the 22 point pill
+                            .tapTarget()
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tag.accessibilityLabel)
+                    .accessibilityIdentifier("post-tag-\(tag.name)")
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.top, 8)
+        .accessibilityIdentifier("post-tags")
+    }
+}
+
 /// RN postDisplayView's footer source row: "Posted by {author} via {App} {age}", then the badges.
 struct PostedByRow: View {
     let post: Post

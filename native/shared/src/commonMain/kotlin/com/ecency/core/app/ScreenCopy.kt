@@ -279,6 +279,10 @@ object ReadingUiCopy {
     fun tabSelected(title: String): String = L.native.ui.reading.tabSelected(title = title)
     fun feedPinned(label: String): String = L.native.ui.reading.feedPinned(label = label)
     fun inTopic(topic: String): String = L.native.ui.reading.inTopic(topic = topic)
+    /** A community pill of the post's tags row, read by screen readers. */
+    fun tagCommunity(name: String): String = L.native.ui.reading.tagCommunity(name = name)
+    /** A plain tag pill of the post's tags row, read by screen readers. */
+    fun tagTopic(name: String): String = L.native.ui.reading.tagTopic(name = name)
 }
 
 /** Chat screens and sheets. */

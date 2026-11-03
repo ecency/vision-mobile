@@ -52,6 +52,8 @@ data class PostState(
     val botComments: List<CommentItem> = emptyList(),
     /** RN postReadingMetadata (words, minutes, speech text); null until computed. */
     val reading: ReadingInfo? = null,
+    /** RN postDisplayView footer `<Tags>`: the category and tags, community titles filled in as they are looked up. */
+    val tags: List<PostTag> = emptyList(),
 )
 
 /**
@@ -153,7 +155,8 @@ class PostModel internal constructor(
     private suspend fun showPost(post: Post) {
         val previous = current.post
         val card = card(post, withSummary = false)
-        setState { it.copy(post = post, card = card, notFound = false) }
+        setState { it.copy(post = post, card = card, notFound = false, tags = PostTags.of(post, tagTitles)) }
+        lookUpTagTitles(post)
         env.localVotes.retireConfirmed(listOf(post), env.session.current.username)
         // RN usePlausibleTracker: one pageview per post screen, when its post first loads
         if (!pageviewRecorded) {
@@ -182,6 +185,27 @@ class PostModel internal constructor(
     }
 
     private var bodyJob: Job? = null
+
+    /** Community titles of the post's tags (RN tagContainer getCommunity): a title, or null for no such community. */
+    private val tagTitles = mutableMapOf<String, String?>()
+    private val tagLookups = mutableSetOf<String>()
+
+    private fun lookUpTagTitles(post: Post) {
+        for (name in PostTags.lookups(post)) {
+            if (!tagLookups.add(name)) continue // once per screen, even when the post comes again
+            scope.launch {
+                val title = try {
+                    env.communityApi.community(name)?.title.orEmpty()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    return@launch // RN's fallback: the name, still a community
+                }
+                tagTitles[name] = title.ifBlank { null }
+                current.post?.let { p -> setState { it.copy(tags = PostTags.of(p, tagTitles)) } }
+            }
+        }
+    }
 
     private var pageviewRecorded = false
 

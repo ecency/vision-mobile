@@ -2290,6 +2290,8 @@
         "files": "Files",
         "paused": "Paused",
         "in_topic": "in {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Vote",
         "reply": "Reply",
         "mute_sound": "Mute",

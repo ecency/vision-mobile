@@ -45,6 +45,33 @@ final class Gaps2UITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["ecency"].exists, "no text stands in for the mark")
     }
 
+    /// RN postDisplayView's footer tags: above "Posted by", the community first (pinned) by its title, then the tags;
+    /// each pill a button with its label and kind and a 44 point target; a tag opens its results, a community its screen.
+    func testThePostFooterShowsItsTagsAndATapOpensTheTagOrTheCommunity() {
+        let app = launch(["-openPost", "spike-alice/fake-post-1"])
+        XCTAssertTrue(element(app, "post-title").waitForExistence(timeout: 20), app.debugDescription)
+        let community = app.buttons["post-tag-hive-100001"]
+        let spike = app.buttons["post-tag-spike"]
+        let footer = element(app, "posted-by")
+        for _ in 0..<8 where !(spike.exists && spike.isHittable && footer.exists) { app.swipeUp() }
+        XCTAssertTrue(community.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(spike.exists)
+        XCTAssertEqual(community.label, "Spike Community, community")
+        XCTAssertEqual(spike.label, "spike, tag")
+        XCTAssertLessThan(community.frame.minX, spike.frame.minX, "the community first")
+        XCTAssertGreaterThanOrEqual(community.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(spike.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(spike.frame.width, 44)
+        XCTAssertTrue(footer.exists)
+        XCTAssertLessThanOrEqual(spike.frame.maxY, footer.frame.minY + 0.5, "above the posted by line")
+        spike.tap()
+        XCTAssertTrue(app.navigationBars["#spike"].waitForExistence(timeout: 10), app.debugDescription)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(community.waitForExistence(timeout: 10))
+        community.tap()
+        XCTAssertTrue(element(app, "community-details").waitForExistence(timeout: 15), app.debugDescription)
+    }
+
     /// One-off device check (with `TEST_RUNNER_GAPS2_PHOTO_CHECK=1` after PhotoSaveDeviceCheck): the Photos app shows
     /// what was saved; the screenshot is kept in the result bundle.
     func testPhotosShowsTheSavedImages() throws {
