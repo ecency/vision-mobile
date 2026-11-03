@@ -382,7 +382,7 @@ struct CommunityScreen: View {
             } else if let error = state.error {
                 ErrorStateView(error: error) { community.retry() }
             } else {
-                ProgressView().padding()
+                PageLoading()
             }
         }
         .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))

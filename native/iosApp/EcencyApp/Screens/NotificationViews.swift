@@ -369,7 +369,7 @@ private struct LeaderboardView: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     if state.users.isEmpty, state.isLoading || !state.loaded {
-                        ProgressView().padding(.top, 48)
+                        PageLoading()
                     } else if state.users.isEmpty {
                         Text(UiCopy.shared.NOTHING_HERE).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 48)
                     }

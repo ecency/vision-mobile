@@ -277,7 +277,7 @@ struct EditorScreen: View {
                     .font(.footnote).foregroundStyle(theme.dangerText).padding(.horizontal, 16).accessibilityIdentifier("local-save-failed")
             }
             if state.loading {
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let error = state.error, state.owner != nil, state.body.isEmpty, state.kind.name != "NEW_POST" {
                 VStack(spacing: 12) {
                     Text(error.message).foregroundStyle(theme.secondary)

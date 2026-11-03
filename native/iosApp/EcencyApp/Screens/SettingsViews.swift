@@ -212,7 +212,7 @@ struct EmailDigestsScreen: View {
                 if !mine {
                     EmptyView()
                 } else if state.loading {
-                    ProgressView().frame(maxWidth: .infinity).padding(.top, 32).accessibilityIdentifier("digests-loading")
+                    PageLoading(identifier: "digests-loading")
                 } else if let error = state.error {
                     message(error, id: "digests-error")
                 } else {

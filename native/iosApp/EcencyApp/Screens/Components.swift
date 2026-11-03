@@ -364,12 +364,22 @@ struct ThemedForm<Content: View>: View {
     }
 }
 
-/// The spinner of a list still loading its first page, as a List row (`listStateRow`).
-struct ListLoadingRow: View {
+/// The one spinner of a page still loading its first content when the layout is not known (lists of rows use
+/// `RowsSkeleton`, feeds `FeedSkeleton`, the post `PostBodySkeleton`): the same size and place on every screen,
+/// 48 pt under the top, on the page's theme background. In a List it is a state row (`listStateRow`).
+struct PageLoading: View {
+    var identifier: String? = nil
     var topPadding: CGFloat = 48
 
     var body: some View {
         ProgressView().frame(maxWidth: .infinity).padding(.top, topPadding).listStateRow()
+            .accessibilityIdentifier(identifier ?? "page-loading")
     }
 }
 
+/// The spinner of a list still loading its first page (`PageLoading`), or its next page (`topPadding: 0`).
+struct ListLoadingRow: View {
+    var topPadding: CGFloat = 48
+
+    var body: some View { PageLoading(topPadding: topPadding) }
+}

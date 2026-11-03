@@ -220,7 +220,7 @@ struct WavesListView: View {
                             } else if state.loaded {
                                 Text(UiCopy.shared.NOTHING_HERE).foregroundStyle(theme.secondary).accessibilityIdentifier("waves-empty").esieAbove(.empty).padding(.top, 80)
                             } else {
-                                ProgressView().padding(.top, 80).accessibilityIdentifier("waves-loading")
+                                PageLoading(identifier: "waves-loading")
                             }
                         }
                         ForEach(state.items, id: \.key) { item in
@@ -289,7 +289,7 @@ struct ProfileWavesTab: View {
                     Text(UiCopy.shared.userHasNoPosts(username: username)).foregroundStyle(theme.secondary)
                         .accessibilityIdentifier("profile-waves-empty").esieAbove(.empty).padding(.top, 32)
                 } else {
-                    ProgressView().padding(.top, 32)
+                    PageLoading()
                 }
             }
             ForEach(state.items, id: \.key) { item in

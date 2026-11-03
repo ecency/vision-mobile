@@ -303,7 +303,7 @@ private struct ProfileTabFeed: View {
                     // the pages read so far may all be filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
                     if FeedPaging.shouldLoadMoreAtEnd(state) { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.padding(.top, 12) }
                 } else {
-                    ProgressView().padding(.top, 32)
+                    PageLoading()
                 }
             }
             ForEach(state.items, id: \.key) { card in
@@ -630,7 +630,7 @@ struct FollowsScreen: View {
         let state = follows.state
         ScrollView {
             LazyVStack(spacing: 0) {
-                if state.isLoading { ProgressView().padding(.top, 32) }
+                if state.isLoading { PageLoading() }
                 if let empty = state.emptyText {
                     VStack(spacing: 8) {
                         EsieView(state.error != nil && state.rows.isEmpty ? .error : .empty)
@@ -699,7 +699,7 @@ struct ProfileEditScreen: View {
         let state = edit.state
         ZStack(alignment: .bottomTrailing) {
             if state.isLoading {
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let error = state.loadError {
                 ErrorStateView(error: error) { model.retry() }
             } else if state.loaded {
@@ -878,7 +878,7 @@ struct BookmarksScreen: View {
             .accessibilityIdentifier("bookmarks-tabs")
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    if state.isLoading(tab: tab) && count(state, tab) == 0 { ProgressView().padding(.top, 32) }
+                    if state.isLoading(tab: tab) && count(state, tab) == 0 { PageLoading() }
                     if let error = state.error(tab: tab), count(state, tab) == 0 {
                         ErrorStateView(error: error) { model.retry(tab: tab) }.padding(.top, 32)
                     }
