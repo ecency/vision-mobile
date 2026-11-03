@@ -490,7 +490,9 @@ internal fun WaveView(
                 DisposableEffect(poll) { onDispose { poll?.close() } }
                 if (poll != null) {
                     androidx.compose.runtime.CompositionLocalProvider(LocalMergedRow provides false) {
-                        PollCard(poll) { voters -> feedx?.env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET }) }
+                        PollCard(poll) { voters ->
+                            feedx?.env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET })
+                        }
                     }
                 }
                 ActionsRow(

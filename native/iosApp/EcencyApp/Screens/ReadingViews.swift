@@ -128,7 +128,8 @@ struct RowPoll: View {
     @StateObject private var holder = RowPollHolder()
 
     var body: some View {
-        if let poll = holder.poll(for: post, env: app.env) { PollCard(model: poll) }
+        // keyed by its model: a refreshed post gets a new model, and a new card that starts it
+        if let poll = holder.poll(for: post, env: app.env) { PollCard(model: poll).id(ObjectIdentifier(poll)) }
     }
 }
 

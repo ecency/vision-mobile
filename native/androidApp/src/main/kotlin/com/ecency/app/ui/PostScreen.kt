@@ -492,7 +492,9 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
                 val poll = remember(item.post.metadata.rawJson, env) { env?.pollModel(item.post) }
                 androidx.compose.runtime.DisposableEffect(poll) { onDispose { poll?.close() } }
                 if (poll != null) {
-                    PollCard(poll) { voters -> env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET }) }
+                    PollCard(poll) { voters ->
+                        env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET })
+                    }
                 }
             }
             ActionsRow(

@@ -1248,6 +1248,25 @@ class FeedxTest {
     }
 
     @Test
+    fun aPollVoteFinishesAfterItsRowCloses() = runTest {
+        // a wave or reply row owns its poll: scrolling it away mid-vote must not drop the vote
+        val results = """[{"poll_trx_id":"trx1","poll_choices":[{"choice_num":1,"choice_text":"A",""" +
+            """"votes":{"total_votes":3,"hive_hp":10}}],"poll_voters":[]}]"""
+        val app = TestApp(this, handler = reads())
+        app.authBackend.rest = { r -> if (r.url.startsWith("https://poll.ecency.com/rpc/poll")) HttpResult(200, results) else null }
+        signedIn(app)
+        val meta = """{"content_type":"poll","question":"Q","choices":["A"],"end_time":${TestApp.NOW / 1000 + 3600}}"""
+        val model = app.env.pollModel(post(entry("alice", "row", metadata = meta)))!!
+        model.start()
+        testScheduler.advanceUntilIdle()
+        model.toggle(1)
+        model.vote()
+        model.close()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.broadcasts().single().body.contains("""{\"poll\":\"trx1\",\"action\":\"vote\",\"choices\":[1]}"""))
+    }
+
+    @Test
     fun endedPollsAndEmptySelectionsDoNotVote() = runTest {
         val results = """[{"poll_trx_id":"trx1","poll_choices":[{"choice_num":1,"choice_text":"A","votes":{"total_votes":3,"hive_hp":10}}],"poll_voters":[]}]"""
         val app = TestApp(this, handler = reads())

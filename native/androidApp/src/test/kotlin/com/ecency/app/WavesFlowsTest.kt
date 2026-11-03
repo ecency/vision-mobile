@@ -169,13 +169,16 @@ class WavesFlowsTest {
     @Test
     fun aWaveWithAPollShowsThePollInTheList() {
         // RN's comment view draws a wave's poll in the list, not only in its thread
-        val poll = ""","content_type":"poll","question":"Dictation assist","choices":["Yes","No"],"end_time":4102444800,"version":1.1"""
+        val poll = ""","content_type":"poll","question":"Dictation assist","choices":["Yes","No"],""" +
+            """"end_time":4102444800,"version":1.1"""
         feedOverride = "[${row("alice", "w1", body = "Do you dictate?", meta = poll)},${row("bob", "w2")}]"
         launch()
         openWaves()
         waitFor("poll")
-        assertEquals(1, compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().size)
-        assertTrue("a wave without a poll has none", compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("wave:bob/w2"))).fetchSemanticsNodes().isEmpty())
+        fun pollsIn(wave: String) = compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag(wave)))
+            .fetchSemanticsNodes().size
+        assertEquals(1, pollsIn("wave:alice/w1"))
+        assertEquals("a wave without a poll has none", 0, pollsIn("wave:bob/w2"))
     }
 
     @Test

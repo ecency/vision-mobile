@@ -16,8 +16,6 @@ internal object CleanReply {
     )
     private val LINE_FILTERS_AFTER = listOf(
         "originally posted through [scrobble.life", "*posted via lumen", "<sub>posted via [hivesuite](",
-        // HiveSuite's newer byline, ahead of render-helper (vision-web #2003)
-        "<sub>[via hivesuite](",
         "view this post <a href=\"https://travelfeed.com/",
         // "[via Inbox]" is compared against the lower-cased line, so it never matches; kept for parity.
         "[via Inbox]", "<sub>[via apps from](",
@@ -43,6 +41,7 @@ internal object CleanReply {
                     !(l.contains("posted from liketu speak") && l.contains("auto-transcrib")) &&
                     LINE_FILTERS_AFTER.none { l.contains(it) } &&
                     !isThreeSpeakFooterLine(item) &&
+                    !isHiveSuiteViaLine(l) &&
                     !(l.contains("_posted from liketu clips") && l.contains("short video, trimmed"))
             }.joinToString("\n")
         }
@@ -85,6 +84,18 @@ internal object CleanReply {
     }
 
     /**
+     * HiveSuite's newer byline, ahead of render-helper (vision-web #2003): the whole [lower]-cased line is
+     * `<sub>[via hivesuite](https://hivesuite.app/...)</sub>`, so prose quoting it stays.
+     */
+    private fun isHiveSuiteViaLine(lower: String): Boolean {
+        val line = Js.trim(lower)
+        if (!line.startsWith(HIVESUITE_VIA) || !line.endsWith(")</sub>")) return false
+        val linkEnd = line.indexOf(')', HIVESUITE_VIA.length)
+        return linkEnd == line.length - ")</sub>".length &&
+            line.substring(HIVESUITE_VIA.length, linkEnd).none { Js.isSpace(it) }
+    }
+
+    /**
      * The newer 3Speak footer line (also the separator lookahead, which sees one line),
      * `/^[ \t]*▶\uFE0F?[ \t]*\[watch on 3speak\.tv\]\(https:\/\/3speak\.tv\/watch[^)\s]*\)\s*$/i`.
      */
@@ -110,5 +121,6 @@ internal object CleanReply {
         return if (i < s.length && s[i] == ')') i + 1 else -1
     }
 
+    private const val HIVESUITE_VIA = "<sub>[via hivesuite](https://hivesuite.app/"
     private const val THREE_SPEAK_LINK = "[watch on 3speak.tv](https://3speak.tv/watch"
 }

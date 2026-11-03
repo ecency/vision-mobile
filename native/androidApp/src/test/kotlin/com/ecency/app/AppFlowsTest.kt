@@ -191,16 +191,15 @@ class AppFlowsTest {
     @Test
     fun aReplyWithAPollShowsItsPollInTheThread() {
         // RN's comment view draws a reply's poll, as the post screen does for the post
-        val poll = ""","content_type":"poll","question":"Pick one","choices":["Yes","No"],"end_time":4102444800,"version":1.1"""
-        replyMetadata = poll
+        replyMetadata = ""","content_type":"poll","question":"Pick one","choices":["Yes","No"],""" +
+            """"end_time":4102444800,"version":1.1"""
         launch()
         waitFor("card:alice/trending-one")
         compose.onNodeWithTag("open:alice/trending-one").performClick()
         waitFor("postTitle")
         compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
-        compose.await("the reply's poll") {
-            compose.onAllNodes(hasTestTag("poll") and hasAnyAncestor(hasTestTag("comment:carol/re-one"))).fetchSemanticsNodes().isNotEmpty()
-        }
+        val replyPoll = hasTestTag("poll") and hasAnyAncestor(hasTestTag("comment:carol/re-one"))
+        compose.await("the reply's poll") { compose.onAllNodes(replyPoll).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
