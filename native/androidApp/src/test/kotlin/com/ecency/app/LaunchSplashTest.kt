@@ -35,14 +35,23 @@ class LaunchSplashTest {
         assertEquals(R.style.Theme_Ecency_Starting, info.theme)
         assertEquals(R.drawable.splash_logo, themeValue(androidx.core.splashscreen.R.attr.windowSplashScreenAnimatedIcon).resourceId)
         assertEquals(0xFFFFFFFF.toInt(), themeValue(androidx.core.splashscreen.R.attr.windowSplashScreenBackground).data)
-        // after the splash: the app's window theme
-        assertEquals(android.R.style.Theme_Material_NoActionBar, themeValue(androidx.core.splashscreen.R.attr.postSplashScreenTheme).resourceId)
+        // after the splash: the app's window theme, on the page colour (README "Themed backgrounds")
+        assertEquals(R.style.Theme_Ecency, themeValue(androidx.core.splashscreen.R.attr.postSplashScreenTheme).resourceId)
+        assertEquals(0xFFFFFFFF.toInt(), windowBackground())
+    }
+
+    /** The window background of the app's window theme, resolved in the current configuration. */
+    private fun windowBackground(): Int {
+        val theme = context.resources.newTheme().apply { applyStyle(R.style.Theme_Ecency, true) }
+        val value = TypedValue().also { assertTrue("theme has a window background", theme.resolveAttribute(android.R.attr.windowBackground, it, true)) }
+        return value.data
     }
 
     @Test
     @Config(qualifiers = "night")
     fun inDarkModeTheBackgroundIsTheDarkPageColour() {
         assertEquals(0xFF1E2835.toInt(), themeValue(androidx.core.splashscreen.R.attr.windowSplashScreenBackground).data)
+        assertEquals(0xFF1E2835.toInt(), windowBackground())
     }
 
     @Test
