@@ -28,10 +28,10 @@ struct AppTheme {
     var isDark = false
     /// Text in the success green (gains, scheduled and done states) on `background`: AA in both themes.
     var successText = Color(hex: ContrastPalette.lightSuccessText)
-    /// The chat warning box (RN dmWarningContainer: the DM warning, the ban notice), RN's cream in light; the same
-    /// values as Android's `EcencyColors`.
+    /// The chat warning box (RN dmWarningContainer: the DM warning, the ban notice), RN's cream in light with a darker
+    /// amber border than RN's (3:1 on the fill, RN's was 1.5:1); the same values as Android's `EcencyColors`.
     var warningBackground = Color(hex: 0xFFF6DF)
-    var warningBorder = Color(hex: 0xF4C26B)
+    var warningBorder = Color(hex: 0xB07800)
     /// Text and icons on `warningBackground`: AA in every theme.
     var warningText = Color(hex: 0x8A5B00)
 
@@ -73,7 +73,6 @@ struct AppTheme {
             t.dangerText = Color(hex: 0x9F2525)
             t.successText = Color(hex: 0x086346)
             t.border = Color(hex: 0x8A8A8A)
-            t.warningBorder = Color(hex: 0xB07800)
             t.warningText = Color(hex: 0x6B4500)
         }
         return t
