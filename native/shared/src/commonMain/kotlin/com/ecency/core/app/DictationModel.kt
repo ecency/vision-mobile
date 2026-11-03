@@ -102,6 +102,8 @@ data class DictationState(
     val retry: Retry? = null,
     val notice: String? = null,
     val alert: String? = null,
+    /** The message of the clip held unsent, as it was written, so a later language change still matches it. */
+    val heldAlert: String? = null,
 ) {
     /**
      * [CHECK]: the request may have been charged, only its key may be sent again. [TRY]: it was refused uncharged
@@ -111,6 +113,13 @@ data class DictationState(
     enum class Retry { CHECK, TRY, CONFIRM }
 
     val isPriceReady: Boolean get() = price != null && !priceLoading && !priceFailed
+
+    /**
+     * The alert's own title, or null for the generic failure title. A clip held unsent (the notification's Stop, the
+     * lock, a call) is not a failure: it says "Recording stopped".
+     */
+    val alertTitle: String?
+        get() = if (alert != null && alert == heldAlert) DictationModel.HELD_TITLE else null
 
     val busy: Boolean get() = phase == DictationPhase.TRANSCRIBING || askPermission
 
@@ -245,7 +254,14 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
                 env.dictationSessions.take(owner, editor.paidScope)?.let { h ->
                     if (withContext(dispatchers.io) { recorder?.read(h.clip) } != null) {
                         held = h.clip to h.millis
-                        setState { it.copy(retry = DictationState.Retry.CONFIRM, seconds = ((h.millis + 999) / 1000).toInt(), alert = h.message) }
+                        setState {
+                            it.copy(
+                                retry = DictationState.Retry.CONFIRM,
+                                seconds = ((h.millis + 999) / 1000).toInt(),
+                                alert = h.message,
+                                heldAlert = h.message,
+                            )
+                        }
                     }
                 }
             }
@@ -548,7 +564,15 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
         held?.let { (old, _) -> r.delete(old); env.dictationSessions.release(old) }
         held = path to elapsed
         current.owner?.let { env.dictationSessions.hold(DictationSessions.Held(it, editor.paidScope, path, elapsed, message)) }
-        setState { it.copy(phase = DictationPhase.IDLE, seconds = ((elapsed + 999) / 1000).toInt(), retry = DictationState.Retry.CONFIRM, alert = message) }
+        setState {
+            it.copy(
+                phase = DictationPhase.IDLE,
+                seconds = ((elapsed + 999) / 1000).toInt(),
+                retry = DictationState.Retry.CONFIRM,
+                alert = message,
+                heldAlert = message,
+            )
+        }
     }
 
     override fun close() {
@@ -587,11 +611,13 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
         const val MAX_TEXT = 100_000
 
         val TITLE: String get() = L.dictation.title
+        val HELD_TITLE: String get() = L.native.dictation.heldTitle
         val HELD_LOCKED: String get() = L.native.dictation.heldLocked
         val HELD_NO_BACKGROUND: String get() = L.native.dictation.heldNoBackground
         val HELD_STOPPED: String get() = L.native.dictation.heldStopped
         val HELD_FOCUS_LOST: String get() = L.native.dictation.heldFocusLost
         val HELD_INTERRUPTED: String get() = L.native.dictation.heldInterrupted
+
         val DENIED: String get() = L.dictation.denied
         val RECORDER_ERROR: String get() = L.dictation.errorRecorder
         val PRICE_ERROR: String get() = L.dictation.priceError

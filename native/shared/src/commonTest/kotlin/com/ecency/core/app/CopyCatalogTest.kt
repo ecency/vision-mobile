@@ -234,6 +234,7 @@ class CopyCatalogTest {
         "BrowserTab.LOADING_TITLE" to { BrowserTab.LOADING_TITLE },
         "DappBrowserModel.MESSAGE" to { DappBrowserModel.MESSAGE },
         "DictationModel.TITLE" to { DictationModel.TITLE },
+        "DictationModel.HELD_TITLE" to { DictationModel.HELD_TITLE },
         "DictationModel.HELD_LOCKED" to { DictationModel.HELD_LOCKED },
         "DictationModel.HELD_NO_BACKGROUND" to { DictationModel.HELD_NO_BACKGROUND },
         "DictationModel.HELD_STOPPED" to { DictationModel.HELD_STOPPED },
