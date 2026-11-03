@@ -50,11 +50,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -171,7 +169,7 @@ fun ChatsTab(env: AppEnvironment, entry: StackEntry, username: String, push: (Ap
             if (mine && state.isLoading && state.rows.isEmpty() && !state.searching) {
                 RowsSkeleton(6, tag = "chatsLoading")
             } else if (mine && (state.isLoading || state.searching)) {
-                CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp).size(28.dp).testTag("chatsLoading"), color = colors.blueText)
+                Spinner(Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp).testTag("chatsLoading"))
             }
             PullToRefreshBox(
                 isRefreshing = mine && state.isRefreshing,
@@ -459,7 +457,7 @@ private fun NewGroupSheet(env: AppEnvironment, model: ChatNewGroupModel, onCreat
                 val visible = model.visible
                 Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).padding(top = 6.dp)) {
                     when {
-                        s.searching && visible.isEmpty() -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(12.dp).size(24.dp), color = colors.blueText)
+                        s.searching && visible.isEmpty() -> Spinner(Modifier.align(Alignment.CenterHorizontally).padding(12.dp), size = 24.dp)
                         visible.isEmpty() -> Text(s.emptyText, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(vertical = 8.dp).testTag("groupEmpty"))
                         else -> LazyColumn {
                             items(visible, key = { it.username }) { p ->
@@ -501,7 +499,7 @@ private fun SheetButton(text: String, enabled: Boolean, busy: Boolean, tag: Stri
             .background(if (enabled) colors.blue else colors.blue.copy(alpha = 0.4f)).clickable(enabled = enabled, onClick = onClick, role = Role.Button).testTag(tag),
         contentAlignment = Alignment.Center,
     ) {
-        if (busy) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+        if (busy) Spinner(size = 20.dp, color = Color.White)
         else Text(text, color = Color.White, fontWeight = FontWeight.Bold)
     }
 }
@@ -621,7 +619,7 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
                         if (s.items.isNotEmpty()) item(key = "footer") {
                             Box(Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                                 when {
-                                    s.isLoading -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText)
+                                    s.isLoading -> Spinner(size = 24.dp)
                                     !s.hasMore -> Text(ChatThreadModel.NO_MORE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.testTag("noMore"))
                                 }
                             }
@@ -630,7 +628,7 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
                 }
             }
             if (mine && s.items.isEmpty() && s.isLoading) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center).size(24.dp), color = colors.blueText)
+                Spinner(Modifier.align(Alignment.Center), size = 24.dp)
             }
             if (mine && s.items.isEmpty() && s.loaded && !s.isLoading) {
                 Text(
@@ -969,7 +967,7 @@ private fun Composer(env: AppEnvironment, model: ChatThreadModel, s: com.ecency.
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.Bottom) {
             Box(Modifier.size(44.dp).clip(CircleShape).clickable(enabled = !s.uploading && !s.sending, onClick = onAttach, role = Role.Button).testTag("attach"), contentAlignment = Alignment.Center) {
-                if (s.uploading) CircularProgressIndicator(Modifier.size(20.dp), color = colors.blueText, strokeWidth = 2.dp) else Glyph(AppIcon.ADD, colors.icon, 24.dp, description = UiCopy.ATTACH_IMAGE)
+                if (s.uploading) Spinner(size = 20.dp) else Glyph(AppIcon.ADD, colors.icon, 24.dp, description = UiCopy.ATTACH_IMAGE)
             }
             Column(Modifier.weight(1f).padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(colors.lightBackground).padding(horizontal = 12.dp, vertical = 10.dp)) {
                 if (s.editingId != null) {
@@ -1085,7 +1083,7 @@ private fun PinnedSheet(model: ChatPinnedModel, canUnpin: Boolean, onDismiss: ()
                 Text(ChatPinnedModel.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(start = 8.dp))
             }
             when {
-                s.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(32.dp), color = colors.blueText)
+                s.isLoading -> Spinner(Modifier.align(Alignment.CenterHorizontally).padding(32.dp))
                 s.error != null -> Text(s.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(32.dp))
                 s.items.isEmpty() -> Text(ChatPinnedModel.EMPTY, color = colors.darkGray, modifier = Modifier.padding(32.dp))
                 else -> LazyColumn(Modifier.heightIn(max = 420.dp).padding(top = 8.dp)) {
@@ -1162,7 +1160,7 @@ private fun ChatTranslationSheet(thread: ChatThreadModel, item: ChatMessageItem,
             Text(state.original, maxLines = 3, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray)
             Box(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 80.dp)) {
                 when {
-                    state.isLoading -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText)
+                    state.isLoading -> Spinner(size = 24.dp)
                     state.error != null -> Text(state.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                     else -> Text(state.translated ?: "", color = colors.text)
                 }

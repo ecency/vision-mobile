@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -118,7 +117,7 @@ fun ActionsRow(
             // pops when the vote lands from elsewhere (another card, a rollback)
             AnimatedSwap(voteInFlight, label = "vote") { inFlight ->
                 if (inFlight) {
-                    CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
+                    Spinner(size = 22.dp)
                 } else {
                     val voted = card.votedByMe || card.downvotedByMe
                     UpvoteGlyph(
@@ -275,7 +274,7 @@ fun ErrorBlock(error: AppError, modifier: Modifier = Modifier, esie: com.ecency.
 @Composable
 fun LoadingBlock(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().height(72.dp).testTag("loading"), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(Modifier.size(28.dp), color = LocalEcencyColors.current.blueText, strokeWidth = 2.5.dp)
+        Spinner()
     }
 }
 

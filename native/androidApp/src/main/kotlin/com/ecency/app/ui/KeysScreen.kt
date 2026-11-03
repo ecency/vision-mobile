@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -197,7 +196,7 @@ private fun ImportKeyDialog(busy: Boolean, properties: DialogProperties, onSign:
             }
         },
         confirmButton = {
-            if (busy) CircularProgressIndicator(Modifier.size(24.dp))
+            if (busy) Spinner(size = 24.dp)
             else TextButton(onClick = { onSign(secret) }, enabled = secret.isNotBlank(), modifier = Modifier.testTag("keyImportSign")) { Text(BackupKeysCopy.SIGN) }
         },
         dismissButton = { TextButton(onClick = onClose, enabled = !busy) { Text(BackupKeysCopy.CANCEL) } },

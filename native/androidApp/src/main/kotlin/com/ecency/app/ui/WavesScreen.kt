@@ -51,14 +51,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -292,7 +290,7 @@ fun WavesTabScreen(env: AppEnvironment, entry: StackEntry, username: String?, no
 @Composable
 private fun WavesTabBar(tabs: WavesTabsState, onTab: (String) -> Unit, onAdd: () -> Unit) {
     val colors = LocalEcencyColors.current
-    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(vertical = 8.dp).testTag("filterStrip"), verticalAlignment = Alignment.CenterVertically) {
         Row(
             Modifier.weight(1f).horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
             horizontalArrangement = if (tabs.tabs.size <= 2) Arrangement.SpaceEvenly else Arrangement.spacedBy(4.dp),
@@ -382,7 +380,7 @@ fun WavesList(
                         item(key = "footer") {
                             Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
                                 when {
-                                    state.isLoadingMore -> CircularProgressIndicator(Modifier.size(24.dp), color = colors.blueText, strokeWidth = 2.dp)
+                                    state.isLoadingMore -> Spinner(size = 24.dp)
                                     state.error != null -> TextButton(onClick = model::retry) { Text(UiCopy.TRY_AGAIN, color = colors.blueText) }
                                 }
                             }
@@ -713,7 +711,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
             }
             if (state.isVideoUploading) {
                 Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("waveVideoUploading"), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
+                    Spinner(size = 22.dp)
                 }
             }
             if (state.videoEmbedUrl != null) {
@@ -807,7 +805,7 @@ fun ShortsReels(env: AppEnvironment, model: ShortsModel, actions: FeedActions, o
     PullToRefreshBox(isRefreshing = state.isRefreshing, onRefresh = model::refresh, modifier = Modifier.fillMaxSize().background(Color.Black).testTag("shorts")) {
         when {
             state.items.isEmpty() && (state.isLoading || !state.loaded && state.error == null) ->
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Color.White) }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Spinner(color = Color.White) }
             state.items.isEmpty() && state.error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 TextButton(onClick = model::retry) { Text(state.error!!.message + "\n" + UiCopy.TRY_AGAIN, color = Color.White) }
             }
@@ -1079,7 +1077,7 @@ internal fun AttachedImageThumb(url: String?, attaching: Boolean, tag: String, e
     val colors = LocalEcencyColors.current
     if (attaching) {
         Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("${tag}Uploading"), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(Modifier.size(22.dp), color = colors.blueText, strokeWidth = 2.dp)
+            Spinner(size = 22.dp)
         }
     } else if (url != null) {
         Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).clickable(enabled = enabled, role = Role.Button, onClick = onRemove).testTag(tag)) {

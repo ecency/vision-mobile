@@ -34,7 +34,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
@@ -265,7 +264,7 @@ fun AuthUpgradeSheet(env: AppEnvironment, prompt: SigningPrompt.AuthUpgrade) {
                     colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 48.dp).testTag("upgradeSign"),
                 ) {
-                    if (prompt.validating) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                    if (prompt.validating) Spinner(size = 20.dp, color = Color.White)
                     else Text(AccountCopy.UPGRADE_SIGN, color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 Text(AccountCopy.UPGRADE_OR, color = colors.darkGray, modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 8.dp))
@@ -315,7 +314,7 @@ private fun HiveAuthBroadcastSheet(env: AppEnvironment, host: AppHost, prompt: S
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(HiveAuthCopy.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
-            CircularProgressIndicator(color = colors.blueText, modifier = Modifier.padding(16.dp))
+            Spinner(Modifier.padding(16.dp))
             Text(if (prompt.step == HiveAuthStep.WAITING) AuthUiCopy.APPROVE_THE_REQUEST_IN else HiveAuthCopy.INITIATING, color = colors.darkGray)
             Countdown(prompt.expiresAtMillis, env.nowMillis)
             if (walletMissing) Text(HiveAuthCopy.NOT_INSTALLED, color = colors.redText, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))

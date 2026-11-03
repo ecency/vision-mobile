@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -72,7 +71,7 @@ fun ReadingBar(info: ReadingInfo, recap: RecapModel? = null) {
                         Text(UiCopy.AI_BADGE, color = Color.White, fontSize = 8.sp, lineHeight = 10.sp, fontWeight = FontWeight.ExtraBold)
                     }
                     when {
-                        r.running -> CircularProgressIndicator(Modifier.size(18.dp).testTag("recapRunning"), strokeWidth = 2.dp)
+                        r.running -> Spinner(Modifier.testTag("recapRunning"), size = 18.dp)
                         r.summary != null -> Text(
                             UiCopy.TRY_AGAIN, color = colors.blueText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.clickable(onClick = recap::tryAgain, role = Role.Button).testTag("recapTryAgain"),
@@ -109,7 +108,7 @@ private fun RecapBox(recap: RecapModel, text: String, translating: Boolean, busy
             .padding(horizontal = 16.dp, vertical = 12.dp).testTag("recapBox"),
     ) {
         Text(text, color = colors.text, fontSize = 14.sp, lineHeight = 20.sp, modifier = Modifier.testTag("recapText"))
-        if (translating && busy) CircularProgressIndicator(Modifier.padding(top = 8.dp).size(18.dp), strokeWidth = 2.dp)
+        if (translating && busy) Spinner(Modifier.padding(top = 8.dp), size = 18.dp)
         Box(Modifier.fillMaxWidth().padding(top = 10.dp).height(1.dp).background(colors.icon))
         Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
@@ -358,7 +357,7 @@ fun PostViewCount(env: com.ecency.core.app.AppEnvironment, post: com.ecency.core
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Glyph(AppIcon.PREVIEW, colors.darkGray.copy(alpha = 0.6f), 14.dp)
-        if (s.loading) CircularProgressIndicator(Modifier.padding(start = 4.dp).size(10.dp), strokeWidth = 1.dp)
+        if (s.loading) Spinner(Modifier.padding(start = 4.dp), size = 10.dp)
         else Text(s.viewsText, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp).testTag("postViewsCount"))
     }
     if (open) PostStatsSheet(model, onPromote = { open = false; onScreen(model.promoteScreen) }) { open = false }

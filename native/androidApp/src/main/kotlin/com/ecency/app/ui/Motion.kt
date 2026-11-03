@@ -381,9 +381,7 @@ fun rememberSendPhase(sending: Boolean, sent: Any?, holdsDone: Boolean = true): 
 fun SendContent(phase: SendButtonPhase, tint: androidx.compose.ui.graphics.Color, size: Dp = 20.dp, idle: @Composable () -> Unit) {
     AnimatedSwap(phase, label = "send") {
         when (it) {
-            SendButtonPhase.SENDING -> androidx.compose.material3.CircularProgressIndicator(
-                androidx.compose.ui.Modifier.size(size).testTag("sending"), color = tint, strokeWidth = 2.dp,
-            )
+            SendButtonPhase.SENDING -> Spinner(androidx.compose.ui.Modifier.testTag("sending"), size = size, color = tint)
             SendButtonPhase.DONE -> androidx.compose.material3.Icon(
                 AppIcon.CHECK.vector(), contentDescription = ShellUiCopy.SENT, tint = tint, modifier = androidx.compose.ui.Modifier.size(size).testTag("sent"),
             )

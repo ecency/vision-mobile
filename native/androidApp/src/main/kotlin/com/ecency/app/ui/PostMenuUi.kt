@@ -37,7 +37,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -292,7 +291,7 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
                     colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                     modifier = Modifier.testTag("publish"),
                 ) {
-                    if (state.isPublishing) CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                    if (state.isPublishing) Spinner(size = 16.dp, color = Color.White)
                     else Text(ReadingUiCopy.PUBLISH, color = Color.White)
                 }
             }

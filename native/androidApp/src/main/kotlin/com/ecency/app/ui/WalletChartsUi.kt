@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -85,12 +84,12 @@ fun BalanceAnalyticsSheet(env: AppEnvironment, username: String, coinType: Strin
             }
             if (s.tab == AnalyticsTab.HISTORY) {
                 when {
-                    s.historyLoading -> Centered { CircularProgressIndicator(color = colors.blueText) }
+                    s.historyLoading -> Centered { Spinner() }
                     s.historyError != null -> Centered { Text(s.historyError!!, color = colors.darkText, fontSize = 14.sp) }
                     s.points.isEmpty() -> Centered { Text(UiCopy.NO_ACTIVITY, color = colors.darkText, fontSize = 14.sp, modifier = Modifier.testTag("analyticsEmpty")) }
                     else -> Box(Modifier.padding(horizontal = 16.dp)) {
                         BalanceChart(s.points, onNearStart = model::loadOlder)
-                        if (s.loadingOlder) CircularProgressIndicator(Modifier.padding(start = 88.dp, top = 8.dp).width(18.dp).height(18.dp), color = colors.blueText, strokeWidth = 2.dp)
+                        if (s.loadingOlder) Spinner(Modifier.padding(start = 88.dp, top = 8.dp), size = 18.dp)
                     }
                 }
             } else {
@@ -106,7 +105,7 @@ fun BalanceAnalyticsSheet(env: AppEnvironment, username: String, coinType: Strin
                 }
                 val sum = s.summary
                 when {
-                    s.summaryLoading -> Centered { CircularProgressIndicator(color = colors.blueText) }
+                    s.summaryLoading -> Centered { Spinner() }
                     s.summaryError != null -> Centered { Text(s.summaryError!!, color = colors.darkText, fontSize = 14.sp) }
                     sum == null -> Centered { Text(UiCopy.NO_ACTIVITY, color = colors.darkText, fontSize = 14.sp) }
                     else -> Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -45,7 +45,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
@@ -53,7 +52,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -150,7 +148,7 @@ fun JoinButton(subscribed: Boolean, pending: Boolean, onClick: () -> Unit, modif
     val colors = LocalEcencyColors.current
     if (pending) {
         Box(modifier.width(65.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(Modifier.size(20.dp).testTag("joinPending"), color = colors.blueText, strokeWidth = 2.dp)
+            Spinner(Modifier.testTag("joinPending"), size = 20.dp)
         }
         return
     }
@@ -195,7 +193,7 @@ fun UnderlineTabs(labels: List<String>, ids: List<String>, selected: Int, onSele
 @Composable
 fun PillTabs(labels: List<String>, ids: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     val colors = LocalEcencyColors.current
-    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(horizontal = 12.dp, vertical = 8.dp)) {
+    Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(horizontal = 12.dp, vertical = 8.dp).testTag("filterStrip")) {
         labels.forEachIndexed { index, label ->
             val on = index == selected
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -510,7 +508,7 @@ fun CommunityMembersScreen(model: CommunityMembersModel, env: AppEnvironment, en
                         if (member.title.isNotEmpty()) Text(member.title, color = colors.darkGray, fontSize = 13.sp)
                     }
                     if (member.account in state.saving) {
-                        CircularProgressIndicator(Modifier.size(18.dp), color = colors.blueText, strokeWidth = 2.dp)
+                        Spinner(size = 18.dp)
                     } else {
                         RoleChip(member) { editing = member }
                     }
@@ -580,7 +578,7 @@ fun RoleSheet(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
                 trailingIcon = {
                     when {
-                        lookupState.searching -> CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        lookupState.searching -> Spinner(size = 18.dp)
                         lookupState.known -> Glyph(AppIcon.CHECK, colors.blueText, 20.dp)
                     }
                 },
@@ -645,7 +643,7 @@ fun CommunitySettingsScreen(model: CommunitySettingsModel, nav: ScreenNav) {
                     colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("saveSettings"),
                 ) {
-                    if (state.saving) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                    if (state.saving) Spinner(size = 18.dp, color = Color.White)
                     else Text(CommunitySettingsState.SAVE, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }

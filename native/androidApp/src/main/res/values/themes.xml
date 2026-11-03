@@ -5,6 +5,24 @@
     <style name="Theme.Ecency.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
-        <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
+        <item name="postSplashScreenTheme">@style/Theme.Ecency</item>
+    </style>
+
+    <!-- The app window (README "Themed backgrounds"): the page colour of the system's light or dark mode until the app
+         sets its own theme's (EcencyApp), so nothing of Material's dark gray shows before the first frame. -->
+    <style name="Theme.Ecency" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="android:colorBackground">@color/splash_background</item>
+    </style>
+
+    <!-- The platform date and time pickers (the editor's schedule and poll end) in the app's theme, not the window's:
+         its page colour and its text blue (EcencyColors, held by UniformBackgroundTest). -->
+    <style name="Theme.Ecency.Picker.Light" parent="@android:style/Theme.Material.Light.Dialog">
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="android:colorAccent">#2E6BD4</item>
+    </style>
+    <style name="Theme.Ecency.Picker.Dark" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:colorBackground">#1E2835</item>
+        <item name="android:colorAccent">#7FB0F7</item>
     </style>
 </resources>

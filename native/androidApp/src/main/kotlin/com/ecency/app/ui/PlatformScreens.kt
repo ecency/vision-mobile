@@ -58,7 +58,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -334,7 +333,7 @@ fun DappBrowserScreen(env: AppEnvironment, entry: StackEntry, initialUrl: String
     }
     state.prompt?.let { prompt -> BridgeConfirmSheet(prompt, onConfirm = model::confirm, onReject = model::reject) }
     if (state.working) {
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)).testTag("bridgeWorking"), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = colors.blueText) }
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)).testTag("bridgeWorking"), contentAlignment = Alignment.Center) { Spinner() }
     }
 }
 
@@ -686,7 +685,7 @@ fun ProposalCard(env: AppEnvironment) {
                     onClick = model::vote, enabled = !state.voting, colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
                     modifier = Modifier.heightIn(min = 40.dp).testTag("proposalVote"),
                 ) {
-                    if (state.voting) CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
+                    if (state.voting) Spinner(size = 18.dp, color = Color.White)
                     else Text(ProposalCopy.VOTE, color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 TextButton(onClick = model::askDismiss, modifier = Modifier.padding(start = 8.dp).testTag("proposalDismiss")) { Text(ProposalCopy.DISMISS, color = colors.blueText) }

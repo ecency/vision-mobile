@@ -184,7 +184,7 @@ fun ToastWindow(toast: UiMessage.Toast?, onDone: (Long) -> Unit, fallback: @Comp
 
 const val TOAST_WINDOW_TITLE = "EcencyToast"
 
-private tailrec fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
+internal tailrec fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
     is android.app.Activity -> this
     is android.content.ContextWrapper -> baseContext.findActivity()
     else -> null

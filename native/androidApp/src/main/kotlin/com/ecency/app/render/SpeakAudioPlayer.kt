@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -314,7 +313,7 @@ internal fun SpeakAudioPlayer(block: Block.SpeakAudio, width: Dp) {
             contentAlignment = Alignment.Center,
         ) {
             if (state.showSpinner) {
-                CircularProgressIndicator(Modifier.size(20.dp).testTag("speak:loading"), color = Color.White, strokeWidth = 2.dp)
+                com.ecency.app.ui.Spinner(Modifier.testTag("speak:loading"), size = 20.dp, color = Color.White)
             } else {
                 PlayPauseGlyph(playing = !state.paused)
             }
