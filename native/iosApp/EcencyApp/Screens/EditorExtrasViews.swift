@@ -593,7 +593,7 @@ struct VideoUploadSheet: View {
         }
         .presentationDetents([.medium, .large])
         .interactiveDismissDisabled(state.uploading)
-        .sheet(item: $picker) { which in
+        .themedSheet(item: $picker) { which in
             switch which {
             case .library: VideoPicker { url, name in picked(url, name) }.ignoresSafeArea()
             case .camera: VideoCameraPicker { url in picked(url, nil) }.ignoresSafeArea()

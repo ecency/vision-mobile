@@ -37,11 +37,14 @@ final class ThemedBackgroundUITests: XCTestCase {
             screenshot = next
             if same { break }
         }
-        let env = ProcessInfo.processInfo.environment
-        if let dir = env["BG_SHOT_DIR"], !dir.isEmpty {
+        save(screenshot, name)
+        return screenshot
+    }
+
+    private func save(_ screenshot: XCUIScreenshot, _ name: String) {
+        if let dir = ProcessInfo.processInfo.environment["BG_SHOT_DIR"], !dir.isEmpty {
             try? screenshot.pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("bg-\(name).png"))
         }
-        return screenshot
     }
 
     /// The sRGB colour at [point] (window points) of [screenshot].
@@ -267,5 +270,199 @@ final class ThemedBackgroundUITests: XCTestCase {
             XCTAssertTrue(close, "the warning box (\(dark ? "dark" : "light")) at \(point): got \(hex(got)), want \(hex(want))")
             app.terminate()
         }
+    }
+
+    // MARK: Every screen
+
+    /// One screen of the sweep: how to open it, and the content that is not page background (a picture, the header's
+    /// avatar pill) and is left out of the scan.
+    private struct Page {
+        let name: String
+        let args: [String]
+        /// Identifiers of elements drawn over the page with their own fill (pictures, the header pill)
+        var skip: [String] = []
+        /// The scan starts this far down
+        var top: CGFloat = 0
+        /// A sheet: the scan starts under its top edge (`sheetTop`), below the dimmed screen behind it
+        var sheet = false
+        /// Scan the leading edge only (the side menu: the trailing part is its scrim)
+        var leadingOnly = false
+        /// A button that opens the sheet under test
+        var tap: String? = nil
+        /// The sheet's root element: waited for, and the scan starts under its top (a medium sheet sits below the
+        /// dimmed screen, whose colours vary)
+        var sheetId: String? = nil
+    }
+
+    /// Identifier prefixes of elements whose rows are left out (see `pageScan`).
+    private static let stripPrefixes = ["notifications-page-", "notification-", "editor-toolbar"]
+
+    /// Content drawn edge to edge with its own fill: the profile cover and the skeleton's cover bone.
+    private static let contentIds = ["skeleton-profile", "profile-cover"]
+
+    /// The theme's card colour (AppTheme.lightBackground): RN's filter strips, zebra rows and card separators.
+    private static let darkCard = (0x2E, 0x3D, 0x51)
+    private static let lightCard = (0xF6, 0xF6, 0xF6)
+
+    /// The header's avatar pill (a brand gradient) on every tab.
+    private static let tabSkip = ["account-menu"]
+
+    /// The scan: the leading and trailing 2 pt of the window from the top (status bar) to the bottom (home indicator),
+    /// every 4 pt, minus [skip] frames and the tab bar's shadow; returns the runs that were neither of the theme's two
+    /// surfaces (the page background, and the card colour of RN's strips, zebra rows and separators): the system
+    /// black, greys and whites show up here.
+    private func pageScan(_ s: XCUIScreenshot, _ app: XCUIApplication, dark: Bool, _ page: Page) -> [String] {
+        let w = app.windows.firstMatch.frame
+        let want = dark ? Self.darkBackground : Self.lightBackground, card = dark ? Self.darkCard : Self.lightCard
+        var skips = (page.skip + Self.contentIds).map { element(app, $0) }.filter { $0.exists }.map { $0.frame.insetBy(dx: -2, dy: -2) }
+        // the notifications page chips (the selected one is an accent fill at the edge), unread notification rows
+        // (RN's tint) and the editor's toolbar (its labels run under the edge): their rows are left out
+        for prefix in Self.stripPrefixes {
+            let chips = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).allElementsBoundByIndex
+            for chip in chips where chip.exists && chip.frame.height < 80 {
+                skips.append(CGRect(x: w.minX, y: chip.frame.minY - 8, width: w.width, height: chip.frame.height + 16))
+            }
+        }
+        let tabBar = element(app, "tab-bar")
+        if tabBar.exists {
+            // the bar is on the theme too; its soft shadow darkens the 10 pt above it
+            skips.append(CGRect(x: w.minX, y: tabBar.frame.minY - 12, width: w.width, height: 13))
+        }
+        var runs: [String] = []
+        var top = page.sheet ? sheetTop(s, app) : page.top
+        if let id = page.sheetId, element(app, id).exists { top = max(top, element(app, id).frame.minY + 24) }
+        // a sheet floats inset from the window's edges and bottom (iOS 26): its columns are inside it
+        let inset: CGFloat = page.sheet ? 12 : 2, bottom = w.maxY - (page.sheet ? 44 : 1)
+        for x in page.leadingOnly ? [w.minX + inset] : [w.minX + inset, w.maxX - inset] {
+            var start: CGFloat?
+            var first = (0, 0, 0)
+            var y = w.minY + top + 2
+            func close(_ end: CGFloat) {
+                // one sample alone is a hairline divider (under a header, between rows), not a background
+                if let st = start, end - st > 4 { runs.append("x \(Int(x)) y \(Int(st))...\(Int(end)) \(hex(first))") }
+                start = nil
+            }
+            while y < bottom {
+                let p = CGPoint(x: x, y: y)
+                if skips.contains(where: { $0.contains(p) }) { close(y); y += 4; continue }
+                let got = pixel(s, app, p)
+                let ok = [want, card].contains { abs(got.0 - $0.0) <= 6 && abs(got.1 - $0.1) <= 6 && abs(got.2 - $0.2) <= 6 }
+                if ok { close(y) } else if start == nil { start = y; first = got }
+                y += 4
+            }
+            close(y)
+        }
+        return runs
+    }
+
+    /// Where a sheet starts: down the middle of the window, the first point that is not the dimmed screen above it
+    /// (the colour at the very top), plus room for its rounded corners. Whatever colour the sheet is, it differs from the dimming.
+    private func sheetTop(_ s: XCUIScreenshot, _ app: XCUIApplication) -> CGFloat {
+        let w = app.windows.firstMatch.frame
+        let dim = pixel(s, app, CGPoint(x: w.midX, y: 30))
+        var y: CGFloat = 40
+        while y < w.maxY {
+            let c = pixel(s, app, CGPoint(x: w.midX, y: y))
+            if abs(c.0 - dim.0) > 6 || abs(c.1 - dim.1) > 6 || abs(c.2 - dim.2) > 6 { return y + 40 }
+            y += 2
+        }
+        return w.maxY
+    }
+
+    /// Opens each page in dark and light and scans its edges; one failure per page and theme, naming the runs.
+    private func sweep(_ pages: [Page], file: StaticString = #filePath, line: UInt = #line) {
+        for page in pages {
+            for dark in [true, false] {
+                let app = launch(dark: dark, page.args)
+                continueAfterFailure = true
+                // the screen's first frames (the launch cover fades, the push slides in), then a still screen
+                Thread.sleep(forTimeInterval: 2.5)
+                var page = page
+                if let id = page.tap {
+                    let button = element(app, id)
+                    XCTAssertTrue(button.waitForExistence(timeout: 20), "\(page.name): \(id)")
+                    button.tap()
+                    Thread.sleep(forTimeInterval: 1.5)
+                    page.sheet = true
+                }
+                if let id = page.sheetId { XCTAssertTrue(element(app, id).waitForExistence(timeout: 20), "\(page.name): \(id)") }
+                // one screenshot: the edges are still by now, while Esie, shimmers and spinners in the middle never settle
+                Thread.sleep(forTimeInterval: 1)
+                let s = XCUIScreen.main.screenshot()
+                save(s, "page-\(page.name)-\(dark ? "dark" : "light")")
+                let runs = pageScan(s, app, dark: dark, page)
+                XCTAssertTrue(runs.isEmpty, "\(page.name) (\(dark ? "dark" : "light")): not the theme background \(hex(dark ? Self.darkBackground : Self.lightBackground)) (or its card colour) at \(runs.joined(separator: ", "))",
+                              file: file, line: line)
+                app.terminate()
+            }
+        }
+    }
+
+    private static let signedIn = ["-seedAccounts", "YES"]
+
+    /// The tabs signed in and signed out, the side menu and the welcome screen.
+    func testEveryTab() {
+        let tabs = ["FEED", "WAVES", "NOTIFICATION", "CHATS", "WALLET"]
+        sweep(tabs.map { Page(name: "tab-\($0.lowercased())", args: Self.signedIn + ["-startTab", $0], skip: Self.tabSkip) }
+            + ["NOTIFICATION", "CHATS", "WALLET"].map { Page(name: "tab-\($0.lowercased())-signed-out", args: ["-startTab", $0], skip: Self.tabSkip) }
+            // the drawer under its header picture
+            + [Page(name: "side-menu", args: Self.signedIn + ["-openDrawer", "YES"], top: 200, leadingOnly: true),
+               Page(name: "welcome", args: ["-showWelcome", "YES"])])
+    }
+
+    /// Every pushed screen with the demo data.
+    func testEveryPushedScreen() {
+        let screens: [(String, String)] = [
+            ("settings", "settings"), ("refer", "refer"), ("perks", "perks"), ("spin", "spinGame"), ("get-points", "getPoints"),
+            ("account-boost", "accountBoost"), ("email-digests", "emailDigests"), ("explore", "explore"), ("bookmarks", "bookmarks"),
+            ("edit-profile", "editProfile"), ("drafts", "drafts"), ("editor", "editor"), ("voters", "voters"), ("reblogs", "reblogs"),
+            ("edit-history", "editHistory"), ("tag", "tag"), ("search", "route:SEARCH_RESULT"), ("communities", "route:COMMUNITIES"),
+            ("community", "route:COMMUNITY:hive-125125"), ("community-members", "route:COMMUNITY_MEMBERS:hive-125125"),
+            ("community-activities", "route:COMMUNITY_ACTIVITIES:hive-125125"), ("community-settings", "route:COMMUNITY_SETTINGS:hive-125125"),
+            ("profile", "route:PROFILE:spike-alice"), ("follows", "route:FOLLOWS:spike-alice"), ("tag-result", "route:TAG_RESULT:photography"),
+            ("ai-image", "route:AI_IMAGE_GENERATOR"), ("assets-select", "route:ASSETS_SELECT"), ("trade", "route:TRADE:HIVE"),
+            ("redeem-boost", "route:REDEEM:boost_plus"), ("redeem-promote", "route:REDEEM"), ("asset-details", "route:ASSET_DETAILS:HIVE"),
+            ("bot-comments", "route:BOT_COMMENTS:spike-alice/fake-post-1"), ("transfer", "wallet:transfer,transfer,HIVE,hive,spike-bob"),
+            ("chat-thread", "chat:ch-ecency"),
+        ]
+        sweep(screens.map { Page(name: $0.0, args: Self.signedIn + ["-openScreen", $0.1], ) }
+            + [Page(name: "post", args: Self.signedIn + ["-openLink", "https://ecency.com/@spike-alice/fake-post-1"])])
+    }
+
+    /// The app's sheets (they sit below the dimmed screen: the scan starts under the sheet's top edge).
+    func testEverySheet() {
+        // the keys sheet opens under its PIN warning alert, so it is left out
+        let sheets: [(String, String?)] = [("login", nil), ("accounts", nil), ("register", "register"), ("quickProfile", "quick-profile"),
+                                           ("customise", nil), ("menu", "post-menu"), ("digest", "digest-sheet")]
+        sweep(sheets.map { Page(name: "sheet-\($0.0)", args: Self.signedIn + ["-openScreen", $0.0], sheet: true, sheetId: $0.1) })
+    }
+
+    /// Sheets opened from a screen (not the app's sheet host).
+    func testNestedSheets() {
+        sweep([Page(name: "wallet-receive", args: Self.signedIn + ["-startTab", "WALLET"], tap: "wallet-receive", sheetId: "receive-sheet"),
+               Page(name: "search-filters", args: Self.signedIn + ["-openScreen", "route:SEARCH_RESULT"], tap: "search-filters"),
+               Page(name: "history-filter", args: Self.signedIn + ["-openScreen", "route:ASSET_DETAILS:HIVE"], tap: "history-filter"),
+               Page(name: "chats-new-group", args: Self.signedIn + ["-startTab", "CHATS"], tap: "chats-new-group", sheetId: "new-group-sheet")])
+    }
+
+    /// The first load of every screen that loads, held in its loading state (`-demoNetwork hold`): skeletons and
+    /// spinners sit on the theme background.
+    func testEveryLoadingState() {
+        sweep(loadingPages.map { Page(name: "\($0.name)-loading", args: $0.args + ["-demoNetwork", "hold"], skip: $0.skip) })
+    }
+
+    /// The same screens when every load fails (`-demoNetwork fail`): the error states.
+    func testEveryErrorState() {
+        sweep(loadingPages.map { Page(name: "\($0.name)-error", args: $0.args + ["-demoNetwork", "fail"], skip: $0.skip) })
+    }
+
+    private var loadingPages: [Page] {
+        ["FEED", "WAVES", "NOTIFICATION", "CHATS", "WALLET"].map { Page(name: "tab-\($0.lowercased())", args: Self.signedIn + ["-startTab", $0], skip: Self.tabSkip) }
+            + [("refer", "refer"), ("bookmarks", "bookmarks"), ("drafts", "drafts"), ("voters", "voters"), ("reblogs", "reblogs"),
+               ("edit-history", "editHistory"), ("tag", "tag"), ("communities", "route:COMMUNITIES"), ("community", "route:COMMUNITY:hive-125125"),
+               ("community-members", "route:COMMUNITY_MEMBERS:hive-125125"), ("profile", "route:PROFILE:spike-alice"),
+               ("follows", "route:FOLLOWS:spike-alice"), ("asset-details", "route:ASSET_DETAILS:HIVE"), ("perks", "perks"),
+               ("get-points", "getPoints"), ("chat-thread", "chat:ch-ecency")].map { Page(name: $0.0, args: Self.signedIn + ["-openScreen", $0.1]) }
+            + [Page(name: "post", args: Self.signedIn + ["-openLink", "https://ecency.com/@spike-alice/fake-post-1"])]
     }
 }

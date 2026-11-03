@@ -177,7 +177,7 @@ struct EditHistoryView: View {
             }
             Divider()
             if s.isLoading {
-                ProgressView().frame(maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let message = s.message {
                 Text(message).foregroundStyle(theme.secondary).padding(24).frame(maxHeight: .infinity)
             } else if Int(s.selected) < s.versions.count {

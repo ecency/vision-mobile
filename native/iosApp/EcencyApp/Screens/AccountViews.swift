@@ -148,7 +148,7 @@ struct WelcomeView: View {
         }
         .padding(24)
         .background(theme.background)
-        .sheet(isPresented: $terms) { SafariView(url: URL(string: LoginCopy.shared.TERMS_URL)!).ignoresSafeArea() }
+        .themedSheet(isPresented: $terms) { SafariView(url: URL(string: LoginCopy.shared.TERMS_URL)!).ignoresSafeArea() }
         .onAppear { if previouslyAccepted { accepted = true } }
     }
 }

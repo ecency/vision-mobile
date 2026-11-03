@@ -197,7 +197,7 @@ struct LoopingVideoView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> PlayerView {
         let view = PlayerView()
-        view.backgroundColor = .black
+        view.backgroundColor = .black // media: the video player letterbox
         view.playerLayer.videoGravity = .resizeAspect
         context.coordinator.start(url: url, in: view)
         context.coordinator.set(playing: playing)

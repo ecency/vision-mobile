@@ -84,7 +84,7 @@ struct VoteButton: View {
                     PayoutPopoverView(post: ref.post, env: app.env).presentationCompactAdaptation(.popover)
                 }
         }
-        .sheet(isPresented: $showWeights) {
+        .themedSheet(isPresented: $showWeights) {
             // RN keeps the last weight for waves apart from posts and comments (waveUpvotePercent)
             let wave = app.env.waves.isWave(key: key)
             let start = VoteSheetState.companion.open(rememberedPercent: wave ? app.env.waves.voteWeightPercent : app.voteWeightPercent,
@@ -231,7 +231,6 @@ struct VoteWeightSheet: View {
         .scrollBounceBehavior(.basedOnSize)
         .presentationDetents([.height(measured ?? estimate)])
         .presentationDragIndicator(.visible)
-        .presentationBackground(theme.background)
         .task { preview = try? await app.env.votePreview() }
     }
 

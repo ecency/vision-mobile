@@ -36,7 +36,7 @@ struct RootView: View {
         .environmentObject(app.session)
         .environmentObject(app.votes)
         .environmentObject(app.lock)
-        .sheet(item: $app.sheet, onDismiss: {
+        .themedSheet(item: $app.sheet, onDismiss: {
             // a sheet asked for another one (accounts, then sign-in): show it once this one is gone
             if let next = app.nextSheet {
                 app.nextSheet = nil
@@ -73,8 +73,6 @@ struct RootView: View {
             .environmentObject(app)
             .environmentObject(app.session)
             .environmentObject(app.votes)
-            // the sheets on the theme, not the system sheet colour (black in dark mode)
-            .presentationBackground(theme.background)
         }
         // ---- feed, posts and reading: menu confirmations and failures ----
         .alert(app.confirm?.title ?? "", isPresented: Binding(get: { app.confirm != nil }, set: { if !$0 { app.confirm = nil } }),
@@ -101,7 +99,7 @@ struct RootView: View {
                 app.sheet = .login
             }
         } message: { Text(AccountCopy.shared.AUTH_EXPIRED) }
-        .fullScreenCover(isPresented: Binding(get: { !app.termsAccepted }, set: { _ in })) {
+        .themedFullScreenCover(isPresented: Binding(get: { !app.termsAccepted }, set: { _ in })) {
             WelcomeView(previouslyAccepted: app.termsPreviouslyAccepted) { app.acceptTerms() }
         }
         .onAppear {

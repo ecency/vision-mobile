@@ -122,8 +122,8 @@ struct WavesTabView: View {
             .frame(maxHeight: .infinity)
         }
         .background(theme.background)
-        .sheet(isPresented: $picker) { WavesPickerSheet(tabs: tabs, model: store.model).environment(\.appTheme, theme) }
-        .sheet(item: $composer) { ref in
+        .themedSheet(isPresented: $picker) { WavesPickerSheet(tabs: tabs, model: store.model).environment(\.appTheme, theme) }
+        .themedSheet(item: $composer) { ref in
             WaveComposerSheet(composer: Observed<WaveComposeState>(ref.model, ownsModel: false), proxyBase: app.env.proxyBase, attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui, env: app.env) { composer = nil }
                 .environment(\.appTheme, theme)
         }
@@ -220,7 +220,7 @@ struct WavesListView: View {
                             } else if state.loaded {
                                 Text(UiCopy.shared.NOTHING_HERE).foregroundStyle(theme.secondary).accessibilityIdentifier("waves-empty").esieAbove(.empty).padding(.top, 80)
                             } else {
-                                ProgressView().padding(.top, 80).accessibilityIdentifier("waves-loading")
+                                PageLoading(identifier: "waves-loading")
                             }
                         }
                         ForEach(state.items, id: \.key) { item in
@@ -289,7 +289,7 @@ struct ProfileWavesTab: View {
                     Text(UiCopy.shared.userHasNoPosts(username: username)).foregroundStyle(theme.secondary)
                         .accessibilityIdentifier("profile-waves-empty").esieAbove(.empty).padding(.top, 32)
                 } else {
-                    ProgressView().padding(.top, 32)
+                    PageLoading()
                 }
             }
             ForEach(state.items, id: \.key) { item in
@@ -743,7 +743,7 @@ struct WaveComposerSheet: View {
                     .disabled(!state.canAddVideo)
                     .accessibilityLabel(L.Native.Ios.Waves.addVideo)
                     .accessibilityIdentifier("wave-video-button")
-                    .sheet(isPresented: Binding(get: { videoUpload != nil }, set: { if !$0 { videoUpload = nil } })) {
+                    .themedSheet(isPresented: Binding(get: { videoUpload != nil }, set: { if !$0 { videoUpload = nil } })) {
                         if let videoUpload { VideoUploadSheet(video: videoUpload) }
                     }
                 }
@@ -771,12 +771,11 @@ struct WaveComposerSheet: View {
         .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 8)
         // the sheet's own background, keyboard area included: no see-through stripe above the keyboard
         .background(theme.background.ignoresSafeArea())
-        .presentationBackground(theme.background)
         .presentationDetents([.medium, .large])
         .interactiveDismissDisabled(state.isSending)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-composer")
-        .sheet(item: $aiSheet) { which in
+        .themedSheet(item: $aiSheet) { which in
             if let env {
                 switch which {
                 case .assist: AiAssistSheet(editor: model, env: env).environment(\.appTheme, theme)
@@ -790,7 +789,7 @@ struct WaveComposerSheet: View {
             focused = true
             checkClipboard()
         }
-        .sheet(isPresented: $pollSheet) {
+        .themedSheet(isPresented: $pollSheet) {
             PollSheet(current: state.poll, onAttach: { model.setPoll(poll: $0); pollSheet = false }, onReset: { model.setPoll(poll: nil); pollSheet = false })
                 .environment(\.appTheme, theme)
         }
@@ -848,7 +847,7 @@ struct ShortsReelsView: View {
         let state = shorts.state
         GeometryReader { geo in
             ZStack {
-                Color.black
+                Color.black // media: the shorts player, video full screen
                 if state.items.isEmpty {
                     if let error = state.error {
                         Button(L.Native.Ios.Waves.retry(message: error.message)) { model.retry() }.foregroundStyle(.white)
@@ -913,7 +912,7 @@ struct ReelView: View {
         let playing = state.playingKey == item.key
         let playback = state.playbackOf(key: item.key)
         ZStack {
-            Color.black
+            Color.black // media: behind a short's video
             if playing, let stream = playback as? ShortPlaybackStream, let url = URL(string: stream.url) {
                 if ReelPlayers.useStandIn {
                     Text(L.Native.Ios.Waves.playing(permlink: item.key.permlink)).foregroundStyle(.white).accessibilityIdentifier("reel-player")
@@ -1000,7 +999,7 @@ struct ReelPlayerView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
-        view.backgroundColor = .black
+        view.backgroundColor = .black // media: the shorts video letterbox
         context.coordinator.start(url: url, muted: muted, in: view)
         return view
     }
@@ -1218,7 +1217,7 @@ struct ImageAttachPickers: ViewModifier {
                 attacher?.onPick = nil
                 attacher?.picked(image: nil)
             }
-            .sheet(item: $picker, onDismiss: { if !readingPick { attacher?.picked(image: nil) } }) { which in
+            .themedSheet(item: $picker, onDismiss: { if !readingPick { attacher?.picked(image: nil) } }) { which in
                 let results: (Int) -> Void = { count in readingPick = count > 0 }
                 let picked: ([PickedImage]) -> Void = { images in
                     readingPick = false

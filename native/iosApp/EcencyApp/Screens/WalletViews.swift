@@ -54,7 +54,7 @@ struct WalletTabView: View {
         .refreshable { model.refresh(); app.env.sendJournal.recheck() }
         .onAppear { model.start(); app.env.sendJournal.start(); model.visible(shown: true) }
         .onDisappear { model.visible(shown: false) }
-        .sheet(isPresented: $receive) { ReceiveSheet(username: user) }
+        .themedSheet(isPresented: $receive) { ReceiveSheet(username: user) }
         .accessibilityIdentifier("wallet-tab")
     }
 
@@ -399,14 +399,14 @@ struct AssetDetailsView: View {
         } message: {
             if let p = s.prompt as? DetailsPromptDeleteRecurrent { Text(RecurrentCopy.shared.unsubscribe(username: p.schedule.to)) } else { Text(L.Native.Ios.Wallet.cancelOrder) }
         }
-        .sheet(item: Binding(get: { sheet.map(IdentifiedSheet.init) }, set: { sheet = $0?.sheet })) { item in
+        .themedSheet(item: Binding(get: { sheet.map(IdentifiedSheet.init) }, set: { sheet = $0?.sheet })) { item in
             switch item.sheet {
             case .recurrentTransfers: RecurrentSheet(list: s.recurrent) { model.deleteRecurrent(schedule: $0) }
             default: if let account = s.account { DelegationsSheet(env: app.env, account: account, sheet: item.sheet) { name in sheet = nil; app.push(AppScreenTransfer(transferType: "delegate_vesting_shares", fund: "HP", layer: "hive", recipient: name)) } }
             }
         }
-        .sheet(isPresented: $filter) { HistoryFilterSheet(symbol: s.symbol, selected: s.filter) { model.setFilter(ops: $0); filter = false } }
-        .sheet(isPresented: $analytics) {
+        .themedSheet(isPresented: $filter) { HistoryFilterSheet(symbol: s.symbol, selected: s.filter) { model.setFilter(ops: $0); filter = false } }
+        .themedSheet(isPresented: $analytics) {
             if let coin = s.analyticsCoin, let user = s.account { BalanceAnalyticsSheet(env: app.env, username: user, coinType: coin) }
         }
         .accessibilityIdentifier("asset-details")

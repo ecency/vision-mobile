@@ -239,8 +239,8 @@ struct ChatsTabView: View {
                 .accessibilityIdentifier("channel-option-\(action.name)")
             }
         }
-        .sheet(item: $rename) { r in RenameGroupSheet(env: app.env, channelId: r.id, name: r.name) }
-        .sheet(isPresented: $newGroup) {
+        .themedSheet(item: $rename) { r in RenameGroupSheet(env: app.env, channelId: r.id, name: r.name) }
+        .themedSheet(isPresented: $newGroup) {
             NewGroupSheet(env: app.env) { id in
                 newGroup = false
                 model.groupCreated(channelId: id)
@@ -613,7 +613,7 @@ struct ChatThreadView: View {
             thread.setActive(on: false)
         }
         .onChange(of: scenePhase) { _, phase in thread.setActive(on: onScreen && phase == .active) }
-        .sheet(item: $sheet) { sheet in sheetView(sheet, s) }
+        .themedSheet(item: $sheet) { sheet in sheetView(sheet, s) }
         .alert(ChatThreadModel.companion.REMOVE_TITLE, isPresented: Binding(get: { removeTarget != nil }, set: { if !$0 { removeTarget = nil } }), presenting: removeTarget) { item in
             Button(UiCopy.shared.CANCEL, role: .cancel) {}
             Button(ChatUiCopy.shared.DELETE_MESSAGE, role: .destructive) { thread.remove(item: item) }.accessibilityIdentifier("chat-confirm-remove")

@@ -277,7 +277,7 @@ struct EditorScreen: View {
                     .font(.footnote).foregroundStyle(theme.dangerText).padding(.horizontal, 16).accessibilityIdentifier("local-save-failed")
             }
             if state.loading {
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let error = state.error, state.owner != nil, state.body.isEmpty, state.kind.name != "NEW_POST" {
                 VStack(spacing: 12) {
                     Text(error.message).foregroundStyle(theme.secondary)
@@ -356,7 +356,7 @@ struct EditorScreen: View {
         .alert(EditorUiCopy.shared.NOTICE, isPresented: Binding(get: { videoNotice != nil }, set: { if !$0 { videoNotice = nil } })) {
             Button(UiCopy.shared.OK, role: .cancel) { videoNotice = nil }
         } message: { Text(videoNotice ?? "") }
-        .sheet(item: $sheet) { which in sheetView(which, state: editor.state) }
+        .themedSheet(item: $sheet) { which in sheetView(which, state: editor.state) }
         #if DEBUG
         // -editorSheet aiAssist | aiImage | dictation | translate | video (screenshots of fake-data runs)
         .task {
@@ -814,7 +814,7 @@ private struct SnippetsSheet: View {
                 }
             }
             .onAppear { model.start() }
-            .sheet(isPresented: $editorShown) {
+            .themedSheet(isPresented: $editorShown) {
                 NavigationStack {
                     ThemedForm {
                         TextField(EditorUiCopy.shared.SNIPPET_TITLE, text: $title, axis: .vertical).accessibilityIdentifier("snippet-title")

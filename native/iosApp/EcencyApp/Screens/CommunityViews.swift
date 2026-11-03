@@ -319,7 +319,7 @@ struct CommunityScreen: View {
             }
         }
         // RN communityManageSheet, in the set role sheet's layout; the pick opens once the sheet is gone
-        .sheet(isPresented: $manage, onDismiss: {
+        .themedSheet(isPresented: $manage, onDismiss: {
             if let action = managePick {
                 managePick = nil
                 app.push(community.screenFor(action: action))
@@ -382,7 +382,7 @@ struct CommunityScreen: View {
             } else if let error = state.error {
                 ErrorStateView(error: error) { community.retry() }
             } else {
-                ProgressView().padding()
+                PageLoading()
             }
         }
         .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
@@ -472,7 +472,7 @@ struct CommunityMembersScreen: View {
                     .accessibilityIdentifier("assign-role")
             }
         }
-        .sheet(item: $pick) { p in
+        .themedSheet(item: $pick) { p in
             RoleSheet(env: app.env, account: p.account, current: p.current, roles: state.assignableRoles) { account, role in
                 pick = nil
                 if role != p.current { members.setRole(account: account, role: role) }

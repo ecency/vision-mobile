@@ -99,8 +99,8 @@ struct TransferFormView: View {
         } message: {
             if let a = s.prompt as? TransferPromptAlert { Text(a.message) }
         }
-        .sheet(isPresented: $favorites) { FavoritesSheet(env: app.env) { model.setRecipient(text: $0); favorites = false } }
-        .fullScreenCover(isPresented: $scanning) {
+        .themedSheet(isPresented: $favorites) { FavoritesSheet(env: app.env) { model.setRecipient(text: $0); favorites = false } }
+        .themedFullScreenCover(isPresented: $scanning) {
             RecipientScanner(env: app.env, onValue: { model.scanned(value: $0); scanning = false }, onClose: { scanning = false })
         }
         .modifier(LeaveGuard(busy: s.busy))
@@ -661,7 +661,7 @@ private struct RecipientScanner: View {
             .accessibilityIdentifier("transfer-qr-close")
             .padding(12)
         }
-        .background(Color.black)
+        .background(Color.black) // media: the camera preview of the QR scanner
         .onEscape(onClose)
         .accessibilityIdentifier("transfer-qr")
         .onChange(of: observed.state.outcome as? NSObject) { _, _ in

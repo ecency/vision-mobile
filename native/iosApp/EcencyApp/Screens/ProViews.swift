@@ -44,7 +44,7 @@ struct ProCard: View {
             }
         }
         .onAppear { model.start() }
-        .sheet(isPresented: Binding(get: { observed.state.open }, set: { if !$0 { model.dismiss() } })) {
+        .themedSheet(isPresented: Binding(get: { observed.state.open }, set: { if !$0 { model.dismiss() } })) {
             ProSheet(observed: observed).environment(\.appTheme, theme)
         }
     }
