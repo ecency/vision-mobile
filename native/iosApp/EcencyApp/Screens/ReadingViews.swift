@@ -121,6 +121,34 @@ struct TranslationSheet: View {
 // MARK: Poll
 
 /// RN postPoll: header (question, end chip, notes), choices with bars, Vote, stats toggle, interpretation.
+/// The poll of a wave or a reply in a list (RN's comment view draws it there too). The row owns its model.
+struct RowPoll: View {
+    let post: Post
+    @EnvironmentObject private var app: AppContainer
+    @StateObject private var holder = RowPollHolder()
+
+    var body: some View {
+        // keyed by its model: a refreshed post gets a new model, and a new card that starts it
+        if let poll = holder.poll(for: post, env: app.env) { PollCard(model: poll).id(ObjectIdentifier(poll)) }
+    }
+}
+
+/// One poll model per row, made again only when the post itself changes.
+@MainActor
+final class RowPollHolder: ObservableObject {
+    private var made: Observed<PollState>?
+    private var madeFor: String?
+
+    func poll(for post: Post, env: AppEnvironment) -> Observed<PollState>? {
+        let id = "\(post.author)/\(post.permlink)@\(post.updated)"
+        if madeFor != id {
+            madeFor = id
+            made = env.pollModel(post: post).map { Observed($0, ownsModel: true) }
+        }
+        return made
+    }
+}
+
 struct PollCard: View {
     @ObservedObject var model: Observed<PollState>
     @EnvironmentObject private var app: AppContainer
