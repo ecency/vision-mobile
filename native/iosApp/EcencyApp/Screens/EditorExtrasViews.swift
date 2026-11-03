@@ -457,7 +457,7 @@ struct DictationSheet: View {
             Button(UiCopy.shared.OK, role: .cancel) { model.clearAlert() }
         } message: { Text(state.alert ?? "") }
         .onAppear { model.start() }
-        .onChange(of: state.askPermission) { ask in
+        .onChange(of: state.askPermission) { _, ask in
             // the system's microphone prompt, on the first Record
             if ask { IosDictationRecorder.requestPermission { granted in model.permissionAnswered(granted: granted) } }
         }
@@ -615,7 +615,7 @@ struct VideoUploadSheet: View {
         } message: { Text(notice ?? "") }
         // swiped away: the same as Close
         .onDisappear { if !video.state.uploading { model.dismissed() } }
-        .onChange(of: state.done) { done in if done { dismiss() } }
+        .onChange(of: state.done) { _, done in if done { dismiss() } }
         .accessibilityIdentifier("video-sheet")
     }
 }

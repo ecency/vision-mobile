@@ -10,12 +10,13 @@ final class CrashReportingTests: XCTestCase {
     func testSpansWithUrlsPathsOrQueriesAreDroppedAndTheRestScrubbed() {
         // Bitcoin wiki example key, controls nothing
         let wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"
-        XCTAssertNil(CrashReporting.spanDescription(op: "http.client", description: "GET https://images.example/upload/tester/signature"))
-        XCTAssertNil(CrashReporting.spanDescription(op: "file.read", description: "/var/mobile/tester.json"))
-        XCTAssertNil(CrashReporting.spanDescription(op: "db.sql.query", description: "select"))
+        // the outer nil drops the span; an inner nil would keep it without a description
+        XCTAssertTrue(CrashReporting.spanDescription(op: "http.client", description: "GET https://images.example/upload/tester/signature") == nil)
+        XCTAssertTrue(CrashReporting.spanDescription(op: "file.read", description: "/var/mobile/tester.json") == nil)
+        XCTAssertTrue(CrashReporting.spanDescription(op: "db.sql.query", description: "select") == nil)
         XCTAssertEqual(CrashReporting.spanDescription(op: "ui.load", description: "FeedView"), .some("FeedView"))
         let scrubbed = CrashReporting.spanDescription(op: "ui.load", description: "key \(wif)")
-        XCTAssertNotNil(scrubbed)
+        XCTAssertTrue(scrubbed != nil)
         XCTAssertFalse((scrubbed ?? nil)?.contains(wif) ?? false)
     }
 }

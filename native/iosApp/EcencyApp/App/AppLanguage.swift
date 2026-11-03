@@ -113,9 +113,9 @@ enum UIKitDirection {
     }
 
     @MainActor
-    static func apply(_ languageId: String, scenes: Set<UIScene> = UIApplication.shared.connectedScenes) {
+    static func apply(_ languageId: String) {
         let direction = direction(languageId)
-        for case let scene as UIWindowScene in scenes where current(scene) != direction {
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes where current(scene) != direction {
             scene.traitOverrides.layoutDirection = direction
         }
     }

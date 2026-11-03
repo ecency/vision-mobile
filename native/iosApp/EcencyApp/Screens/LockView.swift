@@ -1,5 +1,5 @@
-import EcencyCore
-import LocalAuthentication
+@preconcurrency import EcencyCore
+@preconcurrency import LocalAuthentication
 import SwiftUI
 import UIKit
 
