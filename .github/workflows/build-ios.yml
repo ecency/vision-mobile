@@ -1,19 +1,28 @@
 name: iOS Build
 
 # Store build of the Ecency app (native 4.x, app.esteem.mobile.ios, an update of the RN 3.x app) for TestFlight and
-# the App Store. Every push to development that changes native/ archives, signs and uploads to App Store Connect, as
+# the App Store. Every push to development that changes the app archives, signs and uploads to App Store Connect, as
 # the RN workflow did; a manual run can skip the upload. Never on pull requests (CI minutes). Signing reuses the RN
 # certificate and the RN App IDs' profiles (app, eshare share extension, ImageNotifi notification service).
-# Flow, secrets and owner checklist: native/README.md "Release pipeline" and native/docs/release-builds.md.
+# Flow, secrets and owner checklist: README.md "Release pipeline" and docs/release-builds.md.
 on:
   push:
     branches:
       - development
-    # native/ only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
-    # "First deploy" steps in native/docs/release-builds.md)
+    # the app's paths only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
+    # "First deploy" steps in docs/release-builds.md)
     paths:
-      - 'native/**'
-      # the native strings are generated from the RN locale files (a Crowdin pull ships through here)
+      - 'androidApp/**'
+      - 'iosApp/**'
+      - 'shared/**'
+      - 'build-logic/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'scripts/**'
+      # the app's strings are generated from the locale files (a Crowdin pull ships through here)
       - 'src/config/locales/**'
   workflow_dispatch:
     inputs:
@@ -59,9 +68,6 @@ jobs:
     timeout-minutes: 110
     outputs:
       build_number: ${{ steps.version.outputs.build_number }}
-    defaults:
-      run:
-        working-directory: native
     steps:
       - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with:
@@ -79,13 +85,13 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           # Dependencies, wrapper and the Kotlin/Native toolchain only, never the Gradle build cache. The build
-          # secrets live in native/local.properties and the generated Swift file, which are never cached.
+          # secrets live in local.properties and the generated Swift file, which are never cached.
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.konan
             !~/.gradle/caches/build-cache-1
-          key: native-ios-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          key: native-ios-gradle-${{ hashFiles('gradle/libs.versions.toml', '**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: native-ios-gradle-
 
       # pinned like every other downloaded tool (GitHub's digest of the 2.46.0 release asset)
@@ -125,7 +131,7 @@ jobs:
       # Values go through env and printf only (no set -x), so they never reach the log. Xcode reads them from
       # local.properties in its "Build secrets" phase; never export them in a step that runs xcodebuild, since
       # Xcode copies the environment into its (printed) build settings. GitHub also masks them.
-      # The names are the RN workflow's secrets, except the two hashes (native/docs/release-builds.md).
+      # The names are the RN workflow's secrets, except the two hashes (docs/release-builds.md).
       - name: Write build secrets
         env:
           PIN_KEY: ${{ secrets.PIN_KEY }}
@@ -145,7 +151,7 @@ jobs:
           GOOGLE_PLIST: ${{ secrets.GOOGLE_PLIST }}
         run: |
           for v in PIN_KEY PIN_KEY_SHA256 DEFAULT_PIN DEFAULT_PIN_SHA256 GOOGLE_PLIST; do
-            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (docs/release-builds.md)"; exit 1; fi
           done
           # a set but malformed update source, or a line break in it, fails the build: no silent fallback to the defaults
           scripts/check-update-source.sh "$UPDATE_RELEASES_URL" "$UPDATE_TAG_PREFIX"
@@ -168,7 +174,7 @@ jobs:
 
       # The RN workflow's certificate and profiles: PROVISIONING_PROFILE for app.esteem.mobile.ios,
       # EXTEN_PROVISIONING_PROFILE for the eshare extension, NOTIFI_PROVISIONING_PROFILE for ImageNotifi, and
-      # WIDGET_PROVISIONING_PROFILE for the widget extension (app.esteem.mobile.ios.widgets, native/docs/release-builds.md).
+      # WIDGET_PROVISIONING_PROFILE for the widget extension (app.esteem.mobile.ios.widgets, docs/release-builds.md).
       - name: Install distribution certificate and provisioning profiles
         env:
           CERTIFICATE_P12: ${{ secrets.CERTIFICATES_P12 }}
@@ -181,7 +187,7 @@ jobs:
           # the app embeds its extensions (EcencyShare and EcencyWidgets always, EcencyNotificationService with
           # ECENCY_PUSH_EXTENSION)
           for v in CERTIFICATE_P12 CERTIFICATE_PASSWORD APP_PROFILE SHARE_PROFILE NSE_PROFILE WIDGET_PROFILE; do
-            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (docs/release-builds.md)"; exit 1; fi
           done
           umask 077
           cert="$RUNNER_TEMP/dist.p12"
@@ -258,7 +264,7 @@ jobs:
       # ECENCY_WIDGET_PROFILE
       # (iosApp/project.yml, push-extension.yml).
       - name: Archive
-        working-directory: native/iosApp
+        working-directory: iosApp
         run: |
           # ECENCY_PUSH_EXTENSION builds the notification service extension (push-extension.yml, RN's ImageNotifi)
           export ECENCY_FIREBASE=true ECENCY_PUSH_EXTENSION=true
@@ -281,7 +287,7 @@ jobs:
             OTHER_CODE_SIGN_FLAGS="--keychain $SIGNING_KEYCHAIN"
 
       - name: Export IPA
-        working-directory: native/iosApp
+        working-directory: iosApp
         run: |
           opts="$RUNNER_TEMP/ExportOptions.plist"
           cp ci/ExportOptions.plist "$opts"
@@ -304,7 +310,7 @@ jobs:
       - name: Simulator release build for the launch check
         if: inputs.launch_check
         timeout-minutes: 40
-        working-directory: native/iosApp
+        working-directory: iosApp
         run: |
           xcodebuild build \
             -project EcencySpike.xcodeproj \

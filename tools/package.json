@@ -1,0 +1,17 @@
+{
+  "name": "ecency-native-golden-tools",
+  "private": true,
+  "description": "Offline generators for the native app's golden fixtures (tools/README.md). Not part of any build. The render generators have their own install in tools/render.",
+  "type": "module",
+  "dependencies": {
+    "@ecency/sdk": "2.4.26",
+    "@hiveio/dhive": "1.3.6",
+    "@noble/curves": "^2.2.0",
+    "@noble/hashes": "^2.2.0",
+    "@tanstack/react-query": "^5.0.0",
+    "crypto-js": "4.2.0",
+    "diff-match-patch": "1.0.5",
+    "react": "^19.0.0",
+    "speakingurl": "14.0.1"
+  }
+}

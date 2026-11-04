@@ -41,7 +41,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             !~/.gradle/caches/build-cache-1
-          key: native-android-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          key: native-android-gradle-${{ hashFiles('gradle/libs.versions.toml', '**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: native-android-gradle-
 
       - name: Enable KVM
@@ -51,7 +51,6 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Build the app and its device tests
-        working-directory: native
         run: ./gradlew --no-daemon :androidApp:assembleDebug :androidApp:assembleDebugAndroidTest
 
       - name: Run device tests
@@ -64,7 +63,6 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          working-directory: native
           script: ./gradlew --no-daemon :androidApp:connectedDebugAndroidTest
 
       - name: Upload test results
@@ -72,6 +70,6 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: android-device-test-results
-          path: native/androidApp/build/outputs/androidTest-results/
+          path: androidApp/build/outputs/androidTest-results/
           retention-days: 30
           if-no-files-found: ignore

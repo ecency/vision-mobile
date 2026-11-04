@@ -1,163 +1,77 @@
 ---
 name: add-query
-description: Use when reading server data in the mobile app - wiring an @ecency/sdk query option into a screen, adding or editing a hook under src/providers/queries/, paginating a feed or list with an infinite query, or fixing a query key, enabled guard, or cache persistence problem.
+description: Use when reading server data in the native Ecency app: adding a Hive RPC or Ecency API read to the shared Kotlin core (an API client under shared/src/commonMain/kotlin/com/ecency/core/api), exposing it through a StateModel with loading, paging, refresh and account binding, or fixing a stale, looping or cross-account read, with FakeTransport and TestApp tests.
 argument-hint: [query-name]
 ---
 
 # Add Query
 
-Read `CLAUDE.md` first (State Management, SDK Migration). Writes are a separate skill: `add-mutation`.
+Reads live in the shared core; the UIs only draw a model's state. CLAUDE.md has the layout; README "Data layer" and
+"Node failover" have the RPC rules. Writes are the `add-mutation` skill.
 
-## First: a failing test for what the app adds
+## Step 0: find what RN asked for, write the failing test
 
-The fetch itself belongs to the SDK, so its spec is written first in vision-web (`add-query` skill there). On mobile, test what the app adds before writing it: a mapping or `select`, an `enabled` guard, a page param for an infinite query. `src/providers/queries/` already has co-located tests to copy. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+1. Find the RN call: `git show rn-3.x-final:<path>` of the screen or hook, then the `@ecency/sdk` query options it
+   used (`getXQueryOptions`). Native sends the same method and parameters. Check whether the core already has it:
+   grep `shared/src/commonMain/kotlin/com/ecency/core/api` for the RPC method name or the private API path.
+2. Write the tests first and see them fail on an assertion:
+   - the request shape, in `shared/src/commonTest/kotlin/com/ecency/core/api/...`: `FakeTransport.byMethod(mapOf(
+     "bridge.x" to "<json>"))` with `clientWith(t)`, then assert `t.sent.single().params` (see `CommunityApiTest`).
+     Fixtures are synthetic but shaped like real answers.
+   - the model, in `commonTest/.../app/<Feature>ModelTest.kt` with `TestApp(this) { req -> ... }` (answer Hive by
+     `req.method`, return `FakeTransport.result(req, json)`) and `app.authBackend.rest = { r -> ... }` for Ecency
+     REST (`ReferModelTest`). Drive time with `testScheduler.advanceUntilIdle()`.
 
-## Rule: the SDK owns the fetch
+## Step 1: the API call
 
-`@ecency/sdk` exports a large family of `get*QueryOptions` helpers. Most files under
-`src/providers/queries/` import from `@ecency/sdk`; a bare `queryFn:` is rare in that directory.
-Search the SDK for your own domain first. Write a `queryFn` only when that search comes back empty:
+- Hive RPC: a method on the area's client (`api/community/CommunityApi.kt`, `api/HiveApi.kt`, `api/wallet/...`)
+  through `client.call(method, params, validate = ...)` on the shared `HiveRpcClient`. Pass `validate` when a
+  well-formed answer can still be impossible (a list expected): the node cools down and the next is asked.
+- Ecency private API (per account, token sent as `code`): a method on the area's class in `api/ecency/` over
+  `EcencyPrivateApi.post(path, username, fields)` (`auth/EcencyTokens.kt`). Public Ecency REST: `EcencyRestApi`.
+- Public entry points are `suspend`, annotated `@Throws(EcencyException::class, CancellationException::class)`
+  (Swift needs it) and wrapped in `guarded { }` so only `EcencyException` or cancellation escapes.
+- Parse with the tolerant readers in `api/model/JsonReading.kt` (`obj()`, `arr()`, `str()`) and
+  `api/json/SafeJson`: chain JSON is loosely typed and `json_metadata` is untrusted. A malformed row is skipped
+  (`mapNotNull(X::fromJson)`), never a crash.
+- Wire a new client once: on `EcencyApi` (Hive) or as a `by lazy` property of `AppEnvironment`
+  (`communityApi`, `editorApi`). Short-lived caches use `api/repository/MemoryCache`.
 
-```bash
-D=node_modules/@ecency/sdk/dist/browser/index.d.ts
-test -f "$D" || echo 'SDK not installed, run yarn'   # a missing file greps as empty, a false all-clear
-grep -o "get[A-Za-z]*QueryOptions" "$D" | sort -u | grep -i draft   # swap in your domain
-grep -n "declare function getPostQueryOptions" "$D"
-```
+## Step 2: the model
 
-Drop the trailing `| grep -i draft` to list them all. The last grep gives the real argument order.
-Do not guess it. In the call sites here, `getPostQueryOptions` takes the observer third.
+- `StateModel<XState>` (`app/StateModel.kt`) with an immutable state: `isLoading`, `isRefreshing`,
+  `isLoadingMore`, `loaded`, `error: AppError?`, and for lists `pages` (count every page, even one of only
+  duplicates, so the UI's "near the end" check does not stall).
+- Paging ends on a cursor the server repeats, a missing cursor, or a page that adds nothing new (`ReferModel`,
+  `FeedPager.isEndReached`): a misbehaving server must not page forever. Drop duplicates by key.
+- Refresh keeps the old list until the new one is complete; `refreshAndWait()` style suspend variants exist for
+  pull to refresh on iOS.
+- Bind to the account: `env.session.awaitLoaded()`, then collect `env.events` for `AppEvent.SessionChanged`,
+  cancel the running job, reset the state and reload; check the account again before applying an answer.
+- Catch `CancellationException` and rethrow; everything else becomes `AppError.from(e)` in state. Never compare
+  catalog text to decide anything.
+- Factory on `AppEnvironment`, closed by the screen (`Observed(..., ownsModel: true)` on iOS, the stack entry on
+  Android). App-wide models (`env.session`, `env.votes`) are never closed by a screen.
 
-## 1. Straight from a component
+## Step 3: offline answers
 
-```typescript
-import { useQuery } from '@tanstack/react-query';
-import { getPostQueryOptions, getAccountFullQueryOptions } from '@ecency/sdk';
+`-fakeData` UI tests and screenshots answer Hive from `DemoHiveTransport` (`shared/.../app/DemoHiveTransport.kt`)
+and iOS `App/FakeHiveTransport.swift`, Ecency REST from `DemoAuthServices`. Add the new call there, or the screen
+shows its error in those runs.
 
-const observer = currentAccount?.name;
-const { data: post, isLoading } = useQuery(getPostQueryOptions(author, permlink, observer));
-const { data: account } = useQuery(getAccountFullQueryOptions(author));
-```
+## Traps
 
-## 2. App hook that adds mobile-only options
+- A read that must not reach the node in a test: assert on `transport.sent` / `authBackend.sent`, not on state only.
+- Public reads send no account token (assert `body == null` for GETs, as `ReferModelTest` does).
+- iOS rows identify by key (`ForEach(..., id: \.key)`), never by hashing the Kotlin data class.
+- Live node smoke test, read only, Android host: `ECENCY_LIVE_TEST=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveSmokeTest*'`.
 
-The dominant shape: spread the SDK options, then override. Verbatim,
-`src/providers/queries/leaderboardQueries/leaderboardQueries.ts`:
+## Checklist
 
-```typescript
-import { useQuery } from '@tanstack/react-query';
-import { getDiscoverLeaderboardQueryOptions } from '@ecency/sdk';
-
-/** hook used to return leaderboard data using SDK */
-export const useGetLeaderboardQuery = (duration: 'day' | 'week' | 'month') => {
-  return useQuery({
-    ...getDiscoverLeaderboardQueryOptions(duration),
-    // Opted in explicitly: the client default is off, because waking every query in
-    // the cache on every resume is far more than this needs. The board lives inside a
-    // tab that stays mounted, so without this it shows whatever it fetched hours ago
-    // until the user thinks to pull to refresh.
-    refetchOnWindowFocus: true,
-  });
-};
-```
-
-Usual overrides: `enabled`, `select`, `staleTime`, `gcTime`, `initialData`. Keep the SDK's
-`queryKey` plus `queryFn` so the cache entry stays shared with other surfaces.
-
-## 3. Private-API queries need the auth pair
-
-Ecency backend queries take `username` plus an access token. Use `useAuth()` rather than
-re-deriving it. From `src/providers/queries/newsletterQueries.ts`:
-
-```typescript
-import { useAuth } from '../../hooks';
-
-export const useDigestSubscriptionsQuery = () => {
-  const { username, code } = useAuth();
-  return useQuery(getDigestSubscriptionsQueryOptions(username, code));
-};
-```
-
-## 4. Infinite queries
-
-SDK `get*InfiniteQueryOptions` already carry `initialPageParam` plus `getNextPageParam`. The repo
-rarely hand-rolls those two. Flatten in the hook, do not re-key. From
-`src/providers/queries/draftQueries.ts` (comments stripped):
-
-```typescript
-const { username, code } = useAuth();
-const enabled = !!username && !!code;
-
-const infiniteQuery = useInfiniteQuery({
-  ...getDraftsInfiniteQueryOptions(username ?? '', code ?? '', limit),
-  enabled,
-});
-
-const data = useMemo(() => {
-  if (!infiniteQuery.data?.pages) return [];
-  return infiniteQuery.data.pages.flatMap((page) => page.data);
-}, [infiniteQuery.data?.pages]);
-
-return { ...infiniteQuery, data, pagesLoaded: infiniteQuery.data?.pages?.length ?? 0 };
-```
-
-## 5. Query keys
-
-- **SDK keys**: `import { QueryKeys } from '@ecency/sdk'`. Namespaced factories, not strings:
-  `QueryKeys.posts.draftsInfinite(username, limit)`, `QueryKeys.accounts.full(name)`,
-  `QueryKeys.polls.details(author, permlink)`. Use these to invalidate or seed an SDK cache entry.
-- **Mobile-only keys**: `src/providers/queries/queryKeys.ts` is a *default* export named `QUERIES`
-  with a nested shape. Files import that default (`import QUERIES from '<relative>/queryKeys'`,
-  so the specifier depends on the file) then `queryKey: [QUERIES.WALLET.GET_ACTIVITIES, username]`.
-  There is no local `QueryKeys` export.
-
-## 6. Hand-rolled query (last resort)
-
-Only when the SDK has nothing. Verbatim, `src/providers/queries/settingsQueries.ts`:
-
-```typescript
-export const useGetServersQuery = () => {
-  return useQuery<string[]>({
-    queryKey: [QUERIES.SETTINGS.GET_SERVERS],
-    queryFn: getNodes,
-    placeholderData: [...SERVER_LIST],
-    staleTime: 0,
-  });
-};
-```
-
-`getNodes` comes from `src/providers/ecency/ecency.ts`, a provider module, not a bare fetch.
-
-## 7. Export
-
-`src/providers/queries/index.ts` uses `export * from './<domain>Queries'`. It also re-exports
-`getQueryClient` from the SDK; the rest of the file is local (`initQueryClient` plus the
-persistence allowlist). A subdirectory carries its own `index.ts` that re-exports namespaces.
-
-## Gotchas
-
-1. **Persistence is an allowlist.** `_shouldDehydrateQuery` in `src/providers/queries/index.ts`
-   switches on `queryKey[0]`, then narrows on `queryKey[1]`. A namespace with no case falls to the
-   default and is dropped, so a new namespace is not persisted until you add its case. Within a
-   case the subtype handling differs per namespace: some subtypes are dropped, some persist only
-   while a single page is loaded, some persist wholesale. Read the switch before assuming a new key
-   persists.
-2. **Guard with `enabled`** when a param can be undefined. An `undefined` anywhere in a query key
-   also blocks persistence.
-3. Returning `undefined` from `getNextPageParam` stops pagination; that is what the repo's
-   hand-rolled case returns.
-4. **Optimistic vote data is no longer Redux.** Call `updateVoteInQueryCaches()` and read back via
-   `applyRecentVoteOverrideToEntry()` from `src/providers/queries/postQueries/voteCacheUtils.ts`;
-   seed a post before navigation with `usePostsCachePrimer()`. `useInjectVotesCache` is gone,
-   though CLAUDE.md's Post Data Flow still lists it.
-5. **Non-React code**: import `getQueryClient` from the app barrel `providers/queries` rather than
-   the SDK: `await queryClient.fetchQuery(getAccountsQueryOptions([username]))`.
-6. `src/providers/queries/sdk-config.ts` runs from `initQueryClient()` and configures
-   `ConfigManager` (query client, private API host, image host, Hive nodes, DMCA lists). Adding a
-   query rarely requires touching it.
-
-Prettier width is 100 (`.prettierrc`). Finish with `yarn lint`, `yarn typecheck` plus
-`yarn test:ci`; `.github/workflows/test.yml` runs all three on every PR. The baseline in
-`tsc-baseline.json` is empty, so any type error fails. Two co-located tests in
-`src/providers/queries/` read `index.ts` and assert the `export * from './<domain>Queries';` line
-from section 7, so a missing barrel export fails jest.
+- [ ] Request shape test and model test were red first, green now (PR body: paths, command, failing assertion, green run)
+- [ ] Same method and parameters as the SDK call RN used
+- [ ] `@Throws` and `guarded`, tolerant parsing, `validate` where an answer can be impossible
+- [ ] Paging ends on repeats and empty pages; `pages` counted
+- [ ] Account change resets and reloads; late answers for the previous account dropped
+- [ ] Demo answers added for fake data runs
+- [ ] `:shared:testAndroidHostTest` for the touched classes, then the full suites and arm64 links once

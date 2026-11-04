@@ -1,165 +1,79 @@
 ---
 name: add-mutation
-description: Use when adding, wrapping, or calling an @ecency/sdk mutation hook in the mobile app (Hive broadcasts like transfer, follow, vote, delegate, community, engine token, or points)
+description: Use when adding or changing a write in the native Ecency app: a Hive broadcast (vote, comment, custom_json, transfer, delegation, account_update2, community or engine operation) built in the shared Kotlin core and sent through SigningModel, or an Ecency private API write (bookmarks, drafts, favourites, points), including operation builders, authority, retry safety, golden vectors and tests.
 argument-hint: [operation-name]
 ---
 
 # Add Mutation
 
-Wrap an `@ecency/sdk` mutation hook in `src/providers/sdk/mutations/`. CLAUDE.md
-("SDK Migration") covers the adapter; this file is the procedure plus the Hive authority
-rules a wrapper must respect.
+Every write goes through the shared core; the UIs call a model action and draw its state. CLAUDE.md "Broadcasts"
+and README "Data layer", "Node failover", "Authentication core" and "Wallet" hold the rules. Read them before
+touching signing.
 
-## 0. Failing test first
+## Step 0: RN source and failing tests
 
-A wrapper is thin by rule, so it rarely needs a test of its own. The behaviour lives elsewhere: the operation payload in `@ecency/sdk` (write that spec first in vision-web, `add-sdk-mutation` skill) and what the caller does with the result (toast, navigation, cache update) at the call site. For call-site logic, write the co-located test from the issue's **Acceptance tests** before wiring it. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+1. Find the RN mutation and the `@ecency/sdk` builder it used: `git show rn-3.x-final:src/providers/sdk/mutations/...`
+   and the screen that calls it. Native builds the same operation JSON.
+2. Write the tests first and see them fail on an assertion (not on a missing class):
+   - the operation JSON: a builder test next to the existing ones (`commonTest/.../api/community/CommunityOpsTest.kt`,
+     `commonTest/.../api/wallet/...`);
+   - a new operation TYPE (new serialization in `hive/`): golden vectors from the SDK. Run `npm ci --prefix tools`
+     once, then the generator for the area (`tools/golden/generate.mjs`, `generate-wallet.mjs`, ...; each header
+     says its output), e.g. `node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt`.
+     Vectors use throwaway keys only.
+   - the model action: `TestApp(this) { req -> TestApp.chain(req) ?: ... }` answers the chain state a broadcast
+     needs; `app.signIn()` stores a posting-key account; assert `app.broadcasts()` (the operations sent) and the
+     state after success, failure and retry (`SocialModelsTest`, `WalletActionsTest`, `SigningModelTest`).
 
-## 1. Create the wrapper
+## Step 1: build the operations (`shared/.../core/api/broadcast/`)
 
-`src/providers/sdk/mutations/use<Operation>Mutation.ts`. Most wrappers there are exactly
-this shape, so copy it verbatim:
+- Add a builder to the area's object (`PostActionOps`, `CommunityOps`, `WalletOps`, `NotificationOps`,
+  `Comments`) returning condenser JSON (`JsonArray`) as the SDK writes it. Operation types live in `hive/`
+  (`Operation.kt`, `WalletOperations.kt`, `GovernanceOperations.kt`).
+- Amounts are chain text, POSIX by construction (`Asset`, `Amounts`, `Num`): never format them with
+  `LocaleFormat`. Typed input goes through `Amounts.typedText` first. `ChainPathsStayPosixTest` scans these paths.
+- Profile metadata writes go through `ProfileWrites` (fresh read, `ProfileMetadataGuard`, merge, `account_update2`
+  with the posting key); never write `posting_json_metadata` from another path.
 
-```typescript
-import { useTransfer } from '@ecency/sdk';
-import { useMutationAuth } from './common';
+## Step 2: send it from a model
 
-export function useTransferMutation() {
-  const { username, authContext } = useMutationAuth();
-  return useTransfer(username, authContext, 'async');
-}
-```
+- Social and content writes: `env.signing.broadcast(user, ops)` (authority from `OperationAuthority.required`),
+  as `PostActionsModel.broadcast`. Check the account first (`requireCurrent`) and drop the result if the session
+  moved on while signing.
+- Anything that is not repeat safe (`RepeatSafeOps`: transfers, delegations, power ups, claims, active-auth
+  custom_json) needs an action id: create it ONCE when the user confirms (`env.idempotencyKey()`) and pass it to
+  `env.signing.broadcast(user, ops, authority, actionId)`. A key account's broadcast without one is refused. Wallet
+  sends use `env.walletSends.send(user, ops, authority, actionId) { final -> ... }` (`AssetDetailsModel.send`),
+  which follows an undecided send until the chain decides.
+- Retries resend the SAME action (same id, same operations, same reply draft). Never rebuild operations or a
+  reply draft to retry: a new permlink or a new transaction can post or pay twice.
+- Errors: catch `CancellationException` and rethrow; map the rest with `AppError.fromBroadcast(e)`.
+  `ErrorKind.CANCELLED` (the user closed a signing prompt) shows nothing; out of RC goes to
+  `env.offerRcIfShort(e)` (RN's offer), not an alert. `BroadcastException.Network(undecided = true)` means "check
+  your wallet", never an automatic new transaction.
+- After success: invalidate and emit what changed (`env.api.posts.invalidate(key)`,
+  `env.emit(AppEvent.PostChanged(key))`), toast through `env.ui.toast(...)`, and record points activity where RN's
+  mutation did (`env.pointActivities.recordBroadcast(user, activity, signed)`).
+- HiveSigner and HiveAuth accounts sign elsewhere (`SigningRouter`); the active key upgrade prompt is shown by
+  `SigningModel` and drawn by the platform's auth overlay (iOS `Screens/AuthOverlay.swift`, Android `ui/AuthUi.kt`).
+  Nothing to wire per operation, but test a posting-only account hitting an active operation if yours needs active.
 
-- `'async'` is the broadcast mode, passed as the last positional arg after `authContext`.
-  Its index varies by hook, so read the signature rather than assuming a position. Pass it
-  unless the hook has no such parameter. `useBroadcastMutation` takes it as
-  `{ broadcastMode: 'async' }` inside the options object instead.
-- `useMutationAuth()` from `./common.ts` (most wrappers import it) returns
-  `{ username, authContext }`: `currentAccount?.name` off `selectCurrentAccount`, plus
-  `useAuthContext()` (`src/providers/sdk/useAuthContext.ts`) building
-  `{ adapter: createMobilePlatformAdapter({...}), enableFallback: true }`. There is no
-  `mobilePlatformAdapter` object to import, use the factory.
-- Most wrappers take no arguments. `useSetCommunityRoleMutation(community)` plus
-  `useUpdateCommunityMutation(community)` take the community because the SDK bakes it into
-  the mutation key. `useAccountRelationsUpdateMutation(target, onSuccess, onError)` takes
-  the target plus both callbacks because the SDK bakes them into the mutation options.
-- A few files are not broadcasts, so they skip `useMutationAuth`, despite
-  CLAUDE.md still saying all mutation wrappers use it.
-  `useGenerateImageMutation` plus the digest hooks in
-  `useNewsletterDigestMutations.ts` (`useSubscribeDigestMutation`,
-  `useLeaveDigestMutation`, `useUnsubscribeAllDigestsMutation`) bind the HiveSigner `code`
-  from `useAuth()` (`src/hooks/useAuth.ts`): `useGenerateImage(username, code)`.
-  `useClaimPointsMutation` instead derives the access token itself, decrypting
-  `currentAccount.local.accessToken` with `getDigitPinCode(pin)` plus `decryptKey`.
+## Ecency private API writes
 
-## 2. Export from the barrel
+- A method on the area class in `api/ecency/` (`EcencyAccountApi.addBookmark`, `EditorApi.addDraft`) over
+  `EcencyPrivateApi.post(path, username, fields)`, which sends the account token as `code` and times out at
+  `TIMEOUT_MILLIS`. A write that timed out may have reached the server: treat it as a lost answer, not a failure
+  to redo blindly.
+- Tests answer it with `app.authBackend.privateApi = { request -> HttpResult(200, "...") }` (or `rest`) and
+  assert `app.authBackend.sent`.
+- Paid calls (AI, points spends) follow README "Paid AI features: the money rules" (`app/PaidCalls.kt`).
 
-One line in `src/providers/sdk/mutations/index.ts`, under the matching domain comment:
+## Checklist
 
-```typescript
-export { useTransferMutation } from './useTransferMutation';
-```
-
-## 3. Call it (from the barrel)
-
-```typescript
-import { useFollowMutation } from '../providers/sdk/mutations';
-const followMutation = useFollowMutation();
-await followMutation.mutateAsync({ following: data.following });
-```
-
-## No SDK hook for the operation?
-
-There is no `packages/sdk` here. `@ecency/sdk` is an npm dependency, so there
-is no local build step. Use the generic `useBroadcastMutation`, as
-`useIgnoreUserMutation.ts` does. The positional args:
-
-```typescript
-return useBroadcastMutation(
-  ['hive', 'ignore-user'],                     // 1 mutation key
-  username,                                    // 2 username
-  ({ following }: { following: string }) => [  // 3 ops builder
-    buildIgnoreOp(username!, following),
-  ],
-  undefined,                                   // 4 onSuccess or undefined
-  authContext,                                 // 5 auth context
-  'posting',                                   // 6 authority
-  { broadcastMode: 'async' },                  // 7 options
-);
-```
-
-Pass authority as a plain lowercase string. The parameter is typed `AuthorityLevel` from
-`@ecency/sdk` (`'posting' | 'active' | 'owner' | 'memo'`); mobile wrappers use
-`'posting'` or `'active'`. Do not import the same-named type from
-`src/screens/dappBrowser/bridges/bridgeTypes.ts`, an unrelated dapp browser union.
-
-- `'posting'`: vote, comment, reblog, follow, ignore, community roles
-- `'active'`: transfer, delegate, power up/down, savings, limit orders, proposal vote,
-  witness proxy
-
-The SDK's exported `OPERATION_AUTHORITY_MAP` is the reference list. It maps both
-`account_update` plus `account_update2` to `'active'` flatly, which is right for the common
-cases but wrong at both ends, so do not copy it for either one.
-
-Both account update operations have payload-dependent authority (`custom_json` is the third
-payload-dependent case, below):
-
-| Operation | Payload sets | Authority Hive requires |
-|---|---|---|
-| both | `owner` | `'owner'` |
-| `account_update2` | only `posting_json_metadata` (profile edit, pinned post) | `'posting'` |
-| both | anything else | `'active'` |
-
-The owner row covers BOTH versions.
-
-`src/utils/hiveOperationAuthority.ts` implements the posting row plus the active row for
-`account_update2` only. It does NOT implement the owner row for either version: the function is
-typed `(operation: Operation) => 'posting' | 'active'`, so its `owner` branch returns
-`'active'`, `account_update` has no branch at all, plus `hiveOperationAuthority.test.ts` has
-no owner case. Its doc comment calling v1 "correctly resolves to active" is wrong whenever the
-payload sets `owner`. That resolver
-serves the hive-uri path (`src/providers/hive/hive.ts` and
-`src/hooks/useLinkProcessor.tsx`), where the operations arrive from an external link.
-Treat an owner change as unsupported and reject it rather than routing
-it to `'active'`.
-
-`custom_json` is the third payload-dependent case. `required_auths` alone means active,
-`required_posting_auths` alone means posting.
-
-A payload populating BOTH is the case this app does not handle. `resolveTxRequiredAuthority`
-collapses a whole transaction to a single `'posting' | 'active'`, which
-`src/providers/hive/hive.ts` then turns into one decrypted key, posting or active. So treat a
-mixed payload as unsupported by this client and say so, rather than calling it malformed or
-picking one authority for it.
-
-Neither implementation detects the case today. `hiveOperationAuthority.ts` never reads
-`required_posting_auths` at all. The SDK's `getCustomJsonAuthority` returns `'active'` as soon
-as `required_auths` is non-empty, without checking the other list. Both therefore sign with one
-key.
-
-`useBroadcastMutation` takes `authority` as its
-sixth positional parameter, fixed when the hook is created, while `operations` is
-`(payload: T) => Operation[]` and only runs at mutate time. The mutation reads the closed-over
-value, so a wrapper cannot choose an authority from its payload. If both shapes are possible,
-write two hooks with fixed authorities and pick at the call site:
-
-```typescript
-// posting: profile edit, pinned post, anything touching only posting_json_metadata
-export const useUpdateProfileMetadataMutation = () => { /* ..., 'posting' */ };
-// active: json_metadata or a key or authority change other than owner (an owner
-// change is unsupported, reject it)
-export const useUpdateAccountKeysMutation = () => { /* ..., 'active' */ };
-```
-
-`useBroadcastMutation`'s `authority` parameter defaults to `'posting'`, so pass the right
-value explicitly.
-
-Prefer an SDK `build<Operation>Op` helper (`buildTransferOp`, `buildVoteOp`) over a hand
-written op tuple.
-
-## Gotchas
-
-1. Auth is not your job: the adapter routes PIN key decryption, HiveSigner `hive-uri`
-   WebView signing, HiveAuth signing, plus the active key upgrade sheet.
-2. No toasts or navigation in the wrapper. Do that at the call site or in hook callbacks.
-3. Check the hook exists in the installed `@ecency/sdk` first, then run `yarn lint` plus
-   `yarn typecheck`; the baseline is empty, so any error fails CI.
+- [ ] Builder JSON equals the SDK's; golden vectors for any new operation type
+- [ ] Tests were red first: operations sent, success state, failure, retry resends the same transaction
+- [ ] Action id for anything not in `RepeatSafeOps`, made once per user confirmation
+- [ ] Account checked before and after signing; cancellation rethrown; `AppError.fromBroadcast`; RC offer
+- [ ] Chain text POSIX; no display formatting in operation builders
+- [ ] Caches invalidated and events emitted so every screen shows the change
+- [ ] Touched test classes green; full suites and arm64 links once at the end

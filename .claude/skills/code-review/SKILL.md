@@ -1,153 +1,111 @@
 ---
 name: code-review
-description: Review a vision-mobile React Native change (diff, branch, PR or file) against this repo's own traps and conventions: action sheet return values, setNativeProps caret, safe-area edges, editor teardown order, notification routing copies, SDK mutation wrappers, EStyleSheet theming.
+description: Review a change to the native Ecency app (diff, branch, PR or file under shared/, androidApp/, iosApp/, build-logic/ or src/config/locales) against this repo's own traps: StateModel threading and account binding, broadcast retry safety, saved navigation, l10n copy rules and literal lints, iPhone Duo panes (isInPane, isPaneTop, transformPreference), themed surfaces, Kotlin/Native and Objective-C guards, test-first evidence and RN parity.
 argument-hint: [file-or-branch]
 ---
 
 # Code Review
 
-Architecture, commands, TypeScript and ESLint rules live in CLAUDE.md. This file holds
-the traps and repo conventions this review gates on. Confirm each finding against the
-code on disk before reporting it.
+Architecture, commands and rules are in CLAUDE.md; each area's rules are in README.md. This file is the checklist
+of traps this codebase has actually hit. Confirm every finding against the code on disk (open the file, quote the
+line) before reporting it, and say which test would catch it.
 
-## Action sheets
+## Process
 
-- [ ] **Resolve an object, gate on a named field.** A repo convention, not something the
-  library enforces today. Two different payloads are involved, so keep them apart when
-  reviewing:
-  - the SHOW payload, `SheetManager.show(name, { payload })`, which the provider hands to
-    the registered component as a prop. Every sheet uses this.
-  - `<ActionSheet payload={...}>`, ActionSheet's OWN prop. Nothing in `src/` sets it, and
-    forwarding the show payload into it is not the same thing.
+- [ ] **Test first.** The PR body lists each acceptance test path, the command, the assertion that failed before
+      the change and the green run after, or repeats the issue's `No test-first: <reason>`. Tests assert the
+      behaviour (requests sent, state, what the user sees), not only that nothing crashed.
+- [ ] **New guards bite.** For each new guard (an account check, a cancel, a dedupe), removing it must fail a test
+      (README "Mutation checks"). Two guards for one risk: say which test fails only when both go.
+- [ ] **RN parity.** Behaviour matches `git show rn-3.x-final:<path>` unless README lists the difference; a new
+      deliberate difference is added to the area's "Deliberate differences" list.
+- [ ] README section for the area updated when behaviour or a rule changed.
+- [ ] No PR labels added; no infrastructure details, real keys or tokens in code, tests, comments or the PR.
 
-  Only the second one feeds `payloadRef`, and the library resolves a close with
-  `data || payloadRef.current || data`. Since no sheet sets that prop, `payloadRef.current`
-  is `undefined` and a falsy result reaches the caller intact today. Keep the convention
-  anyway: adding `payload` to one `<ActionSheet>` would silently turn every falsy cancel in
-  that sheet into a confirm. A dismissal also resolves `undefined`, which truthiness cannot
-  tell apart from a deliberate `false`. Sheets resolve `{ cancelled: true }`
-  or `{ field: value }` instead. Sheets document their own contract, e.g.
-  `src/components/searchFiltersSheet/searchFiltersSheet.tsx`. Callers test the field,
-  abridged from `src/screens/searchResult/screen/searchResultScreen.tsx:65-77`:
-  ```ts
-  const result = await SheetManager.show(SheetNames.SEARCH_FILTERS, {
-    payload: { filters, searchValue: clipSearchValue(searchInputValue) },
-  });
-  if (result && typeof result === 'object' && result.filters) { ... }
-  ```
-- [ ] **Sheets unmount on hide**, so mount-time resets are enough and cleanups run on
-  close (CLAUDE.md, Sheets). Reject "state persists between invocations".
-- [ ] **A throw in a sheet render or cleanup is fatal:** `SheetProvider` wraps
-  `<Application/>` (`src/index.tsx:39-43`), outside `ErrorBoundary`
-  (`src/screens/application/index.tsx:17`). Watch native objects in cleanups.
-- [ ] **Payloads freeze at show time.** A handler in a payload keeps the closure it had
-  when the sheet opened, so route it through a ref
-  (`src/components/quickPostModal/quickPostModalContent.tsx:565-575`).
-- [ ] **Missing `SheetDefinition`?** `everySheetHasDefinition`
-  (`src/navigation/sheets.tsx:358`) fails typecheck and names it. Keys are plain string
-  literals.
+## Shared core (`shared/src/commonMain`)
 
-## Caret on programmatic writes
+- [ ] **State on main, work off it.** `setState` only from the model's scope (main); post bodies, summaries and card
+      images render on `AppDispatchers.render`; blocking platform calls on `io`.
+- [ ] **Cancellation.** Every `catch (e: Exception)` in a coroutine has `catch (e: CancellationException) { throw e }`
+      before it; `runCatching` around a suspend call rethrows cancellation (`onFailure { if (it is
+      CancellationException) throw it }`).
+- [ ] **Account binding.** Results that belong to an account are checked against the current one before they are
+      applied (`ReferModel.owns`, `PostActionsModel.requireCurrent`); `AppEvent.SessionChanged` resets the state.
+      Look for a late answer of the previous account reaching the screen.
+- [ ] **Broadcast retry.** Not repeat safe (`RepeatSafeOps`) means an action id made once per user confirmation
+      (`env.idempotencyKey()`) and passed to `env.signing.broadcast(...)` or `env.walletSends.send(...)`. A retry
+      resends the same action; a rebuilt reply draft or a fresh id on retry can post or pay twice. An undecided
+      `BroadcastException.Network` never signs a new transaction by itself.
+- [ ] **Chain text POSIX.** Operation builders and amounts never read `LocaleFormat` (`ChainPathsStayPosixTest`);
+      typed amounts go through `Amounts.typedText`.
+- [ ] **Paging ends.** A repeated cursor, a missing cursor or a page of only duplicates ends the list; `pages`
+      counts every page.
+- [ ] **Untrusted JSON.** Chain and API data parse through the tolerant readers (`api/model/JsonReading.kt`,
+      `SafeJson`); a malformed row is skipped, never thrown.
+- [ ] **Links validated.** Targets go through `SafeTarget` (`LinkRouter.route`, `ContentLinks.entry`); only
+      http(s) opens a browser.
+- [ ] **Saved navigation.** A new `AppScreen` has `encodeScreen`/`decodeScreen` lines and `AppScreen.of`; its
+      arguments carry no keys, memos, amounts or tokens; a screen that must not return after process death
+      decodes to null.
+- [ ] **Kotlin/Native.** No `combine` of 5+ flows (`NativeCompilerGuardTest`); the arm64 link tasks were run for
+      shared changes. Public suspend entry points have `@Throws(EcencyException::class, CancellationException::class)`;
+      types Swift constructs have overloads instead of relying on default arguments.
+- [ ] **Objective-C names.** No copy member named `YES`, `NO`, `id`, `init...`, `new...`, `copy...`
+      (`ObjcNamesTest`).
 
-- [ ] **`setNativeProps({ text })` on its own moves the caret.** Android keeps the
-  caret's DISTANCE FROM THE END, so it lands inside the text just written and the next
-  keystroke splits it. Pass `selection` whenever the caret position after the write
-  matters: inserts and appends into existing text, plus full replacements of a focused
-  field. A reset to `text: ''` does not need it. Call sites that pass it:
-  `src/components/quickPostModal/quickPostModalContent.tsx:559` and `:604`, plus
-  `src/components/markdownEditor/view/markdownEditorView.tsx:371`.
+## Localization
 
-## Editor teardown order
+- [ ] Keys added only to `src/config/locales/en-US.json`; no edits to the other locale files; RN's English under an
+      existing key unchanged; native copy under `native.<area>`.
+- [ ] A reused RN key is word for word native's English with the same meaning, recorded in `shared/l10n/rn-reuse.json`
+      (`RnReuseTest`). RN keys with fake plurals (`{suffix}`) are not reused; counts are ICU plurals.
+- [ ] Copy read when shown: getters, lambdas for enum labels; no stored `val x = L...`, `by lazy`, enum constructor
+      argument or `MutableStateFlow` initial value reading `L` (`CachedCopyTest`); no Swift `static let` or file
+      level `let` reading the catalog (`SwiftCopyLintTest`).
+- [ ] Whole messages with placeholders, never concatenated fragments; no decision made by comparing copy text.
+- [ ] New allowlist lines in `androidApp/l10n-literals-allowed.txt` / `iosApp/l10n-literals-allowed.txt` are for
+      text that is not copy (brand, ticker, id, debug screen), each with a reason.
+- [ ] Display numbers and dates through `LocaleFormat` (iOS `Fmt.int`, `Fmt.percent`; `Text("\(n)")` formats with
+      the device locale); values beside labels isolated (`Bidi.inUi`, iOS `bidiValue`).
 
-- [ ] **Pending work drains before the save, not in a child cleanup.**
-  `componentWillUnmount` runs in the commit phase ahead of descendant effect cleanups,
-  so the screen calls `flushPendingEditorWork()` then `_saveDraftToDB()`
-  (`src/screens/editor/screen/editorScreen.tsx:116-127`). Register new deferred editor
-  work via `registerPendingFlush`
-  (`src/components/uploadsGalleryModal/mediaInsertQueue.ts:33`), not a local cleanup.
+## iOS (`iosApp/EcencyApp`)
 
-## Safe area
+- [ ] **DestinationView.** A new `AppScreen` has its case in `Screens/RootView.swift`; a missing one compiles and
+      shows `ShellErrorView` at runtime.
+- [ ] **Panes (iPhone Duo).** Screens under the pane's top stay mounted, hidden. Anything live (a chat marking
+      messages read, audio, timers, polling) is gated on `@Environment(\.isPaneTop)` as `ChatThreadView` does.
+      A pane screen sets its title and bar items through `screenTitle` / `screenBarItem` (`Screens/PaneViews.swift`),
+      not `.navigationTitle` or `.toolbar` alone. Bar items merge with `transformPreference`; a new preference
+      that uses `.preference(key:)` for a dictionary of items replaces what sibling views set. Only the selected
+      tab draws the pane (`PanedTab`). `TwoPaneUITests` needs the Duo simulator unfolded and sideways.
+- [ ] **Window, not screen.** No `UIScreen.main`, device orientation or idiom (`ResizabilityTests`); sizes from
+      `\.viewportSize`, pixels from `\.displayScale`.
+- [ ] **Themed surfaces.** `.themedSheet` / `.themedFullScreenCover`, `.themedList()` on every `List` and `Form`, no
+      system background colours, black only behind media with a `// media:` comment (`ThemedBackgroundLintTests`).
+- [ ] **Model lifetime.** Screen models `Observed(model, ownsModel: true)` in a `@StateObject`; app-wide models
+      (`env.session`, `env.votes`) never closed by a screen. Watchers closed with the view.
+- [ ] **Lists.** `ForEach(..., id: \.key)` by post key, never hashing a Kotlin data class.
+- [ ] New Swift files: `project.yml` sources cover them and `xcodegen generate` was run (the project is not committed).
 
-- [ ] **`edges` REPLACES the defaults, it does not add to them.** `edges={['bottom']}`
-  removes the top inset. The top inset is generally the screen's job: a screen
-  rendering `BasicHeader` wraps it in its own `SafeAreaView`
-  (`src/components/basicHeader/view/basicHeaderStyles.ts:13`).
+## Android (`androidApp/src/main/kotlin/com/ecency/app`)
 
-## Notification routing
-
-Notification type strings are matched in more than one place, whose spellings do NOT
-agree. A new type may need adding in several of them.
-
-- [ ] Tap routing: the switch at
-  `src/screens/application/hook/useInitApplication.tsx:222-302`; its `default` does
-  nothing.
-- [ ] Websocket to FCM bridge: the allowlist at
-  `src/screens/application/container/applicationContainer.tsx:891-901` admits
-  `mention`, `reply`, `transfer`, `delegations`, `scheduled_published`, `payouts`,
-  `account_update` and `weekly_earnings`. Each one also needs a case in the title/body
-  switch at `:914`, whose `default` announces a bare `@source`.
-- [ ] Foreground banner: the allowlist at
-  `src/components/foregroundNotification/foregroundNotification.tsx:51-58` admits
-  `reply`, `mention`, `transfer`, `delegations` and `scheduled_published`; anything
-  else shows nothing. Its own `_onPress` (`:127`) routes `transfer` and `delegations`
-  to the wallet, everything else to a post.
-
-Mind the singular/plural split: tap routing matches `favorite` and has no payout case
-at all, the list rendering (`src/utils/notificationImage.ts:12`,
-`src/components/notificationLine/view/notificationLineView.tsx:138`) matches `favorites`
-and `payouts`, while the websocket allowlist has `payouts` but no `favorites`.
-
-## SDK, queries, styling, i18n
-
-- [ ] Broadcast mutation wrappers are thin: `useMutationAuth()` from
-  `src/providers/sdk/mutations/common.ts`, then the SDK hook. No key decryption, no
-  HiveSigner/HiveAuth branching in one; the adapter owns that. The documented
-  exceptions are not broadcasts, so do not report them: `useGenerateImageMutation.ts`
-  and the digest hooks in `useNewsletterDigestMutations.ts` bind the HiveSigner `code`
-  from `useAuth()`, while `useClaimPointsMutation.ts` decrypts
-  `currentAccount.local.accessToken` into a REST access token. A new wrapper that
-  reaches for keys without a non-broadcast reason is still a finding.
-- [ ] Optional query params need `enabled: !!param`.
-- [ ] Mobile-only keys come from `QUERIES`, the DEFAULT export of
-  `src/providers/queries/queryKeys.ts`; SDK-owned data uses `QueryKeys` from
-  `@ecency/sdk`.
-- [ ] DMCA lists are set once by `ConfigManager.setDmcaLists` in
-  `src/providers/queries/sdk-config.ts:69`; a hand-rolled filter in a query is a
-  finding.
-- [ ] `vestsToHp(vests, hivePerMVests)` takes TWO args and returns `0` when either is
-  falsy (`src/utils/conversions.ts`), so a missing rate renders a silent 0.
-- [ ] Colors come from theme vars: `'$primaryBackgroundColor'` inside
-  `EStyleSheet.create` or `EStyleSheet.value('$primaryBlue')` at runtime. A literal hex
-  is a finding when it shadows a var, above all one that differs between
-  `src/themes/lightTheme.ts` and `src/themes/darkTheme.ts`. Deliberately
-  theme-independent chrome is not a finding, e.g. the black media backgrounds in
-  `src/screens/waves/styles/wavesReels.styles.ts`, so flag literals on a surface that
-  should follow the theme. `$white` is `#1e2835` in the dark theme, `$pureWhite` stays
-  white in both.
-- [ ] Text via `intl.formatMessage({ id: 'section.key' })`, key added to the NESTED
-  `src/config/locales/en-US.json`; ids are dotted only because `flattenMessages`
-  flattens the tree in `src/index.tsx`.
-- [ ] Redux reads use `useAppSelector` (`src/hooks/index.ts:6`, a
-  `TypedUseSelectorHook<RootState>` alias) plus a memoized selector from
-  `src/redux/selectors`. The finding is an inline lambda picking state apart, not the
-  hook name. Handlers are `_`-prefixed.
+- [ ] **Models per stack entry.** `entry.get("key") { env.xModel() }` inside `Guarded`, not `remember`, so they
+      survive under other screens and close when popped.
+- [ ] **Windows.** Dialogs, sheets, menus and popups from `ui/Windows.kt` (they follow the app language);
+      `ModalBottomSheet` and `Scaffold` with `colors.background`; the shared `Spinner` and `PullToRefreshBox`; no
+      `MaterialTheme.colorScheme` outside `ui/Theme.kt` (`ThemedBackgroundLintTest`).
+- [ ] **Accessibility.** Clickables name a `role`; icon-only buttons have a label; text uses `blueText` / `redText`,
+      not the fill tokens (`A11yLintTest`).
+- [ ] **Text direction.** Every `TextStyle(...)` names `textDirection` (`Content` for user text, `Ltr` for machine
+      text) (`TextDirectionLintTest`); machine fields stay left to right.
+- [ ] Shared state classes the UI receives are in `androidApp/compose-stability.conf` when recomposition matters.
 
 ## Tests
 
-- [ ] A test for added or fixed behaviour fails without the change. Check it: revert only the
-  source part of the diff (keep the test), run it and confirm it goes red on the assertion it
-  names, then restore. A source file the PR adds cannot be reverted that way, since the test
-  would then fail on its import: replace it with a stub export (a component returning `null`,
-  a function returning `undefined`) instead. For a new guard, delete just the guard. A test
-  that stays green only covers the path where the change does nothing: report it as `BUG`.
-  Restore from a copy of the file, never `git checkout -- <file>`, which drops uncommitted work.
-- [ ] Tests that pin behaviour which already works (a test-only PR, a refactor) are expected to
-  stay green and are not a finding.
-- [ ] The PR body lists each test path, the command, the assertion that failed before the change
-  and the green run after it. A change with no test repeats the issue's `No test-first: <reason>`.
-
-## Report
-
-Group as inline (must fix), outside-diff (should fix), nitpick. Per finding:
-`**[BUG|SECURITY|PERF|STYLE|NITPICK]** file:line`, then what is wrong, why it matters
-and the fix. Gate on `yarn lint`, `yarn typecheck` and `yarn test:ci`.
+- [ ] Shared tests use `TestApp` / `FakeTransport` with synthetic fixtures and throwaway keys; broadcasts are
+      asserted through `app.broadcasts()`.
+- [ ] Android flows wait with `compose.await(...)` (`ComposeAwait.kt`), not wall clock sleeps.
+- [ ] iOS UI tests launch with `-fakeData YES`; new calls have answers in `DemoHiveTransport`,
+      `FakeHiveTransport.swift` or `DemoAuthServices`.
+- [ ] The full suites ran once at the end (PR command, iOS tests, arm64 links) and CI finished green before
+      calling it done.

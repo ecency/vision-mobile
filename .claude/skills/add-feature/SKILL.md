@@ -1,182 +1,102 @@
 ---
 name: add-feature
-description: Use when adding a new screen, route, or user-facing feature to the Ecency mobile React Native app, covering navigator registration, route params, i18n strings and styling.
+description: Use when adding a new screen, route or user-facing feature to the native Ecency app (Kotlin Multiplatform core, SwiftUI, Jetpack Compose), covering the RouteName and AppScreen case, saved navigation encode/decode, the shared StateModel, the iOS DestinationView and Android EcencyApp.kt screens, l10n keys and tests on both platforms.
 argument-hint: [feature-name]
 ---
 
 # Add Feature
 
-Ordered procedure for adding a screen. CLAUDE.md covers Redux, TanStack Query, `@ecency/sdk`,
-sheets and lint rules in more depth. Easiest to miss: the safe-area root (Step 1) and the params
-contract (Step 4). Each one breaks something.
+Ordered procedure for a new screen. CLAUDE.md covers the architecture, commands and rules; README.md has the area
+you are working in. A complete worked example to copy from is Refer & Earn: grep `Refer` through each file below.
 
-New screens are functional. A few older screens under `src/screens/` are still classes, plus
-`application/children/errorBoundary.tsx`, which React requires to be a class. An overlay with no
-route of its own, shown with `SheetManager.show`, is a bottom sheet instead:
-`src/navigation/sheets.tsx`, see CLAUDE.md.
+## Step 0: RN behaviour and failing tests first
 
-```text
-src/screens/<feature>/
-  index.ts                     # local barrel, re-exported from src/screens/index.ts
-  screen/<feature>Screen.tsx
-  screen/<feature>Styles.ts    # or <feature>.styles.ts
-  children/  hooks/            # optional
-```
+1. Read what RN did: `git show rn-3.x-final:src/constants/routeNames.ts` for the route name, then the RN screen
+   (`git show rn-3.x-final:src/screens/<name>/...`). Native matches it unless README lists a deliberate difference.
+2. Write the issue's **Acceptance tests** before the code and see them fail on their assertion:
+   - shared model behaviour: `shared/src/commonTest/kotlin/com/ecency/core/app/<Feature>ModelTest.kt` with `TestApp`
+     (see `ReferModelTest.kt`);
+   - navigation: a case in `NavigationTest.kt` (route, gating, save and restore);
+   - Android UI: a Robolectric flow in `androidApp/src/test/kotlin/com/ecency/app/` (see `GapsFlowsTest.kt`);
+   - iOS: `iosApp/EcencyAppTests/<Area>Tests.swift` and a UI test launched with `-fakeData YES` (see
+     `OnboardingUITests.swift`, which opens Refer with `-seedAccounts YES -openScreen refer`).
 
-## Step 0: failing test first
+## Step 1: route and screen (`shared/.../core/app/Navigation.kt`)
 
-Start from the issue's **Acceptance tests** list. Put the screen's logic (formatting, validation, what a button does with the data) in a hook or util and write its co-located `*.test.ts` before the code; a component-level `*.test.tsx` works too (`src/components/listen/listenBar.test.tsx` is one). Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. Navigation and full flows that Jest cannot reach go in a Maestro flow under `.maestro/`: run it with `maestro test .maestro/<flow>.yaml`, see it fail before the code and pass after; record both runs in the PR. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
+- `RouteName`: the RN route already has an entry (every RN route is listed). Flip `built = true` and check
+  `requiresLogin` (RN `showLoginAlert`). A new native-only route gets a new entry with an `L.native.navigation.*` title.
+- `AppScreen`: add a `data object` or `data class` with `override val route get() = RouteName.X`. Arguments are
+  saved as plain text: never put keys, memos, amounts or tokens in them; read those from a model at runtime.
+  Swift sees no default arguments, so add an explicit secondary constructor when Swift builds it with fewer
+  arguments (see `AppScreen.Profile(author)`).
+- `AppScreen.of(route, arg)`: map the route to the new screen (links and `-openScreen route:...` use it).
+- `NavState.encodeScreen` and `decodeScreen`: add a line each. Return null from `decodeScreen` for a screen that
+  must not come back after process death (as `backupKeys` and `qr` do). Extend
+  `everyWaveScreenSurvivesSaveAndRestoreExceptWhatMustNot` style coverage in `NavigationTest`.
+- Two panes (README "iPhone Duo"): add the screen to `AppScreen.fitsAPane` only if it is reading or people that
+  belongs beside a list; writing, settings, wallet actions and search cover the window.
+- A link to it: extend `ContentLinks.entry` (ecency.com paths) or `AuthLinkModel`, with a `LinkRouterTest` case.
 
-## Step 1: screen rooted in SafeAreaView
+## Step 2: shared model (`shared/.../core/app/<Feature>Model.kt`)
 
-Use `SafeAreaView` from `react-native-safe-area-context` as the root; that is where screens
-generally import it from. `src/screens/dappBrowser/screen/dappBrowser.tsx` still takes it from
-`react-native`, which is the pattern this rule exists to replace. Do not pass `edges`: it
-**replaces** the defaults rather than extending them, so `edges={['bottom']}` drops the top inset
-and the header runs under the status bar. That shipped on the Email digests screen; the fix was
-removing `edges={['bottom']}`.
+- `class XModel internal constructor(private val env: AppEnvironment) : StateModel<XState>(XState(), env.dispatchers)`
+  with an immutable `data class XState` (loading, refreshing, error as `AppError?`, `loaded`, `pages` for paging).
+- Add a factory on `AppEnvironment` (`fun xModel(): XModel = XModel(this)`, as `referModel()`).
+- Actions return at once and launch in `scope`; catch `CancellationException` and rethrow it, map other failures
+  with `AppError.from(e)` (or `AppError.fromBroadcast(e)` for writes).
+- Data belongs to the account that loaded it: wait for `env.session.awaitLoaded()`, collect `env.events` for
+  `AppEvent.SessionChanged`, and drop answers that arrive for a previous account (`ReferModel.owns`).
+- Copy for the screen goes in a copy object with getters (`object XCopy { val TITLE: String get() = L... }`).
+- Data reads: the `add-query` skill. Writes: the `add-mutation` skill.
+- If the Android UI receives the state class, list it in `androidApp/compose-stability.conf` when recomposition matters.
 
-Skeleton for `screen/<feature>Screen.tsx` (a template, not a quote of any one file):
+## Step 3: l10n keys (`src/config/locales/en-US.json` only)
 
-```tsx
-import React from 'react';
-import { useIntl } from 'react-intl';
-import { SafeAreaView } from 'react-native-safe-area-context';
+- RN key with the same English and meaning: reuse it and record it in `shared/l10n/rn-reuse.json`.
+- Otherwise a new key under `native.<area>` (`native.ios.<area>` / `native.android.<area>` for one platform), ICU
+  plurals for counts. Never edit RN's English or the other 38 locale files.
+- Use `L.native.area.key` (Kotlin) / `L.Native.Area.key` (Swift), or the shared copy object.
 
-import { BasicHeader } from '../../../components';
-import { useAppSelector } from '../../../hooks';
-import { selectCurrentAccount } from '../../../redux/selectors';
-import styles from './myFeatureStyles';
+## Step 4: iOS screen
 
-const MyFeatureScreen = () => {
-  const intl = useIntl();
-  const currentAccount = useAppSelector(selectCurrentAccount);
+- SwiftUI view in `iosApp/EcencyApp/Screens/` (an existing area file, or a new file followed by
+  `cd iosApp && xcodegen generate`). Hold the model as `@StateObject private var x: Observed<XState>` built from
+  `Observed(env.xModel(), ownsModel: true)`, and call `start()` on appear.
+- Add the case to `DestinationView` (`Screens/RootView.swift`). A missing case compiles and falls to the default
+  `ShellErrorView` at runtime, so test that the screen opens.
+- A screen that `fitsAPane` sets its title and bar items through `screenTitle(...)` and `screenBarItem(...)`
+  (`Screens/PaneViews.swift`), so they show in the pane's header on iPhone Duo; a covering screen can use
+  `.navigationTitle` (as `ReferScreen`). Lists use `.themedList()`; sheets `.themedSheet(...)`.
+- Accessibility identifiers for UI tests (`.accessibilityIdentifier("x-...")`); counts through `Fmt.int`.
+- Debug entry for UI tests and screenshots: a case in `AppContainer`'s `options.openScreen` switch, or use the
+  generic `-openScreen route:<ROUTE_NAME>:<arg>`.
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <BasicHeader title={intl.formatMessage({ id: 'myfeature.title' })} />
-      {/* content */}
-    </SafeAreaView>
-  );
-};
+## Step 5: Android screen
 
-export default MyFeatureScreen;
-```
+- Composable in `androidApp/src/main/kotlin/com/ecency/app/ui/` (an area file such as `ProfileScreens.kt`).
+- Add the branch to the `when (screen)` in `ui/EcencyApp.kt`: keep models in the stack entry
+  (`entry.get("x") { env.xModel() }`, list state `entry.get("list") { LazyListState() }`) inside
+  `Guarded({ ... }) { model -> ... }`; navigate with `navigator.push(...)` / `navigator.pop()`.
+- Colors from `LocalEcencyColors.current`; `Scaffold(containerColor = colors.background)`; dialogs and sheets from
+  `ui/Windows.kt`; clickables name a `role`; `testTag`s for tests.
+- Debug entry: `--es openScreen ...` handling in `MainActivity.kt` if screenshots need it.
 
-`useAppSelector(selectCurrentAccount)` reads the account; `useAuth()` from `src/hooks` when you
-only need `{ username, code }`. Reusable UI is exported from the `src/components/index.tsx` barrel
-(`BasicHeader`, `MainButton`, `TextInput`, `UserAvatar`, `Icon`).
+## Step 6: offline data for UI tests
 
-The styles file default-exports
-`EStyleSheet.create({ container: { flex: 1, backgroundColor: '$primaryBackgroundColor' } })`.
-Variables are defined in `src/themes/lightTheme.ts` and `darkTheme.ts`: `$primaryBlack` text,
-`$primaryDarkGray` secondary text, `$primaryBlue` accent, `$primaryLightBackground` cards,
-`$iconColor`, `$primaryRed` destructive. Hex literals do not follow the theme.
-
-## Step 2: both barrels
-
-`src/screens/<feature>/index.ts` does `import MyFeature from './screen/myFeatureScreen';` then
-`export { MyFeature }; export default MyFeature;`. Add the import plus the name to the export block
-in `src/screens/index.ts`. `stackNavigator.tsx` imports its screens from that barrel.
-`src/screens/waves` shows the cost of skipping this: it never reached the barrel, so
-`botomTabNavigator.tsx` reaches it by path.
-
-## Step 3: route name
-
-In `src/constants/routeNames.ts`. Entries are template literals over the shared suffix consts. The
-object ends `as const`, which is what makes the route names a literal union:
-
-```ts
-    MY_FEATURE: `MyFeature${SCREEN_SUFFIX}`,
-```
-
-## Step 4: params contract (skip it and typecheck fails)
-
-`src/navigation/types.ts` derives `RouteName` from ROUTES, then asserts every route has an entry:
-
-```ts
-export type _MissingRouteContracts = AssertNever<Exclude<RouteName, keyof AppParamList>>;
-```
-
-A ROUTES entry with no `AppParamList` entry breaks that assertion: the route name does not satisfy
-the constraint `never`. `yarn typecheck` runs against an empty baseline, so this fails CI. Add:
-
-```ts
-  [ROUTES.SCREENS.MY_FEATURE]: { username?: string } | undefined;
-```
-
-Append `| undefined` only if the screen renders with no params. Leaving it off makes params required
-at the call sites, which is what you want for a screen that cannot render empty (`WEB_BROWSER`,
-`VOTERS`, `ASSET_DETAILS`, `CHAT_THREAD`, `PROFILE_EDIT`).
-
-## Step 5: register in the navigator
-
-`src/navigation/stackNavigator.tsx` defines `MainStackNavigator` and the root `StackNavigator`.
-`MainStackNavigator` registers the drawer as its first screen (`ROUTES.DRAWER.MAIN`), so an
-ordinary screen added to it is a sibling of the drawer that pushes over it. The root
-`StackNavigator` holds `MainStackNavigator` itself plus pre-auth and full-screen routes (Login,
-Register, Welcome, PinCode, WebBrowser). Most new screens go in the main one:
-
-```tsx
-<MainStack.Screen name={ROUTES.SCREENS.MY_FEATURE} component={MyFeature} />
-```
-
-Put it in the `<MainStack.Group screenOptions={{ animation: 'slide_from_bottom' }}>` block to slide
-up, add `options={{ presentation: 'modal' }}` for a true modal. The `as any` casts on existing rows
-are legacy prop debt; a new screen needs none.
-
-## Step 6: navigating
-
-`types.ts` declares `ReactNavigation.RootParamList extends AppParamList`, so the untyped hook is
-already checked against Step 4. Omitting params for a route that requires them is a compile error,
-not a blank screen.
-
-```tsx
-const navigation = useNavigation();
-navigation.navigate(ROUTES.SCREENS.MY_FEATURE, { username });
-```
-
-Reading the params back is not settled house style. Most screens destructure a `route` prop, usually
-typed `any`; `useRoute` is rare. Prefer keying off Step 4 instead:
-
-```tsx
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { AppParamList } from '../../../navigation/types';
-
-const route = useRoute<RouteProp<AppParamList, typeof ROUTES.SCREENS.MY_FEATURE>>();
-```
-
-Outside a component (deep links, redux actions) use the equally typed object form,
-`RootNavigation.navigate({ name, params })` from `src/navigation/rootNavigation.tsx`.
-
-## Step 7: strings
-
-`src/config/locales/en-US.json` is the catalog you edit; Crowdin owns the translations. It is
-**nested**: top-level keys are objects, not dotted ids. `src/utils/flattenMessages.ts` joins the
-levels with dots at load, so a nested block is read with a dotted id.
-
-```json
-{ "myfeature": { "title": "My Feature", "empty": "Nothing here yet" } }
-```
-
-```tsx
-intl.formatMessage({ id: 'myfeature.title' });
-```
-
-## Step 8: data
-
-Server data uses `@ecency/sdk` query options with TanStack Query; mutations use a wrapper in
-`src/providers/sdk/mutations/`. See the SDK Migration section of CLAUDE.md. Keep Redux for auth,
-settings, UI state and the optimistic cache reducer. Older reducers (`postsReducer`,
-`walletReducer`) still hold server data; do not extend them for a new screen.
+UI tests and screenshots run without network: Hive calls answer from `DemoHiveTransport` (shared) and
+`iosApp/EcencyApp/App/FakeHiveTransport.swift`, Ecency REST from `DemoAuthServices`. Add answers for every new call,
+or the screen shows its error state in `-fakeData` runs.
 
 ## Checklist
 
-- [ ] Test from Step 0 was red before the code and is green now; the PR body lists each test path, the command and the assertion that failed before the change, then the green run after it (or it repeats the issue's `No test-first: <reason>`)
-- [ ] Root is `SafeAreaView` from `react-native-safe-area-context`, no `edges` override
-- [ ] `src/screens/<feature>/index.ts` re-exported from `src/screens/index.ts`
-- [ ] Route in `routeNames.ts` **and** a params entry in `AppParamList` (`src/navigation/types.ts`)
-- [ ] Registered in `src/navigation/stackNavigator.tsx`
-- [ ] Nested strings in `en-US.json` only
-- [ ] Theme variables, no hex literals
-- [ ] `yarn lint` and `yarn typecheck` clean
+- [ ] Acceptance tests were red before the code and are green now; the PR body lists each test path, the command,
+      the failing assertion before and the green run after (or the issue's `No test-first: <reason>`)
+- [ ] `RouteName` `built`/`requiresLogin`, `AppScreen` case, `AppScreen.of`, encode and decode, `NavigationTest`
+- [ ] No secret or private value in screen arguments
+- [ ] Model via `AppEnvironment` factory; account change handled; cancellation rethrown
+- [ ] Copy in `en-US.json` only, `rn-reuse.json` updated for reused RN keys, no literal UI text
+- [ ] iOS `DestinationView` case, `screenTitle`/`screenBarItem` for pane screens, themed surfaces, `xcodegen generate` run
+- [ ] Android `ui/EcencyApp.kt` branch with `Guarded` and `entry.get`
+- [ ] New route added to the themed background checks (`UniformBackgroundTest` routes, `ThemedBackgroundUITests`)
+- [ ] Demo answers for new calls; README section updated
+- [ ] Touched test classes green; full suites and arm64 links once at the end

@@ -1,18 +1,27 @@
 name: Android Build
 
 # Store build of the Ecency app (native 4.x, app.esteem.mobile.android, an update of the RN 3.x app) for Google
-# Play. Every push to development that changes native/ builds, signs and releases to the alpha track, as the RN
+# Play. Every push to development that changes the app builds, signs and releases to the alpha track, as the RN
 # workflow did; a manual run picks the track. Never on pull requests (CI minutes): test.yml runs the unit tests
-# there. Flow, secrets and owner checklist: native/README.md "Release pipeline" and native/docs/release-builds.md.
+# there. Flow, secrets and owner checklist: README.md "Release pipeline" and docs/release-builds.md.
 on:
   push:
     branches:
       - development
-    # native/ only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
-    # "First deploy" steps in native/docs/release-builds.md)
+    # the app's paths only: a change to this file alone ships nothing (dispatch it by hand to try it; see the
+    # "First deploy" steps in docs/release-builds.md)
     paths:
-      - 'native/**'
-      # the native strings are generated from the RN locale files (a Crowdin pull ships through here)
+      - 'androidApp/**'
+      - 'iosApp/**'
+      - 'shared/**'
+      - 'build-logic/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'scripts/**'
+      # the app's strings are generated from the locale files (a Crowdin pull ships through here)
       - 'src/config/locales/**'
   workflow_dispatch:
     inputs:
@@ -52,9 +61,6 @@ jobs:
     outputs:
       build_number: ${{ steps.version.outputs.build_number }}
       mapping_id: ${{ steps.mapping.outputs.id }}
-    defaults:
-      run:
-        working-directory: native
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -73,7 +79,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             !~/.gradle/caches/build-cache-1
-          key: native-android-gradle-${{ hashFiles('native/gradle/libs.versions.toml', 'native/**/*.gradle.kts', 'native/gradle/wrapper/gradle-wrapper.properties') }}
+          key: native-android-gradle-${{ hashFiles('gradle/libs.versions.toml', '**/*.gradle.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: native-android-gradle-
 
       # RN's scheme: the Unix time as versionCode, so every upload is above the RN store builds and the last upload.
@@ -106,7 +112,7 @@ jobs:
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
       # Values go through env and printf only (no set -x), so they never reach the log. GitHub also masks them.
-      # The names are the RN workflow's secrets, except the two hashes (native/docs/release-builds.md).
+      # The names are the RN workflow's secrets, except the two hashes (docs/release-builds.md).
       - name: Write build secrets
         env:
           PIN_KEY: ${{ secrets.PIN_KEY }}
@@ -126,7 +132,7 @@ jobs:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
         run: |
           for v in PIN_KEY PIN_KEY_SHA256 DEFAULT_PIN DEFAULT_PIN_SHA256 GOOGLE_JSON; do
-            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (native/docs/release-builds.md)"; exit 1; fi
+            if [[ -z "${!v}" ]]; then echo "::error::Secret for $v is not set (docs/release-builds.md)"; exit 1; fi
           done
           # a set but malformed update source, or a line break in it, fails the build: no silent fallback to the defaults
           scripts/check-update-source.sh "$UPDATE_RELEASES_URL" "$UPDATE_TAG_PREFIX"
@@ -178,7 +184,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ecency-android-mapping-${{ env.ECENCY_BUILD_NUMBER }}
-          path: native/androidApp/build/outputs/mapping/release/mapping.txt
+          path: androidApp/build/outputs/mapping/release/mapping.txt
           retention-days: 30
           if-no-files-found: error
 
@@ -215,7 +221,6 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           disable-animations: true
-          working-directory: native
           script: scripts/release-launch-check.sh android ${{ runner.temp }}/universal.apk 30
 
       - name: Remove the launch check APK
@@ -238,8 +243,8 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: app.esteem.mobile.android
-          releaseFiles: native/androidApp/build/outputs/bundle/release/androidApp-release.aab
-          mappingFile: native/androidApp/build/outputs/mapping/release/mapping.txt
+          releaseFiles: androidApp/build/outputs/bundle/release/androidApp-release.aab
+          mappingFile: androidApp/build/outputs/mapping/release/mapping.txt
           track: ${{ inputs.track || 'alpha' }}
           status: ${{ inputs.release_status || 'completed' }}
           whatsNewDirectory: ${{ runner.temp }}/whatsnew

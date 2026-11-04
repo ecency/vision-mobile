@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="splashBackground" type="color">#ffffff</item>
-    <item name="notification_icon" type="color">#ffffff</item>
-    <color name="primary_dark">#000000</color>
-    <color name="app_bg">#ffffff</color>
-    <color name="bootsplash_background">#FFFFFF</color>
-</resources>
