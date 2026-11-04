@@ -452,6 +452,49 @@ class DappBrowserModelTest {
         assertTrue(app.broadcasts().isEmpty(), "a message signature broadcasts nothing")
     }
 
+    @Test
+    fun aMessageShapedLikeAnEcencySignedMessageIsRefusedBeforeAPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val exact = com.ecency.core.auth.HiveSignerMessages.message("code", null, alice, 1_791_288_000_000)
+        val reordered = """{ "timestamp" : 1791288000, "authors" : [ "$alice" ],
+            "signed_message" : { "app" : "ecency.app", "type" : "code" } }"""
+        val escaped = """{"\u0073igned_message":{"type":"code","app":"ecency\u002eapp"},"authors":["$alice"],"timestamp":1}"""
+        val otherApp = """{"signed_message":{"type":"login","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        val messages = listOf(exact, reordered, escaped, otherApp) +
+            listOf("code", "posting", "login", "refresh").map { com.ecency.core.auth.HiveSignerMessages.message(it, "x.app".takeIf { _ -> it == "login" }, alice, 1_000) } +
+            JsonPrimitive(exact).toString()
+        messages.forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNull(b.current.prompt, "refused before a prompt: $message")
+            assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error(), message)
+        }
+        // the Peak Vault path refuses it too
+        send(b, page, peakVault("""[["peakvault-sign_buffer",{"message":${JsonPrimitive(exact)}}]]""", resId = 50))
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error())
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun ordinaryLoginMessagesStillReachThePrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        listOf("Log in to dapp.example #1791288000", """{"login":"dapp.example","nonce":"abc","account":"$alice"}""", "[1,2]").forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertEquals(message, b.current.prompt!!.details.single { it.name == DappBrowserModel.MESSAGE }.value)
+            b.reject()
+        }
+        send(b, page, peakVault("""[["peakvault-sign_buffer",{"message":"hello"}]]""", resId = 9))
+        testScheduler.advanceUntilIdle()
+        assertEquals("hello", b.current.prompt!!.details.single { it.name == DappBrowserModel.MESSAGE }.value)
+    }
+
     // ---- what is shown is what is signed ----
 
     private fun field(b: DappBrowserModel, name: String) = b.current.prompt!!.operations.single().fields.single { it.name == name }.value

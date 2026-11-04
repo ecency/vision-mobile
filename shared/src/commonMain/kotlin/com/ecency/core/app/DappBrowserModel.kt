@@ -555,6 +555,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         // JS hands UTF-16; a lone surrogate has no UTF-8 form the page and the app would agree on
         if (hasLoneSurrogate(message)) return answer.error("Invalid message.")
         if (message.length > MAX_MESSAGE_TO_SIGN) return answer.error("Invalid message.")
+        // Ecency's own login code, upload token and HiveAuth challenge are signed over this same digest: a page
+        // never gets one signed, however it is spaced or ordered
+        if (BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val wif = if (authority == KeyRole.ACTIVE) account.activeKey else account.postingKey
@@ -746,6 +749,8 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val NOT_IN_FRONT = "The page is not in front."
         const val LOCKED = "Ecency is locked. Unlock it and try again."
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
+        /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
+        const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
         val MESSAGE: String get() = L.profile.message
 
         /** Ops JSON plus the page's text: Hive takes 64 KB a transaction, this leaves room for JSON escapes. */
@@ -814,4 +819,29 @@ object BridgeDisplay {
 /** The signBuffer digest: sha256 of the message's UTF-8 bytes (the SDK's sha256 of a string). */
 object BridgeSignatures {
     fun digest(message: String): ByteArray = com.ecency.core.hive.sha256(message.encodeToByteArray())
+
+    private val lenient = Json { isLenient = true }
+
+    /**
+     * True when [message] is shaped like a HiveSigner signed message (`HiveSignerMessages`): a JSON object with a
+     * `signed_message` member, whatever its type or app (Ecency's `ecency.app` included). Parsed leniently, so spacing, key order and
+     * escapes do not matter; JSON text inside a JSON string is read too. Text that does not parse but still names
+     * `signed_message` is refused as well.
+     */
+    fun reserved(message: String): Boolean {
+        var text = message
+        repeat(MAX_NESTING) {
+            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull()
+                ?: return text.contains(SIGNED_MESSAGE, ignoreCase = true)
+            when (parsed) {
+                is JsonObject -> return SIGNED_MESSAGE in parsed
+                is JsonPrimitive -> if (parsed.isString) text = parsed.content else return false
+                else -> return false
+            }
+        }
+        return text.contains(SIGNED_MESSAGE, ignoreCase = true)
+    }
+
+    private const val SIGNED_MESSAGE = "signed_message"
+    private const val MAX_NESTING = 4
 }
