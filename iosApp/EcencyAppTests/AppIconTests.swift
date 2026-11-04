@@ -36,8 +36,16 @@ final class AppIconTests: XCTestCase {
     }
 
     func testWidgetSymbolsDraw() {
-        for symbol in [WidgetSymbol.notifications, .streak, .compose, .waves] {
+        for symbol in [WidgetSymbol.notifications, .streak, .compose] {
             XCTAssertNotNil(UIImage(systemName: symbol.rawValue), symbol.rawValue)
+        }
+    }
+
+    /// The widgets draw the Waves mark from their own copy of the path; it must be the app's mark.
+    func testWidgetWavesMarkDrawsTheAppsMark() {
+        for size in [CGFloat(20), 36, 96] {
+            let rect = CGRect(x: 0, y: 0, width: size, height: size)
+            XCTAssertEqual(WidgetWavesMark().path(in: rect).description, WavyDash().path(in: rect).description, "at \(size)")
         }
     }
 

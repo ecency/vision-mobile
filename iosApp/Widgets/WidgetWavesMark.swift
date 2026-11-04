@@ -24,10 +24,21 @@ struct WidgetWavesMark: Shape {
     }
 }
 
-/// A label with the Waves mark as its icon, sized with the label's text.
+/// A label with the Waves mark as its icon, the size of an SF Symbol beside that text style (Dynamic Type included).
 struct WavesLabel: View {
     let title: String
-    @ScaledMetric(relativeTo: .headline) private var size: CGFloat = 20
+    @ScaledMetric private var size: CGFloat
+
+    init(title: String, textStyle: Font.TextStyle = .headline) {
+        self.title = title
+        // about the height an SF Symbol takes beside the style's text
+        let base: CGFloat = switch textStyle {
+        case .subheadline: 16
+        case .footnote, .caption, .caption2: 14
+        default: 20
+        }
+        _size = ScaledMetric(wrappedValue: base, relativeTo: textStyle)
+    }
 
     var body: some View {
         Label {

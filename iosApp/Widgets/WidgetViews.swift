@@ -210,7 +210,7 @@ private struct ComposeButton: View {
     var body: some View {
         // a text style that follows Dynamic Type, shrinking rather than clipping in the widget's fixed size
         Group {
-            if let icon { Label(label, widgetSymbol: icon) } else { WavesLabel(title: label) }
+            if let icon { Label(label, widgetSymbol: icon) } else { WavesLabel(title: label, textStyle: .subheadline) }
         }
             .font(.subheadline.weight(.semibold))
             .lineLimit(1).minimumScaleFactor(0.6)

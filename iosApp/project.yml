@@ -256,6 +256,7 @@ targets:
       # the widget views, rendered by WidgetViewTests (the extension itself is not a test host)
       - path: Widgets/WidgetViews.swift
       - path: Widgets/WidgetSymbols.swift
+      - path: Widgets/WidgetWavesMark.swift
       - path: Widgets/WidgetL10n.swift
       - path: EcencyApp/App/ContrastPalette.swift
       - path: Generated/WidgetL10nData.generated.swift
