@@ -17,10 +17,6 @@ final class NetworkMonitor {
     deinit { monitor.cancel() }
 }
 
-/// RN tab tints (the same in both themes); the resting icons use the AA icon color (RN 0xC1C5C7 was 1.7:1 on white).
-private let tabActive = Color(hex: 0x357CE6)
-private let tabInactive = Color(hex: ContrastPalette.lightIcon)
-
 extension AppTab {
     var identifier: String { "tab-\(name.lowercased())" }
 }
@@ -40,151 +36,17 @@ struct WavyDash: Shape {
     }
 }
 
-/// RN BottomTabBar: five icons, no labels, 26 pt, 15 pt from the top, the home indicator inset (or 16) below.
-struct BottomTabBar: View {
-    let selected: AppTab
-    let badges: Badges
-    let onSelect: (AppTab) -> Void
-    @Environment(\.appTheme) private var theme
+extension WavyDash {
+    @MainActor private static var tabImages: [CGFloat: UIImage] = [:]
 
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(AppTab.entries, id: \.self) { tab in
-                TabButton(tab: tab, active: tab == selected, badge: badges.text(kind: tab.badge)) { onSelect(tab) }
-            }
-        }
-        .background(Rectangle().fill(theme.background).shadow(color: .black.opacity(0.15), radius: 6).ignoresSafeArea(edges: .bottom))
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("tab-bar")
-    }
-}
-
-private struct TabButton: View {
-    let tab: AppTab
-    let active: Bool
-    let badge: String?
-    let onSelect: () -> Void
-    @Environment(\.appTheme) private var theme
-    @Environment(\.motion) private var motion
-    @State private var selections = 0
-
-    private var tint: Color { active ? tabActive : tabInactive }
-
-    // the selected icon takes its colour with a short fade and bounces once (any icon pops; SF Symbols bounce)
-    @ViewBuilder private var icon: some View {
-        Group {
-            if tab == .waves {
-                WavyDash().fill(tint).frame(width: 26, height: 26).popOnChange(active, enabled: active)
-            } else {
-                Image(appIcon: tab.icon, filled: active).font(.system(size: 22)).foregroundStyle(tint).frame(width: 26, height: 26)
-                    .contentTransition(motion.isOff ? .identity : .symbolEffect(.replace))
-                    .symbolEffect(.bounce, options: .nonRepeating, value: selections)
-            }
-        }
-        .animation(motion.fade(), value: active)
-        .onChange(of: active) { _, now in if now && motion.pops { selections += 1 } }
-    }
-
-    var body: some View {
-        Button { if !active { onSelect() } } label: {
-            ZStack(alignment: .topTrailing) {
-                icon
-                if let badge {
-                    // grows a little with the text size; the tab's large content viewer shows its full name and count
-                    Text(badge).scaledFont(10, weight: .bold, relativeTo: .caption2).foregroundStyle(.white)
-                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                        .padding(.horizontal, 4).background(Capsule().fill(theme.danger))
-                        .offset(x: 10, y: -6)
-                        .accessibilityIdentifier("badge-\(tab.name.lowercased())")
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 15)
-            .padding(.bottom, 4)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(badge.map { ShellUiCopy.shared.tabUnread(title: tab.title, count: $0) } ?? tab.title)
-        .accessibilityAddTraits(active ? .isSelected : [])
-        // the bar keeps its size at large text: a long press shows the tab's icon and name enlarged
-        .largeContent(tab.title, appIcon: tab.icon)
-        .accessibilityIdentifier(tab.identifier)
-    }
-}
-
-/// RN Header on every tab: the avatar in a gradient pill (opens the side menu), name and "@user" (no reputation)
-/// or "Login to customize your feed", then QR, search and boost per tab.
-struct AppHeaderBar: View {
-    let tab: AppTab
-    @EnvironmentObject private var app: AppContainer
-    @EnvironmentObject private var session: Observed<SessionState>
-    @Environment(\.appTheme) private var theme
-    @Environment(\.colorScheme) private var scheme
-    @State private var account: Account?
-
-    var body: some View {
-        let username = session.state.username
-        HStack(spacing: 0) {
-            Button { app.openDrawer() } label: {
-                ZStack(alignment: .trailing) {
-                    LinearGradient(colors: scheme == .dark ? [Color(hex: 0x081C36), Color(hex: 0x43638E)] : [Color(hex: 0x2D5AA0), Color(hex: 0x357CE6)],
-                                   startPoint: .leading, endPoint: .trailing)
-                    Group {
-                        if let username {
-                            AvatarView(url: PostCard.companion.avatarUrl(account: username, proxyBase: app.env.proxyBase, size: "small"), size: 32)
-                        } else {
-                            Image(appIcon: .account, filled: true).resizable().scaledToFit().frame(width: 32, height: 32).foregroundStyle(.white)
-                        }
-                    }
-                    .padding(.trailing, 12)
-                }
-                .frame(width: 68, height: 50)
-                .clipShape(UnevenRoundedRectangle(bottomTrailingRadius: 34, topTrailingRadius: 34))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT)
-            .largeContent(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT, appIcon: .account)
-            .accessibilityIdentifier("account-menu")
-            VStack(alignment: .leading, spacing: 0) {
-                if let username {
-                    if let name = account?.profile.displayName, account?.name == username {
-                        Text(name).scaledFont(14, weight: .bold).foregroundStyle(theme.secondary).lineLimit(1)
-                    }
-                    Text("@\(username)").scaledFont(12).foregroundStyle(theme.secondary).accessibilityIdentifier("header-user")
-                } else {
-                    // secondary, not RN's light icon gray: readable at WCAG AA; three lines before it truncates
-                    Text(ShellUiCopy.shared.LOGIN_TO_CUSTOMIZE_FEED).scaledFont(14).foregroundStyle(theme.secondary).lineLimit(3)
-                        .minimumScaleFactor(0.8)
-                        .accessibilityIdentifier("header-login")
-                }
-            }
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: 0) {
-                if tab.showQr { headerButton(.qrScan, ShellUiCopy.shared.QR_SCAN, "header-qr", theme.icon) { app.push(AppScreenCompanion.shared.of(route: .qrScan, arg: "")) } }
-                if tab.showSearch { headerButton(.search, UiCopy.shared.SEARCH, "header-search", theme.icon) { app.push(AppScreenCompanion.shared.of(route: .searchResult, arg: "")) } }
-                if tab.showsBoost(loggedIn: username != nil) {
-                    headerButton(.boost, ShellUiCopy.shared.PERKS, "header-boost", theme.accent) { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) }
-                }
-            }
-            .padding(.trailing, 16)
-        }
-        .padding(.bottom, 4)
-        .background(theme.background)
-        .task(id: username) {
-            guard let username else { account = nil; return }
-            account = try? await app.env.api.accounts.getAccount(name: username, refresh: false)
-        }
-    }
-
-    private func headerButton(_ icon: AppIcon, _ label: String, _ id: String, _ tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Image(appIcon: icon).scaledFont(20).foregroundStyle(tint).frame(minWidth: 32, minHeight: 32)
-                // the header keeps room for the account name at the largest text sizes
-                .dynamicTypeSize(...DynamicTypeSize.xxLarge).tapTarget() }
-            .accessibilityLabel(label)
-            // the icon stops growing: a long press shows it with its name at accessibility text sizes
-            .largeContent(label, appIcon: icon)
-            .accessibilityIdentifier(id)
+    /// The mark as a 26 pt template image at the display's scale, for the tab bar (the bar tints it).
+    @MainActor static func tabImage(scale: CGFloat) -> UIImage {
+        if let hit = tabImages[scale] { return hit }
+        let renderer = ImageRenderer(content: WavyDash().fill(Color.black).frame(width: 26, height: 26))
+        renderer.scale = scale
+        let image = (renderer.uiImage ?? UIImage()).withRenderingMode(.alwaysTemplate)
+        tabImages[scale] = image
+        return image
     }
 }
 

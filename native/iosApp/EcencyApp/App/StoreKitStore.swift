@@ -30,12 +30,11 @@ final class StoreKitStore: NSObject, StorePlatform {
     deinit { updates?.cancel() }
 
     private func currentListener() -> StoreListener? {
-        lock.lock(); defer { lock.unlock() }
-        return listener
+        lock.withLock { listener }
     }
 
     func setListener(listener: StoreListener?) {
-        lock.lock(); self.listener = listener; lock.unlock()
+        lock.withLock { self.listener = listener }
     }
 
     func connect(done: @escaping (StoreError?) -> Void) {
@@ -48,7 +47,7 @@ final class StoreKitStore: NSObject, StorePlatform {
         Task {
             do {
                 let found = try await Product.products(for: ids)
-                lock.lock(); found.forEach { catalog[$0.id] = $0 }; lock.unlock()
+                lock.withLock { found.forEach { catalog[$0.id] = $0 } }
                 done(found.filter(StoreKitStore.sells).map(StoreKitStore.product), nil)
             } catch {
                 done(nil, StoreKitStore.error(error, productId: nil))
@@ -67,7 +66,7 @@ final class StoreKitStore: NSObject, StorePlatform {
     }
 
     func purchase(productId: String, accountToken: String, done: @escaping (StoreError?) -> Void) {
-        lock.lock(); let product = catalog[productId]; lock.unlock()
+        let product = lock.withLock { catalog[productId] }
         guard let product else {
             return done(StoreError(code: StoreError.companion.ITEM_UNAVAILABLE, message: WalletUiCopy.shared.PRODUCT_NOT_AVAILABLE, productId: productId, responseCode: nil, debugMessage: nil))
         }
@@ -97,7 +96,7 @@ final class StoreKitStore: NSObject, StorePlatform {
 
     func finish(purchase: StorePurchase, done: @escaping (StoreError?) -> Void) {
         Task {
-            lock.lock(); var transaction = transactions[purchase.ref]; lock.unlock()
+            var transaction = lock.withLock { transactions[purchase.ref] }
             if transaction == nil {
                 for await result in StoreKit.Transaction.unfinished {
                     // an unverified one too, once Ecency answered for it
@@ -106,7 +105,7 @@ final class StoreKitStore: NSObject, StorePlatform {
             }
             guard let transaction else { return done(nil) }
             await transaction.finish()
-            lock.lock(); transactions[purchase.ref] = nil; lock.unlock()
+            lock.withLock { transactions[purchase.ref] = nil }
             done(nil)
         }
     }
@@ -114,7 +113,7 @@ final class StoreKitStore: NSObject, StorePlatform {
     /// A transaction as the shared model's purchase: revoked ones as REVOKED, unverified ones as UNVERIFIED.
     private func storePurchase(of result: VerificationResult<StoreKit.Transaction>) -> StorePurchase {
         let t = result.unsafePayloadValue
-        lock.lock(); transactions[String(t.id)] = t; lock.unlock()
+        lock.withLock { transactions[String(t.id)] = t }
         return StorePurchase(productId: t.productID, token: result.jwsRepresentation,
                              state: StoreKitStore.state(of: result), acknowledged: false, ref: String(t.id),
                              purchasedAtMillis: Int64(t.purchaseDate.timeIntervalSince1970 * 1000),

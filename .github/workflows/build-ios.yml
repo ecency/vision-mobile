@@ -42,8 +42,9 @@ permissions:
   contents: read
 
 env:
-  # Same Xcode as the RN iOS build.
-  XCODE_VERSION: '26.3'
+  # The iOS 27.1 SDK: iPhone Duo runs the app edge to edge on both displays, with the system bars at the side
+  # (README "iPhone Duo"). GitHub's xcode-27 image, its default Xcode.
+  XCODE_VERSION: '27.1'
 
 jobs:
   ios-build:
@@ -53,7 +54,7 @@ jobs:
     concurrency:
       group: ios-build-${{ github.ref }}
       cancel-in-progress: true
-    runs-on: macos-26
+    runs-on: xcode-27
     # with the launch check (a second Release build, for the simulator)
     timeout-minutes: 110
     outputs:

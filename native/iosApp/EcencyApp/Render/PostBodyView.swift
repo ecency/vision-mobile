@@ -342,6 +342,7 @@ struct ImageGridView: View {
     let actions: PostActions
     let images: GalleryImages
     @Environment(\.postTheme) private var theme
+    @Environment(\.displayScale) private var displayScale
 
     var body: some View {
         let tile = (maxWidth - 2) / 2
@@ -351,7 +352,8 @@ struct ImageGridView: View {
                 if !actions.showImages && !RevealedImages.shared.isRevealed(img.src) {
                     HiddenImageView(width: tile, height: tile * 3 / 4) { RevealedImages.shared.reveal(img.src) }
                 } else {
-                    LoadedImageView(src: bodyImageURL(img.src, points: tile), fallback: bodyImageURL(img.src, points: tile, avif: false), maxWidth: tile) { _ in }
+                    LoadedImageView(src: bodyImageURL(img.src, points: tile, scale: displayScale),
+                                    fallback: bodyImageURL(img.src, points: tile, scale: displayScale, avif: false), maxWidth: tile) { _ in }
                         .frame(width: tile, height: tile * 3 / 4)
                         .clipped()
                         .contentShape(Rectangle())
@@ -411,6 +413,7 @@ struct RemoteImageView: View {
     @State private var natural: CGSize?
     @State private var animated = false
     @Environment(\.postTheme) private var theme
+    @Environment(\.displayScale) private var displayScale
 
     var body: some View {
         let size: CGSize = {
@@ -424,7 +427,8 @@ struct RemoteImageView: View {
                 .padding(.vertical, 4)
         } else {
             // the column width, not the loaded size, so the URL never changes once the image is in
-            LoadedImageView(src: bodyImageURL(src, points: maxWidth), fallback: bodyImageURL(src, points: maxWidth, avif: false), maxWidth: maxWidth) { loaded in
+            LoadedImageView(src: bodyImageURL(src, points: maxWidth, scale: displayScale),
+                            fallback: bodyImageURL(src, points: maxWidth, scale: displayScale, avif: false), maxWidth: maxWidth) { loaded in
                 natural = loaded.naturalSize
                 animated = loaded.animated
             }
@@ -445,9 +449,10 @@ struct RemoteImageView: View {
 }
 
 /// The proxy size web loads for a body image drawn `points` wide (`ImageProxy.bodyVariant`): AVIF, which iOS
-/// decodes, and the WebP of the same size as the fallback when an AVIF fails to load or decode.
-func bodyImageURL(_ src: String, points: CGFloat, avif: Bool = true) -> String {
-    ImageProxy.companion.bodyVariant(src: src, widthPx: Int32((points * UIScreen.main.scale).rounded()), avif: avif)
+/// decodes, and the WebP of the same size as the fallback when an AVIF fails to load or decode. `scale` is the
+/// display's (`\.displayScale`), which differs between screens (iPhone Duo's two displays, external screens).
+func bodyImageURL(_ src: String, points: CGFloat, scale: CGFloat, avif: Bool = true) -> String {
+    ImageProxy.companion.bodyVariant(src: src, widthPx: Int32((points * scale).rounded()), avif: avif)
 }
 
 /// RN AutoHeightImage's badge on animated images.
@@ -498,7 +503,7 @@ struct LoadedImageView: UIViewRepresentable {
     let src: String
     /// Loaded when `src` fails to load or decode (the WebP of an AVIF body variant); nil or `src` itself: none.
     var fallback: String? = nil
-    /// Widest the image is drawn, in points; it is decoded at this width times the screen scale.
+    /// Widest the image is drawn, in points; it is decoded at this width times the display's scale.
     let maxWidth: CGFloat
     var contentMode: UIView.ContentMode = .scaleAspectFill
     let onLoad: (LoadedImage) -> Void
@@ -519,25 +524,31 @@ struct LoadedImageView: UIViewRepresentable {
     func updateUIView(_ view: UIImageView, context: Context) {
         let coordinator = context.coordinator
         coordinator.onLoad = onLoad
-        guard coordinator.src != src else { return }
+        // in steps of 256 px: a window resizing through many widths (a fold) asks for a few decodes, not one per width
+        let maxPixel = Self.pixelStep(maxWidth * context.environment.displayScale)
+        // the same image drawn wider (a window that unfolded, a display with a higher scale) is decoded again,
+        // sharper; narrower keeps the decode it has
+        let sameSrc = coordinator.src == src
+        guard !sameSrc || maxPixel > coordinator.maxPixel + 0.5 else { return }
         coordinator.src = src
+        coordinator.maxPixel = maxPixel
         let src = self.src
         let fallback = self.fallback == src ? nil : self.fallback
-        let maxPixel = maxWidth * UIScreen.main.scale
         // Rows scrolling back in are drawn from the decoded cache at once, without a flash.
         if let hit = ImageLoader.shared.cached(src, maxPixel: maxPixel) ?? fallback.flatMap({ ImageLoader.shared.cached($0, maxPixel: maxPixel) }) {
             view.image = hit.image
             DispatchQueue.main.async { coordinator.onLoad?(hit) }
             return
         }
-        view.image = nil
+        // a new image clears the old one; a sharper decode of the same one keeps it until it is ready
+        if !sameSrc { view.image = nil }
         Task { @MainActor [weak view, weak coordinator] in
             var loaded = await ImageLoader.shared.load(src, maxPixel: maxPixel)
             // a different URL, so the failure remembered for `src` does not block it
             if loaded == nil, let fallback, coordinator?.src == src {
                 loaded = await ImageLoader.shared.load(fallback, maxPixel: maxPixel)
             }
-            guard let loaded, let view, let coordinator, coordinator.src == src else { return }
+            guard let loaded, let view, let coordinator, coordinator.src == src, coordinator.maxPixel == maxPixel else { return }
             view.image = loaded.image
             coordinator.onLoad?(loaded)
         }
@@ -549,8 +560,12 @@ struct LoadedImageView: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
+    /// The decode width for [pixels]: the next multiple of 256 (never 0).
+    static func pixelStep(_ pixels: CGFloat) -> CGFloat { max(256, (pixels / 256).rounded(.up) * 256) }
+
     final class Coordinator {
         var src: String?
+        var maxPixel: CGFloat = 0
         var onLoad: ((LoadedImage) -> Void)?
     }
 }

@@ -557,11 +557,38 @@ class ChatThreadTest {
         assertEquals(listOf("+1" to 2, "heart" to 1), reply.reactions.map { it.emojiName to it.count })
         val linked = s.items.filterIsInstance<ChatMessageItem>().first { it.card != null }
         assertEquals("Fixture post", linked.card!!.title)
-        // the oldest message after the last read time carries "New messages", scrolled to once
+        // the oldest message after the last read time carries "New messages"; the thread stays at the newest message
         assertEquals(reply.id, s.unreadItemId)
-        assertEquals(reply.id, s.scrollTo)
-        m.consumeScroll()
+        assertNull(s.scrollTo)
         assertTrue("POST channels/ch-ecency/view" in f.paths())
+    }
+
+    @Test
+    fun aThreadWithManyUnreadMessagesOpensAtTheNewestOne() = runTest {
+        // opened by name (the Esie button): every loaded message is newer than the read time, so the first unread is
+        // the oldest loaded row. RN jumped there, up into the history; the thread now stays at the newest message.
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        val s = m.current
+        assertTrue(s.items.isNotEmpty())
+        assertNotNull(s.unreadItemId, "the marker is still shown, above")
+        assertNull(s.scrollTo, "opens at the newest message")
+        // an older page later never jumps either
+        m.loadMore(); f.idle()
+        assertNull(m.current.scrollTo)
+    }
+
+    @Test
+    fun withoutTheMembersTheMarkerComesFromThePostsPagesReadTime() = runTest {
+        // opened by name with no read time in the hint, the channel list and the member list refused: the posts
+        // page's own `member` still says where the unread messages start
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.refuse["members"] = 500 to ""
+        f.before = { r -> if (r.method == "GET" && r.url.substringBefore('?').endsWith("/api/mattermost/channels")) HttpResult(500, "") else null }
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        assertNotNull(m.current.unreadItemId, "the marker from the page's last read time")
     }
 
     @Test

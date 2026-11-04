@@ -1,5 +1,5 @@
-import EcencyCore
-import LocalAuthentication
+@preconcurrency import EcencyCore
+@preconcurrency import LocalAuthentication
 import SwiftUI
 import UIKit
 
@@ -151,10 +151,10 @@ struct PinScreen: View {
 
     var body: some View {
         GeometryReader { geo in
-            let key = geo.size.width / 7 // RN: '$deviceWidth / 7'
             // RN pinCodeStyles flex: logo 2, title 1, information 1, dots 1, keyboard 6, forgot 2
             let top = geo.size.height / 15
             let unit = (geo.size.height - top - 40) / 13
+            let key = Self.keySize(width: geo.size.width, keyboardHeight: unit * 6)
             VStack(spacing: 0) {
                 HStack {
                     if prompt.canCancel {
@@ -250,6 +250,13 @@ struct PinScreen: View {
 
     private func startBiometric() {
         Biometrics.authenticate(model: model)
+    }
+
+    /// RN's key: a seventh of the width ('$deviceWidth / 7'), but never more than four rows (and their 10 pt gaps)
+    /// fit in the keyboard's share of the height: on a wide, short window (iPhone Duo's inner display held sideways)
+    /// the width alone made the keys run over the name, the prompt and "Oh, I forgot it".
+    static func keySize(width: CGFloat, keyboardHeight: CGFloat) -> CGFloat {
+        min(width / 7, max(0, keyboardHeight - 30) / 4)
     }
 
     /// RN NumericKeyboard: 1 to 9 ($deviceWidth / 1.8 wide), then 0 and backspace aligned right; the empty

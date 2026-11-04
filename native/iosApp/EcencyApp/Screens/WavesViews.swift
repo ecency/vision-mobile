@@ -329,6 +329,7 @@ enum WavesPaging {
 /// One wave (RN's comment view for a wave): avatar, name, age, the body, vote and payout, replies, reply, tip,
 /// options. The reply count opens the thread.
 struct WaveRowView: View {
+    @Environment(\.isInPane) private var isInPane
     let item: WaveItem
     let width: CGFloat
     /// A hashtag tapped inside the wave (the Waves tab filters For you); nil lets it open like any tag link.
@@ -382,7 +383,7 @@ struct WaveRowView: View {
                         .buttonStyle(.plain)
                         // VoiceOver: one stop for the author and age, the wave's actions in its actions rotor
                         .accessibilityLabel([proLabel(card.author, pro), CardText.age(card)].joined(separator: ", "))
-                        .accessibilityAction(named: Text(L.Native.Ios.Waves.repliesOpenThread(count: Int(card.comments)))) { app.openPost(item.key) }
+                        .accessibilityAction(named: Text(L.Native.Ios.Waves.repliesOpenThread(count: Int(card.comments)))) { app.openPost(item.key, fromList: !isInPane) }
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.REPLY)) {
                             if app.requireSignIn(to: .reply) { app.sheet = .reply(ReplyRequest(root: item.key, parent: item.post)) }
                         }
@@ -428,7 +429,7 @@ struct WaveRowView: View {
             PostBodyView(blocks: item.blocks, contentWidth: width - 32 - Self.bodyInset, actions: hidden ? covered : actions)
                 .padding(.leading, Self.bodyInset)
                 .contentShape(Rectangle())
-                .onTapGesture { app.openPost(item.key) }
+                .onTapGesture { app.openPost(item.key, fromList: !isInPane) }
             if item.card.hasPoll { RowPoll(post: item.post).padding(.leading, Self.bodyInset) }
             footer(card)
             .padding(.leading, Self.bodyInset - 4)
@@ -456,7 +457,7 @@ struct WaveRowView: View {
         CountLabel(appIcon: .heart, count: card.votes)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L.Post.a11yVotes(count: Int(card.votes)))
-        Button { app.openPost(item.key) } label: { CountLabel(appIcon: .comment, count: card.comments).frame(minHeight: minTapTarget) }
+        Button { app.openPost(item.key, fromList: !isInPane) } label: { CountLabel(appIcon: .comment, count: card.comments).frame(minHeight: minTapTarget) }
             .buttonStyle(.plain)
             .accessibilityLabel(L.Native.Ios.Waves.repliesOpenThread(count: Int(card.comments)))
             .accessibilityIdentifier("wave-thread")

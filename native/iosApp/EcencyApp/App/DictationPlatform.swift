@@ -34,18 +34,13 @@ final class IosDictationRecorder: NSObject, DictationRecorder {
     private var previous: (category: AVAudioSession.Category, mode: AVAudioSession.Mode, options: AVAudioSession.CategoryOptions)?
 
     func hasPermission() -> Bool {
-        if #available(iOS 17.0, *) { return AVAudioApplication.shared.recordPermission == .granted }
-        return AVAudioSession.sharedInstance().recordPermission == .granted
+        AVAudioApplication.shared.recordPermission == .granted
     }
 
     /// The system's microphone prompt; `answer` runs on the main thread.
     static func requestPermission(_ answer: @escaping (Bool) -> Void) {
         let done: (Bool) -> Void = { granted in DispatchQueue.main.async { answer(granted) } }
-        if #available(iOS 17.0, *) {
-            AVAudioApplication.requestRecordPermission(completionHandler: done)
-        } else {
-            AVAudioSession.sharedInstance().requestRecordPermission(done)
-        }
+        AVAudioApplication.requestRecordPermission(completionHandler: done)
     }
 
     func start(ownerTag: String) -> Bool {

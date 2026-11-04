@@ -296,7 +296,7 @@ struct EditorScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar(state) }
         .onAppear { model.start() }
-        .onChange(of: scenePhase) { phase in if phase != .active { model.flush() } }
+        .onChange(of: scenePhase) { _, phase in if phase != .active { model.flush() } }
         .onReceive(editor.$state) { done($0.done) }
         .onReceive(uploads.$state) { _ in }
     }

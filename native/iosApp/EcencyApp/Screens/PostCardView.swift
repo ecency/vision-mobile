@@ -4,6 +4,8 @@ import SwiftUI
 /// RN PostCard: header (avatar, author, community, age), image, title, summary, then
 /// the actions row (vote + payout, votes, comments). Tapping the content opens the post.
 struct PostCardView: View {
+    /// a card in the pane (a profile's posts) opens on in the pane; one in the tab's list replaces it
+    @Environment(\.isInPane) private var isInPane
     let card: PostCard
     let width: CGFloat
     var onAppearWithContent: () -> Void = {}
@@ -49,7 +51,7 @@ struct PostCardView: View {
                 .padding(.bottom, 12)
 
             Button {
-                app.openPost(card.key, hero: heroID)
+                app.openPost(card.key, hero: heroID, fromList: !isInPane)
             } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     if dimmed {
@@ -116,7 +118,7 @@ struct PostCardView: View {
             .accessibilityAddTraits(.isButton)
             // the card's other controls as actions on the one stop (the vote button stays its own stop: it opens
             // the weight sheet it owns)
-            .accessibilityAction(named: L.Post.a11yCommentsHint) { app.openPost(card.key) }
+            .accessibilityAction(named: L.Post.a11yCommentsHint) { app.openPost(card.key, fromList: !isInPane) }
             .accessibilityAction(named: L.Post.a11yVotersHint) { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) }
             .accessibilityAction(named: L.Post.a11yReblogsHint) { app.push(AppScreenReblogs(author: card.key.author, permlink: card.key.permlink)) }
             .accessibilityAction(named: UiCopy.shared.profileOf(username: card.author)) { app.openQuickProfile(card.author) }
@@ -170,7 +172,7 @@ struct PostCardView: View {
     }
 
     private var comments: some View {
-        Button { app.openPost(card.key) } label: { CountLabel(appIcon: .comment, count: card.comments) }
+        Button { app.openPost(card.key, fromList: !isInPane) } label: { CountLabel(appIcon: .comment, count: card.comments) }
             .buttonStyle(.plain)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L.Post.a11yComments(count: Int(card.comments)))
@@ -179,16 +181,19 @@ struct PostCardView: View {
 }
 
 /// Card image: full card width, rounded 8, `$primaryLightBackground` until loaded. Starts at 16:9 like
-/// RN and takes the bitmap's ratio once known, never taller than the screen.
+/// RN and takes the bitmap's ratio once known, never taller than the app's window (not the screen: on iPhone Duo
+/// the window changes with every fold).
 struct CardImageView: View {
     let src: String
     let width: CGFloat
     @State private var ratio: CGFloat = 16.0 / 9.0
     @Environment(\.appTheme) private var theme
+    @Environment(\.viewportSize) private var viewport
 
-    static func height(width: CGFloat, ratio: CGFloat, screenHeight: CGFloat) -> CGFloat {
+    /// `maxHeight` nil (the window not measured yet): only the ratio counts.
+    static func height(width: CGFloat, ratio: CGFloat, maxHeight: CGFloat?) -> CGFloat {
         let safe = ratio.isFinite && ratio > 0 ? ratio : 16.0 / 9.0
-        return min(width / safe, screenHeight)
+        return min(width / safe, maxHeight ?? .infinity)
     }
 
     var body: some View {
@@ -196,7 +201,7 @@ struct CardImageView: View {
             let r = loaded.naturalSize.width / max(1, loaded.naturalSize.height)
             if r.isFinite, r > 0, abs(r - ratio) > 0.01 { ratio = r }
         }
-        .frame(width: width, height: Self.height(width: width, ratio: ratio, screenHeight: UIScreen.main.bounds.height))
+        .frame(width: width, height: Self.height(width: width, ratio: ratio, maxHeight: viewport?.height))
         .background(theme.lightBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }

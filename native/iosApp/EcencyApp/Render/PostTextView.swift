@@ -21,9 +21,10 @@ struct PostTextView: UIViewRepresentable {
     let actions: PostActions
     @Environment(\.postTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.displayScale) private var displayScale
 
     private var key: ContentKey {
-        ContentKey(inlines: inlines as NSArray, style: style, size: size, bold: bold, dark: theme.isDark, typeSize: typeSize)
+        ContentKey(inlines: inlines as NSArray, style: style, size: size, bold: bold, dark: theme.isDark, typeSize: typeSize, scale: displayScale)
     }
 
     func makeUIView(context: Context) -> PostUITextView {
@@ -52,7 +53,7 @@ struct PostTextView: UIViewRepresentable {
         coordinator.key = key
         let entry = PostTextCache.shared.entry(for: key) {
             let built = InlineTextBuilder(theme: theme, size: size, bold: bold, style: style, avatarURL: actions.avatarURL,
-                                          contentSize: UIContentSizeCategory(typeSize)).build(inlines)
+                                          contentSize: UIContentSizeCategory(typeSize), displayScale: displayScale).build(inlines)
             return PostTextCache.Entry(built: built, plainText: PlainTextKt.plainText(inlines))
         }
         coordinator.entry = entry
@@ -89,6 +90,8 @@ struct PostTextView: UIViewRepresentable {
         let bold: Bool
         let dark: Bool
         let typeSize: DynamicTypeSize
+        /// The display's scale: chips are drawn at it (iPhone Duo's two displays, external screens).
+        let scale: CGFloat
     }
 
     final class Coordinator: NSObject {
@@ -113,10 +116,12 @@ struct PostTextView: UIViewRepresentable {
         /// Chips draw a placeholder disc at once; `ImageLoader` fetches each avatar once (shared
         /// in-flight task, failures remembered) and the paragraph is redrawn when it arrives.
         func loadAvatars(for built: InlineTextBuilder.Built, in view: PostUITextView) {
-            let urls = Set(built.chips.filter(\.needsAvatar).compactMap(\.avatarURL))
-            for url in urls {
+            // one load per avatar, at the size its chips draw it
+            var pixels: [String: CGFloat] = [:]
+            for chip in built.chips where chip.needsAvatar { if let url = chip.avatarURL { pixels[url] = chip.avatarPixels } }
+            for (url, maxPixel) in pixels {
                 Task { @MainActor [weak view] in
-                    guard await ImageLoader.shared.load(url, maxPixel: ChipAttachment.avatarPixels) != nil, let view else { return }
+                    guard await ImageLoader.shared.load(url, maxPixel: maxPixel) != nil, let view else { return }
                     view.layoutManager.invalidateDisplay(forCharacterRange: NSRange(location: 0, length: view.textStorage.length))
                 }
             }

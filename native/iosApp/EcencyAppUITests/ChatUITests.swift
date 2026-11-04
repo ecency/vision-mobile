@@ -261,6 +261,17 @@ final class ChatUITests: XCTestCase {
         XCTAssertLessThan(composerQuote.frame.height, 90, "the quote is as tall as its two lines")
     }
 
+    func testAPostLinkCardOpensThePostInTheAppNotTheBrowser() {
+        let app = launch(["-openScreen", "chat:ch-ecency"])
+        let card = element(app, "chat-link-card")
+        XCTAssertTrue(card.waitForExistence(timeout: 20))
+        for _ in 0..<4 where !card.isHittable { app.swipeDown() }
+        card.tap()
+        // the post screen of the app, never the in-app browser (SFSafariViewController's Done button)
+        XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertFalse(app.buttons["Done"].exists)
+    }
+
     func testSettingsHasChatPrivacySignedIn() {
         let app = launch(["-openScreen", "settings"])
         XCTAssertTrue(app.buttons["settings-dm-privacy"].waitForExistence(timeout: 15))

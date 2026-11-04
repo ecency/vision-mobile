@@ -418,7 +418,7 @@ struct FeedScreen: View {
 
     var body: some View {
         FeedListView(feed: feed)
-            .navigationTitle(title)
+            .screenTitle(title)
             .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -461,7 +461,7 @@ struct TagFeedScreen: View {
             FilterPills(titles: Self.sorts.map(\.1), selected: selected, onSelect: { selected = $0 }, onReselect: { scrollTop += 1 })
             FeedListView(feed: feed(selected), scrollToTop: scrollTop).id(selected)
         }
-        .navigationTitle(title)
+        .screenTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { followModel.start() }
     }

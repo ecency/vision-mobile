@@ -237,25 +237,32 @@ struct PostScreen: View {
             }
         }
         .background(theme.background)
-        .navigationTitle(state.card.map { "@\($0.author)" } ?? "")
+        .screenTitle(state.card.map { "@\($0.author)" } ?? "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .screenBarItem(.trailing) {
             if let p = state.post {
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                Group {
                     // RN header edit icon: own posts and comments, into the editor (editor wave)
                     if p.author == app.session.state.username {
+                        // a title and an icon (shown as the icon): a bar item iPhone Duo lays out in its vertical bar
                         Button { app.push(AppScreenCompanion.shared.of(route: .editor, arg: "\(p.author)/\(p.permlink)")) } label: {
-                            Image(appIcon: .compose)
+                            Label(UiCopy.shared.EDIT, appIcon: .compose).labelStyle(.iconOnly)
                         }
                         .accessibilityLabel(UiCopy.shared.EDIT)
                         .largeContent(UiCopy.shared.EDIT, appIcon: .compose)
                         .accessibilityIdentifier("post-edit")
                     }
-                    MenuButton {
+                    // a title and an icon, as the edit one
+                    Button {
                         // RN offers Translate in the menu only for sub-posts (comments opened on their own)
                         let isComment = p.depth > 0
                         app.openMenu(p, context: PostMenuContext(translate: isComment, openThread: false, ownProfile: false))
+                    } label: {
+                        Label(ReadingUiCopy.shared.POST_OPTIONS, appIcon: .more).labelStyle(.iconOnly)
                     }
+                    .accessibilityLabel(ReadingUiCopy.shared.POST_OPTIONS)
+                    .largeContent(ReadingUiCopy.shared.POST_OPTIONS, appIcon: .more)
+                    .accessibilityIdentifier("post-options")
                 }
             }
         }

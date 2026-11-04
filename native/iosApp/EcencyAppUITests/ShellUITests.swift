@@ -155,7 +155,7 @@ final class ShellUITests: XCTestCase {
         let app = launch()
         addUIInterruptionMonitor(withDescription: "camera") { alert in
             for label in ["Allow", "OK", "Don’t Allow"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
+                alert.buttons[label].firstMatch.tap()
                 return true
             }
             return false
