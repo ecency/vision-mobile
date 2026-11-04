@@ -185,7 +185,7 @@ final class DappWebViews: NSObject, ObservableObject, WKNavigationDelegate, WKUI
         return body as? String
     }
 
-    /// What dApps stored goes when no account is left or the data was wiped.
+    /// What dApps stored goes on every account change and on a wipe.
     static func clearData() {
         let store = dataStore
         store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast) {}

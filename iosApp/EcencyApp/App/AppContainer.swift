@@ -367,8 +367,8 @@ final class AppContainer: ObservableObject {
                     self.resetNavigation()
                     ShareInbox.purge(all: true)
                 }
-                // what dApps stored in Explore's own website data goes when no account is left
-                if event is AppEventDataWiped || (event as? AppEventSessionChanged).map({ $0.username == nil }) == true { DappWebViews.clearData() }
+                // what dApps stored in Explore's own website data belongs to the account that browsed: it goes on every account change
+                if event.clearsDappData { DappWebViews.clearData() }
             }
         }
         // @Published delivers the new state before it is stored: use the value handed in, not session.state

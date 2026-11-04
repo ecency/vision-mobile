@@ -33,6 +33,9 @@ import kotlin.time.ExperimentalTime
 
 /** Something one model did that others react to. */
 sealed interface AppEvent {
+    /** The Explore browser's cookies and web storage go on every account change (switch, sign-out) and on a wipe. */
+    val clearsDappData: Boolean get() = this is SessionChanged || this is DataWiped
+
     /** A reply was broadcast under [root]; its discussion should show it. */
     data class CommentPosted(val root: PostKey, val comment: PostKey) : AppEvent
 

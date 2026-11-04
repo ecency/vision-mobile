@@ -271,13 +271,19 @@ internal object DappWeb {
         profile.cookieManager
     }.getOrNull()
 
-    /** What the dApps stored (cookies, web storage) goes when every account left or the data was wiped; tests replace it. */
+    /** What the dApps stored (cookies, web storage) goes on every account change and on a wipe; tests replace it. */
     var clearProfile: () -> Unit = ::clearOwnProfile
 
     @SuppressLint("RequiresFeature")
     private fun clearOwnProfile() {
         runCatching {
-            if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) return
+            if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+                // without profiles the dApp pages share the app's default store: clear that one
+                CookieManager.getInstance().removeAllCookies(null)
+                CookieManager.getInstance().flush()
+                android.webkit.WebStorage.getInstance().deleteAllData()
+                return
+            }
             val profile = ProfileStore.getInstance().getProfile(PROFILE) ?: return
             profile.cookieManager.removeAllCookies(null)
             profile.cookieManager.flush()
