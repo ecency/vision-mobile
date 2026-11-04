@@ -621,6 +621,36 @@ class ProfileModelTest {
     }
 
     @Test
+    fun aPinFetchStillRunningWhenThePostIsDeletedNeverBringsItBack() = runTest {
+        val e = com.ecency.core.api.Fixtures
+        val answer = CompletableDeferred<Unit>()
+        val app = app(rpc = { req ->
+            when (req.method) {
+                "bridge.get_account_posts" -> FakeTransport.result(req, "[" + e.entry("alice", "newest") + "]")
+                // the pinned post's answer is held until the delete happened
+                "bridge.get_post" -> { answer.await(); FakeTransport.result(req, e.entry("alice", "my-post")) }
+                else -> null
+            }
+        })
+        val model = app.env.profileModel("alice", "")
+        model.start()
+        testScheduler.advanceUntilIdle()
+        val feed = assertNotNull(model.feed(ProfileTab.BLOG))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        app.env.emit(AppEvent.PostDeleted(com.ecency.core.api.model.PostKey("alice", "my-post")))
+        testScheduler.advanceUntilIdle()
+        answer.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.items.none { it.key.permlink == "my-post" }, "the old copy does not come back")
+        // nor with the next load from the top
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.items.none { it.key.permlink == "my-post" })
+        model.close()
+    }
+
+    @Test
     fun anAccountWithoutACoverGetsTheImageServersCover() = runTest {
         // no cover in the metadata (never set, or a node that strips it): the image server's /u/<name>/cover, which
         // answers the account's own cover or the default one (RN showed its default cover image)

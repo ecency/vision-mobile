@@ -60,6 +60,12 @@ class FeedModel internal constructor(
     private var pinnedCard: PostCard? = null
     private var pinJob: Job? = null
 
+    /**
+     * Posts deleted on this device while this feed lives (RN feedQueries `deletedPostKeys`): a page, a refresh or a
+     * pinned fetch that was already running when the delete landed may still answer with one, and it never shows.
+     */
+    private val deleted = mutableSetOf<PostKey>()
+
     private fun display(): List<PostCard> {
         // a pin the viewer muted since it loaded is hidden like the author's other cards
         val pin = pinnedCard?.takeIf { it.author !in env.mutedAuthors }
@@ -142,11 +148,16 @@ class FeedModel internal constructor(
             env.events.collect { event ->
                 if (event is AppEvent.SessionChanged && (current.loaded || job?.isActive == true)) refresh()
                 // deleted from this device: the card goes at once (RN removes it from the list cache)
+                if (event is AppEvent.PostDeleted) deleted += event.key
+                // the pinned post, also while its fetch is still running (that answer is dropped with the key)
+                if (event is AppEvent.PostDeleted && (pinnedPost?.key == event.key ||
+                        (source as? FeedSource.Account)?.let { PostKey(it.account, pinnedPermlink ?: "") } == event.key)) {
+                    pinJob?.cancel()
+                    pinnedPost = null
+                    pinnedCard = null
+                    if (current.loaded) redisplay()
+                }
                 if (event is AppEvent.PostDeleted && current.items.any { it.key == event.key }) {
-                    if (pinnedPost?.key == event.key) {
-                        pinnedPost = null
-                        pinnedCard = null
-                    }
                     base = base.filter { it.key != event.key }
                     posts = posts - event.key
                     promotedCards = promotedCards.filter { it.key != event.key }
@@ -318,7 +329,7 @@ class FeedModel internal constructor(
 
     /** RN filterNsfwPost ("Always hide") and the account's mutes. */
     private fun shown(posts: List<Post>, nsfw: NsfwMode) =
-        posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
+        posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors && it.key !in deleted }
 
     private suspend fun cards(posts: List<Post>, nsfw: NsfwMode): List<PostCard> {
         val user = env.session.current.username
