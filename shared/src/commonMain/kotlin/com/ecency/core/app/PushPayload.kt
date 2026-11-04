@@ -58,9 +58,15 @@ data class PushPayload(
             return if (scheme == "hive" || scheme == "ecency") uri else ""
         }
 
-        /** Plain, single-line, capped text for a banner. */
+        /**
+         * Plain, single-line, capped text for a banner. Control characters, bidi overrides and isolates, and other
+         * format characters (zero-width, soft hyphen, byte order mark) and line separators are removed, as for
+         * announcements (README "Announcements").
+         */
         internal fun clean(text: String?): String =
-            text.orEmpty().filter { it >= ' ' || it == '\t' }.replace('\t', ' ').trim().take(MAX_TEXT)
+            text.orEmpty()
+                .filter { it == '\t' || (it >= ' ' && it != '\u007F' && it !in '\u0080'..'\u009F' && it != '\u2028' && it != '\u2029' && it.category != CharCategory.FORMAT) }
+                .replace('\t', ' ').trim().take(MAX_TEXT)
 
         /**
          * A websocket event (`{event:"notify", type, source, target, extra}`) as a payload, with the title and body

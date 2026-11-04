@@ -900,6 +900,18 @@ class PushTest {
         PushRouting.banner(PushPayload.of(mapOf("type" to type, "source" to bob, "target" to alice, "id" to "x-1", *data), title, body))
 
     @Test
+    fun bannerTextsLoseBidiOverridesAndFormatCharacters() {
+        val hostile = "pay‮evil​⁦x⁩­﻿ end"
+        val b = PushRouting.banner(PushPayload.of(mapOf("type" to "reply", "source" to hostile, "target" to "al‮ice", "id" to "x-1"), hostile, hostile))!!
+        assertEquals("New reply on @alice", b.title)
+        val tag = PushRouting.banner(PushPayload.of(mapOf("type" to "tag", "source" to bob, "target" to alice, "id" to "x-2"), hostile, hostile))!!
+        assertEquals("payevilxend", tag.title)
+        assertEquals("payevilxend", tag.body)
+        val transfer = PushRouting.banner(PushPayload.of(mapOf("type" to "transfer", "source" to "bo‮b", "target" to alice, "id" to "x-3"), null, null))!!
+        assertEquals("@bob transferred", transfer.title)
+    }
+
+    @Test
     fun bannersUseRnCopyAndRouting() {
         var b = banner("reply", null, null, "permlink1" to "re-post")!!
         assertEquals("New reply on @$alice", b.title)
