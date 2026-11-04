@@ -79,7 +79,7 @@ data class ProfileHeader(
     val website: String?,
     /** [website] as a link to open, or null when it is not one. */
     val websiteUrl: String?,
-    /** Proxied 640x320 cover, or empty for the default cover. */
+    /** Proxied 640x320 cover, or the image server's `/u/<name>/cover` (the default cover when none is set). */
     val coverUrl: String,
     val avatarUrl: String,
     val joined: CalendarDate?,
@@ -185,10 +185,15 @@ class ProfileModel internal constructor(
         }
     }
 
+    /** RN feedQueries: the profile's pinned post leads the post lists (Blog, Posts), never comments or replies. */
+    private val PINNED_TABS = setOf(ProfileTab.BLOG, ProfileTab.POSTS)
+
     /** The feed of [tab] (blog, posts, comments, replies), created on first use and closed with this model. */
     fun feed(tab: ProfileTab): FeedModel? {
         val sort = tab.sort ?: return null
-        return feeds.getOrPut(tab) { env.feedModel(FeedSource.Account(username, sort)) }
+        return feeds.getOrPut(tab) {
+            env.feedModel(FeedSource.Account(username, sort)).also { f -> if (tab in PINNED_TABS) f.pin(current.header?.pinned) }
+        }
     }
 
     private var wavesModel: WavesFeedModel? = null
@@ -264,6 +269,8 @@ class ProfileModel internal constructor(
                         isPro = loaded.pro == true,
                     )
                 }
+                // the pinned post (or none, after an unpin) on the tabs that show it
+                for (tab in PINNED_TABS) feeds[tab]?.pin(header.pinned)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -294,7 +301,9 @@ class ProfileModel internal constructor(
             location = p.location,
             website = p.website,
             websiteUrl = ProfileFormat.websiteUrl(p.website),
-            coverUrl = p.coverImage?.let { ImageProxy(env.proxyBase).proxify(it, 640, 320) }.orEmpty(),
+            // the metadata's cover, else the image server's (the account's own cover, or its default one)
+            coverUrl = p.coverImage?.takeIf { it.isNotBlank() }?.let { ImageProxy(env.proxyBase).proxify(it, 640, 320) }
+                ?.takeIf { it.isNotEmpty() } ?: "${env.proxyBase.trimEnd('/')}/u/$username/cover",
             avatarUrl = env.avatars.url(username, "large", env.proxyBase),
             joined = ProfileFormat.joined(acc.created),
             reputation = profile?.reputation ?: acc.reputation,

@@ -689,8 +689,10 @@ class ChatThreadModel internal constructor(
         val viewer = current.viewerId
         when (e) {
             is ChatEvent.Posted -> posted(e.post, viewer)
+            // Mattermost also announces a post whose reactions changed as edited, and that post may carry none: it keeps
+            // the ones it has (reaction events add and remove them)
             is ChatEvent.Edited -> if (e.post.userId != viewer) {
-                posts = posts.map { if (it.id == e.post.id) e.post else it }
+                posts = posts.map { if (it.id == e.post.id) (if (e.post.reactions.isEmpty()) e.post.copy(reactions = it.reactions) else e.post) else it }
                 rebuild()
             }
             is ChatEvent.Deleted -> {
@@ -1067,10 +1069,12 @@ class ChatThreadModel internal constructor(
     /** RN `_handleAddReaction`: adds, or removes the viewer's own; the list changes once the server agreed. */
     fun react(item: ChatMessageItem, emojiName: String) {
         val u = user ?: return
-        val viewer = current.viewerId ?: return
         val postId = item.post.id
         scope.launch {
             try {
+                // the chat account's id; read now when the session was not in yet (a tap never just does nothing)
+                val viewer = current.viewerId ?: env.chat.session(u).userId?.also { id -> setState { it.copy(viewerId = id) } }
+                    ?: throw IllegalStateException("no chat session")
                 val had = posts.firstOrNull { it.id == postId }?.reactions?.any { it.emojiName == emojiName && it.userId == viewer } == true
                 env.chat.call(u) { env.chat.api.react(it.token, channelId, postId, emojiName, add = !had) }
                 changeReactions(postId) { list ->

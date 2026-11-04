@@ -52,10 +52,65 @@ class FeedModel internal constructor(
     private var promotedPosts: Map<PostKey, Post> = emptyMap()
 
     /** The post behind a card of this feed (for the options menu). */
-    fun post(key: PostKey): Post? = posts[key] ?: promotedPosts[key]
+    fun post(key: PostKey): Post? = pinnedPost?.takeIf { it.key == key } ?: posts[key] ?: promotedPosts[key]
 
-    private fun display(): List<PostCard> =
-        Promoted.inject(base, promotedCards, { it.key }) { it.author in env.mutedAuthors }
+    /** An account's pinned post ([pin]): first, marked pinned, its copy in the pages dropped. */
+    private var pinnedPermlink: String? = null
+    private var pinnedPost: Post? = null
+    private var pinnedCard: PostCard? = null
+    private var pinJob: Job? = null
+
+    /**
+     * Posts deleted on this device while this feed lives (RN feedQueries `deletedPostKeys`): a page, a refresh or a
+     * pinned fetch that was already running when the delete landed may still answer with one, and it never shows.
+     */
+    private val deleted = mutableSetOf<PostKey>()
+
+    private fun display(): List<PostCard> {
+        // a pin the viewer muted since it loaded is hidden like the author's other cards
+        val pin = pinnedCard?.takeIf { it.author !in env.mutedAuthors }
+        val own = if (pin == null) base else listOf(pin) + base.filter { it.key != pin.key }
+        return Promoted.inject(own, promotedCards, { it.key }) { it.author in env.mutedAuthors }
+    }
+
+    /**
+     * RN feedQueries `pinnedPermlink`: the account's pinned post (profile metadata `pinned`) is fetched on its own
+     * and leads this account feed, marked pinned (RN `is_pinned_blog`). Null takes it away (an unpin). Only for an
+     * account's own feed; a post the feed would hide (muted, nsfw hidden) stays hidden.
+     */
+    fun pin(permlink: String?) {
+        if (source !is FeedSource.Account || permlink == pinnedPermlink) return
+        pinnedPermlink = permlink
+        // a changed pin: the old one leaves at once (the new one shows when it arrived)
+        pinnedPost = null
+        pinnedCard = null
+        if (current.loaded) redisplay()
+        loadPin()
+    }
+
+    /** Fetches [pinnedPermlink] again: on [pin], and with every load from the top (votes, stats, a failed try). */
+    private fun loadPin() {
+        val account = (source as? FeedSource.Account)?.account ?: return
+        val permlink = pinnedPermlink
+        pinJob?.cancel()
+        if (permlink == null) return
+        pinJob = scope.launch {
+            try {
+                val nsfw = NsfwMode.of(env.prefs)
+                val found = env.api.posts.getPost(account, permlink, env.session.current.username) ?: return@launch
+                val post = found.copy(stats = found.stats.copy(isPinnedBlog = true))
+                if (post.author != account || shown(listOf(post), nsfw).isEmpty()) return@launch
+                if (permlink != pinnedPermlink) return@launch
+                pinnedPost = post
+                pinnedCard = cards(listOf(post), nsfw).first()
+                if (current.loaded) redisplay()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // the feed shows without it, as RN's failed pinned query; the next refresh tries again
+            }
+        }
+    }
 
     /** The items again after [base] or the promoted cards changed (deleted, muted, votes). */
     private fun redisplay() {
@@ -78,10 +133,11 @@ class FeedModel internal constructor(
                 if (changed.isEmpty()) return@collect
                 val user = env.session.current.username
                 base = Cards.replaceChanged(base, changed, { it.key }) { c -> posts[c.key]?.let { Cards.withVote(c, it, user, local[c.key]) } }
+                pinnedCard = pinnedCard?.let { c -> if (c.key in changed) pinnedPost?.let { Cards.withVote(c, it, user, local[c.key]) } ?: c else c }
                 promotedCards = Cards.replaceChanged(promotedCards, changed, { it.key }) { c -> promotedPosts[c.key]?.let { Cards.withVote(c, it, user, local[c.key]) } }
                 setState { s ->
                     val items = Cards.replaceChanged(s.items, changed, { it.key }) { c ->
-                        (posts[c.key] ?: promotedPosts[c.key])?.let { Cards.withVote(c, it, user, local[c.key]) }
+                        (posts[c.key] ?: pinnedPost?.takeIf { it.key == c.key } ?: promotedPosts[c.key])?.let { Cards.withVote(c, it, user, local[c.key]) }
                     }
                     if (items === s.items) s else s.copy(items = items)
                 }
@@ -92,8 +148,18 @@ class FeedModel internal constructor(
             env.events.collect { event ->
                 if (event is AppEvent.SessionChanged && (current.loaded || job?.isActive == true)) refresh()
                 // deleted from this device: the card goes at once (RN removes it from the list cache)
+                if (event is AppEvent.PostDeleted) deleted += event.key
+                // the pinned post, also while its fetch is still running (that answer is dropped with the key)
+                if (event is AppEvent.PostDeleted && (pinnedPost?.key == event.key ||
+                        (source as? FeedSource.Account)?.let { PostKey(it.account, pinnedPermlink ?: "") } == event.key)) {
+                    pinJob?.cancel()
+                    pinnedPost = null
+                    pinnedCard = null
+                    if (current.loaded) redisplay()
+                }
                 if (event is AppEvent.PostDeleted && current.items.any { it.key == event.key }) {
                     base = base.filter { it.key != event.key }
+                    posts = posts - event.key
                     promotedCards = promotedCards.filter { it.key != event.key }
                     redisplay()
                 }
@@ -173,6 +239,7 @@ class FeedModel internal constructor(
 
     private fun load(reset: Boolean, refreshing: Boolean) {
         job?.cancel()
+        if (reset) loadPin()
         if (reset) pager = env.api.feeds.pager(source, env.session.current.username)
         val stamp = env.freshness.stamp()
         val activePager = pager ?: env.api.feeds.pager(source, env.session.current.username).also { pager = it }
@@ -230,6 +297,7 @@ class FeedModel internal constructor(
      * stays. A failure keeps the cards and says nothing; the next show tries again.
      */
     private fun refreshQuietly() {
+        loadPin()
         val stamp = env.freshness.stamp()
         val wanted = current.pages.coerceAtLeast(1)
         val fresh = env.api.feeds.pager(source, env.session.current.username)
@@ -261,7 +329,7 @@ class FeedModel internal constructor(
 
     /** RN filterNsfwPost ("Always hide") and the account's mutes. */
     private fun shown(posts: List<Post>, nsfw: NsfwMode) =
-        posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors }
+        posts.filter { (nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it.crossPostOriginal ?: it)) && it.author !in env.mutedAuthors && it.key !in deleted }
 
     private suspend fun cards(posts: List<Post>, nsfw: NsfwMode): List<PostCard> {
         val user = env.session.current.username

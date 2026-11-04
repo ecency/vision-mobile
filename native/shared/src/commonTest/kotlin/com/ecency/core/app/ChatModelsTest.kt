@@ -504,6 +504,31 @@ class ChatThreadTest {
     }
 
     @Test
+    fun aReactionStaysWhenTheServerAnnouncesThePostAsEditedWithoutIt() = runTest {
+        // the tester's report: a reaction never showed. Mattermost sends post_edited for the reacted post, and that
+        // post may come without its reactions; the message keeps the ones it has (reaction events change them)
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            val other = m.current.items.filterIsInstance<ChatMessageItem>().first { !it.own && it.reactions.isEmpty() }
+            m.react(other, "heart")
+            f.run(1)
+            assertEquals(listOf("heart"), (m.current.items.first { it.id == other.id } as ChatMessageItem).reactions.map { it.emojiName })
+            f.chat.editedWithoutReactions("ch-ecency", other.id)
+            f.run(1)
+            val after = m.current.items.first { it.id == other.id } as ChatMessageItem
+            assertEquals(listOf("heart"), after.reactions.map { it.emojiName }, "the reaction is still shown")
+            assertTrue(after.reactions.single().reacted)
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    @Test
     fun theFirstPageShowsMessagesNoticesAndTheUnreadMarkerAndIsMarkedRead() = runTest {
         val f = ChatFixture(this)
         f.start()

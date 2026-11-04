@@ -591,7 +591,8 @@ struct ChipFlow: Layout {
             x += size.width + spacing
             row = max(row, size.height)
         }
-        return CGSize(width: proposal.width ?? x, height: y + row)
+        // its natural width (no proposal) without the gap after the last item
+        return CGSize(width: proposal.width ?? max(0, x - spacing), height: y + row)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
