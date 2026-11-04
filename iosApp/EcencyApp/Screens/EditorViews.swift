@@ -10,11 +10,17 @@ import UniformTypeIdentifiers
 /// The body field. Typing lives in the text view; when the model rewrites the text (a toolbar action, an upload
 /// placeholder), `revision` goes up and the view takes the model's text and selection over.
 ///
-/// The view does not scroll itself: it grows with its text (at least `minHeight`, the visible height of the editor's
-/// scroll view) inside the one scroll view that also holds the community row, title and tags, so those scroll away
-/// with the body and the body gets the room while the keyboard is up (tester: "Window for editing drafts much too
-/// small"). RN's markdownEditorView keeps one scroll container as well (its body input scrolls on its own, title and
-/// tags stay put); here that container is the outer scroll view, and it keeps the caret in view.
+/// The view sits in the one scroll view that also holds the community row, title and tags, so those scroll away with
+/// the body and the body gets the room while the keyboard is up (tester: "Window for editing drafts much too small").
+/// RN's markdownEditorView keeps title and tags fixed above a body input that scrolls on its own.
+/// - Up to `growsUpTo` UTF-16 units the view does not scroll itself: it grows with its text (at least `minHeight`,
+///   the visible height of the scroll view) and the outer scroll view follows the caret.
+/// - Above it the view is `minHeight` tall and scrolls itself (it follows its own caret), because a text view that
+///   does not scroll lays out all of its text on every keystroke: measured on the simulator, about 1.2 ms per 1,000
+///   units, so 10,000 units (about 1,500 words) take some 12 ms a key, inside a 60 Hz frame, and 345,000 units (a
+///   50,000 word draft) about 400 ms; a scrolling one lays out what is visible (12 ms a key at 50,000 words). There a
+///   drag on the text that reaches its top or bottom goes on in the outer scroll view (`chain`), so the title stays
+///   reachable. It turns back into a growing view below `scrollsDownTo`, so it does not flip at every key.
 struct BodyTextView: UIViewRepresentable {
     let text: String
     let selection: CoreTextSelection
@@ -22,16 +28,36 @@ struct BodyTextView: UIViewRepresentable {
     let editable: Bool
     let placeholder: String
     var minHeight: CGFloat = 0
+    /// Goes up when the body comes back (the preview closed): the caret is scrolled into view again.
+    var revealToken: Int = 0
     let onChange: (String, NSRange) -> Void
+
+    static let growsUpTo = 10_000
+    static let scrollsDownTo = 8_000
+
+    /// Whether a body of [length] UTF-16 units scrolls itself, given whether it [scrolls] now.
+    static func scrollsItself(length: Int, scrolls: Bool) -> Bool {
+        scrolls ? length > scrollsDownTo : length > growsUpTo
+    }
+
+    /// The hardware keyboard's bar and a hidden keyboard leave less than this over the window; a keyboard takes more.
+    static let keyboardMinimum: CGFloat = 150
+
+    /// How much of [window] (window coordinates) the keyboard at [frame] (window coordinates) covers.
+    static func keyboardOverlap(_ frame: CGRect, in window: CGRect) -> CGFloat {
+        let covered = window.intersection(frame)
+        return covered.isNull ? 0 : covered.height
+    }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> UITextView {
         let view = UITextView()
         view.delegate = context.coordinator
-        view.isScrollEnabled = false
+        view.isScrollEnabled = Self.scrollsItself(length: (text as NSString).length, scrolls: false)
         context.coordinator.view = view
         context.coordinator.shownText = text
+        context.coordinator.revealToken = revealToken
         view.font = UIFont.preferredFont(forTextStyle: .body)
         view.adjustsFontForContentSizeCategory = true
         view.backgroundColor = .clear
@@ -41,6 +67,8 @@ struct BodyTextView: UIViewRepresentable {
         view.text = text
         view.selectedRange = range(in: text)
         context.coordinator.revision = revision
+        // back from the preview: a new view, the caret is shown again once it is laid out
+        if revealToken > 0 { context.coordinator.reveal(bodyToTop: false, needsFocus: false) }
         return view
     }
 
@@ -52,76 +80,141 @@ struct BodyTextView: UIViewRepresentable {
     }
 
     func updateUIView(_ view: UITextView, context: Context) {
-        context.coordinator.parent = self
+        let coordinator = context.coordinator
+        coordinator.parent = self
         view.isEditable = editable
-        if context.coordinator.revision != revision {
-            context.coordinator.revision = revision
-            context.coordinator.applying = true
+        if coordinator.revision != revision {
+            coordinator.revision = revision
+            coordinator.applying = true
             if view.text != text { view.text = text }
             view.selectedRange = range(in: text)
-            context.coordinator.applying = false
+            coordinator.applying = false
+            coordinator.textChanged()
         }
-        // the visible height changed (the keyboard came or went): move the body up once SwiftUI laid it out
-        context.coordinator.roomChanged(to: minHeight)
-        // the new height is laid out after this update: follow the caret once it is
-        if context.coordinator.shownText != text {
-            context.coordinator.shownText = text
-            context.coordinator.reveal(bodyToTop: false)
+        coordinator.updateMode()
+        coordinator.widthChanged()
+        if coordinator.revealToken != revealToken {
+            coordinator.revealToken = revealToken
+            coordinator.reveal(bodyToTop: false, needsFocus: false)
+        }
+        // the new height is laid out after this update: follow the caret once it is (once a keystroke: the text
+        // view's own change only marks the text as changed)
+        if coordinator.shownText != text {
+            coordinator.shownText = text
+            coordinator.reveal(bodyToTop: false)
         }
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
         guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
-        let fitted = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height
-        return CGSize(width: width, height: max(ceil(fitted), minHeight))
+        if uiView.isScrollEnabled { return CGSize(width: width, height: minHeight) }
+        return CGSize(width: width, height: max(context.coordinator.fittedHeight(uiView, width: width), minHeight))
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: BodyTextView
         var revision: Int32 = -1
+        var revealToken = 0
         var applying = false
         var shownText = ""
         weak var view: UITextView?
-        /// The visible height of the editor, and the largest one seen at this width: a visible height well below
-        /// it means the keyboard is up. Read from the layout the keyboard leaves, so a hardware keyboard (no room
-        /// taken) keeps the header where it is.
-        private var room: CGFloat = 0
-        private var fullRoom: CGFloat = 0
-        private var roomWidth: CGFloat = 0
-        /// The header is moved away once a focus and keyboard: it never jumps away again from someone who scrolled
-        /// back up to the title.
+        /// The text's version, for the fitted height: SwiftUI asks for the size several times a layout.
+        private var textVersion = 0
+        private var fit: (width: CGFloat, version: Int, size: UIContentSizeCategory, height: CGFloat)?
+        /// What the keyboard covers of the window, from its own frame notifications (0 for the hardware keyboard's bar).
+        private(set) var keyboardUp = false
+        private var observers: [NSObjectProtocol] = []
+        /// The header is moved away once a focus: room or footer changes never move it again for someone who
+        /// scrolled back up to the title. `movedTo` is where that left the scroll view.
         private var movedUp = false
+        private var movedTo: CGFloat?
+        private var width: CGFloat = 0
+        private var pending = false
+        private var pendingToTop = false
+        private var pendingNeedsFocus = true
+        private var chaining = false
+        private var lastInnerY: CGFloat?
 
-        init(_ parent: BodyTextView) { self.parent = parent }
+        init(_ parent: BodyTextView) {
+            self.parent = parent
+            super.init()
+            let center = NotificationCenter.default
+            observers.append(center.addObserver(forName: UIResponder.keyboardWillChangeFrameNotification, object: nil, queue: .main) { [weak self] note in
+                self?.keyboardFrame(note)
+            })
+            observers.append(center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] _ in
+                self?.keyboardUp = false
+            })
+        }
 
-        private var keyboardUp: Bool { fullRoom - room > 120 }
+        deinit { for observer in observers { NotificationCenter.default.removeObserver(observer) } }
 
-        func roomChanged(to height: CGFloat) {
-            let width = view?.bounds.width ?? 0
-            guard width > 0 else { return } // not laid out yet
-            if width != roomWidth {
-                // another width (rotation, a pane): what is visible now is the new reference
-                roomWidth = width
-                fullRoom = height
-            }
-            guard height != room else { return }
-            room = height
-            fullRoom = max(fullRoom, height)
-            movedUp = false
-            if keyboardUp { reveal(bodyToTop: true) }
+        private func keyboardFrame(_ note: Notification) {
+            guard let view, let window = view.window, let end = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            // the frame is in the screen's coordinates
+            let space = (note.object as? UIScreen)?.coordinateSpace ?? window.screen.coordinateSpace
+            let overlap = BodyTextView.keyboardOverlap(window.convert(end, from: space), in: window.bounds)
+            let up = overlap > BodyTextView.keyboardMinimum
+            let cameUp = up && !keyboardUp
+            keyboardUp = up
+            // the keyboard came up over the focused body: the body moves to the top once the editor took its room
+            if cameUp { reveal(bodyToTop: true) }
+        }
+
+        func textChanged() {
+            textVersion += 1
+        }
+
+        func fittedHeight(_ view: UITextView, width: CGFloat) -> CGFloat {
+            let size = view.traitCollection.preferredContentSizeCategory
+            if let fit, fit.width == width, fit.version == textVersion, fit.size == size { return fit.height }
+            let height = ceil(view.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height)
+            fit = (width, textVersion, size, height)
+            return height
+        }
+
+        /// Growing or scrolling by the text's length (see BodyTextView).
+        func updateMode() {
+            guard let view else { return }
+            let scrolls = BodyTextView.scrollsItself(length: (view.text as NSString).length, scrolls: view.isScrollEnabled)
+            guard scrolls != view.isScrollEnabled else { return }
+            view.isScrollEnabled = scrolls
+            fit = nil
+            view.invalidateIntrinsicContentSize()
+            if scrolls { DispatchQueue.main.async { view.scrollRangeToVisible(view.selectedRange) } }
+            reveal(bodyToTop: scrolls)
+        }
+
+        /// Another width (rotation, a fold, a pane) with the keyboard up: a body that was moved to the top and left
+        /// there goes to the top again after the text reflowed; otherwise only the caret is kept in view.
+        func widthChanged() {
+            guard let view, view.bounds.width > 0, view.bounds.width != width else { return }
+            let first = width == 0
+            width = view.bounds.width
+            guard !first, view.isFirstResponder, keyboardUp else { return }
+            let scroll = Self.scrollView(around: view)
+            var leftThere = false
+            if let movedTo, let scroll { leftThere = abs(scroll.contentOffset.y - movedTo) < 2 }
+            if leftThere { movedUp = false }
+            reveal(bodyToTop: leftThere)
         }
 
         func textViewDidBeginEditing(_ view: UITextView) {
-            // the keyboard may already be up (focus came from the title or tags): then the room does not change
+            movedUp = false
+            movedTo = nil
+            // the keyboard may already be up (focus came from the title or tags): then it sends no new frame
             reveal(bodyToTop: keyboardUp)
         }
 
-        func textViewDidEndEditing(_ view: UITextView) { movedUp = false }
+        func textViewDidEndEditing(_ view: UITextView) {
+            movedUp = false
+            movedTo = nil
+        }
 
         func textViewDidChange(_ view: UITextView) {
             guard !applying else { return }
+            textChanged()
             parent.onChange(view.text ?? "", view.selectedRange)
-            reveal(bodyToTop: false)
         }
 
         func textViewDidChangeSelection(_ view: UITextView) {
@@ -129,34 +222,99 @@ struct BodyTextView: UIViewRepresentable {
             parent.onChange(view.text ?? "", view.selectedRange)
         }
 
-        /// Scrolls the editor's scroll view (the text view does not scroll itself) so the caret is visible, with
-        /// [bodyToTop] first so the body starts at the top of it. On the next turn, once SwiftUI laid out the height;
-        /// tried again a moment later while the scroll view has not yet taken the height that leaves room for it.
-        func reveal(bodyToTop: Bool, tries: Int = 0) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (tries == 0 ? 0 : 0.1)) { [weak self] in
-                guard let self, let view = self.view, view.isFirstResponder, let scroll = Self.scrollView(around: view) else { return }
-                scroll.layoutIfNeeded()
-                let inset = scroll.adjustedContentInset
-                let lowest = -inset.top
-                let highest = max(lowest, scroll.contentSize.height + inset.bottom - scroll.bounds.height)
-                let shown = scroll.bounds.height - inset.top - inset.bottom
-                var y = scroll.contentOffset.y
-                if bodyToTop, !self.movedUp {
-                    let top = view.convert(CGPoint.zero, to: scroll).y - inset.top
-                    if top > highest + 0.5, tries < 8 {
-                        self.reveal(bodyToTop: true, tries: tries + 1)
-                    } else {
-                        self.movedUp = true
-                    }
-                    y = max(y, top)
+        /// A long body scrolls itself: a drag that reaches its top or bottom goes on in the editor's scroll view.
+        func scrollViewDidScroll(_ inner: UIScrollView) {
+            guard !chaining, inner.isScrollEnabled, inner.isTracking || inner.isDecelerating, let outer = Self.scrollView(around: inner) else {
+                lastInnerY = inner.contentOffset.y
+                return
+            }
+            chaining = true
+            Self.chain(inner: inner, outer: outer, from: lastInnerY ?? inner.contentOffset.y)
+            chaining = false
+            lastInnerY = inner.contentOffset.y
+        }
+
+        /// Moves [outer] instead of [inner]: scrolling down, the header goes away first; pulled past the text's top,
+        /// the header comes back. [from] is where [inner] was before this move.
+        static func chain(inner: UIScrollView, outer: UIScrollView, from: CGFloat) {
+            let innerTop = -inner.adjustedContentInset.top
+            let delta = inner.contentOffset.y - from
+            let inset = outer.adjustedContentInset
+            let lowest = -inset.top
+            let highest = max(lowest, outer.contentSize.height + inset.bottom - outer.bounds.height)
+            if delta < 0, inner.contentOffset.y < innerTop, outer.contentOffset.y > lowest {
+                let pull = innerTop - inner.contentOffset.y
+                outer.contentOffset.y = max(lowest, outer.contentOffset.y - pull)
+                inner.contentOffset.y = innerTop
+            } else if delta > 0, outer.contentOffset.y < highest {
+                let take = min(delta, highest - outer.contentOffset.y)
+                outer.contentOffset.y += take
+                inner.contentOffset.y -= take
+            }
+        }
+
+        /// Scrolls the editor's scroll view so the caret is visible (a growing body; a scrolling one follows its own
+        /// caret), with [bodyToTop] first so the body starts at the top of it. Calls in one turn are one scroll, on
+        /// the next turn once SwiftUI laid out the height, tried again a moment later while the scroll view has not
+        /// yet taken the height that leaves room for the body. Without [needsFocus] it also runs for a body that is
+        /// not being edited (back from the preview).
+        func reveal(bodyToTop: Bool, needsFocus: Bool = true) {
+            pendingToTop = pendingToTop || bodyToTop
+            pendingNeedsFocus = pendingNeedsFocus && needsFocus
+            guard !pending else { return }
+            pending = true
+            DispatchQueue.main.async { [weak self] in self?.runReveal(tries: 0) }
+        }
+
+        private func runReveal(tries: Int) {
+            let toTop = pendingToTop
+            let needsFocus = pendingNeedsFocus
+            pending = false
+            pendingToTop = false
+            pendingNeedsFocus = true
+            guard let view, !needsFocus || view.isFirstResponder else { return }
+            guard let scroll = Self.scrollView(around: view), view.window != nil, view.bounds.height > 0 else {
+                // a new view (back from the preview) that is not in its scroll view yet: again in a moment
+                if !needsFocus, tries < 8 {
+                    pending = true
+                    pendingNeedsFocus = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in self?.runReveal(tries: tries + 1) }
                 }
-                if let end = view.selectedTextRange?.end {
-                    let caret = view.convert(view.caretRect(for: end), to: scroll).insetBy(dx: 0, dy: -8)
-                    if caret.maxY > y + inset.top + shown { y = caret.maxY - inset.top - shown }
-                    if caret.minY < y + inset.top { y = caret.minY - inset.top }
+                return
+            }
+            scroll.layoutIfNeeded()
+            let inset = scroll.adjustedContentInset
+            let lowest = -inset.top
+            let highest = max(lowest, scroll.contentSize.height + inset.bottom - scroll.bounds.height)
+            let shown = scroll.bounds.height - inset.top - inset.bottom
+            var y = scroll.contentOffset.y
+            if toTop, !movedUp {
+                let top = view.convert(CGPoint.zero, to: scroll).y - inset.top
+                if top > highest + 0.5, tries < 8 {
+                    // not laid out with the keyboard's room yet: again in a moment
+                    pending = true
+                    pendingToTop = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in self?.runReveal(tries: tries + 1) }
+                } else {
+                    movedUp = true
                 }
-                y = min(max(y, lowest), highest)
-                if abs(y - scroll.contentOffset.y) > 0.5 { scroll.setContentOffset(CGPoint(x: scroll.contentOffset.x, y: y), animated: false) }
+                y = max(y, top)
+            }
+            if view.isScrollEnabled {
+                if !needsFocus { view.scrollRangeToVisible(view.selectedRange) }
+            } else if let end = view.selectedTextRange?.end {
+                let caret = view.convert(view.caretRect(for: end), to: scroll).insetBy(dx: 0, dy: -8)
+                if caret.maxY > y + inset.top + shown { y = caret.maxY - inset.top - shown }
+                if caret.minY < y + inset.top { y = caret.minY - inset.top }
+            }
+            y = min(max(y, lowest), highest)
+            if abs(y - scroll.contentOffset.y) > 0.5 { scroll.setContentOffset(CGPoint(x: scroll.contentOffset.x, y: y), animated: false) }
+            if toTop, movedUp { movedTo = scroll.contentOffset.y }
+            if !needsFocus, tries == 0 {
+                // a new view's first layout may not have its full height yet: once more when it has
+                pending = true
+                pendingNeedsFocus = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.runReveal(tries: 1) }
             }
         }
 
@@ -304,6 +462,8 @@ struct EditorScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var sheet: EditorSheet?
     @State private var showFormats = false
+    /// Goes up when the preview closes: the body that comes back shows its caret again.
+    @State private var bodyReveal = 0
     @State private var confirmSubmit = false
     @State private var confirmDiscard = false
     @State private var confirmClear = false
@@ -396,6 +556,7 @@ struct EditorScreen: View {
         .toolbar { toolbar(state) }
         .onAppear { model.start() }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.flush() } }
+        .onChange(of: state.isPreview) { was, now in if was, !now { bodyReveal += 1 } }
         .onReceive(editor.$state) { done($0.done) }
         .onReceive(uploads.$state) { _ in }
     }
@@ -649,7 +810,7 @@ struct EditorScreen: View {
             BodyTextView(
                 text: state.body, selection: state.selection, revision: state.bodyRevision, editable: !state.isSending,
                 placeholder: state.isReply ? EditorUiCopy.shared.ADD_YOUR_REPLY : EditorUiCopy.shared.TELL_US_SOMETHING,
-                minHeight: minHeight
+                minHeight: minHeight, revealToken: bodyReveal
             ) { text, range in
                 model.setBody(text: text, selection: CoreTextSelection(start: Int32(range.location), end: Int32(range.location + range.length)))
                 lookUpMentions()

@@ -36,12 +36,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -139,6 +135,9 @@ import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -416,21 +415,28 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
             field = TextFieldValue(state.body, TextRange(state.selection.start, state.selection.end))
         }
     }
-    // the header and the body scroll together: when the body has the focus and the keyboard comes up, the body moves
-    // to the top (once a focus, so a title scrolled back to stays), and the caret is kept on screen while typing
+    // the header and the body scroll together. When the keyboard comes up over the focused body, the scroll column
+    // keeps its focused child in view as the viewport shrinks with the keyboard's inset (Compose's own behaviour, all
+    // through the inset animation): the body is taller than what is left, so its top goes to the top and the header
+    // scrolls away (EditorFlowsTest.whenTheKeyboardComesUpTheFocusedBodyMovesToTheTop, with faked insets). While
+    // typing the caret is kept on screen here.
     val bodyScroll = rememberScrollState()
     var bodyFocused by remember { mutableStateOf(false) }
-    var bodyTop by remember { mutableStateOf(0) }
     var bodyLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
-    var movedUp by remember { mutableStateOf(false) }
     val caretRequester = remember { BringIntoViewRequester() }
     val caretMargin = with(LocalDensity.current) { 8.dp.toPx() }
-    val imeVisible = WindowInsets.isImeVisible
-    LaunchedEffect(bodyFocused, imeVisible) {
-        if (!bodyFocused) movedUp = false
-        if (bodyFocused && imeVisible && !movedUp) {
-            movedUp = true
-            if (bodyScroll.value < bodyTop) bodyScroll.animateScrollTo(bodyTop)
+    // the preview takes the body away and its focus with it; the body that comes back shows its caret
+    var shownPreview by remember { mutableStateOf(state.isPreview) }
+    LaunchedEffect(state.isPreview) {
+        if (shownPreview == state.isPreview) return@LaunchedEffect
+        shownPreview = state.isPreview
+        bodyFocused = false
+        if (state.isPreview) {
+            bodyLayout = null // the field is gone; the next layout is the new field's
+        } else {
+            val layout = snapshotFlow { bodyLayout }.filterNotNull().first()
+            val caret = layout.getCursorRect(field.selection.end.coerceIn(0, layout.layoutInput.text.length))
+            caretRequester.bringIntoView(caret.inflate(caretMargin))
         }
     }
     LaunchedEffect(field.text, bodyLayout) {
@@ -556,7 +562,6 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                             textStyle = TextStyle(fontSize = 16.sp, color = colors.text, lineHeight = 24.sp, textDirection = TextDirection.Content), cursorBrush = SolidColor(colors.blueText),
                             onTextLayout = { bodyLayout = it },
                             modifier = Modifier.fillMaxWidth().heightIn(min = viewport)
-                                .onGloballyPositioned { bodyTop = it.positionInParent().y.toInt() }
                                 .onFocusChanged { bodyFocused = it.isFocused }
                                 .padding(horizontal = 16.dp, vertical = 8.dp).bringIntoViewRequester(caretRequester).testTag("editorBody"),
                             decorationBox = { inner ->

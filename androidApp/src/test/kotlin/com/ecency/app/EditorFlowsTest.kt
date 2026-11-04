@@ -878,6 +878,61 @@ class EditorFlowsTest {
         assertCountRowIsOneLine()
     }
 
+    private fun showKeyboard(height: Int) = compose.runOnUiThread {
+        val insets = androidx.core.view.WindowInsetsCompat.Builder()
+            .setInsets(androidx.core.view.WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.of(0, 0, 0, height))
+            .setVisible(androidx.core.view.WindowInsetsCompat.Type.ime(), height > 0)
+            .build()
+        androidx.core.view.ViewCompat.dispatchApplyWindowInsets(compose.activity.window.decorView, insets)
+    }
+
+    /** The keyboard comes up over a short body that has the focus: the body moves to the top, the header scrolls off. */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun whenTheKeyboardComesUpTheFocusedBodyMovesToTheTop() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorTitle").performTextInput("A short draft")
+        compose.onNodeWithTag("editorBody").performClick()
+        compose.onNodeWithTag("editorBody").performTextInput("start")
+        settle()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        // scrolled back to the title before the keyboard shows (the focus alone may already have moved the field)
+        compose.onNodeWithTag("editorTitle").performScrollTo()
+        settle()
+        assertTrue("the title is in view", node("editorTitle").boundsInRoot.height > 1f)
+        showKeyboard(300)
+        settle()
+        val top = node("editorBack").boundsInRoot.bottom
+        assertTrue("the title scrolled off: ${node("editorTitle").boundsInRoot}", node("editorTitle").boundsInRoot.height < 1f)
+        assertEquals("the body starts under the top bar", top, node("editorBody").boundsInRoot.top, 24f)
+    }
+
+    /** Back from the preview the body shows its caret again (here at the end of a long text). */
+    @Test
+    @Config(qualifiers = "w360dp-h440dp")
+    fun comingBackFromThePreviewShowsTheCaret() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorTitle").performTextInput("A long draft")
+        compose.onNodeWithTag("editorBody").performClick()
+        compose.onNodeWithTag("editorBody").performTextInput((1..30).joinToString("\n") { "Line $it of the draft" })
+        settle()
+        compose.onNodeWithTag("editorTitle").performScrollTo()
+        compose.onNodeWithTag("previewToggle").performClick()
+        waitFor("editorPreview")
+        compose.onNodeWithTag("previewToggle").performClick()
+        waitFor("editorBody")
+        settle()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
+        val caretBottom = node("editorBody").positionInRoot.y + results.first().getCursorRect(model().current.body.length).bottom
+        val top = node("editorBack").boundsInRoot.bottom
+        val bottom = node("editorToolbar").boundsInRoot.top
+        assertTrue("caret at $caretBottom within $top..$bottom", caretBottom in top..(bottom + 1f))
+    }
+
     /** The quest chip and the words count share one row above the toolbar (owner 11-04), one line high. */
     private fun assertCountRowIsOneLine() {
         fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()

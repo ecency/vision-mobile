@@ -364,6 +364,24 @@ final class EditorUITests: XCTestCase {
         XCTAssertTrue(app.buttons["format-bold"].waitForExistence(timeout: 5), "the toolbar took the tap")
     }
 
+    /// Back from the preview the body is a new view: the caret (here at the end of a long text) is shown again.
+    func testComingBackFromThePreviewShowsTheCaret() {
+        let app = launch(["-openScreen", "editor"])
+        write(app, title: "A long draft", body: (1...30).map { "Line \($0) of the draft" }.joined(separator: "\n"))
+        app.buttons["preview-toggle"].tap()
+        XCTAssertTrue(element(app, "editor-preview").waitForExistence(timeout: 5))
+        app.buttons["preview-toggle"].tap()
+        XCTAssertTrue(body(app).waitForExistence(timeout: 5))
+        let top = app.navigationBars.firstMatch.frame.maxY
+        let toolbar = app.buttons["tool-format"].frame
+        // the caret is at the end: the body's last line is between the bar and the toolbar
+        let shown = NSPredicate { _, _ in
+            let frame = self.body(app).frame
+            return frame.maxY > top && frame.maxY <= toolbar.minY + 16
+        }
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: shown, object: nil)], timeout: 5), .completed, "body \(body(app).frame), room \(top)...\(toolbar.minY)")
+    }
+
     /// The body focused first (the keyboard comes up with it): the body still moves to the top once the editor has
     /// made room, and the toolbar still takes its taps.
     func testTheBodyFocusedFirstMovesUpAndTheToolbarStillTakesTaps() throws {
