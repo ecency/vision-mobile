@@ -161,13 +161,11 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         if (stored.rolesOnOwner(authorities.owner).isEmpty()) return false
         val confirmed = env.chain.confirmedAuthorities(username) ?: return false
         if (stored.rolesOnOwner(confirmed.owner).isEmpty()) return false
-        // remembered before the key goes, so a start that ends here still tells it next time
-        writeList(OWNER_NOTICE, list(OWNER_NOTICE) + username)
+        // remembered only once the vault saved the removal: a save that throws leaves no notice of a removal that did
+        // not happen, and the caller keeps the name to check again
         val removed = env.accounts.dropKeysOnOwner(username, confirmed)
-        if (removed.isEmpty()) {
-            writeList(OWNER_NOTICE, list(OWNER_NOTICE) - username)
-            return false
-        }
+        if (removed.isEmpty()) return false
+        writeList(OWNER_NOTICE, list(OWNER_NOTICE) + username)
         queueOwnerNotice(username)
         // the stored keys changed: the session reads them again
         env.session.start()

@@ -242,6 +242,29 @@ class AccountNoticesTest {
         assertNull(app.env.accountNotices.current.notice, "a private key is not a password")
     }
 
+    @Test
+    fun aKeyRemovalThatCannotBeSavedLeavesNoNoticeAndStaysPending() = runTest {
+        // alice's stored posting key is on her owner authority, and her vault entry refuses the write that removes it
+        fun sharedOwner(u: String, r: KeyRole) = if (r == KeyRole.OWNER) AppTestKeys.pub(u, KeyRole.POSTING) else AppTestKeys.pub(u, r)
+        val app = app(::sharedOwner)
+        KeyVault(app.store).run { save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "t")); setCurrentUsername(alice) }
+        app.store.failingWrites["account.$alice"] = com.ecency.core.secure.SecureStoreException.Unavailable(-25308)
+        app.env.prefs.putString(AccountNoticesModel.OWNER_CHECK, alice)
+        start(app)
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)?.postingKey, "the key stays: the write failed")
+        assertNull(app.env.accountNotices.current.notice, "nothing was removed, so nothing is told")
+        assertNull(app.env.prefs.getString(AccountNoticesModel.OWNER_NOTICE), "no notice is remembered for a removal that did not happen")
+        assertEquals(alice, app.env.prefs.getString(AccountNoticesModel.OWNER_CHECK), "the check waits for the next start")
+        // the next start, with the vault writable again: the key goes and the notice shows
+        val next = app(::sharedOwner)
+        next.store.entries.putAll(app.store.entries)
+        next.env.prefs = app.env.prefs
+        start(next)
+        assertNull(KeyVault(next.store).account(alice)?.postingKey)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, next.env.accountNotices.current.notice?.kind)
+        assertEquals(alice, next.env.prefs.getString(AccountNoticesModel.OWNER_NOTICE))
+    }
+
     // ---- a typed key that is also the owner key ----
 
     @Test

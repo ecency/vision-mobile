@@ -13,6 +13,9 @@ class InMemorySecureStore : SecureStore {
     /** Entries whose read fails with the given error (one corrupted or unavailable entry among healthy ones). */
     val failingReads = mutableMapOf<String, SecureStoreException>()
 
+    /** Entries whose write fails with the given error, before anything is written. */
+    val failingWrites = mutableMapOf<String, SecureStoreException>()
+
     /** Number of successful writes, to prove a run did (not) touch the store. */
     var writes = 0
         private set
@@ -27,6 +30,7 @@ class InMemorySecureStore : SecureStore {
     override fun put(name: String, value: ByteArray) {
         SecureStore.requireValidName(name)
         checkKey()
+        failingWrites[name]?.let { throw it }
         entries[name] = value.copyOf()
         writes++
         afterPut?.invoke(name)
