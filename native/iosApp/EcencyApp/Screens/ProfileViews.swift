@@ -180,7 +180,7 @@ struct ProfileScreen: View {
         .background(theme.background)
         .screenTitle(state.header?.displayName ?? "@\(state.username)")
         .navigationBarTitleDisplayMode(.inline)
-        .screenBarItem(.principal) {
+        .screenBarItem(.principal, shown: !collapse.open && state.header != nil) {
             // RN Header with the selected user while the summary is closed; a tap opens it again
             if !collapse.open, let header = state.header {
                 Group {

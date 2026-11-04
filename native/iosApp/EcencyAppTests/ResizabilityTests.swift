@@ -100,6 +100,18 @@ final class ResizabilityTests: XCTestCase {
 
     // MARK: pixels follow the display's scale
 
+    func testThePinKeysFitAWideShortWindow() {
+        // the PIN pad's rows as PinScreen lays them out: a 13th of what is left under the top 15th, six of them
+        func keyboard(_ height: CGFloat) -> CGFloat { (height - height / 15 - 40) / 13 * 6 }
+        // a phone: RN's seventh of the width, as before
+        XCTAssertEqual(PinScreen.keySize(width: 402, keyboardHeight: keyboard(874)), 402 / 7, accuracy: 0.01)
+        // iPhone Duo's inner display held sideways and its outer display: four rows fit their share of the height
+        for (w, h) in [(951.0, 669.0), (466.0, 678.0)] {
+            let key = PinScreen.keySize(width: w, keyboardHeight: keyboard(h))
+            XCTAssertLessThanOrEqual(key * 4 + 30, keyboard(h) + 0.01, "\(w) x \(h)")
+        }
+    }
+
     func testBodyImagesAreRequestedAtTheDisplaysScale() {
         // a proxied image: the proxy serves 320, 600, 800, 1024 and 1280 px wide variants
         let src = ImageProxy(base: ImageProxy.companion.DEFAULT_BASE)

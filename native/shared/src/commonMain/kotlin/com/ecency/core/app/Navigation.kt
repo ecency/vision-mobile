@@ -543,19 +543,20 @@ data class NavState(
 
     /**
      * [pushGated] on a window that may have room for two panes ([wide], see [hasRoomForPanes]). At the root of a tab
-     * what its list opens shows in the pane, replacing what was there (Mail), and what
-     * the pane's screen opens goes on in the pane. Anything else (the editor, settings, search) covers both, as on
-     * a phone.
+     * what its list opens ([fromList], [AppTab.opensInPane]) shows in the pane, replacing what was there (Mail); what
+     * anything else opens while the pane shows (its own screen, a sheet over it) goes on in the pane, so back returns
+     * there. A link with the pane empty opens in it as a list tap does. The rest (the editor, settings, search, and
+     * the side menu's places, [cover]) covers both, as on a phone, and the pane is there again after it.
      */
-    fun pushIn(screen: AppScreen, loggedIn: Boolean, wide: Boolean): NavState {
+    fun pushIn(screen: AppScreen, loggedIn: Boolean, wide: Boolean, fromList: Boolean = false, cover: Boolean = false): NavState {
         val gated = if (!loggedIn && screen.route.requiresLogin) AppScreen.Login else screen
-        if (!wide || !atRoot || !gated.fitsAPane) return pushGated(screen, loggedIn)
+        if (!wide || !atRoot || cover || !gated.fitsAPane) return pushGated(screen, loggedIn)
         val item = NavItem(nextId, gated)
+        val lists = tab.opensInPane(gated)
         val next = when {
-            tab.opensInPane(gated) && pane.singleOrNull()?.screen == gated -> return copy(drawerOpen = false)
-            tab.opensInPane(gated) -> listOf(item)
-            pane.isNotEmpty() && paneTop != gated -> pane + item
-            pane.isNotEmpty() -> return copy(drawerOpen = false)
+            fromList && lists -> if (pane.singleOrNull()?.screen == gated) return copy(drawerOpen = false) else listOf(item)
+            pane.isNotEmpty() -> if (paneTop == gated) return copy(drawerOpen = false) else pane + item
+            lists -> listOf(item)
             else -> return pushGated(screen, loggedIn)
         }
         return copy(pane = next, nextId = nextId + 1, drawerOpen = false)
@@ -856,12 +857,17 @@ object ContentLinks {
         val safe = com.ecency.core.render.blocks.SafeTarget.httpUrl(url) ?: return null
         val rest = safe.substringAfter("://", "")
         val host = rest.substringBefore('/').substringBefore(':').lowercase()
-        if (host !in HOSTS || !safe.startsWith("https://", ignoreCase = true)) return null
+        // ecency.com, and the other Hive frontends' post, profile and tag links (RN deepLinkParser reads any of
+        // them through postUrlParser; the list is render-helper's, which turns the same links in a body into posts)
+        val firstParty = host in HOSTS
+        if (!firstParty && host.removePrefix("www.") !in com.ecency.core.render.methods.Consts.WHITE_LIST) return null
+        if (!safe.startsWith("https://", ignoreCase = true)) return null
         val path = rest.substringAfter('/', "").substringBefore('?').substringBefore('#')
         val parts = path.split('/').filter { it.isNotEmpty() }
         // RN deepLinkParser: /waves/<author>/<permlink> is the wave's thread, /waves (any query) the Waves tab;
-        // a `text` query opens the composer there (WavesService.openLink)
+        // a `text` query opens the composer there (WavesService.openLink). Ecency's own pages only.
         if (parts.firstOrNull()?.lowercase() == "waves") {
+            if (!firstParty) return null
             com.ecency.core.api.search.PostUrlParser.parse(safe)?.let { p ->
                 val author = p.author
                 val permlink = p.permlink

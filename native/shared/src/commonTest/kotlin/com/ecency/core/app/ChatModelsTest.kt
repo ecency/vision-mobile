@@ -555,6 +555,18 @@ class ChatThreadTest {
     }
 
     @Test
+    fun withoutTheMembersTheMarkerComesFromThePostsPagesReadTime() = runTest {
+        // opened by name with no read time in the hint, the channel list and the member list refused: the posts
+        // page's own `member` still says where the unread messages start
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.refuse["members"] = 500 to ""
+        f.before = { r -> if (r.method == "GET" && r.url.substringBefore('?').endsWith("/api/mattermost/channels")) HttpResult(500, "") else null }
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        assertNotNull(m.current.unreadItemId, "the marker from the page's last read time")
+    }
+
+    @Test
     fun pagesGoBackWithBeforeAndANonMemberJoinsFirst() = runTest {
         val f = ChatFixture(this)
         f.start()

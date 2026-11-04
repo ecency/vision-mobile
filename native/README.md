@@ -517,9 +517,11 @@ https://developer.apple.com/iphone-duo/prepare/ (Xcode 27 also exports its `app-
 - Two panes (`NavState.pane`, `pushIn`, `fitTo`, `menuBesideList` in the core; PaneViews.swift): on a window at least
   840 pt wide (the inner display held sideways, not upright at 669 pt) every tab shows two columns.
   Nothing open: the user menu beside the list. A tap in the list (a post, a wave's thread, a chat, an asset's details): the list and what it opened, the menu closed; the
-  next tap replaces it (Mail), and what that screen opens (a profile, voters) goes on in the pane with its own back.
-  The pane's menu button or the account button brings the menu back, the pane's screen kept behind it. The editor,
-  settings, search and wallet screens still cover the window. A fold moves the pane under the pushed screens (the
+  next tap in the list replaces it (Mail, `pushIn(fromList = true)`), and anything else opened while the pane shows
+  (a profile, voters, another post, a sheet's choice) goes on in the pane with its own back. The screens under the
+  pane's top stay alive, hidden, so back finds them as they were (scroll, narration). The pane's menu button or the
+  account button brings the menu back, the pane's screen kept behind it; the account button takes it away again.
+  The side menu's places (`cover`), the editor, settings, search and wallet screens cover the window. A fold moves the pane under the pushed screens (the
   same screen in front) and an unfold moves it back; the saved navigation keeps the pane as pushed screens. A screen
   in the pane shares the app's bar with the list, so its own bar items go through `screenBarItem` (the navigation bar
   on a phone, the pane's header beside a list). `PanesTest` (core) and `TwoPaneUITests` (skips on a phone-sized
@@ -530,13 +532,12 @@ https://developer.apple.com/iphone-duo/prepare/ (Xcode 27 also exports its `app-
   and saves the display's own size, which is App Store Connect's iPhone Duo size (outer 1398 x 2034 px, inner
   2853 x 2007 px sideways or 2007 x 2853 upright), without an alpha channel. Fold or unfold in Device Hub first; the
   script never switches displays.
-- CI: release builds stay on Xcode 26.x (`build-ios.yml`), since GitHub has no macOS 27 runner yet (macos-26 tops out
-  at Xcode 26.6). They build this code (no API newer than the iOS 26 SDK), but iPhone Duo only lays an app out edge
-  to edge with the vertical bars when it was built with the iOS 27.1 SDK: move `XCODE_VERSION` and `runs-on` once a
-  macOS 27 image ships, or build releases on a self-hosted Mac with Xcode 27.1.
-- Still open in #3601: list screens in the pane that rely on the list's default row margins (asset details' history
-  rows) sit flush against the divider there, since a list takes its default margins from the window's edge; the
-  wallet's asset cards set theirs.
+- CI: release builds run on GitHub's `xcode-27` image with Xcode 27.1 (`build-ios.yml`), whose iOS 27.1 SDK is what
+  lets iPhone Duo lay the app out edge to edge with the vertical bars.
+- A list in the pane gets no default row margins (it is away from the window's edge): its rows set them with
+  `paneRowInsets()` (asset details' history), or their own insets (the wallet's asset cards).
+- Links in chat messages and link cards open in the app when they are a post, profile or tag on ecency.com or another
+  Hive frontend (`ContentLinks.entry`, render-helper's frontend list), anything else in the browser.
 
 ## App shell
 

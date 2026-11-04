@@ -4,6 +4,8 @@ import SwiftUI
 /// RN PostCard: header (avatar, author, community, age), image, title, summary, then
 /// the actions row (vote + payout, votes, comments). Tapping the content opens the post.
 struct PostCardView: View {
+    /// a card in the pane (a profile's posts) opens on in the pane; one in the tab's list replaces it
+    @Environment(\.isInPane) private var isInPane
     let card: PostCard
     let width: CGFloat
     var onAppearWithContent: () -> Void = {}
@@ -49,7 +51,7 @@ struct PostCardView: View {
                 .padding(.bottom, 12)
 
             Button {
-                app.openPost(card.key, hero: heroID)
+                app.openPost(card.key, hero: heroID, fromList: !isInPane)
             } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     if dimmed {
@@ -116,7 +118,7 @@ struct PostCardView: View {
             .accessibilityAddTraits(.isButton)
             // the card's other controls as actions on the one stop (the vote button stays its own stop: it opens
             // the weight sheet it owns)
-            .accessibilityAction(named: L.Post.a11yCommentsHint) { app.openPost(card.key) }
+            .accessibilityAction(named: L.Post.a11yCommentsHint) { app.openPost(card.key, fromList: !isInPane) }
             .accessibilityAction(named: L.Post.a11yVotersHint) { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) }
             .accessibilityAction(named: L.Post.a11yReblogsHint) { app.push(AppScreenReblogs(author: card.key.author, permlink: card.key.permlink)) }
             .accessibilityAction(named: UiCopy.shared.profileOf(username: card.author)) { app.openQuickProfile(card.author) }
@@ -170,7 +172,7 @@ struct PostCardView: View {
     }
 
     private var comments: some View {
-        Button { app.openPost(card.key) } label: { CountLabel(appIcon: .comment, count: card.comments) }
+        Button { app.openPost(card.key, fromList: !isInPane) } label: { CountLabel(appIcon: .comment, count: card.comments) }
             .buttonStyle(.plain)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L.Post.a11yComments(count: Int(card.comments)))

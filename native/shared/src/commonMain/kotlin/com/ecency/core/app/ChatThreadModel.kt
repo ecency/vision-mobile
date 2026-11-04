@@ -35,7 +35,10 @@ data class ChatQuote(val postId: String, val username: String?, val text: String
 }
 
 /** A link card: from the message's `link_*` props, or a Hive post found in the text (title fetched). */
-data class ChatLinkCard(val url: String, val title: String, val summary: String, val image: String?, val post: PostKey? = null)
+data class ChatLinkCard(val url: String, val title: String, val summary: String, val image: String?, val post: PostKey? = null) {
+    /** What a tap opens: the post the card shows, in the app (whichever frontend the link was on), else the link. */
+    val openUrl: String get() = post?.let { "https://ecency.com/@${it.author}/${it.permlink}" } ?: url
+}
 
 /** One row of a conversation (newest first, as RN's inverted list). */
 sealed interface ChatItem {
@@ -442,6 +445,8 @@ class ChatThreadModel internal constructor(
                 page.users.forEach { lookup[it.id] = it }
                 page.memberCount?.let { c -> setState { it.copy(memberCount = c) } }
                 page.onlineUserIds?.let { onlineIds = it }
+                // the read time the posts page carries, when neither the list nor the members gave one
+                if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }
                 page.posts.lastOrNull()?.let { before = it.id }
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = page.posts.isNotEmpty()) }

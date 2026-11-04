@@ -189,7 +189,7 @@ private struct NotificationListView: View {
     }
 
     private func tap(_ row: NotificationRow) {
-        if let entry = notifications.open(id: row.id) { app.open(entry: entry) }
+        if let entry = notifications.open(id: row.id) { app.open(entry: entry, fromList: true) }
     }
 }
 

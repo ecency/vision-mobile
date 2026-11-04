@@ -524,25 +524,30 @@ struct LoadedImageView: UIViewRepresentable {
     func updateUIView(_ view: UIImageView, context: Context) {
         let coordinator = context.coordinator
         coordinator.onLoad = onLoad
-        guard coordinator.src != src else { return }
+        let maxPixel = maxWidth * context.environment.displayScale
+        // the same image drawn wider (a window that unfolded, a display with a higher scale) is decoded again,
+        // sharper; narrower keeps the decode it has
+        let sameSrc = coordinator.src == src
+        guard !sameSrc || maxPixel > coordinator.maxPixel + 0.5 else { return }
         coordinator.src = src
+        coordinator.maxPixel = maxPixel
         let src = self.src
         let fallback = self.fallback == src ? nil : self.fallback
-        let maxPixel = maxWidth * context.environment.displayScale
         // Rows scrolling back in are drawn from the decoded cache at once, without a flash.
         if let hit = ImageLoader.shared.cached(src, maxPixel: maxPixel) ?? fallback.flatMap({ ImageLoader.shared.cached($0, maxPixel: maxPixel) }) {
             view.image = hit.image
             DispatchQueue.main.async { coordinator.onLoad?(hit) }
             return
         }
-        view.image = nil
+        // a new image clears the old one; a sharper decode of the same one keeps it until it is ready
+        if !sameSrc { view.image = nil }
         Task { @MainActor [weak view, weak coordinator] in
             var loaded = await ImageLoader.shared.load(src, maxPixel: maxPixel)
             // a different URL, so the failure remembered for `src` does not block it
             if loaded == nil, let fallback, coordinator?.src == src {
                 loaded = await ImageLoader.shared.load(fallback, maxPixel: maxPixel)
             }
-            guard let loaded, let view, let coordinator, coordinator.src == src else { return }
+            guard let loaded, let view, let coordinator, coordinator.src == src, coordinator.maxPixel == maxPixel else { return }
             view.image = loaded.image
             coordinator.onLoad?(loaded)
         }
@@ -556,6 +561,7 @@ struct LoadedImageView: UIViewRepresentable {
 
     final class Coordinator {
         var src: String?
+        var maxPixel: CGFloat = 0
         var onLoad: ((LoadedImage) -> Void)?
     }
 }

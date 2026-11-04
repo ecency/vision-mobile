@@ -49,7 +49,8 @@ final class NotificationUITests: XCTestCase {
         let read = NSPredicate(format: "value == %@", "Read")
         expectation(for: read, evaluatedWith: vote)
         waitForExpectations(timeout: 10)
-        expectation(for: NSPredicate(format: "label == %@", "Notifications"), evaluatedWith: tab)
+        // the system tab bar shows the badge as the button's value: gone, or no longer the 3 unread
+        expectation(for: NSPredicate(format: "label == %@ AND (value == nil OR NOT (value CONTAINS %@))", "Notifications", "3"), evaluatedWith: tab)
         waitForExpectations(timeout: 10)
     }
 

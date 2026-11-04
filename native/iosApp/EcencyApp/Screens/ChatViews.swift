@@ -62,7 +62,10 @@ extension AppContainer {
     func openChatLink(_ url: String) {
         switch ChatLinkKind.of(url) {
         case .appLink: _ = env.authLinks.handleFromContent(url: url)
-        case .web: if let target = SafeTarget.shared.external(url: url) { handle(target) }
+        // a post, profile or tag on ecency.com or another Hive frontend opens in the app, the rest in the browser
+        case .web:
+            if let entry = ContentLinks.shared.entry(url: url) { open(entry: entry) }
+            else if let target = SafeTarget.shared.external(url: url) { handle(target) }
         case .ignored: break
         }
     }
@@ -320,7 +323,7 @@ struct ChatsTabView: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
-            .accessibilityAction { app.push(model.open(row: row)) }
+            .accessibilityAction { app.push(model.open(row: row), fromList: true) }
             .accessibilityAction(named: ChatUiCopy.shared.CHANNEL_OPTIONS) { options = row }
             if row.unread > 0 {
                 Text(Fmt.int(row.unread)).scaledFont(12, weight: .bold).foregroundStyle(.white)
@@ -337,7 +340,7 @@ struct ChatsTabView: View {
             .accessibilityIdentifier("chat-options-\(row.id)")
         }
         .contentShape(Rectangle())
-        .onTapGesture { app.push(model.open(row: row)) }
+        .onTapGesture { app.push(model.open(row: row), fromList: true) }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-row-\(row.id)")
         .listRowSeparator(.hidden)
@@ -579,7 +582,8 @@ struct ChatThreadView: View {
     var body: some View {
         let s = model.state
         VStack(spacing: 0) {
-            header(s)
+            // in the pane its title and chips are in the pane's header (one header, not two)
+            if !isInPane { header(s) }
             if s.showDmWarning { dmWarning }
             messages(s)
             if let typing = s.typing {
@@ -595,6 +599,8 @@ struct ChatThreadView: View {
         }
         .mediaFileImporter(surface: $files) { _, images in if let image = images.first { thread.attach(file: image) } }
         .background(theme.background)
+        .screenBarItem(.principal, shown: isInPane) { title(s) }
+        .screenBarItem(.trailing, shown: isInPane) { chips(s) }
         // its own header instead of the bar; in the pane the bar is the list's too and stays
         .toolbar(isInPane ? .automatic : .hidden, for: .navigationBar)
         .onAppear {
@@ -631,6 +637,23 @@ struct ChatThreadView: View {
         .accessibilityIdentifier("chat-thread")
     }
 
+    /// The conversation's name (and the official badge): the header's start, or the pane header's middle.
+    private func title(_ s: ChatThreadState) -> some View {
+        HStack(spacing: 6) {
+            Text(s.title).scaledFont(16, weight: .semibold).foregroundStyle(theme.text).lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("chat-title")
+            if s.official { OfficialBadge() }
+        }
+    }
+
+    /// Members, pinned messages and a group's options.
+    @ViewBuilder private func chips(_ s: ChatThreadState) -> some View {
+        chip(.members, s.memberCount > 0 ? "\(s.memberCount)" : nil, label: ChatUiCopy.shared.MEMBERS, id: "chat-members") { sheet = .members }
+        if s.pinnedCount > 0 { chip(.pin, "\(s.pinnedCount)", label: ChatUiCopy.shared.PINNED_MESSAGES, id: "chat-pinned") { sheet = .pinned } }
+        if s.isGroup { chip(.more, nil, label: ChatUiCopy.shared.GROUP_OPTIONS, id: "chat-group-options") { groupOptions = true } }
+    }
+
     private func header(_ s: ChatThreadState) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
@@ -641,16 +664,8 @@ struct ChatThreadView: View {
                         .largeContent(UiCopy.shared.BACK, appIcon: .back)
                         .accessibilityIdentifier("chat-back")
                 }
-                HStack(spacing: 6) {
-                    Text(s.title).scaledFont(16, weight: .semibold).foregroundStyle(theme.text).lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
-                        .accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("chat-title")
-                    if s.official { OfficialBadge() }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 8)
-                chip(.members, s.memberCount > 0 ? "\(s.memberCount)" : nil, label: ChatUiCopy.shared.MEMBERS, id: "chat-members") { sheet = .members }
-                if s.pinnedCount > 0 { chip(.pin, "\(s.pinnedCount)", label: ChatUiCopy.shared.PINNED_MESSAGES, id: "chat-pinned") { sheet = .pinned } }
-                if s.isGroup { chip(.more, nil, label: ChatUiCopy.shared.GROUP_OPTIONS, id: "chat-group-options") { groupOptions = true } }
+                title(s).frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 8)
+                chips(s)
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
             Rectangle().fill(theme.border.opacity(0.4)).frame(height: 0.5)
@@ -1012,7 +1027,7 @@ struct ChatMessageBubble: View {
                 }
                 .accessibilityLabel(UiCopy.shared.IMAGE)
             }
-            if let card = item.card { ChatLinkCardView(card: card, own: own) { app.openChatLink(card.url) } }
+            if let card = item.card { ChatLinkCardView(card: card, own: own) { app.openChatLink(card.openUrl) } }
             HStack(spacing: 6) {
                 // read as part of the message above
                 Text(item.edited ? ChatUiCopy.shared.editedAt(time: item.time) : item.time).scaledFont(11).foregroundStyle(own ? Color.white.opacity(0.85) : theme.secondary)

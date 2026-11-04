@@ -311,12 +311,11 @@ struct CommunityScreen: View {
         .background(theme.background)
         .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if state.isModerator {
-                Button { manage = true } label: { Image(appIcon: .moderator) }
-                    .accessibilityLabel(CommunityCopy.shared.MANAGE)
-                    .accessibilityIdentifier("community-manage")
-            }
+        // the pane's header beside a list, where the bar is the list's (screenBarItem)
+        .screenBarItem(.trailing, shown: state.isModerator) {
+            Button { manage = true } label: { Image(appIcon: .moderator) }
+                .accessibilityLabel(CommunityCopy.shared.MANAGE)
+                .accessibilityIdentifier("community-manage")
         }
         // RN communityManageSheet, in the set role sheet's layout; the pick opens once the sheet is gone
         .themedSheet(isPresented: $manage, onDismiss: {
@@ -465,12 +464,10 @@ struct CommunityMembersScreen: View {
         .refreshable { members.refresh() }
         .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if !state.assignableRoles.isEmpty {
-                Button { pick = RolePick(account: nil, current: nil) } label: { Image(appIcon: .personAdd) }
-                    .accessibilityLabel(CommunityCopy.shared.ASSIGN_ROLE)
-                    .accessibilityIdentifier("assign-role")
-            }
+        .screenBarItem(.trailing, shown: !state.assignableRoles.isEmpty) {
+            Button { pick = RolePick(account: nil, current: nil) } label: { Image(appIcon: .personAdd) }
+                .accessibilityLabel(CommunityCopy.shared.ASSIGN_ROLE)
+                .accessibilityIdentifier("assign-role")
         }
         .themedSheet(item: $pick) { p in
             RoleSheet(env: app.env, account: p.account, current: p.current, roles: state.assignableRoles) { account, role in

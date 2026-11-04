@@ -39,7 +39,7 @@ class PanesTest {
         assertTrue(s.atRoot, "the list stays")
         assertEquals(listOf<AppScreen>(post), screens(s.pane))
         // the next post from the list takes its place, as in Mail
-        val next = s.pushIn(other, loggedIn = true, wide = true)
+        val next = s.pushIn(other, loggedIn = true, wide = true, fromList = true)
         assertEquals(listOf<AppScreen>(other), screens(next.pane))
     }
 
@@ -52,6 +52,29 @@ class PanesTest {
         val back = s.back()!!
         assertEquals(listOf<AppScreen>(post), screens(back.pane))
         assertTrue(back.back()!!.pane.isEmpty())
+    }
+
+    @Test
+    fun aPostThePaneOpensGoesOnInThePaneInsteadOfReplacingIt() {
+        // "more replies", a linked post, a post on a profile in the pane: back returns to the first post
+        val s = NavState().pushIn(post, loggedIn = true, wide = true).pushIn(other, loggedIn = true, wide = true)
+        assertEquals(listOf(post, other), screens(s.pane))
+        // a notification's post, then its author's profile from it
+        val n = NavState(tab = AppTab.NOTIFICATION).pushIn(post, loggedIn = true, wide = true).pushIn(profile, loggedIn = true, wide = true)
+        assertEquals(listOf(post, profile), screens(n.pane))
+        // the same screen again from the pane does nothing
+        assertEquals(s.pane, s.pushIn(other, loggedIn = true, wide = true).pane)
+        // a list card's author (through the quick profile) goes on in the pane too
+        assertEquals(listOf(post, profile), screens(NavState().pushIn(post, loggedIn = true, wide = true).pushIn(profile, loggedIn = true, wide = true).pane))
+    }
+
+    @Test
+    fun theSideMenusPlacesCoverBothWhateverThePaneHolds() {
+        val s = NavState().pushIn(post, loggedIn = true, wide = true).pushIn(profile, loggedIn = true, wide = true, cover = true)
+        assertEquals(listOf<AppScreen>(profile), s.screens)
+        assertEquals(listOf<AppScreen>(post), screens(s.pane), "the post is there again after it")
+        // with nothing open, a profile is no list tap on Feed: it covers both as well
+        assertEquals(listOf<AppScreen>(profile), NavState().pushIn(profile, loggedIn = true, wide = true).screens)
     }
 
     @Test
@@ -153,8 +176,8 @@ class PanesTest {
         assertTrue(menu.menuBesideList(wide = true))
         assertEquals(listOf<AppScreen>(post), screens(menu.pane))
         // the same post again from the list brings it back; another one replaces it
-        assertFalse(menu.pushIn(post, loggedIn = true, wide = true).menuBesideList(wide = true))
-        assertEquals(listOf<AppScreen>(other), screens(menu.pushIn(other, loggedIn = true, wide = true).pane))
+        assertFalse(menu.pushIn(post, loggedIn = true, wide = true, fromList = true).menuBesideList(wide = true))
+        assertEquals(listOf<AppScreen>(other), screens(menu.pushIn(other, loggedIn = true, wide = true, fromList = true).pane))
     }
 
     @Test

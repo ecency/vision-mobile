@@ -860,18 +860,19 @@ final class AppContainer: ObservableObject {
     private(set) var heroSources: [Int64: String] = [:]
 
     /// Pushes [screen] and, when it lands on the stack, records [hero] as the view it zooms out of (iOS 18).
-    func push(_ screen: AppScreen, hero: String?) {
+    func push(_ screen: AppScreen, hero: String?, fromList: Bool = false) {
         let before = nav.stack.last?.id
-        push(screen)
+        push(screen, fromList: fromList)
         if let hero, let top = nav.stack.last, top.id != before { heroSources[top.id] = hero }
         let live = Set(nav.stack.map { $0.id })
         heroSources = heroSources.filter { live.contains($0.key) }
     }
 
     /// Pushes [screen]; the login screen is the sign-in sheet on iOS, and gated screens ask for it first. On a wide
-    /// window what a list opens goes to the pane beside it (NavState.pushIn, README "iPhone Duo").
-    func push(_ screen: AppScreen) {
-        let next = nav.pushIn(screen: screen, loggedIn: session.state.isLoggedIn, wide: wideWindow)
+    /// window what a list opens ([fromList]) goes to the pane beside it, and the side menu's places ([cover]) cover
+    /// both (NavState.pushIn, README "iPhone Duo").
+    func push(_ screen: AppScreen, fromList: Bool = false, cover: Bool = false) {
+        let next = nav.pushIn(screen: screen, loggedIn: session.state.isLoggedIn, wide: wideWindow, fromList: fromList, cover: cover)
         if next.top is AppScreenLogin {
             nav = nav.closeDrawer()
             sheet = .login
@@ -918,7 +919,13 @@ final class AppContainer: ObservableObject {
     func selectTab(_ tab: AppTab) { nav = nav.selectTab(tab: tab) }
     func openDrawer() { nav = nav.openDrawer() }
     func closeDrawer() { nav = nav.closeDrawer() }
-    func open(entry: NavEntry, loggedIn: Bool? = nil) {
+    func open(entry: NavEntry, loggedIn: Bool? = nil, fromList: Bool = false) {
+        // one screen on a wide window: as a push, so a list's row replaces the pane and anything else goes on in it
+        if wideWindow, entry.tab == nil, entry.screens.count == 1, let screen = entry.screens.first, loggedIn == nil {
+            push(screen, fromList: fromList)
+            env.entryOpened()
+            return
+        }
         let next = nav.open(entry: entry, loggedIn: loggedIn ?? session.state.isLoggedIn)
         if next.top is AppScreenLogin {
             nav = next.popTo(size: Int32(next.stack.count - 1))
@@ -948,7 +955,7 @@ final class AppContainer: ObservableObject {
     /// A side menu tap.
     func menu(_ item: SideMenuItem, hasOtherAccounts: Bool) {
         switch SideMenu.shared.action(item: item, username: session.state.username, hasOtherAccounts: hasOtherAccounts) {
-        case let open as MenuActionOpen: push(open.screen)
+        case let open as MenuActionOpen: push(open.screen, cover: true)
         case let browser as MenuActionBrowser:
             closeDrawer()
             if let url = NavDecision.webURL(browser.url) { sheet = .browser(url) }
@@ -991,9 +998,9 @@ final class AppContainer: ObservableObject {
     }
 
     /// Opens a post from a card tap (marks the perf event first).
-    func openPost(_ key: PostKey, hero: String? = nil) {
+    func openPost(_ key: PostKey, hero: String? = nil, fromList: Bool = false) {
         _ = PerfMarks.shared.mark(event: PerfEvent.shared.POST_OPEN_TAP)
-        if let screen = Destination.post(author: key.author, permlink: key.permlink).screen { push(screen, hero: hero) }
+        if let screen = Destination.post(author: key.author, permlink: key.permlink).screen { push(screen, hero: hero, fromList: fromList) }
     }
 
     /// What a sign-in prompt asks the user to sign in for: one whole message per action (README "Localization").

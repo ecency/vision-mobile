@@ -32,7 +32,8 @@ final class TwoPaneUITests: XCTestCase {
         XCTAssertTrue(pane.waitForExistence(timeout: 10))
         XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 15), "the post in the pane")
         XCTAssertTrue(card.exists, "the feed stays beside it")
-        XCTAssertLessThan(card.frame.maxX, pane.frame.minX + 1, "the feed on the leading side")
+        // the feed's own column (the tapped card reports the frame its open animation started from)
+        XCTAssertLessThan(element(app, "feed-list").frame.maxX, pane.frame.minX + 1, "the feed on the leading side")
         XCTAssertFalse(element(app, "drawer-main").exists, "the menu closed")
         // the post's own actions are in the pane's header
         XCTAssertTrue(pane.descendants(matching: .any)["post-options"].firstMatch.exists)
@@ -66,6 +67,33 @@ final class TwoPaneUITests: XCTestCase {
         XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 10))
     }
 
+    func testAPostThePaneOpensGoesOnInThePaneWithABackToTheFirst() throws {
+        // "Read next" in a post beside the feed: a list tap would replace the pane, this goes on in it
+        let app = try launch(["-openPost", "spike-alice/fake-post-1", "-fakeSimilar", "YES"])
+        let pane = element(app, "detail-pane")
+        XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 20))
+        let next = pane.buttons.matching(identifier: "similar-entries").matching(NSPredicate(format: "label BEGINSWITH %@", "Fixture post number 2")).firstMatch
+        for _ in 0..<12 where !(next.exists && next.isHittable) { pane.swipeUp() }
+        XCTAssertTrue(next.isHittable, app.debugDescription)
+        next.tap()
+        XCTAssertTrue(element(app, "pane-back").waitForExistence(timeout: 10), "back to the first post")
+        XCTAssertNotEqual(element(app, "pane-title").label, "@spike-alice", "the next post's author heads the pane")
+        element(app, "pane-back").tap()
+        XCTAssertEqual(element(app, "pane-title").label, "@spike-alice")
+        XCTAssertFalse(element(app, "pane-back").exists)
+    }
+
+    func testTheAccountButtonTakesTheMenuColumnAwayAgain() throws {
+        let app = try launch(["-openPost", "spike-alice/fake-post-1"])
+        XCTAssertTrue(element(app, "post-views").waitForExistence(timeout: 20))
+        element(app, "pane-menu").tap()
+        XCTAssertTrue(element(app, "drawer-main").waitForExistence(timeout: 5))
+        // the toolbar's account button, the same menu: tapped again, the post is back beside the feed
+        app.buttons["account-menu"].tap()
+        XCTAssertTrue(element(app, "detail-pane").waitForExistence(timeout: 5))
+        XCTAssertTrue(element(app, "post-views").exists)
+    }
+
     func testAChatOpensBesideTheChatListWithoutABackButton() throws {
         let app = try launch(["-startTab", "CHATS"])
         let row = element(app, "chat-row-ch-ecency")
@@ -76,6 +104,10 @@ final class TwoPaneUITests: XCTestCase {
         XCTAssertTrue(row.exists, "the chat list stays")
         XCTAssertFalse(element(app, "chat-back").exists, "the pane's own buttons instead")
         XCTAssertTrue(element(app, "pane-menu").exists)
+        // one header: the chat's name and its members chip in the pane's header, no second header under it
+        XCTAssertEqual(app.staticTexts.matching(identifier: "chat-title").count, 1)
+        XCTAssertTrue(app.buttons["chat-members"].exists)
+        XCTAssertLessThan(app.staticTexts["chat-title"].frame.midY, element(app, "pane-menu").frame.maxY, "in the pane's header row")
     }
 
     func testAWaveOpensItsThreadBesideTheWaves() throws {

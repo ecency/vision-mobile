@@ -857,7 +857,7 @@ private fun MessageBubble(
                         modifier = Modifier.padding(top = 6.dp).size(220.dp, 160.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button) { onImage(url) },
                     )
                 }
-                item.card?.let { LinkCard(it, own) { onLink(it.url) } }
+                item.card?.let { LinkCard(it, own) { onLink(it.openUrl) } }
                 // the time on the trailing side, as chat apps put it
                 Row(
                     Modifier.align(Alignment.End).padding(top = 4.dp).testTag("messageTime:${item.id}"),

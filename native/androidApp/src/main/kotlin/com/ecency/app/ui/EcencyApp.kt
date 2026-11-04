@@ -723,7 +723,13 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                             ChatThreadActions(
                                 onBack = { navigator.pop() },
                                 onProfile = feedx::openProfile,
-                                onLink = { url -> if (!env.authLinks.handleFromContent(url)) com.ecency.core.render.blocks.SafeTarget.external(url)?.let { routes.open(LinkRouter.route(it)) } },
+                                // a post, profile or tag on ecency.com or another Hive frontend opens in the app, the rest in the browser
+                                onLink = { url ->
+                                    if (!env.authLinks.handleFromContent(url)) {
+                                        com.ecency.core.app.ContentLinks.entry(url)?.let { navigator.open(it, loggedIn) }
+                                            ?: com.ecency.core.render.blocks.SafeTarget.external(url)?.let { routes.open(LinkRouter.route(it)) }
+                                    }
+                                },
                                 onSettings = { routes.push(AppScreen.Settings) },
                             ),
                         )

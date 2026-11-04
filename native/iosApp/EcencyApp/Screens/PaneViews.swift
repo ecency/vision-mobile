@@ -9,11 +9,22 @@ private struct InPaneKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct PaneTopKey: EnvironmentKey {
+    static let defaultValue = true
+}
+
 extension EnvironmentValues {
     /// True for a screen shown in the pane: it shares the app's bar with the list, so it never hides it.
     var isInPane: Bool {
         get { self[InPaneKey.self] }
         set { self[InPaneKey.self] = newValue }
+    }
+
+    /// False for a pane screen kept under the one on top (its scroll, its playing audio): it puts nothing in the
+    /// pane's header.
+    var isPaneTop: Bool {
+        get { self[PaneTopKey.self] }
+        set { self[PaneTopKey.self] = newValue }
     }
 }
 
@@ -30,20 +41,25 @@ private struct PaneBarKey: PreferenceKey {
 
 extension View {
     /// A screen's bar item: in the navigation bar on a phone, in the pane's header beside a list (two panes), where
-    /// the app's bar belongs to the list's tabs.
-    func screenBarItem<Item: View>(_ placement: ScreenBarPlacement, @ViewBuilder _ item: () -> Item) -> some View {
-        modifier(ScreenBarItem(placement: placement, item: item()))
+    /// the app's bar belongs to the list's tabs. Not [shown], there is none (and the pane's header shows the title).
+    func screenBarItem<Item: View>(_ placement: ScreenBarPlacement, shown: Bool = true, @ViewBuilder _ item: () -> Item) -> some View {
+        modifier(ScreenBarItem(placement: placement, shown: shown, item: item()))
     }
 }
 
 private struct ScreenBarItem<Item: View>: ViewModifier {
     let placement: ScreenBarPlacement
+    let shown: Bool
     let item: Item
     @Environment(\.isInPane) private var isInPane
+    @Environment(\.isPaneTop) private var isPaneTop
 
     func body(content: Content) -> some View {
-        if isInPane {
-            content.preference(key: PaneBarKey.self, value: [placement: AnyView(item)])
+        if !shown || (isInPane && !isPaneTop) {
+            content
+        } else if isInPane {
+            // added to what the screen's own views set (a screen with a title item and actions has both)
+            content.transformPreference(PaneBarKey.self) { $0[placement] = AnyView(item) }
         } else if placement == .principal {
             content.toolbar { ToolbarItem(placement: .principal) { item } }
         } else {
@@ -68,9 +84,24 @@ extension View {
 private struct PaneTitle: ViewModifier {
     let title: String
     @Environment(\.isInPane) private var isInPane
+    @Environment(\.isPaneTop) private var isPaneTop
 
     func body(content: Content) -> some View {
-        if isInPane { content.preference(key: PaneTitleKey.self, value: title) } else { content }
+        if isInPane && isPaneTop { content.preference(key: PaneTitleKey.self, value: title) } else { content }
+    }
+}
+
+extension View {
+    /// List rows in the pane: a list away from the window's edge gets no default row margins, so its rows would sit
+    /// against the divider; there they get the phone's. Elsewhere nothing changes.
+    func paneRowInsets() -> some View { modifier(PaneRowInsets()) }
+}
+
+private struct PaneRowInsets: ViewModifier {
+    @Environment(\.isInPane) private var isInPane
+
+    func body(content: Content) -> some View {
+        if isInPane { content.listRowInsets(EdgeInsets(top: 11, leading: 16, bottom: 11, trailing: 16)) } else { content }
     }
 }
 
@@ -87,15 +118,17 @@ struct PanedTab<List: View>: View {
 
     var body: some View {
         let menu = app.nav.menuBesideList(wide: true)
+        let width = Self.listWidth(window: viewport?.width ?? 0)
+        // one list in both layouts, so it keeps its scroll when the menu gives its place to the pane
         HStack(spacing: 0) {
             if menu {
+                // as wide as the drawer, which grows with the text size
                 SideMenuDrawer(asColumn: true)
-                    .frame(width: Self.menuWidth)
                     .transition(motion.pops ? .move(edge: .leading) : .opacity)
                 separator
-                list().frame(maxWidth: .infinity)
-            } else {
-                list().frame(width: Self.listWidth(window: viewport?.width ?? 0))
+            }
+            list().frame(minWidth: menu ? 0 : width, maxWidth: menu ? .infinity : width)
+            if !menu {
                 separator
                 DetailPane(tab: tab)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -106,9 +139,6 @@ struct PanedTab<List: View>: View {
     }
 
     private var separator: some View { Rectangle().fill(theme.border).frame(width: 1 / 3).accessibilityHidden(true) }
-
-    /// RN's drawer width.
-    static var menuWidth: CGFloat { 280 }
 
     /// The list's width beside the pane: at least a 6.3-inch iPhone's column (402 pt), as RN laid its cards and
     /// filter bar out for one, a little wider on a larger window.
@@ -130,11 +160,20 @@ private struct DetailPane: View {
 
     var body: some View {
         if let top = app.nav.pane.last {
-            DestinationView(screen: top.screen)
-                .environment(\.isInPane, true)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // a new screen in the pane is a new view, with its own model
-                .id(top.id)
+            // every screen of the pane stays, the ones under the top hidden: back finds a post where it was left
+            // (its scroll, its narration), as a navigation stack keeps it
+            ZStack {
+                ForEach(app.nav.pane, id: \.id) { item in
+                    let isTop = item.id == top.id
+                    DestinationView(screen: item.screen)
+                        .environment(\.isInPane, true)
+                        .environment(\.isPaneTop, isTop)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(isTop ? 1 : 0)
+                        .allowsHitTesting(isTop)
+                        .accessibilityHidden(!isTop)
+                }
+            }
                 // room for the header, which shows the screen's own bar items (screenBarItem)
                 .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: headerHeight) }
                 .overlayPreferenceValue(PaneBarKey.self, alignment: .top) { items in

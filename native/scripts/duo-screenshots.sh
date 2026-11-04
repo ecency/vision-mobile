@@ -28,6 +28,31 @@ for devices in json.load(sys.stdin)["devices"].values():
         if d["name"] == sys.argv[1]: print(d["udid"]); sys.exit(0)
 sys.exit("no simulator named " + sys.argv[1])' "$SIM_NAME")"
 mkdir -p "$OUT"
+# the raw shots in a folder of their own, never beside the user's files
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+# The display's pixels as an RGB PNG: the alpha channel dropped without re-encoding (a JPEG round trip loses detail).
+opaque_png() {
+  swift - "$1" "$2" <<'SWIFT'
+import CoreGraphics
+import Foundation
+import ImageIO
+import UniformTypeIdentifiers
+let args = CommandLine.arguments
+guard let source = CGImageSourceCreateWithURL(URL(fileURLWithPath: args[1]) as CFURL, nil),
+      let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+      let space = image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB),
+      let context = CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: 0,
+                              space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { exit(1) }
+context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+guard let opaque = context.makeImage(),
+      let out = CGImageDestinationCreateWithURL(URL(fileURLWithPath: args[2]) as CFURL, UTType.png.identifier as CFString, 1, nil)
+else { exit(1) }
+CGImageDestinationAddImage(out, opaque, nil)
+exit(CGImageDestinationFinalize(out) ? 0 : 1)
+SWIFT
+}
 
 # name, then the launch arguments. On the inner display held sideways each tab shows two columns: the user menu
 # beside the list, or the list beside what it opened (a link opens there as a tap does).
@@ -47,11 +72,9 @@ for shot in "${SHOTS[@]}"; do
   xcrun simctl launch "$UDID" "$BUNDLE_ID" -fakeData YES -seedAccounts YES "${args[@]}" >/dev/null
   # past the launch splash and the first data
   sleep 9
-  raw="$OUT/$name.raw.png"
+  raw="$TMP/$name.png"
   xcrun simctl io "$UDID" screenshot --display="$DISPLAY_ID" "$raw" >/dev/null 2>&1
-  # JPEG and back drops the alpha channel; the size stays the display's
-  sips -s format jpeg -s formatOptions best "$raw" --out "$OUT/$name.jpg" >/dev/null
-  sips -s format png "$OUT/$name.jpg" --out "$OUT/duo-$WHICH-$name.png" >/dev/null
-  rm -f "$raw" "$OUT/$name.jpg"
+  # the size stays the display's
+  opaque_png "$raw" "$OUT/duo-$WHICH-$name.png"
   echo "$OUT/duo-$WHICH-$name.png $(sips -g pixelWidth -g pixelHeight "$OUT/duo-$WHICH-$name.png" | awk '/pixel/ {printf "%s ", $2}')"
 done

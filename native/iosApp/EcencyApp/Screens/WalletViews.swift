@@ -40,7 +40,7 @@ struct WalletTabView: View {
             }
             if s.showSkeleton { RowsSkeleton(count: 5, avatar: false, identifier: "wallet-skeleton").listRowSeparator(.hidden).listRowInsets(EdgeInsets()).themedRow() }
             ForEach(mine ? s.rows : [], id: \.symbol) { row in
-                AssetCardView(row: row) { app.push(AppScreenAssetDetails(symbol: row.symbol)) } onClaim: {
+                AssetCardView(row: row) { app.push(AppScreenAssetDetails(symbol: row.symbol), fromList: true) } onClaim: {
                     if row.pendingText == nil && row.symbol == "POINTS" { app.push(AppScreenCompanion.shared.of(route: .boost, arg: user)) }
                     else { model.claim(symbol: row.symbol) }
                 }
@@ -355,7 +355,7 @@ struct AssetDetailsView: View {
                 Section(copy.PENDING_REQUESTS) {
                     ForEach(s.pending, id: \.key) { row in ActivityRowView(row: row, pending: true, expanded: s.expanded.contains(row.key), busy: s.busyKey == "order:\(row.trxIndex ?? 0)", model: model) }
                 }
-                .themedRow()
+                .themedRow().paneRowInsets()
             }
             if s.activitiesEnabled {
                 Section(copy.ACTIVITIES) {
@@ -381,7 +381,7 @@ struct AssetDetailsView: View {
                     }
                     .font(.footnote).foregroundStyle(theme.secondary).listStateRow()
                 }
-                .themedRow()
+                .themedRow().paneRowInsets()
             }
         }
         .listStyle(.plain)

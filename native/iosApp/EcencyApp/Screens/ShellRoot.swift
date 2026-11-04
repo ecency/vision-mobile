@@ -115,7 +115,8 @@ struct ShellToolbar: ToolbarContent {
         let username = session.state.username
         ToolbarItem(placement: .topBarLeading) {
             // an image, not text: text items stay in a horizontal bar, an image joins iPhone Duo's vertical one
-            Button { app.openDrawer() } label: {
+            // beside the list on a wide window the menu is a column over the pane: the same button takes it away
+            Button { if app.wideWindow && app.nav.drawerOpen { app.closeDrawer() } else { app.openDrawer() } } label: {
                 if username != nil, let avatar {
                     Image(uiImage: avatar).renderingMode(.original)
                 } else {
@@ -375,7 +376,8 @@ struct SideMenuDrawer: View {
         .background(theme.background.ignoresSafeArea())
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("drawer")
-        .accessibilityAddTraits(.isModal)
+        // the drawer covers the tabs; the column sits beside the list, which VoiceOver must still reach
+        .accessibilityAddTraits(asColumn ? [] : .isModal)
         .onEscape { app.closeDrawer() }
     }
 }

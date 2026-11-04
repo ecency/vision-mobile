@@ -376,6 +376,8 @@ enum AuditExclusions {
     static func outsideTheTabBar(_ element: XCUIElement, in app: XCUIApplication) -> CGFloat? {
         let frame = element.frame, bar = app.tabBars.firstMatch
         guard !frame.isEmpty, bar.exists else { return nil }
+        // the bar's own buttons sit inside it and are checked as any control (content wholly under the bar is not)
+        guard !bar.buttons.allElementsBoundByIndex.contains(where: { $0.frame == frame }) else { return nil }
         let covered = frame.intersection(bar.frame)
         guard !covered.isNull, !covered.isEmpty else { return nil }
         return 1 - (covered.width * covered.height) / (frame.width * frame.height)

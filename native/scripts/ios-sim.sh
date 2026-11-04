@@ -39,7 +39,7 @@ if [[ -z "$UDID" ]]; then
 import json, sys
 device = sys.argv[1]
 ios = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]
-       and any(d["name"] == device for d in r.get("supportedDeviceTypes", []))]
+       and any(device in (d["name"], d["identifier"]) for d in r.get("supportedDeviceTypes", []))]
 if not ios: sys.exit("No installed iOS runtime runs " + device)
 print(sorted(ios, key=lambda r: [int(p) for p in r["version"].split(".")])[-1]["identifier"])' "$SIM_DEVICE")"
   UDID="$(xcrun simctl create "$SIM_NAME" "$SIM_DEVICE" "$RUNTIME")"
