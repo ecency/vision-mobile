@@ -285,6 +285,9 @@ final class EditorUITests: XCTestCase {
         let app = launch(["-openScreen", "editor"])
         XCTAssertTrue(body(app).waitForExistence(timeout: 20), app.debugDescription)
         body(app).focusAndType("start")
+        // the keys go in before the keyboard is up: the toolbar is still moving up with it (a tap read from its old
+        // frame lands under the keyboard's place and opens nothing)
+        app.waitForKeyboardToSettle()
         app.buttons["tool-snippets"].tap()
         XCTAssertTrue(element(app, "snippet-Footer").waitForExistence(timeout: 10), app.debugDescription)
         element(app, "snippet-Footer").tap()
@@ -296,9 +299,16 @@ final class EditorUITests: XCTestCase {
         XCTAssertTrue(app.buttons["open-files"].exists)
         XCTAssertTrue(element(app, "gallery-image-demo-i1").waitForExistence(timeout: 10), app.debugDescription)
         element(app, "gallery-image-demo-i1").tap()
-        let withImage = NSPredicate(format: "value CONTAINS %@", "![](https://images.ecency.com/demo/one.jpg)")
-        expectation(for: withImage, evaluatedWith: body(app))
+        let image = "![](https://images.ecency.com/demo/one.jpg)"
+        expectation(for: NSPredicate(format: "value CONTAINS %@", image), evaluatedWith: body(app))
         waitForExpectations(timeout: 5)
+        // at the caret each time: the snippet after the typed word, the image after the snippet. A snippet left
+        // selected was replaced by the image; a caret lost while a sheet was up would put them at the start
+        // (a missing text has location NSNotFound, so it is out of order too)
+        let text = body(app).value as? String ?? ""
+        let order = ["start", "Thanks for reading!", image].map { (text as NSString).range(of: $0).location }
+        XCTAssertEqual(order, order.sorted(), "in the order typed and inserted: \(text)")
+        XCTAssertTrue(text.hasPrefix("start"), text)
     }
 
     /// These need the on screen keyboard: a simulator that hides it for the Mac's keyboard shows only a bar, and then

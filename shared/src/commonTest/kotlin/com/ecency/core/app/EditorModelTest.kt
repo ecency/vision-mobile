@@ -10,6 +10,8 @@ import com.ecency.core.editor.BeneficiaryRoute
 import com.ecency.core.editor.EditorFormats
 import com.ecency.core.editor.EditorMeta
 import com.ecency.core.editor.EditorTags
+import com.ecency.core.editor.MediaInsert
+import com.ecency.core.editor.MediaInsertStatus
 import com.ecency.core.editor.PollDraft
 import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
@@ -881,6 +883,33 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals("", m.current.body)
         assertTrue(w.storage.values.isEmpty())
+    }
+
+    /**
+     * A snippet or a link goes in at the caret and the caret ends after it, so what is inserted next (a gallery
+     * image, another snippet) goes in after it. RN's applySnippet left the inserted text selected, and the next
+     * insert then replaced it: the snippet was gone once an image went in.
+     */
+    @Test
+    fun aSnippetOrALinkLeavesTheCaretAfterItAndTheNextInsertKeepsIt() = runTest {
+        val w = World(this)
+        val m = w.newPost(this)
+        m.setBody("start", TextSelection(5))
+        m.insertSnippet("Thanks for reading!")
+        assertEquals("start\nThanks for reading!\n", m.current.body)
+        assertEquals(TextSelection(m.current.body.length), m.current.selection)
+        m.insertMedia(listOf(MediaInsert(url = "https://images.ecency.com/demo/one.jpg", status = MediaInsertStatus.READY)))
+        assertEquals("start\nThanks for reading!\n\n![](https://images.ecency.com/demo/one.jpg)\n", m.current.body)
+        // over a selection: the snippet replaces it, the caret after it
+        m.setBody("one two", TextSelection(4, 7))
+        m.insertSnippet("x")
+        assertEquals("one \nx\n", m.current.body)
+        assertEquals(TextSelection(7), m.current.selection)
+        m.setBody("see ", TextSelection(4))
+        assertTrue(m.insertLink("Ecency", "https://ecency.com", EditorFormats.LinkType.PLAIN))
+        assertEquals(TextSelection(m.current.body.length), m.current.selection)
+        m.insertSnippet("end")
+        assertEquals("see [Ecency](https://ecency.com)\nend\n", m.current.body)
     }
 
     // ---- beneficiaries ----

@@ -736,7 +736,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     fun insertLink(label: String, url: String, type: EditorFormats.LinkType): Boolean {
         val u = url.trim()
         if (!EditorFormats.isWebLink(u)) return false
-        applyEdit(EditorFormats.snippet(current.body, current.selection, EditorFormats.linkSnippet(label, u, type)))
+        insertAtCaret(EditorFormats.linkSnippet(label, u, type))
         return true
     }
 
@@ -830,7 +830,16 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     }
 
     /** A snippet (or shared text) over the selection, on lines of its own. */
-    fun insertSnippet(text: String) = applyEdit(EditorFormats.snippet(current.body, current.selection, "\n$text\n"))
+    fun insertSnippet(text: String) = insertAtCaret("\n$text\n")
+
+    /**
+     * [text] over the selection (RN applySnippet), with the caret after it. RN left it selected, so the next insert
+     * (a gallery image, another snippet) replaced it while the field was not even focused to show the selection.
+     */
+    private fun insertAtCaret(text: String) {
+        val edit = EditorFormats.snippet(current.body, current.selection, text)
+        applyEdit(edit.copy(selection = TextSelection(edit.selection.end)))
+    }
 
     fun insertUsername(username: String) = applyEdit(EditorFormats.username(current.body, current.selection, username))
 

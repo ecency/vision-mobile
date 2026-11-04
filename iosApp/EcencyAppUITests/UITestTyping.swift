@@ -38,3 +38,22 @@ extension XCUIElement {
         }
     }
 }
+
+extension XCUIApplication {
+    /// Waits until the on screen keyboard is up and still. `typeText` does not wait for it: right after the first
+    /// keys the keyboard can still be coming in (seen at 0.4 s on an iPhone SE simulator), and what sits on top of
+    /// it (the editor's toolbar) is still at its old place, so a tap read from that frame lands where the keyboard
+    /// is going. A simulator that shows only the bar for the Mac's keyboard settles as soon as the bar is still.
+    func waitForKeyboardToSettle(timeout: TimeInterval = 5) {
+        let keyboard = keyboards.firstMatch
+        let bottom = windows.firstMatch.frame.maxY
+        let deadline = Date().addingTimeInterval(timeout)
+        var last = CGRect.null
+        while Date() < deadline {
+            let frame = keyboard.exists ? keyboard.frame : .null
+            if !frame.isNull, frame.minY < bottom - 1, frame == last { return }
+            last = frame
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+    }
+}

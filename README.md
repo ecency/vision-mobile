@@ -1070,7 +1070,7 @@ node --no-warnings native/tools/golden/generate-editor.mjs native/shared/src/com
 
 #### Snippets
 
-- List, add, edit, delete, insert at the selection
+- List, add, edit, delete, insert at the selection. The caret ends after the inserted snippet (and after a link from the insert link sheet), so the next insert, such as a gallery image, goes in after it. RN's applySnippet left it selected and the next insert replaced it. `EditorModelTest.aSnippetOrALinkLeavesTheCaretAfterItAndTheNextInsertKeepsIt`, iOS `EditorUITests.testSnippetsAndGalleryImagesGoInAtTheCaret`.
 
 ### Paid AI features: the money rules
 
