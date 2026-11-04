@@ -89,6 +89,12 @@ class FakeHasRelay : HasSocketFactory {
     var autoApproveSign = true
     var waitExpire = 4_000_000_000_000L
 
+    /** The HiveAuth key of an account, to read its sign requests as the wallet does (set by [TestApp]). */
+    var keyOf: suspend (String) -> String? = { null }
+
+    /** The operations of every sign request read, oldest first. */
+    val signedOps = mutableListOf<kotlinx.serialization.json.JsonArray>()
+
     fun push(json: JsonObject) {
         channel.trySend(json.toString())
     }
@@ -110,6 +116,12 @@ class FakeHasRelay : HasSocketFactory {
                 when (json["cmd"]?.jsonPrimitive?.content) {
                     "auth_req" -> push(buildJsonObject { put("cmd", "auth_wait"); put("uuid", "auth-1"); put("expire", waitExpire) })
                     "sign_req" -> {
+                        val key = json["account"]?.jsonPrimitive?.content?.let { keyOf(it) }
+                        val data = json["data"]?.jsonPrimitive?.content
+                        if (key != null && data != null) {
+                            runCatching { Json.parseToJsonElement(CryptoJsCipher.decrypt(data, key)).jsonObject["ops"] as kotlinx.serialization.json.JsonArray }
+                                .getOrNull()?.let { signedOps += it }
+                        }
                         push(buildJsonObject { put("cmd", "sign_wait"); put("uuid", "sign-1"); put("expire", waitExpire) })
                         if (autoApproveSign) push(buildJsonObject { put("cmd", "sign_ack"); put("uuid", "sign-1"); put("broadcast", true); put("data", TestApp.HAS_TX) })
                     }

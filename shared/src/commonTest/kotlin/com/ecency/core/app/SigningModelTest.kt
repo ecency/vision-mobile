@@ -132,6 +132,84 @@ class SigningModelTest {
         assertTrue(app.transport.sent.any { it.method == "transaction_status_api.find_transaction" }, "the chain confirmed it first")
     }
 
+    private suspend fun hiveAuthAccount(app: TestApp) =
+        store(app, VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e", hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"))
+
+    private fun ack(app: TestApp, txId: String) = app.relay.push(kotlinx.serialization.json.buildJsonObject {
+        put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
+        put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(txId))
+    })
+
+    @Test
+    fun aHiveAuthAckNamingAnotherTransactionIsNotASuccess() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        // a real transaction in a block, with other operations than the ones the user approved
+        val other = "ab".repeat(20)
+        app.txStatus = { if (it == other) "within_irreversible_block" else null }
+        app.chainTxs[other] = JsonArray(listOf(OperationJson.encode(Vote("someone", "author", "permlink", 10000))))
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, other)
+        val before = testScheduler.currentTime
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull())
+        assertTrue(app.transport.sent.any { it.method == "condenser_api.get_transaction" }, "the operations were compared")
+        assertTrue(testScheduler.currentTime - before <= 45_000, "the check is bounded")
+    }
+
+    @Test
+    fun aHiveAuthTransactionInTheMempoolCountsOnceItIsInABlock() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        var asked = 0
+        app.txStatus = { if (it == TestApp.HAS_TX) (if (asked++ == 0) "within_mempool" else "within_reversible_block") else null }
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, TestApp.HAS_TX)
+        val before = testScheduler.currentTime
+        testScheduler.advanceUntilIdle()
+        assertEquals(TestApp.HAS_TX, result.await().getOrThrow().txId)
+        assertEquals(2, asked, "the mempool alone is not enough: asked again")
+        assertTrue(testScheduler.currentTime - before >= SigningModel.HIVE_AUTH_LOOKUP_MILLIS, "after the next poll")
+    }
+
+    @Test
+    fun aMempoolOnlyHiveAuthTransactionIsUnconfirmed() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.txStatus = { if (it == TestApp.HAS_TX) "within_mempool" else null }
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull())
+    }
+
+    @Test
+    fun aNodeWithoutTheStatusApiConfirmsByTheTransactionAlone() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.txStatus = { "error" }
+        val r = app.env.signing.broadcast(alice, vote())
+        assertEquals(TestApp.HAS_TX, r.txId)
+        assertTrue(app.transport.sent.any { it.method == "condenser_api.get_transaction" })
+    }
+
+    @Test
+    fun aHiveAuthTransactionWhoseOperationsCannotBeReadIsUnconfirmed() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        val other = "cd".repeat(20)
+        app.txStatus = { if (it == other) "within_irreversible_block" else null }
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, other)
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull(), "no transaction to compare")
+    }
+
     @Test
     fun aHiveAuthAckTheChainNeverShowsIsNotASuccess() = runTest {
         val app = appWithAccounts(this)

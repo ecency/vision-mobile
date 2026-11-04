@@ -266,6 +266,15 @@ class HiveApi(val client: HiveRpcClient) {
             },
         ) as? JsonObject)?.str("status")
 
+    /**
+     * `condenser_api.get_transaction`: the operations of [txId] as the chain stored it (the transaction must be in a
+     * block). Null when the answer has no operations.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun transactionOperations(txId: String): JsonArray? =
+        ((client.call("condenser_api.get_transaction", buildJsonArray { add(JsonPrimitive(txId)) }) as? JsonObject)
+            ?.get("operations") as? JsonArray)
+
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun contentExists(author: String, permlink: String): Boolean = content(author, permlink) != null
 

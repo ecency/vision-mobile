@@ -320,27 +320,43 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
                 }
             }.txId
         }
-        return confirmedOnChain(txId)
+        return confirmedOnChain(txId, ops)
     }
 
     /**
-     * A HiveAuth `sign_ack` is the relay's word: the transaction it names must be on chain (mempool or a block,
-     * `transaction_status_api.find_transaction`) before the send counts as done. Asked [HIVE_AUTH_LOOKUPS] times,
-     * [HIVE_AUTH_LOOKUP_MILLIS] apart; not seen by then (or no transaction id at all), it ends as
-     * [com.ecency.core.api.broadcast.BroadcastException.Unconfirmed]: the user checks the wallet, nothing is sent again.
+     * A HiveAuth `sign_ack` is the relay's word: the transaction it names must be in a block
+     * (`transaction_status_api.find_transaction` says a reversible or irreversible block; the mempool is not enough)
+     * and carry the operations the user approved (`condenser_api.get_transaction`, compared as [sameOperations])
+     * before the send counts as done. A node without the status API is asked for the transaction alone. Asked
+     * [HIVE_AUTH_LOOKUPS] times, [HIVE_AUTH_LOOKUP_MILLIS] apart; not confirmed by then (no transaction id, other
+     * operations, or none readable), it ends as [com.ecency.core.api.broadcast.BroadcastException.Unconfirmed]: the
+     * user checks the wallet, nothing is sent again.
      */
-    private suspend fun confirmedOnChain(txId: String?): String {
+    private suspend fun confirmedOnChain(txId: String?, ops: JsonArray): String {
         val id = txId?.trim()?.lowercase()?.takeIf { TX_ID.matches(it) }
             ?: throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(txId.orEmpty())
         repeat(HIVE_AUTH_LOOKUPS) { attempt ->
             val status = try {
-                env.api.hive.transactionStatus(id, null)
+                env.api.hive.transactionStatus(id, null) ?: STATUS_UNAVAILABLE
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                null
+                STATUS_UNAVAILABLE
             }
-            if (status in ON_CHAIN) return id
+            if (status in IN_BLOCK || status == STATUS_UNAVAILABLE) {
+                val onChain = try {
+                    env.api.hive.transactionOperations(id)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+                if (onChain != null) {
+                    if (sameOperations(ops, onChain)) return id
+                    // a real transaction, but not the one the user approved
+                    throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(id)
+                }
+            }
             if (attempt < HIVE_AUTH_LOOKUPS - 1) delay(HIVE_AUTH_LOOKUP_MILLIS)
         }
         throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(id)
@@ -407,7 +423,41 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         const val HIVE_AUTH_LOOKUPS = 10
         const val HIVE_AUTH_LOOKUP_MILLIS = 3_000L
         private val TX_ID = Regex("^[0-9a-f]{40}$")
-        private val ON_CHAIN = setOf("within_mempool", "within_reversible_block", "within_irreversible_block")
+        private val IN_BLOCK = setOf("within_reversible_block", "within_irreversible_block")
+
+        /** find_transaction failed or is not served by the node: the transaction itself is asked for. */
+        private const val STATUS_UNAVAILABLE = ""
+
+        /**
+         * Whether the chain's [onChain] operations are the [sent] ones: the same count, and each with the same name
+         * (`vote`, `vote_operation` and the `{type, value}` form read alike) and the same fields, read through the
+         * operation serializer where it knows the operation (so number and text spellings and default fields agree),
+         * else as JSON (key order does not matter).
+         */
+        internal fun sameOperations(sent: JsonArray, onChain: JsonArray): Boolean =
+            sent.size == onChain.size && sent.indices.all { i ->
+                val a = normalisedOperation(sent[i])
+                a != null && a == normalisedOperation(onChain[i])
+            }
+
+        private fun normalisedOperation(op: kotlinx.serialization.json.JsonElement): JsonArray? {
+            val pair = when (op) {
+                is JsonArray -> op.takeIf { it.size == 2 }
+                is kotlinx.serialization.json.JsonObject -> {
+                    val type = (op["type"] as? JsonPrimitive)?.contentOrNull
+                    val value = op["value"]
+                    if (type != null && value != null) JsonArray(listOf(JsonPrimitive(type), value)) else null
+                }
+                else -> null
+            } ?: return null
+            val name = (pair[0] as? JsonPrimitive)?.takeIf { it.isString }?.content?.lowercase()?.removeSuffix("_operation") ?: return null
+            val named = JsonArray(listOf(JsonPrimitive(name), pair[1]))
+            return try {
+                com.ecency.core.api.broadcast.OperationJson.encode(com.ecency.core.api.broadcast.OperationJson.decode(named))
+            } catch (e: Exception) {
+                named
+            }
+        }
 
         val HOT_PAGE_CLOSED: String get() = L.native.signing.hotPageClosed
 
