@@ -1,214 +1,70 @@
 ---
 name: add-sheet
-description: Use when adding, registering, or debugging a bottom sheet (action sheet) in the mobile app, including when a sheet's cancel or dismissal reaches the caller as the wrong result.
+description: Use when adding, presenting or debugging a bottom sheet or modal in the native Ecency app: a SwiftUI sheet through themedSheet, the root AppSheet and nextSheet chaining, or a Compose ModalBottomSheet from ui/Windows.kt, including sheets driven by shared state, dismissal versus confirm, sheets that must not close while sending, and sheet background, language and accessibility checks.
 argument-hint: [sheet-name]
 ---
 
 # Add Sheet
 
-Registry, show call and mount lifecycle: CLAUDE.md "Sheets (Bottom Sheets)". This file adds
-the procedure plus the result convention new sheets here should follow.
+A sheet is UI on each platform over shared state. Logic (what the choices are, what confirming does, the copy)
+belongs in the shared core so both apps behave the same; the sheets only draw it and forward taps. Examples with
+shared state: `VoteSheetState` (`shared/.../app/VoteSheet.kt`), `LinkSheet` (`app/LinkSheet.kt`), the chat and
+profile sheet models (`app/ChatSheets.kt`, `app/ProfileSheetModels.kt`).
 
-## Resolve with an object, gate on a named field
+## Step 0: RN behaviour and tests first
 
-`react-native-actions-sheet` 0.9.7, `node_modules/react-native-actions-sheet/dist/src/index.js:408`:
+- Read the RN sheet: `git show rn-3.x-final:src/navigation/sheets.tsx` lists every RN sheet and its component.
+- Tests before the code, failing on their assertion: the shared state or model in `shared/src/commonTest`, then a
+  Robolectric flow on Android (tap the trigger, assert the sheet's `testTag`, confirm and dismiss) and an iOS UI
+  test launched with `-fakeData YES` (assert the sheet's accessibility identifiers).
+- Dismissal is not a confirm: test both. Swipe down, back and a scrim tap must leave state as Cancel does.
 
-```js
-actionSheetEventManager.publish("onclose_".concat(sheetId), data || payloadRef.current || data, currentContext);
-```
+## Step 1: shared part
 
-`data` is what you passed to `SheetManager.hide(id, { payload: data })`. `payloadRef.current` is
-NOT the show payload: it tracks `<ActionSheet>`'s own `payload` prop (`payload = _a.payload` at
-index.js:53, `useRef(payload)` at 87, `payloadRef.current = payload` at 139). The
-`SheetManager.show` payload goes somewhere else entirely, to the registered component as a prop
-from the provider (`<Sheet sheetId={id} payload={payload}/>`, `dist/src/provider.js:160`).
+- The choices, labels (copy getters reading `L`), validation and the confirm action live in the core: a small
+  state class (`VoteSheetState.open(...)`, `withDirection(...)`) or a model with `confirm(...)`.
+- A sheet opened from a screen's action is often a model state field (`state.prompt`, `state.alert`) that the
+  platforms show while non-null and clear through a model call (`dismissAlert()`).
 
-Sheets in `src/` do not forward that prop down into `<ActionSheet>`: `grep -rn "payload=" src/`
-returns zero hits. So `payloadRef.current` is `undefined` for the sheets here.
-`data || payloadRef.current || data` collapses to `data`, so a falsy return does reach the caller
-intact today. Same expression on `onBeforeClose` (line 385) and `onClose` (line 401).
+## Step 2: iOS (SwiftUI)
 
-Still resolve with an object and gate on a named field. Two reasons:
+- Present with `.themedSheet(isPresented:)` / `.themedSheet(item:)` or `.themedFullScreenCover(...)`
+  (`Screens/Components.swift`). Raw `.sheet(` and `.fullScreenCover(` fail `ThemedBackgroundLintTests`: they paint the
+  system sheet colour.
+- App-wide sheets are a case of `AppSheet` (`App/AppContainer.swift`, with a stable `id`) drawn in the
+  `themedSheet(item: $app.sheet)` switch of `Screens/RootView.swift`; open with `app.sheet = .x(...)`. To open
+  another root sheet after this one closes, set `app.nextSheet`, which `onDismiss` shows next. Screen-local sheets
+  sit on the screen with their own `@State`.
+- The root passes `.environmentObject(app)`, `app.session` and `app.votes` into the sheet content; a sheet that
+  needs others gets them passed the same way.
+- Sizing: `.presentationDetents([.medium, .large])` when the content grows with text size; rows that do not fit
+  fall back through `ViewThatFits`. Use `.interactiveDismissDisabled(state.isSending)` while a send runs
+  (`WavesViews.swift`, `EditorExtrasViews.swift`).
+- Signing prompts and the PIN lock sit in windows above every sheet (`AuthOverlay`, `LockOverlay`): do not try
+  to present them from a sheet.
+- Copy from shared copy objects or Swift `L`; identifiers via `.accessibilityIdentifier("x-sheet-...")`.
 
-- A backdrop tap, swipe down or hardware back closes with `data === undefined`, so `show()`
-  resolves `undefined`. Truthiness cannot separate that dismissal from a sheet that deliberately
-  answered `false`, `0` or `''`. A named field can.
-- The substitution is one prop away from going live. Adding `payload={payload}` to an
-  `<ActionSheet>` would silently turn every falsy cancel in that sheet into the truthy show
-  payload, with no type error and no crash.
+## Step 3: Android (Compose)
 
-Copy `modNotesSheet`, `communityRoleEditSheet`, `walletHistoryFiltersSheet` or
-`newsletterDigestSheet`. All four resolve `{ cancelled: true }` on cancel.
-`searchFiltersSheet` is apply-only, with no cancel control, so it is not a model here.
+- Use `ModalBottomSheet` from `ui/Windows.kt` (same name as Material's; screens in `com.ecency.app.ui` get it by the
+  plain name). It wraps the content in `FollowAppLanguage`, so an open sheet switches with the app language.
+- Pass `containerColor = colors.background` (`LocalEcencyColors.current`); anything else fails
+  `ThemedBackgroundLintTest` unless allowlisted there with a reason (media viewers).
+- Hoist the trigger as nullable state and clear it on dismiss, as the vote sheet in `ui/EcencyApp.kt`:
+  `voteTarget?.let { card -> VoteSheet(card, onVote = { ...; voteTarget = null }, onDismiss = { voteTarget = null }) }`.
+- Content: `Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding()
+  .testTag("xSheet"))` so it wraps its content and scrolls at the largest font scale; `imePadding()` with a field.
+- A sheet that must stay open while sending: `rememberModalBottomSheetState(confirmValueChange = { it !=
+  SheetValue.Hidden || !sending })` and an `onDismissRequest` that ignores the call while sending (`ReplySheet` in
+  `ui/Sheets.kt`).
+- Clickables name a `role`; icon-only buttons carry a label (`A11yLintTest`).
 
-`src/components/authUpgradeSheet/authUpgradeSheet.tsx` is one counter-example: it cancels with
-`_close(false)` while `src/providers/sdk/mobilePlatformAdapter.ts:317` gates on
-`if (!result) return false;`. That reads correctly right now, since cancel and dismissal are both
-falsy there and both mean the same thing, but it is one of the sheets that breaks first if anyone
-gives it a `payload` prop.
+## Checklist
 
-Comments across `src/` (in `sheets.tsx`, in several sheet components, in several screens) justify
-this convention by claiming a dismissal resolves the payload object. The convention is right; that
-reason is not.
-
-## Step 0: failing test first
-
-Before the sheet, write a test for its result contract from the issue's **Acceptance tests**: which object it resolves with for each action, with separate assertions for explicit Cancel (resolves `{ cancelled: true }`) and passive dismissal by backdrop tap, swipe or hardware back (resolves `undefined`). Then test the caller's gate on the named field for both, so neither reads as a choice. Run it with `node node_modules/jest/bin/jest.js <path>` and confirm it fails **for the right reason**: an assertion about the missing behaviour, not an import error, a missing mock or a typo. When the subject does not exist yet, add a stub export (a component returning `null`, a function returning `undefined`) so the run reaches the assertion. If the issue says `No test-first: <reason>` (pure layout or styling, a dependency upgrade, native build config), skip this and repeat that line in the PR.
-
-## Step 1: Component
-
-`src/components/<sheetName>/<sheetName>.tsx` is the usual path for a component typed with
-`SheetProps<'...'>`. Other sheets use the enum form `SheetProps<SheetNames.X>`, which is equally
-accepted. Trimmed from `src/components/modNotesSheet/modNotesSheet.tsx`:
-
-```typescript
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useIntl } from 'react-intl';
-import ActionSheet, { SheetManager, SheetProps } from 'react-native-actions-sheet';
-import EStyleSheet from 'react-native-extended-stylesheet';
-import { MainButton } from '../mainButton';
-
-// Matches the SheetNames value. Sheets keep this so `hide` has an id even when the
-// sheet is rendered outside the registry.
-const FALLBACK_SHEET_ID = 'my_sheet';
-
-/** `{ value }` on confirm, `{ cancelled: true }` on cancel. A backdrop, swipe or back
- * dismissal resolves `undefined`, so callers gate on a string `value`, never on
- * truthiness. */
-export interface MySheetResult {
-  value?: string;
-  cancelled?: boolean;
-}
-
-const MySheet: React.FC<SheetProps<'my_sheet'>> = ({ sheetId, payload }) => {
-  const intl = useIntl();
-  const [value, setValue] = useState('');
-  const closedRef = useRef(false);
-
-  const _reset = useCallback(() => {
-    closedRef.current = false;
-    setValue('');
-  }, []);
-
-  // onBeforeShow fires the same reset on every fresh presentation, which a registered
-  // sheet also gets from its fresh mount. This effect covers the one case both miss, a
-  // payload swap while the sheet is already open, because use-sheet-manager.js drops the
-  // re-show with `if (visible) return;` before onBeforeShow can run. Do not delete it as
-  // redundant.
-  useEffect(() => {
-    _reset();
-  }, [payload, _reset]);
-
-  // closedRef stops a double tap firing two hides, which would resolve twice.
-  const _close = (result: MySheetResult) => {
-    if (closedRef.current) return;
-    closedRef.current = true;
-    SheetManager.hide(sheetId || FALLBACK_SHEET_ID, { payload: result });
-  };
-
-  return (
-    <ActionSheet id={sheetId || FALLBACK_SHEET_ID} gestureEnabled closeOnTouchBackdrop
-      onBeforeShow={_reset} containerStyle={styles.sheetContainer}>
-      <MainButton text={intl.formatMessage({ id: 'my_sheet.confirm' })}
-        onPress={() => _close({ value: value.trim() })} />
-      <MainButton text={intl.formatMessage({ id: 'my_sheet.cancel' })}
-        onPress={() => _close({ cancelled: true })} />
-    </ActionSheet>
-  );
-};
-
-const styles = EStyleSheet.create({
-  sheetContainer: { paddingHorizontal: 0, backgroundColor: '$primaryBackgroundColor' },
-});
-
-export default MySheet;
-```
-
-Colors come from EStyleSheet theme variables in `src/themes/` (`$primaryBackgroundColor`,
-`$primaryBlack`, `$primaryDarkGray`, `$iconColor`) rather than a hex literal. For a color a prop
-needs as a plain string rather than a style, resolve it with `EStyleSheet.value('$primaryDarkGray')`, as
-`modNotesSheet` does for `placeholderTextColor`.
-
-## Step 2: Folder index
-
-`src/components/<sheetName>/index.ts`. Sheet folders re-export their sheet with the first line;
-those that also publish a result type add the second:
-
-```typescript
-export { default as MySheet } from './<sheetName>';
-export type { MySheetResult } from './<sheetName>';
-```
-
-A sheet that `sheets.tsx` imports by path can skip this file entirely. `walletHistoryFiltersSheet`
-has no `index.ts`.
-
-## Step 3: Components barrel
-
-`src/components/index.tsx` is an import list plus one `export { ... }` block at line 164. Add
-`import { MySheet } from './<sheetName>';` plus a `MySheet,` entry inside that block. There is no
-`export ... from` line to add. A sheet nothing else imports can skip this step and be imported
-in `sheets.tsx` by path, as some registrations are.
-
-## Step 4: Register in `src/navigation/sheets.tsx`
-
-Add the `SheetNames` member (`MY_SHEET = 'my_sheet',`), the
-`registerSheet(SheetNames.MY_SHEET, MySheet);` call, then extend `Sheets`. **The key must be a
-string literal, not `[SheetNames.MY_SHEET]`**: string enum member types are nominal, so with a
-computed key `keyof Sheets` carries the enum member rather than the string literal and
-`SheetProps<'my_sheet'>` stops resolving.
-
-```typescript
-declare module 'react-native-actions-sheet' {
-  interface Sheets {
-    my_sheet: SheetDefinition<{
-      payload: { someParam: string };
-      // `{ value }` on confirm, `{ cancelled: true }` on cancel, `undefined` on a
-      // backdrop, swipe or back dismissal. Gate on `value`, not on truthiness.
-      returnValue: MySheetResult | undefined;
-    }>;
-  }
-}
-```
-
-Skipping this fails `yarn typecheck`: the `everySheetHasDefinition` assertion at the bottom of
-the file names any `SheetNames` member missing from the augmentation.
-
-## Step 5: Show it and read the result
-
-```typescript
-const result = await SheetManager.show(SheetNames.MY_SHEET, { payload: { someParam: 'x' } });
-
-// Only a confirmation carries a string `value`. Cancel yields { cancelled: true }; a
-// backdrop, swipe or back dismissal yields undefined. Both are rejected here.
-const confirmed = typeof result?.value === 'string' ? result.value : '';
-if (!confirmed) return;
-```
-
-Real callers: `src/components/postOptionsModal/container/postOptionsModal.tsx:742`
-(`typeof result?.notes === 'string'`) and
-`src/screens/assetDetails/screen/assetDetailsScreen.tsx:265` (`!Array.isArray(result?.operations)`).
-
-## Step 6: i18n strings
-
-Edit `src/config/locales/en-US.json` only; Crowdin owns the other locales. The file is nested
-objects, not dotted keys, while `formatMessage` ids stay dotted:
-
-```json
-  "my_sheet": { "title": "Sheet Title", "confirm": "Confirm", "cancel": "Cancel" },
-```
-
-## Lifecycle
-
-- **Sheets mount on a fresh show and unmount on hide**: the library renders the registered
-  component only while that sheet is visible. `useState` initials are fresh on that open, so
-  nothing stale needs clearing on mount; unmount cleanups run on close. The exception is a
-  `show()` against a sheet that is already open: the stored payload is replaced with no remount,
-  so reset on the `payload` prop as well, as Step 1 does. The CLAUDE.md bullet states the mount
-  rule without that exception.
-- **Sheets render outside the ErrorBoundary**: `SheetProvider` returns `<>{children}{sheets}</>`,
-  so sheets are siblings of `<Application/>` while the boundary sits inside it
-  (`src/screens/application/index.tsx:17`). A throw in a sheet render or effect cleanup is fatal.
-  Be careful with native or Expo shared objects in cleanups.
-- **The payload is captured at show time**: it is stored in state at that show, so a callback
-  passed inside a payload keeps the closure it had then. Route anything that changes through a
-  ref, as `src/components/quickPostModal/quickPostModalContent.tsx:565-575` does.
+- [ ] Shared state or model holds choices, copy and the confirm action; tested
+- [ ] Dismiss (swipe, back, scrim) leaves state as Cancel; tested on both platforms
+- [ ] iOS `.themedSheet` (no raw `.sheet(`), root sheets through `AppSheet`; Android `ModalBottomSheet` from
+      `ui/Windows.kt` with `colors.background`
+- [ ] No dismissal while a send runs, when the result belongs on screen
+- [ ] Fits and scrolls at the largest text size; identifiers and test tags for tests
+- [ ] No literal UI text (l10n lints), copy keys in `src/config/locales/en-US.json` only

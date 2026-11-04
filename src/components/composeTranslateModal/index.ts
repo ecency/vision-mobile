@@ -1,1 +1,0 @@
-export { ComposeTranslateModal } from './composeTranslateModal';
