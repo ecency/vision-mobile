@@ -5,8 +5,12 @@
 // Run from the repo root after a fresh Crowdin download (no dependencies):
 //   node tools/l10n/seed-native-plurals.mjs [--check]
 //
-// A language that already has a native key keeps it (Crowdin's translation wins); only missing keys are seeded.
+// A language that already has a native key keeps it (Crowdin's translation wins); only missing keys are seeded. A
+// native key whose text is the English source counts as missing: Crowdin exports an untranslated string as its
+// source text, which is what a language shows after en-US changed the key and its translation was dropped.
 // --check writes nothing and exits 1 when a file would change.
+// --seeded-out <dir> also writes <dir>/<lang>.json with only the keys seeded in this run (the upload to Crowdin
+// sends those and nothing else, so no other translation there is touched).
 //
 // How a translation is converted (mechanical, the same text the old RN message showed):
 //   suffix   `{count} word{suffix}` becomes `{count, plural, <every CLDR form of the language> {# word}}`;
@@ -17,7 +21,7 @@
 //   plain    copied as it is (a plain `{n}` where English has a plural is valid ICU and shows as before).
 // Skipped (English shows): no RN translation, one equal to RN's English (untranslated), unbalanced braces, or a
 // placeholder the native English lacks.
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const KEYS = {
@@ -52,6 +56,9 @@ const ORDER = ['zero', 'one', 'two', 'few', 'many', 'other']
 
 const dir = 'src/config/locales'
 const check = process.argv.includes('--check')
+const outAt = process.argv.indexOf('--seeded-out')
+const seededOut = outAt > 0 ? process.argv[outAt + 1] : null
+if (outAt > 0 && !seededOut) throw new Error('--seeded-out needs a directory')
 const rules = JSON.parse(readFileSync('shared/l10n/cldr-plural-rules.json', 'utf8')).rules
 
 const get = (o, path) => path.split('.').reduce((d, k) => (d && typeof d === 'object' ? d[k] : undefined), o)
@@ -101,10 +108,12 @@ for (const f of readdirSync(dir).filter((x) => x.endsWith('.json') && x !== 'en-
   const data = JSON.parse(raw)
   let seeded = 0
   const skipped = []
+  const only = {}
   for (const [key, kind] of Object.entries(KEYS)) {
     const nativeEnglish = get(en, PREFIX + key)
     if (typeof nativeEnglish !== 'string') throw new Error(`en-US lacks ${PREFIX + key}`)
-    if (get(data, PREFIX + key) !== undefined) continue
+    const have = get(data, PREFIX + key)
+    if (have !== undefined && have !== nativeEnglish) continue
     const rnText = get(data, key)
     const out = SKIP.has(`${lang} ${key}`) ? null : convert(lang, kind, rnText, get(en, key), nativeEnglish)
     if (out == null) {
@@ -112,7 +121,12 @@ for (const f of readdirSync(dir).filter((x) => x.endsWith('.json') && x !== 'en-
       continue
     }
     put(data, PREFIX + key, out)
+    put(only, PREFIX + key, out)
     seeded++
+  }
+  if (seeded && seededOut && !check) {
+    mkdirSync(seededOut, { recursive: true })
+    writeFileSync(join(seededOut, f), JSON.stringify(only, null, 2) + '\n')
   }
   if (seeded) {
     const text = JSON.stringify(data, null, 2) + (raw.endsWith('\n') ? '\n' : '')

@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "Je hebt deze maand {count, plural, one {# bericht} other {# bericht}} gemaakt. Ga zo door!",
+        "checkin": "Je hebt deze week {count, plural, one {# dag} other {# dag}} ingecheckt. Ga zo door!",
         "tags_bundle": "{count, plural, one {# nieuw bericht} other {# nieuwe berichten}} in #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# mislukte poging(en)} other {# mislukte poging(en)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Reeks van {n} dagen"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Alleen accounts ouder dan {days} dagen toegestaan",
+        "max_choices": "• Je mag maximaal {choices} keuzes selecteren"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Resterend: {executions} overboekingen",
+        "schedule_summary": "{executions} overboekingen, telkens elke {hours} uur"
       },
       "editor": {
         "short_content_hint": "Te kort om punten te verdienen ({n, plural, one {# teken} other {# tekens}} of minder, links niet meegeteld)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} personen toegevoegd",
         "ban-remaining-minutes": "over ongeveer {count, plural, one {# minuut} other {# minuten}}",
         "ban-remaining-hours": "over ongeveer {count, plural, one {# uur} other {# uur}}",
         "ban-remaining-days": "over ongeveer {count, plural, one {# dag} other {# dagen}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Minimaal {count} tekens vereist",
+        "chars_remaining": "{count} tekens resterend"
       },
       "alert": {
         "too_many_images": "Je kunt maximaal {count, plural, one {# afbeelding} other {# afbeeldingen}} tegelijk selecteren"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points per {s, plural, one {# seconde} other {# seconden}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Volgende ontstaken is over {days} dagen, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Tussen {min} en {max, plural, one {# teken} other {# tekens}}"

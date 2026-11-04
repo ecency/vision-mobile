@@ -2,12 +2,21 @@ name: Crowdin Upload Sources
 
 # Pushes new/changed English source strings to Crowdin whenever the base locale
 # changes on development. One-way (repo -> Crowdin); creates no commits in the repo.
+#
+# A manual run with "native_plurals" also uploads every language's `native.plurals.*` translations from the
+# repo (README "Crowdin": seeded translations). Only those keys are sent, from files that hold nothing else, so
+# no other translation in Crowdin changes; an approved translation there still wins over the uploaded one.
 on:
   push:
     branches: [development]
     paths:
       - 'src/config/locales/en-US.json'
   workflow_dispatch:
+    inputs:
+      native_plurals:
+        description: Also upload the native.plurals translations (seeded) from the repo
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -27,6 +36,39 @@ jobs:
           download_translations: false
           # Upload into the same Crowdin branch the translations live under, so
           # sources don't fork off into a separate branchless copy.
+          crowdin_branch_name: development
+        env:
+          CROWDIN_PROJECT_ID: "340925"
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      # Files with only the native.plurals subtree of each language, and a config that maps them as translations
+      # of the same source file under the same Crowdin branch.
+      - name: Collect the native.plurals translations
+        if: github.event_name == 'workflow_dispatch' && inputs.native_plurals
+        run: |
+          set -eu
+          mkdir -p .crowdin-seed
+          node -e '
+            const fs = require("fs")
+            const dir = "src/config/locales"
+            for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".json") && x !== "en-US.json")) {
+              const plurals = JSON.parse(fs.readFileSync(dir + "/" + f, "utf8"))?.native?.plurals
+              if (plurals) fs.writeFileSync(".crowdin-seed/" + f, JSON.stringify({ native: { plurals } }, null, 2) + "\n")
+            }
+          '
+          printf '%s\n' 'preserve_hierarchy: true' 'files:' \
+            '  - source: /src/config/locales/en-US.json' \
+            '    translation: /.crowdin-seed/%locale%.json' > .crowdin-seed.yml
+          ls .crowdin-seed | wc -l
+
+      - name: Upload the native.plurals translations to Crowdin
+        if: github.event_name == 'workflow_dispatch' && inputs.native_plurals
+        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
+        with:
+          config: .crowdin-seed.yml
+          upload_sources: false
+          upload_translations: true
+          download_translations: false
           crowdin_branch_name: development
         env:
           CROWDIN_PROJECT_ID: "340925"

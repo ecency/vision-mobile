@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "Ai creat {count, plural, one {# postare} few {# postare} other {# postare}} luna aceasta. Continuă tot așa!",
+        "checkin": "Te-ai înregistrat {count, plural, one {# zi} few {# zi} other {# zi}} săptămâna aceasta. Continuă tot așa!",
         "tags_bundle": "{count, plural, one {# postare nouă} few {# postări noi} other {# de postări noi}} în #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# încercare(ări) eșuate} few {# încercare(ări) eșuate} other {# încercare(ări) eșuate}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Serie de {n} zile"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Sunt permise doar conturile mai vechi de {days} zile",
+        "max_choices": "• Poți selecta până la {choices} opțiuni"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "{executions} transferuri rămase",
+        "schedule_summary": "{executions} transferuri, fiecare la {hours} ore"
       },
       "editor": {
         "short_content_hint": "Prea scurt pentru a primi puncte ({n, plural, one {# caracter} few {# caractere} other {# de caractere}} sau mai puține, fără linkuri)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} persoane s-au alăturat",
         "ban-remaining-minutes": "în aproximativ {count, plural, one {# minut} few {# minute} other {# de minute}}",
         "ban-remaining-hours": "în aproximativ {count, plural, one {# oră} few {# ore} other {# de ore}}",
         "ban-remaining-days": "în aproximativ {count, plural, one {# zi} few {# zile} other {# de zile}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Sunt necesare minimum {count} caractere",
+        "chars_remaining": "{count} caractere rămase"
       },
       "alert": {
         "too_many_images": "Poți selecta cel mult {count, plural, one {# imagine} few {# imagini} other {# de imagini}} deodată"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points la {s, plural, one {# secundă} few {# secunde} other {# de secunde}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Următorul Power Down este în {days} zile, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Între {min} și {max, plural, one {# caracter} few {# caractere} other {# de caractere}}"

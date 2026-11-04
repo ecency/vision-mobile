@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "আপনি এই মাসে {count, plural, one {#টি পোস্ট} other {#টি পোস্ট}} তৈরি করেছেন। চালিয়ে যান!",
+        "checkin": "আপনি এই সপ্তাহে {count, plural, one {# দিন} other {# দিন}} চেক ইন করেছেন। চালিয়ে যান!",
         "tags_bundle": "#{tag}-এ {count, plural, one {#টি নতুন পোস্ট} other {#টি নতুন পোস্ট}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# ব্যর্থ চেষ্টা} other {# ব্যর্থ চেষ্টা}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "{n}-দিনের ধারাবাহিকতা"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• শুধুমাত্র {days} দিনের পুরনো অ্যাকাউন্ট অনুমোদিত",
+        "max_choices": "• আপনি সর্বোচ্চ {choices}টি পছন্দ নির্বাচন করতে পারবেন"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "বাকি {executions}টি স্থানান্তর",
+        "schedule_summary": "{executions}টি স্থানান্তর, প্রতিটি প্রতি {hours} ঘণ্টা অন্তর"
       },
       "editor": {
         "short_content_hint": "Points অর্জনের জন্য খুব ছোট ({n, plural, one {# অক্ষর} other {# অক্ষর}} বা তার কম, লিংক বাদে)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} জন যোগ দিয়েছেন",
         "ban-remaining-minutes": "প্রায় {count, plural, one {# মিনিটে} other {# মিনিটে}}",
         "ban-remaining-hours": "প্রায় {count, plural, one {# ঘণ্টায়} other {# ঘণ্টায়}}",
         "ban-remaining-days": "প্রায় {count, plural, one {# দিনে} other {# দিনে}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "ন্যূনতম {count}টি অক্ষর প্রয়োজন",
+        "chars_remaining": "{count}টি অক্ষর বাকি"
       },
       "alert": {
         "too_many_images": "আপনি একবারে সর্বোচ্চ {count, plural, one {#টি ছবি} other {#টি ছবি}} বাছাই করতে পারবেন"
@@ -3090,7 +3090,7 @@
         "rate": "প্রতি {s, plural, one {# সেকেন্ডে} other {# সেকেন্ডে}} {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "পরবর্তী আনস্টেক {days} দিনে, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} থেকে {max, plural, one {# অক্ষর} other {# অক্ষর}}-এর মধ্যে"

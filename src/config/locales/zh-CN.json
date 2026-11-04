@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "你本月创建了 {count, plural, other {# 篇帖子}}。继续加油！",
+        "checkin": "你本周签到了 {count, plural, other {# 天}}。继续加油！",
         "tags_bundle": "#{tag} 有 {count, plural, other {# 条新帖子}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, other {# 次失败尝试}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "连续 {n} 天"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• 仅允许注册超过 {days} 天的账户",
+        "max_choices": "• 你最多可选择 {choices} 个选项"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "剩余 {executions} 次转账",
+        "schedule_summary": "{executions} 笔转账，每 {hours} 小时一次"
       },
       "editor": {
         "short_content_hint": "内容太短，无法获得积分（{n, plural, other {# 个字符}}及以下，不含链接）"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} 人已加入",
         "ban-remaining-minutes": "约 {count, plural, other {# 分钟}}后",
         "ban-remaining-hours": "约 {count, plural, other {# 小时}}后",
         "ban-remaining-days": "约 {count, plural, other {# 天}}后"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "至少需要 {count} 个字符",
+        "chars_remaining": "剩余 {count} 个字符"
       },
       "alert": {
         "too_many_images": "一次最多可选择 {count, plural, other {# 张图片}}"
@@ -3090,7 +3090,7 @@
         "rate": "每 {s, plural, other {# 秒}} {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "下次解除质押将在 {days} 天后，{hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} 至 {max, plural, other {# 个字符}}"

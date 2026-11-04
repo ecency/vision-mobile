@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "Δημιουργήσατε {count, plural, one {# ανάρτηση} other {# ανάρτηση}} αυτόν τον μήνα. Συνεχίστε έτσι!",
+        "checkin": "Κάνατε check in {count, plural, one {# ημέρα} other {# ημέρα}} αυτή την εβδομάδα. Συνεχίστε έτσι!",
         "tags_bundle": "{count, plural, one {# νέα ανάρτηση} other {# νέες αναρτήσεις}} στο #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# αποτυχημένη(ες) προσπάθεια(ες)} other {# αποτυχημένη(ες) προσπάθεια(ες)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Σερί {n} ημερών"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Επιτρέπονται μόνο λογαριασμοί παλαιότεροι από {days} ημέρες",
+        "max_choices": "• Μπορείτε να επιλέξετε έως {choices} επιλογές"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Απομένουν {executions} μεταφορές",
+        "schedule_summary": "{executions} μεταφορές, κάθε {hours} ώρες"
       },
       "editor": {
         "short_content_hint": "Πολύ σύντομο για να κερδίσει points (έως {n, plural, one {# χαρακτήρας} other {# χαρακτήρες}}, χωρίς τους συνδέσμους)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} άτομα συμμετείχαν",
         "ban-remaining-minutes": "σε περίπου {count, plural, one {# λεπτό} other {# λεπτά}}",
         "ban-remaining-hours": "σε περίπου {count, plural, one {# ώρα} other {# ώρες}}",
         "ban-remaining-days": "σε περίπου {count, plural, one {# ημέρα} other {# ημέρες}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Απαιτούνται τουλάχιστον {count} χαρακτήρες",
+        "chars_remaining": "Απομένουν {count} χαρακτήρες"
       },
       "alert": {
         "too_many_images": "Μπορείτε να επιλέξετε έως {count, plural, one {# εικόνα} other {# εικόνες}} τη φορά"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points ανά {s, plural, one {# δευτερόλεπτο} other {# δευτερόλεπτα}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Το επόμενο unstaking είναι σε {days} ημέρες, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Μεταξύ {min} και {max, plural, one {# χαρακτήρα} other {# χαρακτήρες}}"

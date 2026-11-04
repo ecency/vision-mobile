@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "این ماه {count, plural, one {# پست} other {# پست}} منتشر کردید. ادامه دهید!",
+        "checkin": "این هفته {count, plural, one {# روز} other {# روز}} ثبت حضور کردید. ادامه دهید!",
         "tags_bundle": "{count, plural, one {# پست جدید} other {# پست جدید}} در #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# تلاش ناموفق} other {# تلاش ناموفق}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "زنجیره {n} روزه"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• فقط حساب‌های قدیمی‌تر از {days} روز مجاز هستند",
+        "max_choices": "• می‌توانید تا {choices} گزینه انتخاب کنید"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "{executions} انتقال باقی‌مانده",
+        "schedule_summary": "{executions} انتقال، هر کدام هر {hours} ساعت"
       },
       "editor": {
         "short_content_hint": "برای کسب امتیاز بیش از حد کوتاه است ({n, plural, one {# نویسه} other {# نویسه}} یا کمتر، بدون احتساب پیوندها)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} نفر پیوستند",
         "ban-remaining-minutes": "حدود {count, plural, one {# دقیقه} other {# دقیقه}} دیگر",
         "ban-remaining-hours": "حدود {count, plural, one {# ساعت} other {# ساعت}} دیگر",
         "ban-remaining-days": "حدود {count, plural, one {# روز} other {# روز}} دیگر"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "حداقل {count} نویسه لازم است",
+        "chars_remaining": "{count} نویسه باقی‌مانده"
       },
       "alert": {
         "too_many_images": "می‌توانید در هر بار حداکثر {count, plural, one {# تصویر} other {# تصویر}} انتخاب کنید"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points برای هر {s, plural, one {# ثانیه} other {# ثانیه}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "لغو استیک بعدی در {days} روز، {hp} HIVE"
       },
       "community_settings": {
         "title_length": "بین {min} تا {max, plural, one {# نویسه} other {# نویسه}}"
