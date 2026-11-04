@@ -428,9 +428,9 @@ fun PushSettingsSection(env: AppEnvironment) {
         }
         state.unavailableNotice?.let {
             Text(
-                it, color = Color(0xFF856404), fontSize = 13.sp, lineHeight = 18.sp,
+                it, color = colors.warningText, fontSize = 13.sp, lineHeight = 18.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFFFF3CD)).padding(16.dp).testTag("pushUnavailable"),
+                    .background(colors.warningBackground).padding(16.dp).testTag("pushUnavailable"),
             )
         }
     }

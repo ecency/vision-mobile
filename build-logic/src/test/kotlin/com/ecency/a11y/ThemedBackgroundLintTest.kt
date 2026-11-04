@@ -13,7 +13,9 @@ import kotlin.test.assertEquals
  * - a `Scaffold` names `containerColor = colors.background`;
  * - a `ModalBottomSheet` keeps the theme background (its default) unless allowed below;
  * - a full screen container (`fillMaxSize()`) paints no other colour than the theme background unless allowed below;
- * - the platform date and time pickers take an app theme (a theme resource), not the window's.
+ * - the platform date and time pickers take an app theme (a theme resource), not the window's;
+ * - a box, banner or notice paints no fixed opaque colour (`Color(0xFF...)`): it is a token of `EcencyColors`, so it
+ *   follows the dark theme (translucent scrims over media stay literals).
  * The scan reads source text with balanced brackets, no compiler.
  */
 class ThemedBackgroundLintTest {
@@ -148,6 +150,17 @@ class ThemedBackgroundLintTest {
             }.map { "${f.name}:${lineAt(src, it.range.first)} ${it.groupValues[2].trim()}" }.toList()
         }
         assertEquals(emptyList(), bad, "a full screen container paints the theme background (or is added to the allowlist with its reason)")
+    }
+
+    @Test
+    fun boxesPaintThemeTokensNotFixedColours() {
+        val opaque = Regex("""\.background\((?:androidx\.compose\.ui\.graphics\.)?Color\(0x[Ff]{2}[0-9A-Fa-f]{6}\)""")
+        val bad = findings { f, src ->
+            if (f.name == "Theme.kt") return@findings emptyList()
+            opaque.findAll(src).filter { !isImportOrComment(src, it.range.first) && !isAllowed(f, lineText(src, it.range.first)) }
+                .map { "${f.name}:${lineAt(src, it.range.first)}" }.toList()
+        }
+        assertEquals(emptyList(), bad, "a fixed opaque background stays light in the dark theme: use (or add) an EcencyColors token")
     }
 
     @Test

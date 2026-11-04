@@ -60,6 +60,9 @@ data class EcencyColors(
     val warningBorder: Color = Color(0xFFB07800),
     /** Text and icons on [warningBackground]: 4.5:1 or more. */
     val warningText: Color = Color(0xFF8A5B00),
+    /** The danger box (the dApp phishing and request warnings): RN's pink in light, a dark red surface in dark. Its
+     * text is [text], its icon [redText]. */
+    val dangerBackground: Color = Color(0xFFFDEDED),
 ) {
     companion object {
         val Light = EcencyColors(
@@ -105,6 +108,8 @@ data class EcencyColors(
             warningBackground = Color(0xFF3A3223),
             warningBorder = Color(0xFFC9963A),
             warningText = Color(0xFFFFD98A),
+            // text 13.8:1 and redText 6.5:1 on it, the same value as iOS AppTheme
+            dangerBackground = Color(0xFF3D2427),
         )
     }
 }
