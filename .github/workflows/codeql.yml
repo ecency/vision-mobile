@@ -1,0 +1,118 @@
+name: CodeQL
+
+# Code scanning (replaces the repository's default setup). On pull requests and pushes to development: the workflows
+# (actions), the offline tools (javascript-typescript, python) and the Kotlin of the shared core and the Android app,
+# built with Gradle. Swift needs an Xcode build on macOS (15+ minutes), so it runs weekly and by hand only. CodeQL
+# supports Swift up to 6.3 and cannot trace Xcode 27 builds yet (github/codeql#22742), so it builds with Xcode 26.3.
+on:
+  pull_request:
+    branches: [development]
+  push:
+    branches: [development]
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
+          - language: java-kotlin
+            build-mode: manual
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        if: matrix.language == 'java-kotlin'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      # The extractor sees only what the compiler runs: no daemon, no build or configuration cache. The Android
+      # compile covers the shared core's Android target and the app; debug builds need no secrets.
+      - name: Build Kotlin
+        if: matrix.language == 'java-kotlin'
+        run: ./gradlew --no-daemon --no-build-cache --no-configuration-cache :androidApp:compileDebugKotlin
+
+      - uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: /language:${{ matrix.language }}
+
+  analyze-swift:
+    name: Analyze (swift)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: '26.3'
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # pinned like every other downloaded tool (GitHub's digest of the 2.46.0 release asset)
+      - name: Install XcodeGen
+        env:
+          XCODEGEN_URL: https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+        run: |
+          dir="$RUNNER_TEMP/xcodegen"
+          mkdir -p "$dir"
+          curl -fsSL --retry 3 -o "$dir/xcodegen.zip" "$XCODEGEN_URL"
+          echo "$XCODEGEN_SHA256  $dir/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$dir/xcodegen.zip" -d "$dir"
+          bin="$(find "$dir" -type f -name xcodegen -perm -u+x | head -1)"
+          [[ -n "$bin" ]] || { echo "xcodegen binary not found in the release zip" >&2; exit 1; }
+          echo "$(dirname "$bin")" >> "$GITHUB_PATH"
+
+      - uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          languages: swift
+          build-mode: manual
+
+      # The app for the simulator, unsigned, with the debug build's dummy secrets. Its "Build Kotlin shared core"
+      # phase builds the Kotlin framework first.
+      - name: Build Swift
+        working-directory: iosApp
+        run: |
+          xcodegen generate
+          xcodebuild build -project EcencySpike.xcodeproj -scheme EcencyApp -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+
+      - uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          category: /language:swift
