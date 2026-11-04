@@ -1,6 +1,7 @@
 package com.ecency.core.app
 
 import com.ecency.core.l10n.L
+import com.ecency.core.render.url.WebUrl
 
 /**
  * RN postInteractionHandler's link sheet for external links in post bodies (title "Link"): Copy, Open in Explore (with
@@ -16,6 +17,17 @@ object LinkSheet {
     val CONTINUE: String get() = L.alert.continue_ // alert.continue
     val COPIED: String get() = L.alert.copied // alert.copied
     val EXPLORE_WARNING_TITLE: String get() = L.post.linkExploreWarningTitle // post.link_explore_warning_title
+
+    /**
+     * The URL as the sheet prints it. A host with non-ASCII letters (a look-alike of a known name) gets its ASCII
+     * (punycode) form on a line below, so the real address is visible.
+     */
+    fun display(url: String): String {
+        val authority = url.substringAfter("://", "").substringBefore('/').substringBefore('?').substringBefore('#')
+        if (authority.all { it.code < 128 }) return url
+        val host = WebUrl.parse(url)?.hostname?.takeIf { it.isNotEmpty() } ?: return url
+        return "$url\n$host"
+    }
 
     /** post.link_explore_warning_desc, then a blank line and the raw URL (RN's dash written as a full stop). */
     fun exploreWarning(url: String) =

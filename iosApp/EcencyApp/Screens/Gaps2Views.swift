@@ -812,7 +812,7 @@ struct LinkSheetHost: View {
                 }
                 Button(LinkSheet.shared.OPEN_SYSTEM) { UIApplication.shared.open(url) }.accessibilityIdentifier("link-system")
                 Button(LinkSheet.shared.CANCEL, role: .cancel) {}
-            } message: { url in Text(url.absoluteString) }
+            } message: { url in Text(LinkSheet.shared.display(url: url.absoluteString)) }
             .alert(LinkSheet.shared.EXPLORE_WARNING_TITLE, isPresented: Binding(get: { explore != nil }, set: { if !$0 { explore = nil } }), presenting: explore) { target in
                 Button(LinkSheet.shared.CONTINUE) { app.push(target.screen) }
                 Button(LinkSheet.shared.CANCEL, role: .cancel) {}
