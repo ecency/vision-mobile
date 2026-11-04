@@ -1,4 +1,5 @@
 import XCTest
+import Sentry
 @testable import EcencyApp
 
 /// Performance data (issue #3571) at a low sample rate, with nothing private in its spans.
@@ -18,5 +19,19 @@ final class CrashReportingTests: XCTestCase {
         let scrubbed = CrashReporting.spanDescription(op: "ui.load", description: "key \(wif)")
         XCTAssertTrue(scrubbed != nil)
         XCTAssertFalse((scrubbed ?? nil)?.contains(wif) ?? false)
+    }
+
+    func testRequestBodyHeadersAndCookiesAreNotSent() {
+        let event = Event()
+        let request = SentryRequest()
+        request.url = "https://api.example/path"
+        request.bodySize = 42
+        request.headers = ["Authorization": "x"]
+        request.cookies = "session=x"
+        event.request = request
+        let sent = CrashReporting.beforeSend(event)
+        XCTAssertNil(sent?.request?.bodySize)
+        XCTAssertNil(sent?.request?.headers)
+        XCTAssertNil(sent?.request?.cookies)
     }
 }
