@@ -52,10 +52,52 @@ class FeedModel internal constructor(
     private var promotedPosts: Map<PostKey, Post> = emptyMap()
 
     /** The post behind a card of this feed (for the options menu). */
-    fun post(key: PostKey): Post? = posts[key] ?: promotedPosts[key]
+    fun post(key: PostKey): Post? = posts[key] ?: pinnedPost?.takeIf { it.key == key } ?: promotedPosts[key]
 
-    private fun display(): List<PostCard> =
-        Promoted.inject(base, promotedCards, { it.key }) { it.author in env.mutedAuthors }
+    /** An account's pinned post ([pin]): first, marked pinned, its copy in the pages dropped. */
+    private var pinnedPermlink: String? = null
+    private var pinnedPost: Post? = null
+    private var pinnedCard: PostCard? = null
+    private var pinJob: Job? = null
+
+    private fun display(): List<PostCard> {
+        val pin = pinnedCard
+        val own = if (pin == null) base else listOf(pin) + base.filter { it.key != pin.key }
+        return Promoted.inject(own, promotedCards, { it.key }) { it.author in env.mutedAuthors }
+    }
+
+    /**
+     * RN feedQueries `pinnedPermlink`: the account's pinned post (profile metadata `pinned`) is fetched on its own
+     * and leads this account feed, marked pinned (RN `is_pinned_blog`). Null takes it away (an unpin). Only for an
+     * account's own feed; a post the feed would hide (muted, nsfw hidden) stays hidden.
+     */
+    fun pin(permlink: String?) {
+        val account = (source as? FeedSource.Account)?.account ?: return
+        if (permlink == pinnedPermlink) return
+        pinnedPermlink = permlink
+        pinJob?.cancel()
+        if (permlink == null) {
+            pinnedPost = null
+            pinnedCard = null
+            if (current.loaded) redisplay()
+            return
+        }
+        pinJob = scope.launch {
+            try {
+                val nsfw = NsfwMode.of(env.prefs)
+                val found = env.api.posts.getPost(account, permlink, env.session.current.username) ?: return@launch
+                val post = found.copy(stats = found.stats.copy(isPinnedBlog = true))
+                if (post.author != account || shown(listOf(post), nsfw).isEmpty()) return@launch
+                pinnedPost = post
+                pinnedCard = cards(listOf(post), nsfw).first()
+                if (current.loaded) redisplay()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // the feed shows without it, as RN's failed pinned query
+            }
+        }
+    }
 
     /** The items again after [base] or the promoted cards changed (deleted, muted, votes). */
     private fun redisplay() {
@@ -78,10 +120,11 @@ class FeedModel internal constructor(
                 if (changed.isEmpty()) return@collect
                 val user = env.session.current.username
                 base = Cards.replaceChanged(base, changed, { it.key }) { c -> posts[c.key]?.let { Cards.withVote(c, it, user, local[c.key]) } }
+                pinnedCard = pinnedCard?.let { c -> if (c.key in changed) pinnedPost?.let { Cards.withVote(c, it, user, local[c.key]) } ?: c else c }
                 promotedCards = Cards.replaceChanged(promotedCards, changed, { it.key }) { c -> promotedPosts[c.key]?.let { Cards.withVote(c, it, user, local[c.key]) } }
                 setState { s ->
                     val items = Cards.replaceChanged(s.items, changed, { it.key }) { c ->
-                        (posts[c.key] ?: promotedPosts[c.key])?.let { Cards.withVote(c, it, user, local[c.key]) }
+                        (posts[c.key] ?: pinnedPost?.takeIf { it.key == c.key } ?: promotedPosts[c.key])?.let { Cards.withVote(c, it, user, local[c.key]) }
                     }
                     if (items === s.items) s else s.copy(items = items)
                 }

@@ -1096,6 +1096,8 @@ struct ChatQuoteView: View {
             }
         }
         .padding(8)
+        // as tall as its two lines: the bar takes any height it is offered, which above the composer was most of it
+        .fixedSize(horizontal: false, vertical: true)
         .background(RoundedRectangle(cornerRadius: 8).fill(own ? Color.white.opacity(0.15) : theme.background.opacity(0.6)))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-quote")
@@ -1239,6 +1241,9 @@ struct MessageOptionsSheet: View {
     let actions: [ChatMessageAction]
     let onPick: (MessageOptionChoice) -> Void
     @Environment(\.appTheme) private var theme
+    /// The options' own height: the sheet opens at it instead of half the screen with a gap under the last row.
+    @State private var contentHeight: CGFloat = 0
+    @State private var detent: PresentationDetent = .medium
 
     var body: some View {
         ScrollView { VStack(spacing: 0) {
@@ -1265,9 +1270,15 @@ struct MessageOptionsSheet: View {
                 .accessibilityLabel(action.label)
                 .accessibilityIdentifier("chat-option-\(action.name)")
             }
+        }
+        .padding(.top, 8).padding(.bottom, 16)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { h in
+            contentHeight = h
+            detent = .height(h)
         } }
         .scrollBounceBehavior(.basedOnSize)
-        .presentationDetents([.medium, .large])
+        // its content's height (more rows or larger text scroll inside, up to the full sheet)
+        .presentationDetents(contentHeight > 0 ? [.height(contentHeight), .large] : [.medium, .large], selection: $detent)
         .presentationDragIndicator(.visible)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("chat-options-sheet")

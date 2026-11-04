@@ -408,6 +408,16 @@ class DemoChat(private val nowMillis: () -> Long) {
         emit("posted", channelId, buildJsonObject { put("post", postJson(p).toString()) })
     }
 
+    /**
+     * The server's `post_edited` for [postId] without its reactions (tests): Mattermost announces a post whose
+     * reactions changed as edited, and the post in that event may carry no `metadata.reactions`.
+     */
+    fun editedWithoutReactions(channelId: String, postId: String) {
+        val p = posts.firstOrNull { it.id == postId } ?: return
+        val json = buildJsonObject { postJson(p).forEach { (k, v) -> if (k != "metadata") put(k, v) } }
+        emit("post_edited", channelId, buildJsonObject { put("post", json.toString()) })
+    }
+
     /** Someone else reacts to [postId] (demo runs and tests). */
     fun react(channelId: String, postId: String, emoji: String, who: String = "spike-bob") {
         posts.firstOrNull { it.id == postId }?.reactions?.add(emoji to who)

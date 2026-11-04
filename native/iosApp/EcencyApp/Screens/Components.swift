@@ -86,7 +86,8 @@ struct AuthorLine: View {
                 }
             }
             Spacer(minLength: 0)
-            if card.isPinned {
+            // a community's pin, or the author's own (the profile's pinned post), as on Android
+            if card.isPinned || card.isPinnedBlog {
                 Image(appIcon: .pin, filled: true).rotationEffect(.degrees(45)).foregroundStyle(theme.dangerText)
                     .accessibilityLabel(L.Native.Ios.Card.pinned)
             }
@@ -141,7 +142,7 @@ enum CardText {
         parts.append(L.Post.a11yVotes(count: Int(card.votes)))
         parts.append(L.Post.a11yComments(count: Int(card.comments)))
         parts.append(card.isPayoutDeclined ? L.Native.Ios.Card.payoutDeclined(payout: card.payoutText) : L.Native.Ios.Card.payout(payout: card.payoutText))
-        if card.isPinned { parts.insert(L.Native.Ios.Card.pinned, at: 0) }
+        if card.isPinned || card.isPinnedBlog { parts.insert(L.Native.Ios.Card.pinned, at: 0) }
         if let reblog = card.rebloggedBy.first { parts.insert(L.Native.Ios.Card.rebloggedBy(username: reblog), at: 0) }
         return parts.joined(separator: ", ")
     }

@@ -243,6 +243,24 @@ final class ChatUITests: XCTestCase {
         XCTAssertTrue(app.buttons["chat-group-options"].exists)
     }
 
+    func testTheOptionsSheetFitsItsRowsAndTheReplyQuoteItsLines() {
+        // the tester's screenshots: the options sheet opened at half the screen with a gap under its rows, and the
+        // reply quote above the composer took most of its height
+        let app = launch(["-openScreen", "chat:ch-ecency"])
+        let msg = message(app, containing: "Has anyone tried")
+        XCTAssertTrue(msg.waitForExistence(timeout: 20))
+        msg.press(forDuration: 0.8)
+        let sheet = element(app, "chat-options-sheet")
+        XCTAssertTrue(sheet.waitForExistence(timeout: 5))
+        let last = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'chat-option-'")).allElementsBoundByIndex.last!
+        XCTAssertLessThan(app.windows.firstMatch.frame.maxY - last.frame.maxY, 120, "no gap under the last row")
+        app.buttons["chat-option-REPLY"].tap()
+        let quote = element(app, "chat-quote")
+        XCTAssertTrue(app.buttons["chat-cancel-reply"].waitForExistence(timeout: 5))
+        let composerQuote = app.descendants(matching: .any).matching(identifier: "chat-quote").allElementsBoundByIndex.first { $0.descendants(matching: .any)["chat-cancel-reply"].exists } ?? quote
+        XCTAssertLessThan(composerQuote.frame.height, 90, "the quote is as tall as its two lines")
+    }
+
     func testSettingsHasChatPrivacySignedIn() {
         let app = launch(["-openScreen", "settings"])
         XCTAssertTrue(app.buttons["settings-dm-privacy"].waitForExistence(timeout: 15))

@@ -580,6 +580,54 @@ class ProfileModelTest {
     }
 
     @Test
+    fun anAccountWithoutACoverGetsTheImageServersCover() = runTest {
+        // no cover in the metadata (never set, or a node that strips it): the image server's /u/<name>/cover, which
+        // answers the account's own cover or the default one (RN showed its default cover image)
+        val bare = ProfileFixtures.account("alice", posting = """{"profile":{"name":"Alice A"}}""")
+        val app = TestApp(this, handler = ProfileFixtures.chain(accounts = mapOf("alice" to bare, TestApp.USER to ProfileFixtures.account(TestApp.USER, posting = ""))))
+        app.authBackend.privateApi = ProfileFixtures.ecency()
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val model = app.env.profileModel("alice", "")
+        model.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("${TestApp.PROXY}/u/alice/cover", model.current.header?.coverUrl)
+        model.close()
+    }
+
+    @Test
+    fun thePinnedPostLeadsTheBlogAndPostsTabsMarkedPinned() = runTest {
+        // RN feedQueries: the profile's `pinned` post comes from its own query, first, once (the feed's copy dropped)
+        val e = com.ecency.core.api.Fixtures
+        val app = app(rpc = { req ->
+            when (req.method) {
+                "bridge.get_account_posts" -> FakeTransport.result(req, "[" + e.entry("alice", "newest") + "," + e.entry("alice", "my-post") + "]")
+                "bridge.get_post" -> FakeTransport.result(req, e.entry("alice", "my-post"))
+                else -> null
+            }
+        })
+        val model = app.env.profileModel("alice", "")
+        model.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals("my-post", model.current.header?.pinned)
+        for (tab in listOf(ProfileTab.BLOG, ProfileTab.POSTS)) {
+            val feed = assertNotNull(model.feed(tab))
+            feed.start()
+            testScheduler.advanceUntilIdle()
+            val items = feed.current.items
+            assertEquals(listOf("my-post", "newest"), items.map { it.key.permlink }, "$tab")
+            assertTrue(items.first().isPinnedBlog, "$tab: the pin shows on it")
+            assertFalse(items[1].isPinnedBlog)
+        }
+        // comments and replies are no place for it
+        val comments = assertNotNull(model.feed(ProfileTab.COMMENTS))
+        comments.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(comments.current.items.none { it.isPinnedBlog })
+        model.close()
+    }
+
+    @Test
     fun tabFeedsAreTheAccountSortsAndCloseWithTheModel() = runTest {
         val app = app()
         val model = app.env.profileModel("alice", "")

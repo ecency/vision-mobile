@@ -420,13 +420,19 @@ private struct ProfileSummaryView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("profile-cover")
 
-            // the action pills go under the avatar at accessibility text sizes
-            AdaptiveStack(horizontalAlignment: .leading, verticalAlignment: .bottom) {
-                AvatarView(url: header.avatarUrl, size: 74)
-                    .padding(3)
-                    .background(theme.background, in: Circle())
-                Spacer(minLength: 0)
-                actions.padding(.bottom, 4)
+            // the action pills beside the avatar, or under it when they do not fit (large text, long translations):
+            // a label never breaks inside a word ("Unfollo / w")
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .bottom, spacing: 0) {
+                    avatar(header)
+                    Spacer(minLength: 0)
+                    // one row at its own width, on the trailing side
+                    actions.fixedSize().padding(.bottom, 4)
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    avatar(header)
+                    actions
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, -40)
@@ -503,8 +509,15 @@ private struct ProfileSummaryView: View {
         .accessibilityIdentifier("profile-summary")
     }
 
+    private func avatar(_ header: ProfileHeader) -> some View {
+        AvatarView(url: header.avatarUrl, size: 74)
+            .padding(3)
+            .background(theme.background, in: Circle())
+    }
+
     @ViewBuilder private var actions: some View {
-        HStack(spacing: 8) {
+        // a row that wraps where even the line under the avatar is too narrow (the largest text sizes)
+        ChipFlow(spacing: 8) {
             if state.showsActions {
                 pill(state.followLabel, id: "follow") { Haptics.play(.toggle); model.toggleFollow() }
                 pill(UiCopy.shared.MESSAGE, id: "message") { app.openDirectMessage(state.username) }
@@ -551,6 +564,7 @@ private struct ProfileSummaryView: View {
         Button(action: action) {
             // a new label (Follow, Unfollow) crossfades in place; busy dims (Motion.swift)
             Text(text).scaledFont(13, weight: .bold).foregroundStyle(theme.text)
+                .lineLimit(1).fixedSize()
                 .contentTransition(.opacity)
                 .padding(.horizontal, 16).padding(.vertical, 6)
                 .overlay(Capsule().stroke(theme.icon, lineWidth: 1))
