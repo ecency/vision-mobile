@@ -341,9 +341,28 @@ internal fun playerMayLoad(url: String): Boolean =
  */
 internal fun playerNavigationAllowed(url: String, embedUrl: String): Boolean = SafeTarget.playerNavigationAllowed(url, embedUrl)
 
-/** Loads [embedUrl] with the embedding Referer, only when it is an allowlisted https player. */
+/**
+ * Loads [embedUrl] with the embedding Referer, only when it is an allowlisted https player. A video file the post
+ * links directly ([SafeTarget.playerAllowsScript] false) is never the page: the WebView does not ask
+ * shouldOverrideUrlLoading for a POST, so whatever that URL serves could post a form elsewhere. It plays in an
+ * app-made page with one video element ([mediaFilePage]) on the file's own origin.
+ */
 internal fun WebView.loadEmbed(embedUrl: String) {
-    if (playerMayLoad(embedUrl)) loadUrl(embedUrl, mapOf("Referer" to EMBED_REFERER))
+    if (!playerMayLoad(embedUrl)) return
+    if (SafeTarget.playerAllowsScript(embedUrl)) {
+        loadUrl(embedUrl, mapOf("Referer" to EMBED_REFERER))
+    } else {
+        val origin = android.net.Uri.parse(embedUrl).let { "${it.scheme}://${it.host}/" }
+        loadDataWithBaseURL(origin, mediaFilePage(embedUrl), "text/html", "utf-8", null)
+    }
+}
+
+/** The page a video file plays in: no script, one video element, [url] (validated by [playerMayLoad]) escaped. */
+internal fun mediaFilePage(url: String): String {
+    val src = url.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#39;").replace("<", "&lt;").replace(">", "&gt;")
+    return "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+        "<style>html,body{margin:0;height:100%;background:#000}video{width:100%;height:100%}</style></head>" +
+        "<body><video src=\"$src\" controls playsinline autoplay></video></body></html>"
 }
 
 /** The player web view's settings and navigation rule ([playerNavigationAllowed]) for [embedUrl]. */

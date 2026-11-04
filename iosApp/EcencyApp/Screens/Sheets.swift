@@ -216,7 +216,7 @@ struct EmbedWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            decisionHandler(VideoEmbedPolicy.allows(action.request.url, embed: embed) ? .allow : .cancel)
+            decisionHandler(VideoEmbedPolicy.allows(action.request, embed: embed) ? .allow : .cancel)
         }
 
         /// `target=_blank` and `window.open`: never open anything.

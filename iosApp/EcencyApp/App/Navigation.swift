@@ -75,6 +75,13 @@ enum VideoEmbedPolicy {
         return SafeTarget.shared.playerNavigationAllowed(url: url.absoluteString, embedUrl: embed.absoluteString)
     }
 
+    /// A navigation request: [allows] for its URL, and a video file's page (no script) may not send anything but a
+    /// GET (a form POST from whatever that file URL serves is refused, wherever it goes).
+    static func allows(_ request: URLRequest, embed: URL) -> Bool {
+        if !allowsScript(embed: embed), (request.httpMethod ?? "GET").uppercased() != "GET" { return false }
+        return allows(request.url, embed: embed)
+    }
+
     /// Players need page script; a video file the post links directly plays without it.
     static func allowsScript(embed: URL) -> Bool { SafeTarget.shared.playerAllowsScript(embedUrl: embed.absoluteString) }
 }
