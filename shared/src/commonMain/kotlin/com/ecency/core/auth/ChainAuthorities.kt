@@ -1,6 +1,7 @@
 package com.ecency.core.auth
 
 import com.ecency.core.api.rpc.HiveRpcClient
+import com.ecency.core.api.rpc.NodeHealthTracker
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -109,16 +110,20 @@ class RpcChainAccounts(private val client: HiveRpcClient) : ChainAccounts {
         return parse(result, username)
     }
 
-    /** Asks the nodes one by one, without failover, until two on different hosts answered; their owner keys must match. */
+    /**
+     * Asks the nodes one by one, healthiest first and without failover, until two on different hosts answered;
+     * their owner keys must match. Nodes the pool knows to be down come last, so they do not hold the user up.
+     */
     @Throws(Exception::class)
     override suspend fun confirmedAuthorities(username: String): ChainAuthorities? {
         val params = buildJsonArray { add(buildJsonArray { add(JsonPrimitive(username)) }) }
         val answers = mutableListOf<Pair<String, ChainAuthorities?>>()
-        for (node in client.nodes) {
+        val ordered = client.health.orderedNodes(client.nodes, NodeHealthTracker.apiOf(GET_ACCOUNTS), probe = false)
+        for (node in ordered) {
             val host = hostOf(node)
             if (answers.any { it.first == host }) continue
             val result = try {
-                client.ask(node, "condenser_api.get_accounts", params, client.readTimeoutMillis)
+                client.ask(node, GET_ACCOUNTS, params, client.readTimeoutMillis)
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -139,4 +144,8 @@ class RpcChainAccounts(private val client: HiveRpcClient) : ChainAccounts {
 
     private fun hostOf(node: String): String =
         node.substringAfter("://").substringBefore('/').substringBefore(':').lowercase()
+
+    private companion object {
+        const val GET_ACCOUNTS = "condenser_api.get_accounts"
+    }
 }

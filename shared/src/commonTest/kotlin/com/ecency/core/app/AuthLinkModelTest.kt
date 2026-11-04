@@ -451,6 +451,56 @@ class AuthLinkModelTest {
     }
 
     @Test
+    fun oneNodeSayingTheKeyIsNotOnTheOwnerAuthorityHandsNothingOver() = runTest {
+        // the posting key is on alice's owner authority; node-a, asked first, leaves that out
+        val overlap = "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]"
+        val omitted = "[" + AppTestKeys.accountJson(alice) + "]"
+        val app = TestApp(this) { req ->
+            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
+            else FakeTransport.result(req, if (req.node == NODES[0]) omitted else overlap)
+        }
+        KeyVault(app.store).run {
+            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
+            setCurrentUsername(alice)
+        }
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val links = app.env.authLinks
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
+        testScheduler.advanceUntilIdle()
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        val answer = params(links.answers().single())
+        assertEquals("posting_key_unavailable", answer["error"], "one node's answer never lets the key leave")
+        assertNull(answer["posting_key"])
+    }
+
+    @Test
+    fun twoAgreeingNodesWithoutTheOwnerOverlapHandTheKeyOver() = runTest {
+        val app = TestApp(this) { req ->
+            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
+            else FakeTransport.result(req, "[" + AppTestKeys.accountJson(alice) + "]")
+        }
+        KeyVault(app.store).run {
+            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
+            setCurrentUsername(alice)
+        }
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val links = app.env.authLinks
+        val before = app.transport.sent.size
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
+        testScheduler.advanceUntilIdle()
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        val answer = params(links.answers().single())
+        assertEquals("success", answer["status"])
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), answer["posting_key"])
+        val asked = app.transport.sent.drop(before).filter { it.method == "condenser_api.get_accounts" }.map { it.node }.distinct()
+        assertTrue(asked.size >= 2, "two different nodes were asked: $asked")
+    }
+
+    @Test
     fun aWebsiteCallbackNeverReceivesThePostingKey() = runTest {
         val app = signedIn(this)
         val links = app.env.authLinks
