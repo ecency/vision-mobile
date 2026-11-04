@@ -564,6 +564,8 @@ struct ChatThreadView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isInPane) private var isInPane
+    /// False while a screen it opened covers it in the pane (it stays mounted there): no live messages marked read
+    @Environment(\.isPaneTop) private var isPaneTop
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var sheet: ThreadSheet?
     /// "Choose from Library" or "Choose from Files" for an attachment (RN #3561), and the Files importer while open.
@@ -606,7 +608,7 @@ struct ChatThreadView: View {
         .onAppear {
             thread.start()
             onScreen = true
-            thread.setActive(on: scenePhase == .active)
+            thread.setActive(on: scenePhase == .active && isPaneTop)
             #if DEBUG
             // -demoChatOptions YES (fake data only): the options sheet of the newest message of someone else (screenshots)
             if app.options.fakeData, UserDefaults.standard.bool(forKey: "demoChatOptions") {
@@ -620,7 +622,8 @@ struct ChatThreadView: View {
             onScreen = false
             thread.setActive(on: false)
         }
-        .onChange(of: scenePhase) { _, phase in thread.setActive(on: onScreen && phase == .active) }
+        .onChange(of: scenePhase) { _, phase in thread.setActive(on: onScreen && phase == .active && isPaneTop) }
+        .onChange(of: isPaneTop) { _, top in thread.setActive(on: onScreen && scenePhase == .active && top) }
         .themedSheet(item: $sheet) { sheet in sheetView(sheet, s) }
         .alert(ChatThreadModel.companion.REMOVE_TITLE, isPresented: Binding(get: { removeTarget != nil }, set: { if !$0 { removeTarget = nil } }), presenting: removeTarget) { item in
             Button(UiCopy.shared.CANCEL, role: .cancel) {}
