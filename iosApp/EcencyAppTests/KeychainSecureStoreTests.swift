@@ -130,18 +130,51 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertEqual(try store.names(), ["this.install"])
     }
 
-    func testFreshInstallWipeWaitsWhileProtectedDataIsUnavailable() throws {
+    /// Before the first unlock the check cannot run; until it ran, the store reads and writes nothing, so the
+    /// previous install's items never reach the lock screen or the session of this process.
+    func testPendingInstallCheckBlocksTheVaultUntilProtectedDataIsAvailable() throws {
         let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let store = KeychainSecureStore(service: serviceA)
-        try store.putString(name: "this.install", value: "dummy")
-        // before the first unlock: nothing is wiped and nothing is marked
-        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: false))
-        XCTAssertEqual(try store.names(), ["this.install"])
+        try store.putString(name: "left.over", value: "dummy-previous-install")
+        let protectedData = ProtectedDataFlag(false)
+        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) }))
+        XCTAssertThrowsError(try store.get(name: "left.over"))
+        XCTAssertThrowsError(try store.names())
+        XCTAssertThrowsError(try store.putString(name: "this.install", value: "dummy"))
+        XCTAssertThrowsError(try store.delete(name: "left.over"))
+        // another instance over the same service is closed as well
+        XCTAssertThrowsError(try KeychainSecureStore(service: serviceA).get(name: "left.over"))
+        XCTAssertFalse(try store.runPendingInstallCheck())
         XCTAssertFalse(defaults.bool(forKey: "\(serviceA).installed"))
-        // the next launch, unlocked, runs the check as before
-        XCTAssertTrue(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: true))
+        // after the first unlock the next read runs the check: the previous install's items are gone, the mark is set
+        protectedData.value = true
+        XCTAssertNil(try store.get(name: "left.over"))
+        XCTAssertTrue(defaults.bool(forKey: "\(serviceA).installed"))
         XCTAssertEqual(try store.names(), [])
+        try store.putString(name: "this.install", value: "dummy")
+        XCTAssertEqual(try store.names(), ["this.install"])
+    }
+
+    /// The protected data notification runs the pending check itself; a launch already marked wipes nothing.
+    func testThePendingCheckRunsOnceProtectedDataBecomesAvailable() throws {
+        let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = KeychainSecureStore(service: serviceA)
+        try store.putString(name: "left.over", value: "dummy-previous-install")
+        let protectedData = ProtectedDataFlag(false)
+        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) }))
+        protectedData.value = true
+        XCTAssertTrue(try store.runPendingInstallCheck())
+        XCTAssertFalse(try store.runPendingInstallCheck())
+        XCTAssertEqual(try store.names(), [])
+        try store.putString(name: "this.install", value: "dummy")
+        // the next launch, locked again: the mark is read once available and nothing is wiped
+        protectedData.value = false
+        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) }))
+        protectedData.value = true
+        XCTAssertEqual(try store.names(), ["this.install"])
     }
 }

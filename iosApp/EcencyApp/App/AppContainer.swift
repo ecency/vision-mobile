@@ -777,8 +777,19 @@ final class AppContainer: ObservableObject {
             #endif
             let store = KeychainSecureStore()
             // Keychain items survive an uninstall; the vault must not hand them to a fresh install.
-            // before the first unlock after a restart UserDefaults can read as empty: the check waits for the next launch
-            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: UIApplication.shared.isProtectedDataAvailable)
+            // Before the first unlock after a restart UserDefaults can read as empty: the check stays pending and the
+            // store refuses every read and write until it ran (README "Secure storage"). The store asks from any
+            // thread, so the flag is kept here on the main thread and read under a lock.
+            let protectedData = ProtectedDataFlag(UIApplication.shared.isProtectedDataAvailable)
+            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) })
+            if !protectedData.value {
+                protectedData.observer = NotificationCenter.default.addObserver(
+                    forName: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil, queue: .main
+                ) { _ in
+                    protectedData.value = true
+                    _ = try? store.runPendingInstallCheck()
+                }
+            }
             // the RN app's accounts and PIN, imported once by the app lock's start before it decides anything
             let legacy = LegacyMigrationSource(storage: AsyncStorageReader.companion.forApp(),
                                                pinKey: BuildSecrets.pinKey, defaultPin: BuildSecrets.defaultPin)
@@ -1062,5 +1073,21 @@ enum InstallSource {
         if Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil { return "Other" }
         return "AppStore"
         #endif
+    }
+}
+
+/// Whether the device's protected data is available, for the Keychain store's pending install check: set on the main
+/// thread (launch, `protectedDataDidBecomeAvailableNotification`), read from any thread. It holds the notification
+/// observer for the life of the process.
+final class ProtectedDataFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: Bool
+    var observer: NSObjectProtocol?
+
+    init(_ value: Bool) { stored = value }
+
+    var value: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return stored }
+        set { lock.lock(); stored = newValue; lock.unlock() }
     }
 }
