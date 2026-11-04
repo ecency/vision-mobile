@@ -174,8 +174,15 @@ class HiveUriTest {
                 assertEquals("qr.invalid_op", refused.errorKey1)
             }
         }
+        // nor the memo key: account_update always carries one, account_update2 when it sets it
+        for (op in listOf(
+            """["account_update",{"account":"","memo_key":"STM1","json_metadata":"{\"profile\":{}}"}]""",
+            """["account_update2",{"account":"","memo_key":"STM1","json_metadata":"","posting_json_metadata":"{}"}]""",
+        )) {
+            assertEquals("qr.invalid_op", assertIs<FormattedHiveUriTx.Refused>(HiveUriTx.format(tx(json(op).jsonArray), all), op).errorKey1)
+        }
         // metadata-only updates still pass
-        val meta = json("""["account_update",{"account":"","memo_key":"STM1","json_metadata":"{\"profile\":{}}"}]""").jsonArray
+        val meta = json("""["account_update2",{"account":"","json_metadata":"{\"profile\":{}}","posting_json_metadata":""}]""").jsonArray
         assertEquals("active", assertIs<FormattedHiveUriTx.Ready>(HiveUriTx.format(tx(meta), all)).authority)
         val posting = json("""["account_update2",{"account":"","json_metadata":"","posting_json_metadata":"{}","posting":null}]""").jsonArray
         assertEquals("posting", assertIs<FormattedHiveUriTx.Ready>(HiveUriTx.format(tx(posting), all)).authority)
