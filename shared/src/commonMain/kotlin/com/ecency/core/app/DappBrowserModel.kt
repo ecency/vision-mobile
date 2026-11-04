@@ -223,8 +223,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private val connectApprovals = mutableSetOf<String>()
 
     /**
-     * Connects the user refused, by tab and origin, for the tab's current page load only ([documentStarted]): the
-     * page cannot ask again and again, and a new page load asks once more.
+     * Connects the user refused, by tab and origin, kept while the tab stays on that site ([documentStarted]): the
+     * page cannot ask again and again, not even by reloading itself. A load of another site in the tab, or another
+     * signed-in account ([forgetConnectsUnlessFor]), clears the refusal, and the site may ask once more.
      */
     private val connectRefusals = mutableSetOf<Pair<Int, String>>()
     private var connectedUser: String? = null
@@ -241,7 +242,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         connectApprovals += origin
     }
 
-    /** Keeps the user's refusal of [origin] in [tabId] for this page load, for [user]. */
+    /** Keeps the user's refusal of [origin] in [tabId] while the tab stays on that site, for [user]. */
     private fun rememberConnectRefusal(tabId: Int, origin: String, user: String) {
         forgetConnectsUnlessFor(user)
         connectRefusals += tabId to origin
@@ -455,7 +456,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
 
     /**
      * [tabId]'s web view started a new document (Android onPageStarted, iOS didCommit; a history update of the same
-     * document is not one): a Peak Vault connect the user refused on the page before may be asked again.
+     * document is not one): a Peak Vault connect the user refused may be asked again once the tab is on another site.
      */
     fun documentStarted(tabId: Int, url: String?) {
         // a refusal holds while the tab stays on that site: a page that reloads itself does not get to ask again
