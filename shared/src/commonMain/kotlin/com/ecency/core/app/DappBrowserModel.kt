@@ -219,8 +219,14 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         data object Connect : Work
     }
 
-    /** Origins the user let learn [connectedUser]'s name (Peak Vault connect). A refusal is never kept. */
+    /** Origins the user let learn [connectedUser]'s name (Peak Vault connect). */
     private val connectApprovals = mutableSetOf<String>()
+
+    /**
+     * Connects the user refused, by tab and origin, for the tab's current page load only ([documentStarted]): the
+     * page cannot ask again and again, and a new page load asks once more.
+     */
+    private val connectRefusals = mutableSetOf<Pair<Int, String>>()
     private var connectedUser: String? = null
 
     /** Whether [origin] was approved for [user]; an account change forgets every approval. */
@@ -235,10 +241,29 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         connectApprovals += origin
     }
 
-    private fun forgetConnectsUnlessFor(user: String) {
+    /** Keeps the user's refusal of [origin] in [tabId] for this page load, for [user]. */
+    private fun rememberConnectRefusal(tabId: Int, origin: String, user: String) {
+        forgetConnectsUnlessFor(user)
+        connectRefusals += tabId to origin
+    }
+
+    private fun connectRefused(tabId: Int, origin: String, user: String): Boolean {
+        forgetConnectsUnlessFor(user)
+        return (tabId to origin) in connectRefusals
+    }
+
+    private fun forgetConnectsUnlessFor(user: String?) {
         if (connectedUser == user) return
         connectApprovals.clear()
+        connectRefusals.clear()
         connectedUser = user
+    }
+
+    init {
+        // an account change forgets every connect answer, even one switched away from and back
+        scope.launch {
+            env.session.state.collect { s -> if (!s.isLoading) forgetConnectsUnlessFor(s.username) }
+        }
     }
 
     private class PendingRequest(
@@ -428,6 +453,14 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             }
         }
 
+    /**
+     * [tabId]'s web view started a new document (Android onPageStarted, iOS didCommit; a history update of the same
+     * document is not one): a Peak Vault connect the user refused on the page before may be asked again.
+     */
+    fun documentStarted(tabId: Int) {
+        connectRefusals.removeAll { it.first == tabId }
+    }
+
     /** The web view of [tabId] committed [url]: its document is the one running now (load commit, history update). */
     fun pageCommitted(tabId: Int, url: String?) {
         if (url == null || BrowserPolicy.navigation(url, true, false) != BrowserNavigation.LOAD) return
@@ -530,8 +563,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val user = env.session.current.username ?: return answer.error(NO_ACCOUNT)
         if (single == "peakvault-connect") {
             // the account name is shared once the user approved the origin (RN answered it to any page without a
-            // word); after a refusal the page may ask again
+            // word); after a refusal the page may ask again only from a new page load
             if (connectApproved(origin, user)) return answer.success(JsonArray(listOf(JsonPrimitive(user))))
+            if (connectRefused(tabId, origin, user)) return answer.error(REJECTED)
             return prompt(PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Connect), connectTitle(BrowserPolicy.host(origin)), emptyList(), null)
         }
         if (requested != null && requested != user) return answer.error(mismatch(requested, user))
@@ -679,6 +713,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val request = pending ?: return
         pending = null
         setState { it.copy(prompt = null) }
+        if (request.work == Work.Connect && env.session.current.username == request.username) {
+            rememberConnectRefusal(request.tabId, request.origin, request.username)
+        }
         request.answer.error(REJECTED)
     }
 

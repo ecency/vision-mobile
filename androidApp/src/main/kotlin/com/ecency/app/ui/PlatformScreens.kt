@@ -219,8 +219,11 @@ internal object DappWeb {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
                 !model.shouldLoad(tabId, request.url.toString(), request.isForMainFrame, request.hasGesture())
 
-            override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) =
+            override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                // a new document (a history update of the same one does not start a page)
+                model.documentStarted(tabId)
                 model.pageChanged(tabId, url, null, view.canGoBack(), view.canGoForward())
+            }
 
             // the committed page: a navigation that only started (onPageStarted) never names "the page"
             override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {

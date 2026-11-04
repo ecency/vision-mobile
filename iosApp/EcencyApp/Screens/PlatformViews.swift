@@ -159,7 +159,11 @@ final class DappWebViews: NSObject, ObservableObject, WKNavigationDelegate, WKUI
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        if let id = tabId(of: webView) { model.pageCommitted(tabId: id, url: webView.url?.absoluteString) }
+        // a new document (WebKit does not commit a history update of the same one)
+        if let id = tabId(of: webView) {
+            model.documentStarted(tabId: id)
+            model.pageCommitted(tabId: id, url: webView.url?.absoluteString)
+        }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {

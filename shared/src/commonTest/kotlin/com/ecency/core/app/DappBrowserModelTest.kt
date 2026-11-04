@@ -771,10 +771,16 @@ class DappBrowserModelTest {
         assertEquals("spike-bob", b.current.prompt!!.username)
         b.reject()
         assertEquals(DappBrowserModel.REJECTED, page.error())
-        // a refusal is not remembered: the page may ask again, and the user answers again
+        // a refusal holds for this page load: the page cannot ask again and again
         send(b, page, connect)
         testScheduler.advanceUntilIdle()
-        assertEquals("spike-bob", b.current.prompt!!.username, "asked again after a refusal")
+        assertNull(b.current.prompt, "no new question on the same page load")
+        assertEquals(DappBrowserModel.REJECTED, page.error())
+        // a new document in the tab may ask again, and the user answers again
+        b.documentStarted(b.current.activeTabId)
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", b.current.prompt!!.username, "asked again after a new page load")
         b.confirm()
         testScheduler.advanceUntilIdle()
         assertEquals("spike-bob", page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
@@ -784,6 +790,15 @@ class DappBrowserModelTest {
         send(b, page, connect)
         testScheduler.advanceUntilIdle()
         assertEquals(alice, b.current.prompt!!.username, "an approval is per account")
+        // a refusal goes with an account change too
+        b.reject()
+        app.env.session.switchTo("spike-bob")
+        testScheduler.advanceUntilIdle()
+        app.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, b.current.prompt?.username, "asked again after the account changed")
     }
 
     @Test
