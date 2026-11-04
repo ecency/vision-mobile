@@ -9,12 +9,19 @@ import UniformTypeIdentifiers
 
 /// The body field. Typing lives in the text view; when the model rewrites the text (a toolbar action, an upload
 /// placeholder), `revision` goes up and the view takes the model's text and selection over.
+///
+/// The view does not scroll itself: it grows with its text (at least `minHeight`, the visible height of the editor's
+/// scroll view) inside the one scroll view that also holds the community row, title and tags, so those scroll away
+/// with the body and the body gets the room while the keyboard is up (tester: "Window for editing drafts much too
+/// small"). RN's markdownEditorView keeps one scroll container as well (its body input scrolls on its own, title and
+/// tags stay put); here that container is the outer scroll view, and it keeps the caret in view.
 struct BodyTextView: UIViewRepresentable {
     let text: String
     let selection: CoreTextSelection
     let revision: Int32
     let editable: Bool
     let placeholder: String
+    var minHeight: CGFloat = 0
     let onChange: (String, NSRange) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -22,6 +29,9 @@ struct BodyTextView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let view = UITextView()
         view.delegate = context.coordinator
+        view.isScrollEnabled = false
+        context.coordinator.view = view
+        context.coordinator.shownText = text
         view.font = UIFont.preferredFont(forTextStyle: .body)
         view.adjustsFontForContentSizeCategory = true
         view.backgroundColor = .clear
@@ -51,23 +61,112 @@ struct BodyTextView: UIViewRepresentable {
             view.selectedRange = range(in: text)
             context.coordinator.applying = false
         }
+        // the visible height changed (the keyboard came or went): move the body up once SwiftUI laid it out
+        context.coordinator.roomChanged(to: minHeight)
+        // the new height is laid out after this update: follow the caret once it is
+        if context.coordinator.shownText != text {
+            context.coordinator.shownText = text
+            context.coordinator.reveal(bodyToTop: false)
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
+        let fitted = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height
+        return CGSize(width: width, height: max(ceil(fitted), minHeight))
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: BodyTextView
         var revision: Int32 = -1
         var applying = false
+        var shownText = ""
+        weak var view: UITextView?
+        /// The visible height of the editor, and the largest one seen at this width: a visible height well below
+        /// it means the keyboard is up. Read from the layout the keyboard leaves, so a hardware keyboard (no room
+        /// taken) keeps the header where it is.
+        private var room: CGFloat = 0
+        private var fullRoom: CGFloat = 0
+        private var roomWidth: CGFloat = 0
+        /// The header is moved away once a focus and keyboard: it never jumps away again from someone who scrolled
+        /// back up to the title.
+        private var movedUp = false
 
         init(_ parent: BodyTextView) { self.parent = parent }
+
+        private var keyboardUp: Bool { fullRoom - room > 120 }
+
+        func roomChanged(to height: CGFloat) {
+            let width = view?.bounds.width ?? 0
+            guard width > 0 else { return } // not laid out yet
+            if width != roomWidth {
+                // another width (rotation, a pane): what is visible now is the new reference
+                roomWidth = width
+                fullRoom = height
+            }
+            guard height != room else { return }
+            room = height
+            fullRoom = max(fullRoom, height)
+            movedUp = false
+            if keyboardUp { reveal(bodyToTop: true) }
+        }
+
+        func textViewDidBeginEditing(_ view: UITextView) {
+            // the keyboard may already be up (focus came from the title or tags): then the room does not change
+            reveal(bodyToTop: keyboardUp)
+        }
+
+        func textViewDidEndEditing(_ view: UITextView) { movedUp = false }
 
         func textViewDidChange(_ view: UITextView) {
             guard !applying else { return }
             parent.onChange(view.text ?? "", view.selectedRange)
+            reveal(bodyToTop: false)
         }
 
         func textViewDidChangeSelection(_ view: UITextView) {
             guard !applying else { return }
             parent.onChange(view.text ?? "", view.selectedRange)
+        }
+
+        /// Scrolls the editor's scroll view (the text view does not scroll itself) so the caret is visible, with
+        /// [bodyToTop] first so the body starts at the top of it. On the next turn, once SwiftUI laid out the height;
+        /// tried again a moment later while the scroll view has not yet taken the height that leaves room for it.
+        func reveal(bodyToTop: Bool, tries: Int = 0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (tries == 0 ? 0 : 0.1)) { [weak self] in
+                guard let self, let view = self.view, view.isFirstResponder, let scroll = Self.scrollView(around: view) else { return }
+                scroll.layoutIfNeeded()
+                let inset = scroll.adjustedContentInset
+                let lowest = -inset.top
+                let highest = max(lowest, scroll.contentSize.height + inset.bottom - scroll.bounds.height)
+                let shown = scroll.bounds.height - inset.top - inset.bottom
+                var y = scroll.contentOffset.y
+                if bodyToTop, !self.movedUp {
+                    let top = view.convert(CGPoint.zero, to: scroll).y - inset.top
+                    if top > highest + 0.5, tries < 8 {
+                        self.reveal(bodyToTop: true, tries: tries + 1)
+                    } else {
+                        self.movedUp = true
+                    }
+                    y = max(y, top)
+                }
+                if let end = view.selectedTextRange?.end {
+                    let caret = view.convert(view.caretRect(for: end), to: scroll).insetBy(dx: 0, dy: -8)
+                    if caret.maxY > y + inset.top + shown { y = caret.maxY - inset.top - shown }
+                    if caret.minY < y + inset.top { y = caret.minY - inset.top }
+                }
+                y = min(max(y, lowest), highest)
+                if abs(y - scroll.contentOffset.y) > 0.5 { scroll.setContentOffset(CGPoint(x: scroll.contentOffset.x, y: y), animated: false) }
+            }
+        }
+
+        private static func scrollView(around view: UIView) -> UIScrollView? {
+            var next = view.superview
+            while let candidate = next {
+                if let scroll = candidate as? UIScrollView { return scroll }
+                next = candidate.superview
+            }
+            return nil
         }
     }
 }
@@ -453,194 +552,229 @@ struct EditorScreen: View {
 
     private func fields(_ state: EditorState) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            if !state.isReply, !state.isEdit {
-                Button { sheet = .community } label: {
-                    HStack {
-                        AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/128", size: 28)
-                        Text(state.community?.title ?? EditorUiCopy.shared.MY_BLOG).foregroundStyle(theme.text).accessibilityIdentifier("community-row-title")
-                        Image(appIcon: .expand).font(.footnote).foregroundStyle(theme.icon).accessibilityHidden(true)
-                        Spacer()
+            // one scroll container for the header and the body: the community row, title and tags scroll away with
+            // the text, and the body is at least as tall as what is visible, so with the keyboard up it gets the room
+            GeometryReader { geo in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        header(state)
+                        bodyField(state, minHeight: geo.size.height)
                     }
                 }
-                .padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("community-row")
-                if !state.canPostToCommunity {
-                    Text(EditorUiCopy.shared.communityRestriction(title: state.community?.title ?? "")).font(.footnote).foregroundStyle(theme.dangerText)
-                        .padding(.horizontal, 16).accessibilityIdentifier("community-restriction")
+                .scrollDismissesKeyboard(.never)
+            }
+            footer(state)
+        }
+    }
+
+    @ViewBuilder
+    private func header(_ state: EditorState) -> some View {
+        if !state.isReply, !state.isEdit {
+            Button { sheet = .community } label: {
+                HStack {
+                    AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/128", size: 28)
+                    Text(state.community?.title ?? EditorUiCopy.shared.MY_BLOG).foregroundStyle(theme.text).accessibilityIdentifier("community-row-title")
+                    Image(appIcon: .expand).font(.footnote).foregroundStyle(theme.icon).accessibilityHidden(true)
+                    Spacer()
                 }
             }
-            if !state.isReply {
-                TextField(EditorUiCopy.shared.TITLE, text: Binding(get: { editor.state.title }, set: { model.setTitle(text: $0) }), axis: .vertical)
-                    .font(.title2.bold()).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("editor-title")
-                // chips wrap onto more lines and the field takes its own full-width line, its hint a wrapping Text:
-                // a UITextField placeholder is one line and clipped long languages (de, ru) and large text
-                VStack(alignment: .leading, spacing: 6) {
-                    if !state.tags.isEmpty {
-                        ChipFlow(spacing: 6) {
-                            ForEach(state.tags, id: \.self) { tag in
-                                Button { model.removeTag(tag: tag) } label: {
-                                    Text(tag).font(.footnote).foregroundStyle(.white).padding(.horizontal, 10).padding(.vertical, 4)
-                                        .background(theme.accent, in: Capsule())
-                                }
-                                .accessibilityHint(L.Native.Ui.remove)
-                                .accessibilityIdentifier("tag-\(tag)")
+            .padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("community-row")
+            if !state.canPostToCommunity {
+                Text(EditorUiCopy.shared.communityRestriction(title: state.community?.title ?? "")).font(.footnote).foregroundStyle(theme.dangerText)
+                    .padding(.horizontal, 16).accessibilityIdentifier("community-restriction")
+            }
+        }
+        if !state.isReply {
+            TextField(EditorUiCopy.shared.TITLE, text: Binding(get: { editor.state.title }, set: { model.setTitle(text: $0) }), axis: .vertical)
+                .font(.title2.bold()).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("editor-title")
+            // chips wrap onto more lines and the field takes its own full-width line, its hint a wrapping Text:
+            // a UITextField placeholder is one line and clipped long languages (de, ru) and large text
+            VStack(alignment: .leading, spacing: 6) {
+                if !state.tags.isEmpty {
+                    ChipFlow(spacing: 6) {
+                        ForEach(state.tags, id: \.self) { tag in
+                            Button { model.removeTag(tag: tag) } label: {
+                                Text(tag).font(.footnote).foregroundStyle(.white).padding(.horizontal, 10).padding(.vertical, 4)
+                                    .background(theme.accent, in: Capsule())
                             }
+                            .accessibilityHint(L.Native.Ui.remove)
+                            .accessibilityIdentifier("tag-\(tag)")
                         }
                     }
-                    // the hint sets the height (one line once something is typed); the field covers all of it
-                    Text(editor.state.tagInput.isEmpty ? EditorUiCopy.shared.TAGS_SEPARATE_WITH_SPACE : " ")
-                        .font(.subheadline).foregroundStyle(theme.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
-                        .accessibilityHidden(true)
-                        .overlay {
-                            TagField(model: model, modelText: editor.state.tagInput, textColor: UIColor(theme.text), enabled: !state.isSending)
-                        }
                 }
-                .padding(.horizontal, 16)
-                if let warning = state.tagWarning {
-                    Text(warning).font(.caption).foregroundStyle(theme.dangerText).padding(.horizontal, 16).padding(.top, 2).announces(warning, debounce: true).accessibilityIdentifier("tag-warning")
-                }
+                // the hint sets the height (one line once something is typed); the field covers all of it
+                Text(editor.state.tagInput.isEmpty ? EditorUiCopy.shared.TAGS_SEPARATE_WITH_SPACE : " ")
+                    .font(.subheadline).foregroundStyle(theme.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+                    .accessibilityHidden(true)
+                    .overlay {
+                        TagField(model: model, modelText: editor.state.tagInput, textColor: UIColor(theme.text), enabled: !state.isSending)
+                    }
+            }
+            .padding(.horizontal, 16)
+            if let warning = state.tagWarning {
+                Text(warning).font(.caption).foregroundStyle(theme.dangerText).padding(.horizontal, 16).padding(.top, 2).announces(warning, debounce: true).accessibilityIdentifier("tag-warning")
+            }
+        } else {
+            if let summary = state.parentSummary, !state.isEdit {
+                Text(summary).font(.footnote).foregroundStyle(theme.secondary).lineLimit(3).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("parent-summary")
+            }
+            if state.isEdit {
+                Text("@\(state.owner ?? "")").bold().foregroundStyle(theme.text).padding(.horizontal, 16).padding(.vertical, 4)
             } else {
-                if let summary = state.parentSummary, !state.isEdit {
-                    Text(summary).font(.footnote).foregroundStyle(theme.secondary).lineLimit(3).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("parent-summary")
-                }
-                if state.isEdit {
-                    Text("@\(state.owner ?? "")").bold().foregroundStyle(theme.text).padding(.horizontal, 16).padding(.vertical, 4)
-                } else {
-                    // RN reply account tile: avatar, @name and the arrow; a tap opens the accounts sheet and the reply carries over
-                    Button {
-                        app.env.replyHandoff.begin(editor: model)
-                        app.env.replyHandoff.sheetShown()
-                        app.sheet = .accounts
-                    } label: {
-                        HStack(spacing: 8) {
-                            AvatarView(url: PostCard.companion.avatarUrl(account: state.owner ?? "", proxyBase: app.env.proxyBase, size: "small"), size: 28)
-                            Text("@\(state.owner ?? "")").bold().foregroundStyle(theme.text)
-                            Image(appIcon: .expand).scaledFont(12, weight: .semibold).foregroundStyle(theme.text)
-                        }
+                // RN reply account tile: avatar, @name and the arrow; a tap opens the accounts sheet and the reply carries over
+                Button {
+                    app.env.replyHandoff.begin(editor: model)
+                    app.env.replyHandoff.sheetShown()
+                    app.sheet = .accounts
+                } label: {
+                    HStack(spacing: 8) {
+                        AvatarView(url: PostCard.companion.avatarUrl(account: state.owner ?? "", proxyBase: app.env.proxyBase, size: "small"), size: 28)
+                        Text("@\(state.owner ?? "")").bold().foregroundStyle(theme.text)
+                        Image(appIcon: .expand).scaledFont(12, weight: .semibold).foregroundStyle(theme.text)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(state.isSending)
-                    .padding(.horizontal, 16).padding(.vertical, 4)
-                    .accessibilityLabel(ReplyAccountCopy.shared.SWITCH)
-                    .accessibilityIdentifier("reply-account-tile")
                 }
+                .buttonStyle(.plain)
+                .disabled(state.isSending)
+                .padding(.horizontal, 16).padding(.vertical, 4)
+                .accessibilityLabel(ReplyAccountCopy.shared.SWITCH)
+                .accessibilityIdentifier("reply-account-tile")
             }
-            ZStack(alignment: .topLeading) {
-                BodyTextView(
-                    text: state.body, selection: state.selection, revision: state.bodyRevision, editable: !state.isSending,
-                    placeholder: state.isReply ? EditorUiCopy.shared.ADD_YOUR_REPLY : EditorUiCopy.shared.TELL_US_SOMETHING
-                ) { text, range in
-                    model.setBody(text: text, selection: CoreTextSelection(start: Int32(range.location), end: Int32(range.location + range.length)))
-                    lookUpMentions()
-                }
-                if state.body.isEmpty {
-                    Text(state.isReply ? EditorUiCopy.shared.ADD_YOUR_REPLY : EditorUiCopy.shared.TELL_US_SOMETHING).foregroundStyle(theme.secondary).padding(.horizontal, 17).padding(.vertical, 8).allowsHitTesting(false)
-                        // the body view reads its own placeholder to VoiceOver
-                        .accessibilityHidden(true)
-                }
+        }
+    }
+
+    private func bodyField(_ state: EditorState, minHeight: CGFloat) -> some View {
+        ZStack(alignment: .topLeading) {
+            BodyTextView(
+                text: state.body, selection: state.selection, revision: state.bodyRevision, editable: !state.isSending,
+                placeholder: state.isReply ? EditorUiCopy.shared.ADD_YOUR_REPLY : EditorUiCopy.shared.TELL_US_SOMETHING,
+                minHeight: minHeight
+            ) { text, range in
+                model.setBody(text: text, selection: CoreTextSelection(start: Int32(range.location), end: Int32(range.location + range.length)))
+                lookUpMentions()
             }
-            if state.wordsCount > 0 {
-                // RN shows the count in the header; the iOS bar has no room for it next to the buttons
-                Text(L.Native.Ios.Editor.words(count: Int(state.wordsCount))).font(.caption).foregroundStyle(theme.secondary)
-                    .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 16).accessibilityIdentifier("words-count")
+            if state.body.isEmpty {
+                Text(state.isReply ? EditorUiCopy.shared.ADD_YOUR_REPLY : EditorUiCopy.shared.TELL_US_SOMETHING).foregroundStyle(theme.secondary).padding(.horizontal, 17).padding(.vertical, 8).allowsHitTesting(false)
+                    // the body view reads its own placeholder to VoiceOver
+                    .accessibilityHidden(true)
             }
-            if state.showsShortReplyHint {
-                Text(Quests.shared.SHORT_REPLY_HINT).font(.caption).foregroundStyle(theme.secondary).padding(.horizontal, 16).accessibilityIdentifier("short-reply-hint")
-            }
-            if let chip = state.questChip {
-                // RN quest chip: opens Perks; the x closes it for this run of the app
-                HStack(spacing: 4) {
-                    Button { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) } label: { Text(chip).font(.footnote).foregroundStyle(theme.text).frame(minHeight: minTapTarget) }
-                    Button { model.dismissQuestChip() } label: { Image(appIcon: .close).font(.caption2).tapTarget() }.accessibilityLabel(UiCopy.shared.CANCEL).accessibilityIdentifier("quest-chip-close")
-                }
-                .padding(.horizontal, 12).background(theme.lightBackground, in: Capsule()).padding(.horizontal, 16).padding(.vertical, 4)
-                .accessibilityIdentifier("quest-chip")
-            }
-            if state.recentDraftAvailable {
-                HStack {
-                    Spacer()
-                    Button { model.loadRecentDraft() } label: { Label(EditorUiCopy.shared.DRAFT, appIcon: .compose).bold().foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 8).background(theme.accent, in: Capsule()) }
-                        .accessibilityIdentifier("load-draft")
-                }
-                .padding(.horizontal, 16).padding(.bottom, 8)
-            }
-            if !mentions.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(mentions, id: \.self) { name in
-                            Button { model.insertUsername(username: name); mentions = [] } label: {
-                                HStack(spacing: 6) {
-                                    AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/128", size: 20)
-                                    Text(name).font(.footnote).foregroundStyle(theme.text)
-                                }
-                                .padding(.horizontal, 8).padding(.vertical, 4).background(theme.lightBackground, in: Capsule())
-                            }
-                            .accessibilityIdentifier("mention-\(name)")
+        }
+    }
+
+    /// What stays under the scrolling text, above the keyboard: counts, chips, mentions, progress and the toolbar.
+    @ViewBuilder
+    private func footer(_ state: EditorState) -> some View {
+        if state.wordsCount > 0 || state.questChip != nil {
+            // one row (owner 11-04): the quest chip at the leading edge, the words count at the trailing edge; the
+            // chip's text truncates before the row takes a second line. RN shows the count in the header; the iOS
+            // bar has no room for it next to the buttons
+            HStack(spacing: 8) {
+                if let chip = state.questChip {
+                    // RN quest chip: opens Perks; the x closes it for this run of the app
+                    HStack(spacing: 4) {
+                        Button { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) } label: {
+                            Text(chip).font(.footnote).foregroundStyle(theme.text).lineLimit(1).truncationMode(.tail).frame(minHeight: minTapTarget)
                         }
+                        Button { model.dismissQuestChip() } label: { Image(appIcon: .close).font(.caption2).tapTarget() }.accessibilityLabel(UiCopy.shared.CANCEL).accessibilityIdentifier("quest-chip-close")
                     }
-                    .padding(.horizontal, 8)
+                    .padding(.horizontal, 12).background(theme.lightBackground, in: Capsule())
+                    .accessibilityIdentifier("quest-chip")
                 }
-                .accessibilityIdentifier("mention-bar")
-            }
-            if let progress = uploads.state.progress {
-                HStack {
-                    ProgressView(value: Double(truncating: progress)).tint(theme.accentText)
-                    Button(UiCopy.shared.CANCEL, role: .destructive) { uploader.cancelUploads() }.accessibilityIdentifier("cancel-upload")
+                Spacer(minLength: 0)
+                if state.wordsCount > 0 {
+                    Text(L.Native.Ios.Editor.words(count: Int(state.wordsCount))).font(.caption).foregroundStyle(theme.secondary)
+                        .lineLimit(1).fixedSize().accessibilityIdentifier("words-count")
                 }
-                .padding(.horizontal, 16).padding(.vertical, 4).accessibilityIdentifier("upload-progress")
             }
-            if showFormats {
-                HStack(spacing: 4) {
-                    toolButton("B", id: "format-bold", label: EditorUiCopy.shared.BOLD) { model.bold() }.bold()
-                    toolButton("I", id: "format-italic", label: EditorUiCopy.shared.ITALIC) { model.italic() }.italic()
-                    toolButton(EditorUiCopy.shared.TABLE, id: "format-table", label: EditorUiCopy.shared.TABLE) { model.table() }
-                    toolButton("[ ]( )", id: "format-link", label: EditorUiCopy.shared.LINK) { model.wrapLink() }
-                    Spacer()
-                }
-                .padding(.horizontal, 8).background(theme.lightBackground)
+            .padding(.horizontal, 16).padding(.vertical, state.questChip == nil ? 0 : 4)
+        }
+        if state.showsShortReplyHint {
+            Text(Quests.shared.SHORT_REPLY_HINT).font(.caption).foregroundStyle(theme.secondary).padding(.horizontal, 16).accessibilityIdentifier("short-reply-hint")
+        }
+        if state.recentDraftAvailable {
+            HStack {
+                Spacer()
+                Button { model.loadRecentDraft() } label: { Label(EditorUiCopy.shared.DRAFT, appIcon: .compose).bold().foregroundStyle(.white).padding(.horizontal, 16).padding(.vertical, 8).background(theme.accent, in: Capsule()) }
+                    .accessibilityIdentifier("load-draft")
             }
-            if state.rcWarning {
-                // RN RcPrecheckBanner: advice while writing, never a block; a tap opens the top up / boost offer
-                Button { model.showRcOffer() } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(EditorModel.companion.RC_PRECHECK_TITLE).font(.footnote.bold()).foregroundStyle(theme.text)
-                            Text(EditorModel.companion.RC_PRECHECK_BODY).font(.caption).foregroundStyle(theme.secondary)
-                        }
-                        Spacer()
-                        Text(RcErrors.shared.TOP_UP).font(.caption.bold()).foregroundStyle(theme.accentText)
-                    }
-                    .padding(12).background(theme.lightBackground).clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .padding(.horizontal, 16).accessibilityIdentifier("rc-precheck")
-            }
+            .padding(.horizontal, 16).padding(.bottom, 8)
+        }
+        if !mentions.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    // owner order (10-28): the writing tools first, AI Assist on screen without scrolling (it holds the
-                    // image generator and dictation), the rarely used poll late
-                    toolButton("Aa", id: "tool-format", label: EditorUiCopy.shared.TEXT_FORMAT, selected: showFormats) { showFormats.toggle() }
-                    toolButton(UiCopy.shared.IMAGE, id: "tool-image", label: UiCopy.shared.IMAGE) { sheet = .uploads }
-                    toolButton(UiCopy.shared.VIDEO, id: "tool-video", label: EditorUiCopy.shared.ADD_VIDEO) {
-                        // RN _showVideoUploads: one 3Speak video a post
-                        if let why = (video.model as! VideoUploadModel).refusal() {
-                            videoNotice = why
-                        } else {
-                            (video.model as! VideoUploadModel).reset() // the video of an earlier upload was taken out of the body again
-                            sheet = .video
+                HStack {
+                    ForEach(mentions, id: \.self) { name in
+                        Button { model.insertUsername(username: name); mentions = [] } label: {
+                            HStack(spacing: 6) {
+                                AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/128", size: 20)
+                                Text(name).font(.footnote).foregroundStyle(theme.text)
+                            }
+                            .padding(.horizontal, 8).padding(.vertical, 4).background(theme.lightBackground, in: Capsule())
                         }
+                        .accessibilityIdentifier("mention-\(name)")
                     }
-                    toolButton(EditorUiCopy.shared.AI_ASSIST, id: "tool-ai-assist", label: EditorUiCopy.shared.AI_WRITING_ASSISTANT) { sheet = .aiAssist }
-                    toolButton(EditorUiCopy.shared.SNIPPETS, id: "tool-snippets", label: EditorUiCopy.shared.SNIPPETS) { sheet = .snippets }
-                    toolButton(EditorUiCopy.shared.LINK, id: "tool-link", label: EditorUiCopy.shared.INSERT_LINK) { sheet = .link }
-                    if !state.isEdit, !state.isReply { toolButton(UiCopy.shared.POLL, id: "tool-poll", label: UiCopy.shared.POLL) { sheet = .poll } }
-                    toolButton(UiCopy.shared.TRANSLATE, id: "tool-translate", label: EditorUiCopy.shared.TRANSLATE_POST) { sheet = .translate }
-                    toolButton(UiCopy.shared.CLEAR, id: "tool-clear", label: UiCopy.shared.CLEAR) { confirmClear = true }
                 }
                 .padding(.horizontal, 8)
             }
-            .accessibilityIdentifier("editor-toolbar")
+            .accessibilityIdentifier("mention-bar")
         }
+        if let progress = uploads.state.progress {
+            HStack {
+                ProgressView(value: Double(truncating: progress)).tint(theme.accentText)
+                Button(UiCopy.shared.CANCEL, role: .destructive) { uploader.cancelUploads() }.accessibilityIdentifier("cancel-upload")
+            }
+            .padding(.horizontal, 16).padding(.vertical, 4).accessibilityIdentifier("upload-progress")
+        }
+        if showFormats {
+            HStack(spacing: 4) {
+                toolButton("B", id: "format-bold", label: EditorUiCopy.shared.BOLD) { model.bold() }.bold()
+                toolButton("I", id: "format-italic", label: EditorUiCopy.shared.ITALIC) { model.italic() }.italic()
+                toolButton(EditorUiCopy.shared.TABLE, id: "format-table", label: EditorUiCopy.shared.TABLE) { model.table() }
+                toolButton("[ ]( )", id: "format-link", label: EditorUiCopy.shared.LINK) { model.wrapLink() }
+                Spacer()
+            }
+            .padding(.horizontal, 8).background(theme.lightBackground)
+        }
+        if state.rcWarning {
+            // RN RcPrecheckBanner: advice while writing, never a block; a tap opens the top up / boost offer
+            Button { model.showRcOffer() } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(EditorModel.companion.RC_PRECHECK_TITLE).font(.footnote.bold()).foregroundStyle(theme.text)
+                        Text(EditorModel.companion.RC_PRECHECK_BODY).font(.caption).foregroundStyle(theme.secondary)
+                    }
+                    Spacer()
+                    Text(RcErrors.shared.TOP_UP).font(.caption.bold()).foregroundStyle(theme.accentText)
+                }
+                .padding(12).background(theme.lightBackground).clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .padding(.horizontal, 16).accessibilityIdentifier("rc-precheck")
+        }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 4) {
+                // owner order (10-28): the writing tools first, AI Assist on screen without scrolling (it holds the
+                // image generator and dictation), the rarely used poll late
+                toolButton("Aa", id: "tool-format", label: EditorUiCopy.shared.TEXT_FORMAT, selected: showFormats) { showFormats.toggle() }
+                toolButton(UiCopy.shared.IMAGE, id: "tool-image", label: UiCopy.shared.IMAGE) { sheet = .uploads }
+                toolButton(UiCopy.shared.VIDEO, id: "tool-video", label: EditorUiCopy.shared.ADD_VIDEO) {
+                    // RN _showVideoUploads: one 3Speak video a post
+                    if let why = (video.model as! VideoUploadModel).refusal() {
+                        videoNotice = why
+                    } else {
+                        (video.model as! VideoUploadModel).reset() // the video of an earlier upload was taken out of the body again
+                        sheet = .video
+                    }
+                }
+                toolButton(EditorUiCopy.shared.AI_ASSIST, id: "tool-ai-assist", label: EditorUiCopy.shared.AI_WRITING_ASSISTANT) { sheet = .aiAssist }
+                toolButton(EditorUiCopy.shared.SNIPPETS, id: "tool-snippets", label: EditorUiCopy.shared.SNIPPETS) { sheet = .snippets }
+                toolButton(EditorUiCopy.shared.LINK, id: "tool-link", label: EditorUiCopy.shared.INSERT_LINK) { sheet = .link }
+                if !state.isEdit, !state.isReply { toolButton(UiCopy.shared.POLL, id: "tool-poll", label: UiCopy.shared.POLL) { sheet = .poll } }
+                toolButton(UiCopy.shared.TRANSLATE, id: "tool-translate", label: EditorUiCopy.shared.TRANSLATE_POST) { sheet = .translate }
+                toolButton(UiCopy.shared.CLEAR, id: "tool-clear", label: UiCopy.shared.CLEAR) { confirmClear = true }
+            }
+            .padding(.horizontal, 8)
+        }
+        .accessibilityIdentifier("editor-toolbar")
     }
 
     /// A toolbar button: its text grows up to the first accessibility size, so the bar keeps room for the body; a

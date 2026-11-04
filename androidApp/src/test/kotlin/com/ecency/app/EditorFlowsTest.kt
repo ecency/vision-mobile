@@ -843,6 +843,67 @@ class EditorFlowsTest {
         assertTrue("nothing is charged by opening the hub", paid.isEmpty())
     }
 
+    /**
+     * Tester: "Window for editing drafts much too small". On a short window (a small phone with the keyboard up) the
+     * community row, title and tags scroll away with the body, one scroll container, so the body gets the height
+     * between the screen header and the toolbar; the caret stays on screen and the title can be scrolled back to.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h440dp")
+    fun onAShortWindowTheTitleAndTagsScrollAwayWithTheBody() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorTitle").performTextInput("A long draft")
+        compose.onNodeWithTag("tagInput").performTextInput("ecency test ")
+        compose.onNodeWithTag("editorBody").performClick()
+        compose.onNodeWithTag("editorBody").performTextInput((1..30).joinToString("\n") { "Line $it of the draft" })
+        settle()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        val top = node("editorBack").boundsInRoot.bottom
+        val bottom = node("editorToolbar").boundsInRoot.top
+        // boundsInRoot is clipped by the parents: the part of the body that is on screen
+        val visible = node("editorBody").boundsInRoot
+        assertTrue("the body has most of the room between header and toolbar: ${visible.height} of ${bottom - top}", visible.height >= 0.7f * (bottom - top))
+        assertTrue("the title scrolled off: ${node("editorTitle").boundsInRoot}", node("editorTitle").boundsInRoot.height < 1f)
+        // the caret (at the end) is on screen
+        val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
+        val caret = results.first().getCursorRect(model().current.body.length)
+        val caretBottom = node("editorBody").positionInRoot.y + caret.bottom
+        assertTrue("caret at $caretBottom within $top..$bottom", caretBottom in top..(bottom + 1f))
+        // the title is still reachable
+        compose.onNodeWithTag("editorTitle").performScrollTo()
+        settle()
+        assertTrue("the title is back on screen", node("editorTitle").boundsInRoot.height > 1f)
+        assertCountRowIsOneLine()
+    }
+
+    /** The quest chip and the words count share one row above the toolbar (owner 11-04), one line high. */
+    private fun assertCountRowIsOneLine() {
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        waitFor("questChip")
+        val count = node("wordsCount").boundsInRoot
+        val chip = node("questChip").boundsInRoot
+        val row = node("countRow").boundsInRoot
+        assertEquals("one row: count $count, chip $chip", count.center.y, chip.center.y, 3f)
+        assertTrue("chip leading, count trailing: $chip, $count", chip.right <= count.left)
+        val lines = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        compose.onNode(hasText("Daily", substring = true) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("questChip")), useUnmergedTree = true)
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(lines) }
+        assertEquals("the chip's text is one line", 1, lines.first().lineCount)
+        assertTrue("the row is no taller than the chip: $row, $chip", row.height <= chip.height + 1f + 8f * compose.density.density)
+    }
+
+    @Test
+    fun atLargeTextTheQuestChipTruncatesAndTheRowStaysOneLine() {
+        org.robolectric.RuntimeEnvironment.setFontScale(2f)
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorBody").performTextInput("one two three four five six seven")
+        settle()
+        assertCountRowIsOneLine()
+    }
+
     /** A reply (and an edit) has no poll; the rest keeps the owner's order. */
     @Test
     fun aReplysToolbarHasNoPollAndKeepsTheOrder() {
