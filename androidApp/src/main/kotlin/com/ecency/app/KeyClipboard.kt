@@ -20,7 +20,8 @@ import android.os.PersistableBundle
  */
 object KeyClipboard {
     const val CLEAR_AFTER_MILLIS = 120_000L
-    const val LABEL = "key"
+    /** Only this app names a clip so: a clip labelled plain "key" may be another app's and is never cleared. */
+    const val LABEL = "ecency.private-key"
     private const val PREFS = "ecency.keyclip"
     private const val PENDING = "pending"
 

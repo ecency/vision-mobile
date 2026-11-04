@@ -49,4 +49,14 @@ class KeyClipboardTest {
         KeyClipboard.clearLeftover(context)
         assertEquals("something else", clipboard.primaryClip?.getItemAt(0)?.text?.toString())
     }
+
+    @Test @Config(sdk = [33])
+    fun theKeyClipHasItsOwnLabelSoAnotherAppsKeyClipStays() {
+        KeyClipboard.copy(context, "5KthrowawayKeyText")
+        assertEquals("ecency.private-key", clipboard.primaryClipDescription?.label?.toString())
+        // another app's clip labelled "key" is not ours
+        clipboard.setPrimaryClip(ClipData.newPlainText("key", "a door code"))
+        KeyClipboard.clearLeftover(context)
+        assertEquals("a door code", clipboard.primaryClip?.getItemAt(0)?.text?.toString())
+    }
 }
