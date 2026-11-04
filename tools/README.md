@@ -37,5 +37,5 @@ upstream.
 ## What is gone
 
 The generators that ran the React Native app's own source (`src/utils/*.ts`, its screens and hooks) were removed with
-the RN app (#3627). Their fixtures stay as they are; to regenerate one, check out the `rn-3.x-final` tag, where they
-still run from the repository root.
+the RN app (#3627). Their fixtures stay as they are; to regenerate one, check out the `rn-3.x-final` tag and run it
+from the repository root, with the paths under `native/` (`native/tools/...`, `native/shared/...`).
