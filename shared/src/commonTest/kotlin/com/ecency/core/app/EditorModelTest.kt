@@ -1080,6 +1080,23 @@ class EditorModelTest {
     }
 
     @Test
+    fun aSavedDraftOpenedPublishesWithTheBeneficiariesTheAuthorAddedAfterOpeningIt() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"Body with ![](https://images.example/a.jpg) image","tags":"hive-125125 ecency","tags_arr":["hive-125125","ecency"],"created":"2026-10-06T10:00:00.000Z","modified":"2026-10-06T11:00:00.000Z","meta":{"image":["https://images.example/a.jpg"],"tags":"hive-125125 ecency","rewardType":"sp","description":"d","beneficiaries":[]}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        assertEquals("Saved draft", m.current.title)
+        assertEquals(listOf("hive-125125", "ecency"), m.current.tags)
+        assertTrue(m.current.canSubmit)
+        assertNull(m.addBeneficiary("bob", 10))
+        assertEquals(listOf(BeneficiaryRoute("bob", 1000)), m.current.beneficiaries)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "saved-draft", "d9"), m.current.done, w.toasts().toString())
+        val options = w.ops().single()[1].jsonArray[1].jsonObject["extensions"].toString()
+        assertTrue(options.contains("bob"), options)
+    }
+
+    @Test
     fun aNewerLocalCopyWinsOverTheServerDraftAndDeadPlaceholdersAreSwept() = runTest {
         val w = World(this)
         w.drafts += Json.parseToJsonElement("""{"_id":"d7","title":"Server","body":"server body","tags":"a b","modified":"2026-10-06T11:00:00.000Z","meta":{}}""").jsonObject

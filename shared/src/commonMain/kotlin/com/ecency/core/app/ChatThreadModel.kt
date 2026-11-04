@@ -432,7 +432,9 @@ class ChatThreadModel internal constructor(
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh, error = null) }
         loadJob = scope.launch {
             try {
-                val viewer = current.viewerId
+                // the viewer decides which messages are own (Edit, Remove): a first session read in start() that failed
+                // must not leave it unknown for as long as the screen lives
+                val viewer = current.viewerId ?: env.chat.call(u) { it.userId }?.also { id -> setState { it.copy(viewerId = id) } }
                 val page = try {
                     env.chat.call(u) { env.chat.api.posts(it.token, channelId, from, viewer) }
                 } catch (e: ChatApiException) {
