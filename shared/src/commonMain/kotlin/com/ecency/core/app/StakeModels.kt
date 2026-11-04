@@ -83,8 +83,8 @@ internal object StakeMath {
 sealed interface StakePrompt {
     data class Alert(val title: String, val message: String) : StakePrompt
 
-    /** Delegation review (RN ACTION_MODAL): [summary] and, updating one, [overwrite]. */
-    data class Review(val summary: String, val overwrite: String?, val vests: String) : StakePrompt
+    /** Delegation review (RN ACTION_MODAL): [summary] and, updating one, [overwrite]. [delegatee] and [vests] are what is signed. */
+    data class Review(val summary: String, val overwrite: String?, val vests: String, val delegatee: String) : StakePrompt
 
     /** RN "Continue transaction?" for a power down. */
     data class ConfirmPowerDown(val vests: String) : StakePrompt
@@ -218,7 +218,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
         val vests = if (hp >= s.maxHp) s.maxVests else Vests.fromHp(hp, s.hivePerMVests).coerceAtMost(s.maxVests)
         val vestsText = StakeMath.vestsText(vests)
         setState {
-            it.copy(prompt = StakePrompt.Review(StakeCopy.confirmSummary(StakeMath.hpText(hp), vestsText, s.recipient), s.existingHp?.let(StakeCopy::overwrite), vestsText))
+            it.copy(prompt = StakePrompt.Review(StakeCopy.confirmSummary(StakeMath.hpText(hp), vestsText, s.recipient), s.existingHp?.let(StakeCopy::overwrite), vestsText, s.recipient))
         }
     }
 
@@ -226,7 +226,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
         val s = current
         val review = s.prompt as? StakePrompt.Review ?: return
         val user = s.from ?: return
-        val ops = WalletOps.ops(listOf(WalletOps.delegateVestingShares(user, s.recipient, "${review.vests} VESTS")))
+        val ops = WalletOps.ops(listOf(WalletOps.delegateVestingShares(user, review.delegatee, "${review.vests} VESTS")))
         val actionId = env.idempotencyKey()
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
         env.walletSends.send(user, ops, OperationAuthority.required(ops), actionId)

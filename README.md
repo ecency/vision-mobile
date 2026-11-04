@@ -1505,6 +1505,7 @@ Differences from RN
 - The transfer screen allows several recipients only where RN sends them (plain transfers, points, engine transfers), one elsewhere.
 - A send's outcome is followed after its screen closed (one toast).
 - The trade order book stays the RN walk (its double count of the first level kept, `SwapCalculator.price`).
+- A swap signs the amounts its confirmation showed (`TradePrompt.Confirm.amountToSell` / `minToReceive`), and the minute's order book refresh leaves an open confirmation alone; the quote follows the book again once it closes. RN signs the live quote, which a refresh can change under the open alert. A delegation likewise signs the recipient and VESTS its review showed (`StakePrompt.Review.delegatee`).
 - The price chart (dead code in RN) is not built.
 - Get Points and Account Boost are the in-app purchase screens (see In-app purchases).
 
