@@ -177,7 +177,7 @@ final class LockUITests: XCTestCase {
     }
 
     /// A sheet (the reply composer) is open when the app goes away: the lock comes back above it.
-    func testARelockCoversAnOpenSheet() {
+    func testARelockCoversAnOpenSheet() throws {
         let app = launch(lockTimeoutSeconds: 0)
         XCTAssertTrue(app.staticTexts["pin-message"].waitForExistence(timeout: 15))
         type(app, "1234")
@@ -193,6 +193,10 @@ final class LockUITests: XCTestCase {
         reply.tap()
         XCTAssertTrue(app.descendants(matching: .any)["reply-text"].waitForExistence(timeout: 10))
         XCUIDevice.shared.press(.home)
+        // iPhone Duo's simulator ignores the Home button (the app stays in the foreground): nothing to relock
+        if !app.wait(for: .runningBackgroundSuspended, timeout: 10) && app.state == .runningForeground {
+            throw XCTSkip("the Home button left the app in the foreground")
+        }
         app.activate()
         XCTAssertTrue(app.buttons["pin-key-1"].waitForExistence(timeout: 15))
         XCTAssertTrue(app.buttons["pin-key-1"].isHittable, "the PIN pad must sit above the sheet")

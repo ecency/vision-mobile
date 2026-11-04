@@ -144,6 +144,11 @@ final class PushAppDelegate: NSObject, UIApplicationDelegate, UNUserNotification
         return true
     }
 
+    /// Portrait on phone-sized displays, any orientation on large ones (OrientationPolicy, README "iPhone Duo").
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        OrientationPolicy.mask(screen: window?.windowScene?.screen.bounds.size)
+    }
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         #if canImport(FirebaseMessaging)
         if PushBridge.firebaseReady { Messaging.messaging().apnsToken = deviceToken }

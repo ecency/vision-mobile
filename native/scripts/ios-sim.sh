@@ -7,6 +7,9 @@
 #
 # The simulator is created on first use (name and device type can be overridden):
 #   ECENCY_SIM_NAME="Ecency Spike" ECENCY_SIM_DEVICE="iPhone 16 Pro"
+#   ECENCY_SIM_NAME="Ecency Duo" ECENCY_SIM_DEVICE="iPhone Duo"     (Xcode 27.1+)
+# A device with more than one screen (iPhone Duo) needs the screen to capture: ECENCY_SIM_DISPLAY=primary (the outer
+# screen, the default) or primary-1 (the inner one); `xcrun simctl io <udid> enumerate` lists them.
 set -euo pipefail
 
 SIM_NAME="${ECENCY_SIM_NAME:-Ecency Spike}"
@@ -31,10 +34,14 @@ for runtime, devices in json.load(sys.stdin)["devices"].items():
 
 UDID="$(sim_udid || true)"
 if [[ -z "$UDID" ]]; then
+  # the newest runtime that runs this device: Xcode 27 ships a separate runtime for iPhone Duo with the same version
   RUNTIME="$(xcrun simctl list runtimes -j | python3 -c '
 import json, sys
-ios = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]]
-print(sorted(ios, key=lambda r: [int(p) for p in r["version"].split(".")])[-1]["identifier"])')"
+device = sys.argv[1]
+ios = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]
+       and any(device in (d["name"], d["identifier"]) for d in r.get("supportedDeviceTypes", []))]
+if not ios: sys.exit("No installed iOS runtime runs " + device)
+print(sorted(ios, key=lambda r: [int(p) for p in r["version"].split(".")])[-1]["identifier"])' "$SIM_DEVICE")"
   UDID="$(xcrun simctl create "$SIM_NAME" "$SIM_DEVICE" "$RUNTIME")"
   echo "Created simulator '$SIM_NAME' ($SIM_DEVICE, $RUNTIME)"
 fi
@@ -66,11 +73,22 @@ xcodebuild build -project EcencySpike.xcodeproj -scheme EcencyApp \
 xcrun simctl install "$UDID" "$DERIVED/Build/Products/Debug-iphonesimulator/EcencyApp.app"
 xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl launch "$UDID" "$BUNDLE_ID" >/dev/null
-open -a Simulator --args -CurrentDeviceUDID "$UDID"
+# Xcode 27 renamed Simulator.app to Device Hub; older Xcode still has Simulator. Showing the window is a convenience,
+# so a missing app never fails the run (the app is already installed and launched).
+open -a DeviceHub --args -CurrentDeviceUDID "$UDID" 2>/dev/null \
+  || open -a Simulator --args -CurrentDeviceUDID "$UDID" 2>/dev/null \
+  || echo "Note: no Device Hub or Simulator app found to show the device" >&2
 echo "Running on '$SIM_NAME' ($UDID)"
 
 if [[ "${1:-}" == "--shot" ]]; then
   sleep 3
-  xcrun simctl io "$UDID" screenshot "${2:?screenshot path required}" >/dev/null
+  SHOT="${2:?screenshot path required}"
+  if [[ -n "${ECENCY_SIM_DISPLAY:-}" ]]; then
+    xcrun simctl io "$UDID" screenshot --display="$ECENCY_SIM_DISPLAY" "$SHOT" >/dev/null
+  else
+    # one screen needs no choice; several (iPhone Duo) fail without one, so take the main (outer) screen
+    xcrun simctl io "$UDID" screenshot "$SHOT" >/dev/null 2>&1 \
+      || xcrun simctl io "$UDID" screenshot --display=primary "$SHOT" >/dev/null
+  fi
   echo "Screenshot: $2"
 fi

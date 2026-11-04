@@ -164,14 +164,14 @@ final class ViewStateMappingTests: XCTestCase {
         XCTAssertTrue(FeedPaging.shouldLoadMore(appearing: voted, in: idle))
     }
 
-    func testCommentIndentStopsAtLevelThreeAndCardImagesNeverExceedTheScreen() {
+    func testCommentIndentStopsAtLevelThreeAndCardImagesNeverExceedTheWindow() {
         XCTAssertEqual(CommentRow.indent(level: 1), 0)
         XCTAssertEqual(CommentRow.indent(level: 2), 22)
         XCTAssertEqual(CommentRow.indent(level: 3), 44)
         XCTAssertEqual(CommentRow.indent(level: 7), 44)
-        XCTAssertEqual(CardImageView.height(width: 384, ratio: 16.0 / 9.0, screenHeight: 800), 216)
-        XCTAssertEqual(CardImageView.height(width: 384, ratio: 0.1, screenHeight: 800), 800)
-        XCTAssertEqual(CardImageView.height(width: 384, ratio: .nan, screenHeight: 800), 216)
+        XCTAssertEqual(CardImageView.height(width: 384, ratio: 16.0 / 9.0, maxHeight: 800), 216)
+        XCTAssertEqual(CardImageView.height(width: 384, ratio: 0.1, maxHeight: 800), 800)
+        XCTAssertEqual(CardImageView.height(width: 384, ratio: .nan, maxHeight: 800), 216)
         XCTAssertEqual(CommentSortLabel.title(.votes), "Votes")
     }
 }

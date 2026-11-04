@@ -1,3 +1,4 @@
+import Combine
 import EcencyCore
 import SwiftUI
 import UIKit
@@ -47,6 +48,7 @@ struct PerksScreen: View {
             model.start()
             // RN opts the quests into refetch on focus
             if foreground == nil {
+                let model = self.model
                 foreground = NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak model] _ in
                     MainActor.assumeIsolated { model?.onForeground() }
                 }

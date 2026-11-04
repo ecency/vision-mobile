@@ -116,6 +116,18 @@ enum class AppTab(
     /** The tab's name in the current language (accessibility; the tabs show icons only). */
     val title: String get() = titleText()
 
+    /**
+     * On a wide window every tab's list opens beside itself (README "iPhone Duo"), as Mail's list and message. What a
+     * tap in this tab's list opens, which takes the pane's place: a post (a wave's thread), a chat, an asset's
+     * details; a follow notification opens a profile.
+     */
+    fun opensInPane(screen: AppScreen): Boolean = when (this) {
+        FEED, WAVES -> screen is AppScreen.Post
+        CHATS -> screen is AppScreen.ChatThread
+        WALLET -> screen is AppScreen.AssetDetails
+        NOTIFICATION -> screen is AppScreen.Post || screen is AppScreen.Profile
+    }
+
     /** The text a signed-out user sees on this tab, or null when the tab is public. */
     val loginText: String?
         get() = when (gate) {
@@ -462,6 +474,17 @@ sealed interface AppScreen {
     }
 }
 
+/**
+ * Whether this screen can show in the pane beside a list (README "iPhone Duo"): reading and people, which make sense
+ * beside the list, and an asset's details. Writing, settings, wallet actions (send, swap) and search cover the whole
+ * window, as on a phone.
+ */
+val AppScreen.fitsAPane: Boolean
+    get() = this is AppScreen.Post || this is AppScreen.Profile || this is AppScreen.ChatThread || this is AppScreen.Follows ||
+        this is AppScreen.AccountList || this is AppScreen.Voters || this is AppScreen.Reblogs || this is AppScreen.EditHistory ||
+        this is AppScreen.BotComments || this is AppScreen.Community || this is AppScreen.CommunityMembers ||
+        this is AppScreen.TagResult || this is AppScreen.Feed || this is AppScreen.AssetDetails
+
 /** One back stack entry; [id] tells two entries of the same screen apart (and keys their models). */
 data class NavItem(val id: Long, val screen: AppScreen)
 
@@ -502,6 +525,11 @@ data class NavState(
     val stack: List<NavItem> = emptyList(),
     val drawerOpen: Boolean = false,
     val nextId: Long = 1,
+    /**
+     * Two panes on a wide window (README "iPhone Duo"): what the tab's list opened, shown beside the list, with what
+     * that opened in turn. Empty on a phone-sized window, and on Android, which never asks for it.
+     */
+    val pane: List<NavItem> = emptyList(),
 ) {
     /** The screen on top, or null when the tabs show. */
     val top: AppScreen? get() = stack.lastOrNull()?.screen
@@ -509,6 +537,54 @@ data class NavState(
     val atRoot: Boolean get() = stack.isEmpty()
 
     val screens: List<AppScreen> get() = stack.map { it.screen }
+
+    /** The screen on top of the pane, or null when the pane is empty. */
+    val paneTop: AppScreen? get() = pane.lastOrNull()?.screen
+
+    /**
+     * [pushGated] on a window that may have room for two panes ([wide], see [hasRoomForPanes]). At the root of a tab
+     * what its list opens ([fromList], [AppTab.opensInPane]) shows in the pane, replacing what was there (Mail); what
+     * anything else opens while the pane shows (its own screen, a sheet over it) goes on in the pane, so back returns
+     * there. A link with the pane empty opens in it as a list tap does. The rest (the editor, settings, search, and
+     * the side menu's places, [cover]) covers both, as on a phone, and the pane is there again after it.
+     */
+    fun pushIn(screen: AppScreen, loggedIn: Boolean, wide: Boolean, fromList: Boolean = false, cover: Boolean = false): NavState {
+        val gated = if (!loggedIn && screen.route.requiresLogin) AppScreen.Login else screen
+        if (!wide || !atRoot || cover || !gated.fitsAPane) return pushGated(screen, loggedIn)
+        val item = NavItem(nextId, gated)
+        val lists = tab.opensInPane(gated)
+        val next = when {
+            fromList && lists -> if (pane.singleOrNull()?.screen == gated) return copy(drawerOpen = false) else listOf(item)
+            pane.isNotEmpty() -> if (paneTop == gated) return copy(drawerOpen = false) else pane + item
+            lists -> listOf(item)
+            else -> return pushGated(screen, loggedIn)
+        }
+        return copy(pane = next, nextId = nextId + 1, drawerOpen = false)
+    }
+
+    /**
+     * Which two columns a wide window shows: the side menu beside the list while nothing is open
+     * in the pane (or the menu was opened over it, [drawerOpen]); otherwise the list and the pane. Never on a phone
+     * ([wide] false), where the side menu is the drawer over the tabs.
+     */
+    fun menuBesideList(wide: Boolean): Boolean = wide && atRoot && (pane.isEmpty() || drawerOpen)
+
+    /** Pops the pane down to [size] screens (its back button or swipe). */
+    fun popPaneTo(size: Int): NavState = if (size >= pane.size) this else copy(pane = pane.take(size.coerceAtLeast(0)))
+
+    /**
+     * The window changed size (a fold or an unfold). Narrow: the pane's screens go under the pushed ones, so the
+     * same screen stays in front. Wide: screens the tab's list opened, at the bottom of the stack, move to the pane.
+     */
+    fun fitTo(wide: Boolean): NavState {
+        // the menu column does not become a drawer over the phone's tabs
+        if (!wide) return if (pane.isEmpty() && !drawerOpen) this else copy(stack = pane + stack, pane = emptyList(), drawerOpen = false)
+        if (pane.isNotEmpty()) return this
+        val first = stack.firstOrNull() ?: return this
+        if (!tab.opensInPane(first.screen)) return this
+        val moved = stack.takeWhile { it.screen.fitsAPane }
+        return copy(pane = moved, stack = stack.drop(moved.size))
+    }
 
     /** Pushes [screen] (closing the side menu). Pushing the screen already on top does nothing. */
     fun push(screen: AppScreen): NavState {
@@ -527,6 +603,7 @@ data class NavState(
     fun back(): NavState? = when {
         drawerOpen -> copy(drawerOpen = false)
         stack.isNotEmpty() -> copy(stack = stack.dropLast(1))
+        pane.isNotEmpty() -> copy(pane = pane.dropLast(1))
         tab != AppTab.INITIAL -> copy(tab = AppTab.INITIAL)
         else -> null
     }
@@ -535,7 +612,7 @@ data class NavState(
     fun popTo(size: Int): NavState = if (size >= stack.size) this else copy(stack = stack.take(size.coerceAtLeast(0)))
 
     /** Tab bar tap. Only reachable at the root; the stack is cleared anyway so a tab never shows a stale screen. */
-    fun selectTab(tab: AppTab): NavState = copy(tab = tab, stack = emptyList(), drawerOpen = false)
+    fun selectTab(tab: AppTab): NavState = copy(tab = tab, stack = emptyList(), pane = emptyList(), drawerOpen = false)
 
     /** The side menu belongs to the tabs (RN's drawer wraps the tab navigator): it opens only at the root. */
     fun openDrawer(): NavState = if (stack.isEmpty()) copy(drawerOpen = true) else this
@@ -544,7 +621,7 @@ data class NavState(
 
     /** A deep link or notification: see [NavEntry]. Screens that need an account open the login screen when [loggedIn] is false. */
     fun open(entry: NavEntry, loggedIn: Boolean): NavState {
-        var s = if (entry.tab != null) copy(tab = entry.tab, stack = emptyList()) else this
+        var s = if (entry.tab != null) copy(tab = entry.tab, stack = emptyList(), pane = emptyList()) else this
         s = s.copy(drawerOpen = false)
         for (screen in entry.screens) {
             s = s.pushGated(screen, loggedIn)
@@ -563,7 +640,12 @@ data class NavState(
      * The current account changed (signed out, switched, a logout that moved to the next account, a link login as
      * another account): screens that need an account belonged to the previous one and leave the stack.
      */
-    fun afterAccountChange(): NavState = copy(stack = stack.filter { !it.screen.route.requiresLogin }, drawerOpen = false)
+    fun afterAccountChange(): NavState = copy(
+        stack = stack.filter { !it.screen.route.requiresLogin },
+        // what the pane showed was opened from the previous account's list
+        pane = emptyList(),
+        drawerOpen = false,
+    )
 
     /**
      * A navigation saved while [owner] was signed in (null: nobody, or unknown), restored while [current] is.
@@ -577,11 +659,20 @@ data class NavState(
     /** After a wipe or sign-out from the lock: back to the Feed tab, nothing pushed. */
     fun reset(): NavState = NavState(nextId = nextId)
 
-    /** One line for the tab, then one per pushed screen. Ids are not saved (they are given again on restore). */
-    fun encode(): List<String> = listOf(join("tab", tab.name)) + stack.map { encodeScreen(it.screen) }
+    /**
+     * One line for the tab, then one per pushed screen. Ids are not saved (they are given again on restore). The pane
+     * is saved as the screens under the pushed ones ([fitTo] narrow); a wide window moves them back on restore.
+     */
+    fun encode(): List<String> = listOf(join("tab", tab.name)) + (pane + stack).map { encodeScreen(it.screen) }
 
     companion object {
         private const val SEP = '\u001F'
+
+        /** The narrowest window with two panes: iPhone Duo's inner display held sideways (951 pt), not held upright (669 pt). */
+        const val PANES_MIN_WIDTH = 840.0
+
+        /** Whether a window [width] points wide shows two panes on the tabs that have them. */
+        fun hasRoomForPanes(width: Double): Boolean = width >= PANES_MIN_WIDTH
 
         /** Rows of an [AppScreen.AccountList] kept in the saved navigation. */
         const val ACCOUNT_LIST_SAVED_ROWS = 200
@@ -762,16 +853,38 @@ object ContentLinks {
     fun legacyScheme(url: String): String =
         if (url.startsWith("esteem://", ignoreCase = true)) "ecency://" + url.substring("esteem://".length) else url
 
+    private val REPLY_FRAGMENT = Regex("^@([a-z0-9.-]+)/([a-z0-9-]+)$")
+
+    /**
+     * A link tapped in content (a chat message, a link card): [entry], with a reply its fragment names
+     * (`/@alice/post#@bob/re-post`, RN postUrlParser) opened instead of the post above it. An entry that changes
+     * tabs (the Waves composer) is null, so the page opens in the browser and the conversation stays where it is.
+     */
+    fun contentEntry(url: String): NavEntry? {
+        val page = entry(url) ?: return null
+        val reply = REPLY_FRAGMENT.matchEntire(url.substringAfter('#', "").lowercase())
+        if (reply != null) {
+            com.ecency.core.render.blocks.SafeTarget.post(reply.groupValues[1], reply.groupValues[2])
+                ?.let { NavEntry.from(LinkRouter.route(it)) }?.let { return it }
+        }
+        return page.takeIf { it.tab == null }
+    }
+
     fun entry(url: String): NavEntry? {
         val safe = com.ecency.core.render.blocks.SafeTarget.httpUrl(url) ?: return null
         val rest = safe.substringAfter("://", "")
         val host = rest.substringBefore('/').substringBefore(':').lowercase()
-        if (host !in HOSTS || !safe.startsWith("https://", ignoreCase = true)) return null
+        // ecency.com, and the other Hive frontends' post, profile and tag links (RN deepLinkParser reads any of
+        // them through postUrlParser; the list is render-helper's, which turns the same links in a body into posts)
+        val firstParty = host in HOSTS
+        if (!firstParty && host.removePrefix("www.") !in com.ecency.core.render.methods.Consts.WHITE_LIST) return null
+        if (!safe.startsWith("https://", ignoreCase = true)) return null
         val path = rest.substringAfter('/', "").substringBefore('?').substringBefore('#')
         val parts = path.split('/').filter { it.isNotEmpty() }
         // RN deepLinkParser: /waves/<author>/<permlink> is the wave's thread, /waves (any query) the Waves tab;
-        // a `text` query opens the composer there (WavesService.openLink)
+        // a `text` query opens the composer there (WavesService.openLink). Ecency's own pages only.
         if (parts.firstOrNull()?.lowercase() == "waves") {
+            if (!firstParty) return null
             com.ecency.core.api.search.PostUrlParser.parse(safe)?.let { p ->
                 val author = p.author
                 val permlink = p.permlink

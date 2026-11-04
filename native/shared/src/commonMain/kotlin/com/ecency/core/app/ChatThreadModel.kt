@@ -35,7 +35,10 @@ data class ChatQuote(val postId: String, val username: String?, val text: String
 }
 
 /** A link card: from the message's `link_*` props, or a Hive post found in the text (title fetched). */
-data class ChatLinkCard(val url: String, val title: String, val summary: String, val image: String?, val post: PostKey? = null)
+data class ChatLinkCard(val url: String, val title: String, val summary: String, val image: String?, val post: PostKey? = null) {
+    /** What a tap opens: the post the card shows, in the app (whichever frontend the link was on), else the link. */
+    val openUrl: String get() = post?.let { "https://ecency.com/@${it.author}/${it.permlink}" } ?: url
+}
 
 /** One row of a conversation (newest first, as RN's inverted list). */
 sealed interface ChatItem {
@@ -189,7 +192,6 @@ class ChatThreadModel internal constructor(
     private var onlineIds: List<String> = emptyList()
     private var before: String? = null
     private var anchor: Long? = null
-    private var scrolledToUnread = false
     private var lastMarked = 0L
     private var markedAny = false
     private var groupRenamedLive = false
@@ -443,6 +445,8 @@ class ChatThreadModel internal constructor(
                 page.users.forEach { lookup[it.id] = it }
                 page.memberCount?.let { c -> setState { it.copy(memberCount = c) } }
                 page.onlineUserIds?.let { onlineIds = it }
+                // the read time the posts page carries, when neither the list nor the members gave one
+                if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }
                 page.posts.lastOrNull()?.let { before = it.id }
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = page.posts.isNotEmpty()) }
@@ -461,15 +465,15 @@ class ChatThreadModel internal constructor(
         }
     }
 
-    /** RN: fewer than 15 rows asks for the page before; the unread marker is scrolled to once; the channel is marked read. */
+    /**
+     * RN: fewer than 15 rows asks for the page before; the channel is marked read. Unlike RN, the thread is not
+     * scrolled to the unread marker: it opens at the newest message (owner 11-03), the marker shows above it. RN's jump
+     * to the oldest unread row sent a thread with many unread messages (Esie's) up into its history.
+     */
     private fun afterLoad() {
         val s = current
         if (s.items.size < AUTO_FILL_ROWS && s.hasMore && posts.isNotEmpty()) {
             scope.launch { load(refresh = false) }
-        }
-        if (!scrolledToUnread && s.unreadItemId != null) {
-            scrolledToUnread = true
-            setState { it.copy(scrollTo = it.unreadItemId) }
         }
         markViewed()
     }
@@ -583,10 +587,11 @@ class ChatThreadModel internal constructor(
             out += if (current.isGroup && p.type == ChatPost.HEADER_CHANGE) notice(p) else message(p, viewer, now, proxy)
         }
         flush()
-        // RN firstUnreadIndex: the oldest of the rows above the last read time (counted from the newest)
-        val last = anchor ?: 0L
+        // RN firstUnreadIndex: the oldest of the rows above the last read time (counted from the newest). No read time
+        // (a thread opened by name, before its members arrive): no marker. RN counted every row as unread then and
+        // jumped to the oldest loaded message.
         var unread: String? = null
-        for (item in out) if (item.timestamp > last) unread = item.id else break
+        anchor?.let { last -> for (item in out) if (item.timestamp > last) unread = item.id else break }
         setState { it.copy(items = out, unreadItemId = unread, showDmWarning = dmWarning(viewer)) }
     }
 

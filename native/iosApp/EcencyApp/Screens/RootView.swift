@@ -10,6 +10,7 @@ struct RootView: View {
     @Namespace private var hero
     @Environment(\.motion) private var motion
     @Environment(\.appTheme) private var theme
+    @Environment(\.viewportSize) private var viewport
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,6 +34,8 @@ struct RootView: View {
             }
             if !connectivity.state.online { OfflineBanner() }
         }
+        // two panes on a wide window (README "iPhone Duo"), followed through folds and turns
+        .onChange(of: viewport?.width, initial: true) { _, width in if let width { app.fit(width: width) } }
         .environmentObject(app.session)
         .environmentObject(app.votes)
         .environmentObject(app.lock)
@@ -107,6 +110,7 @@ struct RootView: View {
             app.toastOverlay.attach()
             app.applyThemeToLockWindow()
             // RN's RC offer opens its screen under whatever sheet was up: close the sheet first
+            let app = self.app
             app.authOverlay.onOpenScreen = { [weak app] screen in
                 app?.sheet = nil
                 app?.push(screen)

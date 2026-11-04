@@ -1,6 +1,6 @@
 import AVFoundation
 import Combine
-import EcencyCore
+@preconcurrency import EcencyCore
 import MediaPlayer
 import Observation
 import SwiftUI
@@ -700,7 +700,7 @@ final class ListenScreen: ObservableObject {
         var lockEnabled: Bool?
         lockWatch = env.appLock.watch { [weak player] state in
             MainActor.assumeIsolated {
-                let enabled = (state as! AppLockState).enabled
+                let enabled = state.enabled
                 defer { lockEnabled = enabled }
                 if let before = lockEnabled, before != enabled { player?.refreshCard() }
             }

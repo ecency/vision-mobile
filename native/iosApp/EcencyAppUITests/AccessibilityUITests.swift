@@ -60,7 +60,7 @@ final class AccessibilityUITests: XCTestCase {
             try app.performAccessibilityAudit(for: .all) { issue in
                 if AuditExclusions.excuses(issue) { return true }
                 // text scrolled out of its scroll view's visible part: the audit read the pixels drawn where it would be
-                if issue.auditType == .contrast, let e = issue.element, let visible = AuditExclusions.visibleFraction(e, in: app) {
+                if issue.auditType == .contrast, let e = issue.element, let visible = AuditExclusions.visibleFraction(e, in: app) ?? AuditExclusions.outsideTheTabBar(e, in: app) {
                     let shown = String(format: "%.2f", visible)
                     if visible < AuditExclusions.mostlyScrolledOut {
                         print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) visible in its scroll view, not counted")
@@ -333,6 +333,9 @@ enum AuditExclusions {
         // the sheet's estimate and voting power lines, shown whole at AX5 (checked on screenshots) since the demo data
         // answers the reward fund
         "vote sheet (AX5)": [clipped: 3],
+        // 2026-11-03: the system tab bar (README "iPhone Duo"): the list scrolls on under its glass, and at AX5 the
+        // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it)
+        "notifications (AX5)": [clipped: 3],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).
@@ -365,6 +368,19 @@ enum AuditExclusions {
             return min(visible.height / frame.height, visible.width / frame.width)
         }
         return nil
+    }
+
+    /// The share of an element not under the system tab bar (nil when the bar does not cover it): list rows scroll on
+    /// under the bar's glass, as in Apple's own apps, and the audit reads them through it. Works for the bottom bar and
+    /// iPhone Duo's trailing column alike.
+    static func outsideTheTabBar(_ element: XCUIElement, in app: XCUIApplication) -> CGFloat? {
+        let frame = element.frame, bar = app.tabBars.firstMatch
+        guard !frame.isEmpty, bar.exists else { return nil }
+        // the bar's own buttons sit inside it and are checked as any control (content wholly under the bar is not)
+        guard !bar.buttons.allElementsBoundByIndex.contains(where: { $0.frame == frame }) else { return nil }
+        let covered = frame.intersection(bar.frame)
+        guard !covered.isNull, !covered.isEmpty else { return nil }
+        return 1 - (covered.width * covered.height) / (frame.width * frame.height)
     }
 
     static func excuses(_ issue: XCUIAccessibilityAuditIssue) -> Bool {

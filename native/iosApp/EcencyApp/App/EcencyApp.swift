@@ -59,6 +59,10 @@ struct EcencyApp: App {
                     Text(error.message).padding()
                 }
             }
+            // the window's size for every screen, live through folds and resizes (Viewport.swift)
+            .readsViewport()
+            // portrait on phones, any orientation on a large display (iPhone Duo's inner one), live through folds
+            .followsDisplayOrientationPolicy()
             // FIRST_FRAME: the root's first appearance, marked after the run loop turn that commits it
             .onAppear { DispatchQueue.main.async { _ = PerfMarks.shared.markOnce(event: PerfEvent.shared.FIRST_FRAME) } }
         }

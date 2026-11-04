@@ -306,7 +306,11 @@ final class FakeRestHttp: NSObject, AuthHttp {
         if url.hasSuffix("/detect") { return #"[{"confidence":90,"language":"de"}]"# }
         if url.hasSuffix("/translate") { return #"{"translatedText":"Translated fixture text.","detectedLanguage":{"language":"de"}}"# }
         if url.contains("poll.ecency.com") { return "[]" }
-        if url.contains("/search-api/similar") { return #"{"results":[]}"# }
+        // "Read next" only on request (-fakeSimilar YES), so the other screens and the screenshots keep their layout
+        if url.contains("/search-api/similar") {
+            guard UserDefaults.standard.bool(forKey: "fakeSimilar") else { return #"{"results":[]}"# }
+            return #"{"results":[{"author":"spike-bob","permlink":"fake-post-2","title":"Fixture post number 2","tags":["hive"],"created_at":"2026-10-01T00:00:00"},{"author":"spike-carol","permlink":"fake-post-3","title":"Fixture post number 3","tags":["hive"],"created_at":"2026-10-01T00:00:00"}]}"#
+        }
         return nil
     }
 }

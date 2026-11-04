@@ -40,11 +40,14 @@ struct WalletTabView: View {
             }
             if s.showSkeleton { RowsSkeleton(count: 5, avatar: false, identifier: "wallet-skeleton").listRowSeparator(.hidden).listRowInsets(EdgeInsets()).themedRow() }
             ForEach(mine ? s.rows : [], id: \.symbol) { row in
-                AssetCardView(row: row) { app.push(AppScreenAssetDetails(symbol: row.symbol)) } onClaim: {
+                AssetCardView(row: row) { app.push(AppScreenAssetDetails(symbol: row.symbol), fromList: true) } onClaim: {
                     if row.pendingText == nil && row.symbol == "POINTS" { app.push(AppScreenCompanion.shared.of(route: .boost, arg: user)) }
                     else { model.claim(symbol: row.symbol) }
                 }
                 .listRowSeparator(.hidden)
+                // the phone's 16 pt beside the cards, also where the list is a column beside the user menu (two
+                // panes), whose default row margin is none
+                .listRowInsets(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
                 // the theme between and beside the cards (the system row colour is black in dark mode)
                 .themedRow()
             }
@@ -352,7 +355,7 @@ struct AssetDetailsView: View {
                 Section(copy.PENDING_REQUESTS) {
                     ForEach(s.pending, id: \.key) { row in ActivityRowView(row: row, pending: true, expanded: s.expanded.contains(row.key), busy: s.busyKey == "order:\(row.trxIndex ?? 0)", model: model) }
                 }
-                .themedRow()
+                .themedRow().paneRowInsets()
             }
             if s.activitiesEnabled {
                 Section(copy.ACTIVITIES) {
@@ -378,16 +381,16 @@ struct AssetDetailsView: View {
                     }
                     .font(.footnote).foregroundStyle(theme.secondary).listStateRow()
                 }
-                .themedRow()
+                .themedRow().paneRowInsets()
             }
         }
         .listStyle(.plain)
         .themedList()
         .refreshable { model.refresh() }
-        .navigationTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .screenTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
+        .screenBarItem(.trailing) {
             if s.filterable {
-                Button { filter = true } label: { Image(appIcon: .filter) }
+                Button { filter = true } label: { Label(copy.FILTER_TITLE, appIcon: .filter).labelStyle(.iconOnly) }
                     .accessibilityLabel(copy.FILTER_TITLE).accessibilityIdentifier("history-filter")
             }
         }

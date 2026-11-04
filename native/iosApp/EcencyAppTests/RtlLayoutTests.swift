@@ -97,8 +97,12 @@ final class RtlLayoutTests: XCTestCase {
         let window = UIWindow(windowScene: scene)
         let presented = UIViewController()
         window.rootViewController = presented
+        // iOS 27 hands trait changes only to visible windows, on the next frame (the app's windows are visible)
+        window.isHidden = false
+        defer { window.isHidden = true }
         XCTAssertEqual(presented.traitCollection.layoutDirection, .rightToLeft)
         UIKitDirection.apply("en-US")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
         XCTAssertEqual(presented.traitCollection.layoutDirection, .leftToRight, "live, without a restart")
     }
 }

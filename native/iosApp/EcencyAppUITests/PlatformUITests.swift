@@ -95,7 +95,7 @@ final class PlatformUITests: XCTestCase {
         let app = launch(["-openScreen", "qr", "-qrScan", "https://ecency.com/@spike-bob"])
         addUIInterruptionMonitor(withDescription: "camera") { alert in
             for label in ["Allow", "OK", "Don’t Allow"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
+                alert.buttons[label].firstMatch.tap()
                 return true
             }
             return false

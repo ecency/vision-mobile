@@ -16,7 +16,7 @@ native/
 ## Requirements
 
 - JDK 17+, Android SDK 36 (`native/local.properties` with `sdk.dir=...`, not committed)
-- Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`); Xcode 27.1+ for the iPhone Duo simulator
 
 ## Build and test
 
@@ -46,6 +46,7 @@ xcodebuild test -project EcencySpike.xcodeproj -scheme EcencyApp \
 native/scripts/ios-sim.sh                  # build, install and launch on the "Ecency Spike" iOS simulator (created on first run)
 native/scripts/ios-sim.sh --test           # unit + UI tests on that simulator
 native/scripts/ios-sim.sh --shot out.png   # launch, then screenshot (for UI comparisons)
+ECENCY_SIM_NAME="Ecency Duo" ECENCY_SIM_DEVICE="iPhone Duo" native/scripts/ios-sim.sh   # iPhone Duo (Xcode 27.1+)
 native/scripts/android-emu.sh              # build, install, launch, print launch time
 native/scripts/android-emu.sh --shot out.png
 ```
@@ -484,6 +485,60 @@ Perf marks from the UI: `app_start` (App init), `first_frame` (root first appear
 
 A Release build needs the build secrets (see Secure storage). For a local compile check only, append dummy values with their SHA-256 to `native/local.properties`, build `-configuration Release -sdk iphonesimulator ARCHS=x86_64`, then remove them again; never ship such a build.
 
+## iPhone Duo
+
+Issue #3601. Apps built with the iOS 27 SDK resize on iPhone Duo: the window changes when the device folds or unfolds,
+and the inner display gives any shape (its poses ignore the supported orientations). Builds with the iOS 27.1 SDK go
+edge to edge, with the system bars laid out vertically on the right. Apple's checklist:
+https://developer.apple.com/iphone-duo/prepare/ (Xcode 27 also exports its `app-resizability` agent skill:
+`xcrun agent skills export`).
+
+- Orientation (`OrientationPolicy`, Viewport.swift), from the display's shape: portrait on a tall display (every
+  iPhone, about 2:1, unchanged), any orientation but upside down on a near-square one (both iPhone Duo displays, about
+  1.4:1). Re-read whenever the window scene's geometry changes (a fold or unfold). Not from the display's size: while
+  the app is portrait only, iOS boxes it on the unfolded inner display and reports that display as a phone-sized
+  469 x 669 pt screen, so a size rule (portrait on the outer display only) stayed boxed after every unfold. Layout
+  reads the space it has, never the device's orientation or idiom.
+- Nothing sizes itself from the main screen. The window's size is `\.viewportSize` (`Viewport.swift`, measured at the
+  root and updated on every resize): card image cap, drawer width, profile cover decode width. Pixel sizes use the
+  display's scale (`\.displayScale`, or `context.environment.displayScale` in representables): body image URLs, image
+  decoding, text chips. Screen recording is the window scene's `sceneCaptureState` (`onSceneCaptureChange`).
+- `ResizabilityTests` fails on any `UIScreen.main`, device orientation or idiom in the app sources, and checks that the
+  viewport follows a window resized like a fold.
+- `UIRequiresFullScreen` stays in project.yml: iOS 27 ignores it and resizes anyway (TN3192), and removing it changes
+  older iOS versions.
+- Simulator: create one with `ECENCY_SIM_DEVICE="iPhone Duo"` (`ios-sim.sh` picks the runtime that runs it). Device Hub
+  replaced Simulator.app in Xcode 27. Screenshots need the screen: `ECENCY_SIM_DISPLAY=primary` (outer, the default) or
+  `primary-1` (inner).
+- The shell is the system TabView and the root's navigation bar (`TabsRoot`, ShellRoot.swift), so iOS places them: a
+  bottom tab bar and a top bar on a phone, one column on the trailing edge on iPhone Duo. Tabs show icons only (RN;
+  Waves is RN's wavy dash drawn into a template image) and carry their old ids (`tab-feed`...) on the icon image and
+  the tab bar item (`TabBarTagger`); the bar reads badges itself ("Notifications, 3 items").
+- Two panes (`NavState.pane`, `pushIn`, `fitTo`, `menuBesideList` in the core; PaneViews.swift): on a window at least
+  840 pt wide (the inner display held sideways, not upright at 669 pt) every tab shows two columns.
+  Nothing open: the user menu beside the list. A tap in the list (a post, a wave's thread, a chat, an asset's details): the list and what it opened, the menu closed; the
+  next tap in the list replaces it (Mail, `pushIn(fromList = true)`), and anything else opened while the pane shows
+  (a profile, voters, another post, a sheet's choice) goes on in the pane with its own back. The screens under the
+  pane's top stay alive, hidden, so back finds them as they were (scroll, narration). The pane's menu button or the
+  account button brings the menu back, the pane's screen kept behind it; the account button takes it away again.
+  The side menu's places (`cover`), the editor, settings, search and wallet screens cover the window. A fold moves the pane under the pushed screens (the
+  same screen in front) and an unfold moves it back; the saved navigation keeps the pane as pushed screens. A screen
+  in the pane shares the app's bar with the list, so its own bar items go through `screenBarItem` (the navigation bar
+  on a phone, the pane's header beside a list). `PanesTest` (core) and `TwoPaneUITests` (skips on a phone-sized
+  window; run it on the Duo simulator unfolded and held sideways).
+- A pane screen's title and bar items go through `screenTitle` and `screenBarItem` (PaneViews.swift): the navigation
+  bar on a phone, the pane's header beside a list (the title in the middle, the actions at the trailing end).
+- App Store screenshots: `scripts/duo-screenshots.sh inner|outer <folder>` launches six screens on the synthetic data
+  and saves the display's own size, which is App Store Connect's iPhone Duo size (outer 1398 x 2034 px, inner
+  2853 x 2007 px sideways or 2007 x 2853 upright), without an alpha channel. Fold or unfold in Device Hub first; the
+  script never switches displays.
+- CI: release builds run on GitHub's `xcode-27` image with Xcode 27.1 (`build-ios.yml`), whose iOS 27.1 SDK is what
+  lets iPhone Duo lay the app out edge to edge with the vertical bars.
+- A list in the pane gets no default row margins (it is away from the window's edge): its rows set them with
+  `paneRowInsets()` (asset details' history), or their own insets (the wallet's asset cards).
+- Links in chat messages and link cards open in the app when they are a post, profile or tag on ecency.com or another
+  Hive frontend (`ContentLinks.entry`, render-helper's frontend list), anything else in the browser.
+
 ## App shell
 
 The RN shell (`src/navigation`, `components/bottomTabBar`, `components/sideMenu`, `components/header`) on both platforms, with the navigation model in the core (`shared/.../core/app/Navigation.kt`, `SideMenu.kt`, `Shell.kt`):
@@ -496,7 +551,7 @@ The RN shell (`src/navigation`, `components/bottomTabBar`, `components/sideMenu`
 - Links: `AuthLinkModel` takes ecency://, hive:// and ecency.com /auth and /signup first; ecency.com posts, profiles and feeds (`ContentLinks`) open through `NavState.open(entry, loggedIn)`, gated, on top of the open tab (Android intent filters with `onNewIntent`, a launch link handled once; iOS `onOpenURL`). A link that arrives while locked opens behind the lock, and a cold-start link waits until the accounts were read before the login gate applies. iOS takes links at the scene root (outside the lock gate), so links delivered while the PIN pad shows are kept. Android uses the RN app's ecency.com path patterns with `autoVerify`, verified through ecency.com/.well-known/assetlinks.json, which already lists the RN app id `app.esteem.mobile.android` and its signing certificate (README "In-place upgrade from RN 3.x"). Any account change (sign-out, switch, a logout that moved to the next account, a link login as someone else) keeps the tab and public screens and drops gated ones (`afterAccountChange`); a wipe returns to the Feed tab. Link and key notices use the shared toast channel.
 - iOS saves the navigation from the container (not a view, which is gone while locked) and restores it at launch only when it is under 30 minutes old (Android: saved state after process death; RN restores nothing).
 - Global UI: `UiMessages` (toasts and in-app banners from shared code, one of each at a time), `ConnectivityModel` (fed by `ConnectivityManager` and `NWPathMonitor`; RN's "No connection!" strip at the bottom). Error boundary: screen setup runs guarded (`Guarded` on Android, `ShellErrorView` on iOS) and shows RN's "Something went wrong / Try again?"; neither Compose nor SwiftUI can catch an exception thrown while rendering.
-- Portrait only on both. Nothing of the shell is composed while the app is locked; on iOS the lock window stays above the side menu and every sheet.
+- Portrait only on phones (iOS: a large display such as iPhone Duo's inner one turns too, see iPhone Duo). Nothing of the shell is composed while the app is locked; on iOS the lock window stays above the side menu and every sheet.
 - Deliberate differences: Docs and other web links open the system in-app browser rather than RN's WebView screen; the Feed tab keeps the guest filters (TRENDING, HOT, NEW) until the feed wave; iOS keeps login as a sheet and the segmented feed filter; tab icons are Material (Android) and SF Symbols (iOS) stand-ins for RN's icon fonts, Waves uses RN's wavy dash; there is no edge swipe to open the menu.
 - Tests: `NavigationTest`, `ShellTest` (shared), `ShellFlowsTest` (Android), `ShellTests` and `ShellUITests` (iOS).
 
@@ -1577,7 +1632,7 @@ env.chat.newGroupModel(); renameModel(id, name); privacyModel(); openDirect(user
 - **Session** (RN bootstrapMattermostSession): one bootstrap per account at a time, the answer reused for 30 s, tokens in memory only and passed per call (no shared header that one account could overwrite for another). Logout, logout-all and the wipe (`accountsLeft`) void every bootstrap on the way (also for a caller that joined one already on its way), so a chat token never outlives its account; the channel hints, renames and closed DM notices (kept by channel id) that a departing account saw go too, while what only the accounts that stay saw is kept. A refused access token is renewed once (`SessionRenewals`); a call refused with 401 bootstraps again once.
 - **Badge** (RN `_refreshUnreadChats`): read at account load and unlock, on foreground, after a channel was read or muted, when a read conversation closes; never while signed out, offline or locked. RN's unread rules (`unread_eligible`, muted, never-viewed non-DMs with 0 or null) are pinned by goldens from mattermost.ts.
 - **List**: RN's four sections and sort orders (and sort by name), DM partners resolved through `users/ids`, group titles and two avatars, community avatars from `hive-NNN`, relative times, unread counts, an in-line connecting notice only while the chat is not connected (no "Connected" pill), a round Esie button at the bottom end (the FAB's size and place, hidden signed out or disconnected) that opens her direct message as "Ask Esie" does; options (mark read, favorite, mute, leave channel or conversation, rename group for the owner); search (350 ms, 2 characters, local plus server channels, people with a Hive name first) with Join and message buttons; New group (2 to 7 others, the server's refusal text shown); renames newer than a list fetch are kept.
-- **Conversation**: pages back with `before`, a non-member joins and reads again, fewer than 15 rows asks for more; RN's join notices grouped ("N people joined"), rename notices; the "New messages" marker at the oldest unread row, scrolled to once, the channel marked read; messages with RN's parsing (images out of the text, `@name` to profile links, `:emoji:` from RN's map, links including `hive://`, mentions bold, inline markdown as RN's inlineMarkdown.ts), quotes, link cards, reactions (tap toggles, long press: who reacted), "Edited"; composer with mentions, reply, edit, Hive post link card, image attachment through the app's image upload, send with `pending_post_id`, the posting ban notice (counts down, lifts itself) or RN's toast; message options (quick reactions and the emoji picker, Reply, Copy, Share, Translate, Edit, Pin/Unpin, Delete with confirmation); pinned, members and group sheets; the DM safety notice; moderators of the channel's community may pin and delete.
+- **Conversation**: pages back with `before`, a non-member joins and reads again, fewer than 15 rows asks for more; RN's join notices grouped ("N people joined"), rename notices; the "New messages" marker at the oldest unread row (not scrolled to: the thread opens at the newest message, owner 11-03; RN jumped to it, which sent a thread with many unread messages up into its history), the channel marked read; messages with RN's parsing (images out of the text, `@name` to profile links, `:emoji:` from RN's map, links including `hive://`, mentions bold, inline markdown as RN's inlineMarkdown.ts), quotes, link cards, reactions (tap toggles, long press: who reacted), "Edited"; composer with mentions, reply, edit, Hive post link card, image attachment through the app's image upload, send with `pending_post_id`, the posting ban notice (counts down, lifts itself) or RN's toast; message options (quick reactions and the emoji picker, Reply, Copy, Share, Translate, Edit, Pin/Unpin, Delete with confirmation); pinned, members and group sheets; the DM safety notice; moderators of the channel's community may pin and delete.
 - **Live**: the websocket follows the screen (on screen, app in front, not locked): authentication, ping every 30 s with a 10 s pong bound, backoff 1 s to 30 s for at most an hour; only a connection that got the server's `hello` counts as up (open-then-close before it is a failed attempt, so the backoff grows and the hour runs). It ends for good on a 15 s connect timeout (Android's OkHttp connect bound is the same 15 s), a handshake refused with 401, 403, 404 or 426, a close with one of those codes or 1002 or 1003 (RN doNotReconnectCodes; the code comes from `HasSocket.closeCode`) and a FAIL answer to the authentication challenge. The handshake status is read from the engine's own wording (`HasSocketRefused`: Ktor's "expected status code 101 but was N", 401 on both engines; OkHttp's "Expected HTTP 101 response but was 'N ...'"); Darwin reports other refused statuses as NSURLErrorBadServerResponse without the code, so on iOS a 403, 404 or 426 is retried with backoff until the hour runs out; posts, edits, deletions, reactions, typing ("a is typing...") and group renames arrive in place; the echo of one's own send is recognised by its pending id, and whichever of the echo and the send's answer lands first scrolls the thread to the sent message (the thread may sit at the unread marker; RN scrolls only when the answer lands first).
 - **Lock and accounts**: no chat request while the lock hides content (Android and iOS compose nothing then); the websocket closes behind the lock; an account change empties the list and stops any open conversation (its models answer nothing for the next account).
 - **Entry points**: the Chats tab, profile and quick profile "Message" (RN's "User has not joined chats" toast). RN has no push type and no link that opens a chat, so neither does this app; a restored conversation (saved navigation keeps only the channel id and type) reads its name and type from the channel list.
@@ -1594,7 +1649,7 @@ env.chat.newGroupModel(); renameModel(id, name); privacyModel(); openDirect(user
 - "Mark as read" also zeroes `message_count` locally (RN zeroes the other counters only, so its row could keep a badge until the next load). A failed badge read keeps the last count (RN sets 0).
 - A conversation read on screen clears its row in the list at once (`ChatService.viewed`, after the server took the view); RN refreshes only the tab badge and its row kept the count until the next load.
 - The warning box (the direct message warning and the ban notice, RN `dmWarningContainer`) takes theme colors (`AppTheme.warning*`, `EcencyColors.warning*`, the same values): RN's cream 0xFFF6DF with a darker amber border than RN's, 0xB07800 (3.5:1, RN's 0xF4C26B was 1.5:1), and text 0x8A5B00 (5.5:1) in light; in dark an amber dark surface 0x3A3223 with border 0xC9963A (4.8:1) and text 0xFFD98A (9.4:1); iOS Increase Contrast darkens the light text to 0x6B4500 (7.9:1) and lightens the dark ones to 0xE8B04F (6.5:1) and 0xFFE7B3 (10.4:1). Tests: iOS `AccessibilityTests.testTheWarningBoxMeetsAAInEveryTheme`, `ThemedBackgroundUITests.testDmWarningBox`; Android `ContrastTest`, `ChatsThemedBackgroundTest.dmWarningOnThe*Theme`.
-- The conversation is an inverted list on both apps, as RN's (`inverted` FlatList): Android `reverseLayout`, iOS a flipped `ScrollView` with each row flipped back. It opens at the newest message (or the first unread one, as RN), older pages go in above without moving what is shown, and a page is asked for only when the oldest row comes on screen. Both used to open at the oldest end and load the page before at once: iOS's bottom-anchored stack in reading order laid out from its top, so the oldest row appeared and each page pushed the view up into old history or blank space; Android's list kept its only item, the loading row, in place when the first page came in (the loading row now joins the list only under messages). Tests: shared `ChatsListTest.aConversationReadOnScreenClearsItsRowOnReturn`, Android `ChatFlowsTest` (long channel, direct message, read on return), iOS `ChatUITests` (long channel, direct message). A message's text keeps its full height (iOS `fixedSize`): under a quote, whose bar takes any height offered, a long reply gave its height to the quote and was cut after a few lines (iOS, large text). Fake data: `-demoChatHistory <n>` (Android `--ei demoChatHistory <n>`) adds n older messages, one long message and a long reply quoting it to the demo channel, DM and group.
+- The conversation is an inverted list on both apps, as RN's (`inverted` FlatList): Android `reverseLayout`, iOS a flipped `ScrollView` with each row flipped back. It opens at the newest message (RN opened at the first unread one), older pages go in above without moving what is shown, and a page is asked for only when the oldest row comes on screen. Both used to open at the oldest end and load the page before at once: iOS's bottom-anchored stack in reading order laid out from its top, so the oldest row appeared and each page pushed the view up into old history or blank space; Android's list kept its only item, the loading row, in place when the first page came in (the loading row now joins the list only under messages). Tests: shared `ChatsListTest.aConversationReadOnScreenClearsItsRowOnReturn`, Android `ChatFlowsTest` (long channel, direct message, read on return), iOS `ChatUITests` (long channel, direct message). A message's text keeps its full height (iOS `fixedSize`): under a quote, whose bar takes any height offered, a long reply gave its height to the quote and was cut after a few lines (iOS, large text). Fake data: `-demoChatHistory <n>` (Android `--ei demoChatHistory <n>`) adds n older messages, one long message and a long reply quoting it to the demo channel, DM and group.
 - The composer's link preview is made only for Hive posts: the app never fetches arbitrary third-party pages while someone types (RN reads any page's Open Graph tags with a desktop user agent). Cards that arrive with a message (`link_*` props) show as RN shows them.
 - Message images and link card images go through the image proxy (RN loads them from their hosts).
 - E-mail addresses in messages stay text (RN's linkify makes mailto links); link detection otherwise matches linkify-it on the golden cases.

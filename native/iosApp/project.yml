@@ -94,8 +94,12 @@ targets:
             CFBundleURLSchemes: [app.esteem.mobile.ios.share]
         # The HiveAuth wallets the app opens.
         LSApplicationQueriesSchemes: [has, waves]
+        # Every phone stays in portrait (OrientationPolicy, Viewport.swift); iPhone Duo's near-square displays take any
+        # orientation, or the app sits in a portrait window between black bars on the unfolded one.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
     entitlements:
       # written by XcodeGen; Generated/ is gitignored. push-firebase.yml adds aps-environment to the same file.
       path: Generated/App.entitlements

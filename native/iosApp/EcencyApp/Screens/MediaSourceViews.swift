@@ -7,7 +7,7 @@ import SwiftUI
 // the same options inline in the editor's uploads sheet. The library route stays the system photo picker (PHPicker:
 // no library permission, the item provider the allow-list and the iCloud progress need).
 
-extension MediaSourceOption: Identifiable {
+extension MediaSourceOption: @retroactive Identifiable {
     public var id: String { source.name }
 }
 
