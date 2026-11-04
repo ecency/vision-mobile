@@ -103,12 +103,13 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
     private var pending: Pending? = null
 
     private sealed interface Pending {
-        class Sign(val username: String, val ops: JsonArray, val authority: KeyRole, val callback: String?, val requestId: String?) : Pending {
+        /** [quiet]: from content or a page: its requester never hears a decline. */
+        class Sign(val username: String, val ops: JsonArray, val authority: KeyRole, val callback: String?, val requestId: String?, val quiet: Boolean) : Pending {
             /** One link confirmed once is one action: its retry resumes it, a second link with the same operations is its own. */
             val actionId: String = com.ecency.core.secure.secureRandomBytes(16).joinToString("") { (it.toInt() and 0xff).toString(16).padStart(2, '0') }
         }
         class PostingKey(val link: AuthLink.PostingKeyRequest) : Pending
-        class Proof(val link: AuthLink.AuthRequest) : Pending
+        class Proof(val link: AuthLink.AuthRequest, val quiet: Boolean) : Pending
         class Transfer(val link: AuthLink.AuthTransfer) : Pending
         class Code(val link: AuthLink.CodeLogin) : Pending
 
@@ -150,15 +151,11 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             setState { it.copy(notice = BUSY) }
             return true
         }
-        // a question still open is declined (its requester gets user_cancelled) before the new one replaces it,
-        // and so is a link still waiting for the unlock or the accounts. A refusal the user has not closed and a
-        // posting key question are dropped instead: the user did not act on them, and their answer would tell the
-        // requester whether the account is on this device
-        when (pending) {
-            null -> Unit
-            is Pending.Answer, is Pending.PostingKey -> pending = null
-            else -> decline()
-        }
+        // a question still open, of any kind, is dropped without an answer when the new one replaces it: only the
+        // user's own decline answers, and an answer here would tell the requester whether the account is on this
+        // device and which one is current. A link still waiting for the unlock or the accounts was never asked
+        // about: it is cancelled below
+        pending = null
         waiting?.let { (job, earlier, earlierFromContent) ->
             job.cancel()
             // a content link still waiting was never asked about: its requester hears nothing
@@ -231,7 +228,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             }
             is AuthLink.PostingKeyRequest -> postingKeyRequest(link, user, fromContent = quiet, silent = silent)
             is AuthLink.AuthRequest -> {
-                pending = Pending.Proof(link)
+                pending = Pending.Proof(link, quiet)
                 setState { it.copy(prompt = LinkPrompt.AuthRequest(link.username, AuthLinks.requesterLabel(link.callback))) }
             }
             is AuthLink.AuthTransfer -> {
@@ -372,7 +369,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
                     return refuse(MULTI_OPS_TITLE, NOT_SUPPORTED, silent)
                 }
                 val authority = if (formatted.authority == "active") KeyRole.ACTIVE else KeyRole.POSTING
-                pending = Pending.Sign(user, ops, authority, callback, requestId)
+                pending = Pending.Sign(user, ops, authority, callback, requestId, quiet)
                 setState {
                     it.copy(
                         prompt = LinkPrompt.SignConfirm(
@@ -422,13 +419,13 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         }
     }
 
-    /** The user declined: the requesting app hears `user_cancelled`. */
+    /** The user declined: the requesting app hears `user_cancelled`, unless the request came from content or a page. */
     fun decline() {
         val action = pending
         pending = null
         setState { it.copy(prompt = null) }
         when (action) {
-            is Pending.Sign -> action.callback?.let { answer(it, action.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = false) }
+            is Pending.Sign -> action.callback?.let { answer(it, action.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = action.quiet) }
             is Pending.PostingKey -> answer(
                 action.link.callback, action.link.requestId,
                 listOf(
@@ -437,7 +434,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
                 ),
                 quiet = false,
             )
-            is Pending.Proof -> answer(action.link.callback, action.link.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = false)
+            is Pending.Proof -> answer(action.link.callback, action.link.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = action.quiet)
             // the user saw why: the requester hears it
             is Pending.Answer -> answer(action.callback, action.requestId, action.payload, quiet = false)
             else -> Unit

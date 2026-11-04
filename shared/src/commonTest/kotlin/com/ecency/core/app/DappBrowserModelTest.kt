@@ -126,13 +126,13 @@ class DappBrowserModelTest {
         assertFalse(b.shouldLoad(tab, "ecency://login?username=spike-nobody&callback=dappapp://cb", true, true))
         testScheduler.advanceUntilIdle()
         assertNull(app.env.authLinks.current.callback, "not_logged_in stays on the device")
-        // a signing link still asks, names the page, and the user's decline then goes back
+        // a signing link still asks and names the page; a decline tells the page nothing either
         assertFalse(b.shouldLoad(tab, "ecency://transfer?to=spike-bob&amount=1&asset=HIVE&callback=dappapp://cb", true, true))
         testScheduler.advanceUntilIdle()
         assertIs<LinkPrompt.SignConfirm>(app.env.authLinks.current.prompt)
         app.env.authLinks.decline()
         testScheduler.advanceUntilIdle()
-        assertEquals(true, app.env.authLinks.current.callback?.contains("user_cancelled"))
+        assertNull(app.env.authLinks.current.callback, "a page's request never hears a decline")
     }
 
     @Test

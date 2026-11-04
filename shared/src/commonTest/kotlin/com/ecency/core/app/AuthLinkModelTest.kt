@@ -244,7 +244,7 @@ class AuthLinkModelTest {
     }
 
     @Test
-    fun aContentLinkTheUserWasAskedAboutAnswersTheirChoice() = runTest {
+    fun aContentLinkTheUserDeclinedAnswersNoOne() = runTest {
         val app = signedIn(this)
         val links = app.env.authLinks
         links.handleFromContent(voteLink())
@@ -253,7 +253,38 @@ class AuthLinkModelTest {
         assertNull(links.current.callback)
         links.decline()
         testScheduler.advanceUntilIdle()
-        assertEquals("user_cancelled", params(links.current.callback!!)["error"], "after the question, the user's answer goes back")
+        // a decline would tell the post's author that this account is here and signs with a key
+        assertTrue(links.answers().isEmpty(), "a quiet request hears nothing, a decline included")
+        // a page's auth request too
+        links.handle("ecency://auth-request?callback=otherapp://page&request_id=p", pageHost = "dapp.example")
+        testScheduler.advanceUntilIdle()
+        assertIs<LinkPrompt.AuthRequest>(links.current.prompt)
+        links.decline()
+        testScheduler.advanceUntilIdle()
+        assertTrue(links.answers().isEmpty())
+    }
+
+    @Test
+    fun aSignQuestionReplacedByANewLinkAnswersNoOne() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        // a page's signing link that names the current account, then any other link
+        links.handle(voteLink("https://evil.example/cb"), pageHost = "dapp.example")
+        testScheduler.advanceUntilIdle()
+        assertIs<LinkPrompt.SignConfirm>(links.current.prompt)
+        links.handle("ecency://auth-request?callback=otherapp://second&request_id=b")
+        testScheduler.advanceUntilIdle()
+        links.answers().let { assertTrue(it.isEmpty(), "the page learns nothing: $it") }
+        // an external signing link replaced the same way answers no one either: only the user's own decline answers
+        links.decline()
+        assertEquals("b", params(links.answers().single())["request_id"], "the user declined the second one")
+        links.handle(voteLink())
+        testScheduler.advanceUntilIdle()
+        links.handle("ecency://auth-request?callback=otherapp://third&request_id=c")
+        testScheduler.advanceUntilIdle()
+        links.answers().let { assertTrue(it.isEmpty(), "replaced, not declined: $it") }
+        links.decline()
+        assertEquals("c", params(links.answers().single())["request_id"], "the user's decline answers")
     }
 
     @Test
@@ -627,18 +658,14 @@ class AuthLinkModelTest {
     }
 
     @Test
-    fun aSecondLinkDeclinesTheOpenQuestionAndBothAnswersArrive() = runTest {
+    fun aSecondLinkReplacesTheOpenQuestionWithoutAnsweringIt() = runTest {
         val app = signedIn(this)
         val links = app.env.authLinks
         links.handle("ecency://auth-request?callback=otherapp://first&request_id=a")
         testScheduler.advanceUntilIdle()
         links.handle("ecency://auth-request?callback=otherapp://second&request_id=b")
         testScheduler.advanceUntilIdle()
-        val first = params(links.current.callback!!)
-        assertEquals("user_cancelled", first["error"])
-        assertEquals("a", first["request_id"])
-        links.consumeCallback()
-        assertNull(links.current.callback)
+        assertNull(links.current.callback, "the replaced question answers no one: the user did not decline it")
         assertIs<LinkPrompt.AuthRequest>(links.current.prompt)
         // while the approved request runs, a third link is told the app is busy
         links.confirm()
