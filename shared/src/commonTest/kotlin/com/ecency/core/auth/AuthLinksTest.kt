@@ -125,6 +125,16 @@ class AuthLinksTest {
         browsers.forEach { scheme ->
             assertFalse(AuthLinks.canReceivePostingKey("$scheme://example.com/x"), scheme)
         }
+        // more browsers, by name; "arc" only as the whole name or an arc- / arcs prefix
+        listOf("puffin", "dolphin", "ecosia", "orion", "kagi", "vivaldi", "kiwi", "ucweb", "whale", "arc", "arc-https", "arcs", "puffinsecure").forEach {
+            assertFalse(AuthLinks.canReceivePostingKey("$it://example.com/x"), it)
+        }
+        listOf("search", "marcapp", "hivearcade", "parcel").forEach { assertTrue(AuthLinks.canReceivePostingKey("$it://cb"), it) }
+        // a host that forwards a URL on (x-callback-url style), whatever the scheme
+        listOf("open-url", "open", "navigate", "url", "x-callback-url", "Open-URL").forEach {
+            assertFalse(AuthLinks.canReceivePostingKey("someapp://$it?url=https://evil.example"), it)
+        }
+        assertTrue(AuthLinks.canReceivePostingKey("someapp://login/done"))
         // an app's own scheme still gets the question
         listOf("honeyback", "otherapp", "peakd", "hiveblog").forEach { assertTrue(AuthLinks.canReceivePostingKey("$it://cb"), it) }
         // browser schemes stay acceptable callbacks for answers without a key (the list only guards the key)
