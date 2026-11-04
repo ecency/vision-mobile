@@ -151,7 +151,8 @@ class TestNode {
 
     /** [monotonic]: the app lock's clock, moved by tests that send the app away (README "Foreground refresh"). */
     fun env(monotonic: (() -> Long)? = null) = AppEnvironment(
-        api = EcencyApi(listOf("https://node-a.example"), transport),
+        // two hosts: a decision that needs two nodes to agree (a posting key hand-over) can be made
+        api = EcencyApi(listOf("https://node-a.example", "https://node-b.example"), transport),
         vault = KeyVaultAsync(KeyVault(store), Dispatchers.IO),
         renderer = InterimPostBodyRenderer("https://i.ecency.com"),
         dispatchers = AppDispatchers(Dispatchers.Main, Dispatchers.Default, Dispatchers.IO),
