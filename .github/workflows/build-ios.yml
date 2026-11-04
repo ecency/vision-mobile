@@ -19,6 +19,8 @@ on:
       - 'gradle/**'
       - '*.gradle.kts'
       - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
       - 'scripts/**'
       # the app's strings are generated from the locale files (a Crowdin pull ships through here)
       - 'src/config/locales/**'

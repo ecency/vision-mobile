@@ -19,7 +19,7 @@ iosApp/              SwiftUI app; project.yml is the source, EcencySpike.xcodepr
 build-logic/         Included Gradle build: the l10n generator and the source lint tests
 src/config/locales/  Translations; en-US.json is the one source. Crowdin syncs this exact path: never move it
 scripts/             ios-sim.sh, android-emu.sh, duo-screenshots.sh, icons/, release checks
-tools/               Offline golden fixture generators (tools/package.json, tools/README.md); never part of a build
+tools/               Golden fixture generators run by hand (tools/README.md); never part of a build
 docs/                Release builds, post rendering notes, brand sources
 ```
 

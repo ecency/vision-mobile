@@ -13,7 +13,7 @@ iosApp/          SwiftUI app; project.yml is the source, the .xcodeproj is gener
 build-logic/     Gradle build tools (the localization generator)
 src/config/locales/  The translations (Crowdin syncs this path; the l10n generator reads it)
 scripts/         Simulator, emulator, icon and release helpers
-tools/           Offline generators of golden fixtures (tools/README.md)
+tools/           Golden fixture generators, run by hand (tools/README.md)
 docs/            Release builds, design notes, brand sources (docs/brand)
 ```
 

@@ -1,7 +1,7 @@
 # Golden fixture generators
 
-Offline scripts that write the test fixtures and data tables the shared core's tests check against. No build or test
-runs them: their output is committed (`shared/src/commonTest/...`, a few tables in `shared/src/commonMain/...`), and a
+Scripts, run by hand, that write the test fixtures and data tables the shared core's tests check against. No build or
+test runs them (some read public Hive nodes for chain state, such as `golden/generate.mjs`): their output is committed (`shared/src/commonTest/...`, a few tables in `shared/src/commonMain/...`), and a
 test reads only that output.
 
 They run the npm packages the app's behaviour is defined by, so the fixtures stay a second opinion on the Kotlin code:
