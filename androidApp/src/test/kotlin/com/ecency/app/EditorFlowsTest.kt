@@ -878,6 +878,44 @@ class EditorFlowsTest {
         assertCountRowIsOneLine()
     }
 
+    /**
+     * A long draft (as iOS's BodyTextView, README "Editor and publishing"): above 10,000 characters the body is as tall
+     * as the visible area and scrolls itself, so a key no longer lays out the whole text; a short body grows with its
+     * text. The header still scrolls away and the caret stays on screen.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aLongBodyIsAsTallAsTheViewportAndAShortOneGrows() {
+        launchSignedIn()
+        openEditor()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        compose.onNodeWithTag("editorBody").performClick()
+        // a short body that is still taller than the window: it grows past the viewport
+        compose.onNodeWithTag("editorBody").performTextInput((1..60).joinToString("\n") { "Line $it" })
+        settle()
+        // the visible height of the scroll column (it changes as the words count row comes and goes)
+        // less the field's own 8 dp above and below its text (the tag sits inside that padding)
+        fun viewport() = node("editorScroll").size.height - node("editorBody").layoutInfo.density.run { androidx.compose.ui.unit.Dp(16f).roundToPx() }
+        assertTrue("a short body grows: ${node("editorBody").size.height} > ${viewport()}", node("editorBody").size.height > viewport())
+
+        val line = "A line of a long draft, about fifty characters.\n" // 48
+        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(250)) // 12,000 characters
+        settle()
+        assertEquals(12_000, model().current.body.length)
+        assertEquals("a long body is bounded to the viewport", viewport(), node("editorBody").size.height)
+        // the field is on screen
+        val field = node("editorBody").boundsInRoot
+        assertTrue("the body is on screen: $field", field.height > 0.7f * viewport())
+
+        // back below 8,000 it grows again (between the two it stays as it is)
+        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(190)) // 9,120
+        settle()
+        assertEquals("between 8,000 and 10,000 it keeps scrolling itself", viewport(), node("editorBody").size.height)
+        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(150)) // 7,200
+        settle()
+        assertTrue("below 8,000 it grows again", node("editorBody").size.height > viewport())
+    }
+
     private fun showKeyboard(height: Int) = compose.runOnUiThread {
         val insets = androidx.core.view.WindowInsetsCompat.Builder()
             .setInsets(androidx.core.view.WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.of(0, 0, 0, height))

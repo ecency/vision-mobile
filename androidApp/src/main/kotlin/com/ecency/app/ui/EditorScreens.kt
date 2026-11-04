@@ -425,6 +425,9 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
     var bodyLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
     val caretRequester = remember { BringIntoViewRequester() }
     val caretMargin = with(LocalDensity.current) { 8.dp.toPx() }
+    // a long draft scrolls inside the field (BodyScroll), which keeps its own caret in view: the column then only
+    // keeps the whole field on screen. Decided in the composition of each text, so no frame lays out a long text whole
+    val bodyScrollsItself = remember { BodyScroll() }.update(field.text.length)
     // the preview takes the body away and its focus with it; the body that comes back shows its caret
     var shownPreview by remember { mutableStateOf(state.isPreview) }
     LaunchedEffect(state.isPreview) {
@@ -435,6 +438,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
             bodyLayout = null // the field is gone; the next layout is the new field's
         } else {
             val layout = snapshotFlow { bodyLayout }.filterNotNull().first()
+            if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
             val caret = layout.getCursorRect(field.selection.end.coerceIn(0, layout.layoutInput.text.length))
             caretRequester.bringIntoView(caret.inflate(caretMargin))
         }
@@ -442,6 +446,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
     LaunchedEffect(field.text, bodyLayout) {
         val layout = bodyLayout ?: return@LaunchedEffect
         if (!bodyFocused || layout.layoutInput.text.text != field.text) return@LaunchedEffect
+        if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
         val caret = layout.getCursorRect(field.selection.end.coerceIn(0, field.text.length))
         caretRequester.bringIntoView(caret.inflate(caretMargin))
     }
@@ -561,7 +566,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                             enabled = !state.isSending,
                             textStyle = TextStyle(fontSize = 16.sp, color = colors.text, lineHeight = 24.sp, textDirection = TextDirection.Content), cursorBrush = SolidColor(colors.blueText),
                             onTextLayout = { bodyLayout = it },
-                            modifier = Modifier.fillMaxWidth().heightIn(min = viewport)
+                            modifier = Modifier.fillMaxWidth().then(if (bodyScrollsItself) Modifier.height(viewport) else Modifier.heightIn(min = viewport))
                                 .onFocusChanged { bodyFocused = it.isFocused }
                                 .padding(horizontal = 16.dp, vertical = 8.dp).bringIntoViewRequester(caretRequester).testTag("editorBody"),
                             decorationBox = { inner ->
@@ -1347,4 +1352,26 @@ internal fun PostingAuthorityDialog(onAnswer: (grant: Boolean) -> Unit, onDismis
         confirmButton = { TextButton(onClick = { onAnswer(true) }, modifier = Modifier.testTag("authorityGrant")) { Text(com.ecency.core.app.PostingAuthorityPrompt.GRANT) } },
         dismissButton = { TextButton(onClick = { onAnswer(false) }, modifier = Modifier.testTag("authoritySkip")) { Text(com.ecency.core.app.PostingAuthorityPrompt.SKIP) } },
     )
+}
+
+/**
+ * Whether the body field scrolls itself, as iOS's BodyTextView (README "Editor and publishing"): up to [GROWS_UP_TO]
+ * UTF-16 units it grows with its text inside the editor's scroll column; above that it is as tall as the visible
+ * area and scrolls itself, because a field in an unbounded column lays out its whole text on every key. It grows
+ * again below [SCROLLS_DOWN_TO], so it does not flip at every key.
+ */
+internal class BodyScroll {
+    private var scrolls = false
+
+    fun update(length: Int): Boolean {
+        scrolls = scrollsItself(length, scrolls)
+        return scrolls
+    }
+
+    companion object {
+        const val GROWS_UP_TO = 10_000
+        const val SCROLLS_DOWN_TO = 8_000
+
+        fun scrollsItself(length: Int, scrolls: Boolean): Boolean = if (scrolls) length > SCROLLS_DOWN_TO else length > GROWS_UP_TO
+    }
 }
