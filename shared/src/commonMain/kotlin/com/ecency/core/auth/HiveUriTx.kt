@@ -85,7 +85,9 @@ object HiveUriTx {
      * content-dependent operations (custom_json with required_auths, account_update2) comes from
      * [OperationAuthority.forHiveUri], so an active custom_json needs and shows the active key. A third:
      * account_update and account_update2 carrying owner, active or posting authorities or a memo key are refused, so a link
-     * cannot rotate the account's keys (metadata-only updates pass).
+     * cannot rotate the account's keys (metadata-only updates pass). A fourth: account-control operations
+     * ([OperationAuthority.ACCOUNT_CONTROL]: creation, claims, recovery) and witness key changes are refused for every
+     * account type.
      */
     fun format(tx: JsonObject, available: Map<String, Boolean>?): FormattedHiveUriTx {
         val ops = tx["operations"] as? JsonArray
@@ -97,6 +99,10 @@ object HiveUriTx {
         val resolved = OperationAuthority.forHiveUri(op)
         if (def.authority == "owner" || resolved == KeyRole.OWNER) {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", "owner")
+        }
+        // account creation, recovery and witness keys never come from a link, for any account type
+        if (name in OperationAuthority.ACCOUNT_CONTROL || name in WITNESS_KEYS) {
+            return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", def.authority)
         }
         if (OperationAuthority.isMixedCustomJson(op)) return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", MIXED)
         val authority = if (name in CONTENT_DEPENDENT) resolved.value else def.authority
@@ -126,6 +132,9 @@ object HiveUriTx {
 
     private val CONTENT_DEPENDENT = setOf("custom_json", "account_update2")
     private val ACCOUNT_UPDATES = setOf("account_update", "account_update2")
+
+    /** Operations that set a witness's block signing key or properties. */
+    private val WITNESS_KEYS = setOf("witness_update", "witness_set_properties")
     private val AUTHORITY_FIELDS = listOf("owner", "active", "posting", "memo_key")
 
     private fun isTruthy(e: JsonElement?): Boolean = when (e) {

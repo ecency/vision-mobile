@@ -500,14 +500,34 @@ class AuthLinkModelTest {
     @Test
     fun keyAccountsAreRefusedOperationsTheAppCannotSignBeforeAnyPrompt() = runTest {
         val app = signedIn(this)
-        // (witness votes became signable with the platform wave's governance serializers; claiming an account is not)
-        val op = HiveUri.ops("claim_account" to buildJsonObject {
-            put("creator", JsonPrimitive("__signer")); put("fee", JsonPrimitive("0.000 HIVE")); put("extensions", JsonArray(emptyList()))
+        // (witness votes became signable with the platform wave's governance serializers; removing a proposal is not)
+        val op = HiveUri.ops("remove_proposal" to buildJsonObject {
+            put("proposal_owner", JsonPrimitive("__signer")); put("proposal_ids", JsonArray(listOf(JsonPrimitive(1)))); put("extensions", JsonArray(emptyList()))
         })
         app.env.authLinks.handle(HiveUri.encodeOps(op, HiveUri.Params(callback = cb)))
         testScheduler.advanceUntilIdle()
         assertEquals(AuthLinkModel.NOT_SUPPORTED, assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt).message)
         assertEquals("not_supported", params(app.env.authLinks.current.callback!!)["error"])
+    }
+
+    @Test
+    fun accountControlLinksAreRefusedForEveryAccountType() = runTest {
+        // Part of #3635: the dApp bridge's account-control rule, here for key and HiveSigner accounts alike
+        for (account in listOf(
+            VaultAccount(alice, AuthType.MASTER_PASSWORD, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), activeKey = AppTestKeys.wif(alice, KeyRole.ACTIVE), accessToken = "access-$alice"),
+            VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"),
+        )) {
+            val app = signedIn(this, account)
+            val op = HiveUri.ops("claim_account" to buildJsonObject {
+                put("creator", JsonPrimitive("__signer")); put("fee", JsonPrimitive("0.000 HIVE")); put("extensions", JsonArray(emptyList()))
+            })
+            app.env.authLinks.handle(HiveUri.encodeOps(op, HiveUri.Params(callback = cb)))
+            testScheduler.advanceUntilIdle()
+            assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt, "${account.authType}")
+            app.env.authLinks.confirm()
+            testScheduler.advanceUntilIdle()
+            assertTrue(app.broadcasts().isEmpty())
+        }
     }
 
     @Test

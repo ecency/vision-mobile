@@ -189,6 +189,25 @@ class HiveUriTest {
     }
 
     @Test
+    fun linksNeverCarryAccountControlOperations() {
+        val all = keys("posting", "active", "memo")
+        val ops = listOf(
+            """["account_create",{"fee":"3.000 HIVE","creator":"__signer","new_account_name":"x","owner":{},"active":{},"posting":{},"memo_key":"STM1","json_metadata":""}]""",
+            """["create_claimed_account",{"creator":"__signer","new_account_name":"x","owner":{},"active":{},"posting":{},"memo_key":"STM1","json_metadata":"","extensions":[]}]""",
+            """["claim_account",{"creator":"__signer","fee":"0.000 HIVE","extensions":[]}]""",
+            """["change_recovery_account",{"account_to_recover":"__signer","new_recovery_account":"x","extensions":[]}]""",
+            """["witness_update",{"owner":"__signer","url":"x","block_signing_key":"STM1","props":{},"fee":"0.000 HIVE"}]""",
+            """["witness_set_properties",{"owner":"__signer","props":[],"extensions":[]}]""",
+        )
+        for (op in ops) {
+            // whatever keys the account holds (a HiveSigner or HiveAuth account checks none: null)
+            for (available in listOf(all, null)) {
+                assertEquals("qr.invalid_op", assertIs<FormattedHiveUriTx.Refused>(HiveUriTx.format(tx(json(op).jsonArray), available), op).errorKey1)
+            }
+        }
+    }
+
+    @Test
     fun accountUpdatesSettingOwnerAreRefusedAsOwner() {
         val auth = """{"weight_threshold":1,"account_auths":[],"key_auths":[["STM1",1]]}"""
         for (name in listOf("account_update", "account_update2")) {

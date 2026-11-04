@@ -291,12 +291,8 @@ object BridgeOps {
 
 /** What the bridge refuses to sign, whatever the page asks, and what it can sign at all. */
 object BridgeGuards {
-    /** Operations that change who controls the account, or that only the owner key signs. */
-    private val ACCOUNT_CONTROL = setOf(
-        "account_update", "change_recovery_account", "request_account_recovery", "recover_account", "reset_account",
-        "set_reset_account", "decline_voting_rights", "account_create", "account_create_with_delegation",
-        "create_claimed_account", "claim_account",
-    )
+    /** Operations that change who controls the account, or that only the owner key signs (shared with the link flow). */
+    private val ACCOUNT_CONTROL = OperationAuthority.ACCOUNT_CONTROL
 
     /**
      * Why [ops] are refused before any prompt, or null when they may be confirmed: owner authority, key or authority
