@@ -221,7 +221,7 @@ internal object DappWeb {
 
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
                 // a new document (a history update of the same one does not start a page)
-                model.documentStarted(tabId)
+                model.documentStarted(tabId, url)
                 model.pageChanged(tabId, url, null, view.canGoBack(), view.canGoForward())
             }
 

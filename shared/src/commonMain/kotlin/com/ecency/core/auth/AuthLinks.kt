@@ -163,21 +163,24 @@ object AuthLinks {
     /** Arc, matched as the whole name or an `arc-` / `arcs` prefix ("search" and "parcel" are not browsers). */
     private fun isArc(scheme: String) = scheme == "arc" || scheme.startsWith("arc-") || scheme.startsWith("arcs")
 
-    /** Callback hosts that forward a URL on (x-callback-url style): the key would go wherever that URL points. */
-    private val FORWARDING_HOSTS = setOf("open-url", "open", "navigate", "url", "x-callback-url")
+    /**
+     * Words in a callback host that forwards a URL on (x-callback-url style: `open-url`, `openurl`, `redirect`,
+     * `goto`): the key would go wherever that URL points. Matched inside the host, like [BROWSER_WORDS] in a scheme.
+     */
+    private val FORWARDING_WORDS = listOf("url", "open", "navigat", "redirect", "goto", "forward", "browse")
 
     /**
      * Where a raw posting key may go (`ecency://login`): an app's own scheme on this device, as the Hive apps that ask
      * for it use. A website (`https:`) never gets one; it signs in with the `auth-request` proof instead. Nor does a
      * scheme whose name says it opens a browser ([BROWSER_WORDS], Arc), or a callback whose host forwards a URL on
-     * ([FORWARDING_HOSTS]): the key would land in a web page.
+     * ([FORWARDING_WORDS]): the key would land in a web page.
      */
     fun canReceivePostingKey(callback: String): Boolean {
         if (!isAcceptableCallback(callback)) return false
         val scheme = callbackScheme(callback) ?: return false
         if (scheme == "https" || BROWSER_WORDS.any { it in scheme } || isArc(scheme)) return false
         val host = WebUrl.parse(callback)?.hostname?.lowercase().orEmpty()
-        return host !in FORWARDING_HOSTS
+        return FORWARDING_WORDS.none { it in host }
     }
 
     /** The callback's scheme name, lowercased, without the colon. */

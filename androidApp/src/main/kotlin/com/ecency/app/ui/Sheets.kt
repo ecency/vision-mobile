@@ -343,8 +343,8 @@ internal fun playerNavigationAllowed(url: String, embedUrl: String): Boolean = S
 
 /**
  * Loads [embedUrl] with the embedding Referer, only when it is an allowlisted https player. A video file the post
- * links directly ([SafeTarget.playerAllowsScript] false) is never the page: the WebView does not ask
- * shouldOverrideUrlLoading for a POST, so whatever that URL serves could post a form elsewhere. It plays in an
+ * links directly ([SafeTarget.playerAllowsScript] false) is never the page, since a non-GET navigation does not
+ * reach shouldOverrideUrlLoading and the navigation rule only sees the others. It plays in an
  * app-made page with one video element ([mediaFilePage]) on the file's own origin.
  */
 internal fun WebView.loadEmbed(embedUrl: String) {

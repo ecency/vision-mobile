@@ -457,8 +457,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
      * [tabId]'s web view started a new document (Android onPageStarted, iOS didCommit; a history update of the same
      * document is not one): a Peak Vault connect the user refused on the page before may be asked again.
      */
-    fun documentStarted(tabId: Int) {
-        connectRefusals.removeAll { it.first == tabId }
+    fun documentStarted(tabId: Int, url: String?) {
+        // a refusal holds while the tab stays on that site: a page that reloads itself does not get to ask again
+        val origin = url?.let { com.ecency.core.render.url.WebUrl.parse(it) }?.let { "${it.protocol}//${it.host}".lowercase() }
+        connectRefusals.removeAll { it.first == tabId && it.second.lowercase() != origin }
     }
 
     /** The web view of [tabId] committed [url]: its document is the one running now (load commit, history update). */
@@ -827,10 +829,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val NOT_IN_FRONT = "The page is not in front."
         const val LOCKED = "Ecency is locked. Unlock it and try again."
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
-        /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
         /** native.dapp_browser.lasting_permission: [app] may post, vote and comment as the signer from now on. */
         fun lastingPermission(app: String): String = L.native.dappBrowser.lastingPermission(app = app)
 
+        /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
         const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
 
         /** The question before a page learns the account name (Peak Vault connect). */

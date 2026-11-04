@@ -5,7 +5,9 @@ name: Crowdin Upload Sources
 #
 # A manual run with "native_plurals" also uploads every language's `native.plurals.*` translations from the
 # repo (README "Crowdin": seeded translations). Only those keys are sent, from files that hold nothing else, so
-# no other translation in Crowdin changes; an approved translation there still wins over the uploaded one.
+# no other translation in Crowdin changes; an approved translation there still wins over the uploaded one. Run it
+# right after a Crowdin download was merged, so the repo's native.plurals equal Crowdin's apart from the seed (an
+# unapproved edit made in Crowdin since the last download would otherwise be replaced by the repo's text).
 on:
   push:
     branches: [development]

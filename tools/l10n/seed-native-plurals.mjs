@@ -9,8 +9,8 @@
 // native key whose text is the English source counts as missing: Crowdin exports an untranslated string as its
 // source text, which is what a language shows after en-US changed the key and its translation was dropped.
 // --check writes nothing and exits 1 when a file would change.
-// --seeded-out <dir> also writes <dir>/<lang>.json with only the keys seeded in this run (the upload to Crowdin
-// sends those and nothing else, so no other translation there is touched).
+// --seeded-out <dir> also writes <dir>/<lang>.json with only the keys seeded in this run, for a review of what
+// changed (the manual native_plurals upload in crowdin-upload.yml sends every native.plurals key from the repo).
 //
 // How a translation is converted (mechanical, the same text the old RN message showed):
 //   suffix   `{count} word{suffix}` becomes `{count, plural, <every CLDR form of the language> {# word}}`;

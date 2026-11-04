@@ -776,8 +776,14 @@ class DappBrowserModelTest {
         testScheduler.advanceUntilIdle()
         assertNull(b.current.prompt, "no new question on the same page load")
         assertEquals(DappBrowserModel.REJECTED, page.error())
-        // a new document in the tab may ask again, and the user answers again
-        b.documentStarted(b.current.activeTabId)
+        // the page reloading itself (a new document on the same site) does not get to ask again
+        b.documentStarted(b.current.activeTabId, "$origin/again")
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt, "a reload of the same site keeps the refusal")
+        // after the tab left the site, it may ask again, and the user answers again
+        b.documentStarted(b.current.activeTabId, "https://elsewhere.example/")
+        b.documentStarted(b.current.activeTabId, "$origin/")
         send(b, page, connect)
         testScheduler.advanceUntilIdle()
         assertEquals("spike-bob", b.current.prompt!!.username, "asked again after a new page load")
