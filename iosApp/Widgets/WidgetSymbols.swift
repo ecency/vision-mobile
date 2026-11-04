@@ -10,8 +10,6 @@ enum WidgetSymbol: String {
     case streak = "flame.fill"
     /// AppIcon.COMPOSE.
     case compose = "square.and.pencil"
-    /// AppIcon.WAVES (the system stand-in for the Waves mark).
-    case waves = "water.waves"
 }
 
 extension Image {

@@ -178,7 +178,7 @@ struct ComposeWidgetView: View {
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
-                Image(widgetSymbol: .compose).font(.system(size: 20, weight: .semibold))
+                WidgetWavesMark().fill(.foreground).frame(width: 24, height: 24)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(l10n.newWave)
@@ -188,14 +188,14 @@ struct ComposeWidgetView: View {
             Label(l10n.newWave, widgetSymbol: .compose).widgetURL(WidgetLinks.newWave)
         case .accessoryRectangular:
             HStack(spacing: 8) {
-                Link(destination: WidgetLinks.newWave) { Label(l10n.wave, widgetSymbol: .waves) }
+                Link(destination: WidgetLinks.newWave) { WavesLabel(title: l10n.wave) }
                 Link(destination: WidgetLinks.write) { Label(l10n.write, widgetSymbol: .compose) }
             }
             .font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
         default:
             VStack(spacing: 10) {
-                Link(destination: WidgetLinks.newWave) { ComposeButton(icon: .waves, label: l10n.newWave) }
+                Link(destination: WidgetLinks.newWave) { ComposeButton(icon: nil, label: l10n.newWave) }
                 Link(destination: WidgetLinks.write) { ComposeButton(icon: .compose, label: l10n.write) }
             }
         }
@@ -203,12 +203,15 @@ struct ComposeWidgetView: View {
 }
 
 private struct ComposeButton: View {
-    let icon: WidgetSymbol
+    /// nil: the Waves mark.
+    let icon: WidgetSymbol?
     let label: String
 
     var body: some View {
         // a text style that follows Dynamic Type, shrinking rather than clipping in the widget's fixed size
-        Label(label, widgetSymbol: icon)
+        Group {
+            if let icon { Label(label, widgetSymbol: icon) } else { WavesLabel(title: label) }
+        }
             .font(.subheadline.weight(.semibold))
             .lineLimit(1).minimumScaleFactor(0.6)
             .foregroundStyle(.white)

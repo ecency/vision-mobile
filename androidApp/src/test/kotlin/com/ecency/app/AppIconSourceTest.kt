@@ -77,6 +77,23 @@ class AppIconSourceTest {
         assertEquals(emptyList<String>(), widget.filter { it !in listed })
     }
 
+    /** The widgets draw the Waves mark from a copy of the shared path (no shared core there): the numbers must match. */
+    @Test
+    fun widgetWavesMarkIsTheSharedPath() {
+        val swift = File(native, "iosApp/Widgets/WidgetWavesMark.swift").readText()
+        fun numbers(name: String): List<Float> {
+            // a value up to the end of its line, or a nested array up to its closing line
+            val block = Regex("""static let $name: [^=]+= (\[\n[\s\S]*?\n\s*\]|[^\n]+)""").find(swift)?.groupValues?.get(1)
+                ?: error("no $name in WidgetWavesMark.swift")
+            return Regex("""-?[0-9]+(\.[0-9]+)?""").findAll(block).map { it.value.toFloat() }.toList()
+        }
+        val mark = com.ecency.core.app.WavesMark
+        assertEquals(listOf(mark.GRID), numbers("grid"))
+        assertEquals(listOf(mark.STROKE), numbers("stroke"))
+        assertEquals(mark.START.toList(), numbers("start"))
+        assertEquals(mark.CURVES.flatMap { it.toList() }, numbers("curves"))
+    }
+
     /** Every SF Symbol in the list exists on iOS 17, the deployment target (read from this Mac's symbol catalog). */
     @Test
     fun sfSymbolsExistOnIos17() {
