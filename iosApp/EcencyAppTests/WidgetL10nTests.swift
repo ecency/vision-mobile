@@ -59,7 +59,16 @@ final class WidgetL10nTests: XCTestCase {
         XCTAssertEqual(WidgetL10n(language: "de-DE").notifications, "Benachrichtigungen")
         let ar = WidgetL10n(language: "ar-SA")
         XCTAssertEqual(ar.number(1234), "١٬٢٣٤")
-        XCTAssertTrue(ar.streak(n: 5).contains("\u{2068}\(ar.number(5))\u{2069}"), ar.streak(n: 5))
+        // Arabic's own plural forms ("few" for 5, "two" for 2) in its digits, starting with RLM as the shared catalog
+        XCTAssertEqual(ar.unread(count: 5), "\u{200F}٥ غير مقروءة")
+        XCTAssertEqual(ar.unread(count: 2), "\u{200F}غير مقروءتان")
+        // ar-SA.json holds English for native.plurals.perks.streak (untranslated in Crowdin): English, no RLM
+        XCTAssertEqual(ar.streak(n: 5), "٥-day streak")
+        // a substituted value is isolated in a right to left language only (no widget message has one yet)
+        XCTAssertEqual(ar.formatted("{n} - {who}", ["n": .number(5), "who": .text("@alice")], pluralLanguage: "ar-SA"),
+                       "\u{2068}٥\u{2069} - \u{2068}@alice\u{2069}")
+        XCTAssertEqual(WidgetL10n(language: "en-US").formatted("{n} - {who}", ["n": .number(5), "who": .text("@alice")], pluralLanguage: "en-US"),
+                       "5 - @alice")
         XCTAssertFalse(WidgetL10n(language: "ku-TR").isRtl)
         XCTAssertEqual(WidgetL10n(language: "zz-ZZ").language, "en-US", "an unknown language is English")
     }
@@ -86,11 +95,15 @@ final class WidgetL10nTests: XCTestCase {
         XCTAssertEqual(file.deletingLastPathComponent(), WidgetSnapshotData.fileURL()?.deletingLastPathComponent(), "beside the snapshot, out of backups")
         let before = try? Data(contentsOf: file)
         defer { if let before { try? before.write(to: file) } else { try? FileManager.default.removeItem(at: file) } }
+        // as the app: AppContainer hands over every value of the app language (L10n.language), so the widget shows the
+        // app's copy in the app's language
+        L10n.shared.setLanguage(id: "de-DE")
         IosWidgetStore.handOver(language: "de-DE")
         XCTAssertEqual(WidgetL10n.handedOver(), "de-DE")
         XCTAssertEqual(WidgetL10n.current.language, "de-DE")
         XCTAssertEqual(WidgetEntry(date: Date(), snapshot: .empty).l10n.language, "de-DE", "each timeline entry takes it")
         XCTAssertEqual(StreakWidgetView(snapshot: .empty, family: .systemSmall).l10n.signedOut, L.Native.Widgets.signedOutText)
+        XCTAssertEqual(L.Native.Widgets.signedOutText, "Bei Ecency anmelden")
         IosWidgetStore.handOver(language: "he-IL")
         XCTAssertTrue(WidgetL10n.current.isRtl)
         // untrusted: anything that is not one of the app's languages reads as not handed over (the device's then)

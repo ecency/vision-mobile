@@ -6,7 +6,8 @@ package com.ecency.l10n.gen
  * - Android: `strings.xml` in `values` and `values-<qualifier>` (manifest and widget provider labels and descriptions)
  *   beside `xml/locales_config.xml`,
  *   in the resource folders of the [SystemLocales] tags ([androidQualifier]).
- * - iOS: `<tag>.lproj/InfoPlist.strings` (permission prompts) and the widget extension's table
+ * - iOS: `<tag>.lproj/InfoPlist.strings` (permission prompts, a right to left translation starting with RLM as in the
+ *   app, [rtlMarked]) and the widget extension's table
  *   `WidgetL10nData.swift` (the extension does not link the shared framework, so it gets its messages, plural rules and
  *   digits as Swift data; `iosApp/Widgets/WidgetL10n.swift` formats them).
  *
@@ -192,6 +193,19 @@ object SystemStrings {
         return b.toString()
     }
 
+    /** The right to left languages (the shared `L10n.isRtl`): ar, fa and he; ku-TR is Latin script. */
+    private val RTL_LANGUAGES = setOf("ar", "fa", "he")
+
+    /**
+     * [text] as the shared catalog shows it (`L10n.marked`): a right to left language's own message starts with one RLM
+     * (U+200F), an English fallback keeps its own direction. iOS lays out a permission prompt by its first strong
+     * letter, so "Ecency ..." in Persian or Hebrew would read left to right, its full stop on the wrong side.
+     */
+    internal fun rtlMarked(id: String, text: String, own: Boolean): String =
+        if (!own || text.isEmpty() || text[0] == RLM || id.substringBefore('-').lowercase() !in RTL_LANGUAGES) text else RLM + text
+
+    private const val RLM = '\u200F'
+
     fun appleStrings(entries: List<Pair<String, String>>): String {
         val b = StringBuilder("/* $HEADER_NOTE */\n")
         for ((k, v) in entries) b.append('"').append(appleValue(k)).append("\" = \"").append(appleValue(v)).append("\";\n")
@@ -207,8 +221,12 @@ object SystemStrings {
         val m = Messages(locales, config.infoPlist.values + config.widget.values)
         val out = LinkedHashMap<String, String>()
         for (id in m.ids) {
-            out["InfoPlist/${SystemLocales.tag(id)}.lproj/InfoPlist.strings"] =
-                appleStrings(config.infoPlist.map { (plistKey, key) -> plistKey to plainText(key, m.resolve(id, key).first) })
+            out["InfoPlist/${SystemLocales.tag(id)}.lproj/InfoPlist.strings"] = appleStrings(
+                config.infoPlist.map { (plistKey, key) ->
+                    val (text, own) = m.resolve(id, key)
+                    plistKey to rtlMarked(id, plainText(key, text), own)
+                },
+            )
         }
         out["WidgetL10nData.swift"] = widgetSwift(m, config.widget, L10nGenerator.pluralRules(pluralRulesJson), formatsJson)
         return out

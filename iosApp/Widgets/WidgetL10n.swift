@@ -112,13 +112,18 @@ struct WidgetL10n: Equatable {
 
     /// The message at generated index [index]: the language's own when it parses and formats, else English.
     func format(_ index: Int, _ args: [String: Value]) -> String {
-        if let own = WidgetL10nData.translations[language]?[index], let parts = WidgetIcu.parse(own),
-           let text = render(parts, args, pluralLanguage: language, pound: nil) {
+        if let own = WidgetL10nData.translations[language]?[index], let text = formatted(own, args, pluralLanguage: language) {
             // as the shared catalog: a right to left language's own message starts with RLM, once
             return isRtl && !text.isEmpty && !text.hasPrefix("\u{200F}") ? "\u{200F}" + text : text
         }
         let english = WidgetL10nData.english[index]
-        return WidgetIcu.parse(english).flatMap { render($0, args, pluralLanguage: WidgetL10n.fallback, pound: nil) } ?? english
+        return formatted(english, args, pluralLanguage: WidgetL10n.fallback) ?? english
+    }
+
+    /// [message] with [args] in this language's digits and bidi isolates, plural forms by [pluralLanguage]; nil when
+    /// it does not parse or misses an argument.
+    func formatted(_ message: String, _ args: [String: Value], pluralLanguage: String) -> String? {
+        WidgetIcu.parse(message).flatMap { render($0, args, pluralLanguage: pluralLanguage, pound: nil) }
     }
 
     private func isolate(_ s: String) -> String { isRtl && !s.isEmpty ? "\u{2068}\(s)\u{2069}" : s }
