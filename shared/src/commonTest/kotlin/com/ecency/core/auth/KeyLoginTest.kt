@@ -69,15 +69,6 @@ class KeyLoginTest {
     }
 
     @Test
-    fun aKeyThatIsBothOwnerAndActiveIsKeptAsTheActiveKeyOnly() {
-        val both = TestKeys.pub(KeyRole.OWNER)
-        val r = KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), TestKeys.authorities(active = listOf(both)))
-        assertEquals(setOf(KeyRole.ACTIVE), r.keys.keys, "stored for the active role; there is no owner slot")
-        assertEquals(AuthType.ACTIVE_KEY, r.authType)
-        assertEquals(KeyRole.ACTIVE, r.signingRole)
-    }
-
-    @Test
     fun aMasterPasswordThatOnlyMatchesTheOwnerKeyIsRefused() {
         val stranger = TestKeys.stranger.publicKey().toString()
         val chain = TestKeys.authorities(active = listOf(stranger), posting = listOf(stranger), memo = stranger)
@@ -253,23 +244,15 @@ class KeyLoginTest {
     }
 
     @Test
-    fun aKeySharedWithTheOwnerRoleIsFlaggedAndOneSwitchRefusesIt() {
+    fun aKeyThatIsAlsoTheOwnerKeyIsRefusedAtSignInAndAtImport() {
         val chain = TestKeys.authorities(active = listOf(TestKeys.pub(KeyRole.OWNER)))
-        val r = KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), chain)
-        assertTrue(r.sharesOwnerKey)
-        assertEquals(setOf(KeyRole.ACTIVE), r.keys.keys)
+        assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), chain) }
+        assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.matchForImport(user, TestKeys.wif(KeyRole.OWNER), chain) }
+        val posting = TestKeys.authorities(posting = listOf(TestKeys.pub(KeyRole.OWNER)))
+        assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), posting) }
+        // keys that are not the owner key, and passwords, are unaffected
+        assertEquals(setOf(KeyRole.ACTIVE), KeyLogin.classify(user, TestKeys.wif(KeyRole.ACTIVE), TestKeys.authorities()).keys.keys)
         assertFalse(KeyLogin.classify(user, TestKeys.wif(KeyRole.ACTIVE), TestKeys.authorities()).sharesOwnerKey)
-        assertFalse(KeyLogin.classify(user, AuthGoldenVectors.PASSWORD, TestKeys.authorities()).sharesOwnerKey, "a password derives a key per role")
-        assertFalse(KeyLogin.refuseKeySharedWithOwner, "the default: kept, with a warning")
-        KeyLogin.refuseKeySharedWithOwner = true
-        try {
-            assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), chain) }
-            assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.matchForImport(user, TestKeys.wif(KeyRole.OWNER), chain) }
-            // keys that are not the owner key, and passwords, are unaffected
-            assertEquals(setOf(KeyRole.ACTIVE), KeyLogin.classify(user, TestKeys.wif(KeyRole.ACTIVE), TestKeys.authorities()).keys.keys)
-            assertTrue(KeyLogin.classify(user, AuthGoldenVectors.PASSWORD, TestKeys.authorities()).isMasterPassword)
-        } finally {
-            KeyLogin.refuseKeySharedWithOwner = false
-        }
+        assertTrue(KeyLogin.classify(user, AuthGoldenVectors.PASSWORD, TestKeys.authorities()).isMasterPassword)
     }
 }

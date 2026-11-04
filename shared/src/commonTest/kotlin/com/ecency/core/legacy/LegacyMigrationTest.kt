@@ -55,6 +55,22 @@ class LegacyMigrationTest {
     private val usable = listOf("spike-default", "spike-has", "spike-master", "spike-posting", "spike-signer")
 
     @Test
+    fun anRnKeyThatIsAlsoTheOwnerKeyIsNotKept() {
+        val owner = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.OWNER).toWif()
+        val posting = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.POSTING).toWif()
+        val account = LegacyAccount(
+            username = "spike-shared", authType = LegacyAuthType.ACTIVE_KEY, masterPassword = null,
+            postingKey = posting, activeKey = owner, memoKey = owner, ownerKey = owner, accessToken = "t",
+            hiveAuthKey = null, hiveAuthToken = null, hiveAuthExpiry = 0, unreadable = emptyList(),
+        )
+        LegacyMigration.migrate(LegacyImport(listOf(account), "spike-shared", pinLockEnabled = false), vault, PIN_ITERATIONS)
+        val stored = vault.account("spike-shared")!!
+        assertEquals(posting, stored.postingKey)
+        assertNull(stored.activeKey, "the owner key never reaches the vault, whatever role RN filed it under")
+        assertNull(stored.memoKey)
+    }
+
+    @Test
     fun everyUsableAccountMovesIntoTheVault() {
         val report = run()
         assertEquals(usable, report.imported.sorted())

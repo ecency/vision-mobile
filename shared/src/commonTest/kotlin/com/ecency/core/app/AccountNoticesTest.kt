@@ -245,33 +245,14 @@ class AccountNoticesTest {
     // ---- a typed key that is also the owner key ----
 
     @Test
-    fun aKeySharedWithTheOwnerRoleIsKeptAndWarnedAboutAtSignIn() = runTest {
+    fun aKeySharedWithTheOwnerRoleIsRefusedAtSignInAndNothingIsStored() = runTest {
         val app = app { u, r -> if (r == KeyRole.ACTIVE) AppTestKeys.pub(u, KeyRole.OWNER) else AppTestKeys.pub(u, r) }
         start(app)
-        app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER))
-        testScheduler.advanceUntilIdle()
-        assertEquals(AppTestKeys.wif(alice, KeyRole.OWNER), KeyVault(app.store).account(alice)!!.activeKey, "kept, as the active key")
-        val notice = app.env.accountNotices.current.notice!!
-        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, notice.kind)
-        assertEquals("This key also controls the owner role", notice.title)
-        assertTrue("@spike-alice uses the same key for its owner role and its active role" in notice.body)
-        assertTrue("Give the active role a key of its own" in notice.body)
-    }
-
-    @Test
-    fun withTheSwitchOnTheSharedKeyIsRefusedAtSignInAndNothingIsStored() = runTest {
-        val app = app { u, r -> if (r == KeyRole.ACTIVE) AppTestKeys.pub(u, KeyRole.OWNER) else AppTestKeys.pub(u, r) }
-        start(app)
-        com.ecency.core.auth.KeyLogin.refuseKeySharedWithOwner = true
-        try {
-            val failure = runCatching { app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER)) }.exceptionOrNull() as AppException
-            assertEquals(AppError.KEY_SHARED_WITH_OWNER_REFUSED, failure.error.message)
-            assertTrue(failure.cause is AuthException.KeySharedWithOwner)
-            assertNull(KeyVault(app.store).account(alice))
-            assertNull(app.env.accountNotices.current.notice)
-        } finally {
-            com.ecency.core.auth.KeyLogin.refuseKeySharedWithOwner = false
-        }
+        val failure = runCatching { app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER)) }.exceptionOrNull() as AppException
+        assertEquals(AppError.KEY_SHARED_WITH_OWNER_REFUSED, failure.error.message)
+        assertTrue(failure.cause is com.ecency.core.auth.AuthException.KeySharedWithOwner)
+        assertNull(KeyVault(app.store).account(alice))
+        assertNull(app.env.accountNotices.current.notice)
     }
 
     @Test

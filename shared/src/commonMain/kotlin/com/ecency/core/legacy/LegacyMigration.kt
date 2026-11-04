@@ -327,20 +327,25 @@ object LegacyMigration {
 
     private fun LegacyAccount.toVaultAccount(): VaultAccount? {
         if (!KeyVault.isValidUsername(username)) return null
-        // RN stored the master password and the owner key; neither comes along. An RN entry that has the
-        // password but lacks one of the three keys it derives gets that key derived here, so the account works.
+        // RN stored the master password and the owner key; neither comes along, nor a key RN filed under another
+        // role that is that same owner key. An RN entry that has the password but lacks one of the three keys it
+        // derives gets that key derived here, so the account works.
+        val owner = ownerKey?.let(::publicOf)
+        fun notOwner(wif: String?) = wif?.takeIf { owner == null || publicOf(it) != owner }
         return VaultAccount(
             username = username,
             authType = authType?.toAuthType() ?: inferAuthType(),
-            postingKey = postingKey,
-            activeKey = activeKey,
-            memoKey = memoKey,
+            postingKey = notOwner(postingKey),
+            activeKey = notOwner(activeKey),
+            memoKey = notOwner(memoKey),
             accessToken = accessToken,
             hiveAuthKey = hiveAuthKey,
             hiveAuthToken = hiveAuthToken,
             hiveAuthExpiry = hiveAuthExpiry,
         ).withKeysDerivedFrom(masterPassword)
     }
+
+    private fun publicOf(wif: String): String? = runCatching { com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString() }.getOrNull()
 
     private fun LegacyAuthType.toAuthType() = when (this) {
         LegacyAuthType.MASTER_KEY -> AuthType.MASTER_PASSWORD
