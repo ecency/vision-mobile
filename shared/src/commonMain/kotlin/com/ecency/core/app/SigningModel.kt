@@ -431,8 +431,10 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         /**
          * Whether the chain's [onChain] operations are the [sent] ones: the same count, and each with the same name
          * (`vote`, `vote_operation` and the `{type, value}` form read alike) and the same fields, read through the
-         * operation serializer where it knows the operation (so number and text spellings and default fields agree),
-         * else as JSON (key order does not matter).
+         * operation serializer where it knows the operation (so number and text spellings and default fields agree;
+         * the app's own posting authority `account_update` included, [com.ecency.core.api.broadcast.OperationJson.decodeOwn]),
+         * else as JSON (key order does not matter, and a field set to null reads as an absent one: the chain answers
+         * `"owner": null` for an optional field the app left out; arrays keep their order).
          */
         internal fun sameOperations(sent: JsonArray, onChain: JsonArray): Boolean =
             sent.size == onChain.size && sent.indices.all { i ->
@@ -453,10 +455,19 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
             val name = (pair[0] as? JsonPrimitive)?.takeIf { it.isString }?.content?.lowercase()?.removeSuffix("_operation") ?: return null
             val named = JsonArray(listOf(JsonPrimitive(name), pair[1]))
             return try {
-                com.ecency.core.api.broadcast.OperationJson.encode(com.ecency.core.api.broadcast.OperationJson.decode(named))
+                com.ecency.core.api.broadcast.OperationJson.encode(com.ecency.core.api.broadcast.OperationJson.decodeOwn(named))
             } catch (e: Exception) {
-                named
+                JsonArray(listOf(named[0], withoutNulls(named[1])))
             }
+        }
+
+        /** [value] with every null-valued object field dropped, at any depth; arrays keep their order. */
+        private fun withoutNulls(value: kotlinx.serialization.json.JsonElement): kotlinx.serialization.json.JsonElement = when (value) {
+            is kotlinx.serialization.json.JsonObject -> kotlinx.serialization.json.JsonObject(
+                value.filterValues { it !is kotlinx.serialization.json.JsonNull }.mapValues { withoutNulls(it.value) },
+            )
+            is JsonArray -> JsonArray(value.map(::withoutNulls))
+            else -> value
         }
 
         val HOT_PAGE_CLOSED: String get() = L.native.signing.hotPageClosed

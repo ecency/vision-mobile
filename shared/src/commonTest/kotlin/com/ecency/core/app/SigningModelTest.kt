@@ -43,6 +43,44 @@ class SigningModelTest {
     private fun postingAccount(user: String = alice) =
         VaultAccount(user, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(user, KeyRole.POSTING), accessToken = "access-$user")
 
+    private fun postingGrant(weight: Int = 1, appKey: String = AppTestKeys.pub(alice, KeyRole.POSTING)) = com.ecency.core.hive.AccountUpdatePosting(
+        alice,
+        com.ecency.core.hive.Authority(1, listOf(com.ecency.core.hive.AuthorityEntry("ecency.app", weight)), listOf(com.ecency.core.hive.AuthorityEntry(appKey, 1))),
+        AppTestKeys.pub(alice, KeyRole.MEMO),
+        "{}",
+    )
+
+    /** The chain's form of an operation: the absent optional fields come back as explicit nulls. */
+    private fun withNulls(op: JsonArray, vararg fields: String): JsonArray {
+        val body = op[1] as kotlinx.serialization.json.JsonObject
+        return JsonArray(listOf(op[0], kotlinx.serialization.json.JsonObject(body + fields.associateWith { kotlinx.serialization.json.JsonNull })))
+    }
+
+    @Test
+    fun aPostingAuthorityGrantMatchesTheChainsFormWithExplicitNulls() {
+        val sent = OperationJson.encode(postingGrant())
+        val onChain = withNulls(sent, "owner", "active")
+        assertTrue(SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(onChain))))
+        // a real difference still differs: another weight, another key
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withNulls(OperationJson.encode(postingGrant(weight = 2)), "owner", "active")))))
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withNulls(OperationJson.encode(postingGrant(appKey = AppTestKeys.pub(bob, KeyRole.POSTING))), "owner", "active")))))
+        // a set owner authority is a different operation, never the grant
+        val withOwner = JsonArray(listOf(sent[0], kotlinx.serialization.json.JsonObject((sent[1] as kotlinx.serialization.json.JsonObject) + ("owner" to (sent[1] as kotlinx.serialization.json.JsonObject).getValue("posting")))))
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withOwner))))
+    }
+
+    @Test
+    fun anOperationTheSerializerDoesNotKnowComparesWithNullsAsAbsent() {
+        val sent = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":1,"inner":{"b":[1,2]}}]]""") as JsonArray
+        val same = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"inner":{"b":[1,2],"c":null},"a":1,"d":null}]]""") as JsonArray
+        assertTrue(SigningModel.sameOperations(sent, same))
+        // arrays keep their order, and a value is no null
+        val reordered = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":1,"inner":{"b":[2,1]}}]]""") as JsonArray
+        assertTrue(!SigningModel.sameOperations(sent, reordered))
+        val changed = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":2,"inner":{"b":[1,2]}}]]""") as JsonArray
+        assertTrue(!SigningModel.sameOperations(sent, changed))
+    }
+
     @Test
     fun keyAccountsSignLocallyAndARetryResendsTheSameTransaction() = runTest {
         val app = appWithAccounts(this)
