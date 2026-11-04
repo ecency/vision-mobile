@@ -206,6 +206,8 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
                 // the imported accounts' authorities are read in the background: a stored key that is also the owner
                 // key is removed and the user told (RN often stores one key for both roles as the posting key)
                 env.accountNotices.checkOwnerKeys(report?.imported.orEmpty())
+                // a key the import did not keep because RN stored the same key as the owner key: told too
+                env.accountNotices.ownerKeysDropped(report?.ownerKeyDropped.orEmpty())
                 val snap = io { snapshot() }
                 knownFailures = snap.failures
                 setState {

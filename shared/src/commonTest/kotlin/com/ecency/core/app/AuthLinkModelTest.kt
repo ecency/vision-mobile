@@ -1,6 +1,7 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
+import com.ecency.core.api.NODES
 import com.ecency.core.api.broadcast.OperationJson
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.HiveSignerMessages
@@ -407,6 +408,44 @@ class AuthLinkModelTest {
         val refused = params(links.answers().single())
         assertEquals("posting_key_unavailable", refused["error"])
         assertNull(refused["posting_key"])
+        assertNull(KeyVault(app.store).account(alice)!!.postingKey)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, app.env.accountNotices.current.notice?.kind)
+    }
+
+    @Test
+    fun oneNodeSayingTheKeyIsTheOwnerKeyDeletesNothingTwoAgreeingNodesDo() = runTest {
+        // the lying nodes put alice's posting key on her owner authority; the others answer the truth
+        var lying = setOf("https://node-a.example")
+        val truth = "[" + AppTestKeys.accountJson(alice) + "]"
+        val lie = "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]"
+        val app = TestApp(this) { req ->
+            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
+            else FakeTransport.result(req, if (req.node in lying) lie else truth)
+        }
+        KeyVault(app.store).run {
+            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
+            setCurrentUsername(alice)
+        }
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val links = app.env.authLinks
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
+        testScheduler.advanceUntilIdle()
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        val first = params(links.answers().single())
+        assertEquals("posting_key_unavailable", first["error"], "refused while the nodes disagree")
+        assertNull(first["posting_key"])
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)!!.postingKey, "one node's word deletes nothing")
+        assertNull(app.env.accountNotices.current.notice)
+        assertTrue(app.transport.sent.map { it.node }.filter { it.isNotEmpty() }.distinct().size >= 2, "a second node was asked")
+        // every node says so: the key goes
+        lying = NODES.toSet()
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
+        testScheduler.advanceUntilIdle()
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals("posting_key_unavailable", params(links.answers().single())["error"])
         assertNull(KeyVault(app.store).account(alice)!!.postingKey)
         assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, app.env.accountNotices.current.notice?.kind)
     }

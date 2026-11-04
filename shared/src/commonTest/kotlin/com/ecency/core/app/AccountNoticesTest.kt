@@ -291,6 +291,24 @@ class AccountNoticesTest {
     // ---- (c) the error at first use ----
 
     @Test
+    fun aKeyTheImportDroppedAsTheOwnerKeyIsToldOnce() = runTest {
+        val app = app()
+        KeyVault(app.store).run { save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "t")); setCurrentUsername(alice) }
+        start(app)
+        app.env.accountNotices.ownerKeysDropped(listOf(alice, "spike-gone"))
+        testScheduler.advanceUntilIdle()
+        val notice = app.env.accountNotices.current.notice!!
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, notice.kind)
+        assertEquals(alice, notice.account)
+        assertEquals(0, app.env.accountNotices.current.queued, "an account that is not stored gets no notice")
+        // not seen before the app ended: shown again at the next start, then not after the dismissal
+        val next = nextStart(app)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, next.env.accountNotices.current.notice?.kind)
+        next.env.accountNotices.dismiss()
+        assertNull(nextStart(next).env.accountNotices.current.notice)
+    }
+
+    @Test
     fun aMissingKeyErrorSaysWhereToAddTheKey() {
         assertEquals(
             "posting key is required to perform this transaction. Add it under Settings, Manage Authorities (Import Private), or sign in again with it.",

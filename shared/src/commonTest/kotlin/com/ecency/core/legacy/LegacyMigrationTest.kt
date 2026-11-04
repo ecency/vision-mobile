@@ -55,7 +55,7 @@ class LegacyMigrationTest {
     private val usable = listOf("spike-default", "spike-has", "spike-master", "spike-posting", "spike-signer")
 
     @Test
-    fun anRnKeyFiledUnderAnotherRoleIsImportedAsStoredForTheChainCheck() {
+    fun anRnKeyThatIsTheOwnerKeyRnStoredIsDroppedAtOnceAndReported() {
         val owner = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.OWNER).toWif()
         val posting = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.POSTING).toWif()
         val account = LegacyAccount(
@@ -63,13 +63,14 @@ class LegacyMigrationTest {
             postingKey = posting, activeKey = owner, memoKey = owner, ownerKey = owner, accessToken = "t",
             hiveAuthKey = null, hiveAuthToken = null, hiveAuthExpiry = 0, unreadable = emptyList(),
         )
-        LegacyMigration.migrate(LegacyImport(listOf(account), "spike-shared", pinLockEnabled = false), vault, PIN_ITERATIONS)
+        val report = LegacyMigration.migrate(LegacyImport(listOf(account), "spike-shared", pinLockEnabled = false), vault, PIN_ITERATIONS)
         val stored = vault.account("spike-shared")!!
         assertEquals(posting, stored.postingKey)
-        // which stored key is also the owner key is the chain's to say (RN often leaves the owner key empty): the
-        // first authorities read after the import removes it (AccountNoticesModel.checkOwnerKeys)
-        assertEquals(owner, stored.activeKey)
-        assertEquals(owner, stored.memoKey)
+        // RN stored the owner key: a key that is the same one never reaches the vault, and the user is told
+        assertNull(stored.activeKey)
+        assertNull(stored.memoKey)
+        assertEquals(listOf("spike-shared"), report.ownerKeyDropped)
+        assertFalse("owner" in report.toString().replace("ownerKeyDropped", ""), "names only")
     }
 
     @Test

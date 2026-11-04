@@ -31,13 +31,15 @@ class LegacyMigrationReport(
      * lock is left off rather than locking the user out. The app should suggest setting a PIN again.
      */
     val pinLockDropped: Boolean = false,
+    /** Accounts whose RN posting, active or memo key was the owner key RN also stored: that key was not imported. */
+    val ownerKeyDropped: List<String> = emptyList(),
 ) {
     internal fun withRemoved(removed: Boolean) =
-        LegacyMigrationReport(imported, kept, skipped, unreadable, alreadyDone, removed, pinLockDropped)
+        LegacyMigrationReport(imported, kept, skipped, unreadable, alreadyDone, removed, pinLockDropped, ownerKeyDropped)
 
     override fun toString(): String =
         "LegacyMigrationReport(imported=$imported, kept=$kept, skipped=$skipped, unreadable=$unreadable, " +
-            "alreadyDone=$alreadyDone, rnSecretsRemoved=$rnSecretsRemoved, pinLockDropped=$pinLockDropped)"
+            "alreadyDone=$alreadyDone, rnSecretsRemoved=$rnSecretsRemoved, pinLockDropped=$pinLockDropped, ownerKeyDropped=$ownerKeyDropped)"
 }
 
 /**
@@ -90,7 +92,7 @@ object LegacyMigration {
                 // entries kept by an earlier run that read now go into the vault before their RN copy may go;
                 // other RN accounts were settled before (or came after the import: README "Rollback")
                 val settled = settle(legacy, vault, only = keptBefore, removed)
-                report = done(settled.imported)
+                report = done(settled.imported, settled.ownerKeyDropped)
                 keep = settled.keep
             }
         } else {
@@ -122,7 +124,7 @@ object LegacyMigration {
         return report.withRemoved(scrubbed)
     }
 
-    private class Settled(val imported: List<String>, val keep: Set<String>)
+    private class Settled(val imported: List<String>, val keep: Set<String>, val ownerKeyDropped: List<String>)
 
     /**
      * Which RN entries must stay: an entry leaves only once the vault holds its keys, read back. An account the
@@ -132,6 +134,7 @@ object LegacyMigration {
     private fun settle(legacy: LegacyImport, vault: KeyVault, only: Set<String>?, removed: Set<String>): Settled {
         val imported = mutableListOf<String>()
         val keep = mutableSetOf<String>()
+        val ownerDropped = mutableListOf<String>()
         for (account in legacy.accounts) {
             // removed by the user: neither imported nor kept, so its RN entry goes
             if (account.username in removed) continue
@@ -154,13 +157,14 @@ object LegacyMigration {
                 }
                 val held = vault.account(converted.username)?.holdsKeysOf(converted) == true
                 if (held && existing == null) imported += converted.username
+                if (held && existing == null && account.filesOwnerKeyElsewhere()) ownerDropped += converted.username
                 held
             } catch (_: Exception) {
                 false // the vault did not take it: the RN copy stays for the next run
             }
             if (!safe) keep += account.username
         }
-        return Settled(imported, keep)
+        return Settled(imported, keep, ownerDropped)
     }
 
     /**
@@ -259,6 +263,7 @@ object LegacyMigration {
         val imported = mutableListOf<String>()
         val kept = mutableListOf<String>()
         val skipped = mutableListOf<String>()
+        val ownerDropped = mutableListOf<String>()
         val written = mutableMapOf<String, VaultAccount>()
 
         for (account in legacy.accounts) {
@@ -280,6 +285,7 @@ object LegacyMigration {
                 vault.save(converted)
                 imported += converted.username
                 written[converted.username] = converted
+                if (account.filesOwnerKeyElsewhere()) ownerDropped += converted.username
             }
         }
 
@@ -319,30 +325,43 @@ object LegacyMigration {
             unreadable = legacy.accounts.filter { it.unreadable.isNotEmpty() }.associate { it.username to it.unreadable },
             alreadyDone = false,
             pinLockDropped = pinLockDropped,
+            ownerKeyDropped = ownerDropped,
         )
     }
 
-    private fun done(imported: List<String> = emptyList()) =
-        LegacyMigrationReport(imported, emptyList(), emptyList(), emptyMap(), alreadyDone = true)
+    private fun done(imported: List<String> = emptyList(), ownerKeyDropped: List<String> = emptyList()) =
+        LegacyMigrationReport(imported, emptyList(), emptyList(), emptyMap(), alreadyDone = true, ownerKeyDropped = ownerKeyDropped)
 
     private fun LegacyAccount.toVaultAccount(): VaultAccount? {
         if (!KeyVault.isValidUsername(username)) return null
-        // RN stored the master password and the owner key; neither comes along. An RN entry that has the password
-        // but lacks one of the three keys it derives gets that key derived here, so the account works. A key RN
-        // filed under another role that is also the owner key (RN often leaves the owner key empty when one key is
-        // both) is the chain's to find: the first authorities read after the import removes it and tells the user
-        // (AccountNoticesModel.checkOwnerKeys).
+        // RN stored the master password and the owner key; neither comes along, nor a key RN filed under another
+        // role that is that same owner key (the user is told: LegacyMigrationReport.ownerKeyDropped). RN often
+        // leaves the owner key empty when one key is both: that case is the chain's to find, and the first
+        // authorities read after the import removes the key and tells the user (AccountNoticesModel.checkOwnerKeys).
+        // An RN entry that has the password but lacks one of the three keys it derives gets that key derived here.
+        val owner = ownerPublic()
+        fun notOwner(wif: String?) = wif?.takeIf { owner == null || publicOf(it) != owner }
         return VaultAccount(
             username = username,
             authType = authType?.toAuthType() ?: inferAuthType(),
-            postingKey = postingKey,
-            activeKey = activeKey,
-            memoKey = memoKey,
+            postingKey = notOwner(postingKey),
+            activeKey = notOwner(activeKey),
+            memoKey = notOwner(memoKey),
             accessToken = accessToken,
             hiveAuthKey = hiveAuthKey,
             hiveAuthToken = hiveAuthToken,
             hiveAuthExpiry = hiveAuthExpiry,
         ).withKeysDerivedFrom(masterPassword)
+    }
+
+    private fun publicOf(wif: String): String? = runCatching { com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString() }.getOrNull()
+
+    private fun LegacyAccount.ownerPublic(): String? = ownerKey?.takeIf { it.isNotEmpty() }?.let(::publicOf)
+
+    /** RN stored the owner key and also filed that same key as the posting, active or memo key. */
+    private fun LegacyAccount.filesOwnerKeyElsewhere(): Boolean {
+        val owner = ownerPublic() ?: return false
+        return listOf(postingKey, activeKey, memoKey).any { !it.isNullOrEmpty() && publicOf(it) == owner }
     }
 
     private fun LegacyAuthType.toAuthType() = when (this) {

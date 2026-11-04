@@ -150,15 +150,20 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
     }
 
     /**
-     * [authorities] were read for [username]: its stored keys that are on the owner authority are removed, and it is
-     * told once (remembered until dismissed). True when a key was removed.
+     * [authorities] were read for [username] (from one node): when a stored key is on the owner authority, two
+     * different nodes must agree on the owner keys ([com.ecency.core.auth.ChainAccounts.confirmedAuthorities])
+     * before that key is removed; it is then told once (remembered until dismissed). True when a key was removed.
+     * Throws when the nodes could not confirm it (the key stays; the start check tries again next time).
      */
+    @Throws(Exception::class)
     internal suspend fun ownerKeyFound(username: String, authorities: com.ecency.core.auth.ChainAuthorities): Boolean {
         val stored = env.accounts.vaultAccount(username) ?: return false
         if (stored.rolesOnOwner(authorities.owner).isEmpty()) return false
+        val confirmed = env.chain.confirmedAuthorities(username) ?: return false
+        if (stored.rolesOnOwner(confirmed.owner).isEmpty()) return false
         // remembered before the key goes, so a start that ends here still tells it next time
         writeList(OWNER_NOTICE, list(OWNER_NOTICE) + username)
-        val removed = env.accounts.dropKeysOnOwner(username, authorities)
+        val removed = env.accounts.dropKeysOnOwner(username, confirmed)
         if (removed.isEmpty()) {
             writeList(OWNER_NOTICE, list(OWNER_NOTICE) - username)
             return false
@@ -167,6 +172,18 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         // the stored keys changed: the session reads them again
         env.session.start()
         return true
+    }
+
+    /** The RN import did not keep [names]' key that was the owner key RN also stored: each stored one is told once. */
+    internal fun ownerKeysDropped(names: List<String>) {
+        if (names.isEmpty()) return
+        scope.launch {
+            val here = runCatching { env.accounts.accounts().map { it.username }.toSet() }.getOrNull() ?: return@launch
+            val told = names.filter { it in here }
+            if (told.isEmpty()) return@launch
+            writeList(OWNER_NOTICE, list(OWNER_NOTICE) + told)
+            told.forEach(::queueOwnerNotice)
+        }
     }
 
     private fun queueOwnerNotice(account: String) {
