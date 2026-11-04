@@ -66,6 +66,65 @@ class EmbedPathsTest {
     }
 
     @Test
+    fun thePlayerNavigationRuleReadsUrlsAsTheWebViewDoes() {
+        val embed = "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        val allowed = listOf(
+            "https://www.youtube.com/embed/other",
+            "https://youtube.com/embed/x",
+            "https://WWW.YOUTUBE.COM/x",
+            "about:blank",
+            "about:srcdoc",
+        )
+        allowed.forEach { assertTrue(SafeTarget.playerNavigationAllowed(it, embed), it) }
+        val refused = listOf(
+            // a backslash is a slash to the web view: the host is the part before it
+            "https://evil.example\\@www.youtube.com/embed/x",
+            "https://www.youtube.com\\@evil.example/",
+            "https:\\\\www.youtube.com/embed/x",
+            // userinfo reads like one site and loads another
+            "https://www.youtube.com@evil.example/",
+            "https://user@www.youtube.com/embed/x",
+            "https://user:pass@www.youtube.com/embed/x",
+            // other host, other scheme
+            "https://evil.example/",
+            "https://m.youtube.com/watch?v=x",
+            "https://evilyoutube.com/x",
+            "https://player.vimeo.com/video/1",
+            "http://www.youtube.com/embed/x",
+            "javascript:alert(1)",
+            "intent://x#Intent;end",
+            "data:text/html,x",
+            "about:srcdoc#x",
+            "https://www.you\ttube.com/embed/x",
+            "",
+        )
+        refused.forEach { assertFalse(SafeTarget.playerNavigationAllowed(it, embed), it) }
+        assertFalse(SafeTarget.playerNavigationAllowed("https://www.youtube.com/embed/x", "https://evil.example\\@www.youtube.com/embed/x"), "nor from such an embed")
+    }
+
+    @Test
+    fun anIpfsVideoStaysOnItsOwnFileWithoutScript() {
+        val embed = "https://ipfs.skatehive.app/ipfs/QmVideoHash"
+        assertTrue(SafeTarget.playerNavigationAllowed(embed, embed))
+        assertTrue(SafeTarget.playerNavigationAllowed("$embed?filename=clip.mp4", embed))
+        listOf(
+            "https://ipfs.skatehive.app/ipfs/QmOtherHash",
+            "https://ipfs.skatehive.app/ipfs/QmVideoHashMore",
+            "https://ipfs.skatehive.app/login",
+            "https://www.ipfs.skatehive.app/ipfs/QmVideoHash",
+        ).forEach { assertFalse(SafeTarget.playerNavigationAllowed(it, embed), it) }
+        // the player opens the file the post's video tag names, never a page under it
+        assertNotNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"))
+        assertNotNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/clip.mp4"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/index.html"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/a/b.mp4"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/Qm%2F..%2Fx"))
+        // a video file plays without page script; players keep theirs
+        assertFalse(SafeTarget.playerAllowsScript(embed))
+        assertTrue(SafeTarget.playerAllowsScript("https://www.youtube.com/embed/dQw4w9WgXcQ"))
+    }
+
+    @Test
     fun everyAllowlistedHostHasAPlayerRule() {
         val missing = (EmbedSrc.ALLOWED_HOSTS + EmbedSrc.ALLOWED_SUFFIXES).filterNot { SafeTarget.hasPlayerRule(it) }
         assertEquals(emptyList(), missing, "a host the allow list accepts needs a player path rule")

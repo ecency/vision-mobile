@@ -165,7 +165,7 @@ struct SafariView: UIViewControllerRepresentable {
 }
 
 /// Video sheet: a WKWebView on the allowlisted embed URL only. No script message handlers, no new
-/// windows, and every navigation outside the embed host is cancelled.
+/// windows, every navigation `VideoEmbedPolicy` refuses is cancelled, and a video file runs no page script.
 struct VideoPlayerSheet: View {
     let url: URL
     @Environment(\.dismiss) private var dismiss
@@ -195,6 +195,7 @@ struct EmbedWebView: UIViewRepresentable {
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         config.websiteDataStore = .nonPersistent()
+        config.defaultWebpagePreferences.allowsContentJavaScript = VideoEmbedPolicy.allowsScript(embed: url)
         let view = WKWebView(frame: .zero, configuration: config)
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator

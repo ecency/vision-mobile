@@ -88,6 +88,21 @@ final class NavigationDecisionTests: XCTestCase {
         XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "javascript:alert(1)"), embed: embed))
         XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "about:srcdoc#x"), embed: embed))
         XCTAssertFalse(VideoEmbedPolicy.allows(nil, embed: embed))
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://user@www.youtube.com/embed/x"), embed: embed), "userinfo")
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://www.youtube.com@evil.example/"), embed: embed), "userinfo")
+    }
+
+    func testVideoSheetUsesTheSharedRuleAndAVideoFileRunsNoScript() {
+        let skate = URL(string: "https://ipfs.skatehive.app/ipfs/QmVideoHash")!
+        XCTAssertTrue(VideoEmbedPolicy.allows(skate, embed: skate))
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://ipfs.skatehive.app/ipfs/QmOtherHash"), embed: skate), "another file on the host")
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://user@ipfs.skatehive.app/ipfs/QmVideoHash"), embed: skate), "userinfo")
+        for url in ["https://ipfs.skatehive.app/ipfs/QmOtherHash", "https://ipfs.skatehive.app/ipfs/QmVideoHash", "https://www.youtube.com/x"] {
+            XCTAssertEqual(VideoEmbedPolicy.allows(URL(string: url), embed: skate),
+                           SafeTarget.shared.playerNavigationAllowed(url: url, embedUrl: skate.absoluteString), url)
+        }
+        XCTAssertFalse(VideoEmbedPolicy.allowsScript(embed: skate))
+        XCTAssertTrue(VideoEmbedPolicy.allowsScript(embed: URL(string: "https://www.youtube.com/embed/aaaaaaaaaaa")!))
     }
 }
 

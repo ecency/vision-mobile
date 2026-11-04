@@ -39,6 +39,7 @@ import com.ecency.app.ui.Navigator
 import com.ecency.core.app.AppScreen
 import com.ecency.core.app.NavState
 import com.ecency.app.ui.loadEmbed
+import com.ecency.app.ui.setUpPlayer
 import com.ecency.app.ui.playerNavigationAllowed
 import com.ecency.core.api.AccountPostsSort
 import com.ecency.core.api.RankedSort
@@ -433,5 +434,42 @@ class SliceFlowsTest {
         val blocked = WebView(ApplicationProvider.getApplicationContext())
         blocked.loadEmbed("https://evil.example/embed/x")
         assertEquals(null, shadowOf(blocked).lastLoadedUrl)
+    }
+
+    @Test
+    fun thePlayerSheetUsesTheSharedNavigationRule() {
+        val skate = "https://ipfs.skatehive.app/ipfs/QmVideoHash"
+        val youtube = "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        val cases = listOf(
+            "https://evil.example\\@ipfs.skatehive.app/ipfs/QmVideoHash",
+            "https://user@ipfs.skatehive.app/ipfs/QmVideoHash",
+            "https://ipfs.skatehive.app/ipfs/QmOtherHash",
+            skate,
+            "https://evil.example\\@www.youtube.com/embed/x",
+            "https://www.youtube.com/embed/other",
+        )
+        for (embed in listOf(skate, youtube)) for (url in cases) {
+            assertEquals(url, com.ecency.core.render.blocks.SafeTarget.playerNavigationAllowed(url, embed), playerNavigationAllowed(url, embed))
+        }
+        assertFalse(playerNavigationAllowed("https://evil.example\\@ipfs.skatehive.app/ipfs/QmVideoHash", skate))
+        // the web view's client blocks what the rule refuses, and a video file plays without page script
+        val view = WebView(ApplicationProvider.getApplicationContext())
+        view.setUpPlayer(skate)
+        assertFalse(view.settings.javaScriptEnabled)
+        val client = shadowOf(view).webViewClient!!
+        assertTrue(client.shouldOverrideUrlLoading(view, request("https://ipfs.skatehive.app/login")))
+        assertFalse(client.shouldOverrideUrlLoading(view, request(skate)))
+        val player = WebView(ApplicationProvider.getApplicationContext())
+        player.setUpPlayer(youtube)
+        assertTrue(player.settings.javaScriptEnabled)
+    }
+
+    private fun request(url: String) = object : android.webkit.WebResourceRequest {
+        override fun getUrl() = android.net.Uri.parse(url)
+        override fun isForMainFrame() = true
+        override fun isRedirect() = false
+        override fun hasGesture() = false
+        override fun getMethod() = "GET"
+        override fun getRequestHeaders() = emptyMap<String, String>()
     }
 }
