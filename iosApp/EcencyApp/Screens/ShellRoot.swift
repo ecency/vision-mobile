@@ -114,20 +114,15 @@ struct ShellToolbar: ToolbarContent {
     var body: some ToolbarContent {
         let username = session.state.username
         ToolbarItem(placement: .topBarLeading) {
-            // a title and an icon shown as the icon: text items stay in a horizontal bar, an icon joins iPhone Duo's
-            // vertical one. Beside the list on a wide window the menu is a column over the pane: the same button takes
-            // it away
+            // an image, not a Label: a bar draws a Label's icon as a template, which turned the avatar into a flat
+            // tinted circle. The name is the accessibility label and the large content title. An image joins iPhone
+            // Duo's vertical bar; beside the list on a wide window the same button takes the menu column away again
             Button { if app.wideWindow && app.nav.drawerOpen { app.closeDrawer() } else { app.openDrawer() } } label: {
-                Label {
-                    Text(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT)
-                } icon: {
-                    if username != nil, let avatar {
-                        Image(uiImage: avatar).renderingMode(.original)
-                    } else {
-                        Image(appIcon: .account, filled: true)
-                    }
+                if username != nil, let avatar {
+                    Image(uiImage: avatar).renderingMode(.original)
+                } else {
+                    Image(appIcon: .account, filled: true)
                 }
-                .labelStyle(.iconOnly)
             }
             .accessibilityLabel(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT)
             .largeContent(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT, appIcon: .account)
