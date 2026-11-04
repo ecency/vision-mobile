@@ -121,7 +121,8 @@ object SafeTarget {
     private val VIMM_PLAYER = Regex("^/[^/]+(/embed)?/?$")
     private val BRAND_NEW_TUBE_PLAYER = Regex("^/embed/[A-Za-z0-9]+$")
     private val AUREAL_PLAYER = Regex("^/[0-9]+$")
-    private val IPFS_VIDEO = Regex("^/ipfs/[A-Za-z0-9]+(/[A-Za-z0-9._-]+\\.(mp4|m4v|mov|webm|ogv|ogg))?$", RegexOption.IGNORE_CASE)
+    // a CID (base58, base32 or base36, dashes and underscores allowed), then nothing, a slash or one video file
+    private val IPFS_VIDEO = Regex("^/ipfs/[A-Za-z0-9_-]+(/|/[A-Za-z0-9._-]+\\.(mp4|m4v|mov|mkv|webm|ogv|ogg))?$", RegexOption.IGNORE_CASE)
 
     private val PLAYER_PATHS: Map<String, (String) -> Boolean> = mapOf(
         // ARCH_REGEX: /embed/<item>

@@ -119,6 +119,17 @@ class EmbedPathsTest {
         assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/index.html"))
         assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/a/b.mp4"))
         assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/Qm%2F..%2Fx"))
+        // base32 and base36 CIDs with dashes or underscores, a trailing slash, an mkv file
+        assertNotNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/Qm_Video-Hash"))
+        assertNotNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/"))
+        assertNotNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/clip.MKV"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash//"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/Qm.Video"))
+        assertNull(SafeTarget.embed("https://ipfs.skatehive.app/ipfs/QmVideoHash/clip.mkv/"))
+        assertFalse(SafeTarget.playerAllowsScript("https://ipfs.skatehive.app/ipfs/QmVideoHash/clip.mkv"))
+        // the frame rule stays exact: the trailing slash form is its own file
+        assertTrue(SafeTarget.playerNavigationAllowed("$embed/", "$embed/"))
+        assertFalse(SafeTarget.playerNavigationAllowed("$embed/", embed))
         // a video file plays without page script; players keep theirs
         assertFalse(SafeTarget.playerAllowsScript(embed))
         assertTrue(SafeTarget.playerAllowsScript("https://www.youtube.com/embed/dQw4w9WgXcQ"))
