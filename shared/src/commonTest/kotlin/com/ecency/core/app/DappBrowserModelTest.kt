@@ -453,6 +453,26 @@ class DappBrowserModelTest {
     }
 
     @Test
+    fun anotherAppsHiveSignerLoginMessageIsSignedAfterTheConfirmation() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val messages = listOf("login", "posting", "offline").map {
+            """{"signed_message":{"type":"$it","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        } + """{"signed_message":{"type":"login","app":"ecency.app","app":"other.app"},"authors":["$alice"],"timestamp":1}""" +
+            """{"signed_message":{"type":"login","app":"other.app"},"authors":["$alice"],"timestamp":1"""
+        messages.forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNotNull(b.current.prompt, "asked, not refused: $message")
+            b.confirm()
+            testScheduler.advanceUntilIdle()
+            assertTrue(page.lastResponse["success"]!!.jsonPrimitive.content.toBoolean(), message)
+        }
+        assertFalse(BridgeSignatures.reserved("""{"signed_message":{"type":"login","app":"other.app"}}"""))
+    }
+
+    @Test
     fun aMessageShapedLikeAnEcencySignedMessageIsRefusedBeforeAPrompt() = runTest {
         val app = signedIn(this)
         val b = browser(app)
@@ -461,10 +481,19 @@ class DappBrowserModelTest {
         val reordered = """{ "timestamp" : 1791288000, "authors" : [ "$alice" ],
             "signed_message" : { "app" : "ecency.app", "type" : "code" } }"""
         val escaped = """{"\u0073igned_message":{"type":"code","app":"ecency\u002eapp"},"authors":["$alice"],"timestamp":1}"""
-        val otherApp = """{"signed_message":{"type":"login","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
-        val messages = listOf(exact, reordered, escaped, otherApp) +
-            listOf("code", "posting", "login", "refresh").map { com.ecency.core.auth.HiveSignerMessages.message(it, "x.app".takeIf { _ -> it == "login" }, alice, 1_000) } +
-            JsonPrimitive(exact).toString()
+        val otherAppCode = """{"signed_message":{"type":"code","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        val otherAppRefresh = """{"signed_message":{"type":" Refresh ","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        val ecencyCased = """{"signed_message":{"type":"offline","app":" Ecency.App "},"authors":["$alice"],"timestamp":1}"""
+        val noApp = """{"signed_message":{"type":"code"},"authors":["$alice"],"timestamp":1}"""
+        val notAnObject = """{"signed_message":"login","authors":["$alice"]}"""
+        val arrayApp = """{"signed_message":{"type":"login","app":["ecency.app"]},"authors":["$alice"]}"""
+        // a duplicate key reads as its last value, as JSON.parse keeps it
+        val duplicateApp = """{"signed_message":{"type":"login","app":"other.app","app":"ecency.app"},"authors":["$alice"]}"""
+        val duplicateType = """{"signed_message":{"type":"login","type":"code","app":"other.app"},"authors":["$alice"]}"""
+        val unparsed = """{"signed_message":{"type":"code","app":"other.app"}"""
+        val messages = listOf(exact, reordered, escaped, otherAppCode, otherAppRefresh, ecencyCased, noApp, notAnObject, arrayApp, duplicateApp, duplicateType, unparsed) +
+            listOf("code", "posting", "login", "refresh", "offline").map { com.ecency.core.auth.HiveSignerMessages.message(it, "x.app".takeIf { _ -> it == "login" }, alice, 1_000) } +
+            JsonPrimitive(exact).toString() + JsonPrimitive(otherAppCode).toString()
         messages.forEachIndexed { i, message ->
             send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
             testScheduler.advanceUntilIdle()

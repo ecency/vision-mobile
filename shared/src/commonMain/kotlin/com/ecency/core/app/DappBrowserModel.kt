@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.LoginMethod
 import com.ecency.core.auth.loginMethod
 import com.ecency.core.hive.KeyRole
@@ -860,25 +861,48 @@ object BridgeSignatures {
     private val lenient = Json { isLenient = true }
 
     /**
-     * True when [message] is shaped like a HiveSigner signed message (`HiveSignerMessages`): a JSON object with a
-     * `signed_message` member, whatever its type or app (Ecency's `ecency.app` included). Parsed leniently, so spacing, key order and
-     * escapes do not matter; JSON text inside a JSON string is read too. Text that does not parse but still names
-     * `signed_message` is refused as well.
+     * True when [message] is a HiveSigner signed message the app must never sign for a page: one for Ecency's own
+     * app (`signed_message.app` is `ecency.app`, any type), or a `code` or `refresh` message for any app (HiveSigner
+     * trades those for tokens). Other apps' `login`, `posting` and `offline` messages are allowed: HiveSigner style
+     * logins on other dApps use them. Parsed leniently, so spacing, key order and escapes do not matter; JSON text
+     * inside a JSON string is read too. A duplicate key reads as its last value, as JS `JSON.parse` does. A
+     * `signed_message` that is not an object, or an `app` or `type` that is not a string, is refused. Text that does
+     * not parse is refused when it names `signed_message` and `ecency.app`, `code` or `refresh`.
      */
     fun reserved(message: String): Boolean {
         var text = message
         repeat(MAX_NESTING) {
-            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull()
-                ?: return text.contains(SIGNED_MESSAGE, ignoreCase = true)
+            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull() ?: return unparsedReserved(text)
             when (parsed) {
-                is JsonObject -> return SIGNED_MESSAGE in parsed
+                is JsonObject -> return reservedObject(parsed)
                 is JsonPrimitive -> if (parsed.isString) text = parsed.content else return false
                 else -> return false
             }
         }
-        return text.contains(SIGNED_MESSAGE, ignoreCase = true)
+        return unparsedReserved(text)
     }
 
+    private fun reservedObject(obj: JsonObject): Boolean {
+        val signed = obj[SIGNED_MESSAGE] ?: return false
+        if (signed !is JsonObject) return true
+        val app = field(signed, "app") ?: return true
+        val type = field(signed, "type") ?: return true
+        return app.trim().equals(HiveSignerMessages.APP, ignoreCase = true) ||
+            type.trim().lowercase() in TOKEN_TYPES
+    }
+
+    /** The field as text ("" when absent), or null when it is there but not a string. */
+    private fun field(obj: JsonObject, name: String): String? = when (val v = obj[name]) {
+        null, JsonNull -> ""
+        is JsonPrimitive -> if (v.isString) v.content else null
+        else -> null
+    }
+
+    private fun unparsedReserved(text: String): Boolean =
+        text.contains(SIGNED_MESSAGE, ignoreCase = true) &&
+            (text.contains(HiveSignerMessages.APP, ignoreCase = true) || TOKEN_TYPES.any { text.contains(it, ignoreCase = true) })
+
+    private val TOKEN_TYPES = setOf("code", "refresh")
     private const val SIGNED_MESSAGE = "signed_message"
     private const val MAX_NESTING = 4
 }
