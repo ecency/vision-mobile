@@ -645,6 +645,8 @@ class DappBrowserModelTest {
         val b = browser(app)
         val page = Page()
         send(b, page, peakVault("""[["peakvault-connect",{}]]""", account = ""))
+        b.confirm()
+        testScheduler.advanceUntilIdle()
         assertEquals("peakvault", page.last["kind"]!!.jsonPrimitive.content)
         assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
 
@@ -666,6 +668,43 @@ class DappBrowserModelTest {
         assertEquals(1, app.broadcasts().size)
         assertEquals(4L, page.last["id"]!!.jsonPrimitive.content.toLong())
         assertEquals("", page.lastResponse["error"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun peakVaultConnectAsksOncePerOriginBeforeNamingTheAccount() = runTest {
+        val app = signedIn(this)
+        KeyVault(app.store).save(VaultAccount("spike-bob", AuthType.MASTER_PASSWORD, postingKey = AppTestKeys.wif("spike-bob", KeyRole.POSTING), accessToken = "access-spike-bob"))
+        val b = browser(app)
+        val page = Page()
+        val connect = peakVault("""[["peakvault-connect",{}]]""", account = "")
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertTrue(page.answers.isEmpty(), "the page learns nothing before the user answers")
+        val prompt = b.current.prompt!!
+        assertEquals(DappBrowserModel.connectTitle("dapp.example"), prompt.title)
+        assertEquals(alice, prompt.username)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // asked once: the same origin hears it again without a prompt
+        send(b, page, connect.replace("\"resId\":0", "\"resId\":1"))
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        assertEquals(2, page.answers.size)
+        assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // another account: asked again
+        app.env.session.switchTo("spike-bob")
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", b.current.prompt!!.username)
+        b.reject()
+        assertEquals(DappBrowserModel.REJECTED, page.error())
+        // a refusal is remembered too: no prompt again, the page hears the refusal
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        assertEquals(DappBrowserModel.REJECTED, page.error())
     }
 
     @Test

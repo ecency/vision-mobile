@@ -211,6 +211,22 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private sealed interface Work {
         class Broadcast(val ops: JsonArray, val authority: KeyRole) : Work
         class SignBuffer(val message: String, val authority: KeyRole) : Work
+
+        /** Peak Vault connect: the page learns the account name, nothing is signed. */
+        data object Connect : Work
+    }
+
+    /** Peak Vault connect answers per origin for [connectedUser]: shared (true) or refused (false). */
+    private val connectAnswers = mutableMapOf<String, Boolean>()
+    private var connectedUser: String? = null
+
+    /** The remembered connect answer of [origin] for [user]; an account change forgets them all. */
+    private fun connectAnswer(origin: String, user: String): Boolean? {
+        if (connectedUser != user) {
+            connectAnswers.clear()
+            connectedUser = user
+        }
+        return connectAnswers[origin]
     }
 
     private class PendingRequest(
@@ -500,7 +516,14 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         if (keyRole != null && keyRole !in listOf("posting", "active", "memo")) return answer.error("Invalid keyRole: \"$keyRole\"")
         val single = (ops.singleOrNull() as? JsonArray)?.let { (it.getOrNull(0) as? JsonPrimitive)?.contentOrNull }
         val user = env.session.current.username ?: return answer.error(NO_ACCOUNT)
-        if (single == "peakvault-connect") return answer.success(JsonArray(listOf(JsonPrimitive(user))))
+        if (single == "peakvault-connect") {
+            // the account name is asked for once per origin (RN answered it to any page without a word)
+            return when (connectAnswer(origin, user)) {
+                true -> answer.success(JsonArray(listOf(JsonPrimitive(user))))
+                false -> answer.error(REJECTED)
+                null -> prompt(PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Connect), connectTitle(BrowserPolicy.host(origin)), emptyList(), null)
+            }
+        }
         if (requested != null && requested != user) return answer.error(mismatch(requested, user))
         when (single) {
             "peakvault-sign_buffer" -> {
@@ -578,8 +601,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?) {
         pending = request
         val authority = when (val w = request.work) {
-            is Work.Broadcast -> w.authority
-            is Work.SignBuffer -> w.authority
+            is Work.Broadcast -> w.authority.value.uppercase()
+            is Work.SignBuffer -> w.authority.value.uppercase()
+            Work.Connect -> CONNECT_AUTHORITY
         }
         val host = BrowserPolicy.host(request.origin)
         setState {
@@ -590,7 +614,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                     title = title,
                     host = host,
                     username = request.username,
-                    authority = authority.value.uppercase(),
+                    authority = authority,
                     operations = ops.orEmpty().mapNotNull { op -> (op as? JsonArray)?.let(::view) },
                     details = details,
                     blacklisted = DappBlacklist.check(host),
@@ -622,6 +646,11 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                 when (val w = request.work) {
                     is Work.SignBuffer -> signBuffer(request, w)
                     is Work.Broadcast -> broadcast(request, w)
+                    Work.Connect -> {
+                        connectAnswer(request.origin, request.username)
+                        connectAnswers[request.origin] = true
+                        request.answer.success(JsonArray(listOf(JsonPrimitive(request.username))))
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -638,6 +667,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val request = pending ?: return
         pending = null
         setState { it.copy(prompt = null) }
+        if (request.work == Work.Connect && env.session.current.username == request.username) {
+            connectAnswer(request.origin, request.username)
+            connectAnswers[request.origin] = false
+        }
         request.answer.error(REJECTED)
     }
 
@@ -751,6 +784,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
         /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
         const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
+
+        /** The question before a page learns the account name (Peak Vault connect). */
+        fun connectTitle(host: String) = L.native.dappBrowser.connectTitle(host = host)
+        val CONNECT_AUTHORITY: String get() = L.native.dappBrowser.connectAuthority
         val MESSAGE: String get() = L.profile.message
 
         /** Ops JSON plus the page's text: Hive takes 64 KB a transaction, this leaves room for JSON escapes. */

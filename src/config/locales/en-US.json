@@ -2804,7 +2804,9 @@
       "home_title": "Home",
       "loading_title": "Loading...",
       "blank_run": "[{count, plural, one {# blank character} other {# blank characters}}]",
-      "too_large": "This page asked to sign a request too large to show, so Ecency refused it."
+      "too_large": "This page asked to sign a request too large to show, so Ecency refused it.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "The account changed."
