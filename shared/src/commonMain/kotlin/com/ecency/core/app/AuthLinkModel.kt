@@ -148,8 +148,14 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             return true
         }
         // a question still open is declined (its requester gets user_cancelled) before the new one replaces it,
-        // and so is a link still waiting for the unlock or the accounts
-        if (pending != null) decline()
+        // and so is a link still waiting for the unlock or the accounts. A refusal the user has not closed and a
+        // posting key question are dropped instead: the user did not act on them, and their answer would tell the
+        // requester whether the account is on this device
+        when (pending) {
+            null -> Unit
+            is Pending.Answer, is Pending.PostingKey -> pending = null
+            else -> decline()
+        }
         waiting?.let { (job, earlier, earlierFromContent) ->
             job.cancel()
             // a content link still waiting was never asked about: its requester hears nothing
@@ -535,7 +541,8 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
     }
 
     private fun refuse(title: String, message: String, silent: Boolean) {
-        // a refusal still waiting to answer its requester is replaced before the user closed it: that requester hears nothing
+        // this refusal answers no one: a refusal shown before it that the user has not closed yet is dropped, and its
+        // requester hears nothing either
         if (pending is Pending.Answer) pending = null
         if (silent) return
         setState { it.copy(prompt = LinkPrompt.Refused(title, message)) }

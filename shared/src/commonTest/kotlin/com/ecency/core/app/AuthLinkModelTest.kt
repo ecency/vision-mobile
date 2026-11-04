@@ -543,6 +543,42 @@ class AuthLinkModelTest {
     }
 
     @Test
+    fun aRefusalReplacedByANewLinkNeverAnswersItsRequester() = runTest {
+        val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
+        val links = app.env.authLinks
+        // two login links in a row for accounts not on this device: the user never closed the first refusal
+        links.handle("ecency://login?username=spike-nobody&callback=otherapp://first&request_id=a")
+        testScheduler.advanceUntilIdle()
+        assertIs<LinkPrompt.Refused>(links.current.prompt)
+        links.handle("ecency://login?username=spike-nobody2&callback=otherapp://second&request_id=b")
+        testScheduler.advanceUntilIdle()
+        links.answers().let { assertTrue(it.isEmpty(), "the first requester hears nothing: $it") }
+        links.dismiss()
+        testScheduler.advanceUntilIdle()
+        val answer = params(links.answers().single())
+        assertEquals("b", answer["request_id"], "only the refusal the user closed answers")
+        assertEquals("not_logged_in", answer["error"])
+    }
+
+    @Test
+    fun aPostingKeyQuestionReplacedByANewLinkTellsItsRequesterNothing() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        links.handle("ecency://login?username=$alice&callback=otherapp://first&request_id=a")
+        testScheduler.advanceUntilIdle()
+        assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
+        links.handle("ecency://login?username=spike-nobody&callback=otherapp://second&request_id=b")
+        testScheduler.advanceUntilIdle()
+        links.answers().let { assertTrue(it.isEmpty(), "the user did not decline: $it") }
+        // the user declining a question is still answered
+        links.dismiss()
+        links.handle("ecency://login?username=$alice&callback=otherapp://third&request_id=c")
+        testScheduler.advanceUntilIdle()
+        links.decline()
+        assertEquals("user_cancelled", params(links.answers().last())["error"])
+    }
+
+    @Test
     fun aSecondLinkDeclinesTheOpenQuestionAndBothAnswersArrive() = runTest {
         val app = signedIn(this)
         val links = app.env.authLinks
