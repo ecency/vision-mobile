@@ -15,9 +15,12 @@ final class MotionUITests: XCTestCase {
         app.descendants(matching: .any)[id].firstMatch
     }
 
-    /// The system's edge swipe: from the left edge across most of the screen.
+    /// The system's edge swipe: from the left edge across most of the screen. It starts on the edge itself: on iOS 26
+    /// and later a synthesized touch a few points in (dx 0.01 is 3.75 points on an SE) never begins the edge
+    /// recognizer, and only the content swipe takes it, which UIKit turns off on a screen that hides the bar (the chat
+    /// thread). Starting on the edge exercises the edge swipe that SwipeBackPolicy keeps for those screens.
     private func swipeBack(_ app: XCUIApplication) {
-        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5))
         let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
         start.press(forDuration: 0.05, thenDragTo: end)
     }
