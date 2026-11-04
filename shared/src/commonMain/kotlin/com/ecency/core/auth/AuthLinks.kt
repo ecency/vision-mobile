@@ -151,11 +151,28 @@ object AuthLinks {
     }
 
     /**
-     * Where a raw posting key may go (`ecency://login`): an app's own scheme on this device, as the Hive apps that ask
-     * for it use. A website (`https:`) never gets one; it signs in with the `auth-request` proof instead.
+     * Words in a scheme name that hand the URL to a browser (`microsoft-edge-https`, `firefox-focus`, `touch-https`,
+     * `ddgquicklink`, `yandexbrowser-open-url`, `samsunginternet`, ...): such a scheme never receives a posting key.
      */
-    fun canReceivePostingKey(callback: String): Boolean =
-        isAcceptableCallback(callback) && WebUrl.parse(callback)?.protocol?.lowercase() != "https:"
+    private val BROWSER_WORDS = listOf(
+        "http", "browser", "url", "open", "web", "safari", "chrome", "edge", "firefox", "opera", "brave", "ddg",
+        "duckduckgo", "yandex", "samsung", "focus",
+    )
+
+    /**
+     * Where a raw posting key may go (`ecency://login`): an app's own scheme on this device, as the Hive apps that ask
+     * for it use. A website (`https:`) never gets one; it signs in with the `auth-request` proof instead. Nor does a
+     * scheme whose name says it opens a browser ([BROWSER_WORDS]): the key would land in a web page.
+     */
+    fun canReceivePostingKey(callback: String): Boolean {
+        if (!isAcceptableCallback(callback)) return false
+        val scheme = callbackScheme(callback) ?: return false
+        return scheme != "https" && BROWSER_WORDS.none { it in scheme }
+    }
+
+    /** The callback's scheme name, lowercased, without the colon. */
+    fun callbackScheme(callback: String): String? =
+        WebUrl.parse(callback)?.protocol?.removeSuffix(":")?.lowercase()?.takeIf { it.isNotEmpty() }
 
     /** RN callbackAudience: scheme and host of the callback, lowercased. */
     fun callbackAudience(callback: String): String =

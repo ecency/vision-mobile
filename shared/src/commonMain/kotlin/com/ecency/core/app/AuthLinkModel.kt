@@ -44,7 +44,10 @@ sealed interface LinkPrompt {
     /** RN getFormattedTx errors (qr.* copy) and unusable links. */
     data class Refused(val title: String, val message: String) : LinkPrompt
 
-    /** RN deep_link.posting_key_request: another app asks for the posting key of [username]. */
+    /**
+     * Another app asks for the posting key of [username] (RN deep_link.posting_key_request, with native copy that
+     * names [requester], the callback's scheme, as an app outside Ecency).
+     */
     data class PostingKeyRequest(val username: String, val requester: String) : LinkPrompt
 
     /** RN deep_link.auth_request_*: another app asks for a sign-in proof (never a key). */
@@ -322,7 +325,9 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username), keyRequestNoKey(requester, link.username))
         }
         pending = Pending.PostingKey(link)
-        setState { it.copy(prompt = LinkPrompt.PostingKeyRequest(link.username, requester)) }
+        // named by its scheme only ("An app outside Ecency (<scheme>)"): the rest of the callback is the requester's own text
+        val scheme = AuthLinks.callbackScheme(link.callback) ?: requester
+        setState { it.copy(prompt = LinkPrompt.PostingKeyRequest(link.username, scheme)) }
     }
 
     private suspend fun sign(user: String, decoded: HiveUri.Decoded, callback: String?, requestId: String?, pageHost: String?, quiet: Boolean, silent: Boolean) {

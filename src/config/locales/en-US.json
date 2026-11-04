@@ -2659,7 +2659,8 @@
       "key_request_web": "{requester} asked for your posting key. Ecency hands a posting key only to an app on this device, never to a website. Ask the site to offer sign in with Ecency instead: it proves your account without sharing a key.",
       "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content.",
       "key_request_not_here": "{requester} asked for the posting key of @{account}, but that account is not signed in on this device.",
-      "key_request_no_key": "{requester} asked for the posting key of @{account}, but Ecency has no posting key stored for that account."
+      "key_request_no_key": "{requester} asked for the posting key of @{account}, but Ecency has no posting key stored for that account.",
+      "posting_key_request_external": "An app outside Ecency ({scheme}) is requesting the posting private key for @{username}.\n\nWith this key that app can post, comment, vote and follow as @{username} until you change your keys. Continue only if you opened this request yourself, from an app you trust."
     },
     "chats": {
       "group_members": "Group members",

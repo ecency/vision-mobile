@@ -321,7 +321,12 @@ class AuthLinkModelTest {
         val links = app.env.authLinks
         links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
         testScheduler.advanceUntilIdle()
-        assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
+        val prompt = assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
+        // the requester is named by its scheme as an app outside Ecency, never by the raw callback
+        assertEquals("otherapp", prompt.requester)
+        val copy = AccountCopy.postingKeyRequest(prompt.requester, prompt.username)
+        assertTrue(copy.startsWith("An app outside Ecency (otherapp)"), copy)
+        assertFalse("otherapp://done" in copy, copy)
         assertNull(links.current.callback, "no answer before the user decides")
 
         links.confirm()

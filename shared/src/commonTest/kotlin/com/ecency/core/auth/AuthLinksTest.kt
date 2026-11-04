@@ -116,6 +116,23 @@ class AuthLinksTest {
     }
 
     @Test
+    fun aPostingKeyNeverGoesToASchemeThatOpensABrowser() {
+        val browsers = listOf(
+            "microsoft-edge-https", "firefox-focus", "touch-https", "ddgquicklink", "yandexbrowser-open-url", "samsunginternet",
+            "googlechromes", "x-safari-https", "opera-http", "brave", "openurl", "mywebview", "safari", "chrome", "edge",
+            "firefox", "opera", "duckduckgo", "yandex", "samsung", "focus", "anybrowser", "urlhandler", "HTTPHandler",
+        )
+        browsers.forEach { scheme ->
+            assertFalse(AuthLinks.canReceivePostingKey("$scheme://example.com/x"), scheme)
+        }
+        // an app's own scheme still gets the question
+        listOf("honeyback", "otherapp", "peakd", "hiveblog").forEach { assertTrue(AuthLinks.canReceivePostingKey("$it://cb"), it) }
+        // browser schemes stay acceptable callbacks for answers without a key (the list only guards the key)
+        assertTrue(AuthLinks.isAcceptableCallback("firefox-focus://open?url=x"))
+        assertFalse(AuthLinks.canReceivePostingKey("https://site.example/cb"))
+    }
+
+    @Test
     fun postingKeyRequests() {
         assertEquals(
             AuthLink.PostingKeyRequest("good-karma", "honeyback://hive", "r1"),
