@@ -390,7 +390,7 @@ struct AssetDetailsView: View {
         .screenTitle(copy.DETAILS).navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.trailing) {
             if s.filterable {
-                Button { filter = true } label: { Image(appIcon: .filter) }
+                Button { filter = true } label: { Label(copy.FILTER_TITLE, appIcon: .filter).labelStyle(.iconOnly) }
                     .accessibilityLabel(copy.FILTER_TITLE).accessibilityIdentifier("history-filter")
             }
         }

@@ -64,7 +64,7 @@ extension AppContainer {
         case .appLink: _ = env.authLinks.handleFromContent(url: url)
         // a post, profile or tag on ecency.com or another Hive frontend opens in the app, the rest in the browser
         case .web:
-            if let entry = ContentLinks.shared.entry(url: url) { open(entry: entry) }
+            if let entry = ContentLinks.shared.contentEntry(url: url) { open(entry: entry) }
             else if let target = SafeTarget.shared.external(url: url) { handle(target) }
         case .ignored: break
         }

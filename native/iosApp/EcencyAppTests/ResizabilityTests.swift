@@ -112,6 +112,14 @@ final class ResizabilityTests: XCTestCase {
         }
     }
 
+    func testImagesDecodeInWidthStepsSoAResizeAsksForFew() {
+        XCTAssertEqual(LoadedImageView.pixelStep(1206), 1280)
+        XCTAssertEqual(LoadedImageView.pixelStep(1280), 1280)
+        XCTAssertEqual(LoadedImageView.pixelStep(1), 256)
+        // a fold's in-between widths share one decode
+        XCTAssertEqual(Set([1030, 1100, 1180, 1270].map { LoadedImageView.pixelStep($0) }), [1280])
+    }
+
     func testBodyImagesAreRequestedAtTheDisplaysScale() {
         // a proxied image: the proxy serves 320, 600, 800, 1024 and 1280 px wide variants
         let src = ImageProxy(base: ImageProxy.companion.DEFAULT_BASE)

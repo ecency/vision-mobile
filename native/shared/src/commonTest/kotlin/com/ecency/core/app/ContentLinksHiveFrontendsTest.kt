@@ -2,6 +2,7 @@ package com.ecency.core.app
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /**
@@ -52,5 +53,26 @@ class ChatLinkCardOpenTest {
         assertEquals(listOf<AppScreen>(AppScreen.Post("alice", "my-post")), ContentLinks.entry(card.openUrl)?.screens)
         // a plain page card opens its link
         assertEquals("https://example.com/a", ChatLinkCard("https://example.com/a", "T", "", null).openUrl)
+    }
+}
+
+/** A link tapped in a chat message or a link card ([ContentLinks.contentEntry]). */
+class ContentLinksInContentTest {
+    @Test
+    fun aReplyNamedInTheFragmentOpensTheReply() {
+        assertEquals(listOf<AppScreen>(AppScreen.Post("bob", "re-my-post")),
+            ContentLinks.contentEntry("https://peakd.com/photography/@alice/my-post#@bob/re-my-post")?.screens)
+        assertEquals(listOf<AppScreen>(AppScreen.Post("alice", "my-post")), ContentLinks.contentEntry("https://ecency.com/@alice/my-post#comments")?.screens)
+        // the fragment of a site the app does not open is not read
+        assertNull(ContentLinks.contentEntry("https://example.com/@alice/my-post#@bob/re-my-post"))
+    }
+
+    @Test
+    fun aLinkThatWouldChangeTabsLeavesTheConversationOpen() {
+        // the Waves composer link switches tabs and clears the stack: the chat would close, its draft lost
+        assertNotNull(ContentLinks.entry("https://ecency.com/waves?text=hello")?.tab)
+        assertNull(ContentLinks.contentEntry("https://ecency.com/waves?text=hello"))
+        // a wave's thread is a screen over the chat
+        assertEquals(1, ContentLinks.contentEntry("https://ecency.com/waves/alice/wave-1")?.screens?.size)
     }
 }

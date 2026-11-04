@@ -117,7 +117,11 @@ struct PanedTab<List: View>: View {
     @Environment(\.viewportSize) private var viewport
 
     var body: some View {
-        let menu = app.nav.menuBesideList(wide: true)
+        // the navigation (its pane, its menu) is the selected tab's: a tab kept alive behind it shows its list alone,
+        // never a second copy of the pane's screen or the menu
+        let selected = app.nav.tab == tab
+        let menu = selected && app.nav.menuBesideList(wide: true)
+        let pane = selected && !menu
         let width = Self.listWidth(window: viewport?.width ?? 0)
         // one list in both layouts, so it keeps its scroll when the menu gives its place to the pane
         HStack(spacing: 0) {
@@ -127,8 +131,8 @@ struct PanedTab<List: View>: View {
                     .transition(motion.pops ? .move(edge: .leading) : .opacity)
                 separator
             }
-            list().frame(minWidth: menu ? 0 : width, maxWidth: menu ? .infinity : width)
-            if !menu {
+            list().frame(minWidth: pane ? width : 0, maxWidth: pane ? width : .infinity)
+            if pane {
                 separator
                 DetailPane(tab: tab)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

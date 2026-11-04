@@ -524,7 +524,8 @@ struct LoadedImageView: UIViewRepresentable {
     func updateUIView(_ view: UIImageView, context: Context) {
         let coordinator = context.coordinator
         coordinator.onLoad = onLoad
-        let maxPixel = maxWidth * context.environment.displayScale
+        // in steps of 256 px: a window resizing through many widths (a fold) asks for a few decodes, not one per width
+        let maxPixel = Self.pixelStep(maxWidth * context.environment.displayScale)
         // the same image drawn wider (a window that unfolded, a display with a higher scale) is decoded again,
         // sharper; narrower keeps the decode it has
         let sameSrc = coordinator.src == src
@@ -558,6 +559,9 @@ struct LoadedImageView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
+
+    /// The decode width for [pixels]: the next multiple of 256 (never 0).
+    static func pixelStep(_ pixels: CGFloat) -> CGFloat { max(256, (pixels / 256).rounded(.up) * 256) }
 
     final class Coordinator {
         var src: String?

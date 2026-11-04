@@ -853,6 +853,23 @@ object ContentLinks {
     fun legacyScheme(url: String): String =
         if (url.startsWith("esteem://", ignoreCase = true)) "ecency://" + url.substring("esteem://".length) else url
 
+    private val REPLY_FRAGMENT = Regex("^@([a-z0-9.-]+)/([a-z0-9-]+)$")
+
+    /**
+     * A link tapped in content (a chat message, a link card): [entry], with a reply its fragment names
+     * (`/@alice/post#@bob/re-post`, RN postUrlParser) opened instead of the post above it. An entry that changes
+     * tabs (the Waves composer) is null, so the page opens in the browser and the conversation stays where it is.
+     */
+    fun contentEntry(url: String): NavEntry? {
+        val page = entry(url) ?: return null
+        val reply = REPLY_FRAGMENT.matchEntire(url.substringAfter('#', "").lowercase())
+        if (reply != null) {
+            com.ecency.core.render.blocks.SafeTarget.post(reply.groupValues[1], reply.groupValues[2])
+                ?.let { NavEntry.from(LinkRouter.route(it)) }?.let { return it }
+        }
+        return page.takeIf { it.tab == null }
+    }
+
     fun entry(url: String): NavEntry? {
         val safe = com.ecency.core.render.blocks.SafeTarget.httpUrl(url) ?: return null
         val rest = safe.substringAfter("://", "")

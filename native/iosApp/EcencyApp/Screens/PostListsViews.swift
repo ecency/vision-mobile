@@ -207,7 +207,9 @@ struct EditHistoryView: View {
         .navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.trailing) {
             Group {
-                Button { history.toggleDiff() } label: { Image(appIcon: .swap) }
+                Button { history.toggleDiff() } label: {
+                    Label(s.showDiff ? L.Native.Ios.Reading.showVersion : L.Native.Ios.Reading.showChanges, appIcon: .swap).labelStyle(.iconOnly)
+                }
                     .accessibilityLabel(s.showDiff ? L.Native.Ios.Reading.showVersion : L.Native.Ios.Reading.showChanges)
                     .largeContent(s.showDiff ? L.Native.Ios.Reading.showVersion : L.Native.Ios.Reading.showChanges, appIcon: .swap)
                     .accessibilityIdentifier("history-diff")
