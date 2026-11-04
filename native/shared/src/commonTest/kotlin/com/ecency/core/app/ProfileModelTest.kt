@@ -580,6 +580,47 @@ class ProfileModelTest {
     }
 
     @Test
+    fun thePinnedPostFollowsDeletesMutesRefreshesAndAChangedPin() = runTest {
+        val e = com.ecency.core.api.Fixtures
+        var pinFails = true
+        var pinGets = 0
+        val app = app(rpc = { req ->
+            when (req.method) {
+                "bridge.get_account_posts" -> FakeTransport.result(req, "[" + e.entry("alice", "newest") + "," + e.entry("alice", "my-post") + "]")
+                "bridge.get_post" -> { pinGets++; if (pinFails) HttpResult(500, "down") else FakeTransport.result(req, e.entry("alice", req.params.jsonObject["permlink"]!!.jsonPrimitive.content)) }
+                else -> null
+            }
+        })
+        val model = app.env.profileModel("alice", "")
+        model.start()
+        testScheduler.advanceUntilIdle()
+        val feed = assertNotNull(model.feed(ProfileTab.BLOG))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        // the pinned post's own fetch failed: the feed shows without it, and a refresh tries again
+        assertTrue(feed.current.items.none { it.isPinnedBlog })
+        pinFails = false
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-post", "newest"), feed.current.items.map { it.key.permlink })
+        assertTrue(pinGets >= 2, "fetched again on refresh")
+        // the menu reads the pinned copy (Unpin, not Pin)
+        assertEquals(true, feed.post(feed.current.items.first().key)?.stats?.isPinnedBlog)
+        // another pin: the old one goes at once, the new one leads once it arrived
+        feed.pin("newest")
+        assertTrue(feed.current.items.none { it.isPinnedBlog && it.key.permlink == "my-post" })
+        testScheduler.advanceUntilIdle()
+        assertEquals("newest", feed.current.items.first().key.permlink)
+        assertTrue(feed.current.items.first().isPinnedBlog)
+        // deleted on this device: gone, pinned copy included
+        app.env.emit(AppEvent.PostDeleted(com.ecency.core.api.model.PostKey("alice", "newest")))
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.items.none { it.key.permlink == "newest" })
+        assertNull(feed.post(com.ecency.core.api.model.PostKey("alice", "newest")))
+        model.close()
+    }
+
+    @Test
     fun anAccountWithoutACoverGetsTheImageServersCover() = runTest {
         // no cover in the metadata (never set, or a node that strips it): the image server's /u/<name>/cover, which
         // answers the account's own cover or the default one (RN showed its default cover image)

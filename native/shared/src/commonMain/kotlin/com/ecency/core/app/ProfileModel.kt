@@ -185,10 +185,10 @@ class ProfileModel internal constructor(
         }
     }
 
-    /** The feed of [tab] (blog, posts, comments, replies), created on first use and closed with this model. */
     /** RN feedQueries: the profile's pinned post leads the post lists (Blog, Posts), never comments or replies. */
     private val PINNED_TABS = setOf(ProfileTab.BLOG, ProfileTab.POSTS)
 
+    /** The feed of [tab] (blog, posts, comments, replies), created on first use and closed with this model. */
     fun feed(tab: ProfileTab): FeedModel? {
         val sort = tab.sort ?: return null
         return feeds.getOrPut(tab) {
