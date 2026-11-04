@@ -625,6 +625,70 @@ class AppLockModelTest {
         return TestApp(this, legacy = LegacyMigrationSource(rn, LegacyFixtures.PIN_KEY, LegacyFixtures.DEFAULT_PIN)) { HttpResult(500, "") }
     }
 
+    /** Every notice queued, oldest first, each dismissed as it is read. */
+    private fun drainNotices(app: TestApp): List<AccountNotice> = buildList {
+        while (true) {
+            val n = app.env.accountNotices.current.notice ?: break
+            add(n)
+            app.env.accountNotices.dismiss(n.id)
+        }
+    }
+
+    @Test
+    fun anRnPostingKeyThatIsAlsoTheOwnerKeyIsRemovedAfterTheChainReadAndToldOnce() = runTest {
+        // RN signs in with one WIF that is both owner and posting: it stores it as the posting key, the owner key empty
+        val shared = com.ecency.core.hive.PrivateKey.fromWif(LegacyFixtures.POSTING_ONLY).publicKey().toString()
+        val other = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-owner-check-other").publicKey().toString()
+        var chainUp = false
+        fun auth(key: String) = """{"weight_threshold":1,"account_auths":[],"key_auths":[["$key",1]]}"""
+        val handler: suspend com.ecency.core.api.FakeTransport.(com.ecency.core.api.Sent) -> HttpResult = { req ->
+            when {
+                req.method != "condenser_api.get_accounts" -> HttpResult(500, "")
+                !chainUp -> HttpResult(500, "")
+                "\"spike-posting\"" in req.body -> com.ecency.core.api.FakeTransport.result(
+                    req, """[{"name":"spike-posting","owner":${auth(shared)},"active":${auth(other)},"posting":${auth(shared)},"memo_key":"$other"}]""",
+                )
+                else -> com.ecency.core.api.FakeTransport.result(req, "[]")
+            }
+        }
+        val rn = MapLegacyStorage(mapOf("persist:root" to LegacyFixtures.PERSIST_ROOT, "user" to LegacyFixtures.USERS))
+        val first = TestApp(this, legacy = LegacyMigrationSource(rn, LegacyFixtures.PIN_KEY, LegacyFixtures.DEFAULT_PIN), handler = handler)
+        first.env.session.start()
+        first.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        // the node is not reachable at this start: the key is kept until the chain can be asked
+        assertEquals(LegacyFixtures.POSTING_ONLY, KeyVault(first.store).account("spike-posting")!!.postingKey, "imported as RN stored it")
+        assertTrue(drainNotices(first).none { it.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER })
+
+        // the next start reads the chain: the key is the owner key too, so it goes, and the user is told why
+        chainUp = true
+        val second = TestApp(this, handler = handler)
+        second.store.entries.putAll(first.store.entries)
+        second.env.prefs = first.env.prefs
+        second.env.session.start()
+        second.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        val stored = KeyVault(second.store).account("spike-posting")!!
+        assertNull(stored.postingKey, "the owner key does not stay in the vault")
+        assertFalse(com.ecency.core.hive.KeyRole.POSTING in second.env.session.current.accounts.single { it.username == "spike-posting" }.storedKeys, "the session shows it")
+        val told = drainNotices(second).filter { it.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER }
+        assertEquals(listOf("spike-posting"), told.map { it.account })
+        assertEquals(
+            "@spike-posting's key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys.",
+            told.single().body,
+        )
+
+        // told once: a later start neither asks the chain again nor shows it
+        val third = TestApp(this, handler = handler)
+        third.store.entries.putAll(second.store.entries)
+        third.env.prefs = second.env.prefs
+        third.env.session.start()
+        third.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(drainNotices(third).none { it.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER })
+        assertTrue(third.transport.sent.none { it.method == "condenser_api.get_accounts" && "spike-posting" in it.body })
+    }
+
     @Test
     fun theFirstLaunchAfterTheUpdateLocksWithTheRnPin() = runTest {
         val app = legacyApp()

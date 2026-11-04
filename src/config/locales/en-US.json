@@ -2592,7 +2592,7 @@
       "could_not_reach_the": "Could not reach the HiveAuth server. Please try again.",
       "unexpected_redirect": "The server sent an unexpected redirect. Nothing was changed. Please try again later.",
       "missing_key_hint": "Add it under Settings, Manage Authorities (Import Private), or sign in again with it.",
-      "this_key_is_also": "This key is also this account's owner key. Ecency does not keep a key that controls the owner role: give your active and posting roles keys of their own, then sign in with those.",
+      "this_key_is_also": "This key is also this account's owner key. Ecency does not keep a key that controls the owner role: sign in with HiveSigner or HiveAuth, or give your active and posting roles keys of their own and sign in with those.",
       "this_is_the_owner": "This is the owner key. Ecency never stores or uses the owner key: sign in with your master password, or with your posting or active key.",
       "this_password_only_matches": "This password only matches the account's owner key. Ecency never stores or uses the owner key: sign in with your posting or active key.",
       "this_key_cannot_sign": "This key cannot sign for the account on its own: the account needs more than one signature (its weight is below the threshold).",
@@ -2797,8 +2797,8 @@
       "cannot_post": "post, vote or comment",
       "cannot_transfer": "send transfers or change account settings",
       "missing_roles": "Your password no longer matches @{account}''s {missing} key: it was changed on the account since the password was set. Stored on this device: the {kept} key. Until you add the {missing} key under {manageKeys} (Import Private), this app cannot {cannot} with keys for @{account}.",
-      "shared_owner_title": "This key also controls the owner role",
-      "shared_owner": "@{account} uses the same key for its owner role and its {names} role. Whoever has this key controls the whole account. Ecency keeps it as the {names} key only and never uses it for owner operations. Give the {names} role a key of its own, and keep the owner key offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
       "message_from": "Message from {host}",

@@ -24,9 +24,6 @@ class KeyLoginResult internal constructor(
 ) {
     fun signingKey(): PrivateKey = PrivateKey.fromWif(keys.getValue(signingRole))
 
-    /** A typed private key that is also the account's owner key (refused by [KeyLogin.classify], so never true for a kept result). */
-    val sharesOwnerKey: Boolean get() = !isMasterPassword && KeyRole.OWNER in matchedRoles
-
     /**
      * For a master password: which of posting and active it did not give, because the account's key for that
      * role is no longer the one the password derives (or cannot sign alone). Empty for a private key.

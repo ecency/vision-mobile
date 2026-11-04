@@ -203,6 +203,9 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
                     io { candidates.associateWith { name -> runCatching { env.vault.vault.account(name)?.isKeyAccountWithoutSigningKey == true }.getOrNull() } }
                 }.getOrElse { candidates.associateWith { null } }
                 env.accountNotices.noSigningKey(judged.filterValues { it == true }.keys.toList(), unread = judged.filterValues { it == null }.keys.toList())
+                // the imported accounts' authorities are read in the background: a stored key that is also the owner
+                // key is removed and the user told (RN often stores one key for both roles as the posting key)
+                env.accountNotices.checkOwnerKeys(report?.imported.orEmpty())
                 val snap = io { snapshot() }
                 knownFailures = snap.failures
                 setState {

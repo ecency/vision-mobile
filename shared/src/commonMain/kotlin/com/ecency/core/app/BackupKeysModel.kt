@@ -307,13 +307,17 @@ class BackupKeysModel internal constructor(private val env: AppEnvironment) :
     }
 
     private suspend fun show(user: String) {
-        val account = env.accounts.vaultAccount(user) ?: return shut()
+        var account = env.accounts.vaultAccount(user) ?: return shut()
         val chain: ChainAuthorities? = try {
             env.chain.authorities(user)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             null
+        }
+        // a stored key that is also the owner key goes (with its notice) before anything shows
+        if (chain != null && runCatching { env.accountNotices.ownerKeyFound(user, chain) }.getOrDefault(false)) {
+            account = env.accounts.vaultAccount(user) ?: return shut()
         }
         // the account may have changed, or the app locked, while the vault and the node were read
         if (env.session.current.username != user || env.appLock.current.hidesContent || current.phase == KeysPhase.CLOSED) return shut()

@@ -250,6 +250,7 @@ class AccountNoticesTest {
         start(app)
         val failure = runCatching { app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER)) }.exceptionOrNull() as AppException
         assertEquals(AppError.KEY_SHARED_WITH_OWNER_REFUSED, failure.error.message)
+        assertTrue("sign in with HiveSigner or HiveAuth" in failure.error.message, "the refusal says how to go on")
         assertTrue(failure.cause is com.ecency.core.auth.AuthException.KeySharedWithOwner)
         assertNull(KeyVault(app.store).account(alice))
         assertNull(app.env.accountNotices.current.notice)

@@ -507,6 +507,18 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         val stored = env.accounts.vaultAccount(link.username)
         val key = stored?.shareablePostingKey
             ?: return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
+        // the key leaves only once the chain says it is not also the owner key; a read that fails hands over nothing
+        val chain = try {
+            env.chain.authorities(link.username)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        } ?: return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
+        if (KeyRole.POSTING in stored.rolesOnOwner(chain.owner)) {
+            runCatching { env.accountNotices.ownerKeyFound(link.username, chain) }
+            return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
+        }
         answer(link.callback, link.requestId, listOf("status" to "success", "username" to link.username, "posting_key" to key), quiet = false)
     }
 

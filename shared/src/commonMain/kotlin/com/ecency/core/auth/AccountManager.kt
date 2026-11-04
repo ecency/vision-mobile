@@ -69,8 +69,6 @@ class KeyLoginOutcome(
     val summary: AccountSummary,
     /** Of posting and active: the roles a master password no longer matches on chain (nothing is stored for them). */
     val missingSigningRoles: Set<KeyRole>,
-    /** The typed key is also the account's owner key. */
-    val sharesOwnerKey: Boolean,
 )
 
 /**
@@ -187,7 +185,7 @@ class AccountManager(
             ),
             session.copy(username = username),
         )
-        return KeyLoginOutcome(summary, result.missingSigningRoles, result.sharesOwnerKey)
+        return KeyLoginOutcome(summary, result.missingSigningRoles)
     }
 
     /**
@@ -324,6 +322,29 @@ class AccountManager(
                 save(next)
                 next
             }
+        }
+    }
+
+    /**
+     * Removes from [username]'s stored keys every posting, active or memo key that is on the owner authority of
+     * [authorities] (read from the chain): the app never keeps a key that controls the owner role. Returns the roles
+     * removed, empty when there were none or the account is not stored.
+     */
+    @Throws(Exception::class)
+    suspend fun dropKeysOnOwner(username: String, authorities: ChainAuthorities): Set<KeyRole> = mutex.withLock {
+        db {
+            val stored = account(username)
+            val roles = stored?.rolesOnOwner(authorities.owner).orEmpty()
+            if (stored != null && roles.isNotEmpty()) {
+                save(
+                    stored.copy(
+                        postingKey = stored.postingKey.takeUnless { KeyRole.POSTING in roles },
+                        activeKey = stored.activeKey.takeUnless { KeyRole.ACTIVE in roles },
+                        memoKey = stored.memoKey.takeUnless { KeyRole.MEMO in roles },
+                    ),
+                )
+            }
+            roles
         }
     }
 

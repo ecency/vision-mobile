@@ -1,6 +1,8 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.broadcast.OperationJson
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.HiveUri
 import com.ecency.core.hive.KeyRole
@@ -335,6 +337,47 @@ class AuthLinkModelTest {
         assertEquals("success", p["status"])
         assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), p["posting_key"])
         assertEquals("r2", p["request_id"])
+    }
+
+    @Test
+    fun aPostingKeyThatIsAlsoTheOwnerKeyIsNeverHandedOver() = runTest {
+        var down = false
+        val app = TestApp(this) { req ->
+            when {
+                req.method != "condenser_api.get_accounts" -> HttpResult(500, "")
+                down -> HttpResult(500, "")
+                else -> FakeTransport.result(req, "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]")
+            }
+        }
+        KeyVault(app.store).run {
+            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
+            setCurrentUsername(alice)
+        }
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val links = app.env.authLinks
+        // the chain cannot be read: no key leaves
+        down = true
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
+        testScheduler.advanceUntilIdle()
+        assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        val unread = params(links.answers().single())
+        assertEquals("posting_key_unavailable", unread["error"])
+        assertNull(unread["posting_key"])
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)!!.postingKey, "nothing is decided without the chain")
+        // the chain says the key is the owner key too: refused, and the key goes
+        down = false
+        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
+        testScheduler.advanceUntilIdle()
+        links.confirm()
+        testScheduler.advanceUntilIdle()
+        val refused = params(links.answers().single())
+        assertEquals("posting_key_unavailable", refused["error"])
+        assertNull(refused["posting_key"])
+        assertNull(KeyVault(app.store).account(alice)!!.postingKey)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, app.env.accountNotices.current.notice?.kind)
     }
 
     @Test

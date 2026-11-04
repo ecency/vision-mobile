@@ -85,6 +85,18 @@ data class VaultAccount(
         )
     }
 
+    /**
+     * The roles (posting, active, memo) whose stored key is one of [owner], the chain's owner authority keys: a key
+     * the app does not keep, whatever role it was stored under.
+     */
+    internal fun rolesOnOwner(owner: Collection<String>): Set<com.ecency.core.hive.KeyRole> = buildSet {
+        fun on(wif: String?) = !wif.isNullOrEmpty() &&
+            runCatching { com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString() }.getOrNull()?.let { it in owner } == true
+        if (on(postingKey)) add(com.ecency.core.hive.KeyRole.POSTING)
+        if (on(activeKey)) add(com.ecency.core.hive.KeyRole.ACTIVE)
+        if (on(memoKey)) add(com.ecency.core.hive.KeyRole.MEMO)
+    }
+
     /** A key account (not HiveSigner, not HiveAuth) that holds neither a posting nor an active key: it can sign nothing. */
     val isKeyAccountWithoutSigningKey: Boolean
         get() = isKeyAccount && postingKey.isNullOrEmpty() && activeKey.isNullOrEmpty()

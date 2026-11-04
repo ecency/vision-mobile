@@ -252,7 +252,6 @@ class KeyLoginTest {
         assertFailsWith<AuthException.KeySharedWithOwner> { KeyLogin.classify(user, TestKeys.wif(KeyRole.OWNER), posting) }
         // keys that are not the owner key, and passwords, are unaffected
         assertEquals(setOf(KeyRole.ACTIVE), KeyLogin.classify(user, TestKeys.wif(KeyRole.ACTIVE), TestKeys.authorities()).keys.keys)
-        assertFalse(KeyLogin.classify(user, TestKeys.wif(KeyRole.ACTIVE), TestKeys.authorities()).sharesOwnerKey)
         assertTrue(KeyLogin.classify(user, AuthGoldenVectors.PASSWORD, TestKeys.authorities()).isMasterPassword)
     }
 }
