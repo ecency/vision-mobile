@@ -122,13 +122,34 @@ class SigningModelTest {
         assertEquals(false, (app.env.signing.current.prompt as SigningPrompt.HiveAuthBroadcast).openWallet)
         app.relay.push(kotlinx.serialization.json.buildJsonObject {
             put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
-            put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive("has-tx-1"))
+            put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(TestApp.HAS_TX))
         })
         val r = result.await()
         assertEquals(SigningMethod.HIVEAUTH, r.method)
-        assertEquals("has-tx-1", r.txId)
+        assertEquals(TestApp.HAS_TX, r.txId)
         assertEquals(alice, app.relay.sent.single { it["cmd"]!!.jsonPrimitive.content == "sign_req" }["account"]!!.jsonPrimitive.content)
         assertTrue(app.broadcasts().isEmpty())
+        assertTrue(app.transport.sent.any { it.method == "transaction_status_api.find_transaction" }, "the chain confirmed it first")
+    }
+
+    @Test
+    fun aHiveAuthAckTheChainNeverShowsIsNotASuccess() = runTest {
+        val app = appWithAccounts(this)
+        store(app, VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e", hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"))
+        for (txId in listOf("ff".repeat(20), "not-a-transaction-id")) {
+            app.relay.autoApproveSign = false
+            val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+            repeat(5) { testScheduler.runCurrent() }
+            app.relay.push(kotlinx.serialization.json.buildJsonObject {
+                put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
+                put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(txId))
+            })
+            val before = testScheduler.currentTime
+            testScheduler.advanceUntilIdle()
+            val failure = result.await().exceptionOrNull()
+            assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(failure, "the relay's word alone is not a success: $txId")
+            assertTrue(testScheduler.currentTime - before <= 60_000, "the check is bounded")
+        }
     }
 
     @Test

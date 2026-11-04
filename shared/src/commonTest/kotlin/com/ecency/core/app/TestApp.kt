@@ -121,6 +121,9 @@ class TestApp(
         const val PROXY = "https://i.ecency.com"
         const val USER = "spike-voter"
 
+        /** The transaction id the fake HiveAuth relay's sign_ack names; the fake chain has it in the mempool. */
+        const val HAS_TX = "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567"
+
         /** 2026-10-06T12:00:00Z */
         const val NOW = 1_791_288_000_000L
 
@@ -136,6 +139,8 @@ class TestApp(
             )
             "condenser_api.get_block_header" -> FakeTransport.result(request, """{"previous":"$REF_ID"}""")
             "condenser_api.get_content" -> FakeTransport.result(request, """{"author":"","permlink":""}""")
+            "transaction_status_api.find_transaction" ->
+                if (request.params.toString().contains(HAS_TX)) FakeTransport.result(request, """{"status":"within_mempool"}""") else null
             else -> null
         }
     }

@@ -111,7 +111,7 @@ class FakeHasRelay : HasSocketFactory {
                     "auth_req" -> push(buildJsonObject { put("cmd", "auth_wait"); put("uuid", "auth-1"); put("expire", waitExpire) })
                     "sign_req" -> {
                         push(buildJsonObject { put("cmd", "sign_wait"); put("uuid", "sign-1"); put("expire", waitExpire) })
-                        if (autoApproveSign) push(buildJsonObject { put("cmd", "sign_ack"); put("uuid", "sign-1"); put("broadcast", true); put("data", "has-tx-1") })
+                        if (autoApproveSign) push(buildJsonObject { put("cmd", "sign_ack"); put("uuid", "sign-1"); put("broadcast", true); put("data", TestApp.HAS_TX) })
                     }
                 }
             }

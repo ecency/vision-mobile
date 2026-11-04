@@ -253,15 +253,16 @@ class HiveApi(val client: HiveRpcClient) {
     /**
      * `transaction_status_api.find_transaction` (as hive-tx checkStatus): where [txId] is, e.g. "within_mempool",
      * "within_irreversible_block", "expired_reversible", "unknown", "too_old". Null when the answer has no status.
-     * With the expiration given, a node that never saw the transaction answers "expired_*" once it is past.
+     * With the expiration given, a node that never saw the transaction answers "expired_*" once it is past; without
+     * it (a transaction signed elsewhere), "unknown" until the node sees it.
      */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun transactionStatus(txId: String, expiration: String): String? =
+    suspend fun transactionStatus(txId: String, expiration: String?): String? =
         (client.call(
             "transaction_status_api.find_transaction",
             buildJsonObject {
                 put("transaction_id", txId)
-                put("expiration", expiration)
+                if (expiration != null) put("expiration", expiration)
             },
         ) as? JsonObject)?.str("status")
 

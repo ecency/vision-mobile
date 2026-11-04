@@ -21,6 +21,7 @@ import com.ecency.core.secure.VaultAccount
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
@@ -302,7 +303,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         // never weaker than the authority the router resolved; HiveAuth has no owner key type
         val keyType = OperationAuthority.hiveAuthKeyType(ops).let { if (it == KeyRole.POSTING && authority == KeyRole.ACTIVE) KeyRole.ACTIVE else it }
         if (keyType == KeyRole.OWNER || authority == KeyRole.OWNER) throw AuthException.UnsupportedOperation(L.native.dappBridgeOps.ownerRefused)
-        return prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
+        val txId = prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
             env.hiveAuth.broadcast(session, keyType, ops) { wait ->
                 setState { s ->
                     val p = s.prompt
@@ -319,6 +320,30 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
                 }
             }.txId
         }
+        return confirmedOnChain(txId)
+    }
+
+    /**
+     * A HiveAuth `sign_ack` is the relay's word: the transaction it names must be on chain (mempool or a block,
+     * `transaction_status_api.find_transaction`) before the send counts as done. Asked [HIVE_AUTH_LOOKUPS] times,
+     * [HIVE_AUTH_LOOKUP_MILLIS] apart; not seen by then (or no transaction id at all), it ends as
+     * [com.ecency.core.api.broadcast.BroadcastException.Unconfirmed]: the user checks the wallet, nothing is sent again.
+     */
+    private suspend fun confirmedOnChain(txId: String?): String {
+        val id = txId?.trim()?.lowercase()?.takeIf { TX_ID.matches(it) }
+            ?: throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(txId.orEmpty())
+        repeat(HIVE_AUTH_LOOKUPS) { attempt ->
+            val status = try {
+                env.api.hive.transactionStatus(id, null)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+            if (status in ON_CHAIN) return id
+            if (attempt < HIVE_AUTH_LOOKUPS - 1) delay(HIVE_AUTH_LOOKUP_MILLIS)
+        }
+        throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(id)
     }
 
     /** In-app owner signing is not offered yet: always declined. */
@@ -378,6 +403,12 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     private fun setPrompt(prompt: SigningPrompt) = setState { it.copy(prompt = prompt) }
 
     companion object {
+        /** How often, and how far apart, a HiveAuth transaction is looked up on chain (about 30 s, ten blocks). */
+        const val HIVE_AUTH_LOOKUPS = 10
+        const val HIVE_AUTH_LOOKUP_MILLIS = 3_000L
+        private val TX_ID = Regex("^[0-9a-f]{40}$")
+        private val ON_CHAIN = setOf("within_mempool", "within_reversible_block", "within_irreversible_block")
+
         val HOT_PAGE_CLOSED: String get() = L.native.signing.hotPageClosed
 
         // RN en-US auth_upgrade.invalid_key, auth_upgrade.key_mismatch
