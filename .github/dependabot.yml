@@ -1,11 +1,12 @@
 version: 2
 
-# Weekly, grouped, at most 3 open pull requests per ecosystem to keep CI minutes low.
+# Monthly, grouped, at most 3 open pull requests per ecosystem to keep CI minutes low (security updates still come
+# as soon as an advisory lands, whatever the schedule).
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 3
     groups:
       github-actions:
@@ -14,7 +15,7 @@ updates:
   - package-ecosystem: gradle
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 3
     groups:
       gradle:
@@ -26,7 +27,7 @@ updates:
       - /tools
       - /tools/render
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 3
     groups:
       tools:
