@@ -217,17 +217,26 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         data object Connect : Work
     }
 
-    /** Peak Vault connect answers per origin for [connectedUser]: shared (true) or refused (false). */
-    private val connectAnswers = mutableMapOf<String, Boolean>()
+    /** Origins the user let learn [connectedUser]'s name (Peak Vault connect). A refusal is never kept. */
+    private val connectApprovals = mutableSetOf<String>()
     private var connectedUser: String? = null
 
-    /** The remembered connect answer of [origin] for [user]; an account change forgets them all. */
-    private fun connectAnswer(origin: String, user: String): Boolean? {
-        if (connectedUser != user) {
-            connectAnswers.clear()
-            connectedUser = user
-        }
-        return connectAnswers[origin]
+    /** Whether [origin] was approved for [user]; an account change forgets every approval. */
+    private fun connectApproved(origin: String, user: String): Boolean {
+        forgetConnectsUnlessFor(user)
+        return origin in connectApprovals
+    }
+
+    /** Keeps the user's approval of [origin] for [user] until the account changes. */
+    private fun rememberConnect(origin: String, user: String) {
+        forgetConnectsUnlessFor(user)
+        connectApprovals += origin
+    }
+
+    private fun forgetConnectsUnlessFor(user: String) {
+        if (connectedUser == user) return
+        connectApprovals.clear()
+        connectedUser = user
     }
 
     private class PendingRequest(
@@ -518,12 +527,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val single = (ops.singleOrNull() as? JsonArray)?.let { (it.getOrNull(0) as? JsonPrimitive)?.contentOrNull }
         val user = env.session.current.username ?: return answer.error(NO_ACCOUNT)
         if (single == "peakvault-connect") {
-            // the account name is asked for once per origin (RN answered it to any page without a word)
-            return when (connectAnswer(origin, user)) {
-                true -> answer.success(JsonArray(listOf(JsonPrimitive(user))))
-                false -> answer.error(REJECTED)
-                null -> prompt(PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Connect), connectTitle(BrowserPolicy.host(origin)), emptyList(), null)
-            }
+            // the account name is shared once the user approved the origin (RN answered it to any page without a
+            // word); after a refusal the page may ask again
+            if (connectApproved(origin, user)) return answer.success(JsonArray(listOf(JsonPrimitive(user))))
+            return prompt(PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Connect), connectTitle(BrowserPolicy.host(origin)), emptyList(), null)
         }
         if (requested != null && requested != user) return answer.error(mismatch(requested, user))
         when (single) {
@@ -648,8 +655,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                     is Work.SignBuffer -> signBuffer(request, w)
                     is Work.Broadcast -> broadcast(request, w)
                     Work.Connect -> {
-                        connectAnswer(request.origin, request.username)
-                        connectAnswers[request.origin] = true
+                        rememberConnect(request.origin, request.username)
                         request.answer.success(JsonArray(listOf(JsonPrimitive(request.username))))
                     }
                 }
@@ -668,10 +674,6 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val request = pending ?: return
         pending = null
         setState { it.copy(prompt = null) }
-        if (request.work == Work.Connect && env.session.current.username == request.username) {
-            connectAnswer(request.origin, request.username)
-            connectAnswers[request.origin] = false
-        }
         request.answer.error(REJECTED)
     }
 

@@ -748,11 +748,19 @@ class DappBrowserModelTest {
         assertEquals("spike-bob", b.current.prompt!!.username)
         b.reject()
         assertEquals(DappBrowserModel.REJECTED, page.error())
-        // a refusal is remembered too: no prompt again, the page hears the refusal
+        // a refusal is not remembered: the page may ask again, and the user answers again
         send(b, page, connect)
         testScheduler.advanceUntilIdle()
-        assertNull(b.current.prompt)
-        assertEquals(DappBrowserModel.REJECTED, page.error())
+        assertEquals("spike-bob", b.current.prompt!!.username, "asked again after a refusal")
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // back to the first account: its approval was forgotten with the account change
+        app.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, b.current.prompt!!.username, "an approval is per account")
     }
 
     @Test
