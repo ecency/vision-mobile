@@ -297,7 +297,8 @@ object BridgeGuards {
     /**
      * Why [ops] are refused before any prompt, or null when they may be confirmed: owner authority, key or authority
      * changes (account_update, account_update2 with owner, active, posting or memo_key; the link flow's rule plus the
-     * memo key), account creation and recovery; and, for an account that signs on this device ([signsHere]), an
+     * memo key), witness key and property changes (witness_update, witness_set_properties), account creation and
+     * recovery; and, for an account that signs on this device ([signsHere]), an
      * operation the app cannot serialize yet. More than [MAX_OPS] operations are refused too.
      */
     fun refusal(ops: JsonArray, signsHere: Boolean): String? {
@@ -313,7 +314,7 @@ object BridgeGuards {
             if (!OperationAuthority.isKnown(name)) return NOT_SUPPORTED
             if (OperationAuthority.forHiveUri(op) == KeyRole.OWNER) return OWNER_REFUSED
             if (OperationAuthority.isMixedCustomJson(op)) return OperationAuthority.MIXED_AUTHORITIES
-            if (name in ACCOUNT_CONTROL) return KEYS_REFUSED
+            if (name in ACCOUNT_CONTROL || name in OperationAuthority.WITNESS_KEYS) return KEYS_REFUSED
             if (name == "account_update2") {
                 val body = op.getOrNull(1) as? JsonObject
                 if (listOf("owner", "active", "posting", "memo_key").any { body?.get(it).let { v -> v != null && v != JsonNull } }) return KEYS_REFUSED

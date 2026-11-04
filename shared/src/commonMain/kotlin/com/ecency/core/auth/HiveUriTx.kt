@@ -101,7 +101,7 @@ object HiveUriTx {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", "owner")
         }
         // account creation, recovery and witness keys never come from a link, for any account type
-        if (name in OperationAuthority.ACCOUNT_CONTROL || name in WITNESS_KEYS) {
+        if (name in OperationAuthority.ACCOUNT_CONTROL || name in OperationAuthority.WITNESS_KEYS) {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", def.authority)
         }
         if (OperationAuthority.isMixedCustomJson(op)) return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", MIXED)
@@ -133,8 +133,6 @@ object HiveUriTx {
     private val CONTENT_DEPENDENT = setOf("custom_json", "account_update2")
     private val ACCOUNT_UPDATES = setOf("account_update", "account_update2")
 
-    /** Operations that set a witness's block signing key or properties. */
-    private val WITNESS_KEYS = setOf("witness_update", "witness_set_properties")
     private val AUTHORITY_FIELDS = listOf("owner", "active", "posting", "memo_key")
 
     private fun isTruthy(e: JsonElement?): Boolean = when (e) {

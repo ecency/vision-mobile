@@ -53,6 +53,11 @@ object OperationAuthority {
         "create_claimed_account", "claim_account",
     )
 
+    /**
+     * Operations that set a witness's block signing key or properties: never signed for a web page or a link either.
+     */
+    val WITNESS_KEYS: Set<String> = setOf("witness_update", "witness_set_properties")
+
     /** Whether [name] is an operation this map classifies (its authority is not a guess). */
     fun isKnown(name: String): Boolean =
         name in SDK_MAP || name in BEYOND_SDK || name == "custom_json" || name == "create_proposal" || name == "update_proposal"

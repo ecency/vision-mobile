@@ -305,6 +305,25 @@ class DappBrowserModelTest {
     }
 
     @Test
+    fun witnessKeyAndPropertyChangesAreRefusedBeforeAnyPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val ops = listOf(
+            """[["witness_update",{"owner":"$alice","url":"https://x","block_signing_key":"STM1","props":{"account_creation_fee":"3.000 HIVE","maximum_block_size":65536,"hbd_interest_rate":0},"fee":"0.000 HIVE"}]]""",
+            """[["witness_set_properties",{"owner":"$alice","props":[["key","00"]],"extensions":[]}]]""",
+        )
+        ops.forEachIndexed { i, json ->
+            send(b, page, keychain("broadcast", ""","method":"Active","operations":$json""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNull(b.current.prompt, json)
+            assertEquals(BridgeGuards.KEYS_REFUSED, page.error(), json)
+            assertEquals(BridgeGuards.KEYS_REFUSED, BridgeGuards.refusal(Json.parseToJsonElement(json).jsonArray, signsHere = false), json)
+        }
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    @Test
     fun ownerAndKeyChangesAreRefusedForAccountsThatSignElsewhereToo() = runTest {
         // a HiveSigner account would sign anything on HiveSigner's page: the bridge's own refusal is the only guard
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
@@ -358,7 +377,7 @@ class DappBrowserModelTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val b = browser(app)
         val page = Page()
-        send(b, page, keychain("broadcast", ""","operations":[["witness_set_properties",{"owner":"$alice","props":[],"extensions":[]}]]"""))
+        send(b, page, keychain("broadcast", ""","operations":[["feed_publish",{"publisher":"$alice","exchange_rate":{"base":"0.300 HBD","quote":"1.000 HIVE"}}]]"""))
         testScheduler.advanceUntilIdle()
         assertEquals("ACTIVE", b.current.prompt!!.authority, "never shown as posting")
         b.reject()
@@ -410,7 +429,7 @@ class DappBrowserModelTest {
         val app = signedIn(this)
         val b = browser(app)
         val page = Page()
-        send(b, page, keychain("broadcast", ""","operations":[["witness_update",{"owner":"$alice","url":"x","block_signing_key":"STM1","props":{},"fee":"0.000 HIVE"}]]"""))
+        send(b, page, keychain("broadcast", ""","operations":[["limit_order_create2",{"owner":"$alice","orderid":1,"amount_to_sell":"1.000 HIVE","exchange_rate":{"base":"1.000 HIVE","quote":"0.300 HBD"},"fill_or_kill":false,"expiration":"2030-01-01T00:00:00"}]]"""))
         testScheduler.advanceUntilIdle()
         assertEquals(BridgeGuards.NOT_SUPPORTED, page.error())
         assertNull(b.current.prompt)
