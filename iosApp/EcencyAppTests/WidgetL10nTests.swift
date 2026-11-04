@@ -62,9 +62,9 @@ final class WidgetL10nTests: XCTestCase {
         // Arabic's own plural forms ("few" for 5, "two" for 2) in its digits, starting with RLM as the shared catalog
         XCTAssertEqual(ar.unread(count: 5), "\u{200F}٥ غير مقروءة")
         XCTAssertEqual(ar.unread(count: 2), "\u{200F}غير مقروءتان")
-        // ar-SA.json holds English for native.plurals.perks.streak (untranslated in Crowdin): English, no RLM
-        XCTAssertEqual(ar.streak(n: 5), "٥-day streak")
-        // a substituted value is isolated in a right to left language only (no widget message has one yet)
+        // the seeded Arabic streak ("{n}" kept from RN's message): RLM first, the number isolated
+        XCTAssertEqual(ar.streak(n: 5), "\u{200F}سلسلة \u{2068}٥\u{2069} يوم")
+        // a substituted value is isolated in a right to left language only
         XCTAssertEqual(ar.formatted("{n} - {who}", ["n": .number(5), "who": .text("@alice")], pluralLanguage: "ar-SA"),
                        "\u{2068}٥\u{2069} - \u{2068}@alice\u{2069}")
         XCTAssertEqual(WidgetL10n(language: "en-US").formatted("{n} - {who}", ["n": .number(5), "who": .text("@alice")], pluralLanguage: "en-US"),
