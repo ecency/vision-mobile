@@ -489,6 +489,17 @@ struct BridgeConfirmSheet: View {
                 .announces(BrowserCopy.shared.PHISHING)
                 .accessibilityIdentifier("bridge-phishing")
             }
+            if let warning = prompt.warning {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(appIcon: .warning, filled: true).foregroundStyle(Color(hex: 0xE74C3C)).accessibilityHidden(true)
+                    Text(warning).scaledFont(13, weight: .semibold).foregroundStyle(Color(hex: 0x3C4449))
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color(hex: 0xFDEDED)))
+                .padding(.bottom, 12)
+                .announces(warning)
+                .accessibilityIdentifier("bridge-warning")
+            }
             Button(action: onConfirm) {
                 Text(BrowserCopy.shared.CONFIRM).scaledFont(16, weight: .bold).frame(maxWidth: .infinity).frame(minHeight: 44)
             }

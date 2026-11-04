@@ -514,6 +514,15 @@ fun BridgeConfirmSheet(prompt: BridgePrompt, onConfirm: () -> Unit, onReject: ()
                     Text(BrowserCopy.PHISHING, color = Color(0xFFE74C3C), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
                 }
             }
+            prompt.warning?.let { warning ->
+                Row(
+                    Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFDEDED)).padding(12.dp).testTag("bridgeWarning"),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Glyph(AppIcon.WARNING, Color(0xFFE74C3C), 18.dp)
+                    Text(warning, color = Color(0xFFE74C3C), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+                }
+            }
             Column(Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState()).padding(bottom = 20.dp)) {
                 DetailRow(BrowserCopy.ACCOUNT, "@${prompt.username}")
                 DetailRow(BrowserCopy.AUTHORITY, prompt.authority, tag = "bridgeAuthority")

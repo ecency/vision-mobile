@@ -2801,6 +2801,7 @@
       "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Message from {host}",
       "home_title": "Home",
       "loading_title": "Loading...",

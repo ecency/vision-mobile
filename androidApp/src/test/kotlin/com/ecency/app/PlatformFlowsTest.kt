@@ -265,6 +265,24 @@ class PlatformFlowsTest {
     }
 
     @Test
+    fun anotherAppsLastingPermissionMessageIsFlaggedOnTheSheet() {
+        launchSignedIn()
+        push(AppScreen.DappBrowser("https://dapp.example/"))
+        waitFor("dappPage")
+        val model = browser()
+        val message = kotlinx.serialization.json.JsonPrimitive("""{"signed_message":{"type":"posting","app":"other.app"},"authors":["tester"],"timestamp":1}""")
+        compose.runOnUiThread {
+            model.bridgeMessage(
+                model.current.activeTabId, "https://dapp.example", true,
+                """{"name":"swRequest_hive","request_id":1,"data":{"type":"signBuffer","message":$message,"method":"Posting"}}""",
+                Page().reply,
+            )
+        }
+        waitFor("bridgeWarning")
+        assertTrue(exists("bridgeWarning"))
+    }
+
+    @Test
     fun onlyACommittedPageNamesTheTab() {
         launchSignedIn()
         push(AppScreen.DappBrowser("https://evil.example/"))

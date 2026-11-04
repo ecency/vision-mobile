@@ -150,6 +150,8 @@ data class BridgePrompt(
     val details: List<LinkField> = emptyList(),
     /** The listed phishing domain the page is (or is under), shown as a warning. */
     val blacklisted: String? = null,
+    /** A line shown above the confirmation, e.g. that a signed message gives another app lasting permission. */
+    val warning: String? = null,
 )
 
 data class DappBrowserState(
@@ -597,6 +599,8 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             prompt(
                 PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.SignBuffer(message, authority)),
                 BridgeLabels.of("signBuffer"), listOf(LinkField(MESSAGE, BridgeDisplay.shown(message))), null,
+                // another app's posting or offline message works as a lasting HiveSigner token for that app
+                warning = BridgeSignatures.lastingGrantApp(message)?.let { lastingPermission(BridgeDisplay.shown(it)) },
             )
         }
     }
@@ -606,7 +610,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             current.tabs.firstOrNull { it.id == tabId }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
             env.session.current.username == user
 
-    private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?) {
+    private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?, warning: String? = null) {
         pending = request
         val authority = when (val w = request.work) {
             is Work.Broadcast -> w.authority.value.uppercase()
@@ -626,6 +630,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                     operations = ops.orEmpty().mapNotNull { op -> (op as? JsonArray)?.let(::view) },
                     details = details,
                     blacklisted = DappBlacklist.check(host),
+                    warning = warning,
                 ),
             )
         }
@@ -786,6 +791,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val LOCKED = "Ecency is locked. Unlock it and try again."
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
         /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
+        /** native.dapp_browser.lasting_permission: [app] may post, vote and comment as the signer from now on. */
+        fun lastingPermission(app: String): String = L.native.dappBrowser.lastingPermission(app = app)
+
         const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
 
         /** The question before a page learns the account name (Peak Vault connect). */
@@ -871,18 +879,47 @@ object BridgeSignatures {
      * `signed_message` that is not an object, or an `app` or `type` that is not a string, is refused. Text that does
      * not parse is refused when it names `signed_message` and `ecency.app`, `code` or `refresh`.
      */
-    fun reserved(message: String): Boolean {
+    fun reserved(message: String): Boolean = when (val read = read(message)) {
+        is Read.Object -> reservedObject(read.obj)
+        is Read.Unparsed -> unparsedReserved(read.text)
+        Read.Other -> false
+    }
+
+    /**
+     * The app named by another app's `posting` or `offline` signed message: HiveSigner takes such a message as a
+     * lasting token for that app (it may post, vote and comment as the signer), so the prompt says so. Null for
+     * anything else (a `login` message, a reserved message, plain text).
+     */
+    fun lastingGrantApp(message: String): String? {
+        val obj = (read(message) as? Read.Object)?.obj ?: return null
+        if (reservedObject(obj)) return null
+        val signed = obj[SIGNED_MESSAGE] as? JsonObject ?: return null
+        val type = field(signed, "type")?.trim()?.lowercase() ?: return null
+        if (type !in LASTING_TYPES) return null
+        return field(signed, "app")?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    private sealed interface Read {
+        class Object(val obj: JsonObject) : Read
+        class Unparsed(val text: String) : Read
+        data object Other : Read
+    }
+
+    /** The message as JSON, read leniently, JSON text inside a JSON string included. */
+    private fun read(message: String): Read {
         var text = message
         repeat(MAX_NESTING) {
-            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull() ?: return unparsedReserved(text)
+            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull() ?: return Read.Unparsed(text)
             when (parsed) {
-                is JsonObject -> return reservedObject(parsed)
-                is JsonPrimitive -> if (parsed.isString) text = parsed.content else return false
-                else -> return false
+                is JsonObject -> return Read.Object(parsed)
+                is JsonPrimitive -> if (parsed.isString) text = parsed.content else return Read.Other
+                else -> return Read.Other
             }
         }
-        return unparsedReserved(text)
+        return Read.Unparsed(text)
     }
+
+    private val LASTING_TYPES = setOf("posting", "offline")
 
     private fun reservedObject(obj: JsonObject): Boolean {
         val signed = obj[SIGNED_MESSAGE] ?: return false

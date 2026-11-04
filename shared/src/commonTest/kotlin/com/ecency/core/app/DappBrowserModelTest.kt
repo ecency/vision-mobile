@@ -492,6 +492,29 @@ class DappBrowserModelTest {
     }
 
     @Test
+    fun anotherAppsPostingOrOfflineMessageWarnsOfLastingPermission() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        fun message(type: String, app: String = "other.app") = """{"signed_message":{"type":"$type","app":"$app"},"authors":["$alice"],"timestamp":1}"""
+        val cases = listOf(
+            message("login") to null,
+            message("posting") to "This gives other.app lasting permission to post, vote and comment as you.",
+            message(" Offline ", " peak.app ") to "This gives peak.app lasting permission to post, vote and comment as you.",
+            // inside a JSON string too
+            JsonPrimitive(message("posting")).toString() to "This gives other.app lasting permission to post, vote and comment as you.",
+            "plain text" to null,
+        )
+        cases.forEachIndexed { i, (text, warning) ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(text)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertEquals(warning, b.current.prompt!!.warning, text)
+            b.reject()
+            testScheduler.advanceUntilIdle()
+        }
+    }
+
+    @Test
     fun aMessageShapedLikeAnEcencySignedMessageIsRefusedBeforeAPrompt() = runTest {
         val app = signedIn(this)
         val b = browser(app)
