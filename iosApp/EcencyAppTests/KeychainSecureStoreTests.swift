@@ -129,4 +129,19 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults))
         XCTAssertEqual(try store.names(), ["this.install"])
     }
+
+    func testFreshInstallWipeWaitsWhileProtectedDataIsUnavailable() throws {
+        let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = KeychainSecureStore(service: serviceA)
+        try store.putString(name: "this.install", value: "dummy")
+        // before the first unlock: nothing is wiped and nothing is marked
+        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: false))
+        XCTAssertEqual(try store.names(), ["this.install"])
+        XCTAssertFalse(defaults.bool(forKey: "\(serviceA).installed"))
+        // the next launch, unlocked, runs the check as before
+        XCTAssertTrue(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: true))
+        XCTAssertEqual(try store.names(), [])
+    }
 }

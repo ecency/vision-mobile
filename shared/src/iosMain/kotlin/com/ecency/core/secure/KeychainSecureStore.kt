@@ -78,9 +78,18 @@ class KeychainSecureStore(val service: String) : SecureStore {
      * Call once at launch, before reading the vault: wipes this service when [defaults] has no install
      * mark yet, then sets it. UserDefaults are removed on uninstall and kept across updates (including the
      * update from the RN app, which never used this service). Returns true when it wiped.
+     *
+     * Before the first unlock after a restart the device's protected data is unavailable and UserDefaults can
+     * read as empty: with [protectedDataAvailable] false nothing is wiped and the mark stays unset, so the
+     * check runs again at the next launch.
      */
     @Throws(SecureStoreException::class)
-    fun wipeIfFreshInstall(defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults): Boolean = withLock {
+    fun wipeIfFreshInstall(defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults): Boolean =
+        wipeIfFreshInstall(defaults, protectedDataAvailable = true)
+
+    @Throws(SecureStoreException::class)
+    fun wipeIfFreshInstall(defaults: NSUserDefaults, protectedDataAvailable: Boolean): Boolean = withLock {
+        if (!protectedDataAvailable) return@withLock false
         val mark = "$service.installed"
         if (defaults.boolForKey(mark)) return@withLock false
         wipe()

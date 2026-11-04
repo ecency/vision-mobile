@@ -777,7 +777,8 @@ final class AppContainer: ObservableObject {
             #endif
             let store = KeychainSecureStore()
             // Keychain items survive an uninstall; the vault must not hand them to a fresh install.
-            _ = try store.wipeIfFreshInstall(defaults: .standard)
+            // before the first unlock after a restart UserDefaults can read as empty: the check waits for the next launch
+            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: UIApplication.shared.isProtectedDataAvailable)
             // the RN app's accounts and PIN, imported once by the app lock's start before it decides anything
             let legacy = LegacyMigrationSource(storage: AsyncStorageReader.companion.forApp(),
                                                pinKey: BuildSecrets.pinKey, defaultPin: BuildSecrets.defaultPin)
