@@ -128,9 +128,10 @@ class AuthLinkModelTest {
         links.handleFromContent("ecency://transfer?to=bob&amount=abc&callback=$cb")
         testScheduler.advanceUntilIdle()
         assertNull(links.current.callback)
-        // the same link from another app keeps RN's answer
+        // the same link from another app keeps RN's answer, once the user saw why
         links.handle("ecency://login?username=spike-nobody&callback=$cb")
         testScheduler.advanceUntilIdle()
+        links.dismiss()
         assertEquals("not_logged_in", params(links.current.callback!!)["error"])
     }
 
@@ -142,9 +143,11 @@ class AuthLinkModelTest {
             com.ecency.core.l10n.PseudoLocales.install(com.ecency.core.l10n.PseudoLocales.ACCENTED)
             links.handle("ecency://login?username=spike-nobody&callback=$cb")
             testScheduler.advanceUntilIdle()
+            links.dismiss()
             assertEquals("Username spike-nobody is not logged in on Ecency.", params(links.answers().single())["message"])
             links.handle("ecency://login?username=$alice&callback=$cb")
             testScheduler.advanceUntilIdle()
+            links.dismiss()
             assertEquals("Username $alice doesn't have a posting private key stored on Ecency.", params(links.answers().single())["message"])
         } finally {
             com.ecency.core.l10n.L10n.setLanguage(com.ecency.core.l10n.L10n.SOURCE)
@@ -219,17 +222,22 @@ class AuthLinkModelTest {
         io.releaseOne()
         io.hold = false
         testScheduler.advanceUntilIdle()
+        links.dismiss()
+        testScheduler.advanceUntilIdle()
         return links.answers()
     }
 
     @Test
     fun aContentLinkAndAnExternalLinkRoutedTogetherKeepTheirOwnOrigin() = runTest {
-        // only the external requester hears not_logged_in, whichever link started first and resumed first
+        // only the external requester ever hears not_logged_in, whichever link started first and resumed first; when
+        // the content link's refusal replaced the external one before the user closed it, nobody hears anything
         for (contentFirst in listOf(true, false)) {
             val answers = interleaved(contentFirst)
-            assertEquals(1, answers.size, "contentFirst=$contentFirst: $answers")
-            assertTrue(answers.single().startsWith("otherapp://ext"), answers.single())
-            assertEquals("not_logged_in", params(answers.single())["error"])
+            assertEquals(if (contentFirst) 1 else 0, answers.size, "contentFirst=$contentFirst: $answers")
+            answers.forEach {
+                assertTrue(it.startsWith("otherapp://ext"), it)
+                assertEquals("not_logged_in", params(it)["error"])
+            }
         }
     }
 
@@ -325,6 +333,59 @@ class AuthLinkModelTest {
     }
 
     @Test
+    fun aWebsiteCallbackNeverReceivesThePostingKey() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        links.handle("ecency://login?username=$alice&callback=https%3A%2F%2Fsite.example%2Fcb")
+        testScheduler.advanceUntilIdle()
+        val prompt = assertIs<LinkPrompt.Refused>(links.current.prompt, "no question to share the key with a website")
+        assertEquals(AuthLinkModel.KEY_REQUEST_TITLE, prompt.title)
+        assertEquals(AuthLinkModel.keyRequestWeb("https://site.example/cb"), prompt.message)
+        links.confirm()
+        links.dismiss()
+        testScheduler.advanceUntilIdle()
+        assertTrue(links.answers().isEmpty(), "nothing goes to the website")
+    }
+
+    @Test
+    fun aLoginLinkFromContentNeverHandsOverTheKey() = runTest {
+        val app = signedIn(this)
+        val links = app.env.authLinks
+        val link = "ecency://login?username=$alice&callback=$cb"
+        for (open in listOf<() -> Unit>({ links.handleFromContent(link) }, { links.handle(link, pageHost = "dapp.example") }, { links.handleFromPush(link) })) {
+            open()
+            testScheduler.advanceUntilIdle()
+            assertFalse(links.current.prompt is LinkPrompt.PostingKeyRequest, "never the question")
+            (links.current.prompt as? LinkPrompt.Refused)?.let { assertEquals(AuthLinkModel.KEY_REQUEST_CONTENT, it.message) }
+            links.confirm()
+            links.dismiss()
+            testScheduler.advanceUntilIdle()
+            assertTrue(links.answers().isEmpty(), "the key never leaves")
+        }
+    }
+
+    @Test
+    fun anExternalLoginLinkAnswersOnlyAfterTheUserSawWhy() = runTest {
+        val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
+        val links = app.env.authLinks
+        links.handle("ecency://login?username=spike-nobody&callback=$cb")
+        testScheduler.advanceUntilIdle()
+        assertEquals(AuthLinkModel.keyRequestNotHere(cb, "spike-nobody"), assertIs<LinkPrompt.Refused>(links.current.prompt).message)
+        assertNull(links.current.callback, "nothing before the user saw it")
+        links.dismiss()
+        testScheduler.advanceUntilIdle()
+        assertEquals("not_logged_in", params(links.answers().single())["error"])
+
+        links.handle("ecency://login?username=$alice&callback=$cb")
+        testScheduler.advanceUntilIdle()
+        assertEquals(AuthLinkModel.keyRequestNoKey(cb, alice), assertIs<LinkPrompt.Refused>(links.current.prompt).message)
+        assertNull(links.current.callback)
+        links.dismiss()
+        testScheduler.advanceUntilIdle()
+        assertEquals("posting_key_unavailable", params(links.answers().single())["error"])
+    }
+
+    @Test
     fun postingKeyNeedsThePinWhenTheLockIsOn() = runTest {
         val app = signedIn(this)
         PinLock(KeyVault(app.store), 16).setPin("1234")
@@ -356,11 +417,14 @@ class AuthLinkModelTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         app.env.authLinks.handle("ecency://login?username=$alice&callback=$cb")
         testScheduler.advanceUntilIdle()
-        assertNull(app.env.authLinks.current.prompt)
+        assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt, "never the question")
+        app.env.authLinks.confirm()
+        testScheduler.advanceUntilIdle()
         assertEquals("posting_key_unavailable", params(app.env.authLinks.current.callback!!)["error"])
         app.env.authLinks.consumeCallback()
         app.env.authLinks.handle("ecency://login?username=spike-nobody&callback=$cb")
         testScheduler.advanceUntilIdle()
+        app.env.authLinks.dismiss()
         assertEquals("not_logged_in", params(app.env.authLinks.current.callback!!)["error"])
     }
 

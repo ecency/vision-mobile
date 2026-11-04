@@ -150,6 +150,13 @@ object AuthLinks {
         return APP_SCHEME.matches(scheme) && scheme !in SYSTEM_SCHEMES && SYSTEM_PREFIXES.none { scheme.startsWith(it) }
     }
 
+    /**
+     * Where a raw posting key may go (`ecency://login`): an app's own scheme on this device, as the Hive apps that ask
+     * for it use. A website (`https:`) never gets one; it signs in with the `auth-request` proof instead.
+     */
+    fun canReceivePostingKey(callback: String): Boolean =
+        isAcceptableCallback(callback) && WebUrl.parse(callback)?.protocol?.lowercase() != "https:"
+
     /** RN callbackAudience: scheme and host of the callback, lowercased. */
     fun callbackAudience(callback: String): String =
         WebUrl.parse(callback)?.let { "${it.protocol}//${it.host}".lowercase() } ?: callback
@@ -166,7 +173,8 @@ object AuthLinks {
 
     /**
      * `ecency://login?username&callback|redirect_uri|return_url&request_id`. RN answers any callback; the
-     * port also requires [isAcceptableCallback], since the success answer carries the posting key.
+     * port also requires [isAcceptableCallback], since the success answer carries the posting key, and the model
+     * hands the key only to [canReceivePostingKey] callbacks.
      */
     private fun postingKeyRequest(u: WebUrl): AuthLink {
         val callback = u.param("callback").orEmptyNull() ?: u.param("redirect_uri").orEmptyNull() ?: u.param("return_url").orEmptyNull()
