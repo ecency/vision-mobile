@@ -52,6 +52,8 @@ import com.ecency.core.app.BackupKeysModel
 import com.ecency.core.app.KeyRow
 import com.ecency.core.app.KeysPhase
 import com.ecency.core.app.AuthUiCopy
+import com.ecency.app.AndroidCopy
+import com.ecency.app.KeyClipboard
 import com.ecency.core.app.UiCopy
 
 /**
@@ -128,6 +130,7 @@ fun BackupKeysScreen(env: AppEnvironment, host: AppHost, model: BackupKeysModel,
 @Composable
 private fun KeyBox(row: KeyRow, onButton: () -> Unit, onCopy: () -> Unit) {
     val colors = LocalEcencyColors.current
+    val canCopy = !row.isSensitive || KeyClipboard.canCopyPrivateKey()
     Column(Modifier.fillMaxWidth().padding(vertical = 10.dp).testTag("key:${row.role.name}")) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(row.label, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.testTag("keyLabel:${row.role.name}"))
@@ -163,12 +166,14 @@ private fun KeyBox(row: KeyRow, onButton: () -> Unit, onCopy: () -> Unit) {
                     } else Modifier.testTag(tag),
                 )
             }
-            Box(
+            if (canCopy) Box(
                 Modifier.size(44.dp).clip(RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)).background(colors.blue).clickable(onClick = onCopy, role = Role.Button)
                     .semantics { contentDescription = AuthUiCopy.keyCopyLabel(row.title) }.testTag("keyCopy:${row.role.name}"),
                 contentAlignment = Alignment.Center,
             ) { Text("⧉", color = Color.White, fontSize = 18.sp) }
         }
+        // a private key is shown for reading only where the clipboard cannot be cleared again (below Android 9)
+        if (!canCopy) Text(AndroidCopy.KEY_COPY_UNAVAILABLE, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp).testTag("keyCopyUnavailable:${row.role.name}"))
     }
 }
 

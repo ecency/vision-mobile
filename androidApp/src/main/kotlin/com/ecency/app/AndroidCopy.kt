@@ -4,6 +4,7 @@ import com.ecency.core.l10n.L
 
 /** Copy only the Android app shows (system prompts, Play Billing, the image saver), read when shown (`native.android.*`). */
 object AndroidCopy {
+    val KEY_COPY_UNAVAILABLE: String get() = L.native.android.keyCopyUnavailable
     val NO_BROWSER: String get() = L.native.android.noBrowser
     val BIOMETRIC_UNLOCK_TITLE: String get() = L.native.android.biometricUnlockTitle
     val BIOMETRIC_CONFIRM: String get() = L.native.android.biometricConfirm

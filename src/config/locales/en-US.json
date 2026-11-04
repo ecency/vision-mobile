@@ -3040,6 +3040,7 @@
     },
     "android": {
       "no_browser": "No browser available",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Unlock Ecency with biometrics",
       "biometric_confirm": "Confirm with your fingerprint or face",
       "image_unsupported_address": "Unsupported image address",

@@ -370,6 +370,8 @@ class MainActivity : FragmentActivity() {
         // and on Android 12+ always (the system shows its splash on a restore after process death too); not on API
         // 24-30 recreations (dark mode, font scale, multi-window), where an exit listener builds the splash view again
         val splash = installSplashScreen()
+        // a private key copy whose clear timer died with the process is cleared now (README "Secure storage")
+        if (savedInstanceState == null) KeyClipboard.clearLeftover(this)
         if (savedInstanceState == null || Build.VERSION.SDK_INT >= 31) {
             splashAnimated = true
             splash.setOnExitAnimationListener { provider -> onSplashExit(provider.view, provider::remove) }
