@@ -333,7 +333,7 @@ Follows RN `applicationContainer._compareAndPromptForUpdate` with `providers/git
 - Decision: at app start, skipped while "Remind Later" was tapped under 48 hours ago; asks when `parseVersionNumber(tag) > parseVersionNumber(app version)`; any failure is silent
 - Prompt: "Update available v<version>", "Using latest version of Ecency gives you the best experience", "Remind Later" (stores the time), "Update Now" (stores nothing, so the next start asks again until the app is updated)
 - "Update Now" target by installer, as RN, for the app id: Android `market://details?id=app.esteem.mobile.android` for a Play install (the Play web listing when nothing takes `market://`), else the GitHub releases page; iOS the App Store page for an App Store install, else the releases page
-- Not built yet: RN's header image on the prompt.
+- Difference from RN: the prompt has no header image.
 
 Differences from RN: on iOS the store page comes from Apple's lookup by bundle id (`itunes.apple.com/lookup?bundleId=app.esteem.mobile.ios`) at the tap (RN hard-codes the listing's numeric id 1451896376, which is this app's too and could replace the lookup); the answer must be an https page on apps.apple.com, else the releases page opens. A tag counts only when it is the build's tag prefix followed by plain `X.Y.Z`: `v4.1.0`, `4.1`, `4.1.0-beta` or anything else is ignored (RN reads any tag with `parseInt`).
 
@@ -565,7 +565,7 @@ Links and sharing: the app handles RN's App Link paths, including `/trending`, `
 What the update carries over, checked against RN 3.5.11 (@react-native-async-storage/async-storage 2.2.0, RN 0.79.5):
 - RN data, read by `AsyncStorageReader` and imported once (see "Importing accounts from the RN app"). Android: the SQLite database `databases/RKStorage`, table `catalystLocalStorage (key TEXT PRIMARY KEY, value TEXT NOT NULL)`, the async-storage default (RN does not set `AsyncStorage_useNextStorage`, so the newer Room database is not used); RN opens it with write-ahead logging, which the reader handles while RN's rows may still sit in `RKStorage-wal`. iOS: `Library/Application Support/app.esteem.mobile.ios/RCTAsyncLocalStorage_V1/manifest.json`, values over 1024 characters as null there and in a file named md5(key); checked on a simulator holding a real RN 3.5.11 install: `persist:root`, `user` and `REACT_QUERY_OFFLINE_CACHE` are files `817e01df...`, `ee11cbb1...`, `b6fc4091...`, the other keys inline. An RN install never opened since async-storage moved its folder out of `Documents` is read from `Documents/RCTAsyncLocalStorage_V1` (or the older `RNCAsyncLocalStorage_V1`, `RCTAsyncLocalStorage`) instead. RN copies `Documents` into Application Support without deleting the old copy, so those folders can still hold old RN secrets: every RN folder other than the live one is deleted whole together with the secrets (`LegacyCleanup.scrub`: after the import mark and in the PIN wipe; `AsyncStorageReader.forApp`, `LegacyStorage.hasStaleCopies`). Tests with that layout: `AsyncStorageReaderTest` (Android, shared iOS).
 - Push: the same Firebase apps (RN's `google-services.json` and `GoogleService-Info.plist`; CI decodes the existing `GOOGLE_JSON` and `GOOGLE_PLIST` secrets), so Firebase's installation id and the FCM token in the app's data stay valid; the app registers the token with Ecency again at start, as RN did. The notification permission belongs to the app id: Android's `POST_NOTIFICATIONS` grant (RN declared it through notifee and Firebase) and iOS's authorization stay. Pushes keep landing in Firebase's `fcm_fallback_notification_channel`, the channel RN's pushes used, so a user's sound and importance settings for it survive (no `default_notification_channel_id` on purpose, see the manifest). RN's media channel (`RNVIDEO_SESSION_NOTIFICATION`) was deleted by RN whenever playback stopped, so there is nothing to keep there.
-- Links: the same app id, so ecency.com's `assetlinks.json` (RN's signing certificate) already verifies the Android App Links and the `apple-app-site-association` already lists the iOS app; `ecency://` and `hive://` stay registered on both platforms. RN's `esteem://` scheme is intentionally not carried over (the brand was retired years ago).
+- Links: the same app id, so ecency.com's `assetlinks.json` (RN's signing certificate) already verifies the Android App Links and the `apple-app-site-association` already lists the iOS app; `ecency://` and `hive://` stay registered on both platforms. RN's old `esteem://` scheme stays registered on iOS only, as RN iOS registered it, and is read as `ecency://`; Android does not register it.
 - Backups: `allowBackup=false` as RN; the RN AsyncStorage folder on iOS is excluded from backups by RN.
 - Keychain (iOS): RN kept no secrets in the Keychain (no keychain library); native uses the service `app.esteem.mobile.ios.secure` in the app's default access group, which no RN item uses (Firebase's own items stay untouched). `wipeIfFreshInstall` only ever clears that service, and an update from RN has nothing there.
 - Debug builds use the release id too, with no `applicationIdSuffix`: a suffix would give the app another data folder (Android) or bundle id folder (iOS), so it could never exercise the real RN import. A debug build installs over an RN build only when both are signed with the same key (on Android RN's debug keystore differs from Gradle's default, so a debug build does not replace an RN store or dev build there).
@@ -702,8 +702,7 @@ xcrun xcresulttool get test-results summary --path "$(ls -td build/ios-dd/Logs/T
 - Authority recovery: the posting authority grant (the editor's schedule prompt, the quick post recovery) needs the active authority. A posting-only account gets the upgrade sheet and its key must reach the account's active threshold; a master password account signs with its stored active key without a prompt; a HiveSigner account gets a prompt and its token is never used for it. Test: `AuthorityRecoveryTest`.
 
 Not built yet:
-- Import the RN app's HiveSigner refresh tokens (`sc_accounts`) into `auth.session.<user>` beyond what the RN migration carries (migrated accounts keep their token until it expires).
-- Binary serializers for the hive:// operations beyond vote, comment, comment_options, custom_json and transfer.
+- Key accounts cannot sign `hive://` links for `account_create`, `account_update2`, `change_recovery_account`, `claim_account`, `create_claimed_account`, `create_proposal`, `update_proposal`, `remove_proposal`, `limit_order_create2`, `witness_update` and `witness_set_properties` (no serializer yet; refused as not supported). HiveSigner and HiveAuth accounts are not affected. #3635.
 
 ## Login and accounts
 
@@ -813,7 +812,7 @@ Behaviour (RN parity)
 - Entry points: "Sign up now!" and the header button on the login screen ("Sign up", `register.title`, plain weight so the filled LOGIN stays the one primary action; RN says "JOIN NOW"), "Create a new account" in the account switcher, and `ecency://signup` / `ecency.com/signup` links (referral, username and email prefilled and validated like typed values)
 
 Not built yet:
-- Welcome art: RN's line icons and the 3.5 s launch animation over the screen are not drawn
+- Welcome art: RN's line icons and the 3.5 s launch animation over the screen are not drawn (#3636).
 
 Paid account: when the store offers `999accounts`, the register screen's paid card has RN's buy button ("Buy Account - {price}"); a `/purchase?type=account` link opens the screen with the paid card only (`purchaseOnly`). The purchase itself follows "In-app purchases".
 
@@ -847,7 +846,7 @@ Behaviour (RN parity)
 - Row: `$$` (blue once rewarded; RN's popover text "Referral points rewarded" / "Referral reward pending" shows as a toast), avatar, name, date in the device locale, "Delegate HP"; a tap on the row opens the quick profile
 
 Not built yet:
-- "Delegate HP" opens the transfer placeholder with the account as its argument: RN opens the transfer screen in delegation mode, which belongs to the wallet.
+- "Delegate HP" opens the transfer placeholder with the account as its argument: RN opens the transfer screen in delegation mode, which belongs to the wallet (#3633).
 
 Rules: both requests are public GETs (no token, as RN's no-token list). The list belongs to the account signed in when it loaded: an account change empties it and loads the new account's, a late answer for the previous account is dropped (the reload cancels the running page, the account change cancels it, and the answer is checked against the account), and the UIs draw rows only while `ReferState.account` is the signed-in account. A page that brings no new row ends the list.
 
@@ -1101,10 +1100,6 @@ AI assist, the AI image generator and dictation spend Ecency points. All three g
 - The reply tile reopens the editor for the new account instead of keeping one editor across accounts.
 - iOS shows the words count above the toolbar, not in the navigation bar; toolbar buttons are text labels on both platforms, not RN's icon fonts, in this app's order rather than RN's, and RN's full editor keeps separate AI image and dictation buttons where native lists both inside AI Assist; schedule and poll dates use the system pickers.
 
-### Not built yet
-
-- Share intent (text and files from other apps).
-
 Tests of the prompts: shared `AuthorityRecoveryTest`, `RatingPromptTest`, `DigestModelTest`; Android `WavesFlowsTest` (the grant prompt in the composer), `PlayReviewTest` (Play's own fake review manager), `EditorFlowsTest` (the digest sheet); iOS `EditorUITests`.
 
 Tests of the RC precheck: shared `RcCostTest` (golden), `RcPrecheckEditorTest`.
@@ -1198,9 +1193,8 @@ env.waves.openLink(url)                    // ecency.com/waves?text=... asks for
 
 ### Not built yet
 
-- A share extension for the OS share sheet "Wave".
-- The check-in is not recorded when a post is opened (RN's reading area), a failed check-in request is not retried twice and failed activities are not replayed at the next start; a failed check-in is simply tried again at the next visit. The backend records at most one per window either way.
-- Explicit waves the live combined feed returns without the `nsfw` tag show ungated by the app's NSFW setting unless the API flags them (above).
+- The check-in is not recorded when a post is opened (RN's reading area), a failed check-in request is not retried twice and failed activities are not replayed at the next start; a failed check-in is simply tried again at the next visit. The backend records at most one per window either way (#3634).
+- Explicit waves the live combined feed returns without the `nsfw` tag show ungated by the app's NSFW setting unless the API flags them (above). #3634.
 
 ### Debug and tests
 
@@ -1514,8 +1508,8 @@ Differences from RN
 - Get Points and Account Boost are the in-app purchase screens (see In-app purchases).
 
 Not built yet
-- The transfer favourites sheet and QR scan into the recipient are not wired (the parser is: `TransferRecipientParser`).
-- Memo encryption (memos go as plain text).
+- The transfer favourites sheet (#3633). A QR scan fills the recipient (`TransferRecipientParser`).
+- Memo encryption and memo safety: memos go as plain text, a `#` memo is not encrypted and a pasted private key is not refused (#3633).
 
 Debug (fake data only): Android `--ez demoAuth true --ez seedAccounts true --ez acceptTerms true --ez walletTab true`, `--es walletScreen transfer,transfer,HIVE,hive,spike-bob` (a saved-navigation line, ',' separated), `--ez demoUndecided true` (broadcasts never answer: the check-your-wallet state); iOS `-fakeData YES -seedAccounts YES -startTab WALLET` or `-openScreen wallet:<line>`. `DemoWallet` answers the wallet reads offline; broadcasts are still refused.
 
@@ -1592,7 +1586,7 @@ Pro by in-app purchase, over the purchase service above (same order contract, mo
 - **Refunds**: a refund through Stripe ends the membership; store refunds (App Store `REFUND` notifications, Play voided purchases) do not yet.
 
 Not built yet
-- Claiming the free blog and showing the expiry date (the roster has none).
+- Claiming the free blog and showing the expiry date (the roster has none). #3636.
 
 Tests: shared `ProTest` (26: stale pending, token binding, earlier purchase of another account at buy, account switch, settled pending, kept outcomes, multi-account activation); Android `ProFlowsTest` (4) and the token case of `PurchaseFlowsTest`; iOS `ProTests` (3, StoreKitTest), `ProUITests` (2).
 
@@ -1629,9 +1623,6 @@ Differences from RN
 - Rate Ecency on iOS needs Apple's lookup to name this app's page; the lookup is capped at 5 s; offline, slow or before the listing exists it opens RN's web listing (`StoreListing.IOS_WEB`), Android falls back to the Play web listing.
 - "Finger Print / Face Unlock" shows only when the device has biometrics enrolled (RN shows it whenever the PIN is on).
 - Push registrations of one account go out one at a time and read the switches when their turn comes, so the RN import (or a quick toggle) during the first registration is always the last write.
-
-Not built yet
-- Most copy is still English until it moves to the catalog.
 
 Debug: Android `--es openScreen settings|emailDigests`, `--ez demoDigests true`; iOS `-openScreen settings|emailDigests`, `-demoDigests YES` (two synthetic subscriptions; demo support settings keep their values for the run).
 
@@ -1951,8 +1942,9 @@ Screen reading (VoiceOver, Switch Control), Dynamic Type up to AX5, Display Zoom
 - Tests: `AccessibilityTests` (ScaledFont grows at AX5, AdaptiveStack stacks only at accessibility sizes, ChipFlow keeps a long chip inside the row, 44 pt targets, the WCAG ratio helper, text tokens AA in both themes, the announcement log, and a source lint that fails on a literal point size in any spelling (`.font(.system(size:))`, `Font.system(size:)`, `UIFont.systemFont(ofSize:)`, `.custom(_, size:)` without `relativeTo:`) unless the line draws only an `Image`, a widget symbol or an emoji glyph, or says `fixed size:` and why); `AccessibilityUITests` (Xcode's `performAccessibilityAudit` on feed, post, waves, wallet, notifications, chats, profile, communities, search, settings, login and editor, at the default size and at AX5, and six of them in dark mode; tab labels, traits and size at AX5; the feed card one stop inside the screen at AX5; the German tag hint wraps at AX5; the hidden Feed tab out of the tree, which fails together with the audits if the Feed tab is put back under the other tabs). The audit reads pixels at frames it took earlier, so it runs only on a still screen (two screenshots 0.5 s apart within 1000 changed pixels, Esie and the status bar left out) and runs again when the screen after it differs from the one before (an image that loaded mid audit moved a card's title); contrast readings on text scrolled out of its scroll view (the AX5 profile summary, capped at 70 % of the screen) are not counted.
 
 Not built yet:
-- Long chat channel names can still break mid-word beside the favourite star at AX5.
-- No announcement for messages arriving in an open chat (it would be noisy).
+- Long chat channel names can still break mid-word beside the favourite star at AX5 (#3636).
+
+Messages arriving in an open chat are not announced (it would be noisy).
 
 ## Icons
 
