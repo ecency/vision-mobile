@@ -149,7 +149,7 @@ draft to retry. README "Data layer" and "Node failover" hold the rules.
   source with `git show rn-3.x-final:<path>` (e.g. `git show rn-3.x-final:src/constants/routeNames.ts`) and name
   the RN file in comments where behaviour follows it.
 - **Native means native.** No runtime JavaScript. JS packages run only offline in `tools/` to generate golden
-  fixtures (`npm install --prefix tools`, then e.g. `node tools/golden/generate.mjs <out>`).
+  fixtures (`npm ci --prefix tools`, and `npm ci --prefix tools/render` for the renderer ones; tools/README.md).
 - **Kotlin/Native guard.** No `combine` of 5 or more flows in shared code (`NativeCompilerGuardTest`): it crashes
   the arm64 Apple compiler. Combine two at a time and run the link tasks above.
 - **Objective-C names.** Copy members never use names like `YES`, `NO`, `init...`, `new...`, `copy...`

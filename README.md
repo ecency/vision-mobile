@@ -113,7 +113,7 @@ Every change lands with tests:
 - signatures must equal the SDK's deterministic (RFC 6979) signature byte for byte, and the SDK's own randomised signatures must recover to the signer;
 - master-password key derivation must match the SDK for every role.
 
-Regenerate after adding an operation (from the repository root, after `npm install --prefix tools`; tools/README.md):
+Regenerate after adding an operation (from the repository root, after `npm ci --prefix tools`; tools/README.md):
 
 ```sh
 node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt
@@ -898,7 +898,7 @@ env.draftsModel(tab); env.snippetsModel(); env.communityPickerModel()
 - Golden vectors (RN's own TypeScript, speakingurl and the SDK run offline; RN sources load through `tools/golden/rn-hooks.mjs`, which compiles them with the app's TypeScript and stubs React Native):
 
 ```sh
-# from the repository root (npm install --prefix tools first)
+# from the repository root (npm ci --prefix tools first)
 node tools/golden/generate-slug-data.mjs shared/src/commonMain/kotlin/com/ecency/core/editor/SlugData.kt   # when speakingurl changes
 # from a checkout of the rn-3.x-final tag (it runs the RN app's own sources)
 node --no-warnings tools/golden/generate-editor.mjs shared/src/commonTest/kotlin/com/ecency/core/editor/EditorGoldenVectors.kt

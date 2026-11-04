@@ -17,7 +17,7 @@ touching signing.
 2. Write the tests first and see them fail on an assertion (not on a missing class):
    - the operation JSON: a builder test next to the existing ones (`commonTest/.../api/community/CommunityOpsTest.kt`,
      `commonTest/.../api/wallet/...`);
-   - a new operation TYPE (new serialization in `hive/`): golden vectors from the SDK. Run `npm install --prefix tools`
+   - a new operation TYPE (new serialization in `hive/`): golden vectors from the SDK. Run `npm ci --prefix tools`
      once, then the generator for the area (`tools/golden/generate.mjs`, `generate-wallet.mjs`, ...; each header
      says its output), e.g. `node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt`.
      Vectors use throwaway keys only.

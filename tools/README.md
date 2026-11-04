@@ -16,13 +16,19 @@ They run the npm packages the app's behaviour is defined by, so the fixtures sta
 
 ## Running one
 
+Two installs, once each, with the versions the committed fixtures were made with:
+
 ```sh
-npm install --prefix tools   # once: the versions in tools/package.json, which the committed fixtures were made with
+npm ci --prefix tools             # golden/ and l10n/ (tools/package.json and its lockfile)
+npm ci --prefix tools/render      # render/ (tools/render/package.json and its lockfile: @ecency/render-helper)
+
 node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt
+node tools/render/generate-dom-fixtures.mjs shared/src/commonTest/kotlin/com/ecency/core/render/dom
 ```
 
-The scripts find their packages in `tools/node_modules` wherever they run from; `golden/generate-wallet.mjs` and
-`golden/generate-platform.mjs` take another install through `GOLDEN_MODULES` (see their headers).
+The scripts find their packages next to them (`tools/render/node_modules` for `render/`, `tools/node_modules` for
+the rest) wherever they run from; `golden/generate-wallet.mjs` and `golden/generate-platform.mjs` take another
+install through `GOLDEN_MODULES` (see their headers).
 
 Each script's header says what it writes and with which arguments. Diff the output against the committed file: a
 change is either a fix in the package (update the Kotlin side to match, and say so in the PR) or a regression to file
