@@ -34,6 +34,13 @@ struct ShellPromptsHost: View {
             // notices about an account's keys on this device (AccountNoticesModel), one at a time
             Color.clear.alert(notice?.title ?? "", isPresented: Binding(get: { notice != nil }, set: { if !$0, let id = notice?.id { env.accountNotices.dismiss(id: id) } })) {
                 Button(UiCopy.shared.OK, role: .cancel) {}.accessibilityIdentifier("account-notice-ok")
+                // an account the RN import kept back: log in to it again (the login screen opens with its name)
+                if let notice, let action = notice.action {
+                    Button(action) {
+                        env.accountNotices.logIn(notice: notice)
+                        app.sheet = .login
+                    }.accessibilityIdentifier("account-notice-action")
+                }
             } message: { Text(notice?.body ?? "") }
             Color.clear.alert(copy.CONFIRM_TITLE, isPresented: Binding(get: { deletion.state.asking != nil }, set: { if !$0 { env.deleteAccount.cancel() } })) {
                 Button(copy.CANCEL, role: .cancel) { env.deleteAccount.cancel() }.accessibilityIdentifier("delete-cancel")

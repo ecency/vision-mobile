@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -687,6 +688,56 @@ class AppLockModelTest {
         testScheduler.advanceUntilIdle()
         assertTrue(drainNotices(third).none { it.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER })
         assertTrue(third.transport.sent.none { it.method == "condenser_api.get_accounts" && "spike-posting" in it.body })
+    }
+
+    /** #3611: an RN account the import could not take (an owner key only, or nothing it could decrypt) is named once. */
+    @Test
+    fun anAccountTheImportKeptBackIsNamedOnceWithALogInAction() = runTest {
+        fun TestScope.restart(from: TestApp): TestApp = TestApp(this) { HttpResult(500, "") }.also {
+            it.store.entries.putAll(from.store.entries)
+            it.env.prefs = from.env.prefs
+            it.env.session.start()
+            it.env.appLock.start()
+            testScheduler.advanceUntilIdle()
+        }
+        fun keptBack(app: TestApp) = buildList {
+            while (true) {
+                val n = app.env.accountNotices.current.notice?.takeIf { it.kind == AccountNoticeKind.NOT_IMPORTED } ?: break
+                add(n)
+                app.env.accountNotices.dismiss(n.id)
+            }
+        }
+        val first = legacyApp()
+        first.env.session.start()
+        first.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        // the fixtures' RN data holds an account with no credential and one with only an owner key
+        val notice = assertNotNull(first.env.accountNotices.current.notice, "the kept back accounts are named")
+        assertEquals(AccountNoticeKind.NOT_IMPORTED, notice.kind)
+        assertTrue(notice.account in setOf("spike-legacy", "spike-owner"), notice.account)
+        assertEquals(AccountNoticeCopy.notImported(notice.account), notice.body)
+        assertTrue("@${notice.account}" in notice.body, notice.body)
+        assertEquals(AccountNoticeCopy.LOG_IN, notice.action)
+        assertEquals(1, first.env.accountNotices.current.queued, "one notice per account")
+        // the app ended before the user saw them: both come back at the next start
+        val second = restart(first)
+        assertEquals(listOf("spike-legacy", "spike-owner"), keptBack(second).map { it.account }.sorted())
+        // dismissed: never again
+        assertTrue(keptBack(restart(second)).isEmpty())
+
+        // an account the user signs in to meanwhile needs no notice any more
+        val other = legacyApp()
+        other.env.session.start()
+        other.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        val chosen = other.env.accountNotices.current.notice!!
+        // the alert closed first (as SwiftUI may do): the button still opens the login for that account
+        other.env.accountNotices.dismiss(chosen.id)
+        other.env.accountNotices.logIn(chosen)
+        assertEquals(chosen.account, other.env.session.current.loginPrefill, "the login screen opens for that account")
+        val rest = keptBack(other).map { it.account }
+        assertEquals(listOf("spike-legacy", "spike-owner") - chosen.account, rest)
+        assertTrue(keptBack(restart(other)).isEmpty(), "the one the user went to log in to is not named again")
     }
 
     @Test

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.ecency.core.app.AnnouncementTarget
 import com.ecency.core.app.AppEnvironment
 import com.ecency.core.app.DeleteAccountCopy
+import com.ecency.core.app.AppScreen
 import com.ecency.core.app.NavEntry
 import com.ecency.core.app.RcErrors
 import com.ecency.core.app.RcOfferChoice
@@ -83,6 +84,15 @@ fun ShellPrompts(env: AppEnvironment, host: AppHost, onEntry: (NavEntry) -> Unit
             title = { Text(notice.title, modifier = Modifier.testTag("accountNoticeTitle")) },
             text = { Text(notice.body, modifier = Modifier.testTag("accountNotice:${notice.kind.name}")) },
             confirmButton = { TextButton(onClick = { env.accountNotices.dismiss(notice.id) }, modifier = Modifier.testTag("accountNoticeOk")) { Text(UiCopy.OK) } },
+            // an account the RN import kept back: log in to it again (the login screen opens with its name)
+            dismissButton = notice.action?.let { action ->
+                {
+                    TextButton(
+                        onClick = { env.accountNotices.logIn(notice); onEntry(NavEntry.screen(AppScreen.Login)) },
+                        modifier = Modifier.testTag("accountNoticeAction"),
+                    ) { Text(action) }
+                }
+            },
         )
     }
 
