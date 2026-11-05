@@ -93,6 +93,77 @@ class WalletModelsTest {
         assertEquals("0.617 HP", w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText)
     }
 
+    /**
+     * Tester report: after a claim the balances stayed as they were until a manual refresh. The portfolio can still
+     * answer the old balance a few seconds after the claim, so the claimed amount shows in the balance at once and
+     * the portfolio is read again until it shows the claim, with no refresh by the user.
+     */
+    @Test
+    fun aClaimShowsInTheBalanceAtOnceAndIsReadAgainUntilThePortfolioShowsIt() = runTest {
+        val w = world(this)
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
+        val before = reads()
+        // the portfolio answers the old balance twice more, then the claimed one (with a new curation reward since)
+        var stale = 2
+        val fresh = WalletWorld.PORTFOLIO.replace(
+            "\"pendingRewards\":0.617,\"apr\":4.5945,\"liquid\":900.0,\"staked\":950.0",
+            "\"pendingRewards\":0.002,\"apr\":4.5945,\"liquid\":900.617,\"staked\":950.617",
+        ).replace("\"symbol\":\"HP\",\"layer\":\"hive\",\"balance\":950.0", "\"symbol\":\"HP\",\"layer\":\"hive\",\"balance\":950.617")
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, if (stale-- > 0) WalletWorld.PORTFOLIO else fresh) }
+        w.env.wallet.claim("HP")
+        testScheduler.advanceTimeBy(500)
+        testScheduler.runCurrent()
+        val claimed = w.env.wallet.current.rows.first { it.symbol == "HP" }
+        assertEquals("950.617", claimed.balanceText)
+        assertNull(claimed.pendingText)
+        assertEquals(950.617, w.env.wallet.current.item("HP")!!.staked!!, 1e-9)
+        // the header total counts the claimed HP too: 398.94 + 0.617 * 0.25
+        assertEquals("$399.09", w.env.wallet.current.totalText)
+        // no refresh by the user: the portfolio is read until it shows the claim, and its own numbers then show
+        testScheduler.advanceTimeBy(60_000)
+        testScheduler.runCurrent()
+        val after = w.env.wallet.current.rows.first { it.symbol == "HP" }
+        assertEquals("950.617", after.balanceText)
+        assertEquals("0.002 HP", after.pendingText)
+        assertEquals(3, reads() - before)
+        assertFalse(w.env.wallet.current.isUpdating)
+    }
+
+    @Test
+    fun aPointsClaimShowsInThePointsBalanceAtOnce() = runTest {
+        val w = world(this)
+        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        w.env.wallet.claim("POINTS")
+        testScheduler.advanceTimeBy(500)
+        testScheduler.runCurrent()
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,501.250", points.balanceText)
+        assertNull(points.pendingText)
+        // the portfolio never shows it (a lagging API): the claimed amount stays shown until the 3 minute mask ends
+        testScheduler.advanceTimeBy(60_000)
+        testScheduler.runCurrent()
+        assertEquals("1,501.250", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
+    }
+
+    @Test
+    fun anEngineClaimOnlyHidesThePendingReward() = runTest {
+        val w = world(this)
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace("\"pendingRewards\":0,\"liquid\":3.5", "\"pendingRewards\":1.5,\"liquid\":3.5")) }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        w.env.wallet.claim("LEO")
+        testScheduler.advanceTimeBy(500)
+        testScheduler.runCurrent()
+        // a token's rewards may go to its stake or its liquid balance, so its balance waits for the portfolio
+        val leo = w.env.wallet.current.rows.first { it.symbol == "LEO" }
+        assertEquals("3.500", leo.balanceText)
+        assertNull(leo.pendingText)
+    }
+
     @Test
     fun claimingAnEngineTokenIsAPostingScotClaim() = runTest {
         val w = world(this)

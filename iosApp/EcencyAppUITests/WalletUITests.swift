@@ -74,6 +74,22 @@ final class WalletUITests: XCTestCase {
         WalletShots.save("claim-\(label)")
     }
 
+    /// Tester report: after a claim the balances stayed as they were until a manual refresh. The fake portfolio never
+    /// shows the claim, so the claimed amount must show from the shared state without a refresh. POINTS: the demo
+    /// answers the points claim, while it refuses every broadcast (a HIVE, HBD or HP claim).
+    func testAClaimShowsInTheBalanceWithoutARefresh() {
+        let app = launch(["-startTab", "WALLET"])
+        let balance = app.staticTexts["asset-balance-POINTS"]
+        XCTAssertTrue(balance.waitForExistence(timeout: 30))
+        XCTAssertEqual(balance.label, "1,250.500")
+        let claim = app.buttons["claim-POINTS"]
+        XCTAssertTrue(claim.waitForExistence(timeout: 10))
+        claim.tap()
+        expectation(for: NSPredicate(format: "label == %@", "1,251.250"), evaluatedWith: balance)
+        waitForExpectations(timeout: 20)
+        WalletShots.save("claimed")
+    }
+
     func testATransferFormChecksTheRecipientAndAsksBeforeSending() {
         let app = launch(["-openScreen", "wallet:transfer,transfer,HIVE,hive,spike-bob"])
         let amount = app.textFields["transfer-amount"]

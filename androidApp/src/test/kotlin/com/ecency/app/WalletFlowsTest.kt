@@ -262,6 +262,23 @@ class WalletFlowsTest {
         assertEquals(AppScreen.Transfer("transfer", "HIVE", "hive", "spike-bob"), navigator.state.top)
     }
 
+    /** Tester report: after a claim the balance stayed as it was until a manual refresh (the portfolio here never shows it). */
+    @Test
+    @Config(qualifiers = "w360dp-h740dp")
+    fun aClaimShowsInTheBalanceWithoutARefresh() {
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)))
+        until { exists("claim:HP") }
+        assertEquals("50.000", text("assetBalance:HP"))
+        assertEquals("$20.79", text("walletTotal"))
+        compose.onNodeWithTag("claim:HP", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        try { until { node.broadcasts().isNotEmpty() && text("assetBalance:HP") == "50.500" } } catch (e: AssertionError) {
+            throw AssertionError("balance=${text("assetBalance:HP")} sends=${env.walletSends.current} sent=${node.sent.map { it.substringAfter("method\":\"").substringBefore('"') }}")
+        }
+        assertTrue(node.broadcasts().single().contains("claim_reward_balance"))
+        assertFalse(exists("claim:HP")) // nothing pending any more
+        assertEquals("$20.91", text("walletTotal")) // 20.78625 + 0.5 HP * 0.25
+    }
+
     @Test
     fun aHistoryCategoryAsksTheChainForItsOperationsOnly() {
         val masks = java.util.Collections.synchronizedList(mutableListOf<String?>())
