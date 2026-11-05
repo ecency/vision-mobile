@@ -9,6 +9,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertTextEquals
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -91,6 +95,20 @@ class ReplyToolbarFlowsTest {
         // RN: poll and video are the wave mode's only
         assertFalse(exists("replyPoll"))
         assertFalse(exists("replyVideoButton"))
+    }
+
+    @OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+    /** Tester report: Enter on the keyboard starts a new line in a reply (the key, not pasted text). */
+    @Test
+    fun enterStartsANewLineInAReply() {
+        openReplySheet()
+        val text = compose.onNodeWithTag("replyText")
+        text.performTextInput("first line")
+        text.performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        text.performTextInput("second line")
+        compose.waitForIdle()
+        text.assertTextEquals("first line\nsecond line", includeEditableText = true)
     }
 
     @Test

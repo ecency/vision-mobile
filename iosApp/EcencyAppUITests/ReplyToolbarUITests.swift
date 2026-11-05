@@ -33,6 +33,14 @@ final class ReplyToolbarUITests: XCTestCase {
         Shots.save("reply-toolbar")
     }
 
+    /// Tester report: return on the keyboard starts a new line in a reply.
+    func testReturnStartsANewLineInAReply() {
+        let app = openReplyComposer()
+        let text = app.textViews["reply-text"]
+        text.focusAndType("first line\nsecond line")
+        XCTAssertEqual(text.value as? String, "first line\nsecond line")
+    }
+
     func testTheReplysAiAssistOffersRnsThreeActions() {
         let app = openReplyComposer()
         app.textViews["reply-text"].focusAndType("A reply worth improving")
