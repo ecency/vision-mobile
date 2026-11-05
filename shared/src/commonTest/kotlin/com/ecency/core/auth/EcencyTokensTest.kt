@@ -77,6 +77,40 @@ class EcencyTokensTest {
         assertTrue(s.isExpired(1_001))
     }
 
+    /** #3611: a 401 renews the session once and the call is sent once more; never a loop. */
+    @Test
+    fun aPrivateCallAnswered401IsRetriedOnceWithARenewedCode() = runTest {
+        var current = "old"
+        val renewals = mutableListOf<String>()
+        val codes = object : EcencyCodeProvider {
+            override suspend fun code(username: String) = current
+            override suspend fun renewAfterRejection(username: String, rejected: String): String? {
+                renewals += rejected
+                return "new".also { current = it }
+            }
+        }
+        fun codeOf(req: AuthHttpRequest) = req.body?.let { Json.parseToJsonElement(it).jsonObject["code"]?.jsonPrimitive?.content } ?: req.headers["X-HS-Token"]
+        // refused with the old code, accepted with the new one
+        val http = FakeAuthHttp { req -> if (codeOf(req) == "new") HttpResult(200, "{}") else HttpResult(401, "") }
+        val api = EcencyPrivateApi(http, codes)
+        assertEquals(200, api.post("points", "alice").status)
+        assertEquals(listOf("old", "new"), http.sent.map(::codeOf))
+        assertEquals(listOf("old"), renewals)
+        // the relays renew the same way
+        current = "old"
+        assertEquals(200, api.relay("GET", "newsletter/status", "alice").status)
+        // still refused after the renewal: the 401 goes back, after exactly one retry
+        current = "old"
+        val always401 = FakeAuthHttp { HttpResult(401, "") }
+        assertEquals(401, EcencyPrivateApi(always401, codes).post("points", "alice").status)
+        assertEquals(listOf("old", "new"), always401.sent.map(::codeOf))
+        // a renewal that cannot help: nothing is sent again
+        val none = object : EcencyCodeProvider { override suspend fun code(username: String) = "old" }
+        val once = FakeAuthHttp { HttpResult(401, "") }
+        assertEquals(401, EcencyPrivateApi(once, none).post("points", "alice").status)
+        assertEquals(1, once.sent.size)
+    }
+
     @Test
     fun privateApiAttachesTheCode() = runTest {
         val http = FakeAuthHttp { HttpResult(200, "{}") }

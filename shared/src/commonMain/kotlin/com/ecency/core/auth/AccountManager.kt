@@ -407,6 +407,55 @@ class AccountManager(
     @Throws(Exception::class)
     override suspend fun code(username: String): String? = db { account(username)?.accessToken?.takeIf { it.isNotEmpty() } }
 
+    /**
+     * One session renewal at a time, whoever asks: the start's [refreshSession] (through SessionRenewals) and a
+     * refused call's [renewAfterRejection] never spend the same refresh token twice. Taken before [mutex], never inside it.
+     */
+    private val renewal = Mutex()
+
+    /**
+     * A private call was refused (401) with [rejected] (#3611). When the stored token is no longer [rejected]
+     * (another call renewed it meanwhile) that one is returned. Otherwise the session is renewed whatever its stored
+     * expiry says: the refresh token is exchanged, and a key account whose refresh token is refused too (or that has
+     * none) signs a fresh code. Null when nothing worked or the account was removed meanwhile; the stored session
+     * is then left as it was, and the call's 401 goes back to its caller.
+     */
+    @Throws(Exception::class)
+    override suspend fun renewAfterRejection(username: String, rejected: String): String? {
+        // before the first suspension: a removal that starts at any point after this voids the write below
+        val mark = removalMark(username)
+        return renewal.withLock { renewRejected(username, rejected, mark) }
+    }
+
+    private suspend fun renewRejected(username: String, rejected: String, mark: RemovalMark): String? {
+        val current = code(username) ?: return null
+        // renewed meanwhile (another refused call, or the start's renewal): that token, with no second exchange
+        if (current != rejected) return current
+        val existing = db { session(username) } ?: return null
+        val exchanged = existing.refreshToken?.takeIf { it.isNotEmpty() }?.let { refresh ->
+            try {
+                tokens.exchange(refresh, nowMillis()).takeIf { it.username == username }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+        }
+        if (exchanged != null) {
+            val stored = mutex.withLock {
+                removalMark(username) == mark && db { (account(username) != null).also { if (it) saveSession(exchanged.copy(username = username)) } }
+            }
+            return if (stored) exchanged.accessToken else null
+        }
+        return try {
+            signKeySession(username, mark)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /** The account's stored refresh token, or null (the chat bootstrap sends it, as RN does). */
     @Throws(Exception::class)
     suspend fun refreshToken(username: String): String? = db { session(username)?.refreshToken?.takeIf { it.isNotEmpty() } }
@@ -423,6 +472,11 @@ class AccountManager(
     suspend fun refreshSession(username: String): String? {
         // before the first suspension: a removal that starts at any point after this voids the write below
         val mark = removalMark(username)
+        // one renewal at a time with a refused call's ([renewal]): the refresh token is read after the other one stored its own
+        return renewal.withLock { refreshLocked(username, mark) }
+    }
+
+    private suspend fun refreshLocked(username: String, mark: RemovalMark): String? {
         val existing = db { session(username) } ?: return null
         val refresh = existing.refreshToken ?: return if (!existing.isExpired(nowMillis())) existing.accessToken else try {
             signKeySession(username, mark) ?: if (removalMark(username) != mark) null else existing.accessToken

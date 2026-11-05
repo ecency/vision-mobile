@@ -290,6 +290,49 @@ class AccountManagerTest {
         assertNull(rig.manager.refreshSession("nobody-here"))
     }
 
+    /** #3611: a private call answered 401 renews the session once, whatever the stored expiry says. */
+    @Test
+    fun aRejectedTokenIsRenewedOnceAndAnAlreadyRenewedOneIsReused() = runTest {
+        val rig = Rig(this)
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        // the stored token has not expired, yet the server refused it: the refresh token is exchanged anyway
+        rig.http = { FakeAuthHttp.tokens(access = "access-2", refresh = "refresh-2", expiresIn = 10) }
+        assertEquals("access-2", rig.manager.renewAfterRejection("spike-user", "access-1"))
+        assertEquals("refresh-1", rig.sentCode())
+        assertEquals("access-2", rig.vault.account("spike-user")!!.accessToken)
+        // a second call that was refused with the old token gets the new one, without another exchange
+        rig.http = { error("no second exchange") }
+        assertEquals("access-2", rig.manager.renewAfterRejection("spike-user", "access-1"))
+        // the refresh token is refused too: a key account signs a fresh code
+        rig.http = { req -> if ("refresh-2" in req.body.orEmpty()) HttpResult(401, "") else FakeAuthHttp.tokens(access = "access-3", refresh = "refresh-3") }
+        assertEquals("access-3", rig.manager.renewAfterRejection("spike-user", "access-2"))
+        assertEquals("code", HiveSignerMessages.decode(rig.sentCode()).type)
+        // nothing works: null, and the stored session is left as it was
+        rig.http = { HttpResult(500, "") }
+        assertNull(rig.manager.renewAfterRejection("spike-user", "access-3"))
+        assertEquals("access-3", rig.vault.account("spike-user")!!.accessToken)
+        assertNull(rig.manager.renewAfterRejection("nobody-here", "x"))
+    }
+
+    /** Review of the release blockers: the start's renewal and a refused call's renewal never spend the refresh token twice. */
+    @Test
+    fun theStartRenewalAndARefusedCallShareOneExchange() = runTest {
+        val rig = Rig(this)
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        val before = rig.fake.sent.size
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        rig.fake.beforeAnswer = { gate.await() }
+        rig.http = { FakeAuthHttp.tokens(access = "access-2", refresh = "refresh-2", expiresIn = 10) }
+        val start = async { rig.manager.refreshSession("spike-user") }
+        val refused = async { rig.manager.renewAfterRejection("spike-user", "access-1") }
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, rig.fake.sent.size - before, "the second one waits for the first")
+        gate.complete(Unit)
+        assertEquals("access-2", start.await())
+        assertEquals("access-2", refused.await(), "the refused call takes the token the start stored")
+        assertEquals(1, rig.fake.sent.size - before, "one exchange of refresh-1 in all")
+    }
+
     @Test
     fun refreshForAnotherAccountIsNeverStored() = runTest {
         val rig = Rig(this)
