@@ -37,11 +37,11 @@ class BackgroundMediaTest {
     @Test
     fun anNsfwPostOrOneWithoutAnImageShowsTheAuthorsAvatar() {
         val nsfw = NowPlaying.card(post(tags = listOf("nsfw")), "alice", lockEnabled = false, image = image, proxyBase = proxy)
-        assertEquals("$proxy/u/alice/avatar/256", nsfw.artworkUrl)
+        assertEquals("$proxy/u/alice/avatar/medium", nsfw.artworkUrl)
         val none = NowPlaying.card(post(), "alice", lockEnabled = false, image = null, proxyBase = proxy)
-        assertEquals("$proxy/u/alice/avatar/256", none.artworkUrl)
+        assertEquals("$proxy/u/alice/avatar/medium", none.artworkUrl)
         val plain = NowPlaying.card(post(), "alice", lockEnabled = false, image = "http://example.com/a.jpg", proxyBase = proxy)
-        assertEquals("$proxy/u/alice/avatar/256", plain.artworkUrl, "only https artwork")
+        assertEquals("$proxy/u/alice/avatar/medium", plain.artworkUrl, "only https artwork")
     }
 
     @Test

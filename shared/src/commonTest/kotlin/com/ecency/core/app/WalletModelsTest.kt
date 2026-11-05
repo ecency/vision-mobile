@@ -529,7 +529,7 @@ class WalletModelsTest {
         assertEquals(listOf("spike-bob", "spike-a1", "spike-a2", "spike-a3", "spike-a4"), points.current.recipientAvatars)
         // a numeric size the image service reads (#3599)
         // a numeric size the image service reads (#3599): 128 px, enough for the row's 40 pt at 3x
-        assertEquals("${w.env.proxyBase}/u/spike-bob/avatar/128", points.avatarUrl("spike-bob"))
+        assertEquals("${w.env.proxyBase}/u/spike-bob/avatar/small", points.avatarUrl("spike-bob"))
         assertTrue(points.avatarUrl(w.user).startsWith("https://"), "the sender's avatar too")
         // a screen that sends to one account shows one avatar
         val savings = transfer(w, AppScreen.Transfer("transfer_to_savings", "HIVE", "hive"))

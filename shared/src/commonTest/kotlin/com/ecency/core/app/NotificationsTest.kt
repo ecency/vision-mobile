@@ -346,7 +346,7 @@ class NotificationsTest {
         assertEquals("spike-bob", s.items[0].source)
         assertEquals("voted 100%", s.items[0].text)
         assertEquals("Title n1", s.items[0].moreInfo)
-        assertEquals("https://i.ecency.com/u/spike-bob/avatar/128", s.items[0].avatarUrl)
+        assertEquals("https://i.ecency.com/u/spike-bob/avatar/small", s.items[0].avatarUrl)
         assertFalse(s.endReached)
 
         f.model.loadMore(); f.idle()

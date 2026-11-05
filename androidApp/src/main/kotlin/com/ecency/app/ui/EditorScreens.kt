@@ -511,7 +511,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                     Column(Modifier.fillMaxSize().verticalScroll(bodyScroll).testTag("editorScroll")) {
                         if (!state.isReply && !state.isEdit) {
                             Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { sheet = "community" }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("communityRow"), verticalAlignment = Alignment.CenterVertically) {
-                                Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/128", 28.dp)
+                                Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/small", 28.dp)
                                 Text(state.community?.title ?: EditorUiCopy.MY_BLOG, color = colors.text, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp).weight(1f))
                                 if (!state.canPostToCommunity) Text(EditorUiCopy.communityRestriction(state.community?.title.orEmpty()), color = colors.redText, fontSize = 12.sp, modifier = Modifier.testTag("communityRestriction"))
                             }
@@ -835,7 +835,7 @@ private fun MentionBar(env: AppEnvironment, model: EditorModel, state: EditorSta
     LazyRow(Modifier.fillMaxWidth().padding(horizontal = 8.dp).testTag("mentionBar")) {
         items(names) { name ->
             Row(Modifier.padding(4.dp).clip(RoundedCornerShape(50)).background(colors.lightBackground).clickable(role = Role.Button) { model.insertUsername(name) }.padding(horizontal = 8.dp, vertical = 4.dp).testTag("mention:$name"), verticalAlignment = Alignment.CenterVertically) {
-                Avatar("https://images.ecency.com/u/$name/avatar/128", 20.dp)
+                Avatar("https://images.ecency.com/u/$name/avatar/small", 20.dp)
                 Text(name, color = colors.text, fontSize = 13.sp, modifier = Modifier.padding(start = 6.dp))
             }
         }
@@ -1145,7 +1145,7 @@ private fun CommunitySheet(model: CommunityPickerModel, onPick: (EditorCommunity
     LaunchedEffect(model) { model.start() }
     @Composable fun Section(title: String) = Text(title, color = colors.darkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
     @Composable fun CommunityRow(c: EditorCommunity) = Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { scope.launch { onPick(model.resolve(c)) } }.padding(vertical = 8.dp).testTag("community:${c.name}"), verticalAlignment = Alignment.CenterVertically) {
-        Avatar("https://images.ecency.com/u/${c.name}/avatar/128", 32.dp)
+        Avatar("https://images.ecency.com/u/${c.name}/avatar/small", 32.dp)
         Text(c.title, color = colors.text, modifier = Modifier.padding(start = 12.dp))
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {

@@ -330,7 +330,7 @@ class SettingsModelTest {
         assertEquals(before, w.app.env.renderer, "a renderer without a proxy stays")
         assertEquals("https://images.hive.blog", w.app.env.prefs.getString(SettingsModel.KEY_IMAGE_SERVER))
         assertEquals(listOf("Successful"), w.toasts())
-        assertEquals("https://images.hive.blog/u/alice/avatar/128", PostCard.avatarUrl("alice", w.app.env.proxyBase))
+        assertEquals("https://images.hive.blog/u/alice/avatar/small", PostCard.avatarUrl("alice", w.app.env.proxyBase))
 
         w.settings.setImageServer("https://evil.example")
         assertEquals("https://images.hive.blog", w.app.env.proxyBase, "only RN's three servers")

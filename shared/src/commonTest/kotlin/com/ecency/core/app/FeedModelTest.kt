@@ -148,7 +148,7 @@ class FeedModelTest {
         testScheduler.advanceUntilIdle()
         val card = feed.current.items.single()
         assertEquals(PostKey("author0", "p-0"), card.key)
-        assertEquals("https://i.ecency.com/u/author0/avatar/128", card.avatarUrl)
+        assertEquals("https://i.ecency.com/u/author0/avatar/small", card.avatarUrl)
         assertEquals(50, card.reputation)
         assertEquals("Title of p-0", card.title)
         assertEquals("Card 0 of p", card.summary)

@@ -87,23 +87,18 @@ data class PostCard(
          */
         fun avatarUrl(account: String, proxyBase: String = ImageProxy.DEFAULT_BASE, size: String = "small"): String {
             if (!isHiveAccountName(account)) return ""
-            val base = "$proxyBase/u/$account/avatar/${avatarPixels(size)}"
+            val base = "$proxyBase/u/$account/avatar/${avatarSize(size)}"
             return AvatarCacheStamps.of(account)?.let { "$base?stamp=$it" } ?: base
         }
 
         /**
-         * The image service reads only a numeric avatar size and serves 256 px for anything else, so RN's
-         * "small" and "medium" were both 256 px (#3599). The names map to the sizes it keeps rendered (64, 128,
-         * 256, 512), picked for phone densities: small 128 (list avatars up to about 40 pt at 3x), medium 256,
-         * large 512. A number passes through. The post renderer's mention chips keep render-helper's
-         * `avatar/small` (byte parity with its output).
+         * The image service's avatar sizes are "small", "medium" and "large", the names the website requests too,
+         * so the app and the site share one CDN cache entry per account and size. Anything else (a number, a
+         * path) becomes "small".
          */
-        fun avatarPixels(size: String): String = when (size) {
-            "small" -> "128"
-            "medium" -> "256"
-            "large" -> "512"
-            else -> size.takeIf { s -> s.isNotEmpty() && s.all { it.isDigit() } } ?: "128"
-        }
+        fun avatarSize(size: String): String = if (size in AVATAR_SIZES) size else "small"
+
+        private val AVATAR_SIZES = setOf("small", "medium", "large")
 
         fun formatPayout(value: Double): String {
             val thousandths = round(value * 1000).toLong().coerceAtLeast(0)

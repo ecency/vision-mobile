@@ -736,7 +736,7 @@ struct EditorScreen: View {
         if !state.isReply, !state.isEdit {
             Button { sheet = .community } label: {
                 HStack {
-                    AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/128", size: 28)
+                    AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/small", size: 28)
                     Text(state.community?.title ?? EditorUiCopy.shared.MY_BLOG).foregroundStyle(theme.text).accessibilityIdentifier("community-row-title")
                     Image(appIcon: .expand).font(.footnote).foregroundStyle(theme.icon).accessibilityHidden(true)
                     Spacer()
@@ -870,7 +870,7 @@ struct EditorScreen: View {
                     ForEach(mentions, id: \.self) { name in
                         Button { model.insertUsername(username: name); mentions = [] } label: {
                             HStack(spacing: 6) {
-                                AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/128", size: 20)
+                                AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/small", size: 20)
                                 Text(name).font(.footnote).foregroundStyle(theme.text)
                             }
                             .padding(.horizontal, 8).padding(.vertical, 4).background(theme.lightBackground, in: Capsule())
@@ -1373,7 +1373,7 @@ private struct CommunitySheet: View {
             Task { onPick((try? await model.resolve(choice: c)) ?? c) }
         } label: {
             HStack {
-                AvatarView(url: "https://images.ecency.com/u/\(c.name)/avatar/128", size: 32)
+                AvatarView(url: "https://images.ecency.com/u/\(c.name)/avatar/small", size: 32)
                 Text(c.title)
             }
         }

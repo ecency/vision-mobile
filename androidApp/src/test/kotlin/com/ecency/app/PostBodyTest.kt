@@ -131,8 +131,8 @@ class PostBodyTest {
     fun mentionChipLoadsTheSmallAvatarAndTagChipHasNone() {
         val blocks = listOf(Block.Paragraph(listOf(Inline.Mention("alice"), Inline.Text(" "), Inline.Tag("hive"))))
         compose.setContent { PostBody(blocks, 360.dp, actions) }
-        compose.onNodeWithTag("chip-avatar:https://images.ecency.com/u/alice/avatar/128", useUnmergedTree = true).assertExists()
-        waitForRequest("https://images.ecency.com/u/alice/avatar/128")
+        compose.onNodeWithTag("chip-avatar:https://images.ecency.com/u/alice/avatar/small", useUnmergedTree = true).assertExists()
+        waitForRequest("https://images.ecency.com/u/alice/avatar/small")
         val avatars = compose.onAllNodes(hasTestTagStartingWith("chip-avatar:"), useUnmergedTree = true).fetchSemanticsNodes()
         assertEquals(1, avatars.size)
     }
@@ -287,9 +287,9 @@ class PostBodyTest {
     fun invalidAccountNamesGetNoAvatarRequest() {
         val blocks = listOf(Block.Paragraph(listOf(Inline.Mention("../evil"), Inline.Mention("alice"))))
         compose.setContent { PostBody(blocks, 360.dp, actions) }
-        waitForRequest("https://images.ecency.com/u/alice/avatar/128")
+        waitForRequest("https://images.ecency.com/u/alice/avatar/small")
         compose.onNodeWithTag("chip:@../evil", useUnmergedTree = true).assertExists()
-        assertEquals(listOf("https://images.ecency.com/u/alice/avatar/128"), requested.toList())
+        assertEquals(listOf("https://images.ecency.com/u/alice/avatar/small"), requested.toList())
     }
 
     // Body images load the proxy size web's srcset picks (README "Body images"), so they share its CDN cache entries.

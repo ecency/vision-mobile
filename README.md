@@ -1986,7 +1986,7 @@ Signing keys, keystores, provisioning profiles, `google-services.json`, `GoogleS
 
 - #3535 signing: an `account_update` or `account_update2` that sets `owner` is an owner operation (never signed, refused on links and in the dApp bridge); a `custom_json` with both authority lists is refused as unsupported (one key signs); the HiveAuth key type follows the operation's fields.
 - #3600 key entry: a pasted public key and a private key of another role get their own messages.
-- #3599: "Reported" only when the report went through; AI Recap is copy only; numeric avatar sizes (128, 256, 512); bare `/created` app link; "Communities" search tab; the Manage Authorities button reads "Open".
+- #3599: "Reported" only when the report went through; AI Recap is copy only; avatar sizes by name (`small`, `medium`, `large`, the names the website requests, so both share the CDN cache); bare `/created` app link; "Communities" search tab; the Manage Authorities button reads "Open".
 - #3460: the translate `/detect` call only for a signed-in reader.
 - #3586: an API-flagged wave under "Always warn" stays listed with readable text and covered media, revealed per wave; "Always hide" leaves it out. Its thread screen keeps the cover when it was opened from a list this session. Known gap: a wave opened by a link is not listed and the post API carries no flag, so it opens uncovered, as every post screen does (NSFW covers live on list cards).
 - #3527: publishing waits for a draft save in flight.

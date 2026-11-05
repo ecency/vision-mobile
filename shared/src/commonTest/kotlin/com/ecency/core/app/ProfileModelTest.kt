@@ -139,7 +139,7 @@ class ProfileModelTest {
         assertEquals(42, h.resourceCreditsHours)
         assertEquals("my-post", h.pinned)
         assertTrue(h.coverUrl.startsWith(TestApp.PROXY + "/"))
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/512", h.avatarUrl)
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/large", h.avatarUrl)
         assertTrue(s.isFollowing)
         assertFalse(s.isMuted)
         assertTrue(s.isPro, "Pro is case-insensitive")
