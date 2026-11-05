@@ -4,7 +4,7 @@ import SwiftUI
 /// The tabs (README "iPhone Duo"): the system TabView and the root's navigation bar, so iOS places them. A bottom tab
 /// bar and a top bar on a phone; on iPhone Duo's outer display (and the inner one held sideways) both move to a column
 /// on the trailing edge under the status bar, which hand-built bars never do. The header's buttons (RN Header: the
-/// account pill opening the side menu, QR, search, boost) are toolbar items with a title and a symbol each, as the
+/// account pill opening the side menu, QR, search, perks) are toolbar items with a title and a symbol each, as the
 /// vertical bar needs. Screens pushed on the stack still cover the tabs (RN's main stack).
 struct TabsRoot: View {
     @EnvironmentObject private var app: AppContainer
@@ -102,7 +102,7 @@ struct TabsRoot: View {
 }
 
 /// RN Header as toolbar items: the account avatar opens the side menu (its header shows the name; the bar keeps the
-/// height for content); QR, search and boost per tab. Every item has a title and a symbol for iPhone Duo's vertical bar.
+/// height for content); then QR, search and perks (signed in), the same on every tab. Every item has a title and a symbol for iPhone Duo's vertical bar.
 struct ShellToolbar: ToolbarContent {
     let tab: AppTab
     /// Round, at its final size (`round`), or nil until it loaded: the account symbol meanwhile.
@@ -128,19 +128,20 @@ struct ShellToolbar: ToolbarContent {
             .largeContent(username.map { ShellUiCopy.shared.accountOf(username: $0) } ?? ShellUiCopy.shared.ACCOUNT_SIGNED_OUT, appIcon: .account)
             .accessibilityIdentifier("account-menu")
         }
+        // the same buttons in the same order on every tab (AppTab.headerButtons)
         ToolbarItemGroup(placement: .topBarTrailing) {
-            if tab.showQr {
-                Button { app.push(AppScreenCompanion.shared.of(route: .qrScan, arg: "")) } label: { Label(ShellUiCopy.shared.QR_SCAN, appIcon: .qrScan) }
-                    .accessibilityIdentifier("header-qr")
+            ForEach(tab.headerButtons(loggedIn: username != nil), id: \.self) { button in
+                Button { app.push(AppScreenCompanion.shared.of(route: button.route, arg: "")) } label: { Label(button.label, appIcon: button.icon) }
+                    .accessibilityIdentifier(Self.identifier(button))
             }
-            if tab.showSearch {
-                Button { app.push(AppScreenCompanion.shared.of(route: .searchResult, arg: "")) } label: { Label(UiCopy.shared.SEARCH, appIcon: .search) }
-                    .accessibilityIdentifier("header-search")
-            }
-            if tab.showsBoost(loggedIn: username != nil) {
-                Button { app.push(AppScreenCompanion.shared.of(route: .perks, arg: "")) } label: { Label(ShellUiCopy.shared.PERKS, appIcon: .boost) }
-                    .accessibilityIdentifier("header-boost")
-            }
+        }
+    }
+
+    static func identifier(_ button: TabHeaderButton) -> String {
+        switch button {
+        case .qrScan: "header-qr"
+        case .search: "header-search"
+        default: "header-boost"
         }
     }
 

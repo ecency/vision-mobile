@@ -35,6 +35,32 @@ final class ShellUITests: XCTestCase {
         XCTAssertTrue(app.textFields["login-username"].waitForExistence(timeout: 5))
     }
 
+    /// Owner request: every tab's header has the Feed's QR, search and perks buttons, left to right.
+    func testEveryTabHeaderShowsQrSearchAndPerksInOrder() {
+        let ids = ["header-qr", "header-search", "header-boost"]
+        for tab in ["FEED", "WAVES", "CHATS", "WALLET", "NOTIFICATION"] {
+            let app = launch(["-seedAccounts", "YES", "-startTab", tab])
+            XCTAssertTrue(app.buttons["account-menu"].waitForExistence(timeout: 20), tab)
+            for id in ids { XCTAssertTrue(app.buttons[id].waitForExistence(timeout: 10), "\(id) on \(tab)") }
+            let xs = ids.map { app.buttons[$0].frame.midX }
+            XCTAssertEqual(xs, xs.sorted(), "\(tab): QR, search, perks left to right")
+            app.terminate()
+        }
+    }
+
+    /// Signed out, every tab has QR and search; perks needs an account (RN).
+    func testSignedOutEveryTabHeaderShowsQrAndSearch() {
+        let app = launch()
+        XCTAssertTrue(app.buttons["tab-feed"].waitForExistence(timeout: 15))
+        for tab in ["tab-feed", "tab-waves", "tab-chats", "tab-wallet", "tab-notification"] {
+            app.buttons[tab].tap()
+            XCTAssertTrue(app.buttons["header-qr"].waitForExistence(timeout: 10), "QR on \(tab)")
+            XCTAssertTrue(app.buttons["header-search"].exists, "search on \(tab)")
+            XCTAssertFalse(app.buttons["header-boost"].exists, "perks only signed in, \(tab)")
+            XCTAssertLessThan(app.buttons["header-qr"].frame.midX, app.buttons["header-search"].frame.midX, tab)
+        }
+    }
+
     /// The shared toast host centres every toast at the bottom, one line or several (it once sat at the left edge).
     func testToastsAreCenteredAtTheBottom() {
         let long = "Your request for deletion is sent. " + String(repeating: "Your account will be removed in a few days. ", count: 4)

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import com.ecency.core.app.AppTab
 import com.ecency.core.app.Badges
 import com.ecency.core.app.ShellUiCopy
+import com.ecency.core.app.TabHeaderButton
 import com.ecency.core.app.UiCopy
 
 /** RN tabBarActiveTintColor / tabBarInactiveTintColor (the same in both themes). */
@@ -92,7 +93,8 @@ fun BottomTabBar(selected: AppTab, badges: Badges, onSelect: (AppTab) -> Unit) {
 
 /**
  * RN Header on every tab: the avatar in a gradient pill (opens the side menu), the display name and
- * "@user" (no reputation: only the quick profile shows it) or, signed out, "Login to customize your feed", then QR, search and boost per tab.
+ * "@user" (no reputation: only the quick profile shows it) or, signed out, "Login to customize your feed", then the
+ * trailing buttons every tab shares ([AppTab.headerButtons]: QR, search, perks signed in).
  */
 @Composable
 fun AppHeader(
@@ -101,9 +103,7 @@ fun AppHeader(
     displayName: String?,
     avatarUrl: String,
     onAvatar: () -> Unit,
-    onQr: () -> Unit,
-    onSearch: () -> Unit,
-    onBoost: () -> Unit,
+    onButton: (TabHeaderButton) -> Unit,
 ) {
     val colors = LocalEcencyColors.current
     Row(Modifier.fillMaxWidth().background(colors.background).padding(bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -129,10 +129,16 @@ fun AppHeader(
                 Text(ShellUiCopy.LOGIN_TO_CUSTOMIZE_FEED, fontSize = 14.sp, color = colors.darkGray, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("headerLogin"))
             }
         }
-        Row(Modifier.padding(end = 16.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-            if (tab.showQr) HeaderIcon(AppIcon.QR_SCAN, colors.icon, ShellUiCopy.QR_SCAN, "headerQr", onQr, Modifier.padding(end = 8.dp))
-            if (tab.showSearch) HeaderIcon(AppIcon.SEARCH, colors.icon, UiCopy.SEARCH, "headerSearch", onSearch)
-            if (tab.showsBoost(username != null)) HeaderIcon(AppIcon.BOOST, colors.blueText, ShellUiCopy.PERKS, "headerBoost", onBoost, Modifier.padding(start = 8.dp))
+        Row(Modifier.padding(end = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            for (button in tab.headerButtons(loggedIn = username != null)) {
+                val (tint, tag) = when (button) {
+                    TabHeaderButton.QR_SCAN -> colors.icon to "headerQr"
+                    TabHeaderButton.SEARCH -> colors.icon to "headerSearch"
+                    // RN's boost (fire) button in the accent colour
+                    TabHeaderButton.PERKS -> colors.blueText to "headerBoost"
+                }
+                HeaderIcon(button.icon, tint, button.label, tag, { onButton(button) })
+            }
         }
     }
 }
