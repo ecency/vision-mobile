@@ -174,6 +174,15 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Text("${TransferCopy.FROM}: ${com.ecency.core.l10n.Bidi.inUi("@" + s.from.orEmpty())}", color = colors.darkGray, fontSize = 13.sp)
             if (!s.recipientLocked) {
+                // RN's recipient row: the sender, an arrow, then each typed recipient's avatar (a mistyped name shows
+                // a stranger's face before anything is sent)
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 6.dp).testTag("transferAvatars")) {
+                    s.from?.let { Avatar(model.avatarUrl(it), 40.dp) }
+                    Glyph(com.ecency.core.app.AppIcon.ARROW_FORWARD, colors.darkGray, 18.dp, Modifier.padding(horizontal = 8.dp))
+                    s.recipientAvatars.forEachIndexed { i, name ->
+                        Avatar(model.avatarUrl(name), 40.dp, Modifier.padding(start = if (i == 0) 0.dp else 4.dp).testTag("transferAvatar:$name"))
+                    }
+                }
                 Field(TransferCopy.TO, s.recipient, model::setRecipient, "transferTo", enabled = !s.busy, placeholder = TransferCopy.TO_PLACEHOLDER, ltr = true)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = { favorites = true }, enabled = !s.busy, modifier = Modifier.testTag("transferFavorites")) { Text(WalletCopy.PICK_FAVORITE, color = colors.blueText, fontSize = 13.sp) }

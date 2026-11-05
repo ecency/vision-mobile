@@ -205,6 +205,13 @@ data class TransferState(
 
     val recipients: List<String> get() = WalletOps.recipients(recipient)
 
+    /**
+     * RN transferScreen's recipient row: an avatar for each typed recipient that is an account name, after the
+     * sender's ([TransferModel.avatarUrl]), so a mistyped name shows a stranger's face before anything is sent.
+     */
+    val recipientAvatars: List<String>
+        get() = if (recipientLocked) emptyList() else recipients.filter { com.ecency.core.render.blocks.isHiveAccountName(it) }.take(MAX_AVATARS)
+
     val allowsMultiple: Boolean get() = !isRecurrent && (kind == TransferKind.TRANSFER || kind == TransferKind.POINTS || kind == TransferKind.ENGINE_TRANSFER)
 
     /** Several names typed where one account is sent to (a savings deposit, a recurrent transfer, a delegation of tokens). */
@@ -249,6 +256,9 @@ data class TransferState(
 
     companion object {
         const val MIN_EXECUTIONS = 2
+
+        /** Recipient avatars shown at most (RN draws every one; a long list would push the form down). */
+        const val MAX_AVATARS = 5
     }
 }
 
@@ -377,6 +387,9 @@ class TransferModel internal constructor(
         if (current.busy) return
         setState { it.copy(memo = text).withWarnings() }
     }
+
+    /** The avatar picture of [account] for the recipient row (RN UserAvatar). */
+    fun avatarUrl(account: String): String = PostCard.avatarUrl(account, env.proxyBase, "medium")
 
     /** "Use saved memo": the memo this account last sent to the exchange ([TransferState.savedExchangeMemo]). */
     fun useSavedMemo() {

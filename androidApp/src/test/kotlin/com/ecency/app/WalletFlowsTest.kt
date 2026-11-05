@@ -284,6 +284,15 @@ class WalletFlowsTest {
         until { compose.onNodeWithTag("tab:history:INTEREST", useUnmergedTree = true).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Selected) == true }
     }
 
+    /** Tester report: a Points transfer shows the sender's and the recipient's avatars, as RN did. */
+    @Test
+    fun aPointsTransferShowsTheRecipientsAvatar() {
+        launch(Navigator(NavState().push(AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))))
+        until { exists("transferForm") && exists("transferAvatars") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        until { exists("transferAvatar:spike-bob") }
+    }
+
     /** The memo last sent to an exchange is offered under the memo field, and filled in only on a tap. */
     @Test
     fun theMemoLastSentToAnExchangeIsOfferedAndFilledOnATap() {

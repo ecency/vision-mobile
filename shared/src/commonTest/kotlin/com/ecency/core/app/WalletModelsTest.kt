@@ -469,6 +469,23 @@ class WalletModelsTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** Tester report: RN's sender and recipient avatars over the recipient field, on every transfer with one (Points too). */
+    @Test
+    fun theSenderAndEachTypedRecipientShowTheirAvatars() = runTest {
+        val w = world(this)
+        val points = transfer(w, AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))
+        assertEquals(emptyList(), points.current.recipientAvatars)
+        points.setRecipient("spike-bob, spike-carol, x!")
+        // valid account names only, in the order typed
+        assertEquals(listOf("spike-bob", "spike-carol"), points.current.recipientAvatars)
+        assertEquals(PostCard.avatarUrl("spike-bob", w.env.proxyBase, "medium"), points.avatarUrl("spike-bob"))
+        assertTrue(points.avatarUrl(w.user).startsWith("https://"), "the sender's avatar too")
+        // no recipient field, no recipient avatars
+        val convert = transfer(w, AppScreen.Transfer("convert", "HBD", "hive"))
+        assertTrue(convert.current.recipientLocked)
+        assertEquals(emptyList(), convert.current.recipientAvatars)
+    }
+
     /**
      * An exchange's deposit memo, once a transfer with it went through, is offered (never filled in by itself) the next
      * time this account sends to the same exchange; per account, on the device, gone when the account leaves.
