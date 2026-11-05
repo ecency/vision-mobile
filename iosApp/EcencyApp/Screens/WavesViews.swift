@@ -634,9 +634,9 @@ struct WaveComposerSheet: View {
     /// composer keeps, so a failed upload can be continued after the sheet was closed).
     @State private var videoUpload: Observed<VideoUploadState>?
 
-    /// RN quick post: dictation and AI assist, the editor's sheets over this composer.
+    /// RN quick post: dictation and AI assist, the editor's sheets over this composer, and the uploads gallery.
     private enum AiSheet: String, Identifiable {
-        case assist, dictation
+        case assist, dictation, uploads
         var id: String { rawValue }
     }
 
@@ -735,7 +735,8 @@ struct WaveComposerSheet: View {
                 HStack(spacing: 0) {
                 QuickComposeTools(idPrefix: "wave", onAttach: { model.attach(source: $0) },
                                   onDictate: env == nil ? nil : { aiSheet = .dictation },
-                                  onAiAssist: env == nil ? nil : { aiSheet = .assist }) {
+                                  onAiAssist: env == nil ? nil : { aiSheet = .assist },
+                                  onUploads: env == nil ? nil : { aiSheet = .uploads }) {
                 // RN's poll button (the editor's poll wizard); tinted once a poll is attached
                 Button { pollSheet = true } label: {
                     Image(appIcon: .chartBar).scaledFont(20).foregroundStyle(state.poll != nil ? theme.accent : theme.text).tapTarget()
@@ -786,6 +787,8 @@ struct WaveComposerSheet: View {
                 switch which {
                 case .assist: AiAssistSheet(editor: model, env: env).environment(\.appTheme, theme)
                 case .dictation: DictationSheet(editor: model, env: env).environment(\.appTheme, theme)
+                // RN UploadsGalleryModal allowMultiple={false}: a tapped upload is the wave's image
+                case .uploads: QuickUploadsSheet(env: env) { model.pickUploaded(url: $0) }.environment(\.appTheme, theme)
                 }
             }
         }
@@ -1143,13 +1146,15 @@ struct WavesOnboardingCard: View {
 
 /// RN quick post's content buttons (quickPostModalContent `_renderExpandBtn`) for both of its modes: the wave
 /// composer (its poll and video in `middle`) and the reply composer (RN comment mode). Image, camera and files go
-/// through the composer's image attach; dictation and AI assist open the editor's sheets (only with both handlers).
-/// Identifiers are `idPrefix` + -attach, -camera, -files, -dictate, -ai-assist.
+/// through the composer's image attach; with `onUploads`, a button opens the account's uploads gallery
+/// (`QuickUploadsSheet`); dictation and AI assist open the editor's sheets (only with both handlers).
+/// Identifiers are `idPrefix` + -attach, -camera, -files, -uploads, -dictate, -ai-assist.
 struct QuickComposeTools<Middle: View>: View {
     let idPrefix: String
     let onAttach: (WaveImageSource) -> Void
     var onDictate: (() -> Void)?
     var onAiAssist: (() -> Void)?
+    var onUploads: (() -> Void)?
     @ViewBuilder var middle: () -> Middle
 
     var body: some View {
@@ -1162,6 +1167,12 @@ struct QuickComposeTools<Middle: View>: View {
         Button { onAttach(.files) } label: { Image(appIcon: .folder).scaledFont(20).tapTarget() }
             .accessibilityLabel(MediaPickCopy.shared.FILES)
             .accessibilityIdentifier("\(idPrefix)-files")
+        if let onUploads {
+            // RN UploadsGalleryModal: the account's uploaded images
+            Button(action: onUploads) { Image(appIcon: .uploads).scaledFont(20).tapTarget() }
+                .accessibilityLabel(WaveComposeCopy.shared.UPLOADED_IMAGES)
+                .accessibilityIdentifier("\(idPrefix)-uploads")
+        }
         middle()
         if let onDictate, let onAiAssist {
             // RN: dictation with the content buttons, then the AI pair
@@ -1176,8 +1187,29 @@ struct QuickComposeTools<Middle: View>: View {
 }
 
 extension QuickComposeTools where Middle == EmptyView {
-    init(idPrefix: String, onAttach: @escaping (WaveImageSource) -> Void, onDictate: (() -> Void)? = nil, onAiAssist: (() -> Void)? = nil) {
-        self.init(idPrefix: idPrefix, onAttach: onAttach, onDictate: onDictate, onAiAssist: onAiAssist) { EmptyView() }
+    init(idPrefix: String, onAttach: @escaping (WaveImageSource) -> Void, onDictate: (() -> Void)? = nil, onAiAssist: (() -> Void)? = nil, onUploads: (() -> Void)? = nil) {
+        self.init(idPrefix: idPrefix, onAttach: onAttach, onDictate: onDictate, onAiAssist: onAiAssist, onUploads: onUploads) { EmptyView() }
+    }
+}
+
+/// RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the editor's `UploadsSheet` over the signed-in
+/// account's uploads (`env.uploadsModel(editor: nil)`, nothing goes into an editor), where one tap hands that image to
+/// `onPick` and closes the sheet. The composer's own buttons are the pickers, so the sheet shows the gallery alone.
+struct QuickUploadsSheet: View {
+    @StateObject private var uploads: Observed<UploadsState>
+    let onPick: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    init(env: AppEnvironment, onPick: @escaping (String) -> Void) {
+        _uploads = StateObject(wrappedValue: Observed(env.uploadsModel(editor: nil), ownsModel: true))
+        self.onPick = onPick
+    }
+
+    var body: some View {
+        UploadsSheet(uploads: uploads, onInsert: { urls in
+            if let url = urls.first { onPick(url) }
+            dismiss()
+        })
     }
 }
 

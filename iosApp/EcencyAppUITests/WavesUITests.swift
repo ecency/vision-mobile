@@ -101,6 +101,26 @@ final class WavesUITests: XCTestCase {
         XCTAssertFalse(element(app, "wave-video").exists)
     }
 
+    /// RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the account's uploaded images, and one tap is
+    /// the wave's image (the fake gallery's first image).
+    func testAnImageFromTheUploadsGalleryIsTheWavesImage() {
+        let app = launch(["-seedAccounts", "YES"])
+        XCTAssertTrue(app.buttons["wave-fab"].waitForExistence(timeout: 20))
+        app.buttons["wave-fab"].tap()
+        XCTAssertTrue(element(app, "wave-text").waitForExistence(timeout: 10))
+        let uploads = app.buttons["wave-uploads"]
+        XCTAssertTrue(uploads.waitForExistence(timeout: 10), app.debugDescription)
+        uploads.tap()
+        let image = element(app, "gallery-image-demo-i1")
+        XCTAssertTrue(image.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(app.buttons["open-gallery"].exists, "the composer's own buttons are the pickers")
+        XCTAssertFalse(app.buttons["add-to-gallery"].exists)
+        image.tap()
+        XCTAssertTrue(element(app, "wave-image").waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(element(app, "uploads-sheet").exists, "the gallery closed")
+        XCTAssertTrue(app.buttons["wave-publish"].isEnabled, "an image alone is a wave")
+    }
+
     func testPinnedShortsTabPlaysOnlyTheReelInView() {
         let app = launch()
         XCTAssertTrue(app.buttons["waves-tab-customise"].waitForExistence(timeout: 20))

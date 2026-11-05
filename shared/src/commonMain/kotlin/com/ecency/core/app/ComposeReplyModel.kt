@@ -155,6 +155,25 @@ class ComposeReplyModel internal constructor(
         }
     }
 
+    /**
+     * RN quick reply's UploadsGalleryModal (`allowMultiple={false}`, `_handleMediaInsert`): an image the account
+     * uploaded before ([UploadsModel] over `env.uploadsModel(null)`) becomes the reply's one image, nothing is
+     * uploaded. The same guards as [attach]: not while attaching or sending, only for [owner] while signed in, and
+     * only a clean address on the image host. Saved with the draft at once, as RN's `_addQuickCommentIntoCache`.
+     */
+    fun pickUploaded(url: String) {
+        val s = current
+        if (s.isAttaching || s.isSending) return
+        val user = owner
+        if (user == null || env.session.current.username != user) {
+            setState { it.copy(error = AppError(ErrorKind.AUTH, if (user == null) L.native.composeReply.pleaseSignInFirst else ACCOUNT_CHANGED, false)) }
+            return
+        }
+        if (!UploadNames.isSafeUrl(url, env.imageHost)) return
+        setState { it.copy(imageUrl = url, sent = null, error = null) }
+        saveNow()
+    }
+
     /** RN: a tap on the thumbnail takes the image off. */
     fun removeImage() {
         if (current.isSending) return

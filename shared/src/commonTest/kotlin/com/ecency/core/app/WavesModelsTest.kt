@@ -1056,6 +1056,43 @@ class WavesModelsTest {
     }
 
     @Test
+    fun anImageFromTheUploadsGalleryBecomesTheWavesOneImage() = runTest {
+        val app = app(Backend())
+        signIn(app)
+        val composer = app.env.waves.composer()
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        // RN quick post's UploadsGalleryModal (allowMultiple={false}): a tapped upload is the wave's image
+        composer.pickUploaded(gallery)
+        assertEquals(gallery, composer.current.imageUrl)
+        assertFalse(composer.current.isAttaching)
+        composer.pickUploaded("https://evil.example/x.jpg")
+        assertEquals(gallery, composer.current.imageUrl, "only a clean address on the image host")
+        // not while a picked image is still uploading
+        val upload = CompletableDeferred<String?>()
+        app.env.waves.attacher = object : WaveImageAttacher {
+            override suspend fun attach(username: String, source: WaveImageSource): String? = upload.await()
+        }
+        composer.removeImage()
+        composer.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        composer.pickUploaded(gallery)
+        assertNull(composer.current.imageUrl)
+        upload.complete(null)
+        testScheduler.advanceUntilIdle()
+        composer.pickUploaded(gallery)
+        composer.setText("Look at this")
+        composer.send()
+        testScheduler.advanceUntilIdle()
+        val fields = broadcastOps(app).single().jsonArray[1].jsonObject
+        assertEquals("Look at this\n\n ![]($gallery)", fields.getValue("body").jsonPrimitive.content)
+        // a composer left open across an account change refuses
+        val stale = WaveComposeModel(app.env, "someone-else")
+        stale.pickUploaded(gallery)
+        assertNull(stale.current.imageUrl)
+        assertEquals(WaveComposeModel.ACCOUNT_CHANGED, stale.current.error?.message)
+    }
+
+    @Test
     fun aShareLinksTextWaitsForTheComposerOnce() = runTest {
         val app = app(Backend())
         val events = mutableListOf<AppEvent>()

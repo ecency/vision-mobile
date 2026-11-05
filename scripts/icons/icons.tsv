@@ -125,3 +125,4 @@ REFUND	currency_exchange	-	arrow.uturn.backward.circle	arrow.uturn.backward.circ
 TROPHY	emoji_events	=	trophy	trophy.fill	no
 TARGET	target	-	target	-	no
 SHRINK	close_fullscreen	-	arrow.down.right.and.arrow.up.left	-	no
+UPLOADS	photo_library	-	photo.on.rectangle	-	no

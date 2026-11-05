@@ -84,6 +84,54 @@ class QuickReplyToolsTest {
     }
 
     @Test
+    fun anImageFromTheUploadsGalleryBecomesTheRepliesOneImageAsRnsUploadsGalleryModal() = runTest {
+        val app = signedIn()
+        val reply = app.env.replyModel(key, parent)
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        // RN UploadsGalleryModal allowMultiple={false}: a tapped upload is the reply's image, nothing is uploaded
+        reply.pickUploaded(gallery)
+        assertEquals(gallery, reply.current.imageUrl)
+        assertFalse(reply.current.isAttaching)
+        testScheduler.advanceUntilIdle()
+        assertEquals(gallery, ComposeReplyModel(app.env, key, parent).also { testScheduler.advanceUntilIdle() }.current.imageUrl, "saved with the draft like an uploaded one")
+        reply.setText("Nice post")
+        // a second pick replaces it, as RN's one image
+        reply.pickUploaded(url)
+        assertEquals(url, reply.current.imageUrl)
+        // only a clean address on the image host goes into a body
+        reply.pickUploaded("https://evil.example/x.jpg")
+        reply.pickUploaded("https://images.ecency.com/a b.jpg")
+        assertEquals(url, reply.current.imageUrl)
+        // not while a picked image is still uploading: the upload's answer would replace it
+        val upload = CompletableDeferred<String?>()
+        app.uploads { upload.await() }
+        reply.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        reply.pickUploaded(gallery)
+        assertEquals(url, reply.current.imageUrl)
+        upload.complete(null)
+        testScheduler.advanceUntilIdle()
+        reply.pickUploaded(gallery)
+        reply.send()
+        testScheduler.advanceUntilIdle()
+        assertEquals("Nice post\n\n ![]($gallery)", app.sentBody(), "sent as RN writes a reply image")
+    }
+
+    @Test
+    fun anUploadsGalleryPickIsTheComposersOwnersOnly() = runTest {
+        val app = signedIn()
+        val reply = ComposeReplyModel(app.env, key, parent)
+        testScheduler.advanceUntilIdle()
+        app.signIn("spike-bob")
+        app.env.session.switchTo("spike-bob")
+        testScheduler.advanceUntilIdle()
+        // a sheet left open across a switch: another account's gallery image never lands in this account's reply
+        reply.pickUploaded(url)
+        assertNull(reply.current.imageUrl)
+        assertEquals(ComposeReplyModel.ACCOUNT_CHANGED, reply.current.error?.message)
+    }
+
+    @Test
     fun anImageAloneIsAReplyAndRemovingItLeavesNothingToSend() = runTest {
         val app = signedIn()
         app.uploads { url }

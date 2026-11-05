@@ -2764,7 +2764,8 @@
       "write_something_first": "Write something first.",
       "account_changed": "This wave was written as another account. Close it and write it again.",
       "no_upload": "Image upload is not available in this build yet. Paste an image link into the text instead.",
-      "fail": "Fail"
+      "fail": "Fail",
+      "uploads": "Uploads"
     },
     "delete_account": {
       "sign_out_failed": "Your request was sent, but signing out failed. Please log out from the menu.",

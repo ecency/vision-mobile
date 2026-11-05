@@ -689,6 +689,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
     val context = androidx.compose.ui.platform.LocalContext.current
     // RN quick post: dictation and AI assist, the editor's sheets over this composer
     var aiSheet by remember { mutableStateOf<String?>(null) }
+    var uploadsSheet by remember { mutableStateOf(false) }
     // RN hasClipboardImage: checked when the composer opens and whenever the app comes back to the front
     ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
     ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }, sheetState = sheetState, containerColor = colors.background) {
@@ -750,6 +751,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
                 QuickComposeTools(
                     "wave", state.isSending, state.isAttaching, onAttach = model::attach,
                     onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.weight(1f),
+                    onUploads = { uploadsSheet = true },
                     middle = {
                         // RN's poll button (the editor's poll wizard); blue once a poll is attached
                         QuickTool(UiCopy.POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null, bold = state.poll != null) { pollSheet = true }
@@ -774,6 +776,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
         PollSheet(state.poll, onAttach = { model.setPoll(it); pollSheet = false }, onReset = { model.setPoll(null); pollSheet = false }, onDismiss = { pollSheet = false })
     }
     QuickComposeAiSheet(env, model, aiSheet) { aiSheet = null }
+    if (uploadsSheet) QuickUploadsSheet(env, onPick = model::pickUploaded) { uploadsSheet = false }
     val recordVideo = rememberVideoRecord(env, model.owner, "wave") { uri ->
         val appContext = context.applicationContext
         val video = model.video()
@@ -992,8 +995,9 @@ fun WavesOnboardingCard(env: AppEnvironment, username: String, onWave: () -> Uni
  * RN quick post's content buttons (quickPostModalContent `_renderExpandBtn`), one row for both of its modes: the
  * wave composer (with its poll and video in [middle]) and the reply sheet (RN comment mode, with expand in
  * [trailing]). Image, camera and files go through the composer's image attach; dictation and AI assist open the
- * editor's sheets over the composer ([QuickComposeAiSheet]). The row scrolls sideways when it does not fit. Tags
- * are [tagPrefix] + Attach, Camera, Files, Dictate, AiAssist.
+ * editor's sheets over the composer ([QuickComposeAiSheet]); with [onUploads], a button for the account's uploads
+ * gallery ([QuickUploadsSheet]). The row scrolls sideways when it does not fit. Tags are [tagPrefix] + Attach,
+ * Camera, Files, Uploads, Dictate, AiAssist.
  */
 @Composable
 internal fun QuickComposeTools(
@@ -1004,6 +1008,7 @@ internal fun QuickComposeTools(
     onDictate: () -> Unit,
     onAiAssist: () -> Unit,
     modifier: Modifier = Modifier,
+    onUploads: (() -> Unit)? = null,
     middle: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
     trailing: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
 ) {
@@ -1011,6 +1016,13 @@ internal fun QuickComposeTools(
         QuickTool(UiCopy.IMAGE, "${tagPrefix}Attach", enabled = !sending && !attaching) { onAttach(WaveImageSource.GALLERY) }
         QuickTool(ReadingUiCopy.CAMERA, "${tagPrefix}Camera", enabled = !sending && !attaching) { onAttach(WaveImageSource.CAMERA) }
         QuickTool(ReadingUiCopy.FILES, "${tagPrefix}Files", enabled = !sending && !attaching) { onAttach(WaveImageSource.FILES) }
+        // RN UploadsGalleryModal: the account's uploaded images ([QuickUploadsSheet])
+        if (onUploads != null) {
+            QuickTool(
+                com.ecency.core.app.WaveComposeCopy.UPLOADS, "${tagPrefix}Uploads", enabled = !sending && !attaching,
+                description = com.ecency.core.app.WaveComposeCopy.UPLOADED_IMAGES, onClick = onUploads,
+            )
+        }
         middle()
         // RN: dictation with the content buttons, then the AI pair
         QuickTool(com.ecency.core.app.WaveComposeCopy.DICTATE, "${tagPrefix}Dictate", enabled = !sending, onClick = onDictate)
@@ -1047,6 +1059,18 @@ internal fun QuickComposeAiSheet(env: AppEnvironment, target: com.ecency.core.ap
             DictationSheet(dictation, onDismiss = onDismiss)
         }
     }
+}
+
+/**
+ * RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the editor's [UploadsSheet] over the signed-in
+ * account's uploads (`env.uploadsModel(null)`, nothing goes into an editor), where one tap hands that image to
+ * [onPick] and closes the sheet. The composer's own buttons are the pickers, so the sheet shows the gallery alone.
+ */
+@Composable
+internal fun QuickUploadsSheet(env: AppEnvironment, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+    val uploads = remember { env.uploadsModel(null) }
+    DisposableEffect(uploads) { onDispose { uploads.close() } }
+    UploadsSheet(uploads, onInsert = { urls -> urls.firstOrNull()?.let(onPick); onDismiss() }, onDismiss = onDismiss)
 }
 
 /** RN hasClipboardImage: [onCheck] when the composer opens and whenever the app comes back to the front. */

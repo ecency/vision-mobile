@@ -509,4 +509,33 @@ class WavesFlowsTest {
         compose.await("playing.isEmpty()") { playing.isEmpty() }
         assertEquals(1, wavesRequests.count { "api/embed" in it })
     }
+
+    @Test
+    fun anImageFromTheUploadsGalleryIsTheWavesImage() {
+        // RN quick post's UploadsGalleryModal (allowMultiple={false}): the account's uploaded images, one tap is the wave's image
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        node.auth.rest = { r ->
+            if ("/private-api/images?" in r.url) HttpResult(200, """{"data":[{"_id":"i1","url":"$gallery","created":"2026-10-01"}],"pagination":{"total":1,"limit":20,"offset":0,"has_next":false}}""") else null
+        }
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveUploads")
+        waitFor("uploadsSheet")
+        // the toolbar already has the pickers: the sheet is the gallery alone
+        assertFalse(compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertFalse(exists("addToGallery"))
+        waitFor("galleryImage:$gallery")
+        click("galleryImage:$gallery")
+        waitFor("waveImage")
+        waitGone("uploadsSheet")
+        assertEquals(gallery, env.waves.composer().current.imageUrl)
+        compose.onNodeWithTag("waveText").performTextInput("A wave with an old upload")
+        click("wavePublish")
+        pump { node.broadcasts().isNotEmpty() || env.waves.composer().current.error != null }
+        val tx = node.broadcasts().single()
+        assertTrue(tx, "A wave with an old upload\\n\\n ![]($gallery)" in tx)
+    }
 }
