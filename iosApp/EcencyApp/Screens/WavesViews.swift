@@ -574,6 +574,9 @@ struct WavesPickerSheet: View {
 /// gets the row's width and wraps its own text instead of running off screen.
 struct ChipFlow: Layout {
     var spacing: CGFloat = 8
+    /// Rows end at the trailing edge (own chat messages' reactions); the layout takes the whole proposed width, so
+    /// an outer frame's alignment cannot move the chips.
+    var trailing = false
 
     static func size(of view: LayoutSubview, in width: CGFloat) -> CGSize {
         let natural = view.sizeThatFits(.unspecified)
@@ -600,17 +603,26 @@ struct ChipFlow: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         var x = bounds.minX, y = bounds.minY, row: CGFloat = 0
+        var line: [(LayoutSubview, CGPoint, CGSize)] = []
+        func flush() {
+            // a trailing row moves right by the room left after its last chip
+            let shift = trailing ? max(0, bounds.maxX - ((line.last.map { $0.1.x + $0.2.width }) ?? bounds.maxX)) : 0
+            for (view, at, size) in line { view.place(at: CGPoint(x: at.x + shift, y: at.y), proposal: ProposedViewSize(size)) }
+            line.removeAll()
+        }
         for view in subviews {
             let size = Self.size(of: view, in: bounds.width)
             if x > bounds.minX, x + size.width > bounds.maxX {
+                flush()
                 x = bounds.minX
                 y += row + spacing
                 row = 0
             }
-            view.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            line.append((view, CGPoint(x: x, y: y), size))
             x += size.width + spacing
             row = max(row, size.height)
         }
+        flush()
     }
 }
 

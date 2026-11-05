@@ -874,7 +874,8 @@ private fun MessageBubble(
             }
         }
         if (item.reactions.isNotEmpty()) {
-            FlowRow(Modifier.padding(top = 4.dp, start = if (own) 0.dp else 40.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            // own messages' reactions end at the trailing edge, wrapped rows too
+            FlowRow(Modifier.padding(top = 4.dp, start = if (own) 0.dp else 40.dp), horizontalArrangement = Arrangement.spacedBy(4.dp, if (own) Alignment.End else Alignment.Start)) {
                 item.reactions.forEach { pill ->
                     Row(
                         Modifier.clip(RoundedCornerShape(12.dp)).background(colors.lightBackground)

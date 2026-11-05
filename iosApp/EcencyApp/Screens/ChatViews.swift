@@ -1054,7 +1054,8 @@ struct ChatMessageBubble: View {
 
     private func reactions(_ own: Bool) -> some View {
         // reactions wrap onto more lines instead of running off screen at large text
-        ChipFlow(spacing: 4) {
+        // own messages' reactions on the trailing side, under the bubble (tester report: they sat on the left)
+        ChipFlow(spacing: 4, trailing: own) {
             ForEach(item.reactions, id: \.emojiName) { pill in
                 ReactionPillView(pill: pill, id: "chat-reaction-\(item.rowId)-\(pill.emojiName)", onReact: onReact, onReactors: onReactors)
             }
