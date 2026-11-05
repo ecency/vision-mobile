@@ -255,7 +255,11 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 // the next start shows them
                 return@launch
             }
-            val pending = list(NOT_IMPORTED_NOTICE).filter { it !in here }
+            // a name on the device already needs no notice: dropped from the list too, so a later sign-out of that
+            // account never brings a wrong "not brought over" back
+            val listed = list(NOT_IMPORTED_NOTICE)
+            if (listed.any { it in here }) writeList(NOT_IMPORTED_NOTICE, listed.filterNot { it in here })
+            val pending = listed.filter { it !in here }
             pending.filter { name -> queue.none { it.kind == AccountNoticeKind.NOT_IMPORTED && it.account == name } }.forEach { name ->
                 queue += AccountNotice(
                     nextId++, AccountNoticeKind.NOT_IMPORTED, name, AccountNoticeCopy.notImportedTitle(name),

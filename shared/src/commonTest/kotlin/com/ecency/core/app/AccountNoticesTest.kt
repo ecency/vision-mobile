@@ -313,6 +313,18 @@ class AccountNoticesTest {
 
     // ---- (c) the error at first use ----
 
+    /** #3648 review: a name the import kept back that is on the device already is neither shown nor kept for later. */
+    @Test
+    fun aKeptBackNameAlreadyOnTheDeviceLeavesNothingBehind() = runTest {
+        val app = app()
+        KeyVault(app.store).run { save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "t")); setCurrentUsername(alice) }
+        start(app)
+        app.env.accountNotices.notImported(listOf(alice, "spike-gone"))
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("spike-gone"), listOfNotNull(app.env.accountNotices.current.notice?.account))
+        assertEquals("spike-gone", app.env.prefs.getString(AccountNoticesModel.NOT_IMPORTED_NOTICE), "a later sign-out of alice brings nothing back")
+    }
+
     @Test
     fun aKeyTheImportDroppedAsTheOwnerKeyIsToldOnce() = runTest {
         val app = app()
