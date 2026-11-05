@@ -302,6 +302,41 @@ class ChatFlowsTest {
         assertEquals(text.boundsInRoot.right, time.boundsInRoot.right, 2f)
     }
 
+    /** Tester report: with the keyboard up (3-button navigation bar) the composer row sits right on top of it. */
+    @Test
+    fun theComposerSitsRightOnTopOfTheKeyboard() {
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-dm-alice")
+        compose.onNodeWithTag("chatRow:ch-dm-alice").performClick()
+        waitFor("composer")
+        fun bottom(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInWindow.bottom
+        val window = compose.activity.window.decorView.height.toFloat()
+        val density = compose.density.density
+        val bar = (48 * density).toInt()
+        val keyboard = (300 * density).toInt()
+        fun insets(ime: Int) {
+            compose.runOnUiThread {
+                val b = androidx.core.view.WindowInsetsCompat.Builder()
+                    .setInsets(androidx.core.view.WindowInsetsCompat.Type.navigationBars(), androidx.core.graphics.Insets.of(0, 0, 0, bar))
+                    .setVisible(androidx.core.view.WindowInsetsCompat.Type.navigationBars(), true)
+                    // the IME inset is measured from the bottom of the window: it covers the navigation bar too
+                    .setInsets(androidx.core.view.WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.of(0, 0, 0, ime))
+                    .setVisible(androidx.core.view.WindowInsetsCompat.Type.ime(), ime > 0)
+                androidx.core.view.ViewCompat.dispatchApplyWindowInsets(compose.activity.window.decorView, b.build())
+            }
+            compose.waitForIdle()
+        }
+        val slack = 4 * density
+        // the send button is the row's tallest child: its bottom plus the row's 8 dp is the row's bottom
+        val pad = 8 * density
+        insets(0)
+        assertEquals("above the navigation bar", window - bar, bottom("send") + pad, slack)
+        insets(keyboard + bar)
+        assertEquals("right on top of the keyboard", window - keyboard - bar, bottom("send") + pad, slack)
+        assertEquals("the thread ends at the keyboard", window - keyboard - bar, bottom("chatThread"), slack)
+    }
+
     @Test
     fun aConversationReadOnScreenShowsReadInTheListOnReturn() {
         node.signIn()

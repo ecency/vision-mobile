@@ -50,10 +50,14 @@
         tools:ignore="UnusedTranslation">
         <!-- Portrait only, like the RN app and iOS. Other configuration changes still recreate the activity
              and keep the back stack (NavigationViewModel). A language change (the in-app picker sets the per-app
-             language, or the system settings do) does not: the Compose root switches copy and direction live. -->
+             language, or the system settings do) does not: the Compose root switches copy and direction live.
+             adjustResize (as RN's manifest): the edge to edge window gets the keyboard as an inset that the screens'
+             imePadding takes. Unspecified, Android pans the window up to the focused field as well, and a field at the
+             bottom (the chat composer) stood a keyboard's height above the keyboard. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="locale|layoutDirection"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
