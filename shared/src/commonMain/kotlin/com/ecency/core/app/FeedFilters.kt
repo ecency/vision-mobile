@@ -88,8 +88,14 @@ enum class NsfwMode(val value: String, private val labelText: () -> String) {
 
         fun of(prefs: Prefs): NsfwMode = entries.firstOrNull { it.value == prefs.getString(PREFS_KEY) } ?: WARN
 
-        /** RN filterNsfwPost's test. */
-        fun isNsfw(post: Post): Boolean = post.parentPermlink == "nsfw" || "nsfw" in post.metadata.tags
+        /**
+         * RN filterNsfwPost's test, with the tag read in any case and spacing as the website reads a wave's
+         * (`waves/_utils/wave-nsfw.ts`): `NSFW` or ` nsfw` mark a post as surely as `nsfw` (#3634).
+         */
+        fun isNsfw(post: Post): Boolean =
+            isNsfwTag(post.parentPermlink.orEmpty()) || post.metadata.tags.any(::isNsfwTag)
+
+        private fun isNsfwTag(tag: String) = tag.trim().equals("nsfw", ignoreCase = true)
 
         /** RN NSFW_IMAGE, shown in place of the card image when warning. */
         const val NSFW_IMAGE = "https://i.ecency.com/DQmZ1jW4p7o5GyoqWyCib1fSLE2ftbewsMCt2GvbmT9kmoY/nsfw_3x.png"

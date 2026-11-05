@@ -310,6 +310,21 @@ class GapsFlowsTest {
         waitFor("wavesScreen")
     }
 
+    /** #3634 (RN useCheckIn in the reading area): opening a post records the day's check-in once per window. */
+    @Test
+    fun openingAPostRecordsTheCheckInOnce() {
+        signIn()
+        wavesBackend("""{"daily":[],"streak":{"current":0}}""")
+        val navigator = Navigator(NavState().push(AppScreen.Post("alice", "trending-one")))
+        launch(navigator)
+        until { requests("/private-api/usr-activity").isNotEmpty() }
+        assertTrue("\"ty\":10" in requests("/private-api/usr-activity").single().body!!)
+        // a second post in the same window sends nothing more
+        compose.runOnIdle { navigator.push(AppScreen.Post("alice", "trending-two")) }
+        compose.waitForIdle()
+        assertEquals(1, requests("/private-api/usr-activity").size)
+    }
+
     @Test
     fun aNewAccountSeesGettingStartedAndBrowsingWavesRecordsTheCheckIn() {
         signIn()
@@ -384,6 +399,22 @@ class GapsFlowsTest {
     }
 
     // ---- notices about an account's keys ----
+
+    /** #3611: an RN account the import kept back is named with a Log in button that opens the login for it. */
+    @Test
+    fun anAccountTheImportKeptBackOffersToLogInAgain() {
+        node.signIn()
+        // named at an earlier start, not seen yet
+        env.prefs.putString(com.ecency.core.app.AccountNoticesModel.NOT_IMPORTED_NOTICE, "spike-gone")
+        launch()
+        waitFor("accountNotice:NOT_IMPORTED")
+        assertEquals("Log in again as @spike-gone", text("accountNoticeTitle"))
+        compose.onNodeWithTag("accountNoticeAction").performClick()
+        waitFor("login")
+        val typed = compose.onNodeWithTag("loginUser").fetchSemanticsNode().config.getOrNull(SemanticsProperties.EditableText)?.text
+        assertEquals("the login opens with that account's name", "spike-gone", typed)
+        assertNull("dismissed", env.prefs.getString(com.ecency.core.app.AccountNoticesModel.NOT_IMPORTED_NOTICE))
+    }
 
     @Test
     fun anAccountLeftWithoutASigningKeyIsToldOnceWithTheApp() {

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -174,6 +175,16 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Text("${TransferCopy.FROM}: ${com.ecency.core.l10n.Bidi.inUi("@" + s.from.orEmpty())}", color = colors.darkGray, fontSize = 13.sp)
             if (!s.recipientLocked) {
+                // RN's recipient row: the sender, an arrow, then each typed recipient's avatar (a mistyped name shows
+                // a stranger's face before anything is sent)
+                // scrolls sideways on a narrow window rather than clipping the last avatar
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp).testTag("transferAvatars")) {
+                    s.from?.let { Avatar(model.avatarUrl(it), 40.dp) }
+                    Glyph(com.ecency.core.app.AppIcon.ARROW_FORWARD, colors.darkGray, 18.dp, Modifier.padding(horizontal = 8.dp))
+                    s.recipientAvatars.forEachIndexed { i, name ->
+                        Avatar(model.avatarUrl(name), 40.dp, Modifier.padding(start = if (i == 0) 0.dp else 4.dp).testTag("transferAvatar:$name"))
+                    }
+                }
                 Field(TransferCopy.TO, s.recipient, model::setRecipient, "transferTo", enabled = !s.busy, placeholder = TransferCopy.TO_PLACEHOLDER, ltr = true)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = { favorites = true }, enabled = !s.busy, modifier = Modifier.testTag("transferFavorites")) { Text(WalletCopy.PICK_FAVORITE, color = colors.blueText, fontSize = 13.sp) }
@@ -227,8 +238,17 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
             }
             if (s.showMemo) {
                 Field(TransferCopy.MEMO, s.memo, model::setMemo, "transferMemo", enabled = !s.busy, placeholder = TransferCopy.MEMO_PLACEHOLDER)
+                // the memo last sent to this exchange: offered, never filled in by itself
+                val saved = s.savedExchangeMemo
+                val ex = s.exchange
+                if (saved != null && ex != null && !s.busy) {
+                    TextButton(onClick = model::useSavedMemo, modifier = Modifier.testTag("useSavedMemo")) {
+                        Text(TransferCopy.useSavedMemo(ex, saved), color = colors.blueText, fontSize = 13.sp)
+                    }
+                }
                 Text(TransferCopy.MEMO_DESC, color = colors.darkGray, fontSize = 12.sp)
             }
+            if (s.memoHasSecret) Warning(TransferCopy.MEMO_HAS_SECRET, "memoHasSecret")
             if (s.kind == com.ecency.core.app.TransferKind.CONVERT) Warning(TransferCopy.CONVERT_DESC, "convertDesc", red = false)
             s.exchange?.let { ex ->
                 if (s.exchangeMemoRequired) Warning(TransferCopy.exchangeMemoRequired(ex), "exchangeMemo")

@@ -469,6 +469,167 @@ class WalletModelsTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** Tester report: RN's sender and recipient avatars over the recipient field, on every transfer with one (Points too). */
+    @Test
+    fun theSenderAndEachTypedRecipientShowTheirAvatars() = runTest {
+        val w = world(this)
+        val points = transfer(w, AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))
+        assertEquals(emptyList(), points.current.recipientAvatars)
+        points.setRecipient("spike-bob, spike-carol, x!")
+        // valid account names only, in the order typed
+        assertEquals(listOf("spike-bob", "spike-carol"), points.current.recipientAvatars)
+        // the same name twice is one avatar, and at most five
+        points.setRecipient("spike-bob, spike-bob, spike-a1, spike-a2, spike-a3, spike-a4, spike-a5")
+        assertEquals(listOf("spike-bob", "spike-a1", "spike-a2", "spike-a3", "spike-a4"), points.current.recipientAvatars)
+        // a numeric size the image service reads (#3599)
+        // a numeric size the image service reads (#3599): 128 px, enough for the row's 40 pt at 3x
+        assertEquals("${w.env.proxyBase}/u/spike-bob/avatar/128", points.avatarUrl("spike-bob"))
+        assertTrue(points.avatarUrl(w.user).startsWith("https://"), "the sender's avatar too")
+        // a screen that sends to one account shows one avatar
+        val savings = transfer(w, AppScreen.Transfer("transfer_to_savings", "HIVE", "hive"))
+        savings.setRecipient("spike-bob spike-carol")
+        assertEquals(listOf("spike-bob"), savings.current.recipientAvatars)
+        // no recipient field, no recipient avatars
+        val convert = transfer(w, AppScreen.Transfer("convert", "HBD", "hive"))
+        assertTrue(convert.current.recipientLocked)
+        assertEquals(emptyList(), convert.current.recipientAvatars)
+    }
+
+    /**
+     * An exchange's deposit memo, once a transfer with it went through, is offered (never filled in by itself) the next
+     * time this account sends to the same exchange; per account, on the device, gone when the account leaves.
+     */
+    @Test
+    fun anExchangesMemoIsOfferedAfterASuccessfulTransfer() = runTest {
+        val w = world(this)
+        suspend fun send(to: String, memo: String) {
+            val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+            m.setRecipient(to)
+            m.setAmount("1")
+            testScheduler.advanceUntilIdle()
+            m.setMemo(memo)
+            m.next()
+            m.confirm()
+            testScheduler.advanceUntilIdle()
+        }
+        suspend fun form(to: String) = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive")).also {
+            it.setRecipient(to)
+            testScheduler.advanceUntilIdle()
+        }
+        // nothing saved yet
+        assertNull(form("bittrex").current.savedExchangeMemo)
+        send("bittrex", " 104857 ")
+        val next = form("bittrex")
+        assertEquals("104857", next.current.savedExchangeMemo, "offered, trimmed")
+        assertEquals("", next.current.memo, "never filled in by itself")
+        next.useSavedMemo()
+        assertEquals("104857", next.current.memo)
+        assertNull(next.current.savedExchangeMemo, "not offered once it is the memo")
+        // another exchange, and an ordinary account, are not offered it
+        assertNull(form("blocktrades").current.savedExchangeMemo)
+        assertNull(form("spike-bob").current.savedExchangeMemo)
+        // a later transfer with another memo replaces it
+        send("bittrex", "222333")
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a memo the secret guard refused is never kept (it is never sent either)
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-exchange-memo").toWif()
+        send("bittrex", wif)
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a `#` memo (meant to be encrypted) is never kept as plain text
+        send("bittrex", "#secret note")
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // several recipients: neither offered nor kept (the memo would go to all of them)
+        send("bittrex, spike-bob", "999")
+        assertNull(form("bittrex, spike-bob").current.savedExchangeMemo)
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a savings deposit is no exchange deposit: not offered there
+        val savings = transfer(w, AppScreen.Transfer("transfer_to_savings", "HIVE", "hive"))
+        savings.setRecipient("bittrex")
+        testScheduler.advanceUntilIdle()
+        assertNull(savings.current.savedExchangeMemo)
+        // a non-exchange transfer keeps nothing
+        send("spike-bob", "hello")
+        assertFalse("hello" in w.env.prefs.getString(ExchangeMemos.PREFS_KEY).orEmpty())
+        // the account leaves: its memos go with it
+        w.env.accountsLeft(listOf(w.user), forget = true) {}
+        assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
+    /** #3648 review: a transfer that succeeds after its screen closed still keeps its exchange memo. */
+    @Test
+    fun anExchangeMemoIsKeptWhenTheSendSucceedsAfterTheScreenClosed() = runTest {
+        val w = world(this)
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val answer = w.broadcastAnswer
+        w.broadcastAnswer = { gate.await(); answer(it) }
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("bittrex")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("104857")
+        m.next()
+        m.confirm()
+        testScheduler.runCurrent()
+        // the user leaves the screen while the broadcast is on its way
+        m.close()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals("104857", w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
+    /** #3648 review: a retryable failure the screen gave up on (released) leaves no success hook holding the memo. */
+    @Test
+    fun aReleasedFailedExchangeSendDropsItsMemoHook() = runTest {
+        val w = world(this)
+        w.broadcastAnswer = { throw IllegalStateException("Failed to connect to ${it.node} (Connection refused)") }
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("bittrex")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("104857")
+        m.next()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(assertIs<SendPhase.Failed>(m.current.phase).retryable)
+        assertEquals(0, w.env.walletSends.successHookCount, "the send is gone, so is its hook")
+        assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
+    /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */
+    @Test
+    fun aPrivateKeyOrMasterPasswordInAMemoBlocksTheSend() = runTest {
+        val w = world(this)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.nextEnabled)
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-memo-guard").toWif()
+        // glued to other base58 text too (review): a key pasted against a word still counts
+        for (memo in listOf(wif, "verify me $wif please", "P5" + "K".repeat(50), "key:$wif.", "verify$wif", "${wif}ok", "abc${wif}xyz", "my password: P5" + "K".repeat(50), "pwP5" + "K".repeat(50),
+            // split by copy noise (#3648 review): still readable on chain
+            wif.take(20) + " " + wif.drop(20), wif.take(10) + "\u200B" + wif.drop(10), wif.take(25) + "\n" + wif.drop(25),
+            // a password with invisible characters slipped in
+            "P5" + "K".repeat(20) + "\u200B" + "K".repeat(30))) {
+            m.setMemo(memo)
+            assertTrue(m.current.memoHasSecret, memo)
+            assertFalse(m.current.nextEnabled, memo)
+        }
+        // public keys, ordinary text and a WIF-shaped string that fails its checksum go through
+        val pub = com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString()
+        val broken = wif.dropLast(1) + (if (wif.last() == 'a') 'b' else 'a')
+        // nor a long run with P5 inside, as an encrypted memo can be
+        val encrypted = "#" + "Ab3".repeat(30) + "P5" + "K".repeat(50) + "Ab3".repeat(30)
+        for (memo in listOf("thanks for the coffee", pub, broken, "P5 is my favourite car", "", encrypted)) {
+            m.setMemo(memo)
+            assertFalse(m.current.memoHasSecret, memo)
+            assertTrue(m.current.nextEnabled, memo)
+        }
+        m.setMemo(wif)
+        m.next()
+        assertTrue(w.app.broadcasts().isEmpty(), "nothing is signed")
+    }
+
     @Test
     fun anExchangeNeedsAMemoAndABadActorIsWarnedAbout() = runTest {
         val w = world(this)

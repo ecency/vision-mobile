@@ -427,6 +427,8 @@ class ChatFlowsTest {
     fun askEsieOpensHerConversationMarkedOfficial() {
         node.signIn()
         launch(AppTab.FEED)
+        // the header is drawn after the first frames: on a slow runner it is not there yet (#3639)
+        waitFor("account")
         compose.onNodeWithTag("account").performClick()
         waitFor("drawer")
         compose.onNodeWithTag("menu:ask_esie").performScrollTo().performClick()

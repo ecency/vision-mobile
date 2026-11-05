@@ -370,12 +370,14 @@ data class ChatPostsPage(
     }
 }
 
-/** What `POST /api/mattermost/bootstrap` hands back: the chat token for the account and its Mattermost user. */
-class ChatBootstrap(val token: String, val user: ChatUser?) {
-    val userId: String? get() = user?.id
-
+/**
+ * What `POST /api/mattermost/bootstrap` hands back: the chat token for the account and its Mattermost user id (which
+ * decides the viewer's own messages: Edit, Remove). The live route sends the id alone (`userId`); [user] is there when
+ * an answer carries the user object.
+ */
+class ChatBootstrap(val token: String, val user: ChatUser?, val userId: String? = user?.id) {
     /** Never prints the token. */
-    override fun toString(): String = "ChatBootstrap(user=${user?.id})"
+    override fun toString(): String = "ChatBootstrap(userId=$userId)"
 }
 
 /** RN MattermostDmPrivacy. */

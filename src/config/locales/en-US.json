@@ -2464,6 +2464,8 @@
     },
     "transfer": {
       "one_recipient": "Only one recipient can be used for this transfer.",
+      "memo_has_secret": "This memo holds a private key or a master password. Memos are public on the blockchain: never put a key or password in one.",
+      "use_saved_memo": "Use the memo you sent to @{exchange} last time: {memo}",
       "is_an_exchange_and": "{exchange} is an exchange and may not support recurring transfers: funds sent on a schedule can be lost. Use a one-time transfer instead."
     },
     "dapps": {
@@ -2795,7 +2797,9 @@
       "cannot_transfer": "send transfers or change account settings",
       "missing_roles": "Your password no longer matches @{account}''s {missing} key: it was changed on the account since the password was set. Stored on this device: the {kept} key. Until you add the {missing} key under {manageKeys} (Import Private), this app cannot {cannot} with keys for @{account}.",
       "owner_key_not_kept_title": "Key not kept",
-      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys.",
+      "not_imported_title": "Log in again as @{account}",
+      "not_imported": "Ecency could not bring @{account} over from the previous version of the app: no key it can use was stored for it. Log in again to use @{account} here."
     },
     "dapp_browser": {
       "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",

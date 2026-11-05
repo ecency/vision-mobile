@@ -373,6 +373,8 @@ class NotificationFlowsTest {
         compose.onNodeWithTag("notificationChip:REPLIES").performClick()
         waitUntil { env.notifications.current.filter == NotificationFilter.ACTIVITIES }
         waitUntil { !chipOn(NotificationFilter.REPLIES) }
+        // the state changes before its read goes out: wait for that read rather than look at the last one (#3639)
+        waitUntil { node.calls("notifications").lastOrNull()?.let { node.field(it, "filter") } == null }
         assertNull(node.field(node.calls("notifications").last(), "filter"))
 
         // the menu keeps both: Mentions chosen there selects its chip

@@ -6,10 +6,20 @@ import com.ecency.core.l10n.L
 import kotlinx.coroutines.launch
 
 /** Why a notice is shown; the platform only needs it for test tags. */
-enum class AccountNoticeKind { NO_SIGNING_KEY, PASSWORD_MISSING_ROLES, KEY_SHARED_WITH_OWNER }
+enum class AccountNoticeKind { NO_SIGNING_KEY, PASSWORD_MISSING_ROLES, KEY_SHARED_WITH_OWNER, NOT_IMPORTED }
 
-/** One notice about an account's keys, shown as an alert with OK. It names its account; it holds no secret. */
-data class AccountNotice(val id: Long, val kind: AccountNoticeKind, val account: String, val title: String, val body: String)
+/**
+ * One notice about an account's keys, shown as an alert with OK. It names its account; it holds no secret. [action]
+ * labels a second button when there is one ([AccountNoticesModel.logIn] for [AccountNoticeKind.NOT_IMPORTED]).
+ */
+data class AccountNotice(
+    val id: Long,
+    val kind: AccountNoticeKind,
+    val account: String,
+    val title: String,
+    val body: String,
+    val action: String? = null,
+)
 
 data class AccountNoticesState(val notice: AccountNotice? = null, val queued: Int = 0)
 
@@ -41,6 +51,13 @@ object AccountNoticeCopy {
 
     /** A stored key of [account] was also its owner key on chain and was removed. */
     fun ownerKeyNotKept(account: String) = L.native.accountNotice.ownerKeyNotKept(account = account)
+
+    fun notImportedTitle(account: String) = L.native.accountNotice.notImportedTitle(account = account)
+
+    /** The RN import kept [account] back: no key it can use was stored for it (an owner key only, or none it could read). */
+    fun notImported(account: String) = L.native.accountNotice.notImported(account = account)
+
+    val LOG_IN: String get() = L.native.ui.reading.logIn
 }
 
 /**
@@ -50,7 +67,9 @@ object AccountNoticeCopy {
  *    it is shown once even when the app ends before the user saw it;
  *  - a master password sign-in that gave fewer than posting and active;
  *  - a stored key the chain shows on the owner authority, removed ([checkOwnerKeys], [ownerKeyFound]): remembered
- *    in the device preferences until it was dismissed, as the first kind.
+ *    in the device preferences until it was dismissed, as the first kind;
+ *  - an RN account the import kept back ([notImported]), with a "Log in" action ([logIn]): remembered until
+ *    dismissed, named once, dropped when the account is signed in here.
  * The UIs draw them only with the app unlocked. A wipe drops them all; a notice of an account that left the
  * device is dropped.
  */
@@ -69,6 +88,9 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                         writePending(emptyList())
                         writeList(OWNER_CHECK, emptyList())
                         writeList(OWNER_NOTICE, emptyList())
+                        writeList(NOT_IMPORTED_NOTICE, emptyList())
+                        // a wipe leaves no account names behind (the RN data that named them is gone with it)
+                        writeList(NOT_IMPORTED_TOLD, emptyList())
                         publish()
                     }
                     else -> {}
@@ -86,7 +108,10 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 // is on the device: no notice is dropped on it
                 if (session.accounts.isEmpty() && session.error?.kind == ErrorKind.STORAGE) return@collect
                 val here = session.accounts.map { it.username }.toSet()
-                var changed = queue.removeAll { it.account !in here }
+                // a kept back account is not on the device by definition; once it is (signed in), it needs no notice
+                var changed = queue.removeAll { if (it.kind == AccountNoticeKind.NOT_IMPORTED) it.account in here else it.account !in here }
+                val notImported = list(NOT_IMPORTED_NOTICE)
+                if (notImported.any { it in here }) writeList(NOT_IMPORTED_NOTICE, notImported.filterNot { it in here })
                 val owners = list(OWNER_NOTICE)
                 if (owners.any { it !in here }) writeList(OWNER_NOTICE, owners.filter { it in here })
                 // an account that can sign again, however it got there (a key, or a HiveSigner or HiveAuth sign-in
@@ -207,6 +232,45 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         publish()
     }
 
+    /**
+     * At app start: [names] are the accounts the RN import kept back this time (no key it can use was stored for
+     * them). Each is named once: remembered until dismissed, so a notice the user did not see comes back at the next
+     * start, and never named again after that ([NOT_IMPORTED_TOLD]). An account that is on the device by then is
+     * left out.
+     */
+    internal fun notImported(names: List<String>) {
+        scope.launch {
+            // remembered first: the import reports these names only once, so a failed read below must not lose them
+            val told = list(NOT_IMPORTED_TOLD)
+            val fresh = names.distinct().filter { it !in told }
+            if (fresh.isNotEmpty()) {
+                // the pending list first: a failed second write then names them again, never loses them
+                writeList(NOT_IMPORTED_NOTICE, (list(NOT_IMPORTED_NOTICE) + fresh).distinct())
+                writeList(NOT_IMPORTED_TOLD, (told + fresh).distinct())
+            }
+            val here = try {
+                env.accounts.accounts().map { it.username }.toSet()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the next start shows them
+                return@launch
+            }
+            // a name on the device already needs no notice: dropped from the list too, so a later sign-out of that
+            // account never brings a wrong "not brought over" back
+            val listed = list(NOT_IMPORTED_NOTICE)
+            if (listed.any { it in here }) writeList(NOT_IMPORTED_NOTICE, listed.filterNot { it in here })
+            val pending = listed.filter { it !in here }
+            pending.filter { name -> queue.none { it.kind == AccountNoticeKind.NOT_IMPORTED && it.account == name } }.forEach { name ->
+                queue += AccountNotice(
+                    nextId++, AccountNoticeKind.NOT_IMPORTED, name, AccountNoticeCopy.notImportedTitle(name),
+                    AccountNoticeCopy.notImported(name), action = AccountNoticeCopy.LOG_IN,
+                )
+            }
+            publish()
+        }
+    }
+
     /** After a key sign-in went through. */
     internal fun signedIn(outcome: KeyLoginOutcome) {
         val account = outcome.summary.username
@@ -228,6 +292,16 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         publish()
     }
 
+    /**
+     * "Log in" on a [AccountNoticeKind.NOT_IMPORTED] [notice]: dismissed, and the login screen is asked for its account.
+     * Takes the notice itself, not its id: an alert may close (and dismiss it) before its button's action runs.
+     */
+    fun logIn(notice: AccountNotice) {
+        if (notice.kind != AccountNoticeKind.NOT_IMPORTED) return
+        dismiss(notice.id)
+        env.session.requestLogin(notice.account)
+    }
+
     /** OK on the notice that is on screen. */
     fun dismiss() {
         current.notice?.let { dismiss(it.id) }
@@ -246,6 +320,9 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         if (shown.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER) {
             writeList(OWNER_NOTICE, list(OWNER_NOTICE) - shown.account)
         }
+        if (shown.kind == AccountNoticeKind.NOT_IMPORTED) {
+            writeList(NOT_IMPORTED_NOTICE, list(NOT_IMPORTED_NOTICE) - shown.account)
+        }
         publish()
     }
 
@@ -259,5 +336,11 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
 
         /** Accounts whose "key not kept" notice was not dismissed yet. */
         const val OWNER_NOTICE = "accounts.ownerKeyNotice"
+
+        /** Accounts the RN import kept back whose notice was not dismissed yet. */
+        const val NOT_IMPORTED_NOTICE = "accounts.notImportedNotice"
+
+        /** Accounts the RN import kept back that were named once: never named again. */
+        const val NOT_IMPORTED_TOLD = "accounts.notImportedTold"
     }
 }

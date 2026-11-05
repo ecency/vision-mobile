@@ -111,6 +111,19 @@ struct TransferFormView: View {
         Section {
             Text("\(tcopy.FROM): \(bidiValue("@" + (s.from ?? "")))").font(.footnote).foregroundStyle(theme.secondary)
             if !s.recipientLocked {
+                // RN's recipient row: the sender, an arrow, then each typed recipient's avatar (a mistyped name shows
+                // a stranger's face before anything is sent)
+                // scrolls sideways on a narrow window rather than clipping the last avatar
+                ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    if let from = s.from { AvatarView(url: model.avatarUrl(account: from), size: 40) }
+                    Image(appIcon: .arrowForward).foregroundStyle(theme.secondary).padding(.horizontal, 4).accessibilityHidden(true)
+                    ForEach(s.recipientAvatars, id: \.self) { name in
+                        AvatarView(url: model.avatarUrl(account: name), size: 40).accessibilityIdentifier("transfer-avatar-\(name)")
+                    }
+                }
+                }
+                .accessibilityIdentifier("transfer-avatars")
                 WalletField(label: tcopy.TO_PLACEHOLDER, text: binding(s.recipient) { model.setRecipient(text: $0) }, disabled: s.busy, id: "transfer-to")
                 HStack {
                     Button(copy.PICK_FAVORITE) { favorites = true }.font(.footnote).disabled(s.busy).accessibilityIdentifier("transfer-favorites")
@@ -173,10 +186,19 @@ struct TransferFormView: View {
     @ViewBuilder private func memoSection(_ s: TransferState) -> some View {
         Section(footer: Text(tcopy.MEMO_DESC)) {
             WalletField(label: tcopy.MEMO_PLACEHOLDER, text: binding(s.memo) { model.setMemo(text: $0) }, disabled: s.busy, machine: false, id: "transfer-memo")
+            // the memo last sent to this exchange: offered, never filled in by itself
+            if let saved = s.savedExchangeMemo, let ex = s.exchange, !s.busy {
+                Button(tcopy.useSavedMemo(exchange: ex, memo: saved)) { model.useSavedMemo() }
+                    .font(.footnote).accessibilityIdentifier("use-saved-memo")
+            }
         }
     }
 
     @ViewBuilder private func notes(_ s: TransferState) -> some View {
+        if s.memoHasSecret {
+            Text(tcopy.MEMO_HAS_SECRET).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.MEMO_HAS_SECRET, debounce: true).accessibilityIdentifier("memo-has-secret")
+        }
         if s.kind == TransferKind.convert { Text(tcopy.CONVERT_DESC).font(.footnote).foregroundStyle(theme.secondary) }
         if let ex = s.exchange {
             if s.exchangeMemoRequired { Text(tcopy.exchangeMemoRequired(exchange: ex)).font(.footnote).foregroundStyle(theme.dangerText).announces(tcopy.exchangeMemoRequired(exchange: ex), debounce: true).accessibilityIdentifier("exchange-memo") }

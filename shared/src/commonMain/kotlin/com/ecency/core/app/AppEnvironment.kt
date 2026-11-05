@@ -394,6 +394,9 @@ class AppEnvironment(
     /** RN useCheckIn: the daily check-in, at most once per 15 minutes and account. One per app. */
     val checkIn: CheckInRecorder by lazy { CheckInRecorder(this) }
 
+    /** The last deposit memo per account and exchange, offered on the transfer screen ([ExchangeMemos]). */
+    val exchangeMemos: ExchangeMemos by lazy { ExchangeMemos(this) }
+
     // ---- points and perks (Perks.kt, SpinGame.kt, PointActivities.kt) ----
 
     /** Quests, the spin game, the streak freeze and points activities on Ecency's private API. */
@@ -581,6 +584,8 @@ class AppEnvironment(
         guardedStep { dictationRecorder?.let { DictationClips.purgeLeft(it, drafts) } }
         // the restart journal names the account: it leaves with it (a wipe clears the store, this the memory)
         guardedStep { sendJournal.forget(drafts) }
+        // the exchange deposit memos it sent go with it
+        guardedStep { exchangeMemos.forget(drafts) }
         // nothing signs again for an account that left (a pending holds its key in memory)
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { walletSends.accountsLeft(drafts) } }
         // nor does a broadcast retry the broadcaster keeps after a network error (it holds the key too)

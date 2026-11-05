@@ -106,6 +106,20 @@ class EcencyTokenApi(
 fun interface EcencyCodeProvider {
     @Throws(Exception::class)
     suspend fun code(username: String): String?
+
+    /**
+     * Which session of [username] a call is about to go out with, taken before it is sent: [renewAfterRejection] is
+     * given it back, so a session that left while the call was on its way is never renewed for it. Null: no such mark.
+     */
+    fun sessionMark(username: String): Any? = null
+
+    /**
+     * A private call sent under [mark] ([sessionMark]) was refused (401) with [rejected]: a renewed code to send it
+     * once more with, or null when the session cannot be renewed or is no longer the one it went out with. The
+     * default renews nothing.
+     */
+    @Throws(Exception::class)
+    suspend fun renewAfterRejection(username: String, rejected: String, mark: Any?): String? = null
 }
 
 /**
@@ -133,16 +147,37 @@ class EcencyPrivateApi(
      * so a slow generation is an answer and not "no answer". Everything else keeps [TIMEOUT_MILLIS].
      */
     @Throws(Exception::class)
-    suspend fun post(path: String, username: String, fields: JsonObject, timeoutMillis: Long): HttpResult {
-        val code = codes.code(username) ?: throw AuthException.NotSignedIn()
-        return withTimeoutOrNull(timeoutMillis) {
+    suspend fun post(path: String, username: String, fields: JsonObject, timeoutMillis: Long): HttpResult = renewing(username) { code ->
+        withTimeoutOrNull(timeoutMillis) {
             http.send(request(path, code, fields).let { if (timeoutMillis == TIMEOUT_MILLIS) it else it.copy(timeoutMillis = timeoutMillis) })
         } ?: throw EcencyTimeoutException()
     }
 
     /**
+     * Sends with [username]'s code; a 401 asks [EcencyCodeProvider.renewAfterRejection] for a new one and sends
+     * once more with it (a 401 is refused before anything is done, so the resend is safe). A second 401, or no new
+     * code, goes back to the caller as it came. Never a loop.
+     */
+    private suspend fun renewing(username: String, send: suspend (String) -> HttpResult): HttpResult {
+        // the session the call goes out with, taken before it is sent: a sign-out and in while it is on its way voids it
+        val mark = codes.sessionMark(username)
+        val code = codes.code(username) ?: throw AuthException.NotSignedIn()
+        val first = send(code)
+        if (first.status != 401) return first
+        val fresh = try {
+            codes.renewAfterRejection(username, code, mark)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+        if (fresh.isNullOrEmpty() || fresh == code) return first
+        return send(fresh)
+    }
+
+    /**
      * `POST {host}/private-api/<path>` as a multipart form (the SDK's FormData): [fields], the account's `code`,
-     * and one file part. Bounded by [timeoutMillis]; like [post] it is sent once.
+     * and one file part. Bounded by [timeoutMillis]; like [post] it is sent once, and once more only after a 401 that renewed the session.
      */
     @Throws(Exception::class)
     suspend fun postMultipart(
@@ -155,10 +190,9 @@ class EcencyPrivateApi(
         file: ByteArray,
         boundary: String,
         timeoutMillis: Long = UPLOAD_TIMEOUT_MILLIS,
-    ): HttpResult {
-        val code = codes.code(username) ?: throw AuthException.NotSignedIn()
+    ): HttpResult = renewing(username) { code ->
         val body = Multipart.encode(mapOf("code" to code) + fields, fileField, fileName, fileType, file, boundary)
-        return withTimeoutOrNull(timeoutMillis) {
+        withTimeoutOrNull(timeoutMillis) {
             http.send(
                 AuthHttpRequest(
                     "POST", "$host/private-api/${path.trimStart('/')}", emptyMap(), null,
@@ -171,20 +205,19 @@ class EcencyPrivateApi(
     /**
      * Ecency's relays next to the private API (`{host}/api/<path>`, the newsletter relay): as the SDK calls them,
      * a POST carries the account's `code` in its JSON body, a GET or DELETE in the `X-HS-Token` header. Bounded
-     * like [post] ([TIMEOUT_MILLIS]) and sent once.
+     * like [post] ([TIMEOUT_MILLIS]) and sent once, and once more only after a 401 that renewed the session.
      *
      * @throws AuthException.NotSignedIn when [username] has no session.
      */
     @Throws(Exception::class)
-    suspend fun relay(method: String, path: String, username: String, fields: JsonObject? = null): HttpResult {
-        val code = codes.code(username) ?: throw AuthException.NotSignedIn()
+    suspend fun relay(method: String, path: String, username: String, fields: JsonObject? = null): HttpResult = renewing(username) { code ->
         val url = "$host/api/${path.trimStart('/')}"
         val request = if (method == "POST") {
             AuthHttpRequest("POST", url, mapOf("Content-Type" to "application/json"), JsonObject(fields.orEmpty() + ("code" to JsonPrimitive(code))).toString())
         } else {
             AuthHttpRequest(method, url, mapOf("X-HS-Token" to code), null)
         }
-        return withTimeoutOrNull(TIMEOUT_MILLIS) { http.send(request) } ?: throw EcencyTimeoutException()
+        withTimeoutOrNull(TIMEOUT_MILLIS) { http.send(request) } ?: throw EcencyTimeoutException()
     }
 
     /** The request [post] sends, for callers with their own transport. */

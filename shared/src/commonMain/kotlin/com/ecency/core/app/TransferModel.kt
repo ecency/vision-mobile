@@ -140,6 +140,10 @@ object TransferCopy {
 
     fun exchangeMemoRequired(exchange: String) = L.transfer.exchangeMemoRequired(exchange = exchange)
 
+    val MEMO_HAS_SECRET: String get() = L.native.transfer.memoHasSecret
+
+    fun useSavedMemo(exchange: String, memo: String) = L.native.transfer.useSavedMemo(exchange = exchange, memo = memo)
+
     fun exchangeRecurrentWarning(exchange: String) =
         L.native.transfer.isAnExchangeAnd(exchange = exchange)
 
@@ -188,6 +192,8 @@ data class TransferState(
     val precisionFailed: Boolean = false,
     val badActor: Boolean = false,
     val exchange: String? = null,
+    /** The memo this account last sent to [exchange] ([ExchangeMemos]), while the memo field does not hold it. */
+    val savedExchangeMemo: String? = null,
     val prompt: TransferPrompt? = null,
     /** The confirmed action's send, once confirmed. */
     val actionId: String? = null,
@@ -199,6 +205,18 @@ data class TransferState(
 
     val recipients: List<String> get() = WalletOps.recipients(recipient)
 
+    /**
+     * RN transferScreen's recipient row: an avatar for each typed recipient that is an account name, after the
+     * sender's ([TransferModel.avatarUrl]), so a mistyped name shows a stranger's face before anything is sent.
+     */
+    val recipientAvatars: List<String>
+        get() {
+            if (recipientLocked) return emptyList()
+            val names = recipients.filter { com.ecency.core.render.blocks.isHiveAccountName(it) }.distinct()
+            // a screen that sends to one account shows one, however the text splits
+            return names.take(if (allowsMultiple) MAX_AVATARS else 1)
+        }
+
     val allowsMultiple: Boolean get() = !isRecurrent && (kind == TransferKind.TRANSFER || kind == TransferKind.POINTS || kind == TransferKind.ENGINE_TRANSFER)
 
     /** Several names typed where one account is sent to (a savings deposit, a recurrent transfer, a delegation of tokens). */
@@ -208,13 +226,19 @@ data class TransferState(
 
     val maxDecimals: Int get() = if (kind.isEngine) tokenPrecision ?: 8 else Amounts.precision(fund)
 
-    private val isNativeFund: Boolean get() = fund == "HIVE" || fund == "HBD"
+    internal val isNativeFund: Boolean get() = fund == "HIVE" || fund == "HBD"
+
+    /** A deposit memo is kept and offered ([ExchangeMemos]) only for a plain HIVE or HBD transfer to one exchange. */
+    internal val offersExchangeMemo: Boolean get() = kind == TransferKind.TRANSFER && isNativeFund && recipients.size == 1
 
     /** RN exchangeMemoRequired: blocks NEXT. */
     val exchangeMemoRequired: Boolean get() = exchange != null && isNativeFund && memo.isBlank()
 
     /** RN exchangeRecurrentWarning. */
     val exchangeRecurrentWarning: Boolean get() = isRecurrent && isNativeFund && exchange != null
+
+    /** The memo holds a private key or a master password ([MemoSecrets]): a memo is public, so this blocks NEXT (#3633). */
+    val memoHasSecret: Boolean get() = MemoSecrets.contains(memo)
 
     val busy: Boolean get() = phase is SendPhase.Sending || phase is SendPhase.Checking
 
@@ -227,6 +251,7 @@ data class TransferState(
             if (!amountOk || !recipientValid || balance == null || tooManyRecipients) return false
             if (kind.isEngine && tokenPrecision == null && amount.contains('.') && amount.substringAfter('.').trimEnd('0').isNotEmpty()) return false
             if (exchangeMemoRequired) return false
+            if (memoHasSecret) return false
             if (isRecurrent) {
                 val n = executions.toIntOrNull()
                 if (n == null || n < MIN_EXECUTIONS || executions.trim() != n.toString()) return false
@@ -236,6 +261,9 @@ data class TransferState(
 
     companion object {
         const val MIN_EXECUTIONS = 2
+
+        /** Recipient avatars shown at most (RN draws every one; a long list would push the form down). */
+        const val MAX_AVATARS = 5
     }
 }
 
@@ -365,6 +393,15 @@ class TransferModel internal constructor(
         setState { it.copy(memo = text).withWarnings() }
     }
 
+    /** The avatar picture of [account] for the recipient row (RN UserAvatar). */
+    fun avatarUrl(account: String): String = PostCard.avatarUrl(account, env.proxyBase, "small")
+
+    /** "Use saved memo": the memo this account last sent to the exchange ([TransferState.savedExchangeMemo]). */
+    fun useSavedMemo() {
+        val saved = current.savedExchangeMemo ?: return
+        setMemo(saved)
+    }
+
     /** The HIVE/HBD switch of a plain transfer. */
     fun setFund(symbol: String) {
         if (symbol !in current.tokenChoices || symbol == current.fund || current.busy) return
@@ -424,6 +461,14 @@ class TransferModel internal constructor(
         }
         val json = WalletOps.ops(ops)
         val actionId = env.idempotencyKey()
+        // the memo that was confirmed, kept once this send went through, even after the screen closed (the send goes on
+        // without it); not for an account that left the device meanwhile
+        s.exchange?.takeIf { s.offersExchangeMemo && s.memo.isNotBlank() }?.let { exchange ->
+            val memo = s.memo
+            env.walletSends.afterSuccess(actionId) {
+                if (env.session.current.accounts.any { it.username == user }) env.exchangeMemos.save(user, exchange, memo)
+            }
+        }
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
         env.walletSends.send(user, json, OperationAuthority.required(json), actionId)
         owned.owns(actionId)
@@ -432,6 +477,8 @@ class TransferModel internal constructor(
     /** RN "Delete Recurrent Transfer": asks first. */
     fun deleteSchedule() {
         if (current.existingScheduleDate == null || current.busy) return
+        // the deletion sends the memo as it stands (RN): one holding a secret is refused like Next, and said why
+        if (current.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         setState { it.copy(prompt = TransferPrompt.ConfirmDeleteSchedule) }
     }
 
@@ -439,6 +486,8 @@ class TransferModel internal constructor(
     fun confirmDeleteSchedule() {
         val s = current
         if (s.prompt != TransferPrompt.ConfirmDeleteSchedule) return
+        // the memo may have been edited while the question was open
+        if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
@@ -485,6 +534,8 @@ class TransferModel internal constructor(
 
     /** The screen closed: a send in flight keeps running in the app (its outcome is toasted by [WalletSends]). */
     override fun close() {
+        // the last memo looked at (maybe a key the user typed) does not outlive the screen
+        MemoSecrets.forget()
         // a send still running goes on without this screen and reports its outcome itself (WalletSends.orphanDone)
         owned.closeAll()
         super.close()
@@ -594,7 +645,10 @@ class TransferModel internal constructor(
 
     private fun TransferState.withWarnings(): TransferState {
         val names = recipients
-        return copy(badActor = names.any { it in badActors }, exchange = names.firstOrNull(ExchangeAccounts::isExchange))
+        val ex = names.firstOrNull(ExchangeAccounts::isExchange)
+        // offered only where the exchange needs a memo (native funds), and only while the field does not hold it
+        val saved = if (ex != null && offersExchangeMemo) from?.let { env.exchangeMemos.get(it, ex) } else null
+        return copy(badActor = names.any { it in badActors }, exchange = ex, savedExchangeMemo = saved?.takeIf { it != memo.trim() })
     }
 
     /** RN: picking a recipient with an existing schedule fills memo, amount, recurrence, executions and its date. */
@@ -657,4 +711,50 @@ object TransferRecipientParser {
         // 4. a bare name
         return normalize(raw).takeIf { NAME.matches(it) } ?: ""
     }
+}
+
+/**
+ * Secrets that must never go into a memo, which is public on chain (the "send 0.001 with your key in the memo to
+ * verify" scam): a private key (a WIF whose checksum holds, so ordinary text never matches) or a Hive master password
+ * (`P5` and 50 base58 characters). Public keys pass. A key glued to other text counts too: every 51 character stretch
+ * of a base58 run that starts with `5` is checked (the checksum keeps chance matches out). A password has no checksum,
+ * so it counts only as a whole run or at either end of one (glued to a word on one side): a long run such as an
+ * encrypted memo, with `P5` somewhere inside, is not taken for one. A key split by copy noise (spaces, line breaks,
+ * invisible characters) counts as well.
+ */
+object MemoSecrets {
+    private val WORD = Regex("[1-9A-HJ-NP-Za-km-z]+")
+    private const val WIF_LENGTH = 51
+    private const val PASSWORD_LENGTH = 52
+
+    // the last memo looked at and its answer, as one value (never a new memo with an old answer): the forms ask on
+    // every redraw while the memo stays the same. Dropped when the transfer screen closes ([forget]).
+    private var last: Pair<String, Boolean>? = null
+
+    fun contains(memo: String): Boolean {
+        last?.let { (m, answer) -> if (m == memo) return answer }
+        return scan(memo).also { last = memo to it }
+    }
+
+    /** Forgets the last memo looked at (it may be a key the user typed). */
+    fun forget() {
+        last = null
+    }
+
+    private fun scan(memo: String): Boolean =
+        WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) } ||
+            // a key split by spaces, line breaks or invisible characters is still readable on chain: the copy noise
+            // key input ignores (KeyInput.isNoise) is taken out and the keys looked for again
+            WORD.findAll(memo.filterNot(com.ecency.core.auth.KeyInput::isNoise)).any { hasKey(it.value) } ||
+            // a password has no checksum, so only invisible characters are taken out for it (never in plain text;
+            // joining across spaces would take ordinary words that start with P5 for a password)
+            WORD.findAll(memo.filterNot { com.ecency.core.auth.KeyInput.isNoise(it) && !it.isWhitespace() }).any { hasPassword(it.value) }
+
+    private fun hasKey(run: String): Boolean =
+        (0..run.length - WIF_LENGTH).any { i ->
+            run[i] == '5' && runCatching { com.ecency.core.hive.PrivateKey.fromWif(run.substring(i, i + WIF_LENGTH)) }.isSuccess
+        }
+
+    private fun hasPassword(run: String): Boolean =
+        run.length >= PASSWORD_LENGTH && (run.startsWith("P5") || run.substring(run.length - PASSWORD_LENGTH).startsWith("P5"))
 }

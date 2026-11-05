@@ -183,6 +183,26 @@ class FeedxTest {
         assertEquals(PostMenuEffect.Login, app.env.postActions.select(PostMenuItem.REBLOG, post(entry("alice", "one"))))
     }
 
+    /** Tester report: an own reply or wave can be edited (RN's comment footer "Edit comment"); others' cannot. */
+    @Test
+    fun anOwnReplyOrWaveOffersEditWhichOpensItInTheEditor() = runTest {
+        val app = TestApp(this, handler = reads())
+        signedIn(app)
+        val mine = post(entry(TestApp.USER, "my-reply", parent = "alice" to "one", netRshares = 5, children = 2))
+        val items = app.env.postActions.menu(mine, PostMenuContext())
+        // editing is allowed however many votes or replies it has (deleting is not)
+        assertTrue(PostMenuItem.EDIT in items)
+        assertFalse(PostMenuItem.DELETE in items)
+        assertEquals(
+            PostMenuEffect.Open(AppScreen.Editor(EditorArgs(EditorKind.EDIT_POST, TestApp.USER, "my-reply"))),
+            app.env.postActions.select(PostMenuItem.EDIT, mine),
+        )
+        assertEquals(UiCopy.EDIT.uppercase(), PostMenuItem.EDIT.title)
+        // someone else's reply, and an own top post (its screen has its own Edit button), offer none
+        assertFalse(PostMenuItem.EDIT in app.env.postActions.menu(post(entry("bob", "theirs", parent = "alice" to "one")), PostMenuContext()))
+        assertFalse(PostMenuItem.EDIT in app.env.postActions.menu(post(entry(TestApp.USER, "top")), PostMenuContext()))
+    }
+
     @Test
     fun ownPostOffersPinAndDeleteOnlyWhenTheChainAllows() = runTest {
         val app = TestApp(this, handler = reads(reblogged = listOf(TestApp.USER)))

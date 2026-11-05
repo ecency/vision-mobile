@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -281,6 +282,50 @@ class WalletFlowsTest {
         val interest = com.ecency.core.api.wallet.WalletHistory.mask(listOf("interest")).first!!
         assertTrue(masks.last(), masks.last()!!.contains(interest))
         until { compose.onNodeWithTag("tab:history:INTEREST", useUnmergedTree = true).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Selected) == true }
+    }
+
+    /** Tester report: a Points transfer shows the sender's and the recipient's avatars, as RN did. */
+    @Test
+    fun aPointsTransferShowsTheRecipientsAvatar() {
+        launch(Navigator(NavState().push(AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))))
+        until { exists("transferForm") && exists("transferAvatars") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        until { exists("transferAvatar:spike-bob") }
+    }
+
+    /** The memo last sent to an exchange is offered under the memo field, and filled in only on a tap. */
+    @Test
+    fun theMemoLastSentToAnExchangeIsOfferedAndFilledOnATap() {
+        val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))
+        launch(navigator)
+        until { exists("transferForm") && text("transferBalance").contains("12.345") }
+        env.exchangeMemos.save(env.session.current.username!!, "bittrex", "104857")
+        compose.onNodeWithTag("transferTo").performTextInput("bittrex")
+        until { exists("useSavedMemo") }
+        val typed = { compose.onNodeWithTag("transferMemo").fetchSemanticsNode().config.getOrNull(SemanticsProperties.EditableText)?.text.orEmpty() }
+        assertEquals("never filled in by itself", "", typed())
+        compose.onNodeWithTag("useSavedMemo").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        try { until { typed() == "104857" && !exists("useSavedMemo") } } catch (e: AssertionError) {
+            throw AssertionError("typed=${typed()} state=${navigator.top.peek<com.ecency.core.app.TransferModel>("transfer")?.current}")
+        }
+    }
+
+    /** #3633: a key in the memo shows the warning and keeps Next off; an ordinary memo clears both. */
+    @Test
+    fun aKeyInTheMemoShowsTheWarningAndKeepsNextOff() {
+        fun nextEnabled() = compose.onAllNodes(hasTestTag("transferNext")).fetchSemanticsNodes().firstOrNull()?.config?.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled) == false
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))))
+        until { exists("transferForm") && text("transferBalance").contains("12.345") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        compose.onNodeWithTag("transferAmount").performTextInput("1.5")
+        until { nextEnabled() }
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-memo-ui").toWif()
+        compose.onNodeWithTag("transferMemo").performTextInput("verify $wif")
+        until { exists("memoHasSecret") }
+        assertFalse("Next stays off", nextEnabled())
+        compose.onNodeWithTag("transferMemo").performTextReplacement("thanks")
+        until { !exists("memoHasSecret") && nextEnabled() }
+        assertTrue(node.broadcasts().isEmpty())
     }
 
     @Test

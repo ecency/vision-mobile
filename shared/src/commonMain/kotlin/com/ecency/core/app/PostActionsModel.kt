@@ -33,6 +33,8 @@ enum class PostMenuItem(val id: String) {
     UNPIN_REPLY("unpin-reply"),
     MUTE_POST("mute-post"),
     UNMUTE_POST("unmute-post"),
+    /** Not in RN's menu (RN drew an Edit button in each own comment's footer, `post.a11y_edit`), so here it is this entry. */
+    EDIT("edit"),
     EDIT_HISTORY("edit-history"),
     SHARE("share"),
     BOOKMARKS("bookmarks"),
@@ -41,8 +43,8 @@ enum class PostMenuItem(val id: String) {
     DELETE("delete-post"),
     ;
 
-    /** RN `post_dropdown.<id>` in the current language (every id has its key, recorded in `rn-reuse.json`). */
-    val label: String get() = L10n.byKey("post_dropdown.$id") ?: id
+    /** RN `post_dropdown.<id>` in the current language (recorded in `rn-reuse.json`); Edit, native only, reads `UiCopy.EDIT`. */
+    val label: String get() = if (this == EDIT) UiCopy.EDIT else L10n.byKey("post_dropdown.$id") ?: id
 
     /** RN draws every label upper-cased. */
     val title: String get() = label.uppercase()
@@ -183,6 +185,8 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 PostMenuItem.OPEN_THREAD -> isComment && context.openThread
                 PostMenuItem.TRANSLATE -> context.translate
                 PostMenuItem.DELETE -> canDelete
+                // an own reply or wave (a top post has the Edit button of its screen); the chain takes edits at any time
+                PostMenuItem.EDIT -> isComment && user != null && user == post.author && !crossPost
                 PostMenuItem.CROSS_POST -> community != null
                 else -> true
             }
@@ -217,6 +221,9 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
             PostMenuItem.PROMOTE -> if (user == null) PostMenuEffect.None
             else PostMenuEffect.Open(AppScreen.of(RouteName.REDEEM, "${post.author}/${post.permlink}"))
             PostMenuItem.EDIT_HISTORY -> PostMenuEffect.Open(AppScreen.EditHistory(post.author, post.permlink))
+            // the editor turns an edit of a reply into a reply edit itself (EditorKind.EDIT_REPLY)
+            PostMenuItem.EDIT -> if (user == null || user != post.author) PostMenuEffect.None
+            else PostMenuEffect.Open(AppScreen.Editor(EditorArgs(EditorKind.EDIT_POST, post.author, post.permlink)))
             PostMenuItem.CROSS_POST -> if (user == null) PostMenuEffect.Login else PostMenuEffect.CrossPost(post)
             PostMenuItem.TRANSLATE -> PostMenuEffect.Translate(post)
             PostMenuItem.DELETE -> if (user == null) PostMenuEffect.Login else PostMenuEffect.Confirm(item, post, REMOVE_ALERT, null, L.alert.delete, user)

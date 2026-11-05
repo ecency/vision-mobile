@@ -107,7 +107,8 @@ class EcencyRestApi(
             val a = r.string("author") ?: continue
             val p = r.string("permlink") ?: continue
             val entryTags = r.list("tags").mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
-            if (p == permlink || "nsfw" in entryTags || !seen.add(a)) continue
+            // the nsfw tag in any case and spacing, as the feeds read it (NsfwMode.isNsfw)
+            if (p == permlink || entryTags.any { it.trim().equals("nsfw", ignoreCase = true) } || !seen.add(a)) continue
             out += SimilarEntry(a, p, r.string("title") ?: "", r.string("img_url"), r.string("created_at") ?: "")
         }
         return out

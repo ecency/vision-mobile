@@ -208,6 +208,8 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
                 env.accountNotices.checkOwnerKeys(report?.imported.orEmpty())
                 // a key the import did not keep because RN stored the same key as the owner key: told too
                 env.accountNotices.ownerKeysDropped(report?.ownerKeyDropped.orEmpty())
+                // an RN account the import could not take is named once, with a way to log in again (#3611)
+                env.accountNotices.notImported(report?.skipped.orEmpty())
                 val snap = io { snapshot() }
                 knownFailures = snap.failures
                 setState {

@@ -204,7 +204,8 @@ class DemoChat(private val nowMillis: () -> Long) {
         val parts = bare.split('/')
         if (bare == "bootstrap") {
             viewer = body(request)["username"].text() ?: viewer
-            return ok(buildJsonObject { put("token", "demo-chat-token"); put("user", userJson("VIEWER")) })
+            // the live route's shape (vision-web `api/mattermost/bootstrap`): the viewer as a bare `userId`, no user object
+            return ok(buildJsonObject { put("ok", true); put("userId", userId("VIEWER")); put("channelId", "ch-public"); put("token", "demo-chat-token") })
         }
         if (request.headers["X-MM-Token"].isNullOrEmpty()) return HttpResult(401, """{"error":"unauthorized"}""")
         return when {

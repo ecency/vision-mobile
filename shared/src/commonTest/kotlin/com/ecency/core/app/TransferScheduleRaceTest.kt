@@ -41,6 +41,28 @@ class TransferScheduleRaceTest {
         assertEquals("2026-10-07T00:00:00", m.current.existingScheduleDate)
     }
 
+    /** #3648 review: deleting a schedule sends the memo as it stands, so a secret typed into it blocks the deletion too. */
+    @Test
+    fun aScheduleIsNotDeletedWithASecretInItsMemo() = runTest {
+        val (w, m, gate) = heldSchedule()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-schedule-memo").toWif()
+        m.setMemo("verify $wif")
+        m.deleteSchedule()
+        assertEquals(TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET), m.current.prompt, "not asked: told why")
+        m.dismissPrompt()
+        // typed after the question was asked
+        m.setMemo("bob memo")
+        m.deleteSchedule()
+        assertEquals(TransferPrompt.ConfirmDeleteSchedule, m.current.prompt)
+        m.setMemo(wif)
+        m.confirmDeleteSchedule()
+        testScheduler.advanceUntilIdle()
+        assertNull(m.current.actionId, "nothing is signed")
+        assertTrue(w.app.broadcasts().isEmpty())
+    }
+
     @Test
     fun aRecipientChangedDuringTheReadGetsNoneOfTheOldOnesSchedule() = runTest {
         val (_, m, gate) = heldSchedule()
