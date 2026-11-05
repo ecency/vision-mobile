@@ -116,6 +116,38 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(amount.exists, "cancel keeps the transfer form")
     }
 
+    /// Tester report "unable to send Points gifts on comments": the gift under a comment tips that comment's author in
+    /// POINTS, through the same signing as a transfer (a posting-key login is asked for the active key).
+    func testAPointsTipOnACommentReachesSigning() {
+        let app = launch(["-homeFilter", "trending"])
+        let card = app.buttons.matching(identifier: "post-card").firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 30))
+        card.tap()
+        XCTAssertTrue(app.staticTexts["post-title"].waitForExistence(timeout: 15))
+        let comment = app.staticTexts["First fixture comment."]
+        for _ in 0..<12 where !(comment.exists && comment.isHittable) { app.swipeUp() }
+        XCTAssertTrue(comment.isHittable, app.debugDescription)
+        let tips = app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter { $0.isHittable && $0.frame.minY > comment.frame.maxY }
+        let tip = try! XCTUnwrap(tips.min { $0.frame.minY < $1.frame.minY }, app.debugDescription)
+        tip.tap()
+        XCTAssertTrue(app.staticTexts["Support @spike-bob"].waitForExistence(timeout: 15), app.debugDescription)
+        let points = app.buttons["tip-currency-POINTS"]
+        XCTAssertTrue(points.waitForExistence(timeout: 10))
+        points.tap()
+        expectation(for: NSPredicate(format: "isSelected == true"), evaluatedWith: points)
+        waitForExpectations(timeout: 10)
+        app.textFields["tip-amount"].focusAndType("1")
+        let send = app.buttons["tip-send"]
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: send)
+        waitForExpectations(timeout: 10)
+        send.tap()
+        let confirm = app.alerts.firstMatch.buttons["tip-confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(app.alerts.firstMatch.staticTexts["Send 1 POINTS to @spike-bob?"].exists, app.debugDescription)
+        confirm.tap()
+        XCTAssertTrue(app.secureTextFields["upgrade-key"].waitForExistence(timeout: 15), "the active key is asked: \(app.debugDescription)")
+    }
+
     func testOtherWalletScreensOpen() {
         let cases: [(String, String, String)] = [
             ("wallet:transfer,delegate_vesting_shares,HP,hive,spike-bob", "delegate-hp", "delegate"),
