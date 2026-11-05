@@ -121,6 +121,8 @@ object SafeTarget {
     private val VIMM_PLAYER = Regex("^/[^/]+(/embed)?/?$")
     private val BRAND_NEW_TUBE_PLAYER = Regex("^/embed/[A-Za-z0-9]+$")
     private val AUREAL_PLAYER = Regex("^/[0-9]+$")
+    // a CID (base58, base32 or base36, dashes and underscores allowed), then nothing, a slash or one video file
+    private val IPFS_VIDEO = Regex("^/ipfs/[A-Za-z0-9_-]+(/|/[A-Za-z0-9._-]+\\.(mp4|m4v|mov|mkv|webm|ogv|ogg))?$", RegexOption.IGNORE_CASE)
 
     private val PLAYER_PATHS: Map<String, (String) -> Boolean> = mapOf(
         // ARCH_REGEX: /embed/<item>
@@ -137,8 +139,8 @@ object SafeTarget {
         "brandnewtube.com" to { p -> BRAND_NEW_TUBE_PLAYER.matches(p) },
         // LBRY_REGEX: /$/embed/...
         "lbry.tv" to { p -> p.startsWith("/$/embed/") || p.startsWith("/%24/embed/") },
-        // SKATEHIVE_IPFS_REGEX: /ipfs/<cid> (a video tag)
-        "ipfs.skatehive.app" to { p -> p.startsWith("/ipfs/") && p.length > 6 },
+        // SKATEHIVE_IPFS_REGEX: /ipfs/<cid> (render-helper makes it a video tag), or a video file in that folder
+        "ipfs.skatehive.app" to { p -> IPFS_VIDEO.matches(p) },
         // SKATEHYPE_EMBED_REGEX: /ifplay.php?v=<n>
         "www.skatehype.com" to { p -> p == "/ifplay.php" },
         "skatehype.com" to { p -> p == "/ifplay.php" },
@@ -164,6 +166,45 @@ object SafeTarget {
         val b = embedHost.lowercase().removePrefix("www.")
         return a.isNotEmpty() && a == b
     }
+
+    /**
+     * Whether the video sheet may navigate a frame (main or sub) to [url] while it plays [embedUrl], on both apps
+     * (Android `PlayerWebView`, iOS `VideoEmbedPolicy`). Read with the WHATWG parser, as the web view reads it: only
+     * https, no userinfo, no backslash (a slash to the web view) and no control or space characters anywhere, then
+     * the embed's own host, with or without `www.` ([samePlayerHost]). A video file the post links directly
+     * ([MEDIA_FILE_HOSTS]) stays on its exact host and file. The `about:blank` / `about:srcdoc` frames players create
+     * are allowed.
+     */
+    fun playerNavigationAllowed(url: String, embedUrl: String): Boolean {
+        if (url == "about:blank" || url == "about:srcdoc") return true
+        val target = playerUrl(url) ?: return false
+        val embed = playerUrl(embedUrl) ?: return false
+        val embedHost = embed.hostname.lowercase()
+        if (embedHost in MEDIA_FILE_HOSTS) {
+            return target.hostname.lowercase() == embedHost && target.pathname == embed.pathname
+        }
+        return samePlayerHost(target.hostname, embedHost)
+    }
+
+    /** An https URL with a host, no userinfo, no backslash and no control or space characters; else null. */
+    private fun playerUrl(url: String): WebUrl? {
+        if (url.any { it == '\\' || it.code <= 0x20 || it.code == 0x7F }) return null
+        val u = WebUrl.parse(url) ?: return null
+        return u.takeIf { it.protocol == "https:" && it.hostname.isNotEmpty() && !it.hasCredentials }
+    }
+
+    /**
+     * Whether the sheet runs page script for [embedUrl]. Players need it; a video file the post links directly
+     * ([MEDIA_FILE_HOSTS]) plays without it, so whatever such a link serves runs no script.
+     */
+    fun playerAllowsScript(embedUrl: String): Boolean =
+        WebUrl.parse(embedUrl)?.hostname?.lowercase() !in MEDIA_FILE_HOSTS
+
+    /**
+     * Hosts whose embeds are video files rather than player pages: render-helper turns their iframes into a
+     * `<video>` tag (SKATEHIVE_IPFS_REGEX).
+     */
+    private val MEDIA_FILE_HOSTS = setOf("ipfs.skatehive.app")
 
     /** A body image source: http(s) only. */
     fun image(src: String?): String? = httpUrl(src)

@@ -11,7 +11,6 @@ import androidx.compose.ui.semantics.Role
 
 import com.ecency.core.app.AppIcon
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -313,11 +312,11 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
  * Third-party video player for an allowlisted embed. The WebView loads only [embedUrl], sent with
  * `Referer: https://ecency.com/` (players such as YouTube refuse an embed without an embedding origin:
  * error 153), as the iOS sheet does. Every navigation, main frame or subframe, must stay on the embed's
- * own host over https ([playerNavigationAllowed]); popups are off; no JavaScript bridges, no file or
+ * own host over https, and a video file on its own file ([playerNavigationAllowed], shared with iOS); popups are off; no JavaScript bridges, no file or
  * content access. Cookies and storage are not kept: third-party cookies are refused and everything the
  * player stored is cleared when the sheet closes. Cookies and storage are process-wide: the HiveSigner web view
  * (AuthWeb.kt) clears them too, so a sheet that closes signs nothing else out. JavaScript itself stays
- * on because the players need it.
+ * on because the players need it, except for a video file ([SafeTarget.playerAllowsScript]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -337,44 +336,63 @@ internal fun playerMayLoad(url: String): Boolean =
     url.startsWith("https://", ignoreCase = true) && SafeTarget.embed(url) != null
 
 /**
- * Whether the player may navigate a frame to [url] (iOS `VideoEmbedPolicy`): https on the embed's own
- * host (with or without `www.`, [SafeTarget.samePlayerHost]), or the `about:blank` / `about:srcdoc` frames players create. Applies to subframes too.
+ * Whether the player may navigate a frame to [url]: the shared rule both apps use ([SafeTarget.playerNavigationAllowed],
+ * iOS `VideoEmbedPolicy`), read with the WHATWG parser as Chromium reads it. Applies to subframes too.
  */
-internal fun playerNavigationAllowed(url: String, embedUrl: String): Boolean {
-    if (url == "about:blank" || url == "about:srcdoc") return true
-    val target = runCatching { Uri.parse(url) }.getOrNull() ?: return false
-    val embed = runCatching { Uri.parse(embedUrl) }.getOrNull() ?: return false
-    if (!target.scheme.equals("https", ignoreCase = true)) return false
-    return SafeTarget.samePlayerHost(target.host ?: return false, embed.host ?: return false)
-}
+internal fun playerNavigationAllowed(url: String, embedUrl: String): Boolean = SafeTarget.playerNavigationAllowed(url, embedUrl)
 
-/** Loads [embedUrl] with the embedding Referer, only when it is an allowlisted https player. */
+/**
+ * Loads [embedUrl] with the embedding Referer, only when it is an allowlisted https player. A video file the post
+ * links directly ([SafeTarget.playerAllowsScript] false) is never the page, since a non-GET navigation does not
+ * reach shouldOverrideUrlLoading and the navigation rule only sees the others. It plays in an
+ * app-made page with one video element ([mediaFilePage]) on the file's own origin.
+ */
 internal fun WebView.loadEmbed(embedUrl: String) {
-    if (playerMayLoad(embedUrl)) loadUrl(embedUrl, mapOf("Referer" to EMBED_REFERER))
+    if (!playerMayLoad(embedUrl)) return
+    if (SafeTarget.playerAllowsScript(embedUrl)) {
+        loadUrl(embedUrl, mapOf("Referer" to EMBED_REFERER))
+    } else {
+        val origin = android.net.Uri.parse(embedUrl).let { "${it.scheme}://${it.host}/" }
+        loadDataWithBaseURL(origin, mediaFilePage(embedUrl), "text/html", "utf-8", null)
+    }
 }
 
+/** The page a video file plays in: no script, one video element, [url] (validated by [playerMayLoad]) escaped. */
+internal fun mediaFilePage(url: String): String {
+    val src = url.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#39;").replace("<", "&lt;").replace(">", "&gt;")
+    return "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+        "<style>html,body{margin:0;height:100%;background:#000}video{width:100%;height:100%}</style></head>" +
+        "<body><video src=\"$src\" controls playsinline autoplay></video></body></html>"
+}
+
+/** The player web view's settings and navigation rule ([playerNavigationAllowed]) for [embedUrl]. */
 @SuppressLint("SetJavaScriptEnabled")
+internal fun WebView.setUpPlayer(embedUrl: String) {
+    // players need script; a video file the post links directly plays without it
+    settings.javaScriptEnabled = SafeTarget.playerAllowsScript(embedUrl)
+    settings.domStorageEnabled = true
+    settings.mediaPlaybackRequiresUserGesture = false
+    settings.allowFileAccess = false
+    settings.allowContentAccess = false
+    settings.setSupportMultipleWindows(false)
+    settings.javaScriptCanOpenWindowsAutomatically = false
+    settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+    settings.setGeolocationEnabled(false)
+    CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
+    webViewClient = object : WebViewClient() {
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+            // true = blocked: no frame leaves the embed's host
+            !playerNavigationAllowed(request.url.toString(), embedUrl)
+    }
+}
+
 @Composable
 internal fun PlayerWebView(embedUrl: String, modifier: Modifier) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
             WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.mediaPlaybackRequiresUserGesture = false
-                settings.allowFileAccess = false
-                settings.allowContentAccess = false
-                settings.setSupportMultipleWindows(false)
-                settings.javaScriptCanOpenWindowsAutomatically = false
-                settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                settings.setGeolocationEnabled(false)
-                CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
-                webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
-                        // true = blocked: no frame leaves the embed's host
-                        !playerNavigationAllowed(request.url.toString(), embedUrl)
-                }
+                setUpPlayer(embedUrl)
                 loadEmbed(embedUrl)
             }
         },

@@ -76,6 +76,8 @@ enum CrashReporting {
             request.queryString = scrubber.scrub(text: request.queryString)
             request.headers = nil
             request.cookies = nil
+            // the Cocoa SDK keeps no request body (only its size); that goes too
+            request.bodySize = nil
         }
         event.user = nil
         return event

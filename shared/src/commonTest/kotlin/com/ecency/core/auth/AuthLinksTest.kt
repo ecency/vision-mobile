@@ -116,14 +116,13 @@ class AuthLinksTest {
     }
 
     @Test
-    fun postingKeyRequests() {
+    fun loginLinksCarryOnlyWhereTheRefusalGoes() {
         assertEquals(
-            AuthLink.PostingKeyRequest("good-karma", "honeyback://hive", "r1"),
+            AuthLink.LoginRequest("honeyback://hive", "r1"),
             AuthLinks.parse("ecency://login?username=%40Good-Karma&redirect_uri=honeyback%3A%2F%2Fhive&request_id=r1"),
         )
+        assertEquals(AuthLink.LoginRequest("waves://ecency-login", null), AuthLinks.parse("ecency://login?callback=waves%3A%2F%2Fecency-login"))
         assertEquals(AuthLink.Invalid("invalid_params"), AuthLinks.parse("ecency://login?username=alice"))
-        assertEquals(AuthLink.Invalid("invalid_params"), AuthLinks.parse("ecency://login?username=a%20b&callback=x%3A%2F%2Fy"))
-        // Stricter than RN: the posting key never goes to a plain-text or page callback.
         assertEquals(AuthLink.Invalid("invalid_callback"), AuthLinks.parse("ecency://login?username=alice&callback=http%3A%2F%2Fevil.example"))
     }
 

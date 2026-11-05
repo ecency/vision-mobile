@@ -13,9 +13,12 @@ on:
     - cron: '17 3 * * 1'
   workflow_dispatch:
 
+# A newer push or pull request commit replaces a running scan of the same branch. Weekly and manual runs (the long
+# Swift build) get their own group, so a merge to development does not cancel them: a running full scan always
+# finishes, and a newer full run of the same branch only replaces one that is still waiting (it scans newer code).
 concurrency:
-  group: codeql-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+  group: codeql-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'change' }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read

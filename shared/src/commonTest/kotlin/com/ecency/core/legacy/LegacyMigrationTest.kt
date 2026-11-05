@@ -55,6 +55,25 @@ class LegacyMigrationTest {
     private val usable = listOf("spike-default", "spike-has", "spike-master", "spike-posting", "spike-signer")
 
     @Test
+    fun anRnKeyThatIsTheOwnerKeyRnStoredIsDroppedAtOnceAndReported() {
+        val owner = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.OWNER).toWif()
+        val posting = com.ecency.core.hive.PrivateKey.fromLogin("spike-shared", "pw", com.ecency.core.hive.KeyRole.POSTING).toWif()
+        val account = LegacyAccount(
+            username = "spike-shared", authType = LegacyAuthType.ACTIVE_KEY, masterPassword = null,
+            postingKey = posting, activeKey = owner, memoKey = owner, ownerKey = owner, accessToken = "t",
+            hiveAuthKey = null, hiveAuthToken = null, hiveAuthExpiry = 0, unreadable = emptyList(),
+        )
+        val report = LegacyMigration.migrate(LegacyImport(listOf(account), "spike-shared", pinLockEnabled = false), vault, PIN_ITERATIONS)
+        val stored = vault.account("spike-shared")!!
+        assertEquals(posting, stored.postingKey)
+        // RN stored the owner key: a key that is the same one never reaches the vault, and the user is told
+        assertNull(stored.activeKey)
+        assertNull(stored.memoKey)
+        assertEquals(listOf("spike-shared"), report.ownerKeyDropped)
+        assertFalse("owner" in report.toString().replace("ownerKeyDropped", ""), "names only")
+    }
+
+    @Test
     fun everyUsableAccountMovesIntoTheVault() {
         val report = run()
         assertEquals(usable, report.imported.sorted())

@@ -25,7 +25,7 @@ sealed class AuthException(message: String, cause: Throwable? = null) : EcencyEx
      */
     class OwnerKeyOnly(val fromMasterPassword: Boolean) : AuthException("the owner key is not accepted")
 
-    /** [KeyLogin.refuseKeySharedWithOwner] is on and the typed key is also the account's owner key. */
+    /** The typed key is also the account's owner key: never kept, for any role. */
     class KeySharedWithOwner : AuthException("this key is also the account's owner key")
 
     /** No such account on chain (RN `auth.invalid_username`). */

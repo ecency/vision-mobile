@@ -64,9 +64,6 @@ object AccountCopy {
     /** auth_upgrade.description; the role reads in the app language ([CopyLists.role]), the chain word stays English. */
     fun upgradeDescription(authority: KeyRole): String = L.authUpgrade.description(authority = CopyLists.role(authority))
 
-    fun postingKeyRequest(requester: String, username: String): String =
-        L.deepLink.postingKeyRequest(requester = requester, username = username)
-
     fun authRequest(requester: String, username: String?): String =
         if (username != null) L.deepLink.authRequestAsUser(requester = requester, username = username)
         else L.deepLink.authRequestAsCurrent(requester = requester)

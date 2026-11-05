@@ -10,6 +10,8 @@ import com.ecency.core.editor.BeneficiaryRoute
 import com.ecency.core.editor.EditorFormats
 import com.ecency.core.editor.EditorMeta
 import com.ecency.core.editor.EditorTags
+import com.ecency.core.editor.MediaInsert
+import com.ecency.core.editor.MediaInsertStatus
 import com.ecency.core.editor.PollDraft
 import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
@@ -883,6 +885,33 @@ class EditorModelTest {
         assertTrue(w.storage.values.isEmpty())
     }
 
+    /**
+     * A snippet or a link goes in at the caret and the caret ends after it, so what is inserted next (a gallery
+     * image, another snippet) goes in after it. RN's applySnippet left the inserted text selected, and the next
+     * insert then replaced it: the snippet was gone once an image went in.
+     */
+    @Test
+    fun aSnippetOrALinkLeavesTheCaretAfterItAndTheNextInsertKeepsIt() = runTest {
+        val w = World(this)
+        val m = w.newPost(this)
+        m.setBody("start", TextSelection(5))
+        m.insertSnippet("Thanks for reading!")
+        assertEquals("start\nThanks for reading!\n", m.current.body)
+        assertEquals(TextSelection(m.current.body.length), m.current.selection)
+        m.insertMedia(listOf(MediaInsert(url = "https://images.ecency.com/demo/one.jpg", status = MediaInsertStatus.READY)))
+        assertEquals("start\nThanks for reading!\n\n![](https://images.ecency.com/demo/one.jpg)\n", m.current.body)
+        // over a selection: the snippet replaces it, the caret after it
+        m.setBody("one two", TextSelection(4, 7))
+        m.insertSnippet("x")
+        assertEquals("one \nx\n", m.current.body)
+        assertEquals(TextSelection(7), m.current.selection)
+        m.setBody("see ", TextSelection(4))
+        assertTrue(m.insertLink("Ecency", "https://ecency.com", EditorFormats.LinkType.PLAIN))
+        assertEquals(TextSelection(m.current.body.length), m.current.selection)
+        m.insertSnippet("end")
+        assertEquals("see [Ecency](https://ecency.com)\nend\n", m.current.body)
+    }
+
     // ---- beneficiaries ----
 
     @Test
@@ -1077,6 +1106,23 @@ class EditorModelTest {
         opened.deletePublishedDraft()
         testScheduler.advanceUntilIdle()
         assertTrue(w.drafts.isEmpty())
+    }
+
+    @Test
+    fun aSavedDraftOpenedPublishesWithTheBeneficiariesTheAuthorAddedAfterOpeningIt() = runTest {
+        val w = World(this)
+        w.drafts += Json.parseToJsonElement("""{"_id":"d9","title":"Saved draft","body":"Body with ![](https://images.example/a.jpg) image","tags":"hive-125125 ecency","tags_arr":["hive-125125","ecency"],"created":"2026-10-06T10:00:00.000Z","modified":"2026-10-06T11:00:00.000Z","meta":{"image":["https://images.example/a.jpg"],"tags":"hive-125125 ecency","rewardType":"sp","description":"d","beneficiaries":[]}}""").jsonObject
+        val m = w.newPost(this, EditorArgs(EditorKind.NEW_POST, draftId = "d9"))
+        assertEquals("Saved draft", m.current.title)
+        assertEquals(listOf("hive-125125", "ecency"), m.current.tags)
+        assertTrue(m.current.canSubmit)
+        assertNull(m.addBeneficiary("bob", 10))
+        assertEquals(listOf(BeneficiaryRoute("bob", 1000)), m.current.beneficiaries)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "saved-draft", "d9"), m.current.done, w.toasts().toString())
+        val options = w.ops().single()[1].jsonArray[1].jsonObject["extensions"].toString()
+        assertTrue(options.contains("bob"), options)
     }
 
     @Test

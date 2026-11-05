@@ -43,6 +43,28 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aDelegationGoesToTheRecipientTheReviewShowed() = runTest {
+        val w = world(this)
+        w.rpc["condenser_api.get_vesting_delegations"] = { "[]" }
+        val m = w.env.delegateModel("spike-bob")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        m.setHp("1")
+        m.review()
+        val review = assertIs<StakePrompt.Review>(m.current.prompt)
+        assertEquals("spike-bob", review.delegatee)
+        // the field changes behind the open review
+        m.setRecipient("spike-mallory")
+        testScheduler.advanceUntilIdle()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(
+            """["delegate_vesting_shares",{"delegator":"spike-voter","delegatee":"spike-bob","vesting_shares":"${review.vests} VESTS"}]""",
+            w.broadcastOpsJson().single(),
+        )
+    }
+
+    @Test
     fun theMaxDelegatesTheExactVestsNotARoundedHpFigure() = runTest {
         val w = world(this)
         w.rpc["condenser_api.get_vesting_delegations"] = { "[]" }
@@ -169,7 +191,7 @@ class WalletActionsTest {
             assertFalse(m.current.continueEnabled)
             m.setAmount("4")
             m.next()
-            assertEquals(TradePrompt.Confirm(TradeCopy.swapFor("4.000 HIVE", "1.000 HBD")), m.current.prompt) // copy in the language of the run, amounts POSIX
+            assertEquals(TradePrompt.Confirm(TradeCopy.swapFor("4.000 HIVE", "1.000 HBD"), "4.000 HIVE", "1.000 HBD"), m.current.prompt) // copy in the language of the run, amounts POSIX
             m.confirm()
             testScheduler.advanceTimeBy(3_000)
             testScheduler.runCurrent()
@@ -210,6 +232,68 @@ class WalletActionsTest {
             assertEquals(0.0, m.current.toAmount)
             assertTrue(TradeCopy.OFFER_UNAVAILABLE in m.current.errors)
             assertFalse(m.current.continueEnabled)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun theSwapSignsTheAmountsTheUserConfirmedEvenWhenTheBookRefreshesMeanwhile() = runTest {
+        val w = world(this)
+        var worse = false
+        w.rpc["condenser_api.get_order_book"] = {
+            val hbd = if (worse) 2000 else 2500
+            """{"bids":[{"created":"x","hbd":$hbd,"hive":10000,"order_price":{"base":"x","quote":"y"},"real_price":"0.${hbd}0000"}],"asks":[{"created":"x","hbd":2600,"hive":10000,"real_price":"0.26000000"}]}"""
+        }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        val m = w.env.tradeModel("HIVE")
+        try {
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("4")
+            m.next()
+            val shown = assertIs<TradePrompt.Confirm>(m.current.prompt)
+            assertEquals(TradeCopy.swapFor("4.000 HIVE", "1.000 HBD"), shown.text)
+            // the book refreshes to a worse price while the question is open
+            worse = true
+            testScheduler.advanceTimeBy(TradeModel.BOOK_REFRESH_MILLIS + 1_000)
+            assertEquals(shown, m.current.prompt, "the open question keeps its amounts")
+            m.confirm()
+            testScheduler.advanceTimeBy(3_000)
+            testScheduler.runCurrent()
+            val body = w.broadcastOps().single()[1].jsonObject
+            assertEquals("4.000 HIVE", body["amount_to_sell"]!!.jsonPrimitive.content)
+            assertEquals("1.000 HBD", body["min_to_receive"]!!.jsonPrimitive.content, "what was shown is what is signed")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aSwapQuestionClosedAfterARefreshShowsTheNewQuote() = runTest {
+        val w = world(this)
+        var worse = false
+        w.rpc["condenser_api.get_order_book"] = {
+            val hbd = if (worse) 2000 else 2500
+            """{"bids":[{"created":"x","hbd":$hbd,"hive":10000,"order_price":{"base":"x","quote":"y"},"real_price":"0.${hbd}0000"}],"asks":[{"created":"x","hbd":2600,"hive":10000,"real_price":"0.26000000"}]}"""
+        }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        val m = w.env.tradeModel("HIVE")
+        try {
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("4")
+            m.next()
+            worse = true
+            testScheduler.advanceTimeBy(TradeModel.BOOK_REFRESH_MILLIS + 1_000)
+            m.dismissPrompt()
+            assertEquals(0.8, m.current.toAmount, "the screen shows the refreshed quote once the question closed")
+            m.next()
+            assertEquals(TradeCopy.swapFor("4.000 HIVE", "0.800 HBD"), assertIs<TradePrompt.Confirm>(m.current.prompt).text)
         } finally {
             m.close()
         }

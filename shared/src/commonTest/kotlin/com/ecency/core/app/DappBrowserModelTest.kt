@@ -126,13 +126,13 @@ class DappBrowserModelTest {
         assertFalse(b.shouldLoad(tab, "ecency://login?username=spike-nobody&callback=dappapp://cb", true, true))
         testScheduler.advanceUntilIdle()
         assertNull(app.env.authLinks.current.callback, "not_logged_in stays on the device")
-        // a signing link still asks, names the page, and the user's decline then goes back
+        // a signing link still asks and names the page; a decline tells the page nothing either
         assertFalse(b.shouldLoad(tab, "ecency://transfer?to=spike-bob&amount=1&asset=HIVE&callback=dappapp://cb", true, true))
         testScheduler.advanceUntilIdle()
         assertIs<LinkPrompt.SignConfirm>(app.env.authLinks.current.prompt)
         app.env.authLinks.decline()
         testScheduler.advanceUntilIdle()
-        assertEquals(true, app.env.authLinks.current.callback?.contains("user_cancelled"))
+        assertNull(app.env.authLinks.current.callback, "a page's request never hears a decline")
     }
 
     @Test
@@ -305,6 +305,25 @@ class DappBrowserModelTest {
     }
 
     @Test
+    fun witnessKeyAndPropertyChangesAreRefusedBeforeAnyPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val ops = listOf(
+            """[["witness_update",{"owner":"$alice","url":"https://x","block_signing_key":"STM1","props":{"account_creation_fee":"3.000 HIVE","maximum_block_size":65536,"hbd_interest_rate":0},"fee":"0.000 HIVE"}]]""",
+            """[["witness_set_properties",{"owner":"$alice","props":[["key","00"]],"extensions":[]}]]""",
+        )
+        ops.forEachIndexed { i, json ->
+            send(b, page, keychain("broadcast", ""","method":"Active","operations":$json""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNull(b.current.prompt, json)
+            assertEquals(BridgeGuards.KEYS_REFUSED, page.error(), json)
+            assertEquals(BridgeGuards.KEYS_REFUSED, BridgeGuards.refusal(Json.parseToJsonElement(json).jsonArray, signsHere = false), json)
+        }
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    @Test
     fun ownerAndKeyChangesAreRefusedForAccountsThatSignElsewhereToo() = runTest {
         // a HiveSigner account would sign anything on HiveSigner's page: the bridge's own refusal is the only guard
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
@@ -358,7 +377,7 @@ class DappBrowserModelTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val b = browser(app)
         val page = Page()
-        send(b, page, keychain("broadcast", ""","operations":[["witness_set_properties",{"owner":"$alice","props":[],"extensions":[]}]]"""))
+        send(b, page, keychain("broadcast", ""","operations":[["feed_publish",{"publisher":"$alice","exchange_rate":{"base":"0.300 HBD","quote":"1.000 HIVE"}}]]"""))
         testScheduler.advanceUntilIdle()
         assertEquals("ACTIVE", b.current.prompt!!.authority, "never shown as posting")
         b.reject()
@@ -410,7 +429,7 @@ class DappBrowserModelTest {
         val app = signedIn(this)
         val b = browser(app)
         val page = Page()
-        send(b, page, keychain("broadcast", ""","operations":[["witness_update",{"owner":"$alice","url":"x","block_signing_key":"STM1","props":{},"fee":"0.000 HIVE"}]]"""))
+        send(b, page, keychain("broadcast", ""","operations":[["limit_order_create2",{"owner":"$alice","orderid":1,"amount_to_sell":"1.000 HIVE","exchange_rate":{"base":"1.000 HIVE","quote":"0.300 HBD"},"fill_or_kill":false,"expiration":"2030-01-01T00:00:00"}]]"""))
         testScheduler.advanceUntilIdle()
         assertEquals(BridgeGuards.NOT_SUPPORTED, page.error())
         assertNull(b.current.prompt)
@@ -450,6 +469,101 @@ class DappBrowserModelTest {
         assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), response["publicKey"]!!.jsonPrimitive.content)
         assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), Signature.fromHex(signature).recover(BridgeSignatures.digest(message)).toString())
         assertTrue(app.broadcasts().isEmpty(), "a message signature broadcasts nothing")
+    }
+
+    @Test
+    fun anotherAppsHiveSignerLoginMessageIsSignedAfterTheConfirmation() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val messages = listOf("login", "posting", "offline").map {
+            """{"signed_message":{"type":"$it","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        } + """{"signed_message":{"type":"login","app":"ecency.app","app":"other.app"},"authors":["$alice"],"timestamp":1}""" +
+            """{"signed_message":{"type":"login","app":"other.app"},"authors":["$alice"],"timestamp":1"""
+        messages.forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNotNull(b.current.prompt, "asked, not refused: $message")
+            b.confirm()
+            testScheduler.advanceUntilIdle()
+            assertTrue(page.lastResponse["success"]!!.jsonPrimitive.content.toBoolean(), message)
+        }
+        assertFalse(BridgeSignatures.reserved("""{"signed_message":{"type":"login","app":"other.app"}}"""))
+    }
+
+    @Test
+    fun anotherAppsPostingOrOfflineMessageWarnsOfLastingPermission() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        fun message(type: String, app: String = "other.app") = """{"signed_message":{"type":"$type","app":"$app"},"authors":["$alice"],"timestamp":1}"""
+        val cases = listOf(
+            message("login") to null,
+            message("posting") to "This gives other.app lasting permission to post, vote and comment as you.",
+            message(" Offline ", " peak.app ") to "This gives peak.app lasting permission to post, vote and comment as you.",
+            // inside a JSON string too
+            JsonPrimitive(message("posting")).toString() to "This gives other.app lasting permission to post, vote and comment as you.",
+            "plain text" to null,
+        )
+        cases.forEachIndexed { i, (text, warning) ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(text)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertEquals(warning, b.current.prompt!!.warning, text)
+            b.reject()
+            testScheduler.advanceUntilIdle()
+        }
+    }
+
+    @Test
+    fun aMessageShapedLikeAnEcencySignedMessageIsRefusedBeforeAPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        val exact = com.ecency.core.auth.HiveSignerMessages.message("code", null, alice, 1_791_288_000_000)
+        val reordered = """{ "timestamp" : 1791288000, "authors" : [ "$alice" ],
+            "signed_message" : { "app" : "ecency.app", "type" : "code" } }"""
+        val escaped = """{"\u0073igned_message":{"type":"code","app":"ecency\u002eapp"},"authors":["$alice"],"timestamp":1}"""
+        val otherAppCode = """{"signed_message":{"type":"code","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        val otherAppRefresh = """{"signed_message":{"type":" Refresh ","app":"other.app"},"authors":["$alice"],"timestamp":1}"""
+        val ecencyCased = """{"signed_message":{"type":"offline","app":" Ecency.App "},"authors":["$alice"],"timestamp":1}"""
+        val noApp = """{"signed_message":{"type":"code"},"authors":["$alice"],"timestamp":1}"""
+        val notAnObject = """{"signed_message":"login","authors":["$alice"]}"""
+        val arrayApp = """{"signed_message":{"type":"login","app":["ecency.app"]},"authors":["$alice"]}"""
+        // a duplicate key reads as its last value, as JSON.parse keeps it
+        val duplicateApp = """{"signed_message":{"type":"login","app":"other.app","app":"ecency.app"},"authors":["$alice"]}"""
+        val duplicateType = """{"signed_message":{"type":"login","type":"code","app":"other.app"},"authors":["$alice"]}"""
+        val unparsed = """{"signed_message":{"type":"code","app":"other.app"}"""
+        val messages = listOf(exact, reordered, escaped, otherAppCode, otherAppRefresh, ecencyCased, noApp, notAnObject, arrayApp, duplicateApp, duplicateType, unparsed) +
+            listOf("code", "posting", "login", "refresh", "offline").map { com.ecency.core.auth.HiveSignerMessages.message(it, "x.app".takeIf { _ -> it == "login" }, alice, 1_000) } +
+            JsonPrimitive(exact).toString() + JsonPrimitive(otherAppCode).toString()
+        messages.forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertNull(b.current.prompt, "refused before a prompt: $message")
+            assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error(), message)
+        }
+        // the Peak Vault path refuses it too
+        send(b, page, peakVault("""[["peakvault-sign_buffer",{"message":${JsonPrimitive(exact)}}]]""", resId = 50))
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error())
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun ordinaryLoginMessagesStillReachThePrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        listOf("Log in to dapp.example #1791288000", """{"login":"dapp.example","nonce":"abc","account":"$alice"}""", "[1,2]").forEachIndexed { i, message ->
+            send(b, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1))
+            testScheduler.advanceUntilIdle()
+            assertEquals(message, b.current.prompt!!.details.single { it.name == DappBrowserModel.MESSAGE }.value)
+            b.reject()
+        }
+        send(b, page, peakVault("""[["peakvault-sign_buffer",{"message":"hello"}]]""", resId = 9))
+        testScheduler.advanceUntilIdle()
+        assertEquals("hello", b.current.prompt!!.details.single { it.name == DappBrowserModel.MESSAGE }.value)
     }
 
     // ---- what is shown is what is signed ----
@@ -602,6 +716,8 @@ class DappBrowserModelTest {
         val b = browser(app)
         val page = Page()
         send(b, page, peakVault("""[["peakvault-connect",{}]]""", account = ""))
+        b.confirm()
+        testScheduler.advanceUntilIdle()
         assertEquals("peakvault", page.last["kind"]!!.jsonPrimitive.content)
         assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
 
@@ -623,6 +739,72 @@ class DappBrowserModelTest {
         assertEquals(1, app.broadcasts().size)
         assertEquals(4L, page.last["id"]!!.jsonPrimitive.content.toLong())
         assertEquals("", page.lastResponse["error"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun peakVaultConnectAsksOncePerOriginBeforeNamingTheAccount() = runTest {
+        val app = signedIn(this)
+        KeyVault(app.store).save(VaultAccount("spike-bob", AuthType.MASTER_PASSWORD, postingKey = AppTestKeys.wif("spike-bob", KeyRole.POSTING), accessToken = "access-spike-bob"))
+        val b = browser(app)
+        val page = Page()
+        val connect = peakVault("""[["peakvault-connect",{}]]""", account = "")
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertTrue(page.answers.isEmpty(), "the page learns nothing before the user answers")
+        val prompt = b.current.prompt!!
+        assertEquals(DappBrowserModel.connectTitle("dapp.example"), prompt.title)
+        assertEquals(alice, prompt.username)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // asked once: the same origin hears it again without a prompt
+        send(b, page, connect.replace("\"resId\":0", "\"resId\":1"))
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        assertEquals(2, page.answers.size)
+        assertEquals(alice, page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // another account: asked again
+        app.env.session.switchTo("spike-bob")
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", b.current.prompt!!.username)
+        b.reject()
+        assertEquals(DappBrowserModel.REJECTED, page.error())
+        // a refusal holds for this page load: the page cannot ask again and again
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt, "no new question on the same page load")
+        assertEquals(DappBrowserModel.REJECTED, page.error())
+        // the page reloading itself (a new document on the same site) does not get to ask again
+        b.documentStarted(b.current.activeTabId, "$origin/again")
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt, "a reload of the same site keeps the refusal")
+        // after the tab left the site, it may ask again, and the user answers again
+        b.documentStarted(b.current.activeTabId, "https://elsewhere.example/")
+        b.documentStarted(b.current.activeTabId, "$origin/")
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", b.current.prompt!!.username, "asked again after a new page load")
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-bob", page.lastResponse["result"]!!.toString().trim('[', ']', '"'))
+        // back to the first account: its approval was forgotten with the account change
+        app.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, b.current.prompt!!.username, "an approval is per account")
+        // a refusal goes with an account change too
+        b.reject()
+        app.env.session.switchTo("spike-bob")
+        testScheduler.advanceUntilIdle()
+        app.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        send(b, page, connect)
+        testScheduler.advanceUntilIdle()
+        assertEquals(alice, b.current.prompt?.username, "asked again after the account changed")
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.ecency.core.auth
 
 import com.ecency.core.api.rpc.HiveRpcClient
+import com.ecency.core.api.rpc.NodeHealthTracker
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -84,7 +85,18 @@ data class ChainAuthorities(
 fun interface ChainAccounts {
     @Throws(Exception::class)
     suspend fun authorities(username: String): ChainAuthorities?
+
+    /**
+     * The authorities as two different nodes agree on them (their owner keys), for a decision that deletes a stored
+     * key: one node's answer is never enough. Null when both say the account does not exist. Throws
+     * [UnconfirmedChainRead] when fewer than two nodes answered or they disagree.
+     */
+    @Throws(Exception::class)
+    suspend fun confirmedAuthorities(username: String): ChainAuthorities? = throw UnconfirmedChainRead(username)
 }
+
+/** Two nodes could not be asked, or they disagree about an account's owner keys: nothing is decided. */
+class UnconfirmedChainRead(val username: String) : com.ecency.core.api.EcencyException("the nodes did not agree about @$username")
 
 /** [ChainAccounts] over the app's node pool: `condenser_api.get_accounts`. */
 class RpcChainAccounts(private val client: HiveRpcClient) : ChainAccounts {
@@ -95,6 +107,45 @@ class RpcChainAccounts(private val client: HiveRpcClient) : ChainAccounts {
             buildJsonArray { add(buildJsonArray { add(JsonPrimitive(username)) }) },
             validate = HiveRpcClient.IS_ARRAY,
         )
-        return (result as? JsonArray).orEmpty().mapNotNull(ChainAuthorities::fromJson).firstOrNull { it.username == username }
+        return parse(result, username)
+    }
+
+    /**
+     * Asks the nodes one by one, healthiest first and without failover, until two on different hosts answered;
+     * their owner keys must match. Nodes the pool knows to be down come last, so they do not hold the user up.
+     */
+    @Throws(Exception::class)
+    override suspend fun confirmedAuthorities(username: String): ChainAuthorities? {
+        val params = buildJsonArray { add(buildJsonArray { add(JsonPrimitive(username)) }) }
+        val answers = mutableListOf<Pair<String, ChainAuthorities?>>()
+        val ordered = client.health.orderedNodes(client.nodes, NodeHealthTracker.apiOf(GET_ACCOUNTS), probe = false)
+        for (node in ordered) {
+            val host = hostOf(node)
+            if (answers.any { it.first == host }) continue
+            val result = try {
+                client.ask(node, GET_ACCOUNTS, params, client.readTimeoutMillis)
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                continue
+            }
+            if (result !is JsonArray) continue
+            answers += host to parse(result, username)
+            if (answers.size == 2) break
+        }
+        if (answers.size < 2) throw UnconfirmedChainRead(username)
+        val (first, second) = answers.map { it.second }
+        if (first?.owner?.toSet() != second?.owner?.toSet()) throw UnconfirmedChainRead(username)
+        return first
+    }
+
+    private fun parse(result: JsonElement, username: String): ChainAuthorities? =
+        (result as? JsonArray).orEmpty().mapNotNull(ChainAuthorities::fromJson).firstOrNull { it.username == username }
+
+    private fun hostOf(node: String): String =
+        node.substringAfter("://").substringBefore('/').substringBefore(':').lowercase()
+
+    private companion object {
+        const val GET_ACCOUNTS = "condenser_api.get_accounts"
     }
 }

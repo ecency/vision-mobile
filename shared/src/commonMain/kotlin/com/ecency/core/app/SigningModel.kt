@@ -21,6 +21,7 @@ import com.ecency.core.secure.VaultAccount
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
@@ -302,7 +303,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         // never weaker than the authority the router resolved; HiveAuth has no owner key type
         val keyType = OperationAuthority.hiveAuthKeyType(ops).let { if (it == KeyRole.POSTING && authority == KeyRole.ACTIVE) KeyRole.ACTIVE else it }
         if (keyType == KeyRole.OWNER || authority == KeyRole.OWNER) throw AuthException.UnsupportedOperation(L.native.dappBridgeOps.ownerRefused)
-        return prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
+        val txId = prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
             env.hiveAuth.broadcast(session, keyType, ops) { wait ->
                 setState { s ->
                     val p = s.prompt
@@ -319,6 +320,46 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
                 }
             }.txId
         }
+        return confirmedOnChain(txId, ops)
+    }
+
+    /**
+     * A HiveAuth `sign_ack` is the relay's word: the transaction it names must be in a block
+     * (`transaction_status_api.find_transaction` says a reversible or irreversible block; the mempool is not enough)
+     * and carry the operations the user approved (`condenser_api.get_transaction`, compared as [sameOperations])
+     * before the send counts as done. A node without the status API is asked for the transaction alone. Asked
+     * [HIVE_AUTH_LOOKUPS] times, [HIVE_AUTH_LOOKUP_MILLIS] apart; not confirmed by then (no transaction id, other
+     * operations, or none readable), it ends as [com.ecency.core.api.broadcast.BroadcastException.Unconfirmed]: the
+     * user checks the wallet, nothing is sent again.
+     */
+    private suspend fun confirmedOnChain(txId: String?, ops: JsonArray): String {
+        val id = txId?.trim()?.lowercase()?.takeIf { TX_ID.matches(it) }
+            ?: throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(txId.orEmpty())
+        repeat(HIVE_AUTH_LOOKUPS) { attempt ->
+            val status = try {
+                env.api.hive.transactionStatus(id, null) ?: STATUS_UNAVAILABLE
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                STATUS_UNAVAILABLE
+            }
+            if (status in IN_BLOCK || status == STATUS_UNAVAILABLE) {
+                val onChain = try {
+                    env.api.hive.transactionOperations(id)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+                if (onChain != null) {
+                    if (sameOperations(ops, onChain)) return id
+                    // a real transaction, but not the one the user approved
+                    throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(id)
+                }
+            }
+            if (attempt < HIVE_AUTH_LOOKUPS - 1) delay(HIVE_AUTH_LOOKUP_MILLIS)
+        }
+        throw com.ecency.core.api.broadcast.BroadcastException.Unconfirmed(id)
     }
 
     /** In-app owner signing is not offered yet: always declined. */
@@ -378,6 +419,57 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     private fun setPrompt(prompt: SigningPrompt) = setState { it.copy(prompt = prompt) }
 
     companion object {
+        /** How often, and how far apart, a HiveAuth transaction is looked up on chain (about 30 s, ten blocks). */
+        const val HIVE_AUTH_LOOKUPS = 10
+        const val HIVE_AUTH_LOOKUP_MILLIS = 3_000L
+        private val TX_ID = Regex("^[0-9a-f]{40}$")
+        private val IN_BLOCK = setOf("within_reversible_block", "within_irreversible_block")
+
+        /** find_transaction failed or is not served by the node: the transaction itself is asked for. */
+        private const val STATUS_UNAVAILABLE = ""
+
+        /**
+         * Whether the chain's [onChain] operations are the [sent] ones: the same count, and each with the same name
+         * (`vote`, `vote_operation` and the `{type, value}` form read alike) and the same fields, read through the
+         * operation serializer where it knows the operation (so number and text spellings and default fields agree;
+         * the app's own posting authority `account_update` included, [com.ecency.core.api.broadcast.OperationJson.decodeOwn]),
+         * else as JSON (key order does not matter, and a field set to null reads as an absent one: the chain answers
+         * `"owner": null` for an optional field the app left out; arrays keep their order).
+         */
+        internal fun sameOperations(sent: JsonArray, onChain: JsonArray): Boolean =
+            sent.size == onChain.size && sent.indices.all { i ->
+                val a = normalisedOperation(sent[i])
+                a != null && a == normalisedOperation(onChain[i])
+            }
+
+        private fun normalisedOperation(op: kotlinx.serialization.json.JsonElement): JsonArray? {
+            val pair = when (op) {
+                is JsonArray -> op.takeIf { it.size == 2 }
+                is kotlinx.serialization.json.JsonObject -> {
+                    val type = (op["type"] as? JsonPrimitive)?.contentOrNull
+                    val value = op["value"]
+                    if (type != null && value != null) JsonArray(listOf(JsonPrimitive(type), value)) else null
+                }
+                else -> null
+            } ?: return null
+            val name = (pair[0] as? JsonPrimitive)?.takeIf { it.isString }?.content?.lowercase()?.removeSuffix("_operation") ?: return null
+            val named = JsonArray(listOf(JsonPrimitive(name), pair[1]))
+            return try {
+                com.ecency.core.api.broadcast.OperationJson.encode(com.ecency.core.api.broadcast.OperationJson.decodeOwn(named))
+            } catch (e: Exception) {
+                JsonArray(listOf(named[0], withoutNulls(named[1])))
+            }
+        }
+
+        /** [value] with every null-valued object field dropped, at any depth; arrays keep their order. */
+        private fun withoutNulls(value: kotlinx.serialization.json.JsonElement): kotlinx.serialization.json.JsonElement = when (value) {
+            is kotlinx.serialization.json.JsonObject -> kotlinx.serialization.json.JsonObject(
+                value.filterValues { it !is kotlinx.serialization.json.JsonNull }.mapValues { withoutNulls(it.value) },
+            )
+            is JsonArray -> JsonArray(value.map(::withoutNulls))
+            else -> value
+        }
+
         val HOT_PAGE_CLOSED: String get() = L.native.signing.hotPageClosed
 
         // RN en-US auth_upgrade.invalid_key, auth_upgrade.key_mismatch

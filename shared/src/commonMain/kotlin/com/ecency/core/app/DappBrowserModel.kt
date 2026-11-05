@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.LoginMethod
 import com.ecency.core.auth.loginMethod
 import com.ecency.core.hive.KeyRole
@@ -149,6 +150,8 @@ data class BridgePrompt(
     val details: List<LinkField> = emptyList(),
     /** The listed phishing domain the page is (or is under), shown as a warning. */
     val blacklisted: String? = null,
+    /** A line shown above the confirmation, e.g. that a signed message gives another app lasting permission. */
+    val warning: String? = null,
 )
 
 data class DappBrowserState(
@@ -211,6 +214,57 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private sealed interface Work {
         class Broadcast(val ops: JsonArray, val authority: KeyRole) : Work
         class SignBuffer(val message: String, val authority: KeyRole) : Work
+
+        /** Peak Vault connect: the page learns the account name, nothing is signed. */
+        data object Connect : Work
+    }
+
+    /** Origins the user let learn [connectedUser]'s name (Peak Vault connect). */
+    private val connectApprovals = mutableSetOf<String>()
+
+    /**
+     * Connects the user refused, by tab and origin, kept while the tab stays on that site ([documentStarted]): the
+     * page cannot ask again and again, not even by reloading itself. A load of another site in the tab, or another
+     * signed-in account ([forgetConnectsUnlessFor]), clears the refusal, and the site may ask once more.
+     */
+    private val connectRefusals = mutableSetOf<Pair<Int, String>>()
+    private var connectedUser: String? = null
+
+    /** Whether [origin] was approved for [user]; an account change forgets every approval. */
+    private fun connectApproved(origin: String, user: String): Boolean {
+        forgetConnectsUnlessFor(user)
+        return origin in connectApprovals
+    }
+
+    /** Keeps the user's approval of [origin] for [user] until the account changes. */
+    private fun rememberConnect(origin: String, user: String) {
+        forgetConnectsUnlessFor(user)
+        connectApprovals += origin
+    }
+
+    /** Keeps the user's refusal of [origin] in [tabId] while the tab stays on that site, for [user]. */
+    private fun rememberConnectRefusal(tabId: Int, origin: String, user: String) {
+        forgetConnectsUnlessFor(user)
+        connectRefusals += tabId to origin
+    }
+
+    private fun connectRefused(tabId: Int, origin: String, user: String): Boolean {
+        forgetConnectsUnlessFor(user)
+        return (tabId to origin) in connectRefusals
+    }
+
+    private fun forgetConnectsUnlessFor(user: String?) {
+        if (connectedUser == user) return
+        connectApprovals.clear()
+        connectRefusals.clear()
+        connectedUser = user
+    }
+
+    init {
+        // an account change forgets every connect answer, even one switched away from and back
+        scope.launch {
+            env.session.state.collect { s -> if (!s.isLoading) forgetConnectsUnlessFor(s.username) }
+        }
     }
 
     private class PendingRequest(
@@ -400,6 +454,16 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             }
         }
 
+    /**
+     * [tabId]'s web view started a new document (Android onPageStarted, iOS didCommit; a history update of the same
+     * document is not one): a Peak Vault connect the user refused may be asked again once the tab is on another site.
+     */
+    fun documentStarted(tabId: Int, url: String?) {
+        // a refusal holds while the tab stays on that site: a page that reloads itself does not get to ask again
+        val origin = url?.let { com.ecency.core.render.url.WebUrl.parse(it) }?.let { "${it.protocol}//${it.host}".lowercase() }
+        connectRefusals.removeAll { it.first == tabId && it.second.lowercase() != origin }
+    }
+
     /** The web view of [tabId] committed [url]: its document is the one running now (load commit, history update). */
     fun pageCommitted(tabId: Int, url: String?) {
         if (url == null || BrowserPolicy.navigation(url, true, false) != BrowserNavigation.LOAD) return
@@ -500,7 +564,13 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         if (keyRole != null && keyRole !in listOf("posting", "active", "memo")) return answer.error("Invalid keyRole: \"$keyRole\"")
         val single = (ops.singleOrNull() as? JsonArray)?.let { (it.getOrNull(0) as? JsonPrimitive)?.contentOrNull }
         val user = env.session.current.username ?: return answer.error(NO_ACCOUNT)
-        if (single == "peakvault-connect") return answer.success(JsonArray(listOf(JsonPrimitive(user))))
+        if (single == "peakvault-connect") {
+            // the account name is shared once the user approved the origin (RN answered it to any page without a
+            // word); after a refusal the page may ask again only from a new page load
+            if (connectApproved(origin, user)) return answer.success(JsonArray(listOf(JsonPrimitive(user))))
+            if (connectRefused(tabId, origin, user)) return answer.error(REJECTED)
+            return prompt(PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Connect), connectTitle(BrowserPolicy.host(origin)), emptyList(), null)
+        }
         if (requested != null && requested != user) return answer.error(mismatch(requested, user))
         when (single) {
             "peakvault-sign_buffer" -> {
@@ -555,6 +625,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         // JS hands UTF-16; a lone surrogate has no UTF-8 form the page and the app would agree on
         if (hasLoneSurrogate(message)) return answer.error("Invalid message.")
         if (message.length > MAX_MESSAGE_TO_SIGN) return answer.error("Invalid message.")
+        // Ecency's own login code, upload token and HiveAuth challenge are signed over this same digest: a page
+        // never gets one signed, however it is spaced or ordered
+        if (BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val wif = if (authority == KeyRole.ACTIVE) account.activeKey else account.postingKey
@@ -563,6 +636,8 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             prompt(
                 PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.SignBuffer(message, authority)),
                 BridgeLabels.of("signBuffer"), listOf(LinkField(MESSAGE, BridgeDisplay.shown(message))), null,
+                // another app's posting or offline message works as a lasting HiveSigner token for that app
+                warning = BridgeSignatures.lastingGrantApp(message)?.let { lastingPermission(BridgeDisplay.shown(it)) },
             )
         }
     }
@@ -572,11 +647,12 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             current.tabs.firstOrNull { it.id == tabId }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
             env.session.current.username == user
 
-    private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?) {
+    private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?, warning: String? = null) {
         pending = request
         val authority = when (val w = request.work) {
-            is Work.Broadcast -> w.authority
-            is Work.SignBuffer -> w.authority
+            is Work.Broadcast -> w.authority.value.uppercase()
+            is Work.SignBuffer -> w.authority.value.uppercase()
+            Work.Connect -> CONNECT_AUTHORITY
         }
         val host = BrowserPolicy.host(request.origin)
         setState {
@@ -587,10 +663,11 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                     title = title,
                     host = host,
                     username = request.username,
-                    authority = authority.value.uppercase(),
+                    authority = authority,
                     operations = ops.orEmpty().mapNotNull { op -> (op as? JsonArray)?.let(::view) },
                     details = details,
                     blacklisted = DappBlacklist.check(host),
+                    warning = warning,
                 ),
             )
         }
@@ -619,6 +696,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
                 when (val w = request.work) {
                     is Work.SignBuffer -> signBuffer(request, w)
                     is Work.Broadcast -> broadcast(request, w)
+                    Work.Connect -> {
+                        rememberConnect(request.origin, request.username)
+                        request.answer.success(JsonArray(listOf(JsonPrimitive(request.username))))
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -635,6 +716,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         val request = pending ?: return
         pending = null
         setState { it.copy(prompt = null) }
+        if (request.work == Work.Connect && env.session.current.username == request.username) {
+            rememberConnectRefusal(request.tabId, request.origin, request.username)
+        }
         request.answer.error(REJECTED)
     }
 
@@ -746,6 +830,15 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         const val NOT_IN_FRONT = "The page is not in front."
         const val LOCKED = "Ecency is locked. Unlock it and try again."
         const val ACCOUNT_CHANGED = "The signed-in account changed. Please try again."
+        /** native.dapp_browser.lasting_permission: [app] may post, vote and comment as the signer from now on. */
+        fun lastingPermission(app: String): String = L.native.dappBrowser.lastingPermission(app = app)
+
+        /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
+        const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
+
+        /** The question before a page learns the account name (Peak Vault connect). */
+        fun connectTitle(host: String) = L.native.dappBrowser.connectTitle(host = host)
+        val CONNECT_AUTHORITY: String get() = L.native.dappBrowser.connectAuthority
         val MESSAGE: String get() = L.profile.message
 
         /** Ops JSON plus the page's text: Hive takes 64 KB a transaction, this leaves room for JSON escapes. */
@@ -814,4 +907,81 @@ object BridgeDisplay {
 /** The signBuffer digest: sha256 of the message's UTF-8 bytes (the SDK's sha256 of a string). */
 object BridgeSignatures {
     fun digest(message: String): ByteArray = com.ecency.core.hive.sha256(message.encodeToByteArray())
+
+    private val lenient = Json { isLenient = true }
+
+    /**
+     * True when [message] is a HiveSigner signed message the app must never sign for a page: one for Ecency's own
+     * app (`signed_message.app` is `ecency.app`, any type), or a `code` or `refresh` message for any app (HiveSigner
+     * trades those for tokens). Other apps' `login`, `posting` and `offline` messages are allowed: HiveSigner style
+     * logins on other dApps use them. Parsed leniently, so spacing, key order and escapes do not matter; JSON text
+     * inside a JSON string is read too. A duplicate key reads as its last value, as JS `JSON.parse` does. A
+     * `signed_message` that is not an object, or an `app` or `type` that is not a string, is refused. Text that does
+     * not parse is refused when it names `signed_message` and `ecency.app`, `code` or `refresh`.
+     */
+    fun reserved(message: String): Boolean = when (val read = read(message)) {
+        is Read.Object -> reservedObject(read.obj)
+        is Read.Unparsed -> unparsedReserved(read.text)
+        Read.Other -> false
+    }
+
+    /**
+     * The app named by another app's `posting` or `offline` signed message: HiveSigner takes such a message as a
+     * lasting token for that app (it may post, vote and comment as the signer), so the prompt says so. Null for
+     * anything else (a `login` message, a reserved message, plain text).
+     */
+    fun lastingGrantApp(message: String): String? {
+        val obj = (read(message) as? Read.Object)?.obj ?: return null
+        if (reservedObject(obj)) return null
+        val signed = obj[SIGNED_MESSAGE] as? JsonObject ?: return null
+        val type = field(signed, "type")?.trim()?.lowercase() ?: return null
+        if (type !in LASTING_TYPES) return null
+        return field(signed, "app")?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    private sealed interface Read {
+        class Object(val obj: JsonObject) : Read
+        class Unparsed(val text: String) : Read
+        data object Other : Read
+    }
+
+    /** The message as JSON, read leniently, JSON text inside a JSON string included. */
+    private fun read(message: String): Read {
+        var text = message
+        repeat(MAX_NESTING) {
+            val parsed = runCatching { lenient.parseToJsonElement(text) }.getOrNull() ?: return Read.Unparsed(text)
+            when (parsed) {
+                is JsonObject -> return Read.Object(parsed)
+                is JsonPrimitive -> if (parsed.isString) text = parsed.content else return Read.Other
+                else -> return Read.Other
+            }
+        }
+        return Read.Unparsed(text)
+    }
+
+    private val LASTING_TYPES = setOf("posting", "offline")
+
+    private fun reservedObject(obj: JsonObject): Boolean {
+        val signed = obj[SIGNED_MESSAGE] ?: return false
+        if (signed !is JsonObject) return true
+        val app = field(signed, "app") ?: return true
+        val type = field(signed, "type") ?: return true
+        return app.trim().equals(HiveSignerMessages.APP, ignoreCase = true) ||
+            type.trim().lowercase() in TOKEN_TYPES
+    }
+
+    /** The field as text ("" when absent), or null when it is there but not a string. */
+    private fun field(obj: JsonObject, name: String): String? = when (val v = obj[name]) {
+        null, JsonNull -> ""
+        is JsonPrimitive -> if (v.isString) v.content else null
+        else -> null
+    }
+
+    private fun unparsedReserved(text: String): Boolean =
+        text.contains(SIGNED_MESSAGE, ignoreCase = true) &&
+            (text.contains(HiveSignerMessages.APP, ignoreCase = true) || TOKEN_TYPES.any { text.contains(it, ignoreCase = true) })
+
+    private val TOKEN_TYPES = setOf("code", "refresh")
+    private const val SIGNED_MESSAGE = "signed_message"
+    private const val MAX_NESTING = 4
 }

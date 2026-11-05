@@ -817,6 +817,25 @@ class PushTest {
     }
 
     @Test
+    fun pushTextKeepsJoinersAndDropsHiddenCharacters() {
+        val family = "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67" // man ZWJ woman ZWJ girl
+        val persian = "\u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u0645" // mi-khaham, with a ZWNJ
+        val marks = "a\u200Eb\u200Fc"
+        assertEquals("$family $persian $marks", PushPayload.clean("$family $persian $marks"))
+        // tag characters (a hidden "hi" after a flag base), RLO and isolates, zero width and format characters go
+        val tags = "\uDB40\uDC68\uDB40\uDC69"
+        assertEquals("abcdefgh", PushPayload.clean("a${tags}b\u202Ec\u2066d\u2069e\u200B\uFEFF\u00ADf\u2060\u2064g\u0001\u0085\u007F\u2028h"))
+        // lone surrogates go, a pair stays
+        assertEquals("ab\uD83D\uDE00", PushPayload.clean("a\uD83Db\uDE00\uD83D\uDE00"))
+        // truncation ends on a code point boundary
+        val long = "a" + "\uD83D\uDE00".repeat(400)
+        val cut = PushPayload.clean(long)
+        assertFalse(cut.last().isHighSurrogate(), "no lone high surrogate at the end")
+        assertTrue(cut.length <= 300)
+        assertEquals(cut, PushPayload.clean(cut), "what is left is clean")
+    }
+
+    @Test
     fun aTappedPushWaitsBehindTheLockAndShowsNothingThere() = runTest {
         val p = Push(this, pin = "1234")
         p.backend.markUnread = 0
@@ -898,6 +917,18 @@ class PushTest {
 
     private fun banner(type: String, title: String? = null, body: String? = null, vararg data: Pair<String, String>) =
         PushRouting.banner(PushPayload.of(mapOf("type" to type, "source" to bob, "target" to alice, "id" to "x-1", *data), title, body))
+
+    @Test
+    fun bannerTextsLoseBidiOverridesAndFormatCharacters() {
+        val hostile = "pay‮evil​⁦x⁩­﻿ end"
+        val b = PushRouting.banner(PushPayload.of(mapOf("type" to "reply", "source" to hostile, "target" to "al‮ice", "id" to "x-1"), hostile, hostile))!!
+        assertEquals("New reply on @alice", b.title)
+        val tag = PushRouting.banner(PushPayload.of(mapOf("type" to "tag", "source" to bob, "target" to alice, "id" to "x-2"), hostile, hostile))!!
+        assertEquals("payevilxend", tag.title)
+        assertEquals("payevilxend", tag.body)
+        val transfer = PushRouting.banner(PushPayload.of(mapOf("type" to "transfer", "source" to "bo‮b", "target" to alice, "id" to "x-3"), null, null))!!
+        assertEquals("@bob transferred", transfer.title)
+    }
 
     @Test
     fun bannersUseRnCopyAndRouting() {

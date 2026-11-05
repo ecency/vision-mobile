@@ -75,7 +75,16 @@ class TestApp(
     ioWrap: ((kotlinx.coroutines.CoroutineDispatcher) -> kotlinx.coroutines.CoroutineDispatcher)? = null,
     val handler: suspend FakeTransport.(Sent) -> HttpResult,
 ) {
-    val transport = FakeTransport(handler)
+    /**
+     * The fake chain's transactions by id, for HiveAuth confirmations (`condenser_api.get_transaction`); [HAS_TX]
+     * holds whatever the relay double was last asked to sign unless set here.
+     */
+    val chainTxs = mutableMapOf<String, kotlinx.serialization.json.JsonArray>()
+
+    /** find_transaction answers by id (null: the test's own handler answers); "error" answers an RPC error. */
+    var txStatus: (String) -> String? = { null }
+
+    val transport = FakeTransport { request -> chainTransaction(request) ?: handler(request) }
     val store = InMemorySecureStore()
     val main = StandardTestDispatcher(scope.testScheduler, "main")
     val render = TrackingDispatcher(StandardTestDispatcher(scope.testScheduler, "render"))
@@ -104,6 +113,8 @@ class TestApp(
     )
 
     init {
+        // the relay double reads a sign request as the wallet would, with the account's HiveAuth key
+        relay.keyOf = { KeyVault(store).account(it)?.hiveAuthKey }
         // the welcome screen is behind the tests' user unless a test says otherwise
         env.setWelcomeDone(true)
     }
@@ -117,9 +128,30 @@ class TestApp(
 
     fun broadcasts() = transport.sent.filter { it.method == "condenser_api.broadcast_transaction" }
 
+    private fun txIdOf(request: Sent): String =
+        Regex("[0-9a-f]{40}").find(request.params.toString())?.value.orEmpty()
+
+    private fun chainTransaction(request: Sent): HttpResult? = when (request.method) {
+        "transaction_status_api.find_transaction" -> when (val status = txStatus(txIdOf(request))) {
+            null -> null
+            "error" -> FakeTransport.error(request, -32601, "Could not find method find_transaction")
+            else -> FakeTransport.result(request, """{"status":"$status"}""")
+        }
+        "condenser_api.get_transaction" -> {
+            val id = txIdOf(request)
+            val ops = chainTxs[id] ?: relay.signedOps.lastOrNull()?.takeIf { id == HAS_TX }
+            if (ops == null) FakeTransport.error(request, -32000, "Unknown Transaction $id")
+            else FakeTransport.result(request, """{"ref_block_num":1,"ref_block_prefix":2,"expiration":"2026-10-06T12:01:00","operations":$ops,"extensions":[],"signatures":[],"transaction_id":"$id","block_num":100,"transaction_num":0}""")
+        }
+        else -> null
+    }
+
     companion object {
         const val PROXY = "https://i.ecency.com"
         const val USER = "spike-voter"
+
+        /** The transaction id the fake HiveAuth relay's sign_ack names; the fake chain has it in a block. */
+        const val HAS_TX = "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567"
 
         /** 2026-10-06T12:00:00Z */
         const val NOW = 1_791_288_000_000L
@@ -136,6 +168,8 @@ class TestApp(
             )
             "condenser_api.get_block_header" -> FakeTransport.result(request, """{"previous":"$REF_ID"}""")
             "condenser_api.get_content" -> FakeTransport.result(request, """{"author":"","permlink":""}""")
+            "transaction_status_api.find_transaction" ->
+                if (request.params.toString().contains(HAS_TX)) FakeTransport.result(request, """{"status":"within_reversible_block"}""") else null
             else -> null
         }
     }

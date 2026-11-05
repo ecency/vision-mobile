@@ -22,7 +22,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
     val rpc = mutableMapOf<String, (Sent) -> String?>()
     val http = mutableMapOf<String, (com.ecency.core.auth.AuthHttpRequest) -> HttpResult?>()
     var broadcastAnswer: suspend (Sent) -> HttpResult = { FakeTransport.result(it, "{}") }
-    var statusAnswer: (Sent) -> String = { "\"unknown\"" }
+    var statusAnswer: (Sent) -> String = { if (it.params.toString().contains(TestApp.HAS_TX)) "\"within_reversible_block\"" else "\"unknown\"" }
 
     /** A method whose answer waits for its gate (an in-flight read held while the test acts). */
     val gates = mutableMapOf<String, kotlinx.coroutines.CompletableDeferred<Unit>>()

@@ -126,7 +126,11 @@ data class TradeState(
 }
 
 sealed interface TradePrompt {
-    data class Confirm(val text: String) : TradePrompt
+    /**
+     * The question before a send. For a swap, [amountToSell] and [minToReceive] are the chain amounts [text] shows:
+     * those are what is signed, whatever the order book does while the question is open.
+     */
+    data class Confirm(val text: String, val amountToSell: String = "", val minToReceive: String = "") : TradePrompt
 
     data class Alert(val title: String, val message: String) : TradePrompt
 }
@@ -208,6 +212,8 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
 
     private fun requote() {
         val s = current
+        // an open question keeps the amounts it shows; the quote follows the book again once it closes
+        if (s.prompt is TradePrompt.Confirm) return
         val amount = s.fromValue
         val q = SwapCalculator.quote(bids, asks, amount, s.from == "HIVE")
         // no amount in the new quote (an empty book): no amount to confirm (RN kept the last one)
@@ -238,19 +244,25 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     fun next() {
         val s = current
         if (!s.continueEnabled) return
-        setState { it.copy(prompt = TradePrompt.Confirm(TradeCopy.swapFor("${Amounts.fixed(s.fromAmount, 3)} ${s.from}", "${Num.fixed(s.toAmount, 3)} ${s.to}"))) }
+        val sell = "${Amounts.fixed(s.fromAmount, 3)} ${s.from}"
+        val receive = "${Num.fixed(s.toAmount, 3)} ${s.to}"
+        setState { it.copy(prompt = TradePrompt.Confirm(TradeCopy.swapFor(sell, receive), sell, receive)) }
     }
 
-    fun dismissPrompt() = setState { it.copy(prompt = null) }
+    fun dismissPrompt() {
+        setState { it.copy(prompt = null) }
+        requote()
+    }
 
     fun confirm() {
         val s = current
-        if (s.prompt !is TradePrompt.Confirm) return
+        val prompt = s.prompt as? TradePrompt.Confirm ?: return
         val owner = user ?: return
         val now = env.nowMillis()
         val op = try {
+            // the amounts the question showed, never the live quote
             WalletOps.limitOrderCreate(
-                owner, "${Amounts.fixed(s.fromAmount, 3)} ${s.from}", "${Num.fixed(s.toAmount, 3)} ${s.to}", false,
+                owner, prompt.amountToSell, prompt.minToReceive, false,
                 ChainTime.fromEpochSeconds(now / 1000 + EXPIRATION_SECONDS), orderId(now),
             )
         } catch (e: Exception) {

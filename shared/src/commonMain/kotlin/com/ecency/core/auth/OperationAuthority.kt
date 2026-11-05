@@ -43,6 +43,21 @@ object OperationAuthority {
         put("decline_voting_rights", KeyRole.OWNER)
     }
 
+    /**
+     * Operations that change who controls an account, or that only the owner key signs: never signed for a web page
+     * (the dApp bridge's `BridgeGuards`) or a link (`HiveUriTx.format`).
+     */
+    val ACCOUNT_CONTROL: Set<String> = setOf(
+        "account_update", "change_recovery_account", "request_account_recovery", "recover_account", "reset_account",
+        "set_reset_account", "decline_voting_rights", "account_create", "account_create_with_delegation",
+        "create_claimed_account", "claim_account",
+    )
+
+    /**
+     * Operations that set a witness's block signing key or properties: never signed for a web page or a link either.
+     */
+    val WITNESS_KEYS: Set<String> = setOf("witness_update", "witness_set_properties")
+
     /** Whether [name] is an operation this map classifies (its authority is not a guess). */
     fun isKnown(name: String): Boolean =
         name in SDK_MAP || name in BEYOND_SDK || name == "custom_json" || name == "create_proposal" || name == "update_proposal"

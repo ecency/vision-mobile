@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "Criou {count, plural, one {# artigo} many {# artigo} other {# artigo}} este mês. Continue assim!",
+        "checkin": "Registou presença em {count, plural, one {# dia} many {# dia} other {# dia}} esta semana. Continue assim!",
         "tags_bundle": "{count, plural, one {# nova publicação} many {# de novas publicações} other {# novas publicações}} em #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# tentativa(s) errada(s)} many {# tentativa(s) errada(s)} other {# tentativa(s) errada(s)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Sequência de {n} dias"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Apenas contas mais antigas do que {days} dias são permitidas",
+        "max_choices": "• Você pode selecionar até {choices} opções"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Restantes {executions} transferências",
+        "schedule_summary": "{executions} transferências, cada uma a cada {hours} horas"
       },
       "editor": {
         "short_content_hint": "Demasiado curto para ganhar pontos ({n, plural, one {# carácter} many {# de caracteres} other {# caracteres}} ou menos, sem contar ligações)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} pessoas aderiram",
         "ban-remaining-minutes": "em cerca de {count, plural, one {# minuto} many {# de minutos} other {# minutos}}",
         "ban-remaining-hours": "em cerca de {count, plural, one {# hora} many {# de horas} other {# horas}}",
         "ban-remaining-days": "em cerca de {count, plural, one {# dia} many {# de dias} other {# dias}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "São necessários no mínimo {count} caracteres",
+        "chars_remaining": "{count} caracteres restantes"
       },
       "alert": {
         "too_many_images": "Pode selecionar até {count, plural, one {# imagem} many {# de imagens} other {# imagens}} de cada vez"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points por {s, plural, one {# segundo} many {# de segundos} other {# segundos}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Próxima redução de poder será em {days} dias, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Entre {min} e {max, plural, one {# carácter} many {# de caracteres} other {# caracteres}}"

@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "Bu ay {count, plural, one {# gönderi} other {# gönderi}} oluşturdun. Böyle devam et!",
+        "checkin": "Bu hafta {count, plural, one {# gün} other {# gün}} giriş yaptın. Böyle devam et!",
         "tags_bundle": "#{tag} etiketinde {count, plural, one {# yeni gönderi} other {# yeni gönderi}}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# hatalı deneme(ler)} other {# hatalı deneme(ler)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "{n} günlük seri"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Yalnızca {days} günden eski hesaplara izin verilir",
+        "max_choices": "• En fazla {choices} seçenek seçebilirsiniz"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Kalan {executions} transfer",
+        "schedule_summary": "{executions} transfer, her biri {hours} saatte bir"
       },
       "editor": {
         "short_content_hint": "Points kazanmak için çok kısa ({n, plural, one {# karakter} other {# karakter}} veya daha az, bağlantılar hariç)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} kişi katıldı",
         "ban-remaining-minutes": "yaklaşık {count, plural, one {# dakika} other {# dakika}} sonra",
         "ban-remaining-hours": "yaklaşık {count, plural, one {# saat} other {# saat}} sonra",
         "ban-remaining-days": "yaklaşık {count, plural, one {# gün} other {# gün}} sonra"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "En az {count} karakter gerekli",
+        "chars_remaining": "{count} karakter kaldı"
       },
       "alert": {
         "too_many_images": "Bir seferde en fazla {count, plural, one {# görsel} other {# görsel}} seçebilirsin"
@@ -3090,7 +3090,7 @@
         "rate": "{s, plural, one {# saniye} other {# saniye}} için {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Bir sonraki çözme {days} gün sonra, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} ile {max, plural, one {# karakter} other {# karakter}} arasında"

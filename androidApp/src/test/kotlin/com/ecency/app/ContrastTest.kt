@@ -39,8 +39,12 @@ class ContrastTest {
             // in light, where RN's 1.5:1 border was hard to see), and in dark a fill that stays a dark surface
             check(failures, "$theme warningText on warningBackground", c.warningText, c.warningBackground, 4.5)
             check(failures, "$theme warningBorder on warningBackground", c.warningBorder, c.warningBackground, 3.0)
+            // the danger box (dApp phishing and request warnings): its text and icon on its fill
+            check(failures, "$theme text on dangerBackground", c.text, c.dangerBackground, 4.5)
+            check(failures, "$theme redText icon on dangerBackground", c.redText, c.dangerBackground, 3.0)
             if (c.isDark) {
                 if (c.warningBackground.luminance() > c.lightBackground.luminance() + 0.02f) failures += "$theme warningBackground is not a dark surface"
+                if (c.dangerBackground.luminance() > c.lightBackground.luminance() + 0.02f) failures += "$theme dangerBackground is not a dark surface"
             }
             // white labels on the blue and red fills (buttons, badges)
             check(failures, "$theme white on blue", Color.White, c.blue, 4.5)

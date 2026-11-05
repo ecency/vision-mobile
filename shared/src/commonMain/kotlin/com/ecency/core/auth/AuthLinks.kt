@@ -29,8 +29,11 @@ sealed interface AuthLink {
     /** `ecency://auth-request`: answer another app with a sign-in proof (never a key). */
     data class AuthRequest(val callback: String, val requestId: String?, val username: String?) : AuthLink
 
-    /** `ecency://login`: another app asks for the posting key of [username]. */
-    data class PostingKeyRequest(val username: String, val callback: String, val requestId: String?) : AuthLink
+    /**
+     * `ecency://login`: another app asks for a posting key. Ecency no longer hands keys to other apps (RN did): the
+     * request is answered `not_supported` once the user saw why.
+     */
+    data class LoginRequest(val callback: String, val requestId: String?) : AuthLink
 
     /** `ecency://auth-transfer`: HiveSigner tokens handed over from the web app. */
     data class AuthTransfer(
@@ -91,7 +94,7 @@ object AuthLinks {
             when (parsed.hostname.lowercase()) {
                 "auth-transfer" -> return authTransfer(parsed)
                 "auth-request" -> return parseAuthRequest(url) ?: AuthLink.Invalid("invalid_request")
-                "login" -> return postingKeyRequest(parsed)
+                "login" -> return loginRequest(parsed)
                 "transfer" -> return transfer(parsed)
             }
         }
@@ -150,6 +153,10 @@ object AuthLinks {
         return APP_SCHEME.matches(scheme) && scheme !in SYSTEM_SCHEMES && SYSTEM_PREFIXES.none { scheme.startsWith(it) }
     }
 
+    /** The callback's scheme name, lowercased, without the colon. */
+    fun callbackScheme(callback: String): String? =
+        WebUrl.parse(callback)?.protocol?.removeSuffix(":")?.lowercase()?.takeIf { it.isNotEmpty() }
+
     /** RN callbackAudience: scheme and host of the callback, lowercased. */
     fun callbackAudience(callback: String): String =
         WebUrl.parse(callback)?.let { "${it.protocol}//${it.host}".lowercase() } ?: callback
@@ -164,19 +171,12 @@ object AuthLinks {
         return AuthLink.AuthRequest(callback, u.param("request_id"), username.ifEmpty { null })
     }
 
-    /**
-     * `ecency://login?username&callback|redirect_uri|return_url&request_id`. RN answers any callback; the
-     * port also requires [isAcceptableCallback], since the success answer carries the posting key.
-     */
-    private fun postingKeyRequest(u: WebUrl): AuthLink {
+    /** `ecency://login?callback|redirect_uri|return_url&request_id`: only where the refusal goes back to. */
+    private fun loginRequest(u: WebUrl): AuthLink {
         val callback = u.param("callback").orEmptyNull() ?: u.param("redirect_uri").orEmptyNull() ?: u.param("return_url").orEmptyNull()
-        val requestId = u.param("request_id")
-        val raw = u.param("username").orEmptyNull()
-        if (raw == null || callback == null) return AuthLink.Invalid("invalid_params")
+            ?: return AuthLink.Invalid("invalid_params")
         if (!isAcceptableCallback(callback)) return AuthLink.Invalid("invalid_callback")
-        val username = raw.replace(Regex("^@"), "").trim().lowercase()
-        if (!isHiveAccountName(username)) return AuthLink.Invalid("invalid_params")
-        return AuthLink.PostingKeyRequest(username, callback, requestId)
+        return AuthLink.LoginRequest(callback, u.param("request_id"))
     }
 
     /** A signing link: decodable, and any `cb=` callback acceptable (else Invalid without a callback). */

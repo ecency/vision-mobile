@@ -1,0 +1,37 @@
+version: 2
+
+# Monthly, grouped, at most 3 open pull requests per ecosystem to keep CI minutes low (security updates still come
+# as soon as an advisory lands, whatever the schedule).
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      gradle:
+        patterns: ["*"]
+
+  # Offline golden fixture generators only; never part of a build.
+  - package-ecosystem: npm
+    directories:
+      - /tools
+      - /tools/render
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      tools:
+        patterns: ["*"]
+
+  # swift: not configured. Dependabot reads Package.swift or a committed Xcode project; the iOS project here is
+  # generated from iosApp/project.yml (XcodeGen) and is not committed, so there is nothing for it to update.

@@ -34,6 +34,9 @@ struct AppTheme {
     var warningBorder = Color(hex: 0xB07800)
     /// Text and icons on `warningBackground`: AA in every theme.
     var warningText = Color(hex: 0x8A5B00)
+    /// The danger box (the dApp phishing and request warnings): RN's pink in light, a dark red surface in dark, under
+    /// `text` and a `dangerText` icon; the same values as Android's `EcencyColors`.
+    var dangerBackground = Color(hex: 0xFDEDED)
 
     static let light = AppTheme(
         background: Color(hex: 0xFFFFFF), lightBackground: Color(hex: 0xF6F6F6), text: Color(hex: 0x3C4449),
@@ -49,7 +52,9 @@ struct AppTheme {
         accentText: Color(hex: ContrastPalette.darkAccentText), dangerText: Color(hex: ContrastPalette.darkDangerText), isDark: true,
         successText: Color(hex: 0x4FD688),
         // an amber dark surface: border 4.8:1, text 9.4:1 on it
-        warningBackground: Color(hex: 0x3A3223), warningBorder: Color(hex: 0xC9963A), warningText: Color(hex: 0xFFD98A)
+        warningBackground: Color(hex: 0x3A3223), warningBorder: Color(hex: 0xC9963A), warningText: Color(hex: 0xFFD98A),
+        // text 13.8:1 and dangerText 6.5:1 on it
+        dangerBackground: Color(hex: 0x3D2427)
     )
 
     /// Increase Contrast: text colors reach about 7:1 in light; in dark AA on `lightBackground` too; icons 3:1.

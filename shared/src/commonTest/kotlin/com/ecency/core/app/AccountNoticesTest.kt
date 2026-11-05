@@ -242,36 +242,41 @@ class AccountNoticesTest {
         assertNull(app.env.accountNotices.current.notice, "a private key is not a password")
     }
 
+    @Test
+    fun aKeyRemovalThatCannotBeSavedLeavesNoNoticeAndStaysPending() = runTest {
+        // alice's stored posting key is on her owner authority, and her vault entry refuses the write that removes it
+        fun sharedOwner(u: String, r: KeyRole) = if (r == KeyRole.OWNER) AppTestKeys.pub(u, KeyRole.POSTING) else AppTestKeys.pub(u, r)
+        val app = app(::sharedOwner)
+        KeyVault(app.store).run { save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "t")); setCurrentUsername(alice) }
+        app.store.failingWrites["account.$alice"] = com.ecency.core.secure.SecureStoreException.Unavailable(-25308)
+        app.env.prefs.putString(AccountNoticesModel.OWNER_CHECK, alice)
+        start(app)
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)?.postingKey, "the key stays: the write failed")
+        assertNull(app.env.accountNotices.current.notice, "nothing was removed, so nothing is told")
+        assertNull(app.env.prefs.getString(AccountNoticesModel.OWNER_NOTICE), "no notice is remembered for a removal that did not happen")
+        assertEquals(alice, app.env.prefs.getString(AccountNoticesModel.OWNER_CHECK), "the check waits for the next start")
+        // the next start, with the vault writable again: the key goes and the notice shows
+        val next = app(::sharedOwner)
+        next.store.entries.putAll(app.store.entries)
+        next.env.prefs = app.env.prefs
+        start(next)
+        assertNull(KeyVault(next.store).account(alice)?.postingKey)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, next.env.accountNotices.current.notice?.kind)
+        assertEquals(alice, next.env.prefs.getString(AccountNoticesModel.OWNER_NOTICE))
+    }
+
     // ---- a typed key that is also the owner key ----
 
     @Test
-    fun aKeySharedWithTheOwnerRoleIsKeptAndWarnedAboutAtSignIn() = runTest {
+    fun aKeySharedWithTheOwnerRoleIsRefusedAtSignInAndNothingIsStored() = runTest {
         val app = app { u, r -> if (r == KeyRole.ACTIVE) AppTestKeys.pub(u, KeyRole.OWNER) else AppTestKeys.pub(u, r) }
         start(app)
-        app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER))
-        testScheduler.advanceUntilIdle()
-        assertEquals(AppTestKeys.wif(alice, KeyRole.OWNER), KeyVault(app.store).account(alice)!!.activeKey, "kept, as the active key")
-        val notice = app.env.accountNotices.current.notice!!
-        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, notice.kind)
-        assertEquals("This key also controls the owner role", notice.title)
-        assertTrue("@spike-alice uses the same key for its owner role and its active role" in notice.body)
-        assertTrue("Give the active role a key of its own" in notice.body)
-    }
-
-    @Test
-    fun withTheSwitchOnTheSharedKeyIsRefusedAtSignInAndNothingIsStored() = runTest {
-        val app = app { u, r -> if (r == KeyRole.ACTIVE) AppTestKeys.pub(u, KeyRole.OWNER) else AppTestKeys.pub(u, r) }
-        start(app)
-        com.ecency.core.auth.KeyLogin.refuseKeySharedWithOwner = true
-        try {
-            val failure = runCatching { app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER)) }.exceptionOrNull() as AppException
-            assertEquals(AppError.KEY_SHARED_WITH_OWNER_REFUSED, failure.error.message)
-            assertTrue(failure.cause is AuthException.KeySharedWithOwner)
-            assertNull(KeyVault(app.store).account(alice))
-            assertNull(app.env.accountNotices.current.notice)
-        } finally {
-            com.ecency.core.auth.KeyLogin.refuseKeySharedWithOwner = false
-        }
+        val failure = runCatching { app.env.session.loginWithKey(alice, AppTestKeys.wif(alice, KeyRole.OWNER)) }.exceptionOrNull() as AppException
+        assertEquals(AppError.KEY_SHARED_WITH_OWNER_REFUSED, failure.error.message)
+        assertTrue("sign in with HiveSigner or HiveAuth" in failure.error.message, "the refusal says how to go on")
+        assertTrue(failure.cause is com.ecency.core.auth.AuthException.KeySharedWithOwner)
+        assertNull(KeyVault(app.store).account(alice))
+        assertNull(app.env.accountNotices.current.notice)
     }
 
     @Test
@@ -307,6 +312,24 @@ class AccountNoticesTest {
     }
 
     // ---- (c) the error at first use ----
+
+    @Test
+    fun aKeyTheImportDroppedAsTheOwnerKeyIsToldOnce() = runTest {
+        val app = app()
+        KeyVault(app.store).run { save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "t")); setCurrentUsername(alice) }
+        start(app)
+        app.env.accountNotices.ownerKeysDropped(listOf(alice, "spike-gone"))
+        testScheduler.advanceUntilIdle()
+        val notice = app.env.accountNotices.current.notice!!
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, notice.kind)
+        assertEquals(alice, notice.account)
+        assertEquals(0, app.env.accountNotices.current.queued, "an account that is not stored gets no notice")
+        // not seen before the app ended: shown again at the next start, then not after the dismissal
+        val next = nextStart(app)
+        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, next.env.accountNotices.current.notice?.kind)
+        next.env.accountNotices.dismiss()
+        assertNull(nextStart(next).env.accountNotices.current.notice)
+    }
 
     @Test
     fun aMissingKeyErrorSaysWhereToAddTheKey() {

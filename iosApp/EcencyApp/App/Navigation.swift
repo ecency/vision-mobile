@@ -65,17 +65,25 @@ enum NavDecision: Equatable {
     }
 }
 
-/// Which navigations the video sheet's web view may perform: the embed URL's host only (https; with or
-/// without `www.`, so youtube.com/embed redirecting to www.youtube.com still plays),
-/// plus `about:blank` / `about:srcdoc` frames the players create. Everything else is cancelled.
+/// Which navigations the video sheet's web view may perform: the shared rule both apps use
+/// (`SafeTarget.playerNavigationAllowed`): https on the embed's host (with or without `www.`, so youtube.com/embed
+/// redirecting to www.youtube.com still plays), a video file on its own file only, no userinfo or backslash, plus the
+/// `about:blank` / `about:srcdoc` frames the players create. Everything else is cancelled.
 enum VideoEmbedPolicy {
     static func allows(_ url: URL?, embed: URL) -> Bool {
         guard let url else { return false }
-        let scheme = url.scheme?.lowercased()
-        if scheme == "about" { return url.absoluteString == "about:blank" || url.absoluteString == "about:srcdoc" }
-        guard scheme == "https", let host = url.host?.lowercased(), let embedHost = embed.host?.lowercased() else { return false }
-        return SafeTarget.shared.samePlayerHost(host: host, embedHost: embedHost)
+        return SafeTarget.shared.playerNavigationAllowed(url: url.absoluteString, embedUrl: embed.absoluteString)
     }
+
+    /// A navigation request: [allows] for its URL, and a video file's page (no script) may not send anything but a
+    /// GET (a form POST from whatever that file URL serves is refused, wherever it goes).
+    static func allows(_ request: URLRequest, embed: URL) -> Bool {
+        if !allowsScript(embed: embed), (request.httpMethod ?? "GET").uppercased() != "GET" { return false }
+        return allows(request.url, embed: embed)
+    }
+
+    /// Players need page script; a video file the post links directly plays without it.
+    static func allowsScript(embed: URL) -> Bool { SafeTarget.shared.playerAllowsScript(embedUrl: embed.absoluteString) }
 }
 
 extension Destination {

@@ -88,6 +88,33 @@ final class NavigationDecisionTests: XCTestCase {
         XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "javascript:alert(1)"), embed: embed))
         XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "about:srcdoc#x"), embed: embed))
         XCTAssertFalse(VideoEmbedPolicy.allows(nil, embed: embed))
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://user@www.youtube.com/embed/x"), embed: embed), "userinfo")
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://www.youtube.com@evil.example/"), embed: embed), "userinfo")
+    }
+
+    func testVideoSheetUsesTheSharedRuleAndAVideoFileRunsNoScript() {
+        let skate = URL(string: "https://ipfs.skatehive.app/ipfs/QmVideoHash")!
+        XCTAssertTrue(VideoEmbedPolicy.allows(skate, embed: skate))
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://ipfs.skatehive.app/ipfs/QmOtherHash"), embed: skate), "another file on the host")
+        XCTAssertFalse(VideoEmbedPolicy.allows(URL(string: "https://user@ipfs.skatehive.app/ipfs/QmVideoHash"), embed: skate), "userinfo")
+        for url in ["https://ipfs.skatehive.app/ipfs/QmOtherHash", "https://ipfs.skatehive.app/ipfs/QmVideoHash", "https://www.youtube.com/x"] {
+            XCTAssertEqual(VideoEmbedPolicy.allows(URL(string: url), embed: skate),
+                           SafeTarget.shared.playerNavigationAllowed(url: url, embedUrl: skate.absoluteString), url)
+        }
+        // a video file's page posts nothing, not even to its own file; players keep their own requests
+        var post = URLRequest(url: skate)
+        post.httpMethod = "POST"
+        XCTAssertFalse(VideoEmbedPolicy.allows(post, embed: skate), "no POST from a video file")
+        var offHost = URLRequest(url: URL(string: "https://evil.example/collect")!)
+        offHost.httpMethod = "POST"
+        XCTAssertFalse(VideoEmbedPolicy.allows(offHost, embed: skate))
+        XCTAssertTrue(VideoEmbedPolicy.allows(URLRequest(url: skate), embed: skate), "a GET of the file itself")
+        let youtube = URL(string: "https://www.youtube.com/embed/aaaaaaaaaaa")!
+        var playerPost = URLRequest(url: URL(string: "https://www.youtube.com/embed/x")!)
+        playerPost.httpMethod = "POST"
+        XCTAssertTrue(VideoEmbedPolicy.allows(playerPost, embed: youtube), "a player on its own host")
+        XCTAssertFalse(VideoEmbedPolicy.allowsScript(embed: skate))
+        XCTAssertTrue(VideoEmbedPolicy.allowsScript(embed: URL(string: "https://www.youtube.com/embed/aaaaaaaaaaa")!))
     }
 }
 

@@ -37,13 +37,10 @@ object AccountNoticeCopy {
         )
     }
 
-    val SHARED_OWNER_TITLE: String get() = L.native.accountNotice.sharedOwnerTitle
+    val OWNER_KEY_NOT_KEPT_TITLE: String get() = L.native.accountNotice.ownerKeyNotKeptTitle
 
-    /** [roles]: the non-owner roles the typed key is kept for. */
-    fun sharedOwner(account: String, roles: Set<KeyRole>): String {
-        val names = CopyLists.and(listOf(KeyRole.ACTIVE, KeyRole.POSTING).filter { it in roles }.map(CopyLists::role))
-        return L.native.accountNotice.sharedOwner(account = account, names = names)
-    }
+    /** A stored key of [account] was also its owner key on chain and was removed. */
+    fun ownerKeyNotKept(account: String) = L.native.accountNotice.ownerKeyNotKept(account = account)
 }
 
 /**
@@ -52,7 +49,8 @@ object AccountNoticeCopy {
  *    of an earlier build, or the RN import): remembered in the device preferences until it was dismissed, so
  *    it is shown once even when the app ends before the user saw it;
  *  - a master password sign-in that gave fewer than posting and active;
- *  - a typed key that is also the account's owner key.
+ *  - a stored key the chain shows on the owner authority, removed ([checkOwnerKeys], [ownerKeyFound]): remembered
+ *    in the device preferences until it was dismissed, as the first kind.
  * The UIs draw them only with the app unlocked. A wipe drops them all; a notice of an account that left the
  * device is dropped.
  */
@@ -69,6 +67,8 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                     AppEvent.DataWiped -> {
                         queue.clear()
                         writePending(emptyList())
+                        writeList(OWNER_CHECK, emptyList())
+                        writeList(OWNER_NOTICE, emptyList())
                         publish()
                     }
                     else -> {}
@@ -87,6 +87,8 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 if (session.accounts.isEmpty() && session.error?.kind == ErrorKind.STORAGE) return@collect
                 val here = session.accounts.map { it.username }.toSet()
                 var changed = queue.removeAll { it.account !in here }
+                val owners = list(OWNER_NOTICE)
+                if (owners.any { it !in here }) writeList(OWNER_NOTICE, owners.filter { it in here })
                 // an account that can sign again, however it got there (a key, or a HiveSigner or HiveAuth sign-in
                 // as that account), no longer needs to be told that it has no signing key
                 val able = session.accounts.filter { a ->
@@ -106,8 +108,89 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         runCatching { env.prefs.getString(PENDING) }.getOrNull().orEmpty().split(',').filter { it.isNotEmpty() }
 
     /** A preferences failure never breaks a sign-in, a start or a wipe: the notice is then only not remembered. */
-    private fun writePending(names: List<String>) {
-        runCatching { env.prefs.putString(PENDING, names.joinToString(",").ifEmpty { null }) }
+    private fun writePending(names: List<String>) = writeList(PENDING, names)
+
+    private fun list(key: String): List<String> =
+        runCatching { env.prefs.getString(key) }.getOrNull().orEmpty().split(',').filter { it.isNotEmpty() }
+
+    private fun writeList(key: String, names: List<String>) {
+        runCatching { env.prefs.putString(key, names.distinct().joinToString(",").ifEmpty { null }) }
+    }
+
+    /**
+     * At app start, with the accounts the RN import brought ([imported]): each of them, and each name still waiting
+     * from an earlier start, has its authorities read once; a stored key on the owner authority is removed and the
+     * account told ([ownerKeyFound]). A read that fails keeps the name for the next start; an account that is gone
+     * on chain, or read and fine, is done. Notices of this kind not dismissed at an earlier start are shown again.
+     */
+    internal fun checkOwnerKeys(imported: List<String>) {
+        val toCheck = (list(OWNER_CHECK) + imported).distinct()
+        writeList(OWNER_CHECK, toCheck)
+        scope.launch {
+            val here = runCatching { env.accounts.accounts().map { it.username }.toSet() }.getOrNull()
+            if (here != null) list(OWNER_NOTICE).filter { it in here }.forEach(::queueOwnerNotice)
+            for (name in toCheck) {
+                val authorities = try {
+                    env.chain.authorities(name)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    continue
+                }
+                try {
+                    if (authorities != null) ownerKeyFound(name, authorities)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    continue
+                }
+                writeList(OWNER_CHECK, list(OWNER_CHECK) - name)
+            }
+        }
+    }
+
+    /**
+     * [authorities] were read for [username] (from one node): when a stored key is on the owner authority, two
+     * different nodes must agree on the owner keys ([com.ecency.core.auth.ChainAccounts.confirmedAuthorities])
+     * before that key is removed; it is then told once (remembered until dismissed). True when a key was removed.
+     * Throws when the nodes could not confirm it (the key stays; the start check tries again next time).
+     */
+    @Throws(Exception::class)
+    internal suspend fun ownerKeyFound(username: String, authorities: com.ecency.core.auth.ChainAuthorities): Boolean {
+        val stored = env.accounts.vaultAccount(username) ?: return false
+        if (stored.rolesOnOwner(authorities.owner).isEmpty()) return false
+        val confirmed = env.chain.confirmedAuthorities(username) ?: return false
+        if (stored.rolesOnOwner(confirmed.owner).isEmpty()) return false
+        // remembered only once the vault saved the removal: a save that throws leaves no notice of a removal that did
+        // not happen, and the caller keeps the name to check again
+        val removed = env.accounts.dropKeysOnOwner(username, confirmed)
+        if (removed.isEmpty()) return false
+        writeList(OWNER_NOTICE, list(OWNER_NOTICE) + username)
+        queueOwnerNotice(username)
+        // the stored keys changed: the session reads them again
+        env.session.start()
+        return true
+    }
+
+    /** The RN import did not keep [names]' key that was the owner key RN also stored: each stored one is told once. */
+    internal fun ownerKeysDropped(names: List<String>) {
+        if (names.isEmpty()) return
+        scope.launch {
+            val here = runCatching { env.accounts.accounts().map { it.username }.toSet() }.getOrNull() ?: return@launch
+            val told = names.filter { it in here }
+            if (told.isEmpty()) return@launch
+            writeList(OWNER_NOTICE, list(OWNER_NOTICE) + told)
+            told.forEach(::queueOwnerNotice)
+        }
+    }
+
+    private fun queueOwnerNotice(account: String) {
+        if (queue.any { it.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER && it.account == account }) return
+        queue += AccountNotice(
+            nextId++, AccountNoticeKind.KEY_SHARED_WITH_OWNER, account, AccountNoticeCopy.OWNER_KEY_NOT_KEPT_TITLE,
+            AccountNoticeCopy.ownerKeyNotKept(account),
+        )
+        publish()
     }
 
     /**
@@ -136,12 +219,8 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 AccountNoticeCopy.missingRoles(account, outcome.missingSigningRoles, kept),
             )
         }
-        if (outcome.sharesOwnerKey) {
-            queue += AccountNotice(
-                nextId++, AccountNoticeKind.KEY_SHARED_WITH_OWNER, account, AccountNoticeCopy.SHARED_OWNER_TITLE,
-                AccountNoticeCopy.sharedOwner(account, kept - KeyRole.MEMO),
-            )
-        }
+        // signed in again with keys of its own (a typed owner key is refused): the owner key notice is void
+        if (account in list(OWNER_NOTICE)) writeList(OWNER_NOTICE, list(OWNER_NOTICE) - account)
         // it has keys again: a pending "no signing key" notice for it is void
         if (queue.removeAll { it.kind == AccountNoticeKind.NO_SIGNING_KEY && it.account == account } || account in pendingNoSigningKey()) {
             writePending(pendingNoSigningKey() - account)
@@ -164,6 +243,9 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
         if (shown.kind == AccountNoticeKind.NO_SIGNING_KEY) {
             writePending(pendingNoSigningKey() - shown.account)
         }
+        if (shown.kind == AccountNoticeKind.KEY_SHARED_WITH_OWNER) {
+            writeList(OWNER_NOTICE, list(OWNER_NOTICE) - shown.account)
+        }
         publish()
     }
 
@@ -171,5 +253,11 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
 
     companion object {
         const val PENDING = "accounts.noSigningKeyNotice"
+
+        /** Accounts whose authorities are still to be read for a stored key that is also the owner key. */
+        const val OWNER_CHECK = "accounts.ownerKeyCheck"
+
+        /** Accounts whose "key not kept" notice was not dismissed yet. */
+        const val OWNER_NOTICE = "accounts.ownerKeyNotice"
     }
 }

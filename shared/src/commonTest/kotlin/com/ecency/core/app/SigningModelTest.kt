@@ -43,6 +43,44 @@ class SigningModelTest {
     private fun postingAccount(user: String = alice) =
         VaultAccount(user, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(user, KeyRole.POSTING), accessToken = "access-$user")
 
+    private fun postingGrant(weight: Int = 1, appKey: String = AppTestKeys.pub(alice, KeyRole.POSTING)) = com.ecency.core.hive.AccountUpdatePosting(
+        alice,
+        com.ecency.core.hive.Authority(1, listOf(com.ecency.core.hive.AuthorityEntry("ecency.app", weight)), listOf(com.ecency.core.hive.AuthorityEntry(appKey, 1))),
+        AppTestKeys.pub(alice, KeyRole.MEMO),
+        "{}",
+    )
+
+    /** The chain's form of an operation: the absent optional fields come back as explicit nulls. */
+    private fun withNulls(op: JsonArray, vararg fields: String): JsonArray {
+        val body = op[1] as kotlinx.serialization.json.JsonObject
+        return JsonArray(listOf(op[0], kotlinx.serialization.json.JsonObject(body + fields.associateWith { kotlinx.serialization.json.JsonNull })))
+    }
+
+    @Test
+    fun aPostingAuthorityGrantMatchesTheChainsFormWithExplicitNulls() {
+        val sent = OperationJson.encode(postingGrant())
+        val onChain = withNulls(sent, "owner", "active")
+        assertTrue(SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(onChain))))
+        // a real difference still differs: another weight, another key
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withNulls(OperationJson.encode(postingGrant(weight = 2)), "owner", "active")))))
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withNulls(OperationJson.encode(postingGrant(appKey = AppTestKeys.pub(bob, KeyRole.POSTING))), "owner", "active")))))
+        // a set owner authority is a different operation, never the grant
+        val withOwner = JsonArray(listOf(sent[0], kotlinx.serialization.json.JsonObject((sent[1] as kotlinx.serialization.json.JsonObject) + ("owner" to (sent[1] as kotlinx.serialization.json.JsonObject).getValue("posting")))))
+        assertTrue(!SigningModel.sameOperations(JsonArray(listOf(sent)), JsonArray(listOf(withOwner))))
+    }
+
+    @Test
+    fun anOperationTheSerializerDoesNotKnowComparesWithNullsAsAbsent() {
+        val sent = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":1,"inner":{"b":[1,2]}}]]""") as JsonArray
+        val same = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"inner":{"b":[1,2],"c":null},"a":1,"d":null}]]""") as JsonArray
+        assertTrue(SigningModel.sameOperations(sent, same))
+        // arrays keep their order, and a value is no null
+        val reordered = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":1,"inner":{"b":[2,1]}}]]""") as JsonArray
+        assertTrue(!SigningModel.sameOperations(sent, reordered))
+        val changed = kotlinx.serialization.json.Json.parseToJsonElement("""[["made_up",{"a":2,"inner":{"b":[1,2]}}]]""") as JsonArray
+        assertTrue(!SigningModel.sameOperations(sent, changed))
+    }
+
     @Test
     fun keyAccountsSignLocallyAndARetryResendsTheSameTransaction() = runTest {
         val app = appWithAccounts(this)
@@ -122,13 +160,112 @@ class SigningModelTest {
         assertEquals(false, (app.env.signing.current.prompt as SigningPrompt.HiveAuthBroadcast).openWallet)
         app.relay.push(kotlinx.serialization.json.buildJsonObject {
             put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
-            put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive("has-tx-1"))
+            put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(TestApp.HAS_TX))
         })
         val r = result.await()
         assertEquals(SigningMethod.HIVEAUTH, r.method)
-        assertEquals("has-tx-1", r.txId)
+        assertEquals(TestApp.HAS_TX, r.txId)
         assertEquals(alice, app.relay.sent.single { it["cmd"]!!.jsonPrimitive.content == "sign_req" }["account"]!!.jsonPrimitive.content)
         assertTrue(app.broadcasts().isEmpty())
+        assertTrue(app.transport.sent.any { it.method == "transaction_status_api.find_transaction" }, "the chain confirmed it first")
+    }
+
+    private suspend fun hiveAuthAccount(app: TestApp) =
+        store(app, VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e", hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"))
+
+    private fun ack(app: TestApp, txId: String) = app.relay.push(kotlinx.serialization.json.buildJsonObject {
+        put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
+        put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(txId))
+    })
+
+    @Test
+    fun aHiveAuthAckNamingAnotherTransactionIsNotASuccess() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        // a real transaction in a block, with other operations than the ones the user approved
+        val other = "ab".repeat(20)
+        app.txStatus = { if (it == other) "within_irreversible_block" else null }
+        app.chainTxs[other] = JsonArray(listOf(OperationJson.encode(Vote("someone", "author", "permlink", 10000))))
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, other)
+        val before = testScheduler.currentTime
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull())
+        assertTrue(app.transport.sent.any { it.method == "condenser_api.get_transaction" }, "the operations were compared")
+        assertTrue(testScheduler.currentTime - before <= 45_000, "the check is bounded")
+    }
+
+    @Test
+    fun aHiveAuthTransactionInTheMempoolCountsOnceItIsInABlock() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        var asked = 0
+        app.txStatus = { if (it == TestApp.HAS_TX) (if (asked++ == 0) "within_mempool" else "within_reversible_block") else null }
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, TestApp.HAS_TX)
+        val before = testScheduler.currentTime
+        testScheduler.advanceUntilIdle()
+        assertEquals(TestApp.HAS_TX, result.await().getOrThrow().txId)
+        assertEquals(2, asked, "the mempool alone is not enough: asked again")
+        assertTrue(testScheduler.currentTime - before >= SigningModel.HIVE_AUTH_LOOKUP_MILLIS, "after the next poll")
+    }
+
+    @Test
+    fun aMempoolOnlyHiveAuthTransactionIsUnconfirmed() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.txStatus = { if (it == TestApp.HAS_TX) "within_mempool" else null }
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull())
+    }
+
+    @Test
+    fun aNodeWithoutTheStatusApiConfirmsByTheTransactionAlone() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.txStatus = { "error" }
+        val r = app.env.signing.broadcast(alice, vote())
+        assertEquals(TestApp.HAS_TX, r.txId)
+        assertTrue(app.transport.sent.any { it.method == "condenser_api.get_transaction" })
+    }
+
+    @Test
+    fun aHiveAuthTransactionWhoseOperationsCannotBeReadIsUnconfirmed() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        val other = "cd".repeat(20)
+        app.txStatus = { if (it == other) "within_irreversible_block" else null }
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        ack(app, other)
+        testScheduler.advanceUntilIdle()
+        assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(result.await().exceptionOrNull(), "no transaction to compare")
+    }
+
+    @Test
+    fun aHiveAuthAckTheChainNeverShowsIsNotASuccess() = runTest {
+        val app = appWithAccounts(this)
+        store(app, VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e", hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"))
+        for (txId in listOf("ff".repeat(20), "not-a-transaction-id")) {
+            app.relay.autoApproveSign = false
+            val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+            repeat(5) { testScheduler.runCurrent() }
+            app.relay.push(kotlinx.serialization.json.buildJsonObject {
+                put("cmd", kotlinx.serialization.json.JsonPrimitive("sign_ack")); put("uuid", kotlinx.serialization.json.JsonPrimitive("sign-1"))
+                put("broadcast", kotlinx.serialization.json.JsonPrimitive(true)); put("data", kotlinx.serialization.json.JsonPrimitive(txId))
+            })
+            val before = testScheduler.currentTime
+            testScheduler.advanceUntilIdle()
+            val failure = result.await().exceptionOrNull()
+            assertIs<com.ecency.core.api.broadcast.BroadcastException.Unconfirmed>(failure, "the relay's word alone is not a success: $txId")
+            assertTrue(testScheduler.currentTime - before <= 60_000, "the check is bounded")
+        }
     }
 
     @Test

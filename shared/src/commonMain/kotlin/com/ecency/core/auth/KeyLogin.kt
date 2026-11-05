@@ -24,9 +24,6 @@ class KeyLoginResult internal constructor(
 ) {
     fun signingKey(): PrivateKey = PrivateKey.fromWif(keys.getValue(signingRole))
 
-    /** A typed private key that is also the account's owner key: kept for its other role, with a warning. */
-    val sharesOwnerKey: Boolean get() = !isMasterPassword && KeyRole.OWNER in matchedRoles
-
     /**
      * For a master password: which of posting and active it did not give, because the account's key for that
      * role is no longer the one the password derives (or cannot sign alone). Empty for a private key.
@@ -68,13 +65,6 @@ object KeyLogin {
     private val RN_ROLE_ORDER = listOf(KeyRole.ACTIVE, KeyRole.MEMO, KeyRole.OWNER, KeyRole.POSTING)
     /** The Ecency session code is signed with the least powerful key that works: posting, else active. */
     private val SIGNING_ORDER = listOf(KeyRole.POSTING, KeyRole.ACTIVE)
-
-    /**
-     * The one switch for a typed private key that is the account's owner key and also its active or posting key
-     * (the account uses one key for several roles). False: it is kept for the non-owner role and the user is
-     * warned ([KeyLoginResult.sharesOwnerKey]). True: it is refused with [AuthException.KeySharedWithOwner].
-     */
-    var refuseKeySharedWithOwner: Boolean = false
 
     /** The roles whose private key the app may keep. */
     val STORABLE = setOf(KeyRole.POSTING, KeyRole.ACTIVE, KeyRole.MEMO)
@@ -146,8 +136,9 @@ object KeyLogin {
         // for, nothing it merely derives.
         val storable = matched.filter { it in STORABLE }
         if (storable.isEmpty()) throw AuthException.OwnerKeyOnly(fromMasterPassword = isMaster)
-        // a typed key that is also the owner key (a master password derives a different key per role)
-        if (!isMaster && KeyRole.OWNER in matched && refuseKeySharedWithOwner) throw AuthException.KeySharedWithOwner()
+        // a typed key that is also the owner key is never kept, for any role (the account uses one key for several
+        // roles); a master password derives a different key per role
+        if (!isMaster && KeyRole.OWNER in matched) throw AuthException.KeySharedWithOwner()
         val signingRole = SIGNING_ORDER.firstOrNull { it in storable } ?: throw AuthException.MemoKeyOnly()
 
         val authType = if (isMaster) AuthType.MASTER_PASSWORD else when (storable.last()) {

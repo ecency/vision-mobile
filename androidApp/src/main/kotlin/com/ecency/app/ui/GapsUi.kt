@@ -502,7 +502,7 @@ fun LinkActionSheet(url: String, onCopy: () -> Unit, onExplore: (com.ecency.core
         title = { Text(com.ecency.core.app.LinkSheet.TITLE) },
         text = {
             Column(Modifier.testTag("linkSheet")) {
-                Text(url, color = colors.darkGray, fontSize = 12.sp, maxLines = 2, modifier = Modifier.padding(bottom = 8.dp))
+                Text(com.ecency.core.app.LinkSheet.display(url), color = colors.darkGray, fontSize = 12.sp, maxLines = 3, modifier = Modifier.padding(bottom = 8.dp))
                 LinkOption(com.ecency.core.app.LinkSheet.COPY, "linkCopy") { onDismiss(); onCopy() }
                 if (explore != null) LinkOption(com.ecency.core.app.LinkSheet.OPEN_EXPLORE, "linkExplore") { warn = true }
                 LinkOption(com.ecency.core.app.LinkSheet.OPEN_SYSTEM, "linkSystem") { onDismiss(); onSystem() }

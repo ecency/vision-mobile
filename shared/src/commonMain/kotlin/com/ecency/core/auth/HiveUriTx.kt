@@ -84,8 +84,10 @@ object HiveUriTx {
      * gets the owner key; RN only reaches them through its owner-key map), and the authority of
      * content-dependent operations (custom_json with required_auths, account_update2) comes from
      * [OperationAuthority.forHiveUri], so an active custom_json needs and shows the active key. A third:
-     * account_update and account_update2 carrying owner, active or posting authorities are refused, so a link
-     * cannot rotate the account's keys (metadata-only updates pass).
+     * account_update and account_update2 carrying owner, active or posting authorities or a memo key are refused, so a link
+     * cannot rotate the account's keys (metadata-only updates pass). A fourth: account-control operations
+     * ([OperationAuthority.ACCOUNT_CONTROL]: creation, claims, recovery) and witness key changes are refused for every
+     * account type.
      */
     fun format(tx: JsonObject, available: Map<String, Boolean>?): FormattedHiveUriTx {
         val ops = tx["operations"] as? JsonArray
@@ -98,9 +100,14 @@ object HiveUriTx {
         if (def.authority == "owner" || resolved == KeyRole.OWNER) {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", "owner")
         }
+        // account creation, recovery and witness keys never come from a link, for any account type
+        if (name in OperationAuthority.ACCOUNT_CONTROL || name in OperationAuthority.WITNESS_KEYS) {
+            return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", def.authority)
+        }
         if (OperationAuthority.isMixedCustomJson(op)) return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", MIXED)
         val authority = if (name in CONTENT_DEPENDENT) resolved.value else def.authority
-        // a link never rotates keys: only metadata updates of account_update / account_update2 pass
+        // a link never rotates keys, the memo key included: only metadata updates of account_update2 pass (account_update
+        // always carries a memo key)
         if (name in ACCOUNT_UPDATES && AUTHORITY_FIELDS.any { (op[1] as? JsonObject)?.get(it).let { v -> v != null && v != JsonNull } }) {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", authority)
         }
@@ -125,7 +132,8 @@ object HiveUriTx {
 
     private val CONTENT_DEPENDENT = setOf("custom_json", "account_update2")
     private val ACCOUNT_UPDATES = setOf("account_update", "account_update2")
-    private val AUTHORITY_FIELDS = listOf("owner", "active", "posting")
+
+    private val AUTHORITY_FIELDS = listOf("owner", "active", "posting", "memo_key")
 
     private fun isTruthy(e: JsonElement?): Boolean = when (e) {
         null, kotlinx.serialization.json.JsonNull -> false

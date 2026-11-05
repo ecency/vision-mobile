@@ -20,6 +20,8 @@ class WebUrl private constructor(
     private val fragment: String?,
 ) {
     val protocol: String get() = "$scheme:"
+    /** Whether the URL carries userinfo (`user@`, `user:pass@`). */
+    val hasCredentials: Boolean get() = username.isNotEmpty() || password.isNotEmpty()
     val hostname: String get() = hostValue ?: ""
     val host: String get() = if (hostValue == null) "" else if (port == null) hostValue else "$hostValue:$port"
     val pathname: String get() = opaquePath ?: pathSegments!!.joinToString("") { "/$it" }

@@ -159,7 +159,11 @@ final class DappWebViews: NSObject, ObservableObject, WKNavigationDelegate, WKUI
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        if let id = tabId(of: webView) { model.pageCommitted(tabId: id, url: webView.url?.absoluteString) }
+        // a new document (WebKit does not commit a history update of the same one)
+        if let id = tabId(of: webView) {
+            model.documentStarted(tabId: id, url: webView.url?.absoluteString)
+            model.pageCommitted(tabId: id, url: webView.url?.absoluteString)
+        }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -185,7 +189,7 @@ final class DappWebViews: NSObject, ObservableObject, WKNavigationDelegate, WKUI
         return body as? String
     }
 
-    /// What dApps stored goes when no account is left or the data was wiped.
+    /// What dApps stored goes on every account change and on a wipe.
     static func clearData() {
         let store = dataStore
         store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast) {}
@@ -479,15 +483,26 @@ struct BridgeConfirmSheet: View {
             VStack(spacing: 0) {
             if prompt.blacklisted != nil {
                 HStack(alignment: .top, spacing: 8) {
-                    Image(appIcon: .warning, filled: true).foregroundStyle(Color(hex: 0xE74C3C)).accessibilityHidden(true)
-                    // RN's dark text on the fixed pink banner (its red text was 3.4:1 there)
-                    Text(BrowserCopy.shared.PHISHING).scaledFont(13, weight: .semibold).foregroundStyle(Color(hex: 0x3C4449))
+                    Image(appIcon: .warning, filled: true).foregroundStyle(theme.dangerText).accessibilityHidden(true)
+                    // the theme's text on the danger fill (RN's red text was 3.4:1 on its pink)
+                    Text(BrowserCopy.shared.PHISHING).scaledFont(13, weight: .semibold).foregroundStyle(theme.text)
                 }
                 .padding(12)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Color(hex: 0xFDEDED)))
+                .background(RoundedRectangle(cornerRadius: 10).fill(theme.dangerBackground))
                 .padding(.bottom, 12)
                 .announces(BrowserCopy.shared.PHISHING)
                 .accessibilityIdentifier("bridge-phishing")
+            }
+            if let warning = prompt.warning {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(appIcon: .warning, filled: true).foregroundStyle(theme.dangerText).accessibilityHidden(true)
+                    Text(warning).scaledFont(13, weight: .semibold).foregroundStyle(theme.text)
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 10).fill(theme.dangerBackground))
+                .padding(.bottom, 12)
+                .announces(warning)
+                .accessibilityIdentifier("bridge-warning")
             }
             Button(action: onConfirm) {
                 Text(BrowserCopy.shared.CONFIRM).scaledFont(16, weight: .bold).frame(maxWidth: .infinity).frame(minHeight: 44)

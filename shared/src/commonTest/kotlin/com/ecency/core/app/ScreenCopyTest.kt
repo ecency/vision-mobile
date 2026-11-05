@@ -419,7 +419,6 @@ class ScreenCopyTest {
         "BrowserCopy.AUTHORITY" to { BrowserCopy.AUTHORITY },
         "BrowserCopy.PHISHING" to { BrowserCopy.PHISHING },
         "AccountCopy.upgradeDescription" to { AccountCopy.upgradeDescription(KeyRole.ACTIVE) },
-        "AccountCopy.postingKeyRequest" to { AccountCopy.postingKeyRequest("7", "7") },
         "AccountCopy.authRequest" to { AccountCopy.authRequest("7", "7") + AccountCopy.authRequest("7", null) },
         "AccountCopy.authTransfer" to { AccountCopy.authTransfer("7") },
         "AccountCopy.authTransferStored" to { LoginMethod.entries.joinToString { AccountCopy.authTransferStored("7", it) } },

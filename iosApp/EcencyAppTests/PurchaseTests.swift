@@ -72,13 +72,14 @@ final class PurchaseTests: XCTestCase {
         return result ?? []
     }
 
-    func testStoreKitSellsRnsProductsAndHandsOverTheSignedTransaction() {
+    func testStoreKitSellsRnsProductsAndHandsOverTheSignedTransaction() throws {
         let store = StoreKitStore()
         let recorder = Recorder()
         store.setListener(listener: recorder)
         let list = products(store, PurchaseSkus.shared.ALL)
         XCTAssertEqual(Set(list.map(\.productId)), Set(PurchaseSkus.shared.ALL))
-        let points = list.first { $0.productId == "999points" }!
+        // XCTUnwrap, not `!`: a slow StoreKit test session fails this test instead of crashing the whole run
+        let points = try XCTUnwrap(list.first { $0.productId == "999points" })
         XCTAssertEqual(points.price, "9.99")
         XCTAssertEqual(points.currency, "USD")
         XCTAssertEqual(points.localizedPrice, "$9.99")
@@ -87,15 +88,15 @@ final class PurchaseTests: XCTestCase {
         store.purchase(productId: "999points", accountToken: PurchaseService.companion.accountToken(username: "spike-alice")) { e in DispatchQueue.main.async { started = .some(e) } }
         waitUntil { !recorder.snapshot.0.isEmpty }
         XCTAssertNil(started ?? nil)
-        let bought = recorder.snapshot.0.single
-        XCTAssertEqual(bought?.productId, "999points")
-        XCTAssertEqual(bought?.state, .purchased)
-        XCTAssertEqual(bought?.accountToken, PurchaseService.companion.accountToken(username: "spike-alice"), "the buyer travels as appAccountToken")
-        XCTAssertEqual(bought?.token.split(separator: ".").count, 3, "the receipt is the JWS (jwsRepresentation)")
+        let bought = try XCTUnwrap(recorder.snapshot.0.single, "the StoreKit test session handed over no purchase")
+        XCTAssertEqual(bought.productId, "999points")
+        XCTAssertEqual(bought.state, .purchased)
+        XCTAssertEqual(bought.accountToken, PurchaseService.companion.accountToken(username: "spike-alice"), "the buyer travels as appAccountToken")
+        XCTAssertEqual(bought.token.split(separator: ".").count, 3, "the receipt is the JWS (jwsRepresentation)")
         // unfinished until Ecency took the order: RN's getAvailablePurchases missed exactly this on iOS
-        XCTAssertEqual(unfinished(store).map(\.ref), [bought!.ref])
+        XCTAssertEqual(unfinished(store).map(\.ref), [bought.ref])
         var finished = false
-        store.finish(purchase: bought!) { _ in DispatchQueue.main.async { finished = true } }
+        store.finish(purchase: bought) { _ in DispatchQueue.main.async { finished = true } }
         waitUntil { finished }
         XCTAssertTrue(unfinished(store).isEmpty)
     }

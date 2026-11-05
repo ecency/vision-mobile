@@ -636,6 +636,26 @@ class ChatThreadTest {
     }
 
     @Test
+    fun ownMessagesCanBeEditedWhenTheFirstSessionReadFailed() = runTest {
+        // the tester's report: no Edit in the message menu. The thread's first session read failed (a flaky network),
+        // the history then loaded through a fresh session, and the viewer stayed unknown: no message was "own".
+        val f = ChatFixture(this)
+        f.start()
+        f.run(ChatService.CACHE_MILLIS + 1)
+        var failed = false
+        f.before = { r -> if (!failed && r.url.endsWith("/bootstrap")) { failed = true; HttpResult(503, "{}") } else null }
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        f.before = null
+        m.setText("mine")
+        m.send()
+        f.idle()
+        assertTrue(failed, "the first session read was refused")
+        val mine = m.current.items.filterIsInstance<ChatMessageItem>().first { it.post.message == "mine" }
+        assertTrue(mine.own)
+        assertTrue(ChatMessageAction.EDIT in m.actions(mine))
+    }
+
+    @Test
     fun sendingEditingReactingPinningAndRemoving() = runTest {
         val f = ChatFixture(this, team = listOf(ChatFixture.USER to "mod"))
         f.start()

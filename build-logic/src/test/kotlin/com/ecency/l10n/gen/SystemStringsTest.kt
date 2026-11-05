@@ -121,6 +121,25 @@ class SystemStringsTest {
     }
 
     @Test
+    fun `a right to left translation of a permission prompt starts with RLM as the app's message`() {
+        // the OS lays the prompt out by its first strong letter: "Ecency ..." in Hebrew would read left to right
+        val locales = mapOf(
+            "en-US" to en,
+            "he-IL" to """{"a": {"camera": "Ecency מצלמת"}}""",
+            "fa-IR" to "{}",
+            "ar-SA" to """{"a": {"camera": "‏كاميرا"}}""",
+            "ru-RU" to """{"a": {"camera": "Камера"}}""",
+        )
+        val files = SystemStrings.apple(locales, config, rules.replace("\"he-IL\": {}", "\"he-IL\": {}, \"fa-IR\": {}, \"ar-SA\": {}"), formats(*locales.keys.toTypedArray()))
+        fun camera(tag: String) = files.getValue("InfoPlist/$tag.lproj/InfoPlist.strings").lines().single { it.startsWith("\"NSCameraUsageDescription\"") }
+        assertEquals("\"NSCameraUsageDescription\" = \"‏Ecency מצלמת\";", camera("he"))
+        assertEquals("\"NSCameraUsageDescription\" = \"‏كاميرا\";", camera("ar"), "once")
+        assertEquals("\"NSCameraUsageDescription\" = \"Camera's use\";", camera("fa"), "an English fallback keeps its direction")
+        assertEquals("\"NSCameraUsageDescription\" = \"Камера\";", camera("ru"))
+        assertEquals("\"NSCameraUsageDescription\" = \"Camera's use\";", camera("en"))
+    }
+
+    @Test
     fun `integer plural rules use whole number literals`() {
         assertEquals("(inR((o.i % 10), 2, 4) && !inR((o.i % 100), 12, 14))", PluralRuleCompiler.compile("i % 10 = 2..4 and i % 100 != 12..14", integer = true))
         assertEquals("(inR((o.i % 10.0), 2.0, 4.0) && !inR((o.i % 100.0), 12.0, 14.0))", PluralRuleCompiler.compile("i % 10 = 2..4 and i % 100 != 12..14"))

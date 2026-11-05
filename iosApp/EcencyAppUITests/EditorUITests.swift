@@ -285,6 +285,9 @@ final class EditorUITests: XCTestCase {
         let app = launch(["-openScreen", "editor"])
         XCTAssertTrue(body(app).waitForExistence(timeout: 20), app.debugDescription)
         body(app).focusAndType("start")
+        // the keys go in before the keyboard is up: the toolbar is still moving up with it (a tap read from its old
+        // frame lands under the keyboard's place and opens nothing)
+        app.waitForKeyboardToSettle()
         app.buttons["tool-snippets"].tap()
         XCTAssertTrue(element(app, "snippet-Footer").waitForExistence(timeout: 10), app.debugDescription)
         element(app, "snippet-Footer").tap()
@@ -296,9 +299,113 @@ final class EditorUITests: XCTestCase {
         XCTAssertTrue(app.buttons["open-files"].exists)
         XCTAssertTrue(element(app, "gallery-image-demo-i1").waitForExistence(timeout: 10), app.debugDescription)
         element(app, "gallery-image-demo-i1").tap()
-        let withImage = NSPredicate(format: "value CONTAINS %@", "![](https://images.ecency.com/demo/one.jpg)")
-        expectation(for: withImage, evaluatedWith: body(app))
+        let image = "![](https://images.ecency.com/demo/one.jpg)"
+        expectation(for: NSPredicate(format: "value CONTAINS %@", image), evaluatedWith: body(app))
         waitForExpectations(timeout: 5)
+        // at the caret each time: the snippet after the typed word, the image after the snippet. A snippet left
+        // selected was replaced by the image; a caret lost while a sheet was up would put them at the start
+        // (a missing text has location NSNotFound, so it is out of order too)
+        let text = body(app).value as? String ?? ""
+        let order = ["start", "Thanks for reading!", image].map { (text as NSString).range(of: $0).location }
+        XCTAssertEqual(order, order.sorted(), "in the order typed and inserted: \(text)")
+        XCTAssertTrue(text.hasPrefix("start"), text)
+    }
+
+    /// These need the on screen keyboard: a simulator that hides it for the Mac's keyboard shows only a bar, and then
+    /// there is nothing to measure (`defaults write com.apple.keyboard.preferences AutomaticMinimizationEnabled -bool
+    /// false` through `xcrun simctl spawn <device>`, then reboot it, brings it back).
+    private func requireSoftwareKeyboard(_ app: XCUIApplication) throws {
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+    }
+
+    /// The quest chip and the words count share one row above the toolbar (owner 11-04): chip at the leading edge,
+    /// count at the trailing edge, and the row is one line high.
+    private func assertCountRowIsOneLine(_ app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
+        let count = element(app, "words-count")
+        let chip = app.buttons.matching(identifier: "quest-chip").firstMatch
+        XCTAssertTrue(count.waitForExistence(timeout: 5) && chip.exists, app.debugDescription, file: file, line: line)
+        XCTAssertEqual(count.frame.midY, chip.frame.midY, accuracy: 3, "one row: count \(count.frame), chip \(chip.frame)", file: file, line: line)
+        XCTAssertLessThan(chip.frame.maxX, count.frame.minX, "chip leading, count trailing", file: file, line: line)
+        // one line: a second line would make the chip about twice the count's height (and over the 44 point target)
+        XCTAssertLessThan(chip.frame.height, max(44, count.frame.height) * 1.5, "the chip is one line: \(chip.frame), count \(count.frame)", file: file, line: line)
+    }
+
+    /// At the largest text both do not fit: the chip truncates and the row stays one line.
+    func testTheQuestChipAndTheWordsCountShareOneLineAtTheLargestText() {
+        let app = launch(["-openScreen", "editor", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        XCTAssertTrue(body(app).waitForExistence(timeout: 20), app.debugDescription)
+        body(app).focusAndType("one two three four five six seven")
+        assertCountRowIsOneLine(app)
+    }
+
+    /// Tester: "Window for editing drafts much too small". With the keyboard up the community row, title and tags
+    /// scroll away with the body (one scroll container), so the body gets most of the room between the navigation
+    /// bar and the toolbar; the toolbar stays above the keyboard and the title can be scrolled back to.
+    func testWithTheKeyboardUpTheTitleAndTagsScrollAwayWithTheBody() throws {
+        let app = launch(["-openScreen", "editor"])
+        write(app, title: "A long draft", body: (1...12).map { "Line \($0) of the draft" }.joined(separator: "\n"))
+        let keyboard = app.keyboards.firstMatch
+        try requireSoftwareKeyboard(app)
+        sleep(1) // the keyboard and the scroll settle
+        let top = app.navigationBars.firstMatch.frame.maxY
+        // a toolbar button's frame: the bar's own container reports more than the row it draws
+        let toolbar = app.buttons["tool-format"].frame
+        XCTAssertLessThanOrEqual(toolbar.maxY, keyboard.frame.minY + 1, "the toolbar stays above the keyboard: \(toolbar), keyboard \(keyboard.frame)")
+        let room = toolbar.minY - top
+        let bodyFrame = body(app).frame
+        let visible = min(bodyFrame.maxY, toolbar.minY) - max(bodyFrame.minY, top)
+        XCTAssertGreaterThanOrEqual(visible, 0.7 * room, "body \(bodyFrame) gets most of the room \(top)...\(toolbar.minY)")
+        assertCountRowIsOneLine(app)
+        let title = element(app, "editor-title")
+        // scrolled off: above the bar, or (out of the visible content) with no frame at all
+        XCTAssertTrue(title.frame.isEmpty || title.frame.maxY <= top + 1, "the title scrolled off: \(title.frame)")
+        // reachable: dragging the text down brings the title back (a slow drag: a fast swipe on the focused text is
+        // not a scroll for XCUITest)
+        for _ in 0..<4 where !title.isHittable {
+            let from = body(app).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+            from.press(forDuration: 0.05, thenDragTo: from.withOffset(CGVector(dx: 0, dy: 160)), withVelocity: .slow, thenHoldForDuration: 0.2)
+        }
+        XCTAssertTrue(title.isHittable, "the title can be scrolled back to: \(title.frame)")
+        // the body now reaches down under the toolbar: the toolbar still takes its taps
+        app.buttons["tool-format"].tap()
+        XCTAssertTrue(app.buttons["format-bold"].waitForExistence(timeout: 5), "the toolbar took the tap")
+    }
+
+    /// Back from the preview the body is a new view: the caret (here at the end of a long text) is shown again.
+    func testComingBackFromThePreviewShowsTheCaret() {
+        let app = launch(["-openScreen", "editor"])
+        write(app, title: "A long draft", body: (1...30).map { "Line \($0) of the draft" }.joined(separator: "\n"))
+        app.buttons["preview-toggle"].tap()
+        XCTAssertTrue(element(app, "editor-preview").waitForExistence(timeout: 5))
+        app.buttons["preview-toggle"].tap()
+        XCTAssertTrue(body(app).waitForExistence(timeout: 5))
+        let top = app.navigationBars.firstMatch.frame.maxY
+        let toolbar = app.buttons["tool-format"].frame
+        // the caret is at the end: the body's last line is between the bar and the toolbar
+        let shown = NSPredicate { _, _ in
+            let frame = self.body(app).frame
+            return frame.maxY > top && frame.maxY <= toolbar.minY + 16
+        }
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: shown, object: nil)], timeout: 5), .completed, "body \(body(app).frame), room \(top)...\(toolbar.minY)")
+    }
+
+    /// The body focused first (the keyboard comes up with it): the body still moves to the top once the editor has
+    /// made room, and the toolbar still takes its taps.
+    func testTheBodyFocusedFirstMovesUpAndTheToolbarStillTakesTaps() throws {
+        let app = launch(["-openScreen", "editor"])
+        XCTAssertTrue(body(app).waitForExistence(timeout: 20), app.debugDescription)
+        body(app).focusAndType("start")
+        try requireSoftwareKeyboard(app)
+        let title = element(app, "editor-title")
+        let top = app.navigationBars.firstMatch.frame.maxY
+        let off = NSPredicate { _, _ in title.frame.isEmpty || title.frame.maxY <= top + 1 }
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: off, object: nil)], timeout: 5), .completed, "the title scrolled off: \(title.frame)")
+        app.buttons["tool-format"].tap()
+        XCTAssertTrue(app.buttons["format-bold"].waitForExistence(timeout: 5), "the toolbar took the tap")
+        XCTAssertEqual(body(app).value as? String, "start")
     }
 
     func testDraftsScreenTabsAndOpeningADraft() {

@@ -29,6 +29,12 @@ object DemoWallet {
         "reward_vesting_balance" to JsonPrimitive("2048.000000 VESTS"), "next_vesting_withdrawal" to JsonPrimitive("1969-12-31T23:59:59"),
     )
 
+    /**
+     * The one transaction the demo chain holds: in an irreversible block, with the demo transfer of
+     * [DemoAuthServices.transferOps] (spike-alice to spike-bob), so a demo HiveAuth send that names it confirms.
+     */
+    const val DEMO_TX_ID = "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
+
     const val DGP = """{"head_block_number":100000000,"head_block_id":"05f5e10011111111111111111111111111111111","time":"2026-10-06T12:00:00","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS","vote_power_reserve_rate":1}"""
 
     /** A Hive RPC call of the wallet, or null when it is not a wallet call. */
@@ -66,7 +72,16 @@ object DemoWallet {
                 """"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"},{"created":"x","hbd":53000,"hive":200000,"real_price":"0.26500000"}]}""",
         )
         "condenser_api.get_ticker" -> json("""{"latest":"0.25500000","lowest_ask":"0.26000000","highest_bid":"0.25000000","percent_change":"1.2","hive_volume":"1000.000 HIVE","hbd_volume":"255.000 HBD"}""")
-        "transaction_status_api.find_transaction" -> json("""{"status":"unknown"}""")
+        // the demo transaction is in a block; any other (an undecided demo send) stays unknown
+        "transaction_status_api.find_transaction" ->
+            if (((params as? JsonObject)?.get("transaction_id") as? JsonPrimitive)?.content == DEMO_TX_ID) json("""{"status":"within_irreversible_block"}""")
+            else json("""{"status":"unknown"}""")
+        "condenser_api.get_transaction" ->
+            if (((params as? JsonArray)?.getOrNull(0) as? JsonPrimitive)?.content == DEMO_TX_ID) buildJsonObject {
+                put("transaction_id", DEMO_TX_ID)
+                put("block_num", 100000000)
+                put("operations", DemoAuthServices.transferOps("spike-alice", "spike-bob"))
+            } else null
         else -> null
     }
 

@@ -242,7 +242,7 @@ final class AccessibilityTests: XCTestCase {
 
     /// The pairings drawn on other backgrounds, in every theme: blue and red text on the gray fill (secondary buttons,
     /// the downvote), card counts and author names on the card, the notification line and time on the unread tint,
-    /// RC text on white, the phishing warning's text on its pink banner.
+    /// RC text on white.
     func testTextOnOtherBackgroundsMeetsAA() {
         let themes = [("light", AppTheme.light), ("dark", AppTheme.dark),
                       ("light high contrast", AppTheme.light.highContrast), ("dark high contrast", AppTheme.dark.highContrast)]
@@ -259,7 +259,6 @@ final class AccessibilityTests: XCTestCase {
             XCTAssertGreaterThanOrEqual(Self.contrast(NotificationRowColors.line(theme), unread), 4.5, "\(name) notification line on unread")
         }
         XCTAssertGreaterThanOrEqual(Self.contrast(Color(hex: ContrastPalette.lightRcText), .white), 4.5, "RC text")
-        XCTAssertGreaterThanOrEqual(Self.contrast(Color(hex: 0x3C4449), Color(hex: 0xFDEDED)), 4.5, "phishing warning")
     }
 
     /// The chat warning box (DM warning, ban notice): its text and icons 4.5:1 and its border 3:1 on its fill in every
@@ -273,6 +272,13 @@ final class AccessibilityTests: XCTestCase {
         }
         XCTAssertLessThan(Self.luminance(AppTheme.dark.warningBackground), Self.luminance(AppTheme.dark.lightBackground) + 0.02,
                           "the dark warning fill is a dark surface")
+        // the danger box (dApp phishing and request warnings): text on its fill, the icon 3:1, a dark surface in dark
+        for (name, theme) in themes {
+            XCTAssertGreaterThanOrEqual(Self.contrast(theme.text, theme.dangerBackground), 4.5, "\(name) text on the danger fill")
+            XCTAssertGreaterThanOrEqual(Self.contrast(theme.dangerText, theme.dangerBackground), 3, "\(name) danger icon")
+        }
+        XCTAssertLessThan(Self.luminance(AppTheme.dark.dangerBackground), Self.luminance(AppTheme.dark.lightBackground) + 0.02,
+                          "the dark danger fill is a dark surface")
         XCTAssertGreaterThanOrEqual(Self.contrast(AppTheme.dark.highContrast.warningText, AppTheme.dark.highContrast.warningBackground),
                                     Self.contrast(AppTheme.dark.warningText, AppTheme.dark.warningBackground), "high contrast is stronger")
     }

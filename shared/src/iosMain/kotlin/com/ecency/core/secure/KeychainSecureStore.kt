@@ -34,6 +34,7 @@ import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
 import platform.Security.SecItemUpdate
 import platform.Security.errSecDuplicateItem
+import platform.Security.errSecInteractionNotAllowed
 import platform.Security.errSecItemNotFound
 import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccessible
@@ -80,16 +81,48 @@ class KeychainSecureStore(val service: String) : SecureStore {
      * update from the RN app, which never used this service). Returns true when it wiped.
      */
     @Throws(SecureStoreException::class)
-    fun wipeIfFreshInstall(defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults): Boolean = withLock {
+    fun wipeIfFreshInstall(defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults): Boolean =
+        wipeIfFreshInstall(defaults) { true }
+
+    /**
+     * The launch check where the device may still be locked since a restart. Before the first unlock the
+     * device's protected data is unavailable and UserDefaults can read as empty, so the check cannot run yet:
+     * it stays pending for this service and every [get], [put], [delete] and [names] first runs it once
+     * [protectedDataAvailable] says so, and fails closed ([SecureStoreException.Unavailable]) until then. So
+     * nothing of a previous install is read, and nothing of this one written, before the check ran.
+     * [runPendingInstallCheck] runs it at once (iOS: on `protectedDataDidBecomeAvailableNotification`).
+     * [protectedDataAvailable] is called from any thread. Returns true when it wiped.
+     */
+    @Throws(SecureStoreException::class)
+    fun wipeIfFreshInstall(defaults: NSUserDefaults, protectedDataAvailable: () -> Boolean): Boolean = withLock {
+        setPending(service, InstallCheck(defaults, protectedDataAvailable))
+        runPendingInstallCheck()
+    }
+
+    /** Runs a pending [wipeIfFreshInstall] when protected data is now available; true when it wiped. */
+    @Throws(SecureStoreException::class)
+    fun runPendingInstallCheck(): Boolean = withLock {
+        val check = pendingFor(service) ?: return@withLock false
+        if (!check.available()) return@withLock false
         val mark = "$service.installed"
-        if (defaults.boolForKey(mark)) return@withLock false
-        wipe()
-        defaults.setBool(true, forKey = mark)
-        true
+        val wiped = !check.defaults.boolForKey(mark)
+        if (wiped) wipe()
+        check.defaults.setBool(true, forKey = mark)
+        // only after the wipe and the mark: a failure leaves the check pending and the store closed
+        setPending(service, null)
+        wiped
+    }
+
+    /** Every entry access waits for the install check: run it now if it can run, or refuse. */
+    private fun requireInstallChecked() {
+        if (pendingFor(service) == null) return
+        runPendingInstallCheck()
+        if (pendingFor(service) != null) throw SecureStoreException.Unavailable(errSecInteractionNotAllowed)
     }
 
     override fun put(name: String, value: ByteArray) = withLock {
         SecureStore.requireValidName(name)
+        requireInstallChecked()
         val status = withQuery(item(name) + listOf(kSecValueData to value.toNSData(), kSecAttrAccessible to ACCESSIBLE)) {
             SecItemAdd(it, null)
         }
@@ -109,6 +142,7 @@ class KeychainSecureStore(val service: String) : SecureStore {
 
     override fun get(name: String): ByteArray? = withLock {
         SecureStore.requireValidName(name)
+        requireInstallChecked()
         memScoped {
             val result = alloc<CFTypeRefVar>()
             val status = withQuery(item(name) + listOf(kSecReturnData to kCFBooleanTrue, kSecMatchLimit to kSecMatchLimitOne)) {
@@ -125,11 +159,15 @@ class KeychainSecureStore(val service: String) : SecureStore {
 
     override fun delete(name: String) = withLock {
         SecureStore.requireValidName(name)
+        requireInstallChecked()
         val status = withQuery(item(name)) { SecItemDelete(it) }
         if (status != errSecSuccess && status != errSecItemNotFound) throw SecureStoreException.Unavailable(status)
     }
 
-    override fun names(): Set<String> = withLock { names0() }
+    override fun names(): Set<String> = withLock {
+        requireInstallChecked()
+        names0()
+    }
 
     private fun names0(): Set<String> = memScoped {
         val result = alloc<CFTypeRefVar>()
@@ -198,6 +236,29 @@ private inline fun <T> withQuery(pairs: List<Pair<CFTypeRef?, Any?>>, call: (CFD
 /** One lock per Keychain service for the whole process, so separate instances never interleave. */
 private val locksGuard = NSLock()
 private val locks = mutableMapOf<String, NSRecursiveLock>()
+
+/** A fresh install check that could not run yet, per service; read and written under that service's lock. */
+private class InstallCheck(val defaults: NSUserDefaults, val available: () -> Boolean)
+
+private val pendingChecks = mutableMapOf<String, InstallCheck>()
+
+private fun pendingFor(service: String): InstallCheck? {
+    locksGuard.lock()
+    try {
+        return pendingChecks[service]
+    } finally {
+        locksGuard.unlock()
+    }
+}
+
+private fun setPending(service: String, check: InstallCheck?) {
+    locksGuard.lock()
+    try {
+        if (check == null) pendingChecks.remove(service) else pendingChecks[service] = check
+    } finally {
+        locksGuard.unlock()
+    }
+}
 
 private fun lockFor(service: String): NSRecursiveLock {
     locksGuard.lock()

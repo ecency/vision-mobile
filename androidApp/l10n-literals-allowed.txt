@@ -16,6 +16,13 @@ ReadingScreens.kt	TOP	test id of the tag feed sort (label: ReadingUiCopy.TOP_CAP
 ReadingScreens.kt	HOT	test id of the tag feed sort (label: UiCopy.HOT)
 ReadingScreens.kt	NEW	test id of the tag feed sort (label: UiCopy.NEW)
 Sheets.kt	Referer	HTTP header name
+Sheets.kt	&amp;	HTML escape in the video file page, markup
+Sheets.kt	&quot;	HTML escape in the video file page, markup
+Sheets.kt	&lt;	HTML escape in the video file page, markup
+Sheets.kt	&gt;	HTML escape in the video file page, markup
+Sheets.kt	<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">	markup of the video file page, no text
+Sheets.kt	<style>html,body{margin:0;height:100%;background:#000}video{width:100%;height:100%}</style></head>	markup of the video file page, no text
+Sheets.kt	<body><video src=\"{}\" controls playsinline autoplay></video></body></html>	markup of the video file page, no text
 ShellOverlays.kt	no activity for the toast window	exception for a programming error
 ShellOverlays.kt	EcencyToast	window title of the toast overlay, not shown
 TransferScreens.kt	 HP	ticker after a chain amount

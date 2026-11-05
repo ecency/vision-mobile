@@ -285,8 +285,8 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         // Feed and post models refresh themselves on a session change (the reader keeps the post they
         // signed in from). A wipe removed every account: its screens go, as RN returns to the start.
         env.events.collect {
-            // what dApps stored in Explore's own web profile goes when no account is left
-            if (it is AppEvent.DataWiped || (it is AppEvent.SessionChanged && it.username == null)) DappWeb.clearProfile()
+            // what dApps stored in Explore's own web profile belongs to the account that browsed: it goes on every account change
+            if (it.clearsDappData) DappWeb.clearProfile()
             if (it is AppEvent.DataWiped) {
                 navigator.reset()
                 // the signup challenge's own WebView profile (cookies, storage) goes with everything else

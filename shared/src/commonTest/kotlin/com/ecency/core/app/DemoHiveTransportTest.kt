@@ -41,6 +41,17 @@ class DemoHiveTransportTest {
     }
 
     @Test
+    fun theDemoTransactionIsInABlockWithTheDemoTransfer() = runTest {
+        // what a HiveAuth send looks up once the wallet answered: where the transaction is, then its operations
+        assertEquals("within_irreversible_block", api.hive.transactionStatus(DemoWallet.DEMO_TX_ID, null))
+        val ops = assertNotNull(api.hive.transactionOperations(DemoWallet.DEMO_TX_ID))
+        assertTrue(SigningModel.sameOperations(DemoAuthServices.transferOps("spike-alice", "spike-bob"), ops), "$ops")
+        // any other transaction is not known (an undecided send stays undecided)
+        assertEquals("unknown", api.hive.transactionStatus("ab".repeat(20), null))
+        assertNull(runCatching { api.hive.transactionOperations("ab".repeat(20)) }.getOrNull())
+    }
+
+    @Test
     fun nothingADemoRunDoesCanReachAChain() {
         // chain state is unavailable; broadcasts are refused with the chain's kind of error (no result, nothing sent)
         assertEquals(503, demo.answer("""{"jsonrpc":"2.0","id":1,"method":"condenser_api.get_dynamic_global_properties","params":[]}""").status)

@@ -219,8 +219,11 @@ internal object DappWeb {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
                 !model.shouldLoad(tabId, request.url.toString(), request.isForMainFrame, request.hasGesture())
 
-            override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) =
+            override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                // a new document (a history update of the same one does not start a page)
+                model.documentStarted(tabId, url)
                 model.pageChanged(tabId, url, null, view.canGoBack(), view.canGoForward())
+            }
 
             // the committed page: a navigation that only started (onPageStarted) never names "the page"
             override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
@@ -271,13 +274,19 @@ internal object DappWeb {
         profile.cookieManager
     }.getOrNull()
 
-    /** What the dApps stored (cookies, web storage) goes when every account left or the data was wiped; tests replace it. */
+    /** What the dApps stored (cookies, web storage) goes on every account change and on a wipe; tests replace it. */
     var clearProfile: () -> Unit = ::clearOwnProfile
 
     @SuppressLint("RequiresFeature")
     private fun clearOwnProfile() {
         runCatching {
-            if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) return
+            if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+                // without profiles the dApp pages share the app's default store: clear that one
+                CookieManager.getInstance().removeAllCookies(null)
+                CookieManager.getInstance().flush()
+                android.webkit.WebStorage.getInstance().deleteAllData()
+                return
+            }
             val profile = ProfileStore.getInstance().getProfile(PROFILE) ?: return
             profile.cookieManager.removeAllCookies(null)
             profile.cookieManager.flush()
@@ -501,11 +510,20 @@ fun BridgeConfirmSheet(prompt: BridgePrompt, onConfirm: () -> Unit, onReject: ()
             }
             prompt.blacklisted?.let {
                 Row(
-                    Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFDEDED)).padding(12.dp).testTag("bridgePhishing"),
+                    Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.dangerBackground).padding(12.dp).testTag("bridgePhishing"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Glyph(AppIcon.WARNING, Color(0xFFE74C3C), 18.dp)
-                    Text(BrowserCopy.PHISHING, color = Color(0xFFE74C3C), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+                    Glyph(AppIcon.WARNING, colors.redText, 18.dp)
+                    Text(BrowserCopy.PHISHING, color = colors.text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+            prompt.warning?.let { warning ->
+                Row(
+                    Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.dangerBackground).padding(12.dp).testTag("bridgeWarning"),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Glyph(AppIcon.WARNING, colors.redText, 18.dp)
+                    Text(warning, color = colors.text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
                 }
             }
             Column(Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState()).padding(bottom = 20.dp)) {

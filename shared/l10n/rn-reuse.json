@@ -266,7 +266,6 @@
   "dapp_browser.title": "Explore Ecosystem",
   "deep_link.auth_request_as_current": "{requester} wants to sign you in with your Ecency account.\n\nOnly your username and a sign-in proof are shared. No key leaves Ecency.",
   "deep_link.auth_request_as_user": "{requester} wants to sign you in as @{username}.\n\nOnly your username and a sign-in proof are shared. No key leaves Ecency.",
-  "deep_link.posting_key_request": "{requester} is requesting the posting private key for @{username}.\n\nOnly continue if you trust this request.",
   "delete.confirm_delete_body": "Are you sure you want to delete account? It will erase all of your data",
   "delete.confirm_delete_title": "Confirm Delete",
   "delete.request_sent": "Your request for deletion is sent",

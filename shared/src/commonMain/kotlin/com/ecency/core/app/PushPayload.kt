@@ -58,9 +58,57 @@ data class PushPayload(
             return if (scheme == "hive" || scheme == "ecency") uri else ""
         }
 
-        /** Plain, single-line, capped text for a banner. */
-        internal fun clean(text: String?): String =
-            text.orEmpty().filter { it >= ' ' || it == '\t' }.replace('\t', ' ').trim().take(MAX_TEXT)
+        /**
+         * Plain, single-line, capped text for a banner, read by code point. Removed: control characters (C0, DEL,
+         * C1), line and paragraph separators, bidi embeddings, overrides and isolates, zero width space, byte order
+         * mark, soft hyphen, the invisible operators U+2060 to U+2064 and other format characters, tag characters
+         * and lone surrogates, as for announcements (README "Announcements"). Kept: the zero width non-joiner and
+         * joiner and the direction marks (Persian and Indic words, emoji sequences). Cut on a code point boundary.
+         */
+        internal fun clean(text: String?): String {
+            val raw = text.orEmpty()
+            val out = StringBuilder(raw.length)
+            var i = 0
+            while (i < raw.length) {
+                val c = raw[i]
+                val pair = c.isHighSurrogate() && i + 1 < raw.length && raw[i + 1].isLowSurrogate()
+                if (pair) {
+                    val cp = 0x10000 + ((c.code - 0xD800) shl 10) + (raw[i + 1].code - 0xDC00)
+                    if (!hiddenSupplementary(cp)) out.append(c).append(raw[i + 1])
+                    i += 2
+                    continue
+                }
+                when {
+                    c == '\t' -> out.append(' ')
+                    c.isSurrogate() -> Unit
+                    keptInBmp(c) -> out.append(c)
+                }
+                i++
+            }
+            var cut = out.toString().trim()
+            if (cut.length > MAX_TEXT) {
+                cut = cut.take(MAX_TEXT)
+                if (cut.last().isHighSurrogate()) cut = cut.dropLast(1)
+                cut = cut.trimEnd()
+            }
+            return cut
+        }
+
+        /** Joiners and direction marks a script or an emoji sequence needs (Arabic letter mark included). */
+        private val KEPT_FORMAT = setOf('\u200C', '\u200D', '\u200E', '\u200F', '\u061C')
+
+        private fun keptInBmp(c: Char): Boolean = when {
+            c < ' ' || c == '\u007F' || c in '\u0080'..'\u009F' -> false
+            c == '\u2028' || c == '\u2029' -> false
+            c in KEPT_FORMAT -> true
+            // bidi embeddings, overrides and isolates, U+200B, U+FEFF, U+00AD, U+2060 to U+2064 are all format characters
+            c.category == CharCategory.FORMAT -> false
+            else -> true
+        }
+
+        /** Tag characters and the other supplementary format characters (shorthand and musical formatting). */
+        private fun hiddenSupplementary(cp: Int): Boolean =
+            cp in 0xE0000..0xE007F || cp in 0x1BCA0..0x1BCA3 || cp in 0x1D173..0x1D17A
 
         /**
          * A websocket event (`{event:"notify", type, source, target, extra}`) as a payload, with the title and body

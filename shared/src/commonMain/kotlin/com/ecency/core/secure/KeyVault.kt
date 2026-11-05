@@ -62,14 +62,6 @@ data class VaultAccount(
         get() = authType != null && authType != AuthType.HIVE_SIGNER && authType != AuthType.HIVE_AUTH
 
     /**
-     * The posting key another app may be handed (`ecency://login`), or null. Read from the keys the account
-     * holds, not from its auth type: a key account with a stored posting key that is not also its active key
-     * (one WIF can sit in several roles; handing that out would hand out the stronger role).
-     */
-    val shareablePostingKey: String?
-        get() = postingKey?.takeIf { isKeyAccount && it.isNotEmpty() && it != activeKey }
-
-    /**
      * This account with the posting, active and memo keys [masterPassword] derives filled in where it holds
      * none (keys it already holds are kept). Derivation needs no network; whether a derived key is still one of
      * the account's keys is the chain's to say when it is used. The password itself goes nowhere.
@@ -83,6 +75,18 @@ data class VaultAccount(
             activeKey = activeKey?.takeIf { it.isNotEmpty() } ?: derived(com.ecency.core.hive.KeyRole.ACTIVE),
             memoKey = memoKey?.takeIf { it.isNotEmpty() } ?: derived(com.ecency.core.hive.KeyRole.MEMO),
         )
+    }
+
+    /**
+     * The roles (posting, active, memo) whose stored key is one of [owner], the chain's owner authority keys: a key
+     * the app does not keep, whatever role it was stored under.
+     */
+    internal fun rolesOnOwner(owner: Collection<String>): Set<com.ecency.core.hive.KeyRole> = buildSet {
+        fun on(wif: String?) = !wif.isNullOrEmpty() &&
+            runCatching { com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString() }.getOrNull()?.let { it in owner } == true
+        if (on(postingKey)) add(com.ecency.core.hive.KeyRole.POSTING)
+        if (on(activeKey)) add(com.ecency.core.hive.KeyRole.ACTIVE)
+        if (on(memoKey)) add(com.ecency.core.hive.KeyRole.MEMO)
     }
 
     /** A key account (not HiveSigner, not HiveAuth) that holds neither a posting nor an active key: it can sign nothing. */

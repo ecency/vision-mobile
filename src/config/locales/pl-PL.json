@@ -3045,29 +3045,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "W tym miesiącu utworzyłeś(-aś) {count, plural, one {# wpis(ów)} few {# wpis(ów)} many {# wpis(ów)} other {# wpis(ów)}}. Tak trzymaj!",
+        "checkin": "W tym tygodniu zameldowałeś(-aś) się przez {count, plural, one {# dzień(dni)} few {# dzień(dni)} many {# dzień(dni)} other {# dzień(dni)}}. Tak trzymaj!",
         "tags_bundle": "{count, plural, one {# nowy wpis} few {# nowe wpisy} many {# nowych wpisów} other {# nowego wpisu}} w #{tag}"
       },
       "pincode": {
-        "attempts_postfix": "{count, plural, one {# failed attempt} other {# failed attempts}}"
+        "attempts_postfix": "{count, plural, one {# nieudana(-e) próba(-y)} few {# nieudana(-e) próba(-y)} many {# nieudana(-e) próba(-y)} other {# nieudana(-e) próba(-y)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Seria {n} dni"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Dozwolone tylko konta starsze niż {days} dni",
+        "max_choices": "• Możesz wybrać maksymalnie {choices} opcji"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Pozostało {executions} przelewów",
+        "schedule_summary": "{executions} przelewów, każdy co {hours} godz."
       },
       "editor": {
         "short_content_hint": "Zbyt krótkie, by dawać punkty (do {n, plural, one {# znaku} few {# znaków} many {# znaków} other {# znaku}} włącznie, bez linków)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "Dołączyło osób: {count}",
         "ban-remaining-minutes": "za około {count, plural, one {# minutę} few {# minuty} many {# minut} other {# minuty}}",
         "ban-remaining-hours": "za około {count, plural, one {# godzinę} few {# godziny} many {# godzin} other {# godziny}}",
         "ban-remaining-days": "za około {count, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}}"
@@ -3079,8 +3079,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Wymagane minimum {count} znaków",
+        "chars_remaining": "Pozostało znaków: {count}"
       },
       "alert": {
         "too_many_images": "Możesz wybrać maksymalnie {count, plural, one {# obraz} few {# obrazy} many {# obrazów} other {# obrazu}} naraz"
@@ -3090,7 +3090,7 @@
         "rate": "{n} Points za {s, plural, one {# sekundę} few {# sekundy} many {# sekund} other {# sekundy}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Następne wycofanie ze stakingu za {days} dni, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Od {min} do {max, plural, one {# znaku} few {# znaków} many {# znaków} other {# znaku}}"

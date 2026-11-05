@@ -367,8 +367,8 @@ final class AppContainer: ObservableObject {
                     self.resetNavigation()
                     ShareInbox.purge(all: true)
                 }
-                // what dApps stored in Explore's own website data goes when no account is left
-                if event is AppEventDataWiped || (event as? AppEventSessionChanged).map({ $0.username == nil }) == true { DappWebViews.clearData() }
+                // what dApps stored in Explore's own website data belongs to the account that browsed: it goes on every account change
+                if event.clearsDappData { DappWebViews.clearData() }
             }
         }
         // @Published delivers the new state before it is stored: use the value handed in, not session.state
@@ -757,7 +757,8 @@ final class AppContainer: ObservableObject {
                     if options.seedAccounts { try seedAccounts(store) }
                 }
                 env = AppEnvironment(
-                    api: try EcencyApi(nodes: ["https://fake-hive.invalid"], transport: FakeHiveTransport()),
+                    // two hosts: removing a stored key that is on the owner authority needs two nodes to agree
+                    api: try EcencyApi(nodes: ["https://fake-hive.invalid", "https://fake-hive-2.invalid"], transport: FakeHiveTransport()),
                     vault: KeyVaultAsync(vault: KeyVault(store: store)),
                     renderer: PostBodyRendererCompanion.shared.`default`(proxyBase: ImageProxy.companion.DEFAULT_BASE),
                     dispatchers: AppDispatchers.companion.platform(),
@@ -777,7 +778,19 @@ final class AppContainer: ObservableObject {
             #endif
             let store = KeychainSecureStore()
             // Keychain items survive an uninstall; the vault must not hand them to a fresh install.
-            _ = try store.wipeIfFreshInstall(defaults: .standard)
+            // Before the first unlock after a restart UserDefaults can read as empty: the check stays pending and the
+            // store refuses every read and write until it ran (README "Secure storage"). The store asks from any
+            // thread, so the flag is kept here on the main thread and read under a lock.
+            let protectedData = ProtectedDataFlag(UIApplication.shared.isProtectedDataAvailable)
+            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) })
+            if !protectedData.value {
+                protectedData.observer = NotificationCenter.default.addObserver(
+                    forName: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil, queue: .main
+                ) { _ in
+                    protectedData.value = true
+                    _ = try? store.runPendingInstallCheck()
+                }
+            }
             // the RN app's accounts and PIN, imported once by the app lock's start before it decides anything
             let legacy = LegacyMigrationSource(storage: AsyncStorageReader.companion.forApp(),
                                                pinKey: BuildSecrets.pinKey, defaultPin: BuildSecrets.defaultPin)
@@ -1061,5 +1074,21 @@ enum InstallSource {
         if Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil { return "Other" }
         return "AppStore"
         #endif
+    }
+}
+
+/// Whether the device's protected data is available, for the Keychain store's pending install check: set on the main
+/// thread (launch, `protectedDataDidBecomeAvailableNotification`), read from any thread. It holds the notification
+/// observer for the life of the process.
+final class ProtectedDataFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: Bool
+    var observer: NSObjectProtocol?
+
+    init(_ value: Bool) { stored = value }
+
+    var value: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return stored }
+        set { lock.lock(); stored = newValue; lock.unlock() }
     }
 }

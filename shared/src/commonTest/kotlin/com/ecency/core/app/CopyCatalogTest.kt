@@ -41,7 +41,7 @@ class CopyCatalogTest {
         "AccountNoticeCopy.noSigningKeyTitle" to { AccountNoticeCopy.noSigningKeyTitle("7") },
         "AccountNoticeCopy.noSigningKey" to { AccountNoticeCopy.noSigningKey("7") },
         "AccountNoticeCopy.MISSING_ROLES_TITLE" to { AccountNoticeCopy.MISSING_ROLES_TITLE },
-        "AccountNoticeCopy.SHARED_OWNER_TITLE" to { AccountNoticeCopy.SHARED_OWNER_TITLE },
+        "AccountNoticeCopy.OWNER_KEY_NOT_KEPT_TITLE" to { AccountNoticeCopy.OWNER_KEY_NOT_KEPT_TITLE },
         "PaidCopy.POINTS" to { PaidCopy.POINTS },
         "PaidCopy.CHECK_AGAIN" to { PaidCopy.CHECK_AGAIN },
         "PaidCopy.GIVE_UP" to { PaidCopy.GIVE_UP },

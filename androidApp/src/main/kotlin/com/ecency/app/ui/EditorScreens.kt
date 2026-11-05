@@ -36,6 +36,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -133,6 +135,9 @@ import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -280,7 +285,7 @@ private fun ToolButton(label: String, tag: String, description: String, active: 
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav: ScreenNav) {
     val state by model.state.collectAsState()
@@ -410,12 +415,48 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
             field = TextFieldValue(state.body, TextRange(state.selection.start, state.selection.end))
         }
     }
+    // the header and the body scroll together. When the keyboard comes up over the focused body, the scroll column
+    // keeps its focused child in view as the viewport shrinks with the keyboard's inset (Compose's own behaviour, all
+    // through the inset animation): the body is taller than what is left, so its top goes to the top and the header
+    // scrolls away (EditorFlowsTest.whenTheKeyboardComesUpTheFocusedBodyMovesToTheTop, with faked insets). While
+    // typing the caret is kept on screen here.
+    val bodyScroll = rememberScrollState()
+    var bodyFocused by remember { mutableStateOf(false) }
+    var bodyLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
+    val caretRequester = remember { BringIntoViewRequester() }
+    val caretMargin = with(LocalDensity.current) { 8.dp.toPx() }
+    // a long draft scrolls inside the field (BodyScroll), which keeps its own caret in view: the column then only
+    // keeps the whole field on screen. Decided in the composition of each text, so no frame lays out a long text whole
+    val bodyScrollsItself = remember { BodyScroll() }.update(field.text.length)
+    // the preview takes the body away and its focus with it; the body that comes back shows its caret
+    var shownPreview by remember { mutableStateOf(state.isPreview) }
+    LaunchedEffect(state.isPreview) {
+        if (shownPreview == state.isPreview) return@LaunchedEffect
+        shownPreview = state.isPreview
+        bodyFocused = false
+        if (state.isPreview) {
+            bodyLayout = null // the field is gone; the next layout is the new field's
+        } else {
+            val layout = snapshotFlow { bodyLayout }.filterNotNull().first()
+            if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
+            val caret = layout.getCursorRect(field.selection.end.coerceIn(0, layout.layoutInput.text.length))
+            caretRequester.bringIntoView(caret.inflate(caretMargin))
+        }
+    }
+    LaunchedEffect(field.text, bodyLayout) {
+        val layout = bodyLayout ?: return@LaunchedEffect
+        if (!bodyFocused || layout.layoutInput.text.text != field.text) return@LaunchedEffect
+        if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
+        val caret = layout.getCursorRect(field.selection.end.coerceIn(0, field.text.length))
+        caretRequester.bringIntoView(caret.inflate(caretMargin))
+    }
 
     Column(Modifier.fillMaxSize().imePadding().testTag("editor")) {
         // ---- header ----
         Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.clip(RoundedCornerShape(50)).clickable(role = Role.Button) { leave() }.padding(12.dp).testTag("editorBack")) { Glyph(AppIcon.BACK, colors.darkGray, 24.dp, description = UiCopy.BACK) }
-            Text(if (state.wordsCount > 0) EditorUiCopy.wordsCount(state.wordsCount) else "", color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.weight(1f).testTag("wordsCount"))
+            // the words count sits on the quest chip's row above the toolbar (owner 11-04), as on iOS
+            Spacer(Modifier.weight(1f))
             if (state.isDraftSaving) Spinner(size = 18.dp)
             if (!state.isReply && !state.isEdit) {
                 LabelOrIcon(
@@ -461,78 +502,102 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                 }
             }
             else -> Column(Modifier.weight(1f).fillMaxWidth()) {
-                if (!state.isReply && !state.isEdit) {
-                    Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { sheet = "community" }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("communityRow"), verticalAlignment = Alignment.CenterVertically) {
-                        Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/128", 28.dp)
-                        Text(state.community?.title ?: EditorUiCopy.MY_BLOG, color = colors.text, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp).weight(1f))
-                        if (!state.canPostToCommunity) Text(EditorUiCopy.communityRestriction(state.community?.title.orEmpty()), color = colors.redText, fontSize = 12.sp, modifier = Modifier.testTag("communityRestriction"))
-                    }
-                }
-                if (!state.isReply) {
-                    PlainField(state.title, model::setTitle, EditorUiCopy.TITLE, "editorTitle", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content))
-                    FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        state.tags.forEach { tag ->
-                            Text(
-                                tag, color = Color.White, fontSize = 13.sp,
-                                modifier = Modifier.clip(RoundedCornerShape(50)).background(colors.blue).clickable(role = Role.Button) { model.removeTag(tag) }.padding(horizontal = 10.dp, vertical = 4.dp).testTag("tag:$tag"),
-                            )
+                // one scroll container for the header and the body (tester: "Window for editing drafts much too small"):
+                // the community row, title and tags scroll away with the text, and the body is at least as tall as what
+                // is visible, so with the keyboard up it gets the room. RN's markdownEditorView keeps one scroll container
+                // as well (its body input scrolls on its own, title and tags stay put); here it is this column.
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                    val viewport = maxHeight
+                    Column(Modifier.fillMaxSize().verticalScroll(bodyScroll).testTag("editorScroll")) {
+                        if (!state.isReply && !state.isEdit) {
+                            Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { sheet = "community" }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("communityRow"), verticalAlignment = Alignment.CenterVertically) {
+                                Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/128", 28.dp)
+                                Text(state.community?.title ?: EditorUiCopy.MY_BLOG, color = colors.text, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp).weight(1f))
+                                if (!state.canPostToCommunity) Text(EditorUiCopy.communityRestriction(state.community?.title.orEmpty()), color = colors.redText, fontSize = 12.sp, modifier = Modifier.testTag("communityRestriction"))
+                            }
                         }
-                        PlainField(
-                            state.tagInput, model::setTagInput, EditorUiCopy.TAGS_SEPARATE_WITH_SPACE, "tagInput",
-                            Modifier.width(220.dp).padding(vertical = 4.dp).onFocusChanged { if (!it.isFocused) model.endTagEditing() }, TextStyle(fontSize = 14.sp, textDirection = TextDirection.Content), singleLine = true,
-                            keyboard = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false, keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Done),
-                            actions = KeyboardActions(onDone = { model.endTagEditing() }),
+                        if (!state.isReply) {
+                            PlainField(state.title, model::setTitle, EditorUiCopy.TITLE, "editorTitle", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content))
+                            FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                state.tags.forEach { tag ->
+                                    Text(
+                                        tag, color = Color.White, fontSize = 13.sp,
+                                        modifier = Modifier.clip(RoundedCornerShape(50)).background(colors.blue).clickable(role = Role.Button) { model.removeTag(tag) }.padding(horizontal = 10.dp, vertical = 4.dp).testTag("tag:$tag"),
+                                    )
+                                }
+                                PlainField(
+                                    state.tagInput, model::setTagInput, EditorUiCopy.TAGS_SEPARATE_WITH_SPACE, "tagInput",
+                                    Modifier.width(220.dp).padding(vertical = 4.dp).onFocusChanged { if (!it.isFocused) model.endTagEditing() }, TextStyle(fontSize = 14.sp, textDirection = TextDirection.Content), singleLine = true,
+                                    keyboard = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false, keyboardType = KeyboardType.Ascii, imeAction = ImeAction.Done),
+                                    actions = KeyboardActions(onDone = { model.endTagEditing() }),
+                                )
+                                // the field shows the model's text from this composition on (EditorModel.tagFieldShown)
+                                val shownTags = state.tagInput
+                                androidx.compose.runtime.SideEffect { model.tagFieldShown(shownTags) }
+                            }
+                            state.tagWarning?.let { Text(it, color = colors.redText, fontSize = 12.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(horizontal = 16.dp, vertical = 2.dp).testTag("tagWarning")) }
+                        } else {
+                            state.parentSummary?.takeIf { !state.isEdit }?.let {
+                                Text(it, color = colors.darkGray, fontSize = 13.sp, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("parentSummary"))
+                            }
+                            if (state.isEdit) {
+                                Text("@${state.owner.orEmpty()}", color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                            } else {
+                                // RN reply account tile: avatar, @name and the arrow; a tap opens the accounts sheet and the reply carries over
+                                Row(
+                                    Modifier.padding(horizontal = 16.dp, vertical = 4.dp).clip(RoundedCornerShape(8.dp))
+                                        .clickable(enabled = !state.isSending, role = Role.Button) { env.replyHandoff.begin(model) }
+                                        .semantics { contentDescription = com.ecency.core.app.ReplyAccountCopy.SWITCH }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp).testTag("replyAccountTile"),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Avatar(com.ecency.core.app.PostCard.avatarUrl(state.owner.orEmpty(), env.proxyBase), 28.dp)
+                                    Text("@${state.owner.orEmpty()}", color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+                                    Glyph(AppIcon.DROPDOWN, colors.text, 20.dp, Modifier.padding(start = 2.dp))
+                                }
+                            }
+                        }
+                        BasicTextField(
+                            value = field,
+                            onValueChange = {
+                                field = it
+                                model.setBody(it.text, TextSelection(it.selection.min, it.selection.max))
+                            },
+                            enabled = !state.isSending,
+                            textStyle = TextStyle(fontSize = 16.sp, color = colors.text, lineHeight = 24.sp, textDirection = TextDirection.Content), cursorBrush = SolidColor(colors.blueText),
+                            onTextLayout = { bodyLayout = it },
+                            modifier = Modifier.fillMaxWidth().then(if (bodyScrollsItself) Modifier.height(viewport) else Modifier.heightIn(min = viewport))
+                                .onFocusChanged { bodyFocused = it.isFocused }
+                                .padding(horizontal = 16.dp, vertical = 8.dp).bringIntoViewRequester(caretRequester).testTag("editorBody"),
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxSize()) {
+                                    if (field.text.isEmpty()) Text(if (state.isReply) EditorUiCopy.ADD_YOUR_REPLY else EditorUiCopy.TELL_US_SOMETHING, color = colors.darkGray, fontSize = 16.sp)
+                                    inner()
+                                }
+                            },
                         )
-                        // the field shows the model's text from this composition on (EditorModel.tagFieldShown)
-                        val shownTags = state.tagInput
-                        androidx.compose.runtime.SideEffect { model.tagFieldShown(shownTags) }
-                    }
-                    state.tagWarning?.let { Text(it, color = colors.redText, fontSize = 12.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(horizontal = 16.dp, vertical = 2.dp).testTag("tagWarning")) }
-                } else {
-                    state.parentSummary?.takeIf { !state.isEdit }?.let {
-                        Text(it, color = colors.darkGray, fontSize = 13.sp, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("parentSummary"))
-                    }
-                    if (state.isEdit) {
-                        Text("@${state.owner.orEmpty()}", color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
-                    } else {
-                        // RN reply account tile: avatar, @name and the arrow; a tap opens the accounts sheet and the reply carries over
-                        Row(
-                            Modifier.padding(horizontal = 16.dp, vertical = 4.dp).clip(RoundedCornerShape(8.dp))
-                                .clickable(enabled = !state.isSending, role = Role.Button) { env.replyHandoff.begin(model) }
-                                .semantics { contentDescription = com.ecency.core.app.ReplyAccountCopy.SWITCH }
-                                .padding(vertical = 4.dp, horizontal = 4.dp).testTag("replyAccountTile"),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Avatar(com.ecency.core.app.PostCard.avatarUrl(state.owner.orEmpty(), env.proxyBase), 28.dp)
-                            Text("@${state.owner.orEmpty()}", color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
-                            Glyph(AppIcon.DROPDOWN, colors.text, 20.dp, Modifier.padding(start = 2.dp))
-                        }
                     }
                 }
-                BasicTextField(
-                    value = field,
-                    onValueChange = {
-                        field = it
-                        model.setBody(it.text, TextSelection(it.selection.min, it.selection.max))
-                    },
-                    enabled = !state.isSending,
-                    textStyle = TextStyle(fontSize = 16.sp, color = colors.text, lineHeight = 24.sp, textDirection = TextDirection.Content), cursorBrush = SolidColor(colors.blueText),
-                    modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("editorBody"),
-                    decorationBox = { inner ->
-                        Box(Modifier.fillMaxSize()) {
-                            if (field.text.isEmpty()) Text(if (state.isReply) EditorUiCopy.ADD_YOUR_REPLY else EditorUiCopy.TELL_US_SOMETHING, color = colors.darkGray, fontSize = 16.sp)
-                            inner()
-                        }
-                    },
-                )
                 if (state.showsShortReplyHint) {
                     Text(com.ecency.core.app.Quests.SHORT_REPLY_HINT, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp).testTag("shortReplyHint"))
                 }
-                state.questChip?.let { chip ->
-                    // RN quest chip: opens Perks; the x closes it for this run of the app
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp).clip(RoundedCornerShape(50)).background(colors.lightBackground).testTag("questChip"), verticalAlignment = Alignment.CenterVertically) {
-                        Text(chip, color = colors.text, fontSize = 13.sp, modifier = Modifier.clickable(role = Role.Button) { nav.push(AppScreen.of(com.ecency.core.app.RouteName.PERKS)) }.padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 6.dp))
-                        Box(Modifier.clickable(onClick = model::dismissQuestChip, role = Role.Button).padding(8.dp).testTag("questChipClose")) { Glyph(AppIcon.CLOSE, colors.darkGray, 14.dp, description = UiCopy.CANCEL) }
+                if (state.wordsCount > 0 || state.questChip != null) {
+                    // one row (owner 11-04): the quest chip at the leading edge, the words count at the trailing edge;
+                    // the chip's text truncates before the row takes a second line
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = if (state.questChip == null) 0.dp else 4.dp).testTag("countRow"), horizontalArrangement = if (state.questChip == null) Arrangement.End else Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        state.questChip?.let { chip ->
+                            // RN quest chip: opens Perks; the x closes it for this run of the app
+                            Row(Modifier.weight(1f, fill = false).clip(RoundedCornerShape(50)).background(colors.lightBackground).testTag("questChip"), verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    chip, color = colors.text, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false).clickable(role = Role.Button) { nav.push(AppScreen.of(com.ecency.core.app.RouteName.PERKS)) }.padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 6.dp),
+                                )
+                                Box(Modifier.clickable(onClick = model::dismissQuestChip, role = Role.Button).padding(8.dp).testTag("questChipClose")) { Glyph(AppIcon.CLOSE, colors.darkGray, 14.dp, description = UiCopy.CANCEL) }
+                            }
+                        }
+                        if (state.wordsCount > 0) {
+                            Text(EditorUiCopy.wordsCount(state.wordsCount), color = colors.darkGray, fontSize = 13.sp, maxLines = 1, softWrap = false, modifier = Modifier.padding(start = 8.dp).testTag("wordsCount"))
+                        }
                     }
                 }
                 if (state.recentDraftAvailable) {
@@ -1287,4 +1352,26 @@ internal fun PostingAuthorityDialog(onAnswer: (grant: Boolean) -> Unit, onDismis
         confirmButton = { TextButton(onClick = { onAnswer(true) }, modifier = Modifier.testTag("authorityGrant")) { Text(com.ecency.core.app.PostingAuthorityPrompt.GRANT) } },
         dismissButton = { TextButton(onClick = { onAnswer(false) }, modifier = Modifier.testTag("authoritySkip")) { Text(com.ecency.core.app.PostingAuthorityPrompt.SKIP) } },
     )
+}
+
+/**
+ * Whether the body field scrolls itself, as iOS's BodyTextView (README "Editor and publishing"): up to [GROWS_UP_TO]
+ * UTF-16 units it grows with its text inside the editor's scroll column; above that it is as tall as the visible
+ * area and scrolls itself, because a field in an unbounded column lays out its whole text on every key. It grows
+ * again below [SCROLLS_DOWN_TO], so it does not flip at every key.
+ */
+internal class BodyScroll {
+    private var scrolls = false
+
+    fun update(length: Int): Boolean {
+        scrolls = scrollsItself(length, scrolls)
+        return scrolls
+    }
+
+    companion object {
+        const val GROWS_UP_TO = 10_000
+        const val SCROLLS_DOWN_TO = 8_000
+
+        fun scrollsItself(length: Int, scrolls: Boolean): Boolean = if (scrolls) length > SCROLLS_DOWN_TO else length > GROWS_UP_TO
+    }
 }

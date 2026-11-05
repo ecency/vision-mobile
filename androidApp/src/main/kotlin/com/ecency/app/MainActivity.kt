@@ -359,6 +359,13 @@ class MainActivity : FragmentActivity() {
             }
         }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // a private key copy whose clear timer died with the process (or ran with the clipboard hidden) is cleared
+        // now: only a focused app can read the clipboard on Android 10+ (README "Secure storage")
+        KeyClipboard.clearLeftover(this, hasFocus)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         videoCaptures.save(outState)
