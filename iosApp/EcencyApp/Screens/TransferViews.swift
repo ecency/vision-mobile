@@ -173,6 +173,11 @@ struct TransferFormView: View {
     @ViewBuilder private func memoSection(_ s: TransferState) -> some View {
         Section(footer: Text(tcopy.MEMO_DESC)) {
             WalletField(label: tcopy.MEMO_PLACEHOLDER, text: binding(s.memo) { model.setMemo(text: $0) }, disabled: s.busy, machine: false, id: "transfer-memo")
+            // the memo last sent to this exchange: offered, never filled in by itself
+            if let saved = s.savedExchangeMemo, let ex = s.exchange, !s.busy {
+                Button(tcopy.useSavedMemo(exchange: ex, memo: saved)) { model.useSavedMemo() }
+                    .font(.footnote).accessibilityIdentifier("use-saved-memo")
+            }
         }
     }
 

@@ -227,6 +227,14 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
             }
             if (s.showMemo) {
                 Field(TransferCopy.MEMO, s.memo, model::setMemo, "transferMemo", enabled = !s.busy, placeholder = TransferCopy.MEMO_PLACEHOLDER)
+                // the memo last sent to this exchange: offered, never filled in by itself
+                val saved = s.savedExchangeMemo
+                val ex = s.exchange
+                if (saved != null && ex != null && !s.busy) {
+                    TextButton(onClick = model::useSavedMemo, modifier = Modifier.testTag("useSavedMemo")) {
+                        Text(TransferCopy.useSavedMemo(ex, saved), color = colors.blueText, fontSize = 13.sp)
+                    }
+                }
                 Text(TransferCopy.MEMO_DESC, color = colors.darkGray, fontSize = 12.sp)
             }
             if (s.memoHasSecret) Warning(TransferCopy.MEMO_HAS_SECRET, "memoHasSecret")

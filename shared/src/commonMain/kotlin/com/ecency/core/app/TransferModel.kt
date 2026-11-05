@@ -142,6 +142,8 @@ object TransferCopy {
 
     val MEMO_HAS_SECRET: String get() = L.native.transfer.memoHasSecret
 
+    fun useSavedMemo(exchange: String, memo: String) = L.native.transfer.useSavedMemo(exchange = exchange, memo = memo)
+
     fun exchangeRecurrentWarning(exchange: String) =
         L.native.transfer.isAnExchangeAnd(exchange = exchange)
 
@@ -190,6 +192,8 @@ data class TransferState(
     val precisionFailed: Boolean = false,
     val badActor: Boolean = false,
     val exchange: String? = null,
+    /** The memo this account last sent to [exchange] ([ExchangeMemos]), while the memo field does not hold it. */
+    val savedExchangeMemo: String? = null,
     val prompt: TransferPrompt? = null,
     /** The confirmed action's send, once confirmed. */
     val actionId: String? = null,
@@ -210,7 +214,7 @@ data class TransferState(
 
     val maxDecimals: Int get() = if (kind.isEngine) tokenPrecision ?: 8 else Amounts.precision(fund)
 
-    private val isNativeFund: Boolean get() = fund == "HIVE" || fund == "HBD"
+    internal val isNativeFund: Boolean get() = fund == "HIVE" || fund == "HBD"
 
     /** RN exchangeMemoRequired: blocks NEXT. */
     val exchangeMemoRequired: Boolean get() = exchange != null && isNativeFund && memo.isBlank()
@@ -371,6 +375,15 @@ class TransferModel internal constructor(
         setState { it.copy(memo = text).withWarnings() }
     }
 
+    /** "Use saved memo": the memo this account last sent to the exchange ([TransferState.savedExchangeMemo]). */
+    fun useSavedMemo() {
+        val saved = current.savedExchangeMemo ?: return
+        setMemo(saved)
+    }
+
+    /** The exchange memo of the confirmed send, kept ([ExchangeMemos]) once that send went through. */
+    private var sentExchangeMemo: Triple<String, String, String>? = null
+
     /** The HIVE/HBD switch of a plain transfer. */
     fun setFund(symbol: String) {
         if (symbol !in current.tokenChoices || symbol == current.fund || current.busy) return
@@ -430,6 +443,8 @@ class TransferModel internal constructor(
         }
         val json = WalletOps.ops(ops)
         val actionId = env.idempotencyKey()
+        // what was confirmed, not what the form holds later
+        sentExchangeMemo = s.exchange?.takeIf { s.isNativeFund && s.memo.isNotBlank() }?.let { Triple(user, it, s.memo) }
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
         env.walletSends.send(user, json, OperationAuthority.required(json), actionId)
         owned.owns(actionId)
@@ -463,6 +478,8 @@ class TransferModel internal constructor(
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> {
+                sentExchangeMemo?.let { (user, exchange, memo) -> env.exchangeMemos.save(user, exchange, memo) }
+                sentExchangeMemo = null
                 env.ui.toast(WalletCopy.SUCCESSFUL)
                 release()
                 env.wallet.refreshLater()
@@ -604,7 +621,10 @@ class TransferModel internal constructor(
 
     private fun TransferState.withWarnings(): TransferState {
         val names = recipients
-        return copy(badActor = names.any { it in badActors }, exchange = names.firstOrNull(ExchangeAccounts::isExchange))
+        val ex = names.firstOrNull(ExchangeAccounts::isExchange)
+        // offered only where the exchange needs a memo (native funds), and only while the field does not hold it
+        val saved = if (ex != null && isNativeFund) from?.let { env.exchangeMemos.get(it, ex) } else null
+        return copy(badActor = names.any { it in badActors }, exchange = ex, savedExchangeMemo = saved?.takeIf { it != memo.trim() })
     }
 
     /** RN: picking a recipient with an existing schedule fills memo, amount, recurrence, executions and its date. */

@@ -2465,6 +2465,7 @@
     "transfer": {
       "one_recipient": "Only one recipient can be used for this transfer.",
       "memo_has_secret": "This memo holds a private key or a master password. Memos are public on the blockchain: never put a key or password in one.",
+      "use_saved_memo": "Use the memo you sent to @{exchange} last time: {memo}",
       "is_an_exchange_and": "{exchange} is an exchange and may not support recurring transfers: funds sent on a schedule can be lost. Use a one-time transfer instead."
     },
     "dapps": {

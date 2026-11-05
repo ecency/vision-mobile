@@ -469,6 +469,54 @@ class WalletModelsTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /**
+     * An exchange's deposit memo, once a transfer with it went through, is offered (never filled in by itself) the next
+     * time this account sends to the same exchange; per account, on the device, gone when the account leaves.
+     */
+    @Test
+    fun anExchangesMemoIsOfferedAfterASuccessfulTransfer() = runTest {
+        val w = world(this)
+        suspend fun send(to: String, memo: String) {
+            val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+            m.setRecipient(to)
+            m.setAmount("1")
+            testScheduler.advanceUntilIdle()
+            m.setMemo(memo)
+            m.next()
+            m.confirm()
+            testScheduler.advanceUntilIdle()
+        }
+        suspend fun form(to: String) = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive")).also {
+            it.setRecipient(to)
+            testScheduler.advanceUntilIdle()
+        }
+        // nothing saved yet
+        assertNull(form("bittrex").current.savedExchangeMemo)
+        send("bittrex", " 104857 ")
+        val next = form("bittrex")
+        assertEquals("104857", next.current.savedExchangeMemo, "offered, trimmed")
+        assertEquals("", next.current.memo, "never filled in by itself")
+        next.useSavedMemo()
+        assertEquals("104857", next.current.memo)
+        assertNull(next.current.savedExchangeMemo, "not offered once it is the memo")
+        // another exchange, and an ordinary account, are not offered it
+        assertNull(form("blocktrades").current.savedExchangeMemo)
+        assertNull(form("spike-bob").current.savedExchangeMemo)
+        // a later transfer with another memo replaces it
+        send("bittrex", "222333")
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a memo the secret guard refused is never kept (it is never sent either)
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-exchange-memo").toWif()
+        send("bittrex", wif)
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a non-exchange transfer keeps nothing
+        send("spike-bob", "hello")
+        assertFalse("hello" in w.env.prefs.getString(ExchangeMemos.PREFS_KEY).orEmpty())
+        // the account leaves: its memos go with it
+        w.env.accountsLeft(listOf(w.user), forget = true) {}
+        assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
     /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */
     @Test
     fun aPrivateKeyOrMasterPasswordInAMemoBlocksTheSend() = runTest {

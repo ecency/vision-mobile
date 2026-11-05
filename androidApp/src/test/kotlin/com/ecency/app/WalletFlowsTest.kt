@@ -284,6 +284,23 @@ class WalletFlowsTest {
         until { compose.onNodeWithTag("tab:history:INTEREST", useUnmergedTree = true).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Selected) == true }
     }
 
+    /** The memo last sent to an exchange is offered under the memo field, and filled in only on a tap. */
+    @Test
+    fun theMemoLastSentToAnExchangeIsOfferedAndFilledOnATap() {
+        val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))
+        launch(navigator)
+        until { exists("transferForm") && text("transferBalance").contains("12.345") }
+        env.exchangeMemos.save(env.session.current.username!!, "bittrex", "104857")
+        compose.onNodeWithTag("transferTo").performTextInput("bittrex")
+        until { exists("useSavedMemo") }
+        val typed = { compose.onNodeWithTag("transferMemo").fetchSemanticsNode().config.getOrNull(SemanticsProperties.EditableText)?.text.orEmpty() }
+        assertEquals("never filled in by itself", "", typed())
+        compose.onNodeWithTag("useSavedMemo").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        try { until { typed() == "104857" && !exists("useSavedMemo") } } catch (e: AssertionError) {
+            throw AssertionError("typed=${typed()} state=${navigator.top.peek<com.ecency.core.app.TransferModel>("transfer")?.current}")
+        }
+    }
+
     /** #3633: a key in the memo shows the warning and keeps Next off; an ordinary memo clears both. */
     @Test
     fun aKeyInTheMemoShowsTheWarningAndKeepsNextOff() {
