@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -694,7 +695,8 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
         }
         if (opened.isFailure) picking = null
     }
-    Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().testTag("profileEdit")) {
+    // above the keyboard: the form shrinks and keeps the focused field in view, SAVE rides on the keyboard
+    Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().fitInside(androidx.compose.ui.layout.WindowInsetsRulers.Ime.current).testTag("profileEdit")) {
         Column(Modifier.fillMaxSize()) {
             TopBar(ProfileUiCopy.EDIT_PROFILE, onBack = onBack)
             when {
