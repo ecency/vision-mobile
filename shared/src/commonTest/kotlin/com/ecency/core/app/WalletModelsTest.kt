@@ -590,7 +590,9 @@ class WalletModelsTest {
         // glued to other base58 text too (review): a key pasted against a word still counts
         for (memo in listOf(wif, "verify me $wif please", "P5" + "K".repeat(50), "key:$wif.", "verify$wif", "${wif}ok", "abc${wif}xyz", "my password: P5" + "K".repeat(50), "pwP5" + "K".repeat(50),
             // split by copy noise (#3648 review): still readable on chain
-            wif.take(20) + " " + wif.drop(20), wif.take(10) + "\u200B" + wif.drop(10), wif.take(25) + "\n" + wif.drop(25))) {
+            wif.take(20) + " " + wif.drop(20), wif.take(10) + "\u200B" + wif.drop(10), wif.take(25) + "\n" + wif.drop(25),
+            // a password with invisible characters slipped in
+            "P5" + "K".repeat(20) + "\u200B" + "K".repeat(30))) {
             m.setMemo(memo)
             assertTrue(m.current.memoHasSecret, memo)
             assertFalse(m.current.nextEnabled, memo)

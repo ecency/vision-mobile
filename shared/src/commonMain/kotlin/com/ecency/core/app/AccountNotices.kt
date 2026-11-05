@@ -244,8 +244,9 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
             val told = list(NOT_IMPORTED_TOLD)
             val fresh = names.distinct().filter { it !in told }
             if (fresh.isNotEmpty()) {
-                writeList(NOT_IMPORTED_TOLD, told + fresh)
+                // the pending list first: a failed second write then names them again, never loses them
                 writeList(NOT_IMPORTED_NOTICE, list(NOT_IMPORTED_NOTICE) + fresh)
+                writeList(NOT_IMPORTED_TOLD, told + fresh)
             }
             val here = try {
                 env.accounts.accounts().map { it.username }.toSet()

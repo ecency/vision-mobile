@@ -747,7 +747,10 @@ object MemoSecrets {
         WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) } ||
             // a key split by spaces, line breaks or invisible characters is still readable on chain: the copy noise
             // key input ignores (KeyInput.isNoise) is taken out and the keys looked for again
-            WORD.findAll(memo.filterNot(com.ecency.core.auth.KeyInput::isNoise)).any { hasKey(it.value) }
+            WORD.findAll(memo.filterNot(com.ecency.core.auth.KeyInput::isNoise)).any { hasKey(it.value) } ||
+            // a password has no checksum, so only invisible characters are taken out for it (never in plain text;
+            // joining across spaces would take ordinary words that start with P5 for a password)
+            WORD.findAll(memo.filterNot { com.ecency.core.auth.KeyInput.isNoise(it) && !it.isWhitespace() }).any { hasPassword(it.value) }
 
     private fun hasKey(run: String): Boolean =
         (0..run.length - WIF_LENGTH).any { i ->
