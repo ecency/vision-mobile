@@ -64,8 +64,22 @@ final class ChatUITests: XCTestCase {
         mine.tap()
         XCTAssertTrue(element(app, "chat-options-sheet").waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["chat-option-EDIT"].exists)
+        // RN's four, then a wave and a party; More (every emoji) at the row's end
+        XCTAssertTrue(app.buttons["chat-quick-wave"].exists && app.buttons["chat-quick-tada"].exists)
+        let more = app.buttons["chat-quick-more"]
+        XCTAssertTrue(more.exists)
+        XCTAssertGreaterThanOrEqual(more.frame.minX, app.buttons["chat-quick-tada"].frame.maxX, "More after the reactions")
         app.buttons["chat-quick-+1"].tap()
-        XCTAssertTrue(any(app, prefix: "chat-reaction-").waitForExistence(timeout: 10), "the reaction shows under the message")
+        let pill = any(app, prefix: "chat-reaction-")
+        XCTAssertTrue(pill.waitForExistence(timeout: 10), "the reaction shows under the message")
+        // the pill sits right under its message (tester report: too far from it): its 44 point touch area may
+        // reach into the bubble, the drawn pill is within a few points of it
+        let reactedRow = String(pill.identifier.dropFirst("chat-reaction-".count).prefix { $0 != "-" })
+        let message = app.descendants(matching: .any)["chat-message-\(reactedRow)"]
+        let bubbleBottom = message.descendants(matching: .any).matching(NSPredicate(format: "identifier ENDSWITH %@", "chat-text-\(reactedRow)"))
+            .allElementsBoundByIndex.map(\.frame.maxY).max() ?? 0
+        XCTAssertGreaterThan(bubbleBottom, 0)
+        XCTAssertLessThan(pill.frame.midY - bubbleBottom, 22, "the pill sits right under its message")
     }
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the

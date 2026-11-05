@@ -345,9 +345,15 @@ class ChatFlowsTest {
         waitFor("message:p4")
         compose.onNodeWithTag("bubble:p4").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
         waitFor("quick:+1")
-        tap("quick:+1")
-        waitFor("reaction:p4:+1")
-        assertTrue(node.chat.sent.drop(question).any { it.method == "POST" && it.url.endsWith("/p4/reactions") })
+        // RN's four, then a wave and a party; More (every emoji) is a button of its own at the row's end
+        assertTrue(exists("quick:wave") && exists("quick:tada"))
+        val more = compose.onNodeWithTag("quick:more").fetchSemanticsNode()
+        assertEquals(com.ecency.core.app.ChatUiCopy.MORE_MENU, more.config[androidx.compose.ui.semantics.SemanticsProperties.ContentDescription].single())
+        val party = compose.onNodeWithTag("quick:tada").fetchSemanticsNode()
+        assertTrue("More after the reactions", more.boundsInRoot.left >= party.boundsInRoot.right)
+        tap("quick:wave")
+        waitFor("reaction:p4:wave")
+        assertTrue(node.chat.sent.drop(question).any { it.method == "POST" && it.url.endsWith("/p4/reactions") && "wave" in it.body.orEmpty() })
         // copy from the options sheet, opened the TalkBack way: the bubble's double tap names and opens the options
         val bubble = compose.onNodeWithTag("bubble:p4").fetchSemanticsNode()
         assertEquals(com.ecency.core.app.ChatUiCopy.MESSAGE_OPTIONS, bubble.config[androidx.compose.ui.semantics.SemanticsActions.OnClick].label)

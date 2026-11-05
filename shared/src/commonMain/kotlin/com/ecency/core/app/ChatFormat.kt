@@ -639,6 +639,11 @@ object ChatEmoji {
         return picker.filter { e -> Js.lower(e.name).contains(q) || e.aliases.any { Js.lower(it).contains(q) } }
     }
 
-    /** RN ChatOptionsSheet's quick reactions. */
-    val QUICK: List<Pair<String, String>> = listOf("+1" to "👍", "-1" to "👎", "smile" to "😄", "heart" to "❤️")
+    /**
+     * The quick reactions over the message options: RN ChatOptionsSheet's four, then a wave and a party (the row has
+     * room for them; More, at the row's end, opens every emoji).
+     */
+    val QUICK: List<Pair<String, String>> = listOf(
+        "+1" to "👍", "-1" to "👎", "smile" to "😄", "heart" to "❤️", "wave" to "👋", "tada" to "🎉",
+    )
 }

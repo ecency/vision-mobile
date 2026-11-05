@@ -1060,6 +1060,9 @@ struct ChatMessageBubble: View {
             }
         }
         .padding(own ? .trailing : .leading, own || typeSize.isAccessibilitySize ? 0 : 40)
+        // each pill's touch area is 44 points tall around a smaller pill: the row moves up by that margin so the
+        // pills sit right under their message (the tester's report: too far from it)
+        .padding(.top, -8)
         .frame(maxWidth: .infinity, alignment: own ? .trailing : .leading)
     }
 }
@@ -1270,18 +1273,22 @@ struct MessageOptionsSheet: View {
 
     var body: some View {
         ScrollView { VStack(spacing: 0) {
-            // the quick reactions wrap at large text instead of pushing More off screen
-            ChipFlow(spacing: 12) {
-                ForEach(ChatEmoji.shared.QUICK, id: \.first) { pair in
-                    let name = pair.first as String? ?? ""
-                    Button { onPick(.react(name)) } label: { Text(pair.second as String? ?? "").scaledFont(28, relativeTo: .title).tapTarget() }
-                        .accessibilityIdentifier("chat-quick-\(name)")
+            // the quick reactions wrap at large text; More stays at the row's end and opens every emoji
+            HStack(alignment: .center, spacing: 8) {
+                ChipFlow(spacing: 8) {
+                    ForEach(ChatEmoji.shared.QUICK, id: \.first) { pair in
+                        let name = pair.first as String? ?? ""
+                        Button { onPick(.react(name)) } label: { Text(pair.second as String? ?? "").scaledFont(28, relativeTo: .title).tapTarget() }
+                            .accessibilityIdentifier("chat-quick-\(name)")
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 Button { onPick(.more) } label: {
-                    Text("\u{22EF} " + ChatUiCopy.shared.MORE_MENU).scaledFont(15).foregroundStyle(theme.text).padding(.horizontal, 12).padding(.vertical, 8)
-                        .background(Capsule().fill(theme.lightBackground)).frame(minHeight: minTapTarget)
+                    Image(appIcon: .more).foregroundStyle(theme.text)
+                        .frame(width: minTapTarget, height: minTapTarget).background(Circle().fill(theme.lightBackground))
                 }
                 .accessibilityLabel(ChatUiCopy.shared.MORE_MENU)
+                .largeContent(ChatUiCopy.shared.MORE_MENU, appIcon: .more)
                 .accessibilityIdentifier("chat-quick-more")
             }
             .padding(.vertical, 16).padding(.horizontal, 16)
