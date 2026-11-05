@@ -127,8 +127,15 @@ final class WalletUITests: XCTestCase {
         let comment = app.staticTexts["First fixture comment."]
         for _ in 0..<12 where !(comment.exists && comment.isHittable) { app.swipeUp() }
         XCTAssertTrue(comment.isHittable, app.debugDescription)
-        let tips = app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter { $0.isHittable && $0.frame.minY > comment.frame.maxY }
-        let tip = try! XCTUnwrap(tips.min { $0.frame.minY < $1.frame.minY }, app.debugDescription)
+        // the comment's own gift: below its text, never the pinned post footer's (scrolled into view if needed)
+        let footer = app.descendants(matching: .any)["post-footer"]
+        func commentTips() -> [XCUIElement] {
+            app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter {
+                $0.isHittable && $0.frame.minY > comment.frame.maxY && !(footer.exists && footer.frame.intersects($0.frame))
+            }
+        }
+        for _ in 0..<3 where commentTips().isEmpty { app.swipeUp() }
+        let tip = try! XCTUnwrap(commentTips().min { $0.frame.minY < $1.frame.minY }, app.debugDescription)
         tip.tap()
         XCTAssertTrue(app.staticTexts["Support @spike-bob"].waitForExistence(timeout: 15), app.debugDescription)
         let points = app.buttons["tip-currency-POINTS"]

@@ -733,6 +733,13 @@ class WalletModelsTest {
         m.setMemo("#104857")
         assertEquals(MemoEncryption.EXCHANGE, m.current.memoEncryption)
         assertFalse(m.current.nextEnabled)
+        // cipher text already encrypted is refused too: the exchange could not read the deposit memo either
+        m.setMemo(com.ecency.core.hive.MEMO_VECTORS.first().encoded)
+        assertEquals(MemoEncryption.EXCHANGE, m.current.memoEncryption)
+        assertFalse(m.current.nextEnabled)
+        m.setMemo("104857")
+        assertEquals(MemoEncryption.NONE, m.current.memoEncryption)
+        assertTrue(m.current.nextEnabled)
     }
 
     @Test

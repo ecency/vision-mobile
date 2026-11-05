@@ -265,11 +265,13 @@ data class TransferState(
      */
     val memoEncryption: MemoEncryption
         get() = when {
-            // cipher text already (an existing schedule's memo, one pasted): it goes as it is, never encrypted twice
-            !memo.startsWith("#") || Memo.isEncrypted(memo) -> MemoEncryption.NONE
-            !(isNativeFund && kind in ENCRYPTED_MEMO_KINDS) -> MemoEncryption.UNSUPPORTED
-            // an exchange cannot read an encrypted deposit memo, and the deposit may not be credited
+            !memo.startsWith("#") -> MemoEncryption.NONE
+            // an exchange cannot read an encrypted deposit memo, and the deposit may not be credited: no `#` memo
+            // goes to one, cipher text already encrypted included
             exchange != null -> MemoEncryption.EXCHANGE
+            // cipher text already (an existing schedule's memo, one pasted): it goes as it is, never encrypted twice
+            Memo.isEncrypted(memo) -> MemoEncryption.NONE
+            !(isNativeFund && kind in ENCRYPTED_MEMO_KINDS) -> MemoEncryption.UNSUPPORTED
             memoCipherKey == false -> MemoEncryption.NO_KEY
             else -> MemoEncryption.ENCRYPTS
         }

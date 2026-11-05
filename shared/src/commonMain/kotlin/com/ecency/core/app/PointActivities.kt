@@ -8,6 +8,7 @@ import com.ecency.core.api.model.str
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonObject
@@ -44,9 +45,6 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
     private val replays = mutableMapOf<String, Job>()
     private var nextId = 0L
     private var started = false
-    /** Bumped by [forget]: a report still being sent when its account left is not parked again. */
-    private val departures = mutableMapOf<String, Int>()
-    private var wipes = 0
 
     /**
      * Main thread, once (the app's start): a report refused while the app lock hid the app stays parked, so the
@@ -71,15 +69,12 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
      */
     fun record(username: String?, type: Int, txId: String? = null, blockNum: Long? = null, onResult: (Boolean) -> Unit = {}) {
         val user = username?.removePrefix("@")?.takeIf { it.isNotEmpty() } ?: return onResult(false)
-        val departed = departures[user] ?: 0
-        val wiped = wipes
         env.background.launch {
             val ok = send(user, type, txId, blockNum)
             // an account without an Ecency session can never report: nothing is parked for it, nor for an account
-            // that left the device while this was sent (#3634). A store that fails to write loses this report, never
-            // the caller's coroutine.
-            val stillHere = (departures[user] ?: 0) == departed && wipes == wiped
-            if (ok == false && stillHere) runCatching { park(user, type, txId, blockNum) }
+            // that left the device while this was sent, its broadcast included (#3634): the vault says, read when
+            // the report would be parked. A store that fails to write loses this report, never the caller's coroutine.
+            if (ok == false && isOnDevice(user)) runCatching { park(user, type, txId, blockNum) }
             onResult(ok == true)
         }
     }
@@ -127,7 +122,6 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
      * stops (#3634). Main thread.
      */
     internal fun forget(accounts: List<String>?) {
-        if (accounts == null) wipes++ else accounts.forEach { departures[it] = (departures[it] ?: 0) + 1 }
         val names = accounts ?: env.prefs.keys().filter { it.startsWith(KEY_PREFIX) }.map { it.removePrefix(KEY_PREFIX) }
         names.forEach { name ->
             replays.remove(name)?.cancel()
@@ -156,6 +150,15 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
     }
 
     data class Parked(val id: String, val type: Int, val txId: String?, val blockNum: Long?)
+
+    /** [user] still has its account on the device; an unreadable vault keeps the report (it leaves with the account). */
+    private suspend fun isOnDevice(user: String): Boolean = try {
+        withContext(env.dispatchers.io) { user in env.vault.vault.usernames() }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        true
+    }
 
     private fun park(user: String, type: Int, txId: String?, blockNum: Long?) {
         val id = "${env.nowMillis()}-${nextId++}"

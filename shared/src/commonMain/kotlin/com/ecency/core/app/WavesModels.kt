@@ -249,7 +249,9 @@ class WavesFeedModel internal constructor(
     private fun reload(key: PostKey) {
         val user = env.session.current.username
         val startedIn = generation
-        val shownBody = current.items.firstOrNull { it.key == key }?.post?.body
+        val shown = current.items.firstOrNull { it.key == key }?.post
+        val shownBody = shown?.body
+        val shownUpdated = shown?.updated.orEmpty()
         reloads.remove(key)?.cancel()
         reloads[key] = scope.launch {
             var fresh: Post? = null
@@ -263,8 +265,11 @@ class WavesFeedModel internal constructor(
                 } catch (e: Exception) {
                     null
                 }
-                if (read != null) fresh = read
-                if (read != null && read.body != shownBody) break
+                // an answer from a node that is behind (older than the card, or without `updated`, which
+                // bridge.get_post always sends) is tried again rather than taken
+                if (read == null || read.updated.isEmpty() || read.updated < shownUpdated) continue
+                fresh = read
+                if (read.body != shownBody) break
             }
             val got = fresh ?: return@launch
             val warn = NsfwMode.of(env.prefs) == NsfwMode.WARN
@@ -274,7 +279,7 @@ class WavesFeedModel internal constructor(
             }
             if (startedIn != generation) return@launch
             val update: (WaveItem) -> WaveItem? = update@{ item ->
-                if (got.updated.isNotEmpty() && got.updated < item.post.updated) return@update item
+                if (got.updated < item.post.updated) return@update item
                 val card = rebuilt.first.let { if (item.card.isNsfw && !it.isNsfw) it.copy(isNsfw = true) else it }
                 // a vote made while the read ran: the vote state now, not the one the card was built with
                 val voted = Cards.withVote(card, got, user, env.localVotes.get(key))
@@ -451,7 +456,9 @@ class WavesFeedModel internal constructor(
                 val items = build(visible(activePager.loadMore()), user, promoted = false)
                 if (startedIn != generation) return@launch
                 val known = if (reset) emptySet() else organic.map { it.key }.toHashSet()
-                organic = if (reset) items else organic + items.filter { it.key !in known }
+                // a pull to refresh before the feed has an edit keeps the edited body, as the minute's refetch
+                val shownByKey = if (reset) organic.associateBy { it.key } else emptyMap()
+                organic = if (reset) items.map { row -> shownByKey[row.key]?.let { keepNewerBody(it, row) } ?: row } else organic + items.filter { it.key !in known }
                 if (reset && kind.injectsPromoted) loadPromoted(startedIn, user)
                 if (reset) env.waves.forgetIndexed(organic.map { it.key })
                 if (reset) readAt = stamp
@@ -480,8 +487,8 @@ class WavesFeedModel internal constructor(
     companion object {
         const val REFETCH_MILLIS = 60_000L
 
-        /** How long an edited wave's read waits before each try: at once, then while the API catches up with the block. */
-        internal val RELOAD_WAITS = listOf(0L, 3_000L, 6_000L)
+        /** How long an edited wave's read waits before each try (at once, 3 s, 6 s): the API catches up with the block. */
+        internal val RELOAD_WAITS = listOf(0L, 3_000L, 3_000L)
 
         /**
          * The minute's refresh for a wave already shown. A wave read again after an edit is newer than the feed's

@@ -156,15 +156,37 @@ class PointActivitiesTest {
         app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-a")
         testScheduler.runCurrent()
         assertEquals(1, app.reports().size, "the first try failed, the retry waits")
+        // the sign-out: the account leaves the vault, then its data
+        KeyVault(app.store).remove(alice)
         app.env.accountsLeft(listOf(alice), forget = false) {}
         testScheduler.advanceUntilIdle()
-        assertEquals(3, app.reports().size)
         assertTrue(app.env.pointActivities.pending(alice).isEmpty())
         assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
         // signed in again: a new report parks as before
+        KeyVault(app.store).save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, com.ecency.core.hive.KeyRole.POSTING), accessToken = "access-$alice"))
         app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-b")
         testScheduler.advanceUntilIdle()
         assertEquals(listOf("tx-b"), app.env.pointActivities.pending(alice).map { it.txId })
+    }
+
+    /** Review: a broadcast that started before the sign-out and reports after it parks nothing for the account. */
+    @Test
+    fun aReportFromABroadcastThatEndsAfterTheSignOutIsNotParked() = runTest {
+        val app = app()
+        // the app lock hides the app, so the report cannot go now and would be parked
+        PinLock(KeyVault(app.store), 16).setPin("1234")
+        app.env.appLock.refresh()
+        testScheduler.advanceUntilIdle()
+        app.env.appLock.lockIfEnabled()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.appLock.current.hidesContent)
+        KeyVault(app.store).remove(alice)
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        // the vote's broadcast went through only now, after the account left
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-late")
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty())
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
     }
 
     @Test

@@ -885,7 +885,7 @@ class WavesModelsTest {
         val before = feed.current.items.first()
         bridgePosts = mapOf(
             "w1" to """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"Wave w1 without the typo",
-                "created":"2026-10-06T11:00:00","children":1,"net_rshares":10,"active_votes":[{"voter":"x","rshares":5},{"voter":"y","rshares":5}],
+                "created":"2026-10-06T11:00:00","updated":"2026-10-06T11:05:00","children":1,"net_rshares":10,"active_votes":[{"voter":"x","rshares":5},{"voter":"y","rshares":5}],
                 "stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}""",
         )
         val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
@@ -921,7 +921,7 @@ class WavesModelsTest {
         feed.start()
         testScheduler.advanceUntilIdle()
         fun bridgeRow(body: String) = """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"$body",
-            "created":"2026-10-06T11:00:00","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}"""
+            "created":"2026-10-06T11:00:00","updated":"2026-10-06T11:05:00","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}"""
         val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
         bridgePosts = mapOf("w1" to bridgeRow("Wave w1"))
         app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
@@ -975,6 +975,41 @@ class WavesModelsTest {
         feed.close()
     }
 
+    /** Review: the tries run 3 s and 6 s after the edit, and an answer older than the card shown is tried again. */
+    @Test
+    fun anOlderAnswerIsTriedAgainAtThreeAndSixSeconds() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        bridgePosts = mapOf("w1" to editedRow("Second edit", "2026-10-06T11:06:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
+        val before = reads()
+        // a third edit; a node that is behind answers with the first one, then one without `updated`
+        bridgePosts = mapOf("w1" to editedRow("First edit", "2026-10-06T11:05:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        assertEquals(before + 1, reads())
+        bridgePosts = mapOf("w1" to """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"Unversioned",
+            "created":"2026-10-06T11:00:00","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}""")
+        testScheduler.advanceTimeBy(3_000)
+        testScheduler.runCurrent()
+        assertEquals(before + 2, reads(), "tried again 3 s later")
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        bridgePosts = mapOf("w1" to editedRow("Third edit", "2026-10-06T11:07:00"))
+        testScheduler.advanceTimeBy(3_000)
+        testScheduler.runCurrent()
+        assertEquals(before + 3, reads(), "and 6 s after the edit")
+        assertEquals("Third edit", feed.current.items.first().post.body)
+        feed.close()
+    }
+
     /** Review: a feed row without `updated` never shows an edit, yet its votes and replies still refresh the card. */
     @Test
     fun anEditedWaveKeepsItsBodyWhileTheMinutesRefreshUpdatesItsCounters() = runTest {
@@ -997,6 +1032,11 @@ class WavesModelsTest {
         assertEquals("Edited", item.post.body, "the feed's older row does not bring the old body back")
         assertEquals(9, item.card.votes)
         assertEquals(4, item.card.comments)
+        // a pull to refresh before the feed has the edit keeps it too
+        feed.refresh()
+        testScheduler.runCurrent()
+        assertEquals("Edited", feed.current.items.first().post.body, "the pull to refresh brought the old body back")
+        assertEquals(9, feed.current.items.first().card.votes)
         // once the feed has the edit, its row is taken whole
         backend.feed = { "[${row(alice, "w1", body = "Edited again", extra = ",\"updated\":\"2026-10-06T11:07:00\"")}]" }
         testScheduler.advanceTimeBy(WavesFeedModel.REFETCH_MILLIS + 1)
