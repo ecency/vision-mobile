@@ -99,8 +99,12 @@ class WavesModelsTest {
     /** What `condenser_api.get_content` says the chain holds for any permlink asked (null: nothing). */
     private var onChainBody: String? = null
 
+    /** `bridge.get_post` answers by permlink (an edited wave read again); others get the linked post. */
+    private var bridgePosts: Map<String, String> = emptyMap()
+
     private fun chain(): suspend FakeTransport.(Sent) -> HttpResult = { req ->
-        when (req.method) {
+        val asked = if (req.method == "bridge.get_post") req.params.jsonObject["permlink"]?.jsonPrimitive?.content else null
+        if (asked != null && asked in bridgePosts) FakeTransport.result(req, bridgePosts.getValue(asked)) else when (req.method) {
             "bridge.get_account_posts" -> {
                 val host = req.params.jsonObject.getValue("account").jsonPrimitive.content
                 containers[host]?.let { if (it == "fail") HttpResult(500, "down") else FakeTransport.result(req, "[$it]") } ?: FakeTransport.result(req, "[]")
@@ -865,6 +869,44 @@ class WavesModelsTest {
         testScheduler.advanceUntilIdle()
         assertEquals(listOf("w1"), feed.permlinks())
         assertEquals(emptyList(), app.env.waves.localItems(alice))
+        feed.close()
+    }
+
+    /** Tester report: a wave fixed in the editor shows its new text in the list at once, without a refresh. */
+    @Test
+    fun anEditedWaveIsReadAgainAndReplacedInTheList() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")},${row(bob, "w2")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        val before = feed.current.items.first()
+        bridgePosts = mapOf(
+            "w1" to """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"Wave w1 without the typo",
+                "created":"2026-10-06T11:00:00","children":1,"net_rshares":10,"active_votes":[{"voter":"x","rshares":5},{"voter":"y","rshares":5}],
+                "stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}""",
+        )
+        val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
+        // a post this list does not hold is not read
+        app.env.emit(AppEvent.PostChanged(PostKey(bob, "elsewhere")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(0, reads())
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, reads())
+        assertEquals(listOf("w1", "w2"), feed.permlinks())
+        val after = feed.current.items.first()
+        assertEquals("Wave w1 without the typo", after.post.body)
+        assertTrue(after.blocks != before.blocks, "the body is drawn again")
+        assertEquals(before.host, after.host)
+        assertEquals(2, after.card.votes)
+        // a failed read keeps the card as it is
+        bridgePosts = mapOf("w1" to "null")
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Wave w1 without the typo", feed.current.items.first().post.body)
         feed.close()
     }
 

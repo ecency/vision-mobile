@@ -226,6 +226,7 @@ class WavesFeedModel internal constructor(
                         promoted = promoted.filter { it.key != event.key }
                         redisplay()
                     }
+                    is AppEvent.PostChanged -> if (current.items.any { it.key == event.key }) reload(event.key)
                     is AppEvent.AuthorMuted, AppEvent.MutesLoaded -> redisplay()
                     is AppEvent.WavePosted -> if (kind == WavesFeedKind.ForYou) redisplay()
                     else -> {}
@@ -234,6 +235,39 @@ class WavesFeedModel internal constructor(
         }
         // README "Foreground refresh": back after a long trip with the list on screen, its first page at once
         scope.launch { env.freshness.staleReturns.collect { if (pollJob?.isActive == true) refetchIfStale() } }
+    }
+
+    /**
+     * A wave of this list changed (the editor's edit, as PostModel does): read it again (`bridge.get_post`) and
+     * replace its card in place. A failed read keeps the card; an answer for a previous account never lands.
+     */
+    private fun reload(key: PostKey) {
+        val user = env.session.current.username
+        val startedIn = generation
+        scope.launch {
+            val fresh = try {
+                env.api.posts.getPost(key.author, key.permlink, user, refresh = true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            } ?: return@launch
+            val warn = NsfwMode.of(env.prefs) == NsfwMode.WARN
+            val rebuilt = withContext(dispatchers.render) {
+                val card = Cards.of(fresh, env.renderer, user, env.localVotes.get(key), env.proxyBase, promoted = false, nsfwWarn = warn)
+                card to env.renderBody(fresh)
+            }
+            if (startedIn != generation) return@launch
+            val update: (WaveItem) -> WaveItem? = { item ->
+                val card = rebuilt.first.let { if (item.card.isNsfw && !it.isNsfw) it.copy(isNsfw = true) else it }
+                item.copy(post = fresh, card = card.copy(isPromoted = item.card.isPromoted), blocks = rebuilt.second)
+            }
+            val changed = setOf(key)
+            organic = Cards.replaceChanged(organic, changed, { it.key }, update)
+            promoted = Cards.replaceChanged(promoted, changed, { it.key }, update)
+            env.waves.updateLocal(changed, update)
+            redisplay()
+        }
     }
 
     /** The account changed: nothing of the previous one stays on screen, and the feed loads again if it was in use. */
