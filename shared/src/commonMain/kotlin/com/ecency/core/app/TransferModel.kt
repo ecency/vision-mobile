@@ -437,7 +437,8 @@ class TransferModel internal constructor(
 
     /** RN "Delete Recurrent Transfer": asks first. */
     fun deleteSchedule() {
-        if (current.existingScheduleDate == null || current.busy) return
+        // the deletion sends the memo as it stands (RN): one holding a secret is refused like Next ([memoHasSecret])
+        if (current.existingScheduleDate == null || current.busy || current.memoHasSecret) return
         setState { it.copy(prompt = TransferPrompt.ConfirmDeleteSchedule) }
     }
 
@@ -445,6 +446,11 @@ class TransferModel internal constructor(
     fun confirmDeleteSchedule() {
         val s = current
         if (s.prompt != TransferPrompt.ConfirmDeleteSchedule) return
+        // the memo may have been edited while the question was open
+        if (s.memoHasSecret) {
+            setState { it.copy(prompt = null) }
+            return
+        }
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
@@ -671,14 +677,19 @@ object TransferRecipientParser {
  * (`P5` and 50 base58 characters). Public keys pass. A key glued to other text counts too: every 51 character stretch
  * of a base58 run that starts with `5` is checked (the checksum keeps chance matches out). A password has no checksum,
  * so it counts only as a whole run or at either end of one (glued to a word on one side): a long run such as an
- * encrypted memo, with `P5` somewhere inside, is not taken for one.
+ * encrypted memo, with `P5` somewhere inside, is not taken for one. A key split by copy noise (spaces, line breaks,
+ * invisible characters) counts as well.
  */
 object MemoSecrets {
     private val WORD = Regex("[1-9A-HJ-NP-Za-km-z]+")
     private const val WIF_LENGTH = 51
     private const val PASSWORD_LENGTH = 52
 
-    fun contains(memo: String): Boolean = WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) }
+    fun contains(memo: String): Boolean =
+        WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) } ||
+            // a key split by spaces, line breaks or invisible characters is still readable on chain: the copy noise
+            // key input ignores (KeyInput.isNoise) is taken out and the keys looked for again
+            WORD.findAll(memo.filterNot(com.ecency.core.auth.KeyInput::isNoise)).any { hasKey(it.value) }
 
     private fun hasKey(run: String): Boolean =
         (0..run.length - WIF_LENGTH).any { i ->
