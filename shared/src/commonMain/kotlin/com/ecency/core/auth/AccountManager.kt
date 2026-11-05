@@ -420,11 +420,17 @@ class AccountManager(
      * none) signs a fresh code. Null when nothing worked or the account was removed meanwhile; the stored session
      * is then left as it was, and the call's 401 goes back to its caller.
      */
+    override fun sessionMark(username: String): Any? = removalMark(username)
+
+    /** [renewAfterRejection] for a call whose session is taken to be the current one (tests and callers without a mark). */
     @Throws(Exception::class)
-    override suspend fun renewAfterRejection(username: String, rejected: String): String? {
-        // before the first suspension: a removal that starts at any point after this voids the write below
-        val mark = removalMark(username)
-        return renewal.withLock { renewRejected(username, rejected, mark) }
+    suspend fun renewAfterRejection(username: String, rejected: String): String? = renewAfterRejection(username, rejected, removalMark(username))
+
+    @Throws(Exception::class)
+    override suspend fun renewAfterRejection(username: String, rejected: String, mark: Any?): String? {
+        // the mark the call was sent under ([sessionMark]); without one, the session as it is now
+        val sent = mark as? RemovalMark ?: removalMark(username)
+        return renewal.withLock { renewRejected(username, rejected, sent) }
     }
 
     private suspend fun renewRejected(username: String, rejected: String, mark: RemovalMark): String? {

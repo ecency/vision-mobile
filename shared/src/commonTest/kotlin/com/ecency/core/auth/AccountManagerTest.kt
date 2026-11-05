@@ -359,6 +359,26 @@ class AccountManagerTest {
         assertEquals("access-new", rig.vault.account("spike-user")!!.accessToken, "the new session is left as it is")
     }
 
+    /** #3648 review: a call sent before a sign-out and in, refused after it, is not sent again with the new session. */
+    @Test
+    fun aCallSentBeforeASignOutAndInIsNotRenewedWithTheNewSession() = runTest {
+        val rig = Rig(this)
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        // the call goes out with access-1 under this mark
+        val mark = rig.manager.sessionMark("spike-user")
+        // while it is on its way the account signs out and in again
+        rig.manager.remove("spike-user")
+        rig.http = { FakeAuthHttp.tokens(access = "access-new", refresh = "refresh-new") }
+        rig.manager.loginWithKey("spike-user", TestKeys.wif(KeyRole.POSTING))
+        val sentBefore = rig.fake.sent.size
+        // its 401 arrives now
+        assertNull(rig.manager.renewAfterRejection("spike-user", "access-1", mark))
+        assertEquals(sentBefore, rig.fake.sent.size, "no exchange for it either")
+        // a call of the new session is renewed as usual
+        rig.http = { FakeAuthHttp.tokens(access = "access-3", refresh = "refresh-3") }
+        assertEquals("access-3", rig.manager.renewAfterRejection("spike-user", "access-new", rig.manager.sessionMark("spike-user")))
+    }
+
     /** #3648 review: a renewal whose account left while its exchange ran stores nothing. */
     @Test
     fun aRenewalWhoseAccountLeftStoresNothing() = runTest {

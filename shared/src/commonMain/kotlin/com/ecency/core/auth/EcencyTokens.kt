@@ -108,11 +108,18 @@ fun interface EcencyCodeProvider {
     suspend fun code(username: String): String?
 
     /**
-     * A private call was refused (401) with [rejected]: a renewed code to send it once more with, or null when the
-     * session cannot be renewed. The default renews nothing.
+     * Which session of [username] a call is about to go out with, taken before it is sent: [renewAfterRejection] is
+     * given it back, so a session that left while the call was on its way is never renewed for it. Null: no such mark.
+     */
+    fun sessionMark(username: String): Any? = null
+
+    /**
+     * A private call sent under [mark] ([sessionMark]) was refused (401) with [rejected]: a renewed code to send it
+     * once more with, or null when the session cannot be renewed or is no longer the one it went out with. The
+     * default renews nothing.
      */
     @Throws(Exception::class)
-    suspend fun renewAfterRejection(username: String, rejected: String): String? = null
+    suspend fun renewAfterRejection(username: String, rejected: String, mark: Any?): String? = null
 }
 
 /**
@@ -152,11 +159,13 @@ class EcencyPrivateApi(
      * code, goes back to the caller as it came. Never a loop.
      */
     private suspend fun renewing(username: String, send: suspend (String) -> HttpResult): HttpResult {
+        // the session the call goes out with, taken before it is sent: a sign-out and in while it is on its way voids it
+        val mark = codes.sessionMark(username)
         val code = codes.code(username) ?: throw AuthException.NotSignedIn()
         val first = send(code)
         if (first.status != 401) return first
         val fresh = try {
-            codes.renewAfterRejection(username, code)
+            codes.renewAfterRejection(username, code, mark)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

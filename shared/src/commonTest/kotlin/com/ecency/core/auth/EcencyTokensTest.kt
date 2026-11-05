@@ -84,7 +84,7 @@ class EcencyTokensTest {
         val renewals = mutableListOf<String>()
         val codes = object : EcencyCodeProvider {
             override suspend fun code(username: String) = current
-            override suspend fun renewAfterRejection(username: String, rejected: String): String? {
+            override suspend fun renewAfterRejection(username: String, rejected: String, mark: Any?): String? {
                 renewals += rejected
                 return "new".also { current = it }
             }
