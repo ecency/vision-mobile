@@ -184,6 +184,23 @@ final class AppContainer: ObservableObject {
     /// Hands the app language over to the widget extension (IosWidgetStore.handOver).
     private var widgetLanguage: Closeable?
     private var foregroundObservers: [NSObjectProtocol] = []
+    /// The restarts after the secure store opened late ([ProtectedDataFlag.storageOpened], [recoverStorageStart]).
+    private var storageObserver: NSObjectProtocol?
+    private var storageWatchers: [Closeable] = []
+    private var storageRecovery = StorageRecovery()
+
+    /// Runs again a session or lock start that failed while the store was closed, once the store is open.
+    private func recoverStorageStart(_ launch: (flag: ProtectedDataFlag, store: KeychainSecureStore)) {
+        let run = storageRecovery.next(
+            closedAtLaunch: launch.flag.closedAtLaunch, storeOpen: !launch.store.installCheckPending(),
+            sessionFailed: env.session.current.error?.kind == .storage, lockFailed: env.appLock.current.error?.kind == .storage
+        )
+        if run.session { env.session.start() }
+        if run.lock {
+            env.appLock.clearError()
+            env.appLock.start()
+        }
+    }
     /// Ecency Pro members for the badge (ProfileViews.swift).
     let proMembers: Observed<NSSet>
     /// The post menu's running actions, failure alert and deletions (PostMenu.swift).
@@ -343,6 +360,15 @@ final class AppContainer: ObservableObject {
         env.session.start()
         // runs the RN migration first (when there is RN data), then decides whether to lock
         env.appLock.start()
+        // the secure store opened late (its install check waited for protected data): the session's and the lock's
+        // starts that failed closed meanwhile run again, each on its own, whenever its storage error shows up after
+        // the store opened (an error still on its way when the store opened included), so nobody has to find Retry
+        // (README "Secure storage")
+        if let launch = ProtectedDataFlag.launch {
+            let check = { [weak self] in MainActor.assumeIsolated { self?.recoverStorageStart(launch) } }
+            storageObserver = NotificationCenter.default.addObserver(forName: ProtectedDataFlag.storageOpened, object: nil, queue: .main) { _ in check() }
+            storageWatchers = [env.session.watch { _ in check() }, env.appLock.watch { _ in check() }]
+        }
         startNotifications()
         restore(AppContainer.savedRecently())
         if let target = options.openPost?.split(separator: "/"), target.count == 2 {
@@ -781,16 +807,16 @@ final class AppContainer: ObservableObject {
             // Before the first unlock after a restart UserDefaults can read as empty: the check stays pending and the
             // store refuses every read and write until it ran (README "Secure storage"). The store asks from any
             // thread, so the flag is kept here on the main thread and read under a lock.
+            // The value read at launch can be false on a phone that is already unlocked (a prewarmed launch), and then
+            // no "became available" notification follows: it is read again whenever the app becomes active or comes
+            // to the foreground, and on the main thread before every store call made there.
             let protectedData = ProtectedDataFlag(UIApplication.shared.isProtectedDataAvailable)
-            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: { KotlinBoolean(value: protectedData.value) })
-            if !protectedData.value {
-                protectedData.observer = NotificationCenter.default.addObserver(
-                    forName: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil, queue: .main
-                ) { _ in
-                    protectedData.value = true
-                    _ = try? store.runPendingInstallCheck()
-                }
-            }
+            _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: {
+                KotlinBoolean(value: Thread.isMainThread ? protectedData.refresh() : protectedData.value)
+            })
+            protectedData.closedAtLaunch = store.installCheckPending()
+            protectedData.watch { protectedData.runPendingCheck(store) }
+            ProtectedDataFlag.launch = (protectedData, store)
             // the RN app's accounts and PIN, imported once by the app lock's start before it decides anything
             let legacy = LegacyMigrationSource(storage: AsyncStorageReader.companion.forApp(),
                                                pinKey: BuildSecrets.pinKey, defaultPin: BuildSecrets.defaultPin)
@@ -1077,18 +1103,72 @@ enum InstallSource {
     }
 }
 
-/// Whether the device's protected data is available, for the Keychain store's pending install check: set on the main
-/// thread (launch, `protectedDataDidBecomeAvailableNotification`), read from any thread. It holds the notification
-/// observer for the life of the process.
+/// Whether the device's protected data is available, for the Keychain store's pending install check: read from
+/// `UIApplication` on the main thread (launch, [refresh], the notifications in [watch]), read from any thread as
+/// [value]. It holds its notification observers for the life of the process.
 final class ProtectedDataFlag: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: Bool
-    var observer: NSObjectProtocol?
+    private var observers: [NSObjectProtocol] = []
+
+    /// Posted on the main thread when a pending install check ran, so a start that failed closed meanwhile restarts.
+    static let storageOpened = Notification.Name("ecency.secureStorageOpened")
+
+    /// The launch's flag and store (not in fake-data runs), for the container's restarts.
+    nonisolated(unsafe) static var launch: (flag: ProtectedDataFlag, store: KeychainSecureStore)?
+
+    /// The store's install check could not run at launch: only then do failed starts restart by themselves.
+    var closedAtLaunch = false
 
     init(_ value: Bool) { stored = value }
 
     var value: Bool {
         get { lock.lock(); defer { lock.unlock() }; return stored }
         set { lock.lock(); stored = newValue; lock.unlock() }
+    }
+
+    /// Main thread: reads `UIApplication.isProtectedDataAvailable` again and keeps it.
+    @discardableResult
+    func refresh() -> Bool {
+        let now = UIApplication.shared.isProtectedDataAvailable
+        value = now
+        return now
+    }
+
+    /// Main thread: [onChange] runs after a fresh read whenever the device unlocks, the app becomes active or comes
+    /// to the foreground. An app that is active is unlocked, so a launch that read "unavailable" recovers here.
+    func watch(_ onChange: @escaping () -> Void) {
+        let names = [UIApplication.protectedDataDidBecomeAvailableNotification, UIApplication.didBecomeActiveNotification,
+                     UIApplication.willEnterForegroundNotification]
+        observers = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                self?.refresh()
+                onChange()
+            }
+        }
+    }
+
+    /// Main thread: runs the store's pending install check when it can run now; posts [storageOpened] when it ran.
+    func runPendingCheck(_ store: KeychainSecureStore) {
+        guard value, store.installCheckPending() else { return }
+        _ = try? store.runPendingInstallCheck()
+        if !store.installCheckPending() { NotificationCenter.default.post(name: Self.storageOpened, object: nil) }
+    }
+}
+
+/// Which starts to run again once a store that was closed at launch opened: the session and the lock each once, when
+/// its storage error is there with the store open, in whatever order the error and the opening arrive. Once only, so a
+/// store that keeps failing for another reason never loops (Retry stays for that).
+struct StorageRecovery {
+    private(set) var sessionRetried = false
+    private(set) var lockRetried = false
+
+    mutating func next(closedAtLaunch: Bool, storeOpen: Bool, sessionFailed: Bool, lockFailed: Bool) -> (session: Bool, lock: Bool) {
+        guard closedAtLaunch, storeOpen else { return (false, false) }
+        let session = sessionFailed && !sessionRetried
+        let lock = lockFailed && !lockRetried
+        if session { sessionRetried = true }
+        if lock { lockRetried = true }
+        return (session, lock)
     }
 }
