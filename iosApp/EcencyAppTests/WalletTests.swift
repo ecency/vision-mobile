@@ -54,7 +54,7 @@ final class WalletTests: XCTestCase {
         XCTAssertEqual(WalletHistory.shared.POINT_TYPES.count, 12)
         let state = AssetDetailsState(symbol: "POINTS", account: nil, asset: nil, summary: [], aprText: nil, actions: [], pending: [], activities: [],
                                       activitiesEnabled: true, isLoading: false, isLoadingMore: false, isRefreshing: false, historyFailed: false,
-                                      endReached: false, filter: nil, pointType: 0, recurrent: [], busyKey: nil, prompt: nil, expanded: [],
+                                      endReached: false, filter: nil, pointType: 0, recurrent: [], busyKey: nil, prompt: nil, decryptedMemos: [:], expanded: [],
                                       filterable: false, analyticsCoin: nil)
         XCTAssertEqual(state.pointTypes.first?.int32Value, 0)
         XCTAssertTrue(state.categories.isEmpty)

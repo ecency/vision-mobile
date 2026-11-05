@@ -328,6 +328,31 @@ class WalletFlowsTest {
         assertTrue(node.broadcasts().isEmpty())
     }
 
+    /** #3633: a `#` memo says it will be encrypted on a HIVE transfer; a Points transfer refuses it and keeps Next off. */
+    @Test
+    fun aHashMemoSaysItIsEncryptedOrWhyItCannotBe() {
+        fun nextEnabled() = compose.onAllNodes(hasTestTag("transferNext")).fetchSemanticsNodes().firstOrNull()?.config?.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled) == false
+        launch(Navigator(NavState().push(AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))))
+        until { exists("transferForm") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        compose.onNodeWithTag("transferAmount").performTextInput("1")
+        compose.onNodeWithTag("transferMemo").performTextInput("#secret")
+        until { exists("memoEncryptUnsupported") && exists("transferNext") }
+        assertFalse("Next stays off", nextEnabled())
+        compose.onNodeWithTag("transferMemo").performTextReplacement("public")
+        until { !exists("memoEncryptUnsupported") }
+        assertTrue(node.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun aHashMemoOnAHiveTransferSaysItWillBeEncrypted() {
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))))
+        until { exists("transferForm") && text("transferBalance").contains("12.345") }
+        compose.onNodeWithTag("transferMemo").performTextInput("#rent")
+        until { exists("memoEncrypted") }
+        assertFalse(exists("memoEncryptNoKey"))
+    }
+
     @Test
     fun aTransferIsConfirmedOnceAndBroadcastAsTheSdksOperation() {
         val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))

@@ -1,6 +1,11 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
+import com.ecency.core.hive.KeyRole
+import com.ecency.core.hive.Memo
+import com.ecency.core.secure.AuthType
+import com.ecency.core.secure.KeyVault
+import com.ecency.core.secure.VaultAccount
 import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.api.wallet.AssetLayer
@@ -171,6 +176,47 @@ class WalletModelsTest {
         assertTrue(seen.none { it.isRefreshing || it.isLoading || it.activities.isEmpty() }, "no spinner, the rows stay: $seen")
         assertFalse(w.env.wallet.current.isRefreshing)
         watch.close()
+        details.close()
+    }
+
+    /** #3633: an encrypted memo in the history is read on demand with a key on the device; Repeat never re-sends the cipher text. */
+    @Test
+    fun anEncryptedMemoInTheHistoryDecryptsWithAKeyOnTheDevice() = runTest {
+        val w = world(this)
+        val me = w.user
+        val incoming = Memo.encode(AppTestKeys.key("spike-bob", KeyRole.MEMO), AppTestKeys.key(me, KeyRole.MEMO).publicKey(), "#for you")
+        val outgoing = Memo.encode(AppTestKeys.key(me, KeyRole.POSTING), AppTestKeys.key("spike-bob", KeyRole.MEMO).publicKey(), "#sent by me")
+        w.rpc["condenser_api.get_account_history"] = {
+            "[" + historyRow(101, "transfer", """{"from":"$me","to":"spike-bob","amount":"1.000 HIVE","memo":"$outgoing"}""") + "," +
+                historyRow(102, "transfer", """{"from":"spike-bob","to":"$me","amount":"2.000 HIVE","memo":"$incoming"}""") + "," +
+                historyRow(103, "transfer", """{"from":"spike-bob","to":"$me","amount":"3.000 HIVE","memo":"#just a tag"}""") + "]"
+        }
+        w.env.wallet.start()
+        val details = w.env.assetDetailsModel("HIVE")
+        details.start()
+        testScheduler.advanceUntilIdle()
+        val rows = details.current.activities.associateBy { it.trxIndex }
+        assertTrue(rows[101]!!.encryptedMemo)
+        assertTrue(rows[102]!!.encryptedMemo)
+        assertFalse(rows[103]!!.encryptedMemo, "a # memo that is no cipher text is shown as it is")
+        // Repeat before the memo is read: no cipher text goes back into a transfer
+        details.repeat(rows[101]!!)
+        assertEquals("", w.env.transferPrefill!!.memo)
+        // the posting key sent it, so it reads it back
+        details.decryptMemo(rows[101]!!)
+        testScheduler.advanceUntilIdle()
+        assertEquals("sent by me", details.current.decryptedMemos[rows[101]!!.key])
+        details.repeat(rows[101]!!)
+        assertEquals("#sent by me", w.env.transferPrefill!!.memo, "repeated as the text, encrypted again")
+        // the incoming one needs the memo key, not on the device yet
+        details.decryptMemo(rows[102]!!)
+        testScheduler.advanceUntilIdle()
+        assertNull(details.current.decryptedMemos[rows[102]!!.key])
+        assertEquals(TransferCopy.DECRYPT_MEMO_FAILED, w.env.ui.current.toast?.text)
+        KeyVault(w.app.store).run { save(account(me)!!.copy(memoKey = AppTestKeys.wif(me, KeyRole.MEMO))) }
+        details.decryptMemo(rows[102]!!)
+        testScheduler.advanceUntilIdle()
+        assertEquals("for you", details.current.decryptedMemos[rows[102]!!.key])
         details.close()
     }
 
@@ -593,6 +639,161 @@ class WalletModelsTest {
         assertTrue(assertIs<SendPhase.Failed>(m.current.phase).retryable)
         assertEquals(0, w.env.walletSends.successHookCount, "the send is gone, so is its hook")
         assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
+    /** The other accounts' chain records too (each with its memo key), so a `#` memo can be encrypted for them. */
+    private fun withRecipients(w: WalletWorld) {
+        val own = w.rpc["condenser_api.get_accounts"]!!
+        w.rpc["condenser_api.get_accounts"] = { r ->
+            val names = r.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
+            val mine = own(r)!!.trim().removePrefix("[").removeSuffix("]").trim()
+            val others = names.filter { it != w.user && it in WalletWorld.KNOWN }.map { AppTestKeys.accountJson(it) }
+            "[" + (listOfNotNull(mine.ifEmpty { null }) + others).joinToString(",") + "]"
+        }
+    }
+
+    private fun memos(w: WalletWorld) = w.broadcastOps().map { (it[1] as JsonObject)["memo"]!!.jsonPrimitive.content }
+
+    /** #3633: a `#` memo goes on chain encrypted for each recipient's memo key; the sender reads it back too. */
+    @Test
+    fun aHashMemoIsEncryptedForEachRecipient() = runTest {
+        val w = world(this)
+        withRecipients(w)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob, spike-carol")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#rent for May")
+        assertEquals(MemoEncryption.ENCRYPTS, m.current.memoEncryption)
+        m.next()
+        testScheduler.advanceUntilIdle()
+        assertEquals(TransferPrompt.Confirm, m.current.prompt)
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        val sent = memos(w)
+        assertEquals(2, sent.size)
+        assertTrue(sent.none { it.contains("rent") }, "never on chain as text")
+        assertEquals("#rent for May", Memo.decode(AppTestKeys.key("spike-bob", KeyRole.MEMO), sent[0]))
+        assertEquals("#rent for May", Memo.decode(AppTestKeys.key("spike-carol", KeyRole.MEMO), sent[1]))
+        // no memo key stored: the posting key encrypts, and reads its own memo back
+        assertEquals("#rent for May", Memo.decode(AppTestKeys.key(w.user, KeyRole.POSTING), sent[0]))
+    }
+
+    /** #3648 review: a form edited while the memo is being encrypted does not confirm the old values. */
+    @Test
+    fun anEditWhileTheMemoIsEncryptedDropsTheOldConfirmation() = runTest {
+        val w = world(this)
+        withRecipients(w)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#rent")
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.get_accounts"] = gate
+        m.next()
+        testScheduler.runCurrent()
+        assertTrue(m.current.encryptingMemo)
+        m.setAmount("2")
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.encryptingMemo)
+        assertNull(m.current.prompt, "no confirmation for the old amount")
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.app.broadcasts().isEmpty())
+    }
+
+    /** #3648 review: a memo that is already cipher text (an existing schedule's, a pasted one) goes as it is, not encrypted twice. */
+    @Test
+    fun aMemoThatIsAlreadyEncryptedGoesAsItIs() = runTest {
+        val w = world(this)
+        withRecipients(w)
+        val cipher = Memo.encode(AppTestKeys.key(w.user, KeyRole.POSTING), AppTestKeys.key("spike-bob", KeyRole.MEMO).publicKey(), "#old note")
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo(cipher)
+        assertEquals(MemoEncryption.NONE, m.current.memoEncryption)
+        m.next()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(cipher), memos(w))
+    }
+
+    /** #3648 review: an exchange cannot read an encrypted deposit memo, so a `#` memo to one is refused. */
+    @Test
+    fun aHashMemoToAnExchangeIsRefused() = runTest {
+        val w = world(this)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("bittrex")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#104857")
+        assertEquals(MemoEncryption.EXCHANGE, m.current.memoEncryption)
+        assertFalse(m.current.nextEnabled)
+    }
+
+    @Test
+    fun theMemoKeyEncryptsWhenItIsOnTheDevice() = runTest {
+        val w = world(this)
+        withRecipients(w)
+        KeyVault(w.app.store).run { save(account(w.user)!!.copy(memoKey = AppTestKeys.wif(w.user, KeyRole.MEMO))) }
+        val m = transfer(w, AppScreen.Transfer("transfer_to_savings", "HBD", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#savings note")
+        m.next()
+        testScheduler.advanceUntilIdle()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        val memo = memos(w).single()
+        assertEquals("#savings note", Memo.decode(AppTestKeys.key(w.user, KeyRole.MEMO), memo))
+        assertEquals("#savings note", Memo.decode(AppTestKeys.key("spike-bob", KeyRole.MEMO), memo))
+    }
+
+    @Test
+    fun aHashMemoIsRefusedWhereItCannotBeEncrypted() = runTest {
+        // Points (no Hive memo key on that ledger)
+        val w = world(this)
+        val points = transfer(w, AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))
+        points.setRecipient("spike-bob")
+        points.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        points.setMemo("#secret")
+        assertEquals(MemoEncryption.UNSUPPORTED, points.current.memoEncryption)
+        assertFalse(points.current.nextEnabled)
+        points.setMemo("public")
+        assertEquals(MemoEncryption.NONE, points.current.memoEncryption)
+        // an account without a key on the device (HiveSigner)
+        val w2 = world(this)
+        KeyVault(w2.app.store).run { save(VaultAccount(w2.user, AuthType.HIVE_SIGNER, accessToken = "access-${w2.user}")) }
+        val m = transfer(w2, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#secret")
+        assertEquals(MemoEncryption.NO_KEY, m.current.memoEncryption)
+        assertFalse(m.current.nextEnabled)
+        m.next()
+        assertTrue(w2.app.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun aRecipientWhoseMemoKeyCannotBeReadSendsNothing() = runTest {
+        val w = world(this)
+        // the default fixture knows only the sender's account
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#secret")
+        m.next()
+        testScheduler.advanceUntilIdle()
+        assertIs<TransferPrompt.Alert>(m.current.prompt)
+        assertTrue(w.app.broadcasts().isEmpty(), "never sent as plain text")
     }
 
     /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */

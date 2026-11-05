@@ -73,6 +73,8 @@ data class AssetDetailsState(
     /** The open order being cancelled or recurrent transfer being removed. */
     val busyKey: String? = null,
     val prompt: DetailsPrompt? = null,
+    /** Encrypted memos read on this screen (#3633), by row key: in memory only, gone with the screen. */
+    val decryptedMemos: Map<String, String> = emptyMap(),
     /** Whether the expanded row is shown, by row key. */
     val expanded: Set<String> = emptySet(),
     /** RN: the filter icon is shown for the hive layer only. */
@@ -186,11 +188,34 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
         val amount = row.value.trim().substringBefore(' ').removePrefix("-")
         val fund = if (item.layer == AssetLayer.POINTS) "POINT" else item.symbol
         val type = if (item.layer == AssetLayer.POINTS) "ecency_point_transfer" else "transfer"
-        env.transferPrefill = TransferPrefill(type, fund, other, amount, row.memo.orEmpty())
+        // an encrypted memo is repeated as its text once read (encrypted again on the way), never as the cipher text
+        val memo = if (row.encryptedMemo) current.decryptedMemos[row.key]?.let { "#$it" }.orEmpty() else row.memo.orEmpty()
+        env.transferPrefill = TransferPrefill(type, fund, other, amount, memo)
         return AppScreen.Transfer(type, fund, item.layer.value, other)
     }
 
     fun dismissPrompt() = setState { it.copy(prompt = null) }
+
+    /**
+     * #3633: reads [row]'s encrypted memo with a key of this account on the device (the memo key, else the posting or
+     * active key that may have sent it). Kept in memory for this screen only; a memo no key here can read says so.
+     */
+    fun decryptMemo(row: CoinActivity) {
+        val memo = row.memo?.takeIf { row.encryptedMemo } ?: return
+        val user = current.account ?: return
+        scope.launch {
+            val text = kotlinx.coroutines.withContext(env.dispatchers.io) {
+                val account = runCatching { env.vault.vault.account(user) }.getOrNull()
+                listOfNotNull(account?.memoKey, account?.postingKey, account?.activeKey).filter { it.isNotEmpty() }.firstNotNullOfOrNull { wif ->
+                    runCatching { com.ecency.core.hive.Memo.decode(com.ecency.core.hive.PrivateKey.fromWif(wif), memo) }.getOrNull()
+                }
+            }
+            // the account changed meanwhile: its memo is not shown under another one
+            if (current.account != user) return@launch
+            if (text == null) env.ui.toast(TransferCopy.DECRYPT_MEMO_FAILED)
+            else setState { it.copy(decryptedMemos = it.decryptedMemos + (row.key to text.removePrefix("#"))) }
+        }
+    }
 
     fun cancelOrder(orderId: Long) {
         if (current.busyKey != null) return

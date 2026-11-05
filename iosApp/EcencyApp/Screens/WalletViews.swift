@@ -353,7 +353,7 @@ struct AssetDetailsView: View {
             }
             if !s.pending.isEmpty {
                 Section(copy.PENDING_REQUESTS) {
-                    ForEach(s.pending, id: \.key) { row in ActivityRowView(row: row, pending: true, expanded: s.expanded.contains(row.key), busy: s.busyKey == "order:\(row.trxIndex ?? 0)", model: model) }
+                    ForEach(s.pending, id: \.key) { row in ActivityRowView(row: row, pending: true, expanded: s.expanded.contains(row.key), busy: s.busyKey == "order:\(row.trxIndex ?? 0)", model: model, decrypted: s.decryptedMemos[row.key]) }
                 }
                 .themedRow().paneRowInsets()
             }
@@ -371,7 +371,7 @@ struct AssetDetailsView: View {
                         }
                     }
                     ForEach(s.activities, id: \.key) { row in
-                        ActivityRowView(row: row, pending: false, expanded: s.expanded.contains(row.key), busy: false, model: model)
+                        ActivityRowView(row: row, pending: false, expanded: s.expanded.contains(row.key), busy: false, model: model, decrypted: s.decryptedMemos[row.key])
                             .onAppear { if row.key == s.activities.last?.key { model.loadMore() } }
                     }
                     Group {
@@ -462,6 +462,8 @@ struct ActivityRowView: View {
     let expanded: Bool
     let busy: Bool
     let model: AssetDetailsModel
+    /** #3633: the encrypted memo's text, once read with a key on the device. */
+    var decrypted: String? = nil
     @EnvironmentObject private var app: AppContainer
     @Environment(\.appTheme) private var theme
 
@@ -495,7 +497,17 @@ struct ActivityRowView: View {
             }
             if expanded {
                 if let d = row.details { Text(d).font(.caption).foregroundStyle(theme.secondary) }
-                if let m = row.memo, !m.isEmpty { Text(m).font(.caption).foregroundStyle(theme.text) }
+                if let m = row.memo, !m.isEmpty {
+                    // #3633: an encrypted memo shows its text once read with a key on the device, never the cipher text
+                    if !row.encryptedMemo {
+                        Text(m).font(.caption).foregroundStyle(theme.text)
+                    } else if let d = decrypted {
+                        Text(d).font(.caption).foregroundStyle(theme.text).accessibilityIdentifier("memo-decrypted")
+                    } else {
+                        Button(TransferCopy.shared.DECRYPT_MEMO) { model.decryptMemo(row: row) }
+                            .font(.caption).buttonStyle(.borderless).accessibilityIdentifier("decrypt-memo-\(row.key)")
+                    }
+                }
                 if let id = row.trxId {
                     Button("\(copy.TRANSACTION_ID): \(bidiValue("\(id.prefix(12))..."))") {
                         UIPasteboard.general.string = TransactionExplorer.shared.link(trxId: id)

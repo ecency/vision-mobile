@@ -328,7 +328,7 @@ fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsMo
                 }
                 if (state.pending.isNotEmpty()) {
                     item(key = "pendingTitle") { SectionTitle(WalletCopy.PENDING_REQUESTS) }
-                    items(state.pending, key = { "p:" + it.key + it.textKey }) { row -> ActivityRow(env, host, row, state.expanded, model, pending = true, busy = state.busyKey == "order:${row.trxIndex}", push = push) }
+                    items(state.pending, key = { "p:" + it.key + it.textKey }) { row -> ActivityRow(env, host, row, state.expanded, model, pending = true, busy = state.busyKey == "order:${row.trxIndex}", push = push, decrypted = state.decryptedMemos[row.key]) }
                 }
                 if (state.activitiesEnabled) {
                     item(key = "activitiesTitle") { SectionTitle(WalletCopy.ACTIVITIES) }
@@ -339,7 +339,7 @@ fun AssetDetailsScreen(env: AppEnvironment, host: AppHost, model: AssetDetailsMo
                     if (state.pointTypes.isNotEmpty()) item(key = "pointTypes") {
                         HistoryChips(state.pointTypes.map { it.toString() to WalletCopy.pointTypeLabel(it) }, state.pointType.toString()) { model.setPointType(it.toInt()) }
                     }
-                    items(state.activities, key = { "a:" + it.key + it.textKey }) { row -> ActivityRow(env, host, row, state.expanded, model, pending = false, busy = false, push = push) }
+                    items(state.activities, key = { "a:" + it.key + it.textKey }) { row -> ActivityRow(env, host, row, state.expanded, model, pending = false, busy = false, push = push, decrypted = state.decryptedMemos[row.key]) }
                     item(key = "footer") {
                         Box(Modifier.fillMaxWidth().height(72.dp), contentAlignment = Alignment.Center) {
                             when {
@@ -394,7 +394,7 @@ private fun SectionTitle(text: String) {
 
 /** RN Transaction row: label, time, value; tap expands details, memo and the transaction id. */
 @Composable
-private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, expanded: Set<String>, model: AssetDetailsModel, pending: Boolean, busy: Boolean, push: (AppScreen) -> Unit) {
+private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, expanded: Set<String>, model: AssetDetailsModel, pending: Boolean, busy: Boolean, push: (AppScreen) -> Unit, decrypted: String? = null) {
     val colors = LocalEcencyColors.current
     val open = row.key in expanded
     Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.toggle(row.key) }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("activity:${row.key}")) {
@@ -419,7 +419,17 @@ private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, e
         }
         if (open) {
             row.details?.let { Text(it, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
-            row.memo?.takeIf { it.isNotEmpty() }?.let { Text(it, color = colors.text, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
+            row.memo?.takeIf { it.isNotEmpty() }?.let { memo ->
+                when {
+                    // #3633: an encrypted memo shows its text once read with a key on the device, never the cipher text
+                    !row.encryptedMemo -> Text(memo, color = colors.text, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                    decrypted != null -> Text(decrypted, color = colors.text, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp).testTag("memoDecrypted:${row.key}"))
+                    else -> Text(
+                        com.ecency.core.app.TransferCopy.DECRYPT_MEMO, color = colors.blueText, fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp).clickable(role = Role.Button) { model.decryptMemo(row) }.padding(vertical = 4.dp).testTag("decryptMemo:${row.key}"),
+                    )
+                }
+            }
             row.trxId?.let { id ->
                 Row(Modifier.padding(top = 6.dp).clickable(role = Role.Button) { host.copy(TransactionExplorer.link(id)); env.ui.toast(WalletCopy.COPIED) }.testTag("copyTx:${row.key}"), verticalAlignment = Alignment.CenterVertically) {
                     Text("${WalletCopy.TRANSACTION_ID}: ${com.ecency.core.l10n.Bidi.inUi(id.take(12) + "...")}", color = colors.blueText, fontSize = 12.sp)

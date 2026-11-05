@@ -87,6 +87,18 @@ class PlatformGoldenVectorTest {
         }
     }
 
+    /** #3633: Keychain encrypts a `#` memo; the bridge cannot here, so it refuses one instead of sending it as text. */
+    @Test
+    fun aBridgeTransferWithAPlainHashMemoIsRefusedAndACipherMemoGoesAsItIs() {
+        val u = "spike-voter"
+        fun build(type: String, json: String) = BridgeOps.build(type, Json.parseToJsonElement(json) as JsonObject, u, { 500.0 }, { 1L })
+        assertFailsWith<BridgeRefused> { build("transfer", """{"to":"a","amount":"1.000","currency":"HIVE","memo":"#secret"}""") }
+        assertFailsWith<BridgeRefused> { build("recurrentTransfer", """{"to":"a","amount":"1.000","currency":"HIVE","memo":"#secret","recurrence":24,"executions":2}""") }
+        val cipher = Memo.encode(PrivateKey.fromSeed("a"), PrivateKey.fromSeed("b").publicKey(), "#x", 1)
+        assertTrue(build("transfer", """{"to":"a","amount":"1.000","currency":"HIVE","memo":"$cipher"}""").toString().contains(cipher))
+        assertTrue(build("transfer", """{"to":"a","amount":"1.000","currency":"HIVE","memo":"thanks"}""").toString().contains("thanks"))
+    }
+
     @Test
     fun theBridgeRefusesAmountsItWouldHaveToRound() {
         fun build(type: String, json: String) = BridgeOps.build(type, Json.parseToJsonElement(json) as JsonObject, u, { 500.0 }, { 1L })

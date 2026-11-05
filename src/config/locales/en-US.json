@@ -2466,7 +2466,14 @@
       "one_recipient": "Only one recipient can be used for this transfer.",
       "memo_has_secret": "This memo holds a private key or a master password. Memos are public on the blockchain: never put a key or password in one.",
       "use_saved_memo": "Use the memo you sent to @{exchange} last time: {memo}",
-      "is_an_exchange_and": "{exchange} is an exchange and may not support recurring transfers: funds sent on a schedule can be lost. Use a one-time transfer instead."
+      "is_an_exchange_and": "{exchange} is an exchange and may not support recurring transfers: funds sent on a schedule can be lost. Use a one-time transfer instead.",
+      "memo_encrypted": "This memo starts with #, so it will be encrypted: only you and the recipient can read it.",
+      "memo_encrypt_no_key": "An encrypted memo (starting with #) needs one of this account's keys on this device. Log in with a key or the master password, or remove the # to send a public memo.",
+      "memo_encrypt_unsupported": "Only HIVE and HBD transfers can carry an encrypted memo (starting with #). Remove the # to send a public memo.",
+      "memo_encrypt_exchange": "@{exchange} is an exchange and cannot read an encrypted memo: send its deposit memo without the #.",
+      "memo_recipient_no_key": "@{account} has no memo key to encrypt for.",
+      "decrypt_memo": "Decrypt memo",
+      "decrypt_memo_failed": "This memo cannot be read with the keys on this device."
     },
     "dapps": {
       "signing_info": "Ecency acts as your Hive signing extension. When a dApp asks you to log in with a browser extension like Keychain, Keeper, or Peak Vault, select that option. Ecency will handle the signing securely.",
