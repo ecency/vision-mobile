@@ -416,6 +416,7 @@ internal fun WaveView(
     // TalkBack: the header is one stop (author, age, votes) carrying the wave's taps as custom actions; the text after
     // it opens the thread and keeps its links; the small taps are hidden from TalkBack (LocalMergedRow)
     val payoutDetails = rememberPayoutDetails()
+    val footerScope = androidx.compose.runtime.rememberCoroutineScope()
     val a11yActions = remember(item, actions, feedx, LocalAppLanguage.current) { buildList {
         add(a11yAction(UiCopy.UPVOTE) { actions.onVote(card) })
         add(a11yAction(com.ecency.core.l10n.L.post.a11yReplyHint) { ui.requireLogin { feedx?.handle(PostMenuEffect.Reply(item.post), item.key) } })
@@ -424,6 +425,7 @@ internal fun WaveView(
         add(a11yAction(com.ecency.core.l10n.L.post.a11yVotersHint) { ui.push(AppScreen.Voters(item.key.author, item.key.permlink)) })
         actions.onTip?.let { add(a11yAction(UiCopy.SEND_TIP) { it(card) }) }
         if (feedx != null) add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, PostMenuContext(translate = true), item.key) })
+        addAll(ownFooterA11yActions(feedx, item.post, card.votes, item.key, footerScope))
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
     } }
     val pro = isProMember(env, card.author)
@@ -502,6 +504,8 @@ internal fun WaveView(
                     onComments = { actions.onOpen(card) },
                     modifier = Modifier.padding(top = 2.dp),
                     trailing = {
+                        // RN commentView: Edit and Delete on an own wave, before the reply
+                        OwnFooterButtons(item.post, card.votes, item.key, tag = "wave")
                         Text(
                             ReadingUiCopy.REPLY, color = colors.darkGray, fontSize = 14.sp, fontWeight = FontWeight.Bold,
                             modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(role = Role.Button) {
