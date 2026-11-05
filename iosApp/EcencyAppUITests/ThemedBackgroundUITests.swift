@@ -297,8 +297,10 @@ final class ThemedBackgroundUITests: XCTestCase {
     /// Identifier prefixes of elements whose rows are left out (see `pageScan`).
     private static let stripPrefixes = ["notifications-page-", "notification-", "editor-toolbar"]
 
-    /// Content drawn edge to edge with its own fill: the profile cover and the skeleton's cover bone.
-    private static let contentIds = ["skeleton-profile", "profile-cover"]
+    /// Content drawn edge to edge with its own fill: the profile cover and the skeleton's cover bone. The profile
+    /// screen names its skeleton "profile-loading", and on iOS 27 that name replaces the skeleton's own (#3620): the
+    /// cover bone was scanned, and failed whenever the shimmer crossed the window's edge at the screenshot.
+    private static let contentIds = ["skeleton-profile", "profile-loading", "profile-cover"]
 
     /// The theme's card colour (AppTheme.lightBackground): RN's filter strips, zebra rows and card separators.
     private static let darkCard = (0x2E, 0x3D, 0x51)
