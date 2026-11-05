@@ -113,6 +113,9 @@ class KeychainSecureStore(val service: String) : SecureStore {
         wiped
     }
 
+    /** True while the launch's install check waits for protected data (the store refuses every access meanwhile). */
+    fun installCheckPending(): Boolean = pendingFor(service) != null
+
     /** Every entry access waits for the install check: run it now if it can run, or refuse. */
     private fun requireInstallChecked() {
         if (pendingFor(service) == null) return

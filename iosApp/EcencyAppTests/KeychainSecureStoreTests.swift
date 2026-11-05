@@ -157,6 +157,30 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertEqual(try store.names(), ["this.install"])
     }
 
+    /// TestFlight 11-05: a launch read "protected data unavailable" on a phone that was already unlocked (a prewarmed
+    /// launch), and no "became available" notification follows then, so the store stayed closed ("Secure storage is
+    /// unavailable", Retry failing the same way). Becoming active reads it again, runs the check and says the store
+    /// opened; an update keeps every account.
+    func testALaunchThatReadUnavailableOpensTheStoreWhenTheAppBecomesActive() throws {
+        let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        // an update: the earlier build set the install mark and stored an account
+        defaults.set(true, forKey: "\(serviceA).installed")
+        let store = KeychainSecureStore(service: serviceA)
+        try store.putString(name: "account.kept", value: "dummy-this-install")
+        let flag = ProtectedDataFlag(false)
+        XCTAssertFalse(try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: { KotlinBoolean(value: flag.value) }))
+        XCTAssertTrue(store.installCheckPending())
+        XCTAssertThrowsError(try store.get(name: "account.kept"))
+        let opened = expectation(forNotification: ProtectedDataFlag.storageOpened, object: nil)
+        flag.watch { flag.runPendingCheck(store) }
+        NotificationCenter.default.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        wait(for: [opened], timeout: 5)
+        XCTAssertFalse(store.installCheckPending())
+        XCTAssertEqual(try store.getString(name: "account.kept"), "dummy-this-install", "an update never loses its accounts")
+    }
+
     /// The protected data notification runs the pending check itself; a launch already marked wipes nothing.
     func testThePendingCheckRunsOnceProtectedDataBecomesAvailable() throws {
         let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
