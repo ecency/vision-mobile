@@ -629,7 +629,10 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         // never gets one signed, however it is spaced or ordered
         // Ecency's own messages are refused everywhere but Ecency's own site: there they are its login (a `code`) and
         // Raidstead's sign-in (a `login` with an audience), as RN signed them. The origin is the verified top frame.
-        if (origin != ECENCY_ORIGIN && BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
+        // Only those two shapes, with the posting key as the site asks: a `refresh`, another app's `code` or an Ecency
+        // `posting` message stays refused there too.
+        val ownLogin = origin == ECENCY_ORIGIN && authority == KeyRole.POSTING && BridgeSignatures.ecencySiteLogin(message)
+        if (!ownLogin && BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val wif = if (authority == KeyRole.ACTIVE) account.activeKey else account.postingKey
@@ -942,6 +945,22 @@ object BridgeSignatures {
         val type = field(signed, "type")?.trim()?.lowercase() ?: return null
         if (type !in LASTING_TYPES) return null
         return field(signed, "app")?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * True only for ecency.com's own sign-ins: its login `code` for `ecency.app` with no audience (web makeHsCode)
+     * and Raidstead's `login` for `ecency.app` with an audience (web @ecency/raidstead proof). Nothing else.
+     */
+    fun ecencySiteLogin(message: String): Boolean {
+        val obj = (read(message) as? Read.Object)?.obj ?: return false
+        val signed = obj[SIGNED_MESSAGE] as? JsonObject ?: return false
+        if (field(signed, "app")?.trim()?.equals(HiveSignerMessages.APP, ignoreCase = true) != true) return false
+        val audience = field(signed, "audience")?.trim() ?: return false
+        return when (field(signed, "type")?.trim()?.lowercase()) {
+            "code" -> audience.isEmpty()
+            "login" -> audience.isNotEmpty()
+            else -> false
+        }
     }
 
     private sealed interface Read {

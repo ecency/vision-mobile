@@ -575,6 +575,23 @@ class DappBrowserModelTest {
             val signature = page.lastResponse["result"]!!.jsonPrimitive.content
             assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), Signature.fromHex(signature).recover(BridgeSignatures.digest(message)).toString())
         }
+        // on ecency.com too, only those two shapes with the posting key: never a token message or another Ecency message
+        val refusedThere = listOf(
+            com.ecency.core.auth.HiveSignerMessages.message("refresh", null, alice, 1_791_288_000_000) to "Posting",
+            com.ecency.core.auth.HiveSignerMessages.message("posting", null, alice, 1_791_288_000_000) to "Posting",
+            com.ecency.core.auth.HiveSignerMessages.message("offline", null, alice, 1_791_288_000_000) to "Posting",
+            """{"signed_message":{"type":"code","app":"someapp"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            """{"signed_message":{"type":"code","app":"ecency.app","audience":"raidstead"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            """{"signed_message":{"type":"login","app":"ecency.app"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            code to "Active",
+            raidstead to "Active",
+        )
+        refusedThere.forEachIndexed { i, (message, method) ->
+            send(ecency, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"$method"""", id = 20 + i), frame = "https://ecency.com")
+            testScheduler.advanceUntilIdle()
+            assertNull(ecency.current.prompt, "$method $message")
+            assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error(), "$method $message")
+        }
         for (site in listOf("https://ecency.com.evil.io", "https://alpha.ecency.com", "https://peakd.com")) {
             val other = browser(app, "$site/login")
             val otherPage = Page()
