@@ -9,3 +9,9 @@ internal actual fun aesCbcDecrypt(key: ByteArray, iv: ByteArray, data: ByteArray
         init(Cipher.DECRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
         doFinal(data)
     }
+
+internal actual fun aesCbcEncrypt(key: ByteArray, iv: ByteArray, data: ByteArray): ByteArray =
+    Cipher.getInstance("AES/CBC/PKCS5Padding").run {
+        init(Cipher.ENCRYPT_MODE, SecretKeySpec(key, "AES"), IvParameterSpec(iv))
+        doFinal(data)
+    }

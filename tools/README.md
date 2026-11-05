@@ -23,6 +23,7 @@ npm ci --prefix tools             # golden/ and l10n/ (tools/package.json and it
 npm ci --prefix tools/render      # render/ (tools/render/package.json and its lockfile: @ecency/render-helper)
 
 node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt
+node tools/golden/generate-memo.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/MemoGoldenVectors.kt
 node tools/render/generate-dom-fixtures.mjs shared/src/commonTest/kotlin/com/ecency/core/render/dom
 ```
 
