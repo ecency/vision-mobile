@@ -116,6 +116,14 @@ class HiveUriTest {
 
     private fun tx(vararg ops: JsonArray) = HiveUri.decode(HiveUri.encodeOps(JsonArray(ops.toList()))).tx as JsonObject
 
+    /** #3633 review: a link cannot encrypt a `#` memo, so it is refused rather than signed as public text. */
+    @Test
+    fun aLinkWithAPlainHashMemoIsRefused() {
+        val op = json("""["transfer",{"from":"__signer","to":"ecency","amount":"1.500 HIVE","memo":"#secret"}]""").jsonArray
+        assertEquals(FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", HiveUriTx.HASH_MEMO), HiveUriTx.format(tx(op), keys("active")))
+        assertIs<FormattedHiveUriTx.Ready>(HiveUriTx.format(tx(transferOp), keys("active")))
+    }
+
     @Test
     fun formatsASignableOperation() {
         val r = assertIs<FormattedHiveUriTx.Ready>(HiveUriTx.format(tx(voteOp), keys("posting")))

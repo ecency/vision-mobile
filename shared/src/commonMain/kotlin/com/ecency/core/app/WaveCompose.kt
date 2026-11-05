@@ -600,7 +600,7 @@ class WaveComposeModel internal constructor(
     /**
      * RN quick post's UploadsGalleryModal (`allowMultiple={false}`): an image the account uploaded before
      * ([UploadsModel] over `env.uploadsModel(null)`) becomes the wave's one image, nothing is uploaded. The same
-     * guards as [attach], and only a clean address on the image host. Its ratio is unknown unless it was uploaded
+     * guards as [attach], and only a clean https address (any host: older uploads may sit on another one). Its ratio is unknown unless it was uploaded
      * in this session (RN writes `null` when it cannot measure).
      */
     fun pickUploaded(url: String) {

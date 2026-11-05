@@ -39,7 +39,7 @@ object BridgeOps {
     private fun hiveMemo(data: JsonObject): String {
         val memo = optText(data, "memo")
         if (memo.startsWith("#") && !com.ecency.core.hive.Memo.isEncrypted(memo)) {
-            throw BridgeRefused("Encrypted memos (starting with #) are not supported here. Send it from the app's wallet.")
+            throw BridgeRefused(BridgeGuards.HASH_MEMO_REFUSED)
         }
         return memo
     }
@@ -332,6 +332,7 @@ object BridgeGuards {
                 if (listOf("owner", "active", "posting", "memo_key").any { body?.get(it).let { v -> v != null && v != JsonNull } }) return KEYS_REFUSED
             }
             if (signsHere && !OperationJson.canDecode(op)) return NOT_SUPPORTED
+            if (com.ecency.core.hive.Memo.hasPlainHashMemo(op)) return HASH_MEMO_REFUSED
         }
         if (OperationAuthority.required(ops) == KeyRole.OWNER) return OWNER_REFUSED
         // posting and active operations in one request: one key cannot sign both since HF28
@@ -348,6 +349,8 @@ object BridgeGuards {
     const val OWNER_REFUSED = "Operations that need the owner key cannot be signed in Ecency."
     const val KEYS_REFUSED = "Ecency does not sign changes to account keys or authorities from a website."
     const val NOT_SUPPORTED = "Ecency cannot sign this operation in this version yet."
+    /** #3633: the typed requests' memo refusal, for a raw broadcast too. */
+    const val HASH_MEMO_REFUSED = "Encrypted memos (starting with #) are not supported here. Send it from the app's wallet."
 }
 
 /** RN dappBrowser/utils/domainBlacklist: known Hive phishing domains, warned about on the confirmation. */

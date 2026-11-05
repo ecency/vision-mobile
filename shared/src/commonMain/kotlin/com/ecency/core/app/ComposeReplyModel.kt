@@ -159,7 +159,7 @@ class ComposeReplyModel internal constructor(
      * RN quick reply's UploadsGalleryModal (`allowMultiple={false}`, `_handleMediaInsert`): an image the account
      * uploaded before ([UploadsModel] over `env.uploadsModel(null)`) becomes the reply's one image, nothing is
      * uploaded. The same guards as [attach]: not while attaching or sending, only for [owner] while signed in, and
-     * only a clean address on the image host. Saved with the draft at once, as RN's `_addQuickCommentIntoCache`.
+     * only a clean https address (any host: older uploads may sit on another one). Saved with the draft at once, as RN's `_addQuickCommentIntoCache`.
      */
     fun pickUploaded(url: String) {
         val s = current

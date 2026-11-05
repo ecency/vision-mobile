@@ -368,7 +368,13 @@ class TransferModel internal constructor(
             }
             launch { badActors = runCatching { BadActors.load(env.auth.http) }.getOrDefault(emptySet()); checkRecipient(immediate = true) }
             launch {
-                val has = runCatching { withContext(env.dispatchers.io) { memoCipherKey(user) != null } }.getOrDefault(false)
+                val has = try {
+                    withContext(env.dispatchers.io) { memoCipherKey(user) != null }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    false
+                }
                 setState { it.copy(memoCipherKey = has) }
             }
             loadBalance()

@@ -516,6 +516,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         else -> when (r.authorityKeyType) {
             "owner" -> INVALID_OP_TITLE to OWNER_REFUSED
             com.ecency.core.auth.HiveUriTx.MIXED -> INVALID_OP_TITLE to com.ecency.core.auth.OperationAuthority.MIXED_AUTHORITIES
+            com.ecency.core.auth.HiveUriTx.HASH_MEMO -> INVALID_OP_TITLE to HASH_MEMO_REFUSED
             else -> INVALID_OP_TITLE to INVALID_OP_MESSAGE
         }
     }
@@ -547,6 +548,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         val INVALID_OP_TITLE: String get() = L.qr.invalidOp
         val INVALID_OP_MESSAGE: String get() = L.qr.invalidOpDesc
         val OWNER_REFUSED: String get() = L.native.authLink.ownerRefused
+        val HASH_MEMO_REFUSED: String get() = L.native.transfer.memoEncryptFromLink
         val INVALID_AMOUNT_TITLE: String get() = L.qr.invalidAmount
         val INVALID_AMOUNT_MESSAGE: String get() = L.qr.invalidAmountDesc
         val TRANSACTION_FAILED: String get() = L.qr.transactionFailed

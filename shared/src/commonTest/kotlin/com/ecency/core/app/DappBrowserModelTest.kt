@@ -368,6 +368,9 @@ class DappBrowserModelTest {
         fun ops(json: String) = Json.parseToJsonElement(json) as kotlinx.serialization.json.JsonArray
         assertEquals("No valid operations found.", BridgeGuards.refusal(ops("""[[10,{"account":"a"}]]"""), signsHere = false))
         assertEquals("No valid operations found.", BridgeGuards.refusal(ops("""[["vote"]]"""), signsHere = false))
+        // #3633 review: a raw broadcast cannot send a `#` memo as plain text either
+        assertEquals(BridgeGuards.HASH_MEMO_REFUSED, BridgeGuards.refusal(ops("""[["transfer",{"from":"a","to":"b","amount":"1.000 HIVE","memo":"#secret"}]]"""), signsHere = false))
+        assertEquals(null, BridgeGuards.refusal(ops("""[["transfer",{"from":"a","to":"b","amount":"1.000 HIVE","memo":"public"}]]"""), signsHere = false))
         assertEquals(BridgeGuards.NOT_SUPPORTED, BridgeGuards.refusal(ops("""[["account_update_operation",{}]]"""), signsHere = false))
         assertNull(BridgeGuards.refusal(ops("""[["vote",{"voter":"a","author":"b","permlink":"p","weight":1}]]"""), signsHere = false))
     }

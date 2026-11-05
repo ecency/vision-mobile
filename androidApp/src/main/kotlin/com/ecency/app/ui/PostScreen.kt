@@ -439,7 +439,8 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
     // keyed on the toggle's state, not the toggle (a new one each pass): its latest handler is read when used
     val currentThread by androidx.compose.runtime.rememberUpdatedState(thread)
     val footerScope = androidx.compose.runtime.rememberCoroutineScope()
-    val a11yActions = remember(item, actions, thread?.open, tip, feedx, LocalAppLanguage.current) { buildList {
+    val footerUser = signedInUser(feedx)
+    val a11yActions = remember(item, actions, thread?.open, tip, feedx, footerUser, LocalAppLanguage.current) { buildList {
         add(a11yAction(UiCopy.UPVOTE) { actions.onVote(item.card) })
         add(a11yAction(com.ecency.core.l10n.L.post.a11yReplyHint) { actions.onReply(item.post) })
         add(a11yAction(UiCopy.profileOf(item.card.author)) { actions.onAuthor(item.card.author) })

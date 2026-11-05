@@ -172,6 +172,8 @@ class WavesFeedModel internal constructor(
 
     /** Bumped on every account change; work started before it never lands. */
     private var generation = 0
+    /** The read running for each wave [reload] was asked for. */
+    private val reloads = mutableMapOf<PostKey, Job>()
     private var started = false
 
     private var organic: List<WaveItem> = emptyList()
@@ -241,13 +243,15 @@ class WavesFeedModel internal constructor(
      * A wave of this list changed (the editor's edit, as PostModel does): read it again (`bridge.get_post`) and
      * replace its card in place. The edit is broadcast before the API shows it, so a read that still has the shown
      * body is tried again after [RELOAD_WAITS]. A failed read keeps the card; an answer for a previous account never
-     * lands.
+     * lands. A second edit cancels the first one's read, and an answer older than the card shown is dropped, so
+     * reads that finish out of order never bring back an earlier body.
      */
     private fun reload(key: PostKey) {
         val user = env.session.current.username
         val startedIn = generation
         val shownBody = current.items.firstOrNull { it.key == key }?.post?.body
-        scope.launch {
+        reloads.remove(key)?.cancel()
+        reloads[key] = scope.launch {
             var fresh: Post? = null
             for (wait in RELOAD_WAITS) {
                 if (wait > 0) delay(wait)
@@ -269,7 +273,8 @@ class WavesFeedModel internal constructor(
                 card to env.renderBody(got)
             }
             if (startedIn != generation) return@launch
-            val update: (WaveItem) -> WaveItem? = { item ->
+            val update: (WaveItem) -> WaveItem? = update@{ item ->
+                if (got.updated.isNotEmpty() && got.updated < item.post.updated) return@update item
                 val card = rebuilt.first.let { if (item.card.isNsfw && !it.isNsfw) it.copy(isNsfw = true) else it }
                 // a vote made while the read ran: the vote state now, not the one the card was built with
                 val voted = Cards.withVote(card, got, user, env.localVotes.get(key))
@@ -280,7 +285,7 @@ class WavesFeedModel internal constructor(
             promoted = Cards.replaceChanged(promoted, changed, { it.key }, update)
             env.waves.updateLocal(changed, update)
             redisplay()
-        }
+        }.also { job -> job.invokeOnCompletion { if (reloads[key] === job) reloads.remove(key) } }
     }
 
     /** The account changed: nothing of the previous one stays on screen, and the feed loads again if it was in use. */
@@ -371,8 +376,7 @@ class WavesFeedModel internal constructor(
         readAt = stamp
         val byKey = fresh.associateBy { it.key }
         val known = organic.map { it.key }.toHashSet()
-        // a wave read again after an edit is newer than the feed's row until the feed catches up
-        organic = fresh.filter { it.key !in known } + organic.map { old -> byKey[old.key]?.takeIf { it.post.updated >= old.post.updated } ?: old }
+        organic = fresh.filter { it.key !in known } + organic.map { old -> byKey[old.key]?.let { keepNewerBody(old, it) } ?: old }
         redisplay()
         env.localVotes.retireConfirmed(fresh.map { it.post }, user)
     }
@@ -478,6 +482,19 @@ class WavesFeedModel internal constructor(
 
         /** How long an edited wave's read waits before each try: at once, then while the API catches up with the block. */
         internal val RELOAD_WAITS = listOf(0L, 3_000L, 6_000L)
+
+        /**
+         * The minute's refresh for a wave already shown. A wave read again after an edit is newer than the feed's
+         * row until the feed catches up (a row without `updated` never does: it carries `created`), so the shown
+         * body stays while votes, replies, payout and tips come from the row.
+         */
+        internal fun keepNewerBody(shown: WaveItem, row: WaveItem): WaveItem =
+            if (row.post.updated >= shown.post.updated) row
+            else row.copy(
+                post = row.post.copy(title = shown.post.title, body = shown.post.body, metadata = shown.post.metadata, updated = shown.post.updated),
+                card = row.card.copy(hasPoll = shown.card.hasPoll, isNsfw = shown.card.isNsfw || row.card.isNsfw),
+                blocks = shown.blocks,
+            )
     }
 }
 

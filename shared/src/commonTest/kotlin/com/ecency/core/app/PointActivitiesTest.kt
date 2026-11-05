@@ -148,6 +148,25 @@ class PointActivitiesTest {
         assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
     }
 
+    /** Review: a report still being tried when its account signs out is not parked again afterwards. */
+    @Test
+    fun aReportInFlightAtSignOutIsNotParkedAgain() = runTest {
+        val app = app()
+        activityStatus = 500
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-a")
+        testScheduler.runCurrent()
+        assertEquals(1, app.reports().size, "the first try failed, the retry waits")
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        testScheduler.advanceUntilIdle()
+        assertEquals(3, app.reports().size)
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty())
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
+        // signed in again: a new report parks as before
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-b")
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("tx-b"), app.env.pointActivities.pending(alice).map { it.txId })
+    }
+
     @Test
     fun anAccountWithoutAnEcencySessionParksNothing() = runTest {
         val app = app()

@@ -495,11 +495,20 @@ fun OwnFooterButtons(post: Post, votes: Int, root: PostKey, tag: String) {
     val colors = LocalEcencyColors.current
     val merged = LocalMergedRow.current
     val scope = rememberCoroutineScope()
-    feedx.env.postActions.footer(post, votes).forEach { item ->
+    // the session as Compose state: a row kept across an account switch drops the previous account's buttons
+    val user = signedInUser(feedx)
+    remember(post, votes, user) { feedx.env.postActions.footer(post, votes) }.forEach { item ->
         Box(Modifier.iconClickable(radius = 20.dp) { scope.launch { feedx.select(item, post, root) } }.inMergedRow(merged).padding(6.dp).testTag("$tag:${item.id}")) {
             Glyph(com.ecency.core.app.PostFooter.icon(item), colors.icon, 20.dp, description = com.ecency.core.app.PostFooter.label(item))
         }
     }
+}
+
+/** The signed-in account, observed: a key for what [OwnFooterButtons] and [ownFooterA11yActions] show. */
+@Composable
+fun signedInUser(feedx: FeedxUi?): String? {
+    val ui = feedx ?: return null
+    return ui.env.session.state.collectAsState().value.username
 }
 
 /** The footer icons as TalkBack actions, for a merged row that hides the icons themselves. */

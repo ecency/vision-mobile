@@ -417,7 +417,8 @@ internal fun WaveView(
     // it opens the thread and keeps its links; the small taps are hidden from TalkBack (LocalMergedRow)
     val payoutDetails = rememberPayoutDetails()
     val footerScope = androidx.compose.runtime.rememberCoroutineScope()
-    val a11yActions = remember(item, actions, feedx, LocalAppLanguage.current) { buildList {
+    val footerUser = signedInUser(feedx)
+    val a11yActions = remember(item, actions, feedx, footerUser, LocalAppLanguage.current) { buildList {
         add(a11yAction(UiCopy.UPVOTE) { actions.onVote(card) })
         add(a11yAction(com.ecency.core.l10n.L.post.a11yReplyHint) { ui.requireLogin { feedx?.handle(PostMenuEffect.Reply(item.post), item.key) } })
         add(a11yAction(com.ecency.core.l10n.L.post.a11yCommentsHint) { actions.onOpen(card) })

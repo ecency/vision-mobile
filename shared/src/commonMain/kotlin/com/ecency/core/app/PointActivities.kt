@@ -44,6 +44,9 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
     private val replays = mutableMapOf<String, Job>()
     private var nextId = 0L
     private var started = false
+    /** Bumped by [forget]: a report still being sent when its account left is not parked again. */
+    private val departures = mutableMapOf<String, Int>()
+    private var wipes = 0
 
     /**
      * Main thread, once (the app's start): a report refused while the app lock hid the app stays parked, so the
@@ -68,11 +71,15 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
      */
     fun record(username: String?, type: Int, txId: String? = null, blockNum: Long? = null, onResult: (Boolean) -> Unit = {}) {
         val user = username?.removePrefix("@")?.takeIf { it.isNotEmpty() } ?: return onResult(false)
+        val departed = departures[user] ?: 0
+        val wiped = wipes
         env.background.launch {
             val ok = send(user, type, txId, blockNum)
-            // an account without an Ecency session can never report: nothing is parked for it. A store that fails
-            // to write loses this report, never the caller's coroutine.
-            if (ok == false) runCatching { park(user, type, txId, blockNum) }
+            // an account without an Ecency session can never report: nothing is parked for it, nor for an account
+            // that left the device while this was sent (#3634). A store that fails to write loses this report, never
+            // the caller's coroutine.
+            val stillHere = (departures[user] ?: 0) == departed && wipes == wiped
+            if (ok == false && stillHere) runCatching { park(user, type, txId, blockNum) }
             onResult(ok == true)
         }
     }
@@ -120,6 +127,7 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
      * stops (#3634). Main thread.
      */
     internal fun forget(accounts: List<String>?) {
+        if (accounts == null) wipes++ else accounts.forEach { departures[it] = (departures[it] ?: 0) + 1 }
         val names = accounts ?: env.prefs.keys().filter { it.startsWith(KEY_PREFIX) }.map { it.removePrefix(KEY_PREFIX) }
         names.forEach { name ->
             replays.remove(name)?.cancel()

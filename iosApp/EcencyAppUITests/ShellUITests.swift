@@ -74,10 +74,12 @@ final class ShellUITests: XCTestCase {
 
     /// Whether the side menu item [id] shows whole: inside the window and the menu's scroll views that hold it.
     /// `isHittable` is false for every element of the drawer on iOS 27 though a tap on one lands (a tap on Settings
-    /// opens Settings), so it can no longer say whether an item is on screen (#3620).
+    /// opens Settings), so it can no longer say whether an item is on screen (#3620). Before iOS 27 it still must be
+    /// hittable, so a view covering the item fails there.
     private func shownInMenu(_ app: XCUIApplication, _ id: String) -> Bool {
         let item = app.buttons[id]
         guard item.exists, !item.frame.isEmpty else { return false }
+        if #unavailable(iOS 27), !item.isHittable { return false }
         var visible = app.windows.firstMatch.frame
         for scroll in ["drawer-menu", "drawer-main"] {
             let view = element(app, scroll)

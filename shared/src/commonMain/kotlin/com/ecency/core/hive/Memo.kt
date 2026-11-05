@@ -30,13 +30,44 @@ object Memo {
         return "#" + Base58.encode(w.toByteArray())
     }
 
-    /** [memo] is an encrypted memo's text (`#`, then base58 of two keys, nonce, check and cipher), not a plain `#` memo. */
+    /**
+     * [memo] is an encrypted memo's text (`#`, then base58 of two keys, nonce, check and cipher), not a plain `#` memo:
+     * two compressed keys, then a cipher text whose length prefix matches what follows and fills whole AES blocks.
+     */
     fun isEncrypted(memo: String): Boolean {
         if (!memo.startsWith("#") || memo.length < MIN_ENCODED || memo.any { it.isWhitespace() }) return false
         val raw = runCatching { Base58.decode(memo.substring(1)) }.getOrNull() ?: return false
+        if (raw.size < HEADER + 17) return false
         fun isKey(at: Int) = raw[at].toInt() == 2 || raw[at].toInt() == 3
-        return raw.size >= HEADER + 17 && isKey(0) && isKey(33)
+        if (!isKey(0) || !isKey(33)) return false
+        var at = HEADER
+        var length = 0L
+        var shift = 0
+        while (true) {
+            if (at >= raw.size || shift > 28) return false
+            val b = raw[at++].toInt() and 0xff
+            length = length or ((b and 0x7f).toLong() shl shift)
+            if (b < 0x80) break
+            shift += 7
+        }
+        return length > 0 && length % 16 == 0L && at + length == raw.size.toLong()
     }
+
+    /**
+     * A transfer-like operation (`[name, body]`) whose memo starts with `#` but is not encrypted: signed as it is, it
+     * would put text the sender meant to keep private on chain. Websites and signing links have no memo key lookup,
+     * so such an operation is refused there (#3633).
+     */
+    fun hasPlainHashMemo(op: kotlinx.serialization.json.JsonElement): Boolean {
+        val pair = op as? kotlinx.serialization.json.JsonArray ?: return false
+        val name = (pair.getOrNull(0) as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it.isString }?.content
+        if (name !in MEMO_OPS) return false
+        val memo = ((pair.getOrNull(1) as? kotlinx.serialization.json.JsonObject)?.get("memo") as? kotlinx.serialization.json.JsonPrimitive)
+            ?.takeIf { it.isString }?.content ?: return false
+        return memo.startsWith("#") && !isEncrypted(memo)
+    }
+
+    private val MEMO_OPS = setOf("transfer", "recurrent_transfer", "transfer_to_savings", "transfer_from_savings")
 
     /** Reads an encrypted memo with the sender's or the recipient's memo key; throws for another key or a damaged memo. */
     fun decode(key: PrivateKey, memo: String): String {
