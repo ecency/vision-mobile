@@ -177,6 +177,10 @@ struct TransferFormView: View {
     }
 
     @ViewBuilder private func notes(_ s: TransferState) -> some View {
+        if s.memoHasSecret {
+            Text(tcopy.MEMO_HAS_SECRET).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.MEMO_HAS_SECRET, debounce: true).accessibilityIdentifier("memo-has-secret")
+        }
         if s.kind == TransferKind.convert { Text(tcopy.CONVERT_DESC).font(.footnote).foregroundStyle(theme.secondary) }
         if let ex = s.exchange {
             if s.exchangeMemoRequired { Text(tcopy.exchangeMemoRequired(exchange: ex)).font(.footnote).foregroundStyle(theme.dangerText).announces(tcopy.exchangeMemoRequired(exchange: ex), debounce: true).accessibilityIdentifier("exchange-memo") }

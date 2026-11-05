@@ -140,6 +140,8 @@ object TransferCopy {
 
     fun exchangeMemoRequired(exchange: String) = L.transfer.exchangeMemoRequired(exchange = exchange)
 
+    val MEMO_HAS_SECRET: String get() = L.native.transfer.memoHasSecret
+
     fun exchangeRecurrentWarning(exchange: String) =
         L.native.transfer.isAnExchangeAnd(exchange = exchange)
 
@@ -216,6 +218,9 @@ data class TransferState(
     /** RN exchangeRecurrentWarning. */
     val exchangeRecurrentWarning: Boolean get() = isRecurrent && isNativeFund && exchange != null
 
+    /** The memo holds a private key or a master password ([MemoSecrets]): a memo is public, so this blocks NEXT (#3633). */
+    val memoHasSecret: Boolean get() = MemoSecrets.contains(memo)
+
     val busy: Boolean get() = phase is SendPhase.Sending || phase is SendPhase.Checking
 
     /** RN nextBtnDisabled, inverted. */
@@ -227,6 +232,7 @@ data class TransferState(
             if (!amountOk || !recipientValid || balance == null || tooManyRecipients) return false
             if (kind.isEngine && tokenPrecision == null && amount.contains('.') && amount.substringAfter('.').trimEnd('0').isNotEmpty()) return false
             if (exchangeMemoRequired) return false
+            if (memoHasSecret) return false
             if (isRecurrent) {
                 val n = executions.toIntOrNull()
                 if (n == null || n < MIN_EXECUTIONS || executions.trim() != n.toString()) return false
@@ -657,4 +663,28 @@ object TransferRecipientParser {
         // 4. a bare name
         return normalize(raw).takeIf { NAME.matches(it) } ?: ""
     }
+}
+
+/**
+ * Secrets that must never go into a memo, which is public on chain (the "send 0.001 with your key in the memo to
+ * verify" scam): a private key (a WIF whose checksum holds, so ordinary text never matches) or a Hive master password
+ * (`P5` and 50 base58 characters). Public keys pass. A key glued to other text counts too: every 51 character stretch
+ * of a base58 run that starts with `5` is checked (the checksum keeps chance matches out). A password has no checksum,
+ * so it counts only as a whole run or at either end of one (glued to a word on one side): a long run such as an
+ * encrypted memo, with `P5` somewhere inside, is not taken for one.
+ */
+object MemoSecrets {
+    private val WORD = Regex("[1-9A-HJ-NP-Za-km-z]+")
+    private const val WIF_LENGTH = 51
+    private const val PASSWORD_LENGTH = 52
+
+    fun contains(memo: String): Boolean = WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) }
+
+    private fun hasKey(run: String): Boolean =
+        (0..run.length - WIF_LENGTH).any { i ->
+            run[i] == '5' && runCatching { com.ecency.core.hive.PrivateKey.fromWif(run.substring(i, i + WIF_LENGTH)) }.isSuccess
+        }
+
+    private fun hasPassword(run: String): Boolean =
+        run.length >= PASSWORD_LENGTH && (run.startsWith("P5") || run.substring(run.length - PASSWORD_LENGTH).startsWith("P5"))
 }

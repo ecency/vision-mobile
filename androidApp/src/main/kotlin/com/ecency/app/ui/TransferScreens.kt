@@ -229,6 +229,7 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
                 Field(TransferCopy.MEMO, s.memo, model::setMemo, "transferMemo", enabled = !s.busy, placeholder = TransferCopy.MEMO_PLACEHOLDER)
                 Text(TransferCopy.MEMO_DESC, color = colors.darkGray, fontSize = 12.sp)
             }
+            if (s.memoHasSecret) Warning(TransferCopy.MEMO_HAS_SECRET, "memoHasSecret")
             if (s.kind == com.ecency.core.app.TransferKind.CONVERT) Warning(TransferCopy.CONVERT_DESC, "convertDesc", red = false)
             s.exchange?.let { ex ->
                 if (s.exchangeMemoRequired) Warning(TransferCopy.exchangeMemoRequired(ex), "exchangeMemo")

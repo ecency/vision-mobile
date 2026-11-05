@@ -469,6 +469,37 @@ class WalletModelsTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */
+    @Test
+    fun aPrivateKeyOrMasterPasswordInAMemoBlocksTheSend() = runTest {
+        val w = world(this)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.nextEnabled)
+        val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-memo-guard").toWif()
+        // glued to other base58 text too (review): a key pasted against a word still counts
+        for (memo in listOf(wif, "verify me $wif please", "P5" + "K".repeat(50), "key:$wif.", "verify$wif", "${wif}ok", "abc${wif}xyz", "my password: P5" + "K".repeat(50), "pwP5" + "K".repeat(50))) {
+            m.setMemo(memo)
+            assertTrue(m.current.memoHasSecret, memo)
+            assertFalse(m.current.nextEnabled, memo)
+        }
+        // public keys, ordinary text and a WIF-shaped string that fails its checksum go through
+        val pub = com.ecency.core.hive.PrivateKey.fromWif(wif).publicKey().toString()
+        val broken = wif.dropLast(1) + (if (wif.last() == 'a') 'b' else 'a')
+        // nor a long run with P5 inside, as an encrypted memo can be
+        val encrypted = "#" + "Ab3".repeat(30) + "P5" + "K".repeat(50) + "Ab3".repeat(30)
+        for (memo in listOf("thanks for the coffee", pub, broken, "P5 is my favourite car", "", encrypted)) {
+            m.setMemo(memo)
+            assertFalse(m.current.memoHasSecret, memo)
+            assertTrue(m.current.nextEnabled, memo)
+        }
+        m.setMemo(wif)
+        m.next()
+        assertTrue(w.app.broadcasts().isEmpty(), "nothing is signed")
+    }
+
     @Test
     fun anExchangeNeedsAMemoAndABadActorIsWarnedAbout() = runTest {
         val w = world(this)
