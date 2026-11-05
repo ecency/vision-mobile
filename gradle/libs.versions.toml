@@ -2,7 +2,7 @@
 agp = "9.5.0"
 kotlin = "2.4.21"
 coroutines = "1.11.0"
-composeBom = "2025.06.00"
+composeBom = "2026.09.00"
 activityCompose = "1.10.1"
 # the launch screen (README "Launch screen")
 coreSplashscreen = "1.2.0"
@@ -15,7 +15,7 @@ kotlincrypto-hash = "0.8.0"
 serialization = "1.12.0"
 robolectric = "4.17"
 # 3.6 needs compileSdk 37 (with the Compose BOM and Ktor 3.6): it moves in the compileSdk 37 step.
-coil = "3.4.0"
+coil = "3.6.3"
 media3 = "1.4.1"
 # home screen widgets (README "Widgets"); 1.1.1 is built with Kotlin 1.8
 glance = "1.1.1"
@@ -23,12 +23,12 @@ glance = "1.1.1"
 # R8 breaks: minified release builds crashed at launch. 2.11 ships its own keep rules and a current Room.
 work = "2.12.0"
 # 3.6 pulls OkHttp 5.5, which needs compileSdk 37: it moves in the compileSdk 37 step.
-ktor = "3.4.3"
+ktor = "3.6.1"
 sentry = "8.62.0"
 
 [libraries]
 # test only: the CLDR 45 oracle for the generated plural rules and the ICU subset formatter (Java, no Kotlin)
-icu4j = { module = "com.ibm.icu:icu4j", version = "75.1" }
+icu4j = { module = "com.ibm.icu:icu4j", version = "79.1" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -79,7 +79,7 @@ camerax-view = { module = "androidx.camera:camera-view", version = "1.4.2" }
 # play-services-tasks) are Java-only: no class in their classes.jar carries kotlin/Metadata, so there is no Kotlin
 # version to match. The -ktx artifact is not used.
 play-review = { module = "com.google.android.play:review", version = "2.0.2" }
-firebase-messaging = { module = "com.google.firebase:firebase-messaging", version = "25.1.3" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version = "26.0.1" }
 # Google Play Billing 9 (in-app purchases; RN expo-iap runs Billing 9 too, Play wants 8+ from Aug 31, 2026). Its classes.jar
 # has no kotlin/Metadata (Java only); it pulls androidx.activity 1.2.3 and play-services 18.x, older than what the app has.
 play-billing = { module = "com.android.billingclient:billing", version = "9.1.0" }
