@@ -577,6 +577,24 @@ class WalletModelsTest {
         assertEquals("104857", w.env.exchangeMemos.get(w.user, "bittrex"))
     }
 
+    /** #3648 review: a retryable failure the screen gave up on (released) leaves no success hook holding the memo. */
+    @Test
+    fun aReleasedFailedExchangeSendDropsItsMemoHook() = runTest {
+        val w = world(this)
+        w.broadcastAnswer = { throw IllegalStateException("Failed to connect to ${it.node} (Connection refused)") }
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("bittrex")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("104857")
+        m.next()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(assertIs<SendPhase.Failed>(m.current.phase).retryable)
+        assertEquals(0, w.env.walletSends.successHookCount, "the send is gone, so is its hook")
+        assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
     /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */
     @Test
     fun aPrivateKeyOrMasterPasswordInAMemoBlocksTheSend() = runTest {

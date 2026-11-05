@@ -72,13 +72,15 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * Main thread. [block] runs once [actionId]'s send ends in [SendPhase.Done], even after its screen closed (the send
-     * goes on without it); a retryable failure keeps it for the retry, any other outcome drops it. Register it before
+     * goes on without it); a retryable failure keeps it for the retry until the send is released, any other outcome drops it. Register it before
      * [send]: a send refused at once (the journal full) drops it there. For what belongs to the outcome rather than the screen (an
      * exchange's deposit memo kept, [ExchangeMemos]).
      */
     fun afterSuccess(actionId: String, block: () -> Unit) {
         successHooks[actionId] = block
     }
+
+    internal val successHookCount: Int get() = successHooks.size
 
     /**
      * Main thread. Starts [actionId]'s broadcast; a second call with the same id while it runs does nothing. The caller
@@ -145,11 +147,12 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         send(s.username, r.ops, r.authority, actionId, onDone)
     }
 
-    /** Forgets a finished send. A send still running is not stopped. */
+    /** Forgets a finished send, and with it any retry and its success hook. A send still running is not stopped. */
     fun release(actionId: String) {
         val s = current.sends[actionId] ?: return
         if (!s.isFinal) return
         running.remove(actionId)
+        successHooks.remove(actionId)
         setState { it.copy(sends = it.sends - actionId) }
     }
 
