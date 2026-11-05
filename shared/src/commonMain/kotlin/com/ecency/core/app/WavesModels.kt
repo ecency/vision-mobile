@@ -239,28 +239,41 @@ class WavesFeedModel internal constructor(
 
     /**
      * A wave of this list changed (the editor's edit, as PostModel does): read it again (`bridge.get_post`) and
-     * replace its card in place. A failed read keeps the card; an answer for a previous account never lands.
+     * replace its card in place. The edit is broadcast before the API shows it, so a read that still has the shown
+     * body is tried again after [RELOAD_WAITS]. A failed read keeps the card; an answer for a previous account never
+     * lands.
      */
     private fun reload(key: PostKey) {
         val user = env.session.current.username
         val startedIn = generation
+        val shownBody = current.items.firstOrNull { it.key == key }?.post?.body
         scope.launch {
-            val fresh = try {
-                env.api.posts.getPost(key.author, key.permlink, user, refresh = true)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                null
-            } ?: return@launch
+            var fresh: Post? = null
+            for (wait in RELOAD_WAITS) {
+                if (wait > 0) delay(wait)
+                if (startedIn != generation) return@launch
+                val read = try {
+                    env.api.posts.getPost(key.author, key.permlink, user, refresh = true)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+                if (read != null) fresh = read
+                if (read != null && read.body != shownBody) break
+            }
+            val got = fresh ?: return@launch
             val warn = NsfwMode.of(env.prefs) == NsfwMode.WARN
             val rebuilt = withContext(dispatchers.render) {
-                val card = Cards.of(fresh, env.renderer, user, env.localVotes.get(key), env.proxyBase, promoted = false, nsfwWarn = warn)
-                card to env.renderBody(fresh)
+                val card = Cards.of(got, env.renderer, user, env.localVotes.get(key), env.proxyBase, promoted = false, nsfwWarn = warn)
+                card to env.renderBody(got)
             }
             if (startedIn != generation) return@launch
             val update: (WaveItem) -> WaveItem? = { item ->
                 val card = rebuilt.first.let { if (item.card.isNsfw && !it.isNsfw) it.copy(isNsfw = true) else it }
-                item.copy(post = fresh, card = card.copy(isPromoted = item.card.isPromoted), blocks = rebuilt.second)
+                // a vote made while the read ran: the vote state now, not the one the card was built with
+                val voted = Cards.withVote(card, got, user, env.localVotes.get(key))
+                item.copy(post = got, card = voted.copy(isPromoted = item.card.isPromoted), blocks = rebuilt.second)
             }
             val changed = setOf(key)
             organic = Cards.replaceChanged(organic, changed, { it.key }, update)
@@ -358,7 +371,8 @@ class WavesFeedModel internal constructor(
         readAt = stamp
         val byKey = fresh.associateBy { it.key }
         val known = organic.map { it.key }.toHashSet()
-        organic = fresh.filter { it.key !in known } + organic.map { byKey[it.key] ?: it }
+        // a wave read again after an edit is newer than the feed's row until the feed catches up
+        organic = fresh.filter { it.key !in known } + organic.map { old -> byKey[old.key]?.takeIf { it.post.updated >= old.post.updated } ?: old }
         redisplay()
         env.localVotes.retireConfirmed(fresh.map { it.post }, user)
     }
@@ -461,6 +475,9 @@ class WavesFeedModel internal constructor(
 
     companion object {
         const val REFETCH_MILLIS = 60_000L
+
+        /** How long an edited wave's read waits before each try: at once, then while the API catches up with the block. */
+        internal val RELOAD_WAITS = listOf(0L, 3_000L, 6_000L)
     }
 }
 

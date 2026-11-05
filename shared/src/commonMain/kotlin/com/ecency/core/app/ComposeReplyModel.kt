@@ -169,7 +169,7 @@ class ComposeReplyModel internal constructor(
             setState { it.copy(error = AppError(ErrorKind.AUTH, if (user == null) L.native.composeReply.pleaseSignInFirst else ACCOUNT_CHANGED, false)) }
             return
         }
-        if (!UploadNames.isSafeUrl(url, env.imageHost)) return
+        if (!UploadNames.isClean(url)) return
         setState { it.copy(imageUrl = url, sent = null, error = null) }
         saveNow()
     }

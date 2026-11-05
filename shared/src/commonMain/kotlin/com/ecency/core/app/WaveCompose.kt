@@ -607,7 +607,7 @@ class WaveComposeModel internal constructor(
         val s = current
         if (s.isAttaching || s.isSending) return
         if (refuseOtherAccount()) return
-        if (!UploadNames.isSafeUrl(url, env.imageHost)) return
+        if (!UploadNames.isClean(url)) return
         setState { it.copy(imageUrl = url, sent = null, error = null) }
     }
 

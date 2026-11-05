@@ -465,9 +465,9 @@ struct WaveRowView: View {
     }
 
     @ViewBuilder private func footerActions(_ card: PostCard) -> some View {
-        // RN commentView: Edit and Delete on an own wave
-        OwnFooterButtons(post: item.post, votes: card.votes, root: item.key, idPrefix: "wave")
         TipButton(key: card.key)
+        // RN commentView: Edit and Delete on an own wave, after the tip
+        OwnFooterButtons(post: item.post, votes: card.votes, root: item.key, idPrefix: "wave")
         Button(ReadingUiCopy.shared.REPLY) {
             if app.requireSignIn(to: .reply) { app.sheet = .reply(ReplyRequest(root: item.key, parent: item.post)) }
         }

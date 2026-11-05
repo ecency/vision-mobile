@@ -72,8 +72,6 @@ final class ShellUITests: XCTestCase {
         XCTAssertTrue(addAccount.isHittable, "the sheet still takes touches outside the pill")
     }
 
-    /// The footer group sits at the bottom of the menu, always visible; the main group scrolls on its own when it
-    /// does not fit (the largest standard text size here; the shared pinsFooter rule covers a landscape phone).
     /// Whether the side menu item [id] shows whole: inside the window and the menu's scroll views that hold it.
     /// `isHittable` is false for every element of the drawer on iOS 27 though a tap on one lands (a tap on Settings
     /// opens Settings), so it can no longer say whether an item is on screen (#3620).
@@ -88,6 +86,8 @@ final class ShellUITests: XCTestCase {
         return visible.insetBy(dx: -0.5, dy: -0.5).contains(item.frame)
     }
 
+    /// The footer group sits at the bottom of the menu, always visible; the main group scrolls on its own when it
+    /// does not fit (the largest standard text size here; the shared pinsFooter rule covers a landscape phone).
     func testSideMenuFooterIsPinnedAndTheMainGroupScrolls() {
         let app = launch(["-seedAccounts", "YES", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"])
         let menu = app.buttons["account-menu"]

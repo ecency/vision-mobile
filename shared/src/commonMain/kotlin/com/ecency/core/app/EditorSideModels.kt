@@ -648,6 +648,18 @@ class CommunityPickerModel internal constructor(private val env: AppEnvironment)
 
 /** What may go into a post body from an upload: the placeholder's file name and the url the host answered with. */
 object UploadNames {
+    /**
+     * https on any host, no whitespace, parentheses, brackets, quotes or control characters, no user or port: safe to
+     * write as `![](url)`. An image from the account's own uploads gallery may sit on an older host, as the editor
+     * inserts it.
+     */
+    fun isClean(url: String): Boolean {
+        if (!url.startsWith("https://") || url.length > 2048) return false
+        if (url.any { it <= ' ' || it == '(' || it == ')' || it == '[' || it == ']' || it == '<' || it == '>' || it == '"' || it == '\\' || it.code == 0x7f }) return false
+        val host = url.removePrefix("https://").substringBefore('/').substringBefore('?').substringBefore('#')
+        return host.isNotEmpty() && !host.contains('@') && !host.contains(':')
+    }
+
     private val HOSTS = setOf("images.ecency.com", "i.ecency.com", "img.ecency.com")
 
     /** Letters, digits, dot, dash and underscore; anything else (spaces, parentheses, brackets, line breaks) becomes "_". 80 characters at most. */
@@ -661,12 +673,10 @@ object UploadNames {
         return if (dot <= 0) "$name-$n" else name.substring(0, dot) + "-$n" + name.substring(dot)
     }
 
-    /** https, on Ecency's image hosts or [imageHost], no whitespace, parentheses, brackets, quotes or control characters. */
+    /** https, on Ecency's image hosts or [imageHost], and [isClean]. */
     fun isSafeUrl(url: String, imageHost: String): Boolean {
-        if (!url.startsWith("https://") || url.length > 2048) return false
-        if (url.any { it <= ' ' || it == '(' || it == ')' || it == '[' || it == ']' || it == '<' || it == '>' || it == '"' || it == '\\' || it.code == 0x7f }) return false
+        if (!isClean(url)) return false
         val host = url.removePrefix("https://").substringBefore('/').substringBefore('?').substringBefore('#')
-        if (host.contains('@') || host.contains(':')) return false
         val configured = imageHost.removePrefix("https://").substringBefore('/')
         return host.lowercase() in HOSTS || (imageHost.startsWith("https://") && host.equals(configured, ignoreCase = true))
     }

@@ -83,8 +83,9 @@ final class AccessibilityUITests: XCTestCase {
                 }
                 // a clipping reading on a screen with an allowance counts against it whether or not the audit names
                 // the element: on iOS 27 it names some of the nodes it left unnamed before, and which ones varies
-                // from run to run (the vote sheet: its own lines one run, the feed card behind it the next)
-                if let e = issue.element, issue.auditType == .textClipped, AuditExclusions.allowance(screen)[AuditExclusions.clipped] != nil {
+                // from run to run (the vote sheet: its own lines one run, the feed card behind it the next). Before
+                // iOS 27 a named clipping still fails at once.
+                if #available(iOS 27, *), let e = issue.element, issue.auditType == .textClipped, AuditExclusions.allowance(screen)[AuditExclusions.clipped] != nil {
                     print("AccessibilityUITests \(screen): clipping reading on '\(e.identifier)' '\(e.label)', counted against the allowance")
                     // a named node's description names it, so it is counted under the generic one
                     unresolved.append(AuditExclusions.clipped)

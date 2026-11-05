@@ -98,10 +98,15 @@ class QuickReplyToolsTest {
         // a second pick replaces it, as RN's one image
         reply.pickUploaded(url)
         assertEquals(url, reply.current.imageUrl)
-        // only a clean address on the image host goes into a body
-        reply.pickUploaded("https://evil.example/x.jpg")
+        // only a clean https address goes into a body
+        reply.pickUploaded("http://images.ecency.com/x.jpg")
         reply.pickUploaded("https://images.ecency.com/a b.jpg")
+        reply.pickUploaded("https://images.ecency.com/x.jpg)<script>")
         assertEquals(url, reply.current.imageUrl)
+        // an older upload on another host is the gallery's too (the editor inserts it as well)
+        reply.pickUploaded("https://img.esteem.app/old.gif")
+        assertEquals("https://img.esteem.app/old.gif", reply.current.imageUrl)
+        reply.pickUploaded(url)
         // not while a picked image is still uploading: the upload's answer would replace it
         val upload = CompletableDeferred<String?>()
         app.uploads { upload.await() }
