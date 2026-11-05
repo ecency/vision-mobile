@@ -169,7 +169,12 @@ object DemoAuthServices {
             }
             path.startsWith("favorites-check") -> HttpResult(200, "false")
             path.startsWith("bookmarks?") -> wrapped("""[{"_id":"demo-b1","author":"spike-alice","permlink":"fake-post-1","timestamp":2},{"_id":"demo-b2","author":"spike-bob","permlink":"fake-post-2","timestamp":1}]""")
-            path.startsWith("favorites?") -> wrapped("""[{"_id":"demo-f1","account":"spike-carol","timestamp":2},{"_id":"demo-f2","account":"spike-dave","timestamp":1}]""")
+            path.startsWith("favorites?") -> wrapped(demoFavorites.mapIndexed { i, a -> """{"_id":"demo-f$i","account":"$a","timestamp":${demoFavorites.size - i}}""" }.joinToString(",", "[", "]"))
+            // the transfer favourites sheet's add: kept for this run only
+            path == "favorites-add" -> HttpResult(200, "{}").also {
+                runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject["account"]?.jsonPrimitive?.content }.getOrNull()
+                    ?.takeIf { it.isNotEmpty() && it !in demoFavorites }?.let { demoFavorites += it }
+            }
             path.startsWith("favorite-tags?") -> wrapped("""[{"tag":"photography"},{"tag":"spike"}]""")
             // editor area: drafts, schedules, gallery, snippets, support settings
             path.startsWith("drafts-add") -> HttpResult(200, """{"drafts":[{"_id":"demo-d9","title":"Saved","body":"","tags":"","modified":"2026-10-06T10:00:00.000Z","meta":{}}]}""")
@@ -258,6 +263,9 @@ object DemoAuthServices {
 
     /** The demo Pro roster: spike-alice, and every account a demo Pro purchase was ordered for in this run. */
     val demoProMembers: MutableSet<String> = mutableSetOf("spike-alice")
+
+    /** The demo account's favourite accounts; the transfer favourites sheet adds to it. */
+    val demoFavorites: MutableList<String> = mutableListOf("spike-carol", "spike-dave")
 
     /** Debug `demoNoPro`: nobody is Pro until a demo purchase (the Pro card's non-member screenshots and UI tests). */
     fun clearDemoPro() = demoProMembers.clear()

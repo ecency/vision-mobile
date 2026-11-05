@@ -134,6 +134,30 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(amount.exists, "cancel keeps the transfer form")
     }
 
+    /// #3633: RN transferFavoritesSheet: add a favourite by name, find it, and pick it as the recipient.
+    func testTheFavouritesSheetAddsAFavouriteAndPicksItAsTheRecipient() {
+        let app = launch(["-openScreen", "wallet:transfer,transfer,HIVE,hive"])
+        let open = app.buttons["transfer-favorites"]
+        XCTAssertTrue(open.waitForExistence(timeout: 30))
+        open.tap()
+        XCTAssertTrue(app.buttons["favorite-spike-carol"].waitForExistence(timeout: 15), app.debugDescription)
+        app.buttons["favorites-add-toggle"].tap()
+        let name = app.textFields["favorites-add-name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        name.focusAndType("@Spike-Erin")
+        let save = app.buttons["favorites-add-save"]
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: save)
+        waitForExpectations(timeout: 10)
+        save.tap()
+        let added = app.buttons["favorite-spike-erin"]
+        XCTAssertTrue(added.waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertFalse(app.buttons["favorite-spike-carol"].exists, "the search shows the new one")
+        added.tap()
+        let to = app.textFields["transfer-to"]
+        expectation(for: NSPredicate(format: "value == 'spike-erin'"), evaluatedWith: to)
+        waitForExpectations(timeout: 10)
+    }
+
     /// Tester report "unable to send Points gifts on comments": the gift under a comment tips that comment's author in
     /// POINTS, through the same signing as a transfer (a posting-key login is asked for the active key).
     func testAPointsTipOnACommentReachesSigning() {

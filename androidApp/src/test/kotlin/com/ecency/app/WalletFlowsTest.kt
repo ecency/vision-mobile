@@ -499,6 +499,36 @@ class WalletFlowsTest {
         assertTrue(sent, sent.contains("ecency_point_transfer") && sent.contains("""Tip for @carol/re-one"""))
     }
 
+    /** #3633: RN transferFavoritesSheet: add a favourite by name, find it, and pick it as the recipient. */
+    @Test
+    fun theFavouritesSheetAddsAFavouriteAndPicksItAsTheRecipient() {
+        val saved = mutableListOf("spike-bob")
+        val added = mutableListOf<String>()
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            when {
+                r.url.contains("/private-api/favorites?format=wrapped") ->
+                    HttpResult(200, saved.mapIndexed { i, a -> """{"_id":"f$i","account":"$a","timestamp":$i}""" }.joinToString(",", "[", "]"))
+                r.url.endsWith("/private-api/favorites-add") -> HttpResult(200, "{}").also { added += r.body.orEmpty(); saved += "carol" }
+                else -> base?.invoke(r)
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))))
+        until { exists("transferFavorites") }
+        compose.onNodeWithTag("transferFavorites").performClick()
+        until { exists("favorite:spike-bob") }
+        compose.onNodeWithTag("favoritesAddToggle").performClick()
+        until { exists("favoritesAddName") }
+        compose.onNodeWithTag("favoritesAddName").performTextInput("@Carol")
+        compose.onNodeWithTag("favoritesAddSave").performClick()
+        until { exists("favorite:carol") }
+        assertTrue(added.toString(), added.single().contains("\"account\":\"carol\""))
+        assertFalse("the search shows the new one", exists("favorite:spike-bob"))
+        compose.onNodeWithTag("favorite:carol").performClick()
+        until { !exists("favoritesSheet") }
+        assertTrue(compose.onAllNodes(hasTestTag("transferTo") and hasText("carol", substring = true)).fetchSemanticsNodes().isNotEmpty())
+    }
+
     @Test
     fun theDelegationReviewSummarisesBeforeAnythingIsSent() {
         node.extra.let { base ->

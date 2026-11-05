@@ -29,6 +29,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -66,6 +67,8 @@ import com.ecency.core.app.Recurrence
 import com.ecency.core.app.RedeemCopy
 import com.ecency.core.app.RedeemKind
 import com.ecency.core.app.RedeemModel
+import com.ecency.core.app.TransferFavoritesCopy
+import com.ecency.core.app.TransferFavoritesModel
 import com.ecency.core.app.StakeCopy
 import com.ecency.core.app.StakePrompt
 import com.ecency.core.app.TipCopy
@@ -614,10 +617,30 @@ private fun FavoritesSheet(model: com.ecency.core.app.TransferFavoritesModel, on
     LaunchedEffect(model) { model.start() }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).testTag("favoritesSheet")) {
-            Text(WalletCopy.PICK_FAVORITE, color = colors.text, fontWeight = FontWeight.Bold)
-            OutlinedTextField(value = s.query, onValueChange = model::setQuery, placeholder = { Text(TransferCopy.TO_PLACEHOLDER) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+            // RN: the title, and the button that opens or closes the add row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(TransferFavoritesCopy.TITLE, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                IconButton(onClick = model::toggleAdd, modifier = Modifier.testTag("favoritesAddToggle")) {
+                    Glyph(if (s.adding) AppIcon.CLOSE else AppIcon.PERSON_ADD, colors.blueText, 22.dp, description = if (s.adding) TransferFavoritesCopy.CANCEL_ADD else TransferFavoritesCopy.ADD)
+                }
+            }
+            if (s.adding) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                    OutlinedTextField(
+                        value = s.addName, onValueChange = model::setAddName, placeholder = { Text(TransferFavoritesCopy.USERNAME) }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, capitalization = KeyboardCapitalization.None),
+                        modifier = Modifier.weight(1f).testTag("favoritesAddName"),
+                    )
+                    IconButton(
+                        onClick = model::add, enabled = !s.isSaving && TransferFavoritesModel.normalize(s.addName).isNotEmpty(),
+                        modifier = Modifier.padding(start = 8.dp).testTag("favoritesAddSave"),
+                    ) { Glyph(AppIcon.CHECK, colors.blueText, 22.dp, description = TransferFavoritesCopy.CONFIRM_ADD) }
+                }
+            }
+            OutlinedTextField(value = s.query, onValueChange = model::setQuery, placeholder = { Text(TransferFavoritesCopy.SEARCH) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("favoritesSearch"))
             if (s.isLoading) LoadingBlock()
             s.error?.let { ErrorBlock(it, onRetry = model::start) }
+            if (!s.isLoading && s.error == null && s.visible.isEmpty()) Text(TransferFavoritesCopy.EMPTY, color = colors.darkGray, modifier = Modifier.padding(10.dp).testTag("favoritesEmpty"))
             s.visible.forEach { name ->
                 Text("@$name", color = colors.blueText, modifier = Modifier.fillMaxWidth().clickable(role = Role.Button) { onPick(name) }.padding(10.dp).testTag("favorite:$name"))
             }
