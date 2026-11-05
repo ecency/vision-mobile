@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -176,7 +177,8 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
             if (!s.recipientLocked) {
                 // RN's recipient row: the sender, an arrow, then each typed recipient's avatar (a mistyped name shows
                 // a stranger's face before anything is sent)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 6.dp).testTag("transferAvatars")) {
+                // scrolls sideways on a narrow window rather than clipping the last avatar
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp).testTag("transferAvatars")) {
                     s.from?.let { Avatar(model.avatarUrl(it), 40.dp) }
                     Glyph(com.ecency.core.app.AppIcon.ARROW_FORWARD, colors.darkGray, 18.dp, Modifier.padding(horizontal = 8.dp))
                     s.recipientAvatars.forEachIndexed { i, name ->

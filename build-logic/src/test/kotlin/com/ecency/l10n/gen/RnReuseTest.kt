@@ -95,7 +95,9 @@ class RnReuseTest {
             ?.let { Regex("\"([^\"]+)\"").findAll(it).map { m -> "notification." + m.groupValues[1] }.toList() }.orEmpty()
         // PostMenuItem ids, read as `post_dropdown.<id>`
         val menu = app.resolve("PostActionsModel.kt").readText().substringAfter("enum class PostMenuItem(").substringBefore(";")
-        val menuKeys = Regex("""\n\s+[A-Z_]+\("([^"]+)"\)""").findAll(menu).map { "post_dropdown." + it.groupValues[1] }.toList()
+        // Edit is native only (RN drew it in each own comment's footer): its label is the app's own "Edit" (UiCopy.EDIT)
+        val nativeOnly = setOf("post_dropdown.edit")
+        val menuKeys = Regex("""\n\s+[A-Z_]+\("([^"]+)"\)""").findAll(menu).map { "post_dropdown." + it.groupValues[1] }.filterNot { it in nativeOnly }.toList()
         assertTrue(copyKeys.size > 40 && menuKeys.size > 20, "the run time key lists moved (${copyKeys.size}, ${menuKeys.size})")
         val all = copyKeys + menuKeys
         assertTrue(all.none { it !in en }, "run time keys missing from en-US: " + all.filter { it !in en })

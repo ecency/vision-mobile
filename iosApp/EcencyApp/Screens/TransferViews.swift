@@ -113,12 +113,15 @@ struct TransferFormView: View {
             if !s.recipientLocked {
                 // RN's recipient row: the sender, an arrow, then each typed recipient's avatar (a mistyped name shows
                 // a stranger's face before anything is sent)
+                // scrolls sideways on a narrow window rather than clipping the last avatar
+                ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
                     if let from = s.from { AvatarView(url: model.avatarUrl(account: from), size: 40) }
                     Image(appIcon: .arrowForward).foregroundStyle(theme.secondary).padding(.horizontal, 4).accessibilityHidden(true)
                     ForEach(s.recipientAvatars, id: \.self) { name in
                         AvatarView(url: model.avatarUrl(account: name), size: 40).accessibilityIdentifier("transfer-avatar-\(name)")
                     }
+                }
                 }
                 .accessibilityIdentifier("transfer-avatars")
                 WalletField(label: tcopy.TO_PLACEHOLDER, text: binding(s.recipient) { model.setRecipient(text: $0) }, disabled: s.busy, id: "transfer-to")

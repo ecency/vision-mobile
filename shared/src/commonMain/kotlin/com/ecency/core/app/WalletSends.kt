@@ -72,7 +72,8 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * Main thread. [block] runs once [actionId]'s send ends in [SendPhase.Done], even after its screen closed (the send
-     * goes on without it); any other outcome drops it. For what belongs to the outcome rather than the screen (an
+     * goes on without it); a retryable failure keeps it for the retry, any other outcome drops it. Register it before
+     * [send]: a send refused at once (the journal full) drops it there. For what belongs to the outcome rather than the screen (an
      * exchange's deposit memo kept, [ExchangeMemos]).
      */
     fun afterSuccess(actionId: String, block: () -> Unit) {
@@ -90,6 +91,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         owners[actionId] = (owners[actionId] ?: 0) + 1
         // the restart journal keeps every undecided send; when it is full of them, nothing new that could join them goes out
         if (env.sendJournal.current.entries.count { it.outcome == null } >= SendJournal.MAX_ENTRIES) {
+            successHooks.remove(actionId)
             setState { it.copy(sends = it.sends + (actionId to WalletSend(actionId, username, operation, SendPhase.Failed(AppError(ErrorKind.UNKNOWN, JOURNAL_FULL, false), retryable = false)))) }
             env.background.launch { onDone?.invoke(current.sends.getValue(actionId)) }
             return
@@ -102,7 +104,9 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
             // phase and releases it; one that disowned before leaves it to the toast. Never both.
             kotlinx.coroutines.withContext(env.dispatchers.main) {
                 setState { it.copy(sends = it.sends + (actionId to final)) }
-                if (final.isFinal) successHooks.remove(actionId)?.let { hook -> if (final.phase is SendPhase.Done) runCatching { hook() } }
+                // a retryable failure keeps it for the retry of the same action ([retry]); any other end drops it
+                val retryable = (final.phase as? SendPhase.Failed)?.retryable == true
+                if (final.isFinal && !retryable) successHooks.remove(actionId)?.let { hook -> if (final.phase is SendPhase.Done) runCatching { hook() } }
                 if (final.isFinal && final.phase !is SendPhase.Failed) running.remove(actionId)
                 if (onDone == null && (owners[actionId] ?: 0) == 0) orphanDone(final)
             }

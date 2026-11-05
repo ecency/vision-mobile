@@ -402,8 +402,6 @@ class TransferModel internal constructor(
         setMemo(saved)
     }
 
-
-
     /** The HIVE/HBD switch of a plain transfer. */
     fun setFund(symbol: String) {
         if (symbol !in current.tokenChoices || symbol == current.fund || current.busy) return

@@ -33,7 +33,7 @@ enum class PostMenuItem(val id: String) {
     UNPIN_REPLY("unpin-reply"),
     MUTE_POST("mute-post"),
     UNMUTE_POST("unmute-post"),
-    /** Not in RN's menu: RN had an Edit button in each own comment's footer (`post.a11y_edit`); here it is this entry. */
+    /** Not in RN's menu (RN drew an Edit button in each own comment's footer, `post.a11y_edit`), so here it is this entry. */
     EDIT("edit"),
     EDIT_HISTORY("edit-history"),
     SHARE("share"),
@@ -43,7 +43,7 @@ enum class PostMenuItem(val id: String) {
     DELETE("delete-post"),
     ;
 
-    /** RN `post_dropdown.<id>` in the current language (every id has its key, recorded in `rn-reuse.json`). */
+    /** RN `post_dropdown.<id>` in the current language (recorded in `rn-reuse.json`); Edit, native only, reads `UiCopy.EDIT`. */
     val label: String get() = if (this == EDIT) UiCopy.EDIT else L10n.byKey("post_dropdown.$id") ?: id
 
     /** RN draws every label upper-cased. */
