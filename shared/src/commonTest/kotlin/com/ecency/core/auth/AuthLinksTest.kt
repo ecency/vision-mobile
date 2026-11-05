@@ -116,42 +116,13 @@ class AuthLinksTest {
     }
 
     @Test
-    fun aPostingKeyNeverGoesToASchemeThatOpensABrowser() {
-        val browsers = listOf(
-            "microsoft-edge-https", "firefox-focus", "touch-https", "ddgquicklink", "yandexbrowser-open-url", "samsunginternet",
-            "googlechromes", "x-safari-https", "opera-http", "brave", "openurl", "mywebview", "safari", "chrome", "edge",
-            "firefox", "opera", "duckduckgo", "yandex", "samsung", "focus", "anybrowser", "urlhandler", "HTTPHandler",
-        )
-        browsers.forEach { scheme ->
-            assertFalse(AuthLinks.canReceivePostingKey("$scheme://example.com/x"), scheme)
-        }
-        // more browsers, by name; "arc" only as the whole name or an arc- / arcs prefix
-        listOf("puffin", "dolphin", "ecosia", "orion", "kagi", "vivaldi", "kiwi", "ucweb", "whale", "arc", "arc-https", "arcs", "puffinsecure").forEach {
-            assertFalse(AuthLinks.canReceivePostingKey("$it://example.com/x"), it)
-        }
-        listOf("search", "marcapp", "hivearcade", "parcel").forEach { assertTrue(AuthLinks.canReceivePostingKey("$it://cb"), it) }
-        // a host that forwards a URL on (x-callback-url style), whatever the scheme
-        listOf("open-url", "open", "navigate", "url", "x-callback-url", "Open-URL", "openurl", "open_url", "redirect", "goto", "forward", "browse").forEach {
-            assertFalse(AuthLinks.canReceivePostingKey("someapp://$it?url=https://evil.example"), it)
-        }
-        assertTrue(AuthLinks.canReceivePostingKey("someapp://login/done"))
-        listOf("auth", "callback", "signin", "done").forEach { assertTrue(AuthLinks.canReceivePostingKey("someapp://$it"), it) }
-        // an app's own scheme still gets the question
-        listOf("honeyback", "otherapp", "peakd", "hiveblog").forEach { assertTrue(AuthLinks.canReceivePostingKey("$it://cb"), it) }
-        // browser schemes stay acceptable callbacks for answers without a key (the list only guards the key)
-        assertTrue(AuthLinks.isAcceptableCallback("firefox-focus://open?url=x"))
-        assertFalse(AuthLinks.canReceivePostingKey("https://site.example/cb"))
-    }
-
-    @Test
-    fun postingKeyRequests() {
+    fun loginLinksCarryOnlyWhereTheRefusalGoes() {
         assertEquals(
-            AuthLink.PostingKeyRequest("good-karma", "honeyback://hive", "r1"),
+            AuthLink.LoginRequest("honeyback://hive", "r1"),
             AuthLinks.parse("ecency://login?username=%40Good-Karma&redirect_uri=honeyback%3A%2F%2Fhive&request_id=r1"),
         )
+        assertEquals(AuthLink.LoginRequest("waves://ecency-login", null), AuthLinks.parse("ecency://login?callback=waves%3A%2F%2Fecency-login"))
         assertEquals(AuthLink.Invalid("invalid_params"), AuthLinks.parse("ecency://login?username=alice"))
-        assertEquals(AuthLink.Invalid("invalid_params"), AuthLinks.parse("ecency://login?username=a%20b&callback=x%3A%2F%2Fy"))
-        // Stricter than RN: the posting key never goes to a plain-text or page callback.
         assertEquals(AuthLink.Invalid("invalid_callback"), AuthLinks.parse("ecency://login?username=alice&callback=http%3A%2F%2Fevil.example"))
     }
 

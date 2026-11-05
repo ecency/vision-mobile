@@ -353,7 +353,6 @@ private fun LinkPrompts(env: AppEnvironment, host: AppHost, onOpenLogin: () -> U
             text = { Text(prompt.message, modifier = Modifier.testTag("linkRefused")) },
             confirmButton = { TextButton(onClick = links::dismiss) { Text(UiCopy.CLOSE) } },
         )
-        is LinkPrompt.PostingKeyRequest -> ConfirmAlert(AccountCopy.postingKeyRequest(prompt.requester, prompt.username), "postingKeyRequest", links)
         is LinkPrompt.AuthRequest -> ConfirmAlert(AccountCopy.authRequest(prompt.requester, prompt.username), "authRequest", links)
         is LinkPrompt.AuthTransfer -> ConfirmAlert(
             AccountCopy.authTransfer(prompt.username) + AccountCopy.authTransferStored(prompt.username, prompt.storedMethod.takeIf { prompt.accountStored }),

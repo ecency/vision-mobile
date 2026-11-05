@@ -51,11 +51,10 @@ class CopyIdentityTest {
     @Test
     fun answersToAnAppThatOpenedALinkStayEnglish() {
         PseudoLocales.install(PseudoLocales.ACCENTED)
-        assertEquals("Username bob is not logged in on Ecency.", CallbackText.notLoggedIn("bob"))
-        assertEquals("Username bob doesn't have a posting private key stored on Ecency.", CallbackText.postingKeyUnavailable("bob"))
-        assertEquals("Unable to unlock stored keys for bob.", CallbackText.pinRequired("bob"))
-        assertEquals("User declined to share the posting private key with https://app.example.", CallbackText.declined("https://app.example"))
-        assertEquals("User declined to share the posting private key.", CallbackText.declined(null))
+        assertEquals(
+            "Ecency no longer shares posting private keys with other apps. Sign in with HiveSigner or HiveAuth instead.",
+            CallbackText.KEYS_NOT_SHARED,
+        )
     }
 
     @Test

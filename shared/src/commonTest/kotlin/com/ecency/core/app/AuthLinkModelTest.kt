@@ -1,9 +1,6 @@
 package com.ecency.core.app
 
-import com.ecency.core.api.FakeTransport
-import com.ecency.core.api.NODES
 import com.ecency.core.api.broadcast.OperationJson
-import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.HiveUri
 import com.ecency.core.hive.KeyRole
@@ -120,38 +117,35 @@ class AuthLinkModelTest {
     fun aLinkFromContentNeverTellsItsRequesterAnythingBeforeTheUserWasAsked() = runTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val links = app.env.authLinks
-        // a post body naming accounts: neither "no posting key" nor "not here" reaches the post's author
+        // a login link in a post body: its author hears nothing, not even that Ecency is installed
         assertTrue(links.handleFromContent("ecency://login?username=$alice&callback=$cb"))
         testScheduler.advanceUntilIdle()
-        assertNull(links.current.callback, "posting_key_unavailable stays on the device")
-        assertTrue(links.handleFromContent("ecency://login?username=spike-nobody&callback=$cb"))
-        testScheduler.advanceUntilIdle()
-        assertNull(links.current.callback, "not_logged_in stays on the device")
+        links.dismiss()
+        assertNull(links.current.callback, "not_supported stays on the device")
         // a malformed transfer (AuthLink.Invalid / invalid_params) answers nothing either
         links.handleFromContent("ecency://transfer?to=bob&amount=abc&callback=$cb")
         testScheduler.advanceUntilIdle()
         assertNull(links.current.callback)
-        // the same link from another app keeps RN's answer, once the user saw why
+        // the same link from another app is answered, once the user saw why
         links.handle("ecency://login?username=spike-nobody&callback=$cb")
         testScheduler.advanceUntilIdle()
         links.dismiss()
-        assertEquals("not_logged_in", params(links.current.callback!!)["error"])
+        assertEquals("not_supported", params(links.current.callback!!)["error"])
     }
 
     @Test
-    fun callbackMessagesStayRnsEnglishInAnyLanguage() = runTest {
+    fun callbackMessagesStayEnglishInAnyLanguage() = runTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val links = app.env.authLinks
         try {
             com.ecency.core.l10n.PseudoLocales.install(com.ecency.core.l10n.PseudoLocales.ACCENTED)
-            links.handle("ecency://login?username=spike-nobody&callback=$cb")
-            testScheduler.advanceUntilIdle()
-            links.dismiss()
-            assertEquals("Username spike-nobody is not logged in on Ecency.", params(links.answers().single())["message"])
             links.handle("ecency://login?username=$alice&callback=$cb")
             testScheduler.advanceUntilIdle()
             links.dismiss()
-            assertEquals("Username $alice doesn't have a posting private key stored on Ecency.", params(links.answers().single())["message"])
+            assertEquals(
+                "Ecency no longer shares posting private keys with other apps. Sign in with HiveSigner or HiveAuth instead.",
+                params(links.answers().single())["message"],
+            )
         } finally {
             com.ecency.core.l10n.L10n.setLanguage(com.ecency.core.l10n.L10n.SOURCE)
         }
@@ -203,7 +197,7 @@ class AuthLinkModelTest {
         var holder: HoldingDispatcher? = null
         val app = TestApp(this, ioWrap = { HoldingDispatcher(it).also { h -> holder = h } }) { TestApp.chain(it) ?: com.ecency.core.api.rpc.HttpResult(500, "") }
         KeyVault(app.store).run {
-            save(VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
+            save(VaultAccount(alice, AuthType.MASTER_PASSWORD, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
             setCurrentUsername(alice)
         }
         app.env.session.start()
@@ -211,8 +205,10 @@ class AuthLinkModelTest {
         val links = app.env.authLinks
         val io = holder!!
         io.hold = true
-        val content = "ecency://login?username=spike-nobody&callback=postapp://cb"
-        val external = "ecency://login?username=spike-nobody&callback=otherapp://ext"
+        // an operation the app cannot sign: refused after the account's vault read, answered `not_supported`
+        val unsignable = JsonArray(listOf(JsonArray(listOf(JsonPrimitive("vote"), buildJsonObject {}))))
+        val content = HiveUri.encodeOps(unsignable, HiveUri.Params(callback = "postapp://cb"))
+        val external = HiveUri.encodeOps(unsignable, HiveUri.Params(callback = "otherapp://ext"))
         // the first link stops in its vault read, the second starts and stops there too, then each goes on
         if (contentFirst) links.handleFromContent(content) else links.handle(external)
         testScheduler.runCurrent()
@@ -232,15 +228,11 @@ class AuthLinkModelTest {
 
     @Test
     fun aContentLinkAndAnExternalLinkRoutedTogetherKeepTheirOwnOrigin() = runTest {
-        // only the external requester ever hears not_logged_in, whichever link started first and resumed first; when
-        // the content link's refusal replaced the external one before the user closed it, nobody hears anything
+        // only the external requester ever hears not_supported, whichever link started first and resumed first
         for (contentFirst in listOf(true, false)) {
-            val answers = interleaved(contentFirst)
-            assertEquals(if (contentFirst) 1 else 0, answers.size, "contentFirst=$contentFirst: $answers")
-            answers.forEach {
-                assertTrue(it.startsWith("otherapp://ext"), it)
-                assertEquals("not_logged_in", params(it)["error"])
-            }
+            val answer = interleaved(contentFirst).single()
+            assertTrue(answer.startsWith("otherapp://ext"), "contentFirst=$contentFirst: $answer")
+            assertEquals("not_supported", params(answer)["error"])
         }
     }
 
@@ -350,169 +342,24 @@ class AuthLinkModelTest {
     }
 
     @Test
-    fun postingKeyLeavesOnlyAfterConfirmation() = runTest {
+    fun aLoginLinkHandsOverNoKeyAndTellsItsAppToUseHiveSignerOrHiveAuth() = runTest {
         val app = signedIn(this)
         val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
-        testScheduler.advanceUntilIdle()
-        val prompt = assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
-        // the requester is named by its scheme as an app outside Ecency, never by the raw callback
-        assertEquals("otherapp", prompt.requester)
-        val copy = AccountCopy.postingKeyRequest(prompt.requester, prompt.username)
-        assertTrue(copy.startsWith("An app outside Ecency (otherapp)"), copy)
-        assertFalse("otherapp://done" in copy, copy)
-        assertNull(links.current.callback, "no answer before the user decides")
-
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val p = params(links.current.callback!!)
-        assertEquals("success", p["status"])
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), p["posting_key"])
-        assertEquals("r2", p["request_id"])
-    }
-
-    @Test
-    fun aPostingKeyThatIsAlsoTheOwnerKeyIsNeverHandedOver() = runTest {
-        var down = false
-        val app = TestApp(this) { req ->
-            when {
-                req.method != "condenser_api.get_accounts" -> HttpResult(500, "")
-                down -> HttpResult(500, "")
-                else -> FakeTransport.result(req, "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]")
-            }
+        // the same answer whether the account is here with a posting key, or not here at all
+        for ((account, id) in listOf(alice to "r1", "spike-nobody" to "r2")) {
+            links.handle("ecency://login?username=$account&callback=$cb&request_id=$id")
+            testScheduler.advanceUntilIdle()
+            val prompt = assertIs<LinkPrompt.Refused>(links.current.prompt, "never a question")
+            assertEquals(AuthLinkModel.KEY_REQUEST_TITLE, prompt.title)
+            assertEquals(AuthLinkModel.keyRequestRetired("otherapp"), prompt.message)
+            assertTrue(prompt.message.startsWith("An app outside Ecency (otherapp)"), prompt.message)
+            assertNull(links.current.callback, "nothing before the user saw why")
+            links.confirm()
+            testScheduler.advanceUntilIdle()
+            val p = params(links.answers().single())
+            assertEquals(mapOf("status" to "error", "error" to "not_supported", "message" to CallbackText.KEYS_NOT_SHARED, "request_id" to id), p)
         }
-        KeyVault(app.store).run {
-            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
-            setCurrentUsername(alice)
-        }
-        app.env.session.start()
-        testScheduler.advanceUntilIdle()
-        val links = app.env.authLinks
-        // the chain cannot be read: no key leaves
-        down = true
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
-        testScheduler.advanceUntilIdle()
-        assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val unread = params(links.answers().single())
-        assertEquals("posting_key_unavailable", unread["error"])
-        assertNull(unread["posting_key"])
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)!!.postingKey, "nothing is decided without the chain")
-        // the chain says the key is the owner key too: refused, and the key goes
-        down = false
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val refused = params(links.answers().single())
-        assertEquals("posting_key_unavailable", refused["error"])
-        assertNull(refused["posting_key"])
-        assertNull(KeyVault(app.store).account(alice)!!.postingKey)
-        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, app.env.accountNotices.current.notice?.kind)
-    }
-
-    @Test
-    fun oneNodeSayingTheKeyIsTheOwnerKeyDeletesNothingTwoAgreeingNodesDo() = runTest {
-        // the lying nodes put alice's posting key on her owner authority; the others answer the truth
-        var lying = setOf("https://node-a.example")
-        val truth = "[" + AppTestKeys.accountJson(alice) + "]"
-        val lie = "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]"
-        val app = TestApp(this) { req ->
-            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
-            else FakeTransport.result(req, if (req.node in lying) lie else truth)
-        }
-        KeyVault(app.store).run {
-            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
-            setCurrentUsername(alice)
-        }
-        app.env.session.start()
-        testScheduler.advanceUntilIdle()
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val first = params(links.answers().single())
-        assertEquals("posting_key_unavailable", first["error"], "refused while the nodes disagree")
-        assertNull(first["posting_key"])
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), KeyVault(app.store).account(alice)!!.postingKey, "one node's word deletes nothing")
-        assertNull(app.env.accountNotices.current.notice)
-        assertTrue(app.transport.sent.map { it.node }.filter { it.isNotEmpty() }.distinct().size >= 2, "a second node was asked")
-        // every node says so: the key goes
-        lying = NODES.toSet()
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r2")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        assertEquals("posting_key_unavailable", params(links.answers().single())["error"])
-        assertNull(KeyVault(app.store).account(alice)!!.postingKey)
-        assertEquals(AccountNoticeKind.KEY_SHARED_WITH_OWNER, app.env.accountNotices.current.notice?.kind)
-    }
-
-    @Test
-    fun oneNodeSayingTheKeyIsNotOnTheOwnerAuthorityHandsNothingOver() = runTest {
-        // the posting key is on alice's owner authority; node-a, asked first, leaves that out
-        val overlap = "[" + AppTestKeys.accountJson(alice).replace(AppTestKeys.pub(alice, KeyRole.OWNER), AppTestKeys.pub(alice, KeyRole.POSTING)) + "]"
-        val omitted = "[" + AppTestKeys.accountJson(alice) + "]"
-        val app = TestApp(this) { req ->
-            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
-            else FakeTransport.result(req, if (req.node == NODES[0]) omitted else overlap)
-        }
-        KeyVault(app.store).run {
-            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
-            setCurrentUsername(alice)
-        }
-        app.env.session.start()
-        testScheduler.advanceUntilIdle()
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val answer = params(links.answers().single())
-        assertEquals("posting_key_unavailable", answer["error"], "one node's answer never lets the key leave")
-        assertNull(answer["posting_key"])
-    }
-
-    @Test
-    fun twoAgreeingNodesWithoutTheOwnerOverlapHandTheKeyOver() = runTest {
-        val app = TestApp(this) { req ->
-            if (req.method != "condenser_api.get_accounts") HttpResult(500, "")
-            else FakeTransport.result(req, "[" + AppTestKeys.accountJson(alice) + "]")
-        }
-        KeyVault(app.store).run {
-            save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), accessToken = "access-$alice"))
-            setCurrentUsername(alice)
-        }
-        app.env.session.start()
-        testScheduler.advanceUntilIdle()
-        val links = app.env.authLinks
-        val before = app.transport.sent.size
-        links.handle("ecency://login?username=$alice&callback=$cb&request_id=r1")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        val answer = params(links.answers().single())
-        assertEquals("success", answer["status"])
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), answer["posting_key"])
-        val asked = app.transport.sent.drop(before).filter { it.method == "condenser_api.get_accounts" }.map { it.node }.distinct()
-        assertTrue(asked.size >= 2, "two different nodes were asked: $asked")
-    }
-
-    @Test
-    fun aWebsiteCallbackNeverReceivesThePostingKey() = runTest {
-        val app = signedIn(this)
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=https%3A%2F%2Fsite.example%2Fcb")
-        testScheduler.advanceUntilIdle()
-        val prompt = assertIs<LinkPrompt.Refused>(links.current.prompt, "no question to share the key with a website")
-        assertEquals(AuthLinkModel.KEY_REQUEST_TITLE, prompt.title)
-        assertEquals(AuthLinkModel.keyRequestWeb("https://site.example/cb"), prompt.message)
-        links.confirm()
-        links.dismiss()
-        testScheduler.advanceUntilIdle()
-        assertTrue(links.answers().isEmpty(), "nothing goes to the website")
+        assertTrue(app.transport.sent.none { it.method == "condenser_api.get_accounts" }, "nothing is read for it")
     }
 
     @Test
@@ -523,77 +370,12 @@ class AuthLinkModelTest {
         for (open in listOf<() -> Unit>({ links.handleFromContent(link) }, { links.handle(link, pageHost = "dapp.example") }, { links.handleFromPush(link) })) {
             open()
             testScheduler.advanceUntilIdle()
-            assertFalse(links.current.prompt is LinkPrompt.PostingKeyRequest, "never the question")
             (links.current.prompt as? LinkPrompt.Refused)?.let { assertEquals(AuthLinkModel.KEY_REQUEST_CONTENT, it.message) }
             links.confirm()
             links.dismiss()
             testScheduler.advanceUntilIdle()
-            assertTrue(links.answers().isEmpty(), "the key never leaves")
+            assertTrue(links.answers().isEmpty(), "a link from content hears nothing")
         }
-    }
-
-    @Test
-    fun anExternalLoginLinkAnswersOnlyAfterTheUserSawWhy() = runTest {
-        val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=spike-nobody&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        assertEquals(AuthLinkModel.keyRequestNotHere(cb, "spike-nobody"), assertIs<LinkPrompt.Refused>(links.current.prompt).message)
-        assertNull(links.current.callback, "nothing before the user saw it")
-        links.dismiss()
-        testScheduler.advanceUntilIdle()
-        assertEquals("not_logged_in", params(links.answers().single())["error"])
-
-        links.handle("ecency://login?username=$alice&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        assertEquals(AuthLinkModel.keyRequestNoKey(cb, alice), assertIs<LinkPrompt.Refused>(links.current.prompt).message)
-        assertNull(links.current.callback)
-        links.dismiss()
-        testScheduler.advanceUntilIdle()
-        assertEquals("posting_key_unavailable", params(links.answers().single())["error"])
-    }
-
-    @Test
-    fun postingKeyNeedsThePinWhenTheLockIsOn() = runTest {
-        val app = signedIn(this)
-        PinLock(KeyVault(app.store), 16).setPin("1234")
-        app.env.appLock.refresh()
-        testScheduler.advanceUntilIdle()
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        assertEquals(PinPurpose.VERIFY, app.env.appLock.current.prompt?.purpose)
-        assertNull(links.current.callback)
-        app.env.appLock.cancel()
-        testScheduler.advanceUntilIdle()
-        assertEquals("pin_required", params(links.current.callback!!)["error"])
-
-        links.consumeCallback()
-        links.handle("ecency://login?username=$alice&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        links.confirm()
-        testScheduler.advanceUntilIdle()
-        "1234".forEach { app.env.appLock.enterDigit(it - '0') }
-        testScheduler.advanceUntilIdle()
-        assertEquals("success", params(links.current.callback!!)["status"])
-    }
-
-    @Test
-    fun accountsWithoutAPostingKeyNeverHandOne() = runTest {
-        val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
-        app.env.authLinks.handle("ecency://login?username=$alice&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt, "never the question")
-        app.env.authLinks.confirm()
-        testScheduler.advanceUntilIdle()
-        assertEquals("posting_key_unavailable", params(app.env.authLinks.current.callback!!)["error"])
-        app.env.authLinks.consumeCallback()
-        app.env.authLinks.handle("ecency://login?username=spike-nobody&callback=$cb")
-        testScheduler.advanceUntilIdle()
-        app.env.authLinks.dismiss()
-        assertEquals("not_logged_in", params(app.env.authLinks.current.callback!!)["error"])
     }
 
     @Test
@@ -714,7 +496,7 @@ class AuthLinkModelTest {
     fun aRefusalReplacedByANewLinkNeverAnswersItsRequester() = runTest {
         val app = signedIn(this, VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"))
         val links = app.env.authLinks
-        // two login links in a row for accounts not on this device: the user never closed the first refusal
+        // two login links in a row: the user never closed the first refusal
         links.handle("ecency://login?username=spike-nobody&callback=otherapp://first&request_id=a")
         testScheduler.advanceUntilIdle()
         assertIs<LinkPrompt.Refused>(links.current.prompt)
@@ -725,25 +507,7 @@ class AuthLinkModelTest {
         testScheduler.advanceUntilIdle()
         val answer = params(links.answers().single())
         assertEquals("b", answer["request_id"], "only the refusal the user closed answers")
-        assertEquals("not_logged_in", answer["error"])
-    }
-
-    @Test
-    fun aPostingKeyQuestionReplacedByANewLinkTellsItsRequesterNothing() = runTest {
-        val app = signedIn(this)
-        val links = app.env.authLinks
-        links.handle("ecency://login?username=$alice&callback=otherapp://first&request_id=a")
-        testScheduler.advanceUntilIdle()
-        assertIs<LinkPrompt.PostingKeyRequest>(links.current.prompt)
-        links.handle("ecency://login?username=spike-nobody&callback=otherapp://second&request_id=b")
-        testScheduler.advanceUntilIdle()
-        links.answers().let { assertTrue(it.isEmpty(), "the user did not decline: $it") }
-        // the user declining a question is still answered
-        links.dismiss()
-        links.handle("ecency://login?username=$alice&callback=otherapp://third&request_id=c")
-        testScheduler.advanceUntilIdle()
-        links.decline()
-        assertEquals("user_cancelled", params(links.answers().last())["error"])
+        assertEquals("not_supported", answer["error"])
     }
 
     @Test

@@ -29,8 +29,11 @@ sealed interface AuthLink {
     /** `ecency://auth-request`: answer another app with a sign-in proof (never a key). */
     data class AuthRequest(val callback: String, val requestId: String?, val username: String?) : AuthLink
 
-    /** `ecency://login`: another app asks for the posting key of [username]. */
-    data class PostingKeyRequest(val username: String, val callback: String, val requestId: String?) : AuthLink
+    /**
+     * `ecency://login`: another app asks for a posting key. Ecency no longer hands keys to other apps (RN did): the
+     * request is answered `not_supported` once the user saw why.
+     */
+    data class LoginRequest(val callback: String, val requestId: String?) : AuthLink
 
     /** `ecency://auth-transfer`: HiveSigner tokens handed over from the web app. */
     data class AuthTransfer(
@@ -91,7 +94,7 @@ object AuthLinks {
             when (parsed.hostname.lowercase()) {
                 "auth-transfer" -> return authTransfer(parsed)
                 "auth-request" -> return parseAuthRequest(url) ?: AuthLink.Invalid("invalid_request")
-                "login" -> return postingKeyRequest(parsed)
+                "login" -> return loginRequest(parsed)
                 "transfer" -> return transfer(parsed)
             }
         }
@@ -150,39 +153,6 @@ object AuthLinks {
         return APP_SCHEME.matches(scheme) && scheme !in SYSTEM_SCHEMES && SYSTEM_PREFIXES.none { scheme.startsWith(it) }
     }
 
-    /**
-     * Words in a scheme name that hand the URL to a browser (`microsoft-edge-https`, `firefox-focus`, `touch-https`,
-     * `ddgquicklink`, `yandexbrowser-open-url`, `samsunginternet`, ...): such a scheme never receives a posting key.
-     */
-    private val BROWSER_WORDS = listOf(
-        "http", "browser", "url", "open", "web", "safari", "chrome", "edge", "firefox", "opera", "brave", "ddg",
-        "duckduckgo", "yandex", "samsung", "focus", "puffin", "dolphin", "ecosia", "orion", "kagi", "vivaldi", "kiwi",
-        "ucweb", "whale",
-    )
-
-    /** Arc, matched as the whole name or an `arc-` / `arcs` prefix ("search" and "parcel" are not browsers). */
-    private fun isArc(scheme: String) = scheme == "arc" || scheme.startsWith("arc-") || scheme.startsWith("arcs")
-
-    /**
-     * Words in a callback host that forwards a URL on (x-callback-url style: `open-url`, `openurl`, `redirect`,
-     * `goto`): the key would go wherever that URL points. Matched inside the host, like [BROWSER_WORDS] in a scheme.
-     */
-    private val FORWARDING_WORDS = listOf("url", "open", "navigat", "redirect", "goto", "forward", "browse")
-
-    /**
-     * Where a raw posting key may go (`ecency://login`): an app's own scheme on this device, as the Hive apps that ask
-     * for it use. A website (`https:`) never gets one; it signs in with the `auth-request` proof instead. Nor does a
-     * scheme whose name says it opens a browser ([BROWSER_WORDS], Arc), or a callback whose host forwards a URL on
-     * ([FORWARDING_WORDS]): the key would land in a web page.
-     */
-    fun canReceivePostingKey(callback: String): Boolean {
-        if (!isAcceptableCallback(callback)) return false
-        val scheme = callbackScheme(callback) ?: return false
-        if (scheme == "https" || BROWSER_WORDS.any { it in scheme } || isArc(scheme)) return false
-        val host = WebUrl.parse(callback)?.hostname?.lowercase().orEmpty()
-        return FORWARDING_WORDS.none { it in host }
-    }
-
     /** The callback's scheme name, lowercased, without the colon. */
     fun callbackScheme(callback: String): String? =
         WebUrl.parse(callback)?.protocol?.removeSuffix(":")?.lowercase()?.takeIf { it.isNotEmpty() }
@@ -201,20 +171,12 @@ object AuthLinks {
         return AuthLink.AuthRequest(callback, u.param("request_id"), username.ifEmpty { null })
     }
 
-    /**
-     * `ecency://login?username&callback|redirect_uri|return_url&request_id`. RN answers any callback; the
-     * port also requires [isAcceptableCallback], since the success answer carries the posting key, and the model
-     * hands the key only to [canReceivePostingKey] callbacks.
-     */
-    private fun postingKeyRequest(u: WebUrl): AuthLink {
+    /** `ecency://login?callback|redirect_uri|return_url&request_id`: only where the refusal goes back to. */
+    private fun loginRequest(u: WebUrl): AuthLink {
         val callback = u.param("callback").orEmptyNull() ?: u.param("redirect_uri").orEmptyNull() ?: u.param("return_url").orEmptyNull()
-        val requestId = u.param("request_id")
-        val raw = u.param("username").orEmptyNull()
-        if (raw == null || callback == null) return AuthLink.Invalid("invalid_params")
+            ?: return AuthLink.Invalid("invalid_params")
         if (!isAcceptableCallback(callback)) return AuthLink.Invalid("invalid_callback")
-        val username = raw.replace(Regex("^@"), "").trim().lowercase()
-        if (!isHiveAccountName(username)) return AuthLink.Invalid("invalid_params")
-        return AuthLink.PostingKeyRequest(username, callback, requestId)
+        return AuthLink.LoginRequest(callback, u.param("request_id"))
     }
 
     /** A signing link: decodable, and any `cb=` callback acceptable (else Invalid without a callback). */

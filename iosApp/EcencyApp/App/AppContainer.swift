@@ -757,7 +757,7 @@ final class AppContainer: ObservableObject {
                     if options.seedAccounts { try seedAccounts(store) }
                 }
                 env = AppEnvironment(
-                    // two hosts: a posting key hand-over needs two nodes to agree on the owner keys
+                    // two hosts: removing a stored key that is on the owner authority needs two nodes to agree
                     api: try EcencyApi(nodes: ["https://fake-hive.invalid", "https://fake-hive-2.invalid"], transport: FakeHiveTransport()),
                     vault: KeyVaultAsync(vault: KeyVault(store: store)),
                     renderer: PostBodyRendererCompanion.shared.`default`(proxyBase: ImageProxy.companion.DEFAULT_BASE),

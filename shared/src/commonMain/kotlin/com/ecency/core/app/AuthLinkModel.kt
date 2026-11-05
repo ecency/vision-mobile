@@ -44,12 +44,6 @@ sealed interface LinkPrompt {
     /** RN getFormattedTx errors (qr.* copy) and unusable links. */
     data class Refused(val title: String, val message: String) : LinkPrompt
 
-    /**
-     * Another app asks for the posting key of [username] (RN deep_link.posting_key_request, with native copy that
-     * names [requester], the callback's scheme, as an app outside Ecency).
-     */
-    data class PostingKeyRequest(val username: String, val requester: String) : LinkPrompt
-
     /** RN deep_link.auth_request_*: another app asks for a sign-in proof (never a key). */
     data class AuthRequest(val username: String?, val requester: String) : LinkPrompt
 
@@ -91,10 +85,9 @@ data class AuthLinkState(
 /**
  * Sign-in, signing and hand-off links (RN useLinkProcessor) for both UIs: [handle] parses with [AuthLinks.parse]
  * and asks the user first; [confirm] / [decline] act. Callbacks are only ever the parser-validated callback of
- * the link with RN's payload (`status`, `error`, `id`, `username`, `posting_key`, `code`, `request_id`).
+ * the link with RN's payload (`status`, `error`, `id`, `username`, `code`, `request_id`, `message`).
  *
- * Guards: a posting key leaves the app only after explicit confirmation (and the PIN when the lock is on), for
- * an account signed in with a master password or posting key; owner operations are refused; auth-transfer
+ * Guards: no key ever leaves the app (`ecency://login` is refused); owner operations are refused; auth-transfer
  * tokens are redeemed for the account the link names (see [com.ecency.core.auth.AccountManager]).
  */
 class AuthLinkModel internal constructor(private val env: AppEnvironment) :
@@ -108,7 +101,6 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             /** One link confirmed once is one action: its retry resumes it, a second link with the same operations is its own. */
             val actionId: String = com.ecency.core.secure.secureRandomBytes(16).joinToString("") { (it.toInt() and 0xff).toString(16).padStart(2, '0') }
         }
-        class PostingKey(val link: AuthLink.PostingKeyRequest) : Pending
         class Proof(val link: AuthLink.AuthRequest, val quiet: Boolean) : Pending
         class Transfer(val link: AuthLink.AuthTransfer) : Pending
         class Code(val link: AuthLink.CodeLogin) : Pending
@@ -226,7 +218,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
                 // the transfer's own callback answers; the hive-uri inside carries the same one
                 sign(user, HiveUri.decode(link.hiveUri), link.callback, link.requestId, pageHost, quiet, silent)
             }
-            is AuthLink.PostingKeyRequest -> postingKeyRequest(link, user, fromContent = quiet, silent = silent)
+            is AuthLink.LoginRequest -> loginRequest(link, fromContent = quiet, silent = silent)
             is AuthLink.AuthRequest -> {
                 pending = Pending.Proof(link, quiet)
                 setState { it.copy(prompt = LinkPrompt.AuthRequest(link.username, AuthLinks.requesterLabel(link.callback))) }
@@ -299,32 +291,16 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
     }
 
     /**
-     * The key leaves only for an app's own scheme on this device, after the question ([canReceivePostingKey]). A link
-     * from content (a post, a chat, a web page, a push) never gets the question. When the key cannot be handed over
-     * the user sees why, and an external app hears the reason only once the user closed that ([Pending.Answer]):
-     * nothing tells a requester which accounts are on this device without the user seeing it.
+     * `ecency://login` (RN hands the posting key over): Ecency shares no key with another app. A link from content
+     * (a post, a chat, a web page, a push) is refused and answers nothing; an external one shows why, and its app hears
+     * `not_supported` with a pointer to HiveSigner or HiveAuth once the user closed that ([Pending.Answer]). The answer
+     * is the same whatever accounts are here, so it tells the requester nothing about them.
      */
-    private suspend fun postingKeyRequest(link: AuthLink.PostingKeyRequest, user: String?, fromContent: Boolean, silent: Boolean) {
-        val requester = AuthLinks.requesterLabel(link.callback)
-        fun error(code: String, message: String, shown: String) {
-            val payload = listOf("status" to "error", "username" to link.username, "error" to code, "message" to message)
-            pending = Pending.Answer(link.callback, link.requestId, payload)
-            setState { it.copy(prompt = LinkPrompt.Refused(KEY_REQUEST_TITLE, shown)) }
-        }
-        // read first whatever the link's source, so every source takes the same path to its answer
-        val stored = env.accounts.vaultAccount(link.username)
+    private fun loginRequest(link: AuthLink.LoginRequest, fromContent: Boolean, silent: Boolean) {
         if (fromContent) return refuse(KEY_REQUEST_TITLE, KEY_REQUEST_CONTENT, silent)
-        if (!AuthLinks.canReceivePostingKey(link.callback)) return refuse(KEY_REQUEST_TITLE, keyRequestWeb(requester), silent)
-        if (user == null || stored == null) {
-            return error("not_logged_in", CallbackText.notLoggedIn(link.username), keyRequestNotHere(requester, link.username))
-        }
-        if (stored.shareablePostingKey == null) {
-            return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username), keyRequestNoKey(requester, link.username))
-        }
-        pending = Pending.PostingKey(link)
-        // named by its scheme only ("An app outside Ecency (<scheme>)"): the rest of the callback is the requester's own text
-        val scheme = AuthLinks.callbackScheme(link.callback) ?: requester
-        setState { it.copy(prompt = LinkPrompt.PostingKeyRequest(link.username, scheme)) }
+        val scheme = AuthLinks.callbackScheme(link.callback) ?: AuthLinks.requesterLabel(link.callback)
+        pending = Pending.Answer(link.callback, link.requestId, listOf("status" to "error", "error" to "not_supported", "message" to CallbackText.KEYS_NOT_SHARED))
+        setState { it.copy(prompt = LinkPrompt.Refused(KEY_REQUEST_TITLE, keyRequestRetired(scheme))) }
     }
 
     private suspend fun sign(user: String, decoded: HiveUri.Decoded, callback: String?, requestId: String?, pageHost: String?, quiet: Boolean, silent: Boolean) {
@@ -396,7 +372,6 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             try {
                 when (action) {
                     is Pending.Sign -> confirmSign(action)
-                    is Pending.PostingKey -> handOverPostingKey(action.link)
                     is Pending.Proof -> answerAuthRequest(action.link)
                     is Pending.Transfer -> {
                         env.session.loginWithAuthTransfer(action.link)
@@ -426,14 +401,6 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         setState { it.copy(prompt = null) }
         when (action) {
             is Pending.Sign -> action.callback?.let { answer(it, action.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = action.quiet) }
-            is Pending.PostingKey -> answer(
-                action.link.callback, action.link.requestId,
-                listOf(
-                    "status" to "error", "username" to action.link.username, "error" to "user_cancelled",
-                    "message" to CallbackText.declined(AuthLinks.requesterLabel(action.link.callback)),
-                ),
-                quiet = false,
-            )
             is Pending.Proof -> answer(action.link.callback, action.link.requestId, listOf("status" to "error", "error" to "user_cancelled"), quiet = action.quiet)
             // the user saw why: the requester hears it
             is Pending.Answer -> answer(action.callback, action.requestId, action.payload, quiet = false)
@@ -496,30 +463,6 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         }
     }
 
-    private suspend fun handOverPostingKey(link: AuthLink.PostingKeyRequest) {
-        fun error(code: String, message: String) =
-            answer(link.callback, link.requestId, listOf("status" to "error", "username" to link.username, "error" to code, "message" to message), quiet = false)
-        // RN asks for the PIN before any key leaves the app
-        if (!env.appLock.verifyPin(whenOff = true)) return error("pin_required", CallbackText.pinRequired(link.username))
-        val stored = env.accounts.vaultAccount(link.username)
-        val key = stored?.shareablePostingKey
-            ?: return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
-        // the key leaves only once two different nodes agree it is not also the owner key; a read that fails, fewer
-        // than two answers or nodes that disagree hand over nothing
-        val chain = try {
-            env.chain.confirmedAuthorities(link.username)
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            null
-        } ?: return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
-        if (KeyRole.POSTING in stored.rolesOnOwner(chain.owner)) {
-            runCatching { env.accountNotices.ownerKeyFound(link.username, chain) }
-            return error("posting_key_unavailable", CallbackText.postingKeyUnavailable(link.username))
-        }
-        answer(link.callback, link.requestId, listOf("status" to "success", "username" to link.username, "posting_key" to key), quiet = false)
-    }
-
     private suspend fun answerAuthRequest(link: AuthLink.AuthRequest) {
         fun refuseWith(code: String) = answer(link.callback, link.requestId, listOf("status" to "error", "error" to code), quiet = false)
         val current = env.session.current
@@ -550,7 +493,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         is AuthLink.HiveSign -> link.decoded.params.callback?.let { it to null }
         is AuthLink.Transfer -> link.callback?.let { it to link.requestId }
         is AuthLink.AuthRequest -> link.callback to link.requestId
-        is AuthLink.PostingKeyRequest -> link.callback to link.requestId
+        is AuthLink.LoginRequest -> link.callback to link.requestId
         is AuthLink.Invalid -> link.callback?.let { it to link.requestId }
         else -> null
     }
@@ -616,22 +559,16 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         val NOT_SUPPORTED: String get() = L.native.authLink.notSupported
         val KEY_REQUEST_TITLE: String get() = L.native.authLink.keyRequestRefusedTitle
         val KEY_REQUEST_CONTENT: String get() = L.native.authLink.keyRequestContent
-        fun keyRequestWeb(requester: String) = L.native.authLink.keyRequestWeb(requester = requester)
-        fun keyRequestNotHere(requester: String, account: String) = L.native.authLink.keyRequestNotHere(requester = requester, account = account)
-        fun keyRequestNoKey(requester: String, account: String) = L.native.authLink.keyRequestNoKey(requester = requester, account = account)
+        fun keyRequestRetired(scheme: String) = L.native.authLink.keyRequestRetired(scheme = scheme)
 
         fun signWarning(authority: String) = L.qr.signWarning(authority = authority)
     }
 }
 
 /**
- * The `message` of an error answer sent back to the app that opened an ecency:// link: RN useLinkProcessor's fixed
- * English, word for word, never the app language (the other app reads it).
+ * The `message` of an error answer sent back to the app that opened an ecency:// link: fixed English, as RN
+ * useLinkProcessor's, never the app language (the other app reads it).
  */
 internal object CallbackText {
-    fun notLoggedIn(username: String) = "Username $username is not logged in on Ecency."
-    fun postingKeyUnavailable(username: String) = "Username $username doesn't have a posting private key stored on Ecency."
-    fun pinRequired(username: String) = "Unable to unlock stored keys for $username."
-    fun declined(requester: String?) =
-        if (requester.isNullOrEmpty()) "User declined to share the posting private key." else "User declined to share the posting private key with $requester."
+    const val KEYS_NOT_SHARED = "Ecency no longer shares posting private keys with other apps. Sign in with HiveSigner or HiveAuth instead."
 }

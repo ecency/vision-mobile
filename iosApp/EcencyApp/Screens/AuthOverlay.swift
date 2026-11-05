@@ -258,8 +258,6 @@ private struct LinkPromptView: View {
             Text(p.title).font(.headline).accessibilityAddTraits(.isHeader)
             Text(p.message).accessibilityIdentifier("link-refused")
             Button(UiCopy.shared.CLOSE) { links.dismiss() }.frame(maxWidth: .infinity)
-        case let p as LinkPromptPostingKeyRequest:
-            confirm(AccountCopy.shared.postingKeyRequest(requester: p.requester, username: p.username), id: "posting-key-request")
         case let p as LinkPromptAuthRequest:
             confirm(AccountCopy.shared.authRequest(requester: p.requester, username: p.username), id: "auth-request")
         case let p as LinkPromptAuthTransfer:

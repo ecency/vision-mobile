@@ -295,7 +295,7 @@ class AccountManager(
      * switches the type to the imported key's, which changes what the account may do elsewhere). Only a master
      * password that gave both the posting and the active key makes a key account a master-password account,
      * since it then holds everything that sign-in holds. A HiveSigner or HiveAuth account keeps its sign-in method and its tokens. What the account can do
-     * is read from the keys it holds ([VaultAccount.shareablePostingKey], [VaultAccount.signsWithPostingKey]).
+     * is read from the keys it holds ([VaultAccount.signsWithPostingKey]).
      * Nothing changes unless [username] is still the current account when the write happens.
      * @throws AuthException WrongPassword, KeyNotOnAccount or InvalidKey when no role matches (RN
      *   `auth.invalid_credentials`), KeyBelowThreshold for a key that cannot sign alone, UnknownAccount,

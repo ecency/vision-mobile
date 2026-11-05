@@ -362,8 +362,7 @@ class BackupKeysModelTest {
         assertEquals(AppTestKeys.wif(alice, KeyRole.ACTIVE), stored.activeKey)
         assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), stored.postingKey)
         assertEquals(AuthType.POSTING_KEY, stored.authType, "how the account signed in does not change with an imported key")
-        // what it could do before, it still can: hand out its posting key, sign uploads with it
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), stored.shareablePostingKey)
+        // what it could do before, it still can: sign uploads with its posting key
         assertTrue(stored.signsWithPostingKey)
         // the import reveals nothing by itself
         assertFalse(model.row(KeyRole.ACTIVE).revealed)
@@ -423,7 +422,6 @@ class BackupKeysModelTest {
         val stored = KeyVault(app.store).account(alice)!!
         assertEquals(AppTestKeys.wif(alice, KeyRole.MEMO), stored.memoKey)
         assertEquals(AuthType.POSTING_KEY, stored.authType, "not a memo-key account now")
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), stored.shareablePostingKey)
         assertTrue(stored.signsWithPostingKey)
     }
 
@@ -483,7 +481,6 @@ class BackupKeysModelTest {
     @Test
     fun anActiveKeyAccountThatImportsItsPostingKeyStaysAnActiveKeyAccountWithMoreKeys() = runTest {
         val app = app(account = VaultAccount(alice, AuthType.ACTIVE_KEY, activeKey = AppTestKeys.wif(alice, KeyRole.ACTIVE), accessToken = "t"))
-        assertNull(KeyVault(app.store).account(alice)!!.shareablePostingKey)
         assertFalse(KeyVault(app.store).account(alice)!!.signsWithPostingKey)
         val model = shown(app)
         model.toggle(KeyRole.POSTING)
@@ -491,18 +488,17 @@ class BackupKeysModelTest {
         testScheduler.advanceUntilIdle()
         val stored = KeyVault(app.store).account(alice)!!
         assertEquals(AuthType.ACTIVE_KEY, stored.authType)
-        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), stored.shareablePostingKey, "capabilities follow the stored keys")
-        assertTrue(stored.signsWithPostingKey)
+        assertEquals(AppTestKeys.wif(alice, KeyRole.POSTING), stored.postingKey)
+        assertTrue(stored.signsWithPostingKey, "capabilities follow the stored keys")
         assertEquals("t", stored.accessToken)
     }
 
     @Test
-    fun aPostingKeyThatIsAlsoTheActiveKeyIsNeverHandedOut() {
+    fun onlyAKeyAccountSignsWithItsStoredPostingKey() {
         val same = AppTestKeys.wif(alice, KeyRole.POSTING)
-        assertNull(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = same, activeKey = same).shareablePostingKey)
-        assertNull(VaultAccount(alice, AuthType.HIVE_SIGNER, postingKey = same, accessToken = "t").shareablePostingKey, "a HiveSigner account hands out nothing")
+        assertFalse(VaultAccount(alice, AuthType.HIVE_SIGNER, postingKey = same, accessToken = "t").signsWithPostingKey)
         assertFalse(VaultAccount(alice, AuthType.HIVE_AUTH, postingKey = same).signsWithPostingKey)
-        assertEquals(same, VaultAccount(alice, AuthType.MASTER_PASSWORD, postingKey = same, activeKey = AppTestKeys.wif(alice, KeyRole.ACTIVE)).shareablePostingKey)
+        assertTrue(VaultAccount(alice, AuthType.MASTER_PASSWORD, postingKey = same, activeKey = AppTestKeys.wif(alice, KeyRole.ACTIVE)).signsWithPostingKey)
     }
 
     @Test
@@ -559,7 +555,7 @@ class BackupKeysModelTest {
         val model = shown(app)
         assertFalse(model.row(KeyRole.OWNER).hasPrivate)
         assertEquals(listOf(false, true, true, true), model.current.rows.map { it.hasPrivate })
-        assertEquals(wif(KeyRole.POSTING), KeyVault(app.store).account(alice)!!.shareablePostingKey)
+        assertEquals(wif(KeyRole.POSTING), KeyVault(app.store).account(alice)!!.postingKey)
     }
 
     // ---- RN #3600 on Settings, Keys, Import ----

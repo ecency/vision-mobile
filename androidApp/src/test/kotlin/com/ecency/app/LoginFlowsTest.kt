@@ -35,6 +35,7 @@ import com.ecency.core.app.AppError
 import com.ecency.core.app.AuthLinkModel
 import com.ecency.core.app.LinkPrompt
 import com.ecency.core.app.SigningModel
+import com.ecency.core.app.UiCopy
 import com.ecency.core.auth.HiveUri
 import com.ecency.core.hive.Asset
 import com.ecency.core.hive.Transfer
@@ -365,16 +366,18 @@ class LoginFlowsTest {
     }
 
     @Test
-    fun aPostingKeyRequestIsAnsweredOnlyAfterApprove() {
+    fun aLoginLinkSharesNoKeyAndAnswersOnlyAfterTheUserClosedTheNotice() {
         store(tester())
         launch()
         waitFor("account")
         compose.runOnIdle { env.authLinks.handle("ecency://login?username=tester&callback=otherapp://cb") }
-        waitFor("postingKeyRequest")
+        waitFor("linkRefused")
+        assertFalse("never a question", exists("linkApprove"))
         assertTrue(callbacks.isEmpty())
-        compose.onNodeWithTag("linkApprove").performClick()
+        compose.onNode(hasText(UiCopy.CLOSE)).performClick()
         until { callbacks.isNotEmpty() }
-        assertTrue("posting_key=${node.key.toWif()}" in callbacks.single())
+        assertTrue("error=not_supported" in callbacks.single())
+        assertFalse("posting_key" in callbacks.single())
     }
 
     @Test
