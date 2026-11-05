@@ -89,6 +89,8 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                         writeList(OWNER_CHECK, emptyList())
                         writeList(OWNER_NOTICE, emptyList())
                         writeList(NOT_IMPORTED_NOTICE, emptyList())
+                        // a wipe leaves no account names behind (the RN data that named them is gone with it)
+                        writeList(NOT_IMPORTED_TOLD, emptyList())
                         publish()
                     }
                     else -> {}
@@ -238,12 +240,20 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
      */
     internal fun notImported(names: List<String>) {
         scope.launch {
-            val here = runCatching { env.accounts.accounts().map { it.username }.toSet() }.getOrNull() ?: return@launch
+            // remembered first: the import reports these names only once, so a failed read below must not lose them
             val told = list(NOT_IMPORTED_TOLD)
-            val fresh = names.distinct().filter { it !in told && it !in here }
+            val fresh = names.distinct().filter { it !in told }
             if (fresh.isNotEmpty()) {
                 writeList(NOT_IMPORTED_TOLD, told + fresh)
                 writeList(NOT_IMPORTED_NOTICE, list(NOT_IMPORTED_NOTICE) + fresh)
+            }
+            val here = try {
+                env.accounts.accounts().map { it.username }.toSet()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the next start shows them
+                return@launch
             }
             val pending = list(NOT_IMPORTED_NOTICE).filter { it !in here }
             pending.filter { name -> queue.none { it.kind == AccountNoticeKind.NOT_IMPORTED && it.account == name } }.forEach { name ->

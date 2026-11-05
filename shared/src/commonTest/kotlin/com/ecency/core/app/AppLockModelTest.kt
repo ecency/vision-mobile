@@ -738,6 +738,22 @@ class AppLockModelTest {
         val rest = keptBack(other).map { it.account }
         assertEquals(listOf("spike-legacy", "spike-owner") - chosen.account, rest)
         assertTrue(keptBack(restart(other)).isEmpty(), "the one the user went to log in to is not named again")
+
+        // signing in as a kept back account drops its notice, unseen or not (#3648 review)
+        val third = legacyApp()
+        third.env.session.start()
+        third.env.appLock.start()
+        testScheduler.advanceUntilIdle()
+        KeyVault(third.store).save(VaultAccount("spike-legacy", AuthType.POSTING_KEY, postingKey = AppTestKeys.wif("spike-legacy", com.ecency.core.hive.KeyRole.POSTING)))
+        third.env.session.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("spike-owner"), keptBack(third).map { it.account }, "only the account still missing")
+        assertFalse("spike-legacy" in third.env.prefs.getString(AccountNoticesModel.NOT_IMPORTED_NOTICE).orEmpty())
+        // a wipe leaves no names behind
+        third.env.emit(AppEvent.DataWiped)
+        testScheduler.advanceUntilIdle()
+        assertNull(third.env.prefs.getString(AccountNoticesModel.NOT_IMPORTED_TOLD))
+        assertNull(third.env.prefs.getString(AccountNoticesModel.NOT_IMPORTED_NOTICE))
     }
 
     @Test
