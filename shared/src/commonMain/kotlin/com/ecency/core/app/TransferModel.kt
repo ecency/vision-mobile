@@ -151,6 +151,16 @@ object TransferCopy {
     val DECRYPT_MEMO: String get() = L.native.transfer.decryptMemo
     val DECRYPT_MEMO_FAILED: String get() = L.native.transfer.decryptMemoFailed
     fun memoEncryptExchange(exchange: String) = L.native.transfer.memoEncryptExchange(exchange = exchange)
+
+    /** The exchange note for [memo]: cipher text is replaced by the exchange's deposit memo, a plain one loses its `#`. */
+    fun memoExchange(exchange: String, memo: String) =
+        if (Memo.isEncrypted(memo)) L.native.transfer.memoEncryptedExchange(exchange = exchange) else memoEncryptExchange(exchange)
+
+    /**
+     * The memo a recurrent transfer's deletion sends: a `#` memo is not encrypted for a deletion (it moves nothing),
+     * so it goes empty rather than as text; the transfer screen and the wallet details alike.
+     */
+    fun deletionMemo(memo: String): String = if (memo.startsWith("#")) "" else memo
     fun recipientNoMemoKey(account: String) = L.native.transfer.memoRecipientNoKey(account = account)
 
     fun useSavedMemo(exchange: String, memo: String) = L.native.transfer.useSavedMemo(exchange = exchange, memo = memo)
@@ -602,8 +612,7 @@ class TransferModel internal constructor(
         if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
-        // a `#` memo is not encrypted for a deletion (it moves nothing): it goes empty rather than as text
-        val memo = if (s.memo.startsWith("#")) "" else s.memo
+        val memo = TransferCopy.deletionMemo(s.memo)
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", memo, Recurrence.DAILY.hours, 2)
         val json = WalletOps.ops(listOf(op))
         val actionId = env.idempotencyKey()
@@ -669,7 +678,7 @@ class TransferModel internal constructor(
             MemoEncryption.ENCRYPTS -> encrypted?.get(name) ?: throw com.ecency.core.api.InvalidInputException(TransferCopy.recipientNoMemoKey(name))
             MemoEncryption.NO_KEY -> throw com.ecency.core.api.InvalidInputException(TransferCopy.MEMO_ENCRYPT_NO_KEY)
             MemoEncryption.UNSUPPORTED -> throw com.ecency.core.api.InvalidInputException(TransferCopy.MEMO_ENCRYPT_UNSUPPORTED)
-            MemoEncryption.EXCHANGE -> throw com.ecency.core.api.InvalidInputException(TransferCopy.memoEncryptExchange(s.exchange.orEmpty()))
+            MemoEncryption.EXCHANGE -> throw com.ecency.core.api.InvalidInputException(TransferCopy.memoExchange(s.exchange.orEmpty(), s.memo))
         }
         return when (s.kind) {
             TransferKind.TRANSFER -> if (s.recurrenceHours != null) {

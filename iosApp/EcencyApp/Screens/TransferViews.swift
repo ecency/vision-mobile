@@ -211,8 +211,8 @@ struct TransferFormView: View {
             Text(tcopy.MEMO_ENCRYPT_UNSUPPORTED).font(.footnote).foregroundStyle(theme.dangerText)
                 .announces(tcopy.MEMO_ENCRYPT_UNSUPPORTED, debounce: true).accessibilityIdentifier("memo-encrypt-unsupported")
         case .exchange:
-            Text(tcopy.memoEncryptExchange(exchange: s.exchange ?? "")).font(.footnote).foregroundStyle(theme.dangerText)
-                .announces(tcopy.memoEncryptExchange(exchange: s.exchange ?? ""), debounce: true).accessibilityIdentifier("memo-encrypt-exchange")
+            Text(tcopy.memoExchange(exchange: s.exchange ?? "", memo: s.memo)).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.memoExchange(exchange: s.exchange ?? "", memo: s.memo), debounce: true).accessibilityIdentifier("memo-encrypt-exchange")
         default: EmptyView()
         }
         if s.kind == TransferKind.convert { Text(tcopy.CONVERT_DESC).font(.footnote).foregroundStyle(theme.secondary) }

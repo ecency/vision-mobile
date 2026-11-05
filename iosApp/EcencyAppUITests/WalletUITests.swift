@@ -86,6 +86,8 @@ final class WalletUITests: XCTestCase {
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
         WalletShots.save("transfer")
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first
+        for _ in 0..<3 where next.frame.maxY > app.windows.firstMatch.frame.maxY - 8 { app.swipeUp() }
         next.tap()
         XCTAssertTrue(app.buttons["transfer-confirm"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Continue transaction?"].exists)
@@ -104,6 +106,8 @@ final class WalletUITests: XCTestCase {
         let next = app.buttons["transfer-next"]
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first
+        for _ in 0..<3 where next.frame.maxY > app.windows.firstMatch.frame.maxY - 8 { app.swipeUp() }
         next.tap()
         let confirm = app.buttons["transfer-confirm"].firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 10))

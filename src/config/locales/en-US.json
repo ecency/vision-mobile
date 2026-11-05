@@ -2471,6 +2471,7 @@
       "memo_encrypt_no_key": "An encrypted memo (starting with #) needs one of this account's keys on this device. Log in with a key or the master password, or remove the # to send a public memo.",
       "memo_encrypt_unsupported": "Only HIVE and HBD transfers can carry an encrypted memo (starting with #). Remove the # to send a public memo.",
       "memo_encrypt_exchange": "@{exchange} is an exchange and cannot read an encrypted memo: send its deposit memo without the #.",
+      "memo_encrypted_exchange": "@{exchange} is an exchange and cannot read an encrypted memo: replace this one with the deposit memo @{exchange} gave you.",
       "memo_recipient_no_key": "@{account} has no memo key to encrypt for.",
       "memo_encrypt_from_link": "This request has a memo starting with #, which would go on the blockchain as public text. Ecency encrypts memos only in its own wallet: send this transfer from there.",
       "decrypt_memo": "Decrypt memo",

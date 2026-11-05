@@ -425,6 +425,26 @@ class WalletModelsTest {
         assertTrue(d.current.recurrent.isEmpty())
     }
 
+    /** Review: the wallet details' delete sends an empty memo for a `#` one, as the transfer screen's does. */
+    @Test
+    fun aScheduleDeletedFromTheWalletDetailsSendsAnEmptyHashMemo() = runTest {
+        val w = world(this)
+        w.rpc["condenser_api.get_account_history"] = { "[]" }
+        listOf("get_savings_withdraw_from", "get_conversion_requests", "get_collateralized_conversion_requests", "get_open_orders").forEach { w.rpc["condenser_api.$it"] = { "[]" } }
+        w.rpc["condenser_api.find_recurrent_transfers"] = { """[{"id":4,"trigger_date":"2026-10-07T00:00:00","from":"spike-voter","to":"spike-bob","amount":"1.500 HIVE","memo":"#a private note","recurrence":24,"consecutive_failures":0,"remaining_executions":5}]""" }
+        w.env.wallet.start()
+        val d = w.env.assetDetailsModel("HIVE")
+        d.start()
+        testScheduler.advanceUntilIdle()
+        d.deleteRecurrent(d.current.recurrent.single())
+        d.confirmPrompt()
+        testScheduler.advanceUntilIdle()
+        assertEquals(
+            """["recurrent_transfer",{"from":"spike-voter","to":"spike-bob","amount":"0.000 HIVE","memo":"","recurrence":24,"executions":2,"extensions":[]}]""",
+            w.broadcastOpsJson().last(),
+        )
+    }
+
     @Test
     fun theSummaryAndActionsFollowRn() = runTest {
         val w = world(this)
@@ -737,6 +757,9 @@ class WalletModelsTest {
         m.setMemo(com.ecency.core.hive.MEMO_VECTORS.first().encoded)
         assertEquals(MemoEncryption.EXCHANGE, m.current.memoEncryption)
         assertFalse(m.current.nextEnabled)
+        // its note asks for the exchange's deposit memo: dropping the `#` would send the cipher text as a public memo
+        assertEquals(com.ecency.core.l10n.L.native.transfer.memoEncryptedExchange(exchange = "bittrex"), TransferCopy.memoExchange("bittrex", m.current.memo))
+        assertEquals(TransferCopy.memoEncryptExchange("bittrex"), TransferCopy.memoExchange("bittrex", "#104857"))
         m.setMemo("104857")
         assertEquals(MemoEncryption.NONE, m.current.memoEncryption)
         assertTrue(m.current.nextEnabled)

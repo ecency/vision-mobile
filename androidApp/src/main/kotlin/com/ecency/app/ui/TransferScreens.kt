@@ -253,7 +253,7 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
                 com.ecency.core.app.MemoEncryption.ENCRYPTS -> Warning(TransferCopy.MEMO_ENCRYPTED, "memoEncrypted", red = false)
                 com.ecency.core.app.MemoEncryption.NO_KEY -> Warning(TransferCopy.MEMO_ENCRYPT_NO_KEY, "memoEncryptNoKey")
                 com.ecency.core.app.MemoEncryption.UNSUPPORTED -> Warning(TransferCopy.MEMO_ENCRYPT_UNSUPPORTED, "memoEncryptUnsupported")
-                com.ecency.core.app.MemoEncryption.EXCHANGE -> Warning(TransferCopy.memoEncryptExchange(s.exchange.orEmpty()), "memoEncryptExchange")
+                com.ecency.core.app.MemoEncryption.EXCHANGE -> Warning(TransferCopy.memoExchange(s.exchange.orEmpty(), s.memo), "memoEncryptExchange")
                 com.ecency.core.app.MemoEncryption.NONE -> Unit
             }
             if (s.kind == com.ecency.core.app.TransferKind.CONVERT) Warning(TransferCopy.CONVERT_DESC, "convertDesc", red = false)

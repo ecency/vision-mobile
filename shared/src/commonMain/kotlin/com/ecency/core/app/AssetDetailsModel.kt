@@ -234,7 +234,7 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
             is DetailsPrompt.DeleteRecurrent -> {
                 val sym = Vests.symbol(p.schedule.amount).ifEmpty { "HIVE" }
                 // RN useDeleteRecurrentTransferMutation: amount 0, the schedule's recurrence (at least 24 h), 2 executions
-                val op = WalletOps.recurrentTransfer(user, p.schedule.to, "0.000 $sym", p.schedule.memo, maxOf(24, p.schedule.recurrence), 2)
+                val op = WalletOps.recurrentTransfer(user, p.schedule.to, "0.000 $sym", TransferCopy.deletionMemo(p.schedule.memo), maxOf(24, p.schedule.recurrence), 2)
                 send(user, "recurrent:${p.schedule.to}", listOf(op), RecurrentCopy.DELETE_SUCCESS) { e -> RecurrentCopy.deleteFailed(e) }
             }
             null -> Unit
