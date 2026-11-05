@@ -115,6 +115,18 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
     /** The reports parked for [username] (tests and the debug screens). */
     fun pending(username: String): List<Parked> = read(username)
 
+    /**
+     * Accounts that left the device (null: all of them): their parked reports go with them and a replay of theirs
+     * stops (#3634). Main thread.
+     */
+    internal fun forget(accounts: List<String>?) {
+        val names = accounts ?: env.prefs.keys().filter { it.startsWith(KEY_PREFIX) }.map { it.removePrefix(KEY_PREFIX) }
+        names.forEach { name ->
+            replays.remove(name)?.cancel()
+            runCatching { env.prefs.putString(key(name), null) }
+        }
+    }
+
     /** True when it went through, false when it may go through later, null when it never can (no session). */
     private suspend fun send(user: String, type: Int, txId: String?, blockNum: Long?): Boolean? {
         repeat(ATTEMPTS) { attempt ->

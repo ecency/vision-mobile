@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -129,6 +130,22 @@ class PointActivitiesTest {
         assertTrue(PointActivities.key(alice) in app.env.prefs.keys())
         AccountPrefs.clear(app.env.prefs)
         assertTrue(app.env.pointActivities.pending(alice).isEmpty(), "the key names the account: a wipe removes it")
+    }
+
+    /** #3634: an account signed out (not a wipe) takes its parked reports with it; the others' stay. */
+    @Test
+    fun parkedReportsGoWithTheirAccountOnSignOut() = runTest {
+        val app = app()
+        activityStatus = 500
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-a")
+        app.env.pointActivities.record(bob, PointActivity.VOTE, "tx-b")
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, app.env.pointActivities.pending(alice).size)
+        assertEquals(1, app.env.pointActivities.pending(bob).size)
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty(), "gone with the account")
+        assertEquals(1, app.env.pointActivities.pending(bob).size)
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
     }
 
     @Test
