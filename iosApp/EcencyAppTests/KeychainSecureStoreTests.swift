@@ -181,6 +181,39 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertEqual(try store.getString(name: "account.kept"), "dummy-this-install", "an update never loses its accounts")
     }
 
+    /// While iOS still says protected data is unavailable, a notification neither opens the store nor says it opened.
+    func testThePendingCheckStaysClosedWhileProtectedDataIsUnavailable() throws {
+        let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = KeychainSecureStore(service: serviceA)
+        let flag = ProtectedDataFlag(false)
+        _ = try store.wipeIfFreshInstall(defaults: defaults, protectedDataAvailable: { KotlinBoolean(value: flag.value) })
+        let opened = expectation(forNotification: ProtectedDataFlag.storageOpened, object: nil)
+        opened.isInverted = true
+        flag.runPendingCheck(store)
+        wait(for: [opened], timeout: 0.5)
+        XCTAssertTrue(store.installCheckPending())
+        XCTAssertFalse(defaults.bool(forKey: "\(serviceA).installed"))
+    }
+
+    /// #3647 review: the session and the lock each restart once after the store opened, whichever arrives first (the
+    /// opening or a failure still on its way), independently of each other; never while closed, never twice.
+    func testFailedStartsRestartOnceEachAfterTheStoreOpened() {
+        var r = StorageRecovery()
+        // nothing while the store is still closed
+        XCTAssertTrue(r.next(closedAtLaunch: true, storeOpen: false, sessionFailed: true, lockFailed: true) == (false, false))
+        // the store opened before the lock's failure arrived: the opening finds only the session's
+        XCTAssertTrue(r.next(closedAtLaunch: true, storeOpen: true, sessionFailed: true, lockFailed: false) == (true, false))
+        // the lock's failure arrives later: it restarts then
+        XCTAssertTrue(r.next(closedAtLaunch: true, storeOpen: true, sessionFailed: false, lockFailed: true) == (false, true))
+        // failing again for another reason: no loop, Retry is there for that
+        XCTAssertTrue(r.next(closedAtLaunch: true, storeOpen: true, sessionFailed: true, lockFailed: true) == (false, false))
+        // a launch whose store was never closed restarts nothing by itself
+        var normal = StorageRecovery()
+        XCTAssertTrue(normal.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true) == (false, false))
+    }
+
     /// The protected data notification runs the pending check itself; a launch already marked wipes nothing.
     func testThePendingCheckRunsOnceProtectedDataBecomesAvailable() throws {
         let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"

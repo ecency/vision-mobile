@@ -184,8 +184,23 @@ final class AppContainer: ObservableObject {
     /// Hands the app language over to the widget extension (IosWidgetStore.handOver).
     private var widgetLanguage: Closeable?
     private var foregroundObservers: [NSObjectProtocol] = []
-    /// The restart after the secure store opened late ([ProtectedDataFlag.storageOpened]).
+    /// The restarts after the secure store opened late ([ProtectedDataFlag.storageOpened], [recoverStorageStart]).
     private var storageObserver: NSObjectProtocol?
+    private var storageWatchers: [Closeable] = []
+    private var storageRecovery = StorageRecovery()
+
+    /// Runs again a session or lock start that failed while the store was closed, once the store is open.
+    private func recoverStorageStart(_ launch: (flag: ProtectedDataFlag, store: KeychainSecureStore)) {
+        let run = storageRecovery.next(
+            closedAtLaunch: launch.flag.closedAtLaunch, storeOpen: !launch.store.installCheckPending(),
+            sessionFailed: env.session.current.error?.kind == .storage, lockFailed: env.appLock.current.error?.kind == .storage
+        )
+        if run.session { env.session.start() }
+        if run.lock {
+            env.appLock.clearError()
+            env.appLock.start()
+        }
+    }
     /// Ecency Pro members for the badge (ProfileViews.swift).
     let proMembers: Observed<NSSet>
     /// The post menu's running actions, failure alert and deletions (PostMenu.swift).
@@ -345,13 +360,14 @@ final class AppContainer: ObservableObject {
         env.session.start()
         // runs the RN migration first (when there is RN data), then decides whether to lock
         env.appLock.start()
-        // the secure store opened late (its install check waited for protected data): a start that failed closed
-        // meanwhile is run again, so nobody has to find Retry (README "Secure storage")
-        storageObserver = NotificationCenter.default.addObserver(forName: ProtectedDataFlag.storageOpened, object: nil, queue: .main) { [weak self] _ in
-            guard let self, self.env.appLock.current.error != nil else { return }
-            self.env.appLock.clearError()
-            self.env.session.start()
-            self.env.appLock.start()
+        // the secure store opened late (its install check waited for protected data): the session's and the lock's
+        // starts that failed closed meanwhile run again, each on its own, whenever its storage error shows up after
+        // the store opened (an error still on its way when the store opened included), so nobody has to find Retry
+        // (README "Secure storage")
+        if let launch = ProtectedDataFlag.launch {
+            let check = { [weak self] in MainActor.assumeIsolated { self?.recoverStorageStart(launch) } }
+            storageObserver = NotificationCenter.default.addObserver(forName: ProtectedDataFlag.storageOpened, object: nil, queue: .main) { _ in check() }
+            storageWatchers = [env.session.watch { _ in check() }, env.appLock.watch { _ in check() }]
         }
         startNotifications()
         restore(AppContainer.savedRecently())
@@ -798,7 +814,9 @@ final class AppContainer: ObservableObject {
             _ = try store.wipeIfFreshInstall(defaults: .standard, protectedDataAvailable: {
                 KotlinBoolean(value: Thread.isMainThread ? protectedData.refresh() : protectedData.value)
             })
+            protectedData.closedAtLaunch = store.installCheckPending()
             protectedData.watch { protectedData.runPendingCheck(store) }
+            ProtectedDataFlag.launch = (protectedData, store)
             // the RN app's accounts and PIN, imported once by the app lock's start before it decides anything
             let legacy = LegacyMigrationSource(storage: AsyncStorageReader.companion.forApp(),
                                                pinKey: BuildSecrets.pinKey, defaultPin: BuildSecrets.defaultPin)
@@ -1096,6 +1114,12 @@ final class ProtectedDataFlag: @unchecked Sendable {
     /// Posted on the main thread when a pending install check ran, so a start that failed closed meanwhile restarts.
     static let storageOpened = Notification.Name("ecency.secureStorageOpened")
 
+    /// The launch's flag and store (not in fake-data runs), for the container's restarts.
+    nonisolated(unsafe) static var launch: (flag: ProtectedDataFlag, store: KeychainSecureStore)?
+
+    /// The store's install check could not run at launch: only then do failed starts restart by themselves.
+    var closedAtLaunch = false
+
     init(_ value: Bool) { stored = value }
 
     var value: Bool {
@@ -1129,5 +1153,22 @@ final class ProtectedDataFlag: @unchecked Sendable {
         guard value, store.installCheckPending() else { return }
         _ = try? store.runPendingInstallCheck()
         if !store.installCheckPending() { NotificationCenter.default.post(name: Self.storageOpened, object: nil) }
+    }
+}
+
+/// Which starts to run again once a store that was closed at launch opened: the session and the lock each once, when
+/// its storage error is there with the store open, in whatever order the error and the opening arrive. Once only, so a
+/// store that keeps failing for another reason never loops (Retry stays for that).
+struct StorageRecovery {
+    private(set) var sessionRetried = false
+    private(set) var lockRetried = false
+
+    mutating func next(closedAtLaunch: Bool, storeOpen: Bool, sessionFailed: Bool, lockFailed: Bool) -> (session: Bool, lock: Bool) {
+        guard closedAtLaunch, storeOpen else { return (false, false) }
+        let session = sessionFailed && !sessionRetried
+        let lock = lockFailed && !lockRetried
+        if session { sessionRetried = true }
+        if lock { lockRetried = true }
+        return (session, lock)
     }
 }
