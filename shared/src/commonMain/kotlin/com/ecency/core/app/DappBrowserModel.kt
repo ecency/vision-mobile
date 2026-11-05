@@ -627,7 +627,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         if (message.length > MAX_MESSAGE_TO_SIGN) return answer.error("Invalid message.")
         // Ecency's own login code, upload token and HiveAuth challenge are signed over this same digest: a page
         // never gets one signed, however it is spaced or ordered
-        if (BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
+        // Ecency's own messages are refused everywhere but Ecency's own site: there they are its login (a `code`) and
+        // Raidstead's sign-in (a `login` with an audience), as RN signed them. The origin is the verified top frame.
+        if (origin != ECENCY_ORIGIN && BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val wif = if (authority == KeyRole.ACTIVE) account.activeKey else account.postingKey
@@ -835,6 +837,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
 
         /** A message shaped like one of Ecency's own signed messages (login code, upload token): never signed here. */
         const val RESERVED_MESSAGE = "This message cannot be signed in Ecency browser."
+
+        /** The one site whose pages may ask for Ecency's own signed messages ([BridgeSignatures.reserved]). */
+        const val ECENCY_ORIGIN = "https://ecency.com"
 
         /** The question before a page learns the account name (Peak Vault connect). */
         fun connectTitle(host: String) = L.native.dappBrowser.connectTitle(host = host)
