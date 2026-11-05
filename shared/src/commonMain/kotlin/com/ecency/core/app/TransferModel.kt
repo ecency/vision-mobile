@@ -538,12 +538,13 @@ class TransferModel internal constructor(
             result.onSuccess { memos ->
                 // the form changed while the memo was encrypted, or another question opened: that is not what was
                 // pressed, so nothing is offered for confirmation (Next again encrypts the form as it is now)
-                if (current.prompt != null || !sameForm(current, s)) return@onSuccess setState { it.copy(encryptingMemo = false) }
+                // or the account changed and the screen is closing: nothing is offered for the old account
+                if (current.closed || current.prompt != null || !sameForm(current, s)) return@onSuccess setState { it.copy(encryptingMemo = false) }
                 shown = s
                 encryptedMemos = memos
                 setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Confirm) }
             }.onFailure { e ->
-                if (current.prompt != null) return@onFailure setState { it.copy(encryptingMemo = false) }
+                if (current.closed || current.prompt != null) return@onFailure setState { it.copy(encryptingMemo = false) }
                 setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
             }
         }
@@ -569,7 +570,7 @@ class TransferModel internal constructor(
 
     /** "Confirm": the action id is made now, once; the send runs app-wide. */
     fun confirm() {
-        if (current.prompt != TransferPrompt.Confirm) return
+        if (current.closed || current.prompt != TransferPrompt.Confirm) return
         val s = shown ?: return
         shown = null
         val encrypted = encryptedMemos

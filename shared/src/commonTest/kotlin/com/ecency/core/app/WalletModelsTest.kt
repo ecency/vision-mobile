@@ -724,6 +724,33 @@ class WalletModelsTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** Review: an account switch while the memo is encrypted closes the screen; no confirmation opens for the old account. */
+    @Test
+    fun anAccountSwitchWhileTheMemoIsEncryptedOffersNoConfirmation() = runTest {
+        val w = world(this)
+        withRecipients(w)
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#rent")
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.get_accounts"] = gate
+        m.next()
+        testScheduler.runCurrent()
+        assertTrue(m.current.encryptingMemo)
+        w.env.emit(AppEvent.SessionChanged("spike-other"))
+        testScheduler.runCurrent()
+        assertTrue(m.current.closed)
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.encryptingMemo)
+        assertNull(m.current.prompt, "no confirmation for the previous account")
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.app.broadcasts().isEmpty())
+    }
+
     /** #3648 review: a memo that is already cipher text (an existing schedule's, a pasted one) goes as it is, not encrypted twice. */
     @Test
     fun aMemoThatIsAlreadyEncryptedGoesAsItIs() = runTest {

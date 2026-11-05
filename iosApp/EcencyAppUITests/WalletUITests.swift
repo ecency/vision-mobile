@@ -86,8 +86,15 @@ final class WalletUITests: XCTestCase {
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
         WalletShots.save("transfer")
-        // the memo hint put Next under the keyboard on a small window: scrolled into view first
-        for _ in 0..<3 where next.frame.maxY > app.windows.firstMatch.frame.maxY - 8 { app.swipeUp() }
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first. isHittable says
+        // true for it there, so the check is its frame against the window's bottom and the keyboard's top
+        func nextHidden() -> Bool {
+            let keyboard = app.keyboards.firstMatch
+            let bottom = min(app.windows.firstMatch.frame.maxY, keyboard.exists ? keyboard.frame.minY : .greatestFiniteMagnitude)
+            return next.frame.maxY > bottom - 4
+        }
+        for _ in 0..<4 where nextHidden() { app.swipeUp() }
+        XCTAssertFalse(nextHidden(), "Next scrolled into view: \(next.frame)")
         next.tap()
         XCTAssertTrue(app.buttons["transfer-confirm"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Continue transaction?"].exists)
@@ -106,8 +113,15 @@ final class WalletUITests: XCTestCase {
         let next = app.buttons["transfer-next"]
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
-        // the memo hint put Next under the keyboard on a small window: scrolled into view first
-        for _ in 0..<3 where next.frame.maxY > app.windows.firstMatch.frame.maxY - 8 { app.swipeUp() }
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first. isHittable says
+        // true for it there, so the check is its frame against the window's bottom and the keyboard's top
+        func nextHidden() -> Bool {
+            let keyboard = app.keyboards.firstMatch
+            let bottom = min(app.windows.firstMatch.frame.maxY, keyboard.exists ? keyboard.frame.minY : .greatestFiniteMagnitude)
+            return next.frame.maxY > bottom - 4
+        }
+        for _ in 0..<4 where nextHidden() { app.swipeUp() }
+        XCTAssertFalse(nextHidden(), "Next scrolled into view: \(next.frame)")
         next.tap()
         let confirm = app.buttons["transfer-confirm"].firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 10))
@@ -134,8 +148,13 @@ final class WalletUITests: XCTestCase {
         // the comment's own gift: below its text, never the pinned post footer's (scrolled into view if needed)
         let footer = app.descendants(matching: .any)["post-footer"]
         func commentTips() -> [XCUIElement] {
-            app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter {
-                $0.isHittable && $0.frame.minY > comment.frame.maxY && !(footer.exists && footer.frame.intersects($0.frame))
+            // the comment's and the footer's frames read once per look, not once per button
+            let below = comment.frame.maxY
+            let pinned = footer.exists ? footer.frame : .null
+            let bottom = app.windows.firstMatch.frame.maxY
+            return app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter {
+                let f = $0.frame
+                return f.minY > below && f.maxY < bottom && !pinned.intersects(f)
             }
         }
         for _ in 0..<3 where commentTips().isEmpty { app.swipeUp() }
