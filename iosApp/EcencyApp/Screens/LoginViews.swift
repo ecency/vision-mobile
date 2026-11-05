@@ -76,10 +76,10 @@ struct LoginSheet: View {
             .navigationTitle(LoginCopy.shared.TITLE)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button(UiCopy.shared.CANCEL) { dismiss() }.accessibilityIdentifier("login-cancel") }
+                ToolbarItem(placement: .cancellationAction) { Button(UiCopy.shared.CANCEL) { dismiss() }.accessibilityIdentifier("login-cancel") }.onPage()
                 // secondary: a plain trailing item (a confirmation action is drawn bold and reads as a second
                 // primary next to the filled LOGIN button)
-                ToolbarItem(placement: .topBarTrailing) { Button(LoginCopy.shared.JOIN) { app.nextSheet = .register(""); dismiss() }.fontWeight(.regular).accessibilityIdentifier("login-join") }
+                ToolbarItem(placement: .topBarTrailing) { Button(LoginCopy.shared.JOIN) { app.nextSheet = .register(""); dismiss() }.fontWeight(.regular).accessibilityIdentifier("login-join") }.onPage()
             }
         }
         .onAppear {

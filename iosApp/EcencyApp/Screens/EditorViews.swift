@@ -662,11 +662,14 @@ struct EditorScreen: View {
         ToolbarItem(placement: .navigationBarLeading) {
             Button { leave() } label: { Image(appIcon: .back) }.accessibilityLabel(UiCopy.shared.BACK).accessibilityIdentifier("editor-back")
         }
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if !state.isReply, !state.isEdit {
+        if !state.isReply, !state.isEdit {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(state.isDraftSaved ? EditorUiCopy.shared.SAVED : UiCopy.shared.SAVE) { if state.draftId != nil { saveChoice = true } else { model.saveDraft(saveAsNew: false) } }
                     .disabled(state.isDraftSaved || state.isDraftSaving).accessibilityIdentifier("save-draft")
             }
+            .onPage()
+        }
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button { model.setPreview(on: !state.isPreview) } label: { Image(appIcon: state.isPreview ? .edit : .preview) }
                 .accessibilityLabel(state.isPreview ? UiCopy.shared.EDIT : EditorUiCopy.shared.PREVIEW).accessibilityIdentifier("preview-toggle")
             if !state.isReply {

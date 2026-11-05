@@ -146,6 +146,16 @@ extension PrimitiveButtonStyle where Self == ProminentFillStyle {
     static var prominentFill: ProminentFillStyle { ProminentFillStyle() }
 }
 
+/// A text button in the navigation bar drawn on the page itself, without the bar's glass capsule (iOS 26 and later).
+/// In dark mode the capsule is a lighter grey (#475667) and the text blue on it measured 3.9:1, under AA; on the page
+/// it is 6.5:1 (#3620). Icon buttons keep the capsule.
+extension ToolbarContent {
+    @ToolbarContentBuilder
+    func onPage() -> some ToolbarContent {
+        if #available(iOS 26, *) { sharedBackgroundVisibility(.hidden) } else { self }
+    }
+}
+
 /// The secondary button (was `.bordered`): text in an AA text color (the text blue unless given another, such as
 /// `dangerText` for a downvote) on `lightBackground`. `.bordered` laid a 15% blue over white under blue text, 4.1:1.
 struct SubtleFillStyle: ButtonStyle {
