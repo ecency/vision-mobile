@@ -2179,7 +2179,8 @@
         "sort_by_name": "مرتب‌سازی بر اساس نام",
         "more": "بیشتر",
         "reaction_label": "{emoji} {count}. برای دیدن واکنش‌دهندگان، نگه دارید",
-        "members": "اعضا"
+        "members": "اعضا",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "پستی در این پیوند وجود دارد و با آنچه فرستادید تفاوت دارد. به‌روزرسانی شود یا به‌عنوان جدید منتشر شود؟",
@@ -2265,6 +2266,10 @@
         "unread": "خوانده‌نشده",
         "voice_position": "جایگاه صدا",
         "vote_weight": "وزن رأی",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "بازنشر توسط {username}",
         "no_more_posts": "پست دیگری نیست.",
         "favourite": "دلخواه",
@@ -2285,6 +2290,8 @@
         "files": "فایل‌ها",
         "paused": "متوقف‌شده",
         "in_topic": "در {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "رأی",
         "reply": "پاسخ",
         "mute_sound": "بی‌صدا",
@@ -2516,6 +2523,7 @@
       "transcribe": "تبدیل به متن",
       "no_longer_free_cost": "این ضبط امروز دیگر رایگان نیست. هزینه آن {cost} Points است.",
       "no_longer_free": "این ضبط امروز دیگر رایگان نیست.",
+      "held_title": "Recording stopped",
       "held_locked": "ضبط با قفل شدن Ecency متوقف شد. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
       "held_no_background": "ضبط با خروج Ecency از صفحه متوقف شد (نتوانست اعلان ضبط را نشان دهد). چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
       "held_stopped": "ضبط از طریق اعلان متوقف شد. چیزی ارسال نشد. برای ارسال، «تبدیل به متن» را بزنید یا انصراف دهید.",
@@ -2646,7 +2654,10 @@
       "requester_page": "صفحه {host}",
       "owner_refused": "عملیاتی که به کلید owner نیاز دارند از طریق پیوند امضا نمی‌شوند.",
       "busy": "لطفاً صبر کنید: درخواست دیگری هنوز در حال پردازش است.",
-      "not_supported": "Ecency هنوز در این نسخه نمی‌تواند این عملیات را امضا کند."
+      "not_supported": "Ecency هنوز در این نسخه نمی‌تواند این عملیات را امضا کند.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "اعضای گروه",
@@ -2783,15 +2794,18 @@
       "cannot_post": "پست گذاشتن، رأی دادن یا نظر دادن",
       "cannot_transfer": "ارسال انتقال یا تغییر تنظیمات حساب",
       "missing_roles": "رمز شما دیگر با کلید {missing} حساب @{account} مطابقت ندارد: از زمان تعیین رمز، روی حساب تغییر کرده است. ذخیره‌شده روی این دستگاه: کلید {kept}. تا زمانی که کلید {missing} را در {manageKeys} (وارد کردن کلید خصوصی) اضافه نکنید، این برنامه با کلیدهای @{account} نمی‌تواند {cannot}.",
-      "shared_owner_title": "این کلید نقش owner را هم کنترل می‌کند",
-      "shared_owner": "@{account} برای نقش owner و نقش {names} از یک کلید استفاده می‌کند. هر کس این کلید را داشته باشد کل حساب را کنترل می‌کند. Ecency آن را فقط به‌عنوان کلید {names} نگه می‌دارد و هرگز برای عملیات owner استفاده نمی‌کند. برای نقش {names} کلیدی جداگانه بسازید و کلید owner را آفلاین نگه دارید."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "پیام از {host}",
       "home_title": "خانه",
       "loading_title": "در حال بارگیری...",
       "blank_run": "[{count, plural, one {# نویسه خالی} other {# نویسه خالی}}]",
-      "too_large": "این صفحه درخواست امضای چیزی را داد که برای نمایش بیش از حد بزرگ بود، بنابراین Ecency آن را رد کرد."
+      "too_large": "این صفحه درخواست امضای چیزی را داد که برای نمایش بیش از حد بزرگ بود، بنابراین Ecency آن را رد کرد.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "حساب تغییر کرد."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "مرورگری در دسترس نیست",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency را با اطلاعات زیستی باز کنید",
       "biometric_confirm": "با اثر انگشت یا چهره تأیید کنید",
       "image_unsupported_address": "نشانی تصویر پشتیبانی نمی‌شود",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# تلاش ناموفق} other {# تلاش ناموفق}}"
       },
       "perks": {
-        "streak": "زنجیره {n} روزه"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• فقط حساب‌های قدیمی‌تر از {days} روز مجاز هستند",
-        "max_choices": "• می‌توانید تا {choices} گزینه انتخاب کنید"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} انتقال باقی‌مانده",
-        "schedule_summary": "{executions} انتقال، هر کدام هر {hours} ساعت"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "برای کسب امتیاز بیش از حد کوتاه است ({n, plural, one {# نویسه} other {# نویسه}} یا کمتر، بدون احتساب پیوندها)"
       },
       "chats": {
-        "people_joined": "{count} نفر پیوستند",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "حدود {count, plural, one {# دقیقه} other {# دقیقه}} دیگر",
         "ban-remaining-hours": "حدود {count, plural, one {# ساعت} other {# ساعت}} دیگر",
         "ban-remaining-days": "حدود {count, plural, one {# روز} other {# روز}} دیگر"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "حداقل {count} نویسه لازم است",
-        "chars_remaining": "{count} نویسه باقی‌مانده"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "می‌توانید در هر بار حداکثر {count, plural, one {# تصویر} other {# تصویر}} انتخاب کنید"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points برای هر {s, plural, one {# ثانیه} other {# ثانیه}}"
       },
       "transfer": {
-        "powering_down_info": "لغو استیک بعدی در {days} روز، {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "بین {min} تا {max, plural, one {# نویسه} other {# نویسه}}"

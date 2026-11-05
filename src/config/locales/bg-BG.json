@@ -2179,7 +2179,8 @@
         "sort_by_name": "Подреди по име",
         "more": "Още",
         "reaction_label": "{emoji} {count}. Натиснете и задръжте, за да видите кой е реагирал",
-        "members": "Членове"
+        "members": "Членове",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Публикация на този адрес вече съществува и се различава от изпратената. Да се обнови ли, или да се публикува като нова?",
@@ -2265,6 +2266,10 @@
         "unread": "Непрочетени",
         "voice_position": "Позиция на гласа",
         "vote_weight": "Сила на гласа",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "споделено от {username}",
         "no_more_posts": "Няма повече публикации.",
         "favourite": "Любимо",
@@ -2285,6 +2290,8 @@
         "files": "Файлове",
         "paused": "На пауза",
         "in_topic": "в {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Гласувай",
         "reply": "Отговори",
         "mute_sound": "Заглуши звука",
@@ -2516,6 +2523,7 @@
       "transcribe": "Транскрибирай",
       "no_longer_free_cost": "Този запис вече не е безплатен днес. Струва {cost} Points.",
       "no_longer_free": "Този запис вече не е безплатен днес.",
+      "held_title": "Recording stopped",
       "held_locked": "Записът спря, когато Ecency се заключи. Нищо не е изпратено. Докоснете „Транскрибирай“, за да го изпратите, или се откажете.",
       "held_no_background": "Записът спря, когато Ecency напусна екрана (не можа да покаже известието за запис). Нищо не е изпратено. Докоснете „Транскрибирай“, за да го изпратите, или се откажете.",
       "held_stopped": "Записът спря от известието. Нищо не е изпратено. Докоснете „Транскрибирай“, за да го изпратите, или се откажете.",
@@ -2646,7 +2654,10 @@
       "requester_page": "страницата {host}",
       "owner_refused": "Операции, изискващи owner ключ, не могат да се подписват от връзка.",
       "busy": "Моля, изчакайте: друга заявка още се обработва.",
-      "not_supported": "Ecency още не може да подпише тази операция в тази версия."
+      "not_supported": "Ecency още не може да подпише тази операция в тази версия.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Членове на групата",
@@ -2783,15 +2794,18 @@
       "cannot_post": "публикува, гласува или коментира",
       "cannot_transfer": "изпраща преводи или променя настройките на акаунта",
       "missing_roles": "Паролата ви вече не съвпада с {missing} ключа на @{account}: той е сменен в акаунта, след като паролата е била зададена. Съхранен на това устройство: {kept} ключът. Докато не добавите {missing} ключа в {manageKeys} (Импорт на личен ключ), това приложение не може да {cannot} с ключове за @{account}.",
-      "shared_owner_title": "Този ключ управлява и ролята owner",
-      "shared_owner": "@{account} използва един и същ ключ за ролята owner и за ролята {names}. Който има този ключ, контролира целия акаунт. Ecency го пази само като {names} ключ и никога не го използва за owner операции. Задайте на ролята {names} собствен ключ и пазете owner ключа офлайн."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Съобщение от {host}",
       "home_title": "Начало",
       "loading_title": "Зареждане...",
       "blank_run": "[{count, plural, one {# празен знак} other {# празни знака}}]",
-      "too_large": "Тази страница поиска подписване на заявка, твърде голяма за показване, затова Ecency я отказа."
+      "too_large": "Тази страница поиска подписване на заявка, твърде голяма за показване, затова Ecency я отказа.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Акаунтът се промени."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Няма наличен браузър",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Отключване на Ecency с биометрия",
       "biometric_confirm": "Потвърдете с пръстов отпечатък или лице",
       "image_unsupported_address": "Неподдържан адрес на изображение",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# неуспешни опити} other {# неуспешни опити}}"
       },
       "perks": {
-        "streak": "Серия от {n} дни"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Разрешени са само акаунти, по-стари от {days} дни",
-        "max_choices": "• Можете да изберете до {choices} опции"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Остават {executions} превода",
-        "schedule_summary": "{executions} превода, всеки на всеки {hours} часа"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Твърде кратко за Points ({n, plural, one {# знак} other {# знака}} или по-малко, без връзките)"
       },
       "chats": {
-        "people_joined": "{count} души се присъединиха",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "след около {count, plural, one {# минута} other {# минути}}",
         "ban-remaining-hours": "след около {count, plural, one {# час} other {# часа}}",
         "ban-remaining-days": "след около {count, plural, one {# ден} other {# дни}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Изискват се минимум {count} символа",
-        "chars_remaining": "Остават {count} символа"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Можете да изберете до {count, plural, one {# изображение} other {# изображения}} наведнъж"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points за {s, plural, one {# секунда} other {# секунди}}"
       },
       "transfer": {
-        "powering_down_info": "Следващото изтегляне от стейк е след {days} дни, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Между {min} и {max, plural, one {# знак} other {# знака}}"

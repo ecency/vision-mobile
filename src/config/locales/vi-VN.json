@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sắp xếp theo tên",
         "more": "Thêm",
         "reaction_label": "{emoji} {count}. Nhấn giữ để xem ai đã bày tỏ biểu cảm",
-        "members": "Thành viên"
+        "members": "Thành viên",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Đã có một bài viết tại liên kết này và nó khác với những gì bạn gửi. Cập nhật nó, hay đăng thành bài mới?",
@@ -2265,6 +2266,10 @@
         "unread": "Chưa đọc",
         "voice_position": "Vị trí giọng đọc",
         "vote_weight": "Trọng số bình chọn",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "được {username} đăng lại",
         "no_more_posts": "Không còn bài viết nào.",
         "favourite": "Yêu thích",
@@ -2285,6 +2290,8 @@
         "files": "Tệp",
         "paused": "Đã tạm dừng",
         "in_topic": "trong {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Bình chọn",
         "reply": "Trả lời",
         "mute_sound": "Tắt tiếng",
@@ -2516,6 +2523,7 @@
       "transcribe": "Chuyển thành văn bản",
       "no_longer_free_cost": "Bản ghi âm này không còn miễn phí hôm nay. Chi phí {cost} Points.",
       "no_longer_free": "Bản ghi âm này không còn miễn phí hôm nay.",
+      "held_title": "Recording stopped",
       "held_locked": "Bản ghi âm đã dừng khi Ecency bị khóa. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
       "held_no_background": "Bản ghi âm đã dừng khi Ecency rời khỏi màn hình (không thể hiện thông báo ghi âm). Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
       "held_stopped": "Bản ghi âm đã dừng từ thông báo. Chưa gửi gì. Chạm Chuyển thành văn bản để gửi, hoặc bỏ nó.",
@@ -2646,7 +2654,10 @@
       "requester_page": "trang {host}",
       "owner_refused": "Các thao tác cần khóa owner không thể được ký từ liên kết.",
       "busy": "Vui lòng chờ: một yêu cầu khác vẫn đang được xử lý.",
-      "not_supported": "Ecency chưa thể ký thao tác này trong phiên bản này."
+      "not_supported": "Ecency chưa thể ký thao tác này trong phiên bản này.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Thành viên nhóm",
@@ -2783,15 +2794,18 @@
       "cannot_post": "đăng bài, bình chọn hoặc bình luận",
       "cannot_transfer": "gửi chuyển khoản hoặc đổi cài đặt tài khoản",
       "missing_roles": "Mật khẩu của bạn không còn khớp với khóa {missing} của @{account}: nó đã bị đổi trên tài khoản kể từ khi mật khẩu được đặt. Đã lưu trên thiết bị này: khóa {kept}. Cho đến khi bạn thêm khóa {missing} trong {manageKeys} (Import Private), ứng dụng này không thể {cannot} bằng các khóa của @{account}.",
-      "shared_owner_title": "Khóa này cũng điều khiển vai trò owner",
-      "shared_owner": "@{account} dùng cùng một khóa cho vai trò owner và vai trò {names}. Ai có khóa này sẽ điều khiển toàn bộ tài khoản. Ecency chỉ giữ nó làm khóa {names} và không bao giờ dùng cho thao tác owner. Hãy cho vai trò {names} một khóa riêng và giữ khóa owner ngoại tuyến."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Tin nhắn từ {host}",
       "home_title": "Trang chủ",
       "loading_title": "Đang tải...",
       "blank_run": "[{count, plural, other {# ký tự trống}}]",
-      "too_large": "Trang này yêu cầu ký một yêu cầu quá lớn để hiển thị, nên Ecency đã từ chối."
+      "too_large": "Trang này yêu cầu ký một yêu cầu quá lớn để hiển thị, nên Ecency đã từ chối.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Tài khoản đã thay đổi."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Không có trình duyệt",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Mở khóa Ecency bằng sinh trắc học",
       "biometric_confirm": "Xác nhận bằng vân tay hoặc khuôn mặt của bạn",
       "image_unsupported_address": "Địa chỉ hình ảnh không được hỗ trợ",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, other {# lần thử thất bại}}"
       },
       "perks": {
-        "streak": "Chuỗi {n} ngày"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Chỉ cho phép tài khoản cũ hơn {days} ngày",
-        "max_choices": "• Bạn có thể chọn tối đa {choices} lựa chọn"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Còn lại {executions} lần chuyển",
-        "schedule_summary": "{executions} lần chuyển, mỗi lần cách nhau {hours} giờ"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Quá ngắn để nhận Points ({n, plural, other {# ký tự}} trở xuống, không tính liên kết)"
       },
       "chats": {
-        "people_joined": "{count} người đã tham gia",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "sau khoảng {count, plural, other {# phút}}",
         "ban-remaining-hours": "sau khoảng {count, plural, other {# giờ}}",
         "ban-remaining-days": "sau khoảng {count, plural, other {# ngày}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Yêu cầu tối thiểu {count} ký tự",
-        "chars_remaining": "Còn lại {count} ký tự"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Bạn có thể chọn tối đa {count, plural, other {# hình ảnh}} mỗi lần"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points mỗi {s, plural, other {# giây}}"
       },
       "transfer": {
-        "powering_down_info": "Lần hủy đặt cọc tiếp theo sau {days} ngày, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Từ {min} đến {max, plural, other {# ký tự}}"

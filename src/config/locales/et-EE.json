@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sorteeri nime järgi",
         "more": "Rohkem",
         "reaction_label": "{emoji} {count}. Vajuta pikalt, et näha, kes reageeris",
-        "members": "Liikmed"
+        "members": "Liikmed",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Selle lingi all on juba postitus, mis erineb sinu saadetust. Uuenda seda või avalda uuena?",
@@ -2265,6 +2266,10 @@
         "unread": "Lugemata",
         "voice_position": "Hääle asukoht",
         "vote_weight": "Hääle kaal",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "jaganud {username}",
         "no_more_posts": "Rohkem postitusi pole.",
         "favourite": "Lemmik",
@@ -2285,6 +2290,8 @@
         "files": "Failid",
         "paused": "Peatatud",
         "in_topic": "teemas {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Hääleta",
         "reply": "Vasta",
         "mute_sound": "Vaigista",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transkribeeri",
       "no_longer_free_cost": "See salvestus pole täna enam tasuta. See maksab {cost} Points.",
       "no_longer_free": "See salvestus pole täna enam tasuta.",
+      "held_title": "Recording stopped",
       "held_locked": "Salvestus peatus, kui Ecency lukustus. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
       "held_no_background": "Salvestus peatus, kui Ecency ekraanilt lahkus (see ei saanud salvestusteavitust näidata). Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
       "held_stopped": "Salvestus peatati teavitusest. Midagi ei saadetud. Saatmiseks puuduta Transkribeeri või loobu sellest.",
@@ -2646,7 +2654,10 @@
       "requester_page": "leht {host}",
       "owner_refused": "Omaniku võtit nõudvaid toiminguid ei saa lingilt allkirjastada.",
       "busy": "Palun oota: teist päringut töödeldakse veel.",
-      "not_supported": "Ecency ei saa seda toimingut selles versioonis veel allkirjastada."
+      "not_supported": "Ecency ei saa seda toimingut selles versioonis veel allkirjastada.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Grupi liikmed",
@@ -2783,15 +2794,18 @@
       "cannot_post": "postitada, hääletada ega kommenteerida",
       "cannot_transfer": "saata ülekandeid ega muuta konto seadeid",
       "missing_roles": "Sinu parool ei vasta enam konto @{account} {missing}-võtmele: seda muudeti kontol pärast parooli määramist. Sellel seadmel on salvestatud: {kept}-võti. Kuni lisad {missing}-võtme jaotises {manageKeys} (Impordi privaatvõti), ei saa see rakendus kontole @{account} kuuluvate võtmetega {cannot}.",
-      "shared_owner_title": "See võti juhib ka owner-rolli",
-      "shared_owner": "@{account} kasutab owner-rolli ja {names}-rolli jaoks sama võtit. Kes seda võtit omab, juhib kogu kontot. Ecency hoiab seda ainult {names}-võtmena ega kasuta seda kunagi owner-toiminguteks. Anna {names}-rollile eraldi võti ja hoia owner-võtit võrguühenduseta."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Sõnum saidilt {host}",
       "home_title": "Avaleht",
       "loading_title": "Laadin...",
       "blank_run": "[{count, plural, one {# tühi tähemärk} other {# tühja tähemärki}}]",
-      "too_large": "See leht palus allkirjastada päringu, mis on kuvamiseks liiga suur, seega Ecency keeldus sellest."
+      "too_large": "See leht palus allkirjastada päringu, mis on kuvamiseks liiga suur, seega Ecency keeldus sellest.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Konto muutus."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Brauserit pole saadaval",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ava Ecency biomeetriaga",
       "biometric_confirm": "Kinnita sõrmejälje või näoga",
       "image_unsupported_address": "Toetamata pildiaadress",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# ebaõnnestunud katse(d)} other {# ebaõnnestunud katse(d)}}"
       },
       "perks": {
-        "streak": "{n}-päevane seeria"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Lubatud on ainult kontod, mis on vanemad kui {days} päeva",
-        "max_choices": "• Võid valida kuni {choices} valikut"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Jäänud {executions} ülekannet",
-        "schedule_summary": "{executions} ülekannet, iga {hours} tunni järel"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Liiga lühike punktide teenimiseks ({n, plural, one {# tähemärk} other {# tähemärki}} või vähem, lingid välja arvatud)"
       },
       "chats": {
-        "people_joined": "{count} inimest liitus",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "umbes {count, plural, one {# minuti} other {# minuti}} pärast",
         "ban-remaining-hours": "umbes {count, plural, one {# tunni} other {# tunni}} pärast",
         "ban-remaining-days": "umbes {count, plural, one {# päeva} other {# päeva}} pärast"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Nõutav on vähemalt {count} tähemärki",
-        "chars_remaining": "{count} tähemärki jäänud"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Korraga saad valida kuni {count, plural, one {# pildi} other {# pilti}}"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points {s, plural, one {# sekundi} other {# sekundi}} kohta"
       },
       "transfer": {
-        "powering_down_info": "Järgmine panustamise lõpetamine on {days} päeva pärast, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} kuni {max, plural, one {# tähemärki} other {# tähemärki}}"

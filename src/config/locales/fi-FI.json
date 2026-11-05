@@ -2179,7 +2179,8 @@
         "sort_by_name": "Lajittele nimen mukaan",
         "more": "Lisää",
         "reaction_label": "{emoji} {count}. Paina pitkään nähdäksesi, ketkä reagoivat",
-        "members": "Jäsenet"
+        "members": "Jäsenet",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Tässä linkissä on jo julkaisu, joka eroaa lähettämästäsi. Päivitetäänkö se vai julkaistaanko uutena?",
@@ -2265,6 +2266,10 @@
         "unread": "Lukematon",
         "voice_position": "Äänen kohta",
         "vote_weight": "Äänen paino",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "jakanut {username}",
         "no_more_posts": "Ei enempää julkaisuja.",
         "favourite": "Suosikki",
@@ -2285,6 +2290,8 @@
         "files": "Tiedostot",
         "paused": "Tauolla",
         "in_topic": "aiheessa {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Äänestä",
         "reply": "Vastaa",
         "mute_sound": "Mykistä",
@@ -2516,6 +2523,7 @@
       "transcribe": "Litteroi",
       "no_longer_free_cost": "Tämä nauhoitus ei ole enää ilmainen tänään. Se maksaa {cost} pistettä.",
       "no_longer_free": "Tämä nauhoitus ei ole enää ilmainen tänään.",
+      "held_title": "Recording stopped",
       "held_locked": "Nauhoitus pysähtyi, kun Ecency lukittui. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
       "held_no_background": "Nauhoitus pysähtyi, kun Ecency poistui näytöltä (se ei voinut näyttää nauhoitusilmoitusta). Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
       "held_stopped": "Nauhoitus pysäytettiin ilmoituksesta. Mitään ei lähetetty. Napauta Litteroi lähettääksesi sen tai luovuta.",
@@ -2646,7 +2654,10 @@
       "requester_page": "sivu {host}",
       "owner_refused": "Owner-avainta vaativia toimintoja ei voi allekirjoittaa linkistä.",
       "busy": "Odota: toista pyyntöä käsitellään vielä.",
-      "not_supported": "Ecency ei vielä voi allekirjoittaa tätä toimintoa tässä versiossa."
+      "not_supported": "Ecency ei vielä voi allekirjoittaa tätä toimintoa tässä versiossa.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Ryhmän jäsenet",
@@ -2783,15 +2794,18 @@
       "cannot_post": "julkaista, äänestää tai kommentoida",
       "cannot_transfer": "lähettää siirtoja tai muuttaa tilin asetuksia",
       "missing_roles": "Salasanasi ei enää vastaa tilin @{account} {missing}-avainta: sitä muutettiin tilillä salasanan asettamisen jälkeen. Tallennettuna tälle laitteelle: {kept}-avain. Kunnes lisäät {missing}-avaimen kohdassa {manageKeys} (Tuo yksityinen), tämä sovellus ei voi toimintoja \"{cannot}\" tilin @{account} avaimilla.",
-      "shared_owner_title": "Tämä avain hallitsee myös owner-roolia",
-      "shared_owner": "@{account} käyttää samaa avainta owner-roolille ja {names}-roolille. Kuka tahansa, jolla on tämä avain, hallitsee koko tiliä. Ecency säilyttää sen vain {names}-avaimena eikä koskaan käytä sitä owner-toimintoihin. Anna {names}-roolille oma avain ja säilytä owner-avainta offline-tilassa."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Viesti sivustolta {host}",
       "home_title": "Koti",
       "loading_title": "Ladataan...",
       "blank_run": "[{count, plural, one {# tyhjä merkki} other {# tyhjää merkkiä}}]",
-      "too_large": "Tämä sivu pyysi allekirjoittamaan pyynnön, joka on liian suuri näytettäväksi, joten Ecency hylkäsi sen."
+      "too_large": "Tämä sivu pyysi allekirjoittamaan pyynnön, joka on liian suuri näytettäväksi, joten Ecency hylkäsi sen.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Tili vaihtui."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Selainta ei ole saatavilla",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Avaa Ecency biometrisillä tiedoilla",
       "biometric_confirm": "Vahvista sormenjäljellä tai kasvoilla",
       "image_unsupported_address": "Kuvan osoitetta ei tueta",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# epäonnistuneet yritykset} other {# epäonnistuneet yritykset}}"
       },
       "perks": {
-        "streak": "{n} päivän putki"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• {days} päivää vanhemmat tilit",
-        "max_choices": "• Voit valita {choices}"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Jäljellä olevat {executions}-siirrot",
-        "schedule_summary": "{executions} siirtoa, kukin {hours} tunnin välein"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Liian lyhyt pisteiden ansaitsemiseen (enintään {n, plural, one {# merkki} other {# merkkiä}}, linkkejä ei lasketa)"
       },
       "chats": {
-        "people_joined": "{count} henkilöä liittyi",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "noin {count, plural, one {# minuutin} other {# minuutin}} kuluttua",
         "ban-remaining-hours": "noin {count, plural, one {# tunnin} other {# tunnin}} kuluttua",
         "ban-remaining-days": "noin {count, plural, one {# päivän} other {# päivän}} kuluttua"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Vähintään {count} merkkiä vaaditaan",
-        "chars_remaining": "{count} merkkiä jäljellä"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Voit valita kerralla enintään {count, plural, one {# kuvan} other {# kuvaa}}"
@@ -3090,7 +3105,7 @@
         "rate": "{n} pistettä / {s, plural, one {# sekunti} other {# sekuntia}}"
       },
       "transfer": {
-        "powering_down_info": "Seuraavaan panostuksen poistoon on {days} päivää, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min}–{max, plural, one {# merkki} other {# merkkiä}}"

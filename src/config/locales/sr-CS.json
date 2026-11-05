@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sortiraj po imenu",
         "more": "Više",
         "reaction_label": "{emoji} {count}. Dugo pritisni da vidiš ko je reagovao",
-        "members": "Članovi"
+        "members": "Članovi",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Objava na ovoj vezi već postoji i razlikuje se od onoga što si poslao/la. Ažurirati je ili objaviti kao novu?",
@@ -2265,6 +2266,10 @@
         "unread": "Nepročitano",
         "voice_position": "Pozicija glasa",
         "vote_weight": "Težina glasa",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "podelio/la {username}",
         "no_more_posts": "Nema više objava.",
         "favourite": "Omiljeno",
@@ -2285,6 +2290,8 @@
         "files": "Datoteke",
         "paused": "Pauzirano",
         "in_topic": "u {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Glasaj",
         "reply": "Odgovori",
         "mute_sound": "Isključi zvuk",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transkribuj",
       "no_longer_free_cost": "Ovaj snimak danas više nije besplatan. Košta {cost} Points.",
       "no_longer_free": "Ovaj snimak danas više nije besplatan.",
+      "held_title": "Recording stopped",
       "held_locked": "Snimanje je zaustavljeno kada se Ecency zaključao. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
       "held_no_background": "Snimanje je zaustavljeno kada je Ecency napustio ekran (nije mogao da prikaže obaveštenje o snimanju). Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
       "held_stopped": "Snimanje je zaustavljeno iz obaveštenja. Ništa nije poslato. Dodirni Transkribuj da ga pošalješ ili odustani.",
@@ -2646,7 +2654,10 @@
       "requester_page": "stranica {host}",
       "owner_refused": "Operacije koje zahtevaju owner ključ ne mogu se potpisati iz veze.",
       "busy": "Sačekaj: drugi zahtev se još obrađuje.",
-      "not_supported": "Ecency još ne može da potpiše ovu operaciju u ovoj verziji."
+      "not_supported": "Ecency još ne može da potpiše ovu operaciju u ovoj verziji.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Članovi grupe",
@@ -2783,15 +2794,18 @@
       "cannot_post": "objavljuje, glasa ili komentariše",
       "cannot_transfer": "šalje prenose ili menja podešavanja naloga",
       "missing_roles": "Tvoja lozinka više ne odgovara {missing} ključu naloga @{account}: promenjen je na nalogu otkako je lozinka postavljena. Sačuvano na ovom uređaju: {kept} ključ. Dok ne dodaš {missing} ključ u odeljku {manageKeys} (Uvezi privatni), ova aplikacija ne može da {cannot} ključevima za @{account}.",
-      "shared_owner_title": "Ovaj ključ kontroliše i ulogu owner",
-      "shared_owner": "@{account} koristi isti ključ za ulogu owner i ulogu {names}. Ko ima ovaj ključ, kontroliše ceo nalog. Ecency ga čuva samo kao {names} ključ i nikada ga ne koristi za owner operacije. Daj ulozi {names} sopstveni ključ, a owner ključ čuvaj van mreže."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Poruka od {host}",
       "home_title": "Početna",
       "loading_title": "Učitavanje...",
       "blank_run": "[{count, plural, one {# prazan znak} few {# prazna znaka} other {# praznih znakova}}]",
-      "too_large": "Ova stranica je tražila potpisivanje zahteva prevelikog za prikaz, pa ga je Ecency odbio."
+      "too_large": "Ova stranica je tražila potpisivanje zahteva prevelikog za prikaz, pa ga je Ecency odbio.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Nalog se promenio."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Nema dostupnog pregledača",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Otključaj Ecency biometrijom",
       "biometric_confirm": "Potvrdi otiskom prsta ili licem",
       "image_unsupported_address": "Nepodržana adresa slike",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# neuspeli pokušaj(i)} few {# neuspeli pokušaj(i)} other {# neuspeli pokušaj(i)}}"
       },
       "perks": {
-        "streak": "Niz od {n} dana"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Dozvoljeni samo nalozi stariji od {days} dana",
-        "max_choices": "• Možeš izabrati najviše {choices} izbora"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Preostalo {executions} prenosa",
-        "schedule_summary": "{executions} prenosa, svaki na svakih {hours} sati"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Prekratko za Points ({n, plural, one {# znak} few {# znaka} other {# znakova}} ili manje, bez veza)"
       },
       "chats": {
-        "people_joined": "{count} ljudi se pridružilo",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "za oko {count, plural, one {# minut} few {# minuta} other {# minuta}}",
         "ban-remaining-hours": "za oko {count, plural, one {# sat} few {# sata} other {# sati}}",
         "ban-remaining-days": "za oko {count, plural, one {# dan} few {# dana} other {# dana}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Potrebno je najmanje {count} znakova",
-        "chars_remaining": "Preostalo {count} znakova"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Možeš izabrati najviše {count, plural, one {# sliku} few {# slike} other {# slika}} odjednom"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points na {s, plural, one {# sekundu} few {# sekunde} other {# sekundi}}"
       },
       "transfer": {
-        "powering_down_info": "Sledeće povlačenje uloga je za {days} dana, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Između {min} i {max, plural, one {# znak} few {# znaka} other {# znakova}}"

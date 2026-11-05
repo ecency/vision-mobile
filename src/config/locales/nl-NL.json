@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sorteren op naam",
         "more": "Meer",
         "reaction_label": "{emoji} {count}. Houd ingedrukt om te zien wie heeft gereageerd",
-        "members": "Leden"
+        "members": "Leden",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Er bestaat al een bericht op deze link dat afwijkt van wat je hebt verstuurd. Bijwerken, of als nieuw publiceren?",
@@ -2265,6 +2266,10 @@
         "unread": "Ongelezen",
         "voice_position": "Positie van de stem",
         "vote_weight": "Stemgewicht",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "geherblogd door {username}",
         "no_more_posts": "Geen berichten meer.",
         "favourite": "Favoriet",
@@ -2285,6 +2290,8 @@
         "files": "Bestanden",
         "paused": "Gepauzeerd",
         "in_topic": "in {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Stemmen",
         "reply": "Reageren",
         "mute_sound": "Dempen",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transcriberen",
       "no_longer_free_cost": "Deze opname is vandaag niet meer gratis. Het kost {cost} Points.",
       "no_longer_free": "Deze opname is vandaag niet meer gratis.",
+      "held_title": "Recording stopped",
       "held_locked": "De opname is gestopt toen Ecency werd vergrendeld. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
       "held_no_background": "De opname is gestopt toen Ecency het scherm verliet (de opnamemelding kon niet worden getoond). Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
       "held_stopped": "De opname is gestopt via de melding. Er is niets verzonden. Tik op Transcriberen om te verzenden, of geef het op.",
@@ -2646,7 +2654,10 @@
       "requester_page": "de pagina {host}",
       "owner_refused": "Bewerkingen die de owner-sleutel nodig hebben, kunnen niet vanuit een link worden ondertekend.",
       "busy": "Even geduld: een ander verzoek wordt nog verwerkt.",
-      "not_supported": "Ecency kan deze bewerking in deze versie nog niet ondertekenen."
+      "not_supported": "Ecency kan deze bewerking in deze versie nog niet ondertekenen.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Groepsleden",
@@ -2783,15 +2794,18 @@
       "cannot_post": "posten, stemmen of reageren",
       "cannot_transfer": "overboekingen verzenden of accountinstellingen wijzigen",
       "missing_roles": "Je wachtwoord komt niet meer overeen met de {missing}-sleutel van @{account}: die is op het account gewijzigd sinds het wachtwoord is ingesteld. Opgeslagen op dit apparaat: de {kept}-sleutel. Tot je de {missing}-sleutel toevoegt onder {manageKeys} (Privé importeren), kan deze app niet {cannot} met sleutels voor @{account}.",
-      "shared_owner_title": "Deze sleutel beheert ook de owner-rol",
-      "shared_owner": "@{account} gebruikt dezelfde sleutel voor de owner-rol en de {names}-rol. Wie deze sleutel heeft, beheert het hele account. Ecency bewaart hem alleen als {names}-sleutel en gebruikt hem nooit voor owner-bewerkingen. Geef de {names}-rol een eigen sleutel en bewaar de owner-sleutel offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Bericht van {host}",
       "home_title": "Home",
       "loading_title": "Laden...",
       "blank_run": "[{count, plural, one {# leeg teken} other {# lege tekens}}]",
-      "too_large": "Deze pagina vroeg om een verzoek te ondertekenen dat te groot is om te tonen, dus Ecency heeft het geweigerd."
+      "too_large": "Deze pagina vroeg om een verzoek te ondertekenen dat te groot is om te tonen, dus Ecency heeft het geweigerd.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Het account is gewijzigd."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Geen browser beschikbaar",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency ontgrendelen met biometrie",
       "biometric_confirm": "Bevestig met je vingerafdruk of gezicht",
       "image_unsupported_address": "Niet-ondersteund afbeeldingsadres",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# mislukte poging(en)} other {# mislukte poging(en)}}"
       },
       "perks": {
-        "streak": "Reeks van {n} dagen"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Alleen accounts ouder dan {days} dagen toegestaan",
-        "max_choices": "• Je mag maximaal {choices} keuzes selecteren"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Resterend: {executions} overboekingen",
-        "schedule_summary": "{executions} overboekingen, telkens elke {hours} uur"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Te kort om punten te verdienen ({n, plural, one {# teken} other {# tekens}} of minder, links niet meegeteld)"
       },
       "chats": {
-        "people_joined": "{count} personen toegevoegd",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "over ongeveer {count, plural, one {# minuut} other {# minuten}}",
         "ban-remaining-hours": "over ongeveer {count, plural, one {# uur} other {# uur}}",
         "ban-remaining-days": "over ongeveer {count, plural, one {# dag} other {# dagen}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimaal {count} tekens vereist",
-        "chars_remaining": "{count} tekens resterend"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Je kunt maximaal {count, plural, one {# afbeelding} other {# afbeeldingen}} tegelijk selecteren"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points per {s, plural, one {# seconde} other {# seconden}}"
       },
       "transfer": {
-        "powering_down_info": "Volgende ontstaken is over {days} dagen, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Tussen {min} en {max, plural, one {# teken} other {# tekens}}"

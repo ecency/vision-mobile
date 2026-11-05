@@ -2179,7 +2179,8 @@
         "sort_by_name": "依名稱排序",
         "more": "更多",
         "reaction_label": "{emoji} {count}。長按查看誰做出了回應",
-        "members": "成員"
+        "members": "成員",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "此連結上已有一篇文章，且與你送出的內容不同。要更新它，還是作為新文章發佈？",
@@ -2265,6 +2266,10 @@
         "unread": "未讀",
         "voice_position": "語音位置",
         "vote_weight": "點讚權重",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} 轉發",
         "no_more_posts": "沒有更多文章了。",
         "favourite": "收藏",
@@ -2285,6 +2290,8 @@
         "files": "檔案",
         "paused": "已暫停",
         "in_topic": "在 {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "投票",
         "reply": "回覆",
         "mute_sound": "靜音",
@@ -2516,6 +2523,7 @@
       "transcribe": "轉錄",
       "no_longer_free_cost": "今天這次錄音不再免費。費用為 {cost} Points。",
       "no_longer_free": "今天這次錄音不再免費。",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency 鎖定時錄音已停止。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
       "held_no_background": "Ecency 離開畫面時錄音已停止（無法顯示錄音通知）。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
       "held_stopped": "已從通知中停止錄音。未傳送任何內容。點一下「轉錄」傳送，或放棄。",
@@ -2646,7 +2654,10 @@
       "requester_page": "頁面 {host}",
       "owner_refused": "需要 owner 金鑰的操作無法透過連結簽署。",
       "busy": "請稍候：另一個請求仍在處理中。",
-      "not_supported": "Ecency 在此版本中尚不支援簽署此操作。"
+      "not_supported": "Ecency 在此版本中尚不支援簽署此操作。",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "群組成員",
@@ -2783,15 +2794,18 @@
       "cannot_post": "發文、點讚或評論",
       "cannot_transfer": "傳送轉帳或變更帳號設定",
       "missing_roles": "你的密碼已不再符合 @{account} 的 {missing} 金鑰：自設定密碼以來，該帳號上的金鑰已被變更。此裝置上儲存的是 {kept} 金鑰。在你於{manageKeys}（匯入私密金鑰）下新增 {missing} 金鑰之前，此應用程式無法使用 @{account} 的金鑰{cannot}。",
-      "shared_owner_title": "此金鑰同時控制 owner 角色",
-      "shared_owner": "@{account} 的 owner 角色和 {names} 角色使用同一把金鑰。擁有該金鑰的人可控制整個帳號。Ecency 僅將其保存為 {names} 金鑰，絕不用於 owner 操作。請為 {names} 角色設定獨立的金鑰，並將 owner 金鑰離線保存。"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "來自 {host} 的訊息",
       "home_title": "首頁",
       "loading_title": "載入中…",
       "blank_run": "[{count, plural, other {# 個空白字元}}]",
-      "too_large": "此頁面要求簽署的內容過大，無法顯示，因此 Ecency 拒絕了該要求。"
+      "too_large": "此頁面要求簽署的內容過大，無法顯示，因此 Ecency 拒絕了該要求。",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "帳號已變更。"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "沒有可用的瀏覽器",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "使用生物辨識解鎖 Ecency",
       "biometric_confirm": "請用指紋或臉部確認",
       "image_unsupported_address": "不支援的圖片位址",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, other {# 失敗嘗試}}"
       },
       "perks": {
-        "streak": "連續 {n} 天"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• 僅允許註冊超過 {days} 天的帳號",
-        "max_choices": "• 你最多可選擇 {choices} 個選項"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "剩餘 {executions} 次轉帳",
-        "schedule_summary": "{executions} 筆轉帳，每 {hours} 小時一次"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "內容太短，無法獲得積分（{n, plural, other {# 個字元}}以下，不含連結）"
       },
       "chats": {
-        "people_joined": "{count} 人已加入",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "約 {count, plural, other {# 分鐘}}後",
         "ban-remaining-hours": "約 {count, plural, other {# 小時}}後",
         "ban-remaining-days": "約 {count, plural, other {# 天}}後"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "至少需要 {count} 個字元",
-        "chars_remaining": "尚餘 {count} 個字元"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "一次最多可選擇 {count, plural, other {# 張圖片}}"
@@ -3090,7 +3105,7 @@
         "rate": "每 {s, plural, other {# 秒}} {n} Points"
       },
       "transfer": {
-        "powering_down_info": "下次解除質押將於 {days} 天後進行，{hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} 至 {max, plural, other {# 個字元}}"

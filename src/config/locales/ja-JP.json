@@ -2179,7 +2179,8 @@
         "sort_by_name": "名前順",
         "more": "その他",
         "reaction_label": "{emoji} {count}。長押しでリアクションした人を表示",
-        "members": "メンバー"
+        "members": "メンバー",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "このリンクにはすでに投稿があり、送信した内容と異なります。更新しますか？それとも新規として公開しますか？",
@@ -2265,6 +2266,10 @@
         "unread": "未読",
         "voice_position": "音声の位置",
         "vote_weight": "投票の強さ",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} がリブログ",
         "no_more_posts": "これ以上投稿はありません。",
         "favourite": "お気に入り",
@@ -2285,6 +2290,8 @@
         "files": "ファイル",
         "paused": "一時停止中",
         "in_topic": "{topic} 内",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "投票",
         "reply": "返信",
         "mute_sound": "ミュート",
@@ -2516,6 +2523,7 @@
       "transcribe": "文字起こし",
       "no_longer_free_cost": "今日はこの録音は無料ではなくなりました。{cost} Points かかります。",
       "no_longer_free": "今日はこの録音は無料ではなくなりました。",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency がロックされたため録音が停止しました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
       "held_no_background": "Ecency が画面から離れたため録音が停止しました（録音通知を表示できませんでした）。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
       "held_stopped": "通知から録音が停止されました。何も送信されていません。「文字起こし」をタップして送信するか、破棄してください。",
@@ -2646,7 +2654,10 @@
       "requester_page": "ページ {host}",
       "owner_refused": "オーナーキーが必要な操作はリンクから署名できません。",
       "busy": "しばらくお待ちください。別のリクエストを処理中です。",
-      "not_supported": "Ecency はこのバージョンではこの操作にまだ署名できません。"
+      "not_supported": "Ecency はこのバージョンではこの操作にまだ署名できません。",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "グループメンバー",
@@ -2783,15 +2794,18 @@
       "cannot_post": "投稿・投票・コメントすること",
       "cannot_transfer": "送金やアカウント設定の変更をすること",
       "missing_roles": "パスワードが @{account} の {missing} キーと一致しなくなりました。パスワード設定後にアカウント側で鍵が変更されたためです。このデバイスに保存されているのは {kept} キーです。{manageKeys}（秘密鍵をインポート）で {missing} キーを追加するまで、このアプリは @{account} の鍵で{cannot}はできません。",
-      "shared_owner_title": "この鍵はオーナーロールも制御します",
-      "shared_owner": "@{account} はオーナーロールと {names} ロールに同じ鍵を使用しています。この鍵を持つ人はアカウント全体を制御できます。Ecency はこれを {names} キーとしてのみ保持し、オーナー操作には使用しません。{names} ロールに専用の鍵を設定し、オーナーキーはオフラインで保管してください。"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} からのメッセージ",
       "home_title": "ホーム",
       "loading_title": "読み込み中...",
       "blank_run": "[{count, plural, other {# 個の空白文字}}]",
-      "too_large": "このページは大きすぎて表示できない署名リクエストを要求したため、Ecency が拒否しました。"
+      "too_large": "このページは大きすぎて表示できない署名リクエストを要求したため、Ecency が拒否しました。",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "アカウントが変更されました。"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "利用可能なブラウザーがありません",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "生体認証で Ecency のロックを解除",
       "biometric_confirm": "指紋または顔で確認してください",
       "image_unsupported_address": "サポートされていない画像アドレスです",
@@ -3045,29 +3060,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "今月 {count} 件の投稿を作成しました。この調子で続けましょう！",
-        "checkin": "今週 {count} 日チェックインしました。この調子で続けましょう！",
+        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
+        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
         "tags_bundle": "#{tag} に{count, plural, other {新しい投稿が # 件}}あります"
       },
       "pincode": {
         "attempts_postfix": "{count, plural, other {# 回失敗}}"
       },
       "perks": {
-        "streak": "{n}日連続"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• {days}日以上経過したアカウントのみ許可",
-        "max_choices": "• 最大 {choices} 件の選択肢を選べます"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "残り {executions} 回の送金",
-        "schedule_summary": "{executions}回の送金（それぞれ{hours}時間ごと）"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "短すぎるためポイントは獲得できません（{n, plural, other {# 文字}}以下、リンクを除く）"
       },
       "chats": {
-        "people_joined": "{count} 人が参加しました",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "約{count, plural, other {# 分}}後",
         "ban-remaining-hours": "約{count, plural, other {# 時間}}後",
         "ban-remaining-days": "約{count, plural, other {# 日}}後"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "最低 {count} 文字必要です",
-        "chars_remaining": "残り {count} 文字"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "一度に選択できる画像は{count, plural, other {# 枚}}までです"
@@ -3090,7 +3105,7 @@
         "rate": "{s, plural, other {# 秒}}あたり {n} Points"
       },
       "transfer": {
-        "powering_down_info": "次回のアンステークは {days} 日後、{hp} HIVE です"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min}～{max, plural, other {# 文字}}"

@@ -2179,7 +2179,8 @@
         "sort_by_name": "Nom bo‘yicha saralash",
         "more": "Yana",
         "reaction_label": "{emoji} {count}. Kim reaksiya bildirganini ko‘rish uchun bosib turing",
-        "members": "A‘zolar"
+        "members": "A‘zolar",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Bu havolada post allaqachon mavjud va yuborganingizdan farq qiladi. Yangilansinmi yoki yangi post sifatida nashr qilinsinmi?",
@@ -2265,6 +2266,10 @@
         "unread": "O‘qilmagan",
         "voice_position": "Audio pozitsiyasi",
         "vote_weight": "Ovoz og‘irligi",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} qayta bloglagan",
         "no_more_posts": "Boshqa postlar yo‘q.",
         "favourite": "Sevimli",
@@ -2285,6 +2290,8 @@
         "files": "Fayllar",
         "paused": "To‘xtatilgan",
         "in_topic": "{topic} ichida",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Ovoz berish",
         "reply": "Javob berish",
         "mute_sound": "Ovozsiz",
@@ -2516,6 +2523,7 @@
       "transcribe": "Matnga aylantirish",
       "no_longer_free_cost": "Bu yozuv bugun endi bepul emas. Narxi {cost} Points.",
       "no_longer_free": "Bu yozuv bugun endi bepul emas.",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency qulflanganda yozib olish to‘xtadi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
       "held_no_background": "Ecency ekrandan chiqqanda yozib olish to‘xtadi (yozib olish bildirishnomasini ko‘rsata olmadi). Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
       "held_stopped": "Yozib olish bildirishnomadan to‘xtatildi. Hech narsa yuborilmadi. Yuborish uchun Matnga aylantirish tugmasini bosing yoki voz keching.",
@@ -2646,7 +2654,10 @@
       "requester_page": "{host} sahifasi",
       "owner_refused": "Egasi kalitini talab qiladigan amallarni havoladan imzolab bo‘lmaydi.",
       "busy": "Iltimos, kuting: boshqa so‘rov hali qayta ishlanmoqda.",
-      "not_supported": "Ecency bu amalni bu versiyada hali imzolay olmaydi."
+      "not_supported": "Ecency bu amalni bu versiyada hali imzolay olmaydi.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Guruh a‘zolari",
@@ -2783,15 +2794,18 @@
       "cannot_post": "post joylash, ovoz berish yoki izoh yozish",
       "cannot_transfer": "o‘tkazma yuborish yoki hisob sozlamalarini o‘zgartirish",
       "missing_roles": "Parolingiz endi @{account} hisobining {missing} kalitiga mos kelmaydi: parol o‘rnatilganidan beri hisobda o‘zgartirilgan. Bu qurilmada saqlangan: {kept} kaliti. {manageKeys} bo‘limida (Maxfiy kalitni import qilish) {missing} kalitini qo‘shmaguningizcha, bu ilova @{account} uchun kalitlar bilan {cannot} amalini bajara olmaydi.",
-      "shared_owner_title": "Bu kalit egasi rolini ham boshqaradi",
-      "shared_owner": "@{account} egasi roli va {names} roli uchun bir xil kalitdan foydalanadi. Bu kalit egasi butun hisobni boshqaradi. Ecency uni faqat {names} kaliti sifatida saqlaydi va egasi amallari uchun hech qachon ishlatmaydi. {names} roliga o‘z kalitini bering va egasi kalitini oflayn saqlang."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} saytidan xabar",
       "home_title": "Bosh sahifa",
       "loading_title": "Yuklanmoqda...",
       "blank_run": "[{count, plural, one {# bo‘sh belgi} other {# bo‘sh belgi}}]",
-      "too_large": "Bu sahifa ko‘rsatib bo‘lmaydigan darajada katta imzo so‘rovini yubordi, shuning uchun Ecency uni rad etdi."
+      "too_large": "Bu sahifa ko‘rsatib bo‘lmaydigan darajada katta imzo so‘rovini yubordi, shuning uchun Ecency uni rad etdi.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Hisob o‘zgardi."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Brauzer mavjud emas",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency qulfini biometrik ma‘lumot bilan oching",
       "biometric_confirm": "Barmoq izi yoki yuzingiz bilan tasdiqlang",
       "image_unsupported_address": "Qo‘llab-quvvatlanmaydigan rasm manzili",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# muvaffaqiyatsiz urinish(lar)} other {# muvaffaqiyatsiz urinish(lar)}}"
       },
       "perks": {
-        "streak": "{n} kunlik seriya"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Faqat {days} kundan eski hisoblar uchun ruxsat berilgan",
-        "max_choices": "• Siz {choices} tagacha variant tanlashingiz mumkin"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Qolgan {executions} ta o'tkazma",
-        "schedule_summary": "{executions} ta o‘tkazma, har biri har {hours} soatda"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Points ishlash uchun juda qisqa ({n, plural, one {# ta belgi} other {# ta belgi}} yoki undan kam, havolalar hisobga olinmaydi)"
       },
       "chats": {
-        "people_joined": "{count} kishi qo'shildi",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "taxminan {count, plural, one {# daqiqadan} other {# daqiqadan}} keyin",
         "ban-remaining-hours": "taxminan {count, plural, one {# soatdan} other {# soatdan}} keyin",
         "ban-remaining-days": "taxminan {count, plural, one {# kundan} other {# kundan}} keyin"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Kamida {count} ta belgi talab qilinadi",
-        "chars_remaining": "{count} ta belgi qoldi"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Bir vaqtda ko‘pi bilan {count, plural, one {# ta rasm} other {# ta rasm}} tanlashingiz mumkin"
@@ -3090,7 +3105,7 @@
         "rate": "{s, plural, one {# soniya} other {# soniya}} uchun {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Keyingi staking bekor qilish {days} kundan keyin, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} va {max, plural, one {# belgi} other {# belgi}} orasida"

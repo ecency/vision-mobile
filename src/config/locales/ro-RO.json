@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sortează după nume",
         "more": "Mai multe",
         "reaction_label": "{emoji} {count}. Apasă lung pentru a vedea cine a reacționat",
-        "members": "Membri"
+        "members": "Membri",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Există deja o postare la acest link și diferă de ce ai trimis. O actualizezi sau o publici ca nouă?",
@@ -2265,6 +2266,10 @@
         "unread": "Necitite",
         "voice_position": "Poziția vocii",
         "vote_weight": "Puterea votului",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "redistribuit de {username}",
         "no_more_posts": "Nu mai sunt postări.",
         "favourite": "Favorit",
@@ -2285,6 +2290,8 @@
         "files": "Fișiere",
         "paused": "În pauză",
         "in_topic": "în {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Votează",
         "reply": "Răspunde",
         "mute_sound": "Dezactivează sunetul",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transcrie",
       "no_longer_free_cost": "Această înregistrare nu mai este gratuită astăzi. Costă {cost} Points.",
       "no_longer_free": "Această înregistrare nu mai este gratuită astăzi.",
+      "held_title": "Recording stopped",
       "held_locked": "Înregistrarea s-a oprit când Ecency s-a blocat. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
       "held_no_background": "Înregistrarea s-a oprit când Ecency a părăsit ecranul (nu a putut afișa notificarea de înregistrare). Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
       "held_stopped": "Înregistrarea a fost oprită din notificare. Nu s-a trimis nimic. Atinge Transcrie pentru a o trimite sau renunță.",
@@ -2646,7 +2654,10 @@
       "requester_page": "pagina {host}",
       "owner_refused": "Operațiunile care necesită cheia owner nu pot fi semnate dintr-un link.",
       "busy": "Așteaptă: altă solicitare este încă în curs de procesare.",
-      "not_supported": "Ecency nu poate semna încă această operațiune în această versiune."
+      "not_supported": "Ecency nu poate semna încă această operațiune în această versiune.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Membrii grupului",
@@ -2783,15 +2794,18 @@
       "cannot_post": "posta, vota sau comenta",
       "cannot_transfer": "trimite transferuri sau schimba setările contului",
       "missing_roles": "Parola ta nu se mai potrivește cu cheia {missing} a contului @{account}: a fost schimbată pe cont de la setarea parolei. Stocată pe acest dispozitiv: cheia {kept}. Până adaugi cheia {missing} la {manageKeys} (Importă cheie privată), această aplicație nu poate {cannot} cu cheile pentru @{account}.",
-      "shared_owner_title": "Această cheie controlează și rolul owner",
-      "shared_owner": "@{account} folosește aceeași cheie pentru rolul owner și rolul {names}. Cine are această cheie controlează întregul cont. Ecency o păstrează doar ca cheie {names} și nu o folosește niciodată pentru operațiuni owner. Dă rolului {names} o cheie proprie și păstrează cheia owner offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Mesaj de la {host}",
       "home_title": "Acasă",
       "loading_title": "Se încarcă...",
       "blank_run": "[{count, plural, one {# caracter gol} few {# caractere goale} other {# de caractere goale}}]",
-      "too_large": "Această pagină a cerut semnarea unei solicitări prea mari pentru a fi afișată, așa că Ecency a refuzat-o."
+      "too_large": "Această pagină a cerut semnarea unei solicitări prea mari pentru a fi afișată, așa că Ecency a refuzat-o.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Contul s-a schimbat."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Niciun browser disponibil",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Deblochează Ecency cu date biometrice",
       "biometric_confirm": "Confirmă cu amprenta sau fața",
       "image_unsupported_address": "Adresă de imagine neacceptată",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# încercare(ări) eșuate} few {# încercare(ări) eșuate} other {# încercare(ări) eșuate}}"
       },
       "perks": {
-        "streak": "Serie de {n} zile"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Sunt permise doar conturile mai vechi de {days} zile",
-        "max_choices": "• Poți selecta până la {choices} opțiuni"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "{executions} transferuri rămase",
-        "schedule_summary": "{executions} transferuri, fiecare la {hours} ore"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Prea scurt pentru a primi puncte ({n, plural, one {# caracter} few {# caractere} other {# de caractere}} sau mai puține, fără linkuri)"
       },
       "chats": {
-        "people_joined": "{count} persoane s-au alăturat",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "în aproximativ {count, plural, one {# minut} few {# minute} other {# de minute}}",
         "ban-remaining-hours": "în aproximativ {count, plural, one {# oră} few {# ore} other {# de ore}}",
         "ban-remaining-days": "în aproximativ {count, plural, one {# zi} few {# zile} other {# de zile}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Sunt necesare minimum {count} caractere",
-        "chars_remaining": "{count} caractere rămase"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Poți selecta cel mult {count, plural, one {# imagine} few {# imagini} other {# de imagini}} deodată"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points la {s, plural, one {# secundă} few {# secunde} other {# de secunde}}"
       },
       "transfer": {
-        "powering_down_info": "Următorul Power Down este în {days} zile, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Între {min} și {max, plural, one {# caracter} few {# caractere} other {# de caractere}}"

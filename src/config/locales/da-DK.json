@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sortér efter navn",
         "more": "Mere",
         "reaction_label": "{emoji} {count}. Tryk og hold for at se, hvem der reagerede",
-        "members": "Medlemmer"
+        "members": "Medlemmer",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Der findes allerede et indlæg på dette link, og det adskiller sig fra det, du sendte. Opdatér det, eller udgiv som nyt?",
@@ -2265,6 +2266,10 @@
         "unread": "Ulæst",
         "voice_position": "Stemmens position",
         "vote_weight": "Stemmevægt",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "rebloggede af {username}",
         "no_more_posts": "Ikke flere indlæg.",
         "favourite": "Favorit",
@@ -2285,6 +2290,8 @@
         "files": "Filer",
         "paused": "På pause",
         "in_topic": "i {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Stem",
         "reply": "Svar",
         "mute_sound": "Slå lyd fra",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transskribér",
       "no_longer_free_cost": "Denne optagelse er ikke længere gratis i dag. Den koster {cost} Points.",
       "no_longer_free": "Denne optagelse er ikke længere gratis i dag.",
+      "held_title": "Recording stopped",
       "held_locked": "Optagelsen stoppede, da Ecency blev låst. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
       "held_no_background": "Optagelsen stoppede, da Ecency forlod skærmen (den kunne ikke vise sin optagelsesnotifikation). Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
       "held_stopped": "Optagelsen blev stoppet fra notifikationen. Intet blev sendt. Tryk på Transskribér for at sende den, eller giv op.",
@@ -2646,7 +2654,10 @@
       "requester_page": "siden {host}",
       "owner_refused": "Handlinger, der kræver owner-nøglen, kan ikke signeres fra et link.",
       "busy": "Vent lidt: en anden anmodning behandles stadig.",
-      "not_supported": "Ecency kan endnu ikke signere denne handling i denne version."
+      "not_supported": "Ecency kan endnu ikke signere denne handling i denne version.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Gruppemedlemmer",
@@ -2783,15 +2794,18 @@
       "cannot_post": "udgive, stemme eller kommentere",
       "cannot_transfer": "sende overførsler eller ændre kontoindstillinger",
       "missing_roles": "Din adgangskode matcher ikke længere {missing}-nøglen for @{account}: den blev ændret på kontoen, efter adgangskoden blev angivet. Gemt på denne enhed: {kept}-nøglen. Indtil du tilføjer {missing}-nøglen under {manageKeys} (Importér privat), kan denne app ikke {cannot} med nøgler til @{account}.",
-      "shared_owner_title": "Denne nøgle styrer også owner-rollen",
-      "shared_owner": "@{account} bruger den samme nøgle til owner-rollen og {names}-rollen. Den, der har denne nøgle, styrer hele kontoen. Ecency gemmer den kun som {names}-nøgle og bruger den aldrig til owner-handlinger. Giv {names}-rollen en egen nøgle, og opbevar owner-nøglen offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Besked fra {host}",
       "home_title": "Hjem",
       "loading_title": "Indlæser...",
       "blank_run": "[{count, plural, one {# tomt tegn} other {# tomme tegn}}]",
-      "too_large": "Siden bad om at signere en anmodning, der er for stor til at blive vist, så Ecency afviste den."
+      "too_large": "Siden bad om at signere en anmodning, der er for stor til at blive vist, så Ecency afviste den.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Kontoen er ændret."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Ingen browser tilgængelig",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Lås Ecency op med biometri",
       "biometric_confirm": "Bekræft med dit fingeraftryk eller ansigt",
       "image_unsupported_address": "Billedadressen understøttes ikke",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# mislykkede forsøg} other {# mislykkede forsøg}}"
       },
       "perks": {
-        "streak": "{n}-dages stime"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Kun konti ældre end {days} dage er tilladt",
-        "max_choices": "• Du kan vælge op til {choices} valgmuligheder"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Resterende {executions} overførsler",
-        "schedule_summary": "{executions} overførsler, hver {hours} time"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "For kort til at give point ({n, plural, one {# tegn} other {# tegn}} eller færre, links ikke medregnet)"
       },
       "chats": {
-        "people_joined": "{count} personer tilsluttede sig",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "om cirka {count, plural, one {# minut} other {# minutter}}",
         "ban-remaining-hours": "om cirka {count, plural, one {# time} other {# timer}}",
         "ban-remaining-days": "om cirka {count, plural, one {# dag} other {# dage}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Mindst {count} tegn kræves",
-        "chars_remaining": "{count} tegn tilbage"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Du kan vælge op til {count, plural, one {# billede} other {# billeder}} ad gangen"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points pr. {s, plural, one {# sekund} other {# sekunder}}"
       },
       "transfer": {
-        "powering_down_info": "Næste unstaking er om {days} dage, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Mellem {min} og {max, plural, one {# tegn} other {# tegn}}"

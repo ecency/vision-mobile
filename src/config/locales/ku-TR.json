@@ -2179,7 +2179,8 @@
         "sort_by_name": "Li gorî nav rêz bike",
         "more": "Zêdetir",
         "reaction_label": "{emoji} {count}. Ji bo dîtina kê reaksiyon daye dirêj bitikîne",
-        "members": "Endam"
+        "members": "Endam",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Li vê lînkê jixwe şandiyek heye û ji ya te şandî cuda ye. Were nûkirin, an wekî nû were weşandin?",
@@ -2265,6 +2266,10 @@
         "unread": "Nexwendî",
         "voice_position": "Cihê dengê",
         "vote_weight": "Giraniya dengê",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} dîsa weşand",
         "no_more_posts": "Şandiyên din tune ne.",
         "favourite": "Bijare",
@@ -2285,6 +2290,8 @@
         "files": "Pel",
         "paused": "Hatiye sekinandin",
         "in_topic": "di {topic} de",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Deng bide",
         "reply": "Bersiv bide",
         "mute_sound": "Bêdeng",
@@ -2516,6 +2523,7 @@
       "transcribe": "Veguherîne nivîsê",
       "no_longer_free_cost": "Ev tomar îro êdî belaş nine. Bihayê wê {cost} Points e.",
       "no_longer_free": "Ev tomar îro êdî belaş nine.",
+      "held_title": "Recording stopped",
       "held_locked": "Dema Ecency hat kilîtkirin tomarkirin sekinî. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
       "held_no_background": "Dema Ecency ji ekranê derket tomarkirin sekinî (nekarî agahdariya tomarkirinê nîşan bide). Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
       "held_stopped": "Tomarkirin ji agahdariyê hat rawestandin. Tiştek nehat şandin. Ji bo şandinê Veguherîne nivîsê bitikîne an dev jê berde.",
@@ -2646,7 +2654,10 @@
       "requester_page": "rûpela {host}",
       "owner_refused": "Çalakiyên ku kilîta xwedî dixwazin ji lînkê nayên îmzekirin.",
       "busy": "Ji kerema xwe bisekine: daxwazeke din hê tê pêvajoykirin.",
-      "not_supported": "Ecency vê çalakiyê di vê guhertoyê de hê nikare îmze bike."
+      "not_supported": "Ecency vê çalakiyê di vê guhertoyê de hê nikare îmze bike.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Endamên komê",
@@ -2783,15 +2794,18 @@
       "cannot_post": "şandin, dengdan an şîrovekirin",
       "cannot_transfer": "veguhastin şandin an sazkariyên hesabê guhertin",
       "missing_roles": "Şîfreya te êdî bi kilîta {missing} ya hesabê @{account} re li hev nake: ji dema ku şîfre hat danîn li ser hesabê hat guhertin. Li ser vê cîhazê hatiye tomarkirin: kilîta {kept}. Heta ku tu kilîta {missing} di {manageKeys} de (Kilîta Taybet Têxe) zêde nekî, ev sepan nikare bi kilîtên @{account} re {cannot}.",
-      "shared_owner_title": "Ev kilît rola xwedî jî kontrol dike",
-      "shared_owner": "@{account} ji bo rola xwedî û rola {names} heman kilîtê bi kar tîne. Kesê ku vê kilîtê hebe tevahiya hesabî kontrol dike. Ecency wê tenê wekî kilîta {names} dihêle û ji bo çalakiyên xwedî tu carî bi kar neyne. Ji rola {names} re kilîtekî taybet bide û kilîta xwedî derveyî torê bihêle."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Peyam ji {host}",
       "home_title": "Mal",
       "loading_title": "Tê barkirin...",
       "blank_run": "[{count, plural, one {# tîpa vala} other {# tîpên vala}}]",
-      "too_large": "Ev rûpel daxwazeke îmzeyê ya pir mezin ji bo nîşandanê şand, ji ber vê Ecency red kir."
+      "too_large": "Ev rûpel daxwazeke îmzeyê ya pir mezin ji bo nîşandanê şand, ji ber vê Ecency red kir.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Hesab hat guhertin."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Gerok ne berdest e",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency bi biyometrîk veke",
       "biometric_confirm": "Bi şopa tiliyê an rûyê xwe bipejirîne",
       "image_unsupported_address": "Navnîşana wêneyê nayê piştgirîkirin",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# ceribandina(ên) têkçûyî} other {# ceribandina(ên) têkçûyî}}"
       },
       "perks": {
-        "streak": "Rêzeya {n} rojan"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Tenê hesabên ji {days} rojan kevintir destûr in",
-        "max_choices": "• Tu dikarî heta {choices} bijartinan hilbijêrî"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Mayî {executions} veguhastin",
-        "schedule_summary": "{executions} veguhastin, her yek di her {hours} saetan de"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Ji bo qezenckirina Points pir kurt e ({n, plural, one {# tîp} other {# tîp}} an kêmtir, bêyî lînkan)"
       },
       "chats": {
-        "people_joined": "{count} kes tevlî bûn",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "di nêzîkî {count, plural, one {# deqeyê} other {# deqeyan}} de",
         "ban-remaining-hours": "di nêzîkî {count, plural, one {# demjimêrê} other {# demjimêran}} de",
         "ban-remaining-days": "di nêzîkî {count, plural, one {# rojê} other {# rojan}} de"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Herî kêm {count} tîp pêwîst in",
-        "chars_remaining": "{count} tîp man"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Tu dikarî di carekê de heta {count, plural, one {# wêne} other {# wêne}} hilbijêrî"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points ji bo {s, plural, one {# çirkeyê} other {# çirkeyan}}"
       },
       "transfer": {
-        "powering_down_info": "Derxistina bê di {days} rojan de ye, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Di navbera {min} û {max, plural, one {# tîp} other {# tîp}} de"

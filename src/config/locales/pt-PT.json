@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ordenar por nome",
         "more": "Mais",
         "reaction_label": "{emoji} {count}. Prima longamente para ver quem reagiu",
-        "members": "Membros"
+        "members": "Membros",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Já existe uma publicação nesta ligação e é diferente do que enviou. Atualizá-la, ou publicar como nova?",
@@ -2265,6 +2266,10 @@
         "unread": "Não lido",
         "voice_position": "Posição da voz",
         "vote_weight": "Peso do voto",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "reblogado por {username}",
         "no_more_posts": "Não há mais publicações.",
         "favourite": "Favorito",
@@ -2285,6 +2290,8 @@
         "files": "Ficheiros",
         "paused": "Em pausa",
         "in_topic": "em {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Votar",
         "reply": "Responder",
         "mute_sound": "Silenciar",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transcrever",
       "no_longer_free_cost": "Esta gravação já não é grátis hoje. Custa {cost} Points.",
       "no_longer_free": "Esta gravação já não é grátis hoje.",
+      "held_title": "Recording stopped",
       "held_locked": "A gravação parou quando o Ecency bloqueou. Nada foi enviado. Toque em Transcrever para enviar, ou desista.",
       "held_no_background": "A gravação parou quando o Ecency saiu do ecrã (não conseguiu mostrar a notificação de gravação). Nada foi enviado. Toque em Transcrever para enviar, ou desista.",
       "held_stopped": "A gravação foi parada a partir da notificação. Nada foi enviado. Toque em Transcrever para enviar, ou desista.",
@@ -2646,7 +2654,10 @@
       "requester_page": "a página {host}",
       "owner_refused": "As operações que precisam da chave owner não podem ser assinadas a partir de uma ligação.",
       "busy": "Aguarde: outro pedido ainda está a ser processado.",
-      "not_supported": "O Ecency ainda não consegue assinar esta operação nesta versão."
+      "not_supported": "O Ecency ainda não consegue assinar esta operação nesta versão.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Membros do grupo",
@@ -2783,15 +2794,18 @@
       "cannot_post": "publicar, votar ou comentar",
       "cannot_transfer": "enviar transferências ou alterar definições da conta",
       "missing_roles": "A sua palavra-passe já não corresponde à chave {missing} de @{account}: foi alterada na conta desde que a palavra-passe foi definida. Guardada neste dispositivo: a chave {kept}. Até adicionar a chave {missing} em {manageKeys} (Importar privada), esta aplicação não pode {cannot} com chaves de @{account}.",
-      "shared_owner_title": "Esta chave também controla a função owner",
-      "shared_owner": "@{account} usa a mesma chave para a função owner e para a função {names}. Quem tiver esta chave controla a conta inteira. O Ecency guarda-a apenas como chave {names} e nunca a usa em operações owner. Dê à função {names} uma chave própria e mantenha a chave owner offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Mensagem de {host}",
       "home_title": "Início",
       "loading_title": "A carregar...",
       "blank_run": "[{count, plural, one {# carácter em branco} many {# de caracteres em branco} other {# caracteres em branco}}]",
-      "too_large": "Esta página pediu para assinar um pedido demasiado grande para mostrar, por isso o Ecency recusou-o."
+      "too_large": "Esta página pediu para assinar um pedido demasiado grande para mostrar, por isso o Ecency recusou-o.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "A conta mudou."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Nenhum navegador disponível",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Desbloquear o Ecency com biometria",
       "biometric_confirm": "Confirme com a impressão digital ou o rosto",
       "image_unsupported_address": "Endereço de imagem não suportado",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# tentativa(s) errada(s)} many {# tentativa(s) errada(s)} other {# tentativa(s) errada(s)}}"
       },
       "perks": {
-        "streak": "Sequência de {n} dias"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Apenas contas mais antigas do que {days} dias são permitidas",
-        "max_choices": "• Você pode selecionar até {choices} opções"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Restantes {executions} transferências",
-        "schedule_summary": "{executions} transferências, cada uma a cada {hours} horas"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Demasiado curto para ganhar pontos ({n, plural, one {# carácter} many {# de caracteres} other {# caracteres}} ou menos, sem contar ligações)"
       },
       "chats": {
-        "people_joined": "{count} pessoas aderiram",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "em cerca de {count, plural, one {# minuto} many {# de minutos} other {# minutos}}",
         "ban-remaining-hours": "em cerca de {count, plural, one {# hora} many {# de horas} other {# horas}}",
         "ban-remaining-days": "em cerca de {count, plural, one {# dia} many {# de dias} other {# dias}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "São necessários no mínimo {count} caracteres",
-        "chars_remaining": "{count} caracteres restantes"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Pode selecionar até {count, plural, one {# imagem} many {# de imagens} other {# imagens}} de cada vez"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points por {s, plural, one {# segundo} many {# de segundos} other {# segundos}}"
       },
       "transfer": {
-        "powering_down_info": "Próxima redução de poder será em {days} dias, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Entre {min} e {max, plural, one {# carácter} many {# de caracteres} other {# caracteres}}"

@@ -2179,7 +2179,8 @@
         "sort_by_name": "Сортувати за іменем",
         "more": "Ще",
         "reaction_label": "{emoji} {count}. Натисніть і утримуйте, щоб побачити, хто зреагував",
-        "members": "Учасники"
+        "members": "Учасники",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Допис за цим посиланням уже існує й відрізняється від надісланого. Оновити його чи опублікувати як новий?",
@@ -2265,6 +2266,10 @@
         "unread": "Непрочитані",
         "voice_position": "Позиція озвучення",
         "vote_weight": "Сила голосу",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "репост від {username}",
         "no_more_posts": "Більше дописів немає.",
         "favourite": "Улюблене",
@@ -2285,6 +2290,8 @@
         "files": "Файли",
         "paused": "На паузі",
         "in_topic": "у {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Голосувати",
         "reply": "Відповісти",
         "mute_sound": "Вимкнути звук",
@@ -2516,6 +2523,7 @@
       "transcribe": "Розшифрувати",
       "no_longer_free_cost": "Сьогодні цей запис уже не безкоштовний. Вартість: {cost} Points.",
       "no_longer_free": "Сьогодні цей запис уже не безкоштовний.",
+      "held_title": "Recording stopped",
       "held_locked": "Запис зупинився, коли Ecency заблокувався. Нічого не надіслано. Натисніть «Розшифрувати», щоб надіслати, або відмовтеся.",
       "held_no_background": "Запис зупинився, коли Ecency залишив екран (не вдалося показати сповіщення про запис). Нічого не надіслано. Натисніть «Розшифрувати», щоб надіслати, або відмовтеся.",
       "held_stopped": "Запис зупинено зі сповіщення. Нічого не надіслано. Натисніть «Розшифрувати», щоб надіслати, або відмовтеся.",
@@ -2646,7 +2654,10 @@
       "requester_page": "сторінка {host}",
       "owner_refused": "Операції, що потребують owner-ключа, неможливо підписати з посилання.",
       "busy": "Зачекайте: інший запит ще обробляється.",
-      "not_supported": "Ecency поки не може підписати цю операцію в цій версії."
+      "not_supported": "Ecency поки не може підписати цю операцію в цій версії.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Учасники групи",
@@ -2783,15 +2794,18 @@
       "cannot_post": "публікувати, голосувати та коментувати",
       "cannot_transfer": "надсилати перекази та змінювати налаштування акаунта",
       "missing_roles": "Ваш пароль більше не підходить до ключа {missing} для @{account}: його було змінено в акаунті після встановлення пароля. Збережено на цьому пристрої ключ: {kept}. Доки ви не додасте ключ {missing} у розділі «{manageKeys}» (Імпорт приватного ключа), цей застосунок не зможе {cannot} з ключами для @{account}.",
-      "shared_owner_title": "Цей ключ також керує роллю owner",
-      "shared_owner": "@{account} використовує один ключ для ролі owner і ролі {names}. Хто володіє цим ключем, керує всім акаунтом. Ecency зберігає його лише як ключ {names} і ніколи не використовує для операцій owner. Задайте для ролі {names} окремий ключ, а owner-ключ зберігайте офлайн."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Повідомлення від {host}",
       "home_title": "Головна",
       "loading_title": "Завантаження...",
       "blank_run": "[{count, plural, one {# порожній символ} few {# порожні символи} many {# порожніх символів} other {# порожнього символу}}]",
-      "too_large": "Ця сторінка запросила підпис, завеликий для показу, тому Ecency відхилив його."
+      "too_large": "Ця сторінка запросила підпис, завеликий для показу, тому Ecency відхилив його.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Акаунт змінився."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Браузер недоступний",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Розблокувати Ecency біометрією",
       "biometric_confirm": "Підтвердьте відбитком пальця або обличчям",
       "image_unsupported_address": "Непідтримувана адреса зображення",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# невдалих спроб} few {# невдалих спроб} many {# невдалих спроб} other {# невдалих спроб}}"
       },
       "perks": {
-        "streak": "Серія: {n} дн."
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Дозволено лише акаунтам, старшим за {days} дн.",
-        "max_choices": "• Можна обрати до {choices} варіантів"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Залишилося переказів: {executions}",
-        "schedule_summary": "{executions} переказів, кожен раз на {hours} год"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Занадто коротко для Points ({n, plural, one {# символ} few {# символи} many {# символів} other {# символу}} і менше, посилання не враховуються)"
       },
       "chats": {
-        "people_joined": "Приєдналося людей: {count}",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "приблизно за {count, plural, one {# хвилину} few {# хвилини} many {# хвилин} other {# хвилини}}",
         "ban-remaining-hours": "приблизно за {count, plural, one {# годину} few {# години} many {# годин} other {# години}}",
         "ban-remaining-days": "приблизно за {count, plural, one {# день} few {# дні} many {# днів} other {# дня}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Потрібно щонайменше {count} символів",
-        "chars_remaining": "Залишилося символів: {count}"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "За раз можна вибрати не більше {count, plural, one {# зображення} few {# зображень} many {# зображень} other {# зображення}}"
@@ -3090,7 +3105,7 @@
         "rate": "{n} Points за {s, plural, one {# секунду} few {# секунди} many {# секунд} other {# секунди}}"
       },
       "transfer": {
-        "powering_down_info": "Наступне розстейкання через {days} днів, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Від {min} до {max, plural, one {# символу} few {# символів} many {# символів} other {# символу}}"

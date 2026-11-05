@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ada görə sırala",
         "more": "Daha çox",
         "reaction_label": "{emoji} {count}. Kimin reaksiya verdiyini görmək üçün uzun bas",
-        "members": "Üzvlər"
+        "members": "Üzvlər",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Bu keçiddə artıq göndəriş var və göndərdiyindən fərqlənir. Yenilənsin, yoxsa yeni kimi dərc edilsin?",
@@ -2265,6 +2266,10 @@
         "unread": "Oxunmamış",
         "voice_position": "Səs mövqeyi",
         "vote_weight": "Səs çəkisi",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} yenidən paylaşdı",
         "no_more_posts": "Başqa göndəriş yoxdur.",
         "favourite": "Sevimli",
@@ -2285,6 +2290,8 @@
         "files": "Fayllar",
         "paused": "Dayandırılıb",
         "in_topic": "{topic} daxilində",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Səs ver",
         "reply": "Cavab ver",
         "mute_sound": "Səssiz",
@@ -2516,6 +2523,7 @@
       "transcribe": "Mətnə çevir",
       "no_longer_free_cost": "Bu yazı bu gün artıq pulsuz deyil. Qiyməti {cost} Points.",
       "no_longer_free": "Bu yazı bu gün artıq pulsuz deyil.",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency kilidləndikdə yazı dayandı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
       "held_no_background": "Ecency ekrandan çıxdıqda yazı dayandı (yazı bildirişini göstərə bilmədi). Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
       "held_stopped": "Yazı bildirişdən dayandırıldı. Heç nə göndərilmədi. Göndərmək üçün Mətnə çevir düyməsinə toxun və ya əl çək.",
@@ -2646,7 +2654,10 @@
       "requester_page": "{host} səhifəsi",
       "owner_refused": "Sahib açarı tələb edən əməliyyatlar keçiddən imzalana bilməz.",
       "busy": "Gözlə: başqa sorğu hələ də emal olunur.",
-      "not_supported": "Ecency bu əməliyyatı bu versiyada hələ imzalaya bilmir."
+      "not_supported": "Ecency bu əməliyyatı bu versiyada hələ imzalaya bilmir.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Qrup üzvləri",
@@ -2783,15 +2794,18 @@
       "cannot_post": "göndəriş paylaşmaq, səs vermək və ya şərh yazmaq",
       "cannot_transfer": "köçürmə göndərmək və ya hesab tənzimləmələrini dəyişmək",
       "missing_roles": "Parolun artıq @{account} hesabının {missing} açarına uyğun gəlmir: parol təyin ediləndən sonra hesabda dəyişdirilib. Bu cihazda saxlanılan: {kept} açarı. {manageKeys} bölməsindən (Şəxsi açarı idxal et) {missing} açarını əlavə edənə qədər bu tətbiq @{account} üçün açarlarla {cannot} əməliyyatını edə bilməz.",
-      "shared_owner_title": "Bu açar sahib rolunu da idarə edir",
-      "shared_owner": "@{account} sahib rolu və {names} rolu üçün eyni açardan istifadə edir. Bu açara sahib olan bütün hesabı idarə edir. Ecency onu yalnız {names} açarı kimi saxlayır və sahib əməliyyatları üçün heç vaxt istifadə etmir. {names} roluna öz açarını ver və sahib açarını oflayn saxla."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} saytından mesaj",
       "home_title": "Ana səhifə",
       "loading_title": "Yüklənir...",
       "blank_run": "[{count, plural, one {# boş simvol} other {# boş simvol}}]",
-      "too_large": "Bu səhifə göstərilə bilməyəcək qədər böyük imza sorğusu göndərdi, ona görə Ecency rədd etdi."
+      "too_large": "Bu səhifə göstərilə bilməyəcək qədər böyük imza sorğusu göndərdi, ona görə Ecency rədd etdi.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Hesab dəyişdi."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Brauzer əlçatan deyil",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency kilidini biometrik məlumatla aç",
       "biometric_confirm": "Barmaq izi və ya üzünlə təsdiqlə",
       "image_unsupported_address": "Dəstəklənməyən şəkil ünvanı",
@@ -3053,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# uğursuz cəhd(lər)} other {# uğursuz cəhd(lər)}}"
       },
       "perks": {
-        "streak": "{n} günlük seriya"
+        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
       },
       "post_poll": {
-        "age_limit": "• Yalnız {days} gündən köhnə hesablara icazə verilir",
-        "max_choices": "• Ən çoxu {choices} seçim edə bilərsən"
+        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
+        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
       },
       "recurrent": {
-        "remaining_executions": "Qalan {executions} köçürmə",
-        "schedule_summary": "{executions} köçürmə, hər biri hər {hours} saatdan bir"
+        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
+        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
       },
       "editor": {
         "short_content_hint": "Points qazanmaq üçün çox qısadır ({n, plural, one {# simvol} other {# simvol}} və ya daha az, keçidlər istisna olmaqla)"
       },
       "chats": {
-        "people_joined": "{count} nəfər qoşuldu",
+        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
         "ban-remaining-minutes": "təxminən {count, plural, one {# dəqiqəyə} other {# dəqiqəyə}}",
         "ban-remaining-hours": "təxminən {count, plural, one {# saata} other {# saata}}",
         "ban-remaining-days": "təxminən {count, plural, one {# günə} other {# günə}}"
@@ -3079,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count} simvol tələb olunur",
-        "chars_remaining": "{count} simvol qalıb"
+        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
+        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
       },
       "alert": {
         "too_many_images": "Bir dəfəyə ən çox {count, plural, one {# şəkil} other {# şəkil}} seçə bilərsən"
@@ -3090,7 +3105,7 @@
         "rate": "{s, plural, one {# saniyə} other {# saniyə}} üçün {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Növbəti steyk çıxarması {days} gün sonradır, {hp} HIVE"
+        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} ilə {max, plural, one {# simvol} other {# simvol}} arasında"
