@@ -216,6 +216,9 @@ data class TransferState(
 
     internal val isNativeFund: Boolean get() = fund == "HIVE" || fund == "HBD"
 
+    /** A deposit memo is kept and offered ([ExchangeMemos]) only for a plain HIVE or HBD transfer to one exchange. */
+    internal val offersExchangeMemo: Boolean get() = kind == TransferKind.TRANSFER && isNativeFund && recipients.size == 1
+
     /** RN exchangeMemoRequired: blocks NEXT. */
     val exchangeMemoRequired: Boolean get() = exchange != null && isNativeFund && memo.isBlank()
 
@@ -444,7 +447,7 @@ class TransferModel internal constructor(
         val json = WalletOps.ops(ops)
         val actionId = env.idempotencyKey()
         // what was confirmed, not what the form holds later
-        sentExchangeMemo = s.exchange?.takeIf { s.isNativeFund && s.memo.isNotBlank() }?.let { Triple(user, it, s.memo) }
+        sentExchangeMemo = s.exchange?.takeIf { s.offersExchangeMemo && s.memo.isNotBlank() }?.let { Triple(user, it, s.memo) }
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
         env.walletSends.send(user, json, OperationAuthority.required(json), actionId)
         owned.owns(actionId)
@@ -464,6 +467,8 @@ class TransferModel internal constructor(
         if (s.prompt != TransferPrompt.ConfirmDeleteSchedule) return
         // the memo may have been edited while the question was open
         if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
+        // a schedule deletion is no deposit: no exchange memo is kept from it
+        sentExchangeMemo = null
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
@@ -486,12 +491,15 @@ class TransferModel internal constructor(
                 setState { it.copy(closed = true) }
             }
             is SendPhase.Failed -> {
+                sentExchangeMemo = null
                 // RN goes back and says why ("{operation} failed: {reason}", the key warning for a key problem)
                 env.ui.toast(failureText(phase.error))
                 release()
                 setState { it.copy(closed = true) }
             }
             is SendPhase.Cancelled -> {
+                // nothing went out: its memo is not kept (a later send, a schedule deletion say, must not keep it)
+                sentExchangeMemo = null
                 release()
                 setState { it.copy(actionId = null, phase = null) }
             }
@@ -512,6 +520,8 @@ class TransferModel internal constructor(
 
     /** The screen closed: a send in flight keeps running in the app (its outcome is toasted by [WalletSends]). */
     override fun close() {
+        // the last memo looked at (maybe a key the user typed) does not outlive the screen
+        MemoSecrets.forget()
         // a send still running goes on without this screen and reports its outcome itself (WalletSends.orphanDone)
         owned.closeAll()
         super.close()
@@ -623,7 +633,7 @@ class TransferModel internal constructor(
         val names = recipients
         val ex = names.firstOrNull(ExchangeAccounts::isExchange)
         // offered only where the exchange needs a memo (native funds), and only while the field does not hold it
-        val saved = if (ex != null && isNativeFund) from?.let { env.exchangeMemos.get(it, ex) } else null
+        val saved = if (ex != null && offersExchangeMemo) from?.let { env.exchangeMemos.get(it, ex) } else null
         return copy(badActor = names.any { it in badActors }, exchange = ex, savedExchangeMemo = saved?.takeIf { it != memo.trim() })
     }
 
@@ -703,13 +713,18 @@ object MemoSecrets {
     private const val WIF_LENGTH = 51
     private const val PASSWORD_LENGTH = 52
 
-    // the last memo looked at and its answer: the forms ask on every redraw while the memo stays the same
-    private var lastMemo: String? = null
-    private var lastAnswer = false
+    // the last memo looked at and its answer, as one value (never a new memo with an old answer): the forms ask on
+    // every redraw while the memo stays the same. Dropped when the transfer screen closes ([forget]).
+    private var last: Pair<String, Boolean>? = null
 
     fun contains(memo: String): Boolean {
-        if (memo == lastMemo) return lastAnswer
-        return scan(memo).also { lastMemo = memo; lastAnswer = it }
+        last?.let { (m, answer) -> if (m == memo) return answer }
+        return scan(memo).also { last = memo to it }
+    }
+
+    /** Forgets the last memo looked at (it may be a key the user typed). */
+    fun forget() {
+        last = null
     }
 
     private fun scan(memo: String): Boolean =

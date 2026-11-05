@@ -21,7 +21,8 @@ class ExchangeMemos internal constructor(private val env: AppEnvironment) {
     /** After a transfer from [account] to [exchange] with [memo] went through. */
     fun save(account: String, exchange: String, memo: String) {
         val m = memo.trim()
-        if (m.isEmpty() || MemoSecrets.contains(m)) return
+        // nothing secret, and no `#` memo (meant to be encrypted, #3633): only what went on chain as plain text
+        if (m.isEmpty() || m.startsWith("#") || MemoSecrets.contains(m)) return
         val all = read().toMutableMap()
         all[account] = (all[account].orEmpty() + (exchange.lowercase() to m))
         write(all)

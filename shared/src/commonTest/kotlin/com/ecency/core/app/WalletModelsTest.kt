@@ -509,6 +509,18 @@ class WalletModelsTest {
         val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-exchange-memo").toWif()
         send("bittrex", wif)
         assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a `#` memo (meant to be encrypted) is never kept as plain text
+        send("bittrex", "#secret note")
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // several recipients: neither offered nor kept (the memo would go to all of them)
+        send("bittrex, spike-bob", "999")
+        assertNull(form("bittrex, spike-bob").current.savedExchangeMemo)
+        assertEquals("222333", form("bittrex").current.savedExchangeMemo)
+        // a savings deposit is no exchange deposit: not offered there
+        val savings = transfer(w, AppScreen.Transfer("transfer_to_savings", "HIVE", "hive"))
+        savings.setRecipient("bittrex")
+        testScheduler.advanceUntilIdle()
+        assertNull(savings.current.savedExchangeMemo)
         // a non-exchange transfer keeps nothing
         send("spike-bob", "hello")
         assertFalse("hello" in w.env.prefs.getString(ExchangeMemos.PREFS_KEY).orEmpty())
