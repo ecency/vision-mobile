@@ -428,9 +428,12 @@ class AccountManager(
     }
 
     private suspend fun renewRejected(username: String, rejected: String, mark: RemovalMark): String? {
+        // signed out meanwhile (and maybe in again): the refused call belongs to the session that left, so it is not
+        // sent again with whatever session is there now
+        if (removalMark(username) != mark) return null
         val current = code(username) ?: return null
         // renewed meanwhile (another refused call, or the start's renewal): that token, with no second exchange
-        if (current != rejected) return current
+        if (current != rejected) return if (removalMark(username) == mark) current else null
         val existing = db { session(username) } ?: return null
         val exchanged = existing.refreshToken?.takeIf { it.isNotEmpty() }?.let { refresh ->
             try {
