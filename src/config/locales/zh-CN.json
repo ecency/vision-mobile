@@ -2179,7 +2179,8 @@
         "sort_by_name": "按名称排序",
         "more": "更多",
         "reaction_label": "{emoji} {count}。长按查看谁做出了回应",
-        "members": "成员"
+        "members": "成员",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "此链接上已存在一篇帖子，且与你发送的内容不同。要更新它，还是作为新帖发布？",
@@ -2265,6 +2266,10 @@
         "unread": "未读",
         "voice_position": "语音位置",
         "vote_weight": "点赞权重",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} 转发",
         "no_more_posts": "没有更多帖子了。",
         "favourite": "收藏",
@@ -2285,6 +2290,8 @@
         "files": "文件",
         "paused": "已暂停",
         "in_topic": "在 {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "投票",
         "reply": "回复",
         "mute_sound": "静音",
@@ -2516,6 +2523,7 @@
       "transcribe": "转写",
       "no_longer_free_cost": "今天此次录音不再免费。费用为 {cost} Points。",
       "no_longer_free": "今天此次录音不再免费。",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency 锁定时录音已停止。未发送任何内容。点按“转写”发送，或放弃。",
       "held_no_background": "Ecency 离开屏幕时录音已停止（无法显示录音通知）。未发送任何内容。点按“转写”发送，或放弃。",
       "held_stopped": "已从通知中停止录音。未发送任何内容。点按“转写”发送，或放弃。",
@@ -2646,7 +2654,10 @@
       "requester_page": "页面 {host}",
       "owner_refused": "需要 owner 密钥的操作无法通过链接签名。",
       "busy": "请稍候：另一个请求仍在处理中。",
-      "not_supported": "Ecency 在此版本中暂不支持签署此操作。"
+      "not_supported": "Ecency 在此版本中暂不支持签署此操作。",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "群组成员",
@@ -2783,15 +2794,18 @@
       "cannot_post": "发帖、点赞或评论",
       "cannot_transfer": "发送转账或更改账户设置",
       "missing_roles": "你的密码已不再匹配 @{account} 的 {missing} 密钥：自设置密码以来，该账户上的密钥已被更改。此设备上存储的是 {kept} 密钥。在你于{manageKeys}（导入私钥）下添加 {missing} 密钥之前，此应用无法使用 @{account} 的密钥{cannot}。",
-      "shared_owner_title": "此密钥同时控制 owner 角色",
-      "shared_owner": "@{account} 的 owner 角色和{names} 角色使用同一个密钥。拥有该密钥的人可控制整个账户。Ecency 仅将其保存为{names} 密钥，绝不用于 owner 操作。请为{names} 角色设置独立的密钥，并将 owner 密钥离线保存。"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "来自 {host} 的消息",
       "home_title": "主页",
       "loading_title": "加载中……",
       "blank_run": "[{count, plural, other {# 个空白字符}}]",
-      "too_large": "此页面请求签署的内容过大，无法显示，因此 Ecency 拒绝了该请求。"
+      "too_large": "此页面请求签署的内容过大，无法显示，因此 Ecency 拒绝了该请求。",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "账户已更改。"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "没有可用的浏览器",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "使用生物识别解锁 Ecency",
       "biometric_confirm": "请用指纹或面容确认",
       "image_unsupported_address": "不支持的图片地址",

@@ -2179,7 +2179,8 @@
         "sort_by_name": "Trier par nom",
         "more": "Plus",
         "reaction_label": "{emoji} {count}. Appui long pour voir qui a réagi",
-        "members": "Membres"
+        "members": "Membres",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Une publication existe déjà à ce lien et diffère de ce que vous avez envoyé. La mettre à jour, ou publier comme nouvelle ?",
@@ -2265,6 +2266,10 @@
         "unread": "Non lu",
         "voice_position": "Position de la voix",
         "vote_weight": "Poids du vote",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "reblogué par {username}",
         "no_more_posts": "Plus de publications.",
         "favourite": "Favori",
@@ -2285,6 +2290,8 @@
         "files": "Fichiers",
         "paused": "En pause",
         "in_topic": "dans {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Voter",
         "reply": "Répondre",
         "mute_sound": "Couper le son",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transcrire",
       "no_longer_free_cost": "Cet enregistrement n’est plus gratuit aujourd’hui. Il coûte {cost} Points.",
       "no_longer_free": "Cet enregistrement n’est plus gratuit aujourd’hui.",
+      "held_title": "Recording stopped",
       "held_locked": "L’enregistrement s’est arrêté lorsque Ecency s’est verrouillé. Rien n’a été envoyé. Appuyez sur Transcrire pour l’envoyer, ou abandonnez-le.",
       "held_no_background": "L’enregistrement s’est arrêté lorsque Ecency a quitté l’écran (il n’a pas pu afficher sa notification d’enregistrement). Rien n’a été envoyé. Appuyez sur Transcrire pour l’envoyer, ou abandonnez-le.",
       "held_stopped": "L’enregistrement a été arrêté depuis la notification. Rien n’a été envoyé. Appuyez sur Transcrire pour l’envoyer, ou abandonnez-le.",
@@ -2646,7 +2654,10 @@
       "requester_page": "la page {host}",
       "owner_refused": "Les opérations qui nécessitent la clé propriétaire ne peuvent pas être signées depuis un lien.",
       "busy": "Veuillez patienter : une autre requête est encore en cours de traitement.",
-      "not_supported": "Ecency ne peut pas encore signer cette opération dans cette version."
+      "not_supported": "Ecency ne peut pas encore signer cette opération dans cette version.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Membres du groupe",
@@ -2783,15 +2794,18 @@
       "cannot_post": "publier, voter ou commenter",
       "cannot_transfer": "envoyer des transferts ou modifier les paramètres du compte",
       "missing_roles": "Votre mot de passe ne correspond plus à la clé {missing} de @{account} : elle a été modifiée sur le compte depuis la définition du mot de passe. Enregistrée sur cet appareil : la clé {kept}. Tant que vous n’ajoutez pas la clé {missing} dans {manageKeys} (Importer privée), cette application ne peut pas {cannot} avec les clés de @{account}.",
-      "shared_owner_title": "Cette clé contrôle aussi le rôle propriétaire",
-      "shared_owner": "@{account} utilise la même clé pour son rôle propriétaire et son rôle {names}. Quiconque possède cette clé contrôle tout le compte. Ecency la conserve uniquement comme clé {names} et ne l’utilise jamais pour les opérations propriétaire. Donnez au rôle {names} une clé distincte et gardez la clé propriétaire hors ligne."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Message de {host}",
       "home_title": "Accueil",
       "loading_title": "Chargement...",
       "blank_run": "[{count, plural, one {# caractère vide} many {# caractères vides} other {# caractères vides}}]",
-      "too_large": "Cette page a demandé de signer une requête trop volumineuse pour être affichée, Ecency l’a donc refusée."
+      "too_large": "Cette page a demandé de signer une requête trop volumineuse pour être affichée, Ecency l’a donc refusée.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Le compte a changé."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Aucun navigateur disponible",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Déverrouiller Ecency avec la biométrie",
       "biometric_confirm": "Confirmez avec votre empreinte ou votre visage",
       "image_unsupported_address": "Adresse d’image non prise en charge",

@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ada göre sırala",
         "more": "Daha fazla",
         "reaction_label": "{emoji} {count}. Kimin tepki verdiğini görmek için basılı tut",
-        "members": "Üyeler"
+        "members": "Üyeler",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Bu bağlantıda zaten bir gönderi var ve gönderdiğinden farklı. Güncellensin mi, yoksa yeni olarak mı yayınlansın?",
@@ -2265,6 +2266,10 @@
         "unread": "Okunmamış",
         "voice_position": "Ses konumu",
         "vote_weight": "Oy ağırlığı",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} yeniden yayınladı",
         "no_more_posts": "Başka gönderi yok.",
         "favourite": "Favori",
@@ -2285,6 +2290,8 @@
         "files": "Dosyalar",
         "paused": "Duraklatıldı",
         "in_topic": "{topic} içinde",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Oy ver",
         "reply": "Yanıtla",
         "mute_sound": "Sesi kapat",
@@ -2516,6 +2523,7 @@
       "transcribe": "Metne dönüştür",
       "no_longer_free_cost": "Bu kayıt bugün artık ücretsiz değil. Maliyeti {cost} Points.",
       "no_longer_free": "Bu kayıt bugün artık ücretsiz değil.",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency kilitlendiğinde kayıt durdu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
       "held_no_background": "Ecency ekrandan ayrıldığında kayıt durdu (kayıt bildirimini gösteremedi). Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
       "held_stopped": "Kayıt bildirimden durduruldu. Hiçbir şey gönderilmedi. Göndermek için Metne dönüştür'e dokun veya vazgeç.",
@@ -2646,7 +2654,10 @@
       "requester_page": "{host} sayfası",
       "owner_refused": "Sahip anahtarı gerektiren işlemler bağlantıdan imzalanamaz.",
       "busy": "Lütfen bekle: başka bir istek hâlâ işleniyor.",
-      "not_supported": "Ecency bu işlemi bu sürümde henüz imzalayamıyor."
+      "not_supported": "Ecency bu işlemi bu sürümde henüz imzalayamıyor.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Grup üyeleri",
@@ -2783,15 +2794,18 @@
       "cannot_post": "gönderi paylaşmak, oy vermek veya yorum yapmak",
       "cannot_transfer": "transfer göndermek veya hesap ayarlarını değiştirmek",
       "missing_roles": "Parolan artık @{account} hesabının {missing} anahtarıyla eşleşmiyor: parola belirlendiğinden beri hesapta değiştirilmiş. Bu cihazda saklanan: {kept} anahtarı. {manageKeys} bölümünden (Özel Anahtar İçe Aktar) {missing} anahtarını ekleyene kadar bu uygulama @{account} için anahtarlarla {cannot} işlemini yapamaz.",
-      "shared_owner_title": "Bu anahtar sahip rolünü de denetliyor",
-      "shared_owner": "@{account}, sahip rolü ve {names} rolü için aynı anahtarı kullanıyor. Bu anahtara sahip olan hesabın tamamını denetler. Ecency onu yalnızca {names} anahtarı olarak saklar ve sahip işlemleri için asla kullanmaz. {names} rolüne kendi anahtarını ver ve sahip anahtarını çevrimdışı tut."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} sitesinden mesaj",
       "home_title": "Ana sayfa",
       "loading_title": "Yükleniyor...",
       "blank_run": "[{count, plural, one {# boş karakter} other {# boş karakter}}]",
-      "too_large": "Bu sayfa, gösterilemeyecek kadar büyük bir imza isteği gönderdi, bu yüzden Ecency reddetti."
+      "too_large": "Bu sayfa, gösterilemeyecek kadar büyük bir imza isteği gönderdi, bu yüzden Ecency reddetti.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Hesap değişti."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Kullanılabilir tarayıcı yok",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency kilidini biyometrik veriyle aç",
       "biometric_confirm": "Parmak izin veya yüzünle onayla",
       "image_unsupported_address": "Desteklenmeyen görsel adresi",

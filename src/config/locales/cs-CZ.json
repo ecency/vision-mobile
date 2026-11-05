@@ -2179,7 +2179,8 @@
         "sort_by_name": "Řadit podle jména",
         "more": "Více",
         "reaction_label": "{emoji} {count}. Dlouhým stisknutím zobrazíš, kdo reagoval",
-        "members": "Členové"
+        "members": "Členové",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Na tomto odkazu už příspěvek existuje a liší se od toho, co jsi odeslal/a. Aktualizovat ho, nebo publikovat jako nový?",
@@ -2265,6 +2266,10 @@
         "unread": "Nepřečtené",
         "voice_position": "Pozice hlasu",
         "vote_weight": "Síla hlasu",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "rebloggováno uživatelem {username}",
         "no_more_posts": "Žádné další příspěvky.",
         "favourite": "Oblíbené",
@@ -2285,6 +2290,8 @@
         "files": "Soubory",
         "paused": "Pozastaveno",
         "in_topic": "v {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Hlasovat",
         "reply": "Odpovědět",
         "mute_sound": "Ztlumit",
@@ -2516,6 +2523,7 @@
       "transcribe": "Přepsat",
       "no_longer_free_cost": "Tato nahrávka už dnes není zdarma. Stojí {cost} Points.",
       "no_longer_free": "Tato nahrávka už dnes není zdarma.",
+      "held_title": "Recording stopped",
       "held_locked": "Nahrávání se zastavilo, když se Ecency zamklo. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
       "held_no_background": "Nahrávání se zastavilo, když Ecency opustilo obrazovku (nemohlo zobrazit oznámení o nahrávání). Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
       "held_stopped": "Nahrávání bylo zastaveno z oznámení. Nic nebylo odesláno. Klepnutím na Přepsat ji odešleš, nebo to vzdej.",
@@ -2646,7 +2654,10 @@
       "requester_page": "stránka {host}",
       "owner_refused": "Operace vyžadující klíč owner nelze podepsat z odkazu.",
       "busy": "Počkej prosím: jiný požadavek se stále zpracovává.",
-      "not_supported": "Ecency tuto operaci v této verzi zatím podepsat nedokáže."
+      "not_supported": "Ecency tuto operaci v této verzi zatím podepsat nedokáže.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Členové skupiny",
@@ -2783,15 +2794,18 @@
       "cannot_post": "přispívat, hlasovat nebo komentovat",
       "cannot_transfer": "odesílat převody ani měnit nastavení účtu",
       "missing_roles": "Tvé heslo už neodpovídá klíči {missing} účtu @{account}: na účtu byl od nastavení hesla změněn. Uloženo na tomto zařízení: klíč {kept}. Dokud nepřidáš klíč {missing} v části {manageKeys} (Importovat soukromý klíč), nemůže tato aplikace s klíči pro @{account} {cannot}.",
-      "shared_owner_title": "Tento klíč ovládá také roli owner",
-      "shared_owner": "@{account} používá stejný klíč pro roli owner a roli {names}. Kdo tento klíč má, ovládá celý účet. Ecency ho uchovává jen jako klíč {names} a nikdy ho nepoužívá k operacím owner. Dej roli {names} vlastní klíč a klíč owner uchovávej offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Zpráva od {host}",
       "home_title": "Domů",
       "loading_title": "Načítání...",
       "blank_run": "[{count, plural, one {# prázdný znak} few {# prázdné znaky} many {# prázdného znaku} other {# prázdných znaků}}]",
-      "too_large": "Tato stránka požádala o podepsání žádosti příliš velké na zobrazení, proto ji Ecency odmítlo."
+      "too_large": "Tato stránka požádala o podepsání žádosti příliš velké na zobrazení, proto ji Ecency odmítlo.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Účet se změnil."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Není k dispozici žádný prohlížeč",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Odemknout Ecency biometrií",
       "biometric_confirm": "Potvrď otiskem prstu nebo obličejem",
       "image_unsupported_address": "Nepodporovaná adresa obrázku",

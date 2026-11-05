@@ -2179,7 +2179,8 @@
         "sort_by_name": "Urutkan menurut nama",
         "more": "Lainnya",
         "reaction_label": "{emoji} {count}. Tekan lama untuk melihat siapa yang bereaksi",
-        "members": "Anggota"
+        "members": "Anggota",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Sudah ada postingan di tautan ini dan berbeda dari yang Anda kirim. Perbarui, atau terbitkan sebagai baru?",
@@ -2265,6 +2266,10 @@
         "unread": "Belum dibaca",
         "voice_position": "Posisi suara",
         "vote_weight": "Bobot suara",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "ditampilkan kembali oleh {username}",
         "no_more_posts": "Tidak ada postingan lagi.",
         "favourite": "Favorit",
@@ -2285,6 +2290,8 @@
         "files": "Berkas",
         "paused": "Dijeda",
         "in_topic": "di {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Beri suara",
         "reply": "Balas",
         "mute_sound": "Bisukan",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transkripsi",
       "no_longer_free_cost": "Rekaman ini tidak lagi gratis hari ini. Biayanya {cost} Points.",
       "no_longer_free": "Rekaman ini tidak lagi gratis hari ini.",
+      "held_title": "Recording stopped",
       "held_locked": "Perekaman berhenti saat Ecency terkunci. Tidak ada yang terkirim. Ketuk Transkripsi untuk mengirimnya, atau menyerah.",
       "held_no_background": "Perekaman berhenti saat Ecency keluar dari layar (tidak dapat menampilkan notifikasi perekaman). Tidak ada yang terkirim. Ketuk Transkripsi untuk mengirimnya, atau menyerah.",
       "held_stopped": "Perekaman dihentikan dari notifikasi. Tidak ada yang terkirim. Ketuk Transkripsi untuk mengirimnya, atau menyerah.",
@@ -2646,7 +2654,10 @@
       "requester_page": "halaman {host}",
       "owner_refused": "Operasi yang memerlukan kunci owner tidak dapat ditandatangani dari tautan.",
       "busy": "Harap tunggu: permintaan lain masih diproses.",
-      "not_supported": "Ecency belum dapat menandatangani operasi ini di versi ini."
+      "not_supported": "Ecency belum dapat menandatangani operasi ini di versi ini.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Anggota grup",
@@ -2783,15 +2794,18 @@
       "cannot_post": "memposting, memberi suara, atau berkomentar",
       "cannot_transfer": "mengirim transfer atau mengubah pengaturan akun",
       "missing_roles": "Kata sandi Anda tidak lagi cocok dengan kunci {missing} milik @{account}: kunci itu diubah di akun sejak kata sandi diatur. Tersimpan di perangkat ini: kunci {kept}. Sampai Anda menambahkan kunci {missing} di {manageKeys} (Impor Privat), aplikasi ini tidak dapat {cannot} dengan kunci untuk @{account}.",
-      "shared_owner_title": "Kunci ini juga mengendalikan peran owner",
-      "shared_owner": "@{account} menggunakan kunci yang sama untuk peran owner dan peran {names}. Siapa pun yang memiliki kunci ini mengendalikan seluruh akun. Ecency menyimpannya hanya sebagai kunci {names} dan tidak pernah menggunakannya untuk operasi owner. Beri peran {names} kunci tersendiri, dan simpan kunci owner secara offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Pesan dari {host}",
       "home_title": "Beranda",
       "loading_title": "Memuat...",
       "blank_run": "[{count, plural, other {# karakter kosong}}]",
-      "too_large": "Halaman ini meminta penandatanganan permintaan yang terlalu besar untuk ditampilkan, jadi Ecency menolaknya."
+      "too_large": "Halaman ini meminta penandatanganan permintaan yang terlalu besar untuk ditampilkan, jadi Ecency menolaknya.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Akun telah berubah."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Tidak ada browser yang tersedia",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Buka kunci Ecency dengan biometrik",
       "biometric_confirm": "Konfirmasi dengan sidik jari atau wajah Anda",
       "image_unsupported_address": "Alamat gambar tidak didukung",

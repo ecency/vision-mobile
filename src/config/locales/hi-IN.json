@@ -2179,7 +2179,8 @@
         "sort_by_name": "नाम से क्रमबद्ध करें",
         "more": "अधिक",
         "reaction_label": "{emoji} {count}. किसने प्रतिक्रिया दी, देखने के लिए देर तक दबाएँ",
-        "members": "सदस्य"
+        "members": "सदस्य",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "इस लिंक पर पहले से एक पोस्ट मौजूद है और वह आपके भेजे से अलग है। इसे अपडेट करें, या नई प्रकाशित करें?",
@@ -2265,6 +2266,10 @@
         "unread": "अपठित",
         "voice_position": "आवाज़ की स्थिति",
         "vote_weight": "वोट का भार",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} ने रीब्लॉग किया",
         "no_more_posts": "और पोस्ट नहीं हैं।",
         "favourite": "पसंदीदा",
@@ -2285,6 +2290,8 @@
         "files": "फ़ाइलें",
         "paused": "पॉज़ किया गया",
         "in_topic": "{topic} में",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "वोट करें",
         "reply": "जवाब दें",
         "mute_sound": "म्यूट करें",
@@ -2516,6 +2523,7 @@
       "transcribe": "ट्रांसक्राइब करें",
       "no_longer_free_cost": "यह रिकॉर्डिंग आज अब निःशुल्क नहीं है। इसकी लागत {cost} Points है।",
       "no_longer_free": "यह रिकॉर्डिंग आज अब निःशुल्क नहीं है।",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency लॉक होने पर रिकॉर्डिंग रुक गई। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
       "held_no_background": "Ecency के स्क्रीन से हटने पर रिकॉर्डिंग रुक गई (वह अपनी रिकॉर्डिंग नोटिफ़िकेशन नहीं दिखा सका)। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
       "held_stopped": "नोटिफ़िकेशन से रिकॉर्डिंग रोकी गई। कुछ नहीं भेजा गया। भेजने के लिए ट्रांसक्राइब करें पर टैप करें, या इसे छोड़ दें।",
@@ -2646,7 +2654,10 @@
       "requester_page": "पेज {host}",
       "owner_refused": "जिन ऑपरेशनों में ओनर कुंजी चाहिए, उन्हें लिंक से साइन नहीं किया जा सकता।",
       "busy": "कृपया प्रतीक्षा करें: दूसरा अनुरोध अभी प्रोसेस हो रहा है।",
-      "not_supported": "Ecency इस संस्करण में अभी यह ऑपरेशन साइन नहीं कर सकता।"
+      "not_supported": "Ecency इस संस्करण में अभी यह ऑपरेशन साइन नहीं कर सकता।",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "ग्रुप सदस्य",
@@ -2783,15 +2794,18 @@
       "cannot_post": "पोस्ट, वोट या टिप्पणी करना",
       "cannot_transfer": "स्थानांतरण भेजना या खाता सेटिंग बदलना",
       "missing_roles": "आपका पासवर्ड अब @{account} की {missing} कुंजी से मेल नहीं खाता: पासवर्ड सेट होने के बाद खाते पर इसे बदला गया। इस डिवाइस पर सहेजी: {kept} कुंजी। जब तक आप {manageKeys} (Import Private) में {missing} कुंजी नहीं जोड़ते, @{account} की कुंजियों के साथ {cannot} संभव नहीं होगा।",
-      "shared_owner_title": "यह कुंजी ओनर भूमिका को भी नियंत्रित करती है",
-      "shared_owner": "@{account} अपनी ओनर भूमिका और {names} भूमिका के लिए एक ही कुंजी उपयोग करता है। जिसके पास यह कुंजी है, वह पूरे खाते को नियंत्रित करता है। Ecency इसे केवल {names} कुंजी के रूप में रखता है और ओनर ऑपरेशनों के लिए कभी उपयोग नहीं करता। {names} भूमिका को अपनी अलग कुंजी दें, और ओनर कुंजी को ऑफ़लाइन रखें।"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} से संदेश",
       "home_title": "होम",
       "loading_title": "लोड हो रहा है...",
       "blank_run": "[{count, plural, one {# खाली अक्षर} other {# खाली अक्षर}}]",
-      "too_large": "इस पेज ने इतना बड़ा अनुरोध साइन करने को कहा जो दिखाया नहीं जा सकता, इसलिए Ecency ने उसे अस्वीकार कर दिया।"
+      "too_large": "इस पेज ने इतना बड़ा अनुरोध साइन करने को कहा जो दिखाया नहीं जा सकता, इसलिए Ecency ने उसे अस्वीकार कर दिया।",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "खाता बदल गया।"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "कोई ब्राउज़र उपलब्ध नहीं",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "बायोमेट्रिक से Ecency अनलॉक करें",
       "biometric_confirm": "अपने फ़िंगरप्रिंट या चेहरे से पुष्टि करें",
       "image_unsupported_address": "असमर्थित छवि पता",

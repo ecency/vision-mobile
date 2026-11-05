@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ayusin ayon sa pangalan",
         "more": "Higit pa",
         "reaction_label": "{emoji} {count}. Pindutin nang matagal para makita kung sino ang nag-react",
-        "members": "Mga Miyembro"
+        "members": "Mga Miyembro",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "May post na sa link na ito at iba ito sa ipinadala mo. I-update ito, o i-publish bilang bago?",
@@ -2265,6 +2266,10 @@
         "unread": "Hindi pa nababasa",
         "voice_position": "Posisyon ng boses",
         "vote_weight": "Bigat ng boto",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "na-reblog ni {username}",
         "no_more_posts": "Wala nang post.",
         "favourite": "Paborito",
@@ -2285,6 +2290,8 @@
         "files": "Files",
         "paused": "Naka-pause",
         "in_topic": "sa {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Bumoto",
         "reply": "Tumugon",
         "mute_sound": "I-mute",
@@ -2516,6 +2523,7 @@
       "transcribe": "I-transcribe",
       "no_longer_free_cost": "Hindi na libre ngayong araw ang recording na ito. Nagkakahalaga ito ng {cost} Points.",
       "no_longer_free": "Hindi na libre ngayong araw ang recording na ito.",
+      "held_title": "Recording stopped",
       "held_locked": "Huminto ang recording nang ma-lock ang Ecency. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
       "held_no_background": "Huminto ang recording nang umalis ang Ecency sa screen (hindi nito naipakita ang recording notification). Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
       "held_stopped": "Huminto ang recording mula sa notification. Walang naipadala. I-tap ang I-transcribe para ipadala ito, o sumuko.",
@@ -2646,7 +2654,10 @@
       "requester_page": "ang pahinang {host}",
       "owner_refused": "Hindi malalagdaan mula sa link ang mga operasyong nangangailangan ng owner key.",
       "busy": "Pakihintay: may ibang kahilingang pinoproseso pa.",
-      "not_supported": "Hindi pa makakapirma ang Ecency sa operasyong ito sa bersyong ito."
+      "not_supported": "Hindi pa makakapirma ang Ecency sa operasyong ito sa bersyong ito.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Mga miyembro ng grupo",
@@ -2783,15 +2794,18 @@
       "cannot_post": "mag-post, bumoto o magkomento",
       "cannot_transfer": "magpadala ng transfer o magbago ng settings ng account",
       "missing_roles": "Hindi na tugma ang password mo sa {missing} key ni @{account}: nabago ito sa account mula nang itakda ang password. Naka-store sa device na ito: ang {kept} key. Hanggang hindi ka nagdaragdag ng {missing} key sa {manageKeys} (Import Private), hindi magagawa ng app na ito ang mga ito gamit ang mga key para kay @{account}: {cannot}.",
-      "shared_owner_title": "Kinokontrol din ng key na ito ang owner role",
-      "shared_owner": "Iisang key ang gamit ni @{account} para sa owner role at sa {names} role nito. Ang sinumang may hawak ng key na ito ang kumokontrol sa buong account. Itinatago ito ng Ecency bilang {names} key lang at hindi kailanman ginagamit para sa mga owner operation. Bigyan ng sariling key ang {names} role, at itago offline ang owner key."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Mensahe mula sa {host}",
       "home_title": "Home",
       "loading_title": "Naglo-load...",
       "blank_run": "[{count, plural, one {# blankong karakter} other {# blankong karakter}}]",
-      "too_large": "Humiling ang page na ito na pumirma ng kahilingang masyadong malaki para ipakita, kaya tinanggihan ito ng Ecency."
+      "too_large": "Humiling ang page na ito na pumirma ng kahilingang masyadong malaki para ipakita, kaya tinanggihan ito ng Ecency.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Nagbago ang account."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Walang available na browser",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "I-unlock ang Ecency gamit ang biometrics",
       "biometric_confirm": "Kumpirmahin gamit ang fingerprint o mukha mo",
       "image_unsupported_address": "Hindi suportadong address ng larawan",

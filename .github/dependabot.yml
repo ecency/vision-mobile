@@ -32,6 +32,10 @@ updates:
     groups:
       tools:
         patterns: ["*"]
+    ignore:
+      # tools/render pins htmlparser2 to the version @ecency/render-helper bundles (its fixture scripts parse and
+      # decode entities as render-helper does); it moves only together with render-helper, by hand.
+      - dependency-name: htmlparser2
 
   # swift: not configured. Dependabot reads Package.swift or a committed Xcode project; the iOS project here is
   # generated from iosApp/project.yml (XcodeGen) and is not committed, so there is nothing for it to update.

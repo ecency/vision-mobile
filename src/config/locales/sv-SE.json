@@ -2179,7 +2179,8 @@
         "sort_by_name": "Sortera efter namn",
         "more": "Mer",
         "reaction_label": "{emoji} {count}. Tryck länge för att se vem som reagerade",
-        "members": "Medlemmar"
+        "members": "Medlemmar",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Det finns redan ett inlägg på den här länken och det skiljer sig från det du skickade. Uppdatera det, eller publicera som nytt?",
@@ -2265,6 +2266,10 @@
         "unread": "Oläst",
         "voice_position": "Röstens position",
         "vote_weight": "Rösträtt",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "rebloggat av {username}",
         "no_more_posts": "Inga fler inlägg.",
         "favourite": "Favorit",
@@ -2285,6 +2290,8 @@
         "files": "Filer",
         "paused": "Pausad",
         "in_topic": "i {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Rösta",
         "reply": "Svara",
         "mute_sound": "Ljud av",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transkribera",
       "no_longer_free_cost": "Den här inspelningen är inte längre gratis i dag. Den kostar {cost} Points.",
       "no_longer_free": "Den här inspelningen är inte längre gratis i dag.",
+      "held_title": "Recording stopped",
       "held_locked": "Inspelningen stoppades när Ecency låstes. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
       "held_no_background": "Inspelningen stoppades när Ecency lämnade skärmen (den kunde inte visa sin inspelningsavisering). Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
       "held_stopped": "Inspelningen stoppades från aviseringen. Inget skickades. Tryck på Transkribera för att skicka den, eller ge upp.",
@@ -2646,7 +2654,10 @@
       "requester_page": "sidan {host}",
       "owner_refused": "Operationer som kräver owner-nyckeln kan inte signeras från en länk.",
       "busy": "Vänta: en annan begäran behandlas fortfarande.",
-      "not_supported": "Ecency kan inte signera den här operationen i den här versionen än."
+      "not_supported": "Ecency kan inte signera den här operationen i den här versionen än.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Gruppmedlemmar",
@@ -2783,15 +2794,18 @@
       "cannot_post": "publicera, rösta eller kommentera",
       "cannot_transfer": "skicka överföringar eller ändra kontoinställningar",
       "missing_roles": "Ditt lösenord matchar inte längre {missing}-nyckeln för @{account}: den ändrades på kontot efter att lösenordet angavs. Sparad på den här enheten: {kept}-nyckeln. Tills du lägger till {missing}-nyckeln under {manageKeys} (Importera privat) kan den här appen inte {cannot} med nycklar för @{account}.",
-      "shared_owner_title": "Den här nyckeln styr också owner-rollen",
-      "shared_owner": "@{account} använder samma nyckel för owner-rollen och {names}-rollen. Den som har den här nyckeln styr hela kontot. Ecency sparar den bara som {names}-nyckel och använder den aldrig för owner-operationer. Ge {names}-rollen en egen nyckel och förvara owner-nyckeln offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Meddelande från {host}",
       "home_title": "Hem",
       "loading_title": "Laddar...",
       "blank_run": "[{count, plural, one {# tomt tecken} other {# tomma tecken}}]",
-      "too_large": "Sidan bad om att signera en begäran som är för stor för att visas, så Ecency avvisade den."
+      "too_large": "Sidan bad om att signera en begäran som är för stor för att visas, så Ecency avvisade den.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Kontot har ändrats."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Ingen webbläsare tillgänglig",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Lås upp Ecency med biometri",
       "biometric_confirm": "Bekräfta med fingeravtryck eller ansikte",
       "image_unsupported_address": "Bildadressen stöds inte",

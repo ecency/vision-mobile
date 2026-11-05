@@ -2179,7 +2179,8 @@
         "sort_by_name": "الترتيب حسب الاسم",
         "more": "المزيد",
         "reaction_label": "{emoji} {count}. اضغط مطولًا لمعرفة من تفاعل",
-        "members": "الأعضاء"
+        "members": "الأعضاء",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "يوجد منشور بهذا الرابط ويختلف عما أرسلته. هل تحدّثه أم تنشره كمنشور جديد؟",
@@ -2265,6 +2266,10 @@
         "unread": "غير مقروء",
         "voice_position": "موضع الصوت",
         "vote_weight": "وزن التصويت",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "أعاد نشره {username}",
         "no_more_posts": "لا مزيد من المنشورات.",
         "favourite": "المفضلة",
@@ -2285,6 +2290,8 @@
         "files": "الملفات",
         "paused": "متوقف مؤقتًا",
         "in_topic": "في {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "تصويت",
         "reply": "رد",
         "mute_sound": "كتم الصوت",
@@ -2516,6 +2523,7 @@
       "transcribe": "تحويل إلى نص",
       "no_longer_free_cost": "لم يعد هذا التسجيل مجانيًا اليوم. تكلفته {cost} نقاط.",
       "no_longer_free": "لم يعد هذا التسجيل مجانيًا اليوم.",
+      "held_title": "Recording stopped",
       "held_locked": "توقف التسجيل عند قفل Ecency. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
       "held_no_background": "توقف التسجيل عندما غادر Ecency الشاشة (تعذر عرض إشعار التسجيل). لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
       "held_stopped": "توقف التسجيل من الإشعار. لم يُرسل شيء. انقر على تحويل إلى نص لإرساله، أو تخلَّ عنه.",
@@ -2646,7 +2654,10 @@
       "requester_page": "الصفحة {host}",
       "owner_refused": "لا يمكن توقيع العمليات التي تحتاج إلى مفتاح المالك من رابط.",
       "busy": "يرجى الانتظار: لا يزال طلب آخر قيد المعالجة.",
-      "not_supported": "لا يستطيع Ecency توقيع هذه العملية في هذا الإصدار بعد."
+      "not_supported": "لا يستطيع Ecency توقيع هذه العملية في هذا الإصدار بعد.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "أعضاء المجموعة",
@@ -2783,15 +2794,18 @@
       "cannot_post": "النشر أو التصويت أو التعليق",
       "cannot_transfer": "إرسال التحويلات أو تغيير إعدادات الحساب",
       "missing_roles": "لم تعد كلمة مرورك تطابق مفتاح {missing} للحساب @{account}'': فقد تغيّر على الحساب منذ تعيين كلمة المرور. المخزّن على هذا الجهاز: مفتاح {kept}. إلى أن تضيف مفتاح {missing} ضمن {manageKeys} (استيراد المفتاح الخاص)، لا يستطيع هذا التطبيق {cannot} بمفاتيح الحساب @{account}.",
-      "shared_owner_title": "هذا المفتاح يتحكم أيضًا في دور المالك",
-      "shared_owner": "يستخدم @{account} المفتاح نفسه لدور المالك ودور {names}. من يملك هذا المفتاح يتحكم في الحساب كله. يحتفظ Ecency به كمفتاح {names} فقط ولا يستخدمه أبدًا في عمليات المالك. امنح دور {names} مفتاحًا خاصًا به، واحتفظ بمفتاح المالك دون اتصال."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "رسالة من {host}",
       "home_title": "الرئيسية",
       "loading_title": "جارٍ التحميل...",
       "blank_run": "[{count, plural, zero {# حرف فارغ} one {حرف فارغ واحد} two {حرفان فارغان} few {# أحرف فارغة} many {# حرفًا فارغًا} other {# حرف فارغ}}]",
-      "too_large": "طلبت هذه الصفحة توقيع طلب أكبر من أن يُعرض، لذا رفضه Ecency."
+      "too_large": "طلبت هذه الصفحة توقيع طلب أكبر من أن يُعرض، لذا رفضه Ecency.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "تغيّر الحساب."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "لا يوجد متصفح متاح",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "افتح قفل Ecency بالقياسات الحيوية",
       "biometric_confirm": "أكّد ببصمة إصبعك أو وجهك",
       "image_unsupported_address": "عنوان صورة غير مدعوم",

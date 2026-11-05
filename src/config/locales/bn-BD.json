@@ -2179,7 +2179,8 @@
         "sort_by_name": "নাম অনুযায়ী সাজান",
         "more": "আরও",
         "reaction_label": "{emoji} {count}। কারা প্রতিক্রিয়া দিয়েছে দেখতে দীর্ঘক্ষণ চেপে ধরুন",
-        "members": "সদস্য"
+        "members": "সদস্য",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "এই লিংকে আগে থেকেই একটি পোস্ট আছে এবং সেটি আপনার পাঠানোর থেকে আলাদা। এটি আপডেট করবেন, নাকি নতুন হিসেবে প্রকাশ করবেন?",
@@ -2265,6 +2266,10 @@
         "unread": "না-পড়া",
         "voice_position": "ভয়েসের অবস্থান",
         "vote_weight": "ভোটের ওজন",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "{username} রিব্লগ করেছেন",
         "no_more_posts": "আর কোনো পোস্ট নেই।",
         "favourite": "প্রিয়",
@@ -2285,6 +2290,8 @@
         "files": "ফাইল",
         "paused": "বিরতি দেওয়া হয়েছে",
         "in_topic": "{topic}-এ",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "ভোট দিন",
         "reply": "উত্তর দিন",
         "mute_sound": "মিউট",
@@ -2516,6 +2523,7 @@
       "transcribe": "ট্রান্সক্রাইব করুন",
       "no_longer_free_cost": "এই রেকর্ডিং আজ আর বিনামূল্যে নয়। এর খরচ {cost} Points।",
       "no_longer_free": "এই রেকর্ডিং আজ আর বিনামূল্যে নয়।",
+      "held_title": "Recording stopped",
       "held_locked": "Ecency লক হওয়ায় রেকর্ডিং থেমে গেছে। কিছু পাঠানো হয়নি। পাঠাতে ট্রান্সক্রাইব ট্যাপ করুন, অথবা এটি বাদ দিন।",
       "held_no_background": "Ecency স্ক্রিন ছেড়ে যাওয়ায় রেকর্ডিং থেমে গেছে (এটি নিজের রেকর্ডিং বিজ্ঞপ্তি দেখাতে পারেনি)। কিছু পাঠানো হয়নি। পাঠাতে ট্রান্সক্রাইব ট্যাপ করুন, অথবা এটি বাদ দিন।",
       "held_stopped": "বিজ্ঞপ্তি থেকে রেকর্ডিং থামানো হয়েছে। কিছু পাঠানো হয়নি। পাঠাতে ট্রান্সক্রাইব ট্যাপ করুন, অথবা এটি বাদ দিন।",
@@ -2646,7 +2654,10 @@
       "requester_page": "পেজ {host}",
       "owner_refused": "যে অপারেশনে ওনার কী লাগে তা লিংক থেকে সাইন করা যায় না।",
       "busy": "অনুগ্রহ করে অপেক্ষা করুন: আরেকটি অনুরোধ এখনও প্রক্রিয়া হচ্ছে।",
-      "not_supported": "Ecency এই সংস্করণে এখনও এই অপারেশন সাইন করতে পারে না।"
+      "not_supported": "Ecency এই সংস্করণে এখনও এই অপারেশন সাইন করতে পারে না।",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "গ্রুপের সদস্য",
@@ -2783,15 +2794,18 @@
       "cannot_post": "পোস্ট, ভোট বা মন্তব্য করা",
       "cannot_transfer": "স্থানান্তর পাঠানো বা অ্যাকাউন্ট সেটিংস বদলানো",
       "missing_roles": "আপনার পাসওয়ার্ড আর @{account}-এর {missing} কীর সঙ্গে মেলে না: পাসওয়ার্ড সেট করার পর অ্যাকাউন্টে এটি বদলানো হয়েছে। এই ডিভাইসে সংরক্ষিত: {kept} কী। আপনি {manageKeys} (Import Private)-এ {missing} কী যোগ না করা পর্যন্ত @{account}-এর কী দিয়ে {cannot} সম্ভব হবে না।",
-      "shared_owner_title": "এই কী ওনার ভূমিকাও নিয়ন্ত্রণ করে",
-      "shared_owner": "@{account} তার ওনার ভূমিকা ও {names} ভূমিকার জন্য একই কী ব্যবহার করে। যার কাছে এই কী আছে সে পুরো অ্যাকাউন্ট নিয়ন্ত্রণ করে। Ecency এটিকে শুধু {names} কী হিসেবে রাখে এবং ওনার অপারেশনে কখনো ব্যবহার করে না। {names} ভূমিকাকে নিজস্ব কী দিন, এবং ওনার কী অফলাইনে রাখুন।"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "{host} থেকে বার্তা",
       "home_title": "হোম",
       "loading_title": "লোড হচ্ছে...",
       "blank_run": "[{count, plural, one {# ফাঁকা অক্ষর} other {# ফাঁকা অক্ষর}}]",
-      "too_large": "এই পেজ এত বড় একটি অনুরোধ সাইন করতে বলেছে যা দেখানো সম্ভব নয়, তাই Ecency সেটি প্রত্যাখ্যান করেছে।"
+      "too_large": "এই পেজ এত বড় একটি অনুরোধ সাইন করতে বলেছে যা দেখানো সম্ভব নয়, তাই Ecency সেটি প্রত্যাখ্যান করেছে।",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "অ্যাকাউন্ট বদলে গেছে।"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "কোনো ব্রাউজার নেই",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "বায়োমেট্রিক দিয়ে Ecency আনলক করুন",
       "biometric_confirm": "আঙুলের ছাপ বা মুখ দিয়ে নিশ্চিত করুন",
       "image_unsupported_address": "অসমর্থিত ছবির ঠিকানা",

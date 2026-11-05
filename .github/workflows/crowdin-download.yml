@@ -68,3 +68,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CROWDIN_PROJECT_ID: "340925"
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      # Crowdin cannot hold a translation without plural forms for a plural source, so a native.plurals key seeded
+      # from RN's text comes back as English after every download. The seed script restores it on the same branch
+      # (README "Crowdin", seeded translations); nothing is pushed when it changes nothing. A fresh clone: the
+      # Crowdin action runs in a container, so the workspace files it wrote may not be writable here.
+      - name: Reseed native plurals
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          repo="https://github.com/${GITHUB_REPOSITORY}.git"
+          if ! git -c http.extraheader="$auth" ls-remote --exit-code "$repo" refs/heads/l10n/crowdin >/dev/null; then
+            echo "no l10n/crowdin branch"; exit 0
+          fi
+          dir="$RUNNER_TEMP/reseed"
+          git -c http.extraheader="$auth" clone -q --depth 1 --branch l10n/crowdin "$repo" "$dir"
+          cd "$dir"
+          node tools/l10n/seed-native-plurals.mjs
+          if git diff --quiet -- src/config/locales; then echo "nothing to reseed"; exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m 'chore(i18n): reseed native plurals Crowdin cannot hold yet' -- src/config/locales
+          git -c http.extraheader="$auth" push -q origin l10n/crowdin

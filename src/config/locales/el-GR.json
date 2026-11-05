@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ταξινόμηση κατά όνομα",
         "more": "Περισσότερα",
         "reaction_label": "{emoji} {count}. Πατήστε παρατεταμένα για να δείτε ποιοι αντέδρασαν",
-        "members": "Μέλη"
+        "members": "Μέλη",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Υπάρχει ήδη ανάρτηση σε αυτόν τον σύνδεσμο που διαφέρει από αυτήν που στείλατε. Να ενημερωθεί ή να δημοσιευτεί ως νέα;",
@@ -2265,6 +2266,10 @@
         "unread": "Μη αναγνωσμένα",
         "voice_position": "Θέση φωνής",
         "vote_weight": "Βάρος ψήφου",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "αναδημοσίευση από τον/την {username}",
         "no_more_posts": "Δεν υπάρχουν άλλες αναρτήσεις.",
         "favourite": "Αγαπημένο",
@@ -2285,6 +2290,8 @@
         "files": "Αρχεία",
         "paused": "Σε παύση",
         "in_topic": "στο {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Ψήφος",
         "reply": "Απάντηση",
         "mute_sound": "Σίγαση",
@@ -2516,6 +2523,7 @@
       "transcribe": "Μεταγραφή",
       "no_longer_free_cost": "Αυτή η εγγραφή δεν είναι πλέον δωρεάν σήμερα. Κοστίζει {cost} Points.",
       "no_longer_free": "Αυτή η εγγραφή δεν είναι πλέον δωρεάν σήμερα.",
+      "held_title": "Recording stopped",
       "held_locked": "Η εγγραφή σταμάτησε όταν κλειδώθηκε το Ecency. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
       "held_no_background": "Η εγγραφή σταμάτησε όταν το Ecency έφυγε από την οθόνη (δεν μπόρεσε να εμφανίσει την ειδοποίηση εγγραφής). Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
       "held_stopped": "Η εγγραφή σταμάτησε από την ειδοποίηση. Δεν στάλθηκε τίποτα. Πατήστε Μεταγραφή για αποστολή ή εγκαταλείψτε την.",
@@ -2646,7 +2654,10 @@
       "requester_page": "η σελίδα {host}",
       "owner_refused": "Οι λειτουργίες που απαιτούν το κλειδί ιδιοκτήτη δεν μπορούν να υπογραφούν από σύνδεσμο.",
       "busy": "Περιμένετε: άλλο αίτημα εξακολουθεί να επεξεργάζεται.",
-      "not_supported": "Το Ecency δεν μπορεί ακόμα να υπογράψει αυτή τη λειτουργία σε αυτή την έκδοση."
+      "not_supported": "Το Ecency δεν μπορεί ακόμα να υπογράψει αυτή τη λειτουργία σε αυτή την έκδοση.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Μέλη ομάδας",
@@ -2783,15 +2794,18 @@
       "cannot_post": "αναρτήσετε, ψηφίσετε ή σχολιάσετε",
       "cannot_transfer": "στείλετε μεταφορές ή αλλάξετε ρυθμίσεις λογαριασμού",
       "missing_roles": "Ο κωδικός πρόσβασής σας δεν ταιριάζει πια με το κλειδί {missing} του @{account}: άλλαξε στον λογαριασμό μετά τον ορισμό του κωδικού. Αποθηκευμένο σε αυτή τη συσκευή: το κλειδί {kept}. Μέχρι να προσθέσετε το κλειδί {missing} στο {manageKeys} (Εισαγωγή ιδιωτικού), δεν μπορείτε να {cannot} με αυτή την εφαρμογή χρησιμοποιώντας κλειδιά για τον @{account}.",
-      "shared_owner_title": "Αυτό το κλειδί ελέγχει επίσης τον ρόλο ιδιοκτήτη",
-      "shared_owner": "Ο @{account} χρησιμοποιεί το ίδιο κλειδί για τον ρόλο ιδιοκτήτη και τον ρόλο {names}. Όποιος έχει αυτό το κλειδί ελέγχει ολόκληρο τον λογαριασμό. Το Ecency το κρατά μόνο ως κλειδί {names} και δεν το χρησιμοποιεί ποτέ για λειτουργίες ιδιοκτήτη. Δώστε στον ρόλο {names} δικό του κλειδί και κρατήστε το κλειδί ιδιοκτήτη εκτός σύνδεσης."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Μήνυμα από {host}",
       "home_title": "Αρχική",
       "loading_title": "Φόρτωση...",
       "blank_run": "[{count, plural, one {# κενός χαρακτήρας} other {# κενοί χαρακτήρες}}]",
-      "too_large": "Αυτή η σελίδα ζήτησε υπογραφή αιτήματος πολύ μεγάλου για εμφάνιση, οπότε το Ecency το απέρριψε."
+      "too_large": "Αυτή η σελίδα ζήτησε υπογραφή αιτήματος πολύ μεγάλου για εμφάνιση, οπότε το Ecency το απέρριψε.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Ο λογαριασμός άλλαξε."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Δεν υπάρχει διαθέσιμο πρόγραμμα περιήγησης",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ξεκλειδώστε το Ecency με βιομετρικά",
       "biometric_confirm": "Επιβεβαιώστε με το δακτυλικό αποτύπωμα ή το πρόσωπό σας",
       "image_unsupported_address": "Μη υποστηριζόμενη διεύθυνση εικόνας",

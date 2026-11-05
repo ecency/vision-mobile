@@ -2179,7 +2179,8 @@
         "sort_by_name": "Сортировать по имени",
         "more": "Ещё",
         "reaction_label": "{emoji} {count}. Нажмите и удерживайте, чтобы увидеть, кто отреагировал",
-        "members": "Участники"
+        "members": "Участники",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Пост по этой ссылке уже существует и отличается от отправленного. Обновить его или опубликовать как новый?",
@@ -2265,6 +2266,10 @@
         "unread": "Непрочитанные",
         "voice_position": "Позиция озвучки",
         "vote_weight": "Сила голоса",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "репост от {username}",
         "no_more_posts": "Больше постов нет.",
         "favourite": "Избранное",
@@ -2285,6 +2290,8 @@
         "files": "Файлы",
         "paused": "На паузе",
         "in_topic": "в {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Голосовать",
         "reply": "Ответить",
         "mute_sound": "Выключить звук",
@@ -2516,6 +2523,7 @@
       "transcribe": "Расшифровать",
       "no_longer_free_cost": "Сегодня эта запись уже не бесплатная. Стоимость: {cost} Points.",
       "no_longer_free": "Сегодня эта запись уже не бесплатная.",
+      "held_title": "Recording stopped",
       "held_locked": "Запись остановилась, когда Ecency заблокировался. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
       "held_no_background": "Запись остановилась, когда Ecency ушёл с экрана (не удалось показать уведомление о записи). Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
       "held_stopped": "Запись остановлена из уведомления. Ничего не отправлено. Нажмите «Расшифровать», чтобы отправить, или откажитесь.",
@@ -2646,7 +2654,10 @@
       "requester_page": "страница {host}",
       "owner_refused": "Операции, требующие owner-ключа, нельзя подписать из ссылки.",
       "busy": "Подождите: другой запрос ещё обрабатывается.",
-      "not_supported": "Ecency пока не может подписать эту операцию в этой версии."
+      "not_supported": "Ecency пока не может подписать эту операцию в этой версии.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Участники группы",
@@ -2783,15 +2794,18 @@
       "cannot_post": "публиковать, голосовать и комментировать",
       "cannot_transfer": "отправлять переводы и менять настройки аккаунта",
       "missing_roles": "Ваш пароль больше не подходит к ключу {missing} для @{account}: он был изменён в аккаунте после установки пароля. Сохранён на этом устройстве ключ: {kept}. Пока вы не добавите ключ {missing} в разделе «{manageKeys}» (Импорт приватного ключа), это приложение не сможет {cannot} с ключами для @{account}.",
-      "shared_owner_title": "Этот ключ также управляет ролью owner",
-      "shared_owner": "@{account} использует один ключ для роли owner и роли {names}. Кто владеет этим ключом, управляет всем аккаунтом. Ecency хранит его только как ключ {names} и никогда не использует для операций owner. Задайте для роли {names} отдельный ключ, а owner-ключ храните офлайн."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Сообщение от {host}",
       "home_title": "Главная",
       "loading_title": "Загрузка...",
       "blank_run": "[{count, plural, one {# пустой символ} few {# пустых символа} many {# пустых символов} other {# пустого символа}}]",
-      "too_large": "Эта страница запросила подпись, слишком большую для отображения, поэтому Ecency отклонил её."
+      "too_large": "Эта страница запросила подпись, слишком большую для отображения, поэтому Ecency отклонил её.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Аккаунт изменился."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Браузер недоступен",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Разблокировать Ecency биометрией",
       "biometric_confirm": "Подтвердите отпечатком пальца или лицом",
       "image_unsupported_address": "Неподдерживаемый адрес изображения",

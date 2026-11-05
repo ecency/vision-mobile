@@ -2179,7 +2179,8 @@
         "sort_by_name": "Rendezés név szerint",
         "more": "Továbbiak",
         "reaction_label": "{emoji} {count}. Nyomd hosszan, hogy lásd, ki reagált",
-        "members": "Tagok"
+        "members": "Tagok",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Ezen a hivatkozáson már van bejegyzés, és eltér attól, amit küldtél. Frissíted, vagy újként teszed közzé?",
@@ -2265,6 +2266,10 @@
         "unread": "Olvasatlan",
         "voice_position": "Hang pozíciója",
         "vote_weight": "Szavazat súlya",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "megosztotta: {username}",
         "no_more_posts": "Nincs több bejegyzés.",
         "favourite": "Kedvenc",
@@ -2285,6 +2290,8 @@
         "files": "Fájlok",
         "paused": "Szüneteltetve",
         "in_topic": "itt: {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Szavazás",
         "reply": "Válasz",
         "mute_sound": "Némítás",
@@ -2516,6 +2523,7 @@
       "transcribe": "Átírás",
       "no_longer_free_cost": "Ez a felvétel ma már nem ingyenes. Költsége {cost} Pont.",
       "no_longer_free": "Ez a felvétel ma már nem ingyenes.",
+      "held_title": "Recording stopped",
       "held_locked": "A felvétel leállt, amikor az Ecency zárolt. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
       "held_no_background": "A felvétel leállt, amikor az Ecency elhagyta a képernyőt (nem tudta megjeleníteni a felvételi értesítést). Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
       "held_stopped": "A felvételt az értesítésből állították le. Semmi sem lett elküldve. Koppints az Átírás gombra az elküldéshez, vagy add fel.",
@@ -2646,7 +2654,10 @@
       "requester_page": "a(z) {host} oldal",
       "owner_refused": "Az owner kulcsot igénylő műveletek hivatkozásból nem írhatók alá.",
       "busy": "Kérlek, várj: másik kérés még feldolgozás alatt van.",
-      "not_supported": "Az Ecency ezt a műveletet ebben a verzióban még nem tudja aláírni."
+      "not_supported": "Az Ecency ezt a műveletet ebben a verzióban még nem tudja aláírni.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Csoporttagok",
@@ -2783,15 +2794,18 @@
       "cannot_post": "közzétenni, szavazni vagy hozzászólni",
       "cannot_transfer": "átutalásokat küldeni vagy a fiókbeállításokat módosítani",
       "missing_roles": "A jelszavad már nem egyezik @{account} fiók {missing} kulcsával: a jelszó beállítása óta módosult a fiókon. Ezen az eszközön tárolva: a(z) {kept} kulcs. Amíg nem adod hozzá a(z) {missing} kulcsot itt: {manageKeys} (Privát kulcs importálása), az alkalmazás nem tud @{account} kulcsaival {cannot}.",
-      "shared_owner_title": "Ez a kulcs az owner szerepkört is vezérli",
-      "shared_owner": "@{account} ugyanazt a kulcsot használja az owner és a(z) {names} szerepkörhöz. Aki ezt a kulcsot birtokolja, az egész fiókot irányítja. Az Ecency csak {names} kulcsként őrzi, és soha nem használja owner műveletekhez. Adj a(z) {names} szerepkörnek saját kulcsot, az owner kulcsot pedig tartsd offline."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Üzenet innen: {host}",
       "home_title": "Kezdőlap",
       "loading_title": "Betöltés...",
       "blank_run": "[{count, plural, one {# üres karakter} other {# üres karakter}}]",
-      "too_large": "Ez az oldal túl nagy aláírási kérést küldött a megjelenítéshez, ezért az Ecency elutasította."
+      "too_large": "Ez az oldal túl nagy aláírási kérést küldött a megjelenítéshez, ezért az Ecency elutasította.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "A fiók megváltozott."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Nincs elérhető böngésző",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency feloldása biometrikus azonosítással",
       "biometric_confirm": "Erősítsd meg ujjlenyomattal vagy arccal",
       "image_unsupported_address": "Nem támogatott képcím",

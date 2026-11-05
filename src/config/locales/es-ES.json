@@ -2179,7 +2179,8 @@
         "sort_by_name": "Ordenar por nombre",
         "more": "Más",
         "reaction_label": "{emoji} {count}. Mantén pulsado para ver quién reaccionó",
-        "members": "Miembros"
+        "members": "Miembros",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Ya existe una publicación en este enlace y es distinta de lo que enviaste. ¿Actualizarla o publicar como nueva?",
@@ -2265,6 +2266,10 @@
         "unread": "No leído",
         "voice_position": "Posición de la voz",
         "vote_weight": "Peso del voto",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "reblogueado por {username}",
         "no_more_posts": "No hay más publicaciones.",
         "favourite": "Favorito",
@@ -2285,6 +2290,8 @@
         "files": "Archivos",
         "paused": "En pausa",
         "in_topic": "en {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Votar",
         "reply": "Responder",
         "mute_sound": "Silenciar",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transcribir",
       "no_longer_free_cost": "Esta grabación ya no es gratis hoy. Cuesta {cost} puntos.",
       "no_longer_free": "Esta grabación ya no es gratis hoy.",
+      "held_title": "Recording stopped",
       "held_locked": "La grabación se detuvo cuando Ecency se bloqueó. No se envió nada. Toca Transcribir para enviarla o descártala.",
       "held_no_background": "La grabación se detuvo cuando Ecency salió de la pantalla (no pudo mostrar su notificación de grabación). No se envió nada. Toca Transcribir para enviarla o descártala.",
       "held_stopped": "La grabación se detuvo desde la notificación. No se envió nada. Toca Transcribir para enviarla o descártala.",
@@ -2646,7 +2654,10 @@
       "requester_page": "la página {host}",
       "owner_refused": "Las operaciones que requieren la clave de propietario no se pueden firmar desde un enlace.",
       "busy": "Espera: otra solicitud aún se está procesando.",
-      "not_supported": "Ecency aún no puede firmar esta operación en esta versión."
+      "not_supported": "Ecency aún no puede firmar esta operación en esta versión.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Miembros del grupo",
@@ -2783,15 +2794,18 @@
       "cannot_post": "publicar, votar o comentar",
       "cannot_transfer": "enviar transferencias o cambiar ajustes de la cuenta",
       "missing_roles": "Tu contraseña ya no coincide con la clave {missing} de @{account}: se cambió en la cuenta desde que se estableció la contraseña. Guardada en este dispositivo: la clave {kept}. Hasta que añadas la clave {missing} en {manageKeys} (Importar privada), esta aplicación no puede {cannot} con las claves de @{account}.",
-      "shared_owner_title": "Esta clave también controla el rol de propietario",
-      "shared_owner": "@{account} usa la misma clave para su rol de propietario y su rol {names}. Quien tenga esta clave controla toda la cuenta. Ecency la conserva solo como clave {names} y nunca la usa para operaciones de propietario. Da al rol {names} una clave propia y guarda la clave de propietario sin conexión."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Mensaje de {host}",
       "home_title": "Inicio",
       "loading_title": "Cargando...",
       "blank_run": "[{count, plural, one {# carácter en blanco} many {# caracteres en blanco} other {# caracteres en blanco}}]",
-      "too_large": "Esta página pidió firmar una solicitud demasiado grande para mostrarla, así que Ecency la rechazó."
+      "too_large": "Esta página pidió firmar una solicitud demasiado grande para mostrarla, así que Ecency la rechazó.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "La cuenta cambió."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "No hay navegador disponible",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Desbloquear Ecency con biometría",
       "biometric_confirm": "Confirma con tu huella o tu cara",
       "image_unsupported_address": "Dirección de imagen no compatible",

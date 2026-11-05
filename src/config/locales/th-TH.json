@@ -2179,7 +2179,8 @@
         "sort_by_name": "เรียงตามชื่อ",
         "more": "เพิ่มเติม",
         "reaction_label": "{emoji} {count} กดค้างเพื่อดูว่าใครแสดงรีแอคชัน",
-        "members": "สมาชิก"
+        "members": "สมาชิก",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "มีโพสต์ที่ลิงก์นี้อยู่แล้วและแตกต่างจากที่คุณส่ง อัปเดตหรือเผยแพร่เป็นโพสต์ใหม่?",
@@ -2265,6 +2266,10 @@
         "unread": "ยังไม่ได้อ่าน",
         "voice_position": "ตำแหน่งเสียง",
         "vote_weight": "น้ำหนักโหวต",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "รีบล็อกโดย {username}",
         "no_more_posts": "ไม่มีโพสต์เพิ่มเติม",
         "favourite": "รายการโปรด",
@@ -2285,6 +2290,8 @@
         "files": "ไฟล์",
         "paused": "หยุดชั่วคราวแล้ว",
         "in_topic": "ใน {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "โหวต",
         "reply": "ตอบกลับ",
         "mute_sound": "ปิดเสียง",
@@ -2516,6 +2523,7 @@
       "transcribe": "ถอดเสียง",
       "no_longer_free_cost": "การบันทึกนี้ไม่ฟรีอีกต่อไปในวันนี้ ค่าใช้จ่าย {cost} Points",
       "no_longer_free": "การบันทึกนี้ไม่ฟรีอีกต่อไปในวันนี้",
+      "held_title": "Recording stopped",
       "held_locked": "การบันทึกหยุดเมื่อ Ecency ล็อก ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
       "held_no_background": "การบันทึกหยุดเมื่อ Ecency ออกจากหน้าจอ (แสดงการแจ้งเตือนการบันทึกไม่ได้) ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
       "held_stopped": "การบันทึกถูกหยุดจากการแจ้งเตือน ไม่มีการส่งอะไร แตะถอดเสียงเพื่อส่ง หรือเลิกทำ",
@@ -2646,7 +2654,10 @@
       "requester_page": "หน้า {host}",
       "owner_refused": "การดำเนินการที่ต้องใช้คีย์ owner ไม่สามารถลงนามจากลิงก์ได้",
       "busy": "โปรดรอสักครู่ ยังประมวลผลคำขออื่นอยู่",
-      "not_supported": "Ecency ยังลงนามการดำเนินการนี้ในเวอร์ชันนี้ไม่ได้"
+      "not_supported": "Ecency ยังลงนามการดำเนินการนี้ในเวอร์ชันนี้ไม่ได้",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "สมาชิกกลุ่ม",
@@ -2783,15 +2794,18 @@
       "cannot_post": "โพสต์ โหวต หรือแสดงความคิดเห็น",
       "cannot_transfer": "ส่งการโอนหรือเปลี่ยนการตั้งค่าบัญชี",
       "missing_roles": "รหัสผ่านของคุณไม่ตรงกับคีย์ {missing} ของ @{account} อีกต่อไป เพราะมีการเปลี่ยนบนบัญชีหลังตั้งรหัสผ่าน คีย์ที่เก็บบนอุปกรณ์นี้: คีย์ {kept} จนกว่าคุณจะเพิ่มคีย์ {missing} ที่ {manageKeys} (Import Private) แอปนี้จะไม่สามารถ{cannot}ด้วยคีย์ของ @{account} ได้",
-      "shared_owner_title": "คีย์นี้ควบคุมบทบาท owner ด้วย",
-      "shared_owner": "@{account} ใช้คีย์เดียวกันสำหรับบทบาท owner และบทบาท {names} ใครมีคีย์นี้ก็ควบคุมทั้งบัญชี Ecency เก็บไว้เป็นคีย์ {names} เท่านั้นและไม่เคยใช้กับการดำเนินการ owner ให้บทบาท {names} มีคีย์ของตัวเอง และเก็บคีย์ owner ไว้แบบออฟไลน์"
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "ข้อความจาก {host}",
       "home_title": "หน้าหลัก",
       "loading_title": "กำลังโหลด...",
       "blank_run": "[{count, plural, other {อักขระว่าง #}}]",
-      "too_large": "หน้านี้ขอให้ลงนามคำขอที่ใหญ่เกินกว่าจะแสดงได้ Ecency จึงปฏิเสธ"
+      "too_large": "หน้านี้ขอให้ลงนามคำขอที่ใหญ่เกินกว่าจะแสดงได้ Ecency จึงปฏิเสธ",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "บัญชีเปลี่ยนไปแล้ว"
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "ไม่มีเบราว์เซอร์",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "ปลดล็อก Ecency ด้วยชีวมิติ",
       "biometric_confirm": "ยืนยันด้วยลายนิ้วมือหรือใบหน้า",
       "image_unsupported_address": "ไม่รองรับที่อยู่รูปภาพ",

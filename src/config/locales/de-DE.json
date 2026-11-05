@@ -2179,7 +2179,8 @@
         "sort_by_name": "Nach Name sortieren",
         "more": "Mehr",
         "reaction_label": "{emoji} {count}. Lange drücken, um zu sehen, wer reagiert hat",
-        "members": "Mitglieder"
+        "members": "Mitglieder",
+        "chat_with_esie": "Chat with Esie"
       },
       "editor": {
         "a_post_already_exists_at_this": "Unter diesem Link existiert bereits ein Beitrag, der sich von dem unterscheidet, was du gesendet hast. Aktualisieren oder als neu veröffentlichen?",
@@ -2265,6 +2266,10 @@
         "unread": "Ungelesen",
         "voice_position": "Position der Stimme",
         "vote_weight": "Gewichtung der Stimme",
+        "vote_up": "Up",
+        "vote_down": "Down",
+        "upvote_percent": "Upvote {percent}%",
+        "voting_power": "Voting power {percent}",
         "reblogged_by": "rebloggt von {username}",
         "no_more_posts": "Keine weiteren Beiträge.",
         "favourite": "Favorit",
@@ -2285,6 +2290,8 @@
         "files": "Dateien",
         "paused": "Pausiert",
         "in_topic": "in {topic}",
+        "tag_community": "{name}, community",
+        "tag_topic": "{name}, tag",
         "poll_vote": "Abstimmen",
         "reply": "Antworten",
         "mute_sound": "Stummschalten",
@@ -2516,6 +2523,7 @@
       "transcribe": "Transkribieren",
       "no_longer_free_cost": "Diese Aufnahme ist heute nicht mehr kostenlos. Sie kostet {cost} Points.",
       "no_longer_free": "Diese Aufnahme ist heute nicht mehr kostenlos.",
+      "held_title": "Recording stopped",
       "held_locked": "Die Aufnahme wurde gestoppt, als Ecency gesperrt wurde. Es wurde nichts gesendet. Tippe auf Transkribieren, um sie zu senden, oder gib sie auf.",
       "held_no_background": "Die Aufnahme wurde gestoppt, als Ecency den Bildschirm verlassen hat (die Aufnahmebenachrichtigung konnte nicht angezeigt werden). Es wurde nichts gesendet. Tippe auf Transkribieren, um sie zu senden, oder gib sie auf.",
       "held_stopped": "Die Aufnahme wurde über die Benachrichtigung gestoppt. Es wurde nichts gesendet. Tippe auf Transkribieren, um sie zu senden, oder gib sie auf.",
@@ -2646,7 +2654,10 @@
       "requester_page": "die Seite {host}",
       "owner_refused": "Operationen, die den Owner-Schlüssel benötigen, können nicht über einen Link signiert werden.",
       "busy": "Bitte warten: Eine andere Anfrage wird noch bearbeitet.",
-      "not_supported": "Ecency kann diese Operation in dieser Version noch nicht signieren."
+      "not_supported": "Ecency kann diese Operation in dieser Version noch nicht signieren.",
+      "key_request_refused_title": "Posting key not shared",
+      "key_request_retired": "An app outside Ecency ({scheme}) asked for your posting key. Ecency no longer shares keys with other apps: sign in to that app with HiveSigner or HiveAuth instead.",
+      "key_request_content": "A link in a post, a chat or a web page asked for your posting key. Ecency never shares a key with a link from content."
     },
     "chats": {
       "group_members": "Gruppenmitglieder",
@@ -2783,15 +2794,18 @@
       "cannot_post": "posten, abstimmen oder kommentieren",
       "cannot_transfer": "Überweisungen senden oder Kontoeinstellungen ändern",
       "missing_roles": "Dein Passwort passt nicht mehr zum {missing}-Schlüssel von @{account}: Er wurde im Konto geändert, seit das Passwort festgelegt wurde. Auf diesem Gerät gespeichert: der {kept}-Schlüssel. Solange du den {missing}-Schlüssel nicht unter {manageKeys} (Privat importieren) hinzufügst, kann diese App mit den Schlüsseln für @{account} nicht {cannot}.",
-      "shared_owner_title": "Dieser Schlüssel steuert auch die Owner-Rolle",
-      "shared_owner": "@{account} verwendet denselben Schlüssel für die Owner-Rolle und die Rolle {names}. Wer diesen Schlüssel hat, kontrolliert das gesamte Konto. Ecency behält ihn nur als {names}-Schlüssel und verwendet ihn nie für Owner-Operationen. Gib der Rolle {names} einen eigenen Schlüssel und bewahre den Owner-Schlüssel offline auf."
+      "owner_key_not_kept_title": "Key not kept",
+      "owner_key_not_kept": "@{account}'s key is also its owner key, so the app does not keep it. Sign in with HiveSigner or HiveAuth, or give the posting and active roles their own keys."
     },
     "dapp_browser": {
+      "lasting_permission": "This gives {app} lasting permission to post, vote and comment as you.",
       "message_from": "Nachricht von {host}",
       "home_title": "Start",
       "loading_title": "Wird geladen...",
       "blank_run": "[{count, plural, one {# leeres Zeichen} other {# leere Zeichen}}]",
-      "too_large": "Diese Seite wollte eine zu große Anfrage zum Signieren anzeigen, daher hat Ecency sie abgelehnt."
+      "too_large": "Diese Seite wollte eine zu große Anfrage zum Signieren anzeigen, daher hat Ecency sie abgelehnt.",
+      "connect_title": "Share your account name with {host}?",
+      "connect_authority": "None: only your account name is shared"
     },
     "community_service": {
       "the_account_changed": "Das Konto hat sich geändert."
@@ -3032,6 +3046,7 @@
     },
     "android": {
       "no_browser": "Kein Browser verfügbar",
+      "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Ecency mit Biometrie entsperren",
       "biometric_confirm": "Mit Fingerabdruck oder Gesicht bestätigen",
       "image_unsupported_address": "Nicht unterstützte Bildadresse",
