@@ -317,6 +317,17 @@ class WavesModelsTest {
         assertTrue("flagged" in shown(WavesFeedKind.Author(bob)))
     }
 
+    /** #3634: the nsfw tag is read in any case and spacing, as the website reads it (`waves/_utils/wave-nsfw.ts`). */
+    @Test
+    fun anNsfwTagInAnyCaseOrSpacingGatesAWave() {
+        fun tagged(vararg tags: String) = com.ecency.core.api.waves.WaveEntry.fromJson(
+            Json.parseToJsonElement(row(bob, "w").replace("\"tags\":[\"waves\"]", "\"tags\":" + Json.encodeToString(listOf("waves") + tags))),
+        )!!.post
+        for (tag in listOf("nsfw", "NSFW", "Nsfw", " nsfw ", "nsfw\n")) assertTrue(NsfwMode.isNsfw(tagged(tag)), "tag \"$tag\"")
+        for (tag in listOf("nsfwart", "not-nsfw", "sfw")) assertFalse(NsfwMode.isNsfw(tagged(tag)), "tag \"$tag\"")
+        assertFalse(NsfwMode.isNsfw(tagged()))
+    }
+
     @Test
     fun waveNsfwRuleMatchesRn() {
         fun entry(author: String, flag: String?) = com.ecency.core.api.waves.WaveEntry.fromJson(
