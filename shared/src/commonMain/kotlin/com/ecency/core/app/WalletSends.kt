@@ -67,6 +67,18 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
     /** Screens (and callers with an onDone) that show a send; a send nobody owns any more reports itself ([orphanDone]). */
     private val owners = mutableMapOf<String, Int>()
 
+    /** What runs when a send ends in [SendPhase.Done], whoever watches it ([afterSuccess]). */
+    private val successHooks = mutableMapOf<String, () -> Unit>()
+
+    /**
+     * Main thread. [block] runs once [actionId]'s send ends in [SendPhase.Done], even after its screen closed (the send
+     * goes on without it); any other outcome drops it. For what belongs to the outcome rather than the screen (an
+     * exchange's deposit memo kept, [ExchangeMemos]).
+     */
+    fun afterSuccess(actionId: String, block: () -> Unit) {
+        successHooks[actionId] = block
+    }
+
     /**
      * Main thread. Starts [actionId]'s broadcast; a second call with the same id while it runs does nothing. The caller
      * owns it until [disown] ([onDone] callers own it for good, they hear the outcome).
@@ -90,6 +102,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
             // phase and releases it; one that disowned before leaves it to the toast. Never both.
             kotlinx.coroutines.withContext(env.dispatchers.main) {
                 setState { it.copy(sends = it.sends + (actionId to final)) }
+                if (final.isFinal) successHooks.remove(actionId)?.let { hook -> if (final.phase is SendPhase.Done) runCatching { hook() } }
                 if (final.isFinal && final.phase !is SendPhase.Failed) running.remove(actionId)
                 if (onDone == null && (owners[actionId] ?: 0) == 0) orphanDone(final)
             }
@@ -148,6 +161,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         gone.forEach { id ->
             running.remove(id)?.job?.cancel()
             owners.remove(id)
+            successHooks.remove(id)
         }
         setState { s -> s.copy(sends = s.sends - gone.toSet()) }
     }

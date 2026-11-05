@@ -210,7 +210,12 @@ data class TransferState(
      * sender's ([TransferModel.avatarUrl]), so a mistyped name shows a stranger's face before anything is sent.
      */
     val recipientAvatars: List<String>
-        get() = if (recipientLocked) emptyList() else recipients.filter { com.ecency.core.render.blocks.isHiveAccountName(it) }.take(MAX_AVATARS)
+        get() {
+            if (recipientLocked) return emptyList()
+            val names = recipients.filter { com.ecency.core.render.blocks.isHiveAccountName(it) }.distinct()
+            // a screen that sends to one account shows one, however the text splits
+            return names.take(if (allowsMultiple) MAX_AVATARS else 1)
+        }
 
     val allowsMultiple: Boolean get() = !isRecurrent && (kind == TransferKind.TRANSFER || kind == TransferKind.POINTS || kind == TransferKind.ENGINE_TRANSFER)
 
@@ -389,7 +394,7 @@ class TransferModel internal constructor(
     }
 
     /** The avatar picture of [account] for the recipient row (RN UserAvatar). */
-    fun avatarUrl(account: String): String = PostCard.avatarUrl(account, env.proxyBase, "medium")
+    fun avatarUrl(account: String): String = PostCard.avatarUrl(account, env.proxyBase, "small")
 
     /** "Use saved memo": the memo this account last sent to the exchange ([TransferState.savedExchangeMemo]). */
     fun useSavedMemo() {
@@ -397,8 +402,7 @@ class TransferModel internal constructor(
         setMemo(saved)
     }
 
-    /** The exchange memo of the confirmed send, kept ([ExchangeMemos]) once that send went through. */
-    private var sentExchangeMemo: Triple<String, String, String>? = null
+
 
     /** The HIVE/HBD switch of a plain transfer. */
     fun setFund(symbol: String) {
@@ -459,8 +463,14 @@ class TransferModel internal constructor(
         }
         val json = WalletOps.ops(ops)
         val actionId = env.idempotencyKey()
-        // what was confirmed, not what the form holds later
-        sentExchangeMemo = s.exchange?.takeIf { s.offersExchangeMemo && s.memo.isNotBlank() }?.let { Triple(user, it, s.memo) }
+        // the memo that was confirmed, kept once this send went through, even after the screen closed (the send goes on
+        // without it); not for an account that left the device meanwhile
+        s.exchange?.takeIf { s.offersExchangeMemo && s.memo.isNotBlank() }?.let { exchange ->
+            val memo = s.memo
+            env.walletSends.afterSuccess(actionId) {
+                if (env.session.current.accounts.any { it.username == user }) env.exchangeMemos.save(user, exchange, memo)
+            }
+        }
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
         env.walletSends.send(user, json, OperationAuthority.required(json), actionId)
         owned.owns(actionId)
@@ -480,8 +490,6 @@ class TransferModel internal constructor(
         if (s.prompt != TransferPrompt.ConfirmDeleteSchedule) return
         // the memo may have been edited while the question was open
         if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
-        // a schedule deletion is no deposit: no exchange memo is kept from it
-        sentExchangeMemo = null
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
@@ -496,23 +504,18 @@ class TransferModel internal constructor(
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> {
-                sentExchangeMemo?.let { (user, exchange, memo) -> env.exchangeMemos.save(user, exchange, memo) }
-                sentExchangeMemo = null
                 env.ui.toast(WalletCopy.SUCCESSFUL)
                 release()
                 env.wallet.refreshLater()
                 setState { it.copy(closed = true) }
             }
             is SendPhase.Failed -> {
-                sentExchangeMemo = null
                 // RN goes back and says why ("{operation} failed: {reason}", the key warning for a key problem)
                 env.ui.toast(failureText(phase.error))
                 release()
                 setState { it.copy(closed = true) }
             }
             is SendPhase.Cancelled -> {
-                // nothing went out: its memo is not kept (a later send, a schedule deletion say, must not keep it)
-                sentExchangeMemo = null
                 release()
                 setState { it.copy(actionId = null, phase = null) }
             }

@@ -478,8 +478,17 @@ class WalletModelsTest {
         points.setRecipient("spike-bob, spike-carol, x!")
         // valid account names only, in the order typed
         assertEquals(listOf("spike-bob", "spike-carol"), points.current.recipientAvatars)
-        assertEquals(PostCard.avatarUrl("spike-bob", w.env.proxyBase, "medium"), points.avatarUrl("spike-bob"))
+        // the same name twice is one avatar, and at most five
+        points.setRecipient("spike-bob, spike-bob, spike-a1, spike-a2, spike-a3, spike-a4, spike-a5")
+        assertEquals(listOf("spike-bob", "spike-a1", "spike-a2", "spike-a3", "spike-a4"), points.current.recipientAvatars)
+        // a numeric size the image service reads (#3599)
+        // a numeric size the image service reads (#3599): 128 px, enough for the row's 40 pt at 3x
+        assertEquals("${w.env.proxyBase}/u/spike-bob/avatar/128", points.avatarUrl("spike-bob"))
         assertTrue(points.avatarUrl(w.user).startsWith("https://"), "the sender's avatar too")
+        // a screen that sends to one account shows one avatar
+        val savings = transfer(w, AppScreen.Transfer("transfer_to_savings", "HIVE", "hive"))
+        savings.setRecipient("spike-bob spike-carol")
+        assertEquals(listOf("spike-bob"), savings.current.recipientAvatars)
         // no recipient field, no recipient avatars
         val convert = transfer(w, AppScreen.Transfer("convert", "HBD", "hive"))
         assertTrue(convert.current.recipientLocked)
@@ -544,6 +553,28 @@ class WalletModelsTest {
         // the account leaves: its memos go with it
         w.env.accountsLeft(listOf(w.user), forget = true) {}
         assertNull(w.env.exchangeMemos.get(w.user, "bittrex"))
+    }
+
+    /** #3648 review: a transfer that succeeds after its screen closed still keeps its exchange memo. */
+    @Test
+    fun anExchangeMemoIsKeptWhenTheSendSucceedsAfterTheScreenClosed() = runTest {
+        val w = world(this)
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val answer = w.broadcastAnswer
+        w.broadcastAnswer = { gate.await(); answer(it) }
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("bittrex")
+        m.setAmount("1")
+        testScheduler.advanceUntilIdle()
+        m.setMemo("104857")
+        m.next()
+        m.confirm()
+        testScheduler.runCurrent()
+        // the user leaves the screen while the broadcast is on its way
+        m.close()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals("104857", w.env.exchangeMemos.get(w.user, "bittrex"))
     }
 
     /** #3633: a memo is public on chain; a private key or a master password in it blocks the send with a warning. */
