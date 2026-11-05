@@ -50,7 +50,8 @@ class TransferScheduleRaceTest {
         val wif = com.ecency.core.hive.PrivateKey.fromSeed("ecency-native-schedule-memo").toWif()
         m.setMemo("verify $wif")
         m.deleteSchedule()
-        assertNull(m.current.prompt, "not even asked")
+        assertEquals(TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET), m.current.prompt, "not asked: told why")
+        m.dismissPrompt()
         // typed after the question was asked
         m.setMemo("bob memo")
         m.deleteSchedule()

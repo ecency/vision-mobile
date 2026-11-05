@@ -437,8 +437,9 @@ class TransferModel internal constructor(
 
     /** RN "Delete Recurrent Transfer": asks first. */
     fun deleteSchedule() {
-        // the deletion sends the memo as it stands (RN): one holding a secret is refused like Next ([memoHasSecret])
-        if (current.existingScheduleDate == null || current.busy || current.memoHasSecret) return
+        if (current.existingScheduleDate == null || current.busy) return
+        // the deletion sends the memo as it stands (RN): one holding a secret is refused like Next, and said why
+        if (current.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         setState { it.copy(prompt = TransferPrompt.ConfirmDeleteSchedule) }
     }
 
@@ -447,10 +448,7 @@ class TransferModel internal constructor(
         val s = current
         if (s.prompt != TransferPrompt.ConfirmDeleteSchedule) return
         // the memo may have been edited while the question was open
-        if (s.memoHasSecret) {
-            setState { it.copy(prompt = null) }
-            return
-        }
+        if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
         val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
@@ -685,7 +683,16 @@ object MemoSecrets {
     private const val WIF_LENGTH = 51
     private const val PASSWORD_LENGTH = 52
 
-    fun contains(memo: String): Boolean =
+    // the last memo looked at and its answer: the forms ask on every redraw while the memo stays the same
+    private var lastMemo: String? = null
+    private var lastAnswer = false
+
+    fun contains(memo: String): Boolean {
+        if (memo == lastMemo) return lastAnswer
+        return scan(memo).also { lastMemo = memo; lastAnswer = it }
+    }
+
+    private fun scan(memo: String): Boolean =
         WORD.findAll(memo).any { m -> hasKey(m.value) || hasPassword(m.value) } ||
             // a key split by spaces, line breaks or invisible characters is still readable on chain: the copy noise
             // key input ignores (KeyInput.isNoise) is taken out and the keys looked for again
