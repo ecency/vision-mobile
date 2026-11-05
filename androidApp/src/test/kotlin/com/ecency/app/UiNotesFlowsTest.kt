@@ -327,6 +327,8 @@ class UiNotesFlowsTest {
         signIn()
         node.broadcastDown = true
         pushed(com.ecency.core.app.AppScreen.Feed(com.ecency.core.api.repository.FeedSource.Ranked(com.ecency.core.api.RankedSort.TRENDING, "photography"), "#photography"))
+        // the feed's cards arrive after its read: on a slow runner there is no vote button yet (#3639)
+        compose.await("a vote button") { compose.onAllNodes(hasTestTag("vote")).fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodes(hasTestTag("vote"))[0].performClick()
         waitFor("voteSheet")
         compose.mainClock.advanceTimeBy(2_000)
