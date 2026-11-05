@@ -9,11 +9,15 @@ import com.ecency.core.api.wallet.AssetLayer
 import com.ecency.core.api.wallet.RecurrentSchedule
 import com.ecency.core.api.wallet.Vests
 import com.ecency.core.auth.OperationAuthority
+import com.ecency.core.hive.Memo
 import com.ecency.core.hive.Operation
+import com.ecency.core.hive.PrivateKey
+import com.ecency.core.hive.PublicKey
 import com.ecency.core.l10n.L
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /** What the transfer screen does (RN TransferTypes for the generic TransferView, normalized). */
@@ -141,6 +145,23 @@ object TransferCopy {
     fun exchangeMemoRequired(exchange: String) = L.transfer.exchangeMemoRequired(exchange = exchange)
 
     val MEMO_HAS_SECRET: String get() = L.native.transfer.memoHasSecret
+    val MEMO_ENCRYPTED: String get() = L.native.transfer.memoEncrypted
+    val MEMO_ENCRYPT_NO_KEY: String get() = L.native.transfer.memoEncryptNoKey
+    val MEMO_ENCRYPT_UNSUPPORTED: String get() = L.native.transfer.memoEncryptUnsupported
+    val DECRYPT_MEMO: String get() = L.native.transfer.decryptMemo
+    val DECRYPT_MEMO_FAILED: String get() = L.native.transfer.decryptMemoFailed
+    fun memoEncryptExchange(exchange: String) = L.native.transfer.memoEncryptExchange(exchange = exchange)
+
+    /** The exchange note for [memo]: cipher text is replaced by the exchange's deposit memo, a plain one loses its `#`. */
+    fun memoExchange(exchange: String, memo: String) =
+        if (Memo.isEncrypted(memo)) L.native.transfer.memoEncryptedExchange(exchange = exchange) else memoEncryptExchange(exchange)
+
+    /**
+     * The memo a recurrent transfer's deletion sends: a `#` memo is not encrypted for a deletion (it moves nothing),
+     * so it goes empty rather than as text; the transfer screen and the wallet details alike.
+     */
+    fun deletionMemo(memo: String): String = if (memo.startsWith("#")) "" else memo
+    fun recipientNoMemoKey(account: String) = L.native.transfer.memoRecipientNoKey(account = account)
 
     fun useSavedMemo(exchange: String, memo: String) = L.native.transfer.useSavedMemo(exchange = exchange, memo = memo)
 
@@ -149,6 +170,9 @@ object TransferCopy {
 
     fun customSchedule(hours: Int) = L.transfer.customSchedule(hours = hours.toString())
 }
+
+/** A memo starting with `#` is encrypted for the recipient (#3633). */
+enum class MemoEncryption { NONE, ENCRYPTS, NO_KEY, UNSUPPORTED, EXCHANGE }
 
 /** A question the transfer screen must answer before it goes on. */
 sealed interface TransferPrompt {
@@ -194,6 +218,10 @@ data class TransferState(
     val exchange: String? = null,
     /** The memo this account last sent to [exchange] ([ExchangeMemos]), while the memo field does not hold it. */
     val savedExchangeMemo: String? = null,
+    /** One of the sender's keys that can encrypt a `#` memo is on the device; null until read ([MemoEncryption]). */
+    val memoCipherKey: Boolean? = null,
+    /** Next pressed with a `#` memo: the recipients' memo keys are read and the memo encrypted before the confirmation. */
+    val encryptingMemo: Boolean = false,
     val prompt: TransferPrompt? = null,
     /** The confirmed action's send, once confirmed. */
     val actionId: String? = null,
@@ -240,6 +268,24 @@ data class TransferState(
     /** The memo holds a private key or a master password ([MemoSecrets]): a memo is public, so this blocks NEXT (#3633). */
     val memoHasSecret: Boolean get() = MemoSecrets.contains(memo)
 
+    /**
+     * A memo starting with `#` (the Hive wallets' convention) goes on chain encrypted for the recipient (#3633): only on
+     * a HIVE or HBD transfer (Points and Engine memos have no memo key to encrypt for), and only with one of the sender's
+     * keys on the device. Never sent as plain text instead.
+     */
+    val memoEncryption: MemoEncryption
+        get() = when {
+            !memo.startsWith("#") -> MemoEncryption.NONE
+            // an exchange cannot read an encrypted deposit memo, and the deposit may not be credited: no `#` memo
+            // goes to one, cipher text already encrypted included
+            exchange != null -> MemoEncryption.EXCHANGE
+            // cipher text already (an existing schedule's memo, one pasted): it goes as it is, never encrypted twice
+            Memo.isEncrypted(memo) -> MemoEncryption.NONE
+            !(isNativeFund && kind in ENCRYPTED_MEMO_KINDS) -> MemoEncryption.UNSUPPORTED
+            memoCipherKey == false -> MemoEncryption.NO_KEY
+            else -> MemoEncryption.ENCRYPTS
+        }
+
     val busy: Boolean get() = phase is SendPhase.Sending || phase is SendPhase.Checking
 
     /** RN nextBtnDisabled, inverted. */
@@ -252,6 +298,9 @@ data class TransferState(
             if (kind.isEngine && tokenPrecision == null && amount.contains('.') && amount.substringAfter('.').trimEnd('0').isNotEmpty()) return false
             if (exchangeMemoRequired) return false
             if (memoHasSecret) return false
+            // a `#` memo is sent encrypted or not at all; while the keys are being read or the memo encrypted, wait
+            if (encryptingMemo || memoEncryption in BLOCKING_MEMO) return false
+            if (memoEncryption == MemoEncryption.ENCRYPTS && memoCipherKey == null) return false
             if (isRecurrent) {
                 val n = executions.toIntOrNull()
                 if (n == null || n < MIN_EXECUTIONS || executions.trim() != n.toString()) return false
@@ -260,6 +309,9 @@ data class TransferState(
         }
 
     companion object {
+        private val ENCRYPTED_MEMO_KINDS = setOf(TransferKind.TRANSFER, TransferKind.TO_SAVINGS, TransferKind.FROM_SAVINGS)
+        private val BLOCKING_MEMO = setOf(MemoEncryption.NO_KEY, MemoEncryption.UNSUPPORTED, MemoEncryption.EXCHANGE)
+
         const val MIN_EXECUTIONS = 2
 
         /** Recipient avatars shown at most (RN draws every one; a long list would push the form down). */
@@ -290,6 +342,9 @@ class TransferModel internal constructor(
 
     /** The form as the confirmation showed it: what confirm() signs. */
     private var shown: TransferState? = null
+
+    /** [shown]'s `#` memo encrypted for each recipient (#3633); what confirm() puts on chain instead of the text. */
+    private var encryptedMemos: Map<String, String>? = null
     private var started = false
 
     init {
@@ -324,6 +379,16 @@ class TransferModel internal constructor(
                 s.copy(from = user, recipient = if (selfDefault) user else s.recipient)
             }
             launch { badActors = runCatching { BadActors.load(env.auth.http) }.getOrDefault(emptySet()); checkRecipient(immediate = true) }
+            launch {
+                val has = try {
+                    withContext(env.dispatchers.io) { memoCipherKey(user) != null }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    false
+                }
+                setState { it.copy(memoCipherKey = has) }
+            }
             loadBalance()
             if (kind.isEngine) loadPrecision()
             checkRecipient(immediate = true)
@@ -438,23 +503,81 @@ class TransferModel internal constructor(
             setState { it.copy(prompt = TransferPrompt.Alert(TransferCopy.LOW_LIQUIDITY, "")) }
             return
         }
+        if (s.memoEncryption == MemoEncryption.ENCRYPTS) return encryptThenConfirm(s)
         shown = s
+        encryptedMemos = null
         setState { it.copy(prompt = TransferPrompt.Confirm) }
+    }
+
+    /**
+     * #3633: each recipient's memo key is read from the chain and the memo encrypted with the sender's key before the
+     * confirmation shows; any failure says why and sends nothing (a `#` memo never goes out as text).
+     */
+    private fun encryptThenConfirm(s: TransferState) {
+        val user = s.from ?: return
+        setState { it.copy(encryptingMemo = true) }
+        scope.launch {
+            val result = try {
+                val key = withContext(env.dispatchers.io) { memoCipherKey(user) }
+                    ?: throw com.ecency.core.api.InvalidInputException(TransferCopy.MEMO_ENCRYPT_NO_KEY)
+                val names = s.recipients.ifEmpty { listOf(user) }.distinct()
+                val memoKeys = env.api.hive.accounts(names).associate { it.name to it.memoKey }
+                Result.success(
+                    names.associateWith { name ->
+                        val pub = memoKeys[name]?.let { runCatching { PublicKey.fromString(it) }.getOrNull() }
+                        // no memo key, or one that is no curve point (the null key): nothing to encrypt for
+                        pub?.let { runCatching { Memo.encode(key, it, s.memo) }.getOrNull() }
+                            ?: throw com.ecency.core.api.InvalidInputException(TransferCopy.recipientNoMemoKey(name))
+                    },
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+            result.onSuccess { memos ->
+                // the form changed while the memo was encrypted, or another question opened: that is not what was
+                // pressed, so nothing is offered for confirmation (Next again encrypts the form as it is now)
+                // or the account changed and the screen is closing: nothing is offered for the old account
+                if (current.closed || current.prompt != null || !sameForm(current, s)) return@onSuccess setState { it.copy(encryptingMemo = false) }
+                shown = s
+                encryptedMemos = memos
+                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Confirm) }
+            }.onFailure { e ->
+                if (current.closed || current.prompt != null) return@onFailure setState { it.copy(encryptingMemo = false) }
+                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+            }
+        }
+    }
+
+    private fun sameForm(a: TransferState, b: TransferState) =
+        a.from == b.from && a.kind == b.kind && a.fund == b.fund && a.recipient == b.recipient && a.amount == b.amount &&
+            a.memo == b.memo && a.recurrenceHours == b.recurrenceHours && a.executions == b.executions
+
+    /** The sender's key that encrypts a `#` memo: the memo key, else the posting key, else the active key (#3633). */
+    private fun memoCipherKey(user: String): PrivateKey? {
+        val account = env.vault.vault.account(user) ?: return null
+        return listOf(account.memoKey, account.postingKey, account.activeKey).firstNotNullOfOrNull { wif ->
+            wif?.takeIf { it.isNotEmpty() }?.let { runCatching { PrivateKey.fromWif(it) }.getOrNull() }
+        }
     }
 
     fun dismissPrompt() {
         shown = null
+        encryptedMemos = null
         setState { it.copy(prompt = null) }
     }
 
     /** "Confirm": the action id is made now, once; the send runs app-wide. */
     fun confirm() {
-        if (current.prompt != TransferPrompt.Confirm) return
+        if (current.closed || current.prompt != TransferPrompt.Confirm) return
         val s = shown ?: return
         shown = null
+        val encrypted = encryptedMemos
+        encryptedMemos = null
         val user = s.from ?: return
         val ops = try {
-            operations(s, user)
+            operations(s, user, encrypted)
         } catch (e: Exception) {
             setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
             return
@@ -490,7 +613,8 @@ class TransferModel internal constructor(
         if (s.memoHasSecret) return setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, TransferCopy.MEMO_HAS_SECRET)) }
         val user = s.from ?: return
         val to = s.recipients.singleOrNull() ?: return
-        val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", s.memo, Recurrence.DAILY.hours, 2)
+        val memo = TransferCopy.deletionMemo(s.memo)
+        val op = WalletOps.recurrentTransfer(user, to, "0.000 ${s.fund}", memo, Recurrence.DAILY.hours, 2)
         val json = WalletOps.ops(listOf(op))
         val actionId = env.idempotencyKey()
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
@@ -543,20 +667,28 @@ class TransferModel internal constructor(
 
     // ---- internals ----
 
-    private fun operations(s: TransferState, user: String): List<Operation> {
+    private fun operations(s: TransferState, user: String, encrypted: Map<String, String>?): List<Operation> {
         val to = s.recipients
         // never the first of several names: a single-recipient operation goes to exactly the one typed
         if (s.tooManyRecipients) throw com.ecency.core.api.InvalidInputException(TransferCopy.ONE_RECIPIENT)
         val one = to.firstOrNull() ?: user
         val native = Amounts.asset(s.amount, s.fund)
+        // a `#` memo goes encrypted for each recipient, or nothing goes (never as text)
+        fun memo(name: String): String = when (s.memoEncryption) {
+            MemoEncryption.NONE -> s.memo
+            MemoEncryption.ENCRYPTS -> encrypted?.get(name) ?: throw com.ecency.core.api.InvalidInputException(TransferCopy.recipientNoMemoKey(name))
+            MemoEncryption.NO_KEY -> throw com.ecency.core.api.InvalidInputException(TransferCopy.MEMO_ENCRYPT_NO_KEY)
+            MemoEncryption.UNSUPPORTED -> throw com.ecency.core.api.InvalidInputException(TransferCopy.MEMO_ENCRYPT_UNSUPPORTED)
+            MemoEncryption.EXCHANGE -> throw com.ecency.core.api.InvalidInputException(TransferCopy.memoExchange(s.exchange.orEmpty(), s.memo))
+        }
         return when (s.kind) {
             TransferKind.TRANSFER -> if (s.recurrenceHours != null) {
-                listOf(WalletOps.recurrentTransfer(user, one, native, s.memo, s.recurrenceHours, s.executions.toInt()))
+                listOf(WalletOps.recurrentTransfer(user, one, native, memo(one), s.recurrenceHours, s.executions.toInt()))
             } else {
-                WalletOps.multiTransfer(user, s.recipient, native, s.memo)
+                WalletOps.multiTransfer(user, s.recipient, native, s.memo).map { it.copy(memo = memo(it.to)) }
             }
-            TransferKind.TO_SAVINGS -> listOf(WalletOps.transferToSavings(user, one, native, s.memo))
-            TransferKind.FROM_SAVINGS -> listOf(WalletOps.transferFromSavings(user, one, native, s.memo, requestId()))
+            TransferKind.TO_SAVINGS -> listOf(WalletOps.transferToSavings(user, one, native, memo(one)))
+            TransferKind.FROM_SAVINGS -> listOf(WalletOps.transferFromSavings(user, one, native, memo(one), requestId()))
             TransferKind.POWER_UP -> listOf(WalletOps.transferToVesting(user, one, native))
             TransferKind.CONVERT -> listOf(WalletOps.convert(user, native, requestId()))
             TransferKind.POINTS -> WalletOps.multiPointTransfer(user, s.recipient, Amounts.asset(s.amount, "POINT"), s.memo)

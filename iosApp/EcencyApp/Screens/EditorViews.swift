@@ -662,11 +662,14 @@ struct EditorScreen: View {
         ToolbarItem(placement: .navigationBarLeading) {
             Button { leave() } label: { Image(appIcon: .back) }.accessibilityLabel(UiCopy.shared.BACK).accessibilityIdentifier("editor-back")
         }
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if !state.isReply, !state.isEdit {
+        if !state.isReply, !state.isEdit {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(state.isDraftSaved ? EditorUiCopy.shared.SAVED : UiCopy.shared.SAVE) { if state.draftId != nil { saveChoice = true } else { model.saveDraft(saveAsNew: false) } }
                     .disabled(state.isDraftSaved || state.isDraftSaving).accessibilityIdentifier("save-draft")
             }
+            .onPage()
+        }
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button { model.setPreview(on: !state.isPreview) } label: { Image(appIcon: state.isPreview ? .edit : .preview) }
                 .accessibilityLabel(state.isPreview ? UiCopy.shared.EDIT : EditorUiCopy.shared.PREVIEW).accessibilityIdentifier("preview-toggle")
             if !state.isReply {
@@ -733,7 +736,7 @@ struct EditorScreen: View {
         if !state.isReply, !state.isEdit {
             Button { sheet = .community } label: {
                 HStack {
-                    AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/128", size: 28)
+                    AvatarView(url: "https://images.ecency.com/u/\(state.community?.name ?? state.owner ?? "")/avatar/small", size: 28)
                     Text(state.community?.title ?? EditorUiCopy.shared.MY_BLOG).foregroundStyle(theme.text).accessibilityIdentifier("community-row-title")
                     Image(appIcon: .expand).font(.footnote).foregroundStyle(theme.icon).accessibilityHidden(true)
                     Spacer()
@@ -867,7 +870,7 @@ struct EditorScreen: View {
                     ForEach(mentions, id: \.self) { name in
                         Button { model.insertUsername(username: name); mentions = [] } label: {
                             HStack(spacing: 6) {
-                                AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/128", size: 20)
+                                AvatarView(url: "https://images.ecency.com/u/\(name)/avatar/small", size: 20)
                                 Text(name).font(.footnote).foregroundStyle(theme.text)
                             }
                             .padding(.horizontal, 8).padding(.vertical, 4).background(theme.lightBackground, in: Capsule())
@@ -1370,7 +1373,7 @@ private struct CommunitySheet: View {
             Task { onPick((try? await model.resolve(choice: c)) ?? c) }
         } label: {
             HStack {
-                AvatarView(url: "https://images.ecency.com/u/\(c.name)/avatar/128", size: 32)
+                AvatarView(url: "https://images.ecency.com/u/\(c.name)/avatar/small", size: 32)
                 Text(c.title)
             }
         }
@@ -1399,15 +1402,16 @@ private struct CommunitySheet: View {
     }
 }
 
-/// RN uploadsGalleryModal: where an image comes from, and the account's uploaded images.
-private struct UploadsSheet: View {
+/// RN uploadsGalleryModal: where an image comes from, and the account's uploaded images. Without the source
+/// handlers (the quick composers, `QuickUploadsSheet`) it is the gallery alone: no source tiles and no "+".
+struct UploadsSheet: View {
     @ObservedObject var uploads: Observed<UploadsState>
-    let onGallery: () -> Void
-    let onFiles: () -> Void
-    let onCamera: () -> Void
-    let onPaste: () -> Void
+    var onGallery: (() -> Void)?
+    var onFiles: (() -> Void)?
+    var onCamera: (() -> Void)?
+    var onPaste: (() -> Void)?
     let onInsert: ([String]) -> Void
-    let onAdd: () -> Void
+    var onAdd: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
 
@@ -1419,7 +1423,7 @@ private struct UploadsSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     // hasImages reads no content, so iOS shows no paste notice until the user taps
-                    MediaSourceTiles(
+                    if onGallery != nil { MediaSourceTiles(
                         options: MediaSourceMenus.shared.editorUploads(camera: CameraPicker.isAvailable, paste: UIPasteboard.general.hasImages),
                         identifier: { source in
                             switch source {
@@ -1431,19 +1435,21 @@ private struct UploadsSheet: View {
                         }
                     ) { source in
                         switch source {
-                        case .files: onFiles()
-                        case .camera: onCamera()
-                        case .paste: onPaste()
-                        default: onGallery()
+                        case .files: onFiles?()
+                        case .camera: onCamera?()
+                        case .paste: onPaste?()
+                        default: onGallery?()
                         }
-                    }
+                    } }
                     HStack {
                         Text(EditorUiCopy.shared.UPLOADED_IMAGES).bold().accessibilityAddTraits(.isHeader)
                         Spacer()
                         // RN's "+" pill: add images to the gallery without inserting them
-                        Button(action: onAdd) { Image(appIcon: .add).scaledFont(18, weight: .semibold).tapTarget() }
-                            .accessibilityLabel(UploadsCopy.shared.ADD_TO_GALLERY)
-                            .accessibilityIdentifier("add-to-gallery")
+                        if let onAdd {
+                            Button(action: onAdd) { Image(appIcon: .add).scaledFont(18, weight: .semibold).tapTarget() }
+                                .accessibilityLabel(UploadsCopy.shared.ADD_TO_GALLERY)
+                                .accessibilityIdentifier("add-to-gallery")
+                        }
                         if state.uploading > 0 { ProgressView() }
                         if !state.selected.isEmpty { Button(EditorUiCopy.shared.deleteCount(count: Int32(state.selected.count)), role: .destructive) { model.deleteSelected() }.accessibilityIdentifier("delete-images") }
                     }

@@ -511,7 +511,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                     Column(Modifier.fillMaxSize().verticalScroll(bodyScroll).testTag("editorScroll")) {
                         if (!state.isReply && !state.isEdit) {
                             Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { sheet = "community" }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("communityRow"), verticalAlignment = Alignment.CenterVertically) {
-                                Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/128", 28.dp)
+                                Avatar("https://images.ecency.com/u/${state.community?.name ?: state.owner.orEmpty()}/avatar/small", 28.dp)
                                 Text(state.community?.title ?: EditorUiCopy.MY_BLOG, color = colors.text, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp).weight(1f))
                                 if (!state.canPostToCommunity) Text(EditorUiCopy.communityRestriction(state.community?.title.orEmpty()), color = colors.redText, fontSize = 12.sp, modifier = Modifier.testTag("communityRestriction"))
                             }
@@ -791,28 +791,31 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
         "community" -> CommunitySheet(remember { entry.get("communities") { env.communityPickerModel() } }, onPick = { model.selectCommunity(it); sheet = null }) { sheet = null }
         "uploads" -> UploadsSheet(
             uploads,
-            canPaste = remember(sheet) { EditorImages.clipboardHasImage(context) },
-            onGallery = { sheet = null; photoPicker.pickFromLibrary() },
-            onFiles = { sheet = null; photoPicker.pickFromFiles() },
-            onCamera = {
-                sheet = null
-                cameraGate {
-                    runCatching {
-                        val uri = EditorImages.newCameraUri(context)
-                        cameraUri = uri
-                        camera.launch(uri)
-                    }.onFailure { env.ui.toast(UiCopy.SOMETHING_WRONG) }
-                }
-            },
-            onPaste = {
-                sheet = null
-                val uri = EditorImages.clipboardImage(context)
-                if (uri == null) env.ui.toast(EditorUiCopy.CLIPBOARD_NO_IMAGE) else upload(listOf(uri))
-            },
             onInsert = { urls -> uploads.insert(urls); sheet = null },
-            // the sheet stays open: the new images show in it as they arrive
-            onAdd = { galleryAdd.pickFromLibrary() },
-        ) { sheet = null }
+            onDismiss = { sheet = null },
+            sources = UploadSources(
+                canPaste = remember(sheet) { EditorImages.clipboardHasImage(context) },
+                onGallery = { sheet = null; photoPicker.pickFromLibrary() },
+                onFiles = { sheet = null; photoPicker.pickFromFiles() },
+                onCamera = {
+                    sheet = null
+                    cameraGate {
+                        runCatching {
+                            val uri = EditorImages.newCameraUri(context)
+                            cameraUri = uri
+                            camera.launch(uri)
+                        }.onFailure { env.ui.toast(UiCopy.SOMETHING_WRONG) }
+                    }
+                },
+                onPaste = {
+                    sheet = null
+                    val uri = EditorImages.clipboardImage(context)
+                    if (uri == null) env.ui.toast(EditorUiCopy.CLIPBOARD_NO_IMAGE) else upload(listOf(uri))
+                },
+                // the sheet stays open: the new images show in it as they arrive
+                onAdd = { galleryAdd.pickFromLibrary() },
+            ),
+        )
     }
 }
 
@@ -832,7 +835,7 @@ private fun MentionBar(env: AppEnvironment, model: EditorModel, state: EditorSta
     LazyRow(Modifier.fillMaxWidth().padding(horizontal = 8.dp).testTag("mentionBar")) {
         items(names) { name ->
             Row(Modifier.padding(4.dp).clip(RoundedCornerShape(50)).background(colors.lightBackground).clickable(role = Role.Button) { model.insertUsername(name) }.padding(horizontal = 8.dp, vertical = 4.dp).testTag("mention:$name"), verticalAlignment = Alignment.CenterVertically) {
-                Avatar("https://images.ecency.com/u/$name/avatar/128", 20.dp)
+                Avatar("https://images.ecency.com/u/$name/avatar/small", 20.dp)
                 Text(name, color = colors.text, fontSize = 13.sp, modifier = Modifier.padding(start = 6.dp))
             }
         }
@@ -1142,7 +1145,7 @@ private fun CommunitySheet(model: CommunityPickerModel, onPick: (EditorCommunity
     LaunchedEffect(model) { model.start() }
     @Composable fun Section(title: String) = Text(title, color = colors.darkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
     @Composable fun CommunityRow(c: EditorCommunity) = Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { scope.launch { onPick(model.resolve(c)) } }.padding(vertical = 8.dp).testTag("community:${c.name}"), verticalAlignment = Alignment.CenterVertically) {
-        Avatar("https://images.ecency.com/u/${c.name}/avatar/128", 32.dp)
+        Avatar("https://images.ecency.com/u/${c.name}/avatar/small", 32.dp)
         Text(c.title, color = colors.text, modifier = Modifier.padding(start = 12.dp))
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
@@ -1164,27 +1167,35 @@ private fun CommunitySheet(model: CommunityPickerModel, onPick: (EditorCommunity
     }
 }
 
-/** RN uploadsGalleryModal: where an image comes from, and the account's uploaded images. */
+/** The editor's routes into its uploads sheet: the source tiles and RN's "+" (add to the gallery without inserting). */
+internal class UploadSources(
+    val canPaste: Boolean,
+    val onGallery: () -> Unit,
+    val onFiles: () -> Unit,
+    val onCamera: () -> Unit,
+    val onPaste: () -> Unit,
+    val onAdd: () -> Unit,
+)
+
+/**
+ * RN uploadsGalleryModal: where an image comes from, and the account's uploaded images. Without [sources] (the
+ * quick composers, [QuickUploadsSheet]) it is the gallery alone: no source tiles and no "+".
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun UploadsSheet(
+internal fun UploadsSheet(
     model: UploadsModel,
-    canPaste: Boolean,
-    onGallery: () -> Unit,
-    onFiles: () -> Unit,
-    onCamera: () -> Unit,
-    onPaste: () -> Unit,
     onInsert: (List<String>) -> Unit,
-    onAdd: () -> Unit,
     onDismiss: () -> Unit,
+    sources: UploadSources? = null,
 ) {
     val colors = LocalEcencyColors.current
     val state by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
     ModalBottomSheet(onDismissRequest = { model.clearSelection(); onDismiss() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding().testTag("uploadsSheet")) {
-            MediaSourceTiles(
-                com.ecency.core.app.MediaSourceMenus.editorUploads(camera = true, paste = canPaste),
+            if (sources != null) MediaSourceTiles(
+                com.ecency.core.app.MediaSourceMenus.editorUploads(camera = true, paste = sources.canPaste),
                 tagFor = {
                     when (it) {
                         com.ecency.core.app.MediaSource.FILES -> "openFiles"
@@ -1195,17 +1206,17 @@ private fun UploadsSheet(
                 },
             ) {
                 when (it) {
-                    com.ecency.core.app.MediaSource.FILES -> onFiles()
-                    com.ecency.core.app.MediaSource.CAMERA -> onCamera()
-                    com.ecency.core.app.MediaSource.PASTE -> onPaste()
-                    else -> onGallery()
+                    com.ecency.core.app.MediaSource.FILES -> sources.onFiles()
+                    com.ecency.core.app.MediaSource.CAMERA -> sources.onCamera()
+                    com.ecency.core.app.MediaSource.PASTE -> sources.onPaste()
+                    else -> sources.onGallery()
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(EditorUiCopy.UPLOADED_IMAGES, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.weight(1f))
                 // RN's "+" pill: add images to the gallery without inserting them
-                Box(
-                    Modifier.clip(CircleShape).clickable(onClick = onAdd, role = Role.Button).semantics { contentDescription = com.ecency.core.app.UploadsCopy.ADD_TO_GALLERY }
+                if (sources != null) Box(
+                    Modifier.clip(CircleShape).clickable(onClick = sources.onAdd, role = Role.Button).semantics { contentDescription = com.ecency.core.app.UploadsCopy.ADD_TO_GALLERY }
                         .padding(6.dp).testTag("addToGallery"),
                 ) { Glyph(AppIcon.ADD, colors.text, 24.dp, description = null) }
                 if (state.uploading > 0) Spinner(Modifier.padding(horizontal = 6.dp), size = 18.dp)

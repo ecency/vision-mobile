@@ -60,7 +60,7 @@ class PostModelTest {
         assertTrue(s.comments.last().hasHiddenReplies)
         assertFalse(s.comments.first().hasHiddenReplies)
         assertTrue(s.comments.all { it.blocks.isNotEmpty() })
-        assertEquals("https://i.ecency.com/u/bob/avatar/128", s.comments[1].card.avatarUrl)
+        assertEquals("https://i.ecency.com/u/bob/avatar/small", s.comments[1].card.avatarUrl)
         assertEquals("$5.000", s.comments[1].card.payoutText)
         model.close()
     }

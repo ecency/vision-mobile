@@ -647,13 +647,18 @@ fun ChatThreadScreen(env: AppEnvironment, host: AppHost, entry: StackEntry, scre
         OptionsSheet(
             null, options.map { it.label.uppercase() to it.destructive }, options.map { it.name }, onDismiss = { messageOptions = null },
             header = {
-                LazyRow(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    items(ChatEmoji.QUICK, key = { it.first }) { (name, emoji) ->
-                        Text(emoji, fontSize = 26.sp, modifier = Modifier.clip(CircleShape).clickable(role = Role.Button) { messageOptions = null; model.react(item, name) }.padding(10.dp).testTag("quick:$name"))
+                // the quick reactions share the row; More stays at its end and opens every emoji
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LazyRow(Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(ChatEmoji.QUICK, key = { it.first }) { (name, emoji) ->
+                            Text(emoji, fontSize = 26.sp, modifier = Modifier.clip(CircleShape).clickable(role = Role.Button) { messageOptions = null; model.react(item, name) }.padding(8.dp).testTag("quick:$name"))
+                        }
                     }
-                    item(key = "more") {
-                        Text("\u22EF " + ChatUiCopy.MORE_MENU, fontSize = 16.sp, color = colors.text, modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(colors.lightBackground).clickable(role = Role.Button) { messageOptions = null; emojiFor = item }.padding(horizontal = 12.dp, vertical = 10.dp).testTag("quick:more"))
-                    }
+                    Box(
+                        Modifier.padding(start = 4.dp).size(44.dp).clip(CircleShape).background(colors.lightBackground)
+                            .clickable(role = Role.Button) { messageOptions = null; emojiFor = item }.testTag("quick:more"),
+                        contentAlignment = Alignment.Center,
+                    ) { Glyph(AppIcon.MORE, colors.text, 22.dp, description = ChatUiCopy.MORE_MENU) }
                 }
             },
         ) { index ->
@@ -869,7 +874,8 @@ private fun MessageBubble(
             }
         }
         if (item.reactions.isNotEmpty()) {
-            FlowRow(Modifier.padding(top = 4.dp, start = if (own) 0.dp else 40.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            // own messages' reactions end at the trailing edge, wrapped rows too
+            FlowRow(Modifier.padding(top = 4.dp, start = if (own) 0.dp else 40.dp), horizontalArrangement = Arrangement.spacedBy(4.dp, if (own) Alignment.End else Alignment.Start)) {
                 item.reactions.forEach { pill ->
                     Row(
                         Modifier.clip(RoundedCornerShape(12.dp)).background(colors.lightBackground)

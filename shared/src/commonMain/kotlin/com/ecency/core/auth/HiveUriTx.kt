@@ -105,6 +105,8 @@ object HiveUriTx {
             return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", def.authority)
         }
         if (OperationAuthority.isMixedCustomJson(op)) return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", MIXED)
+        // #3633: a link cannot encrypt a `#` memo, and signing it as it is would make it public
+        if (com.ecency.core.hive.Memo.hasPlainHashMemo(op)) return FormattedHiveUriTx.Refused("qr.invalid_op", "qr.invalid_op_desc", HASH_MEMO)
         val authority = if (name in CONTENT_DEPENDENT) resolved.value else def.authority
         // a link never rotates keys, the memo key included: only metadata updates of account_update2 pass (account_update
         // always carries a memo key)
@@ -129,6 +131,9 @@ object HiveUriTx {
 
     /** [FormattedHiveUriTx.Refused.authorityKeyType] of a custom_json that needs active and posting signatures. */
     const val MIXED = "mixed"
+
+    /** [FormattedHiveUriTx.Refused.authorityKeyType] of a transfer whose `#` memo is not encrypted. */
+    const val HASH_MEMO = "hash-memo"
 
     private val CONTENT_DEPENDENT = setOf("custom_json", "account_update2")
     private val ACCOUNT_UPDATES = setOf("account_update", "account_update2")

@@ -209,7 +209,7 @@ struct DrawerHeaderBackground: View {
 
     var body: some View {
         theme.accent
-            .overlay { Image("SideMenuBackground").resizable().scaledToFill() }
+            .overlay { Image(decorative: "SideMenuBackground").resizable().scaledToFill() }
             .clipped()
             .ignoresSafeArea(edges: .top)
             .accessibilityHidden(true)

@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -129,6 +130,63 @@ class PointActivitiesTest {
         assertTrue(PointActivities.key(alice) in app.env.prefs.keys())
         AccountPrefs.clear(app.env.prefs)
         assertTrue(app.env.pointActivities.pending(alice).isEmpty(), "the key names the account: a wipe removes it")
+    }
+
+    /** #3634: an account signed out (not a wipe) takes its parked reports with it; the others' stay. */
+    @Test
+    fun parkedReportsGoWithTheirAccountOnSignOut() = runTest {
+        val app = app()
+        activityStatus = 500
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-a")
+        app.env.pointActivities.record(bob, PointActivity.VOTE, "tx-b")
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, app.env.pointActivities.pending(alice).size)
+        assertEquals(1, app.env.pointActivities.pending(bob).size)
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty(), "gone with the account")
+        assertEquals(1, app.env.pointActivities.pending(bob).size)
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
+    }
+
+    /** Review: a report still being tried when its account signs out is not parked again afterwards. */
+    @Test
+    fun aReportInFlightAtSignOutIsNotParkedAgain() = runTest {
+        val app = app()
+        activityStatus = 500
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-a")
+        testScheduler.runCurrent()
+        assertEquals(1, app.reports().size, "the first try failed, the retry waits")
+        // the sign-out: the account leaves the vault, then its data
+        KeyVault(app.store).remove(alice)
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty())
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
+        // signed in again: a new report parks as before
+        KeyVault(app.store).save(VaultAccount(alice, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(alice, com.ecency.core.hive.KeyRole.POSTING), accessToken = "access-$alice"))
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-b")
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("tx-b"), app.env.pointActivities.pending(alice).map { it.txId })
+    }
+
+    /** Review: a broadcast that started before the sign-out and reports after it parks nothing for the account. */
+    @Test
+    fun aReportFromABroadcastThatEndsAfterTheSignOutIsNotParked() = runTest {
+        val app = app()
+        // the app lock hides the app, so the report cannot go now and would be parked
+        PinLock(KeyVault(app.store), 16).setPin("1234")
+        app.env.appLock.refresh()
+        testScheduler.advanceUntilIdle()
+        app.env.appLock.lockIfEnabled()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.appLock.current.hidesContent)
+        KeyVault(app.store).remove(alice)
+        app.env.accountsLeft(listOf(alice), forget = false) {}
+        // the vote's broadcast went through only now, after the account left
+        app.env.pointActivities.record(alice, PointActivity.VOTE, "tx-late")
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.pointActivities.pending(alice).isEmpty())
+        assertFalse(PointActivities.key(alice) in app.env.prefs.keys())
     }
 
     @Test

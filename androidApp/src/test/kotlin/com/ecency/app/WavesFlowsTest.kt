@@ -166,6 +166,43 @@ class WavesFlowsTest {
         waitFor("postScreen")
     }
 
+    /**
+     * Tester report "in Waves no option to fix typos or delete comments": own waves carry RN commentView's footer
+     * Edit pencil, and the Delete trash while the wave has no votes and no replies; others' waves carry neither.
+     */
+    @Test
+    fun ownWavesShowEditAndDeleteInTheFooterAndDeleteConfirmsThenBroadcasts() {
+        fun own(permlink: String, votes: Int, children: Int) =
+            """{"id":1,"author":"tester","permlink":"$permlink","title":"","body":"Wave with a tpyo $permlink","json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]},
+               "timestamp":"2026-10-06T11:00:00+00:00","pending_payout_value":"0.000 HBD","net_votes":$votes,"children":$children,"host":"ecency.waves","_cursor":"c-$permlink"}"""
+        feedOverride = "[${own("fresh", 0, 0)},${own("voted", 3, 0)},${row("alice", "w1")}]"
+        node.signIn()
+        launch()
+        waitFor("bottomTab:WAVES")
+        compose.onNodeWithTag("bottomTab:WAVES").performClick()
+        waitFor("wave:tester/fresh")
+        fun inWave(wave: String, tag: String) = compose.onAllNodes(hasTestTag(tag) and hasAnyAncestor(hasTestTag(wave))).fetchSemanticsNodes().isNotEmpty()
+        assertTrue(inWave("wave:tester/fresh", "wave:edit") && inWave("wave:tester/fresh", "wave:delete-post"))
+        assertTrue(inWave("wave:tester/voted", "wave:edit") && !inWave("wave:tester/voted", "wave:delete-post"))
+        assertFalse(inWave("wave:alice/w1", "wave:edit") || inWave("wave:alice/w1", "wave:delete-post"))
+        // icon buttons with a label and a role
+        compose.onAllNodes(hasTestTag("wave:delete-post") and hasAnyAncestor(hasTestTag("wave:tester/fresh")))[0]
+            .assert(androidx.compose.ui.test.hasContentDescription(com.ecency.core.l10n.L.post.a11yDelete))
+            .assert(androidx.compose.ui.test.SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, androidx.compose.ui.semantics.Role.Button))
+        // Delete asks first (the menu's confirmation), then broadcasts delete_comment and the wave leaves the list
+        compose.onAllNodes(hasTestTag("wave:delete-post") and hasAnyAncestor(hasTestTag("wave:tester/fresh")))[0].performClick()
+        waitFor("confirm")
+        assertTrue(node.broadcasts().isEmpty())
+        click("confirm")
+        pump { node.broadcasts().isNotEmpty() }
+        val tx = node.broadcasts().single()
+        assertTrue(tx, "delete_comment" in tx && "\"permlink\":\"fresh\"" in tx)
+        waitGone("wave:tester/fresh")
+        // Edit opens the wave in the editor
+        compose.onAllNodes(hasTestTag("wave:edit") and hasAnyAncestor(hasTestTag("wave:tester/voted")))[0].performClick()
+        waitFor("editor")
+    }
+
     @Test
     fun aWaveWithAPollShowsThePollInTheList() {
         // RN's comment view draws a wave's poll in the list, not only in its thread
@@ -471,5 +508,34 @@ class WavesFlowsTest {
         waitFor("wave:alice/w1")
         compose.await("playing.isEmpty()") { playing.isEmpty() }
         assertEquals(1, wavesRequests.count { "api/embed" in it })
+    }
+
+    @Test
+    fun anImageFromTheUploadsGalleryIsTheWavesImage() {
+        // RN quick post's UploadsGalleryModal (allowMultiple={false}): the account's uploaded images, one tap is the wave's image
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        node.auth.rest = { r ->
+            if ("/private-api/images?" in r.url) HttpResult(200, """{"data":[{"_id":"i1","url":"$gallery","created":"2026-10-01"}],"pagination":{"total":1,"limit":20,"offset":0,"has_next":false}}""") else null
+        }
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveUploads")
+        waitFor("uploadsSheet")
+        // the toolbar already has the pickers: the sheet is the gallery alone
+        assertFalse(compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertFalse(exists("addToGallery"))
+        waitFor("galleryImage:$gallery")
+        click("galleryImage:$gallery")
+        waitFor("waveImage")
+        waitGone("uploadsSheet")
+        assertEquals(gallery, env.waves.composer().current.imageUrl)
+        compose.onNodeWithTag("waveText").performTextInput("A wave with an old upload")
+        click("wavePublish")
+        pump { node.broadcasts().isNotEmpty() || env.waves.composer().current.error != null }
+        val tx = node.broadcasts().single()
+        assertTrue(tx, "A wave with an old upload\\n\\n ![]($gallery)" in tx)
     }
 }

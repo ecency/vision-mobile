@@ -564,6 +564,7 @@
   "post.a11y_comments": "{count, plural, one {# comment} other {# comments}}",
   "post.a11y_comments_hint": "View comments",
   "post.a11y_delete": "Delete comment",
+  "post.a11y_edit": "Edit comment",
   "post.a11y_hide_replies": "Hide replies",
   "post.a11y_post_options": "Post options",
   "post.a11y_reblogs": "{count, plural, one {# reblog} other {# reblogs}}",

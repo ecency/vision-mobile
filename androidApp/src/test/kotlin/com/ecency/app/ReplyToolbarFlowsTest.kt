@@ -9,6 +9,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertTextEquals
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -93,6 +97,20 @@ class ReplyToolbarFlowsTest {
         assertFalse(exists("replyVideoButton"))
     }
 
+    @OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+    /** Tester report: Enter on the keyboard starts a new line in a reply (the key, not pasted text). */
+    @Test
+    fun enterStartsANewLineInAReply() {
+        openReplySheet()
+        val text = compose.onNodeWithTag("replyText")
+        text.performTextInput("first line")
+        text.performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        text.performTextInput("second line")
+        compose.waitForIdle()
+        text.assertTextEquals("first line\nsecond line", includeEditableText = true)
+    }
+
     @Test
     fun anImagePickedInTheReplySheetGoesOutWithTheReply() {
         val asked = mutableListOf<WaveImageSource>()
@@ -111,5 +129,30 @@ class ReplyToolbarFlowsTest {
         compose.await("the reply reaches the node") { node.broadcasts().isNotEmpty() }
         val sent = node.broadcasts().single()
         assertTrue(sent, "Nice post\\n\\n ![](https://images.ecency.com/DQmReply/photo.jpg)" in sent)
+    }
+
+    @Test
+    fun anImageFromTheUploadsGalleryIsTheRepliesImage() {
+        // RN quick reply's UploadsGalleryModal (allowMultiple={false}): the account's uploaded images, one tap is the reply's image
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        node.auth.rest = { r ->
+            if ("/private-api/images?" in r.url) com.ecency.core.api.rpc.HttpResult(200, """{"data":[{"_id":"i1","url":"$gallery","created":"2026-10-01"}],"pagination":{"total":1,"limit":20,"offset":0,"has_next":false}}""") else null
+        }
+        openReplySheet()
+        compose.onNodeWithTag("replyText").performTextInput("Nice post")
+        assertTrue("the gallery button sits in the reply sheet", compose.onAllNodes(hasTestTag("replyUploads") and hasAnyAncestor(hasTestTag("replySheet"))).fetchSemanticsNodes().isNotEmpty())
+        compose.onNodeWithTag("replyUploads").performSemanticsAction(SemanticsActions.OnClick)
+        waitFor("uploadsSheet")
+        // the toolbar already has the pickers: the sheet is the gallery alone
+        assertFalse(compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertFalse(exists("addToGallery"))
+        waitFor("galleryImage:$gallery")
+        compose.onNodeWithTag("galleryImage:$gallery").performSemanticsAction(SemanticsActions.OnClick)
+        waitFor("replyImage")
+        compose.await("the gallery closes") { !exists("uploadsSheet") }
+        compose.onNodeWithTag("replySend").performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the reply reaches the node") { node.broadcasts().isNotEmpty() }
+        val sent = node.broadcasts().single()
+        assertTrue(sent, "Nice post\\n\\n ![]($gallery)" in sent)
     }
 }

@@ -8,7 +8,7 @@ import UIKit
 struct PostActions {
     /// Avatar for a mention chip; nil draws the chip without one. Invalid account names get none.
     static let defaultAvatarURL: (String) -> String? = {
-        PlainTextKt.isHiveAccountName(name: $0) ? "https://images.ecency.com/u/\($0)/avatar/128" : nil
+        PlainTextKt.isHiveAccountName(name: $0) ? "https://images.ecency.com/u/\($0)/avatar/small" : nil
     }
 
     var onLink: (LinkTarget) -> Void = { _ in }

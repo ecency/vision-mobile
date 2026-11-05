@@ -19,6 +19,12 @@ class PrivateKey private constructor(private val secret: ByteArray) {
 
     fun publicKey(): PublicKey = PublicKey(Secp256k1.pubKeyCompress(Secp256k1.pubkeyCreate(secret)))
 
+    /** The memo cipher's shared secret with [other] (dhive get_shared_secret): SHA-512 of the x of other times this key. */
+    internal fun sharedSecret(other: PublicKey): ByteArray {
+        val point = Secp256k1.pubKeyCompress(Secp256k1.pubKeyTweakMul(Secp256k1.pubkeyParse(other.compressed), secret))
+        return org.kotlincrypto.hash.sha2.SHA512().digest(point.copyOfRange(1, 33))
+    }
+
     /**
      * Signs a 32-byte digest. Deterministic (RFC 6979) and low-S, encoded as hived expects:
      * header byte (recovery id + 31) followed by the 64-byte compact signature.

@@ -249,13 +249,21 @@ fun TransferForm(env: AppEnvironment, model: TransferModel, onBack: () -> Unit) 
                 Text(TransferCopy.MEMO_DESC, color = colors.darkGray, fontSize = 12.sp)
             }
             if (s.memoHasSecret) Warning(TransferCopy.MEMO_HAS_SECRET, "memoHasSecret")
+            when (s.memoEncryption) {
+                com.ecency.core.app.MemoEncryption.ENCRYPTS -> Warning(TransferCopy.MEMO_ENCRYPTED, "memoEncrypted", red = false)
+                com.ecency.core.app.MemoEncryption.NO_KEY -> Warning(TransferCopy.MEMO_ENCRYPT_NO_KEY, "memoEncryptNoKey")
+                com.ecency.core.app.MemoEncryption.UNSUPPORTED -> Warning(TransferCopy.MEMO_ENCRYPT_UNSUPPORTED, "memoEncryptUnsupported")
+                com.ecency.core.app.MemoEncryption.EXCHANGE -> Warning(TransferCopy.memoExchange(s.exchange.orEmpty(), s.memo), "memoEncryptExchange")
+                com.ecency.core.app.MemoEncryption.NONE -> Unit
+            }
             if (s.kind == com.ecency.core.app.TransferKind.CONVERT) Warning(TransferCopy.CONVERT_DESC, "convertDesc", red = false)
             s.exchange?.let { ex ->
                 if (s.exchangeMemoRequired) Warning(TransferCopy.exchangeMemoRequired(ex), "exchangeMemo")
                 if (s.exchangeRecurrentWarning) Warning(TransferCopy.exchangeRecurrentWarning(ex), "exchangeRecurrent")
             }
             SendPhasePanel(s.phase, onClose = onBack)
-            if (!s.busy && s.phase !is com.ecency.core.app.SendPhase.Unconfirmed) PrimaryButton(TransferCopy.NEXT, s.nextEnabled, "transferNext", model::next)
+            if (s.encryptingMemo) Spinner(Modifier.fillMaxWidth().padding(12.dp).testTag("memoEncrypting"))
+            else if (!s.busy && s.phase !is com.ecency.core.app.SendPhase.Unconfirmed) PrimaryButton(TransferCopy.NEXT, s.nextEnabled, "transferNext", model::next)
         }
     }
     when (val p = s.prompt) {

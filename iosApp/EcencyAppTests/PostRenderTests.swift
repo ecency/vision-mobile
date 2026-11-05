@@ -38,7 +38,7 @@ final class PostRenderTests: XCTestCase {
         let built = InlineTextBuilder(theme: .light, size: 16).build(mention)
         let chips = built.chips
         XCTAssertEqual(chips.map(\.label), ["@ecency", "#hive"])
-        XCTAssertEqual(chips[0].avatarURL, "https://images.ecency.com/u/ecency/avatar/128")
+        XCTAssertEqual(chips[0].avatarURL, "https://images.ecency.com/u/ecency/avatar/small")
         XCTAssertNil(chips[1].avatarURL)
         XCTAssertEqual(chips[0].bounds.height, 18)
         // Avatar slot (2 + 14 + 4) makes the mention chip wider than a tag chip with the same label length.
@@ -127,7 +127,7 @@ final class PostRenderTests: XCTestCase {
     }
 
     func testInvalidAccountNamesGetNoAvatar() {
-        XCTAssertEqual(PostActions.defaultAvatarURL("hive.blog"), "https://images.ecency.com/u/hive.blog/avatar/128")
+        XCTAssertEqual(PostActions.defaultAvatarURL("hive.blog"), "https://images.ecency.com/u/hive.blog/avatar/small")
         XCTAssertNil(PostActions.defaultAvatarURL("../evil"))
         XCTAssertNil(PostActions.defaultAvatarURL("a b"))
         let built = InlineTextBuilder(theme: .light, size: 16).build([InlineMention(author: "Bad/Name")])

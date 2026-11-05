@@ -128,6 +128,9 @@ class FeedxUi(
     /** RN showLoginAlert: the login screen. */
     fun requestLogin() = login()
 
+    /** A menu item run from outside the sheet (the footer's Edit and Delete): the menu's own select and effect. */
+    suspend fun select(item: PostMenuItem, post: Post, root: PostKey) = handle(env.postActions.select(item, post), root)
+
     /** Acts on what a menu tap asked for (RN _handleOnDropdownSelect after the sheet closed). */
     fun handle(effect: PostMenuEffect, root: PostKey) {
         when (effect) {
@@ -188,7 +191,7 @@ fun FeedxOverlays(ui: FeedxUi) {
                             modifier = Modifier.fillMaxWidth().clickable(role = Role.Button) {
                                 ui.menu = null
                                 if (item in MenuToggles) ui.haptics(com.ecency.core.app.HapticEvent.TOGGLE)
-                                scope.launch { ui.handle(env.postActions.select(item, request.post), request.root) }
+                                scope.launch { ui.select(item, request.post, request.root) }
                             }.padding(horizontal = 24.dp, vertical = 14.dp).testTag("menu:${item.id}"),
                         )
                     }
@@ -479,5 +482,39 @@ fun OptionsButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     val colors = LocalEcencyColors.current
     Box(modifier.iconClickable(radius = 20.dp, onClick = onClick).inMergedRow(LocalMergedRow.current).padding(6.dp).testTag("options")) {
         Glyph(AppIcon.MORE, colors.icon, 24.dp, description = ReadingUiCopy.POST_OPTIONS)
+    }
+}
+
+/**
+ * RN commentView's footer icons on an own reply or wave: Edit, and Delete while nothing stops it ([PostFooter]). Each
+ * runs the menu's item ([FeedxUi.select]): the editor, or the menu's confirmation and delete. Tags `<tag>:<item id>`.
+ */
+@Composable
+fun OwnFooterButtons(post: Post, votes: Int, root: PostKey, tag: String) {
+    val feedx = LocalFeedx.current ?: return
+    val colors = LocalEcencyColors.current
+    val merged = LocalMergedRow.current
+    val scope = rememberCoroutineScope()
+    // the session as Compose state: a row kept across an account switch drops the previous account's buttons
+    val user = signedInUser(feedx)
+    remember(post, votes, user) { feedx.env.postActions.footer(post, votes) }.forEach { item ->
+        Box(Modifier.iconClickable(radius = 20.dp) { scope.launch { feedx.select(item, post, root) } }.inMergedRow(merged).padding(6.dp).testTag("$tag:${item.id}")) {
+            Glyph(com.ecency.core.app.PostFooter.icon(item), colors.icon, 20.dp, description = com.ecency.core.app.PostFooter.label(item))
+        }
+    }
+}
+
+/** The signed-in account, observed: a key for what [OwnFooterButtons] and [ownFooterA11yActions] show. */
+@Composable
+fun signedInUser(feedx: FeedxUi?): String? {
+    val ui = feedx ?: return null
+    return ui.env.session.state.collectAsState().value.username
+}
+
+/** The footer icons as TalkBack actions, for a merged row that hides the icons themselves. */
+fun ownFooterA11yActions(feedx: FeedxUi?, post: Post, votes: Int, root: PostKey, scope: kotlinx.coroutines.CoroutineScope): List<androidx.compose.ui.semantics.CustomAccessibilityAction> {
+    val ui = feedx ?: return emptyList()
+    return ui.env.postActions.footer(post, votes).map { item ->
+        a11yAction(com.ecency.core.app.PostFooter.label(item)) { scope.launch { ui.select(item, post, root) } }
     }
 }

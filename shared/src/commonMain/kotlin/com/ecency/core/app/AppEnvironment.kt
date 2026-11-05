@@ -586,6 +586,7 @@ class AppEnvironment(
         guardedStep { sendJournal.forget(drafts) }
         // the exchange deposit memos it sent go with it
         guardedStep { exchangeMemos.forget(drafts) }
+        guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { pointActivities.forget(drafts) } }
         // nothing signs again for an account that left (a pending holds its key in memory)
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { walletSends.accountsLeft(drafts) } }
         // nor does a broadcast retry the broadcaster keeps after a network error (it holds the key too)

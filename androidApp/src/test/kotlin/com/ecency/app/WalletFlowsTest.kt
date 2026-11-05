@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -328,6 +329,31 @@ class WalletFlowsTest {
         assertTrue(node.broadcasts().isEmpty())
     }
 
+    /** #3633: a `#` memo says it will be encrypted on a HIVE transfer; a Points transfer refuses it and keeps Next off. */
+    @Test
+    fun aHashMemoSaysItIsEncryptedOrWhyItCannotBe() {
+        fun nextEnabled() = compose.onAllNodes(hasTestTag("transferNext")).fetchSemanticsNodes().firstOrNull()?.config?.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled) == false
+        launch(Navigator(NavState().push(AppScreen.Transfer("ecency_point_transfer", "POINT", "points"))))
+        until { exists("transferForm") }
+        compose.onNodeWithTag("transferTo").performTextInput("spike-bob")
+        compose.onNodeWithTag("transferAmount").performTextInput("1")
+        compose.onNodeWithTag("transferMemo").performTextInput("#secret")
+        until { exists("memoEncryptUnsupported") && exists("transferNext") }
+        assertFalse("Next stays off", nextEnabled())
+        compose.onNodeWithTag("transferMemo").performTextReplacement("public")
+        until { !exists("memoEncryptUnsupported") }
+        assertTrue(node.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun aHashMemoOnAHiveTransferSaysItWillBeEncrypted() {
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))))
+        until { exists("transferForm") && text("transferBalance").contains("12.345") }
+        compose.onNodeWithTag("transferMemo").performTextInput("#rent")
+        until { exists("memoEncrypted") }
+        assertFalse(exists("memoEncryptNoKey"))
+    }
+
     @Test
     fun aTransferIsConfirmedOnceAndBroadcastAsTheSdksOperation() {
         val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))
@@ -417,6 +443,60 @@ class WalletFlowsTest {
         // the first gift button of the screen: the post's own, or its comment's (RN tips a comment's author too)
         assertTrue(sent, sent.contains(""""to":"alice","amount":"1.000 HIVE","memo":"Tip for @alice/trending-one"""") ||
             sent.contains(""""to":"carol","amount":"1.000 HIVE","memo":"Tip for @carol/re-one""""))
+    }
+
+    @Test
+    fun aPointsTipOnACommentSendsAPointTransferToTheCommentsAuthor() {
+        launch(Navigator(NavState().push(AppScreen.Post("alice", "trending-one"))))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
+        compose.onAllNodes(hasTestTag("tip") and hasAnyAncestor(hasTestTag("comment:carol/re-one")), useUnmergedTree = true).onFirst()
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipSheet") }
+        until { compose.onAllNodes(hasText("100.000"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("tipCurrency:POINTS").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.onNodeWithTag("tipAmount").performTextInput("1")
+        compose.onNodeWithTag("tipSend").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipConfirm") }
+        compose.onNodeWithTag("tipConfirm").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { node.broadcasts().isNotEmpty() }
+        val sent = node.broadcasts().single()
+        assertTrue(sent, sent.contains("ecency_point_transfer"))
+        assertTrue(sent, sent.contains("""\"receiver\":\"carol\"""") && sent.contains("""\"amount\":\"1.000 POINT\"""") && sent.contains("""Tip for @carol/re-one"""))
+    }
+
+    /** A posting-key login: the POINTS tip on a comment asks for the active key once, then sends. */
+    @Test
+    fun aPointsTipOnACommentFromAPostingKeyLoginAsksForTheActiveKey() {
+        val active = com.ecency.core.hive.PrivateKey.fromSeed("ecency-tests-throwaway-active-tip")
+        KeyVault(node.store).save(VaultAccount("tester", AuthType.POSTING_KEY, postingKey = node.key.toWif(), accessToken = "access-tester"))
+        node.extra.let { base ->
+            node.extra = { m, r ->
+                if (m == "condenser_api.get_accounts") {
+                    """[{"name":"tester","balance":"12.345 HIVE","hbd_balance":"5.000 HBD","reward_vesting_balance":"1000.000000 VESTS","vesting_shares":"100000.000000 VESTS",
+                       "posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},
+                       "active":{"weight_threshold":1,"account_auths":[],"key_auths":[["${active.publicKey()}",1]]},"memo_key":"${node.key.publicKey()}","posting_json_metadata":"","json_metadata":""}]"""
+                } else base?.invoke(m, r)
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.Post("alice", "trending-one"))))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
+        compose.onAllNodes(hasTestTag("tip") and hasAnyAncestor(hasTestTag("comment:carol/re-one")), useUnmergedTree = true).onFirst()
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipSheet") }
+        until { compose.onAllNodes(hasText("100.000"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("tipCurrency:POINTS").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.onNodeWithTag("tipAmount").performTextInput("1")
+        compose.onNodeWithTag("tipSend").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipConfirm") }
+        compose.onNodeWithTag("tipConfirm").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("authUpgrade") }
+        compose.onNodeWithTag("upgradeKey", useUnmergedTree = true).performTextInput(active.toWif())
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.waitForIdle()
+        compose.onNodeWithTag("upgradeSign", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { node.broadcasts().isNotEmpty() }
+        val sent = node.broadcasts().single()
+        assertTrue(sent, sent.contains("ecency_point_transfer") && sent.contains("""Tip for @carol/re-one"""))
     }
 
     @Test

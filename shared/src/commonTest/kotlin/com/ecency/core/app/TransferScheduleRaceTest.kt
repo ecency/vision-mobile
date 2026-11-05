@@ -63,6 +63,22 @@ class TransferScheduleRaceTest {
         assertTrue(w.app.broadcasts().isEmpty())
     }
 
+    /** Review: a deletion moves nothing, so its `#` memo is not encrypted: it goes empty, never as plain text. */
+    @Test
+    fun aScheduleDeletedWithAHashMemoSendsAnEmptyMemo() = runTest {
+        val (w, m, gate) = heldSchedule()
+        gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        m.setMemo("#private note")
+        m.deleteSchedule()
+        assertEquals(TransferPrompt.ConfirmDeleteSchedule, m.current.prompt)
+        m.confirmDeleteSchedule()
+        testScheduler.advanceUntilIdle()
+        val sent = w.app.broadcasts().single().params.toString()
+        assertTrue("private note" !in sent, "the memo went as text")
+        assertTrue("\"memo\":\"\"" in sent, sent)
+    }
+
     @Test
     fun aRecipientChangedDuringTheReadGetsNoneOfTheOldOnesSchedule() = runTest {
         val (_, m, gate) = heldSchedule()

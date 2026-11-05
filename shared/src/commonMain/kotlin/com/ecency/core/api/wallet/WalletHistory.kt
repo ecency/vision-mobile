@@ -55,6 +55,9 @@ data class CoinActivity(
     /** The row's key in lists (RN `activity_item_<engineTrxId ?? trxIndex>_<created>`). */
     val key: String get() = "${engineId ?: trxIndex?.toString() ?: ""}_$created"
 
+    /** The memo is an encrypted one (#3633): shown with "Decrypt memo", never repeated as it stands. */
+    val encryptedMemo: Boolean get() = memo?.let(com.ecency.core.hive.Memo::isEncrypted) == true
+
     /**
      * [value] as the row shows it: its amounts in the app language ("1,500 HBD" in de-DE). [value] itself stays the
      * chain's POSIX text, since a repeated transfer reads its amount from it.

@@ -53,6 +53,40 @@ enum class PostMenuItem(val id: String) {
     val destructive: Boolean get() = this == DELETE
 }
 
+/**
+ * RN commentView's footer icons on an own reply or wave (src/components/comment/view/commentView.tsx): an Edit pencil
+ * always, a Delete trash only with no replies, no votes and RN `isDeletable` (utils/postParser.tsx). Both apps draw
+ * exactly this list; a tap runs the menu's item through [PostActionsModel.select].
+ */
+object PostFooter {
+    /** An own reply or wave that is not a cross-post (an own top post has the Edit button of its screen). */
+    internal fun canEdit(shown: Post, user: String?): Boolean {
+        val post = shown.crossPostOriginal ?: shown
+        val isComment = post.depth > 0 || !post.parentAuthor.isNullOrEmpty()
+        return isComment && user != null && user == post.author && shown.crossPostOriginal == null
+    }
+
+    /** The menu's delete rule: hived refuses a delete with replies or a positive vote, and once paid out. */
+    internal fun canDelete(shown: Post, user: String?): Boolean {
+        val post = shown.crossPostOriginal ?: shown
+        return user != null && user == post.author && shown.crossPostOriginal == null && !post.isPaidout && post.children == 0 && post.netRshares <= 0
+    }
+
+    /** RN's footer icons: a pencil for Edit, a trash for Delete. */
+    fun icon(item: PostMenuItem): AppIcon = if (item == PostMenuItem.DELETE) AppIcon.DISCARD else AppIcon.EDIT
+
+    /** RN `post.a11y_edit` / `post.a11y_delete` (recorded in `rn-reuse.json`), in the current language. */
+    fun label(item: PostMenuItem): String = if (item == PostMenuItem.DELETE) L.post.a11yDelete else L.post.a11yEdit
+
+    /** [votes] is the count the card shows (it takes a vote made in the app before the chain has it). */
+    fun actions(shown: Post, votes: Int, user: String?): List<PostMenuItem> {
+        if (!canEdit(shown, user)) return emptyList()
+        // RN: !childCount && !_totalVotes && isDeletable (no active_votes, no children, net_rshares <= 0)
+        val noVotes = votes == 0 && shown.stats.totalVotes == 0 && shown.activeVotes.isEmpty()
+        return if (noVotes && canDelete(shown, user)) listOf(PostMenuItem.EDIT, PostMenuItem.DELETE) else listOf(PostMenuItem.EDIT)
+    }
+}
+
 /** Where the menu is opened: RN's PostOptionsModal props. */
 data class PostMenuContext(
     /** RN `isVisibleTranslateModal`: comments and sub-posts. */
@@ -168,7 +202,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
         val moderator = moderatorDeferred.await()
         val pinnedBlog = pinnedBlogDeferred.await()
         val pinnedReply = pinnedReplyDeferred.await()
-        val canDelete = user != null && user == post.author && !crossPost && !post.isPaidout && post.children == 0 && post.netRshares <= 0
+        val canDelete = PostFooter.canDelete(shown, user)
         PostMenuItem.entries.filter { item ->
             when (item) {
                 PostMenuItem.REBLOG -> !reblogged
@@ -186,12 +220,15 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 PostMenuItem.TRANSLATE -> context.translate
                 PostMenuItem.DELETE -> canDelete
                 // an own reply or wave (a top post has the Edit button of its screen); the chain takes edits at any time
-                PostMenuItem.EDIT -> isComment && user != null && user == post.author && !crossPost
+                PostMenuItem.EDIT -> PostFooter.canEdit(shown, user)
                 PostMenuItem.CROSS_POST -> community != null
                 else -> true
             }
         }
     }
+
+    /** The footer icons of a reply or wave for the signed-in account ([PostFooter]); [votes] is the card's count. */
+    fun footer(shown: Post, votes: Int): List<PostMenuItem> = PostFooter.actions(shown, votes, me)
 
     /** The profile's pinned permlink, read fresh from posting_json_metadata. */
     private suspend fun pinnedOf(account: String): String? {

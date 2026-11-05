@@ -165,12 +165,12 @@ class SocialModelsTest {
         assertTrue(profile.current.header!!.avatarUrl.contains("?stamp="))
         // every avatar of the account carries the stamp (feed cards, comments, the drawer), other accounts do not
         assertTrue(PostCard.avatarUrl(TestApp.USER, TestApp.PROXY).contains("?stamp="))
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/128", PostCard.avatarUrl("alice", TestApp.PROXY))
-        // the image service reads numeric sizes only (RN #3599: named sizes all came back 256 px)
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/256", PostCard.avatarUrl("alice", TestApp.PROXY, "medium"))
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/512", PostCard.avatarUrl("alice", TestApp.PROXY, "large"))
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/64", PostCard.avatarUrl("alice", TestApp.PROXY, "64"))
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/128", PostCard.avatarUrl("alice", TestApp.PROXY, "../x"))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/small", PostCard.avatarUrl("alice", TestApp.PROXY))
+        // the names the website requests (one CDN cache entry), anything else is small
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/medium", PostCard.avatarUrl("alice", TestApp.PROXY, "medium"))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/large", PostCard.avatarUrl("alice", TestApp.PROXY, "large"))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/small", PostCard.avatarUrl("alice", TestApp.PROXY, "64"))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/small", PostCard.avatarUrl("alice", TestApp.PROXY, "../x"))
         AvatarCacheStamps.clear()
         profile.close()
         edit.close()
@@ -741,11 +741,11 @@ class SocialModelsTest {
         assertEquals(listOf("Alice", "malice"), AccountListFilter.filter(entries, "ali").map { it.account })
         assertEquals(entries, AccountListFilter.filter(entries, ""))
         val app = TestApp(this, handler = ProfileFixtures.chain())
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/128", app.env.avatars.url("alice", "small", TestApp.PROXY))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/small", app.env.avatars.url("alice", "small", TestApp.PROXY))
         app.env.avatars.bump("alice", 42)
         testScheduler.advanceUntilIdle()
-        assertEquals("${TestApp.PROXY}/u/alice/avatar/128?stamp=42", app.env.avatars.url("alice", "small", TestApp.PROXY))
-        assertEquals("${TestApp.PROXY}/u/bob/avatar/128", app.env.avatars.url("bob", "small", TestApp.PROXY))
+        assertEquals("${TestApp.PROXY}/u/alice/avatar/small?stamp=42", app.env.avatars.url("alice", "small", TestApp.PROXY))
+        assertEquals("${TestApp.PROXY}/u/bob/avatar/small", app.env.avatars.url("bob", "small", TestApp.PROXY))
         AvatarCacheStamps.clear()
     }
 

@@ -91,7 +91,7 @@ class PostActions(
     /** A tap on plain paragraph text (not a link): a wave in a list opens its thread. Null leaves taps alone. */
     val onParagraphTap: (() -> Unit)? = null,
     /** Avatar for a mention chip; null draws the chip without one. Invalid account names get none. */
-    val avatarUrl: (username: String) -> String? = { if (isHiveAccountName(it)) "https://images.ecency.com/u/$it/avatar/128" else null },
+    val avatarUrl: (username: String) -> String? = { if (isHiveAccountName(it)) "https://images.ecency.com/u/$it/avatar/small" else null },
     /**
      * The "Show images" setting. When false each image is a same-size placeholder and its bytes are
      * never requested until the user taps it; a revealed image stays revealed for the session.

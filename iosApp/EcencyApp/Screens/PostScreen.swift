@@ -538,6 +538,7 @@ struct CommentRow: View {
                     .accessibilityAction(named: L.Post.a11yPostOptions) {
                         app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false), root: root)
                     }
+                    .ownFooterActions(item.post, votes: card.votes, root: root)
                 if item.isLocal {
                     Text(L.Schedules.pending).scaledFont(11, weight: .semibold, relativeTo: .caption)
                         .foregroundStyle(theme.secondary)
@@ -605,6 +606,8 @@ struct CommentRow: View {
 
     @ViewBuilder private func commentTools(_ card: PostCard) -> some View {
         TipButton(key: card.key)
+        // RN commentView: Edit and Delete on an own reply
+        OwnFooterButtons(post: item.post, votes: card.votes, root: root, idPrefix: "comment")
     }
 
     /// The comments icon with the reply count is the reply button (no "Reply" text, so the caret stays on the line).

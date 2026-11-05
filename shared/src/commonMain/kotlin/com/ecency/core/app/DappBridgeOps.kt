@@ -32,6 +32,18 @@ class BridgeRefused(message: String) : Exception(message)
  * (RN would sign "undefined"); "post" metadata that is not JSON is refused (RN throws, which answers the same).
  */
 object BridgeOps {
+    /**
+     * #3633: Keychain encrypts a Hive transfer memo that starts with `#` for the recipient; the bridge has no memo key
+     * lookup, so such a memo is refused instead of going on chain as text. Cipher text already encrypted goes as it is.
+     */
+    private fun hiveMemo(data: JsonObject): String {
+        val memo = optText(data, "memo")
+        if (memo.startsWith("#") && !com.ecency.core.hive.Memo.isEncrypted(memo)) {
+            throw BridgeRefused(BridgeGuards.HASH_MEMO_REFUSED)
+        }
+        return memo
+    }
+
     /** [requestId] makes the savings withdraw and convert ids (RN: seconds since the epoch plus a random 0..999). */
     fun build(type: String, data: JsonObject, account: String, hivePerMVests: () -> Double, requestId: () -> Long): JsonArray = when (type) {
         "vote" -> ops(
@@ -109,7 +121,7 @@ object BridgeOps {
                 put("from", account)
                 put("to", text(data, "to"))
                 put("amount", asset(data, "amount", liquid(data)))
-                put("memo", optText(data, "memo"))
+                put("memo", hiveMemo(data))
             },
         )
         "delegation" -> {
@@ -165,7 +177,7 @@ object BridgeOps {
                 put("from", account)
                 put("to", text(data, "to"))
                 put("amount", asset(data, "amount", liquid(data)))
-                put("memo", optText(data, "memo"))
+                put("memo", hiveMemo(data))
                 put("recurrence", int(data, "recurrence"))
                 put("executions", int(data, "executions"))
                 putJsonArray("extensions") {}
@@ -177,7 +189,7 @@ object BridgeOps {
                     put("from", account)
                     put("to", optText(data, "to").ifEmpty { account })
                     put("amount", asset(data, "amount", liquid(data)))
-                    put("memo", optText(data, "memo"))
+                    put("memo", hiveMemo(data))
                 },
             )
             "withdraw_cancel" -> ops(
@@ -191,7 +203,7 @@ object BridgeOps {
                     put("from", account)
                     put("to", optText(data, "to").ifEmpty { account })
                     put("amount", asset(data, "amount", liquid(data)))
-                    put("memo", optText(data, "memo"))
+                    put("memo", hiveMemo(data))
                     put("request_id", requestId())
                 },
             )
@@ -320,6 +332,7 @@ object BridgeGuards {
                 if (listOf("owner", "active", "posting", "memo_key").any { body?.get(it).let { v -> v != null && v != JsonNull } }) return KEYS_REFUSED
             }
             if (signsHere && !OperationJson.canDecode(op)) return NOT_SUPPORTED
+            if (com.ecency.core.hive.Memo.hasPlainHashMemo(op)) return HASH_MEMO_REFUSED
         }
         if (OperationAuthority.required(ops) == KeyRole.OWNER) return OWNER_REFUSED
         // posting and active operations in one request: one key cannot sign both since HF28
@@ -336,6 +349,8 @@ object BridgeGuards {
     const val OWNER_REFUSED = "Operations that need the owner key cannot be signed in Ecency."
     const val KEYS_REFUSED = "Ecency does not sign changes to account keys or authorities from a website."
     const val NOT_SUPPORTED = "Ecency cannot sign this operation in this version yet."
+    /** #3633: the typed requests' memo refusal, for a raw broadcast too. */
+    const val HASH_MEMO_REFUSED = "Encrypted memos (starting with #) are not supported here. Send it from the app's wallet."
 }
 
 /** RN dappBrowser/utils/domainBlacklist: known Hive phishing domains, warned about on the confirmation. */

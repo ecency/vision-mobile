@@ -72,7 +72,7 @@ object LegacyMigration {
         // accounts whose RN secrets must stay
         val keep: Set<String>
         // accounts the user removed in this app (forget): never imported again
-        val removed = names(vault, REMOVED)
+        val removed = removedNames(vault)
         val firstRun = !vault.legacyImported()
         if (!firstRun) {
             // without both lists a kept or removed entry cannot be told from the rest: import and delete nothing
@@ -181,12 +181,28 @@ object LegacyMigration {
                 if (!before.containsAll(names)) writeNames(vault, REMOVED, before + names)
             }
         }
+        // #3609: the list cannot be read (corrupted, or not right now): the names go to a second entry every run reads
+        // with it, so the sign-out goes ahead and the account still never comes back once the list reads again
+        val pending = if (recorded.isSuccess) recorded else runCatching {
+            vault.store.withLock {
+                val before = names(vault, REMOVED_PENDING) ?: throw SecureStoreException.Corrupted(REMOVED_PENDING)
+                if (!before.containsAll(names)) writeNames(vault, REMOVED_PENDING, before + names)
+            }
+        }
         val scrubbed = runCatching { storage?.let { LegacyCleanup.forget(it, names.toSet()) } }
-        if (scrubbed.isFailure) recorded.exceptionOrNull()?.let { throw it }
+        if (scrubbed.isFailure && pending.isFailure) recorded.exceptionOrNull()?.let { throw it }
     }
 
     private const val KEPT = "legacy.kept"
     private const val REMOVED = "legacy.removed"
+    private const val REMOVED_PENDING = "legacy.removed.pending"
+
+    /** [REMOVED] with the names a sign-out could only write to [REMOVED_PENDING]; null when either cannot be read. */
+    private fun removedNames(vault: KeyVault): Set<String>? {
+        val removed = names(vault, REMOVED) ?: return null
+        val pending = names(vault, REMOVED_PENDING) ?: return null
+        return removed + pending
+    }
 
     /** A list of usernames in the vault: empty when absent, null when it cannot be read (then nothing may be deleted). */
     private fun names(vault: KeyVault, entry: String): Set<String>? = try {
@@ -254,7 +270,7 @@ object LegacyMigration {
     @Throws(LegacyImportError::class, SecureStoreException::class)
     fun migrate(legacy: LegacyImport, vault: KeyVault, pinIterations: Int): LegacyMigrationReport {
         if (vault.legacyImported()) return done()
-        val removed = names(vault, REMOVED) ?: throw LegacyImportError.StorageUnreadable()
+        val removed = removedNames(vault) ?: throw LegacyImportError.StorageUnreadable()
         return importAccounts(legacy, vault, pinIterations, removed).also { vault.markLegacyImported() }
     }
 

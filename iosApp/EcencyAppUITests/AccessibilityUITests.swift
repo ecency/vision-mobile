@@ -81,6 +81,16 @@ final class AccessibilityUITests: XCTestCase {
                     unresolved.append(issue.detailedDescription)
                     return true
                 }
+                // a clipping reading on a screen with an allowance counts against it whether or not the audit names
+                // the element: on iOS 27 it names some of the nodes it left unnamed before, and which ones varies
+                // from run to run (the vote sheet: its own lines one run, the feed card behind it the next). Before
+                // iOS 27 a named clipping still fails at once.
+                if #available(iOS 27, *), let e = issue.element, issue.auditType == .textClipped, AuditExclusions.allowance(screen)[AuditExclusions.clipped] != nil {
+                    print("AccessibilityUITests \(screen): clipping reading on '\(e.identifier)' '\(e.label)', counted against the allowance")
+                    // a named node's description names it, so it is counted under the generic one
+                    unresolved.append(AuditExclusions.clipped)
+                    return true
+                }
                 let who = issue.element.map { "\($0.elementType.rawValue) '\($0.identifier)' '\($0.label)' at \($0.frame)" } ?? "- \(issue.detailedDescription)"
                 found.append("[\(issue.auditType)] \(issue.compactDescription) on \(who)")
                 return true
@@ -320,6 +330,7 @@ enum AuditExclusions {
     /// issue shares one generic description. The numbers are those measured on 2026-10-27 on screens with the tab bar
     /// (fixed size icons with the large content viewer), the feed's cards (summaries cut at five lines on purpose) or a
     /// system navigation bar at AX5 (back button, title, toolbar items); the screenshots show no clipped text of ours.
+    /// A clipping reading the audit does name counts against the same number on a listed screen (iOS 27 names some).
     /// One more than allowed fails. Screens not listed allow none; a dark run takes its screen's numbers (the dark feed
     /// sometimes reports the same 2 clipped and 3 fixed size nodes as the light one, sometimes none).
     static let clipped = "Text of this element may be clipped at larger Dynamic Type sizes."
@@ -331,8 +342,11 @@ enum AuditExclusions {
         "profile closed (AX5)": [clipped: 1],
         // 2026-11-02: the vote sheet over the feed, whose header the sheet dims but does not hide (the feed's one), and
         // the sheet's estimate and voting power lines, shown whole at AX5 (checked on screenshots) since the demo data
-        // answers the reward fund
+        // answers the reward fund. 2026-11-05 (iOS 27): it names them, with the vote button (whole on the screenshot)
         "vote sheet (AX5)": [clipped: 3],
+        // 2026-11-05 (iOS 27): the post at AX5, one node; the screenshot shows every line whole but the listen card,
+        // which runs on under the action bar until the post is scrolled
+        "post (AX5)": [clipped: 1],
         // 2026-11-03: the system tab bar (README "iPhone Duo"): the list scrolls on under its glass, and at AX5 the
         // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it)
         "notifications (AX5)": [clipped: 3],

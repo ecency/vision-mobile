@@ -98,6 +98,31 @@ class FeedxFlowsTest {
         settle()
     }
 
+    /** RN commentView: an own reply carries the Edit pencil (Delete only without votes); others' replies neither. */
+    @Test
+    fun anOwnReplyShowsEditInItsFooterWhichOpensTheEditor() {
+        node.extra = { method, _ ->
+            if (method != "bridge.get_discussion") null
+            else """{"alice/trending-one":${node.entry("alice", "trending-one", votes = listOf("x"), children = 2)},""" +
+                """"tester/re-mine":${node.entry("tester", "re-mine", parent = "alice" to "trending-one")},""" +
+                """"carol/re-one":${node.entry("carol", "re-one", parent = "alice" to "trending-one")}}"""
+        }
+        node.signIn()
+        launch()
+        waitFor("card:alice/trending-one")
+        compose.onNodeWithTag("open:alice/trending-one").performClick()
+        waitFor("postTitle")
+        compose.scrollListTo("postList", hasTestTag("comment:tester/re-mine"))
+        fun inRow(row: String, tag: String) = compose.onAllNodes(hasTestTag(tag) and hasAnyAncestor(hasTestTag(row))).fetchSemanticsNodes().isNotEmpty()
+        // the reply has a positive payout (net_rshares > 0): hived refuses a delete, so only Edit
+        assertTrue(inRow("comment:tester/re-mine", "comment:edit") && !inRow("comment:tester/re-mine", "comment:delete-post"))
+        compose.scrollListTo("postList", hasTestTag("comment:carol/re-one"))
+        assertFalse(inRow("comment:carol/re-one", "comment:edit"))
+        compose.scrollListTo("postList", hasTestTag("comment:tester/re-mine"))
+        compose.onAllNodes(hasTestTag("comment:edit") and hasAnyAncestor(hasTestTag("comment:tester/re-mine")))[0].performClick()
+        waitFor("editor")
+    }
+
     @Test
     fun theCardMenuCopiesAndSharesTheCanonicalLink() {
         launch()

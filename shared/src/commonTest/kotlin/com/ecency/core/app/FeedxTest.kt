@@ -203,6 +203,45 @@ class FeedxTest {
         assertFalse(PostMenuItem.EDIT in app.env.postActions.menu(post(entry(TestApp.USER, "top")), PostMenuContext()))
     }
 
+    /**
+     * Tester report "in Waves no option to fix typos or delete comments": RN commentView drew an Edit pencil on every
+     * own reply or wave, and a Delete trash only while nothing stops the delete (no replies, no votes, RN isDeletable).
+     */
+    @Test
+    fun anOwnReplyOrWaveFooterShowsEditAndDeleteUnderRnsRule() {
+        val me = TestApp.USER
+        val wave = post(entry(me, "w", parent = "ecency.waves" to "waves-1", netRshares = 0))
+        assertEquals(listOf(PostMenuItem.EDIT, PostMenuItem.DELETE), PostFooter.actions(wave, 0, me))
+        // a vote (also one only made in the app: the card's count), a reply, a voter with no rshares, payout: Edit only
+        assertEquals(listOf(PostMenuItem.EDIT), PostFooter.actions(wave, 1, me))
+        assertEquals(listOf(PostMenuItem.EDIT), PostFooter.actions(post(entry(me, "w", parent = "ecency.waves" to "waves-1", netRshares = 0, children = 1)), 0, me))
+        val dust = post(entry(me, "w", parent = "ecency.waves" to "waves-1", netRshares = 0, votes = listOf("bob"), voteRshares = mapOf("bob" to 0L)))
+        assertEquals(listOf(PostMenuItem.EDIT), PostFooter.actions(dust, 0, me))
+        assertEquals(listOf(PostMenuItem.EDIT), PostFooter.actions(post(entry(me, "w", parent = "ecency.waves" to "waves-1", netRshares = 5)), 0, me))
+        assertEquals(listOf(PostMenuItem.EDIT), PostFooter.actions(wave.copy(isPaidout = true), 0, me))
+        // someone else's, signed out, an own top post (its screen has Edit) and a cross-post: nothing
+        assertEquals(emptyList(), PostFooter.actions(wave, 0, "bob"))
+        assertEquals(emptyList(), PostFooter.actions(wave, 0, null))
+        assertEquals(emptyList(), PostFooter.actions(post(entry(me, "top", netRshares = 0)), 0, me))
+        assertEquals(emptyList(), PostFooter.actions(post(entry("bob", "cross", parent = "ecency.waves" to "waves-1")).copy(crossPostOriginal = wave), 0, me))
+    }
+
+    /** The footer icons are the menu's own items: same Edit screen, same confirmed delete for the account that asked. */
+    @Test
+    fun theFooterRunsTheMenusEditAndDelete() = runTest {
+        val app = TestApp(this, handler = reads())
+        signedIn(app)
+        val wave = post(entry(TestApp.USER, "w", parent = "ecency.waves" to "waves-1", netRshares = 0))
+        val footer = app.env.postActions.footer(wave, 0)
+        assertEquals(listOf(PostMenuItem.EDIT, PostMenuItem.DELETE), footer)
+        val menu = app.env.postActions.menu(wave, PostMenuContext(translate = true))
+        assertTrue(menu.containsAll(footer), menu.toString())
+        assertEquals(PostMenuEffect.Open(AppScreen.Editor(EditorArgs(EditorKind.EDIT_POST, TestApp.USER, "w"))), app.env.postActions.select(PostMenuItem.EDIT, wave))
+        val confirm = assertIs<PostMenuEffect.Confirm>(app.env.postActions.select(PostMenuItem.DELETE, wave))
+        assertEquals(TestApp.USER, confirm.user)
+        assertEquals(emptyList(), app.env.postActions.footer(post(entry("bob", "theirs", parent = "ecency.waves" to "waves-1", netRshares = 0)), 0))
+    }
+
     @Test
     fun ownPostOffersPinAndDeleteOnlyWhenTheChainAllows() = runTest {
         val app = TestApp(this, handler = reads(reblogged = listOf(TestApp.USER)))

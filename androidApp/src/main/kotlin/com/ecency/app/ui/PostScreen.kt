@@ -438,7 +438,9 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
     val payoutDetails = rememberPayoutDetails()
     // keyed on the toggle's state, not the toggle (a new one each pass): its latest handler is read when used
     val currentThread by androidx.compose.runtime.rememberUpdatedState(thread)
-    val a11yActions = remember(item, actions, thread?.open, tip, feedx, LocalAppLanguage.current) { buildList {
+    val footerScope = androidx.compose.runtime.rememberCoroutineScope()
+    val footerUser = signedInUser(feedx)
+    val a11yActions = remember(item, actions, thread?.open, tip, feedx, footerUser, LocalAppLanguage.current) { buildList {
         add(a11yAction(UiCopy.UPVOTE) { actions.onVote(item.card) })
         add(a11yAction(com.ecency.core.l10n.L.post.a11yReplyHint) { actions.onReply(item.post) })
         add(a11yAction(UiCopy.profileOf(item.card.author)) { actions.onAuthor(item.card.author) })
@@ -448,6 +450,7 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
         if (feedx != null) {
             add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, com.ecency.core.app.PostMenuContext(translate = true, openThread = true), actions.root ?: item.post.key) })
         }
+        addAll(ownFooterA11yActions(feedx, item.post, item.card.votes, actions.root ?: item.post.key, footerScope))
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
     } }
     val pro = isProMember(feedx?.env, item.card.author)
@@ -506,7 +509,11 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
                 onComments = { actions.onReply(item.post) },
                 commentsReply = true,
                 modifier = Modifier.padding(top = 2.dp),
-                trailing = { thread?.let { ThreadTogglePill(it) } },
+                trailing = {
+                    // RN commentView: Edit and Delete on an own reply, before the thread toggle
+                    OwnFooterButtons(item.post, item.card.votes, actions.root ?: item.post.key, tag = "comment")
+                    thread?.let { ThreadTogglePill(it) }
+                },
                 extras = RowExtras(
                     onVoters = { actions.onScreen(AppScreen.Voters(item.key.author, item.key.permlink)) },
                     onTip = { tip?.invoke(item.key) },

@@ -99,8 +99,12 @@ class WavesModelsTest {
     /** What `condenser_api.get_content` says the chain holds for any permlink asked (null: nothing). */
     private var onChainBody: String? = null
 
+    /** `bridge.get_post` answers by permlink (an edited wave read again); others get the linked post. */
+    private var bridgePosts: Map<String, String> = emptyMap()
+
     private fun chain(): suspend FakeTransport.(Sent) -> HttpResult = { req ->
-        when (req.method) {
+        val asked = if (req.method == "bridge.get_post") req.params.jsonObject["permlink"]?.jsonPrimitive?.content else null
+        if (asked != null && asked in bridgePosts) FakeTransport.result(req, bridgePosts.getValue(asked)) else when (req.method) {
             "bridge.get_account_posts" -> {
                 val host = req.params.jsonObject.getValue("account").jsonPrimitive.content
                 containers[host]?.let { if (it == "fail") HttpResult(500, "down") else FakeTransport.result(req, "[$it]") } ?: FakeTransport.result(req, "[]")
@@ -868,6 +872,180 @@ class WavesModelsTest {
         feed.close()
     }
 
+    /** Tester report: a wave fixed in the editor shows its new text in the list at once, without a refresh. */
+    @Test
+    fun anEditedWaveIsReadAgainAndReplacedInTheList() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")},${row(bob, "w2")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        val before = feed.current.items.first()
+        bridgePosts = mapOf(
+            "w1" to """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"Wave w1 without the typo",
+                "created":"2026-10-06T11:00:00","updated":"2026-10-06T11:05:00","children":1,"net_rshares":10,"active_votes":[{"voter":"x","rshares":5},{"voter":"y","rshares":5}],
+                "stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}""",
+        )
+        val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
+        // a post this list does not hold is not read
+        app.env.emit(AppEvent.PostChanged(PostKey(bob, "elsewhere")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(0, reads())
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, reads())
+        assertEquals(listOf("w1", "w2"), feed.permlinks())
+        val after = feed.current.items.first()
+        assertEquals("Wave w1 without the typo", after.post.body)
+        assertTrue(after.blocks != before.blocks, "the body is drawn again")
+        assertEquals(before.host, after.host)
+        assertEquals(2, after.card.votes)
+        // a failed read keeps the card as it is
+        bridgePosts = mapOf("w1" to "null")
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Wave w1 without the typo", feed.current.items.first().post.body)
+        feed.close()
+    }
+
+    /** Review: the edit is broadcast before the API shows it, so a read that still has the old body is tried again. */
+    @Test
+    fun anEditedWaveTheApiDoesNotShowYetIsReadAgainAndAnAnswerAfterAnAccountChangeIsDropped() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")},${row(bob, "w2")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        fun bridgeRow(body: String) = """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"$body",
+            "created":"2026-10-06T11:00:00","updated":"2026-10-06T11:05:00","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}"""
+        val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
+        bridgePosts = mapOf("w1" to bridgeRow("Wave w1"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        assertEquals(1, reads())
+        assertEquals("Wave w1", feed.current.items.first().post.body)
+        // the node has the edit a moment later
+        bridgePosts = mapOf("w1" to bridgeRow("Wave w1 fixed"))
+        testScheduler.advanceUntilIdle()
+        assertEquals(2, reads(), "read again until the edit shows, then no more")
+        assertEquals("Wave w1 fixed", feed.current.items.first().post.body)
+
+        // an answer that arrives after an account change never lands on the new account's list
+        bridgePosts = mapOf("w1" to bridgeRow("Wave w1 fixed"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        switchTo(app, bob)
+        bridgePosts = mapOf("w1" to bridgeRow("Wave w1 from before"))
+        testScheduler.advanceUntilIdle()
+        assertTrue(feed.current.items.none { it.post.body == "Wave w1 from before" })
+        feed.close()
+    }
+
+    private fun editedRow(body: String, updated: String) = """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"$body",
+        "created":"2026-10-06T11:00:00","updated":"$updated","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}"""
+
+    /** Review: two edits in a row start two reads; the first one's late answer never brings back its older body. */
+    @Test
+    fun aSecondEditsReadWinsOverTheFirstOnesLateAnswer() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        // the first edit: the API does not show it yet, so its read waits to try again
+        bridgePosts = mapOf("w1" to editedRow("Wave w1", "2026-10-06T11:00:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(1_000)
+        // the second edit is read at once
+        bridgePosts = mapOf("w1" to editedRow("Second edit", "2026-10-06T11:06:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        // a node that is behind answers with the first edit when the first read would try again
+        bridgePosts = mapOf("w1" to editedRow("First edit", "2026-10-06T11:05:00"))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        feed.close()
+    }
+
+    /** Review: the tries run 3 s and 6 s after the edit, and an answer older than the card shown is tried again. */
+    @Test
+    fun anOlderAnswerIsTriedAgainAtThreeAndSixSeconds() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        bridgePosts = mapOf("w1" to editedRow("Second edit", "2026-10-06T11:06:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        val reads = { app.transport.sent.count { it.method == "bridge.get_post" } }
+        val before = reads()
+        // a third edit; a node that is behind answers with the first one, then one without `updated`
+        bridgePosts = mapOf("w1" to editedRow("First edit", "2026-10-06T11:05:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.runCurrent()
+        assertEquals(before + 1, reads())
+        bridgePosts = mapOf("w1" to """{"author":"$alice","permlink":"w1","parent_author":"ecency.waves","parent_permlink":"waves-x","depth":1,"body":"Unversioned",
+            "created":"2026-10-06T11:00:00","children":1,"stats":{"total_votes":2},"json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]}}""")
+        testScheduler.advanceTimeBy(3_000)
+        testScheduler.runCurrent()
+        assertEquals(before + 2, reads(), "tried again 3 s later")
+        assertEquals("Second edit", feed.current.items.first().post.body)
+        bridgePosts = mapOf("w1" to editedRow("Third edit", "2026-10-06T11:07:00"))
+        testScheduler.advanceTimeBy(3_000)
+        testScheduler.runCurrent()
+        assertEquals(before + 3, reads(), "and 6 s after the edit")
+        assertEquals("Third edit", feed.current.items.first().post.body)
+        feed.close()
+    }
+
+    /** Review: a feed row without `updated` never shows an edit, yet its votes and replies still refresh the card. */
+    @Test
+    fun anEditedWaveKeepsItsBodyWhileTheMinutesRefreshUpdatesItsCounters() = runTest {
+        val backend = Backend()
+        backend.feed = { "[${row(alice, "w1")}]" }
+        val app = app(backend)
+        signIn(app)
+        val feed = WavesFeedModel(app.env, WavesFeedKind.ForYou)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        bridgePosts = mapOf("w1" to editedRow("Edited", "2026-10-06T11:05:00"))
+        app.env.emit(AppEvent.PostChanged(PostKey(alice, "w1")))
+        testScheduler.advanceUntilIdle()
+        assertEquals("Edited", feed.current.items.first().post.body)
+        feed.setActive(true)
+        backend.feed = { "[${row(alice, "w1").replace("\"net_votes\":2", "\"net_votes\":9").replace("\"children\":1", "\"children\":4")}]" }
+        testScheduler.advanceTimeBy(WavesFeedModel.REFETCH_MILLIS + 1)
+        testScheduler.runCurrent()
+        val item = feed.current.items.first()
+        assertEquals("Edited", item.post.body, "the feed's older row does not bring the old body back")
+        assertEquals(9, item.card.votes)
+        assertEquals(4, item.card.comments)
+        // a pull to refresh before the feed has the edit keeps it too
+        feed.refresh()
+        testScheduler.runCurrent()
+        assertEquals("Edited", feed.current.items.first().post.body, "the pull to refresh brought the old body back")
+        assertEquals(9, feed.current.items.first().card.votes)
+        // once the feed has the edit, its row is taken whole
+        backend.feed = { "[${row(alice, "w1", body = "Edited again", extra = ",\"updated\":\"2026-10-06T11:07:00\"")}]" }
+        testScheduler.advanceTimeBy(WavesFeedModel.REFETCH_MILLIS + 1)
+        testScheduler.runCurrent()
+        feed.setActive(false)
+        assertEquals("Edited again", feed.current.items.first().post.body)
+        feed.close()
+    }
+
     @Test
     fun aShareTextNeverOverwritesADraftAndWaitsThroughLogin() = runTest {
         val app = app(Backend())
@@ -1011,6 +1189,46 @@ class WavesModelsTest {
         testScheduler.advanceUntilIdle()
         again.removeImage()
         assertNull(again.current.imageUrl)
+    }
+
+    @Test
+    fun anImageFromTheUploadsGalleryBecomesTheWavesOneImage() = runTest {
+        val app = app(Backend())
+        signIn(app)
+        val composer = app.env.waves.composer()
+        val gallery = "https://images.ecency.com/DQmGallery/funny.gif"
+        // RN quick post's UploadsGalleryModal (allowMultiple={false}): a tapped upload is the wave's image
+        composer.pickUploaded(gallery)
+        assertEquals(gallery, composer.current.imageUrl)
+        assertFalse(composer.current.isAttaching)
+        composer.pickUploaded("https://img.ecency.com/a b.gif")
+        assertEquals(gallery, composer.current.imageUrl, "only a clean https address")
+        composer.pickUploaded("https://img.esteem.app/old.gif")
+        assertEquals("https://img.esteem.app/old.gif", composer.current.imageUrl, "an older upload on another host")
+        composer.pickUploaded(gallery)
+        // not while a picked image is still uploading
+        val upload = CompletableDeferred<String?>()
+        app.env.waves.attacher = object : WaveImageAttacher {
+            override suspend fun attach(username: String, source: WaveImageSource): String? = upload.await()
+        }
+        composer.removeImage()
+        composer.attach(WaveImageSource.GALLERY)
+        testScheduler.advanceUntilIdle()
+        composer.pickUploaded(gallery)
+        assertNull(composer.current.imageUrl)
+        upload.complete(null)
+        testScheduler.advanceUntilIdle()
+        composer.pickUploaded(gallery)
+        composer.setText("Look at this")
+        composer.send()
+        testScheduler.advanceUntilIdle()
+        val fields = broadcastOps(app).single().jsonArray[1].jsonObject
+        assertEquals("Look at this\n\n ![]($gallery)", fields.getValue("body").jsonPrimitive.content)
+        // a composer left open across an account change refuses
+        val stale = WaveComposeModel(app.env, "someone-else")
+        stale.pickUploaded(gallery)
+        assertNull(stale.current.imageUrl)
+        assertEquals(WaveComposeModel.ACCOUNT_CHANGED, stale.current.error?.message)
     }
 
     @Test

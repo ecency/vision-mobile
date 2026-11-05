@@ -64,8 +64,24 @@ final class ChatUITests: XCTestCase {
         mine.tap()
         XCTAssertTrue(element(app, "chat-options-sheet").waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["chat-option-EDIT"].exists)
+        // RN's four, then a wave and a party; More (every emoji) at the row's end
+        XCTAssertTrue(app.buttons["chat-quick-wave"].exists && app.buttons["chat-quick-tada"].exists)
+        let more = app.buttons["chat-quick-more"]
+        XCTAssertTrue(more.exists)
+        XCTAssertGreaterThanOrEqual(more.frame.minX, app.buttons["chat-quick-tada"].frame.maxX, "More after the reactions")
+        let mineRow = String(mine.identifier.dropFirst("chat-message-actions-".count))
         app.buttons["chat-quick-+1"].tap()
-        XCTAssertTrue(any(app, prefix: "chat-reaction-").waitForExistence(timeout: 10), "the reaction shows under the message")
+        // the reaction on the message just reacted to (other messages may carry reactions of their own)
+        let pill = any(app, prefix: "chat-reaction-\(mineRow)-")
+        XCTAssertTrue(pill.waitForExistence(timeout: 10), "the reaction shows under the message")
+        // the pill sits right under its message (tester report: too far from it). Measured from the bubble's last
+        // row (the time and the options button) on this own message: the bubble's padding and half the pill's 44
+        // point touch area lie between them; without the row's 8 point lift the gap is 34
+        let lastRow = mine.frame.maxY
+        XCTAssertGreaterThan(lastRow, 0)
+        XCTAssertLessThan(pill.frame.midY - lastRow, 30, "the pill sits right under its message")
+        // an own message's reaction sits on its side, under the bubble's trailing edge (tester report: on the left)
+        XCTAssertGreaterThan(pill.frame.midX, app.windows.firstMatch.frame.midX, "the own message's reaction on the trailing side")
     }
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the

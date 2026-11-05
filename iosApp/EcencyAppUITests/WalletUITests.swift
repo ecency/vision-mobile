@@ -86,6 +86,15 @@ final class WalletUITests: XCTestCase {
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
         WalletShots.save("transfer")
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first. isHittable says
+        // true for it there, so the check is its frame against the window's bottom and the keyboard's top
+        func nextHidden() -> Bool {
+            let keyboard = app.keyboards.firstMatch
+            let bottom = min(app.windows.firstMatch.frame.maxY, keyboard.exists ? keyboard.frame.minY : .greatestFiniteMagnitude)
+            return next.frame.maxY > bottom - 4
+        }
+        for _ in 0..<4 where nextHidden() { app.swipeUp() }
+        XCTAssertFalse(nextHidden(), "Next scrolled into view: \(next.frame)")
         next.tap()
         XCTAssertTrue(app.buttons["transfer-confirm"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Continue transaction?"].exists)
@@ -104,6 +113,15 @@ final class WalletUITests: XCTestCase {
         let next = app.buttons["transfer-next"]
         expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: next)
         waitForExpectations(timeout: 20)
+        // the memo hint put Next under the keyboard on a small window: scrolled into view first. isHittable says
+        // true for it there, so the check is its frame against the window's bottom and the keyboard's top
+        func nextHidden() -> Bool {
+            let keyboard = app.keyboards.firstMatch
+            let bottom = min(app.windows.firstMatch.frame.maxY, keyboard.exists ? keyboard.frame.minY : .greatestFiniteMagnitude)
+            return next.frame.maxY > bottom - 4
+        }
+        for _ in 0..<4 where nextHidden() { app.swipeUp() }
+        XCTAssertFalse(nextHidden(), "Next scrolled into view: \(next.frame)")
         next.tap()
         let confirm = app.buttons["transfer-confirm"].firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 10))
@@ -114,6 +132,50 @@ final class WalletUITests: XCTestCase {
         expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: app.staticTexts["pin-message"])
         waitForExpectations(timeout: 10)
         XCTAssertTrue(amount.exists, "cancel keeps the transfer form")
+    }
+
+    /// Tester report "unable to send Points gifts on comments": the gift under a comment tips that comment's author in
+    /// POINTS, through the same signing as a transfer (a posting-key login is asked for the active key).
+    func testAPointsTipOnACommentReachesSigning() {
+        let app = launch(["-homeFilter", "trending"])
+        let card = app.buttons.matching(identifier: "post-card").firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 30))
+        card.tap()
+        XCTAssertTrue(app.staticTexts["post-title"].waitForExistence(timeout: 15))
+        let comment = app.staticTexts["First fixture comment."]
+        for _ in 0..<12 where !(comment.exists && comment.isHittable) { app.swipeUp() }
+        XCTAssertTrue(comment.isHittable, app.debugDescription)
+        // the comment's own gift: below its text, never the pinned post footer's (scrolled into view if needed)
+        let footer = app.descendants(matching: .any)["post-footer"]
+        func commentTips() -> [XCUIElement] {
+            // the comment's and the footer's frames read once per look, not once per button
+            let below = comment.frame.maxY
+            let pinned = footer.exists ? footer.frame : .null
+            let bottom = app.windows.firstMatch.frame.maxY
+            return app.buttons.matching(identifier: "tip").allElementsBoundByIndex.filter {
+                let f = $0.frame
+                return f.minY > below && f.maxY < bottom && !pinned.intersects(f)
+            }
+        }
+        for _ in 0..<3 where commentTips().isEmpty { app.swipeUp() }
+        let tip = try! XCTUnwrap(commentTips().min { $0.frame.minY < $1.frame.minY }, app.debugDescription)
+        tip.tap()
+        XCTAssertTrue(app.staticTexts["Support @spike-bob"].waitForExistence(timeout: 15), app.debugDescription)
+        let points = app.buttons["tip-currency-POINTS"]
+        XCTAssertTrue(points.waitForExistence(timeout: 10))
+        points.tap()
+        expectation(for: NSPredicate(format: "isSelected == true"), evaluatedWith: points)
+        waitForExpectations(timeout: 10)
+        app.textFields["tip-amount"].focusAndType("1")
+        let send = app.buttons["tip-send"]
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: send)
+        waitForExpectations(timeout: 10)
+        send.tap()
+        let confirm = app.alerts.firstMatch.buttons["tip-confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(app.alerts.firstMatch.staticTexts["Send 1 POINTS to @spike-bob?"].exists, app.debugDescription)
+        confirm.tap()
+        XCTAssertTrue(app.secureTextFields["upgrade-key"].waitForExistence(timeout: 15), "the active key is asked: \(app.debugDescription)")
     }
 
     func testOtherWalletScreensOpen() {

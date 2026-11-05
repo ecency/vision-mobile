@@ -382,6 +382,39 @@ class WalletActionsTest {
         )
     }
 
+    /** Tester report "unable to send Points gifts on comments": a comment's key tips like a post's, in each currency. */
+    @Test
+    fun aPointsTipOnACommentGoesOutAsAnActivePointTransfer() = runTest {
+        val permlink = "re-spike-voter-a-post-20261105t101010123z"
+        suspend fun tip(currency: String): kotlinx.serialization.json.JsonArray {
+            val w = world(this)
+            val m = w.env.tipModel("spike-author", permlink)
+            m.start()
+            testScheduler.advanceUntilIdle()
+            m.setCurrency(currency)
+            m.setAmount("1")
+            m.send()
+            m.confirm()
+            testScheduler.advanceUntilIdle()
+            assertEquals(com.ecency.core.app.SendPhase.Done::class, m.current.phase?.let { it::class })
+            return w.broadcastOps().single()
+        }
+        val points = tip("POINTS")
+        assertEquals("custom_json", points[0].jsonPrimitive.content)
+        val body = points[1].jsonObject
+        assertEquals("ecency_point_transfer", body["id"]!!.jsonPrimitive.content)
+        assertEquals("""["spike-voter"]""", body["required_auths"].toString())
+        assertEquals("[]", body["required_posting_auths"].toString())
+        assertEquals(
+            """{"sender":"spike-voter","receiver":"spike-author","amount":"1.000 POINT","memo":"Tip for @spike-author/$permlink"}""",
+            body["json"]!!.jsonPrimitive.content,
+        )
+        assertEquals(
+            """["transfer",{"from":"spike-voter","to":"spike-author","amount":"1.000 HIVE","memo":"Tip for @spike-author/$permlink"}]""",
+            tip("HIVE").toString(),
+        )
+    }
+
     @Test
     fun tipAmountsAreCheckedLikeRn() = runTest {
         val w = world(this)

@@ -23,12 +23,13 @@ final class LayoutPolishUITests: XCTestCase {
     }
 
     /// Waits until [element] can be tapped and has stopped moving (a sheet or drawer at the end of its slide).
-    private func waitSettled(_ element: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+    /// [hittable] false for the side menu: iOS 27 reports none of its elements hittable though taps on them land (#3620).
+    private func waitSettled(_ element: XCUIElement, hittable: Bool = true, file: StaticString = #filePath, line: UInt = #line) {
         var last = CGRect.null
         let settled = NSPredicate { _, _ in
             let now = element.frame
             defer { last = now }
-            return element.isHittable && now == last
+            return (hittable ? element.isHittable : element.exists && !now.isEmpty) && now == last
         }
         let result = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: settled, object: nil)], timeout: 15)
         XCTAssertEqual(result, .completed, "\(element) settled", file: file, line: line)
@@ -126,7 +127,7 @@ final class LayoutPolishUITests: XCTestCase {
             XCTAssertTrue(menu.waitForExistence(timeout: 20))
             menu.tap()
             XCTAssertTrue(app.buttons["drawer-accounts"].waitForExistence(timeout: 10))
-            waitSettled(app.buttons["drawer-accounts"])
+            waitSettled(app.buttons["drawer-accounts"], hittable: false)
             let drawer = element(app, "drawer").frame
             let accounts = app.buttons["drawer-accounts"].frame
             XCTAssertTrue(drawer.insetBy(dx: -0.5, dy: -0.5).contains(accounts), "\(name): the header's controls inside the drawer")

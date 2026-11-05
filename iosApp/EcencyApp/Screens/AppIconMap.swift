@@ -134,6 +134,7 @@ extension AppIcon {
         case .trophy: return "trophy"
         case .target: return "target"
         case .shrink: return "arrow.down.right.and.arrow.up.left"
+        case .uploads: return "photo.on.rectangle"
         default: return nil
         }
     }

@@ -77,6 +77,8 @@ final class LoginUITests: XCTestCase {
         XCTAssertTrue(key.waitForExistence(timeout: 15))
         XCTAssertTrue(app.staticTexts["Authorization Required"].exists)
         key.focusAndType("5KnotTheActiveKey")
+        // the card rides up with the keyboard, which iOS 27 brings in after the first keys (#3620)
+        app.waitForKeyboardToSettle()
         app.buttons["upgrade-sign"].tap()
         XCTAssertTrue(app.staticTexts["upgrade-error"].waitForExistence(timeout: 10))
         app.buttons["upgrade-cancel"].tap()

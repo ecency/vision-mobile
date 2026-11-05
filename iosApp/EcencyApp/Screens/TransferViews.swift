@@ -79,7 +79,9 @@ struct TransferFormView: View {
             if s.showMemo { memoSection(s) }
             notes(s)
             SendPhaseView(phase: s.phase) { dismiss() }
-            if !s.busy && !(s.phase is SendPhaseUnconfirmed) {
+            if s.encryptingMemo {
+                ProgressView().frame(maxWidth: .infinity).accessibilityIdentifier("memo-encrypting")
+            } else if !s.busy && !(s.phase is SendPhaseUnconfirmed) {
                 Button(tcopy.NEXT) { model.next() }.frame(maxWidth: .infinity).disabled(!s.nextEnabled).accessibilityIdentifier("transfer-next")
             }
         }
@@ -198,6 +200,20 @@ struct TransferFormView: View {
         if s.memoHasSecret {
             Text(tcopy.MEMO_HAS_SECRET).font(.footnote).foregroundStyle(theme.dangerText)
                 .announces(tcopy.MEMO_HAS_SECRET, debounce: true).accessibilityIdentifier("memo-has-secret")
+        }
+        switch s.memoEncryption {
+        case .encrypts:
+            Text(tcopy.MEMO_ENCRYPTED).font(.footnote).foregroundStyle(theme.secondary).accessibilityIdentifier("memo-encrypted")
+        case .noKey:
+            Text(tcopy.MEMO_ENCRYPT_NO_KEY).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.MEMO_ENCRYPT_NO_KEY, debounce: true).accessibilityIdentifier("memo-encrypt-no-key")
+        case .unsupported:
+            Text(tcopy.MEMO_ENCRYPT_UNSUPPORTED).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.MEMO_ENCRYPT_UNSUPPORTED, debounce: true).accessibilityIdentifier("memo-encrypt-unsupported")
+        case .exchange:
+            Text(tcopy.memoExchange(exchange: s.exchange ?? "", memo: s.memo)).font(.footnote).foregroundStyle(theme.dangerText)
+                .announces(tcopy.memoExchange(exchange: s.exchange ?? "", memo: s.memo), debounce: true).accessibilityIdentifier("memo-encrypt-exchange")
+        default: EmptyView()
         }
         if s.kind == TransferKind.convert { Text(tcopy.CONVERT_DESC).font(.footnote).foregroundStyle(theme.secondary) }
         if let ex = s.exchange {

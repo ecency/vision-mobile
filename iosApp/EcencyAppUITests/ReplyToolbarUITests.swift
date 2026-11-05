@@ -33,6 +33,14 @@ final class ReplyToolbarUITests: XCTestCase {
         Shots.save("reply-toolbar")
     }
 
+    /// Tester report: return on the keyboard starts a new line in a reply.
+    func testReturnStartsANewLineInAReply() {
+        let app = openReplyComposer()
+        let text = app.textViews["reply-text"]
+        text.focusAndType("first line\nsecond line")
+        XCTAssertEqual(text.value as? String, "first line\nsecond line")
+    }
+
     func testTheReplysAiAssistOffersRnsThreeActions() {
         let app = openReplyComposer()
         app.textViews["reply-text"].focusAndType("A reply worth improving")
@@ -53,5 +61,24 @@ final class ReplyToolbarUITests: XCTestCase {
         app.buttons["reply-attach"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["reply-image-uploading"].waitForExistence(timeout: 10))
         XCTAssertFalse(expand.isEnabled, "as Android: the editor would open without the image")
+    }
+
+    /// RN quick reply's UploadsGalleryModal (`allowMultiple={false}`): the account's uploaded images, and one tap is
+    /// the reply's image (the fake gallery's first image).
+    func testAnImageFromTheUploadsGalleryIsTheRepliesImage() {
+        let app = openReplyComposer()
+        let uploads = app.buttons["reply-uploads"]
+        XCTAssertTrue(uploads.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertGreaterThanOrEqual(uploads.frame.minY, app.textViews["reply-text"].frame.maxY - 1, "it sits with the other content buttons")
+        uploads.tap()
+        let image = app.descendants(matching: .any)["gallery-image-demo-i1"]
+        XCTAssertTrue(image.waitForExistence(timeout: 10), app.debugDescription)
+        // the composer's own buttons are the pickers: the sheet is the gallery alone
+        XCTAssertFalse(app.buttons["open-gallery"].exists)
+        XCTAssertFalse(app.buttons["add-to-gallery"].exists)
+        image.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["reply-image"].waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(app.descendants(matching: .any)["uploads-sheet"].exists, "the gallery closed")
+        XCTAssertTrue(app.buttons["reply-send"].isEnabled, "an image alone is a reply")
     }
 }

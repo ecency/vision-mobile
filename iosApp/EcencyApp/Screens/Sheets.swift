@@ -4,7 +4,7 @@ import SwiftUI
 import WebKit
 
 /// Reply composer over a `ComposeReplyModel` (RN quick reply, quickPostModalContent in comment mode): the text, the
-/// attached image, the clipboard chip and RN's toolbar under the text (image, camera, files, dictation, AI assist:
+/// attached image, the clipboard chip and RN's toolbar under the text (image, camera, files, uploads, dictation, AI assist:
 /// the wave composer's `QuickComposeTools` without poll and video); expand and Send in the bar. The text lives in
 /// the model, so closing the sheet after a failure keeps the draft (and its permlink) for the next attempt; only a
 /// success clears it.
@@ -20,11 +20,11 @@ struct ReplyComposer: View {
     @EnvironmentObject private var app: AppContainer
     @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focused: Bool
-    /// RN quick reply: dictation and AI assist, the editor's sheets over this reply.
+    /// RN quick reply: dictation and AI assist, the editor's sheets over this reply, and the uploads gallery.
     @State private var aiSheet: AiSheet?
 
     private enum AiSheet: String, Identifiable {
-        case assist, dictation
+        case assist, dictation, uploads
         var id: String { rawValue }
     }
 
@@ -72,7 +72,8 @@ struct ReplyComposer: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 0) {
                         QuickComposeTools(idPrefix: "reply", onAttach: { draft.model.attach(source: $0) },
-                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist })
+                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist },
+                                          onUploads: { aiSheet = .uploads })
                     }
                 }
                 .foregroundStyle(theme.text)
@@ -137,6 +138,8 @@ struct ReplyComposer: View {
             switch which {
             case .assist: AiAssistSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
             case .dictation: DictationSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
+            // RN UploadsGalleryModal allowMultiple={false}: a tapped upload is the reply's image
+            case .uploads: QuickUploadsSheet(env: app.env) { draft.model.pickUploaded(url: $0) }.environment(\.appTheme, theme)
             }
         }
         .onAppear {

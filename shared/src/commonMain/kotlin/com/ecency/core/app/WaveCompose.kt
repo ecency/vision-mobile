@@ -47,6 +47,12 @@ object WaveComposeCopy {
 
     /** The AI assist button's label (RN's AI assist icon). */
     val AI_ASSIST: String get() = L.aiAssist.title
+
+    /** The uploads gallery button's label (RN quick post's UploadsGalleryModal). */
+    val UPLOADS: String get() = L.native.waveCompose.uploads
+
+    /** Its spoken name and the sheet's heading (RN editor.uploaded_images). */
+    val UPLOADED_IMAGES: String get() = L.editor.uploadedImages
 }
 
 /**
@@ -589,6 +595,20 @@ class WaveComposeModel internal constructor(
                 setState { it.copy(isAttaching = false, error = AppError.from(e), errorTitle = SOMETHING_WRONG) }
             }
         }
+    }
+
+    /**
+     * RN quick post's UploadsGalleryModal (`allowMultiple={false}`): an image the account uploaded before
+     * ([UploadsModel] over `env.uploadsModel(null)`) becomes the wave's one image, nothing is uploaded. The same
+     * guards as [attach], and only a clean https address (any host: older uploads may sit on another one). Its ratio is unknown unless it was uploaded
+     * in this session (RN writes `null` when it cannot measure).
+     */
+    fun pickUploaded(url: String) {
+        val s = current
+        if (s.isAttaching || s.isSending) return
+        if (refuseOtherAccount()) return
+        if (!UploadNames.isClean(url)) return
+        setState { it.copy(imageUrl = url, sent = null, error = null) }
     }
 
     /**

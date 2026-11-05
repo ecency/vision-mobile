@@ -150,6 +150,7 @@ fun AppIcon.drawableRes(): Int? = when (this) {
     AppIcon.TROPHY -> R.drawable.ic_trophy
     AppIcon.TARGET -> R.drawable.ic_target
     AppIcon.SHRINK -> R.drawable.ic_shrink
+    AppIcon.UPLOADS -> R.drawable.ic_uploads
 }
 
 /** The filled drawable for [this], or null when it has no filled form (the outline is drawn instead). */

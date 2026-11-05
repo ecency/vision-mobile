@@ -559,6 +559,25 @@ class LegacyMigrationTest {
         assertEquals(originalUser("spike-master"), rnUser("spike-master"))
     }
 
+    /** #3609: a corrupted removal list and unreadable RN storage no longer refuse the sign-out, and the account stays out. */
+    @Test
+    fun aSignOutWithACorruptedListAndUnreadableRnStorageStillGoesAndStaysOut() {
+        vault.save(VaultAccount("spike-master", AuthType.POSTING_KEY, postingKey = "dummy-native-wif"))
+        run()
+        store.putString("legacy.removed", "{corrupted")
+        val stuck = object : LegacyStorage by rn {
+            override fun write(key: String, value: String) = throw LegacyImportError.StorageUnreadable()
+        }
+        LegacyMigration.forget(vault, stuck, listOf("spike-master"))
+        vault.remove("spike-master")
+        run()
+        assertNull(vault.account("spike-master"), "a signed-out account came back while the list is corrupted")
+        // the list reads again later (rewritten, restored): the removal is still honoured
+        store.putString("legacy.removed", "[]")
+        run()
+        assertNull(vault.account("spike-master"), "a signed-out account came back once the list read again")
+    }
+
     @Test
     fun anAccountSignedOutBeforeTheImportIsNotImported() {
         // signed in natively while the RN data could not be opened yet, then signed out

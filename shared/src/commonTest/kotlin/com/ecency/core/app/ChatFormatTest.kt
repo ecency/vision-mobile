@@ -286,4 +286,11 @@ class ChatFormatTest {
         assertEquals("@carol joined a minute ago", ChatText.body(post, mapOf("u1" to ChatUser("u1", username = "carol")), now))
         assertEquals("x".repeat(100) + "...", ChatText.quote("x".repeat(101)))
     }
+
+    /** The quick reactions over the message options: RN's four first, then wave and party; each a name the server knows. */
+    @Test
+    fun theQuickReactionsAreRnsFourThenWaveAndParty() {
+        assertEquals(listOf("+1", "-1", "smile", "heart", "wave", "tada"), ChatEmoji.QUICK.map { it.first })
+        for ((name, emoji) in ChatEmoji.QUICK) assertEquals(emoji, ChatEmoji.map[name], name)
+    }
 }

@@ -211,7 +211,7 @@ private fun VoteTicks(color: Color, modifier: Modifier) {
 
 /**
  * Reply composer (RN quick reply, quickPostModalContent in comment mode): the text, the attached image, the
- * clipboard chip and RN's toolbar on its own line under the text (image, camera, files, dictation, AI assist: the wave
+ * clipboard chip and RN's toolbar on its own line under the text (image, camera, files, uploads, dictation, AI assist: the wave
  * composer's [QuickComposeTools] without poll and video), then expand to the full editor and Reply. The draft lives in [model] (app-wide, one per parent) until a send succeeds, so
  * retries reuse its permlink and closing the sheet or leaving the post keeps it. While a send runs the
  * sheet cannot be swiped, tapped or backed away: back and scrim taps go through the same
@@ -228,6 +228,7 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
     (env.waves.attacher as? com.ecency.core.app.WaveUploadAttacher)?.let { WaveImagePickers(env, it) }
     ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
     var aiSheet by remember { mutableStateOf<String?>(null) }
+    var uploadsSheet by remember { mutableStateOf(false) }
     // RN: a reply HiveSigner refused for the missing ecency.app authority offers the grant; closing it is a skip
     if (state.authorityPrompt) PostingAuthorityDialog(onAnswer = model::answerAuthorityPrompt, onDismiss = { model.answerAuthorityPrompt(false) })
     if (state.conflict) {
@@ -283,6 +284,7 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
             QuickComposeTools(
                 "reply", state.isSending, state.isAttaching, onAttach = model::attach,
                 onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                onUploads = { uploadsSheet = true },
             )
             Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 // RN quick reply "expand": the same reply continues in the full editor
@@ -306,6 +308,7 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
         }
     }
     QuickComposeAiSheet(env, model, aiSheet) { aiSheet = null }
+    if (uploadsSheet) QuickUploadsSheet(env, onPick = model::pickUploaded) { uploadsSheet = false }
 }
 
 /**

@@ -72,6 +72,9 @@ final class FeedReadingUITests: XCTestCase {
         XCTAssertFalse(app.buttons["mod-notes-confirm"].isEnabled)
         input.focusAndType("off topic")
         XCTAssertTrue(app.buttons["mod-notes-confirm"].isEnabled)
+        // iOS 27 brings the keyboard in after the first keys and the sheet rides up with it: a tap read from the
+        // button's frame before then lands where the button was (#3620)
+        app.waitForKeyboardToSettle()
         app.buttons["mod-notes-cancel"].tap()
         XCTAssertTrue(input.waitForNonExistence(timeout: 5))
     }
