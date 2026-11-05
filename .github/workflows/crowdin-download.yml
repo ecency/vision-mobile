@@ -33,7 +33,7 @@ jobs:
       - name: Remove trigger label
         if: github.event_name == 'pull_request'
         continue-on-error: true
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.issues.removeLabel({
@@ -44,7 +44,7 @@ jobs:
             });
 
       - name: Download translations from Crowdin
-        uses: crowdin/github-action@8f01d54f70f1713ee3f09d82c2bbb2daeac28689 # v2.17.1
+        uses: crowdin/github-action@5b9790df740c85af5412a3a3a91b24988d5d324f # v3.5.1
         with:
           upload_sources: false
           upload_translations: false
