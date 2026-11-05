@@ -131,7 +131,7 @@ android {
         // The RN store app's id; Kotlin packages and the namespace stay com.ecency.*.
         applicationId = APPLICATION_ID
         minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.compileSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         // Above every RN build (docs/release-builds.md): the build number in CI, RN's formula locally.
         versionCode = appVersionCode
         versionName = libs.versions.appVersion.get()
