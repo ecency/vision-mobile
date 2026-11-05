@@ -85,7 +85,12 @@ class ChatApi(private val http: AuthHttp, base: String) {
         }
         val o = send("POST", "/api/mattermost/bootstrap", null, body).obj()
         val token = o?.get("token").text()?.takeIf { it.isNotEmpty() } ?: throw ChatApiException(200, "Chat session could not be prepared.")
-        return ChatBootstrap(token, ChatUser.parse(o?.get("user")))
+        val user = ChatUser.parse(o?.get("user"))
+        // RN chatThreadContainer: `user.id || user.userId || userId`; the live route sends only the bare `userId`
+        val userId = user?.id?.takeIf { it.isNotEmpty() }
+            ?: o?.get("user").obj()?.get("userId").text()?.takeIf { it.isNotEmpty() }
+            ?: o?.get("userId").text()?.takeIf { it.isNotEmpty() }
+        return ChatBootstrap(token, user, userId)
     }
 
     // ---- channels ----
