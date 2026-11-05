@@ -3068,21 +3068,21 @@
         "attempts_postfix": "{count, plural, other {# ครั้งที่ล้มเหลว}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "สตรีค {n} วัน"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• อนุญาตเฉพาะบัญชีที่มีอายุมากกว่า {days} วันเท่านั้น",
+        "max_choices": "• คุณสามารถเลือกได้สูงสุด {choices} ตัวเลือก"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "เหลืออีก {executions} ครั้ง",
+        "schedule_summary": "{executions} การโอน แต่ละครั้งทุก {hours} ชั่วโมง"
       },
       "editor": {
         "short_content_hint": "สั้นเกินไปที่จะได้รับ Points ({n, plural, other {# ตัวอักษร}}หรือน้อยกว่า ไม่รวมลิงก์)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} คนเข้าร่วม",
         "ban-remaining-minutes": "ในอีกประมาณ {count, plural, other {# นาที}}",
         "ban-remaining-hours": "ในอีกประมาณ {count, plural, other {# ชั่วโมง}}",
         "ban-remaining-days": "ในอีกประมาณ {count, plural, other {# วัน}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "ต้องมีอย่างน้อย {count} ตัวอักษร",
+        "chars_remaining": "เหลืออีก {count} ตัวอักษร"
       },
       "alert": {
         "too_many_images": "คุณเลือกได้สูงสุด {count, plural, other {# รูปภาพ}}ต่อครั้ง"
@@ -3105,7 +3105,7 @@
         "rate": "{n} Points ต่อ {s, plural, other {# วินาที}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "การเลิก Stake ครั้งถัดไปในอีก {days} วัน, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "ระหว่าง {min} ถึง {max, plural, other {# ตัวอักษร}}"

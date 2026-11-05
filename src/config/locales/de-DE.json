@@ -3068,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# fehlgeschlagene(r) Versuch(e)} other {# fehlgeschlagene(r) Versuch(e)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "{n}-Tage-Serie"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Nur Konten erlaubt, die älter als {days} Tage sind",
+        "max_choices": "• Du kannst bis zu {choices} Auswahlmöglichkeiten wählen"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Verbleibende {executions} Überweisungen",
+        "schedule_summary": "{executions} Überweisungen, jeweils alle {hours} Stunden"
       },
       "editor": {
         "short_content_hint": "Zu kurz für Points ({n, plural, one {# Zeichen} other {# Zeichen}} oder weniger, Links ausgenommen)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} Personen beigetreten",
         "ban-remaining-minutes": "in etwa {count, plural, one {# Minute} other {# Minuten}}",
         "ban-remaining-hours": "in etwa {count, plural, one {# Stunde} other {# Stunden}}",
         "ban-remaining-days": "in etwa {count, plural, one {# Tag} other {# Tagen}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Mindestens {count} Zeichen erforderlich",
+        "chars_remaining": "{count} Zeichen übrig"
       },
       "alert": {
         "too_many_images": "Du kannst bis zu {count, plural, one {# Bild} other {# Bilder}} auf einmal auswählen"
@@ -3105,7 +3105,7 @@
         "rate": "{n} Points pro {s, plural, one {# Sekunde} other {# Sekunden}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Nächstes Unstaking in {days} Tagen, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Zwischen {min} und {max, plural, one {# Zeichen} other {# Zeichen}}"

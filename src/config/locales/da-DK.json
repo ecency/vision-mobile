@@ -3068,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# mislykkede forsøg} other {# mislykkede forsøg}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "{n}-dages stime"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Kun konti ældre end {days} dage er tilladt",
+        "max_choices": "• Du kan vælge op til {choices} valgmuligheder"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Resterende {executions} overførsler",
+        "schedule_summary": "{executions} overførsler, hver {hours} time"
       },
       "editor": {
         "short_content_hint": "For kort til at give point ({n, plural, one {# tegn} other {# tegn}} eller færre, links ikke medregnet)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} personer tilsluttede sig",
         "ban-remaining-minutes": "om cirka {count, plural, one {# minut} other {# minutter}}",
         "ban-remaining-hours": "om cirka {count, plural, one {# time} other {# timer}}",
         "ban-remaining-days": "om cirka {count, plural, one {# dag} other {# dage}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Mindst {count} tegn kræves",
+        "chars_remaining": "{count} tegn tilbage"
       },
       "alert": {
         "too_many_images": "Du kan vælge op til {count, plural, one {# billede} other {# billeder}} ad gangen"
@@ -3105,7 +3105,7 @@
         "rate": "{n} Points pr. {s, plural, one {# sekund} other {# sekunder}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Næste unstaking er om {days} dage, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Mellem {min} og {max, plural, one {# tegn} other {# tegn}}"

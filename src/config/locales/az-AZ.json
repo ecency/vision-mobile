@@ -3068,21 +3068,21 @@
         "attempts_postfix": "{count, plural, one {# uğursuz cəhd(lər)} other {# uğursuz cəhd(lər)}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "{n} günlük seriya"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Yalnız {days} gündən köhnə hesablara icazə verilir",
+        "max_choices": "• Ən çoxu {choices} seçim edə bilərsən"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Qalan {executions} köçürmə",
+        "schedule_summary": "{executions} köçürmə, hər biri hər {hours} saatdan bir"
       },
       "editor": {
         "short_content_hint": "Points qazanmaq üçün çox qısadır ({n, plural, one {# simvol} other {# simvol}} və ya daha az, keçidlər istisna olmaqla)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} nəfər qoşuldu",
         "ban-remaining-minutes": "təxminən {count, plural, one {# dəqiqəyə} other {# dəqiqəyə}}",
         "ban-remaining-hours": "təxminən {count, plural, one {# saata} other {# saata}}",
         "ban-remaining-days": "təxminən {count, plural, one {# günə} other {# günə}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Minimum {count} simvol tələb olunur",
+        "chars_remaining": "{count} simvol qalıb"
       },
       "alert": {
         "too_many_images": "Bir dəfəyə ən çox {count, plural, one {# şəkil} other {# şəkil}} seçə bilərsən"
@@ -3105,7 +3105,7 @@
         "rate": "{s, plural, one {# saniyə} other {# saniyə}} üçün {n} Points"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Növbəti steyk çıxarması {days} gün sonradır, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "{min} ilə {max, plural, one {# simvol} other {# simvol}} arasında"

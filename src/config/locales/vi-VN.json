@@ -3068,21 +3068,21 @@
         "attempts_postfix": "{count, plural, other {# lần thử thất bại}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "Chuỗi {n} ngày"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• Chỉ cho phép tài khoản cũ hơn {days} ngày",
+        "max_choices": "• Bạn có thể chọn tối đa {choices} lựa chọn"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "Còn lại {executions} lần chuyển",
+        "schedule_summary": "{executions} lần chuyển, mỗi lần cách nhau {hours} giờ"
       },
       "editor": {
         "short_content_hint": "Quá ngắn để nhận Points ({n, plural, other {# ký tự}} trở xuống, không tính liên kết)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} người đã tham gia",
         "ban-remaining-minutes": "sau khoảng {count, plural, other {# phút}}",
         "ban-remaining-hours": "sau khoảng {count, plural, other {# giờ}}",
         "ban-remaining-days": "sau khoảng {count, plural, other {# ngày}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "Yêu cầu tối thiểu {count} ký tự",
+        "chars_remaining": "Còn lại {count} ký tự"
       },
       "alert": {
         "too_many_images": "Bạn có thể chọn tối đa {count, plural, other {# hình ảnh}} mỗi lần"
@@ -3105,7 +3105,7 @@
         "rate": "{n} Points mỗi {s, plural, other {# giây}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "Lần hủy đặt cọc tiếp theo sau {days} ngày, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "Từ {min} đến {max, plural, other {# ký tự}}"

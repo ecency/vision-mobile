@@ -3060,29 +3060,29 @@
     },
     "plurals": {
       "notification": {
-        "monthly_posts": "You created {count, plural, one {# post} other {# posts}} this month. Keep it up!",
-        "checkin": "You checked in {count, plural, one {# day} other {# days}} this week. Keep it up!",
+        "monthly_posts": "יצרתם {count} פוסטים החודש. כל הכבוד, המשיכו כך!",
+        "checkin": "ביצעתם צ'ק אין {count} ימים השבוע. המשיכו כך!",
         "tags_bundle": "{count, plural, one {פוסט חדש #} two {# פוסטים חדשים} other {# פוסטים חדשים}} ב-#{tag}"
       },
       "pincode": {
         "attempts_postfix": "{count, plural, one {# ניסיונות כושלים} two {# ניסיונות כושלים} other {# ניסיונות כושלים}}"
       },
       "perks": {
-        "streak": "{n, plural, one {#-day streak} other {#-day streak}}"
+        "streak": "רצף של {n} ימים"
       },
       "post_poll": {
-        "age_limit": "• Only accounts older than {days, plural, one {# day} other {# days}} allowed",
-        "max_choices": "• You may select upto {choices, plural, one {# choice} other {# choices}}"
+        "age_limit": "• מותר רק לחשבונות בני יותר מ-{days} ימים",
+        "max_choices": "• ניתן לבחור עד {choices} אפשרויות"
       },
       "recurrent": {
-        "remaining_executions": "Remaining {executions, plural, one {# transfer} other {# transfers}}",
-        "schedule_summary": "{executions, plural, one {# transfer} other {# transfers}}, each every {hours, plural, one {# hour} other {# hours}}"
+        "remaining_executions": "נותרו {executions} העברות",
+        "schedule_summary": "{executions} העברות, כל אחת מדי {hours} שעות"
       },
       "editor": {
         "short_content_hint": "קצר מדי כדי לזכות בנקודות (עד {n, plural, one {תו #} two {# תווים} other {# תווים}}, לא כולל קישורים)"
       },
       "chats": {
-        "people_joined": "{count, plural, one {# person joined} other {# people joined}}",
+        "people_joined": "{count} אנשים הצטרפו",
         "ban-remaining-minutes": "בעוד כ{count, plural, one {דקה #} two {# דקות} other {# דקות}}",
         "ban-remaining-hours": "בעוד כ{count, plural, one {שעה #} two {# שעות} other {# שעות}}",
         "ban-remaining-days": "בעוד כ{count, plural, one {יום #} two {# ימים} other {# ימים}}"
@@ -3094,8 +3094,8 @@
         }
       },
       "ai_assist": {
-        "min_chars": "Minimum {count, plural, one {# character} other {# characters}} required",
-        "chars_remaining": "{count, plural, one {# character remaining} other {# characters remaining}}"
+        "min_chars": "נדרשים לפחות {count} תווים",
+        "chars_remaining": "{count} תווים שנותרו"
       },
       "alert": {
         "too_many_images": "אפשר לבחור עד {count, plural, one {תמונה #} two {# תמונות} other {# תמונות}} בכל פעם"
@@ -3105,7 +3105,7 @@
         "rate": "{n} Points לכל {s, plural, one {שנייה #} two {# שניות} other {# שניות}}"
       },
       "transfer": {
-        "powering_down_info": "Next unstaking is in {days, plural, one {# day} other {# days}}, {hp} HIVE"
+        "powering_down_info": "ביטול ההקצאה הבא בעוד {days} ימים, {hp} HIVE"
       },
       "community_settings": {
         "title_length": "בין {min} ל-{max, plural, one {תו #} two {# תווים} other {# תווים}}"
