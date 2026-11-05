@@ -156,6 +156,16 @@ extension ToolbarContent {
     }
 }
 
+extension View {
+    /// A horizontal scroll view right under the navigation bar: iOS 27 drew the bar's edge effect for it, a lighter
+    /// band with a hairline over the status bar and the bar (#22303F on the dark theme's #1E2835), as if the page had
+    /// scrolled under it (#3620). It scrolls sideways only, so nothing ever passes under the bar.
+    @ViewBuilder
+    func noBarEdgeEffect() -> some View {
+        if #available(iOS 26, *) { scrollEdgeEffectHidden(true, for: .top) } else { self }
+    }
+}
+
 /// The secondary button (was `.bordered`): text in an AA text color (the text blue unless given another, such as
 /// `dangerText` for a downvote) on `lightBackground`. `.bordered` laid a 15% blue over white under blue text, 4.1:1.
 struct SubtleFillStyle: ButtonStyle {

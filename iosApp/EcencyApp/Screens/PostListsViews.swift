@@ -175,6 +175,7 @@ struct EditHistoryView: View {
                 }
                 .padding(12)
             }
+            .noBarEdgeEffect()
             Divider()
             if s.isLoading {
                 PageLoading().frame(maxHeight: .infinity, alignment: .top)
