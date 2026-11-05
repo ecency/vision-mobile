@@ -74,6 +74,20 @@ final class ShellUITests: XCTestCase {
 
     /// The footer group sits at the bottom of the menu, always visible; the main group scrolls on its own when it
     /// does not fit (the largest standard text size here; the shared pinsFooter rule covers a landscape phone).
+    /// Whether the side menu item [id] shows whole: inside the window and the menu's scroll views that hold it.
+    /// `isHittable` is false for every element of the drawer on iOS 27 though a tap on one lands (a tap on Settings
+    /// opens Settings), so it can no longer say whether an item is on screen (#3620).
+    private func shownInMenu(_ app: XCUIApplication, _ id: String) -> Bool {
+        let item = app.buttons[id]
+        guard item.exists, !item.frame.isEmpty else { return false }
+        var visible = app.windows.firstMatch.frame
+        for scroll in ["drawer-menu", "drawer-main"] {
+            let view = element(app, scroll)
+            if view.exists, view.buttons[id].exists { visible = visible.intersection(view.frame) }
+        }
+        return visible.insetBy(dx: -0.5, dy: -0.5).contains(item.frame)
+    }
+
     func testSideMenuFooterIsPinnedAndTheMainGroupScrolls() {
         let app = launch(["-seedAccounts", "YES", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"])
         let menu = app.buttons["account-menu"]
@@ -85,7 +99,7 @@ final class ShellUITests: XCTestCase {
         let screen = app.windows.firstMatch.frame
         for id in ["menu-qr", "menu-settings", "menu-logout"] {
             let item = app.buttons[id]
-            XCTAssertTrue(item.isHittable, "\(id) is visible")
+            XCTAssertTrue(shownInMenu(app, id), "\(id) is visible")
             XCTAssertLessThan(item.frame.maxY, version.frame.minY + 1, "\(id) above the version line")
         }
         XCTAssertGreaterThan(version.frame.maxY, screen.maxY - 60, "the footer is at the bottom")
@@ -99,7 +113,7 @@ final class ShellUITests: XCTestCase {
             main.swipeUp()
             swipes += 1
         }
-        XCTAssertTrue(explore.isHittable, "the last main item scrolls into view")
+        XCTAssertTrue(shownInMenu(app, "menu-explore"), "the last main item scrolls into view")
         XCTAssertEqual(app.buttons["menu-qr"].frame.minY, footerTop, accuracy: 1, "the footer did not move")
     }
 
@@ -117,17 +131,17 @@ final class ShellUITests: XCTestCase {
                 let item = app.buttons[id]
                 var swipes = 0
                 // the main group scrolls on its own (pinned) or the whole menu does: either brings the item in
-                while !item.isHittable, swipes < 8 {
+                while !shownInMenu(app, id), swipes < 8 {
                     element(app, "drawer-main").swipeUp()
-                    if !item.isHittable { element(app, "drawer-menu").swipeUp() }
+                    if !shownInMenu(app, id) { element(app, "drawer-menu").swipeUp() }
                     swipes += 1
                 }
-                XCTAssertTrue(item.isHittable, "\(id) is reachable at \(size)")
+                XCTAssertTrue(shownInMenu(app, id), "\(id) is reachable at \(size)")
                 XCTAssertLessThanOrEqual(item.frame.maxY, screen.maxY + 1, "\(id) on screen at \(size)")
             }
             let explore = app.buttons["menu-explore"]
             let qr = app.buttons["menu-qr"]
-            if explore.isHittable && qr.isHittable {
+            if shownInMenu(app, "menu-explore") && shownInMenu(app, "menu-qr") {
                 XCTAssertLessThanOrEqual(explore.frame.maxY, qr.frame.minY + 1, "the groups do not overlap at \(size)")
             }
             app.terminate()
