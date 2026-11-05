@@ -62,6 +62,30 @@ final class WavesUITests: XCTestCase {
         XCTAssertFalse(element(app, "wave-local").exists)
     }
 
+    /// Tester report "in Waves no option to fix typos or delete comments": an own wave carries RN commentView's
+    /// footer Edit pencil and, with no votes and no replies, the Delete trash; others' waves carry neither.
+    func testAnOwnWaveShowsEditAndDeleteInItsFooter() {
+        let app = launch(["-seedAccounts", "YES"])
+        let mine = element(app, "wave-spike-alice-wave-mine")
+        XCTAssertTrue(element(app, "wave-spike-carol-wave-one").waitForExistence(timeout: 20))
+        for _ in 0..<6 where !mine.exists { app.swipeUp() }
+        XCTAssertTrue(mine.waitForExistence(timeout: 10), app.debugDescription)
+        let edit = mine.buttons["wave-edit"]
+        let delete = mine.buttons["wave-delete-post"]
+        XCTAssertTrue(edit.exists && delete.exists, app.debugDescription)
+        XCTAssertEqual(delete.label, "Delete comment")
+        XCTAssertFalse(element(app, "wave-spike-carol-wave-one").buttons["wave-edit"].exists)
+        // Delete asks first (the menu's confirmation); Cancel sends nothing and the wave stays
+        delete.tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.alerts.buttons["menu-confirm"].exists)
+        app.alerts.buttons["Cancel"].tap()
+        XCTAssertTrue(mine.exists)
+        // Edit opens the wave in the editor
+        edit.tap()
+        XCTAssertTrue(app.textViews["editor-body"].waitForExistence(timeout: 20), app.debugDescription)
+    }
+
     func testTheComposersVideoButtonOpensTheShortUploader() {
         let app = launch(["-seedAccounts", "YES"])
         XCTAssertTrue(app.buttons["wave-fab"].waitForExistence(timeout: 20))

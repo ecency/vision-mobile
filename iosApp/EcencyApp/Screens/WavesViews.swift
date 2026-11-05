@@ -390,6 +390,7 @@ struct WaveRowView: View {
                         .accessibilityAction(named: Text(ReadingUiCopy.shared.POST_OPTIONS)) {
                             app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: false, ownProfile: false), root: item.key)
                         }
+                        .ownFooterActions(item.post, votes: card.votes, root: item.key)
                         }
                         ProBadge(username: card.author).accessibilityHidden(true)
                     }
@@ -464,6 +465,8 @@ struct WaveRowView: View {
     }
 
     @ViewBuilder private func footerActions(_ card: PostCard) -> some View {
+        // RN commentView: Edit and Delete on an own wave
+        OwnFooterButtons(post: item.post, votes: card.votes, root: item.key, idPrefix: "wave")
         TipButton(key: card.key)
         Button(ReadingUiCopy.shared.REPLY) {
             if app.requireSignIn(to: .reply) { app.sheet = .reply(ReplyRequest(root: item.key, parent: item.post)) }

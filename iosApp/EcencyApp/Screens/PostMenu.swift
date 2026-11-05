@@ -137,6 +137,65 @@ extension AppContainer {
     var readerLanguage: String { env.settings.contentLanguage }
 }
 
+/// RN commentView's footer icons on an own reply or wave: Edit, and Delete while nothing stops it (`PostFooter`).
+/// Each runs the menu's item (`app.select`): the editor, or the menu's confirmation and delete. Identifiers
+/// `<idPrefix>-<item id>`.
+struct OwnFooterButtons: View {
+    let post: Post
+    let votes: Int32
+    let root: PostKey
+    let idPrefix: String
+    @EnvironmentObject private var app: AppContainer
+    @EnvironmentObject private var session: Observed<SessionState>
+    @Environment(\.appTheme) private var theme
+
+    /// The items for the signed-in account; the same list the footer's accessibility actions use.
+    static func items(_ post: Post, votes: Int32, user: String?) -> [PostMenuItem] {
+        PostFooter.shared.actions(shown: post, votes: votes, user: user)
+    }
+
+    var body: some View {
+        ForEach(Self.items(post, votes: votes, user: session.state.username), id: \.self) { item in
+            let label = PostFooter.shared.label(item: item)
+            let icon = PostFooter.shared.icon(item: item)
+            Button {
+                app.select(item, request: MenuRequest(post: post, context: PostMenuContext(translate: false, openThread: false, ownProfile: false), root: root))
+            } label: {
+                Image(appIcon: icon).scaledFont(18).foregroundStyle(theme.icon).tapTarget()
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(label)
+            .largeContent(label, appIcon: icon)
+            .accessibilityIdentifier("\(idPrefix)-\(item.id)")
+        }
+    }
+}
+
+/// The footer's Edit and Delete as VoiceOver actions on a row's author line, next to its other actions.
+private struct OwnFooterActions: ViewModifier {
+    let post: Post
+    let votes: Int32
+    let root: PostKey
+    @EnvironmentObject private var app: AppContainer
+    @EnvironmentObject private var session: Observed<SessionState>
+
+    func body(content: Content) -> some View {
+        content.accessibilityActions {
+            ForEach(OwnFooterButtons.items(post, votes: votes, user: session.state.username), id: \.self) { item in
+                Button(PostFooter.shared.label(item: item)) {
+                    app.select(item, request: MenuRequest(post: post, context: PostMenuContext(translate: false, openThread: false, ownProfile: false), root: root))
+                }
+            }
+        }
+    }
+}
+
+extension View {
+    func ownFooterActions(_ post: Post, votes: Int32, root: PostKey) -> some View {
+        modifier(OwnFooterActions(post: post, votes: votes, root: root))
+    }
+}
+
 /// RN postOptionsModal: a list of upper-cased items, Delete in red. Items load when the sheet opens.
 struct PostMenuSheet: View {
     let request: MenuRequest

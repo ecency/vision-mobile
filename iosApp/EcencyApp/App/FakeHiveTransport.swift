@@ -267,8 +267,8 @@ final class FakeRestHttp: NSObject, AuthHttp {
         }
     }
 
-    private static func wave(author: String, permlink: String, body: String, extra: String = "") -> String {
-        #"{"id":1,"author":"\#(author)","permlink":"\#(permlink)","title":"","body":"\#(body)","json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]},"timestamp":"2026-10-06T11:00:00+00:00","pending_payout_value":"0.250 HBD","net_votes":3,"children":2,"tip_count":0,"host":"ecency.waves","_cursor":"c-\#(permlink)"\#(extra)}"#
+    private static func wave(author: String, permlink: String, body: String, votes: Int = 3, children: Int = 2, extra: String = "") -> String {
+        #"{"id":1,"author":"\#(author)","permlink":"\#(permlink)","title":"","body":"\#(body)","json_metadata":{"app":"ecency/4.0.0-mobile","tags":["waves"]},"timestamp":"2026-10-06T11:00:00+00:00","pending_payout_value":"0.250 HBD","net_votes":\#(votes),"children":\#(children),"tip_count":0,"host":"ecency.waves","_cursor":"c-\#(permlink)"\#(extra)}"#
     }
 
     static func answer(_ url: String) -> String? {
@@ -299,6 +299,8 @@ final class FakeRestHttp: NSObject, AuthHttp {
                 wave(author: "spike-carol", permlink: "wave-one", body: "Good morning from the waves feed #hive"),
                 wave(author: "spike-bob", permlink: "wave-two", body: "Second wave with a [link](https://ecency.com/@spike-alice/fake-post-1) inside"),
                 wave(author: "spike-carol", permlink: "wave-three", body: "Third wave, plain text only."),
+                // the seeded account's own wave, no votes and no replies yet: its footer offers Edit and Delete
+                wave(author: "spike-alice", permlink: "wave-mine", body: "My own wave with a tpyo", votes: 0, children: 0),
             ].joined(separator: ",") + "]"
         }
         if url.contains("play.3speak.tv/api/embed") { return #"{"videoUrl":"https://play.3speak.tv/hls?u=fixture"}"# }
