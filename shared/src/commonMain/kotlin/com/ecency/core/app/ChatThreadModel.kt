@@ -62,7 +62,8 @@ data class ChatMessageItem(
     val authorAccount: String?,
     /** Posted by one of Ecency's own accounts (web isOfficialPostAuthor): the name carries the official badge. */
     val authorOfficial: Boolean = false,
-    val spans: List<ChatSpan>,
+    /** The text as blocks (#3468); empty for a message that is only images. */
+    val blocks: List<ChatBlock>,
     /** Image urls of the message, through the image proxy. */
     val images: List<String>,
     val quote: ChatQuote?,
@@ -75,6 +76,9 @@ data class ChatMessageItem(
 ) : ChatItem {
     /** The name to show, in the current language when unknown. */
     val author: String get() = authorName ?: L.chats.anonymous
+
+    /** The text as one run of spans ([ChatText.flatten]): what a screen reader reads, and the links in it. */
+    val spans: List<ChatSpan> get() = ChatText.flatten(blocks)
 }
 
 /** "@name joined 2 hours ago" (RN SystemMessageItem); [account] opens the quick profile. */
@@ -173,19 +177,19 @@ class ChatThreadModel internal constructor(
     private val roots = mutableMapOf<String, ChatPost>()
 
     /**
-     * The spans of each message by post id and text: a rebuild (every new message, reaction or typing user) parses
+     * The blocks of each message by post id and text: a rebuild (every new message, reaction or typing user) parses
      * only messages that are new or edited (RN memoizes per message too).
      */
-    private val spanCache = HashMap<String, Pair<String, List<ChatSpan>>>()
+    private val spanCache = HashMap<String, Pair<String, List<ChatBlock>>>()
 
     internal var spanParses = 0
         private set
 
-    private fun spansFor(id: String, text: String): List<ChatSpan> {
-        spanCache[id]?.let { (cached, spans) -> if (cached == text) return spans }
+    private fun blocksFor(id: String, text: String): List<ChatBlock> {
+        spanCache[id]?.let { (cached, blocks) -> if (cached == text) return blocks }
         if (spanCache.size > SPAN_CACHE_MAX) spanCache.clear()
         spanParses++
-        return ChatText.spans(text).also { spanCache[id] = text to it }
+        return ChatText.blocks(text).also { spanCache[id] = text to it }
     }
     private val lookup = mutableMapOf<String, ChatUser>()
     private var memberIds: List<String> = emptyList()
@@ -626,7 +630,7 @@ class ChatThreadModel internal constructor(
             authorName = name,
             authorAccount = name?.lowercase()?.let { SafeTarget.account(it) },
             authorOfficial = OfficialAccounts.postedByOfficial(p, lookup),
-            spans = spansFor(p.id, content.text),
+            blocks = blocksFor(p.id, content.text),
             images = content.images.map { proxy.proxify(it) },
             quote = quote,
             card = card,

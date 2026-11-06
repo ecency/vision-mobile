@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -115,6 +117,13 @@ import com.ecency.core.app.ChatRenameModel
 import com.ecency.core.app.ChatRenameState
 import com.ecency.core.app.ChatRow
 import com.ecency.core.app.ChatSpan
+import com.ecency.core.app.ChatBlock
+import com.ecency.core.app.ChatCodeBlock
+import com.ecency.core.app.ChatHeadingBlock
+import com.ecency.core.app.ChatListBlock
+import com.ecency.core.app.ChatParagraphBlock
+import com.ecency.core.app.ChatQuoteBlock
+import com.ecency.core.app.ChatRuleBlock
 import com.ecency.core.app.ChatThreadModel
 import com.ecency.core.app.ChatsModel
 import com.ecency.core.app.PostCard
@@ -814,6 +823,46 @@ private fun messageText(spans: List<ChatSpan>, own: Boolean, onLink: (String) ->
     }
 }
 
+/**
+ * A message's blocks as web lays them out (#3468), drawn natively: paragraphs, headings bold at the body size (so
+ * "# introduceyourself" is no title), quotes with a bar, lists with their markers, code on a shade, rules.
+ */
+@Composable
+private fun MessageBlocks(blocks: List<ChatBlock>, id: String, own: Boolean, color: Color, onLink: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        for (block in blocks) MessageBlock(block, id, own, color, onLink)
+    }
+}
+
+@Composable
+private fun MessageBlock(block: ChatBlock, id: String, own: Boolean, color: Color, onLink: (String) -> Unit) {
+    val colors = LocalEcencyColors.current
+    when (block) {
+        is ChatParagraphBlock -> Text(messageText(block.spans, own, onLink), color = color, fontSize = 15.sp, modifier = Modifier.testTag("messageText:$id"))
+        is ChatHeadingBlock -> Text(
+            messageText(block.spans, own, onLink), color = color, fontSize = 15.sp, fontWeight = FontWeight.Bold,
+            modifier = Modifier.semantics { heading() }.testTag("messageHeading:$id"),
+        )
+        is ChatQuoteBlock -> Row(Modifier.height(IntrinsicSize.Min).testTag("messageQuote:$id")) {
+            Box(Modifier.width(3.dp).fillMaxHeight().background(if (own) Color.White.copy(alpha = 0.7f) else colors.blue))
+            Box(Modifier.padding(start = 8.dp)) { MessageBlocks(block.blocks, id, own, color, onLink) }
+        }
+        is ChatListBlock -> Column(Modifier.testTag("messageList:$id"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            for (entry in block.items) {
+                Row {
+                    Text(entry.marker, color = color, fontSize = 15.sp, modifier = Modifier.padding(end = 6.dp).testTag("listMarker:$id"))
+                    MessageBlocks(entry.blocks, id, own, color, onLink)
+                }
+            }
+        }
+        is ChatCodeBlock -> Text(
+            block.text, color = color, fontSize = 14.sp, fontFamily = FontFamily.Monospace,
+            modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(ChatCodeShade).padding(horizontal = 6.dp, vertical = 4.dp).testTag("messageCode:$id"),
+        )
+        ChatRuleBlock -> Box(Modifier.padding(vertical = 4.dp).width(48.dp).height(1.dp).background(color.copy(alpha = 0.4f)))
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun MessageBubble(
@@ -855,7 +904,7 @@ private fun MessageBubble(
                     }
                 }
                 item.quote?.let { QuoteBox(it, own, onClose = null) }
-                if (item.spans.isNotEmpty()) Text(messageText(item.spans, own, onLink), color = text, fontSize = 15.sp, modifier = Modifier.testTag("messageText:${item.id}"))
+                if (item.blocks.isNotEmpty()) MessageBlocks(item.blocks, item.id, own, text, onLink)
                 item.images.forEach { url ->
                     AsyncImage(
                         url, contentDescription = UiCopy.IMAGE, contentScale = ContentScale.Crop,

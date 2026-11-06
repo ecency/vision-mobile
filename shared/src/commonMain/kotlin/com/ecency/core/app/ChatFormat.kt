@@ -8,8 +8,10 @@ import com.ecency.core.api.chat.firstText
 import com.ecency.core.l10n.L
 import com.ecency.core.l10n.LocaleFormat
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.markdown.ChatBlocks
 import com.ecency.core.render.markdown.ChatInline
 import com.ecency.core.render.markdown.InlineRun
+import com.ecency.core.render.markdown.MdBlock
 import com.ecency.core.render.methods.JsRegex
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -179,6 +181,44 @@ data class ChatSpan(
     /** The link's target (http, https or hive://); [text] is what is shown for it (RN setLinkText). */
     val url: String? = null,
 )
+
+/**
+ * A block of a chat message as web's `simpleMarkdownToHTML` lays it out (#3468, README "Chats"): both apps draw these
+ * natively, never through an HTML renderer. Text inside is [ChatSpan]s (marks, mentions, links).
+ */
+sealed interface ChatBlock
+
+/** A paragraph. */
+data class ChatParagraphBlock(val spans: List<ChatSpan>) : ChatBlock
+
+/** A heading (`# a`, `a` over `---`): drawn bold at the body size, so `# introduceyourself` is no title. */
+data class ChatHeadingBlock(val level: Int, val spans: List<ChatSpan>) : ChatBlock
+
+/** A block quote (`> a`). */
+data class ChatQuoteBlock(val blocks: List<ChatBlock>) : ChatBlock
+
+/** A bullet or ordered list; [depth] counts the lists around it (0 at the top). */
+data class ChatListBlock(val ordered: Boolean, val depth: Int, val items: List<ChatListItem>) : ChatBlock
+
+/** One item of a list: its marker and its blocks. */
+data class ChatListItem(val ordered: Boolean, val number: Long, val depth: Int, val blocks: List<ChatBlock>) {
+    /**
+     * "1." in the reader's digits for an ordered list (web's sanitizer drops the start number, so every ordered list
+     * counts from 1 there and here), else a disc, circle or square by depth as browsers draw them.
+     */
+    val marker: String
+        get() = if (ordered) LocaleFormat.integer(number) + "." else BULLETS[minOf(depth, BULLETS.size - 1)]
+
+    private companion object {
+        val BULLETS = listOf("•", "◦", "▪")
+    }
+}
+
+/** A fenced or indented code block, shown as typed. */
+data class ChatCodeBlock(val text: String) : ChatBlock
+
+/** A rule (`---`). */
+data object ChatRuleBlock : ChatBlock
 
 /** The text and the images of one message (RN parseMessageContent). */
 data class ChatMessageContent(val text: String, val images: List<String>)
@@ -371,6 +411,81 @@ object ChatText {
      * a link or mention inside it as its raw text.
      */
     fun spans(text: String): List<ChatSpan> {
+        val atoms = atomize(text)
+        return spansOf(if (atoms.markdown) ChatInline.runs(atoms.src) else listOf(InlineRun(atoms.src)), atoms)
+    }
+
+    /**
+     * The message's blocks as web reads them ([ChatBlocks]: lists, quotes, headings, code, rules), their text as
+     * [spans] reads it. A message longer than [MAX_MARKDOWN] is one paragraph as typed. Callers cache the answer per
+     * message ([ChatThreadModel]).
+     */
+    fun blocks(text: String): List<ChatBlock> {
+        if (text.isEmpty()) return emptyList()
+        val atoms = atomize(text)
+        if (!atoms.markdown) return listOf(ChatParagraphBlock(spansOf(listOf(InlineRun(atoms.src)), atoms)))
+        return blocksOf(ChatBlocks.parse(atoms.src), atoms, 0)
+    }
+
+    private fun blocksOf(blocks: List<MdBlock>, atoms: Atoms, depth: Int): List<ChatBlock> = blocks.map { b ->
+        when (b) {
+            is MdBlock.Paragraph -> ChatParagraphBlock(spansOf(b.runs, atoms))
+            is MdBlock.Heading -> ChatHeadingBlock(b.level, spansOf(b.runs, atoms))
+            is MdBlock.Quote -> ChatQuoteBlock(blocksOf(b.blocks, atoms, depth))
+            is MdBlock.ListBlock -> ChatListBlock(
+                b.ordered, depth,
+                b.items.mapIndexed { i, item -> ChatListItem(b.ordered, i + 1L, depth, blocksOf(item, atoms, depth + 1)) },
+            )
+            is MdBlock.Code -> {
+                // a fence's info string is not shown: the links and mentions in it are skipped
+                atoms.next += b.info.count { it == ATOM }
+                ChatCodeBlock(spansOf(listOf(InlineRun(b.text, code = true)), atoms).joinToString("") { it.text })
+            }
+            MdBlock.Rule -> ChatRuleBlock
+        }
+    }
+
+    /**
+     * The blocks as one run of spans, each paragraph, heading or code block on a line of its own and a list item
+     * after its marker: what a screen reader reads and what copy and the link actions use.
+     */
+    fun flatten(blocks: List<ChatBlock>): List<ChatSpan> {
+        val out = mutableListOf<ChatSpan>()
+        fun line(spans: List<ChatSpan>, prefix: String?) {
+            if (out.isNotEmpty()) out += ChatSpan("\n")
+            if (prefix != null) out += ChatSpan("$prefix ")
+            out += spans
+        }
+        fun walk(list: List<ChatBlock>, prefix: String?) {
+            var pending = prefix
+            for (b in list) {
+                when (b) {
+                    is ChatParagraphBlock -> line(b.spans, pending).also { pending = null }
+                    is ChatHeadingBlock -> line(b.spans, pending).also { pending = null }
+                    is ChatCodeBlock -> line(listOf(ChatSpan(b.text, code = true)), pending).also { pending = null }
+                    is ChatQuoteBlock -> walk(b.blocks, pending).also { pending = null }
+                    is ChatListBlock -> b.items.forEach { item -> walk(item.blocks.ifEmpty { listOf(ChatParagraphBlock(emptyList())) }, item.marker) }
+                    ChatRuleBlock -> {}
+                }
+            }
+        }
+        walk(blocks, null)
+        // neighbouring plain text joins, as one paragraph's spans do
+        val merged = mutableListOf<ChatSpan>()
+        for (s in out) {
+            val p = merged.lastOrNull()
+            if (p != null && p.copy(text = "") == s.copy(text = "") && s.url == null) merged[merged.size - 1] = p.copy(text = p.text + s.text)
+            else if (s.text.isNotEmpty() || s.url != null) merged += s
+        }
+        return merged
+    }
+
+    /** The message with each link and mention as one placeholder character, for the markdown to read around. */
+    private class Atoms(val text: String, val kept: List<Atom>, val src: String, val markdown: Boolean) {
+        var next = 0
+    }
+
+    private fun atomize(text: String): Atoms {
         // the rebuild runs on the main thread: a message longer than this shows its marks as typed (Mattermost allows
         // 16383 characters; real chat lines are far shorter)
         val markdown = text.length <= MAX_MARKDOWN
@@ -407,9 +522,16 @@ object ChatText {
             last = a.end
         }
         plain(text.length)
+        return Atoms(text, kept, src.toString(), markdown)
+    }
+
+    /** [runs] of the placeholder text as spans, each placeholder its link or mention again (in order: [Atoms.next]). */
+    private fun spansOf(runs: List<InlineRun>, atoms: Atoms): List<ChatSpan> {
+        val text = atoms.text
+        val kept = atoms.kept
+        var next = atoms.next
         val out = mutableListOf<ChatSpan>()
-        var next = 0
-        for (run in if (markdown) ChatInline.runs(src.toString()) else listOf(InlineRun(src.toString()))) {
+        for (run in runs) {
             if (run.code) {
                 val sb = StringBuilder()
                 for (c in run.text) if (c == ATOM && next < kept.size) kept[next++].let { sb.append(text, it.start, it.end) } else sb.append(c)
@@ -430,6 +552,7 @@ object ChatText {
             }
             if (from < run.text.length) out += ChatSpan(run.text.substring(from), run.bold, run.italic, run.strike)
         }
+        atoms.next = next
         return out
     }
 

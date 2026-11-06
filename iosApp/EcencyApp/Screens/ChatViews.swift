@@ -42,6 +42,72 @@ enum ChatAttributed {
     }
 }
 
+/// A message's blocks as web lays them out (#3468), drawn natively: paragraphs, headings bold at the body size (so
+/// "# introduceyourself" is no title), quotes with a bar, lists with their markers, code on a shade, rules. The
+/// bubble reads as one VoiceOver element ([ChatBubbleText.label]), so these views add no labels of their own.
+struct ChatBlocksView: View {
+    let blocks: [ChatBlock]
+    let own: Bool
+    let color: Color
+    let linkColor: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                ChatBlockView(block: block, own: own, color: color, linkColor: linkColor)
+            }
+        }
+    }
+}
+
+struct ChatBlockView: View {
+    let block: ChatBlock
+    let own: Bool
+    let color: Color
+    let linkColor: Color
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        if let p = block as? ChatParagraphBlock {
+            text(p.spans, weight: .regular)
+        } else if let h = block as? ChatHeadingBlock {
+            text(h.spans, weight: .bold).accessibilityAddTraits(.isHeader)
+        } else if let q = block as? ChatQuoteBlock {
+            HStack(alignment: .top, spacing: 8) {
+                // as tall as the quoted blocks: the stack takes its children's height, the bar fills it
+                Rectangle().fill(own ? Color.white.opacity(0.7) : theme.accent).frame(width: 3).frame(maxHeight: .infinity)
+                ChatBlocksView(blocks: q.blocks, own: own, color: color, linkColor: linkColor)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+        } else if let list = block as? ChatListBlock {
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(Array(list.items.enumerated()), id: \.offset) { _, entry in
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(verbatim: entry.marker).scaledFont(15).foregroundStyle(color)
+                        ChatBlocksView(blocks: entry.blocks, own: own, color: color, linkColor: linkColor)
+                    }
+                }
+            }
+        } else if let code = block as? ChatCodeBlock {
+            Text(verbatim: code.text).scaledFont(14).monospaced().foregroundStyle(color)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 6).padding(.vertical, 4)
+                .background(RoundedRectangle(cornerRadius: 6).fill(ChatAttributed.codeShade))
+        } else {
+            // a rule
+            Rectangle().fill(color.opacity(0.4)).frame(width: 48, height: 1).padding(.vertical, 4)
+        }
+    }
+
+    private func text(_ spans: [ChatSpan], weight: Font.Weight) -> some View {
+        Text(ChatAttributed.make(spans, linkColor: linkColor))
+            .scaledFont(15, weight: weight).foregroundStyle(color)
+            // the whole message, always: under a quote (whose bar takes any height it is offered) a long reply gave
+            // its height to the quote and was cut after a few lines
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
 /// Where a tapped chat link goes (RN handleLink): signing and login links to the auth link flow, web links through
 /// the app's link router (posts and profiles open in the app), anything else nowhere.
 enum ChatLinkKind: Equatable {
@@ -1016,12 +1082,8 @@ struct ChatMessageBubble: View {
                     .accessibilityHidden(true)
                 }
                 if let quote = item.quote { ChatQuoteView(quote: quote, own: own, onClose: nil) }
-                if !item.spans.isEmpty {
-                    Text(ChatAttributed.make(item.spans, linkColor: own ? .white : theme.accentText))
-                        .scaledFont(15).foregroundStyle(text)
-                        // the whole message, always: under a quote (whose bar takes any height it is offered) a long
-                        // reply gave its height to the quote and was cut after a few lines
-                        .fixedSize(horizontal: false, vertical: true)
+                if !item.blocks.isEmpty {
+                    ChatBlocksView(blocks: item.blocks, own: own, color: text, linkColor: own ? .white : theme.accentText)
                         .environment(\.openURL, OpenURLAction { url in
                             app.openChatLink(url.absoluteString)
                             return .handled

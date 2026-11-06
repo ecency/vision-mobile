@@ -33,6 +33,9 @@ object ChatInline {
         return out
     }
 
+    /** The runs of one paragraph (no blank line in it), as [ChatBlocks] reads a block's text. */
+    internal fun paragraph(src: String): List<InlineRun> = ArrayList<InlineRun>().also { paragraph(src, it) }
+
     private fun paragraph(src: String, out: MutableList<InlineRun>) {
         if (src.isEmpty()) return
         val tokens = ArrayList<Token>()

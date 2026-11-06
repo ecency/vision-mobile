@@ -13,6 +13,21 @@ final class AccessibilityTests: XCTestCase {
         return host.sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
     }
 
+    /// #3468: a heading in a chat message is bold at the body's size (so "# introduceyourself" is no title) and grows
+    /// with Dynamic Type as the body does; list items stand on lines of their own.
+    func testAChatHeadingIsBodySizeAndScales() {
+        func blocks(_ text: String) -> ChatBlocksView {
+            ChatBlocksView(blocks: ChatText.shared.blocks(text: text), own: false, color: .primary, linkColor: .blue)
+        }
+        let heading = blocks("# Club notes"), body = blocks("Club notes")
+        XCTAssertTrue(ChatText.shared.blocks(text: "# Club notes").first is ChatHeadingBlock)
+        for typeSize in [DynamicTypeSize.large, .accessibility3] {
+            XCTAssertEqual(size(heading, typeSize).height, size(body, typeSize).height, accuracy: 1, "\(typeSize)")
+        }
+        XCTAssertGreaterThan(size(heading, .accessibility5).height, size(heading, .large).height * 2)
+        XCTAssertGreaterThan(size(blocks("- a\n- b"), .large).height, size(body, .large).height * 1.8)
+    }
+
     func testScaledFontGrowsWithDynamicType() {
         let text = Text(verbatim: "Ag").scaledFont(16)
         let base = size(text, .large), big = size(text, .accessibility5)
