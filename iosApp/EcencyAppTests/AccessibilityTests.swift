@@ -42,6 +42,20 @@ final class AccessibilityTests: XCTestCase {
                              "the long chip wraps and the short one moves to its own line: \(fitted)")
     }
 
+    /// #3636: a 40 character channel name at AX5 breaks only between words. Where its longest word is wider than the
+    /// name's room it would be broken inside the word, so the name takes one line with an ellipsis; where every word
+    /// fits, it wraps between words.
+    func testALongChannelNameAtAX5KeepsWholeWords() {
+        let name = "Hive Photography Contest Winners Gallery"
+        XCTAssertEqual(name.count, 40)
+        let line = size(Text(verbatim: "Ag").scaledFont(15, weight: .semibold), .accessibility5).height
+        let word = size(Text(verbatim: "Photography").scaledFont(15, weight: .semibold).fixedSize(), .accessibility5, width: 2000).width
+        let narrow = size(ChatRowName(title: name), .accessibility5, width: word - 20)
+        XCTAssertLessThan(narrow.height, line * 1.5, "a word wider than the room (\(word) pt in \(word - 20)) must not wrap inside itself: \(narrow), a line is \(line)")
+        let wide = size(ChatRowName(title: name), .accessibility5, width: word + 40)
+        XCTAssertGreaterThan(wide.height, line * 1.5, "every word fits: the name wraps between words: \(wide)")
+    }
+
     func testTapTargetIsAtLeast44Points() {
         let small = Image(systemName: "xmark").font(.system(size: 10)).tapTarget()
         let fitted = size(small, .large)

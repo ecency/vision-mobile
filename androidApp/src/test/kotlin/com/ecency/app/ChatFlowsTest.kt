@@ -557,6 +557,42 @@ class ChatFlowsTest {
         assertFalse(exists("chatThread"))
         assertFalse(hasTextNode("Has anyone tried"))
     }
+
+    /**
+     * #3636: a 40 character channel name at font scale 2 on a 360 dp phone keeps whole words (a line ends between
+     * words, or the last one shown ends in an ellipsis) and the favourite star stays in view beside or under it.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h740dp")
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    fun aLongFavouriteChannelNameAtFontScale2KeepsWholeWordsAndTheStar() {
+        val name = "Hive Photography Contest Winners Gallery"
+        assertEquals(40, name.length)
+        node.chat.rename("ch-photo", name)
+        node.signIn()
+        launch(fontScale = 2f)
+        waitFor("chatRow:ch-photo")
+        val title = compose.onAllNodes(hasText(name), useUnmergedTree = true).fetchSemanticsNodes().single()
+        val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        title.config[androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult].action!!(results)
+        val r = results.single()
+        val lines = (0 until r.lineCount).map { name.substring(r.getLineStart(it), r.getLineEnd(it)) }
+        for (i in 0 until r.lineCount) {
+            val end = r.getLineEnd(i)
+            val ellipsized = r.isLineEllipsized(i)
+            val betweenWords = end == name.length || name[end - 1] == ' ' || name[end] == ' '
+            assertTrue("line $i of $lines ends inside a word", betweenWords || (ellipsized && i == r.lineCount - 1))
+        }
+        val row = compose.onNodeWithTag("chatRow:ch-photo").fetchSemanticsNode().boundsInRoot
+        val star = compose.onAllNodes(androidx.compose.ui.test.hasContentDescription(com.ecency.core.app.ChatUiCopy.FAVORITE), useUnmergedTree = true)
+            .fetchSemanticsNodes().map { it.boundsInRoot }.firstOrNull { it.overlaps(row) }
+        assertTrue("the favourite star is in the row $row", star != null)
+        star!!
+        val text = title.boundsInRoot
+        assertTrue("the star is drawn: $star", star.width > 0f && star.height > 0f)
+        assertTrue("the star is inside the row $row: $star", star.left >= row.left - 0.5f && star.right <= row.right + 0.5f && star.top >= row.top - 0.5f && star.bottom <= row.bottom + 0.5f)
+        assertFalse("the star does not cover the name $text: $star", star.overlaps(text.deflate(0.5f)))
+    }
 }
 
 private fun androidx.compose.ui.test.SemanticsNodeInteractionCollection.onFirst() = this[0]

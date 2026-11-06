@@ -1,6 +1,8 @@
 package com.ecency.core.app
 
 import com.ecency.core.l10n.L
+import com.ecency.core.l10n.LocaleFormat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /** Ecency Pro copy (web `pro.*` wording where it fits, issue #3555). No text points to buying Pro anywhere else. */
@@ -8,6 +10,7 @@ object ProCopy {
     val TITLE: String get() = L.native.pro.title
     val SUBTITLE: String get() = L.native.pro.subtitle
     val MEMBER: String get() = L.native.pro.member
+    fun until(date: String) = L.native.pro.memberUntil(date = date)
     val CARD_PLAIN: String get() = L.native.pro.cardDescriptionPlain
     fun card(price: String) = L.native.pro.cardDescription(price = price)
     val BENEFITS: List<String> get() = listOf(L.native.pro.benefitBadge, L.native.pro.benefitBlog, L.native.pro.benefitSupport, L.native.pro.benefitEarly)
@@ -44,7 +47,11 @@ data class ProState(
     /** A pending payment or an order still being processed. */
     val notice: String? = null,
     val alert: StoreAlert? = null,
+    /** When the account's membership ends (Ecency's Points API, `pro.expires`); null when not known. */
+    val expiresMillis: Long? = null,
 ) {
+    /** "Your membership runs until {date}." for a member whose end date is known (read when shown: language). */
+    val expiryText: String? get() = expiresMillis?.takeIf { member }?.let { ProCopy.until(LocaleFormat.date(it)) }
     /** Paid and accepted, not on the roster yet. */
     val activating: Boolean get() = purchased && !member
     val succeeded: Boolean get() = purchased && member
@@ -123,6 +130,7 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
         scope.launch { env.proMembers.state.collect { sync() } }
         scope.launch { env.purchases.state.collect { sync() } }
         scope.launch { env.proPurchases.state.collect { sync() } }
+        scope.launch { state.collect { readExpiry() } }
         scope.launch { env.purchases.outcomes.collect { if (it.productId == PurchaseSkus.PRO) onOutcome(it) } }
         env.proMembers.ensureLoaded()
         loadPrice()
@@ -142,6 +150,36 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 else -> null
             },
         )
+    }
+
+    /** The account (and whether its purchase was delivered) the end date was read for: read again when either changes. */
+    private var expiryReadFor: Pair<String, Boolean>? = null
+
+    /**
+     * The member's end date (#3636) from the Points API's `pro.expires`, once per account, and again once a purchase
+     * extended it. An answer for an account no longer signed in is dropped; a failed read shows no date.
+     */
+    private fun readExpiry() {
+        val s = current
+        val account = s.account
+        if (account == null || !s.member) {
+            expiryReadFor = null
+            if (s.expiresMillis != null) setState { it.copy(expiresMillis = null) }
+            return
+        }
+        val key = account to s.purchased
+        if (key == expiryReadFor) return
+        expiryReadFor = key
+        scope.launch {
+            val ends = try {
+                env.walletApi.proMembership(account)?.takeIf { it.active }?.expiresMillis
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            }
+            if (current.account == account) setState { it.copy(expiresMillis = ends) }
+        }
     }
 
     /** RN `getItems` for the one product. */

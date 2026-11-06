@@ -372,6 +372,11 @@ class DemoChat(private val nowMillis: () -> Long) {
         outgoing.toList().forEach { it.trySend(text) }
     }
 
+    /** Gives [channelId] the display name [name] (demo runs and tests: a long channel name at large text sizes). */
+    fun rename(channelId: String, name: String) {
+        channels.firstOrNull { it.id == channelId }?.display = name
+    }
+
     /** Someone else types in [channelId] (demo runs and tests). */
     fun typing(channelId: String, who: String = "spike-alice") = emit("typing", channelId, buildJsonObject { put("user_id", userId(who)) })
 

@@ -135,6 +135,7 @@ extension AppIcon {
         case .target: return "target"
         case .shrink: return "arrow.down.right.and.arrow.up.left"
         case .uploads: return "photo.on.rectangle"
+        case .smile: return "face.smiling"
         default: return nil
         }
     }
@@ -217,6 +218,7 @@ extension AppIcon {
         case .created: return "burst.fill"
         case .refund: return "arrow.uturn.backward.circle.fill"
         case .trophy: return "trophy.fill"
+        case .smile: return "face.smiling.fill"
         default: return nil
         }
     }

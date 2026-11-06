@@ -32,6 +32,9 @@ class ProTest {
     private var deliverOnOrder = true
     private var orderAnswer = HttpResult(201, "{}")
 
+    /** Each account's `pro` object in the Points API's answer. */
+    private val proStatus = mutableMapOf<String, String>()
+
     private fun TestScope.rig(signedIn: String? = alice, prefs: Prefs = InMemoryPrefs(), held: List<StorePurchase> = emptyList(), purchasesFirst: Boolean = false): Rig {
         val app = appWithAccounts(this)
         val vault = KeyVault(app.store)
@@ -44,6 +47,12 @@ class ProTest {
                     if (it.status in 200..299 && deliverOnOrder && o["product"]?.jsonPrimitive?.content == PurchaseSkus.PRO) roster += o["user"]!!.jsonPrimitive.content
                 }
                 r.url.endsWith("/private-api/pro-members") -> HttpResult(200, """{"members":[${roster.joinToString(",") { "\"$it\"" }}],"count":${roster.size}}""")
+                // the Points API's answer carries the membership (Ecency's `pro: {active, expires}`)
+                r.url.endsWith("/private-api/points") -> {
+                    val user = Json.parseToJsonElement(r.body!!).jsonObject["username"]!!.jsonPrimitive.content
+                    val pro = proStatus[user] ?: """{"active":false,"expires":null}"""
+                    HttpResult(200, """{"username":"$user","points":"10.000","unclaimed_points":"0.000","pro":$pro}""")
+                }
                 else -> null
             }
         }
@@ -99,6 +108,57 @@ class ProTest {
         assertTrue(m.current.member)
         assertEquals("You are a Pro member.", m.current.cardText)
         assertEquals("Extend by 12 months for $19.99", m.current.buyLabel)
+        m.close()
+    }
+
+    /** #3636: the membership's end, from the Points API's `pro.expires` (the field Ecency's server returns). */
+    @Test
+    fun aMemberSeesWhenTheMembershipEnds() = runTest {
+        roster += alice
+        proStatus[alice] = """{"active":true,"expires":"2027-07-27T17:05:51.195514+02:00"}"""
+        val r = rig()
+        val m = pro(r)
+        val end = kotlin.time.Instant.parse("2027-07-27T15:05:51.195514Z").toEpochMilliseconds()
+        assertEquals(end, m.current.expiresMillis)
+        assertEquals(ProCopy.until(com.ecency.core.l10n.LocaleFormat.date(end)), m.current.expiryText)
+        assertTrue(m.current.expiryText!!.startsWith("Your membership runs until "), m.current.expiryText)
+        m.close()
+    }
+
+    @Test
+    fun aNonMemberHasNoEndDate() = runTest {
+        proStatus[alice] = """{"active":false,"expires":null}"""
+        val r = rig()
+        val m = pro(r)
+        assertNull(m.current.expiresMillis)
+        assertNull(m.current.expiryText)
+        m.close()
+    }
+
+    @Test
+    fun theEndDateIsTheSignedInAccounts() = runTest {
+        roster += alice
+        roster += bob
+        proStatus[alice] = """{"active":true,"expires":"2027-07-27T00:00:00+00:00"}"""
+        proStatus[bob] = """{"active":true,"expires":"2028-01-02T00:00:00+00:00"}"""
+        val r = rig()
+        val m = pro(r)
+        assertEquals(kotlin.time.Instant.parse("2027-07-27T00:00:00Z").toEpochMilliseconds(), m.current.expiresMillis)
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertEquals(bob, m.current.account)
+        assertEquals(kotlin.time.Instant.parse("2028-01-02T00:00:00Z").toEpochMilliseconds(), m.current.expiresMillis)
+        m.close()
+    }
+
+    @Test
+    fun anUnreadableEndDateShowsNone() = runTest {
+        roster += alice
+        proStatus[alice] = """{"active":true,"expires":"soon"}"""
+        val r = rig()
+        val m = pro(r)
+        assertTrue(m.current.member)
+        assertNull(m.current.expiryText)
         m.close()
     }
 

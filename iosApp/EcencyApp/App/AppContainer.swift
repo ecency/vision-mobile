@@ -329,6 +329,10 @@ final class AppContainer: ObservableObject {
                     DemoAuthServices.shared.chat?.seedHistory(channelId: id, read: Int32(history), unread: 0)
                 }
             }
+            // -demoChatName "<name>": the favourite demo channel's name (long names at large text sizes)
+            if let name = UserDefaults.standard.string(forKey: "demoChatName") {
+                DemoAuthServices.shared.chat?.rename(channelId: "ch-photo", name: name)
+            }
             // -demoToast "<text>": a toast through the shared channel at launch (toast layout UI tests)
             if let text = UserDefaults.standard.string(forKey: "demoToast") {
                 // -demoToastDelay <s>: later, so a test can open a sheet first

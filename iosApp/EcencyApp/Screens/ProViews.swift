@@ -27,6 +27,11 @@ struct ProCard: View {
                             Text(s.cardText).scaledFont(13).foregroundStyle(theme.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .accessibilityIdentifier(s.member ? "pro-card-member" : "pro-card-text")
+                            if let ends = s.expiryText {
+                                Text(ends).scaledFont(13).foregroundStyle(theme.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .accessibilityIdentifier("pro-card-expiry")
+                            }
                         }
                         Spacer(minLength: 0)
                         Image(appIcon: .chevronRight).foregroundStyle(theme.icon).accessibilityHidden(true)
@@ -82,6 +87,9 @@ struct ProSheet: View {
                     } else {
                         if s.member {
                             Text(copy.MEMBER).scaledFont(15, weight: .semibold).foregroundStyle(theme.text).accessibilityIdentifier("pro-member")
+                        }
+                        if let ends = s.expiryText {
+                            Text(ends).scaledFont(14).foregroundStyle(theme.text).accessibilityIdentifier("pro-expiry")
                         }
                         Text(copy.SUBTITLE).scaledFont(14).foregroundStyle(theme.secondary)
                         VStack(alignment: .leading, spacing: 8) {

@@ -2561,6 +2561,7 @@
       "card_description": "Go Pro for {price} a year. Verified badge, a free blog, and support Ecency.",
       "card_description_plain": "Go Pro for a year. Verified badge, a free blog, and support Ecency.",
       "member": "You are a Pro member.",
+      "member_until": "Your membership runs until {date}.",
       "benefit_badge": "A verified Pro badge next to your name.",
       "benefit_blog": "A free blog at yourname.blogs.ecency.com.",
       "benefit_support": "Directly support Ecency development.",

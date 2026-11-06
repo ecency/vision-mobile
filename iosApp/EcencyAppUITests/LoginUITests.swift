@@ -118,6 +118,8 @@ final class LoginUITests: XCTestCase {
         let start = app.buttons["welcome-start"]
         XCTAssertTrue(start.waitForExistence(timeout: 15))
         XCTAssertFalse(start.isEnabled)
+        // RN's launch animation covers the screen first (WelcomeUITests)
+        XCTAssertTrue(app.images["welcome-launch"].waitForNonExistence(timeout: 8))
         app.buttons["welcome-terms"].tap()
         XCTAssertTrue(start.isEnabled)
         start.tap()
