@@ -1,5 +1,7 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.broadcast.BroadcastException
+import com.ecency.core.api.broadcast.OperationJson
 import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.LoginMethod
 import com.ecency.core.auth.loginMethod
@@ -611,12 +613,23 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val signsHere = account.authType?.loginMethod() == LoginMethod.KEY
             BridgeGuards.refusal(ops, signsHere)?.let { return@launch answer.error(it) }
+            // signed here: the sheet shows and the app signs the binary form's own JSON, so a field the chain does not
+            // know, or an amount the page wrote another way, is never shown other than it is signed (as hive:// links)
+            val shown = if (signsHere) {
+                try {
+                    JsonArray(ops.map { OperationJson.encode(OperationJson.decode(it as? JsonArray ?: JsonArray(emptyList()))) })
+                } catch (_: BroadcastException) {
+                    return@launch answer.error(BridgeGuards.NOT_SUPPORTED)
+                }
+            } else {
+                ops
+            }
             // the page may have moved on or another request taken the slot while the account was read
             if (!stillAsking(tabId, origin, user)) return@launch answer.error(BUSY)
-            val authority = com.ecency.core.auth.OperationAuthority.required(ops)
+            val authority = com.ecency.core.auth.OperationAuthority.required(shown)
             prompt(
-                PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Broadcast(ops, authority)),
-                title, details, ops,
+                PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Broadcast(shown, authority)),
+                title, details, shown,
             )
         }
     }

@@ -427,6 +427,24 @@ class DappBrowserModelTest {
         assertEquals(2, app.broadcasts().size, "the same transfer twice is two transfers")
     }
 
+    /** #3635 review: a key account signs the binary form, so the sheet shows that form, never a field it drops. */
+    @Test
+    fun aKeyAccountSeesExactlyWhatItSigns() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        // end_date belongs in the extensions; at the top level the chain form has no place for it
+        send(b, page, keychain("broadcast", ""","operations":[["update_proposal",{"proposal_id":7,"creator":"$alice","daily_pay":"10.000 HBD","subject":"Better","permlink":"my-proposal","end_date":"2027-12-01T00:00:00","extensions":[]}]]"""))
+        testScheduler.advanceUntilIdle()
+        val fields = b.current.prompt!!.operations.single().fields.map { it.name }
+        assertFalse("end_date" in fields, "shown: $fields")
+        assertTrue("daily_pay" in fields)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, app.broadcasts().size)
+        assertFalse("end_date" in app.broadcasts().single().params.toString())
+    }
+
     @Test
     fun aKeyAccountIsRefusedWhatItCannotSerialize() = runTest {
         val app = signedIn(this)

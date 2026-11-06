@@ -50,7 +50,7 @@ data class LimitOrderCreate(
         require(amountToSell.symbol != minToReceive.symbol) { "an order trades HIVE against HBD" }
         require(amountToSell.units > 0 && minToReceive.units > 0) { "order amounts must be positive" }
         require(orderId in 0..0xFFFFFFFFL) { "orderid out of range" }
-        ChainTime.toEpochSeconds(expiration)
+        ChainTime.signable(expiration)
     }
 
     override fun write(writer: HiveWriter) = with(writer) {
@@ -85,7 +85,7 @@ data class LimitOrderCreate2(
         require(base.symbol != quote.symbol) { "an order trades HIVE against HBD" }
         require(amountToSell.units > 0 && base.units > 0 && quote.units > 0) { "order amounts must be positive" }
         require(orderId in 0..0xFFFFFFFFL) { "orderid out of range" }
-        ChainTime.toEpochSeconds(expiration)
+        ChainTime.signable(expiration)
     }
 
     override fun write(writer: HiveWriter) = with(writer) {

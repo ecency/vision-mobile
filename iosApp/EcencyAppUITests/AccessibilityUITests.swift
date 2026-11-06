@@ -57,8 +57,9 @@ final class AccessibilityUITests: XCTestCase {
         var unattributed = 0
         var unresolved: [String] = []
         // text the tab bar covers: the audit reads it through the bar's glass and cannot name it (#3651)
-        let underTheBar = AuditExclusions.textsUnderTheTabBar(app)
-        if underTheBar > 0 { print("AccessibilityUITests \(screen): \(underTheBar) text(s) under the tab bar") }
+        let counted = AuditExclusions.textsUnderTheTabBar(app)
+        let underTheBar = min(counted, AuditExclusions.underTheBarMeasured[String(screen.split(separator: " ").first ?? "")] ?? 0)
+        if counted > 0 { print("AccessibilityUITests \(screen): \(counted) text(s) under the tab bar, \(underTheBar) allowed") }
         do {
             try app.performAccessibilityAudit(for: .all) { issue in
                 if AuditExclusions.excuses(issue) { return true }
@@ -73,7 +74,7 @@ final class AccessibilityUITests: XCTestCase {
                 }
                 // a contrast reading on a SwiftUI node the audit cannot resolve to an element (text inside a combined
                 // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen, plus
-                // one per text the tab bar covers (`textsUnderTheTabBar`); any other unattributed issue (clipping,
+                // one per text the tab bar covers (`textsUnderTheTabBar`, at most `underTheBarMeasured`); any other unattributed issue (clipping,
                 // Dynamic Type, hit region) fails.
                 if issue.element == nil, issue.auditType == .contrast, unattributed < AuditExclusions.unattributedBudget + underTheBar {
                     unattributed += 1
@@ -353,6 +354,11 @@ enum AuditExclusions {
                                           "notification-line", "chat-row-time", "asset-name", "asset-fiat"]
     /// Contrast readings on SwiftUI nodes the audit cannot resolve to an element, allowed per screen (see `audit`).
     static let unattributedBudget = 3
+    /// The most texts under the tab bar each screen may count on top of [unattributedBudget], measured on 2026-11-06
+    /// (#3651). The audit names no node for these readings, so the bar's allowance cannot be tied to the bar itself:
+    /// capped at what was measured, more text scrolled under the bar never makes room for a new reading elsewhere.
+    /// A screen not listed gets none.
+    static let underTheBarMeasured: [String: Int] = ["feed": 1, "waves": 2, "wallet": 5, "notifications": 2]
     /// A bounded allowance, per screen and description, for clipping and Dynamic Type issues on nodes the audit
     /// cannot resolve to an element. This is not identification: the audit names no node and no text and every such
     /// issue shares one generic description. The numbers are those measured on 2026-10-27 on screens with the tab bar

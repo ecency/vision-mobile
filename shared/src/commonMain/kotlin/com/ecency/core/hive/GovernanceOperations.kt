@@ -66,7 +66,7 @@ data class CreateProposal(
 ) : Operation {
     init {
         requireDailyPay(dailyPay)
-        require(ChainTime.toEpochSeconds(endDate) > ChainTime.toEpochSeconds(startDate)) { "a proposal ends after it starts" }
+        require(ChainTime.signable(endDate) > ChainTime.signable(startDate)) { "a proposal ends after it starts" }
     }
 
     override fun write(writer: HiveWriter) = with(writer) {
@@ -97,7 +97,7 @@ data class UpdateProposal(
     init {
         require(proposalId >= 0) { "proposal id is not negative" }
         requireDailyPay(dailyPay)
-        endDate?.let(ChainTime::toEpochSeconds)
+        endDate?.let(ChainTime::signable)
     }
 
     override fun write(writer: HiveWriter) = with(writer) {

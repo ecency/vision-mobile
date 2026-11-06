@@ -36,7 +36,7 @@ data class ConversionRequest(val requestId: Long, val amount: String, val date: 
 /** An account's Ecency Pro membership (the Points API's `pro`): [expiresMillis] null when unknown or unreadable. */
 data class ProMembership(val active: Boolean, val expiresMillis: Long?)
 
-data class OpenOrder(val orderId: Long,val created: String, val expiration: String, val base: String, val quote: String, val forSale: Long)
+data class OpenOrder(val orderId: Long, val created: String, val expiration: String, val base: String, val quote: String, val forSale: Long)
 
 /** A recurrent transfer schedule (find_recurrent_transfers). */
 data class RecurrentSchedule(

@@ -86,4 +86,27 @@ class LinkOpGoldenVectorTest {
         refused(remove("[]"))
         refused(remove("[1,2,3,4,5,6]"))
     }
+
+    /** Review of #3635: a date the chain cannot hold, or one that does not exist, is refused before any prompt. */
+    @Test
+    fun datesOutsideTheChainsRangeOrTheCalendarAreRefused() {
+        val u = LinkOpGoldenVectors.USER
+        fun refused(json: String) = assertFailsWith<BroadcastException.InvalidOperation>(json) { OperationJson.decode(Json.parseToJsonElement(json) as JsonArray) }
+        fun order(expiration: String) =
+            """["limit_order_create2",{"owner":"$u","orderid":1,"amount_to_sell":"10.000 HIVE","exchange_rate":{"base":"1.000 HIVE","quote":"0.250 HBD"},"fill_or_kill":false,"expiration":"$expiration"}]"""
+        fun proposal(start: String, end: String) =
+            """["create_proposal",{"creator":"$u","receiver":"r","start_date":"$start","end_date":"$end","daily_pay":"1.000 HBD","subject":"s","permlink":"p","extensions":[]}]"""
+        fun update(end: String) =
+            """["update_proposal",{"proposal_id":1,"creator":"$u","daily_pay":"1.000 HBD","subject":"s","permlink":"p","extensions":[[1,{"end_date":"$end"}]]}]"""
+        for (bad in listOf("2026-02-31T00:00:00", "2026-04-31T12:00:00", "2200-01-01T00:00:00", "1960-01-01T00:00:00")) {
+            refused(order(bad))
+            refused(update(bad))
+        }
+        refused(proposal("1960-01-01T00:00:00", "2027-05-01T00:00:00"))
+        refused(proposal("2026-11-01T00:00:00", "2200-01-01T00:00:00"))
+        refused(proposal("2026-11-01T00:00:00", "2027-02-29T00:00:00"))
+        // the last second the chain holds, and a leap day, still go through
+        assertTrue(OperationJson.canDecode(Json.parseToJsonElement(order("2106-02-07T06:28:15")) as JsonArray))
+        assertTrue(OperationJson.canDecode(Json.parseToJsonElement(proposal("2026-11-01T00:00:00", "2028-02-29T00:00:00")) as JsonArray))
+    }
 }
