@@ -2,6 +2,7 @@ package com.ecency.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -43,7 +46,7 @@ import com.ecency.core.app.UiCopy
 
 /** The Pro card on Perks (issue #3555): membership or the store's price; a tap opens [ProSheet]. */
 @Composable
-fun ProCard(model: ProModel) {
+fun ProCard(model: ProModel, onOpenUrl: (String) -> Unit = {}) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
@@ -61,13 +64,13 @@ fun ProCard(model: ProModel) {
         }
         Glyph(AppIcon.CHEVRON_RIGHT, colors.icon, 22.dp)
     }
-    if (s.open) ProSheet(model)
+    if (s.open) ProSheet(model, onOpenUrl)
 }
 
 /** The Pro sheet: web's benefits, the store purchase (or a member's extension) and its outcome. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProSheet(model: ProModel) {
+private fun ProSheet(model: ProModel, onOpenUrl: (String) -> Unit) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     ModalBottomSheet(
@@ -107,6 +110,8 @@ private fun ProSheet(model: ProModel) {
                     if (s.member) Text(ProCopy.EXTEND_NOTE, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
                 }
             }
+            // #3636: the free blog, for a member
+            if (s.member) ProBlogSection(model, onOpenUrl)
             s.notice?.let {
                 Text(it, color = colors.text, fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp).semantics { liveRegion = LiveRegionMode.Polite }.testTag("proNotice"))
             }
@@ -136,5 +141,61 @@ private fun ProSheet(model: ProModel) {
             text = { Text(a.body) },
             confirmButton = { TextButton(onClick = model::dismissAlert, modifier = Modifier.testTag("proAlertOk")) { Text(UiCopy.OK) } },
         )
+    }
+}
+
+/**
+ * A member's free blog (#3636): its address with Open once it exists, else "Claim your free blog" and the small
+ * form (title and description from the profile, the default look). Nothing here points to buying anything.
+ */
+@Composable
+private fun ProBlogSection(model: ProModel, onOpenUrl: (String) -> Unit) {
+    val colors = LocalEcencyColors.current
+    val s by model.state.collectAsState()
+    val address = s.blogAddress
+    when {
+        address != null -> Column(Modifier.fillMaxWidth().padding(top = 16.dp).clip(RoundedCornerShape(12.dp)).background(colors.lightBackground).padding(12.dp).testTag("proBlog")) {
+            Text(s.blogHeading, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("proBlogHeading"))
+            Text(address, color = colors.text, fontSize = 14.sp, style = ltrFieldStyle(), modifier = Modifier.padding(top = 4.dp).testTag("proBlogAddress"))
+            TextButton(onClick = { s.blogUrl?.let(onOpenUrl) }, modifier = Modifier.heightIn(min = 48.dp).testTag("proBlogOpen")) {
+                Text(ProCopy.BLOG_OPEN, color = colors.blueText, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        s.blogFormOpen -> Column(Modifier.fillMaxWidth().padding(top = 16.dp).testTag("proBlogForm")) {
+            Text(ProCopy.BLOG_CLAIM, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.semantics { heading() })
+            Text(s.blogIntro, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+            OutlinedTextField(
+                value = s.blogTitle, onValueChange = model::setBlogTitle, enabled = !s.blogClaiming && !s.blogPrefilling, singleLine = true,
+                label = { Text(ProCopy.BLOG_TITLE_LABEL) },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("proBlogTitle"),
+            )
+            OutlinedTextField(
+                value = s.blogDescription, onValueChange = model::setBlogDescription, enabled = !s.blogClaiming && !s.blogPrefilling, minLines = 2,
+                label = { Text(ProCopy.BLOG_DESCRIPTION_LABEL) },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("proBlogDescription"),
+            )
+            s.blogError?.let {
+                Text(it.message, color = colors.redText, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }.testTag("proBlogError"))
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = model::cancelBlogForm, enabled = !s.blogClaiming, modifier = Modifier.heightIn(min = 48.dp).testTag("proBlogCancel")) {
+                    Text(ProCopy.BLOG_CANCEL, color = colors.blueText)
+                }
+                Button(
+                    onClick = model::claimBlog, enabled = s.canClaimBlog,
+                    colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = colors.blue),
+                    modifier = Modifier.padding(start = 8.dp).heightIn(min = 48.dp).testTag("proBlogConfirm"),
+                ) {
+                    if (s.blogClaiming || s.blogPrefilling) Spinner(Modifier.testTag("proBlogClaiming"), size = 18.dp, color = Color.White)
+                    else Text(ProCopy.BLOG_CLAIM_CONFIRM, color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+        s.showBlogClaim -> OutlinedButton(
+            onClick = model::openBlogForm,
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp).heightIn(min = 48.dp).testTag("proBlogClaim"),
+        ) {
+            Text(ProCopy.BLOG_CLAIM, color = colors.blueText, fontWeight = FontWeight.SemiBold)
+        }
     }
 }

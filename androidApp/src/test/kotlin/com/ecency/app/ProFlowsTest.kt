@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import com.ecency.app.ui.AppHost
 import com.ecency.app.ui.EcencyApp
 import com.ecency.app.ui.EcencyTheme
@@ -49,8 +50,18 @@ class ProFlowsTest {
 
     @Volatile private var orderStatus = 201
 
+    /** The hosting API's answer about tester's blog (null: none, 404) and Ecency's answer to a claim. */
+    @Volatile private var tenant: HttpResult? = null
+
+    @Volatile private var claimAnswer = HttpResult(200, """{"created":true,"tenant":{"blogUrl":"https://tester.blogs.ecency.com"}}""")
+
+    /** Pages handed to the browser. */
+    private val opened = java.util.Collections.synchronizedList(mutableListOf<String>())
+
     private val host = object : AppHost {
-        override fun openExternal(url: String) {}
+        override fun openExternal(url: String) {
+            opened += url
+        }
         override fun toast(text: String) {}
         override fun copy(text: String) {}
         override fun share(text: String) {}
@@ -74,6 +85,9 @@ class ProFlowsTest {
                     """{"points":"10.000","unclaimed_points":"0.000","pro":""" +
                         (if ("tester" in roster) """{"active":true,"expires":"$PRO_ENDS"}""" else """{"active":false,"expires":null}""") + "}",
                 )
+                // #3636: the free blog's lookup and claim
+                r.url.endsWith("/v1/tenants/tester") -> tenant ?: HttpResult(404, """{"error":"Tenant not found"}""")
+                r.url.endsWith("/api/hosting/claim-blog") -> claimAnswer
                 else -> null
             }
         }
@@ -161,6 +175,78 @@ class ProFlowsTest {
 
     private companion object {
         const val PRO_ENDS = "2027-07-27T12:00:00+00:00"
+    }
+
+    // ---- the free blog (#3636)
+
+    private fun claims() = node.auth.requests.filter { it.url.endsWith("/api/hosting/claim-blog") }
+
+    @Test
+    fun aMemberClaimsTheFreeBlogAndOpensIt() {
+        signIn()
+        roster += "tester"
+        launch()
+        waitFor("proCardMember")
+        click("proCard")
+        waitFor("proBlogClaim")
+        click("proBlogClaim")
+        waitFor("proBlogForm")
+        compose.await("the claim button") { compose.onAllNodes(hasTestTag("proBlogConfirm") and androidx.compose.ui.test.isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("proBlogTitle").performTextReplacement("Tester writes")
+        click("proBlogConfirm")
+        compose.await("the claim") { claims().isNotEmpty() }
+        val body = Json.parseToJsonElement(claims().single().body!!).jsonObject
+        assertEquals("access-tester", body.getValue("code").jsonPrimitive.content)
+        assertEquals("Tester writes", body.getValue("title").jsonPrimitive.content)
+        waitFor("proBlogAddress")
+        assertEquals("tester.blogs.ecency.com", text("proBlogAddress"))
+        assertEquals(ProCopy.BLOG_CLAIMED, text("proBlogHeading"))
+        assertFalse(exists("proBlogClaim"))
+        click("proBlogOpen")
+        compose.await("the browser") { opened.isNotEmpty() }
+        assertEquals(listOf("https://tester.blogs.ecency.com"), opened.toList())
+    }
+
+    @Test
+    fun anExistingBlogShowsItsAddressInsteadOfTheClaim() {
+        signIn()
+        roster += "tester"
+        tenant = HttpResult(200, """{"username":"tester","subscriptionStatus":"active","blogUrl":"https://tester.blogs.ecency.com"}""")
+        launch()
+        waitFor("proCardMember")
+        click("proCard")
+        waitFor("proBlogAddress")
+        assertEquals(ProCopy.BLOG_EXISTING, text("proBlogHeading"))
+        assertFalse(exists("proBlogClaim"))
+        assertTrue(claims().isEmpty())
+    }
+
+    @Test
+    fun aRefusedClaimShowsWhy() {
+        signIn()
+        roster += "tester"
+        claimAnswer = HttpResult(403, """{"error":"Ecency Pro membership required"}""")
+        launch()
+        waitFor("proCardMember")
+        click("proCard")
+        waitFor("proBlogClaim")
+        click("proBlogClaim")
+        compose.await("the claim button") { compose.onAllNodes(hasTestTag("proBlogConfirm") and androidx.compose.ui.test.isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        click("proBlogConfirm")
+        waitFor("proBlogError")
+        assertEquals(ProCopy.BLOG_NOT_PRO, text("proBlogError"))
+        assertTrue(exists("proBlogForm"))
+    }
+
+    @Test
+    fun aNonMemberHasNoBlogClaim() {
+        signIn()
+        launch()
+        waitFor("proCardText")
+        click("proCard")
+        waitFor("proSheet")
+        compose.waitForIdle()
+        assertFalse(exists("proBlogClaim") || exists("proBlog"))
     }
 
     @Test

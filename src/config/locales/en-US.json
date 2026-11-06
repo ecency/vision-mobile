@@ -2574,7 +2574,19 @@
       "success_title": "Welcome to Ecency Pro",
       "success_body": "Your Pro membership is active. Your badge will appear on your profile shortly.",
       "extending": "Payment received. Your Pro membership is being extended by 12 months.",
-      "open_a11y": "Open Ecency Pro"
+      "open_a11y": "Open Ecency Pro",
+      "blog_claim": "Claim your free blog",
+      "blog_intro": "Ecency Pro includes a free blog at {address}. It starts with the default look, which you can change later.",
+      "blog_title_label": "Blog title (optional)",
+      "blog_description_label": "Description (optional)",
+      "blog_claim_confirm": "Claim blog",
+      "blog_claimed": "Your blog is ready",
+      "blog_existing": "Your blog is already set up",
+      "blog_open": "Open blog",
+      "blog_not_pro": "Ecency Pro membership is required to claim a free blog.",
+      "blog_unavailable": "Blog hosting is not available right now. Please try again later.",
+      "blog_failed": "Could not claim your blog. Please try again.",
+      "blog_login": "Please sign in again to claim your blog."
     },
     "editor": {
       "saving_draft": "Saving draft...",

@@ -1,5 +1,9 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.ecency.BlogClaim
+import com.ecency.core.api.ecency.HostingApi
+import com.ecency.core.auth.AuthException
 import com.ecency.core.l10n.L
 import com.ecency.core.l10n.LocaleFormat
 import kotlinx.coroutines.CancellationException
@@ -26,6 +30,21 @@ object ProCopy {
     val EXTENDING: String get() = L.native.pro.extending
     val OPEN: String get() = L.native.pro.openA11y
     val CLOSE: String get() = UiCopy.CLOSE
+
+    // the free blog (#3636, web `pro-blog.*`): no template, accent or font pickers, the default look
+    val BLOG_CLAIM: String get() = L.native.pro.blogClaim
+    fun blogIntro(address: String) = L.native.pro.blogIntro(address = address)
+    val BLOG_TITLE_LABEL: String get() = L.native.pro.blogTitleLabel
+    val BLOG_DESCRIPTION_LABEL: String get() = L.native.pro.blogDescriptionLabel
+    val BLOG_CLAIM_CONFIRM: String get() = L.native.pro.blogClaimConfirm
+    val BLOG_CANCEL: String get() = L.alert.cancel
+    val BLOG_CLAIMED: String get() = L.native.pro.blogClaimed
+    val BLOG_EXISTING: String get() = L.native.pro.blogExisting
+    val BLOG_OPEN: String get() = L.native.pro.blogOpen
+    val BLOG_NOT_PRO: String get() = L.native.pro.blogNotPro
+    val BLOG_UNAVAILABLE: String get() = L.native.pro.blogUnavailable
+    val BLOG_FAILED: String get() = L.native.pro.blogFailed
+    val BLOG_LOGIN: String get() = L.native.pro.blogLogin
 }
 
 data class ProState(
@@ -51,7 +70,32 @@ data class ProState(
     val alert: StoreAlert? = null,
     /** When the account's membership ends (Ecency's Points API, `pro.expires`); null when not known. */
     val expiresMillis: Long? = null,
+    /** The member's free blog (#3636): whether it exists is being asked. */
+    val blogChecking: Boolean = false,
+    /** The blog's address once known (it existed, or the claim made it). */
+    val blogUrl: String? = null,
+    /** This claim made the blog; false: it was there already. */
+    val blogClaimed: Boolean = false,
+    /** The claim form is shown. */
+    val blogFormOpen: Boolean = false,
+    /** The profile's name and about are being read into the form. */
+    val blogPrefilling: Boolean = false,
+    val blogTitle: String = "",
+    val blogDescription: String = "",
+    /** The claim is on its way. */
+    val blogClaiming: Boolean = false,
+    /** Why the claim failed. */
+    val blogError: AppError? = null,
 ) {
+    /** "Claim your free blog": a member whose blog is not known to exist, once that was asked. */
+    val showBlogClaim: Boolean get() = account != null && member && blogUrl == null && !blogChecking && !blogFormOpen
+    val canClaimBlog: Boolean get() = account != null && member && blogFormOpen && !blogPrefilling && !blogClaiming
+    /** The blog's address without its scheme ({username}.blogs.ecency.com). */
+    val blogAddress: String? get() = blogUrl?.takeIf { member }?.removePrefix("https://")?.trimEnd('/')
+    val blogHeading: String get() = if (blogClaimed) ProCopy.BLOG_CLAIMED else ProCopy.BLOG_EXISTING
+    /** The address the form claims, before there is an answer. */
+    val blogIntro: String get() = ProCopy.blogIntro(account?.let { com.ecency.core.api.ecency.HostingApi.blogUrl(it).removePrefix("https://") }.orEmpty())
+
     /** "Your membership runs until {date}." for a member whose end date is known (read when shown: language). */
     val expiryText: String? get() = expiresMillis?.takeIf { member }?.let { ProCopy.until(LocaleFormat.date(it)) }
     /** Paid and accepted, not on the roster yet. */
@@ -124,6 +168,7 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
             env.session.state.collect { s ->
                 if (s.username != current.account) {
                     buyingFor = null
+                    accountGen++
                     setState { ProState(account = s.username, price = it.price, unavailable = it.unavailable, open = it.open) }
                     sync()
                 }
@@ -132,7 +177,12 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
         scope.launch { env.proMembers.state.collect { sync() } }
         scope.launch { env.purchases.state.collect { sync() } }
         scope.launch { env.proPurchases.state.collect { sync() } }
-        scope.launch { state.collect { readExpiry() } }
+        scope.launch {
+            state.collect {
+                readExpiry()
+                readBlog()
+            }
+        }
         scope.launch { env.purchases.outcomes.collect { if (it.productId == PurchaseSkus.PRO) onOutcome(it) } }
         env.proMembers.ensureLoaded()
         loadPrice()
@@ -230,6 +280,121 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
         buyingFor = user
         env.proPurchases.started(user, extending = s.member)
         env.purchases.buy(PurchaseSkus.PRO, PurchaseTarget(user = user))
+    }
+
+    // ---- the free blog (#3636, web `features/pro/pro-blog-claim.tsx`)
+
+    /** Moves on with every account change: an answer asked for under another one is dropped. */
+    private var accountGen = 0
+    private var blogReadFor: String? = null
+    private var blogJob: Job? = null
+
+    /**
+     * Whether a member's blog exists (web's existence probe), once per account: an existing one shows its address
+     * instead of the claim. A failed or abandoned lookup leaves the claim (web fails open: the claim answers honestly).
+     */
+    private fun readBlog() {
+        val s = current
+        val account = s.account
+        if (account == null || !s.member) {
+            blogReadFor = null
+            blogJob?.cancel()
+            if (s.blogChecking) setState { it.copy(blogChecking = false) }
+            return
+        }
+        if (account == blogReadFor) return
+        blogReadFor = account
+        blogJob?.cancel()
+        val gen = accountGen
+        setState { it.copy(blogChecking = true) }
+        blogJob = scope.launch {
+            val url = try {
+                env.hostingApi.blog(account)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            }
+            if (gen != accountGen || current.account != account) return@launch
+            // a claim that answered first keeps its address
+            setState { it.copy(blogChecking = false, blogUrl = it.blogUrl ?: url, blogFormOpen = it.blogFormOpen && it.blogUrl == null && url == null) }
+        }
+    }
+
+    /** "Claim your free blog": the form, its title and description from the account's profile (web's prefill). */
+    fun openBlogForm() {
+        val s = current
+        val account = s.account ?: return
+        if (!s.member || s.blogUrl != null || s.blogFormOpen) return
+        val prefill = s.blogTitle.isEmpty() && s.blogDescription.isEmpty()
+        setState { it.copy(blogFormOpen = true, blogError = null, blogPrefilling = prefill) }
+        if (!prefill) return
+        val gen = accountGen
+        scope.launch {
+            val profile = try {
+                env.api.accounts.getAccount(account)?.profile
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            }
+            if (gen != accountGen || current.account != account) return@launch
+            setState {
+                it.copy(
+                    blogPrefilling = false,
+                    // only empty fields are filled: what was typed meanwhile stays
+                    blogTitle = it.blogTitle.ifEmpty { profile?.displayName?.take(HostingApi.TITLE_MAX).orEmpty() },
+                    blogDescription = it.blogDescription.ifEmpty { profile?.about?.take(HostingApi.DESCRIPTION_MAX).orEmpty() },
+                )
+            }
+        }
+    }
+
+    fun cancelBlogForm() {
+        if (current.blogClaiming) return
+        setState { it.copy(blogFormOpen = false, blogError = null) }
+    }
+
+    fun setBlogTitle(text: String) = setState { it.copy(blogTitle = text.take(HostingApi.TITLE_MAX)) }
+
+    fun setBlogDescription(text: String) = setState { it.copy(blogDescription = text.take(HostingApi.DESCRIPTION_MAX)) }
+
+    /**
+     * Claims the signed-in member's blog with the form's title and description, on the default look. One claim at a
+     * time; Ecency answers an existing blog unchanged ([BlogClaim.created] false). An answer that lands after the
+     * account changed is dropped.
+     */
+    fun claimBlog() {
+        val user = env.session.current.username ?: return
+        val s = current
+        if (!s.canClaimBlog || s.account != user) return
+        val gen = accountGen
+        setState { it.copy(blogClaiming = true, blogError = null) }
+        scope.launch {
+            val result = try {
+                Result.success(env.hostingApi.claim(user, s.blogTitle, s.blogDescription))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+            if (gen != accountGen || current.account != user) return@launch
+            result.fold(
+                onSuccess = { c -> setState { it.copy(blogClaiming = false, blogFormOpen = false, blogUrl = c.blogUrl, blogClaimed = c.created) } },
+                onFailure = { e -> setState { it.copy(blogClaiming = false, blogError = blogError(e)) } },
+            )
+        }
+    }
+
+    /** web's messages by status: 403 not a member, 503 (and the proxy's 502) unavailable, the rest failed. */
+    private fun blogError(e: Throwable): AppError = when {
+        e is AuthException -> AppError(ErrorKind.AUTH, ProCopy.BLOG_LOGIN, false)
+        e !is EcencyHttpException -> AppError(ErrorKind.UNKNOWN, ProCopy.BLOG_FAILED, true)
+        e.status == 0 -> AppError.from(e)
+        e.status == 401 -> AppError(ErrorKind.AUTH, ProCopy.BLOG_LOGIN, false)
+        e.status == 403 -> AppError(ErrorKind.AUTH, ProCopy.BLOG_NOT_PRO, false)
+        e.status == 502 || e.status == 503 -> AppError(ErrorKind.NETWORK, ProCopy.BLOG_UNAVAILABLE, true)
+        else -> AppError(ErrorKind.UNKNOWN, ProCopy.BLOG_FAILED, true)
     }
 
     private fun onOutcome(o: PurchaseOutcome) {

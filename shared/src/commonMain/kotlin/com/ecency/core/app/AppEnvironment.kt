@@ -909,6 +909,11 @@ class AppEnvironment(
     /** Listen: a post's natural-voice audio status and its unlock with Points (RN 760b9070be). */
     val listenApi: com.ecency.core.api.ecency.ListenApi by lazy { com.ecency.core.api.ecency.ListenApi(auth.http, auth.tokenHost) }
 
+    /** The free blog of Ecency Pro (#3636): whether it exists and its claim. */
+    val hostingApi: com.ecency.core.api.ecency.HostingApi by lazy {
+        com.ecency.core.api.ecency.HostingApi(auth.http, com.ecency.core.auth.EcencyPrivateApi(auth.http, accounts, auth.tokenHost))
+    }
+
     /** One access token renewal per account at a time, for screens that outlived their token (Listen). */
     val sessionRenewals: SessionRenewals by lazy { SessionRenewals(this) }
 

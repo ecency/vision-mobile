@@ -104,6 +104,8 @@ struct ProSheet: View {
                         }
                         if s.member { Text(copy.EXTEND_NOTE).scaledFont(13).foregroundStyle(theme.secondary) }
                     }
+                    // #3636: the free blog, for a member
+                    if s.member { ProBlogSection(observed: observed) }
                     if let notice = s.notice {
                         Text(notice).scaledFont(13).foregroundStyle(theme.text).announces(notice).accessibilityIdentifier("pro-notice")
                     }
@@ -141,6 +143,93 @@ struct ProSheet: View {
             Button(UiCopy.shared.OK, role: .cancel) { model.dismissAlert() }.accessibilityIdentifier("pro-alert-ok")
         } message: {
             Text(s.alert?.body ?? "")
+        }
+    }
+}
+
+/// A member's free blog (#3636): its address with Open once it exists, else "Claim your free blog" and the small
+/// form (title and description from the profile, the default look). Nothing here points to buying anything.
+struct ProBlogSection: View {
+    @ObservedObject var observed: Observed<ProState>
+    @Environment(\.appTheme) private var theme
+    @Environment(\.openURL) private var openURL
+
+    private var model: ProModel { observed.model as! ProModel }
+    private var copy: ProCopy { ProCopy.shared }
+
+    var body: some View {
+        let s = observed.state
+        if let address = s.blogAddress {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(s.blogHeading).scaledFont(15, weight: .bold).foregroundStyle(theme.text)
+                    .announces(s.blogHeading)
+                    .accessibilityIdentifier("pro-blog-heading")
+                Text(verbatim: address).scaledFont(14).foregroundStyle(theme.text)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .accessibilityIdentifier("pro-blog-address")
+                Button(copy.BLOG_OPEN) {
+                    if let url = s.blogUrl.flatMap({ URL(string: $0) }) { openURL(url) }
+                }
+                .scaledFont(15, weight: .semibold)
+                .frame(minHeight: minTapTarget)
+                .accessibilityIdentifier("pro-blog-open")
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(theme.lightBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 8)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("pro-blog")
+        } else if s.blogFormOpen {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(copy.BLOG_CLAIM).scaledFont(15, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
+                Text(s.blogIntro).scaledFont(13).foregroundStyle(theme.secondary).fixedSize(horizontal: false, vertical: true)
+                Text(copy.BLOG_TITLE_LABEL).scaledFont(13, weight: .semibold).foregroundStyle(theme.text)
+                TextField(copy.BLOG_TITLE_LABEL, text: Binding(get: { observed.state.blogTitle }, set: { model.setBlogTitle(text: $0) }))
+                    .textFieldStyle(.roundedBorder)
+                    .disabled(s.blogClaiming || s.blogPrefilling)
+                    .accessibilityIdentifier("pro-blog-title")
+                Text(copy.BLOG_DESCRIPTION_LABEL).scaledFont(13, weight: .semibold).foregroundStyle(theme.text)
+                TextField(copy.BLOG_DESCRIPTION_LABEL, text: Binding(get: { observed.state.blogDescription }, set: { model.setBlogDescription(text: $0) }), axis: .vertical)
+                    .lineLimit(2...5)
+                    .textFieldStyle(.roundedBorder)
+                    .disabled(s.blogClaiming || s.blogPrefilling)
+                    .accessibilityIdentifier("pro-blog-description")
+                if let error = s.blogError {
+                    Text(error.message).scaledFont(13).foregroundStyle(theme.dangerText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .announces(error.message)
+                        .accessibilityIdentifier("pro-blog-error")
+                }
+                HStack {
+                    Spacer(minLength: 0)
+                    Button(copy.BLOG_CANCEL) { model.cancelBlogForm() }
+                        .disabled(s.blogClaiming)
+                        .frame(minHeight: minTapTarget)
+                        .accessibilityIdentifier("pro-blog-cancel")
+                    Button { model.claimBlog() } label: {
+                        Group {
+                            if s.blogClaiming || s.blogPrefilling { ProgressView().tint(.white) } else { Text(copy.BLOG_CLAIM_CONFIRM).bold() }
+                        }
+                        .frame(minHeight: 36)
+                    }
+                    .buttonStyle(.prominentFill)
+                    .disabled(!s.canClaimBlog)
+                    .accessibilityIdentifier("pro-blog-confirm")
+                }
+            }
+            .padding(.top, 8)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("pro-blog-form")
+        } else if s.showBlogClaim {
+            Button { model.openBlogForm() } label: {
+                Text(copy.BLOG_CLAIM).bold().frame(maxWidth: .infinity, minHeight: 36)
+            }
+            .buttonStyle(.bordered)
+            .tint(theme.accent)
+            .padding(.top, 8)
+            .accessibilityIdentifier("pro-blog-claim")
         }
     }
 }

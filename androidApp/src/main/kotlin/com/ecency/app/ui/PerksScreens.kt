@@ -104,6 +104,8 @@ fun PerksScreen(
     nowMillis: () -> Long, pro: com.ecency.core.app.ProModel? = null,
     /** Purchases held for review (issue #3612), above the quests. */
     heldNotices: @Composable () -> Unit = {},
+    /** Opens a web page in the browser (the Pro blog's address). */
+    onOpenUrl: (String) -> Unit = {},
 ) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
@@ -153,7 +155,7 @@ fun PerksScreen(
                 }
             }
             // issue #3555: Ecency Pro by in-app purchase (ProScreens.kt)
-            pro?.let { ProCard(it) }
+            pro?.let { ProCard(it, onOpenUrl) }
             Card {
                 Text(PerksCopy.SPEND_TITLE, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.darkText)
                 SpendOptions.ALL.forEachIndexed { i, option ->
