@@ -75,15 +75,15 @@
                 <data android:scheme="ecency" />
                 <data android:scheme="hive" />
             </intent-filter>
-            <!-- ecency.com/auth and /signup. The RN app's id, so ecency.com's assetlinks.json already verifies them
-                 (README "In-place upgrade from RN 3.x"). -->
+            <!-- ecency.com/signup. The RN app's id, so ecency.com's assetlinks.json already verifies it (README
+                 "In-place upgrade from RN 3.x"). Not /auth: it is the website's HiveSigner login callback, which must
+                 stay in the browser (#3655); the app signs in through its own redirect and ecency://auth-transfer. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="ecency.com" />
-                <data android:path="/auth" />
                 <data android:path="/signup" />
                 <!-- RN parsePurchaseUrl: the web app's "buy in the app" links (README "In-app purchases") -->
                 <data android:path="/purchase" />
