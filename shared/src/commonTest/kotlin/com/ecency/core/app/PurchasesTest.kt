@@ -570,6 +570,52 @@ class PurchasesTest {
         assertTrue(third.env.purchases.current.heldOrders.isEmpty())
     }
 
+    /** Review of #3612: a held notice is its account's: another account on the device neither sees nor dismisses it. */
+    @Test
+    fun aHeldNoticeShowsOnlyForItsAccountAcrossARestart() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig()
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("12", "999points"))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        model.close()
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty(), "bob does not see alice's order")
+        r.env.purchases.dismissHeld("12")
+        // a restart while the store is down, signed in as bob, then back to alice: hers is still there
+        val held = r.store.held.toList()
+        val again = rig(prefs = r.env.prefs, signedIn = bob, start = false)
+        again.store.held += held
+        again.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(again.env.purchases.current.heldOrders.isEmpty())
+        again.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "bob's dismiss did not reach alice's notice")
+    }
+
+    /** A held purchase of a new account is no device account's: it shows whoever is signed in, Ecency up or down. */
+    @Test
+    fun aHeldNewAccountPurchaseShowsForEveryAccount() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":77}"""))
+        val r = rig(start = false)
+        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta("newbie.one", "a@b.co", "")), r.app.now)
+        r.store.held += r.store.paid(PurchaseSkus.ACCOUNT)
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("77", PurchaseSkus.ACCOUNT))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        // Ecency is down at the switch: the resend gets no answer, so nothing recomputes who sees it
+        answers = mutableListOf(HttpResult(500, ""))
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+    }
+
     /** A wipe removes the saved notices; the ones in memory go too and are never saved again. */
     @Test
     fun aWipeForgetsTheHeldNotices() = runTest {

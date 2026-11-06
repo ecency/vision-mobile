@@ -114,6 +114,9 @@ object PurchaseCopy {
 /** A purchase Ecency holds for review (422 `receipt_held`): its order number, for support. */
 data class HeldPurchase(val order: String, val productId: String)
 
+/** A held purchase and the account on this device it is for (empty: shown to every account). */
+internal data class HeldNotice(val held: HeldPurchase, val owner: String)
+
 /** The lasting notice of a held purchase (issue #3612): Perks and Settings, until dismissed or released. */
 object HeldPurchaseCopy {
     val TITLE: String get() = L.native.purchase.heldTitle
@@ -247,7 +250,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         if (started) return
         started = true
         // the notices of an earlier run, kept while the store or Ecency cannot be reached (#3612 review)
-        heldKeys.putAll(Marks.heldNotices(env.prefs).filterValues { !Marks.heldDismissed(env.prefs, it.order) })
+        heldKeys.putAll(Marks.heldNotices(env.prefs).filterValues { !Marks.heldDismissed(env.prefs, it.held.order) })
         publishHeld()
         env.store.setListener(listener)
         env.background.launch {
@@ -256,6 +259,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         }
         env.background.launch {
             env.events.collect {
+                // the notices shown are the signed-in account's
+                if (it is AppEvent.SessionChanged) publishHeld()
                 if (it is AppEvent.SessionChanged && it.username != null) recover()
                 // a wipe removed the saved notices: the ones in memory go too, and are not saved again
                 if (it is AppEvent.DataWiped) {
@@ -272,18 +277,24 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         env.background.launch { recover() }
     }
 
-    /** The user closed the notice of the held order [order]. Main thread. */
+    /** The user closed the notice of the held order [order]: only a notice this account is shown. Main thread. */
     fun dismissHeld(order: String) {
+        if (heldKeys.values.none { it.held.order == order && shownNow(it) }) return
         Marks.dismissHeld(env.prefs, order)
-        heldKeys.entries.removeAll { it.value.order == order }
+        heldKeys.entries.removeAll { it.value.held.order == order }
         publishHeld()
     }
 
-    /** Held purchases by [orderKey] (one order each), in the order they were found. */
-    private val heldKeys = linkedMapOf<String, HeldPurchase>()
+    /**
+     * Held purchases by [orderKey] (one order each), in the order they were found, with the account each is for: an
+     * account on this device the order credits, or none (a new account's purchase, a gift), shown to every account.
+     */
+    private val heldKeys = linkedMapOf<String, HeldNotice>()
+
+    private fun shownNow(n: HeldNotice) = n.owner.isEmpty() || n.owner == env.session.current.username
 
     private fun publishHeld() {
-        val list = heldKeys.values.distinctBy { it.order }
+        val list = heldKeys.values.filter { shownNow(it) }.map { it.held }.distinctBy { it.order }
         if (list != current.heldOrders) mutableState.update { it.copy(heldOrders = list) }
         Marks.saveHeldNotices(env.prefs, heldKeys)
     }
@@ -529,7 +540,9 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     if (!fromBuy && first) env.ui.toast(PurchaseCopy.held(result.order))
                     // the lasting notice (Perks, Settings) until a resend is accepted or the user dismissed it
                     if (!Marks.heldDismissed(env.prefs, result.order)) {
-                        heldKeys[key] = HeldPurchase(result.order, p.productId)
+                        // a new account's purchase is no device account's (its order names the buyer of the moment)
+                        val owner = if (p.productId == PurchaseSkus.ACCOUNT) "" else order.user.takeIf { u -> env.session.current.accounts.any { it.username == u } }.orEmpty()
+                        heldKeys[key] = HeldNotice(HeldPurchase(result.order, p.productId), owner)
                         publishHeld()
                     }
                     emit(PurchaseOutcome.Held(p.productId, fromBuy, result.order))
@@ -781,25 +794,25 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
 
         fun heldDismissed(prefs: Prefs, order: String): Boolean = list(prefs, HELD_DISMISSED).any { it.first == order }
 
-        /** The listed held notices by purchase key (a hash, never a receipt): order number and product. */
-        fun heldNotices(prefs: Prefs): Map<String, HeldPurchase> {
+        /** The held notices by purchase key (a hash, never a receipt): order number, product and the account it is for. */
+        fun heldNotices(prefs: Prefs): Map<String, HeldNotice> {
             val o = prefs.getString(HELD_NOTICES)?.let { SafeJson.parseOrNull(it, 3) }.obj() ?: return emptyMap()
             return o.entries.mapNotNull { (k, v) ->
                 val e = v.obj() ?: return@mapNotNull null
                 val order = e.str("o").orEmpty()
                 val product = e.str("p").orEmpty()
-                if (order.isEmpty() || product !in PurchaseSkus.ALL) null else k to HeldPurchase(order, product)
+                if (order.isEmpty() || product !in PurchaseSkus.ALL) null else k to HeldNotice(HeldPurchase(order, product), e.str("u").orEmpty())
             }.takeLast(ONCE_MAX).toMap()
         }
 
-        fun saveHeldNotices(prefs: Prefs, notices: Map<String, HeldPurchase>) {
+        fun saveHeldNotices(prefs: Prefs, notices: Map<String, HeldNotice>) {
             if (notices.isEmpty()) {
                 if (prefs.getString(HELD_NOTICES) != null) prefs.putString(HELD_NOTICES, null)
                 return
             }
             val json = buildJsonObject {
-                notices.entries.toList().takeLast(ONCE_MAX).forEach { (k, h) ->
-                    put(k, buildJsonObject { put("o", h.order); put("p", h.productId) })
+                notices.entries.toList().takeLast(ONCE_MAX).forEach { (k, n) ->
+                    put(k, buildJsonObject { put("o", n.held.order); put("p", n.held.productId); put("u", n.owner) })
                 }
             }.toString()
             if (prefs.getString(HELD_NOTICES) != json) prefs.putString(HELD_NOTICES, json)

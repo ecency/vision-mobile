@@ -1058,6 +1058,26 @@ class NotificationsTest {
         board.close()
     }
 
+    /** Review of #3612: a weekly read today does not count as today's daily read. */
+    @Test
+    fun aFailedDailyReadAfterAWeeklyOneIsStillTriedAgain() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        // 2026-10-29T12:00:00Z: the retry stays on the same UTC day
+        f.app.now = 1_793_318_340_000L - 11 * 3_600_000L - 59 * 60_000L
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        board.select(LeaderboardDuration.WEEK); f.idle()
+        val served = f.app.authBackend.privateApi
+        f.app.authBackend.privateApi = { HttpResult(500, "") }
+        board.select(LeaderboardDuration.DAY); f.idle()
+        f.app.authBackend.privateApi = served
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/week", "leaderboard/day"), f.backend.paths())
+        board.close()
+    }
+
     @Test
     fun leaderboardFailureIsAToast() = runTest {
         val f = NotificationFixture(this, users = emptyList())

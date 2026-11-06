@@ -506,10 +506,10 @@ data class LeaderboardState(
 class LeaderboardModel internal constructor(private val env: AppEnvironment) : StateModel<LeaderboardState>(LeaderboardState(), env.dispatchers) {
     private var job: Job? = null
 
-    /** The UTC day (days since the epoch) of the last read that answered. */
+    /** The UTC day (days since the epoch) of the last daily read that answered (a weekly or monthly one never counts). */
     private var loadedDay = Long.MIN_VALUE
 
-    /** When the last read after a reset failed: the tick tries again [RETRY_MILLIS] later. */
+    /** When the last read failed: the daily tick tries again [RETRY_MILLIS] later. */
     private var failedAt = Long.MIN_VALUE
 
     fun start() {
@@ -532,7 +532,9 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
     fun tick() {
         if (current.duration != LeaderboardDuration.DAY || !current.loaded || job?.isActive == true) return
         val now = env.nowMillis()
-        if (now.floorDiv(DailyReset.DAY_MILLIS) > loadedDay && (failedAt == Long.MIN_VALUE || now - failedAt >= RETRY_MILLIS)) load(quiet = true)
+        val failed = failedAt != Long.MIN_VALUE
+        // a new UTC day, or a failed read of the board shown (also one from before the reset), retried RETRY_MILLIS later
+        if ((now.floorDiv(DailyReset.DAY_MILLIS) > loadedDay || failed) && (!failed || now - failedAt >= RETRY_MILLIS)) load(quiet = true)
     }
 
     /** RN's tooltip on a row's reward (`leaderboard.tooltip_earn`), shown through the toast channel. */
@@ -557,7 +559,7 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
                 val users = env.notificationsApi.leaderboard(duration.apiValue)
                 // daily: users who finished their quests first, each group in its own order (a stable partition)
                 val ordered = if (duration == LeaderboardDuration.DAY) users.filter { it.questsDone } + users.filter { !it.questsDone } else users
-                loadedDay = day
+                if (duration == LeaderboardDuration.DAY) loadedDay = day
                 failedAt = Long.MIN_VALUE
                 setState { it.copy(users = ordered, isLoading = false, loaded = true) }
             } catch (e: CancellationException) {
