@@ -64,6 +64,42 @@ data class LimitOrderCreate(
     }
 }
 
+/**
+ * An internal market order priced by [base] (the sold asset) per [quote]: sell [amountToSell] at that rate until
+ * [expiration]. The app never builds one; hive:// links can ask for it (#3635). hived's validate: the sold asset is the
+ * price's base, the price is positive and trades HIVE against HBD.
+ */
+data class LimitOrderCreate2(
+    val owner: String,
+    val orderId: Long,
+    val amountToSell: Asset,
+    val base: Asset,
+    val quote: Asset,
+    val fillOrKill: Boolean,
+    val expiration: String,
+) : Operation {
+    init {
+        requireLiquid(amountToSell, "amount_to_sell")
+        requireLiquid(quote, "exchange_rate quote")
+        require(base.symbol == amountToSell.symbol) { "the sold asset must be the price's base" }
+        require(base.symbol != quote.symbol) { "an order trades HIVE against HBD" }
+        require(amountToSell.units > 0 && base.units > 0 && quote.units > 0) { "order amounts must be positive" }
+        require(orderId in 0..0xFFFFFFFFL) { "orderid out of range" }
+        ChainTime.toEpochSeconds(expiration)
+    }
+
+    override fun write(writer: HiveWriter) = with(writer) {
+        varint32(21)
+        string(owner)
+        u32(orderId)
+        amountToSell.write(this)
+        base.write(this)
+        quote.write(this)
+        bool(fillOrKill)
+        u32(ChainTime.toEpochSeconds(expiration))
+    }
+}
+
 data class LimitOrderCancel(val owner: String, val orderId: Long) : Operation {
     init {
         require(orderId in 0..0xFFFFFFFFL) { "orderid out of range" }

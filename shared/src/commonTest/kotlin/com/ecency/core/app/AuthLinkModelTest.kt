@@ -4,6 +4,8 @@ import com.ecency.core.api.broadcast.OperationJson
 import com.ecency.core.auth.HiveSignerMessages
 import com.ecency.core.auth.HiveUri
 import com.ecency.core.hive.KeyRole
+import com.ecency.core.hive.Signature
+import com.ecency.core.hive.Transaction
 import com.ecency.core.hive.Vote
 import com.ecency.core.render.url.WebUrl
 import com.ecency.core.secure.AuthType
@@ -12,9 +14,13 @@ import com.ecency.core.secure.PinLock
 import com.ecency.core.secure.VaultAccount
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -450,9 +456,11 @@ class AuthLinkModelTest {
     @Test
     fun keyAccountsAreRefusedOperationsTheAppCannotSignBeforeAnyPrompt() = runTest {
         val app = signedIn(this)
-        // (witness votes became signable with the platform wave's governance serializers; removing a proposal is not)
-        val op = HiveUri.ops("remove_proposal" to buildJsonObject {
-            put("proposal_owner", JsonPrimitive("__signer")); put("proposal_ids", JsonArray(listOf(JsonPrimitive(1)))); put("extensions", JsonArray(emptyList()))
+        // (every operation links accept has a serializer since #3635; a recurrent transfer's pair id extension has none)
+        val op = HiveUri.ops("recurrent_transfer" to buildJsonObject {
+            put("from", JsonPrimitive("__signer")); put("to", JsonPrimitive("spike-bob")); put("amount", JsonPrimitive("1.000 HIVE")); put("memo", JsonPrimitive(""))
+            put("recurrence", JsonPrimitive(24)); put("executions", JsonPrimitive(2))
+            put("extensions", Json.parseToJsonElement("""[[1,{"pair_id":1}]]"""))
         })
         app.env.authLinks.handle(HiveUri.encodeOps(op, HiveUri.Params(callback = cb)))
         testScheduler.advanceUntilIdle()
@@ -462,21 +470,66 @@ class AuthLinkModelTest {
 
     @Test
     fun accountControlLinksAreRefusedForEveryAccountType() = runTest {
-        // Part of #3635: the dApp bridge's account-control rule, here for key and HiveSigner accounts alike
+        // #3635: the dApp bridge's account-control rule, for key, HiveSigner and HiveAuth accounts alike, before any prompt
+        val ops = listOf(
+            """["account_create",{"fee":"3.000 HIVE","creator":"__signer","new_account_name":"spike-new","owner":{},"active":{},"posting":{},"memo_key":"STM1","json_metadata":""}]""",
+            """["create_claimed_account",{"creator":"__signer","new_account_name":"spike-new","owner":{},"active":{},"posting":{},"memo_key":"STM1","json_metadata":"","extensions":[]}]""",
+            """["claim_account",{"creator":"__signer","fee":"0.000 HIVE","extensions":[]}]""",
+            """["change_recovery_account",{"account_to_recover":"__signer","new_recovery_account":"spike-bob","extensions":[]}]""",
+            """["witness_update",{"owner":"__signer","url":"x","block_signing_key":"STM1","props":{},"fee":"0.000 HIVE"}]""",
+            """["witness_set_properties",{"owner":"__signer","props":[],"extensions":[]}]""",
+        )
         for (account in listOf(
             VaultAccount(alice, AuthType.MASTER_PASSWORD, postingKey = AppTestKeys.wif(alice, KeyRole.POSTING), activeKey = AppTestKeys.wif(alice, KeyRole.ACTIVE), accessToken = "access-$alice"),
             VaultAccount(alice, AuthType.HIVE_SIGNER, accessToken = "access-$alice"),
+            VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "k", hiveAuthToken = "t", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"),
         )) {
-            val app = signedIn(this, account)
-            val op = HiveUri.ops("claim_account" to buildJsonObject {
-                put("creator", JsonPrimitive("__signer")); put("fee", JsonPrimitive("0.000 HIVE")); put("extensions", JsonArray(emptyList()))
-            })
-            app.env.authLinks.handle(HiveUri.encodeOps(op, HiveUri.Params(callback = cb)))
+            for (op in ops) {
+                val app = signedIn(this, account)
+                app.env.authLinks.handle(HiveUri.encodeOps(JsonArray(listOf(Json.parseToJsonElement(op))), HiveUri.Params(callback = cb)))
+                testScheduler.advanceUntilIdle()
+                val what = "${account.authType} $op"
+                assertEquals(AuthLinkModel.INVALID_OP_TITLE, assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt, what).title, what)
+                app.env.authLinks.confirm()
+                testScheduler.advanceUntilIdle()
+                assertTrue(app.broadcasts().isEmpty(), what)
+                assertNull(app.env.authLinks.current.prompt as? LinkPrompt.SignConfirm, what)
+            }
+        }
+    }
+
+    @Test
+    fun proposalAndOrderLinksReachTheConfirmationAndSignExactlyWhatItShows() = runTest {
+        // #3635: key accounts sign these on the device now; the confirmation lists exactly the fields that are signed
+        // ("125.5 HBD" is signed as "125.500 HBD", and that is what it shows)
+        val links = listOf(
+            "create_proposal" to """{"creator":"__signer","receiver":"spike-bob","start_date":"2026-11-01T00:00:00","end_date":"2027-05-01T00:00:00","daily_pay":"125.5 HBD","subject":"A proposal","permlink":"a-proposal","extensions":[]}""",
+            "limit_order_create2" to """{"owner":"","orderid":7,"amount_to_sell":"10.000 HIVE","exchange_rate":{"base":"1.000 HIVE","quote":"0.250 HBD"},"fill_or_kill":false,"expiration":"2026-11-02T12:00:00"}""",
+        )
+        for ((name, body) in links) {
+            val app = signedIn(this)
+            app.env.authLinks.handle(HiveUri.encodeOps(JsonArray(listOf(Json.parseToJsonElement("""["$name",$body]"""))), HiveUri.Params(callback = cb)))
             testScheduler.advanceUntilIdle()
-            assertIs<LinkPrompt.Refused>(app.env.authLinks.current.prompt, "${account.authType}")
+            val prompt = assertIs<LinkPrompt.SignConfirm>(app.env.authLinks.current.prompt, name)
+            assertEquals(name, prompt.operation)
+            assertEquals("active", prompt.authority, name)
+            assertTrue(app.broadcasts().isEmpty(), "nothing before confirm")
             app.env.authLinks.confirm()
             testScheduler.advanceUntilIdle()
-            assertTrue(app.broadcasts().isEmpty())
+            val tx = app.broadcasts().single().params.jsonArray.single().jsonObject
+            val sent = tx["operations"]!!.jsonArray.single().jsonArray
+            assertEquals(name, sent[0].jsonPrimitive.content)
+            val shown = prompt.fields.associate { it.name to it.value }
+            val signed = sent[1].jsonObject.mapValues { (_, v) -> (v as? JsonPrimitive)?.content ?: v.toString() }
+            assertEquals(signed, shown, "$name: the confirmation shows exactly the signed fields")
+            assertEquals(alice, signed[if (name == "create_proposal") "creator" else "owner"])
+            // and the signature is the account's active key over those operations
+            val t = Transaction(
+                tx["ref_block_num"]!!.jsonPrimitive.content.toInt(), tx["ref_block_prefix"]!!.jsonPrimitive.content.toLong(),
+                tx["expiration"]!!.jsonPrimitive.content, listOf(OperationJson.decode(sent)),
+            )
+            assertEquals(AppTestKeys.pub(alice, KeyRole.ACTIVE), Signature.fromHex(tx["signatures"]!!.jsonArray.single().jsonPrimitive.content).recover(t.digest()).toString())
+            assertEquals("success", params(app.env.authLinks.current.callback!!)["status"])
         }
     }
 
