@@ -32,10 +32,10 @@ data class SavingsWithdrawal(val requestId: Long, val from: String, val to: Stri
 /** An HBD to HIVE conversion waiting for its date; [collateralized] for HIVE to HBD with collateral. */
 data class ConversionRequest(val requestId: Long, val amount: String, val date: String, val collateralized: Boolean)
 
-/** An internal market order still open (get_open_orders). */
 /** An account's Ecency Pro membership (the Points API's `pro`): [expiresMillis] null when unknown or unreadable. */
 data class ProMembership(val active: Boolean, val expiresMillis: Long?)
 
+/** An internal market order still open (get_open_orders). */
 data class OpenOrder(val orderId: Long, val created: String, val expiration: String, val base: String, val quote: String, val forSale: Long)
 
 /** A recurrent transfer schedule (find_recurrent_transfers). */

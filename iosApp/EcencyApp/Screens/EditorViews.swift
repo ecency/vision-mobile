@@ -1608,7 +1608,7 @@ struct DraftsScreen: View {
                 Text([tag.map { "#\($0)" }, Self.shownDate(date)].compactMap { $0 }.joined(separator: "  "))
                     .font(.caption).foregroundStyle(theme.secondary)
                 Text(title).bold().lineLimit(2).foregroundStyle(theme.text)
-                Text(String(body.prefix(100))).font(.footnote).lineLimit(2).foregroundStyle(theme.secondary)
+                Text(drafts.state.summaries[body] ?? "").font(.footnote).lineLimit(2).foregroundStyle(theme.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

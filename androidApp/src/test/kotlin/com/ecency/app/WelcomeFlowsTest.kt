@@ -77,14 +77,8 @@ class WelcomeFlowsTest {
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
     /** Frame by frame (the clock is held) until the welcome screen shows: the accounts are read first. */
-    private fun untilWelcome() {
-        val end = System.currentTimeMillis() + 10_000
-        while (!exists("welcome")) {
-            if (System.currentTimeMillis() > end) throw AssertionError("no welcome screen in 10 s")
-            compose.mainClock.advanceTimeByFrame()
-            org.robolectric.shadows.ShadowLooper.idleMainLooper()
-            Thread.sleep(10)
-        }
+    private fun untilWelcome() = compose.await("the welcome screen") {
+        exists("welcome").also { if (!it) compose.mainClock.advanceTimeByFrame() }
     }
 
     @Test

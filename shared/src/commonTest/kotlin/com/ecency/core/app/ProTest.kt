@@ -125,6 +125,48 @@ class ProTest {
         m.close()
     }
 
+    /** Review of #3636: the read from before an extension, answering last, never replaces the newer end date. */
+    @Test
+    fun anOlderEndDateAnsweringLastIsDropped() = runTest {
+        roster += alice
+        proStatus[alice] = """{"active":true,"expires":"2027-07-27T00:00:00+00:00"}"""
+        val r = rig()
+        // the first end date read is held back
+        val first = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var held = false
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("/private-api/points") && !held) { held = true; first.await() } }
+        val m = pro(r)
+        assertTrue(held)
+        // an extension is bought meanwhile: the end date is read again and answers at once
+        proStatus[alice] = """{"active":true,"expires":"2028-07-27T00:00:00+00:00"}"""
+        m.open()
+        m.buy()
+        testScheduler.runCurrent()
+        assertTrue(m.current.purchased)
+        val later = kotlin.time.Instant.parse("2028-07-27T00:00:00Z").toEpochMilliseconds()
+        assertEquals(later, m.current.expiresMillis)
+        // the held read now answers with the old date
+        proStatus[alice] = """{"active":true,"expires":"2027-07-27T00:00:00+00:00"}"""
+        first.complete(Unit)
+        testScheduler.runCurrent()
+        assertEquals(later, m.current.expiresMillis)
+        m.close()
+    }
+
+    /** Review of #3636: a read that fails is tried again, a few times, instead of hiding the date until the next change. */
+    @Test
+    fun aFailedEndDateReadIsTriedAgain() = runTest {
+        roster += alice
+        proStatus[alice] = """{"active":true,"expires":"2027-07-27T00:00:00+00:00"}"""
+        val r = rig()
+        var fails = 1
+        val served = r.app.authBackend.rest!!
+        r.app.authBackend.rest = { req -> if (req.url.endsWith("/private-api/points") && fails-- > 0) HttpResult(500, "") else served(req) }
+        val m = pro(r)
+        assertEquals(kotlin.time.Instant.parse("2027-07-27T00:00:00Z").toEpochMilliseconds(), m.current.expiresMillis)
+        m.close()
+    }
+
     @Test
     fun aNonMemberHasNoEndDate() = runTest {
         proStatus[alice] = """{"active":false,"expires":null}"""

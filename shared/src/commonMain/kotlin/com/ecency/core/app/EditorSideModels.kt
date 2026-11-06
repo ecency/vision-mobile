@@ -13,12 +13,16 @@ import com.ecency.core.auth.AuthException
 import com.ecency.core.editor.MediaInsert
 import com.ecency.core.editor.MediaInsertStatus
 import com.ecency.core.l10n.L
+import com.ecency.core.render.RenderHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -45,6 +49,8 @@ data class DraftsState(
     /** Rows with a request running (clone, delete, move). */
     val busy: Set<String> = emptySet(),
     val error: AppError? = null,
+    /** Each row's summary by its body: RN's plain text of 100 characters, cut at a word. */
+    val summaries: Map<String, String> = emptyMap(),
 ) {
     val hasSelection: Boolean get() = if (tab == 1) selectedSchedules.isNotEmpty() else selectedDrafts.isNotEmpty()
 }
@@ -65,6 +71,20 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
         scope.launch {
             env.session.awaitLoaded()
             reload()
+        }
+        // RN draftsScreen.tsx: each row shows postBodySummary(item, 100), worked out off the main thread
+        scope.launch {
+            state.map { s -> (s.drafts + s.templates).map { it.body }.toSet() + s.schedules.map { it.body } + listOfNotNull(s.localDraft?.body) }
+                .distinctUntilChanged()
+                .collect { bodies ->
+                    val missing = bodies - current.summaries.keys
+                    val platform = (env.renderer as? RenderHelperPostBodyRenderer)?.platform ?: RenderHelper.Platform.ANDROID
+                    val made = withContext(env.dispatchers.render) {
+                        val helper = RenderHelper(env.proxyBase)
+                        missing.associateWith { helper.postBodySummary(it, SUMMARY_LENGTH, platform) }
+                    }
+                    setState { it.copy(summaries = it.summaries.filterKeys { k -> k in bodies } + made) }
+                }
         }
         scope.launch {
             env.events.collect { e ->
@@ -257,6 +277,9 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
     companion object {
         /** RN AUTO_FETCH_PAGE_BUDGET. */
         const val AUTO_FETCH_PAGE_BUDGET = 5
+
+        /** RN draftsScreen.tsx: a row's summary is 100 characters. */
+        const val SUMMARY_LENGTH = 100
     }
 }
 

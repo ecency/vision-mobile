@@ -1027,6 +1027,37 @@ class NotificationsTest {
         board.close()
     }
 
+    /** Review of #3612: a failed read after the reset is tried again a few minutes later, without a toast each time. */
+    @Test
+    fun aFailedReadAfterTheResetIsTriedAgainLaterAndQuietly() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        val beforeMidnight = 1_793_318_340_000L
+        f.app.now = beforeMidnight
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        val served = f.app.authBackend.privateApi
+        var failed = 0
+        f.app.authBackend.privateApi = { failed++; HttpResult(500, "") }
+
+        f.app.now = beforeMidnight + 61_000L
+        board.tick(); f.idle()
+        assertEquals(1, failed)
+        assertNull(f.env.ui.current.toast, "a background read says nothing when it fails")
+        f.app.now += 60_000L
+        board.tick(); f.idle()
+        assertEquals(1, failed, "not every minute")
+
+        f.app.authBackend.privateApi = served
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day"), f.backend.paths(), "read again once it answers")
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(2, f.backend.paths().size, "then once per reset")
+        board.close()
+    }
+
     @Test
     fun leaderboardFailureIsAToast() = runTest {
         val f = NotificationFixture(this, users = emptyList())

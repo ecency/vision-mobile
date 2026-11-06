@@ -33,9 +33,12 @@ final class PurchaseTests: XCTestCase {
     static func requireSessionPurchases(_ session: SKTestSession) throws {
         if sessionPurchases == nil {
             let outcome = ProbeOutcome()
-            Task.detached { outcome.set(await probeSessionPurchase()) }
-            while outcome.value == nil { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
-            sessionPurchases = outcome.value
+            let probe = Task.detached { outcome.set(await probeSessionPurchase()) }
+            // one bound for the product lookup and the purchase together: a lookup that never answers fails here too
+            let deadline = Date().addingTimeInterval(30)
+            while outcome.value == nil, Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
+            if outcome.value == nil { probe.cancel() }
+            sessionPurchases = outcome.value ?? false
             session.clearTransactions()
         }
         if sessionPurchases != true {

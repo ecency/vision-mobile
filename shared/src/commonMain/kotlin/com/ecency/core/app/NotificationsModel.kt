@@ -367,6 +367,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
                 seenIds.addAll(seen)
                 readAt = stamp
                 setState { it.copy(items = rows, endReached = end, pages = pages, loaded = true, error = null) }
+                // the Unread chip: no unread row left in the pages read again, so the next ones follow (once this job ended)
+                if (current.unreadOnly && current.shown.isEmpty()) scope.launch { if (gen == generation) fillUnread() }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -504,8 +506,11 @@ data class LeaderboardState(
 class LeaderboardModel internal constructor(private val env: AppEnvironment) : StateModel<LeaderboardState>(LeaderboardState(), env.dispatchers) {
     private var job: Job? = null
 
-    /** The UTC day (days since the epoch) the last read started in. */
+    /** The UTC day (days since the epoch) of the last read that answered. */
     private var loadedDay = Long.MIN_VALUE
+
+    /** When the last read after a reset failed: the tick tries again [RETRY_MILLIS] later. */
+    private var failedAt = Long.MIN_VALUE
 
     fun start() {
         if (!current.loaded && job?.isActive != true) load()
@@ -526,7 +531,8 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
      */
     fun tick() {
         if (current.duration != LeaderboardDuration.DAY || !current.loaded || job?.isActive == true) return
-        if (env.nowMillis().floorDiv(DailyReset.DAY_MILLIS) > loadedDay) load()
+        val now = env.nowMillis()
+        if (now.floorDiv(DailyReset.DAY_MILLIS) > loadedDay && (failedAt == Long.MIN_VALUE || now - failedAt >= RETRY_MILLIS)) load(quiet = true)
     }
 
     /** RN's tooltip on a row's reward (`leaderboard.tooltip_earn`), shown through the toast channel. */
@@ -540,9 +546,10 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
         state.first { !it.isLoading }
     }
 
-    private fun load() {
+    /** [quiet]: the tick's read, which keeps the board and says nothing when it fails. */
+    private fun load(quiet: Boolean = false) {
         val duration = current.duration
-        loadedDay = env.nowMillis().floorDiv(DailyReset.DAY_MILLIS)
+        val day = env.nowMillis().floorDiv(DailyReset.DAY_MILLIS)
         job?.cancel()
         setState { it.copy(isLoading = true) }
         job = scope.launch {
@@ -550,13 +557,21 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
                 val users = env.notificationsApi.leaderboard(duration.apiValue)
                 // daily: users who finished their quests first, each group in its own order (a stable partition)
                 val ordered = if (duration == LeaderboardDuration.DAY) users.filter { it.questsDone } + users.filter { !it.questsDone } else users
+                loadedDay = day
+                failedAt = Long.MIN_VALUE
                 setState { it.copy(users = ordered, isLoading = false, loaded = true) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                failedAt = env.nowMillis()
                 setState { it.copy(isLoading = false, loaded = true) }
-                env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e).message))
+                if (!quiet) env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e).message))
             }
         }
+    }
+
+    companion object {
+        /** A failed read after the reset is tried again by the tick this much later. */
+        const val RETRY_MILLIS = 5 * 60_000L
     }
 }

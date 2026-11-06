@@ -3,6 +3,8 @@ package com.ecency.core.app
 import com.ecency.core.l10n.L
 import com.ecency.core.l10n.LocaleFormat
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Ecency Pro copy (web `pro.*` wording where it fits, issue #3555). No text points to buying Pro anywhere else. */
@@ -154,31 +156,39 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
 
     /** The account (and whether its purchase was delivered) the end date was read for: read again when either changes. */
     private var expiryReadFor: Pair<String, Boolean>? = null
+    private var expiryJob: Job? = null
 
     /**
      * The member's end date (#3636) from the Points API's `pro.expires`, once per account, and again once a purchase
-     * extended it. An answer for an account no longer signed in is dropped; a failed read shows no date.
+     * extended it. Only the newest read lands (an older one is cancelled); a failed read is tried again
+     * [EXPIRY_TRIES] times in all, then shows no date.
      */
     private fun readExpiry() {
         val s = current
         val account = s.account
         if (account == null || !s.member) {
             expiryReadFor = null
+            expiryJob?.cancel()
             if (s.expiresMillis != null) setState { it.copy(expiresMillis = null) }
             return
         }
         val key = account to s.purchased
         if (key == expiryReadFor) return
         expiryReadFor = key
-        scope.launch {
-            val ends = try {
-                env.walletApi.proMembership(account)?.takeIf { it.active }?.expiresMillis
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                null
+        expiryJob?.cancel()
+        expiryJob = scope.launch {
+            var ends: Long? = null
+            for (attempt in 1..EXPIRY_TRIES) {
+                try {
+                    ends = env.walletApi.proMembership(account)?.takeIf { it.active }?.expiresMillis
+                    break
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    if (attempt < EXPIRY_TRIES) delay(EXPIRY_RETRY_MILLIS)
+                }
             }
-            if (current.account == account) setState { it.copy(expiresMillis = ends) }
+            if (expiryReadFor == key && current.account == account) setState { it.copy(expiresMillis = ends) }
         }
     }
 
@@ -245,5 +255,11 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 else -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, o.error.message)) }
             }
         }
+    }
+
+    companion object {
+        /** End date reads in all when they fail, this far apart. */
+        const val EXPIRY_TRIES = 3
+        const val EXPIRY_RETRY_MILLIS = 5_000L
     }
 }

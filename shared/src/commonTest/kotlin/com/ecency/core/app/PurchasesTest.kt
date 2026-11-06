@@ -532,6 +532,59 @@ class PurchasesTest {
         assertTrue(again.env.purchases.current.heldOrders.isEmpty())
     }
 
+    /** Review of #3612: the notice and its order number survive a restart while the store or Ecency cannot be reached. */
+    @Test
+    fun aHeldNoticeOutlivesARestartWhileTheStoreOrEcencyIsDownAndGoesWhenTheStoreNoLongerHoldsIt() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("12", "999points"))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        val held = r.store.held.toList()
+        // the store cannot be reached at the next start
+        val again = rig(prefs = r.env.prefs, start = false)
+        again.store.held += held
+        again.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "the store is down: the notice stays")
+        // the store answers, Ecency does not: the purchase is still held, so is the notice
+        again.store.connectError = null
+        answers = mutableListOf(HttpResult(500, ""), HttpResult(500, ""), HttpResult(500, ""))
+        again.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        again.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "Ecency is down: the notice stays")
+        // the store no longer holds the purchase (finished or refunded elsewhere): the notice goes, for good
+        again.store.held.clear()
+        again.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        again.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertTrue(again.env.purchases.current.heldOrders.isEmpty())
+        val third = rig(prefs = r.env.prefs, start = false)
+        third.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        third.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(third.env.purchases.current.heldOrders.isEmpty())
+    }
+
+    /** A wipe removes the saved notices; the ones in memory go too and are never saved again. */
+    @Test
+    fun aWipeForgetsTheHeldNotices() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.env.purchases.current.heldOrders.size)
+        r.env.resetAfterWipe()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty())
+        assertNull(r.env.prefs.getString(PurchaseService.Marks.HELD_NOTICES))
+    }
+
     @Test
     fun theHeldNoticeSaysTheOrderAndItsSupportMailCarriesIt() {
         assertEquals("Purchase held for review", HeldPurchaseCopy.TITLE)
