@@ -42,6 +42,61 @@ final class ResizabilityTests: XCTestCase {
         XCTAssertTrue(offenders.isEmpty, "size from the window or the trait collection instead:\n" + offenders.joined(separator: "\n"))
     }
 
+    /// iPhone Duo lays the bars out vertically and shows bar items with their titles: a bar button's label is a
+    /// `Label` (a title and an icon, drawn as the icon), never an icon image alone. The account button's avatar is an
+    /// image on purpose (ShellRoot: a bar draws a Label's icon as a template) and is not an app icon.
+    func testBarButtonsCarryATitleWithTheirIcon() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("EcencyApp")
+        var offenders: [String] = []
+        let enumerator = try XCTUnwrap(FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil))
+        for case let url as URL in enumerator where url.pathExtension == "swift" {
+            let lines = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
+            for (i, line) in lines.enumerated() where line.contains("label: { Image(appIcon:") {
+                let context = lines[max(0, i - 3)...i].joined(separator: "\n")
+                if ["ToolbarItem", "screenBarItem(", ".toolbar {"].contains(where: context.contains) {
+                    offenders.append("\(url.lastPathComponent):\(i + 1)")
+                }
+            }
+        }
+        XCTAssertTrue(offenders.isEmpty, "bar buttons with an icon and no title (use Label(title, appIcon:).labelStyle(.iconOnly)):\n" + offenders.joined(separator: "\n"))
+    }
+
+    /// On a short window (iPhone Duo's inner display held sideways is about 670 pt high) a medium sheet is about 330 pt:
+    /// a sheet never stops at medium only, so it can always be pulled up to the window's height. A measured height
+    /// (`.height(measured ...)`) fits its content and is left alone.
+    func testNoSheetStopsAtMediumOnly() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("EcencyApp")
+        var offenders: [String] = []
+        let enumerator = try XCTUnwrap(FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil))
+        for case let url as URL in enumerator where url.pathExtension == "swift" {
+            let lines = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
+            for (i, line) in lines.enumerated() where line.contains("[.medium]") && line.contains("presentationDetents") {
+                offenders.append("\(url.lastPathComponent):\(i + 1)")
+            }
+        }
+        XCTAssertTrue(offenders.isEmpty, "sheets that cannot grow past medium:\n" + offenders.joined(separator: "\n"))
+    }
+
+    /// The share extension and the widgets run on iPhone Duo too: they never size from the main screen either.
+    func testTheExtensionsNeverSizeFromTheScreen() throws {
+        let iosApp = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        var files = 0
+        var offenders: [String] = []
+        for folder in ["ShareExtension", "Widgets", "NotificationService"] {
+            let enumerator = try XCTUnwrap(FileManager.default.enumerator(at: iosApp.appendingPathComponent(folder), includingPropertiesForKeys: nil))
+            for case let url as URL in enumerator where url.pathExtension == "swift" {
+                files += 1
+                let lines = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
+                for (i, line) in lines.enumerated() {
+                    let code = line.components(separatedBy: "//").first ?? line
+                    for token in Self.forbidden where code.contains(token) { offenders.append("\(folder)/\(url.lastPathComponent):\(i + 1): \(token)") }
+                }
+            }
+        }
+        XCTAssertGreaterThan(files, 3, "the extension sources were found")
+        XCTAssertTrue(offenders.isEmpty, "size from the window or the trait collection instead:\n" + offenders.joined(separator: "\n"))
+    }
+
     // MARK: sizes follow the window
 
     func testCardImagesAreCappedAtTheWindowNotTheScreen() {

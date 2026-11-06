@@ -288,6 +288,9 @@ https://developer.apple.com/iphone-duo/prepare/ (Xcode 27 also exports its `app-
   script never switches displays.
 - CI: release builds run on GitHub's `xcode-27` image with Xcode 27.1 (`build-ios.yml`), whose iOS 27.1 SDK is what
   lets iPhone Duo lay the app out edge to edge with the vertical bars.
+- Bar items carry a title with their icon (`Label(title, appIcon:).labelStyle(.iconOnly)`): a phone's bar draws the icon, iPhone Duo's vertical bar can show the title. `ResizabilityTests.testBarButtonsCarryATitleWithTheirIcon` fails on a toolbar or `screenBarItem` button whose label is an icon image alone; the account button's avatar is an image on purpose (a bar draws a Label's icon as a template).
+- Sheets never stop at medium only (`testNoSheetStopsAtMediumOnly`): on the inner display held sideways (about 670 pt high) a medium sheet is about 330 pt, so every sheet can be pulled to the window's height; a measured height detent fits its content and stays.
+- The share extension, widgets and notification service follow the same rule as the app (`testTheExtensionsNeverSizeFromTheScreen`).
 - A list in the pane gets no default row margins (it is away from the window's edge): its rows set them with
   `paneRowInsets()` (asset details' history), or their own insets (the wallet's asset cards).
 - Links in chat messages and link cards open in the app when they are a post, profile or tag on ecency.com or another
