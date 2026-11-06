@@ -468,6 +468,9 @@ data class LeaderboardState(
 class LeaderboardModel internal constructor(private val env: AppEnvironment) : StateModel<LeaderboardState>(LeaderboardState(), env.dispatchers) {
     private var job: Job? = null
 
+    /** The UTC day (days since the epoch) the last read started in. */
+    private var loadedDay = Long.MIN_VALUE
+
     fun start() {
         if (!current.loaded && job?.isActive != true) load()
     }
@@ -479,6 +482,16 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
     }
 
     fun refresh() = load()
+
+    /**
+     * The daily line's minute tick while the board is shown (each UI calls it from its reset line): once the 00:00 UTC
+     * reset passed since the daily board was read, it is read again, once (issue #3612). Weekly and monthly do not
+     * reset at midnight.
+     */
+    fun tick() {
+        if (current.duration != LeaderboardDuration.DAY || !current.loaded || job?.isActive == true) return
+        if (env.nowMillis().floorDiv(DailyReset.DAY_MILLIS) > loadedDay) load()
+    }
 
     /** RN's tooltip on a row's reward (`leaderboard.tooltip_earn`), shown through the toast channel. */
     fun showEarnHint() {
@@ -493,6 +506,7 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
 
     private fun load() {
         val duration = current.duration
+        loadedDay = env.nowMillis().floorDiv(DailyReset.DAY_MILLIS)
         job?.cancel()
         setState { it.copy(isLoading = true) }
         job = scope.launch {

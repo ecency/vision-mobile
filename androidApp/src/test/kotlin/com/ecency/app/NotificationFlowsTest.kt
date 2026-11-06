@@ -77,6 +77,9 @@ class NotificationsNode {
     val store = TestStore()
     val nowS = 1_791_288_000L
 
+    /** The environment's clock; tests move it (the leaderboard's midnight). */
+    @Volatile var nowMillis = nowS * 1000
+
     @Volatile var unread = mapOf("tester" to 3, "other" to 1)
 
     private fun rows(user: String) = if (user == "tester") {
@@ -123,7 +126,7 @@ class NotificationsNode {
         dispatchers = AppDispatchers(Dispatchers.Main, Dispatchers.Default, Dispatchers.IO),
         proxyBase = "https://i.ecency.com",
         debugKeyImport = true,
-        nowMillis = { nowS * 1000 },
+        nowMillis = { nowMillis },
         security = SecurityConfig(pinIterations = NotificationFlowsTest.ITERATIONS),
         auth = AuthServices(http, HasSocketFactory { error("no relay") }),
     )
@@ -652,5 +655,24 @@ class NotificationFlowsTest {
         val old = notificationTime(now - 8 * 86_400_000L, now)!!
         assertFalse(old.endsWith("ago"))
         assertTrue(old, "2026" in old)
+    }
+
+    // issue #3612: the daily board is read again once the 00:00 UTC reset passed while it is open
+    @Test
+    fun theDailyBoardIsReadAgainAfterMidnight() {
+        launch()
+        waitFor("loginPrompt")
+        compose.onNodeWithTag("notificationsPage:Leaderboard").performClick()
+        waitFor("leader:alice")
+        assertEquals(1, node.calls("leaderboard/day").size)
+        // the test clock is 12:00 UTC: the next day, back on the board (it was kept while away)
+        compose.onNodeWithTag("notificationsPage:Notifications").performClick()
+        waitFor("loginPrompt")
+        node.nowMillis += 13 * 3_600_000L
+        compose.onNodeWithTag("notificationsPage:Leaderboard").performClick()
+        waitUntil { node.calls("leaderboard/day").size == 2 }
+        compose.onNodeWithTag("leaderboardReset", useUnmergedTree = true).assertTextEquals("Today (UTC), resets in 23h")
+        compose.waitForIdle()
+        assertEquals("once", 2, node.calls("leaderboard/day").size)
     }
 }

@@ -104,6 +104,8 @@ fun SettingsScreen(env: AppEnvironment, host: AppHost, lock: AppLockState, logge
         // one page colour from the top bar down (README "Themed backgrounds"): RN's gray gaps between the cards were a
         // lighter band in dark mode; the cards' blue titles mark the sections
         Column(Modifier.fillMaxSize().background(colors.background).verticalScroll(rememberScrollState()).padding(bottom = 72.dp)) {
+            // purchases held for review (issue #3612), above the settings
+            HeldPurchaseNotices(env, host::openMail, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
             SettingsCard {
                 CardTitle(SettingsCopy.GENERAL)
                 DropdownRow(

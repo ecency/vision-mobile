@@ -63,4 +63,25 @@ final class PurchaseUITests: XCTestCase {
         buy.tap()
         XCTAssertTrue(app.buttons["register-done"].waitForExistence(timeout: 15))
     }
+
+    /// Issue #3612: a purchase Ecency holds for review at launch stays on Perks and in Settings with its order number
+    /// and "Contact support" until it is dismissed.
+    func testAPurchaseHeldAtLaunchShowsItsOrderOnPerksAndInSettingsUntilDismissed() {
+        let app = launch(["-demoHeldPurchase", "31", "-openScreen", "perks"])
+        let text = app.staticTexts["held-purchase-text-31"]
+        XCTAssertTrue(text.waitForExistence(timeout: 20))
+        XCTAssertEqual(text.label, "This purchase is held for review. Contact support@ecency.com with order #31.")
+        XCTAssertTrue(app.staticTexts["Purchase held for review"].exists)
+        XCTAssertTrue(app.buttons["held-purchase-support-31"].exists)
+        XCTAssertEqual(app.buttons["held-purchase-support-31"].label, "Contact support")
+        shot("held-perks")
+
+        let settings = launch(["-demoHeldPurchase", "31", "-openScreen", "settings"])
+        let notice = settings.staticTexts["held-purchase-text-31"]
+        XCTAssertTrue(notice.waitForExistence(timeout: 20))
+        XCTAssertTrue(settings.buttons["held-purchase-support-31"].exists)
+        settings.buttons["held-purchase-dismiss-31"].tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: notice)
+        waitForExpectations(timeout: 10)
+    }
 }

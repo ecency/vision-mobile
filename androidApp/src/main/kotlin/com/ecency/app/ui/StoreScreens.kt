@@ -40,7 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
 import com.ecency.core.app.AppEnvironment
+import com.ecency.core.app.HeldPurchaseCopy
 import com.ecency.core.app.PurchaseCopy
 import com.ecency.core.app.StoreRow
 import com.ecency.core.app.StoreScreenModel
@@ -184,4 +186,48 @@ fun SpinPackRow(env: AppEnvironment, model: StoreScreenModel) {
         s.rows.forEach { ProductItemLine(it, enabled = !s.processing, onBuy = model::buy) }
     }
     StoreDialogs(env, model) {}
+}
+
+/**
+ * Purchases Ecency holds for review (issue #3612): one notice per order with its number, "Contact support" (a mail
+ * naming the order) and "Dismiss". Shown on Perks and in Settings until a resend is accepted or the user dismissed
+ * it (`PurchaseService.heldOrders`).
+ */
+@Composable
+fun HeldPurchaseNotices(env: AppEnvironment, openMail: (String) -> Boolean, modifier: Modifier = Modifier) {
+    val colors = LocalEcencyColors.current
+    val state by env.purchases.state.collectAsState()
+    if (state.heldOrders.isEmpty()) return
+    Column(modifier.fillMaxWidth()) {
+        state.heldOrders.forEach { held ->
+            Column(
+                Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(12.dp)).background(colors.warningBackground)
+                    .border(1.dp, colors.warningBorder, RoundedCornerShape(12.dp)).padding(16.dp).testTag("heldPurchase:${held.order}"),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Glyph(AppIcon.ERROR, colors.warningText, 20.dp)
+                    Text(
+                        HeldPurchaseCopy.TITLE, color = colors.warningText, fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 8.dp).weight(1f),
+                    )
+                }
+                Text(
+                    HeldPurchaseCopy.message(held.order), color = colors.warningText, fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 6.dp).testTag("heldPurchaseText:${held.order}"),
+                )
+                Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = { env.purchases.dismissHeld(held.order) }, modifier = Modifier.testTag("heldPurchaseDismiss:${held.order}")) {
+                        Text(HeldPurchaseCopy.DISMISS, color = colors.warningText)
+                    }
+                    TextButton(
+                        onClick = {
+                            val opened = openMail(HeldPurchaseCopy.supportMailto(held.order))
+                            if (!opened) env.ui.toast(com.ecency.core.app.SettingsCopy.FEEDBACK_FAIL)
+                        },
+                        modifier = Modifier.testTag("heldPurchaseSupport:${held.order}"),
+                    ) { Text(HeldPurchaseCopy.CONTACT_SUPPORT, color = colors.warningText, fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    }
 }

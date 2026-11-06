@@ -917,6 +917,38 @@ class NotificationsTest {
     }
 
     @Test
+    fun theDailyBoardIsReadAgainOnceWhenTheResetPassesWhileItIsOpen() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        // 2026-10-29T23:59:00Z
+        val beforeMidnight = 1_793_318_340_000L
+        f.app.now = beforeMidnight
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        assertEquals(listOf("leaderboard/day"), f.backend.paths())
+        board.tick(); f.idle()
+        assertEquals(1, f.backend.paths().size, "the same UTC day: nothing")
+
+        f.app.now = beforeMidnight + 61_000L
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day"), f.backend.paths(), "the reset passed: read again")
+        board.tick(); f.idle()
+        f.app.now += 3_600_000L
+        board.tick(); f.idle()
+        assertEquals(2, f.backend.paths().size, "once per reset")
+
+        // weekly and monthly do not reset at midnight
+        board.select(LeaderboardDuration.WEEK); f.idle()
+        f.app.now += DailyReset.DAY_MILLIS
+        board.tick(); f.idle()
+        board.select(LeaderboardDuration.MONTH); f.idle()
+        f.app.now += DailyReset.DAY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day", "leaderboard/week", "leaderboard/month"), f.backend.paths())
+        board.close()
+    }
+
+    @Test
     fun leaderboardFailureIsAToast() = runTest {
         val f = NotificationFixture(this, users = emptyList())
         f.start()

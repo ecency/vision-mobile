@@ -111,6 +111,22 @@ object PurchaseCopy {
     val PROCESSING: String get() = L.native.purchase.processing
 }
 
+/** A purchase Ecency holds for review (422 `receipt_held`): its order number, for support. */
+data class HeldPurchase(val order: String, val productId: String)
+
+/** The lasting notice of a held purchase (issue #3612): Perks and Settings, until dismissed or released. */
+object HeldPurchaseCopy {
+    val TITLE: String get() = L.native.purchase.heldTitle
+    fun message(order: String): String = PurchaseCopy.held(order)
+    val CONTACT_SUPPORT: String get() = L.native.purchase.contactSupport
+    val DISMISS: String get() = L.feature.spotlight.dismiss
+    const val SUPPORT_EMAIL = "support@ecency.com"
+
+    /** A mail to support naming the order (encoded as the feedback mail, RN sendEmail's qs). */
+    fun supportMailto(order: String): String =
+        "mailto:$SUPPORT_EMAIL?subject=" + SettingsOptions.qsEncode(L.native.purchase.heldSubject(order = order).removePrefix("\u200F"))
+}
+
 /** Who a purchase is for (RN: the screen's username param or the current account; for a paid account, the new account's details). */
 data class PurchaseTarget(val user: String = "", val meta: AccountOrderMeta? = null)
 
@@ -154,6 +170,8 @@ data class PurchaseServiceState(
     val pending: Set<String> = emptySet(),
     /** Products being bought or ordered right now (RN `isProcessing`). */
     val busy: Set<String> = emptySet(),
+    /** Purchases Ecency holds for review, oldest first, until a resend is accepted or the notice was dismissed. */
+    val heldOrders: List<HeldPurchase> = emptyList(),
 )
 
 /**
@@ -242,6 +260,25 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     fun onForeground() {
         if (!started || env.nowMillis() - lastRecoveryMillis < FOREGROUND_RECOVERY_MILLIS) return
         env.background.launch { recover() }
+    }
+
+    /** The user closed the notice of the held order [order]. Main thread. */
+    fun dismissHeld(order: String) {
+        Marks.dismissHeld(env.prefs, order)
+        heldKeys.entries.removeAll { it.value.order == order }
+        publishHeld()
+    }
+
+    /** Held purchases by [orderKey] (one order each), in the order they were found. */
+    private val heldKeys = linkedMapOf<String, HeldPurchase>()
+
+    private fun publishHeld() {
+        val list = heldKeys.values.distinctBy { it.order }
+        if (list != current.heldOrders) mutableState.update { it.copy(heldOrders = list) }
+    }
+
+    private fun clearHeld(key: String) {
+        if (heldKeys.remove(key) != null) publishHeld()
     }
 
     /** RN `initConnection`; null when connected. */
@@ -415,6 +452,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     // refunded before it was finished: nothing to deliver (Ecency rejects revoked transactions too)
                     env.crashReporter.breadcrumb("iap", "revoked purchase finished", mapOf("productId" to p.productId))
                     held = held - key
+                    clearHeld(key)
                     Intents.removeKey(env.prefs, key)
                     finish(p)
                     return
@@ -473,6 +511,11 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, null) }
                     val first = Marks.tellHeld(env.prefs, result.order)
                     if (!fromBuy && first) env.ui.toast(PurchaseCopy.held(result.order))
+                    // the lasting notice (Perks, Settings) until a resend is accepted or the user dismissed it
+                    if (!Marks.heldDismissed(env.prefs, result.order)) {
+                        heldKeys[key] = HeldPurchase(result.order, p.productId)
+                        publishHeld()
+                    }
                     emit(PurchaseOutcome.Held(p.productId, fromBuy, result.order))
                 }
             }
@@ -488,6 +531,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             env.proMembers.activate(it)
         }
         Intents.removeKey(env.prefs, orderKey(p))
+        clearHeld(orderKey(p))
         finish(p)
         held = held - orderKey(p)
         mutableState.update { it.copy(unfinished = it.unfinished - p.productId) }
@@ -705,12 +749,20 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     internal object Marks {
         const val ACCEPTED = "purchases.accepted"
         const val HELD_TOLD = "purchases.heldTold"
+        const val HELD_DISMISSED = "purchases.heldDismissed"
         const val UNVERIFIED_REPORTED = "purchases.unverifiedReported"
         private const val MAX = 64
         private const val ONCE_MAX = 16
 
         /** True the first time [order] is told. */
         fun tellHeld(prefs: Prefs, order: String): Boolean = once(prefs, HELD_TOLD, order)
+
+        /** The notice of the held order [order] was dismissed: it does not come back at a later resend. */
+        fun dismissHeld(prefs: Prefs, order: String) {
+            once(prefs, HELD_DISMISSED, order)
+        }
+
+        fun heldDismissed(prefs: Prefs, order: String): Boolean = list(prefs, HELD_DISMISSED).any { it.first == order }
 
         /** True the first time the unverified purchase [hash] is reported. */
         fun tellUnverified(prefs: Prefs, hash: String): Boolean = once(prefs, UNVERIFIED_REPORTED, hash)
