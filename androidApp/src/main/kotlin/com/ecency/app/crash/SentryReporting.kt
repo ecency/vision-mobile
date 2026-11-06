@@ -79,6 +79,7 @@ object SentryReporting {
         tx.user = null
         tx
     } catch (t: Throwable) {
+        // not reported: the reporter itself; a lost sample costs nothing
         null
     }
 
@@ -97,6 +98,7 @@ object SentryReporting {
             scrubEvent(event)
             event
         } catch (t: Throwable) {
+            // not reported: the reporter itself
             runCatching {
                 event.message = Message().apply { message = CrashScrubber.FAILED }
                 event.exceptions?.forEach { it.value = CrashScrubber.FAILED }
@@ -116,6 +118,8 @@ object SentryReporting {
             m.params = m.params?.map { CrashScrubber.scrub(it) ?: "" }
         }
         event.exceptions?.forEach { it.value = CrashScrubber.scrub(it.value) }
+        // handled reports group by a fingerprint that holds a normalised message: it is scrubbed like every text
+        event.fingerprints = event.fingerprints?.map { CrashScrubber.scrub(it) ?: "" }
         event.breadcrumbs?.forEach { scrub(it) }
         event.extras?.let { extras -> event.extras = extras.mapValues { (k, v) -> deep(k, v, 0) } }
         // named contexts (the iap context carries the store's own messages); the SDK's typed ones (device, os, app)
@@ -144,6 +148,7 @@ object SentryReporting {
         data.forEach { (k, v) -> crumb.setData(k, deep(k, v, 0) ?: "") }
         crumb
     } catch (t: Throwable) {
+        // not reported: the reporter itself
         crumb.message = CrashScrubber.FAILED
         runCatching { crumb.data.keys.toList().forEach { crumb.removeData(it) } }
         crumb

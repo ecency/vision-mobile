@@ -241,7 +241,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                AppError.from(e).message
+                AppError.from(e, "signing.submitUpgradeKey").message
             }
             if (error == null) {
                 deferred.complete(AuthUpgradeChoice.KEY)
@@ -341,6 +341,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "signing.hiveAuthStatus")
                 STATUS_UNAVAILABLE
             }
             if (status in IN_BLOCK || status == STATUS_UNAVAILABLE) {
@@ -349,6 +350,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "signing.hiveAuthOperations")
                     null
                 }
                 if (onChain != null) {
@@ -457,6 +459,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
             return try {
                 com.ecency.core.api.broadcast.OperationJson.encode(com.ecency.core.api.broadcast.OperationJson.decodeOwn(named))
             } catch (e: Exception) {
+                // not reported: decode fallback for operations with null fields
                 JsonArray(listOf(named[0], withoutNulls(named[1])))
             }
         }

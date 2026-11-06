@@ -347,8 +347,8 @@ class AccountNoticesTest {
     fun aMissingKeyErrorSaysWhereToAddTheKey() {
         assertEquals(
             "posting key is required to perform this transaction. Add it under Settings, Manage Authorities (Import Private), or sign in again with it.",
-            AppError.from(AuthException.MissingKey(KeyRole.POSTING)).message,
+            AppError.from(AuthException.MissingKey(KeyRole.POSTING), "test.where").message,
         )
-        assertTrue(AppError.from(AuthException.MissingKey(KeyRole.ACTIVE)).message.startsWith("active key is required to perform this transaction"))
+        assertTrue(AppError.from(AuthException.MissingKey(KeyRole.ACTIVE), "test.where").message.startsWith("active key is required to perform this transaction"))
     }
 }

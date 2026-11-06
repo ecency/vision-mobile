@@ -68,6 +68,34 @@ class SentryMappingTest {
     }
 
     @Test
+    fun aHandledReportIsAnEventWithItsFingerprintTagsAndAScrubbedContext() {
+        // Bitcoin wiki example key, controls nothing
+        val wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"
+        val report = com.ecency.core.app.CrashReport(
+            type = "Rejected",
+            message = "refused for key $wif",
+            tags = mapOf("handled" to "true", "where" to "editor.publish", "error.kind" to "rejected", "exception" to "Rejected"),
+            fingerprint = listOf("handled", "editor.publish", "rejected", "Rejected", "refused for key $wif"),
+            contextName = "handled",
+            context = mapOf("where" to "editor.publish", "stack" to "Rejected: refused for key $wif\n\tat Editor.submit", "memo" to "secret"),
+            level = "warning",
+        )
+        val event = SentryReporting.Reporter.event(report)
+        val out = configured(id).beforeSend!!.execute(event, io.sentry.Hint())!!
+        assertEquals(io.sentry.SentryLevel.WARNING, out.level)
+        assertEquals("editor.publish", out.getTag("where"))
+        assertEquals("true", out.getTag("handled"))
+        assertEquals(listOf("handled", "editor.publish", "rejected", "Rejected"), out.fingerprints!!.take(4))
+        assertEquals(false, out.fingerprints!!.any { wif in it })
+        assertEquals(false, out.exceptions!!.single().value!!.contains(wif))
+        @Suppress("UNCHECKED_CAST")
+        val context = out.contexts["handled"] as Map<String, Any?>
+        assertEquals(false, (context["stack"] as String).contains(wif))
+        assertEquals(true, (context["stack"] as String).contains("Editor.submit"))
+        assertEquals("<redacted>", context["memo"])
+    }
+
+    @Test
     fun theBuildExposesItsMappingId() {
         // empty in local and debug builds; CI sets it for store builds (build.gradle.kts rejects a malformed one)
         assertEquals("", BuildConfig.PROGUARD_UUID)

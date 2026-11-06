@@ -206,7 +206,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 throw e
             } catch (e: Exception) {
                 if (gen != generation) return@launch
-                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = message(e, L.native.chats.failedToLoadChats)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = message(e, L.native.chats.failedToLoadChats, "chats.load")) }
             }
         }
     }
@@ -237,7 +237,8 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             rebuild()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chats.users")
             // RN ignores lookup failures so the channels still show
         }
     }
@@ -343,7 +344,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     ChatChannelAction.MUTE, ChatChannelAction.UNMUTE -> L.native.chats.unableToUpdateMute
                     else -> UNABLE_TO_LEAVE
                 }
-                setState { it.copy(error = message(e, fallback)) }
+                setState { it.copy(error = message(e, fallback, "chats.channelAction")) }
             }
         }
     }
@@ -390,7 +391,8 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 list.firstOrNull { it.id == channelId }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chats.channel")
                 null
             }
             if (gen != generation) return@launch
@@ -455,7 +457,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            if (gen == generation) setState { it.copy(searching = false, searchError = message(e, L.native.chats.unableToSearch)) }
+            if (gen == generation) setState { it.copy(searching = false, searchError = message(e, L.native.chats.unableToSearch, "chats.search")) }
         }
     }
 
@@ -473,7 +475,8 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     true
                 } catch (e: CancellationException) {
                     throw e
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorReports.quiet(e, "chats.markViewed")
                     false
                 }
                 if (gen != generation) return@launch
@@ -494,7 +497,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (gen == generation) setState { it.copy(searchError = message(e, UNABLE_TO_JOIN)) }
+                if (gen == generation) setState { it.copy(searchError = message(e, UNABLE_TO_JOIN, "chats.join")) }
             }
         }
     }
@@ -521,7 +524,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (gen == generation) setState { it.copy(searchError = message(e, L.native.chats.unableToStartChat)) }
+                if (gen == generation) setState { it.copy(searchError = message(e, L.native.chats.unableToStartChat, "chats.startChat")) }
             }
         }
     }
@@ -544,12 +547,18 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             return SafeTarget.community(m.value.lowercase())
         }
 
-        /** What RN shows for a failed chat call: the server's text, else a network message, else [fallback]. */
-        fun message(e: Throwable, fallback: String): String = when {
-            e is ChatApiException -> e.message ?: fallback
-            e is EcencyHttpException && e.isNetwork -> AppError.NETWORK_MESSAGE
-            e is AuthException -> AppError.from(e).message
-            else -> fallback
+        /**
+         * What RN shows for a failed chat call: the server's text, else a network message, else [fallback]. The
+         * failure is reported as handled at [where] (ErrorReports).
+         */
+        fun message(e: Throwable, fallback: String, where: String): String {
+            val mapped = AppError.from(e, where)
+            return when {
+                e is ChatApiException -> e.message ?: fallback
+                e is EcencyHttpException && e.isNetwork -> AppError.NETWORK_MESSAGE
+                e is AuthException -> mapped.message
+                else -> fallback
+            }
         }
 
         /**

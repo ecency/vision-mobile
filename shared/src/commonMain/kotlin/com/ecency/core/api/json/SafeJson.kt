@@ -18,6 +18,7 @@ internal object SafeJson {
         return try {
             Json.parseToJsonElement(text)
         } catch (e: Exception) {
+            // not reported: untrusted chain JSON, often malformed
             null
         }
     }

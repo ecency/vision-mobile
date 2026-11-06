@@ -19,6 +19,7 @@ internal object PostingAuthorityFlow {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "postingAuthority.accountRow")
             null
         }
         // a key account's own posting key must be in the authority that is about to be rewritten

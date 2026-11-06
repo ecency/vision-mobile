@@ -302,6 +302,7 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "assetDetails.history")
             setState { it.copy(isLoading = false, isLoadingMore = false, isRefreshing = false, historyFailed = true) }
         }
     }
@@ -367,6 +368,7 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "assetDetails.autoAdvance")
                 nextStart = kept.nextStart
                 enginePage = kept.enginePage
                 raw = kept.raw
@@ -519,7 +521,7 @@ class DelegationsModel internal constructor(private val env: AppEnvironment, pri
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, error = AppError.from(e, "delegations.load")) }
             }
         }
     }

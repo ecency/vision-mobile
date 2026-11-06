@@ -33,6 +33,7 @@ class PickedVideo(val source: TusSource, val durationMillis: Long? = null, val r
         try {
             release?.invoke()
         } catch (e: Exception) {
+            // not reported: cleanup of a file that is already gone
             // a file that is already gone
         }
     }
@@ -274,6 +275,7 @@ class VideoUploadModel internal constructor(private val env: AppEnvironment, pri
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
+                        ErrorReports.quiet(e, "videoUpload.thumbnail")
                         null
                     }
                 }
@@ -297,6 +299,7 @@ class VideoUploadModel internal constructor(private val env: AppEnvironment, pri
                 generation++
                 setState { VideoUploadState(locked = it.locked, error = SOURCE_GONE) }
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "videoUpload.upload")
                 val status = (e as? TusException)?.status ?: 0
                 setState { it.copy(uploading = false, canResume = upload != null, error = if (!ownerSignedIn(owner)) PaidCopy.otherAccount(owner) else message(status)) }
             } finally {

@@ -138,6 +138,7 @@ object NotificationTime {
         val seconds = try {
             com.ecency.core.hive.ChainTime.toEpochSeconds("${m.groupValues[1]}T${m.groupValues[2]}")
         } catch (e: Exception) {
+            // not reported: a server date outside the chain's range sorts as 0
             return 0
         }
         val zone = m.groupValues[4]

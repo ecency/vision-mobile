@@ -246,6 +246,7 @@ class TranslateModel internal constructor(private val env: AppEnvironment, val k
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "reading.translateBody")
                 // RN goes back to idle without a toast
                 setState { it.copy(translating = false) }
             }
@@ -321,6 +322,7 @@ class TranslationSheetModel internal constructor(private val env: AppEnvironment
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "reading.translate")
                 setState { it.copy(isLoading = false, error = e.message?.takeIf { m -> m.isNotBlank() } ?: L.alert.error) }
             }
         }

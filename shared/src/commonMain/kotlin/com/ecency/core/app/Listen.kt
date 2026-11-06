@@ -361,6 +361,7 @@ class SessionRenewals internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "listen.exchange")
             null
         } ?: return null
         val current = withContext(env.dispatchers.main) { env.session.current.username }
@@ -407,6 +408,7 @@ class ListenUnlocks internal constructor(private val env: AppEnvironment) {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "listen.unlock")
                 UnlockOutcome.Lost
             }
             when (outcome) {
@@ -571,6 +573,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    // not reported: retried with backoff, the give-up below reports it
                     if (e is EcencyHttpException && e.status == 401 && user != null && code != null) {
                         statusFailed = true
                         if (user == reader) renewStatus(user, code)
@@ -582,6 +585,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
                         failures++
                         continue
                     }
+                    ErrorReports.quiet(e, "listen.status")
                     statusFailed = true
                     return@launch
                 }
@@ -601,6 +605,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "listen.readerCode")
         null
     }
 
@@ -626,6 +631,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "listen.status")
                     return@launch
                 }
                 if (reader != user) return@launch
@@ -722,6 +728,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
         } catch (e: ListenUnlockException) {
             UnlockOutcome.Refused(e.status, e.required, e.available)
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "listen.unlockRequest")
             // no answer: the outcome is unknown, the key stays for the next tap (a replay if it was charged)
             UnlockOutcome.Lost
         }
@@ -754,6 +761,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "listen.statusFirst")
             null
         }
         if (user != reader) throw IllegalStateException("listen: the reader changed")

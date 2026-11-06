@@ -197,6 +197,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "register.lookup")
             setState { it.copy(alert = RegisterAlert(RegisterCopy.ERROR, RegisterCopy.UNKNOWN_ERROR)) }
             null
         }
@@ -296,6 +297,7 @@ class RegisterModel internal constructor(private val env: AppEnvironment, prefil
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "register.signUp")
                 val body = if (e is SignupException) RegisterCopy.signupError(e) else RegisterCopy.UNKNOWN_ERROR
                 setState {
                     it.copy(

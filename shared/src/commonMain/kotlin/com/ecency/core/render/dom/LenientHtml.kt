@@ -53,6 +53,7 @@ object LenientHtml {
                 try {
                     el.setAttribute(a.groupValues[1], EntityDecoder.decode(value, EntityDecoder.V6, EntityDecoder.Mode.ATTRIBUTE))
                 } catch (e: Exception) {
+                    // not reported: an unusable attribute name is skipped
                     // an unusable attribute name: skip it
                 }
             }

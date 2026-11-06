@@ -262,6 +262,7 @@ class MainActivity : FragmentActivity() {
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "image.save")
                 e.message ?: com.ecency.core.app.UiCopy.IMAGE_SAVE_ERROR
             }
             done(error)

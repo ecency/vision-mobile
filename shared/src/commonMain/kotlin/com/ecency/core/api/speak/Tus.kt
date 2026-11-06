@@ -94,6 +94,7 @@ class TusClient(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        // not reported: no answer may heal; the upload retries and its caller reports when it gives up
         (e as? com.ecency.core.api.EcencyHttpException)?.takeIf { it.isRedirect }?.let { HttpResult(it.status, "") }
     }
 

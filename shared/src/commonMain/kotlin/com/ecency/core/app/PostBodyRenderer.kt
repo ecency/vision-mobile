@@ -83,6 +83,7 @@ class RenderHelperPostBodyRenderer(
     private inline fun <T> safely(fallback: T, block: () -> T): T = try {
         block()
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "render.safely")
         fallback
     }
 }
@@ -121,6 +122,7 @@ class InterimPostBodyRenderer(private val proxyBase: String = ImageProxy.DEFAULT
         val rendered = try {
             Markdown.render(markdown)
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "render.markdown")
             // remarkable throws on a few inputs (lone surrogates in link targets); show the text
             return RenderBodyParser.finish(escape(markdown))
         }
@@ -158,6 +160,7 @@ class InterimPostBodyRenderer(private val proxyBase: String = ImageProxy.DEFAULT
     private inline fun <T> safely(fallback: T, block: () -> T): T = try {
         block()
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "render.safely")
         fallback
     }
 }

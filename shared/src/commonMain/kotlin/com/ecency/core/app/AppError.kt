@@ -58,8 +58,17 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
     constructor(kind: ErrorKind, message: String, retryable: Boolean) : this(kind, message, retryable, false)
 
     companion object {
-        /** Maps any failure from the data layer, the vault or the app layer to what the UI shows. */
-        fun from(error: Throwable): AppError = when (error) {
+        /**
+         * Maps any failure from the data layer, the vault or the app layer to what the UI shows, and reports it as a
+         * handled error at [where] ([ErrorReports.handled]): a short stable name of the place, `area.action`
+         * ("editor.publish", "post.vote"), never built from user data (build-logic `ErrorReportLintTest`).
+         */
+        fun from(error: Throwable, where: String): AppError = map(error).also { ErrorReports.handled(error, where, it) }
+
+        /** The [ErrorKind] of [error] without reporting it: for code that only decides by the kind (a cancel). */
+        fun kindOf(error: Throwable): ErrorKind = map(error).kind
+
+        private fun map(error: Throwable): AppError = when (error) {
             is AppException -> error.error
             is AuthException -> fromAuth(error)
             is BroadcastException.Network -> AppError(ErrorKind.NETWORK, error.message ?: NETWORK_MESSAGE, true, undecided = error.undecided)
@@ -142,9 +151,9 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
          * so the message says the action may have gone through and that retrying is safe (the
          * retry resends the same transaction).
          */
-        fun fromBroadcast(error: Throwable): AppError = from(error).let {
+        fun fromBroadcast(error: Throwable, where: String): AppError = map(error).let {
             if (it.kind == ErrorKind.NETWORK) it.copy(message = MAY_HAVE_LANDED_MESSAGE) else it
-        }
+        }.also { ErrorReports.handled(error, where, it) }
 
         val MAY_HAVE_LANDED_MESSAGE: String get() = L.native.appError.networkErrorThisMay
         val NETWORK_MESSAGE: String get() = L.native.appError.networkMessage

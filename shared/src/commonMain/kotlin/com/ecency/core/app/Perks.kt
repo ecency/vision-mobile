@@ -219,6 +219,7 @@ class StreakFreezeBuys internal constructor(private val env: AppEnvironment) {
                 // 0 is a timeout, a 5xx or 502 says nothing about the charge
                 if (e.status in 400..499) FreezeOutcome.Refused(e.status) else FreezeOutcome.Lost
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "perks.freeze")
                 FreezeOutcome.Lost
             }
             when (outcome) {
@@ -386,6 +387,7 @@ class PerksModel internal constructor(private val env: AppEnvironment) : StateMo
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "perks.load")
             if (!owns(user)) return
             // RN shows the error only while there is no data; earlier numbers stay on a failed refetch
             setState { it.copy(loading = false, retrying = false, failed = it.quests == null, timedOut = (e as? EcencyHttpException)?.status == 0) }

@@ -1058,6 +1058,28 @@ class NotificationsTest {
         board.close()
     }
 
+    /** A failed quiet read says nothing on screen but goes to Sentry as a quiet warning (ErrorReports). */
+    @Test
+    fun aFailedQuietReadIsAWarningReportOnly() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        val beforeMidnight = 1_793_318_340_000L
+        f.app.now = beforeMidnight
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        val reporter = RecordingReporter()
+        f.app.env.crashReporter = reporter
+        f.app.authBackend.privateApi = { HttpResult(500, "") }
+        f.app.now = beforeMidnight + 61_000L
+        board.tick(); f.idle()
+        assertNull(f.env.ui.current.toast)
+        val r = reporter.reports.single()
+        assertEquals("leaderboard.refresh", r.tags["where"])
+        assertEquals("warning", r.level)
+        assertEquals("true", r.tags["quiet"])
+        board.close()
+    }
+
     /** Review of #3612: a weekly read today does not count as today's daily read. */
     @Test
     fun aFailedDailyReadAfterAWeeklyOneIsStillTriedAgain() = runTest {

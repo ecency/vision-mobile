@@ -77,7 +77,7 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
             } catch (e: Exception) {
                 if (session != generation) return@launch
                 rollback(key, previous)
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "post.vote")
                 // the user closed the signing screen: nothing to report; out of RC: RN's offer instead of the error
                 if (error.kind == ErrorKind.CANCELLED || env.offerRcIfShort(e)) setState { VoteState(it.statuses - key) }
                 else update(key, VoteStatus(key, weight, inFlight = false, error = error))

@@ -1239,7 +1239,8 @@ internal fun openDirectMessage(env: AppEnvironment, scope: kotlinx.coroutines.Co
             push(AppScreen.ChatThread(id, "D"))
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "chats.openDirect")
             env.ui.toast(com.ecency.core.app.ChatService.DM_ERROR)
         }
     }

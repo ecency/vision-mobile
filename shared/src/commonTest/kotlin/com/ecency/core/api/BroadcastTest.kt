@@ -460,7 +460,7 @@ class BroadcastTest {
         assertFailsWith<BroadcastException.Unconfirmed> { b.broadcastAction("act-1", listOf(transferOp), key) }
         assertEquals(lookups, statusLookups.size)
         assertEquals(1, distinct(transport))
-        assertEquals(false, com.ecency.core.app.AppError.from(end).retryable)
+        assertEquals(false, com.ecency.core.app.AppError.from(end, "test.where").retryable)
     }
 
     @Test

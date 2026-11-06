@@ -110,6 +110,7 @@ object EditorVideos {
                 }.getOrNull()
             }
         } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "video.thumbnails")
             emptyList()
         } finally {
             runCatching { retriever.release() }

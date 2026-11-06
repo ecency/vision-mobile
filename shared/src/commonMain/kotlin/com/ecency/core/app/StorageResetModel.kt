@@ -47,6 +47,7 @@ class StorageResetModel internal constructor(private val env: AppEnvironment) : 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "storageReset.wipe")
                 setState { it.copy(needed = true, working = false, error = FAILED) }
             }
         }

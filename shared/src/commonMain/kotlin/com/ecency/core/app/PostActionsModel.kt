@@ -336,7 +336,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    if (AppError.fromBroadcast(e).kind == ErrorKind.CANCELLED) throw e
+                    if (AppError.fromBroadcast(e, "postActions.confirm").kind == ErrorKind.CANCELLED) throw e
                     env.ui.toast(FAIL)
                     return@run
                 }
@@ -351,6 +351,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "postActions.report")
                     env.ui.toast(L.report.failed)
                     return@run
                 }
@@ -381,7 +382,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            val error = AppError.fromBroadcast(e)
+            val error = AppError.fromBroadcast(e, "postActions.reblog")
             if (error.kind == ErrorKind.CANCELLED) return
             when {
                 (e.message ?: "").contains("has already reblogged") -> env.ui.toast(L.alert.alreadyRebloged)
@@ -405,7 +406,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            val error = AppError.fromBroadcast(e)
+            val error = AppError.fromBroadcast(e, "postActions.ignore")
             if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.message)) }
         }
     }
@@ -440,7 +441,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "postActions.action")
                 // RN postOptionsModal _profileActionDone: out of RC is the app-wide offer, not the alert
                 if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.message)) }
             } finally {
@@ -455,6 +456,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "postActions.read")
         null
     }
 

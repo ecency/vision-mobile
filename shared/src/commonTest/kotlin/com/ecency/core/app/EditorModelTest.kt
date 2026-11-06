@@ -259,6 +259,24 @@ class EditorModelTest {
     }
 
     @Test
+    fun aRefusedPublishIsOneHandledReportAtEditorPublish() = runTest {
+        val w = World(this)
+        val reporter = RecordingReporter()
+        w.app.env.crashReporter = reporter
+        w.broadcastAnswer = { FakeTransport.error(it, -32000, "Assert Exception: body is too odd") }
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.toasts().single().startsWith("Something went wrong\n"), "the screen shows it as before")
+        // the fixture's unanswered side reads report quietly; the failure the screen shows is one handled report
+        val r = reporter.reports.filter { it.tags["quiet"] == null }.single()
+        assertEquals("editor.publish", r.tags["where"])
+        assertEquals("rejected", r.tags["error.kind"])
+        assertEquals(listOf("handled", "editor.publish", "rejected"), r.fingerprint.take(3))
+    }
+
+    @Test
     fun aPublishWhoseAnswerWasLostIsNotPostedAgain() = runTest {
         val w = World(this)
         val m = w.newPost(this)

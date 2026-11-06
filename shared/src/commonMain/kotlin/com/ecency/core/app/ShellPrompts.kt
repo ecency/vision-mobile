@@ -98,6 +98,7 @@ class DeleteAccountModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "shell.requestDelete")
                 false
             }
             if (!sent) {
@@ -111,6 +112,7 @@ class DeleteAccountModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "shell.deleteSignOut")
                 false
             }
             setState { DeleteAccountState() }
@@ -214,6 +216,7 @@ class UpdateModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "shell.updateCheck")
                 // RN reports to Sentry and shows nothing
             }
         }
@@ -333,6 +336,7 @@ class AnnouncementsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "shell.announcement")
                 // no announcement this time
             }
         }

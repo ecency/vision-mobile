@@ -79,6 +79,7 @@ class FeedRepository(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    com.ecency.core.app.ErrorReports.quiet(e, "feed.crossPostOriginal")
                     post // as the SDK: a failed original fetch keeps the wrapper
                 }
             }

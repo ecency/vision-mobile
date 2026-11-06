@@ -139,7 +139,7 @@ class ProfileEditModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, loadError = AppError.from(e)) }
+                setState { it.copy(isLoading = false, loadError = AppError.from(e, "profileEdit.load")) }
             }
         }
     }
@@ -196,6 +196,7 @@ class ProfileEditModel internal constructor(private val env: AppEnvironment) :
                 setState { it.copy(uploading = null) }
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "profileEdit.upload")
                 setState { it.copy(uploading = null, alert = AppError(ErrorKind.UNKNOWN, com.ecency.core.api.ecency.ImageUploader.message(e), false)) }
                 return@launch
             }
@@ -226,7 +227,7 @@ class ProfileEditModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.from(e)
+                val error = AppError.from(e, "profileEdit.save")
                 setState { it.copy(isSaving = false, alert = if (error.kind == ErrorKind.CANCELLED) null else error) }
             }
         }

@@ -95,6 +95,7 @@ class SpotlightModel internal constructor(private val env: AppEnvironment) : Sta
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "spotlight.load")
                 // RN: a failed query shows no card
                 all.orEmpty()
             }

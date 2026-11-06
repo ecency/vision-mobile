@@ -220,6 +220,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "digest.load")
                 if (startedIn != generation) return@launch
                 setState { it.copy(loading = false, unavailable = true) }
             }
@@ -265,6 +266,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "digest.subscribe")
                 if (startedIn != generation) return@launch
                 val status = (e as? com.ecency.core.api.EcencyHttpException)?.status
                 setState { it.copy(subscribing = false, alert = if (status == 429) DigestCopy.TOO_MANY else DigestCopy.FAIL) }
@@ -294,6 +296,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "digest.leave")
                 if (startedIn != generation) return@launch
                 setState { it.copy(leaving = false, alert = DigestCopy.FAIL) }
             }
@@ -335,6 +338,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "digest.postCount")
             null
         }
         if (!answered) countUnreadable += owner
@@ -360,6 +364,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "digest.offer")
                 // RN: the offer must never break anything
             }
         }

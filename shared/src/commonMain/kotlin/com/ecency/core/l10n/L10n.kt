@@ -113,6 +113,7 @@ object L10n {
         return try {
             marked(formatResolved(r, args, a), a, r, index)
         } catch (e: Exception) {
+            // not reported: hot path, a translation that fails to format falls back to English
             val en = english(index)
             if (en === r) englishTable[index].orEmpty() else runCatching { formatResolved(en, args, a) }.getOrElse { englishTable[index].orEmpty() }
         }
@@ -169,6 +170,7 @@ object L10n {
             // a translation may drop placeholders (react-intl formats it); a name English lacks would show raw
             if (en.message.argNames.containsAll(m.argNames)) Resolved(m, a.pluralLocale) else en
         } catch (e: Exception) {
+            // not reported: a translation that does not parse falls back to English
             en
         }
         return publish(a.cache, index, r)
@@ -178,7 +180,12 @@ object L10n {
         englishCache.loadAt(index)?.let { return it }
         val source = englishTable[index].orEmpty()
         // en-US is checked by the generator at build time; a plain text message is the last resort anyway
-        val m = try { IcuMessage.parse(source) } catch (e: Exception) { IcuMessage.literal(source) }
+        val m = try {
+            IcuMessage.parse(source)
+        } catch (e: Exception) {
+            // not reported: en-US is checked at build time; a plain text message is the last resort
+            IcuMessage.literal(source)
+        }
         return publish(englishCache, index, Resolved(m, SOURCE))
     }
 

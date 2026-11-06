@@ -309,7 +309,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(error = AppError.from(e)) }
+                setState { it.copy(error = AppError.from(e, "editor.start")) }
             }
             setState { s -> s.copy(loading = false, wordsCount = EditorMeta.wordsCount(s.body), tagWarning = EditorTags.warning(s.tags)) }
             loadSupportPercent(owner)
@@ -342,6 +342,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.loadDraft")
                 if (local == null) env.ui.toast(L.alert.fail)
                 null
             }
@@ -356,6 +357,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.loadTemplate")
                 null
             }
             if (template != null) {
@@ -383,6 +385,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "drafts.recent")
                 emptyList()
             }
             recentDraft = drafts.maxByOrNull { EditorMeta.isoMillis(it.modified) ?: EditorMeta.isoMillis(it.modified + "Z") ?: 0 }
@@ -521,6 +524,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "editor.community")
             null
         } ?: return
         setState { s -> if (s.tags.firstOrNull() == name) s.copy(community = EditorCommunity(c.name, c.title, c.typeId, c.observerRole ?: "guest")) else s }
@@ -533,6 +537,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "editor.supportPercent")
             null
         } ?: return
         setState { it.copy(supportPercent = percent) }
@@ -581,6 +586,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "editor.authorities")
             null
         } ?: return
         if (authorities.grantsPostingTo()) return
@@ -614,6 +620,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "editor.rcAccount")
             null
         }
         rcAccount = (read("rc_api.find_rc_accounts", kotlinx.serialization.json.buildJsonObject { put("accounts", kotlinx.serialization.json.buildJsonArray { add(kotlinx.serialization.json.JsonPrimitive(owner)) }) })
@@ -640,6 +647,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.rcWarning")
                 // an estimate is a courtesy: a draft that cannot be costed says nothing
                 false
             }
@@ -961,6 +969,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "editor.accountExists")
         false
     }
 
@@ -998,6 +1007,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.supportSave")
                 withContext(dispatchers.main) { env.ui.toast(L.alert.fail) }
             }
         }
@@ -1144,6 +1154,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.saveTemplate")
                 false
             }
             withContext(dispatchers.main) { env.ui.toast(if (ok) L.templates.saved else L.editor.draftSaveFail) }
@@ -1204,7 +1215,10 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             onMain {
                 if (fromModel) setState { it.copy(isDraftSaved = false, isDraftSaving = false) }
                 // the account left the device (logout) while it ran: the teardown at work, not a failure to report
-                if (!env.localDrafts.hasLeft(owner)) env.ui.toast(L.editor.draftSaveFail)
+                if (!env.localDrafts.hasLeft(owner)) {
+                    ErrorReports.quiet(e, "editor.saveDraft")
+                    env.ui.toast(L.editor.draftSaveFail)
+                }
             }
         }
     }
@@ -1274,7 +1288,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: Exception) {
                 // the permlink that may have gone out is remembered on disk too
                 env.localDrafts.save(owner, slot, localDraft(current))
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, submitWhere(s))
                 // RN: out of resource credits is an offer (top up or boost), not a dead-end toast
                 val outOfRc = RcErrors.isInsufficientRc(e) || RcErrors.matches(error.message)
                 setState { it.copy(isSending = false) }
@@ -1284,6 +1298,14 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 if (!outOfRc && error.kind != ErrorKind.CANCELLED) env.ui.toast(L.alert.somethingWrongMsg(message = error.message))
             }
         }
+    }
+
+    /** Where a failed [submit] is reported (ErrorReports): what the user was sending. */
+    private fun submitWhere(s: EditorState): String = when {
+        s.isEdit -> "editor.update"
+        s.isReply -> "editor.reply"
+        s.scheduledFor != null -> "editor.schedule"
+        else -> "editor.publish"
     }
 
     private class PublishConflict(val changedElsewhere: Boolean = false) : Exception()
@@ -1336,6 +1358,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "editor.supportBeneficiary")
                     null
                 }
             } ?: 0.0
@@ -1442,6 +1465,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "editor.reblog")
                     withContext(dispatchers.main) { env.ui.toast(L.alert.fail) }
                 }
             }
@@ -1457,6 +1481,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "editor.authorities")
             null
         } ?: throw AppException(AppError(ErrorKind.AUTH, L.native.editor.couldNotCheckYour, true))
         if (!authorities.grantsPostingTo()) {

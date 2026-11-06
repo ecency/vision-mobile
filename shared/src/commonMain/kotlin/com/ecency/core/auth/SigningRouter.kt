@@ -168,6 +168,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "signing.authUpgrade")
                 null
             }
             deferred.complete(choice)

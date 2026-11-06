@@ -106,6 +106,7 @@ object CrashScrubber {
                 .replace(JSON_SECRET) { "${it.groupValues[1]}\"<redacted>\"" }
                 .replace(EMAIL, "<redacted-email>")
         } catch (e: Throwable) {
+            // not reported: scrubber must stay total
             FAILED
         }
     }
@@ -114,6 +115,7 @@ object CrashScrubber {
     fun scrubValue(key: String, value: String?): String? = try {
         if (key.lowercase().replace("-", "_") in SECRET_KEYS || key.lowercase() in SECRET_KEYS) "<redacted>" else scrub(value)
     } catch (e: Throwable) {
+        // not reported: scrubber must stay total
         FAILED
     }
 
@@ -121,6 +123,7 @@ object CrashScrubber {
     fun scrubMap(data: Map<String, String>): Map<String, String> = try {
         data.mapValues { (k, v) -> scrubValue(k, v) ?: "" }
     } catch (e: Throwable) {
+        // not reported: scrubber must stay total
         emptyMap()
     }
 
@@ -138,6 +141,7 @@ object CrashScrubber {
         val value = message.orEmpty()
         simple in IGNORED_TYPES || value in IGNORED_VALUES || IGNORED_PATTERNS.any { it.containsMatchIn(value) }
     } catch (e: Throwable) {
+        // not reported: scrubber must stay total
         false
     }
 

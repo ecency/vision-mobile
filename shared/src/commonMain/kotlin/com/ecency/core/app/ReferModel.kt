@@ -114,7 +114,7 @@ class ReferModel internal constructor(private val env: AppEnvironment) : StateMo
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (owns(user)) setState { it.copy(isLoadingMore = false, error = AppError.from(e)) }
+                if (owns(user)) setState { it.copy(isLoadingMore = false, error = AppError.from(e, "refer.loadMore")) }
             }
         }
     }
@@ -151,7 +151,7 @@ class ReferModel internal constructor(private val env: AppEnvironment) : StateMo
                 throw e
             } catch (e: Exception) {
                 val name = user
-                if (name == null || owns(name)) setState { it.copy(isLoading = false, isRefreshing = false, error = AppError.from(e)) }
+                if (name == null || owns(name)) setState { it.copy(isLoading = false, isRefreshing = false, error = AppError.from(e, "refer.load")) }
             }
         }
     }

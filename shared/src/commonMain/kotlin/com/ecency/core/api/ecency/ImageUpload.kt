@@ -141,6 +141,7 @@ class ImageUploader(
             } catch (e: EcencyException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: mapped to a status 0 failure that is retried or thrown below
                 // The address holds the upload token, and HTTP stacks put the address into their messages: neither
                 // the message nor the cause of what leaves here carries it, only the kind of failure.
                 EcencyHttpException(0, "network error (${e::class.simpleName ?: "unknown"})")

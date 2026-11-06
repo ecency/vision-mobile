@@ -108,6 +108,7 @@ data class PostCard(
         internal fun epochMillis(chainTime: String): Long = try {
             ChainTime.toEpochSeconds(chainTime) * 1000
         } catch (e: Exception) {
+            // not reported: parsing a chain time, 0 is the fallback
             0
         }
     }

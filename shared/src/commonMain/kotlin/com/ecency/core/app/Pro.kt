@@ -235,6 +235,7 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
+                    // not reported: retried, the expiry stays unknown
                     if (attempt < EXPIRY_TRIES) delay(EXPIRY_RETRY_MILLIS)
                 }
             }
@@ -312,7 +313,8 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 env.hostingApi.blog(account)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "pro.blogLookup")
                 null
             }
             if (gen != accountGen || current.account != account) return@launch
@@ -335,7 +337,8 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 env.api.accounts.getAccount(account)?.profile
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "pro.blogPrefill")
                 null
             }
             if (gen != accountGen || current.account != account) return@launch
@@ -376,12 +379,13 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: reported below through ErrorReports.handled
                 Result.failure(e)
             }
             if (gen != accountGen || current.account != user) return@launch
             result.fold(
                 onSuccess = { c -> setState { it.copy(blogClaiming = false, blogFormOpen = false, blogUrl = c.blogUrl, blogClaimed = c.created) } },
-                onFailure = { e -> setState { it.copy(blogClaiming = false, blogError = blogError(e)) } },
+                onFailure = { e -> val m = blogError(e).also { ErrorReports.handled(e, "pro.blogClaim", it) }; setState { it.copy(blogClaiming = false, blogError = m) } },
             )
         }
     }
@@ -390,7 +394,7 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
     private fun blogError(e: Throwable): AppError = when {
         e is AuthException -> AppError(ErrorKind.AUTH, ProCopy.BLOG_LOGIN, false)
         e !is EcencyHttpException -> AppError(ErrorKind.UNKNOWN, ProCopy.BLOG_FAILED, true)
-        e.status == 0 -> AppError.from(e)
+        e.status == 0 -> AppError.from(e, "pro.blogClaim")
         e.status == 401 -> AppError(ErrorKind.AUTH, ProCopy.BLOG_LOGIN, false)
         e.status == 403 -> AppError(ErrorKind.AUTH, ProCopy.BLOG_NOT_PRO, false)
         e.status == 502 || e.status == 503 -> AppError(ErrorKind.NETWORK, ProCopy.BLOG_UNAVAILABLE, true)

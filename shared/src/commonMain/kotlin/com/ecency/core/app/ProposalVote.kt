@@ -150,7 +150,8 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "proposal.load")
                 // RN: the card stays hidden when its queries fail
             }
         }

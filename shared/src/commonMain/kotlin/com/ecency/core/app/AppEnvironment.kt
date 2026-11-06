@@ -422,6 +422,11 @@ class AppEnvironment(
     /** Sentry, when the build has a DSN; each platform sets its adapter at start. */
     var crashReporter: CrashReporter = CrashReporter.None
 
+    init {
+        // handled and quiet failures (ErrorReports) go to this environment's reporter, read when each one is sent
+        ErrorReports.install({ crashReporter }, nowMillis)
+    }
+
     /** Store products, purchases and Ecency orders. One per app. */
     val purchases: PurchaseService by lazy { PurchaseService(this) }
 
@@ -531,6 +536,7 @@ class AppEnvironment(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "appEnv.drawerHeader")
             null
         }
         val vp = account?.let { Mana.oneDecimal(Mana.votingPowerPercent(it, nowMillis())) } ?: "0"
@@ -604,7 +610,8 @@ class AppEnvironment(
     private inline fun guardedStep(block: () -> Unit) {
         try {
             block()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "appEnv.teardown")
             // the steps after this one still run
         }
     }
@@ -669,6 +676,7 @@ class AppEnvironment(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "appEnv.bots")
             emptySet()
         }
     }
@@ -743,6 +751,7 @@ class AppEnvironment(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "appEnv.mutes")
             return
         }
         withContext(dispatchers.main) {
@@ -880,6 +889,7 @@ class AppEnvironment(
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: a failed review request is not a request (RN)
                 // RN: a failed request is not a request
             } finally {
                 rating.finish(asked)

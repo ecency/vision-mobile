@@ -196,7 +196,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            setState { it.copy(bookLoading = false, prompt = TradePrompt.Alert(TradeCopy.MARKET_FAILED, AppError.from(e).message)) }
+            setState { it.copy(bookLoading = false, prompt = TradePrompt.Alert(TradeCopy.MARKET_FAILED, AppError.from(e, "trade.orderBook").message)) }
         }
     }
 
@@ -266,7 +266,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 ChainTime.fromEpochSeconds(now / 1000 + EXPIRATION_SECONDS), orderId(now),
             )
         } catch (e: Exception) {
-            setState { it.copy(prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, AppError.from(e).message)) }
+            setState { it.copy(prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, AppError.from(e, "trade.swap").message)) }
             return
         }
         val ops = WalletOps.ops(listOf(op))
@@ -475,7 +475,7 @@ class RedeemModel internal constructor(private val env: AppEnvironment, kind: Re
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(prompt = TradePrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+                setState { it.copy(prompt = TradePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "redeem.confirm").message)) }
                 return@launch
             }
             val ops = WalletOps.ops(listOf(op))
@@ -635,6 +635,7 @@ class TipModel internal constructor(private val env: AppEnvironment, author: Str
                 else -> WalletOps.transfer(user, s.author, "$amount ${c.symbol}", memo)
             }
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "tip.confirm")
             env.ui.toast(TipCopy.ERROR)
             setState { it.copy(confirming = false) }
             return
@@ -758,7 +759,7 @@ class ManageAssetsModel internal constructor(private val env: AppEnvironment) : 
                 throw e
             } catch (e: Exception) {
                 if (e is com.ecency.core.auth.AuthException.Cancelled) setState { it.copy(saving = false) }
-                else setState { it.copy(saving = false, error = "${WalletCopy.UPDATE_TOKENS_FAILED} ${AppError.from(e).message}") }
+                else setState { it.copy(saving = false, error = "${WalletCopy.UPDATE_TOKENS_FAILED} ${AppError.from(e, "manageAssets.save").message}") }
             }
         }
     }

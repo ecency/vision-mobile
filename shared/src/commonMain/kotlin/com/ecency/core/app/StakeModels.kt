@@ -165,7 +165,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+                setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "delegate.start").message)) }
             }
             if (current.recipient.isNotEmpty()) check(immediate = true)
         }
@@ -343,7 +343,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+            setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "powerDown.load").message)) }
         }
         loadRoutes(user)
     }
@@ -420,7 +420,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         val ops = try {
             WalletOps.ops(listOf(WalletOps.setWithdrawVestingRoute(user, account, percent, autoVest)))
         } catch (e: Exception) {
-            setState { it.copy(prompt = StakePrompt.Alert(failTitle, AppError.from(e).message)) }
+            setState { it.copy(prompt = StakePrompt.Alert(failTitle, AppError.from(e, "powerDown.route").message)) }
             return
         }
         val actionId = env.idempotencyKey()

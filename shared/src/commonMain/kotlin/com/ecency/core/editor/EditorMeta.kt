@@ -2,6 +2,7 @@ package com.ecency.core.editor
 
 import com.ecency.core.EcencyCore
 import com.ecency.core.api.model.JsValue
+import com.ecency.core.app.ErrorReports
 import com.ecency.core.api.search.PostUrlParser
 import com.ecency.core.hive.Asset
 import com.ecency.core.hive.Beneficiary
@@ -246,6 +247,7 @@ object EditorMeta {
     fun isoMillis(iso: String): Long? = try {
         kotlin.time.Instant.parse(iso).toEpochMilliseconds()
     } catch (_: Exception) {
+        // not reported: untrusted date text
         null
     }
 
@@ -300,6 +302,7 @@ object EditorMeta {
             val parts = try {
                 PostUrlParser.parse(url)
             } catch (_: Exception) {
+                // not reported: untrusted link text
                 null
             }
             val author = parts?.author
@@ -309,7 +312,8 @@ object EditorMeta {
                 linkedPost(author, permlink)
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "editor.linkMeta")
                 null
             }
             val meta = linksMeta ?: JsValue.Obj().also { linksMeta = it }
@@ -334,6 +338,7 @@ object EditorMeta {
                         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                             throw e
                         } catch (_: Exception) {
+                            // not reported: an image that cannot be probed has no ratio
                             null
                         }
                         JsValue.Num(ratio ?: Double.NaN)

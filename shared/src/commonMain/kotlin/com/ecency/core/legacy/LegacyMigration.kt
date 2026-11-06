@@ -159,7 +159,8 @@ object LegacyMigration {
                 if (held && existing == null) imported += converted.username
                 if (held && existing == null && account.filesOwnerKeyElsewhere()) ownerDropped += converted.username
                 held
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "legacy.importAccount")
                 false // the vault did not take it: the RN copy stays for the next run
             }
             if (!safe) keep += account.username
@@ -209,7 +210,8 @@ object LegacyMigration {
         vault.store.getString(entry)?.let { raw ->
             (Json.parseToJsonElement(raw) as JsonArray).map { e -> (e as JsonPrimitive).also { check(it.isString) }.content }.toSet()
         } ?: emptySet()
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "legacy.readNames")
         null
     }
 
@@ -220,7 +222,8 @@ object LegacyMigration {
     private fun recordKept(vault: KeyVault, keep: Set<String>): Boolean = try {
         if (keep != names(vault, KEPT)) writeNames(vault, KEPT, keep)
         true
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "legacy.recordKept")
         false
     }
 

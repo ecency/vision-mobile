@@ -102,7 +102,8 @@ object MediaPickers {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             file.delete()
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "media.copyPicked")
             false
         }
         if (!ok) {

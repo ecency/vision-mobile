@@ -151,7 +151,7 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(discoverLoading = false, discoverError = AppError.from(e)) }
+                setState { it.copy(discoverLoading = false, discoverError = AppError.from(e, "communities.load")) }
             }
             rebuild()
         }
@@ -276,7 +276,7 @@ class CommunityModel(private val env: AppEnvironment, val name: String) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, error = AppError.from(e)) }
+                setState { it.copy(loading = false, error = AppError.from(e, "community.load")) }
             }
             rebuild()
         }
@@ -365,7 +365,7 @@ class CommunityMembersModel(private val env: AppEnvironment, val name: String, t
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loadingMore = false, error = AppError.from(e)) }
+                setState { it.copy(loadingMore = false, error = AppError.from(e, "communityMembers.loadMore")) }
             }
             rebuild()
         }
@@ -401,7 +401,7 @@ class CommunityMembersModel(private val env: AppEnvironment, val name: String, t
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.from(e)
+                val error = AppError.from(e, "communityMembers.setRole")
                 setState { it.copy(saving = it.saving - account, alert = if (error.kind == ErrorKind.CANCELLED) null else error.message) }
             }
         }
@@ -421,7 +421,7 @@ class CommunityMembersModel(private val env: AppEnvironment, val name: String, t
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                failure = AppError.from(e)
+                failure = AppError.from(e, "communityMembers.load")
             }
             try {
                 val page = env.communityApi.subscribers(name, null)
@@ -431,7 +431,7 @@ class CommunityMembersModel(private val env: AppEnvironment, val name: String, t
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                failure = failure ?: AppError.from(e)
+                failure = failure ?: AppError.from(e, "communityMembers.load")
             }
             if (refresh) patched = emptyMap()
             setState { it.copy(loading = false, refreshing = false, error = failure) }
@@ -588,7 +588,7 @@ class CommunitySettingsModel(private val env: AppEnvironment, val name: String) 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.from(e)
+                val error = AppError.from(e, "communitySettings.save")
                 setState { it.copy(saving = false, alert = if (error.kind == ErrorKind.CANCELLED) null else error.message) }
             }
         }
@@ -610,7 +610,7 @@ class CommunitySettingsModel(private val env: AppEnvironment, val name: String) 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, error = AppError.from(e)) }
+                setState { it.copy(loading = false, error = AppError.from(e, "communitySettings.load")) }
             }
         }
     }
@@ -680,7 +680,7 @@ class CommunityActivitiesModel(private val env: AppEnvironment, val name: String
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, refreshing = false, loadingMore = false, error = AppError.from(e)) }
+                setState { it.copy(loading = false, refreshing = false, loadingMore = false, error = AppError.from(e, "communityActivities.load")) }
             }
         }
     }

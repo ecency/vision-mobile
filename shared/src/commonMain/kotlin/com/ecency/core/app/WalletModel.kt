@@ -188,7 +188,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                env.ui.toast(WalletCopy.claimFailed(AppError.from(e).message))
+                env.ui.toast(WalletCopy.claimFailed(AppError.from(e, "wallet.claim").message))
                 false
             }
             claimingNow -= symbol
@@ -285,7 +285,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, isRefreshing = false, error = if (quiet) it.error else AppError.from(e)) }
+                // a quiet refresh keeps what is on screen and is reported as a warning only
+                val error = if (quiet) null.also { ErrorReports.quiet(e, "wallet.refresh") } else AppError.from(e, "wallet.load")
+                setState { it.copy(isLoading = false, isRefreshing = false, error = if (quiet) it.error else error) }
             }
         }
     }

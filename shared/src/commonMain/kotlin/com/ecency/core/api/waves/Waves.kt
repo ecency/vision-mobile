@@ -221,6 +221,7 @@ data class WaveEntry(
             return try {
                 com.ecency.core.hive.ChainTime.fromEpochSeconds(com.ecency.core.hive.ChainTime.toEpochSeconds(local) - offset)
             } catch (e: Exception) {
+                // not reported: a date from the server outside the chain's range shows no date
                 ""
             }
         }
@@ -261,6 +262,7 @@ class WavesApi(private val http: AuthHttp, val host: String = "https://ecency.co
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "waves.trendingTags")
         emptyList()
     }
 
@@ -277,6 +279,7 @@ class WavesApi(private val http: AuthHttp, val host: String = "https://ecency.co
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "waves.threeSpeakStream")
         null
     }
 

@@ -204,6 +204,7 @@ object WavePublish {
             val parts = try {
                 PostUrlParser.parse(url)
             } catch (e: Exception) {
+                // not reported: a link in the user's text that is not a post
                 null
             }
             val author = parts?.author?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null

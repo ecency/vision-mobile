@@ -157,6 +157,7 @@ class SpinGameModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "spin.status")
                 if (!owns(user)) return@launch
                 if (env.spinStatusRequests.isNewest(n)) setState { it.copy(alert = message(e)) }
                 setState { it.copy(loading = false) }
@@ -196,6 +197,7 @@ class SpinGameModel internal constructor(private val env: AppEnvironment) : Stat
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "spin.gameStatus")
             if (env.spinStatusRequests.isNewest(n) && live(user)) setState { it.copy(alert = message(e)) }
             return
         }
@@ -217,6 +219,7 @@ class SpinGameModel internal constructor(private val env: AppEnvironment) : Stat
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "spin.claim")
             if (live(user)) setState { it.copy(alert = message(e)) }
             return
         }

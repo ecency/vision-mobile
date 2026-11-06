@@ -301,6 +301,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
+                // not reported: the first page reports the failure
                 // the first page reports the failure
             }
             if (user == null) return@launch
@@ -330,7 +331,8 @@ class ChatThreadModel internal constructor(
             refreshTitle()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chatThread.members")
             // RN ignores member failures so the messages still show
         }
     }
@@ -341,7 +343,8 @@ class ChatThreadModel internal constructor(
             if (user != null) setState { it.copy(pinnedCount = pinned.size) }
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chatThread.pinnedCount")
             setState { it.copy(pinnedCount = 0) }
         }
     }
@@ -359,7 +362,8 @@ class ChatThreadModel internal constructor(
             if (user != null) setState { it.copy(canModerate = role in MODERATOR_ROLES) }
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chatThread.moderation")
             setState { it.copy(canModerate = false) }
         }
     }
@@ -391,7 +395,8 @@ class ChatThreadModel internal constructor(
             rebuild()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chatThread.channel")
         }
     }
 
@@ -466,7 +471,7 @@ class ChatThreadModel internal constructor(
                 throw e
             } catch (e: Exception) {
                 if (user == null) return@launch
-                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = ChatsModel.message(e, L.native.chatThread.unableToLoadMessages)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = ChatsModel.message(e, L.native.chatThread.unableToLoadMessages, "chatThread.load")) }
             }
         }
     }
@@ -497,7 +502,8 @@ class ChatThreadModel internal constructor(
                 env.chat.markedViewed(channelId, u)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.markRead")
                 lastMarked = 0
             }
         }
@@ -512,7 +518,8 @@ class ChatThreadModel internal constructor(
             if (user != null) rebuild()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "chatThread.users")
         }
     }
 
@@ -523,7 +530,8 @@ class ChatThreadModel internal constructor(
                 env.chat.call(u) { env.chat.api.post(it.token, channelId, id) }?.let { roots[it.id] = it }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.roots")
             }
         }
         if (user == null) return
@@ -540,7 +548,8 @@ class ChatThreadModel internal constructor(
                 env.api.posts.getPost(key.author, key.permlink, observer = null)?.let { p -> card(p, "") }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.cards")
                 null
             }
         }
@@ -685,7 +694,8 @@ class ChatThreadModel internal constructor(
                 socket.connect(env.chat.api.websocketUrl(session.token), session.token)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.connect")
             }
         }
     }
@@ -844,7 +854,8 @@ class ChatThreadModel internal constructor(
                 env.api.posts.getPost(key.author, key.permlink, observer = owner)?.let { card(it, first) }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.preview")
                 null
             }
             setState { it.copy(preview = card, fetchingPreview = false) }
@@ -993,7 +1004,7 @@ class ChatThreadModel internal constructor(
                         when {
                             info != null -> showBan(info)
                             ban != null -> env.ui.toast(ChatBan.GENERIC)
-                            else -> env.ui.toast(ChatsModel.message(e, L.native.chatThread.unableToSendYour))
+                            else -> env.ui.toast(ChatsModel.message(e, L.native.chatThread.unableToSendYour, "chatThread.send"))
                         }
                     }
                 }
@@ -1042,6 +1053,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.upload")
                 // RN: an account that cannot sign uploads gets an alert; anything else the upload's message
                 setState { it.copy(alert = if (e is ImageSigningUnavailable) DECRYPT_FAIL else ImageUploader.message(e)) }
             } finally {
@@ -1089,7 +1101,8 @@ class ChatThreadModel internal constructor(
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.react")
                 env.ui.toast(REACTION_ERROR)
             }
         }
@@ -1106,7 +1119,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                env.ui.toast(ChatsModel.message(e, L.native.chatThread.unableToRemoveMessage))
+                env.ui.toast(ChatsModel.message(e, L.native.chatThread.unableToRemoveMessage, "chatThread.remove"))
             }
         }
     }
@@ -1124,7 +1137,8 @@ class ChatThreadModel internal constructor(
                 onDone?.invoke()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.pin")
                 env.ui.toast(L.alert.error)
             }
         }
@@ -1228,7 +1242,7 @@ class ChatPinnedModel internal constructor(private val env: AppEnvironment, priv
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, loaded = true, error = ChatsModel.message(e, L.native.chatThread.failedToLoadPinned)) }
+                setState { it.copy(isLoading = false, loaded = true, error = ChatsModel.message(e, L.native.chatThread.failedToLoadPinned, "chatThread.pinned")) }
             }
         }
     }
@@ -1279,7 +1293,8 @@ class ChatReactorsModel internal constructor(
                 rebuild()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatGroups.users")
             }
         }
     }

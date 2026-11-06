@@ -34,6 +34,7 @@ class TagFollowModel internal constructor(private val env: AppEnvironment, rawTa
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "tagFollow.load")
                 false
             }
             setState { it.copy(following = followed, busy = false) }
@@ -55,6 +56,7 @@ class TagFollowModel internal constructor(private val env: AppEnvironment, rawTa
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "tagFollow.toggle")
                 setState { it.copy(busy = false, following = !follow) }
                 env.ui.toast(PostActionsModel.FAIL)
             }

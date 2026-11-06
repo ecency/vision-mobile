@@ -160,6 +160,7 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "accountNotices.ownerCheck")
                     continue
                 }
                 try {
@@ -167,6 +168,7 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "accountNotices.ownerKeyFound")
                     continue
                 }
                 writeList(OWNER_CHECK, list(OWNER_CHECK) - name)
@@ -253,6 +255,7 @@ class AccountNoticesModel internal constructor(private val env: AppEnvironment) 
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "accountNotices.accounts")
                 // the next start shows them
                 return@launch
             }

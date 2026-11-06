@@ -78,6 +78,7 @@ class PostTipsModel internal constructor(private val env: AppEnvironment, val au
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "postTips.load")
             null
         }
         if (server != null && (final || server >= floor)) floor = 0

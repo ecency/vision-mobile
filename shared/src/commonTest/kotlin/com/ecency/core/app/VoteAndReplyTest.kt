@@ -75,6 +75,22 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun aRefusedVoteIsOneHandledReportAtPostVote() = runTest {
+        val app = TestApp(this, handler = handler { FakeTransport.error(it, -32000, "Assert Exception: voting too often") })
+        val reporter = RecordingReporter()
+        app.env.crashReporter = reporter
+        signedIn(app)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        assertNotNull(app.env.votes.current.statuses[key]?.error, "the row shows the failure as before")
+        // the fixture's unanswered side reads report quietly; the failure the screen shows is one handled report
+        val r = reporter.reports.filter { it.tags["quiet"] == null }.single()
+        assertEquals("post.vote", r.tags["where"])
+        assertEquals("rejected", r.tags["error.kind"])
+        assertEquals("error", r.level)
+    }
+
+    @Test
     fun rejectedVoteRollsBack() = runTest {
         val gate = CompletableDeferred<Unit>()
         val app = TestApp(this, handler = handler {

@@ -126,6 +126,7 @@ class PayoutDetailsModel internal constructor(private val env: AppEnvironment, p
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "payoutDetails.load")
                 return@launch
             }
             setState { PayoutDetailsState(PayoutDetails.rows(post, props, env.nowMillis())) }

@@ -127,6 +127,7 @@ class RpcChainAccounts(private val client: HiveRpcClient) : ChainAccounts {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: one node of several; the next node is asked and node health records it
                 continue
             }
             if (result !is JsonArray) continue

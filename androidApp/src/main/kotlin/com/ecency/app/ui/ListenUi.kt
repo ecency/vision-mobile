@@ -242,6 +242,7 @@ class ListenController(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "listen.renewUrls")
                 false
             }
             if (renewal === coroutineContext[Job]) renewal = null

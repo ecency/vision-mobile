@@ -280,6 +280,7 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "ai.prices")
             null
         }
         if (prices != null) pricesAtMillis = env.nowMillis()
@@ -289,6 +290,7 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "ai.points")
             null
         }
         if (points != null) setState { it.copy(balanceText = points, balance = PaidCalls.points(points)) }
@@ -561,6 +563,7 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "ai.imagePrices")
             null
         }
         setState { it.copy(loading = false, prices = prices ?: it.prices) }
@@ -569,6 +572,7 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "ai.points")
             null
         }
         // RN: rounded to three decimals

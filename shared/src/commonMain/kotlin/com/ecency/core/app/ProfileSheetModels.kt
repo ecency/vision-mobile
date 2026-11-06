@@ -126,7 +126,7 @@ class QuickProfileModel internal constructor(private val env: AppEnvironment, us
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "quickProfile.follow")
                 setState { it.copy(actionRunning = false) }
                 if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) env.ui.toast(L.native.profileSheet.fail(message = error.message))
             }
@@ -147,6 +147,7 @@ class QuickProfileModel internal constructor(private val env: AppEnvironment, us
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "profileSheet.favorite")
                 setState { it.copy(actionRunning = false) }
                 env.ui.toast(PostActionsModel.FAIL)
             }
@@ -158,6 +159,7 @@ class QuickProfileModel internal constructor(private val env: AppEnvironment, us
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "profileSheet.read")
         null
     }
 
@@ -204,6 +206,7 @@ class SimilarEntriesModel internal constructor(private val env: AppEnvironment) 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "profileSheet.similar")
                 emptyList()
             }
             setState { SimilarState(entries.take(2)) }
