@@ -355,15 +355,17 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * The server's numbers include the claim: its pending reward fell below the claimed amount (only a claim lowers
-     * it), or the balance moved by the claimed amount itself, to the asset's last digit (HP within the slow drift of
-     * its HIVE per VESTS rate). The pending reward alone cannot tell: new rewards larger than the claim can come in
-     * before the next read. Any other balance change (a transfer in or out) is not the claim, so the claim stays
+     * it), or the balance moved by the claimed amount itself, to half the asset's last digit (HP within the slow
+     * drift of its HIVE per VESTS rate), never as loosely as half the claim. The pending reward alone cannot tell:
+     * new rewards larger than the claim can come in before the next read. Any other balance change (a transfer in or out) is not the claim, so the claim stays
      * shown on top of it; only a transfer of exactly the claimed amount could be taken for it.
      */
     private fun showsClaim(item: PortfolioItem, mask: ClaimMask): Boolean {
         if (item.pendingRewards < mask.amount - CLAIM_EPSILON) return true
+        // half a last digit for rounding, plus HP's rate drift, and always under half the claim: a balance that did
+        // not move never matches, however small the claim
         val digit = 10.0.pow(-item.precision.coerceIn(0, 8))
-        val tolerance = maxOf(digit * 1.5, mask.before * RATE_DRIFT)
+        val tolerance = minOf(digit / 2 + mask.before * RATE_DRIFT, mask.amount * 0.49)
         return abs(item.balance - mask.before - mask.amount) <= tolerance
     }
 

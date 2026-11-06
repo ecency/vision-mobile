@@ -234,6 +234,26 @@ class WalletModelsTest {
         assertEquals("1,501.750", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
     }
 
+    /** A claim of the smallest amount: an unchanged balance is not the claim, however close it is to the last digit. */
+    @Test
+    fun theSmallestClaimStaysShownWhileThePortfolioLags() = runTest {
+        val w = world(this)
+        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.001")) }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        w.env.wallet.claim("POINTS")
+        testScheduler.advanceTimeBy(500)
+        testScheduler.runCurrent()
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,500.501", points.balanceText)
+        assertNull(points.pendingText)
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+        assertEquals("1,500.501", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
+        assertNull(w.env.wallet.current.rows.first { it.symbol == "POINTS" }.pendingText)
+    }
+
     @Test
     fun anEngineClaimOnlyHidesThePendingReward() = runTest {
         val w = world(this)
