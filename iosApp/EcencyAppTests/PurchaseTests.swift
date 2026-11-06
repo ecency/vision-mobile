@@ -19,6 +19,56 @@ final class PurchaseTests: XCTestCase {
         session.clearTransactions()
     }
 
+    /// Whether this test process buys from the local StoreKit test session, found once per process (#3638).
+    ///
+    /// The session's configuration (Products.storekit) reaches the simulator's StoreKit daemon when a test first opens
+    /// an SKTestSession, and the app takes it when it starts: a process started before that (the first test run on a
+    /// freshly erased simulator, or on a simulator this target never ran on) loads products from the session but sends
+    /// every purchase to the real App Store, which asks to sign in and never answers. No wait in that process helps.
+    /// `scripts/ios-sim.sh --test` therefore runs `StoreKitSessionTests` in a process of its own before the full run.
+    /// Without that, every test that buys fails here at once and says why, instead of on its own wait.
+    private static var sessionPurchases: Bool?
+
+    /// Called first by every test that buys, after `setUp` opened [session]; the probe's purchase is cleared again.
+    static func requireSessionPurchases(_ session: SKTestSession) throws {
+        if sessionPurchases == nil {
+            let outcome = ProbeOutcome()
+            Task.detached { outcome.set(await probeSessionPurchase()) }
+            while outcome.value == nil { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
+            sessionPurchases = outcome.value
+            session.clearTransactions()
+        }
+        if sessionPurchases != true {
+            throw XCTestError(.failureWhileWaiting, userInfo: [NSLocalizedDescriptionKey:
+                "the StoreKit test session does not serve purchases in this test process (the session was first opened on this simulator " +
+                "after the process started): run scripts/ios-sim.sh --test, which opens it in a run of its own first"])
+        }
+    }
+
+    /// One purchase straight through StoreKit (not the app's store, which the tests check): done within 20 s or not at all.
+    private static func probeSessionPurchase() async -> Bool {
+        guard let product = try? await Product.products(for: ["199points"]).first else { return false }
+        let outcome = ProbeOutcome()
+        let bought = Task.detached {
+            guard case let .success(result) = try? await product.purchase() else { return outcome.set(false) }
+            await result.unsafePayloadValue.finish()
+            outcome.set(true)
+        }
+        for _ in 0..<200 {
+            if let done = outcome.value { return done }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+        bought.cancel()
+        return false
+    }
+
+    private final class ProbeOutcome: @unchecked Sendable {
+        private let lock = NSLock()
+        private var result: Bool?
+        var value: Bool? { lock.withLock { result } }
+        func set(_ done: Bool) { lock.withLock { result = done } }
+    }
+
     override func tearDown() async throws {
         PurchaseTests.detachServiceStores()
         try await session.setSimulatedError(nil, forAPI: .verification)
@@ -73,6 +123,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testStoreKitSellsRnsProductsAndHandsOverTheSignedTransaction() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         let store = StoreKitStore()
         let recorder = Recorder()
         store.setListener(listener: recorder)
@@ -102,6 +153,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testAskToBuyIsPendingUntilApprovedAndThenArrivesByItself() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         session.askToBuyEnabled = true
         let store = StoreKitStore()
         let recorder = Recorder()
@@ -118,6 +170,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testTheServiceOrdersThenFinishesAndARefundIsFinishedWithoutAnOrder() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         let env = try PurchaseTests.environment()
         let store = PurchaseTests.serviceStore()
         env.store = store
@@ -179,6 +232,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testAnOrderWhoseAcceptWasLostIsFinishedOnThe409AsDelivered() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         // Ecency stored the order but its 201 never arrived; the retry is answered 409 (the receipt is recorded)
         DemoAuthServices.shared.demoOrderLost = 1
         DemoAuthServices.shared.demoOrderStatus = 409
@@ -202,6 +256,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testAnUnverifiedTransactionIsOrderedAndFinishedOnlyOnEcencysAnswer() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         // StoreKit could not check the signature: the signed transaction still goes to Ecency, which verifies it itself;
         // it is finished only on Ecency's definite answer
         var simulated = false
@@ -248,6 +303,7 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testAReceiptHeldForReviewStaysUnfinishedAndShowsTheOrderNumber() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         DemoAuthServices.shared.demoOrderStatus = 422
         DemoAuthServices.shared.demoOrderBody = #"{"reason":"receipt_held","order":55}"#
         let env = try PurchaseTests.environment()
