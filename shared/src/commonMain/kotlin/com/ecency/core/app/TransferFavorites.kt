@@ -1,6 +1,7 @@
 package com.ecency.core.app
 
 import com.ecency.core.l10n.L
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -26,9 +27,13 @@ data class TransferFavoritesState(
  */
 class TransferFavoritesModel internal constructor(private val env: AppEnvironment) :
     StateModel<TransferFavoritesState>(TransferFavoritesState(), env.dispatchers) {
+    private var list: Job? = null
+
+    /** Reads the list; a newer read replaces one still running, so an older answer never lands last. */
     fun start() {
         setState { it.copy(isLoading = true, error = null) }
-        scope.launch {
+        list?.cancel()
+        list = scope.launch {
             try {
                 env.session.awaitLoaded()
                 val user = env.session.current.username ?: return@launch setState { it.copy(isLoading = false) }
@@ -51,7 +56,8 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
 
     /**
      * RN _handleAddFavorite: `favorites-add` for the typed name, then the list is read again and searched for it. A
-     * refusal says "Could not add favorite" and keeps the row as it is.
+     * refusal says "Could not add favorite" and keeps the row as it is. An answer that comes after the account changed
+     * does nothing; a name typed while it was saving stays in the row.
      */
     fun add() {
         val s = current
@@ -59,16 +65,20 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
         if (name.isEmpty() || s.isSaving) return
         setState { it.copy(isSaving = true) }
         scope.launch {
+            val user = env.session.current.username ?: return@launch setState { it.copy(isSaving = false) }
             try {
-                val user = env.session.current.username ?: return@launch setState { it.copy(isSaving = false) }
                 env.accountApi.addFavorite(user, name)
-                setState { it.copy(isSaving = false, adding = false, addName = "", query = name) }
+                if (env.session.current.username != user) return@launch setState { it.copy(isSaving = false) }
+                setState {
+                    val same = normalize(it.addName) == name
+                    it.copy(isSaving = false, adding = it.adding && !same, addName = if (same) "" else it.addName, query = name)
+                }
                 start()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 setState { it.copy(isSaving = false) }
-                env.ui.toast(TransferFavoritesCopy.ADD_ERROR)
+                if (env.session.current.username == user) env.ui.toast(TransferFavoritesCopy.ADD_ERROR)
             }
         }
     }
@@ -76,8 +86,11 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
     companion object {
         const val LIMIT = 50
 
-        /** RN normalizeUsername: trimmed, without a leading "@", lower case. */
-        fun normalize(text: String): String = text.trim().removePrefix("@").lowercase()
+        /**
+         * RN normalizeUsername (trimmed, without a leading "@", lower case), and no whitespace anywhere: a Hive name has
+         * none, and RN sent " alice" for "@ alice".
+         */
+        fun normalize(text: String): String = text.filterNot { it.isWhitespace() }.removePrefix("@").lowercase()
     }
 }
 

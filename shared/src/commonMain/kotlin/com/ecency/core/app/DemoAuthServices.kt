@@ -169,7 +169,7 @@ object DemoAuthServices {
             }
             path.startsWith("favorites-check") -> HttpResult(200, "false")
             path.startsWith("bookmarks?") -> wrapped("""[{"_id":"demo-b1","author":"spike-alice","permlink":"fake-post-1","timestamp":2},{"_id":"demo-b2","author":"spike-bob","permlink":"fake-post-2","timestamp":1}]""")
-            path.startsWith("favorites?") -> wrapped(demoFavorites.mapIndexed { i, a -> """{"_id":"demo-f$i","account":"$a","timestamp":${demoFavorites.size - i}}""" }.joinToString(",", "[", "]"))
+            path.startsWith("favorites?") -> wrapped(demoFavorites.mapIndexed { i, a -> """{"_id":"demo-f$i","account":${JsonPrimitive(a)},"timestamp":${demoFavorites.size - i}}""" }.joinToString(",", "[", "]"))
             // the transfer favourites sheet's add: kept for this run only
             path == "favorites-add" -> HttpResult(200, "{}").also {
                 runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject["account"]?.jsonPrimitive?.content }.getOrNull()

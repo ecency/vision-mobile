@@ -149,6 +149,39 @@ class WalletModelsTest {
         assertEquals("1,501.250", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
     }
 
+    /** A new reward before the portfolio shows the claim: the claimed amount stays in the balance and reads go on. */
+    @Test
+    fun aRewardArrivingBeforeTheClaimShowsKeepsTheClaimedBalance() = runTest {
+        val w = world(this)
+        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
+        val before = reads()
+        // the old balance with 0.050 more pending: the claim is not in it yet
+        val grown = WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.8")
+        var stale = 3
+        val fresh = WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.05")
+            .replaceFirst("\"balance\":1500.5", "\"balance\":1501.25")
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, if (stale-- > 0) grown else fresh) }
+        w.env.wallet.claim("POINTS")
+        testScheduler.advanceTimeBy(2_500)
+        testScheduler.runCurrent()
+        val masked = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,501.250", masked.balanceText)
+        assertEquals("0.050 POINTS", masked.pendingText)
+        // a second claim waits until the first shows: its amount would count twice
+        w.env.wallet.claim("POINTS")
+        testScheduler.runCurrent()
+        assertEquals(1, w.app.authBackend.sent.count { it.url.endsWith("/private-api/points-claim") })
+        testScheduler.advanceTimeBy(60_000)
+        testScheduler.runCurrent()
+        val shown = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,501.250", shown.balanceText)
+        assertEquals("0.050 POINTS", shown.pendingText)
+        assertEquals(4, reads() - before)
+    }
+
     @Test
     fun anEngineClaimOnlyHidesThePendingReward() = runTest {
         val w = world(this)

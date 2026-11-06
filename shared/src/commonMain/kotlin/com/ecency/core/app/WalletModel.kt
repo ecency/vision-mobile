@@ -161,7 +161,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     fun claim(symbol: String) {
         val user = current.account ?: return
         val item = current.item(symbol) ?: return
-        if (symbol in claimingNow || item.pendingRewards <= 0) return
+        // a claim the server does not show yet blocks another: its amount would count twice
+        if (symbol in claimingNow || symbol in claimMask || item.pendingRewards <= 0) return
         claimingNow += symbol
         publish()
         val claimed = item.pendingRewards
@@ -200,7 +201,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /**
      * RN reads the portfolio once, 2 s after a claim; the portfolio can still answer the old balance then, which stayed
      * on screen until a manual refresh (tester report). Reads again, quietly, at [CLAIM_REREAD_MILLIS] until it shows
-     * the claim (its pending reward changed, [withRows] drops the mask) or the mask ends.
+     * the claim (its pending reward fell below the claimed amount, [withRows] drops the mask) or the mask ends.
      */
     private suspend fun readUntilClaimed(user: String, symbol: String) {
         for (wait in CLAIM_REREAD_MILLIS) {
@@ -306,9 +307,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun withRows(s: WalletState): WalletState {
         val now = env.nowMillis()
-        // a mask ends when it expires or when the server's pending reward moved on (it shows the claim)
+        // a mask ends when it expires or when the server shows the claim: its pending reward fell below the claimed
+        // amount. A pending reward that grew (a new reward came in before the claim showed) keeps it.
         claimMask.entries.removeAll { (symbol, mask) ->
-            mask.second <= now || served.firstOrNull { it.symbol == symbol }?.let { it.pendingRewards != mask.first } == true
+            mask.second <= now || served.firstOrNull { it.symbol == symbol }?.let { showsClaim(it, mask.first) } == true
         }
         val all = served.map(::claimed)
         val rows = s.selection.mapNotNull { sym -> all.firstOrNull { it.symbol == sym } }.map { item ->
@@ -332,18 +334,25 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      */
     private fun claimed(item: PortfolioItem): PortfolioItem {
         val mask = claimMask[item.symbol] ?: return item
-        if (mask.first != item.pendingRewards) return item
-        if (item.layer == AssetLayer.ENGINE) return item.copy(pendingRewards = 0.0)
+        if (showsClaim(item, mask.first)) return item
         val c = mask.first
+        // what came in since the claim stays pending
+        val pending = (item.pendingRewards - c).takeIf { it > CLAIM_EPSILON } ?: 0.0
+        if (item.layer == AssetLayer.ENGINE) return item.copy(pendingRewards = pending)
         return item.copy(
-            pendingRewards = 0.0,
+            pendingRewards = pending,
             balance = item.balance + c,
             liquid = item.liquid?.plus(c),
             staked = if (item.symbol == "HP") item.staked?.plus(c) else item.staked,
         )
     }
 
+    /** The server's numbers include the claim of [claimed]: only a claim lowers a pending reward. */
+    private fun showsClaim(item: PortfolioItem, claimed: Double) = item.pendingRewards < claimed - CLAIM_EPSILON
+
     companion object {
+        private const val CLAIM_EPSILON = 1e-9
+
         /** RN DEFAULT_ASSETS. */
         val DEFAULT_ASSETS = listOf("POINTS", "HP", "HIVE", "HBD")
 
