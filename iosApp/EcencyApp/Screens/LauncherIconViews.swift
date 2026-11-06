@@ -33,29 +33,58 @@ struct LauncherIconSection: View {
         Section {
             Toggle(LauncherIconCopy.shared.SEASONAL, isOn: Binding(get: { state.seasonal }, set: { app.launcherIconSwitcher.setSeasonal($0) }))
                 .accessibilityIdentifier("settings-seasonal-icons")
-            Picker(selection: Binding(get: { state.current }, set: { if $0 != state.current { app.launcherIconSwitcher.pick($0) } })) {
-                ForEach(LauncherIcon.entries, id: \.self) { icon in
-                    Label {
-                        Text(icon.title)
-                    } icon: {
-                        Image("IconPreview-\(icon.key)").resizable().frame(width: 30, height: 30)
-                            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-                            .accessibilityHidden(true)
-                    }
-                    .tag(icon)
-                    .accessibilityIdentifier("app-icon-\(icon.key)")
-                }
+            // a row of our own: the system picker row drew its title in a grey that read under 4.5:1 beside the
+            // selected icon's preview; here the title takes the theme's text colour and the value is the icon's name
+            NavigationLink {
+                LauncherIconList(icons: icons)
             } label: {
-                // the theme's text colour: the list style's default label fails the contrast audit on the themed list
-                Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.text)
+                // the name goes under the title at accessibility sizes, as the other Settings rows do
+                AdaptiveStack(spacing: 4) {
+                    Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.text)
+                    FormRowGap(minLength: 0)
+                    Text(state.current.title).foregroundStyle(theme.accentText)
+                }
             }
-            // a list with each icon's preview (a menu would draw the preview in the row, unlabelled)
-            .pickerStyle(.navigationLink)
             .accessibilityIdentifier("settings-app-icon")
         } header: {
             Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.accentText)
         } footer: {
             Text(LauncherIconCopy.shared.SEASONAL_HINT).foregroundStyle(theme.secondary)
         }
+    }
+}
+
+/// Every icon with its preview; a tap picks it (the everyday one included) and the current one carries a checkmark.
+struct LauncherIconList: View {
+    @EnvironmentObject private var app: AppContainer
+    @ObservedObject var icons: Observed<LauncherIconState>
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        let current = icons.state.current
+        ThemedForm {
+            Section {
+                ForEach(LauncherIcon.entries, id: \.self) { icon in
+                    // the current one too: a pick keeps that icon and turns seasonal icons off, as on Android
+                    Button { app.launcherIconSwitcher.pick(icon) } label: {
+                        HStack(spacing: 12) {
+                            Image("IconPreview-\(icon.key)").resizable().frame(width: 30, height: 30)
+                                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                                .accessibilityHidden(true)
+                            Text(icon.title).foregroundStyle(theme.text)
+                            Spacer(minLength: 8)
+                            if icon == current {
+                                Image(appIcon: .check).foregroundStyle(theme.accentText).accessibilityHidden(true)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(icon == current ? .isSelected : [])
+                    .accessibilityIdentifier("app-icon-\(icon.key)")
+                }
+            }
+        }
+        .navigationTitle(LauncherIconCopy.shared.TITLE)
     }
 }

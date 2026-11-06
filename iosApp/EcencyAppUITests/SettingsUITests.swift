@@ -26,6 +26,23 @@ final class SettingsUITests: XCTestCase {
         XCTAssertFalse(app.buttons["settings-email-digests"].exists)
     }
 
+    /// #3656: the App icon row names the current icon in the theme's colours and opens every icon, the current one
+    /// selected (a row of our own: the system picker's grey title failed the contrast audit).
+    func testTheAppIconRowOpensEveryIconWithTheCurrentOneSelected() {
+        let app = launch(["-openScreen", "settings"])
+        let row = app.buttons["settings-app-icon"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15))
+        scrollTo(row, in: app)
+        row.tap()
+        let everyday = app.buttons["app-icon-Default"]
+        XCTAssertTrue(everyday.waitForExistence(timeout: 10))
+        XCTAssertTrue(everyday.isSelected)
+        let halloween = app.buttons["app-icon-Halloween"]
+        scrollTo(halloween, in: app)
+        XCTAssertTrue(halloween.exists)
+        XCTAssertFalse(halloween.isSelected)
+    }
+
     func testCurrencyPickSavesAndTheSupportCardSaves() {
         let app = launch(["-seedAccounts", "YES", "-openScreen", "settings"])
         let currency = app.buttons["settings-currency"]
