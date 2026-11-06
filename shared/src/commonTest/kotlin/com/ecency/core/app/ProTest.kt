@@ -758,7 +758,10 @@ class ProTest {
         testScheduler.advanceUntilIdle()
         assertEquals("https://spike-alice.blogs.ecency.com", m.current.blogUrl)
         m.close()
-        for (bad in listOf("https://user@spike-alice.blogs.ecency.com", "https://blogs.ecency.com.example.org", "http://spike-alice.blogs.ecency.com", "https://spike-alice.blogs.ecency.com:8443")) {
+        for (bad in listOf("https://user@spike-alice.blogs.ecency.com", "https://blogs.ecency.com.example.org", "http://spike-alice.blogs.ecency.com", "https://spike-alice.blogs.ecency.com:8443",
+            // a browser ends the host at a backslash (review of #3659)
+            "https://example.org\\spike-alice.blogs.ecency.com", "https://example.org%5Cx.blogs.ecency.com",
+        )) {
             assertNull(com.ecency.core.api.ecency.HostingApi.safeUrl(bad), bad)
         }
         assertEquals("https://x.blogs.ecency.com/p?a=1", com.ecency.core.api.ecency.HostingApi.safeUrl("https://x.blogs.ecency.com/p?a=1"))

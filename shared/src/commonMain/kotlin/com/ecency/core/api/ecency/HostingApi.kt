@@ -96,12 +96,17 @@ class HostingApi(
 
         /**
          * The server's address, only as an https URL on the blog domain (opened in the browser), without spaces,
-         * control characters or credentials; anything else is the default address.
+         * control characters or backslashes; anything else is the default address. The host may hold only letters,
+         * digits, dots and hyphens, so no credentials, port or character a browser reads as the host's end (a
+         * backslash is a slash to a browser: `https://example.org\x.blogs.ecency.com` opens example.org).
          */
         fun safeUrl(url: String?): String? {
-            val u = url?.trim()?.takeIf { it.startsWith("https://") && it.length in 9..512 && it.none { c -> c.isWhitespace() || c.code < 0x20 } } ?: return null
+            val u = url?.trim()?.takeIf {
+                it.startsWith("https://") && it.length in 9..512 && it.none { c -> c.isWhitespace() || c.code < 0x20 || c == '\\' }
+            } ?: return null
             val host = u.removePrefix("https://").substringBefore('/').substringBefore('?').substringBefore('#').lowercase()
-            return u.takeIf { '@' !in host && ':' !in host && host.endsWith(".$BLOG_DOMAIN") }
+            val plain = host.isNotEmpty() && host.all { it in 'a'..'z' || it in '0'..'9' || it == '.' || it == '-' }
+            return u.takeIf { plain && host.endsWith(".$BLOG_DOMAIN") }
         }
     }
 }
