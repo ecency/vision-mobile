@@ -33,7 +33,7 @@ struct LauncherIconSection: View {
         Section {
             Toggle(LauncherIconCopy.shared.SEASONAL, isOn: Binding(get: { state.seasonal }, set: { app.launcherIconSwitcher.setSeasonal($0) }))
                 .accessibilityIdentifier("settings-seasonal-icons")
-            Picker(LauncherIconCopy.shared.TITLE, selection: Binding(get: { state.current }, set: { if $0 != state.current { app.launcherIconSwitcher.pick($0) } })) {
+            Picker(selection: Binding(get: { state.current }, set: { if $0 != state.current { app.launcherIconSwitcher.pick($0) } })) {
                 ForEach(LauncherIcon.entries, id: \.self) { icon in
                     Label {
                         Text(icon.title)
@@ -45,9 +45,12 @@ struct LauncherIconSection: View {
                     .tag(icon)
                     .accessibilityIdentifier("app-icon-\(icon.key)")
                 }
+            } label: {
+                // the theme's text colour: the list style's default label fails the contrast audit on the themed list
+                Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.text)
             }
-            // the other Settings pickers' style: a menu (its value in the accent colour), a list at accessibility sizes
-            .settingsPickerStyle()
+            // a list with each icon's preview (a menu would draw the preview in the row, unlabelled)
+            .pickerStyle(.navigationLink)
             .accessibilityIdentifier("settings-app-icon")
         } header: {
             Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.accentText)
