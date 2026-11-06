@@ -19,7 +19,7 @@ docs/            Release builds, design notes, brand sources (docs/brand)
 
 ## Requirements
 
-- JDK 17+, Android SDK 36 (`local.properties` with `sdk.dir=...`, not committed)
+- JDK 17+, Android SDK 37 (`local.properties` with `sdk.dir=...`, not committed)
 - Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`); Xcode 27.1+ for the iPhone Duo simulator
 
 ## Build and test

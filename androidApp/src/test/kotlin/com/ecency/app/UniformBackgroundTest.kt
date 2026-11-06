@@ -14,7 +14,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeDown
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.intercept.Interceptor
@@ -329,19 +328,23 @@ class UniformBackgroundTest {
 
     /** The pull to refresh indicator: the shared spinner's blue on the theme background, like every other loader. */
     private fun refreshIndicator(dark: Boolean) {
-        // an empty feed: nothing but the indicator at its top
-        node.extra = { method, _ -> if (method == "bridge.get_ranked_posts") "[]" else null }
-        val navigator = launch(dark, hold = false)
+        // a feed whose first page never answers: its skeleton (light gray bones) under the indicator at its top
+        val navigator = launch(dark, hold = true)
         compose.runOnUiThread { navigator.push(AppScreen.Feed(FeedSource.Ranked(RankedSort.TRENDING, "hive"), "#hive")) }
         compose.await("the feed") { idleMain(); compose.onAllNodes(hasTestTag("feed"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         settle()
-        // the refresh never answers: the indicator stays
-        node.holdAll = CompletableDeferred()
-        compose.onNodeWithTag("feed").performTouchInput { swipeDown(durationMillis = 600) }
+        val density = compose.activity.resources.displayMetrics.density
+        // pulled past the threshold and held. Not released: a refresh of a feed with no cards shows the skeleton, not
+        // the indicator (FeedModel.refresh: isRefreshing only with cards), and Material 1.4 hides the indicator after a
+        // release that leaves isRefreshing false, where 1.3 left it standing
+        compose.onNodeWithTag("feed").performTouchInput {
+            down(androidx.compose.ui.geometry.Offset(centerX, 4 * density))
+            repeat(20) { advanceEventTime(30); moveBy(androidx.compose.ui.geometry.Offset(0f, 10 * density)) }
+        }
         settle(10)
         val colors = if (dark) EcencyColors.Dark else EcencyColors.Light
         val image = shot("refresh-${if (dark) "dark" else "light"}")
-        val density = compose.activity.resources.displayMetrics.density
+        compose.onNodeWithTag("feed").performTouchInput { up() }
         val feed = compose.onNodeWithTag("feed").fetchSemanticsNode().boundsInRoot
         val bg = colors.background.toArgb()
         val blue = colors.blueText.toArgb()

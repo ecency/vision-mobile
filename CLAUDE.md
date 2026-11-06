@@ -25,7 +25,7 @@ docs/                Release builds, post rendering notes, brand sources
 
 ## Commands
 
-Requirements: JDK 17+, Android SDK 36 (`local.properties` with `sdk.dir=...`), Xcode 26+ (27.1+ for iPhone Duo),
+Requirements: JDK 17+, Android SDK 37 (`local.properties` with `sdk.dir=...`), Xcode 26+ (27.1+ for iPhone Duo),
 XcodeGen (`brew install xcodegen`).
 
 ```sh

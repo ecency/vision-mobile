@@ -2,11 +2,13 @@
 agp = "9.5.0"
 kotlin = "2.4.21"
 coroutines = "1.11.0"
-composeBom = "2025.06.00"
+composeBom = "2026.09.00"
 activityCompose = "1.10.1"
 # the launch screen (README "Launch screen")
 coreSplashscreen = "1.2.0"
-compileSdk = "36"
+compileSdk = "37"
+# targetSdk moves on its own, after a behaviour review of the new platform
+targetSdk = "36"
 minSdk = "24"
 appVersion = "4.0.0"
 junit = "4.13.2"
@@ -14,16 +16,15 @@ secp256k1 = "0.24.0"
 kotlincrypto-hash = "0.8.0"
 serialization = "1.12.0"
 robolectric = "4.17"
-# 3.6 needs compileSdk 37 (with the Compose BOM and Ktor 3.6): it moves in the compileSdk 37 step.
-coil = "3.4.0"
+coil = "3.6.3"
 media3 = "1.4.1"
 # home screen widgets (README "Widgets"); 1.1.1 is built with Kotlin 1.8
 glance = "1.1.1"
 # Glance 1.1.1 pulls WorkManager 2.7.1 (Room 2.2.5), whose WorkDatabase is found by a reflective name lookup that
 # R8 breaks: minified release builds crashed at launch. 2.11 ships its own keep rules and a current Room.
 work = "2.12.0"
-# 3.6 pulls OkHttp 5.5, which needs compileSdk 37: it moves in the compileSdk 37 step.
-ktor = "3.4.3"
+# 3.6 pulls OkHttp 5.5, which needs compileSdk 37.
+ktor = "3.6.1"
 sentry = "8.62.0"
 
 [libraries]
