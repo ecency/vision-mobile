@@ -56,6 +56,9 @@ final class AccessibilityUITests: XCTestCase {
         var found: [String] = []
         var unattributed = 0
         var unresolved: [String] = []
+        // text the tab bar covers: the audit reads it through the bar's glass and cannot name it (#3651)
+        let underTheBar = AuditExclusions.textsUnderTheTabBar(app)
+        if underTheBar > 0 { print("AccessibilityUITests \(screen): \(underTheBar) text(s) under the tab bar") }
         do {
             try app.performAccessibilityAudit(for: .all) { issue in
                 if AuditExclusions.excuses(issue) { return true }
@@ -69,9 +72,10 @@ final class AccessibilityUITests: XCTestCase {
                     print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) visible in its scroll view, counted")
                 }
                 // a contrast reading on a SwiftUI node the audit cannot resolve to an element (text inside a combined
-                // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen;
-                // any other unattributed issue (clipping, Dynamic Type, hit region) fails.
-                if issue.element == nil, issue.auditType == .contrast, unattributed < AuditExclusions.unattributedBudget {
+                // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen, plus
+                // one per text the tab bar covers (`textsUnderTheTabBar`); any other unattributed issue (clipping,
+                // Dynamic Type, hit region) fails.
+                if issue.element == nil, issue.auditType == .contrast, unattributed < AuditExclusions.unattributedBudget + underTheBar {
                     unattributed += 1
                     return true
                 }
@@ -395,6 +399,30 @@ enum AuditExclusions {
         let covered = frame.intersection(bar.frame)
         guard !covered.isNull, !covered.isEmpty else { return nil }
         return 1 - (covered.width * covered.height) / (frame.width * frame.height)
+    }
+
+    /// The bottom tabs' identifiers (`AppTab.identifier`).
+    static let tabIds: Set<String> = ["tab-feed", "tab-waves", "tab-chats", "tab-wallet", "tab-notification"]
+
+    /// Static texts the system tab bar covers, from one snapshot of the screen (#3651). A list scrolls under the iOS 26
+    /// glass tab bar; the audit reads the text there through the glass as low contrast and cannot resolve it to an
+    /// element (its point lands on the bar). On the wallet the fourth asset card sits under the bar at launch: its five
+    /// texts (symbol, name, balance, fiat value, claim) were the five unattributed readings, and they went away when
+    /// that card was hidden. The bar is the union of the tab buttons (XCUITest shows no TabBar element for SwiftUI's
+    /// TabView on iOS 27).
+    static func textsUnderTheTabBar(_ app: XCUIApplication) -> Int {
+        guard let root = try? app.snapshot() else { return 0 }
+        var tabs: [CGRect] = [], texts: [CGRect] = []
+        func walk(_ node: XCUIElementSnapshot) {
+            // a tab's own label is the bar's, not content under it
+            if node.elementType == .button, tabIds.contains(node.identifier) { return tabs.append(node.frame) }
+            if node.elementType == .staticText { texts.append(node.frame) }
+            node.children.forEach(walk)
+        }
+        walk(root)
+        guard let first = tabs.first else { return 0 }
+        let bar = tabs.dropFirst().reduce(first) { $0.union($1) }
+        return texts.filter { !$0.isEmpty && $0.intersects(bar) }.count
     }
 
     static func excuses(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
