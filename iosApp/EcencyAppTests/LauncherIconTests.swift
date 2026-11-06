@@ -88,6 +88,19 @@ final class LauncherIconTests: XCTestCase {
         XCTAssertEqual(icons.calls, ["AppIcon-Holi"])
     }
 
+    /// Review of #3659: a phone on the Persian, Islamic or Buddhist calendar still gets the Gregorian day the
+    /// celebration table uses, in its own time zone.
+    func testTodayIsTheGregorianDayWhateverThePhonesCalendar() throws {
+        // 2027-03-20 22:30 UTC is already Mar 21 in Tehran (UTC+3:30)
+        let instant = Date(timeIntervalSince1970: 1805581800)
+        let tehran = try XCTUnwrap(TimeZone(identifier: "Asia/Tehran"))
+        for id in [Calendar.Identifier.persian, .islamicUmmAlQura, .buddhist, .japanese, .gregorian] {
+            var phone = Calendar(identifier: id)
+            phone.timeZone = tehran
+            XCTAssertEqual(LauncherIconSwitcher.today(instant, phone: phone), CalendarDay(year: 2027, month: 3, day: 21), "\(id)")
+        }
+    }
+
     func testEveryIconShipsWithItsPreview() {
         let icons = (Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any])?["CFBundleAlternateIcons"] as? [String: Any] ?? [:]
         for icon in LauncherIcon.entries {

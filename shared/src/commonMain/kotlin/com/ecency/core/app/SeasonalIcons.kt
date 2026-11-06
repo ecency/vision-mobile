@@ -263,9 +263,9 @@ object IconAudiences {
 
 /**
  * The rule both apps use (README "App icons"): which icon shows on a day. Of the celebrations that reach the phone,
- * regional ones go before global ones, regional ones in their region's order, then the earlier; one is kept unless a
- * kept one is less than [MIN_GAP_DAYS] plain days away from it (so a phone never changes icon twice within a few
- * days, which keeps iOS to two system notices per celebration). The same answer on every launch.
+ * regional ones go before global ones, regional ones in their region's order, then the earlier; each keeps only its
+ * days at least [MIN_GAP_DAYS] plain days from every one kept before it (so a phone never changes icon twice within a
+ * few days, which keeps iOS to two system notices per celebration part). The same answer on every launch.
  */
 object SeasonalIcons {
     const val MIN_GAP_DAYS = 3
@@ -281,14 +281,27 @@ object SeasonalIcons {
             .sortedWith(
                 compareBy<SeasonalWindow>({ if (it.icon.regional) 0 else 1 }, { order.indexOf(it.icon) }, { it.range.start }, { it.icon.ordinal }),
             )
+        // each one keeps the days at least [MIN_GAP_DAYS] plain days from every one kept before it: a long window
+        // that only starts inside a higher one shows after it (Ramadan after Lunar New Year in Singapore)
         val kept = mutableListOf<SeasonalWindow>()
-        for (w in candidates) if (kept.none { tooClose(it.range, w.range) }) kept += w
+        for (w in candidates) {
+            var parts = listOf(w.range)
+            for (k in kept) parts = parts.flatMap { without(it, k.range) }
+            parts.forEach { kept += w.copy(range = it) }
+        }
         return kept.sortedBy { it.range.start }
     }
 
-    /** Fewer than [MIN_GAP_DAYS] plain days between [a] and [b] (or they overlap). */
-    private fun tooClose(a: DayRange, b: DayRange): Boolean =
-        b.start.epochDay - a.end.epochDay - 1 < MIN_GAP_DAYS && a.start.epochDay - b.end.epochDay - 1 < MIN_GAP_DAYS
+    /** The days of [range] with [MIN_GAP_DAYS] plain days or more between them and [taken]: none, one or two parts. */
+    private fun without(range: DayRange, taken: DayRange): List<DayRange> {
+        val blockedFrom = taken.start.plusDays(-MIN_GAP_DAYS)
+        val blockedTo = taken.end.plusDays(MIN_GAP_DAYS)
+        if (range.end < blockedFrom || range.start > blockedTo) return listOf(range)
+        return listOfNotNull(
+            DayRange(range.start, blockedFrom.plusDays(-1)).takeIf { it.start <= it.end },
+            DayRange(blockedTo.plusDays(1), range.end).takeIf { it.start <= it.end },
+        )
+    }
 
     private fun withOverrides(year: Int, table: List<SeasonalWindow>, overrides: List<SeasonalOverride>): List<SeasonalWindow> {
         val mine = overrides.filter { it.year == null || it.year == year }

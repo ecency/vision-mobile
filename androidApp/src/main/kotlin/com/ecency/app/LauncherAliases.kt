@@ -9,6 +9,8 @@ import com.ecency.core.app.AppEnvironment
 import com.ecency.core.app.CalendarDay
 import com.ecency.core.app.LauncherIcon
 import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
 
 /**
  * The launcher icon (README "App icons"): one `<activity-alias>` of MainActivity per [LauncherIcon]
@@ -56,7 +58,12 @@ object LauncherAliases {
         env.launcherIcons.configure(locale?.country?.takeIf { it.isNotEmpty() }, locale?.language, asksFirst = false)
     }
 
-    fun today(): CalendarDay = Calendar.getInstance().let { CalendarDay(it.get(Calendar.YEAR), it.get(Calendar.MONTH) + 1, it.get(Calendar.DAY_OF_MONTH)) }
+    /**
+     * Today in the phone's time zone, as a Gregorian date: the celebration table is Gregorian, and
+     * `Calendar.getInstance()` follows the locale's calendar (Buddhist on a Thai phone, the year 2569).
+     */
+    fun today(now: Date = Date()): CalendarDay = GregorianCalendar().apply { time = now }
+        .let { CalendarDay(it.get(Calendar.YEAR), it.get(Calendar.MONTH) + 1, it.get(Calendar.DAY_OF_MONTH)) }
 
     private fun isEnabled(pm: PackageManager, icon: LauncherIcon, name: ComponentName): Boolean = when (pm.getComponentEnabledSetting(name)) {
         PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true

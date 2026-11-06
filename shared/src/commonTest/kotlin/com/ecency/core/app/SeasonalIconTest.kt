@@ -76,8 +76,17 @@ class SeasonalIconTest {
             "MY", "ms",
             mapOf("2027-02-05" to DEFAULT, "2027-02-06" to DEFAULT, "2027-02-07" to RAMADAN_EID, "2027-02-14" to RAMADAN_EID, "2027-03-12" to RAMADAN_EID, "2027-03-13" to DEFAULT),
         )
-        // Singapore's order puts Lunar New Year first
-        assertDays("SG", "ms", mapOf("2027-02-06" to LUNAR_NEW_YEAR, "2027-02-14" to LUNAR_NEW_YEAR, "2027-03-01" to DEFAULT))
+        // Singapore's order puts Lunar New Year first; Ramadan and Eid follow from 3 plain days after it, to Eid + 3
+        assertDays(
+            "SG", "ms",
+            mapOf(
+                "2027-02-06" to LUNAR_NEW_YEAR, "2027-02-14" to LUNAR_NEW_YEAR, "2027-02-20" to LUNAR_NEW_YEAR,
+                "2027-02-21" to DEFAULT, "2027-02-23" to DEFAULT, "2027-02-24" to RAMADAN_EID, "2027-03-09" to RAMADAN_EID,
+                "2027-03-12" to RAMADAN_EID, "2027-03-13" to DEFAULT,
+            ),
+        )
+        // an English phone in Singapore: Lunar New Year only
+        assertEquals(DEFAULT, icon("2027-03-01", "SG", "en"))
         // elsewhere Valentine's Day
         assertDays("US", "en", mapOf("2027-02-06" to DEFAULT, "2027-02-14" to VALENTINES))
     }
@@ -97,6 +106,10 @@ class SeasonalIconTest {
     @Test
     fun nowruzWinsInIranAndEidKeepsItsLaterThirdDay() {
         assertEquals(LauncherIcon.NOWRUZ, icon("2026-03-21", "IR", "fa"))
+        // Ramadan still shows there until 3 plain days before Nowruz
+        assertEquals(LauncherIcon.RAMADAN_EID, icon("2026-03-01", "IR", "fa"))
+        assertEquals(LauncherIcon.RAMADAN_EID, icon("2026-03-16", "IR", "fa"))
+        assertEquals(LauncherIcon.DEFAULT, icon("2026-03-17", "IR", "fa"))
         assertEquals(LauncherIcon.NOWRUZ, icon("2026-03-21", "AF", "fa"))
         assertEquals(LauncherIcon.RAMADAN_EID, icon("2026-03-21", "UZ", "uz"), "Central Asia keeps Eid first")
         // Umm al-Qura Eid al-Fitr 2027 is Mar 9; where it falls on Mar 10, its third day is Mar 12
@@ -114,7 +127,8 @@ class SeasonalIconTest {
         val apart = listOf(SeasonalOverride(CHRISTMAS, 2026, DayRange(day(2026, 12, 20), day(2026, 12, 27))))
         assertDays("DE", "de", mapOf("2026-12-27" to CHRISTMAS, "2026-12-31" to YEAR_START), apart)
         val tooClose = listOf(SeasonalOverride(CHRISTMAS, 2026, DayRange(day(2026, 12, 20), day(2026, 12, 28))))
-        assertDays("DE", "de", mapOf("2026-12-24" to CHRISTMAS, "2026-12-31" to DEFAULT), tooClose)
+        // New Year keeps its days 3 plain days after Christmas
+        assertDays("DE", "de", mapOf("2026-12-24" to CHRISTMAS, "2026-12-31" to DEFAULT, "2027-01-01" to YEAR_START), tooClose)
     }
 
     /** Black Friday shows on its own days, the day after the US Thanksgiving to the Sunday, without a Points sale. */

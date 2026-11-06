@@ -41,6 +41,22 @@ class LauncherAliasesTest {
 
     private fun idle() = shadowOf(android.os.Looper.getMainLooper()).idle()
 
+    /** Review of #3659: a Thai phone (Buddhist calendar, the year 2570) still gets the Gregorian day the table uses. */
+    @Test
+    fun todayIsTheGregorianDayOnAThaiPhone() {
+        val locale = java.util.Locale.getDefault()
+        val zone = java.util.TimeZone.getDefault()
+        try {
+            java.util.Locale.setDefault(java.util.Locale.forLanguageTag("th-TH"))
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Bangkok"))
+            // 2027-03-20 22:30 UTC is Mar 21 in Bangkok
+            assertEquals(com.ecency.core.app.CalendarDay(2027, 3, 21), LauncherAliases.today(java.util.Date(1805581800L * 1000)))
+        } finally {
+            java.util.Locale.setDefault(locale)
+            java.util.TimeZone.setDefault(zone)
+        }
+    }
+
     /** The launcher entries the system lists for the app now. */
     private fun launcherEntries(): List<String> {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)

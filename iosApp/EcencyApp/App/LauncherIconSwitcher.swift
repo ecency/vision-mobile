@@ -15,7 +15,10 @@ final class SystemAlternateIcon: AlternateIconSetting {
 
     func setName(_ name: String?) {
         guard UIApplication.shared.supportsAlternateIcons else { return }
-        UIApplication.shared.setAlternateIconName(name) { _ in }
+        // a refusal changes nothing the person sees (the old icon stays); it reaches Sentry as a warning
+        UIApplication.shared.setAlternateIconName(name) { error in
+            if let error { Reports.quiet(error, where: "launcherIcon.set") }
+        }
     }
 }
 
@@ -35,8 +38,12 @@ final class LauncherIconSwitcher {
         model.configure(region: region, language: language, asksFirst: true)
     }
 
-    static func today(_ date: Date = Date()) -> CalendarDay {
-        let c = Calendar.current.dateComponents([.year, .month, .day], from: date)
+    /// Today in the phone's time zone, as a Gregorian date: the celebration table is Gregorian, and the phone's own
+    /// calendar ([phone], `Calendar.current`) follows its calendar setting (Persian, Islamic, Buddhist, Japanese...).
+    static func today(_ date: Date = Date(), phone: Calendar = .current) -> CalendarDay {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = phone.timeZone
+        let c = gregorian.dateComponents([.year, .month, .day], from: date)
         return CalendarDay(year: Int32(c.year ?? 1970), month: Int32(c.month ?? 1), day: Int32(c.day ?? 1))
     }
 
