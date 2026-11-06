@@ -182,6 +182,34 @@ class WalletModelsTest {
         assertEquals(4, reads() - before)
     }
 
+    /** The claim shows with a new reward larger than the claim: the balance already holds it, so it is not added again. */
+    @Test
+    fun aClaimShownWithALargerNewRewardIsNotCountedTwice() = runTest {
+        val w = world(this)
+        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
+        // claimed 0.75, then 0.80 came in before the next read: pending is above the claimed amount again
+        w.http["/wallet-api/portfolio-v2"] = {
+            HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.8").replaceFirst("\"balance\":1500.5", "\"balance\":1501.25"))
+        }
+        w.env.wallet.claim("POINTS")
+        testScheduler.advanceTimeBy(2_500)
+        testScheduler.runCurrent()
+        val before = reads()
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,501.250", points.balanceText)
+        assertEquals("0.800 POINTS", points.pendingText)
+        // the claim shows, so the reads stop and the new reward can be claimed
+        testScheduler.advanceTimeBy(60_000)
+        testScheduler.runCurrent()
+        assertEquals(before, reads())
+        w.env.wallet.claim("POINTS")
+        testScheduler.runCurrent()
+        assertEquals(2, w.app.authBackend.sent.count { it.url.endsWith("/private-api/points-claim") })
+    }
+
     @Test
     fun anEngineClaimOnlyHidesThePendingReward() = runTest {
         val w = world(this)

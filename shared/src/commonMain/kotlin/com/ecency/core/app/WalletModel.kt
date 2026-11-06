@@ -73,7 +73,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private var readAt = Long.MIN_VALUE
 
     /** RN claimsCollection: symbol to (claimed value, expiry), so a claimed reward reads 0 until the server agrees. */
-    private val claimMask = mutableMapOf<String, Pair<Double, Long>>()
+    private val claimMask = mutableMapOf<String, ClaimMask>()
+
+    /** A claim the portfolio may not show yet: the amount, the asset's balance before it, and when the mask ends. */
+    private class ClaimMask(val amount: Double, val before: Double, val until: Long)
 
     /** The portfolio as the server answered it; [WalletState.all] is it with the claims of [claimMask] applied. */
     private var served: List<PortfolioItem> = emptyList()
@@ -166,6 +169,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         claimingNow += symbol
         publish()
         val claimed = item.pendingRewards
+        // the balance as served before the claim: a later read that already holds the claim must not be counted again
+        val before = served.firstOrNull { it.symbol == symbol }?.balance ?: item.balance
         scope.launch {
             val ok = try {
                 when {
@@ -190,7 +195,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             }
             claimingNow -= symbol
             if (ok && owns(user)) {
-                claimMask[symbol] = claimed to env.nowMillis() + CLAIM_MASK_MILLIS
+                claimMask[symbol] = ClaimMask(claimed, before, env.nowMillis() + CLAIM_MASK_MILLIS)
                 env.ui.toast(WalletCopy.CLAIMED)
             }
             publish()
@@ -307,10 +312,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun withRows(s: WalletState): WalletState {
         val now = env.nowMillis()
-        // a mask ends when it expires or when the server shows the claim: its pending reward fell below the claimed
-        // amount. A pending reward that grew (a new reward came in before the claim showed) keeps it.
+        // a mask ends when it expires or when the server shows the claim (see [showsClaim])
         claimMask.entries.removeAll { (symbol, mask) ->
-            mask.second <= now || served.firstOrNull { it.symbol == symbol }?.let { showsClaim(it, mask.first) } == true
+            mask.until <= now || served.firstOrNull { it.symbol == symbol }?.let { showsClaim(it, mask) } == true
         }
         val all = served.map(::claimed)
         val rows = s.selection.mapNotNull { sym -> all.firstOrNull { it.symbol == sym } }.map { item ->
@@ -334,8 +338,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      */
     private fun claimed(item: PortfolioItem): PortfolioItem {
         val mask = claimMask[item.symbol] ?: return item
-        if (showsClaim(item, mask.first)) return item
-        val c = mask.first
+        if (showsClaim(item, mask)) return item
+        val c = mask.amount
         // what came in since the claim stays pending
         val pending = (item.pendingRewards - c).takeIf { it > CLAIM_EPSILON } ?: 0.0
         if (item.layer == AssetLayer.ENGINE) return item.copy(pendingRewards = pending)
@@ -347,8 +351,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         )
     }
 
-    /** The server's numbers include the claim of [claimed]: only a claim lowers a pending reward. */
-    private fun showsClaim(item: PortfolioItem, claimed: Double) = item.pendingRewards < claimed - CLAIM_EPSILON
+    /**
+     * The server's numbers include the claim: its pending reward fell below the claimed amount (only a claim lowers
+     * it), or the balance grew by at least half of it since the claim. The pending reward alone cannot tell: new
+     * rewards larger than the claim can come in before the next read, and a grown pending reward with the old balance
+     * is a claim not shown yet.
+     */
+    private fun showsClaim(item: PortfolioItem, mask: ClaimMask) =
+        item.pendingRewards < mask.amount - CLAIM_EPSILON || item.balance >= mask.before + mask.amount / 2
 
     companion object {
         private const val CLAIM_EPSILON = 1e-9
