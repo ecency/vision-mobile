@@ -986,6 +986,9 @@ class AppEnvironment(
     /** RN settings: device settings, support percents, the RN settings import. One per app; start it at launch. */
     val settings: SettingsModel by lazy { SettingsModel(this) }
 
+    /** The app icon setting and today's seasonal icon (README "App icons"). One per app. */
+    val launcherIcons: LauncherIconModel by lazy { LauncherIconModel({ prefs }, dispatchers) }
+
     /** RN emailDigestsScreen; the screen owns it. */
     fun emailDigestsModel(): EmailDigestsModel = EmailDigestsModel(this)
 
