@@ -132,7 +132,9 @@ Comments differ only in width (`window - 68`, minus 44 past depth 2), video thum
 `fromDocument(document[, options])`) turns render-helper's final HTML (`renderPostBody(body, true,
 false)`) into `List<Block>`. It parses with the xmldom port, falls back to render-helper's repair
 path, then to `LenientHtml` (a stack-based tree builder that keeps links and images); it never
-throws. `BlockText.of(blocks)` gives the visible text (copy actions, fidelity tests).
+throws. `LenientHtml` finds tags with an iterative scanner in linear time (no regex recursion per
+attribute, which overflowed the stack near 20,000 attributes and crashed Kotlin/Native) and keeps
+the first 256 attributes of an element (#3613, `LenientHtmlTest`). `BlockText.of(blocks)` gives the visible text (copy actions, fidelity tests).
 
 Rules:
 - Whitespace collapses as a browser displays it: runs become one space (the first space of a run
