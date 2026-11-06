@@ -141,6 +141,7 @@ fun SettingsScreen(env: AppEnvironment, host: AppHost, lock: AppLockState, logge
                     }
                 }
             }
+            SettingsCard { AppIconSection(env) }
             if (loggedIn) {
                 SettingsCard { PushSettingsSection(env) }
                 // only the signed-in account's own values (iOS does the same)
@@ -196,7 +197,7 @@ private fun SettingsCard(modifier: Modifier = Modifier, content: @Composable () 
 }
 
 @Composable
-private fun CardTitle(text: String) =
+internal fun CardTitle(text: String) =
     Text(text, color = LocalEcencyColors.current.blueText, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 12.dp).semantics { heading() })
 
 @Composable
@@ -205,7 +206,7 @@ private fun androidx.compose.foundation.layout.RowScope.RowTitle(text: String) =
 
 /** RN SettingsItem type "toggle": the whole row is the switch. */
 @Composable
-private fun ToggleRow(title: String, on: Boolean, tag: String, onChange: (Boolean) -> Unit) {
+internal fun ToggleRow(title: String, on: Boolean, tag: String, onChange: (Boolean) -> Unit) {
     val colors = LocalEcencyColors.current
     Row(
         Modifier.fillMaxWidth().toggleable(value = on, role = Role.Switch, onValueChange = onChange).padding(vertical = 2.dp).testTag(tag),

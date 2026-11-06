@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -149,6 +150,25 @@ class SettingsFlowsTest {
             assertFalse("$tag needs an account", exists(tag))
         }
         assertTrue(exists("settings:rate") && exists("settings:feedback"))
+    }
+
+    /** Issue #3656: the App icon card turns seasonal icons off and picks any icon by hand, the everyday one included. */
+    @Test
+    fun theAppIconCardPicksAnIconAndTurnsSeasonalIconsOff() {
+        launch()
+        waitFor("appIcon:Christmas")
+        assertTrue("on by default on Android", env.launcherIcons.current.seasonal)
+        compose.onNodeWithTag("appIcon:Christmas").performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(com.ecency.core.app.LauncherIcon.CHRISTMAS, env.launcherIcons.current.current)
+        assertFalse(env.launcherIcons.current.seasonal)
+        compose.onNodeWithTag("appIcon:Christmas").assertIsSelected()
+        compose.onNodeWithTag("appIcon:Default").performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(com.ecency.core.app.LauncherIcon.DEFAULT, env.launcherIcons.current.current)
+        compose.onNodeWithTag("settings:seasonalIcons").performScrollTo().performClick()
+        compose.waitForIdle()
+        assertTrue(env.launcherIcons.current.seasonal)
     }
 
     /** The l10n core's end to end proof: the language row title is read through the generated catalog. */

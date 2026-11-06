@@ -313,6 +313,13 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         EcencyGraph.foreground = false
+        // the launcher icon changes only once the app is out of sight (README "App icons"), never for a rotation
+        if (!isChangingConfigurations) {
+            EcencyGraph.started()?.launcherIcons?.let {
+                it.refresh(LauncherAliases.today())
+                LauncherAliases.apply(this, it.current.current)
+            }
+        }
         if (EcencyGraph.frontActivity?.get() === this) EcencyGraph.frontActivity = null
         super.onStop()
     }
@@ -430,6 +437,9 @@ class MainActivity : FragmentActivity() {
         if (BuildConfig.DEBUG) intent.getStringExtra("pseudoLocale")?.let { com.ecency.core.l10n.L10n.usePseudo(it) }
         val env = EcencyGraph.env(this)
         env.appVersion = BuildConfig.VERSION_NAME
+        // the seasonal app icon follows the phone's region and language (README "App icons")
+        LauncherAliases.configure(env)
+        env.launcherIcons.refresh(LauncherAliases.today())
         if (BuildConfig.DEBUG && intent.getBooleanExtra("acceptTerms", false)) env.welcome.accept(consent = true)
         // debug demo runs never load the hosted signup challenge
         if (BuildConfig.DEBUG && EcencyGraph.demoAuth) {
