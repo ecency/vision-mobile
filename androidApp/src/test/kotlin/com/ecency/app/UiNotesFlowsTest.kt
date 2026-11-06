@@ -199,6 +199,11 @@ class UiNotesFlowsTest {
         node.postBodyExtra = " " + (1..600).joinToString(" ") { "word$it" }
         signIn()
         openPost()
+        // the bar shows with the card, before the body's render lands: the fold is read once the long body is laid out
+        // (its last word placed in the list), not from the skeleton in its place
+        compose.await("the long body laid out") {
+            exists("bodyStart") && compose.onAllNodes(androidx.compose.ui.test.hasText("word600", substring = true)).fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNode(hasText(com.ecency.core.app.ReadingUiCopy.REPLY) and hasAnyAncestor(hasTestTag("postActions")), useUnmergedTree = true).assertDoesNotExist()
         compose.onNode(inBar("reply"), useUnmergedTree = true).assertDoesNotExist()
         val comments = compose.onNode(inBar("postComments"), useUnmergedTree = true)

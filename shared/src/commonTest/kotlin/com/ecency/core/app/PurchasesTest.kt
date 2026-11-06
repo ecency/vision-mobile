@@ -488,6 +488,159 @@ class PurchasesTest {
     }
 
     @Test
+    fun aHeldPurchaseFoundAtLaunchIsListedWithItsOrderUntilA409ClearsIt() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(HeldPurchase("12", "999points")), r.env.purchases.current.heldOrders)
+        // resent at the next recovery and still held: listed once
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(HeldPurchase("12", "999points")), r.env.purchases.current.heldOrders)
+        // support released it: the next resend gets 409, the purchase is finished and the notice goes
+        answers = mutableListOf(HttpResult(409, "{}"))
+        r.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        r.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.store.finished.size)
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty())
+    }
+
+    @Test
+    fun aHeldPurchaseOfABuyIsListedTooAndADismissedNoticeStaysDismissed() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":4711}"""))
+        val r = rig()
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("4711"), r.env.purchases.current.heldOrders.map { it.order })
+        r.env.purchases.dismissHeld("4711")
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty())
+        assertEquals(setOf("999points"), r.env.purchases.current.unfinished, "dismissing the notice keeps the purchase")
+        // the next start still finds it held, the dismissed notice does not come back
+        val prefs = r.env.prefs
+        val held = r.store.held.toList()
+        model.close()
+        val again = rig(prefs = prefs, start = false)
+        again.store.held += held
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, again.orders.size)
+        assertTrue(again.env.purchases.current.heldOrders.isEmpty())
+    }
+
+    /** Review of #3612: the notice and its order number survive a restart while the store or Ecency cannot be reached. */
+    @Test
+    fun aHeldNoticeOutlivesARestartWhileTheStoreOrEcencyIsDownAndGoesWhenTheStoreNoLongerHoldsIt() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("12", "999points"))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        val held = r.store.held.toList()
+        // the store cannot be reached at the next start
+        val again = rig(prefs = r.env.prefs, start = false)
+        again.store.held += held
+        again.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "the store is down: the notice stays")
+        // the store answers, Ecency does not: the purchase is still held, so is the notice
+        again.store.connectError = null
+        answers = mutableListOf(HttpResult(500, ""), HttpResult(500, ""), HttpResult(500, ""))
+        again.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        again.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "Ecency is down: the notice stays")
+        // the store no longer holds the purchase (finished or refunded elsewhere): the notice goes, for good
+        again.store.held.clear()
+        again.app.now += PurchaseService.FOREGROUND_RECOVERY_MILLIS
+        again.env.purchases.onForeground()
+        testScheduler.advanceUntilIdle()
+        assertTrue(again.env.purchases.current.heldOrders.isEmpty())
+        val third = rig(prefs = r.env.prefs, start = false)
+        third.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        third.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(third.env.purchases.current.heldOrders.isEmpty())
+    }
+
+    /** Review of #3612: a held notice is its account's: another account on the device neither sees nor dismisses it. */
+    @Test
+    fun aHeldNoticeShowsOnlyForItsAccountAcrossARestart() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig()
+        val model = screen(r, StoreScreenKind.POINTS)
+        model.buy("999points")
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("12", "999points"))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        model.close()
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty(), "bob does not see alice's order")
+        r.env.purchases.dismissHeld("12")
+        // a restart while the store is down, signed in as bob, then back to alice: hers is still there
+        val held = r.store.held.toList()
+        val again = rig(prefs = r.env.prefs, signedIn = bob, start = false)
+        again.store.held += held
+        again.store.connectError = StoreError(StoreError.SERVICE_ERROR, "store down")
+        again.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(again.env.purchases.current.heldOrders.isEmpty())
+        again.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, again.env.purchases.current.heldOrders, "bob's dismiss did not reach alice's notice")
+    }
+
+    /** A held purchase of a new account is no device account's: it shows whoever is signed in, Ecency up or down. */
+    @Test
+    fun aHeldNewAccountPurchaseShowsForEveryAccount() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":77}"""))
+        val r = rig(start = false)
+        PurchaseService.Intents.save(r.env.prefs, PurchaseSkus.ACCOUNT, PurchaseTarget(meta = com.ecency.core.api.ecency.AccountOrderMeta("newbie.one", "a@b.co", "")), r.app.now)
+        r.store.held += r.store.paid(PurchaseSkus.ACCOUNT)
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        val notice = listOf(HeldPurchase("77", PurchaseSkus.ACCOUNT))
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+        // Ecency is down at the switch: the resend gets no answer, so nothing recomputes who sees it
+        answers = mutableListOf(HttpResult(500, ""))
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertEquals(notice, r.env.purchases.current.heldOrders)
+    }
+
+    /** A wipe removes the saved notices; the ones in memory go too and are never saved again. */
+    @Test
+    fun aWipeForgetsTheHeldNotices() = runTest {
+        answers = mutableListOf(HttpResult(422, """{"reason":"receipt_held","order":12}"""))
+        val r = rig(start = false)
+        r.store.held += r.store.paid("999points")
+        r.env.purchases.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.env.purchases.current.heldOrders.size)
+        r.env.resetAfterWipe()
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.env.purchases.current.heldOrders.isEmpty())
+        assertNull(r.env.prefs.getString(PurchaseService.Marks.HELD_NOTICES))
+    }
+
+    @Test
+    fun theHeldNoticeSaysTheOrderAndItsSupportMailCarriesIt() {
+        assertEquals("Purchase held for review", HeldPurchaseCopy.TITLE)
+        assertEquals(PurchaseCopy.held("12"), HeldPurchaseCopy.message("12"))
+        assertEquals("Contact support", HeldPurchaseCopy.CONTACT_SUPPORT)
+        assertEquals("Dismiss", HeldPurchaseCopy.DISMISS)
+        assertEquals("mailto:support@ecency.com?subject=Purchase%20held%20for%20review%2C%20order%20%2312", HeldPurchaseCopy.supportMailto("12"))
+    }
+
+    @Test
     fun a400OrA422WithoutTheHeldBodyKeepsThePurchaseUnfinished() = runTest {
         for (answer in listOf(HttpResult(400, """{"message":"unknown product"}"""), HttpResult(422, """{"reason":"other"}"""))) {
             answers = mutableListOf(answer)

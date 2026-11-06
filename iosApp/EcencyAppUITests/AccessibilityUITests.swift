@@ -56,6 +56,10 @@ final class AccessibilityUITests: XCTestCase {
         var found: [String] = []
         var unattributed = 0
         var unresolved: [String] = []
+        // text the tab bar covers: the audit reads it through the bar's glass and cannot name it (#3651)
+        let counted = AuditExclusions.textsUnderTheTabBar(app)
+        let underTheBar = min(counted, AuditExclusions.underTheBarMeasured[String(screen.split(separator: " ").first ?? "")] ?? 0)
+        if counted > 0 { print("AccessibilityUITests \(screen): \(counted) text(s) under the tab bar, \(underTheBar) allowed") }
         do {
             try app.performAccessibilityAudit(for: .all) { issue in
                 if AuditExclusions.excuses(issue) { return true }
@@ -69,9 +73,10 @@ final class AccessibilityUITests: XCTestCase {
                     print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) visible in its scroll view, counted")
                 }
                 // a contrast reading on a SwiftUI node the audit cannot resolve to an element (text inside a combined
-                // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen;
-                // any other unattributed issue (clipping, Dynamic Type, hit region) fails.
-                if issue.element == nil, issue.auditType == .contrast, unattributed < AuditExclusions.unattributedBudget {
+                // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen, plus
+                // one per text the tab bar covers (`textsUnderTheTabBar`, at most `underTheBarMeasured`); any other unattributed issue (clipping,
+                // Dynamic Type, hit region) fails.
+                if issue.element == nil, issue.auditType == .contrast, unattributed < AuditExclusions.unattributedBudget + underTheBar {
                     unattributed += 1
                     return true
                 }
@@ -195,15 +200,17 @@ final class AccessibilityUITests: XCTestCase {
         ].map { ($0.0, $0.1 + size, $0.2) }
     }
 
-    private func auditAll(_ size: [String]) {
+    private func auditAll(_ size: [String], bold: Bool = false) {
+        let ax5 = !size.isEmpty
+        let suffix = (ax5 ? " (AX5)" : "") + (bold ? " (bold)" : "")
         for (name, args, ready) in screens(size) {
-            let app = launch(args)
-            if name == "profile", !size.isEmpty {
-                audit(app, "profile closed (AX5)", ready: ready)
+            let app = launch(args + (bold ? Self.boldText : []))
+            if name == "profile", ax5 {
+                audit(app, "profile closed" + suffix, ready: ready)
                 element(app, ready).tap()
-                audit(app, "profile (AX5)", ready: "profile-summary")
+                audit(app, "profile" + suffix, ready: "profile-summary")
             } else {
-                audit(app, name + (size.isEmpty ? "" : " (AX5)"), ready: ready)
+                audit(app, name + suffix, ready: ready)
             }
             app.terminate()
         }
@@ -212,6 +219,28 @@ final class AccessibilityUITests: XCTestCase {
     func testAuditMainScreensAtTheDefaultTextSize() { auditAll([]) }
 
     func testAuditMainScreensAtTheLargestAccessibilityTextSize() { auditAll(Self.ax5) }
+
+    /// Bold Text (#2569), set for the app only: the debug `-boldText YES` puts the bold legibility weight in the
+    /// app's windows (UIKit) and its SwiftUI environment, as the system setting does.
+    static let boldText = ["-boldText", "YES"]
+
+    /// The audits below mean something only if the setting reaches the app's text: the same label draws wider.
+    func testBoldTextReachesTheAppsText() {
+        func width(_ extra: [String]) -> CGFloat {
+            let app = launch(["-showWelcome", "YES", "-reduceMotion", "YES"] + extra)
+            let label = app.staticTexts["Welcome to"].firstMatch
+            XCTAssertTrue(label.waitForExistence(timeout: 25), app.debugDescription)
+            let w = label.frame.width
+            app.terminate()
+            return w
+        }
+        let regular = width([]), bold = width(Self.boldText)
+        XCTAssertGreaterThan(bold, regular * 1.02, "Bold Text draws the welcome label wider: \(regular) -> \(bold)")
+    }
+
+    func testAuditMainScreensWithBoldText() { auditAll([], bold: true) }
+
+    func testAuditMainScreensWithBoldTextAtTheLargestAccessibilityTextSize() { auditAll(Self.ax5, bold: true) }
 
     /// Dark mode: the screens heaviest on blue text (text buttons, links, tabs, the settings list, the login form).
     func testAuditInDarkMode() {
@@ -325,6 +354,11 @@ enum AuditExclusions {
                                           "notification-line", "chat-row-time", "asset-name", "asset-fiat"]
     /// Contrast readings on SwiftUI nodes the audit cannot resolve to an element, allowed per screen (see `audit`).
     static let unattributedBudget = 3
+    /// The most texts under the tab bar each screen may count on top of [unattributedBudget], measured on 2026-11-06
+    /// (#3651). The audit names no node for these readings, so the bar's allowance cannot be tied to the bar itself:
+    /// capped at what was measured, more text scrolled under the bar never makes room for a new reading elsewhere.
+    /// A screen not listed gets none.
+    static let underTheBarMeasured: [String: Int] = ["feed": 1, "waves": 2, "wallet": 5, "notifications": 2]
     /// A bounded allowance, per screen and description, for clipping and Dynamic Type issues on nodes the audit
     /// cannot resolve to an element. This is not identification: the audit names no node and no text and every such
     /// issue shares one generic description. The numbers are those measured on 2026-10-27 on screens with the tab bar
@@ -348,13 +382,17 @@ enum AuditExclusions {
         // which runs on under the action bar until the post is scrolled
         "post (AX5)": [clipped: 1],
         // 2026-11-03: the system tab bar (README "iPhone Duo"): the list scrolls on under its glass, and at AX5 the
-        // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it)
-        "notifications (AX5)": [clipped: 3],
+        // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it).
+        // 2026-11-06 (#2686): the Unread chip joins Replies and Mentions; at AX5 the three stack, all whole on the
+        // screenshot, and push the list down, so one more line runs under the bar
+        "notifications (AX5)": [clipped: 4],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).
     static func allowance(_ screen: String) -> [String: Int] {
-        unresolvedAllowance[screen] ?? unresolvedAllowance[screen.replacingOccurrences(of: " (dark)", with: "")] ?? [:]
+        // a dark or Bold Text run takes its screen's numbers
+        let base = screen.replacingOccurrences(of: " (dark)", with: "").replacingOccurrences(of: " (bold)", with: "")
+        return unresolvedAllowance[screen] ?? unresolvedAllowance[base] ?? [:]
     }
 
     /// Deliberate previews that end in an ellipsis (RN numberOfLines); the full text is one tap away.
@@ -395,6 +433,30 @@ enum AuditExclusions {
         let covered = frame.intersection(bar.frame)
         guard !covered.isNull, !covered.isEmpty else { return nil }
         return 1 - (covered.width * covered.height) / (frame.width * frame.height)
+    }
+
+    /// The bottom tabs' identifiers (`AppTab.identifier`).
+    static let tabIds: Set<String> = ["tab-feed", "tab-waves", "tab-chats", "tab-wallet", "tab-notification"]
+
+    /// Static texts the system tab bar covers, from one snapshot of the screen (#3651). A list scrolls under the iOS 26
+    /// glass tab bar; the audit reads the text there through the glass as low contrast and cannot resolve it to an
+    /// element (its point lands on the bar). On the wallet the fourth asset card sits under the bar at launch: its five
+    /// texts (symbol, name, balance, fiat value, claim) were the five unattributed readings, and they went away when
+    /// that card was hidden. The bar is the union of the tab buttons (XCUITest shows no TabBar element for SwiftUI's
+    /// TabView on iOS 27).
+    static func textsUnderTheTabBar(_ app: XCUIApplication) -> Int {
+        guard let root = try? app.snapshot() else { return 0 }
+        var tabs: [CGRect] = [], texts: [CGRect] = []
+        func walk(_ node: XCUIElementSnapshot) {
+            // a tab's own label is the bar's, not content under it
+            if node.elementType == .button, tabIds.contains(node.identifier) { return tabs.append(node.frame) }
+            if node.elementType == .staticText { texts.append(node.frame) }
+            node.children.forEach(walk)
+        }
+        walk(root)
+        guard let first = tabs.first else { return 0 }
+        let bar = tabs.dropFirst().reduce(first) { $0.union($1) }
+        return texts.filter { !$0.isEmpty && $0.intersects(bar) }.count
     }
 
     static func excuses(_ issue: XCUIAccessibilityAuditIssue) -> Bool {

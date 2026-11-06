@@ -314,6 +314,26 @@ class ForegroundRefreshTest {
         watch.close()
     }
 
+    /** Review of #2686: a quiet reload that leaves the Unread view empty pages on by itself, as a normal load does. */
+    @Test
+    fun aQuietReloadThatLeavesTheUnreadViewEmptyPagesOnToTheUnreadRows() = runTest {
+        val f = NotificationFixture(this)
+        val alice = NotificationFixture.ALICE
+        f.backend.rows[alice] = listOf(FakeNotificationsBackend.vote("u1")) + (1..5).map { FakeNotificationsBackend.vote("r$it", read = 1) }
+        f.backend.unread[alice] = 1
+        f.start()
+        f.model.show(); f.idle()
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(listOf("u1"), f.model.current.shown.map { it.id })
+
+        // meanwhile u1 was read elsewhere and newer read rows push the one unread row two pages down
+        f.backend.rows[alice] = (1..6).map { FakeNotificationsBackend.vote("x$it", read = 1) } + listOf(FakeNotificationsBackend.vote("u9"))
+        f.app.away(long)
+        f.model.onForeground()
+        f.idle()
+        assertEquals(listOf("u9"), f.model.current.shown.map { it.id })
+    }
+
     // ---- profile ----
 
     @Test

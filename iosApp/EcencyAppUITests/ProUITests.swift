@@ -53,6 +53,25 @@ final class ProUITests: XCTestCase {
         shot("member-sheet")
     }
 
+    /// #3636: a member sees when the membership ends (the Points API's `pro.expires`; the demo's is 27 July 2027).
+    func testAMemberSeesWhenTheMembershipEnds() {
+        let app = launch([])
+        let card = element(app, "pro-card-expiry")
+        XCTAssertTrue(card.waitForExistence(timeout: 20))
+        XCTAssertTrue(card.label.hasPrefix("Your membership runs until "), card.label)
+        XCTAssertTrue(card.label.contains("2027"), card.label)
+        app.buttons["pro-card"].tap()
+        let sheet = element(app, "pro-expiry")
+        XCTAssertTrue(sheet.waitForExistence(timeout: 10))
+        XCTAssertEqual(sheet.label, card.label)
+    }
+
+    func testANonMemberSeesNoEndDate() {
+        let app = launch(["-demoNoPro", "YES"])
+        XCTAssertTrue(element(app, "pro-card-text").waitForExistence(timeout: 20))
+        XCTAssertFalse(element(app, "pro-card-expiry").exists)
+    }
+
     // MARK: - the badge beside a member's name (RN ProBadge)
 
     /** The fake feed with spike-alice (the demo roster) and spike-bob (the first comment's author) on the roster. */

@@ -1273,7 +1273,7 @@ fun DraftsScreen(env: AppEnvironment, model: com.ecency.core.app.DraftsModel, na
                     Column(Modifier.weight(1f)) {
                         Text(listOfNotNull(tag?.let { "#$it" }, shownDraftDate(date)).joinToString("  "), color = colors.darkGray, fontSize = 12.sp)
                         Text(title, color = colors.text, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        Text(body.take(100), color = colors.darkGray, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(state.summaries[body].orEmpty(), color = colors.darkGray, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                     if (id in state.busy) Spinner(size = 18.dp) else trailing()
                 }

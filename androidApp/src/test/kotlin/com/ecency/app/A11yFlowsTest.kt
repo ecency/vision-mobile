@@ -104,7 +104,8 @@ class A11yFlowsTest {
     /** Rows each tab showed (printed: a tab the fake node leaves empty is checked in its own flow test with rows). */
     private val shown = mutableMapOf<AppTab, Int>()
 
-    private fun eachSignedInTab(tabs: List<AppTab>, fontScale: Float, check: (AppTab) -> Unit) {
+    private fun eachSignedInTab(tabs: List<AppTab>, fontScale: Float, bold: Boolean = false, check: (AppTab) -> Unit) {
+        if (bold) boldText()
         node.signIn()
         val navigator = Navigator(NavState())
         launch(fontScale = fontScale, navigator = navigator)
@@ -299,6 +300,97 @@ class A11yFlowsTest {
     fun signedInTabsAtFontScale2CutNoText() =
         eachSignedInTab(listOf(AppTab.WAVES, AppTab.NOTIFICATION, AppTab.WALLET, AppTab.CHATS), 2f) { assertNothingClipped(it.name) }
 
+    // ---- Bold text (#2569): the system's font weight adjustment, at font scale 1 and 2 on a 360 dp phone ----
+
+    /**
+     * Android's "Bold text" (Settings > Accessibility > Display size and text, API 31+): the configuration's
+     * `fontWeightAdjustment`, 300 as the system sets it (FontStyle.FONT_WEIGHT_BOLD - FONT_WEIGHT_NORMAL). Compose
+     * reads it when the view makes its font resolver, so it is set before the content.
+     */
+    private fun boldText() {
+        val res = compose.activity.resources
+        val config = android.content.res.Configuration(res.configuration).apply { fontWeightAdjustment = BOLD_TEXT_ADJUSTMENT }
+        @Suppress("DEPRECATION")
+        res.updateConfiguration(config, res.displayMetrics)
+    }
+
+    /** The check below means something only if Bold Text reaches the app's text: the same text draws wider. */
+    @Test
+    fun boldTextReachesTheAppsText() {
+        boldText()
+        val plain = compose.activity.createConfigurationContext(
+            android.content.res.Configuration(compose.activity.resources.configuration).apply { fontWeightAdjustment = 0 },
+        )
+        compose.setContent {
+            EcencyTheme(dark = false) {
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.Text("Bold text check", modifier = Modifier.testTag("adjusted"))
+                    CompositionLocalProvider(androidx.compose.ui.platform.LocalFontFamilyResolver provides androidx.compose.ui.text.font.createFontFamilyResolver(plain)) {
+                        androidx.compose.material3.Text("Bold text check", modifier = Modifier.testTag("plain"))
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        fun width(tag: String): Float {
+            val results = mutableListOf<TextLayoutResult>()
+            compose.onNodeWithTag(tag).fetchSemanticsNode().config[SemanticsActions.GetTextLayoutResult].action!!(results)
+            return results.single().size.width.toFloat()
+        }
+        assertTrue("bold ${width("adjusted")} wider than regular ${width("plain")}", width("adjusted") > width("plain") * 1.02f)
+    }
+
+    @Test
+    fun theFeedWithBoldTextCutsNoText() {
+        boldText()
+        launch(fontScale = 2f)
+        waitFor("card:alice/trending-one")
+        assertNothingClipped("feed, bold text")
+    }
+
+    @Test
+    fun theFeedWithBoldTextAtTheDefaultSizeCutsNoText() {
+        boldText()
+        launch()
+        waitFor("card:alice/trending-one")
+        assertNothingClipped("feed, bold text, font scale 1")
+    }
+
+    @Test
+    fun thePostWithBoldTextCutsNoText() {
+        boldText()
+        launch(fontScale = 2f)
+        waitFor("open:alice/trending-one")
+        compose.onNodeWithTag("open:alice/trending-one").performClick()
+        waitFor("postActions")
+        compose.mainClock.advanceTimeBy(1_000)
+        assertNothingClipped("post, bold text")
+    }
+
+    @Test
+    fun settingsWithBoldTextCutNoText() {
+        boldText()
+        launch(NavState().push(AppScreen.Settings), fontScale = 2f)
+        waitFor("settings:language")
+        assertNothingClipped("settings, bold text")
+    }
+
+    @Test
+    fun theLoginScreenWithBoldTextCutsNoText() {
+        boldText()
+        launch(NavState().push(AppScreen.Login), fontScale = 2f)
+        waitFor("login")
+        assertNothingClipped("login, bold text")
+    }
+
+    @Test
+    fun signedInTabsWithBoldTextCutNoText() =
+        eachSignedInTab(listOf(AppTab.WAVES, AppTab.NOTIFICATION, AppTab.WALLET, AppTab.CHATS), 2f, bold = true) { assertNothingClipped("${it.name}, bold text") }
+
+    @Test
+    fun signedInTabsWithBoldTextAtTheDefaultSizeCutNoText() =
+        eachSignedInTab(listOf(AppTab.WAVES, AppTab.NOTIFICATION, AppTab.WALLET, AppTab.CHATS), 1f, bold = true) { assertNothingClipped("${it.name}, bold text, font scale 1") }
+
     @Test
     fun theScansSeeACutTextAndAnUnlabelledButton() {
         compose.setContent {
@@ -319,3 +411,6 @@ class A11yFlowsTest {
         assertTrue(unlabelledActions().toString(), unlabelledActions().any { "underHidden" in it })
     }
 }
+
+/** Android Bold Text: FontStyle.FONT_WEIGHT_BOLD (700) - FONT_WEIGHT_NORMAL (400). */
+private const val BOLD_TEXT_ADJUSTMENT = 300

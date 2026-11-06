@@ -454,10 +454,14 @@ class MainActivity : FragmentActivity() {
             if (intent.getBooleanExtra("demoStreak", false)) com.ecency.core.app.DemoAuthServices.demoQuests = com.ecency.core.app.DemoAuthServices.SAMPLE_QUESTS
             // `--ez demoNoPro true`: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots)
             if (intent.getBooleanExtra("demoNoPro", false)) com.ecency.core.app.DemoAuthServices.clearDemoPro()
+            // `--es demoHeldPurchase <order>`: an unfinished purchase Ecency holds for review at launch (issue #3612)
+            if (savedInstanceState == null) intent.getStringExtra("demoHeldPurchase")?.let { order -> (env.store as? com.ecency.core.app.DemoStore)?.holdForReview(order) }
             com.ecency.core.app.DemoAuthServices.demoReleaseTag = if (intent.getBooleanExtra("demoUpdate", false)) "99.1.0" else null
             // `--ei demoChatHistory <n>`: n older messages and one long one in the demo channel, DM and group
             val history = intent.getIntExtra("demoChatHistory", 0)
             if (history > 0 && savedInstanceState == null) listOf("ch-ecency", "ch-dm-alice", "ch-group").forEach { com.ecency.core.app.DemoAuthServices.chat?.seedHistory(it, history) }
+            // `--es demoChatName <name>`: the favourite demo channel's name (long names at large text sizes)
+            intent.getStringExtra("demoChatName")?.let { com.ecency.core.app.DemoAuthServices.chat?.rename("ch-photo", it) }
         }
         EcencyGraph.playReview.attach(this)
         // `--ez seedAccounts true` (debug only, with demoAuth): two throwaway accounts signed in, for screenshots.

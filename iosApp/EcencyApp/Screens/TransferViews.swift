@@ -669,8 +669,8 @@ struct FavoritesSheet: View {
                 .navigationTitle(fcopy.TITLE).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { model.toggleAdd() } label: { Image(appIcon: s.adding ? .close : .personAdd) }
-                            .accessibilityLabel(s.adding ? fcopy.CANCEL_ADD : fcopy.ADD).accessibilityIdentifier("favorites-add-toggle")
+                        Button { model.toggleAdd() } label: { Label(s.adding ? fcopy.CANCEL_ADD : fcopy.ADD, appIcon: s.adding ? .close : .personAdd).labelStyle(.iconOnly) }
+                            .accessibilityIdentifier("favorites-add-toggle")
                     }
                 }
         }
@@ -691,7 +691,7 @@ private struct LeaveGuard: ViewModifier {
             .toolbar {
                 if busy {
                     ToolbarItem(placement: .topBarLeading) {
-                        Button { asking = true } label: { Image(appIcon: .back) }.accessibilityLabel(UiCopy.shared.BACK).accessibilityIdentifier("leave-guard-back")
+                        Button { asking = true } label: { Label(UiCopy.shared.BACK, appIcon: .back).labelStyle(.iconOnly) }.accessibilityIdentifier("leave-guard-back")
                     }
                 }
             }

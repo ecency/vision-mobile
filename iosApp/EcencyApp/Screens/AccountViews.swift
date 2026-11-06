@@ -86,14 +86,17 @@ struct AccountSwitcherSheet: View {
     }
 }
 
-/// RN welcome screen: three lines, the terms checkbox, "Get started!" once accepted.
+/// RN welcome screen: three lines with RN's line icons, the terms checkbox, "Get started!" once accepted; RN's launch
+/// animation covers it for its first 3.55 s at full motion (README "Welcome and terms, register").
 struct WelcomeView: View {
     var previouslyAccepted = false
     let onAccepted: () -> Void
     @State private var accepted = false
     @State private var terms = false
+    @State private var revealed = false
     @Environment(\.appTheme) private var theme
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.motion) private var motion
 
     /// At accessibility text sizes the title needs the whole width: Esie stays out (README "Esie").
     static func showsEsie(_ size: DynamicTypeSize) -> Bool { !size.isAccessibilitySize }
@@ -126,9 +129,20 @@ struct WelcomeView: View {
                         }
                         }
                     }
-                    ForEach(lines, id: \.0) { heading, body in
-                        Text(heading).bold().padding(.top, 12)
-                        Text(body).foregroundStyle(theme.secondary)
+                    ForEach(Array(lines.enumerated()), id: \.offset) { i, line in
+                        // RN _renderInfo: a 30 pt line icon in the blue, the heading and body beside it
+                        HStack(alignment: .top, spacing: 10) {
+                            // fixed size: RN's 30 pt icon (it stays beside the text, which grows)
+                            Image(appIcon: WelcomeArt.shared.LINE_ICONS[i]).font(.system(size: CGFloat(WelcomeArt.shared.ICON_SIZE)))
+                                .foregroundStyle(theme.accentText)
+                                .accessibilityIdentifier("welcome-icon-\(i)")
+                                .accessibilityHidden(!EsieView.exposedForUITests)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(line.0).bold()
+                                Text(line.1).foregroundStyle(theme.secondary)
+                            }
+                        }
+                        .padding(.top, 12)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,5 +164,10 @@ struct WelcomeView: View {
         .background(theme.background)
         .themedSheet(isPresented: $terms) { SafariView(url: URL(string: LoginCopy.shared.TERMS_URL)!).ignoresSafeArea() }
         .onAppear { if previouslyAccepted { accepted = true } }
+        .overlay {
+            if !revealed && LaunchReveal.shared.shows(level: motion.level) {
+                LaunchRevealOverlay { revealed = true }.ignoresSafeArea()
+            }
+        }
     }
 }

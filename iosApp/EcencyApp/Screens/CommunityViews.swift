@@ -313,8 +313,7 @@ struct CommunityScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         // the pane's header beside a list, where the bar is the list's (screenBarItem)
         .screenBarItem(.trailing, shown: state.isModerator) {
-            Button { manage = true } label: { Image(appIcon: .moderator) }
-                .accessibilityLabel(CommunityCopy.shared.MANAGE)
+            Button { manage = true } label: { Label(CommunityCopy.shared.MANAGE, appIcon: .moderator).labelStyle(.iconOnly) }
                 .accessibilityIdentifier("community-manage")
         }
         // RN communityManageSheet, in the set role sheet's layout; the pick opens once the sheet is gone
@@ -465,8 +464,7 @@ struct CommunityMembersScreen: View {
         .screenTitle(state.headerTitle)
         .navigationBarTitleDisplayMode(.inline)
         .screenBarItem(.trailing, shown: !state.assignableRoles.isEmpty) {
-            Button { pick = RolePick(account: nil, current: nil) } label: { Image(appIcon: .personAdd) }
-                .accessibilityLabel(CommunityCopy.shared.ASSIGN_ROLE)
+            Button { pick = RolePick(account: nil, current: nil) } label: { Label(CommunityCopy.shared.ASSIGN_ROLE, appIcon: .personAdd).labelStyle(.iconOnly) }
                 .accessibilityIdentifier("assign-role")
         }
         .themedSheet(item: $pick) { p in

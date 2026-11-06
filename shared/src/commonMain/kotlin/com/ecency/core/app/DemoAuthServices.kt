@@ -183,7 +183,12 @@ object DemoAuthServices {
             path.startsWith("images?") -> wrapped("""[{"_id":"demo-i1","url":"https://images.ecency.com/demo/one.jpg","created":"2026-10-01"},{"_id":"demo-i2","url":"https://images.ecency.com/demo/two.jpg","created":"2026-10-02"}]""")
             path.startsWith("fragments?") -> wrapped("""[{"id":"demo-f1","title":"Footer","body":"Thanks for reading!"},{"id":"demo-f2","title":"Disclaimer","body":"Synthetic fixture text."}]""")
             // paid AI features: synthetic prices, balance and answers; nothing is charged anywhere
-            path == "points" -> HttpResult(200, """{"points":"1,250.500","unclaimed_points":"0.000"}""")
+            // the Points API also carries the Pro membership: demo members until a fixed synthetic date
+            path == "points" -> {
+                val user = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject["username"]?.jsonPrimitive?.content }.getOrNull()
+                val pro = if (user != null && user.lowercase() in demoProMembers) """{"active":true,"expires":"$DEMO_PRO_EXPIRES"}""" else """{"active":false,"expires":null}"""
+                HttpResult(200, """{"points":"1,250.500","unclaimed_points":"0.000","pro":$pro}""")
+            }
             path == "ai-assist-price" -> HttpResult(
                 200,
                 """[{"action":"improve","cost":5,"free_limit":3,"free_remaining":2},{"action":"suggest_tags","cost":2,"free_limit":3,"free_remaining":0},""" +
@@ -260,6 +265,9 @@ object DemoAuthServices {
         """{"daily":[{"id":"checkin","progress":1},{"id":"post","progress":0},{"id":"comment","progress":2},{"id":"vote","progress":6},{"id":"reblog","progress":1}],""" +
             """"weekly":[{"id":"post","progress":3},{"id":"comment","progress":9},{"id":"vote","progress":31}],"monthly":[{"id":"post","progress":12}],""" +
             """"streak":{"current":5,"best":12,"at_risk":false,"freezes_owned":1}}"""
+
+    /** When every demo member's synthetic membership ends (the Points API's `pro.expires`). */
+    const val DEMO_PRO_EXPIRES = "2027-07-27T12:00:00+00:00"
 
     /** The demo Pro roster: spike-alice, and every account a demo Pro purchase was ordered for in this run. */
     val demoProMembers: MutableSet<String> = mutableSetOf("spike-alice")

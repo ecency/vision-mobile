@@ -427,12 +427,31 @@ class DappBrowserModelTest {
         assertEquals(2, app.broadcasts().size, "the same transfer twice is two transfers")
     }
 
+    /** #3635 review: a key account signs the binary form, so the sheet shows that form, never a field it drops. */
+    @Test
+    fun aKeyAccountSeesExactlyWhatItSigns() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        // end_date belongs in the extensions; at the top level the chain form has no place for it
+        send(b, page, keychain("broadcast", ""","operations":[["update_proposal",{"proposal_id":7,"creator":"$alice","daily_pay":"10.000 HBD","subject":"Better","permlink":"my-proposal","end_date":"2027-12-01T00:00:00","extensions":[]}]]"""))
+        testScheduler.advanceUntilIdle()
+        val fields = b.current.prompt!!.operations.single().fields.map { it.name }
+        assertFalse("end_date" in fields, "shown: $fields")
+        assertTrue("daily_pay" in fields)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, app.broadcasts().size)
+        assertFalse("end_date" in app.broadcasts().single().params.toString())
+    }
+
     @Test
     fun aKeyAccountIsRefusedWhatItCannotSerialize() = runTest {
         val app = signedIn(this)
         val b = browser(app)
         val page = Page()
-        send(b, page, keychain("broadcast", ""","operations":[["limit_order_create2",{"owner":"$alice","orderid":1,"amount_to_sell":"1.000 HIVE","exchange_rate":{"base":"1.000 HIVE","quote":"0.300 HBD"},"fill_or_kill":false,"expiration":"2030-01-01T00:00:00"}]]"""))
+        // (limit_order_create2 has a serializer since #3635; an escrow transfer has none)
+        send(b, page, keychain("broadcast", ""","operations":[["escrow_transfer",{"from":"$alice","to":"spike-bob","agent":"spike-agent","escrow_id":1,"hbd_amount":"0.000 HBD","hive_amount":"1.000 HIVE","fee":"0.001 HIVE","ratification_deadline":"2030-01-01T00:00:00","escrow_expiration":"2030-02-01T00:00:00","json_meta":""}]]"""))
         testScheduler.advanceUntilIdle()
         assertEquals(BridgeGuards.NOT_SUPPORTED, page.error())
         assertNull(b.current.prompt)

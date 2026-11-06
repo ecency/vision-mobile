@@ -195,6 +195,47 @@ object OperationJson {
             put("account", op.account)
             put("proxy", op.proxy)
         }
+        is com.ecency.core.hive.LimitOrderCreate2 -> pair("limit_order_create2") {
+            put("owner", op.owner)
+            put("orderid", op.orderId)
+            put("amount_to_sell", op.amountToSell.toString())
+            put(
+                "exchange_rate",
+                buildJsonObject {
+                    put("base", op.base.toString())
+                    put("quote", op.quote.toString())
+                },
+            )
+            put("fill_or_kill", op.fillOrKill)
+            put("expiration", op.expiration)
+        }
+        is com.ecency.core.hive.CreateProposal -> pair("create_proposal") {
+            put("creator", op.creator)
+            put("receiver", op.receiver)
+            put("start_date", op.startDate)
+            put("end_date", op.endDate)
+            put("daily_pay", op.dailyPay.toString())
+            put("subject", op.subject)
+            put("permlink", op.permlink)
+            putJsonArray("extensions") {}
+        }
+        is com.ecency.core.hive.UpdateProposal -> pair("update_proposal") {
+            put("proposal_id", op.proposalId)
+            put("creator", op.creator)
+            put("daily_pay", op.dailyPay.toString())
+            put("subject", op.subject)
+            put("permlink", op.permlink)
+            putJsonArray("extensions") {
+                op.endDate?.let { end ->
+                    add(buildJsonArray { add(JsonPrimitive(1)); add(buildJsonObject { put("end_date", end) }) })
+                }
+            }
+        }
+        is com.ecency.core.hive.RemoveProposal -> pair("remove_proposal") {
+            put("proposal_owner", op.owner)
+            putJsonArray("proposal_ids") { op.proposalIds.forEach { add(JsonPrimitive(it)) } }
+            putJsonArray("extensions") {}
+        }
         is AccountUpdate2 -> pair("account_update2") {
             put("account", op.account)
             put("json_metadata", op.jsonMetadata)
@@ -205,8 +246,8 @@ object OperationJson {
 
     /**
      * The reverse of [encode] for the operations the binary serializer supports (vote, comment,
-     * comment_options, transfer, custom_json, delete_comment, metadata-only account_update2, and the wallet
-     * operations of WalletOperations.kt). Throws [BroadcastException.InvalidOperation] for anything
+     * comment_options, transfer, custom_json, delete_comment, metadata-only account_update2, the wallet
+     * operations of WalletOperations.kt and the governance ones of GovernanceOperations.kt). Throws [BroadcastException.InvalidOperation] for anything
      * else or for malformed fields, so a hive:// link with an operation the app cannot sign yet fails cleanly.
      */
     /**
@@ -305,6 +346,29 @@ object OperationJson {
                         .map { (it as? JsonPrimitive)?.takeIf { p -> !p.isString }?.content?.toLongOrNull() ?: throw BroadcastException.InvalidOperation("Invalid operation data: proposal_ids") }
                     com.ecency.core.hive.UpdateProposalVotes(str("voter"), ids, bool("approve"))
                 }
+                "remove_proposal" -> {
+                    noExtensions(body)
+                    com.ecency.core.hive.RemoveProposal(str("proposal_owner"), proposalIds(body))
+                }
+                "create_proposal" -> {
+                    noExtensions(body)
+                    com.ecency.core.hive.CreateProposal(
+                        str("creator"), str("receiver"), str("start_date"), str("end_date"), Asset.parse(str("daily_pay")), str("subject"), str("permlink"),
+                    )
+                }
+                "update_proposal" -> com.ecency.core.hive.UpdateProposal(
+                    nonNegative(body, "proposal_id"), str("creator"), Asset.parse(str("daily_pay")), str("subject"), str("permlink"),
+                    proposalEndDate(body),
+                )
+                "limit_order_create2" -> {
+                    val rate = body["exchange_rate"] as? JsonObject ?: throw BroadcastException.InvalidOperation("Invalid operation data: exchange_rate")
+                    fun price(k: String) = Asset.parse((rate[k] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: throw BroadcastException.InvalidOperation("Invalid operation data: exchange_rate"))
+                    // nothing but base and quote: a field the chain does not know would be shown and not signed
+                    if (rate.keys != setOf("base", "quote")) throw BroadcastException.InvalidOperation("Invalid operation data: exchange_rate")
+                    com.ecency.core.hive.LimitOrderCreate2(
+                        str("owner"), u32("orderid"), Asset.parse(str("amount_to_sell")), price("base"), price("quote"), bool("fill_or_kill"), str("expiration"),
+                    )
+                }
                 "account_witness_vote" -> com.ecency.core.hive.AccountWitnessVote(str("account"), str("witness"), bool("approve"))
                 "account_witness_proxy" -> com.ecency.core.hive.AccountWitnessProxy(str("account"), str("proxy"))
                 "custom_json" -> CustomJson(names("required_auths"), names("required_posting_auths"), str("id"), str("json"))
@@ -356,6 +420,34 @@ object OperationJson {
         if (extensions != null && (extensions !is JsonArray || extensions.isNotEmpty())) {
             throw BroadcastException.InvalidOperation("Invalid operation data: extensions")
         }
+    }
+
+    /** A JSON number (never a string, a fraction or an exponent) that is not negative: proposal ids. */
+    private fun nonNegative(element: kotlinx.serialization.json.JsonElement?, what: String): Long =
+        (element as? JsonPrimitive)?.takeIf { !it.isString }?.content?.toLongOrNull()?.takeIf { it >= 0 }
+            ?: throw BroadcastException.InvalidOperation("Invalid operation data: $what")
+
+    private fun nonNegative(body: JsonObject, k: String): Long = nonNegative(body[k], k)
+
+    /** JSON numbers only, ascending and distinct (hived keeps them in a flat_set, which it signs sorted). */
+    private fun proposalIds(body: JsonObject): List<Long> =
+        (body["proposal_ids"] as? JsonArray ?: throw BroadcastException.InvalidOperation("Invalid operation data: proposal_ids"))
+            .map { nonNegative(it, "proposal_ids") }
+
+    /**
+     * update_proposal's extensions: none, or exactly hived's update_proposal_end_date (`[1, {"end_date": ...}]`) and
+     * nothing else in it. Anything else is refused: it would be shown and not signed, or signed as something else.
+     */
+    private fun proposalEndDate(body: JsonObject): String? {
+        val extensions = body["extensions"] ?: return null
+        fun bad(): Nothing = throw BroadcastException.InvalidOperation("Invalid operation data: extensions")
+        if (extensions !is JsonArray) bad()
+        if (extensions.isEmpty()) return null
+        val pair = extensions.singleOrNull() as? JsonArray ?: bad()
+        if (pair.size != 2 || (pair[0] as? JsonPrimitive)?.takeIf { !it.isString }?.content != "1") bad()
+        val value = pair[1] as? JsonObject ?: bad()
+        if (value.keys != setOf("end_date")) bad()
+        return (value["end_date"] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: bad()
     }
 
     /** Whether [decode] can turn [op] into a binary operation (the app can sign it with a key). */

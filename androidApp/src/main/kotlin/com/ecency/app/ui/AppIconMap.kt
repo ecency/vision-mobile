@@ -151,6 +151,7 @@ fun AppIcon.drawableRes(): Int? = when (this) {
     AppIcon.TARGET -> R.drawable.ic_target
     AppIcon.SHRINK -> R.drawable.ic_shrink
     AppIcon.UPLOADS -> R.drawable.ic_uploads
+    AppIcon.SMILE -> R.drawable.ic_smile
 }
 
 /** The filled drawable for [this], or null when it has no filled form (the outline is drawn instead). */
@@ -230,6 +231,7 @@ fun AppIcon.filledDrawableRes(): Int? = when (this) {
     AppIcon.HOURGLASS_TOP -> R.drawable.ic_hourglass_top_fill
     AppIcon.CREATED -> R.drawable.ic_created_fill
     AppIcon.TROPHY -> R.drawable.ic_trophy_fill
+    AppIcon.SMILE -> R.drawable.ic_smile_fill
     else -> null
 }
 

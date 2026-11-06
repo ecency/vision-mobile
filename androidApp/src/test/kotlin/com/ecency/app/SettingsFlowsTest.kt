@@ -290,4 +290,30 @@ class SettingsFlowsTest {
         assertEquals("other", env.settings.current.supportAccount)
         assertEquals(null, env.settings.current.support)
     }
+
+    // issue #3612: a purchase held for review at launch stays in Settings until dismissed, with its order and support
+    @Test
+    fun aPurchaseHeldAtLaunchShowsItsOrderAndContactSupportUntilDismissed() {
+        val rest = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.endsWith("/private-api/purchase-order")) HttpResult(422, """{"reason":"receipt_held","order":31}""") else rest?.invoke(r)
+        }
+        try {
+            signIn()
+            env.store = com.ecency.core.app.DemoStore(com.ecency.core.app.PurchaseService.PLAY).also { it.holdForReview("31") }
+            launch()
+            waitFor("heldPurchase:31")
+            assertEquals("This purchase is held for review. Contact support@ecency.com with order #31.", text("heldPurchaseText:31"))
+            assertTrue(compose.onAllNodes(hasText("Purchase held for review"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+            compose.onNodeWithTag("heldPurchaseSupport:31", useUnmergedTree = true).performClick()
+            until { mails.isNotEmpty() }
+            assertEquals("mailto:support@ecency.com?subject=Purchase%20held%20for%20review%2C%20order%20%2331", mails.last())
+            compose.onNodeWithTag("heldPurchaseDismiss:31", useUnmergedTree = true).performClick()
+            until { !exists("heldPurchase:31") }
+            assertTrue(env.purchases.current.heldOrders.isEmpty())
+        } finally {
+            com.ecency.core.app.DemoAuthServices.demoOrderStatus = 201
+            com.ecency.core.app.DemoAuthServices.demoOrderBody = "{}"
+        }
+    }
 }

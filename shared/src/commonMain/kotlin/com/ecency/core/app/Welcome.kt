@@ -29,6 +29,15 @@ object AppVersions {
 }
 
 /**
+ * RN welcome `_renderInfo`: the SimpleLineIcons line icons beside the three lines ("question", "emotsmile",
+ * "people"), drawn as the app's own outlined icons in the text blue, 30 dp / pt as RN.
+ */
+object WelcomeArt {
+    val LINE_ICONS: List<AppIcon> = listOf(AppIcon.HELP, AppIcon.SMILE, AppIcon.GROUP)
+    const val ICON_SIZE = 30
+}
+
+/**
  * RN's welcome screen decision (`appNavigator`: `!lastAppVersion || parse(lastAppVersion) < parse(appVersion)`)
  * and what "Get started!" stores (`setLastAppVersion`, `setIsTermsAccepted`): the screen shows on the first
  * launch and again after each update, with the terms box already ticked for someone who accepted before.

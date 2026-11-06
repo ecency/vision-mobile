@@ -138,6 +138,37 @@ struct ChatAvatarView: View {
 
 // MARK: - the Chats tab
 
+/// A chat row's channel name (README "Chats"): one line with an ellipsis; at accessibility sizes up to three lines
+/// that break only between words. Text breaks a word wider than its line inside the word, so when the widest word of
+/// the name does not fit the room (AX5, "Photography" is about 250 pt), the name stays on one line with an
+/// ellipsis instead (#3636).
+struct ChatRowName: View {
+    let title: String
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    private var words: [String] { title.split(whereSeparator: \.isWhitespace).map(String.init) }
+
+    var body: some View {
+        Group {
+            if typeSize.isAccessibilitySize {
+                ViewThatFits(in: .horizontal) {
+                    // ideally as wide as its widest word, so it fits only when every word fits on a line
+                    ZStack(alignment: .topLeading) {
+                        ForEach(Array(words.enumerated()), id: \.offset) { _, word in
+                            Text(verbatim: word).lineLimit(1).fixedSize().hidden().accessibilityHidden(true)
+                        }
+                        Text(title).lineLimit(3).frame(minWidth: 0, idealWidth: 0, maxWidth: .infinity, alignment: .leading)
+                    }
+                    Text(title).lineLimit(1)
+                }
+            } else {
+                Text(title).lineLimit(1)
+            }
+        }
+        .scaledFont(15, weight: .semibold)
+    }
+}
+
 /// RN chatsContainer: search bar, results, the channel list, the status pill and the channel sheets.
 struct ChatsTabView: View {
     @ObservedObject var observed: Observed<ChatsState>
@@ -312,7 +343,7 @@ struct ChatsTabView: View {
                 if !typeSize.isAccessibilitySize { ChatAvatarView(avatar: row.avatar, size: 44) }
                 VStack(alignment: .leading, spacing: 2) {
                     AdaptiveStack(spacing: 4) {
-                        Text(row.title).scaledFont(15, weight: .semibold).foregroundStyle(theme.text).lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
+                        ChatRowName(title: row.title).foregroundStyle(theme.text)
                         if row.official { OfficialBadge() }
                         if row.favorite { Image(appIcon: .star, filled: true).scaledFont(12).foregroundStyle(ChatColors.star).accessibilityLabel(ChatUiCopy.shared.FAVORITE) }
                         if row.muted { Image(appIcon: .notificationsOff).scaledFont(12).foregroundStyle(theme.icon).accessibilityLabel(UiCopy.shared.MUTED) }

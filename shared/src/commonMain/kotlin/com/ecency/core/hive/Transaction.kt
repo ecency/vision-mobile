@@ -38,6 +38,17 @@ internal object ChainTime {
         return daysFromCivil(y, mo, d) * 86400L + h * 3600L + mi * 60L + s
     }
 
+    /**
+     * [toEpochSeconds] for a time the app signs: a real calendar date (no Feb 31: the text must read back the same)
+     * that fits the chain's 32-bit time. An operation checks it when it is built, so a link or a page with such a
+     * date is refused before any confirmation, and what is shown is exactly what is signed (#3635).
+     */
+    fun signable(value: String): Long {
+        val seconds = toEpochSeconds(value)
+        require(seconds in 0..0xFFFFFFFFL && fromEpochSeconds(seconds) == value) { "invalid chain time: $value" }
+        return seconds
+    }
+
     /** Inverse of [toEpochSeconds]: "YYYY-MM-DDTHH:MM:SS" (UTC) for a non-negative epoch second. */
     fun fromEpochSeconds(epochSeconds: Long): String {
         require(epochSeconds >= 0) { "negative chain time" }

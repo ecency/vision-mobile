@@ -25,9 +25,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -1192,6 +1194,32 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals(other, m.current.username)
         assertNull(m.current.localDraft)
+    }
+
+    /**
+     * Tester report: a mention near the 100th character was cut (`@annephilbrick` as `@annephil`) and links showed as
+     * raw markdown. Rows show RN's summary (rn-3.x-final src/screens/drafts/screen/draftsScreen.tsx, postBodySummary
+     * of 100): plain text, cut at a word.
+     */
+    @Test
+    fun draftRowsShowAPlainTextSummaryCutAtAWord() = runTest {
+        val w = World(this)
+        val body = "a".repeat(90) + " @annephilbrick and [Ecency](https://ecency.com/some/very/long/path)"
+        w.drafts += buildJsonObject { put("_id", "d1"); put("title", "Mentions"); put("body", body); put("tags", ""); put("modified", "2026-10-01T11:00:00.000Z"); put("meta", buildJsonObject {}) }
+        val m = w.app.env.draftsModel(0)
+        m.start()
+        testScheduler.advanceUntilIdle()
+        val summary = m.current.summaries[body]
+        assertNotNull(summary)
+        assertTrue(summary.endsWith("@annephilbrick"), summary)
+        assertFalse("](" in summary, summary)
+        // a link reads as its text
+        val linked = "See [the Ecency site](https://ecency.com/some/very/long/path/that/would/fill/the/row) for @annephilbrick"
+        w.drafts += buildJsonObject { put("_id", "d2"); put("title", "Links"); put("body", linked); put("tags", ""); put("modified", "2026-10-02T11:00:00.000Z"); put("meta", buildJsonObject {}) }
+        m.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals("See the Ecency site for @annephilbrick", m.current.summaries[linked])
+        m.close()
     }
 
     @Test

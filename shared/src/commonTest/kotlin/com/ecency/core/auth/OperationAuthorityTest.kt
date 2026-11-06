@@ -40,6 +40,18 @@ class OperationAuthorityTest {
     }
 
     @Test
+    fun theOperationsLinksNowSignAreActiveEverywhere() {
+        // #3635: hived wants the active key of the creator, proposal owner or order owner for each of these
+        for (name in listOf("create_proposal", "update_proposal", "remove_proposal", "limit_order_create2")) {
+            val o = op("""["$name",{}]""")
+            assertEquals(KeyRole.ACTIVE, OperationAuthority.of(o), name)
+            assertEquals(KeyRole.ACTIVE, OperationAuthority.forHiveUri(o), name)
+            assertEquals(KeyRole.ACTIVE, OperationAuthority.hiveAuthKeyType(JsonArray(listOf(o))), name)
+            assertEquals("active", HiveUriOperations.find(name)!!.authority, name)
+        }
+    }
+
+    @Test
     fun requiredTakesTheHighest() {
         assertEquals(KeyRole.POSTING, OperationAuthority.required(ops("""["vote",{}]""", """["comment",{}]""")))
         assertEquals(KeyRole.ACTIVE, OperationAuthority.required(ops("""["comment",{}]""", """["transfer",{}]""")))

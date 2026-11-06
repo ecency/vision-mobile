@@ -658,6 +658,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                                 entry.get("perks") { env.perksModel() }, session.username, onBack = { navigator.pop() }, onOpen = routes::push,
                                 onGetPoints = { routes.push(AppScreen.of(RouteName.BOOST, it)) },
                                 nowMillis = env.nowMillis, pro = entry.get("pro") { env.proModel() },
+                                heldNotices = { HeldPurchaseNotices(env, host::openMail) },
                             )
                         }
                         AppScreen.SpinGame -> Box(Modifier.fillMaxSize().statusBarsPadding()) {

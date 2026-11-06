@@ -336,14 +336,25 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
                 val resolved = HiveUri.resolveTransaction(
                     formatted.tx, decoded.params, com.ecency.core.api.broadcast.TxReference(0, 0), HiveUri.expirationFrom(env.nowMillis()), user,
                 )
-                val ops = resolved["operations"] as? JsonArray ?: return refuse(INVALID_OP_TITLE, INVALID_OP_MESSAGE, silent)
-                val op = ops.first() as JsonArray
+                val linkOps = resolved["operations"] as? JsonArray ?: return refuse(INVALID_OP_TITLE, INVALID_OP_MESSAGE, silent)
+                val linkOp = linkOps.first() as JsonArray
                 // key accounts sign on the device: an operation the app cannot serialize yet is refused before the
                 // user approves anything (HiveSigner and HiveAuth accounts sign it in their own app)
-                if (available != null && !com.ecency.core.api.broadcast.OperationJson.canDecode(op)) {
-                    callback?.let { answer(it, requestId, listOf("status" to "error", "error" to "not_supported"), quiet) }
-                    return refuse(MULTI_OPS_TITLE, NOT_SUPPORTED, silent)
+                val binary = if (available != null) {
+                    try {
+                        com.ecency.core.api.broadcast.OperationJson.decode(linkOp)
+                    } catch (_: com.ecency.core.api.broadcast.BroadcastException) {
+                        callback?.let { answer(it, requestId, listOf("status" to "error", "error" to "not_supported"), quiet) }
+                        return refuse(MULTI_OPS_TITLE, NOT_SUPPORTED, silent)
+                    }
+                } else {
+                    null
                 }
+                // ...and the confirmation shows the operation exactly as it is signed: the binary form's own JSON (#3635),
+                // so a field the chain does not know, or an amount written another way ("1 HBD"), is never shown other
+                // than it is signed
+                val op = binary?.let(com.ecency.core.api.broadcast.OperationJson::encode) ?: linkOp
+                val ops = JsonArray(listOf(op))
                 val authority = if (formatted.authority == "active") KeyRole.ACTIVE else KeyRole.POSTING
                 pending = Pending.Sign(user, ops, authority, callback, requestId, quiet)
                 setState {
@@ -535,7 +546,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
         private val KEY_FIELDS = listOf(
             "account", "to", "to_account", "delegatee", "receiver", "agent", "new_account_name",
             "new_recovery_account", "recovery_account", "owner", "active", "posting",
-            "amount", "vesting_shares", "hive_amount", "hbd_amount", "fee",
+            "amount", "vesting_shares", "hive_amount", "hbd_amount", "fee", "daily_pay", "amount_to_sell", "exchange_rate", "min_to_receive",
         )
 
         /** Callback error when the chain cannot say whether the link's transaction went in (the user checks the wallet). */

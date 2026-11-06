@@ -40,6 +40,8 @@ final class EsieUITests: XCTestCase {
         let esie = app.images["esie"]
         XCTAssertTrue(esie.waitForExistence(timeout: 15))
         XCTAssertEqual(esie.value as? String, "wave")
+        // RN's launch animation covers the screen first (WelcomeUITests)
+        XCTAssertTrue(app.images["welcome-launch"].waitForNonExistence(timeout: 8))
         XCTAssertTrue(app.buttons["welcome-start"].isHittable, "the start button stays on screen")
         let title = app.staticTexts["Ecency"].firstMatch
         XCTAssertLessThanOrEqual(title.frame.maxX, esie.frame.minX, "Esie clear of the title")

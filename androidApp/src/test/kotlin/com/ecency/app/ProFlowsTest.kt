@@ -68,6 +68,12 @@ class ProFlowsTest {
                 }
                 r.url.endsWith("/private-api/pro-members") -> HttpResult(200, """{"members":[${roster.joinToString(",") { "\"$it\"" }}]}""")
                 r.url.endsWith("/private-api/quests") -> HttpResult(200, """{"daily":[],"weekly":[],"monthly":[]}""")
+                // the Points API carries the membership's end (Ecency's `pro: {active, expires}`)
+                r.url.endsWith("/private-api/points") -> HttpResult(
+                    200,
+                    """{"points":"10.000","unclaimed_points":"0.000","pro":""" +
+                        (if ("tester" in roster) """{"active":true,"expires":"$PRO_ENDS"}""" else """{"active":false,"expires":null}""") + "}",
+                )
                 else -> null
             }
         }
@@ -128,6 +134,33 @@ class ProFlowsTest {
         waitFor("proBuy")
         compose.await("the extend label") { hasText("Extend by 12 months for $19.99") }
         assertTrue(hasText(ProCopy.EXTEND_NOTE))
+    }
+
+    /** #3636: a member sees when the membership ends, on the card and in the sheet; a non-member sees no date. */
+    @Test
+    fun aMemberSeesWhenTheMembershipEnds() {
+        signIn()
+        roster += "tester"
+        launch()
+        waitFor("proCardExpiry")
+        val ends = ProCopy.until(com.ecency.core.l10n.LocaleFormat.date(kotlin.time.Instant.parse(PRO_ENDS).toEpochMilliseconds()))
+        assertEquals(ends, text("proCardExpiry"))
+        click("proCard")
+        waitFor("proExpiry")
+        assertEquals(ends, text("proExpiry"))
+    }
+
+    @Test
+    fun aNonMemberSeesNoEndDate() {
+        signIn()
+        launch()
+        waitFor("proCardText")
+        compose.waitForIdle()
+        assertFalse(exists("proCardExpiry"))
+    }
+
+    private companion object {
+        const val PRO_ENDS = "2027-07-27T12:00:00+00:00"
     }
 
     @Test

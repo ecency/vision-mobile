@@ -33,6 +33,8 @@ struct PerksScreen: View {
         let mine = state.account != nil && state.account == session.state.username
         ScrollView {
             VStack(spacing: 16) {
+                // issue #3612: purchases held for review (HeldPurchaseViews.swift)
+                HeldPurchaseNotices(env: app.env)
                 questsCard(state, mine: mine)
                 // issue #3555: Ecency Pro by in-app purchase (ProViews.swift)
                 ProCard(env: app.env)
@@ -307,10 +309,12 @@ struct SpinGameScreen: View {
 }
 
 /// The daily reset line (00:00 UTC, issue #3548): `line` reads the clock, nil hides it. It ticks while shown, each
-/// time the minutes it reads change, so it rolls over at midnight.
+/// time the minutes it reads change, so it rolls over at midnight; `onTick` runs when it shows and at every tick (the
+/// daily leaderboard reads its board again after the reset, issue #3612).
 struct DailyResetLine: View {
     let line: (Int64) -> String?
     let identifier: String
+    var onTick: () -> Void = {}
     @Environment(\.appTheme) private var theme
     @State private var now = DailyResetLine.clock()
 
@@ -323,10 +327,12 @@ struct DailyResetLine: View {
                 .accessibilityIdentifier(identifier)
                 .task {
                     now = DailyResetLine.clock()
+                    onTick()
                     while !Task.isCancelled {
                         let wait = DailyReset.shared.nextTickMillis(nowMillis: DailyResetLine.clock())
                         try? await Task.sleep(nanoseconds: UInt64(max(wait, 1)) * 1_000_000)
                         now = DailyResetLine.clock()
+                        onTick()
                     }
                 }
         }

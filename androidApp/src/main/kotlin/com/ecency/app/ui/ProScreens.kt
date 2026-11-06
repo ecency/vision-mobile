@@ -57,6 +57,7 @@ fun ProCard(model: ProModel) {
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
             Text(ProCopy.TITLE, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.blueText)
             Text(s.cardText, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(top = 2.dp).testTag(if (s.member) "proCardMember" else "proCardText"))
+            s.expiryText?.let { Text(it, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(top = 2.dp).testTag("proCardExpiry")) }
         }
         Glyph(AppIcon.CHEVRON_RIGHT, colors.icon, 22.dp)
     }
@@ -93,6 +94,7 @@ private fun ProSheet(model: ProModel) {
                 }
                 else -> {
                     if (s.member) Text(ProCopy.MEMBER, color = colors.text, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp).testTag("proMember"))
+                    s.expiryText?.let { Text(it, color = colors.text, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp).testTag("proExpiry")) }
                     Text(ProCopy.SUBTITLE, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
                     Column(Modifier.padding(top = 10.dp)) {
                         ProCopy.BENEFITS.forEachIndexed { i, b ->

@@ -412,9 +412,22 @@ fun SignConfirmSheet(prompt: LinkPrompt.SignConfirm, onApprove: () -> Unit, onCa
 /** Esie on the welcome screen only below large text sizes (README "Esie"). */
 fun welcomeShowsEsie(fontScale: Float): Boolean = fontScale < 1.5f
 
-/** RN welcome screen: three lines, the terms checkbox, "Get started!" only once accepted. */
+/**
+ * RN welcome screen: three lines with RN's line icons, the terms checkbox, "Get started!" only once accepted; RN's
+ * launch animation covers it for its first 3.55 s at full motion (README "Welcome and terms, register").
+ */
 @Composable
 fun WelcomeScreen(host: AppHost, onAccepted: () -> Unit) {
+    var revealing by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
+    val showsReveal = revealing && com.ecency.core.app.LaunchReveal.shows(LocalMotion.current.level)
+    Box(Modifier.fillMaxSize()) {
+        WelcomeContent(host, onAccepted)
+        if (showsReveal) LaunchRevealOverlay(onDone = { revealing = false })
+    }
+}
+
+@Composable
+private fun WelcomeContent(host: AppHost, onAccepted: () -> Unit) {
     val colors = LocalEcencyColors.current
     var accepted by remember { mutableStateOf(host.termsPreviouslyAccepted()) }
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding().padding(24.dp).testTag("welcome")) {
@@ -438,9 +451,18 @@ fun WelcomeScreen(host: AppHost, onAccepted: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(24.dp))
-            WelcomeCopy.LINES.forEach { (heading, body) ->
-                Text(heading, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(top = 16.dp))
-                Text(body, color = colors.darkGray, fontSize = 14.sp)
+            WelcomeCopy.LINES.forEachIndexed { i, (heading, body) ->
+                // RN _renderInfo: a 30 dp line icon in the blue, the heading and body beside it
+                Row(Modifier.padding(top = 16.dp)) {
+                    Glyph(
+                        com.ecency.core.app.WelcomeArt.LINE_ICONS[i], colors.blueText, com.ecency.core.app.WelcomeArt.ICON_SIZE.dp,
+                        Modifier.padding(top = 2.dp).testTag("welcomeIcon:$i"),
+                    )
+                    Column(Modifier.padding(start = 10.dp)) {
+                        Text(heading, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(body, color = colors.darkGray, fontSize = 14.sp)
+                    }
+                }
             }
         }
         Row(

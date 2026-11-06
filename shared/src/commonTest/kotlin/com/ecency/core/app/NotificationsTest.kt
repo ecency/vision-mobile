@@ -802,6 +802,85 @@ class NotificationsTest {
         assertEquals(6, f.backend.of("notifications").size, "every chip tap is one request")
     }
 
+    // ---- unread only (issue #2686): client side, the API has no unread parameter ----
+
+    @Test
+    fun theUnreadChipShowsOnlyUnreadRowsAndKeepsTheMenuFilter() = runTest {
+        val f = NotificationFixture(this)
+        f.backend.rows[alice] = listOf(FakeNotificationsBackend.vote("n1"), FakeNotificationsBackend.vote("n2", read = 1), FakeNotificationsBackend.vote("n3"))
+        f.backend.unread[alice] = 2
+        f.start()
+        f.model.show(); f.idle()
+        assertFalse(f.model.current.unreadOnly)
+        assertEquals(listOf("n1", "n2", "n3"), f.model.current.shown.map { it.id })
+        val requests = f.backend.of("notifications").size
+
+        f.model.toggleUnreadOnly(); f.idle()
+        assertTrue(f.model.current.unreadOnly)
+        assertEquals(listOf("n1", "n3"), f.model.current.shown.map { it.id })
+        assertEquals(requests, f.backend.of("notifications").size, "the rows in memory are filtered: no request")
+        assertTrue(f.backend.of("notifications").all { it.body["unread"] == null }, "the API takes no unread parameter")
+
+        // a quick chip (or the menu) keeps the unread chip on: unread mentions
+        f.model.toggleQuickFilter(NotificationFilter.MENTIONS); f.idle()
+        assertTrue(f.model.current.unreadOnly)
+        assertEquals("mentions", f.backend.of("notifications").last().text("filter"))
+        assertEquals(listOf("n1", "n3"), f.model.current.shown.map { it.id })
+
+        // a row marked read leaves the unread view; the last one gone, the empty text is the unread one
+        assertTrue(f.model.markRead("n1")); f.idle()
+        assertEquals(listOf("n3"), f.model.current.shown.map { it.id })
+        f.model.markAllRead(); f.idle()
+        assertTrue(f.model.current.shown.isEmpty())
+        assertTrue(f.model.current.isEmpty)
+        assertEquals("No unread notifications", f.model.current.emptyText)
+
+        // off again: every row
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(listOf("n1", "n2", "n3"), f.model.current.shown.map { it.id })
+        assertEquals("No recent activity", NotificationsState(loaded = true).emptyText)
+    }
+
+    @Test
+    fun theUnreadViewPagesPastPagesWithoutUnreadRowsAndStopsWhenAllAreFound() = runTest {
+        val f = NotificationFixture(this)
+        // two pages of read rows, then the two unread ones, then more read rows
+        f.backend.rows[alice] = (1..6).map { FakeNotificationsBackend.vote("r$it", read = 1) } +
+            listOf(FakeNotificationsBackend.vote("u1"), FakeNotificationsBackend.vote("u2")) +
+            (7..12).map { FakeNotificationsBackend.vote("r$it", read = 1) }
+        f.backend.unread[alice] = 2
+        f.start()
+        f.model.show(); f.idle()
+        assertEquals(1, f.backend.of("notifications").size)
+
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(listOf("u1", "u2"), f.model.current.shown.map { it.id })
+        assertEquals(listOf("", "r3", "r6"), f.backend.of("notifications").map { it.text("since") }, "read-only pages are skipped by themselves")
+        assertFalse(f.model.current.endReached)
+        // the two unread rows of the count are on screen: nothing more is asked by itself
+        f.idle()
+        assertEquals(3, f.backend.of("notifications").size)
+        // scrolling on asks for one page; one without unread rows goes no further: every unread row is shown
+        f.model.loadMore(); f.idle()
+        assertEquals(listOf("", "r3", "r6", "r7"), f.backend.of("notifications").map { it.text("since") })
+    }
+
+    @Test
+    fun theUnreadViewNeverPagesBeyondTheWindowByItself() = runTest {
+        val f = NotificationFixture(this)
+        f.backend.rows[alice] = (1..60).map { FakeNotificationsBackend.vote("r$it", read = 1) }
+        f.backend.unread[alice] = 5
+        f.start()
+        f.model.show(); f.idle()
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(NotificationsModel.WINDOW_PAGES, f.backend.of("notifications").size, "no page leaves memory for an empty view")
+        assertTrue(f.model.current.shown.isEmpty())
+        assertEquals(NotificationsModel.WINDOW_PAGES, f.model.current.pages)
+        // a reload with the chip on starts over from the newest and is bounded the same way
+        f.model.refresh(); f.idle()
+        assertEquals(2 * NotificationsModel.WINDOW_PAGES, f.backend.of("notifications").size)
+    }
+
     @Test
     fun aFailedMarkPutsRowAndCountBackAndSaysFail() = runTest {
         val f = NotificationFixture(this)
@@ -914,6 +993,89 @@ class NotificationsTest {
         assertNull(board.current.resetLine(now), "monthly")
         board.select(LeaderboardDuration.DAY); f.idle()
         assertEquals("Today (UTC), resets in 24h", board.current.resetLine(now + 5 * 3_600_000L + 12 * 60_000L), "rolls over at midnight")
+    }
+
+    @Test
+    fun theDailyBoardIsReadAgainOnceWhenTheResetPassesWhileItIsOpen() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        // 2026-10-29T23:59:00Z
+        val beforeMidnight = 1_793_318_340_000L
+        f.app.now = beforeMidnight
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        assertEquals(listOf("leaderboard/day"), f.backend.paths())
+        board.tick(); f.idle()
+        assertEquals(1, f.backend.paths().size, "the same UTC day: nothing")
+
+        f.app.now = beforeMidnight + 61_000L
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day"), f.backend.paths(), "the reset passed: read again")
+        board.tick(); f.idle()
+        f.app.now += 3_600_000L
+        board.tick(); f.idle()
+        assertEquals(2, f.backend.paths().size, "once per reset")
+
+        // weekly and monthly do not reset at midnight
+        board.select(LeaderboardDuration.WEEK); f.idle()
+        f.app.now += DailyReset.DAY_MILLIS
+        board.tick(); f.idle()
+        board.select(LeaderboardDuration.MONTH); f.idle()
+        f.app.now += DailyReset.DAY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day", "leaderboard/week", "leaderboard/month"), f.backend.paths())
+        board.close()
+    }
+
+    /** Review of #3612: a failed read after the reset is tried again a few minutes later, without a toast each time. */
+    @Test
+    fun aFailedReadAfterTheResetIsTriedAgainLaterAndQuietly() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        val beforeMidnight = 1_793_318_340_000L
+        f.app.now = beforeMidnight
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        val served = f.app.authBackend.privateApi
+        var failed = 0
+        f.app.authBackend.privateApi = { failed++; HttpResult(500, "") }
+
+        f.app.now = beforeMidnight + 61_000L
+        board.tick(); f.idle()
+        assertEquals(1, failed)
+        assertNull(f.env.ui.current.toast, "a background read says nothing when it fails")
+        f.app.now += 60_000L
+        board.tick(); f.idle()
+        assertEquals(1, failed, "not every minute")
+
+        f.app.authBackend.privateApi = served
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/day"), f.backend.paths(), "read again once it answers")
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(2, f.backend.paths().size, "then once per reset")
+        board.close()
+    }
+
+    /** Review of #3612: a weekly read today does not count as today's daily read. */
+    @Test
+    fun aFailedDailyReadAfterAWeeklyOneIsStillTriedAgain() = runTest {
+        val f = NotificationFixture(this, users = emptyList())
+        f.start()
+        // 2026-10-29T12:00:00Z: the retry stays on the same UTC day
+        f.app.now = 1_793_318_340_000L - 11 * 3_600_000L - 59 * 60_000L
+        val board = f.env.leaderboardModel()
+        board.start(); f.idle()
+        board.select(LeaderboardDuration.WEEK); f.idle()
+        val served = f.app.authBackend.privateApi
+        f.app.authBackend.privateApi = { HttpResult(500, "") }
+        board.select(LeaderboardDuration.DAY); f.idle()
+        f.app.authBackend.privateApi = served
+        f.app.now += LeaderboardModel.RETRY_MILLIS
+        board.tick(); f.idle()
+        assertEquals(listOf("leaderboard/day", "leaderboard/week", "leaderboard/day"), f.backend.paths())
+        board.close()
     }
 
     @Test

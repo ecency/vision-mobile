@@ -60,7 +60,15 @@ SIGNING=(CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=)
 if [[ "${1:-}" == "--test" ]]; then
   # The test run's own status: a failing test must fail the script.
   status=0
-  xcodebuild test -project EcencySpike.xcodeproj -scheme EcencyApp \
+  xcodebuild build-for-testing -project EcencySpike.xcodeproj -scheme EcencyApp \
+    -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED" \
+    "${SIGNING[@]}" -quiet
+  # The StoreKit test session first, in a process of its own: a test process serves purchases from the session only
+  # when the session's configuration was on the simulator before it started (a fresh simulator has none), #3638.
+  xcodebuild test-without-building -project EcencySpike.xcodeproj -scheme EcencyApp \
+    -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED" \
+    -only-testing:EcencyAppTests/StoreKitSessionTests "${SIGNING[@]}" -quiet || status=$?
+  xcodebuild test-without-building -project EcencySpike.xcodeproj -scheme EcencyApp \
     -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DERIVED" \
     "${SIGNING[@]}" -quiet || status=$?
   exit "$status"

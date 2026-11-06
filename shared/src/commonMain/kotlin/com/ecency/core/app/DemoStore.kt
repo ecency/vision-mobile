@@ -19,7 +19,20 @@ class DemoStore(override val platform: String) : StorePlatform {
     override fun products(ids: List<String>, done: (List<StoreProduct>?, StoreError?) -> Unit) =
         done(CATALOG.filter { it.productId in ids }, null)
 
-    override fun purchases(done: (List<StorePurchase>?, StoreError?) -> Unit) = done(emptyList(), null)
+    /** Paid purchases left unfinished, as the store lists them at launch ([holdForReview]). */
+    private val unfinished = mutableListOf<StorePurchase>()
+
+    /**
+     * Debug `demoHeldPurchase`: an unfinished Points purchase waits at launch and the demo order answers 422
+     * `receipt_held` with [order], so the held notice shows (issue #3612). Set before `purchases.start()`.
+     */
+    fun holdForReview(order: String) {
+        unfinished += StorePurchase("999points", "demo-held-$order", StorePurchaseState.PURCHASED)
+        DemoAuthServices.demoOrderStatus = 422
+        DemoAuthServices.demoOrderBody = """{"reason":"receipt_held","order":$order}"""
+    }
+
+    override fun purchases(done: (List<StorePurchase>?, StoreError?) -> Unit) = done(unfinished.toList(), null)
 
     override fun purchase(productId: String, accountToken: String, done: (StoreError?) -> Unit) {
         done(null)
@@ -31,7 +44,10 @@ class DemoStore(override val platform: String) : StorePlatform {
         }
     }
 
-    override fun finish(purchase: StorePurchase, done: (StoreError?) -> Unit) = done(null)
+    override fun finish(purchase: StorePurchase, done: (StoreError?) -> Unit) {
+        unfinished.removeAll { it.token == purchase.token }
+        done(null)
+    }
 
     override fun setListener(listener: StoreListener?) {
         this.listener = listener

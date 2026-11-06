@@ -84,7 +84,8 @@ struct DigestSheet: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(theme.background)
-        .presentationDetents(typeSize > .large ? [.medium, .large] : [.medium])
+        // never medium only: a short window (iPhone Duo's inner display held sideways) gets about 330 pt there
+        .presentationDetents([.medium, .large])
         .alert(state.alert ?? "", isPresented: Binding(get: { state.alert != nil }, set: { if !$0 { model.clearAlert() } })) {
             Button(DigestCopy.shared.OK, role: .cancel) { model.clearAlert() }
         }

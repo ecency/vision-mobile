@@ -102,6 +102,8 @@ private fun OnStart(onForeground: () -> Unit) {
 fun PerksScreen(
     model: PerksModel, signedIn: String?, onBack: () -> Unit, onOpen: (AppScreen) -> Unit, onGetPoints: (String) -> Unit,
     nowMillis: () -> Long, pro: com.ecency.core.app.ProModel? = null,
+    /** Purchases held for review (issue #3612), above the quests. */
+    heldNotices: @Composable () -> Unit = {},
 ) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
@@ -118,6 +120,7 @@ fun PerksScreen(
     Column(Modifier.fillMaxSize().background(colors.background).testTag("perks")) {
         TopBar(PerksCopy.HEADER, onBack = onBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+            heldNotices()
             Card {
                 Text(PerksCopy.QUESTS_TITLE, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.darkText)
                 if (mine && s.failed) {
@@ -353,16 +356,20 @@ fun SpinGameScreen(env: com.ecency.core.app.AppEnvironment, model: SpinGameModel
 
 /**
  * The daily reset line (00:00 UTC, issue #3548): [line] reads the clock, null hides it. It ticks while shown, each
- * time the minutes it reads change, so it rolls over at midnight.
+ * time the minutes it reads change, so it rolls over at midnight; [onTick] runs when it shows and at every tick (the
+ * daily leaderboard reads its board again after the reset, issue #3612).
  */
 @Composable
-internal fun DailyResetLine(nowMillis: () -> Long, line: (Long) -> String?, tag: String, modifier: Modifier = Modifier) {
+internal fun DailyResetLine(nowMillis: () -> Long, line: (Long) -> String?, tag: String, modifier: Modifier = Modifier, onTick: () -> Unit = {}) {
     val now = remember { mutableLongStateOf(nowMillis()) }
     val text = line(now.longValue) ?: return
+    val tick by androidx.compose.runtime.rememberUpdatedState(onTick)
     LaunchedEffect(Unit) {
+        tick()
         while (true) {
             kotlinx.coroutines.delay(com.ecency.core.app.DailyReset.nextTickMillis(nowMillis()))
             now.longValue = nowMillis()
+            tick()
         }
     }
     Text(text, fontSize = 13.sp, color = LocalEcencyColors.current.darkGray, modifier = modifier.testTag(tag))

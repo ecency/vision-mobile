@@ -47,6 +47,7 @@ final class ProTests: XCTestCase {
     }
 
     func testANonMemberBuysProWhichIsOrderedFinishedAndActivates() throws {
+        try PurchaseTests.requireSessionPurchases(session)
         let env = try PurchaseTests.environment()
         let store = PurchaseTests.serviceStore()
         env.store = store

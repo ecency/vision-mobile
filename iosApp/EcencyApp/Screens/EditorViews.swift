@@ -660,7 +660,7 @@ struct EditorScreen: View {
     @ToolbarContentBuilder
     private func toolbar(_ state: EditorState) -> some ToolbarContent {
         ToolbarItem(placement: .navigationBarLeading) {
-            Button { leave() } label: { Image(appIcon: .back) }.accessibilityLabel(UiCopy.shared.BACK).accessibilityIdentifier("editor-back")
+            Button { leave() } label: { Label(UiCopy.shared.BACK, appIcon: .back).labelStyle(.iconOnly) }.accessibilityIdentifier("editor-back")
         }
         if !state.isReply, !state.isEdit {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -670,10 +670,12 @@ struct EditorScreen: View {
             .onPage()
         }
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            Button { model.setPreview(on: !state.isPreview) } label: { Image(appIcon: state.isPreview ? .edit : .preview) }
-                .accessibilityLabel(state.isPreview ? UiCopy.shared.EDIT : EditorUiCopy.shared.PREVIEW).accessibilityIdentifier("preview-toggle")
+            Button { model.setPreview(on: !state.isPreview) } label: {
+                Label(state.isPreview ? UiCopy.shared.EDIT : EditorUiCopy.shared.PREVIEW, appIcon: state.isPreview ? .edit : .preview).labelStyle(.iconOnly)
+            }
+            .accessibilityIdentifier("preview-toggle")
             if !state.isReply {
-                Button { sheet = .options } label: { Image(appIcon: .settings) }.accessibilityLabel(EditorUiCopy.shared.POST_OPTIONS).accessibilityIdentifier("post-options")
+                Button { sheet = .options } label: { Label(EditorUiCopy.shared.POST_OPTIONS, appIcon: .settings).labelStyle(.iconOnly) }.accessibilityIdentifier("post-options")
             }
             if state.isSending || state.uploading > 0 {
                 ProgressView().accessibilityIdentifier("editor-busy")
@@ -1055,7 +1057,7 @@ private struct LinkSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
     }
 }
 
@@ -1606,7 +1608,7 @@ struct DraftsScreen: View {
                 Text([tag.map { "#\($0)" }, Self.shownDate(date)].compactMap { $0 }.joined(separator: "  "))
                     .font(.caption).foregroundStyle(theme.secondary)
                 Text(title).bold().lineLimit(2).foregroundStyle(theme.text)
-                Text(String(body.prefix(100))).font(.footnote).lineLimit(2).foregroundStyle(theme.secondary)
+                Text(drafts.state.summaries[body] ?? "").font(.footnote).lineLimit(2).foregroundStyle(theme.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

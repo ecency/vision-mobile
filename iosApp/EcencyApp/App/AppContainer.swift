@@ -329,6 +329,10 @@ final class AppContainer: ObservableObject {
                     DemoAuthServices.shared.chat?.seedHistory(channelId: id, read: Int32(history), unread: 0)
                 }
             }
+            // -demoChatName "<name>": the favourite demo channel's name (long names at large text sizes)
+            if let name = UserDefaults.standard.string(forKey: "demoChatName") {
+                DemoAuthServices.shared.chat?.rename(channelId: "ch-photo", name: name)
+            }
             // -demoToast "<text>": a toast through the shared channel at launch (toast layout UI tests)
             if let text = UserDefaults.standard.string(forKey: "demoToast") {
                 // -demoToastDelay <s>: later, so a test can open a sheet first
@@ -350,7 +354,14 @@ final class AppContainer: ObservableObject {
         Task { try? await env.hiveNodes.start() }
         // in-app purchases (README "In-app purchases"): StoreKit 2, or the offline demo store in fake-data runs; the
         // transaction listener runs from the start and whatever an earlier run left is delivered
-        env.store = options.fakeData ? DemoStore(platform: PurchaseService.companion.APP_STORE) : StoreKitStore()
+        if options.fakeData {
+            let demo = DemoStore(platform: PurchaseService.companion.APP_STORE)
+            // -demoHeldPurchase <order>: an unfinished purchase Ecency holds for review at launch (issue #3612)
+            if let order = UserDefaults.standard.string(forKey: "demoHeldPurchase") { demo.holdForReview(order: order) }
+            env.store = demo
+        } else {
+            env.store = StoreKitStore()
+        }
         if CrashReporting.started && !options.fakeData { env.crashReporter = CrashReporting.Reporter() }
         env.analytics.config = AnalyticsConfig(host: AppContainer.analyticsHost(BuildSecrets.plausibleHost, debug: AppContainer.isDebugBuild || options.fakeData),
                                                os: "ios", userAgent: AppContainer.analyticsUserAgent())

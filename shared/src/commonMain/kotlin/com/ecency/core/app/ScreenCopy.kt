@@ -206,6 +206,7 @@ object ReadingUiCopy {
     val NOTIFICATIONS: String get() = L.notification.notification
     val NOT_ENOUGH_POINTS: String get() = L.native.ui.reading.notEnoughPoints
     val NO_RECENT_ACTIVITY: String get() = L.notification.noactivity
+    val NO_UNREAD_NOTIFICATIONS: String get() = L.native.ui.reading.noUnread
     val OPEN_EDITOR: String get() = L.native.ui.reading.openEditor
     val PAUSE: String get() = L.listen.pause
     val PAUSE_VOICE: String get() = L.native.ui.reading.pauseVoice

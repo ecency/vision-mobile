@@ -113,10 +113,10 @@ struct ReplyComposer: View {
                 // RN quick reply "expand": the same reply continues in the full editor
                 ToolbarItem(placement: .primaryAction) {
                     if !state.isSending, let onExpand {
-                        Button { draft.model.expand { args in dismiss(); onExpand(args) } } label: { Image(appIcon: .fullscreen) }
+                        Button { draft.model.expand { args in dismiss(); onExpand(args) } } label: { Label(ReadingUiCopy.shared.OPEN_EDITOR, appIcon: .fullscreen).labelStyle(.iconOnly) }
                             // as Android: the editor waits for an image being picked or uploaded (the model refuses too)
                             .disabled(state.isAttaching)
-                            .accessibilityLabel(ReadingUiCopy.shared.OPEN_EDITOR).largeContent(ReadingUiCopy.shared.OPEN_EDITOR, appIcon: .fullscreen)
+                            .largeContent(ReadingUiCopy.shared.OPEN_EDITOR, appIcon: .fullscreen)
                             .accessibilityIdentifier("reply-expand")
                     }
                 }
@@ -256,7 +256,7 @@ struct GallerySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: { Image(appIcon: .close) }.accessibilityLabel(UiCopy.shared.CLOSE)
+                    Button { dismiss() } label: { Label(UiCopy.shared.CLOSE, appIcon: .close).labelStyle(.iconOnly) }
                         .largeContent(UiCopy.shared.CLOSE, appIcon: .close).accessibilityIdentifier("gallery-close")
                 }
                 ToolbarItemGroup(placement: .primaryAction) {

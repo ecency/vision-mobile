@@ -111,6 +111,25 @@ object PurchaseCopy {
     val PROCESSING: String get() = L.native.purchase.processing
 }
 
+/** A purchase Ecency holds for review (422 `receipt_held`): its order number, for support. */
+data class HeldPurchase(val order: String, val productId: String)
+
+/** A held purchase and the account on this device it is for (empty: shown to every account). */
+internal data class HeldNotice(val held: HeldPurchase, val owner: String)
+
+/** The lasting notice of a held purchase (issue #3612): Perks and Settings, until dismissed or released. */
+object HeldPurchaseCopy {
+    val TITLE: String get() = L.native.purchase.heldTitle
+    fun message(order: String): String = PurchaseCopy.held(order)
+    val CONTACT_SUPPORT: String get() = L.native.purchase.contactSupport
+    val DISMISS: String get() = L.feature.spotlight.dismiss
+    const val SUPPORT_EMAIL = "support@ecency.com"
+
+    /** A mail to support naming the order (encoded as the feedback mail, RN sendEmail's qs). */
+    fun supportMailto(order: String): String =
+        "mailto:$SUPPORT_EMAIL?subject=" + SettingsOptions.qsEncode(L.native.purchase.heldSubject(order = order).removePrefix("\u200F"))
+}
+
 /** Who a purchase is for (RN: the screen's username param or the current account; for a paid account, the new account's details). */
 data class PurchaseTarget(val user: String = "", val meta: AccountOrderMeta? = null)
 
@@ -154,6 +173,8 @@ data class PurchaseServiceState(
     val pending: Set<String> = emptySet(),
     /** Products being bought or ordered right now (RN `isProcessing`). */
     val busy: Set<String> = emptySet(),
+    /** Purchases Ecency holds for review, oldest first, until a resend is accepted or the notice was dismissed. */
+    val heldOrders: List<HeldPurchase> = emptyList(),
 )
 
 /**
@@ -228,13 +249,25 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     fun start() {
         if (started) return
         started = true
+        // the notices of an earlier run, kept while the store or Ecency cannot be reached (#3612 review)
+        heldKeys.putAll(Marks.heldNotices(env.prefs).filterValues { !Marks.heldDismissed(env.prefs, it.held.order) })
+        publishHeld()
         env.store.setListener(listener)
         env.background.launch {
             connect()
             recover()
         }
         env.background.launch {
-            env.events.collect { if (it is AppEvent.SessionChanged && it.username != null) recover() }
+            env.events.collect {
+                // the notices shown are the signed-in account's
+                if (it is AppEvent.SessionChanged) publishHeld()
+                if (it is AppEvent.SessionChanged && it.username != null) recover()
+                // a wipe removed the saved notices: the ones in memory go too, and are not saved again
+                if (it is AppEvent.DataWiped) {
+                    heldKeys.clear()
+                    publishHeld()
+                }
+            }
         }
     }
 
@@ -242,6 +275,32 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     fun onForeground() {
         if (!started || env.nowMillis() - lastRecoveryMillis < FOREGROUND_RECOVERY_MILLIS) return
         env.background.launch { recover() }
+    }
+
+    /** The user closed the notice of the held order [order]: only a notice this account is shown. Main thread. */
+    fun dismissHeld(order: String) {
+        if (heldKeys.values.none { it.held.order == order && shownNow(it) }) return
+        Marks.dismissHeld(env.prefs, order)
+        heldKeys.entries.removeAll { it.value.held.order == order }
+        publishHeld()
+    }
+
+    /**
+     * Held purchases by [orderKey] (one order each), in the order they were found, with the account each is for: an
+     * account on this device the order credits, or none (a new account's purchase, a gift), shown to every account.
+     */
+    private val heldKeys = linkedMapOf<String, HeldNotice>()
+
+    private fun shownNow(n: HeldNotice) = n.owner.isEmpty() || n.owner == env.session.current.username
+
+    private fun publishHeld() {
+        val list = heldKeys.values.filter { shownNow(it) }.map { it.held }.distinctBy { it.order }
+        if (list != current.heldOrders) mutableState.update { it.copy(heldOrders = list) }
+        Marks.saveHeldNotices(env.prefs, heldKeys)
+    }
+
+    private fun clearHeld(key: String) {
+        if (heldKeys.remove(key) != null) publishHeld()
     }
 
     /** RN `initConnection`; null when connected. */
@@ -353,6 +412,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         // reports the foreground before the session has loaded)
         env.session.awaitLoaded()
         if (connect() != null) return
+        val before = heldKeys.keys.toSet()
         val (list, error) = callStore<List<StorePurchase>> { done -> env.store.purchases(done) }
         if (error != null) {
             errors.report(error, IapStage.RECOVER)
@@ -366,6 +426,10 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             h.isSyntheticPending && purchases.none { it.productId == h.productId } && now - h.purchasedAtMillis < SYNTHETIC_PENDING_MILLIS
         }
         held = (purchases + waiting).associateBy { orderKey(it) }
+        // a notice whose purchase the store no longer holds (finished or refunded elsewhere) goes; only one listed
+        // before this read began (a purchase held while it was out is not in its list)
+        val listed = purchases.map { orderKey(it) }.toSet()
+        if (heldKeys.keys.removeAll { it in before && it !in listed }) publishHeld()
         // a Pro payment shown as pending that the store no longer holds as pending is not pending any more
         if ((purchases + waiting).none { it.productId == PurchaseSkus.PRO && it.state == StorePurchaseState.PENDING }) env.proPurchases.dropPending(null)
         mutableState.update { s ->
@@ -415,6 +479,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     // refunded before it was finished: nothing to deliver (Ecency rejects revoked transactions too)
                     env.crashReporter.breadcrumb("iap", "revoked purchase finished", mapOf("productId" to p.productId))
                     held = held - key
+                    clearHeld(key)
                     Intents.removeKey(env.prefs, key)
                     finish(p)
                     return
@@ -473,6 +538,13 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                     if (p.productId == PurchaseSkus.PRO) creditedUser(p)?.let { env.proPurchases.update(it, null) }
                     val first = Marks.tellHeld(env.prefs, result.order)
                     if (!fromBuy && first) env.ui.toast(PurchaseCopy.held(result.order))
+                    // the lasting notice (Perks, Settings) until a resend is accepted or the user dismissed it
+                    if (!Marks.heldDismissed(env.prefs, result.order)) {
+                        // a new account's purchase is no device account's (its order names the buyer of the moment)
+                        val owner = if (p.productId == PurchaseSkus.ACCOUNT) "" else order.user.takeIf { u -> env.session.current.accounts.any { it.username == u } }.orEmpty()
+                        heldKeys[key] = HeldNotice(HeldPurchase(result.order, p.productId), owner)
+                        publishHeld()
+                    }
                     emit(PurchaseOutcome.Held(p.productId, fromBuy, result.order))
                 }
             }
@@ -488,6 +560,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             env.proMembers.activate(it)
         }
         Intents.removeKey(env.prefs, orderKey(p))
+        clearHeld(orderKey(p))
         finish(p)
         held = held - orderKey(p)
         mutableState.update { it.copy(unfinished = it.unfinished - p.productId) }
@@ -705,12 +778,45 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     internal object Marks {
         const val ACCEPTED = "purchases.accepted"
         const val HELD_TOLD = "purchases.heldTold"
+        const val HELD_DISMISSED = "purchases.heldDismissed"
+        const val HELD_NOTICES = "purchases.heldNotices"
         const val UNVERIFIED_REPORTED = "purchases.unverifiedReported"
         private const val MAX = 64
         private const val ONCE_MAX = 16
 
         /** True the first time [order] is told. */
         fun tellHeld(prefs: Prefs, order: String): Boolean = once(prefs, HELD_TOLD, order)
+
+        /** The notice of the held order [order] was dismissed: it does not come back at a later resend. */
+        fun dismissHeld(prefs: Prefs, order: String) {
+            once(prefs, HELD_DISMISSED, order)
+        }
+
+        fun heldDismissed(prefs: Prefs, order: String): Boolean = list(prefs, HELD_DISMISSED).any { it.first == order }
+
+        /** The held notices by purchase key (a hash, never a receipt): order number, product and the account it is for. */
+        fun heldNotices(prefs: Prefs): Map<String, HeldNotice> {
+            val o = prefs.getString(HELD_NOTICES)?.let { SafeJson.parseOrNull(it, 3) }.obj() ?: return emptyMap()
+            return o.entries.mapNotNull { (k, v) ->
+                val e = v.obj() ?: return@mapNotNull null
+                val order = e.str("o").orEmpty()
+                val product = e.str("p").orEmpty()
+                if (order.isEmpty() || product !in PurchaseSkus.ALL) null else k to HeldNotice(HeldPurchase(order, product), e.str("u").orEmpty())
+            }.takeLast(ONCE_MAX).toMap()
+        }
+
+        fun saveHeldNotices(prefs: Prefs, notices: Map<String, HeldNotice>) {
+            if (notices.isEmpty()) {
+                if (prefs.getString(HELD_NOTICES) != null) prefs.putString(HELD_NOTICES, null)
+                return
+            }
+            val json = buildJsonObject {
+                notices.entries.toList().takeLast(ONCE_MAX).forEach { (k, n) ->
+                    put(k, buildJsonObject { put("o", n.held.order); put("p", n.held.productId); put("u", n.owner) })
+                }
+            }.toString()
+            if (prefs.getString(HELD_NOTICES) != json) prefs.putString(HELD_NOTICES, json)
+        }
 
         /** True the first time the unverified purchase [hash] is reported. */
         fun tellUnverified(prefs: Prefs, hash: String): Boolean = once(prefs, UNVERIFIED_REPORTED, hash)

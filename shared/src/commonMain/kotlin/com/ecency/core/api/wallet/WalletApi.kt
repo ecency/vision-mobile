@@ -32,6 +32,9 @@ data class SavingsWithdrawal(val requestId: Long, val from: String, val to: Stri
 /** An HBD to HIVE conversion waiting for its date; [collateralized] for HIVE to HBD with collateral. */
 data class ConversionRequest(val requestId: Long, val amount: String, val date: String, val collateralized: Boolean)
 
+/** An account's Ecency Pro membership (the Points API's `pro`): [expiresMillis] null when unknown or unreadable. */
+data class ProMembership(val active: Boolean, val expiresMillis: Long?)
+
 /** An internal market order still open (get_open_orders). */
 data class OpenOrder(val orderId: Long, val created: String, val expiration: String, val base: String, val quote: String, val forSale: Long)
 
@@ -312,6 +315,18 @@ class WalletApi(
         // a 2xx without a balance is a shape change or an error body, not an empty wallet
         val points = o?.str("points") ?: throw EcencyHttpException(200, "Points payload contained no balance")
         return points to (o.str("unclaimed_points") ?: "0.000")
+    }
+
+    /**
+     * The account's Ecency Pro membership as the same Points API answers it: `pro: {active, expires}` (Ecency's
+     * server; `expires` an ISO 8601 time with its offset). Null when the answer has no `pro` object.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun proMembership(username: String): ProMembership? {
+        val pro = rest.post("$host/private-api/points", buildJsonObject { put("username", username) }).obj()?.get("pro").obj() ?: return null
+        val active = (pro["active"] as? JsonPrimitive)?.content == "true"
+        val expires = pro.str("expires")?.let { runCatching { kotlin.time.Instant.parse(it).toEpochMilliseconds() }.getOrNull() }
+        return ProMembership(active, expires)
     }
 
     /** `POST /private-api/point-list {username, type}` (0: every type; web's points filter sends one), in the API's order. */

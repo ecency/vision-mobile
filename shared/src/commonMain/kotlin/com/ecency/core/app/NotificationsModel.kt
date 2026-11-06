@@ -30,9 +30,17 @@ data class NotificationsState(
     val unread: Int = 0,
     /** RN "Show Images" (`hidePostsThumbnails` inverted): off hides the post thumbnails of the rows. */
     val showImages: Boolean = true,
+    /** The Unread chip: only unread rows are shown, whatever the menu filter. */
+    val unreadOnly: Boolean = false,
 ) {
-    /** RN "No recent activity". */
-    val isEmpty: Boolean get() = loaded && items.isEmpty() && error == null && !isLoading
+    /** The rows to draw: every row, or with the Unread chip the unread ones (a row marked read leaves at once). */
+    val shown: List<NotificationRow> get() = if (unreadOnly) items.filter { !it.read } else items
+
+    /** RN "No recent activity" (with the Unread chip: no unread row). */
+    val isEmpty: Boolean get() = loaded && shown.isEmpty() && error == null && !isLoading
+
+    /** What an empty list says: RN's "No recent activity", or "No unread notifications" with the Unread chip. */
+    val emptyText: String get() = if (unreadOnly) ReadingUiCopy.NO_UNREAD_NOTIFICATIONS else ReadingUiCopy.NO_RECENT_ACTIVITY
 }
 
 /**
@@ -131,7 +139,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         unreadJob = null
         pageSizes.clear()
         seenIds.clear()
-        setState { NotificationsState(account = user, filter = it.filter, showImages = it.showImages) }
+        setState { NotificationsState(account = user, filter = it.filter, showImages = it.showImages, unreadOnly = it.unreadOnly) }
         env.badges.setNotifications(0)
     }
 
@@ -161,7 +169,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         listJob?.cancel()
         pageSizes.clear()
         seenIds.clear()
-        setState { NotificationsState(account = it.account, filter = filter, unread = it.unread, showImages = it.showImages) }
+        setState { NotificationsState(account = it.account, filter = filter, unread = it.unread, showImages = it.showImages, unreadOnly = it.unreadOnly) }
         if (active) load(reset = true)
     }
 
@@ -171,6 +179,30 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
      */
     fun toggleQuickFilter(filter: NotificationFilter) =
         selectFilter(if (filter == current.filter) NotificationFilter.ACTIVITIES else filter)
+
+    /**
+     * The Unread chip (issue #2686): only unread rows, on top of the menu filter (a quick chip or the menu keeps it).
+     * The API has no unread parameter (SDK `getNotificationsInfiniteQueryOptions`; web's Unread view filters the
+     * loaded pages too), so the rows in memory are filtered and the paging stays the API's ([fillUnread]).
+     */
+    fun toggleUnreadOnly() {
+        sync()
+        setState { it.copy(unreadOnly = !it.unreadOnly) }
+        if (current.shown.isEmpty()) fillUnread()
+    }
+
+    /**
+     * With the Unread chip, a page that brought no unread row (or an empty view) is followed by the next page by
+     * itself, since nothing on screen would ask for it. It stops at the end, once the unread rows shown reach the
+     * server's unread count, and at [WINDOW_PAGES] pages (so no unread row leaves memory for it); scrolling goes on
+     * from there as usual.
+     */
+    private fun fillUnread() {
+        val s = current
+        if (!s.unreadOnly || !active || listJob?.isActive == true || !s.loaded || s.error != null || s.endReached || s.items.isEmpty()) return
+        if (s.pages >= WINDOW_PAGES || s.shown.size >= s.unread) return
+        load(reset = false)
+    }
 
     /** Pull to refresh: the first page again, and the badge with it (RN `_refreshUnreadCount`). */
     fun refresh() {
@@ -229,6 +261,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
                         pages = if (reset) 1 else s.pages + 1,
                     )
                 }
+                // the Unread chip: a page without unread rows is followed by the next one (once this job ended)
+                if (current.unreadOnly && fresh.none { !it.read }) scope.launch { if (gen == generation) fillUnread() }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -333,6 +367,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
                 seenIds.addAll(seen)
                 readAt = stamp
                 setState { it.copy(items = rows, endReached = end, pages = pages, loaded = true, error = null) }
+                // the Unread chip: no unread row left in the pages read again, so the next ones follow (once this job ended)
+                if (current.unreadOnly && current.shown.isEmpty()) scope.launch { if (gen == generation) fillUnread() }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -415,6 +451,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         }
         setState { s -> s.copy(items = s.items.map { if (it.id in wasUnread) it.copy(read = true) else it }) }
         setUnread(guess)
+        // the Unread chip: the last unread row on screen was read, more may wait further down
+        if (current.unreadOnly && current.shown.isEmpty()) fillUnread()
         scope.launch {
             try {
                 val result = env.notificationsApi.markRead(user, id)
@@ -468,6 +506,12 @@ data class LeaderboardState(
 class LeaderboardModel internal constructor(private val env: AppEnvironment) : StateModel<LeaderboardState>(LeaderboardState(), env.dispatchers) {
     private var job: Job? = null
 
+    /** The UTC day (days since the epoch) of the last daily read that answered (a weekly or monthly one never counts). */
+    private var loadedDay = Long.MIN_VALUE
+
+    /** When the last read failed: the daily tick tries again [RETRY_MILLIS] later. */
+    private var failedAt = Long.MIN_VALUE
+
     fun start() {
         if (!current.loaded && job?.isActive != true) load()
     }
@@ -480,6 +524,19 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
 
     fun refresh() = load()
 
+    /**
+     * The daily line's minute tick while the board is shown (each UI calls it from its reset line): once the 00:00 UTC
+     * reset passed since the daily board was read, it is read again, once (issue #3612). Weekly and monthly do not
+     * reset at midnight.
+     */
+    fun tick() {
+        if (current.duration != LeaderboardDuration.DAY || !current.loaded || job?.isActive == true) return
+        val now = env.nowMillis()
+        val failed = failedAt != Long.MIN_VALUE
+        // a new UTC day, or a failed read of the board shown (also one from before the reset), retried RETRY_MILLIS later
+        if ((now.floorDiv(DailyReset.DAY_MILLIS) > loadedDay || failed) && (!failed || now - failedAt >= RETRY_MILLIS)) load(quiet = true)
+    }
+
     /** RN's tooltip on a row's reward (`leaderboard.tooltip_earn`), shown through the toast channel. */
     fun showEarnHint() {
         env.ui.toast(L.leaderboard.tooltipEarn)
@@ -491,8 +548,10 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
         state.first { !it.isLoading }
     }
 
-    private fun load() {
+    /** [quiet]: the tick's read, which keeps the board and says nothing when it fails. */
+    private fun load(quiet: Boolean = false) {
         val duration = current.duration
+        val day = env.nowMillis().floorDiv(DailyReset.DAY_MILLIS)
         job?.cancel()
         setState { it.copy(isLoading = true) }
         job = scope.launch {
@@ -500,13 +559,21 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
                 val users = env.notificationsApi.leaderboard(duration.apiValue)
                 // daily: users who finished their quests first, each group in its own order (a stable partition)
                 val ordered = if (duration == LeaderboardDuration.DAY) users.filter { it.questsDone } + users.filter { !it.questsDone } else users
+                if (duration == LeaderboardDuration.DAY) loadedDay = day
+                failedAt = Long.MIN_VALUE
                 setState { it.copy(users = ordered, isLoading = false, loaded = true) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                failedAt = env.nowMillis()
                 setState { it.copy(isLoading = false, loaded = true) }
-                env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e).message))
+                if (!quiet) env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e).message))
             }
         }
+    }
+
+    companion object {
+        /** A failed read after the reset is tried again by the tick this much later. */
+        const val RETRY_MILLIS = 5 * 60_000L
     }
 }

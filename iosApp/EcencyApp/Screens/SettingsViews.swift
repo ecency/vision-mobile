@@ -20,6 +20,8 @@ struct SettingsView: View {
         let state = observed.state
         let loggedIn = session.state.isLoggedIn
         ThemedForm {
+            // issue #3612: purchases held for review (HeldPurchaseViews.swift), above the settings
+            HeldPurchaseSection(env: app.env)
             Section {
                 picker(copy.CURRENCY, options.CURRENCIES, selected: state.currency, id: "settings-currency") { settings.setCurrency(code: $0) }
                 picker(L.Settings.language, options.LANGUAGES, selected: state.language, id: "settings-language") { settings.setLanguage(code: $0) }

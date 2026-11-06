@@ -164,4 +164,28 @@ final class NotificationUITests: XCTestCase {
         banner.tap()
         XCTAssertTrue(element(app, "post-title").waitForExistence(timeout: 15))
     }
+
+    /// Issue #2686: the Unread chip shows only unread rows, on top of the menu filter, and says when none is left.
+    func testTheUnreadChipShowsOnlyUnreadRows() {
+        let app = launch(["-seedAccounts", "YES", "-startTab", "NOTIFICATION"])
+        XCTAssertTrue(element(app, "notification-n-1").waitForExistence(timeout: 15))
+        let read = element(app, "notification-n-4")
+        XCTAssertTrue(read.waitForExistence(timeout: 5))
+        let chip = app.buttons["notification-chip-UNREAD"]
+        XCTAssertEqual(chip.label, "Unread")
+        XCTAssertFalse(chip.isSelected)
+        chip.tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: read)
+        waitForExpectations(timeout: 10)
+        XCTAssertTrue(chip.isSelected)
+        XCTAssertTrue(element(app, "notification-n-1").exists)
+        XCTAssertTrue(element(app, "notification-n-3").exists)
+        // a quick chip keeps it on
+        app.buttons["notification-chip-MENTIONS"].tap()
+        XCTAssertTrue(app.staticTexts["MENTIONS"].waitForExistence(timeout: 10))
+        XCTAssertTrue(chip.isSelected)
+        // every row read: the unread empty text
+        app.buttons["mark-all-read"].tap()
+        XCTAssertTrue(app.staticTexts["No unread notifications"].waitForExistence(timeout: 10))
+    }
 }
