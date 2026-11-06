@@ -118,6 +118,8 @@ struct RootView: View {
         }
         // ---- accounts and shell gaps: delete confirmation, update prompt, announcement (ShellPromptsViews.swift) ----
         .background(ShellPromptsHost(env: app.env))
+        // seasonal app icons: the one question before the first automatic switch (README "App icons")
+        .background(LauncherIconQuestionHost(icons: app.launcherIcons, lock: app.lock))
         // RN postInteractionHandler's link sheet for external links in bodies
         .background(LinkSheetHost())
         .alert(app.alert?.title ?? "", isPresented: Binding(get: { app.alert != nil }, set: { if !$0 { app.alert = nil } }),

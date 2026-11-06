@@ -213,6 +213,9 @@ final class AppContainer: ObservableObject {
     /// RN settings.theme, applied to the main window and the lock window.
     /// RN settings (SettingsViews.swift): device settings, support percents, the RN settings import.
     let settings: Observed<SettingsState>
+    /// The app icon setting and today's seasonal icon (README "App icons"); the root shows its one question.
+    let launcherIcons: Observed<LauncherIconState>
+    let launcherIconSwitcher: LauncherIconSwitcher
     /// The app language for the SwiftUI root (AppLanguage.swift), driven by the settings.
     let language: AppLanguage
     private var settingsChanges: AnyCancellable?
@@ -270,6 +273,15 @@ final class AppContainer: ObservableObject {
             UserDefaults.standard.removeObject(forKey: "themeMode")
         }
         settings = Observed(env.settings, ownsModel: false)
+        // seasonal app icons follow the phone's own region and language; fake-data runs (UI tests) switch nothing by
+        // themselves unless a test names the day (-launcherIconDay 2027-03-20)
+        let defaults = UserDefaults.standard
+        LauncherIconSwitcher.configure(env.launcherIcons,
+                                       region: options.fakeData ? defaults.string(forKey: "launcherIconRegion") : Locale.current.region?.identifier,
+                                       language: options.fakeData ? defaults.string(forKey: "launcherIconLanguage") : Locale.preferredLanguages.first)
+        launcherIcons = Observed(env.launcherIcons, ownsModel: false)
+        launcherIconSwitcher = LauncherIconSwitcher(model: env.launcherIcons, setting: SystemAlternateIcon(),
+                                                    isActive: { UIApplication.shared.applicationState == .active })
         // local drafts (editor): private files; fake-data runs use their own folder and never reach the image host
         let draftsDirectory = EditorImages.draftsDirectory(fakeData: options.fakeData)
         if options.fakeData, !options.keepFakeStore { try? FileManager.default.removeItem(atPath: draftsDirectory) }
@@ -528,6 +540,17 @@ final class AppContainer: ObservableObject {
     // MARK: Notifications and push
 
     /// The unread count and list model, push registration, tapped pushes and the foreground refreshes.
+    /// Today's seasonal icon, applied while active (README "App icons"). Fake-data runs only with -launcherIconDay.
+    func launcherIconForeground() {
+        if options.fakeData {
+            let parts = (UserDefaults.standard.string(forKey: "launcherIconDay") ?? "").split(separator: "-").compactMap { Int32($0) }
+            guard parts.count == 3 else { return }
+            launcherIconSwitcher.foreground(today: CalendarDay(year: parts[0], month: parts[1], day: parts[2]))
+        } else {
+            launcherIconSwitcher.foreground(today: LauncherIconSwitcher.today())
+        }
+    }
+
     private func startNotifications() {
         // fake-data runs (UI tests, screenshots) never ask for the permission or talk to Firebase
         if !options.fakeData {
@@ -570,6 +593,7 @@ final class AppContainer: ObservableObject {
                     self?.env.chat.onForeground()
                     self?.env.push.onForeground()
                     self?.env.purchases.onForeground()
+                    self?.launcherIconForeground()
                     // a failed roster read is tried again (no-op once loaded)
                     self?.env.proMembers.ensureLoaded()
                     // RN lazyMutatePendingActivities on every return to the foreground (the launch's own replay is

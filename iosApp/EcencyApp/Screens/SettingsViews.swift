@@ -53,6 +53,8 @@ struct SettingsView: View {
             } header: {
                 Text(copy.GENERAL).foregroundStyle(theme.accentText).accessibilityIdentifier("settings-section-general")
             }
+            // issue #3656: the app icon (README "App icons")
+            LauncherIconSection(icons: app.launcherIcons)
             if loggedIn {
                 PushSettingsSection(push: app.push)
                 if let support = state.support, state.supportAccount == session.state.username {
