@@ -349,7 +349,9 @@ class NotificationFlowsTest {
         assertFalse("no read status menu any more", exists("notificationReadFilter"))
     }
 
-    private fun chipOn(filter: NotificationFilter) = compose.onNodeWithTag("notificationChip:${filter.name}", useUnmergedTree = true)
+    private fun chipOn(filter: NotificationFilter) = chipOn(filter.name)
+
+    private fun chipOn(name: String) = compose.onNodeWithTag("notificationChip:$name", useUnmergedTree = true)
         .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ToggleableState) == androidx.compose.ui.state.ToggleableState.On
 
     @Test
@@ -655,6 +657,43 @@ class NotificationFlowsTest {
         val old = notificationTime(now - 8 * 86_400_000L, now)!!
         assertFalse(old.endsWith("ago"))
         assertTrue(old, "2026" in old)
+    }
+
+    // issue #2686: unread only, on top of the menu filter
+    @Test
+    @Config(qualifiers = "w411dp-h1600dp")
+    fun theUnreadChipShowsOnlyUnreadRowsAndKeepsTheFilter() {
+        node.signIn()
+        launch()
+        waitFor("notification:n-4")
+        val chip = compose.onNodeWithTag("notificationChip:UNREAD", useUnmergedTree = true).fetchSemanticsNode().config
+        assertEquals(androidx.compose.ui.semantics.Role.Checkbox, chip.getOrNull(SemanticsProperties.Role))
+        assertTrue(hasTextNode("Unread"))
+        // the count arrives after the first page and reloads it once it grew: settled before counting requests
+        waitUntil { env.notifications.current.unread == 3 && !env.notifications.current.isRefreshing && !env.notifications.current.isLoading }
+        val requests = node.calls("notifications").size
+
+        compose.onNodeWithTag("notificationChip:UNREAD").performClick()
+        waitUntil { !exists("notification:n-4") }
+        assertTrue(chipOn("UNREAD"))
+        assertTrue(exists("notification:n-1"))
+        assertTrue(exists("notification:n-2"))
+        assertFalse(exists("notification:n-3"))
+        assertEquals("filtered on the device: no request", requests, node.calls("notifications").size)
+        assertTrue(node.calls("notifications").none { node.field(it, "unread") != null })
+
+        // a quick chip keeps it: unread replies
+        compose.onNodeWithTag("notificationChip:REPLIES").performClick()
+        waitUntil { node.calls("notifications").any { node.field(it, "filter") == "\"replies\"" } }
+        assertTrue(chipOn("UNREAD"))
+        assertTrue(chipOn(NotificationFilter.REPLIES))
+
+        // every row read: the unread empty text
+        compose.onNodeWithTag("markAllRead").performClick()
+        waitUntil { hasTextNode("No unread notifications") }
+        compose.onNodeWithTag("notificationChip:UNREAD").performClick()
+        waitUntil { !chipOn("UNREAD") }
+        waitFor("notification:n-4")
     }
 
     // issue #3612: the daily board is read again once the 00:00 UTC reset passed while it is open

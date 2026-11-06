@@ -191,7 +191,8 @@ private fun NotificationList(
     LaunchedEffect(username) { model.show() }
     // another account's rows never draw, not even for the frame in which the account changes
     val mine = state.account == username
-    val items = if (mine) state.items else emptyList()
+    // the Unread chip shows only unread rows (state.shown)
+    val items = if (mine) state.shown else emptyList()
 
     // near the end means one of the last rows is on screen: an empty view's placeholder and footer never ask for more
     val tail by androidx.compose.runtime.rememberUpdatedState(items.takeLast(4).map { it.id }.toSet())
@@ -205,6 +206,8 @@ private fun NotificationList(
         FilterBar(
             state.filter.title, NotificationFilter.entries.map { it.title }, { model.selectFilter(NotificationFilter.entries[it]) }, "notificationFilter",
             chips = {
+                // issue #2686: unread only, on top of the menu filter and the other chips
+                QuickFilterChip(ReadingUiCopy.UNREAD, state.unreadOnly, "notificationChip:UNREAD") { model.toggleUnreadOnly() }
                 NotificationFilter.quick.forEach { filter ->
                     QuickFilterChip(filter.label, filter == state.filter, "notificationChip:${filter.name}") { model.toggleQuickFilter(filter) }
                 }
@@ -227,7 +230,7 @@ private fun NotificationList(
                         // RN QueryErrorRetry
                         EsieMessageBlock(com.ecency.core.esie.EsiePlacement.ERROR, ReadingUiCopy.LOAD_FAILED_RETRY, Modifier.padding(top = 48.dp), UiCopy.TRY_AGAIN_QUESTION, model::retry)
                     }
-                    items.isEmpty() -> item(key = "empty") { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NO_RECENT_ACTIVITY, Modifier.padding(top = 48.dp)) }
+                    items.isEmpty() -> item(key = "empty") { EsieMessageBlock(com.ecency.core.esie.EsiePlacement.EMPTY, state.emptyText, Modifier.padding(top = 48.dp)) }
                 }
                 items(items, key = { it.id }) { row ->
                     SwipeToRead(row, onRead = { model.markRead(row.id) }) {
@@ -241,7 +244,10 @@ private fun NotificationList(
     }
 }
 
-/** A quick filter next to the menu (Replies, Mentions): blue filled while selected; tapped again it goes back to All. */
+/**
+ * A quick filter next to the menu: Unread (on and off, with any filter), Replies and Mentions (tapped again they go
+ * back to All). Blue filled while selected.
+ */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun androidx.compose.foundation.layout.FlowRowScope.QuickFilterChip(label: String, on: Boolean, tag: String, onToggle: () -> Unit) {

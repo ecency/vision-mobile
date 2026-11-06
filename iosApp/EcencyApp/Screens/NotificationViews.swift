@@ -111,7 +111,8 @@ private struct NotificationListView: View {
         let state = model.state
         // another account's rows never draw, not even for the frame in which the account changes
         let mine = state.account == username
-        let items: [NotificationRow] = mine ? state.items : []
+        // the Unread chip shows only unread rows (state.shown)
+        let items: [NotificationRow] = mine ? state.shown : []
         VStack(spacing: 0) {
             filterBar(state)
             ScrollViewReader { proxy in
@@ -137,6 +138,11 @@ private struct NotificationListView: View {
     private func filterBar(_ state: NotificationsState) -> some View {
         FilterBar(selected: state.filter.title, options: NotificationFilter.entries.map(\.title), identifier: "notification-filter",
                   onSelect: { notifications.selectFilter(filter: NotificationFilter.entries[$0]) }) {
+            // issue #2686: unread only, on top of the menu filter and the other chips
+            PillButton(label: ReadingUiCopy.shared.UNREAD, filled: state.unreadOnly) { notifications.toggleUnreadOnly() }
+                .fixedSize()
+                .accessibilityAddTraits(state.unreadOnly ? .isSelected : [])
+                .accessibilityIdentifier("notification-chip-UNREAD")
             ForEach(NotificationFilter.companion.quick, id: \.self) { filter in
                 quickChip(filter, on: filter == state.filter)
             }
@@ -158,7 +164,8 @@ private struct NotificationListView: View {
             .accessibilityIdentifier("notification-chip-\(filter.name)")
     }
 
-    /// RN's placeholder, error with retry (QueryErrorRetry) and "No recent activity".
+    /// RN's placeholder, error with retry (QueryErrorRetry) and "No recent activity" ("No unread notifications" with
+    /// the Unread chip).
     @ViewBuilder private func placeholder(_ state: NotificationsState, mine: Bool, empty: Bool) -> some View {
         if !mine || (empty && (state.isLoading || !state.loaded)) {
             RowsSkeleton(count: 8, identifier: "notifications-loading")
@@ -171,7 +178,7 @@ private struct NotificationListView: View {
             }
             .padding(.top, 48).padding(.horizontal, 24)
         } else if empty {
-            Text(ReadingUiCopy.shared.NO_RECENT_ACTIVITY).foregroundStyle(theme.secondary)
+            Text(state.emptyText).foregroundStyle(theme.secondary)
                 .accessibilityIdentifier("notifications-empty").esieAbove(.empty).padding(.top, 48)
         }
     }

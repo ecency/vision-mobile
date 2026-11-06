@@ -2264,6 +2264,7 @@
         "the_audio_could_not_be_loaded": "The audio could not be loaded.",
         "this_post_does_not_exist_or": "This post does not exist or was deleted.",
         "unread": "Unread",
+        "no_unread": "No unread notifications",
         "voice_position": "Voice position",
         "vote_weight": "Vote weight",
         "vote_up": "Up",

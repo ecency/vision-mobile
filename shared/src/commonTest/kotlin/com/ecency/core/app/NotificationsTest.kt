@@ -802,6 +802,85 @@ class NotificationsTest {
         assertEquals(6, f.backend.of("notifications").size, "every chip tap is one request")
     }
 
+    // ---- unread only (issue #2686): client side, the API has no unread parameter ----
+
+    @Test
+    fun theUnreadChipShowsOnlyUnreadRowsAndKeepsTheMenuFilter() = runTest {
+        val f = NotificationFixture(this)
+        f.backend.rows[alice] = listOf(FakeNotificationsBackend.vote("n1"), FakeNotificationsBackend.vote("n2", read = 1), FakeNotificationsBackend.vote("n3"))
+        f.backend.unread[alice] = 2
+        f.start()
+        f.model.show(); f.idle()
+        assertFalse(f.model.current.unreadOnly)
+        assertEquals(listOf("n1", "n2", "n3"), f.model.current.shown.map { it.id })
+        val requests = f.backend.of("notifications").size
+
+        f.model.toggleUnreadOnly(); f.idle()
+        assertTrue(f.model.current.unreadOnly)
+        assertEquals(listOf("n1", "n3"), f.model.current.shown.map { it.id })
+        assertEquals(requests, f.backend.of("notifications").size, "the rows in memory are filtered: no request")
+        assertTrue(f.backend.of("notifications").all { it.body["unread"] == null }, "the API takes no unread parameter")
+
+        // a quick chip (or the menu) keeps the unread chip on: unread mentions
+        f.model.toggleQuickFilter(NotificationFilter.MENTIONS); f.idle()
+        assertTrue(f.model.current.unreadOnly)
+        assertEquals("mentions", f.backend.of("notifications").last().text("filter"))
+        assertEquals(listOf("n1", "n3"), f.model.current.shown.map { it.id })
+
+        // a row marked read leaves the unread view; the last one gone, the empty text is the unread one
+        assertTrue(f.model.markRead("n1")); f.idle()
+        assertEquals(listOf("n3"), f.model.current.shown.map { it.id })
+        f.model.markAllRead(); f.idle()
+        assertTrue(f.model.current.shown.isEmpty())
+        assertTrue(f.model.current.isEmpty)
+        assertEquals("No unread notifications", f.model.current.emptyText)
+
+        // off again: every row
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(listOf("n1", "n2", "n3"), f.model.current.shown.map { it.id })
+        assertEquals("No recent activity", NotificationsState(loaded = true).emptyText)
+    }
+
+    @Test
+    fun theUnreadViewPagesPastPagesWithoutUnreadRowsAndStopsWhenAllAreFound() = runTest {
+        val f = NotificationFixture(this)
+        // two pages of read rows, then the two unread ones, then more read rows
+        f.backend.rows[alice] = (1..6).map { FakeNotificationsBackend.vote("r$it", read = 1) } +
+            listOf(FakeNotificationsBackend.vote("u1"), FakeNotificationsBackend.vote("u2")) +
+            (7..12).map { FakeNotificationsBackend.vote("r$it", read = 1) }
+        f.backend.unread[alice] = 2
+        f.start()
+        f.model.show(); f.idle()
+        assertEquals(1, f.backend.of("notifications").size)
+
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(listOf("u1", "u2"), f.model.current.shown.map { it.id })
+        assertEquals(listOf("", "r3", "r6"), f.backend.of("notifications").map { it.text("since") }, "read-only pages are skipped by themselves")
+        assertFalse(f.model.current.endReached)
+        // the two unread rows of the count are on screen: nothing more is asked by itself
+        f.idle()
+        assertEquals(3, f.backend.of("notifications").size)
+        // scrolling on asks for one page; one without unread rows goes no further: every unread row is shown
+        f.model.loadMore(); f.idle()
+        assertEquals(listOf("", "r3", "r6", "r7"), f.backend.of("notifications").map { it.text("since") })
+    }
+
+    @Test
+    fun theUnreadViewNeverPagesBeyondTheWindowByItself() = runTest {
+        val f = NotificationFixture(this)
+        f.backend.rows[alice] = (1..60).map { FakeNotificationsBackend.vote("r$it", read = 1) }
+        f.backend.unread[alice] = 5
+        f.start()
+        f.model.show(); f.idle()
+        f.model.toggleUnreadOnly(); f.idle()
+        assertEquals(NotificationsModel.WINDOW_PAGES, f.backend.of("notifications").size, "no page leaves memory for an empty view")
+        assertTrue(f.model.current.shown.isEmpty())
+        assertEquals(NotificationsModel.WINDOW_PAGES, f.model.current.pages)
+        // a reload with the chip on starts over from the newest and is bounded the same way
+        f.model.refresh(); f.idle()
+        assertEquals(2 * NotificationsModel.WINDOW_PAGES, f.backend.of("notifications").size)
+    }
+
     @Test
     fun aFailedMarkPutsRowAndCountBackAndSaysFail() = runTest {
         val f = NotificationFixture(this)
