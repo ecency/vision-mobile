@@ -80,6 +80,27 @@ enum UnitTestHost {
     }
 }
 
+/// Debug Bold Text (`-boldText YES`), as the system setting gives it: the bold legibility weight in the SwiftUI
+/// environment and in every window's traits (UIKit bars, alerts and the lock window). Nothing when off, so the
+/// system's own setting stays in charge.
+private struct ForcedBoldText: ViewModifier {
+    let on: Bool
+
+    func body(content: Content) -> some View {
+        if on {
+            content
+                .environment(\.legibilityWeight, .bold)
+                .onAppear {
+                    for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+                        scene.windows.forEach { $0.traitOverrides.legibilityWeight = .bold }
+                    }
+                }
+        } else {
+            content
+        }
+    }
+}
+
 /// RN settings.theme: the saved choice over the system appearance (the lock window follows it too). Also the
 /// scene's link entry point, since it is always in the hierarchy.
 struct ThemeChoice<Content: View>: View {
@@ -95,9 +116,19 @@ struct ThemeChoice<Content: View>: View {
         #endif
     }
 
+    /// Debug `-boldText YES`: the system's Bold Text for this app only (the Bold Text audits, README "Accessibility").
+    static var forcedBold: Bool {
+        #if DEBUG
+        return UserDefaults.standard.bool(forKey: "boldText")
+        #else
+        return false
+        #endif
+    }
+
     var body: some View {
         content
             .preferredColorScheme(Self.forcedDark ? .dark : app.themeMode == .light ? .light : app.themeMode == .dark ? .dark : nil)
+            .modifier(ForcedBoldText(on: Self.forcedBold))
             .onAppear { app.applyThemeToLockWindow() }
             // Outside LockGate: links the system delivers while the lock state loads or the PIN pad shows are kept
             // (the link model waits for the unlock; content links open behind the lock).

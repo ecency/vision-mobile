@@ -199,15 +199,17 @@ final class AccessibilityUITests: XCTestCase {
         ].map { ($0.0, $0.1 + size, $0.2) }
     }
 
-    private func auditAll(_ size: [String]) {
+    private func auditAll(_ size: [String], bold: Bool = false) {
+        let ax5 = !size.isEmpty
+        let suffix = (ax5 ? " (AX5)" : "") + (bold ? " (bold)" : "")
         for (name, args, ready) in screens(size) {
-            let app = launch(args)
-            if name == "profile", !size.isEmpty {
-                audit(app, "profile closed (AX5)", ready: ready)
+            let app = launch(args + (bold ? Self.boldText : []))
+            if name == "profile", ax5 {
+                audit(app, "profile closed" + suffix, ready: ready)
                 element(app, ready).tap()
-                audit(app, "profile (AX5)", ready: "profile-summary")
+                audit(app, "profile" + suffix, ready: "profile-summary")
             } else {
-                audit(app, name + (size.isEmpty ? "" : " (AX5)"), ready: ready)
+                audit(app, name + suffix, ready: ready)
             }
             app.terminate()
         }
@@ -216,6 +218,28 @@ final class AccessibilityUITests: XCTestCase {
     func testAuditMainScreensAtTheDefaultTextSize() { auditAll([]) }
 
     func testAuditMainScreensAtTheLargestAccessibilityTextSize() { auditAll(Self.ax5) }
+
+    /// Bold Text (#2569), set for the app only: the debug `-boldText YES` puts the bold legibility weight in the
+    /// app's windows (UIKit) and its SwiftUI environment, as the system setting does.
+    static let boldText = ["-boldText", "YES"]
+
+    /// The audits below mean something only if the setting reaches the app's text: the same label draws wider.
+    func testBoldTextReachesTheAppsText() {
+        func width(_ extra: [String]) -> CGFloat {
+            let app = launch(["-showWelcome", "YES", "-reduceMotion", "YES"] + extra)
+            let label = app.staticTexts["Welcome to"].firstMatch
+            XCTAssertTrue(label.waitForExistence(timeout: 25), app.debugDescription)
+            let w = label.frame.width
+            app.terminate()
+            return w
+        }
+        let regular = width([]), bold = width(Self.boldText)
+        XCTAssertGreaterThan(bold, regular * 1.02, "Bold Text draws the welcome label wider: \(regular) -> \(bold)")
+    }
+
+    func testAuditMainScreensWithBoldText() { auditAll([], bold: true) }
+
+    func testAuditMainScreensWithBoldTextAtTheLargestAccessibilityTextSize() { auditAll(Self.ax5, bold: true) }
 
     /// Dark mode: the screens heaviest on blue text (text buttons, links, tabs, the settings list, the login form).
     func testAuditInDarkMode() {
@@ -358,7 +382,9 @@ enum AuditExclusions {
 
     /// The allowance of [screen] (a dark run's is its screen's).
     static func allowance(_ screen: String) -> [String: Int] {
-        unresolvedAllowance[screen] ?? unresolvedAllowance[screen.replacingOccurrences(of: " (dark)", with: "")] ?? [:]
+        // a dark or Bold Text run takes its screen's numbers
+        let base = screen.replacingOccurrences(of: " (dark)", with: "").replacingOccurrences(of: " (bold)", with: "")
+        return unresolvedAllowance[screen] ?? unresolvedAllowance[base] ?? [:]
     }
 
     /// Deliberate previews that end in an ellipsis (RN numberOfLines); the full text is one tap away.
