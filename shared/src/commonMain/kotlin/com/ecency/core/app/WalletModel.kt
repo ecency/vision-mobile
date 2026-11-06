@@ -11,6 +11,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.abs
+import kotlin.math.pow
 
 /** One card of the Wallet tab (RN AssetCard). */
 data class AssetRow(
@@ -353,15 +355,23 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * The server's numbers include the claim: its pending reward fell below the claimed amount (only a claim lowers
-     * it), or the balance grew by at least half of it since the claim. The pending reward alone cannot tell: new
-     * rewards larger than the claim can come in before the next read, and a grown pending reward with the old balance
-     * is a claim not shown yet.
+     * it), or the balance moved by the claimed amount itself, to the asset's last digit (HP within the slow drift of
+     * its HIVE per VESTS rate). The pending reward alone cannot tell: new rewards larger than the claim can come in
+     * before the next read. Any other balance change (a transfer in or out) is not the claim, so the claim stays
+     * shown on top of it; only a transfer of exactly the claimed amount could be taken for it.
      */
-    private fun showsClaim(item: PortfolioItem, mask: ClaimMask) =
-        item.pendingRewards < mask.amount - CLAIM_EPSILON || item.balance >= mask.before + mask.amount / 2
+    private fun showsClaim(item: PortfolioItem, mask: ClaimMask): Boolean {
+        if (item.pendingRewards < mask.amount - CLAIM_EPSILON) return true
+        val digit = 10.0.pow(-item.precision.coerceIn(0, 8))
+        val tolerance = maxOf(digit * 1.5, mask.before * RATE_DRIFT)
+        return abs(item.balance - mask.before - mask.amount) <= tolerance
+    }
 
     companion object {
         private const val CLAIM_EPSILON = 1e-9
+
+        /** How far HP's HIVE per VESTS rate can move a balance while a claim is masked (a few minutes): a millionth. */
+        private const val RATE_DRIFT = 1e-6
 
         /** RN DEFAULT_ASSETS. */
         val DEFAULT_ASSETS = listOf("POINTS", "HP", "HIVE", "HBD")

@@ -210,6 +210,30 @@ class WalletModelsTest {
         assertEquals(2, w.app.authBackend.sent.count { it.url.endsWith("/private-api/points-claim") })
     }
 
+    /** A transfer in while the portfolio still lacks the claim is not the claim: the claim stays shown on top of it. */
+    @Test
+    fun aTransferInIsNotTakenForTheClaim() = runTest {
+        val w = world(this)
+        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
+        // 0.5 came in, the 0.75 claim is not in the answer yet (still pending)
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"balance\":1500.5", "\"balance\":1501.0")) }
+        w.env.wallet.claim("POINTS")
+        testScheduler.advanceTimeBy(2_500)
+        testScheduler.runCurrent()
+        val before = reads()
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,501.750", points.balanceText)
+        assertNull(points.pendingText)
+        // still read again for the claim
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+        assertTrue(reads() > before)
+        assertEquals("1,501.750", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
+    }
+
     @Test
     fun anEngineClaimOnlyHidesThePendingReward() = runTest {
         val w = world(this)
