@@ -573,7 +573,7 @@ class ListenModel internal constructor(private val env: AppEnvironment, val key:
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    // not reported: retried with backoff, the give-up below reports it
+                    // retried with backoff; the give-up below reports it
                     if (e is EcencyHttpException && e.status == 401 && user != null && code != null) {
                         statusFailed = true
                         if (user == reader) renewStatus(user, code)

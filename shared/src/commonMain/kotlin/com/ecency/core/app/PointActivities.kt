@@ -142,7 +142,7 @@ class PointActivities internal constructor(private val env: AppEnvironment) {
             } catch (e: com.ecency.core.auth.AuthException.NotSignedIn) {
                 return null
             } catch (e: Exception) {
-                // not reported: retried with backoff, the give-up below reports it
+                // retried with backoff; the give-up below reports it
                 // React Query's retry delay: 1 s, then 2 s
                 if (attempt < ATTEMPTS - 1) delay(1_000L shl attempt) else ErrorReports.quiet(e, "pointActivities.send")
             }

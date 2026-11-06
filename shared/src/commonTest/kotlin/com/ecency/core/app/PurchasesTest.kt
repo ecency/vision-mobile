@@ -105,6 +105,9 @@ class RecordingReporter : CrashReporter {
     override fun breadcrumb(category: String, message: String, data: Map<String, String>) {
         crumbs += message to data
     }
+
+    /** The store's own reports (IapErrors), without the handled and quiet failures of the rig's unanswered side reads. */
+    fun iap() = reports.filter { "handled" !in it.tags }
 }
 
 /** In-app purchases (RN inAppPurchaseContainer, providers/iap, ecency.ts purchaseOrder) and the money rules. */
@@ -300,7 +303,7 @@ class PurchasesTest {
         model.buy("999points")
         testScheduler.advanceUntilIdle()
         assertEquals(PurchaseCopy.POINTS_SUCCESS, r.env.ui.current.toast?.text, "a failed finish is not a failed purchase")
-        assertEquals("finish", r.reporter.reports.single().tags["iap.stage"])
+        assertEquals("finish", r.reporter.iap().single().tags["iap.stage"])
         assertEquals(1, r.store.held.size)
 
         // the next recovery finishes it without posting it again: the device knows Ecency took it
@@ -911,7 +914,7 @@ class PurchasesTest {
         testScheduler.advanceUntilIdle()
         assertNull(model.current.alert)
         assertFalse(model.current.processing)
-        assertTrue(r.reporter.reports.isEmpty())
+        assertTrue(r.reporter.iap().isEmpty())
         assertEquals("user cancelled purchase", r.reporter.crumbs.single().first)
 
         // the same store error through the listener and the request: one report, one alert
@@ -923,7 +926,7 @@ class PurchasesTest {
         testScheduler.advanceUntilIdle()
         r.store.storeListener!!.onError(e)
         testScheduler.advanceUntilIdle()
-        val report = r.reporter.reports.single()
+        val report = r.reporter.iap().single()
         assertEquals(listOf("iap", "service-error"), report.fingerprint)
         assertEquals(mapOf("iap.stage" to "purchase", "iap.code" to "service-error", "iap.product" to "999boosts", "iap.platform" to "play_store"), report.tags)
         assertEquals("IAP service-error: Service unavailable", report.message)
@@ -936,7 +939,7 @@ class PurchasesTest {
         model.buy(PurchaseSkus.BOOST)
         testScheduler.advanceUntilIdle()
         assertEquals(StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.GOOGLE_PLAY_VERSION), model.current.alert)
-        assertEquals("request", r.reporter.reports.last().tags["iap.stage"])
+        assertEquals("request", r.reporter.iap().last().tags["iap.stage"])
         model.close()
     }
 
