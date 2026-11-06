@@ -124,14 +124,37 @@ struct WalletTabView: View {
     private func quick(_ icon: AppIcon, _ label: String, _ id: String, _ wraps: Bool, _ action: @escaping () -> Void) -> AnyView {
         AnyView(Button(action: action) {
             VStack(spacing: 4) {
-                Image(appIcon: icon, filled: true).foregroundStyle(.white).frame(width: 42, height: 42).background(Circle().fill(theme.accent))
-                    .accessibilityHidden(true)
+                QuickActionIcon(icon: icon)
                 // the row keeps each label on one line and turns into a grid instead of breaking a word
                 Text(label).font(.caption).foregroundStyle(theme.text).multilineTextAlignment(.center)
                     .lineLimit(wraps ? 2 : 1).fixedSize(horizontal: !wraps, vertical: wraps)
             }
         }
         .buttonStyle(.borderless).accessibilityIdentifier(id))
+    }
+}
+
+/// A quick action's white glyph on its accent circle. The circle grows with the glyph, so the glyph never spills
+/// onto the card (white on the card failed contrast at the largest text sizes, #3658); both stop growing at the first
+/// accessibility size so the four actions keep fitting, and the label below keeps growing.
+struct QuickActionIcon: View {
+    let icon: AppIcon
+
+    var body: some View {
+        // capped out here: a scaled metric reads the size its parent gives it
+        Circled(icon: icon).dynamicTypeSize(...DynamicTypeSize.accessibility1)
+    }
+
+    private struct Circled: View {
+        let icon: AppIcon
+        @ScaledMetric(relativeTo: .body) private var circle: CGFloat = 42
+        @Environment(\.appTheme) private var theme
+
+        var body: some View {
+            Image(appIcon: icon, filled: true).font(.body).foregroundStyle(.white)
+                .frame(width: circle, height: circle).background(Circle().fill(theme.accent))
+                .accessibilityHidden(true)
+        }
     }
 }
 
