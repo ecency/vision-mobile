@@ -131,6 +131,15 @@ class ErrorReportsTest {
         assertEquals(emptyList(), reporter.reports)
     }
 
+    /** Review of #3659: a failure the screen shows with its own text is handled, so offline it still counts. */
+    @Test
+    fun aShownFailureOfTheConnectionIsAnExpectedWarning() {
+        ErrorReports.handled(EcencyHttpException.ofSendFailure(IllegalStateException("offline")), "emailDigests.stopAll")
+        ErrorReports.handled(IllegalStateException("boom"), "digest.leave")
+        assertEquals(listOf("warning", "error"), reporter.reports.map { it.level })
+        assertEquals(listOf("true", null), reporter.reports.map { it.tags["expected"] })
+    }
+
     @Test
     fun aNetworkFailureGroupsWithoutItsMessage() {
         // the platform's text (Darwin's NSError description) is in the device language

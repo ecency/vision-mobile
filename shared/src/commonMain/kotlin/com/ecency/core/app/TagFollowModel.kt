@@ -56,7 +56,7 @@ class TagFollowModel internal constructor(private val env: AppEnvironment, rawTa
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "tagFollow.toggle")
+                ErrorReports.handled(e, "tagFollow.toggle")
                 setState { it.copy(busy = false, following = !follow) }
                 env.ui.toast(PostActionsModel.FAIL)
             }

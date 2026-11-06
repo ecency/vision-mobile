@@ -112,7 +112,8 @@ class ChatNewGroupModel internal constructor(private val env: AppEnvironment) : 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(creating = false, error = (e as? ChatApiException)?.message ?: ChatsModel.message(e, ChatNewGroupState.FAILED, "chats.newGroup")) }
+                // ChatsModel.message reports it and keeps the server's text of a refusal
+                setState { it.copy(creating = false, error = ChatsModel.message(e, ChatNewGroupState.FAILED, "chats.newGroup")) }
             }
         }
     }
@@ -165,7 +166,7 @@ class ChatRenameModel internal constructor(private val env: AppEnvironment, priv
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatRename.save")
+                ErrorReports.handled(e, "chatRename.save")
                 val notOwner = (e as? ChatApiException)?.code == "not_owner"
                 setState { it.copy(saving = false, error = if (notOwner) ChatRenameState.NOT_OWNER else ChatRenameState.FAILED) }
             }

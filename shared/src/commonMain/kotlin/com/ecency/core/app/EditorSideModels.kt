@@ -199,7 +199,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "drafts.action")
+                ErrorReports.handled(e, "drafts.action")
                 env.ui.toast(L.alert.fail)
             } finally {
                 setState { it.copy(busy = it.busy - id) }
@@ -252,7 +252,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    ErrorReports.quiet(e, "drafts.delete")
+                    ErrorReports.handled(e, "drafts.delete")
                     failed++
                 }
             }
@@ -514,7 +514,7 @@ class UploadsModel internal constructor(private val env: AppEnvironment, private
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "uploads.delete")
+                ErrorReports.handled(e, "uploads.delete")
                 env.ui.toast(L.native.editorSide.failedToDelete)
                 refresh()
             }
@@ -590,7 +590,7 @@ class SnippetsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "snippets.save")
+                ErrorReports.handled(e, "snippets.save")
                 env.ui.toast(L.snippets.messageFailed)
             }
             refresh()
@@ -608,7 +608,7 @@ class SnippetsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "snippets.delete")
+                ErrorReports.handled(e, "snippets.delete")
                 env.ui.toast(L.alert.fail)
             }
         }

@@ -77,7 +77,7 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "transferFavorites.add")
+                ErrorReports.handled(e, "transferFavorites.add")
                 setState { it.copy(isSaving = false) }
                 if (env.session.current.username == user) env.ui.toast(TransferFavoritesCopy.ADD_ERROR)
             }

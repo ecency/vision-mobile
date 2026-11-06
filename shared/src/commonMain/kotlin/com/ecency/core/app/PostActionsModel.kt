@@ -351,7 +351,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    ErrorReports.quiet(e, "postActions.report")
+                    ErrorReports.handled(e, "postActions.report")
                     env.ui.toast(L.report.failed)
                     return@run
                 }

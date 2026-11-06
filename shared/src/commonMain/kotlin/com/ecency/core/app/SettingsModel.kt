@@ -507,7 +507,7 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    ErrorReports.quiet(e, "settings.supportSave")
+                    ErrorReports.handled(e, "settings.supportSave")
                     if (seq != supportOpSeq) return@withLock
                     setState { it.copy(support = confirmed ?: prev) }
                     env.ui.toast(SettingsCopy.FAIL)

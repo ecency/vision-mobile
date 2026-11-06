@@ -1007,7 +1007,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "editor.supportSave")
+                ErrorReports.handled(e, "editor.supportSave")
                 withContext(dispatchers.main) { env.ui.toast(L.alert.fail) }
             }
         }
@@ -1154,7 +1154,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "editor.saveTemplate")
+                ErrorReports.handled(e, "editor.saveTemplate")
                 false
             }
             withContext(dispatchers.main) { env.ui.toast(if (ok) L.templates.saved else L.editor.draftSaveFail) }
@@ -1216,7 +1216,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 if (fromModel) setState { it.copy(isDraftSaved = false, isDraftSaving = false) }
                 // the account left the device (logout) while it ran: the teardown at work, not a failure to report
                 if (!env.localDrafts.hasLeft(owner)) {
-                    ErrorReports.quiet(e, "editor.saveDraft")
+                    ErrorReports.handled(e, "editor.saveDraft")
                     env.ui.toast(L.editor.draftSaveFail)
                 }
             }
@@ -1465,7 +1465,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    ErrorReports.quiet(e, "editor.reblog")
+                    ErrorReports.handled(e, "editor.reblog")
                     withContext(dispatchers.main) { env.ui.toast(L.alert.fail) }
                 }
             }

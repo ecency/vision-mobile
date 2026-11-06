@@ -635,7 +635,7 @@ class TipModel internal constructor(private val env: AppEnvironment, author: Str
                 else -> WalletOps.transfer(user, s.author, "$amount ${c.symbol}", memo)
             }
         } catch (e: Exception) {
-            ErrorReports.quiet(e, "tip.confirm")
+            ErrorReports.handled(e, "tip.confirm")
             env.ui.toast(TipCopy.ERROR)
             setState { it.copy(confirming = false) }
             return

@@ -299,7 +299,7 @@ class VideoUploadModel internal constructor(private val env: AppEnvironment, pri
                 generation++
                 setState { VideoUploadState(locked = it.locked, error = SOURCE_GONE) }
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "videoUpload.upload")
+                ErrorReports.handled(e, "videoUpload.upload")
                 val status = (e as? TusException)?.status ?: 0
                 setState { it.copy(uploading = false, canResume = upload != null, error = if (!ownerSignedIn(owner)) PaidCopy.otherAccount(owner) else message(status)) }
             } finally {

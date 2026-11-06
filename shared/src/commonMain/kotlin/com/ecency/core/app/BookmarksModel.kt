@@ -181,7 +181,7 @@ class BookmarksModel internal constructor(private val env: AppEnvironment, initi
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "bookmarks.write")
+                ErrorReports.handled(e, "bookmarks.write")
                 env.ui.toast(L.alert.fail)
             }
         }

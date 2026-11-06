@@ -343,7 +343,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "search.people")
+                ErrorReports.handled(e, "search.people")
                 setState { it.copy(people = SearchPeopleState(error = SearchCopy.ERROR)) }
             }
         }
@@ -363,7 +363,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "search.communities")
+                ErrorReports.handled(e, "search.communities")
                 communities = emptyList()
                 setState { it.copy(communities = SearchCommunitiesState(error = SearchCopy.ERROR, loaded = true)) }
             }

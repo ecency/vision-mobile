@@ -253,7 +253,7 @@ class EditHistoryModel internal constructor(private val env: AppEnvironment, val
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "postLists.history")
+                ErrorReports.handled(e, "postLists.history")
                 setState { it.copy(isLoading = false, message = L.native.postLists.noHistoryFound) }
             }
         }

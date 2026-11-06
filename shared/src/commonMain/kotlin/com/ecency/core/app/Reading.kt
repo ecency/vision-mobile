@@ -322,7 +322,7 @@ class TranslationSheetModel internal constructor(private val env: AppEnvironment
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "reading.translate")
+                ErrorReports.handled(e, "reading.translate")
                 setState { it.copy(isLoading = false, error = e.message?.takeIf { m -> m.isNotBlank() } ?: L.alert.error) }
             }
         }

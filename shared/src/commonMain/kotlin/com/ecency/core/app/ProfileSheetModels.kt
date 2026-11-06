@@ -147,7 +147,7 @@ class QuickProfileModel internal constructor(private val env: AppEnvironment, us
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "profileSheet.favorite")
+                ErrorReports.handled(e, "profileSheet.favorite")
                 setState { it.copy(actionRunning = false) }
                 env.ui.toast(PostActionsModel.FAIL)
             }

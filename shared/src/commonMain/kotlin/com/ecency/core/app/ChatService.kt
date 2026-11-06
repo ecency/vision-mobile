@@ -355,7 +355,7 @@ class ChatPrivacyModel internal constructor(private val env: AppEnvironment) : S
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatPrivacy.save")
+                ErrorReports.handled(e, "chatPrivacy.save")
                 setState { it.copy(saving = false) }
                 env.ui.toast(FAILED)
             }

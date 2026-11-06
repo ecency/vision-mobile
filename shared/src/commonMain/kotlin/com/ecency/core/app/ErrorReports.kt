@@ -57,6 +57,14 @@ object ErrorReports {
         seen.store(NONE)
     }
 
+    /**
+     * A failure the UI shows with its own text (a toast, an alert, an error line) at [where]: reported as handled, so a
+     * lost connection still counts (as an expected one), unlike [quiet].
+     */
+    fun handled(e: Throwable, where: String) {
+        AppError.from(e, where)
+    }
+
     /** A failure the UI shows, as [AppError.from] mapped it at [where]. */
     fun handled(e: Throwable, where: String, mapped: AppError) {
         try {

@@ -142,7 +142,7 @@ class EmailDigestsModel internal constructor(private val env: AppEnvironment) : 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "emailDigests.load")
+                ErrorReports.handled(e, "emailDigests.load")
                 if (startedIn != generation) return@launch
                 val status = (e as? EcencyHttpException)?.status
                 setState { it.copy(loading = false, error = if (status == 503) DigestCopy.UNAVAILABLE else DigestCopy.FAIL) }
@@ -168,7 +168,7 @@ class EmailDigestsModel internal constructor(private val env: AppEnvironment) : 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "emailDigests.stopAll")
+                ErrorReports.handled(e, "emailDigests.stopAll")
                 if (!stillOwner()) return@launch
                 setState { it.copy(stopping = null, alert = DigestCopy.FAIL) }
             }

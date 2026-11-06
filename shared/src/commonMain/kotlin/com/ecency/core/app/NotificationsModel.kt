@@ -465,7 +465,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "notifications.markRead")
+                ErrorReports.handled(e, "notifications.markRead")
                 if (gen != generation) return@launch
                 setState { s -> s.copy(items = s.items.map { if (it.id in wasUnread) it.copy(read = false) else it }) }
                 setUnread(before.unread)

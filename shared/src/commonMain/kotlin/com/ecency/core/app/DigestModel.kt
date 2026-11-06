@@ -266,7 +266,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "digest.subscribe")
+                ErrorReports.handled(e, "digest.subscribe")
                 if (startedIn != generation) return@launch
                 val status = (e as? com.ecency.core.api.EcencyHttpException)?.status
                 setState { it.copy(subscribing = false, alert = if (status == 429) DigestCopy.TOO_MANY else DigestCopy.FAIL) }
@@ -296,7 +296,7 @@ class DigestModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "digest.leave")
+                ErrorReports.handled(e, "digest.leave")
                 if (startedIn != generation) return@launch
                 setState { it.copy(leaving = false, alert = DigestCopy.FAIL) }
             }

@@ -196,7 +196,7 @@ class ProfileEditModel internal constructor(private val env: AppEnvironment) :
                 setState { it.copy(uploading = null) }
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "profileEdit.upload")
+                ErrorReports.handled(e, "profileEdit.upload")
                 setState { it.copy(uploading = null, alert = AppError(ErrorKind.UNKNOWN, com.ecency.core.api.ecency.ImageUploader.message(e), false)) }
                 return@launch
             }

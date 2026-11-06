@@ -98,7 +98,7 @@ class DeleteAccountModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "shell.requestDelete")
+                ErrorReports.handled(e, "shell.requestDelete")
                 false
             }
             if (!sent) {

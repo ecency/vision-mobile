@@ -1053,7 +1053,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatThread.upload")
+                ErrorReports.handled(e, "chatThread.upload")
                 // RN: an account that cannot sign uploads gets an alert; anything else the upload's message
                 setState { it.copy(alert = if (e is ImageSigningUnavailable) DECRYPT_FAIL else ImageUploader.message(e)) }
             } finally {
@@ -1102,7 +1102,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatThread.react")
+                ErrorReports.handled(e, "chatThread.react")
                 env.ui.toast(REACTION_ERROR)
             }
         }
@@ -1138,7 +1138,7 @@ class ChatThreadModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatThread.pin")
+                ErrorReports.handled(e, "chatThread.pin")
                 env.ui.toast(L.alert.error)
             }
         }
