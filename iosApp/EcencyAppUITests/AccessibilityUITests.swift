@@ -382,8 +382,10 @@ enum AuditExclusions {
         // which runs on under the action bar until the post is scrolled
         "post (AX5)": [clipped: 1],
         // 2026-11-03: the system tab bar (README "iPhone Duo"): the list scrolls on under its glass, and at AX5 the
-        // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it)
-        "notifications (AX5)": [clipped: 3],
+        // row it cuts reads as clipped (checked on a screenshot; the old solid bar ended the list above it).
+        // 2026-11-06 (#2686): the Unread chip joins Replies and Mentions; at AX5 the three stack, all whole on the
+        // screenshot, and push the list down, so one more line runs under the bar
+        "notifications (AX5)": [clipped: 4],
     ]
 
     /// The allowance of [screen] (a dark run's is its screen's).
