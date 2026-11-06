@@ -1,0 +1,103 @@
+// Golden vectors from Hive's own serializer, @hiveio/wax (hived's C++ protocol code built to WebAssembly), for every
+// transaction the @ecency/sdk vectors pin (#3613): GoldenVectors (the cases of tx-cases.mjs), WalletGoldenVectors,
+// PlatformGoldenVectors, LinkOpGoldenVectors and GrantGoldenVectors. The operations are read from the committed SDK
+// vector files (their operation JSON), so wax always sees exactly what the SDK saw. WaxGoldenVectorTest checks the
+// Kotlin serializer against both.
+//
+// For each transaction, in the legacy (pre HF26) serialization the SDK, dhive and the app sign (assets as STEEM/SBD):
+// - serialized: wax's legacy binary form of the unsigned transaction (legacy_binaryViewMetadata, without the empty
+//   signature list);
+// - digest: wax legacy_sigDigest (sha256 of the chain id and those bytes);
+// - txId: wax legacy_id.
+// Wax runs offline here, in Node only: it is never part of the apps (CLAUDE.md "Native means native").
+//
+// After `npm ci --prefix tools`, from the repository root:
+//   node tools/golden/generate-wax.mjs shared/src/commonTest/kotlin/com/ecency/core/hive
+// writes WaxGoldenVectors.kt there and prints every transaction where wax and the SDK vectors disagree.
+//
+// No keys are used (nothing is signed). No network.
+import { readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { HEADER, cases } from './tx-cases.mjs'
+
+const dir = process.argv[2]
+if (!dir) throw new Error('usage: generate-wax.mjs <directory of the SDK vector files>')
+const waxPackage = new URL('../node_modules/@hiveio/wax/', import.meta.url)
+const waxVersion = JSON.parse(readFileSync(new URL('package.json', waxPackage), 'utf8')).version
+// the package only exports an ESM entry point for import, not a resolvable CommonJS path
+const wax = await import(new URL('wasm/dist/bundle/node.js', waxPackage).href)
+const chain = await wax.createWaxFoundation()
+
+// a Kotlin string literal the generators wrote (JSON.stringify with every `$` escaped as `\$`) back to its text
+const kotlinString = (literal) => JSON.parse(literal.replace(/\\\$/g, '$'))
+const LITERAL = String.raw`"(?:[^"\\]|\\.)*"`
+const read = (file) => readFileSync(join(dir, file), 'utf8')
+
+// [source, name, operations, sdk { serialized?, txId }]
+const txs = []
+const golden = read('GoldenVectors.kt')
+for (const [name, operations] of cases) {
+  const block = golden.match(new RegExp(String.raw`name = ${JSON.stringify(name)},[\s\S]*?serialized = (${LITERAL}),[\s\S]*?txId = (${LITERAL}),`))
+  if (!block) throw new Error(`GoldenVectors.kt has no ${name}`)
+  txs.push(['GoldenVectors', name, operations, { serialized: kotlinString(block[1]), txId: kotlinString(block[2]) }])
+}
+for (const source of ['WalletGoldenVectors', 'PlatformGoldenVectors', 'LinkOpGoldenVectors']) {
+  const text = read(`${source}.kt`)
+  const re = new RegExp(String.raw`WalletVector\(\s*name = (${LITERAL}),\s*operationsJson = (${LITERAL}),\s*serialized = (${LITERAL}),\s*digest = ${LITERAL},\s*txId = (${LITERAL}),`, 'g')
+  let n = 0
+  for (const m of text.matchAll(re)) {
+    txs.push([source, kotlinString(m[1]), JSON.parse(kotlinString(m[2])), { serialized: kotlinString(m[3]), txId: kotlinString(m[4]) }])
+    n++
+  }
+  if (n === 0) throw new Error(`no transactions read from ${source}.kt`)
+}
+{
+  const text = readFileSync(join(dir, '..', 'api', 'GrantGoldenVectors.kt'), 'utf8')
+  // GrantVector(name, username, accountJson, opJson, txId, signature)
+  const re = new RegExp(String.raw`GrantVector\((${LITERAL}), ${LITERAL}, ${LITERAL}, (${LITERAL}), (${LITERAL}), ${LITERAL}\)`, 'g')
+  let n = 0
+  for (const m of text.matchAll(re)) {
+    txs.push(['GrantGoldenVectors', kotlinString(m[1]), [JSON.parse(kotlinString(m[2]))], { txId: kotlinString(m[3]) }])
+    n++
+  }
+  if (n === 0) throw new Error('no transactions read from GrantGoldenVectors.kt')
+}
+
+const kStr = (s) => JSON.stringify(s).replace(/\$/g, '\\$')
+const vectors = []
+const disagreements = []
+for (const [source, name, operations, sdk] of txs) {
+  const tx = chain.createTransactionFromLegacyJson({ ...HEADER, operations, extensions: [], signatures: [] })
+  const signed = tx.legacy_binaryViewMetadata.binary
+  // the binary view is of the signed transaction: drop its empty signature list (varint 0)
+  if (!signed.endsWith('00')) throw new Error(`${source} ${name}: unexpected binary tail`)
+  const serialized = signed.slice(0, -2)
+  const digest = tx.legacy_sigDigest
+  const txId = tx.legacy_id
+  if (sdk.serialized !== undefined && sdk.serialized !== serialized) disagreements.push(`${source} ${name}: bytes\n  sdk ${sdk.serialized}\n  wax ${serialized}`)
+  if (sdk.txId !== txId) disagreements.push(`${source} ${name}: transaction id sdk ${sdk.txId} wax ${txId}`)
+  vectors.push(`        WaxVector(${kStr(source)}, ${kStr(name)}, ${kStr(serialized)}, ${kStr(digest)}, ${kStr(txId)}),`)
+}
+
+const out = process.argv[3] ?? join(dir, 'WaxGoldenVectors.kt')
+writeFileSync(out, `// GENERATED by tools/golden/generate-wax.mjs from @hiveio/wax ${waxVersion}. Do not edit by hand.
+// Every transaction the @ecency/sdk vectors pin, serialized by Hive's own protocol code (legacy serialization).
+package com.ecency.core.hive
+
+object WaxGoldenVectors {
+    const val WAX_VERSION = ${kStr(waxVersion)}
+
+    val transactions = listOf(
+${vectors.join('\n')}
+    )
+}
+
+/** [source] is the SDK vector file's object, [name] the vector's name there. */
+data class WaxVector(val source: String, val name: String, val serialized: String, val digest: String, val txId: String)
+`)
+console.log(`wrote ${vectors.length} wax vectors to ${out}`)
+if (disagreements.length > 0) {
+  console.log(`wax and the SDK vectors disagree on ${disagreements.length}:\n${disagreements.join('\n')}`)
+} else {
+  console.log('wax and the SDK vectors agree on every transaction')
+}

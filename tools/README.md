@@ -9,7 +9,9 @@ They run the npm packages the app's behaviour is defined by, so the fixtures sta
 - `render/`: `@ecency/render-helper` (post bodies, Markdown, URLs, proxied images, speak and video embeds, the
   block inputs). Run these again after a render-helper release (docs/upstream-render-helper-issues.md).
 - `golden/`: `@ecency/sdk`, `@hiveio/dhive`, `diff-match-patch`, `speakingurl` (operations and their serialization,
-  signing, wallet and resource credit math, feeds, profiles, slugs, edit history diffs).
+  signing, wallet and resource credit math, feeds, profiles, slugs, edit history diffs). `golden/generate-wax.mjs`
+  serializes every transaction those vectors pin again with Hive's own `@hiveio/wax` (hived's protocol code as
+  WebAssembly, run here in Node only, never in the apps), so the Kotlin core is checked against the chain's code too.
 - `l10n/seed-native-plurals.mjs`: fills missing `native.plurals.*` translations from the RN keys' translations in
   `src/config/locales`.
 - `esie/`: the Esie mascot's art, converted to Kotlin path data.
@@ -24,6 +26,7 @@ npm ci --prefix tools/render      # render/ (tools/render/package.json and its l
 
 node tools/golden/generate.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/GoldenVectors.kt
 node tools/golden/generate-memo.mjs shared/src/commonTest/kotlin/com/ecency/core/hive/MemoGoldenVectors.kt
+node tools/golden/generate-wax.mjs shared/src/commonTest/kotlin/com/ecency/core/hive   # after any SDK vector file changes
 node tools/render/generate-dom-fixtures.mjs shared/src/commonTest/kotlin/com/ecency/core/render/dom
 ```
 

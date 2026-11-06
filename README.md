@@ -362,7 +362,8 @@ Release setup: the source is a build setting, `ecency.updateReleasesUrl` and `ec
 
 - serialized bytes come from hived itself (`condenser_api.get_transaction_hex`) and must hash to the `@ecency/sdk` transaction id;
 - signatures must equal the SDK's deterministic (RFC 6979) signature byte for byte, and the SDK's own randomised signatures must recover to the signer;
-- master-password key derivation must match the SDK for every role.
+- master-password key derivation must match the SDK for every role;
+- every transaction those vector files pin (`GoldenVectors`, `WalletGoldenVectors`, `PlatformGoldenVectors`, `LinkOpGoldenVectors`, `GrantGoldenVectors`) is serialized again by Hive's own `@hiveio/wax` (hived's protocol code, run offline in Node by `tools/golden/generate-wax.mjs`, never in the apps): `WaxGoldenVectorTest` wants the Kotlin bytes, transaction id and digest equal to wax's, and wax equal to the SDK's, so a vector the SDK got wrong cannot pin the app to it (#3613). wax 2.0.2 agrees with the SDK on all 69. Rerun it whenever an SDK vector file changes.
 
 Regenerate after adding an operation (from the repository root, after `npm ci --prefix tools`; tools/README.md):
 
