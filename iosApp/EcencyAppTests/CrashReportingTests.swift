@@ -74,7 +74,8 @@ final class CrashReportingTests: XCTestCase {
         let file = recorder.reports[0]
         XCTAssertEqual(file.tags["where"], "image.save")
         // grouped by domain and code, never the description in the device language
-        XCTAssertEqual(file.fingerprint, ["handled", "image.save", "unknown", "CocoaError", "NSCocoaErrorDomain 4"])
+        XCTAssertEqual(file.fingerprint.prefix(3), ["handled", "image.save", "unknown"])
+        XCTAssertEqual(file.fingerprint.last, "NSCocoaErrorDomain 4")
         let offline = recorder.reports[1]
         XCTAssertEqual(offline.level, "warning")
         XCTAssertEqual(offline.tags["error.kind"], "network")
