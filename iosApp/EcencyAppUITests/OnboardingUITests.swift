@@ -65,6 +65,18 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertFalse(app.buttons["register-continue"].isEnabled)
     }
 
+    /// #3633: RN referScreen _handleDelegateHP: "Delegate HP" opens the delegation form for the referred account.
+    func testDelegateHpOnAReferralOpensTheDelegationFormForThatAccount() {
+        let app = launch(["-seedAccounts", "YES", "-openScreen", "refer"])
+        let delegate = app.buttons["referral-delegate-spike-dave"]
+        XCTAssertTrue(delegate.waitForExistence(timeout: 15))
+        delegate.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["delegate-form"].waitForExistence(timeout: 15), app.debugDescription)
+        let to = app.textFields["delegate-to"]
+        XCTAssertTrue(to.waitForExistence(timeout: 5))
+        XCTAssertEqual(to.value as? String, "spike-dave")
+    }
+
     func testReferShowsPointsRowsAndTheShareButton() {
         let app = launch(["-seedAccounts", "YES", "-openScreen", "refer"])
         // each total is one stop: its name as the label, the number as the value

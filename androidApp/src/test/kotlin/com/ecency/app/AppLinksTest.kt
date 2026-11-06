@@ -30,6 +30,19 @@ class AppLinksTest {
         assertTrue(opensHere("https://ecency.com/trending/photography"))
     }
 
+    /**
+     * #3655: `/auth` is the website's HiveSigner login callback (`/auth?code=...`). The app taking it left a website
+     * login unfinished; the app signs in through its own loopback redirect and `ecency://auth-transfer`.
+     */
+    @Test
+    fun theWebsitesLoginCallbackStaysInTheBrowser() {
+        for (url in listOf("https://ecency.com/auth", "https://ecency.com/auth?code=abc", "https://ecency.com/auth?username=alice&code=abc")) {
+            assertEquals(url, false, opensHere(url))
+        }
+        assertTrue(opensHere("https://ecency.com/signup?referral=alice"))
+        assertTrue(opensHere("https://ecency.com/purchase"))
+    }
+
     @Test
     fun otherPathsAndHostsStayInTheBrowser() {
         for (url in listOf("https://ecency.com/payout", "https://ecency.com/faq", "https://evil.example/trending")) {

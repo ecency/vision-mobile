@@ -106,14 +106,15 @@ object DemoWallet {
     fun http(url: String, body: String?): HttpResult? {
         val path = url.substringAfter("ecency.com/", "")
         return when {
-            path.startsWith("wallet-api/portfolio-v2") -> HttpResult(200, PORTFOLIO)
+            // after a Points claim the portfolio shows it, as the server does once it catches up
+            path.startsWith("wallet-api/portfolio-v2") -> HttpResult(200, if (pointsClaimed) PORTFOLIO_CLAIMED else PORTFOLIO)
             path == "private-api/point-list" -> HttpResult(
                 200,
                 """[{"id":31,"amount":"0.250","type":10,"sender":null,"receiver":null,"memo":null,"created":"2026-10-06T09:00:00+00:00"},""" +
                     """{"id":30,"amount":"-50.000","type":997,"sender":null,"receiver":null,"memo":"AI image","created":"2026-10-05T09:00:00+00:00"},""" +
                     """{"id":29,"amount":"100.000","type":999,"sender":"spike-bob","receiver":"spike-alice","memo":"Gift","created":"2026-10-04T09:00:00+00:00"}]""",
             )
-            path == "private-api/points-claim" -> HttpResult(200, "{}")
+            path == "private-api/points-claim" -> HttpResult(200, "{}").also { pointsClaimed = true }
             path == "private-api/boost-plus-price" -> HttpResult(200, """[{"duration":7,"price":1500},{"duration":14,"price":2800},{"duration":30,"price":5500}]""")
             path == "private-api/rc-delegation-price" -> HttpResult(200, """[{"duration":1,"price":100},{"duration":3,"price":250},{"duration":7,"price":500}]""")
             path == "private-api/boosted-plus-account" -> HttpResult(200, """{"account":"spike-alice","expires":null}""")
@@ -135,6 +136,12 @@ object DemoWallet {
     }
 
     private fun json(text: String): JsonElement = kotlinx.serialization.json.Json.parseToJsonElement(text)
+
+    /** Set by the demo Points claim, for this run only. */
+    private var pointsClaimed = false
+
+    private val PORTFOLIO_CLAIMED: String
+        get() = PORTFOLIO.replaceFirst("\"balance\":1250.5,", "\"balance\":1251.25,").replaceFirst("\"pendingRewards\":0.75,\"liquid\":1250.5", "\"pendingRewards\":0,\"liquid\":1251.25")
 
     val PORTFOLIO = """{"username":"spike-alice","currency":"usd","wallets":[
         {"name":"Ecency Points","symbol":"POINTS","layer":"points","balance":1250.5,"fiatRate":0.002,"currency":"USD","precision":3,"actions":[{"id":"ecency_point_transfer"},{"id":"promote"},{"id":"boost"}],"pendingRewards":0.75,"liquid":1250.5},

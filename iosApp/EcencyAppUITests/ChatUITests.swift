@@ -251,6 +251,27 @@ final class ChatUITests: XCTestCase {
         wait(for: [gone], timeout: 5)
     }
 
+    /// Tester report (Android, checked here too): with the keyboard up the composer row sits right on top of it, no
+    /// gap. Needs the on screen keyboard (see EditorUITests.requireSoftwareKeyboard).
+    func testTheComposerSitsRightOnTopOfTheKeyboard() throws {
+        let app = launch(["-openScreen", "chat:ch-group:G"])
+        let composer = element(app, "chat-composer")
+        XCTAssertTrue(composer.waitForExistence(timeout: 20), app.debugDescription)
+        composer.tap()
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        sleep(1) // the keyboard settles
+        let send = app.buttons["chat-send"].frame
+        // the predictions bar is above the Keyboard element and part of what the keyboard covers
+        let bar = app.otherElements["SystemInputAssistantView"]
+        let top = bar.exists && bar.frame.height > 0 ? min(bar.frame.minY, keyboard.frame.minY) : keyboard.frame.minY
+        // the row's bottom padding is 8 points
+        XCTAssertLessThanOrEqual(send.maxY, top + 1, "above the keyboard: send \(send), keyboard top \(top)")
+        XCTAssertGreaterThanOrEqual(send.maxY, top - 16, "right on top of the keyboard: send \(send), keyboard top \(top)")
+    }
+
     func testAGroupOpensByIdWithItsName() {
         let app = launch(["-openScreen", "chat:ch-group:G"])
         XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 20))

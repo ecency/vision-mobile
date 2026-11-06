@@ -65,10 +65,25 @@ class NavigationTest {
         assertEquals(BadgeKind.NOTIFICATION, AppTab.NOTIFICATION.badge)
         assertEquals(BadgeKind.CHAT, AppTab.CHATS.badge)
         assertNull(AppTab.FEED.badge)
-        assertTrue(AppTab.FEED.showsBoost(loggedIn = true))
-        assertFalse(AppTab.FEED.showsBoost(loggedIn = false))
-        assertFalse(AppTab.CHATS.showSearch)
-        assertEquals(listOf(AppTab.FEED, AppTab.WALLET), AppTab.entries.filter { it.showQr })
+    }
+
+    /** Owner request: every tab's header has the Feed's trailing buttons, in the Feed's order; perks only signed in (RN). */
+    @Test
+    fun everyTabHeaderHasQrSearchAndPerksInTheSameOrder() {
+        for (tab in AppTab.entries) {
+            assertEquals(
+                listOf(TabHeaderButton.QR_SCAN, TabHeaderButton.SEARCH, TabHeaderButton.PERKS),
+                tab.headerButtons(loggedIn = true),
+                "$tab signed in",
+            )
+            assertEquals(listOf(TabHeaderButton.QR_SCAN, TabHeaderButton.SEARCH), tab.headerButtons(loggedIn = false), "$tab signed out")
+        }
+        assertEquals(
+            listOf(RouteName.QR_SCAN, RouteName.SEARCH_RESULT, RouteName.PERKS),
+            TabHeaderButton.entries.map { it.route },
+        )
+        assertEquals(listOf(AppIcon.QR_SCAN, AppIcon.SEARCH, AppIcon.BOOST), TabHeaderButton.entries.map { it.icon })
+        assertTrue(TabHeaderButton.entries.all { it.label.isNotBlank() })
     }
 
     @Test

@@ -102,6 +102,21 @@ class LaunchSplashActivityTest {
         scenario.close()
     }
 
+    /**
+     * The window resizes for the keyboard (RN's manifest had adjustResize too). Without it Android pans the whole
+     * edge to edge window up to the focused field while Compose's imePadding lifts the field as well: the chat
+     * composer stood a keyboard's height above the keyboard (tester report).
+     */
+    @Test
+    fun theWindowResizesForTheKeyboardInsteadOfPanning() {
+        val scenario = launched()
+        scenario.onActivity { activity ->
+            val adjust = activity.window.attributes.softInputMode and android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST
+            assertEquals("soft input adjust mode", android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE, adjust)
+        }
+        scenario.close()
+    }
+
     @Test
     fun androidTwelveAndLaterAnimateTheSplashOutOnARestoreToo() {
         val scenario = launched()

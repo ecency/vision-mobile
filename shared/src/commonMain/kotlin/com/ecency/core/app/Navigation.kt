@@ -77,6 +77,19 @@ enum class RouteName(val rnName: String, private val titleText: () -> String, va
     }
 }
 
+/** A trailing button of the tab header ([AppTab.headerButtons]): what it shows and the screen it opens. */
+enum class TabHeaderButton(val icon: AppIcon, val route: RouteName, private val labelText: () -> String) {
+    QR_SCAN(AppIcon.QR_SCAN, RouteName.QR_SCAN, { ShellUiCopy.QR_SCAN }),
+    SEARCH(AppIcon.SEARCH, RouteName.SEARCH_RESULT, { UiCopy.SEARCH }),
+
+    /** RN's boost (fire) button, which opens Perks. */
+    PERKS(AppIcon.BOOST, RouteName.PERKS, { ShellUiCopy.PERKS }),
+    ;
+
+    /** The accessibility label in the current language (the buttons show icons only). */
+    val label: String get() = labelText()
+}
+
 /** What a tab shows while signed out. */
 enum class TabGate {
     NONE,
@@ -93,8 +106,8 @@ enum class BadgeKind { NOTIFICATION, CHAT }
 
 /**
  * The RN bottom tabs (src/navigation/botomTabNavigator.tsx) in their order. Icon only, no labels; [icon] is
- * outlined at rest and filled when the tab is selected ([AppIcon.WAVES] is RN's own wavy dash). The header flags are RN's
- * `<Header showQR showBoost hideSearch>` per tab screen.
+ * outlined at rest and filled when the tab is selected ([AppIcon.WAVES] is RN's own wavy dash). Every tab's header has the
+ * same trailing buttons ([headerButtons]).
  */
 enum class AppTab(
     val rnName: String,
@@ -102,15 +115,12 @@ enum class AppTab(
     val icon: AppIcon,
     val gate: TabGate,
     val badge: BadgeKind?,
-    val showQr: Boolean,
-    val showSearch: Boolean,
-    val showBoost: Boolean,
 ) {
-    FEED("FeedTabbar", { L.home.feed }, AppIcon.HOME, TabGate.NONE, null, showQr = true, showSearch = true, showBoost = true),
-    WAVES("WavesTabbar", { L.profile.waves }, AppIcon.WAVES, TabGate.NONE, null, showQr = false, showSearch = true, showBoost = false),
-    CHATS("ChatsTabbar", { L.chats.title }, AppIcon.CHAT, TabGate.LOGIN_MESSAGE, BadgeKind.CHAT, showQr = false, showSearch = false, showBoost = false),
-    WALLET("WalletTabbar", { L.profile.wallet }, AppIcon.WALLET, TabGate.LOGIN_PROMPT, null, showQr = true, showSearch = true, showBoost = false),
-    NOTIFICATION("NotificationTabbar", { L.notification.notification }, AppIcon.NOTIFICATIONS, TabGate.LOGIN_PROMPT, BadgeKind.NOTIFICATION, showQr = false, showSearch = true, showBoost = false),
+    FEED("FeedTabbar", { L.home.feed }, AppIcon.HOME, TabGate.NONE, null),
+    WAVES("WavesTabbar", { L.profile.waves }, AppIcon.WAVES, TabGate.NONE, null),
+    CHATS("ChatsTabbar", { L.chats.title }, AppIcon.CHAT, TabGate.LOGIN_MESSAGE, BadgeKind.CHAT),
+    WALLET("WalletTabbar", { L.profile.wallet }, AppIcon.WALLET, TabGate.LOGIN_PROMPT, null),
+    NOTIFICATION("NotificationTabbar", { L.notification.notification }, AppIcon.NOTIFICATIONS, TabGate.LOGIN_PROMPT, BadgeKind.NOTIFICATION),
     ;
 
     /** The tab's name in the current language (accessibility; the tabs show icons only). */
@@ -136,8 +146,13 @@ enum class AppTab(
             TabGate.LOGIN_MESSAGE -> L.chats.loginRequired
         }
 
-    /** RN only shows the boost (fire) button signed in. */
-    fun showsBoost(loggedIn: Boolean): Boolean = showBoost && loggedIn
+    /**
+     * The header's trailing buttons, in order: the same on every tab (the Feed's, RN `<Header showQR showBoost>`; RN
+     * gave the other tabs fewer, the owner asked for one header everywhere). RN shows perks (the boost button) only
+     * signed in.
+     */
+    fun headerButtons(loggedIn: Boolean): List<TabHeaderButton> =
+        if (loggedIn) TabHeaderButton.entries else listOf(TabHeaderButton.QR_SCAN, TabHeaderButton.SEARCH)
 
     companion object {
         /** RN `initialRouteName` and `backBehavior="initialRoute"`. */

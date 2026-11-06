@@ -898,9 +898,7 @@ private fun TabsRoot(
             tab, username, account?.takeIf { it.name == username }?.profile?.displayName,
             username?.let { PostCard.avatarUrl(it, env.proxyBase) }.orEmpty(),
             onAvatar = navigator::openDrawer,
-            onQr = { push(AppScreen.of(RouteName.QR_SCAN)) },
-            onSearch = { push(AppScreen.of(RouteName.SEARCH_RESULT)) },
-            onBoost = { push(AppScreen.of(RouteName.PERKS)) },
+            onButton = { push(AppScreen.of(it.route)) },
         )
         // Material fade through between tabs (a crossfade under reduce motion, Motion.kt)
         val motion = LocalMotion.current

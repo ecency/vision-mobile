@@ -50,10 +50,14 @@
         tools:ignore="UnusedTranslation">
         <!-- Portrait only, like the RN app and iOS. Other configuration changes still recreate the activity
              and keep the back stack (NavigationViewModel). A language change (the in-app picker sets the per-app
-             language, or the system settings do) does not: the Compose root switches copy and direction live. -->
+             language, or the system settings do) does not: the Compose root switches copy and direction live.
+             adjustResize (as RN's manifest): the edge to edge window gets the keyboard as an inset that the screens'
+             imePadding takes. Unspecified, Android pans the window up to the focused field as well, and a field at the
+             bottom (the chat composer) stood a keyboard's height above the keyboard. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="locale|layoutDirection"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -71,15 +75,15 @@
                 <data android:scheme="ecency" />
                 <data android:scheme="hive" />
             </intent-filter>
-            <!-- ecency.com/auth and /signup. The RN app's id, so ecency.com's assetlinks.json already verifies them
-                 (README "In-place upgrade from RN 3.x"). -->
+            <!-- ecency.com/signup. The RN app's id, so ecency.com's assetlinks.json already verifies it (README
+                 "In-place upgrade from RN 3.x"). Not /auth: it is the website's HiveSigner login callback, which must
+                 stay in the browser (#3655); the app signs in through its own redirect and ecency://auth-transfer. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:host="ecency.com" />
-                <data android:path="/auth" />
                 <data android:path="/signup" />
                 <!-- RN parsePurchaseUrl: the web app's "buy in the app" links (README "In-app purchases") -->
                 <data android:path="/purchase" />

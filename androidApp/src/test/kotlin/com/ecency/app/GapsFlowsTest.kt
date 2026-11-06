@@ -148,6 +148,24 @@ class GapsFlowsTest {
         assertEquals(listOf("https://ecency.com/signup?referral=tester"), shared)
     }
 
+    /** #3633: RN referScreen _handleDelegateHP: "Delegate HP" opens the delegation form for the referred account. */
+    @Test
+    fun delegateHpOnAReferralOpensTheDelegationFormForThatAccount() {
+        signIn()
+        node.auth.rest = { r ->
+            when {
+                r.url.endsWith("/referrals/tester/stats") -> HttpResult(200, """{"total":1,"rewarded":0}""")
+                r.url.endsWith("/referrals/tester") -> HttpResult(200, """[{"id":1,"username":"friend-one","rewarded":0,"created":"2026-09-20T10:00:00+00:00"}]""")
+                else -> null
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.Refer)))
+        waitFor("referralDelegate:friend-one")
+        compose.onNodeWithTag("referralDelegate:friend-one").performClick()
+        waitFor("delegateForm")
+        assertTrue("the referred account is the delegatee", compose.onAllNodes(hasTestTag("delegateTo") and androidx.compose.ui.test.hasText("friend-one", substring = true)).fetchSemanticsNodes().isNotEmpty())
+    }
+
     @Test
     fun theReferShareIconGrowsWithTheFontScale() {
         signIn()

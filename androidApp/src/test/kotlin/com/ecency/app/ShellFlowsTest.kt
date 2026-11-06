@@ -252,6 +252,36 @@ class ShellFlowsTest {
         assertFalse(exists("comingSoon"))
     }
 
+    /** Owner request: the same QR, search and perks buttons, left to right, on every tab's header; perks signed in only. */
+    @Test
+    fun everyTabHeaderShowsQrSearchAndPerksInOrder() {
+        node.signIn()
+        launch()
+        waitFor("headerUser")
+        val ids = listOf("headerQr", "headerSearch", "headerBoost")
+        for (tab in AppTab.entries) {
+            compose.onNodeWithTag("bottomTab:${tab.name}").performClick()
+            compose.waitForIdle()
+            for (id in ids) assertTrue("$id on $tab", exists(id))
+            val xs = ids.map { bounds(it).left }
+            assertEquals("$tab: QR, search, perks left to right", xs.sorted(), xs)
+        }
+    }
+
+    @Test
+    fun signedOutEveryTabHeaderShowsQrAndSearchButNoPerks() {
+        launch()
+        waitFor("headerLogin")
+        for (tab in AppTab.entries) {
+            compose.onNodeWithTag("bottomTab:${tab.name}").performClick()
+            compose.waitForIdle()
+            assertTrue("QR on $tab", exists("headerQr"))
+            assertTrue("search on $tab", exists("headerSearch"))
+            assertFalse("perks only signed in, $tab", exists("headerBoost"))
+            assertTrue("$tab: QR before search", bounds("headerQr").left < bounds("headerSearch").left)
+        }
+    }
+
     @Test
     fun createButtonAsksForLoginThenOpensTheEditorPlaceholder() {
         launch()

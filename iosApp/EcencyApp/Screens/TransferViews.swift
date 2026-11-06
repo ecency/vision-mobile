@@ -630,6 +630,7 @@ struct TipSheet: View {
 /// RN TRANSFER_FAVORITES: pick the recipient from the favourite accounts.
 struct FavoritesSheet: View {
     let onPick: (String) -> Void
+    @Environment(\.appTheme) private var theme
     @StateObject private var observed: Observed<TransferFavoritesState>
 
     init(env: AppEnvironment, onPick: @escaping (String) -> Void) {
@@ -641,12 +642,37 @@ struct FavoritesSheet: View {
 
     var body: some View {
         let s = observed.state
+        let fcopy = TransferFavoritesCopy.shared
         NavigationStack {
-            List(s.visible, id: \.self) { name in Button("@\(name)") { onPick(name) }.themedCardRow().accessibilityIdentifier("favorite-\(name)") }
+            List {
+                // RN: the add row under the header button: a username and a save button
+                if s.adding {
+                    HStack {
+                        TextField(fcopy.USERNAME, text: Binding(get: { s.addName }, set: { model.setAddName(text: $0) }))
+                            .textInputAutocapitalization(.never).autocorrectionDisabled().accessibilityIdentifier("favorites-add-name")
+                        // borderless: in a list row the button takes its own tap, not the whole row's
+                        Button { model.add() } label: { Image(appIcon: .check).foregroundStyle(theme.accent).tapTarget() }
+                            .buttonStyle(.borderless)
+                            .disabled(s.isSaving || TransferFavoritesModel.companion.normalize(text: s.addName).isEmpty)
+                            .accessibilityLabel(fcopy.CONFIRM_ADD).accessibilityIdentifier("favorites-add-save")
+                    }
+                    .themedCardRow()
+                }
+                ForEach(s.visible, id: \.self) { name in Button("@\(name)") { onPick(name) }.themedCardRow().accessibilityIdentifier("favorite-\(name)") }
+                if !s.isLoading && s.error == nil && s.visible.isEmpty {
+                    Text(fcopy.EMPTY).foregroundStyle(theme.secondary).themedCardRow().accessibilityIdentifier("favorites-empty")
+                }
+            }
                 .themedList()
                 .overlay { if s.isLoading { ProgressView() } }
-                .searchable(text: Binding(get: { s.query }, set: { model.setQuery(q: $0) }), prompt: tcopy.TO_PLACEHOLDER)
-                .navigationTitle(copy.PICK_FAVORITE).navigationBarTitleDisplayMode(.inline)
+                .searchable(text: Binding(get: { s.query }, set: { model.setQuery(q: $0) }), prompt: fcopy.SEARCH)
+                .navigationTitle(fcopy.TITLE).navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { model.toggleAdd() } label: { Image(appIcon: s.adding ? .close : .personAdd) }
+                            .accessibilityLabel(s.adding ? fcopy.CANCEL_ADD : fcopy.ADD).accessibilityIdentifier("favorites-add-toggle")
+                    }
+                }
         }
         .onAppear { model.start() }
         .presentationDetents([.medium, .large])

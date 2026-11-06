@@ -262,6 +262,32 @@ class WalletFlowsTest {
         assertEquals(AppScreen.Transfer("transfer", "HIVE", "hive", "spike-bob"), navigator.state.top)
     }
 
+    /** Tester report: after a claim the balance stayed as it was until a manual refresh: the portfolio is read again until it shows the claim. */
+    @Test
+    @Config(qualifiers = "w360dp-h740dp")
+    fun aClaimShowsInTheBalanceWithoutARefresh() {
+        // the server shows the claim on a read after the broadcast, as the portfolio does once it catches up
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.endsWith("/wallet-api/portfolio-v2") && node.broadcasts().isNotEmpty()) {
+                HttpResult(200, portfolio.replace("\"balance\":50,\"fiatRate\":0.25,\"precision\":3,\"actions\":[{\"id\":\"delegate_vesting_shares\"}],\"pendingRewards\":0.5,\"staked\":50", "\"balance\":50.5,\"fiatRate\":0.25,\"precision\":3,\"actions\":[{\"id\":\"delegate_vesting_shares\"}],\"pendingRewards\":0,\"staked\":50.5"))
+            } else {
+                base?.invoke(r)
+            }
+        }
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)))
+        until { exists("claim:HP") }
+        assertEquals("50.000", text("assetBalance:HP"))
+        assertEquals("$20.79", text("walletTotal"))
+        compose.onNodeWithTag("claim:HP", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        try { until { node.broadcasts().isNotEmpty() && text("assetBalance:HP") == "50.500" } } catch (e: AssertionError) {
+            throw AssertionError("balance=${text("assetBalance:HP")} sends=${env.walletSends.current} sent=${node.sent.map { it.substringAfter("method\":\"").substringBefore('"') }}")
+        }
+        assertTrue(node.broadcasts().single().contains("claim_reward_balance"))
+        assertFalse(exists("claim:HP")) // nothing pending any more
+        assertEquals("$20.91", text("walletTotal")) // 20.78625 + 0.5 HP * 0.25
+    }
+
     @Test
     fun aHistoryCategoryAsksTheChainForItsOperationsOnly() {
         val masks = java.util.Collections.synchronizedList(mutableListOf<String?>())
@@ -497,6 +523,36 @@ class WalletFlowsTest {
         until { node.broadcasts().isNotEmpty() }
         val sent = node.broadcasts().single()
         assertTrue(sent, sent.contains("ecency_point_transfer") && sent.contains("""Tip for @carol/re-one"""))
+    }
+
+    /** #3633: RN transferFavoritesSheet: add a favourite by name, find it, and pick it as the recipient. */
+    @Test
+    fun theFavouritesSheetAddsAFavouriteAndPicksItAsTheRecipient() {
+        val saved = mutableListOf("spike-bob")
+        val added = mutableListOf<String>()
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            when {
+                r.url.contains("/private-api/favorites?format=wrapped") ->
+                    HttpResult(200, saved.mapIndexed { i, a -> """{"_id":"f$i","account":"$a","timestamp":$i}""" }.joinToString(",", "[", "]"))
+                r.url.endsWith("/private-api/favorites-add") -> HttpResult(200, "{}").also { added += r.body.orEmpty(); saved += "carol" }
+                else -> base?.invoke(r)
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))))
+        until { exists("transferFavorites") }
+        compose.onNodeWithTag("transferFavorites").performClick()
+        until { exists("favorite:spike-bob") }
+        compose.onNodeWithTag("favoritesAddToggle").performClick()
+        until { exists("favoritesAddName") }
+        compose.onNodeWithTag("favoritesAddName").performTextInput("@Carol")
+        compose.onNodeWithTag("favoritesAddSave").performClick()
+        until { exists("favorite:carol") }
+        assertTrue(added.toString(), added.single().contains("\"account\":\"carol\""))
+        assertFalse("the search shows the new one", exists("favorite:spike-bob"))
+        compose.onNodeWithTag("favorite:carol").performClick()
+        until { !exists("favoritesSheet") }
+        assertTrue(compose.onAllNodes(hasTestTag("transferTo") and hasText("carol", substring = true)).fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test

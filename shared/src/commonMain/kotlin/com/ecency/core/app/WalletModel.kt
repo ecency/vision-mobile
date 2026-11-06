@@ -11,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.abs
 
 /** One card of the Wallet tab (RN AssetCard). */
 data class AssetRow(
@@ -30,7 +31,7 @@ data class WalletState(
     /** Whose portfolio this is; rows are only drawn while it is the signed-in account. */
     val account: String? = null,
     val rows: List<AssetRow> = emptyList(),
-    /** Everything the portfolio answered (the total counts all of it, as RN). */
+    /** Everything the portfolio answered (the total counts all of it, as RN); a claimed reward it still reports reads 0. */
     val all: List<PortfolioItem> = emptyList(),
     val totalText: String = "--.--",
     val updatedAtMillis: Long? = null,
@@ -73,7 +74,13 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private var readAt = Long.MIN_VALUE
 
     /** RN claimsCollection: symbol to (claimed value, expiry), so a claimed reward reads 0 until the server agrees. */
-    private val claimMask = mutableMapOf<String, Pair<Double, Long>>()
+    private val claimMask = mutableMapOf<String, ClaimMask>()
+
+    /** A claimed reward and when its mask ends. */
+    private class ClaimMask(val amount: Double, val until: Long)
+
+    /** The portfolio as the server answered it; [WalletState.all] is it with the claims of [claimMask] applied. */
+    private var served: List<PortfolioItem> = emptyList()
     private val claimingNow = mutableSetOf<String>()
 
     fun start() {
@@ -85,6 +92,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                     job?.cancel()
                     claimMask.clear()
                     claimingNow.clear()
+                    served = emptyList()
                     override = null
                     setState { WalletState(currency = WalletCurrency.of(env.prefs)) }
                     if (e.username != null) load(refresh = false)
@@ -185,15 +193,29 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             }
             claimingNow -= symbol
             if (ok && owns(user)) {
-                claimMask[symbol] = claimed to env.nowMillis() + CLAIM_MASK_MILLIS
+                claimMask[symbol] = ClaimMask(claimed, env.nowMillis() + CLAIM_MASK_MILLIS)
                 env.ui.toast(WalletCopy.CLAIMED)
             }
             publish()
-            if (ok) {
-                // RN: the portfolio again 2 s later (the chain needs a moment)
-                delay(CLAIM_REFRESH_DELAY_MILLIS)
-                if (owns(user)) load(refresh = true)
-            }
+            if (ok) readUntilClaimed(user, symbol, claimed)
+        }
+    }
+
+    /**
+     * RN reads the portfolio once, 2 s after a claim; the portfolio can still answer the old balance then, which stayed
+     * on screen until a manual refresh (tester report). Reads again, quietly, at [CLAIM_REREAD_MILLIS] (at most five
+     * reads) and stops once the portfolio shows the claim: its pending reward fell below the claimed amount, which only
+     * a claim does. The balance is always the server's: the app never adds the claim itself, so a read that already
+     * holds it, with a transfer or a new reward besides, cannot count it twice.
+     */
+    private suspend fun readUntilClaimed(user: String, symbol: String, claimed: Double) {
+        for (wait in CLAIM_REREAD_MILLIS) {
+            delay(wait)
+            if (!owns(user)) return
+            if (job?.isActive != true) load(refresh = true, quiet = true)
+            job?.join()
+            val shown = served.firstOrNull { it.symbol == symbol }?.let { it.pendingRewards < claimed - CLAIM_EPSILON } == true
+            if (shown) return
         }
     }
 
@@ -238,6 +260,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 env.session.awaitLoaded()
                 val user = env.session.current.username
                 if (user == null) {
+                    served = emptyList()
                     setState { WalletState(currency = it.currency) }
                     return@launch
                 }
@@ -250,6 +273,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val perMVests = rate.await()
                 if (!owns(user)) return@launch
                 readAt = stamp
+                served = items
                 setState {
                     withRows(
                         it.copy(
@@ -290,24 +314,34 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun withRows(s: WalletState): WalletState {
         val now = env.nowMillis()
-        claimMask.entries.removeAll { it.value.second <= now }
-        val rows = s.selection.mapNotNull { sym -> s.all.firstOrNull { it.symbol == sym } }.map { item ->
-            val mask = claimMask[item.symbol]
-            val pending = if (mask != null && mask.first == item.pendingRewards) 0.0 else item.pendingRewards
+        claimMask.entries.removeAll { it.value.until <= now }
+        val all = served.map(::claimed)
+        val rows = s.selection.mapNotNull { sym -> all.firstOrNull { it.symbol == sym } }.map { item ->
             AssetRow(
                 item = item,
                 name = WalletCopy.assetName(item),
                 balanceText = WalletFormat.amount(item.balance),
                 fiatText = item.fiatRate?.let { WalletFormat.fiat(item.balance * it, s.currency) },
-                pendingText = if (pending > 0) "${WalletFormat.amount(pending)} ${item.symbol}" else null,
+                pendingText = if (item.pendingRewards > 0) "${WalletFormat.amount(item.pendingRewards)} ${item.symbol}" else null,
                 claiming = item.symbol in claimingNow,
             )
         }
-        val total = s.all.sumOf { it.balance * (it.fiatRate ?: 0.0) }
-        return s.copy(rows = rows, totalText = if (s.loaded) WalletFormat.fiat(total, s.currency) else "--.--")
+        val total = all.sumOf { it.balance * (it.fiatRate ?: 0.0) }
+        return s.copy(all = all, rows = rows, totalText = if (s.loaded) WalletFormat.fiat(total, s.currency) else "--.--")
+    }
+
+    /**
+     * RN claimsCollection: a claimed reward reads 0 while the server still reports exactly that amount as pending, for
+     * 3 minutes at most. Any other pending amount is the server's and shows; the balance is never changed here.
+     */
+    private fun claimed(item: PortfolioItem): PortfolioItem {
+        val mask = claimMask[item.symbol] ?: return item
+        return if (abs(item.pendingRewards - mask.amount) < CLAIM_EPSILON) item.copy(pendingRewards = 0.0) else item
     }
 
     companion object {
+        private const val CLAIM_EPSILON = 1e-9
+
         /** RN DEFAULT_ASSETS. */
         val DEFAULT_ASSETS = listOf("POINTS", "HP", "HIVE", "HBD")
 
@@ -317,7 +351,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         /** RN claim cache expiry. */
         const val CLAIM_MASK_MILLIS = 180_000L
 
-        const val CLAIM_REFRESH_DELAY_MILLIS = 2_000L
+        /** The waits between the portfolio reads after a claim: RN's 2 s first, then until about 40 s. */
+        val CLAIM_REREAD_MILLIS = listOf(2_000L, 3_000L, 5_000L, 10_000L, 20_000L)
 
         const val AFTER_BROADCAST_DELAY_MILLIS = 3_000L
 

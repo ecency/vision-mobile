@@ -488,6 +488,40 @@ class ProfileFlowsTest {
         assertFalse(exists("imageUploading"))
     }
 
+    /**
+     * The window resizes for the keyboard (adjustResize, no system pan): the last field of the form, focused, and the
+     * save button stay above the keyboard.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun theFocusedProfileFieldAndSaveStayAboveTheKeyboard() {
+        node.signIn()
+        launch(AppScreen.Profile("tester"))
+        waitFor("editProfile")
+        compose.onNodeWithTag("editProfile").performClick()
+        waitFor("field:NAME")
+        // scrolled to: the last field comes in at the bottom of the screen
+        compose.onNode(androidx.compose.ui.test.hasScrollAction() and androidx.compose.ui.test.hasAnyDescendant(hasTestTag("field:NAME")))
+            .performScrollToNode(hasTestTag("field:WEBSITE"))
+        compose.waitForIdle()
+        val window = compose.activity.window.decorView.height.toFloat()
+        val keyboard = (300 * compose.density.density).toInt()
+        fun bounds(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInWindow
+        compose.onNodeWithTag("field:WEBSITE").performClick()
+        compose.onNodeWithTag("field:WEBSITE").performTextInput("x")
+        waitFor("saveProfile")
+        assertTrue("the field starts where the keyboard will be: ${bounds("field:WEBSITE")}", bounds("field:WEBSITE").bottom > window - keyboard)
+        compose.runOnUiThread {
+            val insets = androidx.core.view.WindowInsetsCompat.Builder()
+                .setInsets(androidx.core.view.WindowInsetsCompat.Type.ime(), androidx.core.graphics.Insets.of(0, 0, 0, keyboard))
+                .setVisible(androidx.core.view.WindowInsetsCompat.Type.ime(), true)
+                .build()
+            androidx.core.view.ViewCompat.dispatchApplyWindowInsets(compose.activity.window.decorView, insets)
+        }
+        compose.await("the field above the keyboard") { idleMain(); bounds("field:WEBSITE").let { it.bottom <= window - keyboard + 1f && it.height > 1f } }
+        assertTrue("save above the keyboard: ${bounds("saveProfile")}", bounds("saveProfile").bottom <= window - keyboard + 1f)
+    }
+
     @Test
     fun ownProfileEditSavesAccountUpdate2AndCloses() {
         node.signIn()

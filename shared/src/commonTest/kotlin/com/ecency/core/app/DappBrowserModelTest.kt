@@ -553,6 +553,56 @@ class DappBrowserModelTest {
         assertTrue(app.broadcasts().isEmpty())
     }
 
+    /**
+     * Owner report: ecency.com's own login (a `code` for ecency.app) and Raidstead's wallet sign-in (a `login` for
+     * ecency.app with an audience) are Ecency's messages on Ecency's site: from the top frame of https://ecency.com
+     * they reach the confirmation, as in RN. Any other site, a look-alike host or a subdomain is still refused.
+     */
+    @Test
+    fun ecencyComsOwnLoginMessagesReachThePromptOnlyThere() = runTest {
+        val app = signedIn(this)
+        val code = com.ecency.core.auth.HiveSignerMessages.message("code", null, alice, 1_791_288_000_000)
+        val raidstead = """{"signed_message":{"type":"login","app":"ecency.app","audience":"raidstead"},"authors":["$alice"],"timestamp":1791288000}"""
+        val ecency = browser(app, "https://ecency.com/raidstead")
+        val page = Page()
+        listOf(code, raidstead).forEachIndexed { i, message ->
+            send(ecency, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"Posting"""", id = i + 1), frame = "https://ecency.com")
+            testScheduler.advanceUntilIdle()
+            assertNotNull(ecency.current.prompt, "asked on ecency.com: $message")
+            ecency.confirm()
+            testScheduler.advanceUntilIdle()
+            assertTrue(page.lastResponse["success"]!!.jsonPrimitive.content.toBoolean(), message)
+            val signature = page.lastResponse["result"]!!.jsonPrimitive.content
+            assertEquals(AppTestKeys.pub(alice, KeyRole.POSTING), Signature.fromHex(signature).recover(BridgeSignatures.digest(message)).toString())
+        }
+        // on ecency.com too, only those two shapes with the posting key: never a token message or another Ecency message
+        val refusedThere = listOf(
+            com.ecency.core.auth.HiveSignerMessages.message("refresh", null, alice, 1_791_288_000_000) to "Posting",
+            com.ecency.core.auth.HiveSignerMessages.message("posting", null, alice, 1_791_288_000_000) to "Posting",
+            com.ecency.core.auth.HiveSignerMessages.message("offline", null, alice, 1_791_288_000_000) to "Posting",
+            """{"signed_message":{"type":"code","app":"someapp"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            """{"signed_message":{"type":"code","app":"ecency.app","audience":"raidstead"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            """{"signed_message":{"type":"login","app":"ecency.app"},"authors":["$alice"],"timestamp":1791288000}""" to "Posting",
+            code to "Active",
+            raidstead to "Active",
+        )
+        refusedThere.forEachIndexed { i, (message, method) ->
+            send(ecency, page, keychain("signBuffer", ""","message":${JsonPrimitive(message)},"method":"$method"""", id = 20 + i), frame = "https://ecency.com")
+            testScheduler.advanceUntilIdle()
+            assertNull(ecency.current.prompt, "$method $message")
+            assertEquals(DappBrowserModel.RESERVED_MESSAGE, page.error(), "$method $message")
+        }
+        for (site in listOf("https://ecency.com.evil.io", "https://alpha.ecency.com", "https://peakd.com")) {
+            val other = browser(app, "$site/login")
+            val otherPage = Page()
+            send(other, otherPage, keychain("signBuffer", ""","message":${JsonPrimitive(code)},"method":"Posting"""", id = 9, domain = site), frame = site)
+            testScheduler.advanceUntilIdle()
+            assertNull(other.current.prompt, site)
+            assertEquals(DappBrowserModel.RESERVED_MESSAGE, otherPage.error(), site)
+        }
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
     @Test
     fun ordinaryLoginMessagesStillReachThePrompt() = runTest {
         val app = signedIn(this)
