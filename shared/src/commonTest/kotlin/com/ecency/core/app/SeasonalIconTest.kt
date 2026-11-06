@@ -117,22 +117,17 @@ class SeasonalIconTest {
         assertDays("DE", "de", mapOf("2026-12-24" to CHRISTMAS, "2026-12-31" to DEFAULT), tooClose)
     }
 
+    /** Black Friday shows on its own days, the day after the US Thanksgiving to the Sunday, without a Points sale. */
     @Test
-    fun theServerCanStopOrShiftACelebration() {
-        val off2027 = listOf(SeasonalOverride(HIVE_DAY, 2027, null))
-        assertDays("DE", "de", mapOf("2027-03-20" to DEFAULT, "2028-03-20" to HIVE_DAY), off2027)
-        val offEveryYear = listOf(SeasonalOverride(CHRISTMAS, null, null))
-        assertDays("DE", "de", mapOf("2026-12-24" to DEFAULT, "2027-12-24" to DEFAULT), offEveryYear)
-        val shifted = listOf(SeasonalOverride(DIWALI, 2027, DayRange(day(2027, 10, 30), day(2027, 11, 3))))
-        assertDays("IN", "hi", mapOf("2027-10-28" to DEFAULT, "2027-11-02" to DIWALI, "2027-11-04" to DEFAULT), shifted)
-    }
-
-    @Test
-    fun blackFridayShowsOnlyWhenTheServerGivesItDays() {
-        assertEquals(DEFAULT, icon("2026-11-27", "US", "en"), "no Points sale known: no Black Friday icon")
-        val sale = listOf(SeasonalOverride(BLACK_FRIDAY, 2026, DayRange(day(2026, 11, 27), day(2026, 11, 30))))
-        assertEquals(BLACK_FRIDAY, icon("2026-11-27", "US", "en", sale))
-        assertEquals(DEFAULT, icon("2026-11-27", "JP", "ja", sale))
+    fun blackFridayShowsFromTheDayAfterThanksgivingToTheSunday() {
+        assertDays(
+            "US", "en",
+            mapOf(
+                "2026-11-26" to DEFAULT, "2026-11-27" to BLACK_FRIDAY, "2026-11-29" to BLACK_FRIDAY, "2026-11-30" to DEFAULT,
+                "2027-11-26" to BLACK_FRIDAY, "2028-11-24" to BLACK_FRIDAY, "2029-11-23" to BLACK_FRIDAY, "2029-11-22" to DEFAULT,
+            ),
+        )
+        assertEquals(DEFAULT, icon("2026-11-27", "JP", "ja"), "regional: not on a Japanese phone")
     }
 
     @Test

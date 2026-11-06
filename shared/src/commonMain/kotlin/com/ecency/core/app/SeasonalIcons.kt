@@ -88,11 +88,10 @@ object LauncherIconCopy {
 data class SeasonalWindow(val icon: LauncherIcon, val year: Int, val range: DayRange)
 
 /**
- * The server's word on a celebration: for [year] (every year when null), [range] null stops it, else it shows over
- * [range] instead of the table's days. No endpoint sends these yet (README "App icons"); the model takes them through
- * [LauncherIconModel.setOverrides].
+ * Other days for a celebration in the rule's tests: for [year] (every year when null), [range] null drops it, else it
+ * shows over [range] instead of the table's days. The apps pass none: the days come only from [SeasonalCalendar].
  */
-data class SeasonalOverride(val icon: LauncherIcon, val year: Int?, val range: DayRange?)
+internal data class SeasonalOverride(val icon: LauncherIcon, val year: Int?, val range: DayRange?)
 
 /**
  * When each celebration shows: the one place its days are decided (README "App icons"). A celebration of [year] may
@@ -112,14 +111,20 @@ data class SeasonalOverride(val icon: LauncherIcon, val year: Int?, val range: D
  * - Mid-Autumn Festival: the day before to the day after.
  * - Diwali: Dhanteras (two days before Lakshmi Puja) to Bhai Dooj (two days after).
  * - The football tournament and the summer games: their match days.
- * - Black Friday: no days of its own; it shows only while a Points sale runs, which the app cannot see yet, so only
- *   a [SeasonalOverride] with days turns it on.
+ * - Black Friday: the day after the US Thanksgiving (the fourth Thursday of November) to the Sunday.
  */
 object SeasonalCalendar {
     const val FIRST_YEAR = 2026
     const val LAST_YEAR = 2029
 
     private fun d(y: Int, m: Int, day: Int) = CalendarDay(y, m, day)
+
+    /** The Friday after the fourth Thursday of November (1970-01-01, epoch day 0, was a Thursday). */
+    internal fun blackFriday(year: Int): CalendarDay {
+        val nov1 = d(year, 11, 1)
+        val firstThursday = nov1.plusDays(((7 - nov1.epochDay.mod(7L)) % 7).toInt())
+        return firstThursday.plusDays(22)
+    }
 
     /** Lunar New Year's day (Spring Festival). Source: Royal Observatory Greenwich, "Lunar New Year dates"; China's State Council holiday notices (2026 to 2028). */
     private val LUNAR_NEW_YEAR = mapOf(2026 to d(2026, 2, 17), 2027 to d(2027, 2, 6), 2028 to d(2028, 1, 26), 2029 to d(2029, 2, 13))
@@ -173,6 +178,7 @@ object SeasonalCalendar {
         MID_AUTUMN[year]?.let { add(LauncherIcon.MID_AUTUMN, it.plusDays(-1), it.plusDays(1)) }
         DIWALI[year]?.let { add(LauncherIcon.DIWALI, it.plusDays(-2), it.plusDays(2)) }
         add(LauncherIcon.HALLOWEEN, d(year, 10, 29), d(year, 10, 31))
+        blackFriday(year).let { add(LauncherIcon.BLACK_FRIDAY, it, it.plusDays(2)) }
         add(LauncherIcon.CHRISTMAS, d(year, 12, 20), d(year, 12, 26))
         return out
     }
@@ -264,10 +270,10 @@ object IconAudiences {
 object SeasonalIcons {
     const val MIN_GAP_DAYS = 3
 
-    fun pick(today: CalendarDay, region: String?, language: String?, overrides: List<SeasonalOverride>): LauncherIcon =
+    internal fun pick(today: CalendarDay, region: String?, language: String?, overrides: List<SeasonalOverride> = emptyList()): LauncherIcon =
         shown(today.year - 1..today.year + 1, region, language, overrides).firstOrNull { today in it.range }?.icon ?: LauncherIcon.DEFAULT
 
-    /** The windows that show over [years] for this phone, after the server's [overrides] and the spacing rule. */
+    /** The windows that show over [years] for this phone, after the tests' [overrides] and the spacing rule. */
     internal fun shown(years: IntRange, region: String?, language: String?, overrides: List<SeasonalOverride>): List<SeasonalWindow> {
         val order = IconAudiences.order(region)
         val candidates = years.flatMap { year -> withOverrides(year, SeasonalCalendar.windows(year), overrides) }
@@ -317,7 +323,6 @@ class LauncherIconModel internal constructor(private val prefs: () -> Prefs, dis
     private var region: String? = null
     private var language: String? = null
     private var asksFirst = false
-    private var overrides: List<SeasonalOverride> = emptyList()
     private var today: CalendarDay? = null
 
     init {
@@ -331,19 +336,13 @@ class LauncherIconModel internal constructor(private val prefs: () -> Prefs, dis
         update()
     }
 
-    /** The server's switch: stops or moves celebrations without a release. */
-    fun setOverrides(overrides: List<SeasonalOverride>) {
-        this.overrides = overrides
-        update()
-    }
-
     fun refresh(today: CalendarDay) {
         this.today = today
         update()
     }
 
     /** The celebration's icon the rule picks for today, whatever the setting. */
-    fun seasonalToday(): LauncherIcon = today?.let { SeasonalIcons.pick(it, region, language, overrides) } ?: LauncherIcon.DEFAULT
+    fun seasonalToday(): LauncherIcon = today?.let { SeasonalIcons.pick(it, region, language) } ?: LauncherIcon.DEFAULT
 
     /** The one question: yes turns automatic switches on, no keeps them off; it is not asked again either way. */
     fun answerConsent(agree: Boolean) = setSeasonal(agree)
