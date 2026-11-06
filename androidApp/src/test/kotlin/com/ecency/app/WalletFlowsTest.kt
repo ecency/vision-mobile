@@ -262,10 +262,19 @@ class WalletFlowsTest {
         assertEquals(AppScreen.Transfer("transfer", "HIVE", "hive", "spike-bob"), navigator.state.top)
     }
 
-    /** Tester report: after a claim the balance stayed as it was until a manual refresh (the portfolio here never shows it). */
+    /** Tester report: after a claim the balance stayed as it was until a manual refresh: the portfolio is read again until it shows the claim. */
     @Test
     @Config(qualifiers = "w360dp-h740dp")
     fun aClaimShowsInTheBalanceWithoutARefresh() {
+        // the server shows the claim on a read after the broadcast, as the portfolio does once it catches up
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.endsWith("/wallet-api/portfolio-v2") && node.broadcasts().isNotEmpty()) {
+                HttpResult(200, portfolio.replace("\"balance\":50,\"fiatRate\":0.25,\"precision\":3,\"actions\":[{\"id\":\"delegate_vesting_shares\"}],\"pendingRewards\":0.5,\"staked\":50", "\"balance\":50.5,\"fiatRate\":0.25,\"precision\":3,\"actions\":[{\"id\":\"delegate_vesting_shares\"}],\"pendingRewards\":0,\"staked\":50.5"))
+            } else {
+                base?.invoke(r)
+            }
+        }
         launch(Navigator(NavState().selectTab(AppTab.WALLET)))
         until { exists("claim:HP") }
         assertEquals("50.000", text("assetBalance:HP"))

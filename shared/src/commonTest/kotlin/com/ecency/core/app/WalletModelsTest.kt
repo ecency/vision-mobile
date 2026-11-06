@@ -95,11 +95,11 @@ class WalletModelsTest {
 
     /**
      * Tester report: after a claim the balances stayed as they were until a manual refresh. The portfolio can still
-     * answer the old balance a few seconds after the claim, so the claimed amount shows in the balance at once and
-     * the portfolio is read again until it shows the claim, with no refresh by the user.
+     * answer the old balance a few seconds after the claim, so it is read again until it shows the claim, with no
+     * refresh by the user. Meanwhile the claimed reward reads 0 (RN) and the balance is the server's.
      */
     @Test
-    fun aClaimShowsInTheBalanceAtOnceAndIsReadAgainUntilThePortfolioShowsIt() = runTest {
+    fun aClaimIsReadAgainUntilThePortfolioShowsIt() = runTest {
         val w = world(this)
         w.env.wallet.start()
         testScheduler.advanceUntilIdle()
@@ -116,12 +116,9 @@ class WalletModelsTest {
         testScheduler.advanceTimeBy(500)
         testScheduler.runCurrent()
         val claimed = w.env.wallet.current.rows.first { it.symbol == "HP" }
-        assertEquals("950.617", claimed.balanceText)
+        assertEquals("950.000", claimed.balanceText)
         assertNull(claimed.pendingText)
-        assertEquals(950.617, w.env.wallet.current.item("HP")!!.staked!!, 1e-9)
-        // the header total counts the claimed HP too: 398.94 + 0.617 * 0.25
-        assertEquals("$399.09", w.env.wallet.current.totalText)
-        // no refresh by the user: the portfolio is read until it shows the claim, and its own numbers then show
+        // no refresh by the user: read until the portfolio shows the claim, then its own numbers show
         testScheduler.advanceTimeBy(60_000)
         testScheduler.runCurrent()
         val after = w.env.wallet.current.rows.first { it.symbol == "HP" }
@@ -131,127 +128,79 @@ class WalletModelsTest {
         assertFalse(w.env.wallet.current.isUpdating)
     }
 
+    /** A portfolio that never catches up: five reads at most, and the claimed reward reads 0 until the 3 minutes end. */
     @Test
-    fun aPointsClaimShowsInThePointsBalanceAtOnce() = runTest {
-        val w = world(this)
-        w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
-        w.env.wallet.start()
-        testScheduler.advanceUntilIdle()
-        w.env.wallet.claim("POINTS")
-        testScheduler.advanceTimeBy(500)
-        testScheduler.runCurrent()
-        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,501.250", points.balanceText)
-        assertNull(points.pendingText)
-        // the portfolio never shows it (a lagging API): the claimed amount stays shown until the 3 minute mask ends
-        testScheduler.advanceTimeBy(60_000)
-        testScheduler.runCurrent()
-        assertEquals("1,501.250", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
-    }
-
-    /** A new reward before the portfolio shows the claim: the claimed amount stays in the balance and reads go on. */
-    @Test
-    fun aRewardArrivingBeforeTheClaimShowsKeepsTheClaimedBalance() = runTest {
+    fun aLaggingPortfolioIsReadFiveTimesAtMost() = runTest {
         val w = world(this)
         w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
         w.env.wallet.start()
         testScheduler.advanceUntilIdle()
         val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
         val before = reads()
-        // the old balance with 0.050 more pending: the claim is not in it yet
-        val grown = WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.8")
-        var stale = 3
-        val fresh = WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.05")
-            .replaceFirst("\"balance\":1500.5", "\"balance\":1501.25")
-        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, if (stale-- > 0) grown else fresh) }
         w.env.wallet.claim("POINTS")
-        testScheduler.advanceTimeBy(2_500)
-        testScheduler.runCurrent()
-        val masked = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,501.250", masked.balanceText)
-        assertEquals("0.050 POINTS", masked.pendingText)
-        // a second claim waits until the first shows: its amount would count twice
-        w.env.wallet.claim("POINTS")
-        testScheduler.runCurrent()
-        assertEquals(1, w.app.authBackend.sent.count { it.url.endsWith("/private-api/points-claim") })
         testScheduler.advanceTimeBy(60_000)
         testScheduler.runCurrent()
-        val shown = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,501.250", shown.balanceText)
-        assertEquals("0.050 POINTS", shown.pendingText)
-        assertEquals(4, reads() - before)
+        assertEquals(5, reads() - before)
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,500.500", points.balanceText)
+        assertNull(points.pendingText)
     }
 
-    /** The claim shows with a new reward larger than the claim: the balance already holds it, so it is not added again. */
+    /**
+     * Review cases: whatever the portfolio holds besides the claim (a transfer in, a new reward larger than the claim,
+     * both), the balance shown is the server's, so the claim is never counted twice, and a new reward can be claimed.
+     */
     @Test
-    fun aClaimShownWithALargerNewRewardIsNotCountedTwice() = runTest {
+    fun theBalanceIsAlwaysTheServersSoAClaimIsNeverCountedTwice() = runTest {
         val w = world(this)
         w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
         w.env.wallet.start()
         testScheduler.advanceUntilIdle()
-        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
-        // claimed 0.75, then 0.80 came in before the next read: pending is above the claimed amount again
+        // claimed 0.75; 0.50 came in and 0.80 in new rewards before the next read
         w.http["/wallet-api/portfolio-v2"] = {
-            HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.8").replaceFirst("\"balance\":1500.5", "\"balance\":1501.25"))
+            HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.8").replaceFirst("\"balance\":1500.5", "\"balance\":1501.75"))
         }
         w.env.wallet.claim("POINTS")
         testScheduler.advanceTimeBy(2_500)
         testScheduler.runCurrent()
-        val before = reads()
         val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,501.250", points.balanceText)
+        assertEquals("1,501.750", points.balanceText)
         assertEquals("0.800 POINTS", points.pendingText)
-        // the claim shows, so the reads stop and the new reward can be claimed
-        testScheduler.advanceTimeBy(60_000)
-        testScheduler.runCurrent()
-        assertEquals(before, reads())
         w.env.wallet.claim("POINTS")
         testScheduler.runCurrent()
         assertEquals(2, w.app.authBackend.sent.count { it.url.endsWith("/private-api/points-claim") })
     }
 
-    /** A transfer in while the portfolio still lacks the claim is not the claim: the claim stays shown on top of it. */
+    /** A transfer in while the portfolio lacks the claim: the server's balance shows and the claimed reward reads 0. */
     @Test
-    fun aTransferInIsNotTakenForTheClaim() = runTest {
+    fun aTransferInBeforeTheClaimShowsKeepsTheRewardHidden() = runTest {
         val w = world(this)
         w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
         w.env.wallet.start()
         testScheduler.advanceUntilIdle()
-        val reads = { w.app.authBackend.sent.count { it.url.endsWith("portfolio-v2") } }
-        // 0.5 came in, the 0.75 claim is not in the answer yet (still pending)
         w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"balance\":1500.5", "\"balance\":1501.0")) }
         w.env.wallet.claim("POINTS")
         testScheduler.advanceTimeBy(2_500)
         testScheduler.runCurrent()
-        val before = reads()
         val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,501.750", points.balanceText)
+        assertEquals("1,501.000", points.balanceText)
         assertNull(points.pendingText)
-        // still read again for the claim
-        testScheduler.advanceTimeBy(10_000)
-        testScheduler.runCurrent()
-        assertTrue(reads() > before)
-        assertEquals("1,501.750", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
     }
 
-    /** A claim of the smallest amount: an unchanged balance is not the claim, however close it is to the last digit. */
+    /** The smallest claim reads 0 too while the portfolio still reports it. */
     @Test
-    fun theSmallestClaimStaysShownWhileThePortfolioLags() = runTest {
+    fun theSmallestClaimIsHiddenWhileThePortfolioLags() = runTest {
         val w = world(this)
         w.http["/private-api/points-claim"] = { HttpResult(200, "{}") }
         w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replaceFirst("\"pendingRewards\":0.75", "\"pendingRewards\":0.001")) }
         w.env.wallet.start()
         testScheduler.advanceUntilIdle()
         w.env.wallet.claim("POINTS")
-        testScheduler.advanceTimeBy(500)
-        testScheduler.runCurrent()
-        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
-        assertEquals("1,500.501", points.balanceText)
-        assertNull(points.pendingText)
         testScheduler.advanceTimeBy(10_000)
         testScheduler.runCurrent()
-        assertEquals("1,500.501", w.env.wallet.current.rows.first { it.symbol == "POINTS" }.balanceText)
-        assertNull(w.env.wallet.current.rows.first { it.symbol == "POINTS" }.pendingText)
+        val points = w.env.wallet.current.rows.first { it.symbol == "POINTS" }
+        assertEquals("1,500.500", points.balanceText)
+        assertNull(points.pendingText)
     }
 
     @Test

@@ -12,7 +12,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
-import kotlin.math.pow
 
 /** One card of the Wallet tab (RN AssetCard). */
 data class AssetRow(
@@ -32,7 +31,7 @@ data class WalletState(
     /** Whose portfolio this is; rows are only drawn while it is the signed-in account. */
     val account: String? = null,
     val rows: List<AssetRow> = emptyList(),
-    /** Everything the portfolio answered (the total counts all of it, as RN), with the claims it does not show yet. */
+    /** Everything the portfolio answered (the total counts all of it, as RN); a claimed reward it still reports reads 0. */
     val all: List<PortfolioItem> = emptyList(),
     val totalText: String = "--.--",
     val updatedAtMillis: Long? = null,
@@ -77,8 +76,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /** RN claimsCollection: symbol to (claimed value, expiry), so a claimed reward reads 0 until the server agrees. */
     private val claimMask = mutableMapOf<String, ClaimMask>()
 
-    /** A claim the portfolio may not show yet: the amount, the asset's balance before it, and when the mask ends. */
-    private class ClaimMask(val amount: Double, val before: Double, val until: Long)
+    /** A claimed reward and when its mask ends. */
+    private class ClaimMask(val amount: Double, val until: Long)
 
     /** The portfolio as the server answered it; [WalletState.all] is it with the claims of [claimMask] applied. */
     private var served: List<PortfolioItem> = emptyList()
@@ -166,13 +165,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     fun claim(symbol: String) {
         val user = current.account ?: return
         val item = current.item(symbol) ?: return
-        // a claim the server does not show yet blocks another: its amount would count twice
-        if (symbol in claimingNow || symbol in claimMask || item.pendingRewards <= 0) return
+        if (symbol in claimingNow || item.pendingRewards <= 0) return
         claimingNow += symbol
         publish()
         val claimed = item.pendingRewards
-        // the balance as served before the claim: a later read that already holds the claim must not be counted again
-        val before = served.firstOrNull { it.symbol == symbol }?.balance ?: item.balance
         scope.launch {
             val ok = try {
                 when {
@@ -197,25 +193,29 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             }
             claimingNow -= symbol
             if (ok && owns(user)) {
-                claimMask[symbol] = ClaimMask(claimed, before, env.nowMillis() + CLAIM_MASK_MILLIS)
+                claimMask[symbol] = ClaimMask(claimed, env.nowMillis() + CLAIM_MASK_MILLIS)
                 env.ui.toast(WalletCopy.CLAIMED)
             }
             publish()
-            if (ok) readUntilClaimed(user, symbol)
+            if (ok) readUntilClaimed(user, symbol, claimed)
         }
     }
 
     /**
      * RN reads the portfolio once, 2 s after a claim; the portfolio can still answer the old balance then, which stayed
-     * on screen until a manual refresh (tester report). Reads again, quietly, at [CLAIM_REREAD_MILLIS] until it shows
-     * the claim (its pending reward fell below the claimed amount, [withRows] drops the mask) or the mask ends.
+     * on screen until a manual refresh (tester report). Reads again, quietly, at [CLAIM_REREAD_MILLIS] (at most five
+     * reads) and stops once the portfolio shows the claim: its pending reward fell below the claimed amount, which only
+     * a claim does. The balance is always the server's: the app never adds the claim itself, so a read that already
+     * holds it, with a transfer or a new reward besides, cannot count it twice.
      */
-    private suspend fun readUntilClaimed(user: String, symbol: String) {
+    private suspend fun readUntilClaimed(user: String, symbol: String, claimed: Double) {
         for (wait in CLAIM_REREAD_MILLIS) {
             delay(wait)
-            if (!owns(user) || symbol !in claimMask) return
+            if (!owns(user)) return
             if (job?.isActive != true) load(refresh = true, quiet = true)
             job?.join()
+            val shown = served.firstOrNull { it.symbol == symbol }?.let { it.pendingRewards < claimed - CLAIM_EPSILON } == true
+            if (shown) return
         }
     }
 
@@ -314,10 +314,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private fun withRows(s: WalletState): WalletState {
         val now = env.nowMillis()
-        // a mask ends when it expires or when the server shows the claim (see [showsClaim])
-        claimMask.entries.removeAll { (symbol, mask) ->
-            mask.until <= now || served.firstOrNull { it.symbol == symbol }?.let { showsClaim(it, mask) } == true
-        }
+        claimMask.entries.removeAll { it.value.until <= now }
         val all = served.map(::claimed)
         val rows = s.selection.mapNotNull { sym -> all.firstOrNull { it.symbol == sym } }.map { item ->
             AssetRow(
@@ -334,46 +331,16 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * [item] with its claim while the server still reports the claimed reward as pending: pending 0 (RN), and for
-     * POINTS, HIVE, HBD and HP the claimed amount in the balance (RN waits for the portfolio). An engine token's
-     * reward may go to its stake or its liquid balance, so only its pending reward is hidden.
+     * RN claimsCollection: a claimed reward reads 0 while the server still reports exactly that amount as pending, for
+     * 3 minutes at most. Any other pending amount is the server's and shows; the balance is never changed here.
      */
     private fun claimed(item: PortfolioItem): PortfolioItem {
         val mask = claimMask[item.symbol] ?: return item
-        if (showsClaim(item, mask)) return item
-        val c = mask.amount
-        // what came in since the claim stays pending
-        val pending = (item.pendingRewards - c).takeIf { it > CLAIM_EPSILON } ?: 0.0
-        if (item.layer == AssetLayer.ENGINE) return item.copy(pendingRewards = pending)
-        return item.copy(
-            pendingRewards = pending,
-            balance = item.balance + c,
-            liquid = item.liquid?.plus(c),
-            staked = if (item.symbol == "HP") item.staked?.plus(c) else item.staked,
-        )
-    }
-
-    /**
-     * The server's numbers include the claim: its pending reward fell below the claimed amount (only a claim lowers
-     * it), or the balance moved by the claimed amount itself, to half the asset's last digit (HP within the slow
-     * drift of its HIVE per VESTS rate), never as loosely as half the claim. The pending reward alone cannot tell:
-     * new rewards larger than the claim can come in before the next read. Any other balance change (a transfer in or out) is not the claim, so the claim stays
-     * shown on top of it; only a transfer of exactly the claimed amount could be taken for it.
-     */
-    private fun showsClaim(item: PortfolioItem, mask: ClaimMask): Boolean {
-        if (item.pendingRewards < mask.amount - CLAIM_EPSILON) return true
-        // half a last digit for rounding, plus HP's rate drift, and always under half the claim: a balance that did
-        // not move never matches, however small the claim
-        val digit = 10.0.pow(-item.precision.coerceIn(0, 8))
-        val tolerance = minOf(digit / 2 + mask.before * RATE_DRIFT, mask.amount * 0.49)
-        return abs(item.balance - mask.before - mask.amount) <= tolerance
+        return if (abs(item.pendingRewards - mask.amount) < CLAIM_EPSILON) item.copy(pendingRewards = 0.0) else item
     }
 
     companion object {
         private const val CLAIM_EPSILON = 1e-9
-
-        /** How far HP's HIVE per VESTS rate can move a balance while a claim is masked (a few minutes): a millionth. */
-        private const val RATE_DRIFT = 1e-6
 
         /** RN DEFAULT_ASSETS. */
         val DEFAULT_ASSETS = listOf("POINTS", "HP", "HIVE", "HBD")
