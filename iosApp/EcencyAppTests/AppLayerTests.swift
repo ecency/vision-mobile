@@ -312,7 +312,7 @@ final class FakeDataModelTests: XCTestCase {
             _ = try await env.session.loginWithKey(username: "spike-alice", secret: "not the password")
             XCTFail("must throw")
         } catch {
-            XCTAssertEqual(ErrorText.message(error), AppError.companion.INVALID_CREDENTIALS)
+            XCTAssertEqual(ErrorText.message(error, where: "test.where"), AppError.companion.INVALID_CREDENTIALS)
         }
         XCTAssertNil(env.session.current.username)
     }
@@ -322,7 +322,7 @@ final class FakeDataModelTests: XCTestCase {
             _ = try await env.session.loginWithKey(username: "spike-alice", secret: FakeHiveTransport.password)
             XCTFail("must throw: the default auth services are offline")
         } catch {
-            XCTAssertEqual(ErrorText.appError(error)?.kind, .network)
+            XCTAssertEqual(ErrorText.appError(error, where: "test.where")?.kind, .network)
         }
         let remaining = try await env.accounts.accounts().count
         XCTAssertEqual(remaining, 0)

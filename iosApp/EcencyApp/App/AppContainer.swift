@@ -741,7 +741,7 @@ final class AppContainer: ObservableObject {
     func logout(_ username: String) {
         Task {
             do { try await env.session.logout(username: username) } catch {
-                alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error))
+                alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error, where: "session.logout"))
             }
         }
     }
@@ -767,7 +767,7 @@ final class AppContainer: ObservableObject {
     func logoutAll() {
         Task {
             do { try await env.session.logoutAll() } catch {
-                alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error))
+                alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error, where: "session.logoutAll"))
             }
         }
     }
@@ -858,7 +858,9 @@ final class AppContainer: ObservableObject {
             env = try AppEnvironment.companion.create(store: store, debugKeyImport: debugKeyImport, legacy: legacy, userAgent: BuildSecrets.userAgent)
             return .success(AppContainer(env: env, options: options))
         } catch {
-            return .failure(AppStartError(message: ErrorText.message(error)))
+            // no environment, so no shared reports yet: straight to Sentry
+            CrashReporting.captureStartFailure(error)
+            return .failure(AppStartError(message: ErrorText.message(error, where: "app.start")))
         }
     }
 
@@ -1113,15 +1115,16 @@ struct AppStartError: Error {
 
 /// User-facing text for errors thrown across the Kotlin bridge.
 enum ErrorText {
-    static func appError(_ error: Error) -> AppError? {
+    /// The failure as the UI shows it, reported as handled at `where` (shared `ErrorReports`, README "Crash reporting").
+    static func appError(_ error: Error, where: String) -> AppError? {
         let kotlin = (error as NSError).userInfo["KotlinException"]
-        if let app = kotlin as? AppException { return app.error }
-        if let throwable = kotlin as? KotlinThrowable { return AppError.companion.from(error: throwable) }
+        if let throwable = kotlin as? KotlinThrowable { return AppError.companion.from(error: throwable, where: `where`) }
+        Reports.handled(error, where: `where`)
         return nil
     }
 
-    static func message(_ error: Error) -> String {
-        appError(error)?.message ?? error.localizedDescription
+    static func message(_ error: Error, where: String) -> String {
+        appError(error, where: `where`)?.message ?? error.localizedDescription
     }
 }
 

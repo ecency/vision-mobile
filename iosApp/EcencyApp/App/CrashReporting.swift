@@ -47,6 +47,13 @@ enum CrashReporting {
 
     static let tracesSampleRate = 0.05
 
+    /// The app could not start (no environment, so no shared reports yet): the error goes to Sentry as it is, through
+    /// `beforeSend` like every event.
+    static func captureStartFailure(_ error: Error) {
+        guard started else { return }
+        SentrySDK.capture(error: error)
+    }
+
     /// A span's description to send, or nil to drop the span: network, file and database spans never go (their
     /// descriptions are URLs, paths and queries, and transactions skip `beforeSend`); the rest is scrubbed.
     static func spanDescription(op: String, description: String?) -> String?? {
@@ -66,6 +73,8 @@ enum CrashReporting {
             event.message = scrubbed
         }
         event.exceptions?.forEach { $0.value = scrubber.scrub(text: $0.value) ?? "" }
+        // handled reports group by a fingerprint that holds a normalised message: it is scrubbed like every text
+        if let fingerprint = event.fingerprint { event.fingerprint = fingerprint.map { scrubber.scrub(text: $0) ?? "" } }
         event.breadcrumbs = event.breadcrumbs?.map(scrub)
         if let extra = event.extra { event.extra = deep(extra, depth: 0) }
         // named contexts (the iap context carries the store's own messages)
@@ -137,5 +146,38 @@ enum CrashReporting {
             if !report.contextName.isEmpty { event.context = [report.contextName: report.context] }
             return event
         }
+    }
+}
+
+/// Handled and quiet failures to Sentry through the shared `ErrorReports` (README "Crash reporting"), for errors a Swift
+/// `catch` gets: a Kotlin exception goes as itself, a Swift error by its type, domain and code. A cancellation is never
+/// reported. `where` is a short stable `area.action` name, never built from user data.
+enum Reports {
+    /// A failure the screen shows (an alert, an error text).
+    static func handled(_ error: Error, where: String) { send(error, where: `where`, quiet: false) }
+
+    /// A failure the app swallows on purpose: a warning.
+    static func quiet(_ error: Error, where: String) { send(error, where: `where`, quiet: true) }
+
+    private static func send(_ error: Error, where: String, quiet: Bool) {
+        if error is CancellationError { return }
+        let ns = error as NSError
+        if let throwable = ns.userInfo["KotlinException"] as? KotlinThrowable {
+            if quiet {
+                ErrorReports.shared.quiet(e: throwable, where: `where`)
+            } else {
+                _ = AppError.companion.from(error: throwable, where: `where`)
+            }
+            return
+        }
+        if ns.domain == NSURLErrorDomain && ns.code == NSURLErrorCancelled { return }
+        let stack = Thread.callStackSymbols.prefix(Int(ErrorReports.shared.STACK_LINES)).joined(separator: "\n")
+        ErrorReports.shared.foreign(
+            type: String(describing: type(of: error)),
+            message: "\(ns.domain) \(ns.code): \(ns.localizedDescription)",
+            stack: stack,
+            where: `where`,
+            quiet: quiet
+        )
     }
 }

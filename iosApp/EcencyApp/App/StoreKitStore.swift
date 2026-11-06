@@ -50,6 +50,7 @@ final class StoreKitStore: NSObject, StorePlatform {
                 lock.withLock { found.forEach { catalog[$0.id] = $0 } }
                 done(found.filter(StoreKitStore.sells).map(StoreKitStore.product), nil)
             } catch {
+                // not reported: the store error goes to IapErrors, which reports it
                 done(nil, StoreKitStore.error(error, productId: nil))
             }
         }
@@ -89,6 +90,7 @@ final class StoreKitStore: NSObject, StorePlatform {
                     l?.onError(error: StoreError(code: StoreError.companion.UNKNOWN, message: L.Native.Ios.Store.unknownResult, productId: productId, responseCode: nil, debugMessage: nil))
                 }
             } catch {
+                // not reported: the store error goes to IapErrors, which reports it
                 l?.onError(error: StoreKitStore.error(error, productId: productId))
             }
         }

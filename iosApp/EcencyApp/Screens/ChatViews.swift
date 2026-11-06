@@ -143,6 +143,7 @@ extension AppContainer {
                 let id = try await env.chat.openDirect(username: username)
                 push(AppScreenChatThread(channelId: id, type: "D"))
             } catch {
+                Reports.quiet(error, where: "chats.openDirect")
                 _ = env.ui.toast(text: ChatService.companion.DM_ERROR)
             }
         }

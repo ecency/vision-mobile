@@ -98,7 +98,7 @@ struct LoginSheet: View {
                 hiveSigner = false
                 guard let code else { return }
                 Task {
-                    do { _ = try await app.env.session.loginWithHiveSignerCode(code: code); dismiss() } catch { failure = ErrorText.message(error) }
+                    do { _ = try await app.env.session.loginWithHiveSignerCode(code: code); dismiss() } catch { failure = ErrorText.message(error, where: "login.hiveSigner") }
                 }
             }
         }
@@ -115,7 +115,7 @@ struct LoginSheet: View {
                 secret = ""
                 dismiss()
             } catch {
-                failure = ErrorText.message(error)
+                failure = ErrorText.message(error, where: "login.key")
             }
         }
     }
