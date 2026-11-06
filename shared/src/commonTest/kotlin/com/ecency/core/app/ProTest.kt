@@ -745,6 +745,25 @@ class ProTest {
         m.close()
     }
 
+    /** Review of #3636: the Open button only ever opens an address on the blog domain. */
+    @Test
+    fun anAddressOffTheBlogDomainIsReplacedByTheDefaultOne() = runTest {
+        roster += alice
+        claimAnswer = HttpResult(200, """{"created":true,"tenant":{"blogUrl":"https://example.org/spike-alice"}}""")
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        assertEquals("https://spike-alice.blogs.ecency.com", m.current.blogUrl)
+        m.close()
+        for (bad in listOf("https://user@spike-alice.blogs.ecency.com", "https://blogs.ecency.com.example.org", "http://spike-alice.blogs.ecency.com", "https://spike-alice.blogs.ecency.com:8443")) {
+            assertNull(com.ecency.core.api.ecency.HostingApi.safeUrl(bad), bad)
+        }
+        assertEquals("https://x.blogs.ecency.com/p?a=1", com.ecency.core.api.ecency.HostingApi.safeUrl("https://x.blogs.ecency.com/p?a=1"))
+    }
+
     @Test
     fun refusedClaimsLandInStateWithTheirCopy() = runTest {
         roster += alice

@@ -133,7 +133,8 @@ class ListenPlaybackService : MediaSessionService() {
             // the network stays up with the screen off while a long post streams
             .setWakeMode(C.WAKE_MODE_NETWORK)
             .build()
-        val open = packageManager.getLaunchIntentForPackage(packageName)?.let {
+        // MainActivity itself, never the launcher alias of the moment (README "App icons")
+        val open = LauncherAliases.openApp(this).let {
             PendingIntent.getActivity(this, 0, it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
         val skips = skipButtons()

@@ -100,4 +100,52 @@ class LauncherAliasesTest {
             assertTrue(LauncherAliases.enabled(context) == listOf(icon))
         }
     }
+
+    /** Review of #3656: a picker, the camera, a Custom Tab or the share sheet in front is not the app leaving. */
+    @Test
+    fun aScreenTheAppOpensInFrontIsNotTheAppLeaving() {
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+        idle()
+        env.launcherIcons.pick(LauncherIcon.HIVE_DAY)
+        idle()
+        scenario.onActivity { it.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://example.org"))) }
+        scenario.moveToState(Lifecycle.State.CREATED)
+        idle()
+        assertEquals("the app opened that screen itself", listOf(LauncherIcon.DEFAULT), LauncherAliases.enabled(context))
+        // back in front, then really left: now it switches
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.moveToState(Lifecycle.State.CREATED)
+        idle()
+        assertEquals(listOf(LauncherIcon.HIVE_DAY), LauncherAliases.enabled(context))
+        scenario.close()
+    }
+
+    /** Review of #3656: a notification that opens the app names MainActivity, never the alias enabled when it was posted. */
+    @Test
+    fun noNotificationOpensTheAppThroughAnAlias() {
+        val src = java.io.File("src/main/kotlin")
+        val offenders = src.walkTopDown().filter { it.extension == "kt" && "getLaunchIntentForPackage" in it.readText() }.map { it.name }.toList()
+        assertEquals("the launch intent names whichever alias is on, and a switch disables it", emptyList<String>(), offenders)
+        val open = LauncherAliases.openApp(context)
+        assertEquals(MainActivity::class.java.name, open.component?.className)
+    }
+
+    /**
+     * Review of #3656: every alias ever shipped stays in the manifest. Android forgets the state of a removed component,
+     * so removing the one a phone has enabled would leave the app with no launcher entry (Default is disabled there).
+     * Retire an icon by keeping its alias with the default artwork; add new names here.
+     */
+    @Test
+    fun everyAliasEverShippedIsStillThere() {
+        val shipped = listOf(
+            "Default", "NewYear", "LunarNewYear", "Valentines", "RamadanEid", "HiveDay", "Nowruz", "Holi", "EarthDay", "PizzaDay",
+            "Football", "SummerGames", "ProgrammersDay", "MidAutumn", "Halloween", "Diwali", "BlackFriday", "Christmas",
+        )
+        for (key in shipped) {
+            val info = runCatching {
+                context.packageManager.getActivityInfo(android.content.ComponentName(context.packageName, "com.ecency.app.Launcher$key"), PackageManager.MATCH_DISABLED_COMPONENTS)
+            }.getOrNull()
+            assertNotNull("Launcher$key was shipped and must stay", info)
+        }
+    }
 }

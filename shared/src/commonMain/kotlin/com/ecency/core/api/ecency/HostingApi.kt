@@ -94,8 +94,14 @@ class HostingApi(
         /** web's fallback address: `https://{username}.blogs.ecency.com`. */
         fun blogUrl(username: String): String = "https://${username.lowercase()}.$BLOG_DOMAIN"
 
-        /** The server's address, only as an https URL without spaces or control characters. */
-        fun safeUrl(url: String?): String? =
-            url?.trim()?.takeIf { it.startsWith("https://") && it.length in 9..512 && it.none { c -> c.isWhitespace() || c.code < 0x20 } }
+        /**
+         * The server's address, only as an https URL on the blog domain (opened in the browser), without spaces,
+         * control characters or credentials; anything else is the default address.
+         */
+        fun safeUrl(url: String?): String? {
+            val u = url?.trim()?.takeIf { it.startsWith("https://") && it.length in 9..512 && it.none { c -> c.isWhitespace() || c.code < 0x20 } } ?: return null
+            val host = u.removePrefix("https://").substringBefore('/').substringBefore('?').substringBefore('#').lowercase()
+            return u.takeIf { '@' !in host && ':' !in host && host.endsWith(".$BLOG_DOMAIN") }
+        }
     }
 }

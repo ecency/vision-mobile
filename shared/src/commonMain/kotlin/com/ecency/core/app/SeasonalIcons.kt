@@ -107,7 +107,7 @@ data class SeasonalOverride(val icon: LauncherIcon, val year: Int?, val range: D
  * rather than on a wrong day, so extend the tables before [LAST_YEAR]):
  * - Lunar New Year: the eve to the Lantern Festival (14 days after).
  * - Ramadan and Eid: the evening before the first fast (moon sighting can start it a day later too) to the third day
- *   of Eid al-Fitr.
+ *   of Eid al-Fitr where moon sighting puts Eid a day after the Umm al-Qura date (Eid + 3).
  * - Holi: Holika Dahan (the day before) and Holi.
  * - Mid-Autumn Festival: the day before to the day after.
  * - Diwali: Dhanteras (two days before Lakshmi Puja) to Bhai Dooj (two days after).
@@ -161,7 +161,7 @@ object SeasonalCalendar {
         add(LauncherIcon.YEAR_START, d(year - 1, 12, 31), d(year, 1, 2))
         LUNAR_NEW_YEAR[year]?.let { add(LauncherIcon.LUNAR_NEW_YEAR, it.plusDays(-1), it.plusDays(14)) }
         add(LauncherIcon.VALENTINES, d(year, 2, 13), d(year, 2, 14))
-        RAMADAN[year]?.let { (first, eid) -> add(LauncherIcon.RAMADAN_EID, first.plusDays(-1), eid.plusDays(2)) }
+        RAMADAN[year]?.let { (first, eid) -> add(LauncherIcon.RAMADAN_EID, first.plusDays(-1), eid.plusDays(3)) }
         add(LauncherIcon.HIVE_DAY, d(year, 3, 20))
         add(LauncherIcon.NOWRUZ, d(year, 3, 20), d(year, 3, 23))
         HOLI[year]?.let { add(LauncherIcon.HOLI, it.plusDays(-1), it) }
@@ -221,9 +221,15 @@ object IconAudiences {
         LauncherIcon.MID_AUTUMN, LauncherIcon.CHRISTMAS, LauncherIcon.HALLOWEEN, LauncherIcon.BLACK_FRIDAY,
     )
 
-    /** Singapore's majority keeps Lunar New Year first. */
+    /**
+     * Singapore's majority keeps Lunar New Year first. In Iran, Afghanistan and Tajikistan Nowruz is the main holiday
+     * of the year and wins where Ramadan or Eid fall with it (2026: Eid al-Fitr is Mar 20).
+     */
     private val REGION_ORDER: Map<String, List<LauncherIcon>> = mapOf(
         "SG" to listOf(LauncherIcon.LUNAR_NEW_YEAR, LauncherIcon.MID_AUTUMN),
+        "IR" to listOf(LauncherIcon.NOWRUZ),
+        "AF" to listOf(LauncherIcon.NOWRUZ),
+        "TJ" to listOf(LauncherIcon.NOWRUZ),
     )
 
     /** Android still reports some languages by their old codes. */

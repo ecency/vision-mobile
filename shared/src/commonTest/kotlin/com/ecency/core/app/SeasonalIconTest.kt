@@ -74,7 +74,7 @@ class SeasonalIconTest {
         // Malaysia qualifies for both: Ramadan and Eid come first there, Lunar New Year (overlapping) does not show
         assertDays(
             "MY", "ms",
-            mapOf("2027-02-05" to DEFAULT, "2027-02-06" to DEFAULT, "2027-02-07" to RAMADAN_EID, "2027-02-14" to RAMADAN_EID, "2027-03-11" to RAMADAN_EID, "2027-03-12" to DEFAULT),
+            mapOf("2027-02-05" to DEFAULT, "2027-02-06" to DEFAULT, "2027-02-07" to RAMADAN_EID, "2027-02-14" to RAMADAN_EID, "2027-03-12" to RAMADAN_EID, "2027-03-13" to DEFAULT),
         )
         // Singapore's order puts Lunar New Year first
         assertDays("SG", "ms", mapOf("2027-02-06" to LUNAR_NEW_YEAR, "2027-02-14" to LUNAR_NEW_YEAR, "2027-03-01" to DEFAULT))
@@ -91,6 +91,16 @@ class SeasonalIconTest {
             assertDays(region, language, mapOf("2027-03-19" to DEFAULT, "2027-03-20" to NOWRUZ, "2027-03-23" to NOWRUZ, "2027-03-24" to DEFAULT))
         }
         assertEquals(NOWRUZ, icon("2027-03-21", "DE", "fa"), "a Persian phone anywhere")
+    }
+
+    /** Review of #3656: in Iran Nowruz wins over Eid (both on Mar 20, 2026); Eid shows through Eid + 3 elsewhere. */
+    @Test
+    fun nowruzWinsInIranAndEidKeepsItsLaterThirdDay() {
+        assertEquals(LauncherIcon.NOWRUZ, icon("2026-03-21", "IR", "fa"))
+        assertEquals(LauncherIcon.NOWRUZ, icon("2026-03-21", "AF", "fa"))
+        assertEquals(LauncherIcon.RAMADAN_EID, icon("2026-03-21", "UZ", "uz"), "Central Asia keeps Eid first")
+        // Umm al-Qura Eid al-Fitr 2027 is Mar 9; where it falls on Mar 10, its third day is Mar 12
+        assertEquals(LauncherIcon.RAMADAN_EID, icon("2027-03-12", "MY", "ms"))
     }
 
     @Test
@@ -140,7 +150,7 @@ class SeasonalIconTest {
             }
         }
         // the table's spot checks (published dates, see SeasonalCalendar)
-        assertEquals(DayRange(day(2027, 2, 7), day(2027, 3, 11)), SeasonalCalendar.windows(2027).first { it.icon == RAMADAN_EID }.range)
+        assertEquals(DayRange(day(2027, 2, 7), day(2027, 3, 12)), SeasonalCalendar.windows(2027).first { it.icon == RAMADAN_EID }.range)
         assertEquals(DayRange(day(2027, 2, 5), day(2027, 2, 20)), SeasonalCalendar.windows(2027).first { it.icon == LUNAR_NEW_YEAR }.range)
         assertEquals(DayRange(day(2026, 11, 6), day(2026, 11, 10)), SeasonalCalendar.windows(2026).first { it.icon == DIWALI }.range)
         assertEquals(DayRange(day(2028, 3, 10), day(2028, 3, 11)), SeasonalCalendar.windows(2028).first { it.icon == HOLI }.range)

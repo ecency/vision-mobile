@@ -2,6 +2,7 @@ package com.ecency.app
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import com.ecency.core.app.AppEnvironment
@@ -16,6 +17,13 @@ import java.util.Calendar
  */
 object LauncherAliases {
     fun component(context: Context, icon: LauncherIcon) = ComponentName(context.packageName, "com.ecency.app.Launcher${icon.key}")
+
+    /**
+     * What a notification opens: MainActivity itself. The package's launch intent names the alias enabled at the time,
+     * which a later switch disables, so a tap on an older notification would open nothing.
+     */
+    fun openApp(context: Context): Intent =
+        Intent(context, MainActivity::class.java).setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
 
     /** The icons whose alias is enabled now (one, unless a switch was cut short). */
     fun enabled(context: Context): List<LauncherIcon> = LauncherIcon.entries.filter { isEnabled(context.packageManager, it, component(context, it)) }

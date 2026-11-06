@@ -77,8 +77,8 @@ data class ChatMessageItem(
     /** The name to show, in the current language when unknown. */
     val author: String get() = authorName ?: L.chats.anonymous
 
-    /** The text as one run of spans ([ChatText.flatten]): what a screen reader reads, and the links in it. */
-    val spans: List<ChatSpan> get() = ChatText.flatten(blocks)
+    /** The text as one run of spans ([ChatText.flatten], once per item): what a screen reader reads, and the links in it. */
+    val spans: List<ChatSpan> = ChatText.flatten(blocks)
 }
 
 /** "@name joined 2 hours ago" (RN SystemMessageItem); [account] opens the quick profile. */
