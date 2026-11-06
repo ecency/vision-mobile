@@ -77,13 +77,21 @@ sealed class LegacyImportError(message: String, cause: Throwable? = null) : Exce
     class PinUnavailable : LegacyImportError("stored PIN could not be decrypted")
 
     /** RN storage exists but cannot be read now; retry later, never treat it as "nothing to import". */
-    class StorageUnreadable(cause: Throwable? = null) : LegacyImportError("RN app storage is unreadable", cause)
+    class StorageUnreadable(cause: Throwable? = null) : LegacyImportError("RN app storage is unreadable" + typeOnly(cause))
 
     /** RN storage was read but is not in the expected shape. */
-    class Malformed(cause: Throwable? = null) : LegacyImportError("RN app storage is malformed", cause)
+    class Malformed(cause: Throwable? = null) : LegacyImportError("RN app storage is malformed" + typeOnly(cause))
 
     /** Migrated accounts did not read back from the vault; nothing is marked done or deleted. */
     class NotVerified(val usernames: List<String>) : LegacyImportError("migrated accounts did not read back: $usernames")
+
+    private companion object {
+        /**
+         * The failure under a storage read as its type only, never as a cause: a parser's message quotes the RN storage
+         * it read (keys, tokens), and a cause's message travels with every stack trace and crash report.
+         */
+        fun typeOnly(cause: Throwable?): String = cause?.let { " (${it::class.simpleName ?: "Throwable"})" } ?: ""
+    }
 }
 
 /**

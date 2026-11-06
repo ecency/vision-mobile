@@ -30,6 +30,26 @@ class CrashAndAnalyticsTest {
     }
 
     @Test
+    fun theScrubberRedactsVaultFieldsPasswordsAndTokensAfterTheirNames() {
+        // a Hive master password shape (P5 + base58), made up for the test
+        val password = "P5" + "K".repeat(50)
+        assertEquals("pass <redacted-password> end", CrashScrubber.scrub("pass $password end"))
+        for (name in listOf("postingKey", "activeKey", "memoKey", "ownerKey", "hiveAuthKey", "hiveAuthToken", "masterPassword")) {
+            assertEquals("""{"$name":"<redacted>","username":"x"}""", CrashScrubber.scrub("""{"$name":"value-of-it","username":"x"}"""), name)
+        }
+        // a JSON text cut off inside a secret value (a parser's "JSON input: ..." excerpt)
+        assertEquals("""JSON input: {"username":"x","accessToken":"<redacted>""", CrashScrubber.scrub("""JSON input: {"username":"x","accessToken":"abcdefghijklmnopqrstu"""))
+        // query parameters without a leading ? and & (a URL cut short, a form body)
+        assertEquals("code=<redacted>&state=1", CrashScrubber.scrub("code=abcdef123456&state=1"))
+        assertEquals("access_token=<redacted> refresh_token=<redacted>", CrashScrubber.scrub("access_token=abc.def refresh_token=ghi"))
+        // a HiveSigner-like base64url token right after its name
+        val token = "dGhpc0lzQUhpdmVTaWduZXJUb2tlbl9mb3JUZXN0cw"
+        assertEquals("token <redacted>", CrashScrubber.scrub("token $token"))
+        assertEquals("accessToken: <redacted>", CrashScrubber.scrub("accessToken: $token"))
+        assertEquals("key not found", CrashScrubber.scrub("key not found"))
+    }
+
+    @Test
     fun breadcrumbDataDropsSecretKeysWhole() {
         val scrubbed = CrashScrubber.scrubMap(mapOf("code" to "abc", "X-MM-Token" to "t", "memo" to "hi", "url" to "https://a.b/?token=xyz", "productId" to "999points"))
         assertEquals(mapOf("code" to "<redacted>", "X-MM-Token" to "<redacted>", "memo" to "<redacted>", "url" to "https://a.b/?token=<redacted>", "productId" to "999points"), scrubbed)

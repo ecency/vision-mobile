@@ -51,7 +51,27 @@ enum CrashReporting {
     /// `beforeSend` like every event.
     static func captureStartFailure(_ error: Error) {
         guard started else { return }
-        SentrySDK.capture(error: error)
+        SentrySDK.capture(event: startFailureEvent(error))
+    }
+
+    /// The event built here from the error's type, domain and code and its scrubbed message, never the bridged
+    /// NSError itself (Sentry would put its userInfo, the Kotlin exception included, into the mechanism).
+    static func startFailureEvent(_ error: Error) -> Event {
+        let ns = error as NSError
+        let kotlin = ns.userInfo["KotlinException"] as? KotlinThrowable
+        let type = kotlin.map { String(describing: Swift.type(of: $0)) } ?? String(describing: Swift.type(of: error))
+        let message = kotlin?.message ?? "\(ns.domain) \(ns.code)"
+        let report = CrashReport(
+            type: type,
+            message: ErrorReports.shared.withoutPlaces(text: scrubber.scrub(text: message) ?? ""),
+            tags: ["where": "app.start"],
+            fingerprint: ["start", type],
+            contextName: "",
+            context: [:],
+            isMessage: false,
+            level: "error"
+        )
+        return Reporter.event(report)
     }
 
     /// A span's description to send, or nil to drop the span: network, file and database spans never go (their
@@ -72,7 +92,14 @@ enum CrashReporting {
             scrubbed.message = scrubber.scrub(text: m.message)
             event.message = scrubbed
         }
-        event.exceptions?.forEach { $0.value = scrubber.scrub(text: $0.value) ?? "" }
+        event.exceptions?.forEach { e in
+            e.value = scrubber.scrub(text: e.value) ?? ""
+            // a captured NSError puts its description and userInfo (a Kotlin exception's text) into the mechanism
+            if let mechanism = e.mechanism {
+                mechanism.desc = scrubber.scrub(text: mechanism.desc)
+                mechanism.data = nil
+            }
+        }
         // handled reports group by a fingerprint that holds a normalised message: it is scrubbed like every text
         if let fingerprint = event.fingerprint { event.fingerprint = fingerprint.map { scrubber.scrub(text: $0) ?? "" } }
         event.breadcrumbs = event.breadcrumbs?.map(scrub)
@@ -174,10 +201,22 @@ enum Reports {
         let stack = Thread.callStackSymbols.prefix(Int(ErrorReports.shared.STACK_LINES)).joined(separator: "\n")
         ErrorReports.shared.foreign(
             type: String(describing: type(of: error)),
-            message: "\(ns.domain) \(ns.code): \(ns.localizedDescription)",
+            code: "\(ns.domain) \(ns.code)",
+            message: ns.localizedDescription,
             stack: stack,
             where: `where`,
-            quiet: quiet
+            quiet: quiet,
+            network: isNetwork(ns)
         )
+    }
+
+    /// No connection, as the shared `ErrorKind.NETWORK`: the URL loading system's offline and timeout codes.
+    static func isNetwork(_ ns: NSError) -> Bool {
+        guard ns.domain == NSURLErrorDomain else { return false }
+        return [
+            NSURLErrorNotConnectedToInternet, NSURLErrorTimedOut, NSURLErrorNetworkConnectionLost,
+            NSURLErrorCannotFindHost, NSURLErrorCannotConnectToHost, NSURLErrorDNSLookupFailed,
+            NSURLErrorInternationalRoamingOff, NSURLErrorDataNotAllowed, NSURLErrorSecureConnectionFailed,
+        ].contains(ns.code)
     }
 }

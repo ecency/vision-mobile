@@ -111,6 +111,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    // not reported: a missing authority falls back to the next method; anything else is rethrown
                     if (!AuthFallback.shouldTrigger(e)) throw e
                 }
             }
@@ -119,6 +120,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: a missing authority falls back to the auth upgrade; anything else is rethrown
                 if (AuthFallback.shouldTrigger(e) && (authority == KeyRole.POSTING || authority == KeyRole.ACTIVE)) {
                     upgraded(account, ops, authority, opName)
                 } else {
@@ -133,6 +135,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: a missing authority falls back to the auth upgrade; anything else is rethrown
                 if (AuthFallback.shouldTrigger(e)) upgraded(account, ops, authority, opName) else throw e
             }
             KeyRole.ACTIVE -> upgraded(account, ops, authority, opName)
@@ -211,6 +214,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
+                            // not reported: a missing authority falls back to the hot signing; anything else is rethrown
                             if (AuthFallback.shouldTrigger(e)) hot(account, ops, authority) else throw e
                         }
                     }

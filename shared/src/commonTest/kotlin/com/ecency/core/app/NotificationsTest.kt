@@ -1069,7 +1069,8 @@ class NotificationsTest {
         board.start(); f.idle()
         val reporter = RecordingReporter()
         f.app.env.crashReporter = reporter
-        f.app.authBackend.privateApi = { HttpResult(500, "") }
+        // a refusal, not a lost connection (a quiet read that cannot connect sends nothing)
+        f.app.authBackend.privateApi = { HttpResult(400, "") }
         f.app.now = beforeMidnight + 61_000L
         board.tick(); f.idle()
         assertNull(f.env.ui.current.toast)

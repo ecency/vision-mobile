@@ -65,11 +65,41 @@ final class CrashReportingTests: XCTestCase {
             auth: DemoAuthServices.shared.create(nowMillis: { KotlinLong(value: 0) }, waitMillis: 1000)
         )
         env.crashReporter = recorder
-        Reports.handled(URLError(.timedOut), where: "image.save")
+        Reports.handled(CocoaError(.fileNoSuchFile), where: "image.save")
         Reports.quiet(CancellationError(), where: "image.save")
-        XCTAssertEqual(recorder.reports.count, 1)
-        XCTAssertEqual(recorder.reports.first?.tags["where"], "image.save")
-        XCTAssertEqual(recorder.reports.first?.fingerprint.first, "handled")
+        // a lost connection: nothing when quiet, a warning when the screen shows it
+        Reports.quiet(URLError(.notConnectedToInternet), where: "image.download")
+        Reports.handled(URLError(.timedOut), where: "image.download")
+        XCTAssertEqual(recorder.reports.count, 2)
+        let file = recorder.reports[0]
+        XCTAssertEqual(file.tags["where"], "image.save")
+        // grouped by domain and code, never the description in the device language
+        XCTAssertEqual(file.fingerprint, ["handled", "image.save", "unknown", "CocoaError", "NSCocoaErrorDomain 4"])
+        let offline = recorder.reports[1]
+        XCTAssertEqual(offline.level, "warning")
+        XCTAssertEqual(offline.tags["error.kind"], "network")
+    }
+
+    func testMechanismTextsAreScrubbed() {
+        let wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"
+        let password = "P5" + String(repeating: "K", count: 50)
+        let event = Event(level: .error)
+        let e = Exception(value: "pass \(password)", type: "NSError")
+        let mechanism = Mechanism(type: "NSError")
+        mechanism.desc = "key \(wif)"
+        mechanism.data = ["KotlinException": "JSON input: {\"postingKey\":\"\(wif)\""]
+        e.mechanism = mechanism
+        event.exceptions = [e]
+        let sent = CrashReporting.beforeSend(event)
+        let out = sent?.exceptions?.first
+        XCTAssertFalse(out?.value.contains(password) ?? true)
+        XCTAssertFalse(out?.mechanism?.desc?.contains(wif) ?? false)
+        XCTAssertFalse(String(describing: out?.mechanism?.data ?? [:]).contains(wif))
+
+        // a start failure goes as an event built from the type, domain and code, never the bridged NSError
+        let start = CrashReporting.startFailureEvent(NSError(domain: "Start", code: 7, userInfo: ["detail": "key \(wif)"]))
+        XCTAssertEqual(start.exceptions?.first?.value, "Start 7")
+        XCTAssertNil(start.exceptions?.first?.mechanism)
     }
 
     func testRequestBodyHeadersAndCookiesAreNotSent() {

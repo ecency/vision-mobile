@@ -5,10 +5,12 @@ import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.rpc.AllNodesFailedException
 import com.ecency.core.auth.AuthException
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -114,6 +116,63 @@ class ErrorReportsTest {
     }
 
     @Test
+    fun warningsHaveTheirOwnCapSoTheyNeverCrowdOutAnError() {
+        repeat(ErrorReports.MAX_WARNINGS + 10) { ErrorReports.quiet(IllegalStateException("boom"), "area.quiet$it") }
+        assertEquals(ErrorReports.MAX_WARNINGS, reporter.reports.size)
+        AppError.from(IllegalStateException("boom"), "editor.publish")
+        assertEquals("error", reporter.reports.last().level)
+        assertEquals(ErrorReports.MAX_WARNINGS + 1, reporter.reports.size)
+    }
+
+    @Test
+    fun aQuietFailureOfTheConnectionIsNotSent() {
+        ErrorReports.quiet(AllNodesFailedException("bridge.get_ranked_posts", emptyList()), "feed.refresh")
+        ErrorReports.quiet(EcencyHttpException.ofSendFailure(IllegalStateException("offline")), "leaderboard.refresh")
+        assertEquals(emptyList(), reporter.reports)
+    }
+
+    @Test
+    fun aNetworkFailureGroupsWithoutItsMessage() {
+        // the platform's text (Darwin's NSError description) is in the device language
+        AppError.from(AllNodesFailedException("m", emptyList()), "feed.load")
+        assertEquals(listOf("handled", "feed.load", "network", "AllNodesFailedException", ""), reporter.reports.single().fingerprint)
+        // a chat failure's text is the server's or the catalog's fallback in the app language
+        AppError.from(com.ecency.core.api.chat.ChatApiException(400, "Anfrage fehlgeschlagen"), "chats.load")
+        assertEquals("", reporter.reports.last().fingerprint[4])
+    }
+
+    @Test
+    fun theMessageSentLosesAddressesUrisAndPaths() {
+        AppError.from(IllegalStateException("copy of content://media/external/images/12 to /data/user/0/app/cache/x.jpg failed: https://images.example/upload?sig=1"), "media.copyPicked")
+        val m = reporter.reports.single().message
+        assertEquals("copy of <url> to <path> failed: <url>", m)
+    }
+
+    @Test
+    fun aCorruptedVaultEntryNeverSendsItsText() = runTest {
+        val app = TestApp(this, handler = { TestApp.chain(it) ?: com.ecency.core.api.rpc.HttpResult(500, "") })
+        app.signIn()
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val reporter = RecordingReporter()
+        app.env.crashReporter = reporter
+        val wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"
+        // a vault entry cut off mid-way: the JSON parser quotes the text around the error in its message
+        app.store.putString("account.victim", """{"username":"victim","postingKey":"$wif","memo":"VAULTTEXT""")
+        runCatching { app.env.session.switchTo("victim") }
+        testScheduler.advanceUntilIdle()
+        val r = reporter.reports.single { it.tags["where"] == "session.switchTo" }
+        val everything = listOf(r.type, r.message) + r.tags.values + r.fingerprint + r.context.values
+        assertTrue(everything.none { "VAULTTEXT" in it || wif in it || "postingKey" in it }, everything.toString())
+        // the failure itself keeps the parser's type, never its text (a shorter stack would carry its "Caused by")
+        val corrupted = assertFailsWith<com.ecency.core.secure.SecureStoreException.Corrupted> {
+            com.ecency.core.secure.KeyVault(app.store).account("victim")
+        }
+        val trace = corrupted.stackTraceToString()
+        assertFalse("VAULTTEXT" in trace || wif in trace, trace.lines().filter { "VAULTTEXT" in it }.toString())
+    }
+
+    @Test
     fun oneExceptionMappedTwiceIsOneReport() {
         val e = IllegalStateException("boom")
         AppError.from(e, "community.subscribe")
@@ -136,14 +195,17 @@ class ErrorReportsTest {
         val r = reporter.reports.single()
         assertEquals("handled", r.contextName)
         val stack = r.context.getValue("stack")
-        assertTrue(stack.contains("IllegalStateException") && stack.contains("boom"), stack)
+        // frames and type names only: an exception's or a cause's message never goes in the stack
+        assertTrue(stack.contains("IllegalStateException"), stack)
+        assertTrue(stack.lines().any { it.trimStart().startsWith("at ") }, stack)
+        assertFalse(stack.contains("boom") || stack.contains("root cause"), stack)
         assertTrue(stack.lines().size <= ErrorReports.STACK_LINES)
         assertEquals("editor.publish", r.context["where"])
     }
 
     @Test
     fun aQuietFailureIsAWarning() {
-        ErrorReports.quiet(EcencyHttpException(500, "server error"), "notifications.refresh")
+        ErrorReports.quiet(IllegalStateException("server error"), "notifications.refresh")
         val r = reporter.reports.single()
         assertEquals("warning", r.level)
         assertEquals("true", r.tags["quiet"])
@@ -153,11 +215,23 @@ class ErrorReportsTest {
 
     @Test
     fun aSwiftErrorIsReportedByItsTypeName() {
-        ErrorReports.foreign("URLError", "The request timed out (-1001)", "", "image.save", quiet = false)
+        ErrorReports.foreign("CocoaError", "NSCocoaErrorDomain 4", "Datei nicht gefunden", "", "image.save", quiet = false, network = false)
         val r = reporter.reports.single()
-        assertEquals("URLError", r.type)
-        assertEquals(listOf("handled", "image.save", "unknown", "URLError", "The request timed out (-<n>)"), r.fingerprint)
+        assertEquals("CocoaError", r.type)
+        // grouped by domain and code: the localized description stays out of the fingerprint
+        assertEquals(listOf("handled", "image.save", "unknown", "CocoaError", "NSCocoaErrorDomain 4"), r.fingerprint)
         assertNotEquals("warning", r.level)
+    }
+
+    @Test
+    fun aSwiftNetworkErrorIsAWarningWhenShownAndNothingWhenQuiet() {
+        ErrorReports.foreign("URLError", "NSURLErrorDomain -1009", "offline", "", "image.save", quiet = true, network = true)
+        assertEquals(emptyList(), reporter.reports)
+        ErrorReports.foreign("URLError", "NSURLErrorDomain -1009", "offline", "", "image.save", quiet = false, network = true)
+        val r = reporter.reports.single()
+        assertEquals("warning", r.level)
+        assertEquals("network", r.tags["error.kind"])
+        assertEquals("true", r.tags["expected"])
     }
 
     @Test

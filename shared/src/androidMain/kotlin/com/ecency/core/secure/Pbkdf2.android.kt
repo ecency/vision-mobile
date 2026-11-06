@@ -17,6 +17,7 @@ internal actual fun platformPbkdf2HmacSha256(password: ByteArray, salt: ByteArra
     val sdk = try {
         Build.VERSION.SDK_INT
     } catch (_: Throwable) {
+        // not reported: a feature probe: JVM host tests have no Build
         0
     }
     if (sdk < 26 || password.isEmpty() || salt.isEmpty()) return null
@@ -27,6 +28,7 @@ internal actual fun platformPbkdf2HmacSha256(password: ByteArray, salt: ByteArra
     return try {
         SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
     } catch (_: Exception) {
+        // not reported: the shared PBKDF2 runs instead (null)
         null
     } finally {
         spec.clearPassword()
@@ -39,6 +41,7 @@ internal actual fun secureRandomBytes(count: Int): ByteArray = ByteArray(count).
 actual fun monotonicMillis(): Long = try {
     SystemClock.elapsedRealtime()
 } catch (_: RuntimeException) {
+    // not reported: JVM host tests only: android.jar stubs throw
     // host tests without Robolectric: android.jar stubs throw
     System.nanoTime() / 1_000_000
 }

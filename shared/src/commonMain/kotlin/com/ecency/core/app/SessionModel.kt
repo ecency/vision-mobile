@@ -383,6 +383,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
                 turnLockOffIfEmpty()
             }
         } catch (e: Exception) {
+            // not reported: guarded() reported it; it is thrown here or after the cleanup
             if (username !in gone(listOf(username))) {
                 env.push.staying(leaving)
                 throw e
@@ -425,6 +426,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
                 turnLockOffIfEmpty()
             }
         } catch (e: Exception) {
+            // not reported: guarded() reported it; it is thrown here or after the cleanup
             val removed = gone(names)
             if (removed.isEmpty()) {
                 env.push.staying(leaving)

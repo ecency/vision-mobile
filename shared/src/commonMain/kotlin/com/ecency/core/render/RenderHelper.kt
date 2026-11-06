@@ -55,6 +55,7 @@ class RenderHelper(proxyBase: String = ImageProxy.DEFAULT_BASE) {
             renderPostBody(body, forApp, parentDomain, seoContext, options)
         } catch (t: Throwable) {
             if (isFatal(t)) throw t
+            com.ecency.core.app.ErrorReports.quiet(t, "render.postBody")
             null
         }
         if (out != null && (out.isNotBlank() || CleanReply.cleanReply(body).isBlank())) return out

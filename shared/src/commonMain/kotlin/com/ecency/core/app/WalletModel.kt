@@ -227,6 +227,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // not reported: rethrown (the caller maps it) unless the claim landed after all
             val fresh = runCatching { api.portfolio(user, current.currency.code, true) }.getOrNull()
             if (fresh?.firstOrNull { it.symbol == "POINTS" }?.pendingRewards == 0.0) true else throw e
         }

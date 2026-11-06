@@ -101,6 +101,7 @@ object PostingGrant {
             keys.forEach { PublicKey.fromString(it.name) }
             PublicKey.fromString(memo)
         } catch (_: IllegalArgumentException) {
+            // not reported: refuse() throws the refusal; the key text is untrusted chain data
             refuse()
         }
         if (keys.isEmpty() && accounts.isEmpty()) refuse()

@@ -85,9 +85,21 @@ object CrashScrubber {
     private val JWT = Regex("\\beyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}(\\.[A-Za-z0-9_-]+)?")
     private val LONG_HEX = Regex("\\b[0-9a-fA-F]{64,}\\b")
     private const val SECRET_NAMES = "code|access_token|accessToken|refresh_token|refreshToken|token|key|wif|memo|pin|password|" +
-        "signature|sig|secret|receipt|purchaseToken|private_key|privateKey|email"
-    private val QUERY_SECRET = Regex("(?i)([?&;](?:$SECRET_NAMES)=)[^&#\\s]*")
-    private val JSON_SECRET = Regex("(?i)(\"(?:$SECRET_NAMES)\"\\s*:\\s*)\"(?:[^\"\\\\]|\\\\.)*\"")
+        "signature|sig|secret|receipt|purchaseToken|private_key|privateKey|email|" +
+        // the vault's own field names (VaultAccount JSON) and RN's
+        "postingKey|activeKey|memoKey|ownerKey|hiveAuthKey|hiveAuthToken|masterPassword|posting_key|active_key|memo_key|owner_key"
+
+    // a Hive master password: P5 and base58, as the wallet derives keys from it
+    private val MASTER_PASSWORD = Regex("\\bP5[1-9A-HJ-NP-Za-km-z]{50,51}\\b")
+
+    // a query or form parameter, also at the start of a text or after a space (a URL cut short, a form body)
+    private val QUERY_SECRET = Regex("(?i)((?:^|[?&;\\s])(?:$SECRET_NAMES)=)[^&#\\s]*")
+
+    // a JSON field; its closing quote may be missing (a parser's excerpt of the text it read stops mid-value)
+    private val JSON_SECRET = Regex("(?i)(\"(?:$SECRET_NAMES)\"\\s*:\\s*)\"(?:[^\"\\\\]|\\\\.)*\"?")
+
+    // a long token (HiveSigner's base64url codes, any opaque token) right after one of the names, in free text
+    private val NAMED_TOKEN = Regex("(?i)\\b((?:$SECRET_NAMES)\\b\\s*[:=]?\\s*)[\"']?[A-Za-z0-9_~+/=.-]{16,}[\"']?")
     private val EMAIL = Regex("[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\\.[A-Za-z]{2,24}")
 
     /** Keys whose value is dropped whole in breadcrumb data and contexts. */
@@ -99,11 +111,13 @@ object CrashScrubber {
         return try {
             val t = if (text.length > MAX_TEXT) text.substring(0, MAX_TEXT) else text
             t.replace(WIF, "<redacted-key>")
+                .replace(MASTER_PASSWORD, "<redacted-password>")
                 .replace(BEARER) { "${it.groupValues[1]} <redacted>" }
                 .replace(JWT, "<redacted-token>")
                 .replace(LONG_HEX, "<redacted-hex>")
                 .replace(QUERY_SECRET) { "${it.groupValues[1]}<redacted>" }
-                .replace(JSON_SECRET) { "${it.groupValues[1]}\"<redacted>\"" }
+                .replace(JSON_SECRET) { "${it.groupValues[1]}\"<redacted>" + if (it.value.endsWith("\"") && it.value.length > it.groupValues[1].length + 1) "\"" else "" }
+                .replace(NAMED_TOKEN) { "${it.groupValues[1]}<redacted>" }
                 .replace(EMAIL, "<redacted-email>")
         } catch (e: Throwable) {
             // not reported: scrubber must stay total

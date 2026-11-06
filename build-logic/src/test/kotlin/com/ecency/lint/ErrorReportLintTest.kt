@@ -20,7 +20,7 @@ import kotlin.test.assertTrue
 class ErrorReportLintTest {
     private val root = generateSequence(File("").absoluteFile) { it.parentFile }.first { it.resolve("src/config/locales/en-US.json").isFile }
 
-    private fun kotlinSources() = listOf("shared/src/commonMain", "androidApp/src/main").flatMap { dir ->
+    private fun kotlinSources() = listOf("shared/src/commonMain", "shared/src/androidMain", "shared/src/iosMain", "androidApp/src/main").flatMap { dir ->
         root.resolve(dir).walkTopDown().filter { it.isFile && it.extension == "kt" }.toList()
     }.sortedBy { it.path }
 
@@ -53,8 +53,13 @@ class ErrorReportLintTest {
             fun e() = try { x() } catch (e: Exception) { AppError.from(e) }
             fun f() = try { x() } catch (e: Exception) { AppError.from(e, "post.${'$'}author") }
             fun g() = try { x() } catch (e: Exception) { toast(ChatsModel.message(e, FAIL, "chats.load")) }
+            fun h() = try { x() } catch (e: Exception) { if (fatal(e)) throw e; null }
+            fun i() = try { x() } catch (e: Exception) { open(url, "ecency.com") }
+            fun j() = try { x() } catch (e: java.io.IOException) { null }
+            fun k() = try { x() } catch (e: Exception) { cleanup(); throw IllegalStateException("x", e) }
+            fun l() = try { x() } catch (e: IllegalArgumentException) { null }
         """.trimIndent()
-        assertEquals(listOf(1), ErrorReportLint.kotlinCatches(kotlin))
+        assertEquals(listOf(1, 11, 12, 13, 15), ErrorReportLint.kotlinCatches(kotlin))
         assertEquals(listOf(8, 9), ErrorReportLint.kotlinWheres(kotlin))
         val swift = """
             do { try a() } catch { ok = false }
@@ -64,8 +69,11 @@ class ErrorReportLintTest {
             }
             let m = ErrorText.message(error)
             let n = ErrorText.message(error, where: name)
+            do { try a() } catch { let x = AppErrorView(); show(x) }
+            do { try a() } catch let failure { log(failure) }
+            do { try a() } catch let failure { throw failure }
         """.trimIndent()
-        assertEquals(listOf(1), ErrorReportLint.swiftCatches(swift))
+        assertEquals(listOf(1, 8, 9), ErrorReportLint.swiftCatches(swift))
         assertEquals(listOf(6, 7), ErrorReportLint.swiftWheres(swift))
         assertTrue(ErrorReportLint.isWhere("\"editor.publish\""))
         assertTrue(!ErrorReportLint.isWhere("\"Editor publish\""))
@@ -144,22 +152,64 @@ object ErrorReportLint {
         if (where != null && isWhere(where)) null else lineAt(src, m.range.first)
     }.toList()
 
-    private val KOTLIN_CATCH = Regex("""catch\s*\(\s*\w+\s*:\s*(?:kotlin\.)?(?:Exception|Throwable)\s*\)\s*\{""")
-    private val HANDED_TO_HELPER = Regex(""",\s*"[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)+"\s*\)""")
+    /** Broad catches: Exception, Throwable, Error and the platform's general exceptions, qualified or not. */
+    private val KOTLIN_CATCH = Regex(
+        """catch\s*\(\s*\w+\s*:\s*(?:[\w.]+\.)?(?:Exception|Throwable|Error|RuntimeException|IOException|IllegalStateException|IllegalArgumentException)\s*\)\s*\{""",
+    )
     private val MARKER = Regex("""//\s*not reported:\s*\S""")
+    private const val WHERE_LITERAL = """"[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)+""""
 
-    private fun handles(body: String) = Regex("""\bthrow\b""").containsMatchIn(body) || "AppError.from" in body ||
-        "ErrorReports." in body || HANDED_TO_HELPER.containsMatchIn(body) || MARKER.containsMatchIn(body)
+    /** The reporting calls a catch may use; a helper counts only when it is one of the known ones given a where literal. */
+    private val KOTLIN_REPORTS = Regex(
+        """\b(?:AppError\.(?:from|fromBroadcast)\(|ErrorReports\.(?:quiet|handled)\()|""" +
+            """(?<![\w])(?:ChatsModel\.)?message\([^()]*(?:\([^()]*\)[^()]*)*,\s*$WHERE_LITERAL\s*\)""",
+    )
+    private val SWIFT_REPORTS = Regex("""(?<![\w])(?:Reports\.(?:quiet|handled)\(|ErrorText\.(?:message|appError)\(|AppError\.companion\.(?:from|fromBroadcast)\()""")
+
+    /** Comments and strings dropped, so a reporting call or a `throw` inside them does not count. */
+    private fun code(body: String): String =
+        body.replace(Regex("""//[^\n]*"""), "").replace(Regex("""/\*.*?\*/""", RegexOption.DOT_MATCHES_ALL), "")
+
+    /** The body's last top-level statement (split on new lines and `;` outside brackets). */
+    private fun lastStatement(body: String): String {
+        val text = code(body)
+        var depth = 0
+        var inString = false
+        var start = 0
+        var last = ""
+        var i = 0
+        fun cut(end: Int) { text.substring(start, end).trim().takeIf { it.isNotEmpty() }?.let { last = it } }
+        while (i < text.length) {
+            val ch = text[i]
+            if (inString) {
+                if (ch == '\\') i++ else if (ch == '"') inString = false
+            } else when (ch) {
+                '"' -> inString = true
+                '(', '[', '{' -> depth++
+                ')', ']', '}' -> depth--
+                '\n', ';' -> if (depth == 0) { cut(i); start = i + 1 }
+            }
+            i++
+        }
+        cut(text.length)
+        return last
+    }
+
+    /** Rethrows unconditionally: its last top-level statement is a `throw`. A conditional throw must also report or say why not. */
+    private fun rethrows(body: String) = lastStatement(body).startsWith("throw ")
 
     fun kotlinCatches(src: String): List<Int> = KOTLIN_CATCH.findAll(src).filter { !isComment(src, it.range.first) }.mapNotNull { m ->
-        if (handles(balanced(src, m.range.last, '{', '}'))) null else lineAt(src, m.range.first)
+        val body = balanced(src, m.range.last, '{', '}')
+        val ok = rethrows(body) || MARKER.containsMatchIn(body) || KOTLIN_REPORTS.containsMatchIn(code(body))
+        if (ok) null else lineAt(src, m.range.first)
     }.toList()
 
-    private val SWIFT_CATCH = Regex("""\bcatch\s*\{""")
+    /** Catch-alls: `catch {` and `catch let name {` (a typed `catch let x as T` or a pattern is a deliberate case). */
+    private val SWIFT_CATCH = Regex("""\bcatch(?:\s+let\s+\w+)?\s*\{""")
 
     fun swiftCatches(src: String): List<Int> = SWIFT_CATCH.findAll(src).filter { !isComment(src, it.range.first) }.mapNotNull { m ->
         val body = balanced(src, m.range.last, '{', '}')
-        val ok = handles(body) || "Reports." in body || "ErrorText." in body || "AppError" in body
+        val ok = rethrows(body) || MARKER.containsMatchIn(body) || SWIFT_REPORTS.containsMatchIn(code(body))
         if (ok) null else lineAt(src, m.range.first)
     }.toList()
 }

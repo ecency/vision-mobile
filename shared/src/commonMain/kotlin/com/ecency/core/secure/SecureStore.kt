@@ -74,9 +74,19 @@ sealed class SecureStoreException(message: String, cause: Throwable? = null) : E
     class KeyInvalidated(cause: Throwable? = null) :
         SecureStoreException("device key for secure storage is gone or invalidated", cause)
 
-    /** One entry failed authentication or decoding. Its name is reported, never its value. */
+    /**
+     * One entry failed authentication or decoding. Its name is reported, never its value: the failure that caused it is
+     * kept as its type only ([causeType]), never as a cause, because a parser's message quotes the text it read (vault
+     * JSON with keys and tokens) and a cause's message travels with every stack trace.
+     */
     class Corrupted(val name: String, cause: Throwable? = null) :
-        SecureStoreException("secure store entry '$name' is unreadable", cause)
+        SecureStoreException("secure store entry '$name' is unreadable" + (cause?.let { " (${typeOf(it)})" } ?: "")) {
+        val causeType: String? = cause?.let(::typeOf)
+
+        private companion object {
+            fun typeOf(t: Throwable): String = t::class.simpleName ?: "Throwable"
+        }
+    }
 
     /**
      * The platform refused the operation (Keychain status, Keystore provider error, device locked).
