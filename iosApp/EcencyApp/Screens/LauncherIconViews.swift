@@ -46,12 +46,13 @@ struct LauncherIconSection: View {
                     .accessibilityIdentifier("app-icon-\(icon.key)")
                 }
             }
-            .pickerStyle(.navigationLink)
+            // the other Settings pickers' style: a menu (its value in the accent colour), a list at accessibility sizes
+            .settingsPickerStyle()
             .accessibilityIdentifier("settings-app-icon")
         } header: {
             Text(LauncherIconCopy.shared.TITLE).foregroundStyle(theme.accentText)
         } footer: {
-            Text(LauncherIconCopy.shared.SEASONAL_HINT)
+            Text(LauncherIconCopy.shared.SEASONAL_HINT).foregroundStyle(theme.secondary)
         }
     }
 }

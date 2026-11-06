@@ -325,5 +325,5 @@ private struct SettingsPickerStyle: ViewModifier {
 }
 
 extension View {
-    fileprivate func settingsPickerStyle() -> some View { modifier(SettingsPickerStyle()) }
+    func settingsPickerStyle() -> some View { modifier(SettingsPickerStyle()) }
 }
