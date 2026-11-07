@@ -34,6 +34,12 @@ class SessionRefusalTest {
         /** The private API takes a code when this says so: everything while signing in, then what the test sets. */
         var accepts: (String?) -> Boolean = { true }
 
+        /**
+         * While set, every exchange fails this way: 0 is no answer at all (the transport throws), anything else that
+         * HTTP status. Null: exchanges behave as the rig's refresh status says.
+         */
+        var exchangeFails: Int? = null
+
         /** Private API requests sent, in order. */
         val privateCalls get() = app.authBackend.sent.filter { "/private-api/" in it.url }
         val exchanges get() = app.authBackend.sent.filter { it.url.endsWith("/auth-api/hs-token-refresh") }
@@ -52,7 +58,11 @@ class SessionRefusalTest {
         app.authBackend.rest = { r ->
             if (r.url.endsWith("/auth-api/hs-token-refresh")) {
                 val code = r.code().orEmpty()
-                if (code.startsWith("refresh-") && refreshStatus != null) {
+                val fails = rig.exchangeFails
+                if (fails == 0) throw IllegalStateException("no connection")
+                if (fails != null) {
+                    HttpResult(fails, "busy")
+                } else if (code.startsWith("refresh-") && refreshStatus != null) {
                     HttpResult(refreshStatus, """{"error":"invalid_grant"}""")
                 } else {
                     rig.issued++
@@ -115,6 +125,32 @@ class SessionRefusalTest {
             assertNull(app.env.session.current.expiredSession, "asked once")
             assertEquals(exchanges, rig.exchanges.size, "no renewal loop")
             assertEquals(1, rig.renewReports.size)
+        }
+    }
+
+    @Test
+    fun aRenewalThatGotNoAnswerOrAServerErrorDoesNotAskToSignInAndTheNextCallRenews() = runTest {
+        // the exchange answered nothing, a 5xx or a 429: the session is not known to be refused, so nothing is asked
+        // and nothing is recorded, and once the exchange works again the next refused call renews and goes through
+        for (key in listOf(false, true)) {
+            for (status in listOf(0, 503, 429)) {
+                val rig = rig()
+                val app = rig.app
+                if (key) app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD) else app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+                testScheduler.advanceUntilIdle()
+                val stored = "access-${rig.issued}"
+                rig.accepts = { it != stored }
+                rig.exchangeFails = status
+
+                assertNotNull(claim(app), "key=$key status=$status")
+                assertNull(app.env.session.current.expiredSession, "no prompt: key=$key status=$status")
+
+                rig.exchangeFails = null
+                val before = rig.privateCalls.size
+                assertNull(claim(app), "renewed: key=$key status=$status")
+                assertEquals(listOf(stored, "access-${rig.issued}"), rig.privateCalls.drop(before).map { it.code() })
+                assertNull(app.env.session.current.expiredSession)
+            }
         }
     }
 

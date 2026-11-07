@@ -136,6 +136,14 @@ fun interface EcencyCodeProvider {
 class SessionRenewalFailed(reason: String) : com.ecency.core.api.EcencyException(reason)
 
 /**
+ * Thrown by [EcencyCodeProvider.renewAfterRejection] when the renewal could not be tried to the end: the exchange
+ * gave no answer, a server error or a 429, or a key account's fresh code could not be sent. The session is not known
+ * to be refused, so nobody is asked to sign in again; the refused call goes back to its caller and the next one tries
+ * again. [reason] is in words of the code only, never a token.
+ */
+class SessionRenewalUnavailable(reason: String) : com.ecency.core.api.EcencyException(reason)
+
+/**
  * Calls Ecency's private API the way @ecency/sdk does: `POST {host}/private-api/<path>` with a JSON body
  * that carries the account's access token as `code`.
  */
@@ -170,7 +178,9 @@ class EcencyPrivateApi(
      * Sends with [username]'s code; a 401 asks [EcencyCodeProvider.renewAfterRejection] for a new one and sends
      * once more with it (a 401 is refused before anything is done, so the resend is safe). A second 401, or no new
      * code, goes back to the caller as it came, and the session is given up as refused
-     * ([EcencyCodeProvider.sessionRefused]): the user is asked to sign in again. Never a loop.
+     * ([EcencyCodeProvider.sessionRefused]): the user is asked to sign in again. Never a loop. A renewal that could
+     * not be tried to the end ([SessionRenewalUnavailable], or any other failure of the provider) gives the 401 back
+     * without giving the session up, so the next call renews again.
      */
     private suspend fun renewing(username: String, send: suspend (String) -> HttpResult): HttpResult {
         // the session the call goes out with, taken before it is sent: a sign-out and in while it is on its way voids it
@@ -182,9 +192,12 @@ class EcencyPrivateApi(
             codes.renewAfterRejection(username, code, mark)
         } catch (e: CancellationException) {
             throw e
+        } catch (e: SessionRenewalUnavailable) {
+            // not known to be refused (no answer, a server error): nothing is recorded or asked, the next call renews
+            return first
         } catch (e: Exception) {
             com.ecency.core.app.ErrorReports.quiet(e, "auth.renewToken")
-            null
+            return first
         }
         if (fresh.isNullOrEmpty() || fresh == code) {
             codes.sessionRefused(username, code, mark)

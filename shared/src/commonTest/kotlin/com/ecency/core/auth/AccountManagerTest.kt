@@ -307,8 +307,12 @@ class AccountManagerTest {
         rig.http = { req -> if ("refresh-2" in req.body.orEmpty()) HttpResult(401, "") else FakeAuthHttp.tokens(access = "access-3", refresh = "refresh-3") }
         assertEquals("access-3", rig.manager.renewAfterRejection("spike-user", "access-2"))
         assertEquals("code", HiveSignerMessages.decode(rig.sentCode()).type)
-        // nothing works: null, and the stored session is left as it was
+        // no path could be tried to the end (server errors): not known to be refused, the session is left as it was
         rig.http = { HttpResult(500, "") }
+        assertFailsWith<SessionRenewalUnavailable> { rig.manager.renewAfterRejection("spike-user", "access-3") }
+        assertEquals("access-3", rig.vault.account("spike-user")!!.accessToken)
+        // every path refused: null, and the stored session is left as it was
+        rig.http = { HttpResult(400, "") }
         assertNull(rig.manager.renewAfterRejection("spike-user", "access-3"))
         assertEquals("access-3", rig.vault.account("spike-user")!!.accessToken)
         assertNull(rig.manager.renewAfterRejection("nobody-here", "x"))

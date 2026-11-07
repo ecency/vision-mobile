@@ -449,6 +449,8 @@ class AccountManager(
         val existing = db { session(username) } ?: return null
         val refresh = existing.refreshToken?.takeIf { it.isNotEmpty() }
         var why = if (refresh == null) "no refresh token" else ""
+        // a path that could not be tried to the end (no answer, a server error, a 429): the session is not known to be refused
+        var unsettled = false
         val exchanged = refresh?.let {
             try {
                 tokens.exchange(it, nowMillis()).also { s -> if (s.username != username) why = "refresh exchange answered another account" }
@@ -458,6 +460,7 @@ class AccountManager(
             } catch (e: Exception) {
                 com.ecency.core.app.ErrorReports.quiet(e, "auth.refreshToken")
                 why = "refresh exchange " + failure(e)
+                if (!isRefusal(e)) unsettled = true
                 null
             }
         }
@@ -479,15 +482,25 @@ class AccountManager(
             } catch (e: Exception) {
                 com.ecency.core.app.ErrorReports.quiet(e, "auth.keySession")
                 why += "; key session " + failure(e)
+                if (!isRefusal(e)) unsettled = true
                 null
             }
         }
         // signed out while it ran: nothing to tell
         if (signed == null && removalMark(username) == mark) {
             com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed(why), "auth.renewToken")
+            // not known to be refused: no prompt and nothing recorded, the next refused call renews again
+            if (unsettled) throw SessionRenewalUnavailable(why)
         }
         return signed
     }
+
+    /**
+     * The exchange answered and refused (a 4xx other than 429, or another account's session): trying again will not
+     * help. No answer, a redirect, a server error, a 429 or any other failure may pass on a later call.
+     */
+    private fun isRefusal(e: Exception): Boolean =
+        e is AuthException.AccountMismatch || (e is AuthException.TokenExchangeFailed && e.status in 400..499 && e.status != 429)
 
     /** How an exchange failed, for [SessionRenewalFailed]: a status or a type name, never a message or a token. */
     private fun failure(e: Exception): String = when {
