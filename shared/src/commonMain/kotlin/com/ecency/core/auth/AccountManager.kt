@@ -522,9 +522,21 @@ class AccountManager(
      */
     var onSessionRefused: (String) -> Unit = {}
 
-    override fun sessionRefused(username: String, rejected: String, mark: Any?) {
+    @Throws(Exception::class)
+    override suspend fun sessionRefused(username: String, rejected: String, mark: Any?) {
         // the session the call went out with left meanwhile (signed out, maybe in again): nothing to ask
         if ((mark as? RemovalMark ?: return) != removalMark(username)) return
+        // signed in again (or renewed) since the token was refused: the stored session is another one
+        val stored = try {
+            mutex.withLock { code(username) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the stored session could not be read: taken to be the refused one, the prompt is still asked once
+            com.ecency.core.app.ErrorReports.quiet(e, "auth.sessionRefused")
+            rejected
+        }
+        if (stored != rejected) return
         while (true) {
             val before = refused.load()
             if (before[username] == rejected) return

@@ -123,10 +123,11 @@ fun interface EcencyCodeProvider {
 
     /**
      * A private call sent under [mark] was refused (401) with [rejected], and renewing did not help: no new code, or
-     * the new one ([rejected] then) was refused too. The session is the user's to sign in again to. The default
-     * does nothing.
+     * the new one ([rejected] then) was refused too. The session is the user's to sign in again to, unless another
+     * one was stored meanwhile. The default does nothing.
      */
-    fun sessionRefused(username: String, rejected: String, mark: Any?) {}
+    @Throws(Exception::class)
+    suspend fun sessionRefused(username: String, rejected: String, mark: Any?) {}
 }
 
 /**

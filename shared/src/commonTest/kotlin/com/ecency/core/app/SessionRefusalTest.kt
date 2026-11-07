@@ -209,6 +209,33 @@ class SessionRefusalTest {
     }
 
     @Test
+    fun aRefusedSpinOrStreakFreezeReadsAsAnExpiredSession() = runTest {
+        val rig = rig(refreshStatus = 401)
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        val perks = app.env.perksApi
+        val calls = listOf<suspend () -> Unit>(
+            { perks.gameStatus(alice) },
+            { perks.claimSpin(alice, "key") },
+            { perks.buyStreakFreeze(alice, "idem") },
+        )
+        for (call in calls) {
+            val e = assertNotNull(runCatching { call() }.exceptionOrNull())
+            val shown = AppError.from(e, "perks.spin")
+            assertEquals(AppError.SESSION_EXPIRED, shown.message)
+            assertNull(shown.code)
+        }
+        // the spin screen's own alert says the session expired, not "An error occurred"
+        val spin = app.env.spinGameModel()
+        spin.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(AppError.SESSION_EXPIRED, spin.current.alert)
+        spin.close()
+    }
+
+    @Test
     fun aKeyAccountSignsAFreshCodeAndTheResendWorks() = runTest {
         // the refresh token is refused; the key signs a new code, whose token the server takes
         val rig = rig(refreshStatus = 400)
@@ -246,6 +273,33 @@ class SessionRefusalTest {
             assertNull(app.env.session.current.expiredSession, "signInAgain=$signInAgain")
             assertTrue(rig.renewReports.isEmpty(), "signInAgain=$signInAgain")
         }
+    }
+
+    @Test
+    fun noPromptWhenTheUserSignedInAgainBeforeTheRenewedTokenWasRefused() = runTest {
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        val signedIn = rig.issued
+        // the first token is refused, so the call renews and is sent again with the renewed one
+        rig.accepts = { it != "access-$signedIn" }
+        val held = CompletableDeferred<Unit>()
+        app.authBackend.gate = { r -> if ("/private-api/" in r.url && r.code() == "access-${signedIn + 1}") held.await() }
+        val call = async { runCatching { app.env.walletApi.claimPoints(alice) } }
+        testScheduler.runCurrent()
+        // signed in again (no sign-out) while the resend is on its way; the resend is then refused
+        app.authBackend.gate = null
+        rig.accepts = { it != "access-$signedIn" && it != "access-${signedIn + 1}" }
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        // no time passes: the held resend must not time out
+        testScheduler.runCurrent()
+        assertEquals("access-${signedIn + 2}", app.env.accounts.code(alice), "a new session was stored")
+        held.complete(Unit)
+        assertTrue(call.await().isFailure)
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again")
+        assertNull(app.env.session.current.expiredSession, "the session the call went out with is no longer the stored one")
     }
 
     @Test

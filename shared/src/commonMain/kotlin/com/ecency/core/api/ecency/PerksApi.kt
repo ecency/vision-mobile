@@ -74,6 +74,7 @@ class PerksApi(private val privateApi: EcencyPrivateApi, private val http: AuthH
     @Throws(Exception::class)
     suspend fun gameStatus(username: String): GameStatus {
         val response = privateApi.post("get-game", username, buildJsonObject { put("game_type", SPIN) })
+        if (response.sessionRefused && response.status == 401) throw response.failure()
         if (response.status !in 200..299) throw PerksHttpException(response.status, serverMessage(response.body))
         return GameStatus.parse(response.body) ?: throw PerksHttpException(response.status, null)
     }
@@ -85,6 +86,7 @@ class PerksApi(private val privateApi: EcencyPrivateApi, private val http: AuthH
     @Throws(Exception::class)
     suspend fun claimSpin(username: String, key: String): Int {
         val response = privateApi.post("post-game", username, buildJsonObject { put("game_type", SPIN); put("key", key) })
+        if (response.sessionRefused && response.status == 401) throw response.failure()
         if (response.status !in 200..299) throw PerksHttpException(response.status, serverMessage(response.body))
         val o = SafeJson.parseOrNull(response.body, 4).obj() ?: throw PerksHttpException(response.status, null)
         return (o.int("score") ?: 0).coerceIn(0, 1_000_000)
@@ -98,6 +100,7 @@ class PerksApi(private val privateApi: EcencyPrivateApi, private val http: AuthH
     @Throws(Exception::class)
     suspend fun buyStreakFreeze(username: String, idempotencyKey: String): StreakFreezeResult {
         val response = privateApi.post("streak-freeze/buy", username, buildJsonObject { put("idempotency_key", idempotencyKey) })
+        if (response.sessionRefused && response.status == 401) throw response.failure()
         if (response.status !in 200..299) throw PerksHttpException(response.status, serverMessage(response.body))
         // an unreadable 200 says nothing about the charge: the caller treats it as a lost answer
         val o = SafeJson.parseOrNull(response.body, 4).obj() ?: throw EcencyHttpException(502, "malformed streak freeze answer")
