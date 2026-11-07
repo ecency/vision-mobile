@@ -374,7 +374,7 @@ struct LockCover: View {
 
 /// Errors go to the PIN pad while one shows (`promptError`), so no alert is needed for them then.
 private func alertText(_ state: AppLockState) -> String? {
-    state.notice ?? (state.hidesContent || state.prompt != nil ? nil : state.error?.message)
+    state.notice ?? (state.hidesContent || state.prompt != nil ? nil : state.error?.text)
 }
 
 /// The main window's side of the lock: nothing private is in its hierarchy while the lock state is unknown
@@ -414,7 +414,7 @@ private struct LockOverlayView: View {
                 } else if state.biometricOffer {
                     BiometricOfferView(model: model)
                 } else if state.hidesContent {
-                    LockCover(error: state.error?.message) { model.clearError(); model.start() }
+                    LockCover(error: state.error?.text) { model.clearError(); model.start() }
                 } else {
                     Color.clear
                 }

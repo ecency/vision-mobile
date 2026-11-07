@@ -793,7 +793,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
         AlertDialog(
             onDismissRequest = model::clearError,
             title = { Text(state.errorTitle) },
-            text = { Text(error.message, modifier = Modifier.testTag("waveError")) },
+            text = { Text(error.text, modifier = Modifier.testTag("waveError")) },
             confirmButton = { TextButton(onClick = model::clearError) { Text(UiCopy.OK) } },
         )
     }

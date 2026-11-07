@@ -491,7 +491,7 @@ class RedeemModel internal constructor(private val env: AppEnvironment, kind: Re
         when (phase) {
             is SendPhase.Done -> { owned.done(id); env.ui.toast(WalletCopy.SUCCESSFUL); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
             // RN: the key warning and the message
-            is SendPhase.Failed -> { owned.done(id); env.ui.toast("${WalletCopy.KEY_WARNING}\n${phase.error.message}"); setState { it.copy(actionId = null, phase = null) } }
+            is SendPhase.Failed -> { owned.done(id); env.ui.toast("${WalletCopy.KEY_WARNING}\n${phase.error.text}", phase.error); setState { it.copy(actionId = null, phase = null) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }

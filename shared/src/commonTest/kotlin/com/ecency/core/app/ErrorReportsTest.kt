@@ -4,6 +4,7 @@ import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.rpc.AllNodesFailedException
 import com.ecency.core.auth.AuthException
+import com.ecency.core.l10n.L
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -42,6 +43,28 @@ class ErrorReportsTest {
         assertEquals("rejected", r.tags["error.kind"])
         assertEquals("Rejected", r.tags["exception"])
         assertFalse("expected" in r.tags)
+    }
+
+    @Test
+    fun anUnexpectedFailureShowsTheCodeItsReportIsTaggedWith() {
+        // issue #3660: a tester's screenshot finds the Sentry issue
+        val error = AppError.from(IllegalStateException("boom"), "editor.publish")
+        val code = error.code
+        assertTrue(code != null && Regex("^[0-9A-Z]{6}$").matches(code), "six letters or digits: $code")
+        assertEquals(code, reporter.reports.single().tags["error_code"])
+        assertEquals(AppError.GENERIC_MESSAGE + "\n" + L.native.appError.errorCode(code = code), error.text, "said once, then the code")
+        // the same fingerprint, the same code, even when the report itself is throttled
+        assertEquals(code, AppError.from(IllegalStateException("boom"), "editor.publish").code)
+        assertNotEquals(code, AppError.from(IllegalStateException("boom"), "post.vote").code)
+    }
+
+    @Test
+    fun anExpectedRefusalCarriesNoCode() {
+        val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
+        assertEquals(null, error.code)
+        assertEquals(error.message, error.text)
+        assertFalse("error_code" in reporter.reports.single().tags)
+        assertEquals(null, AppError.from(AllNodesFailedException("bridge.get_ranked_posts", emptyList()), "feed.load").code)
     }
 
     @Test

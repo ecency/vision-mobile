@@ -128,7 +128,7 @@ class QuickProfileModel internal constructor(private val env: AppEnvironment, us
             } catch (e: Exception) {
                 val error = AppError.fromBroadcast(e, "quickProfile.follow")
                 setState { it.copy(actionRunning = false) }
-                if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) env.ui.toast(L.native.profileSheet.fail(message = error.message))
+                if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) env.ui.toast(L.native.profileSheet.fail(message = error.text), error)
             }
         }
     }

@@ -2,6 +2,7 @@ package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.Sent
+import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.api.ecency.ImageUploadTransport
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.AuthHttpRequest
@@ -16,6 +17,8 @@ import com.ecency.core.editor.PollDraft
 import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
 import com.ecency.core.hive.GoldenVectors
+import com.ecency.core.l10n.L
+import com.ecency.core.l10n.LocaleFormat
 import com.ecency.core.secure.AuthType
 import com.ecency.core.secure.KeyVault
 import com.ecency.core.secure.VaultAccount
@@ -246,7 +249,8 @@ class EditorModelTest {
         assertFalse(m.current.isSending)
         assertEquals("My first post", m.current.title)
         assertEquals("Hello world", m.current.body)
-        assertTrue(w.toasts().single().startsWith("Something went wrong\n"))
+        // #3660: the connection, said once, and that retrying is safe
+        assertEquals(listOf(AppError.MAY_HAVE_LANDED_MESSAGE), w.toasts())
         val saved = LocalDraft.decode(w.storage.values[LocalDrafts.key(user, LocalDrafts.NEW_POST)])!!
         assertEquals("my-first-post", saved.pending?.permlink, "the permlink that may be on chain is remembered on disk")
         val sentBefore = w.app.broadcasts().map { it.params.toString() }.distinct()
@@ -268,12 +272,44 @@ class EditorModelTest {
         w.fill(m, this)
         m.submit()
         testScheduler.advanceUntilIdle()
-        assertTrue(w.toasts().single().startsWith("Something went wrong\n"), "the screen shows it as before")
         // the fixture's unanswered side reads report quietly; the failure the screen shows is one handled report
         val r = reporter.reports.filter { it.tags["quiet"] == null }.single()
+        // issue #3660: the node's reason, once (never "Something went wrong" twice), and the code its report carries,
+        // shown long enough to read
+        val toast = w.app.env.ui.current.toast!!
+        val code = r.tags["error_code"]!!
+        assertEquals(L.native.chainRefusal.refusedWith(reason = "Assert Exception: body is too odd") + "\n" + L.native.appError.errorCode(code = code), toast.text)
+        assertEquals(UiMessage.ERROR_TOAST_MILLIS, toast.durationMillis)
         assertEquals("editor.publish", r.tags["where"])
         assertEquals("rejected", r.tags["error.kind"])
         assertEquals(listOf("handled", "editor.publish", "rejected"), r.fingerprint.take(3))
+    }
+
+    @Test
+    fun aTitleTheChainRefusesShowsOnlyWhyAndHowToFixIt() = runTest {
+        val w = World(this)
+        w.broadcastAnswer = { FakeTransport.error(it, -32000, "Assert Exception: Title size limit exceeded.") }
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val toast = w.app.env.ui.current.toast!!
+        assertEquals(ChainRefusal.TITLE_TOO_LONG.message, toast.text)
+        assertEquals(UiMessage.TOAST_MILLIS, toast.durationMillis, "an ordinary refusal has no code to read")
+    }
+
+    @Test
+    fun aTitleOverTheChainsByteLimitIsRefusedBeforeAnythingIsSigned() = runTest {
+        val w = World(this)
+        val m = w.newPost(this)
+        // 70 emoji: 140 characters, 280 bytes
+        w.fill(m, this, title = "🌞".repeat(70))
+        assertTrue(m.current.canSubmit, "the button stays on: the reason is told on tap")
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.app.broadcasts().isEmpty())
+        assertEquals(listOf(L.native.chainRefusal.titleBytes(size = LocaleFormat.integer(280), max = LocaleFormat.integer(EditorMeta.MAX_TITLE_BYTES.toLong()))), w.toasts())
+        assertFalse(m.current.isSending)
     }
 
     @Test
@@ -1774,7 +1810,7 @@ class EditorModelTest {
         m.submit()
         testScheduler.advanceUntilIdle()
         assertTrue(w.api.none { it.first == "schedules-add" })
-        assertEquals(listOf("Something went wrong\nCould not check your account's posting authority. Check your connection and try again."), w.toasts())
+        assertEquals(listOf("Could not check your account's posting authority. Check your connection and try again."), w.toasts())
     }
 
     @Test

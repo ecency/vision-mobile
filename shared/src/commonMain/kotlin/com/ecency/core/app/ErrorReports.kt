@@ -1,5 +1,7 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.broadcast.BroadcastException
+import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.auth.AuthException
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -65,15 +67,22 @@ object ErrorReports {
         AppError.from(e, where)
     }
 
-    /** A failure the UI shows, as [AppError.from] mapped it at [where]. */
-    fun handled(e: Throwable, where: String, mapped: AppError) {
-        try {
-            val root = rootOf(e)
-            if (skips(e, root, mapped.kind)) return
-            send(root, where, mapped.kind.name.lowercase(), expected(e, root, mapped.kind), root)
-        } catch (t: Throwable) {
-            // not reported: reporting must never fail the caller
+    /**
+     * A failure the UI shows, as [AppError.from] mapped it at [where]. Returns the code the screen shows with it (issue
+     * #3660), the report's `error_code` tag: for a failure that is not expected (see the class comment), else null. The
+     * code depends only on the fingerprint, so it is the same when this report is throttled or capped.
+     */
+    fun handled(e: Throwable, where: String, mapped: AppError): String? = try {
+        val root = rootOf(e)
+        if (skips(e, root, mapped.kind)) {
+            null
+        } else {
+            val expected = expected(e, root, mapped.kind)
+            send(root, where, mapped.kind.name.lowercase(), expected, root)
         }
+    } catch (t: Throwable) {
+        // not reported: reporting must never fail the caller
+        null
     }
 
     /**
@@ -118,6 +127,7 @@ object ErrorReports {
 
     private fun expected(e: Throwable, root: Throwable, kind: ErrorKind): Boolean = when {
         kind in EXPECTED_KINDS -> true
+        ChainRefusal.of(e)?.isUsersOwn == true -> true
         e is AppException && e.cause == null -> true
         root is AuthException -> isUserMistake(root)
         else -> false
@@ -143,7 +153,7 @@ object ErrorReports {
      * stays out of the fingerprint, so one bug is one issue in every language.
      */
     private fun isCopy(e: Throwable): Boolean =
-        (e is com.ecency.core.api.broadcast.BroadcastException && e !is com.ecency.core.api.broadcast.BroadcastException.Rejected) ||
+        (e is BroadcastException && e !is BroadcastException.Rejected) ||
             e is AppException || e is com.ecency.core.api.chat.ChatApiException
 
     /**
@@ -153,27 +163,33 @@ object ErrorReports {
      */
     private fun fingerprintMessage(e: Throwable, kind: String): String = when {
         e is Foreign -> e.code
+        // each refusal its own issue, whatever language its copy is in
+        e is BroadcastException.Refused -> e.refusal.name
+        e is BroadcastException.MissingAuthority -> e.refusal.name
+        e is BroadcastException.CommentTooSoon -> e.refusal.name
         kind == "network" || isCopy(e) -> ""
         else -> normalise(e.message.orEmpty())
     }
 
     private fun typeOf(e: Throwable): String = (e as? Foreign)?.type ?: e::class.simpleName ?: "Throwable"
 
-    private fun send(e: Throwable, where: String, kind: String, expected: Boolean, identity: Throwable?, quiet: Boolean = false) {
-        val s = sink.load() ?: return
+    /** Sends the report unless throttled or capped; returns the code of an unexpected failure (see [handled]). */
+    private fun send(e: Throwable, where: String, kind: String, expected: Boolean, identity: Throwable?, quiet: Boolean = false): String? {
         val type = typeOf(e)
-        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
-        val message = withoutPlaces(e.message.orEmpty())
         val fingerprint = listOf("handled", where, kind, type, fingerprintMessage(e, kind))
         val key = fingerprint.joinToString("\u0000")
+        val code = if (expected || quiet) null else codeOf(key)
+        val s = sink.load() ?: return code
+        // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
+        val message = withoutPlaces(e.message.orEmpty())
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
             // separate caps: offline warnings never use up the room a later error needs
-            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return
-            if (identity != null && before.recent.any { it === identity }) return
+            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code
+            if (identity != null && before.recent.any { it === identity }) return code
             val last = before.lastSent[key]
-            if (last != null && now - last in 0 until THROTTLE_MILLIS) return
+            if (last != null && now - last in 0 until THROTTLE_MILLIS) return code
             val after = Seen(
                 if (expected) before.errors else before.errors + 1,
                 if (expected) before.warnings + 1 else before.warnings,
@@ -193,6 +209,7 @@ object ErrorReports {
                     put("exception", type)
                     if (quiet) put("quiet", "true")
                     if (expected) put("expected", "true")
+                    if (code != null) put("error_code", code)
                 },
                 fingerprint = fingerprint,
                 contextName = "handled",
@@ -200,7 +217,24 @@ object ErrorReports {
                 level = if (expected) "warning" else "error",
             ),
         )
+        return code
     }
+
+    /**
+     * Six letters and digits from the fingerprint (FNV-1a, 30 bits in base 32 without I, L, O, U): what a screenshot
+     * shows and Sentry's `error_code` tag finds. The fingerprint holds no user data, so neither does the code.
+     */
+    internal fun codeOf(key: String): String {
+        var h = 0x811c9dc5.toInt()
+        for (b in key.encodeToByteArray()) {
+            h = h xor (b.toInt() and 0xff)
+            h *= 16777619
+        }
+        var v = h ushr 2
+        return buildString { repeat(6) { append(CODE_ALPHABET[v and 31]); v = v ushr 5 } }
+    }
+
+    private const val CODE_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
     /**
      * The exception's own stack trace, first [STACK_LINES] lines, as frames and type names only: the first line and

@@ -2632,8 +2632,7 @@
       "link_text_placeholder": "Text here"
     },
     "app_error": {
-      "this_reply_is_too": "This reply is too long.",
-      "the_network_refused_this": "The network refused this action.",
+      "error_code": "Error code: {code}",
       "invalid_input": "Invalid input.",
       "secure_storage_is_unavailable": "Secure storage is unavailable. Please sign in again.",
       "please_sign_in_first": "Please sign in first.",
@@ -2882,13 +2881,34 @@
     "bookmarks": {
       "please_sign_in_first": "Please sign in first."
     },
+    "chain_refusal": {
+      "post_cooldown": "Hive allows one new post every 5 minutes. Wait a few minutes and publish again; your draft is kept.",
+      "comment_cooldown": "Hive allows one reply every 3 seconds. Wait a moment and send it again.",
+      "edit_cooldown": "This was just changed. Wait a few seconds and save again.",
+      "identical_vote": "You have already voted on this with the same weight.",
+      "vote_too_small": "This vote is too small to count. Raise the vote weight, or wait for your voting power to recover.",
+      "paid_out": "This post has already been paid out, so it can no longer be voted on, deleted or have its payout options changed.",
+      "delete_voted": "This cannot be deleted because it has votes.",
+      "delete_replies": "This cannot be deleted because it has replies.",
+      "title_too_long": "The title is too long for Hive: 255 bytes at most, and emoji and many letters take 2 to 4 bytes each. Shorten it and publish again.",
+      "title_bytes": "The title is too long for Hive: {size} bytes, {max} at most. Emoji and many letters take 2 to 4 bytes each; shorten it and publish again.",
+      "body_empty": "The post is empty. Write something and publish again.",
+      "not_utf8": "The text has a character Hive cannot store, often a broken emoji or symbol pasted from elsewhere. Remove it and try again.",
+      "beneficiaries_refused": "Hive refused the beneficiary list. Check the accounts in it and try again.",
+      "options_locked": "Beneficiaries can only be set when a post is first published, before it gets votes. Keep them as they were and try again.",
+      "payout_raised": "The payout options of a published post can only be lowered, not raised.",
+      "insufficient_funds": "There are not enough funds in your wallet for this.",
+      "resource_credits": "Not enough Resource Credits for this. Top up or boost your account, or wait for them to recover.",
+      "missing_posting": "Your login cannot post for this account. Sign in again with your posting key, or grant Ecency posting permission.",
+      "missing_active": "This needs your active key. Sign in with it, or use HiveSigner or HiveAuth.",
+      "missing_owner": "This needs your owner key, which Ecency never uses. Do it from a wallet that holds the owner key.",
+      "hive_signer_no_permission": "HiveSigner cannot post for you: Ecency does not have posting permission on your account. Grant it and try again.",
+      "hive_signer_expired": "Your HiveSigner login has expired or was revoked. Sign in again with HiveSigner and try again.",
+      "wallet_refused": "Your wallet app refused this: {reason}",
+      "refused_with": "The Hive network refused this: {reason}",
+      "too_large": "This is too large to publish: {size} KB, and Hive allows {max} KB. Shorten it and try again."
+    },
     "broadcast_errors": {
-      "duplicate_vote": "You have already voted with the same weight.",
-      "insufficient_rc": "Insufficient Resource Credits. Please wait or power up.",
-      "missing_authority": "Missing posting authority. Please check your login method.",
-      "comment_too_soon": "Please wait before posting again.",
-      "paid_out": "This post has already been paid out.",
-      "too_large": "Transaction is {size, plural, one {# byte} other {# bytes}}, over the {max} byte limit.",
       "network_error_please_check": "Network error. Please check your connection and try again.",
       "unconfirmed_message": "Could not confirm whether this went through. Please check your wallet or history; start it again only if it is not there.",
       "undecided_message": "This may already have gone through. Please check your wallet or history before trying again."

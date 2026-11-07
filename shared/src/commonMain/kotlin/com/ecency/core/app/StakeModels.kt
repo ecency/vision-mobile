@@ -237,7 +237,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> { env.ui.toast(WalletCopy.SUCCESSFUL); owned.done(id); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
-            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.DELEGATE, phase.error.message)); owned.done(id); setState { it.copy(closed = true) } }
+            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.DELEGATE, phase.error.text), phase.error); owned.done(id); setState { it.copy(closed = true) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }
@@ -448,7 +448,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> { env.ui.toast(WalletCopy.SUCCESSFUL); owned.done(id); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
-            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.POWER_DOWN, phase.error.message)); owned.done(id); setState { it.copy(closed = true) } }
+            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.POWER_DOWN, phase.error.text), phase.error); owned.done(id); setState { it.copy(closed = true) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }

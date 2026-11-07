@@ -256,7 +256,7 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
                         if (key.startsWith("recurrent:")) setState { s -> s.copy(recurrent = s.recurrent.filterNot { it.to == key.removePrefix("recurrent:") }).withAsset(s.asset, env.wallet.current.hivePerMVests) }
                         scope.launch { kotlinx.coroutines.delay(1_000); loadPending(user) }
                     }
-                    is SendPhase.Failed -> env.ui.toast(failure?.invoke(p.error.message) ?: WalletCopy.operationFailed(WalletCopy.label(SigningModel.operationName(json)), p.error.message))
+                    is SendPhase.Failed -> env.ui.toast(failure?.invoke(p.error.text) ?: WalletCopy.operationFailed(WalletCopy.label(SigningModel.operationName(json)), p.error.text), p.error)
                     is SendPhase.Unconfirmed -> env.ui.toast(p.message)
                     else -> Unit
                 }

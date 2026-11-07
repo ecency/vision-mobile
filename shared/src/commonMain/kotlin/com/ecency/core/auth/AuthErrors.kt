@@ -83,7 +83,7 @@ sealed class AuthException(message: String, cause: Throwable? = null) : EcencyEx
         AuthException("HiveSigner error ${error ?: status}${description?.let { ": $it" } ?: ""}")
 
     /** HiveAuth: the wallet rejected, the request expired, or the relay reported an error. */
-    class HiveAuth(val reason: Reason, detail: String? = null, cause: Throwable? = null) :
+    class HiveAuth(val reason: Reason, val detail: String? = null, cause: Throwable? = null) :
         AuthException("HiveAuth ${reason.name.lowercase()}${detail?.let { ": $it" } ?: ""}", cause) {
         enum class Reason {
             REJECTED, EXPIRED, ERROR, NOT_CONNECTED, SESSION_EXPIRED, INVALID_RESPONSE,

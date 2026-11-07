@@ -1,10 +1,13 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.broadcast.BroadcastException
+import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.bool
 import com.ecency.core.api.model.int
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.str
+import com.ecency.core.api.rpc.RpcErrorException
 import com.ecency.core.auth.AuthHttpRequest
 import com.ecency.core.l10n.L
 import com.ecency.core.render.js.Js
@@ -114,23 +117,22 @@ object RcErrors {
     /** RN REDEEM redeemType for the Points RC top-up. */
     const val TOP_UP_REDEEM_TYPE = "rc_topup"
 
-    /** /Please wait to transact|has \d+ RC, needs \d+ RC/i over every message of the error chain. */
+    /**
+     * [ChainRefusal.RESOURCE_CREDITS] (RN RC_SHORTFALL) over every message of the error chain and a node error's `data`:
+     * the same rule that makes the error's kind, whichever way it was signed.
+     */
     fun isInsufficientRc(error: Throwable?): Boolean {
         var e = error
         var depth = 0
         while (e != null && depth++ < 8) {
-            if (matches(e.message.orEmpty())) return true
+            if (matches(e.message.orEmpty()) || ChainRefusal.RESOURCE_CREDITS.matches((e as? RpcErrorException)?.data)) return true
+            if (e is BroadcastException.InsufficientResourceCredits) return true
             e = e.cause
         }
         return false
     }
 
-    fun matches(message: String): Boolean {
-        if (message.contains("Please wait to transact", ignoreCase = true)) return true
-        return SHORTFALL.containsMatchIn(message)
-    }
-
-    private val SHORTFALL = Regex("has [0-9]+ RC, needs [0-9]+ RC", RegexOption.IGNORE_CASE)
+    fun matches(message: String): Boolean = ChainRefusal.RESOURCE_CREDITS.matches(message)
 }
 
 /**

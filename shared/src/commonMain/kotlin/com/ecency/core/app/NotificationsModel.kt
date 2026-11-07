@@ -572,7 +572,7 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
             } catch (e: Exception) {
                 failedAt = env.nowMillis()
                 setState { it.copy(isLoading = false, loaded = true) }
-                if (quiet) ErrorReports.quiet(e, "leaderboard.refresh") else env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e, "leaderboard.load").message))
+                if (quiet) ErrorReports.quiet(e, "leaderboard.refresh") else env.ui.toast(AppError.from(e, "leaderboard.load"))
             }
         }
     }

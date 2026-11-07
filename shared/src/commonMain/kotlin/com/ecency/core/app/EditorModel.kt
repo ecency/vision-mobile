@@ -25,6 +25,7 @@ import com.ecency.core.editor.TextSelection
 import com.ecency.core.hive.ChainTime
 import com.ecency.core.hive.Operation
 import com.ecency.core.l10n.L
+import com.ecency.core.l10n.LocaleFormat
 import com.ecency.core.render.RenderHelper
 import com.ecency.core.render.blocks.Block
 import kotlinx.coroutines.Job
@@ -1257,6 +1258,17 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             env.ui.toast(L.alert.canNotBeEmpty)
             return
         }
+        // hived counts the title in bytes (an emoji is 4): say so here rather than send what it refuses (#3660)
+        val titleBytes = if (s.isReply) 0 else s.title.encodeToByteArray().size
+        if (titleBytes > EditorMeta.MAX_TITLE_BYTES) {
+            env.ui.toast(
+                L.native.chainRefusal.titleBytes(
+                    size = LocaleFormat.integer(titleBytes.toLong()),
+                    max = LocaleFormat.integer(EditorMeta.MAX_TITLE_BYTES.toLong()),
+                ),
+            )
+            return
+        }
         saveJob?.cancel()
         setState { it.copy(isSending = true, publishConflict = false, conflictChangedElsewhere = false, grantPrompt = false) }
         scope.launch {
@@ -1294,8 +1306,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 setState { it.copy(isSending = false) }
                 // the app-wide offer (RcOfferModel), as every other broadcast that ran out
                 if (outOfRc) env.rcOffer.raise()
-                // RN alert.something_wrong_msg; a closed signing prompt says nothing
-                if (!outOfRc && error.kind != ErrorKind.CANCELLED) env.ui.toast(L.alert.somethingWrongMsg(message = error.message))
+                // what went wrong and what to do, once, with the report's code when it has one (#3660); a closed
+                // signing prompt says nothing
+                if (!outOfRc && error.kind != ErrorKind.CANCELLED) env.ui.toast(error)
             }
         }
     }

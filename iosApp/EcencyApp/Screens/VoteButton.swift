@@ -13,7 +13,7 @@ enum VoteButtonState: Equatable {
     static func of(votedByMe: Bool, downvotedByMe: Bool, status: VoteStatus?) -> VoteButtonState {
         if let status {
             if status.inFlight { return .inFlight }
-            if let error = status.error { return .failed(message: error.message, retryable: error.retryable) }
+            if let error = status.error { return .failed(message: error.text, retryable: error.retryable) }
         }
         if votedByMe { return .upvoted }
         if downvotedByMe { return .downvoted }

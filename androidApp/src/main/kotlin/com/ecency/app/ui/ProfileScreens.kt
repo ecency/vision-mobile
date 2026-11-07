@@ -348,7 +348,7 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = model::dismissAlert,
             title = { Text(UiCopy.FAIL) },
-            text = { Text(error.message.ifEmpty { ProfileUiCopy.AN_ERROR_OCCURRED }) },
+            text = { Text(error.text.ifEmpty { ProfileUiCopy.AN_ERROR_OCCURRED }) },
             confirmButton = { TextButton(onClick = model::dismissAlert) { Text(UiCopy.OK) } },
         )
     }
@@ -785,7 +785,7 @@ fun ProfileEditScreen(env: AppEnvironment, model: ProfileEditModel, onBack: () -
         AlertDialog(
             onDismissRequest = model::dismissAlert,
             title = { Text(UiCopy.FAIL) },
-            text = { Text(error.message) },
+            text = { Text(error.text) },
             confirmButton = { TextButton(onClick = model::dismissAlert) { Text(UiCopy.OK) } },
         )
     }

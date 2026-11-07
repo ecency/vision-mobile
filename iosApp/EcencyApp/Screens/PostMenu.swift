@@ -281,7 +281,7 @@ struct CrossPostSheet: View {
                     .background(theme.lightBackground, in: RoundedRectangle(cornerRadius: 8))
                 Text(ReadingUiCopy.shared.CROSS_POST_DESCRIPTION)
                     .scaledFont(12).foregroundStyle(theme.secondary)
-                if let error = s.error { Text(error.message).scaledFont(12).foregroundStyle(theme.dangerText).announces(error.message, attempt: ObjectAttempt(error)) }
+                if let error = s.error { Text(error.text).scaledFont(12).foregroundStyle(theme.dangerText).announces(error.text, attempt: ObjectAttempt(error)) }
             }
             .padding(16)
             }

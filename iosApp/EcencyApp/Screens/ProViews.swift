@@ -197,9 +197,9 @@ struct ProBlogSection: View {
                     .disabled(s.blogClaiming || s.blogPrefilling)
                     .accessibilityIdentifier("pro-blog-description")
                 if let error = s.blogError {
-                    Text(error.message).scaledFont(13).foregroundStyle(theme.dangerText)
+                    Text(error.text).scaledFont(13).foregroundStyle(theme.dangerText)
                         .fixedSize(horizontal: false, vertical: true)
-                        .announces(error.message)
+                        .announces(error.text)
                         .accessibilityIdentifier("pro-blog-error")
                 }
                 HStack {

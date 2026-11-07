@@ -68,6 +68,9 @@ data class VideoThumb(val embedUrl: String, val thumbUrl: String)
 object EditorMeta {
     const val DEFAULT_PARENT_PERMLINK = "hive-125125"
 
+    /** hived HIVE_COMMENT_TITLE_LIMIT - 1: the title's size in UTF-8 bytes, not characters. */
+    const val MAX_TITLE_BYTES = 255
+
     /** SDK POLLS_PROTOCOL_VERSION. */
     const val POLLS_PROTOCOL_VERSION = 1.1
     const val THREESPEAK_ACCOUNT = "threespeakfund"

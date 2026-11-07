@@ -539,7 +539,7 @@ struct EditorScreen: View {
                 PageLoading().frame(maxHeight: .infinity, alignment: .top)
             } else if let error = state.error, state.owner != nil, state.body.isEmpty, state.kind.name != "NEW_POST" {
                 VStack(spacing: 12) {
-                    Text(error.message).foregroundStyle(theme.secondary)
+                    Text(error.text).foregroundStyle(theme.secondary)
                     Button(EditorLoadCopy.shared.RETRY) { model.retryLoad() }.accessibilityIdentifier("editor-retry")
                     Button(UiCopy.shared.BACK) { pop() }
                 }
