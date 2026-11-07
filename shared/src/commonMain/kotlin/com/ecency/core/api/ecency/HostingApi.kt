@@ -1,6 +1,7 @@
 package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.str
@@ -50,7 +51,7 @@ class HostingApi(
             }
         } ?: throw EcencyTimeoutException()
         if (response.status == 404) return null
-        if (response.status !in 200..299) throw EcencyHttpException(response.status, "blog lookup failed with status ${response.status}")
+        if (response.status !in 200..299) throw response.failure("blog lookup failed with status ${response.status}")
         val o = runCatching { Json.parseToJsonElement(response.body) }.getOrNull().obj()
             ?: throw EcencyHttpException(response.status, "malformed blog lookup")
         if (o.str("subscriptionStatus") == ABANDONED) return null
@@ -69,7 +70,7 @@ class HostingApi(
             description.trim().takeIf { it.isNotEmpty() }?.let { put("description", JsonPrimitive(it.take(DESCRIPTION_MAX))) }
         }
         val response = privateApi.relay("POST", CLAIM_PATH, username, JsonObject(fields))
-        if (response.status !in 200..299) throw EcencyHttpException(response.status, "blog claim failed with status ${response.status}")
+        if (response.status !in 200..299) throw response.failure("blog claim failed with status ${response.status}")
         val o = runCatching { Json.parseToJsonElement(response.body) }.getOrNull().obj()
         val created = (o?.get("created") as? JsonPrimitive)?.takeIf { !it.isString }?.booleanOrNull
         val url = safeUrl(o?.get("tenant").obj()?.str("blogUrl")) ?: blogUrl(username)

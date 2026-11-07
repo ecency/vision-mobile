@@ -1,6 +1,7 @@
 package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.double
@@ -113,7 +114,7 @@ class ListenApi(
             updated?.takeIf { it.isNotEmpty() }?.let { put("updated", it) }
         }
         val response = send(body)
-        if (response.status !in 200..299) throw EcencyHttpException(response.status, "Failed to fetch listen status: ${response.status}")
+        if (response.status !in 200..299) throw response.failure("Failed to fetch listen status: ${response.status}")
         return ListenStatus.parse(response.body) ?: throw EcencyHttpException(response.status, "malformed listen status")
     }
 

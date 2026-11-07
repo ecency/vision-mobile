@@ -1,5 +1,6 @@
 package com.ecency.core.api.ecency
 
+import com.ecency.core.api.failure
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.double
 import com.ecency.core.api.model.int
@@ -120,8 +121,17 @@ class AiApi(private val private: EcencyPrivateApi, private val http: AuthHttp, p
     private fun cost(o: JsonObject, key: String): Double? = o.double(key)?.takeIf { it.isFinite() && it >= 0 && it < 1e9 }
 
     private fun json(response: HttpResult): JsonElement? {
-        // typed, so a refused session (401) reads as one and a server error as a lost connection
-        if (response.status !in 200..299) throw com.ecency.core.api.EcencyHttpException(response.status)
+        // typed, so a session the private API gave up reads as one; a server error stays a reported failure ([AiServerError])
+        if (response.status in 500..599) throw AiServerError(response.status)
+        if (response.status !in 200..299) throw response.failure()
         return runCatching { Json.parseToJsonElement(response.body) }.getOrNull()
     }
+}
+
+/**
+ * The AI API answered a server error. Not a lost connection: the paid AI calls had a double-charge history, so their
+ * server's failures are reported (a generic message with its code) instead of being dropped as "no internet".
+ */
+class AiServerError(status: Int) : com.ecency.core.api.EcencyHttpException(status, "AI API error $status") {
+    override val isNetwork: Boolean get() = false
 }

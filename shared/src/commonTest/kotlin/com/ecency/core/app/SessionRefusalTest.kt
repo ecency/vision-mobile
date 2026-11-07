@@ -1,5 +1,8 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.ecency.ImageUploadTransport
+import com.ecency.core.api.ecency.ImageUploader
+import com.ecency.core.api.ecency.UploadFile
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.AuthHttpRequest
 import com.ecency.core.auth.FakeAuthHttp
@@ -152,6 +155,41 @@ class SessionRefusalTest {
                 assertNull(app.env.session.current.expiredSession)
             }
         }
+    }
+
+    @Test
+    fun only401sThePrivateApiGaveUpOnReadAsAnExpiredSession() = runTest {
+        // an image upload refused with 401 has no renewal path behind it: a bug report with its code, not "session expired"
+        val reporter = RecordingReporter()
+        appWithAccounts(this).env.crashReporter = reporter
+        val refused = ImageUploadTransport { _, _, _, _ -> HttpResult(401, "Unauthorized") }
+        val upload = assertNotNull(
+            runCatching { ImageUploader(refused, "https://images.example").upload(UploadFile(ByteArray(10), "a.jpg", "image/jpeg"), "token") }.exceptionOrNull(),
+        )
+        val shown = AppError.from(upload, "editor.upload")
+        assertTrue(shown.message != AppError.SESSION_EXPIRED, shown.message)
+        assertNotNull(shown.code, "reported with its code")
+        assertTrue(reporter.reports.single { it.tags["where"] == "editor.upload" }.tags["expected"] != "true", "not an expected failure")
+
+        // the private API's own final refusal still reads as one
+        val rig = rig(refreshStatus = 400)
+        rig.app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        assertEquals(AppError.SESSION_EXPIRED, AppError.from(assertNotNull(claim(rig.app)), "wallet.claim").message)
+    }
+
+    @Test
+    fun anAiServerErrorIsReported() = runTest {
+        // the paid AI endpoints had a double-charge history: their 5xx stay visible, unlike a lost connection elsewhere
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        app.authBackend.privateApi = { HttpResult(502, "Bad Gateway") }
+        val e = assertNotNull(runCatching { app.env.aiApi.assistPrices(alice) }.exceptionOrNull())
+        ErrorReports.quiet(e, "recap.price")
+        assertTrue(rig.reporter.reports.any { it.tags["where"] == "recap.price" }, rig.reporter.reports.toString())
     }
 
     @Test

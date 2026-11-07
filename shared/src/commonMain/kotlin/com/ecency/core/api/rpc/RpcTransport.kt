@@ -15,6 +15,11 @@ data class HttpResult(
     val body: String,
     /** Response headers by lower-cased name, where the transport provides them (the auth transport does; node calls carry `retry-after` only). */
     val headers: Map<String, String> = emptyMap(),
+    /**
+     * Set by the private API only ([com.ecency.core.auth.EcencyPrivateApi]): this 401 is a session it gave up as
+     * refused after renewing did not help. Thrown, it is a [com.ecency.core.api.SessionRefusedException] ([com.ecency.core.api.failure]).
+     */
+    val sessionRefused: Boolean = false,
 ) {
     constructor(status: Int, body: String) : this(status, body, emptyMap())
 }

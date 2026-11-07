@@ -1,6 +1,7 @@
 package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.auth.AuthHttp
 import com.ecency.core.auth.AuthHttpRequest
@@ -62,7 +63,7 @@ class PurchaseApi(private val http: AuthHttp, private val codes: EcencyCodeProvi
             )
         } ?: throw EcencyTimeoutException()
         if (response.status == 422) heldOrder(response.body)?.let { throw ReceiptHeldException(it) }
-        if (response.status !in 200..299) throw EcencyHttpException(response.status)
+        if (response.status !in 200..299) throw response.failure()
         return response.status
     }
 

@@ -1,6 +1,7 @@
 package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.json.SafeJson
 import com.ecency.core.api.model.int
@@ -62,7 +63,7 @@ class PerksApi(private val privateApi: EcencyPrivateApi, private val http: AuthH
         val response = withTimeoutOrNull(EcencyPrivateApi.TIMEOUT_MILLIS) {
             http.send(AuthHttpRequest("POST", "$host/private-api/quests", mapOf("Content-Type" to "application/json"), body))
         } ?: throw EcencyTimeoutException()
-        if (response.status !in 200..299) throw EcencyHttpException(response.status, "Failed to fetch quests: ${response.status}")
+        if (response.status !in 200..299) throw response.failure("Failed to fetch quests: ${response.status}")
         return response.body
     }
 
@@ -118,7 +119,7 @@ class PerksApi(private val privateApi: EcencyPrivateApi, private val http: AuthH
             txId?.takeIf { it.isNotEmpty() }?.let { put("tx", it) }
         }
         val response = privateApi.post("usr-activity", username, fields)
-        if (response.status !in 200..299) throw EcencyHttpException(response.status)
+        if (response.status !in 200..299) throw response.failure()
     }
 
     private fun serverMessage(body: String): String? =

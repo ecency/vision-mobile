@@ -2,6 +2,7 @@ package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyException
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.bool
 import com.ecency.core.api.model.double
@@ -235,7 +236,7 @@ class EditorApi(private val private: EcencyPrivateApi) {
         } catch (e: Exception) {
             throw EcencyHttpException.ofSendFailure(e)
         }
-        if (response.status !in 200..299) throw EcencyHttpException(response.status)
+        if (response.status !in 200..299) throw response.failure()
         return runCatching { Json.parseToJsonElement(response.body) }.getOrNull()
     }
 

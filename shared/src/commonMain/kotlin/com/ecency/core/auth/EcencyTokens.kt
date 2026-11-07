@@ -201,12 +201,13 @@ class EcencyPrivateApi(
         }
         if (fresh.isNullOrEmpty() || fresh == code) {
             codes.sessionRefused(username, code, mark)
-            return first
+            return first.copy(sessionRefused = true)
         }
         val second = send(fresh)
         if (second.status == 401) {
             com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed("renewed token refused again"), "auth.renewToken")
             codes.sessionRefused(username, fresh, mark)
+            return second.copy(sessionRefused = true)
         }
         return second
     }

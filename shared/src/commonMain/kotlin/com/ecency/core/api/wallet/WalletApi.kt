@@ -2,6 +2,7 @@ package com.ecency.core.api.wallet
 
 import com.ecency.core.api.EcencyException
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyRestApi
 import com.ecency.core.api.guarded
 import com.ecency.core.api.json.SafeJson
@@ -341,14 +342,14 @@ class WalletApi(
     @Throws(Exception::class)
     suspend fun claimPoints(username: String) {
         val result = privateApi.post("points-claim", username)
-        if (result.status !in 200..299 && result.status != 406) throw EcencyHttpException(result.status, SafeJson.parseOrNull(result.body).obj()?.str("message") ?: "HTTP ${result.status}")
+        if (result.status !in 200..299 && result.status != 406) throw result.failure(SafeJson.parseOrNull(result.body).obj()?.str("message") ?: "HTTP ${result.status}")
     }
 
     /** `POST /private-api/boost-plus-price {code}` or `rc-delegation-price`: `[{duration, price}]`. */
     @Throws(Exception::class)
     suspend fun prices(username: String, path: String): List<DurationPrice> {
         val result = privateApi.post(path, username)
-        if (result.status !in 200..299) throw EcencyHttpException(result.status)
+        if (result.status !in 200..299) throw result.failure()
         return SafeJson.parseOrNull(result.body).arr().orEmpty().mapNotNull { e ->
             val o = e.obj() ?: return@mapNotNull null
             val d = o["duration"].asDouble()?.takeIf { it.isFinite() }?.toInt() ?: return@mapNotNull null

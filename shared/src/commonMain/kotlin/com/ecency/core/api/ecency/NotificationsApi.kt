@@ -2,6 +2,7 @@ package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyException
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.str
@@ -278,7 +279,7 @@ class NotificationsApi(
     }
 
     private fun parse(response: HttpResult): JsonElement? {
-        if (response.status !in 200..299) throw EcencyHttpException(response.status)
+        if (response.status !in 200..299) throw response.failure()
         return runCatching { Json.parseToJsonElement(response.body) }.getOrNull()
     }
 }

@@ -4,6 +4,7 @@ import com.ecency.core.api.json.SafeJson
 import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.str
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.AuthHttp
 import com.ecency.core.auth.AuthHttpRequest
 import com.ecency.core.auth.EcencyPrivateApi
@@ -21,13 +22,16 @@ import kotlin.coroutines.cancellation.CancellationException
 
 /** An Ecency HTTP endpoint answered with [status] (0: the request never got an answer). */
 open class EcencyHttpException(val status: Int, message: String = "Ecency API error $status", cause: Throwable? = null) : EcencyException(message, cause) {
-    val isNetwork: Boolean get() = status == 0 || status >= 500 || status == 429
+    open val isNetwork: Boolean get() = status == 0 || status >= 500 || status == 429
 
     /** The transport refused to follow a redirect ([status] 3xx): an answer, not a lost connection. Never retried by itself. */
     val isRedirect: Boolean get() = status in 300..399
 
-    /** Ecency refused the account's session (401): the user signs in again, not a bug of the app. */
-    val isSessionRefused: Boolean get() = status == 401
+    /**
+     * Ecency's private API refused the account's session and renewing it did not help ([SessionRefusedException]): the
+     * user was asked to sign in again, not a bug of the app. Any other 401 (the image host, a public endpoint) is not.
+     */
+    val isSessionRefused: Boolean get() = this is SessionRefusedException
 
     companion object {
         /**
@@ -39,6 +43,19 @@ open class EcencyHttpException(val status: Int, message: String = "Ecency API er
             if (e is EcencyHttpException && e.isRedirect) e else EcencyHttpException(0, "network error", e)
     }
 }
+
+/**
+ * A private API call refused (401) after the session renewal gave up ([HttpResult.sessionRefused]): the user was asked
+ * to sign in again. Shown as an expired session, never reported as a bug.
+ */
+class SessionRefusedException(message: String = "Ecency API error 401") : EcencyHttpException(401, message)
+
+/**
+ * [result], a status outside 2xx, as thrown: a [SessionRefusedException] when the private API gave its session up,
+ * else an [EcencyHttpException] with its status.
+ */
+fun HttpResult.failure(message: String = "Ecency API error $status"): EcencyHttpException =
+    if (sessionRefused && status == 401) SessionRefusedException(message) else EcencyHttpException(status, message)
 
 /** No answer within the caller's bound (status 0, message "timeout"). The request may still have reached the server. */
 class EcencyTimeoutException : EcencyHttpException(0, "timeout")
@@ -235,7 +252,7 @@ object BadActors {
         } catch (e: Exception) {
             throw EcencyHttpException.ofSendFailure(e)
         }
-        if (result.status !in 200..299) throw EcencyHttpException(result.status, "HTTP ${result.status}")
+        if (result.status !in 200..299) throw result.failure("HTTP ${result.status}")
         return parse(result.body)
     }
 }
