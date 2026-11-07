@@ -174,11 +174,16 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 if (takes) handledAnswer = f
                 if (takes && applyList(f.channels, f.startedAt, f.owner, gen)) {
                     // fresh rows: an earlier load's failure no longer describes them (a channel action's stays)
-                    if (loadFailed) {
+                    val recovered = loadFailed
+                    if (recovered) {
                         loadFailed = false
-                        setState { it.copy(error = null) }
+                        setState { it.copy(error = null, loaded = true) }
                     }
-                    dmUserIds(channels).takeIf { it.isNotEmpty() }?.let { ids -> scope.launch { resolveUsers(f.owner, gen, ids) } }
+                    scope.launch {
+                        // a load that failed before it connected: the session this read used is the list's too
+                        if (recovered && !current.connected) connect(f.owner, gen)
+                        dmUserIds(channels).takeIf { it.isNotEmpty() }?.let { ids -> resolveUsers(f.owner, gen, ids) }
+                    }
                 } else if (listed) {
                     // an older answer than the rows: the badge it set goes back to the rows' sum
                     current.account?.let { env.chat.listShown(it, channels) }
@@ -193,6 +198,22 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 wasOnline = c.online
                 if (back && canLoad() && (current.error != null || !current.loaded)) load(refresh = true)
             }
+        }
+    }
+
+    /** The chat session of [user] (the one already open, if any): the viewer's id and the session actions. */
+    private suspend fun connect(user: String, gen: Int) {
+        try {
+            val session = env.chat.session(user)
+            if (gen != generation) return
+            viewerId = session.userId
+            session.user?.let { lookup[it.id] = it }
+            setState { it.copy(connected = true) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the rows are shown; the session actions wait for the next load
+            ErrorReports.quiet(e, "chats.connect")
         }
     }
 

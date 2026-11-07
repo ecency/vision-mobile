@@ -6,6 +6,7 @@ import com.ecency.core.l10n.L
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -199,6 +200,24 @@ class ChatListFreshnessTest {
         assertNull(m.current.error)
         assertTrue(m.current.rows.isNotEmpty())
         assertEquals(f.env.badges.current.chats.toLong(), m.rowSum())
+    }
+
+    @Test
+    fun aListWhoseSessionFailedIsConnectedAgainAfterAGoodBadgeRead() = runTest {
+        val f = ChatFixture(this)
+        // the chat bootstrap itself fails from the start, so the list never connected
+        f.before = { r -> if ("/api/mattermost/" in r.url) HttpResult(502, "") else null }
+        f.start()
+        val m = list(f)
+        assertNotNull(m.current.error)
+        assertFalse(m.current.connected)
+        f.before = null
+        f.env.chat.refreshUnread()
+        f.idle()
+        assertNull(m.current.error)
+        assertTrue(m.current.rows.isNotEmpty())
+        assertTrue(m.current.connected, "connected: New group and the other session actions show")
+        assertTrue(m.current.canStartGroup)
     }
 
     @Test
