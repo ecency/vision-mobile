@@ -47,10 +47,20 @@ object ErrorReports {
 
     private class Sink(val reporter: () -> CrashReporter, val nowMillis: () -> Long)
 
-    /** [recent]: the exceptions already reported, each with the code it was shown with (null for an expected one). */
-    private class Seen(val errors: Int, val warnings: Int, val lastSent: Map<String, Long>, val recent: List<Pair<Throwable, String?>>)
+    /**
+     * [lastSent]: when each fingerprint last went out, inside the throttle window only. [sent]: every fingerprint sent
+     * in this run (at most the two caps). [recent]: the exceptions already reported, each with the code it was shown
+     * with (null for an expected or quiet one).
+     */
+    private class Seen(
+        val errors: Int,
+        val warnings: Int,
+        val lastSent: Map<String, Long>,
+        val sent: Set<String>,
+        val recent: List<Pair<Throwable, String?>>,
+    )
 
-    private val NONE = Seen(0, 0, emptyMap(), emptyList())
+    private val NONE = Seen(0, 0, emptyMap(), emptySet(), emptyList())
     private val sink = AtomicReference<Sink?>(null)
     private val seen = AtomicReference(NONE)
 
@@ -181,29 +191,35 @@ object ErrorReports {
         val fingerprint = listOf("handled", where, kind, type, fingerprintMessage(e, kind))
         val key = fingerprint.joinToString("\u0000")
         val code = if (expected || quiet) null else codeOf(key)
-        // nothing is sent before the platform set Sentry: no code that would find nothing
+        // nothing is sent before the platform set Sentry (or in a build without it): no code that would find nothing
         val s = sink.load() ?: return null
+        val reporter = s.reporter()
+        if (reporter === CrashReporter.None) return null
         // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
         val message = withoutPlaces(e.message.orEmpty())
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
             // separate caps: offline warnings never use up the room a later error needs
-            // over the run's cap nothing is sent: no code, unless this very fingerprint went out earlier
-            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code?.takeIf { key in before.lastSent }
-            // reported once, at its first place: shown again elsewhere, it keeps that report's code
-            if (identity != null) before.recent.firstOrNull { it.first === identity }?.let { return it.second }
+            // reported once, at its first place: shown again elsewhere, it keeps that report's code; a quiet or expected
+            // first report has none, so a failure that needs a code is still reported
+            if (identity != null) {
+                before.recent.firstOrNull { it.first === identity && (it.second != null || code == null) }?.let { return it.second }
+            }
+            // over the run's cap nothing is sent: no code, unless this very fingerprint went out earlier in the run
+            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code?.takeIf { key in before.sent }
             val last = before.lastSent[key]
             if (last != null && now - last in 0 until THROTTLE_MILLIS) return code
             val after = Seen(
                 if (expected) before.errors else before.errors + 1,
                 if (expected) before.warnings + 1 else before.warnings,
                 before.lastSent.filterValues { now - it in 0 until THROTTLE_MILLIS } + (key to now),
-                if (identity == null) before.recent else (before.recent + (identity to code)).takeLast(RECENT),
+                before.sent + key,
+                if (identity == null) before.recent else (before.recent.filterNot { it.first === identity } + (identity to code)).takeLast(RECENT),
             )
             if (seen.compareAndSet(before, after)) break
         }
-        s.reporter().capture(
+        reporter.capture(
             CrashReport(
                 type = type,
                 message = message,

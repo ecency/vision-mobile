@@ -90,6 +90,30 @@ class ErrorReportsTest {
     }
 
     @Test
+    fun overTheCapAFailureSentEarlierInTheRunKeepsItsCodePastTheThrottleWindow() {
+        val first = AppError.from(IllegalStateException("boom"), "place.early")
+        now += ErrorReports.THROTTLE_MILLIS + 1
+        repeat(ErrorReports.MAX_REPORTS - 1) { AppError.from(IllegalStateException("boom $it"), "place.n$it") }
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+        val again = AppError.from(IllegalStateException("boom"), "place.early")
+        assertEquals(first.code, again.code)
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+    }
+
+    @Test
+    fun aFailureFirstSwallowedQuietlyStillGetsAReportedCodeWhenShown() {
+        val e = IllegalStateException("boom")
+        ErrorReports.quiet(e, "feed.refresh")
+        val shown = AppError.from(e, "feed.load")
+        assertNotEquals(null, shown.code)
+        assertEquals(2, reporter.reports.size)
+        assertEquals(shown.code, reporter.reports.last().tags["error_code"])
+        // shown again, it keeps that report's code and sends nothing more
+        assertEquals(shown.code, AppError.from(e, "feed.other").code)
+        assertEquals(2, reporter.reports.size)
+    }
+
+    @Test
     fun anExpectedRefusalCarriesNoCode() {
         val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
         assertEquals(null, error.code)
@@ -300,7 +324,8 @@ class ErrorReportsTest {
     @Test
     fun nothingGoesOutBeforeAnEnvironmentInstalledTheReporter() {
         ErrorReports.install({ CrashReporter.None }, { now })
-        AppError.from(IllegalStateException("boom"), "editor.publish")
+        // a build without Sentry shows no code that would find nothing
+        assertEquals(null, AppError.from(IllegalStateException("boom"), "editor.publish").code)
         assertEquals(emptyList(), reporter.reports)
     }
 }
