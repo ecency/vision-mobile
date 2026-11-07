@@ -184,6 +184,25 @@ class KeysFlowsTest {
     }
 
     @Test
+    fun theWindowStaysSecureUntilTheLeavingKeysScreenIsGone() {
+        openKeys()
+        compose.onNodeWithTag("keyButton:POSTING").performClick()
+        until { text("keyLabel:POSTING") == "Posting Key (Private)" }
+        // system Back: the stack changes at once, the keys screen is still drawn while it slides out
+        compose.mainClock.autoAdvance = false
+        compose.runOnUiThread { navigator.back() }
+        // a few frames into the slide-out: the stack's effects have run, the screen is still drawn
+        repeat(4) { compose.mainClock.advanceTimeByFrame(); compose.runOnIdle {} }
+        assertTrue(navigator.top.screen != AppScreen.BackupKeys)
+        assertTrue("still drawn", exists("backupKeys"))
+        assertTrue("secure while the revealed key is drawn", sensitiveScreen.last())
+        compose.mainClock.autoAdvance = true
+        until { !exists("backupKeys") }
+        compose.waitForIdle()
+        assertFalse("capturable once it is gone", sensitiveScreen.last())
+    }
+
+    @Test
     fun aPublicKeyIsCopiedPlainlyAndAPrivateKeyOnlyAfterTheWarningThroughTheKeyClipboard() {
         openKeys()
         compose.onNodeWithTag("keyCopy:POSTING").performClick()

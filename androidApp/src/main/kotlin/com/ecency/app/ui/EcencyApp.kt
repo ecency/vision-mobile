@@ -115,7 +115,7 @@ interface AppHost {
     /** Keeps the app out of the recents thumbnail while the PIN lock is on (Android 13+; nothing below, as in RN). */
     fun setHideInRecents(hide: Boolean) {}
 
-    /** The keys screen (Manage Authorities) is up: FLAG_SECURE on every Android version. */
+    /** A keys screen (Manage Authorities) came (true) or left (false), counted: FLAG_SECURE while any is drawn. */
     fun setSensitiveScreen(sensitive: Boolean) {}
 
     /** The last vote weight in percent (1..100), offered again by the next vote sheet, as RN and iOS do. */
@@ -500,10 +500,6 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         onDispose { lifecycle.removeObserver(observer) }
     }
     LaunchedEffect(lock.loaded, lock.enabled) { if (lock.loaded) host.setHideInRecents(lock.enabled) }
-    // only the keys screen (Manage Authorities), which shows the keys themselves, is kept out of screenshots; login,
-    // the key entry of the auth upgrade and HiveSigner's pages hide what is typed and stay capturable for bug reports
-    val sensitive = navigator.top.screen == AppScreen.BackupKeys
-    LaunchedEffect(sensitive) { host.setSensitiveScreen(sensitive) }
 
     // drawer first, then the stack, then back to the Feed tab; at the Feed root the system leaves the app
     BackHandler(enabled = !lock.hidesContent && nav.back() != null) { navigator.back() }

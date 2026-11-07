@@ -37,10 +37,10 @@ class LockPlatformTest {
 
     @Test
     @Config(sdk = [30])
-    fun belowAndroid13TheLockNeverBlocksScreenshots() {
+    fun belowAndroid13TheLockSetsFlagSecure() {
         val activity = activity()
         activity.applyHideInRecents(true)
-        assertFalse(activity.secure())
+        assertTrue(activity.secure())
         activity.applyHideInRecents(false)
         assertFalse(activity.secure())
     }
@@ -51,6 +51,18 @@ class LockPlatformTest {
         activity.applyHideInRecents(true)
         assertFalse("screenshots stay allowed on 13+", activity.secure())
         activity.applyHideInRecents(true, sdk = 30)
-        assertFalse("and below 13", activity.secure())
+        assertTrue(activity.secure())
+    }
+
+    @Test
+    fun aKeysScreenEnteringBeforeTheLeavingOneLetsGoKeepsTheWindowSecure() {
+        val holds = SensitiveHolds()
+        assertTrue(holds.change(true))
+        // back and forward again: the new keys screen holds before the old one is disposed
+        assertTrue(holds.change(true))
+        assertTrue("one keys screen is still drawn", holds.change(false))
+        assertFalse(holds.change(false))
+        assertFalse("an extra release never goes below zero", holds.change(false))
+        assertTrue(holds.change(true))
     }
 }

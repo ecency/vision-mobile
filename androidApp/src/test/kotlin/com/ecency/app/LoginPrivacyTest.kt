@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
 import java.time.Duration
 
-/** FLAG_SECURE only on the keys screen (every Android version; KeysFlowsTest), never on login, and the key clipboard expiry. */
+/** FLAG_SECURE on the keys screen (every Android version; KeysFlowsTest) and, below 13, under the lock; never on login. The key clipboard expiry. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class LoginPrivacyTest {
@@ -89,9 +89,9 @@ class LoginPrivacyTest {
                 assertEquals(0, it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE)
                 it.applyWindowPrivacy(hideInRecents = false, sensitive = true, sdk = 35)
                 assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
-                // below 13 the lock sets nothing: FLAG_SECURE there would block screenshots of the whole app
+                // below 13 the lock has no other way to keep content out of the recents thumbnail
                 it.applyWindowPrivacy(hideInRecents = true, sensitive = false, sdk = 30)
-                assertEquals(0, it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE)
+                assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
                 it.applyWindowPrivacy(hideInRecents = true, sensitive = true, sdk = 30)
                 assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
                 it.applyWindowPrivacy(hideInRecents = false, sensitive = false, sdk = 30)
