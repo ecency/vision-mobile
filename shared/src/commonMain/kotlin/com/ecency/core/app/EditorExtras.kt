@@ -125,7 +125,8 @@ object RcErrors {
         var e = error
         var depth = 0
         while (e != null && depth++ < 8) {
-            if (matches(e.message.orEmpty()) || ChainRefusal.RESOURCE_CREDITS.matches((e as? RpcErrorException)?.data)) return true
+            if (matches(e.message.orEmpty())) return true
+            if (e is RpcErrorException && ChainRefusal.formats(e.data).any(::matches)) return true
             if (e is BroadcastException.InsufficientResourceCredits) return true
             e = e.cause
         }

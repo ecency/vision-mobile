@@ -196,7 +196,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            setState { it.copy(bookLoading = false, prompt = TradePrompt.Alert(TradeCopy.MARKET_FAILED, AppError.from(e, "trade.orderBook").message)) }
+            setState { it.copy(bookLoading = false, prompt = TradePrompt.Alert(TradeCopy.MARKET_FAILED, AppError.from(e, "trade.orderBook").text)) }
         }
     }
 
@@ -266,7 +266,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 ChainTime.fromEpochSeconds(now / 1000 + EXPIRATION_SECONDS), orderId(now),
             )
         } catch (e: Exception) {
-            setState { it.copy(prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, AppError.from(e, "trade.swap").message)) }
+            setState { it.copy(prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, AppError.from(e, "trade.swap").text)) }
             return
         }
         val ops = WalletOps.ops(listOf(op))
@@ -296,7 +296,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
             }
             is SendPhase.Failed -> {
                 owned.done(id)
-                setState { it.copy(actionId = null, phase = null, prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, phase.error.message)) }
+                setState { it.copy(actionId = null, phase = null, prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, phase.error.text)) }
             }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
@@ -475,7 +475,7 @@ class RedeemModel internal constructor(private val env: AppEnvironment, kind: Re
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(prompt = TradePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "redeem.confirm").message)) }
+                setState { it.copy(prompt = TradePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "redeem.confirm").text)) }
                 return@launch
             }
             val ops = WalletOps.ops(listOf(op))
@@ -759,7 +759,7 @@ class ManageAssetsModel internal constructor(private val env: AppEnvironment) : 
                 throw e
             } catch (e: Exception) {
                 if (e is com.ecency.core.auth.AuthException.Cancelled) setState { it.copy(saving = false) }
-                else setState { it.copy(saving = false, error = "${WalletCopy.UPDATE_TOKENS_FAILED} ${AppError.from(e, "manageAssets.save").message}") }
+                else setState { it.copy(saving = false, error = "${WalletCopy.UPDATE_TOKENS_FAILED} ${AppError.from(e, "manageAssets.save").text}") }
             }
         }
     }

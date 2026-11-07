@@ -7,7 +7,6 @@ import com.ecency.core.api.rpc.NodeFailureException
 import com.ecency.core.api.rpc.RpcErrorException
 import com.ecency.core.api.rpc.RpcTimeoutException
 import com.ecency.core.l10n.L
-import com.ecency.core.l10n.LocaleFormat
 
 /**
  * Why a broadcast failed, classified like @ecency/sdk's parseChainError so the UI can react
@@ -39,12 +38,7 @@ sealed class BroadcastException(message: String, cause: Throwable? = null) : Ece
     class InvalidOperation(message: String, cause: Throwable? = null) : BroadcastException(message, cause)
 
     /** The signed transaction is over Hive's 64 KB limit. */
-    class TooLarge(val size: Int) : BroadcastException(
-        L.native.chainRefusal.tooLarge(
-            size = LocaleFormat.integer(((size + 1023) / 1024).toLong()),
-            max = LocaleFormat.integer((HiveBroadcaster.MAX_TRANSACTION_SIZE / 1024).toLong()),
-        ),
-    )
+    class TooLarge(val size: Int) : BroadcastException("transaction of $size bytes, over ${HiveBroadcaster.MAX_TRANSACTION_SIZE}")
 
     /**
      * No node could be reached, or none answered in time: the transaction may or may not have
@@ -86,9 +80,9 @@ sealed class BroadcastException(message: String, cause: Throwable? = null) : Ece
         /** Maps a failure from [com.ecency.core.api.rpc.HiveRpcClient] to a typed error. */
         fun from(e: HiveApiException, pending: PendingBroadcast? = null): BroadcastException {
             if (e is NodeFailureException || e is RpcTimeoutException || e is AllNodesFailedException) return Network(e, pending)
-            val refusal = if (e is RpcErrorException) ChainRefusal.of(e.rpcMessage, e.data) else ChainRefusal.of(e.message)
+            val refusal = if (e is RpcErrorException) ChainRefusal.of(e) else ChainRefusal.of(e.message)
             return when (refusal) {
-                null -> Rejected(((e as? RpcErrorException)?.rpcMessage ?: e.message.orEmpty()).take(150), e)
+                null -> Rejected(ChainRefusal.readable((e as? RpcErrorException)?.rpcMessage ?: e.message.orEmpty()).take(150), e)
                 else -> of(refusal, e)
             }
         }

@@ -407,7 +407,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
             throw e
         } catch (e: Exception) {
             val error = AppError.fromBroadcast(e, "postActions.ignore")
-            if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.message)) }
+            if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.text)) }
         }
     }
 
@@ -443,7 +443,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: Exception) {
                 val error = AppError.fromBroadcast(e, "postActions.action")
                 // RN postOptionsModal _profileActionDone: out of RC is the app-wide offer, not the alert
-                if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.message)) }
+                if (error.kind != ErrorKind.CANCELLED && !env.offerRcIfShort(e)) setState { it.copy(alert = ActionAlert(FAIL, error.text)) }
             } finally {
                 setState { it.copy(running = it.running - post.key) }
             }

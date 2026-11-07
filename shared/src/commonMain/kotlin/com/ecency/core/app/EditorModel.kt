@@ -1302,7 +1302,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 env.localDrafts.save(owner, slot, localDraft(current))
                 val error = AppError.fromBroadcast(e, submitWhere(s))
                 // RN: out of resource credits is an offer (top up or boost), not a dead-end toast
-                val outOfRc = RcErrors.isInsufficientRc(e) || RcErrors.matches(error.message)
+                val outOfRc = RcErrors.isInsufficientRc(e)
                 setState { it.copy(isSending = false) }
                 // the app-wide offer (RcOfferModel), as every other broadcast that ran out
                 if (outOfRc) env.rcOffer.raise()

@@ -110,6 +110,8 @@ object AuthFallback {
 
     fun shouldTrigger(error: Throwable): Boolean {
         if (error is AuthException.MissingKey) return true
+        // the node's refusal, typed by the broadcaster: its message is copy in the app language, so the type decides
+        if (error is com.ecency.core.api.broadcast.BroadcastException.MissingAuthority) return true
         if (error is AuthException.HiveSignerApi && error.error in CODES) return true
         val texts = buildList {
             add(error.message)

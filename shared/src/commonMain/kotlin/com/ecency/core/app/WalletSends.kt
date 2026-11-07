@@ -129,7 +129,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
     private fun orphanDone(s: WalletSend) {
         val text = when (val p = s.phase) {
             is SendPhase.Done -> WalletCopy.SUCCESSFUL
-            is SendPhase.Failed -> WalletCopy.operationFailed(WalletCopy.operationLabel(s.operation).replaceFirstChar { it.uppercase() }, p.error.message)
+            is SendPhase.Failed -> WalletCopy.operationFailed(WalletCopy.operationLabel(s.operation).replaceFirstChar { it.uppercase() }, p.error.text)
             is SendPhase.Unconfirmed -> p.message
             else -> null
         }

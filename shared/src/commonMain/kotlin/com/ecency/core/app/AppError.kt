@@ -9,6 +9,8 @@ import com.ecency.core.api.rpc.NodeFailureException
 import com.ecency.core.api.rpc.RpcTimeoutException
 import com.ecency.core.auth.AuthException
 import com.ecency.core.l10n.L
+import com.ecency.core.l10n.LocaleFormat
+import com.ecency.core.api.broadcast.HiveBroadcaster
 import com.ecency.core.secure.SecureStoreException
 
 /** What went wrong, coarse enough for the UI to pick an icon, a message and whether to offer retry. */
@@ -75,7 +77,8 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
          */
         fun from(error: Throwable, where: String): AppError = map(error).let { coded(it, ErrorReports.handled(error, where, it)) }
 
-        private fun coded(error: AppError, code: String?): AppError = if (code == null) error else error.copy(code = code)
+        /** A failure mapped again (an [AppException] holding an earlier [AppError]) keeps the code its report was sent with. */
+        private fun coded(error: AppError, code: String?): AppError = if (code == null || error.code != null) error else error.copy(code = code)
 
         /** The [ErrorKind] of [error] without reporting it: for code that only decides by the kind (a cancel). */
         fun kindOf(error: Throwable): ErrorKind = map(error).kind
@@ -92,7 +95,14 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
             is BroadcastException.CommentTooSoon -> AppError(ErrorKind.TOO_SOON, error.message.orEmpty(), true)
             is BroadcastException.PaidOut -> AppError(ErrorKind.PAID_OUT, error.message.orEmpty(), false)
             is BroadcastException.InvalidOperation -> AppError(ErrorKind.INVALID_INPUT, error.message.orEmpty(), false)
-            is BroadcastException.TooLarge -> AppError(ErrorKind.INVALID_INPUT, error.message.orEmpty(), false)
+            is BroadcastException.TooLarge -> AppError(
+                ErrorKind.INVALID_INPUT,
+                L.native.chainRefusal.tooLarge(
+                    size = LocaleFormat.integer(((error.size + 1023) / 1024).toLong()),
+                    max = LocaleFormat.integer((HiveBroadcaster.MAX_TRANSACTION_SIZE / 1024).toLong()),
+                ),
+                false,
+            )
             is BroadcastException.Refused -> AppError(error.refusal.kind, error.message.orEmpty(), false)
             // the node's own words when it said something; an unexpected failure of the app itself says so, with its code
             is BroadcastException.Rejected -> AppError(
@@ -147,8 +157,10 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 AuthException.HiveAuth.Reason.SESSION_EXPIRED -> AppError(ErrorKind.AUTH, HIVEAUTH_EXPIRED, false)
                 AuthException.HiveAuth.Reason.NOT_CONNECTED -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
                 AuthException.HiveAuth.Reason.NOT_BROADCAST -> AppError(ErrorKind.AUTH, L.hiveauth.transactionFail, false)
-                // the wallet's own reason, when it gave one
-                else -> AppError(ErrorKind.AUTH, e.detail?.ifBlank { null }?.let { L.native.chainRefusal.walletRefused(reason = it.take(150)) } ?: L.hiveauth.authFail, false)
+                // the wallet's or relay's own reason, when it gave one; an answer the app could not read stays generic
+                AuthException.HiveAuth.Reason.ERROR ->
+                    AppError(ErrorKind.AUTH, e.detail?.ifBlank { null }?.let { L.native.chainRefusal.walletRefused(reason = it.take(150)) } ?: L.hiveauth.authFail, false)
+                else -> AppError(ErrorKind.AUTH, L.hiveauth.authFail, false)
             }
         }
 

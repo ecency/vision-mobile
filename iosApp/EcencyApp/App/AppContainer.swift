@@ -1124,7 +1124,7 @@ enum ErrorText {
     }
 
     static func message(_ error: Error, where: String) -> String {
-        appError(error, where: `where`)?.message ?? error.localizedDescription
+        appError(error, where: `where`)?.text ?? error.localizedDescription
     }
 }
 

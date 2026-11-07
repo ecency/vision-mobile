@@ -148,7 +148,7 @@ class StoreScreenModel internal constructor(
                 o.report != IapReport.REPORTED -> Unit
                 o.error.isBillingUnavailable && env.store.platform == PurchaseService.PLAY ->
                     setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, PurchaseCopy.GOOGLE_PLAY_VERSION)) }
-                points -> env.ui.toast(PurchaseCopy.pointsFailed(o.error.text), o.error)
+                points -> env.ui.toast(PurchaseCopy.pointsFailed(o.error.message))
                 else -> setState { it.copy(alert = StoreAlert(PurchaseCopy.WARNING, o.error.message)) }
             }
         }

@@ -73,6 +73,39 @@ class ChainRefusalTest {
     }
 
     @Test
+    fun hivedsQuotedConditionNeverDecides() {
+        // hived's message quotes the C++ condition before its words; `comment_cashout` there must not read as paid out
+        val withConditions = listOf(
+            ChainRefusal.DELETE_VOTED to "Assert Exception:comment_cashout->get_net_rshares() <= 0: Cannot delete a comment with net positive votes.",
+            ChainRefusal.DELETE_REPLIES to "Assert Exception:!comment_cashout->has_replies(): Cannot delete a comment with replies.",
+            ChainRefusal.OPTIONS_LOCKED to "Assert Exception:!comment_cashout->has_votes(): One of the included comment options requires the comment to have no rshares allocated to it.",
+            ChainRefusal.PAYOUT_RAISED to "Assert Exception:comment_cashout->get_max_accepted_payout() >= o.max_accepted_payout: A comment cannot accept a greater payout.",
+            ChainRefusal.PAID_OUT to "Assert Exception:comment_cashout: Votes evaluating for comment that is paid out is forbidden.",
+        )
+        for ((refusal, text) in withConditions) {
+            assertEquals(refusal, ChainRefusal.of(text), text)
+            assertEquals(refusal.message, viaNode(text).message, text)
+        }
+        // an unknown refusal quotes hived's words, not its condition
+        assertEquals(
+            L.native.chainRefusal.refusedWith(reason = "Something new went wrong."),
+            viaNode("Assert Exception:_db.head_block_time() < o.expiration: Something new went wrong.").message,
+        )
+    }
+
+    @Test
+    fun aPostsOwnTextInTheNodesDataNeverDecides() {
+        // data's frames carry the transaction: a body that mentions RC must not open the Top up offer
+        val data = "{\"stack\":[{\"format\":\"Beneficiaries must be specified in sorted order (account ascending)\",\"data\":{\"trx\":{\"body\":\"Please wait to transact; has 1 RC, needs 2 RC\"}}}]}"
+        val e = node("Assert Exception", data)
+        assertEquals(ChainRefusal.BENEFICIARIES_REFUSED, ChainRefusal.of(e))
+        assertFalse(RcErrors.isInsufficientRc(e))
+        // the node's message wins over its data, even over a refusal listed earlier
+        val titleData = "{\"stack\":[{\"format\":\"Title size limit exceeded.\"}]}"
+        assertEquals(ChainRefusal.BENEFICIARIES_REFUSED, ChainRefusal.of(node("Assert Exception: Beneficiaries must be specified in sorted order", titleData)))
+    }
+
+    @Test
     fun theRefusalIsFoundInTheNodesDataToo() {
         // hived renders some asserts with placeholders and puts the words that matter in `data`
         assertEquals(ChainRefusal.TITLE_TOO_LONG.message, viaNode("Assert Exception", "{\"stack\":[{\"format\":\"Title size limit exceeded.\"}]}").message)

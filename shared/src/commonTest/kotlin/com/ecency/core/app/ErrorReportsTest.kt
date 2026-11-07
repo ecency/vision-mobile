@@ -59,6 +59,13 @@ class ErrorReportsTest {
     }
 
     @Test
+    fun aFailureMappedAgainKeepsTheCodeItsReportWasSentWith() {
+        val first = AppError.from(IllegalStateException("boom"), "community.send")
+        val again = AppError.from(AppException(first, IllegalStateException("boom")), "communityMembers.setRole")
+        assertEquals(first.code, again.code)
+    }
+
+    @Test
     fun anExpectedRefusalCarriesNoCode() {
         val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
         assertEquals(null, error.code)

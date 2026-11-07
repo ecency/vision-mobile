@@ -402,7 +402,7 @@ class CommunityMembersModel(private val env: AppEnvironment, val name: String, t
                 throw e
             } catch (e: Exception) {
                 val error = AppError.from(e, "communityMembers.setRole")
-                setState { it.copy(saving = it.saving - account, alert = if (error.kind == ErrorKind.CANCELLED) null else error.message) }
+                setState { it.copy(saving = it.saving - account, alert = if (error.kind == ErrorKind.CANCELLED) null else error.text) }
             }
         }
     }
@@ -589,7 +589,7 @@ class CommunitySettingsModel(private val env: AppEnvironment, val name: String) 
                 throw e
             } catch (e: Exception) {
                 val error = AppError.from(e, "communitySettings.save")
-                setState { it.copy(saving = false, alert = if (error.kind == ErrorKind.CANCELLED) null else error.message) }
+                setState { it.copy(saving = false, alert = if (error.kind == ErrorKind.CANCELLED) null else error.text) }
             }
         }
     }

@@ -35,7 +35,7 @@ data class FollowsState(
     val emptyText: String?
         get() = when {
             visible.isNotEmpty() || isLoading -> null
-            error != null && rows.isEmpty() -> L.native.follows.fail(message = error.message)
+            error != null && rows.isEmpty() -> L.native.follows.fail(message = error.text)
             loaded || query.isNotEmpty() -> L.voters.noUser
             else -> null
         }

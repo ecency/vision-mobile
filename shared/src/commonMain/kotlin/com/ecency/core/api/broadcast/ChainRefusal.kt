@@ -6,7 +6,10 @@ import com.ecency.core.l10n.L
  * What the chain refused, read from any text a failure carries: the node's message and `data`, HiveSigner's
  * `error_description`, a HiveAuth wallet's reason (issue #3660). The patterns are hived's own assertion texts (1.28.8:
  * `hive_evaluator_social.cpp`, `hive_operations.cpp`, `validation.hpp`, `rc_utility.cpp`); each refusal says what
- * happened and what to do. The first match wins, so the more specific patterns come first.
+ * happened and what to do. Texts are read in order (the node's message before its `data`) and, within one text, the
+ * first refusal that matches wins, so the more specific patterns come first: hived's message also quotes the C++
+ * condition (`comment_cashout->has_replies(): Cannot delete a comment with replies.`), so a pattern never matches a
+ * name that appears in conditions.
  */
 enum class ChainRefusal(private val pattern: Regex) {
     /** RN `rcError.ts` RC_SHORTFALL, the one rule for the error kind and the Top up / Boost offer. */
@@ -18,12 +21,6 @@ enum class ChainRefusal(private val pattern: Regex) {
     VOTE_TOO_SMALL(
         Regex(
             "voting weight is too small|does not have enough power to vote|does not have voting power|vote weight cannot be 0|cannot vote with 0 rshares",
-            RegexOption.IGNORE_CASE,
-        ),
-    ),
-    PAID_OUT(
-        Regex(
-            "comment that is paid out is forbidden|cannot delete comment after payout|discussion is frozen|comment_cashout",
             RegexOption.IGNORE_CASE,
         ),
     ),
@@ -40,6 +37,12 @@ enum class ChainRefusal(private val pattern: Regex) {
     ),
     BENEFICIARIES_REFUSED(Regex("beneficiaries must be specified in sorted order|beneficiary .* must exist|at least one beneficiary", RegexOption.IGNORE_CASE)),
     PAYOUT_RAISED(Regex("cannot accept a greater (payout|percent)|cannot increase payout", RegexOption.IGNORE_CASE)),
+    PAID_OUT(
+        Regex(
+            "comment that is paid out is forbidden|cannot delete comment after payout|discussion is frozen",
+            RegexOption.IGNORE_CASE,
+        ),
+    ),
     INSUFFICIENT_FUNDS(Regex("does not have sufficient (funds|hive power)", RegexOption.IGNORE_CASE)),
     HIVESIGNER_NO_PERMISSION(Regex("permission to broadcast", RegexOption.IGNORE_CASE)),
     MISSING_POSTING(Regex("missing (required )?posting authority", RegexOption.IGNORE_CASE)),
@@ -75,21 +78,49 @@ enum class ChainRefusal(private val pattern: Regex) {
     fun matches(text: String?): Boolean = !text.isNullOrBlank() && pattern.containsMatchIn(text)
 
     companion object {
-        /** The refusal [texts] carry (null and blank ones skipped), or null when none is known. */
+        /** The refusal the first of [texts] that names one carries (null and blank ones skipped), or null. */
         fun of(vararg texts: String?): ChainRefusal? {
-            return entries.firstOrNull { refusal -> texts.any { refusal.matches(it) } }
+            for (text in texts) {
+                if (text.isNullOrBlank()) continue
+                entries.firstOrNull { it.matches(text) }?.let { return it }
+            }
+            return null
         }
 
-        /** The refusal anywhere in [error]'s cause chain (its messages, and a node error's `data`). */
+        /** A node error: its message, then the assertion texts of its `data` ([formats]). */
+        fun of(error: com.ecency.core.api.rpc.RpcErrorException): ChainRefusal? = of(error.rpcMessage, *formats(error.data).toTypedArray())
+
+        /** The refusal anywhere in [error]'s cause chain. */
         fun of(error: Throwable?): ChainRefusal? {
             var e = error
             var depth = 0
             while (e != null && depth++ < 8) {
-                val data = (e as? com.ecency.core.api.rpc.RpcErrorException)?.data
-                of(e.message, data)?.let { return it }
+                val found = if (e is com.ecency.core.api.rpc.RpcErrorException) of(e) else of(e.message)
+                if (found != null) return found
                 e = e.cause
             }
             return null
         }
+
+        /**
+         * The `format` strings of a node error's `data.stack` (hived's assertion texts, `${...}` placeholders kept),
+         * never the rest of `data`: its frames can carry the transaction, so a post's own title or body would decide.
+         */
+        fun formats(data: String?): List<String> {
+            if (data.isNullOrBlank()) return emptyList()
+            val json = runCatching { kotlinx.serialization.json.Json.parseToJsonElement(data) }.getOrNull() ?: return emptyList()
+            val stack = (json as? kotlinx.serialization.json.JsonObject)?.get("stack") as? kotlinx.serialization.json.JsonArray ?: return emptyList()
+            return stack.mapNotNull { frame ->
+                ((frame as? kotlinx.serialization.json.JsonObject)?.get("format") as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it.isString }?.content
+            }
+        }
+
+        /** [message] without hived's `Assert Exception:<condition>: ` lead, so the human words are what is quoted. */
+        fun readable(message: String): String {
+            val m = ASSERT_LEAD.find(message) ?: return message
+            return message.substring(m.range.last + 1).trim().ifEmpty { message }
+        }
+
+        private val ASSERT_LEAD = Regex("^.*?Assert Exception:[^:\\s][^:]*:\\s")
     }
 }
