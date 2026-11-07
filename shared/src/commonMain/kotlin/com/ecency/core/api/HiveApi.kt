@@ -235,8 +235,8 @@ class HiveApi(val client: HiveRpcClient) {
      * (`PendingPublish.canStillLand`) is re-sent as the same post, never published as free. The one "is this permlink on chain, and with which body" read behind every publish: the editor's
      * permlink check, its pending publish, the reply composer and a wave all ask here before anything is sent.
      *
-     * Only an answer that lists the post's comments and does not hold it means "no post": an error or an answer
-     * without the list is thrown, so a permlink is never taken as free when the chain did not say so (publishing
+     * Only an answer that lists the post's comments and does not hold it means "no post": an error is thrown, and an
+     * answer without the list sends the read to the next node (thrown when no node lists them), so a permlink is never taken as free when the chain did not say so (publishing
      * on a taken permlink edits that post). `condenser_api.get_content` is served by hivemind now (it lags the chain
      * and answers a missing post with an assert), so it is not used here.
      */
@@ -247,6 +247,8 @@ class HiveApi(val client: HiveRpcClient) {
             buildJsonObject {
                 put("comments", buildJsonArray { add(buildJsonArray { add(JsonPrimitive(author)); add(JsonPrimitive(permlink)) }) })
             },
+            // a node that answers without the list is defective: the next node is asked
+            validate = { (it as? JsonObject)?.get("comments") is JsonArray },
         ).obj()
         val comments = answer?.get("comments") as? JsonArray
             ?: throw EcencyException("database_api.find_comments answered without a comments list")

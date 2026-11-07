@@ -53,6 +53,15 @@ class ChainContentTest {
     }
 
     @Test
+    fun aNodeAnsweringWithoutTheListGivesWayToTheNextNode() = runTest {
+        val first = NODES.first()
+        val (api, transport) = api { if (it.node == first) FakeTransport.result(it, "{}") else TestApp.comments(it, null) }
+        assertNull(api.content("alice", "new-post"))
+        assertEquals(first, transport.sent.first().node)
+        assertEquals(2, transport.sent.map { it.node }.distinct().size, "the next node was asked")
+    }
+
+    @Test
     fun anErrorIsNeverReadAsAFreePermlink() = runTest {
         val (api, _) = api { FakeTransport.error(it, -32602, "Assert Exception:Post alice/new-post does not exist") }
         assertFailsWith<EcencyException> { api.content("alice", "new-post") }
