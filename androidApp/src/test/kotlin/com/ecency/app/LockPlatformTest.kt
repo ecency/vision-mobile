@@ -37,10 +37,10 @@ class LockPlatformTest {
 
     @Test
     @Config(sdk = [30])
-    fun belowAndroid13TheLockSetsFlagSecure() {
+    fun belowAndroid13TheLockNeverBlocksScreenshots() {
         val activity = activity()
         activity.applyHideInRecents(true)
-        assertTrue(activity.secure())
+        assertFalse(activity.secure())
         activity.applyHideInRecents(false)
         assertFalse(activity.secure())
     }
@@ -51,6 +51,6 @@ class LockPlatformTest {
         activity.applyHideInRecents(true)
         assertFalse("screenshots stay allowed on 13+", activity.secure())
         activity.applyHideInRecents(true, sdk = 30)
-        assertTrue(activity.secure())
+        assertFalse("and below 13", activity.secure())
     }
 }

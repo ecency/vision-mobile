@@ -157,23 +157,24 @@ object EcencyGraph {
 }
 
 /**
- * Keeps app content out of the recents thumbnail while the app lock is on. Android 13+ only leaves the app
- * out of recents (screenshots and recording stay allowed, as in the RN app); below 13 there is no such
- * switch, so FLAG_SECURE covers it, which also blocks screenshots and screen recording while the lock is on.
- * [sdk] is only overridden by tests, so the API 33 call never runs on an older device.
+ * Keeps app content out of the recents thumbnail while the app lock is on: Android 13+ only, which leaves the app
+ * out of recents while screenshots and recording stay allowed (as in the RN app). Below 13 there is no such switch;
+ * FLAG_SECURE would also block screenshots of the whole app, which testers and users need for bug reports, so
+ * nothing is set there (the RN app set nothing either). [sdk] is only overridden by tests, so the API 33 call never
+ * runs on an older device.
  */
 @SuppressLint("NewApi")
 internal fun Activity.applyHideInRecents(hide: Boolean, sdk: Int = Build.VERSION.SDK_INT) = applyWindowPrivacy(hide, sensitive = false, sdk)
 
 /**
  * The window's privacy for both reasons at once: [hideInRecents] (lock on, see [applyHideInRecents]) and
- * [sensitive] (a screen that shows or takes private keys and passwords: login, keys, the auth upgrade sheet),
- * which sets FLAG_SECURE on every Android version, blocking screenshots and recording while it shows.
+ * [sensitive] (the keys screen, Manage Authorities, which shows the keys themselves), which sets FLAG_SECURE on every
+ * Android version, blocking screenshots and recording while it shows. Nothing else is ever secure.
  */
 @SuppressLint("NewApi")
 internal fun Activity.applyWindowPrivacy(hideInRecents: Boolean, sensitive: Boolean, sdk: Int = Build.VERSION.SDK_INT) {
     if (sdk >= 33) setRecentsScreenshotEnabled(!hideInRecents)
-    if (sensitive || (sdk < 33 && hideInRecents)) {
+    if (sensitive) {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     } else {
         window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)

@@ -112,10 +112,10 @@ interface AppHost {
      */
     fun confirmBiometric(onSuccess: () -> Unit) {}
 
-    /** Keeps the app out of the recents thumbnail while the PIN lock is on (FLAG_SECURE below Android 13). */
+    /** Keeps the app out of the recents thumbnail while the PIN lock is on (Android 13+; nothing below, as in RN). */
     fun setHideInRecents(hide: Boolean) {}
 
-    /** A screen showing or taking private keys or passwords is up: FLAG_SECURE on every Android version. */
+    /** The keys screen (Manage Authorities) is up: FLAG_SECURE on every Android version. */
     fun setSensitiveScreen(sensitive: Boolean) {}
 
     /** The last vote weight in percent (1..100), offered again by the next vote sheet, as RN and iOS do. */
@@ -500,10 +500,9 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         onDispose { lifecycle.removeObserver(observer) }
     }
     LaunchedEffect(lock.loaded, lock.enabled) { if (lock.loaded) host.setHideInRecents(lock.enabled) }
-    // login, keys and the key entry of the auth upgrade (or HiveSigner's page) never end up in a screenshot
-    val signingPrompt by env.signing.state.collectAsState()
-    val sensitive = navigator.top.screen.let { it == AppScreen.Login || it == AppScreen.BackupKeys } ||
-        signingPrompt.prompt.let { it is com.ecency.core.app.SigningPrompt.AuthUpgrade || it is com.ecency.core.app.SigningPrompt.HiveSignerHot }
+    // only the keys screen (Manage Authorities), which shows the keys themselves, is kept out of screenshots; login,
+    // the key entry of the auth upgrade and HiveSigner's pages hide what is typed and stay capturable for bug reports
+    val sensitive = navigator.top.screen == AppScreen.BackupKeys
     LaunchedEffect(sensitive) { host.setSensitiveScreen(sensitive) }
 
     // drawer first, then the stack, then back to the Feed tab; at the Feed root the system leaves the app
