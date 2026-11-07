@@ -76,6 +76,20 @@ class ErrorReportsTest {
     }
 
     @Test
+    fun anExpiredHiveSignerLoginIsTheUsersToFixWithNoCode() {
+        val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")
+        assertEquals(null, error.code)
+        assertEquals("true", reporter.reports.single().tags["expected"])
+    }
+
+    @Test
+    fun overTheRunsCapNoCodeIsShownForAReportNeverSent() {
+        repeat(ErrorReports.MAX_REPORTS) { AppError.from(IllegalStateException("boom $it"), "place.n$it") }
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+        assertEquals(null, AppError.from(IllegalStateException("past the cap"), "place.late").code)
+    }
+
+    @Test
     fun anExpectedRefusalCarriesNoCode() {
         val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
         assertEquals(null, error.code)

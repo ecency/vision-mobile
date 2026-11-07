@@ -107,6 +107,14 @@ class ChainRefusalTest {
     }
 
     @Test
+    fun rcTextInTheNodesDataNeverOpensTheOfferOverTheRefusalItsMessageNames() {
+        val rcData = "{\"stack\":[{\"format\":\"Please wait to transact or power up HIVE.\"}]}"
+        assertFalse(RcErrors.isInsufficientRc(node("Assert Exception: Title size limit exceeded.", rcData)))
+        // when the message names nothing, the data's RC assertion still does
+        assertTrue(RcErrors.isInsufficientRc(node("Assert Exception", rcData)))
+    }
+
+    @Test
     fun theRefusalIsFoundInTheNodesDataToo() {
         // hived renders some asserts with placeholders and puts the words that matter in `data`
         assertEquals(ChainRefusal.TITLE_TOO_LONG.message, viaNode("Assert Exception", "{\"stack\":[{\"format\":\"Title size limit exceeded.\"}]}").message)

@@ -146,6 +146,7 @@ object ErrorReports {
         is AuthException.KeySharedWithOwner, is AuthException.NotSignedIn, is AuthException.MissingKey,
         is AuthException.InvalidLink, is AuthException.SessionExpired -> true
         is AuthException.HiveAuth -> e.reason == AuthException.HiveAuth.Reason.REJECTED || e.reason == AuthException.HiveAuth.Reason.EXPIRED
+        is AuthException.HiveSignerApi -> AppError.isExpiredHiveSignerLogin(e)
         else -> false
     }
 
@@ -180,14 +181,16 @@ object ErrorReports {
         val fingerprint = listOf("handled", where, kind, type, fingerprintMessage(e, kind))
         val key = fingerprint.joinToString("\u0000")
         val code = if (expected || quiet) null else codeOf(key)
-        val s = sink.load() ?: return code
+        // nothing is sent before the platform set Sentry: no code that would find nothing
+        val s = sink.load() ?: return null
         // addresses, URIs and file paths never leave as they are (an upload URL, a picked file's content:// URI)
         val message = withoutPlaces(e.message.orEmpty())
         val now = s.nowMillis()
         while (true) {
             val before = seen.load()
             // separate caps: offline warnings never use up the room a later error needs
-            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code
+            // over the run's cap nothing is sent: no code, unless this very fingerprint went out earlier
+            if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code?.takeIf { key in before.lastSent }
             // reported once, at its first place: shown again elsewhere, it keeps that report's code
             if (identity != null) before.recent.firstOrNull { it.first === identity }?.let { return it.second }
             val last = before.lastSent[key]

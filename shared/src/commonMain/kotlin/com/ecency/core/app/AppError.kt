@@ -150,7 +150,7 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
             // HiveSigner relays the chain's refusal in error_description: read as the node's (#3660)
             is AuthException.HiveSignerApi -> ChainRefusal.of(e.description, e.error)?.let { refused(it, e) } ?: when {
                 // an expired token also comes back as unauthorized_client "The token has expired"
-                e.error in HIVESIGNER_LOGIN_CODES || HIVESIGNER_EXPIRED.containsMatchIn(e.description.orEmpty()) ->
+                isExpiredHiveSignerLogin(e) ->
                     AppError(ErrorKind.AUTH, L.native.chainRefusal.hiveSignerExpired, false)
                 // a chain refusal HiveSigner relayed that no pattern knows: the node's words, as for a key login
                 e.description.orEmpty().contains("Assert Exception", ignoreCase = true) ->
@@ -180,6 +180,11 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
         private val HIVESIGNER_LOGIN_CODES = setOf("invalid_grant", "unauthorized_access")
 
         private val HIVESIGNER_EXPIRED = Regex("token (has )?expired|invalid token", RegexOption.IGNORE_CASE)
+
+        /** HiveSigner's answer for a login that expired or was revoked: the user signs in again, not a bug of the app. */
+        internal fun isExpiredHiveSignerLogin(e: AuthException.HiveSignerApi): Boolean =
+            ChainRefusal.of(e.description, e.error) == null &&
+                (e.error in HIVESIGNER_LOGIN_CODES || HIVESIGNER_EXPIRED.containsMatchIn(e.description.orEmpty()))
 
         /** "Something went wrong. Please try again.": only when nothing more is known, and said once. */
         val GENERIC_MESSAGE: String get() = L.aiAssist.errorGeneric

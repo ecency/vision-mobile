@@ -125,8 +125,12 @@ object RcErrors {
         var e = error
         var depth = 0
         while (e != null && depth++ < 8) {
-            if (matches(e.message.orEmpty())) return true
-            if (e is RpcErrorException && ChainRefusal.formats(e.data).any(::matches)) return true
+            // a node error by its classified refusal: RC text in `data` never beats the refusal its message names
+            if (e is RpcErrorException) {
+                if (ChainRefusal.of(e) == ChainRefusal.RESOURCE_CREDITS) return true
+            } else if (matches(e.message.orEmpty())) {
+                return true
+            }
             if (e is BroadcastException.InsufficientResourceCredits) return true
             e = e.cause
         }
