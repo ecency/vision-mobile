@@ -63,7 +63,8 @@ class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
         HiveNodes.parseRemote(env.rest.get(HiveNodes.REMOTE_LIST_URL))
     } catch (e: CancellationException) {
         throw e
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorReports.quiet(e, "settings.nodeList")
         null
     } ?: HiveNodes.DEFAULT
 
@@ -85,6 +86,7 @@ class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
         val serverMillis = try {
             ChainTime.toEpochSeconds(time) * 1000
         } catch (_: Exception) {
+            // not reported: UNREACHABLE is the answer shown to the user
             return ServerCheck.UNREACHABLE
         }
         return if (env.nowMillis() - serverMillis < MAX_LAG_MILLIS) ServerCheck.OK else ServerCheck.STALE

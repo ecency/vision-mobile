@@ -150,7 +150,7 @@ class ComposeReplyModel internal constructor(
                 setState { it.copy(isAttaching = false) }
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isAttaching = false, error = AppError.from(e)) }
+                setState { it.copy(isAttaching = false, error = AppError.from(e, "composeReply.attach")) }
             }
         }
     }
@@ -358,7 +358,7 @@ class ComposeReplyModel internal constructor(
                     setState { it.copy(isSending = false, authorityPrompt = true) }
                     return@launch
                 }
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "composeReply.send")
                 // out of RC: the app-wide offer (top up or boost) instead of the error; the draft stays
                 val offered = error.kind != ErrorKind.CANCELLED && env.offerRcIfShort(e)
                 setState { it.copy(isSending = false, error = error.takeIf { err -> err.kind != ErrorKind.CANCELLED && !offered }) }
@@ -389,7 +389,7 @@ class ComposeReplyModel internal constructor(
                 setState { it.copy(isSending = false) }
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "composeReply.answerAuthorityPrompt")
                 setState { it.copy(isSending = false, error = error.takeIf { err -> err.kind != ErrorKind.CANCELLED }) }
                 return@launch
             }

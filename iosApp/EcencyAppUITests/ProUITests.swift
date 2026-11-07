@@ -66,6 +66,41 @@ final class ProUITests: XCTestCase {
         XCTAssertEqual(sheet.label, card.label)
     }
 
+    /// #3636: a member claims the free blog (the demo's offline claim) and sees its address with Open.
+    func testAMemberClaimsTheFreeBlog() {
+        let app = launch([])
+        XCTAssertTrue(element(app, "pro-card-member").waitForExistence(timeout: 20))
+        app.buttons["pro-card"].tap()
+        let claim = app.buttons["pro-blog-claim"]
+        XCTAssertTrue(claim.waitForExistence(timeout: 10))
+        XCTAssertEqual(claim.label, "Claim your free blog")
+        claim.tap()
+        XCTAssertTrue(app.staticTexts["Ecency Pro includes a free blog at spike-alice.blogs.ecency.com. It starts with the default look, which you can change later."].waitForExistence(timeout: 10))
+        let title = app.textFields["pro-blog-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        let confirm = app.buttons["pro-blog-confirm"]
+        let deadline = Date().addingTimeInterval(10)
+        while !confirm.isEnabled && Date() < deadline { RunLoop.current.run(until: Date().addingTimeInterval(0.2)) }
+        XCTAssertTrue(confirm.isEnabled)
+        shot("blog-form")
+        confirm.tap()
+        let address = element(app, "pro-blog-address")
+        XCTAssertTrue(address.waitForExistence(timeout: 10))
+        XCTAssertEqual(address.label, "spike-alice.blogs.ecency.com")
+        XCTAssertEqual(element(app, "pro-blog-heading").label, "Your blog is ready")
+        XCTAssertTrue(app.buttons["pro-blog-open"].exists)
+        XCTAssertFalse(app.buttons["pro-blog-claim"].exists)
+        shot("blog-claimed")
+    }
+
+    func testANonMemberHasNoBlogClaim() {
+        let app = launch(["-demoNoPro", "YES"])
+        XCTAssertTrue(element(app, "pro-card-text").waitForExistence(timeout: 20))
+        app.buttons["pro-card"].tap()
+        XCTAssertTrue(element(app, "pro-benefit-0").waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["pro-blog-claim"].exists)
+    }
+
     func testANonMemberSeesNoEndDate() {
         let app = launch(["-demoNoPro", "YES"])
         XCTAssertTrue(element(app, "pro-card-text").waitForExistence(timeout: 20))

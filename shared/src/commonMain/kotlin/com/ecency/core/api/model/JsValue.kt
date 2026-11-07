@@ -66,6 +66,7 @@ sealed class JsValue {
             // SafeJson: metadata nested deeper than any real payload is refused, not parsed (stack overflow)
             com.ecency.core.api.json.SafeJson.parseOrNull(text)?.let(::from)
         } catch (_: Exception) {
+            // not reported: untrusted JSON, often malformed
             null
         }
 

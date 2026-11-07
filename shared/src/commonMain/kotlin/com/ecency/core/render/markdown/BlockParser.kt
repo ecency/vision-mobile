@@ -119,23 +119,37 @@ internal class StateBlock(
     }
 }
 
-/** remarkable's ParserBlock with the rule set render-helper enables (all block rules). */
-internal class BlockParser(full: Boolean = true) {
-    // `full` is render-helper's set (deflist enabled); false is remarkable's default preset.
-    private val rules: List<BlockRule> = listOfNotNull(
-        BlockRules::code, BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list,
-        BlockRules::footnote, BlockRules::heading, BlockRules::lheading, BlockRules::htmlblock,
-        BlockRules::table, if (full) BlockRules::deflist else null, BlockRules::paragraph,
-    )
+/**
+ * remarkable's ParserBlock with the rule set render-helper enables (all block rules). [full] is render-helper's set
+ * (deflist enabled), false remarkable's default preset; [chat] is chat's set (README "Chats"): the default preset
+ * without html blocks, tables and footnotes, which chat shows as typed.
+ */
+internal class BlockParser(full: Boolean = true, chat: Boolean = false) {
+    private val rules: List<BlockRule> = if (chat) {
+        listOf(
+            BlockRules::code, BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list,
+            BlockRules::heading, BlockRules::lheading, BlockRules::paragraph,
+        )
+    } else {
+        listOfNotNull(
+            BlockRules::code, BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list,
+            BlockRules::footnote, BlockRules::heading, BlockRules::lheading, BlockRules::htmlblock,
+            BlockRules::table, if (full) BlockRules::deflist else null, BlockRules::paragraph,
+        )
+    }
 
     // Terminator chains ("alt" lists), in rule order, enabled rules only.
-    val paragraphTerminators: List<BlockRule> = listOfNotNull(
-        BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list, BlockRules::footnote,
-        BlockRules::heading, BlockRules::htmlblock, BlockRules::table, if (full) BlockRules::deflist else null,
-    )
-    val blockquoteTerminators: List<BlockRule> = listOf(
+    val paragraphTerminators: List<BlockRule> = if (chat) {
+        listOf(BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list, BlockRules::heading)
+    } else {
+        listOfNotNull(
+            BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list, BlockRules::footnote,
+            BlockRules::heading, BlockRules::htmlblock, BlockRules::table, if (full) BlockRules::deflist else null,
+        )
+    }
+    val blockquoteTerminators: List<BlockRule> = listOfNotNull(
         BlockRules::fences, BlockRules::blockquote, BlockRules::hr, BlockRules::list, BlockRules::heading,
-        BlockRules::htmlblock,
+        if (chat) null else BlockRules::htmlblock,
     )
     val listTerminators: List<BlockRule> = listOf(BlockRules::fences, BlockRules::blockquote, BlockRules::hr)
 

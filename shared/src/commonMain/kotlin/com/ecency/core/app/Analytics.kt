@@ -56,6 +56,7 @@ class PlausibleAnalytics internal constructor(private val env: AppEnvironment, p
                     http.send(AuthHttpRequest("POST", "${c.host}/api/event", mapOf("Content-Type" to "application/json", "User-Agent" to c.userAgent), body))
                 }
             } catch (e: Exception) {
+                // not reported: fire and forget analytics, one event per screen view
                 // RN: fire and forget; transport failures are not reported (one per screen view on a broken path)
             }
         }

@@ -150,7 +150,7 @@ class KtorAuthHttpTest {
             assertTrue(e.isRedirect && !e.isNetwork, "an answer, not a lost connection")
             assertTrue("network" !in e.message.orEmpty() && "elsewhere" !in e.message.orEmpty(), e.message)
             // what the user reads names the cause, not their connection
-            assertEquals(com.ecency.core.app.AppError.UNEXPECTED_REDIRECT, com.ecency.core.app.AppError.from(e).message)
+            assertEquals(com.ecency.core.app.AppError.UNEXPECTED_REDIRECT, com.ecency.core.app.AppError.from(e, "test.where").message)
             return e.status
         }
         assertEquals(302, status { com.ecency.core.api.EcencyRestApi(redirecting).get("https://ecency.com/private-api/public/bots") })
@@ -167,7 +167,7 @@ class KtorAuthHttpTest {
         val failed = assertFailsWith<AuthException.TokenExchangeFailed> { EcencyTokenApi(redirecting).exchange("code", 0) }
         assertEquals(302, failed.status)
         assertEquals(1, calls, "a redirect is not tried three more times")
-        assertEquals(com.ecency.core.app.AppError.UNEXPECTED_REDIRECT, com.ecency.core.app.AppError.from(failed).message)
+        assertEquals(com.ecency.core.app.AppError.UNEXPECTED_REDIRECT, com.ecency.core.app.AppError.from(failed, "test.where").message)
         // a lost connection is still status 0 and "network"
         val lost = assertFailsWith<EcencyHttpException> { com.ecency.core.api.EcencyRestApi(AuthHttp { throw IllegalStateException("reset") }).get("https://ecency.com/x") }
         assertEquals(0, lost.status)

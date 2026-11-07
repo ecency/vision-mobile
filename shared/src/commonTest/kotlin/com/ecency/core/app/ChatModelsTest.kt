@@ -604,8 +604,8 @@ class ChatThreadTest {
         assertEquals("", pages.first())
         assertTrue(pages.drop(1).all { it.startsWith("?before=") }, "$pages")
         assertFalse(m.current.hasMore)
-        assertEquals(5, m.current.items.filterIsInstance<ChatMessageItem>().size)
-        assertEquals(6, m.current.items.size, "five messages and the grouped joins")
+        assertEquals(6, m.current.items.filterIsInstance<ChatMessageItem>().size)
+        assertEquals(7, m.current.items.size, "six messages and the grouped joins")
         val pub = thread(f, "ch-public", "O")
         assertTrue("POST channels/ch-public/join" in f.paths())
         assertEquals(1, pub.current.items.size)
@@ -727,6 +727,22 @@ class ChatThreadTest {
         m.remove(question)
         f.idle()
         assertTrue(m.current.items.none { it.id == question.id })
+    }
+
+    /** #3468: the demo channel's notes message is a heading, a list with a mention, a quote and an ordered list. */
+    @Test
+    fun aMessageWithBlocksShowsThemWithItsMentions() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        val item = m.current.items.filterIsInstance<ChatMessageItem>().first { it.post.message == DemoChat.BLOCKS_MESSAGE }
+        val blocks = item.blocks
+        assertEquals(listOf("ChatHeadingBlock", "ChatListBlock", "ChatQuoteBlock", "ChatListBlock"), blocks.map { it::class.simpleName }, "$blocks")
+        val bullets = blocks[1] as ChatListBlock
+        val mention = (bullets.items[1].blocks.single() as ChatParagraphBlock).spans.single { it.url != null }
+        assertEquals("@spike-alice" to "https://ecency.com/@spike-alice", mention.text to mention.url)
+        assertTrue((blocks[3] as ChatListBlock).ordered)
+        assertTrue(item.spans.joinToString("") { it.text }.startsWith("Club notes\n• read the guide first"), "${item.spans}")
     }
 
     @Test

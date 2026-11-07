@@ -169,6 +169,7 @@ class EcencyPrivateApi(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "auth.renewToken")
             null
         }
         if (fresh.isNullOrEmpty() || fresh == code) return first

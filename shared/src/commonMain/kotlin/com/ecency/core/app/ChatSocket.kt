@@ -125,6 +125,7 @@ class ChatSocket internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: a refused or failed handshake is an expected disconnect
                 // a refused handshake (bad token, endpoint gone) is final, as RN's close codes
                 if (HasSocketRefused.statusOf(e) in NEVER_RECONNECT) return
                 null
@@ -142,6 +143,7 @@ class ChatSocket internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
+                    // not reported: a broken socket reconnects below
                     // broken: reconnect below
                 } finally {
                     socket = null

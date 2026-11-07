@@ -65,6 +65,7 @@ class BalanceAnalyticsModel internal constructor(private val env: AppEnvironment
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "balance.hivePerMVests")
                     null
                 }
             }
@@ -100,6 +101,7 @@ class BalanceAnalyticsModel internal constructor(private val env: AppEnvironment
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.handled(e, "balance.history")
             setState { if (page == null) it.copy(historyLoading = false, historyError = UiCopy.SOMETHING_WRONG) else it.copy(loadingOlder = false) }
         }
     }
@@ -113,6 +115,7 @@ class BalanceAnalyticsModel internal constructor(private val env: AppEnvironment
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.handled(e, "balance.summary")
             if (current.granularity == g) setState { it.copy(summaryLoading = false, summaryError = UiCopy.SOMETHING_WRONG, summary = null) }
             return
         }

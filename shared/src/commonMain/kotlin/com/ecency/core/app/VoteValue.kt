@@ -86,6 +86,7 @@ object VoteValue {
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    // not reported: the SDK assumes HF28 when this fails
                     null // the SDK assumes HF28 when this fails
                 }
             }
@@ -138,6 +139,7 @@ suspend fun AppEnvironment.votePreview(): VotePreview? {
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "voteValue.preview")
         null
     }
 }

@@ -93,6 +93,7 @@ class FirebasePushPlatform(context: Context) : PushPlatform {
         try {
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task -> done(if (task.isSuccessful) task.result else null) }
         } catch (e: Exception) {
+            // not reported: a feature probe: no Play services on this device
             // no Play services, a broken configuration: push cannot work on this device
             done(null)
         }
@@ -103,6 +104,7 @@ class FirebasePushPlatform(context: Context) : PushPlatform {
         try {
             FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener { task -> done(task.isSuccessful) }
         } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "push.deleteToken")
             done(false)
         }
     }

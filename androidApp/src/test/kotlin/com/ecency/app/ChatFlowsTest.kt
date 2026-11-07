@@ -3,6 +3,7 @@ package com.ecency.app
 import androidx.compose.ui.test.onNodeWithText
 
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performFirstLinkClick
 
 import androidx.compose.ui.semantics.getOrNull
 
@@ -412,6 +413,44 @@ class ChatFlowsTest {
         val label = with(compose.density) { compose.onNodeWithText(com.ecency.core.app.ChatThreadModel.EDITING, useUnmergedTree = true).fetchSemanticsNode().size.height.toDp() }
         assertTrue("cancel button $cancel tall", cancel.value <= 20f)
         assertTrue("editing banner $banner taller than its label $label", banner.value <= maxOf(label.value, cancel.value) + 0.5f)
+    }
+
+    /** #3468: web's lists, quotes and headings as blocks; a heading stays body size; a mention in a list opens the profile. */
+    @Test
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE) // real text layout
+    fun aMessageShowsWebsBlocksWithABodySizeHeadingAndMentions() {
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("composer")
+        waitUntil { exists("messages") }
+        compose.scrollListTo("messages", hasText("Club notes"))
+        val tag = androidx.compose.ui.semantics.SemanticsProperties.TestTag
+        fun tagOf(text: String) = compose.onAllNodes(hasText(text), useUnmergedTree = true).fetchSemanticsNodes()
+            .mapNotNull { it.config.getOrNull(tag) }.firstOrNull { it.startsWith("message") }.orEmpty()
+        // each block is a text of its own: no "#", "-", ">" or "1." left in the text
+        assertTrue(tagOf("Club notes"), tagOf("Club notes").startsWith("messageHeading:"))
+        val id = tagOf("Club notes").removePrefix("messageHeading:")
+        assertFalse("the markers are gone", hasTextNode("# Club") || hasTextNode("- read") || hasTextNode("> Bring") || hasTextNode("1. pick"))
+        assertTrue(exists("messageList:$id") && exists("messageQuote:$id"))
+        assertEquals(listOf("•", "•", "1.", "2."), compose.onAllNodes(hasTestTag("listMarker:$id"), useUnmergedTree = true).fetchSemanticsNodes()
+            .map { it.config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString("") { t -> t.text } })
+        assertTrue(compose.onAllNodes(hasText("Bring your questions") and hasTestTag("messageText:$id"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        // the heading is bold at the body's size
+        fun layout(text: String): androidx.compose.ui.text.TextLayoutResult {
+            val out = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            compose.onAllNodes(hasText(text), useUnmergedTree = true).onFirst()
+                .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(out) }
+            return out.single()
+        }
+        val title = layout("Club notes").layoutInput
+        val body = layout("pick a book").layoutInput
+        assertEquals(body.style.fontSize, title.style.fontSize)
+        assertEquals(androidx.compose.ui.text.font.FontWeight.Bold, title.style.fontWeight)
+        // the mention in the list opens the profile
+        compose.onAllNodes(hasText("say hi to @spike-alice"), useUnmergedTree = true).onFirst().performFirstLinkClick()
+        waitUntil { navigator.state.top == AppScreen.Profile("spike-alice") }
     }
 
     @Test

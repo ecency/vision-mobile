@@ -47,6 +47,33 @@ enum CrashReporting {
 
     static let tracesSampleRate = 0.05
 
+    /// The app could not start (no environment, so no shared reports yet): the error goes to Sentry as it is, through
+    /// `beforeSend` like every event.
+    static func captureStartFailure(_ error: Error) {
+        guard started else { return }
+        SentrySDK.capture(event: startFailureEvent(error))
+    }
+
+    /// The event built here from the error's type, domain and code and its scrubbed message, never the bridged
+    /// NSError itself (Sentry would put its userInfo, the Kotlin exception included, into the mechanism).
+    static func startFailureEvent(_ error: Error) -> Event {
+        let ns = error as NSError
+        let kotlin = ns.userInfo["KotlinException"] as? KotlinThrowable
+        let type = kotlin.map { String(describing: Swift.type(of: $0)) } ?? String(describing: Swift.type(of: error))
+        let message = kotlin?.message ?? "\(ns.domain) \(ns.code)"
+        let report = CrashReport(
+            type: type,
+            message: ErrorReports.shared.withoutPlaces(text: scrubber.scrub(text: message) ?? ""),
+            tags: ["where": "app.start"],
+            fingerprint: ["start", type],
+            contextName: "",
+            context: [:],
+            isMessage: false,
+            level: "error"
+        )
+        return Reporter.event(report)
+    }
+
     /// A span's description to send, or nil to drop the span: network, file and database spans never go (their
     /// descriptions are URLs, paths and queries, and transactions skip `beforeSend`); the rest is scrubbed.
     static func spanDescription(op: String, description: String?) -> String?? {
@@ -65,7 +92,16 @@ enum CrashReporting {
             scrubbed.message = scrubber.scrub(text: m.message)
             event.message = scrubbed
         }
-        event.exceptions?.forEach { $0.value = scrubber.scrub(text: $0.value) ?? "" }
+        event.exceptions?.forEach { e in
+            e.value = scrubber.scrub(text: e.value) ?? ""
+            // a captured NSError puts its description and userInfo (a Kotlin exception's text) into the mechanism
+            if let mechanism = e.mechanism {
+                mechanism.desc = scrubber.scrub(text: mechanism.desc)
+                mechanism.data = nil
+            }
+        }
+        // handled reports group by a fingerprint that holds a normalised message: it is scrubbed like every text
+        if let fingerprint = event.fingerprint { event.fingerprint = fingerprint.map { scrubber.scrub(text: $0) ?? "" } }
         event.breadcrumbs = event.breadcrumbs?.map(scrub)
         if let extra = event.extra { event.extra = deep(extra, depth: 0) }
         // named contexts (the iap context carries the store's own messages)
@@ -137,5 +173,50 @@ enum CrashReporting {
             if !report.contextName.isEmpty { event.context = [report.contextName: report.context] }
             return event
         }
+    }
+}
+
+/// Handled and quiet failures to Sentry through the shared `ErrorReports` (README "Crash reporting"), for errors a Swift
+/// `catch` gets: a Kotlin exception goes as itself, a Swift error by its type, domain and code. A cancellation is never
+/// reported. `where` is a short stable `area.action` name, never built from user data.
+enum Reports {
+    /// A failure the screen shows (an alert, an error text).
+    static func handled(_ error: Error, where: String) { send(error, where: `where`, quiet: false) }
+
+    /// A failure the app swallows on purpose: a warning.
+    static func quiet(_ error: Error, where: String) { send(error, where: `where`, quiet: true) }
+
+    private static func send(_ error: Error, where: String, quiet: Bool) {
+        if error is CancellationError { return }
+        let ns = error as NSError
+        if let throwable = ns.userInfo["KotlinException"] as? KotlinThrowable {
+            if quiet {
+                ErrorReports.shared.quiet(e: throwable, where: `where`)
+            } else {
+                _ = AppError.companion.from(error: throwable, where: `where`)
+            }
+            return
+        }
+        if ns.domain == NSURLErrorDomain && ns.code == NSURLErrorCancelled { return }
+        let stack = Thread.callStackSymbols.prefix(Int(ErrorReports.shared.STACK_LINES)).joined(separator: "\n")
+        ErrorReports.shared.foreign(
+            type: String(describing: type(of: error)),
+            code: "\(ns.domain) \(ns.code)",
+            message: ns.localizedDescription,
+            stack: stack,
+            where: `where`,
+            quiet: quiet,
+            network: isNetwork(ns)
+        )
+    }
+
+    /// No connection, as the shared `ErrorKind.NETWORK`: the URL loading system's offline and timeout codes.
+    static func isNetwork(_ ns: NSError) -> Bool {
+        guard ns.domain == NSURLErrorDomain else { return false }
+        return [
+            NSURLErrorNotConnectedToInternet, NSURLErrorTimedOut, NSURLErrorNetworkConnectionLost,
+            NSURLErrorCannotFindHost, NSURLErrorCannotConnectToHost, NSURLErrorDNSLookupFailed,
+            NSURLErrorInternationalRoamingOff, NSURLErrorDataNotAllowed, NSURLErrorSecureConnectionFailed,
+        ].contains(ns.code)
     }
 }

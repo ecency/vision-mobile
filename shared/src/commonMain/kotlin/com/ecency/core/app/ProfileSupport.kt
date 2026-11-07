@@ -42,7 +42,8 @@ class ProMembersModel internal constructor(private val env: AppEnvironment) : St
                 setState { members }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "profileSupport.members")
                 // no badges until the next try, after the pause
                 failedAt = env.nowMillis()
             }
@@ -78,7 +79,8 @@ class ProMembersModel internal constructor(private val env: AppEnvironment) : St
                     setState { members }
                 } catch (e: CancellationException) {
                     throw e
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorReports.quiet(e, "profileSupport.poll")
                     // read again at the next poll
                 }
                 activating.keys.toList().forEach { n ->

@@ -302,6 +302,7 @@ class WavesService internal constructor(private val env: AppEnvironment) {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: the retry loop keeps last and reports later
                 last = e
                 null
             }
@@ -592,7 +593,7 @@ class WaveComposeModel internal constructor(
                 setState { it.copy(isAttaching = false) }
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isAttaching = false, error = AppError.from(e), errorTitle = SOMETHING_WRONG) }
+                setState { it.copy(isAttaching = false, error = AppError.from(e, "waveCompose.attach"), errorTitle = SOMETHING_WRONG) }
             }
         }
     }
@@ -629,7 +630,7 @@ class WaveComposeModel internal constructor(
                 setState { it.copy(isAttaching = false) }
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isAttaching = false, error = AppError.from(e), errorTitle = SOMETHING_WRONG) }
+                setState { it.copy(isAttaching = false, error = AppError.from(e, "waveCompose.attachPrepared"), errorTitle = SOMETHING_WRONG) }
             }
         }
     }
@@ -655,7 +656,7 @@ class WaveComposeModel internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    setState { it.copy(isSending = false, error = AppError.from(e), errorTitle = FAIL) }
+                    setState { it.copy(isSending = false, error = AppError.from(e, "waveCompose.send"), errorTitle = FAIL) }
                     return@launch
                 }
                 val wave = draftFor(author, container, body, state.poll, videoThumb)
@@ -695,7 +696,7 @@ class WaveComposeModel internal constructor(
                     setState { it.copy(isSending = false, authorityPrompt = true) }
                     return@launch
                 }
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "waveCompose.send")
                 // out of RC: the app-wide offer (top up or boost) instead of the error; the draft stays
                 val offered = error.kind != ErrorKind.CANCELLED && env.offerRcIfShort(e)
                 setState { it.copy(isSending = false, error = error.takeIf { err -> err.kind != ErrorKind.CANCELLED && !offered }, errorTitle = SOMETHING_WRONG) }
@@ -722,7 +723,7 @@ class WaveComposeModel internal constructor(
                 setState { it.copy(isSending = false) }
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "waveCompose.answerAuthorityPrompt")
                 setState { it.copy(isSending = false, error = error.takeIf { err -> err.kind != ErrorKind.CANCELLED }, errorTitle = SOMETHING_WRONG) }
                 return@launch
             }
@@ -747,6 +748,7 @@ class WaveComposeModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "waveCompose.linkTitle")
                 null
             }
         }
@@ -758,6 +760,7 @@ class WaveComposeModel internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    // not reported: an image that cannot be probed has no ratio
                     // RN resolves NaN: the ratio is written as null
                 }
             }
@@ -1090,6 +1093,7 @@ class ShortsModel internal constructor(private val env: AppEnvironment) : StateM
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "shorts.refresh")
             return
         }
         if (startedIn != generation || job?.isActive == true) return
@@ -1137,7 +1141,7 @@ class ShortsModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: Exception) {
                 if (startedIn != generation) return@launch
                 if (reset) pager = null
-                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "shorts.load")) }
             }
         }
     }

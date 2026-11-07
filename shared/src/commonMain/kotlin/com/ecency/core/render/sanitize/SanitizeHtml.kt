@@ -418,6 +418,7 @@ object RenderText {
         return try {
             EntityDecoder.decode(safe, EntityDecoder.V6)
         } catch (e: IllegalArgumentException) {
+            // not reported: untrusted entity text
             safe
         }
     }

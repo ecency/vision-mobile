@@ -52,6 +52,7 @@ enum RichPush {
                 }
             }
         } catch {
+            // not reported: the notification extension has no reporter; the push shows without its image
             return nil
         }
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).\(ext)")

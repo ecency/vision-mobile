@@ -126,6 +126,7 @@ class ComposeTranslateModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "translate.run")
                 // RN compose_translate.error; nothing of a failed run is kept
                 if (runId == id) setState { it.copy(translating = false, failed = true) }
             }

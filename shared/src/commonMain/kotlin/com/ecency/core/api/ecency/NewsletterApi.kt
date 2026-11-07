@@ -39,6 +39,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
         val json = try {
             Json.parseToJsonElement(body)
         } catch (e: Exception) {
+            // not reported: a body that is not JSON is the error below
             null
         }
         if (status !in 200..299) throw EcencyHttpException(status, json.obj()?.str("error")?.take(200) ?: "Request failed ($status)")

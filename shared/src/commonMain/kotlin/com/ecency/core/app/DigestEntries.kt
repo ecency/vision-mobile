@@ -82,6 +82,7 @@ class DigestPromptModel internal constructor(private val env: AppEnvironment) :
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "digest.entrySubscriptions")
                     setState { it.copy(visible = false) }
                     return@collect
                 }
@@ -130,6 +131,7 @@ class DigestSenderModel internal constructor(private val env: AppEnvironment, pr
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "digest.senderSubscribers")
                 null
             } ?: return@launch
             if (env.session.current.username == username) setState { DigestSenderState(counts.first, counts.second, loaded = true) }

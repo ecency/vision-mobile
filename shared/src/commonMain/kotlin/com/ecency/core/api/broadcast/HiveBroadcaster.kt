@@ -303,6 +303,7 @@ class HiveBroadcaster(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // not reported: the send stays undecided, which its caller reports
             null
         }
         return if (chainMillis != null && chainMillis >= expiresAt(tx) + AGE_OUT_MILLIS) BroadcastException.Unconfirmed(tx.id, cause)
@@ -336,6 +337,7 @@ class HiveBroadcaster(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // not reported: the send stays undecided, which its caller reports
             return Landing.UNDECIDED
         }
     }
@@ -357,6 +359,7 @@ class HiveBroadcaster(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // not reported: an older reference block is an optimisation
             // Keep the head block; the transaction is only more likely to hit a lagging node.
         }
         return referenceOf(refNum, refId)

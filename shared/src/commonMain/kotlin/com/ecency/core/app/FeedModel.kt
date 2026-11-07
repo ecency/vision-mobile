@@ -106,7 +106,8 @@ class FeedModel internal constructor(
                 if (current.loaded) redisplay()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "feed.pinned")
                 // the feed shows without it, as RN's failed pinned query; the next refresh tries again
             }
         }
@@ -223,6 +224,7 @@ class FeedModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "feed.promoted")
                 return@launch
             }.filter { nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it) }.distinctBy { it.key }
             val user = env.session.current.username
@@ -286,7 +288,7 @@ class FeedModel internal constructor(
                 throw e
             } catch (e: Exception) {
                 if (reset) pager = null
-                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "feed.load")) }
             }
         }
     }
@@ -322,6 +324,7 @@ class FeedModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "feed.refresh")
                 // the cards on screen stay as they are
             }
         }

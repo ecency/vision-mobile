@@ -152,6 +152,7 @@ class EcencyRestApi(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "translate.detect")
         emptyList()
     }
 

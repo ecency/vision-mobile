@@ -149,7 +149,8 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
             env.api.hive.transactionStatus(e.txId, e.expiration)
         } catch (c: CancellationException) {
             throw c
-        } catch (_: Exception) {
+        } catch (t: Exception) {
+            ErrorReports.quiet(t, "sendJournal.status")
             return null
         }
         return when (status) {
@@ -168,7 +169,8 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
                     ChainTime.toEpochSeconds(env.api.hive.chainHead().time) * 1000
                 } catch (c: CancellationException) {
                     throw c
-                } catch (_: Exception) {
+                } catch (t: Exception) {
+                    ErrorReports.quiet(t, "sendJournal.chainHead")
                     return null
                 }
                 val expires = runCatching { ChainTime.toEpochSeconds(e.expiration) * 1000 }.getOrElse { return JournalOutcome.UNCONFIRMED }
@@ -193,7 +195,8 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "sendJournal.update")
             transform(current.entries)
         }
         withContext(env.dispatchers.main) { setState { it.copy(entries = next) } }
@@ -204,7 +207,8 @@ class SendJournal internal constructor(private val env: AppEnvironment) : StateM
     private fun read(): List<JournalEntry> {
         val raw = try {
             store.getString(ENTRY)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "sendJournal.read")
             null
         } ?: return emptyList()
         val array = runCatching { Json.parseToJsonElement(raw) as? JsonArray }.getOrNull() ?: return emptyList()

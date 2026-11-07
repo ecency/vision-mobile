@@ -274,7 +274,10 @@ class ProfileModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, loaded = true, error = if (quiet && it.header != null) it.error else AppError.from(e)) }
+                // a quiet refresh over a shown profile keeps it and is reported as a warning only
+                val keep = quiet && current.header != null
+                val error = if (keep) null.also { ErrorReports.quiet(e, "profile.refresh") } else AppError.from(e, "profile.load")
+                setState { it.copy(isLoading = false, loaded = true, error = if (keep) it.error else error) }
             }
         }
     }
@@ -358,7 +361,7 @@ class ProfileModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(busy = false, alert = AppError.from(e)) }
+                setState { it.copy(busy = false, alert = AppError.from(e, "profile.toggleFavorite")) }
             }
         }
     }
@@ -380,7 +383,7 @@ class ProfileModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(busy = false, alert = AppError.from(e)) }
+                setState { it.copy(busy = false, alert = AppError.from(e, "profile.report")) }
                 return@launch
             }
             env.ui.toast(L.report.added)
@@ -436,7 +439,7 @@ class ProfileModel internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            val error = AppError.from(e)
+            val error = AppError.from(e, "profile.action")
             // RN profileContainer: out of RC is the app-wide offer (top up or boost), not a dead-end alert
             val offered = error.kind != ErrorKind.CANCELLED && env.offerRcIfShort(e)
             setState { it.copy(busy = false, alert = if (error.kind == ErrorKind.CANCELLED || offered) null else error) }
@@ -473,6 +476,7 @@ class ProfileModel internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "profile.read")
             null
         }
     }

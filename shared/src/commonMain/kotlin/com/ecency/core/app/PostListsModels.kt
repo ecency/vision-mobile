@@ -90,7 +90,7 @@ class VotersModel internal constructor(private val env: AppEnvironment, val key:
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, error = AppError.from(e, "voters.load")) }
             }
         }
     }
@@ -197,7 +197,7 @@ class ReblogsModel internal constructor(private val env: AppEnvironment, val key
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, error = AppError.from(e, "reblogs.refresh")) }
             }
         }
     }
@@ -253,6 +253,7 @@ class EditHistoryModel internal constructor(private val env: AppEnvironment, val
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "postLists.history")
                 setState { it.copy(isLoading = false, message = L.native.postLists.noHistoryFound) }
             }
         }
@@ -326,7 +327,7 @@ class CrossPostModel internal constructor(private val env: AppEnvironment, val p
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, error = AppError.from(e, "crossPost.start")) }
             }
         }
     }
@@ -353,7 +354,7 @@ class CrossPostModel internal constructor(private val env: AppEnvironment, val p
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "crossPost.publish")
                 // RN repostQueries onError: out of RC is the app-wide offer, every other failure "Fail!"
                 val offered = error.kind != ErrorKind.CANCELLED && env.offerRcIfShort(e)
                 if (error.kind != ErrorKind.CANCELLED && !offered) env.ui.toast(PostActionsModel.FAIL)

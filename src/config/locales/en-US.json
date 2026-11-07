@@ -2098,6 +2098,12 @@
         "on": "On",
         "off": "Off"
       },
+      "app_icon": {
+        "consent_title": "Show seasonal icons?",
+        "consent_message": "You'll see a short notice when it changes.",
+        "consent_yes": "Show",
+        "consent_no": "Not now"
+      },
       "lock": {
         "biometric_reason": "Turn on biometric unlock for Ecency",
         "offer_title": "Unlock with {method}",
@@ -2356,6 +2362,29 @@
       "feedback_subject": "Feedback/Bug report",
       "unknown_user": "Unknown User"
     },
+    "app_icon": {
+      "title": "App icon",
+      "seasonal": "Seasonal icons",
+      "seasonal_hint": "The icon changes for a few days around celebrations, then goes back.",
+      "name_default": "Everyday",
+      "name_new_year": "New Year",
+      "name_lunar_new_year": "Lunar New Year",
+      "name_valentines": "Valentine's Day",
+      "name_ramadan_eid": "Ramadan and Eid",
+      "name_hive_day": "Hive Day",
+      "name_nowruz": "Nowruz",
+      "name_holi": "Holi",
+      "name_earth_day": "Earth Day",
+      "name_pizza_day": "Bitcoin Pizza Day",
+      "name_football": "Football tournament",
+      "name_summer_games": "Summer games",
+      "name_programmers_day": "Programmers' Day",
+      "name_mid_autumn": "Mid-Autumn Festival",
+      "name_diwali": "Diwali",
+      "name_halloween": "Halloween",
+      "name_black_friday": "Black Friday",
+      "name_christmas": "Christmas"
+    },
     "navigation": {
       "editor": "Editor",
       "followers": "Followers",
@@ -2574,7 +2603,19 @@
       "success_title": "Welcome to Ecency Pro",
       "success_body": "Your Pro membership is active. Your badge will appear on your profile shortly.",
       "extending": "Payment received. Your Pro membership is being extended by 12 months.",
-      "open_a11y": "Open Ecency Pro"
+      "open_a11y": "Open Ecency Pro",
+      "blog_claim": "Claim your free blog",
+      "blog_intro": "Ecency Pro includes a free blog at {address}. It starts with the default look, which you can change later.",
+      "blog_title_label": "Blog title (optional)",
+      "blog_description_label": "Description (optional)",
+      "blog_claim_confirm": "Claim blog",
+      "blog_claimed": "Your blog is ready",
+      "blog_existing": "Your blog is already set up",
+      "blog_open": "Open blog",
+      "blog_not_pro": "Ecency Pro membership is required to claim a free blog.",
+      "blog_unavailable": "Blog hosting is not available right now. Please try again later.",
+      "blog_failed": "Could not claim your blog. Please try again.",
+      "blog_login": "Please sign in again to claim your blog."
     },
     "editor": {
       "saving_draft": "Saving draft...",
@@ -3065,6 +3106,7 @@
     },
     "android": {
       "no_browser": "No browser available",
+      "app_icon_applies": "The new icon shows once you leave the app.",
       "key_copy_unavailable": "This version of Android cannot clear the clipboard afterwards, so a private key cannot be copied. Write it down from the screen instead.",
       "biometric_unlock_title": "Unlock Ecency with biometrics",
       "biometric_confirm": "Confirm with your fingerprint or face",

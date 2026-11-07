@@ -318,7 +318,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val message = message(e)
+                val message = message(e, "search.posts")
                 setState { s ->
                     if (more) s.copy(posts = s.posts.copy(loadingMore = false, moreError = message))
                     else s.copy(posts = s.posts.copy(loading = false, error = message, loaded = true))
@@ -343,6 +343,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "search.people")
                 setState { it.copy(people = SearchPeopleState(error = SearchCopy.ERROR)) }
             }
         }
@@ -362,6 +363,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "search.communities")
                 communities = emptyList()
                 setState { it.copy(communities = SearchCommunitiesState(error = SearchCopy.ERROR, loaded = true)) }
             }
@@ -374,9 +376,9 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
         setState { it.copy(communities = it.communities.copy(rows = communities.map { c -> CommunitiesModel.row(c, subs) })) }
     }
 
-    private fun message(e: Exception): String = when (e) {
-        is SearchApiException -> SearchCopy.ERROR
-        else -> AppError.from(e).let { if (it.kind == ErrorKind.NETWORK) it.message else SearchCopy.ERROR }
+    /** The search error to show; the failure is reported as handled at [where] (ErrorReports). */
+    private fun message(e: Exception, where: String): String = AppError.from(e, where).let {
+        if (e !is SearchApiException && it.kind == ErrorKind.NETWORK) it.message else SearchCopy.ERROR
     }
 
     companion object {
@@ -451,6 +453,7 @@ class AccountLookupModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "search.suggestions")
                 setState { it.copy(suggestions = emptyList(), known = false, searching = false) }
             }
         }
@@ -557,6 +560,7 @@ object Dapps {
         val encoded = try {
             js.encodeUri(s)
         } catch (e: Exception) {
+            // not reported: encoding fallback for lone surrogates
             js.encodeUri(s.filterNot { it.isSurrogate() })
         }
         val sb = StringBuilder(encoded.length)

@@ -1,5 +1,6 @@
 package com.ecency.core.render.blocks
 
+import com.ecency.core.app.ErrorReports
 import com.ecency.core.render.blocks.Inline.Mark
 import com.ecency.core.render.dom.CDATASection
 import com.ecency.core.render.dom.Document
@@ -47,10 +48,12 @@ object BlockBuilder {
         fromDocument(parse(html), options)
     } catch (e: Throwable) {
         if (e is OutOfMemoryError) throw e
+        ErrorReports.quiet(e, "render.blocks")
         try {
             fromDocument(LenientHtml.parse(html), options)
         } catch (e2: Throwable) {
             if (e2 is OutOfMemoryError) throw e2
+            ErrorReports.quiet(e2, "render.blocksLenient")
             emptyList()
         }
     }
@@ -66,6 +69,7 @@ object BlockBuilder {
     private fun parse(html: String): Document = try {
         XmlDomParser.parseFromString(RenderBodyParser.wrap(html))
     } catch (e: Exception) {
+        // not reported: malformed html is repaired below
         RenderBodyParser.parseRepaired(html).document ?: LenientHtml.parse(html)
     }
 

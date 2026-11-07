@@ -154,7 +154,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loadingDrafts = false, loaded = true, refreshing = false, error = AppError.from(e)) }
+                setState { it.copy(loadingDrafts = false, loaded = true, refreshing = false, error = AppError.from(e, "drafts.loadDrafts")) }
             }
         }
     }
@@ -174,7 +174,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loadingSchedules = false, error = AppError.from(e)) }
+                setState { it.copy(loadingSchedules = false, error = AppError.from(e, "drafts.loadSchedules")) }
             }
         }
     }
@@ -199,6 +199,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "drafts.action")
                 env.ui.toast(L.alert.fail)
             } finally {
                 setState { it.copy(busy = it.busy - id) }
@@ -251,6 +252,7 @@ class DraftsModel internal constructor(private val env: AppEnvironment, tab: Int
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.handled(e, "drafts.delete")
                     failed++
                 }
             }
@@ -378,7 +380,7 @@ class UploadsModel internal constructor(private val env: AppEnvironment, private
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, loaded = true, error = AppError.from(e)) }
+                setState { it.copy(loading = false, loaded = true, error = AppError.from(e, "uploads.load")) }
             }
         }
     }
@@ -439,6 +441,7 @@ class UploadsModel internal constructor(private val env: AppEnvironment, private
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (e: Exception) {
+                                ErrorReports.quiet(e, "uploads.upload")
                                 failures += e
                                 if (insert) dispatch(listOf(MediaInsert(filename = file.name, status = MediaInsertStatus.FAILED)))
                             } finally {
@@ -511,6 +514,7 @@ class UploadsModel internal constructor(private val env: AppEnvironment, private
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "uploads.delete")
                 env.ui.toast(L.native.editorSide.failedToDelete)
                 refresh()
             }
@@ -566,7 +570,7 @@ class SnippetsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, loaded = true, error = AppError.from(e)) }
+                setState { it.copy(loading = false, loaded = true, error = AppError.from(e, "snippets.load")) }
             }
         }
     }
@@ -586,6 +590,7 @@ class SnippetsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "snippets.save")
                 env.ui.toast(L.snippets.messageFailed)
             }
             refresh()
@@ -603,6 +608,7 @@ class SnippetsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "snippets.delete")
                 env.ui.toast(L.alert.fail)
             }
         }
@@ -645,6 +651,7 @@ class CommunityPickerModel internal constructor(private val env: AppEnvironment)
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "editorCommunity.load")
         null
     }
 

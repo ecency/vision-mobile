@@ -298,6 +298,24 @@ final class ChatUITests: XCTestCase {
         XCTAssertLessThan(composerQuote.frame.height, 90, "the quote is as tall as its two lines")
     }
 
+    /// #3468: the demo notes message shows web's blocks; VoiceOver reads it as one message, each item after its marker
+    /// and no markdown left in it.
+    func testAMessageWithBlocksReadsItsItemsInOrder() {
+        let app = launch(["-openScreen", "chat:ch-ecency"])
+        let msg = message(app, containing: "Club notes")
+        XCTAssertTrue(msg.waitForExistence(timeout: 20))
+        for _ in 0..<4 where !msg.isHittable { element(app, "chat-messages").swipeDown() }
+        XCTAssertTrue(msg.isHittable)
+        let label = msg.label
+        for part in ["Club notes", "\u{2022} read the guide first", "\u{2022} say hi to @spike-alice", "Bring your questions", "1. pick a book", "2. share a quote"] {
+            XCTAssertTrue(label.contains(part), "\(part) in \(label)")
+        }
+        XCTAssertLessThan(label.range(of: "Club notes")!.lowerBound, label.range(of: "2. share a quote")!.lowerBound)
+        for typed in ["# Club", "- read", "> Bring", "**guide**"] {
+            XCTAssertFalse(label.contains(typed), "\(typed) in \(label)")
+        }
+    }
+
     func testAPostLinkCardOpensThePostInTheAppNotTheBrowser() {
         let app = launch(["-openScreen", "chat:ch-ecency"])
         let card = element(app, "chat-link-card")

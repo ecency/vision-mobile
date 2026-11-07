@@ -263,6 +263,7 @@ class WavesFeedModel internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "wavesFeed.reload")
                     null
                 }
                 // an answer from a node that is behind (older than the card, or without `updated`, which
@@ -375,6 +376,7 @@ class WavesFeedModel internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "wavesFeed.refresh")
             return // the list stays as it is; the next tick tries again
         }
         if (startedIn != generation || job?.isActive == true) return
@@ -417,6 +419,7 @@ class WavesFeedModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "wavesFeed.promoted")
                 return@launch
             }
             if (startedIn != generation) return@launch
@@ -479,7 +482,7 @@ class WavesFeedModel internal constructor(
             } catch (e: Exception) {
                 if (startedIn != generation) return@launch
                 if (reset) pager = null
-                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "wavesFeed.load")) }
             }
         }
     }

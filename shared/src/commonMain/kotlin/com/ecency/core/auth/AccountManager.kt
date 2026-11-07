@@ -447,6 +447,7 @@ class AccountManager(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "auth.refreshToken")
                 null
             }
         }
@@ -461,6 +462,7 @@ class AccountManager(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "auth.keySession")
             null
         }
     }

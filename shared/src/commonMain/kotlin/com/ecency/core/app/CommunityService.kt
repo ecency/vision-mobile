@@ -106,7 +106,7 @@ class CommunityService internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, error = AppError.from(e)) }
+                setState { it.copy(loading = false, error = AppError.from(e, "community.load")) }
             }
         }
     }
@@ -141,7 +141,7 @@ class CommunityService internal constructor(private val env: AppEnvironment) :
                 throw e
             } catch (e: Exception) {
                 setState { it.copy(pending = it.pending - community) }
-                if (AppError.from(e).kind != ErrorKind.CANCELLED) env.ui.toast(if (leaving) FAIL_LEAVE else FAIL_SUBSCRIBE)
+                if (AppError.from(e, "community.subscribe").kind != ErrorKind.CANCELLED) env.ui.toast(if (leaving) FAIL_LEAVE else FAIL_SUBSCRIBE)
             }
         }
         return true
@@ -181,7 +181,7 @@ class CommunityService internal constructor(private val env: AppEnvironment) :
         send(asUser) { user -> CommunityOps.flagPost(user, community, author, permlink, notes) }
 
     private suspend fun send(asUser: String? = null, build: (String) -> CustomJson) {
-        val user = env.session.current.username ?: throw AppException(AppError.from(AuthException.NotSignedIn()))
+        val user = env.session.current.username ?: throw AppException(AppError.from(AuthException.NotSignedIn(), "community.send"))
         if (asUser != null && asUser != user) throw AppException(AppError(ErrorKind.CANCELLED, L.native.communityService.theAccountChanged, false))
         try {
             val op = build(user)
@@ -195,7 +195,7 @@ class CommunityService internal constructor(private val env: AppEnvironment) :
         } catch (e: AppException) {
             throw e
         } catch (e: Exception) {
-            throw AppException(AppError.fromBroadcast(e), e)
+            throw AppException(AppError.fromBroadcast(e, "community.send"), e)
         }
     }
 

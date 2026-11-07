@@ -78,6 +78,7 @@ class PollModel internal constructor(private val env: AppEnvironment, val key: P
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "poll.load")
                 null
             }
             val user = env.session.current.username
@@ -141,7 +142,7 @@ class PollModel internal constructor(private val env: AppEnvironment, val key: P
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.fromBroadcast(e)
+                val error = AppError.fromBroadcast(e, "poll.vote")
                 setState { it.copy(isVoting = false, results = before, showResults = before?.choicesOf(user)?.isNotEmpty() == true) }
                 if (error.kind != ErrorKind.CANCELLED) env.ui.toast(L.native.poll.fail(message = error.message))
             }

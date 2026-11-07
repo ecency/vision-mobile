@@ -122,7 +122,7 @@ class KeyLoginTest {
         assertFalse(KeyLogin.isPublicKey(wrongChecksum))
         assertFalse(KeyLogin.isPublicKey("STM" + "1".repeat(50)))
         assertEquals(listOf(KeyRole.ACTIVE), KeyLogin.rolesOf(pub, TestKeys.authorities()))
-        assertEquals(com.ecency.core.app.AppError.PUBLIC_KEY_GIVEN, com.ecency.core.app.AppError.from(AuthException.PublicKeyGiven()).message)
+        assertEquals(com.ecency.core.app.AppError.PUBLIC_KEY_GIVEN, com.ecency.core.app.AppError.from(AuthException.PublicKeyGiven(), "test.where").message)
     }
 
     @Test

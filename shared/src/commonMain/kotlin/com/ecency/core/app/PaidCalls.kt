@@ -214,6 +214,7 @@ internal class PaidRunner<T>(
             // no session to send with: nothing went out now; an earlier request for this intent may still be fetched
             return PaidOutcome.Refused(401)
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "paidCalls.send")
             // timeout or transport error: the request may have arrived
             return PaidOutcome.Unknown
         }

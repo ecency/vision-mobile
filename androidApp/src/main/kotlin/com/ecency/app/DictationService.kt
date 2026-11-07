@@ -71,7 +71,8 @@ class DictationService : Service() {
         fun notification(context: Context): Notification {
             val manager = context.getSystemService(NotificationManager::class.java)
             if (Build.VERSION.SDK_INT >= 26 && manager != null) SystemChannels.ensure(manager, CHANNEL)
-            val open = context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
+            // MainActivity itself, never the launcher alias of the moment (README "App icons")
+            val open = LauncherAliases.openApp(context).let {
                 PendingIntent.getActivity(context, 0, it.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             }
             val stop = PendingIntent.getService(

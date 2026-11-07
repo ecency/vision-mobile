@@ -168,7 +168,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                refuse(TRANSACTION_FAILED, AppError.from(e).message, silentRefusal)
+                refuse(TRANSACTION_FAILED, AppError.from(e, "authLink.open").message, silentRefusal)
             }
         }
         waiting = Triple(job, link, fromContent)
@@ -397,7 +397,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val error = AppError.from(e)
+                val error = AppError.from(e, "authLink.confirm")
                 if (error.kind != ErrorKind.CANCELLED) setState { it.copy(prompt = LinkPrompt.Refused(FAIL_TITLE, error.message)) }
             } finally {
                 setState { it.copy(isWorking = false) }

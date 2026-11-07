@@ -50,9 +50,11 @@ object QrDecoder {
             try {
                 reader.decodeWithState(BinaryBitmap(HybridBinarizer(source.invert()))).text
             } catch (_: Exception) {
+                // not reported: a frame without a QR code
                 null
             }
         } catch (_: Exception) {
+            // not reported: a frame without a QR code
             null
         } finally {
             reader.reset()
@@ -109,6 +111,7 @@ object QrCamera {
         val bytes = ByteArray(buffer.remaining()).also { buffer.get(it) }
         QrDecoder.decode(bytes, image.width, image.height, plane.rowStride)
     } catch (_: Exception) {
+        // not reported: a frame without a QR code
         null
     } finally {
         image.close()

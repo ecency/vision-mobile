@@ -15,6 +15,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import androidx.activity.SystemBarStyle
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
@@ -261,6 +262,7 @@ class MainActivity : FragmentActivity() {
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "image.save")
                 e.message ?: com.ecency.core.app.UiCopy.IMAGE_SAVE_ERROR
             }
             done(error)
@@ -298,8 +300,34 @@ class MainActivity : FragmentActivity() {
         else platform.answered(grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED)
     }
 
+    /**
+     * Something this activity opened is in front (a picker, the camera, the share sheet, a Custom Tab, the browser):
+     * its onStop is not the app leaving, so the launcher icon does not switch then (a switch can end the task while
+     * a result is awaited). Cleared when the activity is in front again.
+     */
+    private var openedOther = false
+
+    override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
+        openedOther = true
+        super.startActivityForResult(intent, requestCode, options)
+    }
+
+    override fun startIntentSenderForResult(
+        intent: android.content.IntentSender,
+        requestCode: Int,
+        fillInIntent: Intent?,
+        flagsMask: Int,
+        flagsValues: Int,
+        extraFlags: Int,
+        options: Bundle?,
+    ) {
+        openedOther = true
+        super.startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags, options)
+    }
+
     override fun onStart() {
         super.onStart()
+        openedOther = false
         EcencyGraph.foreground = true
         EcencyGraph.frontActivity = java.lang.ref.WeakReference(this)
     }
@@ -313,6 +341,13 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         EcencyGraph.foreground = false
+        // the launcher icon changes only once the app is out of sight (README "App icons"), never for a rotation
+        if (!isChangingConfigurations && !openedOther) {
+            EcencyGraph.started()?.launcherIcons?.let {
+                it.refresh(LauncherAliases.today())
+                LauncherAliases.apply(this, it.current.current)
+            }
+        }
         if (EcencyGraph.frontActivity?.get() === this) EcencyGraph.frontActivity = null
         super.onStop()
     }
@@ -430,6 +465,9 @@ class MainActivity : FragmentActivity() {
         if (BuildConfig.DEBUG) intent.getStringExtra("pseudoLocale")?.let { com.ecency.core.l10n.L10n.usePseudo(it) }
         val env = EcencyGraph.env(this)
         env.appVersion = BuildConfig.VERSION_NAME
+        // the seasonal app icon follows the phone's region and language (README "App icons")
+        LauncherAliases.configure(env)
+        env.launcherIcons.refresh(LauncherAliases.today())
         if (BuildConfig.DEBUG && intent.getBooleanExtra("acceptTerms", false)) env.welcome.accept(consent = true)
         // debug demo runs never load the hosted signup challenge
         if (BuildConfig.DEBUG && EcencyGraph.demoAuth) {

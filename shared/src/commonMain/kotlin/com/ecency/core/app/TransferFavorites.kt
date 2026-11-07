@@ -42,7 +42,7 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, error = AppError.from(e, "transferFavorites.start")) }
             }
         }
     }
@@ -77,6 +77,7 @@ class TransferFavoritesModel internal constructor(private val env: AppEnvironmen
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "transferFavorites.add")
                 setState { it.copy(isSaving = false) }
                 if (env.session.current.username == user) env.ui.toast(TransferFavoritesCopy.ADD_ERROR)
             }

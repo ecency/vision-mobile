@@ -199,6 +199,7 @@ class BackupKeysModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "backupKeys.open")
                 // an unreadable vault shows nothing
                 shut()
             }
@@ -223,6 +224,7 @@ class BackupKeysModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "backupKeys.pin")
                 shut()
             }
         }
@@ -300,7 +302,7 @@ class BackupKeysModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                val reason = AppError.from(e).message
+                val reason = AppError.from(e, "backupKeys.import").message
                 setState { it.copy(isImporting = false, importError = "$reason\n${BackupKeysCopy.IMPORT_FAILED_TAIL}") }
             }
         }
@@ -313,6 +315,7 @@ class BackupKeysModel internal constructor(private val env: AppEnvironment) :
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "backupKeys.authorities")
             null
         }
         // a stored key that is also the owner key goes (with its notice) before anything shows

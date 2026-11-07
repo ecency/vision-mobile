@@ -68,6 +68,51 @@ class SentryMappingTest {
     }
 
     @Test
+    fun aHandledReportIsAnEventWithItsFingerprintTagsAndAScrubbedContext() {
+        // Bitcoin wiki example key, controls nothing
+        val wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw"
+        val report = com.ecency.core.app.CrashReport(
+            type = "Rejected",
+            message = "refused for key $wif",
+            tags = mapOf("handled" to "true", "where" to "editor.publish", "error.kind" to "rejected", "exception" to "Rejected"),
+            fingerprint = listOf("handled", "editor.publish", "rejected", "Rejected", "refused for key $wif"),
+            contextName = "handled",
+            context = mapOf("where" to "editor.publish", "stack" to "Rejected: refused for key $wif\n\tat Editor.submit", "memo" to "secret"),
+            level = "warning",
+        )
+        val event = SentryReporting.Reporter.event(report)
+        val out = configured(id).beforeSend!!.execute(event, io.sentry.Hint())!!
+        assertEquals(io.sentry.SentryLevel.WARNING, out.level)
+        assertEquals("editor.publish", out.getTag("where"))
+        assertEquals("true", out.getTag("handled"))
+        assertEquals(listOf("handled", "editor.publish", "rejected", "Rejected"), out.fingerprints!!.take(4))
+        assertEquals(false, out.fingerprints!!.any { wif in it })
+        assertEquals(false, out.exceptions!!.single().value!!.contains(wif))
+        @Suppress("UNCHECKED_CAST")
+        val context = out.contexts["handled"] as Map<String, Any?>
+        assertEquals(false, (context["stack"] as String).contains(wif))
+        assertEquals(true, (context["stack"] as String).contains("Editor.submit"))
+        assertEquals("<redacted>", context["memo"])
+    }
+
+    @Test
+    fun aMasterPasswordAVaultFieldAndATokenAfterItsNameNeverLeave() {
+        val password = "P5" + "K".repeat(50)
+        val report = com.ecency.core.app.CrashReport(
+            type = "Corrupted",
+            message = "pass $password then {\"activeKey\":\"abc\"} and token dGhpc0lzQUhpdmVTaWduZXJUb2tlbl9mb3JUZXN0cw",
+            contextName = "handled",
+            context = mapOf("stack" to "JSON input: {\"accessToken\":\"abcdefghijklmnop"),
+        )
+        val out = configured(id).beforeSend!!.execute(SentryReporting.Reporter.event(report), io.sentry.Hint())!!
+        val value = out.exceptions!!.single().value!!
+        assertEquals(false, password in value || "\"abc\"" in value || "dGhpc0lz" in value)
+        @Suppress("UNCHECKED_CAST")
+        val stack = (out.contexts["handled"] as Map<String, Any?>)["stack"] as String
+        assertEquals(false, "abcdefghijklmnop" in stack)
+    }
+
+    @Test
     fun theBuildExposesItsMappingId() {
         // empty in local and debug builds; CI sets it for store builds (build.gradle.kts rejects a malformed one)
         assertEquals("", BuildConfig.PROGUARD_UUID)

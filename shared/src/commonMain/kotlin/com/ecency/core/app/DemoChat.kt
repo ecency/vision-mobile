@@ -126,6 +126,8 @@ class DemoChat(private val nowMillis: () -> Long) {
         post("ch-photo", "spike-bob", "Golden hour today", 30)
         post("ch-muted", "spike-dave", "Muted chatter", 200)
         post("ch-public", "spike-alice", "Public channel you have not joined.", 500)
+        // seeded last so the ids above stay; read before the viewer's last visit, so no unread count changes
+        post("ch-ecency", "spike-bob", BLOCKS_MESSAGE, 75)
     }
 
     /** A demo person who shares the viewer's name (the seeded spike-alice) still gets an id of their own. */
@@ -450,6 +452,9 @@ class DemoChat(private val nowMillis: () -> Long) {
             "with a second thought about why the post was picked, a third about the tags it used, " +
             "and a fourth about the community it was posted in, so it is clearly longer than a short note, " +
             "and then it closes with the final words of the long reply."
+        /** A message with web's block markdown (#3468): a heading, a list with a mention, a quote, an ordered list. */
+        const val BLOCKS_MESSAGE = "# Club notes\n- read the **guide** first\n- say hi to @spike-alice\n\n" +
+            "> Bring your questions\n\n1. pick a book\n2. share a quote"
         const val WEBSOCKET_PATH = "/api/mattermost/websocket"
     }
 }

@@ -60,6 +60,36 @@ final class LayoutPolishTests: XCTestCase {
 
     private static func red(_ p: (r: UInt8, g: UInt8, b: UInt8, a: UInt8)) -> Bool { p.a > 200 && p.r > 200 && p.g < 60 && p.b < 60 }
 
+    /// #3658: a wallet quick action's white glyph stays on its accent disc at every text size; it used to grow with
+    /// the text past the fixed 42 pt circle onto the card, white on light grey (the contrast audit's "Swap"). Both stop
+    /// growing at the first accessibility size, so the four actions keep fitting.
+    func testAQuickActionGlyphStaysOnItsCircle() throws {
+        func isWhite(_ p: (r: UInt8, g: UInt8, b: UInt8, a: UInt8)) -> Bool { p.a > 200 && p.r > 235 && p.g > 235 && p.b > 235 }
+        for icon in [AppIcon.send, .qrScan, .swap, .add] {
+            var widths: [DynamicTypeSize: CGFloat] = [:]
+            for size in textSizes + [.accessibility1] {
+                let card = ZStack {
+                    Self.pure
+                    QuickActionIcon(icon: icon)
+                }
+                let bitmap = try render(card, CGSize(width: 200, height: 200), typeSize: size)
+                let circle = try XCTUnwrap(bitmap.box { $0.a > 200 && $0.b > 150 && $0.r < 120 }, "\(icon) \(size): no circle")
+                widths[size] = circle.width
+                // every white pixel inside the disc (its corners are the card)
+                let radius = circle.width / 2, centre = CGPoint(x: circle.midX, y: circle.midY)
+                var outside = 0
+                for y in 0..<bitmap.height {
+                    for x in 0..<bitmap.width where isWhite(bitmap.pixel(x, y)) {
+                        if hypot(CGFloat(x) + 0.5 - centre.x, CGFloat(y) + 0.5 - centre.y) > radius + 1 { outside += 1 }
+                    }
+                }
+                XCTAssertEqual(outside, 0, "\(icon) \(size): \(outside) white px off the disc \(circle)")
+            }
+            XCTAssertEqual(widths[.accessibility5], widths[.accessibility1], "\(icon): the circle grows past the first accessibility size")
+            XCTAssertGreaterThan(widths[.accessibility1] ?? 0, widths[.large] ?? 0, "\(icon): the circle does not grow with the text")
+        }
+    }
+
     /// The stage as the screen fills it: counters, a wheel, the button. [wheelWidth] narrower than the screen is the
     /// spinning state (no tags), where the wheel used to sit at the leading edge.
     private func stage(wheel: CGFloat) -> some View {

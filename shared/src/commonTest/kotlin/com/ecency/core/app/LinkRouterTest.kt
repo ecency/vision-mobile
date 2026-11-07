@@ -82,12 +82,12 @@ class LinkRouterTest {
 
     @Test
     fun errorMappingCoversEveryKind() {
-        assertEquals(ErrorKind.NETWORK, AppError.from(com.ecency.core.api.rpc.AllNodesFailedException("m", emptyList())).kind)
-        assertEquals(ErrorKind.STORAGE, AppError.from(com.ecency.core.secure.SecureStoreException.KeyInvalidated()).kind)
-        assertEquals(ErrorKind.INVALID_INPUT, AppError.from(com.ecency.core.api.InvalidInputException("x")).kind)
-        assertEquals(ErrorKind.UNKNOWN, AppError.from(IllegalStateException("boom")).kind)
+        assertEquals(ErrorKind.NETWORK, AppError.from(com.ecency.core.api.rpc.AllNodesFailedException("m", emptyList()), "test.where").kind)
+        assertEquals(ErrorKind.STORAGE, AppError.from(com.ecency.core.secure.SecureStoreException.KeyInvalidated(), "test.where").kind)
+        assertEquals(ErrorKind.INVALID_INPUT, AppError.from(com.ecency.core.api.InvalidInputException("x"), "test.where").kind)
+        assertEquals(ErrorKind.UNKNOWN, AppError.from(IllegalStateException("boom"), "test.where").kind)
         val wrapped = AppError(ErrorKind.PAID_OUT, "paid", false)
-        assertEquals(wrapped, AppError.from(AppException(wrapped)))
+        assertEquals(wrapped, AppError.from(AppException(wrapped), "test.where"))
     }
 
     @Test

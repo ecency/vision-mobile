@@ -231,7 +231,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             } catch (e: Exception) {
                 // Fail closed: an unreadable lock state keeps the content hidden, with the error shown.
                 started = false
-                setState { it.copy(error = AppError.from(e)) }
+                setState { it.copy(error = AppError.from(e, "appLock.start")) }
             }
         }
     }
@@ -381,7 +381,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
         val prompt = current.prompt ?: return
         val verifying = prompt.purpose == PinPurpose.VERIFY && prompt.step == PinStep.CURRENT
         if ((prompt.purpose != PinPurpose.UNLOCK && !verifying) || prompt.isChecking) return
-        run(prompt) { handleCheck(prompt, io { lock.unlockWithBiometric(binding) }) }
+        run(prompt, "appLock.biometric") { handleCheck(prompt, io { lock.unlockWithBiometric(binding) }) }
     }
 
     /**
@@ -395,7 +395,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(error = AppError.from(e)) }
+                setState { it.copy(error = AppError.from(e, "appLock.biometricInvalidated")) }
             }
             setState { s ->
                 s.copy(biometricEnabled = false, notice = BIOMETRIC_CHANGED_NOTICE, prompt = s.prompt?.copy(autoBiometric = false))
@@ -407,7 +407,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
     fun forgotPin() {
         val prompt = current.prompt ?: return
         if (!prompt.showForgot || prompt.isChecking) return
-        run(prompt) {
+        run(prompt, "appLock.forgotPin") {
             io { lock.wipeAll() }
             wiped()
         }
@@ -440,7 +440,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(error = AppError.from(e)) }
+                setState { it.copy(error = AppError.from(e, "appLock.refresh")) }
             }
         }
     }
@@ -535,7 +535,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
 
     private fun submit(prompt: PinPrompt, pin: String) {
         when (prompt.step) {
-            PinStep.CURRENT -> run(prompt) {
+            PinStep.CURRENT -> run(prompt, "appLock.checkPin") {
                 val result = io {
                     when (prompt.purpose) {
                         PinPurpose.UNLOCK -> lock.verify(pin).also { if (it == PinCheck.Success) bindPendingBiometric() }
@@ -562,7 +562,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
                     )
                     return
                 }
-                run(prompt) {
+                run(prompt, "appLock.savePin") {
                     when (prompt.purpose) {
                         PinPurpose.ENABLE -> {
                             io { lock.setPin(pin) }
@@ -578,6 +578,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (_: Exception) {
+                                // not reported: feature probe, unavailable biometrics is the answer
                                 false
                             }
                             finish(prompt, notice = if (on) BIOMETRIC_ON_NOTICE else BIOMETRIC_UNAVAILABLE_NOTICE)
@@ -656,7 +657,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
      * Never two checks at once: an entry made while another check is still running (a relock replaced its
      * pad) is dropped and the pad clears for the user to type again.
      */
-    private fun run(prompt: PinPrompt, block: suspend () -> Unit) {
+    private fun run(prompt: PinPrompt, where: String, block: suspend () -> Unit) {
         if (job?.isActive == true) {
             setState { s -> s.copy(prompt = s.prompt?.copy(digits = 0)) }
             return
@@ -669,7 +670,7 @@ class AppLockModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { s -> s.copy(prompt = s.prompt?.copy(isChecking = false, digits = 0), error = AppError.from(e)) }
+                setState { s -> s.copy(prompt = s.prompt?.copy(isChecking = false, digits = 0), error = AppError.from(e, where)) }
             }
         }
     }

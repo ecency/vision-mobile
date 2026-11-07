@@ -276,6 +276,7 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "dictation.price")
             null
         }
         if (price != null) priceAtMillis = env.nowMillis()
@@ -285,6 +286,7 @@ class DictationModel internal constructor(private val env: AppEnvironment, priva
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "dictation.points")
             null
         }
         if (points != null) setState { it.copy(balanceText = points) }

@@ -96,6 +96,7 @@ class PostStatsModel internal constructor(private val env: AppEnvironment, priva
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "postStats.load")
         null
     }
 

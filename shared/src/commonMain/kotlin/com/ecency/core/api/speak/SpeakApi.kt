@@ -47,6 +47,7 @@ class SpeakApi(private val http: AuthHttp, private val code: suspend (username: 
     } catch (e: kotlin.coroutines.cancellation.CancellationException) {
         throw e
     } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "speak.thumbnail")
         false
     }
 
@@ -69,6 +70,7 @@ class SpeakApi(private val http: AuthHttp, private val code: suspend (username: 
     } catch (e: TusException) {
         e.status
     } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "speak.linkHive")
         0
     }
 

@@ -173,6 +173,7 @@ fun ToastWindow(toast: UiMessage.Toast?, onDone: (Long) -> Unit, fallback: @Comp
             windows.addView(content, params)
             true
         } catch (e: Exception) {
+            // not reported: the toast is drawn in the content instead
             android.util.Log.w("EcencyToast", "toast window refused, drawing it in the content", e)
             false
         }

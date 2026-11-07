@@ -1,5 +1,6 @@
 package com.ecency.core.render
 
+import com.ecency.core.app.ErrorReports
 import com.ecency.core.render.js.Js
 import com.ecency.core.render.methods.CleanReply
 import com.ecency.core.render.methods.Helper
@@ -33,6 +34,7 @@ internal object PostBodySummary {
         var text = try {
             Markdown.renderSummary(body)
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "render.summary")
             ""
         }
         if (!web && placeholders.isNotEmpty()) {

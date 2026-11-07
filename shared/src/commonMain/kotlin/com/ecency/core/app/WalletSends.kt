@@ -200,7 +200,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
                 if (pending == null || !(pending.mayHaveLanded || e.undecided)) {
                     // never reached a node: nothing can have landed; the same action may be tried again
                     r.pending = pending
-                    return at(SendPhase.Failed(AppError.from(e), retryable = true))
+                    return at(SendPhase.Failed(AppError.from(e, "wallet.send"), retryable = true))
                 }
                 r.pending = pending
                 if (env.nowMillis() - started > CHECK_BOUND_MILLIS) {
@@ -217,7 +217,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
                 if (signsElsewhere(username) && mayHaveReachedSigner(e)) {
                     return at(SendPhase.Failed(AppError(ErrorKind.NETWORK, BroadcastException.UNDECIDED_MESSAGE, false, undecided = true), retryable = false))
                 }
-                return at(SendPhase.Failed(AppError.from(e), retryable = false))
+                return at(SendPhase.Failed(AppError.from(e, "wallet.send"), retryable = false))
             }
         }
     }
@@ -227,7 +227,8 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         m == com.ecency.core.auth.LoginMethod.HIVESIGNER || m == com.ecency.core.auth.LoginMethod.HIVEAUTH
     } catch (e: CancellationException) {
         throw e
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorReports.quiet(e, "wallet.signsElsewhere")
         false
     }
 

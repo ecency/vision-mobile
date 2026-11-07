@@ -418,6 +418,7 @@ class WalletApi(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: the next node is asked; the last failure is thrown below
                 last = e
             }
         }

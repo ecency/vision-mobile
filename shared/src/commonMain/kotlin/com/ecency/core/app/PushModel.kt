@@ -279,6 +279,7 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "push.accounts")
         emptyList()
     }
 
@@ -287,6 +288,7 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
+        ErrorReports.quiet(e, "push.code")
         null
     }
 
@@ -355,7 +357,8 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
                     if (renewed != null && renewed != code && stillWanted(username)) register(username) else rejected[username] = code
                 }
                 // offline or a server error: the next start, reconnect or daily refresh retries
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "push.register")
             }
         } finally {
             inFlight.update { it - 1 }
@@ -413,7 +416,8 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
                 releaseLock.withLock { withTimeoutOrNull(RELEASE_BOUND_MILLIS) { releaseNow(accounts) } }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "push.release")
                 // a failed release never breaks the chain
             } finally {
                 withContext(NonCancellable) { releases.update { it - 1 } }
@@ -435,7 +439,8 @@ class PushModel internal constructor(private val env: AppEnvironment) : StateMod
                 true
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "push.disable")
                 false
             }
             if (!ok) allDisabled = false
@@ -686,6 +691,7 @@ internal class ActivitySocket(
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
+                // not reported: socket reconnect loop backs off and retries
                 // could not connect, or the connection broke: back off below
             }
             if (attempts >= MAX_ATTEMPTS) return

@@ -43,6 +43,7 @@ internal object MarkdownToHtml {
             Traverse.traverse(doc, ctx, ImageState())
             output = XmlSerializer.serializeToString(doc)
         } catch (e: Throwable) {
+            // not reported: untrusted post markup the parser rejects; repaired below
             // Throwable, not Exception: render-helper also catches a stack overflow (RangeError)
             // here. The port's parsers and traversal are iterative, but a JVM StackOverflowError
             // from any remaining recursion takes the same fallback instead of escaping.
@@ -56,6 +57,7 @@ internal object MarkdownToHtml {
                 output = XmlSerializer.serializeToString(doc)
             } catch (e2: Throwable) {
                 if (isFatal(e2)) throw e2
+                com.ecency.core.app.ErrorReports.quiet(e2, "render.markdownRepair")
                 output = HtmlSanitizer.sanitize(output.ifEmpty { Markdown.render(input) }, ctx.sanitizeOptions)
             }
         }

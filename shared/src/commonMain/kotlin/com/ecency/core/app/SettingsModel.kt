@@ -408,6 +408,7 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
+                // not reported: UNREACHABLE is the answer shown to the user
                 ServerCheck.UNREACHABLE
             }
             setState { it.copy(checkingServer = false, server = shownServer()) }
@@ -426,7 +427,8 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
                 env.onboardingApi.appStorePage(UpdateLinks.APP_STORE_LOOKUP)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "settings.storeListing")
                 null
             }
         }
@@ -458,7 +460,8 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
             setState { it.copy(supportAccount = user, support = loaded) }
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "settings.supportLoad")
             // the card stays hidden; showing the screen again retries
             if (seq == supportOpSeq) setState { it.copy(supportAccount = user, support = null) }
         }
@@ -503,7 +506,8 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
                     env.ui.toast(SettingsCopy.SUCCESSFUL)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorReports.handled(e, "settings.supportSave")
                     if (seq != supportOpSeq) return@withLock
                     setState { it.copy(support = confirmed ?: prev) }
                     env.ui.toast(SettingsCopy.FAIL)
@@ -528,7 +532,8 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
             throw e
         } catch (_: LegacyImportError.StorageUnreadable) {
             return
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "settings.legacyImport")
             null
         }
         if (legacy != null) {
@@ -545,7 +550,8 @@ class SettingsModel internal constructor(private val env: AppEnvironment) : Stat
             throw e
         } catch (_: LegacyImportError.StorageUnreadable) {
             return
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "settings.legacyDrafts")
         }
         env.prefs.putString(KEY_IMPORTED, "1")
         if (legacy == null) return

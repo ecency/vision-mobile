@@ -96,7 +96,8 @@ data class QuestChip(val postProgress: Int, val streak: Int, val atRisk: Boolean
             if (response != null && response.status in 200..299) response.body else null
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "quests.load")
             null
         }
     }

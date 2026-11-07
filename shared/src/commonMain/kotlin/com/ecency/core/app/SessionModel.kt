@@ -131,7 +131,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
                     throw e
                 } catch (e: Exception) {
                     // reload() armed the next good read to announce what it finds
-                    setState { it.copy(isLoading = false, error = AppError.from(e)) }
+                    setState { it.copy(isLoading = false, error = AppError.from(e, "session.start")) }
                     continue
                 }
                 val user = current.username
@@ -192,7 +192,8 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
                 env.accounts.sessionExpiry(user)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "session.expiry")
                 null
             } ?: return@launch
             if (expiry in 1..(env.nowMillis() + REFRESH_MARGIN_MILLIS)) refreshSession(user)
@@ -236,7 +237,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
         val username = KeyLogin.normalizeUsername(usernameInput)
         hiveAuthJob?.cancel()
         if (!KeyVault.isValidUsername(username)) {
-            setState { it.copy(hiveAuth = HiveAuthLoginState(username, HiveAuthStep.FAILED, error = AppError.from(AuthException.InvalidUsername()))) }
+            setState { it.copy(hiveAuth = HiveAuthLoginState(username, HiveAuthStep.FAILED, error = AppError.from(AuthException.InvalidUsername(), "session.hiveAuth"))) }
             return
         }
         setState { it.copy(hiveAuth = HiveAuthLoginState(username, HiveAuthStep.INITIATING), error = null) }
@@ -267,7 +268,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { s -> s.copy(hiveAuth = s.hiveAuth?.copy(step = HiveAuthStep.FAILED, link = null, error = AppError.from(e))) }
+                setState { s -> s.copy(hiveAuth = s.hiveAuth?.copy(step = HiveAuthStep.FAILED, link = null, error = AppError.from(e, "session.hiveAuth"))) }
             }
         }
     }
@@ -298,7 +299,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
             setState { it.copy(isSigningIn = false) }
             throw e
         } catch (e: Exception) {
-            val error = AppError.from(e)
+            val error = AppError.from(e, "session.signIn")
             setState { it.copy(isSigningIn = false, error = error) }
             throw e as? AppException ?: AppException(error, e)
         }
@@ -329,7 +330,8 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
                     hook.afterLogin(summary.username)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorReports.quiet(e, "session.afterLogin")
                     // a prefetch never fails the sign-in
                 }
             }
@@ -349,7 +351,7 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
             setState { it.copy(switchingTo = null) }
             throw e
         } catch (e: Exception) {
-            val error = AppError.from(e)
+            val error = AppError.from(e, "session.switchTo")
             setState { it.copy(switchingTo = null, error = error) }
             throw AppException(error, e)
         }
@@ -375,12 +377,13 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
         var next: AccountSummary? = null
         var failure: Exception? = null
         try {
-            guarded {
+            guarded("session.logout") {
                 env.signing.forget(username)
                 next = env.accounts.remove(username)
                 turnLockOffIfEmpty()
             }
         } catch (e: Exception) {
+            // not reported: guarded() reported it; it is thrown here or after the cleanup
             if (username !in gone(listOf(username))) {
                 env.push.staying(leaving)
                 throw e
@@ -417,12 +420,13 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
         var left: Set<String>? = null
         var failure: Exception? = null
         try {
-            guarded {
+            guarded("session.logoutAll") {
                 names.forEach { env.signing.forget(it) }
                 env.accounts.logoutAll()
                 turnLockOffIfEmpty()
             }
         } catch (e: Exception) {
+            // not reported: guarded() reported it; it is thrown here or after the cleanup
             val removed = gone(names)
             if (removed.isEmpty()) {
                 env.push.staying(leaving)
@@ -461,12 +465,12 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
         if (env.vault.vault.usernames().isEmpty()) env.pinLock.clearWithoutPin()
     }
 
-    private suspend fun <T> guarded(block: suspend () -> T): T = try {
+    private suspend fun <T> guarded(where: String, block: suspend () -> T): T = try {
         block()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        val error = AppError.from(e)
+        val error = AppError.from(e, where)
         setState { it.copy(error = error) }
         throw AppException(error, e)
     }
@@ -534,7 +538,8 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
             throw e
         } catch (e: AuthException.SessionExpired) {
             setState { it.copy(expiredSession = username) }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "session.refresh")
             // offline or the endpoint is down: the stored token stays until the next start
         }
     }

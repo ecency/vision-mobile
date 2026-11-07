@@ -649,6 +649,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 if (e.status == 409) return OrderResult.Duplicate
                 last = e
             } catch (e: Exception) {
+                // not reported: retried, IapErrors reports it after the last attempt
                 last = e
             }
             if (attempt < ORDER_ATTEMPTS - 1) delay(1_000L shl attempt)
@@ -671,6 +672,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                         }
                     }
                 } catch (e: Exception) {
+                    // not reported: IapErrors reports the StoreError returned
                     if (!resumed) {
                         resumed = true
                         c.resume(null to StoreError(StoreError.UNKNOWN, e.message.orEmpty()))

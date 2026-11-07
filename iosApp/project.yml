@@ -120,6 +120,9 @@ targets:
         PROVISIONING_PROFILE_SPECIFIER: $(ECENCY_APP_PROFILE)
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # the seasonal icons (README "App icons"): every other AppIcon-<key> set is an alternate icon, listed in the
+        # generated Info.plist by the asset compiler
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         GENERATE_INFOPLIST_FILE: YES
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)

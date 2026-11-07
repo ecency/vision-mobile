@@ -385,6 +385,7 @@ class TransferModel internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    ErrorReports.quiet(e, "transfer.memoKey")
                     false
                 }
                 setState { it.copy(memoCipherKey = has) }
@@ -533,6 +534,7 @@ class TransferModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // not reported: reported below by AppError.from in onFailure
                 Result.failure(e)
             }
             result.onSuccess { memos ->
@@ -545,7 +547,7 @@ class TransferModel internal constructor(
                 setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Confirm) }
             }.onFailure { e ->
                 if (current.closed || current.prompt != null) return@onFailure setState { it.copy(encryptingMemo = false) }
-                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e, "transfer.encryptMemo").message)) }
             }
         }
     }
@@ -579,7 +581,7 @@ class TransferModel internal constructor(
         val ops = try {
             operations(s, user, encrypted)
         } catch (e: Exception) {
-            setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e).message)) }
+            setState { it.copy(prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e, "transfer.confirm").message)) }
             return
         }
         val json = WalletOps.ops(ops)
@@ -734,6 +736,7 @@ class TransferModel internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "transfer.balance")
             setState { it.copy(balanceFailed = true) }
             return
         }
@@ -747,6 +750,7 @@ class TransferModel internal constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "transfer.precision")
             null
         }
         setState { it.copy(tokenPrecision = p, precisionFailed = p == null, amount = if (p != null) Amounts.capDecimals(it.amount, p) else it.amount) }
@@ -765,6 +769,7 @@ class TransferModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "transfer.recipient")
                 false
             }
             val suggestions = if (names.size == 1 && !valid) runCatching { env.communityApi.lookupAccounts(names[0], 20) }.getOrDefault(emptyList()) else emptyList()

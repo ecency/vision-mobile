@@ -7,7 +7,11 @@ import com.ecency.core.secure.KeyVault
 import com.ecency.core.secure.VaultAccount
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import com.ecency.core.api.FakeTransport
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
@@ -35,8 +39,35 @@ class ProTest {
     /** Each account's `pro` object in the Points API's answer. */
     private val proStatus = mutableMapOf<String, String>()
 
+    /** Each account's posting_json_metadata profile (`name`, `about`), for the blog form's prefill. */
+    private val profiles = mutableMapOf<String, Pair<String, String>>()
+
+    /** The hosting API's answer about each account's blog; none: 404. */
+    private val tenants = mutableMapOf<String, HttpResult>()
+
+    /** Ecency's answer to a blog claim. */
+    private var claimAnswer = HttpResult(200, """{"created":true,"tenant":{"username":"spike-alice","blogUrl":"https://spike-alice.blogs.ecency.com"}}""")
+
+    private fun TestScope.accounts(): TestApp = TestApp(this) { req ->
+        if (req.method == "condenser_api.get_accounts") {
+            val found = listOf(alice, bob).filter { "\"$it\"" in req.body }
+            FakeTransport.result(
+                req,
+                found.joinToString(",", "[", "]") { user ->
+                    val json = AppTestKeys.accountJson(user)
+                    profiles[user]?.let { (name, about) ->
+                        val meta = buildJsonObject { put("profile", buildJsonObject { put("name", name); put("about", about) }) }.toString()
+                        json.replace("\"posting_json_metadata\":\"\"", "\"posting_json_metadata\":${JsonPrimitive(meta)}")
+                    } ?: json
+                },
+            )
+        } else {
+            TestApp.chain(req) ?: if (req.method == "condenser_api.broadcast_transaction") FakeTransport.result(req, "null") else HttpResult(500, "")
+        }
+    }
+
     private fun TestScope.rig(signedIn: String? = alice, prefs: Prefs = InMemoryPrefs(), held: List<StorePurchase> = emptyList(), purchasesFirst: Boolean = false): Rig {
-        val app = appWithAccounts(this)
+        val app = accounts()
         val vault = KeyVault(app.store)
         listOf(bob, alice).forEach { vault.save(VaultAccount(it, AuthType.POSTING_KEY, postingKey = AppTestKeys.wif(it, com.ecency.core.hive.KeyRole.POSTING), accessToken = "access-$it")) }
         vault.setCurrentUsername(signedIn)
@@ -53,6 +84,9 @@ class ProTest {
                     val pro = proStatus[user] ?: """{"active":false,"expires":null}"""
                     HttpResult(200, """{"username":"$user","points":"10.000","unclaimed_points":"0.000","pro":$pro}""")
                 }
+                // the free blog (#3636): the hosting API's lookup and Ecency's claim
+                "/v1/tenants/" in r.url -> tenants[r.url.substringAfterLast("/")] ?: HttpResult(404, """{"error":"Tenant not found"}""")
+                r.url.endsWith("/api/hosting/claim-blog") -> claimAnswer
                 else -> null
             }
         }
@@ -588,6 +622,241 @@ class ProTest {
         r.env.purchases.recover()
         testScheduler.advanceUntilIdle()
         assertNull(r.env.proPurchases.of(bob)?.progress)
+        m.close()
+    }
+
+    // ---- the free blog (#3636)
+
+    private fun claims(r: Rig) = r.app.authBackend.sent.filter { it.url.endsWith("/api/hosting/claim-blog") }
+    private fun lookups(r: Rig) = r.app.authBackend.sent.filter { "/v1/tenants/" in it.url }
+
+    @Test
+    fun aNonMemberHasNoBlogClaim() = runTest {
+        val r = rig()
+        val m = pro(r)
+        assertFalse(m.current.showBlogClaim)
+        m.openBlogForm()
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.blogFormOpen)
+        assertTrue(claims(r).isEmpty())
+        assertTrue(lookups(r).isEmpty(), "no lookup for a non-member")
+        m.close()
+    }
+
+    @Test
+    fun aMemberClaimsTheBlogWithTheProfilePrefillAndTheAccountToken() = runTest {
+        roster += alice
+        profiles[alice] = "Alice in Chains" to "Notes from the chain"
+        val r = rig()
+        val m = pro(r)
+        assertEquals("https://api.blogs.ecency.com/v1/tenants/spike-alice", lookups(r).singleOrNull()?.url)
+        assertTrue(m.current.showBlogClaim)
+        assertNull(m.current.blogUrl)
+        assertEquals(
+            "Ecency Pro includes a free blog at spike-alice.blogs.ecency.com. It starts with the default look, which you can change later.",
+            m.current.blogIntro,
+        )
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.blogFormOpen)
+        assertEquals("Alice in Chains", m.current.blogTitle)
+        assertEquals("Notes from the chain", m.current.blogDescription)
+        m.setBlogTitle("  Alice writes  ")
+        assertTrue(m.current.canClaimBlog)
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        val sent = claims(r).single()
+        assertEquals("https://ecency.com/api/hosting/claim-blog", sent.url)
+        assertEquals("POST", sent.method)
+        val body = Json.parseToJsonElement(sent.body!!).jsonObject
+        assertEquals(setOf("code", "title", "description"), body.keys)
+        assertEquals("access-spike-alice", body["code"]!!.jsonPrimitive.content)
+        assertEquals("Alice writes", body["title"]!!.jsonPrimitive.content)
+        assertEquals("Notes from the chain", body["description"]!!.jsonPrimitive.content)
+        val s = m.current
+        assertEquals("https://spike-alice.blogs.ecency.com", s.blogUrl)
+        assertEquals("spike-alice.blogs.ecency.com", s.blogAddress)
+        assertTrue(s.blogClaimed)
+        assertEquals("Your blog is ready", s.blogHeading)
+        assertFalse(s.blogFormOpen)
+        assertFalse(s.showBlogClaim)
+        assertNull(s.blogError)
+        m.close()
+    }
+
+    @Test
+    fun blankFieldsAreLeftOutOfTheClaim() = runTest {
+        roster += alice
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        assertEquals("", m.current.blogTitle)
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        assertEquals(setOf("code"), claims(r).singleOrNull()?.let { Json.parseToJsonElement(it.body!!).jsonObject.keys })
+        m.close()
+    }
+
+    @Test
+    fun anExistingBlogShowsItsAddressAndNoClaim() = runTest {
+        roster += alice
+        tenants[alice] = HttpResult(200, """{"username":"spike-alice","subscriptionStatus":"active","blogUrl":"https://spike-alice.blogs.ecency.com"}""")
+        val r = rig()
+        val m = pro(r)
+        assertEquals("spike-alice.blogs.ecency.com", m.current.blogAddress)
+        assertEquals("https://spike-alice.blogs.ecency.com", m.current.blogUrl)
+        assertFalse(m.current.blogClaimed)
+        assertEquals("Your blog is already set up", m.current.blogHeading)
+        assertFalse(m.current.showBlogClaim)
+        m.close()
+    }
+
+    @Test
+    fun anAbandonedOrUnreadableLookupLeavesTheClaim() = runTest {
+        roster += alice
+        tenants[alice] = HttpResult(200, """{"username":"spike-alice","subscriptionStatus":"abandoned","blogUrl":"https://spike-alice.blogs.ecency.com"}""")
+        val r = rig()
+        val m = pro(r)
+        assertEquals(1, lookups(r).size)
+        assertTrue(m.current.showBlogClaim)
+        m.close()
+        tenants[alice] = HttpResult(500, "")
+        val m2 = pro(r)
+        assertEquals(2, lookups(r).size)
+        assertTrue(m2.current.showBlogClaim, "a failed lookup fails open: the claim answers honestly")
+        m2.close()
+    }
+
+    @Test
+    fun aClaimThatFindsTheBlogThereAlreadySaysSo() = runTest {
+        roster += alice
+        claimAnswer = HttpResult(200, """{"created":false,"tenant":{"blogUrl":"https://spike-alice.blogs.ecency.com"}}""")
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        assertEquals("spike-alice.blogs.ecency.com", m.current.blogAddress)
+        assertFalse(m.current.blogClaimed)
+        assertEquals("Your blog is already set up", m.current.blogHeading)
+        m.close()
+    }
+
+    /** Review of #3636: the Open button only ever opens an address on the blog domain. */
+    @Test
+    fun anAddressOffTheBlogDomainIsReplacedByTheDefaultOne() = runTest {
+        roster += alice
+        claimAnswer = HttpResult(200, """{"created":true,"tenant":{"blogUrl":"https://example.org/spike-alice"}}""")
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        m.claimBlog()
+        testScheduler.advanceUntilIdle()
+        assertEquals("https://spike-alice.blogs.ecency.com", m.current.blogUrl)
+        m.close()
+        for (bad in listOf("https://user@spike-alice.blogs.ecency.com", "https://blogs.ecency.com.example.org", "http://spike-alice.blogs.ecency.com", "https://spike-alice.blogs.ecency.com:8443",
+            // a browser ends the host at a backslash (review of #3659)
+            "https://example.org\\spike-alice.blogs.ecency.com", "https://example.org%5Cx.blogs.ecency.com",
+        )) {
+            assertNull(com.ecency.core.api.ecency.HostingApi.safeUrl(bad), bad)
+        }
+        assertEquals("https://x.blogs.ecency.com/p?a=1", com.ecency.core.api.ecency.HostingApi.safeUrl("https://x.blogs.ecency.com/p?a=1"))
+    }
+
+    @Test
+    fun refusedClaimsLandInStateWithTheirCopy() = runTest {
+        roster += alice
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        for ((status, copy) in listOf(403 to ProCopy.BLOG_NOT_PRO, 503 to ProCopy.BLOG_UNAVAILABLE, 502 to ProCopy.BLOG_UNAVAILABLE, 400 to ProCopy.BLOG_FAILED)) {
+            claimAnswer = HttpResult(status, """{"error":"server words"}""")
+            m.claimBlog()
+            testScheduler.advanceUntilIdle()
+            assertEquals(copy, m.current.blogError?.message, "status $status")
+            assertFalse(m.current.blogClaiming)
+            assertTrue(m.current.blogFormOpen, "the form stays for another try")
+            assertNull(m.current.blogUrl)
+        }
+        assertEquals("Ecency Pro membership is required to claim a free blog.", ProCopy.BLOG_NOT_PRO)
+        assertEquals(4, claims(r).size)
+        m.close()
+    }
+
+    @Test
+    fun aSecondTapWhileClaimingSendsNothing() = runTest {
+        roster += alice
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("/api/hosting/claim-blog")) release.await() }
+        m.claimBlog()
+        testScheduler.runCurrent()
+        assertTrue(m.current.blogClaiming)
+        assertFalse(m.current.canClaimBlog)
+        m.claimBlog()
+        testScheduler.runCurrent()
+        release.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, claims(r).size)
+        assertEquals("spike-alice.blogs.ecency.com", m.current.blogAddress)
+        m.close()
+    }
+
+    @Test
+    fun aClaimAnsweringAfterAnAccountSwitchIsDropped() = runTest {
+        roster += alice
+        roster += bob
+        val r = rig()
+        val m = pro(r)
+        m.openBlogForm()
+        testScheduler.advanceUntilIdle()
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("/api/hosting/claim-blog")) release.await() }
+        m.claimBlog()
+        testScheduler.runCurrent()
+        assertTrue(m.current.blogClaiming)
+        r.env.session.switchTo(bob)
+        testScheduler.runCurrent()
+        assertEquals(bob, m.current.account)
+        release.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val s = m.current
+        assertNull(s.blogUrl, "alice's blog is not bob's")
+        assertFalse(s.blogClaimed)
+        assertFalse(s.blogClaiming)
+        assertFalse(s.blogFormOpen)
+        assertNull(s.blogError)
+        assertTrue(s.showBlogClaim)
+        m.close()
+    }
+
+    @Test
+    fun aLateLookupForAnotherAccountIsDropped() = runTest {
+        roster += alice
+        roster += bob
+        tenants[alice] = HttpResult(200, """{"subscriptionStatus":"active","blogUrl":"https://spike-alice.blogs.ecency.com"}""")
+        val r = rig()
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        r.app.authBackend.gate = { req -> if (req.url.endsWith("/v1/tenants/spike-alice")) release.await() }
+        // held while the account changes: runCurrent only (advancing time would time the lookup out)
+        val m = r.env.proModel().also { it.start() }
+        testScheduler.runCurrent()
+        assertTrue(m.current.blogChecking)
+        r.env.session.switchTo(bob)
+        testScheduler.runCurrent()
+        release.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals(bob, m.current.account)
+        assertNull(m.current.blogUrl)
+        assertTrue(m.current.showBlogClaim)
         m.close()
     }
 }

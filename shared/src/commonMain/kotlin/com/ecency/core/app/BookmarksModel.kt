@@ -121,7 +121,7 @@ class BookmarksModel internal constructor(private val env: AppEnvironment, initi
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                update(tab) { it.copy(isLoading = false, isLoadingMore = false, loaded = true, error = AppError.from(e)) }
+                update(tab) { it.copy(isLoading = false, isLoadingMore = false, loaded = true, error = AppError.from(e, "bookmarks.load")) }
             }
         }
     }
@@ -181,6 +181,7 @@ class BookmarksModel internal constructor(private val env: AppEnvironment, initi
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "bookmarks.write")
                 env.ui.toast(L.alert.fail)
             }
         }

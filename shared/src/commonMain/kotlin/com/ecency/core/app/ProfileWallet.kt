@@ -71,7 +71,7 @@ class ProfileWalletModel internal constructor(private val env: AppEnvironment, v
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(loading = false, error = AppError.from(e)) }
+                setState { it.copy(loading = false, error = AppError.from(e, "profileWallet.load")) }
             }
         }
     }

@@ -23,6 +23,7 @@ enum PhotoSaver {
         } catch let SaveError.status(code) {
             return L.Native.Ios.Media.downloadFailed(status: String(code))
         } catch {
+            Reports.handled(error, where: "image.download")
             return error.localizedDescription
         }
         defer { try? FileManager.default.removeItem(at: download.file) }
@@ -46,6 +47,7 @@ enum PhotoSaver {
             }
             return nil
         } catch {
+            Reports.handled(error, where: "image.save")
             return error.localizedDescription
         }
     }
@@ -160,6 +162,7 @@ final class ChunkedDownload: NSObject, URLSessionDataDelegate {
         do {
             try PhotoSaver.append(data, to: handle, total: &total, max: max)
         } catch {
+            // not reported: the download ends with this failure, which the save reports
             failure = error
             dataTask.cancel()
         }

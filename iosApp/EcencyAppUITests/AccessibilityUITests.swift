@@ -63,14 +63,15 @@ final class AccessibilityUITests: XCTestCase {
         do {
             try app.performAccessibilityAudit(for: .all) { issue in
                 if AuditExclusions.excuses(issue) { return true }
-                // text scrolled out of its scroll view's visible part: the audit read the pixels drawn where it would be
-                if issue.auditType == .contrast, let e = issue.element, let visible = AuditExclusions.visibleFraction(e, in: app) ?? AuditExclusions.outsideTheTabBar(e, in: app) {
+                // text scrolled out of its scroll view's visible part or under the tab bar: the audit read the pixels
+                // drawn where it would be (`readableShare`)
+                if issue.auditType == .contrast, let e = issue.element, let visible = AuditExclusions.readableShare(e, in: app) {
                     let shown = String(format: "%.2f", visible)
                     if visible < AuditExclusions.mostlyScrolledOut {
-                        print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) visible in its scroll view, not counted")
+                        print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) readable, not counted")
                         return true
                     }
-                    print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) visible in its scroll view, counted")
+                    print("AccessibilityUITests \(screen): contrast reading on '\(e.label)', \(shown) readable, counted")
                 }
                 // a contrast reading on a SwiftUI node the audit cannot resolve to an element (text inside a combined
                 // element; its colors are checked in AccessibilityTests). Allowed up to a small budget per screen, plus
@@ -252,6 +253,21 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    /// Settings > App icon's list (#3656), light, dark and at the largest text: every row's title and preview.
+    func testAuditTheAppIconList() {
+        for (name, extra) in [("app icon list", [String]()), ("app icon list (dark)", ["-forceDarkTheme", "YES"]), ("app icon list (AX5)", Self.ax5)] {
+            let app = launch(["-openScreen", "settings"] + extra)
+            XCTAssertTrue(element(app, "settings").waitForExistence(timeout: 25), name)
+            // at AX5 the row is below the fold and the list draws it only once scrolled to
+            let row = element(app, "settings-app-icon")
+            for _ in 0..<15 where !(row.exists && row.isHittable) { app.swipeUp(velocity: .slow) }
+            XCTAssertTrue(row.isHittable, name)
+            row.tap()
+            audit(app, name, ready: "app-icon-Default")
+            app.terminate()
+        }
+    }
+
     /// The post footer's tags row (below the fold, so the screen audit above misses it) at the largest text. Only the
     /// pills' findings count: once scrolled, rows left under the translucent top bar read as low contrast whatever
     /// their colours, and the screen audit covers those unscrolled.
@@ -401,38 +417,68 @@ enum AuditExclusions {
     /// field's own empty text container.
     static let emptyFieldsReadAsClipped: Set<String> = ["chats-search"]
 
-    /// Text with less than this share of it inside its scroll view's visible frame is not checked for contrast.
+    /// Text with less than this share of it readable (`readableShare`) is not checked for contrast.
     static let mostlyScrolledOut: CGFloat = 0.5
 
-    /// The share of the element inside the visible frame of a scroll view that holds it and clips it (the smaller of
-    /// the visible height and width shares); nil when no scroll view clips it. VoiceOver scrolls to such text, but the
-    /// audit reads the pixels drawn where it would be (at AX5 the profile summary is capped to 70 % of the screen and
-    /// scrolls inside, so its location and follower counts sit under the tabs and the first post; the reading then
-    /// depended on which card had loaded there).
-    static func visibleFraction(_ element: XCUIElement, in app: XCUIApplication) -> CGFloat? {
+    /// The share of the element drawn where it can be read; nil when nothing cuts it. Two things cut it. A scroll view
+    /// that holds it and clips it, or the window's edge: VoiceOver scrolls to such text, but the audit reads the pixels
+    /// drawn where it would be (at AX5 the profile summary is capped to 70 % of the screen and scrolls inside, so its
+    /// location and follower counts sit under the tabs and the first post; the reading then depended on which card had
+    /// loaded there). Then the system tab bar: list rows scroll on under its glass, as in Apple's own apps, and the
+    /// audit reads them through it. The visible share is the smaller of the visible height and width shares, less the
+    /// part under the bar. Both count together: a wallet card title half below the screen's edge has the rest of it
+    /// under the bar (#3658), and neither share alone reached half.
+    static func readableShare(_ element: XCUIElement, in app: XCUIApplication) -> CGFloat? {
         let frame = element.frame
         guard !frame.isEmpty else { return nil }
+        let clipped = scrollVisible(element, frame, in: app)
+        // the bar's own buttons sit inside it and are checked as any control (content wholly under the bar is not)
+        let bar = tabIds.contains(element.identifier) ? nil : tabBarFrame(app).flatMap { $0.intersects(frame) ? $0 : nil }
+        let window = app.windows.firstMatch.frame
+        let offScreen = !window.isEmpty && !window.insetBy(dx: -0.5, dy: -0.5).contains(frame)
+        guard clipped != nil || bar != nil || offScreen else { return nil }
+        // what lies past the window's edge is not drawn at all
+        let shown = window.isEmpty ? (clipped ?? frame) : (clipped ?? frame).intersection(window)
+        guard !shown.isNull, !shown.isEmpty else { return 0 }
+        let visible = min(shown.height / frame.height, shown.width / frame.width)
+        guard let bar else { return visible }
+        let under = shown.intersection(bar)
+        let underShare = under.isNull || under.isEmpty ? 0 : (under.width * under.height) / (frame.width * frame.height)
+        return max(0, visible - underShare)
+    }
+
+    /// The part of [frame] inside a scroll view that holds the element and clips it; nil when no scroll view clips it.
+    private static func scrollVisible(_ element: XCUIElement, _ frame: CGRect, in app: XCUIApplication) -> CGRect? {
         for scroll in app.scrollViews.allElementsBoundByIndex where !scroll.frame.insetBy(dx: -0.5, dy: -0.5).contains(frame) {
             let same = scroll.descendants(matching: element.elementType).matching(NSPredicate(format: "label == %@", element.label))
             guard same.allElementsBoundByIndex.contains(where: { $0.frame == frame }) else { continue }
-            let visible = frame.intersection(scroll.frame)
-            if visible.isNull || visible.isEmpty { return 0 }
-            return min(visible.height / frame.height, visible.width / frame.width)
+            return frame.intersection(scroll.frame)
         }
         return nil
     }
 
-    /// The share of an element not under the system tab bar (nil when the bar does not cover it): list rows scroll on
-    /// under the bar's glass, as in Apple's own apps, and the audit reads them through it. Works for the bottom bar and
-    /// iPhone Duo's trailing column alike.
-    static func outsideTheTabBar(_ element: XCUIElement, in app: XCUIApplication) -> CGFloat? {
-        let frame = element.frame, bar = app.tabBars.firstMatch
-        guard !frame.isEmpty, bar.exists else { return nil }
-        // the bar's own buttons sit inside it and are checked as any control (content wholly under the bar is not)
-        guard !bar.buttons.allElementsBoundByIndex.contains(where: { $0.frame == frame }) else { return nil }
-        let covered = frame.intersection(bar.frame)
-        guard !covered.isNull, !covered.isEmpty else { return nil }
-        return 1 - (covered.width * covered.height) / (frame.width * frame.height)
+    /// Where the system tab bar covers the content, or nil when no bar is on top (a sheet or cover over the tabs
+    /// leaves their buttons in the tree but not hittable, and text on the sheet is checked as any). The bar is the
+    /// union of the tab buttons (XCUITest shows no TabBar element for SwiftUI's TabView on iOS 27), over the bar's own
+    /// span, out to the window's nearer edge: the glass and the system's fade under it reach past the buttons to the
+    /// home indicator. A bottom bar runs down; iPhone Duo's column runs to its side (the trailing edge, the left one
+    /// in right-to-left languages).
+    static func tabBarFrame(_ app: XCUIApplication) -> CGRect? {
+        let tabs = tabIds.compactMap { id -> CGRect? in
+            let tab = app.buttons[id]
+            return tab.exists && tab.isHittable && !tab.frame.isEmpty ? tab.frame : nil
+        }
+        // one button alone tells no direction
+        guard tabs.count >= 2, let first = tabs.first else { return nil }
+        let bar = tabs.dropFirst().reduce(first) { $0.union($1) }
+        let window = app.windows.firstMatch.frame
+        guard !window.isEmpty else { return bar }
+        if bar.width >= bar.height {
+            return CGRect(x: bar.minX, y: bar.minY, width: bar.width, height: max(bar.height, window.maxY - bar.minY))
+        }
+        return bar.midX > window.midX
+            ? CGRect(x: bar.minX, y: bar.minY, width: max(bar.width, window.maxX - bar.minX), height: bar.height)
+            : CGRect(x: window.minX, y: bar.minY, width: max(bar.width, bar.maxX - window.minX), height: bar.height)
     }
 
     /// The bottom tabs' identifiers (`AppTab.identifier`).

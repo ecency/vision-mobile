@@ -208,7 +208,7 @@ class HiveAuthTest {
             val e = assertFailsWith<AuthException.HiveAuth>("broadcast=$flag") {
                 client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.ACTIVE, ops) {}
             }
-            assertEquals("Transaction Failed", com.ecency.core.app.AppError.from(e).message, "broadcast=$flag")
+            assertEquals("Transaction Failed", com.ecency.core.app.AppError.from(e, "test.where").message, "broadcast=$flag")
         }
     }
 

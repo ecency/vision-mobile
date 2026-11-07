@@ -551,6 +551,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             } catch (e: BridgeRefused) {
                 return@launch answer.error(e.message ?: "Failed to build operations for \"$type\".")
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "dappBrowser.buildOps")
                 return@launch answer.error("Failed to build operations for \"$type\".")
             }
             val details = listOfNotNull(
@@ -722,7 +723,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                request.answer.error(AppError.from(e).message.ifEmpty { "Transaction failed." })
+                request.answer.error(AppError.from(e, "dappBrowser.confirm").message.ifEmpty { "Transaction failed." })
             } finally {
                 setState { it.copy(working = false) }
             }

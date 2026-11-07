@@ -44,6 +44,7 @@ internal object ProfileWrites {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "profileWrites.hivemind")
             null
         }
         check(sawPosting || wrotePosting, ownWrite, account, hivemind)?.let { return Checked(account, it) }
@@ -104,6 +105,7 @@ internal object ProfileWrites {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "profileWrites.base")
             null
         }
         val ownWrite = env.api.accounts.wroteProfile(account.name)

@@ -69,6 +69,7 @@ final class IosDictationRecorder: NSObject, DictationRecorder {
             file = target
             return true
         } catch {
+            Reports.quiet(error, where: "dictation.start")
             cancel()
             return false
         }

@@ -570,7 +570,7 @@ final class ListenAudioController: ListenEvents {
         // set before it runs, so its end can tell it is still the current one
         renewal = Task { [weak self] in
             var ok = true
-            do { try await self?.model.renewUrls() } catch { ok = false }
+            do { try await self?.model.renewUrls() } catch { Reports.quiet(error, where: "listen.renewUrls"); ok = false }
             guard let self, !Task.isCancelled, self.renewalId == id else { return }
             self.renewal = nil
             guard let s = self.state else { return }

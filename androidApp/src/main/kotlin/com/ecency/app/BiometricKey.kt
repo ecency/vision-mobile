@@ -51,7 +51,8 @@ object BiometricKey {
             generateKey()
         }
         BINDING
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        com.ecency.core.app.ErrorReports.quiet(e, "biometric.createKey")
         null
     }
 
@@ -65,6 +66,8 @@ object BiometricKey {
             Use.Ready(Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key) })
         }
     } catch (e: Exception) {
+        // a changed enrollment invalidates the key on purpose; anything else is worth seeing
+        if (e !is KeyPermanentlyInvalidatedException) com.ecency.core.app.ErrorReports.quiet(e, "biometric.useKey")
         failure(e)
     }
 
@@ -84,6 +87,7 @@ object BiometricKey {
     fun proves(cipher: Cipher?): Boolean = try {
         cipher != null && cipher.doFinal(ByteArray(16)).isNotEmpty()
     } catch (_: Exception) {
+        // not reported: a cipher the prompt did not unlock is the answer
         false
     }
 }

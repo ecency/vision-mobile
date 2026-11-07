@@ -105,7 +105,7 @@ class FollowsModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, isLoadingMore = false, loaded = true, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isLoadingMore = false, loaded = true, error = AppError.from(e, "follows.load")) }
             }
         }
     }

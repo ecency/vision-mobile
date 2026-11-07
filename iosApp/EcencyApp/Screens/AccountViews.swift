@@ -80,7 +80,7 @@ struct AccountSwitcherSheet: View {
         guard !account.isCurrent else { return }
         Task {
             do { try await app.env.session.switchTo(username: account.username); dismiss() } catch {
-                app.alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error))
+                app.alert = AppAlert(title: UiCopy.shared.FAIL, message: ErrorText.message(error, where: "session.switch"))
             }
         }
     }

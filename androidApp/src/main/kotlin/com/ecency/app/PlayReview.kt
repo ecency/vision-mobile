@@ -39,6 +39,7 @@ class PlayReview(private val managers: (Activity) -> ReviewManager = { ReviewMan
             val manager = try {
                 managers(shown)
             } catch (e: Exception) {
+                // not reported: a feature probe: no Play review on this device
                 done.resume(false)
                 return@suspendCancellableCoroutine
             }
@@ -51,6 +52,7 @@ class PlayReview(private val managers: (Activity) -> ReviewManager = { ReviewMan
                 try {
                     manager.launchReviewFlow(shown, info.result).addOnCompleteListener { flow -> if (done.isActive) done.resume(flow.isSuccessful) }
                 } catch (e: Exception) {
+                    // not reported: best effort: Play decides whether the review shows
                     if (done.isActive) done.resume(false)
                 }
             }

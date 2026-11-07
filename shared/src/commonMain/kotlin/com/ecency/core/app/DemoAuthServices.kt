@@ -33,6 +33,7 @@ object DemoAuthServices {
             if (demoChat.holdSignIn && "/api/mattermost/bootstrap" in request.url) delay(120_000)
             demoChat.http(request)?.let { return@AuthHttp it }
             DemoWallet.http(request.url, request.body)?.let { return@AuthHttp it }
+            demoBlog(request.method, request.url, request.body)?.let { return@AuthHttp it }
             demoPrivateApi(request.url, nowMillis(), request.body)?.let { return@AuthHttp it }
             // the email digest sheet: no subscription yet, and a subscribe that waits for its confirmation mail
             if ("/api/newsletter/" in request.url) {
@@ -96,6 +97,31 @@ object DemoAuthServices {
     private fun demoTranslate(body: String?): HttpResult {
         val q = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject["q"]?.jsonPrimitive?.content }.getOrNull().orEmpty()
         return HttpResult(200, """{"translatedText":${kotlinx.serialization.json.JsonPrimitive("(demo translation) $q")}}""")
+    }
+
+    /** Accounts whose free Pro blog was claimed in this run (#3636). */
+    val demoBlogs: MutableSet<String> = mutableSetOf()
+
+    /**
+     * The Pro blog (#3636): the hosting lookup (none until claimed) and the claim, which makes it. A demo access token
+     * names its account (`demo-access-<user>`); a seeded account's (`demo`) names none, so the claim answers without
+     * an address and the app shows the claimant's own.
+     */
+    private fun demoBlog(method: String, url: String, body: String?): HttpResult? {
+        if (method == "GET" && "/v1/tenants/" in url) {
+            val user = url.substringAfterLast("/").lowercase()
+            return if (user in demoBlogs) {
+                HttpResult(200, """{"username":"$user","subscriptionStatus":"active","blogUrl":"${com.ecency.core.api.ecency.HostingApi.blogUrl(user)}"}""")
+            } else {
+                HttpResult(404, """{"error":"Tenant not found"}""")
+            }
+        }
+        if (!url.endsWith("/api/hosting/claim-blog")) return null
+        val code = runCatching { Json.parseToJsonElement(body ?: "{}").jsonObject["code"]?.jsonPrimitive?.content }.getOrNull().orEmpty()
+        val user = code.removePrefix("demo-access-").takeIf { code.startsWith("demo-access-") }?.lowercase()
+        if (user != null && user !in demoProMembers) return HttpResult(403, """{"error":"Ecency Pro membership required"}""")
+        val created = user == null || demoBlogs.add(user)
+        return HttpResult(200, """{"created":$created,"tenant":{}}""")
     }
 
     /** Synthetic answers of the Ecency private API calls the profile area makes (bookmarks, favourites, tags, Pro). */

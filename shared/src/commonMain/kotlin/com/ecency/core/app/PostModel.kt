@@ -146,7 +146,7 @@ class PostModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(isLoading = false, isRefreshing = false, error = AppError.from(e)) }
+                setState { it.copy(isLoading = false, isRefreshing = false, error = AppError.from(e, "post.loadPost")) }
             }
         }
     }
@@ -199,6 +199,7 @@ class PostModel internal constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    // not reported: optional community title, RN falls back to the name
                     return@launch // RN's fallback: the name, still a community
                 }
                 tagTitles[name] = title.ifBlank { null }
@@ -218,6 +219,7 @@ class PostModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "post.parent")
                 null
             } ?: return@launch
             val summary = kotlinx.coroutines.withContext(env.dispatchers.render) { env.renderer.summary(parent) }
@@ -264,7 +266,7 @@ class PostModel internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(commentsLoading = false, commentsError = AppError.from(e)) }
+                setState { it.copy(commentsLoading = false, commentsError = AppError.from(e, "post.comments")) }
             }
         }
     }

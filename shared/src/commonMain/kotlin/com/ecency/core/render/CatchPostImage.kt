@@ -26,6 +26,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return try {
             Json.parseToJsonElement(json)
         } catch (e: Exception) {
+            // not reported: untrusted post metadata
             null
         }
     }

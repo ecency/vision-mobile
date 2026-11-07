@@ -44,6 +44,7 @@ class AndroidDictationRecorder(context: Context, private val dir: File = directo
             file = target
             true
         } catch (e: Exception) {
+            com.ecency.core.app.ErrorReports.quiet(e, "dictation.start")
             cancel()
             false
         }

@@ -127,7 +127,7 @@ final class LoginTests: XCTestCase {
         XCTAssertEqual((env.signing.current.prompt as? SigningPromptAuthUpgrade)?.error, SigningModel.companion.KEY_MISMATCH)
         env.signing.cancel()
         do { _ = try await task.value; XCTFail("cancelled") } catch {
-            XCTAssertEqual(ErrorText.appError(error)?.kind, .cancelled)
+            XCTAssertEqual(ErrorText.appError(error, where: "test.where")?.kind, .cancelled)
         }
     }
 
@@ -150,7 +150,7 @@ final class LoginTests: XCTestCase {
                 _ = try await env.session.loginWithKey(username: "spike-alice", secret: input)
                 XCTFail("a public key cannot sign in")
             } catch {
-                XCTAssertEqual(ErrorText.message(error), AppError.companion.PUBLIC_KEY_GIVEN)
+                XCTAssertEqual(ErrorText.message(error, where: "test.where"), AppError.companion.PUBLIC_KEY_GIVEN)
             }
         }
         XCTAssertNil(env.session.current.username)
@@ -191,7 +191,7 @@ final class LoginTests: XCTestCase {
             _ = try await env.accounts.importKeys(username: "spike-alice", secret: "\(key(.active).publicKey().description)\u{2060}")
             XCTFail("a public key is not imported")
         } catch {
-            XCTAssertEqual(ErrorText.message(error), AppError.companion.PUBLIC_KEY_GIVEN)
+            XCTAssertEqual(ErrorText.message(error, where: "test.where"), AppError.companion.PUBLIC_KEY_GIVEN)
         }
         let imported = try await env.accounts.importKeys(username: "spike-alice", secret: "\(key(.active).toWif())\u{200B}")
         XCTAssertEqual(imported.activeKey, key(.active).toWif())

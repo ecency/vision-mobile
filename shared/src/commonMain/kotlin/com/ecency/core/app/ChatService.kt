@@ -227,7 +227,8 @@ class ChatService internal constructor(private val env: AppEnvironment) {
                 if (env.session.current.username == user && badgeAccount == user) env.badges.setChats(total.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chats.unread")
                 // the last count stays
             }
         }
@@ -334,7 +335,8 @@ class ChatPrivacyModel internal constructor(private val env: AppEnvironment) : S
                 if (current.account == user) setState { it.copy(value = value, loaded = true) }
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatPrivacy.load")
                 // RN keeps the default
             }
         }
@@ -352,7 +354,8 @@ class ChatPrivacyModel internal constructor(private val env: AppEnvironment) : S
                 env.ui.toast(UPDATED)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.handled(e, "chatPrivacy.save")
                 setState { it.copy(saving = false) }
                 env.ui.toast(FAILED)
             }

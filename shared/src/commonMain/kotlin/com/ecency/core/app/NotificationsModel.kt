@@ -270,7 +270,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
                 setState { s ->
                     s.copy(
                         isLoading = false, isRefreshing = false, isLoadingMore = false, loaded = true,
-                        error = if (s.items.isEmpty()) AppError.from(e) else null,
+                        error = if (s.items.isEmpty()) AppError.from(e, "notifications.load") else null,
                     )
                 }
             }
@@ -288,6 +288,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "notifications.hivePerMVests")
             0.0
         }
     }
@@ -310,6 +311,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "notifications.unreadCount")
                 return@launch
             }
             if (gen != generation) return@launch
@@ -372,6 +374,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "notifications.refresh")
                 // the rows on screen stay as they are
             }
         }
@@ -412,7 +415,8 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
                 env.signing.broadcast(user, NotificationOps.setLastRead(user, env.nowMillis()))
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "notifications.setLastRead")
                 // the Ecency side is marked; the chain marker is retried by the next "mark all"
             }
         }
@@ -461,6 +465,7 @@ class NotificationsModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.handled(e, "notifications.markRead")
                 if (gen != generation) return@launch
                 setState { s -> s.copy(items = s.items.map { if (it.id in wasUnread) it.copy(read = false) else it }) }
                 setUnread(before.unread)
@@ -567,7 +572,7 @@ class LeaderboardModel internal constructor(private val env: AppEnvironment) : S
             } catch (e: Exception) {
                 failedAt = env.nowMillis()
                 setState { it.copy(isLoading = false, loaded = true) }
-                if (!quiet) env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e).message))
+                if (quiet) ErrorReports.quiet(e, "leaderboard.refresh") else env.ui.toast(L.alert.somethingWrongMsg(message = AppError.from(e, "leaderboard.load").message))
             }
         }
     }

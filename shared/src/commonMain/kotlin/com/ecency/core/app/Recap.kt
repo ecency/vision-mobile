@@ -135,6 +135,7 @@ class RecapModel internal constructor(private val env: AppEnvironment, val key: 
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "recap.price")
             null
         }
         val points = try {
@@ -142,6 +143,7 @@ class RecapModel internal constructor(private val env: AppEnvironment, val key: 
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "recap.points")
             null
         }
         if (current.owner != owner) return
@@ -254,6 +256,7 @@ class RecapModel internal constructor(private val env: AppEnvironment, val key: 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ErrorReports.quiet(e, "recap.translate")
                 // RN only logs it and keeps the summary on screen
                 null
             }

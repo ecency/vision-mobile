@@ -314,7 +314,8 @@ class PurchaseFlowsTest {
         }
         val out = SentryReporting.beforeSend(event)!!
         assertEquals("key <redacted-key> and Bearer <redacted>", out.message!!.message)
-        assertEquals("memo={\"memo\":\"<redacted>\"}", out.exceptions!!.single().value)
+        // a parameter at the start of the text is redacted whole, its JSON value with it
+        assertEquals("memo=<redacted>", out.exceptions!!.single().value)
         val crumb = out.breadcrumbs!!.single()
         assertEquals("GET https://ecency.com/x?code=<redacted>", crumb.message)
         assertEquals("<redacted>", crumb.getData("code"))

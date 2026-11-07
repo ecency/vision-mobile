@@ -23,11 +23,11 @@ class CopyIdentityTest {
 
     @Test
     fun anUndecidedSendIsAFlagNotAMessage() {
-        val error = AppError.from(BroadcastException.Network(IllegalStateException("x"), null, true))
+        val error = AppError.from(BroadcastException.Network(IllegalStateException("x"), null, true), "test.where")
         PseudoLocales.install(PseudoLocales.ACCENTED)
         assertTrue(error.undecided)
         assertNotEquals(BroadcastException.UNDECIDED_MESSAGE, error.message, "the message was English, the language changed")
-        assertFalse(AppError.from(BroadcastException.Network(IllegalStateException("x"), null, false)).undecided)
+        assertFalse(AppError.from(BroadcastException.Network(IllegalStateException("x"), null, false), "test.where").undecided)
     }
 
     @Test

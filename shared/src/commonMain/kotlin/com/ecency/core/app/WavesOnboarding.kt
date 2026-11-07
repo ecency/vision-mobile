@@ -209,6 +209,7 @@ class WavesOnboardingModel internal constructor(private val env: AppEnvironment)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            ErrorReports.quiet(e, "waves.quests")
             // RN renders nothing until both inputs arrived
         }
     }
