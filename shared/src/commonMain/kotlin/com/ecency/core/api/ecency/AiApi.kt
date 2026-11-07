@@ -120,7 +120,8 @@ class AiApi(private val private: EcencyPrivateApi, private val http: AuthHttp, p
     private fun cost(o: JsonObject, key: String): Double? = o.double(key)?.takeIf { it.isFinite() && it >= 0 && it < 1e9 }
 
     private fun json(response: HttpResult): JsonElement? {
-        if (response.status !in 200..299) throw IllegalStateException("status ${response.status}")
+        // typed, so a refused session (401) reads as one and a server error as a lost connection
+        if (response.status !in 200..299) throw com.ecency.core.api.EcencyHttpException(response.status)
         return runCatching { Json.parseToJsonElement(response.body) }.getOrNull()
     }
 }

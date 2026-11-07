@@ -104,7 +104,8 @@ object ErrorReports {
         try {
             val root = rootOf(e)
             val kind = AppError.kindOf(e)
-            if (kind == ErrorKind.NETWORK || skips(e, root, kind)) return
+            // a refused session is not sent either: the user is asked to sign in again, and auth.renewToken says why
+            if (kind == ErrorKind.NETWORK || isSessionRefused(root) || skips(e, root, kind)) return
             send(root, where, kind.name.lowercase(), true, root, quiet = true)
         } catch (t: Throwable) {
             // not reported: reporting must never fail the caller
@@ -140,9 +141,13 @@ object ErrorReports {
         kind in EXPECTED_KINDS -> true
         ChainRefusal.of(e)?.isUsersOwn == true -> true
         e is AppException && e.cause == null -> true
+        isSessionRefused(root) -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
+
+    /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
+    private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true
 
     private val EXPECTED_KINDS = setOf(
         ErrorKind.NETWORK, ErrorKind.TOO_SOON, ErrorKind.RESOURCE_CREDITS, ErrorKind.PAID_OUT, ErrorKind.DUPLICATE_VOTE,

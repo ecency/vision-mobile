@@ -26,6 +26,9 @@ open class EcencyHttpException(val status: Int, message: String = "Ecency API er
     /** The transport refused to follow a redirect ([status] 3xx): an answer, not a lost connection. Never retried by itself. */
     val isRedirect: Boolean get() = status in 300..399
 
+    /** Ecency refused the account's session (401): the user signs in again, not a bug of the app. */
+    val isSessionRefused: Boolean get() = status == 401
+
     companion object {
         /**
          * What a send that threw is reported as. A redirect the transport refused keeps its status and message

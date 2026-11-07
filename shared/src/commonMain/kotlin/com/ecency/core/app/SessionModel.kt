@@ -488,6 +488,17 @@ class SessionModel internal constructor(private val env: AppEnvironment) :
 
     fun dismissExpiredSession() = setState { it.copy(expiredSession = null) }
 
+    /**
+     * Ecency's private API refused [username]'s session and no renewal fixed it ([com.ecency.core.auth.AccountManager]
+     * tells this once per refused session, from any thread): the same "session expired" prompt as at start, while
+     * [username] is still the signed-in account. Not RN, which never looked at a 401.
+     */
+    internal fun sessionRefused(username: String) {
+        scope.launch {
+            if (current.username == username) setState { it.copy(expiredSession = username) }
+        }
+    }
+
     fun clearError() = setState { it.copy(error = null) }
 
     /** The vault was wiped: signed out, nothing left to read. */

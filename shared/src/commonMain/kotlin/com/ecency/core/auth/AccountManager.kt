@@ -108,8 +108,12 @@ class AccountManager(
     internal fun removalMark(username: String): RemovalMark = removals.load().let { RemovalMark(it.all, it.byAccount[username] ?: 0) }
 
     /** Called after the removal is done (inside [mutex]), so a renewal that read the store during it is stale too. */
-    private fun markRemoved(username: String?) = removals.update { m ->
-        if (username == null) m.copy(all = m.all + 1) else m.copy(byAccount = m.byAccount + (username to (m.byAccount[username] ?: 0) + 1))
+    private fun markRemoved(username: String?) {
+        removals.update { m ->
+            if (username == null) m.copy(all = m.all + 1) else m.copy(byAccount = m.byAccount + (username to (m.byAccount[username] ?: 0) + 1))
+        }
+        // a session signed in again starts unrefused
+        refused.update { r -> if (username == null) emptyMap() else r - username }
     }
 
     /**
@@ -440,14 +444,20 @@ class AccountManager(
         val current = code(username) ?: return null
         // renewed meanwhile (another refused call, or the start's renewal): that token, with no second exchange
         if (current != rejected) return if (removalMark(username) == mark) current else null
+        // this token was already given up as refused: the user was asked to sign in again, nothing is spent again
+        if (refused.load()[username] == current) return null
         val existing = db { session(username) } ?: return null
-        val exchanged = existing.refreshToken?.takeIf { it.isNotEmpty() }?.let { refresh ->
+        val refresh = existing.refreshToken?.takeIf { it.isNotEmpty() }
+        var why = if (refresh == null) "no refresh token" else ""
+        val exchanged = refresh?.let {
             try {
-                tokens.exchange(refresh, nowMillis()).takeIf { it.username == username }
+                tokens.exchange(it, nowMillis()).also { s -> if (s.username != username) why = "refresh exchange answered another account" }
+                    .takeIf { s -> s.username == username }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 com.ecency.core.app.ErrorReports.quiet(e, "auth.refreshToken")
+                why = "refresh exchange " + failure(e)
                 null
             }
         }
@@ -457,14 +467,57 @@ class AccountManager(
             }
             return if (stored) exchanged.accessToken else null
         }
-        return try {
-            signKeySession(username, mark)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            com.ecency.core.app.ErrorReports.quiet(e, "auth.keySession")
+        val method = db { account(username) }?.authType?.loginMethod()
+        val signed = if (method != LoginMethod.KEY) {
+            why += "; not a key account"
             null
+        } else {
+            try {
+                signKeySession(username, mark).also { if (it == null) why += "; no usable signing key" }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(e, "auth.keySession")
+                why += "; key session " + failure(e)
+                null
+            }
         }
+        // signed out while it ran: nothing to tell
+        if (signed == null && removalMark(username) == mark) {
+            com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed(why), "auth.renewToken")
+        }
+        return signed
+    }
+
+    /** How an exchange failed, for [SessionRenewalFailed]: a status or a type name, never a message or a token. */
+    private fun failure(e: Exception): String = when {
+        e is AuthException.TokenExchangeFailed && e.status == 0 -> "got no answer"
+        e is AuthException.TokenExchangeFailed -> "answered HTTP ${e.status}"
+        e is AuthException.AccountMismatch -> "answered another account"
+        else -> "failed (${e::class.simpleName})"
+    }
+
+    /**
+     * The token each account's session was given up with ([sessionRefused]): while it is still the stored one, a
+     * refused call neither renews again nor asks again. A new sign-in or a renewal stores another token.
+     */
+    private val refused = AtomicReference<Map<String, String>>(emptyMap())
+
+    /**
+     * Called with the account's name, once per refused session, when a private call was refused and renewing did not
+     * help (see [sessionRefused]). Set by the app ([com.ecency.core.app.SessionModel] asks to sign in again).
+     */
+    var onSessionRefused: (String) -> Unit = {}
+
+    override fun sessionRefused(username: String, rejected: String, mark: Any?) {
+        // the session the call went out with left meanwhile (signed out, maybe in again): nothing to ask
+        if ((mark as? RemovalMark ?: return) != removalMark(username)) return
+        while (true) {
+            val before = refused.load()
+            if (before[username] == rejected) return
+            if (refused.compareAndSet(before, before + (username to rejected))) break
+        }
+        onSessionRefused(username)
     }
 
     /** The account's stored refresh token, or null (the chat bootstrap sends it, as RN does). */
