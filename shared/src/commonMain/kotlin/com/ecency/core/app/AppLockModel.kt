@@ -135,7 +135,7 @@ data class AppLockState(
      * What the PIN pad shows under its message: the entry's own error, else a storage failure of the last
      * check. The pad shows it in place of an alert, which cannot appear while the app is locked.
      */
-    val promptError: String? get() = prompt?.let { it.error ?: error?.message }
+    val promptError: String? get() = prompt?.let { it.error ?: error?.text }
 
     /** Whether the lock screen should start the biometric prompt by itself now (once per lock). */
     val autoStartsBiometric: Boolean get() = offersBiometric && prompt?.autoBiometric == true

@@ -133,7 +133,8 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
             is SendPhase.Unconfirmed -> p.message
             else -> null
         }
-        text?.let { env.ui.toast(it) }
+        val failed = (s.phase as? SendPhase.Failed)?.error
+        text?.let { if (failed != null) env.ui.toast(it, failed) else env.ui.toast(it) }
         release(s.actionId)
     }
 

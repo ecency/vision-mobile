@@ -147,7 +147,7 @@ class AppLockDeltaTest {
         assertTrue(lock.current.isLocked)
         val error = lock.current.error
         assertTrue(error != null)
-        assertEquals(error.message, lock.current.promptError, "the pad shows what an alert cannot while locked")
+        assertEquals(error.text, lock.current.promptError, "the pad shows what an alert cannot while locked, with its code (#3660)")
         app.store.keyLost = false
         type(lock, "0000")
         assertNull(lock.current.error, "a new check replaces the old failure")

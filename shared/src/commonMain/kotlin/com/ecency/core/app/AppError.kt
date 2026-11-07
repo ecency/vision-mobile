@@ -148,9 +148,15 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
             is AuthException.UnsupportedOperation -> AppError(ErrorKind.INVALID_INPUT, e.message.orEmpty(), false)
             is AuthException.InvalidLink -> AppError(ErrorKind.INVALID_INPUT, L.qr.unsupportedAlertDesc, false)
             // HiveSigner relays the chain's refusal in error_description: read as the node's (#3660)
-            is AuthException.HiveSignerApi -> ChainRefusal.of(e.description, e.error)?.let { refused(it, e) }
-                ?: if (e.error in HIVESIGNER_LOGIN_CODES) AppError(ErrorKind.AUTH, L.native.chainRefusal.hiveSignerExpired, false)
-                else AppError(ErrorKind.AUTH, e.description ?: e.error ?: UNKNOWN_AUTH_ERROR, false)
+            is AuthException.HiveSignerApi -> ChainRefusal.of(e.description, e.error)?.let { refused(it, e) } ?: when {
+                // an expired token also comes back as unauthorized_client "The token has expired"
+                e.error in HIVESIGNER_LOGIN_CODES || HIVESIGNER_EXPIRED.containsMatchIn(e.description.orEmpty()) ->
+                    AppError(ErrorKind.AUTH, L.native.chainRefusal.hiveSignerExpired, false)
+                // a chain refusal HiveSigner relayed that no pattern knows: the node's words, as for a key login
+                e.description.orEmpty().contains("Assert Exception", ignoreCase = true) ->
+                    AppError(ErrorKind.REJECTED, L.native.chainRefusal.refusedWith(reason = ChainRefusal.readable(e.description.orEmpty()).take(150)), false)
+                else -> AppError(ErrorKind.AUTH, e.description ?: e.error ?: UNKNOWN_AUTH_ERROR, false)
+            }
             is AuthException.HiveAuth -> ChainRefusal.of(e.detail)?.let { refused(it, e) } ?: when (e.reason) {
                 AuthException.HiveAuth.Reason.REJECTED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestWasRejected, false)
                 AuthException.HiveAuth.Reason.EXPIRED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestExpiredBefore, true)
@@ -172,6 +178,8 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
 
         /** HiveSigner's answers for a login that expired or was revoked (RN/SDK shouldTriggerAuthFallback codes). */
         private val HIVESIGNER_LOGIN_CODES = setOf("invalid_grant", "unauthorized_access")
+
+        private val HIVESIGNER_EXPIRED = Regex("token (has )?expired|invalid token", RegexOption.IGNORE_CASE)
 
         /** "Something went wrong. Please try again.": only when nothing more is known, and said once. */
         val GENERIC_MESSAGE: String get() = L.aiAssist.errorGeneric
@@ -217,7 +225,8 @@ open class AppException(val error: AppError, cause: Throwable? = null) : EcencyE
  * change after the fact are the app's doing, so they keep their code.
  */
 val ChainRefusal.isUsersOwn: Boolean get() = this !in setOf(
-    ChainRefusal.NOT_UTF8, ChainRefusal.BENEFICIARIES_REFUSED, ChainRefusal.OPTIONS_LOCKED, ChainRefusal.PAYOUT_RAISED,
+    ChainRefusal.NOT_UTF8, ChainRefusal.INVALID_JSON, ChainRefusal.BENEFICIARIES_REFUSED, ChainRefusal.OPTIONS_LOCKED,
+    ChainRefusal.PAYOUT_RAISED,
 )
 
 /** The [ErrorKind] a chain refusal is shown as (issue #3660). */
@@ -229,5 +238,6 @@ val ChainRefusal.kind: ErrorKind get() = when (this) {
     ChainRefusal.HIVESIGNER_NO_PERMISSION, ChainRefusal.MISSING_POSTING, ChainRefusal.MISSING_ACTIVE, ChainRefusal.MISSING_OWNER -> ErrorKind.AUTH
     ChainRefusal.INSUFFICIENT_FUNDS, ChainRefusal.VOTE_TOO_SMALL, ChainRefusal.DELETE_VOTED, ChainRefusal.DELETE_REPLIES,
     ChainRefusal.OPTIONS_LOCKED, ChainRefusal.PAYOUT_RAISED -> ErrorKind.REJECTED
-    ChainRefusal.TITLE_TOO_LONG, ChainRefusal.BODY_EMPTY, ChainRefusal.NOT_UTF8, ChainRefusal.BENEFICIARIES_REFUSED -> ErrorKind.INVALID_INPUT
+    ChainRefusal.TITLE_TOO_LONG, ChainRefusal.BODY_EMPTY, ChainRefusal.NOT_UTF8, ChainRefusal.INVALID_JSON,
+    ChainRefusal.BENEFICIARIES_REFUSED -> ErrorKind.INVALID_INPUT
 }

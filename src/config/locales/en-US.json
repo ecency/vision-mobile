@@ -2894,6 +2894,7 @@
       "title_bytes": "The title is too long for Hive: {size} bytes, {max} at most. Emoji and many letters take 2 to 4 bytes each; shorten it and publish again.",
       "body_empty": "The post is empty. Write something and publish again.",
       "not_utf8": "The text has a character Hive cannot store, often a broken emoji or symbol pasted from elsewhere. Remove it and try again.",
+      "invalid_json": "Hive refused the post's details (tags, links or images) as invalid. Try again, and if it repeats, send us the error code.",
       "beneficiaries_refused": "Hive refused the beneficiary list. Check the accounts in it and try again.",
       "options_locked": "Beneficiaries can only be set when a post is first published, before it gets votes. Keep them as they were and try again.",
       "payout_raised": "The payout options of a published post can only be lowered, not raised.",

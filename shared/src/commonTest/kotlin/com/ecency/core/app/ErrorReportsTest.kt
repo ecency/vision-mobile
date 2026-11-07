@@ -66,6 +66,16 @@ class ErrorReportsTest {
     }
 
     @Test
+    fun oneFailureShownAtTwoPlacesShowsTheCodeOfItsOneReport() {
+        val e = IllegalStateException("boom")
+        val first = AppError.from(e, "community.send")
+        val second = AppError.from(e, "communityMembers.setRole")
+        assertEquals(1, reporter.reports.size)
+        assertEquals(first.code, second.code)
+        assertEquals(reporter.reports.single().tags["error_code"], second.code)
+    }
+
+    @Test
     fun anExpectedRefusalCarriesNoCode() {
         val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
         assertEquals(null, error.code)

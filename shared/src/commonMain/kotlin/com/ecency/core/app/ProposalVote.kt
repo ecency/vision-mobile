@@ -216,7 +216,7 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 is SendPhase.Failed -> {
                     setState { it.copy(voting = false) }
                     val message = phase.error.text
-                    env.ui.toast(if (message.isNotEmpty()) "${ProposalCopy.FAIL}: $message" else ProposalCopy.FAIL)
+                    env.ui.toast(if (message.isNotEmpty()) "${ProposalCopy.FAIL}: $message" else ProposalCopy.FAIL, phase.error)
                 }
                 else -> setState { it.copy(voting = false) }
             }

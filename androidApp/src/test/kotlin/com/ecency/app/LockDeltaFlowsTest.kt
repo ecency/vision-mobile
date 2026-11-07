@@ -126,7 +126,7 @@ class LockDeltaFlowsTest {
         // fetching semantics idles the main looper, where the model's results land
         compose.await("exists(\"pinError\")") { exists("pinError") }
         assertTrue("still locked", env.appLock.current.isLocked)
-        compose.onNodeWithTag("pinError").assertTextEquals(env.appLock.current.error!!.message)
+        compose.onNodeWithTag("pinError").assertTextEquals(env.appLock.current.error!!.text)
     }
 
     @Test

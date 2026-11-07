@@ -29,6 +29,7 @@ enum class ChainRefusal(private val pattern: Regex) {
     TITLE_TOO_LONG(Regex("title size limit exceeded", RegexOption.IGNORE_CASE)),
     BODY_EMPTY(Regex("body is empty", RegexOption.IGNORE_CASE)),
     NOT_UTF8(Regex("not formatted in utf-?8|not valid utf-?8|must be utf-?8", RegexOption.IGNORE_CASE)),
+    INVALID_JSON(Regex("json is not valid json", RegexOption.IGNORE_CASE)),
     OPTIONS_LOCKED(
         Regex(
             "already has beneficiaries specified|must not have been voted on before specifying beneficiaries|requires the comment to have no rshares",
@@ -64,6 +65,7 @@ enum class ChainRefusal(private val pattern: Regex) {
         TITLE_TOO_LONG -> L.native.chainRefusal.titleTooLong
         BODY_EMPTY -> L.native.chainRefusal.bodyEmpty
         NOT_UTF8 -> L.native.chainRefusal.notUtf8
+        INVALID_JSON -> L.native.chainRefusal.invalidJson
         OPTIONS_LOCKED -> L.native.chainRefusal.optionsLocked
         BENEFICIARIES_REFUSED -> L.native.chainRefusal.beneficiariesRefused
         PAYOUT_RAISED -> L.native.chainRefusal.payoutRaised

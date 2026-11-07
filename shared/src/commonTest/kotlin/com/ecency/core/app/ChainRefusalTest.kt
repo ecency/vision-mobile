@@ -51,6 +51,7 @@ class ChainRefusalTest {
         ChainRefusal.BODY_EMPTY to "Assert Exception: Body is empty",
         ChainRefusal.NOT_UTF8 to "Assert Exception: Body not formatted in UTF8",
         ChainRefusal.NOT_UTF8 to "Assert Exception: JSON Metadata must be UTF-8",
+        ChainRefusal.INVALID_JSON to "Assert Exception:fc::json::is_valid(json): JSON is not valid JSON",
         ChainRefusal.BENEFICIARIES_REFUSED to "Assert Exception: Beneficiaries must be specified in sorted order (account ascending)",
         ChainRefusal.OPTIONS_LOCKED to "Assert Exception: Comment already has beneficiaries specified.",
         ChainRefusal.OPTIONS_LOCKED to "Assert Exception: Comment must not have been voted on before specifying beneficiaries.",
@@ -142,6 +143,28 @@ class ChainRefusalTest {
         val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "test.hivesigner")
         assertEquals(ErrorKind.AUTH, error.kind)
         assertEquals(L.native.chainRefusal.hiveSignerExpired, error.message)
+    }
+
+    @Test
+    fun anExpiredHiveSignerTokenAnsweredAsUnauthorizedClientSaysSignInAgain() {
+        val error = AppError.from(AuthException.HiveSignerApi(401, "unauthorized_client", "The token has expired"), "test.hivesigner")
+        assertEquals(L.native.chainRefusal.hiveSignerExpired, error.message)
+        // a missing permission keeps its own copy
+        val permission = viaHiveSigner("The app @ecency.app doesn't have permission to broadcast for @spike-voter")
+        assertEquals(ChainRefusal.HIVESIGNER_NO_PERMISSION.message, permission.message)
+    }
+
+    @Test
+    fun anUnknownRefusalHiveSignerRelayedIsQuotedLikeTheNodes() {
+        val error = viaHiveSigner("Assert Exception:_db.head_block_time() < o.expiration: Something new went wrong.")
+        assertEquals(ErrorKind.REJECTED, error.kind)
+        assertEquals(L.native.chainRefusal.refusedWith(reason = "Something new went wrong."), error.message)
+    }
+
+    @Test
+    fun aHiveAuthAnswerTheAppCouldNotReadStaysGeneric() {
+        val error = AppError.from(AuthException.HiveAuth(AuthException.HiveAuth.Reason.INVALID_RESPONSE, "missing uuid"), "test.hiveauth")
+        assertEquals(L.hiveauth.authFail, error.message)
     }
 
     @Test
