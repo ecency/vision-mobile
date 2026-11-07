@@ -523,9 +523,9 @@ class AccountManager(
     var onSessionRefused: (String) -> Unit = {}
 
     @Throws(Exception::class)
-    override suspend fun sessionRefused(username: String, rejected: String, mark: Any?) {
+    override suspend fun sessionRefused(username: String, rejected: String, mark: Any?): Boolean {
         // the session the call went out with left meanwhile (signed out, maybe in again): nothing to ask
-        if ((mark as? RemovalMark ?: return) != removalMark(username)) return
+        if ((mark as? RemovalMark ?: return false) != removalMark(username)) return false
         // signed in again (or renewed) since the token was refused: the stored session is another one
         val stored = try {
             mutex.withLock { code(username) }
@@ -536,13 +536,14 @@ class AccountManager(
             com.ecency.core.app.ErrorReports.quiet(e, "auth.sessionRefused")
             rejected
         }
-        if (stored != rejected) return
+        if (stored != rejected) return false
         while (true) {
             val before = refused.load()
-            if (before[username] == rejected) return
+            if (before[username] == rejected) return true
             if (refused.compareAndSet(before, before + (username to rejected))) break
         }
         onSessionRefused(username)
+        return true
     }
 
     /** The account's stored refresh token, or null (the chat bootstrap sends it, as RN does). */

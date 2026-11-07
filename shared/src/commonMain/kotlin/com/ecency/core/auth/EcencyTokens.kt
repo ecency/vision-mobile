@@ -124,10 +124,11 @@ fun interface EcencyCodeProvider {
     /**
      * A private call sent under [mark] was refused (401) with [rejected], and renewing did not help: no new code, or
      * the new one ([rejected] then) was refused too. The session is the user's to sign in again to, unless another
-     * one was stored meanwhile. The default does nothing.
+     * one was stored meanwhile. True when the refusal was taken: the call then reads as an expired session; false
+     * (another session stands) leaves it a plain 401. The default takes it.
      */
     @Throws(Exception::class)
-    suspend fun sessionRefused(username: String, rejected: String, mark: Any?) {}
+    suspend fun sessionRefused(username: String, rejected: String, mark: Any?): Boolean = true
 }
 
 /**
@@ -201,14 +202,12 @@ class EcencyPrivateApi(
             return first
         }
         if (fresh.isNullOrEmpty() || fresh == code) {
-            codes.sessionRefused(username, code, mark)
-            return first.copy(sessionRefused = true)
+            return first.copy(sessionRefused = codes.sessionRefused(username, code, mark))
         }
         val second = send(fresh)
         if (second.status == 401) {
             com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed("renewed token refused again"), "auth.renewToken")
-            codes.sessionRefused(username, fresh, mark)
-            return second.copy(sessionRefused = true)
+            return second.copy(sessionRefused = codes.sessionRefused(username, fresh, mark))
         }
         return second
     }

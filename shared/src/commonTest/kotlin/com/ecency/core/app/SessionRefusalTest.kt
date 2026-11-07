@@ -16,6 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -296,7 +297,9 @@ class SessionRefusalTest {
         testScheduler.runCurrent()
         assertEquals("access-${signedIn + 2}", app.env.accounts.code(alice), "a new session was stored")
         held.complete(Unit)
-        assertTrue(call.await().isFailure)
+        val failure = assertNotNull(call.await().exceptionOrNull())
+        // the stale 401 is no expired session either: the call's own failure, the new session stands
+        assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(failure, "wallet.claim").message)
         testScheduler.advanceUntilIdle()
         assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again")
         assertNull(app.env.session.current.expiredSession, "the session the call went out with is no longer the stored one")
