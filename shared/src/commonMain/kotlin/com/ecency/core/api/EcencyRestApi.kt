@@ -37,10 +37,11 @@ open class EcencyHttpException(val status: Int, message: String = "Ecency API er
         /**
          * What a send that threw is reported as. A redirect the transport refused keeps its status and message
          * (asking again gets the same answer, and "network error" would send the user looking at their
-         * connection); anything else never got an answer: status 0.
+         * connection); a timeout stays one (the server was slow, the connection may be fine); anything else never
+         * got an answer: status 0.
          */
         fun ofSendFailure(e: Exception): EcencyHttpException =
-            if (e is EcencyHttpException && e.isRedirect) e else EcencyHttpException(0, "network error", e)
+            if (e is EcencyHttpException && (e.isRedirect || e is EcencyTimeoutException)) e else EcencyHttpException(0, "network error", e)
     }
 }
 

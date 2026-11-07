@@ -186,6 +186,16 @@ class ChatListFreshnessTest {
     }
 
     @Test
+    fun aChannelsReadThatTimedOutIsNotNoInternet() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.before = { r -> if (r.url.endsWith("/api/mattermost/channels")) throw com.ecency.core.api.EcencyTimeoutException() else null }
+        val m = list(f)
+        assertNotNull(m.current.error)
+        assertNotEquals(ChatsModel.NO_INTERNET, m.current.error, "the server was slow, the connection was there")
+    }
+
+    @Test
     fun aRefusedChannelsReadShowsItsOwnFailureNotNoInternet() = runTest {
         val f = ChatFixture(this)
         val reporter = RecordingReporter()
