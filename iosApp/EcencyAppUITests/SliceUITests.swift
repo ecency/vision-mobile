@@ -156,6 +156,29 @@ final class SliceUITests: XCTestCase {
         XCTAssertTrue(app.alerts["Sign in required"].waitForExistence(timeout: 5))
     }
 
+    /// Tester feedback: the reply sits under the post, before the comments (RN WritePostButton). Signed out it asks
+    /// to sign in; signed in it opens the reply composer.
+    func testTheReplyFieldUnderThePostOpensTheReply() {
+        let signedOut = launch()
+        openFirstPost(signedOut)
+        let field = signedOut.buttons["write-reply"]
+        for _ in 0..<12 where !field.exists || !field.isHittable { signedOut.swipeUp(velocity: .slow) }
+        XCTAssertTrue(field.isHittable)
+        XCTAssertEqual(field.label, "Add a comment...")
+        field.tap()
+        XCTAssertTrue(signedOut.alerts["Sign in required"].waitForExistence(timeout: 5))
+        signedOut.terminate()
+
+        let app = XCUIApplication()
+        app.launchArguments += ["-fakeData", "YES", "-homeSort", "trending", "-seedAccounts", "YES"]
+        app.launch()
+        openFirstPost(app)
+        let reply = app.buttons["write-reply"]
+        for _ in 0..<12 where !reply.exists || !reply.isHittable { app.swipeUp(velocity: .slow) }
+        reply.tap()
+        XCTAssertTrue(app.textViews["reply-text"].waitForExistence(timeout: 10))
+    }
+
     /// Typing in the reply composer keeps every character. The editor used to read its text back from the
     /// model's watched state, which arrives a main-queue turn later, so fast typing lost characters (a live
     /// run sent "NS" for "Native app test reply iOS").

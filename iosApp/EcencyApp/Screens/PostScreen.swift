@@ -189,6 +189,12 @@ struct PostScreen: View {
                         if state.post != nil, state.body != nil, !state.tags.isEmpty { PostTagsRow(tags: state.tags) { app.push($0) } }
                         // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges
                         if let p = state.post, state.body != nil, extras.translate.state.translated == nil { PostedByRow(post: p) }
+                        // RN postDisplayView's WritePostButton: the reply sits under the post, not only in the comments header
+                        if let p = state.post, state.body != nil {
+                            WriteReplyRow(avatarUrl: app.session.state.username.map { PostCard.companion.avatarUrl(account: $0, proxyBase: app.env.proxyBase, size: "small") }) {
+                                if app.requireSignIn(to: .reply) { replyTarget = ReplyTarget(parent: p) }
+                            }
+                        }
                         // RN NewsletterPostPrompt, once the body is in
                         if let p = state.post, state.body != nil { DigestPostPrompt(model: extras.digestPrompt, post: p) }
                         if let poll = extras.poll { PollCard(model: poll) }
@@ -622,5 +628,39 @@ struct CommentRow: View {
                 .accessibilityIdentifier("reply-comment")
             if let thread { ThreadTogglePill(toggle: thread) }
         }
+    }
+}
+
+/**
+ * RN WritePostButton under the post: the reader's avatar and an "Add a comment..." field that opens the reply (a
+ * signed-out reader is asked to sign in, as for every reply). One button, with the reply icon so it reads as one.
+ */
+private struct WriteReplyRow: View {
+    let avatarUrl: String?
+    let action: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                if let avatarUrl { AvatarView(url: avatarUrl, size: 32).accessibilityHidden(true) }
+                HStack {
+                    Text(ReadingUiCopy.shared.ADD_A_COMMENT).scaledFont(15).foregroundStyle(theme.secondary)
+                    Spacer(minLength: 8)
+                    Image(appIcon: .reply).foregroundStyle(theme.accentText).accessibilityHidden(true)
+                }
+                .padding(.horizontal, 16)
+                .frame(minHeight: 40)
+                .background(Capsule().fill(theme.lightBackground))
+                .overlay(Capsule().stroke(theme.border, lineWidth: 1))
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 4)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(ReadingUiCopy.shared.ADD_A_COMMENT)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("write-reply")
     }
 }
