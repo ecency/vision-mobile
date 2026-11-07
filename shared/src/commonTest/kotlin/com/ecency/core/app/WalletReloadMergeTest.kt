@@ -116,6 +116,55 @@ class WalletReloadMergeTest {
         assertEquals(WalletModel.DEFAULT_ASSETS, w.env.wallet.current.rows.map { it.symbol })
     }
 
+    private val withoutLeo = """[{"symbol":"LEO","type":"ENGINE","meta":{"show":false}},{"symbol":"BNB","type":"CHAIN","meta":{"show":true,"address":"0xabc"}}]"""
+    private val portfolioWithoutLeo = WalletWorld.PORTFOLIO.replace(""""symbol":"LEO","layer":"engine"""", """"symbol":"LEO","layer":"nope"""")
+
+    /** The total a first load shows for the account with LEO turned off. */
+    private suspend fun TestScope.totalWithoutLeo(): String {
+        val w = WalletWorld(this, tokensJson = withoutLeo)
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, portfolioWithoutLeo) }
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        return w.env.wallet.current.totalText
+    }
+
+    /** A token turned off in Manage Assets: the enabled-only portfolio leaves it out, and its value leaves the total. */
+    @Test
+    fun aTokenTurnedOffLeavesTheRowsAndTheTotalOnTheNextReload() = runTest {
+        val expected = totalWithoutLeo()
+        val w = loaded()
+        assertTrue(w.env.wallet.current.totalText != expected, "LEO counts while it is on")
+        w.rpc["condenser_api.get_accounts"] = { w.accountsJson(it, withoutLeo) }
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, portfolioWithoutLeo) }
+        w.env.wallet.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("POINTS", "HP", "HIVE", "HBD", "BNB"), w.env.wallet.current.rows.map { it.symbol })
+        assertTrue(w.env.wallet.current.all.none { it.symbol == "LEO" }, "no stale LEO item")
+        assertEquals(expected, w.env.wallet.current.totalText)
+    }
+
+    /** A whole answer (every default asset) is the portfolio: a symbol it no longer has goes on a reload too, as RN. */
+    @Test
+    fun aWholeReloadWithoutASymbolDropsIt() = runTest {
+        val w = loaded()
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, portfolioWithoutLeo) }
+        w.env.wallet.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("POINTS", "HP", "HIVE", "HBD", "BNB"), w.env.wallet.current.rows.map { it.symbol })
+    }
+
+    /** A partial answer (POINTS alone) keeps the selected rows, but not a token turned off meanwhile. */
+    @Test
+    fun aPartialReloadKeepsTheSelectedRowsOnly() = runTest {
+        val w = loaded()
+        w.rpc["condenser_api.get_accounts"] = { w.accountsJson(it, withoutLeo) }
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, pointsOnly()) }
+        w.env.wallet.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("POINTS", "HP", "HIVE", "HBD", "BNB"), w.env.wallet.current.rows.map { it.symbol })
+        assertTrue(w.env.wallet.current.all.none { it.symbol == "LEO" }, "no stale LEO item")
+    }
+
     /** A token the account really no longer has goes once a full load (not a reload after an action) answers without it. */
     @Test
     fun aFullLoadReplacesThePortfolio() = runTest {

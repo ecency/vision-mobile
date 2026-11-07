@@ -282,13 +282,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 if (!owns(user)) return@launch
                 readAt = stamp
                 val key = user to currency.code
-                served = if (refresh && servedFor == key) merged(served, items) else items
+                val selection = tokens?.let(::selectionFor) ?: current.selection
+                served = if (refresh && servedFor == key) merged(served, items, selection) else items
                 servedFor = key
                 setState {
                     withRows(
                         it.copy(
                             hivePerMVests = perMVests, isLoading = false, isRefreshing = false, loaded = true,
-                            updatedAtMillis = env.nowMillis(), selection = tokens?.let(::selectionFor) ?: it.selection, error = null,
+                            updatedAtMillis = env.nowMillis(), selection = selection, error = null,
                         ),
                     )
                 }
@@ -304,12 +305,16 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * A reload's answer over the portfolio shown (README "Wallet", reloads keep rows): an answered symbol takes the new
-     * item, a symbol the answer left out keeps its last one, so a partial answer (POINTS alone after quick claims) never
-     * drops a row or the total's share of it. A full load ([retry], the first load, a currency or account change) replaces.
+     * item. A symbol the answer left out keeps its last one only while the answer is plainly partial (it lacks one of
+     * [DEFAULT_ASSETS], which a whole answer always holds) and the symbol is still in [selection], so a partial answer
+     * (POINTS alone after quick claims) never drops a row or the total's share of it, while a token turned off in Manage
+     * Assets (the enabled-only portfolio leaves it out) or one a whole answer no longer has goes, with its value and any
+     * stale pending reward. A full load ([retry], the first load, a currency or account change) replaces.
      */
-    private fun merged(old: List<PortfolioItem>, fresh: List<PortfolioItem>): List<PortfolioItem> {
+    private fun merged(old: List<PortfolioItem>, fresh: List<PortfolioItem>, selection: List<String>): List<PortfolioItem> {
         val bySymbol = fresh.associateBy { it.symbol }
-        val kept = old.map { bySymbol[it.symbol] ?: it }
+        val partial = DEFAULT_ASSETS.any { it !in bySymbol }
+        val kept = old.mapNotNull { bySymbol[it.symbol] ?: it.takeIf { partial && it.symbol in selection } }
         val known = old.mapTo(HashSet()) { it.symbol }
         return kept + fresh.filter { it.symbol !in known }
     }
