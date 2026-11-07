@@ -120,7 +120,30 @@ fun interface EcencyCodeProvider {
      */
     @Throws(Exception::class)
     suspend fun renewAfterRejection(username: String, rejected: String, mark: Any?): String? = null
+
+    /**
+     * A private call sent under [mark] was refused (401) with [rejected], and renewing did not help: no new code, or
+     * the new one ([rejected] then) was refused too. The session is the user's to sign in again to, unless another
+     * one was stored meanwhile. True when the refusal was taken: the call then reads as an expired session; false
+     * (another session stands) leaves it a plain 401. The default takes it.
+     */
+    @Throws(Exception::class)
+    suspend fun sessionRefused(username: String, rejected: String, mark: Any?): Boolean = true
 }
+
+/**
+ * Why a refused session could not be renewed (`auth.renewToken`, a quiet report): which path was taken and how it
+ * failed, in words of the code only. Never carries a token or other user data.
+ */
+class SessionRenewalFailed(reason: String) : com.ecency.core.api.EcencyException(reason)
+
+/**
+ * Thrown by [EcencyCodeProvider.renewAfterRejection] when the renewal could not be tried to the end: the exchange
+ * gave no answer, a server error or a 429, or a key account's fresh code could not be sent. The session is not known
+ * to be refused, so nobody is asked to sign in again; the refused call goes back to its caller and the next one tries
+ * again. [reason] is in words of the code only, never a token.
+ */
+class SessionRenewalUnavailable(reason: String) : com.ecency.core.api.EcencyException(reason)
 
 /**
  * Calls Ecency's private API the way @ecency/sdk does: `POST {host}/private-api/<path>` with a JSON body
@@ -156,7 +179,10 @@ class EcencyPrivateApi(
     /**
      * Sends with [username]'s code; a 401 asks [EcencyCodeProvider.renewAfterRejection] for a new one and sends
      * once more with it (a 401 is refused before anything is done, so the resend is safe). A second 401, or no new
-     * code, goes back to the caller as it came. Never a loop.
+     * code, goes back to the caller as it came, and the session is given up as refused
+     * ([EcencyCodeProvider.sessionRefused]): the user is asked to sign in again. Never a loop. A renewal that could
+     * not be tried to the end ([SessionRenewalUnavailable], or any other failure of the provider) gives the 401 back
+     * without giving the session up, so the next call renews again.
      */
     private suspend fun renewing(username: String, send: suspend (String) -> HttpResult): HttpResult {
         // the session the call goes out with, taken before it is sent: a sign-out and in while it is on its way voids it
@@ -168,12 +194,22 @@ class EcencyPrivateApi(
             codes.renewAfterRejection(username, code, mark)
         } catch (e: CancellationException) {
             throw e
+        } catch (e: SessionRenewalUnavailable) {
+            // not known to be refused (no answer, a server error): nothing is recorded or asked, the next call renews
+            return first
         } catch (e: Exception) {
             com.ecency.core.app.ErrorReports.quiet(e, "auth.renewToken")
-            null
+            return first
         }
-        if (fresh.isNullOrEmpty() || fresh == code) return first
-        return send(fresh)
+        if (fresh.isNullOrEmpty() || fresh == code) {
+            return first.copy(sessionRefused = codes.sessionRefused(username, code, mark))
+        }
+        val second = send(fresh)
+        if (second.status == 401) {
+            com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed("renewed token refused again"), "auth.renewToken")
+            return second.copy(sessionRefused = codes.sessionRefused(username, fresh, mark))
+        }
+        return second
     }
 
     /**

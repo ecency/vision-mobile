@@ -2,6 +2,7 @@ package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyException
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.json.SafeJson
 import com.ecency.core.api.model.arr
@@ -165,7 +166,7 @@ class OnboardingApi(
     @Throws(Exception::class)
     suspend fun requestDelete(username: String) {
         val result = private.post("request-delete", username, buildJsonObject { put("username", username); put("data", "") })
-        if (result.status !in 200..299) throw EcencyHttpException(result.status, "HTTP ${result.status}")
+        if (result.status !in 200..299) throw result.failure("HTTP ${result.status}")
     }
 
     /** RN fetchLatestAppVersion: the `tag_name` of the repository's latest GitHub release. */
@@ -193,7 +194,7 @@ class OnboardingApi(
         } catch (e: Exception) {
             throw EcencyHttpException.ofSendFailure(e)
         }
-        if (result.status !in 200..299) throw EcencyHttpException(result.status, "HTTP ${result.status}")
+        if (result.status !in 200..299) throw result.failure("HTTP ${result.status}")
         if (result.body.isBlank()) return null
         return SafeJson.parseOrNull(result.body)
     }

@@ -27,6 +27,9 @@ data class ChatRename(val channelId: String, val name: String, val atMillis: Lon
 /** A conversation [owner] read in this app (an open conversation told the server it was viewed), at [atMillis]. */
 data class ChatViewed(val channelId: String, val owner: String, val atMillis: Long)
 
+/** [owner]'s channel list as read by a request that started at [startedAt] ([ChatService.fetchChannels]). */
+internal class ChatChannelsFetched(val owner: String, val channels: List<ChatChannel>, val startedAt: Long)
+
 /** What the list knew about a channel when it opened it (RN's navigation params), kept in memory only. */
 internal class ChatHint(val channel: ChatChannel?, val title: String, val users: Map<String, ChatUser>)
 
@@ -40,7 +43,8 @@ internal class ChatHint(val channel: ChatChannel?, val title: String, val users:
  * ([ChatApi]); a request refused with 401 bootstraps again once.
  *
  * Badge: read when the account is loaded or unlocked, on foreground, after a channel was read; nothing is asked
- * while signed out, offline or while the lock hides content. A failed read keeps the last count.
+ * while signed out, offline or while the lock hides content. A failed read keeps the last count. The badge and the
+ * chat list read the same channel list ([fetchChannels]), so the count is always the sum of the rows.
  */
 class ChatService internal constructor(private val env: AppEnvironment) {
     /** RN chatApi on `ECENCY_BACKEND_API` ([AppEnvironment.chatHost]). */
@@ -69,6 +73,18 @@ class ChatService internal constructor(private val env: AppEnvironment) {
     internal fun markedViewed(channelId: String, owner: String) {
         viewedEvents.tryEmit(ChatViewed(channelId, owner, env.nowMillis()))
     }
+
+    private val fetchedEvents = MutableSharedFlow<ChatChannelsFetched>(extraBufferCapacity = 4)
+
+    /** Every channel list read for an account ([fetchChannels]); the chat list of that account takes it as its rows. */
+    internal val fetched: SharedFlow<ChatChannelsFetched> = fetchedEvents.asSharedFlow()
+
+    /** The badge for [owner]'s [channels] as the list shows them (the list's own changes since the fetch applied). */
+    internal fun listShown(owner: String, channels: List<ChatChannel>) {
+        if (env.session.current.username == owner && badgeAccount == owner) env.badges.setChats(badgeCount(channels))
+    }
+
+    private fun badgeCount(channels: List<ChatChannel>): Int = ChatUnread.globalTotal(channels).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
     internal val hints = LinkedHashMap<String, ChatHint>()
 
@@ -223,14 +239,33 @@ class ChatService internal constructor(private val env: AppEnvironment) {
         badgeJob?.cancel()
         badgeJob = env.background.launch {
             try {
-                val total = ChatUnread.globalTotal(call(user) { api.channels(it.token) })
-                if (env.session.current.username == user && badgeAccount == user) env.badges.setChats(total.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+                fetchChannels(user)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 ErrorReports.quiet(e, "chats.unread")
                 // the last count stays
             }
+        }
+    }
+
+    /**
+     * [username]'s channels (`GET /channels`), with the renames made since the request started. Every read of the list
+     * goes through here: the badge takes its count and the chat list ([fetched]) its rows from the same answer, so the
+     * two never disagree (tester report: an unread count on the tab that no row showed).
+     */
+    @Throws(Exception::class)
+    internal suspend fun fetchChannels(username: String): List<ChatChannel> = fetchChannelsAnswer(username).channels
+
+    /** [fetchChannels] as the event [fetched] carries: a caller that applies it itself knows the event when it comes. */
+    @Throws(Exception::class)
+    internal suspend fun fetchChannelsAnswer(username: String): ChatChannelsFetched {
+        val started = env.nowMillis()
+        val answer = call(username) { api.channels(it.token) }
+        return withContext(env.dispatchers.main) {
+            val list = withNewerRenames(answer, started)
+            if (env.session.current.username == username && badgeAccount == username) env.badges.setChats(badgeCount(list))
+            ChatChannelsFetched(username, list, started).also { fetchedEvents.tryEmit(it) }
         }
     }
 

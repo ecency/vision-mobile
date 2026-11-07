@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
 import java.time.Duration
 
-/** FLAG_SECURE on screens with keys and passwords (every Android version), and the key clipboard expiry. */
+/** FLAG_SECURE on the keys screen (every Android version; KeysFlowsTest) and, below 13, under the lock; never on login. The key clipboard expiry. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class LoginPrivacyTest {
@@ -68,7 +68,7 @@ class LoginPrivacyTest {
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
 
     @Test
-    fun loginAndKeysScreensAreSecureOnAndroid13AndLaterEvenWithoutTheLock() {
+    fun loginStaysCapturableForBugReports() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             compose.await("exists(\"account\")") { exists("account") }
             assertFalse("the feed is not secure", secure(scenario))
@@ -77,11 +77,7 @@ class LoginPrivacyTest {
             compose.runOnIdle { nav!!.push(AppScreen.Login) }
             compose.await("exists(\"login\")") { exists("login") }
             compose.waitForIdle()
-            assertTrue("login is secure", secure(scenario))
-            compose.runOnIdle { nav!!.pop() }
-            compose.await("!exists(\"login\")") { !exists("login") }
-            compose.waitForIdle()
-            assertFalse("cleared when login goes", secure(scenario))
+            assertFalse("login is not secure: its fields hide keys and passwords", secure(scenario))
         }
     }
 
@@ -93,7 +89,10 @@ class LoginPrivacyTest {
                 assertEquals(0, it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE)
                 it.applyWindowPrivacy(hideInRecents = false, sensitive = true, sdk = 35)
                 assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
+                // below 13 the lock has no other way to keep content out of the recents thumbnail
                 it.applyWindowPrivacy(hideInRecents = true, sensitive = false, sdk = 30)
+                assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
+                it.applyWindowPrivacy(hideInRecents = true, sensitive = true, sdk = 30)
                 assertTrue(it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
                 it.applyWindowPrivacy(hideInRecents = false, sensitive = false, sdk = 30)
                 assertEquals(0, it.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE)

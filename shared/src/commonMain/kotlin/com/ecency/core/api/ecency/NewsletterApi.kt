@@ -1,8 +1,10 @@
 package com.ecency.core.api.ecency
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.str
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.EcencyPrivateApi
 import com.ecency.core.render.js.Js
 import kotlinx.serialization.json.Json
@@ -35,14 +37,16 @@ enum class DigestSubscribeStatus { ACTIVE, PENDING_CONFIRMATION, REFUSED }
  * A status outside 2xx and an answer that is not a JSON object are errors with that status, as in the SDK.
  */
 class NewsletterApi(private val api: EcencyPrivateApi) {
-    private fun read(status: Int, body: String): JsonObject {
+    private fun read(response: HttpResult): JsonObject {
+        val status = response.status
+        val body = response.body
         val json = try {
             Json.parseToJsonElement(body)
         } catch (e: Exception) {
             // not reported: a body that is not JSON is the error below
             null
         }
-        if (status !in 200..299) throw EcencyHttpException(status, json.obj()?.str("error")?.take(200) ?: "Request failed ($status)")
+        if (status !in 200..299) throw response.failure(json.obj()?.str("error")?.take(200) ?: "Request failed ($status)")
         return json.obj() ?: throw EcencyHttpException(status, "Unexpected response ($status)")
     }
 
@@ -50,7 +54,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
     @Throws(Exception::class)
     suspend fun subscriptions(username: String): List<DigestSubscription> {
         val response = api.relay("GET", "newsletter/subscriptions", username)
-        val rows = read(response.status, response.body)["subscriptions"] as? JsonArray ?: return emptyList()
+        val rows = read(response)["subscriptions"] as? JsonArray ?: return emptyList()
         return rows.take(MAX_ROWS).mapNotNull { row ->
             val o = row.obj() ?: return@mapNotNull null
             DigestSubscription(
@@ -75,7 +79,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
             put("source", SOURCE)
         }
         val response = api.relay("POST", "newsletter/subscribe", username, fields)
-        return when (read(response.status, response.body).str("status")) {
+        return when (read(response).str("status")) {
             "refused" -> DigestSubscribeStatus.REFUSED
             "pending_confirmation" -> DigestSubscribeStatus.PENDING_CONFIRMATION
             else -> DigestSubscribeStatus.ACTIVE
@@ -85,7 +89,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
     @Throws(Exception::class)
     suspend fun leave(username: String, id: String) {
         val response = api.relay("DELETE", "newsletter/subscriptions/${encode(id)}", username)
-        read(response.status, response.body)
+        read(response)
     }
 
     /**
@@ -95,7 +99,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
     @Throws(Exception::class)
     suspend fun senderSubscribers(username: String, type: String, target: String): Pair<Int, Int>? {
         val response = api.relay("GET", "newsletter/sender?type=${encode(type)}&target=${encode(target)}", username)
-        val subscribers = read(response.status, response.body)["subscribers"].obj() ?: return null
+        val subscribers = read(response)["subscribers"].obj() ?: return null
         fun count(k: String) = (subscribers[k] as? JsonPrimitive)?.content?.toDoubleOrNull()?.takeIf { it.isFinite() && it >= 0 }?.toInt() ?: 0
         return count("weekly") to count("monthly")
     }
@@ -104,7 +108,7 @@ class NewsletterApi(private val api: EcencyPrivateApi) {
     @Throws(Exception::class)
     suspend fun unsubscribeAll(username: String, email: String) {
         val response = api.relay("POST", "newsletter/unsubscribe-all", username, buildJsonObject { put("email", email) })
-        read(response.status, response.body)
+        read(response)
     }
 
     companion object {

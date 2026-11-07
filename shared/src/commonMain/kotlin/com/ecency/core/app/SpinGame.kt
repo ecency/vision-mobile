@@ -236,6 +236,8 @@ class SpinGameModel internal constructor(private val env: AppEnvironment) : Stat
 
     /** RN `err.message || 'An error occurred'`: the server's own message when it sent one, else the generic text. */
     private fun message(e: Exception): String = when (e) {
+        // the session was refused for good: the words of the sign-in prompt (which itself shows once)
+        is com.ecency.core.api.SessionRefusedException -> AppError.SESSION_EXPIRED
         is PerksHttpException -> e.serverMessage ?: SpinCopy.UNKNOWN_ERROR
         is EcencyHttpException -> if (e.status == 0) PerksCopy.TIMED_OUT else SpinCopy.UNKNOWN_ERROR
         else -> SpinCopy.UNKNOWN_ERROR

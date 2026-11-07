@@ -24,6 +24,7 @@ import com.ecency.core.app.AppIcon
 import com.ecency.app.render.ProvideSpeakPlayers
 import com.ecency.app.render.SpeakPlayers
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -308,6 +309,10 @@ fun PostScreen(
                 if (post != null && state.body != null && state.tags.isNotEmpty()) item(key = "postTags") { PostTagsRow(state.tags, actions.onScreen) }
                 // RN postDisplayView footer: "Posted by ... via ..." with the source and AI badges, once the body is in
                 if (post != null && state.body != null && translation?.translated == null) item(key = "postedBy") { PostedByRow(post, nowMillis) }
+                // RN postDisplayView's WritePostButton: the reply sits under the post, not only in the comments header
+                if (post != null && state.body != null) item(key = "writeReply") {
+                    WriteReplyRow(me?.let { com.ecency.core.app.PostCard.avatarUrl(it, env?.proxyBase ?: com.ecency.core.render.ImageProxy.DEFAULT_BASE) }) { actions.onReply(post) }
+                }
                 // RN NewsletterPostPrompt, once the body is in
                 if (digestPrompt != null && post != null && state.body != null) item(key = "digestPrompt") { DigestPostPrompt(digestPrompt, post, me) }
                 if (poll != null) item(key = "poll") { PollCard(poll) { voters -> feedx?.env?.ui?.toast(voters.joinToString(", ").ifEmpty { ReadingUiCopy.NO_VOTES_YET }) } }
@@ -381,6 +386,30 @@ fun PostScreen(
                     tips = tips,
                 ),
             )
+        }
+    }
+}
+
+/**
+ * RN WritePostButton under the post: the reader's avatar and an "Add a comment..." field that opens the reply (a
+ * signed-out reader is asked to log in, as for every reply). One button, with the reply icon so it reads as one.
+ */
+@Composable
+private fun WriteReplyRow(avatarUrl: String?, onClick: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    Row(
+        Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp).clip(RoundedCornerShape(24.dp))
+            .clickable(onClick = onClick, role = Role.Button).testTag("writeReply"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (avatarUrl != null) Avatar(avatarUrl, 32.dp, Modifier.clip(RoundedCornerShape(50)).then(HiddenFromA11y))
+        Row(
+            Modifier.padding(start = if (avatarUrl != null) 10.dp else 0.dp).weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
+                .background(colors.lightBackground).border(1.dp, colors.border, RoundedCornerShape(24.dp)).padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(ReadingUiCopy.ADD_A_COMMENT, color = colors.darkGray, fontSize = 15.sp, modifier = Modifier.weight(1f))
+            Glyph(AppIcon.REPLY, colors.blueText, 18.dp)
         }
     }
 }

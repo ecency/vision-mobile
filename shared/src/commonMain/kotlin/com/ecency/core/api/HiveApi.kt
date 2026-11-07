@@ -229,22 +229,32 @@ class HiveApi(val client: HiveRpcClient) {
     }
 
     /**
-     * `condenser_api.get_content`: what the chain itself holds (no hivemind lag); null when there is no such post.
-     * The one "is this permlink on chain, and with which body" read behind every publish retry: the editor's
-     * pending publish, the reply composer and a wave all ask here before anything is sent again.
+     * `database_api.find_comments`: the chain state the node holds, not hivemind's indexer (a node's API layer may
+     * still answer a moment behind its head, so a post just broadcast can be missing for a short while); null when
+     * there is no such post. A retry does not rely on this read alone: a pending publish that can still land
+     * (`PendingPublish.canStillLand`) is re-sent as the same post, never published as free. The one "is this permlink on chain, and with which body" read behind every publish: the editor's
+     * permlink check, its pending publish, the reply composer and a wave all ask here before anything is sent.
+     *
+     * Only an answer that lists the post's comments and does not hold it means "no post": an error is thrown, and an
+     * answer without the list sends the read to the next node (thrown when no node lists them), so a permlink is never taken as free when the chain did not say so (publishing
+     * on a taken permlink edits that post). `condenser_api.get_content` is served by hivemind now (it lags the chain
+     * and answers a missing post with an assert), so it is not used here.
      */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun content(author: String, permlink: String): ChainContent? {
-        val result = client.call(
-            "condenser_api.get_content",
-            buildJsonArray {
-                add(JsonPrimitive(author))
-                add(JsonPrimitive(permlink))
+        val answer = client.call(
+            "database_api.find_comments",
+            buildJsonObject {
+                put("comments", buildJsonArray { add(buildJsonArray { add(JsonPrimitive(author)); add(JsonPrimitive(permlink)) }) })
             },
+            // a node that answers without the list is defective: the next node is asked
+            validate = { (it as? JsonObject)?.get("comments") is JsonArray },
         ).obj()
-        // condenser answers a missing post with an empty-author object rather than an error
-        if (result?.str("author") != author || result.str("permlink") != permlink) return null
-        // json_metadata arrives as text from condenser (as an object from some nodes)
+        val comments = answer?.get("comments") as? JsonArray
+            ?: throw EcencyException("database_api.find_comments answered without a comments list")
+        val result = comments.firstOrNull { it.obj()?.let { c -> c.str("author") == author && c.str("permlink") == permlink } == true }.obj()
+            ?: return null
+        // json_metadata arrives as text from find_comments (as an object from some nodes)
         val meta = result["json_metadata"].let { m -> (m as? JsonPrimitive)?.takeIf { it.isString }?.let { com.ecency.core.api.json.SafeJson.parseOrNull(it.content) } ?: m }.obj()
         val tags = (meta?.get("tags") as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
         return ChainContent(author, permlink, result.str("title").orEmpty(), result.str("body").orEmpty(), result.str("parent_author").orEmpty(), result.str("parent_permlink").orEmpty(), tags)
@@ -312,7 +322,7 @@ class HiveApi(val client: HiveRpcClient) {
     }
 }
 
-/** A post or comment as `condenser_api.get_content` returns it. */
+/** A post or comment as the chain holds it (`database_api.find_comments`). */
 data class ChainContent(
     val author: String, val permlink: String, val title: String, val body: String, val parentAuthor: String, val parentPermlink: String,
     /** `json_metadata.tags`, empty when the metadata has none or cannot be read. */

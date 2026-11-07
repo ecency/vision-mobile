@@ -2,6 +2,7 @@ package com.ecency.core.api.waves
 
 import com.ecency.core.api.EcencyException
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import com.ecency.core.api.json.SafeJson
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.arr
@@ -293,7 +294,7 @@ class WavesApi(private val http: AuthHttp, val host: String = "https://ecency.co
         } catch (e: Exception) {
             throw EcencyHttpException.ofSendFailure(e)
         }
-        if (result.status !in 200..299) throw EcencyHttpException(result.status, "$what: ${result.status}")
+        if (result.status !in 200..299) throw result.failure("$what: ${result.status}")
         if (result.body.isBlank()) return null
         return SafeJson.parseOrNull(result.body)
     }

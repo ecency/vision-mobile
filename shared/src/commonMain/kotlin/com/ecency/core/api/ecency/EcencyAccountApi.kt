@@ -18,6 +18,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.failure
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -185,7 +186,7 @@ class EcencyAccountApi(
     }
 
     private fun parse(response: HttpResult): JsonElement? {
-        if (response.status !in 200..299) throw EcencyHttpException(response.status)
+        if (response.status !in 200..299) throw response.failure()
         return runCatching { Json.parseToJsonElement(response.body) }.getOrNull()
     }
 

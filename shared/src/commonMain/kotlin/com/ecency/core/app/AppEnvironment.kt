@@ -425,6 +425,8 @@ class AppEnvironment(
     init {
         // handled and quiet failures (ErrorReports) go to this environment's reporter, read when each one is sent
         ErrorReports.install({ crashReporter }, nowMillis)
+        // a private call refused with a session no renewal fixes: ask to sign in again (SessionModel.expiredSession)
+        accounts.onSessionRefused = { session.sessionRefused(it) }
     }
 
     /** Store products, purchases and Ecency orders. One per app. */

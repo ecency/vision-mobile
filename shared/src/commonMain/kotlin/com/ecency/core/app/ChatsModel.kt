@@ -1,6 +1,7 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.EcencyHttpException
+import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.chat.ChatApiException
 import com.ecency.core.api.chat.ChatChannel
 import com.ecency.core.api.chat.ChatUser
@@ -124,6 +125,26 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
     private var generation = 0
     private var shown = false
 
+    /** [channels] came from a channel read for [ChatsState.account] (not just the empty start). */
+    private var listed = false
+
+    /** The last channel read this list took ([ChatService.fetched] or its own): the same answer is never applied twice. */
+    private var handledAnswer: ChatChannelsFetched? = null
+
+    /** The error shown is a failed load's (not a channel action's): fresh rows from the badge's read clear it. */
+    private var loadFailed = false
+
+    /** When the request of the rows shown started. */
+    private var appliedStart = Long.MIN_VALUE
+
+    /**
+     * What this list changed on a channel (read, favorite, mute, leave) and when: a channel read that started before a
+     * change still carries the old state, so the change is applied over it again. Null from a change drops the channel.
+     */
+    private class LocalChange(val channelId: String, val atMillis: Long, val change: (ChatChannel) -> ChatChannel?)
+
+    private val changes = mutableListOf<LocalChange>()
+
     init {
         scope.launch {
             combine(env.session.state, env.appLock.state) { s, l -> Triple(s.isLoading, s.username, l.hidesContent) }
@@ -141,6 +162,64 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             // next reload; here the row clears as the conversation is read
             env.chat.viewed.collect { v -> if (v.owner == current.account) markRead(v.channelId, v.atMillis) }
         }
+        scope.launch {
+            // the badge's channel read (foreground, unlock, after a read) is this list's too: the tab's count and the
+            // rows come from one answer. A read for another account is never taken.
+            env.chat.fetched.collect { f ->
+                val gen = generation
+                // the answer of this list's own read: [load] or [groupCreated] applied it already
+                if (f === handledAnswer) return@collect
+                // a list shown, or one whose load failed (its rows come back with the next good read)
+                val takes = listed || loadFailed
+                if (takes) handledAnswer = f
+                if (takes && applyList(f.channels, f.startedAt, f.owner, gen)) {
+                    // fresh rows: an earlier load's failure no longer describes them (a channel action's stays)
+                    val recovered = loadFailed
+                    if (recovered) {
+                        loadFailed = false
+                        setState { it.copy(error = null, loaded = true) }
+                    }
+                    scope.launch {
+                        // a load that failed before it connected: the session this read used is the list's too
+                        if (recovered && !current.connected) connect(f.owner, gen)
+                        dmUserIds(channels).takeIf { it.isNotEmpty() }?.let { ids -> resolveUsers(f.owner, gen, ids) }
+                    }
+                } else if (listed) {
+                    // an older answer than the rows: the badge it set goes back to the rows' sum
+                    current.account?.let { env.chat.listShown(it, channels) }
+                }
+            }
+        }
+        scope.launch {
+            // a list that failed (or never loaded) loads again when the connection comes back
+            var wasOnline = env.connectivity.current.online
+            env.connectivity.state.collect { c ->
+                val back = c.online && !wasOnline
+                wasOnline = c.online
+                if (back && canLoad() && (current.error != null || !current.loaded)) load(refresh = true)
+            }
+        }
+    }
+
+    /** The chat session of [user] (the one already open, if any): the viewer's id and the session actions. */
+    private suspend fun connect(user: String, gen: Int) {
+        try {
+            val session = env.chat.session(user)
+            if (gen != generation) return
+            viewerId = session.userId
+            session.user?.let { lookup[it.id] = it }
+            setState { it.copy(connected = true) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the rows are shown; the session actions wait for the next load
+            ErrorReports.quiet(e, "chats.connect")
+        }
+    }
+
+    private fun canLoad(): Boolean {
+        val session = env.session.current
+        return shown && !session.isLoading && session.username != null && session.username == current.account && !env.appLock.current.hidesContent
     }
 
     private fun sync() {
@@ -152,6 +231,10 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             loadJob?.cancel()
             searchJob?.cancel()
             channels = emptyList()
+            listed = false
+            loadFailed = false
+            appliedStart = Long.MIN_VALUE
+            changes.clear()
             lookup.clear()
             viewerId = null
             setState { ChatsState(account = user, sortByName = it.sortByName) }
@@ -159,10 +242,16 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         if (shown && user != null && !env.appLock.current.hidesContent && !current.loaded && loadJob?.isActive != true) load(refresh = true)
     }
 
-    /** The tab is on screen: loads unless loaded (RN loads on mount and on every account change). */
+    /**
+     * The tab is on screen: loads unless loaded (RN loads on mount and on every account change). Shown again, a loaded
+     * list is read again quietly (no spinner; a failure keeps the rows), so it never stays behind the tab's badge; a
+     * list that shows an error tries again.
+     */
     fun show() {
+        val again = shown && current.loaded
         shown = true
         sync()
+        if (again && canLoad() && loadJob?.isActive != true) load(refresh = true, quiet = current.error == null)
     }
 
     /** Pull to refresh (RN `_loadChannels(true)`). */
@@ -174,41 +263,80 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         state.first { !it.isLoading && !it.isRefreshing }
     }
 
-    private fun load(refresh: Boolean) {
+    /**
+     * Reads the account's channels. Nothing is decided by the platform's reachability flag: it can read offline for a
+     * moment (at launch, on resume, between networks) while requests go through (tester report: "No Internet
+     * Connection" on the chat while the rest of the app loaded). "No Internet Connection" shows only when the request
+     * failed for lack of a connection, and the list loads again when the connection comes back. [quiet]: no spinner,
+     * and a failure keeps what is shown (the tab shown again).
+     */
+    private fun load(refresh: Boolean, quiet: Boolean = false) {
         val user = current.account
         if (user == null) {
             setState { it.copy(error = LOGIN_REQUIRED) }
             return
         }
-        if (!env.connectivity.current.online) {
-            setState { it.copy(error = NO_INTERNET, loaded = true) }
-            return
-        }
         val gen = generation
         loadJob?.cancel()
-        setState { it.copy(error = null, isLoading = !refresh || it.rows.isEmpty() && !it.loaded, isRefreshing = refresh && (it.rows.isNotEmpty() || it.loaded)) }
+        if (!quiet) loadFailed = false
+        if (!quiet) setState { it.copy(error = null, isLoading = !refresh || it.rows.isEmpty() && !it.loaded, isRefreshing = refresh && (it.rows.isNotEmpty() || it.loaded)) }
         loadJob = scope.launch {
             try {
-                val session = env.chat.session(user, fresh = refresh && current.connected)
+                val session = env.chat.session(user, fresh = refresh && !quiet && current.connected)
                 if (gen != generation) return@launch
                 viewerId = session.userId
                 session.user?.let { lookup[it.id] = it }
                 setState { it.copy(connected = true) }
                 val started = env.nowMillis()
-                val list = env.chat.withNewerRenames(env.chat.call(user) { env.chat.api.channels(it.token) }, started)
+                val answer = env.chat.fetchChannelsAnswer(user)
                 if (gen != generation) return@launch
-                channels = list
-                seedDirectUsers(list)
-                rebuild()
+                // applied once: the [fetched] collector may have taken this very answer first
+                val mine = answer !== handledAnswer
+                if (mine) {
+                    handledAnswer = answer
+                    applyList(answer.channels, started, user, gen)
+                }
+                loadFailed = false
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = null) }
-                resolveUsers(user, gen, dmUserIds(list))
+                if (mine) resolveUsers(user, gen, dmUserIds(channels))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 if (gen != generation) return@launch
-                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = message(e, L.native.chats.failedToLoadChats, "chats.load")) }
+                if (quiet) {
+                    ErrorReports.quiet(e, "chats.reload")
+                    return@launch
+                }
+                val couldNotConnect = e is EcencyHttpException && e.status == 0 && e !is EcencyTimeoutException && e !is ChatApiException
+                val text = if (couldNotConnect) {
+                    // a request that could not connect: the chat's own copy (also reported, as an expected failure)
+                    AppError.from(e, "chats.load")
+                    NO_INTERNET
+                } else {
+                    message(e, L.native.chats.failedToLoadChats, "chats.load")
+                }
+                loadFailed = true
+                setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = text) }
             }
         }
+    }
+
+    /**
+     * [list] read for [user] by a request that started at [startedAt] becomes the rows: renames and this list's own
+     * changes made since then stay, the badge follows the rows.
+     */
+    private fun applyList(list: List<ChatChannel>, startedAt: Long, user: String, gen: Int): Boolean {
+        // an answer older than the one shown (two reads crossed) would bring old counts back
+        if (gen != generation || user != current.account || startedAt < appliedStart) return false
+        appliedStart = startedAt
+        changes.removeAll { it.atMillis < startedAt }
+        channels = env.chat.withNewerRenames(list, startedAt).mapNotNull { c ->
+            changes.filter { it.channelId == c.id }.fold(c as ChatChannel?) { acc, ch -> acc?.let(ch.change) }
+        }
+        listed = true
+        seedDirectUsers(channels)
+        rebuild()
+        return true
     }
 
     /** RN `_seedDirectUsers`: the `directUser` of each direct message is known without asking. */
@@ -249,6 +377,8 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         val now = env.nowMillis()
         val sorted = sort(channels, current.sortByName, lookup)
         setState { it.copy(rows = sorted.map { c -> row(c, now) }) }
+        // the tab's count is the sum of the rows (ChatRow.unread is ChatUnread.total, as the badge counts)
+        current.account?.let { if (listed) env.chat.listShown(it, channels) }
     }
 
     private fun row(c: ChatChannel, now: Long): ChatRow {
@@ -328,8 +458,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     ChatChannelAction.LEAVE_CHANNEL, ChatChannelAction.LEAVE_CONVERSATION -> {
                         env.chat.call(user) { env.chat.api.leave(it.token, id) }
                         if (gen != generation) return@launch
-                        channels = channels.filter { it.id != id }
-                        rebuild()
+                        update(id) { null }
                         load(refresh = true)
                     }
                     ChatChannelAction.RENAME, ChatChannelAction.MEMBERS -> Unit
@@ -344,19 +473,23 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     ChatChannelAction.MUTE, ChatChannelAction.UNMUTE -> L.native.chats.unableToUpdateMute
                     else -> UNABLE_TO_LEAVE
                 }
+                loadFailed = false
                 setState { it.copy(error = message(e, fallback, "chats.channelAction")) }
             }
         }
     }
 
     /** The row of [id] read at [atMillis]: no unread or mention count. */
-    private fun markRead(id: String, atMillis: Long) = update(id) {
+    private fun markRead(id: String, atMillis: Long) = update(id, atMillis) {
         val viewedAt = maxOf(it.lastPostAt, atMillis)
         it.copy(mentionCounters = it.mentionCounters.map { 0.0 }, messageCounter = it.messageCounter?.let { 0.0 }, lastViewedAt = viewedAt, lastViewAt = viewedAt)
     }
 
-    private fun update(id: String, change: (ChatChannel) -> ChatChannel) {
-        channels = channels.map { if (it.id == id) change(it) else it }
+    /** [change] on the channel [id], kept over a channel read that started before it ([applyList]); null drops it. */
+    private fun update(id: String, atMillis: Long = env.nowMillis(), change: (ChatChannel) -> ChatChannel?) {
+        changes += LocalChange(id, atMillis, change)
+        while (changes.size > MAX_LOCAL_CHANGES) changes.removeAt(0)
+        channels = channels.mapNotNull { if (it.id == id) change(it) else it }
         rebuild()
     }
 
@@ -383,12 +516,13 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         scope.launch {
             val created = try {
                 val started = env.nowMillis()
-                val list = env.chat.withNewerRenames(env.chat.call(user) { env.chat.api.channels(it.token) }, started)
+                val answer = env.chat.fetchChannelsAnswer(user)
                 if (gen != generation) return@launch
-                channels = list
-                seedDirectUsers(list)
-                rebuild()
-                list.firstOrNull { it.id == channelId }
+                if (answer !== handledAnswer) {
+                    handledAnswer = answer
+                    applyList(answer.channels, started, user, gen)
+                }
+                channels.firstOrNull { it.id == channelId }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -540,6 +674,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         val UNABLE_TO_JOIN: String get() = L.chats.unableToJoinChannel
         val UNABLE_TO_START_DM: String get() = L.chats.unableToStartDm
         const val SEARCH_DEBOUNCE_MILLIS = 350L
+        private const val MAX_LOCAL_CHANGES = 100
 
         /** RN extractHiveCommunityIdentifier: a `hive-NNN` in the name, display name or header (lower case, valid only). */
         fun communityOf(c: ChatChannel): String? {
@@ -549,16 +684,18 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
 
         /**
          * What RN shows for a failed chat call: the server's text, else a network message, else [fallback]. The
-         * failure is reported as handled at [where] (ErrorReports).
+         * failure is reported as handled at [where] (ErrorReports). An unexpected failure without words of the server
+         * (RN's "Request failed (N)" or [fallback]) also shows the code of its report (#3660, [AppError.text]).
          */
         fun message(e: Throwable, fallback: String, where: String): String {
             val mapped = AppError.from(e, where)
-            return when {
+            val text = when {
                 e is ChatApiException -> e.message ?: fallback
                 e is EcencyHttpException && e.isNetwork -> AppError.NETWORK_MESSAGE
                 e is AuthException -> mapped.message
                 else -> fallback
             }
+            return if (e is ChatApiException && e.serverText) text else mapped.copy(message = text).text
         }
 
         /**

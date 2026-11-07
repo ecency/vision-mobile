@@ -81,6 +81,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /** The portfolio as the server answered it; [WalletState.all] is it with the claims of [claimMask] applied. */
     private var served: List<PortfolioItem> = emptyList()
+
+    /** The account and currency code [served] answered for: a reload for the same pair merges into it ([merged]). */
+    private var servedFor: Pair<String, String>? = null
     private val claimingNow = mutableSetOf<String>()
 
     fun start() {
@@ -93,6 +96,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                     claimMask.clear()
                     claimingNow.clear()
                     served = emptyList()
+                    servedFor = null
                     override = null
                     setState { WalletState(currency = WalletCurrency.of(env.prefs)) }
                     if (e.username != null) load(refresh = false)
@@ -263,6 +267,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val user = env.session.current.username
                 if (user == null) {
                     served = emptyList()
+                    servedFor = null
                     setState { WalletState(currency = it.currency) }
                     return@launch
                 }
@@ -271,16 +276,20 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val accountJob = async { runCatching { api.account(user) }.getOrNull() }
                 val rate = async { runCatching { api.hivePerMVests() }.getOrDefault(current.hivePerMVests) }
                 val items = api.portfolio(user, currency.code, onlyEnabled = true)
-                val tokens = accountJob.await()?.profileTokens.orEmpty()
+                // a failed account read keeps the selection shown (the profile's tokens), never the defaults alone
+                val tokens = accountJob.await()?.profileTokens
                 val perMVests = rate.await()
                 if (!owns(user)) return@launch
                 readAt = stamp
-                served = items
+                val key = user to currency.code
+                val selection = tokens?.let(::selectionFor) ?: current.selection
+                served = if (refresh && servedFor == key) merged(served, items, selection) else items
+                servedFor = key
                 setState {
                     withRows(
                         it.copy(
-                            all = items, hivePerMVests = perMVests, isLoading = false, isRefreshing = false, loaded = true,
-                            updatedAtMillis = env.nowMillis(), selection = selectionFor(tokens), error = null,
+                            hivePerMVests = perMVests, isLoading = false, isRefreshing = false, loaded = true,
+                            updatedAtMillis = env.nowMillis(), selection = selection, error = null,
                         ),
                     )
                 }
@@ -292,6 +301,22 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 setState { it.copy(isLoading = false, isRefreshing = false, error = if (quiet) it.error else error) }
             }
         }
+    }
+
+    /**
+     * A reload's answer over the portfolio shown (README "Wallet", reloads keep rows): an answered symbol takes the new
+     * item. A symbol the answer left out keeps its last one only while the answer is plainly partial (it lacks one of
+     * [DEFAULT_ASSETS], which a whole answer always holds) and the symbol is still in [selection], so a partial answer
+     * (POINTS alone after quick claims) never drops a row or the total's share of it, while a token turned off in Manage
+     * Assets (the enabled-only portfolio leaves it out) or one a whole answer no longer has goes, with its value and any
+     * stale pending reward. A full load ([retry], the first load, a currency or account change) replaces.
+     */
+    private fun merged(old: List<PortfolioItem>, fresh: List<PortfolioItem>, selection: List<String>): List<PortfolioItem> {
+        val bySymbol = fresh.associateBy { it.symbol }
+        val partial = DEFAULT_ASSETS.any { it !in bySymbol }
+        val kept = old.mapNotNull { bySymbol[it.symbol] ?: it.takeIf { partial && it.symbol in selection } }
+        val known = old.mapTo(HashSet()) { it.symbol }
+        return kept + fresh.filter { it.symbol !in known }
     }
 
     /** Main thread: the manage assets screen saved a new selection (RN dispatches setSelectedAssets before the write). */

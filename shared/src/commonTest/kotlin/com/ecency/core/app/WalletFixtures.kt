@@ -90,7 +90,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
         listOf(KeyRole.POSTING, KeyRole.ACTIVE, KeyRole.OWNER, KeyRole.MEMO).firstOrNull { AppTestKeys.pub(user, it) == pub }
     }
 
-    private fun accountsJson(r: Sent, tokens: String): String {
+    fun accountsJson(r: Sent, tokens: String): String {
         val names = r.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
         return "[" + names.filter { it == user }.joinToString(",") {
             val meta = com.ecency.core.api.broadcast.JsJson.quote("""{"profile":{"name":"Spike","tokens":$tokens}}""")

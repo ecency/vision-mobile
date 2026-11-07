@@ -28,6 +28,8 @@ class ChatApiException(
     val prop: String? = null,
     val bannedUntil: Double? = null,
     val reason: String? = null,
+    /** [message] is the server's own words, not the "Request failed" fallback. */
+    val serverText: Boolean = false,
 ) : EcencyHttpException(status, message) {
     /** RN `isBanError`: the body's `prop` is `ecency_chat_banned_until`. */
     val isBan: Boolean get() = prop == BAN_PROP
@@ -38,16 +40,17 @@ class ChatApiException(
         fun of(status: Int, body: String): ChatApiException {
             val o = SafeJson.parseOrNull(body).obj()
             val error = o?.get("error")
-            val text = o?.get("message").text()?.takeIf { it.isNotEmpty() }
+            val said = o?.get("message").text()?.takeIf { it.isNotEmpty() }
                 ?: error.text()?.takeIf { it.isNotEmpty() }
                 ?: error.obj()?.get("message").text()?.takeIf { it.isNotEmpty() }
-                ?: L.native.chatApi.requestFailed(status = status.toString())
+            val text = said ?: L.native.chatApi.requestFailed(status = status.toString())
             return ChatApiException(
                 status, text,
                 code = o?.get("code").text(),
                 prop = o?.get("prop").text(),
                 bannedUntil = o?.get("bannedUntil")?.let { (it as? JsonPrimitive)?.content?.toDoubleOrNull() },
                 reason = o?.get("reason").text(),
+                serverText = said != null,
             )
         }
     }

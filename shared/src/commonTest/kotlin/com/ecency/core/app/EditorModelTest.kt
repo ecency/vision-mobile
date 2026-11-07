@@ -52,6 +52,9 @@ class EditorModelTest {
         val schedules = mutableListOf<JsonObject>()
         val api = mutableListOf<Pair<String, JsonObject>>()
         var broadcastAnswer: suspend (Sent) -> HttpResult = { FakeTransport.result(it, "{}") }
+
+        /** Overrides every `database_api.find_comments` answer (null: the post from [posts], else no post). */
+        var contentAnswer: ((Sent) -> HttpResult)? = null
         var supportPercent = 0
         var apiDown = false
         var postingAuths = """[["ecency.app",1]]"""
@@ -97,11 +100,9 @@ class EditorModelTest {
                     val k = "${p["author"]!!.jsonPrimitive.content}/${p["permlink"]!!.jsonPrimitive.content}"
                     posts[k]?.takeIf { k !in hivemindLags }?.let { FakeTransport.result(req, it) } ?: FakeTransport.result(req, "null")
                 }
-                "condenser_api.get_content" -> {
-                    val p = req.params.jsonArray
-                    val a = p[0].jsonPrimitive.content
-                    val l = p[1].jsonPrimitive.content
-                    posts["$a/$l"]?.let { FakeTransport.result(req, it) } ?: FakeTransport.result(req, """{"author":"","permlink":""}""")
+                "database_api.find_comments" -> {
+                    val (a, l) = TestApp.commentAsked(req)
+                    contentAnswer?.invoke(req) ?: TestApp.comments(req, posts["$a/$l"])
                 }
                 "condenser_api.get_accounts" -> if (accountsDown) HttpResult(500, "") else if (stripped) FakeTransport.result(
                     req, """[{"name":"$user","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"memo_key":"${GoldenVectors.PUBLIC_KEY}","json_metadata":""}]""",
@@ -1412,6 +1413,40 @@ class EditorModelTest {
         assertTrue(base != grant.fingerprint(row(accounts = """[["a",1]]""")))
         assertNull(grant.fingerprint(Json.parseToJsonElement("""{"name":"x"}""")))
         assertNull(grant.fingerprint(null))
+    }
+
+    @Test
+    fun aNewPostIsCheckedAgainstTheChainsOwnStateNotHivemind() = runTest {
+        // condenser_api.get_content is served by hivemind now (it lags, and asserts on a missing post): never asked
+        val w = World(this)
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals("my-first-post", field(w.ops().single(), 0, "permlink"))
+        assertNotNull(m.current.done)
+        assertTrue(w.app.transport.sent.any { it.method == "database_api.find_comments" })
+        assertTrue(w.app.transport.sent.none { it.method == "condenser_api.get_content" })
+    }
+
+    @Test
+    fun aPermlinkCheckTheChainDidNotAnswerNeverPublishes() = runTest {
+        val w = World(this)
+        // the chain must say "no such post": an error, or an answer without the list, publishes nothing
+        for (answer in listOf<(Sent) -> HttpResult>(
+            { FakeTransport.error(it, -32602, "Assert Exception:Post someone-else/my-first-post does not exist") },
+            { FakeTransport.error(it, -32601, "method not found") },
+            { FakeTransport.result(it, "{}") },
+            { FakeTransport.result(it, "null") },
+        )) {
+            w.contentAnswer = answer
+            val m = w.newPost(this)
+            w.fill(m, this)
+            m.submit()
+            testScheduler.advanceUntilIdle()
+            assertTrue(w.app.broadcasts().isEmpty(), "a permlink the chain did not confirm free is never published")
+            assertNull(m.current.done)
+        }
     }
 
     @Test

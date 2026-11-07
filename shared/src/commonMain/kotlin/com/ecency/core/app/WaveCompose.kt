@@ -661,7 +661,7 @@ class WaveComposeModel internal constructor(
                 }
                 val wave = draftFor(author, container, body, state.poll, videoThumb)
                 // A retry: the earlier broadcast may have landed with its answer lost. The chain itself says
-                // (get_content, not hivemind): the same body is the wave, published; another body is an edit,
+                // (find_comments, the chain state, not hivemind): the same body is the wave, published; another body is an edit,
                 // which must go without comment_options (write-once: resending them fails forever).
                 val onChain = if (attempted) env.api.hive.content(author, wave.permlink)?.body else null
                 attempted = true

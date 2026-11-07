@@ -173,6 +173,28 @@ class SliceFlowsTest {
     }
 
     @Test
+    fun theReplyFieldUnderThePostOpensTheReply() {
+        node.signIn()
+        launch()
+        openPost()
+        // tester feedback: the reply sits under the post, before the comments (RN WritePostButton)
+        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        compose.onNodeWithTag("writeReply").assertTextEquals(com.ecency.core.app.ReadingUiCopy.ADD_A_COMMENT)
+        compose.onNodeWithTag("writeReply").performClick()
+        waitFor("replySheet")
+    }
+
+    @Test
+    fun theReplyFieldAsksASignedOutReaderToLogIn() {
+        launch()
+        openPost()
+        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        compose.onNodeWithTag("writeReply").performClick()
+        waitFor("login")
+        assertFalse(exists("replySheet"))
+    }
+
+    @Test
     fun aDraftIsStillThereAfterLeavingAndReopeningThePost() {
         node.signIn()
         launch()

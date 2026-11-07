@@ -224,6 +224,9 @@ object ReadingUiCopy {
     val READ_NEXT: String get() = L.similarEntries.title
     val REMOVE_VOTE: String get() = L.native.ui.reading.removeVote
     val REPLY: String get() = L.native.ui.reading.reply
+
+    /** RN WritePostButton's placeholder under a post (`quick_reply.placeholder`). */
+    val ADD_A_COMMENT: String get() = L.quickReply.placeholder
     val SEEK: String get() = L.native.ui.reading.seek
     val SELECTED_FILTERS: String get() = L.native.ui.reading.selectedFilters
     val SELECT_COMMUNITY: String get() = L.native.ui.reading.selectCommunity

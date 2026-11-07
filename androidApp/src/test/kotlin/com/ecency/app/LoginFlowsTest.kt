@@ -75,10 +75,14 @@ class LoginFlowsTest {
     private val callbacks = mutableListOf<String>()
     private var terms = true
 
+    /** How often the app asked for a secure window (FLAG_SECURE). */
+    private var secureRequests = 0
+
     private val host = object : AppHost {
         override fun openExternal(url: String) { opened += url }
         override fun toast(text: String) {}
         override fun copy(text: String) {}
+        override fun setSensitiveScreen(sensitive: Boolean) { if (sensitive) secureRequests++ }
         override fun openCallback(url: String) { callbacks += url }
         override fun termsAccepted() = terms
         override fun setTermsAccepted() { terms = true }
@@ -291,6 +295,8 @@ class LoginFlowsTest {
         var outcome: Result<*>? = null
         CoroutineScope(Dispatchers.Main).launch { outcome = runCatching { env.signing.broadcast("tester", ops) } }
         waitFor("authUpgrade")
+        // screenshots stay allowed for bug reports: the key field hides what is typed; only the keys screen is secure
+        assertEquals(0, secureRequests)
         compose.onNodeWithTag("upgradeKey", useUnmergedTree = true).performTextInput(node.key.toWif()) // the posting key
         tapInSheet("upgradeSign")
         waitFor("upgradeError")

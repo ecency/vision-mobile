@@ -176,6 +176,12 @@ class ChatThreadModel internal constructor(
     private var posts: List<ChatPost> = emptyList()
     private val roots = mutableMapOf<String, ChatPost>()
 
+    /** Roots the server answered 404 for ([fetchRoots]): not asked for again. */
+    private val goneRoots = mutableSetOf<String>()
+
+    /** The server answered 405 to a root read: no root is asked for again in this conversation ([fetchRoots]). */
+    private var rootsUnavailable = false
+
     /**
      * The blocks of each message by post id and text: a rebuild (every new message, reaction or typing user) parses
      * only messages that are new or edited (RN memoizes per message too).
@@ -282,6 +288,7 @@ class ChatThreadModel internal constructor(
         socket.disconnect()
         posts = emptyList()
         roots.clear()
+        goneRoots.clear()
         lookup.clear()
         setState { ChatThreadState(account = null, channelId = channelId, type = it.type, sentVersion = it.sentVersion) }
     }
@@ -463,7 +470,7 @@ class ChatThreadModel internal constructor(
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = page.posts.isNotEmpty()) }
                 rebuild()
                 resolveUsers(u, posts.map { it.userId }.filter { it.isNotEmpty() && it !in lookup }.distinct())
-                val missingRoots = page.posts.map { it.rootId }.filter { it.isNotEmpty() && posts.none { p -> p.id == it } && it !in roots }.distinct()
+                val missingRoots = page.posts.map { it.rootId }.filter { it.isNotEmpty() && posts.none { p -> p.id == it } && it !in roots && it !in goneRoots }.distinct()
                 fetchRoots(u, missingRoots)
                 fetchCards(page.posts)
                 afterLoad()
@@ -523,15 +530,28 @@ class ChatThreadModel internal constructor(
         }
     }
 
+    /**
+     * RN fetchMattermostPost for replies whose root is not loaded, best effort (RN `.catch(() => null)`): the quote
+     * then falls back to the reply's own parent props or none. A 404 (the root is gone) skips that root; a 405 (the
+     * server does not serve one post by id: Sentry "Request failed (405)" at chatThread.roots) stops these reads for
+     * the rest of this conversation. Neither is reported; any other failure is, quietly.
+     */
     private suspend fun fetchRoots(u: String, ids: List<String>) {
-        if (ids.isEmpty()) return
+        if (ids.isEmpty() || rootsUnavailable) return
         for (id in ids) {
+            if (rootsUnavailable) break
             try {
                 env.chat.call(u) { env.chat.api.post(it.token, channelId, id) }?.let { roots[it.id] = it }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "chatThread.roots")
+                when ((e as? ChatApiException)?.status) {
+                    // not reported: the server has no such route
+                    405 -> rootsUnavailable = true
+                    // not reported: the root was deleted
+                    404 -> goneRoots += id
+                    else -> ErrorReports.quiet(e, "chatThread.roots")
+                }
             }
         }
         if (user == null) return

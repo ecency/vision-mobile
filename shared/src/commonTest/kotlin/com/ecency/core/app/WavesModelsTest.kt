@@ -96,7 +96,7 @@ class WavesModelsTest {
     /** Broadcasts are refused for lack of resource credits. */
     private var rcShort = false
 
-    /** What `condenser_api.get_content` says the chain holds for any permlink asked (null: nothing). */
+    /** What `database_api.find_comments` says the chain holds for any permlink asked (null: nothing). */
     private var onChainBody: String? = null
 
     /** `bridge.get_post` answers by permlink (an edited wave read again); others get the linked post. */
@@ -116,10 +116,9 @@ class WavesModelsTest {
                 rejectBroadcast -> HttpResult(500, "down")
                 else -> FakeTransport.result(req, "null")
             }
-            "condenser_api.get_content" -> onChainBody?.let { body ->
-                val p = req.params.jsonArray
-                FakeTransport.result(req, """{"author":${p[0]},"permlink":${p[1]},"body":${Json.encodeToString(body)}}""")
-            } ?: FakeTransport.result(req, """{"author":"","permlink":""}""")
+            "database_api.find_comments" -> TestApp.commentAsked(req).let { (a, l) ->
+                TestApp.comments(req, onChainBody?.let { body -> """{"author":"$a","permlink":"$l","body":${Json.encodeToString(body)}}""" })
+            }
             "condenser_api.get_following" -> FakeTransport.result(req, "[]")
             "condenser_api.get_accounts" -> FakeTransport.result(req, "[]")
             else -> TestApp.chain(req) ?: HttpResult(500, "")
@@ -813,7 +812,7 @@ class WavesModelsTest {
         testScheduler.advanceUntilIdle()
         assertNotNull(composer.current.error)
         assertEquals(listOf("comment", "comment_options"), broadcastOps(app).map { it.jsonArray[0].jsonPrimitive.content })
-        assertEquals(0, app.transport.sent.count { it.method == "condenser_api.get_content" }, "a first send does not ask")
+        assertEquals(0, app.transport.sent.count { it.method == "database_api.find_comments" }, "a first send does not ask")
         val sentBefore = app.broadcasts().size
         // retry: the chain has this wave with this body, so it is published; nothing is sent again
         rejectBroadcast = false

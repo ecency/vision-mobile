@@ -41,7 +41,7 @@ data class BroadcastResult(val txId: String)
  * rather than signing a new one. Only once that transaction can no longer be accepted (near
  * expiry) is it re-signed, and then only after the chain said it did not land
  * (`transaction_status_api.find_transaction` answers expired; a reply is also looked up with
- * get_content). While the chain cannot say, the send fails with [BroadcastException.Network]
+ * find_comments). While the chain cannot say, the send fails with [BroadcastException.Network]
  * `undecided` and nothing new is signed, so no operation (a transfer included) goes out twice.
  */
 class PendingBroadcast internal constructor(

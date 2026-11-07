@@ -460,7 +460,9 @@ private class Walker(private val options: BuildOptions) {
         // the reader's IP. An image the proxy cannot serve is left out.
         val safe = SafeTarget.image(el.getAttribute("src")) ?: return null
         val src = SafeTarget.proxify(safe, options.proxyBase) ?: return null
-        return Block.Image(src, el.getAttribute("alt")?.takeIf { it.isNotBlank() }, link)
+        // An empty alt reaches here as a bare `alt` (the parse reads it as its own name, as xmldom does) or as
+        // render-helper's own `alt="alt"`: neither describes the image.
+        return Block.Image(src, el.getAttribute("alt")?.takeIf { it.isNotBlank() && it != "alt" }, link)
     }
 
     private fun thumbnail(src: String?): String? = SafeTarget.proxiedImage(src, options.proxyBase) ?: fallbackThumb

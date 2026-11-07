@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,7 +61,9 @@ import com.ecency.core.app.UiCopy
  * RN backupKeysScreen ("Manage Authorities") over [BackupKeysModel], which holds the gate (PIN or biometrics,
  * or RN's "set a PIN first" warning), the rows and the import. The screen only draws: it leaves when the model
  * says [KeysPhase.CLOSED] (cancelled PIN, lock, background, another account). The window is FLAG_SECURE while
- * this screen is on top (see `EcencyApp`), and its dialogs are secure windows too. A private key is copied
+ * this screen is composed, through the end of its exit animation, and its dialogs are secure windows too. It is the
+ * only screen kept out of screenshots: login, the auth upgrade and HiveSigner's pages hide what is typed and stay
+ * capturable for bug reports. A private key is copied
  * through [AppHost.copySensitive] (the expiring key clipboard) only after the warning.
  */
 @Composable
@@ -70,6 +73,11 @@ fun BackupKeysScreen(env: AppEnvironment, host: AppHost, model: BackupKeysModel,
     LaunchedEffect(model) { model.start() }
     LaunchedEffect(state.phase) { if (state.phase == KeysPhase.CLOSED) onBack() }
     val secure = DialogProperties(securePolicy = SecureFlagPolicy.SecureOn)
+    // held while drawn: Back changes the stack before the screen and a revealed key slide out
+    DisposableEffect(host) {
+        host.setSensitiveScreen(true)
+        onDispose { host.setSensitiveScreen(false) }
+    }
 
     Column(Modifier.fillMaxSize().background(colors.background).testTag("backupKeys")) {
         TopBar(BackupKeysCopy.TITLE, onBack = model::dismiss)

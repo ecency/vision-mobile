@@ -157,18 +157,19 @@ object EcencyGraph {
 }
 
 /**
- * Keeps app content out of the recents thumbnail while the app lock is on. Android 13+ only leaves the app
- * out of recents (screenshots and recording stay allowed, as in the RN app); below 13 there is no such
- * switch, so FLAG_SECURE covers it, which also blocks screenshots and screen recording while the lock is on.
- * [sdk] is only overridden by tests, so the API 33 call never runs on an older device.
+ * Keeps app content out of the recents thumbnail while the app lock is on. Android 13+ only leaves the app out of
+ * recents (screenshots and recording stay allowed). Below 13 there is no such switch, so FLAG_SECURE covers it, which
+ * also blocks screenshots while the lock is on: setting it only on leaving is not enough, as a recents gesture takes
+ * the thumbnail while the app is still in front. [sdk] is only overridden by tests, so the API 33 call never runs on
+ * an older device.
  */
 @SuppressLint("NewApi")
 internal fun Activity.applyHideInRecents(hide: Boolean, sdk: Int = Build.VERSION.SDK_INT) = applyWindowPrivacy(hide, sensitive = false, sdk)
 
 /**
  * The window's privacy for both reasons at once: [hideInRecents] (lock on, see [applyHideInRecents]) and
- * [sensitive] (a screen that shows or takes private keys and passwords: login, keys, the auth upgrade sheet),
- * which sets FLAG_SECURE on every Android version, blocking screenshots and recording while it shows.
+ * [sensitive] (the keys screen, Manage Authorities, which shows the keys themselves), which sets FLAG_SECURE on every
+ * Android version, blocking screenshots and recording while it shows.
  */
 @SuppressLint("NewApi")
 internal fun Activity.applyWindowPrivacy(hideInRecents: Boolean, sensitive: Boolean, sdk: Int = Build.VERSION.SDK_INT) {
@@ -177,6 +178,21 @@ internal fun Activity.applyWindowPrivacy(hideInRecents: Boolean, sensitive: Bool
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     } else {
         window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    }
+}
+
+/**
+ * Keys screens drawn now: one comes (true) or goes (false). Counted, as an entering keys screen can take its hold
+ * before a leaving one lets go; the window stays secure while any is held.
+ */
+internal class SensitiveHolds {
+    private var count = 0
+
+    val held: Boolean get() = count > 0
+
+    fun change(sensitive: Boolean): Boolean {
+        count = (count + if (sensitive) 1 else -1).coerceAtLeast(0)
+        return held
     }
 }
 
@@ -272,7 +288,8 @@ class MainActivity : FragmentActivity() {
     /** Survives rotation and other configuration changes; its back stack is saved for process death. */
     private val navigation: NavigationViewModel by viewModels()
     private var hideInRecents = false
-    private var sensitiveScreen = false
+    /** Keys screens composed now ([AppHost.setSensitiveScreen]). */
+    private val sensitiveHolds = SensitiveHolds()
 
     // The Android 13+ notification permission dialog, for the shared push model's prompt at start. The classic
     // permission call: the ActivityResult API needs a newer Fragment library than androidx.biometric brings. The
@@ -540,12 +557,11 @@ class MainActivity : FragmentActivity() {
 
             override fun setHideInRecents(hide: Boolean) {
                 hideInRecents = hide
-                applyWindowPrivacy(hideInRecents, sensitiveScreen)
+                applyWindowPrivacy(hideInRecents, sensitiveHolds.held)
             }
 
             override fun setSensitiveScreen(sensitive: Boolean) {
-                sensitiveScreen = sensitive
-                applyWindowPrivacy(hideInRecents, sensitiveScreen)
+                applyWindowPrivacy(hideInRecents, sensitiveHolds.change(sensitive))
             }
 
             private val prefs get() = getSharedPreferences("ecency.ui", MODE_PRIVATE)

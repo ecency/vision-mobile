@@ -204,7 +204,7 @@ internal fun fieldColors(): TextFieldColors {
 @Composable
 fun HiveSignerLoginDialog(onCode: (String) -> Unit, onError: (String) -> Unit, onDismiss: () -> Unit) {
     val colors = LocalEcencyColors.current
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, securePolicy = androidx.compose.ui.window.SecureFlagPolicy.SecureOn)) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding().testTag("hiveSignerLogin")) {
             TopBar(LoginCopy.TITLE, onBack = onDismiss)
             HiveSignerWebView(

@@ -53,4 +53,16 @@ class LockPlatformTest {
         activity.applyHideInRecents(true, sdk = 30)
         assertTrue(activity.secure())
     }
+
+    @Test
+    fun aKeysScreenEnteringBeforeTheLeavingOneLetsGoKeepsTheWindowSecure() {
+        val holds = SensitiveHolds()
+        assertTrue(holds.change(true))
+        // back and forward again: the new keys screen holds before the old one is disposed
+        assertTrue(holds.change(true))
+        assertTrue("one keys screen is still drawn", holds.change(false))
+        assertFalse(holds.change(false))
+        assertFalse("an extra release never goes below zero", holds.change(false))
+        assertTrue(holds.change(true))
+    }
 }

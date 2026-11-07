@@ -117,6 +117,9 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
             is com.ecency.core.api.EcencyHttpException ->
                 if (error.isNetwork) AppError(ErrorKind.NETWORK, NETWORK_MESSAGE, true)
                 else if (error.isRedirect) AppError(ErrorKind.UNKNOWN, UNEXPECTED_REDIRECT, true)
+                // Ecency refused the session and renewing it did not help: the user was asked to sign in again
+                // (EcencyPrivateApi, SessionModel.sessionRefused)
+                else if (error.isSessionRefused) AppError(ErrorKind.AUTH, SESSION_EXPIRED, false)
                 else AppError(ErrorKind.UNKNOWN, GENERIC_MESSAGE, true)
             is InvalidInputException -> AppError(ErrorKind.INVALID_INPUT, error.message ?: L.native.appError.invalidInput, false)
             is SecureStoreException -> AppError(ErrorKind.STORAGE, L.native.appError.secureStorageIsUnavailable, false)

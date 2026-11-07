@@ -238,8 +238,7 @@ fun AuthUpgradeSheet(env: AppEnvironment, prompt: SigningPrompt.AuthUpgrade) {
         onDismissRequest = env.signing::cancel,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.background,
-        // the key typed here never ends up in a screenshot or a recording
-        properties = androidx.compose.material3.ModalBottomSheetProperties(securePolicy = androidx.compose.ui.window.SecureFlagPolicy.SecureOn),
+        // screenshots stay allowed (bug reports): the key field hides what is typed; only the keys screen is secure
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("authUpgrade")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -286,7 +285,7 @@ fun AuthUpgradeSheet(env: AppEnvironment, prompt: SigningPrompt.AuthUpgrade) {
 @Composable
 private fun HiveSignerSignDialog(env: AppEnvironment, prompt: SigningPrompt.HiveSignerHot) {
     val colors = LocalEcencyColors.current
-    Dialog(onDismissRequest = env.signing::cancel, properties = DialogProperties(usePlatformDefaultWidth = false, securePolicy = androidx.compose.ui.window.SecureFlagPolicy.SecureOn)) {
+    Dialog(onDismissRequest = env.signing::cancel, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding().testTag("hiveSignerSign")) {
             TopBar(AccountCopy.CONFIRM_TX, onBack = env.signing::cancel)
             HiveSignerWebView(prompt.url, onRedirect = { if (!env.signing.hotSignNavigation(it)) env.signing.cancel() }, modifier = Modifier.fillMaxSize())
