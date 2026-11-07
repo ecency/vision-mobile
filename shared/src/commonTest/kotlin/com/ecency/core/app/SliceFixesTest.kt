@@ -47,11 +47,8 @@ class SliceFixesTest {
             "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf("x")))
             "bridge.get_discussion" -> FakeTransport.result(req, discussion(comments))
             "condenser_api.get_accounts" -> FakeTransport.result(req, "[]")
-            "condenser_api.get_content" -> if (exists()) {
-                val p = req.params.jsonArray
-                FakeTransport.result(req, """{"author":${p[0]},"permlink":${p[1]},"title":"","body":"first","parent_author":"alice","parent_permlink":"root"}""")
-            } else {
-                TestApp.chain(req)!!
+            "database_api.find_comments" -> TestApp.commentAsked(req).let { (a, l) ->
+                TestApp.comments(req, if (exists()) """{"author":"$a","permlink":"$l","title":"","body":"first","parent_author":"alice","parent_permlink":"root"}""" else null)
             }
             else -> TestApp.chain(req) ?: HttpResult(500, "")
         }

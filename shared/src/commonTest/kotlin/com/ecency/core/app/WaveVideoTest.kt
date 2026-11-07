@@ -77,10 +77,9 @@ class WaveVideoTest {
                 }
             "bridge.get_post" -> FakeTransport.result(req, "null")
             "condenser_api.broadcast_transaction" -> if (rejectBroadcast) HttpResult(500, "down") else FakeTransport.result(req, "null")
-            "condenser_api.get_content" -> onChainBody?.let { body ->
-                val p = req.params.jsonArray
-                FakeTransport.result(req, """{"author":${p[0]},"permlink":${p[1]},"body":${Json.encodeToString(body)}}""")
-            } ?: FakeTransport.result(req, """{"author":"","permlink":""}""")
+            "database_api.find_comments" -> TestApp.commentAsked(req).let { (a, l) ->
+                TestApp.comments(req, onChainBody?.let { body -> """{"author":"$a","permlink":"$l","body":${Json.encodeToString(body)}}""" })
+            }
             "condenser_api.get_following", "condenser_api.get_accounts" -> FakeTransport.result(req, "[]")
             else -> TestApp.chain(req) ?: HttpResult(500, "")
         }

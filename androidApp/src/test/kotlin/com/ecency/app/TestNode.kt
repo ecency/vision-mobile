@@ -128,7 +128,7 @@ class TestNode {
                 """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00"}""",
             )
             "condenser_api.get_block_header" -> ok("""{"previous":"000186a0${"22".repeat(16)}"}""")
-            "condenser_api.get_content" -> ok("""{"author":"","permlink":""}""")
+            "database_api.find_comments" -> ok("""{"comments":[]}""")
             // feed, posts and reading
             "condenser_api.get_reblogged_by" -> ok("""["alice","carol"]""")
             "condenser_api.get_active_votes" -> ok(

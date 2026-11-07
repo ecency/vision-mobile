@@ -1,5 +1,8 @@
 package com.ecency.core.app
 
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import com.ecency.core.api.EcencyApi
 import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.NODES
@@ -161,13 +164,22 @@ class TestApp(
         private val REF_ID = "06013039" + "d368b7c8" + "00".repeat(12)
         private val HEAD_ID = "0601303c" + "11".repeat(16)
 
+        /** The `[author, permlink]` a `database_api.find_comments` call asks for (the app asks for one post). */
+        fun commentAsked(request: Sent): Pair<String, String> {
+            val pair = request.params.jsonObject.getValue("comments").jsonArray.single().jsonArray
+            return pair[0].jsonPrimitive.content to pair[1].jsonPrimitive.content
+        }
+
+        /** `database_api.find_comments`'s answer: the post (JSON object text) when [post] is given, else an empty list (no such post). */
+        fun comments(request: Sent, post: String?): HttpResult = FakeTransport.result(request, """{"comments":[${post.orEmpty()}]}""")
+
         /** Answers the chain-state calls a broadcast needs; null for anything else. */
         fun chain(request: Sent): HttpResult? = when (request.method) {
             "condenser_api.get_dynamic_global_properties" -> FakeTransport.result(
                 request, """{"head_block_number":$HEAD,"head_block_id":"$HEAD_ID","vote_power_reserve_rate":10,"time":"2026-10-06T11:59:00"}""",
             )
             "condenser_api.get_block_header" -> FakeTransport.result(request, """{"previous":"$REF_ID"}""")
-            "condenser_api.get_content" -> FakeTransport.result(request, """{"author":"","permlink":""}""")
+            "database_api.find_comments" -> comments(request, null)
             "transaction_status_api.find_transaction" ->
                 if (request.params.toString().contains(HAS_TX)) FakeTransport.result(request, """{"status":"within_reversible_block"}""") else null
             else -> null

@@ -116,7 +116,7 @@ class AppFlowsTest {
                 """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00"}""",
             )
             "condenser_api.get_block_header" -> ok("""{"previous":"000186a0${"22".repeat(16)}"}""")
-            "condenser_api.get_content" -> ok("""{"author":"","permlink":""}""")
+            "database_api.find_comments" -> ok("""{"comments":[]}""")
             "condenser_api.broadcast_transaction" -> if (broadcastDown) HttpResult(503, "") else ok("null")
             else -> HttpResult(500, "no fixture")
         }

@@ -37,9 +37,9 @@ class PointActivitiesTest {
             when (req.method) {
                 "condenser_api.get_accounts" -> FakeTransport.result(req, listOf(alice, bob).filter { "\"$it\"" in req.body }.joinToString(",", "[", "]") { AppTestKeys.accountJson(it) })
                 "condenser_api.broadcast_transaction" -> if (broadcastDown) HttpResult(503, "down") else FakeTransport.result(req, "null")
-                "condenser_api.get_content" -> {
-                    val p = req.params.toString().trim('[', ']').split(',').map { it.trim('"') }
-                    onChain["${p[0]}/${p[1]}"]?.let { FakeTransport.result(req, it) } ?: TestApp.chain(req)!!
+                "database_api.find_comments" -> {
+                    val (a, l) = TestApp.commentAsked(req)
+                    TestApp.comments(req, onChain["$a/$l"])
                 }
                 "bridge.get_post" -> FakeTransport.result(req, entry("someone", "root"))
                 else -> TestApp.chain(req) ?: HttpResult(500, "")

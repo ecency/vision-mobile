@@ -44,7 +44,7 @@ class BroadcastTest {
     /** Test clock; starts at [now]. */
     private var clock = now
 
-    /** Whether condenser_api.get_content reports the reply as existing. */
+    /** Whether database_api.find_comments reports the reply as existing. */
     private var contentExists = false
 
     /** What transaction_status_api.find_transaction answers (null: a node error); expired by default. */
@@ -58,12 +58,9 @@ class BroadcastTest {
     private fun chain(onBroadcast: suspend FakeTransport.(Sent) -> HttpResult = { FakeTransport.result(it, "null") }) =
         FakeTransport { req ->
             when (req.method) {
-                "condenser_api.get_content" -> {
-                    val (author, permlink) = req.params.jsonArray.map { it.jsonPrimitive.content }
-                    FakeTransport.result(
-                        req,
-                        if (contentExists) """{"author":"$author","permlink":"$permlink"}""" else """{"author":"","permlink":""}""",
-                    )
+                "database_api.find_comments" -> {
+                    val (author, permlink) = com.ecency.core.app.TestApp.commentAsked(req)
+                    com.ecency.core.app.TestApp.comments(req, if (contentExists) """{"author":"$author","permlink":"$permlink"}""" else null)
                 }
                 "condenser_api.get_dynamic_global_properties" -> FakeTransport.result(
                     req,
@@ -321,7 +318,7 @@ class BroadcastTest {
         contentExists = true // it did land
         b.comment(draft, key)
         assertEquals(sentBefore, transport.broadcasts().size, "nothing re-sent: comment_options would now fail")
-        assertEquals(1, transport.sent.count { it.method == "condenser_api.get_content" })
+        assertEquals(1, transport.sent.count { it.method == "database_api.find_comments" })
     }
 
     @Test
