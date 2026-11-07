@@ -255,14 +255,17 @@ class ChatService internal constructor(private val env: AppEnvironment) {
      * two never disagree (tester report: an unread count on the tab that no row showed).
      */
     @Throws(Exception::class)
-    internal suspend fun fetchChannels(username: String): List<ChatChannel> {
+    internal suspend fun fetchChannels(username: String): List<ChatChannel> = fetchChannelsAnswer(username).channels
+
+    /** [fetchChannels] as the event [fetched] carries: a caller that applies it itself knows the event when it comes. */
+    @Throws(Exception::class)
+    internal suspend fun fetchChannelsAnswer(username: String): ChatChannelsFetched {
         val started = env.nowMillis()
         val answer = call(username) { api.channels(it.token) }
         return withContext(env.dispatchers.main) {
             val list = withNewerRenames(answer, started)
             if (env.session.current.username == username && badgeAccount == username) env.badges.setChats(badgeCount(list))
-            fetchedEvents.tryEmit(ChatChannelsFetched(username, list, started))
-            list
+            ChatChannelsFetched(username, list, started).also { fetchedEvents.tryEmit(it) }
         }
     }
 

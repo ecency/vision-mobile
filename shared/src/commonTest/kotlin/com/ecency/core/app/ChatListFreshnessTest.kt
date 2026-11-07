@@ -54,6 +54,26 @@ class ChatListFreshnessTest {
     }
 
     @Test
+    fun oneLoadAppliesItsAnswerOnceAndLooksUpItsUsersOnce() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        // a direct message whose other user the list does not know yet: the load asks for that user
+        f.before = { r ->
+            when {
+                r.method == "GET" && r.url.endsWith("/api/mattermost/channels") -> HttpResult(
+                    200,
+                    """{"channels":[{"id":"m-dm","type":"D","name":"u-a__u-x","last_viewed_at":1,"message_count":2,"teammate_id":"u-x"}]}""",
+                )
+                r.url.endsWith("/api/mattermost/users/ids") -> HttpResult(200, """{"users":[{"id":"u-x","username":"spike-x"}]}""")
+                else -> null
+            }
+        }
+        list(f)
+        val lookups = f.app.authBackend.sent.filter { it.url.endsWith("/api/mattermost/users/ids") }
+        assertEquals(1, lookups.size, "one user lookup for one load")
+    }
+
+    @Test
     fun anotherAccountsChannelsNeverReachTheList() = runTest {
         val f = ChatFixture(this, users = listOf(ChatFixture.USER, "spike-yan"))
         f.start()

@@ -128,6 +128,9 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
     /** [channels] came from a channel read for [ChatsState.account] (not just the empty start). */
     private var listed = false
 
+    /** The last channel read this list took ([ChatService.fetched] or its own): the same answer is never applied twice. */
+    private var handledAnswer: ChatChannelsFetched? = null
+
     /** When the request of the rows shown started. */
     private var appliedStart = Long.MIN_VALUE
 
@@ -161,6 +164,9 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             // rows come from one answer. A read for another account is never taken.
             env.chat.fetched.collect { f ->
                 val gen = generation
+                // the answer of this list's own read: [load] or [groupCreated] applied it already
+                if (f === handledAnswer) return@collect
+                if (listed) handledAnswer = f
                 if (listed && applyList(f.channels, f.startedAt, f.owner, gen)) {
                     dmUserIds(channels).takeIf { it.isNotEmpty() }?.let { ids -> scope.launch { resolveUsers(f.owner, gen, ids) } }
                 } else if (listed) {
@@ -249,11 +255,16 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 session.user?.let { lookup[it.id] = it }
                 setState { it.copy(connected = true) }
                 val started = env.nowMillis()
-                val list = env.chat.fetchChannels(user)
+                val answer = env.chat.fetchChannelsAnswer(user)
                 if (gen != generation) return@launch
-                applyList(list, started, user, gen)
+                // applied once: the [fetched] collector may have taken this very answer first
+                val mine = answer !== handledAnswer
+                if (mine) {
+                    handledAnswer = answer
+                    applyList(answer.channels, started, user, gen)
+                }
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = null) }
-                resolveUsers(user, gen, dmUserIds(channels))
+                if (mine) resolveUsers(user, gen, dmUserIds(channels))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -469,9 +480,12 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         scope.launch {
             val created = try {
                 val started = env.nowMillis()
-                val list = env.chat.fetchChannels(user)
+                val answer = env.chat.fetchChannelsAnswer(user)
                 if (gen != generation) return@launch
-                applyList(list, started, user, gen)
+                if (answer !== handledAnswer) {
+                    handledAnswer = answer
+                    applyList(answer.channels, started, user, gen)
+                }
                 channels.firstOrNull { it.id == channelId }
             } catch (e: CancellationException) {
                 throw e
