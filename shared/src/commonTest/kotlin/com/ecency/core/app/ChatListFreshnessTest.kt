@@ -158,6 +158,34 @@ class ChatListFreshnessTest {
     }
 
     @Test
+    fun aBadgeReadThatBringsFreshRowsClearsAnEarlierLoadError() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = list(f)
+        // a pull to refresh that fails keeps the rows and shows its error
+        f.before = { r -> if (r.url.endsWith("/api/mattermost/channels")) HttpResult(502, "") else null }
+        m.refresh()
+        f.idle()
+        assertNotNull(m.current.error)
+        // the badge's next read answers: the rows are fresh, so the error is gone
+        f.before = null
+        f.chat.incoming("ch-photo", "New photo", "spike-bob")
+        f.env.chat.refreshUnread()
+        f.idle()
+        assertEquals(1, m.row("Photography").unread)
+        assertNull(m.current.error)
+        // a channel action's failure is not the list's: the next badge read leaves it on screen
+        f.before = { r -> if (r.url.endsWith("/favorite")) HttpResult(502, "") else null }
+        m.perform(m.row("Photography"), ChatChannelAction.FAVORITE)
+        f.idle()
+        val actionError = assertNotNull(m.current.error)
+        f.before = null
+        f.env.chat.refreshUnread()
+        f.idle()
+        assertEquals(actionError, m.current.error)
+    }
+
+    @Test
     fun aRefusedChannelsReadShowsItsOwnFailureNotNoInternet() = runTest {
         val f = ChatFixture(this)
         val reporter = RecordingReporter()

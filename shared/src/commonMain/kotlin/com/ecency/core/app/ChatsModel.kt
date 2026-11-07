@@ -131,6 +131,9 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
     /** The last channel read this list took ([ChatService.fetched] or its own): the same answer is never applied twice. */
     private var handledAnswer: ChatChannelsFetched? = null
 
+    /** The error shown is a failed load's (not a channel action's): fresh rows from the badge's read clear it. */
+    private var loadFailed = false
+
     /** When the request of the rows shown started. */
     private var appliedStart = Long.MIN_VALUE
 
@@ -168,6 +171,11 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 if (f === handledAnswer) return@collect
                 if (listed) handledAnswer = f
                 if (listed && applyList(f.channels, f.startedAt, f.owner, gen)) {
+                    // fresh rows: an earlier load's failure no longer describes them (a channel action's stays)
+                    if (loadFailed) {
+                        loadFailed = false
+                        setState { it.copy(error = null) }
+                    }
                     dmUserIds(channels).takeIf { it.isNotEmpty() }?.let { ids -> scope.launch { resolveUsers(f.owner, gen, ids) } }
                 } else if (listed) {
                     // an older answer than the rows: the badge it set goes back to the rows' sum
@@ -201,6 +209,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             searchJob?.cancel()
             channels = emptyList()
             listed = false
+            loadFailed = false
             appliedStart = Long.MIN_VALUE
             changes.clear()
             lookup.clear()
@@ -246,6 +255,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
         }
         val gen = generation
         loadJob?.cancel()
+        if (!quiet) loadFailed = false
         if (!quiet) setState { it.copy(error = null, isLoading = !refresh || it.rows.isEmpty() && !it.loaded, isRefreshing = refresh && (it.rows.isNotEmpty() || it.loaded)) }
         loadJob = scope.launch {
             try {
@@ -263,6 +273,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     handledAnswer = answer
                     applyList(answer.channels, started, user, gen)
                 }
+                loadFailed = false
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = null) }
                 if (mine) resolveUsers(user, gen, dmUserIds(channels))
             } catch (e: CancellationException) {
@@ -281,6 +292,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 } else {
                     message(e, L.native.chats.failedToLoadChats, "chats.load")
                 }
+                loadFailed = true
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = text) }
             }
         }
@@ -438,6 +450,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                     ChatChannelAction.MUTE, ChatChannelAction.UNMUTE -> L.native.chats.unableToUpdateMute
                     else -> UNABLE_TO_LEAVE
                 }
+                loadFailed = false
                 setState { it.copy(error = message(e, fallback, "chats.channelAction")) }
             }
         }
