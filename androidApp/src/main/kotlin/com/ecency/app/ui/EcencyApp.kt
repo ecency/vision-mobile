@@ -334,7 +334,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
             shown += failed.key
             launch {
                 val error = failed.error!!
-                val result = snackbar.showSnackbar(error.message, if (error.retryable) UiCopy.RETRY else null, duration = SnackbarDuration.Long)
+                val result = snackbar.showSnackbar(error.text, if (error.retryable) UiCopy.RETRY else null, duration = SnackbarDuration.Long)
                 shown -= failed.key
                 if (result == SnackbarResult.ActionPerformed) env.votes.retry(failed.key.author, failed.key.permlink)
                 else env.votes.dismissError(failed.key.author, failed.key.permlink)
@@ -520,7 +520,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         if (lock.hidesContent) {
             val prompt = lock.prompt
             if (prompt != null) LockPrompt(env, host, lock, prompt, biometricAvailable)
-            else LockCover(lock.error?.message, onRetry = { env.appLock.clearError(); env.appLock.start() })
+            else LockCover(lock.error?.text, onRetry = { env.appLock.clearError(); env.appLock.start() })
             LockNotice(env, lock) // e.g. biometric unlock went off because the enrollment changed
             return@Box
         }
@@ -868,7 +868,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
         lock.error?.takeIf { lock.prompt == null }?.let { error ->
             AlertDialog(
                 onDismissRequest = { env.appLock.clearError() },
-                text = { Text(error.message) },
+                text = { Text(error.text) },
                 confirmButton = { TextButton(onClick = { env.appLock.clearError() }) { Text(UiCopy.OK) } },
             )
         }

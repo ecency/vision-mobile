@@ -269,7 +269,7 @@ fun EsieMessageBlock(
 
 @Composable
 fun ErrorBlock(error: AppError, modifier: Modifier = Modifier, esie: com.ecency.core.esie.EsiePlacement? = null, onRetry: () -> Unit) =
-    EsieMessageBlock(esie, error.message, modifier, if (error.retryable) UiCopy.RETRY else null, onRetry)
+    EsieMessageBlock(esie, error.text, modifier, if (error.retryable) UiCopy.RETRY else null, onRetry)
 
 @Composable
 fun LoadingBlock(modifier: Modifier = Modifier) {

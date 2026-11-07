@@ -95,7 +95,7 @@ fun ReferScreen(
                         when {
                             state.isLoading || state.isLoadingMore -> Spinner(Modifier.testTag("referLoading"))
                             state.error != null -> TextButton(onClick = { if (state.loaded) model.loadMore() else model.retry() }, modifier = Modifier.testTag("referRetry")) {
-                                Text(UiCopy.errorTryAgain(state.error?.message.orEmpty()), color = colors.blueText, textAlign = TextAlign.Center)
+                                Text(UiCopy.errorTryAgain(state.error?.text.orEmpty()), color = colors.blueText, textAlign = TextAlign.Center)
                             }
                             mine && state.isEmpty -> Text(ReferCopy.EMPTY, color = colors.darkGray, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 24.dp).testTag("referEmpty"))
                         }

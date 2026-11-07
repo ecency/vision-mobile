@@ -168,7 +168,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                refuse(TRANSACTION_FAILED, AppError.from(e, "authLink.open").message, silentRefusal)
+                refuse(TRANSACTION_FAILED, AppError.from(e, "authLink.open").text, silentRefusal)
             }
         }
         waiting = Triple(job, link, fromContent)
@@ -398,7 +398,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
                 throw e
             } catch (e: Exception) {
                 val error = AppError.from(e, "authLink.confirm")
-                if (error.kind != ErrorKind.CANCELLED) setState { it.copy(prompt = LinkPrompt.Refused(FAIL_TITLE, error.message)) }
+                if (error.kind != ErrorKind.CANCELLED) setState { it.copy(prompt = LinkPrompt.Refused(FAIL_TITLE, error.text)) }
             } finally {
                 setState { it.copy(isWorking = false) }
             }
@@ -467,7 +467,7 @@ class AuthLinkModel internal constructor(private val env: AppEnvironment) :
             is SendPhase.Failed -> {
                 // a signer elsewhere that may have answered cannot say either: unconfirmed, not failed
                 val undecided = phase.error.undecided
-                setState { it.copy(notice = if (undecided) phase.error.message else TRANSACTION_FAILED) }
+                setState { it.copy(notice = if (undecided) phase.error.text else TRANSACTION_FAILED) }
                 action.callback?.let { cb -> answer(cb, action.requestId, listOf("status" to "error", "error" to if (undecided) UNCONFIRMED else "qr.transaction_failed"), quiet = false) }
             }
             else -> Unit

@@ -1,6 +1,7 @@
 package com.ecency.core.api
 
 import com.ecency.core.api.broadcast.BroadcastException
+import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.api.InvalidInputException
 import com.ecency.core.api.broadcast.Comments
 import com.ecency.core.api.broadcast.HiveBroadcaster
@@ -589,7 +590,8 @@ class BroadcastTest {
             when (expect) {
                 "ok" -> assertTrue(result.isSuccess, "$status: ${result.exceptionOrNull()}")
                 "undecided" -> assertTrue((result.exceptionOrNull() as? BroadcastException.Network)?.undecided == true, "$status: ${result.exceptionOrNull()}")
-                else -> assertIs<BroadcastException.Rejected>(result.exceptionOrNull(), status)
+                // #3660: hived's own refusal, typed
+                else -> assertEquals(ChainRefusal.INSUFFICIENT_FUNDS, (result.exceptionOrNull() as? BroadcastException.Refused)?.refusal, status)
             }
             if (expect == "undecided") {
                 // the pending stays: the next retry asks again and still signs nothing new

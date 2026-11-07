@@ -191,8 +191,8 @@ struct ErrorStateView: View {
                 Image(appIcon: error.kind == .network ? .offline : .warning)
                     .scaledFont(32, relativeTo: .title).foregroundStyle(theme.icon).accessibilityHidden(true)
             }
-            Text(error.message).multilineTextAlignment(.center).foregroundStyle(theme.secondary)
-                .announces(error.message, attempt: ObjectAttempt(error), sticky: sticky ?? (esie == nil))
+            Text(error.text).multilineTextAlignment(.center).foregroundStyle(theme.secondary)
+                .announces(error.text, attempt: ObjectAttempt(error), sticky: sticky ?? (esie == nil))
             if error.retryable {
                 Button(UiCopy.shared.RETRY, action: retry).buttonStyle(.prominentFill).accessibilityIdentifier("retry")
             }
@@ -212,8 +212,8 @@ struct InlineErrorRow: View {
 
     var body: some View {
         AdaptiveStack {
-            Text(error.message).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary)
-                .announces(error.message, attempt: ObjectAttempt(error), sticky: true)
+            Text(error.text).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.secondary)
+                .announces(error.text, attempt: ObjectAttempt(error), sticky: true)
             Spacer(minLength: 0)
             if error.retryable { Button(UiCopy.shared.RETRY, action: retry).frame(minHeight: minTapTarget).accessibilityIdentifier("retry") }
         }

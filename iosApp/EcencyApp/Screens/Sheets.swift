@@ -82,7 +82,7 @@ struct ReplyComposer: View {
                     AdaptiveStack(verticalAlignment: .top) {
                         HStack(alignment: .top) {
                             Image(appIcon: .error).foregroundStyle(theme.dangerText).accessibilityHidden(true)
-                            Text(error.message).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.dangerText)
+                            Text(error.text).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.dangerText)
                         }
                         Spacer(minLength: 0)
                         if error.retryable {
@@ -90,7 +90,7 @@ struct ReplyComposer: View {
                         }
                     }
                     .accessibilityElement(children: .combine)
-                    .announces(error.message, attempt: ObjectAttempt(error))
+                    .announces(error.text, attempt: ObjectAttempt(error))
                     .accessibilityIdentifier("reply-error")
                 }
             }

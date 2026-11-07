@@ -14,27 +14,31 @@ import com.ecency.core.l10n.L
  */
 sealed class BroadcastException(message: String, cause: Throwable? = null) : EcencyException(message, cause) {
     /** The vote is identical to the one already on chain. */
-    class DuplicateVote(cause: Throwable) : BroadcastException(L.native.broadcastErrors.duplicateVote, cause)
+    class DuplicateVote(cause: Throwable) : BroadcastException(ChainRefusal.IDENTICAL_VOTE.message, cause)
 
-    /** Not enough Resource Credits (or bandwidth) to transact. */
+    /** Not enough Resource Credits to transact ([ChainRefusal.RESOURCE_CREDITS], RN's RC_SHORTFALL). */
     class InsufficientResourceCredits(cause: Throwable) :
-        BroadcastException(L.native.broadcastErrors.insufficientRc, cause)
+        BroadcastException(ChainRefusal.RESOURCE_CREDITS.message, cause)
 
-    /** The key used cannot sign this operation. */
-    class MissingAuthority(cause: Throwable) : BroadcastException(L.native.broadcastErrors.missingAuthority, cause)
+    /** The key used cannot sign this operation: [refusal] names the role it needs. */
+    class MissingAuthority(cause: Throwable, val refusal: ChainRefusal = ChainRefusal.MISSING_POSTING) :
+        BroadcastException(refusal.message, cause)
 
-    /** Hive allows one comment per account every 3 seconds. */
-    class CommentTooSoon(cause: Throwable) : BroadcastException(L.native.broadcastErrors.commentTooSoon, cause)
+    /** A cooldown: one post every 5 minutes, one comment every 3 seconds, one edit per block ([refusal]). */
+    class CommentTooSoon(cause: Throwable, val refusal: ChainRefusal = ChainRefusal.POST_COOLDOWN) :
+        BroadcastException(refusal.message, cause)
 
-    /** Voting or editing after payout is not allowed. */
-    class PaidOut(cause: Throwable) : BroadcastException(L.native.broadcastErrors.paidOut, cause)
+    /** Voting, deleting or changing the payout options after payout is not allowed. */
+    class PaidOut(cause: Throwable) : BroadcastException(ChainRefusal.PAID_OUT.message, cause)
+
+    /** Any other refusal hived names ([ChainRefusal]): a title too long, a beneficiary list, funds... */
+    class Refused(val refusal: ChainRefusal, cause: Throwable) : BroadcastException(refusal.message, cause)
 
     /** The operations were refused before anything was sent (vote weight, beneficiaries, empty...). */
     class InvalidOperation(message: String, cause: Throwable? = null) : BroadcastException(message, cause)
 
     /** The signed transaction is over Hive's 64 KB limit. */
-    class TooLarge(val size: Int) :
-        BroadcastException(L.native.broadcastErrors.tooLarge(size = size, max = HiveBroadcaster.MAX_TRANSACTION_SIZE.toString()))
+    class TooLarge(val size: Int) : BroadcastException("transaction of $size bytes, over ${HiveBroadcaster.MAX_TRANSACTION_SIZE}")
 
     /**
      * No node could be reached, or none answered in time: the transaction may or may not have
@@ -76,16 +80,21 @@ sealed class BroadcastException(message: String, cause: Throwable? = null) : Ece
         /** Maps a failure from [com.ecency.core.api.rpc.HiveRpcClient] to a typed error. */
         fun from(e: HiveApiException, pending: PendingBroadcast? = null): BroadcastException {
             if (e is NodeFailureException || e is RpcTimeoutException || e is AllNodesFailedException) return Network(e, pending)
-            val text = if (e is RpcErrorException) "${e.rpcMessage} ${e.data.orEmpty()}" else e.message.orEmpty()
-            return when {
-                has(text, "please wait to transact|insufficient rc|rc mana|rc account|resource credits|bandwidth") ->
-                    InsufficientResourceCredits(e)
-                has(text, "you may only post once every") -> CommentTooSoon(e)
-                has(text, "your current vote on this comment is identical") -> DuplicateVote(e)
-                has(text, "votes evaluating for comment that is paid out is forbidden|comment_cashout") -> PaidOut(e)
-                has(text, "missing (required )?(posting|active|owner) authority") -> MissingAuthority(e)
-                else -> Rejected(((e as? RpcErrorException)?.rpcMessage ?: e.message.orEmpty()).take(150), e)
+            val refusal = if (e is RpcErrorException) ChainRefusal.of(e) else ChainRefusal.of(e.message)
+            return when (refusal) {
+                null -> Rejected(ChainRefusal.readable((e as? RpcErrorException)?.rpcMessage ?: e.message.orEmpty()).take(150), e)
+                else -> of(refusal, e)
             }
+        }
+
+        /** The typed error for a [refusal] read from [cause] (a node, HiveSigner or HiveAuth failure). */
+        fun of(refusal: ChainRefusal, cause: Throwable): BroadcastException = when (refusal) {
+            ChainRefusal.RESOURCE_CREDITS -> InsufficientResourceCredits(cause)
+            ChainRefusal.POST_COOLDOWN, ChainRefusal.COMMENT_COOLDOWN, ChainRefusal.EDIT_COOLDOWN -> CommentTooSoon(cause, refusal)
+            ChainRefusal.IDENTICAL_VOTE -> DuplicateVote(cause)
+            ChainRefusal.PAID_OUT -> PaidOut(cause)
+            ChainRefusal.MISSING_POSTING, ChainRefusal.MISSING_ACTIVE, ChainRefusal.MISSING_OWNER -> MissingAuthority(cause, refusal)
+            else -> Refused(refusal, cause)
         }
 
         internal fun isExpiredOrTapos(e: RpcErrorException): Boolean =

@@ -47,6 +47,9 @@ sealed interface UiMessage {
         /** RN toast duration. */
         const val TOAST_MILLIS = 4000L
 
+        /** A failure with an error code to read and note down (issue #3660). */
+        const val ERROR_TOAST_MILLIS = 8000L
+
         /** RN foreground notification duration. */
         const val BANNER_MILLIS = 5000L
     }
@@ -64,11 +67,20 @@ class UiMessages internal constructor(dispatchers: AppDispatchers) : StateModel<
     private val banners = ArrayDeque<UiMessage.Banner>()
 
     /** Main thread. Returns the toast's id. Blank text is ignored (-1). */
-    fun toast(text: String): Long {
+    fun toast(text: String): Long = toast(text, UiMessage.TOAST_MILLIS)
+
+    /** Main thread. A failure as the screen shows it ([AppError.text]): longer when it carries a code to read. */
+    fun toast(error: AppError): Long = toast(error.text, if (error.code != null) UiMessage.ERROR_TOAST_MILLIS else UiMessage.TOAST_MILLIS)
+
+    /** Main thread. [text] about [error] (its [AppError.text] inside some copy): longer when the error has a code. */
+    fun toast(text: String, error: AppError): Long = toast(text, if (error.code != null) UiMessage.ERROR_TOAST_MILLIS else UiMessage.TOAST_MILLIS)
+
+    /** Main thread. [toast] shown for [durationMillis]. */
+    fun toast(text: String, durationMillis: Long): Long {
         if (text.isBlank()) return -1
         // the same text twice in a row shows once (RN only shows a toast when its text changed)
         toasts.lastOrNull()?.takeIf { it.text == text }?.let { return it.id }
-        val toast = UiMessage.Toast(nextId++, text)
+        val toast = UiMessage.Toast(nextId++, text, durationMillis)
         toasts += toast
         publish()
         return toast.id

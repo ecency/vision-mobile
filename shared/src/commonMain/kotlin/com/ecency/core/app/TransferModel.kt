@@ -547,7 +547,7 @@ class TransferModel internal constructor(
                 setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Confirm) }
             }.onFailure { e ->
                 if (current.closed || current.prompt != null) return@onFailure setState { it.copy(encryptingMemo = false) }
-                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e, "transfer.encryptMemo").message)) }
+                setState { it.copy(encryptingMemo = false, prompt = TransferPrompt.Alert(WalletCopy.FAIL, AppError.from(e, "transfer.encryptMemo").text)) }
             }
         }
     }

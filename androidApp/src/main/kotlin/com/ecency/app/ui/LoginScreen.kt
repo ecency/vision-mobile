@@ -132,7 +132,7 @@ fun LoginScreen(env: AppEnvironment, host: AppHost, onBack: () -> Unit, onSigned
                     scope.launch {
                         runCatching { env.session.loginWithKey(username, secret) }
                             .onSuccess { secret = ""; onSignedIn() }
-                            .onFailure { e -> failure = (e as? com.ecency.core.app.AppException)?.error?.message ?: e.message }
+                            .onFailure { e -> failure = (e as? com.ecency.core.app.AppException)?.error?.text ?: e.message }
                     }
                 },
                 enabled = canSubmit,
@@ -178,7 +178,7 @@ fun LoginScreen(env: AppEnvironment, host: AppHost, onBack: () -> Unit, onSigned
                 scope.launch {
                     runCatching { env.session.loginWithHiveSignerCode(code) }
                         .onSuccess { onSignedIn() }
-                        .onFailure { e -> failure = (e as? com.ecency.core.app.AppException)?.error?.message ?: e.message }
+                        .onFailure { e -> failure = (e as? com.ecency.core.app.AppException)?.error?.text ?: e.message }
                 }
             },
             onError = { hiveSigner = false; failure = it },
@@ -299,7 +299,7 @@ fun HiveAuthLoginSheet(env: AppEnvironment, host: AppHost, initialUsername: Stri
                     Text(HiveAuthCopy.SUCCESS, color = colors.text, modifier = Modifier.padding(top = 8.dp).testTag("hiveAuthSuccess"))
                 }
                 HiveAuthStep.FAILED -> {
-                    Text(progress.error?.message ?: AuthUiCopy.AUTHENTICATION_FAILED, color = colors.redText, textAlign = TextAlign.Center, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("hiveAuthError"))
+                    Text(progress.error?.text ?: AuthUiCopy.AUTHENTICATION_FAILED, color = colors.redText, textAlign = TextAlign.Center, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("hiveAuthError"))
                     Button(
                         onClick = { env.session.startHiveAuth(progress.username) },
                         colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
@@ -340,5 +340,5 @@ internal fun Countdown(expiresAtMillis: Long, nowMillis: () -> Long) {
 /** The user-facing text of an error from a sign-in, unless the user just cancelled. */
 internal fun loginMessage(e: Throwable): String? {
     val error = (e as? com.ecency.core.app.AppException)?.error ?: return e.message
-    return if (error.kind == ErrorKind.CANCELLED) null else error.message
+    return if (error.kind == ErrorKind.CANCELLED) null else error.text
 }

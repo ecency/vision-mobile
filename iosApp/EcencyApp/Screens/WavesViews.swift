@@ -822,7 +822,7 @@ struct WaveComposerSheet: View {
         .alert(state.errorTitle, isPresented: Binding(get: { composer.state.error != nil }, set: { if !$0 { model.clearError() } })) {
             Button(UiCopy.shared.OK) { model.clearError() }
         } message: {
-            Text(state.error?.message ?? "")
+            Text(state.error?.text ?? "")
         }
     }
 }
@@ -871,7 +871,7 @@ struct ShortsReelsView: View {
                 Color.black // media: the shorts player, video full screen
                 if state.items.isEmpty {
                     if let error = state.error {
-                        Button(L.Native.Ios.Waves.retry(message: error.message)) { model.retry() }.foregroundStyle(.white)
+                        Button(L.Native.Ios.Waves.retry(message: error.text)) { model.retry() }.foregroundStyle(.white)
                     } else if state.loaded {
                         Text(ShortsModel.companion.EMPTY).foregroundStyle(.white).accessibilityIdentifier("shorts-empty")
                     } else {

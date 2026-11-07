@@ -4,6 +4,7 @@ import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.rpc.AllNodesFailedException
 import com.ecency.core.auth.AuthException
+import com.ecency.core.l10n.L
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -42,6 +43,83 @@ class ErrorReportsTest {
         assertEquals("rejected", r.tags["error.kind"])
         assertEquals("Rejected", r.tags["exception"])
         assertFalse("expected" in r.tags)
+    }
+
+    @Test
+    fun anUnexpectedFailureShowsTheCodeItsReportIsTaggedWith() {
+        // issue #3660: a tester's screenshot finds the Sentry issue
+        val error = AppError.from(IllegalStateException("boom"), "editor.publish")
+        val code = error.code
+        assertTrue(code != null && Regex("^[0-9A-Z]{6}$").matches(code), "six letters or digits: $code")
+        assertEquals(code, reporter.reports.single().tags["error_code"])
+        assertEquals(AppError.GENERIC_MESSAGE + "\n" + L.native.appError.errorCode(code = code), error.text, "said once, then the code")
+        // the same fingerprint, the same code, even when the report itself is throttled
+        assertEquals(code, AppError.from(IllegalStateException("boom"), "editor.publish").code)
+        assertNotEquals(code, AppError.from(IllegalStateException("boom"), "post.vote").code)
+    }
+
+    @Test
+    fun aFailureMappedAgainKeepsTheCodeItsReportWasSentWith() {
+        val first = AppError.from(IllegalStateException("boom"), "community.send")
+        val again = AppError.from(AppException(first, IllegalStateException("boom")), "communityMembers.setRole")
+        assertEquals(first.code, again.code)
+    }
+
+    @Test
+    fun oneFailureShownAtTwoPlacesShowsTheCodeOfItsOneReport() {
+        val e = IllegalStateException("boom")
+        val first = AppError.from(e, "community.send")
+        val second = AppError.from(e, "communityMembers.setRole")
+        assertEquals(1, reporter.reports.size)
+        assertEquals(first.code, second.code)
+        assertEquals(reporter.reports.single().tags["error_code"], second.code)
+    }
+
+    @Test
+    fun anExpiredHiveSignerLoginIsTheUsersToFixWithNoCode() {
+        val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")
+        assertEquals(null, error.code)
+        assertEquals("true", reporter.reports.single().tags["expected"])
+    }
+
+    @Test
+    fun overTheRunsCapNoCodeIsShownForAReportNeverSent() {
+        repeat(ErrorReports.MAX_REPORTS) { AppError.from(IllegalStateException("boom $it"), "place.n$it") }
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+        assertEquals(null, AppError.from(IllegalStateException("past the cap"), "place.late").code)
+    }
+
+    @Test
+    fun overTheCapAFailureSentEarlierInTheRunKeepsItsCodePastTheThrottleWindow() {
+        val first = AppError.from(IllegalStateException("boom"), "place.early")
+        now += ErrorReports.THROTTLE_MILLIS + 1
+        repeat(ErrorReports.MAX_REPORTS - 1) { AppError.from(IllegalStateException("boom $it"), "place.n$it") }
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+        val again = AppError.from(IllegalStateException("boom"), "place.early")
+        assertEquals(first.code, again.code)
+        assertEquals(ErrorReports.MAX_REPORTS, reporter.reports.size)
+    }
+
+    @Test
+    fun aFailureFirstSwallowedQuietlyStillGetsAReportedCodeWhenShown() {
+        val e = IllegalStateException("boom")
+        ErrorReports.quiet(e, "feed.refresh")
+        val shown = AppError.from(e, "feed.load")
+        assertNotEquals(null, shown.code)
+        assertEquals(2, reporter.reports.size)
+        assertEquals(shown.code, reporter.reports.last().tags["error_code"])
+        // shown again, it keeps that report's code and sends nothing more
+        assertEquals(shown.code, AppError.from(e, "feed.other").code)
+        assertEquals(2, reporter.reports.size)
+    }
+
+    @Test
+    fun anExpectedRefusalCarriesNoCode() {
+        val error = AppError.fromBroadcast(BroadcastException.InsufficientResourceCredits(RuntimeException("rc")), "post.vote")
+        assertEquals(null, error.code)
+        assertEquals(error.message, error.text)
+        assertFalse("error_code" in reporter.reports.single().tags)
+        assertEquals(null, AppError.from(AllNodesFailedException("bridge.get_ranked_posts", emptyList()), "feed.load").code)
     }
 
     @Test
@@ -246,7 +324,8 @@ class ErrorReportsTest {
     @Test
     fun nothingGoesOutBeforeAnEnvironmentInstalledTheReporter() {
         ErrorReports.install({ CrashReporter.None }, { now })
-        AppError.from(IllegalStateException("boom"), "editor.publish")
+        // a build without Sentry shows no code that would find nothing
+        assertEquals(null, AppError.from(IllegalStateException("boom"), "editor.publish").code)
         assertEquals(emptyList(), reporter.reports)
     }
 }

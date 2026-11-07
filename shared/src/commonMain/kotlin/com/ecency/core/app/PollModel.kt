@@ -144,7 +144,7 @@ class PollModel internal constructor(private val env: AppEnvironment, val key: P
             } catch (e: Exception) {
                 val error = AppError.fromBroadcast(e, "poll.vote")
                 setState { it.copy(isVoting = false, results = before, showResults = before?.choicesOf(user)?.isNotEmpty() == true) }
-                if (error.kind != ErrorKind.CANCELLED) env.ui.toast(L.native.poll.fail(message = error.message))
+                if (error.kind != ErrorKind.CANCELLED) env.ui.toast(L.native.poll.fail(message = error.text), error)
             }
             rebuild()
         }

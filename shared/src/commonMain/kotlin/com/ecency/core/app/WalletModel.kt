@@ -188,7 +188,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                env.ui.toast(WalletCopy.claimFailed(AppError.from(e, "wallet.claim").message))
+                // a closed signing prompt says nothing
+                AppError.from(e, "wallet.claim").takeIf { it.kind != ErrorKind.CANCELLED }?.let { env.ui.toast(WalletCopy.claimFailed(it.text), it) }
                 false
             }
             claimingNow -= symbol

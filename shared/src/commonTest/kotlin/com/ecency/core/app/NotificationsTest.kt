@@ -1110,6 +1110,7 @@ class NotificationsTest {
         board.start(); f.idle()
         assertTrue(board.current.users.isEmpty())
         assertFalse(board.current.isLoading)
-        assertTrue(f.env.ui.current.toast!!.text.startsWith("Something went wrong"))
+        // #3660: a server error is the connection, said once
+        assertEquals(AppError.NETWORK_MESSAGE, f.env.ui.current.toast!!.text)
     }
 }

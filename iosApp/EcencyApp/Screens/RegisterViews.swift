@@ -356,7 +356,7 @@ struct ReferScreen: View {
             } else {
                 Group {
                     if let error = state.error {
-                        Button(UiCopy.shared.errorTryAgain(message: error.message)) { if state.loaded { model.loadMore() } else { model.retry() } }
+                        Button(UiCopy.shared.errorTryAgain(message: error.text)) { if state.loaded { model.loadMore() } else { model.retry() } }
                             .frame(maxWidth: .infinity).accessibilityIdentifier("refer-retry")
                     } else if mine && state.isEmpty {
                         Text(copy.EMPTY).foregroundStyle(theme.secondary).multilineTextAlignment(.center).frame(maxWidth: .infinity)

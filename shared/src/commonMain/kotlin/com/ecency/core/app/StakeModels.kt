@@ -165,7 +165,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "delegate.start").message)) }
+                setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "delegate.start").text)) }
             }
             if (current.recipient.isNotEmpty()) check(immediate = true)
         }
@@ -237,7 +237,7 @@ class DelegateModel internal constructor(private val env: AppEnvironment, referr
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> { env.ui.toast(WalletCopy.SUCCESSFUL); owned.done(id); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
-            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.DELEGATE, phase.error.message)); owned.done(id); setState { it.copy(closed = true) } }
+            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.DELEGATE, phase.error.text), phase.error); owned.done(id); setState { it.copy(closed = true) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }
@@ -343,7 +343,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "powerDown.load").message)) }
+            setState { it.copy(prompt = StakePrompt.Alert(WalletCopy.FAIL, AppError.from(e, "powerDown.load").text)) }
         }
         loadRoutes(user)
     }
@@ -420,7 +420,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         val ops = try {
             WalletOps.ops(listOf(WalletOps.setWithdrawVestingRoute(user, account, percent, autoVest)))
         } catch (e: Exception) {
-            setState { it.copy(prompt = StakePrompt.Alert(failTitle, AppError.from(e, "powerDown.route").message)) }
+            setState { it.copy(prompt = StakePrompt.Alert(failTitle, AppError.from(e, "powerDown.route").text)) }
             return
         }
         val actionId = env.idempotencyKey()
@@ -435,7 +435,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
                         // the routes again a moment later (the node needs the block)
                         scope.launch { delay(WalletModel.AFTER_BROADCAST_DELAY_MILLIS); loadRoutes(user) }
                     }
-                    is SendPhase.Failed -> setState { it.copy(prompt = StakePrompt.Alert(failTitle, p.error.message)) }
+                    is SendPhase.Failed -> setState { it.copy(prompt = StakePrompt.Alert(failTitle, p.error.text)) }
                     // not a failure: the chain cannot say any more (the user checks the routes)
                     is SendPhase.Unconfirmed -> setState { it.copy(prompt = StakePrompt.Alert(StakeCopy.WITHDRAW_ACCOUNTS, p.message)) }
                     else -> Unit
@@ -448,7 +448,7 @@ class PowerDownModel internal constructor(private val env: AppEnvironment, route
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> { env.ui.toast(WalletCopy.SUCCESSFUL); owned.done(id); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
-            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.POWER_DOWN, phase.error.message)); owned.done(id); setState { it.copy(closed = true) } }
+            is SendPhase.Failed -> { env.ui.toast(WalletCopy.operationFailed(StakeCopy.POWER_DOWN, phase.error.text), phase.error); owned.done(id); setState { it.copy(closed = true) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }

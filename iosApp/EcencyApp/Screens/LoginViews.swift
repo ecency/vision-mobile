@@ -251,8 +251,8 @@ struct HiveAuthLoginView: View {
                             onSignedIn()
                         }
                 case .failed?:
-                    Text(progress?.error?.message ?? AuthUiCopy.shared.AUTHENTICATION_FAILED).foregroundStyle(theme.dangerText).multilineTextAlignment(.center)
-                        .announces(progress?.error?.message ?? AuthUiCopy.shared.AUTHENTICATION_FAILED)
+                    Text(progress?.error?.text ?? AuthUiCopy.shared.AUTHENTICATION_FAILED).foregroundStyle(theme.dangerText).multilineTextAlignment(.center)
+                        .announces(progress?.error?.text ?? AuthUiCopy.shared.AUTHENTICATION_FAILED)
                         .accessibilityIdentifier("hiveauth-error")
                     Button(UiCopy.shared.TRY_AGAIN) { app.env.session.startHiveAuth(usernameInput: progress?.username ?? username) }
                 default:

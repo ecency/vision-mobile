@@ -83,7 +83,7 @@ sealed class AuthException(message: String, cause: Throwable? = null) : EcencyEx
         AuthException("HiveSigner error ${error ?: status}${description?.let { ": $it" } ?: ""}")
 
     /** HiveAuth: the wallet rejected, the request expired, or the relay reported an error. */
-    class HiveAuth(val reason: Reason, detail: String? = null, cause: Throwable? = null) :
+    class HiveAuth(val reason: Reason, val detail: String? = null, cause: Throwable? = null) :
         AuthException("HiveAuth ${reason.name.lowercase()}${detail?.let { ": $it" } ?: ""}", cause) {
         enum class Reason {
             REJECTED, EXPIRED, ERROR, NOT_CONNECTED, SESSION_EXPIRED, INVALID_RESPONSE,
@@ -110,6 +110,8 @@ object AuthFallback {
 
     fun shouldTrigger(error: Throwable): Boolean {
         if (error is AuthException.MissingKey) return true
+        // the node's refusal, typed by the broadcaster: its message is copy in the app language, so the type decides
+        if (error is com.ecency.core.api.broadcast.BroadcastException.MissingAuthority) return true
         if (error is AuthException.HiveSignerApi && error.error in CODES) return true
         val texts = buildList {
             add(error.message)
