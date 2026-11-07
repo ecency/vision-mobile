@@ -186,6 +186,22 @@ class ChatListFreshnessTest {
     }
 
     @Test
+    fun aBadgeReadRecoversAListWhoseFirstLoadFailed() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.before = { r -> if (r.url.endsWith("/api/mattermost/channels")) HttpResult(502, "") else null }
+        val m = list(f)
+        assertNotNull(m.current.error)
+        assertTrue(m.current.rows.isEmpty())
+        f.before = null
+        f.env.chat.refreshUnread()
+        f.idle()
+        assertNull(m.current.error)
+        assertTrue(m.current.rows.isNotEmpty())
+        assertEquals(f.env.badges.current.chats.toLong(), m.rowSum())
+    }
+
+    @Test
     fun aChannelsReadThatTimedOutIsNotNoInternet() = runTest {
         val f = ChatFixture(this)
         f.start()

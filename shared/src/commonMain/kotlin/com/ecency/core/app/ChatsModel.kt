@@ -169,8 +169,10 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
                 val gen = generation
                 // the answer of this list's own read: [load] or [groupCreated] applied it already
                 if (f === handledAnswer) return@collect
-                if (listed) handledAnswer = f
-                if (listed && applyList(f.channels, f.startedAt, f.owner, gen)) {
+                // a list shown, or one whose load failed (its rows come back with the next good read)
+                val takes = listed || loadFailed
+                if (takes) handledAnswer = f
+                if (takes && applyList(f.channels, f.startedAt, f.owner, gen)) {
                     // fresh rows: an earlier load's failure no longer describes them (a channel action's stays)
                     if (loadFailed) {
                         loadFailed = false
