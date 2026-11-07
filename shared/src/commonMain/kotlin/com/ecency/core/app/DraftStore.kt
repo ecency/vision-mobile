@@ -352,7 +352,7 @@ internal object PendingCheck {
      */
     suspend fun verdict(env: AppEnvironment, owner: String, pending: PendingPublish?, hashNow: String, chainHash: (com.ecency.core.api.ChainContent) -> String): PendingVerdict {
         if (pending == null || !pending.isFresh(env.nowMillis())) return PendingVerdict.FRESH
-        // the chain itself, not hivemind: a post that landed a second ago is already there
+        // the chain state the node holds, not hivemind; a node a moment behind its head is covered by canStillLand below
         val existing = env.api.hive.content(owner, pending.permlink)
         if (existing != null) {
             val onChain = chainHash(existing)

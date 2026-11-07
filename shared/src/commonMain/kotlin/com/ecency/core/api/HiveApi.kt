@@ -229,8 +229,10 @@ class HiveApi(val client: HiveRpcClient) {
     }
 
     /**
-     * `database_api.find_comments`: what the chain itself holds (hived's state, no hivemind lag); null when there is
-     * no such post. The one "is this permlink on chain, and with which body" read behind every publish: the editor's
+     * `database_api.find_comments`: the chain state the node holds, not hivemind's indexer (a node's API layer may
+     * still answer a moment behind its head, so a post just broadcast can be missing for a short while); null when
+     * there is no such post. A retry does not rely on this read alone: a pending publish that can still land
+     * (`PendingPublish.canStillLand`) is re-sent as the same post, never published as free. The one "is this permlink on chain, and with which body" read behind every publish: the editor's
      * permlink check, its pending publish, the reply composer and a wave all ask here before anything is sent.
      *
      * Only an answer that lists the post's comments and does not hold it means "no post": an error or an answer
