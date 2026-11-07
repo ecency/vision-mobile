@@ -196,7 +196,7 @@ invalid value never drops text: the anchor's text stays, without a link (a chip 
 | `a.markdown-video-link` (also `-youtube`, `-speak`, `-vimeo`) | block: `Video(embedUrl, thumbnail, youtubeId, startSeconds)`, then any label text; embed = `data-embed-src`, else `data-video-href`, else inner iframe/first child `src` | `Youtube` or `Video` |
 | `iframe` | `Video(src, metadata thumbnail, youtube id from /embed/)` | `Youtube` or `Video` |
 | `video` (`src` or `source`) | `Video` only for an allowlisted player; fallback text shown | `Video` |
-| `img` | `Image(src, alt)`; `link =` the anchor's target only when the image is the anchor's single child (else the gallery, as RN) | link, else gallery |
+| `img` | `Image(src, alt)` (an empty alt, which reaches the builder as a bare `alt` or as `alt="alt"`, is none); `link =` the anchor's target only when the image is the anchor's single child (else the gallery, as RN) | link, else gallery |
 | `center`, `div.text-center` | `Container(align Center)` | |
 | `div.text-right` | `Container(align End)` (the RN app ignores it) | |
 | `div.text-justify` | `Container(justify)` | |

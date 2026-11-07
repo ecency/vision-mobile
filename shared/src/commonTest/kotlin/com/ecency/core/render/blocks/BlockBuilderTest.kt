@@ -341,6 +341,14 @@ class BlockBuilderTest {
             build("image_in_link"),
         )
         assertEquals(listOf(p(t("before")), Block.Image("https://images.ecency.com/p/mid.png", "mid"), p(t("after"))), build("image_in_text"))
+        // An empty alt has no description. render-helper writes `![](url)` and `<img alt="">` as a bare `alt` (the
+        // sanitizer) or as `alt="alt"` (the DOM serializer); the DOM parse reads a bare attribute as its own name.
+        // Neither may become the image's screen reader label "alt".
+        val src = "https://images.ecency.com/p/abc.png"
+        assertEquals(
+            listOf(Block.Image(src, null), Block.Image(src, null), Block.Image(src, "Alt")),
+            BlockBuilder.build("<p dir=\"auto\"><img src=\"$src\" alt itemprop=\"image\" /></p><p dir=\"auto\"><img src=\"$src\" alt=\"alt\" /></p><p dir=\"auto\"><img src=\"$src\" alt=\"Alt\" /></p>"),
+        )
         // An image inside an inline post link is a linked image, not a preview card.
         assertEquals(
             listOf(Block.Image(px("https://x.example/i.png"), null, LinkTarget.Post("alice", "b"))),
