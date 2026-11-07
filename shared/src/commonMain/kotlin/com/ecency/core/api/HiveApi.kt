@@ -254,7 +254,7 @@ class HiveApi(val client: HiveRpcClient) {
             ?: throw EcencyException("database_api.find_comments answered without a comments list")
         val result = comments.firstOrNull { it.obj()?.let { c -> c.str("author") == author && c.str("permlink") == permlink } == true }.obj()
             ?: return null
-        // json_metadata arrives as text from condenser (as an object from some nodes)
+        // json_metadata arrives as text from find_comments (as an object from some nodes)
         val meta = result["json_metadata"].let { m -> (m as? JsonPrimitive)?.takeIf { it.isString }?.let { com.ecency.core.api.json.SafeJson.parseOrNull(it.content) } ?: m }.obj()
         val tags = (meta?.get("tags") as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
         return ChainContent(author, permlink, result.str("title").orEmpty(), result.str("body").orEmpty(), result.str("parent_author").orEmpty(), result.str("parent_permlink").orEmpty(), tags)

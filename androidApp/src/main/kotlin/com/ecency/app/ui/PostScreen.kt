@@ -398,14 +398,14 @@ fun PostScreen(
 private fun WriteReplyRow(avatarUrl: String?, onClick: () -> Unit) {
     val colors = LocalEcencyColors.current
     Row(
-        Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp).clip(RoundedCornerShape(20.dp))
+        Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp).clip(RoundedCornerShape(24.dp))
             .clickable(onClick = onClick, role = Role.Button).testTag("writeReply"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (avatarUrl != null) Avatar(avatarUrl, 32.dp, Modifier.clip(RoundedCornerShape(50)).then(HiddenFromA11y))
         Row(
-            Modifier.padding(start = if (avatarUrl != null) 10.dp else 0.dp).weight(1f).heightIn(min = 40.dp).clip(RoundedCornerShape(20.dp))
-                .background(colors.lightBackground).border(1.dp, colors.border, RoundedCornerShape(20.dp)).padding(horizontal = 16.dp),
+            Modifier.padding(start = if (avatarUrl != null) 10.dp else 0.dp).weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp))
+                .background(colors.lightBackground).border(1.dp, colors.border, RoundedCornerShape(24.dp)).padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(ReadingUiCopy.ADD_A_COMMENT, color = colors.darkGray, fontSize = 15.sp, modifier = Modifier.weight(1f))

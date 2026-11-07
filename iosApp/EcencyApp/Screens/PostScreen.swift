@@ -650,7 +650,7 @@ private struct WriteReplyRow: View {
                     Image(appIcon: .reply).foregroundStyle(theme.accentText).accessibilityHidden(true)
                 }
                 .padding(.horizontal, 16)
-                .frame(minHeight: 40)
+                .frame(minHeight: minTapTarget)
                 .background(Capsule().fill(theme.lightBackground))
                 .overlay(Capsule().stroke(theme.border, lineWidth: 1))
             }
