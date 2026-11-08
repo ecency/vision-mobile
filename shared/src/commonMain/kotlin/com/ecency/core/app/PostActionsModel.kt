@@ -283,8 +283,14 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 else -> run(item, post) { ignore(user, post.author) }
             }
             PostMenuItem.BOOKMARKS -> if (user == null) PostMenuEffect.Login else run(item, post) {
-                env.accountApi.addBookmark(user, post.author, post.permlink)
-                env.ui.toast(SUCCESS)
+                try {
+                    env.accountApi.addBookmark(user, post.author, post.permlink)
+                    env.ui.toast(SUCCESS)
+                } catch (e: com.ecency.core.api.EcencyHttpException) {
+                    // the server keeps one bookmark per post: a second add is refused with 409, the post is there
+                    if (e.status != 409) throw e
+                    env.ui.toast(ALREADY_BOOKMARKED)
+                }
             }
             PostMenuItem.REBLOG, PostMenuItem.UNDO_REBLOG -> if (user == null) PostMenuEffect.Login else run(item, post) {
                 reblog(user, post, undo = item == PostMenuItem.UNDO_REBLOG)
@@ -464,6 +470,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
         val COPIED: String get() = L.alert.copied
         val BUSY: String get() = L.native.postActions.busy
         val SUCCESS: String get() = L.alert.success
+        val ALREADY_BOOKMARKED: String get() = L.native.postActions.alreadyBookmarked
         val SUCCESSFUL: String get() = L.alert.successful
         val FAIL: String get() = L.alert.fail
         val REMOVE_ALERT: String get() = L.alert.removeAlert
