@@ -218,6 +218,19 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(app.secureTextFields["upgrade-key"].waitForExistence(timeout: 15), "the active key is asked: \(app.debugDescription)")
     }
 
+    /// A Hive user's request: a reward's details name the post that earned it, and tapping that opens the post.
+    func testARewardsPostLinkInItsDetailsOpensThePost() {
+        let app = launch(["-openScreen", "wallet:assetDetails,HP"])
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'activity-1006_'")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 30))
+        row.tap()
+        // the row's identifier covers its children, so the link is found by its text
+        let link = app.buttons.matching(NSPredicate(format: "label == '@spike-alice/fake-post-1'")).firstMatch
+        XCTAssertTrue(link.waitForExistence(timeout: 10))
+        link.tap()
+        XCTAssertTrue(app.staticTexts["post-title"].waitForExistence(timeout: 20))
+    }
+
     func testOtherWalletScreensOpen() {
         let cases: [(String, String, String)] = [
             ("wallet:transfer,delegate_vesting_shares,HP,hive,spike-bob", "delegate-hp", "delegate"),

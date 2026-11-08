@@ -519,7 +519,22 @@ struct ActivityRowView: View {
                 }
             }
             if expanded {
-                if let d = row.details { Text(d).font(.caption).foregroundStyle(theme.secondary) }
+                if let d = row.details {
+                    if let post = row.post {
+                        // a reward's post: tap opens it, the context menu copies its link
+                        Button(d) { app.push(AppScreenPost(author: post.author, permlink: post.permlink)) }
+                            .font(.caption).buttonStyle(.borderless).foregroundStyle(theme.accentText)
+                            .accessibilityHint(WalletUiCopy.shared.OPEN_POST)
+                            .contextMenu {
+                                Button(UiCopy.shared.COPY_LINK) {
+                                    UIPasteboard.general.string = row.postLink
+                                    _ = app.env.ui.toast(text: copy.COPIED)
+                                }
+                            }
+                    } else {
+                        Text(d).font(.caption).foregroundStyle(theme.secondary)
+                    }
+                }
                 if let m = row.memo, !m.isEmpty {
                     // #3633: an encrypted memo shows its text once read with a key on the device, never the cipher text
                     if !row.encryptedMemo {

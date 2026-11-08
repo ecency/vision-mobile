@@ -2777,6 +2777,7 @@
       "from_to_account": "@{from} to {to}",
       "from_user": "from @{user}",
       "to_user": "to @{user}",
+      "open_post": "Open post",
       "interest": "Interest",
       "proposal_pay": "Proposal Payment",
       "categories": "Activity types",

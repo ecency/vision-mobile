@@ -346,6 +346,8 @@ object WalletUiCopy {
     val PRODUCT_NOT_AVAILABLE: String get() = L.native.ui.wallet.productNotAvailable
     val REFRESH: String get() = L.wallet.refresh
     val REPEAT: String get() = L.native.ui.wallet.repeat
+    /** The action of a history row's post link (TalkBack / VoiceOver). */
+    val OPEN_POST: String get() = L.native.walletHistory.openPost
     val SCAN_QR_RECIPIENT: String get() = L.transfer.scanQrRecipient
     val SWAP: String get() = L.wallet.swap
 }
