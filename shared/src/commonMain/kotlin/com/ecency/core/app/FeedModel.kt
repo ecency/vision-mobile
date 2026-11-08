@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.AccountPostsSort
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.FeedPager
@@ -65,6 +66,44 @@ class FeedModel internal constructor(
      * pinned fetch that was already running when the delete landed may still answer with one, and it never shows.
      */
     private val deleted = mutableSetOf<PostKey>()
+
+    /**
+     * The account whose own new posts lead this list until hivemind lists them ([PostRepository.localPosts]): its blog
+     * and posts lists; null for every other feed.
+     */
+    private val localAuthor: String? = (source as? FeedSource.Account)
+        ?.takeIf { it.sort == AccountPostsSort.BLOG || it.sort == AccountPostsSort.POSTS }?.account
+
+    /** The local posts [base] leads with now. */
+    private var localKeys: Set<PostKey> = emptySet()
+
+    /**
+     * [read] (from the top when [top]) with the author's local posts hivemind did not list yet in front; those it did
+     * list are forgotten. A later page only forgets: its copy replaces the local one where it is.
+     */
+    private suspend fun withLocal(read: List<Post>, nsfw: NsfwMode, top: Boolean): List<Post> {
+        val author = localAuthor ?: return read
+        val locals = shown(env.api.posts.localPosts(author, read.map { it.key }), nsfw)
+        localKeys = if (top) locals.mapTo(HashSet()) { it.key } else localKeys - read.map { it.key }.toSet()
+        return if (top) locals + read else read
+    }
+
+    /** A post of this list's account changed here (just published, or edited): its local copy shows at once. */
+    private fun showLocal() {
+        val author = localAuthor ?: return
+        scope.launch {
+            val nsfw = NsfwMode.of(env.prefs)
+            val listed = posts.keys - localKeys
+            val locals = shown(env.api.posts.localPosts(author, listed), nsfw).filter { it.key !in listed }
+            if (locals.isEmpty() && localKeys.isEmpty()) return@launch
+            val cards = cards(locals, nsfw)
+            val gone = localKeys + locals.map { it.key }
+            posts = posts.filterKeys { it !in gone } + locals.associateBy { it.key }
+            base = cards + base.filter { it.key !in gone }
+            localKeys = locals.mapTo(HashSet()) { it.key }
+            redisplay()
+        }
+    }
 
     private fun display(): List<PostCard> {
         // a pin the viewer muted since it loaded is hidden like the author's other cards
@@ -148,6 +187,7 @@ class FeedModel internal constructor(
         scope.launch {
             env.events.collect { event ->
                 if (event is AppEvent.SessionChanged && (current.loaded || job?.isActive == true)) refresh()
+                if (event is AppEvent.PostChanged && event.key.author == localAuthor && current.loaded && job?.isActive != true) showLocal()
                 // deleted from this device: the card goes at once (RN removes it from the list cache)
                 if (event is AppEvent.PostDeleted) deleted += event.key
                 // the pinned post, also while its fetch is still running (that answer is dropped with the key)
@@ -265,9 +305,11 @@ class FeedModel internal constructor(
                     fresh = shown(activePager.loadMore(), nsfw)
                     read++
                 }
-                val cards = cards(fresh, nsfw)
-                posts = (if (reset) emptyMap() else posts) + fresh.associateBy { it.key }
-                base = if (reset) cards else base + cards
+                val all = withLocal(fresh, nsfw, top = reset)
+                val cards = cards(all, nsfw)
+                posts = (if (reset) emptyMap() else posts) + all.associateBy { it.key }
+                // a later page holding a post shown from its local copy: the page's copy, once
+                base = if (reset) cards else base.filter { c -> fresh.none { it.key == c.key } } + cards
                 if (reset) readAt = stamp
                 if (reset && withPromoted) loadPromoted(nsfw)
                 setState {
@@ -313,9 +355,10 @@ class FeedModel internal constructor(
                     read += shown(fresh.loadMore(), nsfw)
                     pages++
                 }
-                val cards = cards(read, nsfw)
+                val all = withLocal(read, nsfw, top = true)
+                val cards = cards(all, nsfw)
                 pager = fresh
-                posts = read.associateBy { it.key }
+                posts = all.associateBy { it.key }
                 base = cards
                 readAt = stamp
                 if (withPromoted) loadPromoted(nsfw)

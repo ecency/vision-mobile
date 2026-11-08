@@ -347,6 +347,8 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                     return@run
                 }
                 setState { it.copy(deleted = it.deleted + post.key) }
+                // a post or reply still shown from its local copy (hivemind lags) does not come back with the next list
+                env.api.posts.forgetLocal(post.key)
                 env.emit(AppEvent.PostDeleted(post.key))
                 env.ui.toast(L.alert.removed)
             } else Unit

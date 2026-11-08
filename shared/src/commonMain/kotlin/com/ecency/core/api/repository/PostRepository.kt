@@ -119,6 +119,9 @@ data class Discussion(
  * top of the discussion (the app's renderOnTop) until the bridge returns them (hivemind indexes
  * a few seconds behind the chain), and are dropped after [localCommentTtlMillis] if it never
  * does (the broadcast most likely did not land).
+ *
+ * New posts work the same way ([addLocalPost]): one just published leads its author's own blog and posts lists
+ * ([localPosts]) and stands in for `bridge.get_post` until hivemind has it, for the same time at most.
  */
 @OptIn(ExperimentalTime::class)
 class PostRepository(
@@ -140,12 +143,16 @@ class PostRepository(
     private val localMutex = Mutex()
     private val local = mutableMapOf<PostKey, List<LocalComment>>()
 
+    /** Just-published posts by author, newest first. */
+    private val localPosts = mutableMapOf<String, List<LocalComment>>()
+
     /** `bridge.get_post`, served from cache unless [refresh]. Null when the post does not exist. */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun getPost(author: String, permlink: String, observer: String? = null, refresh: Boolean = false): Post? = guarded {
         val cacheKey = CacheKey(PostKey(author, permlink), observer.orEmpty())
         if (!refresh) posts.get(cacheKey)?.let { return@guarded it }
-        val post = api.post(author, permlink, observer) ?: return@guarded null
+        // hivemind lags a post published here a moment ago: its local copy stands in meanwhile
+        val post = api.post(author, permlink, observer) ?: return@guarded localPost(PostKey(author, permlink))
         posts.put(cacheKey, post)
         post
     }
@@ -178,6 +185,53 @@ class PostRepository(
     }
 
     /**
+     * Shows a just-published post of [post]'s author on top of the author's own blog and posts lists ([localPosts])
+     * until hivemind lists it. Publishing it again (an update of the same permlink) replaces the copy.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun addLocalPost(post: Post): Unit = guarded {
+        localMutex.withLock {
+            localPosts[post.author] = listOf(LocalComment(post, nowMillis())) + localPosts[post.author].orEmpty().filter { it.post.key != post.key }
+        }
+    }
+
+    /**
+     * [author]'s local posts still waiting for hivemind, newest first. Those in [listed] (what hivemind just answered
+     * for the author) and those older than [localCommentTtlMillis] are forgotten for good.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun localPosts(author: String, listed: Collection<PostKey>): List<Post> = guarded {
+        localMutex.withLock {
+            val now = nowMillis()
+            val kept = localPosts[author].orEmpty().filter { it.post.key !in listed && now - it.addedAt <= localCommentTtlMillis }
+            if (kept.isEmpty()) localPosts.remove(author) else localPosts[author] = kept
+            kept.map { it.post }
+        }
+    }
+
+    /** An edit of a local post ([addLocalPost]) from this device: the copy shows the edit. Nothing when there is none. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun updateLocalPost(post: Post): Unit = guarded {
+        localMutex.withLock {
+            localPosts[post.author] = localPosts[post.author]?.map { if (it.post.key == post.key) LocalComment(post, it.addedAt) else it } ?: return@withLock
+        }
+    }
+
+    /** [key] was deleted from this device: its local copies (a post or a comment) are dropped. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun forgetLocal(key: PostKey): Unit = guarded {
+        localMutex.withLock {
+            localPosts[key.author]?.let { list -> localPosts[key.author] = list.filter { it.post.key != key } }
+            local.keys.toList().forEach { root -> local[root] = local[root].orEmpty().filter { it.post.key != key } }
+        }
+    }
+
+    private suspend fun localPost(key: PostKey): Post? = localMutex.withLock {
+        val now = nowMillis()
+        localPosts[key.author]?.firstOrNull { it.post.key == key && now - it.addedAt <= localCommentTtlMillis }?.post
+    }
+
+    /**
      * Forgets cached copies of [key] (e.g. after voting on it): the post itself and every cached
      * discussion that contains it, so a voted comment refreshes in its thread too.
      */
@@ -187,12 +241,15 @@ class PostRepository(
         discussions.removeIf { k, entries -> k.key == key || entries.any { it.key == key } }
     }
 
-    /** Drops every cached post, discussion and local comment (they carry per-account vote state). */
+    /** Drops every cached post, discussion, local comment and local post (they carry per-account vote state). */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun clearUserData(): Unit = guarded {
         posts.clear()
         discussions.clear()
-        localMutex.withLock { local.clear() }
+        localMutex.withLock {
+            local.clear()
+            localPosts.clear()
+        }
     }
 
     internal suspend fun remember(fetched: List<Post>, observer: String?) {

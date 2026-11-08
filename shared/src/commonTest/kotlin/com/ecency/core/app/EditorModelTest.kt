@@ -1,6 +1,8 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.AccountPostsSort
 import com.ecency.core.api.FakeTransport
+import com.ecency.core.api.repository.FeedSource
 import com.ecency.core.api.Sent
 import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.api.ecency.ImageUploadTransport
@@ -36,6 +38,7 @@ import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -59,6 +62,9 @@ class EditorModelTest {
         var apiDown = false
         var postingAuths = """[["ecency.app",1]]"""
         var accountsDown = false
+
+        /** `bridge.get_account_posts` answers by account (hivemind's blog and posts lists); none: an empty list. */
+        val accountPosts = mutableMapOf<String, List<String>>()
 
         /** Keys ("author/permlink") the chain has but hivemind has not indexed yet. */
         val hivemindLags = mutableSetOf<String>()
@@ -110,6 +116,12 @@ class EditorModelTest {
                     req,
                     """[{"name":"$user","posting":{"weight_threshold":1,"account_auths":${postingAuthsByRead?.let { it(accountReads++) } ?: (if (accountReads++ > 0 && secondReadAdds != null) """[["$secondReadAdds",1]]""" else postingAuths)},"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"active":{"weight_threshold":1,"account_auths":[],"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"owner":{"weight_threshold":1,"account_auths":[],"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"memo_key":"${GoldenVectors.PUBLIC_KEY}","json_metadata":"{\"legacy\":true}"}]""",
                 )
+                "bridge.get_account_posts" -> {
+                    val p = req.params.jsonObject
+                    // one page: a cursor asks past the end
+                    val rows = if (p["start_permlink"] != null) emptyList() else accountPosts[p["account"]!!.jsonPrimitive.content].orEmpty()
+                    FakeTransport.result(req, rows.joinToString(",", "[", "]"))
+                }
                 "condenser_api.lookup_accounts" -> FakeTransport.result(req, """["bob","bobby","carol"]""")
                 "bridge.get_community" -> FakeTransport.result(req, """{"name":"hive-125125","title":"Ecency","type_id":1,"context":{"role":"guest","subscribed":true}}""")
                 else -> TestApp.chain(req) ?: HttpResult(500, "")
@@ -225,6 +237,102 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertTrue(w.storage.values.isEmpty())
         assertTrue(w.api.none { it.first == "drafts-add" })
+    }
+
+    /**
+     * Live test: after a publish the author's profile opened on older posts only, and two pulls later still did
+     * (hivemind lags the chain). The post just published leads the author's own blog and posts lists until hivemind
+     * lists it, never twice, never on another account's lists, and not after it was deleted.
+     */
+    @Test
+    fun aNewPostLeadsTheAuthorsOwnListsUntilHivemindHasIt() = runTest {
+        val w = World(this)
+        val older = entry(user, "older-post", "Older", "older body")
+        w.accountPosts[user] = listOf(older)
+        w.accountPosts[other] = listOf(entry(other, "theirs", "Theirs", "their body"))
+        // the own profile's blog, already open (a profile kept on the stack)
+        val open = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        open.start()
+        testScheduler.advanceUntilIdle()
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "my-first-post", null), m.current.done)
+        assertEquals(listOf("my-first-post", "older-post"), open.current.items.map { it.key.permlink }, "an open list shows it at once")
+        open.close()
+
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        val posts = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.POSTS))
+        val comments = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.COMMENTS))
+        val theirs = w.app.env.feedModel(FeedSource.Account(other, AccountPostsSort.BLOG))
+        listOf(blog, posts, comments, theirs).forEach { it.start() }
+        testScheduler.advanceUntilIdle()
+        fun keys(f: FeedModel) = f.current.items.map { it.key.permlink }
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "the new post on top while hivemind lags")
+        assertEquals("My first post", blog.current.items.first().title)
+        assertEquals(listOf("my-first-post", "older-post"), keys(posts))
+        assertEquals(listOf("older-post"), keys(comments), "a post is not a comment")
+        assertEquals(listOf("theirs"), keys(theirs), "only the publishing account's lists")
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "a pull while hivemind still lags keeps it")
+
+        // hivemind has it now: its copy, once
+        w.accountPosts[user] = listOf(entry(user, "my-first-post", "My first post", "Hello world"), older)
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "never twice")
+        // the local copy is gone: a list that no longer has it does not bring it back
+        w.accountPosts[user] = listOf(older)
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("older-post"), keys(blog))
+        listOf(blog, posts, comments, theirs).forEach { it.close() }
+    }
+
+    @Test
+    fun anEditOfANewPostHivemindHasNotListedShowsTheEdit() = runTest {
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        // hivemind has not indexed it: the editor opens the local copy
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        assertEquals("Hello world", edit.current.body)
+        edit.setTitle("My first post, fixed")
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done)
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        val top = blog.current.items.first()
+        assertEquals("my-first-post", top.key.permlink)
+        assertEquals("My first post, fixed", top.title, "not the text that was published first")
+        blog.close()
+    }
+
+    @Test
+    fun aDeletedNewPostDoesNotStayOnTheAuthorsLists() = runTest {
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val local = com.ecency.core.api.model.Post(user, "my-first-post", category = "ecency", title = "My first post", body = "Hello world")
+        val confirm = assertIs<PostMenuEffect.Confirm>(w.app.env.postActions.select(PostMenuItem.DELETE, local))
+        w.app.env.postActions.confirm(confirm.item, local, confirm.user)
+        testScheduler.advanceUntilIdle()
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("older-post"), blog.current.items.map { it.key.permlink }, "a list opened after the delete")
+        blog.close()
     }
 
     @Test

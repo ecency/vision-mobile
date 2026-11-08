@@ -1431,7 +1431,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         var permlink: String? = null
         val verdict = PendingCheck.verdict(env, owner, was, hash, chainHash)
         when (verdict) {
-            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s)
+            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s, json)
             PendingVerdict.CONFLICT, PendingVerdict.CONFLICT_CHANGED_ELSEWHERE -> when (choice) {
                 null -> throw PublishConflict(verdict == PendingVerdict.CONFLICT_CHANGED_ELSEWHERE)
                 true -> {
@@ -1440,7 +1440,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                         .ifEmpty { EditorMeta.publishTags(s.tags).firstOrNull() ?: EditorMeta.DEFAULT_PARENT_PERMLINK }
                     remember(owner, was.permlink, hash)
                     broadcast(owner, EditorMeta.editOperations(owner, was.permlink, "", parent, s.title, s.body, json))
-                    return finishPost(owner, was.permlink, s)
+                    return finishPost(owner, was.permlink, s, json)
                 }
                 false -> pending = null // a new post: a new permlink below
             }
@@ -1460,10 +1460,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 throw PublishConflict()
             }
         }
-        return finishPost(owner, permlink, s)
+        return finishPost(owner, permlink, s, json)
     }
 
-    private fun finishPost(owner: String, permlink: String, s: EditorState): EditorDone {
+    private suspend fun finishPost(owner: String, permlink: String, s: EditorState, json: String): EditorDone {
+        // hivemind lags the chain: the author's own lists show the post from here until it lists it (live test:
+        // the profile opened after a publish showed only older posts, also after two pulls)
+        env.api.posts.addLocalPost(localPost(owner, permlink, s, json))
         env.ui.toast(L.alert.successShared)
         // RN maybeRequestReview: publishing is the moment the store rating prompt may be asked for, once
         env.maybeRequestReview()
@@ -1485,6 +1488,17 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         }
         env.emit(AppEvent.PostChanged(PostKey(owner, permlink)))
         return EditorDone.Published(owner, permlink, s.draftId)
+    }
+
+    /** A new post as the chain holds it after the publish ([json] as sent), for [PostRepository.addLocalPost]. */
+    private fun localPost(owner: String, permlink: String, s: EditorState, json: String): Post {
+        val now = ChainTime.fromEpochSeconds(env.nowMillis() / 1000)
+        // the parent permlink [EditorMeta.newPostOperations] sends
+        val category = EditorMeta.publishTags(s.tags).firstOrNull() ?: EditorMeta.DEFAULT_PARENT_PERMLINK
+        return Post(
+            author = owner, permlink = permlink, category = category, title = s.title, body = s.body,
+            metadata = PostMetadata.parse(Json.parseToJsonElement(json)), created = now, updated = now, parentAuthor = "", parentPermlink = category,
+        )
     }
 
     private suspend fun submitSchedule(owner: String, s: EditorState): EditorDone {
@@ -1530,7 +1544,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val json = EditorMeta.makeJsonMetadataForUpdate(old, meta, s.tags) ?: EditorMeta.makeJsonMetadata(meta, s.tags)
         val title = if (s.kind == EditorKind.EDIT_REPLY) "" else s.title
         val parentPermlink = p.parentPermlink.orEmpty().ifEmpty { p.category }
-        broadcast(owner, EditorMeta.editOperations(owner, p.permlink, p.parentAuthor.orEmpty(), parentPermlink, title, EditorMeta.editBody(p.body, s.body), EditorMeta.stringify(json)))
+        val jsonText = EditorMeta.stringify(json)
+        broadcast(owner, EditorMeta.editOperations(owner, p.permlink, p.parentAuthor.orEmpty(), parentPermlink, title, EditorMeta.editBody(p.body, s.body), jsonText))
+        // a post still shown from its local copy (hivemind has not listed it yet) shows the edit, not what was published
+        if (s.kind != EditorKind.EDIT_REPLY) {
+            val now = ChainTime.fromEpochSeconds(env.nowMillis() / 1000)
+            env.api.posts.updateLocalPost(p.copy(title = title, body = s.body, metadata = PostMetadata.parse(Json.parseToJsonElement(jsonText)), updated = now))
+        }
         env.emit(AppEvent.PostChanged(p.key))
         return EditorDone.Edited(p.key)
     }
