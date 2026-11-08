@@ -135,6 +135,7 @@ class PostModel internal constructor(
     }
 
     private fun loadPost(refresh: Boolean) {
+        postLoads++
         postJob?.cancel()
         setState { it.copy(isLoading = it.post == null, isRefreshing = refresh && it.post != null, error = null) }
         postJob = scope.launch {
@@ -154,30 +155,54 @@ class PostModel internal constructor(
         }
     }
 
-    /** Accounts and posts whose weightless vote was already looked up on this screen (another account asks again). */
-    private val weightlessChecked = mutableSetOf<Pair<String, PostKey>>()
+    /** The weightless vote this screen shows, per account and post: the percent the chain had ([resolveWeightlessVote]). */
+    private val weightlessShown = mutableMapOf<Pair<String, PostKey>, Int>()
+
+    /** The account, post and load last looked up: one lookup per load of the post, a refresh asks again. */
+    private var weightlessAsked: Triple<String, PostKey, Int>? = null
+    private var postLoads = 0
 
     /**
      * A vote with no payout weight (an account with little HP) is listed by the bridge with rshares 0, as a removed
-     * vote is, so it would read as no vote. In the background, once per post on this screen, `get_active_votes` tells
-     * the two apart by the vote's percent; a vote is then shown as this device's own votes are ([LocalVotes]). Not RN.
+     * vote is, so it would read as no vote. In the background, once per load of the post, `get_active_votes` tells the
+     * two apart by the vote's percent; a vote is then shown as this device's own votes are ([LocalVotes]), and taken
+     * back when a later load finds it removed or weighted. A vote made on this device always wins. Not RN.
      */
     private fun resolveWeightlessVote(post: Post) {
         val me = env.session.current.username ?: return
-        if (post.voteOf(me)?.rshares != 0L || env.localVotes.get(post.key) != null || !weightlessChecked.add(me to post.key)) return
+        val tag = me to post.key
+        if (!isOwnWeightless(tag, env.localVotes.get(post.key))) return
+        if (post.voteOf(me)?.rshares != 0L) {
+            // no vote listed, or one with weight: the bridge's answer stands
+            if (weightlessShown.remove(tag) != null) env.localVotes.remove(post.key)
+            return
+        }
+        val ask = Triple(me, post.key, postLoads)
+        if (weightlessAsked == ask) return
+        weightlessAsked = ask
         scope.launch {
             try {
-                val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: return@launch
-                if (percent == 0 || env.session.current.username != me || env.localVotes.get(post.key) != null) return@launch
-                env.localVotes.set(post.key, LocalVote(percent, pending = false))
+                val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: 0
+                if (env.session.current.username != me || !isOwnWeightless(tag, env.localVotes.get(post.key))) return@launch
+                if (percent == 0) {
+                    if (weightlessShown.remove(tag) != null) env.localVotes.remove(post.key)
+                } else {
+                    weightlessShown[tag] = percent
+                    env.localVotes.set(post.key, LocalVote(percent, pending = false))
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // the post shows as the bridge has it
+                // the post shows as the bridge has it; the next load asks again
+                if (weightlessAsked == ask) weightlessAsked = null
                 ErrorReports.quiet(e, "post.weightlessVote")
             }
         }
     }
+
+    /** No vote of this device for the post, or the one [resolveWeightlessVote] showed for [tag]. */
+    private fun isOwnWeightless(tag: Pair<String, PostKey>, local: LocalVote?): Boolean =
+        local == null || (!local.pending && local.estimate == null && weightlessShown[tag] == local.weight)
 
     /** Shows [post]; renders its body only when it is new or was updated. */
     private suspend fun showPost(post: Post) {

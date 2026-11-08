@@ -133,6 +133,72 @@ class VoteAndReplyTest {
         assertEquals(true, post.current.card?.votedByMe, "the second account's vote")
     }
 
+    /** A post whose bridge copy lists [voters] with rshares 0; get_active_votes answers [percents] (null: fails). */
+    private fun weightless(voters: List<String>, percents: () -> Map<String, Int>?, asked: MutableList<String> = mutableListOf()) =
+        { req: Sent ->
+            val zero = voters.associateWith { 0L }
+            when (req.method) {
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = voters, voteRshares = zero))
+                "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = voters, voteRshares = zero)}}""")
+                "condenser_api.get_active_votes" -> {
+                    asked += req.params.toString()
+                    percents()?.let { p ->
+                        FakeTransport.result(req, p.entries.joinToString(",", "[", "]") { (v, pct) -> """{"voter":"$v","rshares":0,"percent":$pct,"time":"2026-10-01T10:00:00"}""" })
+                    } ?: HttpResult(500, "")
+                }
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        }
+
+    @Test
+    fun aWeightlessVoteRemovedElsewhereGoesOnRefresh() = runTest {
+        var percent = 100
+        val app = TestApp(this, handler = { req -> weightless(listOf(TestApp.USER), { mapOf(TestApp.USER to percent) })(req) })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+        // removed on another client: the chain keeps the voter with percent 0
+        percent = 0
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, post.current.card?.votedByMe, "the refresh follows the chain")
+    }
+
+    @Test
+    fun aWeightlessVoteShowsAgainAfterSwitchingAwayAndBack() = runTest {
+        val bob = "spike-bob"
+        val app = TestApp(this, handler = { req -> weightless(listOf(TestApp.USER), { mapOf(TestApp.USER to 100) })(req) })
+        app.signIn(bob)
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+        app.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, post.current.card?.votedByMe)
+        app.env.session.switchTo(TestApp.USER)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe, "back on the first account")
+    }
+
+    @Test
+    fun aFailedWeightlessLookupIsAskedAgainOnRefresh() = runTest {
+        var down = true
+        val app = TestApp(this, handler = { req -> weightless(listOf(TestApp.USER), { if (down) null else mapOf(TestApp.USER to 100) })(req) })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, post.current.card?.votedByMe)
+        down = false
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+    }
+
     @Test
     fun aVoteWithPayoutWeightAsksNothingMore() = runTest {
         var asked = 0
