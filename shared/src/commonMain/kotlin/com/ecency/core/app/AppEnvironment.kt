@@ -63,6 +63,12 @@ sealed interface AppEvent {
     /** [username]'s profile was edited here; profile screens show the new values. */
     data class ProfileUpdated(val username: String) : AppEvent
 
+    /**
+     * [username]'s own wallet send (transfer, power up, delegation, claim...) succeeded a moment ago and the chain had
+     * time to take it ([WalletModel.refreshLater]): open asset histories read theirs again.
+     */
+    data class WalletSent(val username: String) : AppEvent
+
     /** [username]'s drafts or schedules changed on the server from this device; open lists reload. */
     data class DraftsChanged(val username: String) : AppEvent
 
