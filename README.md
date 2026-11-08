@@ -441,6 +441,17 @@ All tests run against a fake `RpcTransport` (`commonTest/.../api/FakeTransport.k
 ECENCY_LIVE_TEST=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveSmokeTest*'
 ```
 
+Live write tests sign in to two test accounts and write to the real chain through the app's own models and screens: publish, edit, reply, vote, reblog, bookmark, delete, transfer, power up, drafts, follow, notifications, sign out of one of two accounts. They spend resource credits and post public test content, so they never run in CI and only run on purpose. The passwords live outside the repo in `~/.config/ecency-native-test/credentials` (`ECENCY_TEST_USERNAME`, `ECENCY_TEST_PASSWORD`, `ECENCY_TEST_PEER`, `ECENCY_TEST_PEER_PASSWORD`); without that file every test skips itself. Every step is checked against the chain afterwards.
+
+```sh
+ECENCY_LIVE_WRITE=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.publishReplyVoteAndTransferOnChain*' -i
+ECENCY_LIVE_LIFECYCLE="<author>/<post> <peer>/<reply>" ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.editReblog*' -i
+ECENCY_LIVE_MISC=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.draftsFollow*' -i
+ECENCY_LIVE_LOGOUT=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.signOutOfOne*' -i
+```
+
+iOS has the same through the real UI (`EcencyAppUITests/LiveChainUITests`, skipped unless the accounts are passed as `TEST_RUNNER_LIVE_A_USER`, `TEST_RUNNER_LIVE_A_PASS`, `TEST_RUNNER_LIVE_B_USER` and `TEST_RUNNER_LIVE_B_PASS`, read from the same file at run time; each test is one step run by hand).
+
 ### Transport and timeouts
 
 - Transport bound: `KtorAuthHttp` itself gives up after 30 s (`EcencyTimeoutException`), which covers every caller: the token exchange, HiveSigner's API, the private API, search, waves, translation, polls, the Pro and bad actors lists. A sign-in whose token exchange timed out is not retried: the error shows and the button is back after one bound. Uploads keep their stall watchdog.
