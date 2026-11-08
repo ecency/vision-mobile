@@ -477,7 +477,7 @@ private fun ListenPlayerRow(controller: ListenController, s: ListenPlayerState) 
                 onValueChangeFinished = { controller.state?.seeking?.let(controller::dragEnded) },
                 valueRange = 0f..s.sliderMax.toFloat(),
                 colors = SliderDefaults.colors(thumbColor = colors.blueText, activeTrackColor = colors.blueText, inactiveTrackColor = colors.lightBackground),
-                modifier = Modifier.weight(1f).height(32.dp).semantics { contentDescription = ReadingUiCopy.SEEK }.testTag("listenSeek"),
+                modifier = Modifier.weight(1f).height(32.dp).semantics { contentDescription = ReadingUiCopy.SEEK }.edgeSwipeSafe().testTag("listenSeek"),
             )
             Text(s.durationLabel, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.testTag("listenDuration"))
             Chip(s.speedLabel, "listenSpeed", description = ReadingUiCopy.PLAYBACK_SPEED) { controller.nextSpeed() }

@@ -340,7 +340,7 @@ fun DelegateForm(model: DelegateModel, onBack: () -> Unit) {
                 Text("${StakeCopy.REMAIN_HP}: ${com.ecency.core.l10n.Bidi.inUi(s.remainingHp)}", color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.weight(1f))
                 TextButton(onClick = model::max, enabled = !s.busy, modifier = Modifier.testTag("delegateMax")) { Text(TransferCopy.MAX, color = colors.blueText) }
             }
-            Slider(value = ((s.hp.toDoubleOrNull() ?: 0.0) / s.maxHp.coerceAtLeast(0.001)).toFloat().coerceIn(0f, 1f), onValueChange = { model.setFraction(it.toDouble()) }, enabled = !s.busy)
+            Slider(value = ((s.hp.toDoubleOrNull() ?: 0.0) / s.maxHp.coerceAtLeast(0.001)).toFloat().coerceIn(0f, 1f), onValueChange = { model.setFraction(it.toDouble()) }, enabled = !s.busy, modifier = Modifier.edgeSwipeSafe())
             SendPhasePanel(s.phase, onClose = onBack)
             if (!s.busy) PrimaryButton(StakeCopy.REVIEW, s.reviewEnabled, "delegateReview", model::review)
         }
@@ -376,7 +376,7 @@ fun PowerDownForm(model: PowerDownModel, onBack: () -> Unit) {
                         Text("${StakeCopy.ESTIMATED_WEEKLY}: ${StakeCopy.weekly(s.weekly)}", color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.weight(1f).testTag("weekly"))
                         TextButton(onClick = model::max, enabled = !s.busy) { Text(TransferCopy.MAX, color = colors.blueText) }
                     }
-                    Slider(value = ((s.hp.toDoubleOrNull() ?: 0.0) / s.maxHp.coerceAtLeast(0.001)).toFloat().coerceIn(0f, 1f), onValueChange = { model.setFraction(it.toDouble()) }, enabled = !s.busy)
+                    Slider(value = ((s.hp.toDoubleOrNull() ?: 0.0) / s.maxHp.coerceAtLeast(0.001)).toFloat().coerceIn(0f, 1f), onValueChange = { model.setFraction(it.toDouble()) }, enabled = !s.busy, modifier = Modifier.edgeSwipeSafe())
                     if (!s.busy) PrimaryButton(TransferCopy.NEXT, s.amountValid, "powerDownNext", model::next)
                 } else {
                     LoadingBlock()

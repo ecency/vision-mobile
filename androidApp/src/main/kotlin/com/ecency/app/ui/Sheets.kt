@@ -137,7 +137,7 @@ fun VoteSheet(
                 Slider(
                     value = sheet.percent.toFloat(), onValueChange = { sheet = sheet.withPercent(it.toDouble()) }, valueRange = 1f..100f,
                     colors = SliderDefaults.colors(thumbColor = tint, activeTrackColor = tint),
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = ReadingUiCopy.VOTE_WEIGHT }.testTag("voteSlider"),
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = ReadingUiCopy.VOTE_WEIGHT }.edgeSwipeSafe().testTag("voteSlider"),
                 )
                 VoteTicks(colors.darkGray, Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(6.dp))
             }
