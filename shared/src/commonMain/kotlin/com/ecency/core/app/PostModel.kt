@@ -155,9 +155,6 @@ class PostModel internal constructor(
         }
     }
 
-    /** The weightless vote this screen shows, per account and post: the percent the chain had ([resolveWeightlessVote]). */
-    private val weightlessShown = mutableMapOf<Pair<String, PostKey>, Int>()
-
     /** The account, post and load last looked up: one lookup per load of the post, a refresh asks again. */
     private var weightlessAsked: Triple<String, PostKey, Int>? = null
     private var postLoads = 0
@@ -170,11 +167,10 @@ class PostModel internal constructor(
      */
     private fun resolveWeightlessVote(post: Post) {
         val me = env.session.current.username ?: return
-        val tag = me to post.key
-        if (!isOwnWeightless(tag, env.localVotes.get(post.key))) return
+        if (!isChainRead(env.localVotes.get(post.key))) return
         if (post.voteOf(me)?.rshares != 0L) {
             // no vote listed, or one with weight: the bridge's answer stands
-            if (weightlessShown.remove(tag) != null) env.localVotes.remove(post.key)
+            if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
             return
         }
         val ask = Triple(me, post.key, postLoads)
@@ -184,11 +180,10 @@ class PostModel internal constructor(
             try {
                 val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: 0
                 // another account, a vote made here meanwhile, or a newer load of the post decides instead
-                if (env.session.current.username != me || postLoads != ask.third || !isOwnWeightless(tag, env.localVotes.get(post.key))) return@launch
+                if (env.session.current.username != me || postLoads != ask.third || !isChainRead(env.localVotes.get(post.key))) return@launch
                 if (percent == 0) {
-                    if (weightlessShown.remove(tag) != null) env.localVotes.remove(post.key)
+                    if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
                 } else {
-                    weightlessShown[tag] = percent
                     env.localVotes.set(post.key, LocalVote(percent, pending = false, fromChain = true))
                 }
             } catch (e: CancellationException) {
@@ -201,9 +196,11 @@ class PostModel internal constructor(
         }
     }
 
-    /** No vote of this device for the post, or the one [resolveWeightlessVote] showed for [tag]. */
-    private fun isOwnWeightless(tag: Pair<String, PostKey>, local: LocalVote?): Boolean =
-        local == null || (local.fromChain && weightlessShown[tag] == local.weight)
+    /**
+     * No vote of this device for the post, or one read from the chain by any post screen ([LocalVote.fromChain]): it
+     * is checked again on every load, also on a screen opened later. A vote made on this device always wins.
+     */
+    private fun isChainRead(local: LocalVote?): Boolean = local == null || local.fromChain
 
     /** Shows [post]; renders its body only when it is new or was updated. */
     private suspend fun showPost(post: Post) {

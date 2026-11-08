@@ -168,6 +168,24 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun aWeightlessVoteRemovedWhileThePostWasClosedGoesWhenItIsOpenedAgain() = runTest {
+        // review: the overlay is app-wide, but which screen set it was known only to that screen
+        var percent = 100
+        val app = TestApp(this, handler = { req -> weightless(listOf(TestApp.USER), { mapOf(TestApp.USER to percent) })(req) })
+        signedIn(app)
+        val first = app.env.postModel("alice", "root")
+        first.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, first.current.card?.votedByMe)
+        first.close()
+        percent = 0
+        val again = app.env.postModel("alice", "root")
+        again.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, again.current.card?.votedByMe, "a new screen asks the chain again")
+    }
+
+    @Test
     fun aVoteMadeOnTheDeviceIsNeverTakenForTheChainsOne() = runTest {
         // review: a device vote without an estimate and of the same weight read as the screen's own overlay, and a
         // lagging lookup then took it away

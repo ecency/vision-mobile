@@ -210,6 +210,13 @@ class EditorModelTest {
     private fun entry(author: String, permlink: String, title: String, body: String, extra: String = "") =
         """{"author":"$author","permlink":"$permlink","category":"ecency","parent_permlink":"ecency","title":${Json.encodeToString(title)},"body":${Json.encodeToString(body)},"json_metadata":{"tags":["ecency","old"],"app":"peakd/1","format":"markdown"},"created":"2026-10-01T00:00:00","updated":"2026-10-01T00:00:00","depth":0$extra}"""
 
+    /** The just-published post as the chain holds it: [body], and the json_metadata the publish sent, [change]d. */
+    private fun chainCopy(w: World, body: String, change: (JsonObject) -> JsonObject = { it }): String {
+        val sent = Json.parseToJsonElement(field(w.ops().first(), 0, "json_metadata")).jsonObject
+        return entry(user, "my-first-post", "My first post", body)
+            .replace("\"json_metadata\":{\"tags\":[\"ecency\",\"old\"],\"app\":\"peakd/1\",\"format\":\"markdown\"}", "\"json_metadata\":${Json.encodeToString(change(sent).toString())}")
+    }
+
     private fun opNames(ops: JsonArray) = ops.map { it.jsonArray[0].jsonPrimitive.content }
 
     private fun field(ops: JsonArray, index: Int, name: String) = ops[index].jsonArray[1].jsonObject[name]!!.jsonPrimitive.content
@@ -320,6 +327,24 @@ class EditorModelTest {
     }
 
     @Test
+    fun anEditOfTheLocalCopyRefusesOtherMetadataChangedElsewhere() = runTest {
+        // review: title, body and tags alike, but another client changed the description: never written over
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world") { JsonObject(it + ("description" to kotlinx.serialization.json.JsonPrimitive("Changed elsewhere"))) }
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+    }
+
+    @Test
     fun oneListThatHasTheNewPostNeverHidesItFromAnotherStillBehind() = runTest {
         // review: the first list whose answer held the post forgot the shared copy for every other list
         val w = World(this)
@@ -404,7 +429,7 @@ class EditorModelTest {
         val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
         assertEquals("Hello world", edit.current.body, "opened from the local copy")
         // hivemind indexes the same post, with the block's time
-        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world").replace("\"ecency\",\"old\"", "\"ecency\",\"test\"")
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world")
         w.hivemindLags -= "$user/my-first-post"
         edit.setBody("Hello world, fixed", TextSelection(0))
         w.app.env.ui.clear()
