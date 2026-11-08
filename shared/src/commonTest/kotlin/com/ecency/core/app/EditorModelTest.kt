@@ -345,6 +345,35 @@ class EditorModelTest {
     }
 
     @Test
+    fun anEditOfTheLocalCopyIsNotRefusedForDuplicateTagsTheChainKept() = runTest {
+        // review: a post published with a repeated tag (from a draft); the local copy's tags drop the repeat, the
+        // chain keeps it: the same post, not a change made elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        val sent = Json.parseToJsonElement(field(w.ops().first(), 0, "json_metadata")).jsonObject
+        val tags = sent["tags"]!!.jsonArray
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world")
+        // the local copy as it would be from a publish whose tags repeated one: same metadata, tags read without the repeat
+        val repeated = JsonObject(sent + ("tags" to JsonArray(tags + tags.first())))
+        w.app.env.api.posts.updateLocalPost(w.app.env.api.posts.getPost(user, "my-first-post", user, refresh = true)!!.let {
+            it.copy(metadata = com.ecency.core.api.model.PostMetadata.parse(repeated))
+        })
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world") { repeated }
+        val reopened = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        reopened.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        reopened.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(w.app.env.ui.current.toast?.takeIf { it.text == L.native.editor.thisPostWasChanged }, "the same post")
+        edit.close()
+    }
+
+    @Test
     fun oneListThatHasTheNewPostNeverHidesItFromAnotherStillBehind() = runTest {
         // review: the first list whose answer held the post forgot the shared copy for every other list
         val w = World(this)

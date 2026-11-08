@@ -1538,8 +1538,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
             // opened from this device's copy of a just-published post: hivemind's copy (when it arrives) carries the
             // block's time, never this device's, so the chain itself says whether the text or metadata changed elsewhere
             val chain = env.api.hive.content(owner, p.permlink)
+            // the whole json_metadata, tags included, as the chain keeps it (the parsed tags drop repeats)
             val opened = com.ecency.core.api.json.SafeJson.parseOrNull(p.metadata.rawJson)
-            if (chain != null && (chain.title != p.title || chain.body != p.body || chain.tags != p.metadata.tags || (chain.metadata != null && chain.metadata != opened))) {
+            if (chain != null && (chain.title != p.title || chain.body != p.body || (chain.metadata != null && chain.metadata != opened))) {
                 throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
             }
         } else {
