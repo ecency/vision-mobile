@@ -1900,6 +1900,7 @@ class EditorModelTest {
         assertTrue(chip.visible)
         assertFalse(QuestChip.parse("""{"daily":[{"id":"post","progress":1}],"streak":{"current":0,"at_risk":true}}""")!!.visible, "posted today and no streak: nothing to show")
         assertEquals("Daily post 0/1", QuestChip.parse("{}")!!.text)
+        assertEquals("Daily post 1/1", QuestChip.parse("""{"daily":[{"id":"post","progress":3}],"streak":{"current":0}}""")!!.text, "more posts than the goal show the goal")
         assertNull(QuestChip.parse("[]"))
         assertTrue(RcErrors.matches("Please wait to transact, or power up HIVE."))
         assertTrue(RcErrors.matches("Account: spike has 12 RC, needs 3400 RC. Please wait"))
