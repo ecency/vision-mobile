@@ -317,7 +317,7 @@ class PostModel internal constructor(
                     setState { it.copy(comments = withVotesSince(items, votesAtBuild), commentsLoading = false) }
                 }
                 env.localVotes.retireConfirmed(nodes.map { it.first }, env.session.current.username)
-                if (d.sending.isNotEmpty()) watchSending()
+                if (d.sending.isNotEmpty()) watchSending(d.sending)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -332,12 +332,16 @@ class PostModel internal constructor(
      * Live test: a reply said "sending to the chain" for over 75 s after it landed, until hivemind returned it. The
      * chain itself (`database_api.find_comments`, [com.ecency.core.api.HiveApi.content]) is asked every
      * [SENDING_CHECK_MILLIS] for the replies still sending; one it holds shows as posted at once, and its local copy
-     * stays on top until the discussion has it. Asked [SENDING_CHECKS] times at most (a transaction expires after 60 s).
+     * stays on top until the discussion has it. Asked [SENDING_CHECKS] times at most after the last reply that started
+     * sending (a transaction expires after 60 s): a reply sent while another one is watched gets its own time.
      */
-    private fun watchSending() {
+    private fun watchSending(sending: Set<PostKey>) {
+        if (!watchedSending.containsAll(sending) || sendingJob?.isActive != true) sendingChecksLeft = SENDING_CHECKS
+        watchedSending = watchedSending + sending
         if (sendingJob?.isActive == true) return
         sendingJob = scope.launch {
-            repeat(SENDING_CHECKS) {
+            while (sendingChecksLeft > 0) {
+                sendingChecksLeft--
                 kotlinx.coroutines.delay(SENDING_CHECK_MILLIS)
                 val sending = current.comments.filter { it.isSending }.map { it.key }
                 if (sending.isEmpty()) return@launch
@@ -361,6 +365,10 @@ class PostModel internal constructor(
             }
         }
     }
+
+    /** Replies [watchSending] has seen sending, and the checks left before it stops. */
+    private var watchedSending: Set<PostKey> = emptySet()
+    private var sendingChecksLeft = 0
 
     private fun flatten(d: Discussion): List<Triple<Post, Int, Boolean>> = d.threads.flatMap { thread ->
         listOf(Triple(thread.comment, 1, false)) + thread.replies.map { Triple(it.comment, it.level, it.hasHiddenReplies) }

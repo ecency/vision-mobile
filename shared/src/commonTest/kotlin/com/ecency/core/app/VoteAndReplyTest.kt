@@ -15,6 +15,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -214,6 +215,52 @@ class VoteAndReplyTest {
         app.env.postModel("alice", "root").start()
         testScheduler.advanceUntilIdle()
         assertEquals(0, asked)
+    }
+
+    @Test
+    fun aSecondReplyGetsItsOwnTimeToLand() = runTest {
+        // review: a reply sent late in another one's watch inherited what was left of it and could stay "sending"
+        val landed = mutableSetOf<String>()
+        val app = TestApp(this) { req ->
+            when (req.method) {
+                "condenser_api.broadcast_transaction" -> FakeTransport.result(req, "null")
+                "database_api.find_comments" -> TestApp.commentAsked(req).second.let { permlink ->
+                    TestApp.comments(req, permlink.takeIf { it in landed }?.let { entry(TestApp.USER, it, parent = "alice" to "root") })
+                }
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root"))
+                "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root")}}""")
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        }
+        // reply permlinks carry the time: the clock follows the virtual time
+        app.clock = { TestApp.NOW + testScheduler.currentTime }
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        val first = app.env.replyModel(key, post.current.post!!)
+        first.setText("First, never lands")
+        first.send()
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        assertNotNull(first.current.sent)
+        // late in the first one's window, a second reply to the same post
+        testScheduler.advanceTimeBy(70_000)
+        testScheduler.runCurrent()
+        val second = app.env.replyModel(key, post.current.post!!)
+        second.setText("Second")
+        second.send()
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        val sent = assertNotNull(second.current.sent)
+        assertNotEquals(first.current.sent, sent)
+        // it lands after the first window would have ended
+        testScheduler.advanceTimeBy(15_000)
+        testScheduler.runCurrent()
+        landed += sent.permlink
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+        assertFalse(post.current.comments.first { it.key == sent }.isSending, "the second reply's own window")
     }
 
     @Test
