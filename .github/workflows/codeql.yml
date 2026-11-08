@@ -53,6 +53,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # the Gradle distribution only (never the build caches: the extractor must see the whole compile), so a slow
+      # or failing download of it does not fail the analysis
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: matrix.language == 'java-kotlin'
+        with:
+          path: ~/.gradle/wrapper
+          key: codeql-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
       - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           languages: ${{ matrix.language }}
