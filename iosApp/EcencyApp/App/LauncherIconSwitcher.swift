@@ -22,8 +22,8 @@ final class SystemAlternateIcon: AlternateIconSetting {
     }
 }
 
-/// Issue #3656 (README "App icons"): applies the shared rule's icon while the app is active. Settings and the one
-/// question go through here, so a change shows at once; automatic switches only after the person said yes.
+/// Issue #3656 (README "App icons"): applies the shared rule's icon while the app is active. Settings go through here,
+/// so a change shows at once. Seasonal icons are on by default, as on Android; Settings turns them off.
 @MainActor
 final class LauncherIconSwitcher {
     private let model: LauncherIconModel
@@ -35,7 +35,7 @@ final class LauncherIconSwitcher {
 
     /// The phone's own region and the first preferred language, never its location.
     static func configure(_ model: LauncherIconModel, region: String?, language: String?) {
-        model.configure(region: region, language: language, asksFirst: true)
+        model.configure(region: region, language: language, asksFirst: false)
     }
 
     /// Today in the phone's time zone, as a Gregorian date: the celebration table is Gregorian, and the phone's own

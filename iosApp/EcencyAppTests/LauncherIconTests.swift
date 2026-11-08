@@ -37,6 +37,18 @@ final class LauncherIconTests: XCTestCase {
         return env
     }
 
+    /// Seasonal icons are on by default on iOS as on Android: a due celebration switches without a question.
+    func testSeasonalIconsAreOnByDefault() throws {
+        let env = try makeEnv()
+        let icons = Recorder()
+        LauncherIconSwitcher.configure(env.launcherIcons, region: "DE", language: "de")
+        let switcher = LauncherIconSwitcher(model: env.launcherIcons, setting: icons, isActive: { true })
+        switcher.foreground(today: CalendarDay(year: 2027, month: 3, day: 20))
+        XCTAssertTrue(env.launcherIcons.current.seasonal)
+        XCTAssertFalse(env.launcherIcons.current.askConsent, "no question")
+        XCTAssertEqual(icons.calls, ["AppIcon-HiveDay"])
+    }
+
     func testNoAutomaticSwitchBeforeThePersonAgrees() throws {
         let env = try makeEnv()
         let icons = Recorder()

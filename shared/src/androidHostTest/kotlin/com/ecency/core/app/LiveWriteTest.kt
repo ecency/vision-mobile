@@ -462,4 +462,31 @@ class LiveWriteTest {
         }
         if (problems.isNotEmpty()) fail("Live problems:\n" + problems.joinToString("\n"))
     }
+
+    /** ECENCY_LIVE_RENEW=1: a renewed Ecency session is taken by the private API (no chain writes). */
+    @Test
+    fun aRenewedSessionIsTakenByThePrivateApi() = runBlocking {
+        if (System.getenv("ECENCY_LIVE_RENEW") != "1" || !credentials.exists()) return@runBlocking
+        val c = creds()
+        for ((user, pw) in listOf(c.getValue("ECENCY_TEST_PEER") to c.getValue("ECENCY_TEST_PEER_PASSWORD"), c.getValue("ECENCY_TEST_USERNAME") to c.getValue("ECENCY_TEST_PASSWORD"))) {
+            val e = env()
+            step("sign in $user") { signIn(e, user, pw) }
+            step("renew $user") {
+                val first = e.notificationsApi.unreadCount(user)
+                val before = e.accounts.code(user) ?: error("no code")
+                val renewed = e.accounts.renewAfterRejection(user, before)
+                println("LIVE $user unread=$first renewed=${renewed != null && renewed != before}")
+                repeat(3) { n ->
+                    try {
+                        println("LIVE $user after renewal call $n: unread=${e.notificationsApi.unreadCount(user)}")
+                    } catch (x: Exception) {
+                        println("LIVE $user after renewal call $n failed: ${x::class.simpleName} ${(x as? com.ecency.core.api.EcencyHttpException)?.status}")
+                        note("renew $user", "call $n after renewal failed")
+                    }
+                    delay(2_000)
+                }
+            }
+        }
+        if (problems.isNotEmpty()) fail("Live problems:\n" + problems.joinToString("\n"))
+    }
 }
