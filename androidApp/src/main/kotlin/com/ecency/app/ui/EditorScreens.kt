@@ -237,13 +237,14 @@ private fun PlainField(
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle(fontSize = 16.sp, textDirection = TextDirection.Content),
     singleLine: Boolean = false,
+    maxLines: Int = Int.MAX_VALUE,
     enabled: Boolean = true,
     keyboard: KeyboardOptions = KeyboardOptions.Default,
     actions: KeyboardActions = KeyboardActions.Default,
 ) {
     val colors = LocalEcencyColors.current
     BasicTextField(
-        value = value, onValueChange = onValueChange, enabled = enabled, singleLine = singleLine, keyboardOptions = keyboard, keyboardActions = actions,
+        value = value, onValueChange = onValueChange, enabled = enabled, singleLine = singleLine, maxLines = if (singleLine) 1 else maxLines, keyboardOptions = keyboard, keyboardActions = actions,
         textStyle = style.copy(color = colors.text), cursorBrush = SolidColor(colors.blueText), modifier = modifier.testTag(tag),
         decorationBox = { inner ->
             Box {
@@ -253,6 +254,9 @@ private fun PlainField(
         },
     )
 }
+
+/** The title field's height in lines; a longer title scrolls inside it, so the body keeps the room (README "Editor and publishing"). */
+private const val TITLE_MAX_LINES = 3
 
 /** The largest text scale of the editor toolbar's labels: Aa, Image, Video and AI Assist fit a 320dp screen at it. */
 private const val TOOLBAR_MAX_FONT_SCALE = 1.2f
@@ -517,7 +521,13 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                             }
                         }
                         if (!state.isReply) {
-                            PlainField(state.title, model::setTitle, EditorUiCopy.TITLE, "editorTitle", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content))
+                            // at most three lines, then it scrolls inside and keeps its caret in view: a long title typed
+                            // first with the keyboard up left no body on a phone (user report, Galaxy S25). RN's title grows
+                            // without a limit (titleAreaView); deliberate difference
+                            PlainField(
+                                state.title, model::setTitle, EditorUiCopy.TITLE, "editorTitle", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content), maxLines = TITLE_MAX_LINES,
+                            )
                             FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 state.tags.forEach { tag ->
                                     Text(
