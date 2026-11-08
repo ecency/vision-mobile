@@ -946,6 +946,39 @@ class EditorFlowsTest {
         assertEquals("the body starts under the top bar", top, node("editorBody").boundsInRoot.top, 24f)
     }
 
+    /**
+     * A phone (user report, Galaxy S25: 384 dp wide, 832 dp less the status bar): a title typed first with the keyboard
+     * up stops at three lines and scrolls inside, so even the longest title (250 characters, eight lines unbounded)
+     * leaves the body on screen with room to write; with an empty title and no keyboard the body has most of the screen.
+     */
+    @Test
+    @Config(qualifiers = "w384dp-h792dp")
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE) // real font metrics
+    fun onAPhoneALongTitleStopsAtThreeLinesAndLeavesTheBodyOnScreen() {
+        launchSignedIn()
+        openEditor()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        val dp = compose.density.density
+        fun between() = node("editorToolbar").boundsInRoot.top - node("editorBack").boundsInRoot.bottom
+        settle()
+        val emptyBody = node("editorBody").boundsInRoot.height / dp
+        assertTrue("an empty title leaves the body most of the room: $emptyBody of ${between() / dp} dp", emptyBody >= 0.6f * between() / dp)
+
+        compose.onNodeWithTag("editorTitle").performClick()
+        showKeyboard((330 * dp).toInt())
+        val title = "A title long enough to take several lines on a phone, as people write them when they start the post with it. "
+        compose.onNodeWithTag("editorTitle").performTextInput(title.repeat(3).take(250))
+        settle()
+        assertEquals(250, model().current.title.length)
+        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        compose.onNodeWithTag("editorTitle").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val threeLines = layouts.first().getLineBottom(2)
+        val titleHeight = node("editorTitle").size.height
+        assertTrue("the title stops at three lines: $titleHeight px, three lines $threeLines px", titleHeight <= threeLines + 1f)
+        val body = node("editorBody").boundsInRoot.height / dp
+        assertTrue("the body is on screen with room to write: $body dp", body >= 120f)
+    }
+
     /** Back from the preview the body shows its caret again (here at the end of a long text). */
     @Test
     @Config(qualifiers = "w360dp-h440dp")

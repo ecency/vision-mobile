@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -450,19 +451,23 @@ internal fun WaveView(
                     Modifier.semantics(mergeDescendants = true) { contentDescription = header(); customActions = a11yActions }.testTag("wave:header"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false).clickable(role = Role.Button) { actions.onAuthor(card.author) }.then(HiddenFromA11y),
-                    )
-                    ProBadge(env, card.author)
-                    Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray)
-                    if (item.isFromEcency) EcencySourceBadge(Modifier.padding(start = 6.dp), tag = "wave:ecency")
-                    if (item.isLocal) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("wave:local"))
-                    Spacer(Modifier.weight(1f))
+                    // the author line takes the width the trailing items leave: the dots sit at the edge (owner report
+                    // 11-08: a spacer sharing the width with the shrinking name left most of it empty)
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            card.author, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false).clickable(role = Role.Button) { actions.onAuthor(card.author) }.then(HiddenFromA11y),
+                        )
+                        ProBadge(env, card.author)
+                        Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray)
+                        if (item.isFromEcency) EcencySourceBadge(Modifier.padding(start = 6.dp), tag = "wave:ecency")
+                        if (item.isLocal) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("wave:local"))
+                    }
                     if (item.isPromoted) Text(ReadingUiCopy.PROMOTED, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = colors.darkGray, modifier = Modifier.testTag("wave:promoted"))
                     if (feedx != null) {
                         // RN PostOptionsModal isWave: translate offered; a wave is a comment, so no pin to blog and the canonical link
-                        OptionsButton { feedx.openMenu(item.post, PostMenuContext(translate = true), item.key) }
+                        // into the row's end padding, as far from the edge as on the feed's cards
+                        OptionsButton(Modifier.offset(x = 10.dp)) { feedx.openMenu(item.post, PostMenuContext(translate = true), item.key) }
                     }
                 }
                 val bodyWidth = contentWidth - 44.dp

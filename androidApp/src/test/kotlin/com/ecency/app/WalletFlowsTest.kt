@@ -262,6 +262,32 @@ class WalletFlowsTest {
         assertEquals(AppScreen.Transfer("transfer", "HIVE", "hive", "spike-bob"), navigator.state.top)
     }
 
+    /** A Hive user's request: a reward's details name the post that earned it; tapping that opens it, a long press copies its link. */
+    @Test
+    fun aRewardsPostLinkInItsDetailsOpensThePost() {
+        node.extra.let { base ->
+            node.extra = { m, r ->
+                if (m == "condenser_api.get_account_history") {
+                    """[[9,{"trx_id":"${"0".repeat(40)}","timestamp":"2026-10-05T10:00:00","op":["curation_reward",{"curator":"tester","reward":"2000000.000000 VESTS","comment_author":"spike-alice","comment_permlink":"a-post"}]}]]"""
+                } else {
+                    base?.invoke(m, r)
+                }
+            }
+        }
+        val navigator = Navigator(NavState().push(AppScreen.AssetDetails("HP")))
+        launch(navigator)
+        val key = "9_2026-10-05T10:00:00"
+        until { exists("activity:$key") }
+        compose.onNodeWithTag("activity:$key").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("postLink:$key") }
+        val link = compose.onNodeWithTag("postLink:$key", useUnmergedTree = true)
+        assertEquals(com.ecency.core.app.WalletUiCopy.OPEN_POST, link.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsActions.OnClick].label)
+        link.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
+        assertEquals(listOf("https://ecency.com/@spike-alice/a-post"), copied)
+        link.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { navigator.state.top == AppScreen.Post("spike-alice", "a-post") }
+    }
+
     /** Tester report: after a claim the balance stayed as it was until a manual refresh: the portfolio is read again until it shows the claim. */
     @Test
     @Config(qualifiers = "w360dp-h740dp")

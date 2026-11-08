@@ -319,13 +319,19 @@ struct MenuReplySheet: View {
     }
 }
 
-/// The system share sheet over the top-most view controller.
+/// The system share sheet over the top-most view controller that stays. A menu sheet closes right before its Share
+/// runs: a sheet presented on the closing one is dropped by iOS without a word (owner report 11-08), so a controller
+/// being dismissed is skipped and a running transition is waited for.
 enum SystemShare {
-    @MainActor static func present(_ text: String) {
+    @MainActor static func present(_ text: String, attempt: Int = 0) {
         guard let root = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene })
             .flatMap(\.windows).first(where: \.isKeyWindow)?.rootViewController else { return }
         var top = root
-        while let presented = top.presentedViewController { top = presented }
+        while let presented = top.presentedViewController, !presented.isBeingDismissed { top = presented }
+        if attempt < 3, let transition = top.transitionCoordinator ?? top.presentedViewController?.transitionCoordinator {
+            transition.animate(alongsideTransition: nil) { _ in present(text, attempt: attempt + 1) }
+            return
+        }
         let controller = UIActivityViewController(activityItems: [text], applicationActivities: nil)
         controller.popoverPresentationController?.sourceView = top.view
         top.present(controller, animated: true)

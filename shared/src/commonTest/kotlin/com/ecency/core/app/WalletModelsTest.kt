@@ -553,6 +553,28 @@ class WalletModelsTest {
         assertEquals("@a/p", page.first().details)
     }
 
+    /** A reward row names the post that earned it, so its details link opens that post; a transfer names none. */
+    @Test
+    fun aRewardRowNamesThePostThatEarnedIt() {
+        fun groom(op: String, fields: String) = WalletHistory.groom(
+            com.ecency.core.api.wallet.HistoryRow.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(historyRow(9, op, fields)))!!, 500.0,
+        )
+        val key = com.ecency.core.api.model.PostKey("spike-alice", "a-post")
+        // condenser get_account_history fields, as RN utils/wallet.ts groomingTransactionData reads them
+        assertEquals(key, groom("curation_reward", """{"curator":"spike-voter","reward":"1000.000000 VESTS","comment_author":"spike-alice","comment_permlink":"a-post","payout_must_be_claimed":false}""")?.post)
+        assertEquals(key, groom("author_reward", """{"author":"spike-alice","permlink":"a-post","hbd_payout":"1.000 HBD","hive_payout":"0.000 HIVE","vesting_payout":"0.000000 VESTS"}""")?.post)
+        assertEquals(key, groom("comment_benefactor_reward", """{"benefactor":"spike-voter","author":"spike-alice","permlink":"a-post","hbd_payout":"0.000 HBD","hive_payout":"0.000 HIVE","vesting_payout":"1.000000 VESTS"}""")?.post)
+        assertEquals("https://ecency.com/@spike-alice/a-post", groom("curation_reward", """{"curator":"v","reward":"1.000000 VESTS","comment_author":"spike-alice","comment_permlink":"a-post"}""")?.postLink)
+        assertNull(groom("curation_reward", """{"curator":"spike-voter","reward":"1.000000 VESTS","comment_author":"","comment_permlink":""}""")?.post)
+        assertNull(groom("author_reward", """{"author":"spike-alice","permlink":"","hbd_payout":"1.000 HBD"}""")?.post)
+        assertNull(groom("transfer", """{"from":"a","to":"b","amount":"1.000 HIVE","memo":"spike-alice/a-post"}""")?.post)
+        assertNull(groom("claim_reward_balance", """{"account":"a","reward_hive":"0.000 HIVE","reward_hbd":"1.000 HBD","reward_vests":"0.000000 VESTS"}""")?.post)
+        // Hive Engine reward rows name theirs as authorperm (RN groomingEngineHistory)
+        val engine = { o: String -> WalletHistory.groomEngine(kotlinx.serialization.json.Json.parseToJsonElement(o).jsonObject) }
+        assertEquals(key, engine("""{"operation":"comments_curationReward","timestamp":1700000000,"quantity":"1","symbol":"LEO","authorperm":"@spike-alice/a-post"}""")?.post)
+        assertNull(engine("""{"operation":"tokens_transfer","timestamp":1700000000,"quantity":"1","symbol":"LEO","from":"a","to":"b"}""")?.post)
+    }
+
     @Test
     fun pendingRequestsNameTheSymbolAndComeSoonestFirstWithCancelableOrders() = runTest {
         val w = world(this)

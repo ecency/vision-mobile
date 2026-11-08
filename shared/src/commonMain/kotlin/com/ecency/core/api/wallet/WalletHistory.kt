@@ -1,5 +1,6 @@
 package com.ecency.core.api.wallet
 
+import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.model.asDouble
 import com.ecency.core.api.model.asLong
 import com.ecency.core.api.model.obj
@@ -51,9 +52,14 @@ data class CoinActivity(
     val cancelable: Boolean = false,
     /** Engine rows: the engine's own id (dedupe key). */
     val engineId: String? = null,
+    /** The post or comment the row is about (a reward's), opened from its details link; null for a row without one. */
+    val post: PostKey? = null,
 ) {
     /** The row's key in lists (RN `activity_item_<engineTrxId ?? trxIndex>_<created>`). */
     val key: String get() = "${engineId ?: trxIndex?.toString() ?: ""}_$created"
+
+    /** [post]'s web link (RN getPostUrl), copied from the details link with a long press. */
+    val postLink: String? get() = post?.let { "https://ecency.com/@${it.author}/${it.permlink}" }
 
     /** The memo is an encrypted one (#3633): shown with "Decrypt memo", never repeated as it stands. */
     val encryptedMemo: Boolean get() = memo?.let(com.ecency.core.hive.Memo::isEncrypted) == true
@@ -182,6 +188,10 @@ object WalletHistory {
         }
     }
 
+    /** The post a reward names (both parts present), else null. */
+    private fun postOf(author: String?, permlink: String?): PostKey? =
+        if (author.isNullOrBlank() || permlink.isNullOrBlank()) null else PostKey(author, permlink)
+
     /** RN parseToken(x).toFixed(3) with "," made ".". */
     private fun fixed3(value: Double) = Num.fixed(value, 3)
 
@@ -205,11 +215,13 @@ object WalletHistory {
             "curation_reward" -> base.copy(
                 value = "${hp(f.str("reward"))} HP",
                 details = f.str("comment_author")?.takeIf { it.isNotEmpty() }?.let { "@$it/${f.str("comment_permlink").orEmpty()}" },
+                post = postOf(f.str("comment_author"), f.str("comment_permlink")),
             )
             "author_reward", "comment_benefactor_reward" -> base.copy(
                 value = parts(f.str("hbd_payout"), f.str("hive_payout"), f.str("vesting_payout")),
                 details = if (!f.str("author").isNullOrEmpty() && !f.str("permlink").isNullOrEmpty()) "@${f.str("author")}/${f.str("permlink")}" else null,
                 icon = if (row.type == "comment_benefactor_reward") AppIcon.COMMENT else AppIcon.TICKET,
+                post = postOf(f.str("author"), f.str("permlink")),
             )
             "claim_reward_balance" -> base.copy(value = parts(f.str("reward_hbd"), f.str("reward_hive"), f.str("reward_vests")))
             "transfer", "transfer_to_savings", "transfer_from_savings", "transfer_to_vesting" -> base.copy(
@@ -314,6 +326,7 @@ object WalletHistory {
             memo = o.str("memo").orEmpty(),
             sender = from, receiver = to, expires = "", repeatable = operation in REPEATABLE,
             engineId = o.str("id") ?: o.str("_id"),
+            post = PostKey.parse(o.str("authorperm")),
         )
     }
 

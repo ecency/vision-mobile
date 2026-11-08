@@ -98,6 +98,8 @@ object DemoWallet {
                 row(1003, "claim_reward_balance", """{"account":"spike-alice","reward_hive":"1.250 HIVE","reward_hbd":"0.000 HBD","reward_vests":"500.000000 VESTS"}""", "2026-10-04T08:00:00"),
                 row(1004, "transfer", """{"from":"spike-alice","to":"spike-carol","amount":"3.000 HIVE","memo":""}""", "2026-10-05T18:45:00"),
                 row(1005, "fill_order", """{"current_owner":"spike-alice","current_orderid":1,"current_pays":"10.000 HIVE","open_owner":"spike-dave","open_orderid":2,"open_pays":"2.500 HBD"}""", "2026-10-06T09:30:00"),
+                // a curation reward (HP history) names its post, which the details link opens
+                row(1006, "curation_reward", """{"curator":"spike-alice","reward":"2000.000000 VESTS","comment_author":"spike-alice","comment_permlink":"fake-post-1"}""", "2026-10-06T12:00:00"),
             ).joinToString(",") + "]",
         )
     }

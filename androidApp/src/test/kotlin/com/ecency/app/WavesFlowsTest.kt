@@ -151,6 +151,36 @@ class WavesFlowsTest {
         waitFor("wave:alice/w1")
     }
 
+    /** Owner report 11-08: the options dots sat far from the edge (the author name's unused width was left empty). */
+    @Test
+    @Config(qualifiers = "w412dp-h900dp")
+    fun aWavesOptionsSitAtTheRightEdgeLikeTheFeedsCards() {
+        launch()
+        openWaves()
+        val row = compose.onAllNodes(hasTestTag("wave:alice/w1")).fetchSemanticsNodes().first()
+        val dots = compose.onAllNodes(hasTestTag("options") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().first()
+        val gap = with(compose.density) { (row.boundsInRoot.right - dots.boundsInRoot.right).toDp() }
+        assertTrue("dots ${gap} from the right edge", gap.value in 0f..8f)
+    }
+
+    /** Right to left: the dots sit at the left edge, the offset follows the layout direction. */
+    @Test
+    @Config(qualifiers = "w412dp-h900dp")
+    fun aWavesOptionsSitAtTheEndEdgeRightToLeft() {
+        // the app's own language decides the direction (Arabic: right to left)
+        com.ecency.core.l10n.L10n.setLanguage("ar")
+        try {
+            launch()
+            openWaves()
+            val row = compose.onAllNodes(hasTestTag("wave:alice/w1")).fetchSemanticsNodes().first()
+            val dots = compose.onAllNodes(hasTestTag("options") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().first()
+            val gap = with(compose.density) { (dots.boundsInRoot.left - row.boundsInRoot.left).toDp() }
+            assertTrue("dots ${gap} from the left edge", gap.value in 0f..8f)
+        } finally {
+            com.ecency.core.l10n.L10n.setLanguage(com.ecency.core.l10n.L10n.SOURCE)
+        }
+    }
+
     @Test
     fun theTabListsWavesAndAWaveOpensItsThread() {
         launch()

@@ -13,6 +13,7 @@ import com.ecency.core.app.AppIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -392,7 +393,8 @@ private fun SectionTitle(text: String) {
     Text(text, color = LocalEcencyColors.current.darkGray, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { heading() })
 }
 
-/** RN Transaction row: label, time, value; tap expands details, memo and the transaction id. */
+/** RN Transaction row: label, time, value; tap expands details (a reward's post as a link), memo and the transaction id. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, expanded: Set<String>, model: AssetDetailsModel, pending: Boolean, busy: Boolean, push: (AppScreen) -> Unit, decrypted: String? = null) {
     val colors = LocalEcencyColors.current
@@ -418,7 +420,22 @@ private fun ActivityRow(env: AppEnvironment, host: AppHost, row: CoinActivity, e
             }
         }
         if (open) {
-            row.details?.let { Text(it, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp)) }
+            row.details?.let { details ->
+                val post = row.post
+                if (post == null) {
+                    Text(details, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                } else {
+                    // a reward's post: tap opens it, a long press copies its link
+                    Text(
+                        details, color = colors.blueText, fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp).combinedClickable(
+                            role = Role.Button, onClickLabel = WalletUiCopy.OPEN_POST, onLongClickLabel = UiCopy.COPY_LINK,
+                            onLongClick = { row.postLink?.let { host.copy(it); env.ui.toast(WalletCopy.COPIED) } },
+                            onClick = { push(AppScreen.Post(post.author, post.permlink)) },
+                        ).padding(vertical = 4.dp).testTag("postLink:${row.key}"),
+                    )
+                }
+            }
             row.memo?.takeIf { it.isNotEmpty() }?.let { memo ->
                 when {
                     // #3633: an encrypted memo shows its text once read with a key on the device, never the cipher text

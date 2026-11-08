@@ -59,6 +59,20 @@ final class FeedReadingUITests: XCTestCase {
         XCTAssertTrue(element(app, "history-version-1").waitForExistence(timeout: 10))
     }
 
+    /// Owner report 11-08 (TestFlight): Share in a post's menu showed nothing. The menu sheet closes first, and the
+    /// system share sheet was presented on the controller being dismissed, which iOS ignores.
+    func testShareFromThePostMenuOpensTheShareSheet() {
+        let app = launch(["-seedAccounts", "YES"])
+        let options = app.buttons["post-options"].firstMatch
+        XCTAssertTrue(options.waitForExistence(timeout: 15))
+        options.tap()
+        let share = app.buttons["menu-item-share"]
+        XCTAssertTrue(share.waitForExistence(timeout: 10))
+        share.tap()
+        let sheet = app.otherElements["ActivityListView"]
+        XCTAssertTrue(sheet.waitForExistence(timeout: 10), "the system share sheet is up")
+    }
+
     /// The mute post notes sheet (set role layout): the action needs a note, Cancel sends nothing.
     func testModNotesNeedANoteAndCancelCloses() {
         let app = launch(["-seedAccounts", "YES"])

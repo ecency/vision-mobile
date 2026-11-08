@@ -751,8 +751,11 @@ struct EditorScreen: View {
             }
         }
         if !state.isReply {
+            // at most three lines, then it scrolls inside and keeps its caret in view: a long title typed first with the
+            // keyboard up left no body on a phone (user report). RN's title grows without a limit (titleAreaView);
+            // deliberate difference
             TextField(EditorUiCopy.shared.TITLE, text: Binding(get: { editor.state.title }, set: { model.setTitle(text: $0) }), axis: .vertical)
-                .font(.title2.bold()).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("editor-title")
+                .lineLimit(1...3).font(.title2.bold()).padding(.horizontal, 16).padding(.vertical, 8).accessibilityIdentifier("editor-title")
             // chips wrap onto more lines and the field takes its own full-width line, its hint a wrapping Text:
             // a UITextField placeholder is one line and clipped long languages (de, ru) and large text
             VStack(alignment: .leading, spacing: 6) {

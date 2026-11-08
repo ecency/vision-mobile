@@ -374,6 +374,26 @@ final class EditorUITests: XCTestCase {
         XCTAssertTrue(app.buttons["format-bold"].waitForExistence(timeout: 5), "the toolbar took the tap")
     }
 
+    /// User report (Galaxy S25, the same layout here): a long title typed first with the keyboard up pushed the body
+    /// under the keyboard. The title stops at three lines and scrolls inside, so even the longest title (250
+    /// characters) leaves the body on screen with room to write.
+    func testALongTitleStopsAtThreeLinesAndLeavesTheBodyOnScreen() throws {
+        let app = launch(["-openScreen", "editor"])
+        let title = element(app, "editor-title")
+        XCTAssertTrue(title.waitForExistence(timeout: 20), app.debugDescription)
+        title.focusAndType("A")
+        let oneLine = title.frame.height
+        let line = "A title long enough to take several lines on a phone, as people write them when they start the post with it. "
+        title.typeText(String(String(repeating: line, count: 3).prefix(249)))
+        sleep(1) // the layout settles
+        XCTAssertLessThanOrEqual(title.frame.height, 3 * oneLine + 4, "the title stops at three lines: \(title.frame), one line \(oneLine)")
+        try requireSoftwareKeyboard(app)
+        let bottom = min(app.buttons["tool-format"].frame.minY, app.keyboards.firstMatch.frame.minY)
+        let bodyFrame = body(app).frame
+        let visible = min(bodyFrame.maxY, bottom) - max(bodyFrame.minY, app.navigationBars.firstMatch.frame.maxY)
+        XCTAssertGreaterThanOrEqual(visible, 120, "the body is on screen with room to write: \(bodyFrame), above \(bottom)")
+    }
+
     /// Back from the preview the body is a new view: the caret (here at the end of a long text) is shown again.
     func testComingBackFromThePreviewShowsTheCaret() {
         let app = launch(["-openScreen", "editor"])
