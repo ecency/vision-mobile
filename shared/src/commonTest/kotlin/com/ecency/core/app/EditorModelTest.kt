@@ -301,6 +301,25 @@ class EditorModelTest {
     }
 
     @Test
+    fun anEditOfTheLocalCopyRefusesTagsChangedElsewhere() = runTest {
+        // review: only title and body were compared, so tags changed on another client were written over
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        // same title and body, other tags (the fixture's "ecency", "old" against the published "ecency", "test")
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world")
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+    }
+
+    @Test
     fun oneListThatHasTheNewPostNeverHidesItFromAnotherStillBehind() = runTest {
         // review: the first list whose answer held the post forgot the shared copy for every other list
         val w = World(this)
@@ -385,7 +404,7 @@ class EditorModelTest {
         val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
         assertEquals("Hello world", edit.current.body, "opened from the local copy")
         // hivemind indexes the same post, with the block's time
-        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world")
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world").replace("\"ecency\",\"old\"", "\"ecency\",\"test\"")
         w.hivemindLags -= "$user/my-first-post"
         edit.setBody("Hello world, fixed", TextSelection(0))
         w.app.env.ui.clear()

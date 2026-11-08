@@ -1536,9 +1536,9 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         // the patch is made against the version loaded here: if the post changed on chain since, it would revert that
         if (openedFromLocal) {
             // opened from this device's copy of a just-published post: hivemind's copy (when it arrives) carries the
-            // block's time, never this device's, so the chain itself says whether the text changed elsewhere
+            // block's time, never this device's, so the chain itself says whether the text or tags changed elsewhere
             val chain = env.api.hive.content(owner, p.permlink)
-            if (chain != null && (chain.title != p.title || chain.body != p.body)) {
+            if (chain != null && (chain.title != p.title || chain.body != p.body || chain.tags != p.metadata.tags)) {
                 throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
             }
         } else {
