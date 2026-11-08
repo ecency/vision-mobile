@@ -211,16 +211,17 @@ class PostRepository(
     }
 
     /**
-     * [author]'s local posts still waiting for hivemind, newest first. Those in [listed] (what hivemind just answered
-     * for the author) and those older than [localCommentTtlMillis] are forgotten for good.
+     * [author]'s local posts still waiting for hivemind, newest first, without those in [listed] (what hivemind just
+     * answered to this caller). Only age ([localCommentTtlMillis]) and a delete ([forgetLocal]) forget a copy: the
+     * author's blog and posts lists are read apart, and one answer holding the post says nothing of the other's.
      */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun localPosts(author: String, listed: Collection<PostKey>): List<Post> = guarded {
         localMutex.withLock {
             val now = nowMillis()
-            val kept = localPosts[author].orEmpty().filter { it.post.key !in listed && now - it.addedAt <= localCommentTtlMillis }
-            if (kept.isEmpty()) localPosts.remove(author) else localPosts[author] = kept
-            kept.map { it.post }
+            val fresh = localPosts[author].orEmpty().filter { now - it.addedAt <= localCommentTtlMillis }
+            if (fresh.isEmpty()) localPosts.remove(author) else localPosts[author] = fresh
+            fresh.filter { it.post.key !in listed }.map { it.post }
         }
     }
 

@@ -66,6 +66,12 @@ class EditorModelTest {
         /** `bridge.get_account_posts` answers by account (hivemind's blog and posts lists); none: an empty list. */
         val accountPosts = mutableMapOf<String, List<String>>()
 
+        /** Per account and sort ("blog", "posts"), over [accountPosts]: hivemind can answer one list before another. */
+        val accountPostsBySort = mutableMapOf<Pair<String, String>, List<String>>()
+
+        /** Holds every bridge.get_account_posts page after the first until completed. */
+        var pageGate: CompletableDeferred<Unit>? = null
+
         /** Keys ("author/permlink") the chain has but hivemind has not indexed yet. */
         val hivemindLags = mutableSetOf<String>()
 
@@ -119,7 +125,10 @@ class EditorModelTest {
                 "bridge.get_account_posts" -> {
                     val p = req.params.jsonObject
                     // one page: a cursor asks past the end
-                    val rows = if (p["start_permlink"] != null) emptyList() else accountPosts[p["account"]!!.jsonPrimitive.content].orEmpty()
+                    val account = p["account"]!!.jsonPrimitive.content
+                    if (p["start_permlink"] != null) pageGate?.await()
+                    val rows = if (p["start_permlink"] != null) emptyList()
+                    else accountPostsBySort[account to p["sort"]!!.jsonPrimitive.content] ?: accountPosts[account].orEmpty()
                     FakeTransport.result(req, rows.joinToString(",", "[", "]"))
                 }
                 "condenser_api.lookup_accounts" -> FakeTransport.result(req, """["bob","bobby","carol"]""")
@@ -283,12 +292,59 @@ class EditorModelTest {
         blog.refresh()
         testScheduler.advanceUntilIdle()
         assertEquals(listOf("my-first-post", "older-post"), keys(blog), "never twice")
-        // the local copy is gone: a list that no longer has it does not bring it back
+        // a node behind the others answers without it again: the copy still stands in, for its time at most
         w.accountPosts[user] = listOf(older)
         blog.refresh()
         testScheduler.advanceUntilIdle()
-        assertEquals(listOf("older-post"), keys(blog))
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "a lagging answer never hides it (its time: DiscussionTest)")
         listOf(blog, posts, comments, theirs).forEach { it.close() }
+    }
+
+    @Test
+    fun oneListThatHasTheNewPostNeverHidesItFromAnotherStillBehind() = runTest {
+        // review: the first list whose answer held the post forgot the shared copy for every other list
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val posts = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.POSTS))
+        posts.start()
+        testScheduler.advanceUntilIdle()
+        // the blog's answer has it already, the posts list's answer is still behind
+        w.accountPostsBySort[user to "blog"] = listOf(entry(user, "my-first-post", "My first post", "Hello world"), entry(user, "older-post", "Older", "older body"))
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), blog.current.items.map { it.key.permlink })
+        posts.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), posts.current.items.map { it.key.permlink }, "still behind: the local copy")
+        listOf(blog, posts).forEach { it.close() }
+    }
+
+    @Test
+    fun aPostPublishedWhileAPageLoadsShowsWhenThePageIsIn() = runTest {
+        // review: a publish while a page loads must still show the post (the publish's own update supersedes the page)
+        val w = World(this)
+        w.accountPosts[user] = (1..20).map { entry(user, "older-$it", "Older $it", "older body") }
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        w.pageGate = CompletableDeferred()
+        blog.loadMore()
+        testScheduler.runCurrent()
+        assertTrue(blog.current.isLoadingMore, "the next page is being read")
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertNotNull(m.current.done, "published while the page was being read")
+        w.pageGate!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals("my-first-post", blog.current.items.first().key.permlink)
+        blog.close()
     }
 
     @Test
