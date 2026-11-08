@@ -62,6 +62,22 @@ class LiveWriteTest {
         env.session.state.first { it.username == user }
     }
 
+    /** Whether [account]'s latest operations hold one of [op] whose JSON contains every one of [parts]. */
+    private suspend fun onChain(env: AppEnvironment, account: String, op: String, vararg parts: String): Boolean {
+        repeat(10) {
+            val history = env.api.client.call(
+                "condenser_api.get_account_history",
+                kotlinx.serialization.json.buildJsonArray {
+                    add(kotlinx.serialization.json.JsonPrimitive(account)); add(kotlinx.serialization.json.JsonPrimitive(-1)); add(kotlinx.serialization.json.JsonPrimitive(30))
+                },
+            ).toString()
+            val ops = Regex("\\[\"$op\",\\{[^}]*\\}").findAll(history).map { it.value }
+            if (ops.any { o -> parts.all { it in o } }) return true
+            delay(3_000)
+        }
+        return false
+    }
+
     private suspend fun <T> step(name: String, millis: Long = 90_000, block: suspend () -> T): T? = try {
         withTimeout(millis) { block() }.also { println("LIVE OK $name") }
     } catch (e: Throwable) {
@@ -141,6 +157,7 @@ class LiveWriteTest {
                 a.votes.vote(r.author, r.permlink, 100)
                 val s = a.votes.state.first { it.status(r.author, r.permlink)?.inFlight != true }
                 s.status(r.author, r.permlink)?.error?.let { error(it.message) }
+                if (!onChain(a, author, "vote", "\"permlink\":\"${r.permlink}\"")) note("vote on reply", "the vote is not in $author's history")
             }
         }
 
@@ -160,6 +177,8 @@ class LiveWriteTest {
             val s = m.state.first { it.closed || it.phase is SendPhase.Failed || it.prompt is TransferPrompt.Alert }
             (s.prompt as? TransferPrompt.Alert)?.let { error("alert: ${it.message}") }
             if (s.phase is SendPhase.Failed) error("send failed: ${s.phase}")
+            val sender = from.session.current.username ?: error("no sender")
+            if (!onChain(from, sender, "transfer", "\"to\":\"$to\"", "0.001 HBD")) note(label, "the transfer is not in $sender's history")
         }
         transfer(b, author, "transfer $peer to $author")
         transfer(a, peer, "transfer $author to $peer")
@@ -207,6 +226,7 @@ class LiveWriteTest {
                 val s = m.state.first { it.closed || it.phase is SendPhase.Failed || it.prompt is TransferPrompt.Alert }
                 (s.prompt as? TransferPrompt.Alert)?.let { error("alert: ${it.message}") }
                 if (s.phase is SendPhase.Failed) error("send failed: ${s.phase}")
+                if (!onChain(b, peer, "transfer_to_vesting", "\"to\":\"$to\"", amount)) note("power up $amount to $to", "not in $peer's history")
             }
         }
         if (problems.isNotEmpty()) fail("Live problems:\n" + problems.joinToString("\n"))
