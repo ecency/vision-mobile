@@ -24,6 +24,8 @@ data class CommentItem(
     /** Header data (author, avatar, reputation, payout, votes); summary and image are empty. */
     val card: PostCard,
     val blocks: List<Block>,
+    /** [isLocal] and not seen on chain yet: "sending to the chain". Once the chain holds it, it shows as posted. */
+    val isSending: Boolean = false,
 ) {
     val key: PostKey get() = post.key
 }
@@ -274,7 +276,7 @@ class PostModel internal constructor(
                 val nodes = flatten(d)
                 suspend fun item(node: Triple<Post, Int, Boolean>): CommentItem {
                     val (post, level, hidden) = node
-                    return CommentItem(post, level, hidden, post.key in localKeys, card(post, withSummary = false), env.renderBody(post))
+                    return CommentItem(post, level, hidden, post.key in localKeys, card(post, withSummary = false), env.renderBody(post), isSending = post.key in d.sending)
                 }
                 val bots = d.botThreads.map { item(Triple(it.comment, 1, false)) }
                 setState { it.copy(botComments = bots) }
@@ -290,10 +292,45 @@ class PostModel internal constructor(
                     setState { it.copy(comments = withVotesSince(items, votesAtBuild), commentsLoading = false) }
                 }
                 env.localVotes.retireConfirmed(nodes.map { it.first }, env.session.current.username)
+                if (d.sending.isNotEmpty()) watchSending()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 setState { it.copy(commentsLoading = false, commentsError = AppError.from(e, "post.comments")) }
+            }
+        }
+    }
+
+    private var sendingJob: Job? = null
+
+    /**
+     * Live test: a reply said "sending to the chain" for over 75 s after it landed, until hivemind returned it. The
+     * chain itself (`database_api.find_comments`, [com.ecency.core.api.HiveApi.content]) is asked every
+     * [SENDING_CHECK_MILLIS] for the replies still sending; one it holds shows as posted at once, and its local copy
+     * stays on top until the discussion has it. Asked [SENDING_CHECKS] times at most (a transaction expires after 60 s).
+     */
+    private fun watchSending() {
+        if (sendingJob?.isActive == true) return
+        sendingJob = scope.launch {
+            repeat(SENDING_CHECKS) {
+                kotlinx.coroutines.delay(SENDING_CHECK_MILLIS)
+                val sending = current.comments.filter { it.isSending }.map { it.key }
+                if (sending.isEmpty()) return@launch
+                val landed = sending.filter { k ->
+                    try {
+                        env.api.hive.content(k.author, k.permlink) != null
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        ErrorReports.quiet(e, "post.replyOnChain")
+                        false
+                    }
+                }
+                if (landed.isNotEmpty()) {
+                    landed.forEach { env.api.posts.confirmLocalComment(it) }
+                    // the discussion from the cache with the local copies again, now posted
+                    loadComments(refresh = false)
+                }
             }
         }
     }
@@ -336,6 +373,12 @@ class PostModel internal constructor(
 
         /** Comments rendered and shown before the rest of a long discussion (about two screens). */
         const val FIRST_COMMENTS = 12
+
+        /** Between chain checks of a reply still sending (a block is 3 s). */
+        const val SENDING_CHECK_MILLIS = 3_000L
+
+        /** Chain checks of a reply still sending: 75 s, past the 60 s a transaction can still land in. */
+        const val SENDING_CHECKS = 25
     }
 
     /** Post headers need no summary or card image; skip that work. */

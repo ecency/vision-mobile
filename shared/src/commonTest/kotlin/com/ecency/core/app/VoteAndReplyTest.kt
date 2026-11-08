@@ -292,6 +292,62 @@ class VoteAndReplyTest {
         reply.close()
     }
 
+    /**
+     * Live test: a reply kept "sending to the chain" for more than 75 s after it was on chain, until hivemind returned
+     * it. Once the chain holds it (`database_api.find_comments`, chain state) it shows as posted; the local copy stays
+     * on top until the discussion has it.
+     */
+    @Test
+    fun aReplyOnChainStopsSayingSendingBeforeHivemindHasIt() = runTest {
+        var onChain: String? = null
+        var indexed = false
+        val app = TestApp(this) { req ->
+            when (req.method) {
+                "condenser_api.broadcast_transaction" -> FakeTransport.result(req, "null")
+                "database_api.find_comments" -> TestApp.comments(req, onChain?.takeIf { TestApp.commentAsked(req).second == it }?.let { entry(TestApp.USER, it, parent = "alice" to "root") })
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root"))
+                "bridge.get_discussion" -> FakeTransport.result(
+                    req,
+                    if (indexed && onChain != null) """{"alice/root":${entry("alice", "root", replies = listOf("${TestApp.USER}/$onChain"))},"${TestApp.USER}/$onChain":${entry(TestApp.USER, onChain!!, parent = "alice" to "root")}}"""
+                    else """{"alice/root":${entry("alice", "root")}}""",
+                )
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        }
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        val reply = app.env.replyModel(key, post.current.post!!)
+        reply.setText("Nice post")
+        reply.send()
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        val sent = assertNotNull(reply.current.sent)
+        val local = post.current.comments.first()
+        assertEquals(sent, local.key)
+        assertTrue(local.isLocal)
+        assertTrue(local.isSending, "not on chain yet")
+
+        onChain = sent.permlink
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+        val confirmed = post.current.comments.first()
+        assertEquals(sent, confirmed.key)
+        assertTrue(confirmed.isLocal, "the local copy stays until hivemind has it")
+        assertFalse(confirmed.isSending, "on chain: posted, not sending")
+
+        indexed = true
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        val served = post.current.comments.single()
+        assertEquals(sent, served.key)
+        assertFalse(served.isLocal)
+        assertFalse(served.isSending)
+        post.close()
+        reply.close()
+    }
+
     @Test
     fun editedReplyAfterFailureKeepsThePermlink() = runTest {
         var down = true

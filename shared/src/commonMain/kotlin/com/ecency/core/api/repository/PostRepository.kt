@@ -39,6 +39,8 @@ data class Discussion(
     val sort: CommentSort,
     /** Local comments not yet returned by the bridge (shown on top). */
     val pending: Set<PostKey> = emptySet(),
+    /** Those of [pending] not seen on chain yet ([PostRepository.confirmLocalComment]): still "sending to the chain". */
+    val sending: Set<PostKey> = emptySet(),
 ) {
     /** The thread under any comment, for "more replies" navigation (that comment becomes level 1). */
     fun threadFrom(key: PostKey): CommentThread? {
@@ -136,7 +138,7 @@ class PostRepository(
 ) {
     private data class CacheKey(val key: PostKey, val observer: String)
 
-    private class LocalComment(val post: Post, val addedAt: Long)
+    private class LocalComment(val post: Post, val addedAt: Long, val onChain: Boolean = false)
 
     private val posts = MemoryCache<CacheKey, Post>(maxPosts, ttlMillis, nowMillis)
     private val discussions = MemoryCache<CacheKey, List<Post>>(maxDiscussions, ttlMillis, nowMillis)
@@ -172,8 +174,8 @@ class PostRepository(
         val cacheKey = CacheKey(rootKey, resolvedObserver)
         val fetched = (if (refresh) null else discussions.get(cacheKey))
             ?: (api.discussion(author, permlink, resolvedObserver) ?: emptyList()).also { discussions.put(cacheKey, it) }
-        val (entries, pendingKeys) = mergeLocal(rootKey, fetched)
-        Discussion.build(rootKey, entries, sort, botAuthors, onTop = pendingKeys)
+        val (entries, pendingKeys, sendingKeys) = mergeLocal(rootKey, fetched)
+        Discussion.build(rootKey, entries, sort, botAuthors, onTop = pendingKeys).let { d -> d.copy(sending = sendingKeys.filterTo(HashSet()) { it in d.pending }) }
     }
 
     /** Shows a just-broadcast comment under [root] (at the top) until the bridge returns it. */
@@ -181,6 +183,19 @@ class PostRepository(
     suspend fun addLocalComment(root: PostKey, comment: Post): Unit = guarded {
         localMutex.withLock {
             local[root] = local[root].orEmpty().filter { it.post.key != comment.key } + LocalComment(comment, nowMillis())
+        }
+    }
+
+    /**
+     * The chain holds the local comment [key] (its broadcast landed): it shows as posted ([Discussion.sending] leaves
+     * it) and stays on top until the bridge returns it.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun confirmLocalComment(key: PostKey): Unit = guarded {
+        localMutex.withLock {
+            local.keys.toList().forEach { root ->
+                local[root] = local[root].orEmpty().map { if (it.post.key == key && !it.onChain) LocalComment(it.post, it.addedAt, onChain = true) else it }
+            }
         }
     }
 
@@ -256,16 +271,18 @@ class PostRepository(
         fetched.forEach { posts.put(CacheKey(it.key, observer.orEmpty()), it) }
     }
 
-    /** Fetched entries plus still-pending local comments, and the keys of those pending ones. */
-    private suspend fun mergeLocal(root: PostKey, fetched: List<Post>): Pair<List<Post>, Set<PostKey>> {
+    /** Fetched entries plus still-pending local comments, the keys of those pending ones and of those not on chain yet. */
+    private suspend fun mergeLocal(root: PostKey, fetched: List<Post>): Triple<List<Post>, Set<PostKey>, Set<PostKey>> {
         val fetchedKeys = fetched.mapTo(HashSet()) { it.key }
-        val stillPending = localMutex.withLock {
+        val kept = localMutex.withLock {
             val now = nowMillis()
             val kept = local[root].orEmpty().filter { it.post.key !in fetchedKeys && now - it.addedAt <= localCommentTtlMillis }
             if (kept.isEmpty()) local.remove(root) else local[root] = kept
-            kept.map { it.post }
+            kept
         }
-        if (stillPending.isEmpty()) return fetched to emptySet()
+        val stillPending = kept.map { it.post }
+        val sending = kept.filter { !it.onChain }.mapTo(HashSet()) { it.post.key }
+        if (stillPending.isEmpty()) return Triple(fetched, emptySet(), emptySet())
         // Attach each pending comment to its parent's reply list so it shows in the right thread.
         val byKey = LinkedHashMap<PostKey, Post>()
         fetched.forEach { byKey[it.key] = it }
@@ -277,6 +294,6 @@ class PostRepository(
                 byKey[parentKey] = parent.copy(replies = parent.replies + comment.key, children = parent.children + 1)
             }
         }
-        return byKey.values.toList() to stillPending.mapTo(HashSet()) { it.key }
+        return Triple(byKey.values.toList(), stillPending.mapTo(HashSet()) { it.key }, sending)
     }
 }

@@ -510,7 +510,7 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
                     " " + TimeAgo.short(item.card.createdEpochMillis, nowMillis),
                     fontSize = 14.sp, fontWeight = FontWeight.Light, color = colors.darkGray,
                 )
-                if (item.isLocal) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("localComment"))
+                if (item.isSending) Text("  " + ReadingUiCopy.SENDING_TO_CHAIN, fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("localComment"))
                 Spacer(Modifier.weight(1f))
                 if (feedx != null) {
                     // RN comment menu: translate and "open thread" on comment surfaces
