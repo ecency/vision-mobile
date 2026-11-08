@@ -151,6 +151,18 @@ class WavesFlowsTest {
         waitFor("wave:alice/w1")
     }
 
+    /** Owner report 11-08: the options dots sat far from the edge (the author name's unused width was left empty). */
+    @Test
+    @Config(qualifiers = "w412dp-h900dp")
+    fun aWavesOptionsSitAtTheRightEdgeLikeTheFeedsCards() {
+        launch()
+        openWaves()
+        val row = compose.onAllNodes(hasTestTag("wave:alice/w1")).fetchSemanticsNodes().first()
+        val dots = compose.onAllNodes(hasTestTag("options") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().first()
+        val gap = with(compose.density) { (row.boundsInRoot.right - dots.boundsInRoot.right).toDp() }
+        assertTrue("dots ${gap} from the right edge", gap.value <= 8f)
+    }
+
     @Test
     fun theTabListsWavesAndAWaveOpensItsThread() {
         launch()
