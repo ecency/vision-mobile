@@ -160,7 +160,7 @@ class WavesFlowsTest {
         val row = compose.onAllNodes(hasTestTag("wave:alice/w1")).fetchSemanticsNodes().first()
         val dots = compose.onAllNodes(hasTestTag("options") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().first()
         val gap = with(compose.density) { (row.boundsInRoot.right - dots.boundsInRoot.right).toDp() }
-        assertTrue("dots ${gap} from the right edge", gap.value <= 8f)
+        assertTrue("dots ${gap} from the right edge", gap.value in 0f..8f)
     }
 
     /** Right to left: the dots sit at the left edge, the offset follows the layout direction. */
@@ -175,7 +175,7 @@ class WavesFlowsTest {
             val row = compose.onAllNodes(hasTestTag("wave:alice/w1")).fetchSemanticsNodes().first()
             val dots = compose.onAllNodes(hasTestTag("options") and hasAnyAncestor(hasTestTag("wave:alice/w1"))).fetchSemanticsNodes().first()
             val gap = with(compose.density) { (dots.boundsInRoot.left - row.boundsInRoot.left).toDp() }
-            assertTrue("dots ${gap} from the left edge", gap.value <= 8f)
+            assertTrue("dots ${gap} from the left edge", gap.value in 0f..8f)
         } finally {
             com.ecency.core.l10n.L10n.setLanguage(com.ecency.core.l10n.L10n.SOURCE)
         }
