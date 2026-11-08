@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.activeVotes
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.CommentSort
@@ -151,6 +152,31 @@ class PostModel internal constructor(
         }
     }
 
+    /** Posts whose weightless vote of the signed-in account was already looked up on this screen. */
+    private val weightlessChecked = mutableSetOf<PostKey>()
+
+    /**
+     * A vote with no payout weight (an account with little HP) is listed by the bridge with rshares 0, as a removed
+     * vote is, so it would read as no vote. In the background, once per post on this screen, `get_active_votes` tells
+     * the two apart by the vote's percent; a vote is then shown as this device's own votes are ([LocalVotes]). Not RN.
+     */
+    private fun resolveWeightlessVote(post: Post) {
+        val me = env.session.current.username ?: return
+        if (post.voteOf(me)?.rshares != 0L || env.localVotes.get(post.key) != null || !weightlessChecked.add(post.key)) return
+        scope.launch {
+            try {
+                val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: return@launch
+                if (percent == 0 || env.session.current.username != me || env.localVotes.get(post.key) != null) return@launch
+                env.localVotes.set(post.key, LocalVote(percent, pending = false))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the post shows as the bridge has it
+                ErrorReports.quiet(e, "post.weightlessVote")
+            }
+        }
+    }
+
     /** Shows [post]; renders its body only when it is new or was updated. */
     private suspend fun showPost(post: Post) {
         val previous = current.post
@@ -158,6 +184,7 @@ class PostModel internal constructor(
         setState { it.copy(post = post, card = card, notFound = false, tags = PostTags.of(post, tagTitles)) }
         lookUpTagTitles(post)
         env.localVotes.retireConfirmed(listOf(post), env.session.current.username)
+        resolveWeightlessVote(post)
         // RN usePlausibleTracker: one pageview per post screen, when its post first loads
         if (!pageviewRecorded) {
             pageviewRecorded = true

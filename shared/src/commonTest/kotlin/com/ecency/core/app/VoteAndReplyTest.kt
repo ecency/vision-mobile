@@ -74,6 +74,54 @@ class VoteAndReplyTest {
         post.close()
     }
 
+    /**
+     * Live test: a vote of an account with little HP has no payout weight, so the bridge lists it with rshares 0, the
+     * same as a removed vote. The post screen asks get_active_votes for that post alone and shows the vote it holds.
+     */
+    @Test
+    fun aVoteWithoutPayoutWeightShowsAsVotedOnThePost() = runTest {
+        for ((percent, voted) in listOf(100 to true, 0 to false)) {
+            val asked = mutableListOf<String>()
+            val zero = mapOf(TestApp.USER to 0L)
+            val app = TestApp(this, handler = { req ->
+                when (req.method) {
+                    "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER), voteRshares = zero))
+                    "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER), voteRshares = zero)}}""")
+                    "condenser_api.get_active_votes" -> {
+                        asked += req.params.toString()
+                        FakeTransport.result(req, """[{"voter":"${TestApp.USER}","weight":0,"rshares":0,"percent":$percent,"reputation":0,"time":"2026-10-01T10:00:00"}]""")
+                    }
+                    else -> TestApp.chain(req) ?: HttpResult(500, "")
+                }
+            })
+            signedIn(app)
+            val post = app.env.postModel("alice", "root")
+            post.start()
+            testScheduler.advanceUntilIdle()
+            assertEquals(voted, post.current.card?.votedByMe, "percent $percent")
+            assertEquals(1, post.current.card?.votes, "one voter either way")
+            assertEquals(1, asked.size, "asked once, for this post")
+            assertTrue("alice" in asked.single() && "root" in asked.single())
+        }
+    }
+
+    @Test
+    fun aVoteWithPayoutWeightAsksNothingMore() = runTest {
+        var asked = 0
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER)))
+                "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER))}}""")
+                "condenser_api.get_active_votes" -> { asked++; FakeTransport.result(req, "[]") }
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        signedIn(app)
+        app.env.postModel("alice", "root").start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(0, asked)
+    }
+
     @Test
     fun aRefusedVoteIsOneHandledReportAtPostVote() = runTest {
         val app = TestApp(this, handler = handler { FakeTransport.error(it, -32000, "Assert Exception: voting too often") })
