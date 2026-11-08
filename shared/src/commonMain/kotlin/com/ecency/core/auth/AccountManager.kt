@@ -546,6 +546,21 @@ class AccountManager(
         return true
     }
 
+    override suspend fun refusalUnconfirmed(username: String): Boolean {
+        val a = db { account(username) } ?: return false
+        if (a.authType?.loginMethod() != LoginMethod.KEY) return false
+        val posting = a.postingKey?.let { runCatching { com.ecency.core.hive.PrivateKey.fromWif(it).publicKey().toString() }.getOrNull() } ?: return false
+        return try {
+            chain.authorities(username)?.canSignAlone(com.ecency.core.hive.KeyRole.POSTING, posting) == true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // the keys could not be read either: as the private API's own read, nothing says the session is refused
+            com.ecency.core.app.ErrorReports.quiet(e, "auth.refusalCheck")
+            true
+        }
+    }
+
     /** The account's stored refresh token, or null (the chat bootstrap sends it, as RN does). */
     @Throws(Exception::class)
     suspend fun refreshToken(username: String): String? = db { session(username)?.refreshToken?.takeIf { it.isNotEmpty() } }

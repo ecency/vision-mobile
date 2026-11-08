@@ -99,11 +99,11 @@ class EcencyTokensTest {
         // the relays renew the same way
         current = "old"
         assertEquals(200, api.relay("GET", "newsletter/status", "alice").status)
-        // still refused after the renewal: the 401 goes back, after exactly one retry
+        // still refused after the renewal: the renewed code once more after a moment, then the 401 goes back
         current = "old"
         val always401 = FakeAuthHttp { HttpResult(401, "") }
         assertEquals(401, EcencyPrivateApi(always401, codes).post("points", "alice").status)
-        assertEquals(listOf("old", "new"), always401.sent.map(::codeOf))
+        assertEquals(listOf("old", "new", "new"), always401.sent.map(::codeOf))
         // a renewal that cannot help: nothing is sent again
         val none = object : EcencyCodeProvider { override suspend fun code(username: String) = "old" }
         val once = FakeAuthHttp { HttpResult(401, "") }

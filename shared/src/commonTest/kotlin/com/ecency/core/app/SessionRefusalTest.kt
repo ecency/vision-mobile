@@ -203,7 +203,7 @@ class SessionRefusalTest {
         rig.accepts = { false }
         val before = rig.privateCalls.size
         val e = assertNotNull(claim(app))
-        assertEquals(2, rig.privateCalls.size - before)
+        assertEquals(3, rig.privateCalls.size - before, "the renewed token once more after a moment")
         assertEquals(alice, app.env.session.current.expiredSession)
         assertEquals(AppError.SESSION_EXPIRED, AppError.from(e, "wallet.claim").message)
         assertTrue("refused again" in rig.renewReports.single().message)
@@ -251,6 +251,40 @@ class SessionRefusalTest {
         assertEquals(listOf(stored, next), rig.privateCalls.drop(before).map { it.code() })
         assertNull(app.env.session.current.expiredSession)
         assertTrue(rig.renewReports.isEmpty())
+    }
+
+    /**
+     * Sentry 11-08: notifications/unread answered 401, the renewal worked, and the new token was refused too. The
+     * private API checks a code against the account's posting keys read from a node, and answers 401 when that read
+     * fails as well, so a passing node problem read as an expired session (twice, as the app came back from the
+     * system's icon notice). The renewed token is sent once more after a moment.
+     */
+    @Test
+    fun aRenewedTokenRefusedForAMomentIsSentOnceMoreAndNoPromptComes() = runTest {
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        // the API refuses every code until its node answers again, a moment later
+        val refusedUntil = testScheduler.currentTime + 2_000
+        rig.accepts = { testScheduler.currentTime >= refusedUntil }
+        assertNull(claim(app), "the call went through once the API could check again")
+        assertNull(app.env.session.current.expiredSession)
+    }
+
+    @Test
+    fun aKeyAccountWhoseKeyIsStillOnChainIsNotAskedToSignInAgain() = runTest {
+        // refused however often it is sent, while the account's own posting key is still on chain: the API's check
+        // failed, not the session
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        val e = assertNotNull(claim(app))
+        assertNull(app.env.session.current.expiredSession, "no sign in again prompt")
+        assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(e, "wallet.claim").message)
+        assertTrue(rig.renewReports.any { "still on chain" in it.message }, rig.renewReports.map { it.message }.toString())
     }
 
     @Test
@@ -301,7 +335,7 @@ class SessionRefusalTest {
         // the stale 401 is no expired session either: the call's own failure, the new session stands
         assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(failure, "wallet.claim").message)
         testScheduler.advanceUntilIdle()
-        assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again")
+        assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again twice")
         assertNull(app.env.session.current.expiredSession, "the session the call went out with is no longer the stored one")
     }
 
