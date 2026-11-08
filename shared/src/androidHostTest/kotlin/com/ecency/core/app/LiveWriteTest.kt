@@ -423,4 +423,23 @@ class LiveWriteTest {
         }
         if (problems.isNotEmpty()) fail("Live problems:\n" + problems.joinToString("\n"))
     }
+
+    /** ECENCY_LIVE_VOTED="<author>/<permlink>": the peer's weightless vote on that post shows as voted (no writes). */
+    @Test
+    fun aWeightlessVoteShowsAsVoted() = runBlocking {
+        val target = System.getenv("ECENCY_LIVE_VOTED")
+        if (target.isNullOrBlank() || !credentials.exists()) return@runBlocking
+        val c = creds()
+        val b = env()
+        step("sign in peer") { signIn(b, c.getValue("ECENCY_TEST_PEER"), c.getValue("ECENCY_TEST_PEER_PASSWORD")) }
+        step("voted") {
+            val (author, permlink) = target.split("/")
+            val m = b.postModel(author, permlink)
+            m.start()
+            m.state.first { it.card != null }
+            val s = m.state.first { it.card?.votedByMe == true }
+            println("LIVE voted on $target: ${s.card?.votedByMe}")
+        }
+        if (problems.isNotEmpty()) fail("Live problems:\n" + problems.joinToString("\n"))
+    }
 }

@@ -448,6 +448,7 @@ ECENCY_LIVE_WRITE=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTes
 ECENCY_LIVE_LIFECYCLE="<author>/<post> <peer>/<reply>" ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.editReblog*' -i
 ECENCY_LIVE_MISC=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.draftsFollow*' -i
 ECENCY_LIVE_LOGOUT=1 ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.signOutOfOne*' -i
+ECENCY_LIVE_VOTED="<author>/<post the peer voted with little HP>" ./gradlew :shared:testAndroidHostTest --tests '*LiveWriteTest.aWeightless*' -i
 ```
 
 iOS has the same through the real UI (`EcencyAppUITests/LiveChainUITests`, skipped unless the accounts are passed as `TEST_RUNNER_LIVE_A_USER`, `TEST_RUNNER_LIVE_A_PASS`, `TEST_RUNNER_LIVE_B_USER` and `TEST_RUNNER_LIVE_B_PASS`, read from the same file at run time; each test is one step run by hand).
