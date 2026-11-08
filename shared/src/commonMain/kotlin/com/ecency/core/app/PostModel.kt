@@ -183,12 +183,13 @@ class PostModel internal constructor(
         scope.launch {
             try {
                 val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: 0
-                if (env.session.current.username != me || !isOwnWeightless(tag, env.localVotes.get(post.key))) return@launch
+                // another account, a vote made here meanwhile, or a newer load of the post decides instead
+                if (env.session.current.username != me || postLoads != ask.third || !isOwnWeightless(tag, env.localVotes.get(post.key))) return@launch
                 if (percent == 0) {
                     if (weightlessShown.remove(tag) != null) env.localVotes.remove(post.key)
                 } else {
                     weightlessShown[tag] = percent
-                    env.localVotes.set(post.key, LocalVote(percent, pending = false))
+                    env.localVotes.set(post.key, LocalVote(percent, pending = false, fromChain = true))
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -202,7 +203,7 @@ class PostModel internal constructor(
 
     /** No vote of this device for the post, or the one [resolveWeightlessVote] showed for [tag]. */
     private fun isOwnWeightless(tag: Pair<String, PostKey>, local: LocalVote?): Boolean =
-        local == null || (!local.pending && local.estimate == null && weightlessShown[tag] == local.weight)
+        local == null || (local.fromChain && weightlessShown[tag] == local.weight)
 
     /** Shows [post]; renders its body only when it is new or was updated. */
     private suspend fun showPost(post: Post) {

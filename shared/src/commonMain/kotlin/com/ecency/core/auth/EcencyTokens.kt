@@ -140,7 +140,7 @@ fun interface EcencyCodeProvider {
      * check failing, not the session. The default confirms every refusal.
      */
     @Throws(Exception::class)
-    suspend fun refusalUnconfirmed(username: String): Boolean = false
+    suspend fun refusalUnconfirmed(username: String, rejected: String): Boolean = false
 }
 
 /**
@@ -223,9 +223,11 @@ class EcencyPrivateApi(
         // the private API checks a code against the account's posting keys read from a node and answers 401 when that
         // read fails too: the renewed token is sent once more after a moment (a 401 did nothing, so it is safe)
         kotlinx.coroutines.delay(REFUSED_AGAIN_RETRY_MILLIS)
+        // signed out (or out and in again) meanwhile: nothing more goes out for the session that left
+        if (codes.sessionMark(username) != mark) return second
         val third = send(fresh)
         if (third.status != 401) return third
-        if (codes.refusalUnconfirmed(username)) {
+        if (codes.refusalUnconfirmed(username, fresh)) {
             com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed("renewed token refused again, own key still on chain"), "auth.renewToken")
             return third
         }

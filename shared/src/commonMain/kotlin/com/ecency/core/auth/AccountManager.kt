@@ -114,6 +114,7 @@ class AccountManager(
         }
         // a session signed in again starts unrefused
         refused.update { r -> if (username == null) emptyMap() else r - username }
+        unconfirmed.update { r -> if (username == null) emptyMap() else r - username }
     }
 
     /**
@@ -446,6 +447,11 @@ class AccountManager(
         if (current != rejected) return if (removalMark(username) == mark) current else null
         // this token was already given up as refused: the user was asked to sign in again, nothing is spent again
         if (refused.load()[username] == current) return null
+        // refused a moment ago while the account's own key still held: the API's check is failing, the call's 401 goes
+        // back as it is and the same token is tried again once the API answers
+        unconfirmed.load()[username]?.takeIf { (token, at) -> token == current && nowMillis() - at < UNCONFIRMED_HOLD_MILLIS }?.let {
+            throw SessionRenewalUnavailable("refusal not confirmed, held")
+        }
         val existing = db { session(username) } ?: return null
         val refresh = existing.refreshToken?.takeIf { it.isNotEmpty() }
         var why = if (refresh == null) "no refresh token" else ""
@@ -546,11 +552,11 @@ class AccountManager(
         return true
     }
 
-    override suspend fun refusalUnconfirmed(username: String): Boolean {
+    override suspend fun refusalUnconfirmed(username: String, rejected: String): Boolean {
         val a = db { account(username) } ?: return false
         if (a.authType?.loginMethod() != LoginMethod.KEY) return false
         val posting = a.postingKey?.let { runCatching { com.ecency.core.hive.PrivateKey.fromWif(it).publicKey().toString() }.getOrNull() } ?: return false
-        return try {
+        val holds = try {
             chain.authorities(username)?.canSignAlone(com.ecency.core.hive.KeyRole.POSTING, posting) == true
         } catch (e: CancellationException) {
             throw e
@@ -559,7 +565,13 @@ class AccountManager(
             com.ecency.core.app.ErrorReports.quiet(e, "auth.refusalCheck")
             true
         }
+        // remembered for a while: further refused calls with this token neither renew nor resend ([renewRejected])
+        if (holds) unconfirmed.update { it + (username to (rejected to nowMillis())) }
+        return holds
     }
+
+    /** Tokens whose refusal [refusalUnconfirmed] did not confirm, per account, with when: not renewed again for [UNCONFIRMED_HOLD_MILLIS]. */
+    private val unconfirmed = AtomicReference<Map<String, Pair<String, Long>>>(emptyMap())
 
     /** The account's stored refresh token, or null (the chat bootstrap sends it, as RN does). */
     @Throws(Exception::class)
@@ -663,4 +675,7 @@ class AccountManager(
         }
         return if (stored) session.accessToken else null
     }
+
 }
+/** How long a token whose refusal was not confirmed ([AccountManager.refusalUnconfirmed]) is not renewed again. */
+internal const val UNCONFIRMED_HOLD_MILLIS = 10 * 60_000L

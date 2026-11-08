@@ -54,8 +54,11 @@ class SessionRefusalTest {
      * Every exchange gives fresh tokens (`access-N`, `refresh-N`); a refresh token is refused with [refreshStatus]
      * (null: accepted). The private API takes what [Rig.accepts] takes.
      */
+    /** Chain answers ahead of the fixture's (a test moves the account's keys or takes the nodes down). */
+    private var chainBefore: (com.ecency.core.api.Sent) -> HttpResult? = { null }
+
     private fun TestScope.rig(refreshStatus: Int? = null): Rig {
-        val app = appWithAccounts(this)
+        val app = appWithAccounts(this, before = { chainBefore(it) })
         val reporter = RecordingReporter()
         app.env.crashReporter = reporter
         val rig = Rig(app, reporter)
@@ -285,6 +288,61 @@ class SessionRefusalTest {
         assertNull(app.env.session.current.expiredSession, "no sign in again prompt")
         assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(e, "wallet.claim").message)
         assertTrue(rig.renewReports.any { "still on chain" in it.message }, rig.renewReports.map { it.message }.toString())
+    }
+
+    @Test
+    fun aKeyAccountWhoseKeyLeftTheChainIsAskedToSignInAgain() = runTest {
+        // the account's posting key was replaced elsewhere: the refusal is real
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        chainBefore = { req ->
+            if (req.method == "condenser_api.get_accounts" && alice in req.body) {
+                com.ecency.core.api.FakeTransport.result(req, "[" + AppTestKeys.accountJson("spike-bob").replace("spike-bob", alice) + "]")
+            } else null
+        }
+        assertNotNull(claim(app))
+        assertEquals(alice, app.env.session.current.expiredSession, "asked to sign in again")
+    }
+
+    @Test
+    fun anUnconfirmedRefusalIsNotRenewedAgainOnEveryCall() = runTest {
+        // the API keeps refusing while the key is on chain: the next calls do not renew, wait and resend each time
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        assertNotNull(claim(app))
+        val sends = rig.privateCalls.size
+        val reports = rig.renewReports.size
+        assertNotNull(claim(app))
+        assertEquals(1, rig.privateCalls.size - sends, "sent once, no renewal")
+        assertEquals(reports, rig.renewReports.size, "nothing reported again")
+        assertNull(app.env.session.current.expiredSession)
+        // the API answers again: the same session works
+        rig.accepts = { true }
+        assertNull(claim(app))
+    }
+
+    @Test
+    fun noThirdSendAfterTheAccountSignedOut() = runTest {
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        val call = async { runCatching { app.env.walletApi.claimPoints(alice) } }
+        // refused, renewed, refused again: now waiting before the third send
+        testScheduler.advanceTimeBy(1_000)
+        testScheduler.runCurrent()
+        val sent = rig.privateCalls.size
+        app.env.session.logout(alice)
+        testScheduler.advanceUntilIdle()
+        call.await()
+        assertEquals(sent, rig.privateCalls.size, "nothing sent for an account that left")
     }
 
     @Test

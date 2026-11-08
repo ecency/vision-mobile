@@ -28,8 +28,11 @@ fun appWithAccounts(
     known: Set<String> = setOf("spike-alice", "spike-bob"),
     postingApps: List<String> = emptyList(),
     separateIo: Boolean = false,
+    /** Answers before the fixture's chain (a test changes an account's keys); null passes the request on. */
+    before: (com.ecency.core.api.Sent) -> HttpResult? = { null },
 ) =
     TestApp(scope, separateIo = separateIo) { req ->
+        before(req)?.let { return@TestApp it }
         if (req.method == "condenser_api.get_accounts") {
             val found = known.filter { "\"$it\"" in req.body }
             FakeTransport.result(req, found.joinToString(",", "[", "]") { AppTestKeys.accountJson(it, postingApps) })

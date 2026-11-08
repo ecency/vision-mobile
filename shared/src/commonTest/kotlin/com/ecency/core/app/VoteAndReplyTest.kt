@@ -168,6 +168,29 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun aVoteMadeOnTheDeviceIsNeverTakenForTheChainsOne() = runTest {
+        // review: a device vote without an estimate and of the same weight read as the screen's own overlay, and a
+        // lagging lookup then took it away
+        var percent = 100
+        val app = TestApp(this, handler = { req ->
+            if (req.method == "condenser_api.broadcast_transaction") FakeTransport.result(req, "null")
+            else weightless(listOf(TestApp.USER), { mapOf(TestApp.USER to percent) })(req)
+        })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+        // removed elsewhere, then voted again here at the same weight before the node caught up
+        percent = 0
+        app.env.votes.vote("alice", "root", 100)
+        testScheduler.advanceUntilIdle()
+        post.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe, "the vote made on this device stands")
+    }
+
+    @Test
     fun aWeightlessVoteShowsAgainAfterSwitchingAwayAndBack() = runTest {
         val bob = "spike-bob"
         val app = TestApp(this, handler = { req -> weightless(listOf(TestApp.USER), { mapOf(TestApp.USER to 100) })(req) })
