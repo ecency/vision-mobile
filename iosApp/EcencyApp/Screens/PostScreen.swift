@@ -545,7 +545,7 @@ struct CommentRow: View {
                         app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false), root: root)
                     }
                     .ownFooterActions(item.post, votes: card.votes, root: root)
-                if item.isLocal {
+                if item.isSending {
                     Text(L.Schedules.pending).scaledFont(11, weight: .semibold, relativeTo: .caption)
                         .foregroundStyle(theme.secondary)
                         .padding(.horizontal, 6).padding(.vertical, 2)

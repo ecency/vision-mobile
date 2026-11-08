@@ -39,6 +39,8 @@ data class Discussion(
     val sort: CommentSort,
     /** Local comments not yet returned by the bridge (shown on top). */
     val pending: Set<PostKey> = emptySet(),
+    /** Those of [pending] not seen on chain yet ([PostRepository.confirmLocalComment]): still "sending to the chain". */
+    val sending: Set<PostKey> = emptySet(),
 ) {
     /** The thread under any comment, for "more replies" navigation (that comment becomes level 1). */
     fun threadFrom(key: PostKey): CommentThread? {
@@ -119,6 +121,9 @@ data class Discussion(
  * top of the discussion (the app's renderOnTop) until the bridge returns them (hivemind indexes
  * a few seconds behind the chain), and are dropped after [localCommentTtlMillis] if it never
  * does (the broadcast most likely did not land).
+ *
+ * New posts work the same way ([addLocalPost]): one just published leads its author's own blog and posts lists
+ * ([localPosts]) and stands in for `bridge.get_post` until hivemind has it, for the same time at most.
  */
 @OptIn(ExperimentalTime::class)
 class PostRepository(
@@ -133,19 +138,23 @@ class PostRepository(
 ) {
     private data class CacheKey(val key: PostKey, val observer: String)
 
-    private class LocalComment(val post: Post, val addedAt: Long)
+    private class LocalComment(val post: Post, val addedAt: Long, val onChain: Boolean = false)
 
     private val posts = MemoryCache<CacheKey, Post>(maxPosts, ttlMillis, nowMillis)
     private val discussions = MemoryCache<CacheKey, List<Post>>(maxDiscussions, ttlMillis, nowMillis)
     private val localMutex = Mutex()
     private val local = mutableMapOf<PostKey, List<LocalComment>>()
 
+    /** Just-published posts by author, newest first. */
+    private val localPosts = mutableMapOf<String, List<LocalComment>>()
+
     /** `bridge.get_post`, served from cache unless [refresh]. Null when the post does not exist. */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun getPost(author: String, permlink: String, observer: String? = null, refresh: Boolean = false): Post? = guarded {
         val cacheKey = CacheKey(PostKey(author, permlink), observer.orEmpty())
         if (!refresh) posts.get(cacheKey)?.let { return@guarded it }
-        val post = api.post(author, permlink, observer) ?: return@guarded null
+        // hivemind lags a post published here a moment ago: its local copy stands in meanwhile
+        val post = api.post(author, permlink, observer) ?: return@guarded localPost(PostKey(author, permlink))
         posts.put(cacheKey, post)
         post
     }
@@ -165,8 +174,8 @@ class PostRepository(
         val cacheKey = CacheKey(rootKey, resolvedObserver)
         val fetched = (if (refresh) null else discussions.get(cacheKey))
             ?: (api.discussion(author, permlink, resolvedObserver) ?: emptyList()).also { discussions.put(cacheKey, it) }
-        val (entries, pendingKeys) = mergeLocal(rootKey, fetched)
-        Discussion.build(rootKey, entries, sort, botAuthors, onTop = pendingKeys)
+        val (entries, pendingKeys, sendingKeys) = mergeLocal(rootKey, fetched)
+        Discussion.build(rootKey, entries, sort, botAuthors, onTop = pendingKeys).let { d -> d.copy(sending = sendingKeys.filterTo(HashSet()) { it in d.pending }) }
     }
 
     /** Shows a just-broadcast comment under [root] (at the top) until the bridge returns it. */
@@ -175,6 +184,68 @@ class PostRepository(
         localMutex.withLock {
             local[root] = local[root].orEmpty().filter { it.post.key != comment.key } + LocalComment(comment, nowMillis())
         }
+    }
+
+    /**
+     * The chain holds the local comment [key] (its broadcast landed): it shows as posted ([Discussion.sending] leaves
+     * it) and stays on top until the bridge returns it.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun confirmLocalComment(key: PostKey): Unit = guarded {
+        localMutex.withLock {
+            local.keys.toList().forEach { root ->
+                local[root] = local[root].orEmpty().map { if (it.post.key == key && !it.onChain) LocalComment(it.post, it.addedAt, onChain = true) else it }
+            }
+        }
+    }
+
+    /**
+     * Shows a just-published post of [post]'s author on top of the author's own blog and posts lists ([localPosts])
+     * until hivemind lists it. Publishing it again (an update of the same permlink) replaces the copy.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun addLocalPost(post: Post): Unit = guarded {
+        localMutex.withLock {
+            localPosts[post.author] = listOf(LocalComment(post, nowMillis())) + localPosts[post.author].orEmpty().filter { it.post.key != post.key }
+        }
+    }
+
+    /**
+     * [author]'s local posts still waiting for hivemind, newest first, without those in [listed] (what hivemind just
+     * answered to this caller). Only age ([localCommentTtlMillis]) and a delete ([forgetLocal]) forget a copy: the
+     * author's blog and posts lists are read apart, and one answer holding the post says nothing of the other's.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun localPosts(author: String, listed: Collection<PostKey>): List<Post> = guarded {
+        localMutex.withLock {
+            val now = nowMillis()
+            val fresh = localPosts[author].orEmpty().filter { now - it.addedAt <= localCommentTtlMillis }
+            if (fresh.isEmpty()) localPosts.remove(author) else localPosts[author] = fresh
+            fresh.filter { it.post.key !in listed }.map { it.post }
+        }
+    }
+
+    /** An edit of a local post ([addLocalPost]) from this device: the copy shows the edit. Nothing when there is none. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun updateLocalPost(post: Post): Unit = guarded {
+        localMutex.withLock {
+            localPosts[post.author] = localPosts[post.author]?.map { if (it.post.key == post.key) LocalComment(post, it.addedAt) else it } ?: return@withLock
+        }
+    }
+
+    /** [key] was deleted from this device: its local copies (a post or a comment) are dropped. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun forgetLocal(key: PostKey): Unit = guarded {
+        localMutex.withLock {
+            localPosts[key.author]?.let { list -> localPosts[key.author] = list.filter { it.post.key != key } }
+            local.keys.toList().forEach { root -> local[root] = local[root].orEmpty().filter { it.post.key != key } }
+        }
+    }
+
+    /** This device's copy of a just-published post ([addLocalPost]), while it stands in for hivemind. */
+    internal suspend fun localPost(key: PostKey): Post? = localMutex.withLock {
+        val now = nowMillis()
+        localPosts[key.author]?.firstOrNull { it.post.key == key && now - it.addedAt <= localCommentTtlMillis }?.post
     }
 
     /**
@@ -187,28 +258,33 @@ class PostRepository(
         discussions.removeIf { k, entries -> k.key == key || entries.any { it.key == key } }
     }
 
-    /** Drops every cached post, discussion and local comment (they carry per-account vote state). */
+    /** Drops every cached post, discussion, local comment and local post (they carry per-account vote state). */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun clearUserData(): Unit = guarded {
         posts.clear()
         discussions.clear()
-        localMutex.withLock { local.clear() }
+        localMutex.withLock {
+            local.clear()
+            localPosts.clear()
+        }
     }
 
     internal suspend fun remember(fetched: List<Post>, observer: String?) {
         fetched.forEach { posts.put(CacheKey(it.key, observer.orEmpty()), it) }
     }
 
-    /** Fetched entries plus still-pending local comments, and the keys of those pending ones. */
-    private suspend fun mergeLocal(root: PostKey, fetched: List<Post>): Pair<List<Post>, Set<PostKey>> {
+    /** Fetched entries plus still-pending local comments, the keys of those pending ones and of those not on chain yet. */
+    private suspend fun mergeLocal(root: PostKey, fetched: List<Post>): Triple<List<Post>, Set<PostKey>, Set<PostKey>> {
         val fetchedKeys = fetched.mapTo(HashSet()) { it.key }
-        val stillPending = localMutex.withLock {
+        val kept = localMutex.withLock {
             val now = nowMillis()
             val kept = local[root].orEmpty().filter { it.post.key !in fetchedKeys && now - it.addedAt <= localCommentTtlMillis }
             if (kept.isEmpty()) local.remove(root) else local[root] = kept
-            kept.map { it.post }
+            kept
         }
-        if (stillPending.isEmpty()) return fetched to emptySet()
+        val stillPending = kept.map { it.post }
+        val sending = kept.filter { !it.onChain }.mapTo(HashSet()) { it.post.key }
+        if (stillPending.isEmpty()) return Triple(fetched, emptySet(), emptySet())
         // Attach each pending comment to its parent's reply list so it shows in the right thread.
         val byKey = LinkedHashMap<PostKey, Post>()
         fetched.forEach { byKey[it.key] = it }
@@ -220,6 +296,6 @@ class PostRepository(
                 byKey[parentKey] = parent.copy(replies = parent.replies + comment.key, children = parent.children + 1)
             }
         }
-        return byKey.values.toList() to stillPending.mapTo(HashSet()) { it.key }
+        return Triple(byKey.values.toList(), stillPending.mapTo(HashSet()) { it.key }, sending)
     }
 }

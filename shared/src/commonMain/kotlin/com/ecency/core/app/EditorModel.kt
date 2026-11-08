@@ -448,11 +448,15 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         draft.tags.firstOrNull()?.takeIf(EditorTags::isCommunity)?.let { loadCommunity(it, owner) }
     }
 
+    /** The post being edited came from this device's copy of a just-published post ([loadEdit]). */
+    private var openedFromLocal = false
+
     private suspend fun loadEdit(owner: String) {
         val p = env.api.posts.getPost(args.author, args.permlink, owner, refresh = true)
             ?: throw AppException(AppError(ErrorKind.NOT_FOUND, L.native.editor.fetchFailed, true))
         if (p.author != owner) throw AppException(AppError(ErrorKind.AUTH, L.native.editor.youCanOnlyEdit, false))
         post = p
+        openedFromLocal = env.api.posts.localPost(p.key)?.let { it.updated == p.updated } == true
         if (p.depth > 0) setState { it.copy(kind = EditorKind.EDIT_REPLY) }
         originalTitle = p.title
         originalBody = p.body
@@ -1424,14 +1428,20 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val beneficiaries = publishBeneficiaries(owner, s)
         val json = EditorMeta.stringify(postMetadata(s))
         val hash = PendingPublish.hashOf("", "", s.title, s.body, EditorMeta.publishTags(s.tags))
-        val chainHash = { c: com.ecency.core.api.ChainContent -> PendingPublish.hashOf("", "", c.title, c.body, c.tags) }
+        // the json_metadata the chain holds, when the check reads it: a post found already published keeps it for its
+        // local copy, never metadata made again here (it can differ, e.g. an image ratio not known after a restart)
+        var chainJson: String? = null
+        val chainHash = { c: com.ecency.core.api.ChainContent ->
+            chainJson = c.metadata?.toString()
+            PendingPublish.hashOf("", "", c.title, c.body, c.tags)
+        }
         val choice = conflictChoice
         conflictChoice = null
         val was = pending
         var permlink: String? = null
         val verdict = PendingCheck.verdict(env, owner, was, hash, chainHash)
         when (verdict) {
-            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s)
+            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s, chainJson ?: json)
             PendingVerdict.CONFLICT, PendingVerdict.CONFLICT_CHANGED_ELSEWHERE -> when (choice) {
                 null -> throw PublishConflict(verdict == PendingVerdict.CONFLICT_CHANGED_ELSEWHERE)
                 true -> {
@@ -1440,7 +1450,7 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                         .ifEmpty { EditorMeta.publishTags(s.tags).firstOrNull() ?: EditorMeta.DEFAULT_PARENT_PERMLINK }
                     remember(owner, was.permlink, hash)
                     broadcast(owner, EditorMeta.editOperations(owner, was.permlink, "", parent, s.title, s.body, json))
-                    return finishPost(owner, was.permlink, s)
+                    return finishPost(owner, was.permlink, s, json)
                 }
                 false -> pending = null // a new post: a new permlink below
             }
@@ -1460,10 +1470,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
                 throw PublishConflict()
             }
         }
-        return finishPost(owner, permlink, s)
+        return finishPost(owner, permlink, s, json)
     }
 
-    private fun finishPost(owner: String, permlink: String, s: EditorState): EditorDone {
+    private suspend fun finishPost(owner: String, permlink: String, s: EditorState, json: String): EditorDone {
+        // hivemind lags the chain: the author's own lists show the post from here until it lists it (live test:
+        // the profile opened after a publish showed only older posts, also after two pulls)
+        env.api.posts.addLocalPost(localPost(owner, permlink, s, json))
         env.ui.toast(L.alert.successShared)
         // RN maybeRequestReview: publishing is the moment the store rating prompt may be asked for, once
         env.maybeRequestReview()
@@ -1485,6 +1498,17 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         }
         env.emit(AppEvent.PostChanged(PostKey(owner, permlink)))
         return EditorDone.Published(owner, permlink, s.draftId)
+    }
+
+    /** A new post as the chain holds it after the publish ([json] as sent), for [PostRepository.addLocalPost]. */
+    private fun localPost(owner: String, permlink: String, s: EditorState, json: String): Post {
+        val now = ChainTime.fromEpochSeconds(env.nowMillis() / 1000)
+        // the parent permlink [EditorMeta.newPostOperations] sends
+        val category = EditorMeta.publishTags(s.tags).firstOrNull() ?: EditorMeta.DEFAULT_PARENT_PERMLINK
+        return Post(
+            author = owner, permlink = permlink, category = category, title = s.title, body = s.body,
+            metadata = PostMetadata.parse(Json.parseToJsonElement(json)), created = now, updated = now, parentAuthor = "", parentPermlink = category,
+        )
     }
 
     private suspend fun submitSchedule(owner: String, s: EditorState): EditorDone {
@@ -1516,9 +1540,20 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private suspend fun submitEdit(owner: String, s: EditorState): EditorDone {
         val p = post ?: throw AppException(AppError(ErrorKind.NOT_FOUND, L.native.editor.fetchFailed, true))
         // the patch is made against the version loaded here: if the post changed on chain since, it would revert that
-        val latest = env.api.posts.getPost(owner, p.permlink, owner, refresh = true)
-        if (latest != null && latest.updated != p.updated) {
-            throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+        if (openedFromLocal) {
+            // opened from this device's copy of a just-published post: hivemind's copy (when it arrives) carries the
+            // block's time, never this device's, so the chain itself says whether the text or metadata changed elsewhere
+            val chain = env.api.hive.content(owner, p.permlink)
+            // the whole json_metadata, tags included, as the chain keeps it (the parsed tags drop repeats)
+            val opened = com.ecency.core.api.json.SafeJson.parseOrNull(p.metadata.rawJson)
+            if (chain != null && (chain.title != p.title || chain.body != p.body || (chain.metadata != null && chain.metadata != opened))) {
+                throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+            }
+        } else {
+            val latest = env.api.posts.getPost(owner, p.permlink, owner, refresh = true)
+            if (latest != null && latest.updated != p.updated) {
+                throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+            }
         }
         val old = JsValue.parse(p.metadata.rawJson) as? JsValue.Obj
         val meta = EditorMeta.extractMetadata(
@@ -1530,7 +1565,13 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val json = EditorMeta.makeJsonMetadataForUpdate(old, meta, s.tags) ?: EditorMeta.makeJsonMetadata(meta, s.tags)
         val title = if (s.kind == EditorKind.EDIT_REPLY) "" else s.title
         val parentPermlink = p.parentPermlink.orEmpty().ifEmpty { p.category }
-        broadcast(owner, EditorMeta.editOperations(owner, p.permlink, p.parentAuthor.orEmpty(), parentPermlink, title, EditorMeta.editBody(p.body, s.body), EditorMeta.stringify(json)))
+        val jsonText = EditorMeta.stringify(json)
+        broadcast(owner, EditorMeta.editOperations(owner, p.permlink, p.parentAuthor.orEmpty(), parentPermlink, title, EditorMeta.editBody(p.body, s.body), jsonText))
+        // a post still shown from its local copy (hivemind has not listed it yet) shows the edit, not what was published
+        if (s.kind != EditorKind.EDIT_REPLY) {
+            val now = ChainTime.fromEpochSeconds(env.nowMillis() / 1000)
+            env.api.posts.updateLocalPost(p.copy(title = title, body = s.body, metadata = PostMetadata.parse(Json.parseToJsonElement(jsonText)), updated = now))
+        }
         env.emit(AppEvent.PostChanged(p.key))
         return EditorDone.Edited(p.key)
     }

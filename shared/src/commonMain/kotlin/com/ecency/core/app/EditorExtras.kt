@@ -62,10 +62,10 @@ data class QuestChip(val postProgress: Int, val streak: Int, val atRisk: Boolean
 
     val visible: Boolean get() = streak > 0 || !postedToday
 
-    /** "Daily post 0/1 · 🔥 3 day streak · Keep your streak alive". */
+    /** "Daily post 0/1 · 🔥 3 day streak · Keep your streak alive". Progress shows up to the goal ("1/1", not "3/1"); RN prints the raw count, a deliberate difference (README). */
     val text: String
         get() = listOfNotNull(
-            L.native.editorExtras.dailyPost(postProgress = postProgress.toString(), postGoal = postGoal.toString()),
+            L.native.editorExtras.dailyPost(postProgress = minOf(postProgress, postGoal).toString(), postGoal = postGoal.toString()),
             L.native.editorExtras.dayStreak(streak = streak).takeIf { streak > 0 },
             L.questChip.keepStreak.takeIf { atRisk },
         ).joinToString(" · ")

@@ -304,6 +304,42 @@ class WalletModelsTest {
         details.close()
     }
 
+    /**
+     * Live test: a transfer sent from an asset's details screen updated the balance while the history still started with
+     * the older rows. The account's own send reads the history again (chain state), quietly, once the chain had a moment;
+     * a node that does not have it yet is asked once more.
+     */
+    @Test
+    fun theAccountsOwnTransferShowsInTheOpenAssetHistory() = runTest {
+        val w = world(this)
+        fun hive(num: Long) = historyRow(num, "transfer", """{"from":"spike-voter","to":"spike-bob","amount":"$num.000 HIVE","memo":""}""")
+        var newest = listOf(101L, 102L, 103L)
+        var lagging = 1
+        w.rpc["condenser_api.get_account_history"] = { r ->
+            val start = r.params.jsonArray[1].jsonPrimitive.content.toLong()
+            val rows = if (start >= 0) emptyList() else if (newest.last() == 104L && lagging-- > 0) newest.dropLast(1) else newest
+            rows.joinToString(",", "[", "]") { hive(it) }
+        }
+        w.env.wallet.start()
+        val details = w.env.assetDetailsModel("HIVE")
+        details.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(103L, 102L, 101L), details.current.activities.map { it.trxIndex })
+
+        val m = transfer(w, AppScreen.Transfer("transfer", "HIVE", "hive"))
+        m.setRecipient("spike-bob")
+        testScheduler.advanceUntilIdle()
+        m.setAmount("1")
+        m.next()
+        m.confirm()
+        newest = listOf(101L, 102L, 103L, 104L)
+        testScheduler.advanceUntilIdle()
+        assertIs<SendPhase.Done>(m.current.phase)
+        assertEquals(listOf(104L, 103L, 102L, 101L), details.current.activities.map { it.trxIndex }, "the send is on top")
+        assertFalse(details.current.isRefreshing)
+        details.close()
+    }
+
     /** #3633: an encrypted memo in the history is read on demand with a key on the device; Repeat never re-sends the cipher text. */
     @Test
     fun anEncryptedMemoInTheHistoryDecryptsWithAKeyOnTheDevice() = runTest {

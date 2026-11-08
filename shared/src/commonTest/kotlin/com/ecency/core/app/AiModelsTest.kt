@@ -540,12 +540,13 @@ class AiModelsTest {
         w.answers += ::down
         m.submit()
         w.idle()
-        // refused, renewed once (#3611), and refused again: the session cannot be saved
+        // refused, renewed once (#3611), refused again, and once more after a moment: the session cannot be saved
+        // (a 401 is refused before anything is done or charged, so each resend is safe)
         val before = w.paid.size
-        repeat(2) { w.answers += { HttpResult(401, "Unauthorized") } }
+        repeat(3) { w.answers += { HttpResult(401, "Unauthorized") } }
         m.submit()
         w.idle()
-        assertEquals(2, w.paid.size - before, "one resend with the renewed session, never a loop")
+        assertEquals(3, w.paid.size - before, "the renewed session sent twice at most, never a loop")
         assertEquals(PaidCopy.SIGN_IN_AGAIN, m.current.alert)
         assertTrue(m.current.unresolved)
         assertNotNull(w.app.env.paidIntents.load(user, AiAssistModel.KIND, "new"))

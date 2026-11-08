@@ -282,10 +282,18 @@ class AccountManagerTest {
         assertEquals("refresh-1", rig.sentCode())
         assertEquals(TokenSession("spike-user", "access-2", "refresh-2", rig.now + 10_000), rig.store.session("spike-user"))
 
-        // A failed refresh keeps a token that is still valid, and reports an expired one.
+        // A failed refresh keeps a token that is still valid.
         rig.http = { HttpResult(500, "") }
         assertEquals("access-2", rig.manager.refreshSession("spike-user"))
         rig.now += 11_000
+        // live test on a loaded device: an expired token whose refresh and fresh signing got no answer, a server error
+        // or a 429 is not known to be refused: no "session expired", the token stays and the next refused call renews
+        for (status in listOf(0, 500, 503, 429)) {
+            rig.http = { if (status == 0) throw IllegalStateException("no connection") else HttpResult(status, "") }
+            assertEquals("access-2", rig.manager.refreshSession("spike-user"), "status $status")
+        }
+        // refused (a 4xx other than 429) on both: the session is gone, the user is asked to sign in again
+        rig.http = { HttpResult(401, """{"error":"invalid_grant"}""") }
         assertFailsWith<AuthException.SessionExpired> { rig.manager.refreshSession("spike-user") }
         assertNull(rig.manager.refreshSession("nobody-here"))
     }

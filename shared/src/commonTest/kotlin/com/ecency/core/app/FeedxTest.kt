@@ -529,6 +529,21 @@ class FeedxTest {
     }
 
     @Test
+    fun aPostAlreadyBookmarkedSaysSoAndIsNoError() = runTest {
+        // live run: the private API answers a second add of the same post with 409
+        val app = TestApp(this, handler = reads())
+        val reporter = RecordingReporter()
+        app.env.crashReporter = reporter
+        app.authBackend.rest = { r -> if (r.url.endsWith("/private-api/bookmarks-add")) HttpResult(409, "") else null }
+        signedIn(app)
+        app.env.postActions.select(PostMenuItem.BOOKMARKS, post(entry("alice", "one")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(PostActionsModel.ALREADY_BOOKMARKED, app.env.ui.current.toast?.text)
+        assertNull(app.env.postActions.current.alert)
+        assertTrue(reporter.reports.none { it.level == "error" })
+    }
+
+    @Test
     fun copyAndShareUseTheCanonicalUrl() = runTest {
         val app = TestApp(this, handler = reads())
         val p = post(entry("alice", "one"))

@@ -1,6 +1,8 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.AccountPostsSort
 import com.ecency.core.api.FakeTransport
+import com.ecency.core.api.repository.FeedSource
 import com.ecency.core.api.Sent
 import com.ecency.core.api.broadcast.ChainRefusal
 import com.ecency.core.api.ecency.ImageUploadTransport
@@ -36,6 +38,7 @@ import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -59,6 +62,15 @@ class EditorModelTest {
         var apiDown = false
         var postingAuths = """[["ecency.app",1]]"""
         var accountsDown = false
+
+        /** `bridge.get_account_posts` answers by account (hivemind's blog and posts lists); none: an empty list. */
+        val accountPosts = mutableMapOf<String, List<String>>()
+
+        /** Per account and sort ("blog", "posts"), over [accountPosts]: hivemind can answer one list before another. */
+        val accountPostsBySort = mutableMapOf<Pair<String, String>, List<String>>()
+
+        /** Holds every bridge.get_account_posts page after the first until completed. */
+        var pageGate: CompletableDeferred<Unit>? = null
 
         /** Keys ("author/permlink") the chain has but hivemind has not indexed yet. */
         val hivemindLags = mutableSetOf<String>()
@@ -110,6 +122,15 @@ class EditorModelTest {
                     req,
                     """[{"name":"$user","posting":{"weight_threshold":1,"account_auths":${postingAuthsByRead?.let { it(accountReads++) } ?: (if (accountReads++ > 0 && secondReadAdds != null) """[["$secondReadAdds",1]]""" else postingAuths)},"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"active":{"weight_threshold":1,"account_auths":[],"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"owner":{"weight_threshold":1,"account_auths":[],"key_auths":[["${GoldenVectors.PUBLIC_KEY}",1]]},"memo_key":"${GoldenVectors.PUBLIC_KEY}","json_metadata":"{\"legacy\":true}"}]""",
                 )
+                "bridge.get_account_posts" -> {
+                    val p = req.params.jsonObject
+                    // one page: a cursor asks past the end
+                    val account = p["account"]!!.jsonPrimitive.content
+                    if (p["start_permlink"] != null) pageGate?.await()
+                    val rows = if (p["start_permlink"] != null) emptyList()
+                    else accountPostsBySort[account to p["sort"]!!.jsonPrimitive.content] ?: accountPosts[account].orEmpty()
+                    FakeTransport.result(req, rows.joinToString(",", "[", "]"))
+                }
                 "condenser_api.lookup_accounts" -> FakeTransport.result(req, """["bob","bobby","carol"]""")
                 "bridge.get_community" -> FakeTransport.result(req, """{"name":"hive-125125","title":"Ecency","type_id":1,"context":{"role":"guest","subscribed":true}}""")
                 else -> TestApp.chain(req) ?: HttpResult(500, "")
@@ -189,6 +210,13 @@ class EditorModelTest {
     private fun entry(author: String, permlink: String, title: String, body: String, extra: String = "") =
         """{"author":"$author","permlink":"$permlink","category":"ecency","parent_permlink":"ecency","title":${Json.encodeToString(title)},"body":${Json.encodeToString(body)},"json_metadata":{"tags":["ecency","old"],"app":"peakd/1","format":"markdown"},"created":"2026-10-01T00:00:00","updated":"2026-10-01T00:00:00","depth":0$extra}"""
 
+    /** The just-published post as the chain holds it: [body], and the json_metadata the publish sent, [change]d. */
+    private fun chainCopy(w: World, body: String, change: (JsonObject) -> JsonObject = { it }): String {
+        val sent = Json.parseToJsonElement(field(w.ops().first(), 0, "json_metadata")).jsonObject
+        return entry(user, "my-first-post", "My first post", body)
+            .replace("\"json_metadata\":{\"tags\":[\"ecency\",\"old\"],\"app\":\"peakd/1\",\"format\":\"markdown\"}", "\"json_metadata\":${Json.encodeToString(change(sent).toString())}")
+    }
+
     private fun opNames(ops: JsonArray) = ops.map { it.jsonArray[0].jsonPrimitive.content }
 
     private fun field(ops: JsonArray, index: Int, name: String) = ops[index].jsonArray[1].jsonObject[name]!!.jsonPrimitive.content
@@ -225,6 +253,258 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         assertTrue(w.storage.values.isEmpty())
         assertTrue(w.api.none { it.first == "drafts-add" })
+    }
+
+    /**
+     * Live test: after a publish the author's profile opened on older posts only, and two pulls later still did
+     * (hivemind lags the chain). The post just published leads the author's own blog and posts lists until hivemind
+     * lists it, never twice, never on another account's lists, and not after it was deleted.
+     */
+    @Test
+    fun aNewPostLeadsTheAuthorsOwnListsUntilHivemindHasIt() = runTest {
+        val w = World(this)
+        val older = entry(user, "older-post", "Older", "older body")
+        w.accountPosts[user] = listOf(older)
+        w.accountPosts[other] = listOf(entry(other, "theirs", "Theirs", "their body"))
+        // the own profile's blog, already open (a profile kept on the stack)
+        val open = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        open.start()
+        testScheduler.advanceUntilIdle()
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "my-first-post", null), m.current.done)
+        assertEquals(listOf("my-first-post", "older-post"), open.current.items.map { it.key.permlink }, "an open list shows it at once")
+        open.close()
+
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        val posts = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.POSTS))
+        val comments = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.COMMENTS))
+        val theirs = w.app.env.feedModel(FeedSource.Account(other, AccountPostsSort.BLOG))
+        listOf(blog, posts, comments, theirs).forEach { it.start() }
+        testScheduler.advanceUntilIdle()
+        fun keys(f: FeedModel) = f.current.items.map { it.key.permlink }
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "the new post on top while hivemind lags")
+        assertEquals("My first post", blog.current.items.first().title)
+        assertEquals(listOf("my-first-post", "older-post"), keys(posts))
+        assertEquals(listOf("older-post"), keys(comments), "a post is not a comment")
+        assertEquals(listOf("theirs"), keys(theirs), "only the publishing account's lists")
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "a pull while hivemind still lags keeps it")
+
+        // hivemind has it now: its copy, once
+        w.accountPosts[user] = listOf(entry(user, "my-first-post", "My first post", "Hello world"), older)
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "never twice")
+        // a node behind the others answers without it again: the copy still stands in, for its time at most
+        w.accountPosts[user] = listOf(older)
+        blog.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), keys(blog), "a lagging answer never hides it (its time: DiscussionTest)")
+        listOf(blog, posts, comments, theirs).forEach { it.close() }
+    }
+
+    @Test
+    fun anEditOfTheLocalCopyRefusesTagsChangedElsewhere() = runTest {
+        // review: only title and body were compared, so tags changed on another client were written over
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        // same title and body, other tags (the fixture's "ecency", "old" against the published "ecency", "test")
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world")
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+    }
+
+    @Test
+    fun anEditOfTheLocalCopyRefusesOtherMetadataChangedElsewhere() = runTest {
+        // review: title, body and tags alike, but another client changed the description: never written over
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world") { JsonObject(it + ("description" to kotlinx.serialization.json.JsonPrimitive("Changed elsewhere"))) }
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+    }
+
+    @Test
+    fun anEditOfTheLocalCopyIsNotRefusedForDuplicateTagsTheChainKept() = runTest {
+        // review: a post published with a repeated tag (from a draft); the local copy's tags drop the repeat, the
+        // chain keeps it: the same post, not a change made elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        val sent = Json.parseToJsonElement(field(w.ops().first(), 0, "json_metadata")).jsonObject
+        val tags = sent["tags"]!!.jsonArray
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world")
+        // the local copy as it would be from a publish whose tags repeated one: same metadata, tags read without the repeat
+        val repeated = JsonObject(sent + ("tags" to JsonArray(tags + tags.first())))
+        w.app.env.api.posts.updateLocalPost(w.app.env.api.posts.getPost(user, "my-first-post", user, refresh = true)!!.let {
+            it.copy(metadata = com.ecency.core.api.model.PostMetadata.parse(repeated))
+        })
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world") { repeated }
+        val reopened = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        reopened.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        reopened.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(w.app.env.ui.current.toast?.takeIf { it.text == L.native.editor.thisPostWasChanged }, "the same post")
+        edit.close()
+    }
+
+    @Test
+    fun oneListThatHasTheNewPostNeverHidesItFromAnotherStillBehind() = runTest {
+        // review: the first list whose answer held the post forgot the shared copy for every other list
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val posts = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.POSTS))
+        posts.start()
+        testScheduler.advanceUntilIdle()
+        // the blog's answer has it already, the posts list's answer is still behind
+        w.accountPostsBySort[user to "blog"] = listOf(entry(user, "my-first-post", "My first post", "Hello world"), entry(user, "older-post", "Older", "older body"))
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), blog.current.items.map { it.key.permlink })
+        posts.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("my-first-post", "older-post"), posts.current.items.map { it.key.permlink }, "still behind: the local copy")
+        listOf(blog, posts).forEach { it.close() }
+    }
+
+    @Test
+    fun aPostPublishedWhileAPageLoadsShowsWhenThePageIsIn() = runTest {
+        // review: a publish while a page loads must still show the post (the publish's own update supersedes the page)
+        val w = World(this)
+        w.accountPosts[user] = (1..20).map { entry(user, "older-$it", "Older $it", "older body") }
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        w.pageGate = CompletableDeferred()
+        blog.loadMore()
+        testScheduler.runCurrent()
+        assertTrue(blog.current.isLoadingMore, "the next page is being read")
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertNotNull(m.current.done, "published while the page was being read")
+        w.pageGate!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertEquals("my-first-post", blog.current.items.first().key.permlink)
+        blog.close()
+    }
+
+    @Test
+    fun anEditOfANewPostHivemindHasNotListedShowsTheEdit() = runTest {
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        // hivemind has not indexed it: the editor opens the local copy
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        assertEquals("Hello world", edit.current.body)
+        edit.setTitle("My first post, fixed")
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done)
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        val top = blog.current.items.first()
+        assertEquals("my-first-post", top.key.permlink)
+        assertEquals("My first post, fixed", top.title, "not the text that was published first")
+        blog.close()
+    }
+
+    @Test
+    fun anEditOpenedFromTheLocalCopyIsNotRefusedWhenHivemindCatchesUp() = runTest {
+        // review: the local copy carries the device's clock as `updated`, hivemind the block time; the same post
+        // indexed while the editor is open is no change made elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        assertEquals("Hello world", edit.current.body, "opened from the local copy")
+        // hivemind indexes the same post, with the block's time
+        w.posts["$user/my-first-post"] = chainCopy(w, "Hello world")
+        w.hivemindLags -= "$user/my-first-post"
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(w.app.env.ui.current.toast, "not refused as changed elsewhere")
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done)
+    }
+
+    @Test
+    fun anEditStillRefusesAPostChangedElsewhere() = runTest {
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        // another client changed the body meanwhile
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Changed elsewhere")
+        w.hivemindLags -= "$user/my-first-post"
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+        assertNull(edit.current.done)
+    }
+
+    @Test
+    fun aDeletedNewPostDoesNotStayOnTheAuthorsLists() = runTest {
+        val w = World(this)
+        w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val local = com.ecency.core.api.model.Post(user, "my-first-post", category = "ecency", title = "My first post", body = "Hello world")
+        val confirm = assertIs<PostMenuEffect.Confirm>(w.app.env.postActions.select(PostMenuItem.DELETE, local))
+        w.app.env.postActions.confirm(confirm.item, local, confirm.user)
+        testScheduler.advanceUntilIdle()
+        val blog = w.app.env.feedModel(FeedSource.Account(user, AccountPostsSort.BLOG))
+        blog.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf("older-post"), blog.current.items.map { it.key.permlink }, "a list opened after the delete")
+        blog.close()
     }
 
     @Test
@@ -350,6 +630,28 @@ class EditorModelTest {
             FakeTransport.result(req, "{}")
         }
         return m
+    }
+
+    @Test
+    fun aRetryThatFindsThePostKeepsTheChainsMetadataForItsLocalCopy() = runTest {
+        // review: the local copy of a post a retry found on chain took metadata made again (an image ratio can be
+        // lost after a restart), so an edit of that copy read the chain's metadata as changed elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = lostAnswer(w, this)
+        val key = "$user/my-first-post"
+        val held = Json.parseToJsonElement(w.posts.getValue(key)).jsonObject
+        val chainMeta = JsonObject(Json.parseToJsonElement(held["json_metadata"]!!.jsonPrimitive.content).jsonObject + ("image_ratios" to JsonArray(listOf(kotlinx.serialization.json.JsonPrimitive(1.5)))))
+        w.posts[key] = JsonObject(held + ("json_metadata" to kotlinx.serialization.json.JsonPrimitive(chainMeta.toString()))).toString()
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "my-first-post", null), m.current.done)
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done, "the same post: no conflict")
     }
 
     @Test
@@ -1900,6 +2202,7 @@ class EditorModelTest {
         assertTrue(chip.visible)
         assertFalse(QuestChip.parse("""{"daily":[{"id":"post","progress":1}],"streak":{"current":0,"at_risk":true}}""")!!.visible, "posted today and no streak: nothing to show")
         assertEquals("Daily post 0/1", QuestChip.parse("{}")!!.text)
+        assertEquals("Daily post 1/1", QuestChip.parse("""{"daily":[{"id":"post","progress":3}],"streak":{"current":0}}""")!!.text, "more posts than the goal show the goal")
         assertNull(QuestChip.parse("[]"))
         assertTrue(RcErrors.matches("Please wait to transact, or power up HIVE."))
         assertTrue(RcErrors.matches("Account: spike has 12 RC, needs 3400 RC. Please wait"))

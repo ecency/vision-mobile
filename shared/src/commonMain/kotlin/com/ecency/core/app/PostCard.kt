@@ -118,7 +118,13 @@ data class PostCard(
  * A vote this device broadcast (or is broadcasting); overrides the server's view until it catches up.
  * [estimate] moves the shown payout (RN voteCacheUtils); null when the vote sheet's estimate was not read.
  */
-data class LocalVote(val weight: Int, val pending: Boolean, val estimate: VoteEstimate? = null) {
+data class LocalVote(
+    val weight: Int,
+    val pending: Boolean,
+    val estimate: VoteEstimate? = null,
+    /** Read from the chain by the post screen (a weightless vote, [PostModel]), not made on this device. */
+    val fromChain: Boolean = false,
+) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
 }

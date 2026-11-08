@@ -2551,6 +2551,7 @@
       "use_prompt": "Use: \"{prompt}\""
     },
     "post_actions": {
+      "already_bookmarked": "Already in your bookmarks",
       "busy": "Please wait, another action is in progress",
       "not_a_community_post": "Not a community post.",
       "parent_post_not_found": "Parent post not found",

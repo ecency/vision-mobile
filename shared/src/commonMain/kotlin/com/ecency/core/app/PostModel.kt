@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.activeVotes
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.CommentSort
@@ -23,6 +24,8 @@ data class CommentItem(
     /** Header data (author, avatar, reputation, payout, votes); summary and image are empty. */
     val card: PostCard,
     val blocks: List<Block>,
+    /** [isLocal] and not seen on chain yet: "sending to the chain". Once the chain holds it, it shows as posted. */
+    val isSending: Boolean = false,
 ) {
     val key: PostKey get() = post.key
 }
@@ -132,6 +135,7 @@ class PostModel internal constructor(
     }
 
     private fun loadPost(refresh: Boolean) {
+        postLoads++
         postJob?.cancel()
         setState { it.copy(isLoading = it.post == null, isRefreshing = refresh && it.post != null, error = null) }
         postJob = scope.launch {
@@ -151,6 +155,53 @@ class PostModel internal constructor(
         }
     }
 
+    /** The account, post and load last looked up: one lookup per load of the post, a refresh asks again. */
+    private var weightlessAsked: Triple<String, PostKey, Int>? = null
+    private var postLoads = 0
+
+    /**
+     * A vote with no payout weight (an account with little HP) is listed by the bridge with rshares 0, as a removed
+     * vote is, so it would read as no vote. In the background, once per load of the post, `get_active_votes` tells the
+     * two apart by the vote's percent; a vote is then shown as this device's own votes are ([LocalVotes]), and taken
+     * back when a later load finds it removed or weighted. A vote made on this device always wins. Not RN.
+     */
+    private fun resolveWeightlessVote(post: Post) {
+        val me = env.session.current.username ?: return
+        if (!isChainRead(env.localVotes.get(post.key))) return
+        if (post.voteOf(me)?.rshares != 0L) {
+            // no vote listed, or one with weight: the bridge's answer stands
+            if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
+            return
+        }
+        val ask = Triple(me, post.key, postLoads)
+        if (weightlessAsked == ask) return
+        weightlessAsked = ask
+        scope.launch {
+            try {
+                val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: 0
+                // another account, a vote made here meanwhile, or a newer load of the post decides instead
+                if (env.session.current.username != me || postLoads != ask.third || !isChainRead(env.localVotes.get(post.key))) return@launch
+                if (percent == 0) {
+                    if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
+                } else {
+                    env.localVotes.set(post.key, LocalVote(percent, pending = false, fromChain = true))
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the post shows as the bridge has it; the next load asks again
+                if (weightlessAsked == ask) weightlessAsked = null
+                ErrorReports.quiet(e, "post.weightlessVote")
+            }
+        }
+    }
+
+    /**
+     * No vote of this device for the post, or one read from the chain by any post screen ([LocalVote.fromChain]): it
+     * is checked again on every load, also on a screen opened later. A vote made on this device always wins.
+     */
+    private fun isChainRead(local: LocalVote?): Boolean = local == null || local.fromChain
+
     /** Shows [post]; renders its body only when it is new or was updated. */
     private suspend fun showPost(post: Post) {
         val previous = current.post
@@ -158,6 +209,7 @@ class PostModel internal constructor(
         setState { it.copy(post = post, card = card, notFound = false, tags = PostTags.of(post, tagTitles)) }
         lookUpTagTitles(post)
         env.localVotes.retireConfirmed(listOf(post), env.session.current.username)
+        resolveWeightlessVote(post)
         // RN usePlausibleTracker: one pageview per post screen, when its post first loads
         if (!pageviewRecorded) {
             pageviewRecorded = true
@@ -247,7 +299,7 @@ class PostModel internal constructor(
                 val nodes = flatten(d)
                 suspend fun item(node: Triple<Post, Int, Boolean>): CommentItem {
                     val (post, level, hidden) = node
-                    return CommentItem(post, level, hidden, post.key in localKeys, card(post, withSummary = false), env.renderBody(post))
+                    return CommentItem(post, level, hidden, post.key in localKeys, card(post, withSummary = false), env.renderBody(post), isSending = post.key in d.sending)
                 }
                 val bots = d.botThreads.map { item(Triple(it.comment, 1, false)) }
                 setState { it.copy(botComments = bots) }
@@ -263,6 +315,7 @@ class PostModel internal constructor(
                     setState { it.copy(comments = withVotesSince(items, votesAtBuild), commentsLoading = false) }
                 }
                 env.localVotes.retireConfirmed(nodes.map { it.first }, env.session.current.username)
+                if (d.sending.isNotEmpty()) watchSending(d.sending)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -270,6 +323,50 @@ class PostModel internal constructor(
             }
         }
     }
+
+    private var sendingJob: Job? = null
+
+    /**
+     * Live test: a reply said "sending to the chain" for over 75 s after it landed, until hivemind returned it. The
+     * chain itself (`database_api.find_comments`, [com.ecency.core.api.HiveApi.content]) is asked every
+     * [SENDING_CHECK_MILLIS] for the replies still sending; one it holds shows as posted at once, and its local copy
+     * stays on top until the discussion has it. Asked [SENDING_CHECKS] times at most after the last reply that started
+     * sending (a transaction expires after 60 s): a reply sent while another one is watched gets its own time.
+     */
+    private fun watchSending(sending: Set<PostKey>) {
+        if (!watchedSending.containsAll(sending) || sendingJob?.isActive != true) sendingChecksLeft = SENDING_CHECKS
+        watchedSending = watchedSending + sending
+        if (sendingJob?.isActive == true) return
+        sendingJob = scope.launch {
+            while (sendingChecksLeft > 0) {
+                sendingChecksLeft--
+                kotlinx.coroutines.delay(SENDING_CHECK_MILLIS)
+                val sending = current.comments.filter { it.isSending }.map { it.key }
+                if (sending.isEmpty()) return@launch
+                val landed = sending.filter { k ->
+                    try {
+                        env.api.hive.content(k.author, k.permlink) != null
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        ErrorReports.quiet(e, "post.replyOnChain")
+                        false
+                    }
+                }
+                if (landed.isNotEmpty()) {
+                    landed.forEach { env.api.posts.confirmLocalComment(it) }
+                    // the discussion from the cache with the local copies again, now posted; a read already running
+                    // (a pull to refresh) is never cancelled for it: it shows the confirmed copies itself, and a copy
+                    // it missed is found again on the next check
+                    if (commentsJob?.isActive != true) loadComments(refresh = false)
+                }
+            }
+        }
+    }
+
+    /** Replies [watchSending] has seen sending, and the checks left before it stops. */
+    private var watchedSending: Set<PostKey> = emptySet()
+    private var sendingChecksLeft = 0
 
     private fun flatten(d: Discussion): List<Triple<Post, Int, Boolean>> = d.threads.flatMap { thread ->
         listOf(Triple(thread.comment, 1, false)) + thread.replies.map { Triple(it.comment, it.level, it.hasHiddenReplies) }
@@ -309,6 +406,12 @@ class PostModel internal constructor(
 
         /** Comments rendered and shown before the rest of a long discussion (about two screens). */
         const val FIRST_COMMENTS = 12
+
+        /** Between chain checks of a reply still sending (a block is 3 s). */
+        const val SENDING_CHECK_MILLIS = 3_000L
+
+        /** Chain checks of a reply still sending: 75 s, past the 60 s a transaction can still land in. */
+        const val SENDING_CHECKS = 25
     }
 
     /** Post headers need no summary or card image; skip that work. */

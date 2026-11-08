@@ -137,7 +137,10 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
             }
         }
         scope.launch {
-            env.events.collect { e -> if (e is AppEvent.SessionChanged && e.username != current.account) { job?.cancel(); setState { AssetDetailsState(symbol) } } }
+            env.events.collect { e ->
+                if (e is AppEvent.SessionChanged && e.username != current.account) { job?.cancel(); setState { AssetDetailsState(symbol) } }
+                if (e is AppEvent.WalletSent && e.username == current.account) readAfterSend()
+            }
         }
         load(refresh = false)
     }
@@ -377,6 +380,26 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
         }
     }
 
+    private var sendRead: Job? = null
+
+    /**
+     * The account's own send landed ([AppEvent.WalletSent]): the history is read again quietly, so the send shows on top
+     * without a pull (live test: the balance moved, the rows did not). A node that has no new row yet is asked once more.
+     */
+    private fun readAfterSend() {
+        sendRead?.cancel()
+        sendRead = scope.launch {
+            repeat(SEND_READS) { attempt ->
+                if (attempt > 0) kotlinx.coroutines.delay(WalletModel.AFTER_BROADCAST_DELAY_MILLIS)
+                job?.join()
+                val top = current.activities.firstOrNull()?.key
+                refreshQuietly()
+                job?.join()
+                if (current.activities.firstOrNull()?.key != top) return@launch
+            }
+        }
+    }
+
     /** Where the history's paging stood, put back when a quiet refresh failed. */
     private class Cursor(val nextStart: Long?, val enginePage: Int, val raw: List<CoinActivity>, val autoAdvanced: Int)
 
@@ -453,6 +476,9 @@ class AssetDetailsModel internal constructor(private val env: AppEnvironment, va
 
         /** RN MAX_AUTO_ADVANCE_PAGES. */
         const val MAX_AUTO_ADVANCE = 5
+
+        /** Reads of the history after the account's own send: the first, and one more when a node lagged. */
+        const val SEND_READS = 2
     }
 }
 

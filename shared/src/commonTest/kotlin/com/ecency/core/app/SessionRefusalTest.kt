@@ -54,8 +54,11 @@ class SessionRefusalTest {
      * Every exchange gives fresh tokens (`access-N`, `refresh-N`); a refresh token is refused with [refreshStatus]
      * (null: accepted). The private API takes what [Rig.accepts] takes.
      */
+    /** Chain answers ahead of the fixture's (a test moves the account's keys or takes the nodes down). */
+    private var chainBefore: (com.ecency.core.api.Sent) -> HttpResult? = { null }
+
     private fun TestScope.rig(refreshStatus: Int? = null): Rig {
-        val app = appWithAccounts(this)
+        val app = appWithAccounts(this, before = { chainBefore(it) })
         val reporter = RecordingReporter()
         app.env.crashReporter = reporter
         val rig = Rig(app, reporter)
@@ -203,7 +206,7 @@ class SessionRefusalTest {
         rig.accepts = { false }
         val before = rig.privateCalls.size
         val e = assertNotNull(claim(app))
-        assertEquals(2, rig.privateCalls.size - before)
+        assertEquals(3, rig.privateCalls.size - before, "the renewed token once more after a moment")
         assertEquals(alice, app.env.session.current.expiredSession)
         assertEquals(AppError.SESSION_EXPIRED, AppError.from(e, "wallet.claim").message)
         assertTrue("refused again" in rig.renewReports.single().message)
@@ -251,6 +254,95 @@ class SessionRefusalTest {
         assertEquals(listOf(stored, next), rig.privateCalls.drop(before).map { it.code() })
         assertNull(app.env.session.current.expiredSession)
         assertTrue(rig.renewReports.isEmpty())
+    }
+
+    /**
+     * Sentry 11-08: notifications/unread answered 401, the renewal worked, and the new token was refused too. The
+     * private API checks a code against the account's posting keys read from a node, and answers 401 when that read
+     * fails as well, so a passing node problem read as an expired session (twice, as the app came back from the
+     * system's icon notice). The renewed token is sent once more after a moment.
+     */
+    @Test
+    fun aRenewedTokenRefusedForAMomentIsSentOnceMoreAndNoPromptComes() = runTest {
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        // the API refuses every code until its node answers again, a moment later
+        val refusedUntil = testScheduler.currentTime + 2_000
+        rig.accepts = { testScheduler.currentTime >= refusedUntil }
+        assertNull(claim(app), "the call went through once the API could check again")
+        assertNull(app.env.session.current.expiredSession)
+    }
+
+    @Test
+    fun aKeyAccountWhoseKeyIsStillOnChainIsNotAskedToSignInAgain() = runTest {
+        // refused however often it is sent, while the account's own posting key is still on chain: the API's check
+        // failed, not the session
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        val e = assertNotNull(claim(app))
+        assertNull(app.env.session.current.expiredSession, "no sign in again prompt")
+        assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(e, "wallet.claim").message)
+        assertTrue(rig.renewReports.any { "still on chain" in it.message }, rig.renewReports.map { it.message }.toString())
+    }
+
+    @Test
+    fun aKeyAccountWhoseKeyLeftTheChainIsAskedToSignInAgain() = runTest {
+        // the account's posting key was replaced elsewhere: the refusal is real
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        chainBefore = { req ->
+            if (req.method == "condenser_api.get_accounts" && alice in req.body) {
+                com.ecency.core.api.FakeTransport.result(req, "[" + AppTestKeys.accountJson("spike-bob").replace("spike-bob", alice) + "]")
+            } else null
+        }
+        assertNotNull(claim(app))
+        assertEquals(alice, app.env.session.current.expiredSession, "asked to sign in again")
+    }
+
+    @Test
+    fun anUnconfirmedRefusalIsNotRenewedAgainOnEveryCall() = runTest {
+        // the API keeps refusing while the key is on chain: the next calls do not renew, wait and resend each time
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithKey(alice, AppTestKeys.PASSWORD)
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        assertNotNull(claim(app))
+        val sends = rig.privateCalls.size
+        val reports = rig.renewReports.size
+        assertNotNull(claim(app))
+        assertEquals(1, rig.privateCalls.size - sends, "sent once, no renewal")
+        assertEquals(reports, rig.renewReports.size, "nothing reported again")
+        assertNull(app.env.session.current.expiredSession)
+        // the API answers again: the same session works
+        rig.accepts = { true }
+        assertNull(claim(app))
+    }
+
+    @Test
+    fun noThirdSendAfterTheAccountSignedOut() = runTest {
+        val rig = rig()
+        val app = rig.app
+        app.env.session.loginWithHiveSignerCode("hs-code-$alice")
+        testScheduler.advanceUntilIdle()
+        rig.accepts = { false }
+        val call = async { runCatching { app.env.walletApi.claimPoints(alice) } }
+        // refused, renewed, refused again: now waiting before the third send
+        testScheduler.advanceTimeBy(1_000)
+        testScheduler.runCurrent()
+        val sent = rig.privateCalls.size
+        app.env.session.logout(alice)
+        testScheduler.advanceUntilIdle()
+        call.await()
+        assertEquals(sent, rig.privateCalls.size, "nothing sent for an account that left")
     }
 
     @Test
@@ -301,7 +393,7 @@ class SessionRefusalTest {
         // the stale 401 is no expired session either: the call's own failure, the new session stands
         assertNotEquals(AppError.SESSION_EXPIRED, AppError.from(failure, "wallet.claim").message)
         testScheduler.advanceUntilIdle()
-        assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again")
+        assertEquals(listOf("access-$signedIn", "access-${signedIn + 1}", "access-${signedIn + 1}"), rig.privateCalls.map { it.code() }, "refused, renewed, refused again twice")
         assertNull(app.env.session.current.expiredSession, "the session the call went out with is no longer the stored one")
     }
 

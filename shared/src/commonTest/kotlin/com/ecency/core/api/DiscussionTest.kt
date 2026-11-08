@@ -186,4 +186,20 @@ class DiscussionTest {
         repo.getDiscussion("alice", "post")
         assertEquals(2, transport.sent.size)
     }
+
+    @Test
+    fun aLocalPostStaysForEveryListUntilItsTimeOrADelete() = runTest {
+        var now = 1_000_000L
+        val repo = PostRepository(HiveApi(clientWith(FakeTransport { com.ecency.core.api.rpc.HttpResult(500, "") })), ttlMillis = 0, localCommentTtlMillis = 60_000, nowMillis = { now })
+        val post = com.ecency.core.api.model.Post("alice", "new-post", category = "hive", title = "New", body = "Body")
+        repo.addLocalPost(post)
+        // one list's answer already holds it: that list does not repeat it, another still gets it
+        assertEquals(emptyList(), repo.localPosts("alice", listOf(post.key)))
+        assertEquals(listOf(post.key), repo.localPosts("alice", emptyList()).map { it.key })
+        now += 61_000
+        assertEquals(emptyList(), repo.localPosts("alice", emptyList()), "gone after its time")
+        repo.addLocalPost(post)
+        repo.forgetLocal(post.key)
+        assertEquals(emptyList(), repo.localPosts("alice", emptyList()), "gone with a delete")
+    }
 }

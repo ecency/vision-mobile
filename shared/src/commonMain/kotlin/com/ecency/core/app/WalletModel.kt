@@ -147,12 +147,18 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         job?.join()
     }
 
-    /** RN _delayedRefreshCoinsData: the portfolio again 3 s after a broadcast (the chain and the API need a moment). */
+    /**
+     * RN _delayedRefreshCoinsData: the portfolio again 3 s after a broadcast (the chain and the API need a moment). Open
+     * asset histories read theirs then too ([AppEvent.WalletSent]): RN left them as they were until a pull.
+     */
     fun refreshLater() {
         val user = current.account ?: return
         scope.launch {
             delay(AFTER_BROADCAST_DELAY_MILLIS)
-            if (owns(user)) load(refresh = true)
+            if (owns(user)) {
+                load(refresh = true)
+                env.emit(AppEvent.WalletSent(user))
+            }
         }
     }
 

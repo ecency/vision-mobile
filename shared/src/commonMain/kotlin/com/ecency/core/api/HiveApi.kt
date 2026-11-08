@@ -257,7 +257,7 @@ class HiveApi(val client: HiveRpcClient) {
         // json_metadata arrives as text from find_comments (as an object from some nodes)
         val meta = result["json_metadata"].let { m -> (m as? JsonPrimitive)?.takeIf { it.isString }?.let { com.ecency.core.api.json.SafeJson.parseOrNull(it.content) } ?: m }.obj()
         val tags = (meta?.get("tags") as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
-        return ChainContent(author, permlink, result.str("title").orEmpty(), result.str("body").orEmpty(), result.str("parent_author").orEmpty(), result.str("parent_permlink").orEmpty(), tags)
+        return ChainContent(author, permlink, result.str("title").orEmpty(), result.str("body").orEmpty(), result.str("parent_author").orEmpty(), result.str("parent_permlink").orEmpty(), tags, meta)
     }
 
     /**
@@ -327,4 +327,6 @@ data class ChainContent(
     val author: String, val permlink: String, val title: String, val body: String, val parentAuthor: String, val parentPermlink: String,
     /** `json_metadata.tags`, empty when the metadata has none or cannot be read. */
     val tags: List<String> = emptyList(),
+    /** The whole `json_metadata` object, null when it cannot be read. */
+    val metadata: kotlinx.serialization.json.JsonObject? = null,
 )
