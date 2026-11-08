@@ -187,7 +187,11 @@ class FeedModel internal constructor(
         scope.launch {
             env.events.collect { event ->
                 if (event is AppEvent.SessionChanged && (current.loaded || job?.isActive == true)) refresh()
-                if (event is AppEvent.PostChanged && event.key.author == localAuthor && current.loaded && job?.isActive != true) showLocal()
+                if (event is AppEvent.PostChanged && event.key.author == localAuthor && current.loaded) {
+                    // a load running now may have read the local posts before this one: once it is in, it shows too
+                    val running = job?.takeIf { it.isActive }
+                    if (running == null) showLocal() else scope.launch { running.join(); showLocal() }
+                }
                 // deleted from this device: the card goes at once (RN removes it from the list cache)
                 if (event is AppEvent.PostDeleted) deleted += event.key
                 // the pinned post, also while its fetch is still running (that answer is dropped with the key)

@@ -35,10 +35,24 @@ class SliderGestureLintTest {
     }
 
     private fun sliderCalls(src: String): List<Pair<Int, String>> =
-        Regex("""(?<![\w.])Slider\(""").findAll(src).filter { m ->
+        // any call form: plain, qualified (material3.Slider), spaced, and the range slider
+        Regex("""(?<!\w)(?:Range)?Slider\s*\(""").findAll(src).filter { m ->
             val before = src.substring(src.lastIndexOf('\n', m.range.first) + 1, m.range.first).trimStart()
             !before.startsWith("import ") && !before.startsWith("//") && !before.startsWith("*")
         }.map { src.substring(0, it.range.first).count { c -> c == '\n' } + 1 to balanced(src, it.range.last) }.toList()
+
+    @Test
+    fun theScanFindsEveryCallForm() {
+        val src = """
+            import androidx.compose.material3.Slider
+            // Slider( in a comment
+            Slider(value = 1f, onValueChange = {})
+            androidx.compose.material3.Slider (value = 1f, onValueChange = {})
+            RangeSlider(value = 0f..1f, onValueChange = {}, modifier = Modifier.edgeSwipeSafe())
+            SliderDefaults.colors()
+        """.trimIndent()
+        assertEquals(listOf(3, 4, 5), sliderCalls(src).map { it.first })
+    }
 
     @Test
     fun everySliderIsExcludedFromTheBackGesture() {

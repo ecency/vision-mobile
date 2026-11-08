@@ -78,6 +78,16 @@ class LiveWriteTest {
         return false
     }
 
+    /** Unfollows [who] from the profile screen's model and waits until the profile no longer follows. */
+    private suspend fun unfollow(env: AppEnvironment, who: String) {
+        val p = env.profileModel(who, "blog")
+        p.start()
+        p.state.first { it.loaded && it.isFollowing }
+        p.toggleFollow()
+        p.state.first { !it.isFollowing }
+        delay(4_000)
+    }
+
     private suspend fun <T> step(name: String, millis: Long = 90_000, block: suspend () -> T): T? = try {
         withTimeout(millis) { block() }.also { println("LIVE OK $name") }
     } catch (e: Throwable) {
@@ -187,6 +197,8 @@ class LiveWriteTest {
         step("points recorded") {
             delay(10_000)
             val ledger = java.net.URI("https://ecency.com/private-api/point-list").toURL().openConnection() as java.net.HttpURLConnection
+            ledger.connectTimeout = 15_000
+            ledger.readTimeout = 30_000
             ledger.requestMethod = "POST"
             ledger.doOutput = true
             ledger.setRequestProperty("Content-Type", "application/json")
@@ -362,13 +374,19 @@ class LiveWriteTest {
             val q = a.quickProfileModel(peer)
             q.start()
             val s = q.state.first { !it.isLoading && it.showActions }
-            if (s.isFollowing) return@step
-            q.follow()
-            val f = q.state.first { !it.actionRunning && it.isFollowing }
+            // a follow left by an earlier run is undone first, so every run checks a follow from scratch
+            if (s.isFollowing) unfollow(a, peer)
+            val q2 = a.quickProfileModel(peer).also { it.start() }
+            q2.state.first { !it.isLoading && it.showActions && !it.isFollowing }
+            q2.follow()
+            val f = q2.state.first { !it.actionRunning && it.isFollowing }
             delay(4_000)
             val again = a.quickProfileModel(peer).also { it.start() }.state.first { !it.isLoading && it.showActions }
             if (!again.isFollowing) note("follow", "a fresh profile sheet does not show the follow")
             if (f.followers == null) note("follow", "no follower count")
+            if (!onChain(a, author, "custom_json", "follow", peer)) note("follow", "not in $author's history")
+            // and back: the relationship is left as it was found
+            unfollow(a, peer)
         }
         step("favourite") {
             val q = a.quickProfileModel(peer)
