@@ -633,6 +633,28 @@ class EditorModelTest {
     }
 
     @Test
+    fun aRetryThatFindsThePostKeepsTheChainsMetadataForItsLocalCopy() = runTest {
+        // review: the local copy of a post a retry found on chain took metadata made again (an image ratio can be
+        // lost after a restart), so an edit of that copy read the chain's metadata as changed elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = lostAnswer(w, this)
+        val key = "$user/my-first-post"
+        val held = Json.parseToJsonElement(w.posts.getValue(key)).jsonObject
+        val chainMeta = JsonObject(Json.parseToJsonElement(held["json_metadata"]!!.jsonPrimitive.content).jsonObject + ("image_ratios" to JsonArray(listOf(kotlinx.serialization.json.JsonPrimitive(1.5)))))
+        w.posts[key] = JsonObject(held + ("json_metadata" to kotlinx.serialization.json.JsonPrimitive(chainMeta.toString()))).toString()
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Published(user, "my-first-post", null), m.current.done)
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done, "the same post: no conflict")
+    }
+
+    @Test
     fun aTypoFixAfterALostAnswerAsksAndUpdatesThePostWhenChosen() = runTest {
         val w = World(this)
         val m = lostAnswer(w, this)

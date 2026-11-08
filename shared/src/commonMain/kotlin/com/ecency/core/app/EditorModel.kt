@@ -1428,14 +1428,20 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         val beneficiaries = publishBeneficiaries(owner, s)
         val json = EditorMeta.stringify(postMetadata(s))
         val hash = PendingPublish.hashOf("", "", s.title, s.body, EditorMeta.publishTags(s.tags))
-        val chainHash = { c: com.ecency.core.api.ChainContent -> PendingPublish.hashOf("", "", c.title, c.body, c.tags) }
+        // the json_metadata the chain holds, when the check reads it: a post found already published keeps it for its
+        // local copy, never metadata made again here (it can differ, e.g. an image ratio not known after a restart)
+        var chainJson: String? = null
+        val chainHash = { c: com.ecency.core.api.ChainContent ->
+            chainJson = c.metadata?.toString()
+            PendingPublish.hashOf("", "", c.title, c.body, c.tags)
+        }
         val choice = conflictChoice
         conflictChoice = null
         val was = pending
         var permlink: String? = null
         val verdict = PendingCheck.verdict(env, owner, was, hash, chainHash)
         when (verdict) {
-            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s, json)
+            PendingVerdict.PUBLISHED -> return finishPost(owner, was!!.permlink, s, chainJson ?: json)
             PendingVerdict.CONFLICT, PendingVerdict.CONFLICT_CHANGED_ELSEWHERE -> when (choice) {
                 null -> throw PublishConflict(verdict == PendingVerdict.CONFLICT_CHANGED_ELSEWHERE)
                 true -> {
