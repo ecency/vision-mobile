@@ -596,6 +596,7 @@ class AccountManager(
             } catch (c: CancellationException) {
                 throw c
             } catch (f: Exception) {
+                com.ecency.core.app.ErrorReports.quiet(f, "auth.keySession")
                 signFailure = f
                 null
             }
