@@ -138,14 +138,13 @@ object FromNow {
 
     /**
      * A moment humanize bucket: [unit] and [count], [few] for "a few seconds", [english] moment's text. [monthDays]
-     * and [yearDays] are the lengths moment divides by; [minTwo] is moment's "at least 2" for the plural buckets;
-     * [roundDown] floors the counts instead of rounding to nearest (the post footer, so it agrees with the header's TimeAgo).
+     * and [yearDays] are the lengths moment divides by; [minTwo] is moment's "at least 2" for the plural buckets.
      */
     internal class Bucket(val unit: TimeUnit, val count: Long, val few: Boolean, val english: String)
 
-    internal fun bucket(seconds: Double, monthDays: Double = 30.4375, yearDays: Double = 365.25, minTwo: Boolean = true, roundDown: Boolean = false): Bucket {
+    internal fun bucket(seconds: Double, monthDays: Double = 30.4375, yearDays: Double = 365.25, minTwo: Boolean = true): Bucket {
         val s = seconds
-        fun jsRound(x: Double) = if (roundDown) floor(x).toLong() else floor(x + 0.5).toLong() // Math.round, as moment
+        fun jsRound(x: Double) = floor(x + 0.5).toLong() // Math.round, as moment
         val minutes = jsRound(s / 60)
         val hours = jsRound(s / 3600)
         val days = jsRound(s / 86400)

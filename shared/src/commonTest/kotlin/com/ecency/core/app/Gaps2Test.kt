@@ -142,18 +142,6 @@ class PostBadgesTest {
         val post = com.ecency.core.api.model.Post(author = "alice", permlink = "p", created = "2026-10-05T12:00:00", metadata = meta("""{"app":"peakd/2026"}"""))
         assertEquals("Posted by alice via Peakd a day ago", PostBadges.postedBy(post, 1_791_288_000_000L))
     }
-
-    @Test
-    fun postHeaderAndFooterAgreeOnTheSameAge() {
-        val post = com.ecency.core.api.model.Post(author = "alice", permlink = "p", created = "2026-10-05T12:00:00")
-        val created = 1_791_201_600_000L
-        for (secs in listOf(290L, 299L, 150L, 2_639L)) {
-            val now = created + secs * 1000
-            val minutes = secs / 60
-            assertEquals("${minutes}m", TimeAgo.short(created, now))
-            assertTrue(PostBadges.postedBy(post, now).endsWith("$minutes minutes ago"), "footer at ${secs}s: " + PostBadges.postedBy(post, now))
-        }
-    }
 }
 
 class LinkSheetTest {
