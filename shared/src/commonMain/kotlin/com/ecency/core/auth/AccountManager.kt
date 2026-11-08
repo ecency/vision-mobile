@@ -554,8 +554,9 @@ class AccountManager(
      * RN refreshSCToken, run at app start for the current account: the refresh token is exchanged and the new
      * session stored. A key account whose token expired signs a fresh code instead when it has no refresh token
      * (RN data without `sc_accounts`, which the import marks expired) or the refresh failed; otherwise the stored
-     * token is kept (RN never re-signs). When renewal fails, the old token is kept while it has not expired,
-     * else [AuthException.SessionExpired] is thrown (RN then offers to sign out). Null, with nothing stored, when
+     * token is kept (RN never re-signs). When renewal fails, the old token is kept while it has not expired, and
+     * also after it expired when the failure was no answer, a server error or a 429 (not RN: the next refused call
+     * renews); only a refusal throws [AuthException.SessionExpired] (RN then offers to sign out). Null, with nothing stored, when
      * the account was removed while the renewal ran (signed out, or signed out and in again): see [removals].
      */
     @Throws(Exception::class)
@@ -589,10 +590,24 @@ class AccountManager(
             if (removalMark(username) != mark) return null
             if (!existing.isExpired(now)) return existing.accessToken
             // expired: a key account can still sign itself a new session
-            val signed = runCatching { signKeySession(username, mark) }
-                .onFailure { if (it is CancellationException) throw it }.getOrNull()
+            var signFailure: Exception? = null
+            val signed = try {
+                signKeySession(username, mark)
+            } catch (c: CancellationException) {
+                throw c
+            } catch (f: Exception) {
+                signFailure = f
+                null
+            }
             if (removalMark(username) != mark) return null
-            return signed ?: throw AuthException.SessionExpired(e)
+            if (signed != null) return signed
+            // no answer, a server error or a 429 (here or for the fresh signing): not known to be refused, so no
+            // "session expired"; the old token stays and the next refused call renews (as [renewRejected] does)
+            if (!isRefusal(e) || (signFailure != null && !isRefusal(signFailure))) {
+                com.ecency.core.app.ErrorReports.quiet(SessionRenewalFailed("start refresh " + failure(e)), "auth.renewToken")
+                return existing.accessToken
+            }
+            throw AuthException.SessionExpired(e)
         }
         val stored = mutex.withLock {
             removalMark(username) == mark && db { (account(username) != null).also { if (it) saveSession(renewed.copy(username = username)) } }
