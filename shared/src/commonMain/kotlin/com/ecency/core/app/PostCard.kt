@@ -355,9 +355,9 @@ object PostBadges {
     /** The post screen's "posted via" line (RN postDisplayView): no app counts as Ecency, and "contains" is enough. */
     fun footerFromEcency(app: String?): Boolean = (app?.substringBefore('/')?.takeIf { it.isNotEmpty() } ?: "ecency").lowercase().contains("ecency")
 
-    /** RN post.posted_by "Posted by {username} via {appname} " (the app's first segment capitalized, else Ecency), then the age. */
+    /** RN post.posted_by "Posted by {username} via {appname} " (the app's first segment capitalized, else Ecency), then the age. Rounded down like the header's TimeAgo (RN rounded both, so they agreed; native's header floors). */
     fun postedBy(post: Post, nowMillis: Long): String {
         val app = post.metadata.app?.substringBefore('/')?.takeIf { it.isNotEmpty() }?.let { it.replaceFirstChar { c -> c.uppercaseChar() } } ?: "Ecency"
-        return L.post.postedBy(username = post.author, appname = app) + (PayoutDetails.fromNow(post.created, nowMillis) ?: "")
+        return L.post.postedBy(username = post.author, appname = app) + (PayoutDetails.fromNow(post.created, nowMillis, roundDown = true) ?: "")
     }
 }

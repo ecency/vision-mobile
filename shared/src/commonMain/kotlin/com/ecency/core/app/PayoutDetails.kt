@@ -88,11 +88,11 @@ object PayoutDetails {
      * moment.utc(time).fromNow(): "in 5 days", "2 hours ago" ([FromNow]'s wording in the app language, with this
      * screen's own month and year lengths); null for no time.
      */
-    fun fromNow(chainTime: String, nowMillis: Long): String? {
+    fun fromNow(chainTime: String, nowMillis: Long, roundDown: Boolean = false): String? {
         if (chainTime.isBlank()) return null
         val at = runCatching { ChainTime.toEpochSeconds(chainTime.take(19)) * 1000 }.getOrNull() ?: return null
         val delta = at - nowMillis
-        val bucket = FromNow.bucket(abs(delta) / 1000.0, monthDays = 30.4, yearDays = 365.0, minTwo = false)
+        val bucket = FromNow.bucket(abs(delta) / 1000.0, monthDays = 30.4, yearDays = 365.0, minTwo = false, roundDown = roundDown)
         return FromNow.phrase(bucket, future = delta >= 0)
     }
 
