@@ -154,8 +154,8 @@ class PostModel internal constructor(
         }
     }
 
-    /** Posts whose weightless vote of the signed-in account was already looked up on this screen. */
-    private val weightlessChecked = mutableSetOf<PostKey>()
+    /** Accounts and posts whose weightless vote was already looked up on this screen (another account asks again). */
+    private val weightlessChecked = mutableSetOf<Pair<String, PostKey>>()
 
     /**
      * A vote with no payout weight (an account with little HP) is listed by the bridge with rshares 0, as a removed
@@ -164,7 +164,7 @@ class PostModel internal constructor(
      */
     private fun resolveWeightlessVote(post: Post) {
         val me = env.session.current.username ?: return
-        if (post.voteOf(me)?.rshares != 0L || env.localVotes.get(post.key) != null || !weightlessChecked.add(post.key)) return
+        if (post.voteOf(me)?.rshares != 0L || env.localVotes.get(post.key) != null || !weightlessChecked.add(me to post.key)) return
         scope.launch {
             try {
                 val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: return@launch
@@ -328,8 +328,10 @@ class PostModel internal constructor(
                 }
                 if (landed.isNotEmpty()) {
                     landed.forEach { env.api.posts.confirmLocalComment(it) }
-                    // the discussion from the cache with the local copies again, now posted
-                    loadComments(refresh = false)
+                    // the discussion from the cache with the local copies again, now posted; a read already running
+                    // (a pull to refresh) is never cancelled for it: it shows the confirmed copies itself, and a copy
+                    // it missed is found again on the next check
+                    if (commentsJob?.isActive != true) loadComments(refresh = false)
                 }
             }
         }

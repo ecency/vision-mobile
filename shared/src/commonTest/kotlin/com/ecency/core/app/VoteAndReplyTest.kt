@@ -106,6 +106,34 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun anotherAccountsWeightlessVoteIsLookedUpAfterASwitch() = runTest {
+        // review: the lookup was remembered per post only, so the next account's vote on an open post was never asked
+        val bob = "spike-bob"
+        val zero = mapOf(TestApp.USER to 0L, bob to 0L)
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER, bob), voteRshares = zero))
+                "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER, bob), voteRshares = zero)}}""")
+                // the first account's vote was removed (percent 0), the second's is a weightless upvote
+                "condenser_api.get_active_votes" -> FakeTransport.result(
+                    req,
+                    """[{"voter":"${TestApp.USER}","rshares":0,"percent":0,"time":"2026-10-01T10:00:00"},{"voter":"$bob","rshares":0,"percent":100,"time":"2026-10-01T10:00:00"}]""",
+                )
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        app.signIn(bob)
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, post.current.card?.votedByMe)
+        app.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe, "the second account's vote")
+    }
+
+    @Test
     fun aVoteWithPayoutWeightAsksNothingMore() = runTest {
         var asked = 0
         val app = TestApp(this, handler = { req ->
@@ -120,6 +148,54 @@ class VoteAndReplyTest {
         app.env.postModel("alice", "root").start()
         testScheduler.advanceUntilIdle()
         assertEquals(0, asked)
+    }
+
+    @Test
+    fun theSendingWatchNeverCancelsAPullToRefresh() = runTest {
+        // review: the watch's cached reload used to cancel a user's refresh in flight, which then showed stale replies
+        var onChain: String? = null
+        var indexed = false
+        var gate: CompletableDeferred<Unit>? = null
+        val app = TestApp(this) { req ->
+            when (req.method) {
+                "condenser_api.broadcast_transaction" -> FakeTransport.result(req, "null")
+                "database_api.find_comments" -> TestApp.comments(req, onChain?.takeIf { TestApp.commentAsked(req).second == it }?.let { entry(TestApp.USER, it, parent = "alice" to "root") })
+                "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root"))
+                "bridge.get_discussion" -> {
+                    gate?.await()
+                    FakeTransport.result(
+                        req,
+                        if (indexed && onChain != null) """{"alice/root":${entry("alice", "root", replies = listOf("${TestApp.USER}/$onChain"))},"${TestApp.USER}/$onChain":${entry(TestApp.USER, onChain!!, parent = "alice" to "root")}}"""
+                        else """{"alice/root":${entry("alice", "root")}}""",
+                    )
+                }
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        }
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        val reply = app.env.replyModel(key, post.current.post!!)
+        reply.setText("Nice post")
+        reply.send()
+        testScheduler.advanceTimeBy(100)
+        testScheduler.runCurrent()
+        val sent = assertNotNull(reply.current.sent)
+        // the reply lands and hivemind has it; the user pulls to refresh, and the read is slow
+        onChain = sent.permlink
+        indexed = true
+        gate = CompletableDeferred()
+        post.refresh()
+        testScheduler.runCurrent()
+        // the watch finds the reply on chain while the refresh is still reading
+        testScheduler.advanceTimeBy(4_000)
+        testScheduler.runCurrent()
+        gate!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val served = post.current.comments.single()
+        assertEquals(sent, served.key)
+        assertFalse(served.isLocal, "the refresh's answer, not the cache")
     }
 
     @Test
