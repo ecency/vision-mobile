@@ -241,7 +241,8 @@ class PostRepository(
         }
     }
 
-    private suspend fun localPost(key: PostKey): Post? = localMutex.withLock {
+    /** This device's copy of a just-published post ([addLocalPost]), while it stands in for hivemind. */
+    internal suspend fun localPost(key: PostKey): Post? = localMutex.withLock {
         val now = nowMillis()
         localPosts[key.author]?.firstOrNull { it.post.key == key && now - it.addedAt <= localCommentTtlMillis }?.post
     }

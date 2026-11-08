@@ -317,6 +317,49 @@ class EditorModelTest {
     }
 
     @Test
+    fun anEditOpenedFromTheLocalCopyIsNotRefusedWhenHivemindCatchesUp() = runTest {
+        // review: the local copy carries the device's clock as `updated`, hivemind the block time; the same post
+        // indexed while the editor is open is no change made elsewhere
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        assertEquals("Hello world", edit.current.body, "opened from the local copy")
+        // hivemind indexes the same post, with the block's time
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Hello world")
+        w.hivemindLags -= "$user/my-first-post"
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertNull(w.app.env.ui.current.toast, "not refused as changed elsewhere")
+        assertEquals(EditorDone.Edited(com.ecency.core.api.model.PostKey(user, "my-first-post")), edit.current.done)
+    }
+
+    @Test
+    fun anEditStillRefusesAPostChangedElsewhere() = runTest {
+        val w = World(this)
+        w.hivemindLags += "$user/my-first-post"
+        val m = w.newPost(this)
+        w.fill(m, this)
+        m.submit()
+        testScheduler.advanceUntilIdle()
+        val edit = w.newPost(this, EditorArgs(EditorKind.EDIT_POST, user, "my-first-post"))
+        // another client changed the body meanwhile
+        w.posts["$user/my-first-post"] = entry(user, "my-first-post", "My first post", "Changed elsewhere")
+        w.hivemindLags -= "$user/my-first-post"
+        edit.setBody("Hello world, fixed", TextSelection(0))
+        w.app.env.ui.clear()
+        edit.submit()
+        testScheduler.advanceUntilIdle()
+        assertEquals(L.native.editor.thisPostWasChanged, w.app.env.ui.current.toast?.text)
+        assertNull(edit.current.done)
+    }
+
+    @Test
     fun aDeletedNewPostDoesNotStayOnTheAuthorsLists() = runTest {
         val w = World(this)
         w.accountPosts[user] = listOf(entry(user, "older-post", "Older", "older body"))

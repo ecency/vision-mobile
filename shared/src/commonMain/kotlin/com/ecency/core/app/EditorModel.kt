@@ -448,11 +448,15 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
         draft.tags.firstOrNull()?.takeIf(EditorTags::isCommunity)?.let { loadCommunity(it, owner) }
     }
 
+    /** The post being edited came from this device's copy of a just-published post ([loadEdit]). */
+    private var openedFromLocal = false
+
     private suspend fun loadEdit(owner: String) {
         val p = env.api.posts.getPost(args.author, args.permlink, owner, refresh = true)
             ?: throw AppException(AppError(ErrorKind.NOT_FOUND, L.native.editor.fetchFailed, true))
         if (p.author != owner) throw AppException(AppError(ErrorKind.AUTH, L.native.editor.youCanOnlyEdit, false))
         post = p
+        openedFromLocal = env.api.posts.localPost(p.key)?.let { it.updated == p.updated } == true
         if (p.depth > 0) setState { it.copy(kind = EditorKind.EDIT_REPLY) }
         originalTitle = p.title
         originalBody = p.body
@@ -1530,9 +1534,18 @@ class EditorModel internal constructor(private val env: AppEnvironment, val args
     private suspend fun submitEdit(owner: String, s: EditorState): EditorDone {
         val p = post ?: throw AppException(AppError(ErrorKind.NOT_FOUND, L.native.editor.fetchFailed, true))
         // the patch is made against the version loaded here: if the post changed on chain since, it would revert that
-        val latest = env.api.posts.getPost(owner, p.permlink, owner, refresh = true)
-        if (latest != null && latest.updated != p.updated) {
-            throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+        if (openedFromLocal) {
+            // opened from this device's copy of a just-published post: hivemind's copy (when it arrives) carries the
+            // block's time, never this device's, so the chain itself says whether the text changed elsewhere
+            val chain = env.api.hive.content(owner, p.permlink)
+            if (chain != null && (chain.title != p.title || chain.body != p.body)) {
+                throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+            }
+        } else {
+            val latest = env.api.posts.getPost(owner, p.permlink, owner, refresh = true)
+            if (latest != null && latest.updated != p.updated) {
+                throw AppException(AppError(ErrorKind.INVALID_INPUT, L.native.editor.thisPostWasChanged, false))
+            }
         }
         val old = JsValue.parse(p.metadata.rawJson) as? JsValue.Obj
         val meta = EditorMeta.extractMetadata(
