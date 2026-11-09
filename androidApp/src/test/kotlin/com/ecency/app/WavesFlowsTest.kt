@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -538,6 +539,37 @@ class WavesFlowsTest {
         waitFor("wave:alice/w1")
         compose.await("playing.isEmpty()") { playing.isEmpty() }
         assertEquals(1, wavesRequests.count { "api/embed" in it })
+    }
+
+    @Test
+    fun theUploadedImagesButtonIsCalledGallery() {
+        // RN UploadsGalleryModal; testers looked for a gallery on the composer and did not take "Uploads" for it
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        assertTrue(compose.onAllNodes(hasTestTag("waveUploads") and hasText("Gallery")).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun anEmptyOrFailedGallerySaysSo() {
+        // a tester saw "no gallery": an empty grid under the title looked like nothing was there
+        var answer = HttpResult(502, "")
+        node.auth.rest = { r -> if ("/private-api/images?" in r.url) answer else null }
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveUploads")
+        waitFor("uploadsSheet")
+        waitFor("retry")
+        assertFalse(exists("galleryEmpty"))
+        answer = HttpResult(200, """{"data":[],"pagination":{"total":0,"limit":20,"offset":0,"has_next":false}}""")
+        click("retry")
+        waitFor("galleryEmpty")
+        assertTrue(compose.onAllNodes(hasText("No Existing Uploads..."), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test

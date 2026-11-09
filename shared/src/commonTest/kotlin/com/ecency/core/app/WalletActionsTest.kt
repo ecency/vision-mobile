@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.api.wallet.BookOrder
 import com.ecency.core.auth.AuthLink
@@ -413,6 +414,25 @@ class WalletActionsTest {
             """["transfer",{"from":"spike-voter","to":"spike-author","amount":"1.000 HIVE","memo":"Tip for @spike-author/$permlink"}]""",
             tip("HIVE").toString(),
         )
+    }
+
+    /** A tester could not tip and saw only "Failed to send tip": the toast now says why the chain refused it. */
+    @Test
+    fun aRefusedTipSaysWhy() = runTest {
+        val w = world(this)
+        w.broadcastAnswer = { FakeTransport.error(it, -32000, "Assert Exception:_db.get_balance( from_account, o.amount.symbol ) >= o.amount: Account does not have sufficient funds for transfer.") }
+        val m = w.env.tipModel("spike-author", "a-post")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        m.setCurrency("HIVE")
+        m.setAmount("1")
+        m.send()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertIs<SendPhase.Failed>(m.current.phase)
+        val toast = w.app.env.ui.state.value.toast?.text.orEmpty()
+        assertTrue(toast.startsWith(TipCopy.ERROR), toast)
+        assertTrue("not enough funds" in toast, toast)
     }
 
     @Test

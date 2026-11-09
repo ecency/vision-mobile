@@ -1834,6 +1834,37 @@ class EditorModelTest {
         assertEquals("[1.5]", Json.parseToJsonElement(field(w.ops().single(), 0, "json_metadata")).jsonObject["image_ratios"].toString())
     }
 
+    /** A tester found "no gallery" on comments: a gallery that failed to load or has nothing in it now says so. */
+    @Test
+    fun theGallerySaysWhenItFailedOrIsEmpty() = runTest {
+        val w = World(this)
+        var answer = HttpResult(502, "")
+        w.app.authBackend.rest = { r -> if ("/private-api/images" in r.url) answer else null }
+        val gallery = w.app.env.uploadsModel(w.newPost(this))
+        gallery.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(gallery.current.showsError, "a failed first page shows its error")
+        assertFalse(gallery.current.showsEmpty)
+        assertFalse(gallery.current.showsLoadMore, "the error's retry, not a load more under nothing")
+        answer = HttpResult(200, """{"data":[],"pagination":{"total":0,"limit":20,"offset":0,"has_next":false}}""")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(gallery.current.showsError)
+        assertTrue(gallery.current.showsEmpty)
+        assertEquals("No Existing Uploads...", UploadsCopy.NO_IMAGES)
+        // a refresh that fails over images already shown keeps them and still says so, with its retry
+        answer = HttpResult(200, """{"data":[{"_id":"i1","url":"https://images.example/one.jpg","created":"2026-10-01"}],"pagination":{"total":1,"limit":20,"offset":0,"has_next":false}}""")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, gallery.current.images.size)
+        answer = HttpResult(502, "")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, gallery.current.images.size, "the images stay")
+        assertTrue(gallery.current.showsError, "the failed refresh shows its error over the images")
+        assertFalse(gallery.current.showsLoadMore)
+    }
+
     @Test
     fun addingToTheGalleryUploadsWithoutTouchingTheBody() = runTest {
         val w = World(this)

@@ -49,7 +49,7 @@ object WaveComposeCopy {
     val AI_ASSIST: String get() = L.aiAssist.title
 
     /** The uploads gallery button's label (RN quick post's UploadsGalleryModal). */
-    val UPLOADS: String get() = L.native.waveCompose.uploads
+    val GALLERY: String get() = L.sideMenu.gallery
 
     /** Its spoken name and the sheet's heading (RN editor.uploaded_images). */
     val UPLOADED_IMAGES: String get() = L.editor.uploadedImages

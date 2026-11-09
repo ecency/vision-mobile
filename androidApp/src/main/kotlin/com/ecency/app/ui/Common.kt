@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -299,3 +301,30 @@ class Once {
 
 @Composable
 fun rememberOnce(vararg keys: Any?): Once = remember(*keys) { Once() }
+
+/**
+ * Fades a sideways scrolling strip out at each edge it can still scroll toward (put it before `horizontalScroll`
+ * with the same [state]). Right to left, the strip starts on the right, so the fades swap sides.
+ */
+fun Modifier.horizontalEdgeFade(state: androidx.compose.foundation.ScrollState, width: Dp = 24.dp): Modifier =
+    graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val fade = width.toPx().coerceAtMost(size.width / 2)
+            val rtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
+            val fadeLeft = if (rtl) state.canScrollForward else state.canScrollBackward
+            val fadeRight = if (rtl) state.canScrollBackward else state.canScrollForward
+            if (fadeLeft) {
+                drawRect(
+                    androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Black), startX = 0f, endX = fade),
+                    size = androidx.compose.ui.geometry.Size(fade, size.height), blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                )
+            }
+            if (fadeRight) {
+                drawRect(
+                    androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Black, Color.Transparent), startX = size.width - fade, endX = size.width),
+                    topLeft = androidx.compose.ui.geometry.Offset(size.width - fade, 0f),
+                    size = androidx.compose.ui.geometry.Size(fade, size.height), blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                )
+            }
+        }

@@ -1458,6 +1458,12 @@ struct UploadsSheet: View {
                         if state.uploading > 0 { ProgressView() }
                         if !state.selected.isEmpty { Button(EditorUiCopy.shared.deleteCount(count: Int32(state.selected.count)), role: .destructive) { model.deleteSelected() }.accessibilityIdentifier("delete-images") }
                     }
+                    // a failed or empty gallery says so (an empty grid read as "no gallery")
+                    if state.showsError, let error = state.error { InlineErrorRow(error: error) { model.refresh() } }
+                    if state.showsEmpty {
+                        Text(UploadsCopy.shared.NO_IMAGES).foregroundStyle(theme.secondary).frame(maxWidth: .infinity).padding(.vertical, 24)
+                            .accessibilityIdentifier("gallery-empty")
+                    }
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 6) {
                         ForEach(state.images, id: \.url) { image in
                             let selected = state.selected.contains(image.id)
@@ -1473,7 +1479,7 @@ struct UploadsSheet: View {
                                 .accessibilityIdentifier("gallery-image-\(image.id)")
                         }
                     }
-                    if !state.endReached, state.loaded { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() } }
+                    if state.showsLoadMore { Button(UiCopy.shared.LOAD_MORE) { model.loadMore() } }
                     if !state.loaded { ProgressView().frame(maxWidth: .infinity) }
                 }
                 .padding(16)

@@ -272,6 +272,110 @@ final class ChatUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(send.maxY, top - 16, "right on top of the keyboard: send \(send), keyboard top \(top)")
     }
 
+    func testWithAReplyQuoteTheFieldAndSendStayAboveTheKeyboard() throws {
+        // the tester's screenshot: replying to a long message, the quote showed above the keyboard and the field under
+        // it, so the typed words were hidden until a few new lines grew the field into view
+        // opened from the Chats tab, as the tester did (the tab bar hides under the conversation)
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "3"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        // the original by its author and body: the reply under it quotes the same text in its label
+        let msg = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "spike-carol, A long synthetic message")).firstMatch
+        XCTAssertTrue(msg.waitForExistence(timeout: 20))
+        msg.press(forDuration: 0.8)
+        XCTAssertTrue(app.buttons["chat-option-REPLY"].waitForExistence(timeout: 5))
+        app.buttons["chat-option-REPLY"].tap()
+        XCTAssertTrue(app.buttons["chat-cancel-reply"].waitForExistence(timeout: 5))
+        let composer = element(app, "chat-composer")
+        composer.focus()
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        composer.typeText("hello")
+        sleep(1) // the keyboard settles
+        let bar = app.otherElements["SystemInputAssistantView"]
+        let top = bar.exists && bar.frame.height > 0 ? min(bar.frame.minY, keyboard.frame.minY) : keyboard.frame.minY
+        XCTAssertLessThanOrEqual(composer.frame.maxY, top + 1, "the field above the keyboard: field \(composer.frame), keyboard top \(top)")
+        XCTAssertLessThanOrEqual(app.buttons["chat-send"].frame.maxY, top + 1, "send above the keyboard: \(app.buttons["chat-send"].frame), keyboard top \(top)")
+    }
+
+    func testReplyingWithTheKeyboardAlreadyUpKeepsTheFieldAboveIt() throws {
+        // the field focused first, then Reply from the message menu: the keyboard comes back as the menu closes
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "3"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let composer = element(app, "chat-composer")
+        XCTAssertTrue(composer.waitForExistence(timeout: 20))
+        composer.focus()
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        let msg = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "spike-carol, A long synthetic message")).firstMatch
+        // the keyboard took the lower half: scroll back up to the long message, as a person would
+        let list = element(app, "chat-messages")
+        for _ in 0..<6 where !(msg.exists && msg.isHittable) { list.swipeDown() }
+        XCTAssertTrue(msg.waitForExistence(timeout: 5))
+        msg.press(forDuration: 0.8)
+        XCTAssertTrue(app.buttons["chat-option-REPLY"].waitForExistence(timeout: 5))
+        app.buttons["chat-option-REPLY"].tap()
+        XCTAssertTrue(app.buttons["chat-cancel-reply"].waitForExistence(timeout: 5))
+        composer.focus()
+        composer.typeText("hello")
+        sleep(1) // the keyboard settles
+        let bar = app.otherElements["SystemInputAssistantView"]
+        let top = bar.exists && bar.frame.height > 0 ? min(bar.frame.minY, keyboard.frame.minY) : keyboard.frame.minY
+        XCTAssertLessThanOrEqual(composer.frame.maxY, top + 1, "the field above the keyboard: field \(composer.frame), keyboard top \(top)")
+        XCTAssertLessThanOrEqual(app.buttons["chat-send"].frame.maxY, top + 1, "send above the keyboard: \(app.buttons["chat-send"].frame), keyboard top \(top)")
+    }
+
+    func testTheFieldFollowsTheKeyboardWhenItChangesHeight() throws {
+        // a globe or emoji switch while typing changes the keyboard's height without hiding it (founder's report:
+        // the typed words sat under the keyboard after replying, until new lines grew the field into view)
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "3"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let msg = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "spike-carol, A long synthetic message")).firstMatch
+        XCTAssertTrue(msg.waitForExistence(timeout: 20))
+        msg.press(forDuration: 0.8)
+        XCTAssertTrue(app.buttons["chat-option-REPLY"].waitForExistence(timeout: 5))
+        app.buttons["chat-option-REPLY"].tap()
+        let composer = element(app, "chat-composer")
+        composer.focus()
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        composer.typeText("hello")
+        func assertAbove(_ when: String) {
+            sleep(1) // the keyboard settles
+            let bar = app.otherElements["SystemInputAssistantView"]
+            let top = bar.exists && bar.frame.height > 0 ? min(bar.frame.minY, keyboard.frame.minY) : keyboard.frame.minY
+            XCTAssertLessThanOrEqual(composer.frame.maxY, top + 1, "\(when): field \(composer.frame), keyboard \(keyboard.frame), bar \(bar.frame)")
+        }
+        assertAbove("letters")
+        // on Face ID phones the globe and emoji keys sit in the strip under the keys, outside the keyboard element
+        // the emoji keyboard: taller than the letters (a globe key may land on a keyboard of the same height)
+        let emojiKey = app.descendants(matching: .any).matching(NSPredicate(format: "label ==[c] %@", "Emoji")).firstMatch
+        try XCTSkipUnless(emojiKey.exists, "no emoji key: \(app.keys.allElementsBoundByIndex.prefix(40).map(\.label))")
+        let before = keyboard.frame
+        emojiKey.tap()
+        let changed = NSPredicate { _, _ in keyboard.frame.height != before.height }
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: changed, object: nil)], timeout: 5), .completed, "the keyboard changed height: \(before) -> \(keyboard.frame)")
+        assertAbove("on the emoji keyboard (letters were \(before))")
+        let back = app.descendants(matching: .any).matching(NSPredicate(format: "label ==[c] %@", "ABC")).firstMatch
+        if back.exists {
+            back.tap()
+            let restored = NSPredicate { _, _ in keyboard.frame.height == before.height }
+            XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: restored, object: nil)], timeout: 5), .completed, "back to the letters: \(keyboard.frame)")
+            assertAbove("back on the letters")
+        }
+    }
+
     func testAGroupOpensByIdWithItsName() {
         let app = launch(["-openScreen", "chat:ch-group:G"])
         XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 20))
