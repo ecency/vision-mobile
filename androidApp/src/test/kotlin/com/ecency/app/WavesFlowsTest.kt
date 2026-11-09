@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -538,6 +539,17 @@ class WavesFlowsTest {
         waitFor("wave:alice/w1")
         compose.await("playing.isEmpty()") { playing.isEmpty() }
         assertEquals(1, wavesRequests.count { "api/embed" in it })
+    }
+
+    @Test
+    fun theUploadedImagesButtonIsCalledGallery() {
+        // RN UploadsGalleryModal; testers looked for a gallery on the composer and did not take "Uploads" for it
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        assertTrue(compose.onAllNodes(hasTestTag("waveUploads") and hasText("Gallery")).fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test

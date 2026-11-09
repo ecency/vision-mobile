@@ -292,8 +292,10 @@ fun WavesTabScreen(env: AppEnvironment, entry: StackEntry, username: String?, no
 private fun WavesTabBar(tabs: WavesTabsState, onTab: (String) -> Unit, onAdd: () -> Unit) {
     val colors = LocalEcencyColors.current
     Row(Modifier.fillMaxWidth().background(colors.grayBackground).padding(vertical = 8.dp).testTag("filterStrip"), verticalAlignment = Alignment.CenterVertically) {
+        // the strip fades where it scrolls on, so a pill cut off at the "+" reads as more to scroll to
+        val scroll = rememberScrollState()
         Row(
-            Modifier.weight(1f).horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
+            Modifier.weight(1f).horizontalEdgeFade(scroll).horizontalScroll(scroll).padding(horizontal = 8.dp),
             horizontalArrangement = if (tabs.tabs.size <= 2) Arrangement.SpaceEvenly else Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -1025,8 +1027,7 @@ internal fun QuickComposeTools(
         // RN UploadsGalleryModal: the account's uploaded images ([QuickUploadsSheet])
         if (onUploads != null) {
             QuickTool(
-                com.ecency.core.app.WaveComposeCopy.UPLOADS, "${tagPrefix}Uploads", enabled = !sending && !attaching,
-                description = com.ecency.core.app.WaveComposeCopy.UPLOADED_IMAGES, onClick = onUploads,
+                com.ecency.core.app.WaveComposeCopy.GALLERY, "${tagPrefix}Uploads", enabled = !sending && !attaching, onClick = onUploads,
             )
         }
         middle()

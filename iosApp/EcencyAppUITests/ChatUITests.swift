@@ -272,6 +272,34 @@ final class ChatUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(send.maxY, top - 16, "right on top of the keyboard: send \(send), keyboard top \(top)")
     }
 
+    func testWithAReplyQuoteTheFieldAndSendStayAboveTheKeyboard() throws {
+        // the tester's screenshot: replying to a long message, the quote showed above the keyboard and the field under
+        // it, so the typed words were hidden until a few new lines grew the field into view
+        // opened from the Chats tab, as the tester did (the tab bar hides under the conversation)
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "3"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let msg = message(app, containing: "A long synthetic message")
+        XCTAssertTrue(msg.waitForExistence(timeout: 20))
+        msg.press(forDuration: 0.8)
+        XCTAssertTrue(app.buttons["chat-option-REPLY"].waitForExistence(timeout: 5))
+        app.buttons["chat-option-REPLY"].tap()
+        XCTAssertTrue(app.buttons["chat-cancel-reply"].waitForExistence(timeout: 5))
+        let composer = element(app, "chat-composer")
+        if !(composer.value(forKey: "hasKeyboardFocus") as? Bool ?? false) { composer.tap() }
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        composer.typeText("hello")
+        sleep(1) // the keyboard settles
+        let bar = app.otherElements["SystemInputAssistantView"]
+        let top = bar.exists && bar.frame.height > 0 ? min(bar.frame.minY, keyboard.frame.minY) : keyboard.frame.minY
+        XCTAssertLessThanOrEqual(composer.frame.maxY, top + 1, "the field above the keyboard: field \(composer.frame), keyboard top \(top)")
+        XCTAssertLessThanOrEqual(app.buttons["chat-send"].frame.maxY, top + 1, "send above the keyboard: \(app.buttons["chat-send"].frame), keyboard top \(top)")
+    }
+
     func testAGroupOpensByIdWithItsName() {
         let app = launch(["-openScreen", "chat:ch-group:G"])
         XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 20))
