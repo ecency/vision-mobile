@@ -359,13 +359,21 @@ final class ChatUITests: XCTestCase {
         }
         assertAbove("letters")
         // on Face ID phones the globe and emoji keys sit in the strip under the keys, outside the keyboard element
-        let switchKey = app.descendants(matching: .any).matching(NSPredicate(format: "label IN %@", ["Emoji", "Next keyboard", "emoji"])).firstMatch
-        try XCTSkipUnless(switchKey.exists, "no emoji or globe key: \(app.keys.allElementsBoundByIndex.prefix(40).map(\.label))")
+        // the emoji keyboard: taller than the letters (a globe key may land on a keyboard of the same height)
+        let emojiKey = app.descendants(matching: .any).matching(NSPredicate(format: "label ==[c] %@", "Emoji")).firstMatch
+        try XCTSkipUnless(emojiKey.exists, "no emoji key: \(app.keys.allElementsBoundByIndex.prefix(40).map(\.label))")
         let before = keyboard.frame
-        switchKey.tap()
-        assertAbove("after switching (keyboard was \(before))")
-        let back = app.descendants(matching: .any).matching(NSPredicate(format: "label IN %@", ["ABC", "Next keyboard"])).firstMatch
-        if back.exists { back.tap(); assertAbove("after switching back") }
+        emojiKey.tap()
+        let changed = NSPredicate { _, _ in keyboard.frame.height != before.height }
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: changed, object: nil)], timeout: 5), .completed, "the keyboard changed height: \(before) -> \(keyboard.frame)")
+        assertAbove("on the emoji keyboard (letters were \(before))")
+        let back = app.descendants(matching: .any).matching(NSPredicate(format: "label ==[c] %@", "ABC")).firstMatch
+        if back.exists {
+            back.tap()
+            let restored = NSPredicate { _, _ in keyboard.frame.height == before.height }
+            XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: restored, object: nil)], timeout: 5), .completed, "back to the letters: \(keyboard.frame)")
+            assertAbove("back on the letters")
+        }
     }
 
     func testAGroupOpensByIdWithItsName() {
