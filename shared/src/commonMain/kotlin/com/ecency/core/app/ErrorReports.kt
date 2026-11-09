@@ -18,8 +18,8 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * - Never reported: a cancellation ([CancellationException], [ErrorKind.CANCELLED]) and RN's benign errors
  *   ([CrashScrubber.ignores]).
- * - Level "warning" with tag `expected=true` for what is not a bug of the app: no connection, the user's own sign-in
- *   mistakes, the chain's per-user refusals (cooldown, Resource Credits, a paid-out post, a vote already cast) and the
+ * - Level "warning" with tag `expected=true` for what is not a bug of the app: no connection, a Keychain closed while
+ *   the phone is locked, the user's own sign-in mistakes, the chain's per-user refusals (cooldown, Resource Credits, a paid-out post, a vote already cast) and the
  *   app's own refusals (an [AppException] without a cause). Everything else is "error".
  * - Grouping by an explicit fingerprint (never the stack of this one site, which would make one issue of every
  *   failure): `handled`, where, kind, exception type and the message with its numbers, hex, quoted names and @names
@@ -142,9 +142,18 @@ object ErrorReports {
         ChainRefusal.of(e)?.isUsersOwn == true -> true
         e is AppException && e.cause == null -> true
         isSessionRefused(root) -> true
+        isDeviceLocked(root) -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
+
+    /**
+     * The store is closed until the phone is unlocked (iOS starts the app early, a prewarmed launch): it opens again on
+     * the unlock and the session and the lock start again (README "Secure storage"). Only the store's own refusal: a
+     * Keychain call refused with the same status is still an error.
+     */
+    private fun isDeviceLocked(root: Throwable): Boolean =
+        (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true

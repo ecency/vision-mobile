@@ -90,10 +90,15 @@ sealed class SecureStoreException(message: String, cause: Throwable? = null) : E
 
     /**
      * The platform refused the operation (Keychain status, Keystore provider error, device locked).
-     * Possibly transient: retry later, never wipe because of it.
+     * Possibly transient: retry later, never wipe because of it. [untilUnlock]: the store itself refused because the
+     * launch check waits for the first unlock (iOS, a launch before it); it opens again on the unlock. Its own text,
+     * so a crash report of it never groups with a refusal of the platform.
      */
-    class Unavailable(val status: Int, cause: Throwable? = null) :
-        SecureStoreException("secure storage unavailable (status $status)", cause)
+    class Unavailable(val status: Int, cause: Throwable? = null, val untilUnlock: Boolean = false) :
+        SecureStoreException(
+            if (untilUnlock) "secure storage closed until the device is unlocked (status $status)" else "secure storage unavailable (status $status)",
+            cause,
+        )
 
     /** A caller error: invalid entry name or username, unknown account. Nothing was changed. */
     class InvalidArgument(message: String) : SecureStoreException(message)
