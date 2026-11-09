@@ -1233,6 +1233,11 @@ internal fun UploadsSheet(
                 if (state.selected.isNotEmpty()) TextButton(onClick = model::deleteSelected, modifier = Modifier.testTag("deleteImages")) { Text(EditorUiCopy.deleteCount(state.selected.size), color = colors.redText) }
             }
             if (!state.loaded) LoadingBlock(Modifier.padding(vertical = 24.dp))
+            // a failed or empty gallery says so (an empty grid read as "no gallery")
+            state.error?.takeIf { state.showsError }?.let { ErrorBlock(it, Modifier.padding(vertical = 16.dp)) { model.refresh() } }
+            if (state.showsEmpty) {
+                Text(com.ecency.core.app.UploadsCopy.NO_IMAGES, color = colors.darkGray, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp).testTag("galleryEmpty"))
+            }
             LazyVerticalGrid(GridCells.Fixed(3), Modifier.fillMaxWidth().heightIn(max = 360.dp).padding(bottom = 16.dp)) {
                 items(state.images, key = { it.id.ifEmpty { it.url } }) { image ->
                     val selected = image.id in state.selected
@@ -1243,7 +1248,7 @@ internal fun UploadsSheet(
                             .testTag("galleryImage:${image.url}"),
                     ) { AsyncImage(image.url, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
                 }
-                if (!state.endReached && state.loaded) item { TextButton(onClick = model::loadMore) { Text(UiCopy.LOAD_MORE) } }
+                if (state.showsLoadMore) item { TextButton(onClick = model::loadMore) { Text(UiCopy.LOAD_MORE) } }
             }
         }
     }

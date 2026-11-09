@@ -553,6 +553,26 @@ class WavesFlowsTest {
     }
 
     @Test
+    fun anEmptyOrFailedGallerySaysSo() {
+        // a tester saw "no gallery": an empty grid under the title looked like nothing was there
+        var answer = HttpResult(502, "")
+        node.auth.rest = { r -> if ("/private-api/images?" in r.url) answer else null }
+        node.signIn()
+        launch()
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveUploads")
+        waitFor("uploadsSheet")
+        waitFor("retry")
+        assertFalse(exists("galleryEmpty"))
+        answer = HttpResult(200, """{"data":[],"pagination":{"total":0,"limit":20,"offset":0,"has_next":false}}""")
+        click("retry")
+        waitFor("galleryEmpty")
+        assertTrue(compose.onAllNodes(hasText("No Existing Uploads..."), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
     fun anImageFromTheUploadsGalleryIsTheWavesImage() {
         // RN quick post's UploadsGalleryModal (allowMultiple={false}): the account's uploaded images, one tap is the wave's image
         val gallery = "https://images.ecency.com/DQmGallery/funny.gif"

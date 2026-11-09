@@ -1015,6 +1015,7 @@
   "transfer.username_alert": "Username Error!",
   "transfer.username_alert_detail": "Please select different username",
   "transfer.withdraw_accounts": "Withdraw Accounts",
+  "uploads_modal.label_no_images": "No Existing Uploads...",
   "uploads_modal.select_thumb": "Select Thumbnail",
   "uploads_modal.start_upload": "START UPLOAD",
   "uploads_modal.uploading": "UPLOADING",

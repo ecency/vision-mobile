@@ -651,7 +651,8 @@ class TipModel internal constructor(private val env: AppEnvironment, author: Str
         setState { it.copy(phase = phase) }
         when (phase) {
             is SendPhase.Done -> { owned.done(id); env.ui.toast(TipCopy.SUCCESS); env.wallet.refreshLater(); env.tipped.tryEmit(com.ecency.core.api.model.PostKey(current.author, current.permlink)); setState { it.copy(closed = true) } }
-            is SendPhase.Failed -> { owned.done(id); env.ui.toast(TipCopy.ERROR); setState { it.copy(closed = true) } }
+            // the reason under RN's "Failed to send tip" (balance, missing key, a node refusal), as the other wallet sends do
+            is SendPhase.Failed -> { owned.done(id); env.ui.toast("${TipCopy.ERROR}\n${phase.error.text}", phase.error); setState { it.copy(closed = true) } }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }

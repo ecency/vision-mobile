@@ -1834,6 +1834,26 @@ class EditorModelTest {
         assertEquals("[1.5]", Json.parseToJsonElement(field(w.ops().single(), 0, "json_metadata")).jsonObject["image_ratios"].toString())
     }
 
+    /** A tester found "no gallery" on comments: a gallery that failed to load or has nothing in it now says so. */
+    @Test
+    fun theGallerySaysWhenItFailedOrIsEmpty() = runTest {
+        val w = World(this)
+        var answer = HttpResult(502, "")
+        w.app.authBackend.rest = { r -> if ("/private-api/images" in r.url) answer else null }
+        val gallery = w.app.env.uploadsModel(w.newPost(this))
+        gallery.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(gallery.current.showsError, "a failed first page shows its error")
+        assertFalse(gallery.current.showsEmpty)
+        assertFalse(gallery.current.showsLoadMore, "the error's retry, not a load more under nothing")
+        answer = HttpResult(200, """{"data":[],"pagination":{"total":0,"limit":20,"offset":0,"has_next":false}}""")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(gallery.current.showsError)
+        assertTrue(gallery.current.showsEmpty)
+        assertEquals("No Existing Uploads...", UploadsCopy.NO_IMAGES)
+    }
+
     @Test
     fun addingToTheGalleryUploadsWithoutTouchingTheBody() = runTest {
         val w = World(this)
