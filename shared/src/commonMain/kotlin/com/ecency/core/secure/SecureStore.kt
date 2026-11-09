@@ -95,6 +95,11 @@ sealed class SecureStoreException(message: String, cause: Throwable? = null) : E
     class Unavailable(val status: Int, cause: Throwable? = null) :
         SecureStoreException("secure storage unavailable (status $status)", cause)
 
+    companion object {
+        /** iOS errSecInteractionNotAllowed: the Keychain is closed until the phone is unlocked. */
+        const val DEVICE_LOCKED = -25308
+    }
+
     /** A caller error: invalid entry name or username, unknown account. Nothing was changed. */
     class InvalidArgument(message: String) : SecureStoreException(message)
 }

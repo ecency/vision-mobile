@@ -5,6 +5,7 @@ import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.rpc.AllNodesFailedException
 import com.ecency.core.auth.AuthException
 import com.ecency.core.l10n.L
+import com.ecency.core.secure.SecureStoreException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -80,6 +81,25 @@ class ErrorReportsTest {
         val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")
         assertEquals(null, error.code)
         assertEquals("true", reporter.reports.single().tags["expected"])
+    }
+
+    @Test
+    fun aKeychainClosedUntilThePhoneUnlocksIsAWarningWithNoCode() {
+        // iOS can start the app before the first unlock (a prewarmed launch): the Keychain refuses with
+        // errSecInteractionNotAllowed and the app opens the store again once the phone unlocks
+        val error = AppError.from(SecureStoreException.Unavailable(SecureStoreException.DEVICE_LOCKED), "session.start")
+        assertEquals(null, error.code)
+        val r = reporter.reports.single()
+        assertEquals("warning", r.level)
+        assertEquals("true", r.tags["expected"])
+    }
+
+    @Test
+    fun anyOtherStorageRefusalStaysAnErrorWithACode() {
+        // Android's Keystore failure (STATUS_KEYSTORE) is not the phone being locked
+        val error = AppError.from(SecureStoreException.Unavailable(-1), "session.start")
+        assertTrue(error.code != null)
+        assertEquals("error", reporter.reports.single().level)
     }
 
     @Test
