@@ -280,14 +280,15 @@ final class ChatUITests: XCTestCase {
         let row = element(app, "chat-row-ch-ecency")
         XCTAssertTrue(row.waitForExistence(timeout: 20))
         row.tap()
-        let msg = message(app, containing: "A long synthetic message")
+        // the original by its author and body: the reply under it quotes the same text in its label
+        let msg = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "spike-carol, A long synthetic message")).firstMatch
         XCTAssertTrue(msg.waitForExistence(timeout: 20))
         msg.press(forDuration: 0.8)
         XCTAssertTrue(app.buttons["chat-option-REPLY"].waitForExistence(timeout: 5))
         app.buttons["chat-option-REPLY"].tap()
         XCTAssertTrue(app.buttons["chat-cancel-reply"].waitForExistence(timeout: 5))
         let composer = element(app, "chat-composer")
-        if !(composer.value(forKey: "hasKeyboardFocus") as? Bool ?? false) { composer.tap() }
+        composer.focus()
         let keyboard = app.keyboards.firstMatch
         _ = keyboard.waitForExistence(timeout: 10)
         let window = app.windows.firstMatch.frame
