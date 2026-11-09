@@ -333,13 +333,13 @@ data class UploadsState(
     val alert: String? = null,
     val error: AppError? = null,
 ) {
-    /** The gallery could not load and has nothing to show: its error, with a retry ([UploadsModel.refresh]). */
-    val showsError: Boolean get() = loaded && error != null && images.isEmpty()
+    /** The last load failed: its error, with a retry ([UploadsModel.refresh]); images already shown stay under it. */
+    val showsError: Boolean get() = loaded && error != null
 
     /** The account has no uploads (RN's "No Existing Uploads..."). */
     val showsEmpty: Boolean get() = loaded && error == null && images.isEmpty() && endReached
 
-    /** More pages to load; not under an error that has nothing above it (its retry starts over). */
+    /** More pages to load; not while an error shows (its retry starts over). */
     val showsLoadMore: Boolean get() = loaded && !endReached && !showsError
 }
 

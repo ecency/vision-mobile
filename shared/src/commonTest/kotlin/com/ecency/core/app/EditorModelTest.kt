@@ -1852,6 +1852,17 @@ class EditorModelTest {
         assertFalse(gallery.current.showsError)
         assertTrue(gallery.current.showsEmpty)
         assertEquals("No Existing Uploads...", UploadsCopy.NO_IMAGES)
+        // a refresh that fails over images already shown keeps them and still says so, with its retry
+        answer = HttpResult(200, """{"data":[{"_id":"i1","url":"https://images.example/one.jpg","created":"2026-10-01"}],"pagination":{"total":1,"limit":20,"offset":0,"has_next":false}}""")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, gallery.current.images.size)
+        answer = HttpResult(502, "")
+        gallery.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, gallery.current.images.size, "the images stay")
+        assertTrue(gallery.current.showsError, "the failed refresh shows its error over the images")
+        assertFalse(gallery.current.showsLoadMore)
     }
 
     @Test
