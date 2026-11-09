@@ -290,6 +290,15 @@ class ChatsListTest {
     }
 
     @Test
+    fun aLastMessageStampedByAServerClockAheadIsNotInTheFuture() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.incoming("ch-ecency", "from a clock ahead", aheadMillis = 8_000)
+        val m = list(f)
+        assertEquals("a few seconds ago", m.current.rows.first { it.title == "Ecency" }.time)
+    }
+
+    @Test
     fun optionsMarkReadFavoriteMuteAndLeave() = runTest {
         val f = ChatFixture(this)
         f.start()
@@ -501,6 +510,25 @@ class ChatThreadTest {
     private fun thread(f: ChatFixture, id: String, type: String, title: String = ""): ChatThreadModel {
         f.env.chat.hint(id, ChatHint(null, title, emptyMap()), ChatFixture.USER)
         return f.env.chat.threadModel(id, type).also { it.start(); f.idle() }
+    }
+
+    @Test
+    fun aMessageStampedByAServerClockAheadOfThePhoneIsNotInTheFuture() = runTest {
+        // founder's screenshot: a message just sent read "in a few seconds" (the server's clock a little ahead)
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "from a clock ahead", aheadMillis = 8_000)
+            f.run(1)
+            val item = m.current.items.first() as ChatMessageItem
+            assertEquals("from a clock ahead", item.spans.joinToString("") { it.text })
+            assertEquals("a few seconds ago", item.time)
+        } finally {
+            m.close()
+        }
     }
 
     @Test

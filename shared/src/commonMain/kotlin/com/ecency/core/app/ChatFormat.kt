@@ -564,7 +564,7 @@ object ChatText {
 
     /** RN SystemMessageItem / GroupedSystemMessages: "joined 2 hours ago" ([FromNow] in the app language), or "joined" without a time. */
     fun joinedSuffix(timestamp: Long, nowMillis: Long): String =
-        if (timestamp != 0L) L.native.chat.joinedWhen(time = FromNow.format(timestamp, nowMillis)) else L.native.chat.joined
+        if (timestamp != 0L) L.native.chat.joinedWhen(time = FromNow.format(minOf(timestamp, nowMillis), nowMillis)) else L.native.chat.joined
 
     /** RN formatPostBody: a join notice reads "@name joined 2 hours ago", any other post its body. */
     fun body(post: ChatPost, lookup: Map<String, ChatUser>, nowMillis: Long): String {
