@@ -85,13 +85,21 @@ class ErrorReportsTest {
 
     @Test
     fun aKeychainClosedUntilThePhoneUnlocksIsAWarningWithNoCode() {
-        // iOS can start the app before the first unlock (a prewarmed launch): the Keychain refuses with
-        // errSecInteractionNotAllowed and the app opens the store again once the phone unlocks
-        val error = AppError.from(SecureStoreException.Unavailable(SecureStoreException.DEVICE_LOCKED), "session.start")
+        // iOS can start the app before the first unlock (a prewarmed launch): the store refuses every access until
+        // the phone unlocks, then the app opens it again
+        val error = AppError.from(SecureStoreException.Unavailable(-25308, untilUnlock = true), "session.start")
         assertEquals(null, error.code)
         val r = reporter.reports.single()
         assertEquals("warning", r.level)
         assertEquals("true", r.tags["expected"])
+    }
+
+    @Test
+    fun aKeychainCallRefusedWithTheLockedStatusStaysAnErrorWithACode() {
+        // a write, delete or wipe the Keychain itself refused: the store was open, so this is not the locked launch
+        val error = AppError.from(SecureStoreException.Unavailable(-25308), "session.start")
+        assertTrue(error.code != null)
+        assertEquals("error", reporter.reports.single().level)
     }
 
     @Test
@@ -100,6 +108,16 @@ class ErrorReportsTest {
         val error = AppError.from(SecureStoreException.Unavailable(-1), "session.start")
         assertTrue(error.code != null)
         assertEquals("error", reporter.reports.single().level)
+    }
+
+    @Test
+    fun aLockedLaunchWarningNeverThrottlesALaterStorageErrorAtTheSamePlace() {
+        AppError.from(SecureStoreException.Unavailable(-25308, untilUnlock = true), "session.start")
+        now += 1_000
+        val error = AppError.from(SecureStoreException.Unavailable(-1), "session.start")
+        assertEquals(listOf("warning", "error"), reporter.reports.map { it.level })
+        assertNotEquals(reporter.reports[0].fingerprint, reporter.reports[1].fingerprint)
+        assertEquals(error.code, reporter.reports[1].tags["error_code"])
     }
 
     @Test

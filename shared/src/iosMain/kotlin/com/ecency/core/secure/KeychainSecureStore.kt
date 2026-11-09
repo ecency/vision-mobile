@@ -120,7 +120,7 @@ class KeychainSecureStore(val service: String) : SecureStore {
     private fun requireInstallChecked() {
         if (pendingFor(service) == null) return
         runPendingInstallCheck()
-        if (pendingFor(service) != null) throw SecureStoreException.Unavailable(errSecInteractionNotAllowed)
+        if (pendingFor(service) != null) throw SecureStoreException.Unavailable(errSecInteractionNotAllowed, untilUnlock = true)
     }
 
     override fun put(name: String, value: ByteArray) = withLock {

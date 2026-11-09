@@ -148,11 +148,12 @@ object ErrorReports {
     }
 
     /**
-     * The Keychain is closed until the phone is unlocked (iOS starts the app early, a prewarmed launch): the store
-     * opens again on the unlock and the session and the lock start again (README "Secure storage").
+     * The store is closed until the phone is unlocked (iOS starts the app early, a prewarmed launch): it opens again on
+     * the unlock and the session and the lock start again (README "Secure storage"). Only the store's own refusal: a
+     * Keychain call refused with the same status is still an error.
      */
     private fun isDeviceLocked(root: Throwable): Boolean =
-        (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.status == com.ecency.core.secure.SecureStoreException.DEVICE_LOCKED
+        (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true
