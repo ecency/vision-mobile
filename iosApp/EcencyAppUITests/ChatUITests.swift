@@ -376,6 +376,39 @@ final class ChatUITests: XCTestCase {
         }
     }
 
+    func testASentMessageLeavesTheFieldEmptyAtOnce() throws {
+        // founder's report: after a send the field kept showing the text (the send button already dim) until the
+        // app went to the background; typed with the keyboard's suggestion still pending on the last word
+        let app = launch(["-startTab", "CHATS", "-demoChatHistory", "3"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        let composer = element(app, "chat-composer")
+        XCTAssertTrue(composer.waitForExistence(timeout: 20))
+        composer.focus()
+        let keyboard = app.keyboards.firstMatch
+        _ = keyboard.waitForExistence(timeout: 10)
+        let window = app.windows.firstMatch.frame
+        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        for round in 1...3 {
+            let words = "we would know for sure \(round)x"
+            composer.typeText(words)
+            app.buttons["chat-send"].tap()
+            // empty right after the tap, before the message lands (an empty field may report its placeholder)
+            let cleared = NSPredicate { _, _ in
+                let value = (composer.value as? String) ?? ""
+                return value.isEmpty || value == composer.placeholderValue
+            }
+            XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: cleared, object: nil)], timeout: 2), .completed, "round \(round): the field still shows \(composer.value ?? "")")
+            let sent = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", words)).firstMatch
+            XCTAssertTrue(sent.waitForExistence(timeout: 10), "round \(round): the message shows")
+            // the keyboard stays up on the field: the next message is typed straight away (the next round)
+            sleep(1)
+            XCTAssertTrue(keyboard.exists && keyboard.frame.minY < window.maxY - 150, "round \(round): the keyboard stayed up: \(keyboard.frame)")
+            XCTAssertEqual(composer.value(forKey: "hasKeyboardFocus") as? Bool, true, "round \(round): the field kept the focus")
+        }
+    }
+
     func testAGroupOpensByIdWithItsName() {
         let app = launch(["-openScreen", "chat:ch-group:G"])
         XCTAssertTrue(app.staticTexts["chat-title"].waitForExistence(timeout: 20))

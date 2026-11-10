@@ -665,7 +665,8 @@ class ChatThreadModel internal constructor(
             card = card,
             reactions = ChatReactions.pills(p.reactions, viewer),
             edited = p.editAt > 0,
-            time = if (p.timestamp != 0L) FromNow.format(p.timestamp, now) else "",
+            // the server's clock may run a little ahead of the phone's: a message is never in the future
+            time = if (p.timestamp != 0L) FromNow.format(minOf(p.timestamp, now), now) else "",
             timestamp = p.timestamp,
         )
     }
@@ -1256,7 +1257,7 @@ class ChatPinnedModel internal constructor(private val env: AppEnvironment, priv
                 setState {
                     it.copy(isLoading = false, loaded = true, items = posts.map { p ->
                         val a = thread.userFor(p.userId)
-                        ChatPinnedRow(p, firstText(a?.hiveName, a?.safeNickname, a?.username), if (p.timestamp != 0L) FromNow.format(p.timestamp, now) else "", firstText(p.message, p.text).orEmpty())
+                        ChatPinnedRow(p, firstText(a?.hiveName, a?.safeNickname, a?.username), if (p.timestamp != 0L) FromNow.format(minOf(p.timestamp, now), now) else "", firstText(p.message, p.text).orEmpty())
                     })
                 }
             } catch (e: CancellationException) {

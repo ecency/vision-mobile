@@ -408,7 +408,7 @@ class ChatsModel internal constructor(private val env: AppEnvironment) : StateMo
             avatar = community?.let { ChatAvatar.Account(it) } ?: ChatAvatar.initial(title)
         }
         val last = listOf(c.lastPostAt, c.updateAt, c.createAt).firstOrNull { it != 0L }
-        return ChatRow(c, title, avatar, ChatUnread.total(c), last?.let { FromNow.format(it, now) }.orEmpty(), official)
+        return ChatRow(c, title, avatar, ChatUnread.total(c), last?.let { FromNow.format(minOf(it, now), now) }.orEmpty(), official)
     }
 
     fun toggleSort() {

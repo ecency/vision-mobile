@@ -382,9 +382,9 @@ class DemoChat(private val nowMillis: () -> Long) {
     /** Someone else types in [channelId] (demo runs and tests). */
     fun typing(channelId: String, who: String = "spike-alice") = emit("typing", channelId, buildJsonObject { put("user_id", userId(who)) })
 
-    /** Someone else posts [message] in [channelId] (demo runs and tests). */
-    fun incoming(channelId: String, message: String, who: String = "spike-alice") {
-        val p = Post("p${++seq}", channelId, who, message, nowMillis())
+    /** Someone else posts [message] in [channelId] (demo runs and tests), stamped [aheadMillis] after this clock. */
+    fun incoming(channelId: String, message: String, who: String = "spike-alice", aheadMillis: Long = 0) {
+        val p = Post("p${++seq}", channelId, who, message, nowMillis() + aheadMillis)
         posts += p
         emit("posted", channelId, buildJsonObject { put("post", postJson(p).toString()) })
     }
