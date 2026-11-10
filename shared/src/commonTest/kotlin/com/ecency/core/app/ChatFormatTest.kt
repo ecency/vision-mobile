@@ -282,6 +282,8 @@ class ChatFormatTest {
         val now = 1_791_288_000_000L
         assertEquals("joined 2 hours ago", ChatText.joinedSuffix(now - 2 * 3_600_000, now))
         assertEquals("joined", ChatText.joinedSuffix(0, now))
+        // a server clock ahead of the phone: never "joined in a few seconds"
+        assertEquals("joined a few seconds ago", ChatText.joinedSuffix(now + 8_000, now))
         val post = ChatPost("p", type = "system_join_channel", addedUserId = "u1", createAt = now - 60_000)
         assertEquals("@carol joined a minute ago", ChatText.body(post, mapOf("u1" to ChatUser("u1", username = "carol")), now))
         assertEquals("x".repeat(100) + "...", ChatText.quote("x".repeat(101)))

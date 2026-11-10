@@ -394,10 +394,14 @@ final class ChatUITests: XCTestCase {
             let words = "we would know for sure \(round)x"
             composer.typeText(words)
             app.buttons["chat-send"].tap()
+            // empty right after the tap, before the message lands (an empty field may report its placeholder)
+            let cleared = NSPredicate { _, _ in
+                let value = (composer.value as? String) ?? ""
+                return value.isEmpty || value == composer.placeholderValue
+            }
+            XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: cleared, object: nil)], timeout: 2), .completed, "round \(round): the field still shows \(composer.value ?? "")")
             let sent = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", words)).firstMatch
             XCTAssertTrue(sent.waitForExistence(timeout: 10), "round \(round): the message shows")
-            let cleared = NSPredicate { _, _ in !((composer.value as? String) ?? "").contains("know for sure") }
-            XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: cleared, object: nil)], timeout: 2), .completed, "round \(round): the field still shows \(composer.value ?? "")")
             // the keyboard stays up on the field: the next message is typed straight away (the next round)
             sleep(1)
             XCTAssertTrue(keyboard.exists && keyboard.frame.minY < window.maxY - 150, "round \(round): the keyboard stayed up: \(keyboard.frame)")

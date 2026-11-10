@@ -526,6 +526,15 @@ class ChatThreadTest {
             val item = m.current.items.first() as ChatMessageItem
             assertEquals("from a clock ahead", item.spans.joinToString("") { it.text })
             assertEquals("a few seconds ago", item.time)
+            // the pinned list formats the same stamp on its own
+            m.setPinned(item.id, true)
+            f.run(1)
+            val pinned = m.pinnedModel().also { it.start(); f.run(1) }
+            try {
+                assertEquals(listOf("a few seconds ago"), pinned.current.items.map { it.time })
+            } finally {
+                pinned.close()
+            }
         } finally {
             m.close()
         }
