@@ -368,7 +368,62 @@ class WalletActionsTest {
     }
 
     /** A whole-balance swap up to the moment a node accepts it (the done state shows, no outcome or reload yet). */
-    private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel) {
+    private fun hiveLeft(w: WalletWorld, left: String) {
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":$left""").replace(""""liquid":12.345""", """"liquid":$left""")) }
+    }
+
+    private fun TestScope.untilAccepted(m: TradeModel) {
+        repeat(50) { if (m.current.phase !is SendPhase.Done) { testScheduler.advanceTimeBy(10); testScheduler.runCurrent() } }
+        assertTrue(m.current.phase is SendPhase.Done, "the swap was accepted")
+    }
+
+    @Test
+    fun aRefreshThatAlreadyHasTheSwapIsNotReducedAgain() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3")
+            hiveLeft(w, "9.345")
+            // a reload inside the settle delay that already reads the swap (pull to refresh, another screen)
+            w.env.wallet.refresh()
+            testScheduler.advanceTimeBy(100)
+            testScheduler.runCurrent()
+            m.reset()
+            assertEquals(9.345, m.current.balance, 0.0001, "12.345 less the 3 swapped, once")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun twoQuickSwapsAreEachTakenOffOnceAfterTheReloads() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "4")
+            m.reset()
+            assertEquals(8.345, m.current.balance, 0.0001)
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("2")
+            m.next()
+            m.confirm()
+            untilAccepted(m)
+            m.reset()
+            assertEquals(6.345, m.current.balance, 0.0001, "both swaps off the cached balance")
+            // the first swap's reload lands before the second's delay is up, and already reads both
+            hiveLeft(w, "6.345")
+            testScheduler.advanceTimeBy(2_500)
+            testScheduler.runCurrent()
+            assertEquals(6.345, m.current.balance, 0.0001, "a read with both swaps is not reduced again")
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(6.345, m.current.balance, 0.0001, "and nothing is taken off twice")
+        } finally {
+            m.close()
+        }
+    }
+
+    private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel, amount: String? = null) {
         w.app.clock = { TestApp.NOW + testScheduler.currentTime }
         w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
         w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
@@ -376,12 +431,11 @@ class WalletActionsTest {
         w.env.wallet.start()
         m.start()
         testScheduler.advanceTimeBy(1_000)
-        m.useBalance()
+        if (amount == null) m.useBalance() else m.setAmount(amount)
         m.next()
         m.confirm()
-        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":0""").replace(""""liquid":12.345""", """"liquid":0""")) }
-        repeat(50) { if (m.current.phase !is SendPhase.Done) { testScheduler.advanceTimeBy(10); testScheduler.runCurrent() } }
-        assertTrue(m.current.phase is SendPhase.Done, "the swap was accepted")
+        hiveLeft(w, "0")
+        untilAccepted(m)
         assertNull(m.current.outcome, "its outcome check still runs")
     }
 

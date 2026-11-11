@@ -35,6 +35,8 @@ data class WalletState(
     val all: List<PortfolioItem> = emptyList(),
     val totalText: String = "--.--",
     val updatedAtMillis: Long? = null,
+    /** When the read behind [updatedAtMillis] was sent: what it can include (a swap's reconciliation reads it). */
+    val readStartedAtMillis: Long? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val loaded: Boolean = false,
@@ -266,6 +268,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private fun load(refresh: Boolean, quiet: Boolean = false) {
         job?.cancel()
         val stamp = env.freshness.stamp()
+        val startedAt = env.nowMillis()
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh && !quiet, error = if (quiet) it.error else null, currency = WalletCurrency.of(env.prefs)) }
         job = scope.launch {
             try {
@@ -295,7 +298,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                     withRows(
                         it.copy(
                             hivePerMVests = perMVests, isLoading = false, isRefreshing = false, loaded = true,
-                            updatedAtMillis = env.nowMillis(), selection = selection, error = null,
+                            updatedAtMillis = env.nowMillis(), readStartedAtMillis = startedAt, selection = selection, error = null,
                         ),
                     )
                 }
