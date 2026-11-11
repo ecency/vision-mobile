@@ -367,6 +367,97 @@ class WalletActionsTest {
         }
     }
 
+    /** A whole-balance swap up to the moment a node accepts it (the done state shows, no outcome or reload yet). */
+    private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel) {
+        w.app.clock = { TestApp.NOW + testScheduler.currentTime }
+        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        m.start()
+        testScheduler.advanceTimeBy(1_000)
+        m.useBalance()
+        m.next()
+        m.confirm()
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":0""").replace(""""liquid":12.345""", """"liquid":0""")) }
+        repeat(50) { if (m.current.phase !is SendPhase.Done) { testScheduler.advanceTimeBy(10); testScheduler.runCurrent() } }
+        assertTrue(m.current.phase is SendPhase.Done, "the swap was accepted")
+        assertNull(m.current.outcome, "its outcome check still runs")
+    }
+
+    @Test
+    fun doneTappedAtOnceStillReloadsTheWallet() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapAcceptedNow(w, m)
+        // Done while the outcome check runs closes the screen and its model
+        m.close()
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+        assertEquals(0.0, w.env.wallet.current.item("HIVE")?.liquid, "the wallet reload outlives the closed swap screen")
+    }
+
+    @Test
+    fun newSwapTappedAtOnceNeverOffersTheSpentBalance() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m)
+            m.reset()
+            assertEquals(0.0, m.current.balance, "the swapped HIVE is gone before the wallet reloads")
+            m.useBalance()
+            assertFalse(m.current.continueEnabled, "no second swap of the spent funds")
+            // the reload lands later and its balance stands as read (1.000 HIVE came in meanwhile)
+            w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":1""").replace(""""liquid":12.345""", """"liquid":1""")) }
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(1.0, m.current.balance)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun anEarlierSwapsLateOutcomeNeverLandsOnANewForm() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m)
+            m.reset()
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertNull(m.current.outcome)
+            assertFalse(m.current.finished)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun newSwapNeverClearsALiveForm() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
+            w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+            w.rpc["condenser_api.get_open_orders"] = { "[]" }
+            w.env.wallet.start()
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("2")
+            m.next()
+            m.confirm()
+            val sending = m.current
+            assertEquals(SendPhase.Sending, sending.phase)
+            m.reset()
+            assertEquals("2", m.current.fromAmount)
+            assertEquals(sending.actionId, m.current.actionId, "a send in flight keeps its form")
+            assertEquals(SendPhase.Sending, m.current.phase)
+        } finally {
+            m.close()
+        }
+    }
+
     // ---- redeem ----
 
     @Test

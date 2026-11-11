@@ -172,6 +172,13 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     private var started = false
     private var user: String? = null
 
+    /**
+     * What swaps accepted here took from the wallet's cached balances (symbol to amount), until the wallet reload after
+     * the last of them lands ([spentAt]): "New Swap" before that never offers the spent funds again.
+     */
+    private val spent = mutableMapOf<String, Double>()
+    private var spentAt = Long.MIN_VALUE
+
     fun start() {
         if (started) return
         started = true
@@ -197,7 +204,15 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         scope.launch { env.events.collect { e -> if (e is AppEvent.SessionChanged && e.username != user) setState { it.copy(closed = true) } } }
     }
 
-    private fun balance() = setState { s -> s.copy(balance = env.wallet.current.item(s.from)?.let { it.liquid ?: it.balance } ?: s.balance) }
+    private fun balance() {
+        val wallet = env.wallet.current
+        // the reload refreshLater starts after its delay has the spends; one read before it does not
+        if (spent.isNotEmpty() && (wallet.updatedAtMillis ?: Long.MIN_VALUE) >= spentAt + WalletModel.AFTER_BROADCAST_DELAY_MILLIS) spent.clear()
+        setState { s ->
+            val cached = wallet.item(s.from)?.let { it.liquid ?: it.balance } ?: return@setState s
+            s.copy(balance = (cached - (spent[s.from] ?: 0.0)).coerceAtLeast(0.0))
+        }
+    }
 
     private suspend fun loadBook() {
         try {
@@ -294,7 +309,10 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         }
     }
 
-    /** "New Swap": an empty form on the current balance, only from the done state (it never clears a send in flight). */
+    /**
+     * "New Swap": an empty form, only from the done state (it never clears a send in flight). Its balance is the
+     * wallet's less what the swap spent until the reload after it lands.
+     */
     fun reset() {
         if (!current.finished) return
         setState { TradeState(from = it.from, balance = it.balance, rateText = it.rateText, bookLoading = false) }
@@ -307,12 +325,18 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         when (phase) {
             is SendPhase.Done -> {
                 owned.done(id)
+                current.sold.split(' ').takeIf { it.size == 2 }?.let { (amount, symbol) ->
+                    spent[symbol] = (spent[symbol] ?: 0.0) + (amount.toDoubleOrNull() ?: 0.0)
+                }
+                spentAt = env.nowMillis()
+                balance()
+                // now, in the wallet's own scope: Done tapped during the outcome check closes this model
+                env.wallet.refreshLater()
                 scope.launch {
                     delay(1_000)
                     val after = runCatching { env.walletApi.openOrders(user ?: return@launch).size }.getOrDefault(ordersBefore)
                     // a "New Swap" in the meantime started another form: this outcome is not its
                     setState { if (it.actionId != id) it else it.copy(outcome = if (after != ordersBefore) TradeOutcome.PENDING else TradeOutcome.SUCCESSFUL) }
-                    env.wallet.refreshLater()
                 }
             }
             is SendPhase.Failed -> {
