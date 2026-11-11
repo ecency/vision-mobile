@@ -1059,9 +1059,10 @@ internal fun QuickComposeAiSheet(env: AppEnvironment, target: com.ecency.core.ap
 }
 
 /**
- * RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the editor's [UploadsSheet] over the signed-in
- * account's uploads (`env.uploadsModel(null)`, nothing goes into an editor), where one tap hands that image to
- * [onPick] and closes the sheet. The composer's own buttons are the pickers, so the sheet shows the gallery alone.
+ * The quick composers' one image flow: the editor's [UploadsSheet] with its source tiles over the signed-in account's
+ * uploads (`env.uploadsModel(null)`, nothing goes into an editor). A tile closes the sheet and hands its source to
+ * [onSource] (the composer's own picker); a tap on an uploaded image hands its URL to [onPick] and closes the sheet.
+ * No "+": the composer's one image is whatever is picked (RN quick post's UploadsGalleryModal, `allowMultiple={false}`).
  */
 @Composable
 internal fun QuickUploadsSheet(env: AppEnvironment, onPick: (String) -> Unit, onSource: (com.ecency.core.app.MediaSource) -> Unit, onDismiss: () -> Unit) {

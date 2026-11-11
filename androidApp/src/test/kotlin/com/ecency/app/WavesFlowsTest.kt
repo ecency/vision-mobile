@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -558,6 +560,22 @@ class WavesFlowsTest {
         }
         assertTrue(compose.onAllNodes(hasText("Uploaded images", ignoreCase = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
         assertFalse(exists("addToGallery"))
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp", fontScale = 2f)
+    fun atFontScale2OnAShortWindowTheWholeImageSheetScrollsIntoReach() {
+        // the source tiles stack into rows at large font scales: the gallery under them must still be reachable
+        node.auth.rest = { r -> if ("/private-api/images?" in r.url) HttpResult(200, "[]") else null }
+        node.signIn()
+        launch(fontScale = 2f)
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveAttach")
+        waitFor("galleryEmpty")
+        compose.onNodeWithTag("galleryEmpty").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("openGallery").performScrollTo().assertIsDisplayed()
     }
 
     @Test

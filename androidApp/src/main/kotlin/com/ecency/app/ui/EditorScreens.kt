@@ -1206,7 +1206,9 @@ internal fun UploadsSheet(
     val state by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
     ModalBottomSheet(onDismissRequest = { model.clearSelection(); onDismiss() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding().testTag("uploadsSheet")) {
+        // scrolls: at large font scales the tiles stack into rows and a short window would cut off the gallery
+        // (the grid keeps its own height cap, so it scrolls inside)
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).navigationBarsPadding().testTag("uploadsSheet")) {
             if (sources != null) MediaSourceTiles(
                 com.ecency.core.app.MediaSourceMenus.editorUploads(camera = true, paste = sources.canPaste),
                 tagFor = {
