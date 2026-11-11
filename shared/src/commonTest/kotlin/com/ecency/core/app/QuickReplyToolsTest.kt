@@ -173,6 +173,28 @@ class QuickReplyToolsTest {
     }
 
     @Test
+    fun theImageSheetsTilesAttachThroughTheSameUploadAsTheEditorsSheetOffers() = runTest {
+        val app = signedIn()
+        val asked = app.uploads { url }
+        val reply = app.env.replyModel(key, parent)
+        reply.setClipboardHasImage(true)
+        // the editor's sheet tiles, in the order it shows them
+        for (source in MediaSourceMenus.editorUploads(camera = true, paste = true).map { it.source }) {
+            reply.attachFrom(source)
+            testScheduler.advanceUntilIdle()
+        }
+        assertEquals(
+            listOf(WaveImageSource.GALLERY, WaveImageSource.FILES, WaveImageSource.CAMERA, WaveImageSource.CLIPBOARD).map { TestApp.USER to it },
+            asked,
+        )
+        assertFalse(reply.current.clipboardChip, "the paste tile uses the clipboard as the chip does, and the chip goes")
+        // a link is not a tile of this sheet: nothing is attached for it
+        reply.attachFrom(MediaSource.LINK)
+        testScheduler.advanceUntilIdle()
+        assertEquals(4, asked.size)
+    }
+
+    @Test
     fun dictationAndAiAssistWriteIntoTheReplyAsInRn() = runTest {
         val app = signedIn()
         val reply = app.env.replyModel(key, parent)

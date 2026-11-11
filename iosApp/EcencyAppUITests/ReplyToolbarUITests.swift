@@ -1,7 +1,7 @@
 import XCTest
 
-/// RN quick reply's toolbar in the reply composer (quickPostModalContent in comment mode): image (library, camera,
-/// files), dictation and AI assist under the text, expand in the bar. Poll and video are the wave composer's only.
+/// RN quick reply's toolbar in the reply composer (quickPostModalContent in comment mode): image (the editor's image
+/// sheet: library, files, camera, paste and the uploads gallery), dictation and AI assist under the text, expand in the bar. Poll and video are the wave composer's only.
 /// Fake data, a seeded account: nothing is uploaded or broadcast.
 final class ReplyToolbarUITests: XCTestCase {
     private func openReplyComposer() -> XCUIApplication {
@@ -22,11 +22,13 @@ final class ReplyToolbarUITests: XCTestCase {
     func testTheReplyComposerShowsRnsQuickReplyToolbar() {
         let app = openReplyComposer()
         let text = app.textViews["reply-text"]
-        for id in ["reply-attach", "reply-camera", "reply-files", "reply-dictate", "reply-ai-assist"] {
+        for id in ["reply-attach", "reply-dictate", "reply-ai-assist"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.waitForExistence(timeout: 10), "the reply composer has \(id)")
             XCTAssertGreaterThanOrEqual(button.frame.minY, text.frame.maxY - 1, "\(id) sits under the text")
         }
+        // one image button, as the blog editor: the other routes are tiles of its sheet
+        for id in ["reply-camera", "reply-files", "reply-uploads"] { XCTAssertFalse(app.buttons[id].exists, "no \(id) button") }
         XCTAssertTrue(app.buttons["reply-expand"].exists, "expand to the full editor stays")
         XCTAssertFalse(app.buttons["reply-poll"].exists)
         XCTAssertFalse(app.buttons["reply-video-button"].exists)
@@ -57,24 +59,25 @@ final class ReplyToolbarUITests: XCTestCase {
         let expand = app.buttons["reply-expand"]
         XCTAssertTrue(expand.waitForExistence(timeout: 10))
         XCTAssertTrue(expand.isEnabled)
-        // the photo picker is open: the attach is running, nothing is uploaded
+        // the image sheet's gallery tile: the sheet closes, the photo picker opens and the attach runs, nothing is uploaded
         app.buttons["reply-attach"].tap()
+        let gallery = app.buttons["open-gallery"]
+        XCTAssertTrue(gallery.waitForExistence(timeout: 10), app.debugDescription)
+        gallery.tap()
         XCTAssertTrue(app.descendants(matching: .any)["reply-image-uploading"].waitForExistence(timeout: 10))
         XCTAssertFalse(expand.isEnabled, "as Android: the editor would open without the image")
     }
 
-    /// RN quick reply's UploadsGalleryModal (`allowMultiple={false}`): the account's uploaded images, and one tap is
-    /// the reply's image (the fake gallery's first image).
+    /// The image button opens the editor's image sheet: the source tiles, then the account's uploaded images (RN quick
+    /// reply's UploadsGalleryModal, `allowMultiple={false}`), and one tap is the reply's image (the fake gallery's first).
     func testAnImageFromTheUploadsGalleryIsTheRepliesImage() {
         let app = openReplyComposer()
-        let uploads = app.buttons["reply-uploads"]
-        XCTAssertTrue(uploads.waitForExistence(timeout: 10), app.debugDescription)
-        XCTAssertGreaterThanOrEqual(uploads.frame.minY, app.textViews["reply-text"].frame.maxY - 1, "it sits with the other content buttons")
-        uploads.tap()
+        app.buttons["reply-attach"].tap()
         let image = app.descendants(matching: .any)["gallery-image-demo-i1"]
         XCTAssertTrue(image.waitForExistence(timeout: 10), app.debugDescription)
-        // the composer's own buttons are the pickers: the sheet is the gallery alone
-        XCTAssertFalse(app.buttons["open-gallery"].exists)
+        // one flow with the blog editor: the tiles sit over the gallery; no "+", a pick is the reply's image
+        XCTAssertTrue(app.buttons["open-gallery"].exists)
+        XCTAssertTrue(app.buttons["open-files"].exists)
         XCTAssertFalse(app.buttons["add-to-gallery"].exists)
         image.tap()
         XCTAssertTrue(app.descendants(matching: .any)["reply-image"].waitForExistence(timeout: 10), app.debugDescription)

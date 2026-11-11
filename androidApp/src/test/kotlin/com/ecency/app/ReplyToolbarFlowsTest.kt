@@ -88,10 +88,12 @@ class ReplyToolbarFlowsTest {
     @Test
     fun theReplySheetShowsRnsQuickReplyToolbar() {
         openReplySheet()
-        for (tag in listOf("replyAttach", "replyCamera", "replyFiles", "replyDictate", "replyAiAssist", "replyExpand")) {
+        for (tag in listOf("replyAttach", "replyDictate", "replyAiAssist", "replyExpand")) {
             assertTrue("the reply sheet has $tag", exists(tag))
             assertTrue("$tag sits in the reply sheet", compose.onAllNodes(hasTestTag(tag) and hasAnyAncestor(hasTestTag("replySheet"))).fetchSemanticsNodes().isNotEmpty())
         }
+        // one image button: camera, files and the gallery are tiles of its sheet, as in the editor
+        for (tag in listOf("replyCamera", "replyFiles", "replyUploads")) assertFalse("no $tag button", exists(tag))
         // RN: poll and video are the wave mode's only
         assertFalse(exists("replyPoll"))
         assertFalse(exists("replyVideoButton"))
@@ -123,6 +125,14 @@ class ReplyToolbarFlowsTest {
         openReplySheet()
         compose.onNodeWithTag("replyText").performTextInput("Nice post")
         compose.onNodeWithTag("replyAttach").performSemanticsAction(SemanticsActions.OnClick)
+        waitFor("uploadsSheet")
+        // the editor's sheet: where an image comes from, then the account's uploads
+        for (tag in listOf("openGallery", "openFiles", "openCamera")) {
+            assertTrue("the sheet has $tag", compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
+        assertFalse("no add-to-gallery here: a pick is the reply's image", exists("addToGallery"))
+        compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true)[0].performSemanticsAction(SemanticsActions.OnClick)
+        compose.await("the sheet closes") { !exists("uploadsSheet") }
         waitFor("replyImage")
         assertEquals(listOf(WaveImageSource.GALLERY), asked)
         compose.onNodeWithTag("replySend").performSemanticsAction(SemanticsActions.OnClick)
@@ -140,12 +150,8 @@ class ReplyToolbarFlowsTest {
         }
         openReplySheet()
         compose.onNodeWithTag("replyText").performTextInput("Nice post")
-        assertTrue("the gallery button sits in the reply sheet", compose.onAllNodes(hasTestTag("replyUploads") and hasAnyAncestor(hasTestTag("replySheet"))).fetchSemanticsNodes().isNotEmpty())
-        compose.onNodeWithTag("replyUploads").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("replyAttach").performSemanticsAction(SemanticsActions.OnClick)
         waitFor("uploadsSheet")
-        // the toolbar already has the pickers: the sheet is the gallery alone
-        assertFalse(compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
-        assertFalse(exists("addToGallery"))
         waitFor("galleryImage:$gallery")
         compose.onNodeWithTag("galleryImage:$gallery").performSemanticsAction(SemanticsActions.OnClick)
         waitFor("replyImage")

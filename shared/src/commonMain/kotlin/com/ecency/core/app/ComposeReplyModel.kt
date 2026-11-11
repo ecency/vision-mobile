@@ -123,6 +123,15 @@ class ComposeReplyModel internal constructor(
     }
 
     /**
+     * A tile of the composer's image sheet, the editor's uploads sheet ([MediaSourceMenus.editorUploads]): paste is
+     * the chip's paste, the others the reply's one image attach.
+     */
+    fun attachFrom(source: MediaSource) {
+        val mapped = WaveImageSource.of(source) ?: return
+        if (mapped == WaveImageSource.CLIPBOARD) pasteClipboardImage() else attach(mapped)
+    }
+
+    /**
      * RN's image button (UploadsGalleryModal, `allowMultiple={false}`): pick, upload for [owner] through the app's
      * image upload (the wave composer's [WaveImageAttacher]), attach one image; a second one replaces it, as RN.
      * Saved with the draft, apart from the text, as RN's reply cache kept it.

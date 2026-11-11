@@ -101,19 +101,21 @@ final class WavesUITests: XCTestCase {
         XCTAssertFalse(element(app, "wave-video").exists)
     }
 
-    /// RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the account's uploaded images, and one tap is
-    /// the wave's image (the fake gallery's first image).
+    /// The image button opens the editor's image sheet: the source tiles, then the account's uploaded images (RN quick
+    /// post's UploadsGalleryModal, `allowMultiple={false}`), and one tap is the wave's image (the fake gallery's first).
     func testAnImageFromTheUploadsGalleryIsTheWavesImage() {
         let app = launch(["-seedAccounts", "YES"])
         XCTAssertTrue(app.buttons["wave-fab"].waitForExistence(timeout: 20))
         app.buttons["wave-fab"].tap()
         XCTAssertTrue(element(app, "wave-text").waitForExistence(timeout: 10))
-        let uploads = app.buttons["wave-uploads"]
-        XCTAssertTrue(uploads.waitForExistence(timeout: 10), app.debugDescription)
-        uploads.tap()
+        for id in ["wave-camera", "wave-files", "wave-uploads"] { XCTAssertFalse(app.buttons[id].exists, "no \(id) button") }
+        let attach = app.buttons["wave-attach"]
+        XCTAssertTrue(attach.waitForExistence(timeout: 10), app.debugDescription)
+        attach.tap()
         let image = element(app, "gallery-image-demo-i1")
         XCTAssertTrue(image.waitForExistence(timeout: 10), app.debugDescription)
-        XCTAssertFalse(app.buttons["open-gallery"].exists, "the composer's own buttons are the pickers")
+        XCTAssertTrue(app.buttons["open-gallery"].exists, "the source tiles sit over the gallery, as in the editor")
+        XCTAssertTrue(app.buttons["open-files"].exists)
         XCTAssertFalse(app.buttons["add-to-gallery"].exists)
         image.tap()
         XCTAssertTrue(element(app, "wave-image").waitForExistence(timeout: 10), app.debugDescription)

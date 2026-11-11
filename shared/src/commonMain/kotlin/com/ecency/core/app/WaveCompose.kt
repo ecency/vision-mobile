@@ -30,7 +30,20 @@ import kotlin.coroutines.cancellation.CancellationException
 /** Where the composer's image comes from. */
 /** Where a wave's image comes from; CLIPBOARD: RN's "Image in clipboard · Paste image" chip. */
 /** Where a wave's image comes from. [FILES]: the system's file picker, for images stored outside the gallery (RN #3561). */
-enum class WaveImageSource { GALLERY, CAMERA, CLIPBOARD, FILES }
+enum class WaveImageSource {
+    GALLERY, CAMERA, CLIPBOARD, FILES;
+
+    companion object {
+        /** The attach behind a tile of the image sheet ([MediaSourceMenus.editorUploads]); null for a link, which it never shows. */
+        fun of(source: MediaSource): WaveImageSource? = when (source) {
+            MediaSource.LIBRARY -> GALLERY
+            MediaSource.CAMERA -> CAMERA
+            MediaSource.FILES -> FILES
+            MediaSource.PASTE -> CLIPBOARD
+            MediaSource.LINK -> null
+        }
+    }
+}
 
 object WaveComposeCopy {
     /** RN editor.clipboard_image_detected and editor.paste_image, as RN joins them on the chip. */
@@ -47,12 +60,6 @@ object WaveComposeCopy {
 
     /** The AI assist button's label (RN's AI assist icon). */
     val AI_ASSIST: String get() = L.aiAssist.title
-
-    /** The uploads gallery button's label (RN quick post's UploadsGalleryModal). */
-    val GALLERY: String get() = L.sideMenu.gallery
-
-    /** Its spoken name and the sheet's heading (RN editor.uploaded_images). */
-    val UPLOADED_IMAGES: String get() = L.editor.uploadedImages
 }
 
 /**
@@ -468,6 +475,15 @@ class WaveComposeModel internal constructor(
     fun pasteClipboardImage() {
         dismissClipboardChip()
         attach(WaveImageSource.CLIPBOARD)
+    }
+
+    /**
+     * A tile of the composer's image sheet, the editor's uploads sheet ([MediaSourceMenus.editorUploads]): paste is
+     * the chip's paste, the others the wave's one image attach.
+     */
+    fun attachFrom(source: MediaSource) {
+        val mapped = WaveImageSource.of(source) ?: return
+        if (mapped == WaveImageSource.CLIPBOARD) pasteClipboardImage() else attach(mapped)
     }
 
     private var draft: CommentDraft? = null

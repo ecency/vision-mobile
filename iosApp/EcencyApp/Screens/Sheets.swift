@@ -4,8 +4,8 @@ import SwiftUI
 import WebKit
 
 /// Reply composer over a `ComposeReplyModel` (RN quick reply, quickPostModalContent in comment mode): the text, the
-/// attached image, the clipboard chip and RN's toolbar under the text (image, camera, files, uploads, dictation, AI assist:
-/// the wave composer's `QuickComposeTools` without poll and video); expand and Send in the bar. The text lives in
+/// attached image, the clipboard chip and RN's toolbar under the text (image, dictation, AI assist: the wave
+/// composer's `QuickComposeTools` without poll and video; image opens the editor's image sheet); expand and Send in the bar. The text lives in
 /// the model, so closing the sheet after a failure keeps the draft (and its permlink) for the next attempt; only a
 /// success clears it.
 struct ReplyComposer: View {
@@ -22,6 +22,8 @@ struct ReplyComposer: View {
     @FocusState private var focused: Bool
     /// RN quick reply: dictation and AI assist, the editor's sheets over this reply, and the uploads gallery.
     @State private var aiSheet: AiSheet?
+    /// A tile picked in the image sheet: its attach starts once the sheet is gone.
+    @State private var pendingSource: MediaSource?
 
     private enum AiSheet: String, Identifiable {
         case assist, dictation, uploads
@@ -71,9 +73,8 @@ struct ReplyComposer: View {
                 // RN quick reply's toolbar, under the text (it scrolls sideways when it does not fit)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 0) {
-                        QuickComposeTools(idPrefix: "reply", onAttach: { draft.model.attach(source: $0) },
-                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist },
-                                          onUploads: { aiSheet = .uploads })
+                        QuickComposeTools(idPrefix: "reply", onImage: { aiSheet = .uploads },
+                                          onDictate: { aiSheet = .dictation }, onAiAssist: { aiSheet = .assist })
                     }
                 }
                 .foregroundStyle(theme.text)
@@ -134,12 +135,17 @@ struct ReplyComposer: View {
             }
         }
         .modifier(ImageAttachPickers(attacher: app.env.waves.attacher as? WaveUploadAttacher, ui: app.env.ui))
-        .themedSheet(item: $aiSheet) { which in
+        .themedSheet(item: $aiSheet, onDismiss: {
+            // a tile of the image sheet: its picker opens now that the sheet is gone
+            if let source = pendingSource { pendingSource = nil; draft.model.attachFrom(source: source) }
+        }) { which in
             switch which {
             case .assist: AiAssistSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
             case .dictation: DictationSheet(editor: draft.model, env: app.env).environment(\.appTheme, theme)
-            // RN UploadsGalleryModal allowMultiple={false}: a tapped upload is the reply's image
-            case .uploads: QuickUploadsSheet(env: app.env) { draft.model.pickUploaded(url: $0) }.environment(\.appTheme, theme)
+            // the image sheet: a tapped upload is the reply's image (RN UploadsGalleryModal allowMultiple={false})
+            case .uploads:
+                QuickUploadsSheet(env: app.env, onPick: { draft.model.pickUploaded(url: $0) }, onSource: { pendingSource = $0 })
+                    .environment(\.appTheme, theme)
             }
         }
         .onAppear {

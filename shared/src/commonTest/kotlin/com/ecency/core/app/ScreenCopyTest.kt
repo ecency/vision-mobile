@@ -450,8 +450,6 @@ class ScreenCopyTest {
         "ReadingUiCopy.CLEAR_TAG_FILTER" to { ReadingUiCopy.CLEAR_TAG_FILTER },
         "ReadingUiCopy.ADD_TAG_FEED" to { ReadingUiCopy.ADD_TAG_FEED },
         "ReadingUiCopy.ATTACHED_IMAGE_REMOVE" to { ReadingUiCopy.ATTACHED_IMAGE_REMOVE },
-        "ReadingUiCopy.CAMERA" to { ReadingUiCopy.CAMERA },
-        "ReadingUiCopy.FILES" to { ReadingUiCopy.FILES },
         "ReadingUiCopy.PAUSED" to { ReadingUiCopy.PAUSED },
         "ReadingUiCopy.POST" to { ReadingUiCopy.POST },
         "ShellUiCopy.NO_APP_FOR_LINK" to { ShellUiCopy.NO_APP_FOR_LINK },

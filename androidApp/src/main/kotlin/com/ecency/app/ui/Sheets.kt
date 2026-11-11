@@ -282,9 +282,8 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
             }
             // RN quick reply's toolbar, on its own line so every button shows next to the keyboard
             QuickComposeTools(
-                "reply", state.isSending, state.isAttaching, onAttach = model::attach,
+                "reply", state.isSending, state.isAttaching, onImage = { uploadsSheet = true },
                 onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                onUploads = { uploadsSheet = true },
             )
             Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 // RN quick reply "expand": the same reply continues in the full editor
@@ -308,7 +307,7 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
         }
     }
     QuickComposeAiSheet(env, model, aiSheet) { aiSheet = null }
-    if (uploadsSheet) QuickUploadsSheet(env, onPick = model::pickUploaded) { uploadsSheet = false }
+    if (uploadsSheet) QuickUploadsSheet(env, onPick = model::pickUploaded, onSource = model::attachFrom) { uploadsSheet = false }
 }
 
 /**

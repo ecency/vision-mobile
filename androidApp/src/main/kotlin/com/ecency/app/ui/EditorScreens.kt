@@ -1177,19 +1177,22 @@ private fun CommunitySheet(model: CommunityPickerModel, onPick: (EditorCommunity
     }
 }
 
-/** The editor's routes into its uploads sheet: the source tiles and RN's "+" (add to the gallery without inserting). */
+/**
+ * The routes into an uploads sheet: the source tiles and RN's "+" (add to the gallery without inserting). The quick
+ * composers ([QuickUploadsSheet]) have no [onAdd]: their one image is whatever is picked.
+ */
 internal class UploadSources(
     val canPaste: Boolean,
     val onGallery: () -> Unit,
     val onFiles: () -> Unit,
     val onCamera: () -> Unit,
     val onPaste: () -> Unit,
-    val onAdd: () -> Unit,
+    val onAdd: (() -> Unit)? = null,
 )
 
 /**
- * RN uploadsGalleryModal: where an image comes from, and the account's uploaded images. Without [sources] (the
- * quick composers, [QuickUploadsSheet]) it is the gallery alone: no source tiles and no "+".
+ * RN uploadsGalleryModal: where an image comes from, and the account's uploaded images; the editor's and the quick
+ * composers' ([QuickUploadsSheet]) one image flow. Without [sources] it is the gallery alone.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -1225,8 +1228,9 @@ internal fun UploadsSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(EditorUiCopy.UPLOADED_IMAGES, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.weight(1f))
                 // RN's "+" pill: add images to the gallery without inserting them
-                if (sources != null) Box(
-                    Modifier.clip(CircleShape).clickable(onClick = sources.onAdd, role = Role.Button).semantics { contentDescription = com.ecency.core.app.UploadsCopy.ADD_TO_GALLERY }
+                val onAdd = sources?.onAdd
+                if (onAdd != null) Box(
+                    Modifier.clip(CircleShape).clickable(onClick = onAdd, role = Role.Button).semantics { contentDescription = com.ecency.core.app.UploadsCopy.ADD_TO_GALLERY }
                         .padding(6.dp).testTag("addToGallery"),
                 ) { Glyph(AppIcon.ADD, colors.text, 24.dp, description = null) }
                 if (state.uploading > 0) Spinner(Modifier.padding(horizontal = 6.dp), size = 18.dp)

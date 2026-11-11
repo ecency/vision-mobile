@@ -1407,8 +1407,9 @@ private struct CommunitySheet: View {
     }
 }
 
-/// RN uploadsGalleryModal: where an image comes from, and the account's uploaded images. Without the source
-/// handlers (the quick composers, `QuickUploadsSheet`) it is the gallery alone: no source tiles and no "+".
+/// RN uploadsGalleryModal: where an image comes from, and the account's uploaded images; the editor's and the quick
+/// composers' (`QuickUploadsSheet`) one image flow. Without the source handlers it is the gallery alone, without
+/// `onAdd` there is no "+".
 struct UploadsSheet: View {
     @ObservedObject var uploads: Observed<UploadsState>
     var onGallery: (() -> Void)?

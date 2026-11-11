@@ -274,8 +274,6 @@ object ReadingUiCopy {
     val CLEAR_TAG_FILTER: String get() = L.native.ui.reading.clearTagFilter
     val ADD_TAG_FEED: String get() = L.native.ui.reading.addTagFeed
     val ATTACHED_IMAGE_REMOVE: String get() = L.native.ui.reading.attachedImageRemove
-    val CAMERA: String get() = L.native.ui.reading.camera
-    val FILES: String get() = L.native.ui.reading.files
     val PAUSED: String get() = L.native.ui.reading.paused
     val POST: String get() = L.wallet.post
     fun commentsCount(count: Int): String = L.native.ui.reading.commentsCount(count = LocaleFormat.integer(count.toLong()))
