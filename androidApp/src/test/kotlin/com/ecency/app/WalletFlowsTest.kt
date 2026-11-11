@@ -430,6 +430,53 @@ class WalletFlowsTest {
     }
 
     @Test
+    fun aSwapThatWentThroughReplacesItsFormWithTheDoneStateUntilANewSwap() {
+        node.extra.let { base ->
+            node.extra = { method, params ->
+                when (method) {
+                    "condenser_api.get_order_book" -> """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}"""
+                    "condenser_api.get_ticker" -> """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}"""
+                    else -> base?.invoke(method, params)
+                }
+            }
+        }
+        node.auth.rest.let { base ->
+            // the wallet reload after the broadcast finds the HIVE spent
+            node.auth.rest = { r ->
+                if (r.url.endsWith("/wallet-api/portfolio-v2") && node.broadcasts().isNotEmpty()) HttpResult(200, portfolio.replace(""""balance":12.345""", """"balance":0""").replace(""""liquid":12.345""", """"liquid":0"""))
+                else base?.invoke(r)
+            }
+        }
+        val navigator = Navigator(NavState().push(AppScreen.Trade("HIVE")))
+        launch(navigator)
+        until { exists("tradeScreen") && text("tradeBalance").contains("12.345") && text("tradeRate").isNotEmpty() }
+        compose.onNodeWithTag("tradeBalance").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { compose.onAllNodes(hasTestTag("tradeNext")).fetchSemanticsNodes().firstOrNull()?.config?.contains(SemanticsProperties.Disabled) == false }
+        compose.onNodeWithTag("tradeNext").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tradeConfirm") }
+        compose.onNodeWithTag("tradeConfirm").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        val model = { navigator.top.peek<com.ecency.core.app.TradeModel>("trade")!! }
+        try {
+            until { exists("tradeResultTitle") && model().current.balance == 0.0 }
+        } catch (e: AssertionError) {
+            throw AssertionError("state=${model().current}")
+        }
+        assertEquals(com.ecency.core.app.TradeCopy.SUCCESSFUL, text("tradeResultTitle"))
+        assertEquals(com.ecency.core.app.TradeCopy.summary("12.345 HIVE", "3.086 HBD"), text("tradeSummary"))
+        // the form is gone: no field with the swapped amount, no balance warning, nothing to send again
+        assertFalse(exists("tradeFrom"))
+        assertFalse(exists("tradeErrors"))
+        assertFalse(exists("tradeNext"))
+        assertTrue(exists("tradeDone"))
+        compose.onNodeWithTag("tradeNew").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tradeFrom") }
+        assertFalse(exists("tradeResult"))
+        assertEquals("", model().current.fromAmount)
+        assertTrue(text("tradeBalance"), text("tradeBalance").contains("0.000"))
+        assertEquals(1, node.broadcasts().size)
+    }
+
+    @Test
     fun withTheAppLockOnATransferAsksForThePinBeforeSigning() {
         com.ecency.core.secure.PinLock(KeyVault(node.store), 16).setPin("1234")
         val navigator = Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive")))

@@ -78,6 +78,9 @@ object TradeCopy {
     val MARKET_FAILED: String get() = L.alert.marketDataLoadFailed
 
     fun swapFor(from: String, to: String) = L.trade.swapFor(fromAmount = from, toAmount = to)
+
+    /** The done state's line: what the swap sold and the least it receives ("4.000 HIVE for 1.000 HBD"). */
+    fun summary(from: String, to: String) = L.native.trade.swapSummary(fromAmount = from, toAmount = to)
 }
 
 /** How a swap ended. */
@@ -94,11 +97,23 @@ data class TradeState(
     val prompt: TradePrompt? = null,
     val actionId: String? = null,
     val phase: SendPhase? = null,
-    /** After a swap: pending (the order is still open) or done. */
     /** How the swap ended; null while it has not. */
     val outcome: TradeOutcome? = null,
+    /** The chain amounts of the sent swap (its confirmation's), for the done state's summary. */
+    val sold: String = "",
+    val received: String = "",
     val closed: Boolean = false,
 ) {
+    /**
+     * The swap went through (accepted by a node; [outcome] follows a moment later): the done state replaces the form,
+     * which takes no input, shows no checks and cannot be sent again until "New Swap" ([TradeModel.reset]). Without
+     * this the swapped amount stayed in the field and the balance reload under it read as "more than your balance".
+     */
+    val finished: Boolean get() = phase is SendPhase.Done || outcome != null
+
+    /** "4.000 HIVE for 1.000 HBD" in the done state; null before. */
+    val summary: String? get() = if (finished && sold.isNotEmpty()) TradeCopy.summary(sold, received) else null
+
     /** The outcome's title in the current language. */
     val result: String? get() = outcome?.let { if (it == TradeOutcome.PENDING) TradeCopy.PENDING else TradeCopy.SUCCESSFUL }
 
@@ -113,7 +128,7 @@ data class TradeState(
     val moreThanBalance: Boolean get() = fromValue > balance
 
     val errors: List<String>
-        get() = buildList {
+        get() = if (finished) emptyList() else buildList {
             if (moreThanBalance) add(TradeCopy.MORE_THAN_BALANCE)
             if (quote?.invalidAmount == true || (quote?.emptyOrderBook == true && fromValue > 0)) add(TradeCopy.OFFER_UNAVAILABLE)
             if (quote?.tooMuchSlippage == true) add(TradeCopy.TOO_MUCH_SLIPPAGE)
@@ -122,7 +137,7 @@ data class TradeState(
     val busy: Boolean get() = phase is SendPhase.Sending || phase is SendPhase.Checking
 
     val continueEnabled: Boolean
-        get() = !bookLoading && !moreThanBalance && quote?.invalidAmount != true && fromValue > 0 && toAmount > 0 && !busy && actionId == null
+        get() = !bookLoading && !moreThanBalance && quote?.invalidAmount != true && fromValue > 0 && toAmount > 0 && !busy && actionId == null && !finished
 }
 
 sealed interface TradePrompt {
@@ -213,7 +228,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     private fun requote() {
         val s = current
         // an open question keeps the amounts it shows; the quote follows the book again once it closes
-        if (s.prompt is TradePrompt.Confirm) return
+        if (s.prompt is TradePrompt.Confirm || s.finished) return
         val amount = s.fromValue
         val q = SwapCalculator.quote(bids, asks, amount, s.from == "HIVE")
         // no amount in the new quote (an empty book): no amount to confirm (RN kept the last one)
@@ -221,7 +236,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     }
 
     fun setAmount(text: String) {
-        if (current.busy) return
+        if (current.busy || current.finished) return
         val typed = Amounts.typed(text, 3)
         if (typed.isNotEmpty() && typed != "." && Dec.of(typed) == null) return
         setState { it.copy(fromAmount = typed) }
@@ -233,7 +248,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
 
     /** RN handleAssetChange: the other side, with the previous "to" amount as the new "from". */
     fun flip() {
-        if (current.busy) return
+        if (current.busy || current.finished) return
         val previousTo = current.toAmount
         setState { it.copy(from = it.to, fromAmount = if (previousTo > 0) Num.fixed(previousTo, 3) else "", toAmount = 0.0) }
         balance()
@@ -271,7 +286,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         }
         val ops = WalletOps.ops(listOf(op))
         val actionId = env.idempotencyKey()
-        setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending) }
+        setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending, sold = prompt.amountToSell, received = prompt.minToReceive) }
         scope.launch {
             ordersBefore = runCatching { env.walletApi.openOrders(owner).size }.getOrDefault(0)
             env.walletSends.send(owner, ops, OperationAuthority.required(ops), actionId)
@@ -279,8 +294,13 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         }
     }
 
-    /** "New Swap": the screen again. */
-    fun reset() = setState { TradeState(from = it.from, balance = it.balance, rateText = it.rateText, bookLoading = false) }.also { requote() }
+    /** "New Swap": an empty form on the current balance, only from the done state (it never clears a send in flight). */
+    fun reset() {
+        if (!current.finished) return
+        setState { TradeState(from = it.from, balance = it.balance, rateText = it.rateText, bookLoading = false) }
+        balance()
+        requote()
+    }
 
     private fun onPhase(id: String, phase: SendPhase) {
         setState { it.copy(phase = phase) }
@@ -290,7 +310,8 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 scope.launch {
                     delay(1_000)
                     val after = runCatching { env.walletApi.openOrders(user ?: return@launch).size }.getOrDefault(ordersBefore)
-                    setState { it.copy(outcome = if (after != ordersBefore) TradeOutcome.PENDING else TradeOutcome.SUCCESSFUL) }
+                    // a "New Swap" in the meantime started another form: this outcome is not its
+                    setState { if (it.actionId != id) it else it.copy(outcome = if (after != ordersBefore) TradeOutcome.PENDING else TradeOutcome.SUCCESSFUL) }
                     env.wallet.refreshLater()
                 }
             }

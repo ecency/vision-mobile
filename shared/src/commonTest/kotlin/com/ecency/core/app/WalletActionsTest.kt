@@ -300,6 +300,73 @@ class WalletActionsTest {
         }
     }
 
+    /** A swap of the whole HIVE balance that fills at once (no open order before or after). */
+    private fun TestScope.swappedWholeBalance(w: WalletWorld, m: TradeModel) {
+        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        m.start()
+        testScheduler.advanceTimeBy(1_000)
+        m.useBalance()
+        assertEquals("12.345", m.current.fromAmount)
+        m.next()
+        m.confirm()
+        // the wallet reload after the broadcast finds the HIVE spent
+        w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":0""").replace(""""liquid":12.345""", """"liquid":0""")) }
+        testScheduler.advanceTimeBy(10_000)
+        testScheduler.runCurrent()
+    }
+
+    @Test
+    fun aSwapThatWentThroughShowsItsDoneStateAndNoStaleFormErrors() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swappedWholeBalance(w, m)
+            assertEquals(1, w.broadcastOps().size)
+            assertEquals(TradeOutcome.SUCCESSFUL, m.current.outcome)
+            assertEquals(0.0, m.current.balance, "the balance reloaded under the done state")
+            assertEquals(emptyList(), m.current.errors, "no 'more than your balance' under a success")
+            assertTrue(m.current.finished, "the done state replaces the form")
+            assertFalse(m.current.continueEnabled)
+            assertEquals(TradeCopy.summary("12.345 HIVE", "3.086 HBD"), m.current.summary)
+            // the form cannot be edited or sent again until New Swap
+            m.setAmount("1")
+            m.flip()
+            assertEquals("12.345", m.current.fromAmount)
+            assertEquals("HIVE", m.current.from)
+            m.next()
+            assertNull(m.current.prompt)
+            testScheduler.advanceTimeBy(TradeModel.BOOK_REFRESH_MILLIS + 1_000)
+            assertEquals(emptyList(), m.current.errors)
+            assertEquals(1, w.broadcastOps().size)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun newSwapStartsAnEmptyFormOnTheFreshBalance() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swappedWholeBalance(w, m)
+            m.reset()
+            assertFalse(m.current.finished)
+            assertNull(m.current.outcome)
+            assertNull(m.current.summary)
+            assertEquals("", m.current.fromAmount)
+            assertEquals(0.0, m.current.balance)
+            assertEquals(emptyList(), m.current.errors)
+            m.setAmount("1")
+            assertEquals("1", m.current.fromAmount, "the new form takes input again")
+            assertTrue(TradeCopy.MORE_THAN_BALANCE in m.current.errors, "and checks it against the fresh balance")
+        } finally {
+            m.close()
+        }
+    }
+
     // ---- redeem ----
 
     @Test

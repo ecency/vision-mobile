@@ -410,26 +410,24 @@ struct TradeView: View {
     var body: some View {
         let s = observed.state
         ThemedForm {
-            Section {
-                WalletField(label: "\(tcopy.FROM) (\(s.from))", text: binding(s.fromAmount) { model.setAmount(text: $0) }, number: true, disabled: s.busy, id: "trade-from")
-                Button(UiCopy.shared.balance(amount: "\(LocaleFormat.shared.toFixed(value: s.balance, decimals: 3)) \(s.from)")) { model.useBalance() }.font(.footnote).accessibilityIdentifier("trade-balance")
-                Button { model.flip() } label: { Image(appIcon: .sort).tapTarget() }.accessibilityLabel(WalletUiCopy.shared.SWAP).frame(maxWidth: .infinity).disabled(s.busy).accessibilityIdentifier("trade-flip")
-                Text("\(tcopy.TO) (\(bidiValue(s.to))): \(bidiValue(LocaleFormat.shared.toFixed(value: s.toAmount, decimals: 3)))").bold().accessibilityIdentifier("trade-to")
-                if let rate = s.rateText { Text(rate).font(.footnote).foregroundStyle(theme.secondary).accessibilityIdentifier("trade-rate") }
-                Text("\(tr.FEE): \(tr.FREE)").font(.footnote).foregroundStyle(theme.secondary)
-                if !s.errors.isEmpty { Text(s.errors.joined(separator: "\n")).font(.footnote).foregroundStyle(theme.dangerText).announces(s.errors.joined(separator: "\n"), debounce: true).accessibilityIdentifier("trade-errors") }
-                if s.bookLoading { ProgressView() }
-            }
-            SendPhaseView(phase: s.phase) { dismiss() }
-            if let result = s.result {
+            // the done state replaces the form: nothing to edit, check or send again until "New Swap"
+            if s.finished {
+                Section { TradeDoneView(state: s, onNew: { model.reset() }, onDone: { dismiss() }) }
+            } else {
                 Section {
-                    Text(result).bold().accessibilityIdentifier("trade-result")
-                    if s.pending { Text(tr.PENDING_BODY).font(.footnote) }
-                    Button(tr.NEW_SWAP) { model.reset() }
-                    Button(tr.DONE) { dismiss() }
+                    WalletField(label: "\(tcopy.FROM) (\(s.from))", text: binding(s.fromAmount) { model.setAmount(text: $0) }, number: true, disabled: s.busy, id: "trade-from")
+                    Button(UiCopy.shared.balance(amount: "\(LocaleFormat.shared.toFixed(value: s.balance, decimals: 3)) \(s.from)")) { model.useBalance() }.font(.footnote).accessibilityIdentifier("trade-balance")
+                    Button { model.flip() } label: { Image(appIcon: .sort).tapTarget() }.accessibilityLabel(WalletUiCopy.shared.SWAP).frame(maxWidth: .infinity).disabled(s.busy).accessibilityIdentifier("trade-flip")
+                    Text("\(tcopy.TO) (\(bidiValue(s.to))): \(bidiValue(LocaleFormat.shared.toFixed(value: s.toAmount, decimals: 3)))").bold().accessibilityIdentifier("trade-to")
+                    if let rate = s.rateText { Text(rate).font(.footnote).foregroundStyle(theme.secondary).accessibilityIdentifier("trade-rate") }
+                    Text("\(tr.FEE): \(tr.FREE)").font(.footnote).foregroundStyle(theme.secondary)
+                    if !s.errors.isEmpty { Text(s.errors.joined(separator: "\n")).font(.footnote).foregroundStyle(theme.dangerText).announces(s.errors.joined(separator: "\n"), debounce: true).accessibilityIdentifier("trade-errors") }
+                    if s.bookLoading { ProgressView() }
                 }
-            } else if !s.busy {
-                Button(tcopy.NEXT) { model.next() }.frame(maxWidth: .infinity).disabled(!s.continueEnabled).accessibilityIdentifier("trade-next")
+                SendPhaseView(phase: s.phase) { dismiss() }
+                if !s.busy {
+                    Button(tcopy.NEXT) { model.next() }.frame(maxWidth: .infinity).disabled(!s.continueEnabled).accessibilityIdentifier("trade-next")
+                }
             }
         }
         .navigationTitle(tr.TITLE).navigationBarTitleDisplayMode(.inline)
@@ -438,6 +436,39 @@ struct TradeView: View {
         .modifier(TradeAlertModifier(prompt: s.prompt, title: tr.CONFIRM_SWAP, onConfirm: { model.confirm() }, onDismiss: { model.dismissPrompt() }))
         .modifier(LeaveGuard(busy: s.busy))
         .accessibilityIdentifier("trade-screen")
+    }
+}
+
+/// The swap's done state in place of its form (RN showed it as a sheet over the screen): the outcome's icon and
+/// title, what was swapped, "Done" first and "New Swap". A spinner holds the title's place while the open orders
+/// tell "swapped" from "pending".
+struct TradeDoneView: View {
+    let state: TradeState
+    let onNew: () -> Void
+    let onDone: () -> Void
+    @Environment(\.appTheme) private var theme
+    private let tr = TradeCopy.shared
+
+    var body: some View {
+        VStack(spacing: 12) {
+            if let title = state.result {
+                Image(appIcon: state.pending ? .info : .check).font(.system(size: 40, weight: .bold)).foregroundStyle(Color.white)
+                    .padding(16).background(Circle().fill(state.pending ? theme.accent : Color(hex: 0x4CAF50))).accessibilityHidden(true)
+                Text(title).font(.title3).bold().multilineTextAlignment(.center).foregroundStyle(theme.text)
+                    .accessibilityAddTraits(.isHeader).announces(title).accessibilityIdentifier("trade-result")
+            } else {
+                ProgressView().padding(24).accessibilityIdentifier("trade-checking")
+            }
+            if let summary = state.summary {
+                Text(bidiValue(summary)).multilineTextAlignment(.center).foregroundStyle(theme.text).accessibilityIdentifier("trade-summary")
+            }
+            if state.pending { Text(tr.PENDING_BODY).font(.footnote).multilineTextAlignment(.center).foregroundStyle(theme.secondary) }
+            Button(action: onDone) { Text(tr.DONE).bold().frame(maxWidth: .infinity, minHeight: 36) }
+                .buttonStyle(.prominentFill).padding(.top, 8).accessibilityIdentifier("trade-done")
+            Button(action: onNew) { Text(tr.NEW_SWAP).bold().frame(maxWidth: .infinity, minHeight: 36) }
+                .buttonStyle(.subtleFill).accessibilityIdentifier("trade-new")
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 16)
     }
 }
 

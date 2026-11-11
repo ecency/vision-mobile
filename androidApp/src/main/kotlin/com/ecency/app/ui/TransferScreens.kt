@@ -15,6 +15,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -438,6 +441,11 @@ fun TradeScreen(model: TradeModel, onBack: () -> Unit) {
     val back = leaveGuard(s.busy, onBack)
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().imePadding().testTag("tradeScreen")) {
         TopBar(TradeCopy.TITLE, onBack = back)
+        // the done state replaces the form: nothing to edit, check or send again until "New Swap"
+        if (s.finished) {
+            TradeDone(s, onNew = model::reset, onDone = onBack)
+            return@Column
+        }
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Field("${TransferCopy.FROM} (${com.ecency.core.l10n.Bidi.inUi(s.from)})", s.fromAmount, model::setAmount, "tradeFrom", enabled = !s.busy, number = true)
             Text(com.ecency.core.app.UiCopy.balance("${com.ecency.core.l10n.LocaleFormat.toFixed(s.balance, 3)} ${s.from}"), color = colors.blueText, fontSize = 13.sp, modifier = Modifier.clickable(role = Role.Button) { model.useBalance() }.testTag("tradeBalance"))
@@ -448,17 +456,7 @@ fun TradeScreen(model: TradeModel, onBack: () -> Unit) {
             if (s.errors.isNotEmpty()) Warning(s.errors.joinToString("\n"), "tradeErrors")
             if (s.bookLoading) LoadingBlock()
             SendPhasePanel(s.phase, onClose = onBack)
-            s.result?.let { r ->
-                Column(Modifier.fillMaxWidth().padding(top = 12.dp).testTag("tradeResult"), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(r, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                    if (s.pending) Text(TradeCopy.PENDING_BODY, color = colors.darkGray, fontSize = 13.sp, textAlign = TextAlign.Center)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        TextButton(onClick = model::reset, modifier = Modifier.testTag("tradeNew")) { Text(TradeCopy.NEW_SWAP, color = colors.blueText) }
-                        TextButton(onClick = onBack) { Text(TradeCopy.DONE, color = colors.blueText) }
-                    }
-                }
-            }
-            if (s.result == null && !s.busy) PrimaryButton(TransferCopy.NEXT, s.continueEnabled, "tradeNext", model::next)
+            if (!s.busy) PrimaryButton(TransferCopy.NEXT, s.continueEnabled, "tradeNext", model::next)
         }
     }
     when (val p = s.prompt) {
@@ -469,6 +467,37 @@ fun TradeScreen(model: TradeModel, onBack: () -> Unit) {
         )
         is TradePrompt.Alert -> AlertDialog(onDismissRequest = model::dismissPrompt, title = { Text(p.title) }, text = { Text(p.message) }, confirmButton = { TextButton(onClick = model::dismissPrompt) { Text(UiCopy.OK) } })
         null -> Unit
+    }
+}
+
+/**
+ * The swap's done state in place of its form (RN showed it as a sheet over the screen): the outcome's icon and
+ * title, what was swapped, "Done" first and "New Swap". A spinner holds the title's place while the open orders
+ * tell "swapped" from "pending".
+ */
+@Composable
+private fun TradeDone(s: com.ecency.core.app.TradeState, onNew: () -> Unit, onDone: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp).testTag("tradeResult"), horizontalAlignment = Alignment.CenterHorizontally) {
+        val title = s.result
+        if (title == null) {
+            Spinner(Modifier.padding(24.dp).testTag("tradeChecking"), size = 32.dp)
+        } else {
+            Box(Modifier.padding(top = 24.dp).clip(RoundedCornerShape(48.dp)).background(if (s.pending) colors.blue else Color(0xFF4CAF50)).padding(12.dp)) {
+                Glyph(if (s.pending) AppIcon.INFO else AppIcon.CHECK, Color.White, 48.dp)
+            }
+            Text(
+                title, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 16.dp).semantics { heading(); liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }.testTag("tradeResultTitle"),
+            )
+        }
+        s.summary?.let { Text(com.ecency.core.l10n.Bidi.inUi(it), color = colors.text, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp).testTag("tradeSummary")) }
+        if (s.pending) Text(TradeCopy.PENDING_BODY, color = colors.darkGray, fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
+        Spacer(Modifier.height(16.dp))
+        PrimaryButton(TradeCopy.DONE, true, "tradeDone", onDone)
+        OutlinedButton(onClick = onNew, modifier = Modifier.fillMaxWidth().padding(top = 10.dp).heightIn(min = 48.dp).testTag("tradeNew")) {
+            Text(TradeCopy.NEW_SWAP, color = colors.blueText, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
