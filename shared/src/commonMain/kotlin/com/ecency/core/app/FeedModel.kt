@@ -283,6 +283,8 @@ class FeedModel internal constructor(
             val cards = withContext(dispatchers.render) {
                 list.map { Cards.of(it, env.renderer, user, local[it.key], env.proxyBase, promoted = true, nsfwWarn = nsfw == NsfwMode.WARN) }
             }
+            // the account may have changed while the cards rendered
+            if (env.session.current.username != observer) return@launch
             promotedPosts = list.associateBy { it.key }
             promotedCards = cards
             redisplay()

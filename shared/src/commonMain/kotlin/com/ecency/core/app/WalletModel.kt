@@ -450,8 +450,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         } ?: return@withLock true
         val now = env.nowMillis()
         val known = swaps.mapNotNull { it.actionId }.toSet()
-        // one far older than any transaction can live is dropped
-        val back = StoredSwap.decode(stored).filter { it.actionId !in known && it.account !in departed && now - it.at <= RESTORE_MAX_AGE_MILLIS }
+        // one with a known expiration is settled by the chain's time; one without, far older than any transaction can
+        // live by this phone's clock, is dropped (else the next load would start a new hour for it)
+        val back = StoredSwap.decode(stored).filter { it.actionId !in known && it.account !in departed && (it.expiresBy != null || now - it.at <= RESTORE_MAX_AGE_MILLIS) }
         if (back.isEmpty()) return@withLock true
         back.forEach { s ->
             s.actionId?.let { swapActions += it }

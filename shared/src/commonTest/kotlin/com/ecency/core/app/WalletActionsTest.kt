@@ -992,6 +992,21 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aSavedSwapWithAKnownExpirationOutlivesAPhoneClockJump() = runTest {
+        val w = world(this)
+        clocks(w, phoneAheadMillis = 3 * 3_600_000L)
+        // signed here a minute ago by the chain's clock; the phone's clock has since jumped three hours ahead
+        val chainNow = TestApp.NOW + testScheduler.currentTime
+        val saved = StoredSwap(WalletWorld.USER, "HIVE", 1.0, chainNow - 60_000L, chainNow + 60_000L, "action-1", null)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(saved)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "still pending by the chain's time")
+        advance(60_000L + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed it")
+    }
+
+    @Test
     fun aSavedSwapReadThatFailsIsTriedAgainNotTakenAsNone() = runTest {
         val w = world(this)
         clocks(w)

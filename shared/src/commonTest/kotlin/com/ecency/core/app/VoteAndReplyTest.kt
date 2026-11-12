@@ -741,6 +741,13 @@ class VoteAndReplyTest {
         val without = LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, estimate = estimate)).payout
         assertEquals(post.totalPayout + LocalVotes.payoutDelta(post, 100_000L, estimate), with, 0.0001)
         assertTrue(with < without, "the old vote's share comes off")
+        // a read that lists the account with no weight: that vote's share is gone, nothing comes off
+        val listed = v1Post(listed = true, total = 4).copy(pendingPayoutValue = "10.000 HBD", totalPayout = 10.0, netRshares = 1_000_000L)
+        assertEquals(
+            listed.totalPayout + LocalVotes.payoutDelta(listed, 0L, estimate),
+            LocalVotes.view(listed, "spike-voter", LocalVote(5000, pending = false, estimate = estimate, earlierRshares = 100_000L)).payout,
+            0.0001,
+        )
     }
 
     @Test
