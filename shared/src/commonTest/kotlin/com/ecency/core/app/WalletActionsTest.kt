@@ -961,6 +961,26 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aPhoneClockSetBackBeforeASwapNeverShortensItsBound() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        // three hours pass with no chain read; the phone's clock is set back by as much meanwhile
+        advance(3 * 3_600_000L)
+        w.app.monotonic += 3 * 3_600_000L
+        w.app.clock = { TestApp.NOW + 1_000 }
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "after-a-step-back")
+        advance(100)
+        w.env.wallet.close()
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the three hours count: it can still land")
+    }
+
+    @Test
     fun aSwapSignedElsewhereStaysPendingAcrossAPhoneClockJump() = runTest {
         val w = world(this)
         clocks(w)

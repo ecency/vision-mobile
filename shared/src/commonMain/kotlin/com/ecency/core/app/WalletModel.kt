@@ -290,7 +290,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private val swapActions = mutableSetOf<String>()
 
     /** The chain's liquid HIVE and HBD of [account] (get_accounts), from a load sent at [sentAt] that read the head time [head]. */
-    private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long, val sentAt: Long)
+    private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long, val sentAt: Long, val sentMono: Long)
 
     private var chainRead: ChainRead? = null
     private var settleLoad: Job? = null
@@ -319,8 +319,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
         // signed elsewhere or undecided: a wallet app may still approve it after now (a HiveAuth request closed while
         // waiting), within the hour, and its transaction lives an hour more; so it lands no later than the last chain
-        // head plus the time since that read plus both hours (kept across a restart: the phone's clock never decides)
-        val latestBy = if (expiresBy != null) null else chainRead?.takeIf { it.account == account }?.let { it.head + (now - it.sentAt).coerceAtLeast(0) + 2 * MAX_TRANSACTION_LIFETIME_MILLIS }
+        // head plus the time since that read (on the monotonic clock: a phone clock set back never shortens it) plus
+        // both hours. Kept across a restart, where the phone's clock never decides.
+        val latestBy = if (expiresBy != null) null else chainRead?.takeIf { it.account == account }?.let {
+            it.head + (env.security.monotonicMillis() - it.sentMono).coerceAtLeast(0) + 2 * MAX_TRANSACTION_LIFETIME_MILLIS
+        }
         swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy)
         settleLoadsLeft = SETTLE_LOADS
         saveSwaps()
@@ -539,6 +542,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 setState { if (it.account == user) it else WalletState(account = user, isLoading = true, currency = it.currency) }
                 val currency = current.currency
                 val sentAt = env.nowMillis()
+                // the same moment on a clock the user cannot set back (time since this read never rests on the phone's clock)
+                val sentMono = env.security.monotonicMillis()
                 loading = user
                 val orders = swaps.filter { it.account == user }.mapNotNull { it.orderId }
                 val accountJob = async {
@@ -572,7 +577,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 // aside (a failed one too), and settles nothing
                 val head = chainNow?.headTimeMillis
                 val last = chainRead?.takeIf { it.account == user }
-                val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head, sentAt) else null
+                val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head, sentAt, sentMono) else null
                 if (forward != null) chainRead = forward
                 settle(user, sentAt, forward, landed)
                 loading = null
