@@ -2039,7 +2039,6 @@
         "playing": "Playing {permlink}",
         "video_attached_remove": "Video attached, remove",
         "image_attached_remove": "Attached image, remove",
-        "take_photo": "Take photo",
         "edit_poll": "Edit poll",
         "add_poll": "Add poll",
         "add_video": "Add video"
@@ -2667,7 +2666,6 @@
     "purchase": {
       "boost_row": "Boost+  |  {hp} HP",
       "account_meta_missing": "Email and username are required for 999accounts consumption",
-      "stuck": "An earlier purchase of this product could not be completed. Please contact support@ecency.com with your store receipt, it is kept for this.",
       "held": "This purchase is held for review. Contact support@ecency.com with order #{order}.",
       "held_title": "Purchase held for review",
       "held_subject": "Purchase held for review, order #{order}",
