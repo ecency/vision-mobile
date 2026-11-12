@@ -762,11 +762,10 @@ class VoteAndReplyTest {
         testScheduler.advanceUntilIdle()
         assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
         assertEquals(77L, app.env.localVotes.get(key)?.earlierRshares, "nor is its share in the payout taken twice")
-        // a second change: the first one's landed share is what comes off now (none known without an estimate: kept)
-        app.env.localVotes.set(key, LocalVote(5000, pending = false, estimate = VoteEstimate(0.1, 44L), earlierCounted = true, earlierRshares = 77L))
+        // a second change: the looked-up share is still the one the read holds
         app.env.votes.vote("alice", "root", 2000)
         testScheduler.advanceUntilIdle()
-        assertEquals(44L, app.env.localVotes.get(key)?.earlierRshares, "the landed first change's share")
+        assertEquals(77L, app.env.localVotes.get(key)?.earlierRshares, "carried through a second change")
         // changed again, and removed then cast again: the account stays counted (hivemind keeps a removed vote)
         app.env.votes.vote("alice", "root", 3000)
         testScheduler.advanceUntilIdle()
@@ -776,12 +775,13 @@ class VoteAndReplyTest {
         app.env.votes.vote("alice", "root", 3000)
         testScheduler.advanceUntilIdle()
         assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "a vote again after an unvote")
-        // a vote made here first: a card's older read may not have it yet, so it is not taken as counted
+        // a vote made here first: a saved read (a wave row) may not have it, so it is neither counted nor taken off
         val other = PostKey("alice", "other")
-        app.env.votes.vote("alice", "other", 10000)
-        testScheduler.advanceUntilIdle()
+        // landed here, with the sheet's estimate
+        app.env.localVotes.set(other, LocalVote(10000, pending = false, estimate = VoteEstimate(0.1, 44L)))
         app.env.votes.vote("alice", "other", 3000)
         testScheduler.advanceUntilIdle()
         assertEquals(false, app.env.localVotes.get(other)?.earlierCounted)
+        assertNull(app.env.localVotes.get(other)?.earlierRshares)
     }
 }

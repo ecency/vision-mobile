@@ -49,13 +49,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         // a vote read from the chain is in the post's count, and stays in it through later changes and an unvote
         // (hivemind keeps a removed vote counted); one made here may not be in a card's older read yet
         val earlierCounted = previous?.let { (it.fromChain && it.weight != 0) || it.earlierCounted } == true
-        // the replaced vote's share of the post's payout (a read without the account's vote cannot say it): the one read
-        // from the chain, or the landed change made here (its estimate is what the chain holds now)
-        val earlierRshares = when {
-            previous == null -> null
-            previous.fromChain -> previous.earlierRshares
-            else -> previous.estimate?.rshares ?: previous.earlierRshares
-        }
+        // the share of the post's payout a read without the account's vote still holds: the vote read from the chain,
+        // carried through later changes; a vote made here may not be in a saved read (a wave row), so it adds none
+        val earlierRshares = previous?.earlierRshares
         env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation
