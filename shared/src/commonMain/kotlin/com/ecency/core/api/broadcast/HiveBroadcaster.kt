@@ -33,7 +33,11 @@ class SignedTransaction(val transaction: Transaction, val signatures: List<Strin
     val size: Int get() = transaction.serialize().size + 1 + signatures.size * 65
 }
 
-data class BroadcastResult(val txId: String)
+data class BroadcastResult(
+    val txId: String,
+    /** The signed transaction's expiration (epoch millis, chain time): past it the chain has decided it. */
+    val expiresAtMillis: Long? = null,
+)
 
 /**
  * One logical broadcast that may take several sends. It keeps its signed transaction, so
@@ -92,7 +96,8 @@ class HiveBroadcaster(
     private val api: HiveApi,
     private val expirationMillis: Long = EXPIRATION_MILLIS,
     private val chainId: ByteArray = HIVE_CHAIN_ID,
-    private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
+    /** The clock expirations are written from (the system's; a test may set its own). */
+    internal var nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
     private val inFlightMutex = Mutex()
     private val inFlight = LinkedHashMap<String, PendingBroadcast>()
@@ -310,7 +315,7 @@ class HiveBroadcaster(
         else BroadcastException.Network(cause, p, undecided = true)
     }
 
-    private fun succeed(p: PendingBroadcast, txId: String) = BroadcastResult(txId).also { p.result = it }
+    private fun succeed(p: PendingBroadcast, txId: String) = BroadcastResult(txId, p.signed?.let(::expiresAt)).also { p.result = it }
 
     private enum class Landing { LANDED, NOT_LANDED, UNDECIDED, NOT_EXPIRED, TOO_OLD }
 

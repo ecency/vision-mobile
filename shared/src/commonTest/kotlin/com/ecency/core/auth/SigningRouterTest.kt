@@ -34,11 +34,11 @@ class SigningRouterTest {
 
         override suspend fun account(username: String) = account
         override suspend fun hasPostingAuthorization(username: String) = postingAuth
-        override suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): String? {
+        override suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): com.ecency.core.api.broadcast.BroadcastResult? {
             calls += "key:${authority.value}"
             keyError?.let { throw it }
             signedWith = key
-            return "tx-key"
+            return com.ecency.core.api.broadcast.BroadcastResult("tx-key")
         }
         override suspend fun broadcastWithHiveSignerToken(username: String, ops: JsonArray, accessToken: String): String? {
             calls += "token"

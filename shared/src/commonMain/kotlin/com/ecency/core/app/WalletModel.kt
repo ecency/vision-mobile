@@ -265,15 +265,16 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /**
      * A swap's sale of [amount] [symbol] from [account] that may be on chain since [at] (this phone's clock). Taken off
      * the swap form's balance until the chain has decided it for good: past its transaction's expiration it is in a
-     * block or never will be. [expiresBy] bounds that expiration in chain time, once known.
+     * block or never will be. [expiresBy] bounds that expiration in chain time, once known. [floor]: the last chain
+     * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond) at or below that shows it.
      */
-    private class Swap(val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?)
+    private class Swap(val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?, val floor: Double?, val actionId: String?)
 
     /** App-wide, so a swap screen opened again, or one closed before the swap ended, still takes the sale off. */
     private val swaps = mutableListOf<Swap>()
 
-    /** The chain's liquid HIVE and HBD of [account] (get_accounts), from a load that read the head time [head]. */
-    private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long)
+    /** The chain's liquid HIVE and HBD of [account] (get_accounts), from a load sent at [sentAt] that read the head time [head]. */
+    private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long, val sentAt: Long)
 
     private var chainRead: ChainRead? = null
     private var settleLoad: Job? = null
@@ -287,18 +288,26 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * its outcome undecided) the chain still caps it at acceptance plus [MAX_TRANSACTION_LIFETIME_MILLIS], and the
      * first load sent after now bounds the acceptance by its head time.
      */
-    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean) {
+    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean, actionId: String? = null, signedExpiresAt: Long? = null) {
         val now = env.nowMillis()
-        swaps += Swap(account, symbol, amount, now, if (keySigned) now + KEY_TRANSACTION_LIFETIME_MILLIS else null)
+        val waiting = swaps.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }
+        // no floor from a read sent before another send of this account (one not among its swaps here): it may have
+        // spent as much
+        val known = (swaps.filter { it.account == account }.mapNotNull { it.actionId } + listOfNotNull(actionId)).toSet()
+        val floor = chainRead?.takeIf { it.account == account && !env.signing.broadcastSince(account, it.sentAt, known) }
+            ?.liquid?.get(symbol)?.let { it - waiting - amount }
+        // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
+        val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, actionId)
         settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10
     }
 
     /**
      * What the swap form may offer of [symbol]: the last chain read of the account (the portfolio, which can lag
      * behind the chain, only when there is none; a failed read keeps the last) less every swap the chain may not have
-     * decided. Accepted is not decided, nor is a block. Nothing is inferred from how a balance moved: a deposit, a
-     * cancelled order or another send move it too. So for about three minutes after a key signed swap a read that has
-     * it shows it taken off twice: less, never more.
+     * decided, or shown. A swap leaves early on a chain read sent after it that is down by the whole swap from the
+     * read before it ([Swap.floor]): a deposit only moves it up. Otherwise it waits for its expiration: accepted is not
+     * decided, nor is a block, and a read that has not gone down by it may come from a server without it.
      */
     internal fun available(symbol: String): Double? {
         val account = current.account ?: return null
@@ -308,14 +317,19 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * A load of [account] sent at [sentAt] landed; [head] is the chain's time it read, null when its account or time
-     * read failed (it then settles nothing). Swaps it can bound get their expiration bound; those the chain decided
-     * [NODE_LAG_MILLIS] before [head] leave (the account read may come from a server of the node URL a little behind
-     * the one that told the time). A swap still waiting books the load after.
+     * A load of [account] sent at [sentAt] landed with the chain read [read], null when its account or time read
+     * failed, or the load did (it then settles nothing). Swaps it shows leave ([Swap.floor]); swaps it can bound get
+     * their expiration bound, and those the chain decided [NODE_LAG_MILLIS] before its head time leave too (the account
+     * read may come from a server of the node URL a little behind the one that told the time). A swap still waiting
+     * books the load after.
      */
-    private fun settle(account: String, sentAt: Long, head: Long?) {
-        if (head != null) {
-            swaps.filter { it.account == account && it.expiresBy == null && sentAt >= it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
+    private fun settle(account: String, sentAt: Long, read: ChainRead?) {
+        val head = read?.head
+        if (read != null && head != null) {
+            swaps.removeAll { sw ->
+                sw.account == account && sentAt > sw.at && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true)
+            }
+            swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
         }
         val waiting = swaps.filter { it.account == account }
@@ -337,6 +351,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /** [quiet]: no spinner, and a failure keeps what is shown without the banner (README "Foreground refresh"). */
     private fun load(refresh: Boolean, quiet: Boolean = false) {
         job?.cancel()
+        var loading: String? = null
         val stamp = env.freshness.stamp()
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh && !quiet, error = if (quiet) it.error else null, currency = WalletCurrency.of(env.prefs)) }
         job = scope.launch {
@@ -352,6 +367,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 setState { if (it.account == user) it else WalletState(account = user, isLoading = true, currency = it.currency) }
                 val currency = current.currency
                 val sentAt = env.nowMillis()
+                loading = user
                 val accountJob = async { runCatching { api.account(user) }.getOrNull() }
                 val globals = async { runCatching { api.chainGlobals() }.getOrNull() }
                 val items = api.portfolio(user, currency.code, onlyEnabled = true)
@@ -370,9 +386,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 // aside (a failed one too), and settles nothing
                 val head = chainNow?.headTimeMillis
                 val last = chainRead?.takeIf { it.account == user }
-                val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head) else null
+                val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head, sentAt) else null
                 if (forward != null) chainRead = forward
-                settle(user, sentAt, forward?.head)
+                settle(user, sentAt, forward)
+                loading = null
                 setState {
                     withRows(
                         it.copy(
@@ -386,6 +403,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: Exception) {
                 // a quiet refresh keeps what is on screen and is reported as a warning only
                 val error = if (quiet) null.also { ErrorReports.quiet(e, "wallet.refresh") } else AppError.from(e, "wallet.load")
+                // a swap still waiting books its next look whatever failed
+                loading?.let { settle(it, 0, null) }
                 setState { it.copy(isLoading = false, isRefreshing = false, error = if (quiet) it.error else error) }
             }
         }
@@ -472,6 +491,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val CLAIM_REREAD_MILLIS = listOf(2_000L, 3_000L, 5_000L, 10_000L, 20_000L)
 
         const val AFTER_BROADCAST_DELAY_MILLIS = 3_000L
+
+        /** Half of 0.001, the chain's smallest HIVE/HBD amount: float noise in a balance comparison. */
+        private const val HALF_UNIT = 0.0005
 
         /**
          * How far behind the head another node, or another server behind the same URL, may answer: above the 90 s

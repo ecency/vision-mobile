@@ -25,8 +25,11 @@ sealed interface SendPhase {
      */
     data class Checking(val message: String = BroadcastException.UNDECIDED_MESSAGE) : SendPhase
 
-    /** Accepted by a node ([txId] null when the signer did not report one). */
-    data class Done(val txId: String?, val method: SigningMethod) : SendPhase
+    /**
+     * Accepted by a node ([txId] null when the signer did not report one). [expiresAtMillis]: the signed transaction's
+     * expiration (chain time) when this app signed it.
+     */
+    data class Done(val txId: String?, val method: SigningMethod, val expiresAtMillis: Long? = null) : SendPhase
 
     /**
      * The chain cannot tell any more whether it went in (BroadcastException.Unconfirmed), or it could not be reached
@@ -202,7 +205,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         while (true) {
             try {
                 val result = attempt()
-                return at(SendPhase.Done(result.txId, result.method))
+                return at(SendPhase.Done(result.txId, result.method, result.expiresAtMillis))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: AuthException.Cancelled) {

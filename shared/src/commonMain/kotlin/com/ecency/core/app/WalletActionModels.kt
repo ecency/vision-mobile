@@ -301,7 +301,8 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 val mayHaveLanded = phase is SendPhase.Done || phase is SendPhase.Unconfirmed || (phase as? SendPhase.Failed)?.error?.undecided == true
                 if (!mayHaveLanded) return@afterOutcome
                 val keySigned = phase is SendPhase.Done && phase.method == SigningMethod.KEY
-                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned) } }
+                val expiresAt = (phase as? SendPhase.Done)?.expiresAtMillis?.takeIf { keySigned }
+                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned, actionId, expiresAt) } }
                 wallet.refreshLater()
             }
             sends.send(owner, ops, OperationAuthority.required(ops), actionId)

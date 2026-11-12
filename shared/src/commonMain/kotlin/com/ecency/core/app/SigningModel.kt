@@ -82,6 +82,29 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     val router = SigningRouter(this, tempActiveKey)
 
     private val promptLock = Mutex()
+
+    /** Per account, when its recent broadcasts started and for which action (null: none named), newest last. */
+    @OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+    private val started = kotlin.concurrent.atomics.AtomicReference<Map<String, List<Pair<String?, Long>>>>(emptyMap())
+
+    @OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+    private fun noteStart(username: String, actionId: String?) {
+        val at = env.nowMillis()
+        while (true) {
+            val old = started.load()
+            val next = old + (username to ((old[username].orEmpty()) + (actionId to at)).takeLast(RECENT_STARTS))
+            if (started.compareAndSet(old, next)) return
+        }
+    }
+
+    /**
+     * Whether a broadcast for [username] other than those of [known] actions started at or after [since] (this
+     * phone's clock): a balance read sent before it cannot tell what that one spent (the swap form's balance,
+     * WalletModel.spent).
+     */
+    @OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
+    internal fun broadcastSince(username: String, since: Long, known: Set<String>): Boolean =
+        started.load()[username].orEmpty().any { (id, at) -> at >= since && (id == null || id !in known) }
     private var cancelSignal: CompletableDeferred<Unit>? = null
     private var hotResult: CompletableDeferred<HiveSignerSignResult>? = null
     private var upgradeChoice: CompletableDeferred<AuthUpgradeChoice?>? = null
@@ -89,7 +112,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     /** Signs and broadcasts [ops] for [username] with [authority] (default: the operations' own). */
     @Throws(Exception::class)
     suspend fun broadcast(username: String, ops: JsonArray, authority: KeyRole = OperationAuthority.required(ops)): SignedBroadcast =
-        withContext(generationOf(username)) { router.broadcast(username, ops, authority) }
+        withContext(generationOf(username)) { noteStart(username, null); router.broadcast(username, ops, authority) }
 
     /**
      * As [broadcast], for one user action named by [actionId] (made once when the user confirms, e.g. with
@@ -98,7 +121,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
      */
     @Throws(Exception::class)
     suspend fun broadcast(username: String, ops: JsonArray, authority: KeyRole, actionId: String): SignedBroadcast =
-        withContext(SigningAction(actionId) + generationOf(username)) { router.broadcast(username, ops, authority) }
+        withContext(SigningAction(actionId) + generationOf(username)) { noteStart(username, actionId); router.broadcast(username, ops, authority) }
 
     /**
      * Asks again about a key account's send that ended undecided ([com.ecency.core.api.broadcast.BroadcastException.Network]
@@ -109,7 +132,8 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
      */
     @Throws(Exception::class)
     suspend fun resume(username: String, actionId: String, operation: String, pending: com.ecency.core.api.broadcast.PendingBroadcast): SignedBroadcast =
-        SignedBroadcast(com.ecency.core.auth.SigningMethod.KEY, journaled(username, actionId, operation) { pending.send() }.txId)
+        journaled(username, actionId, operation) { noteStart(username, actionId); pending.send() }
+            .let { SignedBroadcast(com.ecency.core.auth.SigningMethod.KEY, it.txId, expiresAtMillis = it.expiresAtMillis) }
 
     private suspend fun journaled(
         username: String,
@@ -261,7 +285,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     override suspend fun hasPostingAuthorization(username: String): Boolean =
         env.chain.authorities(username)?.grantsPostingTo() == true
 
-    override suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): String? {
+    override suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): com.ecency.core.api.broadcast.BroadcastResult? {
         val operations = withContext(env.dispatchers.io) { ops.map { OperationJson.decodeOwn(it as? JsonArray ?: JsonArray(emptyList())) } }
         val action = kotlinx.coroutines.currentCoroutineContext()[SigningAction]?.id
         val broadcaster = env.api.broadcaster
@@ -273,7 +297,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
             com.ecency.core.api.broadcast.RepeatSafeOps.all(operations) -> broadcaster.broadcastIdempotent("ops/$username/$ops", operations, key)
             // anything that moves value must name its action, or a deliberate second transfer could read as a retry
             else -> throw com.ecency.core.api.broadcast.BroadcastException.InvalidOperation(ACTION_ID_REQUIRED)
-        }.txId
+        }
     }
 
     override suspend fun broadcastWithHiveSignerToken(username: String, ops: JsonArray, accessToken: String): String? {
@@ -421,6 +445,9 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
     private fun setPrompt(prompt: SigningPrompt) = setState { it.copy(prompt = prompt) }
 
     companion object {
+        /** Broadcast starts kept per account: plenty for a few minutes of sends. */
+        private const val RECENT_STARTS = 50
+
         /** How often, and how far apart, a HiveAuth transaction is looked up on chain (about 30 s, ten blocks). */
         const val HIVE_AUTH_LOOKUPS = 10
         const val HIVE_AUTH_LOOKUP_MILLIS = 3_000L
