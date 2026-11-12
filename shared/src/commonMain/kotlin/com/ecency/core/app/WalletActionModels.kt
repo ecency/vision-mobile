@@ -197,16 +197,8 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         scope.launch { env.events.collect { e -> if (e is AppEvent.SessionChanged && e.username != user) setState { it.copy(closed = true) } } }
     }
 
-    private fun liquid(wallet: WalletState, symbol: String): Double? = wallet.item(symbol)?.let { it.liquid ?: it.balance }
-
-    private fun balance() {
-        val wallet = env.wallet
-        // less what swaps no wallet read has shown yet took (WalletModel.spent), so "New Swap" never offers it again
-        setState { s ->
-            val cached = liquid(wallet.current, s.from) ?: return@setState s
-            s.copy(balance = (cached - wallet.pendingSpent(s.from)).coerceAtLeast(0.0))
-        }
-    }
+    // less what swaps no chain read has yet took (WalletModel.spent), so "New Swap" never offers it again
+    private fun balance() = setState { s -> env.wallet.available(s.from)?.let { s.copy(balance = it) } ?: s }
 
     private suspend fun loadBook() {
         try {
@@ -321,7 +313,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 owned.done(id)
                 current.sold.split(' ').takeIf { it.size == 2 }?.let { (amount, symbol) ->
                     val sold = amount.toDoubleOrNull() ?: return@let
-                    user?.let { env.wallet.spent(it, symbol, sold) }
+                    user?.let { env.wallet.spent(it, symbol, sold, phase.method) }
                 }
                 balance()
                 // now, in the wallet's own scope: Done tapped during the outcome check closes this model

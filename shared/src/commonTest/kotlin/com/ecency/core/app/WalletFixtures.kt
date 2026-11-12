@@ -41,6 +41,9 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
         }
     }
 
+    /** The account's liquid HIVE on the chain (get_accounts `balance`). */
+    var chainHive = "12.345"
+
     /** The chain's head time (find_transaction's undecided cases compare it with the expiration). */
     var chainTime = "2026-10-06T11:59:00"
 
@@ -94,7 +97,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
         val names = r.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
         return "[" + names.filter { it == user }.joinToString(",") {
             val meta = com.ecency.core.api.broadcast.JsJson.quote("""{"profile":{"name":"Spike","tokens":$tokens}}""")
-            """{"name":"$it","balance":"12.345 HIVE","hbd_balance":"5.000 HBD","savings_balance":"1.000 HIVE","savings_hbd_balance":"20.000 HBD",
+            """{"name":"$it","balance":"$chainHive HIVE","hbd_balance":"5.000 HBD","savings_balance":"1.000 HIVE","savings_hbd_balance":"20.000 HBD",
                "reward_hive_balance":"0.100 HIVE","reward_hbd_balance":"0.200 HBD","reward_vesting_balance":"1234.567890 VESTS",
                "vesting_shares":"2000000.000000 VESTS","delegated_vesting_shares":"100000.000000 VESTS","received_vesting_shares":"0.000000 VESTS",
                "vesting_withdraw_rate":"0.000000 VESTS","next_vesting_withdrawal":"1969-12-31T23:59:59","to_withdraw":0,"withdrawn":0,

@@ -4,7 +4,10 @@ import com.ecency.core.api.broadcast.WalletOps
 import com.ecency.core.api.wallet.AssetLayer
 import com.ecency.core.api.wallet.PortfolioItem
 import com.ecency.core.api.wallet.ProfileToken
+import com.ecency.core.api.wallet.Vests
+import com.ecency.core.api.wallet.WalletAccount
 import com.ecency.core.api.wallet.WalletApi
+import com.ecency.core.auth.SigningMethod
 import com.ecency.core.hive.KeyRole
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -261,43 +264,48 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * A swap's sale of [amount] [symbol] from [account] at [at] that no wallet read has shown yet. [expected] is the
-     * balance the swap form showed then: the read one less the sales still pending before this one.
+     * A swap's sale of [amount] [symbol] from [account] that no chain read is known to include yet: one sent from
+     * [settleFrom] on is.
      */
-    private class Spend(val account: String, val symbol: String, val amount: Double, val expected: Double, val at: Long)
+    private class Spend(val account: String, val symbol: String, val amount: Double, val settleFrom: Long)
 
-    /** Oldest first; app-wide, so a swap screen opened again before the reload still takes the sale off. */
+    /** App-wide, so a swap screen opened again before the reload still takes the sale off. */
     private val spends = mutableListOf<Spend>()
 
-    /** The swap screen: [amount] of [symbol] left [account] just now. */
-    internal fun spent(account: String, symbol: String, amount: Double) {
-        if (current.account != account) return
-        val cached = current.item(symbol)?.let(::liquid) ?: return
-        spends += Spend(account, symbol, amount, cached - pendingSpent(symbol), env.nowMillis())
-    }
+    /** The chain's liquid HIVE and HBD of [account] (get_accounts), from the last load. */
+    private class ChainRead(val account: String, val liquid: Map<String, Double>)
 
-    /** What the signed-in account's sales of [symbol] that no read has shown yet take off its balance. */
-    internal fun pendingSpent(symbol: String): Double =
-        spends.filter { it.account == current.account && it.symbol == symbol }.sumOf { it.amount }
+    private var chainRead: ChainRead? = null
 
     /**
-     * A read sent at [startedAt] shows a sale when its balance went down by it from [Spend.expected]. A read that
-     * still has the expected balance (a lagging portfolio) keeps the sale off. One that moved some other way (funds
-     * came in meanwhile) settles the oldest pending sale only, and only when sent after the settle delay, so a read
-     * sent before the swap, or one with an earlier swap alone, never settles a later one.
+     * The swap screen: [amount] of [symbol] left [account] just now, broadcast by [method]. A node that accepted a
+     * key signed send has it in every read after; one HiveSigner or HiveAuth broadcast elsewhere is in a block (the
+     * settle delay) later.
      */
-    private fun reconcile(account: String, items: List<PortfolioItem>, startedAt: Long) {
-        val pendingBefore = mutableSetOf<String>()
-        val kept = spends.filter { sp ->
-            if (sp.account != account) return@filter true
-            val read = items.firstOrNull { it.symbol == sp.symbol }?.let(::liquid)
-            val shows = read != null && read <= sp.expected - sp.amount + HALF_UNIT
-            val moved = read != null && sp.symbol !in pendingBefore &&
-                startedAt >= sp.at + AFTER_BROADCAST_DELAY_MILLIS && abs(read - sp.expected) > HALF_UNIT
-            (!shows && !moved).also { keep -> if (keep) pendingBefore += sp.symbol }
-        }
-        spends.clear()
-        spends += kept
+    internal fun spent(account: String, symbol: String, amount: Double, method: SigningMethod) {
+        if (current.account != account) return
+        val now = env.nowMillis()
+        spends += Spend(account, symbol, amount, now + if (method == SigningMethod.KEY) 1 else AFTER_BROADCAST_DELAY_MILLIS)
+    }
+
+    /**
+     * What the swap form may offer of [symbol]: the chain's balance (the portfolio can lag behind it), else the
+     * portfolio's, less the sales no chain read is known to include. Never inferred from how a balance changed: a
+     * deposit, a cancelled order or another send can move it either way.
+     */
+    internal fun available(symbol: String): Double? {
+        val account = current.account ?: return null
+        val read = chainRead?.takeIf { it.account == account }?.liquid?.get(symbol) ?: current.item(symbol)?.let(::liquid) ?: return null
+        return (read - spends.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }).coerceAtLeast(0.0)
+    }
+
+    /**
+     * A load of [account] landed with its chain read, sent at [sentAt]: that read has every sale settled by then. A
+     * failed one settles nothing, and the form falls back to the portfolio until the next.
+     */
+    private fun settle(account: String, chain: WalletAccount?, sentAt: Long) {
+        chainRead = chain?.let { ChainRead(account, mapOf("HIVE" to Vests.amount(it.balance), "HBD" to Vests.amount(it.hbdBalance))) }
+        if (chain != null) spends.removeAll { it.account == account && sentAt >= it.settleFrom }
     }
 
     private fun liquid(item: PortfolioItem): Double = item.liquid ?: item.balance
@@ -326,7 +334,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val rate = async { runCatching { api.hivePerMVests() }.getOrDefault(current.hivePerMVests) }
                 val items = api.portfolio(user, currency.code, onlyEnabled = true)
                 // a failed account read keeps the selection shown (the profile's tokens), never the defaults alone
-                val tokens = accountJob.await()?.profileTokens
+                val chain = accountJob.await()
+                val tokens = chain?.profileTokens
                 val perMVests = rate.await()
                 if (!owns(user)) return@launch
                 readAt = stamp
@@ -334,7 +343,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val selection = tokens?.let(::selectionFor) ?: current.selection
                 served = if (refresh && servedFor == key) merged(served, items, selection) else items
                 servedFor = key
-                reconcile(user, served, startedAt)
+                // sent after startedAt: the account read went out once this load began
+                settle(user, chain, startedAt)
                 setState {
                     withRows(
                         it.copy(
@@ -434,9 +444,6 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val CLAIM_REREAD_MILLIS = listOf(2_000L, 3_000L, 5_000L, 10_000L, 20_000L)
 
         const val AFTER_BROADCAST_DELAY_MILLIS = 3_000L
-
-        /** Half of 0.001, the chain's smallest HIVE/HBD amount: float noise in a balance comparison. */
-        private const val HALF_UNIT = 0.0005
 
         /** How long a selection saved here wins over a lagging node's profile. */
         const val OVERRIDE_MILLIS = 10 * 60_000L
