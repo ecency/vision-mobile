@@ -393,6 +393,8 @@ final class ChatUITests: XCTestCase {
         let hasKeyboard = keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150
         for round in 1...3 {
             let words = "we would know for sure \(round)x"
+            // without the software keyboard the field's focus is not checked, so it is given back before typing
+            if !hasKeyboard && round > 1 { composer.tap() }
             composer.typeText(words)
             app.buttons["chat-send"].tap()
             // empty right after the tap, before the message lands (an empty field may report its placeholder)
