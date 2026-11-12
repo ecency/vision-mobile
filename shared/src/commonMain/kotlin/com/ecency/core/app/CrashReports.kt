@@ -189,6 +189,11 @@ class IapErrors internal constructor(private val reporter: () -> CrashReporter, 
             reporter().breadcrumb("iap", "user cancelled purchase", mapOf("stage" to stage.tag, "productId" to productId.orEmpty()))
             return IapReport.CANCELLED
         }
+        if (error.isConnectionDropped) {
+            // transient and not ours: a breadcrumb for the next real issue, no event of its own (the user still hears of it)
+            reporter().breadcrumb("iap", "store connection dropped", mapOf("stage" to stage.tag, "productId" to productId.orEmpty()))
+            return IapReport.REPORTED
+        }
         reporter().capture(
             CrashReport(
                 type = "IapError",

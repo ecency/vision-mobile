@@ -906,6 +906,29 @@ class PurchasesTest {
     }
 
     @Test
+    fun aDroppedStoreConnectionIsABreadcrumbNotAnIssueButStillTold() = runTest {
+        val r = rig()
+        val model = screen(r, StoreScreenKind.ACCOUNT_BOOST)
+        // Play SERVICE_DISCONNECTED (-1): store bots and a restarting Play service drop the link, nothing is wrong with the app
+        val dropped = StoreError(StoreError.SERVICE_ERROR, "Service connection is disconnected", PurchaseSkus.BOOST, -1)
+        r.store.onSheet = { r.store.storeListener!!.onError(dropped) }
+        model.buy(PurchaseSkus.BOOST)
+        testScheduler.advanceUntilIdle()
+        assertTrue(r.reporter.iap().isEmpty())
+        assertTrue(r.reporter.crumbs.any { it.first == "store connection dropped" })
+        assertEquals(StoreAlert(PurchaseCopy.WARNING, "Service connection is disconnected"), model.current.alert)
+
+        // any other service failure is still its own issue
+        model.dismissAlert()
+        r.app.now += 10_000
+        val other = StoreError(StoreError.SERVICE_ERROR, "Service unavailable", PurchaseSkus.BOOST, 6)
+        r.store.onSheet = { r.store.storeListener!!.onError(other) }
+        model.buy(PurchaseSkus.BOOST)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.reporter.iap().size)
+    }
+
+    @Test
     fun storeFailuresAreToldOnceAndACancelIsNoFailure() = runTest {
         val r = rig()
         val model = screen(r, StoreScreenKind.ACCOUNT_BOOST)

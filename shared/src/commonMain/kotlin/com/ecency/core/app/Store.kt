@@ -135,6 +135,9 @@ data class StoreError(
     /** RN isBillingUnavailableError: OpenIAP `billing-unavailable` or Play BILLING_UNAVAILABLE. */
     val isBillingUnavailable: Boolean get() = code == BILLING_UNAVAILABLE || responseCode == PLAY_BILLING_UNAVAILABLE
 
+    /** Play SERVICE_DISCONNECTED: the link to the store dropped. Not an app fault (store test bots, a restarting Play service). */
+    val isConnectionDropped: Boolean get() = responseCode == PLAY_SERVICE_DISCONNECTED
+
     /** A failure that says nothing about the payment (the network, the store's service): the purchase may still arrive. */
     val isTransient: Boolean get() = code == NETWORK_ERROR || code == SERVICE_ERROR
 
@@ -153,6 +156,7 @@ data class StoreError(
         /** Play BillingResponseCode values RN reads as `responseCode`. */
         const val PLAY_USER_CANCELED = 1
         const val PLAY_BILLING_UNAVAILABLE = 3
+        const val PLAY_SERVICE_DISCONNECTED = -1
 
         /**
          * Play BillingResponseCode to OpenIAP's code (openiap-google's mapping for the codes Billing 9 returns).
