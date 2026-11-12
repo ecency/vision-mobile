@@ -658,4 +658,50 @@ class VoteAndReplyTest {
             post.close()
         }
     }
+
+    /** A v1 entry read for spike-voter: [rows] voters (spike-voter among them when [listed], with no weight), [total] counted. */
+    private fun v1Post(listed: Boolean, total: Int, rows: Int = 3): com.ecency.core.api.model.Post {
+        val others = (1..rows).map { """{"voter":"spike-other$it","rshares":1000,"percent":10000}""" }
+        val mine = if (listed) listOf("""{"voter":"spike-voter","rshares":0}""") else emptyList()
+        val json = """{"author":"spike-author","permlink":"p","stats":{"total_votes":$total},"active_votes":[${(others + mine).joinToString(",")}]}"""
+        return com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = "spike-voter")!!
+    }
+
+    @Test
+    fun aWeightlessVoteMadeHereIsCountedOnceOnANodeWithoutV2() {
+        // the vote landed: the v1 list holds the voter's weightless row (unknown for the button) and the count has it
+        val post = v1Post(listed = true, total = 4)
+        assertFalse(post.knowsVoteOf("spike-voter"))
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "never twice")
+        // removed here: it leaves the count
+        assertEquals(3, LocalVotes.view(post, "spike-voter", LocalVote(0, pending = false)).votes)
+        // not in the list yet: the vote is added
+        assertEquals(4, LocalVotes.view(v1Post(listed = false, total = 3), "spike-voter", LocalVote(10000, pending = false)).votes)
+    }
+
+    @Test
+    fun aVoteChangedOverOneThatLandedIsNotCountedAgain() {
+        // a cut list (1000 rows) without the voter: the read cannot tell, but the earlier vote landed and is counted
+        val post = v1Post(listed = false, total = 1500, rows = 1000)
+        assertFalse(post.knowsVoteOf("spike-voter"))
+        assertEquals(1500, LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, earlierCounted = true)).votes)
+        assertEquals(1501, LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false)).votes, "a first vote is added")
+    }
+
+    @Test
+    fun aVoteOverOneThatLandedRemembersItIsCounted() = runTest {
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        // read from the chain by the post screen
+        app.env.localVotes.set(key, LocalVote(10000, pending = false, fromChain = true))
+        app.env.votes.vote("alice", "root", 5000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
+        // removed, then cast again: nothing of the account is counted any more
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 5000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, app.env.localVotes.get(key)?.earlierCounted)
+    }
 }

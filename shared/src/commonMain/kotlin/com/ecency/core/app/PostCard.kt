@@ -124,6 +124,8 @@ data class LocalVote(
     val estimate: VoteEstimate? = null,
     /** Read from the chain by the post screen (a weightless vote, [PostModel]), not made on this device. */
     val fromChain: Boolean = false,
+    /** An earlier vote of this account that landed (read from the chain or made here) is already in the post's count. */
+    val earlierCounted: Boolean = false,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
@@ -189,12 +191,14 @@ class LocalVotes {
             val count = post.stats.totalVotes
             if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
             val hasVote = local.weight != 0
-            // a vote read from the chain ([LocalVote.fromChain]) is already in the count; an unknown earlier vote
-            // counts as none, as before v2 (waves feed rows never carried one)
+            // whether the count already has a vote of the account: the read's answer when it knows; else its voter list
+            // holding the account's row (a weightless vote is unknown but counted), or an earlier vote that landed; a
+            // vote read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one)
+            val inCount = if (post.knowsVoteOf(username)) server != null else (post.listedVoter == username || local.earlierCounted)
             val adjusted = count + when {
                 local.fromChain -> 0
-                hasVote && server == null -> 1
-                !hasVote && server != null -> -1
+                hasVote && !inCount -> 1
+                !hasVote && inCount -> -1
                 else -> 0
             }
             val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)

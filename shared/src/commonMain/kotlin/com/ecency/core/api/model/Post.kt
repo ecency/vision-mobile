@@ -88,6 +88,11 @@ data class Post(
     val observerVote: ObserverVote? = null,
     /** The account this entry was read for, so [observerVote] is an answer about it; null: unknown for everyone. */
     val observerVoteFor: String? = null,
+    /**
+     * The account whose row a v1 voter list holds, whatever the row says (a weightless vote reads as unknown above, but
+     * hivemind's count has it): only for the vote count, never for the vote shown.
+     */
+    val listedVoter: String? = null,
     /** Direct replies, in the bridge's order. Only filled by `get_discussion`. */
     val replies: List<PostKey> = emptyList(),
     val community: String? = null,
@@ -192,6 +197,7 @@ data class Post(
                 payoutAt = o.string("payout_at"),
                 observerVote = observerVote,
                 observerVoteFor = observerVoteFor,
+                listedVoter = observer.takeIf { it.isNotEmpty() && voteList?.any { (it as? JsonObject)?.text("voter") == observer } == true },
                 replies = o["replies"].arr().orEmpty().mapNotNull(::parseReplyKey),
                 community = o.str("community")?.takeIf { it.isNotBlank() },
                 communityTitle = o.str("community_title")?.takeIf { it.isNotBlank() },

@@ -46,7 +46,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         val previous = env.localVotes.get(key)
         // RN upvotePopover: the payout moves by the sheet's estimate at once (an unvote is worth nothing)
         val estimate = if (weight == 0) VoteEstimate.NONE else preview?.takeIf { it.voter == voter }?.estimate(weight)
-        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate))
+        // a vote of this account that landed before (read from the chain or made here) is already in the post's count
+        val earlierCounted = previous != null && !previous.pending && previous.weight != 0
+        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation
         scope.launch {
@@ -68,7 +70,7 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 }
                 // the account changed meanwhile: this result belongs to a session that is gone
                 if (session != generation) return@launch
-                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate))
+                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted))
                 env.api.posts.invalidate(key)
                 setState { VoteState(it.statuses - key) }
             } catch (e: CancellationException) {
