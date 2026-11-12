@@ -932,14 +932,52 @@ class WalletActionsTest {
     fun aSavedSwapOlderThanAnyTransactionCanLiveIsDropped() = runTest {
         val w = world(this)
         clocks(w)
-        val now = w.app.clock()
-        // an hour bound never set (no load ran after it): without the age limit the next load would start a new hour
-        val old = StoredSwap(WalletWorld.USER, "HIVE", 3.0, now - 3 * 3_600_000L, null, "action-old", null)
-        val fresh = StoredSwap(WalletWorld.USER, "HIVE", 1.0, now - 60_000L, null, "action-fresh", null)
+        val chainNow = TestApp.NOW + testScheduler.currentTime
+        // the latest it could land, by the chain's time, is long past: the first load settles it
+        val old = StoredSwap(WalletWorld.USER, "HIVE", 3.0, chainNow - 3 * 3_600_000L, null, "action-old", null, latestBy = chainNow - 2 * 3_600_000L)
+        val fresh = StoredSwap(WalletWorld.USER, "HIVE", 1.0, chainNow - 60_000L, null, "action-fresh", null, latestBy = chainNow + 3_540_000L)
         w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(old, fresh)))
         w.env.wallet.start()
         advance(1_000)
         assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "only the recent one is still pending")
+    }
+
+    @Test
+    fun aSwapSignedElsewhereSavedLongAgoIsSettledByTheChainAtTheNextLaunch() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "long-ago")
+        advance(100)
+        w.env.wallet.close()
+        // the app comes back two and a half hours later by the chain's clock: past the latest it could land
+        advance(2 * 3_600_000L + 30 * 60_000L)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "decided long ago, not given a new hour")
+    }
+
+    @Test
+    fun aSwapSignedElsewhereStaysPendingAcrossAPhoneClockJump() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        // signed elsewhere, its expiration unknown; the app quits before any load bounds it
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "elsewhere")
+        advance(100)
+        w.env.wallet.close()
+        // the phone's clock jumps three hours ahead while the app is closed
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again, phoneAheadMillis = 3 * 3_600_000L)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the chain's time says it can still land")
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed the latest it could land")
     }
 
     @Test

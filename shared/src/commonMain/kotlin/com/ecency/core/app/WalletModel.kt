@@ -272,10 +272,12 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * block or never will be. [expiresBy] bounds that expiration in chain time, once known. [floor]: the last chain
      * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond) at or below that shows it.
      * [orderId]: its limit order's id, which only this swap's own operation carries in the account's history.
+     * [latestBy]: for one without [expiresBy], the latest chain time it could still land, from the last chain read
+     * before it (its head, the time since, an hour for a late approval and a transaction's hour); null without one.
      */
     private class Swap(
         val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?,
-        val floor: Double?, val floorSentAt: Long, val actionId: String?, val orderId: Long?,
+        val floor: Double?, val floorSentAt: Long, val actionId: String?, val orderId: Long?, val latestBy: Long? = null,
     ) {
         /** Short looks booked for its order: its balance drop showed before its block reached the history. */
         var orderLooks = 0
@@ -315,7 +317,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val floor = floorRead?.liquid?.get(symbol)?.let { it - waiting - amount }
         // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
-        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId)
+        // signed elsewhere or undecided: a wallet app may still approve it after now (a HiveAuth request closed while
+        // waiting), within the hour, and its transaction lives an hour more; so it lands no later than the last chain
+        // head plus the time since that read plus both hours (kept across a restart: the phone's clock never decides)
+        val latestBy = if (expiresBy != null) null else chainRead?.takeIf { it.account == account }?.let { it.head + (now - it.sentAt).coerceAtLeast(0) + 2 * MAX_TRANSACTION_LIFETIME_MILLIS }
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy)
         settleLoadsLeft = SETTLE_LOADS
         saveSwaps()
     }
@@ -365,7 +371,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             swaps.removeAll { sw -> sw in dropped && sw.orderId != null && sw.orderId in landed }
             dropped.filter { it in swaps && it.orderLooks < ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
             val bound = swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }
-            bound.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
+            bound.forEach { sw -> sw.expiresBy = (head + MAX_TRANSACTION_LIFETIME_MILLIS).let { by -> sw.latestBy?.let { minOf(it, by) } ?: by } }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
             // a bound just set is saved too: after a restart the hour runs from it, never from a later load
             if (swaps.size != before || bound.isNotEmpty() || saveFailed) saveSwaps()
@@ -400,7 +406,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             }
             swapWrites.withLock {
                 // the list as it is when written (on main), so an older one never lands after a newer change
-                val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId) }
+                val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId, it.latestBy) }
                 try {
                     withContext(env.dispatchers.io) {
                         val store = env.vault.vault.store
@@ -450,15 +456,15 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         } ?: return@withLock true
         val now = env.nowMillis()
         val known = swaps.mapNotNull { it.actionId }.toSet()
-        // one with a known expiration is settled by the chain's time; one without, far older than any transaction can
-        // live by this phone's clock, is dropped (else the next load would start a new hour for it)
-        val back = StoredSwap.decode(stored).filter { it.actionId !in known && it.account !in departed && (it.expiresBy != null || now - it.at <= RESTORE_MAX_AGE_MILLIS) }
+        // each is settled by the chain's time: its expiration, or the latest it could land ([Swap.latestBy]); this
+        // phone's clock, which may have moved while the app was closed, never drops one
+        val back = StoredSwap.decode(stored).filter { it.actionId !in known && it.account !in departed }
         if (back.isEmpty()) return@withLock true
         back.forEach { s ->
             s.actionId?.let { swapActions += it }
             // never later than now: the first load after the restart bounds an unbound one, whatever the clock said then
             val at = minOf(s.at, now - 1)
-            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId)
+            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId, s.latestBy)
         }
         settleLoadsLeft = SETTLE_LOADS
         true
@@ -702,7 +708,6 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             (DEFAULT_ASSETS + tokens.filter { it.show && it.type != "HIVE" && it.symbol != "SPK" }.map { it.symbol }).distinct()
 
         private const val SWAPS_ENTRY = "wallet.pendingSwaps"
-        private const val RESTORE_MAX_AGE_MILLIS = 2 * MAX_TRANSACTION_LIFETIME_MILLIS
         private const val SETTLE_LOADS = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
     }
 }
@@ -710,7 +715,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 /** A pending swap as saved across restarts ([WalletModel]'s secure store entry): no key, no memo, nothing signed. */
 internal data class StoredSwap(
     val account: String, val symbol: String, val amount: Double, val at: Long, val expiresBy: Long?,
-    val actionId: String?, val orderId: Long?,
+    val actionId: String?, val orderId: Long?, val latestBy: Long? = null,
 ) {
     companion object {
         fun encode(swaps: List<StoredSwap>): String = kotlinx.serialization.json.buildJsonArray {
@@ -724,6 +729,7 @@ internal data class StoredSwap(
                         s.expiresBy?.let { put("expiresBy", kotlinx.serialization.json.JsonPrimitive(it)) }
                         s.actionId?.let { put("actionId", kotlinx.serialization.json.JsonPrimitive(it)) }
                         s.orderId?.let { put("orderId", kotlinx.serialization.json.JsonPrimitive(it)) }
+                        s.latestBy?.let { put("latestBy", kotlinx.serialization.json.JsonPrimitive(it)) }
                     },
                 )
             }
@@ -740,7 +746,7 @@ internal data class StoredSwap(
                 val account = text("account")?.takeIf(com.ecency.core.secure.KeyVault::isValidUsername) ?: return@mapNotNull null
                 val symbol = text("symbol")?.takeIf { it == "HIVE" || it == "HBD" } ?: return@mapNotNull null
                 val amount = p("amount")?.takeIf { !it.isString }?.content?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() } ?: return@mapNotNull null
-                StoredSwap(account, symbol, amount, long("at") ?: return@mapNotNull null, long("expiresBy"), text("actionId"), long("orderId"))
+                StoredSwap(account, symbol, amount, long("at") ?: return@mapNotNull null, long("expiresBy"), text("actionId"), long("orderId"), long("latestBy"))
             }
         }
     }
