@@ -276,11 +276,12 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         val prompt = s.prompt as? TradePrompt.Confirm ?: return
         val owner = user ?: return
         val now = env.nowMillis()
+        val order = orderId(now)
         val op = try {
             // the amounts the question showed, never the live quote
             WalletOps.limitOrderCreate(
                 owner, prompt.amountToSell, prompt.minToReceive, false,
-                ChainTime.fromEpochSeconds(now / 1000 + EXPIRATION_SECONDS), orderId(now),
+                ChainTime.fromEpochSeconds(now / 1000 + EXPIRATION_SECONDS), order,
             )
         } catch (e: Exception) {
             setState { it.copy(prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, AppError.from(e, "trade.swap").text)) }
@@ -302,7 +303,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 if (!mayHaveLanded) return@afterOutcome
                 val keySigned = phase is SendPhase.Done && phase.method == SigningMethod.KEY
                 val expiresAt = (phase as? SendPhase.Done)?.expiresAtMillis?.takeIf { keySigned }
-                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned, actionId, expiresAt) } }
+                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned, actionId, expiresAt, order) } }
                 wallet.refreshLater()
             }
             sends.send(owner, ops, OperationAuthority.required(ops), actionId)

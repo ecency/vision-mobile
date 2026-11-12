@@ -37,6 +37,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
                 """{"head_block_number":100675644,"head_block_id":"0601303c${"11".repeat(16)}","time":"${chainClock?.let { com.ecency.core.hive.ChainTime.fromEpochSeconds(it() / 1000) } ?: chainTime}","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}""",
             )
             else -> rpc[request.method]?.invoke(request)?.let { FakeTransport.result(request, it) }
+                ?: swapHistory(request)?.let { FakeTransport.result(request, it) }
                 ?: TestApp.chain(request) ?: HttpResult(500, "no fixture for ${request.method}")
         }
     }
@@ -49,6 +50,17 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
 
     /** When set, the chain's head time in epoch millis, read at each answer ([chainTime] otherwise). */
     var chainClock: (() -> Long)? = null
+
+    /** Whether the account's history has the limit orders broadcast so far (false: none of them on chain yet). */
+    var ordersInHistory = true
+
+    /** The account's `limit_order_create` history: every one broadcast so far, when [ordersInHistory]. */
+    private fun swapHistory(r: Sent): String? {
+        if (r.method != "condenser_api.get_account_history") return null
+        val orders = if (ordersInHistory) broadcastOps().filter { it[0].jsonPrimitive.content == "limit_order_create" } else emptyList()
+        return orders.mapIndexed { i, op -> """[$i,{"trx_id":"${"ab".repeat(20)}","block":100675644,"timestamp":"$chainTime","op":$op}]""" }
+            .joinToString(",", "[", "]")
+    }
 
     init {
         app.authBackend.rest = { req -> http.entries.firstOrNull { req.url.contains(it.key) }?.value?.invoke(req) }

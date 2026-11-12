@@ -473,6 +473,72 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aTransferFromAnotherWalletNeverPassesForTheSwap() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            // the node accepted the swap of 3, then another wallet sent 3 HIVE away first: the chain reads 9.345 with
+            // no order of the swap in the account's history yet
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            w.ordersInHistory = false
+            m.reset()
+            w.env.wallet.refresh()
+            advance(100)
+            assertEquals(6.345, m.current.balance, 0.0001, "the swap's 3 are still committed, whatever the balance dropped by")
+            // the swap lands: its order is in the history and the balance down by it too
+            w.ordersInHistory = true
+            hiveLeft(w, "6.345")
+            w.env.wallet.refresh()
+            advance(100)
+            assertEquals(6.345, m.current.balance, 0.0001, "a read with the swap's own order takes it off at once")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aSwapWhoseBlockReachesTheHistoryLateStillComesOffInSeconds() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            // the reload after the swap reads the balance down by it before its block reached the account's history
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            w.ordersInHistory = false
+            m.reset()
+            advance(3_500)
+            assertEquals(6.345, m.current.balance, 0.0001, "no order on chain yet: still taken off")
+            w.ordersInHistory = true
+            advance(5_500)
+            assertEquals(9.345, m.current.balance, 0.0001, "a short look finds the order, long before the swap's expiration")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aFailedLoadAmongTheShortLooksKeepsThemGoing() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            w.ordersInHistory = false
+            m.reset()
+            advance(3_500)
+            assertEquals(6.345, m.current.balance, 0.0001, "no order on chain yet: still taken off")
+            // the next short look fails
+            val portfolio = w.http.getValue("/wallet-api/portfolio-v2")
+            w.http["/wallet-api/portfolio-v2"] = { HttpResult(503, "") }
+            advance(5_500)
+            w.http["/wallet-api/portfolio-v2"] = portfolio
+            w.ordersInHistory = true
+            advance(5_500)
+            assertEquals(9.345, m.current.balance, 0.0001, "the look after the failed one finds the order within seconds")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
     fun aSwapAcceptedButNotInABlockStaysOffWhateverItsAccountReads() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")

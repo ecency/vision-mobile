@@ -267,11 +267,15 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * the swap form's balance until the chain has decided it for good: past its transaction's expiration it is in a
      * block or never will be. [expiresBy] bounds that expiration in chain time, once known. [floor]: the last chain
      * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond) at or below that shows it.
+     * [orderId]: its limit order's id, which only this swap's own operation carries in the account's history.
      */
     private class Swap(
         val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?,
-        val floor: Double?, val floorSentAt: Long, val actionId: String?,
-    )
+        val floor: Double?, val floorSentAt: Long, val actionId: String?, val orderId: Long?,
+    ) {
+        /** Short looks booked for its order: its balance drop showed before its block reached the history. */
+        var orderLooks = 0
+    }
 
     /** App-wide, so a swap screen opened again, or one closed before the swap ended, still takes the sale off. */
     private val swaps = mutableListOf<Swap>()
@@ -294,7 +298,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * its outcome undecided) the chain still caps it at acceptance plus [MAX_TRANSACTION_LIFETIME_MILLIS], and the
      * first load sent after now bounds the acceptance by its head time.
      */
-    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean, actionId: String? = null, signedExpiresAt: Long? = null) {
+    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean, actionId: String? = null, signedExpiresAt: Long? = null, orderId: Long? = null) {
         val now = env.nowMillis()
         val waiting = swaps.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }
         // no floor from a read sent before another send of this account (one not among its swaps here): it may have
@@ -305,16 +309,18 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val floor = floorRead?.liquid?.get(symbol)?.let { it - waiting - amount }
         // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
-        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId)
-        settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId)
+        settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
     }
 
     /**
      * What the swap form may offer of [symbol]: the last chain read of the account (the portfolio, which can lag
      * behind the chain, only when there is none; a failed read keeps the last) less every swap the chain may not have
      * decided, or shown. A swap leaves early on a chain read sent after it that is down by the whole swap from the
-     * read before it ([Swap.floor]): a deposit only moves it up. Otherwise it waits for its expiration: accepted is not
-     * decided, nor is a block, and a read that has not gone down by it may come from a server without it.
+     * read before it ([Swap.floor]), when the account's history read just before it has the swap's own order: a
+     * deposit only moves the balance up, and a transfer from another wallet is not that order. Otherwise it waits for
+     * its expiration: accepted is not decided, nor is a block, and a read that has not gone down by it may come from a
+     * server without it.
      */
     internal fun available(symbol: String): Double? {
         val account = current.account ?: return null
@@ -325,32 +331,49 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /**
      * A load of [account] sent at [sentAt] landed with the chain read [read], null when its account or time read
-     * failed, or the load did (it then settles nothing). Swaps it shows leave ([Swap.floor]); swaps it can bound get
+     * failed, or the load did (it then settles nothing), and [landed]: the swap orders the account's history had just
+     * before. Swaps it shows leave ([Swap.floor], [Swap.orderId]); swaps it can bound get
      * their expiration bound, and those the chain decided [NODE_LAG_MILLIS] before its head time leave too (the account
      * read may come from a server of the node URL a little behind the one that told the time). A swap still waiting
      * books the load after.
      */
-    private fun settle(account: String, sentAt: Long, read: ChainRead?) {
+    private fun settle(account: String, sentAt: Long, read: ChainRead?, landed: Set<Long> = emptySet()) {
         val head = read?.head
+        var orderSoon = false
         if (read != null && head != null) {
             // a send of this account started since the floor read, the swap's and those waiting aside, could be the drop
             val known = swapActions.toSet()
-            swaps.removeAll { sw ->
+            val dropped = swaps.filter { sw ->
                 sw.account == account && sentAt > sw.at && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true) &&
                     !env.signing.broadcastSince(account, sw.floorSentAt, known)
             }
+            // one from another wallet could be too, so the swap's own order must be on chain; an accepted swap shows in
+            // the balance before its block reaches the history, so a few short looks follow before its expiration wait
+            swaps.removeAll { sw -> sw in dropped && sw.orderId != null && sw.orderId in landed }
+            dropped.filter { it in swaps && it.orderLooks < ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
             swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
+        }
+        // a failed or set aside read in the middle of a swap's short looks keeps them going
+        if (read == null || head == null) {
+            swaps.filter { it.account == account && it.orderLooks in 1 until ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
         }
         val waiting = swaps.filter { it.account == account }
         if (waiting.isEmpty() || settleLoadsLeft-- <= 0) return
         val wait = waiting.minOf { sw -> if (head == null) NODE_LAG_MILLIS else sw.expiresBy?.let { it + NODE_LAG_MILLIS - head } ?: NODE_LAG_MILLIS }
         settleLoad?.cancel()
         settleLoad = scope.launch {
-            delay(wait.coerceAtLeast(NODE_LAG_MILLIS) + 1_000)
+            delay(if (orderSoon) ORDER_LOOK_MILLIS else wait.coerceAtLeast(NODE_LAG_MILLIS) + 1_000)
             if (current.account == account) load(refresh = true, quiet = true)
         }
     }
+
+    /** The ids of [account]'s latest limit orders on chain (its history's `limit_order_create` rows). */
+    private suspend fun landedOrders(account: String): Set<Long> =
+        api.history(account, -1, LANDED_ORDERS_READ, listOf("limit_order_create"))
+            .filter { it.s("owner") == account }
+            .mapNotNull { it.s("orderid")?.toLongOrNull() }
+            .toSet()
 
     private fun chainLiquid(account: WalletAccount) = mapOf("HIVE" to Vests.amount(account.balance), "HBD" to Vests.amount(account.hbdBalance))
 
@@ -378,11 +401,25 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val currency = current.currency
                 val sentAt = env.nowMillis()
                 loading = user
-                val accountJob = async { runCatching { api.account(user) }.getOrNull() }
+                val orders = swaps.filter { it.account == user }.mapNotNull { it.orderId }
+                val accountJob = async {
+                    // the swap orders on chain, read before the account (the two may still come from different servers)
+                    val landed = if (orders.isEmpty()) {
+                        emptySet()
+                    } else {
+                        runCatching { landedOrders(user) }.getOrElse {
+                            if (it is CancellationException) throw it
+                            // no order then: the swap waits for its expiration
+                            ErrorReports.quiet(it, "wallet.swapOrders")
+                            emptySet()
+                        }
+                    }
+                    landed to runCatching { api.account(user) }.getOrNull()
+                }
                 val globals = async { runCatching { api.chainGlobals() }.getOrNull() }
                 val items = api.portfolio(user, currency.code, onlyEnabled = true)
                 // a failed account read keeps the selection shown (the profile's tokens), never the defaults alone
-                val chain = accountJob.await()
+                val (landed, chain) = accountJob.await()
                 val tokens = chain?.profileTokens
                 val chainNow = globals.await()
                 val perMVests = chainNow?.hivePerMVests ?: current.hivePerMVests
@@ -398,7 +435,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val last = chainRead?.takeIf { it.account == user }
                 val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head, sentAt) else null
                 if (forward != null) chainRead = forward
-                settle(user, sentAt, forward)
+                settle(user, sentAt, forward, landed)
                 loading = null
                 setState {
                     withRows(
@@ -504,6 +541,13 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
         /** Half of 0.001, the chain's smallest HIVE/HBD amount: float noise in a balance comparison. */
         private const val HALF_UNIT = 0.0005
+
+        /** Limit orders of the account's history read for a waiting swap's: far more than one sitting places. */
+        private const val LANDED_ORDERS_READ = 50
+
+        /** A swap whose drop shows before its order: looked at again this soon (a block is 3 s), at most [ORDER_LOOKS] times. */
+        private const val ORDER_LOOK_MILLIS = 5_000L
+        private const val ORDER_LOOKS = 6
 
         /**
          * How far behind the head another node, or another server behind the same URL, may answer: above the 90 s
