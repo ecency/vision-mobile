@@ -386,9 +386,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * are not known any more: it waits for its expiration (its signed one, or an hour from the first load after).
      */
     private fun saveSwaps() {
-        val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId) }
         scope.launch {
             swapWrites.withLock {
+                // the list as it is when written (on main), so an older one never lands after a newer change
+                val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId) }
                 try {
                     withContext(env.dispatchers.io) {
                         val store = env.vault.vault.store
@@ -404,7 +405,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         }
     }
 
-    private suspend fun restoreSwaps() {
+    private suspend fun restoreSwaps() = swapWrites.withLock {
         val stored = try {
             withContext(env.dispatchers.io) { env.vault.vault.store.getString(SWAPS_ENTRY) }
         } catch (e: CancellationException) {
@@ -412,24 +413,26 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         } catch (e: Exception) {
             ErrorReports.quiet(e, "wallet.restoreSwaps")
             null
-        } ?: return
+        } ?: return@withLock
         val now = env.nowMillis()
         val known = swaps.mapNotNull { it.actionId }.toSet()
-        // one far older than any transaction can live is dropped (a clock set back keeps it: it waits for the chain)
+        // one far older than any transaction can live is dropped
         val back = StoredSwap.decode(stored).filter { it.actionId !in known && now - it.at <= RESTORE_MAX_AGE_MILLIS }
-        if (back.isEmpty()) return
+        if (back.isEmpty()) return@withLock
         back.forEach { s ->
             s.actionId?.let { swapActions += it }
-            swaps += Swap(s.account, s.symbol, s.amount, s.at, s.expiresBy, null, s.at, s.actionId, s.orderId)
+            // never later than now: the first load after the restart bounds an unbound one, whatever the clock said then
+            val at = minOf(s.at, now - 1)
+            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId)
         }
         settleLoadsLeft = SETTLE_LOADS
     }
 
     /** Accounts left the device ([AppEnvironment.accountsLeft]); null: all. Their pending swaps go, saved ones too. */
     internal suspend fun forgetSwaps(accounts: List<String>?) {
-        swaps.removeAll { accounts == null || it.account in accounts }
         // the saved list is filtered itself: this run may not have read it back yet
         swapWrites.withLock {
+            swaps.removeAll { accounts == null || it.account in accounts }
             withContext(env.dispatchers.io) {
                 val store = env.vault.vault.store
                 store.withLock {

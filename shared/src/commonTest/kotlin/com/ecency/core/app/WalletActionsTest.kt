@@ -4,6 +4,7 @@ import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.api.wallet.BookOrder
 import com.ecency.core.auth.AuthLink
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonObject
@@ -939,6 +940,44 @@ class WalletActionsTest {
         w.env.wallet.start()
         advance(1_000)
         assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "only the recent one is still pending")
+    }
+
+    @Test
+    fun aSwapSavedWithTheClockAheadStillGetsItsHourAfterARestart() = runTest {
+        val w = world(this)
+        clocks(w)
+        // signed elsewhere while the phone's clock ran 5 hours ahead, corrected since
+        val ahead = StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() + 5 * 3_600_000L, null, "action-ahead", null)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(ahead)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "an hour from the first load after the restart, not from the old clock")
+    }
+
+    @Test
+    fun aHiveAuthSwapWaitingAtLogoutIsNotSavedForTheAccountThatLeft() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        com.ecency.core.secure.KeyVault(w.app.store).save(
+            com.ecency.core.secure.VaultAccount(
+                WalletWorld.USER, com.ecency.core.secure.AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e",
+                hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-${WalletWorld.USER}",
+            ),
+        )
+        swapFormOpen(w, m)
+        w.app.relay.autoApproveSign = false
+        m.setAmount("3")
+        m.next()
+        m.confirm()
+        repeat(10) { testScheduler.runCurrent() }
+        assertEquals(HiveAuthStep.WAITING, assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt).step)
+        // logging out closes the prompt: the send may still land, but its account left
+        launch { w.env.session.logout(WalletWorld.USER) }
+        advance(1_000)
+        val again = relaunched(w, m)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing of the account that left came back")
     }
 
     @Test
