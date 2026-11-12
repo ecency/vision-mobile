@@ -568,8 +568,8 @@ private fun PlaceholderTab(title: String, text: String, action: String?, onActio
 }
 
 /**
- * A comment of the comments / replies tab: author, age, text and votes; a tap opens it. A signed in reader also gets
- * RN's gift (CommentView `_handleOnTipPress`, the tipping dialog for the comment) under the row.
+ * A comment of the comments / replies tab: author, age, text and votes; a tap opens it. Under it, RN's gift
+ * (CommentView `_handleOnTipPress`, the tipping dialog for the comment; signed out, the login as on the other cards).
  */
 @Composable
 private fun CommentRow(card: PostCard, nowMillis: Long, actions: FeedActions) {
