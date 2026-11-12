@@ -314,20 +314,23 @@ class HiveAuthClient(
 
     /**
      * Sends [ops] to the wallet for signing and broadcasting with [keyType]. An expired [session] fails
-     * before anything is sent (RN "auth expired"). [onWait] receives the `has://sign_req` link.
+     * before anything is sent (RN "auth expired"). [onSent]: the request went to the relay, so the wallet may sign it
+     * from then on. [onWait] receives the `has://sign_req` link.
      */
     @Throws(Exception::class)
     suspend fun broadcast(
         session: HiveAuthSession,
         keyType: KeyRole,
         ops: JsonArray,
+        onSent: () -> Unit = {},
         onWait: suspend (HiveAuthWait) -> Unit,
-    ): HiveAuthSignResult = lock.withLock { broadcastLocked(session, keyType, ops, onWait) }
+    ): HiveAuthSignResult = lock.withLock { broadcastLocked(session, keyType, ops, onSent, onWait) }
 
     private suspend fun broadcastLocked(
         session: HiveAuthSession,
         keyType: KeyRole,
         ops: JsonArray,
+        onSent: () -> Unit,
         onWait: suspend (HiveAuthWait) -> Unit,
     ): HiveAuthSignResult {
         if (session.isExpired(nowMillis())) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.SESSION_EXPIRED)
@@ -343,6 +346,7 @@ class HiveAuthClient(
                 session.token?.let { put("token", it) }
             }.toString(),
         )
+        onSent()
         val wait = awaitWait("sign_wait")
         onWait(HiveAuthWait(wait.uuid, wait.expire, HiveAuthProtocol.signLink(HiveAuthProtocol.preferredScheme(wait.raw) ?: "has"), wait.raw))
         while (true) {

@@ -12,6 +12,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
 
@@ -107,7 +109,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         }
         // README "Foreground refresh": back after a long trip with the wallet on screen
         scope.launch { env.freshness.staleReturns.collect { if (watchers > 0) refreshIfStale() } }
-        load(refresh = false)
+        // the swaps an earlier run left pending come back before the first load reads a balance
+        scope.launch {
+            restoreSwaps()
+            load(refresh = false)
+        }
     }
 
     /** A screen showing the wallet appeared (or went away, [visible] false): polls every [POLL_MILLIS] while shown. */
@@ -310,7 +316,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
         swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId)
-        settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
+        settleLoadsLeft = SETTLE_LOADS
+        saveSwaps()
     }
 
     /**
@@ -340,6 +347,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private fun settle(account: String, sentAt: Long, read: ChainRead?, landed: Set<Long> = emptySet()) {
         val head = read?.head
         var orderSoon = false
+        val before = swaps.size
         if (read != null && head != null) {
             // a send of this account started since the floor read, the swap's and those waiting aside, could be the drop
             val known = swapActions.toSet()
@@ -351,8 +359,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             // the balance before its block reaches the history, so a few short looks follow before its expiration wait
             swaps.removeAll { sw -> sw in dropped && sw.orderId != null && sw.orderId in landed }
             dropped.filter { it in swaps && it.orderLooks < ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
-            swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
+            val bound = swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }
+            bound.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
+            // a bound just set is saved too: after a restart the hour runs from it, never from a later load
+            if (swaps.size != before || bound.isNotEmpty()) saveSwaps()
         }
         // a failed or set aside read in the middle of a swap's short looks keeps them going
         if (read == null || head == null) {
@@ -367,6 +378,69 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             if (current.account == account) load(refresh = true, quiet = true)
         }
     }
+
+    /**
+     * The pending swaps outlive the process (an app restart inside their window would otherwise offer the swapped
+     * funds again): saved to the secure store at each change ([SWAPS_ENTRY]; a wipe clears it, [forgetSwaps] an
+     * account's), read back at [start]. A restored swap has no floor, as the sends this app started before the restart
+     * are not known any more: it waits for its expiration (its signed one, or an hour from the first load after).
+     */
+    private fun saveSwaps() {
+        val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId) }
+        scope.launch {
+            swapWrites.withLock {
+                try {
+                    withContext(env.dispatchers.io) {
+                        val store = env.vault.vault.store
+                        store.withLock { if (snapshot.isEmpty()) store.delete(SWAPS_ENTRY) else store.putString(SWAPS_ENTRY, StoredSwap.encode(snapshot)) }
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // kept in memory for this run only
+                    ErrorReports.quiet(e, "wallet.saveSwaps")
+                }
+            }
+        }
+    }
+
+    private suspend fun restoreSwaps() {
+        val stored = try {
+            withContext(env.dispatchers.io) { env.vault.vault.store.getString(SWAPS_ENTRY) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ErrorReports.quiet(e, "wallet.restoreSwaps")
+            null
+        } ?: return
+        val now = env.nowMillis()
+        val known = swaps.mapNotNull { it.actionId }.toSet()
+        // one far older than any transaction can live is dropped (a clock set back keeps it: it waits for the chain)
+        val back = StoredSwap.decode(stored).filter { it.actionId !in known && now - it.at <= RESTORE_MAX_AGE_MILLIS }
+        if (back.isEmpty()) return
+        back.forEach { s ->
+            s.actionId?.let { swapActions += it }
+            swaps += Swap(s.account, s.symbol, s.amount, s.at, s.expiresBy, null, s.at, s.actionId, s.orderId)
+        }
+        settleLoadsLeft = SETTLE_LOADS
+    }
+
+    /** Accounts left the device ([AppEnvironment.accountsLeft]); null: all. Their pending swaps go, saved ones too. */
+    internal suspend fun forgetSwaps(accounts: List<String>?) {
+        swaps.removeAll { accounts == null || it.account in accounts }
+        // the saved list is filtered itself: this run may not have read it back yet
+        swapWrites.withLock {
+            withContext(env.dispatchers.io) {
+                val store = env.vault.vault.store
+                store.withLock {
+                    val left = if (accounts == null) emptyList() else store.getString(SWAPS_ENTRY)?.let(StoredSwap::decode).orEmpty().filterNot { it.account in accounts }
+                    if (left.isEmpty()) store.delete(SWAPS_ENTRY) else store.putString(SWAPS_ENTRY, StoredSwap.encode(left))
+                }
+            }
+        }
+    }
+
+    private val swapWrites = kotlinx.coroutines.sync.Mutex()
 
     /** The ids of [account]'s latest limit orders on chain (its history's `limit_order_create` rows). */
     private suspend fun landedOrders(account: String): Set<Long> =
@@ -567,5 +641,48 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         /** RN populateSelectedAssets: the defaults, then ENGINE and CHAIN tokens of the profile that show (no legacy SPK). */
         fun selectedSymbols(tokens: List<ProfileToken>): List<String> =
             (DEFAULT_ASSETS + tokens.filter { it.show && it.type != "HIVE" && it.symbol != "SPK" }.map { it.symbol }).distinct()
+
+        private const val SWAPS_ENTRY = "wallet.pendingSwaps"
+        private const val RESTORE_MAX_AGE_MILLIS = 2 * MAX_TRANSACTION_LIFETIME_MILLIS
+        private const val SETTLE_LOADS = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
+    }
+}
+
+/** A pending swap as saved across restarts ([WalletModel]'s secure store entry): no key, no memo, nothing signed. */
+internal data class StoredSwap(
+    val account: String, val symbol: String, val amount: Double, val at: Long, val expiresBy: Long?,
+    val actionId: String?, val orderId: Long?,
+) {
+    companion object {
+        fun encode(swaps: List<StoredSwap>): String = kotlinx.serialization.json.buildJsonArray {
+            swaps.forEach { s ->
+                add(
+                    kotlinx.serialization.json.buildJsonObject {
+                        put("account", kotlinx.serialization.json.JsonPrimitive(s.account))
+                        put("symbol", kotlinx.serialization.json.JsonPrimitive(s.symbol))
+                        put("amount", kotlinx.serialization.json.JsonPrimitive(s.amount))
+                        put("at", kotlinx.serialization.json.JsonPrimitive(s.at))
+                        s.expiresBy?.let { put("expiresBy", kotlinx.serialization.json.JsonPrimitive(it)) }
+                        s.actionId?.let { put("actionId", kotlinx.serialization.json.JsonPrimitive(it)) }
+                        s.orderId?.let { put("orderId", kotlinx.serialization.json.JsonPrimitive(it)) }
+                    },
+                )
+            }
+        }.toString()
+
+        /** What [raw] holds that reads as a swap; anything else is skipped. */
+        fun decode(raw: String): List<StoredSwap> {
+            val array = runCatching { kotlinx.serialization.json.Json.parseToJsonElement(raw) as? kotlinx.serialization.json.JsonArray }.getOrNull() ?: return emptyList()
+            return array.mapNotNull { el ->
+                val o = el as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
+                fun p(k: String) = o[k] as? kotlinx.serialization.json.JsonPrimitive
+                fun text(k: String) = p(k)?.takeIf { it.isString }?.content
+                fun long(k: String) = p(k)?.takeIf { !it.isString }?.content?.toLongOrNull()
+                val account = text("account")?.takeIf(com.ecency.core.secure.KeyVault::isValidUsername) ?: return@mapNotNull null
+                val symbol = text("symbol")?.takeIf { it == "HIVE" || it == "HBD" } ?: return@mapNotNull null
+                val amount = p("amount")?.takeIf { !it.isString }?.content?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() } ?: return@mapNotNull null
+                StoredSwap(account, symbol, amount, long("at") ?: return@mapNotNull null, long("expiresBy"), text("actionId"), long("orderId"))
+            }
+        }
     }
 }

@@ -3052,6 +3052,7 @@
     },
     "signing": {
       "hot_page_closed": "HiveSigner page closed",
+      "hive_auth_prompt_closed": "HiveAuth request closed",
       "wrong_role": "This is your {given} key; this operation needs your {needed} key.",
       "action_id_required": "This action needs an action id to be retried safely."
     },

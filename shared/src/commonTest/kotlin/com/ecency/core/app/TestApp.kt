@@ -76,6 +76,8 @@ class TestApp(
     separateIo: Boolean = false,
     /** Wraps the IO dispatcher (e.g. [HoldingDispatcher], to hold vault reads back). */
     ioWrap: ((kotlinx.coroutines.CoroutineDispatcher) -> kotlinx.coroutines.CoroutineDispatcher)? = null,
+    /** The secure store; an earlier [TestApp]'s stands for the same device after a relaunch. */
+    val store: InMemorySecureStore = InMemorySecureStore(),
     val handler: suspend FakeTransport.(Sent) -> HttpResult,
 ) {
     /**
@@ -88,7 +90,6 @@ class TestApp(
     var txStatus: (String) -> String? = { null }
 
     val transport = FakeTransport { request -> chainTransaction(request) ?: handler(request) }
-    val store = InMemorySecureStore()
     val main = StandardTestDispatcher(scope.testScheduler, "main")
     val render = TrackingDispatcher(StandardTestDispatcher(scope.testScheduler, "render"))
     val io = (if (separateIo) StandardTestDispatcher(scope.testScheduler, "io") else main).let { ioWrap?.invoke(it) ?: it }

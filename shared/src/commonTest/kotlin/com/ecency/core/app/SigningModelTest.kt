@@ -170,6 +170,48 @@ class SigningModelTest {
         assertTrue(app.transport.sent.any { it.method == "transaction_status_api.find_transaction" }, "the chain confirmed it first")
     }
 
+    @Test
+    fun aHiveAuthPromptClosedWhileTheWalletWaitsMayHaveSigned() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.relay.autoApproveSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        assertEquals(HiveAuthStep.WAITING, assertIs<SigningPrompt.HiveAuthBroadcast>(app.env.signing.current.prompt).step)
+        app.env.signing.cancel()
+        testScheduler.runCurrent()
+        val e = assertIs<AuthException.Cancelled>(result.await().exceptionOrNull())
+        assertTrue(e.mayHaveSigned, "the wallet app can still approve and broadcast it")
+    }
+
+    @Test
+    fun aHiveAuthPromptClosedOnceTheRequestReachedTheRelayMayHaveSigned() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        // the relay took the request, its sign_wait is still to come
+        app.relay.answerSign = false
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        assertTrue(app.relay.sent.any { it["cmd"]?.jsonPrimitive?.content == "sign_req" })
+        app.env.signing.cancel()
+        testScheduler.runCurrent()
+        assertTrue(assertIs<AuthException.Cancelled>(result.await().exceptionOrNull()).mayHaveSigned)
+    }
+
+    @Test
+    fun aHiveAuthPromptClosedBeforeTheRequestWasSentSignedNothing() = runTest {
+        val app = appWithAccounts(this)
+        hiveAuthAccount(app)
+        app.relay.openGate = kotlinx.coroutines.CompletableDeferred()
+        val result = async { runCatching { app.env.signing.broadcast(alice, vote()) } }
+        repeat(5) { testScheduler.runCurrent() }
+        assertEquals(HiveAuthStep.INITIATING, assertIs<SigningPrompt.HiveAuthBroadcast>(app.env.signing.current.prompt).step)
+        app.env.signing.cancel()
+        testScheduler.runCurrent()
+        assertEquals(false, assertIs<AuthException.Cancelled>(result.await().exceptionOrNull()).mayHaveSigned)
+        assertTrue(app.relay.sent.none { it["cmd"]?.jsonPrimitive?.content == "sign_req" }, "nothing reached the relay")
+    }
+
     private suspend fun hiveAuthAccount(app: TestApp) =
         store(app, VaultAccount(alice, AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e", hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-$alice"))
 

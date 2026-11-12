@@ -598,6 +598,8 @@ class AppEnvironment(
         guardedStep { dictationRecorder?.let { DictationClips.purgeLeft(it, drafts) } }
         // the restart journal names the account: it leaves with it (a wipe clears the store, this the memory)
         guardedStep { sendJournal.forget(drafts) }
+        // so do its pending swaps (WalletModel saves them across restarts)
+        guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { wallet.forgetSwaps(drafts) } }
         // the exchange deposit memos it sent go with it
         guardedStep { exchangeMemos.forget(drafts) }
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { pointActivities.forget(drafts) } }

@@ -862,6 +862,95 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aSwapWhoseHiveAuthPromptClosedWhileTheWalletWaitsStaysOffForTheHour() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            com.ecency.core.secure.KeyVault(w.app.store).save(
+                com.ecency.core.secure.VaultAccount(
+                    WalletWorld.USER, com.ecency.core.secure.AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e",
+                    hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-${WalletWorld.USER}",
+                ),
+            )
+            swapFormOpen(w, m)
+            w.app.relay.autoApproveSign = false
+            m.setAmount("3")
+            m.next()
+            m.confirm()
+            repeat(10) { testScheduler.runCurrent() }
+            assertEquals(HiveAuthStep.WAITING, assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt).step)
+            // closed while the wallet app still holds the request: it can approve it until it expires
+            w.env.signing.cancel()
+            advance(100)
+            assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, (m.current.prompt as? TradePrompt.Alert)?.message, "not \"nothing was sent\": check the wallet")
+            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the swap may still land")
+            advance(50 * 60_000L)
+            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
+            advance(15 * 60_000L)
+            assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "past an hour of chain time it is decided")
+        } finally {
+            m.close()
+        }
+    }
+
+    /** The app quits ([w]'s environment stops) and launches again on the same device. */
+    private fun TestScope.relaunched(w: WalletWorld, m: TradeModel): WalletWorld {
+        advance(100)
+        m.close()
+        w.env.wallet.close()
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        return again
+    }
+
+    @Test
+    fun aSwapPendingAtARestartStillComesOffUntilItExpires() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        // accepted; the node read after it does not have it yet
+        swapAcceptedNow(w, m, amount = "3", left = "12.345")
+        val again = relaunched(w, m)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the first read after the restart lacks the swap: still taken off")
+        advance(keySettle)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "past its signed expiration the chain decided it")
+    }
+
+    @Test
+    fun anAccountThatLeftTakesItsPendingSwapsWithIt() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapAcceptedNow(w, m, amount = "3", left = "12.345")
+        w.env.accountsLeft(listOf(WalletWorld.USER), forget = true) {}
+        val again = relaunched(w, m)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing of the account left behind")
+    }
+
+    @Test
+    fun aSavedSwapOlderThanAnyTransactionCanLiveIsDropped() = runTest {
+        val w = world(this)
+        clocks(w)
+        val now = w.app.clock()
+        // an hour bound never set (no load ran after it): without the age limit the next load would start a new hour
+        val old = StoredSwap(WalletWorld.USER, "HIVE", 3.0, now - 3 * 3_600_000L, null, "action-old", null)
+        val fresh = StoredSwap(WalletWorld.USER, "HIVE", 1.0, now - 60_000L, null, "action-fresh", null)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(old, fresh)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "only the recent one is still pending")
+    }
+
+    @Test
+    fun aSavedSwapReadsBackAsItWasAndSkipsWhatIsNotOne() {
+        val s = StoredSwap(WalletWorld.USER, "HBD", 1.5, 1_000L, 2_000L, "action-1", 912345678L)
+        assertEquals(listOf(s), StoredSwap.decode(StoredSwap.encode(listOf(s))))
+        val bad = """[{"account":"${WalletWorld.USER}","symbol":"BTC","amount":1,"at":1},{"account":"${WalletWorld.USER}","symbol":"HIVE","amount":"1","at":1},{"symbol":"HIVE","amount":1,"at":1},7]"""
+        assertEquals(emptyList(), StoredSwap.decode(bad))
+        assertEquals(emptyList(), StoredSwap.decode("not json"))
+    }
+
+    @Test
     fun aLoadSentBeforeASwapNeverStartsItsHour() = runTest {
         val w = world(this)
         clocks(w)
