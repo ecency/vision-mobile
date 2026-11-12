@@ -41,6 +41,22 @@ class TestStore : SecureStore {
 }
 
 /**
+ * hivemind's answer for the bridge v2 reads and `bridge.list_votes` on a node without them (the exact assert the app
+ * falls back to v1 on, on the same node); null for any other method. The scripted nodes below are such nodes.
+ */
+fun bridgeV2Refusal(method: String, id: String): HttpResult? {
+    if (!method.startsWith("bridge.") || !(method.endsWith("_v2") || method == "bridge.list_votes")) return null
+    val name = method.replaceFirst(".", "_api")
+    return HttpResult(200, """{"jsonrpc":"2.0","error":{"code":-32602,"message":"Assert Exception:unknown method: $name"},"id":$id}""")
+}
+
+/** [inner] as a node without the bridge v2 reads: those requests are refused before [inner] sees them. */
+fun withoutBridgeV2(inner: RpcTransport): RpcTransport = RpcTransport { url, body ->
+    val req = Json.parseToJsonElement(body).jsonObject
+    bridgeV2Refusal(req["method"]!!.jsonPrimitive.content, req["id"]!!.jsonPrimitive.content) ?: inner.post(url, body)
+}
+
+/**
  * A scripted Hive node for UI tests (no network, nothing broadcast anywhere): two ranked posts per
  * sort, one post with a comment, a "tester" account whose posting key is [key], broadcasts that
  * succeed unless [broadcastDown], and an optional [broadcastGate] that holds every broadcast.
@@ -107,11 +123,7 @@ class TestNode {
         val id = req["id"]!!.jsonPrimitive.content
         fun ok(result: String) = HttpResult(200, """{"jsonrpc":"2.0","result":$result,"id":$id}""")
         extra?.invoke(method, req)?.let { return@RpcTransport ok(it) }
-        // a node without the bridge v2 reads (hivemind's exact answer): the app reads v1 from it, on the same node
-        if (method.startsWith("bridge.") && (method.endsWith("_v2") || method == "bridge.list_votes")) {
-            val name = method.replaceFirst(".", "_api")
-            return@RpcTransport HttpResult(200, """{"jsonrpc":"2.0","error":{"code":-32602,"message":"Assert Exception:unknown method: $name"},"id":$id}""")
-        }
+        bridgeV2Refusal(method, id)?.let { return@RpcTransport it }
         when (method) {
             "bridge.get_ranked_posts" -> {
                 if (feedDown) return@RpcTransport HttpResult(503, "down")
