@@ -452,6 +452,107 @@ class WalletActionsTest {
         }
     }
 
+    @Test
+    fun aLaggingReloadThatStillReadsThePreSwapBalanceKeepsTheSwapOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3")
+            m.reset()
+            // the portfolio has not caught up: the reload after the settle delay still reads 12.345
+            hiveLeft(w, "12.345")
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(9.345, m.current.balance, 0.0001, "a read without the swap never brings the spent HIVE back")
+            hiveLeft(w, "9.345")
+            w.env.wallet.refreshLater()
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(9.345, m.current.balance, 0.0001, "the read with the swap stands as read")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aSwapScreenReopenedBeforeTheReloadStillTakesTheSwapOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapAcceptedNow(w, m, amount = "3")
+        // Done closes the screen; swap opens again before the wallet reloads
+        m.close()
+        val again = w.env.tradeModel("HIVE")
+        try {
+            again.start()
+            testScheduler.advanceTimeBy(500)
+            testScheduler.runCurrent()
+            assertEquals(9.345, again.current.balance, 0.0001, "the new screen knows the swap the closed one sent")
+            hiveLeft(w, "9.345")
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(9.345, again.current.balance, 0.0001, "and the reload with it is not reduced again")
+        } finally {
+            again.close()
+        }
+    }
+
+    @Test
+    fun aLaggingReloadAfterTwoQuickSwapsKeepsBothOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "4")
+            m.reset()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("2")
+            m.next()
+            m.confirm()
+            untilAccepted(m)
+            m.reset()
+            // every reload, well after both settle delays, still reads the balance before either swap
+            hiveLeft(w, "12.345")
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(6.345, m.current.balance, 0.0001, "a read with neither swap keeps both off")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aReadSentBeforeTheSwapNeverSettlesIt() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            w.app.clock = { TestApp.NOW + testScheduler.currentTime }
+            w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
+            w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+            w.rpc["condenser_api.get_open_orders"] = { "[]" }
+            w.env.wallet.start()
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            // a pull to refresh is in flight when the swap goes out; it read 1.000 HIVE that came in before the swap
+            hiveLeft(w, "13.345")
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            w.gates["condenser_api.get_accounts"] = gate
+            w.env.wallet.refresh()
+            testScheduler.runCurrent()
+            m.setAmount("3")
+            m.next()
+            m.confirm()
+            untilAccepted(m)
+            m.reset()
+            assertEquals(9.345, m.current.balance, 0.0001)
+            gate.complete(Unit)
+            testScheduler.advanceTimeBy(500)
+            testScheduler.runCurrent()
+            assertEquals(13.345, w.env.wallet.current.item("HIVE")?.liquid, "the earlier read landed")
+            assertEquals(10.345, m.current.balance, 0.0001, "a read sent before the swap cannot have it")
+        } finally {
+            m.close()
+        }
+    }
+
     private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel, amount: String? = null) {
         w.app.clock = { TestApp.NOW + testScheduler.currentTime }
         w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }

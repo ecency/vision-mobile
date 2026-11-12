@@ -35,8 +35,6 @@ data class WalletState(
     val all: List<PortfolioItem> = emptyList(),
     val totalText: String = "--.--",
     val updatedAtMillis: Long? = null,
-    /** When the read behind [updatedAtMillis] was sent: what it can include (a swap's reconciliation reads it). */
-    val readStartedAtMillis: Long? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val loaded: Boolean = false,
@@ -262,6 +260,48 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         }
     }
 
+    /**
+     * A swap's sale of [amount] [symbol] from [account] at [at] that no wallet read has shown yet. [expected] is the
+     * balance the swap form showed then: the read one less the sales still pending before this one.
+     */
+    private class Spend(val account: String, val symbol: String, val amount: Double, val expected: Double, val at: Long)
+
+    /** Oldest first; app-wide, so a swap screen opened again before the reload still takes the sale off. */
+    private val spends = mutableListOf<Spend>()
+
+    /** The swap screen: [amount] of [symbol] left [account] just now. */
+    internal fun spent(account: String, symbol: String, amount: Double) {
+        if (current.account != account) return
+        val cached = current.item(symbol)?.let(::liquid) ?: return
+        spends += Spend(account, symbol, amount, cached - pendingSpent(symbol), env.nowMillis())
+    }
+
+    /** What the signed-in account's sales of [symbol] that no read has shown yet take off its balance. */
+    internal fun pendingSpent(symbol: String): Double =
+        spends.filter { it.account == current.account && it.symbol == symbol }.sumOf { it.amount }
+
+    /**
+     * A read sent at [startedAt] shows a sale when its balance went down by it from [Spend.expected]. A read that
+     * still has the expected balance (a lagging portfolio) keeps the sale off. One that moved some other way (funds
+     * came in meanwhile) settles the oldest pending sale only, and only when sent after the settle delay, so a read
+     * sent before the swap, or one with an earlier swap alone, never settles a later one.
+     */
+    private fun reconcile(account: String, items: List<PortfolioItem>, startedAt: Long) {
+        val pendingBefore = mutableSetOf<String>()
+        val kept = spends.filter { sp ->
+            if (sp.account != account) return@filter true
+            val read = items.firstOrNull { it.symbol == sp.symbol }?.let(::liquid)
+            val shows = read != null && read <= sp.expected - sp.amount + HALF_UNIT
+            val moved = read != null && sp.symbol !in pendingBefore &&
+                startedAt >= sp.at + AFTER_BROADCAST_DELAY_MILLIS && abs(read - sp.expected) > HALF_UNIT
+            (!shows && !moved).also { keep -> if (keep) pendingBefore += sp.symbol }
+        }
+        spends.clear()
+        spends += kept
+    }
+
+    private fun liquid(item: PortfolioItem): Double = item.liquid ?: item.balance
+
     private fun owns(user: String) = current.account == user && env.session.current.username == user
 
     /** [quiet]: no spinner, and a failure keeps what is shown without the banner (README "Foreground refresh"). */
@@ -294,11 +334,12 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val selection = tokens?.let(::selectionFor) ?: current.selection
                 served = if (refresh && servedFor == key) merged(served, items, selection) else items
                 servedFor = key
+                reconcile(user, served, startedAt)
                 setState {
                     withRows(
                         it.copy(
                             hivePerMVests = perMVests, isLoading = false, isRefreshing = false, loaded = true,
-                            updatedAtMillis = env.nowMillis(), readStartedAtMillis = startedAt, selection = selection, error = null,
+                            updatedAtMillis = env.nowMillis(), selection = selection, error = null,
                         ),
                     )
                 }
@@ -393,6 +434,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val CLAIM_REREAD_MILLIS = listOf(2_000L, 3_000L, 5_000L, 10_000L, 20_000L)
 
         const val AFTER_BROADCAST_DELAY_MILLIS = 3_000L
+
+        /** Half of 0.001, the chain's smallest HIVE/HBD amount: float noise in a balance comparison. */
+        private const val HALF_UNIT = 0.0005
 
         /** How long a selection saved here wins over a lagging node's profile. */
         const val OVERRIDE_MILLIS = 10 * 60_000L

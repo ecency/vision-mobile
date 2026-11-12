@@ -172,15 +172,6 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     private var started = false
     private var user: String? = null
 
-    /**
-     * A swap accepted here: [amount] of [symbol] left the wallet at [at], when it held [before] after the swaps still
-     * pending. Until a wallet read shows it, the form's balance is the cached one less [amount], so "New Swap" never
-     * offers it again.
-     */
-    private class Spend(val symbol: String, val amount: Double, val before: Double, val at: Long)
-
-    private val spends = mutableListOf<Spend>()
-
     fun start() {
         if (started) return
         started = true
@@ -209,16 +200,11 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     private fun liquid(wallet: WalletState, symbol: String): Double? = wallet.item(symbol)?.let { it.liquid ?: it.balance }
 
     private fun balance() {
-        val wallet = env.wallet.current
-        // a read shows a swap when it went down by it, or was sent after the chain's settle delay (refreshLater's own)
-        val startedAt = wallet.readStartedAtMillis ?: Long.MIN_VALUE
-        spends.removeAll { sp ->
-            val now = liquid(wallet, sp.symbol)
-            startedAt >= sp.at + WalletModel.AFTER_BROADCAST_DELAY_MILLIS || (now != null && now <= sp.before - sp.amount + HALF_UNIT)
-        }
+        val wallet = env.wallet
+        // less what swaps no wallet read has shown yet took (WalletModel.spent), so "New Swap" never offers it again
         setState { s ->
-            val cached = liquid(wallet, s.from) ?: return@setState s
-            s.copy(balance = (cached - spends.filter { it.symbol == s.from }.sumOf { it.amount }).coerceAtLeast(0.0))
+            val cached = liquid(wallet.current, s.from) ?: return@setState s
+            s.copy(balance = (cached - wallet.pendingSpent(s.from)).coerceAtLeast(0.0))
         }
     }
 
@@ -335,11 +321,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 owned.done(id)
                 current.sold.split(' ').takeIf { it.size == 2 }?.let { (amount, symbol) ->
                     val sold = amount.toDoubleOrNull() ?: return@let
-                    // before = the balance after the swaps still pending, so a read with only an earlier one keeps this one
-                    liquid(env.wallet.current, symbol)?.let { cached ->
-                        val pending = spends.filter { it.symbol == symbol }.sumOf { it.amount }
-                        spends += Spend(symbol, sold, cached - pending, env.nowMillis())
-                    }
+                    user?.let { env.wallet.spent(it, symbol, sold) }
                 }
                 balance()
                 // now, in the wallet's own scope: Done tapped during the outcome check closes this model
@@ -363,8 +345,6 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     companion object {
         const val BOOK_REFRESH_MILLIS = 60_000L
 
-        /** Half of 0.001, the chain's smallest HIVE/HBD amount: float noise in a balance comparison. */
-        private const val HALF_UNIT = 0.0005
         const val EXPIRATION_SECONDS = 27L * 86_400
 
         /** RN `parseInt("9" + (Date.now() % 100000000))` (OrderIdPrefix.SWAP). */
