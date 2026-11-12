@@ -278,7 +278,12 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private class Swap(
         val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?,
         val floor: Double?, val floorSentAt: Long, val actionId: String?, val orderId: Long?, val latestBy: Long? = null,
+        /** Its outcome is undecided: a wallet app may still approve it later (a HiveAuth request closed while waiting). */
+        val lateApproval: Boolean = false,
     ) {
+        /** How long after its acceptance could be bounded it can still land: a late approval adds its hour. */
+        val window: Long get() = MAX_TRANSACTION_LIFETIME_MILLIS * (if (lateApproval) 2 else 1)
+
         /** Short looks booked for its order: its balance drop showed before its block reached the history. */
         var orderLooks = 0
     }
@@ -301,10 +306,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /**
      * [account]'s sale of [amount] [symbol] may be on chain. [keySigned]: this app signed it, with an expiration of this
      * phone's clock plus [KEY_TRANSACTION_LIFETIME_MILLIS] (HiveBroadcaster), written before now. Signed elsewhere (or
-     * its outcome undecided) the chain still caps it at acceptance plus [MAX_TRANSACTION_LIFETIME_MILLIS], and the
+     * its outcome undecided) the chain still caps it at acceptance plus [MAX_TRANSACTION_LIFETIME_MILLIS] ([undecided]: a late approval adds an hour), and the
      * first load sent after now bounds the acceptance by its head time.
      */
-    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean, actionId: String? = null, signedExpiresAt: Long? = null, orderId: Long? = null) {
+    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean, actionId: String? = null, signedExpiresAt: Long? = null, orderId: Long? = null, undecided: Boolean = false) {
         // an account that left the device records nothing (an outcome of its send can still arrive)
         if (account in departed) return
         val now = env.nowMillis()
@@ -317,14 +322,15 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val floor = floorRead?.liquid?.get(symbol)?.let { it - waiting - amount }
         // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
-        // signed elsewhere or undecided: a wallet app may still approve it after now (a HiveAuth request closed while
-        // waiting), within the hour, and its transaction lives an hour more; so it lands no later than the last chain
-        // head plus the time since that read (on the monotonic clock: a phone clock set back never shortens it) plus
-        // both hours. Kept across a restart, where the phone's clock never decides.
+        // signed elsewhere: accepted by now, it lands within its transaction's hour; undecided, a wallet app may still
+        // approve it after now (a HiveAuth request closed while waiting), within the hour, and it lives an hour more. So
+        // it lands no later than the last chain head plus the time since that read (on the monotonic clock: a phone
+        // clock set back never shortens it) plus that window. Kept across a restart, where the phone's clock never decides.
+        val window = MAX_TRANSACTION_LIFETIME_MILLIS * (if (undecided) 2 else 1)
         val latestBy = if (expiresBy != null) null else chainRead?.takeIf { it.account == account }?.let {
-            it.head + (env.security.monotonicMillis() - it.sentMono).coerceAtLeast(0) + 2 * MAX_TRANSACTION_LIFETIME_MILLIS
+            it.head + (env.security.monotonicMillis() - it.sentMono).coerceAtLeast(0) + window
         }
-        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy)
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy, undecided)
         settleLoadsLeft = SETTLE_LOADS
         saveSwaps()
     }
@@ -374,7 +380,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             swaps.removeAll { sw -> sw in dropped && sw.orderId != null && sw.orderId in landed }
             dropped.filter { it in swaps && it.orderLooks < ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
             val bound = swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }
-            bound.forEach { sw -> sw.expiresBy = (head + MAX_TRANSACTION_LIFETIME_MILLIS).let { by -> sw.latestBy?.let { minOf(it, by) } ?: by } }
+            bound.forEach { sw -> sw.expiresBy = (head + sw.window).let { by -> sw.latestBy?.let { minOf(it, by) } ?: by } }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
             // a bound just set is saved too: after a restart the hour runs from it, never from a later load
             if (swaps.size != before || bound.isNotEmpty() || saveFailed) saveSwaps()
@@ -409,7 +415,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             }
             swapWrites.withLock {
                 // the list as it is when written (on main), so an older one never lands after a newer change
-                val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId, it.latestBy) }
+                val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId, it.latestBy, it.lateApproval) }
                 try {
                     withContext(env.dispatchers.io) {
                         val store = env.vault.vault.store
@@ -467,7 +473,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             s.actionId?.let { swapActions += it }
             // never later than now: the first load after the restart bounds an unbound one, whatever the clock said then
             val at = minOf(s.at, now - 1)
-            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId, s.latestBy)
+            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId, s.latestBy, s.lateApproval)
         }
         settleLoadsLeft = SETTLE_LOADS
         true
@@ -720,7 +726,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 /** A pending swap as saved across restarts ([WalletModel]'s secure store entry): no key, no memo, nothing signed. */
 internal data class StoredSwap(
     val account: String, val symbol: String, val amount: Double, val at: Long, val expiresBy: Long?,
-    val actionId: String?, val orderId: Long?, val latestBy: Long? = null,
+    val actionId: String?, val orderId: Long?, val latestBy: Long? = null, val lateApproval: Boolean = false,
 ) {
     companion object {
         fun encode(swaps: List<StoredSwap>): String = kotlinx.serialization.json.buildJsonArray {
@@ -735,6 +741,7 @@ internal data class StoredSwap(
                         s.actionId?.let { put("actionId", kotlinx.serialization.json.JsonPrimitive(it)) }
                         s.orderId?.let { put("orderId", kotlinx.serialization.json.JsonPrimitive(it)) }
                         s.latestBy?.let { put("latestBy", kotlinx.serialization.json.JsonPrimitive(it)) }
+                        if (s.lateApproval) put("lateApproval", kotlinx.serialization.json.JsonPrimitive(true))
                     },
                 )
             }
@@ -751,7 +758,7 @@ internal data class StoredSwap(
                 val account = text("account")?.takeIf(com.ecency.core.secure.KeyVault::isValidUsername) ?: return@mapNotNull null
                 val symbol = text("symbol")?.takeIf { it == "HIVE" || it == "HBD" } ?: return@mapNotNull null
                 val amount = p("amount")?.takeIf { !it.isString }?.content?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() } ?: return@mapNotNull null
-                StoredSwap(account, symbol, amount, long("at") ?: return@mapNotNull null, long("expiresBy"), text("actionId"), long("orderId"), long("latestBy"))
+                StoredSwap(account, symbol, amount, long("at") ?: return@mapNotNull null, long("expiresBy"), text("actionId"), long("orderId"), long("latestBy"), p("lateApproval")?.takeIf { !it.isString }?.content == "true")
             }
         }
     }

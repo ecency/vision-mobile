@@ -391,6 +391,8 @@ class WalletActionsTest {
         // the signer writes expirations from the same phone clock
         w.env.api.broadcaster.nowMillis = { w.app.clock() }
         w.chainClock = { TestApp.NOW + testScheduler.currentTime }
+        // the device's monotonic clock runs with real (test) time whatever the phone's clock says
+        w.app.monotonicClock = { testScheduler.currentTime }
     }
 
     /** How long a key signed swap stays off a read that has it: its 60 s lifetime and the node lag margin. */
@@ -885,10 +887,10 @@ class WalletActionsTest {
             advance(100)
             assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, (m.current.prompt as? TradePrompt.Alert)?.message, "not \"nothing was sent\": check the wallet")
             assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the swap may still land")
-            advance(50 * 60_000L)
-            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
-            advance(15 * 60_000L)
-            assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "past an hour of chain time it is decided")
+            advance(65 * 60_000L)
+            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the wallet app may approve it later: an hour more")
+            advance(60 * 60_000L)
+            assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "past both hours of chain time it is decided")
         } finally {
             m.close()
         }
@@ -968,7 +970,6 @@ class WalletActionsTest {
         advance(1_000)
         // three hours pass with no chain read; the phone's clock is set back by as much meanwhile
         advance(3 * 3_600_000L)
-        w.app.monotonic += 3 * 3_600_000L
         w.app.clock = { TestApp.NOW + 1_000 }
         w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "after-a-step-back")
         advance(100)
@@ -1116,7 +1117,7 @@ class WalletActionsTest {
 
     @Test
     fun aSavedSwapReadsBackAsItWasAndSkipsWhatIsNotOne() {
-        val s = StoredSwap(WalletWorld.USER, "HBD", 1.5, 1_000L, 2_000L, "action-1", 912345678L)
+        val s = StoredSwap(WalletWorld.USER, "HBD", 1.5, 1_000L, 2_000L, "action-1", 912345678L, latestBy = 3_000L, lateApproval = true)
         assertEquals(listOf(s), StoredSwap.decode(StoredSwap.encode(listOf(s))))
         val bad = """[{"account":"${WalletWorld.USER}","symbol":"BTC","amount":1,"at":1},{"account":"${WalletWorld.USER}","symbol":"HIVE","amount":"1","at":1},{"symbol":"HIVE","amount":1,"at":1},7]"""
         assertEquals(emptyList(), StoredSwap.decode(bad))
@@ -1135,15 +1136,17 @@ class WalletActionsTest {
         w.env.wallet.refresh()
         testScheduler.runCurrent()
         advance(1_000)
+        val swapAt = testScheduler.currentTime
         w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false)
         advance(3_000)
         w.gates.remove("condenser_api.get_accounts")
         gate.complete(Unit)
         advance(100)
-        // an hour from the held load's head ends about 2 minutes before one from the next load, sent after the swap
-        advance(3_780_000L - testScheduler.currentTime)
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from a read sent after the swap")
-        advance(120_000)
+        // accepted by the time it was recorded: it lands within the hour from then, and leaves the node lag after
+        val due = swapAt + 3_600_000L + WalletModel.NODE_LAG_MILLIS
+        advance(due - 10_000L - testScheduler.currentTime)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from the swap")
+        advance(30_000L)
         assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
     }
 

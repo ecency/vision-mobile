@@ -103,6 +103,9 @@ class TestApp(
 
     /** The lock's monotonic clock, moved by tests. */
     var monotonic = 0L
+
+    /** When set, the monotonic clock follows it instead of [monotonic] (tests on virtual time). */
+    var monotonicClock: (() -> Long)? = null
     val env = AppEnvironment(
         api = EcencyApi(NODES, transport),
         vault = KeyVaultAsync(KeyVault(store), io),
@@ -111,7 +114,7 @@ class TestApp(
         proxyBase = PROXY,
         debugKeyImport = debugKeyImport,
         nowMillis = { clock() },
-        security = SecurityConfig(pinIterations = 16, monotonicMillis = { monotonic }),
+        security = SecurityConfig(pinIterations = 16, monotonicMillis = { monotonicClock?.invoke() ?: monotonic }),
         legacy = legacy,
         auth = AuthServices(authBackend.http, relay),
     )
