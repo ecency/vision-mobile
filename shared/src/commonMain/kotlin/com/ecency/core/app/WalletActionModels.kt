@@ -10,6 +10,7 @@ import com.ecency.core.api.wallet.DurationPrice
 import com.ecency.core.api.wallet.PortfolioItem
 import com.ecency.core.api.wallet.ProfileToken
 import com.ecency.core.auth.OperationAuthority
+import com.ecency.core.auth.SigningMethod
 import com.ecency.core.hive.ChainTime
 import com.ecency.core.hive.Operation
 import com.ecency.core.l10n.L
@@ -197,7 +198,7 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         scope.launch { env.events.collect { e -> if (e is AppEvent.SessionChanged && e.username != user) setState { it.copy(closed = true) } } }
     }
 
-    // less what swaps no chain read has yet took (WalletModel.spent), so "New Swap" never offers it again
+    // less the swaps no chain read is known to include (WalletModel.available), so "New Swap" never offers them again
     private fun balance() = setState { s -> env.wallet.available(s.from)?.let { s.copy(balance = it) } ?: s }
 
     private suspend fun loadBook() {
@@ -290,7 +291,20 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
         setState { it.copy(prompt = null, actionId = actionId, phase = SendPhase.Sending, sold = prompt.amountToSell, received = prompt.minToReceive) }
         scope.launch {
             ordersBefore = runCatching { env.walletApi.openOrders(owner).size }.getOrDefault(0)
-            env.walletSends.send(owner, ops, OperationAuthority.required(ops), actionId)
+            // the sale is the wallet's to know whoever watches the send: a screen closed before it ended included
+            val sold = prompt.amountToSell.split(' ').takeIf { it.size == 2 }
+            val wallet = env.wallet
+            val sends = env.walletSends
+            sends.afterOutcome(actionId) { s ->
+                val phase = s.phase
+                // landed, or may have: only a refusal or a cancel left the funds where they were
+                val mayHaveLanded = phase is SendPhase.Done || phase is SendPhase.Unconfirmed || (phase as? SendPhase.Failed)?.error?.undecided == true
+                if (!mayHaveLanded) return@afterOutcome
+                val keySigned = phase is SendPhase.Done && phase.method == SigningMethod.KEY
+                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned) } }
+                wallet.refreshLater()
+            }
+            sends.send(owner, ops, OperationAuthority.required(ops), actionId)
             owned.owns(actionId)
         }
     }
@@ -308,16 +322,11 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
 
     private fun onPhase(id: String, phase: SendPhase) {
         setState { it.copy(phase = phase) }
+        // an outcome that may have landed was just taken off the wallet's balance (confirm's afterOutcome)
+        balance()
         when (phase) {
             is SendPhase.Done -> {
                 owned.done(id)
-                current.sold.split(' ').takeIf { it.size == 2 }?.let { (amount, symbol) ->
-                    val sold = amount.toDoubleOrNull() ?: return@let
-                    user?.let { env.wallet.spent(it, symbol, sold, phase.method) }
-                }
-                balance()
-                // now, in the wallet's own scope: Done tapped during the outcome check closes this model
-                env.wallet.refreshLater()
                 scope.launch {
                     delay(1_000)
                     val after = runCatching { env.walletApi.openOrders(user ?: return@launch).size }.getOrDefault(ordersBefore)

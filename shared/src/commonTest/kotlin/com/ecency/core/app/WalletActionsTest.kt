@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -367,14 +368,13 @@ class WalletActionsTest {
         }
     }
 
-    /** A whole-balance swap up to the moment a node accepts it (the done state shows, no outcome or reload yet). */
     /** The chain and the portfolio both read [left] HIVE. */
     private fun hiveLeft(w: WalletWorld, left: String) {
         w.chainHive = left
         portfolioReads(w, left)
     }
 
-    /** The portfolio alone reads [left] HIVE (it lags the chain, or runs ahead of nothing). */
+    /** The portfolio alone reads [left] HIVE (it lags the chain). */
     private fun portfolioReads(w: WalletWorld, left: String) {
         w.http["/wallet-api/portfolio-v2"] = { HttpResult(200, WalletWorld.PORTFOLIO.replace(""""balance":12.345""", """"balance":$left""").replace(""""liquid":12.345""", """"liquid":$left""")) }
     }
@@ -384,18 +384,87 @@ class WalletActionsTest {
         assertTrue(m.current.phase is SendPhase.Done, "the swap was accepted")
     }
 
+    /** The phone's clock and the chain's both run on test time; the phone [phoneAheadMillis] ahead. */
+    private fun TestScope.clocks(w: WalletWorld, phoneAheadMillis: Long = 0) {
+        w.app.clock = { TestApp.NOW + testScheduler.currentTime + phoneAheadMillis }
+        w.chainClock = { TestApp.NOW + testScheduler.currentTime }
+    }
+
+    /** How long a key signed swap stays off a read that has it: its 60 s lifetime and the node lag margin. */
+    private val keySettle = WalletModel.KEY_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS
+
+    private fun TestScope.advance(millis: Long) {
+        testScheduler.advanceTimeBy(millis)
+        testScheduler.runCurrent()
+    }
+
+    /** The swap form opened on the 12.345 HIVE fixture, with a book to quote from. */
+    private fun TestScope.swapFormOpen(w: WalletWorld, m: TradeModel, phoneAheadMillis: Long = 0) {
+        clocks(w, phoneAheadMillis)
+        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        m.start()
+        testScheduler.advanceTimeBy(1_000)
+    }
+
+    /** A swap of [amount] (the whole balance when null) accepted by the node, which then reads [left]. */
+    private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel, amount: String? = null, left: String = "0", phoneAheadMillis: Long = 0) {
+        swapFormOpen(w, m, phoneAheadMillis)
+        if (amount == null) m.useBalance() else m.setAmount(amount)
+        m.next()
+        m.confirm()
+        hiveLeft(w, left)
+        untilAccepted(m)
+        assertNull(m.current.outcome, "its outcome check still runs")
+    }
+
     @Test
-    fun aRefreshThatAlreadyHasTheSwapIsNotReducedAgain() = runTest {
+    fun doneTappedAtOnceStillReloadsTheWallet() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapAcceptedNow(w, m)
+        // Done while the outcome check runs closes the screen and its model
+        m.close()
+        advance(10_000)
+        assertEquals(0.0, w.env.wallet.current.item("HIVE")?.liquid, "the wallet reload outlives the closed swap screen")
+    }
+
+    @Test
+    fun newSwapTappedAtOnceNeverOffersTheSpentBalance() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m, amount = "3")
-            hiveLeft(w, "9.345")
-            // a reload inside the settle delay that already reads the swap (pull to refresh, another screen)
-            w.env.wallet.refresh()
-            testScheduler.advanceTimeBy(100)
-            testScheduler.runCurrent()
+            swapAcceptedNow(w, m)
             m.reset()
+            assertEquals(0.0, m.current.balance, "the swapped HIVE is gone before the wallet reloads")
+            m.useBalance()
+            assertFalse(m.current.continueEnabled, "no second swap of the spent funds")
+            // 1.000 HIVE came in meanwhile: once the chain has decided the swap, the read stands as read
+            hiveLeft(w, "1")
+            advance(keySettle - 10_000)
+            assertEquals(0.0, m.current.balance, "not before the swap's transaction expired")
+            advance(15_000)
+            assertEquals(1.0, m.current.balance)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aReadWithTheSwapBeforeTheChainDecidedItTakesItOffAgainUntilThen() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            // a pull to refresh reads the swap at once: nothing can tell, so it comes off that read too, for now
+            w.env.wallet.refresh()
+            advance(100)
+            m.reset()
+            assertEquals(9.345, w.env.wallet.current.item("HIVE")?.liquid)
+            assertEquals(6.345, m.current.balance, 0.0001, "less, never more, until the chain decided it")
+            advance(keySettle + 5_000)
             assertEquals(9.345, m.current.balance, 0.0001, "12.345 less the 3 swapped, once")
         } finally {
             m.close()
@@ -403,81 +472,103 @@ class WalletActionsTest {
     }
 
     @Test
-    fun twoQuickSwapsAreEachTakenOffOnceAfterTheReloads() = runTest {
+    fun aSwapAcceptedButNotInABlockStaysOffWhateverItsAccountReads() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m, amount = "4")
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            m.reset()
+            // in the node's mempool, or read from a server behind it: the old balance, well after the reload
+            hiveLeft(w, "12.345")
+            advance(keySettle - 10_000)
+            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "the scheduled reload landed")
+            assertEquals(9.345, m.current.balance, 0.0001, "accepted is not decided: the swap stays off")
+            // it landed, and 1 HIVE came in
+            hiveLeft(w, "10.345")
+            advance(15_000)
+            assertEquals(10.345, m.current.balance, 0.0001, "decided: the read stands as read")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aSwapThatNeverLandedIsOfferedAgainOnceItExpired() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3", left = "12.345")
+            m.reset()
+            assertEquals(9.345, m.current.balance, 0.0001)
+            // it expired unincluded (or its order was cancelled): the 3 HIVE never left, or came back
+            advance(keySettle + 5_000)
+            assertEquals(12.345, m.current.balance, 0.0001, "past its expiration the chain's balance stands")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun aPhoneClockAheadOfTheChainKeepsTheSwapOffUntilTheChainPassesItsExpiration() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            // the phone runs 5 minutes fast: the swap's transaction is valid 6 minutes on chain
+            swapAcceptedNow(w, m, amount = "3", left = "12.345", phoneAheadMillis = 5 * 60_000L)
+            m.reset()
+            advance(keySettle + 5_000)
+            // by the phone's clock it expired; a pull to refresh asks the chain
+            w.env.wallet.refresh()
+            advance(100)
+            assertEquals(9.345, m.current.balance, 0.0001, "the chain has not passed its expiration: still off")
+            advance(5 * 60_000L)
+            assertEquals(12.345, m.current.balance, 0.0001, "past it on the chain's clock: it never landed")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun twoQuickSwapsEachComeOffUntilTheChainDecidedEach() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "4", left = "8.345")
             m.reset()
             assertEquals(8.345, m.current.balance, 0.0001)
-            testScheduler.advanceTimeBy(1_000)
+            advance(20_000)
             m.setAmount("2")
             m.next()
             m.confirm()
+            hiveLeft(w, "6.345")
             untilAccepted(m)
             m.reset()
-            assertEquals(6.345, m.current.balance, 0.0001, "both swaps off the cached balance")
-            // the first swap's reload lands before the second's delay is up, and already reads both
-            hiveLeft(w, "6.345")
-            testScheduler.advanceTimeBy(2_500)
-            testScheduler.runCurrent()
-            assertEquals(6.345, m.current.balance, 0.0001, "a read with both swaps is not reduced again")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(6.345, m.current.balance, 0.0001, "and nothing is taken off twice")
+            assertEquals(2.345, m.current.balance, 0.0001, "both off the last read, which has the first: less, never more")
+            advance(5_000)
+            assertEquals(0.345, m.current.balance, 0.0001, "both off the read after the second, which has both")
+            // the first is decided about three minutes after it, the second 20 s later
+            advance(160_000)
+            assertEquals(4.345, m.current.balance, 0.0001, "the first settled, the second still off")
+            advance(WalletModel.NODE_LAG_MILLIS)
+            assertEquals(6.345, m.current.balance, 0.0001, "each taken off once")
         } finally {
             m.close()
         }
     }
 
     @Test
-    fun aReloadWithOnlyTheFirstOfTwoQuickSwapsStillTakesTheSecondOff() = runTest {
+    fun aLaggingPortfolioNeverBringsTheSpentHiveBack() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m, amount = "4")
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
             m.reset()
-            testScheduler.advanceTimeBy(1_000)
-            m.setAmount("2")
-            m.next()
-            m.confirm()
-            untilAccepted(m)
-            m.reset()
-            assertEquals(6.345, m.current.balance, 0.0001, "both swaps off the cached balance")
-            // the first swap's reload: the portfolio has only that one, the chain both
-            w.chainHive = "6.345"
-            portfolioReads(w, "8.345")
-            testScheduler.advanceTimeBy(2_500)
-            testScheduler.runCurrent()
-            assertEquals(6.345, m.current.balance, 0.0001, "the second swap is still taken off")
-            // the second swap's reload has both
-            hiveLeft(w, "6.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(6.345, m.current.balance, 0.0001, "and then nothing is taken off twice")
-        } finally {
-            m.close()
-        }
-    }
-
-    @Test
-    fun aLaggingReloadThatStillReadsThePreSwapBalanceKeepsTheSwapOff() = runTest {
-        val w = world(this)
-        val m = w.env.tradeModel("HIVE")
-        try {
-            swapAcceptedNow(w, m, amount = "3")
-            m.reset()
-            // the portfolio has not caught up: the reload after the settle delay still reads 12.345
-            w.chainHive = "9.345"
+            // decided, 0.155 came in; the portfolio still has neither
+            w.chainHive = "9.5"
             portfolioReads(w, "12.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(9.345, m.current.balance, 0.0001, "a portfolio without the swap never brings the spent HIVE back")
-            hiveLeft(w, "9.345")
-            w.env.wallet.refreshLater()
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(9.345, m.current.balance, 0.0001, "the read with the swap stands as read")
+            advance(keySettle + 5_000)
+            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "the portfolio still lags")
+            assertEquals(9.5, m.current.balance, 0.0001, "the chain's balance, not the portfolio's")
         } finally {
             m.close()
         }
@@ -487,61 +578,102 @@ class WalletActionsTest {
     fun aSwapScreenReopenedBeforeTheReloadStillTakesTheSwapOff() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
-        swapAcceptedNow(w, m, amount = "3")
+        swapAcceptedNow(w, m, amount = "3", left = "9.345")
         // Done closes the screen; swap opens again before the wallet reloads
         m.close()
         val again = w.env.tradeModel("HIVE")
         try {
             again.start()
-            testScheduler.advanceTimeBy(500)
-            testScheduler.runCurrent()
+            advance(500)
             assertEquals(9.345, again.current.balance, 0.0001, "the new screen knows the swap the closed one sent")
-            hiveLeft(w, "9.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(9.345, again.current.balance, 0.0001, "and the reload with it is not reduced again")
+            w.chainHive = "9.5"
+            advance(keySettle + 5_000)
+            assertEquals(9.5, again.current.balance, 0.0001, "and the read after it is not reduced again")
         } finally {
             again.close()
         }
     }
 
     @Test
-    fun aLaggingReloadAfterTwoQuickSwapsKeepsBothOff() = runTest {
+    fun aSwapThatEndsAfterItsScreenClosedStillComesOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapFormOpen(w, m)
+        // the node holds its answer; the user leaves the screen meanwhile
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.broadcast_transaction"] = gate
+        m.setAmount("3")
+        m.next()
+        m.confirm()
+        testScheduler.runCurrent()
+        m.close()
+        w.gates.remove("condenser_api.broadcast_transaction")
+        gate.complete(Unit)
+        advance(100)
+        assertEquals(1, w.app.broadcasts().size, "the swap went out")
+        val again = w.env.tradeModel("HIVE")
+        try {
+            again.start()
+            advance(500)
+            assertEquals(9.345, again.current.balance, 0.0001, "the swap no screen saw end is still off")
+        } finally {
+            again.close()
+        }
+    }
+
+    @Test
+    fun aSwapWhoseOutcomeIsUnknownStaysOffAsLongAsItCouldLand() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m, amount = "4")
-            m.reset()
-            testScheduler.advanceTimeBy(1_000)
-            m.setAmount("2")
+            swapFormOpen(w, m)
+            // every node may have taken it and none says: the send ends unconfirmed after its checks
+            w.broadcastAnswer = { HttpResult(502, "") }
+            m.setAmount("3")
             m.next()
             m.confirm()
-            untilAccepted(m)
-            m.reset()
-            // every portfolio read, well after both settle delays, still has the balance before either swap
-            w.chainHive = "6.345"
-            portfolioReads(w, "12.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(6.345, m.current.balance, 0.0001, "a portfolio with neither swap keeps both off")
+            advance(WalletSends.CHECK_BOUND_MILLIS - 10_000)
+            repeat(400) { if (m.current.phase !is SendPhase.Unconfirmed) advance(500) }
+            assertIs<SendPhase.Unconfirmed>(m.current.phase)
+            assertEquals(9.345, m.current.balance, 0.0001, "its own form takes it off as the outcome lands")
+            m.close()
+            val again = w.env.tradeModel("HIVE")
+            try {
+                again.start()
+                advance(500)
+                assertEquals(9.345, again.current.balance, 0.0001, "it may have landed: off")
+                advance(30 * 60_000L)
+                assertEquals(9.345, again.current.balance, 0.0001, "a transaction may live an hour")
+                advance(40 * 60_000L)
+                assertEquals(12.345, again.current.balance, 0.0001, "past any lifetime the chain's balance stands")
+            } finally {
+                again.close()
+            }
         } finally {
             m.close()
         }
     }
 
-    /** The swap form opened on the 12.345 HIVE fixture, with a book to quote from. */
-    private fun TestScope.swapFormOpen(w: WalletWorld, m: TradeModel) {
-        w.app.clock = { TestApp.NOW + testScheduler.currentTime }
-        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
-        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
-        w.rpc["condenser_api.get_open_orders"] = { "[]" }
-        w.env.wallet.start()
-        m.start()
-        testScheduler.advanceTimeBy(1_000)
+    @Test
+    fun aRefusedSwapIsNeverTakenOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapFormOpen(w, m)
+            w.broadcastAnswer = { FakeTransport.error(it, 10, "Assert Exception: insufficient balance") }
+            m.setAmount("3")
+            m.next()
+            m.confirm()
+            advance(2_000)
+            assertIs<TradePrompt.Alert>(m.current.prompt, "the chain refused it")
+            assertEquals(12.345, m.current.balance, 0.0001, "nothing left the wallet")
+        } finally {
+            m.close()
+        }
     }
 
     @Test
-    fun aReadSentBeforeTheSwapNeverSettlesItWhateverItsBalance() = runTest {
+    fun anEarlierReadInFlightLeavesTheSwapOff() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
@@ -558,47 +690,11 @@ class WalletActionsTest {
             untilAccepted(m)
             m.reset()
             assertEquals(9.345, m.current.balance, 0.0001)
+            w.gates.remove("condenser_api.get_accounts")
             gate.complete(Unit)
-            testScheduler.advanceTimeBy(500)
-            testScheduler.runCurrent()
+            advance(500)
             assertEquals(9.345, w.env.wallet.current.item("HIVE")?.liquid, "the earlier read landed")
-            assertEquals(6.345, m.current.balance, 0.0001, "a read sent before the swap cannot have it, even one 3 HIVE lower")
-        } finally {
-            m.close()
-        }
-    }
-
-    @Test
-    fun aDepositInALaggingPortfolioNeverSettlesTheSwap() = runTest {
-        val w = world(this)
-        val m = w.env.tradeModel("HIVE")
-        try {
-            swapAcceptedNow(w, m, amount = "3")
-            m.reset()
-            // 1 HIVE came in; the portfolio shows it but not the swap, the chain both
-            w.chainHive = "10.345"
-            portfolioReads(w, "13.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(10.345, m.current.balance, 0.0001, "a deposit is not the swap")
-        } finally {
-            m.close()
-        }
-    }
-
-    @Test
-    fun aCancelledSwapsReturnedFundsAreOfferedAgain() = runTest {
-        val w = world(this)
-        val m = w.env.tradeModel("HIVE")
-        try {
-            swapAcceptedNow(w, m, amount = "3")
-            m.reset()
-            assertEquals(9.345, m.current.balance, 0.0001)
-            // the order stayed open and was cancelled before the reload: the 3 HIVE are back
-            hiveLeft(w, "12.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(12.345, m.current.balance, 0.0001, "funds back on the chain are offered again")
+            assertEquals(6.345, m.current.balance, 0.0001, "that read cannot have the swap, even one 3 HIVE lower")
         } finally {
             m.close()
         }
@@ -619,109 +715,165 @@ class WalletActionsTest {
             testScheduler.runCurrent()
             hiveLeft(w, "9.345")
             w.env.wallet.refresh()
-            testScheduler.advanceTimeBy(100)
-            testScheduler.runCurrent()
+            advance(100)
             assertEquals(9.345, w.env.wallet.current.item("HIVE")?.liquid)
+            w.gates.remove("condenser_api.broadcast_transaction")
             gate.complete(Unit)
             untilAccepted(m)
             m.reset()
-            // the scheduled reload, sent after the node accepted the swap, has it
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(9.345, m.current.balance, 0.0001, "taken off once, not twice for good")
+            assertEquals(6.345, m.current.balance, 0.0001)
+            w.chainHive = "9.5"
+            advance(keySettle + 5_000)
+            assertEquals(9.5, m.current.balance, 0.0001, "taken off once, not twice for good")
         } finally {
             m.close()
         }
     }
 
     @Test
-    fun aSaleBroadcastElsewhereSettlesOnlyOnAReadABlockLater() = runTest {
-        val w = world(this)
-        w.app.clock = { TestApp.NOW + testScheduler.currentTime }
-        w.env.wallet.start()
-        testScheduler.advanceTimeBy(1_000)
-        // HiveSigner broadcast it through another node: ours may not have it at once
-        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, com.ecency.core.auth.SigningMethod.HIVESIGNER_HOT)
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
-        w.chainHive = "12.345"
-        testScheduler.advanceTimeBy(500)
-        w.env.wallet.refresh()
-        testScheduler.advanceTimeBy(100)
-        testScheduler.runCurrent()
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "a read sent inside the block may not have it")
-        hiveLeft(w, "9.345")
-        testScheduler.advanceTimeBy(3_000)
-        w.env.wallet.refresh()
-        testScheduler.advanceTimeBy(100)
-        testScheduler.runCurrent()
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "a read a block later has it, taken off once")
-    }
-
-    @Test
-    fun aReloadWhoseChainReadFailsSettlesNothing() = runTest {
+    fun aFailedChainReadKeepsTheLastOneAndSettlesNothing() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m, amount = "3")
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
             m.reset()
-            // the account read fails; the portfolio lags
-            w.rpc["condenser_api.get_accounts"] = { "{}" }
+            advance(5_000)
+            assertEquals(6.345, m.current.balance, 0.0001, "the reload's read, the swap off it until decided")
+            // account reads fail from now on while the portfolio lags
+            w.rpc["condenser_api.get_accounts"] = { "[]" }
             portfolioReads(w, "12.345")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "the reload landed")
-            assertEquals(9.345, m.current.balance, 0.0001, "nothing read the chain, so the swap stays off")
+            advance(keySettle * 3)
+            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "reloads landed, their account reads failed")
+            assertEquals(6.345, m.current.balance, 0.0001, "the last chain read stands and no read settled the swap")
         } finally {
             m.close()
         }
     }
 
-    private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel, amount: String? = null) {
-        w.app.clock = { TestApp.NOW + testScheduler.currentTime }
-        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }
-        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
-        w.rpc["condenser_api.get_open_orders"] = { "[]" }
-        w.env.wallet.start()
-        m.start()
-        testScheduler.advanceTimeBy(1_000)
-        if (amount == null) m.useBalance() else m.setAmount(amount)
-        m.next()
-        m.confirm()
-        hiveLeft(w, "0")
-        untilAccepted(m)
-        assertNull(m.current.outcome, "its outcome check still runs")
-    }
-
     @Test
-    fun doneTappedAtOnceStillReloadsTheWallet() = runTest {
+    fun aSwapSignedElsewhereStaysOffAsLongAsItCouldLand() = runTest {
         val w = world(this)
-        val m = w.env.tradeModel("HIVE")
-        swapAcceptedNow(w, m)
-        // Done while the outcome check runs closes the screen and its model
-        m.close()
-        testScheduler.advanceTimeBy(10_000)
-        testScheduler.runCurrent()
-        assertEquals(0.0, w.env.wallet.current.item("HIVE")?.liquid, "the wallet reload outlives the closed swap screen")
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false)
+        hiveLeft(w, "9.345")
+        w.env.wallet.refresh()
+        advance(100)
+        assertEquals(6.345, w.env.wallet.available("HIVE")!!, 0.0001, "its expiration is the signer's: up to an hour")
+        advance(50 * 60_000L)
+        assertEquals(6.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        advance(15 * 60_000L)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "past an hour of chain time it is decided")
     }
 
     @Test
-    fun newSwapTappedAtOnceNeverOffersTheSpentBalance() = runTest {
+    fun aLoadSentBeforeASwapNeverStartsItsHour() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        // a load goes out, its account read held; the swap is accepted meanwhile; the read lands 4 s on
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.get_accounts"] = gate
+        w.env.wallet.refresh()
+        testScheduler.runCurrent()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false)
+        advance(3_000)
+        w.gates.remove("condenser_api.get_accounts")
+        gate.complete(Unit)
+        advance(100)
+        // an hour from the held load's head ends about 2 minutes before one from the next load, sent after the swap
+        advance(3_780_000L - testScheduler.currentTime)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from a read sent after the swap")
+        advance(120_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
+    fun aFailedReadStillBooksTheNextLook() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = true)
+        // the first load after the swap fails its account read; nothing else reloads the wallet
+        val accounts = w.rpc.getValue("condenser_api.get_accounts")
+        w.rpc["condenser_api.get_accounts"] = { "[]" }
+        w.env.wallet.refresh()
+        advance(25_000)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        w.rpc["condenser_api.get_accounts"] = accounts
+        advance(keySettle + 60_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "a later look settled it")
+    }
+
+    @Test
+    fun aStuckNodeAfterASwapSettledNeverBringsItBack() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
         try {
-            swapAcceptedNow(w, m)
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
             m.reset()
-            assertEquals(0.0, m.current.balance, "the swapped HIVE is gone before the wallet reloads")
-            m.useBalance()
-            assertFalse(m.current.continueEnabled, "no second swap of the spent funds")
-            // the reload lands later and its balance stands as read (1.000 HIVE came in meanwhile)
-            hiveLeft(w, "1")
-            testScheduler.advanceTimeBy(10_000)
-            testScheduler.runCurrent()
-            assertEquals(1.0, m.current.balance)
+            advance(keySettle + 5_000)
+            assertEquals(9.345, m.current.balance, 0.0001, "settled")
+            // a node stuck ten minutes back answers the next load: no swap there, and nothing left to take off
+            val stuck = TestApp.NOW + testScheduler.currentTime - 10 * 60_000L
+            w.chainClock = { stuck }
+            hiveLeft(w, "12.345")
+            w.env.wallet.refresh()
+            advance(100)
+            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "the load landed")
+            assertEquals(9.345, m.current.balance, 0.0001, "a read behind the last never moves the chain read back")
         } finally {
             m.close()
         }
+    }
+
+    @Test
+    fun aReadWithoutTheChainsTimeIsSetAside() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "3", left = "9.345")
+            m.reset()
+            advance(keySettle + 5_000)
+            assertEquals(9.345, m.current.balance, 0.0001, "settled")
+            // the time read never answers; the account read comes from a node without the swap
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            w.gates["condenser_api.get_dynamic_global_properties"] = gate
+            hiveLeft(w, "12.345")
+            w.env.wallet.refresh()
+            advance(60_000)
+            assertEquals(12.345, w.env.wallet.current.item("HIVE")?.liquid, "the load landed")
+            assertEquals(9.345, m.current.balance, 0.0001, "an account read with no chain time to place it is set aside")
+            w.gates.remove("condenser_api.get_dynamic_global_properties")
+            gate.complete(Unit)
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
+    fun anHbdSwapComesOffTheHbdBalanceOnly() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HBD", 3.0, keySigned = true)
+        assertEquals(2.0, w.env.wallet.available("HBD")!!, 0.0001, "5.000 HBD on the chain less the 3 sold")
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
+    fun anotherAccountsSwapNeverComesOffThisOne() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent("someone-else", "HIVE", 3.0, keySigned = true)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
     }
 
     @Test

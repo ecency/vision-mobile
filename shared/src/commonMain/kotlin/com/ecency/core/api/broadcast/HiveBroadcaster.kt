@@ -90,7 +90,7 @@ class PendingBroadcast internal constructor(
 @OptIn(ExperimentalTime::class)
 class HiveBroadcaster(
     private val api: HiveApi,
-    private val expirationMillis: Long = 60_000,
+    private val expirationMillis: Long = EXPIRATION_MILLIS,
     private val chainId: ByteArray = HIVE_CHAIN_ID,
     private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
@@ -391,6 +391,9 @@ class HiveBroadcaster(
     }
 
     companion object {
+        /** How long a transaction this app signs stays valid: its expiration is this phone's clock plus this. */
+        const val EXPIRATION_MILLIS = 60_000L
+
         /** Blocks behind head to reference: a block every live node has (see hive-tx). */
         const val TAPOS_DEPTH = 3
 

@@ -7,7 +7,6 @@ import com.ecency.core.api.wallet.ProfileToken
 import com.ecency.core.api.wallet.Vests
 import com.ecency.core.api.wallet.WalletAccount
 import com.ecency.core.api.wallet.WalletApi
-import com.ecency.core.auth.SigningMethod
 import com.ecency.core.hive.KeyRole
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -264,49 +263,72 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * A swap's sale of [amount] [symbol] from [account] that no chain read is known to include yet: one sent from
-     * [settleFrom] on is.
+     * A swap's sale of [amount] [symbol] from [account] that may be on chain since [at] (this phone's clock). Taken off
+     * the swap form's balance until the chain has decided it for good: past its transaction's expiration it is in a
+     * block or never will be. [expiresBy] bounds that expiration in chain time, once known.
      */
-    private class Spend(val account: String, val symbol: String, val amount: Double, val settleFrom: Long)
+    private class Swap(val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?)
 
-    /** App-wide, so a swap screen opened again before the reload still takes the sale off. */
-    private val spends = mutableListOf<Spend>()
+    /** App-wide, so a swap screen opened again, or one closed before the swap ended, still takes the sale off. */
+    private val swaps = mutableListOf<Swap>()
 
-    /** The chain's liquid HIVE and HBD of [account] (get_accounts), from the last load. */
-    private class ChainRead(val account: String, val liquid: Map<String, Double>)
+    /** The chain's liquid HIVE and HBD of [account] (get_accounts), from a load that read the head time [head]. */
+    private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long)
 
     private var chainRead: ChainRead? = null
+    private var settleLoad: Job? = null
+
+    /** Loads [settle] may still book: enough for the longest wait, never endless on a stalled chain. */
+    private var settleLoadsLeft = 0
 
     /**
-     * The swap screen: [amount] of [symbol] left [account] just now, broadcast by [method]. A node that accepted a
-     * key signed send has it in every read after; one HiveSigner or HiveAuth broadcast elsewhere is in a block (the
-     * settle delay) later.
+     * [account]'s sale of [amount] [symbol] may be on chain. [keySigned]: this app signed it, with an expiration of this
+     * phone's clock plus [KEY_TRANSACTION_LIFETIME_MILLIS] (HiveBroadcaster), written before now. Signed elsewhere (or
+     * its outcome undecided) the chain still caps it at acceptance plus [MAX_TRANSACTION_LIFETIME_MILLIS], and the
+     * first load sent after now bounds the acceptance by its head time.
      */
-    internal fun spent(account: String, symbol: String, amount: Double, method: SigningMethod) {
-        if (current.account != account) return
+    internal fun spent(account: String, symbol: String, amount: Double, keySigned: Boolean) {
         val now = env.nowMillis()
-        spends += Spend(account, symbol, amount, now + if (method == SigningMethod.KEY) 1 else AFTER_BROADCAST_DELAY_MILLIS)
+        swaps += Swap(account, symbol, amount, now, if (keySigned) now + KEY_TRANSACTION_LIFETIME_MILLIS else null)
+        settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10
     }
 
     /**
-     * What the swap form may offer of [symbol]: the chain's balance (the portfolio can lag behind it), else the
-     * portfolio's, less the sales no chain read is known to include. Never inferred from how a balance changed: a
-     * deposit, a cancelled order or another send can move it either way.
+     * What the swap form may offer of [symbol]: the last chain read of the account (the portfolio, which can lag
+     * behind the chain, only when there is none; a failed read keeps the last) less every swap the chain may not have
+     * decided. Accepted is not decided, nor is a block. Nothing is inferred from how a balance moved: a deposit, a
+     * cancelled order or another send move it too. So for about three minutes after a key signed swap a read that has
+     * it shows it taken off twice: less, never more.
      */
     internal fun available(symbol: String): Double? {
         val account = current.account ?: return null
-        val read = chainRead?.takeIf { it.account == account }?.liquid?.get(symbol) ?: current.item(symbol)?.let(::liquid) ?: return null
-        return (read - spends.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }).coerceAtLeast(0.0)
+        val base = chainRead?.takeIf { it.account == account }?.liquid?.get(symbol) ?: current.item(symbol)?.let(::liquid) ?: return null
+        val pending = swaps.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }
+        return (base - pending).coerceAtLeast(0.0)
     }
 
     /**
-     * A load of [account] landed with its chain read, sent at [sentAt]: that read has every sale settled by then. A
-     * failed one settles nothing, and the form falls back to the portfolio until the next.
+     * A load of [account] sent at [sentAt] landed; [head] is the chain's time it read, null when its account or time
+     * read failed (it then settles nothing). Swaps it can bound get their expiration bound; those the chain decided
+     * [NODE_LAG_MILLIS] before [head] leave (the account read may come from a server of the node URL a little behind
+     * the one that told the time). A swap still waiting books the load after.
      */
-    private fun settle(account: String, chain: WalletAccount?, sentAt: Long) {
-        chainRead = chain?.let { ChainRead(account, mapOf("HIVE" to Vests.amount(it.balance), "HBD" to Vests.amount(it.hbdBalance))) }
-        if (chain != null) spends.removeAll { it.account == account && sentAt >= it.settleFrom }
+    private fun settle(account: String, sentAt: Long, head: Long?) {
+        if (head != null) {
+            swaps.filter { it.account == account && it.expiresBy == null && sentAt >= it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
+            swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
+        }
+        val waiting = swaps.filter { it.account == account }
+        if (waiting.isEmpty() || settleLoadsLeft-- <= 0) return
+        val wait = waiting.minOf { sw -> if (head == null) NODE_LAG_MILLIS else sw.expiresBy?.let { it + NODE_LAG_MILLIS - head } ?: NODE_LAG_MILLIS }
+        settleLoad?.cancel()
+        settleLoad = scope.launch {
+            delay(wait.coerceAtLeast(NODE_LAG_MILLIS) + 1_000)
+            if (current.account == account) load(refresh = true, quiet = true)
+        }
     }
+
+    private fun chainLiquid(account: WalletAccount) = mapOf("HIVE" to Vests.amount(account.balance), "HBD" to Vests.amount(account.hbdBalance))
 
     private fun liquid(item: PortfolioItem): Double = item.liquid ?: item.balance
 
@@ -316,7 +338,6 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private fun load(refresh: Boolean, quiet: Boolean = false) {
         job?.cancel()
         val stamp = env.freshness.stamp()
-        val startedAt = env.nowMillis()
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh && !quiet, error = if (quiet) it.error else null, currency = WalletCurrency.of(env.prefs)) }
         job = scope.launch {
             try {
@@ -330,21 +351,28 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 }
                 setState { if (it.account == user) it else WalletState(account = user, isLoading = true, currency = it.currency) }
                 val currency = current.currency
+                val sentAt = env.nowMillis()
                 val accountJob = async { runCatching { api.account(user) }.getOrNull() }
-                val rate = async { runCatching { api.hivePerMVests() }.getOrDefault(current.hivePerMVests) }
+                val globals = async { runCatching { api.chainGlobals() }.getOrNull() }
                 val items = api.portfolio(user, currency.code, onlyEnabled = true)
                 // a failed account read keeps the selection shown (the profile's tokens), never the defaults alone
                 val chain = accountJob.await()
                 val tokens = chain?.profileTokens
-                val perMVests = rate.await()
+                val chainNow = globals.await()
+                val perMVests = chainNow?.hivePerMVests ?: current.hivePerMVests
                 if (!owns(user)) return@launch
                 readAt = stamp
                 val key = user to currency.code
                 val selection = tokens?.let(::selectionFor) ?: current.selection
                 served = if (refresh && servedFor == key) merged(served, items, selection) else items
                 servedFor = key
-                // sent after startedAt: the account read went out once this load began
-                settle(user, chain, startedAt)
+                // the chain read only moves forward: one without a head time, or from a node behind the last, is set
+                // aside (a failed one too), and settles nothing
+                val head = chainNow?.headTimeMillis
+                val last = chainRead?.takeIf { it.account == user }
+                val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head) else null
+                if (forward != null) chainRead = forward
+                settle(user, sentAt, forward?.head)
                 setState {
                     withRows(
                         it.copy(
@@ -444,6 +472,18 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val CLAIM_REREAD_MILLIS = listOf(2_000L, 3_000L, 5_000L, 10_000L, 20_000L)
 
         const val AFTER_BROADCAST_DELAY_MILLIS = 3_000L
+
+        /**
+         * How far behind the head another node, or another server behind the same URL, may answer: above the 90 s
+         * (30 blocks) a node may lag before the app's node health sets it aside (NodeHealthTracker).
+         */
+        const val NODE_LAG_MILLIS = 120_000L
+
+        /** What this app's signer gives a transaction. */
+        const val KEY_TRANSACTION_LIFETIME_MILLIS = com.ecency.core.api.broadcast.HiveBroadcaster.EXPIRATION_MILLIS
+
+        /** Hive's longest transaction lifetime (HIVE_MAX_TIME_UNTIL_EXPIRATION): a signer elsewhere may set any up to it. */
+        const val MAX_TRANSACTION_LIFETIME_MILLIS = 3_600_000L
 
         /** How long a selection saved here wins over a lagging node's profile. */
         const val OVERRIDE_MILLIS = 10 * 60_000L

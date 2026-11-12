@@ -34,7 +34,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
             "transaction_status_api.find_transaction" -> FakeTransport.result(request, """{"status":${statusAnswer(request)}}""")
             "condenser_api.get_dynamic_global_properties" -> FakeTransport.result(
                 request,
-                """{"head_block_number":100675644,"head_block_id":"0601303c${"11".repeat(16)}","time":"$chainTime","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}""",
+                """{"head_block_number":100675644,"head_block_id":"0601303c${"11".repeat(16)}","time":"${chainClock?.let { com.ecency.core.hive.ChainTime.fromEpochSeconds(it() / 1000) } ?: chainTime}","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}""",
             )
             else -> rpc[request.method]?.invoke(request)?.let { FakeTransport.result(request, it) }
                 ?: TestApp.chain(request) ?: HttpResult(500, "no fixture for ${request.method}")
@@ -46,6 +46,9 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
 
     /** The chain's head time (find_transaction's undecided cases compare it with the expiration). */
     var chainTime = "2026-10-06T11:59:00"
+
+    /** When set, the chain's head time in epoch millis, read at each answer ([chainTime] otherwise). */
+    var chainClock: (() -> Long)? = null
 
     init {
         app.authBackend.rest = { req -> http.entries.firstOrNull { req.url.contains(it.key) }?.value?.invoke(req) }

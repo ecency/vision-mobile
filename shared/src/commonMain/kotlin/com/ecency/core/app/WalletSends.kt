@@ -82,6 +82,17 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
 
     internal val successHookCount: Int get() = successHooks.size
 
+    /** What runs with [actionId]'s send once it ends for good, whatever the outcome ([afterOutcome]). */
+    private val outcomeHooks = mutableMapOf<String, (WalletSend) -> Unit>()
+
+    /**
+     * Main thread. Like [afterSuccess], for every final outcome (a retryable failure waits for the retry): for what must
+     * know a send that may have landed (Done, Unconfirmed, an undecided failure) even after its screen closed.
+     */
+    fun afterOutcome(actionId: String, block: (WalletSend) -> Unit) {
+        outcomeHooks[actionId] = block
+    }
+
     /**
      * Main thread. Starts [actionId]'s broadcast; a second call with the same id while it runs does nothing. The caller
      * owns it until [disown] ([onDone] callers own it for good, they hear the outcome).
@@ -94,6 +105,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         // the restart journal keeps every undecided send; when it is full of them, nothing new that could join them goes out
         if (env.sendJournal.current.entries.count { it.outcome == null } >= SendJournal.MAX_ENTRIES) {
             successHooks.remove(actionId)
+            outcomeHooks.remove(actionId)
             setState { it.copy(sends = it.sends + (actionId to WalletSend(actionId, username, operation, SendPhase.Failed(AppError(ErrorKind.UNKNOWN, JOURNAL_FULL, false), retryable = false)))) }
             env.background.launch { onDone?.invoke(current.sends.getValue(actionId)) }
             return
@@ -109,6 +121,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
                 // a retryable failure keeps it for the retry of the same action ([retry]); any other end drops it
                 val retryable = (final.phase as? SendPhase.Failed)?.retryable == true
                 if (final.isFinal && !retryable) successHooks.remove(actionId)?.let { hook -> if (final.phase is SendPhase.Done) runCatching { hook() } }
+                if (final.isFinal && !retryable) outcomeHooks.remove(actionId)?.let { hook -> runCatching { hook(final) } }
                 if (final.isFinal && final.phase !is SendPhase.Failed) running.remove(actionId)
                 if (onDone == null && (owners[actionId] ?: 0) == 0) orphanDone(final)
             }
@@ -154,6 +167,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
         if (!s.isFinal) return
         running.remove(actionId)
         successHooks.remove(actionId)
+        outcomeHooks.remove(actionId)
         setState { it.copy(sends = it.sends - actionId) }
     }
 
@@ -170,6 +184,7 @@ class WalletSends internal constructor(private val env: AppEnvironment) : StateM
             running.remove(id)?.job?.cancel()
             owners.remove(id)
             successHooks.remove(id)
+            outcomeHooks.remove(id)
         }
         setState { s -> s.copy(sends = s.sends - gone.toSet()) }
     }
