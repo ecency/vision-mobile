@@ -240,7 +240,8 @@ class SettingsFlowsTest {
         compose.onNodeWithTag("settings:rate").performScrollTo().performClick()
         assertEquals(1, storeOpened)
         compose.onNodeWithTag("settings:feedback").performScrollTo().performClick()
-        compose.waitForIdle()
+        // the mail intent is recorded after the click's work runs: wait for it, never read it at once
+        until { mails.isNotEmpty() }
         val mail = mails.single()
         assertTrue(mail, mail.startsWith("mailto:bug@ecency.com?subject=Feedback%2FBug%20report&body="))
         assertTrue(mail, "tester" in mail && "Robo%20-%20Android%2035" in mail && "%20%287%29" in mail)
