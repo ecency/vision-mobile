@@ -268,10 +268,16 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * block or never will be. [expiresBy] bounds that expiration in chain time, once known. [floor]: the last chain
      * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond) at or below that shows it.
      */
-    private class Swap(val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?, val floor: Double?, val actionId: String?)
+    private class Swap(
+        val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?,
+        val floor: Double?, val floorSentAt: Long, val actionId: String?,
+    )
 
     /** App-wide, so a swap screen opened again, or one closed before the swap ended, still takes the sale off. */
     private val swaps = mutableListOf<Swap>()
+
+    /** The action of every swap recorded here (settled ones too): their broadcasts are not another send. */
+    private val swapActions = mutableSetOf<String>()
 
     /** The chain's liquid HIVE and HBD of [account] (get_accounts), from a load sent at [sentAt] that read the head time [head]. */
     private class ChainRead(val account: String, val liquid: Map<String, Double>, val head: Long, val sentAt: Long)
@@ -293,12 +299,13 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val waiting = swaps.filter { it.account == account && it.symbol == symbol }.sumOf { it.amount }
         // no floor from a read sent before another send of this account (one not among its swaps here): it may have
         // spent as much
-        val known = (swaps.filter { it.account == account }.mapNotNull { it.actionId } + listOfNotNull(actionId)).toSet()
-        val floor = chainRead?.takeIf { it.account == account && !env.signing.broadcastSince(account, it.sentAt, known) }
-            ?.liquid?.get(symbol)?.let { it - waiting - amount }
+        actionId?.let { swapActions += it }
+        val known = swapActions.toSet()
+        val floorRead = chainRead?.takeIf { it.account == account && !env.signing.broadcastSince(account, it.sentAt, known) }
+        val floor = floorRead?.liquid?.get(symbol)?.let { it - waiting - amount }
         // the signed expiration itself; else this phone's clock now, which was later than at signing unless it stepped back
         val expiresBy = if (keySigned) signedExpiresAt ?: (now + KEY_TRANSACTION_LIFETIME_MILLIS) else null
-        swaps += Swap(account, symbol, amount, now, expiresBy, floor, actionId)
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId)
         settleLoadsLeft = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10
     }
 
@@ -326,8 +333,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private fun settle(account: String, sentAt: Long, read: ChainRead?) {
         val head = read?.head
         if (read != null && head != null) {
+            // a send of this account started since the floor read, the swap's and those waiting aside, could be the drop
+            val known = swapActions.toSet()
             swaps.removeAll { sw ->
-                sw.account == account && sentAt > sw.at && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true)
+                sw.account == account && sentAt > sw.at && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true) &&
+                    !env.signing.broadcastSince(account, sw.floorSentAt, known)
             }
             swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }.forEach { it.expiresBy = head + MAX_TRANSACTION_LIFETIME_MILLIS }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }

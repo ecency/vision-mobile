@@ -929,6 +929,26 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aSendAfterTheSwapNeverPassesForIt() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            // the swap, not in a block yet; then 3 HIVE sent from another screen, which lands first
+            swapAcceptedNow(w, m, amount = "3", left = "12.345")
+            m.reset()
+            val transfer = com.ecency.core.api.broadcast.WalletOps.ops(listOf(com.ecency.core.api.broadcast.WalletOps.transfer(WalletWorld.USER, "spike-bob", "3.000 HIVE", "")))
+            w.env.signing.broadcast(WalletWorld.USER, transfer, com.ecency.core.hive.KeyRole.ACTIVE, w.env.idempotencyKey())
+            hiveLeft(w, "9.345")
+            w.env.wallet.refresh()
+            advance(100)
+            assertEquals(9.345, w.env.wallet.current.item("HIVE")?.liquid, "the read has the transfer")
+            assertEquals(6.345, m.current.balance, 0.0001, "the transfer's 3 are not the swap's: it stays off")
+        } finally {
+            m.close()
+        }
+    }
+
+    @Test
     fun aPhoneClockSteppedBackBeforeDoneStillWaitsForTheSignedExpiration() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")
