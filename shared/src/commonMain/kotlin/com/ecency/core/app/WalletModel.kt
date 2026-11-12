@@ -110,8 +110,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         }
         // README "Foreground refresh": back after a long trip with the wallet on screen
         scope.launch { env.freshness.staleReturns.collect { if (watchers > 0) refreshIfStale() } }
-        // the swaps an earlier run left pending come back before the first load reads a balance (loads wait for them)
-        restoreOnce()
+        // the swaps an earlier run left pending come back before the first load reads a balance (loads read them first)
         load(refresh = false)
     }
 
@@ -332,7 +331,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      */
     internal fun available(symbol: String): Double? {
         // nothing to offer before the saved pending swaps are back
-        if (!swapsRestored.isCompleted) {
+        if (!swapsRestored) {
             restoreOnce()
             return null
         }
@@ -395,8 +394,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         // finishes even if the model closes meanwhile: a swap recorded must reach the store
         scope.launch(kotlinx.coroutines.NonCancellable) {
             // a list written before the saved one was read back would drop it
-            restoreOnce()
-            swapsRestored.await()
+            if (!ensureSwapsRestored()) {
+                saveFailed = true
+                return@launch
+            }
             swapWrites.withLock {
                 // the list as it is when written (on main), so an older one never lands after a newer change
                 val snapshot = swaps.map { StoredSwap(it.account, it.symbol, it.amount, it.at, it.expiresBy, it.actionId, it.orderId) }
@@ -419,31 +420,39 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private var restoring: Job? = null
 
-    /** Reads the saved swaps back once per run, from whichever path needs them first. */
+    /** Starts reading the saved swaps back (the swap form asked for a balance first); a load follows to show it. */
     private fun restoreOnce() {
-        if (restoring == null) restoring = scope.launch(kotlinx.coroutines.NonCancellable) { restoreSwaps() }
+        if (restoring?.isActive == true) return
+        restoring = scope.launch(kotlinx.coroutines.NonCancellable) {
+            if (ensureSwapsRestored() && job?.isActive != true) load(refresh = true, quiet = true)
+        }
     }
 
-    private suspend fun restoreSwaps() = try {
-        restoreSavedSwaps()
-    } finally {
-        swapsRestored.complete(Unit)
+    /**
+     * Reads the saved swaps back, once per run, before any balance is read or swap saved. A failed read is not an
+     * empty list: it is tried again by the next load or save, and until then the swap form has no balance.
+     */
+    private suspend fun ensureSwapsRestored(): Boolean = restoreLock.withLock {
+        if (!swapsRestored) swapsRestored = restoreSavedSwaps()
+        swapsRestored
     }
 
-    private suspend fun restoreSavedSwaps() = swapWrites.withLock {
+    private val restoreLock = kotlinx.coroutines.sync.Mutex()
+
+    private suspend fun restoreSavedSwaps(): Boolean = swapWrites.withLock {
         val stored = try {
             withContext(env.dispatchers.io) { env.vault.vault.store.getString(SWAPS_ENTRY) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             ErrorReports.quiet(e, "wallet.restoreSwaps")
-            null
-        } ?: return@withLock
+            return@withLock false
+        } ?: return@withLock true
         val now = env.nowMillis()
         val known = swaps.mapNotNull { it.actionId }.toSet()
         // one far older than any transaction can live is dropped
         val back = StoredSwap.decode(stored).filter { it.actionId !in known && it.account !in departed && now - it.at <= RESTORE_MAX_AGE_MILLIS }
-        if (back.isEmpty()) return@withLock
+        if (back.isEmpty()) return@withLock true
         back.forEach { s ->
             s.actionId?.let { swapActions += it }
             // never later than now: the first load after the restart bounds an unbound one, whatever the clock said then
@@ -451,6 +460,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId)
         }
         settleLoadsLeft = SETTLE_LOADS
+        true
     }
 
     /** Accounts left the device ([AppEnvironment.accountsLeft]); null: all. Their pending swaps go, saved ones too. */
@@ -479,8 +489,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     private val swapWrites = kotlinx.coroutines.sync.Mutex()
 
-    /** Done once [restoreSwaps] ran (whatever it found): loads, saves and [available] wait for it. */
-    private val swapsRestored = kotlinx.coroutines.CompletableDeferred<Unit>()
+    /** The saved swaps were read back ([ensureSwapsRestored]): until then loads and saves try again, and [available] is null. */
+    private var swapsRestored = false
 
     /** The last write of the swaps failed: the next load writes them again. */
     private var saveFailed = false
@@ -510,9 +520,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         job = scope.launch {
             try {
                 env.session.awaitLoaded()
-                // never a balance before the swaps an earlier run left pending are back
-                restoreOnce()
-                swapsRestored.await()
+                // never a balance before the swaps an earlier run left pending are back (a failed read: tried again next load)
+                ensureSwapsRestored()
                 val user = env.session.current.username
                 if (user == null) {
                     served = emptyList()

@@ -992,6 +992,21 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aSavedSwapReadThatFailsIsTriedAgainNotTakenAsNone() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() - 60_000L, null, "action-1", null))))
+        w.app.store.failingReads["wallet.pendingSwaps"] = com.ecency.core.secure.SecureStoreException.Unavailable(-1)
+        w.env.wallet.start()
+        advance(1_000)
+        assertNull(w.env.wallet.available("HIVE"), "no balance while the saved swaps cannot be read")
+        w.app.store.failingReads.clear()
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
     fun anAccountThatLeftRecordsNoSwapFromALateOutcome() = runTest {
         val w = world(this)
         clocks(w)

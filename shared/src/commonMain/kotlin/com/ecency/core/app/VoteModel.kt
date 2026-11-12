@@ -49,7 +49,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         // a vote read from the chain is in the post's count, and stays in it through later changes and an unvote
         // (hivemind keeps a removed vote counted); one made here may not be in a card's older read yet
         val earlierCounted = previous?.let { (it.fromChain && it.weight != 0) || it.earlierCounted } == true
-        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted))
+        // the replaced vote read from the chain is in the post's payout (a read without the account's vote cannot say)
+        val earlierRshares = previous?.takeIf { it.fromChain }?.earlierRshares
+        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation
         scope.launch {
@@ -71,7 +73,7 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 }
                 // the account changed meanwhile: this result belongs to a session that is gone
                 if (session != generation) return@launch
-                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted))
+                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares))
                 env.api.posts.invalidate(key)
                 setState { VoteState(it.statuses - key) }
             } catch (e: CancellationException) {

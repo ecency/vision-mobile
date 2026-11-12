@@ -285,6 +285,21 @@ class HiveRpcClientTest {
     }
 
     @Test
+    fun aFailingFallbackIsChargedToTheApiThatAnswered() = runTest {
+        // no bridge.list_votes on the node, and its database_api answers 503: the bridge did not fail there
+        val transport = FakeTransport { req ->
+            when (req.method) {
+                "bridge.list_votes" -> FakeTransport.error(req, -32602, "Assert Exception:unknown method: bridge_apilist_votes", """{"code":10,"extension":{"assertion_expression":"unknown method: bridge_apilist_votes"}}""")
+                else -> com.ecency.core.api.rpc.HttpResult(503, "")
+            }
+        }
+        val client = clientWith(transport)
+        repeat(2) { runCatching { HiveApi(client).entryVotes("spike-author", "spike-post") } }
+        assertTrue(NODES.all { client.health.isNodeHealthy(it, "bridge") }, "the bridge was never the one failing")
+        assertTrue(NODES.any { !client.health.isNodeHealthy(it, com.ecency.core.api.rpc.NodeHealthTracker.apiOf("database_api.list_votes")) }, "the database api was")
+    }
+
+    @Test
     fun aNodeMarkedWithoutV2IsAskedForItAgainAfterHalfAnHour() = runTest {
         var now = 0L
         val transport = v1OnlyNode()

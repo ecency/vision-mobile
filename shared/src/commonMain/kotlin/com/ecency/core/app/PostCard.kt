@@ -126,6 +126,8 @@ data class LocalVote(
     val fromChain: Boolean = false,
     /** The vote this one replaced was read from the chain ([fromChain]): the post's count already has the account. */
     val earlierCounted: Boolean = false,
+    /** The rshares of the vote read from the chain ([fromChain]) or of the one this vote replaced: in the post's payout. */
+    val earlierRshares: Long? = null,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
@@ -197,7 +199,9 @@ class LocalVotes {
             // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
             val inCount = server != null || post.listedVoter == username || local.earlierCounted
             val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
-            val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
+            // a read that does not know the account's vote: the replaced vote read from the chain is in its payout
+            val serverRshares = server?.rshares ?: local.earlierRshares.takeIf { !post.knowsVoteOf(username) } ?: 0
+            val payout = (post.totalPayout + payoutDelta(post, serverRshares, local.estimate)).coerceAtLeast(0.0)
             return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0), payout)
         }
 

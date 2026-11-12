@@ -159,6 +159,9 @@ class PostModel internal constructor(
     private var voteAsked: Triple<String, PostKey, Int>? = null
     private var postLoads = 0
 
+    /** The chain lookup in flight; a read that knows the vote cancels it, so its answer never lands over the read's. */
+    private var voteLookup: Job? = null
+
     /**
      * When the post's read does not say whether the account voted (SDK normalizeEntry "unknown": a node without bridge
      * v2 whose voter list stops at 1000 rows, or a v1 row with rshares 0 and no percent, which a weightless vote of an
@@ -171,22 +174,26 @@ class PostModel internal constructor(
         val me = env.session.current.username ?: return
         if (!isChainRead(env.localVotes.get(post.key))) return
         if (post.knowsVoteOf(me)) {
-            // the read itself answers: it stands
+            // the read itself answers: it stands, over a lookup still on its way
+            voteLookup?.cancel()
+            voteAsked = null
             if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
             return
         }
         val ask = Triple(me, post.key, postLoads)
         if (voteAsked == ask) return
         voteAsked = ask
-        scope.launch {
+        voteLookup?.cancel()
+        voteLookup = scope.launch {
             try {
-                val percent = env.api.hive.ownVote(post.author, post.permlink, me)?.percent ?: 0
-                // another account, a vote made here meanwhile, or a newer load of the post decides instead
-                if (env.session.current.username != me || postLoads != ask.third || !isChainRead(env.localVotes.get(post.key))) return@launch
-                if (percent == 0) {
+                val vote = env.api.hive.ownVote(post.author, post.permlink, me)
+                // another account, a vote made here meanwhile, a newer load of the post, or a read that knows decides
+                if (env.session.current.username != me || postLoads != ask.third || voteAsked != ask || !isChainRead(env.localVotes.get(post.key))) return@launch
+                if (vote == null) {
                     if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
                 } else {
-                    env.localVotes.set(post.key, LocalVote(percent, pending = false, fromChain = true))
+                    // its rshares are in the post's payout: a later change of the vote here takes them off first
+                    env.localVotes.set(post.key, LocalVote(vote.percent ?: 0, pending = false, fromChain = true, earlierRshares = vote.rshares))
                 }
             } catch (e: CancellationException) {
                 throw e

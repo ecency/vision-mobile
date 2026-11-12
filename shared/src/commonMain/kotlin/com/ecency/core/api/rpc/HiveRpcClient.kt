@@ -267,7 +267,7 @@ class HiveRpcClient(
             val node = ordered.firstOrNull { it !in tried } ?: ordered.first().also { tried.clear() }
             tried += node
             val marked = fallback != null && lacksMethod(node, method)
-            // latency is filed under the method that answered, and the attempt's bound read from it
+            // latency and health are filed under the method that answered, and the attempt's bound read from it
             var asked = if (marked) fallback!! else method
             val timeout = attemptTimeout(node, asked, ceiling, explicit)
             var started = nowMillis()
@@ -284,24 +284,24 @@ class HiveRpcClient(
                     attempt(node, fallback, fallbackParams!!, left)
                 }
                 if (validate != null && !validate(result)) {
-                    health.recordDefectiveResponse(node, api)
+                    health.recordDefectiveResponse(node, NodeHealthTracker.apiOf(asked))
                     failures += NodeFailureException(node, "response validation failed for $asked", scope = NodeFailureException.Scope.API)
                 } else {
-                    health.recordSuccess(node, api, nowMillis() - started, asked)
+                    health.recordSuccess(node, NodeHealthTracker.apiOf(asked), nowMillis() - started, asked)
                     recordHeadBlock(node, asked, result)
                     return FallbackResult(result, asked)
                 }
             } catch (e: RpcErrorException) {
                 if (!isNodeLevelError(e.code, e.rpcMessage)) throw e
-                record(node, e, api)
+                record(node, e, NodeHealthTracker.apiOf(asked))
                 health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             } catch (e: NodeFailureException) {
-                record(node, e, api)
+                record(node, e, NodeHealthTracker.apiOf(asked))
                 health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             } catch (e: RpcTimeoutException) {
-                record(node, e, api)
+                record(node, e, NodeHealthTracker.apiOf(asked))
                 health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             }

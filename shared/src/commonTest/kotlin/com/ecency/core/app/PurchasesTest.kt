@@ -929,6 +929,24 @@ class PurchasesTest {
     }
 
     @Test
+    fun aDroppedConnectionNeverHidesAServiceErrorRightAfterIt() = runTest {
+        val r = rig()
+        val model = screen(r, StoreScreenKind.ACCOUNT_BOOST)
+        val dropped = StoreError(StoreError.SERVICE_ERROR, "Service connection is disconnected", PurchaseSkus.BOOST, -1)
+        r.store.onSheet = { r.store.storeListener!!.onError(dropped) }
+        model.buy(PurchaseSkus.BOOST)
+        testScheduler.advanceUntilIdle()
+        model.dismissAlert()
+        // a real service failure of the same product within the duplicate window: still its own issue
+        r.app.now += 1_000
+        val other = StoreError(StoreError.SERVICE_ERROR, "Service unavailable", PurchaseSkus.BOOST, 6)
+        r.store.onSheet = { r.store.storeListener!!.onError(other) }
+        model.buy(PurchaseSkus.BOOST)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, r.reporter.iap().size)
+    }
+
+    @Test
     fun storeFailuresAreToldOnceAndACancelIsNoFailure() = runTest {
         val r = rig()
         val model = screen(r, StoreScreenKind.ACCOUNT_BOOST)

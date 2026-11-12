@@ -654,6 +654,8 @@ class VoteAndReplyTest {
             post.start()
             testScheduler.advanceUntilIdle()
             assertEquals(voted, post.current.card?.votedByMe, row)
+            // its rshares are kept: they are in the post's payout when the vote is changed here
+            if (voted) assertEquals(9L, app.env.localVotes.get(PostKey("alice", "root"))?.earlierRshares)
             assertEquals("""{"start":["alice","root","${TestApp.USER}"],"limit":1,"order":"by_comment_voter"}""", asked.single())
             post.close()
         }
@@ -693,6 +695,55 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun aReadThatKnowsTheVoteWinsOverALookupStillOnItsWay() = runTest {
+        // one load: the post read cannot tell (a v1 list of 1000 without the reader), the discussion read can (a short
+        // list without the reader: not voted); the chain lookup the first started answers last, with an old vote
+        val crowd = (0 until 1000).map { "spike-v" + it.toString().padStart(4, '0') }
+        val capped = entry("alice", "root", votes = crowd)
+        val known = entry("alice", "root", votes = listOf("spike-other"))
+        val discussion = CompletableDeferred<Unit>()
+        val lookup = CompletableDeferred<Unit>()
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_post" -> FakeTransport.result(req, capped)
+                "bridge.get_discussion" -> { discussion.await(); FakeTransport.result(req, """{"alice/root":$known}""") }
+                "database_api.list_votes" -> {
+                    lookup.await()
+                    FakeTransport.result(req, """{"votes":[{"voter":"${TestApp.USER}","author":"alice","permlink":"root","rshares":9,"vote_percent":3000,"weight":1,"last_update":"2026-10-01T10:00:00"}]}""")
+                }
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.runCurrent()
+        repeat(5) { testScheduler.runCurrent() }
+        assertTrue(app.transport.sent.any { it.method == "database_api.list_votes" }, "the lookup went out")
+        // only what is due now runs: the held lookup must answer, not time out
+        discussion.complete(Unit)
+        repeat(20) { testScheduler.runCurrent() }
+        assertEquals(true, post.current.post?.knowsVoteOf(TestApp.USER), "the discussion's read knows")
+        lookup.complete(Unit)
+        repeat(20) { testScheduler.runCurrent() }
+        assertEquals(1, app.transport.sent.count { it.method == "database_api.list_votes" }, "one lookup, answered")
+        assertEquals(false, post.current.card?.votedByMe, "the read that knows stands")
+        assertNull(app.env.localVotes.get(PostKey("alice", "root")))
+        post.close()
+    }
+
+    @Test
+    fun aChangedVoteTheReadCannotSeeTakesTheOldVotesShareOff() {
+        // a cut list without the reader: the looked-up vote's rshares are in the payout, the read cannot say
+        val post = v1Post(listed = false, total = 1500, rows = 1000).copy(pendingPayoutValue = "10.000 HBD", totalPayout = 10.0, netRshares = 1_000_000L)
+        val estimate = VoteEstimate(0.5, 50_000L)
+        val with = LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, estimate = estimate, earlierRshares = 100_000L)).payout
+        val without = LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, estimate = estimate)).payout
+        assertEquals(post.totalPayout + LocalVotes.payoutDelta(post, 100_000L, estimate), with, 0.0001)
+        assertTrue(with < without, "the old vote's share comes off")
+    }
+
+    @Test
     fun aVoteChangedOverOneReadFromTheChainIsNotCountedAgain() {
         // a cut list (1000 rows) without the voter: the read cannot tell, but the replaced vote was read from the chain
         val post = v1Post(listed = false, total = 1500, rows = 1000)
@@ -706,10 +757,11 @@ class VoteAndReplyTest {
         val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
         signedIn(app)
         // read from the chain by the post screen
-        app.env.localVotes.set(key, LocalVote(10000, pending = false, fromChain = true))
+        app.env.localVotes.set(key, LocalVote(10000, pending = false, fromChain = true, earlierRshares = 77L))
         app.env.votes.vote("alice", "root", 5000)
         testScheduler.advanceUntilIdle()
         assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
+        assertEquals(77L, app.env.localVotes.get(key)?.earlierRshares, "nor is its share in the payout taken twice")
         // changed again, and removed then cast again: the account stays counted (hivemind keeps a removed vote)
         app.env.votes.vote("alice", "root", 3000)
         testScheduler.advanceUntilIdle()
