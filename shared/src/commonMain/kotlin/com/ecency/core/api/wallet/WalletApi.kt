@@ -116,11 +116,16 @@ class WalletApi(
 
     /** SDK getDynamicPropsQueryOptions' hivePerMVests: total_vesting_fund_hive / total_vesting_shares * 1e6. */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun hivePerMVests(): Double = guarded {
+    suspend fun hivePerMVests(): Double = chainGlobals().hivePerMVests
+
+    /** One `get_dynamic_global_properties` read: [ChainGlobals.hivePerMVests] and the head block's time. */
+    @Throws(EcencyException::class, CancellationException::class)
+    internal suspend fun chainGlobals(): ChainGlobals = guarded {
         val p = client.call("condenser_api.get_dynamic_global_properties").obj()
         val fund = Vests.amount(p?.str("total_vesting_fund_hive"))
         val shares = Vests.amount(p?.str("total_vesting_shares"))
-        if (shares == 0.0) 0.0 else fund / shares * 1e6
+        val head = p?.str("time")?.let { runCatching { com.ecency.core.hive.ChainTime.toEpochSeconds(it) * 1000 }.getOrNull() }
+        ChainGlobals(if (shares == 0.0) 0.0 else fund / shares * 1e6, head)
     }
 
     /**
@@ -440,3 +445,6 @@ class WalletApi(
         }
     }
 }
+
+/** What the wallet reads from `get_dynamic_global_properties`: [headTimeMillis] is the chain's own clock (null when unreadable). */
+internal data class ChainGlobals(val hivePerMVests: Double, val headTimeMillis: Long?)

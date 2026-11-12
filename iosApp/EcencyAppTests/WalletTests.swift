@@ -78,6 +78,24 @@ final class WalletTests: XCTestCase {
         XCTAssertEqual(entry.message, "Your power up from @spike-alice did not go through. Nothing was sent; you can start it again.")
     }
 
+    /// A swap that went through: the done state replaces the form (TradeView shows TradeDoneView), with no stale
+    /// "more than your balance" under it once the balance reloaded to 0, and nothing to send again.
+    func testAFinishedSwapShowsItsDoneStateWithoutFormErrors() {
+        let done = TradeState(from: "HIVE", fromAmount: "12.345", toAmount: 3.086, balance: 0, rateText: nil, bookLoading: false, quote: nil,
+                              prompt: nil, actionId: "a", phase: nil, outcome: .successful, sold: "12.345 HIVE", received: "3.086 HBD", closed: false)
+        XCTAssertTrue(done.finished)
+        XCTAssertTrue(done.errors.isEmpty, "\(done.errors)")
+        XCTAssertFalse(done.continueEnabled)
+        XCTAssertEqual(done.result, TradeCopy.shared.SUCCESSFUL)
+        XCTAssertEqual(done.summary, "12.345 HIVE for 3.086 HBD")
+        let form = done.doCopy(from: "HIVE", fromAmount: "12.345", toAmount: 3.086, balance: 0, rateText: nil, bookLoading: false, quote: nil,
+                               prompt: nil, actionId: nil, phase: nil, outcome: nil, sold: "", received: "", closed: false)
+        XCTAssertFalse(form.finished)
+        XCTAssertEqual(form.errors, [TradeCopy.shared.MORE_THAN_BALANCE], "the form still checks its amount")
+        let host = UIHostingController(rootView: TradeDoneView(state: done, onNew: {}, onDone: {}))
+        XCTAssertGreaterThan(host.sizeThatFits(in: CGSize(width: 320, height: 1000)).height, 100)
+    }
+
     /// RN AssetIcon: the logo is contained (aspect fit) and centred at RN's sizes (card 32, details 40, picker 24), never cropped.
     func testAnAssetIconFitsItsLogoInsideItsBox() {
         ImageLoader.shared.setFetch { _ in nil }

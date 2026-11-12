@@ -34,15 +34,33 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
             "transaction_status_api.find_transaction" -> FakeTransport.result(request, """{"status":${statusAnswer(request)}}""")
             "condenser_api.get_dynamic_global_properties" -> FakeTransport.result(
                 request,
-                """{"head_block_number":100675644,"head_block_id":"0601303c${"11".repeat(16)}","time":"$chainTime","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}""",
+                """{"head_block_number":100675644,"head_block_id":"0601303c${"11".repeat(16)}","time":"${chainClock?.let { com.ecency.core.hive.ChainTime.fromEpochSeconds(it() / 1000) } ?: chainTime}","total_vesting_fund_hive":"200000000.000 HIVE","total_vesting_shares":"400000000000.000000 VESTS"}""",
             )
             else -> rpc[request.method]?.invoke(request)?.let { FakeTransport.result(request, it) }
+                ?: swapHistory(request)?.let { FakeTransport.result(request, it) }
                 ?: TestApp.chain(request) ?: HttpResult(500, "no fixture for ${request.method}")
         }
     }
 
+    /** The account's liquid HIVE on the chain (get_accounts `balance`). */
+    var chainHive = "12.345"
+
     /** The chain's head time (find_transaction's undecided cases compare it with the expiration). */
     var chainTime = "2026-10-06T11:59:00"
+
+    /** When set, the chain's head time in epoch millis, read at each answer ([chainTime] otherwise). */
+    var chainClock: (() -> Long)? = null
+
+    /** Whether the account's history has the limit orders broadcast so far (false: none of them on chain yet). */
+    var ordersInHistory = true
+
+    /** The account's `limit_order_create` history: every one broadcast so far, when [ordersInHistory]. */
+    private fun swapHistory(r: Sent): String? {
+        if (r.method != "condenser_api.get_account_history") return null
+        val orders = if (ordersInHistory) broadcastOps().filter { it[0].jsonPrimitive.content == "limit_order_create" } else emptyList()
+        return orders.mapIndexed { i, op -> """[$i,{"trx_id":"${"ab".repeat(20)}","block":100675644,"timestamp":"$chainTime","op":$op}]""" }
+            .joinToString(",", "[", "]")
+    }
 
     init {
         app.authBackend.rest = { req -> http.entries.firstOrNull { req.url.contains(it.key) }?.value?.invoke(req) }
@@ -94,7 +112,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
         val names = r.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
         return "[" + names.filter { it == user }.joinToString(",") {
             val meta = com.ecency.core.api.broadcast.JsJson.quote("""{"profile":{"name":"Spike","tokens":$tokens}}""")
-            """{"name":"$it","balance":"12.345 HIVE","hbd_balance":"5.000 HBD","savings_balance":"1.000 HIVE","savings_hbd_balance":"20.000 HBD",
+            """{"name":"$it","balance":"$chainHive HIVE","hbd_balance":"5.000 HBD","savings_balance":"1.000 HIVE","savings_hbd_balance":"20.000 HBD",
                "reward_hive_balance":"0.100 HIVE","reward_hbd_balance":"0.200 HBD","reward_vesting_balance":"1234.567890 VESTS",
                "vesting_shares":"2000000.000000 VESTS","delegated_vesting_shares":"100000.000000 VESTS","received_vesting_shares":"0.000000 VESTS",
                "vesting_withdraw_rate":"0.000000 VESTS","next_vesting_withdrawal":"1969-12-31T23:59:59","to_withdraw":0,"withdrawn":0,

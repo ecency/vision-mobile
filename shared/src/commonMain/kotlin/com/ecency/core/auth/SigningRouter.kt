@@ -18,7 +18,8 @@ enum class SigningMethod { KEY, HIVESIGNER_TOKEN, HIVESIGNER_HOT, HIVEAUTH }
 /** What the user picked in the auth upgrade sheet. KEY means they entered a key into [TempActiveKey]. */
 enum class AuthUpgradeChoice { KEY, HIVEAUTH, HIVESIGNER }
 
-data class SignedBroadcast(val method: SigningMethod, val txId: String?, val blockNum: Long? = null)
+/** [expiresAtMillis]: the signed transaction's expiration (epoch millis, chain time), when this app signed it. */
+data class SignedBroadcast(val method: SigningMethod, val txId: String?, val blockNum: Long? = null, val expiresAtMillis: Long? = null)
 
 /**
  * The app side of signing: storage, the network and the UI. The router decides, these act.
@@ -34,7 +35,7 @@ interface SigningBackends {
 
     /** Signs with [key] and broadcasts; returns the transaction id. */
     @Throws(Exception::class)
-    suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): String?
+    suspend fun broadcastWithKey(username: String, ops: JsonArray, key: PrivateKey, authority: KeyRole): com.ecency.core.api.broadcast.BroadcastResult?
 
     /** HiveSigner API broadcast with the account's access token (posting only). */
     @Throws(Exception::class)
@@ -198,7 +199,7 @@ class SigningRouter(private val backends: SigningBackends, val tempActiveKey: Te
                     KeyRole.MEMO -> account.memoKey
                 }?.takeIf { it.isNotEmpty() } ?: throw AuthException.MissingKey(authority)
                 val key = runCatching { PrivateKey.fromWif(wif) }.getOrElse { throw AuthException.MissingKey(authority) }
-                SignedBroadcast(SigningMethod.KEY, backends.broadcastWithKey(account.username, ops, key, authority))
+                backends.broadcastWithKey(account.username, ops, key, authority).let { SignedBroadcast(SigningMethod.KEY, it?.txId, expiresAtMillis = it?.expiresAtMillis) }
             }
             LoginMethod.HIVEAUTH -> SignedBroadcast(SigningMethod.HIVEAUTH, backends.broadcastWithHiveAuth(account.username, ops, authority))
             LoginMethod.HIVESIGNER -> {
