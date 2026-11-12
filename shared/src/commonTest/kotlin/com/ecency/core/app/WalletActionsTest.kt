@@ -423,6 +423,35 @@ class WalletActionsTest {
         }
     }
 
+    @Test
+    fun aReloadWithOnlyTheFirstOfTwoQuickSwapsStillTakesTheSecondOff() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            swapAcceptedNow(w, m, amount = "4")
+            m.reset()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("2")
+            m.next()
+            m.confirm()
+            untilAccepted(m)
+            m.reset()
+            assertEquals(6.345, m.current.balance, 0.0001, "both swaps off the cached balance")
+            // the first swap's reload reads the chain before the second swap is in it
+            hiveLeft(w, "8.345")
+            testScheduler.advanceTimeBy(2_500)
+            testScheduler.runCurrent()
+            assertEquals(6.345, m.current.balance, 0.0001, "the second swap is still taken off")
+            // the second swap's reload has both
+            hiveLeft(w, "6.345")
+            testScheduler.advanceTimeBy(10_000)
+            testScheduler.runCurrent()
+            assertEquals(6.345, m.current.balance, 0.0001, "and then nothing is taken off twice")
+        } finally {
+            m.close()
+        }
+    }
+
     private fun TestScope.swapAcceptedNow(w: WalletWorld, m: TradeModel, amount: String? = null) {
         w.app.clock = { TestApp.NOW + testScheduler.currentTime }
         w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":25000,"hive":100000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":26000,"hive":100000,"real_price":"0.26000000"}]}""" }

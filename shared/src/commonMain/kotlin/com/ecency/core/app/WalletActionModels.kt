@@ -173,8 +173,9 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
     private var user: String? = null
 
     /**
-     * A swap accepted here: [amount] of [symbol] left the wallet, whose balance was [before] then, at [at]. Until a
-     * wallet read shows it, the form's balance is the cached one less [amount], so "New Swap" never offers it again.
+     * A swap accepted here: [amount] of [symbol] left the wallet at [at], when it held [before] after the swaps still
+     * pending. Until a wallet read shows it, the form's balance is the cached one less [amount], so "New Swap" never
+     * offers it again.
      */
     private class Spend(val symbol: String, val amount: Double, val before: Double, val at: Long)
 
@@ -334,7 +335,11 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 owned.done(id)
                 current.sold.split(' ').takeIf { it.size == 2 }?.let { (amount, symbol) ->
                     val sold = amount.toDoubleOrNull() ?: return@let
-                    liquid(env.wallet.current, symbol)?.let { spends += Spend(symbol, sold, it, env.nowMillis()) }
+                    // before = the balance after the swaps still pending, so a read with only an earlier one keeps this one
+                    liquid(env.wallet.current, symbol)?.let { cached ->
+                        val pending = spends.filter { it.symbol == symbol }.sumOf { it.amount }
+                        spends += Spend(symbol, sold, cached - pending, env.nowMillis())
+                    }
                 }
                 balance()
                 // now, in the wallet's own scope: Done tapped during the outcome check closes this model
