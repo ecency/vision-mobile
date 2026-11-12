@@ -191,11 +191,11 @@ class LocalVotes {
             val count = post.stats.totalVotes
             if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
             val hasVote = local.weight != 0
-            // whether the count already has the account: the read's answer when it knows; else its voter list holding the
-            // account's row (a weightless vote is unknown but counted), or a replaced vote read from the chain; a vote
+            // whether the count already has the account: a cast vote in the read, the account's row or v2 vote object in it
+            // (a weightless or removed vote is no vote shown but counted), or a replaced vote read from the chain; a vote
             // read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one). Hivemind keeps a
             // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
-            val inCount = if (post.knowsVoteOf(username)) server != null else (post.listedVoter == username || local.earlierCounted)
+            val inCount = server != null || post.listedVoter == username || local.earlierCounted
             val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
             val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
             return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0), payout)

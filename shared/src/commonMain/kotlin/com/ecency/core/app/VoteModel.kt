@@ -46,8 +46,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         val previous = env.localVotes.get(key)
         // RN upvotePopover: the payout moves by the sheet's estimate at once (an unvote is worth nothing)
         val estimate = if (weight == 0) VoteEstimate.NONE else preview?.takeIf { it.voter == voter }?.estimate(weight)
-        // a vote read from the chain is in the post's count; one made here may not be in a card's older read yet
-        val earlierCounted = previous?.fromChain == true && previous.weight != 0
+        // a vote read from the chain is in the post's count, and stays in it through later changes and an unvote
+        // (hivemind keeps a removed vote counted); one made here may not be in a card's older read yet
+        val earlierCounted = previous?.let { (it.fromChain && it.weight != 0) || it.earlierCounted } == true
         env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation

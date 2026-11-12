@@ -981,6 +981,52 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aLoadOtherThanTheFirstStillWaitsForTheSavedSwaps() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() - 60_000L, null, "action-1", null))))
+        // a refresh, not start(), is the first to read the wallet
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "the saved swap is off the first balance read")
+    }
+
+    @Test
+    fun anAccountThatLeftRecordsNoSwapFromALateOutcome() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.forgetSwaps(listOf(WalletWorld.USER))
+        // its send's outcome arrives after it left
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "late")
+        advance(100)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing saved for it either")
+    }
+
+    @Test
+    fun aSwapRecordedJustBeforeTheWalletClosesIsStillSaved() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "just-now")
+        // closed before its write ran
+        w.env.wallet.close()
+        advance(100)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
     fun aSavedSwapReadsBackAsItWasAndSkipsWhatIsNotOne() {
         val s = StoredSwap(WalletWorld.USER, "HBD", 1.5, 1_000L, 2_000L, "action-1", 912345678L)
         assertEquals(listOf(s), StoredSwap.decode(StoredSwap.encode(listOf(s))))

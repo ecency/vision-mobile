@@ -680,6 +680,19 @@ class VoteAndReplyTest {
     }
 
     @Test
+    fun aRemovedVoteReadThroughV2StaysCounted() {
+        // v2 answers a removed vote as a zero observer_vote: not a vote, but hivemind still counts the account
+        val json = """{"author":"spike-author","permlink":"p","stats":{"total_votes":4},"observer_vote":{"rshares":0,"percent":0}}"""
+        val post = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = "spike-voter")!!
+        assertTrue(post.knowsVoteOf("spike-voter"))
+        assertNull(post.voteOf("spike-voter"))
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "a vote again is not a new voter")
+        // a v2 answer of no vote at all: the vote is new
+        val none = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json.replace("{\"rshares\":0,\"percent\":0}", "null")), observer = "spike-voter")!!
+        assertEquals(5, LocalVotes.view(none, "spike-voter", LocalVote(10000, pending = false)).votes)
+    }
+
+    @Test
     fun aVoteChangedOverOneReadFromTheChainIsNotCountedAgain() {
         // a cut list (1000 rows) without the voter: the read cannot tell, but the replaced vote was read from the chain
         val post = v1Post(listed = false, total = 1500, rows = 1000)
@@ -697,9 +710,21 @@ class VoteAndReplyTest {
         app.env.votes.vote("alice", "root", 5000)
         testScheduler.advanceUntilIdle()
         assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
-        // over a vote made here: a card's older read may not have it yet, so it is not taken as counted
+        // changed again, and removed then cast again: the account stays counted (hivemind keeps a removed vote)
         app.env.votes.vote("alice", "root", 3000)
         testScheduler.advanceUntilIdle()
-        assertEquals(false, app.env.localVotes.get(key)?.earlierCounted)
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "a second change")
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 3000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "a vote again after an unvote")
+        // a vote made here first: a card's older read may not have it yet, so it is not taken as counted
+        val other = PostKey("alice", "other")
+        app.env.votes.vote("alice", "other", 10000)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "other", 3000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, app.env.localVotes.get(other)?.earlierCounted)
     }
 }
