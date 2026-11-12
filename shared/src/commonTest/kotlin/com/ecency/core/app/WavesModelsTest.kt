@@ -670,6 +670,31 @@ class WavesModelsTest {
     }
 
     @Test
+    fun theImageSheetsTilesAttachThroughTheComposersUpload() = runTest {
+        val app = app(Backend())
+        signIn(app)
+        val composer = app.env.waves.composer()
+        val sources = mutableListOf<WaveImageSource>()
+        app.env.waves.attacher = object : WaveImageAttacher {
+            override suspend fun attach(username: String, source: WaveImageSource): String? {
+                sources += source
+                return "https://images.ecency.com/DQmTile/t.png"
+            }
+        }
+        composer.setClipboardHasImage(true)
+        for (source in MediaSourceMenus.editorUploads(camera = true, paste = true).map { it.source }) {
+            composer.attachFrom(source)
+            testScheduler.advanceUntilIdle()
+        }
+        assertEquals(listOf(WaveImageSource.GALLERY, WaveImageSource.FILES, WaveImageSource.CAMERA, WaveImageSource.CLIPBOARD), sources)
+        assertEquals("https://images.ecency.com/DQmTile/t.png", composer.current.imageUrl)
+        assertFalse(composer.current.clipboardChip, "the paste tile closes the chip as the chip's own paste does")
+        composer.attachFrom(MediaSource.LINK)
+        testScheduler.advanceUntilIdle()
+        assertEquals(4, sources.size, "a link is not a tile of this sheet")
+    }
+
+    @Test
     fun aWaveOutOfResourceCreditsRaisesTheAppWideOfferAndKeepsTheText() = runTest {
         val app = app(Backend())
         signIn(app)

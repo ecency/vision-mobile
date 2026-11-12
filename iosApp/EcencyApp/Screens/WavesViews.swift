@@ -653,6 +653,8 @@ struct WaveComposerSheet: View {
     }
 
     @State private var aiSheet: AiSheet?
+    /// A tile picked in the image sheet: its attach starts once the sheet is gone.
+    @State private var pendingSource: MediaSource?
     /// For the dictation and AI assist models (nil: those buttons are not shown).
     let env: AppEnvironment?
     @Environment(\.scenePhase) private var scenePhase
@@ -745,10 +747,10 @@ struct WaveComposerSheet: View {
               // the content buttons scroll sideways when they do not fit next to PUBLISH (as on Android)
               ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 0) {
-                QuickComposeTools(idPrefix: "wave", onAttach: { model.attach(source: $0) },
+                // without an environment (previews) there is no gallery: the image button opens the photo library
+                QuickComposeTools(idPrefix: "wave", onImage: { if env == nil { model.attach(source: .gallery) } else { aiSheet = .uploads } },
                                   onDictate: env == nil ? nil : { aiSheet = .dictation },
-                                  onAiAssist: env == nil ? nil : { aiSheet = .assist },
-                                  onUploads: env == nil ? nil : { aiSheet = .uploads }) {
+                                  onAiAssist: env == nil ? nil : { aiSheet = .assist }) {
                 // RN's poll button (the editor's poll wizard); tinted once a poll is attached
                 Button { pollSheet = true } label: {
                     Image(appIcon: .chartBar).scaledFont(20).foregroundStyle(state.poll != nil ? theme.accent : theme.text).tapTarget()
@@ -794,13 +796,18 @@ struct WaveComposerSheet: View {
         .interactiveDismissDisabled(state.isSending)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-composer")
-        .themedSheet(item: $aiSheet) { which in
+        .themedSheet(item: $aiSheet, onDismiss: {
+            // a tile of the image sheet: its picker opens now that the sheet is gone
+            if let source = pendingSource { pendingSource = nil; model.attachFrom(source: source) }
+        }) { which in
             if let env {
                 switch which {
                 case .assist: AiAssistSheet(editor: model, env: env).environment(\.appTheme, theme)
                 case .dictation: DictationSheet(editor: model, env: env).environment(\.appTheme, theme)
-                // RN UploadsGalleryModal allowMultiple={false}: a tapped upload is the wave's image
-                case .uploads: QuickUploadsSheet(env: env) { model.pickUploaded(url: $0) }.environment(\.appTheme, theme)
+                // the image sheet: a tapped upload is the wave's image (RN UploadsGalleryModal allowMultiple={false})
+                case .uploads:
+                    QuickUploadsSheet(env: env, onPick: { model.pickUploaded(url: $0) }, onSource: { pendingSource = $0 })
+                        .environment(\.appTheme, theme)
                 }
             }
         }
@@ -1157,34 +1164,21 @@ struct WavesOnboardingCard: View {
 }
 
 /// RN quick post's content buttons (quickPostModalContent `_renderExpandBtn`) for both of its modes: the wave
-/// composer (its poll and video in `middle`) and the reply composer (RN comment mode). Image, camera and files go
-/// through the composer's image attach; with `onUploads`, a button opens the account's uploads gallery
-/// (`QuickUploadsSheet`); dictation and AI assist open the editor's sheets (only with both handlers).
-/// Identifiers are `idPrefix` + -attach, -camera, -files, -uploads, -dictate, -ai-assist.
+/// composer (its poll and video in `middle`) and the reply composer (RN comment mode). Image opens the editor's
+/// image sheet (`QuickUploadsSheet`: gallery, files, camera, paste and the account's uploads, one flow with the
+/// blog editor); dictation and AI assist open the editor's sheets (only with both handlers).
+/// Identifiers are `idPrefix` + -attach, -dictate, -ai-assist.
 struct QuickComposeTools<Middle: View>: View {
     let idPrefix: String
-    let onAttach: (WaveImageSource) -> Void
+    let onImage: () -> Void
     var onDictate: (() -> Void)?
     var onAiAssist: (() -> Void)?
-    var onUploads: (() -> Void)?
     @ViewBuilder var middle: () -> Middle
 
     var body: some View {
-        Button { onAttach(.gallery) } label: { Image(appIcon: .image).scaledFont(20).tapTarget() }
+        Button(action: onImage) { Image(appIcon: .image).scaledFont(20).tapTarget() }
             .accessibilityLabel(UiCopy.shared.ATTACH_IMAGE)
             .accessibilityIdentifier("\(idPrefix)-attach")
-        Button { onAttach(.camera) } label: { Image(appIcon: .camera).scaledFont(20).tapTarget() }
-            .accessibilityLabel(L.Native.Ios.Waves.takePhoto)
-            .accessibilityIdentifier("\(idPrefix)-camera")
-        Button { onAttach(.files) } label: { Image(appIcon: .folder).scaledFont(20).tapTarget() }
-            .accessibilityLabel(MediaPickCopy.shared.FILES)
-            .accessibilityIdentifier("\(idPrefix)-files")
-        if let onUploads {
-            // RN UploadsGalleryModal: the account's uploaded images
-            Button(action: onUploads) { Image(appIcon: .uploads).scaledFont(20).tapTarget() }
-                .accessibilityLabel(WaveComposeCopy.shared.UPLOADED_IMAGES)
-                .accessibilityIdentifier("\(idPrefix)-uploads")
-        }
         middle()
         if let onDictate, let onAiAssist {
             // RN: dictation with the content buttons, then the AI pair
@@ -1199,29 +1193,45 @@ struct QuickComposeTools<Middle: View>: View {
 }
 
 extension QuickComposeTools where Middle == EmptyView {
-    init(idPrefix: String, onAttach: @escaping (WaveImageSource) -> Void, onDictate: (() -> Void)? = nil, onAiAssist: (() -> Void)? = nil, onUploads: (() -> Void)? = nil) {
-        self.init(idPrefix: idPrefix, onAttach: onAttach, onDictate: onDictate, onAiAssist: onAiAssist, onUploads: onUploads) { EmptyView() }
+    init(idPrefix: String, onImage: @escaping () -> Void, onDictate: (() -> Void)? = nil, onAiAssist: (() -> Void)? = nil) {
+        self.init(idPrefix: idPrefix, onImage: onImage, onDictate: onDictate, onAiAssist: onAiAssist) { EmptyView() }
     }
 }
 
-/// RN quick post's UploadsGalleryModal (`allowMultiple={false}`): the editor's `UploadsSheet` over the signed-in
-/// account's uploads (`env.uploadsModel(editor: nil)`, nothing goes into an editor), where one tap hands that image to
-/// `onPick` and closes the sheet. The composer's own buttons are the pickers, so the sheet shows the gallery alone.
+/// The quick composers' image sheet, one flow with the blog editor: the editor's `UploadsSheet` with its source
+/// tiles over the signed-in account's uploads (`env.uploadsModel(editor: nil)`, RN quick post's UploadsGalleryModal
+/// with `allowMultiple={false}`). A gallery tap hands that image to `onPick`; a tile hands its source to `onSource`.
+/// Either closes the sheet. The composer starts the tile's attach once the sheet is gone (its `onDismiss`), since
+/// its pickers are sheets of their own. No "+": the composer's one image is whatever is picked.
 struct QuickUploadsSheet: View {
     @StateObject private var uploads: Observed<UploadsState>
     let onPick: (String) -> Void
+    let onSource: (MediaSource) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    init(env: AppEnvironment, onPick: @escaping (String) -> Void) {
+    init(env: AppEnvironment, onPick: @escaping (String) -> Void, onSource: @escaping (MediaSource) -> Void) {
         _uploads = StateObject(wrappedValue: Observed(env.uploadsModel(editor: nil), ownsModel: true))
         self.onPick = onPick
+        self.onSource = onSource
+    }
+
+    private func pick(_ source: MediaSource) {
+        onSource(source)
+        dismiss()
     }
 
     var body: some View {
-        UploadsSheet(uploads: uploads, onInsert: { urls in
-            if let url = urls.first { onPick(url) }
-            dismiss()
-        })
+        UploadsSheet(
+            uploads: uploads,
+            onGallery: { pick(.library) },
+            onFiles: { pick(.files) },
+            onCamera: { pick(.camera) },
+            onPaste: { pick(.paste) },
+            onInsert: { urls in
+                if let url = urls.first { onPick(url) }
+                dismiss()
+            }
+        )
     }
 }
 

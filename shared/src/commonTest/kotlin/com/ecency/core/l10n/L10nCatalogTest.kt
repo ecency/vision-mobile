@@ -212,15 +212,6 @@ class L10nCatalogTest {
     }
 
     @Test
-    fun theComposerGalleryButtonIsTranslated() {
-        // the reply and wave composers' Gallery button reuses RN's translated side menu "Gallery"
-        L10n.setLanguage("de-DE")
-        assertEquals("Galerie", com.ecency.core.app.WaveComposeCopy.GALLERY)
-        L10n.setLanguage("es-ES")
-        assertEquals("Galería", com.ecency.core.app.WaveComposeCopy.GALLERY)
-    }
-
-    @Test
     fun dynamicKeys() {
         assertEquals("Language", L10n.byKey("settings.language"))
         assertNull(L10n.byKey("settings.no_such_key"))

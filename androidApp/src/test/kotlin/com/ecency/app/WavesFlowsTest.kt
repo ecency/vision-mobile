@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -542,14 +544,38 @@ class WavesFlowsTest {
     }
 
     @Test
-    fun theUploadedImagesButtonIsCalledGallery() {
-        // RN UploadsGalleryModal; testers looked for a gallery on the composer and did not take "Uploads" for it
+    fun theImageButtonOpensTheEditorsSheetWithTheGalleryInIt() {
+        // one flow with the editor: the image button opens where an image comes from, then the account's uploads
+        // (testers looked for a gallery on the composer: it is the sheet's "Uploaded images")
         node.signIn()
         launch()
         openWaves()
         click("createFab")
         waitFor("waveComposer")
-        assertTrue(compose.onAllNodes(hasTestTag("waveUploads") and hasText("Gallery")).fetchSemanticsNodes().isNotEmpty())
+        for (tag in listOf("waveCamera", "waveFiles", "waveUploads")) assertFalse("no $tag button", exists(tag))
+        click("waveAttach")
+        waitFor("uploadsSheet")
+        for (tag in listOf("openGallery", "openFiles", "openCamera")) {
+            assertTrue("the sheet has $tag", compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        }
+        assertTrue(compose.onAllNodes(hasText("Uploaded images", ignoreCase = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertFalse(exists("addToGallery"))
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp", fontScale = 2f)
+    fun atFontScale2OnAShortWindowTheWholeImageSheetScrollsIntoReach() {
+        // the source tiles stack into rows at large font scales: the gallery under them must still be reachable
+        node.auth.rest = { r -> if ("/private-api/images?" in r.url) HttpResult(200, "[]") else null }
+        node.signIn()
+        launch(fontScale = 2f)
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        click("waveAttach")
+        waitFor("galleryEmpty")
+        compose.onNodeWithTag("galleryEmpty").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("openGallery").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -562,7 +588,7 @@ class WavesFlowsTest {
         openWaves()
         click("createFab")
         waitFor("waveComposer")
-        click("waveUploads")
+        click("waveAttach")
         waitFor("uploadsSheet")
         waitFor("retry")
         assertFalse(exists("galleryEmpty"))
@@ -584,11 +610,8 @@ class WavesFlowsTest {
         openWaves()
         click("createFab")
         waitFor("waveComposer")
-        click("waveUploads")
+        click("waveAttach")
         waitFor("uploadsSheet")
-        // the toolbar already has the pickers: the sheet is the gallery alone
-        assertFalse(compose.onAllNodes(hasTestTag("openGallery"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
-        assertFalse(exists("addToGallery"))
         waitFor("galleryImage:$gallery")
         click("galleryImage:$gallery")
         waitFor("waveImage")
