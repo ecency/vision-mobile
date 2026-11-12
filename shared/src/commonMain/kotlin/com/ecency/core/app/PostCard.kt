@@ -124,7 +124,7 @@ data class LocalVote(
     val estimate: VoteEstimate? = null,
     /** Read from the chain by the post screen (a weightless vote, [PostModel]), not made on this device. */
     val fromChain: Boolean = false,
-    /** An earlier vote of this account that landed (read from the chain or made here) is already in the post's count. */
+    /** The vote this one replaced was read from the chain ([fromChain]): the post's count already has the account. */
     val earlierCounted: Boolean = false,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
@@ -191,16 +191,12 @@ class LocalVotes {
             val count = post.stats.totalVotes
             if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
             val hasVote = local.weight != 0
-            // whether the count already has a vote of the account: the read's answer when it knows; else its voter list
-            // holding the account's row (a weightless vote is unknown but counted), or an earlier vote that landed; a
-            // vote read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one)
+            // whether the count already has the account: the read's answer when it knows; else its voter list holding the
+            // account's row (a weightless vote is unknown but counted), or a replaced vote read from the chain; a vote
+            // read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one). Hivemind keeps a
+            // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
             val inCount = if (post.knowsVoteOf(username)) server != null else (post.listedVoter == username || local.earlierCounted)
-            val adjusted = count + when {
-                local.fromChain -> 0
-                hasVote && !inCount -> 1
-                !hasVote && inCount -> -1
-                else -> 0
-            }
+            val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
             val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
             return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0), payout)
         }

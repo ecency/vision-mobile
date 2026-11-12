@@ -172,7 +172,8 @@ class VotePayoutTest {
         testScheduler.runCurrent()
         assertEquals("$1.500", feed.payout())
         assertEquals("$1.500", post.payout())
-        assertEquals(1, feed.current.items.single().votes)
+        // hivemind keeps a removed vote in total_votes: the count stays as the server will show it
+        assertEquals(2, feed.current.items.single().votes)
         c.gate!!.complete(Unit)
         testScheduler.advanceUntilIdle()
 

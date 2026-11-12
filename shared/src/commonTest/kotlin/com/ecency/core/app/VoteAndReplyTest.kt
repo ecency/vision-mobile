@@ -673,15 +673,15 @@ class VoteAndReplyTest {
         val post = v1Post(listed = true, total = 4)
         assertFalse(post.knowsVoteOf("spike-voter"))
         assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "never twice")
-        // removed here: it leaves the count
-        assertEquals(3, LocalVotes.view(post, "spike-voter", LocalVote(0, pending = false)).votes)
+        // removed here: hivemind keeps a removed vote in total_votes, so nothing comes off
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(0, pending = false)).votes)
         // not in the list yet: the vote is added
         assertEquals(4, LocalVotes.view(v1Post(listed = false, total = 3), "spike-voter", LocalVote(10000, pending = false)).votes)
     }
 
     @Test
-    fun aVoteChangedOverOneThatLandedIsNotCountedAgain() {
-        // a cut list (1000 rows) without the voter: the read cannot tell, but the earlier vote landed and is counted
+    fun aVoteChangedOverOneReadFromTheChainIsNotCountedAgain() {
+        // a cut list (1000 rows) without the voter: the read cannot tell, but the replaced vote was read from the chain
         val post = v1Post(listed = false, total = 1500, rows = 1000)
         assertFalse(post.knowsVoteOf("spike-voter"))
         assertEquals(1500, LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, earlierCounted = true)).votes)
@@ -689,7 +689,7 @@ class VoteAndReplyTest {
     }
 
     @Test
-    fun aVoteOverOneThatLandedRemembersItIsCounted() = runTest {
+    fun aVoteOverOneReadFromTheChainRemembersItIsCounted() = runTest {
         val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
         signedIn(app)
         // read from the chain by the post screen
@@ -697,10 +697,8 @@ class VoteAndReplyTest {
         app.env.votes.vote("alice", "root", 5000)
         testScheduler.advanceUntilIdle()
         assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
-        // removed, then cast again: nothing of the account is counted any more
-        app.env.votes.vote("alice", "root", 0)
-        testScheduler.advanceUntilIdle()
-        app.env.votes.vote("alice", "root", 5000)
+        // over a vote made here: a card's older read may not have it yet, so it is not taken as counted
+        app.env.votes.vote("alice", "root", 3000)
         testScheduler.advanceUntilIdle()
         assertEquals(false, app.env.localVotes.get(key)?.earlierCounted)
     }
