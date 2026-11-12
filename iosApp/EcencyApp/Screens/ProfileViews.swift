@@ -355,10 +355,16 @@ private struct ProfileCommentRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.top, 12)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("comment-\(card.key.author)/\(card.key.permlink)")
+        // RN CommentView `_handleOnTipPress`: the gift opens the tipping sheet for the comment (signed out: the login)
+        HStack {
+            TipButton(key: card.key, identifier: "comment-tip-\(card.key.author)/\(card.key.permlink)")
+            Spacer(minLength: 0)
+        }
+        .padding(.leading, 10)
         Rectangle().fill(theme.lightBackground).frame(height: 1)
     }
 }

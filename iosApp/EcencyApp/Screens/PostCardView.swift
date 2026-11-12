@@ -213,6 +213,8 @@ struct CardImageView: View {
 struct TipButton: View {
     let key: PostKey
     var tips: Observed<PostTipsState>? = nil
+    /// The UI test id; rows that repeat the button (a list of comments) make it unique per row.
+    var identifier = "tip"
     @EnvironmentObject private var app: AppContainer
     @EnvironmentObject private var session: Observed<SessionState>
     @Environment(\.appTheme) private var theme
@@ -236,7 +238,7 @@ struct TipButton: View {
         .accessibilityLabel(UiCopy.shared.SEND_TIP)
         .accessibilityValue(state?.a11yCount ?? "")
         .largeContent(UiCopy.shared.SEND_TIP, appIcon: .gift)
-        .accessibilityIdentifier("tip")
+        .accessibilityIdentifier(identifier)
     }
 
     /// Redraws the button as the count arrives.

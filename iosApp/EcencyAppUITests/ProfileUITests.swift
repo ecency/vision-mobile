@@ -68,6 +68,18 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "profile-compact-header").waitForNonExistence(timeout: 5))
     }
 
+    /// RN CommentView: a comment row of the profile's Comments tab has the gift, which opens the tipping sheet.
+    func testACommentRowOfTheCommentsTabOffersTheTipSheet() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        XCTAssertTrue(app.buttons["tab-comments"].waitForExistence(timeout: 20))
+        app.buttons["tab-comments"].tap()
+        let tip = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'comment-tip-'")).firstMatch
+        XCTAssertTrue(tip.waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertEqual(tip.label, "Send tip")
+        tip.tap()
+        XCTAssertTrue(element(app, "tip-sheet").waitForExistence(timeout: 10), app.debugDescription)
+    }
+
     func testOwnProfileEditShowsSaveOnChange() {
         let app = launch(["-openScreen", "editProfile"])
         let name = element(app, "field-NAME")

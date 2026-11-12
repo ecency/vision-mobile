@@ -429,6 +429,20 @@ class ProfileFlowsTest {
         assertTrue(node.broadcasts().single().contains("""\"what\":[\"ignore\"]"""))
     }
 
+    /** RN CommentView (the profile's Comments tab rows): a signed in reader gets the gift beside the row. */
+    @Test
+    fun aCommentRowOfTheCommentsTabOffersTheTipSheet() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitFor("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        compose.await("tip button in the row") { idleMain(); exists("commentTip:alice/re-one") }
+        compose.onNodeWithTag("commentTip:alice/re-one", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        waitFor("tipSheet")
+    }
+
     @Test
     fun signedOutProfileHasNoActions() {
         launch(AppScreen.Profile("alice"))
