@@ -1,6 +1,8 @@
 package com.ecency.core.api.model
 
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.pow
@@ -19,11 +21,21 @@ data class PostKey(val author: String, val permlink: String) {
     }
 }
 
-data class ActiveVote(
-    val voter: String,
-    /** Can be negative (downvote). */
-    val rshares: Long,
-)
+/**
+ * One account's vote on a post (SDK ObserverVote). [percent] is null when the source did not say (a v1 bridge row has
+ * only rshares); [rshares] is null when the node has not computed them.
+ */
+data class ObserverVote(val rshares: Long?, val percent: Int?) {
+    /** SDK isCastVote: a non-zero percent, or without one non-zero rshares. Percent 0 is a removed vote. */
+    val isCast: Boolean get() = if (percent != null) percent != 0 else rshares != null && rshares != 0L
+
+    /** SDK voteDirection: 1 up, -1 down, 0 not cast. */
+    val direction: Int get() = when {
+        !isCast -> 0
+        percent != null -> if (percent > 0) 1 else -1
+        else -> if ((rshares ?: 0) > 0) 1 else -1
+    }
+}
 
 data class PostStats(
     val hide: Boolean = false,
@@ -72,7 +84,10 @@ data class Post(
     val promoted: String = "0.000 HBD",
     val isPaidout: Boolean = false,
     val payoutAt: String = "",
-    val activeVotes: List<ActiveVote> = emptyList(),
+    /** The vote of [observerVoteFor] (null: not voted), or nothing known when [observerVoteFor] is null (SDK normalizeEntry). */
+    val observerVote: ObserverVote? = null,
+    /** The account this entry was read for, so [observerVote] is an answer about it; null: unknown for everyone. */
+    val observerVoteFor: String? = null,
     /** Direct replies, in the bridge's order. Only filled by `get_discussion`. */
     val replies: List<PostKey> = emptyList(),
     val community: String? = null,
@@ -110,16 +125,28 @@ data class Post(
 
     val isDownvoted: Boolean get() = netRshares < 0
 
-    fun voteOf(voter: String): ActiveVote? = activeVotes.firstOrNull { it.voter == voter }
+    /** SDK entryVoteOf: true when this entry says whether [username] voted ([voteOf] is then an answer, not a guess). */
+    fun knowsVoteOf(username: String?): Boolean = !username.isNullOrEmpty() && observerVoteFor == username
+
+    /** SDK entryVoteOf: [username]'s cast vote; null when not voted, or when unknown ([knowsVoteOf] false). */
+    fun voteOf(username: String?): ObserverVote? = if (knowsVoteOf(username)) observerVote?.takeIf { it.isCast } else null
 
     companion object {
         /** Parses one bridge entry. Null only when it has no author or permlink. */
-        fun fromJson(element: JsonElement?): Post? {
+        /**
+         * Parses one entry from any source (bridge v1 or v2, condenser, private API rows) as SDK normalizeEntry does,
+         * by its shape, never by the method that answered: the vote of [observer] (the account it was read for) comes
+         * from v2's `observer_vote` or from a voter list, and the raw list is not kept. A list of 1000 rows or more may
+         * have been cut, so an observer missing from it is unknown, unless [completeVoteList] (condenser get_content
+         * sends the whole list). Null only when it has no author or permlink.
+         */
+        fun fromJson(element: JsonElement?, observer: String = "", completeVoteList: Boolean = false): Post? {
             val o = element.obj() ?: return null
             val author = o.str("author")?.takeIf { it.isNotBlank() } ?: return null
             val permlink = o.str("permlink")?.takeIf { it.isNotBlank() } ?: return null
             val stats = o["stats"].obj()
-            val activeVotes = o["active_votes"].arr().orEmpty().mapNotNull(::parseVote)
+            val voteList = o["active_votes"] as? JsonArray
+            val (observerVote, observerVoteFor) = observerVoteOf(o, voteList, observer, completeVoteList)
             val rawReputation = o.double("author_reputation")
             val netRshares = o.long("net_rshares") ?: 0
             val body = o.string("body")
@@ -132,7 +159,9 @@ data class Post(
                 hide = stats?.bool("hide") ?: false,
                 gray = stats?.bool("gray") ?: false,
                 // hivemind's count when present, else active_votes (the SDK's countVotes)
-                totalVotes = stats?.int("total_votes") ?: activeVotes.size,
+                // SDK normalizeEntry: without stats, the length of a list that cannot have been cut; else validateEntry's 0
+                totalVotes = if (stats != null) stats.int("total_votes") ?: 0
+                else voteList?.takeIf { completeVoteList || it.size < V1_VOTES_CAP }?.size ?: 0,
                 flagWeight = stats?.double("flag_weight") ?: 0.0,
                 isPinned = stats?.bool("is_pinned") ?: false,
                 isPinnedBlog = stats?.bool("is_pinned_blog"),
@@ -162,7 +191,8 @@ data class Post(
                 promoted = assetString(o["promoted"]) ?: "0.000 HBD",
                 isPaidout = o.bool("is_paidout") ?: false,
                 payoutAt = o.string("payout_at"),
-                activeVotes = activeVotes,
+                observerVote = observerVote,
+                observerVoteFor = observerVoteFor,
                 replies = o["replies"].arr().orEmpty().mapNotNull(::parseReplyKey),
                 community = o.str("community")?.takeIf { it.isNotBlank() },
                 communityTitle = o.str("community_title")?.takeIf { it.isNotBlank() },
@@ -184,10 +214,48 @@ data class Post(
             )
         }
 
-        private fun parseVote(element: JsonElement): ActiveVote? {
-            val o = element.obj() ?: return null
-            val voter = o.str("voter")?.takeIf { it.isNotBlank() } ?: return null
-            return ActiveVote(voter, o.long("rshares") ?: 0)
+        /** The most voters a v1 bridge read lists (SDK BRIDGE_V1_ACTIVE_VOTES_CAP): a list this long may be cut. */
+        const val V1_VOTES_CAP = 1000
+
+        /** SDK normalizeEntry's decision of (observer_vote, observer_vote_for), in its order. */
+        private fun observerVoteOf(o: JsonObject, list: JsonArray?, observer: String, complete: Boolean): Pair<ObserverVote?, String?> {
+            if ("observer_vote_for" in o) {
+                // normalized before: kept, never relabelled for another observer
+                val prev = o.text("observer_vote_for")?.takeIf { it.isNotEmpty() } ?: return null to null
+                return observerVote(o["observer_vote"]) to prev
+            }
+            if (observer.isEmpty()) return null to null
+            if ("observer_vote" in o) return observerVote(o["observer_vote"]) to observer
+            if (list == null) return null to null
+            val row = list.firstOrNull { (it as? JsonObject)?.text("voter") == observer } as JsonObject?
+            return when {
+                // a weightless vote and a removed one both list rshares 0; only the percent tells them apart
+                row != null && row["percent"].isAbsent() && jsLong(row["rshares"]) == 0L -> null to null
+                row != null -> observerVote(row) to observer
+                complete || list.size < V1_VOTES_CAP -> null to observer
+                else -> null to null
+            }
+        }
+
+        /** SDK toObserverVote: a vote-like object as a cast vote, else null (none, or a zero vote). */
+        private fun observerVote(value: JsonElement?): ObserverVote? {
+            val v = value as? JsonObject ?: return null
+            val vote = ObserverVote(
+                rshares = if (v["rshares"].isAbsent()) null else jsLong(v["rshares"]),
+                percent = if (v["percent"].isAbsent()) null else jsLong(v["percent"]).toInt(),
+            )
+            return vote.takeIf { it.isCast }
+        }
+
+        private fun JsonElement?.isAbsent() = this == null || this is JsonNull
+
+        /** A JSON string member only (the SDK checks `typeof === "string"`). */
+        private fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
+
+        /** JS Number() as the SDK's toNumber: a number or numeric text, 0 for anything else. */
+        internal fun jsLong(value: JsonElement?): Long = when {
+            value is JsonPrimitive && !value.isString && value.content == "true" -> 1
+            else -> value.asLong() ?: 0
         }
 
         private fun parseReplyKey(element: JsonElement): PostKey? = when (element) {

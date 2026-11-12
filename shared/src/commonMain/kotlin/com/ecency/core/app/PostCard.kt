@@ -169,7 +169,9 @@ class LocalVotes {
             for (post in posts) {
                 val local = map[post.key] ?: continue
                 val estimate = local.estimate ?: continue
-                if (local.pending || !sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
+                // a read that does not know the account's vote confirms nothing
+                if (local.pending || !post.knowsVoteOf(username)) continue
+                if (!sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
                 out = out + (post.key to local.copy(estimate = null))
             }
             out
@@ -179,16 +181,20 @@ class LocalVotes {
     companion object {
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {
-            val server = username?.let { post.voteOf(it) }
-            val serverUp = server != null && server.rshares > 0
-            val serverDown = server != null && server.rshares < 0
-            val count = post.stats.totalVotes.coerceAtLeast(post.activeVotes.size)
+            // the entry's own answer for the account (SDK entryVoteOf); unknown reads as no vote shown
+            val server = post.voteOf(username)
+            val serverUp = server?.direction == 1
+            val serverDown = server?.direction == -1
+            // hivemind's count (SDK countVotes): a voter list may be cut at 1000, v2 sends none
+            val count = post.stats.totalVotes
             if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
-            val hadVote = server != null
             val hasVote = local.weight != 0
+            // a vote read from the chain ([LocalVote.fromChain]) is already in the count; an unknown earlier vote
+            // counts as none, as before v2 (waves feed rows never carried one)
             val adjusted = count + when {
-                hasVote && !hadVote -> 1
-                !hasVote && hadVote -> -1
+                local.fromChain -> 0
+                hasVote && server == null -> 1
+                !hasVote && server != null -> -1
                 else -> 0
             }
             val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
@@ -206,7 +212,8 @@ class LocalVotes {
         internal fun payoutDelta(post: Post, serverRshares: Long, estimate: VoteEstimate?): Double {
             if (estimate == null || post.isPaidout || post.isDeclinedPayout) return 0.0
             if (sameVote(serverRshares, estimate.rshares)) return 0.0
-            val total = post.activeVotes.sumOf { it.rshares.toDouble() }
+            // net_rshares is the sum of every vote's rshares (a voter list may be cut, v2 sends none)
+            val total = post.netRshares.toDouble()
             val share = if (serverRshares == 0L || total == 0.0) 0.0 else serverRshares * post.totalPayout / total
             return estimate.value - share
         }

@@ -53,7 +53,7 @@ class DiscussionTest {
     fun requestUsesTheDefaultObserverWhenLoggedOut() = runTest {
         val (repo, transport) = repoWith(discussionJson())
         repo.getDiscussion("alice", "post")
-        assertEquals("bridge.get_discussion", transport.sent.single().method)
+        assertEquals("bridge.get_discussion_v2", transport.sent.single().method)
         assertEquals("""{"author":"alice","permlink":"post","observer":"ecency"}""", transport.sent.single().params.toString())
         repo.getDiscussion("alice", "post", observer = "bob")
         assertEquals("""{"author":"alice","permlink":"post","observer":"bob"}""", transport.sent.last().params.toString())
@@ -201,5 +201,17 @@ class DiscussionTest {
         repo.addLocalPost(post)
         repo.forgetLocal(post.key)
         assertEquals(emptyList(), repo.localPosts("alice", emptyList()), "gone with a delete")
+    }
+
+    @Test
+    fun theVotesSortUsesTheCountOfAV2Discussion() = runTest {
+        // #3671 acceptance: v2 comments carry no voter list, so the sort goes by stats.total_votes
+        val entries = listOf(
+            "alice/post" to entry("alice", "post", replies = listOf("bob/c1", "carol/c2"), children = 2),
+            "bob/c1" to Fixtures.v2(entry("bob", "c1", created = "2026-10-01T01:00:00", parent = root), totalVotes = 9),
+            "carol/c2" to Fixtures.v2(entry("carol", "c2", created = "2026-10-01T02:00:00", parent = root), totalVotes = 2),
+        )
+        val (repo, _) = repoWith(entries.joinToString(",", "{", "}") { (k, e) -> "\"$k\":$e" })
+        assertEquals(listOf("c1", "c2"), repo.getDiscussion("alice", "post", sort = CommentSort.VOTES).order())
     }
 }

@@ -41,7 +41,7 @@ class FeedRepositoryTest {
         val third = feeds.page(source, second.nextCursor)
         assertEquals(emptyList(), third.posts)
         assertNull(third.nextCursor)
-        assertEquals(List(3) { "bridge.get_ranked_posts" }, transport.methods())
+        assertEquals(List(3) { "bridge.get_ranked_posts_v2" }, transport.methods())
     }
 
     @Test
@@ -59,7 +59,7 @@ class FeedRepositoryTest {
         val second = feeds.page(source, first.nextCursor)
         assertEquals(1, second.posts.size)
         assertNull(second.nextCursor)
-        assertEquals("bridge.get_account_posts", transport.sent[1].method)
+        assertEquals("bridge.get_account_posts_v2", transport.sent[1].method)
     }
 
     @Test

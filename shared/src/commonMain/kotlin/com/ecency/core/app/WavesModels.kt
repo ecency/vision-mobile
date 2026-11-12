@@ -415,7 +415,7 @@ class WavesFeedModel internal constructor(
     private fun loadPromoted(startedIn: Int, user: String?) {
         scope.launch {
             val items = try {
-                build(visible(env.waves.api.promoted()), user, promoted = true)
+                build(visible(env.waves.api.promoted(user.orEmpty())), user, promoted = true)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

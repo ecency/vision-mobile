@@ -71,8 +71,8 @@ class HiveApi(val client: HiveRpcClient) {
         limit: Int = 20,
         observer: String? = null,
     ): List<Post> = posts(
-        client.call(
-            "bridge.get_ranked_posts",
+        bridgeV2(
+            "get_ranked_posts",
             buildJsonObject {
                 put("sort", sort.apiValue)
                 cursor?.let {
@@ -84,6 +84,7 @@ class HiveApi(val client: HiveRpcClient) {
                 observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
             },
         ),
+        observer,
     )
 
     @Throws(EcencyException::class, CancellationException::class)
@@ -94,8 +95,8 @@ class HiveApi(val client: HiveRpcClient) {
         limit: Int = 20,
         observer: String? = null,
     ): List<Post> = posts(
-        client.call(
-            "bridge.get_account_posts",
+        bridgeV2(
+            "get_account_posts",
             buildJsonObject {
                 put("sort", sort.apiValue)
                 put("account", account)
@@ -107,28 +108,30 @@ class HiveApi(val client: HiveRpcClient) {
                 observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
             },
         ),
+        observer,
     )
 
-    /** `bridge.get_post`. Null when the post does not exist. */
+    /** `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist. */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun post(author: String, permlink: String, observer: String? = null): Post? = notFoundAsNull {
         Post.fromJson(
-            client.call(
-                "bridge.get_post",
+            bridgeV2(
+                "get_post",
                 buildJsonObject {
                     put("author", author)
                     put("permlink", permlink)
                     observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
                 },
             ),
+            observer?.takeIf { it.isNotBlank() }.orEmpty(),
         )
     }
 
-    /** `bridge.get_discussion`: the root and every reply below it, keyed "author/permlink". */
+    /** `bridge.get_discussion_v2` (or v1): the root and every reply below it, keyed "author/permlink". */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun discussion(author: String, permlink: String, observer: String): List<Post>? = notFoundAsNull {
-        val result = client.call(
-            "bridge.get_discussion",
+        val result = bridgeV2(
+            "get_discussion",
             buildJsonObject {
                 put("author", author)
                 put("permlink", permlink)
@@ -136,8 +139,8 @@ class HiveApi(val client: HiveRpcClient) {
             },
         )
         when (result) {
-            is JsonObject -> result.values.mapNotNull(Post::fromJson)
-            is JsonArray -> result.mapNotNull(Post::fromJson)
+            is JsonObject -> result.values.mapNotNull { Post.fromJson(it, observer) }
+            is JsonArray -> result.mapNotNull { Post.fromJson(it, observer) }
             else -> emptyList()
         }
     }
@@ -305,8 +308,16 @@ class HiveApi(val client: HiveRpcClient) {
         client.call("condenser_api.get_block_header", buildJsonArray { add(JsonPrimitive(blockNumber)) })
             .obj()?.str("previous")
 
-    private fun posts(result: JsonElement): List<Post> = when (result) {
-        is JsonArray -> result.mapNotNull(Post::fromJson)
+    /**
+     * SDK bridgeV2Call: the vote-free `bridge.<endpoint>_v2`, with `bridge.<endpoint>` on a node without it
+     * ([HiveRpcClient.callWithFallback]). The same params go to both (no v2-only param is sent). Either shape comes
+     * back; [Post.fromJson] reads both.
+     */
+    private suspend fun bridgeV2(endpoint: String, params: JsonElement): JsonElement =
+        client.callWithFallback("bridge.${endpoint}_v2", params, "bridge.$endpoint").result
+
+    private fun posts(result: JsonElement, observer: String?): List<Post> = when (result) {
+        is JsonArray -> result.mapNotNull { Post.fromJson(it, observer?.takeIf { o -> o.isNotBlank() }.orEmpty()) }
         else -> emptyList() // null or a non-array: the SDK reads that as "no results"
     }
 

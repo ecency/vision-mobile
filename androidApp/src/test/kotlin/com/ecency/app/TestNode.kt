@@ -14,6 +14,7 @@ import com.ecency.core.secure.SecureStore
 import com.ecency.core.secure.VaultAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.util.Collections
@@ -106,6 +107,11 @@ class TestNode {
         val id = req["id"]!!.jsonPrimitive.content
         fun ok(result: String) = HttpResult(200, """{"jsonrpc":"2.0","result":$result,"id":$id}""")
         extra?.invoke(method, req)?.let { return@RpcTransport ok(it) }
+        // a node without the bridge v2 reads (hivemind's exact answer): the app reads v1 from it, on the same node
+        if (method.startsWith("bridge.") && (method.endsWith("_v2") || method == "bridge.list_votes")) {
+            val name = method.replaceFirst(".", "_api")
+            return@RpcTransport HttpResult(200, """{"jsonrpc":"2.0","error":{"code":-32602,"message":"Assert Exception:unknown method: $name"},"id":$id}""")
+        }
         when (method) {
             "bridge.get_ranked_posts" -> {
                 if (feedDown) return@RpcTransport HttpResult(503, "down")
@@ -131,9 +137,13 @@ class TestNode {
             "database_api.find_comments" -> ok("""{"comments":[]}""")
             // feed, posts and reading
             "condenser_api.get_reblogged_by" -> ok("""["alice","carol"]""")
-            "condenser_api.get_active_votes" -> ok(
-                """[{"voter":"x","rshares":"1000","percent":10000,"time":"2026-10-06T10:30:00"},{"voter":"y","rshares":-200,"percent":-5000,"time":"2026-10-06T11:00:00"}]""",
-            )
+            // the voters list on a node without bridge.list_votes: the post's rows, from the start voter on (inclusive)
+            "database_api.list_votes" -> {
+                val start = req["params"]!!.jsonObject["start"]!!.jsonArray.map { it.jsonPrimitive.content }
+                val rows = listOf("x" to """"rshares":"1000","vote_percent":10000,"last_update":"2026-10-06T10:30:00"""", "y" to """"rshares":-200,"vote_percent":-5000,"last_update":"2026-10-06T11:00:00"""")
+                    .filter { it.first >= start[2] }
+                ok(rows.joinToString(",", """{"votes":[""", "]}") { (voter, rest) -> """{"voter":"$voter","author":"${start[0]}","permlink":"${start[1]}",$rest}""" })
+            }
             "bridge.get_community" -> ok("""{"name":"hive-100001","title":"Test Community","team":[["tester","mod",""]]}""")
             "condenser_api.get_feed_history" -> ok("""{"current_median_history":{"base":"0.250 HBD","quote":"1.000 HIVE"}}""")
             "condenser_api.get_reward_fund" -> ok("""{"recent_claims":"600000000000000000","reward_balance":"800000.000 HIVE"}""")

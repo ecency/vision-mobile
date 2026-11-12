@@ -89,10 +89,14 @@ class EcencyRestApi(
     suspend fun bots(): Set<String> = get("$host/private-api/public/bots").arr().orEmpty()
         .mapNotNull { (it as? JsonPrimitive)?.contentOrNull }.toSet()
 
-    /** SDK getPromotedPostsQuery("feed"): `GET /private-api/promoted-entries`, bridge-shaped entries. */
+    /**
+     * SDK getPromotedPostsQuery("feed"): `GET /private-api/promoted-entries`, bridge-shaped entries with a voter list.
+     * Read for [observer] (the SDK reads them for nobody and looks each vote up; native has no such lookup for cards,
+     * so the list answers for the signed-in account as it did before bridge v2).
+     */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun promotedEntries(): List<com.ecency.core.api.model.Post> =
-        get("$host/private-api/promoted-entries").arr().orEmpty().mapNotNull(com.ecency.core.api.model.Post::fromJson)
+    suspend fun promotedEntries(observer: String = ""): List<com.ecency.core.api.model.Post> =
+        get("$host/private-api/promoted-entries").arr().orEmpty().mapNotNull { com.ecency.core.api.model.Post.fromJson(it, observer) }
 
     /**
      * SDK getSimilarEntriesQueryOptions: `POST /search-api/similar`, entries filtered as the SDK does (not the post

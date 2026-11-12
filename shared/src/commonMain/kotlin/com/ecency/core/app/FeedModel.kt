@@ -264,7 +264,7 @@ class FeedModel internal constructor(
     private fun loadPromoted(nsfw: NsfwMode) {
         scope.launch {
             val list = try {
-                env.rest.promotedEntries()
+                env.rest.promotedEntries(env.session.current.username.orEmpty())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

@@ -5,7 +5,7 @@ import com.ecency.core.api.EditHistory
 import com.ecency.core.api.HistoryDiff
 import com.ecency.core.api.HistoryVersion
 import com.ecency.core.api.SubscribedCommunity
-import com.ecency.core.api.activeVotes
+import com.ecency.core.api.entryVotes
 import com.ecency.core.api.broadcast.PostActionOps
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
@@ -64,7 +64,7 @@ data class VotersState(
     val title: String get() = L.native.postLists.votersTitle(total = total.toString())
 }
 
-/** RN votersScreen: get_active_votes with each vote's share of the payout, sort and search. */
+/** RN votersScreen, over the full voter list (SDK getEntryVotes; RN read get_active_votes, which stops at 1000), with each vote's share of the payout, sort and search. */
 class VotersModel internal constructor(private val env: AppEnvironment, val key: PostKey) :
     StateModel<VotersState>(VotersState(), env.dispatchers) {
     private var all: List<VoterRow> = emptyList()
@@ -83,7 +83,7 @@ class VotersModel internal constructor(private val env: AppEnvironment, val key:
         job = scope.launch {
             try {
                 val post = env.api.posts.getPost(key.author, key.permlink, env.session.current.username)
-                val votes = env.api.hive.activeVotes(key.author, key.permlink)
+                val votes = env.api.hive.entryVotes(key.author, key.permlink)
                 all = rows(votes, post, env.proxyBase, env.nowMillis())
                 setState { it.copy(isLoading = false, total = all.size) }
                 apply()

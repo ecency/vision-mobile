@@ -1,6 +1,6 @@
 package com.ecency.core.app
 
-import com.ecency.core.api.activeVotes
+import com.ecency.core.api.ownVote
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.CommentSort
@@ -156,29 +156,31 @@ class PostModel internal constructor(
     }
 
     /** The account, post and load last looked up: one lookup per load of the post, a refresh asks again. */
-    private var weightlessAsked: Triple<String, PostKey, Int>? = null
+    private var voteAsked: Triple<String, PostKey, Int>? = null
     private var postLoads = 0
 
     /**
-     * A vote with no payout weight (an account with little HP) is listed by the bridge with rshares 0, as a removed
-     * vote is, so it would read as no vote. In the background, once per load of the post, `get_active_votes` tells the
-     * two apart by the vote's percent; a vote is then shown as this device's own votes are ([LocalVotes]), and taken
-     * back when a later load finds it removed or weighted. A vote made on this device always wins. Not RN.
+     * When the post's read does not say whether the account voted (SDK normalizeEntry "unknown": a node without bridge
+     * v2 whose voter list stops at 1000 rows, or a v1 row with rshares 0 and no percent, which a weightless vote of an
+     * account with little HP and a removed vote both give), the chain is asked once per load of the post in the
+     * background (`database_api.list_votes`, SDK getEntryVote). A vote is then shown as this device's own votes are
+     * ([LocalVotes]), and taken back when a later load knows the vote itself or finds it removed. A vote made on this
+     * device always wins. Not RN.
      */
-    private fun resolveWeightlessVote(post: Post) {
+    private fun resolveUnknownVote(post: Post) {
         val me = env.session.current.username ?: return
         if (!isChainRead(env.localVotes.get(post.key))) return
-        if (post.voteOf(me)?.rshares != 0L) {
-            // no vote listed, or one with weight: the bridge's answer stands
+        if (post.knowsVoteOf(me)) {
+            // the read itself answers: it stands
             if (env.localVotes.get(post.key)?.fromChain == true) env.localVotes.remove(post.key)
             return
         }
         val ask = Triple(me, post.key, postLoads)
-        if (weightlessAsked == ask) return
-        weightlessAsked = ask
+        if (voteAsked == ask) return
+        voteAsked = ask
         scope.launch {
             try {
-                val percent = env.api.hive.activeVotes(post.author, post.permlink).firstOrNull { it.voter == me }?.percent ?: 0
+                val percent = env.api.hive.ownVote(post.author, post.permlink, me)?.percent ?: 0
                 // another account, a vote made here meanwhile, or a newer load of the post decides instead
                 if (env.session.current.username != me || postLoads != ask.third || !isChainRead(env.localVotes.get(post.key))) return@launch
                 if (percent == 0) {
@@ -190,8 +192,8 @@ class PostModel internal constructor(
                 throw e
             } catch (e: Exception) {
                 // the post shows as the bridge has it; the next load asks again
-                if (weightlessAsked == ask) weightlessAsked = null
-                ErrorReports.quiet(e, "post.weightlessVote")
+                if (voteAsked == ask) voteAsked = null
+                ErrorReports.quiet(e, "post.ownVote")
             }
         }
     }
@@ -209,7 +211,7 @@ class PostModel internal constructor(
         setState { it.copy(post = post, card = card, notFound = false, tags = PostTags.of(post, tagTitles)) }
         lookUpTagTitles(post)
         env.localVotes.retireConfirmed(listOf(post), env.session.current.username)
-        resolveWeightlessVote(post)
+        resolveUnknownVote(post)
         // RN usePlausibleTracker: one pageview per post screen, when its post first loads
         if (!pageviewRecorded) {
             pageviewRecorded = true

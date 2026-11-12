@@ -1460,7 +1460,7 @@ class FeedxTest {
     fun votersSortAndSearchLikeRn() = runTest {
         val app = TestApp(this, handler = { req ->
             when (req.method) {
-                "condenser_api.get_active_votes" -> FakeTransport.result(
+                "bridge.list_votes" -> FakeTransport.result(
                     req,
                     """[{"voter":"alpha","rshares":"100","percent":5000,"time":"2026-10-02T00:00:00"},
                         {"voter":"beta","rshares":300,"percent":10000,"time":"2026-10-03T00:00:00"},

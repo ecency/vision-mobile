@@ -100,6 +100,9 @@ object HiveNodes {
     fun withFirst(server: String, list: List<String>): List<String> = sanitize(listOf(server) + list)
 }
 
+/** What [HiveRpcClient.callWithFallback] got: the result and the method that answered it. */
+data class FallbackResult(val result: JsonElement, val method: String)
+
 /** Base class for everything the data layer throws about talking to Hive nodes. */
 sealed class HiveApiException(message: String, cause: Throwable? = null) : EcencyException(message, cause)
 
@@ -226,7 +229,32 @@ class HiveRpcClient(
         params: JsonElement = JsonArray(emptyList()),
         timeoutMillis: Long? = null,
         validate: ((JsonElement) -> Boolean)? = null,
-    ): JsonElement {
+    ): JsonElement = read(method, params, null, null, timeoutMillis, validate).result
+
+    /**
+     * A read of a method only some nodes serve yet (the bridge `*_v2` reads, `bridge.list_votes`), with [fallback] as
+     * the same read on a node without it (SDK callRPCWithFallback). A node asked for [primary] that answers hivemind's
+     * exact `unknown method` assert is marked for 30 minutes as lacking the whole method family and asked for
+     * [fallback] at once, within what is left of the same attempt: an answer about the node's software, never a
+     * failure, so no failover and nothing recorded against it. A marked node is asked for [fallback] straight away.
+     * Everything else is as in [call]. Callers parse the result by its shape, never by [FallbackResult.method].
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun callWithFallback(
+        primary: String,
+        params: JsonElement,
+        fallback: String,
+        fallbackParams: JsonElement = params,
+    ): FallbackResult = read(primary, params, fallback, fallbackParams, null, null)
+
+    private suspend fun read(
+        method: String,
+        params: JsonElement,
+        fallback: String?,
+        fallbackParams: JsonElement?,
+        timeoutMillis: Long?,
+        validate: ((JsonElement) -> Boolean)?,
+    ): FallbackResult {
         val explicit = timeoutMillis != null
         val ceiling = timeoutMillis ?: readTimeoutMillis
         val api = NodeHealthTracker.apiOf(method)
@@ -238,29 +266,43 @@ class HiveRpcClient(
             val ordered = health.orderedNodes(nodes, api)
             val node = ordered.firstOrNull { it !in tried } ?: ordered.first().also { tried.clear() }
             tried += node
-            val started = nowMillis()
+            val marked = fallback != null && lacksMethod(node, method)
+            // latency is filed under the method that answered, and the attempt's bound read from it
+            var asked = if (marked) fallback!! else method
+            val timeout = attemptTimeout(node, asked, ceiling, explicit)
+            var started = nowMillis()
             try {
-                val result = attempt(node, method, params, attemptTimeout(node, method, ceiling, explicit))
+                val result = try {
+                    attempt(node, asked, if (marked) fallbackParams!! else params, timeout)
+                } catch (e: RpcErrorException) {
+                    if (fallback == null || marked || !isUnknownMethodError(e, method)) throw e
+                    markLacksMethod(node, method)
+                    val left = started + timeout - nowMillis()
+                    if (left <= 0) throw RpcTimeoutException(node, method, timeout)
+                    asked = fallback
+                    started = nowMillis()
+                    attempt(node, fallback, fallbackParams!!, left)
+                }
                 if (validate != null && !validate(result)) {
                     health.recordDefectiveResponse(node, api)
-                    failures += NodeFailureException(node, "response validation failed for $method", scope = NodeFailureException.Scope.API)
+                    failures += NodeFailureException(node, "response validation failed for $asked", scope = NodeFailureException.Scope.API)
                 } else {
-                    health.recordSuccess(node, api, nowMillis() - started, method)
-                    recordHeadBlock(node, method, result)
-                    return result
+                    health.recordSuccess(node, api, nowMillis() - started, asked)
+                    recordHeadBlock(node, asked, result)
+                    return FallbackResult(result, asked)
                 }
             } catch (e: RpcErrorException) {
                 if (!isNodeLevelError(e.code, e.rpcMessage)) throw e
                 record(node, e, api)
-                health.recordSlowFailure(node, nowMillis() - started, method)
+                health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             } catch (e: NodeFailureException) {
                 record(node, e, api)
-                health.recordSlowFailure(node, nowMillis() - started, method)
+                health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             } catch (e: RpcTimeoutException) {
                 record(node, e, api)
-                health.recordSlowFailure(node, nowMillis() - started, method)
+                health.recordSlowFailure(node, nowMillis() - started, asked)
                 failures += e
             }
             if (attempt < retry) jitter()
@@ -268,6 +310,24 @@ class HiveRpcClient(
         val last = failures.last()
         if (failures.all { it is RpcErrorException }) throw last
         throw AllNodesFailedException(method, failures)
+    }
+
+    /** `node\nmethod` to when the mark ends (SDK unsupportedMethods): nodes upgrade on their own, so marks expire. */
+    private val lacking = mutableMapOf<String, Long>()
+    private val lackingLock = PlatformLock()
+
+    internal fun lacksMethod(node: String, method: String): Boolean = lackingLock.withLock {
+        val key = "$node\n$method"
+        val until = lacking[key] ?: return@withLock false
+        if (until > nowMillis()) true else {
+            lacking.remove(key)
+            false
+        }
+    }
+
+    private fun markLacksMethod(node: String, method: String) = lackingLock.withLock {
+        val until = nowMillis() + METHOD_UNSUPPORTED_TTL_MILLIS
+        for (m in METHOD_FAMILIES.firstOrNull { method in it } ?: listOf(method)) lacking["$node\n$m"] = until
     }
 
     /**
@@ -443,8 +503,49 @@ class HiveRpcClient(
             return (at - nowMillis).coerceIn(0, MAX_RETRY_AFTER_MILLIS)
         }
 
-        /** Same rule as @ecency/sdk isNodeLevelRPCError: the node, not the request, is at fault. */
+        /** How long a node stays marked as lacking a method (SDK METHOD_UNSUPPORTED_TTL_MS). */
+        const val METHOD_UNSUPPORTED_TTL_MILLIS = 30 * 60_000L
+
+        /** Methods that ship in one hivemind release: a node lacking one lacks them all (SDK METHOD_FAMILIES). */
+        private val METHOD_FAMILIES = listOf(
+            listOf("bridge.get_post_v2", "bridge.get_ranked_posts_v2", "bridge.get_account_posts_v2", "bridge.get_discussion_v2", "bridge.list_votes"),
+        )
+
+        /**
+         * SDK isUnknownMethodError: hivemind's -32602 assert naming exactly [method] (`bridge.get_post_v2` is
+         * `bridge_apiget_post_v2`), in the message or the assertion, each checked whole. Never a substring: hivemind
+         * echoes params into the same assert, and a crafted permlink must not mark a v2 node as v1 only.
+         */
+        internal fun isUnknownMethodError(e: RpcErrorException, method: String): Boolean {
+            if (e.code != -32602) return false
+            val dot = method.indexOf('.')
+            val marker = "unknown method: " + if (dot > 0) method.substring(0, dot) + "_api" + method.substring(dot + 1) else method
+            fun exact(text: String?): Boolean = text?.trim()?.let { it == "Assert Exception:$marker" || it == marker } == true
+            val assertion = ((SafeJson.parseOrNull(e.data ?: "") as? JsonObject)?.get("extension") as? JsonObject)
+                ?.get("assertion_expression")?.let { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
+            return exact(e.rpcMessage) || exact(assertion)
+        }
+
+        /**
+         * Asserts that mean "this node does not serve this API or method" (hived's plugin registry, the hivemind
+         * redirect): fixed text at the START of the message, which request params cannot forge (SDK).
+         */
+        private val NODE_CAPABILITY_ASSERTS = listOf(
+            "Assert Exception:api_itr != data._registered_apis.end(): Could not find API ",
+            "Assert Exception:method_itr != api_itr->second.end(): Could not find method ",
+            "Assert Exception:false: Supported by hivemind",
+        )
+
+        private val ASSERT = Regex("""^\s*Assert Exception:""")
+
+        /**
+         * Same rule as @ecency/sdk isNodeLevelRPCError: the node, not the request, is at fault. Any other
+         * `Assert Exception:` is the chain or hivemind answering the request, whatever its code: hivemind echoes params
+         * into it ("Post a/internal-notes does not exist"), which must not fail over across the pool.
+         */
         fun isNodeLevelError(code: Int, message: String): Boolean = when {
+            NODE_CAPABILITY_ASSERTS.any { message.startsWith(it) } -> true
+            ASSERT.containsMatchIn(message) -> false
             code == -32603 || code == -32601 -> true
             code in -32099..-32000 -> true
             code == -32602 -> Regex("unable to parse|endpoint data|internal", RegexOption.IGNORE_CASE).containsMatchIn(message)
