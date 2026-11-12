@@ -261,7 +261,7 @@ for (const [name, spec] of votersInputs) {
   poolN++
   hiveTxConfig.nodes = [`https://node-a${poolN}.test`]
   const list = Array.from({ length: spec.count }, (_, i) => voterRow(i))
-  const db = [...Array.from({ length: spec.count }, (_, i) => dbRow(i)), ...Array.from({ length: spec.next ?? 0 }, (_, i) => dbRow(i, 'spike-post-2'))]
+  const db = [...Array.from({ length: spec.count }, (_, i) => dbRow(i)), ...Array.from({ length: spec.next ?? 0 }, (_, i) => dbRow(spec.count + i, 'spike-post-2'))]
   script = (_node, method, params) => {
     if (method === 'bridge.list_votes') {
       if (spec.listVotes === 'unknown') return err(-32602, UNKNOWN('bridge_apilist_votes'))

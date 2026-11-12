@@ -193,9 +193,10 @@ class PostNormalizeGoldenTest {
             }
             val db = (0 until count + next).map { i ->
                 buildJsonObject {
-                    put("voter", voter(if (i < count) i else i - count)); put("author", "spike-author")
-                    put("permlink", if (i < count) "spike-post" else "spike-post-2"); put("rshares", 10 + (if (i < count) i else i - count))
-                    put("vote_percent", 10000); put("weight", 5 + (if (i < count) i else i - count)); put("last_update", "2026-11-07T06:45:09")
+                    // the next post's rows follow in the index, with voters this post does not have
+                    put("voter", voter(i)); put("author", "spike-author")
+                    put("permlink", if (i < count) "spike-post" else "spike-post-2"); put("rshares", 10 + i)
+                    put("vote_percent", 10000); put("weight", 5 + i); put("last_update", "2026-11-07T06:45:09")
                 }
             }
             val transport = FakeTransport { req ->

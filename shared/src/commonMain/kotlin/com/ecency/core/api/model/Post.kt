@@ -132,7 +132,6 @@ data class Post(
     fun voteOf(username: String?): ObserverVote? = if (knowsVoteOf(username)) observerVote?.takeIf { it.isCast } else null
 
     companion object {
-        /** Parses one bridge entry. Null only when it has no author or permlink. */
         /**
          * Parses one entry from any source (bridge v1 or v2, condenser, private API rows) as SDK normalizeEntry does,
          * by its shape, never by the method that answered: the vote of [observer] (the account it was read for) comes

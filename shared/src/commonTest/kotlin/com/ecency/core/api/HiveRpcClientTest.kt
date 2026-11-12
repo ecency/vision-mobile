@@ -288,7 +288,8 @@ class HiveRpcClientTest {
     fun aNodeMarkedWithoutV2IsAskedForItAgainAfterHalfAnHour() = runTest {
         var now = 0L
         val transport = v1OnlyNode()
-        val api = HiveApi(clientWith(transport, now = { now }))
+        // one node: the mark is about that node, and a pool would move the read to an unmarked one
+        val api = HiveApi(HiveRpcClient(listOf(NODES[0]), transport, readTimeoutMillis = 1_000, nowMillis = { now }, jitter = {}))
         api.post("spike-author", "spike-post", "spike-me")
         // one answer marks the whole family: the feeds go to v1 at once
         api.rankedPosts(RankedSort.TRENDING)
