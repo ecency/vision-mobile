@@ -389,7 +389,8 @@ final class ChatUITests: XCTestCase {
         let keyboard = app.keyboards.firstMatch
         _ = keyboard.waitForExistence(timeout: 10)
         let window = app.windows.firstMatch.frame
-        try XCTSkipUnless(keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150, "no on screen keyboard on this simulator: \(keyboard.frame)")
+        // the clear after a send is checked either way; only the on screen keyboard asserts need the software keyboard
+        let hasKeyboard = keyboard.exists && keyboard.frame.height > 150 && keyboard.frame.minY < window.maxY - 150
         for round in 1...3 {
             let words = "we would know for sure \(round)x"
             composer.typeText(words)
@@ -403,6 +404,7 @@ final class ChatUITests: XCTestCase {
             let sent = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", words)).firstMatch
             XCTAssertTrue(sent.waitForExistence(timeout: 10), "round \(round): the message shows")
             // the keyboard stays up on the field: the next message is typed straight away (the next round)
+            guard hasKeyboard else { continue }
             sleep(1)
             XCTAssertTrue(keyboard.exists && keyboard.frame.minY < window.maxY - 150, "round \(round): the keyboard stayed up: \(keyboard.frame)")
             XCTAssertEqual(composer.value(forKey: "hasKeyboardFocus") as? Bool, true, "round \(round): the field kept the focus")
