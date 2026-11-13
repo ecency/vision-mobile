@@ -79,10 +79,12 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 }
                 // the account changed meanwhile: this result belongs to a session that is gone
                 if (session != generation) return@launch
+                // what a read taught while this was on its way stays (review of #3683)
+                val learned = env.localVotes.get(key)
                 env.localVotes.set(
                     key,
                     LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares,
-                        landedAt = landedAt ?: env.security.monotonicMillis(), settledCount = settledCount,
+                        landedAt = learned?.landedAt ?: landedAt ?: env.security.monotonicMillis(), settledCount = learned?.settledCount ?: settledCount,
                     ),
                 )
                 env.api.posts.invalidate(key)
@@ -131,8 +133,10 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         setState { VoteState() }
     }
 
+    /** Back to [previous], keeping a settled count a read set meanwhile (it is about the account, not this vote). */
     private fun rollback(key: PostKey, previous: LocalVote?) {
-        if (previous == null) env.localVotes.remove(key) else env.localVotes.set(key, previous)
+        val learned = env.localVotes.get(key)?.settledCount
+        if (previous == null) env.localVotes.remove(key) else env.localVotes.set(key, previous.copy(settledCount = learned ?: previous.settledCount))
     }
 
     private fun update(key: PostKey, status: VoteStatus) = setState { VoteState(it.statuses + (key to status)) }

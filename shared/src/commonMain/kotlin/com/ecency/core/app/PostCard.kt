@@ -209,10 +209,12 @@ class LocalVotes(
 
     companion object {
         /**
-         * How long after a vote made here first landed a read is trusted to have the account in its count: a node may lag
-         * up to the 90 s its health allows, and the indexer a little more (the SDK holds a just-cast vote 60 s).
+         * How long after a vote made here first landed a read shown then is trusted to have the account in its count. It
+         * judges a read by when it is shown, so it covers when it may have been fetched too: a read fetched 2 minutes on
+         * has it (a node may lag the 90 s its health allows, the indexer a little more; the SDK holds a vote 60 s), and
+         * one shown may be up to the post cache's 60 s old (`PostRepository`) plus a read's 20 s budget.
          */
-        const val SETTLE_MILLIS = 120_000L
+        const val SETTLE_MILLIS = 120_000L + 60_000L + 20_000L
 
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {

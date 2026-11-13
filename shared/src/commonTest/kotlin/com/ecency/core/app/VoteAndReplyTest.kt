@@ -878,9 +878,13 @@ class VoteAndReplyTest {
         val early = read(1)
         app.env.localVotes.retireConfirmed(listOf(early), TestApp.USER)
         assertEquals(2, LocalVotes.view(early, TestApp.USER, app.env.localVotes.get(key)).votes, "within the hold the read is not trusted yet")
-        // a read from a minute on has it: nothing is added to it, nor to any read counting as many (counts only grow),
+        // shown 190 s on, a read may be a cached one fetched before 2 minutes, from a node still behind: not trusted
+        testScheduler.advanceTimeBy(190_000)
+        app.env.localVotes.retireConfirmed(listOf(early), TestApp.USER)
+        assertEquals(2, LocalVotes.view(early, TestApp.USER, app.env.localVotes.get(key)).votes, "a cached read may be older")
+        // a read shown from then on has it: nothing is added to it, nor to any read counting as many (counts only grow),
         // also to a vote cast again later; an older read with fewer still gets the account added
-        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000 - 190_000)
         val fresh = read(1)
         app.env.localVotes.retireConfirmed(listOf(fresh), TestApp.USER)
         assertEquals(1, LocalVotes.view(fresh, TestApp.USER, app.env.localVotes.get(key)).votes)
@@ -917,5 +921,39 @@ class VoteAndReplyTest {
         app.env.localVotes.retireConfirmed(listOf(refreshed), TestApp.USER)
         assertEquals(1501, LocalVotes.view(refreshed, TestApp.USER, app.env.localVotes.get(key)).votes)
         assertEquals(1501, LocalVotes.view(old, TestApp.USER, app.env.localVotes.get(key)).votes, "the old read keeps it added")
+    }
+
+    @Test
+    fun aCountLearnedWhileAVoteIsSendingIsKept() = runTest {
+        // review of #3683: a refresh while a later vote is on its way sets the settled count; neither the vote's landing
+        // nor its rollback may put back the value from before it was sent
+        var fail = false
+        var gate = CompletableDeferred<Unit>()
+        var held = false
+        val app = TestApp(this, handler = handler {
+            if (held) gate.await()
+            if (fail) HttpResult(503, "") else FakeTransport.result(it, "null")
+        })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        fun read(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total}}"""),
+            observer = TestApp.USER,
+        )!!
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        for (failing in listOf(false, true)) {
+            fail = failing
+            gate = CompletableDeferred()
+            held = true
+            app.env.votes.vote("alice", "root", if (failing) 2000 else 5000)
+            testScheduler.runCurrent()
+            app.env.localVotes.retireConfirmed(listOf(read(if (failing) 2 else 3)), TestApp.USER)
+            held = false
+            gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+            assertEquals(if (failing) 2 else 3, app.env.localVotes.get(key)?.settledCount, if (failing) "rolled back" else "landed")
+        }
     }
 }
