@@ -143,7 +143,7 @@ struct BodyTextView: UIViewRepresentable {
                 self?.keyboardFrame(note)
             })
             observers.append(center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] _ in
-                self?.keyboardUp = false
+                self?.keyboardWent()
             })
         }
 
@@ -156,9 +156,19 @@ struct BodyTextView: UIViewRepresentable {
             let overlap = BodyTextView.keyboardOverlap(window.convert(end, from: space), in: window.bounds)
             let up = overlap > BodyTextView.keyboardMinimum
             let cameUp = up && !keyboardUp
+            if !up, keyboardUp { keyboardWent() }
             keyboardUp = up
             // the keyboard came up over the focused body: the body moves to the top once the editor took its room
             if cameUp { reveal(bodyToTop: true) }
+        }
+
+        /// The keyboard went down, also while the body keeps the focus (iOS 27 hides and shows it again as text is
+        /// typed into a just focused body): the editor's scroll view goes back to the title, so the keyboard that comes
+        /// up next moves the body to the top again.
+        private func keyboardWent() {
+            keyboardUp = false
+            movedUp = false
+            movedTo = nil
         }
 
         func textChanged() {
