@@ -324,8 +324,36 @@ class EditorFlowsTest {
         assertFalse("the hub gave way to the tool", exists("aiAssistSheet"))
     }
 
-    /** The direction Compose resolved for the first paragraph of the text field [tag]. */
+    /** The body's EditText (BodyEditText): its text layout, which Compose's semantics do not carry. */
+    private fun bodyView(): com.ecency.app.ui.BodyEditTextView {
+        fun find(v: android.view.View): com.ecency.app.ui.BodyEditTextView? = when (v) {
+            is com.ecency.app.ui.BodyEditTextView -> v
+            is android.view.ViewGroup -> (0 until v.childCount).firstNotNullOfOrNull { find(v.getChildAt(it)) }
+            else -> null
+        }
+        return assertNotNullBody(find(compose.activity.window.decorView))
+    }
+
+    private fun assertNotNullBody(view: com.ecency.app.ui.BodyEditTextView?): com.ecency.app.ui.BodyEditTextView {
+        assertTrue("the body's EditText is on screen", view != null)
+        return view!!
+    }
+
+    /** The top and bottom of the body's line holding [offset], in root coordinates (px). */
+    private fun bodyLine(offset: Int): Pair<Float, Float> {
+        val v = bodyView()
+        val layout = v.layout
+        val line = layout.getLineForOffset(offset.coerceIn(0, v.text.length))
+        val y = compose.onNodeWithTag("editorBody", useUnmergedTree = true).fetchSemanticsNode().positionInRoot.y + v.totalPaddingTop
+        return (y + layout.getLineTop(line)) to (y + layout.getLineBottom(line))
+    }
+
+    /** The direction resolved for the first paragraph of the text field [tag] (the body: its EditText's layout). */
     private fun fieldDirection(tag: String): androidx.compose.ui.text.style.ResolvedTextDirection {
+        if (tag == "editorBody") {
+            return if (bodyView().layout.getParagraphDirection(0) == android.text.Layout.DIR_RIGHT_TO_LEFT) androidx.compose.ui.text.style.ResolvedTextDirection.Rtl
+            else androidx.compose.ui.text.style.ResolvedTextDirection.Ltr
+        }
         val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
         compose.onNodeWithTag(tag).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
         return results.first().getParagraphDirection(0)
@@ -888,10 +916,7 @@ class EditorFlowsTest {
         assertTrue("the body has most of the room between header and toolbar: ${visible.height} of ${bottom - top}", visible.height >= 0.7f * (bottom - top))
         assertTrue("the title scrolled off: ${node("editorTitle").boundsInRoot}", node("editorTitle").boundsInRoot.height < 1f)
         // the caret (at the end) is on screen
-        val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
-        compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
-        val caret = results.first().getCursorRect(model().current.body.length)
-        val caretBottom = node("editorBody").positionInRoot.y + caret.bottom
+        val caretBottom = bodyLine(model().current.body.length).second
         assertTrue("caret at $caretBottom within $top..$bottom", caretBottom in top..(bottom + 1f))
         // the title is still reachable
         compose.onNodeWithTag("editorTitle").performScrollTo()
@@ -901,13 +926,8 @@ class EditorFlowsTest {
     }
 
     /**
-     * A long draft (as iOS's BodyTextView, README "Editor and publishing"): above 10,000 characters the body is as tall
-     * as the visible area and scrolls itself, so a key no longer lays out the whole text; a short body grows with its
-     * text. The header still scrolls away and the caret stays on screen.
-     */
-    /**
-     * Tester report (Android): selecting in a long draft stopped at the window's edge. The field grows inside the
-     * editor's scroll column and Compose scrolls only the field itself, so the column follows a selection end.
+     * Tester report (Android): selecting in a long draft stopped at the window's edge. The body's EditText keeps a
+     * dragged handle (and the caret) in view by asking its parents for that point; the editor's column must follow it.
      */
     @Test
     @Config(qualifiers = "w360dp-h640dp")
@@ -920,24 +940,20 @@ class EditorFlowsTest {
         val text = (1..60).joinToString("\n") { "Line $it of the draft" }
         compose.onNodeWithTag("editorBody").performTextInput(text)
         settle()
-        fun lineTop(offset: Int): Float {
-            val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
-            compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
-            return node("editorBody").positionInRoot.y + results.first().getCursorRect(offset).top
-        }
+        fun lineTop(offset: Int): Float = bodyLine(offset).first
         val third = text.indexOf("Line 3 ")
         val view = node("editorScroll").boundsInRoot
         assertTrue("line 3 starts out of view", lineTop(third) < view.top)
-        // the selection's start goes up to line 3 (as a handle dragged past the top does): the column follows it
-        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(third, text.length))
+        // a handle dragged past the top: the EditText asks to show that point (TextView.bringPointIntoView, as its
+        // pre-draw does for the dragged end), and the column follows it
+        compose.runOnUiThread { bodyView().bringPointIntoView(third) }
         settle()
         val top = lineTop(third)
         assertTrue("line 3 is in view: $top in ${view.top}..${view.bottom}", top >= view.top - 1f && top < view.bottom)
-        assertEquals(third, model().current.selection.start)
-        // and the end handle dragged down to line 58: the column follows the end
+        // and a handle dragged down to line 58: the column follows it
         val fiftyEighth = text.indexOf("Line 58 ")
         assertTrue("line 58 is out of view", lineTop(fiftyEighth) > view.bottom)
-        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(third, fiftyEighth))
+        compose.runOnUiThread { bodyView().bringPointIntoView(fiftyEighth) }
         settle()
         val bottom = lineTop(fiftyEighth)
         assertTrue("line 58 is in view: $bottom in ${view.top}..${view.bottom}", bottom >= view.top && bottom < view.bottom)
@@ -964,61 +980,29 @@ class EditorFlowsTest {
         assertTrue("the title is on screen: $title in $view", title.top >= view.top && title.bottom <= view.bottom)
     }
 
-    /** A body that scrolls itself keeps its own selection in view: the editor's column stays where it is. */
+    /**
+     * A long draft grows with its text like a short one (README "Editor and publishing"): the body is Android's EditText
+     * (BodyEditText), which lays out and redraws only what a key changed, so it needs no bounded mode for long text.
+     * The caret stays on screen.
+     */
     @Test
     @Config(qualifiers = "w360dp-h640dp")
-    fun aSelectionInABodyThatScrollsItselfLeavesTheEditorWhereItIs() {
+    fun aLongBodyGrowsWithItsTextAndKeepsTheCaretOnScreen() {
         launchSignedIn()
         openEditor()
         fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
         compose.onNodeWithTag("editorBody").performClick()
-        val line = "A line of a long draft, about fifty characters.\n" // 48
-        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(250)) // 12,000 characters
-        settle()
-        // the title back on screen, the body still focused
-        compose.onNodeWithTag("editorTitle").performScrollTo()
-        settle()
-        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(100, 200))
-        settle()
-        val title = node("editorTitle").boundsInRoot
-        // the end handle dragged far down
-        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(100, 11_000))
-        settle()
-        assertEquals(11_000, model().current.selection.end)
-        assertEquals("the column did not move", title, node("editorTitle").boundsInRoot)
-    }
-
-    @Test
-    @Config(qualifiers = "w360dp-h640dp")
-    fun aLongBodyIsAsTallAsTheViewportAndAShortOneGrows() {
-        launchSignedIn()
-        openEditor()
-        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
-        compose.onNodeWithTag("editorBody").performClick()
-        // a short body that is still taller than the window: it grows past the viewport
-        compose.onNodeWithTag("editorBody").performTextInput((1..60).joinToString("\n") { "Line $it" })
-        settle()
-        // the visible height of the scroll column (it changes as the words count row comes and goes)
-        // less the field's own 8 dp above and below its text (the tag sits inside that padding)
-        fun viewport() = node("editorScroll").size.height - node("editorBody").layoutInfo.density.run { androidx.compose.ui.unit.Dp(16f).roundToPx() }
-        assertTrue("a short body grows: ${node("editorBody").size.height} > ${viewport()}", node("editorBody").size.height > viewport())
-
         val line = "A line of a long draft, about fifty characters.\n" // 48
         compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(250)) // 12,000 characters
         settle()
         assertEquals(12_000, model().current.body.length)
-        assertEquals("a long body is bounded to the viewport", viewport(), node("editorBody").size.height)
-        // the field is on screen
-        val field = node("editorBody").boundsInRoot
-        assertTrue("the body is on screen: $field", field.height > 0.7f * viewport())
-
-        // back below 8,000 it grows again (between the two it stays as it is)
-        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(190)) // 9,120
+        val view = node("editorScroll").boundsInRoot
+        assertTrue("a long body grows past the viewport: ${node("editorBody").size.height}", node("editorBody").size.height > 5 * view.height)
+        // typing at its end keeps the caret on screen
+        compose.onNodeWithTag("editorBody").performTextInput("more")
         settle()
-        assertEquals("between 8,000 and 10,000 it keeps scrolling itself", viewport(), node("editorBody").size.height)
-        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(150)) // 7,200
-        settle()
-        assertTrue("below 8,000 it grows again", node("editorBody").size.height > viewport())
+        val (top, bottom) = bodyLine(model().current.body.length)
+        assertTrue("caret $top..$bottom within $view", top >= view.top - 1f && bottom <= view.bottom + 1f)
     }
 
     private fun showKeyboard(height: Int) = compose.runOnUiThread {
@@ -1101,9 +1085,7 @@ class EditorFlowsTest {
         waitFor("editorBody")
         settle()
         fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
-        val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
-        compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
-        val caretBottom = node("editorBody").positionInRoot.y + results.first().getCursorRect(model().current.body.length).bottom
+        val caretBottom = bodyLine(model().current.body.length).second
         val top = node("editorBack").boundsInRoot.bottom
         val bottom = node("editorToolbar").boundsInRoot.top
         assertTrue("caret at $caretBottom within $top..$bottom", caretBottom in top..(bottom + 1f))

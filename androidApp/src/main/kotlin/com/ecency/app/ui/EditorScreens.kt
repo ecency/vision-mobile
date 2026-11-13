@@ -82,6 +82,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -97,14 +98,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -133,9 +132,7 @@ import com.ecency.core.editor.RewardType
 import com.ecency.core.editor.TextSelection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import androidx.compose.runtime.snapshotFlow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -406,66 +403,22 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
         }
     }
 
-    // ---- body text field: typing lives in the field, model edits replace it ----
-    var field by remember { mutableStateOf(TextFieldValue(state.body, TextRange(state.selection.start, state.selection.end))) }
-    LaunchedEffect(state.bodyRevision) {
-        if (field.text != state.body || field.selection.min != state.selection.start || field.selection.max != state.selection.end) {
-            field = TextFieldValue(state.body, TextRange(state.selection.start, state.selection.end))
-        }
-    }
+    // ---- body text: the EditText (BodyEditText) holds the typing; model edits go in at each bodyRevision ----
     // the header and the body scroll together. When the keyboard comes up over the focused body, the scroll column
-    // keeps its focused child in view as the viewport shrinks with the keyboard's inset (Compose's own behaviour, all
-    // through the inset animation): the body is taller than what is left, so its top goes to the top and the header
-    // scrolls away (EditorFlowsTest.whenTheKeyboardComesUpTheFocusedBodyMovesToTheTop, with faked insets). While
-    // typing the caret is kept on screen here.
+    // keeps its focused child in view as the viewport shrinks with the keyboard's inset, so its top goes to the top and
+    // the header scrolls away (EditorFlowsTest.whenTheKeyboardComesUpTheFocusedBodyMovesToTheTop, with faked insets).
+    // While typing, the caret and a moved selection end are kept on screen (BodyEditText).
     val bodyScroll = rememberScrollState()
     var bodyFocused by remember { mutableStateOf(false) }
-    var bodyLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
     val caretRequester = remember { BringIntoViewRequester() }
-    val caretMargin = with(LocalDensity.current) { 8.dp.toPx() }
-    // a long draft scrolls inside the field (BodyScroll), which keeps its own caret in view: the column then only
-    // keeps the whole field on screen. Decided in the composition of each text, so no frame lays out a long text whole
-    val bodyScrollsItself = remember { BodyScroll() }.update(field.text.length)
     // the preview takes the body away and its focus with it; the body that comes back shows its caret
     var shownPreview by remember { mutableStateOf(state.isPreview) }
+    var revealCaret by remember { mutableIntStateOf(0) }
     LaunchedEffect(state.isPreview) {
         if (shownPreview == state.isPreview) return@LaunchedEffect
         shownPreview = state.isPreview
         bodyFocused = false
-        if (state.isPreview) {
-            bodyLayout = null // the field is gone; the next layout is the new field's
-        } else {
-            val layout = snapshotFlow { bodyLayout }.filterNotNull().first()
-            if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
-            val caret = layout.getCursorRect(field.selection.end.coerceIn(0, layout.layoutInput.text.length))
-            caretRequester.bringIntoView(caret.inflate(caretMargin))
-        }
-    }
-    LaunchedEffect(field.text, bodyLayout) {
-        val layout = bodyLayout ?: return@LaunchedEffect
-        if (!bodyFocused || layout.layoutInput.text.text != field.text) return@LaunchedEffect
-        if (bodyScrollsItself) return@LaunchedEffect caretRequester.bringIntoView()
-        val caret = layout.getCursorRect(field.selection.end.coerceIn(0, field.text.length))
-        caretRequester.bringIntoView(caret.inflate(caretMargin))
-    }
-    // a selection end that moved (a handle dragged to the top or the bottom, a caret moved by keys) is kept in view.
-    // Compose's field scrolls only itself, and a growing body is never scrolled by it, so the selection stopped one
-    // line past the window's edge, out of sight (tester report: selecting in a long draft). Only while the body is
-    // focused: a draft that opens with its caret restored stays at its title. Not for a long body that scrolls itself:
-    // the layout's rects are not in its scrolled coordinates, so the column would jump; its selection is left to Compose
-    val selectionShown = remember { arrayOf(field.selection) }
-    LaunchedEffect(field.selection) {
-        val before = selectionShown[0]
-        val selection = field.selection
-        selectionShown[0] = selection
-        if (!bodyFocused || bodyScrollsItself) return@LaunchedEffect
-        val layout = bodyLayout ?: return@LaunchedEffect
-        val moved = when {
-            selection.start != before.start -> selection.start
-            selection.end != before.end -> selection.end
-            else -> return@LaunchedEffect
-        }
-        caretRequester.bringIntoView(layout.getCursorRect(moved.coerceIn(0, layout.layoutInput.text.length)).inflate(caretMargin))
+        if (!state.isPreview) revealCaret++
     }
 
     Column(Modifier.fillMaxSize().imePadding().testTag("editor")) {
@@ -525,6 +478,10 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                 // as well (its body input scrolls on its own, title and tags stay put); here it is this column.
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
                     val viewport = maxHeight
+                    // the keyboard coming up over the focused body (the visible height shrinks), or the body taking the focus
+                    // with it up: the body goes into view, its top to the top when it is taller, so the header scrolls away.
+                    // Compose did this for its own focused field; the body's EditText is focused as a View
+                    LaunchedEffect(viewport, bodyFocused) { if (bodyFocused) caretRequester.bringIntoView() }
                     Column(Modifier.fillMaxSize().verticalScroll(bodyScroll).testTag("editorScroll")) {
                         if (!state.isReply && !state.isEdit) {
                             Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { sheet = "community" }.padding(horizontal = 16.dp, vertical = 8.dp).testTag("communityRow"), verticalAlignment = Alignment.CenterVertically) {
@@ -580,24 +537,13 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                                 }
                             }
                         }
-                        BasicTextField(
-                            value = field,
-                            onValueChange = {
-                                field = it
-                                model.setBody(it.text, TextSelection(it.selection.min, it.selection.max))
-                            },
-                            enabled = !state.isSending,
-                            textStyle = TextStyle(fontSize = 16.sp, color = colors.text, lineHeight = 24.sp, textDirection = TextDirection.Content), cursorBrush = SolidColor(colors.blueText),
-                            onTextLayout = { bodyLayout = it },
-                            modifier = Modifier.fillMaxWidth().then(if (bodyScrollsItself) Modifier.height(viewport) else Modifier.heightIn(min = viewport))
-                                .onFocusChanged { bodyFocused = it.isFocused }
+                        BodyEditText(
+                            text = state.body, selection = state.selection, revision = state.bodyRevision, enabled = !state.isSending,
+                            placeholder = if (state.isReply) EditorUiCopy.ADD_YOUR_REPLY else EditorUiCopy.TELL_US_SOMETHING,
+                            revealCaret = revealCaret, requester = caretRequester,
+                            onChange = { text, selection -> model.setBody(text, selection) }, onFocus = { bodyFocused = it },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = viewport)
                                 .padding(horizontal = 16.dp, vertical = 8.dp).bringIntoViewRequester(caretRequester).testTag("editorBody"),
-                            decorationBox = { inner ->
-                                Box(Modifier.fillMaxSize()) {
-                                    if (field.text.isEmpty()) Text(if (state.isReply) EditorUiCopy.ADD_YOUR_REPLY else EditorUiCopy.TELL_US_SOMETHING, color = colors.darkGray, fontSize = 16.sp)
-                                    inner()
-                                }
-                            },
                         )
                     }
                 }
@@ -1395,26 +1341,4 @@ internal fun PostingAuthorityDialog(onAnswer: (grant: Boolean) -> Unit, onDismis
         confirmButton = { TextButton(onClick = { onAnswer(true) }, modifier = Modifier.testTag("authorityGrant")) { Text(com.ecency.core.app.PostingAuthorityPrompt.GRANT) } },
         dismissButton = { TextButton(onClick = { onAnswer(false) }, modifier = Modifier.testTag("authoritySkip")) { Text(com.ecency.core.app.PostingAuthorityPrompt.SKIP) } },
     )
-}
-
-/**
- * Whether the body field scrolls itself, as iOS's BodyTextView (README "Editor and publishing"): up to [GROWS_UP_TO]
- * UTF-16 units it grows with its text inside the editor's scroll column; above that it is as tall as the visible
- * area and scrolls itself, because a field in an unbounded column lays out its whole text on every key. It grows
- * again below [SCROLLS_DOWN_TO], so it does not flip at every key.
- */
-internal class BodyScroll {
-    private var scrolls = false
-
-    fun update(length: Int): Boolean {
-        scrolls = scrollsItself(length, scrolls)
-        return scrolls
-    }
-
-    companion object {
-        const val GROWS_UP_TO = 10_000
-        const val SCROLLS_DOWN_TO = 8_000
-
-        fun scrollsItself(length: Int, scrolls: Boolean): Boolean = if (scrolls) length > SCROLLS_DOWN_TO else length > GROWS_UP_TO
-    }
 }
