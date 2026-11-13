@@ -182,18 +182,21 @@ final class ImageLoader: @unchecked Sendable {
     }
 
     /// UIImage shows an animation's frames for equal times, so each frame is repeated for its own delay: in slots
-    /// of the delays' greatest common divisor (whole 10 ms, as GIF counts), at most `maxSlots` (coarser slots then).
+    /// of the delays' greatest common divisor (whole 10 ms, as GIF counts), at most `maxSlots` (coarser slots then,
+    /// each frame in at least one). The animation always lasts its own total; with as many frames as slots, each
+    /// frame is shown once over that total.
     private static func timeSlots(_ frames: [UIImage], _ delays: [Double]) -> (frames: [UIImage], duration: Double) {
         let tens = delays.map { max(1, Int(($0 * 100).rounded())) }
-        var slot = tens.reduce(0) { gcd($0, $1) }
         let total = tens.reduce(0, +)
-        while total / max(1, slot) > maxSlots { slot *= 2 }
-        guard slot > 0 else { return (frames, delays.reduce(0, +)) }
+        let duration = Double(total) / 100
+        var slot = tens.reduce(0) { gcd($0, $1) }
+        guard slot > 0, frames.count < maxSlots else { return (frames, duration) }
+        while total / slot > maxSlots { slot *= 2 }
         var slots: [UIImage] = []
         for (frame, ten) in zip(frames, tens) {
             slots.append(contentsOf: repeatElement(frame, count: max(1, Int((Double(ten) / Double(slot)).rounded()))))
         }
-        return (slots, Double(slots.count * slot) / 100)
+        return (slots, duration)
     }
 
     private static let maxSlots = 600

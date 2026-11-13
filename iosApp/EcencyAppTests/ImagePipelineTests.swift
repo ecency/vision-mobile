@@ -205,6 +205,13 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(loaded.image.duration, 0.6, accuracy: 0.001)
     }
 
+    /// Past the slot limit an animation still plays for its own length (700 frames of 100 ms: 70 s).
+    func testALongAnimationKeepsItsLength() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 700, side: 1, delays: Array(repeating: 0.1, count: 700)), maxPixel: 100))
+        XCTAssertEqual(loaded.image.images?.count, 700)
+        XCTAssertEqual(loaded.image.duration, 70, accuracy: 0.001)
+    }
+
     /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.
     func testImageProxyRequestsNameAvifAndWebP() throws {
         for src in ["https://i.ecency.com/p/abc?format=match&mode=fit", "https://images.ecency.com/u/someone/avatar/small"] {
