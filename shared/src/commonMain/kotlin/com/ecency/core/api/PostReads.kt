@@ -57,16 +57,16 @@ private fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive
 
 /**
  * SDK getEntryVote: [voter]'s vote on the post, or null when the account has not voted. The seek returns the NEXT row
- * (another voter's or another post's) for an account that did not vote, so the row must match all three; a removed
- * vote (percent 0) is null too. `database_api` is hived's own state, so it does not lag like hivemind.
+ * (another voter's or another post's) for an account that did not vote, so the row must match all three. A removed
+ * vote is its row with percent 0 ([ObserverVote.isRemoved], SDK 2.7.0): hivemind still counts it in `total_votes` (#3682).
+ * `database_api` is hived's own state, so it does not lag like hivemind.
  */
 @Throws(EcencyException::class, CancellationException::class)
 suspend fun HiveApi.ownVote(author: String, permlink: String, voter: String): ObserverVote? = guarded {
     val row = (client.call("database_api.list_votes", databaseListVotes(author, permlink, voter, 1)) as? JsonObject)
         ?.get("votes")?.let { it as? JsonArray }?.firstOrNull() as? JsonObject ?: return@guarded null
     if (row.text("author") != author || row.text("permlink") != permlink || row.text("voter") != voter) return@guarded null
-    val percent = Post.jsLong(row["vote_percent"]).toInt()
-    if (percent == 0) null else ObserverVote(Post.jsLong(row["rshares"]), percent)
+    ObserverVote(Post.jsLong(row["rshares"]), Post.jsLong(row["vote_percent"]).toInt())
 }
 
 /**

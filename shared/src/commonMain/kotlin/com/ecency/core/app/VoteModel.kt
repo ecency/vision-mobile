@@ -46,13 +46,18 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         val previous = env.localVotes.get(key)
         // RN upvotePopover: the payout moves by the sheet's estimate at once (an unvote is worth nothing)
         val estimate = if (weight == 0) VoteEstimate.NONE else preview?.takeIf { it.voter == voter }?.estimate(weight)
-        // a vote read from the chain is in the post's count, and stays in it through later changes and an unvote
-        // (hivemind keeps a removed vote counted); one made here may not be in a card's older read yet
-        val earlierCounted = previous?.let { (it.fromChain && it.weight != 0) || it.earlierCounted } == true
+        // a vote read from the chain is in the post's count, a removed one too (hivemind keeps it counted), and stays in it
+        // through later changes and an unvote; one made here may not be in a card's older read yet
+        val earlierCounted = previous?.let { it.fromChain || it.earlierCounted } == true
+        // a vote made here that landed is counted on chain from then on (an unvote lands only over a vote): an unvote or
+        // another vote does not take it off. The first landing and the count of a read known to have it are about the
+        // account, not this vote: carried
+        val landedAt = previous?.landedAt
+        val settledCount = previous?.settledCount
         // the share of the post's payout a read without the account's vote still holds: the vote read from the chain,
         // carried through later changes; a vote made here may not be in a saved read (a wave row), so it adds none
         val earlierRshares = previous?.earlierRshares
-        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares))
+        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares, landedAt = landedAt, settledCount = settledCount))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation
         scope.launch {
@@ -74,7 +79,14 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 }
                 // the account changed meanwhile: this result belongs to a session that is gone
                 if (session != generation) return@launch
-                env.localVotes.set(key, LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares))
+                // what a read taught while this was on its way stays (review of #3683)
+                val learned = env.localVotes.get(key)
+                env.localVotes.set(
+                    key,
+                    LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares,
+                        landedAt = learned?.landedAt ?: landedAt ?: env.security.monotonicMillis(), settledCount = learned?.settledCount ?: settledCount,
+                    ),
+                )
                 env.api.posts.invalidate(key)
                 setState { VoteState(it.statuses - key) }
             } catch (e: CancellationException) {
@@ -121,8 +133,10 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         setState { VoteState() }
     }
 
+    /** Back to [previous], keeping a settled count a read set meanwhile (it is about the account, not this vote). */
     private fun rollback(key: PostKey, previous: LocalVote?) {
-        if (previous == null) env.localVotes.remove(key) else env.localVotes.set(key, previous)
+        val learned = env.localVotes.get(key)?.settledCount
+        if (previous == null) env.localVotes.remove(key) else env.localVotes.set(key, previous.copy(settledCount = learned ?: previous.settledCount))
     }
 
     private fun update(key: PostKey, status: VoteStatus) = setState { VoteState(it.statuses + (key to status)) }

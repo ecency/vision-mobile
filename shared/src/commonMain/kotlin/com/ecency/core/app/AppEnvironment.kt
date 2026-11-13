@@ -249,7 +249,7 @@ class AppEnvironment(
     /** RN ProposalVoteRequest: the proposal card on the main feed. One per app. */
     val proposalVote: ProposalVoteModel by lazy { ProposalVoteModel(this) }
 
-    val localVotes = LocalVotes()
+    val localVotes = LocalVotes { security.monotonicMillis() }
 
     /** Non-secret preferences (feed tabs, content filters). Each platform sets its own store at start. */
     var prefs: Prefs = InMemoryPrefs()

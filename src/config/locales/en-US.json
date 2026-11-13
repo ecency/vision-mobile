@@ -2038,10 +2038,7 @@
         "retry": "{message}\nTry again",
         "playing": "Playing {permlink}",
         "video_attached_remove": "Video attached, remove",
-        "image_attached_remove": "Attached image, remove",
-        "edit_poll": "Edit poll",
-        "add_poll": "Add poll",
-        "add_video": "Add video"
+        "image_attached_remove": "Attached image, remove"
       },
       "reading": {
         "reply_to": "Reply to {username}",
@@ -2808,7 +2805,10 @@
       "account_not_found": "Account not found"
     },
     "wave_compose": {
+      "add_poll": "Add poll",
+      "add_video": "Add video",
       "clipboard_chip": "Image in clipboard · Paste image",
+      "edit_poll": "Edit poll",
       "no_container": "Latest waves container could not be fetched",
       "please_sign_in_first": "Please sign in first.",
       "write_something_first": "Write something first.",

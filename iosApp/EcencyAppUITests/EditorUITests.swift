@@ -45,6 +45,20 @@ final class EditorUITests: XCTestCase {
     /// Owner order (10-28): Aa, Image, Video, AI Assist, Snippets, Link, Poll, Translate, Clear. At the largest text
     /// the first four are on a 375 point wide phone (the narrowest iOS 26 runs on) without scrolling, and the AI tools
     /// have no buttons of their own: AI Assist lists them.
+    /// Owner (11-13): the toolbar's buttons are icons (RN editorToolbar's were), their names what VoiceOver reads.
+    func testTheToolbarButtonsAreNamedForVoiceOver() {
+        let app = launch(["-openScreen", "editor"])
+        XCTAssertTrue(app.buttons["tool-format"].waitForExistence(timeout: 20), app.debugDescription)
+        let named: [(String, String)] = [
+            ("tool-format", "Text format"), ("tool-image", "Image"), ("tool-video", "Add Video"), ("tool-ai-assist", "AI Writing Assistant"),
+            ("tool-snippets", "Snippets"), ("tool-link", "Insert Link"), ("tool-poll", "Poll"), ("tool-translate", "Translate post"), ("tool-clear", "Clear"),
+        ]
+        // XCUITest shows a SwiftUI button as one element, so what it draws (an icon) is not visible here: the names are
+        for (id, name) in named {
+            XCTAssertEqual(app.buttons[id].label, name, id)
+        }
+    }
+
     func testTheToolbarLeadsWithTheWritingToolsAndAiAssistIsOnANarrowScreenAtTheLargestText() {
         let app = launch(["-openScreen", "editor", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
         XCTAssertTrue(app.buttons["tool-format"].waitForExistence(timeout: 20), app.debugDescription)

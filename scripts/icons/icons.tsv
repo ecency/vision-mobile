@@ -127,3 +127,5 @@ TARGET	target	-	target	-	no
 SHRINK	close_fullscreen	-	arrow.down.right.and.arrow.up.left	-	no
 UPLOADS	photo_library	-	photo.on.rectangle	-	no
 SMILE	sentiment_satisfied	=	face.smiling	face.smiling.fill	no
+TEXT_FORMAT	text_format	-	textformat	-	no
+SNIPPETS	short_text	-	text.alignleft	-	no

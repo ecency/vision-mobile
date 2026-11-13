@@ -755,14 +755,14 @@ struct WaveComposerSheet: View {
                 Button { pollSheet = true } label: {
                     Image(appIcon: .chartBar).scaledFont(20).foregroundStyle(state.poll != nil ? theme.accent : theme.text).tapTarget()
                 }
-                .accessibilityLabel(state.poll != nil ? L.Native.Ios.Waves.editPoll : L.Native.Ios.Waves.addPoll)
+                .accessibilityLabel(state.poll != nil ? WaveComposeCopy.shared.EDIT_POLL : WaveComposeCopy.shared.ADD_POLL)
                 .accessibilityIdentifier("wave-poll")
                 // RN video-outline: tinted and off while a video is attached or on its way
                 Button {
                     videoUpload = Observed(model.video(), ownsModel: false)
                 } label: { Image(appIcon: .video).scaledFont(20).foregroundStyle(state.videoEmbedUrl != nil ? theme.accent : theme.text).tapTarget() }
                     .disabled(!state.canAddVideo)
-                    .accessibilityLabel(L.Native.Ios.Waves.addVideo)
+                    .accessibilityLabel(WaveComposeCopy.shared.ADD_VIDEO)
                     .accessibilityIdentifier("wave-video-button")
                     .themedSheet(isPresented: Binding(get: { videoUpload != nil }, set: { if !$0 { videoUpload = nil } })) {
                         if let videoUpload { VideoUploadSheet(video: videoUpload) }

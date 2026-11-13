@@ -99,7 +99,7 @@ class SliceFixesTest {
         signedIn(app)
         app.env.votes.vote("alice", "root", 10000)
         testScheduler.advanceUntilIdle()
-        assertEquals(LocalVote(10000, false), app.env.localVotes.get(key))
+        assertEquals(LocalVote(10000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
         fail = true
         app.env.votes.vote("alice", "root", 0)
         testScheduler.runCurrent()

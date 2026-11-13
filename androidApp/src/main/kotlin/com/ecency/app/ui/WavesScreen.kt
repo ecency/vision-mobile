@@ -23,6 +23,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -761,9 +762,9 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
                     onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.weight(1f),
                     middle = {
                         // RN's poll button (the editor's poll wizard); blue once a poll is attached
-                        QuickTool(UiCopy.POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null, bold = state.poll != null) { pollSheet = true }
+                        QuickTool(AppIcon.CHART_BAR, if (state.poll != null) com.ecency.core.app.WaveComposeCopy.EDIT_POLL else com.ecency.core.app.WaveComposeCopy.ADD_POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null) { pollSheet = true }
                         // RN video-outline: blue and off while a video is attached or on its way
-                        QuickTool(UiCopy.VIDEO, "waveVideoButton", enabled = state.canAddVideo, color = if (state.videoEmbedUrl != null) colors.blueText else if (state.canAddVideo) colors.text else colors.icon) { showVideo = true }
+                        QuickTool(AppIcon.VIDEO, com.ecency.core.app.WaveComposeCopy.ADD_VIDEO, "waveVideoButton", enabled = state.canAddVideo, color = if (state.videoEmbedUrl != null) colors.blueText else null) { showVideo = true }
                     },
                 )
                 Spacer(Modifier.width(8.dp))
@@ -1019,25 +1020,27 @@ internal fun QuickComposeTools(
     trailing: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
 ) {
     Row(modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
-        QuickTool(UiCopy.IMAGE, "${tagPrefix}Attach", enabled = !sending && !attaching, onClick = onImage)
+        QuickTool(AppIcon.IMAGE, UiCopy.ATTACH_IMAGE, "${tagPrefix}Attach", enabled = !sending && !attaching, onClick = onImage)
         middle()
         // RN: dictation with the content buttons, then the AI pair
-        QuickTool(com.ecency.core.app.WaveComposeCopy.DICTATE, "${tagPrefix}Dictate", enabled = !sending, onClick = onDictate)
-        QuickTool(UiCopy.AI_BADGE, "${tagPrefix}AiAssist", enabled = !sending, bold = true, description = com.ecency.core.app.WaveComposeCopy.AI_ASSIST, onClick = onAiAssist)
+        QuickTool(AppIcon.MIC, com.ecency.core.app.WaveComposeCopy.DICTATE, "${tagPrefix}Dictate", enabled = !sending, onClick = onDictate)
+        QuickTool(AppIcon.AI_ASSIST, com.ecency.core.app.WaveComposeCopy.AI_ASSIST, "${tagPrefix}AiAssist", enabled = !sending, onClick = onAiAssist)
         trailing()
     }
 }
 
-/** One text button of [QuickComposeTools]. */
+/**
+ * One button of [QuickComposeTools]: an [icon] as RN's quick post and iOS draw it (owner 11-13), [name] what TalkBack
+ * reads. [color] tints it (an attached poll or video), else the text colour, or the icon colour while it is off.
+ */
 @Composable
-internal fun QuickTool(label: String, tag: String, enabled: Boolean, color: Color? = null, bold: Boolean = false, description: String? = null, onClick: () -> Unit) {
+internal fun QuickTool(icon: AppIcon, name: String, tag: String, enabled: Boolean, color: Color? = null, onClick: () -> Unit) {
     val colors = LocalEcencyColors.current
-    Text(
-        label, color = color ?: colors.text, fontSize = 14.sp, fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-        modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .let { m -> if (description != null) m.semantics { contentDescription = description } else m }
-            .padding(horizontal = 8.dp, vertical = 8.dp).testTag(tag),
-    )
+    Box(
+        Modifier.clip(RoundedCornerShape(8.dp)).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = name }.sizeIn(minWidth = 48.dp, minHeight = 48.dp).testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { Glyph(icon, color ?: if (enabled) colors.text else colors.icon, 24.dp) }
 }
 
 /** RN quick post: dictation ("dictation") or AI assist ("aiAssist"), the editor's sheets over [target]. */

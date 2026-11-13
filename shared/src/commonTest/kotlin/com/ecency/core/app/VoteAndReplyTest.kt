@@ -4,6 +4,7 @@ import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.Fixtures
 import com.ecency.core.api.Fixtures.entry
 import com.ecency.core.api.Sent
+import com.ecency.core.api.ownVote
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.FeedSource
 import com.ecency.core.api.RankedSort
@@ -69,7 +70,7 @@ class VoteAndReplyTest {
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
         assertTrue(feed.current.items.single().votedByMe)
-        assertEquals(LocalVote(10000, pending = false), app.env.localVotes.get(key))
+        assertEquals(LocalVote(10000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
         val op = app.broadcasts().single().tx()["operations"].toString()
         assertEquals("""[["vote",{"voter":"spike-voter","author":"alice","permlink":"root","weight":10000}]]""", op)
         feed.close()
@@ -424,7 +425,7 @@ class VoteAndReplyTest {
         app.env.votes.retry("alice", "root")
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
-        assertEquals(LocalVote(5000, false), app.env.localVotes.get(key))
+        assertEquals(LocalVote(5000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
         // the retry re-sent the very same signed transaction (same signature), not a new one
         assertEquals(failed.single(), app.broadcasts().last().tx())
     }
@@ -438,7 +439,7 @@ class VoteAndReplyTest {
         app.env.votes.vote("alice", "root", 10000)
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
-        assertEquals(LocalVote(10000, false), app.env.localVotes.get(key))
+        assertEquals(LocalVote(10000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
     }
 
     @Test
@@ -687,7 +688,11 @@ class VoteAndReplyTest {
         val json = """{"author":"spike-author","permlink":"p","stats":{"total_votes":4},"observer_vote":{"rshares":0,"percent":0}}"""
         val post = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = "spike-voter")!!
         assertTrue(post.knowsVoteOf("spike-voter"))
-        assertNull(post.voteOf("spike-voter"))
+        // SDK 2.7.0 entryVoteOf: the removed vote itself, not cast
+        val removed = assertNotNull(post.voteOf("spike-voter"))
+        assertTrue(removed.isRemoved)
+        assertFalse(removed.isCast)
+        assertFalse(LocalVotes.view(post, "spike-voter", null).votedByMe, "shown as no vote")
         assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "a vote again is not a new voter")
         // a v2 answer of no vote at all: the vote is new
         val none = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json.replace("{\"rshares\":0,\"percent\":0}", "null")), observer = "spike-voter")!!
@@ -790,5 +795,165 @@ class VoteAndReplyTest {
         testScheduler.advanceUntilIdle()
         assertEquals(false, app.env.localVotes.get(other)?.earlierCounted)
         assertNull(app.env.localVotes.get(other)?.earlierRshares)
+    }
+
+    @Test
+    fun aVoteMadeHereStaysCountedThroughUnvotesAndRevotes() = runTest {
+        // #3682 acceptance: a read from 0 that does not list the account; hivemind keeps a removed vote counted,
+        // so vote, unvote, revote, unvote, flag all show 1 (the chain: 1, 1, 1, 1, 1)
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        val json = """{"author":"alice","permlink":"root","stats":{"total_votes":0},"active_votes":[]}"""
+        val post = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = TestApp.USER)!!
+        // each one while it is on its way and once it landed
+        val counts = listOf(10000, 0, 5000, 0, -10000).flatMap { weight ->
+            app.env.votes.vote("alice", "root", weight)
+            val sending = LocalVotes.view(post, TestApp.USER, app.env.localVotes.get(key)).votes
+            testScheduler.advanceUntilIdle()
+            listOf(sending, LocalVotes.view(post, TestApp.USER, app.env.localVotes.get(key)).votes)
+        }
+        assertEquals(List(10) { 1 }, counts)
+    }
+
+    @Test
+    fun aRemovedVoteRowIsReportedAsRemovedNotAsNoVote() = runTest {
+        // #3682 acceptance: database_api keeps a removed vote as a row with vote_percent 0; hivemind counts it
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "database_api.list_votes" -> FakeTransport.result(req, """{"votes":[{"voter":"${TestApp.USER}","author":"alice","permlink":"root","rshares":0,"vote_percent":0,"weight":0,"last_update":"2026-10-01T10:00:00"}]}""")
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        val vote = assertNotNull(app.env.api.hive.ownVote("alice", "root", TestApp.USER), "a removed vote, not no vote")
+        assertFalse(vote.isCast)
+        assertEquals(0, vote.percent)
+    }
+
+    @Test
+    fun aVoteAfterALookedUpRemovedVoteIsNotCountedAgain() = runTest {
+        // #3682 acceptance: a read that cannot tell (1000 listed voters without the account, 1500 counted); the chain
+        // has the account's removed vote, which hivemind counts, so a new vote here keeps the count
+        val crowd = (0 until 1000).map { "spike-v" + it.toString().padStart(4, '0') }
+        val capped = entry("alice", "root", votes = crowd).replace("\"total_votes\":1000", "\"total_votes\":1500")
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "condenser_api.broadcast_transaction" -> FakeTransport.result(req, "null")
+                "bridge.get_post" -> FakeTransport.result(req, capped)
+                "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":$capped}""")
+                "database_api.list_votes" -> FakeTransport.result(req, """{"votes":[{"voter":"${TestApp.USER}","author":"alice","permlink":"root","rshares":0,"vote_percent":0,"weight":0,"last_update":"2026-10-01T10:00:00"}]}""")
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1500, post.current.card?.votes)
+        assertEquals(false, post.current.card?.votedByMe)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+        assertEquals(1500, post.current.card?.votes, "the removed vote was already counted")
+        post.close()
+    }
+
+    @Test
+    fun aReadFromAfterTheVoteSettledHasItInItsCountWhenItCannotNameTheVoter() = runTest {
+        // review of #3683: after a vote and an unvote here, a refreshed read that counts the removed vote but cannot name
+        // its voter (a Waves feed row, a v1 list cut at 1000) must not get the account added again
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        fun read(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total}}"""),
+            observer = TestApp.USER,
+        )!!
+        val before = read(0)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, LocalVotes.view(before, TestApp.USER, app.env.localVotes.get(key)).votes, "the read from before has it added")
+        // a read right after the unvote may come before the indexer has it: the vote is still added
+        val early = read(1)
+        app.env.localVotes.retireConfirmed(listOf(early), TestApp.USER)
+        assertEquals(2, LocalVotes.view(early, TestApp.USER, app.env.localVotes.get(key)).votes, "within the hold the read is not trusted yet")
+        // shown 190 s on, a read may be a cached one fetched before 2 minutes, from a node still behind: not trusted
+        testScheduler.advanceTimeBy(190_000)
+        app.env.localVotes.retireConfirmed(listOf(early), TestApp.USER)
+        assertEquals(2, LocalVotes.view(early, TestApp.USER, app.env.localVotes.get(key)).votes, "a cached read may be older")
+        // a read shown from then on has it: nothing is added to it, nor to any read counting as many (counts only grow),
+        // also to a vote cast again later; an older read with fewer still gets the account added
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000 - 190_000)
+        val fresh = read(1)
+        app.env.localVotes.retireConfirmed(listOf(fresh), TestApp.USER)
+        assertEquals(1, LocalVotes.view(fresh, TestApp.USER, app.env.localVotes.get(key)).votes)
+        assertEquals(2, LocalVotes.view(read(2), TestApp.USER, app.env.localVotes.get(key)).votes, "another voter since")
+        assertEquals(1, LocalVotes.view(before, TestApp.USER, app.env.localVotes.get(key)).votes, "the read from before keeps it added")
+        // a later read with more keeps the lowest count known to have the account
+        app.env.localVotes.retireConfirmed(listOf(read(3)), TestApp.USER)
+        assertEquals(2, LocalVotes.view(read(2), TestApp.USER, app.env.localVotes.get(key)).votes, "1 still has it, so 2 does")
+        app.env.votes.vote("alice", "root", 5000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, LocalVotes.view(fresh, TestApp.USER, app.env.localVotes.get(key)).votes, "a vote again")
+    }
+
+    @Test
+    fun aRefreshedCappedReadThatCountsTheRemovedVoteGetsNothingAdded() = runTest {
+        // CodeRabbit's sequence on #3683: a v1 list cut at 1000 without the account, 1500 counted; vote and unvote here;
+        // the refreshed read counts 1501 and still cannot name the voter
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        val crowd = (0 until 1000).joinToString(",") { """{"voter":"spike-v${it.toString().padStart(4, '0')}","rshares":1,"percent":100}""" }
+        fun capped(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total},"active_votes":[$crowd]}"""),
+            observer = TestApp.USER,
+        )!!
+        val old = capped(1500)
+        assertFalse(old.knowsVoteOf(TestApp.USER))
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        val refreshed = capped(1501)
+        app.env.localVotes.retireConfirmed(listOf(refreshed), TestApp.USER)
+        assertEquals(1501, LocalVotes.view(refreshed, TestApp.USER, app.env.localVotes.get(key)).votes)
+        assertEquals(1501, LocalVotes.view(old, TestApp.USER, app.env.localVotes.get(key)).votes, "the old read keeps it added")
+    }
+
+    @Test
+    fun aCountLearnedWhileAVoteIsSendingIsKept() = runTest {
+        // review of #3683: a refresh while a later vote is on its way sets the settled count; neither the vote's landing
+        // nor its rollback may put back the value from before it was sent
+        var fail = false
+        var gate = CompletableDeferred<Unit>()
+        var held = false
+        val app = TestApp(this, handler = handler {
+            if (held) gate.await()
+            if (fail) HttpResult(503, "") else FakeTransport.result(it, "null")
+        })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        fun read(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total}}"""),
+            observer = TestApp.USER,
+        )!!
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        for (failing in listOf(false, true)) {
+            fail = failing
+            gate = CompletableDeferred()
+            held = true
+            app.env.votes.vote("alice", "root", if (failing) 2000 else 5000)
+            testScheduler.runCurrent()
+            app.env.localVotes.retireConfirmed(listOf(read(if (failing) 2 else 3)), TestApp.USER)
+            held = false
+            gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+            assertEquals(if (failing) 2 else 3, app.env.localVotes.get(key)?.settledCount, if (failing) "rolled back" else "landed")
+        }
     }
 }

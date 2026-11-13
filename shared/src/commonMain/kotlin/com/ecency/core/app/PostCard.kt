@@ -128,6 +128,17 @@ data class LocalVote(
     val earlierCounted: Boolean = false,
     /** The rshares of the vote read from the chain ([fromChain]) or of the one this vote replaced: in the post's payout. */
     val earlierRshares: Long? = null,
+    /**
+     * When the first vote made here landed (this one or one it replaced), on the monotonic clock; null before. Hivemind
+     * counts the account from then on, also after an unvote, so a read from before it still gets the account added
+     * (#3682), until a read from [LocalVotes.SETTLE_MILLIS] on gives [settledCount].
+     */
+    val landedAt: Long? = null,
+    /**
+     * The lowest count of a read from after the vote made here settled ([LocalVotes.SETTLE_MILLIS]): it has the account,
+     * and so has any read counting at least as many (hivemind's count only grows). An older read with fewer keeps it added.
+     */
+    val settledCount: Int? = null,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
@@ -147,7 +158,10 @@ data class VoteView(val votedByMe: Boolean, val downvotedByMe: Boolean, val vote
  * Votes made on this device, keyed by post. Feeds and posts combine them with what the API
  * returned, so an optimistic vote shows everywhere at once and a rollback undoes it everywhere.
  */
-class LocalVotes {
+class LocalVotes(
+    /** The device's monotonic clock, for [SETTLE_MILLIS]. */
+    private val monotonicMillis: () -> Long = { 0L },
+) {
     private val votes = MutableStateFlow<Map<PostKey, LocalVote>>(emptyMap())
     val state: StateFlow<Map<PostKey, LocalVote>> = votes.asStateFlow()
 
@@ -168,21 +182,40 @@ class LocalVotes {
      */
     fun retireConfirmed(posts: Collection<Post>, username: String?) {
         if (username == null) return
+        val now = monotonicMillis()
         votes.update { map ->
             var out = map
             for (post in posts) {
                 val local = map[post.key] ?: continue
-                val estimate = local.estimate ?: continue
+                var next = local
                 // a read that does not know the account's vote confirms nothing
-                if (local.pending || !post.knowsVoteOf(username)) continue
-                if (!sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
-                out = out + (post.key to local.copy(estimate = null))
+                val estimate = local.estimate
+                if (estimate != null && !local.pending && post.knowsVoteOf(username) && sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) {
+                    next = next.copy(estimate = null)
+                }
+                // a read from SETTLE_MILLIS after the vote made here first landed: its count has the account, so has any
+                // read counting at least as many (review of #3683: a refreshed count is never added to again); the lowest
+                // such count covers the most reads
+                val landed = local.landedAt
+                if (landed != null && now - landed >= SETTLE_MILLIS) {
+                    val count = post.stats.totalVotes
+                    if (local.settledCount == null || count < local.settledCount) next = next.copy(settledCount = count)
+                }
+                if (next != local) out = out + (post.key to next)
             }
             out
         }
     }
 
     companion object {
+        /**
+         * How long after a vote made here first landed a read shown then is trusted to have the account in its count. It
+         * judges a read by when it is shown, so it covers when it may have been fetched too: a read fetched 2 minutes on
+         * has it (a node may lag the 90 s its health allows, the indexer a little more; the SDK holds a vote 60 s), and
+         * one shown may be up to the post cache's 60 s old (`PostRepository`) plus a read's 20 s budget.
+         */
+        const val SETTLE_MILLIS = 120_000L + 60_000L + 20_000L
+
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {
             // the entry's own answer for the account (SDK entryVoteOf); unknown reads as no vote shown
@@ -197,8 +230,10 @@ class LocalVotes {
             // (a weightless or removed vote is no vote shown but counted), or a replaced vote read from the chain; a vote
             // read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one). Hivemind keeps a
             // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
-            val inCount = server != null || post.listedVoter == username || local.earlierCounted
-            val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
+            val inCount = server != null || post.listedVoter == username || local.earlierCounted ||
+                local.settledCount?.let { count >= it } == true
+            // a vote made here that landed stays in hivemind's count through an unvote ([LocalVote.landedAt])
+            val adjusted = count + if (!local.fromChain && !inCount && (hasVote || local.landedAt != null)) 1 else 0
             // a read that does not know the account's vote: the replaced vote read from the chain is in its payout, unless
             // the read lists the account with no weight (that vote's share is gone, or never was)
             val serverRshares = server?.rshares ?: local.earlierRshares.takeIf { !post.knowsVoteOf(username) && post.listedVoter != username } ?: 0

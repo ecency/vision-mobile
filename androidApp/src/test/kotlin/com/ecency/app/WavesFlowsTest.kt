@@ -1,5 +1,6 @@
 package com.ecency.app
 
+import androidx.compose.ui.semantics.getOrNull
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -350,6 +351,12 @@ class WavesFlowsTest {
         compose.onNodeWithTag("waveText").performTextInput("Hi")
         waitFor("waveShortHint")
         compose.onNodeWithTag("wavePublish").assertIsEnabled()
+        // icons, as RN's quick post and iOS (owner 11-13), named for TalkBack
+        for ((tag, name) in listOf(
+            "waveAttach" to com.ecency.core.app.UiCopy.ATTACH_IMAGE, "wavePoll" to com.ecency.core.app.WaveComposeCopy.ADD_POLL,
+            "waveVideoButton" to com.ecency.core.app.WaveComposeCopy.ADD_VIDEO, "waveDictate" to com.ecency.core.app.WaveComposeCopy.DICTATE,
+            "waveAiAssist" to com.ecency.core.app.WaveComposeCopy.AI_ASSIST,
+        )) assertIconNamed(tag, name)
         // the text fills the sheet down to the hint and the toolbar: no empty stripe above the toolbar
         val dp = compose.density.density
         val textBox = compose.onNodeWithTag("waveText").fetchSemanticsNode().boundsInRoot
@@ -623,4 +630,12 @@ class WavesFlowsTest {
         val tx = node.broadcasts().single()
         assertTrue(tx, "A wave with an old upload\\n\\n ![]($gallery)" in tx)
     }
+
+    /** An icon button: it draws no text, and TalkBack reads [name] (owner 11-13: icons, the words as labels). */
+    private fun assertIconNamed(tag: String, name: String) {
+        val node = compose.onNodeWithTag(tag).fetchSemanticsNode()
+        assertTrue("$tag draws no text: ${node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)}", node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).isNullOrEmpty())
+        assertEquals(tag, listOf(name), node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
+    }
+
 }

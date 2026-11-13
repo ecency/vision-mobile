@@ -29,6 +29,9 @@ data class ObserverVote(val rshares: Long?, val percent: Int?) {
     /** SDK isCastVote: a non-zero percent, or without one non-zero rshares. Percent 0 is a removed vote. */
     val isCast: Boolean get() = if (percent != null) percent != 0 else rshares != null && rshares != 0L
 
+    /** SDK isRemovedVote: percent 0, a vote taken back. Not a vote shown, but hivemind still counts the account (#3682). */
+    val isRemoved: Boolean get() = percent == 0
+
     /** SDK voteDirection: 1 up, -1 down, 0 not cast. */
     val direction: Int get() = when {
         !isCast -> 0
@@ -134,8 +137,11 @@ data class Post(
     /** SDK entryVoteOf: true when this entry says whether [username] voted ([voteOf] is then an answer, not a guess). */
     fun knowsVoteOf(username: String?): Boolean = !username.isNullOrEmpty() && observerVoteFor == username
 
-    /** SDK entryVoteOf: [username]'s cast vote; null when not voted, or when unknown ([knowsVoteOf] false). */
-    fun voteOf(username: String?): ObserverVote? = if (knowsVoteOf(username)) observerVote?.takeIf { it.isCast } else null
+    /**
+     * SDK entryVoteOf: [username]'s vote, cast or removed ([ObserverVote.isRemoved]: no vote shown, still counted); null
+     * when not voted, or when unknown ([knowsVoteOf] false).
+     */
+    fun voteOf(username: String?): ObserverVote? = if (knowsVoteOf(username)) observerVote?.takeIf { it.isCast || it.isRemoved } else null
 
     companion object {
         /**
@@ -244,14 +250,14 @@ data class Post(
             }
         }
 
-        /** SDK toObserverVote: a vote-like object as a cast vote, else null (none, or a zero vote). */
+        /** SDK toObserverVote: a vote-like object as a cast or a removed vote, else null (none, or a zero vote without a percent). */
         private fun observerVote(value: JsonElement?): ObserverVote? {
             val v = value as? JsonObject ?: return null
             val vote = ObserverVote(
                 rshares = if (v["rshares"].isAbsent()) null else jsLong(v["rshares"]),
                 percent = if (v["percent"].isAbsent()) null else jsLong(v["percent"]).toInt(),
             )
-            return vote.takeIf { it.isCast }
+            return vote.takeIf { it.isCast || it.isRemoved }
         }
 
         private fun JsonElement?.isAbsent() = this == null || this is JsonNull
