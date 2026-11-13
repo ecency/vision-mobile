@@ -703,7 +703,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
                         AppScreen.QrScan -> QrScanScreen(env, entry, host, onClose = { navigator.pop() }, onOpen = { navigator.open(it, loggedIn) })
                         // ---- editor and publishing (EditorScreens.kt) ----
                         is AppScreen.Editor, is AppScreen.Drafts, AppScreen.AiImageGenerator ->
-                            EditorAndDraftsScreen(screen, env, entry, ScreenNav(routes::push, { navigator.pop() }, { navigator.push(AppScreen.Login) }))
+                            EditorAndDraftsScreen(screen, env, entry, ScreenNav(routes::push, { navigator.pop() }, { navigator.push(AppScreen.Login) }), bodyActions)
                         // ---- wallet (WalletScreens.kt, TransferScreens.kt) ----
                         is AppScreen.AssetDetails -> Guarded({ entry.get("asset") { env.assetDetailsModel(screen.symbol) } }) { model ->
                             AssetDetailsScreen(env, host, model, entry.get("list") { LazyListState() }, onBack = { navigator.pop() }, push = routes::push)

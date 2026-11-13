@@ -695,7 +695,12 @@ struct EditorScreen: View {
                         if !state.tags.isEmpty { Text(state.tags.map { "#\($0)" }.joined(separator: "  ")).font(.footnote).foregroundStyle(theme.accentText) }
                     }
                     if let blocks = state.preview {
-                        PostBodyView(blocks: blocks, contentWidth: max(geo.size.width - 32, 100))
+                        // a mention, link or image opens as in a published post (RN preview used the same PostBody)
+                        PostBodyView(blocks: blocks, contentWidth: max(geo.size.width - 32, 100), actions: PostActions(
+                            onLink: { app.handleBodyLink($0) },
+                            onImage: { url, all in app.sheet = .gallery(all.isEmpty ? [url] : all, all.firstIndex(of: url) ?? 0) },
+                            showImages: app.notifications.state.showImages
+                        ))
                     } else {
                         ProgressView().frame(maxWidth: .infinity).padding(.top, 24)
                     }
