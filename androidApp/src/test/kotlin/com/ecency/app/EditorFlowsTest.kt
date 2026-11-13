@@ -944,19 +944,50 @@ class EditorFlowsTest {
         val third = text.indexOf("Line 3 ")
         val view = node("editorScroll").boundsInRoot
         assertTrue("line 3 starts out of view", lineTop(third) < view.top)
-        // a handle dragged past the top: the EditText asks to show that point (TextView.bringPointIntoView, as its
-        // pre-draw does for the dragged end), and the column follows it
-        compose.runOnUiThread { bodyView().bringPointIntoView(third) }
-        settle()
+        // a dragged handle moves the selection (the model has it), then the field's pre-draw shows the dragged point
+        // (TextView.onPreDraw: the start while the start handle is dragged, else the end); the column follows it
+        fun drag(start: Int, end: Int, shown: Int) {
+            compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(start, end))
+            settle()
+            compose.runOnUiThread { bodyView().viewTreeObserver.dispatchOnPreDraw(); bodyView().bringPointIntoView(shown) }
+            settle()
+            assertEquals(start, model().current.selection.start)
+            assertEquals(end, model().current.selection.end)
+        }
+        // the start handle dragged up to line 3
+        drag(third, text.length, shown = third)
         val top = lineTop(third)
         assertTrue("line 3 is in view: $top in ${view.top}..${view.bottom}", top >= view.top - 1f && top < view.bottom)
-        // and a handle dragged down to line 58: the column follows it
+        // and the end handle dragged down to line 58
         val fiftyEighth = text.indexOf("Line 58 ")
         assertTrue("line 58 is out of view", lineTop(fiftyEighth) > view.bottom)
-        compose.runOnUiThread { bodyView().bringPointIntoView(fiftyEighth) }
-        settle()
+        drag(third, fiftyEighth, shown = fiftyEighth)
         val bottom = lineTop(fiftyEighth)
         assertTrue("line 58 is in view: $bottom in ${view.top}..${view.bottom}", bottom >= view.top && bottom < view.bottom)
+    }
+
+    /**
+     * A cleared selection (an accessibility service's set-selection with no arguments) reports -1 for both ends: the
+     * field keeps working and the model keeps its last selection.
+     */
+    @Test
+    fun aClearedSelectionIsIgnored() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorBody").performClick()
+        compose.onNodeWithTag("editorBody").performTextInput("Some words")
+        settle()
+        compose.runOnUiThread { android.text.Selection.removeSelection(bodyView().text) }
+        settle()
+        assertEquals("Some words", model().current.body)
+        assertEquals(10, model().current.selection.start)
+        assertEquals(10, model().current.selection.end)
+        // an edit while it is cleared still reaches the model, its caret at the end
+        compose.runOnUiThread { bodyView().text.append("!") }
+        settle()
+        assertEquals("Some words!", model().current.body)
+        assertEquals(11, model().current.selection.start)
+        assertEquals(11, model().current.selection.end)
     }
 
     /** A saved draft opens at its title: its caret, restored at the end, is no reason to scroll (only a focused body follows it). */

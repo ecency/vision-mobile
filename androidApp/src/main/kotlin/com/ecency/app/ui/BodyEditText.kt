@@ -54,7 +54,8 @@ internal class BodyEditTextView(context: Context) : EditText(context) {
 
     override fun onSelectionChanged(selStart: Int, selEnd: Int) {
         super.onSelectionChanged(selStart, selEnd)
-        onSelection?.invoke(selStart, selEnd)
+        // a cleared selection (-1, an accessibility service's set-selection without arguments) is no position
+        if (selStart >= 0 && selEnd >= 0) onSelection?.invoke(selStart, selEnd)
     }
 }
 
@@ -110,6 +111,7 @@ internal fun BodyEditText(
                 setPadding(0, 0, 0, 0)
                 gravity = Gravity.TOP or Gravity.START
                 textDirection = View.TEXT_DIRECTION_FIRST_STRONG
+                // sentences start capitalised, as RN's body TextInput (autoCapitalize default) and iOS's UITextView
                 inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
                 isSingleLine = false
                 setHorizontallyScrolling(false)
@@ -125,10 +127,14 @@ internal fun BodyEditText(
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
                     override fun afterTextChanged(s: Editable?) {
                         val now = s?.toString().orEmpty()
+                        // an edit while the selection is cleared (-1) leaves the caret at the end
+                        val cleared = selectionStart < 0 || selectionEnd < 0
+                        val start = if (cleared) now.length else minOf(selectionStart, selectionEnd)
+                        val end = if (cleared) now.length else maxOf(selectionStart, selectionEnd)
                         shown = now
-                        shownSelection = TextRange(selectionStart, selectionEnd)
+                        shownSelection = TextRange(start, end)
                         if (applying) return
-                        changed(now, TextSelection(minOf(selectionStart, selectionEnd), maxOf(selectionStart, selectionEnd)))
+                        changed(now, TextSelection(start, end))
                     }
                 })
                 onSelection = { start, end ->
