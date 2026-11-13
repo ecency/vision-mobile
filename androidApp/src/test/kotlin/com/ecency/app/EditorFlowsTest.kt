@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
 import coil3.ImageLoader
@@ -1069,6 +1070,24 @@ class EditorFlowsTest {
         waitUntil { model().current.preview != null }
         compose.onNodeWithText("world", substring = true).assertExists()
         assertFalse(exists("editorToolbar"))
+    }
+
+    /**
+     * Tester report: a link in the preview opens as in a published post (RN PostBody), not nothing. Mention chips
+     * use the same onLink (PostBodyTest.mentionAndTagChipsRouteToProfileAndTag); this renderer draws none.
+     */
+    @Test
+    fun linksInThePreviewOpenAsInAPost() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorBody").performTextInput("[Example page](https://example.com/page)")
+        compose.onNodeWithTag("previewToggle").performClick()
+        waitFor("editorPreview")
+        waitUntil { model().current.preview != null }
+        // a tap on the link's first letters: the link is a whole paragraph that starts at the left edge
+        compose.onNodeWithText("Example page", substring = true).performTouchInput { click(androidx.compose.ui.geometry.Offset(12f, centerY)) }
+        // an external link asks what to do, as in a post
+        waitFor("linkSheet")
     }
 
     @Test

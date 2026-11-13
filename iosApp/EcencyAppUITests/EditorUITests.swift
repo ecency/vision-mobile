@@ -105,6 +105,20 @@ final class EditorUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter().wait(for: [wait], timeout: 10), .completed, "field is \(String(describing: field.value))")
     }
 
+    /// Tester report: a mention in the preview opens the profile, as a body mention does in a published post (RN PostBody).
+    func testAMentionInThePreviewOpensTheProfile() {
+        let app = launch(["-openScreen", "editor"])
+        write(app, title: "Mentions", body: "@ecency")
+        app.buttons["preview-toggle"].tap()
+        XCTAssertTrue(element(app, "editor-preview").waitForExistence(timeout: 5))
+        let paragraph = element(app, "editor-preview").descendants(matching: .any).matching(identifier: "paragraph").firstMatch
+        XCTAssertTrue(paragraph.waitForExistence(timeout: 10), app.debugDescription)
+        // the mention is the paragraph's first word
+        paragraph.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 16, dy: 10)).tap()
+        XCTAssertTrue(element(app, "profile").waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertTrue(app.navigationBars["@ecency"].exists, "the mentioned account's profile")
+    }
+
     func testWriteFormatPreviewAndAFailedPublishKeepsEverything() {
         let app = launch(["-openScreen", "editor"])
         write(app, title: "Native post", body: "hello")

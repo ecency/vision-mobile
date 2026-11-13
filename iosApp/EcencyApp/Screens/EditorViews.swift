@@ -143,7 +143,7 @@ struct BodyTextView: UIViewRepresentable {
                 self?.keyboardFrame(note)
             })
             observers.append(center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] _ in
-                self?.keyboardUp = false
+                self?.keyboardWent()
             })
         }
 
@@ -156,9 +156,19 @@ struct BodyTextView: UIViewRepresentable {
             let overlap = BodyTextView.keyboardOverlap(window.convert(end, from: space), in: window.bounds)
             let up = overlap > BodyTextView.keyboardMinimum
             let cameUp = up && !keyboardUp
+            if !up, keyboardUp { keyboardWent() }
             keyboardUp = up
             // the keyboard came up over the focused body: the body moves to the top once the editor took its room
             if cameUp { reveal(bodyToTop: true) }
+        }
+
+        /// The keyboard went down, also while the body keeps the focus (iOS 27 hides and shows it again as text is
+        /// typed into a just focused body): the editor's scroll view goes back to the title, so the keyboard that comes
+        /// up next moves the body to the top again.
+        private func keyboardWent() {
+            keyboardUp = false
+            movedUp = false
+            movedTo = nil
         }
 
         func textChanged() {
@@ -695,7 +705,12 @@ struct EditorScreen: View {
                         if !state.tags.isEmpty { Text(state.tags.map { "#\($0)" }.joined(separator: "  ")).font(.footnote).foregroundStyle(theme.accentText) }
                     }
                     if let blocks = state.preview {
-                        PostBodyView(blocks: blocks, contentWidth: max(geo.size.width - 32, 100))
+                        // a mention, link or image opens as in a published post (RN preview used the same PostBody)
+                        PostBodyView(blocks: blocks, contentWidth: max(geo.size.width - 32, 100), actions: PostActions(
+                            onLink: { app.handleBodyLink($0) },
+                            onImage: { url, all in app.sheet = .gallery(all.isEmpty ? [url] : all, all.firstIndex(of: url) ?? 0) },
+                            showImages: app.notifications.state.showImages
+                        ))
                     } else {
                         ProgressView().frame(maxWidth: .infinity).padding(.top, 24)
                     }

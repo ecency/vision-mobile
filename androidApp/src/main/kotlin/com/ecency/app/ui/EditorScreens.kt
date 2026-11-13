@@ -147,12 +147,12 @@ import com.ecency.core.app.UiCopy
 
 /** The editor and the drafts screen: one entry point for the root's screen switch. */
 @Composable
-fun EditorAndDraftsScreen(screen: AppScreen, env: AppEnvironment, entry: StackEntry, nav: ScreenNav) {
+fun EditorAndDraftsScreen(screen: AppScreen, env: AppEnvironment, entry: StackEntry, nav: ScreenNav, bodyActions: PostActions) {
     val colors = LocalEcencyColors.current
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding()) {
         when (screen) {
             is AppScreen.Editor -> Guarded({ entry.get("editor") { env.editorModel(screen.args) } }) { model ->
-                EditorScreen(env, model, entry, nav)
+                EditorScreen(env, model, entry, nav, bodyActions)
             }
             is AppScreen.Drafts -> Guarded({ entry.get("drafts") { env.draftsModel(screen.tab) } }) { model -> DraftsScreen(env, model, nav) }
             // RN aiImageGenerator opened on its own: the same generator, without "Insert into post"
@@ -291,7 +291,7 @@ private fun ToolButton(label: String, tag: String, description: String, active: 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav: ScreenNav) {
+fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav: ScreenNav, bodyActions: PostActions) {
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
     val context = LocalContext.current
@@ -496,7 +496,7 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                     if (!state.isReply) Text(state.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(vertical = 8.dp))
                     if (!state.isReply && state.tags.isNotEmpty()) Text(state.tags.joinToString("  ") { "#$it" }, color = colors.blueText, fontSize = 13.sp, modifier = Modifier.padding(bottom = 8.dp))
                     val blocks = state.preview
-                    if (blocks == null) LoadingBlock(Modifier.padding(top = 24.dp)) else PostBody(blocks, bodyWidth, PostActions())
+                    if (blocks == null) LoadingBlock(Modifier.padding(top = 24.dp)) else PostBody(blocks, bodyWidth, bodyActions)
                     state.poll?.takeIf { it.title.isNotEmpty() }?.let { poll ->
                         Column(Modifier.padding(vertical = 12.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(colors.lightBackground).padding(12.dp).testTag("pollPreview")) {
                             Text(poll.title, fontWeight = FontWeight.Bold, color = colors.text)
