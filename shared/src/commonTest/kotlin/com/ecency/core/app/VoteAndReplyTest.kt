@@ -70,7 +70,7 @@ class VoteAndReplyTest {
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
         assertTrue(feed.current.items.single().votedByMe)
-        assertEquals(LocalVote(10000, pending = false, countedHere = true), app.env.localVotes.get(key))
+        assertEquals(LocalVote(10000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
         val op = app.broadcasts().single().tx()["operations"].toString()
         assertEquals("""[["vote",{"voter":"spike-voter","author":"alice","permlink":"root","weight":10000}]]""", op)
         feed.close()
@@ -425,7 +425,7 @@ class VoteAndReplyTest {
         app.env.votes.retry("alice", "root")
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
-        assertEquals(LocalVote(5000, pending = false, countedHere = true), app.env.localVotes.get(key))
+        assertEquals(LocalVote(5000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
         // the retry re-sent the very same signed transaction (same signature), not a new one
         assertEquals(failed.single(), app.broadcasts().last().tx())
     }
@@ -439,7 +439,7 @@ class VoteAndReplyTest {
         app.env.votes.vote("alice", "root", 10000)
         testScheduler.advanceUntilIdle()
         assertNull(app.env.votes.current.statuses[key])
-        assertEquals(LocalVote(10000, pending = false, countedHere = true), app.env.localVotes.get(key))
+        assertEquals(LocalVote(10000, pending = false, landedAt = 0L), app.env.localVotes.get(key))
     }
 
     @Test
@@ -855,5 +855,67 @@ class VoteAndReplyTest {
         assertEquals(true, post.current.card?.votedByMe)
         assertEquals(1500, post.current.card?.votes, "the removed vote was already counted")
         post.close()
+    }
+
+    @Test
+    fun aReadFromAfterTheVoteSettledHasItInItsCountWhenItCannotNameTheVoter() = runTest {
+        // review of #3683: after a vote and an unvote here, a refreshed read that counts the removed vote but cannot name
+        // its voter (a Waves feed row, a v1 list cut at 1000) must not get the account added again
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        fun read(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total}}"""),
+            observer = TestApp.USER,
+        )!!
+        val before = read(0)
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, LocalVotes.view(before, TestApp.USER, app.env.localVotes.get(key)).votes, "the read from before has it added")
+        // a read right after the unvote may come before the indexer has it: the vote is still added
+        val early = read(1)
+        app.env.localVotes.retireConfirmed(listOf(early), TestApp.USER)
+        assertEquals(2, LocalVotes.view(early, TestApp.USER, app.env.localVotes.get(key)).votes, "within the hold the read is not trusted yet")
+        // a read from a minute on has it: nothing is added to it, nor to any read counting as many (counts only grow),
+        // also to a vote cast again later; an older read with fewer still gets the account added
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        val fresh = read(1)
+        app.env.localVotes.retireConfirmed(listOf(fresh), TestApp.USER)
+        assertEquals(1, LocalVotes.view(fresh, TestApp.USER, app.env.localVotes.get(key)).votes)
+        assertEquals(2, LocalVotes.view(read(2), TestApp.USER, app.env.localVotes.get(key)).votes, "another voter since")
+        assertEquals(1, LocalVotes.view(before, TestApp.USER, app.env.localVotes.get(key)).votes, "the read from before keeps it added")
+        // a later read with more keeps the lowest count known to have the account
+        app.env.localVotes.retireConfirmed(listOf(read(3)), TestApp.USER)
+        assertEquals(2, LocalVotes.view(read(2), TestApp.USER, app.env.localVotes.get(key)).votes, "1 still has it, so 2 does")
+        app.env.votes.vote("alice", "root", 5000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, LocalVotes.view(fresh, TestApp.USER, app.env.localVotes.get(key)).votes, "a vote again")
+    }
+
+    @Test
+    fun aRefreshedCappedReadThatCountsTheRemovedVoteGetsNothingAdded() = runTest {
+        // CodeRabbit's sequence on #3683: a v1 list cut at 1000 without the account, 1500 counted; vote and unvote here;
+        // the refreshed read counts 1501 and still cannot name the voter
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        app.monotonicClock = { testScheduler.currentTime }
+        val crowd = (0 until 1000).joinToString(",") { """{"voter":"spike-v${it.toString().padStart(4, '0')}","rshares":1,"percent":100}""" }
+        fun capped(total: Int) = com.ecency.core.api.model.Post.fromJson(
+            kotlinx.serialization.json.Json.parseToJsonElement("""{"author":"alice","permlink":"root","stats":{"total_votes":$total},"active_votes":[$crowd]}"""),
+            observer = TestApp.USER,
+        )!!
+        val old = capped(1500)
+        assertFalse(old.knowsVoteOf(TestApp.USER))
+        app.env.votes.vote("alice", "root", 10000)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(LocalVotes.SETTLE_MILLIS + 1_000)
+        val refreshed = capped(1501)
+        app.env.localVotes.retireConfirmed(listOf(refreshed), TestApp.USER)
+        assertEquals(1501, LocalVotes.view(refreshed, TestApp.USER, app.env.localVotes.get(key)).votes)
+        assertEquals(1501, LocalVotes.view(old, TestApp.USER, app.env.localVotes.get(key)).votes, "the old read keeps it added")
     }
 }

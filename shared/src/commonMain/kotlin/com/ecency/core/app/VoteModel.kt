@@ -50,12 +50,14 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
         // through later changes and an unvote; one made here may not be in a card's older read yet
         val earlierCounted = previous?.let { it.fromChain || it.earlierCounted } == true
         // a vote made here that landed is counted on chain from then on (an unvote lands only over a vote): an unvote or
-        // another vote does not take it off
-        val countedHere = previous?.countedHere == true
+        // another vote does not take it off. The first landing and the count of a read known to have it are about the
+        // account, not this vote: carried
+        val landedAt = previous?.landedAt
+        val settledCount = previous?.settledCount
         // the share of the post's payout a read without the account's vote still holds: the vote read from the chain,
         // carried through later changes; a vote made here may not be in a saved read (a wave row), so it adds none
         val earlierRshares = previous?.earlierRshares
-        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares, countedHere = countedHere))
+        env.localVotes.set(key, LocalVote(weight, pending = true, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares, landedAt = landedAt, settledCount = settledCount))
         update(key, VoteStatus(key, weight, inFlight = true, error = null))
         val session = generation
         scope.launch {
@@ -79,7 +81,9 @@ class VoteModel internal constructor(private val env: AppEnvironment) : StateMod
                 if (session != generation) return@launch
                 env.localVotes.set(
                     key,
-                    LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares, countedHere = true),
+                    LocalVote(weight, pending = false, estimate = estimate, earlierCounted = earlierCounted, earlierRshares = earlierRshares,
+                        landedAt = landedAt ?: env.security.monotonicMillis(), settledCount = settledCount,
+                    ),
                 )
                 env.api.posts.invalidate(key)
                 setState { VoteState(it.statuses - key) }
