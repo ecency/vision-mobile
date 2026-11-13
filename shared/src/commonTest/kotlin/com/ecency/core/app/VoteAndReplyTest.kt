@@ -1,6 +1,7 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.FakeTransport
+import com.ecency.core.api.Fixtures
 import com.ecency.core.api.Fixtures.entry
 import com.ecency.core.api.Sent
 import com.ecency.core.api.model.PostKey
@@ -77,7 +78,8 @@ class VoteAndReplyTest {
 
     /**
      * Live test: a vote of an account with little HP has no payout weight, so the bridge lists it with rshares 0, the
-     * same as a removed vote. The post screen asks get_active_votes for that post alone and shows the vote it holds.
+     * same as a removed vote. The post screen asks the chain for that account's vote alone (database_api.list_votes)
+     * and shows the vote it holds.
      */
     @Test
     fun aVoteWithoutPayoutWeightShowsAsVotedOnThePost() = runTest {
@@ -88,9 +90,9 @@ class VoteAndReplyTest {
                 when (req.method) {
                     "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER), voteRshares = zero))
                     "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER), voteRshares = zero)}}""")
-                    "condenser_api.get_active_votes" -> {
+                    "database_api.list_votes" -> {
                         asked += req.params.toString()
-                        FakeTransport.result(req, """[{"voter":"${TestApp.USER}","weight":0,"rshares":0,"percent":$percent,"reputation":0,"time":"2026-10-01T10:00:00"}]""")
+                        listVotes(req, mapOf(TestApp.USER to percent))
                     }
                     else -> TestApp.chain(req) ?: HttpResult(500, "")
                 }
@@ -116,10 +118,7 @@ class VoteAndReplyTest {
                 "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER, bob), voteRshares = zero))
                 "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER, bob), voteRshares = zero)}}""")
                 // the first account's vote was removed (percent 0), the second's is a weightless upvote
-                "condenser_api.get_active_votes" -> FakeTransport.result(
-                    req,
-                    """[{"voter":"${TestApp.USER}","rshares":0,"percent":0,"time":"2026-10-01T10:00:00"},{"voter":"$bob","rshares":0,"percent":100,"time":"2026-10-01T10:00:00"}]""",
-                )
+                "database_api.list_votes" -> listVotes(req, mapOf(TestApp.USER to 0, bob to 100))
                 else -> TestApp.chain(req) ?: HttpResult(500, "")
             }
         })
@@ -134,18 +133,27 @@ class VoteAndReplyTest {
         assertEquals(true, post.current.card?.votedByMe, "the second account's vote")
     }
 
-    /** A post whose bridge copy lists [voters] with rshares 0; get_active_votes answers [percents] (null: fails). */
+    /**
+     * `database_api.list_votes` answering the lookup of the voter [req] asks for on alice/root: that voter's row with
+     * its percent from [percents], or, for anyone else, the next row of the index (another post's), as the seek does.
+     */
+    private fun listVotes(req: Sent, percents: Map<String, Int>): HttpResult {
+        val voter = req.params.jsonObject.getValue("start").jsonArray[2].jsonPrimitive.content
+        val row = percents[voter]?.let { """{"voter":"$voter","author":"alice","permlink":"root","rshares":0,"vote_percent":$it,"weight":0,"last_update":"2026-10-01T10:00:00"}""" }
+            ?: """{"voter":"spike-a","author":"alice","permlink":"root-2","rshares":5,"vote_percent":100,"weight":0,"last_update":"2026-10-01T10:00:00"}"""
+        return FakeTransport.result(req, """{"votes":[$row]}""")
+    }
+
+    /** A post whose bridge copy lists [voters] with rshares 0; the chain answers [percents] (null: fails). */
     private fun weightless(voters: List<String>, percents: () -> Map<String, Int>?, asked: MutableList<String> = mutableListOf()) =
         { req: Sent ->
             val zero = voters.associateWith { 0L }
             when (req.method) {
                 "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = voters, voteRshares = zero))
                 "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = voters, voteRshares = zero)}}""")
-                "condenser_api.get_active_votes" -> {
+                "database_api.list_votes" -> {
                     asked += req.params.toString()
-                    percents()?.let { p ->
-                        FakeTransport.result(req, p.entries.joinToString(",", "[", "]") { (v, pct) -> """{"voter":"$v","rshares":0,"percent":$pct,"time":"2026-10-01T10:00:00"}""" })
-                    } ?: HttpResult(500, "")
+                    percents()?.let { listVotes(req, it) } ?: HttpResult(500, "")
                 }
                 else -> TestApp.chain(req) ?: HttpResult(500, "")
             }
@@ -248,7 +256,7 @@ class VoteAndReplyTest {
             when (req.method) {
                 "bridge.get_post" -> FakeTransport.result(req, entry("alice", "root", votes = listOf(TestApp.USER)))
                 "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":${entry("alice", "root", votes = listOf(TestApp.USER))}}""")
-                "condenser_api.get_active_votes" -> { asked++; FakeTransport.result(req, "[]") }
+                "database_api.list_votes" -> { asked++; FakeTransport.result(req, """{"votes":[]}""") }
                 else -> TestApp.chain(req) ?: HttpResult(500, "")
             }
         })
@@ -597,5 +605,190 @@ class VoteAndReplyTest {
         assertEquals(permlink, comment["permlink"]!!.jsonPrimitive.content)
         assertEquals("first, edited", comment["body"]!!.jsonPrimitive.content)
         reply.close()
+    }
+
+    @Test
+    fun aVoteBeyondTheFirst1000ShowsThroughV2() = runTest {
+        // #3671 acceptance: v2 answers the observer's own vote directly, however many voted before it
+        val voted = Fixtures.v2(entry("alice", "root"), totalVotes = 1500, observerVote = """{"rshares":12,"percent":2500}""")
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_post_v2" -> FakeTransport.result(req, voted)
+                "bridge.get_discussion_v2" -> FakeTransport.result(req, """{"alice/root":$voted}""")
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, post.current.card?.votedByMe)
+        assertEquals(1500, post.current.card?.votes)
+        // known from the read: no lookup
+        assertTrue(app.transport.sent.none { it.method == "database_api.list_votes" })
+        post.close()
+    }
+
+    @Test
+    fun aVoteBeyondTheV1CapIsLookedUpOnTheChain() = runTest {
+        // a node without v2: 1000 listed voters without the observer say nothing, so the chain is asked
+        val crowd = (0 until 1000).map { "spike-v" + it.toString().padStart(4, '0') }
+        val listed = entry("alice", "root", votes = crowd)
+        val asked = mutableListOf<String>()
+        for ((row, voted) in listOf(TestApp.USER to true, "spike-zz" to false)) {
+            asked.clear()
+            val app = TestApp(this, handler = { req ->
+                when (req.method) {
+                    "bridge.get_post" -> FakeTransport.result(req, listed)
+                    "bridge.get_discussion" -> FakeTransport.result(req, """{"alice/root":$listed}""")
+                    // a lower-bound seek: an account that did not vote gets the next row
+                    "database_api.list_votes" -> {
+                        asked += req.params.toString()
+                        FakeTransport.result(req, """{"votes":[{"voter":"$row","author":"alice","permlink":"root","rshares":9,"vote_percent":3000,"weight":1,"last_update":"2026-10-01T10:00:00"}]}""")
+                    }
+                    else -> TestApp.chain(req) ?: HttpResult(500, "")
+                }
+            })
+            signedIn(app)
+            val post = app.env.postModel("alice", "root")
+            post.start()
+            testScheduler.advanceUntilIdle()
+            assertEquals(voted, post.current.card?.votedByMe, row)
+            // its rshares are kept: they are in the post's payout when the vote is changed here
+            if (voted) assertEquals(9L, app.env.localVotes.get(PostKey("alice", "root"))?.earlierRshares)
+            assertEquals("""{"start":["alice","root","${TestApp.USER}"],"limit":1,"order":"by_comment_voter"}""", asked.single())
+            post.close()
+        }
+    }
+
+    /** A v1 entry read for spike-voter: [rows] voters (spike-voter among them when [listed], with no weight), [total] counted. */
+    private fun v1Post(listed: Boolean, total: Int, rows: Int = 3): com.ecency.core.api.model.Post {
+        val others = (1..rows).map { """{"voter":"spike-other$it","rshares":1000,"percent":10000}""" }
+        val mine = if (listed) listOf("""{"voter":"spike-voter","rshares":0}""") else emptyList()
+        val json = """{"author":"spike-author","permlink":"p","stats":{"total_votes":$total},"active_votes":[${(others + mine).joinToString(",")}]}"""
+        return com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = "spike-voter")!!
+    }
+
+    @Test
+    fun aWeightlessVoteMadeHereIsCountedOnceOnANodeWithoutV2() {
+        // the vote landed: the v1 list holds the voter's weightless row (unknown for the button) and the count has it
+        val post = v1Post(listed = true, total = 4)
+        assertFalse(post.knowsVoteOf("spike-voter"))
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "never twice")
+        // removed here: hivemind keeps a removed vote in total_votes, so nothing comes off
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(0, pending = false)).votes)
+        // not in the list yet: the vote is added
+        assertEquals(4, LocalVotes.view(v1Post(listed = false, total = 3), "spike-voter", LocalVote(10000, pending = false)).votes)
+    }
+
+    @Test
+    fun aRemovedVoteReadThroughV2StaysCounted() {
+        // v2 answers a removed vote as a zero observer_vote: not a vote, but hivemind still counts the account
+        val json = """{"author":"spike-author","permlink":"p","stats":{"total_votes":4},"observer_vote":{"rshares":0,"percent":0}}"""
+        val post = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json), observer = "spike-voter")!!
+        assertTrue(post.knowsVoteOf("spike-voter"))
+        assertNull(post.voteOf("spike-voter"))
+        assertEquals(4, LocalVotes.view(post, "spike-voter", LocalVote(10000, pending = false)).votes, "a vote again is not a new voter")
+        // a v2 answer of no vote at all: the vote is new
+        val none = com.ecency.core.api.model.Post.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(json.replace("{\"rshares\":0,\"percent\":0}", "null")), observer = "spike-voter")!!
+        assertEquals(5, LocalVotes.view(none, "spike-voter", LocalVote(10000, pending = false)).votes)
+    }
+
+    @Test
+    fun aReadThatKnowsTheVoteWinsOverALookupStillOnItsWay() = runTest {
+        // one load: the post read cannot tell (a v1 list of 1000 without the reader), the discussion read can (a short
+        // list without the reader: not voted); the chain lookup the first started answers last, with an old vote
+        val crowd = (0 until 1000).map { "spike-v" + it.toString().padStart(4, '0') }
+        val capped = entry("alice", "root", votes = crowd)
+        val known = entry("alice", "root", votes = listOf("spike-other"))
+        val discussion = CompletableDeferred<Unit>()
+        val lookup = CompletableDeferred<Unit>()
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_post" -> FakeTransport.result(req, capped)
+                "bridge.get_discussion" -> { discussion.await(); FakeTransport.result(req, """{"alice/root":$known}""") }
+                "database_api.list_votes" -> {
+                    lookup.await()
+                    FakeTransport.result(req, """{"votes":[{"voter":"${TestApp.USER}","author":"alice","permlink":"root","rshares":9,"vote_percent":3000,"weight":1,"last_update":"2026-10-01T10:00:00"}]}""")
+                }
+                else -> TestApp.chain(req) ?: HttpResult(500, "")
+            }
+        })
+        signedIn(app)
+        val post = app.env.postModel("alice", "root")
+        post.start()
+        testScheduler.runCurrent()
+        repeat(5) { testScheduler.runCurrent() }
+        assertTrue(app.transport.sent.any { it.method == "database_api.list_votes" }, "the lookup went out")
+        // only what is due now runs: the held lookup must answer, not time out
+        discussion.complete(Unit)
+        repeat(20) { testScheduler.runCurrent() }
+        assertEquals(true, post.current.post?.knowsVoteOf(TestApp.USER), "the discussion's read knows")
+        lookup.complete(Unit)
+        repeat(20) { testScheduler.runCurrent() }
+        assertEquals(1, app.transport.sent.count { it.method == "database_api.list_votes" }, "one lookup, answered")
+        assertEquals(false, post.current.card?.votedByMe, "the read that knows stands")
+        assertNull(app.env.localVotes.get(PostKey("alice", "root")))
+        post.close()
+    }
+
+    @Test
+    fun aChangedVoteTheReadCannotSeeTakesTheOldVotesShareOff() {
+        // a cut list without the reader: the looked-up vote's rshares are in the payout, the read cannot say
+        val post = v1Post(listed = false, total = 1500, rows = 1000).copy(pendingPayoutValue = "10.000 HBD", totalPayout = 10.0, netRshares = 1_000_000L)
+        val estimate = VoteEstimate(0.5, 50_000L)
+        val with = LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, estimate = estimate, earlierRshares = 100_000L)).payout
+        val without = LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, estimate = estimate)).payout
+        assertEquals(post.totalPayout + LocalVotes.payoutDelta(post, 100_000L, estimate), with, 0.0001)
+        assertTrue(with < without, "the old vote's share comes off")
+        // a read that lists the account with no weight: that vote's share is gone, nothing comes off
+        val listed = v1Post(listed = true, total = 4).copy(pendingPayoutValue = "10.000 HBD", totalPayout = 10.0, netRshares = 1_000_000L)
+        assertEquals(
+            listed.totalPayout + LocalVotes.payoutDelta(listed, 0L, estimate),
+            LocalVotes.view(listed, "spike-voter", LocalVote(5000, pending = false, estimate = estimate, earlierRshares = 100_000L)).payout,
+            0.0001,
+        )
+    }
+
+    @Test
+    fun aVoteChangedOverOneReadFromTheChainIsNotCountedAgain() {
+        // a cut list (1000 rows) without the voter: the read cannot tell, but the replaced vote was read from the chain
+        val post = v1Post(listed = false, total = 1500, rows = 1000)
+        assertFalse(post.knowsVoteOf("spike-voter"))
+        assertEquals(1500, LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false, earlierCounted = true)).votes)
+        assertEquals(1501, LocalVotes.view(post, "spike-voter", LocalVote(5000, pending = false)).votes, "a first vote is added")
+    }
+
+    @Test
+    fun aVoteOverOneReadFromTheChainRemembersItIsCounted() = runTest {
+        val app = TestApp(this, handler = handler { FakeTransport.result(it, "null") })
+        signedIn(app)
+        // read from the chain by the post screen
+        app.env.localVotes.set(key, LocalVote(10000, pending = false, fromChain = true, earlierRshares = 77L))
+        app.env.votes.vote("alice", "root", 5000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "the weight change is not a new vote in the count")
+        assertEquals(77L, app.env.localVotes.get(key)?.earlierRshares, "nor is its share in the payout taken twice")
+        // a second change: the looked-up share is still the one the read holds
+        app.env.votes.vote("alice", "root", 2000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(77L, app.env.localVotes.get(key)?.earlierRshares, "carried through a second change")
+        // changed again, and removed then cast again: the account stays counted (hivemind keeps a removed vote)
+        app.env.votes.vote("alice", "root", 3000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "a second change")
+        app.env.votes.vote("alice", "root", 0)
+        testScheduler.advanceUntilIdle()
+        app.env.votes.vote("alice", "root", 3000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(true, app.env.localVotes.get(key)?.earlierCounted, "a vote again after an unvote")
+        // a vote made here first: a saved read (a wave row) may not have it, so it is neither counted nor taken off
+        val other = PostKey("alice", "other")
+        // landed here, with the sheet's estimate
+        app.env.localVotes.set(other, LocalVote(10000, pending = false, estimate = VoteEstimate(0.1, 44L)))
+        app.env.votes.vote("alice", "other", 3000)
+        testScheduler.advanceUntilIdle()
+        assertEquals(false, app.env.localVotes.get(other)?.earlierCounted)
+        assertNull(app.env.localVotes.get(other)?.earlierRshares)
     }
 }

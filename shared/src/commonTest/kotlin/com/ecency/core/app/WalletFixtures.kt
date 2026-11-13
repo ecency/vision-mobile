@@ -18,7 +18,13 @@ import kotlinx.serialization.json.jsonPrimitive
  * wallet reads from [rpc] (plus what a broadcast needs) and Ecency's HTTP endpoints from [http]. Every number is
  * synthetic. [broadcastAnswer] decides each broadcast_transaction (default: accepted).
  */
-class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String = "[]") {
+class WalletWorld(
+    scope: TestScope,
+    val user: String = USER,
+    tokensJson: String = "[]",
+    /** An earlier world's store: this world is the same device relaunched. */
+    store: com.ecency.core.secure.InMemorySecureStore = com.ecency.core.secure.InMemorySecureStore(),
+) {
     val rpc = mutableMapOf<String, (Sent) -> String?>()
     val http = mutableMapOf<String, (com.ecency.core.auth.AuthHttpRequest) -> HttpResult?>()
     var broadcastAnswer: suspend (Sent) -> HttpResult = { FakeTransport.result(it, "{}") }
@@ -27,7 +33,7 @@ class WalletWorld(scope: TestScope, val user: String = USER, tokensJson: String 
     /** A method whose answer waits for its gate (an in-flight read held while the test acts). */
     val gates = mutableMapOf<String, kotlinx.coroutines.CompletableDeferred<Unit>>()
 
-    val app = TestApp(scope) { request ->
+    val app = TestApp(scope, store = store) { request ->
         gates[request.method]?.await()
         when (request.method) {
             "condenser_api.broadcast_transaction" -> broadcastAnswer(request)

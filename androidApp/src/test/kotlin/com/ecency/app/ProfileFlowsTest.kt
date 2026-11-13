@@ -151,7 +151,7 @@ class ProfileNode {
     }
 
     fun env() = AppEnvironment(
-        api = EcencyApi(listOf("https://node-a.example"), transport),
+        api = EcencyApi(listOf("https://node-a.example"), withoutBridgeV2(transport)),
         vault = KeyVaultAsync(KeyVault(store), Dispatchers.IO),
         renderer = InterimPostBodyRenderer("https://i.ecency.com"),
         dispatchers = AppDispatchers(Dispatchers.Main, Dispatchers.Default, Dispatchers.IO),
@@ -427,6 +427,20 @@ class ProfileFlowsTest {
         waitFor("mutedView")
         assertEquals(1, node.privateCalls("report").size)
         assertTrue(node.broadcasts().single().contains("""\"what\":[\"ignore\"]"""))
+    }
+
+    /** RN CommentView (the profile's Comments tab rows): a signed in reader gets the gift beside the row. */
+    @Test
+    fun aCommentRowOfTheCommentsTabOffersTheTipSheet() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitFor("tab:comments")
+        compose.onNodeWithTag("tab:comments").performClick()
+        compose.await("scroll to the comment") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("comments:alice/re-one") }.isSuccess }
+        waitFor("comment:alice/re-one")
+        compose.await("tip button in the row") { idleMain(); exists("commentTip:alice/re-one") }
+        compose.onNodeWithTag("commentTip:alice/re-one", useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        waitFor("tipSheet")
     }
 
     @Test

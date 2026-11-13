@@ -47,8 +47,10 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             let json = (try? JSONSerialization.data(withJSONObject: refusal)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
             return HttpResult(status: 200, body: json)
         }
+        // the fake node serves the vote-free bridge v2 reads: the v1 answer without its voter list (voteFree)
+        let v2 = method.hasPrefix("bridge.") && method.hasSuffix("_v2")
         let result: Any
-        switch method {
+        switch v2 ? String(method.dropLast(3)) : method {
         case "bridge.get_ranked_posts":
             result = (params["start_author"] as? String).map { $0.isEmpty } ?? true ? feed(tag: params["tag"] as? String) : []
         case "bridge.get_account_posts":
@@ -104,8 +106,9 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             let prefix = ((request["params"] as? [Any])?.first as? String) ?? ""
             result = authors.filter { $0 >= prefix }
         // ---- feed, posts and reading: synthetic answers for the menu, voters, reblogs and quick profile ----
-        case "condenser_api.get_active_votes":
-            result = activeVotes()
+        case "bridge.list_votes":
+            // the voters screen (HiveApi.entryVotes): one short page
+            result = params["start"] == nil ? activeVotes() : []
         case "condenser_api.get_reblogged_by":
             result = ["spike-bob", "spike-carol", "spike-dave"]
         // the proposal card: one votable @ecency proposal nobody voted for (as DemoHiveTransport on Android)
@@ -117,7 +120,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             // Account lookups and chain state: refused, like an unreachable node.
             return HttpResult(status: 503, body: "fake transport: \(method) is not available offline")
         }
-        let reply: [String: Any] = ["jsonrpc": "2.0", "result": result, "id": id]
+        let reply: [String: Any] = ["jsonrpc": "2.0", "result": v2 ? voteFree(result) : result, "id": id]
         let json = (try? JSONSerialization.data(withJSONObject: reply)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
         return HttpResult(status: 200, body: json)
     }
@@ -129,6 +132,18 @@ final class FakeHiveTransport: NSObject, RpcTransport {
          "subscribers": 1200, "num_authors": 40, "num_pending": 280, "created_at": "2020-01-01 00:00:00"]
     }
 
+    /// A v1 answer (an entry, a list of them, or a discussion map) as v2 sends it: no voter list, no own vote.
+    static func voteFree(_ result: Any) -> Any {
+        if let list = result as? [Any] { return list.map { voteFree($0) } }
+        guard var object = result as? [String: Any] else { return result }
+        if object["permlink"] != nil {
+            object["active_votes"] = nil
+            object["observer_vote"] = NSNull()
+            return object
+        }
+        return object.mapValues { voteFree($0) }
+    }
+
     /// Eight synthetic votes, one of them a downvote.
     static func activeVotes() -> [[String: Any]] {
         var out: [[String: Any]] = []
@@ -138,7 +153,7 @@ final class FakeHiveTransport: NSObject, RpcTransport {
             let rshares: Int = i == 7 ? -200 : (8 - i) * 1000
             let percent: Int = i == 7 ? -10000 : 10000 - i * 1000
             let time: String = "2026-10-0\(1 + i % 5)T12:00:00"
-            out.append(["voter": voter, "rshares": rshares, "percent": percent, "time": time])
+            out.append(["voter": voter, "rshares": rshares, "percent": percent, "weight": 8 - i, "time": time])
         }
         return out
     }

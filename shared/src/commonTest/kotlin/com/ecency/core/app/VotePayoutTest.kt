@@ -40,9 +40,13 @@ class VotePayoutTest {
 
     private fun rawPost(c: Chain, author: String, permlink: String, parent: Pair<String, String>?) =
         if (c.indexed) {
-            entry(author, permlink, parent = parent, pending = c.indexedPending, votes = listOf("x", user), voteRshares = mapOf("x" to 900_000_000L, user to c.serverVote))
+            // net_rshares is the sum of the votes' rshares, as on chain (the voter's share is read from it)
+            entry(
+                author, permlink, parent = parent, pending = c.indexedPending, votes = listOf("x", user),
+                voteRshares = mapOf("x" to 900_000_000L, user to c.serverVote), netRshares = 900_000_000L + c.serverVote,
+            )
         } else {
-            entry(author, permlink, parent = parent, pending = c.pending, votes = listOf("x"), voteRshares = mapOf("x" to 900_000_000L))
+            entry(author, permlink, parent = parent, pending = c.pending, votes = listOf("x"), voteRshares = mapOf("x" to 900_000_000L), netRshares = 900_000_000L)
         }
 
     private fun app(scope: TestScope, c: Chain) = TestApp(scope) { req ->
@@ -168,7 +172,8 @@ class VotePayoutTest {
         testScheduler.runCurrent()
         assertEquals("$1.500", feed.payout())
         assertEquals("$1.500", post.payout())
-        assertEquals(1, feed.current.items.single().votes)
+        // hivemind keeps a removed vote in total_votes: the count stays as the server will show it
+        assertEquals(2, feed.current.items.single().votes)
         c.gate!!.complete(Unit)
         testScheduler.advanceUntilIdle()
 

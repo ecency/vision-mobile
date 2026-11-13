@@ -158,8 +158,8 @@ class LiveWriteTest {
                 b.votes.vote(post.author, post.permlink, 100)
                 val s = b.votes.state.first { it.status(post.author, post.permlink)?.inFlight != true }
                 s.status(post.author, post.permlink)?.error?.let { error(it.message) }
-                val votes = b.api.posts.getPost(post.author, post.permlink, refresh = true)?.activeVotes.orEmpty()
-                if (votes.none { it.voter == peer }) note("vote on post", "the vote is not in the post's active votes")
+                val read = b.api.posts.getPost(post.author, post.permlink, observer = peer, refresh = true)
+                if (read?.voteOf(peer) == null) note("vote on post", "the post's read does not hold the vote")
             }
         }
         reply?.let { r ->

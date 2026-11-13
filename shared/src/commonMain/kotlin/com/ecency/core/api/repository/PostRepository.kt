@@ -101,7 +101,8 @@ data class Discussion(
             val sorted = when (sort) {
                 CommentSort.TRENDING -> base.sortedWith(negativeLast.thenByDescending { it.totalPayout })
                 CommentSort.REPUTATION -> base.sortedByDescending { it.authorReputation }
-                CommentSort.VOTES -> base.sortedByDescending { it.activeVotes.size }
+                // the vote count; a voter list may be cut at 1000 and v2 entries carry none
+                CommentSort.VOTES -> base.sortedByDescending { it.stats.totalVotes }
                 CommentSort.AGE -> base
             }
             // renderOnTop beats the sort; the pinned reply is then moved in front of everything.

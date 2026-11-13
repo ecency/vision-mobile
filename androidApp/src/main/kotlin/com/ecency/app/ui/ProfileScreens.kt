@@ -567,19 +567,33 @@ private fun PlaceholderTab(title: String, text: String, action: String?, onActio
     }
 }
 
-/** A comment of the comments / replies tab: author, age, text and votes; a tap opens it. */
+/**
+ * A comment of the comments / replies tab: author, age, text and votes; a tap opens it. Under it, RN's gift
+ * (CommentView `_handleOnTipPress`, the tipping dialog for the comment; signed out, the login as on the other cards).
+ */
 @Composable
 private fun CommentRow(card: PostCard, nowMillis: Long, actions: FeedActions) {
     val colors = LocalEcencyColors.current
-    Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(horizontal = 16.dp, vertical = 12.dp).testTag("comment:${card.key}")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Avatar(card.avatarUrl, 24.dp)
-            Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(start = 8.dp))
-            Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray)
+    Column(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { actions.onOpen(card) }.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (actions.onTip != null) 0.dp else 12.dp).testTag("comment:${card.key}")) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Avatar(card.avatarUrl, 24.dp)
+                Text(card.author, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.text, modifier = Modifier.padding(start = 8.dp))
+                Text(" " + TimeAgo.short(card.createdEpochMillis, nowMillis), fontSize = 12.sp, color = colors.darkGray)
+            }
+            if (card.title.isNotEmpty()) Text(card.title, fontSize = 13.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            Text(card.summary, fontSize = 15.sp, lineHeight = 21.sp, color = colors.text, maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            Text(ProfileUiCopy.cardStats(card.payoutText, card.votes, card.comments), fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 6.dp))
         }
-        if (card.title.isNotEmpty()) Text(card.title, fontSize = 13.sp, color = colors.darkGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
-        Text(card.summary, fontSize = 15.sp, lineHeight = 21.sp, color = colors.text, maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
-        Text(ProfileUiCopy.cardStats(card.payoutText, card.votes, card.comments), fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 6.dp))
+        actions.onTip?.let { onTip ->
+            Box(
+                Modifier.padding(start = 10.dp, bottom = 4.dp).size(48.dp).clip(CircleShape)
+                    .clickable(role = Role.Button) { onTip(card) }
+                    .semantics { contentDescription = UiCopy.SEND_TIP }
+                    .testTag("commentTip:${card.key}"),
+                contentAlignment = Alignment.Center,
+            ) { Glyph(AppIcon.GIFT, colors.icon, 22.dp) }
+        }
     }
     Box(Modifier.fillMaxWidth().height(1.dp).background(colors.lightBackground))
 }

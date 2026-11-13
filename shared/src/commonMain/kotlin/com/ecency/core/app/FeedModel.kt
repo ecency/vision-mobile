@@ -261,10 +261,16 @@ class FeedModel internal constructor(
     }
 
     /** RN usePromotedPostsQuery: fetched with the first page (and on refresh); a failure shows none. */
+    /** The promoted read in flight: a newer one replaces it, so an older answer never lands last. */
+    private var promotedJob: Job? = null
+
     private fun loadPromoted(nsfw: NsfwMode) {
-        scope.launch {
+        promotedJob?.cancel()
+        // read for this account: an answer for another one (the session changed meanwhile) is dropped
+        val observer = env.session.current.username
+        promotedJob = scope.launch {
             val list = try {
-                env.rest.promotedEntries()
+                env.rest.promotedEntries(observer.orEmpty())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -272,10 +278,13 @@ class FeedModel internal constructor(
                 return@launch
             }.filter { nsfw != NsfwMode.HIDE || !NsfwMode.isNsfw(it) }.distinctBy { it.key }
             val user = env.session.current.username
+            if (user != observer) return@launch
             val local = env.localVotes.state.value
             val cards = withContext(dispatchers.render) {
                 list.map { Cards.of(it, env.renderer, user, local[it.key], env.proxyBase, promoted = true, nsfwWarn = nsfw == NsfwMode.WARN) }
             }
+            // the account may have changed while the cards rendered
+            if (env.session.current.username != observer) return@launch
             promotedPosts = list.associateBy { it.key }
             promotedCards = cards
             redisplay()

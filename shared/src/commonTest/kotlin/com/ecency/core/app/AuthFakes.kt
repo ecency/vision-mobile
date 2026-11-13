@@ -89,6 +89,12 @@ class FakeHasRelay : HasSocketFactory {
     var autoApproveSign = true
     var waitExpire = 4_000_000_000_000L
 
+    /** False: a `sign_req` gets no answer at all (the relay has it, its `sign_wait` is still to come). */
+    var answerSign = true
+
+    /** When set, opening the relay waits for it (nothing is sent before). */
+    var openGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     /** The HiveAuth key of an account, to read its sign requests as the wallet does (set by [TestApp]). */
     var keyOf: suspend (String) -> String? = { null }
 
@@ -107,6 +113,7 @@ class FakeHasRelay : HasSocketFactory {
 
     override suspend fun open(host: String): HasSocket {
         opened += host
+        if (chat == null || "/api/mattermost/websocket" !in host) openGate?.await()
         chat?.takeIf { "/api/mattermost/websocket" in host }?.let { return it.open(host) }
         val ch = channel
         return object : HasSocket {
@@ -122,6 +129,7 @@ class FakeHasRelay : HasSocketFactory {
                             runCatching { Json.parseToJsonElement(CryptoJsCipher.decrypt(data, key)).jsonObject["ops"] as kotlinx.serialization.json.JsonArray }
                                 .getOrNull()?.let { signedOps += it }
                         }
+                        if (!answerSign) return
                         push(buildJsonObject { put("cmd", "sign_wait"); put("uuid", "sign-1"); put("expire", waitExpire) })
                         if (autoApproveSign) push(buildJsonObject { put("cmd", "sign_ack"); put("uuid", "sign-1"); put("broadcast", true); put("data", TestApp.HAS_TX) })
                     }

@@ -319,6 +319,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         }
     }
 
+    @OptIn(kotlin.concurrent.atomics.ExperimentalAtomicApi::class)
     override suspend fun broadcastWithHiveAuth(username: String, ops: JsonArray, authority: KeyRole): String? {
         val account = env.accounts.vaultAccount(username) ?: throw AuthException.NotSignedIn()
         val key = account.hiveAuthKey?.takeIf { it.isNotEmpty() }
@@ -327,25 +328,35 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         // never weaker than the authority the router resolved; HiveAuth has no owner key type
         val keyType = OperationAuthority.hiveAuthKeyType(ops).let { if (it == KeyRole.POSTING && authority == KeyRole.ACTIVE) KeyRole.ACTIVE else it }
         if (keyType == KeyRole.OWNER || authority == KeyRole.OWNER) throw AuthException.UnsupportedOperation(L.native.dappBridgeOps.ownerRefused)
-        val txId = prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
-            env.hiveAuth.broadcast(session, keyType, ops) { wait ->
-                setState { s ->
-                    val p = s.prompt
-                    if (p is SigningPrompt.HiveAuthBroadcast) {
-                        s.copy(
-                            prompt = p.copy(
-                                step = HiveAuthStep.WAITING, link = wait.link, expiresAtMillis = wait.expiresAtMillis,
-                                requestId = wait.uuid, openWallet = p.requestId != wait.uuid || p.openWallet,
-                            ),
-                        )
-                    } else {
-                        s
-                    }
-                }
-            }.txId
+        // once the request reached the relay, the wallet app can still sign and broadcast it after the prompt closed
+        val sent = kotlin.concurrent.atomics.AtomicBoolean(false)
+        val txId = try {
+            prompted(SigningPrompt.HiveAuthBroadcast(username, HiveAuthStep.INITIATING)) {
+                hiveAuthBroadcast(session, keyType, ops) { sent.store(true) }
+            }
+        } catch (e: AuthException.Cancelled) {
+            if (sent.load()) throw AuthException.Cancelled(HIVE_AUTH_CLOSED, mayHaveSigned = true)
+            throw e
         }
         return confirmedOnChain(txId, ops)
     }
+
+    private suspend fun hiveAuthBroadcast(session: HiveAuthSession, keyType: KeyRole, ops: JsonArray, onSent: () -> Unit): String? =
+        env.hiveAuth.broadcast(session, keyType, ops, onSent) { wait ->
+            setState { s ->
+                val p = s.prompt
+                if (p is SigningPrompt.HiveAuthBroadcast) {
+                    s.copy(
+                        prompt = p.copy(
+                            step = HiveAuthStep.WAITING, link = wait.link, expiresAtMillis = wait.expiresAtMillis,
+                            requestId = wait.uuid, openWallet = p.requestId != wait.uuid || p.openWallet,
+                        ),
+                    )
+                } else {
+                    s
+                }
+            }
+        }.txId
 
     /**
      * A HiveAuth `sign_ack` is the relay's word: the transaction it names must be in a block
@@ -501,6 +512,7 @@ class SigningModel internal constructor(private val env: AppEnvironment) :
         }
 
         val HOT_PAGE_CLOSED: String get() = L.native.signing.hotPageClosed
+        val HIVE_AUTH_CLOSED: String get() = L.native.signing.hiveAuthPromptClosed
 
         // RN en-US auth_upgrade.invalid_key, auth_upgrade.key_mismatch
         val INVALID_KEY: String get() = L.authUpgrade.invalidKey

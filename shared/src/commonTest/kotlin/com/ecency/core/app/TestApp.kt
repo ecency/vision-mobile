@@ -76,6 +76,8 @@ class TestApp(
     separateIo: Boolean = false,
     /** Wraps the IO dispatcher (e.g. [HoldingDispatcher], to hold vault reads back). */
     ioWrap: ((kotlinx.coroutines.CoroutineDispatcher) -> kotlinx.coroutines.CoroutineDispatcher)? = null,
+    /** The secure store; an earlier [TestApp]'s stands for the same device after a relaunch. */
+    val store: InMemorySecureStore = InMemorySecureStore(),
     val handler: suspend FakeTransport.(Sent) -> HttpResult,
 ) {
     /**
@@ -88,7 +90,6 @@ class TestApp(
     var txStatus: (String) -> String? = { null }
 
     val transport = FakeTransport { request -> chainTransaction(request) ?: handler(request) }
-    val store = InMemorySecureStore()
     val main = StandardTestDispatcher(scope.testScheduler, "main")
     val render = TrackingDispatcher(StandardTestDispatcher(scope.testScheduler, "render"))
     val io = (if (separateIo) StandardTestDispatcher(scope.testScheduler, "io") else main).let { ioWrap?.invoke(it) ?: it }
@@ -102,6 +103,9 @@ class TestApp(
 
     /** The lock's monotonic clock, moved by tests. */
     var monotonic = 0L
+
+    /** When set, the monotonic clock follows it instead of [monotonic] (tests on virtual time). */
+    var monotonicClock: (() -> Long)? = null
     val env = AppEnvironment(
         api = EcencyApi(NODES, transport),
         vault = KeyVaultAsync(KeyVault(store), io),
@@ -110,7 +114,7 @@ class TestApp(
         proxyBase = PROXY,
         debugKeyImport = debugKeyImport,
         nowMillis = { clock() },
-        security = SecurityConfig(pinIterations = 16, monotonicMillis = { monotonic }),
+        security = SecurityConfig(pinIterations = 16, monotonicMillis = { monotonicClock?.invoke() ?: monotonic }),
         legacy = legacy,
         auth = AuthServices(authBackend.http, relay),
     )

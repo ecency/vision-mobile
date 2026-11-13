@@ -124,6 +124,10 @@ data class LocalVote(
     val estimate: VoteEstimate? = null,
     /** Read from the chain by the post screen (a weightless vote, [PostModel]), not made on this device. */
     val fromChain: Boolean = false,
+    /** The vote this one replaced was read from the chain ([fromChain]): the post's count already has the account. */
+    val earlierCounted: Boolean = false,
+    /** The rshares of the vote read from the chain ([fromChain]) or of the one this vote replaced: in the post's payout. */
+    val earlierRshares: Long? = null,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
@@ -169,7 +173,9 @@ class LocalVotes {
             for (post in posts) {
                 val local = map[post.key] ?: continue
                 val estimate = local.estimate ?: continue
-                if (local.pending || !sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
+                // a read that does not know the account's vote confirms nothing
+                if (local.pending || !post.knowsVoteOf(username)) continue
+                if (!sameVote(post.voteOf(username)?.rshares ?: 0, estimate.rshares)) continue
                 out = out + (post.key to local.copy(estimate = null))
             }
             out
@@ -179,19 +185,24 @@ class LocalVotes {
     companion object {
         /** The server's view of [post] for [username], with [local] applied on top. */
         fun view(post: Post, username: String?, local: LocalVote?): VoteView {
-            val server = username?.let { post.voteOf(it) }
-            val serverUp = server != null && server.rshares > 0
-            val serverDown = server != null && server.rshares < 0
-            val count = post.stats.totalVotes.coerceAtLeast(post.activeVotes.size)
+            // the entry's own answer for the account (SDK entryVoteOf); unknown reads as no vote shown
+            val server = post.voteOf(username)
+            val serverUp = server?.direction == 1
+            val serverDown = server?.direction == -1
+            // hivemind's count (SDK countVotes): a voter list may be cut at 1000, v2 sends none
+            val count = post.stats.totalVotes
             if (local == null) return VoteView(serverUp, serverDown, count, post.totalPayout)
-            val hadVote = server != null
             val hasVote = local.weight != 0
-            val adjusted = count + when {
-                hasVote && !hadVote -> 1
-                !hasVote && hadVote -> -1
-                else -> 0
-            }
-            val payout = (post.totalPayout + payoutDelta(post, server?.rshares ?: 0, local.estimate)).coerceAtLeast(0.0)
+            // whether the count already has the account: a cast vote in the read, the account's row or v2 vote object in it
+            // (a weightless or removed vote is no vote shown but counted), or a replaced vote read from the chain; a vote
+            // read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one). Hivemind keeps a
+            // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
+            val inCount = server != null || post.listedVoter == username || local.earlierCounted
+            val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
+            // a read that does not know the account's vote: the replaced vote read from the chain is in its payout, unless
+            // the read lists the account with no weight (that vote's share is gone, or never was)
+            val serverRshares = server?.rshares ?: local.earlierRshares.takeIf { !post.knowsVoteOf(username) && post.listedVoter != username } ?: 0
+            val payout = (post.totalPayout + payoutDelta(post, serverRshares, local.estimate)).coerceAtLeast(0.0)
             return VoteView(local.weight > 0, local.weight < 0, adjusted.coerceAtLeast(0), payout)
         }
 
@@ -206,7 +217,8 @@ class LocalVotes {
         internal fun payoutDelta(post: Post, serverRshares: Long, estimate: VoteEstimate?): Double {
             if (estimate == null || post.isPaidout || post.isDeclinedPayout) return 0.0
             if (sameVote(serverRshares, estimate.rshares)) return 0.0
-            val total = post.activeVotes.sumOf { it.rshares.toDouble() }
+            // net_rshares is the sum of every vote's rshares (a voter list may be cut, v2 sends none)
+            val total = post.netRshares.toDouble()
             val share = if (serverRshares == 0L || total == 0.0) 0.0 else serverRshares * post.totalPayout / total
             return estimate.value - share
         }

@@ -258,4 +258,72 @@ class HiveRpcClientTest {
             assertEquals(1, transport.sent.size, "HTTP ${answer.status}: past the deadline no other node is asked")
         }
     }
+
+    /** A node without the bridge v2 reads: hivemind's exact assert for each `_v2` method, the v1 post otherwise. */
+    private fun v1OnlyNode(): FakeTransport = FakeTransport { req ->
+        if (req.method.endsWith("_v2")) {
+            val name = "bridge_api" + req.method.removePrefix("bridge.")
+            FakeTransport.error(req, -32602, "Assert Exception:unknown method: $name", """{"code":10,"extension":{"assertion_expression":"unknown method: $name"}}""")
+        } else {
+            FakeTransport.result(req, Fixtures.entry("spike-author", "spike-post"))
+        }
+    }
+
+    @Test
+    fun aPostReadAsksV2ThenV1OnTheSameNodeAndRemembersIt() = runTest {
+        // #3671 acceptance: the node lacks v2; the first read asks v2 then v1 on that node, the second v1 only
+        val transport = v1OnlyNode()
+        val client = clientWith(transport)
+        val api = HiveApi(client)
+        assertEquals("spike-post", api.post("spike-author", "spike-post", "spike-me")?.permlink)
+        assertEquals(listOf(NODES[0] to "bridge.get_post_v2", NODES[0] to "bridge.get_post"), transport.sent.map { it.node to it.method })
+        assertEquals("spike-post", api.post("spike-author", "spike-post", "spike-me")?.permlink)
+        assertEquals(NODES[0] to "bridge.get_post", transport.sent.drop(2).single().let { it.node to it.method })
+        // not a failure: no failover, nothing recorded against the node
+        assertEquals(NODES, client.health.orderedNodes(NODES, "bridge", probe = false))
+        assertTrue(client.health.isNodeHealthy(NODES[0], "bridge"))
+    }
+
+    @Test
+    fun aFailingFallbackIsChargedToTheApiThatAnswered() = runTest {
+        // no bridge.list_votes on the node, and its database_api answers 503: the bridge did not fail there
+        val transport = FakeTransport { req ->
+            when (req.method) {
+                "bridge.list_votes" -> FakeTransport.error(req, -32602, "Assert Exception:unknown method: bridge_apilist_votes", """{"code":10,"extension":{"assertion_expression":"unknown method: bridge_apilist_votes"}}""")
+                else -> com.ecency.core.api.rpc.HttpResult(503, "")
+            }
+        }
+        val client = clientWith(transport)
+        repeat(2) { runCatching { HiveApi(client).entryVotes("spike-author", "spike-post") } }
+        assertTrue(NODES.all { client.health.isNodeHealthy(it, "bridge") }, "the bridge was never the one failing")
+        assertTrue(NODES.any { !client.health.isNodeHealthy(it, com.ecency.core.api.rpc.NodeHealthTracker.apiOf("database_api.list_votes")) }, "the database api was")
+    }
+
+    @Test
+    fun aNodeMarkedWithoutV2IsAskedForItAgainAfterHalfAnHour() = runTest {
+        var now = 0L
+        val transport = v1OnlyNode()
+        // one node: the mark is about that node, and a pool would move the read to an unmarked one
+        val api = HiveApi(HiveRpcClient(listOf(NODES[0]), transport, readTimeoutMillis = 1_000, nowMillis = { now }, jitter = {}))
+        api.post("spike-author", "spike-post", "spike-me")
+        // one answer marks the whole family: the feeds go to v1 at once
+        api.rankedPosts(RankedSort.TRENDING)
+        assertEquals("bridge.get_ranked_posts", transport.sent.last().method)
+        now = 30 * 60_000L - 1
+        api.post("spike-author", "spike-post", "spike-me")
+        assertEquals("bridge.get_post", transport.sent.last().method)
+        now = 30 * 60_000L
+        val before = transport.sent.size
+        api.post("spike-author", "spike-post", "spike-me")
+        assertEquals(listOf("bridge.get_post_v2", "bridge.get_post"), transport.sent.drop(before).map { it.method })
+    }
+
+    @Test
+    fun anEchoedAssertIsTheRequestsAnswerNotTheNodes() = runTest {
+        // hivemind echoes params into its asserts: "internal" in a permlink must not read as a sick node
+        val transport = FakeTransport { FakeTransport.error(it, -32602, "Assert Exception:Post spike-author/internal-notes does not exist") }
+        val e = assertFailsWith<RpcErrorException> { clientWith(transport).call("bridge.get_post", buildJsonArray {}) }
+        assertEquals(-32602, e.code)
+        assertEquals(1, transport.sent.size)
+    }
 }

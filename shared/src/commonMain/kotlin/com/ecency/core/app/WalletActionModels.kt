@@ -303,7 +303,9 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                 if (!mayHaveLanded) return@afterOutcome
                 val keySigned = phase is SendPhase.Done && phase.method == SigningMethod.KEY
                 val expiresAt = (phase as? SendPhase.Done)?.expiresAtMillis?.takeIf { keySigned }
-                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned, actionId, expiresAt, order) } }
+                // undecided: a wallet app may still approve it later (a HiveAuth request closed while waiting)
+                val undecided = (phase as? SendPhase.Failed)?.error?.undecided == true
+                sold?.let { (amount, symbol) -> amount.toDoubleOrNull()?.let { wallet.spent(owner, symbol, it, keySigned, actionId, expiresAt, order, undecided) } }
                 wallet.refreshLater()
             }
             sends.send(owner, ops, OperationAuthority.required(ops), actionId)

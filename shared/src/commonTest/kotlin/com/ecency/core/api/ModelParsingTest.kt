@@ -2,6 +2,7 @@ package com.ecency.core.api
 
 import com.ecency.core.api.model.Account
 import com.ecency.core.api.model.ModerationReason
+import com.ecency.core.api.model.ObserverVote
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.model.PostMetadata
@@ -22,13 +23,13 @@ class ModelParsingTest {
     @Test
     fun parsesAFullBridgeEntry() {
         val post = assertNotNull(
-            Post.fromJson(Json.parseToJsonElement(Fixtures.entry("alice", "hello", votes = listOf("bob", "carol"), pending = "1.250 HBD", pinned = true))),
+            Post.fromJson(Json.parseToJsonElement(Fixtures.entry("alice", "hello", votes = listOf("bob", "carol"), pending = "1.250 HBD", pinned = true)), observer = "bob"),
         )
         assertEquals(PostKey("alice", "hello"), post.key)
         assertEquals("Title of hello", post.title)
         assertEquals(listOf("hive-100001", "test"), post.metadata.tags)
         assertEquals("ecency/4.0.0-mobile", post.metadata.app)
-        assertEquals(listOf("bob", "carol"), post.activeVotes.map { it.voter })
+        assertEquals(ObserverVote(100, null), post.voteOf("bob"))
         assertEquals(1.25, post.totalPayout)
         assertEquals("hive-100001", post.community)
         assertEquals("Test Community", post.communityTitle)
@@ -43,7 +44,7 @@ class ModelParsingTest {
         assertEquals("", post.title)
         assertEquals("0.000 HBD", post.pendingPayoutValue)
         assertEquals("1000000.000 HBD", post.maxAcceptedPayout)
-        assertEquals(emptyList(), post.activeVotes)
+        assertNull(post.observerVoteFor)
         assertEquals(0, post.children)
         assertEquals(PostMetadata(), post.metadata)
     }
@@ -68,6 +69,7 @@ class ModelParsingTest {
                     "pending_payout_value":{"amount":"2500","precision":3,"nai":"@@000000013"},
                     "author_payout_value":"not an asset","beneficiaries":[{"account":"ecency","weight":"500"},{"weight":1}]}""",
                 ),
+                observer = "bob",
             ),
         )
         assertEquals(4, post.children)
@@ -77,7 +79,7 @@ class ModelParsingTest {
         assertEquals(61, post.authorReputation) // floored like the app
         assertTrue(post.isPaidout)
         assertEquals(10000, post.percentHbd)
-        assertEquals(listOf("bob" to -77L), post.activeVotes.map { it.voter to it.rshares })
+        assertEquals(ObserverVote(-77, null), post.voteOf("bob"))
         assertEquals(3, post.reblogs)
         assertEquals(listOf(PostKey("bob", "re-1"), PostKey("carol", "re-2")), post.replies)
         assertEquals("2.500 HBD", post.pendingPayoutValue)

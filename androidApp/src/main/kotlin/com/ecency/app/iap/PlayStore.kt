@@ -65,7 +65,7 @@ class PlayStore(context: Context, private val activity: () -> Activity?) : Store
                 // auto reconnection takes care of later calls; a setup that never finished is a failure
                 if (answered) return
                 answered = true
-                done(StoreError(StoreError.SERVICE_ERROR, com.ecency.app.AndroidCopy.BILLING_DISCONNECTED))
+                done(StoreError(StoreError.SERVICE_ERROR, com.ecency.app.AndroidCopy.BILLING_DISCONNECTED, null, StoreError.PLAY_SERVICE_DISCONNECTED))
             }
         })
     }

@@ -4,6 +4,7 @@ import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.api.wallet.BookOrder
 import com.ecency.core.auth.AuthLink
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonObject
@@ -390,6 +391,8 @@ class WalletActionsTest {
         // the signer writes expirations from the same phone clock
         w.env.api.broadcaster.nowMillis = { w.app.clock() }
         w.chainClock = { TestApp.NOW + testScheduler.currentTime }
+        // the device's monotonic clock runs with real (test) time whatever the phone's clock says
+        w.app.monotonicClock = { testScheduler.currentTime }
     }
 
     /** How long a key signed swap stays off a read that has it: its 60 s lifetime and the node lag margin. */
@@ -862,26 +865,309 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aSwapWhoseHiveAuthPromptClosedWhileTheWalletWaitsStaysOffForTheHour() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        try {
+            com.ecency.core.secure.KeyVault(w.app.store).save(
+                com.ecency.core.secure.VaultAccount(
+                    WalletWorld.USER, com.ecency.core.secure.AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e",
+                    hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-${WalletWorld.USER}",
+                ),
+            )
+            swapFormOpen(w, m)
+            w.app.relay.autoApproveSign = false
+            m.setAmount("3")
+            m.next()
+            m.confirm()
+            repeat(10) { testScheduler.runCurrent() }
+            assertEquals(HiveAuthStep.WAITING, assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt).step)
+            // closed while the wallet app still holds the request: it can approve it until it expires
+            w.env.signing.cancel()
+            advance(100)
+            assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, (m.current.prompt as? TradePrompt.Alert)?.message, "not \"nothing was sent\": check the wallet")
+            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the swap may still land")
+            advance(65 * 60_000L)
+            assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the wallet app may approve it later: an hour more")
+            advance(60 * 60_000L)
+            assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "past both hours of chain time it is decided")
+        } finally {
+            m.close()
+        }
+    }
+
+    /** The app quits ([w]'s environment stops) and launches again on the same device. */
+    private fun TestScope.relaunched(w: WalletWorld, m: TradeModel): WalletWorld {
+        advance(100)
+        m.close()
+        w.env.wallet.close()
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        return again
+    }
+
+    @Test
+    fun aSwapPendingAtARestartStillComesOffUntilItExpires() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        // accepted; the node read after it does not have it yet
+        swapAcceptedNow(w, m, amount = "3", left = "12.345")
+        val again = relaunched(w, m)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the first read after the restart lacks the swap: still taken off")
+        advance(keySettle)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "past its signed expiration the chain decided it")
+    }
+
+    @Test
+    fun anAccountThatLeftTakesItsPendingSwapsWithIt() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        swapAcceptedNow(w, m, amount = "3", left = "12.345")
+        w.env.accountsLeft(listOf(WalletWorld.USER), forget = true) {}
+        val again = relaunched(w, m)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing of the account left behind")
+    }
+
+    @Test
+    fun aSavedSwapOlderThanAnyTransactionCanLiveIsDropped() = runTest {
+        val w = world(this)
+        clocks(w)
+        val chainNow = TestApp.NOW + testScheduler.currentTime
+        // the latest it could land, by the chain's time, is long past: the first load settles it
+        val old = StoredSwap(WalletWorld.USER, "HIVE", 3.0, chainNow - 3 * 3_600_000L, null, "action-old", null, latestBy = chainNow - 2 * 3_600_000L)
+        val fresh = StoredSwap(WalletWorld.USER, "HIVE", 1.0, chainNow - 60_000L, null, "action-fresh", null, latestBy = chainNow + 3_540_000L)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(old, fresh)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "only the recent one is still pending")
+    }
+
+    @Test
+    fun aSwapSignedElsewhereSavedLongAgoIsSettledByTheChainAtTheNextLaunch() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "long-ago")
+        advance(100)
+        w.env.wallet.close()
+        // the app comes back two and a half hours later by the chain's clock: past the latest it could land
+        advance(2 * 3_600_000L + 30 * 60_000L)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "decided long ago, not given a new hour")
+    }
+
+    @Test
+    fun aPhoneClockSetBackBeforeASwapNeverShortensItsBound() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        // three hours pass with no chain read; the phone's clock is set back by as much meanwhile
+        advance(3 * 3_600_000L)
+        w.app.clock = { TestApp.NOW + 1_000 }
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "after-a-step-back")
+        advance(100)
+        w.env.wallet.close()
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the three hours count: it can still land")
+    }
+
+    @Test
+    fun aPhoneClockSetBackAfterASwapStillLetsTheNextLoadsBoundIt() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "then-a-step-back")
+        advance(100)
+        // the phone's clock is set back two hours just after: every later load reads as sent before the swap
+        w.app.clock = { TestApp.NOW + testScheduler.currentTime - 2 * 3_600_000L }
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "it can still land")
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 30_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed its hour")
+    }
+
+    @Test
+    fun aSwapSignedElsewhereStaysPendingAcrossAPhoneClockJump() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        // signed elsewhere, its expiration unknown; the app quits before any load bounds it
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "elsewhere")
+        advance(100)
+        w.env.wallet.close()
+        // the phone's clock jumps three hours ahead while the app is closed
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again, phoneAheadMillis = 3 * 3_600_000L)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001, "the chain's time says it can still land")
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed the latest it could land")
+    }
+
+    @Test
+    fun aSwapSavedWithTheClockAheadStillGetsItsHourAfterARestart() = runTest {
+        val w = world(this)
+        clocks(w)
+        // signed elsewhere while the phone's clock ran 5 hours ahead, corrected since
+        val ahead = StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() + 5 * 3_600_000L, null, "action-ahead", null)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(ahead)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "an hour from the first load after the restart, not from the old clock")
+    }
+
+    @Test
+    fun aHiveAuthSwapWaitingAtLogoutIsNotSavedForTheAccountThatLeft() = runTest {
+        val w = world(this)
+        val m = w.env.tradeModel("HIVE")
+        com.ecency.core.secure.KeyVault(w.app.store).save(
+            com.ecency.core.secure.VaultAccount(
+                WalletWorld.USER, com.ecency.core.secure.AuthType.HIVE_AUTH, hiveAuthKey = "3f0c2e9a-1b7d-4c55-9e2a-6d8f0b1c2a3e",
+                hiveAuthToken = "has-token", hiveAuthExpiry = TestApp.NOW + 60_000_000, accessToken = "access-${WalletWorld.USER}",
+            ),
+        )
+        swapFormOpen(w, m)
+        w.app.relay.autoApproveSign = false
+        m.setAmount("3")
+        m.next()
+        m.confirm()
+        repeat(10) { testScheduler.runCurrent() }
+        assertEquals(HiveAuthStep.WAITING, assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt).step)
+        // logging out closes the prompt: the send may still land, but its account left
+        launch { w.env.session.logout(WalletWorld.USER) }
+        advance(1_000)
+        val again = relaunched(w, m)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing of the account that left came back")
+    }
+
+    @Test
+    fun aLoadOtherThanTheFirstStillWaitsForTheSavedSwaps() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() - 60_000L, null, "action-1", null))))
+        // a refresh, not start(), is the first to read the wallet
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "the saved swap is off the first balance read")
+    }
+
+    @Test
+    fun aSavedSwapWithAKnownExpirationOutlivesAPhoneClockJump() = runTest {
+        val w = world(this)
+        clocks(w, phoneAheadMillis = 3 * 3_600_000L)
+        // signed here a minute ago by the chain's clock; the phone's clock has since jumped three hours ahead
+        val chainNow = TestApp.NOW + testScheduler.currentTime
+        val saved = StoredSwap(WalletWorld.USER, "HIVE", 1.0, chainNow - 60_000L, chainNow + 60_000L, "action-1", null)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(saved)))
+        w.env.wallet.start()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001, "still pending by the chain's time")
+        advance(60_000L + WalletModel.NODE_LAG_MILLIS + 10_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed it")
+    }
+
+    @Test
+    fun aSavedSwapReadThatFailsIsTriedAgainNotTakenAsNone() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.app.store.putString("wallet.pendingSwaps", StoredSwap.encode(listOf(StoredSwap(WalletWorld.USER, "HIVE", 1.0, w.app.clock() - 60_000L, null, "action-1", null))))
+        w.app.store.failingReads["wallet.pendingSwaps"] = com.ecency.core.secure.SecureStoreException.Unavailable(-1)
+        w.env.wallet.start()
+        advance(1_000)
+        assertNull(w.env.wallet.available("HIVE"), "no balance while the saved swaps cannot be read")
+        w.app.store.failingReads.clear()
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(11.345, w.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
+    fun anAccountThatLeftRecordsNoSwapFromALateOutcome() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.forgetSwaps(listOf(WalletWorld.USER))
+        // its send's outcome arrives after it left
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "late")
+        advance(100)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(12.345, again.env.wallet.available("HIVE")!!, 0.0001, "nothing saved for it either")
+    }
+
+    @Test
+    fun aSwapRecordedJustBeforeTheWalletClosesIsStillSaved() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "just-now")
+        // closed before its write ran
+        w.env.wallet.close()
+        advance(100)
+        val again = WalletWorld(this, store = w.app.store)
+        clocks(again)
+        again.env.wallet.start()
+        advance(1_000)
+        assertEquals(9.345, again.env.wallet.available("HIVE")!!, 0.0001)
+    }
+
+    @Test
+    fun aSavedSwapReadsBackAsItWasAndSkipsWhatIsNotOne() {
+        val s = StoredSwap(WalletWorld.USER, "HBD", 1.5, 1_000L, 2_000L, "action-1", 912345678L, latestBy = 3_000L, lateApproval = true)
+        assertEquals(listOf(s), StoredSwap.decode(StoredSwap.encode(listOf(s))))
+        val bad = """[{"account":"${WalletWorld.USER}","symbol":"BTC","amount":1,"at":1},{"account":"${WalletWorld.USER}","symbol":"HIVE","amount":"1","at":1},{"symbol":"HIVE","amount":1,"at":1},7]"""
+        assertEquals(emptyList(), StoredSwap.decode(bad))
+        assertEquals(emptyList(), StoredSwap.decode("not json"))
+    }
+
+    @Test
     fun aLoadSentBeforeASwapNeverStartsItsHour() = runTest {
         val w = world(this)
         clocks(w)
         w.env.wallet.start()
         advance(1_000)
-        // a load goes out, its account read held; the swap is accepted meanwhile; the read lands 4 s on
+        // a load goes out, its account read held; the swap is accepted 8 s on; the read lands 9 s on (inside one attempt's 10 s)
         val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
         w.gates["condenser_api.get_accounts"] = gate
         w.env.wallet.refresh()
         testScheduler.runCurrent()
-        advance(1_000)
+        advance(8_000)
+        val swapAt = testScheduler.currentTime
         w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false)
-        advance(3_000)
+        advance(1_000)
         w.gates.remove("condenser_api.get_accounts")
         gate.complete(Unit)
         advance(100)
-        // an hour from the held load's head ends about 2 minutes before one from the next load, sent after the swap
-        advance(3_780_000L - testScheduler.currentTime)
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from a read sent after the swap")
-        advance(120_000)
+        // accepted by the time it was recorded: it lands within the hour from then, and leaves the node lag after
+        val due = swapAt + 3_600_000L + WalletModel.NODE_LAG_MILLIS
+        advance(due - 5_000L - testScheduler.currentTime)
+        // a refresh then (pull to refresh) reads a head past the read's own hour, but not past the swap's
+        w.env.wallet.refresh()
+        advance(100)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from the swap, not from the read sent before it")
+        // that refresh booked the next look a node lag on
+        advance(WalletModel.NODE_LAG_MILLIS + 5_000L)
         assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
     }
 
@@ -901,6 +1187,24 @@ class WalletActionsTest {
         w.rpc["condenser_api.get_accounts"] = accounts
         advance(keySettle + 60_000)
         assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "a later look settled it")
+    }
+
+    @Test
+    fun anUndecidedSwapIsStillSettledWhenReadsFailForItsWholeTwoHours() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, undecided = true)
+        // every account read fails past the swap's two hours; nothing else reloads the wallet
+        val accounts = w.rpc.getValue("condenser_api.get_accounts")
+        w.rpc["condenser_api.get_accounts"] = { "[]" }
+        w.env.wallet.refresh()
+        advance(2 * WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + 10 * 60_000L)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        w.rpc["condenser_api.get_accounts"] = accounts
+        advance(WalletModel.NODE_LAG_MILLIS + 5_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "the looks went on until the chain decided it")
     }
 
     @Test

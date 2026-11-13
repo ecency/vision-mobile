@@ -166,11 +166,12 @@ data class WaveEntry(
     val flaggedNsfw: Boolean = false,
 ) {
     companion object {
-        fun fromJson(element: JsonElement?): WaveEntry? {
+        /** [observer]: the account the row's voter list (promoted rows have one) answers for; feed rows have none. */
+        fun fromJson(element: JsonElement?, observer: String = ""): WaveEntry? {
             val o = element.obj() ?: return null
             val rawCreated = o.str("created") ?: o.str("timestamp")
             val created = rawCreated?.let(::chainTime).orEmpty()
-            val post = Post.fromJson(o) ?: return null
+            val post = Post.fromJson(o, observer) ?: return null
             val host = o.str("host").orEmpty()
             val video = o["video"].obj()?.let { v ->
                 val author = v.str("author") ?: return@let null
@@ -249,9 +250,12 @@ class WavesApi(private val http: AuthHttp, val host: String = "https://ecency.co
     suspend fun shorts(params: WavesFeedParams, cursor: String? = null): List<WaveEntry> =
         rows(get(shortsUrl(host, params, cursor), "Failed to fetch shorts feed"))
 
-    /** SDK getPromotedPostsQuery("waves"): bridge-shaped entries with votes and reputation. */
+    /**
+     * SDK getPromotedPostsQuery("waves"): bridge-shaped entries with votes and reputation, read for [observer] (as
+     * [com.ecency.core.api.EcencyRestApi.promotedEntries]).
+     */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun promoted(): List<WaveEntry> = rows(get(promotedUrl(host), "Failed to fetch promoted waves"))
+    suspend fun promoted(observer: String = ""): List<WaveEntry> = rows(get(promotedUrl(host), "Failed to fetch promoted waves"), observer)
 
     /** SDK getWavesTrendingTagsQueryOptions; like the SDK, any failure is an empty list. */
     @Throws(CancellationException::class)
@@ -284,7 +288,8 @@ class WavesApi(private val http: AuthHttp, val host: String = "https://ecency.co
         null
     }
 
-    private fun rows(element: JsonElement?): List<WaveEntry> = element.arr().orEmpty().mapNotNull(WaveEntry::fromJson)
+    private fun rows(element: JsonElement?, observer: String = ""): List<WaveEntry> =
+        element.arr().orEmpty().mapNotNull { WaveEntry.fromJson(it, observer) }
 
     private suspend fun get(url: String, what: String): JsonElement? {
         val result = try {

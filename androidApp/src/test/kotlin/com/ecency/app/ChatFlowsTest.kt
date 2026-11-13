@@ -95,7 +95,7 @@ class ChatNode {
     }
 
     fun env() = AppEnvironment(
-        api = EcencyApi(listOf("https://node-a.example"), transport),
+        api = EcencyApi(listOf("https://node-a.example"), withoutBridgeV2(transport)),
         vault = KeyVaultAsync(KeyVault(store), Dispatchers.IO),
         renderer = InterimPostBodyRenderer("https://i.ecency.com"),
         dispatchers = AppDispatchers(Dispatchers.Main, Dispatchers.Default, Dispatchers.IO),

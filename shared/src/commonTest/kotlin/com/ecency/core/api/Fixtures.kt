@@ -1,6 +1,9 @@
 package com.ecency.core.api
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 
 /**
  * Synthetic bridge entries, shaped like real `bridge.*` results (field names and types taken
@@ -44,4 +47,14 @@ object Fixtures {
     }
 
     fun array(vararg entries: String) = entries.joinToString(",", "[", "]")
+
+    /**
+     * [entry] as a bridge v2 read answers it: no `active_votes`, the observer's vote as `observer_vote` (JSON text,
+     * "null" for not voted) and the count in `stats.total_votes`.
+     */
+    fun v2(entry: String, totalVotes: Int, observerVote: String = "null"): String {
+        val o = Json.parseToJsonElement(entry).jsonObject
+        val stats = JsonObject(o.getValue("stats").jsonObject + ("total_votes" to JsonPrimitive(totalVotes)))
+        return JsonObject(o - "active_votes" + ("stats" to stats) + ("observer_vote" to Json.parseToJsonElement(observerVote))).toString()
+    }
 }

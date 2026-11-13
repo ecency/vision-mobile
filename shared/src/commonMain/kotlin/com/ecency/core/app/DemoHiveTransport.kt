@@ -54,7 +54,9 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
                 put("id", id)
             }.toString())
         }
-        val result: JsonElement = when (method) {
+        // the demo node serves the vote-free bridge v2 reads: the v1 answer without its voter list (voteFree)
+        val v2 = method.startsWith("bridge.") && method.endsWith("_v2")
+        val result: JsonElement = when (method.removeSuffix("_v2").takeIf { v2 } ?: method) {
             "bridge.get_ranked_posts" -> if (firstPage()) feed(null) else JsonArray(emptyList())
             "bridge.get_account_posts" -> if (firstPage()) feed(text("account") ?: AUTHORS[0]) else JsonArray(emptyList())
             "bridge.get_post" -> {
@@ -110,11 +112,12 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
                 val prefix = (listed?.firstOrNull() as? JsonPrimitive)?.content.orEmpty()
                 JsonArray(AUTHORS.filter { it >= prefix }.map(::JsonPrimitive))
             }
-            "condenser_api.get_active_votes" -> JsonArray((0 until 8).map { i ->
+            // the voters screen (HiveApi.entryVotes): one short page
+            "bridge.list_votes" -> if (named?.get("start") != null) JsonArray(emptyList()) else JsonArray((0 until 8).map { i ->
                 buildJsonObject {
                     put("voter", AUTHORS[i % AUTHORS.size] + if (i >= AUTHORS.size) "-$i" else "")
                     put("rshares", if (i == 7) -200 else (8 - i) * 1000); put("percent", if (i == 7) -10000 else 10000 - i * 1000)
-                    put("time", "2026-10-0${1 + i % 5}T12:00:00")
+                    put("weight", 8 - i); put("time", "2026-10-0${1 + i % 5}T12:00:00")
                 }
             })
             "condenser_api.get_reblogged_by" -> buildJsonArray { add("spike-bob"); add("spike-carol"); add("spike-dave") }
@@ -126,7 +129,15 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             // other chain state: refused, like an unreachable node
             else -> return HttpResult(503, "demo transport: $method is not available offline")
         }
-        return HttpResult(200, buildJsonObject { put("jsonrpc", "2.0"); put("result", result); put("id", id) }.toString())
+        return HttpResult(200, buildJsonObject { put("jsonrpc", "2.0"); put("result", if (v2) voteFree(result) else result); put("id", id) }.toString())
+    }
+
+    /** A v1 answer (an entry, a list of them, or a discussion map) as v2 sends it: no voter list, no own vote (demo accounts vote nowhere). */
+    private fun voteFree(result: JsonElement): JsonElement = when (result) {
+        is JsonArray -> JsonArray(result.map(::voteFree))
+        is JsonObject -> if ("permlink" in result) JsonObject(result - "active_votes" + ("observer_vote" to JsonNull))
+        else JsonObject(result.mapValues { voteFree(it.value) })
+        else -> result
     }
 
     private fun community(name: String, title: String) = buildJsonObject {

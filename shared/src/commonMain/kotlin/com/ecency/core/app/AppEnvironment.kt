@@ -603,6 +603,9 @@ class AppEnvironment(
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { pointActivities.forget(drafts) } }
         // nothing signs again for an account that left (a pending holds its key in memory)
         guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { walletSends.accountsLeft(drafts) } }
+        // so do its pending swaps (WalletModel saves them across restarts), after its sends stopped: a send's outcome
+        // can no longer record one
+        guardedStep { kotlinx.coroutines.withContext(dispatchers.main) { wallet.forgetSwaps(drafts) } }
         // nor does a broadcast retry the broadcaster keeps after a network error (it holds the key too)
         guardedStep { if (drafts == null) api.broadcaster.clear() else drafts.forEach { api.broadcaster.forgetAccount(it) } }
         // a chat token never outlives its account (RN setChatApiToken(null) + clearMattermostBootstrapCache on logout)

@@ -164,7 +164,7 @@ class DeltaFixesTest {
         testScheduler.advanceUntilIdle()
         assertEquals(4, feed.current.pages)
         assertTrue(feed.current.endReached, "three pages in a row added nothing")
-        assertEquals(4, app.transport.sent.count { it.method == "bridge.get_ranked_posts" })
+        assertEquals(4, app.transport.sent.count { it.method == "bridge.get_ranked_posts_v2" })
         feed.close()
     }
 }

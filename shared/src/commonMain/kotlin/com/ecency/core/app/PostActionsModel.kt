@@ -81,8 +81,9 @@ object PostFooter {
     /** [votes] is the count the card shows (it takes a vote made in the app before the chain has it). */
     fun actions(shown: Post, votes: Int, user: String?): List<PostMenuItem> {
         if (!canEdit(shown, user)) return emptyList()
-        // RN: !childCount && !_totalVotes && isDeletable (no active_votes, no children, net_rshares <= 0)
-        val noVotes = votes == 0 && shown.stats.totalVotes == 0 && shown.activeVotes.isEmpty()
+        // RN: !childCount && !_totalVotes && isDeletable (no votes, no children, net_rshares <= 0); the count is
+        // stats.total_votes, as entries no longer carry a voter list (bridge v2)
+        val noVotes = votes == 0 && shown.stats.totalVotes == 0
         return if (noVotes && canDelete(shown, user)) listOf(PostMenuItem.EDIT, PostMenuItem.DELETE) else listOf(PostMenuItem.EDIT)
     }
 }

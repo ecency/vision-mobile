@@ -1436,6 +1436,36 @@ class FeedxTest {
         feed.close()
     }
 
+    @Test
+    fun anOlderPromotedAnswerNeverLandsOverANewerOne() = runTest {
+        val feedJson = (1..5).joinToString(",") { entry("a$it", "p$it") }
+        val app = TestApp(this, handler = { req ->
+            when (req.method) {
+                "bridge.get_ranked_posts" -> FakeTransport.result(req, "[$feedJson]")
+                else -> HttpResult(500, "")
+            }
+        })
+        var promotedReads = 0
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        app.authBackend.gate = { r -> if (r.url.endsWith("/private-api/promoted-entries") && promotedReads++ == 0) held.await() }
+        // the held first read answers last: the first answer to come back is the newer read's
+        var answers = 0
+        app.authBackend.rest = { r ->
+            if (r.url.endsWith("/private-api/promoted-entries")) HttpResult(200, "[${entry("promo", if (answers++ == 0) "new" else "old")}]") else null
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING), withPromoted = true)
+        feed.start()
+        testScheduler.runCurrent()
+        // a refresh asks again while the first promoted read is still out; the first answers last
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        val promoted = feed.current.items.filter { it.featuredText == "PROMOTED" }.map { it.key.permlink }
+        assertEquals(listOf("new"), promoted)
+        feed.close()
+    }
+
     // ---------------------------------------------------------------- lists
 
     @Test
@@ -1460,7 +1490,7 @@ class FeedxTest {
     fun votersSortAndSearchLikeRn() = runTest {
         val app = TestApp(this, handler = { req ->
             when (req.method) {
-                "condenser_api.get_active_votes" -> FakeTransport.result(
+                "bridge.list_votes" -> FakeTransport.result(
                     req,
                     """[{"voter":"alpha","rshares":"100","percent":5000,"time":"2026-10-02T00:00:00"},
                         {"voter":"beta","rshares":300,"percent":10000,"time":"2026-10-03T00:00:00"},

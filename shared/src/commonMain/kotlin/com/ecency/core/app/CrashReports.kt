@@ -182,12 +182,18 @@ class IapErrors internal constructor(private val reporter: () -> CrashReporter, 
         val productId = error.productId?.takeIf { it.isNotEmpty() } ?: sku
         val now = nowMillis()
         recent.entries.removeAll { now - it.value > DUPLICATE_WINDOW_MILLIS }
-        val key = "${error.code}|${productId.orEmpty()}"
+        // a dropped connection shares Play's service-error code: kept apart, so it never hides a real one
+        val key = "${error.code}${if (error.isConnectionDropped) "/dropped" else ""}|${productId.orEmpty()}"
         if (key in recent) return IapReport.DUPLICATE
         recent[key] = now
         if (error.isUserCancelled) {
             reporter().breadcrumb("iap", "user cancelled purchase", mapOf("stage" to stage.tag, "productId" to productId.orEmpty()))
             return IapReport.CANCELLED
+        }
+        if (error.isConnectionDropped) {
+            // transient and not ours: a breadcrumb for the next real issue, no event of its own (the user still hears of it)
+            reporter().breadcrumb("iap", "store connection dropped", mapOf("stage" to stage.tag, "productId" to productId.orEmpty()))
+            return IapReport.REPORTED
         }
         reporter().capture(
             CrashReport(

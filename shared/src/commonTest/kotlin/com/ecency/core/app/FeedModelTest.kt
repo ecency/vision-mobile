@@ -266,4 +266,22 @@ class FeedModelTest {
         assertTrue(app.render.dispatches > 0)
         feed.close()
     }
+
+    @Test
+    fun aV2FeedCardCountsVotesFromStats() = runTest {
+        // #3671 acceptance: v2 entries carry no voter list; the card's count is stats.total_votes
+        val row = com.ecency.core.api.Fixtures.v2(entry("author0", "p-0", votes = listOf("x")), totalVotes = 1225, observerVote = """{"rshares":5,"percent":100}""")
+        val app = TestApp(this) { req ->
+            if (req.method == "bridge.get_ranked_posts_v2") FakeTransport.result(req, "[$row]") else TestApp.chain(req) ?: HttpResult(500, "")
+        }
+        app.signIn()
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val feed = app.env.feedModel(source)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1225, feed.current.items.firstOrNull()?.votes)
+        assertEquals(true, feed.current.items.firstOrNull()?.votedByMe)
+        feed.close()
+    }
 }

@@ -20,7 +20,12 @@ data class Sent(val node: String, val body: String) {
     val params: JsonElement get() = json.getValue("params")
 }
 
-/** Scripted transport: [handler] answers each request; every request is recorded in [sent]. */
+/**
+ * Scripted transport: [handler] answers each request; every request is recorded in [sent]. Nodes lack the bridge v2
+ * reads and `bridge.list_votes` unless [handler] answers them: a request for one that the handler answers with HTTP
+ * 500 (the tests' "no fixture") gets hivemind's `unknown method` assert, as an older node gives. Any other answer,
+ * a 503 included, is passed on as it is.
+ */
 class FakeTransport(private val handler: suspend FakeTransport.(Sent) -> HttpResult) : RpcTransport {
     private val lock = Mutex()
     private val log = mutableListOf<Sent>()
@@ -31,7 +36,9 @@ class FakeTransport(private val handler: suspend FakeTransport.(Sent) -> HttpRes
     override suspend fun post(url: String, body: String): HttpResult {
         val request = Sent(url, body)
         lock.withLock { log += request }
-        return handler(request)
+        val answer = handler(request)
+        val v2 = runCatching { request.method }.getOrNull()?.let { it.startsWith("bridge.") && (it.endsWith("_v2") || it == "bridge.list_votes") } == true
+        return if (v2 && answer.status == 500) unknownMethod(request) else answer
     }
 
     fun methods(): List<String> = sent.map { it.method }
@@ -42,6 +49,12 @@ class FakeTransport(private val handler: suspend FakeTransport.(Sent) -> HttpRes
 
         fun error(request: Sent, code: Int, message: String, data: String = "null") =
             HttpResult(200, """{"jsonrpc":"2.0","error":{"code":$code,"message":${Json.encodeToString(message)},"data":$data},"id":${request.id}}""")
+
+        /** hivemind's answer on a node without the method (`bridge.get_post_v2` is `bridge_apiget_post_v2`). */
+        fun unknownMethod(request: Sent): HttpResult {
+            val name = request.method.replaceFirst(".", "_api")
+            return error(request, -32602, "Assert Exception:unknown method: $name", """{"code":10,"extension":{"assertion_expression":"unknown method: $name"}}""")
+        }
 
         /** Answers by method name from [results] (JSON text); anything else is an HTTP 500. */
         fun byMethod(results: Map<String, String>) = FakeTransport { request ->
