@@ -1190,6 +1190,24 @@ class WalletActionsTest {
     }
 
     @Test
+    fun anUndecidedSwapIsStillSettledWhenReadsFailForItsWholeTwoHours() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, undecided = true)
+        // every account read fails past the swap's two hours; nothing else reloads the wallet
+        val accounts = w.rpc.getValue("condenser_api.get_accounts")
+        w.rpc["condenser_api.get_accounts"] = { "[]" }
+        w.env.wallet.refresh()
+        advance(2 * WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + 10 * 60_000L)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001)
+        w.rpc["condenser_api.get_accounts"] = accounts
+        advance(WalletModel.NODE_LAG_MILLIS + 5_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "the looks went on until the chain decided it")
+    }
+
+    @Test
     fun aStuckNodeAfterASwapSettledNeverBringsItBack() = runTest {
         val w = world(this)
         val m = w.env.tradeModel("HIVE")

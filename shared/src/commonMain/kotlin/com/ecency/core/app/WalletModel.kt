@@ -722,7 +722,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             (DEFAULT_ASSETS + tokens.filter { it.show && it.type != "HIVE" && it.symbol != "SPK" }.map { it.symbol }).distinct()
 
         private const val SWAPS_ENTRY = "wallet.pendingSwaps"
-        private const val SETTLE_LOADS = (MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
+        // a failed load looks again a node lag on: enough looks for the longest a swap can wait (an undecided one's
+        // two hours, Swap.window) and its margin, with some to spare
+        private const val SETTLE_LOADS = (2 * MAX_TRANSACTION_LIFETIME_MILLIS / NODE_LAG_MILLIS).toInt() + 10 + ORDER_LOOKS
     }
 }
 
