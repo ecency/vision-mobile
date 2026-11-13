@@ -270,16 +270,19 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * A swap's sale of [amount] [symbol] from [account] that may be on chain since [at] (this phone's clock). Taken off
      * the swap form's balance until the chain has decided it for good: past its transaction's expiration it is in a
      * block or never will be. [expiresBy] bounds that expiration in chain time, once known. [floor]: the last chain
-     * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond) at or below that shows it.
+     * read before it less the swaps still waiting and this one; a read sent after it (in a later millisecond, [atMono]) at or below that shows it.
      * [orderId]: its limit order's id, which only this swap's own operation carries in the account's history.
      * [latestBy]: for one without [expiresBy], the latest chain time it could still land, from the last chain read
      * before it (its head, the time since, an hour for a late approval and a transaction's hour); null without one.
+     * [atMono]: [at] on the monotonic clock, which orders the loads of this run against it (a phone clock set back
+     * never makes a later load look sent before it); [Long.MIN_VALUE] for one restored, which every load follows.
      */
     private class Swap(
         val account: String, val symbol: String, val amount: Double, val at: Long, var expiresBy: Long?,
         val floor: Double?, val floorSentAt: Long, val actionId: String?, val orderId: Long?, val latestBy: Long? = null,
         /** Its outcome is undecided: a wallet app may still approve it later (a HiveAuth request closed while waiting). */
-        val lateApproval: Boolean = false,
+        val lateApproval: Boolean,
+        val atMono: Long,
     ) {
         /** How long after its acceptance could be bounded it can still land: a late approval adds its hour. */
         val window: Long get() = MAX_TRANSACTION_LIFETIME_MILLIS * (if (lateApproval) 2 else 1)
@@ -330,7 +333,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
         val latestBy = if (expiresBy != null) null else chainRead?.takeIf { it.account == account }?.let {
             it.head + (env.security.monotonicMillis() - it.sentMono).coerceAtLeast(0) + window
         }
-        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy, undecided)
+        swaps += Swap(account, symbol, amount, now, expiresBy, floor, floorRead?.sentAt ?: now, actionId, orderId, latestBy, undecided, env.security.monotonicMillis())
         settleLoadsLeft = SETTLE_LOADS
         saveSwaps()
     }
@@ -357,14 +360,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     }
 
     /**
-     * A load of [account] sent at [sentAt] landed with the chain read [read], null when its account or time read
+     * A load of [account] sent at [sentMono] (the monotonic clock) landed with the chain read [read], null when its account or time read
      * failed, or the load did (it then settles nothing), and [landed]: the swap orders the account's history had just
      * before. Swaps it shows leave ([Swap.floor], [Swap.orderId]); swaps it can bound get
      * their expiration bound, and those the chain decided [NODE_LAG_MILLIS] before its head time leave too (the account
      * read may come from a server of the node URL a little behind the one that told the time). A swap still waiting
      * books the load after.
      */
-    private fun settle(account: String, sentAt: Long, read: ChainRead?, landed: Set<Long> = emptySet()) {
+    private fun settle(account: String, sentMono: Long, read: ChainRead?, landed: Set<Long> = emptySet()) {
         val head = read?.head
         var orderSoon = false
         val before = swaps.size
@@ -372,14 +375,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             // a send of this account started since the floor read, the swap's and those waiting aside, could be the drop
             val known = swapActions.toSet()
             val dropped = swaps.filter { sw ->
-                sw.account == account && sentAt > sw.at && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true) &&
+                sw.account == account && sentMono > sw.atMono && sw.floor != null && (read.liquid[sw.symbol]?.let { it <= sw.floor + HALF_UNIT } == true) &&
                     !env.signing.broadcastSince(account, sw.floorSentAt, known)
             }
             // one from another wallet could be too, so the swap's own order must be on chain; an accepted swap shows in
             // the balance before its block reaches the history, so a few short looks follow before its expiration wait
             swaps.removeAll { sw -> sw in dropped && sw.orderId != null && sw.orderId in landed }
             dropped.filter { it in swaps && it.orderLooks < ORDER_LOOKS }.forEach { it.orderLooks++; orderSoon = true }
-            val bound = swaps.filter { it.account == account && it.expiresBy == null && sentAt > it.at }
+            val bound = swaps.filter { it.account == account && it.expiresBy == null && sentMono > it.atMono }
             bound.forEach { sw -> sw.expiresBy = (head + sw.window).let { by -> sw.latestBy?.let { minOf(it, by) } ?: by } }
             swaps.removeAll { it.account == account && it.expiresBy?.let { by -> head >= by + NODE_LAG_MILLIS } == true }
             // a bound just set is saved too: after a restart the hour runs from it, never from a later load
@@ -473,7 +476,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             s.actionId?.let { swapActions += it }
             // never later than now: the first load after the restart bounds an unbound one, whatever the clock said then
             val at = minOf(s.at, now - 1)
-            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId, s.latestBy, s.lateApproval)
+            swaps += Swap(s.account, s.symbol, s.amount, at, s.expiresBy, null, at, s.actionId, s.orderId, s.latestBy, s.lateApproval, Long.MIN_VALUE)
         }
         settleLoadsLeft = SETTLE_LOADS
         true
@@ -585,7 +588,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 val last = chainRead?.takeIf { it.account == user }
                 val forward = if (chain != null && head != null && (last == null || head >= last.head)) ChainRead(user, chainLiquid(chain), head, sentAt, sentMono) else null
                 if (forward != null) chainRead = forward
-                settle(user, sentAt, forward, landed)
+                settle(user, sentMono, forward, landed)
                 loading = null
                 setState {
                     withRows(

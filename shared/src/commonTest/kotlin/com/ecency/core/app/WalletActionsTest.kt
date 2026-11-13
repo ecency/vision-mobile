@@ -982,6 +982,23 @@ class WalletActionsTest {
     }
 
     @Test
+    fun aPhoneClockSetBackAfterASwapStillLetsTheNextLoadsBoundIt() = runTest {
+        val w = world(this)
+        clocks(w)
+        w.env.wallet.start()
+        advance(1_000)
+        w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false, actionId = "then-a-step-back")
+        advance(100)
+        // the phone's clock is set back two hours just after: every later load reads as sent before the swap
+        w.app.clock = { TestApp.NOW + testScheduler.currentTime - 2 * 3_600_000L }
+        w.env.wallet.refresh()
+        advance(1_000)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "it can still land")
+        advance(WalletModel.MAX_TRANSACTION_LIFETIME_MILLIS + WalletModel.NODE_LAG_MILLIS + 30_000)
+        assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001, "settled once the chain passed its hour")
+    }
+
+    @Test
     fun aSwapSignedElsewhereStaysPendingAcrossAPhoneClockJump() = runTest {
         val w = world(this)
         clocks(w)
@@ -1130,23 +1147,27 @@ class WalletActionsTest {
         clocks(w)
         w.env.wallet.start()
         advance(1_000)
-        // a load goes out, its account read held; the swap is accepted meanwhile; the read lands 4 s on
+        // a load goes out, its account read held; the swap is accepted 8 s on; the read lands 9 s on (inside one attempt's 10 s)
         val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
         w.gates["condenser_api.get_accounts"] = gate
         w.env.wallet.refresh()
         testScheduler.runCurrent()
-        advance(1_000)
+        advance(8_000)
         val swapAt = testScheduler.currentTime
         w.env.wallet.spent(WalletWorld.USER, "HIVE", 3.0, keySigned = false)
-        advance(3_000)
+        advance(1_000)
         w.gates.remove("condenser_api.get_accounts")
         gate.complete(Unit)
         advance(100)
         // accepted by the time it was recorded: it lands within the hour from then, and leaves the node lag after
         val due = swapAt + 3_600_000L + WalletModel.NODE_LAG_MILLIS
-        advance(due - 10_000L - testScheduler.currentTime)
-        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from the swap")
-        advance(30_000L)
+        advance(due - 5_000L - testScheduler.currentTime)
+        // a refresh then (pull to refresh) reads a head past the read's own hour, but not past the swap's
+        w.env.wallet.refresh()
+        advance(100)
+        assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the hour runs from the swap, not from the read sent before it")
+        // that refresh booked the next look a node lag on
+        advance(WalletModel.NODE_LAG_MILLIS + 5_000L)
         assertEquals(12.345, w.env.wallet.available("HIVE")!!, 0.0001)
     }
 
