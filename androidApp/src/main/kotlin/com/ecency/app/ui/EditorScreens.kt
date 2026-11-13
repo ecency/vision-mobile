@@ -454,6 +454,25 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
         val caret = layout.getCursorRect(field.selection.end.coerceIn(0, field.text.length))
         caretRequester.bringIntoView(caret.inflate(caretMargin))
     }
+    // a selection end that moved (a handle dragged to the top or the bottom, a caret moved by keys) is kept in view.
+    // Compose's field scrolls only itself, and a growing body is never scrolled by it, so the selection stopped one
+    // line past the window's edge, out of sight (tester report: selecting in a long draft). Only while the body is
+    // focused: a draft that opens with its caret restored stays at its title. Not for a long body that scrolls itself:
+    // the layout's rects are not in its scrolled coordinates, so the column would jump; its selection is left to Compose
+    val selectionShown = remember { arrayOf(field.selection) }
+    LaunchedEffect(field.selection) {
+        val before = selectionShown[0]
+        val selection = field.selection
+        selectionShown[0] = selection
+        if (!bodyFocused || bodyScrollsItself) return@LaunchedEffect
+        val layout = bodyLayout ?: return@LaunchedEffect
+        val moved = when {
+            selection.start != before.start -> selection.start
+            selection.end != before.end -> selection.end
+            else -> return@LaunchedEffect
+        }
+        caretRequester.bringIntoView(layout.getCursorRect(moved.coerceIn(0, layout.layoutInput.text.length)).inflate(caretMargin))
+    }
 
     Column(Modifier.fillMaxSize().imePadding().testTag("editor")) {
         // ---- header ----

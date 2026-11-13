@@ -884,6 +884,89 @@ class EditorFlowsTest {
      * as the visible area and scrolls itself, so a key no longer lays out the whole text; a short body grows with its
      * text. The header still scrolls away and the caret stays on screen.
      */
+    /**
+     * Tester report (Android): selecting in a long draft stopped at the window's edge. The field grows inside the
+     * editor's scroll column and Compose scrolls only the field itself, so the column follows a selection end.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aSelectionEndMovedOutOfViewScrollsTheEditorToIt() {
+        launchSignedIn()
+        openEditor()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        compose.onNodeWithTag("editorBody").performClick()
+        // a draft taller than the window, the caret at its end: the column shows its last lines
+        val text = (1..60).joinToString("\n") { "Line $it of the draft" }
+        compose.onNodeWithTag("editorBody").performTextInput(text)
+        settle()
+        fun lineTop(offset: Int): Float {
+            val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            compose.onNodeWithTag("editorBody").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
+            return node("editorBody").positionInRoot.y + results.first().getCursorRect(offset).top
+        }
+        val third = text.indexOf("Line 3 ")
+        val view = node("editorScroll").boundsInRoot
+        assertTrue("line 3 starts out of view", lineTop(third) < view.top)
+        // the selection's start goes up to line 3 (as a handle dragged past the top does): the column follows it
+        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(third, text.length))
+        settle()
+        val top = lineTop(third)
+        assertTrue("line 3 is in view: $top in ${view.top}..${view.bottom}", top >= view.top - 1f && top < view.bottom)
+        assertEquals(third, model().current.selection.start)
+        // and the end handle dragged down to line 58: the column follows the end
+        val fiftyEighth = text.indexOf("Line 58 ")
+        assertTrue("line 58 is out of view", lineTop(fiftyEighth) > view.bottom)
+        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(third, fiftyEighth))
+        settle()
+        val bottom = lineTop(fiftyEighth)
+        assertTrue("line 58 is in view: $bottom in ${view.top}..${view.bottom}", bottom >= view.top && bottom < view.bottom)
+    }
+
+    /** A saved draft opens at its title: its caret, restored at the end, is no reason to scroll (only a focused body follows it). */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aLongDraftOpensAtItsTitle() {
+        launchSignedIn()
+        openEditor()
+        compose.onNodeWithTag("editorTitle").performTextInput("A saved draft")
+        compose.onNodeWithTag("editorBody").performClick()
+        compose.onNodeWithTag("editorBody").performTextInput((1..60).joinToString("\n") { "Line $it of the draft" })
+        settle()
+        compose.runOnUiThread { navigator.pop() }
+        settle()
+        openEditor()
+        waitUntil { model().current.body.startsWith("Line 1 of") }
+        settle()
+        assertEquals("the caret came back at the end", model().current.body.length, model().current.selection.start)
+        val title = compose.onNodeWithTag("editorTitle", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        val view = compose.onNodeWithTag("editorScroll", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertTrue("the title is on screen: $title in $view", title.top >= view.top && title.bottom <= view.bottom)
+    }
+
+    /** A body that scrolls itself keeps its own selection in view: the editor's column stays where it is. */
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    fun aSelectionInABodyThatScrollsItselfLeavesTheEditorWhereItIs() {
+        launchSignedIn()
+        openEditor()
+        fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        compose.onNodeWithTag("editorBody").performClick()
+        val line = "A line of a long draft, about fifty characters.\n" // 48
+        compose.onNodeWithTag("editorBody").performTextReplacement(line.repeat(250)) // 12,000 characters
+        settle()
+        // the title back on screen, the body still focused
+        compose.onNodeWithTag("editorTitle").performScrollTo()
+        settle()
+        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(100, 200))
+        settle()
+        val title = node("editorTitle").boundsInRoot
+        // the end handle dragged far down
+        compose.onNodeWithTag("editorBody").performTextInputSelection(androidx.compose.ui.text.TextRange(100, 11_000))
+        settle()
+        assertEquals(11_000, model().current.selection.end)
+        assertEquals("the column did not move", title, node("editorTitle").boundsInRoot)
+    }
+
     @Test
     @Config(qualifiers = "w360dp-h640dp")
     fun aLongBodyIsAsTallAsTheViewportAndAShortOneGrows() {

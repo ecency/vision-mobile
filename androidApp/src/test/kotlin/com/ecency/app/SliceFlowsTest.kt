@@ -107,6 +107,12 @@ class SliceFlowsTest {
 
     private fun scrollToInPost(target: SemanticsMatcher) = compose.scrollListTo("postList", target)
 
+    /** [text] is inside the post list's visible area: composed is not enough, a lazy list may compose a block before it is on screen. */
+    private fun onScreen(text: String): Boolean {
+        val list = compose.onNodeWithTag("postList").fetchSemanticsNode().boundsInRoot
+        return compose.onAllNodes(hasText(text)).fetchSemanticsNodes().any { it.boundsInRoot.height > 0f && it.boundsInRoot.overlaps(list) }
+    }
+
     private fun settle() {
         compose.mainClock.advanceTimeBy(2_000)
         compose.waitForIdle()
@@ -229,13 +235,14 @@ class SliceFlowsTest {
         val depth = navigator.state.stack.size
         val link = hasText("Jump down")
         scrollToInPost(link)
-        assertTrue(compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isEmpty())
+        assertFalse("the destination starts off screen", onScreen("Destination heading"))
         compose.onNode(link).performFirstLinkClick()
-        compose.await("the destination on screen") { compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isNotEmpty() }
+        compose.await("the destination on screen") { onScreen("Destination heading") }
         // a finger on the link's first letters does the same (back to the link first)
         scrollToInPost(link)
+        assertFalse("back at the link, the destination is off screen", onScreen("Destination heading"))
         compose.onNode(link).performTouchInput { click(androidx.compose.ui.geometry.Offset(12f, centerY)) }
-        compose.await("the destination on screen") { compose.onAllNodes(hasText("Destination heading")).fetchSemanticsNodes().isNotEmpty() }
+        compose.await("the destination on screen") { onScreen("Destination heading") }
         settle()
         compose.onNode(hasText("Destination heading")).assertIsDisplayed()
         assertEquals(depth, navigator.state.stack.size)
