@@ -128,6 +128,11 @@ data class LocalVote(
     val earlierCounted: Boolean = false,
     /** The rshares of the vote read from the chain ([fromChain]) or of the one this vote replaced: in the post's payout. */
     val earlierRshares: Long? = null,
+    /**
+     * A vote made on this device landed (this one or one it replaced): hivemind counts the account from then on, also
+     * after an unvote, so a read from before it still gets the account added (#3682).
+     */
+    val countedHere: Boolean = false,
 ) {
     /** Without an estimate (Swift sees no default arguments). */
     constructor(weight: Int, pending: Boolean) : this(weight, pending, null)
@@ -198,7 +203,8 @@ class LocalVotes {
             // read from the chain ([LocalVote.fromChain]) is in it (waves feed rows never carried one). Hivemind keeps a
             // removed vote in `total_votes` (a vote is counted once cast before payout), so an unvote takes nothing off.
             val inCount = server != null || post.listedVoter == username || local.earlierCounted
-            val adjusted = count + if (!local.fromChain && hasVote && !inCount) 1 else 0
+            // a vote made here that landed stays in hivemind's count through an unvote ([LocalVote.countedHere])
+            val adjusted = count + if (!local.fromChain && !inCount && (hasVote || local.countedHere)) 1 else 0
             // a read that does not know the account's vote: the replaced vote read from the chain is in its payout, unless
             // the read lists the account with no weight (that vote's share is gone, or never was)
             val serverRshares = server?.rshares ?: local.earlierRshares.takeIf { !post.knowsVoteOf(username) && post.listedVoter != username } ?: 0

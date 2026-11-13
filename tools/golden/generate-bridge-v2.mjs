@@ -7,7 +7,7 @@
 // - getEntryVotes (the voters list: bridge.list_votes pages, database_api.list_votes on a node without it).
 //
 // The SDK comes from a scratch install:
-//   npm install --prefix /tmp/golden-bridge-v2 @ecency/sdk@2.5.0 @tanstack/react-query@5 react
+//   npm install --prefix /tmp/golden-bridge-v2 @ecency/sdk@2.7.0 @tanstack/react-query@5 react
 //   GOLDEN_MODULES=/tmp/golden-bridge-v2 node tools/golden/generate-bridge-v2.mjs \
 //     shared/src/commonTest/kotlin/com/ecency/core/api/BridgeV2Goldens.kt
 //

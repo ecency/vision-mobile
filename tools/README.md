@@ -33,7 +33,7 @@ node tools/render/generate-dom-fixtures.mjs shared/src/commonTest/kotlin/com/ece
 The scripts find their packages next to them (`tools/render/node_modules` for `render/`, `tools/node_modules` for
 the rest) wherever they run from; `golden/generate-wallet.mjs`, `golden/generate-platform.mjs` and
 `golden/generate-bridge-v2.mjs` (the bridge v2 normalizer, per-node fallback and vote lookups, from `@ecency/sdk`
-2.5.0) take another install through `GOLDEN_MODULES` (see their headers).
+2.7.0) take another install through `GOLDEN_MODULES` (see their headers).
 
 Each script's header says what it writes and with which arguments. Diff the output against the committed file: a
 change is either a fix in the package (update the Kotlin side to match, and say so in the PR) or a regression to file
