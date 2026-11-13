@@ -938,9 +938,10 @@ struct EditorScreen: View {
             HStack(spacing: 4) {
                 // owner order (10-28): the writing tools first, AI Assist on screen without scrolling (it holds the
                 // image generator and dictation), the rarely used poll late
-                toolButton("Aa", id: "tool-format", label: EditorUiCopy.shared.TEXT_FORMAT, selected: showFormats) { showFormats.toggle() }
-                toolButton(UiCopy.shared.IMAGE, id: "tool-image", label: UiCopy.shared.IMAGE) { sheet = .uploads }
-                toolButton(UiCopy.shared.VIDEO, id: "tool-video", label: EditorUiCopy.shared.ADD_VIDEO) {
+                // icons (owner 11-13, as RN's editorToolbar); VoiceOver reads the label, a long press shows it large
+                toolButton(icon: .textFormat, id: "tool-format", label: EditorUiCopy.shared.TEXT_FORMAT, selected: showFormats) { showFormats.toggle() }
+                toolButton(icon: .image, id: "tool-image", label: UiCopy.shared.IMAGE) { sheet = .uploads }
+                toolButton(icon: .video, id: "tool-video", label: EditorUiCopy.shared.ADD_VIDEO) {
                     // RN _showVideoUploads: one 3Speak video a post
                     if let why = (video.model as! VideoUploadModel).refusal() {
                         videoNotice = why
@@ -949,24 +950,28 @@ struct EditorScreen: View {
                         sheet = .video
                     }
                 }
-                toolButton(EditorUiCopy.shared.AI_ASSIST, id: "tool-ai-assist", label: EditorUiCopy.shared.AI_WRITING_ASSISTANT) { sheet = .aiAssist }
-                toolButton(EditorUiCopy.shared.SNIPPETS, id: "tool-snippets", label: EditorUiCopy.shared.SNIPPETS) { sheet = .snippets }
-                toolButton(EditorUiCopy.shared.LINK, id: "tool-link", label: EditorUiCopy.shared.INSERT_LINK) { sheet = .link }
-                if !state.isEdit, !state.isReply { toolButton(UiCopy.shared.POLL, id: "tool-poll", label: UiCopy.shared.POLL) { sheet = .poll } }
-                toolButton(UiCopy.shared.TRANSLATE, id: "tool-translate", label: EditorUiCopy.shared.TRANSLATE_POST) { sheet = .translate }
-                toolButton(UiCopy.shared.CLEAR, id: "tool-clear", label: UiCopy.shared.CLEAR) { confirmClear = true }
+                toolButton(icon: .aiAssist, id: "tool-ai-assist", label: EditorUiCopy.shared.AI_WRITING_ASSISTANT) { sheet = .aiAssist }
+                toolButton(icon: .snippets, id: "tool-snippets", label: EditorUiCopy.shared.SNIPPETS) { sheet = .snippets }
+                toolButton(icon: .link, id: "tool-link", label: EditorUiCopy.shared.INSERT_LINK) { sheet = .link }
+                if !state.isEdit, !state.isReply { toolButton(icon: .chartBar, id: "tool-poll", label: UiCopy.shared.POLL, selected: !(state.poll?.title.isEmpty ?? true)) { sheet = .poll } }
+                toolButton(icon: .translate, id: "tool-translate", label: EditorUiCopy.shared.TRANSLATE_POST) { sheet = .translate }
+                toolButton(icon: .discard, id: "tool-clear", label: UiCopy.shared.CLEAR) { confirmClear = true }
             }
             .padding(.horizontal, 8)
         }
         .accessibilityIdentifier("editor-toolbar")
     }
 
-    /// A toolbar button: its text grows up to the first accessibility size, so the bar keeps room for the body; a
-    /// long press shows it in the large content viewer beyond that.
-    private func toolButton(_ title: String, id: String, label: String, selected: Bool = false, action: @escaping () -> Void) -> some View {
+    /// A toolbar button: an `icon` (the main row, owner 11-13, as RN's editorToolbar) or the text `title` (the format
+    /// row's B, I, Table and link). It grows up to the first accessibility size, so the bar keeps room for the body; a
+    /// long press shows `label` in the large content viewer beyond that, and VoiceOver reads it.
+    private func toolButton(_ title: String? = nil, icon: AppIcon? = nil, id: String, label: String, selected: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title).font(.subheadline).foregroundStyle(selected ? theme.accentText : theme.secondary)
-                .padding(.horizontal, 12).padding(.vertical, 10).frame(minHeight: minTapTarget)
+            Group {
+                if let icon { Image(appIcon: icon).scaledFont(20) } else { Text(title ?? "").font(.subheadline) }
+            }
+            .foregroundStyle(selected ? theme.accentText : theme.secondary)
+            .padding(.horizontal, 12).padding(.vertical, 10).frame(minHeight: minTapTarget)
         }
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .accessibilityLabel(label)

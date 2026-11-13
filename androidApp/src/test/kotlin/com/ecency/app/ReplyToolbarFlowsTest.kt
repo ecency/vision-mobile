@@ -1,5 +1,6 @@
 package com.ecency.app
 
+import androidx.compose.ui.semantics.getOrNull
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasAnyAncestor
@@ -92,6 +93,11 @@ class ReplyToolbarFlowsTest {
             assertTrue("the reply sheet has $tag", exists(tag))
             assertTrue("$tag sits in the reply sheet", compose.onAllNodes(hasTestTag(tag) and hasAnyAncestor(hasTestTag("replySheet"))).fetchSemanticsNodes().isNotEmpty())
         }
+        // icons, as RN's quick post and iOS (owner 11-13), named for TalkBack
+        for ((tag, name) in listOf(
+            "replyAttach" to com.ecency.core.app.UiCopy.ATTACH_IMAGE, "replyDictate" to com.ecency.core.app.WaveComposeCopy.DICTATE,
+            "replyAiAssist" to com.ecency.core.app.WaveComposeCopy.AI_ASSIST,
+        )) assertIconNamed(tag, name)
         // one image button: camera, files and the gallery are tiles of its sheet, as in the editor
         for (tag in listOf("replyCamera", "replyFiles", "replyUploads")) assertFalse("no $tag button", exists(tag))
         // RN: poll and video are the wave mode's only
@@ -161,4 +167,12 @@ class ReplyToolbarFlowsTest {
         val sent = node.broadcasts().single()
         assertTrue(sent, "Nice post\\n\\n ![]($gallery)" in sent)
     }
+
+    /** An icon button: it draws no text, and TalkBack reads [name] (owner 11-13: icons, the words as labels). */
+    private fun assertIconNamed(tag: String, name: String) {
+        val node = compose.onNodeWithTag(tag).fetchSemanticsNode()
+        assertTrue("$tag draws no text: ${node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)}", node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).isNullOrEmpty())
+        assertEquals(tag, listOf(name), node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
+    }
+
 }

@@ -136,6 +136,8 @@ extension AppIcon {
         case .shrink: return "arrow.down.right.and.arrow.up.left"
         case .uploads: return "photo.on.rectangle"
         case .smile: return "face.smiling"
+        case .textFormat: return "textformat"
+        case .snippets: return "text.alignleft"
         default: return nil
         }
     }

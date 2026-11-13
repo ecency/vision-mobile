@@ -9,7 +9,6 @@ MainActivity.kt	{} - Android {}	device and OS line sent with feedback, not shown
 EcencyApp.kt	Android	platform name sent with feedback, not shown
 SystemLanguageSurfaces.kt	unknown channel {}	exception for a programming error
 PostBody.kt	GIF	image format badge, a format name
-EditorScreens.kt	Aa	text format button glyph (its label is EditorUiCopy.TEXT_FORMAT)
 IconGallery.kt	Icons ({})	debug icon gallery
 RegisterScreen.kt	Demo run: the verification step is skipped.	demo and fake data runs only
 ReadingScreens.kt	TOP	test id of the tag feed sort (label: ReadingUiCopy.TOP_CAPS)

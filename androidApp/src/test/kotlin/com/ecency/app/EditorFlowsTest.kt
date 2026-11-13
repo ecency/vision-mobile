@@ -1,5 +1,6 @@
 package com.ecency.app
 
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.performTextClearance
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assert
@@ -799,10 +800,31 @@ class EditorFlowsTest {
         assertFalse("nothing to insert into", exists("aiImageInsert"))
     }
 
+    /** Owner (11-13): the toolbar's buttons are icons (RN editorToolbar's were), their names what TalkBack reads. */
+    @Test
+    fun theToolbarButtonsAreIconsNamedForTalkBack() {
+        launchSignedIn()
+        openEditor()
+        for ((tag, name) in listOf(
+            "toolFormat" to com.ecency.core.app.EditorUiCopy.TEXT_FORMAT, "toolImage" to com.ecency.core.app.UiCopy.IMAGE,
+            "toolVideo" to com.ecency.core.app.EditorUiCopy.ADD_VIDEO, "toolAiAssist" to com.ecency.core.app.EditorUiCopy.AI_WRITING_ASSISTANT,
+            "toolSnippets" to com.ecency.core.app.EditorUiCopy.SNIPPETS, "toolLink" to com.ecency.core.app.EditorUiCopy.INSERT_LINK,
+            "toolPoll" to com.ecency.core.app.UiCopy.POLL, "toolTranslate" to com.ecency.core.app.EditorUiCopy.TRANSLATE_POST,
+            "toolClear" to com.ecency.core.app.UiCopy.CLEAR,
+        )) assertIconNamed(tag, name)
+    }
+
+    /** An icon button: it draws no text, and TalkBack reads [name] (owner 11-13: icons, the words as labels). */
+    private fun assertIconNamed(tag: String, name: String) {
+        val node = compose.onNodeWithTag(tag).fetchSemanticsNode()
+        assertTrue("$tag draws no text: ${node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)}", node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text).isNullOrEmpty())
+        assertEquals(tag, listOf(name), node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
+    }
+
     /**
-     * Owner order (10-28): Aa, Image, Video, AI Assist, Snippets, Link, Poll, Translate, Clear. On a 320dp phone at
-     * twice the text size the first four are on screen without scrolling, and the AI tools have no buttons of their
-     * own: AI Assist lists them.
+     * Owner order (10-28): Aa, Image, Video, AI Assist, Snippets, Link, Poll, Translate, Clear (icons since 11-13). On a
+     * 320dp phone at twice the text size the first four are on screen without scrolling, and the AI tools have no
+     * buttons of their own: AI Assist lists them.
      */
     @Test
     @Config(qualifiers = "w320dp-h640dp")
@@ -822,13 +844,12 @@ class EditorFlowsTest {
         assertTrue("AI Assist on screen without scrolling (ends at $aiRight of $screen)", aiRight <= screen)
         assertFalse(exists("toolAiImage"))
         assertFalse(exists("toolDictate"))
-        // the labels stop at 1.2 times; a long press shows the name at the full text size (iOS: large content viewer)
+        // icons (owner 11-13): a long press shows the name at the full text size (iOS: large content viewer)
         fun fontScaleOf(matcher: androidx.compose.ui.test.SemanticsMatcher): Float {
             val results = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
             compose.onNode(matcher, useUnmergedTree = true).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(results) }
             return results.first().layoutInput.density.fontScale
         }
-        assertEquals(1.2f, fontScaleOf(hasText("AI Assist") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("toolAiAssist"))), 0.001f)
         compose.onNodeWithTag("toolAiAssist").performTouchInput { longClick() }
         waitFor("toolAiAssist:tooltip")
         assertEquals(2f, fontScaleOf(hasText("AI Writing Assistant") and androidx.compose.ui.test.hasAnyAncestor(hasTestTag("toolAiAssist:tooltip"))), 0.001f)

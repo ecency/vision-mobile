@@ -4,10 +4,8 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TooltipBox
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.semantics.LiveRegionMode
 
 import androidx.compose.ui.semantics.liveRegion
@@ -258,34 +256,30 @@ private fun PlainField(
 /** The title field's height in lines; a longer title scrolls inside it, so the body keeps the room (README "Editor and publishing"). */
 private const val TITLE_MAX_LINES = 3
 
-/** The largest text scale of the editor toolbar's labels: Aa, Image, Video and AI Assist fit a 320dp screen at it. */
-private const val TOOLBAR_MAX_FONT_SCALE = 1.2f
-
-/** The screen's own density inside the capped toolbar: the long press tooltip shows the name at the full text size. */
-private val LocalUncappedDensity = staticCompositionLocalOf<Density?> { null }
-
 /**
- * A toolbar button. A long press shows its name in a tooltip at the full text size, the counterpart of iOS's large
- * content viewer, since the toolbar's own labels stop growing at [TOOLBAR_MAX_FONT_SCALE].
+ * A toolbar button: [icon] (the main row, owner 11-13, as RN's editorToolbar) or the text [label] (the format row's
+ * B, I, Table and link). [description] is what TalkBack reads, and a long press shows it in a tooltip at the full text
+ * size, the counterpart of iOS's large content viewer.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ToolButton(label: String, tag: String, description: String, active: Boolean = false, style: TextStyle = TextStyle(textDirection = TextDirection.Content), onClick: () -> Unit) {
+private fun ToolButton(
+    label: String?, tag: String, description: String, active: Boolean = false, icon: AppIcon? = null,
+    style: TextStyle = TextStyle(textDirection = TextDirection.Content), onClick: () -> Unit,
+) {
     val colors = LocalEcencyColors.current
-    val fullDensity = LocalUncappedDensity.current ?: LocalDensity.current
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-        tooltip = {
-            CompositionLocalProvider(LocalDensity provides fullDensity) {
-                PlainTooltip(Modifier.testTag("$tag:tooltip")) { Text(description, fontSize = 15.sp) }
-            }
-        },
+        tooltip = { PlainTooltip(Modifier.testTag("$tag:tooltip")) { Text(description, fontSize = 15.sp) } },
         state = rememberTooltipState(),
     ) {
         Box(
             Modifier.padding(horizontal = 2.dp).clip(RoundedCornerShape(8.dp)).background(if (active) colors.lightBackground else Color.Transparent)
                 .clickable(onClick = onClick, role = Role.Button).padding(horizontal = 12.dp, vertical = 10.dp).semantics { contentDescription = description }.testTag(tag),
-        ) { Text(label, color = colors.darkGray, fontSize = 15.sp, style = style, fontWeight = style.fontWeight ?: FontWeight.Medium) }
+        ) {
+            if (icon != null) Glyph(icon, if (active) colors.blueText else colors.darkGray, 22.dp)
+            else Text(label.orEmpty(), color = colors.darkGray, fontSize = 15.sp, style = style, fontWeight = style.fontWeight ?: FontWeight.Medium)
+        }
     }
 }
 
@@ -663,17 +657,15 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                         ToolButton("[ ]( )", "formatLink", EditorUiCopy.LINK) { model.wrapLink() }
                     }
                 }
-                // the labels grow with the text size up to 1.2 times (TOOLBAR_MAX_FONT_SCALE), so Aa to AI Assist stay on a
-                // 320dp screen; beyond that a long press shows the name at full size and TalkBack reads it
-                val density = LocalDensity.current
-                CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale.coerceAtMost(TOOLBAR_MAX_FONT_SCALE)), LocalUncappedDensity provides density) {
+                // icons (owner 11-13, as RN's editorToolbar): a long press shows the name at full size and TalkBack reads it
+                run {
                     Row(Modifier.fillMaxWidth().background(colors.background).horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp).navigationBarsPadding().testTag("editorToolbar"), verticalAlignment = Alignment.CenterVertically) {
                         // owner order (10-28): the writing tools first, AI Assist on screen without scrolling (it holds the
                         // image generator and dictation), the rarely used poll late
-                        ToolButton("Aa", "toolFormat", EditorUiCopy.TEXT_FORMAT, active = showFormats) { showFormats = !showFormats }
-                        ToolButton(UiCopy.IMAGE, "toolImage", UiCopy.IMAGE) { sheet = "uploads" }
+                        ToolButton(null, "toolFormat", EditorUiCopy.TEXT_FORMAT, active = showFormats, icon = AppIcon.TEXT_FORMAT) { showFormats = !showFormats }
+                        ToolButton(null, "toolImage", UiCopy.IMAGE, icon = AppIcon.IMAGE) { sheet = "uploads" }
                         // RN _showVideoUploads: one 3Speak video a post
-                        ToolButton(UiCopy.VIDEO, "toolVideo", EditorUiCopy.ADD_VIDEO) {
+                        ToolButton(null, "toolVideo", EditorUiCopy.ADD_VIDEO, icon = AppIcon.VIDEO) {
                             val why = video.refusal()
                             if (why != null) {
                                 videoNotice = why
@@ -682,12 +674,12 @@ fun EditorScreen(env: AppEnvironment, model: EditorModel, entry: StackEntry, nav
                                 sheet = "video"
                             }
                         }
-                        ToolButton(EditorUiCopy.AI_ASSIST, "toolAiAssist", EditorUiCopy.AI_WRITING_ASSISTANT) { sheet = "aiAssist" }
-                        ToolButton(EditorUiCopy.SNIPPETS, "toolSnippets", EditorUiCopy.SNIPPETS) { sheet = "snippets" }
-                        ToolButton(EditorUiCopy.LINK, "toolLink", EditorUiCopy.INSERT_LINK) { sheet = "link" }
-                        if (!state.isEdit && !state.isReply) ToolButton(UiCopy.POLL, "toolPoll", UiCopy.POLL, active = state.poll?.title?.isNotEmpty() == true) { sheet = "poll" }
-                        ToolButton(UiCopy.TRANSLATE, "toolTranslate", EditorUiCopy.TRANSLATE_POST) { sheet = "translate" }
-                        ToolButton(UiCopy.CLEAR, "toolClear", UiCopy.CLEAR) { confirmClear = true }
+                        ToolButton(null, "toolAiAssist", EditorUiCopy.AI_WRITING_ASSISTANT, icon = AppIcon.AI_ASSIST) { sheet = "aiAssist" }
+                        ToolButton(null, "toolSnippets", EditorUiCopy.SNIPPETS, icon = AppIcon.SNIPPETS) { sheet = "snippets" }
+                        ToolButton(null, "toolLink", EditorUiCopy.INSERT_LINK, icon = AppIcon.LINK) { sheet = "link" }
+                        if (!state.isEdit && !state.isReply) ToolButton(null, "toolPoll", UiCopy.POLL, active = state.poll?.title?.isNotEmpty() == true, icon = AppIcon.CHART_BAR) { sheet = "poll" }
+                        ToolButton(null, "toolTranslate", EditorUiCopy.TRANSLATE_POST, icon = AppIcon.TRANSLATE) { sheet = "translate" }
+                        ToolButton(null, "toolClear", UiCopy.CLEAR, icon = AppIcon.DISCARD) { confirmClear = true }
                     }
                 }
             }

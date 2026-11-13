@@ -46,6 +46,13 @@ enum class WaveImageSource {
 }
 
 object WaveComposeCopy {
+    /** The poll button's name for TalkBack and VoiceOver (the composer's tools are icons). */
+    val ADD_POLL: String get() = L.native.waveCompose.addPoll
+    val EDIT_POLL: String get() = L.native.waveCompose.editPoll
+
+    /** The video button's name for TalkBack and VoiceOver. */
+    val ADD_VIDEO: String get() = L.native.waveCompose.addVideo
+
     /** RN editor.clipboard_image_detected and editor.paste_image, as RN joins them on the chip. */
     val CLIPBOARD_CHIP: String get() = L.native.waveCompose.clipboardChip
 
