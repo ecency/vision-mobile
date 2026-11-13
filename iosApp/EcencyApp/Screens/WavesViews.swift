@@ -933,6 +933,7 @@ struct ReelView: View {
     let state: ShortsState
     let model: ShortsModel
     @EnvironmentObject private var app: AppContainer
+    @Environment(\.viewportSize) private var viewport
 
     var body: some View {
         let playing = state.playingKey == item.key
@@ -951,7 +952,7 @@ struct ReelView: View {
             } else {
                 if let thumb = item.thumbnailUrl, let url = URL(string: thumb) {
                     // through the app's image loader (the proxy's Accept header, README "Image formats")
-                    LoadedImageView(src: url.absoluteString, maxWidth: 600, contentMode: .scaleAspectFit) { _ in }
+                    LoadedImageView(src: url.absoluteString, maxWidth: viewport?.width ?? 600, contentMode: .scaleAspectFit) { _ in }
                         .background(Color.black) // media: the reel's thumbnail, before it loads
                 }
                 if !playing {

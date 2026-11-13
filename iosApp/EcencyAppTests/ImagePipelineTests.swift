@@ -155,7 +155,7 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(small.image.size.width, 1200, accuracy: 1, "never upscaled")
     }
 
-    private func gif(frames: Int, side: Int) throws -> Data {
+    private func gif(frames: Int, side: Int, delays: [Double]? = nil) throws -> Data {
         let data = NSMutableData()
         let dest = try XCTUnwrap(CGImageDestinationCreateWithData(data, UTType.gif.identifier as CFString, frames, nil))
         let format = UIGraphicsImageRendererFormat()
@@ -165,7 +165,7 @@ final class ImagePipelineTests: XCTestCase {
                 UIColor(hue: CGFloat(i) / CGFloat(frames), saturation: 1, brightness: 1, alpha: 1).setFill()
                 ctx.fill(CGRect(x: 0, y: 0, width: side, height: side))
             }
-            let props = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.05]] as CFDictionary
+            let props = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delays?[i] ?? 0.05]] as CFDictionary
             CGImageDestinationAddImage(dest, try XCTUnwrap(frame.cgImage), props)
         }
         XCTAssertTrue(CGImageDestinationFinalize(dest))
@@ -185,8 +185,24 @@ final class ImagePipelineTests: XCTestCase {
     func testAnimatedWebPPlaysAtItsOwnFrameTimes() throws {
         let loaded = try XCTUnwrap(ImageLoader.decode(Self.animatedWebP, maxPixel: 100))
         XCTAssertTrue(loaded.animated)
-        XCTAssertEqual(loaded.image.images?.count, 2)
+        // UIImage shows its frames for equal times: three slots of 250 ms, the second frame in two of them
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3)
+        guard slots.count == 3 else { return }
+        XCTAssertFalse(slots[0] === slots[1])
+        XCTAssertTrue(slots[1] === slots[2])
         XCTAssertEqual(loaded.image.duration, 0.75, accuracy: 0.001)
+    }
+
+    /// GIF delays are kept per frame the same way (10, 30 and 20 hundredths of a second).
+    func testGifFramesKeepTheirOwnDelays() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 3, side: 4, delays: [0.1, 0.3, 0.2]), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 6)
+        guard slots.count == 6 else { return }
+        XCTAssertEqual(Set(slots[1...3].map { ObjectIdentifier($0) }).count, 1)
+        XCTAssertEqual(Set(slots[4...5].map { ObjectIdentifier($0) }).count, 1)
+        XCTAssertEqual(loaded.image.duration, 0.6, accuracy: 0.001)
     }
 
     /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.

@@ -272,6 +272,7 @@ struct AiImageSheet: View {
     @StateObject private var image: Observed<AiImageState>
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
+    @Environment(\.viewportSize) private var viewport
 
     /// Opened as a screen of its own (the AiImageGeneratorScreen route): no editor, so nothing to insert into.
     private let standalone: Bool
@@ -294,7 +295,7 @@ struct AiImageSheet: View {
     @ViewBuilder
     private func resultView(_ state: AiImageState, _ address: String) -> some View {
         // through the app's image loader (the proxy's Accept header, README "Image formats")
-        LoadedImageView(src: address, maxWidth: 600, contentMode: .scaleAspectFit) { _ in }
+        LoadedImageView(src: address, maxWidth: viewport?.width ?? 600, contentMode: .scaleAspectFit) { _ in }
         .background(theme.lightBackground)
         .aspectRatio(CGFloat(state.ratioNumber), contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: 8)).keepsColorsInverted().accessibilityIdentifier("ai-image-result")
         AdaptiveStack(spacing: 12) {

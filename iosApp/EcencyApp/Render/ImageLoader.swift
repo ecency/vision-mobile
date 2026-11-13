@@ -158,7 +158,7 @@ final class ImageLoader: @unchecked Sendable {
         let count = CGImageSourceGetCount(source)
         if count > 1 {
             var frames: [UIImage] = []
-            var duration: Double = 0
+            var delays: [Double] = []
             var bytes = 0
             for i in 0..<count {
                 guard let cg = CGImageSourceCreateThumbnailAtIndex(source, i, options) else { continue }
@@ -166,9 +166,10 @@ final class ImageLoader: @unchecked Sendable {
                 if !frames.isEmpty, bytes + frameBytes > maxAnimationBytes { break }
                 bytes += frameBytes
                 frames.append(UIImage(cgImage: cg))
-                duration += frameDuration(source, i)
+                delays.append(frameDuration(source, i))
             }
-            if frames.count > 1, let animated = UIImage.animatedImage(with: frames, duration: duration) {
+            let timed = timeSlots(frames, delays)
+            if frames.count > 1, let animated = UIImage.animatedImage(with: timed.frames, duration: timed.duration) {
                 return LoadedImage(image: animated, naturalSize: natural, animated: true, cost: bytes)
             }
             if let first = frames.first {
@@ -179,6 +180,25 @@ final class ImageLoader: @unchecked Sendable {
         guard let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options) else { return nil }
         return LoadedImage(image: UIImage(cgImage: cg), naturalSize: natural, animated: false, cost: cg.bytesPerRow * cg.height)
     }
+
+    /// UIImage shows an animation's frames for equal times, so each frame is repeated for its own delay: in slots
+    /// of the delays' greatest common divisor (whole 10 ms, as GIF counts), at most `maxSlots` (coarser slots then).
+    private static func timeSlots(_ frames: [UIImage], _ delays: [Double]) -> (frames: [UIImage], duration: Double) {
+        let tens = delays.map { max(1, Int(($0 * 100).rounded())) }
+        var slot = tens.reduce(0) { gcd($0, $1) }
+        let total = tens.reduce(0, +)
+        while total / max(1, slot) > maxSlots { slot *= 2 }
+        guard slot > 0 else { return (frames, delays.reduce(0, +)) }
+        var slots: [UIImage] = []
+        for (frame, ten) in zip(frames, tens) {
+            slots.append(contentsOf: repeatElement(frame, count: max(1, Int((Double(ten) / Double(slot)).rounded()))))
+        }
+        return (slots, Double(slots.count * slot) / 100)
+    }
+
+    private static let maxSlots = 600
+
+    private static func gcd(_ a: Int, _ b: Int) -> Int { b == 0 ? a : gcd(b, a % b) }
 
     private static func frameDuration(_ source: CGImageSource, _ index: Int) -> Double {
         let props = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any]
