@@ -1130,7 +1130,7 @@ AI assist, the AI image generator and dictation spend Ecency points. All three g
 - The image url validator caps input at 2048 characters; a 429 upload says "Upload quota exceeded" (RN shows the raw message id, the string is missing from its locale file).
 - AI assist: suggested tags go through the tag field's rules, ten at most (RN sets whatever the answer holds); a title list that is empty after cleaning shows as text (RN would apply `undefined`). The AI image generator is a sheet over the editor, not a route.
 - The reply tile reopens the editor for the new account instead of keeping one editor across accounts.
-- iOS shows the words count above the toolbar, not in the navigation bar; toolbar buttons are text labels on both platforms, not RN's icon fonts, in this app's order rather than RN's, and RN's full editor keeps separate AI image and dictation buttons where native lists both inside AI Assist; schedule and poll dates use the system pickers.
+- iOS shows the words count above the toolbar, not in the navigation bar; toolbar buttons are icons on both platforms (each platform's own set, not RN's icon fonts; since 11-13), in this app's order rather than RN's, and RN's full editor keeps separate AI image and dictation buttons where native lists both inside AI Assist; schedule and poll dates use the system pickers.
 
 Tests of the prompts: shared `AuthorityRecoveryTest`, `RatingPromptTest`, `DigestModelTest`; Android `WavesFlowsTest` (the grant prompt in the composer), `PlayReviewTest` (Play's own fake review manager), `EditorFlowsTest` (the digest sheet); iOS `EditorUITests`.
 
