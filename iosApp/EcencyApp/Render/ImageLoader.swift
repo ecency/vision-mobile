@@ -1,3 +1,4 @@
+import EcencyCore
 import ImageIO
 import UIKit
 
@@ -42,10 +43,25 @@ final class ImageLoader: @unchecked Sendable {
         return URLSession(configuration: config)
     }()
 
-    static let networkFetch: Fetch = { url in
-        guard let (data, response) = try? await session.data(from: url) else { return nil }
-        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
-        return data
+    /// The request for [url]: to Ecency's image proxies it names AVIF and WebP, which ImageIO decodes on iOS 17
+    /// (README "Image formats", issue #3686), so the proxy answers in those instead of the source format.
+    static func request(for url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        if let accept = ImageAccept.shared.header(url: url.absoluteString, avif: true, webp: true) {
+            request.setValue(accept, forHTTPHeaderField: ImageAccept.shared.NAME)
+        }
+        return request
+    }
+
+    static let networkFetch: Fetch = fetch(over: session)
+
+    /// The network fetch over [session] (tests pass one that records the requests).
+    static func fetch(over session: URLSession) -> Fetch {
+        { url in
+            guard let (data, response) = try? await session.data(for: request(for: url)) else { return nil }
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
+            return data
+        }
     }
 
     private let lock = NSLock()
@@ -166,9 +182,13 @@ final class ImageLoader: @unchecked Sendable {
 
     private static func frameDuration(_ source: CGImageSource, _ index: Int) -> Double {
         let props = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any]
+        // a GIF's frame times, or an animated WebP's (the proxy answers an animated source in WebP)
         let gif = props?[kCGImagePropertyGIFDictionary] as? [CFString: Any]
+        let webp = props?[kCGImagePropertyWebPDictionary] as? [CFString: Any]
         let delay = (gif?[kCGImagePropertyGIFUnclampedDelayTime] as? Double)
             ?? (gif?[kCGImagePropertyGIFDelayTime] as? Double)
+            ?? (webp?[kCGImagePropertyWebPUnclampedDelayTime] as? Double)
+            ?? (webp?[kCGImagePropertyWebPDelayTime] as? Double)
             ?? 0.1
         // Browsers treat delays under 20 ms as 100 ms.
         return delay < 0.02 ? 0.1 : delay

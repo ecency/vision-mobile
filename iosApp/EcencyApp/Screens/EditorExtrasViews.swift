@@ -293,9 +293,9 @@ struct AiImageSheet: View {
 
     @ViewBuilder
     private func resultView(_ state: AiImageState, _ address: String) -> some View {
-        AsyncImage(url: URL(string: address)) { phase in
-            if let picture = phase.image { picture.resizable().scaledToFit() } else { theme.lightBackground }
-        }
+        // through the app's image loader (the proxy's Accept header, README "Image formats")
+        LoadedImageView(src: address, maxWidth: 600, contentMode: .scaleAspectFit) { _ in }
+        .background(theme.lightBackground)
         .aspectRatio(CGFloat(state.ratioNumber), contentMode: .fit).clipShape(RoundedRectangle(cornerRadius: 8)).keepsColorsInverted().accessibilityIdentifier("ai-image-result")
         AdaptiveStack(spacing: 12) {
             if state.canInsert {

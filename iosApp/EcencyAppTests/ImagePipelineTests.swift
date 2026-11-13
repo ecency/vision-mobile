@@ -179,6 +179,36 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertFalse(still.animated)
     }
 
+    /// Two 1x1 frames of 250 and 500 ms: the proxy answers an animated source in WebP to an app that names it (#3686).
+    private static let animatedWebP = Data(base64Encoded: "UklGRoAAAABXRUJQVlA4WAoAAAASAAAAAAAAAAAAQU5JTQYAAAAAAAAAAABBTk1GJgAAAAAAAAAAAAAAAAAAAPoAAABWUDhMDgAAAC8AAAAQBxAREYiI/gcAQU5NRiYAAAAAAAAAAAAAAAAAAAD0AQAAVlA4TA4AAAAvAAAAEAcQERGIiP4HAA==")!
+
+    func testAnimatedWebPPlaysAtItsOwnFrameTimes() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(Self.animatedWebP, maxPixel: 100))
+        XCTAssertTrue(loaded.animated)
+        XCTAssertEqual(loaded.image.images?.count, 2)
+        XCTAssertEqual(loaded.image.duration, 0.75, accuracy: 0.001)
+    }
+
+    /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.
+    func testImageProxyRequestsNameAvifAndWebP() throws {
+        for src in ["https://i.ecency.com/p/abc?format=match&mode=fit", "https://images.ecency.com/u/someone/avatar/small"] {
+            let request = ImageLoader.request(for: try XCTUnwrap(URL(string: src)))
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "image/avif,image/webp,*/*", src)
+        }
+        let other = ImageLoader.request(for: try XCTUnwrap(URL(string: "https://images.hive.blog/p/abc")))
+        XCTAssertNil(other.value(forHTTPHeaderField: "Accept"))
+    }
+
+    /// The loader's network fetch sends that request.
+    func testTheNetworkFetchSendsTheAcceptHeader() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [RecordingProtocol.self]
+        RecordingProtocol.accepts = []
+        let fetch = ImageLoader.fetch(over: URLSession(configuration: config))
+        _ = await fetch(try XCTUnwrap(URL(string: "https://i.ecency.com/p/abc?format=match&mode=fit")))
+        XCTAssertEqual(RecordingProtocol.accepts, ["image/avif,image/webp,*/*"])
+    }
+
     func testAnimatedFramesAreCappedByDecodedBytes() throws {
         // 60 frames of 600x600 would be about 86 MB decoded at full size.
         let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 60, side: 600), maxPixel: 600))
@@ -307,4 +337,18 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertLessThanOrEqual(loaded.image.size.width * loaded.image.size.height, 20_000 * 1.05)
         XCTAssertEqual(loaded.image.size.width, 200, accuracy: 2, "the aspect is kept")
     }
+}
+
+/// Answers every request with a 404 and keeps its Accept header.
+private final class RecordingProtocol: URLProtocol {
+    nonisolated(unsafe) static var accepts: [String?] = []
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        Self.accepts.append(request.value(forHTTPHeaderField: "Accept"))
+        let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
 }
