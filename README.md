@@ -1378,7 +1378,7 @@ Push
 - Logout disables the leaving row, deletes the token when needed, the others register again.
 - Registrations and logouts wait for each other; a leaving account is never registered.
 - Settings: master switch and 14 type switches, kept on the device, sent for every account, the unavailable notice.
-- iOS token timing: Firebase refuses a token until Apple's push token of the launch is set, so a token request waits for it (`APNsTokenGate`, at most 10 s; a failed APNs registration answers at once), and its arrival registers every account again (Firebase calls back only for a new token). Before, the first check of a launch could run too early: Settings said push is unsupported, the websocket fallback opened and nothing registered until the next foreground. `PushTests`.
+- iOS token timing: Firebase refuses a token until Apple's push token of the launch is set, so a token request waits for it (`APNsTokenGate`, at most 10 s; a failed APNs registration answers at once). Without Apple's token no Firebase token is asked for (one minted then cannot deliver through APNs, and counting it would hide the notice and the websocket fallback), and its arrival registers every account again (Firebase calls back only for a new token). Before, the first check of a launch could run too early: Settings said push is unsupported, the websocket fallback opened and nothing registered until the next foreground. `PushTests`.
 - Tapped push: RN's routing table (without `hiveuri`), marks read when the id is the current account's, waits behind the PIN.
 - Availability (configuration, permission, token) decides between push and the websocket.
 

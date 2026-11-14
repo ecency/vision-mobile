@@ -51,6 +51,32 @@ final class PushTests: XCTestCase {
         XCTAssertEqual(answers, [false])
     }
 
+    /// Review fix: without Apple's token Firebase is not asked (a token minted then cannot deliver through APNs).
+    func testNoFirebaseTokenWithoutApplesToken() {
+        var fetches = 0
+        var tokens: [String?] = []
+        let fetch: (@escaping (String?) -> Void) -> Void = { got in fetches += 1; got("fcm") }
+
+        let failed = APNsTokenGate()
+        IOSPushPlatform.tokenAfterApns(failed, timeout: 5, fetch: fetch) { tokens.append($0) }
+        failed.failed()
+        XCTAssertEqual(fetches, 0)
+        XCTAssertEqual(tokens, [nil])
+
+        let timedOut = APNsTokenGate()
+        let done = expectation(description: "timeout")
+        IOSPushPlatform.tokenAfterApns(timedOut, timeout: 0.05, fetch: fetch) { tokens.append($0); done.fulfill() }
+        wait(for: [done], timeout: 2)
+        XCTAssertEqual(fetches, 0)
+        XCTAssertEqual(tokens, [nil, nil])
+
+        let ready = APNsTokenGate()
+        IOSPushPlatform.tokenAfterApns(ready, timeout: 5, fetch: fetch) { tokens.append($0) }
+        ready.received()
+        XCTAssertEqual(fetches, 1)
+        XCTAssertEqual(tokens, [nil, nil, "fcm"])
+    }
+
     func testATokenAfterAFailureCounts() {
         let gate = APNsTokenGate()
         gate.failed()

@@ -57,9 +57,9 @@ final class IOSPushPlatform: NSObject, PushPlatform {
                 // Firebase refuses a token until Apple's push token of this launch is set ("APNS device token not set
                 // before retrieving FCM Token"): asked too early, push looked unsupported and nothing registered
                 DispatchQueue.main.async {
-                    PushBridge.apns.wait(timeout: Self.apnsWait) { _ in
-                        Messaging.messaging().token { token, _ in DispatchQueue.main.async { done(token) } }
-                    }
+                    Self.tokenAfterApns(PushBridge.apns, timeout: Self.apnsWait, fetch: { got in
+                        Messaging.messaging().token { token, _ in DispatchQueue.main.async { got(token) } }
+                    }, done: done)
                 }
             default:
                 DispatchQueue.main.async { done(nil) }
@@ -72,6 +72,17 @@ final class IOSPushPlatform: NSObject, PushPlatform {
 
     /** How long a token request waits for Apple's push token (the shared model gives the request 20 s). */
     static let apnsWait: TimeInterval = 10
+
+    /// Firebase's token once Apple's token of the launch is here; none when Apple's registration failed or the wait
+    /// ran out. Firebase can mint a token without Apple's, but it cannot deliver through APNs: counting it would hide
+    /// the notice and the websocket fallback. Apple's token arriving later registers again (the app delegate).
+    static func tokenAfterApns(_ gate: APNsTokenGate, timeout: TimeInterval, fetch: @escaping (@escaping (String?) -> Void) -> Void,
+                               done: @escaping (String?) -> Void) {
+        gate.wait(timeout: timeout) { ready in
+            guard ready else { return done(nil) }
+            fetch(done)
+        }
+    }
 
     func deleteToken(done: @escaping (KotlinBoolean) -> Void) {
         #if canImport(FirebaseMessaging)
