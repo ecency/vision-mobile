@@ -40,6 +40,7 @@ final class IOSPushPlatform: NSObject, PushPlatform {
                 #if canImport(FirebaseMessaging)
                 if PushBridge.firebaseReady, !Messaging.messaging().isAutoInitEnabled { Messaging.messaging().isAutoInitEnabled = true }
                 #endif
+                PushBridge.apns.registering()
                 UIApplication.shared.registerForRemoteNotifications()
             }
             done(KotlinBoolean(bool: granted))
@@ -53,7 +54,13 @@ final class IOSPushPlatform: NSObject, PushPlatform {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
-                Messaging.messaging().token { token, _ in DispatchQueue.main.async { done(token) } }
+                // Firebase refuses a token until Apple's push token of this launch is set ("APNS device token not set
+                // before retrieving FCM Token"): asked too early, push looked unsupported and nothing registered
+                DispatchQueue.main.async {
+                    PushBridge.apns.wait(timeout: Self.apnsWait) { _ in
+                        Messaging.messaging().token { token, _ in DispatchQueue.main.async { done(token) } }
+                    }
+                }
             default:
                 DispatchQueue.main.async { done(nil) }
             }
@@ -62,6 +69,9 @@ final class IOSPushPlatform: NSObject, PushPlatform {
         done(nil)
         #endif
     }
+
+    /** How long a token request waits for Apple's push token (the shared model gives the request 20 s). */
+    static let apnsWait: TimeInterval = 10
 
     func deleteToken(done: @escaping (KotlinBoolean) -> Void) {
         #if canImport(FirebaseMessaging)
@@ -79,8 +89,57 @@ final class IOSPushPlatform: NSObject, PushPlatform {
     }
 }
 
+/// Apple's push token of this launch, which Firebase needs before it hands out its own token. Token requests wait
+/// here until it arrived, its registration failed, or the wait timed out. Main thread only.
+final class APNsTokenGate {
+    enum State { case waiting, ready, failed }
+    private(set) var state: State = .waiting
+    private var waiters: [(Bool) -> Void] = []
+
+    /// [done] once: true when Apple's token is here, false when its registration failed or after [timeout].
+    func wait(timeout: TimeInterval, _ done: @escaping (Bool) -> Void) {
+        switch state {
+        case .ready: return done(true)
+        case .failed: return done(false)
+        case .waiting: break
+        }
+        var finished = false
+        let once: (Bool) -> Void = { ok in
+            guard !finished else { return }
+            finished = true
+            done(ok)
+        }
+        waiters.append(once)
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout) { once(false) }
+    }
+
+    /// Apple is asked again (each launch, after permission): a failure earlier is not the answer any more.
+    func registering() {
+        if state == .failed { state = .waiting }
+    }
+
+    func received() {
+        state = .ready
+        flush(true)
+    }
+
+    func failed() {
+        if state != .ready { state = .failed }
+        flush(false)
+    }
+
+    private func flush(_ ok: Bool) {
+        let all = waiters
+        waiters = []
+        all.forEach { $0(ok) }
+    }
+}
+
 /// Between the app delegate (system callbacks) and the shared push model. Main thread only.
 enum PushBridge {
+    /// Apple's push token of this launch (token requests wait for it).
+    static let apns = APNsTokenGate()
+
     /// Firebase was configured for this process (a plist in the bundle, a real device).
     private(set) static var firebaseReady = false
     private static weak var env: AppEnvironment?
@@ -153,6 +212,13 @@ final class PushAppDelegate: NSObject, UIApplicationDelegate, UNUserNotification
         #if canImport(FirebaseMessaging)
         if PushBridge.firebaseReady { Messaging.messaging().apnsToken = deviceToken }
         #endif
+        PushBridge.apns.received()
+        // a check that ran before Apple's token (and found none) registers now; Firebase calls back only for a new token
+        PushBridge.tokenRefreshed()
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        PushBridge.apns.failed()
     }
 
     /// In front: no system banner (the app shows its own, as RN), the shared model decides what to do.
