@@ -1,0 +1,77 @@
+name: Release APK
+
+# The APK for devices without Google Play (docs/release-builds.md, "APK for devices without Google Play"). When a
+# GitHub release of the app is published (tag: the update prefix, then X.Y.Z, as the update prompt reads it), this
+# attaches Google Play's universal APK of that version: signed by Play with the key Play installs carry, so the APK
+# and a Play install update each other. Its version must be live on Play's production track (publish the release
+# once the stores have it). A manual run checks a version without attaching anything unless asked.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (the update prefix, then X.Y.Z)
+        required: true
+      version_code:
+        description: Play versionCode (default the newest production release)
+        required: false
+      attach:
+        description: Attach the APK to the release (unchecked only fetches and checks it)
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-apk-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: Release APK
+    # a published pre-release is not what the update prompt offers (GitHub's latest release skips them)
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Only the app's release tags: the update prefix (repository variable, as the store builds) and X.Y.Z.
+      # Any other release (rn-3.5.11-final) is not the app's and gets nothing.
+      - name: Version
+        id: version
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          PREFIX: ${{ vars.ECENCY_UPDATE_TAG_PREFIX }}
+        run: |
+          version="${TAG#"$PREFIX"}"
+          if [[ "$TAG" == "$PREFIX$version" && "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$TAG is not an app release tag (${PREFIX}X.Y.Z): no APK"
+          fi
+
+      - name: Fetch and check Play's APK
+        if: steps.version.outputs.version != ''
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: scripts/release-apk.sh "$VERSION" "$RUNNER_TEMP/apk"
+
+      - name: Attach to the release
+        if: steps.version.outputs.version != '' && (github.event_name == 'release' || inputs.attach)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release upload "$TAG" "$RUNNER_TEMP/apk/Ecency-$VERSION.apk" "$RUNNER_TEMP/apk/Ecency-$VERSION.apk.sha256" \
+            --repo "$GITHUB_REPOSITORY" --clobber

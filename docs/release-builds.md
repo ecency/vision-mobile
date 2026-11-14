@@ -164,6 +164,9 @@ Needed:
    dictation (`FOREGROUND_SERVICE_MICROPHONE`), README "Background media") and App Store privacy labels.
 5. iOS universal links use the RN App ID's associated domains (ecency.com, alpha.ecency.com); the profile in
    `PROVISIONING_PROFILE` must include that capability (RN's does).
+6. For the release APK ("APK for devices without Google Play"): give the Play upload's service account "Release to
+   production, exclude devices, and use Play App Signing" for this app, then run "Release APK" by hand once without
+   `attach` on a version that is live on production.
 
 ## First deploy
 
@@ -188,6 +191,35 @@ Before merging the native PR into `development` (the merge push itself builds an
    and dSYM artifacts (plus dSYMs to Sentry when `SENTRY_AUTH_TOKEN` is set). Fix any missing secret (owner
    checklist above) and run them again.
 4. Merge. The push to `development` then builds again and uploads to the Play alpha track and App Store Connect.
+
+## APK for devices without Google Play
+
+Some users run Android without Google Play (no Play Store, Play services disabled or removed). The app works there
+without push notifications, in-app purchases and the rating prompt; each of those fails quietly (checked on an
+emulator with Play services, the Play Store and Google Services Framework disabled). Such users install the APK from
+the GitHub release, and the update prompt sends any install that did not come from Play to the releases page.
+
+`release-apk.yml` attaches that APK. When a GitHub release of the app is published, it takes Google Play's
+universal APK of that version (Play Developer API, `generatedApks`) and attaches `Ecency-<version>.apk` and its
+`.sha256`. Play signs that APK with the app signing key it signs Play installs with, so an APK install and a Play
+install update each other; an APK signed with a key of ours would make a user uninstall (losing local data) to
+switch.
+
+- Which build: the newest release on Play's production track that reached users (completed, or a staged rollout in
+  progress), or the `version_code` given by hand. The job fails when that build is not the tag's version, so
+  publish the GitHub release once the version is live on Play (the update prompt asks users to update as soon as the
+  release is published, so it should not come before the stores either).
+- Which releases: a tag that is the update prefix (`ECENCY_UPDATE_TAG_PREFIX`, empty by default) followed by
+  `X.Y.Z`, not a pre-release. Other releases (`rn-3.5.11-final`) get nothing.
+- Checks before attaching: the APK is `app.esteem.mobile.android`, that versionCode and that version name, and its
+  signature verifies with the certificate Play names for it. `scripts/release-apk-test.sh` tests the script against
+  a local fake of Google (pull requests run it in `test.yml`).
+- By hand (Actions, "Release APK", "Run workflow"): a tag, optionally a `version_code`, and `attach` (off by
+  default: the run only fetches and checks the APK). Use it once before the first release to check the access.
+- Access: it uses the Play upload's service account (`SERVICE_ACCOUNT_JSON`). Downloading Play's generated APKs
+  needs the Play Console permission "Release to production, exclude devices, and use Play App Signing" for this
+  app (Users and permissions, the service account, App permissions); without it the run stops at "Play refused to
+  list the generated APKs".
 
 ## Caches and artifacts
 
