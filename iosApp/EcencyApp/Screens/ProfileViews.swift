@@ -563,6 +563,7 @@ private struct ProfileSummaryView: View {
         switch item {
         case .favorite: model.toggleFavorite()
         case .delegate: app.push(AppScreenCompanion.shared.of(route: .transfer, arg: state.username))
+        case .delegateRc: app.sheet = .delegateRc(state.username)
         case .mute: model.toggleMute()
         case .report: onReport()
         default: break

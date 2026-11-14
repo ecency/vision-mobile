@@ -205,6 +205,9 @@ class AppEnvironment(
 
     fun delegateModel(referredUsername: String): DelegateModel = DelegateModel(this, referredUsername)
 
+    /** Delegate RC to [to] (someone else's profile menu), one per sheet. */
+    fun rcDelegateModel(to: String): RcDelegateModel = RcDelegateModel(this, to)
+
     /** RN powerDownScreen; [routesOnly] for `set_withdraw_vesting_route`. */
     fun powerDownModel(routesOnly: Boolean): PowerDownModel = PowerDownModel(this, routesOnly)
 
@@ -254,10 +257,15 @@ class AppEnvironment(
     /** Non-secret preferences (feed tabs, content filters). Each platform sets its own store at start. */
     var prefs: Prefs = InMemoryPrefs()
 
+    /** Explore's tabs for the rest of the session (one per app); [emit] clears them. */
+    internal val exploreTabs = ExploreTabs()
+
     private val mutableEvents = MutableSharedFlow<AppEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<AppEvent> = mutableEvents.asSharedFlow()
 
     internal fun emit(event: AppEvent) {
+        // Explore's kept tabs belong to the account that browsed, as its cookies do
+        if (event.clearsDappData) exploreTabs.clear()
         mutableEvents.tryEmit(event)
     }
 

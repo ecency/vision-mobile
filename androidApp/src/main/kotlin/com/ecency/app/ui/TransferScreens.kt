@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.semantics
 
 import androidx.compose.ui.semantics.Role
 
+import com.ecency.core.app.RcDelegateCopy
 import com.ecency.core.app.AppIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -634,6 +635,58 @@ fun TipSheet(model: TipModel, onDismiss: () -> Unit) {
         text = { Text(TipCopy.confirm(s.amount, s.currency, s.author)) },
         confirmButton = { TextButton(onClick = model::confirm, modifier = Modifier.testTag("tipConfirm")) { Text(WalletCopy.CONFIRM) } },
         dismissButton = { TextButton(onClick = model::dismissConfirm) { Text(WalletCopy.CANCEL) } },
+    )
+}
+
+/**
+ * Delegate RC from someone else's profile menu (README "Wallet"): what can be delegated and what the account has
+ * now, the amount in billions (at least 5), Delegate and, with a delegation, Remove; both confirm first.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RcDelegateSheet(model: com.ecency.core.app.RcDelegateModel, onDismiss: () -> Unit) {
+    val colors = LocalEcencyColors.current
+    val s by model.state.collectAsState()
+    LaunchedEffect(model) { model.start() }
+    LaunchedEffect(s.closed) { if (s.closed) onDismiss() }
+    ModalBottomSheet(
+        onDismissRequest = { if (!s.busy) onDismiss() },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { !s.busy }),
+        containerColor = colors.background,
+    ) {
+        // scrolls: at the largest text on a short window, or with the keyboard up, Delegate and Remove stay reachable
+        Column(Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("rcDelegateSheet")) {
+            Text(RcDelegateCopy.title(s.to), color = colors.text, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.semantics { heading() })
+            Text(RcDelegateCopy.intro(s.to), color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
+            when {
+                s.loadFailed -> Warning(RcDelegateCopy.LOAD_FAILED, "rcDelegateLoadFailed")
+                s.available == null -> LoadingBlock()
+                else -> {
+                    Text(RcDelegateCopy.available(s.maxTotal), color = colors.text, modifier = Modifier.padding(top = 10.dp).testTag("rcDelegateAvailable"))
+                    if (s.existing > 0) Text(RcDelegateCopy.current(s.to, s.existing), color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.testTag("rcDelegateCurrent"))
+                    Field(RcDelegateCopy.AMOUNT_LABEL, s.amount, model::setAmount, "rcDelegateAmount", enabled = !s.busy, number = true)
+                    val problem = s.problem
+                    if (problem != null) Warning(RcDelegateCopy.problem(problem, s.maxTotal), "rcDelegateProblem")
+                    else Text(RcDelegateCopy.MINIMUM, color = colors.darkGray, fontSize = 12.sp)
+                }
+            }
+            SendPhasePanel(s.phase, onClose = onDismiss)
+            if (!s.busy) {
+                PrimaryButton(RcDelegateCopy.DELEGATE, s.reviewEnabled, "rcDelegateReview", model::review)
+                if (s.canRemove) {
+                    TextButton(onClick = model::remove, modifier = Modifier.fillMaxWidth().padding(top = 4.dp).testTag("rcDelegateRemove")) {
+                        Text(RcDelegateCopy.REMOVE, color = colors.redText)
+                    }
+                }
+            }
+        }
+    }
+    val review = s.prompt as? com.ecency.core.app.RcDelegatePrompt.Review
+    if (review != null) AlertDialog(
+        onDismissRequest = model::dismissPrompt, title = { Text(RcDelegateCopy.CONFIRM_TITLE) },
+        text = { Text(RcDelegateCopy.confirm(review, s.existing)) },
+        confirmButton = { TextButton(onClick = model::confirm, modifier = Modifier.testTag("rcDelegateConfirm")) { Text(WalletCopy.CONFIRM) } },
+        dismissButton = { TextButton(onClick = model::dismissPrompt) { Text(WalletCopy.CANCEL) } },
     )
 }
 

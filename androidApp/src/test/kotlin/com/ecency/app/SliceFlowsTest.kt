@@ -113,6 +113,16 @@ class SliceFlowsTest {
         return compose.onAllNodes(hasText(text)).fetchSemanticsNodes().any { it.boundsInRoot.height > 0f && it.boundsInRoot.overlaps(list) }
     }
 
+    /**
+     * Scrolls the post to [link] until the link is shown and the destination heading is off screen. A scroll can land
+     * before the list settles (a late layout under the full suite's load, #3691), so the scroll is repeated, not
+     * checked once.
+     */
+    private fun backToTheLink(link: SemanticsMatcher) = compose.await("the link on screen, the destination off it") {
+        runCatching { compose.onNodeWithTag("postList").performScrollToNode(link) }.isSuccess &&
+            compose.onAllNodes(link).fetchSemanticsNodes().isNotEmpty() && !onScreen("Destination heading")
+    }
+
     private fun settle() {
         compose.mainClock.advanceTimeBy(2_000)
         compose.waitForIdle()
@@ -184,7 +194,7 @@ class SliceFlowsTest {
         launch()
         openPost()
         // tester feedback: the reply sits under the post, before the comments (RN WritePostButton)
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        scrollToInPost(hasTestTag("writeReply"))
         compose.onNodeWithTag("writeReply").assertTextEquals(com.ecency.core.app.ReadingUiCopy.ADD_A_COMMENT)
         compose.onNodeWithTag("writeReply").performClick()
         waitFor("replySheet")
@@ -194,7 +204,7 @@ class SliceFlowsTest {
     fun theReplyFieldAsksASignedOutReaderToLogIn() {
         launch()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        scrollToInPost(hasTestTag("writeReply"))
         compose.onNodeWithTag("writeReply").performClick()
         waitFor("login")
         assertFalse(exists("replySheet"))
@@ -234,13 +244,11 @@ class SliceFlowsTest {
         openPost()
         val depth = navigator.state.stack.size
         val link = hasText("Jump down")
-        scrollToInPost(link)
-        assertFalse("the destination starts off screen", onScreen("Destination heading"))
+        backToTheLink(link)
         compose.onNode(link).performFirstLinkClick()
         compose.await("the destination on screen") { onScreen("Destination heading") }
         // a finger on the link's first letters does the same (back to the link first)
-        scrollToInPost(link)
-        assertFalse("back at the link, the destination is off screen", onScreen("Destination heading"))
+        backToTheLink(link)
         compose.onNode(link).performTouchInput { click(androidx.compose.ui.geometry.Offset(12f, centerY)) }
         compose.await("the destination on screen") { onScreen("Destination heading") }
         settle()

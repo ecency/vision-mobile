@@ -39,6 +39,39 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 10))
     }
 
+    /// Owner request: Delegate RC from another profile's menu, typed in billions, at least 5, confirmed first.
+    func testDelegateRcFromTheMenuChecksTheAmountAndConfirms() {
+        let app = launch(["-openLink", "https://ecency.com/@spike-bob"])
+        let menu = element(app, "profile-menu")
+        XCTAssertTrue(menu.waitForExistence(timeout: 20))
+        menu.tap()
+        let item = app.buttons["DELEGATE RC"]
+        XCTAssertTrue(item.waitForExistence(timeout: 5), app.debugDescription)
+        item.tap()
+        let available = element(app, "rc-delegate-available")
+        XCTAssertTrue(available.waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertTrue(available.label.contains("64 billion RC"), available.label)
+        let amount = element(app, "rc-delegate-amount")
+        amount.tap()
+        amount.typeText("4")
+        XCTAssertTrue(element(app, "rc-delegate-problem").waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["rc-delegate-review"].isEnabled)
+        amount.typeText("0")
+        XCTAssertTrue(element(app, "rc-delegate-problem").waitForNonExistence(timeout: 5), "40 billion is within the 64")
+        // the unit stays visible inside the field while typing (owner choice)
+        XCTAssertEqual(element(app, "rc-delegate-amount-unit").label, "billion RC", "the field shows its unit")
+        app.buttons["rc-delegate-review"].tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.alerts.firstMatch.staticTexts["Delegate 40 billion RC to @spike-bob?"].exists, app.alerts.firstMatch.debugDescription)
+        app.alerts.buttons["Cancel"].tap()
+        // review fix: a long amount keeps clear of the unit (the text area ends where the unit starts)
+        amount.tap()
+        amount.typeText("123456.123456789")
+        let unit = element(app, "rc-delegate-amount-unit")
+        XCTAssertLessThanOrEqual(amount.frame.maxX, unit.frame.minX, "field \(amount.frame), unit \(unit.frame)")
+        XCTAssertTrue(element(app, "rc-delegate-sheet").exists, "cancel kept the sheet and sent nothing")
+    }
+
     /// RN profileView: the summary closes as the list scrolls down (the bar shows the user, the tabs stay) and opens
     /// again on a tap on the user in the bar or back at the top.
     func testSummaryClosesOnScrollAndOpensFromTheBarOrTheTop() {

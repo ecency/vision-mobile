@@ -79,8 +79,11 @@ final class FakeHiveTransport: NSObject, RpcTransport {
         case "bridge.get_relationship_between_accounts":
             result = ["follows": false, "ignores": false, "blacklists": false, "follows_muted": false, "follows_blacklists": false]
         case "rc_api.find_rc_accounts":
-            result = ["rc_accounts": [["account": "spike-alice", "max_rc": "1000",
-                                       "rc_manabar": ["current_mana": "640", "last_update_time": Int(Date().timeIntervalSince1970)]]]]
+            // 64% of a 100 billion maximum: the profile's bar, and 64 billion to delegate (Delegate RC), as DemoHiveTransport
+            result = ["rc_accounts": [["account": "spike-alice", "max_rc": "100000000000", "received_delegated_rc": 0,
+                                       "rc_manabar": ["current_mana": "64000000000", "last_update_time": Int(Date().timeIntervalSince1970)]]]]
+        case "rc_api.list_rc_direct_delegations":
+            result = ["rc_direct_delegations": [Any]()]
         case "condenser_api.get_followers", "condenser_api.get_following":
             let args = request["params"] as? [Any] ?? []
             let target = args.first as? String ?? "spike-alice"

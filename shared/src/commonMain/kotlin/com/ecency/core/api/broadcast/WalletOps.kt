@@ -160,6 +160,17 @@ object WalletOps {
         return CustomJson(listOf(sender), emptyList(), POINT_TRANSFER_ID, json)
     }
 
+    /**
+     * SDK buildDelegateRcOp: [maxRc] RC of [from]'s to [to], the new total (0 removes it), a posting custom_json `rc`.
+     * The amount is written as a JSON number (the chain reads an integer).
+     */
+    fun delegateRc(from: String, to: String, maxRc: Long): CustomJson {
+        need("buildDelegateRcOp", from, to)
+        if (maxRc < 0) throw InvalidInputException("[buildDelegateRcOp] max_rc must not be negative")
+        val payload = obj("from" to q(from), "delegatees" to "[${q(to)}]", "max_rc" to maxRc.toString())
+        return CustomJson(emptyList(), listOf(from), "rc", "[${q("delegate_rc")},$payload]")
+    }
+
     fun multiPointTransfer(sender: String, destinations: String, amount: String, memo: String): List<CustomJson> {
         need("buildMultiPointTransferOps", sender, destinations, amount)
         val list = recipients(destinations)
