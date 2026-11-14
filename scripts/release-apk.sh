@@ -34,7 +34,17 @@ tools=$( (ls -d "${ANDROID_HOME:?ANDROID_HOME is not set}"/build-tools/* 2>/dev/
 [[ -x "$tools/aapt2" && -x "$tools/apksigner" ]] || fail "no build-tools with aapt2 and apksigner under ANDROID_HOME"
 
 work=$(mktemp -d)
-trap 'rm -rf "$work"' EXIT
+edit=""
+token=""
+# an edit opened on Play is dropped on every way out (an abandoned one blocks nothing, but should not pile up)
+cleanup() {
+  if [[ -n "$edit" && -n "$token" ]]; then
+    curl -sS --fail-with-body -o /dev/null -X DELETE -H "Authorization: Bearer $token" "$api/edits/$edit" ||
+      echo "::warning::could not drop the Play edit $edit (it expires by itself)" >&2
+  fi
+  rm -rf "$work"
+}
+trap cleanup EXIT
 umask 077
 
 # ---- an access token: a JWT signed with the service account's key (RS256), traded at Google's token endpoint ----
@@ -63,7 +73,8 @@ if [[ -z "$code" ]]; then
   edit=$(play -X POST -H 'Content-Type: application/json' -d '{}' "$api/edits" | jq -r '.id // empty') ||
     fail "Play refused to open an edit (the service account needs access to the app)"
   track=$(play "$api/edits/$edit/tracks/production") || fail "Play refused to read the production track"
-  play -X DELETE "$api/edits/$edit" >/dev/null || true
+  play -X DELETE "$api/edits/$edit" >/dev/null || echo "::warning::could not drop the Play edit $edit (it expires by itself)" >&2
+  edit=""
   # releases that reached users (completed, or a staged rollout in progress)
   code=$(jq -r '[.releases[]? | select(.status == "completed" or .status == "inProgress") | .versionCodes[]? | tonumber] | max // empty' <<<"$track")
   [[ -n "$code" ]] || fail "the production track has no completed or rolling out release yet: publish the GitHub release once $version is live on Play, or pass its versionCode"
@@ -73,8 +84,13 @@ fi
 # ---- Play's universal APK of that build, and the certificate Play signed it with ----
 list=$(play "$api/generatedApks/$code") ||
   fail "Play refused to list the generated APKs of $code (the service account needs \"Release to production, exclude devices, and use Play App Signing\")"
-pick=$(jq -c '[.generatedApks[]? | select(.generatedUniversalApk.downloadId) | {cert: .certificateSha256Hash, id: .generatedUniversalApk.downloadId}] | first // empty' <<<"$list")
-[[ -n "$pick" ]] || fail "Play has no universal APK for versionCode $code"
+# one group per signing key: after a key rotation there can be several, and picking one would be a guess
+picks=$(jq -c '[.generatedApks[]? | select(.generatedUniversalApk.downloadId) | {cert: .certificateSha256Hash, id: .generatedUniversalApk.downloadId}]' <<<"$list")
+case "$(jq 'length' <<<"$picks")" in
+  0) fail "Play has no universal APK for versionCode $code" ;;
+  1) pick=$(jq -c '.[0]' <<<"$picks") ;;
+  *) fail "Play has universal APKs of versionCode $code signed by several keys ($(jq -r '[.[].cert] | join(", ")' <<<"$picks")): pick the one Play installs carry by hand" ;;
+esac
 download_id=$(jq -r '.id' <<<"$pick")
 cert=$(jq -r '.cert // empty' <<<"$pick")
 

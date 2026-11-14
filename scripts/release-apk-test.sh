@@ -93,7 +93,8 @@ class H(BaseHTTPRequestHandler):
         self.record()
         if not self.authed(): return
         c = cfg(); p = urlparse(self.path)
-        if p.path.endswith("/edits/e1/tracks/production"): return self.send(200, c["track"])
+        if p.path.endswith("/edits/e1/tracks/production"):
+            return self.send(500, {"error": "backend"}) if c.get("failTrack") else self.send(200, c["track"])
         if "/downloads/" in p.path and p.path.endswith(":download") and parse_qs(p.query).get("alt") == ["media"]:
             return self.send(200, open(c["apk"], "rb").read() if c.get("apk") else b"fake universal apk", "application/octet-stream")
         if "/generatedApks/" in p.path: return self.send(200, c["generated"])
@@ -104,16 +105,18 @@ EOF
 port=$(python3 -I -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])')
 export PLAY_API="http://127.0.0.1:$port/androidpublisher/v3" TOKEN_URL="http://127.0.0.1:$port/token"
 
-fake() { # fake <generated cert> [track json] [refuse token]
-  jq -n --arg cert "$1" --argjson track "${2:-null}" --arg tokenUrl "$TOKEN_URL" --argjson refuse "${3:-false}" '{
-    tokenUrl: $tokenUrl, refuseToken: $refuse,
+fake() { # fake <generated cert> [track json] [refuse token] [fail the track read] [a second signing key's universal APK]
+  jq -n --arg cert "$1" --argjson track "${2:-null}" --arg tokenUrl "$TOKEN_URL" --argjson refuse "${3:-false}" \
+    --argjson failTrack "${4:-false}" --argjson second "${5:-false}" '{
+    tokenUrl: $tokenUrl, refuseToken: $refuse, failTrack: $failTrack,
     track: ($track // {releases: [
       {name: "4.0.0", status: "completed", versionCodes: ["1794600000"]},
       {name: "4.0.1", status: "inProgress", versionCodes: ["1794700000"]},
       {name: "4.0.2", status: "draft", versionCodes: ["1794800000"]}]}),
-    generated: {generatedApks: [
+    generated: {generatedApks: ([
       {certificateSha256Hash: "ffff", generatedSplitApks: [{downloadId: "split"}]},
-      {certificateSha256Hash: $cert, generatedUniversalApk: {downloadId: "uni/v1"}}]}}' >"$work/fake.json"
+      {certificateSha256Hash: $cert, generatedUniversalApk: {downloadId: "uni/v1"}}]
+      + (if $second then [{certificateSha256Hash: "rotated", generatedUniversalApk: {downloadId: "uni2"}}] else [] end))}}' >"$work/fake.json"
   : >"$work/requests"
 }
 fake "$cert_b64"
@@ -173,6 +176,20 @@ fake "$cert_b64" null true
 check "the service account is refused" fail "Google refused the service account" 4.0.1 -- FAKE_CODE=1 FAKE_NAME=4.0.1 FAKE_SIGNER="$cert_hex"
 
 fake "$cert_b64"
+check "the APK is another build than the one asked for" fail "has versionCode 1794699999, not 1794700000" 4.0.1 -- \
+  VERSION_CODE=1794700000 FAKE_CODE=1794699999 FAKE_NAME=4.0.1 FAKE_SIGNER="$cert_hex"
+
+fake "$cert_b64" null false true
+check "a failed track read still drops the edit" fail "Play refused to read the production track" 4.0.1 -- \
+  FAKE_CODE=1794700000 FAKE_NAME=4.0.1 FAKE_SIGNER="$cert_hex"
+grep -q "^DELETE .*/edits/e1$" "$work/requests" || { echo "FAIL the edit was left open"; cat "$work/requests"; exit 1; }
+echo "ok   (the edit was dropped on the way out)"
+
+fake "$cert_b64" null false false true
+check "universal APKs signed by several keys" fail "signed by several keys" 4.0.1 -- \
+  FAKE_CODE=1794700000 FAKE_NAME=4.0.1 FAKE_SIGNER="$cert_hex"
+
+fake "$cert_b64"
 check "a tag that is not X.Y.Z" fail "the version must be X.Y.Z" v4.0.1 -- FAKE_CODE=1 FAKE_NAME=4.0.1 FAKE_SIGNER="$cert_hex"
 
 if [[ -n "${REAL_APK:-}" && -n "${REAL_ANDROID_HOME:-}" ]]; then
@@ -190,5 +207,21 @@ if [[ -n "${REAL_APK:-}" && -n "${REAL_ANDROID_HOME:-}" ]]; then
     ANDROID_HOME="$REAL_ANDROID_HOME" PACKAGE_NAME="$real_package" VERSION_CODE="$real_code"
   cmp -s "$REAL_APK" "$work/out-$((passed - 1))/Ecency-$real_name.apk" || { echo "FAIL the real APK changed on the way"; exit 1; }
 fi
+
+# the workflow's tag gate (scripts/release-tag-version.sh): the update prompt's rule
+tagv() { # tagv <tag> <prefix> <expected version or empty>
+  local got
+  got=$("$root/scripts/release-tag-version.sh" "$1" "$2")
+  [[ "$got" == "$3" ]] || { echo "FAIL tag '$1' prefix '$2': got '$got', expected '$3'"; exit 1; }
+}
+tagv 4.0.0 "" 4.0.0
+tagv rn-3.5.11-final "" ""
+tagv v4.0.0 "" ""
+tagv 4.0.0-beta "" ""
+tagv 4.0 "" ""
+tagv native-4.0.1 native- 4.0.1
+tagv 4.0.0 native- ""
+passed=$((passed + 1))
+echo "ok   release tags: X.Y.Z after the prefix, nothing else"
 
 echo "$passed checks passed"
