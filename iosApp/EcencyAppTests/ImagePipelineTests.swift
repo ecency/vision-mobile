@@ -235,6 +235,19 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(loaded.image.duration, 120, accuracy: 0.001)
     }
 
+    /// Past the slot limit the slots left after rounding down go to the frames rounding cut most, so frames of
+    /// different lengths stay different: 1000 of 30 ms and 1000 of 50 ms get one slot and two of the 3000.
+    func testPastTheSlotLimitTheWholeBudgetKeepsFramesApart() throws {
+        let delays = Array(repeating: 0.03, count: 1000) + Array(repeating: 0.05, count: 1000)
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 2000, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3000)
+        guard slots.count == 3000 else { return }
+        XCTAssertEqual(slots.filter { $0 === slots[0] }.count, 1, "a 30 ms frame in one slot")
+        XCTAssertEqual(slots.filter { $0 === slots[2999] }.count, 2, "a 50 ms frame in two")
+        XCTAssertEqual(loaded.image.duration, 80, accuracy: 0.001)
+    }
+
     /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.
     func testImageProxyRequestsNameAvifAndWebP() throws {
         for src in ["https://i.ecency.com/p/abc?format=match&mode=fit", "https://images.ecency.com/u/someone/avatar/small"] {

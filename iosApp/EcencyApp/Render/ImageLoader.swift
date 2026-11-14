@@ -184,7 +184,7 @@ final class ImageLoader: @unchecked Sendable {
     /// UIImage shows an animation's frames for equal times, so each frame is repeated for its own delay, in slots of
     /// the delays' greatest common divisor (whole 10 ms, as GIF counts). Past `maxSlots` slots, every frame still needs
     /// one: frames shorter than a slot of the time left get one each, and the others share the slots left by their
-    /// delays (the closest split equal slots allow). The animation always lasts its own total; with `maxSlots` frames
+    /// delays, rounded down, then the rest to the largest remainders (the closest split equal slots allow). The animation always lasts its own total; with `maxSlots` frames
     /// or more, each frame is shown once over that total.
     private static func timeSlots(_ frames: [UIImage], _ delays: [Double]) -> (frames: [UIImage], duration: Double) {
         let tens = delays.map { max(1, Int(($0 * 100).rounded())) }
@@ -207,6 +207,17 @@ final class ImageLoader: @unchecked Sendable {
             }
             let unit = Double(rest) / Double(max(1, budget))
             counts = tens.indices.map { short.contains($0) ? 1 : max(1, Int(Double(tens[$0]) / unit)) }
+            // the slots rounding down left go to the frames it cut most (largest remainder), so the whole budget
+            // keeps frames of different lengths apart
+            let left = maxSlots - counts.reduce(0, +)
+            if left > 0 {
+                let cut = tens.indices.filter { !short.contains($0) }
+                    .sorted { a, b in
+                        let ra = Double(tens[a]) / unit - Double(counts[a]), rb = Double(tens[b]) / unit - Double(counts[b])
+                        return ra != rb ? ra > rb : a < b
+                    }
+                for i in cut.prefix(left) { counts[i] += 1 }
+            }
         }
         var slots: [UIImage] = []
         for (frame, count) in zip(frames, counts) { slots.append(contentsOf: repeatElement(frame, count: count)) }
