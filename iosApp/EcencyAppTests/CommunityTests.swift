@@ -75,7 +75,8 @@ final class CommunityTests: XCTestCase {
     }
 
     func testDappColorsAndDirectory() {
-        XCTAssertEqual(Dapps.shared.DIRECTORY.count, 13)
+        XCTAssertEqual(Dapps.shared.DIRECTORY.count, 14)
+        XCTAssertEqual(Dapps.shared.DIRECTORY.first { $0.name == "HiveGrove" }?.url, "https://playhivegrove.com")
         XCTAssertEqual(Color(hexString: "#357CE6"), Color(hex: 0x357CE6))
         XCTAssertEqual(Color(hexString: "nope"), Color(hex: 0x788187))
         XCTAssertEqual(Dapps.shared.screen(url: "https://peakd.com") as? AppScreenDappBrowser, AppScreenDappBrowser(url: "https://peakd.com"))
