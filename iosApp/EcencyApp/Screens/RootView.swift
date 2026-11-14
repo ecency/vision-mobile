@@ -71,6 +71,7 @@ struct RootView: View {
                 case let .reply(r): MenuReplySheet(request: r)
                 case .customiseFilters: CustomiseFiltersSheet()
                 case let .tip(key): TipSheet(author: key.author, permlink: key.permlink, env: app.env)
+                case let .delegateRc(name): RcDelegateSheet(to: name, env: app.env)
                 }
             }
             .environmentObject(app)

@@ -194,7 +194,7 @@ class SliceFlowsTest {
         launch()
         openPost()
         // tester feedback: the reply sits under the post, before the comments (RN WritePostButton)
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        scrollToInPost(hasTestTag("writeReply"))
         compose.onNodeWithTag("writeReply").assertTextEquals(com.ecency.core.app.ReadingUiCopy.ADD_A_COMMENT)
         compose.onNodeWithTag("writeReply").performClick()
         waitFor("replySheet")
@@ -204,7 +204,7 @@ class SliceFlowsTest {
     fun theReplyFieldAsksASignedOutReaderToLogIn() {
         launch()
         openPost()
-        compose.onNodeWithTag("postList").performScrollToNode(hasTestTag("writeReply"))
+        scrollToInPost(hasTestTag("writeReply"))
         compose.onNodeWithTag("writeReply").performClick()
         waitFor("login")
         assertFalse(exists("replySheet"))

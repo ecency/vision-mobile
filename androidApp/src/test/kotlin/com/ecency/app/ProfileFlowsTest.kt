@@ -1,6 +1,7 @@
 package com.ecency.app
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
@@ -117,7 +118,9 @@ class ProfileNode {
             "condenser_api.get_followers" -> ok("""[{"follower":"bob","following":"alice"},{"follower":"carol","following":"alice"},{"follower":"dave","following":"alice"}]""")
             "condenser_api.get_following" -> ok("[]")
             "bridge.get_relationship_between_accounts" -> ok("""{"follows":false,"ignores":false,"blacklists":false,"follows_muted":false,"follows_blacklists":false}""")
-            "rc_api.find_rc_accounts" -> ok("""{"rc_accounts":[{"account":"alice","rc_manabar":{"current_mana":"500","last_update_time":$nowS},"max_rc":"1000"}]}""")
+            // 50% of 100 billion: the profile's bar, and 50 billion to delegate (Delegate RC)
+            "rc_api.find_rc_accounts" -> ok("""{"rc_accounts":[{"account":"alice","rc_manabar":{"current_mana":"50000000000","last_update_time":$nowS},"max_rc":"100000000000","received_delegated_rc":0}]}""")
+            "rc_api.list_rc_direct_delegations" -> ok("""{"rc_direct_delegations":[]}""")
             "bridge.get_account_posts" -> {
                 val sort = params!!.jsonObject["sort"]!!.jsonPrimitive.content
                 val account = params.jsonObject["account"]!!.jsonPrimitive.content
@@ -427,6 +430,33 @@ class ProfileFlowsTest {
         waitFor("mutedView")
         assertEquals(1, node.privateCalls("report").size)
         assertTrue(node.broadcasts().single().contains("""\"what\":[\"ignore\"]"""))
+    }
+
+    /** Owner request: Delegate RC from the menu, typed in billions, confirmed, signed with the posting key of a posting-key account. */
+    @Test
+    fun delegateRcFromTheMenuSendsTheAmountInRc() {
+        node.signIn()
+        launch(AppScreen.Profile("alice"))
+        waitFor("profileMenu")
+        compose.onNodeWithTag("profileMenu").performClick()
+        waitFor("menu:DELEGATE_RC")
+        compose.onNodeWithTag("menu:DELEGATE_RC").performClick()
+        waitFor("rcDelegateAvailable")
+        compose.onNodeWithTag("rcDelegateAvailable", useUnmergedTree = true).assertTextContains("50 billion RC", substring = true)
+        compose.onNodeWithTag("rcDelegateAmount").performTextInput("4")
+        waitFor("rcDelegateProblem")
+        compose.onNodeWithTag("rcDelegateReview").assertIsNotEnabled()
+        compose.onNodeWithTag("rcDelegateAmount").performTextClearance()
+        compose.onNodeWithTag("rcDelegateAmount").performTextInput("12.5")
+        compose.await("the amount is accepted") { idleMain(); !exists("rcDelegateProblem") }
+        compose.onNodeWithTag("rcDelegateReview").performClick()
+        waitFor("rcDelegateConfirm")
+        assertTrue(node.broadcasts().isEmpty())
+        compose.onNodeWithTag("rcDelegateConfirm").performClick()
+        compose.await("broadcast") { idleMain(); node.broadcasts().isNotEmpty() }
+        val sent = node.broadcasts().single()
+        assertTrue(sent, sent.contains("""\"delegate_rc\",{\"from\":\"tester\",\"delegatees\":[\"alice\"],\"max_rc\":12500000000}"""))
+        assertTrue(sent, sent.contains(""""required_posting_auths":["tester"]"""))
     }
 
     /** RN CommentView (the profile's Comments tab rows): a signed in reader gets the gift beside the row. */

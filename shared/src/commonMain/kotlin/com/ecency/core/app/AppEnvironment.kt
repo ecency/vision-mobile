@@ -205,6 +205,9 @@ class AppEnvironment(
 
     fun delegateModel(referredUsername: String): DelegateModel = DelegateModel(this, referredUsername)
 
+    /** Delegate RC to [to] (someone else's profile menu), one per sheet. */
+    fun rcDelegateModel(to: String): RcDelegateModel = RcDelegateModel(this, to)
+
     /** RN powerDownScreen; [routesOnly] for `set_withdraw_vesting_route`. */
     fun powerDownModel(routesOnly: Boolean): PowerDownModel = PowerDownModel(this, routesOnly)
 

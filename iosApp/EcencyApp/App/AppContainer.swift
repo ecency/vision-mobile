@@ -26,6 +26,8 @@ enum AppSheet: Identifiable {
     case customiseFilters
     /// RN TIPPING_DIALOG (TransferViews.swift).
     case tip(PostKey)
+    /// Delegate RC to an account, from its profile menu (TransferViews.swift).
+    case delegateRc(String)
 
     var id: String {
         switch self {
@@ -44,6 +46,7 @@ enum AppSheet: Identifiable {
         case let .reply(r): return "reply:\(r.parent.key)"
         case .customiseFilters: return "customise"
         case let .tip(key): return "tip:\(key.author)/\(key.permlink)"
+        case let .delegateRc(name): return "delegateRc:\(name)"
         }
     }
 }

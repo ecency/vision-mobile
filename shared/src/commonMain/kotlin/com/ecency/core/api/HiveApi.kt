@@ -231,6 +231,32 @@ class HiveApi(val client: HiveRpcClient) {
         return result?.get("rc_accounts").arr()?.firstOrNull()?.let(RcAccount::fromJson)
     }
 
+    /** `rc_api.find_rc_accounts` with the exact figures a delegation needs; null when the node has none. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun rcDelegator(account: String): com.ecency.core.api.model.RcDelegator? {
+        val result = client.call(
+            "rc_api.find_rc_accounts",
+            buildJsonObject { put("accounts", buildJsonArray { add(JsonPrimitive(account)) }) },
+        ).obj()
+        return result?.get("rc_accounts").arr()?.firstOrNull()?.let(com.ecency.core.api.model.RcDelegator::fromJson)
+    }
+
+    /** `rc_api.list_rc_direct_delegations`: the RC [from] delegates to [to] now, 0 when none. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun rcDelegated(from: String, to: String): Long {
+        val result = client.call(
+            "rc_api.list_rc_direct_delegations",
+            buildJsonObject {
+                put("start", buildJsonArray { add(JsonPrimitive(from)); add(JsonPrimitive(to)) })
+                put("limit", JsonPrimitive(1))
+            },
+        ).obj()
+        // the list starts at (from, to): its first row is that pair's delegation, or the next pair when there is none
+        val row = result?.get("rc_direct_delegations").arr()?.firstOrNull().obj() ?: return 0
+        if (row.str("from") != from || row.str("to") != to) return 0
+        return row.long("delegated_rc") ?: 0
+    }
+
     /**
      * `database_api.find_comments`: the chain state the node holds, not hivemind's indexer (a node's API layer may
      * still answer a moment behind its head, so a post just broadcast can be missing for a short while); null when

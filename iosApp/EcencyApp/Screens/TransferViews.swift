@@ -40,6 +40,8 @@ private struct WalletField: View {
     /// Left to right whatever the app's direction (accounts, amounts, permlinks); a memo is free text.
     var machine = true
     let id: String
+    /// The unit shown inside the field after the value once something is typed.
+    var suffix: String? = nil
 
     var body: some View {
         TextField(label, text: $text)
@@ -48,6 +50,13 @@ private struct WalletField: View {
             .textFieldStyle(.roundedBorder).disabled(disabled)
             .environment(\.layoutDirection, machine ? .leftToRight : layoutDirection)
             .accessibilityIdentifier(id)
+            // after the field's identifier: the unit is an element of its own, not part of the field
+            .overlay(alignment: .trailing) {
+                if let suffix, !text.isEmpty {
+                    Text(suffix).foregroundStyle(.secondary).padding(.trailing, 8)
+                        .accessibilityIdentifier("\(id)-unit")
+                }
+            }
     }
 
     @Environment(\.layoutDirection) private var layoutDirection
@@ -655,6 +664,76 @@ struct TipSheet: View {
             Text(tc.confirm(amount: s.amount, currency: s.currency, author: s.author))
         }
         .accessibilityIdentifier("tip-sheet")
+    }
+}
+
+/// Delegate RC from someone else's profile menu (README "Wallet"): what can be delegated and what the account has
+/// now, the amount in billions (at least 5), Delegate and, with a delegation, Remove; both confirm first.
+struct RcDelegateSheet: View {
+    @StateObject private var observed: Observed<RcDelegateState>
+    @Environment(\.appTheme) private var theme
+    @Environment(\.dismiss) private var dismiss
+    private let rc = RcDelegateCopy.shared
+
+    init(to: String, env: AppEnvironment) {
+        _observed = StateObject(wrappedValue: Observed(env.rcDelegateModel(to: to), ownsModel: true))
+    }
+
+    private var model: RcDelegateModel { observed.model as! RcDelegateModel }
+
+    var body: some View {
+        let s = observed.state
+        let review = s.prompt as? RcDelegatePromptReview
+        NavigationStack {
+            ThemedForm {
+                Section {
+                    Text(rc.intro(username: s.to)).foregroundStyle(theme.secondary)
+                }
+                if s.loadFailed {
+                    Text(rc.LOAD_FAILED).foregroundStyle(theme.dangerText).accessibilityIdentifier("rc-delegate-load-failed")
+                } else if s.available == nil {
+                    ProgressView().frame(maxWidth: .infinity)
+                } else {
+                    Section {
+                        Text(rc.available(rc: s.maxTotal)).accessibilityIdentifier("rc-delegate-available")
+                        if s.existing > 0 {
+                            Text(rc.current(username: s.to, rc: s.existing)).font(.footnote).foregroundStyle(theme.secondary)
+                                .accessibilityIdentifier("rc-delegate-current")
+                        }
+                    }
+                    Section(footer: footer(s)) {
+                        WalletField(label: rc.AMOUNT_LABEL, text: binding(s.amount) { model.setAmount(text: $0) }, number: true, disabled: s.busy, id: "rc-delegate-amount", suffix: rc.UNIT)
+                    }
+                }
+                SendPhaseView(phase: s.phase) { dismiss() }
+                if !s.busy {
+                    Button(rc.DELEGATE) { model.review() }.frame(maxWidth: .infinity).disabled(!s.reviewEnabled).accessibilityIdentifier("rc-delegate-review")
+                    if s.canRemove {
+                        Button(rc.REMOVE, role: .destructive) { model.remove() }.frame(maxWidth: .infinity).accessibilityIdentifier("rc-delegate-remove")
+                    }
+                }
+            }
+            .navigationTitle(rc.title(username: s.to)).navigationBarTitleDisplayMode(.inline)
+        }
+        .interactiveDismissDisabled(s.busy)
+        .onAppear { model.start() }
+        .modifier(CloseOn(closed: s.closed))
+        .alert(rc.CONFIRM_TITLE, isPresented: Binding(get: { review != nil }, set: { if !$0 { model.dismissPrompt() } })) {
+            Button(copy.CONFIRM) { model.confirm() }.accessibilityIdentifier("rc-delegate-confirm")
+            Button(copy.CANCEL, role: .cancel) { model.dismissPrompt() }
+        } message: {
+            if let review { Text(rc.confirm(review: review, existing: s.existing)) }
+        }
+        .accessibilityIdentifier("rc-delegate-sheet")
+    }
+
+    /// The problem with the typed amount, else the minimum.
+    @ViewBuilder private func footer(_ s: RcDelegateState) -> some View {
+        if let problem = s.problem {
+            Text(rc.problem(problem: problem, maxTotal: s.maxTotal)).foregroundStyle(theme.dangerText).accessibilityIdentifier("rc-delegate-problem")
+        } else {
+            Text(rc.MINIMUM)
+        }
     }
 }
 

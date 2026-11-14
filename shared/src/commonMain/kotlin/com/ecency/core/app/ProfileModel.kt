@@ -100,8 +100,8 @@ data class ProfileHeader(
     val resourceCreditsText: String get() = ProfileFormat.barText(L.profile.resourceCredits, resourceCredits, resourceCreditsHours)
 }
 
-/** The "more" menu of someone else's profile (RN profileSummary dropdown), in RN order. */
-enum class ProfileMenuItem { FAVORITE, DELEGATE, MUTE, REPORT }
+/** The "more" menu of someone else's profile (RN profileSummary dropdown), in RN order; Delegate RC (beyond RN) after Delegate. */
+enum class ProfileMenuItem { FAVORITE, DELEGATE, DELEGATE_RC, MUTE, REPORT }
 
 data class ProfileState(
     val username: String,
@@ -133,6 +133,7 @@ data class ProfileState(
     fun menuLabel(item: ProfileMenuItem): String = when (item) {
         ProfileMenuItem.FAVORITE -> if (isFavorite) L.user.removeFromFavourites else L.user.addToFavourites
         ProfileMenuItem.DELEGATE -> L.user.delegate
+        ProfileMenuItem.DELEGATE_RC -> RcDelegateCopy.MENU_ITEM
         ProfileMenuItem.MUTE -> if (isMuted) L.user.unmute else L.user.mute
         ProfileMenuItem.REPORT -> L.user.report
     }

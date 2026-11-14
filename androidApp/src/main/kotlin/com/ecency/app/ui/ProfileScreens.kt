@@ -390,6 +390,13 @@ private fun ProfileSummary(
     actions: ProfileActions,
     onReport: () -> Unit,
 ) {
+    // Delegate RC from the menu: the sheet for that account, its model closed with it
+    var rcTo by remember { mutableStateOf<String?>(null) }
+    rcTo?.let { to ->
+        val rc = remember(to) { env.rcDelegateModel(to) }
+        androidx.compose.runtime.DisposableEffect(rc) { onDispose { rc.close() } }
+        RcDelegateSheet(rc, onDismiss = { rcTo = null })
+    }
     val colors = LocalEcencyColors.current
     Column(Modifier.fillMaxWidth().testTag("profileSummary")) {
         // cover edge to edge, the avatar overlapping its bottom by 40dp (RN avatarSection marginTop -40)
@@ -424,6 +431,7 @@ private fun ProfileSummary(
                                 when (item) {
                                     ProfileMenuItem.FAVORITE -> { haptics(com.ecency.core.app.HapticEvent.TOGGLE); model.toggleFavorite() }
                                     ProfileMenuItem.DELEGATE -> actions.onDelegate(state.username)
+                                    ProfileMenuItem.DELEGATE_RC -> rcTo = state.username
                                     ProfileMenuItem.MUTE -> model.toggleMute()
                                     ProfileMenuItem.REPORT -> onReport()
                                 }

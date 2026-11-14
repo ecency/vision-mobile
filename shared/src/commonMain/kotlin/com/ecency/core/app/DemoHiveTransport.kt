@@ -77,11 +77,13 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
             "rc_api.find_rc_accounts" -> buildJsonObject {
                 putJsonArray("rc_accounts") {
                     add(buildJsonObject {
-                        put("account", AUTHORS[0]); put("max_rc", "1000")
-                        putJsonObject("rc_manabar") { put("current_mana", "640"); put("last_update_time", nowSeconds()) }
+                        // 64% of a 100 billion maximum: the profile's bar, and 64 billion to delegate (Delegate RC)
+                        put("account", AUTHORS[0]); put("max_rc", "100000000000"); put("received_delegated_rc", 0)
+                        putJsonObject("rc_manabar") { put("current_mana", "64000000000"); put("last_update_time", nowSeconds()) }
                     })
                 }
             }
+            "rc_api.list_rc_direct_delegations" -> buildJsonObject { putJsonArray("rc_direct_delegations") {} }
             "condenser_api.get_followers", "condenser_api.get_following" -> {
                 val target = (listed?.getOrNull(0) as? JsonPrimitive)?.content ?: AUTHORS[0]
                 val start = listed?.getOrNull(1)

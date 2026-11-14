@@ -1987,6 +1987,28 @@
     "owner_admin_only": "Only the owner and admins can change these settings."
   },
   "native": {
+    "rc_delegation": {
+      "menu_item": "DELEGATE RC",
+      "confirm_title": "Delegate RC",
+      "title": "Delegate RC to @{username}",
+      "intro": "Resource Credits (RC) are what an account spends to vote, comment, post and send. Delegating some of yours lets @{username} do more. It is signed with your posting key, and you can change or remove it at any time.",
+      "available": "You can delegate up to {amount} billion RC",
+      "current": "Delegated to @{username} now: {amount} billion RC",
+      "amount_label": "Amount in billion RC",
+      "unit": "billion RC",
+      "minimum": "At least {amount} billion RC",
+      "too_low": "The minimum is {amount} billion RC.",
+      "too_much": "You can delegate up to {amount} billion RC.",
+      "same": "That is the amount delegated now.",
+      "delegate": "Delegate",
+      "remove": "Remove delegation",
+      "confirm": "Delegate {amount} billion RC to @{username}?",
+      "confirm_remove": "Remove the {amount} billion RC delegated to @{username}?",
+      "done": "RC delegated",
+      "removed": "RC delegation removed",
+      "failed": "Could not delegate RC",
+      "load_failed": "Could not read your Resource Credits. Try again later."
+    },
     "ios": {
       "a11y_shell": {
         "expanded": "Expanded",

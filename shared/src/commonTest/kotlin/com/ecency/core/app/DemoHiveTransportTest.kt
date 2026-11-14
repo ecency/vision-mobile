@@ -26,6 +26,14 @@ class DemoHiveTransportTest {
         }
     }
 
+    /** Delegate RC's reads (the iOS UI test draws them): 64 billion to delegate, no delegation yet. */
+    @Test
+    fun theRcDelegationReadsAcceptTheSyntheticAnswers() = runTest {
+        val rc = kotlin.test.assertNotNull(api.hive.rcDelegator(DemoHiveTransport.AUTHORS[0]))
+        assertEquals(64_000_000_000, rc.delegable(1_791_288_000L))
+        assertEquals(0L, api.hive.rcDelegated(DemoHiveTransport.AUTHORS[0], DemoHiveTransport.AUTHORS[1]))
+    }
+
     @Test
     fun theAppsReadersAcceptTheSyntheticAnswers() = runTest {
         val trending = api.feeds.page(FeedSource.Ranked(RankedSort.TRENDING), null, "spike-alice")
