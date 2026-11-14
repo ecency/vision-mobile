@@ -36,10 +36,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
-import coil3.ImageLoader
 import coil3.SingletonImageLoader
-import coil3.gif.AnimatedImageDecoder
-import coil3.gif.GifDecoder
 import com.ecency.app.render.PostActions
 import com.ecency.app.ui.AppHost
 import com.ecency.app.ui.EcencyApp
@@ -438,12 +435,8 @@ class MainActivity : FragmentActivity() {
         // nothing can be waiting, and whatever an earlier run left behind is deleted
         if (savedInstanceState == null) VideoCaptures.sweep(this) else videoCaptures.restore(savedInstanceState)
         enableEdgeToEdge()
-        // Coil decodes GIF and animated WebP only with an animated decoder registered.
-        SingletonImageLoader.setSafe { context ->
-            ImageLoader.Builder(context)
-                .components { add(if (Build.VERSION.SDK_INT >= 28) AnimatedImageDecoder.Factory() else GifDecoder.Factory()) }
-                .build()
-        }
+        // animated decoders and the image proxies' Accept header (ImageLoading)
+        SingletonImageLoader.setSafe { context -> ImageLoading.loader(context) }
         // Debug only: `--ez demo true` shows the renderer demo post; add `--ez showImages false` for "Show
         // images" off. The activity is exported, so release builds must never skip the app (and its lock).
         if (BuildConfig.DEBUG && intent.getBooleanExtra("demo", false)) {

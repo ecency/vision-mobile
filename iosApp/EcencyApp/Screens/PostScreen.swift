@@ -349,7 +349,7 @@ struct PostScreen: View {
     private func footer(_ card: PostCard, post p: Post) -> some View {
         // before the first layout the width is unknown: no wrapping by width (the text size rule still applies)
         let wraps = AccessibleFooter.wraps(typeSize, width: screenWidth > 0 ? screenWidth : .infinity)
-        return (wraps ? AnyLayout(ChipFlow(spacing: 16)) : AnyLayout(HStackLayout(spacing: 16))) {
+        return FooterRow(spacing: 16, wraps: wraps) {
             VoteButton(key: card.key, votedByMe: card.votedByMe, downvotedByMe: card.downvotedByMe,
                        payoutText: card.payoutText, payoutDeclined: card.isPayoutDeclined, payoutPost: { p })
             Button { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) } label: {
@@ -361,11 +361,11 @@ struct PostScreen: View {
             .accessibilityHint(L.Post.a11yVotersHint)
             .accessibilityAddTraits(.isButton)
             .accessibilityIdentifier("post-voters")
-            if !wraps { Spacer(minLength: 0) }
             Button { app.push(AppScreenReblogs(author: card.key.author, permlink: card.key.permlink)) } label: {
                 CountLabel(appIcon: .reblog, count: card.reblogs)
             }
             .buttonStyle(.plain)
+            .footerTrailing()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L.Post.a11yReblogs(count: Int(card.reblogs)))
             .accessibilityHint(L.Post.a11yReblogsHint)

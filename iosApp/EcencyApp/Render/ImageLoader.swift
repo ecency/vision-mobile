@@ -1,3 +1,4 @@
+import EcencyCore
 import ImageIO
 import UIKit
 
@@ -42,10 +43,25 @@ final class ImageLoader: @unchecked Sendable {
         return URLSession(configuration: config)
     }()
 
-    static let networkFetch: Fetch = { url in
-        guard let (data, response) = try? await session.data(from: url) else { return nil }
-        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
-        return data
+    /// The request for [url]: to Ecency's image proxies it names AVIF and WebP, which ImageIO decodes on iOS 17
+    /// (README "Image formats", issue #3686), so the proxy answers in those instead of the source format.
+    static func request(for url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        if let accept = ImageAccept.shared.header(url: url.absoluteString, avif: true, webp: true) {
+            request.setValue(accept, forHTTPHeaderField: ImageAccept.shared.NAME)
+        }
+        return request
+    }
+
+    static let networkFetch: Fetch = fetch(over: session)
+
+    /// The network fetch over [session] (tests pass one that records the requests).
+    static func fetch(over session: URLSession) -> Fetch {
+        { url in
+            guard let (data, response) = try? await session.data(for: request(for: url)) else { return nil }
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) { return nil }
+            return data
+        }
     }
 
     private let lock = NSLock()
@@ -142,7 +158,7 @@ final class ImageLoader: @unchecked Sendable {
         let count = CGImageSourceGetCount(source)
         if count > 1 {
             var frames: [UIImage] = []
-            var duration: Double = 0
+            var delays: [Double] = []
             var bytes = 0
             for i in 0..<count {
                 guard let cg = CGImageSourceCreateThumbnailAtIndex(source, i, options) else { continue }
@@ -150,9 +166,10 @@ final class ImageLoader: @unchecked Sendable {
                 if !frames.isEmpty, bytes + frameBytes > maxAnimationBytes { break }
                 bytes += frameBytes
                 frames.append(UIImage(cgImage: cg))
-                duration += frameDuration(source, i)
+                delays.append(frameDuration(source, i))
             }
-            if frames.count > 1, let animated = UIImage.animatedImage(with: frames, duration: duration) {
+            let timed = timeSlots(frames, delays)
+            if frames.count > 1, let animated = UIImage.animatedImage(with: timed.frames, duration: timed.duration) {
                 return LoadedImage(image: animated, naturalSize: natural, animated: true, cost: bytes)
             }
             if let first = frames.first {
@@ -164,11 +181,62 @@ final class ImageLoader: @unchecked Sendable {
         return LoadedImage(image: UIImage(cgImage: cg), naturalSize: natural, animated: false, cost: cg.bytesPerRow * cg.height)
     }
 
+    /// UIImage shows an animation's frames for equal times, so each frame is repeated for its own delay, in slots of
+    /// the delays' greatest common divisor (whole 10 ms, as GIF counts). Past `maxSlots` slots, every frame still needs
+    /// one: frames shorter than a slot of the time left get one each, and the others share the slots left by their
+    /// delays, rounded down, then the rest to the largest remainders (the closest split equal slots allow). The animation always lasts its own total; with `maxSlots` frames
+    /// or more, each frame is shown once over that total.
+    private static func timeSlots(_ frames: [UIImage], _ delays: [Double]) -> (frames: [UIImage], duration: Double) {
+        let tens = delays.map { max(1, Int(($0 * 100).rounded())) }
+        let total = tens.reduce(0, +)
+        let duration = Double(total) / 100
+        let slot = tens.reduce(0) { gcd($0, $1) }
+        guard slot > 0, frames.count < maxSlots else { return (frames, duration) }
+        var counts: [Int]
+        if total / slot <= maxSlots {
+            counts = tens.map { $0 / slot }
+        } else {
+            var short = Set<Int>()
+            var budget = maxSlots
+            var rest = total
+            while true {
+                let unit = Double(rest) / Double(budget)
+                let newly = tens.indices.filter { !short.contains($0) && Double(tens[$0]) < unit }
+                if newly.isEmpty { break }
+                for i in newly { short.insert(i); budget -= 1; rest -= tens[i] }
+            }
+            let unit = Double(rest) / Double(max(1, budget))
+            counts = tens.indices.map { short.contains($0) ? 1 : max(1, Int(Double(tens[$0]) / unit)) }
+            // the slots rounding down left go to the frames it cut most (largest remainder), so the whole budget
+            // keeps frames of different lengths apart
+            let left = maxSlots - counts.reduce(0, +)
+            if left > 0 {
+                let cut = tens.indices.filter { !short.contains($0) }
+                    .sorted { a, b in
+                        let ra = Double(tens[a]) / unit - Double(counts[a]), rb = Double(tens[b]) / unit - Double(counts[b])
+                        return ra != rb ? ra > rb : a < b
+                    }
+                for i in cut.prefix(left) { counts[i] += 1 }
+            }
+        }
+        var slots: [UIImage] = []
+        for (frame, count) in zip(frames, counts) { slots.append(contentsOf: repeatElement(frame, count: count)) }
+        return (slots, duration)
+    }
+
+    private static let maxSlots = 3000
+
+    private static func gcd(_ a: Int, _ b: Int) -> Int { b == 0 ? a : gcd(b, a % b) }
+
     private static func frameDuration(_ source: CGImageSource, _ index: Int) -> Double {
         let props = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any]
+        // a GIF's frame times, or an animated WebP's (the proxy answers an animated source in WebP)
         let gif = props?[kCGImagePropertyGIFDictionary] as? [CFString: Any]
+        let webp = props?[kCGImagePropertyWebPDictionary] as? [CFString: Any]
         let delay = (gif?[kCGImagePropertyGIFUnclampedDelayTime] as? Double)
             ?? (gif?[kCGImagePropertyGIFDelayTime] as? Double)
+            ?? (webp?[kCGImagePropertyWebPUnclampedDelayTime] as? Double)
+            ?? (webp?[kCGImagePropertyWebPDelayTime] as? Double)
             ?? 0.1
         // Browsers treat delays under 20 ms as 100 ms.
         return delay < 0.02 ? 0.1 : delay

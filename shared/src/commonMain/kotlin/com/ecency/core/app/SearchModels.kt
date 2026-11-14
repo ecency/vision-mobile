@@ -526,7 +526,7 @@ object Dapps {
 
     private fun favicon(domain: String) = "https://www.google.com/s2/favicons?domain=$domain&sz=128"
 
-    /** RN DAPP_DIRECTORY, in order (categories in the current language). */
+    /** RN DAPP_DIRECTORY, in order (categories in the current language), plus HiveGrove after Rising Star. */
     val DIRECTORY: List<Dapp> get() = listOf(
         Dapp("Ecency", "https://ecency.com", favicon("ecency.com"), "#357CE6", "E", L.native.dapps.categorySocial),
         Dapp("Raidstead", "https://ecency.com/raidstead", "https://ecency.com/assets/raidstead-icon.png", "#7A4BB4", "R", L.native.dapps.categoryGaming),
@@ -534,6 +534,7 @@ object Dapps {
         Dapp("Hive.blog", "https://hive.blog", favicon("hive.blog"), "#E31337", "H", L.native.dapps.categorySocial),
         Dapp("Splinterlands", "https://splinterlands.com", favicon("splinterlands.com"), "#F5A623", "S", L.native.dapps.categoryGaming),
         Dapp("Rising Star", "https://www.risingstargame.com", favicon("risingstargame.com"), "#E91E63", "R", L.native.dapps.categoryGaming),
+        Dapp("HiveGrove", "https://playhivegrove.com", favicon("playhivegrove.com"), "#2E7D32", "HG", L.native.dapps.categoryGaming),
         Dapp("Tribaldex", "https://tribaldex.com", favicon("tribaldex.com"), "#00B4D8", "T", L.native.dapps.categoryDefi),
         Dapp("LeoDex", "https://leodex.io", favicon("leodex.io"), "#F5A623", "L", L.native.dapps.categoryDefi),
         Dapp("HiveEngine", "https://hive-engine.com", favicon("hive-engine.com"), "#E31337", "HE", L.native.dapps.categoryDefi),

@@ -445,9 +445,8 @@ struct WaveRowView: View {
     private func footer(_ card: PostCard) -> some View {
         // chosen by the text size, the same views in either layout (the vote button keeps its state)
         let wraps = AccessibleFooter.wraps(typeSize, width: width)
-        return (wraps ? AnyLayout(ChipFlow(spacing: 14)) : AnyLayout(HStackLayout(spacing: 14))) {
+        return FooterRow(spacing: 14, wraps: wraps) {
             footerCounts(card)
-            if !wraps { Spacer() }
             footerActions(card)
         }
     }
@@ -465,7 +464,7 @@ struct WaveRowView: View {
     }
 
     @ViewBuilder private func footerActions(_ card: PostCard) -> some View {
-        TipButton(key: card.key)
+        TipButton(key: card.key).footerTrailing()
         // RN commentView: Edit and Delete on an own wave, after the tip
         OwnFooterButtons(post: item.post, votes: card.votes, root: item.key, idPrefix: "wave")
         Button(ReadingUiCopy.shared.REPLY) {
@@ -839,9 +838,7 @@ private struct RemoteImage: View {
     let url: String
 
     var body: some View {
-        AsyncImage(url: URL(string: url)) { phase in
-            if let image = phase.image { image.resizable().scaledToFill() } else { Color.gray.opacity(0.2) }
-        }
+        LoadedImageView(src: url, maxWidth: 72) { _ in }.background(Color.gray.opacity(0.2))
     }
 }
 
@@ -935,6 +932,7 @@ struct ReelView: View {
     let state: ShortsState
     let model: ShortsModel
     @EnvironmentObject private var app: AppContainer
+    @Environment(\.viewportSize) private var viewport
 
     var body: some View {
         let playing = state.playingKey == item.key
@@ -952,9 +950,9 @@ struct ReelView: View {
                 EmbedWebView(url: url).accessibilityIdentifier("reel-web")
             } else {
                 if let thumb = item.thumbnailUrl, let url = URL(string: thumb) {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image { image.resizable().scaledToFit() } else { Color.black }
-                    }
+                    // through the app's image loader (the proxy's Accept header, README "Image formats")
+                    LoadedImageView(src: url.absoluteString, maxWidth: viewport?.width ?? 600, contentMode: .scaleAspectFit) { _ in }
+                        .background(Color.black) // media: the reel's thumbnail, before it loads
                 }
                 if !playing {
                     Image(appIcon: .playCircle).resizable().scaledToFit().frame(width: 56, height: 56).foregroundStyle(.white.opacity(0.9)).accessibilityHidden(true)

@@ -155,7 +155,7 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(small.image.size.width, 1200, accuracy: 1, "never upscaled")
     }
 
-    private func gif(frames: Int, side: Int) throws -> Data {
+    private func gif(frames: Int, side: Int, delays: [Double]? = nil) throws -> Data {
         let data = NSMutableData()
         let dest = try XCTUnwrap(CGImageDestinationCreateWithData(data, UTType.gif.identifier as CFString, frames, nil))
         let format = UIGraphicsImageRendererFormat()
@@ -165,7 +165,7 @@ final class ImagePipelineTests: XCTestCase {
                 UIColor(hue: CGFloat(i) / CGFloat(frames), saturation: 1, brightness: 1, alpha: 1).setFill()
                 ctx.fill(CGRect(x: 0, y: 0, width: side, height: side))
             }
-            let props = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.05]] as CFDictionary
+            let props = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delays?[i] ?? 0.05]] as CFDictionary
             CGImageDestinationAddImage(dest, try XCTUnwrap(frame.cgImage), props)
         }
         XCTAssertTrue(CGImageDestinationFinalize(dest))
@@ -177,6 +177,95 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertTrue(loaded.animated)
         let still = try XCTUnwrap(ImageLoader.decode(UIImage(systemName: "photo")!.pngData()!, maxPixel: 100))
         XCTAssertFalse(still.animated)
+    }
+
+    /// Two 1x1 frames of 250 and 500 ms: the proxy answers an animated source in WebP to an app that names it (#3686).
+    private static let animatedWebP = Data(base64Encoded: "UklGRoAAAABXRUJQVlA4WAoAAAASAAAAAAAAAAAAQU5JTQYAAAAAAAAAAABBTk1GJgAAAAAAAAAAAAAAAAAAAPoAAABWUDhMDgAAAC8AAAAQBxAREYiI/gcAQU5NRiYAAAAAAAAAAAAAAAAAAAD0AQAAVlA4TA4AAAAvAAAAEAcQERGIiP4HAA==")!
+
+    func testAnimatedWebPPlaysAtItsOwnFrameTimes() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(Self.animatedWebP, maxPixel: 100))
+        XCTAssertTrue(loaded.animated)
+        // UIImage shows its frames for equal times: three slots of 250 ms, the second frame in two of them
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3)
+        guard slots.count == 3 else { return }
+        XCTAssertFalse(slots[0] === slots[1])
+        XCTAssertTrue(slots[1] === slots[2])
+        XCTAssertEqual(loaded.image.duration, 0.75, accuracy: 0.001)
+    }
+
+    /// GIF delays are kept per frame the same way (10, 30 and 20 hundredths of a second).
+    func testGifFramesKeepTheirOwnDelays() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 3, side: 4, delays: [0.1, 0.3, 0.2]), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 6)
+        guard slots.count == 6 else { return }
+        XCTAssertEqual(Set(slots[1...3].map { ObjectIdentifier($0) }).count, 1)
+        XCTAssertEqual(Set(slots[4...5].map { ObjectIdentifier($0) }).count, 1)
+        XCTAssertEqual(loaded.image.duration, 0.6, accuracy: 0.001)
+    }
+
+    /// Past the slot limit an animation still plays for its own length (700 frames of 100 ms: 70 s).
+    func testALongAnimationKeepsItsLength() throws {
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 700, side: 1, delays: Array(repeating: 0.1, count: 700)), maxPixel: 100))
+        XCTAssertEqual(loaded.image.images?.count, 700)
+        XCTAssertEqual(loaded.image.duration, 70, accuracy: 0.001)
+    }
+
+    /// A long frame among many short ones keeps its own time: 598 frames of 100 ms and one of 10 s.
+    func testALongFrameAmongManyKeepsItsTime() throws {
+        let delays = Array(repeating: 0.1, count: 598) + [10]
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 599, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 698)
+        XCTAssertEqual(slots.suffix(100).map { ObjectIdentifier($0) }.uniqueCount, 1, "the 10 s frame fills 100 slots of 100 ms")
+        XCTAssertFalse(slots[597] === slots[598])
+        XCTAssertEqual(loaded.image.duration, 69.8, accuracy: 0.001)
+    }
+
+    /// Past the slot limit, frames too short for a slot get one each and the rest share the others by their delays:
+    /// 1000 frames of 20 ms and one of 100 s get 1000 slots and 2000, within the 3000 slots.
+    func testPastTheSlotLimitShortFramesKeepOneSlot() throws {
+        let delays = Array(repeating: 0.02, count: 1000) + [100]
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 1001, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3000)
+        XCTAssertEqual(slots.prefix(1000).map { ObjectIdentifier($0) }.uniqueCount, 1000, "each short frame once")
+        XCTAssertEqual(slots.suffix(2000).map { ObjectIdentifier($0) }.uniqueCount, 1)
+        XCTAssertEqual(loaded.image.duration, 120, accuracy: 0.001)
+    }
+
+    /// Past the slot limit the slots left after rounding down go to the frames rounding cut most, so frames of
+    /// different lengths stay different: 1000 of 30 ms and 1000 of 50 ms get one slot and two of the 3000.
+    func testPastTheSlotLimitTheWholeBudgetKeepsFramesApart() throws {
+        let delays = Array(repeating: 0.03, count: 1000) + Array(repeating: 0.05, count: 1000)
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 2000, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3000)
+        guard slots.count == 3000 else { return }
+        XCTAssertEqual(slots.filter { $0 === slots[0] }.count, 1, "a 30 ms frame in one slot")
+        XCTAssertEqual(slots.filter { $0 === slots[2999] }.count, 2, "a 50 ms frame in two")
+        XCTAssertEqual(loaded.image.duration, 80, accuracy: 0.001)
+    }
+
+    /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.
+    func testImageProxyRequestsNameAvifAndWebP() throws {
+        for src in ["https://i.ecency.com/p/abc?format=match&mode=fit", "https://images.ecency.com/u/someone/avatar/small"] {
+            let request = ImageLoader.request(for: try XCTUnwrap(URL(string: src)))
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "image/avif,image/webp,*/*", src)
+        }
+        let other = ImageLoader.request(for: try XCTUnwrap(URL(string: "https://images.hive.blog/p/abc")))
+        XCTAssertNil(other.value(forHTTPHeaderField: "Accept"))
+    }
+
+    /// The loader's network fetch sends that request.
+    func testTheNetworkFetchSendsTheAcceptHeader() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [RecordingProtocol.self]
+        RecordingProtocol.accepts = []
+        let fetch = ImageLoader.fetch(over: URLSession(configuration: config))
+        _ = await fetch(try XCTUnwrap(URL(string: "https://i.ecency.com/p/abc?format=match&mode=fit")))
+        XCTAssertEqual(RecordingProtocol.accepts, ["image/avif,image/webp,*/*"])
     }
 
     func testAnimatedFramesAreCappedByDecodedBytes() throws {
@@ -307,4 +396,22 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertLessThanOrEqual(loaded.image.size.width * loaded.image.size.height, 20_000 * 1.05)
         XCTAssertEqual(loaded.image.size.width, 200, accuracy: 2, "the aspect is kept")
     }
+}
+
+private extension Sequence where Element: Hashable {
+    var uniqueCount: Int { Set(self).count }
+}
+
+/// Answers every request with a 404 and keeps its Accept header.
+private final class RecordingProtocol: URLProtocol {
+    nonisolated(unsafe) static var accepts: [String?] = []
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        Self.accepts.append(request.value(forHTTPHeaderField: "Accept"))
+        let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
 }
