@@ -64,7 +64,12 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(app.alerts.firstMatch.staticTexts["Delegate 40 billion RC to @spike-bob?"].exists, app.alerts.firstMatch.debugDescription)
         app.alerts.buttons["Cancel"].tap()
-        XCTAssertTrue(element(app, "rc-delegate-sheet").exists, "cancel keeps the sheet and sends nothing")
+        // review fix: a long amount keeps clear of the unit (the text area ends where the unit starts)
+        amount.tap()
+        amount.typeText("123456.123456789")
+        let unit = element(app, "rc-delegate-amount-unit")
+        XCTAssertLessThanOrEqual(amount.frame.maxX, unit.frame.minX, "field \(amount.frame), unit \(unit.frame)")
+        XCTAssertTrue(element(app, "rc-delegate-sheet").exists, "cancel kept the sheet and sent nothing")
     }
 
     /// RN profileView: the summary closes as the list scrolls down (the bar shows the user, the tabs stay) and opens

@@ -31,9 +31,17 @@ object RcDelegateCopy {
         RcAmountProblem.TOO_MUCH -> L.native.rcDelegation.tooMuch(amount = billions(maxTotal))
         RcAmountProblem.SAME -> SAME
     }
+    /** The amounts exactly as they will be signed (never rounded: what is approved is what is sent). */
     fun confirm(review: RcDelegatePrompt.Review, existing: Long): String =
-        if (review.remove) L.native.rcDelegation.confirmRemove(amount = billions(existing), username = review.to)
-        else L.native.rcDelegation.confirm(amount = billions(review.maxRc), username = review.to)
+        if (review.remove) L.native.rcDelegation.confirmRemove(amount = exactBillions(existing), username = review.to)
+        else L.native.rcDelegation.confirm(amount = exactBillions(review.maxRc), username = review.to)
+
+    /** RC as billions in the app language, every digit kept (5_009_000_000 is "5.009"). */
+    fun exactBillions(rc: Long): String {
+        val whole = rc / 1_000_000_000
+        val fraction = (rc % 1_000_000_000).toString().padStart(9, '0').trimEnd('0')
+        return LocaleFormat.posix(if (fraction.isEmpty()) "$whole" else "$whole.$fraction", true)
+    }
 
     /** RC as billions in the app language, at most two decimals, rounded down (never more than there is). */
     fun billions(rc: Long): String = LocaleFormat.decimal(floor(rc / 1e7) / 100, 2, 0)
@@ -47,9 +55,10 @@ object RcDelegation {
 
     /** RC of [typed] billions, exact (up to nine decimals, one RC); null when it is not a number. */
     fun rcOf(typed: String): Long? {
-        if (!Regex("^[0-9]{1,9}(\\.[0-9]{0,9})?$").matches(typed)) return null
-        val whole = typed.substringBefore('.').toLong()
-        val fraction = typed.substringAfter('.', "").padEnd(9, '0').toLong()
+        // as typed: "5", "5.", ".5" (no digit at all is no number)
+        if (!Regex("^[0-9]{0,9}(\\.[0-9]{0,9})?$").matches(typed) || typed.none { it.isDigit() }) return null
+        val whole = typed.substringBefore('.').ifEmpty { "0" }.toLong()
+        val fraction = typed.substringAfter('.', "").padEnd(9, '0').ifEmpty { "0" }.toLong()
         return whole * BILLION + fraction
     }
 }
@@ -78,7 +87,7 @@ data class RcDelegateState(
     val closed: Boolean = false,
 ) {
     /** The largest new total: what can be delegated plus what [to] already has (the chain counts only the change). */
-    val maxTotal: Long get() = (available ?: 0) + existing
+    val maxTotal: Long get() = (available ?: 0).let { if (it > Long.MAX_VALUE - existing) Long.MAX_VALUE else it + existing }
 
     val amountRc: Long? get() = RcDelegation.rcOf(amount)
 
@@ -182,7 +191,8 @@ class RcDelegateModel internal constructor(private val env: AppEnvironment, to: 
         val s = current
         val review = s.prompt as? RcDelegatePrompt.Review ?: return
         val user = s.from ?: return
-        if (s.actionId != null) return
+        // a sheet closed by an account change never signs for the account that left
+        if (s.closed || s.actionId != null || env.session.current.username != user) return
         val ops = WalletOps.ops(listOf(WalletOps.delegateRc(user, review.to, review.maxRc)))
         val actionId = env.idempotencyKey()
         sentRemove = review.remove

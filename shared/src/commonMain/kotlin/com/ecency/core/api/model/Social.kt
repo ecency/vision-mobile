@@ -35,10 +35,18 @@ data class FriendRow(val name: String, val reputation: Int = 25, val active: Str
  * An account's RC as a delegation needs it, exact (64-bit integers): [maxRc] counts received delegations, which
  * cannot be passed on; the manabar refills to [maxRc] over five days.
  */
-data class RcDelegator(val maxRc: Long, val receivedDelegatedRc: Long, val currentMana: Long, val lastUpdateTime: Long) {
+data class RcDelegator(
+    val maxRc: Long,
+    val receivedDelegatedRc: Long,
+    val currentMana: Long,
+    val lastUpdateTime: Long,
+    /** RC given for the account creation fee (`max_rc_creation_adjustment`, in RC): counted in [maxRc], never delegable. */
+    val creationAdjustment: Long = 0,
+) {
     /** What the chain lets [delegable] at [nowSeconds]: the lower of the own maximum and the mana refilled until then. */
     fun delegable(nowSeconds: Long): Long {
-        val own = (maxRc - receivedDelegatedRc).coerceAtLeast(0)
+        // hived get_maximum_rc(only_delegable): own vests minus delegated, without received RC or the creation adjustment
+        val own = (maxRc - receivedDelegatedRc - creationAdjustment).coerceAtLeast(0)
         // full after five days; maxRc * elapsed can pass 64 bits on a large account, so it is split exactly
         val elapsed = (nowSeconds - lastUpdateTime).coerceIn(0, REGENERATION_SECONDS)
         val refill = maxRc / REGENERATION_SECONDS * elapsed + maxRc % REGENERATION_SECONDS * elapsed / REGENERATION_SECONDS
@@ -57,7 +65,18 @@ data class RcDelegator(val maxRc: Long, val receivedDelegatedRc: Long, val curre
                 receivedDelegatedRc = o.long("received_delegated_rc") ?: 0,
                 currentMana = bar.long("current_mana") ?: return null,
                 lastUpdateTime = bar.long("last_update_time") ?: return null,
+                creationAdjustment = adjustment(o["max_rc_creation_adjustment"]),
             )
+        }
+
+        /** `{"amount":"5851327807","precision":6,...}` (the amount is RC), or a legacy "5851.327807 VESTS". */
+        private fun adjustment(e: JsonElement?): Long {
+            e.obj()?.let { return it.long("amount") ?: 0 }
+            val text = (e as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it.isString }?.content ?: return 0
+            val number = text.substringBefore(' ').trim()
+            val whole = number.substringBefore('.').toLongOrNull() ?: return 0
+            val fraction = number.substringAfter('.', "").padEnd(6, '0').take(6).toLongOrNull() ?: 0
+            return whole * 1_000_000 + fraction
         }
     }
 }

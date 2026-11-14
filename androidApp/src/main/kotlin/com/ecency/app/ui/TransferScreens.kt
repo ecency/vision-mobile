@@ -654,7 +654,8 @@ fun RcDelegateSheet(model: com.ecency.core.app.RcDelegateModel, onDismiss: () ->
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { !s.busy }),
         containerColor = colors.background,
     ) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp).testTag("rcDelegateSheet")) {
+        // scrolls: at the largest text on a short window, or with the keyboard up, Delegate and Remove stay reachable
+        Column(Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("rcDelegateSheet")) {
             Text(RcDelegateCopy.title(s.to), color = colors.text, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.semantics { heading() })
             Text(RcDelegateCopy.intro(s.to), color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
             when {

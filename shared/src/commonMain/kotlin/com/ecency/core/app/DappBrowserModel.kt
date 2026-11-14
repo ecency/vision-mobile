@@ -195,8 +195,8 @@ internal class ExploreTabs {
 
     private val kept = AtomicReference(Kept(0, null))
 
-    /** The generation now: a browser notes it when it opens, and keeps its tabs only if no clear came since. */
-    val generation: Int get() = kept.load().generation
+    /** The kept tabs ([state], null for none) and the generation they belong to, read together: a browser keeps its tabs on close only in [generation]. */
+    class Restored(val state: DappBrowserState?, val generation: Int)
 
     /**
      * Keeps [state]'s tabs (address and title) and which one is active, unless an account change or a wipe came after
@@ -212,9 +212,13 @@ internal class ExploreTabs {
         }
     }
 
-    /** The kept tabs, ready to show: each page asks its web view to load once shown; null when none are kept. */
-    fun restore(): DappBrowserState? {
-        val state = kept.load().state ?: return null
+    /**
+     * The kept tabs, ready to show (each page asks its web view to load once shown), with their generation from the
+     * same read: a clear between two reads could otherwise hand the previous account's tabs a new generation.
+     */
+    fun restore(): Restored {
+        val now = kept.load()
+        val state = now.state ?: return Restored(null, now.generation)
         val tabs = state.tabs.mapNotNull { tab ->
             when {
                 tab.url == null -> BrowserTab(id = tab.id)
@@ -222,9 +226,9 @@ internal class ExploreTabs {
                 else -> tab.copy(load = 1)
             }
         }
-        if (tabs.isEmpty()) return null
+        if (tabs.isEmpty()) return Restored(null, now.generation)
         val active = tabs.firstOrNull { it.id == state.activeTabId } ?: tabs.first()
-        return DappBrowserState(tabs, active.id, urlText = active.url.orEmpty())
+        return Restored(DappBrowserState(tabs, active.id, urlText = active.url.orEmpty()), now.generation)
     }
 
     fun clear() {
@@ -256,8 +260,10 @@ internal class ExploreTabs {
  * - An answer goes only to the tab and origin that asked: a tab that navigated elsewhere or closed hears nothing.
  * - The account must be the one signed in when the request came and when it is confirmed.
  */
-class DappBrowserModel internal constructor(private val env: AppEnvironment, initialUrl: String?) :
-    StateModel<DappBrowserState>(initialState(initialUrl, env.exploreTabs.restore()), env.dispatchers) {
+class DappBrowserModel private constructor(private val env: AppEnvironment, initialUrl: String?, restored: ExploreTabs.Restored) :
+    StateModel<DappBrowserState>(initialState(initialUrl, restored.state), env.dispatchers) {
+
+    internal constructor(env: AppEnvironment, initialUrl: String?) : this(env, initialUrl, env.exploreTabs.restore())
 
     /** Answers a page: [answer] is the JSON the bridge script's receiver takes. The platform delivers it to the frame. */
     fun interface BridgeReply {
@@ -267,7 +273,7 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     private var nextTabId = current.tabs.maxOf { it.id } + 1
 
     /** Which session of Explore's kept tabs this browser belongs to ([ExploreTabs.keep]). */
-    private val tabsGeneration = env.exploreTabs.generation
+    private val tabsGeneration = restored.generation
     private var nextPromptId = 1L
     private var pending: PendingRequest? = null
 

@@ -1,6 +1,7 @@
 package com.ecency.app
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
@@ -210,11 +211,18 @@ class ProfileFlowsTest {
 
     private lateinit var navigator: Navigator
 
-    private fun launch(vararg screens: AppScreen) {
+    private fun launch(vararg screens: AppScreen) = launchAt(1f, *screens)
+
+    private fun launchAt(fontScale: Float, vararg screens: AppScreen) {
         var state = NavState()
         screens.forEach { state = state.push(it) }
         navigator = Navigator(state)
-        compose.setContent { EcencyApp(env, host, navigator) }
+        compose.setContent {
+            val d = androidx.compose.ui.platform.LocalDensity.current
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(d.density, fontScale)) {
+                EcencyApp(env, host, navigator)
+            }
+        }
     }
 
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
@@ -457,6 +465,20 @@ class ProfileFlowsTest {
         val sent = node.broadcasts().single()
         assertTrue(sent, sent.contains("""\"delegate_rc\",{\"from\":\"tester\",\"delegatees\":[\"alice\"],\"max_rc\":12500000000}"""))
         assertTrue(sent, sent.contains(""""required_posting_auths":["tester"]"""))
+    }
+
+    /** Review fix: on a short window at the largest text the sheet scrolls, so Delegate stays reachable. */
+    @Test
+    @Config(qualifiers = "w320dp-h480dp")
+    fun theRcSheetScrollsToItsButtonOnASmallWindowAtLargeText() {
+        node.signIn()
+        launchAt(2f, AppScreen.Profile("alice"))
+        waitFor("profileMenu")
+        compose.onNodeWithTag("profileMenu").performClick()
+        waitFor("menu:DELEGATE_RC")
+        compose.onNodeWithTag("menu:DELEGATE_RC").performClick()
+        waitFor("rcDelegateAvailable")
+        compose.onNodeWithTag("rcDelegateReview").performScrollTo().assertIsDisplayed()
     }
 
     /** RN CommentView (the profile's Comments tab rows): a signed in reader gets the gift beside the row. */

@@ -40,23 +40,36 @@ private struct WalletField: View {
     /// Left to right whatever the app's direction (accounts, amounts, permlinks); a memo is free text.
     var machine = true
     let id: String
-    /// The unit shown inside the field after the value once something is typed.
+    /// The unit shown inside the field after the value once something is typed; its width is kept, so a long value
+    /// scrolls in the text area instead of running under it.
     var suffix: String? = nil
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
-        TextField(label, text: $text)
-            .keyboardType(number ? .decimalPad : .default)
-            .textInputAutocapitalization(.never).autocorrectionDisabled()
-            .textFieldStyle(.roundedBorder).disabled(disabled)
-            .environment(\.layoutDirection, machine ? .leftToRight : layoutDirection)
-            .accessibilityIdentifier(id)
-            // after the field's identifier: the unit is an element of its own, not part of the field
-            .overlay(alignment: .trailing) {
-                if let suffix, !text.isEmpty {
-                    Text(suffix).foregroundStyle(.secondary).padding(.trailing, 8)
+        if let suffix {
+            HStack(spacing: 6) {
+                input.textFieldStyle(.plain)
+                if !text.isEmpty {
+                    Text(suffix).foregroundStyle(theme.secondary).lineLimit(1).fixedSize()
                         .accessibilityIdentifier("\(id)-unit")
                 }
             }
+            .padding(.horizontal, 8).padding(.vertical, 7)
+            .background(theme.background, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(theme.border, lineWidth: 0.5))
+            .environment(\.layoutDirection, machine ? .leftToRight : layoutDirection)
+        } else {
+            input.textFieldStyle(.roundedBorder)
+                .environment(\.layoutDirection, machine ? .leftToRight : layoutDirection)
+        }
+    }
+
+    private var input: some View {
+        TextField(label, text: $text)
+            .keyboardType(number ? .decimalPad : .default)
+            .textInputAutocapitalization(.never).autocorrectionDisabled()
+            .disabled(disabled)
+            .accessibilityIdentifier(id)
     }
 
     @Environment(\.layoutDirection) private var layoutDirection

@@ -28,10 +28,10 @@ class RcDelegationTest {
      * [user]'s RC: max 900 billion of which 100 billion received (not delegable), 300 billion current mana at [now]
      * (no regeneration), and [existing] already delegated to spike-bob.
      */
-    private fun world(scope: TestScope, existing: Long? = null, current: Long = 300_000_000_000, updated: Long = now): WalletWorld {
+    private fun world(scope: TestScope, existing: Long? = null, current: Long = 300_000_000_000, updated: Long = now, adjustment: Long = 0): WalletWorld {
         val w = WalletWorld(scope)
         w.rpc["rc_api.find_rc_accounts"] = {
-            """{"rc_accounts":[{"account":"${w.user}","rc_manabar":{"current_mana":$current,"last_update_time":$updated},"max_rc_creation_adjustment":{"amount":"0","precision":6,"nai":"@@000000037"},"max_rc":900000000000,"delegated_rc":0,"received_delegated_rc":100000000000}]}"""
+            """{"rc_accounts":[{"account":"${w.user}","rc_manabar":{"current_mana":$current,"last_update_time":$updated},"max_rc_creation_adjustment":{"amount":"$adjustment","precision":6,"nai":"@@000000037"},"max_rc":900000000000,"delegated_rc":0,"received_delegated_rc":100000000000}]}"""
         }
         w.rpc["rc_api.list_rc_direct_delegations"] = { r ->
             val start = r.params.jsonObject["start"]!!.jsonArray.map { it.jsonPrimitive.content }
@@ -93,6 +93,64 @@ class RcDelegationTest {
         assertEquals("5.5", m.current.amount)
         m.setAmount("abc")
         assertEquals("5.5", m.current.amount)
+        // no whole digits: half a billion, said to be below the minimum (not a silently disabled button)
+        m.setAmount(".5")
+        assertEquals(500_000_000, m.current.amountRc)
+        assertEquals(RcAmountProblem.TOO_LOW, m.current.problem)
+        m.setAmount(".")
+        assertNull(m.current.amountRc)
+    }
+
+    /** Review fix: the confirmation names the amount exactly as it is signed, never rounded. */
+    @Test
+    fun theConfirmationShowsTheExactAmount() = runTest {
+        val w = world(this)
+        val m = w.env.rcDelegateModel("spike-bob")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        m.setAmount("5.009")
+        m.review()
+        val review = assertIs<RcDelegatePrompt.Review>(m.current.prompt)
+        assertEquals(5_009_000_000, review.maxRc)
+        assertEquals("Delegate 5.009 billion RC to @spike-bob?", RcDelegateCopy.confirm(review, m.current.existing))
+        assertEquals("123,456,789.000000001", RcDelegateCopy.exactBillions(123_456_789_000_000_001))
+    }
+
+    /** Review fix: a review left open across an account change signs nothing for the account that left. */
+    @Test
+    fun aConfirmationAfterAnAccountChangeSendsNothing() = runTest {
+        val w = world(this)
+        val m = w.env.rcDelegateModel("spike-bob")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        m.setAmount("10")
+        m.review()
+        w.env.emit(AppEvent.SessionChanged("someone-else"))
+        testScheduler.advanceUntilIdle()
+        m.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(w.broadcastOps().isEmpty())
+    }
+
+    /** Review fix: hived leaves the account creation RC out of what can be delegated (get_maximum_rc(true)). */
+    @Test
+    fun theCreationAdjustmentIsNotDelegable() = runTest {
+        // full mana (900 billion): own 900 - 100 received - 50 creation adjustment
+        val w = world(this, current = 900_000_000_000, adjustment = 50_000_000_000)
+        val m = w.env.rcDelegateModel("spike-bob")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(750_000_000_000, m.current.available)
+        // the legacy text form of the adjustment reads the same
+        val legacy = com.ecency.core.api.model.RcDelegator.fromJson(kotlinx.serialization.json.Json.parseToJsonElement(
+            """{"rc_manabar":{"current_mana":900000000000,"last_update_time":0},"max_rc":900000000000,"received_delegated_rc":100000000000,"max_rc_creation_adjustment":"50000.000000 VESTS"}""",
+        ))
+        assertEquals(750_000_000_000, legacy?.delegable(0))
+    }
+
+    @Test
+    fun theLargestTotalNeverWrapsAround() {
+        assertEquals(Long.MAX_VALUE, RcDelegateState(to = "spike-bob", available = Long.MAX_VALUE - 1, existing = 10).maxTotal)
     }
 
     @Test
