@@ -37,7 +37,7 @@ the rest) wherever they run from; `golden/generate-wallet.mjs`, `golden/generate
 
 Each script's header says what it writes and with which arguments. Diff the output against the committed file: a
 change is either a fix in the package (update the Kotlin side to match, and say so in the PR) or a regression to file
-upstream. `GoldenVectors.kt`'s `sdkSignature` lines change on every run: the SDK signs with extra entropy, so its
+upstream. `GoldenVectors.kt`'s `sdkSignature` lines change on every run (commit them with the rest): the SDK signs with extra entropy, so its
 signature differs each time; the tests recover the key from it (the byte-exact check is the generator's own RFC 6979
 signature).
 
