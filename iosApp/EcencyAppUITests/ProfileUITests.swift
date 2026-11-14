@@ -39,6 +39,34 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 10))
     }
 
+    /// Owner report: under the avatar (the pills do not fit beside it) the actions start at the left and the more
+    /// menu ends at the right edge; beside the avatar the menu is the last thing on the right, as before.
+    func testTheProfileMenuSitsAtTheRightOfTheActions() {
+        var sawStacked = false
+        var phoneWidth = false
+        for size in ["", "UICTContentSizeCategoryXXXL"] {
+            let app = launch(["-openLink", "https://ecency.com/@spike-bob"] + (size.isEmpty ? [] : ["-UIPreferredContentSizeCategoryName", size]))
+            let menu = element(app, "profile-menu")
+            XCTAssertTrue(menu.waitForExistence(timeout: 20))
+            let follow = app.buttons["follow"].frame
+            let window = app.windows.firstMatch.frame
+            phoneWidth = window.width <= 440
+            // either layout: the menu ends at the trailing edge of the row
+            XCTAssertGreaterThan(menu.frame.maxX, window.maxX - 32, "\(size): menu at \(menu.frame), window \(window)")
+            XCTAssertLessThanOrEqual(menu.frame.maxX, window.maxX, size)
+            // the layout SwiftUI chose (ViewThatFits), read from the screen, not assumed from the text size: under the
+            // avatar the pills start at the leading gutter, beside it they start after the avatar
+            if follow.minX < window.minX + 40 {
+                sawStacked = true
+                XCTAssertEqual(follow.minX, window.minX + 16, accuracy: 2, "\(size): Follow at \(follow)")
+                XCTAssertLessThan(element(app, "email-digest").frame.maxX, menu.frame.minX - 20, "\(size): the room is between the actions and the menu")
+            }
+            app.terminate()
+        }
+        // on a phone the largest standard text size does not fit beside the avatar: the stacked case was checked
+        if phoneWidth { XCTAssertTrue(sawStacked, "no run put the pills under the avatar") }
+    }
+
     /// Owner request: Delegate RC from another profile's menu, typed in billions, at least 5, confirmed first.
     func testDelegateRcFromTheMenuChecksTheAmountAndConfirms() {
         let app = launch(["-openLink", "https://ecency.com/@spike-bob"])

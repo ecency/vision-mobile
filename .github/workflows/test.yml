@@ -57,3 +57,8 @@ jobs:
       - name: Unit tests and lint
         if: steps.changes.outputs.app == 'true'
         run: ./gradlew --no-daemon :build-logic:test :shared:testAndroidHostTest :androidApp:testDebugUnitTest :androidApp:lintDebug
+
+      # The release APK script against a local fake of Google (no network, no secret): seconds
+      - name: Release APK script
+        if: steps.changes.outputs.app == 'true'
+        run: scripts/release-apk-test.sh
