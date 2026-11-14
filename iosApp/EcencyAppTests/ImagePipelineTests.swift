@@ -212,6 +212,29 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertEqual(loaded.image.duration, 70, accuracy: 0.001)
     }
 
+    /// A long frame among many short ones keeps its own time: 598 frames of 100 ms and one of 10 s.
+    func testALongFrameAmongManyKeepsItsTime() throws {
+        let delays = Array(repeating: 0.1, count: 598) + [10]
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 599, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 698)
+        XCTAssertEqual(slots.suffix(100).map { ObjectIdentifier($0) }.uniqueCount, 1, "the 10 s frame fills 100 slots of 100 ms")
+        XCTAssertFalse(slots[597] === slots[598])
+        XCTAssertEqual(loaded.image.duration, 69.8, accuracy: 0.001)
+    }
+
+    /// Past the slot limit, frames too short for a slot get one each and the rest share the others by their delays:
+    /// 1000 frames of 20 ms and one of 100 s get 1000 slots and 2000, within the 3000 slots.
+    func testPastTheSlotLimitShortFramesKeepOneSlot() throws {
+        let delays = Array(repeating: 0.02, count: 1000) + [100]
+        let loaded = try XCTUnwrap(ImageLoader.decode(try gif(frames: 1001, side: 1, delays: delays), maxPixel: 100))
+        let slots = try XCTUnwrap(loaded.image.images)
+        XCTAssertEqual(slots.count, 3000)
+        XCTAssertEqual(slots.prefix(1000).map { ObjectIdentifier($0) }.uniqueCount, 1000, "each short frame once")
+        XCTAssertEqual(slots.suffix(2000).map { ObjectIdentifier($0) }.uniqueCount, 1)
+        XCTAssertEqual(loaded.image.duration, 120, accuracy: 0.001)
+    }
+
     /// Issue #3686: the proxy answers AVIF or WebP only to a request that names it; other hosts get no Accept.
     func testImageProxyRequestsNameAvifAndWebP() throws {
         for src in ["https://i.ecency.com/p/abc?format=match&mode=fit", "https://images.ecency.com/u/someone/avatar/small"] {
@@ -360,6 +383,10 @@ final class ImagePipelineTests: XCTestCase {
         XCTAssertLessThanOrEqual(loaded.image.size.width * loaded.image.size.height, 20_000 * 1.05)
         XCTAssertEqual(loaded.image.size.width, 200, accuracy: 2, "the aspect is kept")
     }
+}
+
+private extension Sequence where Element: Hashable {
+    var uniqueCount: Int { Set(self).count }
 }
 
 /// Answers every request with a 404 and keeps its Accept header.
