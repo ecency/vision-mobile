@@ -387,6 +387,8 @@ class NotificationFlowsTest {
         waitFor("notificationFilter:${NotificationFilter.MENTIONS.ordinal}")
         compose.onNodeWithTag("notificationFilter:${NotificationFilter.MENTIONS.ordinal}").performClick()
         waitUntil { chipOn(NotificationFilter.MENTIONS) }
+        // the chip turns on before its read goes out: wait for that read (#3687, as #3639 above)
+        waitUntil { node.calls("notifications").lastOrNull()?.let { node.field(it, "filter") } == "\"mentions\"" }
         assertEquals("\"mentions\"", node.field(node.calls("notifications").last(), "filter"))
     }
 
