@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.l10n.L
 import com.ecency.core.api.FakeTransport
 import com.ecency.core.api.Fixtures.entry
 import com.ecency.core.api.Sent
@@ -293,8 +294,14 @@ class SearchModelTest {
 
     @Test
     fun dappDirectoryAndUrlField() {
-        assertEquals(13, Dapps.DIRECTORY.size)
+        assertEquals(14, Dapps.DIRECTORY.size)
         assertEquals(listOf("Ecency", "Raidstead", "PeakD"), Dapps.DIRECTORY.take(3).map { it.name })
+        // owner request: HiveGrove (the tree-growing game hive.io lists) among the games, after Rising Star
+        val names = Dapps.DIRECTORY.map { it.name }
+        assertEquals(names.indexOf("Rising Star") + 1, names.indexOf("HiveGrove"))
+        val grove = Dapps.DIRECTORY.single { it.name == "HiveGrove" }
+        assertEquals("https://playhivegrove.com", grove.url)
+        assertEquals(L.native.dapps.categoryGaming, grove.category)
         assertEquals("https://peakd.com", Dapps.normalizeUrl(" https://peakd.com "))
         assertEquals("https://hive.blog/trending", Dapps.normalizeUrl("hive.blog/trending"))
         assertEquals("https://www.google.com/search?q=hive%20games%3F%20%26%20more", Dapps.normalizeUrl("hive games? & more"))
