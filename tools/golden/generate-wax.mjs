@@ -4,7 +4,7 @@
 // vector files (their operation JSON), so wax always sees exactly what the SDK saw. WaxGoldenVectorTest checks the
 // Kotlin serializer against both.
 //
-// For each transaction, in the legacy (pre HF26) serialization the SDK, dhive and the app sign (assets as STEEM/SBD):
+// For each transaction, in the legacy (pre HF26) serialization the SDK and the app sign (assets as STEEM/SBD):
 // - serialized: wax's legacy binary form of the unsigned transaction (legacy_binaryViewMetadata, without the empty
 //   signature list);
 // - digest: wax legacy_sigDigest (sha256 of the chain id and those bytes);
