@@ -127,15 +127,14 @@ struct PostCardView: View {
             .accessibilityIdentifier("post-card")
             .onAppear(perform: onAppearWithContent)
 
-            // one row; at large text sizes the controls wrap onto lines, so the card never grows wider than the
-            // screen. Chosen by the text size (not ViewThatFits, which built every candidate per lazy row); AnyLayout
+            // one row; at large text sizes, or when they do not fit, the controls wrap onto lines, so the card never
+            // grows wider than the screen. One layout (not ViewThatFits, which built every candidate per lazy row)
             // keeps the same views, so the vote button keeps its state when the size changes
             let wraps = AccessibleFooter.wraps(typeSize, width: width)
-            (wraps ? AnyLayout(ChipFlow(spacing: 16)) : AnyLayout(HStackLayout(spacing: 16))) {
+            FooterRow(spacing: 16, wraps: wraps) {
                 vote
                 voters
-                if !wraps { Spacer() }
-                reblogs
+                reblogs.footerTrailing()
                 comments
                 TipButton(key: card.key)
             }
@@ -253,5 +252,63 @@ struct TipButton: View {
 enum AccessibleFooter {
     static func wraps(_ typeSize: DynamicTypeSize, width: CGFloat) -> Bool {
         typeSize >= .xxxLarge || (typeSize >= .xLarge && width < 380)
+    }
+}
+
+/// Marks the first of a footer's trailing controls: on one row, the room left goes before it (as a Spacer would).
+private struct FooterTrailing: LayoutValueKey {
+    static let defaultValue = false
+}
+
+extension View {
+    func footerTrailing() -> some View { layoutValue(key: FooterTrailing.self, value: true) }
+}
+
+/// A footer's controls: one row, vertically centred, while they fit the width and `wraps` (large text) is off;
+/// otherwise lines as ChipFlow lays them out. So a footer is never wider than its column: an own wave's (vote,
+/// counts, tip, edit, delete, reply) did not fit a phone, and the row grew past the screen, centred, and pushed the
+/// wave's avatar and name off the left edge. One layout either way, so the controls keep their state.
+struct FooterRow: Layout {
+    var spacing: CGFloat
+    var wraps = false
+
+    private func row(_ subviews: Subviews) -> (width: CGFloat, height: CGFloat) {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let width = sizes.reduce(0) { $0 + $1.width } + spacing * CGFloat(max(0, sizes.count - 1))
+        return (width, sizes.map(\.height).max() ?? 0)
+    }
+
+    private func fitsOneRow(_ natural: CGFloat, in width: CGFloat?) -> Bool {
+        !wraps && natural <= (width ?? .infinity) + 0.5
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let natural = row(subviews)
+        if fitsOneRow(natural.width, in: proposal.width) {
+            let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? natural.width
+            return CGSize(width: width, height: natural.height)
+        }
+        var none: () = ()
+        return ChipFlow(spacing: spacing).sizeThatFits(proposal: proposal, subviews: subviews, cache: &none)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let natural = row(subviews)
+        guard fitsOneRow(natural.width, in: bounds.width) else {
+            var none: () = ()
+            ChipFlow(spacing: spacing).placeSubviews(in: bounds, proposal: proposal, subviews: subviews, cache: &none)
+            return
+        }
+        var spare = max(0, bounds.width - natural.width)
+        var x = bounds.minX
+        for view in subviews {
+            if view[FooterTrailing.self] {
+                x += spare
+                spare = 0
+            }
+            let size = view.sizeThatFits(.unspecified)
+            view.place(at: CGPoint(x: x, y: bounds.midY), anchor: .leading, proposal: ProposedViewSize(size))
+            x += size.width + spacing
+        }
     }
 }

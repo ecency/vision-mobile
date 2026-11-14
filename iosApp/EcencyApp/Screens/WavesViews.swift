@@ -445,9 +445,8 @@ struct WaveRowView: View {
     private func footer(_ card: PostCard) -> some View {
         // chosen by the text size, the same views in either layout (the vote button keeps its state)
         let wraps = AccessibleFooter.wraps(typeSize, width: width)
-        return (wraps ? AnyLayout(ChipFlow(spacing: 14)) : AnyLayout(HStackLayout(spacing: 14))) {
+        return FooterRow(spacing: 14, wraps: wraps) {
             footerCounts(card)
-            if !wraps { Spacer() }
             footerActions(card)
         }
     }
@@ -465,7 +464,7 @@ struct WaveRowView: View {
     }
 
     @ViewBuilder private func footerActions(_ card: PostCard) -> some View {
-        TipButton(key: card.key)
+        TipButton(key: card.key).footerTrailing()
         // RN commentView: Edit and Delete on an own wave, after the tip
         OwnFooterButtons(post: item.post, votes: card.votes, root: item.key, idPrefix: "wave")
         Button(ReadingUiCopy.shared.REPLY) {

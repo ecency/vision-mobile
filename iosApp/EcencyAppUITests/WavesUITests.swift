@@ -86,6 +86,23 @@ final class WavesUITests: XCTestCase {
         XCTAssertTrue(app.textViews["editor-body"].waitForExistence(timeout: 20), app.debugDescription)
     }
 
+    /// Owner report: an own wave's footer (vote, payout, counts, tip, edit, delete) is wider than a phone's column;
+    /// it wraps instead of widening the row, which centred the wave and pushed its avatar and name off the left edge.
+    func testAnOwnWaveStaysInsideTheWindow() {
+        let app = launch(["-seedAccounts", "YES"])
+        let mine = element(app, "wave-spike-alice-wave-mine")
+        XCTAssertTrue(element(app, "wave-spike-carol-wave-one").waitForExistence(timeout: 20))
+        for _ in 0..<6 where !mine.exists { app.swipeUp() }
+        XCTAssertTrue(mine.waitForExistence(timeout: 10), app.debugDescription)
+        let window = app.windows.firstMatch.frame
+        let avatar = mine.buttons["wave-avatar"].frame
+        let others = element(app, "wave-spike-carol-wave-one").buttons["wave-avatar"].frame
+        let delete = mine.buttons["wave-delete-post"].frame
+        XCTAssertEqual(avatar.minX, others.minX, accuracy: 1, "own avatar at \(avatar), another wave's at \(others)")
+        XCTAssertLessThanOrEqual(delete.maxX, window.maxX, "delete at \(delete), window \(window)")
+        XCTAssertLessThanOrEqual(mine.frame.width, window.width, "row \(mine.frame), window \(window)")
+    }
+
     func testTheComposersVideoButtonOpensTheShortUploader() {
         let app = launch(["-seedAccounts", "YES"])
         XCTAssertTrue(app.buttons["wave-fab"].waitForExistence(timeout: 20))
