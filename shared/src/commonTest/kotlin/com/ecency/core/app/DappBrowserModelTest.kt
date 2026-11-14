@@ -91,6 +91,75 @@ class DappBrowserModelTest {
         assertFalse(b.home(), "home on the home screen closes the browser")
     }
 
+    // ---- tabs kept for the session (owner request) ----
+
+    /** Two pages in two tabs, the first one active, then Explore closes. */
+    private fun browseAndClose(app: TestApp): List<String> {
+        val b = browser(app, null)
+        b.navigate("https://peakd.com/trending")
+        b.pageChanged(b.current.activeTabId, "https://peakd.com/trending", "PeakD", canGoBack = false, canGoForward = false)
+        val first = b.current.activeTabId
+        b.addTab()
+        b.navigate("https://playhivegrove.com")
+        b.switchTab(first)
+        b.close()
+        return listOf("https://peakd.com/trending", "https://playhivegrove.com")
+    }
+
+    @Test
+    fun exploreOpenedAgainShowsTheTabsItHadWhenItClosed() = runTest {
+        val app = signedIn(this)
+        val urls = browseAndClose(app)
+        val again = browser(app, null)
+        assertEquals(urls, again.current.tabs.map { it.url })
+        assertEquals("https://peakd.com/trending", again.current.activeTab.url, "the tab that was active is active again")
+        assertEquals("PeakD", again.current.activeTab.title)
+        assertTrue(again.current.tabs.all { it.load > 0 }, "each page loads again when its tab is shown")
+        assertNull(again.current.prompt)
+        // a tab added now gets an id of its own
+        again.addTab()
+        assertEquals(3, again.current.tabs.map { it.id }.toSet().size)
+    }
+
+    @Test
+    fun aPageOpenedInExploreJoinsTheKeptTabs() = runTest {
+        val app = signedIn(this)
+        val urls = browseAndClose(app)
+        val opened = browser(app, "https://hive.blog/trending")
+        assertEquals(urls + "https://hive.blog/trending", opened.current.tabs.map { it.url })
+        assertEquals("https://hive.blog/trending", opened.current.activeTab.url)
+    }
+
+    @Test
+    fun anAccountChangeOrAWipeForgetsTheTabs() = runTest {
+        for (event in listOf(AppEvent.SessionChanged("someone-else"), AppEvent.SessionChanged(null), AppEvent.DataWiped)) {
+            val app = signedIn(this)
+            browseAndClose(app)
+            app.env.emit(event)
+            val again = browser(app, null)
+            assertEquals(listOf<String?>(null), again.current.tabs.map { it.url }, "$event")
+        }
+    }
+
+    /** A browser still open across an account change keeps nothing when it closes: its tabs were the other account's. */
+    @Test
+    fun aBrowserOpenAcrossAnAccountChangeKeepsNothing() = runTest {
+        val app = signedIn(this)
+        val b = browser(app, null)
+        b.navigate("https://peakd.com/trending")
+        app.env.emit(AppEvent.SessionChanged("someone-else"))
+        b.close()
+        assertEquals(listOf<String?>(null), browser(app, null).current.tabs.map { it.url })
+    }
+
+    @Test
+    fun aLoneHomeTabIsNothingToKeep() = runTest {
+        val app = signedIn(this)
+        browser(app, null).close()
+        val opened = browser(app, "https://hive.blog/trending")
+        assertEquals(listOf<String?>("https://hive.blog/trending"), opened.current.tabs.map { it.url })
+    }
+
     @Test
     fun onlyWebPagesLoadAndAppLinksNeedATap() = runTest {
         val app = signedIn(this)

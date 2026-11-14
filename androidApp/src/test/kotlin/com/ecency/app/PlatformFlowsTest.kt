@@ -144,6 +144,30 @@ class PlatformFlowsTest {
         compose.await("one tab") { idleMain(); browser().current.tabs.size == 1 }
     }
 
+    /** Owner request: Explore closed and opened again in the session shows the tabs it had, each page loading when shown. */
+    @Test
+    fun exploreOpenedAgainShowsItsTabs() {
+        launchSignedIn()
+        push(AppScreen.Explore)
+        waitFor("dapp:PeakD")
+        compose.onNodeWithTag("dapp:PeakD").performClick()
+        compose.await("tab on peakd") { idleMain(); browser().current.activeTab.url == "https://peakd.com" }
+        val first = browser().current.activeTabId
+        compose.onNodeWithTag("browserAddTab").performClick()
+        compose.await("two tabs") { idleMain(); browser().current.tabs.size == 2 }
+        // the new tab is on the directory: its first header button closes Explore
+        compose.onNodeWithTag("browserHome").performClick()
+        compose.await("Explore closed") { idleMain(); navigator.state.stack.none { it.screen == AppScreen.Explore } }
+        settle()
+
+        push(AppScreen.Explore)
+        waitFor("dapp:PeakD")
+        assertEquals(listOf("https://peakd.com", null), browser().current.tabs.map { it.url })
+        compose.onNodeWithTag("browserTab:$first").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.await("the kept page shows") { idleMain(); browser().current.activeTabId == first }
+        waitFor("dappPage")
+    }
+
     @Test
     fun theWebViewIsLockedDown() {
         launchSignedIn()

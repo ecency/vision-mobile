@@ -14,6 +14,8 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -180,6 +182,59 @@ data class DappBrowserState(
     val canCloseTabs: Boolean get() = tabs.size > 1
 }
 
+/**
+ * Explore's tabs kept for the session (owner request, README "dApp browser"): the tabs a browser screen had when it
+ * closed, so Explore opened again shows them. In memory only, never saved (a page's URL may carry its token), and
+ * forgotten on every account change and on a wipe ([AppEvent.clearsDappData]), as the browser's cookies are. Each
+ * page loads again when its tab is shown; a waiting request and the sites' connect approvals do not carry over.
+ */
+@OptIn(ExperimentalAtomicApi::class)
+internal class ExploreTabs {
+    /** [state] kept in [generation]; every [clear] starts the next generation. */
+    private class Kept(val generation: Int, val state: DappBrowserState?)
+
+    private val kept = AtomicReference(Kept(0, null))
+
+    /** The generation now: a browser notes it when it opens, and keeps its tabs only if no clear came since. */
+    val generation: Int get() = kept.load().generation
+
+    /**
+     * Keeps [state]'s tabs (address and title) and which one is active, unless an account change or a wipe came after
+     * the browser opened in [openedIn] (its tabs were the other account's); a lone home tab is nothing to keep.
+     */
+    fun keep(state: DappBrowserState, openedIn: Int) {
+        val tabs = state.tabs.map { BrowserTab(id = it.id, url = it.url, title = it.title) }
+        val next = if (tabs.all { it.url == null } && tabs.size == 1) null else DappBrowserState(tabs, state.activeTabId)
+        while (true) {
+            val now = kept.load()
+            if (now.generation != openedIn) return
+            if (kept.compareAndSet(now, Kept(openedIn, next))) return
+        }
+    }
+
+    /** The kept tabs, ready to show: each page asks its web view to load once shown; null when none are kept. */
+    fun restore(): DappBrowserState? {
+        val state = kept.load().state ?: return null
+        val tabs = state.tabs.mapNotNull { tab ->
+            when {
+                tab.url == null -> BrowserTab(id = tab.id)
+                BrowserPolicy.navigation(tab.url, true, true) != BrowserNavigation.LOAD -> null
+                else -> tab.copy(load = 1)
+            }
+        }
+        if (tabs.isEmpty()) return null
+        val active = tabs.firstOrNull { it.id == state.activeTabId } ?: tabs.first()
+        return DappBrowserState(tabs, active.id, urlText = active.url.orEmpty())
+    }
+
+    fun clear() {
+        while (true) {
+            val now = kept.load()
+            if (kept.compareAndSet(now, Kept(now.generation + 1, null))) return
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // The model
 
@@ -202,7 +257,7 @@ data class DappBrowserState(
  * - The account must be the one signed in when the request came and when it is confirmed.
  */
 class DappBrowserModel internal constructor(private val env: AppEnvironment, initialUrl: String?) :
-    StateModel<DappBrowserState>(initialState(initialUrl), env.dispatchers) {
+    StateModel<DappBrowserState>(initialState(initialUrl, env.exploreTabs.restore()), env.dispatchers) {
 
     /** Answers a page: [answer] is the JSON the bridge script's receiver takes. The platform delivers it to the frame. */
     fun interface BridgeReply {
@@ -210,6 +265,9 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     }
 
     private var nextTabId = current.tabs.maxOf { it.id } + 1
+
+    /** Which session of Explore's kept tabs this browser belongs to ([ExploreTabs.keep]). */
+    private val tabsGeneration = env.exploreTabs.generation
     private var nextPromptId = 1L
     private var pending: PendingRequest? = null
 
@@ -808,6 +866,8 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
         // the screen went away: a waiting request is refused, a confirmed one finishes in the app (WalletSends)
         pending?.answer?.error(REJECTED)
         pending = null
+        // its tabs come back when Explore opens again in this session (ExploreTabs)
+        env.exploreTabs.keep(current, tabsGeneration)
         super.close()
     }
 
@@ -827,10 +887,13 @@ class DappBrowserModel internal constructor(private val env: AppEnvironment, ini
     }
 
     companion object {
-        private fun initialState(url: String?): DappBrowserState {
+        /** A first tab on [url], or the home tab; after the session's [kept] tabs when there are any (a page opened in Explore joins them). */
+        private fun initialState(url: String?, kept: DappBrowserState?): DappBrowserState {
             val start = url?.let(Dapps::normalizeUrl)?.takeIf { BrowserPolicy.navigation(it, true, true) == BrowserNavigation.LOAD }
-            val tab = if (start != null) BrowserTab(id = 1, url = start, title = BrowserTab.LOADING_TITLE, load = 1) else BrowserTab(id = 1)
-            return DappBrowserState(tabs = listOf(tab), activeTabId = 1, urlText = start.orEmpty())
+            if (kept != null && start == null) return kept
+            val id = (kept?.tabs?.maxOf { it.id } ?: 0) + 1
+            val tab = if (start != null) BrowserTab(id = id, url = start, title = BrowserTab.LOADING_TITLE, load = 1) else BrowserTab(id = id)
+            return DappBrowserState(tabs = kept?.tabs.orEmpty() + tab, activeTabId = id, urlText = start.orEmpty())
         }
 
         /** Larger messages are ignored (a post body fits many times over). */

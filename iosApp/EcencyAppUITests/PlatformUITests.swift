@@ -27,6 +27,34 @@ final class PlatformUITests: XCTestCase {
         XCTAssertTrue(app.buttons["browser-reload"].waitForExistence(timeout: 10), "back on the first tab's page")
     }
 
+    /// Owner request: Explore closed and opened again in the session shows the tabs it had.
+    func testExploreOpenedAgainShowsItsTabs() {
+        let app = launch(["-openScreen", "explore"])
+        let peakd = app.buttons["dapp-PeakD"]
+        XCTAssertTrue(peakd.waitForExistence(timeout: 15))
+        peakd.tap()
+        XCTAssertTrue(app.buttons["browser-reload"].waitForExistence(timeout: 10))
+        app.buttons["browser-add-tab"].tap()
+        XCTAssertTrue(app.buttons["dapp-Ecency"].waitForExistence(timeout: 10))
+        // the new tab is on the directory: its first header button closes Explore
+        app.buttons["browser-home"].tap()
+        XCTAssertTrue(app.buttons["dapp-Ecency"].waitForNonExistence(timeout: 10), "Explore closed")
+
+        let menu = app.buttons["account-menu"]
+        XCTAssertTrue(menu.waitForExistence(timeout: 15))
+        menu.tap()
+        let explore = app.buttons["menu-explore"]
+        XCTAssertTrue(explore.waitForExistence(timeout: 10))
+        for _ in 0..<6 where !explore.isHittable { any(app, "drawer-main").swipeUp() }
+        explore.tap()
+        XCTAssertTrue(any(app, "browser-tab-1").waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertTrue(any(app, "browser-tab-2").exists, "both tabs are back")
+        XCTAssertTrue(app.buttons["dapp-PeakD"].exists, "the tab that was active, the directory, is active again")
+        any(app, "browser-tab-1").tap()
+        XCTAssertTrue(app.buttons["browser-reload"].waitForExistence(timeout: 10), "the kept page shows in its tab")
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 10))
+    }
+
     func testABridgeRequestShowsTheWebViewsOriginAndCancelRejectsIt() {
         let app = launch(["-openScreen", "dapp"])
         let sheet = any(app, "bridge-sheet")
