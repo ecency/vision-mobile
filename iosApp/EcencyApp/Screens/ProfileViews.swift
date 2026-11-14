@@ -525,8 +525,9 @@ private struct ProfileSummaryView: View {
     }
 
     @ViewBuilder private var actions: some View {
-        // a row that wraps where even the line under the avatar is too narrow (the largest text sizes)
-        ChipFlow(spacing: 8) {
+        // one row, the more menu at its trailing end (under the avatar the row takes the width: pills at the leading
+        // edge, the menu at the trailing one); it wraps where even that line is too narrow (the largest text sizes)
+        FooterRow(spacing: 8) {
             if state.showsActions {
                 pill(state.followLabel, id: "follow") { Haptics.play(.toggle); model.toggleFollow() }
                 pill(UiCopy.shared.MESSAGE, id: "message") { app.openDirectMessage(state.username) }
@@ -538,7 +539,7 @@ private struct ProfileSummaryView: View {
                 .largeContent(ProfileUiCopy.shared.EMAIL_DIGEST, appIcon: .email)
                 .accessibilityIdentifier("email-digest")
                 if state.busy {
-                    ProgressView().accessibilityIdentifier("profile-busy")
+                    ProgressView().accessibilityIdentifier("profile-busy").footerTrailing()
                 } else {
                     Menu {
                         ForEach(state.menu, id: \.self) { item in
@@ -550,6 +551,7 @@ private struct ProfileSummaryView: View {
                     .accessibilityLabel(ProfileUiCopy.shared.MENU)
                     .largeContent(ProfileUiCopy.shared.MENU, appIcon: .more)
                     .accessibilityIdentifier("profile-menu")
+                    .footerTrailing()
                 }
             }
             if state.isOwn {
