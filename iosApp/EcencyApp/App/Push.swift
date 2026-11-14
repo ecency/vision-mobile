@@ -106,18 +106,24 @@ final class APNsTokenGate {
     enum State { case waiting, ready, failed }
     private(set) var state: State = .waiting
     private var waiters: [(Bool) -> Void] = []
+    private var token: Data?
+    /// A request ended without Apple's token (failed or timed out): its arrival must register again.
+    private var answeredWithout = false
 
     /// [done] once: true when Apple's token is here, false when its registration failed or after [timeout].
     func wait(timeout: TimeInterval, _ done: @escaping (Bool) -> Void) {
         switch state {
         case .ready: return done(true)
-        case .failed: return done(false)
+        case .failed:
+            answeredWithout = true
+            return done(false)
         case .waiting: break
         }
         var finished = false
-        let once: (Bool) -> Void = { ok in
+        let once: (Bool) -> Void = { [weak self] ok in
             guard !finished else { return }
             finished = true
+            if !ok { self?.answeredWithout = true }
             done(ok)
         }
         waiters.append(once)
@@ -129,9 +135,18 @@ final class APNsTokenGate {
         if state == .failed { state = .waiting }
     }
 
-    func received() {
+    /// Apple's token arrived. True when the accounts must register again: a request ended without it (that check
+    /// found no token), or the token changed. Not for the same token: Apple answers every
+    /// `registerForRemoteNotifications` (each registration's permission check asks) with it, and registering on each
+    /// answer would loop. Not for the first token when nothing missed it: the waiting requests get it and register.
+    @discardableResult
+    func received(_ token: Data) -> Bool {
+        let again = answeredWithout || (self.token != nil && token != self.token)
+        answeredWithout = false
+        self.token = token
         state = .ready
         flush(true)
+        return again
     }
 
     func failed() {
@@ -223,9 +238,9 @@ final class PushAppDelegate: NSObject, UIApplicationDelegate, UNUserNotification
         #if canImport(FirebaseMessaging)
         if PushBridge.firebaseReady { Messaging.messaging().apnsToken = deviceToken }
         #endif
-        PushBridge.apns.received()
-        // a check that ran before Apple's token (and found none) registers now; Firebase calls back only for a new token
-        PushBridge.tokenRefreshed()
+        // a check that ended without Apple's token (and found none) registers now, as does a changed token; Firebase
+        // calls back only for a new token of its own. Never for the same answer: each registration asks Apple again
+        if PushBridge.apns.received(deviceToken) { PushBridge.tokenRefreshed() }
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

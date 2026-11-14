@@ -6,18 +6,19 @@ import XCTest
 /// registered nothing). Token requests now wait for Apple's token (APNsTokenGate) and its arrival registers again.
 @MainActor
 final class PushTests: XCTestCase {
+    private static let apple = Data([1, 2, 3])
     func testARequestWaitsForApplesToken() {
         let gate = APNsTokenGate()
         var answers: [Bool] = []
         gate.wait(timeout: 5) { answers.append($0) }
         XCTAssertEqual(answers, [], "nothing before Apple's token")
-        gate.received()
+        gate.received(Self.apple)
         XCTAssertEqual(answers, [true])
     }
 
     func testARequestAfterTheTokenGoesAtOnce() {
         let gate = APNsTokenGate()
-        gate.received()
+        gate.received(Self.apple)
         var answers: [Bool] = []
         gate.wait(timeout: 5) { answers.append($0) }
         XCTAssertEqual(answers, [true])
@@ -35,7 +36,7 @@ final class PushTests: XCTestCase {
         gate.registering()
         gate.wait(timeout: 5) { answers.append($0) }
         XCTAssertEqual(answers, [false, false])
-        gate.received()
+        gate.received(Self.apple)
         XCTAssertEqual(answers, [false, false, true])
     }
 
@@ -47,7 +48,7 @@ final class PushTests: XCTestCase {
         wait(for: [timedOut], timeout: 2)
         XCTAssertEqual(answers, [false])
         // Apple's token after the timeout does not answer that request a second time
-        gate.received()
+        gate.received(Self.apple)
         XCTAssertEqual(answers, [false])
     }
 
@@ -72,15 +73,44 @@ final class PushTests: XCTestCase {
 
         let ready = APNsTokenGate()
         IOSPushPlatform.tokenAfterApns(ready, timeout: 5, fetch: fetch) { tokens.append($0) }
-        ready.received()
+        ready.received(Self.apple)
         XCTAssertEqual(fetches, 1)
         XCTAssertEqual(tokens, [nil, nil, "fcm"])
+    }
+
+    /// Review fix: Apple answers each registerForRemoteNotifications with the same token; registering the accounts
+    /// again on every answer looped through the permission check. Only a missed request or a changed token does.
+    func testOnlyAMissedRequestOrAChangedTokenRegistersAgain() {
+        let gate = APNsTokenGate()
+        var answers: [Bool] = []
+        gate.wait(timeout: 5) { answers.append($0) }
+        XCTAssertFalse(gate.received(Data([1])), "the waiting request got the first token and registers itself")
+        XCTAssertEqual(answers, [true])
+        XCTAssertFalse(gate.received(Data([1])), "the same token again")
+        XCTAssertFalse(gate.received(Data([1])))
+        XCTAssertTrue(gate.received(Data([2])), "a changed token")
+        XCTAssertFalse(gate.received(Data([2])))
+    }
+
+    func testTheTokenAfterAMissedRequestRegistersAgainOnce() {
+        let timedOut = APNsTokenGate()
+        let done = expectation(description: "timeout")
+        timedOut.wait(timeout: 0.05) { _ in done.fulfill() }
+        wait(for: [done], timeout: 2)
+        XCTAssertTrue(timedOut.received(Data([1])), "that check found no token")
+        XCTAssertFalse(timedOut.received(Data([1])), "once")
+
+        let failed = APNsTokenGate()
+        failed.failed()
+        failed.wait(timeout: 5) { _ in }
+        failed.registering()
+        XCTAssertTrue(failed.received(Data([1])), "a request answered during the failure")
     }
 
     func testATokenAfterAFailureCounts() {
         let gate = APNsTokenGate()
         gate.failed()
-        gate.received()
+        gate.received(Self.apple)
         var answers: [Bool] = []
         gate.wait(timeout: 5) { answers.append($0) }
         XCTAssertEqual(answers, [true])
