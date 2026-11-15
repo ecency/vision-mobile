@@ -98,6 +98,21 @@ class WalletDeltaFixesTest {
         assertFalse(failed.retryable)
     }
 
+    /** #3701: the relay connection lost after the request reached it (the reattach refused) may have been signed. */
+    @Test
+    fun aHiveAuthConnectionLostAfterTheRequestMayHaveBeenSigned() = runTest {
+        val w = hiveAuthWorld(this)
+        val done = CompletableDeferred<WalletSend>()
+        w.env.walletSends.send(w.user, transferOps(w), KeyRole.ACTIVE, "a1") { done.complete(it) }
+        repeat(5) { testScheduler.runCurrent() }
+        assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt)
+        w.app.relay.drop() // the socket ends while the wallet has the request; the relay refuses the reattach
+        testScheduler.advanceUntilIdle()
+        val failed = assertIs<SendPhase.Failed>(done.await().phase)
+        assertEquals(BroadcastException.UNDECIDED_MESSAGE, failed.error.message)
+        assertFalse(failed.retryable)
+    }
+
     @Test
     fun aHiveAuthRejectionIsADefiniteFailure() = runTest {
         val w = hiveAuthWorld(this)

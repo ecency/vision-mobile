@@ -312,8 +312,9 @@ class HiveAuthTest {
         assertEquals(listOf("sign_req", "attach_req"), relay.sent.map { it["cmd"]!!.jsonPrimitive.content })
     }
 
+    /** #3701: a reattach refused after the request reached the relay may have been signed: not "never connected". */
     @Test
-    fun failedAttachIsNotConnected() = runTest {
+    fun failedAttachIsConnectionLost() = runTest {
         val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
         val relay = FakeRelay { m ->
             when (m["cmd"]!!.jsonPrimitive.content) {
@@ -322,12 +323,30 @@ class HiveAuthTest {
             }
         }
         val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
-        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.reason)
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
     }
 
+    /** #3701: the socket dropping again after a reattach is a lost connection too. */
     @Test
-    fun connectFailureIsTyped() = runTest {
-        val c = HiveAuthClient({ throw IllegalStateException("offline") }, { 0 })
-        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, assertFailsWith<AuthException.HiveAuth> { c.authenticate(user, null, key) {} }.reason)
+    fun aSecondDropIsConnectionLost() = runTest {
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "sign_req" -> { push("cmd" to "sign_wait", "uuid" to "s1", "expire" to 50_000); drop() }
+                "attach_req" -> { push("cmd" to "attach_ack", "uuid" to "s1"); drop() }
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
+    /** #3701: a socket that never opened is NOT_CONNECTED, and its message names the cause's type (never its text). */
+    @Test
+    fun connectFailureIsTypedAndNamesItsCause() = runTest {
+        val c = HiveAuthClient({ throw IllegalStateException("secret detail") }, { 0 })
+        val e = assertFailsWith<AuthException.HiveAuth> { c.authenticate(user, null, key) {} }
+        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.reason)
+        assertTrue("IllegalStateException" in e.message.orEmpty(), e.message)
+        assertTrue("secret detail" !in e.message.orEmpty(), e.message)
     }
 }

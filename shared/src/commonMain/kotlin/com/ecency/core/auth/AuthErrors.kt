@@ -88,6 +88,13 @@ sealed class AuthException(message: String, cause: Throwable? = null) : EcencyEx
         enum class Reason {
             REJECTED, EXPIRED, ERROR, NOT_CONNECTED, SESSION_EXPIRED, INVALID_RESPONSE,
 
+            /**
+             * The relay connection ended after the request reached it (the reattach failed): the wallet may have
+             * signed and broadcast it, so a send is undecided, never "not sent" (#3701). [NOT_CONNECTED] is a socket
+             * that never opened.
+             */
+            CONNECTION_LOST,
+
             /** The wallet signed but did not broadcast: nothing went on chain (RN throws on it too). */
             NOT_BROADCAST,
         }

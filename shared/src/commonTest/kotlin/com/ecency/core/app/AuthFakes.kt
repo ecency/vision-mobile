@@ -105,6 +105,16 @@ class FakeHasRelay : HasSocketFactory {
         channel.trySend(json.toString())
     }
 
+    /** What the relay answers an `attach_req` (after [drop]): `attach_ack` when true, `attach_nack` when false. */
+    var attachAnswer = false
+
+    /** The relay closes the open socket (the client sees it end and reattaches on a new one). */
+    fun drop() {
+        val old = channel
+        channel = Channel(Channel.UNLIMITED)
+        old.close()
+    }
+
     /** Chat websockets (`/api/mattermost/websocket`) go here instead of the relay double. */
     var chat: HasSocketFactory? = null
 
@@ -121,6 +131,7 @@ class FakeHasRelay : HasSocketFactory {
                 val json = Json.parseToJsonElement(text).jsonObject
                 sent += json
                 when (json["cmd"]?.jsonPrimitive?.content) {
+                    "attach_req" -> push(buildJsonObject { put("cmd", if (attachAnswer) "attach_ack" else "attach_nack"); put("uuid", json["uuid"]?.jsonPrimitive?.content ?: "") })
                     "auth_req" -> push(buildJsonObject { put("cmd", "auth_wait"); put("uuid", "auth-1"); put("expire", waitExpire) })
                     "sign_req" -> {
                         val key = json["account"]?.jsonPrimitive?.content?.let { keyOf(it) }

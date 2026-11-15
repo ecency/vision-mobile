@@ -164,7 +164,7 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 AuthException.HiveAuth.Reason.REJECTED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestWasRejected, false)
                 AuthException.HiveAuth.Reason.EXPIRED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestExpiredBefore, true)
                 AuthException.HiveAuth.Reason.SESSION_EXPIRED -> AppError(ErrorKind.AUTH, HIVEAUTH_EXPIRED, false)
-                AuthException.HiveAuth.Reason.NOT_CONNECTED -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
+                AuthException.HiveAuth.Reason.NOT_CONNECTED, AuthException.HiveAuth.Reason.CONNECTION_LOST -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
                 AuthException.HiveAuth.Reason.NOT_BROADCAST -> AppError(ErrorKind.AUTH, L.hiveauth.transactionFail, false)
                 // the wallet's or relay's own reason, when it gave one; an answer the app could not read stays generic
                 AuthException.HiveAuth.Reason.ERROR ->
