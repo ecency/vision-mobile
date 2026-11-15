@@ -130,6 +130,26 @@ enum class BodySelectionAction(val tag: String) {
 internal fun paragraphLongPress(actions: PostActions, inlines: List<Inline>): (() -> Unit)? =
     if (actions.onSelection != null) null else ({ actions.onParagraphLongPress(inlines.plainText()) })
 
+/** A code block: left to right in any body, scrolling sideways, selectable like the paragraphs where they are. */
+@Composable
+internal fun CodeBlockView(block: Block.Code, actions: PostActions, state: SelectionState = remember { SelectionState() }) {
+    val theme = LocalPostTheme.current
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        SelectableBodyText(actions.onSelection, state) {
+            BasicText(
+                block.text,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .background(theme.muted.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
+                    .horizontalScroll(rememberScrollState())
+                    .padding(8.dp),
+                style = TextStyle(color = theme.text, fontFamily = FontFamily.Monospace, fontSize = 14.sp, textDirection = TextDirection.Ltr),
+            )
+        }
+    }
+}
+
 /**
  * Selection over [content] when [onSelection] is set: per piece of text (the body is a lazy list, so a selection
  * stays within one paragraph, heading, list item or cell; the post menu's Select text covers longer ones). The
@@ -256,16 +276,7 @@ internal fun BlockView(block: Block, maxWidth: Dp, actions: PostActions, images:
         }
         is Block.ListBlock -> ListView(block, maxWidth, actions, images, depth = 0, trimTop = false, trimBottom = false)
         // code reads left to right in any body
-        is Block.Code -> CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) { BasicText(
-            block.text,
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp)
-                .background(theme.muted.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
-                .horizontalScroll(rememberScrollState())
-                .padding(8.dp),
-            style = TextStyle(color = theme.text, fontFamily = FontFamily.Monospace, fontSize = 14.sp, textDirection = TextDirection.Ltr),
-        ) }
+        is Block.Code -> CodeBlockView(block, actions)
         Block.Rule -> Box(
             Modifier
                 .fillMaxWidth()

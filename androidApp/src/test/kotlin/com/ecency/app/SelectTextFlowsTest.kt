@@ -5,6 +5,8 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -172,6 +174,34 @@ class SelectTextFlowsTest {
 
         compose.runOnIdle { ui.bodySelection(BodySelectionAction.TRANSLATE, "well said", comment, root) }
         assertEquals("well said", ui.translateText)
+    }
+
+    /** Review fix: a code block selects like a paragraph, and the menu gets its text with the indentation. */
+    @Test
+    fun aCodeBlockSelects() {
+        val state = SelectionState()
+        compose.setContent {
+            EcencyTheme(dark = false) { com.ecency.app.render.CodeBlockView(Block.Code("  val x = 1"), PostActions(onSelection = { _, _ -> }), state) }
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { state.selectAll() }
+        val got = mutableListOf<String>()
+        compose.runOnIdle { state.act(BodySelectionAction.QUOTE) { _, t -> got += t } }
+        assertEquals(listOf("  val x = 1"), got)
+    }
+
+    /** Review fix: a long selection's translation scrolls inside the sheet instead of running off the screen. */
+    @Test
+    fun aLongTranslationScrolls() {
+        val long = (1..200).joinToString("\n") { "Translated line $it" }
+        node.auth.rest = { r -> if (r.url.endsWith("/translate")) com.ecency.core.api.rpc.HttpResult(200, """{"translatedText":"${long.replace("\n", "\\n")}"}""") else null }
+        val ui = FeedxUi(env, host, push = {}, reply = { _, _ -> }, login = {})
+        compose.setContent { EcencyTheme(dark = false) { com.ecency.app.ui.FeedxOverlays(ui) } }
+        compose.runOnIdle { ui.bodySelection(BodySelectionAction.TRANSLATE, "a long selection", Post("carol", "re-one", body = "x"), PostKey("alice", "trending-one")) }
+        compose.await("the translation") {
+            compose.onAllNodes(hasTestTag("translated") and hasText("Translated line 1", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNode(hasScrollAction() and hasAnyDescendant(hasTestTag("translated")), useUnmergedTree = true).assertExists()
     }
 
     @Test

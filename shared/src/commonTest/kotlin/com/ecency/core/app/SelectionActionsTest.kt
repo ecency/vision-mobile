@@ -64,6 +64,17 @@ class SelectionActionsTest {
         )
     }
 
+    /** Review fix: code keeps the indentation of its first line, at the top level and inside a quote. */
+    @Test
+    fun codeKeepsItsIndentation() {
+        val code = Block.Code("\n    indented()\n  next()\n")
+        assertEquals("    indented()\n  next()", BodySelection.text(listOf(code)))
+        assertEquals(
+            "Before\n\n    indented()\n  next()",
+            BodySelection.text(listOf(Block.Paragraph(listOf(Inline.Text("Before "))), Block.Quote(listOf(code)))),
+        )
+    }
+
     @Test
     fun quotingWaitsForTheSavedDraftAndAddsToIt() = runTest {
         val app = TestApp(this) { req -> TestApp.chain(req) ?: HttpResult(500, "") }
@@ -86,6 +97,31 @@ class SelectionActionsTest {
         assertTrue(app.env.replyModel(PostKey("spike-bob", "a-post"), parent).quote("and this"))
         testScheduler.advanceUntilIdle()
         assertEquals("My take\n\n> well said\n\n> and this\n\n", reply.current.text)
+    }
+
+    /** Review fix: while the reply is on its way, a quote is refused (false), not accepted and then dropped. */
+    @Test
+    fun aQuoteWhileTheReplySendsIsRefused() = runTest {
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val app = TestApp(this) { req ->
+            if ("broadcast_transaction" in req.body) held.await()
+            TestApp.chain(req) ?: HttpResult(500, "")
+        }
+        app.signIn()
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        val parent = Post("spike-bob", "a-post", body = "Body")
+        val reply = app.env.replyModel(PostKey("spike-bob", "a-post"), parent)
+        testScheduler.advanceUntilIdle()
+        reply.setText("Sending this")
+        reply.send()
+        testScheduler.runCurrent()
+        assertTrue(reply.current.isSending)
+        assertFalse(reply.quote("well said"), "refused while sending")
+        testScheduler.runCurrent()
+        assertEquals("Sending this", reply.current.text)
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
     }
 
     @Test

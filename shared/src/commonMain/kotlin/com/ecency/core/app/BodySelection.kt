@@ -32,7 +32,16 @@ object BodySelection {
     fun shareText(selection: String, post: Post): String = "\"${selection.trim()}\"\n\n${PostActionsModel.postUrl(post)}"
 
     /** The body as plain text for the Select text view: one block a paragraph, list items on their own lines. */
-    fun text(blocks: List<Block>): String = blocks.mapNotNull { blockText(it).trim().ifEmpty { null } }.joinToString("\n\n")
+    fun text(blocks: List<Block>): String = blocks.mapNotNull { block ->
+        val text = blockText(block)
+        when {
+            text.isBlank() -> null
+            // code keeps its indentation (only blank lines around it go); quotes and containers are trimmed inside
+            block is Block.Code -> text.trim('\n', '\r').trimEnd()
+            block is Block.Quote || block is Block.Container -> text
+            else -> text.trim()
+        }
+    }.joinToString("\n\n")
 
     private fun blockText(block: Block): String = when (block) {
         is Block.Paragraph -> block.inlines.plainText()

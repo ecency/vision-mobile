@@ -184,7 +184,13 @@ struct BlockView: View {
         case let code as BlockCode:
             // code reads left to right in every body
             ScrollView(.horizontal, showsIndicators: false) {
-                Text(code.text).font(.system(.subheadline, design: .monospaced)).foregroundStyle(theme.text).padding(8)
+                if let onSelection = actions.onSelection {
+                    SelectableCodeText(text: code.text, color: UIColor(theme.text), tint: UIColor(theme.link), perform: onSelection)
+                        .accessibilityIdentifier("code-block")
+                        .padding(8)
+                } else {
+                    Text(code.text).font(.system(.subheadline, design: .monospaced)).foregroundStyle(theme.text).padding(8)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .environment(\.layoutDirection, .leftToRight)

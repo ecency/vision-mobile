@@ -359,7 +359,8 @@ private fun TranslationSheet(ui: FeedxUi, key: Any, onDismiss: () -> Unit, creat
                 }
             }
             Text(state.original, maxLines = 3, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray)
-            Box(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 80.dp)) {
+            // the rest of the sheet's height, scrolling: a long selection's translation can be taller than the screen
+            Box(Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(top = 12.dp).heightIn(min = 80.dp)) {
                 when {
                     state.isLoading -> LoadingBlock()
                     state.error != null -> Text(state.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })

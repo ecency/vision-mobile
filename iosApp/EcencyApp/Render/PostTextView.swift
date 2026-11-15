@@ -72,7 +72,6 @@ struct PostTextView: UIViewRepresentable {
             return PostTextCache.Entry(built: built, plainText: PlainTextKt.plainText(inlines))
         }
         coordinator.entry = entry
-        view.built = entry.built
         view.attributedText = entry.built.text
         view.accessibilityLabel = entry.plainText
         view.accessibilityCustomActions = entry.built.targets.indices.map { i in
@@ -137,7 +136,8 @@ struct PostTextView: UIViewRepresentable {
         }
 
         @objc func tap(_ gesture: UITapGestureRecognizer) {
-            guard ProcessInfo.processInfo.systemUptime - touchStart <= Self.longestTap,
+            // only selectable text: elsewhere a slow tap still opens (the paragraph long press comes later)
+            guard actions.onSelection == nil || ProcessInfo.processInfo.systemUptime - touchStart <= Self.longestTap,
                   let view = gesture.view as? PostUITextView, let built = entry?.built,
                   let index = view.characterIndex(at: gesture.location(in: view)),
                   let target = built.target(at: index) else { return }
@@ -239,8 +239,6 @@ final class PostTextCache: @unchecked Sendable {
 }
 
 final class PostUITextView: UITextView {
-    /// The text on the view, for selections: a chip is copied as its label.
-    var built: InlineTextBuilder.Built?
 
     /// The text of [range] as a reader reads it: each chip as its `@user` / `#tag` label, none of the attachment
     /// characters that stand for them.

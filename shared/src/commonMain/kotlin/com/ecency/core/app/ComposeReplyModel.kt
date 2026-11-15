@@ -257,10 +257,11 @@ class ComposeReplyModel internal constructor(
     /**
      * Quote from a body selection (#3699): the selection as a markdown quote after the draft. Applied once the saved
      * draft was read, so a quote made as the composer opens adds to that draft instead of hiding it. False when
-     * nothing but whitespace was selected.
+     * nothing but whitespace was selected, or while the reply is on its way (the composer that opens shows that send;
+     * after it this model is done, see [AppEnvironment.replySent]).
      */
     fun quote(selection: String): Boolean {
-        if (BodySelection.quote(selection) == null) return false
+        if (BodySelection.quote(selection) == null || current.isSending) return false
         scope.launch {
             draftRead.await()
             if (current.isSending) return@launch
