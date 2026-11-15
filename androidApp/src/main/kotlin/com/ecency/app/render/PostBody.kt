@@ -45,6 +45,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.rememberUpdatedState
+import com.ecency.core.l10n.L
+import androidx.compose.foundation.text.contextmenu.builder.item
+import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -97,7 +103,86 @@ class PostActions(
      * never requested until the user taps it; a revealed image stays revealed for the session.
      */
     val showImages: Boolean = true,
-)
+    /**
+     * Set where the body's text is selectable (#3699: the post screen's body and its comments): a long press selects
+     * with the system handles, and the text menu's own items get the selected text. Null leaves the text as it was
+     * (waves, previews), the long press handing the paragraph to [onParagraphLongPress].
+     */
+    val onSelection: ((BodySelectionAction, String) -> Unit)? = null,
+) {
+    /** These actions with selection on, [onSelection] getting each selection. */
+    fun selecting(onSelection: (BodySelectionAction, String) -> Unit): PostActions =
+        PostActions(onLink, onImage, onParagraphLongPress, onParagraphTap, avatarUrl, showImages, onSelection)
+}
+
+/** The text menu's own items on selected body text, after the system Copy (#3699, web's selection popover). */
+enum class BodySelectionAction(val tag: String) {
+    QUOTE("selectionQuote"), TRANSLATE("selectionTranslate"), SHARE("selectionShare");
+
+    val label: String get() = when (this) {
+        QUOTE -> L.native.reading.quote
+        TRANSLATE -> L.chats.translate
+        SHARE -> L.chats.share
+    }
+}
+
+/** A paragraph's long press: the paragraph to [PostActions.onParagraphLongPress], or none in selectable text (#3699). */
+internal fun paragraphLongPress(actions: PostActions, inlines: List<Inline>): (() -> Unit)? =
+    if (actions.onSelection != null) null else ({ actions.onParagraphLongPress(inlines.plainText()) })
+
+/** A code block: left to right in any body, scrolling sideways, selectable like the paragraphs where they are. */
+@Composable
+internal fun CodeBlockView(block: Block.Code, actions: PostActions, state: SelectionState = remember { SelectionState() }) {
+    val theme = LocalPostTheme.current
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        SelectableBodyText(actions.onSelection, state) {
+            BasicText(
+                block.text,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+                    .background(theme.muted.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
+                    .horizontalScroll(rememberScrollState())
+                    .padding(8.dp),
+                style = TextStyle(color = theme.text, fontFamily = FontFamily.Monospace, fontSize = 14.sp, textDirection = TextDirection.Ltr),
+            )
+        }
+    }
+}
+
+/**
+ * Selection over [content] when [onSelection] is set: per piece of text (the body is a lazy list, so a selection
+ * stays within one paragraph, heading, list item or cell; the post menu's Select text covers longer ones). The
+ * system menu keeps Copy (chips copy as their `@user` / `#tag` text) and gets Quote, Translate and Share.
+ */
+@Composable
+internal fun SelectableBodyText(
+    onSelection: ((BodySelectionAction, String) -> Unit)?,
+    state: SelectionState = remember { SelectionState() },
+    content: @Composable () -> Unit,
+) {
+    if (onSelection == null) return content()
+    val perform by rememberUpdatedState(onSelection)
+    SelectionContainer(
+        state,
+        Modifier.appendTextContextMenuComponents {
+            separator()
+            BodySelectionAction.entries.forEach { action ->
+                item(action.tag, action.label) {
+                    close()
+                    state.act(action, perform)
+                }
+            }
+        },
+    ) { content() }
+}
+
+/** A menu item's tap: the selected text (a chip as its `@user` / `#tag` text) goes to [perform], the selection goes. */
+internal fun SelectionState.act(action: BodySelectionAction, perform: (BodySelectionAction, String) -> Unit) {
+    val text = selectedTexts.joinToString("") { it.text }
+    clear()
+    if (text.isNotBlank()) perform(action, text)
+}
 
 /**
  * These actions with in-post jumps (#2403) taken first: [onAnchor] gets every [LinkTarget.Anchor] and returns
@@ -106,6 +191,7 @@ class PostActions(
 fun PostActions.withAnchors(onAnchor: (LinkTarget.Anchor) -> Boolean): PostActions = PostActions(
     onLink = { t -> if (t !is LinkTarget.Anchor || !onAnchor(t)) onLink(t) },
     onImage = onImage, onParagraphLongPress = onParagraphLongPress, onParagraphTap = onParagraphTap, avatarUrl = avatarUrl, showImages = showImages,
+    onSelection = onSelection,
 )
 
 /** The lazy item key of top-level block [index] in [postBody] (a jump finds the body's rows by it). */
@@ -190,16 +276,7 @@ internal fun BlockView(block: Block, maxWidth: Dp, actions: PostActions, images:
         }
         is Block.ListBlock -> ListView(block, maxWidth, actions, images, depth = 0, trimTop = false, trimBottom = false)
         // code reads left to right in any body
-        is Block.Code -> CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) { BasicText(
-            block.text,
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp)
-                .background(theme.muted.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
-                .horizontalScroll(rememberScrollState())
-                .padding(8.dp),
-            style = TextStyle(color = theme.text, fontFamily = FontFamily.Monospace, fontSize = 14.sp, textDirection = TextDirection.Ltr),
-        ) }
+        is Block.Code -> CodeBlockView(block, actions)
         Block.Rule -> Box(
             Modifier
                 .fillMaxWidth()
@@ -243,17 +320,20 @@ private fun ParagraphView(
     val theme = LocalPostTheme.current
     val built = rememberInlineText(inlines, actions)
     val color = if (style.phishy) theme.danger else theme.text
-    BasicText(
+    val selectable = actions.onSelection != null
+    SelectableBodyText(actions.onSelection) { BasicText(
         built.text,
         Modifier
             .fillMaxWidth()
             .padding(vertical = spacing)
-            .pointerInput(inlines, actions) {
-                detectTapGestures(
-                    onLongPress = { actions.onParagraphLongPress(inlines.plainText()) },
-                    onTap = actions.onParagraphTap?.let { tap -> { _ -> tap() } },
-                )
-            },
+            .then(
+                if (!selectable || actions.onParagraphTap != null) Modifier.pointerInput(inlines, actions) {
+                    detectTapGestures(
+                        onLongPress = paragraphLongPress(actions, inlines)?.let { press -> { _ -> press() } },
+                        onTap = actions.onParagraphTap?.let { tap -> { _ -> tap() } },
+                    )
+                } else Modifier,
+            ),
         style = TextStyle(
             color = color,
             fontSize = fontSize,
@@ -263,7 +343,7 @@ private fun ParagraphView(
             textDirection = TextDirection.Content,
         ),
         inlineContent = built.inlineContent,
-    )
+    ) }
 }
 
 /**

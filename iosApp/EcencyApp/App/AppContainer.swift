@@ -20,6 +20,10 @@ enum AppSheet: Identifiable {
     case postMenu(MenuRequest)
     case crossPost(PostRef)
     case translation(PostRef)
+    /// Text selected in a body, translated (#3699).
+    case selectionTranslation(String)
+    /// The post menu's Select text (#3699, SelectTextViews.swift).
+    case selectText(SelectTextRequest)
     case modNotes(NotesRequest)
     case quickProfile(String)
     case reply(ReplyRequest)
@@ -41,6 +45,8 @@ enum AppSheet: Identifiable {
         case let .postMenu(r): return "menu:\(r.post.key)"
         case let .crossPost(r): return "crossPost:\(r.post.key)"
         case let .translation(r): return "translation:\(r.post.key)"
+        case let .selectionTranslation(text): return "selectionTranslation:\(text.hashValue)"
+        case let .selectText(r): return "selectText:\(r.post.key)"
         case let .modNotes(r): return "notes:\(r.post.key)"
         case let .quickProfile(name): return "profile:\(name)"
         case let .reply(r): return "reply:\(r.parent.key)"

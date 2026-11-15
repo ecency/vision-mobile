@@ -20,9 +20,14 @@ final class ReplyDrafts: ObservableObject {
     private var drafts: [String: Draft] = [:]
 
     func draft(root: PostKey, parent: Post, env: AppEnvironment) -> Draft {
-        let id = "\(parent.author)/\(parent.permlink)"
-        if let d = drafts[id] { return d }
-        let d = Draft(env.replyModel(root: root, parent: parent))
+        draft(id: "\(parent.author)/\(parent.permlink)", current: env.replyModel(root: root, parent: parent))
+    }
+
+    /// The draft over [current], the environment's composer for this parent now: not one it replaced since (a reply
+    /// sent from elsewhere, an account change), so a quote (#3699) shows in the sheet that opens for it.
+    func draft(id: String, current model: ComposeReplyModel) -> Draft {
+        if let d = drafts[id], d.model === model { return d }
+        let d = Draft(model)
         drafts[id] = d
         return d
     }
@@ -262,7 +267,7 @@ struct PostScreen: View {
                     Button {
                         // RN offers Translate in the menu only for sub-posts (comments opened on their own)
                         let isComment = p.depth > 0
-                        app.openMenu(p, context: PostMenuContext(translate: isComment, openThread: false, ownProfile: false))
+                        app.openMenu(p, context: PostMenuContext(translate: isComment, openThread: false, ownProfile: false, selectText: true))
                     } label: {
                         Label(ReadingUiCopy.shared.POST_OPTIONS, appIcon: .more).labelStyle(.iconOnly)
                     }
@@ -469,6 +474,11 @@ struct PostScreen: View {
                 app.handleBodyLink(target)
             },
             onImage: { url, all in app.sheet = .gallery(all.isEmpty ? [url] : all, all.firstIndex(of: url) ?? 0) },
+            // #3699: the body's text selects; a comment row puts its own post in (CommentRow.bodyActions)
+            onSelection: { [app, key, post] action, text in
+                guard let shown = post.state.post else { return }
+                app.bodySelection(action, text: text, post: shown, root: key)
+            },
             // RN "Show Images": body and comment images wait for a tap, the viewer shows the revealed ones
             showImages: app.notifications.state.showImages && !coveredWave
         )
@@ -528,6 +538,15 @@ struct CommentRow: View {
     static func indent(level: Int32) -> CGFloat { CGFloat(max(0, min(3, Int(level)) - 1)) * 22 }
     static let bodyInset: CGFloat = 38
 
+
+    /// The screen's body actions, with a selection quoting, translating and sharing this comment (#3699).
+    private var bodyActions: PostActions {
+        var a = actions
+        if a.onSelection != nil {
+            a.onSelection = { [app, item, root] action, text in app.bodySelection(action, text: text, post: item.post, root: root) }
+        }
+        return a
+    }
     var body: some View {
         let indent = Self.indent(level: item.level)
         // Body and actions line up with the name, as in the RN comment list (avatar 28 + gap 10).
@@ -542,7 +561,7 @@ struct CommentRow: View {
                     .accessibilityAction(named: L.Post.a11yVotersHint) { app.push(AppScreenVoters(author: card.key.author, permlink: card.key.permlink)) }
                     .accessibilityAction(named: L.Post.a11yTip) { app.sheet = app.session.state.isLoggedIn ? .tip(card.key) : .login }
                     .accessibilityAction(named: L.Post.a11yPostOptions) {
-                        app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false), root: root)
+                        app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false, selectText: true), root: root)
                     }
                     .ownFooterActions(item.post, votes: card.votes, root: root)
                 if item.isSending {
@@ -555,10 +574,10 @@ struct CommentRow: View {
                 // RN commentView: the dots on the author line (PostHeaderDescription showDotMenuButton), with the
                 // comment menu's translate and open thread
                 MenuButton {
-                    app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false), root: root)
+                    app.openMenu(item.post, context: PostMenuContext(translate: true, openThread: true, ownProfile: false, selectText: true), root: root)
                 }
             }
-            PostBodyView(blocks: item.blocks, contentWidth: bodyWidth, actions: actions)
+            PostBodyView(blocks: item.blocks, contentWidth: bodyWidth, actions: bodyActions)
                 .padding(.leading, Self.bodyInset)
             if item.card.hasPoll { RowPoll(post: item.post).padding(.leading, Self.bodyInset) }
             // one row; at large text sizes the vote and count over the other controls, and at the largest the

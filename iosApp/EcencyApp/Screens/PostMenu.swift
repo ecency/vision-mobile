@@ -43,6 +43,7 @@ enum MenuEffectAction: Equatable {
     case reply
     case crossPost
     case translate
+    case selectText
     case confirm(title: String, body: String?, confirm: String)
     case notes(title: String)
     case login
@@ -56,6 +57,7 @@ enum MenuEffectAction: Equatable {
         case is PostMenuEffectReply: return .reply
         case is PostMenuEffectCrossPost: return .crossPost
         case is PostMenuEffectTranslate: return .translate
+        case is PostMenuEffectSelectText: return .selectText
         case let e as PostMenuEffectConfirm: return .confirm(title: e.title, body: e.body, confirm: e.confirmLabel)
         case let e as PostMenuEffectAskNotes: return .notes(title: e.title)
         case is PostMenuEffectLogin: return .login
@@ -121,6 +123,8 @@ extension AppContainer {
             showAfterSheet(.crossPost(PostRef(post: e.post)))
         case let e as PostMenuEffectTranslate:
             showAfterSheet(.translation(PostRef(post: e.post)))
+        case let e as PostMenuEffectSelectText:
+            showAfterSheet(.selectText(SelectTextRequest(post: e.post, root: request.root ?? e.post.key)))
         case let e as PostMenuEffectConfirm:
             confirm = e
         case let e as PostMenuEffectAskNotes:
