@@ -196,6 +196,29 @@ class AiModelsTest {
         assertTrue(w.paid.isEmpty())
     }
 
+    /** Issue #3701: a price or balance read that failed says so and Try again reads them again (it dead ended). */
+    @Test
+    fun aFailedPriceOrBalanceReadSaysSoAndTryAgainLoadsThem() = runTest {
+        val w = World(this)
+        w.pricesDown = true
+        val a = w.assist(w.editor())
+        val i = w.image(w.editor())
+        assertTrue(a.current.loadFailed)
+        assertTrue(i.current.loadFailed)
+        w.pricesDown = false
+        a.reload()
+        i.reload()
+        w.idle()
+        assertFalse(a.current.loadFailed)
+        assertEquals(listOf("improve", "suggest_tags", "generate_title", "summarize"), a.current.prices.map { it.action })
+        assertFalse(i.current.loadFailed)
+        assertNotNull(i.current.cost, "the price is known")
+        w.pointsDown = true
+        a.reload()
+        w.idle()
+        assertFalse(a.current.loadFailed, "a balance already read stays")
+    }
+
     @Test
     fun tooShortTextCannotBeSent() = runTest {
         val w = World(this)

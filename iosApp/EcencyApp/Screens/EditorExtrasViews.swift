@@ -200,6 +200,7 @@ struct AiAssistSheet: View {
             if let cost = state.costText { Text(EditorUiCopy.shared.cost(cost: cost)).accessibilityIdentifier("ai-cost") }
         }
         .font(.subheadline).foregroundStyle(theme.text)
+        if state.loadFailed { AiLoadFailed(id: "ai") { model.reload() } }
         Text(AiAssistModel.companion.HINT).font(.footnote).foregroundStyle(theme.secondary)
         if onImage != nil || onDictate != nil {
             // the other AI tools, a group of their own above the actions (RN's generate image card, outside the price
@@ -362,6 +363,7 @@ struct AiImageSheet: View {
                     Text(EditorUiCopy.shared.cost(cost: state.costLabel)).accessibilityIdentifier("ai-image-cost")
                 }
                 .font(.subheadline).foregroundStyle(theme.text).padding(12).background(theme.lightBackground).clipShape(RoundedRectangle(cornerRadius: 8))
+                if state.loadFailed { AiLoadFailed(id: "ai-image") { model.reload() } }
                 if let address = state.resultUrl { resultView(state, address) } else { formView(state) }
             }
             .padding(16)
@@ -624,5 +626,21 @@ struct VideoUploadSheet: View {
         .onDisappear { if !video.state.uploading { model.dismissed() } }
         .onChange(of: state.done) { _, done in if done { dismiss() } }
         .accessibilityIdentifier("video-sheet")
+    }
+}
+
+/// The prices or the balance could not be read: says so, with Try again (issue #3701: the sheet dead ended).
+private struct AiLoadFailed: View {
+    let id: String
+    let retry: () -> Void
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        HStack {
+            Text(ReadingUiCopy.shared.LOAD_FAILED_RETRY).font(.subheadline).foregroundStyle(theme.dangerText)
+            Spacer()
+            Button(UiCopy.shared.TRY_AGAIN, action: retry).accessibilityIdentifier("\(id)-reload")
+        }
+        .accessibilityIdentifier("\(id)-load-failed")
     }
 }

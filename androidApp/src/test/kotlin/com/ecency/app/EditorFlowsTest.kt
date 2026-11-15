@@ -85,6 +85,7 @@ class EditorFlowsTest {
     private val node = TestNode()
     private val api: MutableList<Pair<String, String>> = Collections.synchronizedList(mutableListOf())
     @Volatile private var apiDown = false
+    @Volatile private var aiPricesDown = false
     private val storage = InMemoryDraftStorage()
     private val uploadGate = CompletableDeferred<Unit>()
 
@@ -105,6 +106,7 @@ class EditorFlowsTest {
                 path.startsWith("fragments?") -> wrapped("""[{"id":"f1","title":"Footer","body":"Thanks for reading!"}]""")
                 path == "support-settings" -> HttpResult(200, """{"beneficiary_percent":0,"curation_percent":0}""")
                 path == "points" -> HttpResult(200, """{"points":"1,000.000","unclaimed_points":"0"}""")
+                path == "ai-assist-price" && aiPricesDown -> HttpResult(502, "")
                 path == "ai-assist-price" -> HttpResult(200, """[{"action":"improve","cost":5,"free_remaining":0},{"action":"suggest_tags","cost":2,"free_remaining":1}]""")
                 path == "ai-generate-price" -> HttpResult(200, """{"prices":[{"aspect_ratio":"4:3","cost":150}],"power":[{"power":1,"multiplier":1},{"power":2,"multiplier":2}]}""")
                 path == "ai-transcribe-price" -> HttpResult(200, """{"unit_seconds":30,"unit_cost":15,"free_remaining":0,"max_seconds":300}""")
@@ -513,6 +515,22 @@ class EditorFlowsTest {
         waitFor("translateTooShort")
         assertFalse(exists("translateRun"))
         assertTrue(translateAsked.isEmpty())
+    }
+
+    /** Issue #3701: prices that could not be read say so, and Try again loads them (the sheet dead ended). */
+    @Test
+    fun aiAssistWhosePricesFailedSaysSoAndTryAgainLoadsThem() {
+        aiPricesDown = true
+        launchSignedIn()
+        openEditor()
+        write(body = longBody)
+        compose.onNodeWithTag("toolAiAssist").performScrollTo().performClick()
+        waitFor("aiLoadFailed")
+        compose.onNodeWithText("We could not load this. Please try again.", useUnmergedTree = true).assertExists()
+        aiPricesDown = false
+        tap("aiReload")
+        waitFor("aiAction:improve")
+        assertFalse(exists("aiLoadFailed"))
     }
 
     @Test
