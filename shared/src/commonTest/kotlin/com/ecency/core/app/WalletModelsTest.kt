@@ -94,6 +94,36 @@ class WalletModelsTest {
     }
 
     /**
+     * #3701 (Sentry "Cannot claim that much VESTS ... Actual: 0"): a claim still on its way when the reader switches
+     * to another account and back keeps its guard, so a second tap sends no second claim; the first claim's end clears
+     * only its own guard.
+     */
+    @Test
+    fun aClaimOnItsWayIsNotSentAgainAfterSwitchingAwayAndBack() = runTest {
+        val w = world(this)
+        KeyVault(w.app.store).save(VaultAccount("spike-other", AuthType.POSTING_KEY, postingKey = com.ecency.core.hive.GoldenVectors.WIF))
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.broadcast_transaction"] = held
+        w.env.wallet.claim("HP")
+        testScheduler.runCurrent()
+        w.env.session.switchTo("spike-other")
+        testScheduler.runCurrent()
+        w.env.session.switchTo(w.user)
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(2_000)
+        assertTrue(w.env.wallet.current.rows.first { it.symbol == "HP" }.claiming, "the claim on its way still shows")
+        w.env.wallet.claim("HP")
+        testScheduler.runCurrent()
+        w.gates.remove("condenser_api.broadcast_transaction")
+        held.complete(Unit)
+        testScheduler.advanceTimeBy(10_000)
+        val claims = w.app.broadcasts().filter { "claim_reward_balance" in it.params.toString() }
+        assertEquals(1, claims.size, "one claim for one reward")
+    }
+
+    /**
      * Tester report: after a claim the balances stayed as they were until a manual refresh. The portfolio can still
      * answer the old balance a few seconds after the claim, so it is read again until it shows the claim, with no
      * refresh by the user. Meanwhile the claimed reward reads 0 (RN) and the balance is the server's.
