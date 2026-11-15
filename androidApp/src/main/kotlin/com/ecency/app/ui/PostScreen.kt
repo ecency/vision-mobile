@@ -180,6 +180,15 @@ fun PostScreen(
     LaunchedEffect(model) { model.start() }
     val feedx = LocalFeedx.current
     val env = feedx?.env
+    // #3699: the body's text selects, its Quote replying to this post (each comment does its own, CommentView)
+    // keyed on the body's actions only: a changed post (a vote, a refresh) must not rebuild every paragraph or end a
+    // selection; the post is read when an action runs
+    val shownPost by androidx.compose.runtime.rememberUpdatedState(state.post)
+    val hasPost = state.post != null
+    val bodyActions = remember(actions.body, hasPost, feedx) {
+        if (feedx == null || !hasPost) actions.body
+        else actions.body.selecting { action, text -> shownPost?.let { feedx.bodySelection(action, text, it, actions.root ?: model.key) } }
+    }
     // RN postDisplayView: reading a post, comment or reply is the daily check-in (at most once per 15 minutes and
     // account, the recorder's rule); asked again when the account lands or the lock lifts
     if (env != null) {
@@ -227,7 +236,7 @@ fun PostScreen(
                     ) { Glyph(AppIcon.EDIT, colors.darkGray, 22.dp, description = UiCopy.EDIT) }
                 }
                 OptionsButton(Modifier.padding(end = 6.dp)) {
-                    feedx.openMenu(p, com.ecency.core.app.PostMenuContext(translate = p.depth > 0, openThread = false), model.key)
+                    feedx.openMenu(p, com.ecency.core.app.PostMenuContext(translate = p.depth > 0, openThread = false, selectText = true), model.key)
                 }
             }
         }
@@ -303,7 +312,7 @@ fun PostScreen(
                     item(key = "bodyStart") {
                         Spacer(Modifier.height(8.dp).onFirstDraw { drawn.run { PerfMarks.mark(PerfEvent.POST_BODY_DRAWN) } }.testTag("bodyStart"))
                     }
-                    postBody(body, contentWidth, actions.body)
+                    postBody(body, contentWidth, bodyActions)
                 }
                 // RN postDisplayView footer <Tags> above "Posted by", once the body is in (RN keeps it beside a translation)
                 if (post != null && state.body != null && state.tags.isNotEmpty()) item(key = "postTags") { PostTagsRow(state.tags, actions.onScreen) }
@@ -458,6 +467,12 @@ private fun CommentsHeader(count: Int, sort: CommentSort, onSort: (CommentSort) 
 @Composable
 internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, voteInFlight: Boolean, actions: PostScreenActions, thread: ThreadToggle? = null) {
     val feedx = LocalFeedx.current
+    // #3699: the comment's text selects, its Quote replying to this comment
+    val commentPost by androidx.compose.runtime.rememberUpdatedState(item.post)
+    val commentBody = remember(actions.body, item.key, feedx) {
+        if (feedx == null) actions.body
+        else actions.body.selecting { action, text -> feedx.bodySelection(action, text, commentPost, actions.root ?: commentPost.key) }
+    }
     val colors = LocalEcencyColors.current
     val indent = (44 * (item.level - 1)).dp
     val bodyWidth = contentWidth - indent - 44.dp
@@ -477,7 +492,7 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
         if (tip != null) add(a11yAction(UiCopy.SEND_TIP) { tip(item.key) })
         thread?.let { t -> add(a11yAction(if (t.open) com.ecency.core.app.CommentThreadCopy.HIDE_REPLIES else com.ecency.core.app.CommentThreadCopy.SHOW_REPLIES) { currentThread?.onToggle?.invoke() }) }
         if (feedx != null) {
-            add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, com.ecency.core.app.PostMenuContext(translate = true, openThread = true), actions.root ?: item.post.key) })
+            add(a11yAction(ReadingUiCopy.POST_OPTIONS) { feedx.openMenu(item.post, com.ecency.core.app.PostMenuContext(translate = true, openThread = true, selectText = true), actions.root ?: item.post.key) })
         }
         addAll(ownFooterA11yActions(feedx, item.post, item.card.votes, actions.root ?: item.post.key, footerScope))
         add(a11yAction(com.ecency.core.app.PayoutCopy.DETAILS) { payoutDetails.value = item.post })
@@ -514,11 +529,11 @@ internal fun CommentView(item: CommentItem, nowMillis: Long, contentWidth: Dp, v
                 Spacer(Modifier.weight(1f))
                 if (feedx != null) {
                     // RN comment menu: translate and "open thread" on comment surfaces
-                    OptionsButton { feedx.openMenu(item.post, com.ecency.core.app.PostMenuContext(translate = true, openThread = true), actions.root ?: item.post.key) }
+                    OptionsButton { feedx.openMenu(item.post, com.ecency.core.app.PostMenuContext(translate = true, openThread = true, selectText = true), actions.root ?: item.post.key) }
                 }
             }
             androidx.compose.runtime.CompositionLocalProvider(LocalMergedRow provides false) {
-                PostBody(item.blocks, bodyWidth, actions.body, Modifier.padding(top = 2.dp))
+                PostBody(item.blocks, bodyWidth, commentBody, Modifier.padding(top = 2.dp))
                 // RN's comment view draws a reply's poll too
                 val env = feedx?.env
                 val poll = remember(item.post.metadata.rawJson, env) { env?.pollModel(item.post) }

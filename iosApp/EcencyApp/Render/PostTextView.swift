@@ -2,9 +2,11 @@ import EcencyCore
 import SwiftUI
 import UIKit
 
-/// A paragraph or heading drawn by TextKit 1 in a non-editable, non-selectable, non-scrolling
-/// UITextView, so `@user` chips (with avatar) wrap like words, `text-justify` justifies, and taps and
-/// long-presses are resolved here instead of by UIKit's link handling.
+/// A paragraph or heading drawn by TextKit 1 in a non-editable, non-scrolling UITextView, so `@user` chips
+/// (with avatar) wrap like words, `text-justify` justifies, and taps and long-presses are resolved here instead
+/// of by UIKit's link handling. Selectable where the screen asks (`PostActions.onSelection`, #3699): a long press
+/// selects with the system handles, and the edit menu offers Copy, Quote, Translate and Share; a chip is copied
+/// as its `@user` / `#tag` text.
 ///
 /// Rows in a LazyVStack are torn down and rebuilt while scrolling, so the attributed string and the
 /// measured heights live in process-wide caches keyed by content, size, Dynamic Type and theme
@@ -40,14 +42,27 @@ struct PostTextView: UIViewRepresentable {
         view.isAccessibilityElement = true
         view.accessibilityTraits = .staticText
         view.accessibilityIdentifier = "paragraph"
-        view.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap(_:))))
-        view.addGestureRecognizer(UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPress(_:))))
+        view.delegate = context.coordinator
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap(_:)))
+        // links and chips open while the text view's own selection gestures stay live
+        tap.delegate = context.coordinator
+        view.addGestureRecognizer(tap)
+        let longPress = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.longPress(_:)))
+        view.addGestureRecognizer(longPress)
+        context.coordinator.longPress = longPress
         return view
     }
 
     func updateUIView(_ view: PostUITextView, context: Context) {
         let coordinator = context.coordinator
         coordinator.actions = actions
+        let selectable = actions.onSelection != nil
+        if view.isSelectable != selectable {
+            view.isSelectable = selectable
+            // the long press selects instead of handing the paragraph over
+            coordinator.longPress?.isEnabled = !selectable
+        }
+        view.tintColor = UIColor(theme.link)
         let key = self.key
         guard coordinator.key != key else { return }
         coordinator.key = key
@@ -57,6 +72,7 @@ struct PostTextView: UIViewRepresentable {
             return PostTextCache.Entry(built: built, plainText: PlainTextKt.plainText(inlines))
         }
         coordinator.entry = entry
+        view.built = entry.built
         view.attributedText = entry.built.text
         view.accessibilityLabel = entry.plainText
         view.accessibilityCustomActions = entry.built.targets.indices.map { i in
@@ -94,15 +110,35 @@ struct PostTextView: UIViewRepresentable {
         let scale: CGFloat
     }
 
-    final class Coordinator: NSObject {
+    final class Coordinator: NSObject, UITextViewDelegate, UIGestureRecognizerDelegate {
         var actions: PostActions
         var key: ContentKey?
         var entry: PostTextCache.Entry?
+        weak var longPress: UILongPressGestureRecognizer?
 
         init(actions: PostActions) { self.actions = actions }
 
+        /// When the finger went down: a press held longer than a tap selects text, and its release opens nothing.
+        private var touchStart: TimeInterval = 0
+        static let longestTap: TimeInterval = 0.35
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            touchStart = touch.timestamp
+            return true
+        }
+
+        func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+            guard let onSelection = actions.onSelection, let view = textView as? PostUITextView,
+                  let text = view.plainText(in: range) else { return nil }
+            return BodySelectionAction.menu(in: view, range: range, text: text, suggested: suggestedActions, perform: onSelection)
+        }
+
         @objc func tap(_ gesture: UITapGestureRecognizer) {
-            guard let view = gesture.view as? PostUITextView, let built = entry?.built,
+            guard ProcessInfo.processInfo.systemUptime - touchStart <= Self.longestTap,
+                  let view = gesture.view as? PostUITextView, let built = entry?.built,
                   let index = view.characterIndex(at: gesture.location(in: view)),
                   let target = built.target(at: index) else { return }
             actions.onLink(target)
@@ -203,6 +239,30 @@ final class PostTextCache: @unchecked Sendable {
 }
 
 final class PostUITextView: UITextView {
+    /// The text on the view, for selections: a chip is copied as its label.
+    var built: InlineTextBuilder.Built?
+
+    /// The text of [range] as a reader reads it: each chip as its `@user` / `#tag` label, none of the attachment
+    /// characters that stand for them.
+    func plainText(in range: NSRange) -> String? {
+        guard let text = attributedText, range.length > 0, NSMaxRange(range) <= text.length else { return nil }
+        var out = ""
+        text.enumerateAttributes(in: range) { attrs, sub, _ in
+            if let chip = attrs[.attachment] as? ChipAttachment {
+                out += chip.label
+            } else {
+                out += (text.string as NSString).substring(with: sub).replacingOccurrences(of: "\u{FFFC}", with: "")
+            }
+        }
+        return out
+    }
+
+    /// The system Copy: the plain text, chips as their labels (the attributed copy would hold attachment characters).
+    override func copy(_ sender: Any?) {
+        guard let text = plainText(in: selectedRange) else { return super.copy(sender) }
+        UIPasteboard.general.string = text
+    }
+
     /// Character under `point`, or nil when the point is past the end of a line or below the text.
     func characterIndex(at point: CGPoint) -> Int? {
         let container = textContainer

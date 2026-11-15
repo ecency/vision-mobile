@@ -98,6 +98,10 @@ class FeedxUi(
     var notes by mutableStateOf<PostMenuEffect.AskNotes?>(null)
     var crossPost by mutableStateOf<Post?>(null)
     var translate by mutableStateOf<Post?>(null)
+    /** Text selected in a body, in the translation sheet (#3699). */
+    var translateText by mutableStateOf<String?>(null)
+    /** The post menu's Select text (#3699): the post and the discussion its Quote replies in. */
+    var selectText by mutableStateOf<MenuRequest?>(null)
     var quickProfile by mutableStateOf<String?>(null)
     var customise by mutableStateOf(false)
 
@@ -117,6 +121,21 @@ class FeedxUi(
         confirm = null
         notes = null
         crossPost = null
+        selectText = null
+    }
+
+    /** An action on text selected in [post]'s body (#3699). */
+    fun bodySelection(action: com.ecency.app.render.BodySelectionAction, text: String, post: Post, root: PostKey) {
+        when (action) {
+            com.ecency.app.render.BodySelectionAction.QUOTE -> {
+                if (env.session.current.username == null) return login()
+                // the composer is one per parent: the quote goes after its draft, and the sheet shows it
+                env.replyModel(root, post).quote(text)
+                reply(root, post)
+            }
+            com.ecency.app.render.BodySelectionAction.TRANSLATE -> translateText = text
+            com.ecency.app.render.BodySelectionAction.SHARE -> host.share(com.ecency.core.app.BodySelection.shareText(text, post))
+        }
     }
 
     fun openProfile(username: String) {
@@ -152,6 +171,7 @@ class FeedxUi(
             )
             is PostMenuEffect.CrossPost -> crossPost = effect.post
             is PostMenuEffect.Translate -> translate = effect.post
+            is PostMenuEffect.SelectText -> selectText = MenuRequest(effect.post, PostMenuContext(), root)
             is PostMenuEffect.Confirm -> confirm = effect
             is PostMenuEffect.AskNotes -> notes = effect
             PostMenuEffect.Login -> login()
@@ -238,6 +258,8 @@ fun FeedxOverlays(ui: FeedxUi) {
 
     ui.crossPost?.let { post -> CrossPostSheet(ui, post) }
     ui.translate?.let { post -> TranslationSheet(ui, post) }
+    ui.translateText?.let { text -> TranslationSheet(ui, text, onDismiss = { ui.translateText = null }) { ui.env.selectionTranslationModel(text, ui.host.readerLanguage()) } }
+    ui.selectText?.let { r -> SelectTextSheet(ui, r) }
     ui.quickProfile?.let { name -> QuickProfileSheet(ui, name) }
     if (ui.customise) CustomiseFiltersSheet(ui)
 }
@@ -303,16 +325,21 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
 }
 
 /** RN post-translation-modal: source and target over the post summary. */
+@Composable
+private fun TranslationSheet(ui: FeedxUi, post: Post) =
+    TranslationSheet(ui, post, onDismiss = { ui.translate = null }) { ui.env.translationSheetModel(post, ui.host.readerLanguage()) }
+
+/** The translation sheet over the model [create] makes for [key] (a post's summary, or a selection's text, #3699). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TranslationSheet(ui: FeedxUi, post: Post) {
+private fun TranslationSheet(ui: FeedxUi, key: Any, onDismiss: () -> Unit, create: () -> com.ecency.core.app.TranslationSheetModel) {
     val colors = LocalEcencyColors.current
-    val model = remember(post) { ui.env.translationSheetModel(post, ui.host.readerLanguage()) }
+    val model = remember(key) { create() }
     DisposableEffect(model) { onDispose { model.close() } }
     LaunchedEffect(model) { model.start() }
     val state by model.state.collectAsState()
     var pick by remember { mutableStateOf<String?>(null) }
-    ModalBottomSheet(onDismissRequest = { ui.translate = null }, containerColor = colors.background) {
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("translationSheet")) {
             Text(UiCopy.TRANSLATE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Row(Modifier.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -337,6 +364,42 @@ private fun TranslationSheet(ui: FeedxUi, post: Post) {
                     state.isLoading -> LoadingBlock()
                     state.error != null -> Text(state.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                     else -> Text(state.translated ?: "", color = colors.text, modifier = Modifier.testTag("translated"))
+                }
+            }
+        }
+    }
+}
+
+/** The post menu's Select text (#3699): the whole body as one selectable text, with the body's selection menu. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectTextSheet(ui: FeedxUi, request: MenuRequest) {
+    val colors = LocalEcencyColors.current
+    val model = remember(request.post) { ui.env.selectTextModel(request.post) }
+    DisposableEffect(model) { onDispose { model.close() } }
+    LaunchedEffect(model) { model.start() }
+    val state by model.state.collectAsState()
+    val close = { ui.selectText = null }
+    ModalBottomSheet(onDismissRequest = close, containerColor = colors.background, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.fillMaxWidth().navigationBarsPadding().testTag("selectTextSheet")) {
+            Text(
+                com.ecency.core.l10n.L.native.reading.selectText, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text,
+                modifier = Modifier.padding(horizontal = 20.dp).semantics { heading() },
+            )
+            val text = state.text
+            if (text == null) {
+                LoadingBlock()
+            } else {
+                com.ecency.app.render.SelectableBodyText({ action, selected ->
+                    // the next sheet takes over: this one goes first (a sheet over a sheet loses the second)
+                    close()
+                    ui.bodySelection(action, selected, request.post, request.root)
+                }) {
+                    Text(
+                        text, color = colors.text, fontSize = 16.sp, lineHeight = 24.sp,
+                        style = androidx.compose.ui.text.TextStyle(textDirection = androidx.compose.ui.text.style.TextDirection.Content),
+                        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp).testTag("selectTextBody"),
+                    )
                 }
             }
         }

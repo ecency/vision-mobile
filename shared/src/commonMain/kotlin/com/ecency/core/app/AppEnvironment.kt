@@ -812,6 +812,13 @@ class AppEnvironment(
 
     fun translationSheetModel(post: Post, readerLanguage: String): TranslationSheetModel = TranslationSheetModel(this, post, readerLanguage)
 
+    /** The Select text view over [post]'s body (#3699). */
+    fun selectTextModel(post: Post): SelectTextModel = SelectTextModel(this, post)
+
+    /** The translation sheet over text a reader selected in a body (#3699), sent whole. */
+    fun selectionTranslationModel(text: String, readerLanguage: String): TranslationSheetModel =
+        TranslationSheetModel(this, Post("", ""), readerLanguage, selection = text)
+
     /** The poll of [post], or null when its json_metadata has none. */
     fun pollModel(post: Post): PollModel? =
         com.ecency.core.api.PostPoll.fromMetadata(post.metadata.rawJson)?.let { PollModel(this, post.key, it) }

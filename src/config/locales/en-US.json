@@ -2495,7 +2495,9 @@
     },
     "reading": {
       "banner_text": "This post is in {source}. Translate to {target}?",
-      "translated_from_text": "Translated from {source}"
+      "translated_from_text": "Translated from {source}",
+      "select_text": "Select text",
+      "quote": "Quote"
     },
     "community": {
       "stats": "{subscribers, plural, one {# Member} other {# Members}} • {authors, plural, one {# Poster} other {# Posters}} • {posts, plural, one {# Post} other {# Posts}}",

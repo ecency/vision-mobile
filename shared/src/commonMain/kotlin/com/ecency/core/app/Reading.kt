@@ -285,12 +285,24 @@ data class TranslationSheetState(
     val error: String? = null,
 )
 
-/** RN post-translation-modal: source (Auto) and target pickers over a ~200 character summary of the post. */
-class TranslationSheetModel internal constructor(private val env: AppEnvironment, private val post: Post, target: String) :
+/**
+ * RN post-translation-modal: source (Auto) and target pickers over a ~200 character summary of the post, or over a
+ * [selection] of a body as it is (#3699: what the reader selected, not a summary of it).
+ */
+class TranslationSheetModel internal constructor(
+    private val env: AppEnvironment,
+    private val post: Post,
+    target: String,
+    private val selection: String? = null,
+) :
     StateModel<TranslationSheetState>(TranslationSheetState(target = Languages.readerLanguage(target)), env.dispatchers) {
     private var job: Job? = null
 
     fun start() {
+        selection?.let { text ->
+            setState { it.copy(original = text.trim()) }
+            return run()
+        }
         scope.launch {
             val platform = (env.renderer as? RenderHelperPostBodyRenderer)?.platform ?: RenderHelper.Platform.ANDROID
             // RN passes `null` as the length, which render-helper reads as 200

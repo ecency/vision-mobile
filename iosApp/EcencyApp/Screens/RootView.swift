@@ -59,6 +59,9 @@ struct RootView: View {
                 case let .postMenu(r): PostMenuSheet(request: r)
                 case let .crossPost(r): CrossPostSheet(post: r.post, env: app.env)
                 case let .translation(r): TranslationSheet(post: r.post, env: app.env, reader: app.readerLanguage)
+                case let .selectionTranslation(text):
+                    TranslationSheet(model: app.env.selectionTranslationModel(text: text, readerLanguage: app.readerLanguage))
+                case let .selectText(r): SelectTextSheet(request: r, env: app.env)
                 case let .modNotes(r):
                     // the one notes sheet (CommunityViews.swift): hivemind's rules on the reason live in ModNotes
                     ModNotesSheet(title: r.title, subtitle: r.description, placeholder: r.placeholder, confirmLabel: r.confirmLabel) { notes in

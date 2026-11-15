@@ -76,8 +76,10 @@ internal fun rememberInlineText(inlines: List<Inline>, actions: PostActions): In
         val chips = LinkedHashMap<String, InlineTextContent>()
         val linkStyle = TextLinkStyles(SpanStyle(color = theme.link))
 
-        // A long-press on a chip copies the paragraph, as anywhere else in it, instead of navigating.
-        val longPress = { actions.onParagraphLongPress(inlines.plainText()) }
+        // A long-press on a chip copies the paragraph, as anywhere else in it, instead of navigating. In selectable text
+        // (#3699) the long press no longer copies the paragraph, so on a chip it does nothing (without a handler of its
+        // own the press would end as a tap and open the profile).
+        val longPress: () -> Unit = if (actions.onSelection != null) ({}) else ({ actions.onParagraphLongPress(inlines.plainText()) })
 
         fun chip(id: String, label: String, avatar: String?, target: LinkTarget) {
             val labelSize = measurer.measure(label, ChipText).size

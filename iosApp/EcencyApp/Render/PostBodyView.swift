@@ -14,12 +14,66 @@ struct PostActions {
     var onLink: (LinkTarget) -> Void = { _ in }
     /// Image tap: the tapped URL and every body image in document order, for the gallery.
     var onImage: (_ url: String, _ all: [String]) -> Void = { _, _ in }
-    /// Paragraph long-press with its plain text, for the copy sheet.
+    /// Paragraph long-press with its plain text, for the copy sheet. Not where the text is selectable ([onSelection]).
     var onParagraphLongPress: (_ plainText: String) -> Void = { _ in }
+    /// Set where the body's text is selectable (#3699: the post screen's body and its comments): a long press
+    /// selects, and the edit menu's own actions get the selected text. Nil leaves the text as it was (waves, previews).
+    var onSelection: ((BodySelectionAction, String) -> Void)?
     var avatarURL: (String) -> String? = PostActions.defaultAvatarURL
     /// The "Show images" setting. When false each image is a same-size placeholder and its bytes are
     /// never requested until the user taps it; a revealed image stays revealed for the session.
     var showImages = true
+}
+
+/// The edit menu's own actions on selected body text, next to the system Copy (#3699, web's selection popover).
+enum BodySelectionAction: CaseIterable {
+    case quote, translate, share
+
+    var title: String {
+        switch self {
+        case .quote: return L.Native.Reading.quote
+        case .translate: return L.Chats.translate
+        case .share: return L.Chats.share
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .quote: return "text.quote"
+        case .translate: return "character.bubble"
+        case .share: return "square.and.arrow.up"
+        }
+    }
+
+    var id: String {
+        switch self {
+        case .quote: return "selection-quote"
+        case .translate: return "selection-translate"
+        case .share: return "selection-share"
+        }
+    }
+
+    /// The edit menu for [text] selected at [range] of [view]: the system's items without its own Share and Look Up
+    /// group (Look Up, Translate, Search Web), then ours, so the menu has one Translate and one Share. Copy and
+    /// Select All stay. Nil (the system menu) for a selection of whitespace only.
+    @MainActor static func menu(in view: UITextView, range: NSRange, text: String, suggested: [UIMenuElement],
+                                perform: @escaping (BodySelectionAction, String) -> Void) -> UIMenu? {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        let own = allCases.map { action in
+            let item = UIAction(title: action.title, image: UIImage(systemName: action.systemImage)) { [weak view] _ in
+                // the selection goes once its text is taken: the next sheet covers the text anyway
+                view?.selectedRange = NSRange(location: range.location, length: 0)
+                perform(action, text)
+            }
+            item.accessibilityIdentifier = action.id
+            return item
+        }
+        let system = suggested.filter { element in
+            guard let menu = element as? UIMenu else { return true }
+            return menu.identifier != .share && menu.identifier != .lookup
+        }
+        return UIMenu(children: system + own)
+    }
 }
 
 /// Images revealed by a tap while "Show images" is off. Session scoped by URL, like RN's revealedImages.

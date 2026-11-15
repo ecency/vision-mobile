@@ -212,18 +212,29 @@ class ComposeReplyModel internal constructor(
     private var saveJob: kotlinx.coroutines.Job? = null
     private val slot = LocalDrafts.reply(parent.author, parent.permlink)
 
+    /** The saved draft was read (or there was none): a quote waits for it. */
+    private val draftRead = kotlinx.coroutines.CompletableDeferred<Unit>()
+
     init {
         // RN replyCache: a reply draft survives the app being closed, per account and parent (shared with the editor)
         scope.launch {
-            env.session.awaitLoaded()
-            if (owner == null) owner = env.session.current.username
-            val user = owner ?: return@launch
-            val local = env.localDrafts.load(user, slot) ?: return@launch
-            if (pending == null) pending = local.pending
-            if (current.isSending) return@launch
-            if (local.body.isNotEmpty() && current.text.isEmpty()) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
-            if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
+            try {
+                readDraft()
+            } finally {
+                draftRead.complete(Unit)
+            }
         }
+    }
+
+    private suspend fun readDraft() {
+        env.session.awaitLoaded()
+        if (owner == null) owner = env.session.current.username
+        val user = owner ?: return
+        val local = env.localDrafts.load(user, slot) ?: return
+        if (pending == null) pending = local.pending
+        if (current.isSending) return
+        if (local.body.isNotEmpty() && current.text.isEmpty()) setState { it.copy(text = local.body, draftPermlink = local.pending?.permlink) }
+        if (local.replyImage != null && current.imageUrl == null && !current.isAttaching) setState { it.copy(imageUrl = local.replyImage) }
     }
 
     /** The slot's draft with [text] and [image] (the attached one); the pending publish is always carried along. */
@@ -241,6 +252,23 @@ class ComposeReplyModel internal constructor(
         val user = owner ?: return
         saveJob?.cancel()
         saveJob = scope.launch { store(user, current.text, current.imageUrl) }
+    }
+
+    /**
+     * Quote from a body selection (#3699): the selection as a markdown quote after the draft. Applied once the saved
+     * draft was read, so a quote made as the composer opens adds to that draft instead of hiding it. False when
+     * nothing but whitespace was selected.
+     */
+    fun quote(selection: String): Boolean {
+        if (BodySelection.quote(selection) == null) return false
+        scope.launch {
+            draftRead.await()
+            if (current.isSending) return@launch
+            val text = BodySelection.appendQuote(current.text, selection) ?: return@launch
+            setText(text)
+            setState { it.copy(prefillSeq = it.prefillSeq + 1) }
+        }
+        return true
     }
 
     fun setText(text: String) {

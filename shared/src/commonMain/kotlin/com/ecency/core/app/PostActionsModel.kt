@@ -20,6 +20,8 @@ enum class PostMenuItem(val id: String) {
     PROMOTE("promote"),
     COPY("copy"),
     COPY_TEXT("copy-text"),
+    /** Not in RN (its bodies could not be selected, #3699): the whole body as one selectable text. */
+    SELECT_TEXT("select-text"),
     OPEN_THREAD("open-thread"),
     REPLY("reply"),
     TRANSLATE("translate"),
@@ -43,8 +45,15 @@ enum class PostMenuItem(val id: String) {
     DELETE("delete-post"),
     ;
 
-    /** RN `post_dropdown.<id>` in the current language (recorded in `rn-reuse.json`); Edit, native only, reads `UiCopy.EDIT`. */
-    val label: String get() = if (this == EDIT) UiCopy.EDIT else L10n.byKey("post_dropdown.$id") ?: id
+    /**
+     * RN `post_dropdown.<id>` in the current language (recorded in `rn-reuse.json`); Edit, native only, reads
+     * `UiCopy.EDIT`, and Select text, native only, its own key.
+     */
+    val label: String get() = when (this) {
+        EDIT -> UiCopy.EDIT
+        SELECT_TEXT -> L.native.reading.selectText
+        else -> L10n.byKey("post_dropdown.$id") ?: id
+    }
 
     /** RN draws every label upper-cased. */
     val title: String get() = label.uppercase()
@@ -96,12 +105,20 @@ data class PostMenuContext(
     val openThread: Boolean = false,
     /** RN `pageType === 'ownProfile'`: a post not by me on my blog is a reblog of mine. */
     val ownProfile: Boolean = false,
-)
+    /** The surface draws a selectable body (the post screen and its comments; not waves, #3699): offer Select text. */
+    val selectText: Boolean = false,
+) {
+    /** Swift sees no default arguments: the surfaces without a selectable body. */
+    constructor(translate: Boolean, openThread: Boolean, ownProfile: Boolean) : this(translate, openThread, ownProfile, false)
+}
 
 /** What the UI does after a menu tap ([PostActionsModel.select]). */
 sealed interface PostMenuEffect {
     /** Copy [text] to the clipboard, then toast [toast] (RN "Copied!"). */
     data class Copy(val text: String, val toast: String) : PostMenuEffect
+
+    /** The Select text view over [post]'s body (#3699). */
+    data class SelectText(val post: Post) : PostMenuEffect
 
     /** The system share sheet with [message] (RN `${title} ${url}`). */
     data class Share(val message: String) : PostMenuEffect
@@ -217,6 +234,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 PostMenuItem.MUTE_POST -> moderator && !post.stats.gray
                 PostMenuItem.UNMUTE_POST -> moderator && post.stats.gray
                 PostMenuItem.COPY_TEXT -> isComment && post.body.isNotBlank()
+                PostMenuItem.SELECT_TEXT -> context.selectText && post.body.isNotBlank()
                 PostMenuItem.OPEN_THREAD -> isComment && context.openThread
                 PostMenuItem.TRANSLATE -> context.translate
                 PostMenuItem.DELETE -> canDelete
@@ -254,6 +272,7 @@ class PostActionsModel internal constructor(private val env: AppEnvironment) :
                 if (text.isBlank()) PostMenuEffect.None else PostMenuEffect.Copy(text, COPIED)
             }
             PostMenuItem.SHARE -> PostMenuEffect.Share("${post.title} ${postUrl(post)}")
+            PostMenuItem.SELECT_TEXT -> if (post.body.isBlank()) PostMenuEffect.None else PostMenuEffect.SelectText(post)
             PostMenuItem.OPEN_THREAD -> PostMenuEffect.Open(AppScreen.Post(post.author, post.permlink))
             PostMenuItem.REPLY -> if (user == null) PostMenuEffect.None else PostMenuEffect.Reply(post)
             PostMenuItem.PROMOTE -> if (user == null) PostMenuEffect.None

@@ -34,6 +34,29 @@ final class PostRenderTests: XCTestCase {
         XCTAssertNil(built.target(at: 999))
     }
 
+    /// #3699: a selection reads, and Copy writes, each chip as its `@user` / `#tag` label, never the attachment
+    /// character that stands for it in the text.
+    @MainActor
+    func testASelectionAndCopyTakeChipsAsTheirLabels() {
+        let built = InlineTextBuilder(theme: .light, size: 16).build(mention)
+        let view = PostUITextView(usingTextLayoutManager: false)
+        view.isEditable = false
+        view.isSelectable = true
+        view.built = built
+        view.attributedText = built.text
+        let all = NSRange(location: 0, length: built.text.length)
+        let text = view.plainText(in: all) ?? ""
+        XCTAssertTrue(text.contains("@ecency"), text)
+        XCTAssertTrue(text.contains("#hive"), text)
+        XCTAssertFalse(text.contains("\u{FFFC}"), text)
+        XCTAssertTrue(text.hasPrefix("Hi "), text)
+        XCTAssertNil(view.plainText(in: NSRange(location: 0, length: 0)), "nothing selected")
+        UIPasteboard.general.string = ""
+        view.selectedRange = all
+        view.copy(nil)
+        XCTAssertEqual(UIPasteboard.general.string, text)
+    }
+
     func testMentionChipCarriesTheSmallAvatarAndTagChipNone() {
         let built = InlineTextBuilder(theme: .light, size: 16).build(mention)
         let chips = built.chips
@@ -163,5 +186,36 @@ final class PostRenderTests: XCTestCase {
         if let hit = view as? T { return hit }
         for sub in view.subviews { if let hit = find(type, in: sub) { return hit } }
         return nil
+    }
+}
+
+/// Review fix (#3699): a reply sheet shows the environment's current composer for its parent, not one replaced since.
+@MainActor
+final class ReplyDraftsTests: XCTestCase {
+    func testADraftFollowsTheComposerTheEnvironmentHasNow() async throws {
+        let env = AppEnvironment(
+            api: try EcencyApi(nodes: ["https://fake-hive.invalid"], transport: FakeHiveTransport()),
+            vault: KeyVaultAsync(vault: KeyVault(store: KeychainSecureStore(service: "app.esteem.mobile.ios.tests.replydrafts"))),
+            renderer: PostBodyRendererCompanion.shared.`default`(proxyBase: ImageProxy.companion.DEFAULT_BASE),
+            dispatchers: AppDispatchers.companion.platform(),
+            proxyBase: ImageProxy.companion.DEFAULT_BASE,
+            debugKeyImport: true,
+            nowMillis: { KotlinLong(value: Int64(Date().timeIntervalSince1970 * 1000)) },
+            security: SecurityConfig(pinIterations: 16, lockTimeoutMillis: 60_000, monotonicMillis: { KotlinLong(value: 0) }),
+            legacy: nil,
+            auth: AuthServices.companion.offline()
+        )
+        let root = PostKey(author: "spike-alice", permlink: "a-post")
+        // two composers (two parents from the fake data) stand for a composer and the one that replaced it
+        let post = try await env.api.posts.getPost(author: "spike-alice", permlink: "a-post", observer: nil, refresh: false)
+        let comment = try await env.api.posts.getPost(author: "spike-bob", permlink: "re-c1", observer: nil, refresh: false)
+        let first = env.replyModel(root: root, parent: try XCTUnwrap(post))
+        let second = env.replyModel(root: root, parent: try XCTUnwrap(comment))
+        let drafts = ReplyDrafts()
+        let a = drafts.draft(id: "x", current: first)
+        XCTAssertTrue(drafts.draft(id: "x", current: first) === a, "the same composer: the same draft")
+        let b = drafts.draft(id: "x", current: second)
+        XCTAssertTrue(b.model === second, "a replaced composer: the draft over the new one")
+        XCTAssertFalse(b === a)
     }
 }
