@@ -166,7 +166,10 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 AuthException.HiveAuth.Reason.REJECTED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestWasRejected, false)
                 AuthException.HiveAuth.Reason.EXPIRED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestExpiredBefore, true)
                 AuthException.HiveAuth.Reason.SESSION_EXPIRED -> AppError(ErrorKind.AUTH, HIVEAUTH_EXPIRED, false)
-                AuthException.HiveAuth.Reason.NOT_CONNECTED, AuthException.HiveAuth.Reason.CONNECTION_LOST -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
+                AuthException.HiveAuth.Reason.NOT_CONNECTED -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
+                // the wallet may have signed and broadcast it: check before trying again, never a blind retry
+                AuthException.HiveAuth.Reason.CONNECTION_LOST ->
+                    AppError(ErrorKind.NETWORK, com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, false, undecided = true)
                 AuthException.HiveAuth.Reason.NOT_BROADCAST -> AppError(ErrorKind.AUTH, L.hiveauth.transactionFail, false)
                 // the wallet's or relay's own reason, when it gave one; an answer the app could not read stays generic
                 AuthException.HiveAuth.Reason.ERROR ->
@@ -218,7 +221,7 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
          * retry resends the same transaction).
          */
         fun fromBroadcast(error: Throwable, where: String): AppError = map(error).let {
-            if (it.kind == ErrorKind.NETWORK) it.copy(message = MAY_HAVE_LANDED_MESSAGE) else it
+            if (it.kind == ErrorKind.NETWORK && !it.undecided) it.copy(message = MAY_HAVE_LANDED_MESSAGE) else it
         }.let { coded(it, ErrorReports.handled(error, where, it)) }
 
         val MAY_HAVE_LANDED_MESSAGE: String get() = L.native.appError.networkErrorThisMay

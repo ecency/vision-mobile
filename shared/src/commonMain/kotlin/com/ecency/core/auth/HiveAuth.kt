@@ -287,7 +287,13 @@ class HiveAuthClient(
         val wait = awaitWait("auth_wait")
         onWait(HiveAuthWait(wait.uuid, wait.expire, HiveAuthProtocol.authLink(username, wait.uuid, authKey, host, HiveAuthProtocol.preferredScheme(wait.raw) ?: "has"), wait.raw))
         while (true) {
-            val m = awaitFor(wait.uuid, wait.expire, setOf("auth_ack", "auth_nack", "auth_err"))
+            // a sign in signs nothing: a lost connection there is safe to try again
+            val m = try {
+                awaitFor(wait.uuid, wait.expire, setOf("auth_ack", "auth_nack", "auth_err"))
+            } catch (e: AuthException.HiveAuth) {
+                if (e.reason != AuthException.HiveAuth.Reason.CONNECTION_LOST) throw e
+                throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.detail, e)
+            }
             when (m.cmd) {
                 "auth_ack" -> {
                     val plain = runCatching { CryptoJsCipher.decrypt(m.text("data") ?: "", authKey) }.getOrNull() ?: continue

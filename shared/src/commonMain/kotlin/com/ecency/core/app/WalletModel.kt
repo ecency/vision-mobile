@@ -271,7 +271,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             is SendPhase.Done -> true
             is SendPhase.Cancelled -> false
             is SendPhase.Failed -> throw AppException(p.error)
-            is SendPhase.Unconfirmed -> { env.ui.toast(p.message); false }
+            // told only to the account that claimed (Account switching: results are checked against the current one)
+            is SendPhase.Unconfirmed -> {
+                if (owns(user)) env.ui.toast(p.message)
+                false
+            }
             else -> false
         }
     }

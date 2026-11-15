@@ -58,6 +58,27 @@ class FeedModelTest {
         }
     }
 
+    /** Review of #3706: a feed refreshed into "not found" drops the cards it showed. */
+    @Test
+    fun aFeedRefreshedIntoNotFoundShowsNoOldCards() = runTest {
+        var missing = false
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") HttpResult(500, "no fixture")
+            else if (missing) FakeTransport.error(req, -32602, "Invalid parameters: Tag gone does not exist")
+            else FakeTransport.result(req, page("p", 3))
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, "gone"))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(3, feed.current.items.size)
+        missing = true
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(FeedNotFound.TAG, feed.current.notFound)
+        assertTrue(feed.current.items.isEmpty(), "the old cards go")
+        feed.close()
+    }
+
     /** Review of #3701: a later page whose start post was deleted is an error with retry, not "this tag has no posts". */
     @Test
     fun aLaterPageWhosePostIsGoneIsAnErrorNotTheEnd() = runTest {

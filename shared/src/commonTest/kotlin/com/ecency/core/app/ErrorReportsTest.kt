@@ -89,6 +89,15 @@ class ErrorReportsTest {
         assertEquals("error", reporter.reports.single().level)
     }
 
+    /** Review of #3706: an unexplained refusal right after an explained one at the same place is still reported as an error. */
+    @Test
+    fun anErrorRightAfterAnExpectedWarningOfTheSameShapeIsReported() {
+        AppError.from(com.ecency.core.api.chat.ChatApiException(403, "@spike-bob is not on Ecency chat yet.", serverText = true), "chats.openDirect")
+        val error = AppError.from(com.ecency.core.api.chat.ChatApiException(403, "Request failed (403)"), "chats.openDirect")
+        assertEquals(listOf("warning", "error"), reporter.reports.map { it.level })
+        assertEquals(error.code, reporter.reports.last().tags["error_code"])
+    }
+
     /** Issue #3701: the chat server's own refusal ("@user is not on Ecency chat yet.") is the user's answer, not a bug. */
     @Test
     fun aChatRefusalTheServerExplainsIsExpected() {

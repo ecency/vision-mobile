@@ -16,6 +16,7 @@ import kotlin.io.encoding.Base64
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -338,6 +339,31 @@ class HiveAuthTest {
         }
         val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
         assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
+    /** Review of #3706: a sign in that loses its connection is safe to try again (nothing can have been signed). */
+    @Test
+    fun aSignInThatLosesItsConnectionIsNotConnected() = runTest {
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "auth_req" -> { push("cmd" to "auth_wait", "uuid" to "a1", "expire" to 50_000); drop() }
+                "attach_req" -> drop()
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).authenticate(user, null, key) {} }
+        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.reason)
+    }
+
+    /** Review of #3706: a lost signing connection says the request may have gone through, and offers no blind retry. */
+    @Test
+    fun aLostSigningConnectionMayHaveGoneThrough() {
+        val lost = com.ecency.core.app.AppError.from(AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST), "post.vote")
+        assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, lost.message)
+        assertFalse(lost.retryable)
+        assertTrue(lost.undecided)
+        val voted = com.ecency.core.app.AppError.fromBroadcast(AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST), "post.vote")
+        assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, voted.message)
+        assertTrue(com.ecency.core.app.AppError.from(AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED), "login").retryable)
     }
 
     /** Review of #3701: the new socket closing during the reattach is a lost connection, not an untyped failure. */

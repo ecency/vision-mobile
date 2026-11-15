@@ -367,7 +367,9 @@ class FeedModel internal constructor(
                 // the bridge does not know the feed's tag or community: shown as such, not an error (issue #3701)
                 val missing = if (reset) notFound(e) else null
                 if (missing != null) {
-                    setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, loaded = true, endReached = true, notFound = missing) }
+                    posts = emptyMap()
+                    base = emptyList()
+                    setState { it.copy(items = emptyList(), isLoading = false, isRefreshing = false, isLoadingMore = false, loaded = true, endReached = true, notFound = missing) }
                 } else {
                     setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "feed.load")) }
                 }
@@ -402,7 +404,7 @@ class FeedModel internal constructor(
                 base = cards
                 readAt = stamp
                 if (withPromoted) loadPromoted(nsfw)
-                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, pages = pages) }
+                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, notFound = null, pages = pages) }
                 env.localVotes.retireConfirmed(read, env.session.current.username)
             } catch (e: CancellationException) {
                 throw e

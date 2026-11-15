@@ -13,6 +13,7 @@ import com.ecency.core.api.wallet.HistoryCategory
 import com.ecency.core.api.wallet.WalletHistory
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -98,6 +99,37 @@ class WalletModelsTest {
      * to another account and back keeps its guard, so a second tap sends no second claim; the first claim's end clears
      * only its own guard.
      */
+    /** Review of #3706: a claim whose outcome stays unknown tells only the account that claimed. */
+    @Test
+    fun anUnconfirmedClaimIsToldOnlyToTheAccountThatClaimed() = runTest {
+        for (switchAway in listOf(false, true)) {
+            val w = world(this)
+            KeyVault(w.app.store).save(VaultAccount("spike-other", AuthType.POSTING_KEY, postingKey = com.ecency.core.hive.GoldenVectors.WIF))
+            w.env.wallet.start()
+            testScheduler.advanceUntilIdle()
+            // every node may have taken it and none says; the chain's clock runs, so the transaction expires
+            w.app.clock = { TestApp.NOW + testScheduler.currentTime }
+            w.env.api.broadcaster.nowMillis = { w.app.clock() }
+            w.chainClock = { TestApp.NOW + testScheduler.currentTime }
+            w.app.monotonicClock = { testScheduler.currentTime }
+            w.broadcastAnswer = { kotlinx.coroutines.awaitCancellation() }
+            w.statusAnswer = { "\"too_old\"" }
+            val toasts = mutableListOf<String>()
+            backgroundScope.launch { w.env.ui.state.collect { st -> st.toast?.text?.let { if (toasts.lastOrNull() != it) toasts += it } } }
+            w.env.wallet.claim("HP")
+            testScheduler.runCurrent()
+            if (switchAway) {
+                w.env.session.switchTo("spike-other")
+                testScheduler.runCurrent()
+            }
+            repeat(40) { testScheduler.advanceTimeBy(10_000); testScheduler.runCurrent() }
+            val undecided = toasts.filter { it == com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE || "check" in it.lowercase() }
+            if (switchAway) assertEquals(emptyList(), undecided, "not told to the other account: $toasts")
+            else assertTrue(undecided.isNotEmpty(), "told to the claimer: $toasts")
+            w.env.wallet.close()
+        }
+    }
+
     @Test
     fun aClaimOnItsWayIsNotSentAgainAfterSwitchingAwayAndBack() = runTest {
         val w = world(this)
