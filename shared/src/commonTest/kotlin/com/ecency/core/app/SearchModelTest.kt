@@ -154,6 +154,18 @@ class SearchModelTest {
         model.close()
     }
 
+    /** Issue #3701: a search that never reached the server says so (the network message), not "search failed". */
+    @Test
+    fun anUnreachedSearchShowsTheNetworkMessage() = runTest {
+        val node = SearchNode().apply { status = 504 }
+        val app = app(node)
+        val model = SearchModel(app.env)
+        model.submit("hive")
+        testScheduler.advanceUntilIdle()
+        assertEquals(AppError.NETWORK_MESSAGE, model.current.posts.emptyText)
+        model.close()
+    }
+
     @Test
     fun aRefusedSearchSaysSoAndALaterPageFailureKeepsResults() = runTest {
         val node = SearchNode().apply { status = 400 }
@@ -172,7 +184,8 @@ class SearchModelTest {
         model.loadMorePosts()
         testScheduler.advanceUntilIdle()
         assertEquals(1, model.current.posts.items.size)
-        assertEquals(SearchCopy.ERROR, model.current.posts.moreError)
+        // a 5xx is the server failing, not the query: the network message (issue #3701)
+        assertEquals(AppError.NETWORK_MESSAGE, model.current.posts.moreError)
         assertNull(model.current.posts.emptyText)
         model.close()
     }

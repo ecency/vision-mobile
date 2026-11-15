@@ -30,6 +30,34 @@ class FeedModelTest {
         },
     )
 
+    /** Issue #3701: a tag or community that does not exist shows that, is not an error and is not reported. */
+    @Test
+    fun aTagOrCommunityThatDoesNotExistShowsNotFoundAndIsNotReported() = runTest {
+        val reporter = RecordingReporter()
+        run {
+            val app = TestApp(this) { req ->
+                val tag = req.params.toString()
+                when {
+                    req.method != "bridge.get_ranked_posts" -> HttpResult(500, "no fixture")
+                    "hive-999999" in tag -> FakeTransport.error(req, -32602, "Invalid parameters: Community hive-999999 does not exist")
+                    else -> FakeTransport.error(req, -32602, "Invalid parameters: Tag nosuchtag does not exist")
+                }
+            }
+            app.env.crashReporter = reporter
+            for ((tag, text) in listOf("nosuchtag" to FeedCopy.TAG_HAS_NO_POSTS, "hive-999999" to FeedCopy.COMMUNITY_NOT_FOUND)) {
+                val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, tag))
+                feed.start()
+                testScheduler.advanceUntilIdle()
+                val s = feed.current
+                assertNull(s.error, tag)
+                assertTrue(s.loaded && s.endReached && s.items.isEmpty(), tag)
+                assertEquals(text, s.emptyText, tag)
+                feed.close()
+            }
+            assertEquals(emptyList(), reporter.reports.map { it.tags["where"] })
+        }
+    }
+
     @Test
     fun pagesAppendUntilAnEmptyPage() = runTest {
         val pages = ArrayDeque(listOf(page("p1", 10), page("p2", 4), "[]"))

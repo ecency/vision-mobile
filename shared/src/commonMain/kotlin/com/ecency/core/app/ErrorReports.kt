@@ -143,6 +143,7 @@ object ErrorReports {
         e is AppException && e.cause == null -> true
         isSessionRefused(root) -> true
         isDeviceLocked(root) -> true
+        isChatRefusal(root) -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
@@ -154,6 +155,10 @@ object ErrorReports {
      */
     private fun isDeviceLocked(root: Throwable): Boolean =
         (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
+
+    /** The chat server refused in its own words ("@user is not on Ecency chat yet."): an answer, not a bug of the app. */
+    private fun isChatRefusal(root: Throwable): Boolean =
+        (root as? com.ecency.core.api.chat.ChatApiException)?.let { it.serverText && it.status in 400..499 } == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true

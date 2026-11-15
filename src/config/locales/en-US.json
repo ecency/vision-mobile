@@ -2512,6 +2512,9 @@
       "topic": "Topic",
       "community_not_found": "Community not found."
     },
+    "feed": {
+      "tag_has_no_posts": "There are no posts with this tag yet."
+    },
     "transfer": {
       "one_recipient": "Only one recipient can be used for this transfer.",
       "memo_has_secret": "This memo holds a private key or a master password. Memos are public on the blockchain: never put a key or password in one.",

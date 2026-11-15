@@ -31,7 +31,7 @@ struct FeedListView: View {
                         if let error = state.error {
                             ErrorStateView(error: error) { model.retry() }.padding(.top, 80)
                         } else if state.loaded && !state.isLoadingMore {
-                            Text(ReadingUiCopy.shared.NOTHING_HERE_YET).foregroundStyle(theme.secondary).esieAbove(.empty).padding(.top, 80)
+                            Text(state.emptyText).foregroundStyle(theme.secondary).accessibilityIdentifier("feed-empty").esieAbove(.empty).padding(.top, 80)
                             // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
                             if FeedPaging.shouldLoadMoreAtEnd(state) {
                                 Button(UiCopy.shared.LOAD_MORE) { model.loadMore() }.padding(.top, 12).accessibilityIdentifier("feed-load-more")

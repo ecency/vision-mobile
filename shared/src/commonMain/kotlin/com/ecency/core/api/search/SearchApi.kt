@@ -76,6 +76,9 @@ class SearchApiException(val status: Int, val detail: String?) :
     EcencyException("search failed (${if (status == 0) "network" else status.toString()})${detail?.let { ": $it" } ?: ""}") {
     /** 408 and 429 describe timing, not the query (SDK searchRetryPolicy). */
     val isRejected: Boolean get() = status in 400..499 && status != 408 && status != 429
+
+    /** No answer (no connection), the server failing (5xx) or timing (408, 429): a network failure, not the query. */
+    val isNetwork: Boolean get() = status == 0 || status >= 500 || status == 408 || status == 429
 }
 
 /**

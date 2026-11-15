@@ -7,7 +7,6 @@ import com.ecency.core.api.community.CommunitySort
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.repository.FeedSource
 import com.ecency.core.api.search.PostUrlParser
-import com.ecency.core.api.search.SearchApiException
 import com.ecency.core.api.search.SearchFilters
 import com.ecency.core.api.search.SearchHit
 import com.ecency.core.api.search.SearchQueries
@@ -378,7 +377,7 @@ class SearchModel(private val env: AppEnvironment, private val debounceMillis: L
 
     /** The search error to show; the failure is reported as handled at [where] (ErrorReports). */
     private fun message(e: Exception, where: String): String = AppError.from(e, where).let {
-        if (e !is SearchApiException && it.kind == ErrorKind.NETWORK) it.message else SearchCopy.ERROR
+        if (it.kind == ErrorKind.NETWORK) it.message else SearchCopy.ERROR
     }
 
     companion object {
