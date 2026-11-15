@@ -72,6 +72,26 @@ class ChatFixture(
         idle()
     }
 
+    /**
+     * The next request [matching] gets the answer the server had when it was sent, delivered only when the returned
+     * signal completes (a slow network: the answer is older than what happens meanwhile).
+     */
+    fun holdNext(matching: (AuthHttpRequest) -> Boolean): kotlinx.coroutines.CompletableDeferred<Unit> {
+        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var armed = true
+        var snapshot: Pair<AuthHttpRequest, HttpResult>? = null
+        app.authBackend.gate = { r ->
+            if (armed && matching(r)) {
+                armed = false
+                snapshot = r to (chat.http(r) ?: HttpResult(503, "{}"))
+                release.await()
+            }
+        }
+        val previous = before
+        before = { r -> snapshot?.takeIf { it.first === r }?.second?.also { snapshot = null } ?: previous?.invoke(r) }
+        return release
+    }
+
     fun idle() = scope.testScheduler.advanceUntilIdle()
 
     /** Moves the clock by [millis] and runs what is due (an open websocket keeps the scheduler busy forever). */
@@ -1208,6 +1228,136 @@ class ChatThreadTest {
         } finally {
             // a failed check must not leave the websocket's heartbeat running into runTest's idle wait
             m.close()
+        }
+    }
+
+    private fun texts(m: ChatThreadModel) = m.current.items.filterIsInstance<ChatMessageItem>().map { it.spans.joinToString("") { s -> s.text } }
+
+    /** Review of #3706: a return while an older page is loading catches up once that load ends. */
+    @Test
+    fun aReturnDuringAnOlderPageLoadCatchesUpWhenItEnds() = runTest {
+        val f = ChatFixture(this)
+        f.chat.seedHistory("ch-ecency", read = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            // the older page is held while the thread comes back
+            val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+            f.app.authBackend.gate = { r -> if (r.url.contains("/posts") && r.url.contains("before=")) held.await() }
+            m.loadMore()
+            f.run(1)
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            assertFalse("sent while away" in texts(m))
+            f.app.authBackend.gate = null
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), "caught up after the load: ${texts(m).take(3)}")
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: a socket that drops on an open thread reads what it missed once it is up again. */
+    @Test
+    fun aDroppedSocketOnAnOpenThreadCatchesUpWhenItIsBack() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue(m.current.connected)
+            f.chat.dropSockets()
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent during the drop")
+            f.run(60_000)
+            f.run(1)
+            assertTrue(m.current.connected, "reconnected")
+            assertTrue("sent during the drop" in texts(m), texts(m).take(3).toString())
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: more missed than a page holds restarts from the newest page and keeps what the socket brought meanwhile. */
+    @Test
+    fun aLongGapKeepsTheMessageTheSocketBroughtDuringTheRead() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            repeat(DemoChat.PAGE + 5) {
+                f.run(1_000)
+                f.chat.incoming("ch-ecency", "away $it")
+            }
+            f.run(1)
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            f.run(1_000)
+            f.chat.incoming("ch-ecency", "live during the read")
+            f.run(1)
+            assertTrue("live during the read" in texts(m), "the socket showed it")
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            val t = texts(m)
+            assertTrue("live during the read" in t, "kept: ${t.take(3)}")
+            assertTrue("away ${DemoChat.PAGE + 4}" in t, "the newest page: ${t.take(3)}")
+            assertEquals(t.size, t.distinct().size, "no duplicates")
+            assertTrue(m.current.hasMore, "the gap pages back")
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: a catch-up read that a pull to refresh overtook changes nothing. */
+    @Test
+    fun aCatchUpOvertakenByARefreshChangesNothing() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            // edited after the catch-up read was answered, then refreshed
+            f.chat.edit("ch-ecency", f.chat.idOf("ch-ecency", "sent while away")!!, "edited while away")
+            f.run(1)
+            m.refresh()
+            f.run(1)
+            f.run(1)
+            assertTrue("edited while away" in texts(m))
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("edited while away" in texts(m), "the older read is dropped: ${texts(m).take(3)}")
+            assertFalse("sent while away" in texts(m))
+        } finally {
+            m.setActive(false)
+            f.run(1)
         }
     }
 
