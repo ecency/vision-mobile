@@ -231,6 +231,9 @@ struct EmbedWebView: UIViewRepresentable {
         /// `target=_blank` and `window.open`: never open anything.
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                      for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
+
+        /// The player's web process ended (a crash, or memory pressure): it loads again instead of staying blank.
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { webView.reload() }
     }
 }
 

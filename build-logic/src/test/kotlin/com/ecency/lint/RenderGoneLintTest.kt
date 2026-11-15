@@ -32,6 +32,27 @@ class RenderGoneLintTest {
         assertEquals(emptyList(), bad, "a WebViewClient without onRenderProcessGone (RenderGone.handle): a renderer crash ends the app")
     }
 
+    /** iOS: every web view delegate answers a web process that ended, so the page never stays blank. */
+    @Test
+    fun everyIosWebViewDelegateAnswersAnEndedProcess() {
+        val delegate = Regex("""(?:class|struct)\s+\w+\s*:[^{]*\bWKNavigationDelegate\b""")
+        val bad = root.resolve("iosApp/EcencyApp").walkTopDown().filter { it.isFile && it.extension == "swift" }.sortedBy { it.path }.flatMap { f ->
+            val text = f.readText()
+            delegate.findAll(text).map { m ->
+                var depth = 0
+                var i = text.indexOf('{', m.range.last)
+                val start = i
+                do {
+                    when (text[i]) { '{' -> depth++; '}' -> depth-- }
+                    i++
+                } while (depth > 0 && i < text.length)
+                val line = text.substring(0, m.range.first).count { it == '\n' } + 1
+                line to text.substring(start, i)
+            }.filter { (_, body) -> "webViewWebContentProcessDidTerminate" !in body }.map { (line, _) -> "${f.relativeTo(root)}:$line" }
+        }.toList()
+        assertEquals(emptyList(), bad, "a WKNavigationDelegate without webViewWebContentProcessDidTerminate: the page stays blank")
+    }
+
     @Test
     fun theScanBites() {
         val text = """
