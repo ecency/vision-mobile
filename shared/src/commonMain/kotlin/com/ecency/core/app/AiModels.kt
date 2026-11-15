@@ -292,10 +292,9 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
         } catch (e: Exception) {
             ErrorReports.quiet(e, "ai.prices")
             null
-        }
-        if (prices != null) pricesAtMillis = env.nowMillis()
-        // a failed read with no prices known yet dead ended the sheet (issue #3701): it says so, with Try again
-        setState { it.copy(loadingPrices = false, prices = prices?.filter { p -> p.action in ACTIONS } ?: it.prices, loadFailed = prices == null && it.prices.isEmpty()) }
+        }?.filter { p -> p.action in ACTIONS }
+        if (!prices.isNullOrEmpty()) pricesAtMillis = env.nowMillis()
+        setState { it.copy(loadingPrices = false, prices = prices ?: it.prices) }
         val points = try {
             env.aiApi.points(owner)
         } catch (e: CancellationException) {
@@ -304,8 +303,13 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
             ErrorReports.quiet(e, "ai.points")
             null
         }
-        if (points != null) setState { it.copy(balanceText = points, balance = PaidCalls.points(points)) }
-        else if (current.balance == null) setState { it.copy(loadFailed = true) }
+        val balance = PaidCalls.points(points)
+        // nothing usable known after both reads dead ended the sheet (issue #3701): it says so, with Try again. Shown
+        // only once both reads ended, so Try again never runs beside a read still on its way
+        setState {
+            val known = if (balance != null) it.copy(balanceText = points, balance = balance) else it
+            known.copy(loadFailed = known.prices.isEmpty() || known.balance == null)
+        }
     }
 
     private fun parse(json: JsonElement): AiAssistResult? {
@@ -587,9 +591,8 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
         } catch (e: Exception) {
             ErrorReports.quiet(e, "ai.imagePrices")
             null
-        }
-        // a failed read with no prices known yet dead ended the sheet (issue #3701): it says so, with Try again
-        setState { it.copy(loading = false, prices = prices ?: it.prices, loadFailed = prices == null && it.prices == null) }
+        }?.takeIf { it.prices.isNotEmpty() }
+        setState { it.copy(loading = false, prices = prices ?: it.prices) }
         val points = try {
             env.aiApi.points(owner)
         } catch (e: CancellationException) {
@@ -599,9 +602,12 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
             null
         }
         // RN: rounded to three decimals
-        val balance = PaidCalls.points(points)
-        if (balance != null) setState { it.copy(balance = kotlin.math.round(balance * 1000) / 1000) }
-        else if (current.balance == null) setState { it.copy(loadFailed = true) }
+        val balance = PaidCalls.points(points)?.let { kotlin.math.round(it * 1000) / 1000 }
+        // nothing usable known after both reads dead ended the sheet (issue #3701): it says so, with Try again
+        setState {
+            val known = if (balance != null) it.copy(balance = balance) else it
+            known.copy(loadFailed = known.prices == null || known.balance == null)
+        }
     }
 
     private val locked: Boolean get() = current.running || current.unresolved

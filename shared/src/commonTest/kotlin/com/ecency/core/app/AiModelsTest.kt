@@ -40,6 +40,12 @@ class AiModelsTest {
         var gate: CompletableDeferred<Unit>? = null
         var pointsDown = false
         var pricesDown = false
+        /** The balance as the points API prints it. */
+        var pointsText = "1,000.500"
+        /** Replaces the assist price list when set. */
+        var assistPrices: String? = null
+        /** Holds the points answer while set. */
+        var pointsGate: CompletableDeferred<Unit>? = null
         var freeTags = 1
         var keys = 0
         val app = TestApp(scope) { TestApp.chain(it) ?: HttpResult(500, "") }
@@ -49,7 +55,10 @@ class AiModelsTest {
             app.env.imageHost = "https://images.example"
             app.env.idempotencyKey = { "key-${++keys}-abcdef" }
             app.authBackend.privateApi = { r -> answer(r) }
-            app.authBackend.gate = { r -> if (r.url.endsWith("/ai-assist") || r.url.endsWith("/ai-generate-image")) gate?.await() }
+            app.authBackend.gate = { r ->
+                if (r.url.endsWith("/ai-assist") || r.url.endsWith("/ai-generate-image")) gate?.await()
+                if (r.url.endsWith("/points")) pointsGate?.await()
+            }
             listOf(user, other).forEach { name ->
                 KeyVault(app.store).save(VaultAccount(name, AuthType.POSTING_KEY, postingKey = GoldenVectors.WIF, accessToken = "token-$name"))
             }
@@ -61,8 +70,8 @@ class AiModelsTest {
             val path = r.url.substringAfter("/private-api/")
             val o = Json.parseToJsonElement(r.body ?: "{}").jsonObject
             return when (path) {
-                "points" -> if (pointsDown) HttpResult(500, "") else HttpResult(200, """{"points":"1,000.500","unclaimed_points":"0"}""")
-                "ai-assist-price" -> if (pricesDown) HttpResult(500, "") else HttpResult(
+                "points" -> if (pointsDown) HttpResult(500, "") else HttpResult(200, """{"points":"$pointsText","unclaimed_points":"0"}""")
+                "ai-assist-price" -> if (pricesDown) HttpResult(500, "") else assistPrices?.let { HttpResult(200, it) } ?: HttpResult(
                     200,
                     """[{"action":"improve","cost":5,"free_remaining":0},{"action":"suggest_tags","cost":2,"free_remaining":$freeTags},{"action":"generate_title","cost":2,"free_remaining":0},""" +
                         """{"action":"summarize","cost":2000,"free_remaining":0},{"action":"check_grammar","cost":"x"},{"action":"translate","cost":1}]""",
@@ -213,10 +222,59 @@ class AiModelsTest {
         assertEquals(listOf("improve", "suggest_tags", "generate_title", "summarize"), a.current.prices.map { it.action })
         assertFalse(i.current.loadFailed)
         assertNotNull(i.current.cost, "the price is known")
-        w.pointsDown = true
+    }
+
+    /** Review of #3706: a balance that cannot be read, or reads as no number, says so; Try again reads it again. */
+    @Test
+    fun anUnreadableBalanceSaysSoAndTryAgainReadsIt() = runTest {
+        for (broken in listOf("down", "n/a")) {
+            val w = World(this)
+            if (broken == "down") w.pointsDown = true else w.pointsText = broken
+            val a = w.assist(w.editor())
+            val i = w.image(w.editor())
+            assertTrue(a.current.loadFailed, broken)
+            assertTrue(i.current.loadFailed, broken)
+            assertNull(a.current.balance)
+            w.pointsDown = false
+            w.pointsText = "1,000.500"
+            a.reload()
+            i.reload()
+            w.idle()
+            assertFalse(a.current.loadFailed, broken)
+            assertFalse(i.current.loadFailed, broken)
+            assertEquals(1000.5, a.current.balance)
+            assertEquals(1000.5, i.current.balance)
+        }
+    }
+
+    /** Review of #3706: a price list with no action the sheet offers is a failed read too. */
+    @Test
+    fun anEmptyPriceListSaysSo() = runTest {
+        val w = World(this)
+        w.assistPrices = "[]"
+        val a = w.assist(w.editor())
+        assertTrue(a.current.loadFailed)
+        w.assistPrices = null
         a.reload()
         w.idle()
-        assertFalse(a.current.loadFailed, "a balance already read stays")
+        assertFalse(a.current.loadFailed)
+        assertTrue(a.current.prices.isNotEmpty())
+    }
+
+    /** Review of #3706: the failure shows once both reads ended, never beside a read still running. */
+    @Test
+    fun theFailureShowsOnlyWhenBothReadsEnded() = runTest {
+        val w = World(this)
+        w.pricesDown = true
+        w.pointsGate = CompletableDeferred()
+        val a = w.app.env.aiAssistModel(w.editor())
+        a.start()
+        testScheduler.advanceTimeBy(1_000)
+        testScheduler.runCurrent()
+        assertFalse(a.current.loadFailed, "the balance is still on its way")
+        w.pointsGate!!.complete(Unit)
+        w.idle()
+        assertTrue(a.current.loadFailed)
     }
 
     @Test
