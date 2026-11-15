@@ -215,6 +215,9 @@ class ChatThreadModel internal constructor(
     private var started = false
     private var active = false
 
+    /** Active once already: a later activation follows a closed socket ([catchUp]). */
+    private var wasActive = false
+
     /** The list (or a profile) handed over what it knew about the channel. */
     private val hinted: Boolean = env.chat.hints[channelId]?.channel != null
     private var dead = false
@@ -433,6 +436,40 @@ class ChatThreadModel internal constructor(
     suspend fun refreshAndWait() {
         refresh()
         state.first { !it.isLoading && !it.isRefreshing }
+    }
+
+    /**
+     * Active again (back from the background or the lock): the newest page is read again and merged, so the messages
+     * sent while the socket was closed show without a pull to refresh. The pages read further back stay; when none of
+     * the newest page is known (more was missed than a page holds), the thread starts again from that page.
+     */
+    private fun catchUp() {
+        val u = user ?: return
+        if (!current.loaded || current.isLoading || current.isRefreshing) return
+        scope.launch {
+            try {
+                val page = env.chat.call(u) { env.chat.api.posts(it.token, channelId, null, current.viewerId) }
+                if (user == null || current.isLoading || current.isRefreshing) return@launch
+                page.users.forEach { lookup[it.id] = it }
+                val fresh = page.posts.map { it.id }.toSet()
+                if (posts.none { it.id in fresh }) {
+                    posts = page.posts
+                    before = page.posts.lastOrNull()?.id
+                    setState { it.copy(hasMore = page.posts.isNotEmpty()) }
+                } else {
+                    // newest first: the page, then what was loaded before it
+                    posts = page.posts + posts.filter { it.id !in fresh }
+                }
+                rebuild()
+                resolveUsers(u, page.posts.map { it.userId }.filter { it.isNotEmpty() && it !in lookup }.distinct())
+                fetchCards(page.posts)
+                markViewed()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                ErrorReports.quiet(e, "chatThread.catchUp")
+            }
+        }
     }
 
     /** The list reached its end (the oldest message): the page before. */
@@ -698,7 +735,12 @@ class ChatThreadModel internal constructor(
     fun setActive(on: Boolean) {
         if (active == on) return
         active = on
-        if (on) connect() else {
+        if (on) {
+            connect()
+            // the socket was closed meanwhile: what was sent then never reached it (issue #3701)
+            if (wasActive) catchUp()
+            wasActive = true
+        } else {
             socket.disconnect()
             // RN: leaving a conversation that was read refreshes the badge
             if (markedAny) env.chat.refreshUnread()

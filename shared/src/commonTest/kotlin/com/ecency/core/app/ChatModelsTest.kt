@@ -540,6 +540,30 @@ class ChatThreadTest {
         }
     }
 
+    /** Issue #3701: a message sent while the app was in the background shows once the thread is active again. */
+    @Test
+    fun aMessageSentWhileTheThreadWasAwayShowsWhenItIsActiveAgain() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            f.run(1)
+            assertTrue(m.current.items.none { it is ChatMessageItem && it.spans.joinToString("") { s -> s.text } == "sent while away" })
+            m.setActive(true)
+            f.run(1)
+            val texts = m.current.items.filterIsInstance<ChatMessageItem>().map { it.spans.joinToString("") { s -> s.text } }
+            assertTrue("sent while away" in texts, "the message missed while away is fetched: $texts")
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
     @Test
     fun aReactionStaysWhenTheServerAnnouncesThePostAsEditedWithoutIt() = runTest {
         // the tester's report: a reaction never showed. Mattermost sends post_edited for the reacted post, and that
