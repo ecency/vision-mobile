@@ -1,0 +1,49 @@
+package com.ecency.lint
+
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+/**
+ * A web view's renderer can crash or be ended by the system under memory pressure; Android then ends the whole app
+ * unless the view's client answers `onRenderProcessGone` (issue #3701). Every `WebViewClient` the Android app creates
+ * overrides it (through `RenderGone.handle`).
+ */
+class RenderGoneLintTest {
+    private val root = generateSequence(File("").absoluteFile) { it.parentFile }.first { it.resolve("src/config/locales/en-US.json").isFile }
+
+    /** The body of each `object : WebViewClient() { ... }` in [text], by balanced braces, with its line. */
+    internal fun clients(text: String): List<Pair<Int, String>> =
+        Regex("""object\s*:\s*WebViewClient\(\)\s*\{""").findAll(text).map { m ->
+            var depth = 1
+            var i = m.range.last + 1
+            while (i < text.length && depth > 0) {
+                when (text[i]) { '{' -> depth++; '}' -> depth-- }
+                i++
+            }
+            text.substring(0, m.range.first).count { it == '\n' } + 1 to text.substring(m.range.last + 1, i)
+        }.toList()
+
+    @Test
+    fun everyWebViewClientSurvivesItsRenderer() {
+        val bad = root.resolve("androidApp/src/main").walkTopDown().filter { it.isFile && it.extension == "kt" }.sortedBy { it.path }.flatMap { f ->
+            clients(f.readText()).filter { (_, body) -> "onRenderProcessGone" !in body || "RenderGone.handle" !in body }.map { (line, _) -> "${f.relativeTo(root)}:$line" }
+        }.toList()
+        assertEquals(emptyList(), bad, "a WebViewClient without onRenderProcessGone (RenderGone.handle): a renderer crash ends the app")
+    }
+
+    @Test
+    fun theScanBites() {
+        val text = """
+            val a = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest): Boolean { return true }
+            }
+            val b = object : WebViewClient() {
+                override fun onRenderProcessGone(v: WebView, d: RenderProcessGoneDetail): Boolean = RenderGone.handle(v) { }
+            }
+        """.trimIndent()
+        val found = clients(text)
+        assertEquals(2, found.size)
+        assertEquals(listOf(1), found.filter { "RenderGone.handle" !in it.second }.map { it.first })
+    }
+}

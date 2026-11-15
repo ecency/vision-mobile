@@ -19,6 +19,7 @@ import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -151,6 +152,12 @@ class DappWebViews : AutoCloseable {
 
     fun get(tabId: Int): WebView? = views[tabId]
 
+    /** [tabId]'s view ended with its renderer ([RenderGone]): forgotten, so Retry builds and loads a new one. */
+    fun drop(tabId: Int) {
+        views.remove(tabId)
+        loaded.remove(tabId)
+    }
+
     /** Tabs that closed: their views go. */
     fun retain(ids: Set<Int>) {
         (views.keys - ids).forEach { id -> views.remove(id)?.let(::destroy); loaded.remove(id) }
@@ -163,6 +170,7 @@ class DappWebViews : AutoCloseable {
     }
 
     private fun destroy(view: WebView) {
+        if (RenderGone.isGone(view)) return
         (view.parent as? ViewGroup)?.removeView(view)
         DappWeb.detach(view)
         view.stopLoading()
@@ -186,7 +194,7 @@ internal object DappWeb {
     }
 
     @SuppressLint("SetJavaScriptEnabled", "RequiresFeature")
-    fun create(context: Context, tabId: Int, model: DappBrowserModel): WebView = WebView(context).apply {
+    fun create(context: Context, tabId: Int, model: DappBrowserModel, onGone: () -> Unit): WebView = WebView(context).apply {
         // its own profile, set before anything else touches the view
         val cookies = ownProfileCookies(this) ?: CookieManager.getInstance()
         settings.javaScriptEnabled = true
@@ -239,6 +247,13 @@ internal object DappWeb {
             override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
                 if (request.isForMainFrame) model.pageFailed(tabId)
             }
+
+            // the page's renderer ended: the tab shows the failed state with Retry, which builds a new view
+            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean =
+                RenderGone.handle(view) {
+                    onGone()
+                    model.pageFailed(tabId)
+                }
         }
         webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) = model.progress(tabId, newProgress / 100f)
@@ -331,7 +346,7 @@ fun DappBrowserScreen(env: AppEnvironment, entry: StackEntry, initialUrl: String
                 else -> androidx.compose.runtime.key(tab.id) {
                     AndroidView(
                         modifier = Modifier.fillMaxSize().testTag("dappPage"),
-                        factory = { ctx -> views.view(tab.id, ctx) { c -> DappWeb.create(c, tab.id, model) }.also { views.loadIfAsked(tab) } },
+                        factory = { ctx -> views.view(tab.id, ctx) { c -> DappWeb.create(c, tab.id, model) { views.drop(tab.id) } }.also { views.loadIfAsked(tab) } },
                         update = { views.loadIfAsked(tab) },
                         onRelease = { (it.parent as? ViewGroup)?.removeView(it) },
                     )

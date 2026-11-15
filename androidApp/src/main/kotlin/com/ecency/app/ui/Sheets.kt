@@ -16,6 +16,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.RenderProcessGoneDetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -369,7 +370,7 @@ internal fun mediaFilePage(url: String): String {
 
 /** The player web view's settings and navigation rule ([playerNavigationAllowed]) for [embedUrl]. */
 @SuppressLint("SetJavaScriptEnabled")
-internal fun WebView.setUpPlayer(embedUrl: String) {
+internal fun WebView.setUpPlayer(embedUrl: String, onGone: () -> Unit = {}) {
     // players need script; a video file the post links directly plays without it
     settings.javaScriptEnabled = SafeTarget.playerAllowsScript(embedUrl)
     settings.domStorageEnabled = true
@@ -385,24 +386,34 @@ internal fun WebView.setUpPlayer(embedUrl: String) {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
             // true = blocked: no frame leaves the embed's host
             !playerNavigationAllowed(request.url.toString(), embedUrl)
+
+        override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean = RenderGone.handle(view, onGone)
     }
 }
 
 @Composable
 internal fun PlayerWebView(embedUrl: String, modifier: Modifier) {
+    // the player's renderer ended (RenderGone): the failed state, and Retry builds a new player
+    var gone by remember { mutableStateOf(false) }
+    if (gone) {
+        WebPageFailed(onRetry = { gone = false }, modifier = modifier)
+        return
+    }
     AndroidView(
         modifier = modifier,
         factory = { context ->
             WebView(context).apply {
-                setUpPlayer(embedUrl)
+                setUpPlayer(embedUrl) { gone = true }
                 loadEmbed(embedUrl)
             }
         },
         onRelease = { view ->
-            view.stopLoading()
-            view.clearHistory()
-            view.clearCache(true)
-            view.destroy()
+            if (!RenderGone.isGone(view)) {
+                view.stopLoading()
+                view.clearHistory()
+                view.clearCache(true)
+                view.destroy()
+            }
             // incognito-like: nothing the player stored outlives it, but never under an open HiveSigner page
             WebData.wipeAfterPlayer()
         },

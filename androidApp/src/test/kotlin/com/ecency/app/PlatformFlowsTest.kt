@@ -168,6 +168,36 @@ class PlatformFlowsTest {
         waitFor("dappPage")
     }
 
+    /** Issue #3701: a page whose renderer ended does not end the app; the tab shows the failed state and Retry. */
+    @Test
+    fun aPageWhoseRendererEndedShowsTheFailedStateAndRetryBuildsANewView() {
+        launchSignedIn()
+        push(AppScreen.DappBrowser("https://dapp.example/"))
+        waitFor("dappPage")
+        fun pages(v: android.view.View): List<WebView> = when (v) {
+            is WebView -> listOf(v)
+            is android.view.ViewGroup -> (0 until v.childCount).flatMap { pages(v.getChildAt(it)) }
+            else -> emptyList()
+        }
+        val web = pages(compose.activity.window.decorView).single()
+        var handled = false
+        compose.runOnUiThread {
+            handled = Shadows.shadowOf(web).webViewClient.onRenderProcessGone(web, RendererGone)
+        }
+        assertTrue("the app goes on", handled)
+        waitFor("browserError")
+        assertTrue(pages(compose.activity.window.decorView).isEmpty())
+        tap("browserRetry")
+        waitFor("dappPage")
+        val again = pages(compose.activity.window.decorView).single()
+        assertTrue("a new view", again !== web)
+    }
+
+    private object RendererGone : android.webkit.RenderProcessGoneDetail() {
+        override fun didCrash() = true
+        override fun rendererPriorityAtExit() = 0
+    }
+
     @Test
     fun theWebViewIsLockedDown() {
         launchSignedIn()
@@ -175,7 +205,7 @@ class PlatformFlowsTest {
         waitFor("dappPage")
         val model = browser()
         val view = WebView(compose.activity)
-        DappWeb.create(compose.activity, model.current.activeTabId, model).let { web ->
+        DappWeb.create(compose.activity, model.current.activeTabId, model) {}.let { web ->
             val s = web.settings
             assertTrue(s.javaScriptEnabled)
             assertFalse(s.allowFileAccess)
@@ -314,7 +344,7 @@ class PlatformFlowsTest {
         val model = browser()
         val tab = model.current.activeTabId
         compose.runOnUiThread {
-            val web = DappWeb.create(compose.activity, tab, model)
+            val web = DappWeb.create(compose.activity, tab, model) {}
             val client = Shadows.shadowOf(web).webViewClient
             client.doUpdateVisitedHistory(web, "https://evil.example/", false)
             // a navigation that only started (the old document still runs) is no committed page

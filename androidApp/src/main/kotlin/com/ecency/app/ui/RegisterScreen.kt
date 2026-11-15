@@ -19,6 +19,7 @@ import android.os.Looper
 import android.view.View
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -303,11 +304,21 @@ fun TurnstileView(onEvent: (TurnstilePage.Event) -> Unit) {
                     override fun onReceivedHttpError(v: WebView, request: WebResourceRequest, response: WebResourceResponse) {
                         if (request.isForMainFrame) failed = true
                     }
+
+                    // the challenge's renderer ended (RenderGone): the failed state with its Retry
+                    override fun onRenderProcessGone(v: WebView, detail: RenderProcessGoneDetail): Boolean =
+                        RenderGone.handle(v) { failed = true }
                 }
                 loadUrl(TurnstilePage.URL)
             }
         },
-        onRelease = { TurnstileBridge.detach(it); it.stopLoading(); it.destroy() },
+        onRelease = {
+            TurnstileBridge.detach(it)
+            if (!RenderGone.isGone(it)) {
+                it.stopLoading()
+                it.destroy()
+            }
+        },
     )
 }
 
