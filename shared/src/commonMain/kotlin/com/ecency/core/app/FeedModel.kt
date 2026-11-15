@@ -1,7 +1,6 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.AccountPostsSort
-import com.ecency.core.api.HiveApi
 import com.ecency.core.api.community.CommunityNames
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
@@ -366,7 +365,7 @@ class FeedModel internal constructor(
             } catch (e: Exception) {
                 if (reset) pager = null
                 // the bridge does not know the feed's tag or community: shown as such, not an error (issue #3701)
-                val missing = notFound(e)
+                val missing = if (reset) notFound(e) else null
                 if (missing != null) {
                     setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, loaded = true, endReached = true, notFound = missing) }
                 } else {
@@ -414,12 +413,16 @@ class FeedModel internal constructor(
         }
     }
 
-    /** A ranked feed of a tag or community the bridge says does not exist ([HiveApi.isNotFound]); null otherwise. */
+    /**
+     * A ranked feed of a tag or community the bridge says does not exist ("Tag x does not exist", "Community x does
+     * not exist"); null otherwise. Only the first page: a later page's "Post a/b does not exist" (its start post was
+     * deleted) is an error with retry, never the end of the feed.
+     */
     private fun notFound(e: Throwable): FeedNotFound? {
         val ranked = source as? FeedSource.Ranked ?: return null
         if (ranked.tag.isEmpty() || ranked.tag == FeedSource.myCommunities().tag) return null
         val rpc = generateSequence(e) { it.cause }.take(8).filterIsInstance<RpcErrorException>().firstOrNull() ?: return null
-        if (!HiveApi.isNotFound(rpc)) return null
+        if (!MISSING_TAG.containsMatchIn(rpc.rpcMessage)) return null
         return if (CommunityNames.isCommunity(ranked.tag)) FeedNotFound.COMMUNITY else FeedNotFound.TAG
     }
 
@@ -436,6 +439,8 @@ class FeedModel internal constructor(
     }
 
     companion object {
+        private val MISSING_TAG = Regex("""\b(tag|community)\b[^\n]*\bdoes not exist""", RegexOption.IGNORE_CASE)
+
         /** Pages read by themselves after one that filtered down to nothing (as [AssetDetailsModel.MAX_AUTO_ADVANCE]). */
         const val MAX_AUTO_ADVANCE = 5
     }

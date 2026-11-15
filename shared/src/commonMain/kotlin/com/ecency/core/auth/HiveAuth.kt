@@ -412,6 +412,9 @@ class HiveAuthClient(
                 } catch (e: AuthException.HiveAuth) {
                     if (e.reason != AuthException.HiveAuth.Reason.NOT_CONNECTED) throw e
                     throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "connection lost: ${e.message}", e)
+                } catch (e: SocketClosed) {
+                    // the new socket closed during the reattach: the same lost connection
+                    throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "connection lost", e)
                 }
                 continue
             }

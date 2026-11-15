@@ -189,7 +189,8 @@ private struct HotSignView: View {
                 Button(UiCopy.shared.CLOSE) { signing.cancel() }.accessibilityIdentifier("hot-sign-close")
             }
             .padding()
-            HiveSignerWebView(url: prompt.url) { url in if !signing.hotSignNavigation(url: url) { signing.cancel() } }
+            // a page whose web process ended closes the prompt (it may have signed: SigningModel), never loads again
+            HiveSignerWebView(url: prompt.url, onEnded: { signing.cancel() }) { url in if !signing.hotSignNavigation(url: url) { signing.cancel() } }
         }
         .background(theme.background)
     }

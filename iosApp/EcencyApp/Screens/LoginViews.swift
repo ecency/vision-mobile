@@ -151,9 +151,11 @@ struct HiveSignerLoginView: View {
 /// never loaded, everything else is cancelled (`HiveSignerPage`).
 struct HiveSignerWebView: UIViewRepresentable {
     let url: String
+    /// The web process ended: instead of one reload (a signing page must not be confirmed twice).
+    var onEnded: (() -> Void)? = nil
     let onRedirect: (String) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onRedirect: onRedirect) }
+    func makeCoordinator() -> Coordinator { Coordinator(onRedirect: onRedirect, onEnded: onEnded) }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -172,8 +174,13 @@ struct HiveSignerWebView: UIViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let onRedirect: (String) -> Void
+        let onEnded: (() -> Void)?
         private var answered = false
-        init(onRedirect: @escaping (String) -> Void) { self.onRedirect = onRedirect }
+        private var reloaded = false
+        init(onRedirect: @escaping (String) -> Void, onEnded: (() -> Void)?) {
+            self.onRedirect = onRedirect
+            self.onEnded = onEnded
+        }
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -190,8 +197,14 @@ struct HiveSignerWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                      for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
 
-        /// The page's web process ended (a crash, or memory pressure): the page loads again instead of staying blank.
-        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { webView.reload() }
+        /// The page's web process ended (a crash, or memory pressure): a signing page closes ([onEnded]); the login page
+        /// loads again once instead of staying blank (Close stays for a page that keeps failing).
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            if let onEnded { onEnded(); return }
+            if reloaded { return }
+            reloaded = true
+            webView.reload()
+        }
     }
 }
 

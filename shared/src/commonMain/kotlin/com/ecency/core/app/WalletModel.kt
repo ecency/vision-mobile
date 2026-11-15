@@ -214,7 +214,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 throw e
             } catch (e: Exception) {
                 // a closed signing prompt says nothing
-                AppError.from(e, "wallet.claim").takeIf { it.kind != ErrorKind.CANCELLED }?.let { env.ui.toast(WalletCopy.claimFailed(it.text), it) }
+                // reported either way; shown only to the account that claimed
+                AppError.from(e, "wallet.claim").takeIf { it.kind != ErrorKind.CANCELLED && owns(user) }?.let { env.ui.toast(WalletCopy.claimFailed(it.text), it) }
                 false
             }
             claimingNow -= key

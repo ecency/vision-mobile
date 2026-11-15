@@ -288,7 +288,8 @@ private fun HiveSignerSignDialog(env: AppEnvironment, prompt: SigningPrompt.Hive
     Dialog(onDismissRequest = env.signing::cancel, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding().testTag("hiveSignerSign")) {
             TopBar(AccountCopy.CONFIRM_TX, onBack = env.signing::cancel)
-            HiveSignerWebView(prompt.url, onRedirect = { if (!env.signing.hotSignNavigation(it)) env.signing.cancel() }, modifier = Modifier.fillMaxSize())
+            // a page whose renderer ended closes the prompt (it may have signed: SigningModel), never loads again
+            HiveSignerWebView(prompt.url, onRedirect = { if (!env.signing.hotSignNavigation(it)) env.signing.cancel() }, modifier = Modifier.fillMaxSize(), onGone = env.signing::cancel)
         }
     }
 }

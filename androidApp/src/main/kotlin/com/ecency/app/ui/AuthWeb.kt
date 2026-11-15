@@ -40,7 +40,14 @@ import com.ecency.core.app.AuthUiCopy
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun HiveSignerWebView(url: String, onRedirect: (String) -> Unit, modifier: Modifier = Modifier, config: HiveSignerConfig = HiveSignerConfig.RN) {
+fun HiveSignerWebView(
+    url: String,
+    onRedirect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    config: HiveSignerConfig = HiveSignerConfig.RN,
+    /** The renderer ended: instead of the failed state with Retry (a signing page must not be confirmed twice). */
+    onGone: (() -> Unit)? = null,
+) {
     val redirect by rememberUpdatedState(onRedirect)
     // the page's renderer ended (RenderGone): the failed state; Retry builds a new view
     var gone by remember { mutableStateOf(false) }
@@ -78,7 +85,7 @@ fun HiveSignerWebView(url: String, onRedirect: (String) -> Unit, modifier: Modif
                         }
 
                         override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean =
-                            RenderGone.handle(view) { gone = true }
+                            RenderGone.handle(view) { if (onGone != null) onGone() else gone = true }
                     }
                     if (HiveSignerPage.decide(url, config) == HiveSignerNavigation.LOAD) loadUrl(url)
                 }

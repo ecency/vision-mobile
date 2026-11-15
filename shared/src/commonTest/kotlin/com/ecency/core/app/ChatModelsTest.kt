@@ -1211,6 +1211,35 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3701: a message sent behind the lock shows once the lock opens; nothing is read while it hides the thread. */
+    @Test
+    fun aMessageSentBehindTheLockShowsWhenItOpens() = runTest {
+        val f = ChatFixture(this, pin = "1234")
+        f.start()
+        "1234".forEach { f.env.appLock.enterDigit(it.digitToInt()) }
+        f.idle()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        fun texts() = m.current.items.filterIsInstance<ChatMessageItem>().map { it.spans.joinToString("") { s -> s.text } }
+        try {
+            m.setActive(true)
+            f.run(1)
+            f.env.appLock.onBackground()
+            f.app.monotonic += f.env.security.lockTimeoutMillis + 1
+            f.env.appLock.onForeground()
+            f.run(1)
+            assertTrue(f.env.appLock.current.hidesContent)
+            f.chat.incoming("ch-ecency", "sent behind the lock")
+            f.run(1)
+            assertFalse("sent behind the lock" in texts(), "nothing is read behind the lock")
+            "1234".forEach { f.env.appLock.enterDigit(it.digitToInt()) }
+            f.run(1)
+            f.run(1)
+            assertTrue("sent behind the lock" in texts(), "read once the lock opened: ${texts()}")
+        } finally {
+            m.close()
+        }
+    }
+
     @Test
     fun theLockAndAnAccountChangeStopTheConversation() = runTest {
         val f = ChatFixture(this, users = listOf(ChatFixture.USER, "spike-yan"), pin = "1234")

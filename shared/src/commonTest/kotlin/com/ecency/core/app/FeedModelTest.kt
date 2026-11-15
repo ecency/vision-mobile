@@ -58,6 +58,25 @@ class FeedModelTest {
         }
     }
 
+    /** Review of #3701: a later page whose start post was deleted is an error with retry, not "this tag has no posts". */
+    @Test
+    fun aLaterPageWhosePostIsGoneIsAnErrorNotTheEnd() = runTest {
+        var reads = 0
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            if (reads++ == 0) FakeTransport.result(req, page("p1", 10)) else FakeTransport.error(req, -32602, "Invalid parameters: Post author9/p1-9 does not exist")
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, "hive"))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertNull(feed.current.notFound)
+        assertNotNull(feed.current.error)
+        assertFalse(feed.current.endReached)
+        feed.close()
+    }
+
     @Test
     fun pagesAppendUntilAnEmptyPage() = runTest {
         val pages = ArrayDeque(listOf(page("p1", 10), page("p2", 4), "[]"))

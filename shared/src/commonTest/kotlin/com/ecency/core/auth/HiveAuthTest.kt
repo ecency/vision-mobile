@@ -340,6 +340,20 @@ class HiveAuthTest {
         assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
     }
 
+    /** Review of #3701: the new socket closing during the reattach is a lost connection, not an untyped failure. */
+    @Test
+    fun aSocketClosedDuringTheReattachIsConnectionLost() = runTest {
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "sign_req" -> { push("cmd" to "sign_wait", "uuid" to "s1", "expire" to 50_000); drop() }
+                "attach_req" -> drop()
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
     /** #3701: a socket that never opened is NOT_CONNECTED, and its message names the cause's type (never its text). */
     @Test
     fun connectFailureIsTypedAndNamesItsCause() = runTest {

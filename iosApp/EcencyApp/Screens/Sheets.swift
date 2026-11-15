@@ -221,6 +221,7 @@ struct EmbedWebView: UIViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let embed: URL
+        private var reloaded = false
         init(embed: URL) { self.embed = embed }
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
@@ -232,8 +233,12 @@ struct EmbedWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                      for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
 
-        /// The player's web process ended (a crash, or memory pressure): it loads again instead of staying blank.
-        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { webView.reload() }
+        /// The player's web process ended (a crash, or memory pressure): it loads again once instead of staying blank.
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            if reloaded { return }
+            reloaded = true
+            webView.reload()
+        }
     }
 }
 

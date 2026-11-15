@@ -14,7 +14,7 @@ class RenderGoneLintTest {
 
     /** The body of each `object : WebViewClient() { ... }` in [text], by balanced braces, with its line. */
     internal fun clients(text: String): List<Pair<Int, String>> =
-        Regex("""object\s*:\s*WebViewClient\(\)\s*\{""").findAll(text).map { m ->
+        Regex("""(?:object|class\s+\w+(?:\([^)]*\))?)\s*:\s*WebViewClient(?:Compat)?\(\)\s*\{""").findAll(text).map { m ->
             var depth = 1
             var i = m.range.last + 1
             while (i < text.length && depth > 0) {
@@ -35,7 +35,7 @@ class RenderGoneLintTest {
     /** iOS: every web view delegate answers a web process that ended, so the page never stays blank. */
     @Test
     fun everyIosWebViewDelegateAnswersAnEndedProcess() {
-        val delegate = Regex("""(?:class|struct)\s+\w+\s*:[^{]*\bWKNavigationDelegate\b""")
+        val delegate = Regex("""(?:class|struct|extension)\s+\w+\s*:[^{]*\bWKNavigationDelegate\b""")
         val bad = root.resolve("iosApp/EcencyApp").walkTopDown().filter { it.isFile && it.extension == "swift" }.sortedBy { it.path }.flatMap { f ->
             val text = f.readText()
             delegate.findAll(text).map { m ->
@@ -62,9 +62,11 @@ class RenderGoneLintTest {
             val b = object : WebViewClient() {
                 override fun onRenderProcessGone(v: WebView, d: RenderProcessGoneDetail): Boolean = RenderGone.handle(v) { }
             }
+            class Named(x: Int) : WebViewClientCompat() {
+            }
         """.trimIndent()
         val found = clients(text)
-        assertEquals(2, found.size)
-        assertEquals(listOf(1), found.filter { "RenderGone.handle" !in it.second }.map { it.first })
+        assertEquals(3, found.size)
+        assertEquals(listOf(1, 7), found.filter { "RenderGone.handle" !in it.second }.map { it.first })
     }
 }
