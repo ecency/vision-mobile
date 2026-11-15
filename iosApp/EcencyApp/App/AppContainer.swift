@@ -598,6 +598,8 @@ final class AppContainer: ObservableObject {
             center.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {
                     self?.env.isForeground = true
+                    // a session that expires within a day is refreshed (Android: ON_START)
+                    self?.env.session.onForeground()
                     self?.env.notifications.onForeground()
                     self?.env.chat.onForeground()
                     self?.env.push.onForeground()
