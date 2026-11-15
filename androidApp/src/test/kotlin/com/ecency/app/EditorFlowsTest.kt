@@ -421,6 +421,31 @@ class EditorFlowsTest {
         assertEquals(listOf("a", "b", "c"), model().current.tags)
     }
 
+    /** Issue #3701: "Later" alone schedules the post at the time it shows; the date picker need not be opened. */
+    @Test
+    fun laterSchedulesThePostWithoutOpeningThePicker() {
+        launchSignedIn()
+        compose.onNodeWithTag("createFab").performClick()
+        waitFor("editorBody")
+        write()
+        compose.onNodeWithTag("postOptions").performClick()
+        waitFor("optionsSheet")
+        compose.onNodeWithTag("schedule:Later").performClick()
+        compose.waitForIdle()
+        val at = model().current.scheduledFor
+        assertTrue("Later sets a schedule: $at", at != null)
+        val millis = com.ecency.core.editor.EditorMeta.isoMillis(at!!)!!
+        assertTrue("about an hour ahead", millis - System.currentTimeMillis() in 55 * 60_000L..61 * 60_000L)
+        tap("optionsDone")
+        compose.onNodeWithTag("editorSubmit").assertTextContains("Schedule")
+        // back to Immediate drops it again
+        compose.onNodeWithTag("postOptions").performClick()
+        waitFor("optionsSheet")
+        compose.onNodeWithTag("schedule:Immediate").performClick()
+        compose.waitForIdle()
+        assertEquals(null, model().current.scheduledFor)
+    }
+
     @Test
     fun aNewPostIsWrittenConfirmedAndPublished() {
         launchSignedIn()

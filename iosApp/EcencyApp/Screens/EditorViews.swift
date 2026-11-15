@@ -345,6 +345,11 @@ private enum EditorSheet: String, Identifiable {
 }
 
 /// `moment(date).format()`: local time with its offset (what RN sends as a schedule).
+/// The time "Later" schedules for until one is picked: an hour from now, to the minute (Android: laterDefault).
+func laterDefault(_ now: Date = Date()) -> Date {
+    Date(timeIntervalSince1970: ((now.timeIntervalSince1970 + 3600) / 60).rounded(.down) * 60)
+}
+
 func scheduleString(_ date: Date, zone: TimeZone = .current) -> String {
     let f = DateFormatter()
     f.locale = Locale(identifier: "en_US_POSIX")
@@ -1253,7 +1258,7 @@ private struct OptionsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
     @State private var later = false
-    @State private var when = Date().addingTimeInterval(3600)
+    @State private var when = laterDefault()
     @State private var account = ""
     @State private var percent = ""
     @State private var benefError: String?
@@ -1268,7 +1273,12 @@ private struct OptionsSheet: View {
             ThemedForm {
                 if !state.isEdit {
                     Section(EditorUiCopy.shared.SCHEDULED_FOR) {
-                        Picker(EditorUiCopy.shared.SCHEDULED_FOR, selection: Binding(get: { later }, set: { later = $0; if !$0 { model.setSchedule(dateTime: nil) } })) {
+                        Picker(EditorUiCopy.shared.SCHEDULED_FOR, selection: Binding(get: { later }, set: { on in
+                            later = on
+                            // Later alone schedules at the time shown (issue #3701: it published at once until the date changed)
+                            if on, editor.state.scheduledFor == nil { when = laterDefault(); model.setSchedule(dateTime: scheduleString(when)) }
+                            if !on { model.setSchedule(dateTime: nil) }
+                        })) {
                             Text(EditorUiCopy.shared.IMMEDIATE).tag(false)
                             Text(EditorUiCopy.shared.LATER).tag(true)
                         }

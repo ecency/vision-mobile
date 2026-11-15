@@ -158,6 +158,26 @@ final class EditorUITests: XCTestCase {
         XCTAssertEqual(element(app, "editor-title").value as? String, "Native post")
     }
 
+    /// Issue #3701: "Later" alone schedules the post at the time it shows; the date picker need not be touched.
+    func testLaterSchedulesThePostAtTheTimeShown() {
+        let app = launch(["-openScreen", "editor"])
+        write(app, title: "Native post", body: "hello")
+        XCTAssertEqual(app.buttons["editor-submit"].label, "Publish")
+        app.buttons["post-options"].tap()
+        let mode = app.segmentedControls["schedule-mode"]
+        XCTAssertTrue(mode.waitForExistence(timeout: 5))
+        mode.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(element(app, "schedule-pick").waitForExistence(timeout: 5))
+        app.buttons["options-done"].tap()
+        XCTAssertTrue(app.buttons["editor-submit"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["editor-submit"].label, "Schedule", "Later sets the schedule")
+        // reopened, the options show the schedule that is set
+        app.buttons["post-options"].tap()
+        XCTAssertTrue(mode.waitForExistence(timeout: 5))
+        XCTAssertTrue(mode.buttons.element(boundBy: 1).isSelected)
+        XCTAssertTrue(element(app, "schedule-pick").exists)
+    }
+
     func testTranslateAddsTheTranslationToTheEndOfThePost() {
         let app = launch(["-openScreen", "editor"])
         let text = "This is the body of the post and it is long enough for the language to be guessed with the words that are in it."

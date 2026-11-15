@@ -166,6 +166,12 @@ fun EditorAndDraftsScreen(screen: AppScreen, env: AppEnvironment, entry: StackEn
 internal fun scheduleString(millis: Long, zone: TimeZone = TimeZone.getDefault()): String =
     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US).apply { timeZone = zone }.format(millis)
 
+/**
+ * The time "Later" schedules for until one is picked: an hour from now, to the minute (issue #3701: choosing Later
+ * alone published at once, the schedule was set only by the picker).
+ */
+internal fun laterDefault(now: Long = System.currentTimeMillis()): Long = (now + 3_600_000L) / 60_000L * 60_000L
+
 /** `Date.toISOString()`. */
 internal fun isoString(millis: Long): String =
     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }.format(millis)
@@ -996,14 +1002,14 @@ private fun OptionsSheet(env: AppEnvironment, model: EditorModel, state: EditorS
                 Label(EditorUiCopy.SCHEDULED_FOR)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     listOf(false to EditorUiCopy.IMMEDIATE, true to EditorUiCopy.LATER).forEach { (value, name) ->
-                        Row(Modifier.clickable(role = Role.Button) { later = value; if (!value) model.setSchedule(null) }.padding(end = 12.dp).testTag(if (value) "schedule:Later" else "schedule:Immediate"), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.clickable(role = Role.Button) { later = value; model.setSchedule(if (value) state.scheduledFor ?: scheduleString(laterDefault()) else null) }.padding(end = 12.dp).testTag(if (value) "schedule:Later" else "schedule:Immediate"), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = later == value, onClick = null, modifier = Modifier.padding(8.dp))
                             Text(name, color = colors.text)
                         }
                     }
                 }
                 if (later) {
-                    TextButton(onClick = { pickDateTime(context, colors.isDark, System.currentTimeMillis()) { model.setSchedule(scheduleString(it)) } }, modifier = Modifier.testTag("schedulePick")) {
+                    TextButton(onClick = { pickDateTime(context, colors.isDark, state.scheduledFor?.let { EditorMeta.isoMillis(it) } ?: laterDefault()) { model.setSchedule(scheduleString(it)) } }, modifier = Modifier.testTag("schedulePick")) {
                         Text(state.scheduledFor?.let { EditorMeta.isoMillis(it) }?.let(::display) ?: EditorUiCopy.SCHEDULING_TIME, color = colors.blueText)
                     }
                 }
