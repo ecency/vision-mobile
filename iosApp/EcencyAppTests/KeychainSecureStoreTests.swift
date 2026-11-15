@@ -214,6 +214,15 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertTrue(normal.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true) == (false, false))
     }
 
+    /// #3701: a start the Keychain refused while the store was open (-25308 in a prewarmed launch, Sentry) restarts once
+    /// when the app becomes active (an active app is unlocked), never while in the background, never twice.
+    func testAStartRefusedWhileTheStoreWasOpenRestartsOnceWhenTheAppBecomesActive() {
+        var r = StorageRecovery()
+        XCTAssertTrue(r.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true, active: false) == (false, false))
+        XCTAssertTrue(r.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true, active: true) == (true, true))
+        XCTAssertTrue(r.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true, active: true) == (false, false))
+    }
+
     /// The protected data notification runs the pending check itself; a launch already marked wipes nothing.
     func testThePendingCheckRunsOnceProtectedDataBecomesAvailable() throws {
         let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"
