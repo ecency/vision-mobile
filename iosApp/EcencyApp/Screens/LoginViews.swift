@@ -224,6 +224,9 @@ struct HiveSignerWebPage: UIViewRepresentable {
             if let onEnded { onEnded(); return }
             recovery.ended(webView)
         }
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { recovery.finished() }
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { recovery.failed(error) }
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { recovery.failed(error) }
     }
 }
 

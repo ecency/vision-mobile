@@ -106,4 +106,21 @@ final class PlatformTests: XCTestCase {
         XCTAssertEqual(failed, 2)
     }
 
+    /// Review of #3706: the reload after an ended process that fails (offline) shows the failed state; a cancelled
+    /// navigation or a failure outside the recovery does not.
+    func testAFailedRecoveryReloadShowsTheFailedState() {
+        let view = WKWebView(frame: .zero)
+        var failed = 0
+        let recovery = WebProcessRecovery { failed += 1 }
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 0, "not recovering")
+        recovery.ended(view)
+        recovery.failed(URLError(.cancelled))
+        XCTAssertEqual(failed, 0, "a cancelled navigation is a newer one")
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 1)
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 1, "once")
+    }
+
 }

@@ -731,9 +731,10 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
         }
     }
 
+    // a tab whose page failed or ended ([pageGone]) asks nothing: the page that asked is gone
     private fun stillAsking(tabId: Int, origin: String, user: String): Boolean =
         pending == null && !current.working && tabId == current.activeTabId &&
-            current.tabs.firstOrNull { it.id == tabId }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
+            current.tabs.firstOrNull { it.id == tabId }?.takeIf { !it.hasError }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
             env.session.current.username == user
 
     private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?, warning: String? = null) {

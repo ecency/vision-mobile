@@ -261,6 +261,24 @@ class AiModelsTest {
         assertTrue(a.current.prices.isNotEmpty())
     }
 
+    /** Review of #3706: prices for none of the actions this sheet offers (a wave's three) are a failed read too. */
+    @Test
+    fun pricesForNoneOfTheSheetsActionsSaySo() = runTest {
+        val w = World(this)
+        w.idle()
+        w.assistPrices = """[{"action":"generate_title","cost":2,"free_remaining":0}]"""
+        val composer = w.app.env.waves.composer()
+        composer.setText("A wave that is long enough to be improved by the assistant, surely, yes.")
+        val m = w.app.env.aiAssistModel(composer)
+        m.start()
+        w.idle()
+        assertTrue(m.current.loadFailed)
+        w.assistPrices = null
+        m.reload()
+        w.idle()
+        assertFalse(m.current.loadFailed)
+    }
+
     /** Review of #3706: the failure shows once both reads ended, never beside a read still running. */
     @Test
     fun theFailureShowsOnlyWhenBothReadsEnded() = runTest {

@@ -308,7 +308,7 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
         // only once both reads ended, so Try again never runs beside a read still on its way
         setState {
             val known = if (balance != null) it.copy(balanceText = points, balance = balance) else it
-            known.copy(loadFailed = known.prices.isEmpty() || known.balance == null)
+            known.copy(loadFailed = known.prices.none { p -> p.action in known.actions } || known.balance == null)
         }
     }
 

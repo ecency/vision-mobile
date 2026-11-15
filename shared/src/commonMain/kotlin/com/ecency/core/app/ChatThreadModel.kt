@@ -222,8 +222,9 @@ class ChatThreadModel internal constructor(
     private var missed = false
     private var missedFrom: Set<String> = emptySet()
 
-    /** A catch-up read is running. */
+    /** A catch-up read is running; [catchUpAgain]: another gap or return came meanwhile, read once it ends. */
     private var catchingUp = false
+    private var catchUpAgain = false
 
     /** Bumped by every pull to refresh: a catch-up read that started before one is older than what it shows. */
     private var refreshGen = 0
@@ -479,7 +480,11 @@ class ChatThreadModel internal constructor(
      */
     private fun catchUp() {
         val u = user ?: return
-        if (!missed || catchingUp || !visible()) return
+        if (!missed || !visible()) return
+        if (catchingUp) {
+            catchUpAgain = true
+            return
+        }
         if (!current.loaded || current.isLoading || current.isRefreshing) return
         missed = false
         catchingUp = true
@@ -488,7 +493,14 @@ class ChatThreadModel internal constructor(
         scope.launch {
             try {
                 val page = env.chat.call(u) { env.chat.api.posts(it.token, channelId, null, current.viewerId) }
-                if (user == null || gen != refreshGen) return@launch
+                if (user == null) return@launch
+                if (gen != refreshGen) {
+                    // a pull to refresh overtook it: read again after it (the refresh may have failed)
+                    missed = true
+                    missedFrom = before
+                    catchUpAgain = true
+                    return@launch
+                }
                 if (!visible() || current.isLoading || current.isRefreshing) {
                     // owed: read again when the thread shows, or when the running load ends
                     missed = true
@@ -523,6 +535,11 @@ class ChatThreadModel internal constructor(
                 ErrorReports.quiet(e, "chatThread.catchUp")
             } finally {
                 catchingUp = false
+                // never for a failed read (no retry loop): only a gap or return that came while it ran
+                if (catchUpAgain) {
+                    catchUpAgain = false
+                    catchUp()
+                }
             }
         }
     }

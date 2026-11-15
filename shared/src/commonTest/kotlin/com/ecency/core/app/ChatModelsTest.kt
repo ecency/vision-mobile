@@ -1361,6 +1361,76 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3706: a second gap while a catch-up read is on its way is read once that read ends. */
+    @Test
+    fun aSecondGapDuringACatchUpIsReadAfterIt() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "first gap")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.run(1_000)
+            f.chat.incoming("ch-ecency", "second gap")
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            f.run(1)
+            val t = texts(m)
+            assertTrue("first gap" in t && "second gap" in t, t.take(4).toString())
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: a pull to refresh that fails while a catch-up read is on its way leaves the gap owed, and it is read. */
+    @Test
+    fun aFailedRefreshDuringACatchUpLeavesTheGapOwed() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            var failing = false
+            f.before = { r -> if (failing && r.url.contains("/posts")) HttpResult(503, "{}") else null }
+            // the catch-up read is answered after the refresh failed; the answer is dropped as overtaken
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            failing = true
+            m.refresh()
+            f.run(1)
+            f.run(1)
+            failing = false
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), texts(m).take(3).toString())
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
     /** Review of #3701: a message sent behind the lock shows once the lock opens; nothing is read while it hides the thread. */
     @Test
     fun aMessageSentBehindTheLockShowsWhenItOpens() = runTest {
