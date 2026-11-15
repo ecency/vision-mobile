@@ -344,12 +344,12 @@ private enum EditorSheet: String, Identifiable {
     var id: String { rawValue }
 }
 
-/// `moment(date).format()`: local time with its offset (what RN sends as a schedule).
 /// The time "Later" schedules for until one is picked: an hour from now, to the minute (Android: laterDefault).
 func laterDefault(_ now: Date = Date()) -> Date {
     Date(timeIntervalSince1970: ((now.timeIntervalSince1970 + 3600) / 60).rounded(.down) * 60)
 }
 
+/// `moment(date).format()`: local time with its offset (what RN sends as a schedule).
 func scheduleString(_ date: Date, zone: TimeZone = .current) -> String {
     let f = DateFormatter()
     f.locale = Locale(identifier: "en_US_POSIX")

@@ -197,15 +197,20 @@ final class AppContainer: ObservableObject {
     private var storageObserver: NSObjectProtocol?
     private var storageWatchers: [Closeable] = []
     private var storageRecovery = StorageRecovery()
-    /// The app became active once already: only the launch's own failures are retried on becoming active.
-    private var storageActivated = false
+    /// Whether the session's and the lock's first starts after launch failed on storage ([LaunchStarts]).
+    private var launchStarts = LaunchStarts()
 
     /// Runs again a session or lock start that failed while the store was closed, once the store is open.
-    private func recoverStorageStart(_ launch: (flag: ProtectedDataFlag, store: KeychainSecureStore), launchActivation: Bool = false) {
+    private func recoverStorageStart(_ launch: (flag: ProtectedDataFlag, store: KeychainSecureStore)) {
+        let session = env.session.current, lock = env.appLock.current
+        launchStarts.note(sessionSettled: !session.isLoading, sessionStorageError: session.error?.kind == .storage,
+                          lockSettled: lock.loaded || lock.error != nil, lockStorageError: lock.error?.kind == .storage)
+        // only the launch's own starts: a later storage failure (a sign in) keeps its Retry
         let run = storageRecovery.next(
             closedAtLaunch: launch.flag.closedAtLaunch, storeOpen: !launch.store.installCheckPending(),
-            sessionFailed: env.session.current.error?.kind == .storage, lockFailed: env.appLock.current.error?.kind == .storage,
-            active: launchActivation
+            sessionFailed: session.error?.kind == .storage && (launch.flag.closedAtLaunch || launchStarts.sessionFailed),
+            lockFailed: lock.error?.kind == .storage && (launch.flag.closedAtLaunch || launchStarts.lockFailed),
+            active: UIApplication.shared.applicationState == .active
         )
         if run.session { env.session.start() }
         if run.lock {
@@ -602,10 +607,7 @@ final class AppContainer: ObservableObject {
                 MainActor.assumeIsolated {
                     self?.env.isForeground = true
                     // a start the Keychain refused before the first unlock runs again now (StorageRecovery)
-                    if let self, let launch = ProtectedDataFlag.launch {
-                        self.recoverStorageStart(launch, launchActivation: !self.storageActivated)
-                        self.storageActivated = true
-                    }
+                    if let self, let launch = ProtectedDataFlag.launch { self.recoverStorageStart(launch) }
                     // a session that expires within a day is refreshed (Android: ON_START)
                     self?.env.session.onForeground()
                     self?.env.notifications.onForeground()
@@ -1213,10 +1215,31 @@ final class ProtectedDataFlag: @unchecked Sendable {
     }
 }
 
+/// Whether the session's and the lock's first starts after launch ended in a storage failure: only those are the
+/// launch's own (a Keychain refusal before the first unlock, -25308), whenever their result arrives; a storage failure
+/// after a start that went through (a sign in) is not (review of #3706).
+struct LaunchStarts {
+    private(set) var sessionFailed = false
+    private(set) var lockFailed = false
+    private var sessionSeen = false
+    private var lockSeen = false
+
+    mutating func note(sessionSettled: Bool, sessionStorageError: Bool, lockSettled: Bool, lockStorageError: Bool) {
+        if !sessionSeen, sessionSettled {
+            sessionSeen = true
+            sessionFailed = sessionStorageError
+        }
+        if !lockSeen, lockSettled {
+            lockSeen = true
+            lockFailed = lockStorageError
+        }
+    }
+}
+
 /// Which starts to run again once a store that was closed at launch opened: the session and the lock each once, when
 /// its storage error is there with the store open, in whatever order the error and the opening arrive. A start the
-/// Keychain refused while the store was open (-25308 before the first unlock) runs again when the app first becomes
-/// [active] after the launch (an active app is unlocked; issue #3701); a later storage failure (a sign in) is not. Once only, so a store that keeps failing for another reason never loops
+/// Keychain refused while the store was open (-25308 before the first unlock) runs again once the app is [active] (an
+/// active app is unlocked; issue #3701): the caller passes only the launch's own failures ([LaunchStarts]). Once only, so a store that keeps failing for another reason never loops
 /// (Retry stays for that).
 struct StorageRecovery {
     private(set) var sessionRetried = false

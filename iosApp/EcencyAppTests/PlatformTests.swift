@@ -1,5 +1,6 @@
 import EcencyCore
 import XCTest
+import WebKit
 @testable import EcencyApp
 
 /// The share extension's hand-over as the app reads it, and the platform screens as Swift sees the core.
@@ -83,4 +84,26 @@ final class PlatformTests: XCTestCase {
         XCTAssertTrue(AppScreenCompanion.shared.of(route: .qrScan, arg: "") is AppScreenQrScan)
         XCTAssertTrue(AppScreenCompanion.shared.of(route: .dappBrowser, arg: "https://peakd.com") is AppScreenDappBrowser)
     }
+
+    /// Review of #3706: a web view whose process ended reloads once, then shows the failed state; never a reload loop.
+    func testAnEndedWebProcessReloadsOnceThenFails() {
+        final class CountingWebView: WKWebView {
+            var reloads = 0
+            override func reload() -> WKNavigation? {
+                reloads += 1
+                return nil
+            }
+        }
+        let view = CountingWebView(frame: .zero)
+        var failed = 0
+        let recovery = WebProcessRecovery { failed += 1 }
+        recovery.ended(view)
+        XCTAssertEqual(view.reloads, 1)
+        XCTAssertEqual(failed, 0)
+        recovery.ended(view)
+        recovery.ended(view)
+        XCTAssertEqual(view.reloads, 1, "no reload loop")
+        XCTAssertEqual(failed, 2)
+    }
+
 }

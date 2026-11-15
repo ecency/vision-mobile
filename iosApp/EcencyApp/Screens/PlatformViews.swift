@@ -177,8 +177,9 @@ final class DappWebViews: NSObject, ObservableObject, WKNavigationDelegate, WKUI
     }
 
     /// The page's web process ended (a crash, or memory pressure): the tab shows the failed state; Retry loads it again.
+    /// A request the page was waiting on goes unanswered.
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        if let id = tabId(of: webView) { model.pageFailed(tabId: id) }
+        if let id = tabId(of: webView) { model.pageGone(tabId: id) }
     }
 
     /// No camera or microphone for pages.

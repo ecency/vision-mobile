@@ -223,6 +223,21 @@ final class KeychainSecureStoreTests: XCTestCase {
         XCTAssertTrue(r.next(closedAtLaunch: false, storeOpen: true, sessionFailed: true, lockFailed: true, active: true) == (false, false))
     }
 
+    /// Review of #3706: a launch start's storage failure counts as the launch's whenever it arrives (also after the first
+    /// activation); a storage failure after a start that went through (a later sign in) never does.
+    func testOnlyTheFirstStartsAfterLaunchAreTheLaunchsOwn() {
+        var late = LaunchStarts()
+        late.note(sessionSettled: false, sessionStorageError: false, lockSettled: false, lockStorageError: false)
+        late.note(sessionSettled: true, sessionStorageError: true, lockSettled: true, lockStorageError: true)
+        XCTAssertTrue(late.sessionFailed)
+        XCTAssertTrue(late.lockFailed)
+        var later = LaunchStarts()
+        later.note(sessionSettled: true, sessionStorageError: false, lockSettled: true, lockStorageError: false)
+        later.note(sessionSettled: true, sessionStorageError: true, lockSettled: true, lockStorageError: true)
+        XCTAssertFalse(later.sessionFailed, "a sign in that failed later is not the launch's")
+        XCTAssertFalse(later.lockFailed)
+    }
+
     /// The protected data notification runs the pending check itself; a launch already marked wipes nothing.
     func testThePendingCheckRunsOnceProtectedDataBecomesAvailable() throws {
         let suite = "app.esteem.mobile.ios.test.\(UUID().uuidString)"

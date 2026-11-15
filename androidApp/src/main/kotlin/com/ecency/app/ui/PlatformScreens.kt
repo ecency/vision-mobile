@@ -248,11 +248,12 @@ internal object DappWeb {
                 if (request.isForMainFrame) model.pageFailed(tabId)
             }
 
-            // the page's renderer ended: the tab shows the failed state with Retry, which builds a new view
+            // the page's renderer ended: the tab shows the failed state with Retry, which builds a new view; a request
+            // the page was waiting on goes unanswered
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean =
                 RenderGone.handle(view) {
                     onGone()
-                    model.pageFailed(tabId)
+                    model.pageGone(tabId)
                 }
         }
         webChromeClient = object : WebChromeClient() {

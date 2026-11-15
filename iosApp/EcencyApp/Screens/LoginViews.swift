@@ -149,13 +149,33 @@ struct HiveSignerLoginView: View {
 /// HiveSigner's pages in a WKWebView: a non-persistent data store (no session outlives it), no script
 /// handlers, no new windows; only https on HiveSigner's host loads, the redirect URI goes to `onRedirect` and is
 /// never loaded, everything else is cancelled (`HiveSignerPage`).
-struct HiveSignerWebView: UIViewRepresentable {
+struct HiveSignerWebView: View {
     let url: String
-    /// The web process ended: instead of one reload (a signing page must not be confirmed twice).
+    /// The web process ended: instead of a reload (a signing page must not be confirmed twice).
     var onEnded: (() -> Void)? = nil
     let onRedirect: (String) -> Void
+    @State private var failed = false
+    @State private var generation = 0
 
-    func makeCoordinator() -> Coordinator { Coordinator(onRedirect: onRedirect, onEnded: onEnded) }
+    var body: some View {
+        if failed {
+            WebPageFailedView {
+                failed = false
+                generation += 1
+            }
+        } else {
+            HiveSignerWebPage(url: url, onEnded: onEnded, onFailed: { failed = true }, onRedirect: onRedirect).id(generation)
+        }
+    }
+}
+
+struct HiveSignerWebPage: UIViewRepresentable {
+    let url: String
+    let onEnded: (() -> Void)?
+    let onFailed: () -> Void
+    let onRedirect: (String) -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(onRedirect: onRedirect, onEnded: onEnded, onFailed: onFailed) }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -175,11 +195,12 @@ struct HiveSignerWebView: UIViewRepresentable {
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let onRedirect: (String) -> Void
         let onEnded: (() -> Void)?
+        let recovery: WebProcessRecovery
         private var answered = false
-        private var reloaded = false
-        init(onRedirect: @escaping (String) -> Void, onEnded: (() -> Void)?) {
+        init(onRedirect: @escaping (String) -> Void, onEnded: (() -> Void)?, onFailed: @escaping () -> Void) {
             self.onRedirect = onRedirect
             self.onEnded = onEnded
+            recovery = WebProcessRecovery(onFailed: onFailed)
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
@@ -198,12 +219,10 @@ struct HiveSignerWebView: UIViewRepresentable {
                      for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
 
         /// The page's web process ended (a crash, or memory pressure): a signing page closes ([onEnded]); the login page
-        /// loads again once instead of staying blank (Close stays for a page that keeps failing).
+        /// loads again once, then shows the failed state.
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             if let onEnded { onEnded(); return }
-            if reloaded { return }
-            reloaded = true
-            webView.reload()
+            recovery.ended(webView)
         }
     }
 }

@@ -491,6 +491,12 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
     /** RN _onError. */
     fun pageFailed(tabId: Int) = updateTab(tabId) { it.copy(hasError = true, progress = 0f) }
 
+    /** [tabId]'s page ended with its renderer: the failed state, and a request it was waiting on goes unanswered. */
+    fun pageGone(tabId: Int) {
+        dropPendingFor(tabId)
+        pageFailed(tabId)
+    }
+
     /** RN _onRetry. */
     fun retry() = updateTab(current.activeTabId) { it.copy(hasError = false, load = it.load + 1) }
 

@@ -331,6 +331,24 @@ class DappBrowserModelTest {
         assertEquals("p", b.current.prompt!!.operations.single().fields.first { it.name == "permlink" }.value)
     }
 
+    /** Review of #3706: a page whose renderer ended loses its waiting request; nothing can be confirmed for it. */
+    @Test
+    fun aPageWhoseRendererEndedLosesItsPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100"""))
+        testScheduler.advanceUntilIdle()
+        assertNotNull(b.current.prompt)
+        b.pageGone(b.current.activeTabId)
+        assertNull(b.current.prompt)
+        assertTrue(b.current.activeTab.hasError)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(page.answers.isEmpty())
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
     @Test
     fun aPageThatMovedOnHearsNothingAndItsPromptGoes() = runTest {
         val app = signedIn(this)
