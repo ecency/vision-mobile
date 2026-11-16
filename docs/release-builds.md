@@ -313,6 +313,9 @@ Play did not compile for), so those first launches and scrolls do not run interp
   `:androidApp` with UiAutomator: `BaselineProfileGenerator` writes the profile, `StartupBenchmarks` measures a cold
   start and the feed scroll without and with it. The journeys (`Journeys.kt`) find screens by their Compose test tags,
   which the app exposes as resource ids. Signed out, as a fresh install: the wallet needs an account, so it is not in.
+  Each journey waits for loaded content (a feed card, the post's rendered body, a wave), not a list that may still
+  show its skeleton or an error, and fails when it never comes. The scroll benchmark loads the feed in its setup and
+  measures only the flings over cards already there, down and back to the top.
 - The profile is committed (`androidApp/src/release/generated/baselineProfiles/baseline-prof.txt`); release builds use
   it and never generate it (`automaticGenerationDuringBuild = false`). R8 rewrites it to the shipped names. The AAB
   carries it as `BUNDLE-METADATA/com.android.tools.build.profiles/baseline.prof`, an APK as

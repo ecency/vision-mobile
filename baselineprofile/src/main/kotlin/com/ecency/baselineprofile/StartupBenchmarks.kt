@@ -59,8 +59,10 @@ class StartupBenchmarks {
             pressHome()
             startActivityAndWait()
             passFirstLaunch()
+            // the feed's load is not measured: only the scroll of cards already there
+            awaitHomeFeed()
         },
     ) {
-        scrollHomeFeed()
+        flingHomeFeed()
     }
 }

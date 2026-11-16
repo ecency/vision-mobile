@@ -48,9 +48,30 @@ class BaselineProfileTest {
         val wanted = Regex("""By\.res\("([^"]+)"\)""").findAll(journeys).map { it.groupValues[1] }.filter { it != "welcome" }.toList() +
             Regex("""By\.res\(Pattern\.compile\("([a-zA-Z]+:)\.\*"\)\)""").findAll(journeys).map { it.groupValues[1] }.toList()
         val ui = root.resolve("androidApp/src/main/kotlin").walk().filter { it.extension == "kt" }.joinToString("\n") { it.readText() }
-        // a tag built from a template ("bottomTab:${tab.name}") is matched by its literal prefix
-        val missing = wanted.distinct().filter { tag -> "testTag(\"${if (':' in tag) tag.substringBefore(':') + ":" else "$tag\""}" !in ui }
+        // a tag built from a template ("bottomTab:${tab.name}") is matched by its literal prefix; Skeleton takes its tag
+        // as an argument (tag = "skeleton:body")
+        val missing = wanted.distinct().filter { tag ->
+            "testTag(\"${if (':' in tag) tag.substringBefore(':') + ":" else "$tag\""}" !in ui && "tag = \"$tag\"" !in ui
+        }
         assertTrue(missing.isEmpty(), "Journeys.kt looks for tags the app no longer sets: $missing")
         assertTrue(wanted.size >= 6, "the journeys' tags were read: ${wanted.toList()}")
+    }
+
+    @Test
+    fun theJourneysWaitForLoadedContentAndTheScrollBenchmarkMeasuresOnlyTheScroll() {
+        val journeys = root.resolve("baselineprofile/src/main/kotlin/com/ecency/baselineprofile/Journeys.kt").readText()
+        // a list's container is there while it shows a skeleton or an error: wait for what only loaded content has
+        assertTrue("Until.gone(By.res(\"skeleton:body\"))" in journeys, "the post journey waits for the rendered body, not postList")
+        assertTrue("By.res(\"wave:header\")" in journeys, "the Waves journey waits for a loaded wave, not wavesList")
+        val unchecked = journeys.lines().filter { ("Until.hasObject(" in it || "Until.gone(" in it) && "|| error(" !in it }
+        assertTrue(unchecked.isEmpty(), "a wait that times out must fail the journey, not scroll an error screen: $unchecked")
+        val fling = journeys.substringAfter("fun MacrobenchmarkScope.flingHomeFeed()").substringBefore("\n}")
+        val down = Regex("""repeat\((\d+)\) \{ feed\.fling\(Direction\.DOWN\) }""").find(fling)?.groupValues?.get(1)
+        val up = Regex("""repeat\((\d+)\) \{ feed\.fling\(Direction\.UP\) }""").find(fling)?.groupValues?.get(1)
+        assertTrue(down != null && down == up, "each measured scroll goes back to where it started: down $down, up $up")
+        val bench = root.resolve("baselineprofile/src/main/kotlin/com/ecency/baselineprofile/StartupBenchmarks.kt").readText()
+        val scroll = bench.substringAfter("private fun scroll(")
+        assertTrue("awaitHomeFeed()" in scroll.substringAfter("setupBlock").substringBefore("},"), "the feed loads in the setup, outside the measured frames")
+        assertTrue(Regex("""\) \{\s*flingHomeFeed\(\)\s*}""").containsMatchIn(scroll), "only the flings are measured")
     }
 }
