@@ -317,7 +317,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
      */
     suspend fun products(ids: List<String>): Pair<List<StoreProduct>, StoreError?> {
         connect()?.let { return emptyList<StoreProduct>() to it }
-        val (list, error) = callStore<List<StoreProduct>> { done -> env.store.products(ids, done) }
+        val (list, error) = connected<List<StoreProduct>> { done -> env.store.products(ids, done) }
         if (error != null) {
             errors.report(error, IapStage.PRODUCTS)
             return emptyList<StoreProduct>() to error
@@ -361,7 +361,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             if (earlier == null) {
                 // the store holds no earlier Pro purchase: a pending one shown for the buyer is gone
                 if (productId == PurchaseSkus.PRO && buyer.isNotEmpty()) env.proPurchases.dropPending(buyer)
-                val (_, error) = callStore<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
+                val (_, error) = connected<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
                 if (error != null) storeFailed(error.copy(productId = error.productId ?: productId), IapStage.REQUEST, fromBuy = true)
                 return@launch
             }
@@ -413,7 +413,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         env.session.awaitLoaded()
         if (connect() != null) return
         val before = heldKeys.keys.toSet()
-        val (list, error) = callStore<List<StorePurchase>> { done -> env.store.purchases(done) }
+        val (list, error) = connected<List<StorePurchase>> { done -> env.store.purchases(done) }
         if (error != null) {
             errors.report(error, IapStage.RECOVER)
             return
@@ -581,7 +581,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
 
     /** RN finishTransaction after the order: never fatal. */
     private suspend fun finish(p: StorePurchase) {
-        val (_, error) = callStore<Unit> { done -> env.store.finish(p) { e -> done(if (e == null) Unit else null, e) } }
+        val (_, error) = connected<Unit> { done -> env.store.finish(p) { e -> done(if (e == null) Unit else null, e) } }
         if (error != null) errors.report(error, IapStage.FINISH, p.productId)
     }
 
@@ -658,6 +658,18 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     }
 
     /** A store call as a suspension on the main thread; null and an error when the store never answered. */
+    /**
+     * [callStore] on a connected store: Play may drop its service after [connect] (nothing tells the app), and a call
+     * then answers SERVICE_DISCONNECTED; the store is connected again and the call made once more (#3703).
+     */
+    private suspend fun <T> connected(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {
+        val first = callStore(timeout, call)
+        if (first.second?.isConnectionDropped != true) return first
+        mutableState.update { it.copy(connected = false) }
+        connect()?.let { return null to it }
+        return callStore(timeout, call)
+    }
+
     private suspend fun <T> callStore(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {
         val wait: suspend () -> Pair<T?, StoreError?> = {
             suspendCancellableCoroutine { c: CancellableContinuation<Pair<T?, StoreError?>> ->

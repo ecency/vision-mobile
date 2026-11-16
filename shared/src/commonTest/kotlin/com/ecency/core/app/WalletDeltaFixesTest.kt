@@ -4,6 +4,7 @@ import com.ecency.core.api.broadcast.Amounts
 import com.ecency.core.api.broadcast.BroadcastException
 import com.ecency.core.api.broadcast.Dec
 import com.ecency.core.api.broadcast.WalletOps
+import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.CryptoJsCipher
 import com.ecency.core.hive.KeyRole
 import com.ecency.core.secure.AuthType
@@ -111,6 +112,73 @@ class WalletDeltaFixesTest {
         val failed = assertIs<SendPhase.Failed>(done.await().phase)
         assertEquals(BroadcastException.UNDECIDED_MESSAGE, failed.error.message)
         assertFalse(failed.retryable)
+    }
+
+    private fun signRequests(w: WalletWorld) = w.app.relay.sent.count { it["cmd"]?.let { c -> (c as kotlinx.serialization.json.JsonPrimitive).content } == "sign_req" }
+
+    /** Signs through HiveAuth until the relay connection is lost after the wallet got the request: it may have signed. */
+    private suspend fun kotlinx.coroutines.test.TestScope.loseTheConnection(w: WalletWorld) {
+        repeat(5) { testScheduler.runCurrent() }
+        assertIs<SigningPrompt.HiveAuthBroadcast>(w.env.signing.current.prompt)
+        w.app.relay.drop()
+        // bounded: a swap's order book refreshes on a timer, so the scheduler is never idle
+        testScheduler.advanceTimeBy(120_000)
+        testScheduler.runCurrent()
+    }
+
+    /** #3703: a promote that may have gone through keeps its form blocked with the check your wallet message. */
+    @Test
+    fun aRedeemThatMayHaveGoneThroughIsNotSentAgain() = runTest {
+        val w = hiveAuthWorld(this)
+        w.http["/private-api/points"] = { HttpResult(200, """{"points":"400.000","unclaimed_points":"0"}""") }
+        w.rpc["bridge.get_post"] = { """{"author":"spike-author","permlink":"p","title":"t","body":"b","category":"c","json_metadata":{},"created":"2026-10-01T00:00:00"}""" }
+        val m = w.env.redeemModel(RedeemKind.PROMOTE, "spike-author/p")
+        try {
+            m.start()
+            testScheduler.advanceUntilIdle()
+            m.next()
+            m.confirm()
+            loseTheConnection(w)
+            val asked = signRequests(w)
+            assertEquals(1, asked)
+            val phase = assertIs<SendPhase.Unconfirmed>(m.current.phase, "${m.current.phase}")
+            assertEquals(BroadcastException.UNDECIDED_MESSAGE, phase.message)
+            assertFalse(m.current.enabled)
+            m.dismissPrompt(); m.next(); m.confirm()
+            testScheduler.advanceUntilIdle()
+            assertEquals(asked, signRequests(w), "the same promote is not asked again")
+        } finally {
+            m.close()
+        }
+    }
+
+    /** #3703: a swap that may have gone through keeps its form blocked with the check your wallet message. */
+    @Test
+    fun aSwapThatMayHaveGoneThroughIsNotSentAgain() = runTest {
+        val w = hiveAuthWorld(this)
+        w.rpc["condenser_api.get_order_book"] = { """{"bids":[{"created":"x","hbd":2500,"hive":10000,"order_price":{"base":"x","quote":"y"},"real_price":"0.25000000"}],"asks":[{"created":"x","hbd":2600,"hive":10000,"real_price":"0.26000000"}]}""" }
+        w.rpc["condenser_api.get_ticker"] = { """{"latest":"0.25","lowest_ask":"0.26","highest_bid":"0.25"}""" }
+        w.rpc["condenser_api.get_open_orders"] = { "[]" }
+        w.env.wallet.start()
+        val m = w.env.tradeModel("HIVE")
+        try {
+            m.start()
+            testScheduler.advanceTimeBy(1_000)
+            m.setAmount("4")
+            m.next()
+            m.confirm()
+            loseTheConnection(w)
+            val asked = signRequests(w)
+            assertEquals(1, asked)
+            assertIs<SendPhase.Unconfirmed>(m.current.phase, "${m.current.phase}")
+            assertNull(m.current.prompt, "no failure alert offering the form again")
+            assertFalse(m.current.continueEnabled)
+            m.next(); m.confirm()
+            testScheduler.advanceTimeBy(5_000)
+            assertEquals(asked, signRequests(w), "the same swap is not asked again")
+        } finally {
+            m.close()
+        }
     }
 
     @Test

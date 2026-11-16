@@ -238,6 +238,26 @@ class ProTest {
         m.close()
     }
 
+    /** #3703: a price the store could not read says so, with a retry that reads it again. */
+    @Test
+    fun aFailedPriceReadSaysSoAndRetryReadsIt() = runTest {
+        val r = rig()
+        r.store.productsError = StoreError(StoreError.NETWORK_ERROR, "offline")
+        val m = pro(r)
+        m.open()
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.priceFailed, "the read failed: not the store's answer that it does not sell Pro")
+        assertFalse(m.current.unavailable)
+        assertFalse(m.current.showBuy)
+        r.store.productsError = null
+        m.loadPrice()
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.priceFailed)
+        assertEquals("$19.99", m.current.price)
+        assertTrue(m.current.showBuy)
+        m.close()
+    }
+
     @Test
     fun theStoreWithoutTheProductShowsNoBuyButton() = runTest {
         val r = rig()
@@ -245,6 +265,7 @@ class ProTest {
         val m = pro(r)
         assertNull(m.current.price)
         assertTrue(m.current.unavailable)
+        assertFalse(m.current.priceFailed)
         assertFalse(m.current.showBuy)
         assertEquals(ProCopy.CARD_PLAIN, m.current.cardText)
         m.buy()

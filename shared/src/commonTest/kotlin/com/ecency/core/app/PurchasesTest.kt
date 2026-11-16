@@ -44,6 +44,10 @@ class FakeStore(override val platform: String = PurchaseService.PLAY) : StorePla
     val finished = mutableListOf<String>()
     var connects = 0
 
+    /** Play dropped its service: every call answers SERVICE_DISCONNECTED until the next connect. */
+    var dropped = false
+    private val disconnected get() = StoreError(StoreError.SERVICE_ERROR, "Service disconnected", null, StoreError.PLAY_SERVICE_DISCONNECTED)
+
     /** What the sheet does when it opens: by default the purchase completes at once. */
     var onSheet: (String) -> Unit = { id -> deliver(paid(id).copy(accountToken = tokens.lastOrNull().orEmpty())) }
     private var n = 0
@@ -62,18 +66,23 @@ class FakeStore(override val platform: String = PurchaseService.PLAY) : StorePla
 
     override fun connect(done: (StoreError?) -> Unit) {
         connects++
+        if (connectError == null) dropped = false
         done(connectError)
     }
 
-    override fun products(ids: List<String>, done: (List<StoreProduct>?, StoreError?) -> Unit) =
-        if (productsError != null) done(null, productsError) else done(catalog.filter { it.productId in ids }, null)
+    override fun products(ids: List<String>, done: (List<StoreProduct>?, StoreError?) -> Unit) = when {
+        dropped -> done(null, disconnected)
+        productsError != null -> done(null, productsError)
+        else -> done(catalog.filter { it.productId in ids }, null)
+    }
 
-    override fun purchases(done: (List<StorePurchase>?, StoreError?) -> Unit) = done(held.toList(), null)
+    override fun purchases(done: (List<StorePurchase>?, StoreError?) -> Unit) = if (dropped) done(null, disconnected) else done(held.toList(), null)
 
     /** The account token of each sheet, in order. */
     val tokens = mutableListOf<String>()
 
     override fun purchase(productId: String, accountToken: String, done: (StoreError?) -> Unit) {
+        if (dropped) return done(disconnected)
         sheets += productId
         tokens += accountToken
         val e = sheetError
@@ -177,6 +186,25 @@ class PurchasesTest {
         assertFalse(model.current.processing)
         assertTrue(r.env.purchases.current.unfinished.isEmpty())
         model.close()
+    }
+
+    /** #3703: Play dropped its service after the app connected: the next query reconnects instead of failing. */
+    @Test
+    fun aStoreThatDroppedItsServiceIsReconnectedBeforeTheNextQuery() = runTest {
+        val r = rig()
+        val before = r.store.connects
+        r.store.dropped = true
+        val points = screen(r, StoreScreenKind.POINTS)
+        assertTrue(points.current.rows.isNotEmpty(), "the products load: ${points.current.alert}")
+        assertNull(points.current.alert)
+        assertEquals(before + 1, r.store.connects)
+        // a purchase sheet on a dropped service is reconnected the same way, and opened once
+        r.store.dropped = true
+        points.buy("999points")
+        testScheduler.advanceUntilIdle()
+        points.current.confirm?.let { points.confirm(); testScheduler.advanceUntilIdle() }
+        assertEquals(listOf("999points"), r.store.sheets)
+        points.close()
     }
 
     @Test

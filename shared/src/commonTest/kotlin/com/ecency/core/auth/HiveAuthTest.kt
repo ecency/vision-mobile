@@ -64,11 +64,16 @@ class HiveAuthTest {
             channel = Channel(Channel.UNLIMITED)
         }
 
+        /** Sockets the relay closed while nobody read them: a send on one fails, as on a closed websocket. */
+        val closedIdle = mutableSetOf<Int>()
+
         override suspend fun open(host: String): HasSocket {
             opened++
             val ch = channel
+            val id = opened
             return object : HasSocket {
                 override suspend fun send(text: String) {
+                    if (id in closedIdle) throw kotlinx.coroutines.channels.ClosedSendChannelException("socket closed")
                     val json = Json.parseToJsonElement(text).jsonObject
                     sent += json
                     onSend(json)
@@ -174,6 +179,27 @@ class HiveAuthTest {
         val payload = decrypt(req)
         assertEquals("active", payload["key_type"]!!.jsonPrimitive.content)
         assertEquals(ops, payload["ops"])
+    }
+
+    /** #3703: the relay closed the socket while the client was idle: the next request goes out on a fresh one. */
+    @Test
+    fun aRequestOnASocketTheRelayClosedWhileIdleOpensAFreshOne() = runTest {
+        var n = 0
+        val relay = FakeRelay {
+            n++
+            push("cmd" to "sign_wait", "uuid" to "s$n", "expire" to 50_000)
+            push("cmd" to "sign_ack", "uuid" to "s$n", "broadcast" to true, "data" to "txid-$n")
+        }
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val c = client(relay)
+        val session = HiveAuthSession(user, key, "has-token", 0)
+        assertEquals("txid-1", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        // closed while idle: nothing was reading, so the client did not see it
+        relay.closedIdle += relay.opened
+        relay.drop()
+        assertEquals("txid-2", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        assertEquals(2, relay.opened)
+        assertEquals(2, relay.sent.count { it["cmd"]!!.jsonPrimitive.content == "sign_req" }, "the request reached the relay once")
     }
 
     @Test

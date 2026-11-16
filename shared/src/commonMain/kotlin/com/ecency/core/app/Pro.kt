@@ -57,6 +57,8 @@ data class ProState(
     val loadingPrice: Boolean = false,
     /** The store answered without the product. */
     val unavailable: Boolean = false,
+    /** The store could not be asked (offline, its service): the sheet says so with a retry ([ProModel.loadPrice]). */
+    val priceFailed: Boolean = false,
     /** The Pro sheet is open. */
     val open: Boolean = false,
     /** The store sheet or the order is under way ([PurchaseServiceState.busy]). */
@@ -246,11 +248,12 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
     /** RN `getItems` for the one product. */
     fun loadPrice() {
         if (current.loadingPrice) return
-        setState { it.copy(loadingPrice = true) }
+        setState { it.copy(loadingPrice = true, priceFailed = false) }
         scope.launch {
-            val (products, _) = env.purchases.products(listOf(PurchaseSkus.PRO))
+            val (products, error) = env.purchases.products(listOf(PurchaseSkus.PRO))
             val product = products.firstOrNull { it.productId == PurchaseSkus.PRO }
-            setState { it.copy(loadingPrice = false, price = product?.localizedPrice, unavailable = product == null) }
+            // a store that could not be asked is not one that does not sell Pro: that says so, with a retry (#3703)
+            setState { it.copy(loadingPrice = false, price = product?.localizedPrice, unavailable = product == null && error == null, priceFailed = product == null && error != null) }
         }
     }
 

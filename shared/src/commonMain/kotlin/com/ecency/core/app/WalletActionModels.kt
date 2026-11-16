@@ -338,7 +338,12 @@ class TradeModel internal constructor(private val env: AppEnvironment, fund: Str
                     setState { if (it.actionId != id) it else it.copy(outcome = if (after != ordersBefore) TradeOutcome.PENDING else TradeOutcome.SUCCESSFUL) }
                 }
             }
-            is SendPhase.Failed -> {
+            // may have gone through (a HiveSigner page closed after signing, a lost wallet relay): the form stays blocked
+            // with the check your wallet message, as Unconfirmed, so the same swap is never sent twice (#3703)
+            is SendPhase.Failed -> if (phase.error.undecided) {
+                owned.done(id)
+                setState { it.copy(phase = SendPhase.Unconfirmed(phase.error.text)) }
+            } else {
                 owned.done(id)
                 setState { it.copy(actionId = null, phase = null, prompt = TradePrompt.Alert(TradeCopy.SWAP_FAILED, phase.error.text)) }
             }
@@ -536,7 +541,13 @@ class RedeemModel internal constructor(private val env: AppEnvironment, kind: Re
         when (phase) {
             is SendPhase.Done -> { owned.done(id); env.ui.toast(WalletCopy.SUCCESSFUL); env.wallet.refreshLater(); setState { it.copy(closed = true) } }
             // RN: the key warning and the message
-            is SendPhase.Failed -> { owned.done(id); env.ui.toast("${WalletCopy.KEY_WARNING}\n${phase.error.text}", phase.error); setState { it.copy(actionId = null, phase = null) } }
+            // may have gone through: blocked with the check your wallet message, never redeemed twice (#3703)
+            is SendPhase.Failed -> if (phase.error.undecided) {
+                owned.done(id)
+                setState { it.copy(phase = SendPhase.Unconfirmed(phase.error.text)) }
+            } else {
+                owned.done(id); env.ui.toast("${WalletCopy.KEY_WARNING}\n${phase.error.text}", phase.error); setState { it.copy(actionId = null, phase = null) }
+            }
             is SendPhase.Cancelled -> { owned.done(id); setState { it.copy(actionId = null, phase = null) } }
             else -> Unit
         }

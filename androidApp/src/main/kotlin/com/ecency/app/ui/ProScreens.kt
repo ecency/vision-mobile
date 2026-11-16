@@ -128,6 +128,8 @@ private fun ProSheet(model: ProModel, onOpenUrl: (String) -> Unit) {
                     Spinner(size = 24.dp)
                 }
                 s.unavailable && !s.purchased -> Text(ProCopy.UNAVAILABLE, color = colors.darkGray, modifier = Modifier.padding(top = 16.dp).testTag("proUnavailable"))
+                // the store could not be asked: the failure and a retry (#3703)
+                s.priceFailed && !s.purchased -> LoadFailedRow(model::loadPrice, "proPrice")
             }
             TextButton(onClick = model::dismiss, modifier = Modifier.align(Alignment.End).padding(top = 8.dp).heightIn(min = 48.dp).testTag("proClose")) {
                 Text(ProCopy.CLOSE, color = colors.blueText)

@@ -885,7 +885,9 @@ class WalletActionsTest {
             // closed while the wallet app still holds the request: it can approve it until it expires
             w.env.signing.cancel()
             advance(100)
-            assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, (m.current.prompt as? TradePrompt.Alert)?.message, "not \"nothing was sent\": check the wallet")
+            // not "nothing was sent": check the wallet, with the form blocked (#3703)
+            assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, (m.current.phase as? SendPhase.Unconfirmed)?.message)
+            assertFalse(m.current.continueEnabled)
             assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the swap may still land")
             advance(65 * 60_000L)
             assertEquals(9.345, w.env.wallet.available("HIVE")!!, 0.0001, "the wallet app may approve it later: an hour more")

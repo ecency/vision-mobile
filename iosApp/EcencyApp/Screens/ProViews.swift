@@ -124,6 +124,9 @@ struct ProSheet: View {
                         ProgressView().frame(maxWidth: .infinity).padding(.top, 8)
                     } else if s.unavailable && !s.purchased {
                         Text(copy.UNAVAILABLE).scaledFont(14).foregroundStyle(theme.secondary).accessibilityIdentifier("pro-unavailable")
+                    } else if s.priceFailed && !s.purchased {
+                        // the store could not be asked: the failure and a retry (#3703)
+                        LoadFailedRow(id: "pro-price") { model.loadPrice() }
                     }
                 }
                 .padding(16)

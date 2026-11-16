@@ -260,6 +260,34 @@ class HiveAuthClient(
     }
 
     /**
+     * Sends [text] on the open socket. One the relay closed while nobody read it (nothing told the client) fails the
+     * send before anything reached the relay: it is dropped and [text] sent once on a fresh socket (#3703).
+     */
+    private suspend fun send(text: String) {
+        try {
+            connected().send(text)
+            return
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: AuthException) {
+            throw e
+        } catch (_: Exception) {
+            // not reported: a closed socket, opened again below
+            dropSocket()
+        }
+        try {
+            connected().send(text)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: AuthException) {
+            throw e
+        } catch (e: Exception) {
+            dropSocket()
+            throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "Failed to send to HiveAuth server (${e::class.simpleName ?: "unknown"})", e)
+        }
+    }
+
+    /**
      * Authenticates [username]. [onWait] receives the `has://auth_req/...` link to open in the wallet.
      * [challenge] defaults to none; the RN login sends [HiveSignerMessages.hiveAuthChallenge] as a posting
      * challenge, whose signature becomes the Ecency code ([HiveSignerMessages.hiveAuthCode]).
@@ -281,9 +309,8 @@ class HiveAuthClient(
         onWait: suspend (HiveAuthWait) -> Unit,
     ): HiveAuthResult {
         pending.clear()
-        val s = connected()
         val data = CryptoJsCipher.encrypt(HiveAuthProtocol.authRequestPayload(challenge), authKey)
-        s.send(buildJsonObject { put("cmd", "auth_req"); put("account", username); put("data", data) }.toString())
+        send(buildJsonObject { put("cmd", "auth_req"); put("account", username); put("data", data) }.toString())
         val wait = awaitWait("auth_wait")
         onWait(HiveAuthWait(wait.uuid, wait.expire, HiveAuthProtocol.authLink(username, wait.uuid, authKey, host, HiveAuthProtocol.preferredScheme(wait.raw) ?: "has"), wait.raw))
         while (true) {
@@ -343,9 +370,8 @@ class HiveAuthClient(
         if (session.isExpired(nowMillis())) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.SESSION_EXPIRED)
         require(ops.isNotEmpty()) { "missing or invalid ops" }
         pending.clear()
-        val s = connected()
         val data = CryptoJsCipher.encrypt(HiveAuthProtocol.signRequestPayload(keyType, ops, nowMillis()), session.key)
-        s.send(
+        send(
             buildJsonObject {
                 put("cmd", "sign_req")
                 put("account", session.username)
