@@ -116,6 +116,13 @@ class PostLinkCardsTest {
         assertTrue(cards.current.mutes > before)
         assertNull(cards.card("spike-author", "first"))
         assertTrue(cards.isPlain("spike-author", "first"))
+        // unmuted (or followed): the read card again, at once
+        val muted = cards.current.mutes
+        app.env.setAuthorMuted("spike-author", false)
+        testScheduler.advanceUntilIdle()
+        assertTrue(cards.current.mutes > muted, "cards on screen redraw")
+        assertFalse(cards.isPlain("spike-author", "first"))
+        assertEquals(card, cards.card("spike-author", "first"))
         assertEquals(card, cards.current.cards["spike-author/first"])
     }
 

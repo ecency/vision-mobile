@@ -41,7 +41,7 @@ class PostLinkCards internal constructor(private val env: AppEnvironment) :
     init {
         // a mute applies to cards already on screen: their views redraw from the changed state
         scope.launch {
-            env.events.collect { e -> if (e is AppEvent.AuthorMuted || e is AppEvent.MutesLoaded) setState { it.copy(mutes = it.mutes + 1) } }
+            env.events.collect { e -> if (e is AppEvent.AuthorMuted || e is AppEvent.AuthorUnmuted || e is AppEvent.MutesLoaded) setState { it.copy(mutes = it.mutes + 1) } }
         }
     }
 
