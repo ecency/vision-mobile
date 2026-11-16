@@ -1358,6 +1358,73 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3706: a reaction or pin during a catch-up read keeps the newer text that read brings (edited while away). */
+    @Test
+    fun aReactionDuringACatchUpReadKeepsTheTextItBrings() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.incoming("ch-ecency", "first version")
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            val id = f.chat.idOf("ch-ecency", "first version")!!
+            m.setActive(false)
+            f.run(1)
+            // edited elsewhere while the socket is closed: only the catch-up read brings it
+            f.chat.edit("ch-ecency", id, "edited while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            f.chat.react("ch-ecency", id, "heart", "spike-carol")
+            m.setPinned(id, true)
+            f.run(1)
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("edited while away" in texts(m), "the read's newer text was dropped: ${texts(m).take(3)}")
+            val item = m.current.items.first { it.id == id } as ChatMessageItem
+            assertEquals(listOf("heart"), item.reactions.map { it.emojiName }, "the live reaction stays")
+            assertTrue(item.post.isPinned, "the pin made here stays")
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: a message removed here while a catch-up read is out does not come back with that read. */
+    @Test
+    fun aMessageRemovedDuringACatchUpReadStaysGone() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.incoming("ch-ecency", "to remove")
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            val id = f.chat.idOf("ch-ecency", "to remove")!!
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            m.remove(m.current.items.first { it.id == id } as ChatMessageItem)
+            f.run(1)
+            assertFalse("to remove" in texts(m))
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), texts(m).take(3).toString())
+            assertFalse("to remove" in texts(m), "the read brought the removed message back")
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
     /** Review of #3706: more missed than a page holds restarts from the newest page and keeps what the socket brought meanwhile. */
     @Test
     fun aLongGapKeepsTheMessageTheSocketBroughtDuringTheRead() = runTest {

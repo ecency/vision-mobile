@@ -229,11 +229,27 @@ class ChatThreadModel internal constructor(
     /** Bumped by every pull to refresh: a catch-up read that started before one is older than what it shows. */
     private var refreshGen = 0
 
-    /** Messages changed here (an edit, reactions, a pin) while a catch-up read was out: its older copies do not replace them. */
-    private val changedDuringCatchUp = mutableSetOf<String>()
+    /** What changed here in a message while a catch-up read was out: the read's older copy does not undo it. */
+    private enum class LiveChange { EDIT, REACTIONS, PIN }
+    private val changedDuringCatchUp = mutableMapOf<String, MutableSet<LiveChange>>()
 
-    private fun changedLive(id: String) {
-        if (catchingUp) changedDuringCatchUp += id
+    private fun changedLive(id: String, change: LiveChange) {
+        if (catchingUp) changedDuringCatchUp.getOrPut(id) { mutableSetOf() } += change
+    }
+
+    /**
+     * The read's [p], with what changed here while it was out: an edit keeps the edited copy (the server's, newer
+     * than the read) unless the read's is newer still; reactions and a pin keep only that field, so a newer text the
+     * read brings (edited elsewhere while away) is kept.
+     */
+    private fun withLiveChanges(p: ChatPost, live: ChatPost?): ChatPost {
+        val changes = changedDuringCatchUp[p.id] ?: return p
+        live ?: return p
+        if (LiveChange.EDIT in changes && live.editAt >= p.editAt) return live
+        return p.copy(
+            reactions = if (LiveChange.REACTIONS in changes) live.reactions else p.reactions,
+            isPinned = if (LiveChange.PIN in changes) live.isPinned else p.isPinned,
+        )
     }
 
     private fun markMissed() {
@@ -519,7 +535,7 @@ class ChatThreadModel internal constructor(
                 }
                 page.users.forEach { lookup[it.id] = it }
                 val now = posts.associateBy { it.id }
-                val read = page.posts.filter { it.id !in deletedIds }.map { p -> now[p.id]?.takeIf { p.id in changedDuringCatchUp } ?: p }
+                val read = page.posts.filter { it.id !in deletedIds }.map { p -> withLiveChanges(p, now[p.id]) }
                 val fresh = read.map { it.id }.toSet()
                 if (read.none { it.id in before }) {
                     // a gap longer than a page: the thread starts again from it; what came live since stays
@@ -862,7 +878,7 @@ class ChatThreadModel internal constructor(
             // Mattermost also announces a post whose reactions changed as edited, and that post may carry none: it keeps
             // the ones it has (reaction events add and remove them)
             is ChatEvent.Edited -> if (e.post.userId != viewer) {
-                changedLive(e.post.id)
+                changedLive(e.post.id, LiveChange.EDIT)
                 posts = posts.map { if (it.id == e.post.id) (if (e.post.reactions.isEmpty()) e.post.copy(reactions = it.reactions) else e.post) else it }
                 rebuild()
             }
@@ -921,7 +937,7 @@ class ChatThreadModel internal constructor(
     }
 
     private fun changeReactions(postId: String, change: (List<ChatReaction>) -> List<ChatReaction>) {
-        changedLive(postId)
+        changedLive(postId, LiveChange.REACTIONS)
         posts = posts.map { if (it.id == postId) it.copy(reactions = change(it.reactions)) else it }
         rebuild()
     }
@@ -1090,7 +1106,7 @@ class ChatThreadModel internal constructor(
                 var first = true
                 if (editing != null) {
                     val updated = env.chat.call(u) { env.chat.api.edit(it.token, channelId, editing, message) }
-                    changedLive(editing)
+                    changedLive(editing, LiveChange.EDIT)
                     posts = posts.map { if (it.id == editing) (updated ?: it).copy(message = message, editAt = maxOf(it.editAt, updated?.editAt ?: env.nowMillis())) else it }
                     rebuild()
                 } else {
@@ -1272,6 +1288,8 @@ class ChatThreadModel internal constructor(
         scope.launch {
             try {
                 env.chat.call(u) { env.chat.api.delete(it.token, channelId, item.post.id) }
+                // as a deletion the socket tells: a read still out does not bring it back
+                deletedIds += item.post.id
                 posts = posts.filter { it.id != item.post.id }
                 rebuild()
             } catch (e: CancellationException) {
@@ -1288,7 +1306,7 @@ class ChatThreadModel internal constructor(
         scope.launch {
             try {
                 env.chat.call(u) { env.chat.api.setPinned(it.token, channelId, postId, pinned) }
-                changedLive(postId)
+                changedLive(postId, LiveChange.PIN)
                 posts = posts.map { if (it.id == postId) it.copy(isPinned = pinned) else it }
                 rebuild()
                 setState { it.copy(pinnedCount = if (pinned) it.pinnedCount + 1 else maxOf(0, it.pinnedCount - 1)) }
