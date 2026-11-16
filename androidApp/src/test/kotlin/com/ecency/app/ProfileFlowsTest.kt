@@ -511,7 +511,7 @@ class ProfileFlowsTest {
         // the summary scrolls inside its cap on a small screen
         compose.onNodeWithTag("followers").performScrollTo().performClick()
         waitFor("user:carol")
-        assertTrue(hasTextNode("Follower (1234)"))
+        assertTrue(hasTextNode("Followers (1234)"))
         compose.onNodeWithTag("searchToggle").performClick()
         compose.onNodeWithTag("followsSearch").performTextInput("CAR")
         compose.await("!exists(\"user:bob\")") { idleMain(); !exists("user:bob") }

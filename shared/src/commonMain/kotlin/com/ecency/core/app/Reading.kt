@@ -187,11 +187,12 @@ class TranslateModel internal constructor(private val env: AppEnvironment, val k
     fun start(post: Post) {
         if (post.body == body) return
         body = post.body
-        setState { it.copy(show = false, translated = null) }
+        // the old body's detection or translation stops here, its spinner with it (#3704)
+        job?.cancel()
+        setState { it.copy(show = false, translated = null, translating = false) }
         if (post.body.trim().length < MIN_CHARS || env.prefs.getString(dismissKey) == "1") return
         // nothing of muted or NSFW content is sent anywhere unasked
         if (post.isMuted || NsfwMode.isNsfw(post)) return
-        job?.cancel()
         job = scope.launch {
             val target = current.target
             val detected: String?

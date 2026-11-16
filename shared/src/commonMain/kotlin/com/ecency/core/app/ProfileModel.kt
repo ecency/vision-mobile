@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import kotlinx.coroutines.flow.first
 import com.ecency.core.api.AccountPostsSort
 import com.ecency.core.api.broadcast.OperationJson
 import com.ecency.core.api.model.Account
@@ -224,6 +225,20 @@ class ProfileModel internal constructor(
         load(refresh = true)
         feeds[current.tab]?.refresh()
         if (current.tab == ProfileTab.WAVES) wavesModel?.refresh()
+    }
+
+    /** iOS `.refreshable` awaits this: its spinner stays until the profile and the shown tab were read again (#3704). */
+    suspend fun refreshAndWait() {
+        refresh()
+        val header = job
+        val feed = feeds[current.tab]
+        val waves = wavesModel.takeIf { current.tab == ProfileTab.WAVES }
+        // waits in the model's scope, so closing the model ends the wait instead of leaving it hanging
+        scope.async {
+            header?.join()
+            feed?.state?.first { !it.isRefreshing && !it.isLoading }
+            waves?.state?.first { !it.isRefreshing && !it.isLoading }
+        }.await()
     }
 
     fun retry() = load(refresh = true)

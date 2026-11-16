@@ -22,10 +22,10 @@ data class FollowsState(
     val pages: Int = 0,
     val query: String = "",
 ) {
-    /** RN "Follower (12)" / "Following". */
+    /** "Followers (12)" / "Following (12)" (RN wrote "Follower (12)", the profile's stat label; #3704). */
     val title: String
-        get() = count?.let { n -> if (following) L.native.follows.followingCount(count = n.toString()) else L.native.follows.followerCount(count = n.toString()) }
-            ?: if (following) L.waves.following else L.profile.follower
+        get() = count?.let { n -> if (following) L.native.follows.followingCount(count = n.toString()) else L.native.follows.followersCount(count = n.toString()) }
+            ?: if (following) L.waves.following else L.native.navigation.followers
 
     /** RN filters the loaded rows by name (case-insensitive substring). */
     val visible: List<FriendRow>

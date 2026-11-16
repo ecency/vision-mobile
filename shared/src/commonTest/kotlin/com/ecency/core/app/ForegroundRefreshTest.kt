@@ -111,6 +111,42 @@ class ForegroundRefreshTest {
         feed.close()
     }
 
+    /**
+     * #3704: a feed scrolled far reads at most [FeedModel.MAX_QUIET_PAGES] pages again on a return, keeps the posts
+     * it had after them, and pages on from where it was.
+     */
+    @Test
+    fun aQuietRefreshReadsAtMostThreePagesAndKeepsTheRest() = runTest {
+        var round = "a"
+        var calls = 0
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            calls++
+            // pages of 10 by the start post's number, 7 pages in all
+            val cursor = req.params.jsonObject["start_permlink"]?.jsonPrimitive?.contentOrNull.orEmpty()
+            val from = if (cursor.isEmpty()) 0 else cursor.substringAfterLast('-').toInt() + 1
+            val range = if (from >= 70) IntRange.EMPTY else from until from + 10
+            FakeTransport.result(req, array(*range.map { entry("author$it", "$round-$it") }.toTypedArray()))
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        repeat(4) { feed.loadMore(); testScheduler.advanceUntilIdle() }
+        assertEquals(50, feed.current.items.size)
+        assertEquals(5, calls)
+
+        round = "b"
+        app.away(long)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(5 + FeedModel.MAX_QUIET_PAGES, calls, "only the first pages are read again")
+        assertEquals((0 until 30).map { "b-$it" } + (30 until 50).map { "a-$it" }, feed.current.items.map { it.key.permlink }, "the rest stays where it was")
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertEquals((50 until 60).map { "b-$it" }, feed.current.items.drop(50).map { it.key.permlink }, "paging goes on after the kept rows")
+        feed.close()
+    }
+
     @Test
     fun aFeedNotShownStaysStaleUntilItIsShown() = runTest {
         val f = Feed(this)

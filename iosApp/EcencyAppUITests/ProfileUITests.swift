@@ -34,7 +34,7 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(element(app, "vp-text").label.hasPrefix("Voting power: 87.3%"))
         app.buttons["followers"].tap()
         XCTAssertTrue(element(app, "user-spike-carol").waitForExistence(timeout: 10))
-        XCTAssertTrue(app.navigationBars["Follower (1234)"].exists)
+        XCTAssertTrue(app.navigationBars["Followers (1234)"].exists)
         element(app, "user-spike-carol").tap()
         XCTAssertTrue(element(app, "profile-name").waitForExistence(timeout: 10))
     }

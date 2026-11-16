@@ -1,5 +1,7 @@
 package com.ecency.core.app
 
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
 import com.ecency.core.api.RankedSort
 import com.ecency.core.api.broadcast.CommunityProps
 import com.ecency.core.api.community.Community
@@ -134,6 +136,16 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
         env.communities.refresh()
         load()
     }
+
+    /** iOS `.refreshable` awaits this: its spinner stays until the list was read again (#3704). */
+    suspend fun refreshAndWait() {
+        refresh()
+        // waits in the model's scope, so closing the model ends the wait instead of leaving it hanging
+        scope.async { state.first { !it.discoverLoading } }.await()
+    }
+
+    /** Signed out there is no Membership to show: the screen opens on Discover (#3704). */
+    val opensOnDiscover: Boolean get() = !env.session.current.isLoggedIn
 
     /** False when signed out: the UI opens the login screen. */
     fun toggle(row: CommunityRow): Boolean = env.communities.toggleSubscription(row.name, row.title, row.subscribed)

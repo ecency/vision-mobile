@@ -120,6 +120,32 @@ class PostModelTest {
         model.close()
     }
 
+    /** #3704: a post deleted while it is open shows only "not found" after a refresh, never its old content. */
+    @Test
+    fun aPostDeletedWhileOpenShowsOnlyNotFound() = runTest {
+        var deleted = false
+        val base = handler()
+        val app = TestApp(this) { req ->
+            // the post and its discussion: both refused once the post is deleted
+            if (deleted && (req.method.startsWith("bridge.get_post") || req.method == "bridge.get_discussion")) FakeTransport.error(req, -32602, "Invalid parameters: Post alice/root does not exist")
+            else base(this, req)
+        }
+        val model = app.env.postModel("alice", "root")
+        model.start()
+        testScheduler.advanceUntilIdle()
+        assertNotNull(model.current.card)
+        deleted = true
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        val s = model.current
+        assertTrue(s.notFound)
+        assertNull(s.card, "the old post is not shown under the not found text")
+        assertNull(s.post)
+        assertNull(s.body)
+        assertTrue(s.comments.isEmpty())
+        model.close()
+    }
+
     @Test
     fun commentErrorThenRetry() = runTest {
         var fail = true

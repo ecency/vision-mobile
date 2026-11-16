@@ -6,6 +6,7 @@ import com.ecency.core.api.community.CommunityRole
 import com.ecency.core.api.rpc.HttpResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -185,6 +186,40 @@ class CommunityModelsTest {
     }
 
     // ---- communities screen ----
+
+    /** #3704: signed out there is no Membership: the screen opens on Discover. */
+    @Test
+    fun signedOutTheCommunitiesOpenOnDiscover() = runTest {
+        val app = TestApp(this, handler = CommunityNode().handler())
+        app.env.session.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(CommunitiesModel(app.env).also { it.close() }.opensOnDiscover)
+        signedIn(app)
+        assertFalse(CommunitiesModel(app.env).also { it.close() }.opensOnDiscover)
+    }
+
+    /** #3704: iOS pull to refresh waits for this, so its spinner stays until the list was read again. */
+    @Test
+    fun refreshAndWaitEndsWhenTheCommunitiesWereReadAgain() = runTest {
+        val node = CommunityNode().apply { communities = "[${CommunityNode.listed("hive-1", "One")}]" }
+        var gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+        val handler = node.handler()
+        val app = TestApp(this) { req -> if (req.method == "bridge.list_communities") gate?.await(); handler(this, req) }
+        signedIn(app)
+        val model = CommunitiesModel(app.env)
+        model.start()
+        testScheduler.advanceUntilIdle()
+        gate = kotlinx.coroutines.CompletableDeferred()
+        var done = false
+        val wait = launch { model.refreshAndWait(); done = true }
+        repeat(10) { testScheduler.runCurrent() }
+        assertFalse(done, "still reading")
+        gate!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(done, "${model.current} ${app.transport.methods()}")
+        wait.cancel()
+        model.close()
+    }
 
     @Test
     fun communitiesScreenListsMembershipAndDiscover() = runTest {

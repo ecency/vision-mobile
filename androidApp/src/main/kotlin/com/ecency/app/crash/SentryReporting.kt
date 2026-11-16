@@ -38,7 +38,12 @@ object SentryReporting {
         o.dsn = dsn
         o.release = release(applicationId, version, build)
         o.dist = build.toString()
-        o.environment = if (debug) "debug" else "production"
+        // a release built without CI's build number (a laptop, an emulator) is not the testers' production (#3704)
+        o.environment = when {
+            debug -> "debug"
+            build == 0 -> "development"
+            else -> "production"
+        }
         // RN sendDefaultPii: false; nothing of the user, no IP from the device
         o.isSendDefaultPii = false
         // performance data at a low sample rate (issue #3571: app starts, slow and frozen frames, screen loads);

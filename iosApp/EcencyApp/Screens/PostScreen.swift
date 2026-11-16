@@ -115,6 +115,8 @@ struct PostScreen: View {
     @State private var anchorJump: AnchorJump?
     /// Bumped by the bar's comments icon: the list goes to the comments header (with its Reply).
     @State private var commentsJump = 0
+    /// The debug `-scrollToComments` jump ran (screenshots).
+    @State private var jumpedToComments = false
     @Environment(\.dynamicTypeSize) private var typeSize
     /// The screen's width (the footer sits outside the content's GeometryReader).
     @State private var screenWidth: CGFloat = 0
@@ -230,7 +232,9 @@ struct PostScreen: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { proxy.scrollTo("comments-header", anchor: .top) }
             }
             .onChange(of: state.comments.count) {
-                guard app.options.scrollToComments, !state.comments.isEmpty else { return }
+                // once, when the comments first load: a comment arriving later never moves the reader (#3704)
+                guard app.options.scrollToComments, !state.comments.isEmpty, !jumpedToComments else { return }
+                jumpedToComments = true
                 // Lazy rows above are estimated until laid out: repeat until the jump settles.
                 for delay in [0.0, 0.5, 1.5, 3.0] {
                     DispatchQueue.main.asyncAfter(deadline: .now() + delay) { proxy.scrollTo("comments-header", anchor: .top) }

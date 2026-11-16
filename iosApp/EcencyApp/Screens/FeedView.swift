@@ -171,17 +171,38 @@ extension View {
 /// tabs keeps each list and its scroll data. Keyed by filter and account (another account, another feed).
 @MainActor
 final class HomeFeeds: ObservableObject {
+    /// Feeds kept for going back to (#3704): each holds every post it scrolled, so only the account's most recently
+    /// opened ones stay; one dropped loads fresh when opened again. The feed on screen is always the most recent.
+    static let kept = 3
+
     private var feeds: [String: Observed<FeedState>] = [:]
+    /// Keys of [feeds], most recently opened first.
+    private var recent: [String] = []
 
     func feed(_ filter: FeedFilter, username: String?, env: AppEnvironment) -> Observed<FeedState>? {
-        let key = "\(filter.key)|\(username ?? "")"
-        if let feed = feeds[key] { return feed }
-        guard let source = filter.source(username: username) else { return nil }
-        // RN injects promoted entries on the home feed
-        let feed = Observed(env.feedModel(source: source, withPromoted: true), ownsModel: true)
+        let account = username ?? ""
+        let key = "\(filter.key)|\(account)"
+        guard let feed = feeds[key] ?? filter.source(username: username).map({
+            // RN injects promoted entries on the home feed
+            Observed(env.feedModel(source: $0, withPromoted: true), ownsModel: true)
+        }) else { return nil }
         feeds[key] = feed
+        opened(key, account: account)
         return feed
     }
+
+    /// Other accounts' feeds go, then the oldest beyond [kept] (their models close with them).
+    private func opened(_ key: String, account: String) {
+        recent.removeAll { $0 == key }
+        recent.insert(key, at: 0)
+        recent.removeAll { !$0.hasSuffix("|\(account)") }
+        while recent.count > Self.kept { recent.removeLast() }
+        let keep = Set(recent)
+        feeds = feeds.filter { keep.contains($0.key) }
+    }
+
+    /// The feeds kept now (tests).
+    var keptKeys: [String] { recent }
 }
 
 /// Home: RN's filter pills (FeedTabs, saved per device) with the "+" customise button, over the feed list.
