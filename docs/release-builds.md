@@ -302,3 +302,43 @@ scripts/release-launch-check.sh ios <DerivedData>/Build/Products/Release-iphones
 Signed with the debug key, the APK replaces a local debug build in place.
 A build signed with another key than the installed app (debug, throwaway, or the RN store app) cannot replace
 it; uninstalling deletes that app's data, so do it only on a device whose data you do not need.
+
+## Baseline Profile
+
+Release builds ship a Baseline Profile (#3702): the code of a cold start, the home feed and its scroll, a post and the
+Waves tab, compiled ahead of time on install (Play) or on the first runs (`profileinstaller`, for sideloads and devices
+Play did not compile for), so those first launches and scrolls do not run interpreted or JIT compiled.
+
+- `baselineprofile/` (a `com.android.test` module, never in CI's test command) drives a release build of
+  `:androidApp` with UiAutomator: `BaselineProfileGenerator` writes the profile, `StartupBenchmarks` measures a cold
+  start and the feed scroll without and with it. The journeys (`Journeys.kt`) find screens by their Compose test tags,
+  which the app exposes as resource ids. Signed out, as a fresh install: the wallet needs an account, so it is not in.
+  Each journey waits for loaded content (a feed card, the post's rendered body, a wave), not a list that may still
+  show its skeleton or an error, and fails when it never comes. The scroll benchmark loads the feed in its setup and
+  measures only the flings over cards already there, down and back to the top.
+- The profile is committed (`androidApp/src/release/generated/baselineProfiles/baseline-prof.txt`); release builds use
+  it and never generate it (`automaticGenerationDuringBuild = false`). R8 rewrites it to the shipped names. The AAB
+  carries it as `BUNDLE-METADATA/com.android.tools.build.profiles/baseline.prof`, an APK as
+  `assets/dexopt/baseline.prof`.
+- The generator and the benchmarks install their own release-based build (signed with the upload key when one is set
+  locally, else the debug key), with the RN import secrets replaced by dummies, and remove the app when they end. Use
+  a device or emulator with no Ecency install whose data you need: a debug install can be replaced (its accounts and
+  keys go with it), and a Play install refuses the other signature. The journeys run signed out, as a fresh install.
+- Generate it again after large changes to startup, the feed or the post screen, on a device or emulator (API 33+,
+  or 28+ rooted) with network:
+
+```sh
+./gradlew :androidApp:generateBaselineProfile
+```
+
+- Measure on a real phone (an emulator's timings are not meaningful), the before and after of a profile change:
+
+```sh
+./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest
+# results: baselineprofile/build/outputs/connected_android_test_additional_output/benchmarkRelease/connected/*/
+#          com.ecency.baselineprofile-benchmarkData.json (timeToInitialDisplayMs, frameDurationCpuMs, frameOverrunMs)
+```
+
+  An emulator refuses to run them unless asked (`-Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR`),
+  which only checks that the journeys work.
+
