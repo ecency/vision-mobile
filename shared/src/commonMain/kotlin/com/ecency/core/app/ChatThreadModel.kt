@@ -215,6 +215,52 @@ class ChatThreadModel internal constructor(
     private var started = false
     private var active = false
 
+    /**
+     * The socket was down (inactive, behind the lock, or dropped) after the thread loaded: [catchUp] reads what it
+     * missed once the socket is up again. [missedFrom] is what the thread held when it went down.
+     */
+    private var missed = false
+    private var missedFrom: Set<String> = emptySet()
+
+    /** A catch-up read is running; [catchUpAgain]: another gap or return came meanwhile, read once it ends. */
+    private var catchingUp = false
+    private var catchUpAgain = false
+
+    /** Bumped by every pull to refresh: a catch-up read that started before one is older than what it shows. */
+    private var refreshGen = 0
+
+    /** What changed here in a message while a catch-up read was out: the read's older copy does not undo it. */
+    private enum class LiveChange { EDIT, REACTIONS, PIN }
+    private val changedDuringCatchUp = mutableMapOf<String, MutableSet<LiveChange>>()
+
+    private fun changedLive(id: String, change: LiveChange) {
+        if (catchingUp) changedDuringCatchUp.getOrPut(id) { mutableSetOf() } += change
+    }
+
+    /**
+     * The read's [p], with what changed here while it was out: an edit keeps the edited copy (the server's, newer
+     * than the read) unless the read's is newer still; reactions and a pin keep only that field, so a newer text the
+     * read brings (edited elsewhere while away) is kept.
+     */
+    private fun withLiveChanges(p: ChatPost, live: ChatPost?): ChatPost {
+        val changes = changedDuringCatchUp[p.id] ?: return p
+        live ?: return p
+        if (LiveChange.EDIT in changes && live.editAt >= p.editAt) return live
+        return p.copy(
+            reactions = if (LiveChange.REACTIONS in changes) live.reactions else p.reactions,
+            isPinned = if (LiveChange.PIN in changes) live.isPinned else p.isPinned,
+        )
+    }
+
+    private fun markMissed() {
+        if (missed || !current.loaded) return
+        missed = true
+        missedFrom = posts.map { it.id }.toSet()
+    }
+
+    /** Messages deleted while this thread was open: a page read before the deletion does not bring them back. */
+    private val deletedIds = mutableSetOf<String>()
+
     /** The list (or a profile) handed over what it knew about the channel. */
     private val hinted: Boolean = env.chat.hints[channelId]?.channel != null
     private var dead = false
@@ -222,7 +268,12 @@ class ChatThreadModel internal constructor(
     private val typingUntil = mutableMapOf<String, Long>()
     private var lastTypingSent = 0L
     private val cards = mutableMapOf<PostKey, ChatLinkCard?>()
-    private val socket = ChatSocket(scope, { env.auth.sockets }, env.nowMillis, ::onEvent) { up -> setState { it.copy(connected = up) } }
+    private val socket = ChatSocket(scope, { env.auth.sockets }, env.nowMillis, ::onEvent) { up ->
+        setState { it.copy(connected = up) }
+        // the socket replays nothing: a drop is a gap, read once it is up again (after a return, an unlock or its
+        // own reconnect), so nothing sent before it opened is lost
+        if (up) catchUp() else markMissed()
+    }
 
     // what the last send put on the wire, to recognise its echo (RN lastSent* refs)
     private var pendingId: String? = null
@@ -263,7 +314,15 @@ class ChatThreadModel internal constructor(
         refreshTitle()
         scope.launch {
             combine(env.session.state, env.appLock.state) { s, l -> s.username to l.hidesContent }.distinctUntilChanged().collect { (user, hidden) ->
-                if (user != owner) stop() else if (hidden) socket.disconnect() else if (active) connect()
+                if (user != owner) {
+                    stop()
+                } else if (hidden) {
+                    // the socket closes behind the lock: what is sent meanwhile is read when the thread shows again
+                    markMissed()
+                    socket.disconnect()
+                } else if (active) {
+                    connect()
+                }
             }
         }
         scope.launch {
@@ -435,6 +494,86 @@ class ChatThreadModel internal constructor(
         state.first { !it.isLoading && !it.isRefreshing }
     }
 
+    /**
+     * The socket is up again after a gap ([missed]): the newest page is read and merged, so messages sent while it was
+     * down show without a pull to refresh. Waits for the socket (its up callback calls this) and for a page load that is
+     * running (it calls this when it ends); a message changed here while the read is out keeps its newer copy; a read
+     * that a pull to refresh overtook, or that ends while the thread is hidden or inactive, changes nothing and stays
+     * owed. When none of the page is in what the thread held before the gap (more was missed than a page holds), the
+     * thread starts again from that page, keeping what the socket delivered since.
+     */
+    private fun catchUp() {
+        val u = user ?: return
+        // the socket is up: a gap read while it waits to reconnect would lose what comes before it is back
+        if (!missed || !visible() || !socket.connected) return
+        if (catchingUp) {
+            catchUpAgain = true
+            return
+        }
+        if (!current.loaded || current.isLoading || current.isRefreshing) return
+        missed = false
+        catchingUp = true
+        changedDuringCatchUp.clear()
+        val gen = refreshGen
+        val before = missedFrom
+        scope.launch {
+            try {
+                val page = env.chat.call(u) { env.chat.api.posts(it.token, channelId, null, current.viewerId) }
+                if (user == null) return@launch
+                if (gen != refreshGen) {
+                    // a pull to refresh overtook it: read again after it (the refresh may have failed)
+                    missed = true
+                    missedFrom = before
+                    catchUpAgain = true
+                    return@launch
+                }
+                if (!visible() || current.isLoading || current.isRefreshing) {
+                    // owed: read again when the thread shows, or when the running load ends
+                    missed = true
+                    missedFrom = before
+                    return@launch
+                }
+                page.users.forEach { lookup[it.id] = it }
+                val now = posts.associateBy { it.id }
+                val read = page.posts.filter { it.id !in deletedIds }.map { p -> withLiveChanges(p, now[p.id]) }
+                val fresh = read.map { it.id }.toSet()
+                if (read.none { it.id in before }) {
+                    // a gap longer than a page: the thread starts again from it; what came live since stays
+                    val live = posts.filter { it.id !in before && it.id !in fresh }
+                    posts = (live + read).sortedByDescending { it.timestamp }
+                    this@ChatThreadModel.before = read.lastOrNull()?.id
+                    setState { it.copy(hasMore = read.isNotEmpty()) }
+                } else {
+                    // newest first, by time; a message the page holds again is the page's (edited since)
+                    posts = (posts.filter { it.id !in fresh } + read).sortedByDescending { it.timestamp }
+                }
+                rebuild()
+                resolveUsers(u, read.map { it.userId }.filter { it.isNotEmpty() && it !in lookup }.distinct())
+                val missingRoots = read.map { it.rootId }.filter { it.isNotEmpty() && posts.none { p -> p.id == it } && it !in roots && it !in goneRoots }.distinct()
+                fetchRoots(u, missingRoots)
+                fetchCards(read)
+                // marked read only while someone is looking
+                if (visible()) markViewed()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                missed = true
+                missedFrom = before
+                ErrorReports.quiet(e, "chatThread.catchUp")
+            } finally {
+                catchingUp = false
+                changedDuringCatchUp.clear()
+                // never for a failed read (no retry loop): only a gap or return that came while it ran
+                if (catchUpAgain) {
+                    catchUpAgain = false
+                    catchUp()
+                }
+            }
+        }
+    }
+
+    private fun visible(): Boolean = active && !env.appLock.current.hidesContent
+
     /** The list reached its end (the oldest message): the page before. */
     fun loadMore() {
         if (current.loaded && current.hasMore) load(refresh = false)
@@ -445,6 +584,7 @@ class ChatThreadModel internal constructor(
         if (current.isLoading || current.isRefreshing) return
         if (!refresh && !current.hasMore) return
         val from = if (refresh) null else before
+        if (refresh) refreshGen++
         setState { it.copy(isLoading = !refresh, isRefreshing = refresh, error = null) }
         loadJob = scope.launch {
             try {
@@ -467,6 +607,8 @@ class ChatThreadModel internal constructor(
                 if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }
                 page.posts.lastOrNull()?.let { before = it.id }
+                // a gap still owed is measured from the newest page just read
+                if (refresh && missed) missedFrom = posts.map { it.id }.toSet()
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, hasMore = page.posts.isNotEmpty()) }
                 rebuild()
                 resolveUsers(u, posts.map { it.userId }.filter { it.isNotEmpty() && it !in lookup }.distinct())
@@ -474,11 +616,14 @@ class ChatThreadModel internal constructor(
                 fetchRoots(u, missingRoots)
                 fetchCards(page.posts)
                 afterLoad()
+                // a catch-up that waited for this load
+                catchUp()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 if (user == null) return@launch
                 setState { it.copy(isLoading = false, isRefreshing = false, loaded = true, error = ChatsModel.message(e, L.native.chatThread.unableToLoadMessages, "chatThread.load")) }
+                catchUp()
             }
         }
     }
@@ -698,7 +843,11 @@ class ChatThreadModel internal constructor(
     fun setActive(on: Boolean) {
         if (active == on) return
         active = on
-        if (on) connect() else {
+        if (on) {
+            // what was sent while the socket was closed is read once it is up again ([catchUp], issue #3701)
+            connect()
+        } else {
+            markMissed()
             socket.disconnect()
             // RN: leaving a conversation that was read refreshes the badge
             if (markedAny) env.chat.refreshUnread()
@@ -729,10 +878,12 @@ class ChatThreadModel internal constructor(
             // Mattermost also announces a post whose reactions changed as edited, and that post may carry none: it keeps
             // the ones it has (reaction events add and remove them)
             is ChatEvent.Edited -> if (e.post.userId != viewer) {
+                changedLive(e.post.id, LiveChange.EDIT)
                 posts = posts.map { if (it.id == e.post.id) (if (e.post.reactions.isEmpty()) e.post.copy(reactions = it.reactions) else e.post) else it }
                 rebuild()
             }
             is ChatEvent.Deleted -> {
+                deletedIds += e.postId
                 posts = posts.filter { it.id != e.postId }
                 rebuild()
             }
@@ -786,6 +937,7 @@ class ChatThreadModel internal constructor(
     }
 
     private fun changeReactions(postId: String, change: (List<ChatReaction>) -> List<ChatReaction>) {
+        changedLive(postId, LiveChange.REACTIONS)
         posts = posts.map { if (it.id == postId) it.copy(reactions = change(it.reactions)) else it }
         rebuild()
     }
@@ -954,6 +1106,7 @@ class ChatThreadModel internal constructor(
                 var first = true
                 if (editing != null) {
                     val updated = env.chat.call(u) { env.chat.api.edit(it.token, channelId, editing, message) }
+                    changedLive(editing, LiveChange.EDIT)
                     posts = posts.map { if (it.id == editing) (updated ?: it).copy(message = message, editAt = maxOf(it.editAt, updated?.editAt ?: env.nowMillis())) else it }
                     rebuild()
                 } else {
@@ -1135,6 +1288,8 @@ class ChatThreadModel internal constructor(
         scope.launch {
             try {
                 env.chat.call(u) { env.chat.api.delete(it.token, channelId, item.post.id) }
+                // as a deletion the socket tells: a read still out does not bring it back
+                deletedIds += item.post.id
                 posts = posts.filter { it.id != item.post.id }
                 rebuild()
             } catch (e: CancellationException) {
@@ -1151,6 +1306,7 @@ class ChatThreadModel internal constructor(
         scope.launch {
             try {
                 env.chat.call(u) { env.chat.api.setPinned(it.token, channelId, postId, pinned) }
+                changedLive(postId, LiveChange.PIN)
                 posts = posts.map { if (it.id == postId) it.copy(isPinned = pinned) else it }
                 rebuild()
                 setState { it.copy(pinnedCount = if (pinned) it.pinnedCount + 1 else maxOf(0, it.pinnedCount - 1)) }

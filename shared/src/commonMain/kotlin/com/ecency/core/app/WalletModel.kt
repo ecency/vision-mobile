@@ -77,7 +77,10 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     /** When the portfolio on screen began to be read ([Freshness.stamp]). */
     private var readAt = Long.MIN_VALUE
 
-    /** RN claimsCollection: symbol to (claimed value, expiry), so a claimed reward reads 0 until the server agrees. */
+    /**
+     * RN claimsCollection: [claimKey] to (claimed value, expiry), so a claimed reward reads 0 until the server agrees.
+     * Kept per account: an account change does not clear it, so switching away and back keeps a claim masked.
+     */
     private val claimMask = mutableMapOf<String, ClaimMask>()
 
     /** A claimed reward and when its mask ends. */
@@ -88,7 +91,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
 
     /** The account and currency code [served] answered for: a reload for the same pair merges into it ([merged]). */
     private var servedFor: Pair<String, String>? = null
+
+    /**
+     * The claims on their way, by [claimKey]: one per account and asset at a time. An account change does not clear
+     * them: a claim keeps signing after the switch, and switching back must not let a second one out (issue #3701).
+     */
     private val claimingNow = mutableSetOf<String>()
+
+    private fun claimKey(user: String?, symbol: String) = "$user/$symbol"
 
     fun start() {
         if (started) return
@@ -98,8 +108,6 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 if (e is AppEvent.SessionChanged) e.username?.let { departed -= it }
                 if (e is AppEvent.SessionChanged && e.username != current.account) {
                     job?.cancel()
-                    claimMask.clear()
-                    claimingNow.clear()
                     served = emptyList()
                     servedFor = null
                     override = null
@@ -181,8 +189,9 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     fun claim(symbol: String) {
         val user = current.account ?: return
         val item = current.item(symbol) ?: return
-        if (symbol in claimingNow || item.pendingRewards <= 0) return
-        claimingNow += symbol
+        val key = claimKey(user, symbol)
+        if (key in claimingNow || item.pendingRewards <= 0) return
+        claimingNow += key
         publish()
         val claimed = item.pendingRewards
         scope.launch {
@@ -205,13 +214,14 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 throw e
             } catch (e: Exception) {
                 // a closed signing prompt says nothing
-                AppError.from(e, "wallet.claim").takeIf { it.kind != ErrorKind.CANCELLED }?.let { env.ui.toast(WalletCopy.claimFailed(it.text), it) }
+                // reported either way; shown only to the account that claimed
+                AppError.from(e, "wallet.claim").takeIf { it.kind != ErrorKind.CANCELLED && owns(user) }?.let { env.ui.toast(WalletCopy.claimFailed(it.text), it) }
                 false
             }
-            claimingNow -= symbol
-            if (ok && owns(user)) {
-                claimMask[symbol] = ClaimMask(claimed, env.nowMillis() + CLAIM_MASK_MILLIS)
-                env.ui.toast(WalletCopy.CLAIMED)
+            claimingNow -= key
+            if (ok) {
+                claimMask[key] = ClaimMask(claimed, env.nowMillis() + CLAIM_MASK_MILLIS)
+                if (owns(user)) env.ui.toast(WalletCopy.CLAIMED)
             }
             publish()
             if (ok) readUntilClaimed(user, symbol, claimed)
@@ -261,7 +271,11 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
             is SendPhase.Done -> true
             is SendPhase.Cancelled -> false
             is SendPhase.Failed -> throw AppException(p.error)
-            is SendPhase.Unconfirmed -> { env.ui.toast(p.message); false }
+            // told only to the account that claimed (Account switching: results are checked against the current one)
+            is SendPhase.Unconfirmed -> {
+                if (owns(user)) env.ui.toast(p.message)
+                false
+            }
             else -> false
         }
     }
@@ -651,7 +665,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
     private fun withRows(s: WalletState): WalletState {
         val now = env.nowMillis()
         claimMask.entries.removeAll { it.value.until <= now }
-        val all = served.map(::claimed)
+        val all = served.map { claimed(s.account, it) }
         val rows = s.selection.mapNotNull { sym -> all.firstOrNull { it.symbol == sym } }.map { item ->
             AssetRow(
                 item = item,
@@ -659,7 +673,7 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
                 balanceText = WalletFormat.amount(item.balance),
                 fiatText = item.fiatRate?.let { WalletFormat.fiat(item.balance * it, s.currency) },
                 pendingText = if (item.pendingRewards > 0) "${WalletFormat.amount(item.pendingRewards)} ${item.symbol}" else null,
-                claiming = item.symbol in claimingNow,
+                claiming = claimKey(s.account, item.symbol) in claimingNow,
             )
         }
         val total = all.sumOf { it.balance * (it.fiatRate ?: 0.0) }
@@ -670,8 +684,8 @@ class WalletModel internal constructor(private val env: AppEnvironment) : StateM
      * RN claimsCollection: a claimed reward reads 0 while the server still reports exactly that amount as pending, for
      * 3 minutes at most. Any other pending amount is the server's and shows; the balance is never changed here.
      */
-    private fun claimed(item: PortfolioItem): PortfolioItem {
-        val mask = claimMask[item.symbol] ?: return item
+    private fun claimed(account: String?, item: PortfolioItem): PortfolioItem {
+        val mask = claimMask[claimKey(account, item.symbol)] ?: return item
         return if (abs(item.pendingRewards - mask.amount) < CLAIM_EPSILON) item.copy(pendingRewards = 0.0) else item
     }
 

@@ -168,16 +168,16 @@ final class ViewStateMappingTests: XCTestCase {
                      payout: 0, payoutText: "$0.000", isPayoutDeclined: false, votes: 0, comments: 0, votedByMe: false,
                      downvotedByMe: false, isPinned: false, isMuted: false, rebloggedBy: [], crossPostAuthor: nil)
         }
-        let idle = FeedState(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: false, endReached: false, error: nil, loaded: true, pages: 1)
+        let idle = FeedState(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: false, endReached: false, error: nil, loaded: true, pages: 1, notFound: nil)
         XCTAssertFalse(FeedPaging.shouldLoadMore(appearing: cards[5], in: idle))
         XCTAssertTrue(FeedPaging.shouldLoadMore(appearing: cards[7], in: idle))
         XCTAssertTrue(FeedPaging.shouldLoadMore(appearing: cards[9], in: idle))
-        let loading = idle.doCopy(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: true, endReached: false, error: nil, loaded: true, pages: 1)
+        let loading = idle.doCopy(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: true, endReached: false, error: nil, loaded: true, pages: 1, notFound: nil)
         XCTAssertFalse(FeedPaging.shouldLoadMore(appearing: cards[9], in: loading))
-        let end = idle.doCopy(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: false, endReached: true, error: nil, loaded: true, pages: 1)
+        let end = idle.doCopy(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: false, endReached: true, error: nil, loaded: true, pages: 1, notFound: nil)
         XCTAssertFalse(FeedPaging.shouldLoadMore(appearing: cards[9], in: end))
         let failed = idle.doCopy(items: cards, isLoading: false, isRefreshing: false, isLoadingMore: false, endReached: false,
-                                 error: AppError(kind: .network, message: "x", retryable: true), loaded: true, pages: 1)
+                                 error: AppError(kind: .network, message: "x", retryable: true), loaded: true, pages: 1, notFound: nil)
         XCTAssertFalse(FeedPaging.shouldLoadMore(appearing: cards[9], in: failed), "errors wait for an explicit retry")
         XCTAssertFalse(FeedPaging.shouldLoadMoreAtEnd(failed))
         XCTAssertTrue(FeedPaging.shouldLoadMoreAtEnd(idle), "the end on screen asks again even when the last page added nothing")

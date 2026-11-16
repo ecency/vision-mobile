@@ -143,6 +143,7 @@ object ErrorReports {
         e is AppException && e.cause == null -> true
         isSessionRefused(root) -> true
         isDeviceLocked(root) -> true
+        isChatRefusal(root) -> true
         root is AuthException -> isUserMistake(root)
         else -> false
     }
@@ -154,6 +155,10 @@ object ErrorReports {
      */
     private fun isDeviceLocked(root: Throwable): Boolean =
         (root as? com.ecency.core.secure.SecureStoreException.Unavailable)?.untilUnlock == true
+
+    /** The chat server refused in its own words ("@user is not on Ecency chat yet."): an answer, not a bug of the app. */
+    private fun isChatRefusal(root: Throwable): Boolean =
+        (root as? com.ecency.core.api.chat.ChatApiException)?.let { it.serverText && it.status in 400..499 } == true
 
     /** Ecency refused the session (401) after the renewal: the user's to fix by signing in again. */
     private fun isSessionRefused(root: Throwable): Boolean = (root as? com.ecency.core.api.EcencyHttpException)?.isSessionRefused == true
@@ -222,12 +227,14 @@ object ErrorReports {
             }
             // over the run's cap nothing is sent: no code, unless this very fingerprint went out earlier in the run
             if (if (expected) before.warnings >= MAX_WARNINGS else before.errors >= MAX_REPORTS) return code?.takeIf { key in before.sent }
-            val last = before.lastSent[key]
+            // a warning never throttles an error of the same shape (an unexplained refusal after an explained one)
+            val throttled = if (expected) "$key\u0000expected" else key
+            val last = before.lastSent[throttled]
             if (last != null && now - last in 0 until THROTTLE_MILLIS) return code
             val after = Seen(
                 if (expected) before.errors else before.errors + 1,
                 if (expected) before.warnings + 1 else before.warnings,
-                before.lastSent.filterValues { now - it in 0 until THROTTLE_MILLIS } + (key to now),
+                before.lastSent.filterValues { now - it in 0 until THROTTLE_MILLIS } + (throttled to now),
                 before.sent + key,
                 if (identity == null) before.recent else (before.recent.filterNot { it.first === identity } + (identity to code)).takeLast(RECENT),
             )

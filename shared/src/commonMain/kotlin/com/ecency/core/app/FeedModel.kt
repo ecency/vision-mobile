@@ -1,10 +1,13 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.AccountPostsSort
+import com.ecency.core.api.community.CommunityNames
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.repository.FeedPager
 import com.ecency.core.api.repository.FeedSource
+import com.ecency.core.api.rpc.RpcErrorException
+import com.ecency.core.l10n.L
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
@@ -31,7 +34,24 @@ data class FeedState(
      * not stall paging.
      */
     val pages: Int = 0,
-)
+    /** The tag or community of a ranked feed does not exist (the bridge said so): not an error, nothing to retry. */
+    val notFound: FeedNotFound? = null,
+) {
+    /** What an empty, loaded feed says. */
+    val emptyText: String get() = when (notFound) {
+        FeedNotFound.TAG -> FeedCopy.TAG_HAS_NO_POSTS
+        FeedNotFound.COMMUNITY -> FeedCopy.COMMUNITY_NOT_FOUND
+        null -> ReadingUiCopy.NOTHING_HERE_YET
+    }
+}
+
+/** Which of a ranked feed's tag or community the bridge did not know. */
+enum class FeedNotFound { TAG, COMMUNITY }
+
+object FeedCopy {
+    val TAG_HAS_NO_POSTS: String get() = L.native.feed.tagHasNoPosts
+    val COMMUNITY_NOT_FOUND: String get() = L.native.community.communityNotFound
+}
 
 /**
  * One feed screen: ranked (trending/hot/new, optionally a tag or community) or an account's
@@ -304,6 +324,7 @@ class FeedModel internal constructor(
                 isRefreshing = refreshing,
                 isLoadingMore = !reset,
                 error = null,
+                notFound = null,
                 items = if (reset && !refreshing) emptyList() else it.items,
             )
         }
@@ -343,7 +364,15 @@ class FeedModel internal constructor(
                 throw e
             } catch (e: Exception) {
                 if (reset) pager = null
-                setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "feed.load")) }
+                // the bridge does not know the feed's tag or community: shown as such, not an error (issue #3701)
+                val missing = if (reset) notFound(e) else null
+                if (missing != null) {
+                    posts = emptyMap()
+                    base = emptyList()
+                    setState { it.copy(items = emptyList(), isLoading = false, isRefreshing = false, isLoadingMore = false, loaded = true, endReached = true, notFound = missing) }
+                } else {
+                    setState { it.copy(isLoading = false, isRefreshing = false, isLoadingMore = false, error = AppError.from(e, "feed.load")) }
+                }
             }
         }
     }
@@ -375,7 +404,7 @@ class FeedModel internal constructor(
                 base = cards
                 readAt = stamp
                 if (withPromoted) loadPromoted(nsfw)
-                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, pages = pages) }
+                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, notFound = null, pages = pages) }
                 env.localVotes.retireConfirmed(read, env.session.current.username)
             } catch (e: CancellationException) {
                 throw e
@@ -384,6 +413,19 @@ class FeedModel internal constructor(
                 // the cards on screen stay as they are
             }
         }
+    }
+
+    /**
+     * A ranked feed of a tag or community the bridge says does not exist ("Tag x does not exist", "Community x does
+     * not exist"); null otherwise. Only the first page: a later page's "Post a/b does not exist" (its start post was
+     * deleted) is an error with retry, never the end of the feed.
+     */
+    private fun notFound(e: Throwable): FeedNotFound? {
+        val ranked = source as? FeedSource.Ranked ?: return null
+        if (ranked.tag.isEmpty() || ranked.tag == FeedSource.myCommunities().tag) return null
+        val rpc = generateSequence(e) { it.cause }.take(8).filterIsInstance<RpcErrorException>().firstOrNull() ?: return null
+        if (!MISSING_TAG.containsMatchIn(rpc.rpcMessage)) return null
+        return if (CommunityNames.isCommunity(ranked.tag)) FeedNotFound.COMMUNITY else FeedNotFound.TAG
     }
 
     /** RN filterNsfwPost ("Always hide") and the account's mutes. */
@@ -399,6 +441,8 @@ class FeedModel internal constructor(
     }
 
     companion object {
+        private val MISSING_TAG = Regex("""\b(tag|community)\b[^\n]*\bdoes not exist""", RegexOption.IGNORE_CASE)
+
         /** Pages read by themselves after one that filtered down to nothing (as [AssetDetailsModel.MAX_AUTO_ADVANCE]). */
         const val MAX_AUTO_ADVANCE = 5
     }

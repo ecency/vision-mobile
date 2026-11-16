@@ -194,10 +194,29 @@ struct VideoPlayerSheet: View {
     }
 }
 
-struct EmbedWebView: UIViewRepresentable {
+/// A player: its page, or the failed state with Retry once its web process ended twice ([WebProcessRecovery]).
+struct EmbedWebView: View {
     let url: URL
+    @State private var failed = false
+    @State private var generation = 0
 
-    func makeCoordinator() -> Coordinator { Coordinator(embed: url) }
+    var body: some View {
+        if failed {
+            WebPageFailedView {
+                failed = false
+                generation += 1
+            }
+        } else {
+            EmbedWebPage(url: url) { failed = true }.id(generation)
+        }
+    }
+}
+
+struct EmbedWebPage: UIViewRepresentable {
+    let url: URL
+    let onFailed: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(embed: url, onFailed: onFailed) }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -221,7 +240,11 @@ struct EmbedWebView: UIViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let embed: URL
-        init(embed: URL) { self.embed = embed }
+        let recovery: WebProcessRecovery
+        init(embed: URL, onFailed: @escaping () -> Void) {
+            self.embed = embed
+            recovery = WebProcessRecovery(onFailed: onFailed)
+        }
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -231,6 +254,12 @@ struct EmbedWebView: UIViewRepresentable {
         /// `target=_blank` and `window.open`: never open anything.
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                      for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
+
+        /// The player's web process ended (a crash, or memory pressure): it loads again once, then the failed state.
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { recovery.ended(webView) }
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { recovery.finished() }
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { recovery.failed(error) }
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { recovery.failed(error) }
     }
 }
 

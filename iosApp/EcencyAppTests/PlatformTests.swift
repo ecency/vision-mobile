@@ -1,5 +1,6 @@
 import EcencyCore
 import XCTest
+import WebKit
 @testable import EcencyApp
 
 /// The share extension's hand-over as the app reads it, and the platform screens as Swift sees the core.
@@ -83,4 +84,43 @@ final class PlatformTests: XCTestCase {
         XCTAssertTrue(AppScreenCompanion.shared.of(route: .qrScan, arg: "") is AppScreenQrScan)
         XCTAssertTrue(AppScreenCompanion.shared.of(route: .dappBrowser, arg: "https://peakd.com") is AppScreenDappBrowser)
     }
+
+    /// Review of #3706: a web view whose process ended reloads once, then shows the failed state; never a reload loop.
+    func testAnEndedWebProcessReloadsOnceThenFails() {
+        final class CountingWebView: WKWebView {
+            var reloads = 0
+            override func reload() -> WKNavigation? {
+                reloads += 1
+                return nil
+            }
+        }
+        let view = CountingWebView(frame: .zero)
+        var failed = 0
+        let recovery = WebProcessRecovery { failed += 1 }
+        recovery.ended(view)
+        XCTAssertEqual(view.reloads, 1)
+        XCTAssertEqual(failed, 0)
+        recovery.ended(view)
+        recovery.ended(view)
+        XCTAssertEqual(view.reloads, 1, "no reload loop")
+        XCTAssertEqual(failed, 2)
+    }
+
+    /// Review of #3706: the reload after an ended process that fails (offline) shows the failed state; a cancelled
+    /// navigation or a failure outside the recovery does not.
+    func testAFailedRecoveryReloadShowsTheFailedState() {
+        let view = WKWebView(frame: .zero)
+        var failed = 0
+        let recovery = WebProcessRecovery { failed += 1 }
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 0, "not recovering")
+        recovery.ended(view)
+        recovery.failed(URLError(.cancelled))
+        XCTAssertEqual(failed, 0, "a cancelled navigation is a newer one")
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 1)
+        recovery.failed(URLError(.notConnectedToInternet))
+        XCTAssertEqual(failed, 1, "once")
+    }
+
 }

@@ -153,6 +153,8 @@ data class AiAssistResult(val action: String, val output: String, val titles: Li
 data class AiAssistState(
     val owner: String? = null,
     val loadingPrices: Boolean = true,
+    /** The prices or the balance could not be read (none known yet): the sheet says so with Try again ([AiAssistModel.reload]). */
+    val loadFailed: Boolean = false,
     val prices: List<AiAssistPrice> = emptyList(),
     /** The balance as the server prints it ("1,234.567"); null until it is known. */
     val balanceText: String? = null,
@@ -274,6 +276,14 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
 
     private var pricesAtMillis = 0L
 
+    /** Try again after a failed price or balance read. */
+    fun reload() {
+        val owner = current.owner ?: return
+        if (!current.loadFailed) return
+        setState { it.copy(loadFailed = false, loadingPrices = true) }
+        scope.launch { refresh(owner) }
+    }
+
     private suspend fun refresh(owner: String) {
         val prices = try {
             env.aiApi.assistPrices(owner)
@@ -282,9 +292,9 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
         } catch (e: Exception) {
             ErrorReports.quiet(e, "ai.prices")
             null
-        }
-        if (prices != null) pricesAtMillis = env.nowMillis()
-        setState { it.copy(loadingPrices = false, prices = prices?.filter { p -> p.action in ACTIONS } ?: it.prices) }
+        }?.filter { p -> p.action in ACTIONS }
+        if (!prices.isNullOrEmpty()) pricesAtMillis = env.nowMillis()
+        setState { it.copy(loadingPrices = false, prices = prices ?: it.prices) }
         val points = try {
             env.aiApi.points(owner)
         } catch (e: CancellationException) {
@@ -293,7 +303,13 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
             ErrorReports.quiet(e, "ai.points")
             null
         }
-        if (points != null) setState { it.copy(balanceText = points, balance = PaidCalls.points(points)) }
+        val balance = PaidCalls.points(points)
+        // nothing usable known after both reads dead ended the sheet (issue #3701): it says so, with Try again. Shown
+        // only once both reads ended, so Try again never runs beside a read still on its way
+        setState {
+            val known = if (balance != null) it.copy(balanceText = points, balance = balance) else it
+            known.copy(loadFailed = known.prices.none { p -> p.action in known.actions } || known.balance == null)
+        }
     }
 
     private fun parse(json: JsonElement): AiAssistResult? {
@@ -451,6 +467,8 @@ class AiAssistModel internal constructor(private val env: AppEnvironment, privat
 data class AiImageState(
     val owner: String? = null,
     val loading: Boolean = true,
+    /** The prices or the balance could not be read (none known yet): the sheet says so with Try again ([AiImageModel.reload]). */
+    val loadFailed: Boolean = false,
     val prices: AiImagePrices? = null,
     val balance: Double? = null,
     val prompt: String = "",
@@ -557,6 +575,14 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
         }
     }
 
+    /** Try again after a failed price or balance read. */
+    fun reload() {
+        val owner = current.owner ?: return
+        if (!current.loadFailed) return
+        setState { it.copy(loadFailed = false, loading = true) }
+        scope.launch { refresh(owner) }
+    }
+
     private suspend fun refresh(owner: String) {
         val prices = try {
             env.aiApi.imagePrices(owner)
@@ -565,7 +591,7 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
         } catch (e: Exception) {
             ErrorReports.quiet(e, "ai.imagePrices")
             null
-        }
+        }?.takeIf { it.prices.isNotEmpty() }
         setState { it.copy(loading = false, prices = prices ?: it.prices) }
         val points = try {
             env.aiApi.points(owner)
@@ -576,7 +602,12 @@ class AiImageModel internal constructor(private val env: AppEnvironment, private
             null
         }
         // RN: rounded to three decimals
-        PaidCalls.points(points)?.let { p -> setState { it.copy(balance = kotlin.math.round(p * 1000) / 1000) } }
+        val balance = PaidCalls.points(points)?.let { kotlin.math.round(it * 1000) / 1000 }
+        // nothing usable known after both reads dead ended the sheet (issue #3701): it says so, with Try again
+        setState {
+            val known = if (balance != null) it.copy(balance = balance) else it
+            known.copy(loadFailed = known.prices == null || known.balance == null)
+        }
     }
 
     private val locked: Boolean get() = current.running || current.unresolved

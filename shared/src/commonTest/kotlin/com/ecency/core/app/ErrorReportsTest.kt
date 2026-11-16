@@ -76,6 +76,38 @@ class ErrorReportsTest {
         assertEquals(reporter.reports.single().tags["error_code"], second.code)
     }
 
+    /** Issue #3701: a search the API could not answer (no connection, 5xx, 408, 429) is a network failure, not a bug. */
+    @Test
+    fun aSearchThatCouldNotBeAnsweredIsANetworkFailure() {
+        for (status in listOf(0, 502, 504, 408, 429)) {
+            val error = AppError.from(com.ecency.core.api.search.SearchApiException(status, null), "search.posts")
+            assertEquals(ErrorKind.NETWORK, error.kind, "status $status")
+        }
+        assertTrue(reporter.reports.all { it.tags["expected"] == "true" }, "${reporter.reports.map { it.level }}")
+        reporter.reports.clear()
+        assertEquals(ErrorKind.UNKNOWN, AppError.from(com.ecency.core.api.search.SearchApiException(400, "bad query"), "search.posts").kind)
+        assertEquals("error", reporter.reports.single().level)
+    }
+
+    /** Review of #3706: an unexplained refusal right after an explained one at the same place is still reported as an error. */
+    @Test
+    fun anErrorRightAfterAnExpectedWarningOfTheSameShapeIsReported() {
+        AppError.from(com.ecency.core.api.chat.ChatApiException(403, "@spike-bob is not on Ecency chat yet.", serverText = true), "chats.openDirect")
+        val error = AppError.from(com.ecency.core.api.chat.ChatApiException(403, "Request failed (403)"), "chats.openDirect")
+        assertEquals(listOf("warning", "error"), reporter.reports.map { it.level })
+        assertEquals(error.code, reporter.reports.last().tags["error_code"])
+    }
+
+    /** Issue #3701: the chat server's own refusal ("@user is not on Ecency chat yet.") is the user's answer, not a bug. */
+    @Test
+    fun aChatRefusalTheServerExplainsIsExpected() {
+        AppError.from(com.ecency.core.api.chat.ChatApiException(403, "@spike-bob is not on Ecency chat yet.", serverText = true), "chats.openDirect")
+        assertEquals("true", reporter.reports.single().tags["expected"])
+        reporter.reports.clear()
+        AppError.from(com.ecency.core.api.chat.ChatApiException(403, "Request failed (403)"), "chatThread.send")
+        assertEquals("error", reporter.reports.single().level, "a refusal without the server's words is still a bug")
+    }
+
     @Test
     fun anExpiredHiveSignerLoginIsTheUsersToFixWithNoCode() {
         val error = AppError.from(AuthException.HiveSignerApi(401, "invalid_grant", "The token has invalid role"), "editor.publish")

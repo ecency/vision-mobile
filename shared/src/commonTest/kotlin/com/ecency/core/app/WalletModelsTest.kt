@@ -13,6 +13,7 @@ import com.ecency.core.api.wallet.HistoryCategory
 import com.ecency.core.api.wallet.WalletHistory
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -91,6 +92,67 @@ class WalletModelsTest {
         w.env.wallet.refresh()
         testScheduler.advanceUntilIdle()
         assertEquals("0.617 HP", w.env.wallet.current.rows.first { it.symbol == "HP" }.pendingText)
+    }
+
+    /**
+     * #3701 (Sentry "Cannot claim that much VESTS ... Actual: 0"): a claim still on its way when the reader switches
+     * to another account and back keeps its guard, so a second tap sends no second claim; the first claim's end clears
+     * only its own guard.
+     */
+    /** Review of #3706: a claim whose outcome stays unknown tells only the account that claimed. */
+    @Test
+    fun anUnconfirmedClaimIsToldOnlyToTheAccountThatClaimed() = runTest {
+        for (switchAway in listOf(false, true)) {
+            val w = world(this)
+            KeyVault(w.app.store).save(VaultAccount("spike-other", AuthType.POSTING_KEY, postingKey = com.ecency.core.hive.GoldenVectors.WIF))
+            w.env.wallet.start()
+            testScheduler.advanceUntilIdle()
+            // every node may have taken it and none says; the chain's clock runs, so the transaction expires
+            w.app.clock = { TestApp.NOW + testScheduler.currentTime }
+            w.env.api.broadcaster.nowMillis = { w.app.clock() }
+            w.chainClock = { TestApp.NOW + testScheduler.currentTime }
+            w.app.monotonicClock = { testScheduler.currentTime }
+            w.broadcastAnswer = { kotlinx.coroutines.awaitCancellation() }
+            w.statusAnswer = { "\"too_old\"" }
+            val toasts = mutableListOf<String>()
+            backgroundScope.launch { w.env.ui.state.collect { st -> st.toast?.text?.let { if (toasts.lastOrNull() != it) toasts += it } } }
+            w.env.wallet.claim("HP")
+            testScheduler.runCurrent()
+            if (switchAway) {
+                w.env.session.switchTo("spike-other")
+                testScheduler.runCurrent()
+            }
+            repeat(40) { testScheduler.advanceTimeBy(10_000); testScheduler.runCurrent() }
+            val undecided = toasts.filter { it == com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE || "check" in it.lowercase() }
+            if (switchAway) assertEquals(emptyList(), undecided, "not told to the other account: $toasts")
+            else assertTrue(undecided.isNotEmpty(), "told to the claimer: $toasts")
+            w.env.wallet.close()
+        }
+    }
+
+    @Test
+    fun aClaimOnItsWayIsNotSentAgainAfterSwitchingAwayAndBack() = runTest {
+        val w = world(this)
+        KeyVault(w.app.store).save(VaultAccount("spike-other", AuthType.POSTING_KEY, postingKey = com.ecency.core.hive.GoldenVectors.WIF))
+        w.env.wallet.start()
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        w.gates["condenser_api.broadcast_transaction"] = held
+        w.env.wallet.claim("HP")
+        testScheduler.runCurrent()
+        w.env.session.switchTo("spike-other")
+        testScheduler.runCurrent()
+        w.env.session.switchTo(w.user)
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(2_000)
+        assertTrue(w.env.wallet.current.rows.first { it.symbol == "HP" }.claiming, "the claim on its way still shows")
+        w.env.wallet.claim("HP")
+        testScheduler.runCurrent()
+        w.gates.remove("condenser_api.broadcast_transaction")
+        held.complete(Unit)
+        testScheduler.advanceTimeBy(10_000)
+        val claims = w.app.broadcasts().filter { "claim_reward_balance" in it.params.toString() }
+        assertEquals(1, claims.size, "one claim for one reward")
     }
 
     /**

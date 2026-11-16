@@ -30,6 +30,74 @@ class FeedModelTest {
         },
     )
 
+    /** Issue #3701: a tag or community that does not exist shows that, is not an error and is not reported. */
+    @Test
+    fun aTagOrCommunityThatDoesNotExistShowsNotFoundAndIsNotReported() = runTest {
+        val reporter = RecordingReporter()
+        run {
+            val app = TestApp(this) { req ->
+                val tag = req.params.toString()
+                when {
+                    req.method != "bridge.get_ranked_posts" -> HttpResult(500, "no fixture")
+                    "hive-999999" in tag -> FakeTransport.error(req, -32602, "Invalid parameters: Community hive-999999 does not exist")
+                    else -> FakeTransport.error(req, -32602, "Invalid parameters: Tag nosuchtag does not exist")
+                }
+            }
+            app.env.crashReporter = reporter
+            for ((tag, text) in listOf("nosuchtag" to FeedCopy.TAG_HAS_NO_POSTS, "hive-999999" to FeedCopy.COMMUNITY_NOT_FOUND)) {
+                val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, tag))
+                feed.start()
+                testScheduler.advanceUntilIdle()
+                val s = feed.current
+                assertNull(s.error, tag)
+                assertTrue(s.loaded && s.endReached && s.items.isEmpty(), tag)
+                assertEquals(text, s.emptyText, tag)
+                feed.close()
+            }
+            assertEquals(emptyList(), reporter.reports.map { it.tags["where"] })
+        }
+    }
+
+    /** Review of #3706: a feed refreshed into "not found" drops the cards it showed. */
+    @Test
+    fun aFeedRefreshedIntoNotFoundShowsNoOldCards() = runTest {
+        var missing = false
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") HttpResult(500, "no fixture")
+            else if (missing) FakeTransport.error(req, -32602, "Invalid parameters: Tag gone does not exist")
+            else FakeTransport.result(req, page("p", 3))
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, "gone"))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals(3, feed.current.items.size)
+        missing = true
+        feed.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(FeedNotFound.TAG, feed.current.notFound)
+        assertTrue(feed.current.items.isEmpty(), "the old cards go")
+        feed.close()
+    }
+
+    /** Review of #3701: a later page whose start post was deleted is an error with retry, not "this tag has no posts". */
+    @Test
+    fun aLaterPageWhosePostIsGoneIsAnErrorNotTheEnd() = runTest {
+        var reads = 0
+        val app = TestApp(this) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            if (reads++ == 0) FakeTransport.result(req, page("p1", 10)) else FakeTransport.error(req, -32602, "Invalid parameters: Post author9/p1-9 does not exist")
+        }
+        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.CREATED, "hive"))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        feed.loadMore()
+        testScheduler.advanceUntilIdle()
+        assertNull(feed.current.notFound)
+        assertNotNull(feed.current.error)
+        assertFalse(feed.current.endReached)
+        feed.close()
+    }
+
     @Test
     fun pagesAppendUntilAnEmptyPage() = runTest {
         val pages = ArrayDeque(listOf(page("p1", 10), page("p2", 4), "[]"))

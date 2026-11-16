@@ -374,6 +374,23 @@ class DemoChat(private val nowMillis: () -> Long) {
         outgoing.toList().forEach { it.trySend(text) }
     }
 
+    /** Someone edits [postId] to [message]; the socket announces it (tests). */
+    fun edit(channelId: String, postId: String, message: String) {
+        val p = posts.firstOrNull { it.id == postId } ?: return
+        p.message = message
+        p.editAt = nowMillis()
+        emit("post_edited", channelId, buildJsonObject { put("post", postJson(p).toString()) })
+    }
+
+    /** The id of the newest message in [channelId] whose text is [message] (tests). */
+    fun idOf(channelId: String, message: String): String? = posts.lastOrNull { it.channel == channelId && it.message == message }?.id
+
+    /** The server drops every open socket (tests: a connection lost while a conversation is open). */
+    fun dropSockets() {
+        outgoing.toList().forEach { it.close() }
+        outgoing.clear()
+    }
+
     /** Gives [channelId] the display name [name] (demo runs and tests: a long channel name at large text sizes). */
     fun rename(channelId: String, name: String) {
         channels.firstOrNull { it.id == channelId }?.display = name

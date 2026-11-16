@@ -16,6 +16,7 @@ import kotlin.io.encoding.Base64
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -312,8 +313,9 @@ class HiveAuthTest {
         assertEquals(listOf("sign_req", "attach_req"), relay.sent.map { it["cmd"]!!.jsonPrimitive.content })
     }
 
+    /** #3701: a reattach refused after the request reached the relay may have been signed: not "never connected". */
     @Test
-    fun failedAttachIsNotConnected() = runTest {
+    fun failedAttachIsConnectionLost() = runTest {
         val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
         val relay = FakeRelay { m ->
             when (m["cmd"]!!.jsonPrimitive.content) {
@@ -322,12 +324,69 @@ class HiveAuthTest {
             }
         }
         val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
+    /** #3701: the socket dropping again after a reattach is a lost connection too. */
+    @Test
+    fun aSecondDropIsConnectionLost() = runTest {
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "sign_req" -> { push("cmd" to "sign_wait", "uuid" to "s1", "expire" to 50_000); drop() }
+                "attach_req" -> { push("cmd" to "attach_ack", "uuid" to "s1"); drop() }
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
+    /** Review of #3706: a sign in that loses its connection is safe to try again (nothing can have been signed). */
+    @Test
+    fun aSignInThatLosesItsConnectionIsNotConnected() = runTest {
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "auth_req" -> { push("cmd" to "auth_wait", "uuid" to "a1", "expire" to 50_000); drop() }
+                "attach_req" -> drop()
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).authenticate(user, null, key) {} }
         assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.reason)
     }
 
+    /** Review of #3706: a lost signing connection says the request may have gone through, and offers no blind retry. */
     @Test
-    fun connectFailureIsTyped() = runTest {
-        val c = HiveAuthClient({ throw IllegalStateException("offline") }, { 0 })
-        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, assertFailsWith<AuthException.HiveAuth> { c.authenticate(user, null, key) {} }.reason)
+    fun aLostSigningConnectionMayHaveGoneThrough() {
+        val lost = com.ecency.core.app.AppError.from(AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST), "post.vote")
+        assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, lost.message)
+        assertFalse(lost.retryable)
+        assertTrue(lost.undecided)
+        val voted = com.ecency.core.app.AppError.fromBroadcast(AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST), "post.vote")
+        assertEquals(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, voted.message)
+        assertTrue(com.ecency.core.app.AppError.from(AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED), "login").retryable)
+    }
+
+    /** Review of #3701: the new socket closing during the reattach is a lost connection, not an untyped failure. */
+    @Test
+    fun aSocketClosedDuringTheReattachIsConnectionLost() = runTest {
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val relay = FakeRelay { m ->
+            when (m["cmd"]!!.jsonPrimitive.content) {
+                "sign_req" -> { push("cmd" to "sign_wait", "uuid" to "s1", "expire" to 50_000); drop() }
+                "attach_req" -> drop()
+            }
+        }
+        val e = assertFailsWith<AuthException.HiveAuth> { client(relay).broadcast(HiveAuthSession(user, key, null, 0), KeyRole.POSTING, ops) {} }
+        assertEquals(AuthException.HiveAuth.Reason.CONNECTION_LOST, e.reason)
+    }
+
+    /** #3701: a socket that never opened is NOT_CONNECTED, and its message names the cause's type (never its text). */
+    @Test
+    fun connectFailureIsTypedAndNamesItsCause() = runTest {
+        val c = HiveAuthClient({ throw IllegalStateException("secret detail") }, { 0 })
+        val e = assertFailsWith<AuthException.HiveAuth> { c.authenticate(user, null, key) {} }
+        assertEquals(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.reason)
+        assertTrue("IllegalStateException" in e.message.orEmpty(), e.message)
+        assertTrue("secret detail" !in e.message.orEmpty(), e.message)
     }
 }

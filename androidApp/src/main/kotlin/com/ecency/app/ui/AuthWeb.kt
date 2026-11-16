@@ -8,12 +8,15 @@ import android.webkit.WebSettings
 import android.webkit.WebStorage
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.RenderProcessGoneDetail
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
@@ -37,8 +40,21 @@ import com.ecency.core.app.AuthUiCopy
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun HiveSignerWebView(url: String, onRedirect: (String) -> Unit, modifier: Modifier = Modifier, config: HiveSignerConfig = HiveSignerConfig.RN) {
+fun HiveSignerWebView(
+    url: String,
+    onRedirect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    config: HiveSignerConfig = HiveSignerConfig.RN,
+    /** The renderer ended: instead of the failed state with Retry (a signing page must not be confirmed twice). */
+    onGone: (() -> Unit)? = null,
+) {
     val redirect by rememberUpdatedState(onRedirect)
+    // the page's renderer ended (RenderGone): the failed state; Retry builds a new view
+    var gone by remember { mutableStateOf(false) }
+    if (gone) {
+        WebPageFailed(onRetry = { gone = false }, modifier = modifier)
+        return
+    }
     AndroidView(
         modifier = modifier.testTag("hiveSignerWeb"),
         factory = { context ->
@@ -67,6 +83,9 @@ fun HiveSignerWebView(url: String, onRedirect: (String) -> Unit, modifier: Modif
                                 if (HiveSignerPage.decide(url, config) == HiveSignerNavigation.REDIRECT) redirect(url)
                             }
                         }
+
+                        override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean =
+                            RenderGone.handle(view) { if (onGone != null) onGone() else gone = true }
                     }
                     if (HiveSignerPage.decide(url, config) == HiveSignerNavigation.LOAD) loadUrl(url)
                 }
@@ -82,10 +101,12 @@ fun HiveSignerWebView(url: String, onRedirect: (String) -> Unit, modifier: Modif
         },
         onRelease = { view ->
             try {
-                view.stopLoading()
-                view.clearHistory()
-                view.clearCache(true)
-                view.destroy()
+                if (!RenderGone.isGone(view)) {
+                    view.stopLoading()
+                    view.clearHistory()
+                    view.clearCache(true)
+                    view.destroy()
+                }
             } finally {
                 WebData.authViews.decrementAndGet()
                 clearWebData()

@@ -231,7 +231,7 @@ fun FeedList(
                 // the pages read so far were all filtered out (FeedModel.MAX_AUTO_ADVANCE): more may follow
                 state.items.isEmpty() && state.loaded -> item(key = "empty") {
                     EsieMessageBlock(
-                        com.ecency.core.esie.EsiePlacement.EMPTY, ReadingUiCopy.NOTHING_HERE_YET, Modifier.padding(top = 48.dp),
+                        com.ecency.core.esie.EsiePlacement.EMPTY, state.emptyText, Modifier.padding(top = 48.dp),
                         actionLabel = if (state.endReached) null else com.ecency.core.app.UiCopy.LOAD_MORE, onAction = model::loadMore,
                     )
                 }

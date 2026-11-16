@@ -26,3 +26,7 @@
 # Readable stack traces in Play vitals; Play deobfuscates with the uploaded mapping.txt.
 -keepattributes SourceFile, LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Handled error reports are named by the exception's class (CrashReports, ErrorReports): a handled report has no
+# frames for the mapping to restore, so renamed classes would split one error into new Sentry issues every release.
+-keepnames class com.ecency.** extends java.lang.Throwable

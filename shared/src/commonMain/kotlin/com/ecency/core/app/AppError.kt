@@ -121,6 +121,8 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 // (EcencyPrivateApi, SessionModel.sessionRefused)
                 else if (error.isSessionRefused) AppError(ErrorKind.AUTH, SESSION_EXPIRED, false)
                 else AppError(ErrorKind.UNKNOWN, GENERIC_MESSAGE, true)
+            is com.ecency.core.api.search.SearchApiException ->
+                if (error.isNetwork) AppError(ErrorKind.NETWORK, NETWORK_MESSAGE, true) else AppError(ErrorKind.UNKNOWN, GENERIC_MESSAGE, true)
             is InvalidInputException -> AppError(ErrorKind.INVALID_INPUT, error.message ?: L.native.appError.invalidInput, false)
             is SecureStoreException -> AppError(ErrorKind.STORAGE, L.native.appError.secureStorageIsUnavailable, false)
             is EcencyException -> AppError(ErrorKind.UNKNOWN, GENERIC_MESSAGE, true)
@@ -165,6 +167,9 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
                 AuthException.HiveAuth.Reason.EXPIRED -> AppError(ErrorKind.AUTH, L.native.appError.theRequestExpiredBefore, true)
                 AuthException.HiveAuth.Reason.SESSION_EXPIRED -> AppError(ErrorKind.AUTH, HIVEAUTH_EXPIRED, false)
                 AuthException.HiveAuth.Reason.NOT_CONNECTED -> AppError(ErrorKind.NETWORK, L.native.appError.couldNotReachThe, true)
+                // the wallet may have signed and broadcast it: check before trying again, never a blind retry
+                AuthException.HiveAuth.Reason.CONNECTION_LOST ->
+                    AppError(ErrorKind.NETWORK, com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE, false, undecided = true)
                 AuthException.HiveAuth.Reason.NOT_BROADCAST -> AppError(ErrorKind.AUTH, L.hiveauth.transactionFail, false)
                 // the wallet's or relay's own reason, when it gave one; an answer the app could not read stays generic
                 AuthException.HiveAuth.Reason.ERROR ->
@@ -216,7 +221,7 @@ data class AppError(val kind: ErrorKind, val message: String, val retryable: Boo
          * retry resends the same transaction).
          */
         fun fromBroadcast(error: Throwable, where: String): AppError = map(error).let {
-            if (it.kind == ErrorKind.NETWORK) it.copy(message = MAY_HAVE_LANDED_MESSAGE) else it
+            if (it.kind == ErrorKind.NETWORK && !it.undecided) it.copy(message = MAY_HAVE_LANDED_MESSAGE) else it
         }.let { coded(it, ErrorReports.handled(error, where, it)) }
 
         val MAY_HAVE_LANDED_MESSAGE: String get() = L.native.appError.networkErrorThisMay

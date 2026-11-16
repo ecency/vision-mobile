@@ -278,6 +278,27 @@ class ShellPromptsTest {
         assertNotNull(updates.current.prompt)
     }
 
+    /** Issue #3701: GitHub's limit for unauthenticated calls (403, 429) is expected; another failure is still reported. */
+    @Test
+    fun aRateLimitedCheckIsNotReported() = runTest {
+        val reporter = RecordingReporter()
+        val app = app()
+        app.env.crashReporter = reporter
+        app.env.appVersion = "4.0.0"
+        var status = 403
+        app.authBackend.rest = { r -> if (r.url == OnboardingApi.RELEASES_URL) HttpResult(status, "rate limited") else null }
+        for (limited in listOf(403, 429)) {
+            status = limited
+            app.env.updates.check()
+            testScheduler.advanceUntilIdle()
+        }
+        assertEquals(emptyList(), reporter.reports.filter { it.tags["where"] == "shell.updateCheck" }.map { it.tags })
+        status = 404
+        app.env.updates.check()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, reporter.reports.count { it.tags["where"] == "shell.updateCheck" }, "a missing release is still reported")
+    }
+
     @Test
     fun aFailedCheckIsSilentAndAHostileTagShowsNothing() = runTest {
         val app = app()

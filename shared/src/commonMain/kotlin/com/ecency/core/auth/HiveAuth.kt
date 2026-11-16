@@ -250,7 +250,8 @@ class HiveAuthClient(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "Failed to connect to HiveAuth server", e)
+        // the cause's type tells a refused TLS chain from a timeout or no route (#3701); never its message
+        throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "Failed to connect to HiveAuth server (${e::class.simpleName ?: "unknown"})", e)
     }
 
     suspend fun close() {
@@ -286,7 +287,13 @@ class HiveAuthClient(
         val wait = awaitWait("auth_wait")
         onWait(HiveAuthWait(wait.uuid, wait.expire, HiveAuthProtocol.authLink(username, wait.uuid, authKey, host, HiveAuthProtocol.preferredScheme(wait.raw) ?: "has"), wait.raw))
         while (true) {
-            val m = awaitFor(wait.uuid, wait.expire, setOf("auth_ack", "auth_nack", "auth_err"))
+            // a sign in signs nothing: a lost connection there is safe to try again
+            val m = try {
+                awaitFor(wait.uuid, wait.expire, setOf("auth_ack", "auth_nack", "auth_err"))
+            } catch (e: AuthException.HiveAuth) {
+                if (e.reason != AuthException.HiveAuth.Reason.CONNECTION_LOST) throw e
+                throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, e.detail, e)
+            }
             when (m.cmd) {
                 "auth_ack" -> {
                     val plain = runCatching { CryptoJsCipher.decrypt(m.text("data") ?: "", authKey) }.getOrNull() ?: continue
@@ -402,9 +409,19 @@ class HiveAuthClient(
             val m = try {
                 next(expire) { it.cmd in cmds && it.text("uuid") == uuid }
             } catch (e: SocketClosed) {
-                if (reattached) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "connection lost")
+                // the request reached the relay: the wallet may have it (and may sign it), so a lost connection from
+                // here on is CONNECTION_LOST, which callers treat as undecided, never as "not sent" (#3701)
+                if (reattached) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "connection lost")
                 reattached = true
-                attach(uuid, expire)
+                try {
+                    attach(uuid, expire)
+                } catch (e: AuthException.HiveAuth) {
+                    if (e.reason != AuthException.HiveAuth.Reason.NOT_CONNECTED) throw e
+                    throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "connection lost: ${e.message}", e)
+                } catch (e: SocketClosed) {
+                    // the new socket closed during the reattach: the same lost connection
+                    throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "connection lost", e)
+                }
                 continue
             }
             if (m == null) {
@@ -420,7 +437,7 @@ class HiveAuthClient(
         val s = connected()
         s.send(buildJsonObject { put("cmd", "attach_req"); put("uuid", uuid) }.toString())
         val m = next(minOf(expire, nowMillis() + timeoutMillis)) { (it.cmd == "attach_ack" || it.cmd == "attach_nack") && it.text("uuid") == uuid }
-        if (m == null || m.cmd == "attach_nack") throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "attach failed")
+        if (m == null || m.cmd == "attach_nack") throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.CONNECTION_LOST, "attach failed")
     }
 
     private class SocketClosed : Exception("socket closed")

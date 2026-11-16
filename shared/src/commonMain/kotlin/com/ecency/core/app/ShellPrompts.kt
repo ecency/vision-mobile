@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.ecency.Announcement
 import com.ecency.core.api.json.SafeJson
 import com.ecency.core.l10n.L
@@ -216,8 +217,9 @@ class UpdateModel internal constructor(private val env: AppEnvironment) : StateM
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ErrorReports.quiet(e, "shell.updateCheck")
-                // RN reports to Sentry and shows nothing
+                // RN reports to Sentry and shows nothing; GitHub's limit for unauthenticated calls (403, 429) is not
+                // a failure of the app: the next check asks again (issue #3701)
+                if ((e as? EcencyHttpException)?.status !in RATE_LIMITED) ErrorReports.quiet(e, "shell.updateCheck")
             }
         }
     }
@@ -233,6 +235,9 @@ class UpdateModel internal constructor(private val env: AppEnvironment) : StateM
 
     companion object {
         const val LAST_CHECK = "update.lastCheck"
+
+        /** GitHub's answers to too many unauthenticated calls. */
+        private val RATE_LIMITED = setOf(403, 429)
 
         /** RN `recheckInterval`: 2 days. */
         const val RECHECK_MILLIS = 48L * 3600 * 1000

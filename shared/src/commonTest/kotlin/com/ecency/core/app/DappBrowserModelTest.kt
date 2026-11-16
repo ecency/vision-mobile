@@ -331,6 +331,66 @@ class DappBrowserModelTest {
         assertEquals("p", b.current.prompt!!.operations.single().fields.first { it.name == "permlink" }.value)
     }
 
+    /** Review of #3706: a page whose renderer ended loses its waiting request; nothing can be confirmed for it. */
+    @Test
+    fun aPageWhoseRendererEndedLosesItsPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100"""))
+        testScheduler.advanceUntilIdle()
+        assertNotNull(b.current.prompt)
+        b.pageGone(b.current.activeTabId)
+        assertNull(b.current.prompt)
+        assertTrue(b.current.activeTab.hasError)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(page.answers.isEmpty())
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    /** Review of #3706: a request still being prepared when its page ended never shows a prompt. */
+    @Test
+    fun aRequestPreparedForAPageThatEndedShowsNoPrompt() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100"""))
+        // the account is still being read when the page's renderer ends
+        b.pageGone(b.current.activeTabId)
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.broadcasts().isEmpty())
+    }
+
+    /** Review of #3706: Retry loads the page again, so a request the ended page made is still not shown. */
+    @Test
+    fun aRequestOfAnEndedPageShowsNoPromptAfterRetry() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100"""))
+        b.pageGone(b.current.activeTabId)
+        b.retry()
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.broadcasts().isEmpty())
+        // a message to sign, the same
+        send(b, page, keychain("signBuffer", ""","message":"hello","method":"Posting"""", id = 2))
+        b.pageGone(b.current.activeTabId)
+        b.retry()
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        // a request from the page loaded again is asked
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100""", id = 3))
+        testScheduler.advanceUntilIdle()
+        assertNotNull(b.current.prompt)
+    }
+
     @Test
     fun aPageThatMovedOnHearsNothingAndItsPromptGoes() = runTest {
         val app = signedIn(this)
