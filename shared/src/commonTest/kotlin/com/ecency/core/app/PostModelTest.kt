@@ -146,6 +146,40 @@ class PostModelTest {
         model.close()
     }
 
+    /** #3704 review: a reply found gone while its parent was being read shows no parent over "not found". */
+    @Test
+    fun aParentReadThatLandsAfterThePostWasFoundGoneShowsNothing() = runTest {
+        var deleted = false
+        val parentGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val app = TestApp(this) { req ->
+            val permlink = (req.params as? kotlinx.serialization.json.JsonObject)?.get("permlink")?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
+            when {
+                req.method.startsWith("bridge.get_post") && permlink == "parent" -> {
+                    parentGate.await()
+                    FakeTransport.result(req, """{"author":"bob","permlink":"parent","title":"Parent","body":"The parent post."}""")
+                }
+                (req.method.startsWith("bridge.get_post") || req.method == "bridge.get_discussion") && deleted ->
+                    FakeTransport.error(req, -32602, "Invalid parameters: Post alice/reply does not exist")
+                req.method.startsWith("bridge.get_post") ->
+                    FakeTransport.result(req, """{"author":"alice","permlink":"reply","parent_author":"bob","parent_permlink":"parent","depth":1,"body":"A reply."}""")
+                else -> FakeTransport.result(req, "{}")
+            }
+        }
+        val model = app.env.postModel("alice", "reply")
+        model.start()
+        repeat(20) { testScheduler.runCurrent() }
+        assertNotNull(model.current.post)
+        deleted = true
+        model.refresh()
+        repeat(20) { testScheduler.runCurrent() }
+        assertTrue(model.current.notFound)
+        parentGate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.notFound)
+        assertNull(model.current.parent, "the parent does not show over not found")
+        model.close()
+    }
+
     @Test
     fun commentErrorThenRetry() = runTest {
         var fail = true

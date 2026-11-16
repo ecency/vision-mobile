@@ -141,11 +141,18 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
     suspend fun refreshAndWait() {
         refresh()
         // waits in the model's scope, so closing the model ends the wait instead of leaving it hanging
-        scope.async { state.first { !it.discoverLoading } }.await()
+        scope.async {
+            state.first { !it.discoverLoading }
+            // the Membership list as well (it is read by the app-wide subscriptions)
+            env.communities.state.first { !it.loading }
+        }.await()
     }
 
-    /** Signed out there is no Membership to show: the screen opens on Discover (#3704). */
-    val opensOnDiscover: Boolean get() = !env.session.current.isLoggedIn
+    /**
+     * Signed out there is no Membership to show: the screen opens on Discover (#3704). Before the stored session was read
+     * nobody is known to be signed out, so it opens on Membership as before.
+     */
+    val opensOnDiscover: Boolean get() = env.session.current.let { !it.isLoading && !it.isLoggedIn }
 
     /** False when signed out: the UI opens the login screen. */
     fun toggle(row: CommunityRow): Boolean = env.communities.toggleSubscription(row.name, row.title, row.subscribed)

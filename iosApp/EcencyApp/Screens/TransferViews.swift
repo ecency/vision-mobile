@@ -520,6 +520,7 @@ struct RedeemView: View {
     @EnvironmentObject private var app: AppContainer
     @StateObject private var observed: Observed<RedeemState>
     @Environment(\.appTheme) private var theme
+    @Environment(\.dismiss) private var dismiss
     private let rc = RedeemCopy.shared
 
     init(screen: AppScreenRedeem, env: AppEnvironment) {
@@ -551,7 +552,8 @@ struct RedeemView: View {
                     Button(rc.BUY_POINTS) { app.push(AppScreenCompanion.shared.of(route: .boost, arg: s.user ?? "")) }
                 }
             }
-            SendPhaseView(phase: s.phase) {}
+            // Close on "may have gone through" leaves the screen (#3703), as Trade and Android do
+            SendPhaseView(phase: s.phase) { dismiss() }
             if !s.busy { Button(tcopy.NEXT) { model.next() }.frame(maxWidth: .infinity).disabled(!s.enabled).accessibilityIdentifier("redeem-next") }
         }
         .navigationTitle(s.kind.title).navigationBarTitleDisplayMode(.inline)

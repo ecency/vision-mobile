@@ -191,6 +191,8 @@ class CommunityModelsTest {
     @Test
     fun signedOutTheCommunitiesOpenOnDiscover() = runTest {
         val app = TestApp(this, handler = CommunityNode().handler())
+        // the stored session not read yet: nobody is known to be signed out
+        assertFalse(CommunitiesModel(app.env).also { it.close() }.opensOnDiscover)
         app.env.session.start()
         testScheduler.advanceUntilIdle()
         assertTrue(CommunitiesModel(app.env).also { it.close() }.opensOnDiscover)
@@ -204,7 +206,12 @@ class CommunityModelsTest {
         val node = CommunityNode().apply { communities = "[${CommunityNode.listed("hive-1", "One")}]" }
         var gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
         val handler = node.handler()
-        val app = TestApp(this) { req -> if (req.method == "bridge.list_communities") gate?.await(); handler(this, req) }
+        var membership: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+        val app = TestApp(this) { req ->
+            if (req.method == "bridge.list_communities") gate?.await()
+            if (req.method == "bridge.list_all_subscriptions") membership?.await()
+            handler(this, req)
+        }
         signedIn(app)
         val model = CommunitiesModel(app.env)
         model.start()
@@ -218,6 +225,16 @@ class CommunityModelsTest {
         testScheduler.advanceUntilIdle()
         assertTrue(done, "${model.current} ${app.transport.methods()}")
         wait.cancel()
+        // the Membership list too: the spinner waits for both reads
+        membership = kotlinx.coroutines.CompletableDeferred()
+        done = false
+        val again = launch { model.refreshAndWait(); done = true }
+        repeat(10) { testScheduler.runCurrent() }
+        assertFalse(done, "the joined list is still being read")
+        membership!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(done)
+        again.cancel()
         model.close()
     }
 

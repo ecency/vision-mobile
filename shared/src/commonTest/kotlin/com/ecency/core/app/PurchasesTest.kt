@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import kotlinx.coroutines.async
 import com.ecency.core.api.rpc.HttpResult
 import com.ecency.core.auth.AuthHttpRequest
 import com.ecency.core.secure.AuthType
@@ -205,6 +206,14 @@ class PurchasesTest {
         points.current.confirm?.let { points.confirm(); testScheduler.advanceUntilIdle() }
         assertEquals(listOf("999points"), r.store.sheets)
         points.close()
+        // two calls that find it dropped at once reconnect once (a second Play startConnection while one runs fails)
+        r.store.dropped = true
+        val connects = r.store.connects
+        val a = async { r.env.purchases.products(listOf("999points")) }
+        val b = async { r.env.purchases.products(listOf("099points")) }
+        testScheduler.advanceUntilIdle()
+        assertTrue(a.await().first.isNotEmpty() && b.await().first.isNotEmpty())
+        assertEquals(connects + 1, r.store.connects)
     }
 
     @Test

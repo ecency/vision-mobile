@@ -1,5 +1,7 @@
 package com.ecency.core.auth
 
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.currentCoroutineContext
 import com.ecency.core.api.rpc.platformWebSocketClient
 import com.ecency.core.hive.KeyRole
 import io.ktor.client.HttpClient
@@ -263,12 +265,18 @@ class HiveAuthClient(
      * Sends [text] on the open socket. One the relay closed while nobody read it (nothing told the client) fails the
      * send before anything reached the relay: it is dropped and [text] sent once on a fresh socket (#3703).
      */
+    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
     private suspend fun send(text: String) {
+        // a socket whose reader already saw it end (the relay closed it while idle): a send may still be accepted into
+        // its buffer and never reach the relay, so it is not used
+        if (socket?.incoming?.isClosedForReceive == true) dropSocket()
         try {
             connected().send(text)
             return
         } catch (e: CancellationException) {
-            throw e
+            // a socket closed with a cancellation is a closed socket; only the caller's own cancellation ends here
+            currentCoroutineContext().ensureActive()
+            dropSocket()
         } catch (e: AuthException) {
             throw e
         } catch (_: Exception) {
@@ -277,11 +285,10 @@ class HiveAuthClient(
         }
         try {
             connected().send(text)
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: AuthException) {
             throw e
         } catch (e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
             dropSocket()
             throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "Failed to send to HiveAuth server (${e::class.simpleName ?: "unknown"})", e)
         }

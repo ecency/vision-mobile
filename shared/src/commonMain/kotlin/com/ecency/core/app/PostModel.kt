@@ -287,7 +287,8 @@ class PostModel internal constructor(
                 null
             } ?: return@launch
             val summary = kotlinx.coroutines.withContext(env.dispatchers.render) { env.renderer.summary(parent) }
-            setState { it.copy(parent = parent, parentSummary = summary) }
+            // the post was found gone meanwhile: "not found" shows alone (#3704)
+            setState { if (it.notFound) it else it.copy(parent = parent, parentSummary = summary) }
         }
     }
     private var renderingVersion: String? = null

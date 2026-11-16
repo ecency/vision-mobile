@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import kotlinx.coroutines.sync.withLock
 import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.ecency.AccountOrderMeta
@@ -303,12 +304,15 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         if (heldKeys.remove(key) != null) publishHeld()
     }
 
+    /** One connect at a time: Play refuses a second `startConnection` while one runs (#3703 review). */
+    private val connecting = kotlinx.coroutines.sync.Mutex()
+
     /** RN `initConnection`; null when connected. */
-    internal suspend fun connect(): StoreError? {
-        if (current.connected) return null
+    internal suspend fun connect(): StoreError? = connecting.withLock {
+        if (current.connected) return@withLock null
         val error = callStore<Unit> { done -> env.store.connect { e -> done(if (e == null) Unit else null, e) } }.second
         if (error == null) mutableState.update { it.copy(connected = true) } else errors.report(error, IapStage.INIT)
-        return error
+        error
     }
 
     /**
@@ -657,7 +661,6 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         return OrderResult.Failed(last)
     }
 
-    /** A store call as a suspension on the main thread; null and an error when the store never answered. */
     /**
      * [callStore] on a connected store: Play may drop its service after [connect] (nothing tells the app), and a call
      * then answers SERVICE_DISCONNECTED; the store is connected again and the call made once more (#3703).
@@ -670,6 +673,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         return callStore(timeout, call)
     }
 
+    /** A store call as a suspension on the main thread; null and an error when the store never answered. */
     private suspend fun <T> callStore(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {
         val wait: suspend () -> Pair<T?, StoreError?> = {
             suspendCancellableCoroutine { c: CancellableContinuation<Pair<T?, StoreError?>> ->

@@ -406,7 +406,7 @@ class FeedModel internal constructor(
                 val all = if (kept && old != null) {
                     // the rows the old pages after the first ones brought, as they were shown (filters applied)
                     val got = fresher.map { it.key }.toSet()
-                    fresher + old.postsAfter(pages).mapNotNull { posts[it.key] }.filter { it.key !in got }
+                    fresher + shown(old.postsAfter(pages).mapNotNull { posts[it.key] }, nsfw).filter { it.key !in got }
                 } else {
                     fresher
                 }

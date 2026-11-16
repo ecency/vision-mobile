@@ -135,15 +135,18 @@ class ForegroundRefreshTest {
         assertEquals(50, feed.current.items.size)
         assertEquals(5, calls)
 
+        // an author muted meanwhile, with a post on a kept page: it does not come back with the kept rows
+        app.env.setAuthorMuted("author40", true)
+        testScheduler.advanceUntilIdle()
         round = "b"
         app.away(long)
         feed.start()
         testScheduler.advanceUntilIdle()
         assertEquals(5 + FeedModel.MAX_QUIET_PAGES, calls, "only the first pages are read again")
-        assertEquals((0 until 30).map { "b-$it" } + (30 until 50).map { "a-$it" }, feed.current.items.map { it.key.permlink }, "the rest stays where it was")
+        assertEquals((0 until 30).map { "b-$it" } + (30 until 50).filter { it != 40 }.map { "a-$it" }, feed.current.items.map { it.key.permlink }, "the rest stays where it was, filtered as shown")
         feed.loadMore()
         testScheduler.advanceUntilIdle()
-        assertEquals((50 until 60).map { "b-$it" }, feed.current.items.drop(50).map { it.key.permlink }, "paging goes on after the kept rows")
+        assertEquals((50 until 60).map { "b-$it" }, feed.current.items.drop(49).map { it.key.permlink }, "paging goes on after the kept rows")
         feed.close()
     }
 
