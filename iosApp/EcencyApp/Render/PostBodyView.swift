@@ -210,16 +210,7 @@ struct BlockView: View {
                 }
             }
         case let preview as BlockPostPreview:
-            VStack(alignment: .leading, spacing: 2) {
-                Text("@\(preview.author)").scaledFont(13, weight: .bold, relativeTo: .footnote).foregroundStyle(theme.link)
-                Text(preview.permlink).scaledFont(14, relativeTo: .subheadline).foregroundStyle(theme.text).lineLimit(2)
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.chipBorder))
-            .contentShape(Rectangle())
-            .onTapGesture { actions.onLink(LinkTargetPost(author: preview.author, permlink: preview.permlink)) }
-            .padding(.vertical, 6)
+            PostLinkCardView(preview: preview, actions: actions)
         case let container as BlockContainer:
             VStack(alignment: container.style.horizontal(direction), spacing: 0) {
                 ForEach(blockIDs(container.blocks), id: \.self) { id in let i = id.index
@@ -662,5 +653,93 @@ extension BlockStyle {
         if align == .end { return rtl ? .leading : .trailing }
         if align == .left { return rtl ? .trailing : .leading }
         return .leading
+    }
+}
+
+// MARK: - Post link cards (#3705)
+
+private struct PostLinkCardsKey: EnvironmentKey {
+    static let defaultValue: Observed<PostLinkCardsState>? = nil
+}
+
+extension EnvironmentValues {
+    /// The session's post link cards (`env.postLinkCards`); nil (previews, tests without it) draws the plain card.
+    var postLinkCards: Observed<PostLinkCardsState>? {
+        get { self[PostLinkCardsKey.self] }
+        set { self[PostLinkCardsKey.self] = newValue }
+    }
+}
+
+/// A link to another post: the linked post's title, the start of its text and its thumbnail, read once the card shows
+/// (the linking post's `links_meta` text until then); author and permlink when there is neither. The card is at least
+/// the thumbnail's height; the thumbnail follows "Show images". As Android's `PostPreviewCard`.
+struct PostLinkCardView: View {
+    let preview: BlockPostPreview
+    let actions: PostActions
+    @Environment(\.postLinkCards) private var cards
+
+    var body: some View {
+        if let cards {
+            ReadCard(preview: preview, actions: actions, cards: cards)
+        } else {
+            PostLinkCardContent(preview: preview, card: preview.card, actions: actions)
+        }
+    }
+
+    private struct ReadCard: View {
+        let preview: BlockPostPreview
+        let actions: PostActions
+        @ObservedObject var cards: Observed<PostLinkCardsState>
+
+        var body: some View {
+            // the linked post's card once read (the model's, not the whole bridged map), the links_meta text until then
+            let model = cards.model as? PostLinkCards
+            PostLinkCardContent(preview: preview, card: model?.card(author: preview.author, permlink: preview.permlink) ?? preview.card, actions: actions)
+                .onAppear { model?.shown(author: preview.author, permlink: preview.permlink) }
+        }
+    }
+}
+
+private struct PostLinkCardContent: View {
+    let preview: BlockPostPreview
+    let card: LinkCard?
+    let actions: PostActions
+    @Environment(\.postTheme) private var theme
+    @ScaledMetric(relativeTo: .body) private var thumb: CGFloat = 64
+
+    var body: some View {
+        HStack(spacing: 12) {
+            if let image = card?.image, actions.showImages {
+                LoadedImageView(src: image, maxWidth: thumb) { _ in }
+                    .frame(width: thumb, height: thumb)
+                    .background(theme.placeholder)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .accessibilityHidden(true)
+                    .accessibilityIdentifier("post-link-thumb")
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                if let card {
+                    Text(card.title).scaledFont(15, weight: .bold, relativeTo: .subheadline).foregroundStyle(theme.text).lineLimit(2)
+                    if !card.summary.isEmpty {
+                        Text(card.summary).scaledFont(13, relativeTo: .footnote).foregroundStyle(theme.text.opacity(0.7)).lineLimit(2)
+                    }
+                    Text("@\(preview.author)").scaledFont(12, weight: .bold, relativeTo: .caption).foregroundStyle(theme.link).lineLimit(1)
+                } else {
+                    Text("@\(preview.author)").scaledFont(13, weight: .bold, relativeTo: .footnote).foregroundStyle(theme.link)
+                    Text(preview.permlink).scaledFont(14, relativeTo: .subheadline).foregroundStyle(theme.text).lineLimit(2)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        // the thumbnail's height: the least a card is, read or not
+        .frame(minHeight: thumb, alignment: .leading)
+        .padding(12)
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.chipBorder))
+        .contentShape(Rectangle())
+        .onTapGesture { actions.onLink(LinkTargetPost(author: preview.author, permlink: preview.permlink)) }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("post-link-card")
+        .padding(.vertical, 6)
     }
 }

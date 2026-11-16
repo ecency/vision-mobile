@@ -24,6 +24,8 @@ data class BuildOptions(
     val waves: Boolean = false,
     val metadataImage: String? = null,
     val proxyBase: String = "https://images.ecency.com",
+    /** The linking post's `links_meta` cards by "author/permlink" ([LinksMeta]). */
+    val linkCards: Map<String, LinkCard> = emptyMap(),
 )
 
 /**
@@ -465,6 +467,9 @@ private class Walker(private val options: BuildOptions) {
         return Block.Image(src, el.getAttribute("alt")?.takeIf { it.isNotBlank() && it != "alt" }, link)
     }
 
+    private fun preview(author: String, permlink: String, el: Element) =
+        Block.PostPreview(author, permlink, SafeTarget.httpUrl(el.getAttribute("data-href")), options.linkCards[LinksMeta.key(author, permlink)])
+
     private fun thumbnail(src: String?): String? = SafeTarget.proxiedImage(src, options.proxyBase) ?: fallbackThumb
 
     /**
@@ -515,7 +520,7 @@ private class Walker(private val options: BuildOptions) {
         }
         BlockBuilder.inlineCard(el)?.let { post ->
             flush(ctx)
-            out += Block.PostPreview(post.author, post.permlink, SafeTarget.httpUrl(el.getAttribute("data-href")))
+            out += preview(post.author, post.permlink, el)
             return
         }
         val target = BlockBuilder.anchorTarget(el)
@@ -616,7 +621,7 @@ private class Walker(private val options: BuildOptions) {
                         }
                         card != null -> {
                             flush(c)
-                            out += Block.PostPreview(card.author, card.permlink, SafeTarget.httpUrl(n.getAttribute("data-href")))
+                            out += preview(card.author, card.permlink, n)
                         }
                         tag == "a" && BlockBuilder.isVideoAnchor(n) -> {
                             flush(c)

@@ -39,6 +39,7 @@ struct RootView: View {
         .environmentObject(app.session)
         .environmentObject(app.votes)
         .environmentObject(app.lock)
+        .environment(\.postLinkCards, app.linkCards)
         .themedSheet(item: $app.sheet, onDismiss: {
             // a sheet asked for another one (accounts, then sign-in): show it once this one is gone
             if let next = app.nextSheet {
@@ -80,6 +81,7 @@ struct RootView: View {
             .environmentObject(app)
             .environmentObject(app.session)
             .environmentObject(app.votes)
+            .environment(\.postLinkCards, app.linkCards)
         }
         // ---- feed, posts and reading: menu confirmations and failures ----
         .alert(app.confirm?.title ?? "", isPresented: Binding(get: { app.confirm != nil }, set: { if !$0 { app.confirm = nil } }),

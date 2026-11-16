@@ -127,6 +127,8 @@ final class AppContainer: ObservableObject {
     let session: Observed<SessionState>
     let votes: Observed<VoteState>
     let lock: Observed<AppLockState>
+    /// Post link cards read when shown (#3705), handed to post bodies through `\.postLinkCards`.
+    let linkCards: Observed<PostLinkCardsState>
     let options: LaunchOptions
     /// The lock screen and app switcher cover, in a window above every sheet and alert.
     let lockOverlay: LockOverlay
@@ -260,6 +262,7 @@ final class AppContainer: ObservableObject {
         session = Observed(env.session, ownsModel: false)
         votes = Observed(env.votes, ownsModel: false)
         lock = Observed(env.appLock, ownsModel: false)
+        linkCards = Observed(env.postLinkCards, ownsModel: false)
         ui = Observed(env.ui, ownsModel: false)
         connectivity = Observed(env.connectivity, ownsModel: false)
         badges = Observed(env.badges, ownsModel: false)

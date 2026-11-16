@@ -44,8 +44,11 @@ sealed interface Block {
         val startSeconds: Int = 0,
     ) : Block
 
-    /** Inline link to another Hive post, drawn as a preview card. */
-    data class PostPreview(val author: String, val permlink: String, val href: String?) : Block
+    /**
+     * Inline link to another Hive post, drawn as a preview card. [card] is the linking post's `links_meta` text for it
+     * ([LinksMeta]), shown until the linked post is read (`PostLinkCards`, #3705).
+     */
+    data class PostPreview(val author: String, val permlink: String, val href: String?, val card: LinkCard? = null) : Block
 
     /** Layout wrapper for `<center>`, `<div class=...>` and similar. */
     data class Container(val blocks: List<Block>, val style: BlockStyle) : Block
@@ -125,3 +128,6 @@ sealed interface LinkTarget {
      */
     data class Anchor(val id: String, val post: Post? = null) : LinkTarget
 }
+
+/** What a post link card shows of the linked post: its title, the start of its text and a small proxied thumbnail. */
+data class LinkCard(val title: String, val summary: String, val image: String?)

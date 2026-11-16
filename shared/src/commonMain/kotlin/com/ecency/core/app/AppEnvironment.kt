@@ -240,6 +240,9 @@ class AppEnvironment(
     /** Content shared into the app (Android share intents, the iOS share extension). One per app. */
     val share: ShareModel by lazy { ShareModel(this) }
 
+    /** Post link cards read when shown, kept for the session (#3705). */
+    val postLinkCards: PostLinkCards by lazy { PostLinkCards(this) }
+
     /** The QR scanner of one open (RN QR_SCAN). */
     fun qrScanModel(purpose: QrPurpose): QrScanModel = QrScanModel(this, purpose)
 

@@ -197,7 +197,10 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
     private fun discussion(rootAuthor: String, rootPermlink: String): Map<String, JsonObject> {
         val root = rootAuthor to rootPermlink
         val all = mutableListOf(
-            entry(rootAuthor, rootPermlink, title = "Fixture post", children = 5, votes = 9, replies = listOf("spike-bob/re-c1", "spike-carol/re-c2")),
+            entry(
+                rootAuthor, rootPermlink, title = "Fixture post", children = 5, votes = 9, replies = listOf("spike-bob/re-c1", "spike-carol/re-c2"),
+                body = if (rootPermlink == LINKING_PERMLINK) LINKING_BODY else BODY,
+            ),
             entry("spike-bob", "re-c1", parent = root, depth = 1, body = "First fixture comment.", replies = listOf("spike-dave/re-r1")),
             entry("spike-dave", "re-r1", parent = "spike-bob" to "re-c1", depth = 2, body = "A reply at level two.", replies = listOf("spike-erin/re-r2")),
             entry("spike-erin", "re-r2", parent = "spike-dave" to "re-r1", depth = 3, body = "A reply at level three.", replies = listOf("spike-frank/re-r3")),
@@ -238,6 +241,11 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
 
         /** The throwaway master password every demo account's keys derive from (public, controls nothing). */
         const val PASSWORD = "P5UiTestThrowawayPasswordNotReal"
+
+        /** A post whose body links two others, drawn as post link cards (#3705; `-openLink .../@spike-alice/fake-post-links`). */
+        const val LINKING_PERMLINK = "fake-post-links"
+        const val LINKING_BODY = "## Further reading\n\nTwo earlier posts on the same subject:\n\n" +
+            "https://ecency.com/hive-100001/@spike-bob/fake-post-2\n\nhttps://ecency.com/hive-100001/@spike-carol/fake-post-3\n\nThanks for reading."
 
         /** Markdown for every demo post: a heading, text, a mention, an external link and emphasis. */
         const val BODY = "## Spike fixture\n\nThis post is synthetic test content for the native app. Hi @spike-bob, thanks for reading.\n\n" +

@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,7 +54,10 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -75,6 +79,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -85,6 +90,7 @@ import com.ecency.core.render.ImageProxy
 import com.ecency.core.render.blocks.Block
 import com.ecency.core.render.blocks.BlockStyle
 import com.ecency.core.render.blocks.LinkTarget
+import com.ecency.core.app.PostLinkCards
 import com.ecency.core.app.UiCopy
 
 /** What the host screen does on taps; mirrors the RN renderer's handler props. */
@@ -643,21 +649,64 @@ internal fun VideoThumb(thumbnail: String?, maxWidth: Dp, threeSpeak: Boolean, o
     }
 }
 
+/** The session's post link cards ([PostLinkCards], #3705); null (previews, tests without it) draws the plain card. */
+val LocalPostLinkCards = staticCompositionLocalOf<PostLinkCards?> { null }
+
+/**
+ * A link to another post: the linked post's title, the start of its text and its thumbnail, read once the card shows
+ * (the linking post's `links_meta` text until then); author and permlink when there is neither. The card is at least
+ * the thumbnail's height, so a read card grows by its extra lines at most; the thumbnail follows "Show images".
+ */
 @Composable
 private fun PostPreviewCard(block: Block.PostPreview, actions: PostActions) {
     val theme = LocalPostTheme.current
-    Column(
+    val cards = LocalPostLinkCards.current
+    // the linked post's card once read, the linking post's links_meta text until then (reading the state's value is
+    // what redraws the card when a read lands)
+    val read = cards?.state?.collectAsState()?.value
+    val card = read?.let { cards.card(block.author, block.permlink) } ?: block.card
+    if (cards != null) {
+        LaunchedEffect(block.author, block.permlink) { cards.shown(block.author, block.permlink) }
+    }
+    Row(
         Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .border(1.dp, theme.chipBorder, RoundedCornerShape(8.dp))
             .clickable(role = Role.Button) { actions.onLink(LinkTarget.Post(block.author, block.permlink)) }
-            .padding(12.dp),
+            .heightIn(min = LINK_CARD_MIN_HEIGHT)
+            .padding(12.dp)
+            .testTag("post-link-card"),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        BasicText("@${block.author}", style = TextStyle(color = theme.link, fontSize = 13.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content))
-        BasicText(block.permlink, style = TextStyle(color = theme.text, fontSize = 14.sp, textDirection = TextDirection.Content), maxLines = 2)
+        val image = card?.image?.takeIf { actions.showImages }
+        if (image != null) {
+            AsyncImage(
+                model = image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(LINK_CARD_THUMB).clip(RoundedCornerShape(6.dp)).background(theme.placeholder).testTag("post-link-thumb"),
+            )
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            if (card != null) {
+                BasicText(card.title, style = TextStyle(color = theme.text, fontSize = 15.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (card.summary.isNotEmpty()) {
+                    BasicText(card.summary, style = TextStyle(color = theme.text.copy(alpha = 0.7f), fontSize = 13.sp, textDirection = TextDirection.Content), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+                BasicText("@${block.author}", style = TextStyle(color = theme.link, fontSize = 12.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content), maxLines = 1)
+            } else {
+                BasicText("@${block.author}", style = TextStyle(color = theme.link, fontSize = 13.sp, fontWeight = FontWeight.Bold, textDirection = TextDirection.Content))
+                BasicText(block.permlink, style = TextStyle(color = theme.text, fontSize = 14.sp, textDirection = TextDirection.Content), maxLines = 2)
+            }
+        }
     }
 }
+
+private val LINK_CARD_THUMB = 64.dp
+// the thumbnail and the padding: the least a card is, read or not
+private val LINK_CARD_MIN_HEIGHT = LINK_CARD_THUMB + 24.dp
 
 @Composable
 private fun DetailsView(block: Block.Details, maxWidth: Dp, actions: PostActions, images: Lazy<List<String>>) {

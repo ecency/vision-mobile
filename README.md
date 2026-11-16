@@ -532,6 +532,16 @@ node block-words.mjs corpus      # local only: expected words for the corpus (ht
 
 With the local corpus in `tools/render/corpus/expected.jsonl`, `./gradlew :shared:testAndroidHostTest --tests '*BlockCorpusTest'` reports crashes, text loss, unhandled tags and classes, and timing.
 
+### Post link cards
+
+A link to another Hive post on a line of its own (`Block.PostPreview`) is a card with the linked post's title, the start of its text, its thumbnail and `@author`; a tap opens the post (#3705). RN read the linked post whenever the linking post's `links_meta` had no full entry (`linkPreview.tsx`), the website always (its oEmbed endpoint); native reads it always, so a card never shows what the linking post claims about another one.
+
+- `env.postLinkCards` (`PostLinkCards`) reads the linked post (`bridge.get_post`) when its card is first shown, at most 3 at once, and keeps the card for the session. Title, summary and thumbnail are the feed card's (`PostBodyRenderer.summary`, `cardImage`). A missing or muted post (`Post.isMuted`), one without a title or an invalid link keeps the plain card (author and permlink) and is not read again; a failed read is read again the next time the card shows. An NSFW post shows no thumbnail unless the NSFW setting is "Always show" when it is read.
+- Until the read lands the card shows the linking post's `links_meta` text for that link (`LinksMeta.cards`, into `PostPreview.card` while the blocks are built): the entry needs a title and a URL that parses to a valid author and permlink; the title is cut to 256 characters and the summary to 150. Its image is never used (any author writes anything there: it could be an NSFW post's cover).
+- The card is at least the thumbnail's height, so a read card grows only by the lines it adds. The thumbnail follows "Show images". Android draws it in `PostPreviewCard` (`LocalPostLinkCards`, provided in `EcencyApp`), iOS in `PostLinkCardView` (`\.postLinkCards`, from `RootView`, its sheet too); a body without the provider (previews) draws the plain card or the `links_meta` text.
+- Fake data: the demo post `@spike-alice/fake-post-links` links two fixture posts (`DemoHiveTransport`, iOS `FakeHiveTransport`).
+- Tests: `PostLinkCardsTest` (shared), `PostLinkCardTest` (Android), `PostLinkCardUITests` (iOS).
+
 ## Render pipeline
 
 `shared/src/commonMain/kotlin/com/ecency/core/render` reproduces `@ecency/render-helper` 2.5.42 end to end in pure Kotlin (JS is only the offline oracle):
