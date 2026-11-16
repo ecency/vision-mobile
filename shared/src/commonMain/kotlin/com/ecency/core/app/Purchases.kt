@@ -368,7 +368,6 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
                 // not retried by itself: Play also reports a failed launch through its purchase listener, which would end
                 // this buy while a retry runs; a dropped service is connected again by the next Buy (#3707 review)
                 val (_, error) = callStore<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
-                if (error?.isConnectionDropped == true) mutableState.update { it.copy(connected = false) }
                 if (error != null) storeFailed(error.copy(productId = error.productId ?: productId), IapStage.REQUEST, fromBuy = true)
                 return@launch
             }
@@ -449,6 +448,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     }
 
     private suspend fun storeFailed(error: StoreError, stage: IapStage, fromBuy: Boolean? = null) {
+        if (error.isConnectionDropped) dropped()
         val report = errors.report(error, stage)
         val productId = error.productId ?: awaiting.singleOrNull() ?: ""
         val buy = fromBuy ?: (productId in awaiting)
@@ -671,10 +671,14 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     private suspend fun <T> connected(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {
         val first = callStore(timeout, call)
         if (first.second?.isConnectionDropped != true) return first
-        mutableState.update { it.copy(connected = false) }
+        dropped()
         connect()?.let { return null to it }
-        return callStore(timeout, call)
+        // dropped again: the next call connects first
+        return callStore(timeout, call).also { if (it.second?.isConnectionDropped == true) dropped() }
     }
+
+    /** Play dropped its service (said by a call or by its purchase listener): the next store call connects first. */
+    private fun dropped() = mutableState.update { it.copy(connected = false) }
 
     /** A store call as a suspension on the main thread; null and an error when the store never answered. */
     private suspend fun <T> callStore(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {

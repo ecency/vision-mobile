@@ -405,10 +405,11 @@ class FeedModel internal constructor(
                 val kept = old != null && !old.isEndReached && loaded > pages && !fresh.isEndReached
                 val fresher = withLocal(read, nsfw, top = true)
                 val all = if (kept && old != null) {
-                    // by post, not by page: whatever the fresh pages did not bring back, in its old order, filtered as shown
+                    // by post, not by page: whatever is shown now (rows an earlier quiet refresh brought included) that the
+                    // fresh pages did not bring back, in its order, filtered as shown
                     val got = fresher.map { it.key }.toSet()
                     old.markSeen(got)
-                    fresher + shown(old.posts.mapNotNull { posts[it.key] }, nsfw).filter { it.key !in got }
+                    fresher + shown(posts.values.toList(), nsfw).filter { it.key !in got }
                 } else {
                     fresher
                 }

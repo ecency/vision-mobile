@@ -109,8 +109,11 @@ class PostLinkCardsTest {
         val image = assertNotNull(card.image)
         assertTrue("width=${PostLinkCards.THUMB_PX}&height=${PostLinkCards.THUMB_PX}" in image, "a thumbnail's size, not a feed card's: $image")
         assertFalse(cards.isPlain("spike-author", "first"))
-        // an author the reader mutes: the plain card at once
+        // an author the reader mutes: the plain card at once (the state changes, so cards on screen redraw)
+        val before = cards.current.mutes
         app.env.setAuthorMuted("spike-author", true)
+        testScheduler.advanceUntilIdle()
+        assertTrue(cards.current.mutes > before)
         assertNull(cards.card("spike-author", "first"))
         assertTrue(cards.isPlain("spike-author", "first"))
         assertEquals(card, cards.current.cards["spike-author/first"])

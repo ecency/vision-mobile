@@ -10,8 +10,11 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
-/** The post link cards read so far, by "author/permlink"; [plain]: reads that ended without a card. */
-data class PostLinkCardsState(val cards: Map<String, LinkCard> = emptyMap(), val plain: Set<String> = emptySet())
+/**
+ * The post link cards read so far, by "author/permlink"; [plain]: reads that ended without a card. [mutes] changes with
+ * the reader's mutes, so cards drawn from [PostLinkCards.card] redraw at once.
+ */
+data class PostLinkCardsState(val cards: Map<String, LinkCard> = emptyMap(), val plain: Set<String> = emptySet(), val mutes: Int = 0)
 
 /**
  * Post link cards (#3705): the linked post is read (`bridge.get_post`) when its card is first shown, and its title,
@@ -34,6 +37,13 @@ class PostLinkCards internal constructor(private val env: AppEnvironment) :
 
     /** Cards of NSFW posts: their thumbnail follows the NSFW setting when served. */
     private val nsfw = mutableSetOf<String>()
+
+    init {
+        // a mute applies to cards already on screen: their views redraw from the changed state
+        scope.launch {
+            env.events.collect { e -> if (e is AppEvent.AuthorMuted || e is AppEvent.MutesLoaded) setState { it.copy(mutes = it.mutes + 1) } }
+        }
+    }
 
     /** The card of [author]/[permlink] once read; null while it is read, and for [isPlain]. */
     fun card(author: String, permlink: String): LinkCard? {

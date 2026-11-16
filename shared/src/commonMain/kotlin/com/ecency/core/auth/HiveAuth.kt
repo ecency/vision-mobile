@@ -207,7 +207,13 @@ class KtorHasSocketFactory(private val client: HttpClient) : HasSocketFactory {
         }
         val channel = Channel<String>(Channel.UNLIMITED)
         val socket = object : HasSocket {
-            override suspend fun send(text: String) = session.send(Frame.Text(text))
+            @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+            override suspend fun send(text: String) {
+                // an outgoing side already closed (a transport failure closes it with that failure as its cause, which
+                // send would rethrow): nothing is queued, said as the one failure HiveAuthClient may send again after
+                if (session.outgoing.isClosedForSend) throw ClosedSendChannelException("HiveAuth socket closed")
+                session.send(Frame.Text(text))
+            }
             override val incoming: ReceiveChannel<String> = channel
             override suspend fun close() = session.close()
             override var closeCode: Int? = null

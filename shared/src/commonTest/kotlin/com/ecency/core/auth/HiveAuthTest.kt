@@ -70,12 +70,16 @@ class HiveAuthTest {
         /** When set, every send fails with it (after the socket may have taken the frame). */
         var failSend: Exception? = null
 
+        /** Every send tried, failed ones included. */
+        var attempts = 0
+
         override suspend fun open(host: String): HasSocket {
             opened++
             val ch = channel
             val id = opened
             return object : HasSocket {
                 override suspend fun send(text: String) {
+                    attempts++
                     if (id in closedIdle) throw kotlinx.coroutines.channels.ClosedSendChannelException("socket closed")
                     failSend?.let { throw it }
                     val json = Json.parseToJsonElement(text).jsonObject
@@ -232,7 +236,8 @@ class HiveAuthTest {
         relay.failSend = IllegalStateException("write failed midway")
         val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
         assertFailsWith<Exception> { client(relay).broadcast(HiveAuthSession(user, key, "has-token", 0), KeyRole.ACTIVE, ops) {} }
-        assertEquals(1, relay.opened, "no second socket, no second request")
+        assertEquals(1, relay.opened, "no second socket")
+        assertEquals(1, relay.attempts, "one send: the frame may have reached the relay")
     }
 
     @Test

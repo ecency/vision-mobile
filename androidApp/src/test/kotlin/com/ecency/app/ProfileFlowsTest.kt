@@ -251,7 +251,8 @@ class ProfileFlowsTest {
         waitFor("proBadge")
         waitFor("follow")
         waitFor("tab:comments")
-        compose.onNodeWithTag("profileList").performScrollToKey("alice/blog-one".let { "blog:$it" })
+        // the blog row comes from a load: retried until it is in the list (one scroll fails before it, on a busy machine)
+        compose.await("the blog row in the profile list") { runCatching { compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-one") }.isSuccess }
         waitFor("card:alice/blog-one")
         assertTrue("no reputation badge on the card avatars", compose.onAllNodes(hasTestTag("reputation"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
         compose.onNodeWithTag("profileList").performScrollToIndex(0)

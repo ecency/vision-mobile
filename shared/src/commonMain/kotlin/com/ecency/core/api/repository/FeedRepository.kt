@@ -107,7 +107,7 @@ class FeedPager internal constructor(
     val posts: List<Post> get() = items.toList()
 
     /** Posts shown from another read (a quiet refresh's fresh pages): a later page of this pager skips them. */
-    suspend fun markSeen(keys: Collection<PostKey>) = mutex.withLock { seen += keys }
+    internal suspend fun markSeen(keys: Collection<PostKey>) = mutex.withLock { seen += keys }
 
     var isEndReached: Boolean = false
         private set

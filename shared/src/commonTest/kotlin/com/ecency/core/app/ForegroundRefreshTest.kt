@@ -154,7 +154,16 @@ class ForegroundRefreshTest {
         assertEquals(expected, feed.current.items.map { it.key.permlink }, "every row once, the fresh ones first")
         feed.loadMore()
         testScheduler.advanceUntilIdle()
-        assertEquals(expected + (50 until 59).map { "p-$it" }, feed.current.items.map { it.key.permlink }, "paging goes on, new-3 stays where it is")
+        val shown = expected + (50 until 59).map { "p-$it" }
+        assertEquals(shown, feed.current.items.map { it.key.permlink }, "paging goes on, new-3 stays where it is")
+
+        // a second return, thirty newer posts on top: the rows the first refresh brought stay too
+        f.rows = (0 until 30).map { "newer-$it" } + f.rows
+        f.after = { null }
+        f.app.away(long)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertEquals((0 until 30).map { "newer-$it" } + shown, feed.current.items.map { it.key.permlink }, "nothing the reader had is lost")
         feed.close()
     }
 

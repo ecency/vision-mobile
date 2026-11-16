@@ -65,9 +65,12 @@ class FakeStore(override val platform: String = PurchaseService.PLAY) : StorePla
         storeListener?.onPurchases(listOf(p))
     }
 
+    /** Reconnects that leave the service dropped again (it drops right after connecting). */
+    var dropsAgain = 0
+
     override fun connect(done: (StoreError?) -> Unit) {
         connects++
-        if (connectError == null) dropped = false
+        if (connectError == null && dropsAgain-- <= 0) dropped = false
         done(connectError)
     }
 
@@ -220,6 +223,21 @@ class PurchasesTest {
         testScheduler.advanceUntilIdle()
         assertTrue(a.await().first.isNotEmpty() && b.await().first.isNotEmpty())
         assertEquals(connects + 1, r.store.connects)
+        // Play's purchase listener says the service dropped: the next call connects first
+        r.store.storeListener!!.onError(StoreError(StoreError.SERVICE_ERROR, "Service disconnected", null, StoreError.PLAY_SERVICE_DISCONNECTED))
+        testScheduler.advanceUntilIdle()
+        r.env.purchases.products(listOf("999points"))
+        testScheduler.advanceUntilIdle()
+        assertEquals(connects + 2, r.store.connects)
+        // the retry after a reconnect drops too: the next purchase sheet connects first instead of failing on it
+        r.store.dropped = true
+        r.store.dropsAgain = 1
+        r.env.purchases.products(listOf("999points"))
+        testScheduler.advanceUntilIdle()
+        val sheets = r.store.sheets.size
+        r.env.purchases.buy("999points", PurchaseTarget(user = alice))
+        testScheduler.advanceUntilIdle()
+        assertEquals(sheets + 1, r.store.sheets.size, "the sheet opened after a reconnect")
     }
 
     @Test
