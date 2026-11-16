@@ -29,7 +29,8 @@ fun MacrobenchmarkScope.passFirstLaunch() {
     if (device.hasObject(By.res("welcome").pkg(PACKAGE))) {
         // after an update the terms come back already ticked: a tap then would untick them and leave Start disabled
         device.findObject(By.res("welcomeTerms"))?.takeIf { !it.isChecked }?.click()
-        device.wait(Until.findObject(By.res("welcomeStart").enabled(true)), 5_000)?.click()
+        // without it the app stays on the welcome screen, and a cold start benchmark would time that screen
+        (device.wait(Until.findObject(By.res("welcomeStart").enabled(true)), 5_000) ?: error("Start never enabled; on screen: ${onScreen()}")).click()
         device.wait(Until.findObject(By.res(DENY)), 3_000)?.click()
     } else {
         device.findObject(By.res(DENY))?.click()

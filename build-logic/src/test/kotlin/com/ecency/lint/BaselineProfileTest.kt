@@ -50,8 +50,11 @@ class BaselineProfileTest {
         val ui = root.resolve("androidApp/src/main/kotlin").walk().filter { it.extension == "kt" }.joinToString("\n") { it.readText() }
         // a tag built from a template ("bottomTab:${tab.name}") is matched by its literal prefix; Skeleton takes its tag
         // as an argument (tag = "skeleton:body")
+        // a literal tag must be set in full: "wave:header" is not found by another "wave:" tag
         val missing = wanted.distinct().filter { tag ->
-            "testTag(\"${if (':' in tag) tag.substringBefore(':') + ":" else "$tag\""}" !in ui && "tag = \"$tag\"" !in ui
+            val exact = "testTag(\"$tag\")" in ui || "tag = \"$tag\"" in ui
+            val template = ':' in tag && "testTag(\"${tag.substringBefore(':')}:\${" in ui
+            !exact && !template
         }
         assertTrue(missing.isEmpty(), "Journeys.kt looks for tags the app no longer sets: $missing")
         assertTrue(wanted.size >= 6, "the journeys' tags were read: ${wanted.toList()}")
@@ -65,6 +68,9 @@ class BaselineProfileTest {
         assertTrue("By.res(\"wave:header\")" in journeys, "the Waves journey waits for a loaded wave, not wavesList")
         val unchecked = journeys.lines().filter { ("Until.hasObject(" in it || "Until.gone(" in it) && "|| error(" !in it }
         assertTrue(unchecked.isEmpty(), "a wait that times out must fail the journey, not scroll an error screen: $unchecked")
+        // only the system's notification question may be absent (asked once, Android 13+)
+        val skipped = journeys.lines().filter { "Until.findObject(" in it && "?: error(" !in it && "DENY" !in it }
+        assertTrue(skipped.isEmpty(), "a button the journey needs must fail it when missing, not be skipped: $skipped")
         val fling = journeys.substringAfter("fun MacrobenchmarkScope.flingHomeFeed()").substringBefore("\n}")
         val down = Regex("""repeat\((\d+)\) \{ feed\.fling\(Direction\.DOWN\) }""").find(fling)?.groupValues?.get(1)
         val up = Regex("""repeat\((\d+)\) \{ feed\.fling\(Direction\.UP\) }""").find(fling)?.groupValues?.get(1)
