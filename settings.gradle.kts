@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ecency-native"
-include(":shared", ":androidApp")
+include(":shared", ":androidApp", ":baselineprofile")
