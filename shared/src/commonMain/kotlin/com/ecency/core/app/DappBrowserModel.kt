@@ -612,6 +612,8 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
             return askSignBuffer(tabId, origin, user, message, authority, answer)
         }
         if (type in UNSUPPORTED) return answer.error("Operation \"$type\" is not yet supported in Ecency browser.")
+        // the page that asked, before the operations are built: Retry may load it again meanwhile
+        val load = loadOf(tabId)
         scope.launch {
             val ops = try {
                 val rate = if (type == "delegation" || type == "powerDown") env.walletApi.hivePerMVests() else 0.0
@@ -627,7 +629,7 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
             val details = listOfNotNull(
                 (data["display_msg"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() && type == "custom" }?.let { pageSays(origin, it) },
             )
-            askBroadcast(tabId, origin, user, BridgeLabels.of(type), ops, details, answer)
+            askBroadcast(tabId, load, origin, user, BridgeLabels.of(type), ops, details, answer)
         }
     }
 
@@ -671,10 +673,11 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
             is JsonObject -> (m["title"] as? JsonPrimitive)?.contentOrNull
             else -> null
         }?.takeIf { it.isNotBlank() }?.take(MAX_TITLE)
-        askBroadcast(tabId, origin, user, BridgeLabels.of("broadcast"), standard, listOfNotNull(pageTitle?.let { pageSays(origin, it) }), answer)
+        askBroadcast(tabId, loadOf(tabId), origin, user, BridgeLabels.of("broadcast"), standard, listOfNotNull(pageTitle?.let { pageSays(origin, it) }), answer)
     }
 
-    private fun askBroadcast(tabId: Int, origin: String, user: String, title: String, ops: JsonArray, details: List<LinkField>, answer: Answerer) {
+    /** [load]: the load of [tabId]'s page that asked ([BrowserTab.load]); a request of an earlier one is not shown. */
+    private fun askBroadcast(tabId: Int, load: Int?, origin: String, user: String, title: String, ops: JsonArray, details: List<LinkField>, answer: Answerer) {
         // the sheet shows every field whole, so a request too large to show is refused, and the user told
         if (ops.toString().length + details.sumOf { it.value.length } > MAX_SHOWN) {
             setState { it.copy(notice = tooLargeNotice) }
@@ -696,7 +699,7 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
                 ops
             }
             // the page may have moved on or another request taken the slot while the account was read
-            if (!stillAsking(tabId, origin, user)) return@launch answer.error(BUSY)
+            if (!stillAsking(tabId, origin, user, load)) return@launch answer.error(BUSY)
             val authority = com.ecency.core.auth.OperationAuthority.required(shown)
             prompt(
                 PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.Broadcast(shown, authority)),
@@ -717,11 +720,12 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
         // `posting` message stays refused there too.
         val ownLogin = origin == ECENCY_ORIGIN && authority == KeyRole.POSTING && BridgeSignatures.ecencySiteLogin(message)
         if (!ownLogin && BridgeSignatures.reserved(message)) return answer.error(RESERVED_MESSAGE)
+        val load = loadOf(tabId)
         scope.launch {
             val account = env.accounts.vaultAccount(user) ?: return@launch answer.error(NO_ACCOUNT)
             val wif = if (authority == KeyRole.ACTIVE) account.activeKey else account.postingKey
             if (wif.isNullOrEmpty()) return@launch answer.error("${if (authority == KeyRole.ACTIVE) "Active" else "Posting"} key not available.")
-            if (!stillAsking(tabId, origin, user)) return@launch answer.error(BUSY)
+            if (!stillAsking(tabId, origin, user, load)) return@launch answer.error(BUSY)
             prompt(
                 PendingRequest(nextPromptId++, tabId, origin, user, answer, Work.SignBuffer(message, authority)),
                 BridgeLabels.of("signBuffer"), listOf(LinkField(MESSAGE, BridgeDisplay.shown(message))), null,
@@ -731,10 +735,13 @@ class DappBrowserModel private constructor(private val env: AppEnvironment, init
         }
     }
 
-    // a tab whose page failed or ended ([pageGone]) asks nothing: the page that asked is gone
-    private fun stillAsking(tabId: Int, origin: String, user: String): Boolean =
+    private fun loadOf(tabId: Int): Int? = current.tabs.firstOrNull { it.id == tabId }?.load
+
+    // a tab whose page failed or ended ([pageGone]) asks nothing: the page that asked is gone, also once Retry or a
+    // navigation loaded it again ([load] moved on)
+    private fun stillAsking(tabId: Int, origin: String, user: String, load: Int?): Boolean =
         pending == null && !current.working && tabId == current.activeTabId &&
-            current.tabs.firstOrNull { it.id == tabId }?.takeIf { !it.hasError }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
+            current.tabs.firstOrNull { it.id == tabId }?.takeIf { !it.hasError && it.load == load }?.url?.let(BrowserPolicy::httpsOrigin) == origin &&
             env.session.current.username == user
 
     private fun prompt(request: PendingRequest, title: String, details: List<LinkField>, ops: JsonArray?, warning: String? = null) {

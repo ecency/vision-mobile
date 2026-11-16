@@ -365,6 +365,32 @@ class DappBrowserModelTest {
         assertTrue(app.broadcasts().isEmpty())
     }
 
+    /** Review of #3706: Retry loads the page again, so a request the ended page made is still not shown. */
+    @Test
+    fun aRequestOfAnEndedPageShowsNoPromptAfterRetry() = runTest {
+        val app = signedIn(this)
+        val b = browser(app)
+        val page = Page()
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100"""))
+        b.pageGone(b.current.activeTabId)
+        b.retry()
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        b.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.broadcasts().isEmpty())
+        // a message to sign, the same
+        send(b, page, keychain("signBuffer", ""","message":"hello","method":"Posting"""", id = 2))
+        b.pageGone(b.current.activeTabId)
+        b.retry()
+        testScheduler.advanceUntilIdle()
+        assertNull(b.current.prompt)
+        // a request from the page loaded again is asked
+        send(b, page, keychain("vote", ""","author":"a","permlink":"p","weight":100""", id = 3))
+        testScheduler.advanceUntilIdle()
+        assertNotNull(b.current.prompt)
+    }
+
     @Test
     fun aPageThatMovedOnHearsNothingAndItsPromptGoes() = runTest {
         val app = signedIn(this)

@@ -1289,6 +1289,75 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3706: a load that ends while the socket waits to reconnect leaves the gap owed until it is back. */
+    @Test
+    fun aLoadEndingDuringTheReconnectWaitLeavesTheGapForTheReconnect() = runTest {
+        val f = ChatFixture(this)
+        f.chat.seedHistory("ch-ecency", read = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+            f.app.authBackend.gate = { r -> if (r.url.contains("/posts") && r.url.contains("before=")) held.await() }
+            m.loadMore()
+            f.run(1)
+            f.chat.dropSockets()
+            f.run(1)
+            assertFalse(m.current.connected)
+            f.chat.incoming("ch-ecency", "sent during the drop")
+            f.app.authBackend.gate = null
+            held.complete(Unit)
+            repeat(5) { f.run(10) }
+            // still waiting to reconnect: nothing can bring this one but the read after the reconnect
+            f.chat.incoming("ch-ecency", "sent before the reconnect")
+            f.run(1)
+            assertFalse(m.current.connected, "still waiting to reconnect")
+            f.run(60_000)
+            f.run(1)
+            assertTrue(m.current.connected, "reconnected")
+            assertTrue("sent during the drop" in texts(m), texts(m).take(3).toString())
+            assertTrue("sent before the reconnect" in texts(m), texts(m).take(3).toString())
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3706: an edit the socket brings while a catch-up read is out stays when that read lands. */
+    @Test
+    fun anEditDuringACatchUpReadIsKept() = runTest {
+        val f = ChatFixture(this)
+        f.start()
+        f.chat.incoming("ch-ecency", "first version")
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue("first version" in texts(m))
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            f.chat.edit("ch-ecency", f.chat.idOf("ch-ecency", "first version")!!, "edited live")
+            f.run(1)
+            assertTrue("edited live" in texts(m), texts(m).take(3).toString())
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), texts(m).take(3).toString())
+            assertTrue("edited live" in texts(m), "the read's older copy replaced the edit: ${texts(m).take(3)}")
+            assertFalse("first version" in texts(m))
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
     /** Review of #3706: more missed than a page holds restarts from the newest page and keeps what the socket brought meanwhile. */
     @Test
     fun aLongGapKeepsTheMessageTheSocketBroughtDuringTheRead() = runTest {
