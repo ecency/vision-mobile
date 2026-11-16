@@ -67,6 +67,9 @@ class HiveAuthTest {
         /** Sockets the relay closed while nobody read them: a send on one fails, as on a closed websocket. */
         val closedIdle = mutableSetOf<Int>()
 
+        /** When set, every send fails with it (after the socket may have taken the frame). */
+        var failSend: Exception? = null
+
         override suspend fun open(host: String): HasSocket {
             opened++
             val ch = channel
@@ -74,6 +77,7 @@ class HiveAuthTest {
             return object : HasSocket {
                 override suspend fun send(text: String) {
                     if (id in closedIdle) throw kotlinx.coroutines.channels.ClosedSendChannelException("socket closed")
+                    failSend?.let { throw it }
                     val json = Json.parseToJsonElement(text).jsonObject
                     sent += json
                     onSend(json)
@@ -194,9 +198,9 @@ class HiveAuthTest {
         val c = client(relay)
         val session = HiveAuthSession(user, key, "has-token", 0)
         assertEquals("txid-1", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
-        // closed while idle: nothing was reading, so the client did not see it
+        // closed while idle, its reader not told yet: the send fails before anything is queued; a new socket gets its own
         relay.closedIdle += relay.opened
-        relay.drop()
+        relay.channel = Channel(Channel.UNLIMITED)
         assertEquals("txid-2", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
         assertEquals(2, relay.opened)
         assertEquals(2, relay.sent.count { it["cmd"]!!.jsonPrimitive.content == "sign_req" }, "the request reached the relay once")
@@ -219,6 +223,16 @@ class HiveAuthTest {
         assertEquals("txid-2", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
         assertEquals(2, relay.opened)
         assertEquals(2, relay.sent.count { it["cmd"]!!.jsonPrimitive.content == "sign_req" }, "never sent into the closed socket")
+    }
+
+    /** #3707 review: a send that fails for another reason may have reached the relay: it is not sent again. */
+    @Test
+    fun aSendThatFailsForAnotherReasonIsNotSentAgain() = runTest {
+        val relay = FakeRelay { }
+        relay.failSend = IllegalStateException("write failed midway")
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        assertFailsWith<Exception> { client(relay).broadcast(HiveAuthSession(user, key, "has-token", 0), KeyRole.ACTIVE, ops) {} }
+        assertEquals(1, relay.opened, "no second socket, no second request")
     }
 
     @Test

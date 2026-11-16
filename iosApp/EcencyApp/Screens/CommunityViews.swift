@@ -196,10 +196,10 @@ struct CommunitiesScreen: View {
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
-        let communities = CommunitiesModel(env: env)
-        _model = StateObject(wrappedValue: Observed(communities, ownsModel: true))
+        // built only when SwiftUI keeps this StateObject: the autoclosure runs once per screen
+        _model = StateObject(wrappedValue: Observed(CommunitiesModel(env: env), ownsModel: true))
         // signed out there is no Membership to show: Discover first (#3704)
-        _tab = State(initialValue: communities.opensOnDiscover ? 1 : 0)
+        _tab = State(initialValue: CommunitiesModel.companion.opensOnDiscover(env: env) ? 1 : 0)
     }
 
     private var communities: CommunitiesModel { model.model as! CommunitiesModel }

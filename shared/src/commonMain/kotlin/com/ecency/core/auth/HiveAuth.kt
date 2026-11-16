@@ -1,5 +1,6 @@
 package com.ecency.core.auth
 
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.currentCoroutineContext
 import com.ecency.core.api.rpc.platformWebSocketClient
@@ -273,16 +274,15 @@ class HiveAuthClient(
         try {
             connected().send(text)
             return
+        } catch (e: ClosedSendChannelException) {
+            // not reported: the socket's outgoing side was closed, so nothing was queued; opened again below
+            dropSocket()
         } catch (e: CancellationException) {
-            // a socket closed with a cancellation is a closed socket; only the caller's own cancellation ends here
+            // a socket closed with a cancellation queued nothing either; only the caller's own cancellation ends here
             currentCoroutineContext().ensureActive()
             dropSocket()
-        } catch (e: AuthException) {
-            throw e
-        } catch (_: Exception) {
-            // not reported: a closed socket, opened again below
-            dropSocket()
         }
+        // any other failure is not known to have stopped the request before the relay: it is not sent again
         try {
             connected().send(text)
         } catch (e: AuthException) {

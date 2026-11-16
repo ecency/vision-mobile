@@ -103,14 +103,11 @@ class FeedPager internal constructor(
     private val seen = mutableSetOf<PostKey>()
     private val items = mutableListOf<Post>()
 
-    /** How many of [items] each page loaded so far ended at. */
-    private val pageEnds = mutableListOf<Int>()
-
     /** Everything loaded so far. */
     val posts: List<Post> get() = items.toList()
 
-    /** What the pages after the first [pages] loaded (a quiet refresh that read only those again keeps them). */
-    fun postsAfter(pages: Int): List<Post> = items.drop(pageEnds.getOrElse(pages - 1) { items.size })
+    /** Posts shown from another read (a quiet refresh's fresh pages): a later page of this pager skips them. */
+    suspend fun markSeen(keys: Collection<PostKey>) = mutex.withLock { seen += keys }
 
     var isEndReached: Boolean = false
         private set
@@ -131,7 +128,6 @@ class FeedPager internal constructor(
         // a node that repeats the cursor, or keeps answering with posts already shown, would page forever
         isEndReached = page.nextCursor == null || page.nextCursor == requested || emptyPages >= MAX_EMPTY_PAGES
         items += fresh
-        pageEnds += items.size
         fresh
     }
 
@@ -145,7 +141,6 @@ class FeedPager internal constructor(
             emptyPages = 0
             seen.clear()
             items.clear()
-            pageEnds.clear()
         }
         return loadMore()
     }

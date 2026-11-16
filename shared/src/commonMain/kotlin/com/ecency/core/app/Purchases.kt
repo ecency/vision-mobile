@@ -365,7 +365,10 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             if (earlier == null) {
                 // the store holds no earlier Pro purchase: a pending one shown for the buyer is gone
                 if (productId == PurchaseSkus.PRO && buyer.isNotEmpty()) env.proPurchases.dropPending(buyer)
-                val (_, error) = connected<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
+                // not retried by itself: Play also reports a failed launch through its purchase listener, which would end
+                // this buy while a retry runs; a dropped service is connected again by the next Buy (#3707 review)
+                val (_, error) = callStore<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
+                if (error?.isConnectionDropped == true) mutableState.update { it.copy(connected = false) }
                 if (error != null) storeFailed(error.copy(productId = error.productId ?: productId), IapStage.REQUEST, fromBuy = true)
                 return@launch
             }

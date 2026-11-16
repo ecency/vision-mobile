@@ -111,42 +111,70 @@ class ForegroundRefreshTest {
         feed.close()
     }
 
+    /** Feed pages of 10 over [rows] (permlinks), by the start post; [after] answers a cursor of its own. */
+    private class Rows(scope: TestScope) {
+        var rows: List<String> = (0 until 70).map { "p-$it" }
+        var after: (String) -> List<String>? = { null }
+        var calls = 0
+        val app = TestApp(scope) { req ->
+            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
+            calls++
+            val cursor = req.params.jsonObject["start_permlink"]?.jsonPrimitive?.contentOrNull.orEmpty()
+            val page = after(cursor) ?: (if (cursor.isEmpty()) rows else rows.drop(rows.indexOf(cursor) + 1)).take(10)
+            FakeTransport.result(req, array(*page.map { entry("author${it.substringAfter('-')}", it) }.toTypedArray()))
+        }
+    }
+
     /**
-     * #3704: a feed scrolled far reads at most [FeedModel.MAX_QUIET_PAGES] pages again on a return, keeps the posts
-     * it had after them, and pages on from where it was.
+     * #3704, review of #3707: a feed scrolled far reads at most [FeedModel.MAX_QUIET_PAGES] pages again on a return.
+     * Ten new posts at the top: the fresh pages bring them and the first old rows, every row the reader had stays after
+     * them once (muted authors filtered), and paging goes on from where it was, never moving a fresh post.
      */
     @Test
     fun aQuietRefreshReadsAtMostThreePagesAndKeepsTheRest() = runTest {
-        var round = "a"
-        var calls = 0
-        val app = TestApp(this) { req ->
-            if (req.method != "bridge.get_ranked_posts") return@TestApp HttpResult(500, "no fixture")
-            calls++
-            // pages of 10 by the start post's number, 7 pages in all
-            val cursor = req.params.jsonObject["start_permlink"]?.jsonPrimitive?.contentOrNull.orEmpty()
-            val from = if (cursor.isEmpty()) 0 else cursor.substringAfterLast('-').toInt() + 1
-            val range = if (from >= 70) IntRange.EMPTY else from until from + 10
-            FakeTransport.result(req, array(*range.map { entry("author$it", "$round-$it") }.toTypedArray()))
-        }
-        val feed = app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        val f = Rows(this)
+        val feed = f.app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
         feed.start()
         testScheduler.advanceUntilIdle()
         repeat(4) { feed.loadMore(); testScheduler.advanceUntilIdle() }
-        assertEquals(50, feed.current.items.size)
-        assertEquals(5, calls)
+        assertEquals((0 until 50).map { "p-$it" }, feed.current.items.map { it.key.permlink })
+        assertEquals(5, f.calls)
 
         // an author muted meanwhile, with a post on a kept page: it does not come back with the kept rows
-        app.env.setAuthorMuted("author40", true)
+        f.app.env.setAuthorMuted("author40", true)
         testScheduler.advanceUntilIdle()
-        round = "b"
-        app.away(long)
+        f.rows = (0 until 10).map { "new-$it" } + (0 until 70).map { "p-$it" }
+        // the old cursor's next page also holds a post the fresh pages show
+        f.after = { if (it == "p-49") (50 until 59).map { n -> "p-$n" } + "new-3" else null }
+        f.app.away(long)
         feed.start()
         testScheduler.advanceUntilIdle()
-        assertEquals(5 + FeedModel.MAX_QUIET_PAGES, calls, "only the first pages are read again")
-        assertEquals((0 until 30).map { "b-$it" } + (30 until 50).filter { it != 40 }.map { "a-$it" }, feed.current.items.map { it.key.permlink }, "the rest stays where it was, filtered as shown")
+        assertEquals(5 + FeedModel.MAX_QUIET_PAGES, f.calls, "only the first pages are read again")
+        val expected = (0 until 10).map { "new-$it" } + (0 until 50).filter { it != 40 }.map { "p-$it" }
+        assertEquals(expected, feed.current.items.map { it.key.permlink }, "every row once, the fresh ones first")
         feed.loadMore()
         testScheduler.advanceUntilIdle()
-        assertEquals((50 until 60).map { "b-$it" }, feed.current.items.drop(49).map { it.key.permlink }, "paging goes on after the kept rows")
+        assertEquals(expected + (50 until 59).map { "p-$it" }, feed.current.items.map { it.key.permlink }, "paging goes on, new-3 stays where it is")
+        feed.close()
+    }
+
+    /** Review of #3707: an old pager that had reached the feed's end is not kept: the refreshed feed pages on. */
+    @Test
+    fun aQuietRefreshOfAFeedReadToItsEndPagesOnFromTheFreshRead() = runTest {
+        val f = Rows(this)
+        f.rows = (0 until 40).map { "p-$it" }
+        val feed = f.app.env.feedModel(FeedSource.Ranked(RankedSort.TRENDING))
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        repeat(4) { feed.loadMore(); testScheduler.advanceUntilIdle() }
+        assertTrue(feed.current.endReached)
+        f.rows = (0 until 60).map { "p-$it" }
+        f.app.away(long)
+        feed.start()
+        testScheduler.advanceUntilIdle()
+        assertFalse(feed.current.endReached, "the feed goes on now")
+        while (!feed.current.endReached) { feed.loadMore(); testScheduler.advanceUntilIdle() }
+        assertEquals((0 until 60).map { "p-$it" }, feed.current.items.map { it.key.permlink })
         feed.close()
     }
 

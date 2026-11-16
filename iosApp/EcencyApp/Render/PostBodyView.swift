@@ -694,7 +694,9 @@ struct PostLinkCardView: View {
         var body: some View {
             // the linked post's card once read (the model's, not the whole bridged map), the links_meta text until then
             let model = cards.model as? PostLinkCards
-            PostLinkCardContent(preview: preview, card: model?.card(author: preview.author, permlink: preview.permlink) ?? preview.card, actions: actions)
+            // a read that ended without a card (missing, muted, untitled) is the plain card, never the links_meta text
+            let plain = model?.isPlain(author: preview.author, permlink: preview.permlink) ?? false
+            PostLinkCardContent(preview: preview, card: plain ? nil : (model?.card(author: preview.author, permlink: preview.permlink) ?? preview.card), actions: actions)
                 .onAppear { model?.shown(author: preview.author, permlink: preview.permlink) }
         }
     }

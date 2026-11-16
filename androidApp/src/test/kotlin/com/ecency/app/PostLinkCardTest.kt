@@ -70,6 +70,21 @@ class PostLinkCardTest {
         compose.onAllNodesWithTag("post-link-thumb", useUnmergedTree = true).assertCountEquals(1)
     }
 
+    /** Review of #3707: a card the read cannot show (here an author the reader muted) is the plain card, not the links_meta text. */
+    @Test
+    fun aCardWithoutAUsableReadIsThePlainCardNotTheLinksMetaText() {
+        val node = TestNode()
+        val env = node.env()
+        env.setAuthorMuted("alice", true)
+        compose.setContent {
+            CompositionLocalProvider(LocalPostLinkCards provides env.postLinkCards) {
+                PostBody(listOf(Block.PostPreview("alice", "trending-one", null, LinkCard("Claimed by the linking post", "Its own words", null))), 360.dp, PostActions())
+            }
+        }
+        compose.onNodeWithText("trending-one").assertExists()
+        compose.onAllNodes(hasText("Claimed by the linking post")).assertCountEquals(0)
+    }
+
     @Test
     fun showImagesOffDrawsNoThumbnailForARead() {
         val node = TestNode().apply { metadataImage = "https://example.com/{permlink}.jpg" }

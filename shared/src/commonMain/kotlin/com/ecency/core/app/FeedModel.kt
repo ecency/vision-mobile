@@ -399,14 +399,16 @@ class FeedModel internal constructor(
                     read += shown(fresh.loadMore(), nsfw)
                     pages++
                 }
-                // fewer pages read than were loaded: the rows after them stay, and paging goes on from where it was
+                // fewer pages read than were loaded: the rows the reader had stay after the fresh ones, and paging goes on
+                // from where it was (an old pager at the feed's end is not kept: the feed may go on further now)
                 val old = pager
-                val kept = old != null && loaded > pages && !fresh.isEndReached
+                val kept = old != null && !old.isEndReached && loaded > pages && !fresh.isEndReached
                 val fresher = withLocal(read, nsfw, top = true)
                 val all = if (kept && old != null) {
-                    // the rows the old pages after the first ones brought, as they were shown (filters applied)
+                    // by post, not by page: whatever the fresh pages did not bring back, in its old order, filtered as shown
                     val got = fresher.map { it.key }.toSet()
-                    fresher + shown(old.postsAfter(pages).mapNotNull { posts[it.key] }, nsfw).filter { it.key !in got }
+                    old.markSeen(got)
+                    fresher + shown(old.posts.mapNotNull { posts[it.key] }, nsfw).filter { it.key !in got }
                 } else {
                     fresher
                 }

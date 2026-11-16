@@ -228,6 +228,7 @@ class ProfileModel internal constructor(
     }
 
     /** iOS `.refreshable` awaits this: its spinner stays until the profile and the shown tab were read again (#3704). */
+    @Throws(com.ecency.core.api.EcencyException::class, kotlinx.coroutines.CancellationException::class)
     suspend fun refreshAndWait() {
         refresh()
         val header = job

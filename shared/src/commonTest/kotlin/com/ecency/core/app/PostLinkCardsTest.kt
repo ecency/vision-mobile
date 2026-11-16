@@ -13,6 +13,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -105,7 +106,13 @@ class PostLinkCardsTest {
         val card = assertNotNull(cards.card("spike-author", "first"))
         assertEquals("Title of first", card.title)
         assertTrue(card.summary.startsWith("The linked post's own text"), card.summary)
-        assertNotNull(card.image)
+        val image = assertNotNull(card.image)
+        assertTrue("width=${PostLinkCards.THUMB_PX}&height=${PostLinkCards.THUMB_PX}" in image, "a thumbnail's size, not a feed card's: $image")
+        assertFalse(cards.isPlain("spike-author", "first"))
+        // an author the reader mutes: the plain card at once
+        app.env.setAuthorMuted("spike-author", true)
+        assertNull(cards.card("spike-author", "first"))
+        assertTrue(cards.isPlain("spike-author", "first"))
         assertEquals(card, cards.current.cards["spike-author/first"])
     }
 
@@ -125,6 +132,9 @@ class PostLinkCardsTest {
         listOf("gone", "muted", "down").forEach { cards.shown("spike-author", it) }
         testScheduler.advanceUntilIdle()
         listOf("gone", "muted", "down").forEach { assertNull(cards.card("spike-author", it), it) }
+        // the linking post's links_meta text never stands in for a post the read rejected; a failed read is not settled
+        assertTrue(cards.isPlain("spike-author", "gone") && cards.isPlain("spike-author", "muted"))
+        assertFalse(cards.isPlain("spike-author", "down"))
         val before = chain.getsOf.toMap()
         // a missing or muted post is not read again; a failed read is, the next time the card shows
         listOf("gone", "muted", "down").forEach { cards.shown("spike-author", it) }
@@ -179,10 +189,10 @@ class PostLinkCardsTest {
         testScheduler.advanceUntilIdle()
         val card = assertNotNull(app.env.postLinkCards.card("spike-author", "n"))
         assertNull(card.image)
-        // "Always show", as feed cards
+        // "Always show", as feed cards, for the card already read too; back to "Always warn" hides it again
         app.env.prefs.putString(NsfwMode.PREFS_KEY, NsfwMode.SHOW.value)
-        app.env.postLinkCards.shown("spike-author", "shown")
-        testScheduler.advanceUntilIdle()
-        assertNotNull(app.env.postLinkCards.card("spike-author", "shown")?.image)
+        assertNotNull(app.env.postLinkCards.card("spike-author", "n")?.image)
+        app.env.prefs.putString(NsfwMode.PREFS_KEY, NsfwMode.WARN.value)
+        assertNull(app.env.postLinkCards.card("spike-author", "n")?.image)
     }
 }

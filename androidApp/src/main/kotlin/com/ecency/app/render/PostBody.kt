@@ -664,7 +664,12 @@ private fun PostPreviewCard(block: Block.PostPreview, actions: PostActions) {
     // the linked post's card once read, the linking post's links_meta text until then (reading the state's value is
     // what redraws the card when a read lands)
     val read = cards?.state?.collectAsState()?.value
-    val card = read?.let { cards.card(block.author, block.permlink) } ?: block.card
+    // a read that ended without a card (missing, muted, untitled) is the plain card, never the links_meta text
+    val card = when {
+        read == null -> block.card
+        cards.isPlain(block.author, block.permlink) -> null
+        else -> cards.card(block.author, block.permlink) ?: block.card
+    }
     if (cards != null) {
         LaunchedEffect(block.author, block.permlink) { cards.shown(block.author, block.permlink) }
     }

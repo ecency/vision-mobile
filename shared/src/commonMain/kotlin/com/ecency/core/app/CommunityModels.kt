@@ -138,6 +138,7 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
     }
 
     /** iOS `.refreshable` awaits this: its spinner stays until the list was read again (#3704). */
+    @Throws(com.ecency.core.api.EcencyException::class, kotlinx.coroutines.CancellationException::class)
     suspend fun refreshAndWait() {
         refresh()
         // waits in the model's scope, so closing the model ends the wait instead of leaving it hanging
@@ -152,7 +153,7 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
      * Signed out there is no Membership to show: the screen opens on Discover (#3704). Before the stored session was read
      * nobody is known to be signed out, so it opens on Membership as before.
      */
-    val opensOnDiscover: Boolean get() = env.session.current.let { !it.isLoading && !it.isLoggedIn }
+    val opensOnDiscover: Boolean get() = opensOnDiscover(env)
 
     /** False when signed out: the UI opens the login screen. */
     fun toggle(row: CommunityRow): Boolean = env.communities.toggleSubscription(row.name, row.title, row.subscribed)
@@ -192,6 +193,9 @@ class CommunitiesModel(private val env: AppEnvironment) : StateModel<Communities
     companion object {
         /** RN fetches 50 communities by rank. */
         const val DISCOVER_LIMIT = 50
+
+        /** [opensOnDiscover] without a model (a screen picks its first tab before it owns one). */
+        fun opensOnDiscover(env: AppEnvironment): Boolean = env.session.current.let { !it.isLoading && !it.isLoggedIn }
 
         internal fun row(c: Community, subs: SubscriptionsState) = CommunityRow(
             c.name, c.title, c.about, c.subscribers, c.numAuthors, c.numPending, c.isNsfw,

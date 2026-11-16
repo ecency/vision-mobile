@@ -199,8 +199,14 @@ class PurchasesTest {
         assertTrue(points.current.rows.isNotEmpty(), "the products load: ${points.current.alert}")
         assertNull(points.current.alert)
         assertEquals(before + 1, r.store.connects)
-        // a purchase sheet on a dropped service is reconnected the same way, and opened once
+        // a purchase sheet on a dropped service is not launched again by itself (Play also reports the failed launch
+        // through its listener); the next Buy reconnects and opens it once
         r.store.dropped = true
+        points.buy("999points")
+        testScheduler.advanceUntilIdle()
+        points.current.confirm?.let { points.confirm(); testScheduler.advanceUntilIdle() }
+        assertTrue(r.store.sheets.isEmpty())
+        points.dismissAlert()
         points.buy("999points")
         testScheduler.advanceUntilIdle()
         points.current.confirm?.let { points.confirm(); testScheduler.advanceUntilIdle() }
