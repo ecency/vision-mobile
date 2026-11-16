@@ -238,6 +238,39 @@ class ProTest {
         m.close()
     }
 
+    /** #3703: a price the store could not read says so, with a retry that reads it again. */
+    @Test
+    fun aFailedPriceReadSaysSoAndRetryReadsIt() = runTest {
+        val r = rig()
+        r.store.productsError = StoreError(StoreError.NETWORK_ERROR, "offline")
+        val m = pro(r)
+        m.open()
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.priceFailed, "the read failed: not the store's answer that it does not sell Pro")
+        assertFalse(m.current.unavailable)
+        assertFalse(m.current.showBuy)
+        // another account while the sheet is open: the price is the store's, so its failure and retry stay
+        r.env.session.switchTo(bob)
+        testScheduler.advanceUntilIdle()
+        assertTrue(m.current.priceFailed)
+        r.store.productsError = null
+        m.loadPrice()
+        testScheduler.advanceUntilIdle()
+        assertFalse(m.current.priceFailed)
+        assertEquals("$19.99", m.current.price)
+        assertTrue(m.current.showBuy)
+        m.close()
+        // a store that cannot sell here (no or old Play, an unsigned build) is "unavailable", never a retry
+        val r2 = rig()
+        r2.store.productsError = StoreError(StoreError.BILLING_UNAVAILABLE, "billing unavailable")
+        val m2 = pro(r2)
+        m2.open()
+        testScheduler.advanceUntilIdle()
+        assertFalse(m2.current.priceFailed)
+        assertTrue(m2.current.unavailable)
+        m2.close()
+    }
+
     @Test
     fun theStoreWithoutTheProductShowsNoBuyButton() = runTest {
         val r = rig()
@@ -245,6 +278,7 @@ class ProTest {
         val m = pro(r)
         assertNull(m.current.price)
         assertTrue(m.current.unavailable)
+        assertFalse(m.current.priceFailed)
         assertFalse(m.current.showBuy)
         assertEquals(ProCopy.CARD_PLAIN, m.current.cardText)
         m.buy()

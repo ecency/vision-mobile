@@ -1,5 +1,8 @@
 package com.ecency.core.auth
 
+import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.currentCoroutineContext
 import com.ecency.core.api.rpc.platformWebSocketClient
 import com.ecency.core.hive.KeyRole
 import io.ktor.client.HttpClient
@@ -204,7 +207,13 @@ class KtorHasSocketFactory(private val client: HttpClient) : HasSocketFactory {
         }
         val channel = Channel<String>(Channel.UNLIMITED)
         val socket = object : HasSocket {
-            override suspend fun send(text: String) = session.send(Frame.Text(text))
+            @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+            override suspend fun send(text: String) {
+                // an outgoing side already closed (a transport failure closes it with that failure as its cause, which
+                // send would rethrow): nothing is queued, said as the one failure HiveAuthClient may send again after
+                if (session.outgoing.isClosedForSend) throw ClosedSendChannelException("HiveAuth socket closed")
+                session.send(Frame.Text(text))
+            }
             override val incoming: ReceiveChannel<String> = channel
             override suspend fun close() = session.close()
             override var closeCode: Int? = null
@@ -260,6 +269,38 @@ class HiveAuthClient(
     }
 
     /**
+     * Sends [text] on the open socket. One the relay closed while nobody read it (nothing told the client) fails the
+     * send before anything reached the relay: it is dropped and [text] sent once on a fresh socket (#3703).
+     */
+    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+    private suspend fun send(text: String) {
+        // a socket whose reader already saw it end (the relay closed it while idle): a send may still be accepted into
+        // its buffer and never reach the relay, so it is not used
+        if (socket?.incoming?.isClosedForReceive == true) dropSocket()
+        try {
+            connected().send(text)
+            return
+        } catch (e: ClosedSendChannelException) {
+            // not reported: the socket's outgoing side was closed, so nothing was queued; opened again below
+            dropSocket()
+        } catch (e: CancellationException) {
+            // a socket closed with a cancellation queued nothing either; only the caller's own cancellation ends here
+            currentCoroutineContext().ensureActive()
+            dropSocket()
+        }
+        // any other failure is not known to have stopped the request before the relay: it is not sent again
+        try {
+            connected().send(text)
+        } catch (e: AuthException) {
+            throw e
+        } catch (e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
+            dropSocket()
+            throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.NOT_CONNECTED, "Failed to send to HiveAuth server (${e::class.simpleName ?: "unknown"})", e)
+        }
+    }
+
+    /**
      * Authenticates [username]. [onWait] receives the `has://auth_req/...` link to open in the wallet.
      * [challenge] defaults to none; the RN login sends [HiveSignerMessages.hiveAuthChallenge] as a posting
      * challenge, whose signature becomes the Ecency code ([HiveSignerMessages.hiveAuthCode]).
@@ -281,9 +322,8 @@ class HiveAuthClient(
         onWait: suspend (HiveAuthWait) -> Unit,
     ): HiveAuthResult {
         pending.clear()
-        val s = connected()
         val data = CryptoJsCipher.encrypt(HiveAuthProtocol.authRequestPayload(challenge), authKey)
-        s.send(buildJsonObject { put("cmd", "auth_req"); put("account", username); put("data", data) }.toString())
+        send(buildJsonObject { put("cmd", "auth_req"); put("account", username); put("data", data) }.toString())
         val wait = awaitWait("auth_wait")
         onWait(HiveAuthWait(wait.uuid, wait.expire, HiveAuthProtocol.authLink(username, wait.uuid, authKey, host, HiveAuthProtocol.preferredScheme(wait.raw) ?: "has"), wait.raw))
         while (true) {
@@ -343,9 +383,8 @@ class HiveAuthClient(
         if (session.isExpired(nowMillis())) throw AuthException.HiveAuth(AuthException.HiveAuth.Reason.SESSION_EXPIRED)
         require(ops.isNotEmpty()) { "missing or invalid ops" }
         pending.clear()
-        val s = connected()
         val data = CryptoJsCipher.encrypt(HiveAuthProtocol.signRequestPayload(keyType, ops, nowMillis()), session.key)
-        s.send(
+        send(
             buildJsonObject {
                 put("cmd", "sign_req")
                 put("account", session.username)

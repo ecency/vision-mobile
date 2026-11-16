@@ -1,5 +1,6 @@
 package com.ecency.core.app
 
+import kotlinx.coroutines.sync.withLock
 import com.ecency.core.api.EcencyHttpException
 import com.ecency.core.api.EcencyTimeoutException
 import com.ecency.core.api.ecency.AccountOrderMeta
@@ -303,12 +304,15 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         if (heldKeys.remove(key) != null) publishHeld()
     }
 
+    /** One connect at a time: Play refuses a second `startConnection` while one runs (#3703 review). */
+    private val connecting = kotlinx.coroutines.sync.Mutex()
+
     /** RN `initConnection`; null when connected. */
-    internal suspend fun connect(): StoreError? {
-        if (current.connected) return null
+    internal suspend fun connect(): StoreError? = connecting.withLock {
+        if (current.connected) return@withLock null
         val error = callStore<Unit> { done -> env.store.connect { e -> done(if (e == null) Unit else null, e) } }.second
         if (error == null) mutableState.update { it.copy(connected = true) } else errors.report(error, IapStage.INIT)
-        return error
+        error
     }
 
     /**
@@ -317,7 +321,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
      */
     suspend fun products(ids: List<String>): Pair<List<StoreProduct>, StoreError?> {
         connect()?.let { return emptyList<StoreProduct>() to it }
-        val (list, error) = callStore<List<StoreProduct>> { done -> env.store.products(ids, done) }
+        val (list, error) = connected<List<StoreProduct>> { done -> env.store.products(ids, done) }
         if (error != null) {
             errors.report(error, IapStage.PRODUCTS)
             return emptyList<StoreProduct>() to error
@@ -361,6 +365,8 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
             if (earlier == null) {
                 // the store holds no earlier Pro purchase: a pending one shown for the buyer is gone
                 if (productId == PurchaseSkus.PRO && buyer.isNotEmpty()) env.proPurchases.dropPending(buyer)
+                // not retried by itself: Play also reports a failed launch through its purchase listener, which would end
+                // this buy while a retry runs; a dropped service is connected again by the next Buy (#3707 review)
                 val (_, error) = callStore<Unit>(timeout = false) { done -> env.store.purchase(productId, token) { e -> done(if (e == null) Unit else null, e) } }
                 if (error != null) storeFailed(error.copy(productId = error.productId ?: productId), IapStage.REQUEST, fromBuy = true)
                 return@launch
@@ -413,7 +419,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         env.session.awaitLoaded()
         if (connect() != null) return
         val before = heldKeys.keys.toSet()
-        val (list, error) = callStore<List<StorePurchase>> { done -> env.store.purchases(done) }
+        val (list, error) = connected<List<StorePurchase>> { done -> env.store.purchases(done) }
         if (error != null) {
             errors.report(error, IapStage.RECOVER)
             return
@@ -442,6 +448,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
     }
 
     private suspend fun storeFailed(error: StoreError, stage: IapStage, fromBuy: Boolean? = null) {
+        if (error.isConnectionDropped) dropped()
         val report = errors.report(error, stage)
         val productId = error.productId ?: awaiting.singleOrNull() ?: ""
         val buy = fromBuy ?: (productId in awaiting)
@@ -581,7 +588,7 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
 
     /** RN finishTransaction after the order: never fatal. */
     private suspend fun finish(p: StorePurchase) {
-        val (_, error) = callStore<Unit> { done -> env.store.finish(p) { e -> done(if (e == null) Unit else null, e) } }
+        val (_, error) = connected<Unit> { done -> env.store.finish(p) { e -> done(if (e == null) Unit else null, e) } }
         if (error != null) errors.report(error, IapStage.FINISH, p.productId)
     }
 
@@ -656,6 +663,22 @@ class PurchaseService internal constructor(private val env: AppEnvironment) {
         }
         return OrderResult.Failed(last)
     }
+
+    /**
+     * [callStore] on a connected store: Play may drop its service after [connect] (nothing tells the app), and a call
+     * then answers SERVICE_DISCONNECTED; the store is connected again and the call made once more (#3703).
+     */
+    private suspend fun <T> connected(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {
+        val first = callStore(timeout, call)
+        if (first.second?.isConnectionDropped != true) return first
+        dropped()
+        connect()?.let { return null to it }
+        // dropped again: the next call connects first
+        return callStore(timeout, call).also { if (it.second?.isConnectionDropped == true) dropped() }
+    }
+
+    /** Play dropped its service (said by a call or by its purchase listener): the next store call connects first. */
+    private fun dropped() = mutableState.update { it.copy(connected = false) }
 
     /** A store call as a suspension on the main thread; null and an error when the store never answered. */
     private suspend fun <T> callStore(timeout: Boolean = true, call: ((T?, StoreError?) -> Unit) -> Unit): Pair<T?, StoreError?> {

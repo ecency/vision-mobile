@@ -142,7 +142,10 @@ class PostModel internal constructor(
             try {
                 val post = env.api.posts.getPost(key.author, key.permlink, env.session.current.username, refresh)
                 if (post == null) {
-                    setState { it.copy(isLoading = false, isRefreshing = false, notFound = true) }
+                    // deleted while open: only "not found" shows, never the old post under it (#3704)
+                    commentsJob?.cancel()
+                    bodyJob?.cancel()
+                    setState { PostState(key = it.key, notFound = true, commentSort = it.commentSort) }
                     return@launch
                 }
                 showPost(post)
@@ -284,7 +287,8 @@ class PostModel internal constructor(
                 null
             } ?: return@launch
             val summary = kotlinx.coroutines.withContext(env.dispatchers.render) { env.renderer.summary(parent) }
-            setState { it.copy(parent = parent, parentSummary = summary) }
+            // the post was found gone meanwhile: "not found" shows alone (#3704)
+            setState { if (it.notFound) it else it.copy(parent = parent, parentSummary = summary) }
         }
     }
     private var renderingVersion: String? = null

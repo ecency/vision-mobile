@@ -5,6 +5,13 @@ import Sentry
 
 /// Performance data (issue #3571) at a low sample rate, with nothing private in its spans.
 final class CrashReportingTests: XCTestCase {
+    /// #3704: a release built on a laptop (no CI build number) is not reported with the testers' production builds.
+    func testALocalReleaseBuildReportsUnderDevelopment() {
+        XCTAssertEqual(CrashReporting.environment(debug: false, build: "1"), "development")
+        XCTAssertEqual(CrashReporting.environment(debug: false, build: "1763290000"), "production")
+        XCTAssertEqual(CrashReporting.environment(debug: true, build: "1763290000"), "debug")
+    }
+
     func testTracesSampleFivePercent() {
         XCTAssertEqual(CrashReporting.tracesSampleRate, 0.05)
     }

@@ -21,6 +21,12 @@ final class CommunityUITests: XCTestCase {
         return XCTWaiter().wait(for: [enabled], timeout: timeout) == .completed
     }
 
+    /// #3704: signed out there is no Membership: the screen opens on Discover.
+    func testSignedOutTheCommunitiesOpenOnDiscover() {
+        let app = launch(["-openScreen", "route:COMMUNITIES"])
+        XCTAssertTrue(element(app, "community-hive-100002").waitForExistence(timeout: 30), app.debugDescription)
+    }
+
     /// Every step waits for what it needs next (a row, a text, an enabled button), never for the screen around it:
     /// the containers ("community-details", a member's row) show before their content has loaded.
     func testCommunitiesFromTheSideMenuThenACommunityAndItsMembers() {

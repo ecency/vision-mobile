@@ -8,6 +8,7 @@ import com.ecency.core.render.blocks.Block
 import com.ecency.core.render.blocks.BlockBuilder
 import com.ecency.core.render.blocks.BlockText
 import com.ecency.core.render.blocks.BuildOptions
+import com.ecency.core.render.blocks.LinksMeta
 import com.ecency.core.render.blocks.SafeTarget
 import com.ecency.core.render.blocks.SpeakAudio
 import com.ecency.core.render.dom.HtmlStringFixes
@@ -68,7 +69,7 @@ class RenderHelperPostBodyRenderer(
         val rendered = helper.renderPostBodySafe(post.body, forApp = true)
         // A Speak voice post: the native player replaces the body's own audio markup (RN postHtmlRenderer).
         val html = if (speak != null) SpeakAudio.stripBodyAudio(rendered) else rendered
-        val blocks = BlockBuilder.build(html, BuildOptions(metadataImage = post.metadata.images.firstOrNull(), proxyBase = proxyBase))
+        val blocks = BlockBuilder.build(html, BuildOptions(metadataImage = post.metadata.images.firstOrNull(), proxyBase = proxyBase, linkCards = LinksMeta.cards(post.metadata.rawJson)))
         if (speak == null) blocks else blocks + Block.SpeakAudio(SpeakAudio.streamUrl(post.author, post.permlink), speak.durationMs, speak.waveformPeaks)
     }
 
@@ -103,7 +104,7 @@ class InterimPostBodyRenderer(private val proxyBase: String = ImageProxy.DEFAULT
     override fun withProxyBase(base: String): PostBodyRenderer = InterimPostBodyRenderer(base)
 
     override fun blocks(post: Post): List<Block> = safely(emptyList()) {
-        BlockBuilder.build(html(post.body), BuildOptions(metadataImage = post.metadata.images.firstOrNull(), proxyBase = proxyBase))
+        BlockBuilder.build(html(post.body), BuildOptions(metadataImage = post.metadata.images.firstOrNull(), proxyBase = proxyBase, linkCards = LinksMeta.cards(post.metadata.rawJson)))
             .map(::proxied)
     }
 

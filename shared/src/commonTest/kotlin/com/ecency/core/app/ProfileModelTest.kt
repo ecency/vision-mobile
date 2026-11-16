@@ -115,6 +115,26 @@ class ProfileModelTest {
         return app
     }
 
+    /** #3704: iOS pull to refresh waits for this, so its spinner stays until the profile was read again. */
+    @Test
+    fun refreshAndWaitEndsWhenTheProfileWasReadAgain() = runTest {
+        var gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+        val app = app(rpc = { req -> if (req.method == "bridge.get_profile") gate?.await(); null })
+        val m = app.env.profileModel("alice", "")
+        m.start()
+        testScheduler.advanceUntilIdle()
+        gate = kotlinx.coroutines.CompletableDeferred()
+        var done = false
+        val wait = launch { m.refreshAndWait(); done = true }
+        repeat(10) { testScheduler.runCurrent() }
+        assertFalse(done, "still reading")
+        gate!!.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertTrue(done)
+        wait.cancel()
+        m.close()
+    }
+
     @Test
     fun headerShowsWhatRnShows() = runTest {
         val app = app()

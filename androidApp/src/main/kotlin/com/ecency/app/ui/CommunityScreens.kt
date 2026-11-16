@@ -1,5 +1,7 @@
 package com.ecency.app.ui
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.semantics.LiveRegionMode
 
 import androidx.compose.ui.semantics.liveRegion
@@ -249,13 +251,20 @@ fun CommunityListRow(row: CommunityRow, index: Int, avatarUrl: String, onOpen: (
 fun CommunitiesScreen(model: CommunitiesModel, proxy: String, entry: StackEntry, nav: ScreenNav) {
     val state by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
-    val tab = entry.get("tab") { mutableIntStateOf(0) }
+    val tab = entry.get("tab") { mutableIntStateOf(if (model.opensOnDiscover) 1 else 0) }
+    val scope = rememberCoroutineScope()
+    // the spinner shows until the list was read again (#3704)
+    var refreshing by remember { mutableStateOf(false) }
     TopBar(CommunityCopy.TITLE, onBack = nav.pop)
     UnderlineTabs(
         listOf(CommunityCopy.JOINED_TAB, CommunityCopy.DISCOVER_TAB), listOf("joined", "discover"), tab.intValue,
         rememberTabTap(tab.intValue, { entry.get(if (tab.intValue == 0) "joined" else "discover") { LazyListState() } }) { tab.intValue = it },
     )
-    PullToRefreshBox(isRefreshing = false, onRefresh = model::refresh, modifier = Modifier.fillMaxSize()) {
+    PullToRefreshBox(
+        isRefreshing = refreshing,
+        onRefresh = { scope.launch { refreshing = true; try { model.refreshAndWait() } finally { refreshing = false } } },
+        modifier = Modifier.fillMaxSize(),
+    ) {
         if (tab.intValue == 0) {
             LazyColumn(Modifier.fillMaxSize().testTag("joinedList"), state = entry.get("joined") { LazyListState() }) {
                 when {

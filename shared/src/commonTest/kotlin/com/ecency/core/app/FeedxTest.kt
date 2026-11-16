@@ -1267,6 +1267,36 @@ class FeedxTest {
         listOf(same, other, again, muted, nsfw).forEach { it.close() }
     }
 
+    /** #3704: the post's body changes while it is being translated: the spinner stops and Translate works again. */
+    @Test
+    fun aBodyChangeDuringATranslationLeavesTranslateWorking() = runTest {
+        val app = TestApp(this, handler = reads())
+        app.authBackend.rest = { r ->
+            if (r.url == "https://translate.ecency.com/translate") HttpResult(200, """{"translatedText":"Hello","detectedLanguage":{"language":"es"}}""") else null
+        }
+        val p = Post(author = "alice", permlink = "es", body = spanish)
+        val m = app.env.translateModel("alice", "es", "en-US")
+        m.start(p)
+        testScheduler.advanceUntilIdle()
+        val held = kotlinx.coroutines.CompletableDeferred<Unit>()
+        app.authBackend.gate = { r -> if (r.url.endsWith("/translate")) held.await() }
+        m.translate(p)
+        repeat(5) { testScheduler.runCurrent() }
+        assertTrue(m.current.translating)
+        val edited = p.copy(body = "$spanish Editado.")
+        m.start(edited)
+        testScheduler.runCurrent()
+        assertFalse(m.current.translating, "the spinner stops with the old body's translation")
+        app.authBackend.gate = null
+        held.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertNull(m.current.translated, "the old body's translation never lands")
+        m.translate(edited)
+        testScheduler.advanceUntilIdle()
+        assertEquals("Hello", m.current.translated)
+        m.close()
+    }
+
     @Test
     fun languageGuess() {
         assertEquals("en", Languages.guess(english))

@@ -187,7 +187,7 @@ invalid value never drops text: the anchor's text stays, without a link (a chip 
 | `a.markdown-tag-link` whose text is `#data-tag` (any case) | `Tag(tag, data-filter)` chip | (chip) `Tag` |
 | `a.markdown-tag-link` with other text | `Link` | `Tag(data-tag, data-filter)` |
 | `a.markdown-community-link` | `Link` | `Community(data-community, data-filter)` |
-| `a.markdown-post-link` `data-is-inline="true"` (no image inside) | `PostPreview(author, permlink, data-href)` | `Post` (card) |
+| `a.markdown-post-link` `data-is-inline="true"` (no image inside) | `PostPreview(author, permlink, data-href, card)` (`card`: `links_meta` text) | `Post` (card) |
 | `a.markdown-post-link` otherwise | `Link` | `Post(author, permlink)`; anchored `#@a/p` and `?query` handled as linkDataParser; invalid: `External(data-href)` |
 | `a.markdown-external-link` with `data-youtube` | `Link` | `Youtube(id, parseInt(data-start-time) or 0)` |
 | `a.markdown-external-link`, `a.markdown-witnesses-link`, `a.markdown-proposal-link` | `Link` | `External(data-href)` or `AppUri` |
@@ -266,7 +266,7 @@ named where they exist (`PostBodyTest`, `PostRenderTests`, `RendererDemoUITests`
 | Table scrolls sideways above 3 header columns | Done | Done | |
 | Dark theme | Done | Done | `PostTheme.Dark` / `.dark` from the system setting, background `$primaryBackgroundColor`. |
 | Video thumbnail 16:9 (3Speak 4:3), play button | Done | Done | Inline YouTube player in posts: not yet. |
-| Post preview card | Basic | Basic | Author and permlink only; RN shows title, image and summary from `links_meta`. |
+| Post preview card | Done | Done | Title, summary and thumbnail of the linked post, read when the card shows (`PostLinkCards`, #3705); the linking post's `links_meta` text until then. See README "Post link cards". |
 | Details / spoiler | Done | Done | iOS summary is plain text (chips not separately tappable). |
 | Waves image grid | Done | Done | Hidden mode supported. |
 | Speak audio player | Done | Done | See "Speak voice posts". The renderer demo ends with a sample player (no stream). |

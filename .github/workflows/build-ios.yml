@@ -116,8 +116,9 @@ jobs:
           OVERRIDE: ${{ inputs.build_number }}
         run: |
           n="${OVERRIDE:-$(date +%s)}"
-          if ! [[ "$n" =~ ^[1-9][0-9]{0,17}$ ]]; then
-            echo "::error::build_number must be a positive integer, got '$n'"
+          # 1 is project.yml's local default, which crash reports file under "development"
+          if ! [[ "$n" =~ ^[1-9][0-9]{0,17}$ ]] || [[ "$n" == "1" ]]; then
+            echo "::error::build_number must be a positive integer other than 1 (the local builds' default), got '$n'"
             exit 1
           fi
           echo "BUILD_NUMBER=$n" >> "$GITHUB_ENV"

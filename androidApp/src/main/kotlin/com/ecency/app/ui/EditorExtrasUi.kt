@@ -231,7 +231,7 @@ internal fun AiAssistSheet(model: AiAssistModel, onImage: (() -> Unit)? = null, 
                     Text(com.ecency.core.app.UiCopy.balance(state.balanceLabel), color = colors.text, fontSize = 14.sp, modifier = Modifier.weight(1f).testTag("aiBalance"))
                     state.costText?.let { Text(EditorUiCopy.cost(it), color = colors.text, fontSize = 14.sp, modifier = Modifier.testTag("aiCost")) }
                 }
-                if (state.loadFailed) AiLoadFailed(model::reload, "ai")
+                if (state.loadFailed) LoadFailedRow(model::reload, "ai")
                 Text(AiAssistModel.HINT, color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(vertical = 8.dp))
                 if (onImage != null || onDictate != null) {
                     // the other AI tools, a group of their own above the actions (RN's generate image card, outside the
@@ -320,7 +320,7 @@ internal fun AiImageBody(model: AiImageModel, showTitle: Boolean = true, onDismi
                 Text(com.ecency.core.app.UiCopy.balance(state.balanceLabel), color = colors.text, fontSize = 14.sp, modifier = Modifier.weight(1f).testTag("aiImageBalance"))
                 Text(EditorUiCopy.cost(state.costLabel), color = colors.text, fontSize = 14.sp, modifier = Modifier.testTag("aiImageCost"))
             }
-            if (state.loadFailed) AiLoadFailed(model::reload, "aiImage")
+            if (state.loadFailed) LoadFailedRow(model::reload, "aiImage")
             val url = state.resultUrl
             if (url != null) {
                 AsyncImage(
@@ -673,7 +673,7 @@ internal fun VideoUploadSheet(model: VideoUploadModel, onRecord: (() -> com.ecen
 
 /** The prices or the balance could not be read: says so, with Try again (issue #3701: the sheet dead ended). */
 @Composable
-private fun AiLoadFailed(onRetry: () -> Unit, tag: String) {
+internal fun LoadFailedRow(onRetry: () -> Unit, tag: String) {
     val colors = LocalEcencyColors.current
     Row(Modifier.fillMaxWidth().padding(top = 8.dp).testTag("${tag}LoadFailed"), verticalAlignment = Alignment.CenterVertically) {
         Text(ReadingUiCopy.LOAD_FAILED_RETRY, color = colors.redText, fontSize = 14.sp, modifier = Modifier.weight(1f))

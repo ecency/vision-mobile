@@ -243,6 +243,16 @@ class CommunityFlowsTest {
         waitFor("card:alice/long-1")
     }
 
+    /** #3704: signed out there is no Membership: the screen opens on Discover. */
+    @Test
+    fun signedOutTheCommunitiesOpenOnDiscover() {
+        compose.setContent { EcencyApp(env, host, navigator) }
+        waitFor("card:alice/trending-one")
+        push(AppScreen.Communities)
+        waitFor("discoverList")
+        assertFalse(exists("joinedList"))
+    }
+
     @Test
     fun aTapOnTheSelectedCommunitiesTabScrollsItsListToTheTop() {
         moreCommunities = 40

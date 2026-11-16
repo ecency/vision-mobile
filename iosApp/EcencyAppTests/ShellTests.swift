@@ -266,6 +266,22 @@ final class ShellTests: XCTestCase {
         XCTAssertNil(app.homeFeeds.feed(.friends, username: nil, env: env))
     }
 
+    /// #3704: only the account's 3 most recently opened home feeds are kept; others go and load fresh again.
+    func testOnlyTheRecentHomeFeedsOfTheAccountAreKept() {
+        let feeds = app.homeFeeds
+        let trending = feeds.feed(.trending, username: "spike-alice", env: env)
+        _ = feeds.feed(.hot, username: "spike-alice", env: env)
+        _ = feeds.feed(.created, username: "spike-alice", env: env)
+        XCTAssertTrue(feeds.feed(.trending, username: "spike-alice", env: env) === trending, "still kept, and now the most recent")
+        _ = feeds.feed(.blog, username: "spike-alice", env: env)
+        XCTAssertEqual(feeds.keptKeys.count, HomeFeeds.kept)
+        XCTAssertFalse(feeds.keptKeys.contains { $0.hasPrefix("\(FeedFilter.hot.key)|") }, "the oldest went")
+        // another account: the first account's feeds go
+        _ = feeds.feed(.trending, username: "spike-bob", env: env)
+        XCTAssertEqual(feeds.keptKeys, ["\(FeedFilter.trending.key)|spike-bob"])
+        XCTAssertFalse(feeds.feed(.trending, username: "spike-alice", env: env) === trending, "loads fresh when opened again")
+    }
+
     func testThemeChoiceIsSaved() {
         XCTAssertEqual(app.themeMode, .system)
         app.env.settings.setTheme(mode: .dark)

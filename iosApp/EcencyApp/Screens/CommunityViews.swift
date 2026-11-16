@@ -196,7 +196,10 @@ struct CommunitiesScreen: View {
     @Environment(\.appTheme) private var theme
 
     init(env: AppEnvironment) {
+        // built only when SwiftUI keeps this StateObject: the autoclosure runs once per screen
         _model = StateObject(wrappedValue: Observed(CommunitiesModel(env: env), ownsModel: true))
+        // signed out there is no Membership to show: Discover first (#3704)
+        _tab = State(initialValue: CommunitiesModel.companion.opensOnDiscover(env: env) ? 1 : 0)
     }
 
     private var communities: CommunitiesModel { model.model as! CommunitiesModel }
@@ -251,7 +254,8 @@ struct CommunitiesScreen: View {
             }
             .listStyle(.plain)
             .themedList()
-            .refreshable { communities.refresh() }
+            // the spinner stays until the list was read again (#3704)
+            .refreshable { try? await communities.refreshAndWait() }
             .onChange(of: scrollTop) { _, _ in
                 // the rows' ForEach ids
                 let first = tab == 0 ? state.joined.first?.name : state.discover.first?.name

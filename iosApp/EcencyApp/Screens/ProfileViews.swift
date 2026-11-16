@@ -228,7 +228,8 @@ struct ProfileScreen: View {
                 .reportsScrollOffset("profile-scroll")
                 .tracksScrollMomentum(momentum)
             }
-            .refreshable { model.refresh() }
+            // the spinner stays until the profile and its tab were read again (#3704)
+            .refreshable { try? await model.refreshAndWait() }
             .collapsesSummary(collapse, space: "profile-scroll")
             // RN postsTabContent's ScrollTopPopup (the profile's post tabs); the top opens the summary
             .scrollTopPopup(space: "profile-scroll", id: "profile-scroll-top") { toTop(proxy) }

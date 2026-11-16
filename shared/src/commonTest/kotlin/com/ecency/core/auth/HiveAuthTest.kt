@@ -64,11 +64,24 @@ class HiveAuthTest {
             channel = Channel(Channel.UNLIMITED)
         }
 
+        /** Sockets the relay closed while nobody read them: a send on one fails, as on a closed websocket. */
+        val closedIdle = mutableSetOf<Int>()
+
+        /** When set, every send fails with it (after the socket may have taken the frame). */
+        var failSend: Exception? = null
+
+        /** Every send tried, failed ones included. */
+        var attempts = 0
+
         override suspend fun open(host: String): HasSocket {
             opened++
             val ch = channel
+            val id = opened
             return object : HasSocket {
                 override suspend fun send(text: String) {
+                    attempts++
+                    if (id in closedIdle) throw kotlinx.coroutines.channels.ClosedSendChannelException("socket closed")
+                    failSend?.let { throw it }
                     val json = Json.parseToJsonElement(text).jsonObject
                     sent += json
                     onSend(json)
@@ -174,6 +187,57 @@ class HiveAuthTest {
         val payload = decrypt(req)
         assertEquals("active", payload["key_type"]!!.jsonPrimitive.content)
         assertEquals(ops, payload["ops"])
+    }
+
+    /** #3703: the relay closed the socket while the client was idle: the next request goes out on a fresh one. */
+    @Test
+    fun aRequestOnASocketTheRelayClosedWhileIdleOpensAFreshOne() = runTest {
+        var n = 0
+        val relay = FakeRelay {
+            n++
+            push("cmd" to "sign_wait", "uuid" to "s$n", "expire" to 50_000)
+            push("cmd" to "sign_ack", "uuid" to "s$n", "broadcast" to true, "data" to "txid-$n")
+        }
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val c = client(relay)
+        val session = HiveAuthSession(user, key, "has-token", 0)
+        assertEquals("txid-1", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        // closed while idle, its reader not told yet: the send fails before anything is queued; a new socket gets its own
+        relay.closedIdle += relay.opened
+        relay.channel = Channel(Channel.UNLIMITED)
+        assertEquals("txid-2", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        assertEquals(2, relay.opened)
+        assertEquals(2, relay.sent.count { it["cmd"]!!.jsonPrimitive.content == "sign_req" }, "the request reached the relay once")
+    }
+
+    /** #3703 review: a socket whose reader saw the relay close it, while a send on it would still be accepted. */
+    @Test
+    fun aRequestOnASocketWhoseReaderEndedOpensAFreshOne() = runTest {
+        var n = 0
+        val relay = FakeRelay {
+            n++
+            push("cmd" to "sign_wait", "uuid" to "s$n", "expire" to 50_000)
+            push("cmd" to "sign_ack", "uuid" to "s$n", "broadcast" to true, "data" to "txid-$n")
+        }
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        val c = client(relay)
+        val session = HiveAuthSession(user, key, "has-token", 0)
+        assertEquals("txid-1", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        relay.drop()
+        assertEquals("txid-2", c.broadcast(session, KeyRole.ACTIVE, ops) {}.txId)
+        assertEquals(2, relay.opened)
+        assertEquals(2, relay.sent.count { it["cmd"]!!.jsonPrimitive.content == "sign_req" }, "never sent into the closed socket")
+    }
+
+    /** #3707 review: a send that fails for another reason may have reached the relay: it is not sent again. */
+    @Test
+    fun aSendThatFailsForAnotherReasonIsNotSentAgain() = runTest {
+        val relay = FakeRelay { }
+        relay.failSend = IllegalStateException("write failed midway")
+        val ops = Json.parseToJsonElement(AuthGoldenVectors.SIGN_OP).jsonArray
+        assertFailsWith<Exception> { client(relay).broadcast(HiveAuthSession(user, key, "has-token", 0), KeyRole.ACTIVE, ops) {} }
+        assertEquals(1, relay.opened, "no second socket")
+        assertEquals(1, relay.attempts, "one send: the frame may have reached the relay")
     }
 
     @Test

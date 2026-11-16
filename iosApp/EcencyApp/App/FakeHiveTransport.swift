@@ -9,6 +9,20 @@ import Foundation
 final class FakeHiveTransport: NSObject, RpcTransport {
     static let authors = ["spike-alice", "spike-bob", "spike-carol", "spike-dave", "spike-erin", "spike-frank"]
 
+    /// A post whose body links two others, drawn as post link cards (#3705; as DemoHiveTransport's LINKING_BODY).
+    static let linkingPermlink = "fake-post-links"
+    static let linkingBody = """
+    ## Further reading
+
+    Two earlier posts on the same subject:
+
+    https://ecency.com/hive-100001/@spike-bob/fake-post-2
+
+    https://ecency.com/hive-100001/@spike-carol/fake-post-3
+
+    Thanks for reading.
+    """
+
     /// Markdown for every fake post: a heading, text, a mention, an external link on its own line and a video.
     static let body = """
     ## Spike fixture
@@ -206,7 +220,8 @@ final class FakeHiveTransport: NSObject, RpcTransport {
     static func discussion(rootAuthor: String, rootPermlink: String) -> [String: [String: Any]] {
         let root = (rootAuthor, rootPermlink)
         var all: [[String: Any]] = [
-            entry(author: rootAuthor, permlink: rootPermlink, title: "Fixture post", children: 5, votes: 9,
+            entry(author: rootAuthor, permlink: rootPermlink, title: "Fixture post",
+                  body: rootPermlink == linkingPermlink ? linkingBody : FakeHiveTransport.body, children: 5, votes: 9,
                   replies: ["spike-bob/re-c1", "spike-carol/re-c2"]),
             entry(author: "spike-bob", permlink: "re-c1", parent: root, depth: 1, body: "First fixture comment.",
                   replies: ["spike-dave/re-r1"]),

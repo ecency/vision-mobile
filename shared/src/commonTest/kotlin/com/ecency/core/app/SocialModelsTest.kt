@@ -42,7 +42,7 @@ class SocialModelsTest {
             FakeTransport.result(req, rows.joinToString(",", "[", "]") { """{"follower":"$it","following":"alice","what":["blog"]}""" })
         }))
         val model = app.env.followsModel("alice", following = false, count = 150)
-        assertEquals("Follower (150)", model.current.title)
+        assertEquals("Followers (150)", model.current.title) // #3704: plural (RN "Follower (150)")
         model.start()
         testScheduler.advanceUntilIdle()
         assertEquals(100, model.current.rows.size)

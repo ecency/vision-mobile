@@ -43,6 +43,19 @@ class SentryMappingTest {
         assertEquals(0.05, o.tracesSampleRate!!, 0.0)
     }
 
+    /** #3704: a release built on a laptop (no CI build number) is not reported with the testers' production builds. */
+    @Test
+    fun aLocalReleaseBuildReportsUnderDevelopment() {
+        val local = SentryAndroidOptions().also {
+            SentryReporting.configure(it, dsn = "https://abc@example.ingest.sentry.io/1", applicationId = "app.esteem.mobile.android", version = "4.0.0", build = 0, debug = false, mappingId = "")
+        }
+        assertEquals("development", local.environment)
+        val debug = SentryAndroidOptions().also {
+            SentryReporting.configure(it, dsn = "https://abc@example.ingest.sentry.io/1", applicationId = "app.esteem.mobile.android", version = "4.0.0", build = 0, debug = true, mappingId = "")
+        }
+        assertEquals("debug", debug.environment)
+    }
+
     @Test
     fun aTransactionKeepsNoUrlPathQueryOrSecret() {
         val wif = "5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw" // Bitcoin wiki example key, controls nothing

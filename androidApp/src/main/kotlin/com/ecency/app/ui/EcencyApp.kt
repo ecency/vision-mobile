@@ -507,7 +507,7 @@ private fun EcencyRoot(env: AppEnvironment, host: AppHost, navigator: Navigator,
     // the first frame of whatever comes first: lock cover, PIN pad or the feed
     val openTip = remember(routes) { { key: PostKey -> routes.requireLogin { tip = key } } }
     // the one "Show Images" read (ContentImages behind env.notifications), for feed cards and post bodies alike
-    androidx.compose.runtime.CompositionLocalProvider(LocalFeedx provides feedx, LocalVideoCaptures provides host.videoCaptures, LocalTip provides openTip, LocalShowImages provides showImages) {
+    androidx.compose.runtime.CompositionLocalProvider(LocalFeedx provides feedx, LocalVideoCaptures provides host.videoCaptures, LocalTip provides openTip, LocalShowImages provides showImages, com.ecency.app.render.LocalPostLinkCards provides env.postLinkCards) {
     Box(Modifier.fillMaxSize().background(colors.background).onFirstDraw { firstFrame.run { PerfMarks.markOnce(PerfEvent.FIRST_FRAME) } }) {
         // the device key of the secure storage is gone: a window of its own, above the lock cover, the PIN pad and every sheet
         StorageResetPrompt(env)

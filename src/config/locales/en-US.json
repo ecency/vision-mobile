@@ -2979,7 +2979,7 @@
     },
     "follows": {
       "fail": "Fail!: {message}",
-      "follower_count": "Follower ({count})",
+      "followers_count": "Followers ({count})",
       "following_count": "Following ({count})"
     },
     "link": {

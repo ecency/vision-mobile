@@ -17,7 +17,7 @@ enum CrashReporting {
             o.dsn = dsn
             o.releaseName = release(bundleId: bundleId, version: version, build: build)
             o.dist = build
-            o.environment = debug ? "debug" : "production"
+            o.environment = environment(debug: debug, build: build)
             // RN sendDefaultPii: false; replays only in development builds, as RN
             o.sendDefaultPii = false
             // performance data (app starts, slow and frozen frames, screen loads) at a low rate; spans that carry
@@ -44,6 +44,15 @@ enum CrashReporting {
     }
 
     static func release(bundleId: String, version: String, build: String) -> String { "\(bundleId)@\(version)+\(build)" }
+
+    /// A release built without CI's build number (project.yml's `CURRENT_PROJECT_VERSION` "1": a laptop, a simulator)
+    /// is not the testers' production (#3704); CI passes the Unix time.
+    static func environment(debug: Bool, build: String) -> String {
+        if debug { return "debug" }
+        return build == localBuild ? "development" : "production"
+    }
+
+    static let localBuild = "1"
 
     static let tracesSampleRate = 0.05
 

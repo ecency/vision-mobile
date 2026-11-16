@@ -385,26 +385,42 @@ class FeedModel internal constructor(
     private fun refreshQuietly() {
         loadPin()
         val stamp = env.freshness.stamp()
-        val wanted = current.pages.coerceAtLeast(1)
+        val loaded = current.pages.coerceAtLeast(1)
+        // the first pages only (#3704): a feed scrolled far is not read again page after page
+        val wanted = minOf(loaded, MAX_QUIET_PAGES)
         val fresh = env.api.feeds.pager(source, env.session.current.username)
         job = scope.launch {
             try {
                 val nsfw = NsfwMode.of(env.prefs)
                 val read = mutableListOf<Post>()
                 var pages = 0
-                // as many pages as were loaded; with nothing to show, on to the first load's cap at most
+                // as many pages as were loaded, up to the cap; with nothing to show, on to the first load's cap at most
                 while (!fresh.isEndReached && (pages < wanted || (read.isEmpty() && pages <= MAX_AUTO_ADVANCE))) {
                     read += shown(fresh.loadMore(), nsfw)
                     pages++
                 }
-                val all = withLocal(read, nsfw, top = true)
+                // fewer pages read than were loaded: the rows the reader had stay after the fresh ones, and paging goes on
+                // from where it was (an old pager at the feed's end is not kept: the feed may go on further now)
+                val old = pager
+                val kept = old != null && !old.isEndReached && loaded > pages && !fresh.isEndReached
+                val fresher = withLocal(read, nsfw, top = true)
+                val all = if (kept && old != null) {
+                    // by post, not by page: whatever is shown now (rows an earlier quiet refresh brought included) that the
+                    // fresh pages did not bring back, in its order, filtered as shown
+                    val got = fresher.map { it.key }.toSet()
+                    old.markSeen(got)
+                    fresher + shown(posts.values.toList(), nsfw).filter { it.key !in got }
+                } else {
+                    fresher
+                }
                 val cards = cards(all, nsfw)
-                pager = fresh
+                val next = if (kept && old != null) old else fresh
+                pager = next
                 posts = all.associateBy { it.key }
                 base = cards
                 readAt = stamp
                 if (withPromoted) loadPromoted(nsfw)
-                setState { it.copy(items = display(), endReached = fresh.isEndReached, loaded = true, error = null, notFound = null, pages = pages) }
+                setState { it.copy(items = display(), endReached = next.isEndReached, loaded = true, error = null, notFound = null, pages = if (kept) loaded else pages) }
                 env.localVotes.retireConfirmed(read, env.session.current.username)
             } catch (e: CancellationException) {
                 throw e
@@ -445,5 +461,8 @@ class FeedModel internal constructor(
 
         /** Pages read by themselves after one that filtered down to nothing (as [AssetDetailsModel.MAX_AUTO_ADVANCE]). */
         const val MAX_AUTO_ADVANCE = 5
+
+        /** Pages a quiet refresh reads again at most (#3704); the rows loaded after them stay. */
+        const val MAX_QUIET_PAGES = 3
     }
 }

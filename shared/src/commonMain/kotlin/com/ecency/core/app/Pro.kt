@@ -57,6 +57,8 @@ data class ProState(
     val loadingPrice: Boolean = false,
     /** The store answered without the product. */
     val unavailable: Boolean = false,
+    /** The store could not be asked (offline, its service): the sheet says so with a retry ([ProModel.loadPrice]). */
+    val priceFailed: Boolean = false,
     /** The Pro sheet is open. */
     val open: Boolean = false,
     /** The store sheet or the order is under way ([PurchaseServiceState.busy]). */
@@ -169,7 +171,8 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
                 if (s.username != current.account) {
                     buyingFor = null
                     accountGen++
-                    setState { ProState(account = s.username, price = it.price, unavailable = it.unavailable, open = it.open) }
+                    // the price is the store's, not the account's: its state, a failed read included, carries over
+                    setState { ProState(account = s.username, price = it.price, unavailable = it.unavailable, open = it.open, loadingPrice = it.loadingPrice, priceFailed = it.priceFailed) }
                     sync()
                 }
             }
@@ -246,11 +249,14 @@ class ProModel internal constructor(private val env: AppEnvironment) : StateMode
     /** RN `getItems` for the one product. */
     fun loadPrice() {
         if (current.loadingPrice) return
-        setState { it.copy(loadingPrice = true) }
+        setState { it.copy(loadingPrice = true, priceFailed = false) }
         scope.launch {
-            val (products, _) = env.purchases.products(listOf(PurchaseSkus.PRO))
+            val (products, error) = env.purchases.products(listOf(PurchaseSkus.PRO))
             val product = products.firstOrNull { it.productId == PurchaseSkus.PRO }
-            setState { it.copy(loadingPrice = false, price = product?.localizedPrice, unavailable = product == null) }
+            // a store that could not be asked (offline, its service) is not one that does not sell Pro: that says so,
+            // with a retry (#3703); one that cannot sell here (no Play billing, an unsigned build) is unavailable
+            val retry = product == null && error?.isTransient == true
+            setState { it.copy(loadingPrice = false, price = product?.localizedPrice, unavailable = product == null && !retry, priceFailed = retry) }
         }
     }
 
