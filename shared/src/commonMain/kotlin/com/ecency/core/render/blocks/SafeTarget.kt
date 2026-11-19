@@ -150,8 +150,6 @@ object SafeTarget {
         "brandnewtube.com" to { p -> BRAND_NEW_TUBE_PLAYER.matches(p) },
         // LBRY_REGEX: /$/embed/...
         "lbry.tv" to { p -> p.startsWith("/$/embed/") || p.startsWith("/%24/embed/") },
-        // SKATEHIVE_IPFS_REGEX: /ipfs/<cid> (render-helper makes it a video tag), or a video file in that folder
-        "ipfs.skatehive.app" to { p -> IPFS_VIDEO.matches(p) },
         // SKATEHYPE_EMBED_REGEX: /ifplay.php?v=<n>
         "www.skatehype.com" to { p -> p == "/ifplay.php" },
         "skatehype.com" to { p -> p == "/ifplay.php" },

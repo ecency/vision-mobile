@@ -1,5 +1,6 @@
 package com.ecency.core.render.blocks
 
+import com.ecency.core.render.sanitize.SanitizeOptions
 import com.ecency.core.app.ErrorReports
 import com.ecency.core.render.blocks.Inline.Mark
 import com.ecency.core.render.dom.CDATASection
@@ -72,7 +73,7 @@ object BlockBuilder {
         XmlDomParser.parseFromString(RenderBodyParser.wrap(html))
     } catch (e: Exception) {
         // not reported: malformed html is repaired below
-        RenderBodyParser.parseRepaired(html).document ?: LenientHtml.parse(html)
+        RenderBodyParser.parseRepaired(html, SanitizeOptions(rendered = true)).document ?: LenientHtml.parse(html)
     }
 
     private fun findBody(root: Element): Element? {

@@ -1,6 +1,7 @@
 package com.ecency.core.render.sanitize
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.methods.JsRegex
 import com.ecency.core.render.methods.g
 import com.ecency.core.render.url.WebUrl
 
@@ -24,7 +25,8 @@ object EmbedSrc {
 
     private fun embedPrefix(path: String) = path.startsWith("/embed/")
     private fun re(pattern: String, ignoreCase: Boolean = false): (String) -> Boolean {
-        val r = if (ignoreCase) Regex(pattern, RegexOption.IGNORE_CASE) else Regex(pattern)
+        // JS semantics on both platforms (JsRegex): no Unicode case folding (`ſ` is not `s`), `$` only at the end
+        val r = JsRegex.compile(pattern, ignoreCase)
         return { p -> r.containsMatchIn(p) }
     }
     private val odysee = re("^/(?:\\$|%24)/embed/")
@@ -98,12 +100,12 @@ object EmbedSrc {
         return pattern == null || pattern(url.pathname)
     }
 
-    private val SCHEME_SLASHES = Regex("^(?:https?:)?//", RegexOption.IGNORE_CASE)
-    private val YOUTUBE_HOST = Regex("^https://(?:m\\.)?youtube\\.com/", RegexOption.IGNORE_CASE)
-    private val SPEAK_HOST = Regex("^https://(?:play\\.)?3speak\\.[a-z]+/", RegexOption.IGNORE_CASE)
-    private val WWW_YOUTUBE = Regex("^https://www\\.youtube\\.com/", RegexOption.IGNORE_CASE)
-    private val YOUTUBE_EMBED = Regex("^(https://www\\.youtube\\.com)/embed/", RegexOption.IGNORE_CASE)
-    private val YOUTUBE_SHORT = Regex("^https://www\\.youtube\\.com/shorts/([A-Za-z0-9_-]{11})/?(?=[?#]|$)", RegexOption.IGNORE_CASE)
+    private val SCHEME_SLASHES = JsRegex.compile("^(?:https?:)?//", ignoreCase = true)
+    private val YOUTUBE_HOST = JsRegex.compile("^https://(?:m\\.)?youtube\\.com/", ignoreCase = true)
+    private val SPEAK_HOST = JsRegex.compile("^https://(?:play\\.)?3speak\\.[a-z]+/", ignoreCase = true)
+    private val WWW_YOUTUBE = JsRegex.compile("^https://www\\.youtube\\.com/", ignoreCase = true)
+    private val YOUTUBE_EMBED = JsRegex.compile("^(https://www\\.youtube\\.com)/embed/", ignoreCase = true)
+    private val YOUTUBE_SHORT = JsRegex.compile("^https://www\\.youtube\\.com/shorts/([A-Za-z0-9_-]{11})/?(?=[?#]|$)", ignoreCase = true)
 
     /**
      * 2.5.45 `canonicalEmbedSrc`: the spelling iframe() normalises an embed to (https, www.youtube.com, play.3speak.tv,

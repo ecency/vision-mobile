@@ -19,6 +19,12 @@ data class SanitizeOptions(
      * DOM and keep render-helper's markers and link policy; every other tag gets the untransformed rules.
      */
     val renderNonce: String? = null,
+    /**
+     * Native only: the HTML is a finished render read again (the block builder's repair of output xmldom refuses).
+     * Its classes were already limited on the render's own final pass, where the author's lost theirs, so they are
+     * kept: render-helper's own (`markdown-author-link`, `markdown-video-link`...) make the chips and cards.
+     */
+    val rendered: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_PROXY_BASE = "https://i.ecency.com"
@@ -183,7 +189,7 @@ object HtmlSanitizer {
             }
             if (tag == "span" && name == "class" && Js.trim(Js.toLowerCase(decoded)) == "wr") return ""
             // A class the render did not stamp is the author's: only the classes an author may write survive.
-            if (isWhiteAttr && name == "class" && !trusted) {
+            if (isWhiteAttr && name == "class" && !trusted && !options.rendered) {
                 val kept = AuthorAttributes.authorClasses(decoded)
                 return if (kept.isNotEmpty()) "class=\"${escapeAttr(kept)}\"" else ""
             }

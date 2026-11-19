@@ -30,4 +30,17 @@ class JsRegexTest {
         assertEquals("\\u[aA][gG]", JsRegex.translate("\\uag", ignoreCase = true))
         assertEquals("\\u00e9", JsRegex.translate("\\u00e9", ignoreCase = false))
     }
+
+    /** The 2.5.52 port's embed and start-time patterns read case as JS does, on every platform (review of #3711). */
+    @Test
+    fun thePortsPatternsDoNotFoldTheLongS() {
+        // JS /i without u never folds U+017F to s: upstream drops this src, so must native
+        val out = com.ecency.core.render.sanitize.HtmlSanitizer.sanitize(
+            "<iframe src=\"http\u017f://www.youtube.com/embed/aaaaaaaaaaa\"></iframe>",
+            com.ecency.core.render.sanitize.SanitizeOptions(),
+        )
+        assertFalse("youtube.com" in out, out)
+        assertEquals("", Helper.extractYtStartTime("https://www.youtube.com/watch?v=aaaaaaaaaaa&t=90\u017f"))
+        assertEquals("90", Helper.extractYtStartTime("https://www.youtube.com/watch?v=aaaaaaaaaaa&t=90S"))
+    }
 }

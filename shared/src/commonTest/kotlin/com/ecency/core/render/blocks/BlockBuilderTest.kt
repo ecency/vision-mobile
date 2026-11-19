@@ -18,6 +18,14 @@ class BlockBuilderTest {
     private fun p(vararg inlines: Inline, style: BlockStyle = BlockStyle.Default) = Block.Paragraph(inlines.toList(), style)
     private val center = BlockStyle(align = BlockStyle.Align.Center)
 
+    /** Rendered HTML that xmldom refuses is repaired, and the classes the render stamped still make chips. */
+    @Test
+    fun aRepairedRenderKeepsTheRendersChips() {
+        val html = "<p><a class=\"markdown-author-link\" data-author=\"spike-alice\" href=\"https://ecency.com/@spike-alice\">@spike-alice</a> hi <b>open</p><p>next</p>"
+        val inlines = BlockBuilder.build(html).filterIsInstance<Block.Paragraph>().flatMap { it.inlines }
+        assertTrue(Inline.Mention("spike-alice") in inlines, "$inlines")
+    }
+
     @Test
     fun everyInputKeepsItsWords() {
         assertEquals(BlockInputs.html.keys, BlockInputs.words.keys)

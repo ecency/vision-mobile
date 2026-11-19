@@ -119,7 +119,7 @@ internal object Helper {
         return run(p + 1, 31) { Js.isAsciiAlpha(it) || Js.isDigit(it) }
     }
 
-    private val AMP_SENTINEL = Regex("[\uE000\uE001]|%EE%80%8[01]|&#x0*e00[01];|&#0*5734[45];", RegexOption.IGNORE_CASE)
+    private val AMP_SENTINEL = JsRegex.compile("[\uE000\uE001]|%EE%80%8[01]|&#x0*e00[01];|&#0*5734[45];", ignoreCase = true)
 
     /** `hasAmpSentinel`: the body already holds the private-use pair the render swaps an escaped `&` for. */
     fun hasAmpSentinel(body: String): Boolean = AMP_SENTINEL.containsMatchIn(body)
@@ -202,7 +202,7 @@ internal object Helper {
         return if (q >= 0 && q < s.length - 1) s.substring(0, q) else s
     }
 
-    private val YT_T = Regex("^(?:([0-9]{1,7})h)?(?:([0-9]{1,7})m)?(?:([0-9]{1,7})s?)?$", RegexOption.IGNORE_CASE)
+    private val YT_T = JsRegex.compile("^(?:([0-9]{1,7})h)?(?:([0-9]{1,7})m)?(?:([0-9]{1,7})s?)?$", ignoreCase = true)
     private const val YT_MAX_SECONDS = 9_999_999L
 
     /**

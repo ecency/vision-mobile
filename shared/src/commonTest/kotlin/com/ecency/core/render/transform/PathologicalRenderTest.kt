@@ -71,6 +71,22 @@ class PathologicalRenderTest {
         assertLinear("tag chain", { n -> "#a".repeat(n) }, 6_000)
     }
 
+    /** The 2.5.52 port's new scanners (review of #3711): each guarded against going quadratic on author input. */
+    @Test
+    fun theNewScannersStayLinear() {
+        // removeDuplicateAttributes' scan budget: unclosed tags whose only `>` sits inside a quoted value (the
+        // render escapes this shape before it gets there, so the scanner is driven directly)
+        LinearScaling.assertLinear("unclosed tags, quoted >", 4_000, { n -> "<a b ".repeat(n) + "c=\">\"" }) {
+            com.ecency.core.render.dom.HtmlStringFixes.removeDuplicateAttributes(it)
+        }
+        // collectDeclaredIds: many author ids and links to them
+        assertLinear("declared ids", { n -> (1..n).joinToString("") { "<a id=\"i$it\" href=\"#i$it\">x</a> " } }, 1_000)
+        // CodeRanges: fences inside nested quote and list containers
+        assertLinear("nested fences", { n -> "> - ```\ncode &amp; x\n```\n".repeat(n) }, 1_000)
+        // EntityProtection: URL runs with parentheses and entities
+        assertLinear("entity url runs", { n -> "https://x.example/(a&amp;b ".repeat(n) }, 2_000)
+    }
+
     @Test
     fun mentionChainsStayLinear() {
         assertLinear("mention chain", { n -> "@" + "a.".repeat(n) + "a" }, 20_000)

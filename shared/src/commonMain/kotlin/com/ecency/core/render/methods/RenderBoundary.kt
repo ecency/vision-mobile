@@ -50,6 +50,11 @@ internal object RenderBoundary {
         return local == "script" || local == "style"
     }
 
+    /**
+     * A fresh nonce per render. Upstream draws it from `crypto.getRandomValues`; `kotlin.random.Random` is enough
+     * here: the nonce never comes from or reaches the body (`data-rh` written by an author is stripped), it only
+     * tells the tags this render emitted from the author's within the one render.
+     */
     fun createRenderNonce(): String {
         val sb = StringBuilder("rh")
         repeat(4) { sb.append(Random.nextLong(0, 0x100000000L).toString(36)) }
