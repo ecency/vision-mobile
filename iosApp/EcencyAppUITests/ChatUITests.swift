@@ -151,7 +151,8 @@ final class ChatUITests: XCTestCase {
         name.press(forDuration: 0.8)
         XCTAssertTrue(element(app, "chat-options-sheet").waitForExistence(timeout: 5), "long press: the options")
         XCTAssertFalse(element(app, "quick-profile").exists, "and no profile")
-        app.swipeDown(velocity: .fast)
+        // swiped on the sheet itself: a member's sheet (no Pin, no Remove) does not reach the screen's middle
+        element(app, "chat-options-sheet").swipeDown(velocity: .fast)
         XCTAssertTrue(element(app, "chat-options-sheet").waitForNonExistence(timeout: 5))
         sleep(1)
         name.tap()
