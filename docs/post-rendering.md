@@ -20,7 +20,7 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules (render-helper 2.5.42, all ported)
+## Custom rules (render-helper 2.5.52, all ported)
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.
@@ -37,7 +37,19 @@ Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port 
 | Bare URL, `@mention` and `#tag` linkify, section anchors | `Linkify`, `Scanners` |
 | SEO `rel` on external links, `dir="auto"` on blocks | `AMethod`, `Traverse` |
 | Sanitizer whitelist (tags, attributes, classes) | `sanitize/SanitizeHtml`, `sanitize/Xss` |
-| Summary and card image | `PostBodySummary`, `CatchPostImage` |
+| Summary and card image (the 2.5.51 card summary rewrite, `getPostBodyText`, is not ported: the app's summaries come from the blocks) | `PostBodySummary`, `CatchPostImage` |
+| (2.5.44) YouTube start time as seconds or `1h2m3s`, each part and the total 7 digits at most, an invalid `t` falls back to a valid `start` | `Helper.extractYtStartTime` |
+| (2.5.45, #1919) Render boundary: author link markers (`markdown-*` classes, render-helper's `data-*`) stripped and attribute names lower-cased before the transforms, every emitted element stamped with a per-render nonce the final sanitizer trusts, script/style/CDATA/comments kept out | `RenderBoundary`, `sanitize/SanitizeHtml` |
+| (2.5.45) Author classes limited to the formatting set (`pull-right`, `text-center`, editor colours, ...), author ids namespaced `user-content-` with same-page links to them | `sanitize/AuthorAttributes`, `sanitize/SanitizeHtml`; the blocks keep the author's names (`BlockBuilder.authorId`) |
+| (2.5.45) Embed allow list on every path, a path shape for every host, `canonicalEmbedSrc`, author sandbox reduced to the granted tokens, `<video poster>` through the proxy, images held to the proxy on the full render | `sanitize/EmbedSrc`, `IframeMethod`, `VideoMethod`, `sanitize/SanitizeHtml` |
+| (2.5.45, #1920) Adjacent tag and mention runs linked in one pass; traverse depth cap 2,000 (deeper subtrees flattened to text); linear attribute pre-pass | `Linkify`, `Traverse`, `HtmlStringFixes` |
+| (2.5.45, #2085) Raw-HTML attribute values decoded as a browser decodes them (`&times=` kept) | `HtmlStringFixes.removeDuplicateAttributes` |
+| (2.5.45, #2092, #2093) App render: entity placeholders never inside URLs or code | `EntityProtection`, `CodeRanges` (`MarkdownToHtml.kt`) |
+| (2.5.46, #2092, #2094) Markdown destinations decoded exactly once, escaped `\&` literal in links; bare image URLs end where `imageUrlEnd` says (query and suffix kept, `.icons`/`photo.jpg.html` not images, text after them stays) | `markdown/AmpPairing`, `Helper.imageUrlEnd`, `Linkify`, `AMethod`, `CatchPostImage` |
+| (2.5.46) `insights` and `notifications` profile sections | `Consts.SECTION_LIST` |
+| (2.5.46, #2095) A refused iframe's placeholder is not linkified | `Traverse` |
+| (2.5.47, #2099, #2107) `tel:` and `web+` links kept as written; an href keeps only the schemes `a()` writes | `Consts.EXTERNAL_SCHEME`, `sanitize/SanitizeHtml` |
+| (2.5.50) Chip classes only as whole tokens on in-site hrefs, author `rel`/`target` dropped, exact `html`/`head` wrapper strip | `AMethod`, `RenderBodyParser` |
 
 RN app rules outside render-helper (`src/components/postHtmlRenderer`): `<center>` to `text-center`
 and span flattening are in `BlockBuilder`; the waves image grid is `BuildOptions.waves`; the waves

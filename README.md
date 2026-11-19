@@ -490,7 +490,7 @@ Rerun both after bumping remarkable, autolinker or render-helper. Fixture inputs
 
 ## Post HTML: DOM and sanitizer
 
-`shared/src/commonMain/kotlin/com/ecency/core/render/dom` and `.../render/sanitize` port the HTML layer of `@ecency/render-helper` 2.5.42 to pure Kotlin: the xmldom 0.9.12 `text/html` parser and serializer (a small mutable DOM the post transforms run on), the htmlparser2 + dom-serializer repair path render-helper takes when xmldom rejects a body, and `sanitizeHtml` (xss 1.0.15 with render-helper's whitelist and hooks). `RenderBodyParser` mirrors the parse step of `markdownToHTML`, including its fallbacks.
+`shared/src/commonMain/kotlin/com/ecency/core/render/dom` and `.../render/sanitize` port the HTML layer of `@ecency/render-helper` 2.5.52 to pure Kotlin: the xmldom 0.9.12 `text/html` parser and serializer (a small mutable DOM the post transforms run on), the htmlparser2 + dom-serializer repair path render-helper takes when xmldom rejects a body, and `sanitizeHtml` (xss 1.0.15 with render-helper's whitelist and hooks). `RenderBodyParser` mirrors the parse step of `markdownToHTML`, including its fallbacks.
 
 Golden fixtures come from the JS packages themselves (synthetic inputs only, plus seeded random combinations):
 
@@ -511,7 +511,7 @@ RANDOM_COUNT=1500 SOUP_COUNT=3000 SOUP_LEN=80 EXTRA_FUZZ=2000 SEED=99 node gener
 
 Everything above is compared byte for byte; the only exceptions are listed in code with a reason, and the tests fail if a listed case stops differing:
 
-- **Iframe host allow list (security).** The sanitizer drops an iframe `src` unless the embed allow list (`EmbedSrc.isAllowedEmbedSrc`, judged on the `https:` form so protocol-relative and `http:` sources of allowed hosts keep working) accepts it, and drops a `sandbox` holding any token beyond the ones render-helper's `iframe()` transform grants (`allow-scripts`, `allow-same-origin`, `allow-popups`). render-helper only enforces the allow list inside the DOM transform, which its sanitize-only fallback never runs. Cases: `DomGoldenTest.securityDeviations` and `TransformDeviations.security` (whole-pipeline goldens); `RenderCorpusTest` counts a post as this deviation only when dropping exactly the off-list iframe sources and their "Unsupported" placeholders from the oracle output gives the Kotlin output. Every rendered iframe is also checked against `IframeInvariant`. Upstream write-up: [docs/upstream-render-helper-issues.md](docs/upstream-render-helper-issues.md).
+- **Iframe host allow list (security): now upstream.** Until 2.5.42 the port alone dropped an iframe `src` outside the embed allow list and author `sandbox` tokens beyond `iframe()`'s grants. render-helper 2.5.45 (#1919) enforces both in its own sanitizer on every path, gives a refused src `iframe()`'s spelling one more try (`EmbedSrc.canonicalEmbedSrc`) and drops an iframe left without a src; the port does the same, so `DomGoldenTest.securityDeviations` and `TransformDeviations.security` are empty (the mechanism stays for the next one).
 - **Very deep nesting (robustness).** Past a few thousand nested elements dom-serializer overflows the V8 stack and render-helper falls back to sanitize-only output; the Kotlin repair is iterative and returns the repaired, fully closed body (`DomGoldenTest.deepNestingPastTheJsStackIsRepaired`).
 
 ### URLs and IDNA
@@ -548,12 +548,12 @@ A link to another Hive post on a line of its own (`Block.PostPreview`) is a card
 
 ## Render pipeline
 
-`shared/src/commonMain/kotlin/com/ecency/core/render` reproduces `@ecency/render-helper` 2.5.42 end to end in pure Kotlin (JS is only the offline oracle):
+`shared/src/commonMain/kotlin/com/ecency/core/render` reproduces `@ecency/render-helper` 2.5.52 end to end in pure Kotlin (JS is only the offline oracle):
 
 - `RenderHelper(proxyBase)` is the entry point: `renderPostBody(body | Entry, forApp, parentDomain, seoContext, options)`, `postBodySummary(body | Entry, length, platform)`, `catchPostImage(Entry | body, width, height, fast)`, `getEntryImageRawUrl`, `getEntryCardImageRawUrl` and `simpleMarkdownToHTML`. The app's `renderPostBody(post, true, false)` plus `setProxyBase(imageServer)` becomes `RenderHelper(imageServer).renderPostBody(post.body, forApp = true)`.
 - `methods/` holds the transforms (traverse, a, img, iframe, text, linkify, clean-reply, markdown-to-html), the helpers and the regex constants. Per-element regexes go through `JsRegex`, which translates the JS source so the JVM and Kotlin/Native engines match JS (`.`, `$`, `\s`, ASCII-only `/i`); hot and whole-body patterns are hand-written scanners (`Scanners`, `Linkify`, `CatchPostImage`).
 - The app should call `renderPostBodySafe` (never throws on content; a failure or a blank result for a non-blank body shows the body as escaped text). Renders are CPU-bound and pathological bodies take seconds, so always render off the main thread.
-- Robustness: traversal deeper than `Traverse.MAX_DEPTH` (5,000) takes render-helper's sanitize-only fallback, as V8's stack overflow does; see `docs/upstream-render-helper-issues.md` and `PathologicalRenderTest`.
+- Robustness: as render-helper 2.5.45 (#1920), a run of adjacent tags and mentions is linked in one pass, and past `Traverse.MAX_DEPTH` (2,000) levels a subtree is reduced to its text instead of being walked; see `PathologicalRenderTest`.
 - Shared JS semantics (whitespace, trim, toLowerCase, URI coding, parseInt, number formatting, UTF-8) live in one place, `render/js/Js.kt`.
 - Threading: a `RenderHelper` holds only its immutable `ImageProxy`. Each call builds its own document and state, regexes are compiled once and immutable, and there is no render cache, so one instance can serve concurrent background renders. `traverse` is iterative, so deeply nested bodies cannot overflow a thread stack.
 
@@ -565,7 +565,7 @@ node generate-transform-fixtures.mjs ../../shared/src/commonTest/kotlin/com/ecen
 node generate-fixtures.mjs ../../shared/src/commonTest/kotlin/com/ecency/core/render/RenderFixtures.kt
 ```
 
-`TransformGoldenTest` compares every case exactly; deviations go in `TransformDeviations` with a reason (only the iframe security deviation above), and `securityDeviationsStillDiffer` fails if a listed case starts matching the oracle. For a local fuzzing run use `SEED=... RANDOM_COUNT=... node generate-transform-fixtures.mjs ...` and regenerate the committed set afterwards.
+`TransformGoldenTest` compares every case exactly; deviations go in `TransformDeviations` with a reason (none since 2.5.45), and `securityDeviationsStillDiffer` fails if a listed case starts matching the oracle. For a local fuzzing run use `SEED=... RANDOM_COUNT=... node generate-transform-fixtures.mjs ...` and regenerate the committed set afterwards.
 
 Corpus run (local only: the posts are other people's content and `corpus/` is gitignored):
 
