@@ -100,8 +100,8 @@ object HiveNodes {
     fun withFirst(server: String, list: List<String>): List<String> = sanitize(listOf(server) + list)
 }
 
-/** What [HiveRpcClient.callWithFallback] got: the result and the method that answered it. */
-data class FallbackResult(val result: JsonElement, val method: String)
+/** What [HiveRpcClient.callWithFallback] got: the result, the method that answered it and the node that did. */
+data class FallbackResult(val result: JsonElement, val method: String, val node: String = "")
 
 /** Base class for everything the data layer throws about talking to Hive nodes. */
 sealed class HiveApiException(message: String, cause: Throwable? = null) : EcencyException(message, cause)
@@ -289,7 +289,7 @@ class HiveRpcClient(
                 } else {
                     health.recordSuccess(node, NodeHealthTracker.apiOf(asked), nowMillis() - started, asked)
                     recordHeadBlock(node, asked, result)
-                    return FallbackResult(result, asked)
+                    return FallbackResult(result, asked, node)
                 }
             } catch (e: RpcErrorException) {
                 if (!isNodeLevelError(e.code, e.rpcMessage)) throw e

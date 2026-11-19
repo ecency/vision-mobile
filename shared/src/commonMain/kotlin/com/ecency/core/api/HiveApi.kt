@@ -11,6 +11,8 @@ import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.long
 import com.ecency.core.api.model.str
+import com.ecency.core.api.rpc.AllNodesFailedException
+import com.ecency.core.api.rpc.HiveApiException
 import com.ecency.core.api.rpc.HiveRpcClient
 import com.ecency.core.api.rpc.NodeFailureException
 import com.ecency.core.api.rpc.RpcErrorException
@@ -111,20 +113,55 @@ class HiveApi(val client: HiveRpcClient) {
         observer,
     )
 
-    /** `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist. */
+    /**
+     * `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist.
+     *
+     * A node that has not the post (null, or hivemind's "does not exist") may only lag behind the chain, so the other
+     * nodes are asked before it is "not found" (SDK 2.9.0 getPostQueryOptions + verifyPostOnAlternateNode, #3712).
+     * The SDK double-checks a null only; hivemind answers a post it lacks with the assert, so here that is checked too.
+     */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun post(author: String, permlink: String, observer: String? = null): Post? = notFoundAsNull {
-        Post.fromJson(
-            bridgeV2(
-                "get_post",
-                buildJsonObject {
-                    put("author", author)
-                    put("permlink", permlink)
-                    observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
-                },
-            ),
-            observer?.takeIf { it.isNotBlank() }.orEmpty(),
-        )
+    suspend fun post(author: String, permlink: String, observer: String? = null): Post? {
+        val viewer = observer?.takeIf { it.isNotBlank() }.orEmpty()
+        val params = buildJsonObject {
+            put("author", author)
+            put("permlink", permlink)
+            if (viewer.isNotEmpty()) put("observer", viewer)
+        }
+        val answeredBy = try {
+            val first = client.callWithFallback("bridge.get_post_v2", params, "bridge.get_post")
+            Post.fromJson(first.result, viewer)?.let { return it }
+            first.node
+        } catch (e: RpcErrorException) {
+            if (!isNotFound(e)) throw e
+            e.node
+        }
+        return postOnOtherNodes(author, permlink, params, answeredBy, viewer)
+    }
+
+    /**
+     * SDK verifyPostOnAlternateNode: the nodes other than [primary] in turn (healthiest first, where the SDK picks
+     * at random), v1 `bridge.get_post`, which every node serves. The post when one has it; null when another node
+     * answered (null, another post, or an assert of the chain such as "does not exist"), or when [primary] is the
+     * only node; when every other node failed, the read failed: a lookup that never got an answer is not "not found".
+     */
+    private suspend fun postOnOtherNodes(author: String, permlink: String, params: JsonElement, primary: String, viewer: String): Post? {
+        val others = client.health.orderedNodes(client.nodes, "bridge", probe = false).filter { it != primary }
+        var answered = false
+        var failure: HiveApiException? = null
+        for (node in others) {
+            try {
+                val post = Post.fromJson(client.ask(node, "bridge.get_post", params, client.readTimeoutMillis), viewer)
+                    ?: run { answered = true; null }
+                if (post != null) return post.takeIf { it.author == author && it.permlink == permlink }
+            } catch (e: RpcErrorException) {
+                if (HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage)) failure = e else answered = true
+            } catch (e: HiveApiException) {
+                failure = e
+            }
+        }
+        if (answered || others.isEmpty()) return null
+        throw failure ?: AllNodesFailedException("bridge.get_post", emptyList())
     }
 
     /** `bridge.get_discussion_v2` (or v1): the root and every reply below it, keyed "author/permlink". */
