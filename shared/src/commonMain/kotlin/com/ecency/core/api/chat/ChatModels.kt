@@ -347,8 +347,17 @@ data class ChatPostsPage(
     val lastViewedAt: Long? = null,
     val memberCount: Int? = null,
     val onlineUserIds: List<String>? = null,
+    /**
+     * The server's word on the viewer (web `channelData`): a moderator of the community this open channel is
+     * (`canModerate`: Remove anyone's message, Pin), and who may notify the whole channel (`canMentionEveryone`).
+     * Null when the answer does not say.
+     */
+    val canModerate: Boolean? = null,
+    val canMentionEveryone: Boolean? = null,
 ) {
     companion object {
+        private fun JsonElement?.flag(): Boolean? = (this as? JsonPrimitive)?.takeIf { !it.isString }?.booleanOrNull
+
         fun parse(e: JsonElement?, viewerId: String?): ChatPostsPage {
             val o = e as? JsonObject
             val membership = o?.get("member").obj() ?: o?.get("membership").obj()
@@ -365,6 +374,8 @@ data class ChatPostsPage(
                 lastViewedAt = viewed,
                 memberCount = o?.get("memberCount").finiteNumber()?.toInt()?.takeIf { it > 0 },
                 onlineUserIds = (o?.get("onlineUserIds") as? JsonArray)?.mapNotNull { it.text() },
+                canModerate = o?.get("canModerate").flag(),
+                canMentionEveryone = o?.get("canMentionEveryone").flag(),
             )
         }
     }

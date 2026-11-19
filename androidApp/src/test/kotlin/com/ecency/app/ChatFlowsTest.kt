@@ -195,6 +195,38 @@ class ChatFlowsTest {
 
     private fun hasTextNode(text: String) = compose.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
+    /** #3710: a moderator of the channel's community is offered @all; picking it fills the composer. */
+    @Test
+    fun aModeratorPicksAChannelWideMention() {
+        node.signIn()
+        node.chat.moderates += "hive-125125"
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("composer")
+        waitUntil { navigator.state.top == AppScreen.ChatThread("ch-ecency", "O") && postReads("ch-ecency") > 0 }
+        compose.onNodeWithTag("composer").performTextInput("hi @al")
+        waitFor("wideMention:all")
+        assertTrue(hasTextNode("Notify all channel members"))
+        tap("wideMention:all")
+        waitUntil { !exists("wideMention:all") }
+        compose.onNodeWithTag("composer").assertTextContains("hi @all ")
+    }
+
+    /** #3710: who may not notify the channel is told so instead. */
+    @Test
+    fun aMemberIsToldChannelWideMentionsAreForModerators() {
+        node.signIn()
+        launch()
+        waitFor("chatRow:ch-ecency")
+        compose.onNodeWithTag("chatRow:ch-ecency").performClick()
+        waitFor("composer")
+        waitUntil { postReads("ch-ecency") > 0 }
+        compose.onNodeWithTag("composer").performTextInput("hi @al")
+        waitFor("wideMentionsLimited")
+        assertTrue(!exists("wideMention:all"))
+    }
+
     @Test
     fun signedOutTheTabAsksToSignIn() {
         launch()

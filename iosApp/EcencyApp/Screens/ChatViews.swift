@@ -1271,8 +1271,28 @@ struct ChatComposer: View {
     var body: some View {
         let s = observed.state
         VStack(spacing: 6) {
-            if !s.mentions.isEmpty {
+            if !s.mentions.isEmpty || !s.wideMentions.isEmpty || s.wideMentionsLimited {
                 VStack(alignment: .leading, spacing: 0) {
+                    // web: channel-wide mentions first for who may use them, a one-line notice for the others
+                    if !s.wideMentions.isEmpty {
+                        Text(ChatThreadModel.companion.WIDE_MENTIONS_TITLE).scaledFont(12, weight: .bold).foregroundStyle(theme.secondary)
+                            .padding(.horizontal, 8).padding(.top, 8)
+                        ForEach(s.wideMentions, id: \.name) { m in
+                            Button { thread.selectWideMention(m: m) } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(m.label).scaledFont(13, weight: .bold).foregroundStyle(theme.text)
+                                    Text(m.description_).scaledFont(12).foregroundStyle(theme.secondary)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(8).frame(minHeight: minTapTarget).contentShape(Rectangle())
+                            }
+                            .accessibilityIdentifier("chat-wide-mention-\(m.name)")
+                        }
+                    }
+                    if s.wideMentionsLimited {
+                        Text(ChatThreadModel.companion.WIDE_MENTIONS_LIMITED).scaledFont(12).foregroundStyle(theme.secondary)
+                            .padding(8).accessibilityIdentifier("chat-wide-mentions-limited")
+                    }
                     ForEach(s.mentions, id: \.name) { m in
                         Button { thread.selectMention(m: m) } label: {
                             HStack(spacing: 8) {

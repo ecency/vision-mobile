@@ -86,6 +86,31 @@ final class ChatUITests: XCTestCase {
 
     /// The author's name on someone else's message: a long press opens the message options only, a tap the
     /// quick profile only (the long press's release never also taps).
+    /// #3710: a moderator of the channel's community is offered @all; a member is told it is for moderators.
+    func testChannelWideMentionsForModeratorsAndANoticeForMembers() {
+        let app = launch(["-startTab", "CHATS", "-demoChat", "moderator"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        XCTAssertTrue(element(app, "chat-unread-marker").waitForExistence(timeout: 10), "the first page is in")
+        element(app, "chat-composer").focusAndType("hi @al")
+        let all = element(app, "chat-wide-mention-all")
+        XCTAssertTrue(all.waitForExistence(timeout: 5))
+        all.tap()
+        XCTAssertTrue(all.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(element(app, "chat-composer").value as? String, "hi @all ")
+        app.terminate()
+
+        let member = launch(["-startTab", "CHATS"])
+        let memberRow = element(member, "chat-row-ch-ecency")
+        XCTAssertTrue(memberRow.waitForExistence(timeout: 20))
+        memberRow.tap()
+        XCTAssertTrue(element(member, "chat-unread-marker").waitForExistence(timeout: 10))
+        element(member, "chat-composer").focusAndType("hi @al")
+        XCTAssertTrue(element(member, "chat-wide-mentions-limited").waitForExistence(timeout: 5))
+        XCTAssertFalse(element(member, "chat-wide-mention-all").exists)
+    }
+
     /// The chat server refuses the sign-in: a notice in the list instead of the floating pill, and no Esie button.
     func testARefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
         let app = launch(["-startTab", "CHATS", "-demoChat", "offline"])

@@ -78,6 +78,14 @@ class DemoChat(private val nowMillis: () -> Long) {
     /** Status codes to answer instead, by a path fragment (tests): "posts" to 403 refuses reading a channel. */
     val refuse = mutableMapOf<String, Pair<Int, String>>()
 
+    /** The communities the viewer moderates (debug runs and tests): their channels answer `canModerate`. */
+    val moderates = mutableSetOf<String>()
+
+    /** The viewer moderates [community] (Swift debug runs: `-demoChat moderator`). */
+    fun moderate(community: String) {
+        moderates += community
+    }
+
     /** Debug runs and tests: the chat sign-in never answers, so the chats list stays on its first load. */
     var holdSignIn = false
 
@@ -296,6 +304,10 @@ class DemoChat(private val nowMillis: () -> Long) {
                     put("memberCount", c.members.size)
                     putJsonArray("onlineUserIds") { add(userId("spike-alice")) }
                     putJsonObject("member") { put("user_id", me); put("last_viewed_at", c.lastViewed) }
+                    // the server's rule: an open channel named for a community the viewer moderates; anyone in a DM
+                    val moderator = c.type == "O" && COMMUNITY_NAME.matches(c.name) && c.name in moderates
+                    put("canModerate", moderator)
+                    put("canMentionEveryone", moderator || c.type == "D")
                 })
             }
             what == "posts" && rest.size == 1 && m == "POST" -> {
@@ -452,6 +464,8 @@ class DemoChat(private val nowMillis: () -> Long) {
     }
 
     companion object {
+        /** The server's COMMUNITY_CHANNEL_NAME_PATTERN. */
+        private val COMMUNITY_NAME = Regex("^hive-[a-z0-9-]+$")
         const val PAGE = 30
 
         /** A message of many lines (shown whole, never cut), added by [seedHistory]. */
