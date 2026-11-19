@@ -144,13 +144,14 @@ class HiveRpcClientTest {
     }
 
     @Test
-    fun blockedAndDuplicateNodesAreDropped() {
+    fun duplicateNodesAreDroppedAndTheOnceStrippingNodesServeAgain() {
         val sanitized = HiveNodes.sanitize(
             listOf("https://api.hive.blog/", "https://techcoderx.com", "https://API.hive.blog", " https://anyx.io "),
         )
-        assertEquals(listOf("https://api.hive.blog", "https://anyx.io"), sanitized)
-        assertTrue(HiveNodes.DEFAULT.none(HiveNodes::isBlocked))
-        assertFailsWith<com.ecency.core.api.InvalidInputException> { HiveRpcClient(listOf("https://hiveapi.actifit.io"), FakeTransport { error("unused") }) }
+        assertEquals(listOf("https://api.hive.blog", "https://techcoderx.com", "https://anyx.io"), sanitized)
+        // SDK 2.9.6: they serve account metadata in full again, listed last
+        assertEquals(listOf("https://techcoderx.com", "https://hiveapi.actifit.io"), HiveNodes.DEFAULT.takeLast(2))
+        assertEquals(listOf("https://hiveapi.actifit.io"), HiveRpcClient(listOf("https://hiveapi.actifit.io"), FakeTransport { error("unused") }).nodes)
     }
 
     @Test

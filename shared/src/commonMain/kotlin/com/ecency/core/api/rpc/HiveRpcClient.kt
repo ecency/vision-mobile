@@ -27,7 +27,12 @@ import kotlin.time.ExperimentalTime
 
 /** Node pools, mirroring the RN app (`src/constants/options/api.ts`). */
 object HiveNodes {
-    /** The app's SERVER_LIST, in the app's order. */
+    /**
+     * The app's SERVER_LIST, in the app's order, then techcoderx.com and hiveapi.actifit.io last, as SDK 2.9.6 lists
+     * them. Until 2026-11 both were left out: their condenser_api.get_accounts served posting_json_metadata stripped,
+     * which silently emptied wallet token settings. Re-checked by the SDK on 2026-11-19 (metadata identical to
+     * api.hive.blog); if wallet tokens go missing again, compare get_accounts on these two against api.hive.blog first.
+     */
     val DEFAULT: List<String> = listOf(
         "https://api.deathwing.me",
         "https://rpc.mahdiyari.info",
@@ -35,23 +40,17 @@ object HiveNodes {
         "https://api.c0ff33a.uk",
         "https://api.hive.blog",
         "https://api.syncad.com",
+        "https://techcoderx.com",
+        "https://hiveapi.actifit.io",
     )
-
-    /**
-     * Nodes that must never serve the app: they answer condenser_api.get_accounts with
-     * posting_json_metadata stripped, which silently empties wallet token settings.
-     */
-    val BLOCKED: List<String> = listOf("https://techcoderx.com", "https://hiveapi.actifit.io")
 
     private fun normalize(node: String) = node.trim().trimEnd('/').lowercase()
 
-    fun isBlocked(node: String): Boolean = BLOCKED.any { normalize(it) == normalize(node) }
-
     private val HTTP = Regex("^https?://.+", RegexOption.IGNORE_CASE)
 
-    /** Drops blocked nodes, anything but http(s) URLs, duplicates and trailing slashes, keeping order (SDK setNodes). */
+    /** Drops anything but http(s) URLs, duplicates and trailing slashes, keeping order (SDK setNodes). */
     fun sanitize(nodes: List<String>): List<String> =
-        nodes.map { it.trim().trimEnd('/') }.filter { HTTP.matches(it) && !isBlocked(it) }.distinctBy(::normalize)
+        nodes.map { it.trim().trimEnd('/') }.filter { HTTP.matches(it) }.distinctBy(::normalize)
 
     /**
      * A node from the published list must be https and name no user or password (`https://user@host` would send
