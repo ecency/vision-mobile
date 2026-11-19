@@ -84,8 +84,6 @@ final class ChatUITests: XCTestCase {
         XCTAssertGreaterThan(pill.frame.midX, app.windows.firstMatch.frame.midX, "the own message's reaction on the trailing side")
     }
 
-    /// The author's name on someone else's message: a long press opens the message options only, a tap the
-    /// quick profile only (the long press's release never also taps).
     /// #3710: a moderator of the channel's community is offered @all; a member is told it is for moderators.
     func testChannelWideMentionsForModeratorsAndANoticeForMembers() {
         let app = launch(["-startTab", "CHATS", "-demoChat", "moderator"])
@@ -135,6 +133,8 @@ final class ChatUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts["chat-title"].label, "esie")
     }
 
+    /// The author's name on someone else's message: a long press opens the message options only, a tap the
+    /// quick profile only (the long press's release never also taps).
     func testTheAuthorNameLongPressesToOptionsAndTapsToTheProfile() {
         let app = launch(["-startTab", "CHATS"])
         let row = element(app, "chat-row-ch-ecency")

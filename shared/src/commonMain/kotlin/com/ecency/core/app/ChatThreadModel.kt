@@ -106,9 +106,9 @@ data class ChatWideMention(val name: String) {
         /** Web's order. */
         val ALL: List<ChatWideMention> = listOf(HERE, "channel", "all", "everyone").map(::ChatWideMention)
 
-        /** Web: those that start with [query] (any case); none when there is no `@` query. */
+        /** Web: those that start with [query] (any case); none without a query of at least one character. */
         fun matching(query: String?): List<ChatWideMention> {
-            val q = query?.lowercase() ?: return emptyList()
+            val q = query?.lowercase()?.takeIf { it.isNotEmpty() } ?: return emptyList()
             return ALL.filter { it.name.startsWith(q) }
         }
     }
@@ -172,7 +172,10 @@ data class ChatThreadState(
     val canMentionEveryone: Boolean = false,
     /** Channel-wide mentions matching the `@` query, offered when [canMentionEveryone]. */
     val wideMentions: List<ChatWideMention> = emptyList(),
-    /** The `@` query matches a channel-wide mention the viewer may not use: say they are for moderators (web). */
+    /**
+     * The `@` query matches a channel-wide mention the viewer may not use: say they are for moderators (web). Only in
+     * an open (community) channel, once the server has said what the viewer may do.
+     */
     val wideMentionsLimited: Boolean = false,
     val viewerId: String? = null,
     val connected: Boolean = false,
@@ -289,6 +292,9 @@ class ChatThreadModel internal constructor(
     /** The list (or a profile) handed over what it knew about the channel. */
     private val hinted: Boolean = env.chat.hints[channelId]?.channel != null
     private var dead = false
+
+    /** A posts page has said what the viewer may do ([applyRights]): until then no "for moderators" notice. */
+    private var rightsKnown = false
     private val repliedHere = mutableSetOf<String>()
     private val typingUntil = mutableMapOf<String, Long>()
     private var lastTypingSent = 0L
@@ -446,6 +452,7 @@ class ChatThreadModel internal constructor(
      */
     private fun applyRights(page: ChatPostsPage) {
         if (page.canModerate == null && page.canMentionEveryone == null) return
+        rightsKnown = true
         setState {
             it.copy(
                 canModerate = page.canModerate ?: it.canModerate,
@@ -993,7 +1000,8 @@ class ChatThreadModel internal constructor(
     private fun updateMentions(text: String) {
         val q = ChatText.mentionQuery(text)
         val users = ChatText.suggestions(lookup.values.toList(), q?.second)
-        val wide = ChatWideMention.matching(q?.second)
+        // web offers them in open channels only: a group has no moderators, a DM reaches one person
+        val wide = if (current.type == "O") ChatWideMention.matching(q?.second) else emptyList()
         setState { s ->
             s.copy(
                 mentions = users.map { u ->
@@ -1002,7 +1010,7 @@ class ChatThreadModel internal constructor(
                     ChatMention(u, name, display?.takeIf { it != name })
                 },
                 wideMentions = if (s.canMentionEveryone) wide else emptyList(),
-                wideMentionsLimited = !s.canMentionEveryone && wide.isNotEmpty(),
+                wideMentionsLimited = rightsKnown && !s.canMentionEveryone && wide.isNotEmpty(),
             )
         }
     }

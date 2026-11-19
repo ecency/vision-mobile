@@ -72,8 +72,8 @@ object HiveNodes {
     const val REMOTE_LIST_URL = "https://ecency.com/public-nodes.json"
 
     /**
-     * RN getNodes: the published list without blocked nodes, or null when the body is not a non-empty list of
-     * names (the caller then keeps [DEFAULT]). A list that held only blocked nodes is null too.
+     * RN getNodes: the published list ([sanitize]d), or null when the body is not a non-empty list of usable names
+     * (the caller then keeps [DEFAULT]).
      */
     fun parseRemote(body: String): List<String>? = parseRemote(SafeJson.parseOrNull(body))
 
@@ -199,7 +199,7 @@ class HiveRpcClient(
     /** The node the next call would start with (no re-probe is spent on asking). */
     val currentNode: String get() = health.orderedNodes(nodes, probe = false).first()
 
-    /** Replaces the pool (e.g. a user-chosen node first). Blocked nodes are dropped; what was learned about each node stays. */
+    /** Replaces the pool (e.g. a user-chosen node first), [HiveNodes.sanitize]d; what was learned about each node stays. */
     @Throws(EcencyException::class)
     fun setNodes(newNodes: List<String>) {
         val sanitized = HiveNodes.sanitize(newNodes)

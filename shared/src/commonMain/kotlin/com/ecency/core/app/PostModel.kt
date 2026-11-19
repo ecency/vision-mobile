@@ -140,7 +140,7 @@ class PostModel internal constructor(
         setState { it.copy(isLoading = it.post == null, isRefreshing = refresh && it.post != null, error = null) }
         postJob = scope.launch {
             try {
-                val post = env.api.posts.getPost(key.author, key.permlink, env.session.current.username, refresh)
+                val post = env.api.posts.getPostVerified(key.author, key.permlink, env.session.current.username, refresh)
                 if (post == null) {
                     // deleted while open: only "not found" shows, never the old post under it (#3704)
                     commentsJob?.cancel()

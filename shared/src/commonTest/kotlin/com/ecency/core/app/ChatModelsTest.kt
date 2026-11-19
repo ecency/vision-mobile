@@ -1777,7 +1777,7 @@ class ChatThreadTest {
         f.env.chat.hint("ch-ecency", ChatHint(null, "Ecency", emptyMap()), ChatFixture.USER)
         val m = f.env.chat.threadModel("ch-ecency", "O")
         m.setText("hi @a")
-        assertTrue(m.current.wideMentionsLimited, "no rights yet")
+        assertFalse(m.current.wideMentionsLimited, "no rights yet: no notice")
         m.start()
         f.idle()
         assertEquals(listOf("all"), m.current.wideMentions.map { it.name })
@@ -1799,7 +1799,9 @@ class ChatThreadTest {
         assertEquals("hi @all ", mod.current.text)
         assertTrue(mod.current.wideMentions.isEmpty())
         mod.setText("@")
-        assertEquals(listOf("here", "channel", "all", "everyone"), mod.current.wideMentions.map { it.name })
+        assertTrue(mod.current.wideMentions.isEmpty(), "web: not on a bare @")
+        mod.setText("@e")
+        assertEquals(listOf("everyone"), mod.current.wideMentions.map { it.name })
 
         val other = thread(f, "ch-photo", "O", "Photography")
         assertFalse(other.current.canMentionEveryone)
@@ -1811,11 +1813,14 @@ class ChatThreadTest {
         other.setText("no mention")
         assertFalse(other.current.wideMentionsLimited)
 
-        // a direct message reaches only the other person: anyone may
+        // web: open channels only; a direct message reaches one person, a group has no moderators
         val dm = thread(f, "ch-dm-alice", "D", "spike-alice")
         assertTrue(dm.current.canMentionEveryone)
         dm.setText("@h")
-        assertEquals(listOf("here"), dm.current.wideMentions.map { it.name })
+        assertTrue(dm.current.wideMentions.isEmpty() && !dm.current.wideMentionsLimited)
+        val group = thread(f, "ch-group", "G")
+        group.setText("@a")
+        assertTrue(group.current.wideMentions.isEmpty() && !group.current.wideMentionsLimited)
     }
 
     @Test

@@ -113,21 +113,23 @@ class HiveApi(val client: HiveRpcClient) {
         observer,
     )
 
+    /** `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist. */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun post(author: String, permlink: String, observer: String? = null): Post? = notFoundAsNull {
+        Post.fromJson(bridgeV2("get_post", postParams(author, permlink, observer)), observer?.takeIf { it.isNotBlank() }.orEmpty())
+    }
+
     /**
-     * `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist.
-     *
-     * A node that has not the post (null, or hivemind's "does not exist") may only lag behind the chain, so the other
-     * nodes are asked before it is "not found" (SDK 2.9.0 getPostQueryOptions + verifyPostOnAlternateNode, #3712).
-     * The SDK double-checks a null only; hivemind answers a post it lacks with the assert, so here that is checked too.
+     * [post] for the post screen: a node that has not the post (null, or hivemind's "does not exist") may only lag
+     * behind the chain, so other nodes are asked before it is "not found" (SDK 2.9.0 getPostQueryOptions +
+     * verifyPostOnAlternateNode, #3712). Only the post screen double-checks, as in the SDK: feeds, link cards and the
+     * editor take the one answer. The SDK double-checks a null only; hivemind answers a post it lacks with the
+     * assert, so here that is checked too.
      */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun post(author: String, permlink: String, observer: String? = null): Post? {
+    suspend fun postVerified(author: String, permlink: String, observer: String? = null): Post? {
         val viewer = observer?.takeIf { it.isNotBlank() }.orEmpty()
-        val params = buildJsonObject {
-            put("author", author)
-            put("permlink", permlink)
-            if (viewer.isNotEmpty()) put("observer", viewer)
-        }
+        val params = postParams(author, permlink, observer)
         val answeredBy = try {
             val first = client.callWithFallback("bridge.get_post_v2", params, "bridge.get_post")
             Post.fromJson(first.result, viewer)?.let { return it }
@@ -139,21 +141,31 @@ class HiveApi(val client: HiveRpcClient) {
         return postOnOtherNodes(author, permlink, params, answeredBy, viewer)
     }
 
+    private fun postParams(author: String, permlink: String, observer: String?) = buildJsonObject {
+        put("author", author)
+        put("permlink", permlink)
+        observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
+    }
+
     /**
-     * SDK verifyPostOnAlternateNode: the nodes other than [primary] in turn (healthiest first, where the SDK picks
-     * at random), v1 `bridge.get_post`, which every node serves. The post when one has it; null when another node
-     * answered (null, another post, or an assert of the chain such as "does not exist"), or when [primary] is the
-     * only node; when every other node failed, the read failed: a lookup that never got an answer is not "not found".
+     * SDK verifyPostOnAlternateNode: other nodes than [primary] in turn for v1 `bridge.get_post`, which every node
+     * serves. The post when one has it; null when another node answered (null, another post, or an assert of the
+     * chain such as "does not exist"), or when no other node may be asked; when every node asked failed, the read
+     * failed: a lookup that never got an answer is not "not found". Unlike the SDK (every node, at random), only
+     * nodes healthy for the bridge are asked, healthiest first, at most [VERIFY_NODES], so a missing post costs a
+     * bounded wait and a cooling or rate-limited node is left alone.
      */
     private suspend fun postOnOtherNodes(author: String, permlink: String, params: JsonElement, primary: String, viewer: String): Post? {
-        val others = client.health.orderedNodes(client.nodes, "bridge", probe = false).filter { it != primary }
+        val others = client.health.orderedNodes(client.nodes, "bridge", probe = false)
+            .filter { it != primary && client.health.isNodeHealthy(it, "bridge") }
+            .take(VERIFY_NODES)
         var answered = false
         var failure: HiveApiException? = null
         for (node in others) {
             try {
                 val post = Post.fromJson(client.ask(node, "bridge.get_post", params, client.readTimeoutMillis), viewer)
-                    ?: run { answered = true; null }
                 if (post != null) return post.takeIf { it.author == author && it.permlink == permlink }
+                answered = true
             } catch (e: RpcErrorException) {
                 if (HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage)) failure = e else answered = true
             } catch (e: HiveApiException) {
@@ -391,6 +403,9 @@ class HiveApi(val client: HiveRpcClient) {
     }
 
     companion object {
+        /** The most other nodes [postVerified] asks after a "not found". */
+        const val VERIFY_NODES = 3
+
         internal fun isNotFound(e: RpcErrorException): Boolean =
             Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
     }

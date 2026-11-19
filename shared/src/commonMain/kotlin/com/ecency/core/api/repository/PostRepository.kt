@@ -5,6 +5,7 @@ import com.ecency.core.api.HiveApi
 import com.ecency.core.api.guarded
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
+import com.ecency.core.api.rpc.HiveApiException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -151,11 +152,28 @@ class PostRepository(
 
     /** `bridge.get_post`, served from cache unless [refresh]. Null when the post does not exist. */
     @Throws(EcencyException::class, CancellationException::class)
-    suspend fun getPost(author: String, permlink: String, observer: String? = null, refresh: Boolean = false): Post? = guarded {
-        val cacheKey = CacheKey(PostKey(author, permlink), observer.orEmpty())
+    suspend fun getPost(author: String, permlink: String, observer: String? = null, refresh: Boolean = false): Post? =
+        read(author, permlink, observer, refresh, verify = false)
+
+    /**
+     * [getPost] for the post screen: a "not found" is double-checked on other nodes first ([HiveApi.postVerified],
+     * #3712). When that check reaches no node, a post published here a moment ago still shows its local copy.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun getPostVerified(author: String, permlink: String, observer: String? = null, refresh: Boolean = false): Post? =
+        read(author, permlink, observer, refresh, verify = true)
+
+    private suspend fun read(author: String, permlink: String, observer: String?, refresh: Boolean, verify: Boolean): Post? = guarded {
+        val key = PostKey(author, permlink)
+        val cacheKey = CacheKey(key, observer.orEmpty())
         if (!refresh) posts.get(cacheKey)?.let { return@guarded it }
         // hivemind lags a post published here a moment ago: its local copy stands in meanwhile
-        val post = api.post(author, permlink, observer) ?: return@guarded localPost(PostKey(author, permlink))
+        val post = if (!verify) api.post(author, permlink, observer) else try {
+            api.postVerified(author, permlink, observer)
+        } catch (e: HiveApiException) {
+            localPost(key) ?: throw e
+        }
+        if (post == null) return@guarded localPost(key)
         posts.put(cacheKey, post)
         post
     }

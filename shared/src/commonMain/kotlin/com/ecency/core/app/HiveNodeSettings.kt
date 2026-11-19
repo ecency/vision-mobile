@@ -26,9 +26,9 @@ enum class ServerCheck {
  * initSdkConfig, `hive.ts` checkClient, `ecency.ts` getNodes, `settingsContainer` `_changeApi`). The settings
  * screen ([SettingsModel]) uses [servers], [selected] and [select].
  *
- * At start ([start]) the saved server (when one is saved and not blocked) is put in front of the built-in list at
+ * At start ([start]) the saved server (when one is saved and safe) is put in front of the built-in list at
  * once, then the published list (`public-nodes.json`) replaces the built-in one; the client's health ranking
- * orders the pool from there, as in the SDK. Blocked nodes never enter it, a saved one included.
+ * orders the pool from there, as in the SDK.
  */
 class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
     private var started = false
@@ -38,7 +38,7 @@ class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
 
     /**
      * The server the user picked in settings (RN `settings.server`), or null. A saved value that is not a safe
-     * server ([HiveNodes.userServer]: https, no user or password, not blocked) reads as none: the default pool.
+     * server ([HiveNodes.userServer]: https, no user or password) reads as none: the default pool.
      */
     fun selected(): String? = HiveNodes.userServer(env.prefs.getString(PREFS_KEY))
 
@@ -55,7 +55,7 @@ class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
     }
 
     /**
-     * RN useGetServersQuery / getNodes: the published node list without blocked nodes, or the built-in list when
+     * RN useGetServersQuery / getNodes: the published node list, or the built-in list when
      * it cannot be read. The picker lists these.
      */
     @Throws(CancellationException::class)
@@ -95,7 +95,7 @@ class HiveNodeSettings internal constructor(private val env: AppEnvironment) {
     /**
      * Picks [server] in settings: checked first ([check]); when it passes it is saved and the pool becomes
      * [server] followed by the rest of [list] (RN `setHiveNodes([server, ...serverList])`). Otherwise nothing
-     * changes. A blocked server never passes.
+     * changes. An unsafe server never passes.
      */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun select(server: String, list: List<String>): ServerCheck {

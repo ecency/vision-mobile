@@ -62,7 +62,7 @@ final class DataLayerErrorTests: XCTestCase {
         ) { error in
             XCTAssertTrue(self.kotlinException(error) is InvalidInputException)
         }
-        XCTAssertThrowsError(try EcencyApi(nodes: ["https://techcoderx.com"])) { error in
+        XCTAssertThrowsError(try EcencyApi(nodes: ["ftp://a.example"])) { error in
             XCTAssertTrue(self.kotlinException(error) is InvalidInputException)
         }
     }
