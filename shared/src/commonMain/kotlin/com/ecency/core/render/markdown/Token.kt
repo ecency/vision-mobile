@@ -37,4 +37,7 @@ internal class Env {
     var footnotesStarted = false
     var footnoteRefs: HashMap<String, Int>? = null
     var footnoteList: MutableList<Footnote?>? = null
+
+    /** render-helper 2.5.46 `ampEscapes` (module-global there, per render here): pair escaped `&` in links. */
+    var ampEscapes = false
 }

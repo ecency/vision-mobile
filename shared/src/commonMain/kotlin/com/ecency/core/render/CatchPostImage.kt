@@ -213,7 +213,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (!isSafeUrl(href)) return false
         var d = href.indexOf('.')
         while (d >= 0) {
-            if (extLen(href, d) > 0) return true
+            // 2.5.46: not `.ico` in `.icons/readme` nor `.jpg` in `photo.jpg.html` (imageUrlEnd)
+            if (extLen(href, d) > 0) return Helper.imageUrlEnd(href) != -1
             d = href.indexOf('.', d + 1)
         }
         return false
@@ -686,7 +687,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private fun isUrlTokenChar(c: Char) = !Js.isSpace(c) && c != '<' && c != '>' && c != '"' && c != '\'' &&
         c != '(' && c != ')' && c != '[' && c != ']'
 
-    /** `URL_TOKEN_RE = /https?:\/\/[^\s<>"'()[\]]+/gi`, standalone tokens only, classified. */
+    /** `URL_TOKEN_RE = /https?:\/\/(?:[^\s<>"'()[\]&]|&(?!lt;|gt;))+/gi` (2.5.51), standalone tokens only, classified. */
     private fun standaloneMatches(scan: ScanText, classify: (String) -> String?): Sequence<Candidate> = sequence {
         val s = scan.text
         var p = 0
@@ -699,7 +700,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 continue
             }
             var e = q
-            while (e < s.length && isUrlTokenChar(s[e])) e++
+            while (e < s.length && isUrlTokenChar(s[e]) && !(s[e] == '&' && (s.startsWith("lt;", e + 1) || s.startsWith("gt;", e + 1)))) e++
             if (e == q) {
                 p = h + 1
                 continue
@@ -721,20 +722,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return 0
     }
 
+    /** 2.5.46: the image URL a bare token denotes, read as linkify reads it ([Helper.imageUrlEnd]). */
     private fun imageToken(token: String): String? {
-        var end = -1
-        var i = 0
-        while (i < token.length) {
-            val l = extLen(token, i)
-            if (l > 0) {
-                end = i + l
-                i += l
-            } else {
-                i++
-            }
-        }
+        val end = Helper.imageUrlEnd(token)
         if (end == -1) return null
-        if (end < token.length && (token[end] == '?' || token[end] == '#')) end = token.length
         val url = token.substring(0, end)
         return if (isSafeUrl(url)) url else null
     }

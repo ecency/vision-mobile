@@ -187,8 +187,15 @@ object BlockBuilder {
     /** The fragment of a `#id` href (`#` alone is the top, an empty id), or null when [href] is more than that. */
     internal fun fragmentOnly(href: String?): String? {
         val h = href?.trim() ?: return null
-        return if (h.startsWith("#")) fragment(h.substring(1)) else null
+        return if (h.startsWith("#")) fragment(h.substring(1))?.let(::authorId) else null
     }
+
+    /**
+     * render-helper 2.5.50 namespaces every author `id` (`user-content-x`) and a same-page `#x` link to a declared one,
+     * exactly once per render. The blocks keep the author's own names, so a link from elsewhere (`.../post#x`) and one
+     * in the body land on the same place.
+     */
+    internal fun authorId(id: String): String = id.removePrefix(com.ecency.core.render.sanitize.AuthorAttributes.AUTHOR_ID_PREFIX)
 
     /** A post link's `#id` (never `#@author/permlink`, the comment form [postTarget] reads), or null. */
     internal fun fragmentOf(href: String?): String? {
@@ -409,7 +416,7 @@ private class Walker(private val options: BuildOptions) {
      * own, so the text before it goes out first.
      */
     private fun anchorIds(el: Element, tag: String, ctx: Ctx) {
-        val id = el.getAttribute("id")?.trim().orEmpty()
+        val id = el.getAttribute("id")?.trim().orEmpty().let(BlockBuilder::authorId)
         val dataId = el.getAttribute("data-id")?.trim().orEmpty()
         if (id.isEmpty() && dataId.isEmpty()) return
         if (tag in BlockBuilder.BLOCK_TAGS) flush(ctx)

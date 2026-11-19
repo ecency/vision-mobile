@@ -198,23 +198,10 @@ class TransformGoldenTest {
 }
 
 /**
- * Cases that differ from render-helper only through the deliberate iframe security deviation
- * (README "Deliberate deviations from the oracle", DomGoldenTest.securityDeviations): the native
- * sanitizer drops an iframe src outside the embed allow list on every path. Verified by turning
- * the deviation off, which makes every one of them match the oracle exactly.
+ * Cases that differ from render-helper only through a deliberate security deviation (README "Deliberate deviations
+ * from the oracle"). render-helper 2.5.45 (#1919) enforces the embed allow list on every path and frames only the
+ * sources the list accepts, the rules the native port kept as deviations until 2.5.42: none left.
  */
 internal object TransformDeviations {
-    private const val SHORTS =
-        "iframe() keeps youtube.com/shorts/<id> when the id is not 11 characters; that src is " +
-            "outside the embed allow list, so the native port shows iframe()'s Unsupported placeholder instead"
-    private const val FALLBACK =
-        "a markdownToHTML fallback path keeps an off-allow-list iframe src in render-helper; " +
-            "the native sanitizer replaces that iframe with iframe()'s Unsupported placeholder"
-
-    val security: Map<String, String> = mapOf(
-        "iframe_youtube_shorts_bad_app" to SHORTS,
-        "iframe_youtube_shorts_bad_web" to SHORTS,
-        "iframe_youtube_shorts_bad_seolow_web" to SHORTS,
-    ) + listOf("random_40", "random_203", "random_214", "random_230", "random_267", "random_334", "random_377")
-        .associateWith { "$SHORTS; and/or $FALLBACK" }
+    val security: Map<String, String> = emptyMap()
 }

@@ -100,65 +100,153 @@ internal object Linkify {
         return -1
     }
 
+    /** Length of the run item (`#[-a-z\d]+` or a mention `[@＠][a-z][-.a-z\d^/]+[a-z\d]`) at [i], or 0. */
+    private fun runItemEnd(s: String, i: Int): Int {
+        if (i >= s.length) return -1
+        if (s[i] == '#') {
+            val e = runEnd(s, i + 1)
+            return if (e > i + 1) e else -1
+        }
+        if (isAt(s[i])) return userEnd(s, i + 1)
+        return -1
+    }
+
+    /** The items of the run that starts at [from] (each greedy, as the regex `(?:TAG|MENTION)*` takes them). */
+    private fun runItems(s: String, from: Int, first: Int = -1): List<String> {
+        val items = ArrayList<String>()
+        var i = from
+        if (first >= 0) {
+            items.add(s.substring(from, first))
+            i = first
+        }
+        while (true) {
+            val e = runItemEnd(s, i)
+            if (e < 0) break
+            items.add(s.substring(i, e))
+            i = e
+        }
+        return items
+    }
+
+    private fun itemsLength(items: List<String>, count: Int): Int {
+        var n = 0
+        for (k in 0 until count) n += items[k].length
+        return n
+    }
+
+    /** linkify `attr`: escaped for a double-quoted attribute (tags and valid usernames never need it). */
+    private fun attr(v: String): String = v.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
+    /** `(^|\s|>|&gt;)` then `#` at [p]: the length of the prefix, or -1. */
+    private fun tagRunPrefix(s: String, p: Int): Int {
+        if (p == 0 && s.isNotEmpty() && s[0] == '#') return 0
+        if (p >= s.length) return -1
+        if (Js.isSpace(s[p]) || s[p] == '>') return if (p + 1 < s.length && s[p + 1] == '#') 1 else -1
+        if (s.startsWith("&gt;", p)) return if (p + 4 < s.length && s[p + 4] == '#') 4 else -1
+        return -1
+    }
+
+    /** Candidate starts of the tag run: 0, or the position of a prefix before a `#`. */
+    private fun tagRunNext(s: String, from: Int): Int {
+        var f = from
+        while (true) {
+            if (f == 0 && s.isNotEmpty() && s[0] == '#') return 0
+            val h = s.indexOf('#', maxOf(f + 1, 1))
+            if (h < 0) return -1
+            // the prefix is one character, or `&gt;` (four)
+            val candidate = if (h >= 4 && s.startsWith("&gt;", h - 4) && h - 4 >= f) h - 4 else h - 1
+            if (candidate >= f) return candidate
+            f = h
+        }
+    }
+
     fun linkify(input: String, ctx: RenderContext): String {
         val forApp = ctx.forApp
         val opts = ctx.options
         var content = input
+        // the author placeholders (web enhanced mentions, app mentions built by the tag pass)
+        val placeholders = ArrayList<String>()
 
-        // Tags
-        content = replaceAll(content, { f -> beforeChar(content, f, '#') }, { p -> tagAt(content, p) }) { start, end ->
-            var tag = content.substring(start, end)
-            val body = tag.substring(tag.indexOf('#') + 1)
-            if (body.all { it in '0'..'9' }) return@replaceAll tag
-            val preceding = if (Js.isSpace(tag[0]) || tag[0] == '>') tag[0].toString() else ""
-            if (tag.startsWith(">")) tag = tag.substring(1)
-            val trimmed = Js.trim(tag)
-            val tagLower = Js.toLowerCase(trimmed.substring(1))
+        fun tagHtml(tag: String): String {
+            val tagLower = Js.toLowerCase(tag.substring(1))
             if (!forApp) {
-                if (opts.inertAuthorAndTagChips) return@replaceAll "$preceding<span class=\"er-tag er-tag-link\">$trimmed</span>"
-                return@replaceAll "$preceding<a class=\"er-tag er-tag-link\" href=\"/trending/$tagLower\">$trimmed</a>"
+                return if (opts.inertAuthorAndTagChips) "<span class=\"er-tag er-tag-link\">$tag</span>"
+                else "<a class=\"er-tag er-tag-link\" href=\"/trending/${attr(tagLower)}\">$tag</a>"
             }
-            "$preceding<a class=\"markdown-tag-link\" data-tag=\"$tagLower\">$trimmed</a>"
+            return "<a class=\"markdown-tag-link\" data-tag=\"${attr(tagLower)}\">$tag</a>"
         }
 
-        // Mentions
-        val placeholders = ArrayList<Pair<String, String>>()
+        fun mentionHtml(mention: String, before: String, placeholder: Boolean): String? {
+            val user = mention.substring(1)
+            if (user.indexOf('/') != -1 || !Helper.isValidUsername(user)) return null
+            val userLower = Js.toLowerCase(user)
+            val html: String
+            if (!forApp) {
+                val avatarSrc = "${ctx.proxy.base}/u/$userLower/avatar/small"
+                val inner = "<img class=\"er-author-link-image\" src=\"${attr(avatarSrc)}\" alt=\"${attr(userLower)}\"/>@$userLower"
+                html = if (opts.inertAuthorAndTagChips) "$before<span class=\"er-author er-author-link\">$inner</span>"
+                else "$before<a class=\"er-author er-author-link\" href=\"/@${attr(userLower)}\">$inner</a>"
+            } else {
+                html = "$before<a class=\"markdown-author-link\" data-author=\"${attr(userLower)}\">@$user</a>"
+                if (!placeholder) return html
+            }
+            val token = "\u200C${placeholders.size}\u200C"
+            placeholders.add(html)
+            return token
+        }
+
+        // 2.5.45 (#1920): an adjacent run of tags and mentions linked in one pass, stopping at the first item that
+        // would not be linked. Returns the markup and how many items it linked.
+        fun linkRun(items: List<String>, before: String, placeholder: Boolean): Pair<String, Int> {
+            val out = StringBuilder()
+            var pending = before
+            for ((i, item) in items.withIndex()) {
+                val html = if (item[0] == '#') {
+                    if (item.length > 1 && item.substring(1).all { it in '0'..'9' }) null else pending + tagHtml(item)
+                } else {
+                    mentionHtml(item, pending, placeholder)
+                }
+                if (html == null) return out.toString() to i
+                out.append(html)
+                pending = ""
+            }
+            return out.toString() to items.size
+        }
+
+        // Tags, and any mentions glued to them.
+        content = replaceRuns(content, { f -> tagRunNext(content, f) }, { p -> tagRunPrefix(content, p) }) { p, prefix ->
+            val before = content.substring(p, p + prefix)
+            val items = runItems(content, p + prefix)
+            if (items.isEmpty()) return@replaceRuns null
+            val preceding = if (before == ">" || before == "&gt;" || (before.length == 1 && Js.isSpace(before[0]))) before else ""
+            val (html, linked) = linkRun(items, preceding, true)
+            if (linked == 0) {
+                val head = before.length + items[0].length
+                content.substring(p, p + head) to head
+            } else {
+                html to before.length + itemsLength(items, linked)
+            }
+        }
+
+        // Mentions, and any tags glued to them.
         val c1 = content
         val atFinder = AtFinder(c1)
-        content = replaceAll(c1, { f -> atFinder.next(f) }, { p ->
-            var end = -1
-            if (p == 0 && c1.isNotEmpty() && isAt(c1[0])) end = userEnd(c1, 1)
-            if (end < 0 && p < c1.length && !(isWordChar(c1[p]) || c1[p] == '/') && p + 1 < c1.length && isAt(c1[p + 1])) {
-                end = userEnd(c1, p + 2)
-            }
-            end
-        }) { start, end ->
-            val match = c1.substring(start, end)
-            val atPos = if (start == 0 && isAt(c1[0]) && userEnd(c1, 1) == end) 0 else start + 1
-            // `(^|[^set1]|(^|[^set2]))`: group 2 is nested in group 1, so a preceding character that only
-            // the third alternative accepts (one of !#$%&*@ and the fullwidth at) is captured twice and
-            // the callback's `preceeding1 + preceeding2` writes it twice.
-            val pre = c1.substring(start, atPos)
-            val preceding = if (pre.length == 1 && pre[0] in "!#\$%&*@\uFF20") pre + pre else pre
-            val user = c1.substring(atPos + 1, end)
-            val userLower = Js.toLowerCase(user)
-            if (userLower.indexOf('/') == -1 && Helper.isValidUsername(user)) {
-                if (!forApp) {
-                    val avatarSrc = "${ctx.proxy.base}/u/$userLower/avatar/small"
-                    val inner = "<img class=\"er-author-link-image\" src=\"$avatarSrc\" alt=\"$userLower\"/>@$userLower"
-                    val html = if (opts.inertAuthorAndTagChips) {
-                        "$preceding<span class=\"er-author er-author-link\">$inner</span>"
-                    } else {
-                        "$preceding<a class=\"er-author er-author-link\" href=\"/@$userLower\">$inner</a>"
-                    }
-                    val placeholder = "‌${placeholders.size}‌"
-                    placeholders.add(placeholder to html)
-                    return@replaceAll placeholder
-                }
-                "$preceding<a class=\"markdown-author-link\" data-author=\"$userLower\">@$user</a>"
-            } else {
-                match
-            }
+        content = replaceRuns(c1, { f -> atFinder.next(f) }, { p ->
+            var at = -1
+            if (p == 0 && c1.isNotEmpty() && isAt(c1[0]) && userEnd(c1, 1) >= 0) at = 0
+            else if (p < c1.length && !(isWordChar(c1[p]) || c1[p] == '/') && p + 1 < c1.length && isAt(c1[p + 1]) && userEnd(c1, p + 2) >= 0) at = p + 1
+            if (at < 0) -1 else at - p
+        }) { p, prefix ->
+            // `(^|[^set1]|(^|[^set2]))`: group 1 holds the character before the mention, once (2.5.45 no longer
+            // writes it twice).
+            val preceding = c1.substring(p, p + prefix)
+            val at = p + prefix
+            val firstEnd = userEnd(c1, at + 1)
+            val items = runItems(c1, at, firstEnd)
+            val (html, linked) = linkRun(items, preceding, false)
+            val head = prefix + items[0].length
+            if (linked == 0) c1.substring(p, p + head) to head
+            else html to prefix + itemsLength(items, linked)
         }
 
         // Internal links with category: /category/@user/permlink
@@ -219,16 +307,110 @@ internal object Linkify {
             }
         }
 
-        // Image links
+        // 2.5.46 (#2094): each URL token whose path ends in an image extension is an image, and what follows it
+        // stays text.
         var firstImageUsed = false
-        content = Scanners.imgReplace(content) { link ->
+        content = urlTokens(content) { token ->
+            val end = Helper.imageUrlEnd(token)
+            if (end == -1) return@urlTokens token
             val isLCP = !firstImageUsed
             firstImageUsed = true
-            ImgMethod.createImageHTML(link, isLCP, ctx)
+            ImgMethod.createImageHTML(token.substring(0, end), isLCP, ctx) + token.substring(end)
         }
 
-        for ((placeholder, html) in placeholders) content = Js.replaceFirstSubstituted(content, placeholder, html)
+        // Author placeholders restored in one scan, the first occurrence of each only (2.5.45).
+        if (placeholders.isNotEmpty()) content = restorePlaceholders(content, placeholders)
         return content
+    }
+
+    /**
+     * linkify `replaceRuns`: a global replace whose callback says how much of the match it consumed; scanning resumes
+     * right after that. [prefixAt] gives the length of the match's prefix at a candidate, or -1; [fn] returns the
+     * replacement and the consumed length, or null for no match there.
+     */
+    private inline fun replaceRuns(s: String, next: (Int) -> Int, prefixAt: (Int) -> Int, fn: (Int, Int) -> Pair<String, Int>?): String {
+        var sb: StringBuilder? = null
+        var last = 0
+        var p = next(0)
+        while (p >= 0 && p <= s.length) {
+            val prefix = prefixAt(p)
+            val r = if (prefix < 0) null else fn(p, prefix)
+            if (r == null) {
+                p = next(p + 1)
+                continue
+            }
+            if (sb == null) sb = StringBuilder(s.length + 64)
+            sb.append(s, last, p).append(r.first)
+            last = p + maxOf(r.second, 1)
+            p = next(last)
+        }
+        if (sb == null) return s
+        sb.append(s, last, s.length)
+        return sb.toString()
+    }
+
+    /** `/https?:\/\/(?:[^\s<>"'&]|&(?!lt;|gt;))+/gi`, each token through [fn]. */
+    private inline fun urlTokens(s: String, fn: (String) -> String): String {
+        var sb: StringBuilder? = null
+        var last = 0
+        var i = 0
+        while (i < s.length) {
+            val h = Js.indexOfCi(s, "http", i)
+            if (h < 0) break
+            var j = h + 4
+            if (j < s.length && (s[j] == 's' || s[j] == 'S')) j++
+            if (!s.startsWith("://", j)) {
+                i = h + 1
+                continue
+            }
+            val start = j + 3
+            var k = start
+            while (k < s.length) {
+                val c = s[k]
+                if (Js.isSpace(c) || c == '<' || c == '>' || c == '"' || c == '\'') break
+                if (c == '&' && (s.startsWith("lt;", k + 1) || s.startsWith("gt;", k + 1))) break
+                k++
+            }
+            if (k == start) {
+                i = h + 1
+                continue
+            }
+            if (sb == null) sb = StringBuilder(s.length + 64)
+            sb.append(s, last, h).append(fn(s.substring(h, k)))
+            last = k
+            i = k
+        }
+        if (sb == null) return s
+        sb.append(s, last, s.length)
+        return sb.toString()
+    }
+
+    /** `/\u200C(\d+)(?=\u200C)/g`: a real placeholder (in range, first time) becomes its markup with both delimiters. */
+    private fun restorePlaceholders(s: String, html: List<String>): String {
+        val restored = HashSet<Int>()
+        val out = StringBuilder(s.length + 64)
+        var last = 0
+        var i = s.indexOf('\u200C')
+        while (i >= 0) {
+            var j = i + 1
+            while (j < s.length && s[j] in '0'..'9') j++
+            if (j == i + 1 || j >= s.length || s[j] != '\u200C') {
+                // no digits, or no closing mark: the regex moves on from the next character (or past the digits)
+                i = s.indexOf('\u200C', if (j == i + 1) i + 1 else j)
+                continue
+            }
+            val digits = s.substring(i + 1, j)
+            val index = if (digits.length > 9) -1 else digits.toInt()
+            if (index < 0 || index >= html.size || !restored.add(index)) {
+                i = s.indexOf('\u200C', j)
+                continue
+            }
+            out.append(s, last, i).append(html[index])
+            last = j + 1
+            i = s.indexOf('\u200C', last)
+        }
+        out.append(s, last, s.length)
+        return out.toString()
     }
 
     private fun nonSpaceRun(s: String, from: Int): Int {

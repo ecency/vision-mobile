@@ -48,8 +48,11 @@ internal object TextMethod {
         if (ctx.options.inertAuthorAndTagChips && inChip) return
 
         val nodeValue = node.data
-        val linkified = Linkify.linkify(nodeValue, ctx)
-        if (linkified != nodeValue) {
+        // 2.5.45 (#1919): the decoded text is parsed as HTML below, so its angle brackets are escaped first or the
+        // author's text would become real markup with forged link markers. `&` stays.
+        val escaped = nodeValue.replace("<", "&lt;").replace(">", "&gt;")
+        val linkified = Linkify.linkify(escaped, ctx)
+        if (linkified != escaped) {
             val doc = XmlDomParser.parseFromString("<span class=\"wr\">$linkified</span>")
             val replaceNode = doc.firstChild
             if (replaceNode != null) {
@@ -59,12 +62,7 @@ internal object TextMethod {
             return
         }
 
-        if (Scanners.imgTest(nodeValue)) {
-            val imageHTML = ImgMethod.createImageHTML(nodeValue, false, ctx)
-            val replaceNode = XmlDomParser.parseFromString(imageHTML).firstChild
-            if (replaceNode != null) parent.replaceChild(replaceNode, node)
-            return
-        }
+        // Image URLs were handled by linkify above (imageUrlEnd, 2.5.46): no whole-node image here.
 
         val yt = Scanners.youtubeFind(nodeValue)
         if (yt != null) {
@@ -86,6 +84,16 @@ internal object TextMethod {
             play.setAttribute("class", "markdown-video-play")
             anchor.appendChild(play)
             container.appendChild(anchor)
+            // 2.5.45: the text around the URL stays where it was. The match starts at `youtube.com/`; widen it to the
+            // whole whitespace-delimited URL.
+            var start = yt.start
+            while (start > 0 && !Js.isSpace(nodeValue[start - 1])) start--
+            var end = yt.end
+            while (end < nodeValue.length && !Js.isSpace(nodeValue[end])) end++
+            val before = nodeValue.substring(0, start)
+            val after = nodeValue.substring(end)
+            if (before.isNotEmpty()) parent.insertBefore(doc.createTextNode(before), node)
+            if (after.isNotEmpty()) parent.insertBefore(doc.createTextNode(after), node.nextSibling)
             parent.replaceChild(container, node)
             return
         }
@@ -113,28 +121,31 @@ internal object TextMethod {
 }
 
 /**
- * render-helper `methods/traverse.method.ts` (and `p.method.ts`), iterative so deep posts cannot
- * overflow the stack.
+ * render-helper `methods/traverse.method.ts` (and `p.method.ts`), iterative so deep posts cannot overflow the stack.
  *
- * ROBUSTNESS DEVIATION: render-helper recurses once per nesting level, and V8 overflows its stack
- * a little above 5,000 levels (about 5,075 nested elements, about 5,450 levels of a `#a#a#a...`
- * tag chain, which nests one wrapper span per tag). The RangeError is caught by markdownToHTML,
- * which retries on the repaired body, overflows again and returns the sanitized markdown output.
- * [MAX_DEPTH] reproduces that: deeper than this the traversal throws and the same sanitize-only
- * fallback runs. Bodies nested between this limit and V8's actual one render sanitize-only here
- * but fully in Node (and Hermes has its own limit), which no real post comes near.
+ * 2.5.45 (#1920): an explicit nesting cap. Past [MAX_DEPTH] a subtree is reduced to its plain text instead of being
+ * walked further, so the rest of the body is still transformed and nothing below the cap ships untransformed.
  */
 internal object Traverse {
-    const val MAX_DEPTH = 5000
+    const val MAX_DEPTH = 2000
 
-    private class Frame(val node: Node, var child: Node?, val inSkip: Boolean, val inChip: Boolean)
+    private class Frame(val node: Node, var child: Node?, val inSkip: Boolean, val inChip: Boolean, val depth: Int)
 
     private fun frameFor(node: Node, parent: Frame?): Frame = Frame(
         node,
         node.firstChild,
         (parent?.inSkip ?: false) || TextMethod.isSkipAncestor(node),
         (parent?.inChip ?: false) || TextMethod.isChip(node),
+        (parent?.depth ?: -1) + 1,
     )
+
+    /** `flattenToText`: an element's children replaced by its text (text and comment nodes are already inert). */
+    private fun flattenToText(node: Node) {
+        if (node !is Element) return
+        val text = node.textContent.orEmpty()
+        while (true) node.removeChild(node.firstChild ?: break)
+        if (text.isNotEmpty()) node.appendChild(node.ownerDocument!!.createTextNode(text))
+    }
 
     fun traverse(root: Node, ctx: RenderContext, state: ImageState) {
         val stack = ArrayList<Frame>()
@@ -149,21 +160,23 @@ internal object Traverse {
             val node = frame.node
             val next = child.nextSibling
             val prev = child.previousSibling
+            // script/style and malformed names never reach the output, so nothing to transform inside them
+            if (child is Element && RenderBoundary.isHiddenElement(child)) {
+                frame.child = next
+                continue
+            }
             val name = Js.toLowerCase(child.nodeName)
             if (child is Element) {
                 when (name) {
                     "a" -> AMethod.a(child, ctx)
-                    "iframe" -> {
-                        val originalSrc = child.getAttribute("src")
-                        IframeMethod.iframe(child, ctx)
-                        if (originalSrc != null) IframeMethod.enforceAllowList(child, originalSrc)
-                    }
+                    "iframe" -> IframeMethod.iframe(child, ctx)
                     "img" -> ImgMethod.img(child, state, ctx)
                     "p" -> if (child.getAttribute("dir").isNullOrEmpty()) child.setAttribute("dir", "auto")
+                    "video" -> VideoMethod.video(child, ctx)
                 }
             } else if (child is Text) {
                 TextMethod.text(child, ctx, frame.inSkip, frame.inChip)
-            } else if (name == "a" || name == "iframe" || name == "img" || name == "p") {
+            } else if (name == "a" || name == "iframe" || name == "img" || name == "p" || name == "video") {
                 // e.g. a processing instruction `<?a ?>`: the JS handlers call getAttribute on it,
                 // which throws a TypeError, and markdownToHTML falls back.
                 throw TransformError("${child.nodeName} is not an element")
@@ -173,12 +186,37 @@ internal object Traverse {
                 child
             } else {
                 val possible = if (next != null) next.previousSibling else node.lastChild
-                if (possible != null && possible !== prev && possible.parentNode === node) possible else null
+                // a refused iframe's placeholder is text the render wrote, left as written (#2095)
+                val refusedPlaceholder = possible is Element && name == "iframe" && possible.getAttribute("class") == "unsupported-iframe"
+                if (possible != null && !refusedPlaceholder && possible !== prev && possible.parentNode === node) possible else null
             }
             if (descend != null) {
-                if (stack.size >= MAX_DEPTH) throw TransformError("nesting deeper than $MAX_DEPTH")
-                stack.add(frameFor(descend, frame))
+                if (frame.depth + 1 > MAX_DEPTH) {
+                    flattenToText(descend)
+                } else {
+                    stack.add(frameFor(descend, frame))
+                }
             }
         }
+    }
+}
+
+/** render-helper 2.5.45 `methods/video.method.ts`: an author's `<video poster>` loads through the image proxy (#1919). */
+internal object VideoMethod {
+    fun video(el: Element, ctx: RenderContext) {
+        val poster = el.getAttribute("poster") ?: return
+        // the parser already decoded the entities once; only percent-encoding is left
+        val decoded = try {
+            Js.trim(Js.decodeUriComponent(poster))
+        } catch (e: com.ecency.core.render.js.UriError) {
+            Js.trim(poster)
+        }
+        if (decoded.startsWith(Helper.trimTrailingSlash(ctx.proxy.base) + "/")) return
+        val proxied = if (Js.regionMatchesLower(decoded, 0, "http://") || Js.regionMatchesLower(decoded, 0, "https://")) {
+            ctx.proxy.proxify(decoded, forceProxy = true)
+        } else {
+            ""
+        }
+        if (proxied.isNotEmpty()) el.setAttribute("poster", proxied) else el.removeAttribute("poster")
     }
 }

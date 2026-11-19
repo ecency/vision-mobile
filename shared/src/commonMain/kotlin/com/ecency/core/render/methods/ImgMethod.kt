@@ -83,7 +83,7 @@ internal object ImgMethod {
 
     fun img(el: Element, state: ImageState?, ctx: RenderContext) {
         val src = el.getAttribute("src") ?: ""
-        val decodedSrc = Helper.decodeImageSrc(src)
+        val decodedSrc = Helper.decodeDomImageSrc(src)
         val reserved = if (ctx.options.preserveImageDimensions) {
             ImageDimensions.authorPixelSize(el.getAttribute("width"), el.getAttribute("height"))
         } else {
@@ -167,8 +167,11 @@ internal object ImgMethod {
         }
     }
 
+    /** 2.5.45: a `"` in a value (a configured proxy base) is written as `&quot;`. */
+    private fun quoteAttr(v: String): String = v.replace("\"", "&quot;")
+
     fun createImageHTML(src: String, isLCP: Boolean, ctx: RenderContext): String {
-        val decoded = Helper.decodeImageSrc(src)
+        val decoded = Helper.decodeDomImageSrc(src)
         val proxified = ctx.proxy.proxify(decoded, forceProxy = true)
         if (proxified.isEmpty()) return ""
         val base = Helper.trimTrailingSlash(ctx.proxy.base)
@@ -176,14 +179,14 @@ internal object ImgMethod {
         val srcset = if (isAlreadyProxied) "" else ctx.proxy.srcSet(decoded)
         val loading = if (isLCP) "eager" else "lazy"
         val fetch = if (isLCP) "fetchpriority=\"high\"" else "decoding=\"async\""
-        val srcsetAttr = if (srcset.isNotEmpty()) "srcset=\"$srcset\" sizes=\"$IMAGE_SIZES\"" else ""
-        val imgTag = "<img\n    class=\"markdown-img-link\"\n    src=\"$proxified\"\n    $srcsetAttr\n    loading=\"$loading\"\n" +
+        val srcsetAttr = if (srcset.isNotEmpty()) "srcset=\"${quoteAttr(srcset)}\" sizes=\"$IMAGE_SIZES\"" else ""
+        val imgTag = "<img\n    class=\"markdown-img-link\"\n    src=\"${quoteAttr(proxified)}\"\n    $srcsetAttr\n    loading=\"$loading\"\n" +
             "    $fetch\n    itemprop=\"image\"\n  />"
         if (!ctx.forApp) {
             val sources = ctx.proxy.pictureSources(decoded)
             if (sources != null) {
-                return "<picture><source type=\"image/avif\" srcset=\"${sources.first}\" sizes=\"$IMAGE_SIZES\" />" +
-                    "<source type=\"image/webp\" srcset=\"${sources.second}\" sizes=\"$IMAGE_SIZES\" />$imgTag</picture>"
+                return "<picture><source type=\"image/avif\" srcset=\"${quoteAttr(sources.first)}\" sizes=\"$IMAGE_SIZES\" />" +
+                    "<source type=\"image/webp\" srcset=\"${quoteAttr(sources.second)}\" sizes=\"$IMAGE_SIZES\" />$imgTag</picture>"
             }
         }
         return imgTag

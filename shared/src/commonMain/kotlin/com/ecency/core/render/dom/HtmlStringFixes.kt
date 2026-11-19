@@ -1,6 +1,7 @@
 package com.ecency.core.render.dom
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.sanitize.RenderText
 /**
  * String passes render-helper runs on the markdown output before parsing it
  * (`helper.ts` and `fixBlockLevelTagsInParagraphs` in `markdown-to-html.method.ts`).
@@ -21,6 +22,10 @@ object HtmlStringFixes {
         // A start tag needs a '>' after it; past the last one nothing can match (keeps runs of
         // unterminated tags linear).
         val lastGt = html.lastIndexOf('>')
+        // 2.5.45: characters scanned by tags that never closed. A '>' only ever inside a quoted value defeats the
+        // guard above; past this budget the rest is copied as written, so the work stays linear.
+        val scanBudget = 4L * n + 4096
+        var wasted = 0L
         var i = 0
         while (i < n) {
             val lt = html.indexOf('<', i)
@@ -61,6 +66,8 @@ object HtmlStringFixes {
                 var r = q
                 while (r < n && isSpaceChar(html[r])) r++
                 var valueEnd = q
+                // the value without its quotes when complete; null keeps the attribute's bytes as written
+                var rawValue: String? = null
                 if (r < n && html[r] == '=') {
                     r++
                     while (r < n && isSpaceChar(html[r])) r++
@@ -72,6 +79,7 @@ object HtmlStringFixes {
                                 val gt = html.indexOf('>', r + 1)
                                 if (gt < 0) n else gt
                             } else {
+                                rawValue = html.substring(r + 1, end)
                                 end + 1
                             }
                         } else {
@@ -82,6 +90,7 @@ object HtmlStringFixes {
                                 s++
                             }
                             valueEnd = s
+                            rawValue = html.substring(r, s)
                         }
                     } else {
                         valueEnd = r
@@ -90,7 +99,14 @@ object HtmlStringFixes {
                 val fullAttr = html.substring(nameStart, valueEnd)
                 q = valueEnd
                 // JS toLowerCase on [A-Za-z0-9-_:.] is plain ASCII lower-casing.
-                if (seen.add(attrName.lowercase())) attrs.add(fullAttr)
+                val key = attrName.lowercase()
+                if (seen.add(key)) {
+                    // 2.5.45 (#1919, #2085): names lower-cased on the way out; a value is handed on decoded as a
+                    // browser decodes an attribute and escaped again, unless that leaves it as written. A literal
+                    // tab, line feed or carriage return is attribute whitespace: a space.
+                    val value = rawValue?.let { escapeAttrValue(RenderText.decodeAttributeEntities(attrWhitespace(it))) }
+                    attrs.add(if (value == null || value == rawValue) key + fullAttr.substring(attrName.length) else "$key=\"$value\"")
+                }
             }
             var selfClose = false
             if (q < n && html[q] == '/') {
@@ -98,6 +114,11 @@ object HtmlStringFixes {
                 q++
             }
             if (q >= n || html[q] != '>') {
+                wasted += q - lt
+                if (wasted > scanBudget) {
+                    out.append(html, lt, n)
+                    break
+                }
                 out.append('<')
                 i = lt + 1
                 continue
@@ -116,6 +137,42 @@ object HtmlStringFixes {
             i = q
         }
         return out.toString()
+    }
+
+    /** `\r\n?|[\n\t]` to a space (helper `removeDuplicateAttributes`). */
+    private fun attrWhitespace(v: String): String {
+        if (v.indexOf('\r') < 0 && v.indexOf('\n') < 0 && v.indexOf('\t') < 0) return v
+        val sb = StringBuilder(v.length)
+        var i = 0
+        while (i < v.length) {
+            val c = v[i]
+            when {
+                c == '\r' -> {
+                    sb.append(' ')
+                    if (i + 1 < v.length && v[i + 1] == '\n') i++
+                }
+                c == '\n' || c == '\t' -> sb.append(' ')
+                else -> sb.append(c)
+            }
+            i++
+        }
+        return sb.toString()
+    }
+
+    /** helper `escapeAttrValue`: for a double-quoted attribute; tab, LF and CR stay references, as xmldom keeps them. */
+    private fun escapeAttrValue(v: String): String {
+        val sb = StringBuilder(v.length + 8)
+        for (c in v) when (c) {
+            '&' -> sb.append("&amp;")
+            '"' -> sb.append("&quot;")
+            '<' -> sb.append("&lt;")
+            '>' -> sb.append("&gt;")
+            '\t' -> sb.append("&#9;")
+            '\n' -> sb.append("&#10;")
+            '\r' -> sb.append("&#13;")
+            else -> sb.append(c)
+        }
+        return sb.toString()
     }
 
     private val BLOCK_TAGS = listOf("center", "div", "table", "figure", "section", "article", "aside", "header", "footer", "nav", "main")

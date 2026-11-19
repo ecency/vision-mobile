@@ -69,18 +69,18 @@ class IframeSecurityTest {
         RenderBodyParser.Path.SANITIZED to """<iframe src="https://evil.example.com/x" sandbox="$wideSandbox">&lt;b&gt;</iframe><p>""",
     )
 
+    /**
+     * render-helper 2.5.45 (#1919) enforces the allow list in the sanitizer on every path: a refused iframe is dropped
+     * (iframe() shows its placeholder on the transformed paths, RenderHelper's goldens).
+     */
     @Test
-    fun unlistedIframeBecomesThePlaceholderOnEveryPath() {
+    fun unlistedIframeIsDroppedOnEveryPath() {
         for ((path, html) in attacks) {
             val r = render(html)
             assertEquals(path, r.path, "input should take the $path path: $html")
-            assertFalse(r.html.contains("src=\"https://evil.example.com"), "$path kept the src: ${r.html}")
+            assertFalse(r.html.contains("evil.example.com"), "$path kept the src: ${r.html}")
             assertFalse(r.html.contains("sandbox"), "$path kept the author sandbox: ${r.html}")
             assertFalse(r.html.contains("<iframe"), "$path kept the iframe: ${r.html}")
-            assertTrue(
-                r.html.contains("<div class=\"unsupported-iframe\">(Unsupported https://evil.example.com/x)</div>"),
-                "$path should show iframe()'s unsupported placeholder: ${r.html}",
-            )
             assertNull(IframeInvariant.violation(r.html))
             // The sanitizer alone (the last step of every path) holds the line too.
             assertNull(IframeInvariant.violation(HtmlSanitizer.sanitize(html, opts)))
@@ -88,16 +88,14 @@ class IframeSecurityTest {
     }
 
     @Test
-    fun unlistedSrcVariantsBecomeThePlaceholder() {
+    fun unlistedSrcVariantsAreDropped() {
         for (src in listOf(
             "//evil.example.com/x", "https://www.youtube.com.evil.example.com/embed/x", "https://evil.example.com/?u=https://www.youtube.com/embed/x",
             "https://www.youtube.com@evil.example.com/embed/x", "javascript&colon;alert(1)", "data:text/html,x", "/relative/path",
             "https://www.youtube.com/watch?v=x", " https://evil.example.com/x", "HTTPS://EVIL.EXAMPLE.COM/x", "http://evil.example.com/x",
         )) {
             val out = HtmlSanitizer.sanitize("""<iframe src="$src"></iframe>""", opts)
-            val shown = RenderText.decodeEntities(src.trim()).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            assertEquals("<div class=\"unsupported-iframe\">(Unsupported $shown)</div>", out, "src $src")
-            assertNull(IframeInvariant.violation(out))
+            assertEquals("", out, "src $src")
         }
     }
 
@@ -105,8 +103,6 @@ class IframeSecurityTest {
     fun allowListedSourcesAndTransformSandboxesPassUnchanged() {
         for (html in listOf(
             """<iframe src="https://www.youtube.com/embed/x" frameborder="0" allowfullscreen></iframe>""",
-            """<iframe src="//www.youtube.com/embed/x"></iframe>""",
-            """<iframe src="http://player.twitch.tv/?channel=x&amp;parent=ecency.com&amp;autoplay=false"></iframe>""",
             """<iframe src="https://open.spotify.com/embed/track/x" sandbox="allow-scripts allow-same-origin allow-popups" frameborder="0"></iframe>""",
             """<iframe src="https://emb.d.tube/#!/a/b" sandbox="allow-scripts allow-same-origin" frameborder="0" allowfullscreen="true"></iframe>""",
             """<iframe src="https://player.eu.dapplr.in/file/dapplr-videos/x.mp4" sandbox="allow-scripts allow-same-origin"></iframe>""",
@@ -115,6 +111,15 @@ class IframeSecurityTest {
             assertEquals(html, out)
             assertNull(IframeInvariant.violation(out))
         }
+        // A protocol-relative or http: embed gets iframe()'s https spelling (canonicalEmbedSrc).
+        assertEquals(
+            """<iframe src="https://www.youtube.com/embed/x"></iframe>""",
+            HtmlSanitizer.sanitize("""<iframe src="//www.youtube.com/embed/x"></iframe>""", opts),
+        )
+        assertEquals(
+            """<iframe src="https://player.twitch.tv/?channel=x&amp;parent=ecency.com&amp;autoplay=false"></iframe>""",
+            HtmlSanitizer.sanitize("""<iframe src="http://player.twitch.tv/?channel=x&amp;parent=ecency.com&amp;autoplay=false"></iframe>""", opts),
+        )
         // An empty sandbox (the most restrictive one) stays; xss writes it without a value.
         assertEquals(
             """<iframe src="https://www.youtube.com/embed/x" sandbox></iframe>""",
@@ -124,9 +129,13 @@ class IframeSecurityTest {
 
     @Test
     fun authorSandboxTokensBeyondTheTransformAreDropped() {
-        for (sandbox in listOf("allow-top-navigation", "allow-scripts allow-forms", "allow-same-origin allow-modals", "allow-popups-to-escape-sandbox")) {
+        // 2.5.45: the granted tokens stay, the rest go (an empty sandbox is the most restrictive)
+        for ((sandbox, kept) in listOf(
+            "allow-top-navigation" to "", "allow-scripts allow-forms" to "allow-scripts",
+            "allow-same-origin allow-modals" to "allow-same-origin", "allow-popups-to-escape-sandbox" to "",
+        )) {
             val out = HtmlSanitizer.sanitize("""<iframe src="https://www.youtube.com/embed/x" sandbox="$sandbox"></iframe>""", opts)
-            assertEquals("""<iframe src="https://www.youtube.com/embed/x"></iframe>""", out, sandbox)
+            assertEquals("""<iframe src="https://www.youtube.com/embed/x" sandbox="$kept"></iframe>""", out, sandbox)
         }
     }
 
@@ -137,8 +146,8 @@ class IframeSecurityTest {
      */
     @Test
     fun eventHandlerGuardDropsWhitelistedOnAttributes() {
-        val xss = Xss(mapOf("a" to listOf("href", "onclick"), "img" to listOf("src", "onerror")), listOf("style")) { tag, name, value ->
-            HtmlSanitizer.onTagAttr(tag, name, value, opts)
+        val xss = Xss(mapOf("a" to listOf("href", "onclick"), "img" to listOf("src", "onerror")), listOf("style")) { tag, name, value, isWhite ->
+            HtmlSanitizer.onTagAttr(tag, name, value, isWhite, opts)
         }
         assertEquals("""<a href="https://a.example/">x</a>""", xss.process("""<a href="https://a.example/" onclick="alert(1)">x</a>"""))
         assertEquals("""<img src="https://a.example/i.png">""", xss.process("""<img src="https://a.example/i.png" onerror="alert(1)">"""))

@@ -7,8 +7,18 @@ import com.ecency.core.render.js.Js
 data class SanitizeOptions(
     /** Keep a validated pixel width/height pair on `<img>` (`RenderOptions.preserveImageDimensions`). */
     val preserveImageDimensions: Boolean = false,
-    /** render-helper's proxy base: `<source srcset>` must point at its `/p/` route. */
+    /** render-helper's proxy base: `<source srcset>` must point at its `/p/` route, images go through it. */
     val proxyBase: String = DEFAULT_PROXY_BASE,
+    /**
+     * 2.5.45 (#1919): the HTML never went through the DOM transforms (the sanitize-only fallback): nothing in it is
+     * trusted. Images through the proxy, author target/rel dropped, render-helper's markers removed.
+     */
+    val untransformed: Boolean = false,
+    /**
+     * 2.5.45: the final pass of a full render. Tags carrying this per-render nonce were emitted by the transformed
+     * DOM and keep render-helper's markers and link policy; every other tag gets the untransformed rules.
+     */
+    val renderNonce: String? = null,
 ) {
     companion object {
         const val DEFAULT_PROXY_BASE = "https://i.ecency.com"
@@ -16,7 +26,7 @@ data class SanitizeOptions(
 }
 
 /**
- * Port of @ecency/render-helper 2.5.42 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
+ * Port of @ecency/render-helper 2.5.52 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
  * xss with the render-helper whitelist and attribute policy, then the `<source>` and image
  * dimension post-passes. String in, string out, byte for byte the JS result.
  */
@@ -53,172 +63,401 @@ object HtmlSanitizer {
         ALLOWED_ATTRIBUTES + ("img" to ALLOWED_ATTRIBUTES.getValue("img") + listOf("width", "height"))
 
     /**
-     * [beforeTransform]: the pre-sanitize of the repair path, whose output still goes through
-     * iframe() and then this sanitizer again. iframe `src` and `sandbox` are left to those two
-     * (as in render-helper), so iframe() can still normalize an allowed embed (a protocol-relative
-     * or m.youtube.com source) before the allow list judges it.
+     * [beforeTransform]: the pre-sanitize of the repair path, ahead of a full DOM transform. Iframes are left to
+     * iframe(), which normalises provider page URLs and shows the unsupported placeholder for the rest; the final
+     * pass enforces the allow list on what it emits.
      */
     fun sanitize(html: String, options: SanitizeOptions = SanitizeOptions(), beforeTransform: Boolean = false): String {
         val preserve = options.preserveImageDimensions
-        // Rejected iframe sources are marked in place, then the whole iframe becomes iframe()'s
-        // "unsupported" placeholder. The marker uses private-use characters, so it is only used
-        // when the input has none of them (otherwise the src is simply dropped).
-        val markIframes = !beforeTransform && html.indexOf(MARK_START) < 0 && html.indexOf(MARK_END) < 0
-        val xss = Xss(if (preserve) WITH_DIMENSIONS else ALLOWED_ATTRIBUTES, listOf("style")) { tag, name, value ->
-            val ret = if (beforeTransform && tag == "iframe" && (name == "src" || name == "sandbox")) {
-                null
-            } else {
-                onTagAttr(tag, name, value, options)
-            }
-            if (markIframes && ret == "" && tag == "iframe" && name == "src") {
-                MARK_START + escapeText(RenderText.decodeEntities(Js.trim(value))) + MARK_END
-            } else {
-                ret
-            }
-        }
-        val cleaned = if (markIframes) replaceMarkedIframes(xss.process(html)) else xss.process(html)
+        val pass = Pass(options, beforeTransform)
+        pass.collectDeclaredIds(html)
+        val xss = Xss(
+            if (preserve) WITH_DIMENSIONS else ALLOWED_ATTRIBUTES,
+            listOf("style"),
+            onTagSeen = { raw -> pass.trusted = options.renderNonce != null && raw.indexOf(options.renderNonce) >= 0 && isStrictTag(raw) },
+        ) { tag, name, value, isWhiteAttr -> pass.onTagAttr(tag, name, value, isWhiteAttr) }
+        val cleaned = xss.process(html)
         val withoutBareSource = replaceTags(cleaned, "source") { tag -> if (hasAvifOrWebpType(tag)) tag else "" }
-        return if (preserve) enforceImageDimensionPair(withoutBareSource) else withoutBareSource
+        val withoutBareIframe = if (beforeTransform) withoutBareSource else dropBareIframes(withoutBareSource)
+        return if (preserve) enforceImageDimensionPair(withoutBareIframe) else withoutBareIframe
     }
 
-    private const val MARK_START = "\uE000"
-    private const val MARK_END = "\uE001"
+    /** One attribute through the rules of a plain `sanitizeHtml` pass (tests drive xss with other whitelists). */
+    internal fun onTagAttr(tag: String, name: String, value: String, isWhiteAttr: Boolean, options: SanitizeOptions): String? =
+        Pass(options, false).onTagAttr(tag, name, value, isWhiteAttr)
 
-    /** XMLSerializer text escaping (`&`, `<`, `>`), as the DOM path writes iframe()'s placeholder text. */
-    private fun escapeText(s: String): String {
-        if (s.none { it == '&' || it == '<' || it == '>' }) return s
-        val sb = StringBuilder(s.length + 16)
-        for (c in s) {
+    /** The attribute rules of one `sanitizeHtml` call (render-helper's `onTagAttr` closure). */
+    private class Pass(val options: SanitizeOptions, val beforeTransform: Boolean) {
+        val untransformed = options.untransformed
+        val enforce = untransformed || options.renderNonce != null
+        val proxyBase = trimTrailingSlash(options.proxyBase) + "/"
+        private val proxy by lazy { com.ecency.core.render.ImageProxy(options.proxyBase) }
+
+        /** Set by xss's onTag for the tag whose attributes come next. */
+        var trusted = false
+
+        /** The ids this input declares, decoded: a `#fragment` link to one follows it to its namespaced id. */
+        private val declaredIds = HashSet<String>()
+
+        /** `/\sid\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi` over the input. */
+        fun collectDeclaredIds(html: String) {
+            var i = 0
+            val n = html.length
+            while (i < n) {
+                if (!Js.isSpace(html[i]) || !Js.regionMatchesLower(html, i + 1, "id")) {
+                    i++
+                    continue
+                }
+                var p = i + 3
+                while (p < n && Js.isSpace(html[p])) p++
+                if (p >= n || html[p] != '=') {
+                    i++
+                    continue
+                }
+                p++
+                while (p < n && Js.isSpace(html[p])) p++
+                if (p >= n) {
+                    i++
+                    continue
+                }
+                val c = html[p]
+                val value: String
+                val end: Int
+                if (c == '"' || c == '\'') {
+                    val close = html.indexOf(c, p + 1)
+                    if (close < 0) {
+                        i++
+                        continue
+                    }
+                    value = html.substring(p + 1, close)
+                    end = close + 1
+                } else {
+                    var q = p
+                    while (q < n && !Js.isSpace(html[q]) && html[q] != '"' && html[q] != '\'' && html[q] != '>') q++
+                    if (q == p) {
+                        i++
+                        continue
+                    }
+                    value = html.substring(p, q)
+                    end = q
+                }
+                declaredIds.add(RenderText.decodeAttributeEntities(Js.trim(value)))
+                i = end
+            }
+        }
+
+        private fun declaredFragment(fragment: String): String? {
+            val candidates = try {
+                listOf(fragment, Js.decodeUriComponent(fragment))
+            } catch (e: com.ecency.core.render.js.UriError) {
+                listOf(fragment)
+            }
+            return candidates.firstOrNull { it in declaredIds && isIdWhitelisted(it) }
+        }
+
+        fun onTagAttr(tag: String, name: String, value: String, isWhiteAttr: Boolean): String? {
+            val decoded = RenderText.decodeAttributeEntities(Js.trim(value))
+            val decodedLower = Js.toLowerCase(decoded)
+
+            if (name.startsWith("on")) return ""
+            // An href keeps only the schemes a() itself writes, read as a browser reads it (#2099).
+            var hrefSchemeAllowed = false
+            if (name == "href") {
+                val scheme = hrefScheme(decoded)
+                if (scheme != null && !isHrefScheme(scheme)) return if (isWhiteAttr) "href" else ""
+                // only tel:, mailto: and web+ handlers skip xss's rule (#2107)
+                hrefSchemeAllowed = scheme != null && isTelMailtoWeb(scheme)
+            }
+            if (tag == "img" && name == "src" && !startsWithHttp(decodedLower)) return ""
+            if ((tag == "img" || tag == "source") && name == "srcset" && !beforeTransform && !isWellFormedSrcset(decoded)) return ""
+            if (tag == "img" && name == "srcset") {
+                if (srcsetCandidates(decoded).any { !startsWithHttpIgnoreCase(it[0]) }) return ""
+            }
+            if (tag == "source" && name == "srcset" && !isProxyPSrcset(decoded)) return ""
+            if (tag == "source" && name == "type" && decodedLower != "image/avif" && decodedLower != "image/webp") return ""
+            if ((tag == "video" || tag == "audio") && (name == "src" || name == "poster") && !startsWithHttp(decodedLower)) return ""
+            if (tag == "audio" && name == "preload" && decodedLower != "metadata" && decodedLower != "none") return ""
+            if (tag == "img" && (name == "dynsrc" || name == "lowsrc")) return ""
+            if (tag == "img" && (name == "width" || name == "height")) {
+                if (!options.preserveImageDimensions || ImageDimensions.parsePixelDimension(decoded) == null) return ""
+            }
+            if (tag == "span" && name == "class" && Js.trim(Js.toLowerCase(decoded)) == "wr") return ""
+            // A class the render did not stamp is the author's: only the classes an author may write survive.
+            if (isWhiteAttr && name == "class" && !trusted) {
+                val kept = AuthorAttributes.authorClasses(decoded)
+                return if (kept.isNotEmpty()) "class=\"${escapeAttr(kept)}\"" else ""
+            }
+            // The embed allow list holds on every path; a refused src gets iframe()'s spelling one more try (#1919).
+            if (!beforeTransform && ((tag == "iframe" && name == "src") || name in EMBED_SRC_DATA_ATTRS) && hasTabOrNewline(decoded)) return ""
+            if (tag == "iframe" && name == "src" && !beforeTransform && !EmbedSrc.isAllowedEmbedSrc(decoded)) {
+                val canonical = EmbedSrc.canonicalEmbedSrc(decoded)
+                return if (EmbedSrc.isAllowedEmbedSrc(canonical)) "src=\"${escapeAttr(canonical)}\"" else ""
+            }
+            // An author's sandbox keeps only the tokens iframe() itself grants.
+            if (tag == "iframe" && name == "sandbox") {
+                val tokens = splitWs(decodedLower)
+                val kept = tokens.filter { it in AuthorAttributes.IFRAME_SANDBOX_GRANTS }
+                if (kept.size != tokens.size) return "sandbox=\"${kept.joinToString(" ")}\""
+            }
+            // Full-render output: images and posters only ever load through the image proxy.
+            if (enforce) {
+                if (tag == "img" && name == "src" && !decoded.startsWith(proxyBase)) {
+                    val proxied = proxy.proxify(decoded, forceProxy = true)
+                    return if (proxied.isNotEmpty()) "src=\"${escapeAttr(proxied)}\"" else ""
+                }
+                if (tag == "img" && name == "srcset" && srcsetCandidates(decoded).any { !it[0].startsWith(proxyBase) }) return ""
+                if (tag == "video" && name == "poster" && !decoded.startsWith(proxyBase)) {
+                    val proxied = if (startsWithHttpIgnoreCase(decoded)) proxy.proxify(decoded, forceProxy = true) else ""
+                    return if (proxied.isNotEmpty()) "poster=\"${escapeAttr(proxied)}\"" else ""
+                }
+            }
+            if (enforce) {
+                // a reference or control character in a class is the author's, hiding a marker until xss decodes it
+                if (isWhiteAttr && name == "class" && value.any { it == '&' || it.code <= 0x1f || it.code == 0x7f }) {
+                    val kept = splitWs(replaceControls(decoded)).filter { !Js.toLowerCase(it).contains("markdown") }.joinToString(" ")
+                    return if (kept.isNotEmpty()) "class=\"${escapeAttr(kept)}\"" else ""
+                }
+                if (tag == "a" && name == "rel" && collapseWs(decodedLower) !in RENDER_HELPER_RELS) return ""
+                if (tag == "a" && name == "target" && decodedLower != "_blank") return ""
+            }
+            // Tags the render did not stamp were hidden from the transforms: render-helper's markers and the link
+            // policy on them are the author's, so they go.
+            if (enforce && !trusted) {
+                if (tag == "a" && (name == "target" || name == "rel")) return ""
+                val navigable = if (tag == "a" && name == "href") navigableHref(decoded) else ""
+                if (navigable.isNotEmpty() && isOffSite(navigable)) {
+                    return "href=\"${escapeAttr(navigable)}\" rel=\"nofollow ugc noopener\""
+                }
+                if (name in AuthorAttributes.RENDER_HELPER_DATA_ATTRIBUTES) return ""
+                if (isWhiteAttr && name == "class") {
+                    val kept = AuthorAttributes.stripMarkdownClasses(decoded)
+                    if (kept != decoded) return if (kept.isNotEmpty()) "class=\"${escapeAttr(kept)}\"" else ""
+                }
+            }
+            if (name in EMBED_SRC_DATA_ATTRS && !EmbedSrc.isAllowedEmbedSrc(decoded)) return ""
+            if (name == "data-href" && !isSafeNavValue(decoded)) return ""
+            if (name == "id") {
+                if (!isIdWhitelisted(decoded)) return ""
+                // every id is the author's, namespaced away from the page's, exactly once per render
+                if (isWhiteAttr && !beforeTransform && !untransformed) return "id=\"${escapeAttr(AuthorAttributes.namespacedId(decoded))}\""
+            }
+            if (isWhiteAttr && !beforeTransform && !untransformed && tag == "a" && (name == "href" || name == "data-href") && decoded.startsWith("#")) {
+                val target = declaredFragment(decoded.substring(1))
+                if (target != null) return "$name=\"#${escapeAttr(AuthorAttributes.namespacedId(target))}\""
+            }
+            // Always emit exactly the string that was validated.
+            if (isWhiteAttr && name == "href") {
+                return if (hrefSchemeAllowed || Xss.safeAttrValue(name, decoded).isNotEmpty()) "href=\"${escapeAttr(decoded)}\"" else "href"
+            }
+            if (!beforeTransform && isWhiteAttr && isUrlAttribute(tag, name)) return "$name=\"${escapeAttr(decoded)}\""
+            return null
+        }
+
+        private fun isProxyPSrcset(srcset: String): Boolean {
+            val prefix = trimTrailingSlash(options.proxyBase) + "/p/"
+            val candidates = srcsetCandidates(srcset).map { it[0] }
+            return candidates.isNotEmpty() && candidates.all { it.startsWith(prefix) }
+        }
+    }
+
+    // data-* attributes later read as an iframe src by the client video extensions
+    private val EMBED_SRC_DATA_ATTRS = setOf("data-embed-src", "data-video-href")
+    private val RENDER_HELPER_RELS = setOf("nofollow ugc noopener", "noopener")
+    private val HREF_SCHEMES = setOf("http", "https", "mailto", "tel", "hive", "steem", "esteem", "ecency")
+
+    private fun trimTrailingSlash(s: String): String {
+        var end = s.length
+        while (end > 0 && s[end - 1] == '/') end--
+        return s.substring(0, end)
+    }
+
+    /** `/^([a-z][a-z0-9+.-]*):/i` after leading `[\s\u0000- �]` and every tab, LF and CR are dropped. */
+    private fun hrefScheme(decoded: String): String? {
+        var i = 0
+        while (i < decoded.length && (Js.isSpace(decoded[i]) || decoded[i].code <= 0x20 || decoded[i] == '�')) i++
+        val sb = StringBuilder()
+        for (k in i until decoded.length) {
+            val c = decoded[k]
+            if (c == '\t' || c == '\n' || c == '\r') continue
+            sb.append(c)
+        }
+        val v = sb.toString()
+        if (v.isEmpty() || !Js.isAsciiAlpha(v[0])) return null
+        var p = 1
+        while (p < v.length && (Js.isAsciiAlpha(v[p]) || Js.isDigit(v[p]) || v[p] == '+' || v[p] == '.' || v[p] == '-')) p++
+        return if (p < v.length && v[p] == ':') v.substring(0, p) else null
+    }
+
+    private fun isWebPlus(lower: String): Boolean =
+        lower.startsWith("web+") && lower.length > 4 && lower.substring(4).all { it in 'a'..'z' || it in '0'..'9' || it == '.' || it == '+' || it == '-' }
+
+    private fun isHrefScheme(scheme: String): Boolean {
+        val lower = Js.toLowerCase(scheme)
+        return lower in HREF_SCHEMES || isWebPlus(lower)
+    }
+
+    private fun isTelMailtoWeb(scheme: String): Boolean {
+        val lower = Js.toLowerCase(scheme)
+        return lower == "tel" || lower == "mailto" || isWebPlus(lower)
+    }
+
+    /** An off-site a() link: `/^(?:https?:)?\/\//i`. */
+    private fun isOffSite(v: String): Boolean {
+        var i = 0
+        if (Js.regionMatchesLower(v, 0, "https:")) i = 6 else if (Js.regionMatchesLower(v, 0, "http:")) i = 5
+        return v.startsWith("//", i)
+    }
+
+    /** The href as a browser reads it: leading `[\u0000- �]` dropped, tab/LF/CR removed, `\` as `/`. */
+    private fun navigableHref(decoded: String): String {
+        var i = 0
+        while (i < decoded.length && (decoded[i].code <= 0x20 || decoded[i] == '�')) i++
+        val sb = StringBuilder(decoded.length - i)
+        for (k in i until decoded.length) {
+            val c = decoded[k]
             when (c) {
-                '&' -> sb.append("&amp;")
-                '<' -> sb.append("&lt;")
-                '>' -> sb.append("&gt;")
+                '\t', '\n', '\r' -> {}
+                '\\' -> sb.append('/')
                 else -> sb.append(c)
             }
         }
         return sb.toString()
     }
 
-    /** iframe()'s replacement for an embed it does not support. */
-    fun unsupportedIframeHtml(escapedSrc: String) = "<div class=\"unsupported-iframe\">(Unsupported $escapedSrc)</div>"
+    private fun hasTabOrNewline(v: String) = v.indexOf('\t') >= 0 || v.indexOf('\n') >= 0 || v.indexOf('\r') >= 0
 
-    /**
-     * SECURITY DEVIATION, placeholder half: an iframe whose `src` the allow list rejects is
-     * replaced (with its content and end tag) by the placeholder iframe() emits for unsupported
-     * embeds, instead of staying as an empty `<iframe>`.
-     */
-    private fun replaceMarkedIframes(html: String): String {
-        var m = html.indexOf(MARK_START)
-        if (m < 0) return html
-        val sb = StringBuilder(html.length)
-        var last = 0
-        while (m >= 0) {
-            val me = html.indexOf(MARK_END, m)
-            val start = lastIndexOfIgnoreCase(html, "<iframe", m)
-            val tagEnd = if (me < 0) -1 else html.indexOf('>', me)
-            if (me < 0 || start < last || tagEnd < 0) {
-                // Malformed: keep the text without the marker.
-                sb.append(html, last, m)
-                last = if (me < 0) m + 1 else me + 1
-                m = html.indexOf(MARK_START, last)
-                continue
-            }
-            val close = indexOfIgnoreCase(html, "</iframe", tagEnd + 1)
-            val end = if (close < 0) tagEnd + 1 else html.indexOf('>', close).let { if (it < 0) html.length else it + 1 }
-            sb.append(html, last, start).append(unsupportedIframeHtml(html.substring(m + 1, me)))
-            last = end
-            m = html.indexOf(MARK_START, last)
-        }
-        sb.append(html, last, html.length)
+    private fun replaceControls(v: String): String {
+        val sb = StringBuilder(v.length)
+        for (c in v) sb.append(if (c.code <= 0x1f || c.code == 0x7f) ' ' else c)
         return sb.toString()
     }
 
-    private fun lastIndexOfIgnoreCase(s: String, lit: String, before: Int): Int {
-        var i = minOf(before, s.length - lit.length)
-        while (i >= 0) {
-            if (Js.regionMatchesLower(s, i, lit)) return i
-            i--
+    /** `value.split(/\s+/).filter(Boolean)` (JS whitespace). */
+    internal fun splitWs(v: String): List<String> {
+        val out = ArrayList<String>()
+        var i = 0
+        while (i < v.length) {
+            while (i < v.length && Js.isSpace(v[i])) i++
+            val start = i
+            while (i < v.length && !Js.isSpace(v[i])) i++
+            if (i > start) out.add(v.substring(start, i))
         }
-        return -1
+        return out
     }
 
-    /** The xss `onTagAttr` hook: null keeps the default handling, "" drops the attribute. */
-    internal fun onTagAttr(tag: String, name: String, value: String, options: SanitizeOptions): String? {
-        val decoded = RenderText.decodeEntities(Js.trim(value))
-        val decodedLower = decoded.lowercase()
-        if (name.startsWith("on")) return ""
-        if (tag == "img" && name == "src" && !startsWithHttp(decodedLower)) return ""
-        if (tag == "img" && name == "srcset") {
-            if (decoded.split(',').any { !startsWithHttpIgnoreCase(firstToken(it)) }) return ""
+    /** `.replace(/\s+/g, ' ')`. */
+    private fun collapseWs(v: String): String {
+        val sb = StringBuilder(v.length)
+        var i = 0
+        while (i < v.length) {
+            if (Js.isSpace(v[i])) {
+                sb.append(' ')
+                while (i < v.length && Js.isSpace(v[i])) i++
+            } else {
+                sb.append(v[i++])
+            }
         }
-        if (tag == "source" && name == "srcset" && !isProxyPSrcset(decoded, options.proxyBase)) return ""
-        if (tag == "source" && name == "type" && decodedLower != "image/avif" && decodedLower != "image/webp") return ""
-        if ((tag == "video" || tag == "audio") && (name == "src" || name == "poster") && !startsWithHttp(decodedLower)) return ""
-        if (tag == "audio" && name == "preload" && decodedLower != "metadata" && decodedLower != "none") return ""
-        if (tag == "img" && (name == "dynsrc" || name == "lowsrc")) return ""
-        if (tag == "img" && (name == "width" || name == "height")) {
-            if (!options.preserveImageDimensions || ImageDimensions.parsePixelDimension(decoded) == null) return ""
-        }
-        if (tag == "span" && name == "class" && Js.trim(decoded.lowercase()) == "wr") return ""
-        if (tag == "iframe" && name == "src" && !isAllowedIframeSrc(decoded)) return ""
-        if (tag == "iframe" && name == "sandbox" && !isTransformSandbox(decoded)) return ""
-        if ((name == "data-embed-src" || name == "data-video-href") && !EmbedSrc.isAllowedEmbedSrc(decoded)) return ""
-        if (name == "data-href" && !isSafeNavValue(decoded)) return ""
-        if (name == "id" && !isIdWhitelisted(decoded)) return ""
-        return null
+        return sb.toString()
     }
+
+    /** sanitize-html `escapeAttr`. */
+    private fun escapeAttr(v: String): String {
+        if (v.none { it == '&' || it == '"' || it == '<' || it == '>' }) return v
+        val sb = StringBuilder(v.length + 8)
+        for (c in v) when (c) {
+            '&' -> sb.append("&amp;")
+            '"' -> sb.append("&quot;")
+            '<' -> sb.append("&lt;")
+            '>' -> sb.append("&gt;")
+            else -> sb.append(c)
+        }
+        return sb.toString()
+    }
+
+    private fun isAsciiWs(c: Char) = c == '\t' || c == '\n' || c == '\u000C' || c == '\r' || c == ' '
+
+    /** `srcsetCandidates`: candidates split on commas, URL and descriptors on ASCII whitespace; empty ones dropped. */
+    private fun srcsetCandidates(srcset: String): List<List<String>> = srcset.split(',').map { candidate ->
+        val parts = ArrayList<String>()
+        var i = 0
+        while (i < candidate.length) {
+            while (i < candidate.length && isAsciiWs(candidate[i])) i++
+            val start = i
+            while (i < candidate.length && !isAsciiWs(candidate[i])) i++
+            if (i > start) parts.add(candidate.substring(start, i))
+        }
+        parts
+    }.filter { it.isNotEmpty() }
+
+    /** Each candidate a URL with at most one `320w` / `1.5x` / `.5x` descriptor. */
+    private fun isWellFormedSrcset(srcset: String): Boolean = srcsetCandidates(srcset).all { parts ->
+        parts.size == 1 || (parts.size == 2 && isDescriptor(parts[1]))
+    }
+
+    /** `/^(?:\d+(?:\.\d+)?|\.\d+)[wx]$/i`. */
+    private fun isDescriptor(d: String): Boolean {
+        if (d.length < 2) return false
+        val last = d[d.length - 1]
+        if (last != 'w' && last != 'x' && last != 'W' && last != 'X') return false
+        val num = d.substring(0, d.length - 1)
+        val dot = num.indexOf('.')
+        if (dot < 0) return num.isNotEmpty() && num.all(Js::isDigit)
+        val a = num.substring(0, dot)
+        val b = num.substring(dot + 1)
+        return b.isNotEmpty() && b.all(Js::isDigit) && a.all(Js::isDigit)
+    }
+
+    /** Attributes whose value is a URL the checks above validate. */
+    private fun isUrlAttribute(tag: String, name: String): Boolean =
+        (name == "src" && tag != "a") || name == "srcset" || name == "poster" || name == "data-href" || name in EMBED_SRC_DATA_ATTRS
 
     /**
-     * SECURITY DEVIATION from render-helper (see docs/upstream-render-helper-issues.md).
-     * render-helper's sanitizer keeps any iframe `src` and author `sandbox`; only the DOM
-     * `iframe()` transform enforces the embed host allow list, and the sanitize-only fallback
-     * (both parses failed) never runs it. Here the sanitizer enforces it on every path: an
-     * iframe keeps its `src` only when [EmbedSrc.isAllowedEmbedSrc] accepts it. The transform
-     * itself leaves protocol-relative and `http:` sources of allowed hosts in place, so those are
-     * judged by their `https:` form and kept as written.
+     * render-boundary `isStrictTag`: `/^<[A-Za-z][A-Za-z0-9:_.-]*(?:\s+[A-Za-z0-9_:.-]+="[^"]*")*\s*\/?>$/`, the exact
+     * shape xmldom serializes. Linear scan.
      */
-    internal fun isAllowedIframeSrc(src: String): Boolean {
-        val t = Js.trim(src)
-        val https = when {
-            t.startsWith("//") -> "https:$t"
-            Js.regionMatchesLower(t, 0, "http://") -> "https://" + t.substring(7)
-            else -> t
+    internal fun isStrictTag(raw: String): Boolean {
+        val n = raw.length
+        if (n < 3 || raw[0] != '<' || !Js.isAsciiAlpha(raw[1])) return false
+        var i = 2
+        fun nameChar(c: Char) = Js.isAsciiAlpha(c) || Js.isDigit(c) || c == ':' || c == '_' || c == '.' || c == '-'
+        while (i < n && nameChar(raw[i])) i++
+        while (true) {
+            val wsStart = i
+            while (i < n && Js.isSpace(raw[i])) i++
+            if (i < n && nameChar(raw[i]) && i > wsStart) {
+                // an attribute: name="value"
+                var p = i
+                while (p < n && nameChar(raw[p])) p++
+                if (p + 1 < n && raw[p] == '=' && raw[p + 1] == '"') {
+                    val close = raw.indexOf('"', p + 2)
+                    if (close < 0) return false
+                    i = close + 1
+                    continue
+                }
+                return false
+            }
+            break
         }
-        return EmbedSrc.isAllowedEmbedSrc(https)
+        if (i < n && raw[i] == '/') i++
+        return i == n - 1 && raw[i] == '>'
     }
 
-    /** The only sandbox tokens render-helper's `iframe()` transform ever grants. */
-    private val TRANSFORM_SANDBOX_TOKENS = setOf("allow-scripts", "allow-same-origin", "allow-popups")
-
-    /**
-     * SECURITY DEVIATION (with [isAllowedIframeSrc]): an iframe `sandbox` survives only when
-     * every token is one the transform itself grants, so an author can never add permissions
-     * such as top navigation or forms. The transform's own values pass unchanged.
-     */
-    private fun isTransformSandbox(value: String): Boolean {
-        val tokens = value.split(' ', '\t', '\n', '\r', '\u000C').filter { it.isNotEmpty() }
-        return tokens.all { it.lowercase() in TRANSFORM_SANDBOX_TOKENS }
+    /** Drops an iframe start tag without a quoted src (and a close tag right after), repeated until stable. */
+    private fun dropBareIframes(html: String): String {
+        var current = html
+        while (true) {
+            val next = replaceTags(current, "iframe", trailingClose = true) { tag ->
+                if (quotedAttrs(tag).any { Js.toLowerCase(it.name) == "src" }) tag else ""
+            }
+            if (next == current) return current
+            current = next
+        }
     }
 
     /** `/^https?:\/\//` on an already lower-cased value. */
     private fun startsWithHttp(v: String) = v.startsWith("http://") || v.startsWith("https://")
 
     private fun startsWithHttpIgnoreCase(v: String) = Js.regionMatchesLower(v, 0, "http://") || Js.regionMatchesLower(v, 0, "https://")
-
-    /** `c.trim().split(/\s+/)[0]`. */
-    private fun firstToken(c: String): String {
-        val t = Js.trim(c)
-        for (i in t.indices) if (Js.isSpace(t[i])) return t.substring(0, i)
-        return t
-    }
-
-    private fun isProxyPSrcset(srcset: String, proxyBase: String): Boolean {
-        var end = proxyBase.length
-        while (end > 0 && proxyBase[end - 1] == '/') end--
-        val prefix = proxyBase.substring(0, end) + "/p/"
-        val candidates = srcset.split(',').map { firstToken(it) }.filter { it.isNotEmpty() }
-        return candidates.isNotEmpty() && candidates.all { it.startsWith(prefix) }
-    }
 
     /** `^[A-Za-z][-A-Za-z0-9_]*$`. */
     private fun isIdWhitelisted(v: String): Boolean {
@@ -295,7 +534,7 @@ object HtmlSanitizer {
      * `html.replace(/<name\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi, fn)`: a start tag of [name] whose
      * quoted spans are consumed whole (a `>` inside quotes does not end it).
      */
-    internal fun replaceTags(html: String, name: String, fn: (String) -> String): String {
+    internal fun replaceTags(html: String, name: String, trailingClose: Boolean = false, fn: (String) -> String): String {
         var i = indexOfIgnoreCase(html, "<$name", 0)
         if (i < 0) return html
         val sb = StringBuilder(html.length)
@@ -323,6 +562,12 @@ object HtmlSanitizer {
             if (end < 0) {
                 i = indexOfIgnoreCase(html, "<$name", i + 1)
                 continue
+            }
+            if (trailingClose) {
+                // `(?:\s*<\/name>)?` after the tag
+                var p = end
+                while (p < html.length && Js.isSpace(html[p])) p++
+                if (Js.regionMatchesLower(html, p, "</$name>")) end = p + name.length + 3
             }
             sb.append(html, last, i)
             sb.append(fn(html.substring(i, end)))
@@ -412,16 +657,31 @@ object RenderText {
      * `decodeEntities`: entities 6 `decodeHTML` (legacy mode) after dropping leading zeros of
      * numeric references and turning overlong ones into U+FFFD. Never throws.
      */
-    fun decodeEntities(value: String): String {
+    fun decodeEntities(value: String): String = decode(value, EntityDecoder.Mode.LEGACY)
+
+    /**
+     * `decodeAttributeEntities` (2.5.45, #2085): an attribute value as a browser decodes it. A legacy named
+     * reference without its `;` stays as written when `=` or an alphanumeric follows (`?x=1&timestamp=5` is not
+     * `×tamp`). Same numeric guard as [decodeEntities].
+     */
+    fun decodeAttributeEntities(value: String): String = decode(value, EntityDecoder.Mode.ATTRIBUTE)
+
+    /** entities `decodeHTMLStrict` of one complete reference, guarded as [decodeEntities] (helper `decodeCompleteReferences`). */
+    fun decodeStrict(value: String): String = decode(value, EntityDecoder.Mode.STRICT)
+
+    private fun decode(value: String, mode: EntityDecoder.Mode): String {
         if (value.indexOf('&') < 0) return value
-        val safe = replaceOverlong(stripLeadingZeros(value))
+        val safe = guardNumericRefs(value)
         return try {
-            EntityDecoder.decode(safe, EntityDecoder.V6)
+            EntityDecoder.decode(safe, EntityDecoder.V6, mode)
         } catch (e: IllegalArgumentException) {
             // not reported: untrusted entity text
             safe
         }
     }
+
+    /** helper `guardNumericRefs`: leading zeros of numeric references dropped, overlong ones to U+FFFD. */
+    fun guardNumericRefs(value: String): String = replaceOverlong(stripLeadingZeros(value))
 
     /** `/&#0+(?=[0-9])/g` to `&#`, then `/&#x0+(?=[0-9a-f])/gi` to the first three chars. */
     private fun stripLeadingZeros(s: String): String {

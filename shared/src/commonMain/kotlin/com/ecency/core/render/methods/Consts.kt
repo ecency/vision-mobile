@@ -16,7 +16,7 @@ internal object Consts {
 
     val SECTION_LIST = listOf(
         "wallet", "feed", "followers", "following", "points", "communities", "posts", "blog", "comments", "replies",
-        "settings", "engine", "permissions", "referrals", "payout", "activities", "spk", "trail",
+        "settings", "engine", "permissions", "referrals", "payout", "activities", "spk", "trail", "insights", "notifications",
     )
 
     private fun i(src: String) = JsRegex.compile(src, ignoreCase = true)
@@ -78,5 +78,6 @@ internal object Consts {
     val PROPOSAL_IDS by lazy { cs("""proposal_ids=\[(\d+)]""") }
     val SHORTS_ID by lazy { i("""\/shorts\/([A-Za-z0-9_-]{11})\/?(?=[?#]|$)""") }
     val SOUNDCLOUD_URL by lazy { cs("""url=(.+?)(?:&|$)""") }
-    val EXTERNAL_SCHEME by lazy { i("""^((#)|(mailto:)|(\/(?!\/))|(((steem|hive|esteem|ecency|https?):)?\/\/))""") }
+    // 2.5.47 (#2107): tel: and web+ links kept as written, not `https://tel:...`
+    val EXTERNAL_SCHEME by lazy { i("""^((#)|(mailto:)|(tel:)|(web\+[a-z0-9.+-]+:)|(\/(?!\/))|(((steem|hive|esteem|ecency|https?):)?\/\/))""") }
 }

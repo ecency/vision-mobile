@@ -39,8 +39,9 @@ function cleanup(output) {
     .replace(/ xmlns="http:\/\/www.w3.org\/1999\/xhtml"/g, '')
     .replace(/^<\?xml[^?]*\?>/, '')
     .replace(/^<!DOCTYPE[^>]*>/i, '')
-    .replace(/<\/?html[^>]*>/g, '')
-    .replace(/<head[^>]*>[\s\S]*?<\/head>/g, '')
+    // render-helper 2.5.45 stripDocumentWrapper: exact tag names (`<header>`, `<htmlx>` are author content)
+    .replace(/<\/?html(?=[\s/>])[^>]*>/g, '')
+    .replace(/<head(?=[\s/>])[^>]*>[\s\S]*?<\/head>/g, '')
     .replace('<body id="root">', '')
     .replace('</body>', '')
     .trim()
@@ -57,7 +58,8 @@ function step(html, opts) {
     path = 'xmldom'
   } catch {
     try {
-      const pre = rh.__sanitizeHtml(html, opts)
+      // the pre-sanitize of markdownToHTML's repair path (beforeTransform: iframes are left to iframe())
+      const pre = rh.__sanitizeHtml(html, { ...opts, beforeTransform: true })
       const dom = htmlparser2.parseDocument(pre, { lowerCaseTags: false, lowerCaseAttributeNames: false })
       repaired = domSerializer(dom.children)
       doc = rh.__DOMParser.parseFromString(wrap(repaired), 'text/html')

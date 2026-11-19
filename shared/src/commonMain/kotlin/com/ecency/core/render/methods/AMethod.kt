@@ -1,6 +1,7 @@
 package com.ecency.core.render.methods
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.url.WebUrl
 import com.ecency.core.render.js.UriError
 import com.ecency.core.render.SeoContext
 import com.ecency.core.render.dom.Element
@@ -140,12 +141,11 @@ internal object AMethod {
             return
         }
 
+        // 2.5.45: whole chip class tokens only, and only on the in-site hrefs chips carry; an author rel never survives
         val className = el.getAttribute("class")
-        if (!className.isNullOrEmpty() && (
-                className == "markdown-author-link" || className == "markdown-tag-link" ||
-                    className.contains("er-author") || className.contains("er-tag")
-                )
-        ) {
+        val isChip = splitWs(className.orEmpty()).any { it in CHIP_CLASS_TOKENS }
+        if (isChip && isInSiteHref(href)) {
+            el.removeAttribute("rel")
             if (!el.getAttribute("target").isNullOrEmpty()) el.setAttribute("rel", externalLinkRel(ctx.seo))
             return
         }
@@ -153,6 +153,8 @@ internal object AMethod {
         val doc = el.ownerDocument!!
 
         if (Scanners.imgTest(href) &&
+            // not `.ico` in `.icons/readme` nor `.jpg` in `photo.jpg.html` (2.5.46)
+            Helper.imageUrlEnd(href) != -1 &&
             Js.trim(href).replace("&amp;", "&") == Js.trim(DomUtil.serializedInnerHTML(el)).replace("&amp;", "&")
         ) {
             val imgHTML = ImgMethod.createImageHTML(href, false, ctx)
@@ -221,7 +223,8 @@ internal object AMethod {
         if (tpostMatch != null) {
             val g1 = tpostMatch.g(1)!!
             if (g1.indexOf('/') == 0) {
-                isValidDomain = true
+                // 2.5.45: not `//host/...` nor `/\host/...`; an app placeholder in the path is not judged in-site
+                isValidDomain = !pathPart(href).contains('\u200B') && isInSiteHref(href)
             } else if (g1.contains('.')) {
                 isValidDomain = stripWww(stripProtocol(g1)) in Consts.WHITE_LIST
             }
@@ -625,6 +628,9 @@ internal object AMethod {
         el.setAttribute("class", "markdown-external-link")
         if (!Consts.EXTERNAL_SCHEME.containsMatchIn(href)) href = "https://$href"
         if (forApp) {
+            // the app opens external links itself from data-href: no author rel or target
+            el.removeAttribute("rel")
+            el.removeAttribute("target")
             el.setAttribute("data-href", href)
             val m = Scanners.youtubeFind(href)
             if (m != null && m.id.isNotEmpty()) {
@@ -636,12 +642,77 @@ internal object AMethod {
         } else {
             if (Js.trim(href).startsWith("#")) {
                 el.setAttribute("class", "markdown-internal-link")
+                el.removeAttribute("rel")
+                el.removeAttribute("target")
             } else {
                 el.setAttribute("target", "_blank")
                 el.setAttribute("rel", externalLinkRel(ctx.seo))
             }
             el.setAttribute("href", href)
         }
+    }
+
+    private val CHIP_CLASS_TOKENS = setOf("markdown-author-link", "markdown-tag-link", "er-author", "er-author-link", "er-tag", "er-tag-link")
+
+    /** `split(/\s+/)`. */
+    private fun splitWs(s: String): List<String> {
+        val out = ArrayList<String>()
+        val sb = StringBuilder()
+        var i = 0
+        while (i < s.length) {
+            if (Js.isSpace(s[i])) {
+                out.add(sb.toString())
+                sb.setLength(0)
+                while (i < s.length && Js.isSpace(s[i])) i++
+            } else {
+                sb.append(s[i++])
+            }
+        }
+        out.add(sb.toString())
+        return out
+    }
+
+    /** `href.split(/[?#]/, 1)[0]` */
+    private fun pathPart(href: String): String {
+        var i = 0
+        while (i < href.length && href[i] != '?' && href[i] != '#') i++
+        return href.substring(0, i)
+    }
+
+    private fun isSlash(c: Char?) = c == '/' || c == '\\'
+
+    /**
+     * 2.5.45 `isInSiteHref`: `new URL(href.trim(), 'https://ecency.com/')` lands on one of the site's own hosts. A
+     * relative path is in-site; `//host` and `/\host` (a browser reads `\` as `/`, drops tab, LF and CR) are not.
+     */
+    private fun isInSiteHref(href: String): Boolean {
+        var s = Js.trim(href)
+        var a = 0
+        var b = s.length
+        while (a < b && s[a].code <= 0x20) a++
+        while (b > a && s[b - 1].code <= 0x20) b--
+        s = s.substring(a, b).filter { it != '\t' && it != '\n' && it != '\r' }
+        var p = 0
+        if (s.isNotEmpty() && Js.isAsciiAlpha(s[0])) {
+            p = 1
+            while (p < s.length && (Js.isAsciiAlpha(s[p]) || Js.isDigit(s[p]) || s[p] == '+' || s[p] == '-' || s[p] == '.')) p++
+        }
+        val hasScheme = p > 0 && p < s.length && s[p] == ':'
+        val host: String = when {
+            hasScheme && Js.toLowerCase(s.substring(0, p)) == "https" -> {
+                // same special scheme as the base: an authority only after two slashes
+                val rest = s.substring(p + 1)
+                when {
+                    rest.startsWith("//") -> WebUrl.parse(s)?.hostname
+                    isSlash(rest.getOrNull(0)) && isSlash(rest.getOrNull(1)) -> WebUrl.parse("https://" + rest.substring(2))?.hostname
+                    else -> "ecency.com"
+                }
+            }
+            hasScheme -> WebUrl.parse(s)?.hostname
+            isSlash(s.getOrNull(0)) && isSlash(s.getOrNull(1)) -> WebUrl.parse("https://" + s.substring(2))?.hostname
+            else -> "ecency.com"
+        } ?: return false
+        return (if (host.startsWith("www.")) host.substring(4) else host) in Consts.WHITE_LIST
     }
 
     /** `.replace(/^https?:\/\//, '')` */
