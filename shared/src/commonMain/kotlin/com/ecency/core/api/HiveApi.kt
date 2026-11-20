@@ -169,8 +169,7 @@ class HiveApi(val client: HiveRpcClient) {
                 if (post != null && post.author == author && post.permlink == permlink) return post
                 answered = true
             } catch (e: RpcErrorException) {
-                // a broken node's error can read "not found" too ("Method not found", a missing table)
-                if (!HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage) && isNotFound(e)) answered = true else failures += e
+                if (isNotFound(e)) answered = true else failures += e
             } catch (e: HiveApiException) {
                 failures += e
             }
@@ -410,8 +409,10 @@ class HiveApi(val client: HiveRpcClient) {
         /** The most other nodes [postVerified] asks after a "not found". */
         const val VERIFY_NODES = 3
 
+        /** The chain's "no such thing"; a broken node's error that reads the same ("Method not found", a missing table) is not. */
         internal fun isNotFound(e: RpcErrorException): Boolean =
-            Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
+            !HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage) &&
+                Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
     }
 }
 

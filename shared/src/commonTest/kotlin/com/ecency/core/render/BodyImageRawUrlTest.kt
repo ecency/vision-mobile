@@ -38,6 +38,7 @@ class BodyImageRawUrlTest {
         "<div>\nhttps://example.com/a.jpg?x=1&lT;b\n</div>" to "https://example.com/a.jpg?x=1",
         "<div>\nhttps://example.com/a.jpg?x=1&#38;gT;b\n</div>" to "https://example.com/a.jpg?x=1",
         "https://example.com/a.jpg?x=1&amp;y=2&GT;z" to "https://example.com/a.jpg?x=1&y=2",
+        // render-helper 2.5.52 answers null here too (checked with node), not the image after the code span
         "`https://code.example/a.jpg` then https://example.com/b.png?x=1:" to null,
     )
 

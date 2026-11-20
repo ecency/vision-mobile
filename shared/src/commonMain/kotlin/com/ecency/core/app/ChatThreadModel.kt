@@ -295,6 +295,10 @@ class ChatThreadModel internal constructor(
 
     /** A posts page has said what the viewer may do ([applyRights]): until then no "for moderators" notice. */
     private var rightsKnown = false
+
+    /** Posts reads in the order they were sent, and the latest whose rights stand: an older read landing late never overrides a newer one. */
+    private var rightsAsked = 0
+    private var rightsHeld = 0
     private val repliedHere = mutableSetOf<String>()
     private val typingUntil = mutableMapOf<String, Long>()
     private var lastTypingSent = 0L
@@ -450,8 +454,10 @@ class ChatThreadModel internal constructor(
      * fields). A flag the answer leaves out keeps what the thread had; `canMentionEveryone` left out follows
      * `canModerate` when that is there (an older server), as web does.
      */
-    private fun applyRights(page: ChatPostsPage) {
+    private fun applyRights(page: ChatPostsPage, asked: Int) {
         if (page.canModerate == null && page.canMentionEveryone == null) return
+        if (asked < rightsHeld) return
+        rightsHeld = asked
         rightsKnown = true
         setState {
             it.copy(
@@ -545,6 +551,7 @@ class ChatThreadModel internal constructor(
         val before = missedFrom
         scope.launch {
             try {
+                val asked = ++rightsAsked
                 val page = env.chat.call(u) { env.chat.api.posts(it.token, channelId, null, current.viewerId) }
                 if (user == null) return@launch
                 if (gen != refreshGen) {
@@ -561,8 +568,8 @@ class ChatThreadModel internal constructor(
                     return@launch
                 }
                 page.users.forEach { lookup[it.id] = it }
-                // a moderator given or taken while away
-                applyRights(page)
+                // a moderator given or taken while away (unless a newer page has spoken since)
+                applyRights(page, asked)
                 val now = posts.associateBy { it.id }
                 val read = page.posts.filter { it.id !in deletedIds }.map { p -> withLiveChanges(p, now[p.id]) }
                 val fresh = read.map { it.id }.toSet()
@@ -620,6 +627,7 @@ class ChatThreadModel internal constructor(
                 // the viewer decides which messages are own (Edit, Remove): a first session read in start() that failed
                 // must not leave it unknown for as long as the screen lives
                 val viewer = current.viewerId ?: env.chat.call(u) { it.userId }?.also { id -> setState { it.copy(viewerId = id) } }
+                val asked = ++rightsAsked
                 val page = try {
                     env.chat.call(u) { env.chat.api.posts(it.token, channelId, from, viewer) }
                 } catch (e: ChatApiException) {
@@ -632,7 +640,7 @@ class ChatThreadModel internal constructor(
                 page.users.forEach { lookup[it.id] = it }
                 page.memberCount?.let { c -> setState { it.copy(memberCount = c) } }
                 page.onlineUserIds?.let { onlineIds = it }
-                applyRights(page)
+                applyRights(page, asked)
                 // the read time the posts page carries, when neither the list nor the members gave one
                 if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }

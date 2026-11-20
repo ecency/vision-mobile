@@ -1796,6 +1796,42 @@ class ChatThreadTest {
         }
     }
 
+    /** Review of #3714: a catch-up read that lands after a newer page has the older rights: they do not come back. */
+    @Test
+    fun anOlderCatchUpDoesNotRestoreRightsANewerPageTookAway() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.chat.seedHistory("ch-ecency", read = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue(m.current.canModerate && m.current.hasMore)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            // taken away while the catch-up read is out; an older page read now says so
+            f.chat.moderates.clear()
+            m.loadMore()
+            f.run(1)
+            f.run(1)
+            assertFalse(m.current.canModerate, "the newer page")
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), "the catch-up's messages still land")
+            assertFalse(m.current.canModerate, "the older catch-up read gave the rights back")
+            assertFalse(m.current.canMentionEveryone)
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
     /** Review of #3714: a restored thread learns it is an open channel after its rights; a query typed is offered then. */
     @Test
     fun aRestoredThreadOffersTheMentionsOnceItsTypeIsKnown() = runTest {

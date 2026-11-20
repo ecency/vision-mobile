@@ -71,21 +71,25 @@ object BlockBuilder {
     }
 
     /**
-     * Every `data-id` in the document, as written: a same-page link to one of them is kept as written ([fragmentOnly]),
-     * any other `#user-content-x` link was namespaced by the sanitizer. Iterative, as deep markup is walked without
-     * recursion.
+     * Every `data-id` in the document as written, less those whose name is also a namespaced `id` the sanitizer kept: a
+     * same-page link to one of them is kept as written ([fragmentOnly]). Any other `#user-content-x` link was
+     * namespaced by the sanitizer; when an author `id="x"` and a `data-id="user-content-x"` both exist the two link
+     * spellings are the same after sanitizing, and the author's own `#x` (the common case) wins. Iterative, as deep
+     * markup is walked without recursion.
      */
     private fun dataIds(root: Element): Set<String> {
         val out = HashSet<String>()
+        val namespaced = HashSet<String>()
         val stack = ArrayList<Node>()
         stack += root
         while (stack.isNotEmpty()) {
             val n = stack.removeAt(stack.size - 1)
             if (n !is Element) continue
             n.getAttribute("data-id")?.trim()?.takeIf { it.isNotEmpty() }?.let { out += it }
+            n.getAttribute("id")?.trim()?.let { if (it.startsWith(AuthorAttributes.AUTHOR_ID_PREFIX)) namespaced += it }
             for (k in n.childNodes.indices.reversed()) stack += n.childNodes[k]
         }
-        return out
+        return out - namespaced
     }
 
     private fun parse(html: String): Document = try {

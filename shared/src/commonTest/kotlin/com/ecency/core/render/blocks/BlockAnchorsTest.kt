@@ -164,12 +164,19 @@ class BlockAnchorsTest {
         assertIs<Block.Heading>(bold[assertNotNull(at, "the heading of that name")])
     }
 
-    /** Review of #3714: a `data-id` written as `user-content-x` wins over a heading whose id the sanitizer namespaced to it. */
+    /**
+     * Review of #3714: with a heading `id="sec"` and a `data-id="user-content-sec"`, the sanitizer makes `#sec` and
+     * `#user-content-sec` the same link; it goes to the author's heading, the common case.
+     */
     @Test
-    fun aDataIdOfTheNamespacedNameWinsOverTheHeading() {
-        val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"sec\">Heading</h2>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go](#user-content-sec)", forApp = true))
-        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
-        val at = BlockAnchors.jump(built, target, here)
-        assertIs<Block.Anchor>(built[at!!])
+    fun aLinkToANamespacedNameGoesToTheHeadingWhenADataIdSharesIt() {
+        for (link in listOf("#sec", "#user-content-sec")) {
+            val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"sec\">Heading</h2>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go]($link)", forApp = true))
+            val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+            val at = assertNotNull(BlockAnchors.jump(built, target, here), link)
+            val index = BlockAnchors.index(built)
+            assertEquals(index["sec"], at, "$link: $index")
+            assertTrue(at < index.getValue("user-content-sec"), "$link: the heading's place, before the data-id")
+        }
     }
 }

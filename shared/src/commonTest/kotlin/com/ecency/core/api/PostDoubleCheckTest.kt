@@ -175,4 +175,11 @@ class PostDoubleCheckTest {
             assertEquals("Local copy", repo.getPostVerified("spike-author", "spike-post", "spike-me")?.title, "$order")
         }
     }
+
+    /** Review of #3714: a broken first node's "Method not found" is a failed read, also with no other node to ask. */
+    @Test
+    fun aBrokenFirstNodesNotFoundTextIsNoAnswer() = runTest {
+        assertFails { api(nodes(mapOf(a to "no-bridge")), listOf(a)).postVerified("spike-author", "spike-post", "spike-me") }
+        assertFails { api(nodes(mapOf(a to "no-bridge")), listOf(a)).post("spike-author", "spike-post", "spike-me") }
+    }
 }
