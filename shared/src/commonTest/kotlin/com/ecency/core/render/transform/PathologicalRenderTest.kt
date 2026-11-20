@@ -81,10 +81,33 @@ class PathologicalRenderTest {
         }
         // collectDeclaredIds: many author ids and links to them
         assertLinear("declared ids", { n -> (1..n).joinToString("") { "<a id=\"i$it\" href=\"#i$it\">x</a> " } }, 1_000)
-        // CodeRanges: fences inside nested quote and list containers
+        // fences inside nested quote and list containers (code entities come back from the code tokens since 2.5.53)
         assertLinear("nested fences", { n -> "> - ```\ncode &amp; x\n```\n".repeat(n) }, 1_000)
         // EntityProtection: URL runs with parentheses and entities
         assertLinear("entity url runs", { n -> "https://x.example/(a&amp;b ".repeat(n) }, 2_000)
+    }
+
+    /** The 2.5.53 and 2.5.54 port's new scanners (#2154, #2155): each guarded against going quadratic on author input. */
+    @Test
+    fun the2554ScannersStayLinear() {
+        val untransformed = com.ecency.core.render.sanitize.SanitizeOptions(proxyBase = RenderCases.PROXY_BASE, untransformed = true)
+        fun sanitize(html: String) = com.ecency.core.render.sanitize.HtmlSanitizer.sanitize(html, untransformed)
+        // dropRefusedIframes: refused iframes with fallback text, unclosed ones, nested kept pairs
+        LinearScaling.assertLinear("refused iframes", 1_000, { n -> "<iframe src=\"https://evil.example.com/x\">fb</iframe>".repeat(n) }) { sanitize(it) }
+        LinearScaling.assertLinear("unclosed refused iframes", 1_000, { n -> "<iframe src=\"https://evil.example.com/x\">a <b>b</b> ".repeat(n) + "</iframe>" }) { sanitize(it) }
+        LinearScaling.assertLinear("nested kept iframes", 1_000, { n ->
+            "<iframe src=\"https://www.youtube.com/embed/abcdefghijk\">".repeat(n) + "</iframe>x<iframe src=\"https://evil.example.com/x\">y".repeat(n)
+        }) { sanitize(it) }
+        // angle destinations and angle reference definitions, read back from the source
+        assertLinear("angle links", { n -> "[x](<https://e.example/a b?q=&amp;amp;>) ".repeat(n) }, 1_000)
+        // one definition per paragraph: Remarkable re-slices a paragraph's rest after each of its definitions
+        // (quadratic in JS too), which is not the angle rule's cost
+        assertLinear("angle definitions", { n -> (1..n).joinToString("") { "[r$it]: <https://e.example/a b?q=&amp;amp;>\n\n" } + "[x][r1]" }, 1_000)
+        // placeholderDelimiter's two-character fallback: every single delimiter taken, many entities
+        val taken = "\u200B\u2060\u2061\u2062\u2063\u2064" + (0xE100..0xF8FF).map { it.toChar() }.joinToString("")
+        assertLinear("pair delimiter", { n -> taken + "\n\n" + "x &copy; y\t&amp;\tz ".repeat(n) }, 2_000)
+        // expandTabsLikeRemarkable: tabs after entities on many lines
+        assertLinear("tabs after entities", { n -> "a&lt;\tb\t&amp;\tc\n".repeat(n) }, 2_000)
     }
 
     @Test

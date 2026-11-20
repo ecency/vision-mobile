@@ -20,7 +20,7 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules in the 2.5.52 port
+## Custom rules in the 2.5.54 port
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.
@@ -44,12 +44,15 @@ Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port 
 | (2.5.45) Embed allow list on every path, a path shape for every host, `canonicalEmbedSrc`, author sandbox reduced to the granted tokens, `<video poster>` through the proxy, images held to the proxy on the full render | `sanitize/EmbedSrc`, `IframeMethod`, `VideoMethod`, `sanitize/SanitizeHtml` |
 | (2.5.45, #1920) Adjacent tag and mention runs linked in one pass; traverse depth cap 2,000 (deeper subtrees flattened to text); linear attribute pre-pass | `Linkify`, `Traverse`, `HtmlStringFixes` |
 | (2.5.45, #2085) Raw-HTML attribute values decoded as a browser decodes them (`&times=` kept) | `HtmlStringFixes.removeDuplicateAttributes` |
-| (2.5.45, #2092, #2093) App render: entity placeholders never inside URLs or code | `EntityProtection`, `CodeRanges` (`MarkdownToHtml.kt`) |
+| (2.5.45, #2092, #2093; 2.5.53, #2154) App render: entity placeholders never inside URLs; their delimiter a character the body does not hold, tabs expanded first, code given its entities back from the parser's code tokens | `EntityProtection` (`MarkdownToHtml.kt`), `Markdown.restoreCodeEntities` |
 | (2.5.46, #2092, #2094) Markdown destinations decoded exactly once, escaped `\&` literal in links; bare image URLs end where `imageUrlEnd` says (query and suffix kept, `.icons`/`photo.jpg.html` not images, text after them stays) | `markdown/AmpPairing`, `Helper.imageUrlEnd`, `Linkify`, `AMethod`, `CatchPostImage` |
 | (2.5.46) `insights` and `notifications` profile sections | `Consts.SECTION_LIST` |
 | (2.5.46, #2095) A refused iframe's placeholder is not linkified | `Traverse` |
 | (2.5.47, #2099, #2107) `tel:` and `web+` links kept as written; an href keeps only the schemes `a()` writes | `Consts.EXTERNAL_SCHEME`, `sanitize/SanitizeHtml` |
 | (2.5.50) Chip classes only as whole tokens on in-site hrefs, author `rel`/`target` dropped, exact `html`/`head` wrapper strip | `AMethod`, `RenderBodyParser` |
+| (2.5.53, #2154) Angle-bracket destinations (`[x](<url>)`, `[r]: <url>`) decoded once, as the plain form | `InlineRules.undecodedAngleDestination`, `CoreRules` |
+| (2.5.53, #2155) A refused iframe on the sanitize-only path dropped with its fallback text and close; a bare image URL with a query drops an unbalanced trailing `)`; Dapplr frames any label chain and the allow list requires the same | `sanitize/SanitizeHtml`, `Helper.imageUrlEnd`, `Consts.DAPPLR_REGEX`, `sanitize/EmbedSrc` |
+| (2.5.54, #2165) The in-site path guard rejects a zero-width space and only the delimiter this render chose | `AMethod`, `RenderContext.placeholderDelimiter` |
 
 RN app rules outside render-helper (`src/components/postHtmlRenderer`): `<center>` to `text-center`
 and span flattening are in `BlockBuilder`; the waves image grid is `BuildOptions.waves`; the waves

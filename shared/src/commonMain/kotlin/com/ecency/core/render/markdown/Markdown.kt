@@ -47,7 +47,15 @@ object Markdown {
      * render-helper 2.5.46 full render: [ampEscapes] pairs escaped `&` in links ([AmpPairing]); destinations are
      * decoded once before linkify. Fenced code is escaped (the highlighter is not loaded, as in the goldens).
      */
-    fun render(src: String, ampEscapes: Boolean): String = renderFull(src, linkify = true, rawFences = false, full = true, ampEscapes = ampEscapes)
+    fun render(src: String, ampEscapes: Boolean): String = render(src, ampEscapes, { it }, null)
+
+    /**
+     * The full render with render-helper 2.5.53's rules (#2154): angle destinations kept undecoded ([Env.angleUnswap],
+     * [unswap] puts the app render's placeholders back), and, when [codeUnswap] is given, code and fence tokens get
+     * their entities back before linkify (`restore_code_entities`), exactly in the code the parser found.
+     */
+    fun render(src: String, ampEscapes: Boolean, unswap: (String) -> String, codeUnswap: ((String) -> String)?): String =
+        renderFull(src, linkify = true, rawFences = false, full = true, ampEscapes = ampEscapes, unswap = unswap, codeUnswap = codeUnswap)
 
     /**
      * The same rule set without linkify and with remarkable's default highlight (escaped fences):
@@ -55,9 +63,18 @@ object Markdown {
      */
     fun renderSummary(src: String): String = renderFull(src, linkify = false, rawFences = false)
 
-    private fun renderFull(src: String, linkify: Boolean, rawFences: Boolean, full: Boolean = false, ampEscapes: Boolean = false): String {
+    private fun renderFull(
+        src: String,
+        linkify: Boolean,
+        rawFences: Boolean,
+        full: Boolean = false,
+        ampEscapes: Boolean = false,
+        unswap: ((String) -> String)? = null,
+        codeUnswap: ((String) -> String)? = null,
+    ): String {
         val env = Env()
         env.ampEscapes = ampEscapes
+        env.angleUnswap = unswap
         var tokens: MutableList<Token> = ArrayList()
         // core rules: block, abbr, references, inline, footnote_tail, abbr2, (replacements and
         // smartquotes are no-ops without typographer), linkify
@@ -68,8 +85,22 @@ object Markdown {
         tokens = CoreRules.footnoteTail(tokens, env)
         CoreRules.abbr2(tokens, env)
         if (full) AmpPairing.decodeDestinations(tokens, env)
+        if (codeUnswap != null) restoreCodeEntities(tokens, codeUnswap)
         if (linkify) Linkify.parseTokens(tokens)
         val html = Renderer.render(tokens, rawFences)
         return if (ampEscapes) AmpPairing.sourceAmp(html) else html
+    }
+
+    /** render-helper 2.5.53 `restoreCodeEntities` (#2093, #2154): code renders its text verbatim, entities as written. */
+    private fun restoreCodeEntities(tokens: List<Token>, unswap: (String) -> String) {
+        fun restore(token: Token) {
+            if (token.type != "code" && token.type != "fence") return
+            if (token.content.isNotEmpty()) token.content = unswap(token.content)
+            if (token.params.isNotEmpty()) token.params = unswap(token.params)
+        }
+        for (token in tokens) {
+            restore(token)
+            if (token.type == "inline") token.children.forEach(::restore)
+        }
     }
 }

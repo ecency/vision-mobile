@@ -69,8 +69,14 @@ internal object CoreRules {
             if (code != 0x20 && code != 0x0A) break
             pos++
         }
+        val destinationAt = pos
         if (!InlineRules.parseLinkDestination(state, pos)) return -1
-        val href = state.linkContent
+        var href = state.linkContent
+        // 2.5.53 withAngleReferences (#2154): the definition that wins its label keeps its angle destination undecoded
+        val unswap = env.angleUnswap
+        if (unswap != null && Js.cc(str, destinationAt) == 0x3C) {
+            href = InlineRules.undecodedAngleDestination(href, Js.slice(str, destinationAt + 1, state.pos - 1), unswap) ?: href
+        }
         pos = state.pos
         val start = pos
         pos++

@@ -38,7 +38,8 @@ internal object Consts {
     val D_TUBE_REGEX2 by lazy { cs("""(https?:\/\/d\.tube\/v\/)(\w+)\/(\w+)""") }
     val D_TUBE_EMBED_REGEX by lazy { i("""^https:\/\/emb\.d\.tube\/#!\/[^/?#]+\/[^/?#]+(?:$|[?#])""") }
     val TWITCH_REGEX by lazy { i("""https?:\/\/(?:www\.)?twitch\.tv\/(?:(videos)\/)?([a-zA-Z0-9][\w]{3,24})""") }
-    val DAPPLR_REGEX by lazy { i("""^(https?:)?\/\/[a-z]*\.dapplr\.in\/file\/dapplr-videos\/.*""") }
+    // 2.5.53 (#2155): any `<label>.` chain before dapplr.in, as the embed allow list accepts it, never an empty label
+    val DAPPLR_REGEX by lazy { i("""^(https?:)?\/\/(?:[a-z\d-]+\.)+dapplr\.in\/file\/dapplr-videos\/.*""") }
     val TRUVVL_REGEX by lazy { i("""^https?:\/\/embed\.truvvl\.com\/(@[\w.\d-]+)\/(.*)""") }
     val LBRY_REGEX by lazy { i("""^(https?:)?\/\/lbry\.tv\/\$\/embed\/[^?#]+(?:$|[?#])""") }
     val ODYSEE_REGEX by lazy { i("""^(https?:)?\/\/odysee\.com\/(?:\$|%24)\/embed\/[^?#]+(?:$|[?#])""") }

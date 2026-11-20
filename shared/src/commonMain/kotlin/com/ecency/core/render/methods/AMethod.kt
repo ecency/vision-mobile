@@ -223,8 +223,12 @@ internal object AMethod {
         if (tpostMatch != null) {
             val g1 = tpostMatch.g(1)!!
             if (g1.indexOf('/') == 0) {
-                // 2.5.45: not `//host/...` nor `/\host/...`; an app placeholder in the path is not judged in-site
-                isValidDomain = !pathPart(href).contains('\u200B') && isInSiteHref(href)
+                // 2.5.45: not `//host/...` nor `/\host/...`; an app placeholder in the path is not judged in-site.
+                // 2.5.54 (#2165): a zero-width space as always, beyond it only the delimiter this render chose.
+                val path = pathPart(href)
+                val delimiter = ctx.placeholderDelimiter
+                val placeholder = path.contains('\u200B') || (delimiter != null && path.contains(delimiter))
+                isValidDomain = !placeholder && isInSiteHref(href)
             } else if (g1.contains('.')) {
                 isValidDomain = stripWww(stripProtocol(g1)) in Consts.WHITE_LIST
             }

@@ -184,44 +184,46 @@ internal class BlockParser(full: Boolean = true, chat: Boolean = false) {
         tokenize(state, state.line, state.lineMax)
     }
 
-    /** ` ` to space, then NEWLINES_RE (`\r[\n\u0085]|[␤ \u0085]`) to `\n`. */
-    private fun normalize(s: String): String {
-        val sb = StringBuilder(s.length)
-        var i = 0
-        while (i < s.length) {
-            val c = s[i]
-            when {
-                c == ' ' -> sb.append(' ')
-                c == '\r' && i + 1 < s.length && (s[i + 1] == '\n' || s[i + 1] == '\u0085') -> {
-                    sb.append('\n')
-                    i++
+    companion object {
+        /** ` ` to space, then NEWLINES_RE (`\r[\n\u0085]|[␤ \u0085]`) to `\n`. */
+        internal fun normalize(s: String): String {
+            val sb = StringBuilder(s.length)
+            var i = 0
+            while (i < s.length) {
+                val c = s[i]
+                when {
+                    c == ' ' -> sb.append(' ')
+                    c == '\r' && i + 1 < s.length && (s[i + 1] == '\n' || s[i + 1] == '\u0085') -> {
+                        sb.append('\n')
+                        i++
+                    }
+                    c == '␤' || c == ' ' || c == '\u0085' -> sb.append('\n')
+                    else -> sb.append(c)
                 }
-                c == '␤' || c == ' ' || c == '\u0085' -> sb.append('\n')
-                else -> sb.append(c)
+                i++
             }
-            i++
+            return sb.toString()
         }
-        return sb.toString()
-    }
 
-    /** remarkable's tab expansion (TABS_SCAN_RE replacer), quirks included. */
-    private fun expandTabs(str: String): String {
-        val sb = StringBuilder(str.length + 16)
-        var lineStart = 0
-        var lastTabPos = 0
-        for (offset in str.indices) {
-            val c = str[offset]
-            if (c == '\n') {
-                lineStart = offset + 1
-                lastTabPos = 0
-                sb.append(c)
-            } else if (c == '\t') {
-                sb.append("    ".substring((offset - lineStart - lastTabPos) % 4))
-                lastTabPos = offset - lineStart + 1
-            } else {
-                sb.append(c)
+        /** remarkable's tab expansion (TABS_SCAN_RE replacer), quirks included. */
+        private fun expandTabs(str: String): String {
+            val sb = StringBuilder(str.length + 16)
+            var lineStart = 0
+            var lastTabPos = 0
+            for (offset in str.indices) {
+                val c = str[offset]
+                if (c == '\n') {
+                    lineStart = offset + 1
+                    lastTabPos = 0
+                    sb.append(c)
+                } else if (c == '\t') {
+                    sb.append("    ".substring((offset - lineStart - lastTabPos) % 4))
+                    lastTabPos = offset - lineStart + 1
+                } else {
+                    sb.append(c)
+                }
             }
+            return sb.toString()
         }
-        return sb.toString()
     }
 }

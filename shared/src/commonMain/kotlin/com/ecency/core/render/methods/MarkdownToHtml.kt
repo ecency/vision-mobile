@@ -6,41 +6,55 @@ import com.ecency.core.render.dom.RenderBodyParser
 import com.ecency.core.render.dom.XmlDomParser
 import com.ecency.core.render.dom.XmlSerializer
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.markdown.BlockParser
 import com.ecency.core.render.markdown.Markdown
 import com.ecency.core.render.sanitize.HtmlSanitizer
 
-/** render-helper `methods/markdown-to-html.method.ts` (2.5.52). */
+/** render-helper `methods/markdown-to-html.method.ts` (2.5.54). */
 internal object MarkdownToHtml {
     private val LEO_PREFIXES = listOf(
         "https://leofinance.io/threads/view/", "https://leofinance.io/posts/", "https://leofinance.io/threads/",
         "https://inleo.io/threads/view/", "https://inleo.io/posts/", "https://inleo.io/threads/",
     )
 
-    fun markdownToHTML(source: String, ctx: RenderContext): String {
+    fun markdownToHTML(source: String, context: RenderContext): String {
         var input = source
         for (prefix in LEO_PREFIXES) input = Js.replaceAll(input, prefix, "/@")
         if (input.isEmpty()) return ""
 
         val ampEscapes = input.contains("\\&") && !Helper.hasAmpSentinel(input)
 
-        // App render: entities become zero-width-space placeholders, outside URLs and code (2.5.45, #2092, #2093).
+        // App render: entities become placeholders (delimiter, index, delimiter) outside URLs (2.5.45, #2092); code
+        // gets them back from the parser's own code tokens (2.5.53, #2154). The delimiter is a character the body
+        // does not hold, so author text never reads as a placeholder.
         val entityPlaceholders = ArrayList<String>()
-        if (ctx.forApp) {
+        var delimiter: String? = null
+        if (context.forApp) {
             val entities = Scanners.entityMatches(input)
             if (entities.isNotEmpty()) {
+                val chosen = EntityProtection.placeholderDelimiter(input)
+                delimiter = chosen
+                // The parser expands tabs to four-column stops; a placeholder is shorter than its entity, so a tab
+                // after one would land on another stop: expand them first, exactly as the parser would.
+                input = EntityProtection.expandTabsLikeRemarkable(input)
                 val indexOf = HashMap<String, Int>()
                 for (e in entities) if (e !in indexOf) {
                     indexOf[e] = entityPlaceholders.size
                     entityPlaceholders.add(e)
                 }
-                input = EntityProtection.protectInput(input, indexOf)
+                input = EntityProtection.protectInput(input, indexOf, chosen)
             }
         }
+        val unswap: (String) -> String = { text -> if (delimiter == null) text else EntityProtection.restore(text, entityPlaceholders, delimiter) }
+        val codeUnswap = if (delimiter != null) unswap else null
+        // a's in-site path guard reads which delimiter this render chose (2.5.54, #2165)
+        val ctx = context.withPlaceholderDelimiter(delimiter)
+        fun renderMarkdown() = Markdown.render(input, ampEscapes, unswap, codeUnswap)
 
         val nonce = RenderBoundary.createRenderNonce()
         var output = ""
         try {
-            output = Markdown.render(input, ampEscapes)
+            output = renderMarkdown()
             output = HtmlStringFixes.fixBlockLevelTagsInParagraphs(output)
             val doc = XmlDomParser.parseFromString(RenderBodyParser.wrap(output))
             RenderBoundary.stripAuthorMarkers(doc)
@@ -61,41 +75,89 @@ internal object MarkdownToHtml {
                 com.ecency.core.app.ErrorReports.quiet(e2, "render.markdownRepair")
                 // the sanitize-only fallback skipped the transforms: the sanitizer applies their rules (#1919)
                 output = HtmlSanitizer.sanitize(
-                    output.ifEmpty { Markdown.render(input, ampEscapes) },
+                    output.ifEmpty { renderMarkdown() },
                     ctx.sanitizeOptions.copy(untransformed = true),
                 )
             }
         }
 
-        if (ctx.forApp && output.isNotEmpty() && entityPlaceholders.isNotEmpty()) {
-            output = EntityProtection.restore(output, entityPlaceholders)
-        }
+        // The delimiter is not in the body, so every match is one of ours.
+        if (output.isNotEmpty() && entityPlaceholders.isNotEmpty()) output = unswap(output)
         return RenderBodyParser.finish(output, ctx.sanitizeOptions.copy(renderNonce = nonce))
     }
 }
 
 /**
- * The app render's entity placeholders (render-helper 2.5.45 markdownToHTML): each distinct entity outside a URL and
- * outside code becomes `​<index>​`; an escaped one (`\&amp;`) is left for the parser, as the web reads it.
+ * The app render's entity placeholders (render-helper 2.5.53 markdownToHTML): each distinct entity outside a URL
+ * becomes `<delimiter><index><delimiter>`; an escaped one (`\\&amp;`) is left for the parser, as the web reads it.
  */
 internal object EntityProtection {
-    private const val ZWSP = '​'
+    /** `PLACEHOLDER_DELIMITERS`: a zero-width space, then a few other invisibles. */
+    private const val DELIMITERS = "\u200B\u2060\u2061\u2062\u2063\u2064"
 
-    fun protectInput(input: String, indexOf: Map<String, Int>): String {
-        val sb = StringBuilder(input.length + 16)
-        var last = 0
-        for ((start, end) in CodeRanges.ranges(input)) {
-            if (start < last) continue
-            protect(input.substring(last, start), indexOf, sb)
-            sb.append(input, start, end)
-            last = end
+    /** `PRIVATE_DELIMITERS_FROM` .. `PRIVATE_DELIMITERS_TO`: the private use area past AmpPairing's pair. */
+    private const val PRIVATE_FROM = 0xE100
+    private const val PRIVATE_TO = 0xF8FF
+
+    /**
+     * `placeholderDelimiter` (2.5.53, #2154): the first of [DELIMITERS] the body does not hold (raw or written as a
+     * reference), then the first free private use character, and when the body holds every one of those, a pair of
+     * private use characters it never holds in that order. Linear.
+     */
+    fun placeholderDelimiter(source: String): String {
+        val input = if (source.indexOf('&') >= 0) source + Helper.decodeEntities(source) else source
+        for (d in DELIMITERS) if (input.indexOf(d) < 0) return d.toString()
+        val size = PRIVATE_TO - PRIVATE_FROM + 1
+        val used = BooleanArray(size)
+        for (c in input) if (c.code in PRIVATE_FROM..PRIVATE_TO) used[c.code - PRIVATE_FROM] = true
+        val free = used.indexOfFirst { !it }
+        if (free >= 0) return (PRIVATE_FROM + free).toChar().toString()
+        val pairs = HashSet<Int>()
+        for (i in 0 until input.length - 1) {
+            val first = input[i].code - PRIVATE_FROM
+            val second = input[i + 1].code - PRIVATE_FROM
+            if (first in 0 until size && second in 0 until size) pairs.add(first * size + second)
         }
-        protect(input.substring(last), indexOf, sb)
+        // At most input.length pairs are taken, so a free one turns up within that.
+        var pair = 0
+        while (pair in pairs) pair++
+        return charArrayOf((PRIVATE_FROM + pair / size).toChar(), (PRIVATE_FROM + pair % size).toChar()).concatToString()
+    }
+
+    /**
+     * `expandTabsLikeRemarkable`: each tab as Remarkable's block parser will expand it, to the next four-column stop
+     * of its line read after the parser's line-break and no-break-space normalisation. Only the tabs change.
+     */
+    fun expandTabsLikeRemarkable(src: String): String {
+        if (src.indexOf('\t') < 0) return src
+        val widths = ArrayList<String>()
+        val normalized = BlockParser.normalize(src)
+        var lineStart = 0
+        var lastTabPos = 0
+        for (offset in normalized.indices) {
+            val c = normalized[offset]
+            if (c == '\n') {
+                lineStart = offset + 1
+                lastTabPos = 0
+            } else if (c == '\t') {
+                widths.add("    ".substring((offset - lineStart - lastTabPos) % 4))
+                lastTabPos = offset - lineStart + 1
+            }
+        }
+        val sb = StringBuilder(src.length + widths.size * 3)
+        var k = 0
+        for (c in src) if (c == '\t') sb.append(widths[k++]) else sb.append(c)
+        return sb.toString()
+    }
+
+    fun protectInput(input: String, indexOf: Map<String, Int>, delimiter: String): String {
+        val sb = StringBuilder(input.length + 16)
+        protect(input, indexOf, delimiter, sb)
         return sb.toString()
     }
 
     /** `swap` outside each `URL_RUN` match. */
-    private fun protect(text: String, indexOf: Map<String, Int>, sb: StringBuilder) {
+    private fun protect(text: String, indexOf: Map<String, Int>, delimiter: String, sb: StringBuilder) {
         var last = 0
         var i = 0
         while (i < text.length) {
@@ -104,15 +166,15 @@ internal object EntityProtection {
                 i++
                 continue
             }
-            swap(text.substring(last, i), indexOf, sb)
+            swap(text.substring(last, i), indexOf, delimiter, sb)
             sb.append(text, i, end)
             last = end
             i = end
         }
-        swap(text.substring(last), indexOf, sb)
+        swap(text.substring(last), indexOf, delimiter, sb)
     }
 
-    private fun swap(text: String, indexOf: Map<String, Int>, sb: StringBuilder) {
+    private fun swap(text: String, indexOf: Map<String, Int>, delimiter: String, sb: StringBuilder) {
         var last = 0
         var amp = text.indexOf('&')
         while (amp >= 0) {
@@ -122,7 +184,7 @@ internal object EntityProtection {
                 continue
             }
             sb.append(text, last, amp)
-            if (escaped(text, amp)) sb.append(text, amp, end) else sb.append(ZWSP).append(indexOf.getValue(text.substring(amp, end))).append(ZWSP)
+            if (escaped(text, amp)) sb.append(text, amp, end) else sb.append(delimiter).append(indexOf.getValue(text.substring(amp, end))).append(delimiter)
             last = end
             amp = text.indexOf('&', end)
         }
@@ -163,13 +225,18 @@ internal object EntityProtection {
         return if (k > start) k else -1
     }
 
-    /** `/​(0|[1-9]\d*)​/g` back to the entities; an index that is not ours is the author's text. */
-    fun restore(output: String, entities: List<String>): String {
+    /**
+     * `unswap`: `/<delimiter>(0|[1-9]\d*)<delimiter>/g` back to the entities, one pass; a match whose index is not
+     * ours stays as it is (the delimiter is not in the body, so that is never the author's text).
+     */
+    fun restore(output: String, entities: List<String>, delimiter: String): String {
+        var i = output.indexOf(delimiter)
+        if (i < 0) return output
+        val d = delimiter.length
         val sb = StringBuilder(output.length)
         var last = 0
-        var i = output.indexOf(ZWSP)
         while (i >= 0) {
-            var j = i + 1
+            var j = i + d
             val ok = if (j < output.length && output[j] == '0') {
                 j++
                 true
@@ -179,265 +246,18 @@ internal object EntityProtection {
             } else {
                 false
             }
-            val entity = if (ok && j < output.length && output[j] == ZWSP) {
-                val digits = output.substring(i + 1, j)
-                if (digits.length > 9) null else entities.getOrNull(digits.toInt())
-            } else {
-                null
-            }
-            if (entity == null) {
-                i = output.indexOf(ZWSP, i + 1)
+            if (!ok || !output.startsWith(delimiter, j)) {
+                i = output.indexOf(delimiter, i + 1)
                 continue
             }
-            sb.append(output, last, i).append(entity)
-            last = j + 1
-            i = output.indexOf(ZWSP, last)
+            val digits = output.substring(i + d, j)
+            val entity = if (digits.length > 9) null else entities.getOrNull(digits.toInt())
+            val end = j + d
+            sb.append(output, last, i).append(entity ?: output.substring(i, end))
+            last = end
+            i = output.indexOf(delimiter, end)
         }
         sb.append(output, last, output.length)
         return sb.toString()
-    }
-}
-
-/**
- * render-helper 2.5.46+ `codeRanges`: code in the markdown source as [start, end) ranges in order: fenced blocks
- * (inside blockquotes and list items too, to the matching close, the end of their container, or the end) and inline
- * code spans (a backtick run to the next run of the same length). Linear.
- */
-internal object CodeRanges {
-    private const val QUOTE = -1
-
-    private fun isSpaceAt(line: String, at: Int) = at in line.indices && line[at] == ' '
-    private fun charAt(line: String, at: Int): Char? = if (at in line.indices) line[at] else null
-
-    class Read(val containers: List<Int>, val at: Int, val column: Int, val carry: Int)
-
-    fun readContainers(line: String, from: Int = 0, fromColumn: Int = 0, carriedIndent: Int = 0): Read {
-        val containers = ArrayList<Int>()
-        var at = from
-        var column = fromColumn
-        var first = true
-        while (true) {
-            var indent = if (first) carriedIndent else 0
-            first = false
-            val spacesFrom = indent
-            while (indent < 4 && isSpaceAt(line, at + indent - spacesFrom)) indent++
-            if (indent > 3) break
-            val markerAt = at + indent - spacesFrom
-            val c = charAt(line, markerAt)
-            if (c == '>') {
-                containers.add(QUOTE)
-                at = markerAt + 1
-                column += indent - spacesFrom + 1
-                if (isSpaceAt(line, at)) {
-                    at++
-                    column++
-                }
-                continue
-            }
-            var markerLength = 0
-            if (c == '-' || c == '*' || c == '+') {
-                markerLength = 1
-            } else {
-                var d = markerAt
-                while (d - markerAt < 9 && d in line.indices && line[d] in '0'..'9') d++
-                if (d > markerAt && (charAt(line, d) == '.' || charAt(line, d) == ')')) markerLength = d - markerAt + 1
-            }
-            if (markerLength == 0) break
-            val afterMarker = column + indent - spacesFrom + markerLength
-            var gapColumns = 0
-            var gapChars = 0
-            while (gapColumns < 5) {
-                val g = charAt(line, markerAt + markerLength + gapChars)
-                if (g == ' ') gapColumns++
-                else if (g == '\t') gapColumns += 4 - ((afterMarker + gapColumns) % 4)
-                else break
-                gapChars++
-            }
-            if (gapChars == 0) break
-            val wide = gapColumns >= 5
-            val width = indent + markerLength + (if (wide) 1 else gapColumns)
-            containers.add(width)
-            at = markerAt + markerLength + (if (wide) 1 else gapChars)
-            column += width - spacesFrom
-            if (wide) {
-                if (charAt(line, at - 1) == '\t') {
-                    val tabWidth = 4 - (afterMarker % 4)
-                    return Read(containers, at, column + tabWidth - 1, tabWidth - 1)
-                }
-                break
-            }
-        }
-        return Read(containers, at, column, if (containers.isEmpty()) carriedIndent else 0)
-    }
-
-    class Inside(val at: Int, val column: Int, val carry: Int, val matched: Int, val prefixAt: Int)
-
-    fun insideContainersAt(line: String, containers: List<Int>, blank: Boolean): Inside {
-        var at = 0
-        var column = 0
-        var carry = 0
-        for (k in containers.indices) {
-            val container = containers[k]
-            val prefix = Inside(-1, column, carry, k, at)
-            if (container == QUOTE) {
-                var indent = 0
-                while (indent < 4 && isSpaceAt(line, at + indent)) indent++
-                if (indent > 3 || charAt(line, at + indent) != '>') return prefix
-                at += indent + 1
-                column += indent + 1
-                carry = 0
-                if (isSpaceAt(line, at)) {
-                    at++
-                    column++
-                }
-            } else {
-                if (blank) return Inside(line.length, column, 0, containers.size, line.length)
-                var needed = container - carry
-                carry = 0
-                while (needed > 0) {
-                    if (isSpaceAt(line, at)) {
-                        at++
-                        column++
-                        needed--
-                    } else if (charAt(line, at) == '\t') {
-                        val width = 4 - (column % 4)
-                        at++
-                        column += width
-                        needed -= width
-                    } else {
-                        return prefix
-                    }
-                }
-                carry = -needed
-            }
-        }
-        return Inside(at, column, carry, containers.size, at)
-    }
-
-    class Fence(val char: Char, val length: Int, val end: Int)
-
-    fun fenceAt(line: String, at: Int, column: Int = 0, carried: Int = 0): Fence? {
-        var indent = carried
-        var col = column
-        var start = at
-        while (indent <= 3) {
-            if (isSpaceAt(line, start)) {
-                indent++
-                col++
-            } else if (charAt(line, start) == '\t') {
-                val width = 4 - (col % 4)
-                indent += width
-                col += width
-            } else {
-                break
-            }
-            start++
-        }
-        if (indent > 3) return null
-        val ch = charAt(line, start)
-        if (ch != '`' && ch != '~') return null
-        var end = start
-        while (charAt(line, end) == ch) end++
-        return if (end - start >= 3) Fence(ch, end - start, end) else null
-    }
-
-    fun ranges(src: String): List<Pair<Int, Int>> {
-        val ranges = ArrayList<Pair<Int, Int>>()
-        val runs = ArrayList<IntArray>()
-        var item: List<Int>? = null
-        var pos = 0
-        while (pos < src.length) {
-            val eol = src.indexOf('\n', pos)
-            val lineEnd = if (eol == -1) src.length else eol
-            val line = src.substring(pos, lineEnd)
-            val blank = Js.trim(line).isEmpty()
-            var containers: List<Int> = emptyList()
-            var open: Fence? = null
-            val read = readContainers(line)
-            if (read.containers.isNotEmpty()) {
-                containers = read.containers
-                open = fenceAt(line, read.at, read.column, read.carry)
-                item = if (containers.any { it != QUOTE }) containers else null
-            } else if (!blank) {
-                val it0 = item
-                if (it0 != null) {
-                    var cur: List<Int> = it0
-                    var inside = insideContainersAt(line, cur, false)
-                    if (inside.at == -1 && inside.matched > 0) {
-                        cur = cur.subList(0, inside.matched).toList()
-                        item = cur
-                        inside = Inside(inside.prefixAt, inside.column, inside.carry, inside.matched, inside.prefixAt)
-                    }
-                    if (inside.at == -1) {
-                        item = null
-                    } else {
-                        val nested = readContainers(line, inside.at, inside.column, inside.carry)
-                        if (nested.containers.isNotEmpty()) {
-                            containers = cur + nested.containers
-                            open = fenceAt(line, nested.at, nested.column, nested.carry)
-                            if (nested.containers.any { it != QUOTE }) item = containers
-                        } else {
-                            open = fenceAt(line, inside.at, inside.column, inside.carry)
-                            if (open != null) containers = cur
-                        }
-                    }
-                }
-                if (open == null) open = fenceAt(line, 0)
-            }
-            if (open != null) {
-                val fence = open
-                var end = src.length
-                var p = lineEnd + 1
-                while (p < src.length) {
-                    val e = src.indexOf('\n', p)
-                    val le = if (e == -1) src.length else e
-                    val next = src.substring(p, le)
-                    val inside = insideContainersAt(next, containers, Js.trim(next).isEmpty())
-                    val at = inside.at
-                    if (at == -1) {
-                        end = p - 1
-                        break
-                    }
-                    val close = fenceAt(next, at, inside.column, inside.carry)
-                    if (close != null && close.char == fence.char && close.length >= fence.length && Js.trim(next.substring(close.end)).isEmpty()) {
-                        end = le
-                        break
-                    }
-                    p = le + 1
-                }
-                ranges.add(pos to end)
-                pos = end + 1
-                continue
-            }
-            var i = pos
-            while (i < lineEnd) {
-                if (src[i] != '`') {
-                    i++
-                    continue
-                }
-                var j = i
-                while (j < lineEnd && src[j] == '`') j++
-                runs.add(intArrayOf(i, j - i))
-                i = j
-            }
-            pos = lineEnd + 1
-        }
-        val nextSame = IntArray(runs.size) { -1 }
-        val lastOfLength = HashMap<Int, Int>()
-        for (k in runs.size - 1 downTo 0) {
-            nextSame[k] = lastOfLength[runs[k][1]] ?: -1
-            lastOfLength[runs[k][1]] = k
-        }
-        var k = 0
-        while (k < runs.size) {
-            val close = nextSame[k]
-            if (close == -1) {
-                k++
-                continue
-            }
-            ranges.add(runs[k][0] to runs[close][0] + runs[close][1])
-            k = close + 1
-        }
-        return ranges.sortedBy { it.first }
     }
 }

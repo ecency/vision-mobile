@@ -490,7 +490,7 @@ Rerun both after bumping remarkable, autolinker or render-helper. Fixture inputs
 
 ## Post HTML: DOM and sanitizer
 
-`shared/src/commonMain/kotlin/com/ecency/core/render/dom` and `.../render/sanitize` port the HTML layer of `@ecency/render-helper` 2.5.52 to pure Kotlin: the xmldom 0.9.12 `text/html` parser and serializer (a small mutable DOM the post transforms run on), the htmlparser2 + dom-serializer repair path render-helper takes when xmldom rejects a body, and `sanitizeHtml` (xss 1.0.15 with render-helper's whitelist and hooks). `RenderBodyParser` mirrors the parse step of `markdownToHTML`, including its fallbacks.
+`shared/src/commonMain/kotlin/com/ecency/core/render/dom` and `.../render/sanitize` port the HTML layer of `@ecency/render-helper` 2.5.54 to pure Kotlin: the xmldom 0.9.12 `text/html` parser and serializer (a small mutable DOM the post transforms run on), the htmlparser2 + dom-serializer repair path render-helper takes when xmldom rejects a body, and `sanitizeHtml` (xss 1.0.15 with render-helper's whitelist and hooks). `RenderBodyParser` mirrors the parse step of `markdownToHTML`, including its fallbacks.
 
 Golden fixtures come from the JS packages themselves (synthetic inputs only, plus seeded random combinations):
 
@@ -548,7 +548,7 @@ A link to another Hive post on a line of its own (`Block.PostPreview`) is a card
 
 ## Render pipeline
 
-`shared/src/commonMain/kotlin/com/ecency/core/render` reproduces `@ecency/render-helper` 2.5.52 end to end in pure Kotlin (JS is only the offline oracle):
+`shared/src/commonMain/kotlin/com/ecency/core/render` reproduces `@ecency/render-helper` 2.5.54 end to end in pure Kotlin (JS is only the offline oracle):
 
 - `RenderHelper(proxyBase)` is the entry point: `renderPostBody(body | Entry, forApp, parentDomain, seoContext, options)`, `postBodySummary(body | Entry, length, platform)`, `catchPostImage(Entry | body, width, height, fast)`, `getEntryImageRawUrl`, `getEntryCardImageRawUrl` and `simpleMarkdownToHTML`. The app's `renderPostBody(post, true, false)` plus `setProxyBase(imageServer)` becomes `RenderHelper(imageServer).renderPostBody(post.body, forApp = true)`.
 - `methods/` holds the transforms (traverse, a, img, iframe, text, linkify, clean-reply, markdown-to-html), the helpers and the regex constants. Per-element regexes go through `JsRegex`, which translates the JS source so the JVM and Kotlin/Native engines match JS (`.`, `$`, `\s`, ASCII-only `/i`); hot and whole-body patterns are hand-written scanners (`Scanners`, `Linkify`, `CatchPostImage`).

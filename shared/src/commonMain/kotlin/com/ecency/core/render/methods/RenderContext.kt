@@ -15,8 +15,16 @@ internal class RenderContext(
     val seo: SeoContext?,
     val options: RenderOptions,
     val proxy: ImageProxy,
+    /**
+     * The entity placeholder delimiter of the app render in progress (render-helper 2.5.54 `placeholder-delimiter.ts`,
+     * a module global there): a's in-site path guard rejects only it beyond the zero-width space (#2165).
+     */
+    val placeholderDelimiter: String? = null,
 ) {
     val sanitizeOptions = SanitizeOptions(preserveImageDimensions = options.preserveImageDimensions, proxyBase = proxy.base)
+
+    fun withPlaceholderDelimiter(delimiter: String?): RenderContext =
+        if (delimiter == placeholderDelimiter) this else RenderContext(forApp, parentDomain, seo, options, proxy, delimiter)
 }
 
 /** traverse's `{ firstImageFound, imageCount }`, one per document pass. */

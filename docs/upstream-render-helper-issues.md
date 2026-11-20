@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.52 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.54 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -128,3 +128,26 @@ only through the image proxy and leaves out an image the proxy cannot serve
 (`BlockBuilderTest.bodyImagesAlwaysLoadThroughTheProxy`). Upstream: ecency/vision-web#1999.
 
 **Status (2.5.45, #1919): fixed upstream.** Author classes are limited to the formatting set, so `no-replace` is dropped and the image is proxied; the full render also holds every image to the proxy. The block layer's own guard stays.
+
+## App render entity placeholders and render edges (#2154, #2155, #2165)
+
+**Where.** `markdownToHTML` (`methods/markdown-to-html.method.ts`), `sanitizeHtml`, `imageUrlEnd` (`helper.ts`),
+`DAPPLR_REGEX` and `isAllowedEmbedSrc`, `a()`'s in-site path guard.
+
+**What happened.** Found while porting 2.5.52: the app render's zero-width-space placeholders could be spelled by
+the author (`\u200B0\u200B`) or misplaced by the fenced-code scan (indented code, backticks paired across blocks,
+a line that opens no fence), an angle-bracket destination (`[x](<url>)`, `[r]: <url>`) was decoded twice, a tab
+after a placeholder landed on another tab stop, a refused iframe on the sanitize-only path left its fallback text
+and close tag, a bare image URL with a query kept a closing `)` of the prose around it, and the Dapplr transform
+and allow list disagreed on hosts such as `player.eu.dapplr.in`.
+
+**Status (2.5.53, #2162; 2.5.54, #2166): fixed upstream, ported.** The placeholder delimiter is a character the body
+does not hold (`EntityProtection.placeholderDelimiter`), tabs are expanded first as the parser would, code gets its
+entities back from the parser's own code tokens (`Markdown.restoreCodeEntities`; `CodeRanges` is gone), angle
+destinations keep their source undecoded (`InlineRules.undecodedAngleDestination`, read where the native links and
+reference rules parse them instead of re-walking the source as upstream's wrappers do), refused iframes go whole
+(`HtmlSanitizer.dropRefusedIframes`), `Helper.imageUrlEnd` drops an unbalanced trailing `)`, `DAPPLR_REGEX` takes any
+label chain and the allow list also requires it. 2.5.54 rejects only the render's chosen delimiter (and a zero-width
+space) in an in-site path (`RenderContext.placeholderDelimiter`, per render instead of upstream's module global, so
+concurrent renders never share it). Goldens: `rules2554` in `generate-transform-fixtures.mjs`, the untransformed
+cases in `generate-dom-fixtures.mjs`.

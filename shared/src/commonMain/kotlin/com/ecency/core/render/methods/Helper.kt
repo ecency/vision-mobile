@@ -40,13 +40,34 @@ internal object Helper {
     /**
      * `imageUrlEnd` (2.5.46, #2094): where the image URL in a bare URL token ends, or -1 when it is not one. A token
      * holding an image extension is an image taken whole, suffixes and query included; only prose punctuation at the
-     * end of a URL without a query or fragment is left out. An extension a letter or digit runs on from (`.icons`),
+     * end of a URL without a query or fragment is left out, and with one an unbalanced trailing `)` (2.5.53). An extension a letter or digit runs on from (`.icons`),
      * or that another extension follows (`photo.jpg.html`), does not count. Linear.
      */
     fun imageUrlEnd(token: String): Int {
         var contentEnd = token.length
         if (token.indexOf('?') < 0 && token.indexOf('#') < 0) {
             while (contentEnd > 0 && TRAILING_PUNCTUATION.indexOf(token[contentEnd - 1]) >= 0) contentEnd--
+        } else {
+            // 2.5.53 (#2155): with a query or fragment only an unbalanced `)` at the end is prose, read in source
+            // order (`?a=)&b=(1)` keeps the `)` that closes `(1)`).
+            var open = 0
+            var unmatchedTail = 0
+            for (c in token) {
+                when (c) {
+                    '(' -> {
+                        open++
+                        unmatchedTail = 0
+                    }
+                    ')' -> if (open > 0) {
+                        open--
+                        unmatchedTail = 0
+                    } else {
+                        unmatchedTail++
+                    }
+                    else -> unmatchedTail = 0
+                }
+            }
+            contentEnd -= unmatchedTail
         }
         var i = 0
         while (i < token.length) {
