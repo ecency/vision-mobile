@@ -105,7 +105,10 @@ class IframeSecurityTest {
             """<iframe src="https://www.youtube.com/embed/x" frameborder="0" allowfullscreen></iframe>""",
             """<iframe src="https://open.spotify.com/embed/track/x" sandbox="allow-scripts allow-same-origin allow-popups" frameborder="0"></iframe>""",
             """<iframe src="https://emb.d.tube/#!/a/b" sandbox="allow-scripts allow-same-origin" frameborder="0" allowfullscreen="true"></iframe>""",
-            """<iframe src="https://player.eu.dapplr.in/file/dapplr-videos/x.mp4" sandbox="allow-scripts allow-same-origin"></iframe>""",
+            // one label before .dapplr.in: the sanitizer allows any subdomain, but the iframe transform's DAPPLR_REGEX
+            // only one, so a deeper host such as player.eu.dapplr.in becomes the unsupported placeholder in a render
+            // (render-helper 2.5.52 does the same)
+            """<iframe src="https://player.dapplr.in/file/dapplr-videos/x.mp4" sandbox="allow-scripts allow-same-origin"></iframe>""",
         )) {
             val out = HtmlSanitizer.sanitize(html, opts)
             assertEquals(html, out)
