@@ -20,7 +20,7 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules (render-helper 2.5.52, all ported)
+## Custom rules in the 2.5.52 port
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.

@@ -44,14 +44,14 @@ through `iframe()`: iframes of allowed hosts whose path the allow list rejects (
 path, for example) lose their `src`, and author sandbox tokens beyond the three above are
 dropped. Golden cases that differ for this reason are listed in `DomGoldenTest.securityDeviations`.
 
-An iframe whose `src` the allow list rejects is not left behind as an empty `<iframe>`: it is
-replaced by the placeholder `iframe()` itself emits for unsupported embeds
-(`<div class="unsupported-iframe">(Unsupported <src>)</div>`). On the DOM paths the native
-traverse does this right after `iframe()` (so the placeholder is processed exactly like one
-`iframe()` built); on the sanitize-only path the sanitizer does it. The pre-sanitize of the repair
-path leaves iframe sources to `iframe()` and the final sanitizer, as render-helper does, so an
-allowed embed written in a form `iframe()` normalizes (protocol-relative, `m.youtube.com`) still
-plays. Transform goldens that differ for this reason are listed in `TransformDeviations.security`.
+An iframe whose `src` the allow list rejects becomes, on the DOM paths, the placeholder `iframe()`
+itself emits for unsupported embeds (`<div class="unsupported-iframe">(Unsupported <src>)</div>`):
+the native traverse builds it right after `iframe()`, so it is processed exactly like one `iframe()`
+built. The sanitize-only path builds no DOM and no placeholder: the sanitizer drops the refused `src`,
+then the iframe left without one (its opening tag and a directly following `</iframe>`), as
+render-helper 2.5.45 does. The pre-sanitize of the repair path leaves iframe sources to `iframe()`
+and the final sanitizer, as render-helper does, so an allowed embed written in a form `iframe()`
+normalizes (protocol-relative, `m.youtube.com`) still plays.
 
 **Status (2.5.45, #1919): fixed upstream.** `sanitizeHtml` enforces the allow list and the sandbox grants on every path and drops an iframe left without a src; the port now matches it and lists no deviation.
 
