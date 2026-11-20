@@ -29,6 +29,14 @@ class BodyImageRawUrlTest {
         "<div>\nhttps://example.com/a.jpg?x=1&amp;y=2&copy\n</div>" to "https://example.com/a.jpg?x=1&y=2©",
         "<div>\nhttps://example.com/a.jpg?x=1&#38;y=2.\n</div>" to "https://example.com/a.jpg?x=1&y=2.",
         "<center>\n\nhttps://example.com/a%20b.jpg?x=1&lt;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
+        "<center>\n\nhttps://example.com/a%20b.jpg?x=1&LT;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
+        "<center>\n\nhttps://example.com/a%20b.jpg?x=1&Gt;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
+        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;LT;b\n\n</center>" to "https://example.com/a.jpg?x=1&LT;b",
+        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;gT;b\n\n</center>" to "https://example.com/a.jpg?x=1&gT;b",
+        // on the HTML block's own line: decoded first, then the token ends at lt; or gt; in any case (render-helper /gi)
+        "<div>\nhttps://example.com/a.jpg?x=1&amp;LT;b\n</div>" to "https://example.com/a.jpg?x=1",
+        "<div>\nhttps://example.com/a.jpg?x=1&lT;b\n</div>" to "https://example.com/a.jpg?x=1",
+        "<div>\nhttps://example.com/a.jpg?x=1&#38;gT;b\n</div>" to "https://example.com/a.jpg?x=1",
         "https://example.com/a.jpg?x=1&amp;y=2&GT;z" to "https://example.com/a.jpg?x=1&y=2",
         "`https://code.example/a.jpg` then https://example.com/b.png?x=1:" to null,
     )

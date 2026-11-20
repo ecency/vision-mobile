@@ -150,8 +150,8 @@ class HiveApi(val client: HiveRpcClient) {
     /**
      * SDK verifyPostOnAlternateNode: other nodes than [primary] in turn for v1 `bridge.get_post`, which every node
      * serves. The post when one has it. Null when another node answered without it (null, another post, or "does not
-     * exist"), or when the pool has no other node. When no other node answered (each failed, said something else, or
-     * was cooling), the read failed: a lookup that never got an answer is not "not found". Unlike the SDK (every
+     * exist" from a node that is not broken), or when the pool has no other node. When no other node answered (each
+     * failed, said something else, or was cooling), the read failed: a lookup that never got an answer is not "not found". Unlike the SDK (every
      * node, at random), only nodes healthy for the bridge when their turn comes are asked, healthiest first, at most
      * [VERIFY_NODES], so a missing post costs a bounded wait; what they answer counts for their health.
      */
@@ -159,7 +159,7 @@ class HiveApi(val client: HiveRpcClient) {
         if (client.nodes.none { it != primary }) return null
         var asked = 0
         var answered = false
-        var failure: HiveApiException? = null
+        val failures = mutableListOf<HiveApiException>()
         for (node in client.health.orderedNodes(client.nodes, "bridge", probe = false)) {
             if (asked == VERIFY_NODES) break
             if (node == primary || !client.health.isNodeHealthy(node, "bridge")) continue
@@ -169,13 +169,15 @@ class HiveApi(val client: HiveRpcClient) {
                 if (post != null && post.author == author && post.permlink == permlink) return post
                 answered = true
             } catch (e: RpcErrorException) {
-                if (isNotFound(e)) answered = true else failure = e
+                // a broken node's error can read "not found" too ("Method not found", a missing table)
+                if (!HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage) && isNotFound(e)) answered = true else failures += e
             } catch (e: HiveApiException) {
-                failure = e
+                failures += e
             }
         }
         if (answered) return null
-        throw failure ?: AllNodesFailedException("bridge.get_post", emptyList())
+        // a check that got no answer, whatever each node failed with: the post screen's failed read (or local copy)
+        throw AllNodesFailedException("bridge.get_post", failures)
     }
 
     /** `bridge.get_discussion_v2` (or v1): the root and every reply below it, keyed "author/permlink". */

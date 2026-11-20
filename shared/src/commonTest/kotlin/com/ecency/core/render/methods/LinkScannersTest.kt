@@ -6,6 +6,7 @@ import com.ecency.core.render.transform.RenderCases
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** The Vimeo and Twitter href matchers against render-helper's regexes, and their scaling. */
 class LinkScannersTest {
@@ -86,5 +87,10 @@ class LinkScannersTest {
             "see https://example.com/a.jpg?x=1&amp;y=2&LT;b" to "https://example.com/a.jpg?x=1&y=2",
         )
         for ((body, expected) in cases) assertEquals(expected, helper.getEntryImageRawUrl(body), body)
+        // the render's linkify reads the same tokens: the image ends there, the rest is text (render-helper 2.5.52)
+        assertTrue(helper.renderPostBody("see https://example.com/a.jpg?x=1&GT;caption", forApp = false).endsWith("</picture>&gt;caption</p>"))
+        assertTrue(helper.renderPostBody("see https://example.com/a.jpg?x=1&Lt;b more", forApp = false).endsWith("</picture>\u226ab more</p>"))
+        // a literal "&GT;" in an HTML text node reaches the token scan as written
+        assertTrue(helper.renderPostBody("<p>https://example.com/a.jpg?x=1&amp;GT;caption</p>", forApp = false).endsWith("</picture>&gt;caption</span></p>"))
     }
 }

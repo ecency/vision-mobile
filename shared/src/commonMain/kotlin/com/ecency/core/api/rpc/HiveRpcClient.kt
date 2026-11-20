@@ -142,7 +142,10 @@ class RpcTimeoutException(val node: String, val method: String, val timeoutMilli
 
 /** No attempt answered usefully. [failures] holds one entry per attempt, in order (reads may ask a node twice). */
 class AllNodesFailedException(val method: String, val failures: List<HiveApiException>) :
-    HiveApiException("$method failed on all ${failures.size} nodes: ${failures.lastOrNull()?.message}", failures.lastOrNull())
+    HiveApiException(
+        if (failures.isEmpty()) "$method: no node could be asked" else "$method failed on all ${failures.size} nodes: ${failures.last().message}",
+        failures.lastOrNull(),
+    )
 
 /**
  * JSON-RPC 2.0 client over a pool of Hive nodes, with the node selection and failover of @ecency/sdk 2.4.26
@@ -338,7 +341,8 @@ class HiveRpcClient(
 
     /**
      * [ask], with the answer counted for the node's health as a read counts it: a rate limit, a timeout or a broken
-     * node cools it, an answer keeps it in favour. No failover, no retry (the post double-check, #3712, picks nodes).
+     * node cools it, an answer keeps it in favour. No failover, no retry (the post double-check, #3712, picks nodes),
+     * and the full [readTimeoutMillis] rather than a read's adaptive per-node bound.
      */
     internal suspend fun askCounted(node: String, method: String, params: JsonElement): JsonElement {
         val api = NodeHealthTracker.apiOf(method)

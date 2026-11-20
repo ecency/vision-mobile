@@ -39,6 +39,8 @@ class PostDoubleCheckTest {
             "missing" -> FakeTransport.error(req, -32602, missing)
             "other" -> FakeTransport.result(req, Fixtures.entry("spike-author", "another-post"))
             "invalid" -> FakeTransport.error(req, -32602, "Invalid parameters: observer")
+            "no-bridge" -> FakeTransport.error(req, -32601, "Method not found")
+            "broken" -> FakeTransport.error(req, -32603, "Internal error: relation \"hivemind_app.hive_posts\" does not exist")
             "limited" -> HttpResult(429, "slow down", mapOf("retry-after" to "60"))
             else -> HttpResult(503, "")
         }
@@ -156,5 +158,21 @@ class PostDoubleCheckTest {
         val refusing = PostRepository(HiveApi(client(FakeTransport { req -> FakeTransport.error(req, -32602, "Invalid parameters: observer") })), nowMillis = { testScheduler.currentTime })
         refusing.addLocalPost(Post("spike-author", "spike-post", title = "Local copy"))
         assertFails { refusing.getPostVerified("spike-author", "spike-post", "spike-me") }
+    }
+
+    /** Review of #3714: a broken node's error that reads "not found" or "does not exist" is a failure, not an answer. */
+    @Test
+    fun aBrokenNodesNotFoundTextIsNoAnswer() = runTest {
+        assertFails { api(nodes(mapOf(a to "null", b to "no-bridge", c to "broken"))).postVerified("spike-author", "spike-post", "spike-me") }
+    }
+
+    /** Review of #3714: when no other node answered, a just-published post shows its local copy whichever node failed last. */
+    @Test
+    fun theLocalCopyStandsInWhateverTheOtherNodesFailedWith() = runTest {
+        for (order in listOf(mapOf(a to "null", b to "invalid", c to "down"), mapOf(a to "null", b to "down", c to "invalid"))) {
+            val repo = PostRepository(HiveApi(client(nodes(order))), nowMillis = { testScheduler.currentTime })
+            repo.addLocalPost(Post("spike-author", "spike-post", title = "Local copy"))
+            assertEquals("Local copy", repo.getPostVerified("spike-author", "spike-post", "spike-me")?.title, "$order")
+        }
     }
 }

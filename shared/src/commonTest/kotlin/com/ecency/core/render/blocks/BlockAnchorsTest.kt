@@ -6,6 +6,7 @@ import com.ecency.core.render.RenderHelper
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -150,5 +151,25 @@ class BlockAnchorsTest {
         val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"$id\">Far</h2>\n\nback to [far](#$id)", forApp = true))
         assertEquals(LinkTarget.Anchor(id), firstLink(built))
         assertEquals(BlockAnchors.index(built)[id], BlockAnchors.jump(built, LinkTarget.Anchor(id), here))
+    }
+
+    /** Review of #3714: an id the sanitizer drops (not on a, span, div, p or a heading) still namespaced its link; the link jumps. */
+    @Test
+    fun aLinkToAnIdTheSanitizerDroppedStillJumps() {
+        val center = BlockBuilder.build(RenderHelper().renderPostBody("<center id=\"top\">Title</center>\n\ntext\n\n[back](#top)", forApp = true))
+        assertEquals(LinkTarget.Anchor("top"), firstLink(center))
+        val bold = BlockBuilder.build(RenderHelper().renderPostBody("<b id=\"intro\">x</b>\n\n## Intro\n\n[go](#intro)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(bold))
+        val at = BlockAnchors.jump(bold, target, here)
+        assertIs<Block.Heading>(bold[assertNotNull(at, "the heading of that name")])
+    }
+
+    /** Review of #3714: a `data-id` written as `user-content-x` wins over a heading whose id the sanitizer namespaced to it. */
+    @Test
+    fun aDataIdOfTheNamespacedNameWinsOverTheHeading() {
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"sec\">Heading</h2>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go](#user-content-sec)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+        val at = BlockAnchors.jump(built, target, here)
+        assertIs<Block.Anchor>(built[at!!])
     }
 }

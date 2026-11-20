@@ -67,21 +67,22 @@ object BlockBuilder {
     fun fromDocument(document: Document, options: BuildOptions): List<Block> {
         val root = document.documentElement ?: return emptyList()
         val body = if (lower(root.tagName) == "body") root else findBody(root) ?: root
-        return Walker(options, namespacedIds(body)).top(body)
+        return Walker(options, dataIds(body)).top(body)
     }
 
     /**
-     * Every `id` in the document that carries the sanitizer's `user-content-` namespace: a same-page link to one of
-     * them was namespaced with it ([fragmentOnly]). Iterative, as deep markup is walked without recursion.
+     * Every `data-id` in the document, as written: a same-page link to one of them is kept as written ([fragmentOnly]),
+     * any other `#user-content-x` link was namespaced by the sanitizer. Iterative, as deep markup is walked without
+     * recursion.
      */
-    private fun namespacedIds(root: Element): Set<String> {
+    private fun dataIds(root: Element): Set<String> {
         val out = HashSet<String>()
         val stack = ArrayList<Node>()
         stack += root
         while (stack.isNotEmpty()) {
             val n = stack.removeAt(stack.size - 1)
             if (n !is Element) continue
-            n.getAttribute("id")?.trim()?.let { if (it.startsWith(AuthorAttributes.AUTHOR_ID_PREFIX)) out += it }
+            n.getAttribute("data-id")?.trim()?.takeIf { it.isNotEmpty() }?.let { out += it }
             for (k in n.childNodes.indices.reversed()) stack += n.childNodes[k]
         }
         return out
@@ -162,14 +163,14 @@ object BlockBuilder {
     }
 
     /** What a tap on [el] does, ignoring chips, cards and videos; null for no (or an unsafe) target. */
-    internal fun anchorTarget(el: Element, namespacedIds: Set<String> = emptySet()): LinkTarget? {
+    internal fun anchorTarget(el: Element, dataIds: Set<String> = emptySet()): LinkTarget? {
         val cls = classes(el)
         val href = el.getAttribute("data-href")?.takeIf { it.isNotBlank() } ?: el.getAttribute("href")?.takeIf { it.isNotBlank() }
         return when {
             "markdown-external-link" in cls -> {
                 val yt = el.getAttribute("data-youtube")
                 if (!yt.isNullOrEmpty()) SafeTarget.youtube(yt, parseIntJs(el.getAttribute("data-start-time")))
-                else fragmentOnly(href, namespacedIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
+                else fragmentOnly(href, dataIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
             }
             "markdown-author-link" in cls -> SafeTarget.author(el.getAttribute("data-author"))
             "markdown-post-link" in cls -> postTarget(el.getAttribute("data-author"), el.getAttribute("data-permlink"))
@@ -177,7 +178,7 @@ object BlockBuilder {
             "markdown-tag-link" in cls -> SafeTarget.tagTarget(el.getAttribute("data-tag"), el.getAttribute("data-filter"))
             "markdown-witnesses-link" in cls || "markdown-proposal-link" in cls -> SafeTarget.external(href)
             "markdown-community-link" in cls -> SafeTarget.communityTarget(el.getAttribute("data-community"), el.getAttribute("data-filter"))
-            else -> fragmentOnly(href, namespacedIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
+            else -> fragmentOnly(href, dataIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
         }
     }
 
@@ -205,15 +206,15 @@ object BlockBuilder {
 
     /**
      * The fragment of a `#id` href (`#` alone is the top, an empty id), or null when [href] is more than that. The
-     * namespace comes off only when the sanitizer put it there, a link to one of the document's [namespacedIds]: a
-     * fragment written as `#user-content-x` to a `data-id` of that name stays as written. The length limit applies
-     * to the author's id, after the namespace is removed.
+     * sanitizer's namespace comes off (it namespaces a link to any id the author declared, also one it then drops),
+     * except on a fragment naming one of the document's [dataIds] exactly: `#user-content-x` to a `data-id` of that
+     * name stays as written. The length limit applies to the author's id, after the namespace is removed.
      */
-    internal fun fragmentOnly(href: String?, namespacedIds: Set<String> = emptySet()): String? {
+    internal fun fragmentOnly(href: String?, dataIds: Set<String> = emptySet()): String? {
         val h = href?.trim() ?: return null
         if (!h.startsWith("#")) return null
         val decoded = decodeFragment(h.substring(1))
-        return checkedId(if (decoded in namespacedIds) authorId(decoded) else decoded)
+        return checkedId(if (decoded in dataIds) decoded else authorId(decoded))
     }
 
     /**
@@ -302,7 +303,7 @@ private sealed interface Piece {
     class Break(override val link: LinkRef?) : Piece
 }
 
-private class Walker(private val options: BuildOptions, private val namespacedIds: Set<String>) {
+private class Walker(private val options: BuildOptions, private val dataIds: Set<String>) {
     private var out: MutableList<Block> = ArrayList()
     private val pieces = ArrayList<Piece>()
 
@@ -556,7 +557,7 @@ private class Walker(private val options: BuildOptions, private val namespacedId
             out += preview(post.author, post.permlink, el)
             return
         }
-        val target = BlockBuilder.anchorTarget(el, namespacedIds)
+        val target = BlockBuilder.anchorTarget(el, dataIds)
         if (target == null) {
             children(el, ctx.with(imageLink = null))
             return
@@ -669,7 +670,7 @@ private class Walker(private val options: BuildOptions, private val namespacedId
                         else -> {
                             var inner = c
                             if (tag == "a") {
-                                val ref = BlockBuilder.anchorTarget(n, namespacedIds)?.let { LinkRef(it) }
+                                val ref = BlockBuilder.anchorTarget(n, dataIds)?.let { LinkRef(it) }
                                 inner = if (ref != null) c.with(link = ref, imageLink = if (onlyImage(n)) ref else null) else c.with(imageLink = null)
                             }
                             val block = tag in BlockBuilder.BLOCK_TAGS
