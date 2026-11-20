@@ -91,6 +91,8 @@ class PathologicalRenderTest {
     fun mentionChainsStayLinear() {
         assertLinear("mention chain", { n -> "@" + "a.".repeat(n) + "a" }, 20_000)
         assertLinear("mention repeat", { n -> "@a.".repeat(n) }, 10_000)
+        // a run whose first mention is refused (17 characters): the run is not collected past it (review of #3714)
+        assertLinear("refused mention runs", { n -> "@aaaaaaaaaaaaaaaaa#-".repeat(n) }, 2_000)
     }
 
     @Test

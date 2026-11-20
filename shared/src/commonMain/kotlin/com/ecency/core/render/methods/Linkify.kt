@@ -111,28 +111,7 @@ internal object Linkify {
         return -1
     }
 
-    /** The items of the run that starts at [from] (each greedy, as the regex `(?:TAG|MENTION)*` takes them). */
-    private fun runItems(s: String, from: Int, first: Int = -1): List<String> {
-        val items = ArrayList<String>()
-        var i = from
-        if (first >= 0) {
-            items.add(s.substring(from, first))
-            i = first
-        }
-        while (true) {
-            val e = runItemEnd(s, i)
-            if (e < 0) break
-            items.add(s.substring(i, e))
-            i = e
-        }
-        return items
-    }
-
-    private fun itemsLength(items: List<String>, count: Int): Int {
-        var n = 0
-        for (k in 0 until count) n += items[k].length
-        return n
-    }
+    private class RunResult(val html: String, val linked: Int, val length: Int, val firstLength: Int)
 
     /** linkify `attr`: escaped for a double-quoted attribute (tags and valid usernames never need it). */
     private fun attr(v: String): String = v.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;")
@@ -196,35 +175,46 @@ internal object Linkify {
         }
 
         // 2.5.45 (#1920): an adjacent run of tags and mentions linked in one pass, stopping at the first item that
-        // would not be linked. Returns the markup and how many items it linked.
-        fun linkRun(items: List<String>, before: String, placeholder: Boolean): Pair<String, Int> {
+        // would not be linked. The items are read one at a time (each greedy, as the regex `(?:TAG|MENTION)*` takes
+        // them) and the run is not read past a refused one: collecting it whole first made every refused head
+        // re-read the rest of the run (quadratic). [firstEnd] is the end of the first item when the caller already
+        // knows it. Returns the markup, how many items it linked, the length they cover and the first item's length.
+        fun linkRun(s: String, from: Int, firstEnd: Int, before: String, placeholder: Boolean): RunResult {
             val out = StringBuilder()
             var pending = before
-            for ((i, item) in items.withIndex()) {
+            var i = from
+            var linked = 0
+            var firstLength = 0
+            while (true) {
+                val e = if (linked == 0 && firstEnd >= 0) firstEnd else runItemEnd(s, i)
+                if (e < 0) break
+                val item = s.substring(i, e)
+                if (linked == 0) firstLength = item.length
                 val html = if (item[0] == '#') {
                     if (item.length > 1 && item.substring(1).all { it in '0'..'9' }) null else pending + tagHtml(item)
                 } else {
                     mentionHtml(item, pending, placeholder)
                 }
-                if (html == null) return out.toString() to i
+                if (html == null) break
                 out.append(html)
                 pending = ""
+                linked++
+                i = e
             }
-            return out.toString() to items.size
+            return RunResult(out.toString(), linked, i - from, firstLength)
         }
 
         // Tags, and any mentions glued to them.
         content = replaceRuns(content, { f -> tagRunNext(content, f) }, { p -> tagRunPrefix(content, p) }) { p, prefix ->
             val before = content.substring(p, p + prefix)
-            val items = runItems(content, p + prefix)
-            if (items.isEmpty()) return@replaceRuns null
             val preceding = if (before == ">" || before == "&gt;" || (before.length == 1 && Js.isSpace(before[0]))) before else ""
-            val (html, linked) = linkRun(items, preceding, true)
-            if (linked == 0) {
-                val head = before.length + items[0].length
+            val run = linkRun(content, p + prefix, -1, preceding, true)
+            if (run.firstLength == 0) return@replaceRuns null
+            if (run.linked == 0) {
+                val head = before.length + run.firstLength
                 content.substring(p, p + head) to head
             } else {
-                html to before.length + itemsLength(items, linked)
+                run.html to before.length + run.length
             }
         }
 
@@ -242,11 +232,10 @@ internal object Linkify {
             val preceding = c1.substring(p, p + prefix)
             val at = p + prefix
             val firstEnd = userEnd(c1, at + 1)
-            val items = runItems(c1, at, firstEnd)
-            val (html, linked) = linkRun(items, preceding, false)
-            val head = prefix + items[0].length
-            if (linked == 0) c1.substring(p, p + head) to head
-            else html to prefix + itemsLength(items, linked)
+            val run = linkRun(c1, at, firstEnd, preceding, false)
+            val head = prefix + run.firstLength
+            if (run.linked == 0) c1.substring(p, p + head) to head
+            else run.html to prefix + run.length
         }
 
         // Internal links with category: /category/@user/permlink
