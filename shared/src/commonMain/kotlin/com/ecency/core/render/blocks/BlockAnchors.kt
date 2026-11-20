@@ -24,12 +24,13 @@ object BlockAnchors {
         if (fragment.isEmpty()) return 0
         val ids = index(blocks)
         ids[fragment]?.let { return it }
-        // the author's id held nowhere the blocks keep an anchor (inside code): a `data-id` of the namespaced name
-        ids[com.ecency.core.render.sanitize.AuthorAttributes.AUTHOR_ID_PREFIX + fragment]?.let { return it }
         val wanted = slug(fragment)
         if (wanted.isNotEmpty()) {
             blocks.forEachIndexed { i, b -> if (headings(b).any { slug(BlockText.ofInlines(it)) == wanted }) return i }
         }
+        // the author's id held nowhere the blocks keep an anchor (inside code), and no heading of that name: a
+        // `data-id` of the namespaced name
+        ids[com.ecency.core.render.sanitize.AuthorAttributes.AUTHOR_ID_PREFIX + fragment]?.let { return it }
         return if (fragment.equals("top", ignoreCase = true)) 0 else null
     }
 

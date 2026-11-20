@@ -189,4 +189,12 @@ class BlockAnchorsTest {
             assertEquals(BlockAnchors.index(built)["user-content-sec"], assertNotNull(BlockAnchors.jump(built, target, here), link), link)
         }
     }
+
+    /** Review of #3714: a heading link is not taken by a later `data-id` of the namespaced name. */
+    @Test
+    fun aHeadingLinkStaysWithTheHeadingOverALaterNamespacedDataId() {
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("## Intro\n\ntext\n\n<a data-id=\"user-content-intro\"></a>\n\n[go](#intro)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+        assertIs<Block.Heading>(built[assertNotNull(BlockAnchors.jump(built, target, here))])
+    }
 }
