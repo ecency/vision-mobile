@@ -336,6 +336,27 @@ class HiveRpcClient(
     internal suspend fun ask(node: String, method: String, params: JsonElement, timeoutMillis: Long): JsonElement =
         attempt(node, method, params, timeoutMillis)
 
+    /**
+     * [ask], with the answer counted for the node's health as a read counts it: a rate limit, a timeout or a broken
+     * node cools it, an answer keeps it in favour. No failover, no retry (the post double-check, #3712, picks nodes).
+     */
+    internal suspend fun askCounted(node: String, method: String, params: JsonElement): JsonElement {
+        val api = NodeHealthTracker.apiOf(method)
+        val started = nowMillis()
+        val result = try {
+            attempt(node, method, params, readTimeoutMillis)
+        } catch (e: HiveApiException) {
+            val nodeLevel = e !is RpcErrorException || isNodeLevelError(e.code, e.rpcMessage)
+            if (nodeLevel && (e is RpcErrorException || e is NodeFailureException || e is RpcTimeoutException)) {
+                record(node, e, api)
+                health.recordSlowFailure(node, nowMillis() - started, method)
+            }
+            throw e
+        }
+        health.recordSuccess(node, api, nowMillis() - started, method)
+        return result
+    }
+
     private fun HiveApiException.nodeOf(): String = when (this) {
         is NodeFailureException -> node
         is RpcTimeoutException -> node

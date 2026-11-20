@@ -149,30 +149,32 @@ class HiveApi(val client: HiveRpcClient) {
 
     /**
      * SDK verifyPostOnAlternateNode: other nodes than [primary] in turn for v1 `bridge.get_post`, which every node
-     * serves. The post when one has it; null when another node answered (null, another post, or an assert of the
-     * chain such as "does not exist"), or when no other node may be asked; when every node asked failed, the read
-     * failed: a lookup that never got an answer is not "not found". Unlike the SDK (every node, at random), only
-     * nodes healthy for the bridge are asked, healthiest first, at most [VERIFY_NODES], so a missing post costs a
-     * bounded wait and a cooling or rate-limited node is left alone.
+     * serves. The post when one has it. Null when another node answered without it (null, another post, or "does not
+     * exist"), or when the pool has no other node. When no other node answered (each failed, said something else, or
+     * was cooling), the read failed: a lookup that never got an answer is not "not found". Unlike the SDK (every
+     * node, at random), only nodes healthy for the bridge when their turn comes are asked, healthiest first, at most
+     * [VERIFY_NODES], so a missing post costs a bounded wait; what they answer counts for their health.
      */
     private suspend fun postOnOtherNodes(author: String, permlink: String, params: JsonElement, primary: String, viewer: String): Post? {
-        val others = client.health.orderedNodes(client.nodes, "bridge", probe = false)
-            .filter { it != primary && client.health.isNodeHealthy(it, "bridge") }
-            .take(VERIFY_NODES)
+        if (client.nodes.none { it != primary }) return null
+        var asked = 0
         var answered = false
         var failure: HiveApiException? = null
-        for (node in others) {
+        for (node in client.health.orderedNodes(client.nodes, "bridge", probe = false)) {
+            if (asked == VERIFY_NODES) break
+            if (node == primary || !client.health.isNodeHealthy(node, "bridge")) continue
+            asked++
             try {
-                val post = Post.fromJson(client.ask(node, "bridge.get_post", params, client.readTimeoutMillis), viewer)
-                if (post != null) return post.takeIf { it.author == author && it.permlink == permlink }
+                val post = Post.fromJson(client.askCounted(node, "bridge.get_post", params), viewer)
+                if (post != null && post.author == author && post.permlink == permlink) return post
                 answered = true
             } catch (e: RpcErrorException) {
-                if (HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage)) failure = e else answered = true
+                if (isNotFound(e)) answered = true else failure = e
             } catch (e: HiveApiException) {
                 failure = e
             }
         }
-        if (answered || others.isEmpty()) return null
+        if (answered) return null
         throw failure ?: AllNodesFailedException("bridge.get_post", emptyList())
     }
 

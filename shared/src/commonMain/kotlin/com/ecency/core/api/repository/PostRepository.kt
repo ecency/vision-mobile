@@ -6,6 +6,8 @@ import com.ecency.core.api.guarded
 import com.ecency.core.api.model.Post
 import com.ecency.core.api.model.PostKey
 import com.ecency.core.api.rpc.HiveApiException
+import com.ecency.core.api.rpc.HiveRpcClient
+import com.ecency.core.api.rpc.RpcErrorException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -171,7 +173,9 @@ class PostRepository(
         val post = if (!verify) api.post(author, permlink, observer) else try {
             api.postVerified(author, permlink, observer)
         } catch (e: HiveApiException) {
-            localPost(key) ?: throw e
+            // no node could be asked; a request a node refused stays an error. The copy is shown, never kept as the post
+            if (e is RpcErrorException && !HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage)) throw e
+            return@guarded localPost(key) ?: throw e
         }
         if (post == null) return@guarded localPost(key)
         posts.put(cacheKey, post)
