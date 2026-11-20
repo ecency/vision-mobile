@@ -533,6 +533,33 @@ class WalletFlowsTest {
      * (here a 400 dp tall window at a larger text size) the sheet did not scroll, so Send sat below the screen out of
      * reach. A real tap (performClick, not a semantics action) must reach it.
      */
+    /**
+     * User report (Android): with many Hive Engine tokens held, the tip sheet showed tokens only, with no amount field
+     * in sight. Like RN tippingDialogContent (and iOS), the tip offers every token held, enabled in the wallet or not,
+     * in one row that scrolls sideways, so the amount field stays on screen however many tokens the account holds.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h740dp")
+    fun manyEngineTokensSitInOneRowAndLeaveTheAmountInSight() {
+        val tokens = (1..60).joinToString(",") { """{"name":"Token $it","symbol":"TOK$it","layer":"engine","balance":$it.5,"fiatRate":0,"precision":3,"actions":[],"pendingRewards":0}""" }
+        val rich = portfolio.removeSuffix("]}") + ",$tokens]}"
+        val base = node.auth.rest
+        node.auth.rest = { r -> if (r.url.endsWith("/wallet-api/portfolio-v2")) HttpResult(200, rich) else base?.invoke(r) }
+        launch(Navigator(NavState().push(AppScreen.Post("alice", "trending-one"))))
+        until { exists("tip") }
+        compose.onAllNodes(hasTestTag("tip"), useUnmergedTree = true).onFirst().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipCurrency:TOK60") }
+        val first = compose.onNodeWithTag("tipCurrency:HIVE").fetchSemanticsNode().positionInRoot
+        val last = compose.onNodeWithTag("tipCurrency:TOK60").fetchSemanticsNode().positionInRoot
+        assertEquals("the tokens wrap into rows", first.y, last.y, 0.5f)
+        compose.onNodeWithTag("tipAmount").assertIsDisplayed()
+        compose.onNodeWithTag("tipCurrency:TOK60").performScrollTo().performClick()
+        compose.onNodeWithTag("tipAmount").performTextInput("1")
+        compose.onNodeWithTag("tipSend").performScrollTo().assertIsDisplayed().performClick()
+        until { exists("tipConfirm") }
+        assertTrue(compose.onAllNodes(hasText("TOK60", substring = true)).fetchSemanticsNodes().isNotEmpty())
+    }
+
     @Test
     @Config(qualifiers = "w360dp-h400dp")
     fun onAShortWindowTheTipSheetScrollsToSend() {

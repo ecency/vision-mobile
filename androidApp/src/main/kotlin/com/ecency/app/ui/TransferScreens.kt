@@ -613,7 +613,9 @@ fun TipSheet(model: TipModel, onDismiss: () -> Unit) {
             Text("${TipCopy.EXISTING} (${s.tipsCount})", color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
             s.tipsTotals.forEach { (cur, total) -> Text("$total $cur", color = colors.text, fontSize = 12.sp) }
             Text(TipCopy.TOKEN, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 10.dp))
-            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // one row that scrolls sideways (RN tippingDialogContent, iOS): every token held is offered, so a wrapping
+            // grid of many Hive Engine tokens pushed the amount and Send off the sheet (user report)
+            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).testTag("tipCurrencies"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 s.currencies.forEach { c ->
                     val selected = c.symbol == s.currency
                     Column(
