@@ -10,6 +10,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
@@ -524,6 +526,23 @@ class WalletFlowsTest {
         assertEquals(1, compose.onAllNodes(hasTestTag("journalDismiss"), useUnmergedTree = true).fetchSemanticsNodes().size)
         compose.onNodeWithTag("journalDismiss").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         assertEquals(1, dismissed)
+    }
+
+    /**
+     * User report (Android): the gift could not send a tip, a wallet transfer could. On a phone with the keyboard up
+     * (here a 400 dp tall window at a larger text size) the sheet did not scroll, so Send sat below the screen out of
+     * reach. A real tap (performClick, not a semantics action) must reach it.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheTipSheetScrollsToSend() {
+        launch(Navigator(NavState().push(AppScreen.Post("alice", "trending-one"))), fontScale = 1.3f)
+        until { exists("tip") }
+        compose.onAllNodes(hasTestTag("tip"), useUnmergedTree = true).onFirst().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("tipSheet") }
+        compose.onNodeWithTag("tipAmount").performTextInput("1")
+        compose.onNodeWithTag("tipSend").performScrollTo().assertIsDisplayed().performClick()
+        until { exists("tipConfirm") }
     }
 
     @Test

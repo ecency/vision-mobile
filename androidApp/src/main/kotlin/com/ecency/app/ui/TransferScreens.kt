@@ -605,7 +605,9 @@ fun TipSheet(model: TipModel, onDismiss: () -> Unit) {
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { !s.busy }),
         containerColor = colors.background,
     ) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp).testTag("tipSheet")) {
+        // scrolls: with the keyboard up on a phone, or at a larger text size, Send stays reachable (user report:
+        // the gift could not send a tip on Android; iOS draws this sheet in a scrolling Form)
+        Column(Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("tipSheet")) {
             Text(TipCopy.TITLE, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.semantics { heading() })
             Text(TipCopy.supportAuthor(s.author), color = colors.darkGray)
             Text("${TipCopy.EXISTING} (${s.tipsCount})", color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
