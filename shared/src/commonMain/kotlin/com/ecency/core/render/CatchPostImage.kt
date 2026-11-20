@@ -700,7 +700,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 continue
             }
             var e = q
-            while (e < s.length && isUrlTokenChar(s[e]) && !(s[e] == '&' && (s.startsWith("lt;", e + 1) || s.startsWith("gt;", e + 1)))) e++
+            // the regex is `/gi`: its `&(?!lt;|gt;)` refuses `&GT;` too
+            while (e < s.length && isUrlTokenChar(s[e]) && !(s[e] == '&' && (Js.startsWithCi(s, "lt;", e + 1) || Js.startsWithCi(s, "gt;", e + 1)))) e++
             if (e == q) {
                 p = h + 1
                 continue

@@ -71,4 +71,20 @@ class LinkScannersTest {
             helper.renderPostBody(it, true)
         }
     }
+
+    /**
+     * render-helper's bare URL token regexes carry the `i` flag, so `&(?!lt;|gt;)` stops at `&GT;` and `&Lt;` too
+     * (review of #3714). Expected values are render-helper 2.5.52's `getEntryImageRawUrl` on the same bodies.
+     */
+    @Test
+    fun bareImageTokensEndAtLtAndGtInAnyCase() {
+        val helper = RenderHelper(RenderCases.PROXY_BASE)
+        val cases = mapOf(
+            "see https://example.com/a.jpg?x=1&GT;caption" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&Lt;b" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&gT;b" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&amp;y=2&LT;b" to "https://example.com/a.jpg?x=1&y=2",
+        )
+        for ((body, expected) in cases) assertEquals(expected, helper.getEntryImageRawUrl(body), body)
+    }
 }

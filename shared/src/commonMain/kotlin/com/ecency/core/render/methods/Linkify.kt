@@ -338,7 +338,7 @@ internal object Linkify {
         return sb.toString()
     }
 
-    /** `/https?:\/\/(?:[^\s<>"'&]|&(?!lt;|gt;))+/gi`, each token through [fn]. */
+    /** `/https?:\/\/(?:[^\s<>"'&]|&(?!lt;|gt;))+/gi` (the lookahead case-insensitive too), each token through [fn]. */
     private inline fun urlTokens(s: String, fn: (String) -> String): String {
         var sb: StringBuilder? = null
         var last = 0
@@ -357,7 +357,7 @@ internal object Linkify {
             while (k < s.length) {
                 val c = s[k]
                 if (Js.isSpace(c) || c == '<' || c == '>' || c == '"' || c == '\'') break
-                if (c == '&' && (s.startsWith("lt;", k + 1) || s.startsWith("gt;", k + 1))) break
+                if (c == '&' && (Js.startsWithCi(s, "lt;", k + 1) || Js.startsWithCi(s, "gt;", k + 1))) break // `/gi`
                 k++
             }
             if (k == start) {
