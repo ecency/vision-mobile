@@ -392,6 +392,14 @@ const urls = [
   'https://\u03A3.dapplr.in/', 'https://\uFB01.dapplr.in/', 'https://a\u3000.dapplr.in/',
   'https://xn--ls8h.dapplr.in/', 'https://XN--LS8H.dapplr.in/', 'https://xn--zz-.dapplr.in/',
   'https://a.xn--.dapplr.in/', 'https://\u0661\u0662.dapplr.in/',
+  // 2.5.53 (#2155): the allow list takes a Dapplr src only as iframe() frames it (DAPPLR_REGEX)
+  'https://player.eu.dapplr.in/file/dapplr-videos/x.mp4', 'https://cdn.dapplr.in/file/dapplr-videos/x.mp4',
+  'https://.dapplr.in/file/dapplr-videos/x.mp4', 'https://a..dapplr.in/file/dapplr-videos/x.mp4',
+  'https://a_b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in:8443/file/dapplr-videos/x.mp4',
+  'https://u:p@a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in\\file\\dapplr-videos\\x',
+  'https:///a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a%2eb.dapplr.in/file/dapplr-videos/x.mp4',
+  '//a.b.dapplr.in/file/dapplr-videos/x.mp4', 'http://a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://A-1.B.DAPPLR.IN/file/dapplr-videos/x',
+  ' https://a.dapplr.in/file/dapplr-videos/x.mp4 ', 'https://a.dapplr.in/file/dapplr-videos/', 'https://a.dapplr.in/FILE/dapplr-videos/x',
 ]
 
 // Seeded PRNG (mulberry32) for combinations.
@@ -570,6 +578,37 @@ const xssQuirks = {
   quirk_trailing_lt: 'abc<',
 }
 for (const [name, html] of Object.entries(xssQuirks)) sanitizeInputs.push([name, html, false])
+
+// The sanitize-only fallback (untransformed: the DOM transforms never ran). 2.5.53 (#2155) drops a refused iframe
+// with its fallback text and its own close, keeping markup inside it and every kept iframe's close.
+const YT_IFRAME = '<iframe src="https://www.youtube.com/embed/abcdefghijk">'
+const VIMEO_IFRAME = '<iframe src="https://player.vimeo.com/video/123456">'
+const EVIL_IFRAME = '<iframe src="https://evil.example.com/x">'
+const untransformedInputs = {
+  fallback_text: `${EVIL_IFRAME}Unavailable</iframe>`,
+  fallback_newline_close_space: `${EVIL_IFRAME}\n</iframe >after`,
+  fallback_upper: '<IFRAME SRC="https://evil.example.com/x">Unavailable</IFRAME>',
+  markup_inside: `a${EVIL_IFRAME}Unavailable <b>x</b></iframe>b`,
+  markup_div: `<div>${EVIL_IFRAME}x</div><p>important</p><div></iframe></div>z`,
+  markup_table: `<table><tr><td>${EVIL_IFRAME}x</td></tr></table>after</iframe>z`,
+  slash_src: '<iframe/src="https://evil.example.com/x">Unavailable</iframe>',
+  bare_nested: '<iframe>a<iframe>b<iframe>c</iframe>d</iframe>e</iframe>f',
+  unclosed: `${EVIL_IFRAME}after`,
+  kept_then_refused: `<iframe src="https://www.youtube.com/embed/abcdefghijk"></iframe>${EVIL_IFRAME}gone</iframe>tail`,
+  refused_inside_kept: `${YT_IFRAME}${EVIL_IFRAME}text</iframe> rest of post`,
+  nested_kept: `${YT_IFRAME}${VIMEO_IFRAME}</iframe></iframe>after the embed`,
+  nested_pair_then_refused_p: `${YT_IFRAME}${YT_IFRAME}</iframe>${EVIL_IFRAME}<p>rest of post</p>`,
+  nested_pair_then_refused_b: `${YT_IFRAME}${YT_IFRAME}</iframe>${EVIL_IFRAME}<b>x</b></iframe>after`,
+  nested_pair_then_refused_text: `${YT_IFRAME}${YT_IFRAME}</iframe>${EVIL_IFRAME}fb</iframe>after`,
+  nested_three: `${YT_IFRAME}${YT_IFRAME}${YT_IFRAME}</iframe> bad<p>rest</p></iframe> bad<p>rest2</p>`,
+  nested_pair_then_kept: `${YT_IFRAME}${YT_IFRAME}</iframe>${VIMEO_IFRAME}</iframe></iframe>REST`,
+  refused_then_refused: `${EVIL_IFRAME}a${EVIL_IFRAME}b</iframe>c</iframe>d`,
+  dapplr_kept: '<iframe src="https://cdn.dapplr.in/file/dapplr-videos/x.mp4"></iframe>x',
+  dapplr_refused: '<iframe src="https://a_b.dapplr.in/file/dapplr-videos/x.mp4">fb</iframe>x',
+}
+const untransformedCases = Object.entries(untransformedInputs).map(([name, html]) => ({
+  name: `untransformed_${name}`, input: html, expected: rh.__sanitizeHtml(html, { untransformed: true }),
+}))
 
 const sanitizeCases = sanitizeInputs.map(([name, html, dims]) => ({
   name, html, dims, expected: rh.__sanitizeHtml(html, dims ? { preserveImageDimensions: true } : undefined),
@@ -807,6 +846,13 @@ internal object EmbedFixtures {
 ${embedCases.map((c) => `        EmbedCase(${k(c.name)}, ${k(c.input)}, ${c.expected}),`).join('\n')}
     )
 }
+
+/** \`sanitizeHtml(html, { untransformed: true })\`: the sanitize-only fallback of markdownToHTML. */
+internal object UntransformedFixtures {
+    val cases = listOf(
+${untransformedCases.map((c) => `        StringCase(${k(c.name)}, ${k(c.input)}, ${k(c.expected)}),`).join('\n')}
+    )
+}
 `)
 console.log('dom cases', domCases.length, pathCount, 'sanitize cases', sanitizeCases.length, 'decode', decodeCases.length,
-  'embed', embedCases.length, 'blockfix', blockFixCases.length, 'large', JSON.stringify(large))
+  'embed', embedCases.length, 'untransformed', untransformedCases.length, 'blockfix', blockFixCases.length, 'large', JSON.stringify(large))

@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.52 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.54 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -20,7 +20,7 @@ const internalsPath = join(here, 'node_modules/.rh-transform-internals.mjs')
 writeFileSync(internalsPath, readFileSync(bundlePath, 'utf8') +
   '\nexport { cleanReply as __cleanReply, linkify as __linkify, extractYtStartTime as __extractYtStartTime,' +
   ' isValidUsername as __isValidUsername, sanitizePermlink as __sanitizePermlink, decodeImageSrc as __decodeImageSrc,' +
-  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass };\n')
+  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd };\n')
 const rh = await import(pathToFileURL(internalsPath).href)
 rh.setSlowRenderThresholdMs(0)
 
@@ -297,9 +297,92 @@ const rules2552 = {
   video_poster: '<video src="https://example.com/v.mp4" poster="https://example.com/p.jpg?a=1&amp;times=2"></video>',
   code_entities: '`&amp; &lt;b&gt;`\n\n```\n&copy; &#169;\n```',
 }
+// Rules added in 2.5.53 and 2.5.54 (#2154 entity protection, #2155 render edges, #2165 placeholder guard), from the
+// upstream specs' inputs with example hosts and accounts. Kept out of FRAGMENTS, as the rules above.
+const allDelimiters = '​⁠⁡⁢⁣⁤' + Array.from({ length: 0xf8ff - 0xe100 + 1 }, (_, i) => String.fromCharCode(0xe100 + i)).join('')
+const rules2554 = {
+  angle_amp_plain: '[x](https://example.com/?q=&amp;amp;amp;)',
+  angle_amp: '[x](<https://example.com/?q=&amp;amp;amp;>)',
+  angle_paren: '[open](<https://example.test/a)b?x=1&amp;y=2>)',
+  angle_space: '[x](<https://example.com/a b?q=1&amp;r=2>)',
+  angle_img: '![x](<https://example.com/a.png?q=&amp;amp;amp;>)',
+  angle_img_plain: '![x](https://example.com/a.png?q=&amp;amp;amp;)',
+  angle_ref: '[x][r]\n\n[r]: <https://example.com/?q=&amp;amp;amp;>',
+  angle_ref_plain: '[x][r]\n\n[r]: https://example.com/?q=&amp;amp;amp;',
+  lookalike_code: '`​0​` and &amp;',
+  lookalike_text: '​0​ and &amp;',
+  indented_code_entity: 'para\n\n    a &amp; b\n',
+  no_fence_entity: '```bad`info\n\nx &copy;\n',
+  backticks_per_block: 'one ` tick\n\ntwo &copy;\n\nthree `code`',
+  path_entity_slash: '[x](/&#47;evil.example/@example-user/X_y)',
+  path_entity_post: 'zero​width\n\n[x](/&#47;evil.example/@example-user/some-post)',
+  path_entity_private: 'a​⁠⁡⁢⁣⁤b\n\n[x](/&#92;evil.example/@example-user/posts)',
+  path_entity_pair: `${allDelimiters}\n\n[x](/&#47;evil.example/@example-user/some-post)`,
+  ref_first_wins: '[a]: https://example.com/?q=&amp;\n[a]: <https://example.com/?q=&amp;amp;>\n\n[x][a]',
+  ref_failed_first: '[a]: <https://example.com/?q=&amp;amp;> junk\n\n[a]: https://example.com/?q=&amp;\n\n[x][a]',
+  tab_fence: '```\nx&lt;\ty\n```',
+  tab_indented: '    x&lt;\ty &amp;\tz\n',
+  tab_after_text: 'a\tb\n\n```\n&copy;\t|\n```',
+  angle_text_no_link: 'see <https://example.com/my page &copy; more> end',
+  angle_text_escaped: 'x &copy; <https://example.com/a\\> y &copy; z > w &copy;',
+  encoded_delimiter: 'https://example.com/&#8203;0&#8203; and &copy;',
+  angle_after_bare_url: '[https://a.example](<https://example.com/a b?x=1&amp;y=2>)',
+  angle_after_bare_url_text: '[see https://a.example](<https://example.com/a b?x=1&amp;y=2>)',
+  angle_ref_bare_url_label: '[https://a.example]: <https://example.com/a b?x=1&amp;y=2>\n\n[x][https://a.example]',
+  cr_breaks: 'a\r\r\n\r\r\nb &amp;',
+  cr_breaks_lead: '&amp;\r\r\nx',
+  ls_tab: 'a \tb &amp;\r\n\tc',
+  heading_definition: '[a]: <https://example.com/?q=&amp;amp;amp;>\n\n# [a]: <https://example.com/?q=&amp;amp;amp;>\n\n[x][a]',
+  angle_ls: 'x (<https://example.com/a b &copy; c>) y',
+  angle_nel: 'x (<https://example.com/a\u0085b &copy; c>) y',
+  angle_2424: 'x (<https://example.com/a␤b &copy; c>) y',
+  angle_ref_ls: '[r]: <https://example.com/a b &copy; c>',
+  angle_ref_nel: '[r]: <https://example.com/a\u0085b &copy; c>',
+  angle_escaped_ls: '[x](<https://example.com/a\\ b?q=&copy;&amp;z=1>)',
+  angle_escaped_lf: '[x](<https://example.com/a\\\nb?q=&copy;&amp;z=1>)',
+  angle_escaped_crlf: '[x](<https://example.com/a\\\r\nb?q=&copy;&amp;z=1>)',
+  angle_escaped_crnel: '[x](<https://example.com/a\\\r\u0085b?q=&copy;&amp;z=1>)',
+  prose_angle_paren: 'see (<https://example.com/a b &copy; c>) end',
+  prose_angle_paren_space: 'see ( <https://example.com/a b &copy;>) end',
+  prose_angle_label: 'text ]: <https://example.com/a b &copy;> end',
+  angle_mailto: '[x](<mailto:example-user@example.com?subject=One&amp;body=Two>)',
+  angle_relative: '[x](</path?q=&amp;amp;>)',
+  angle_lt_inside: '[x](<https://example.com/a<b?q=&amp;z>)',
+  angle_quote_escaped_lf: '> [x](<https://example.com/a\\\n> b?q=&copy;>)',
+  empty_label_plain: '[]: https://example.com/?q=&amp;amp;\n\n[x][]',
+  empty_label_angle: '[]: <https://example.com/?q=&amp;amp;>\n\n[x][]',
+  empty_label_first_wins: '[]: https://example.com/?q=&amp;\n[ ]: <https://example.com/?q=&amp;amp;>\n\n[x][]',
+  all_delimiters_taken: `${allDelimiters}\n\nx &copy; y`,
+  ref_paragraph_end: '[q] and ]: stuff\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[x][b]',
+  ref_note_line: '[a]: <https://example.com/u>\nNote: [b]: <https://example.com/a b?q=&amp;amp;>\n\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[x][b]',
+  ref_empty_after_title: '[a]: <https://example.com/u> "t\n[]: <https://example.com/c d?q=&copy;&amp;>"\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_empty_wide_indent: '[r]: <https://example.com/u>\n　[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_quote: '[a]: <https://example.com/u> "t\n[]: https://example.com/fake"\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_paren: '[a]: <https://example.com/u> (t\n[]: https://example.com/fake)\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_empty_chain: '[x]:\n[]:\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_not_definition: '[a]: <https://example.com/u> "t\n[]: not-a-definition"\n[]: <https://example.com/?q=&amp;amp;>\n\n[][]',
+  img_paren_query: '(https://host.example/photo.jpg?size=1)',
+  img_paren_query_div: '<div>(https://host.example/photo.jpg?size=1)</div>',
+  img_paren_query_p: '<p>(https://host.example/photo.jpg?size=1)</p>',
+  dapplr_nested: '<iframe src="https://player.eu.dapplr.in/file/dapplr-videos/x.mp4"></iframe>',
+  dapplr_cdn: '<iframe src="https://cdn.dapplr.in/file/dapplr-videos/x.mp4"></iframe>',
+  dapplr_refused: ['https://.dapplr.in/file/dapplr-videos/x.mp4', 'https://a..dapplr.in/file/dapplr-videos/x.mp4',
+    'https://a_b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in:8443/file/dapplr-videos/x.mp4',
+    'https://u:p@a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in\\file\\dapplr-videos\\x',
+    'https:///a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a%2eb.dapplr.in/file/dapplr-videos/x.mp4']
+    .map((src) => `<iframe src="${src}"></iframe>`).join('\n\n'),
+  web_path_2060: '<a href="/topic⁠/@example-user/some-post">x</a>',
+  guard_2060: '[x](/topic⁠/@example-user/some-post)',
+  guard_2060_entity: 'a &amp; b\n\n[x](/topic⁠/@example-user/some-post)',
+  guard_private: '[x](/topic/@example-user/some-post)',
+  guard_private_entity: 'a &amp; b\n\n[x](/topic/@example-user/some-post)',
+  guard_zwsp_path: '[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
+  guard_zwsp_path_entity: 'a &amp; b\n\n[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
+}
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -356,6 +439,7 @@ const FRAGMENTS = [
 ]
 Object.assign(handcrafted, bylines2542)
 Object.assign(handcrafted, rules2552)
+Object.assign(handcrafted, rules2554)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)
@@ -462,6 +546,13 @@ imageBodies.forEach((body, i) => {
   imageCases.push({ name: `strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
   imageCases.push({ name: `strraw_${i}`, kind: 'rawstring', body, meta: null, w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(body) })
 })
+// 2.5.53 (#2155): a bare image URL with a query inside parentheses, on the card and the post image.
+;['(https://host.example/photo.jpg?size=1)', '<div>(https://host.example/photo.jpg?size=1)</div>', '<p>(https://host.example/photo.jpg?size=1)</p>'].forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `paren-${i}`, last_update: '2026-11-20T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `paren_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `parencard_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `parenraw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+})
 // Rendered bodies from the render set through the full lookup too.
 bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
   imageCases.push({ name: `body_${name}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
@@ -480,6 +571,10 @@ const helperInputs = {
   isValidPermlink: ['example-post', 'Example', 'photo.png', 'post?x=1', 'a_b', 're-x-20260101t000000z', 'x.jpg?y', '', '-'],
   decodeImageSrc: ['https://example.com/a.png', ' https://example.com/a%20b.png ', 'https://example.com/%zz', '&amp;x=1', '&#0065;', '%E2%82%AC', '%E2%82'],
   stripHtmlTags: ['<b>x</b>', 'a <> b', 'a < b', '<<x>>', '<a href="x">y</a>tail<'],
+  // 2.5.53 (#2155): an unbalanced `)` after a query or fragment is prose
+  imageUrlEnd: ['https://host.example/photo.jpg?size=1)', 'https://host.example/photo.jpg)', 'https://host.example/photo.jpg#a)',
+    'https://host.example/photo.jpg?a=(1)', 'https://host.example/photo.jpg?a=)&amp;b=(1)', 'https://host.example/photo.jpg?a=)&b=(1))',
+    'https://host.example/photo.jpg?a=1))', 'https://host.example/photo.jpg?a=((1)', 'https://host.example/photo.jpg', 'https://host.example/a.png?x=1).'],
   youtubeVideoLinkClass: ['https://www.youtube.com/shorts/x', 'https://YOUTUBE.com/Shorts/x', 'https://youtu.be/x'],
   cleanReply: Object.values(handcrafted).filter((s) => /posted|via|watch on/i.test(s)).concat(['', 'a\n---\n\n\n*posted via lumen*\nb', '---\noriginally posted through [scrobble.life', 'x\n-----\t\n_Originally Posted Through [Scrobble.Life_',
     // 2.5.42: 3Speak separator lookahead and whole-line footer filter
