@@ -109,6 +109,21 @@ final class ChatUITests: XCTestCase {
         XCTAssertFalse(element(member, "chat-wide-mention-all").exists)
     }
 
+    /// Review of #3714: at the largest text the mention list scrolls inside a bounded panel, as on Android, and
+    /// the field stays in reach above the keyboard.
+    func testALongMentionListScrollsInABoundedPanel() {
+        let app = launch(["-startTab", "CHATS", "-demoChat", "moderator", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        let row = element(app, "chat-row-ch-ecency")
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        row.tap()
+        XCTAssertTrue(element(app, "chat-unread-marker").waitForExistence(timeout: 10), "the first page is in")
+        element(app, "chat-composer").focusAndType("hi @a")
+        let panel = element(app, "chat-mentions")
+        XCTAssertTrue(panel.waitForExistence(timeout: 5))
+        XCTAssertLessThanOrEqual(panel.frame.height, 221, "bounded: \(panel.frame.height)")
+        XCTAssertTrue(element(app, "chat-composer").isHittable, "the field stays in reach")
+    }
+
     /// The chat server refuses the sign-in: a notice in the list instead of the floating pill, and no Esie button.
     func testARefusedConnectionShowsTheOfflineNoticeAndNoEsieButton() {
         let app = launch(["-startTab", "CHATS", "-demoChat", "offline"])

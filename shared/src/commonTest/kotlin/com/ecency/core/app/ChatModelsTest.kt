@@ -1769,6 +1769,72 @@ class ChatThreadTest {
         assertTrue(m.current.canModerate && m.current.canMentionEveryone, "an answer without the flags keeps them")
     }
 
+    /** Review of #3714: a moderator given or taken while the thread was away shows on the read that catches it up. */
+    @Test
+    fun rightsGivenOrTakenWhileAwayShowOnTheCatchUp() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue(m.current.canModerate && m.current.canMentionEveryone)
+            for (moderator in listOf(false, true)) {
+                f.chat.dropSockets()
+                f.run(1)
+                if (moderator) f.chat.moderates += "hive-125125" else f.chat.moderates.clear()
+                f.chat.incoming("ch-ecency", "sent while away, moderator $moderator")
+                f.run(60_000)
+                f.run(1)
+                assertTrue("sent while away, moderator $moderator" in texts(m), "caught up")
+                assertEquals(moderator, m.current.canModerate, "canModerate after the catch-up")
+                assertEquals(moderator, m.current.canMentionEveryone, "canMentionEveryone after the catch-up")
+            }
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3714: a restored thread learns it is an open channel after its rights; a query typed is offered then. */
+    @Test
+    fun aRestoredThreadOffersTheMentionsOnceItsTypeIsKnown() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val list = f.holdNext { it.method == "GET" && it.url.substringBefore('?').endsWith("/api/mattermost/channels") }
+        val m = f.env.chat.threadModel("ch-ecency", "")
+        m.setText("hi @a")
+        m.start()
+        f.idle()
+        assertTrue(m.current.canMentionEveryone, "the rights came first")
+        assertEquals("", m.current.type)
+        list.complete(Unit)
+        f.idle()
+        assertEquals("O", m.current.type)
+        assertEquals(listOf("all"), m.current.wideMentions.map { it.name })
+    }
+
+    /** Review of #3714: a sent draft takes its channel-wide offer or notice with it. */
+    @Test
+    fun sendingClearsTheChannelWideOfferAndNotice() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val mod = thread(f, "ch-ecency", "O", "Ecency")
+        mod.setText("hi @a")
+        assertTrue(mod.current.wideMentions.isNotEmpty())
+        mod.send()
+        f.idle()
+        assertEquals("", mod.current.text)
+        assertTrue(mod.current.wideMentions.isEmpty(), "no offer left over an empty composer")
+        val member = thread(f, "ch-photo", "O", "Photography")
+        member.setText("hi @a")
+        assertTrue(member.current.wideMentionsLimited)
+        member.send()
+        f.idle()
+        assertEquals("", member.current.text)
+        assertFalse(member.current.wideMentionsLimited, "no notice left over an empty composer")
+    }
+
     /** #3710: text typed before the first page brings the rights is offered the mentions once it does. */
     @Test
     fun aQueryTypedBeforeTheRightsArriveIsOfferedTheMentionsThen() = runTest {

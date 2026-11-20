@@ -472,7 +472,11 @@ class ChatThreadModel internal constructor(
             if (c == null) return
             if (user == null) return
             // opened by id alone (a restored screen, a debug link): the channel says what it is
-            if (current.type.isEmpty() && c.type.isNotEmpty()) setState { it.copy(type = c.type, groupOwner = c.groupOwner, groupName = c.groupName.orEmpty()) }
+            if (current.type.isEmpty() && c.type.isNotEmpty()) {
+                setState { it.copy(type = c.type, groupOwner = c.groupOwner, groupName = c.groupName.orEmpty()) }
+                // the rights may have come first: a query typed meanwhile is offered the channel-wide mentions now
+                updateMentions(current.text)
+            }
             if (!hinted) {
                 channelName = if (c.isDirect) channelName.ifEmpty { c.directUser?.hiveName ?: c.shownName } else c.shownName
                 if (anchor == null) anchor = listOf(c.lastViewedAt, c.lastViewAt).firstOrNull { it != null && it != 0L }
@@ -557,6 +561,8 @@ class ChatThreadModel internal constructor(
                     return@launch
                 }
                 page.users.forEach { lookup[it.id] = it }
+                // a moderator given or taken while away
+                applyRights(page)
                 val now = posts.associateBy { it.id }
                 val read = page.posts.filter { it.id !in deletedIds }.map { p -> withLiveChanges(p, now[p.id]) }
                 val fresh = read.map { it.id }.toSet()
@@ -1108,6 +1114,8 @@ class ChatThreadModel internal constructor(
                 replyTo = if (s.replyTo?.postId == sent.replyTo) null else s.replyTo,
                 preview = if (s.preview?.url == sent.previewUrl) null else s.preview,
                 mentions = if (clearText || s.mentions == sent.mentions) emptyList() else s.mentions,
+                wideMentions = if (clearText) emptyList() else s.wideMentions,
+                wideMentionsLimited = s.wideMentionsLimited && !clearText,
             )
         }
     }
