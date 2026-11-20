@@ -179,4 +179,14 @@ class BlockAnchorsTest {
             assertTrue(at < index.getValue("user-content-sec"), "$link: the heading's place, before the data-id")
         }
     }
+
+    /** Review of #3714: an author id the blocks hold no anchor for (inside code) leaves the link to the `data-id` of that name. */
+    @Test
+    fun anUnreachableAuthorIdFallsBackToTheDataId() {
+        for (link in listOf("#sec", "#user-content-sec")) {
+            val built = BlockBuilder.build(RenderHelper().renderPostBody("<pre><code><span id=\"sec\">c</span></code></pre>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go]($link)", forApp = true))
+            val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+            assertEquals(BlockAnchors.index(built)["user-content-sec"], assertNotNull(BlockAnchors.jump(built, target, here), link), link)
+        }
+    }
 }
