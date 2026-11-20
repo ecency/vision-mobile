@@ -1,6 +1,7 @@
 package com.ecency.core.render.blocks
 
 import com.ecency.core.render.sanitize.SanitizeOptions
+import com.ecency.core.render.sanitize.AuthorAttributes
 import com.ecency.core.app.ErrorReports
 import com.ecency.core.render.blocks.Inline.Mark
 import com.ecency.core.render.dom.CDATASection
@@ -66,7 +67,24 @@ object BlockBuilder {
     fun fromDocument(document: Document, options: BuildOptions): List<Block> {
         val root = document.documentElement ?: return emptyList()
         val body = if (lower(root.tagName) == "body") root else findBody(root) ?: root
-        return Walker(options).top(body)
+        return Walker(options, namespacedIds(body)).top(body)
+    }
+
+    /**
+     * Every `id` in the document that carries the sanitizer's `user-content-` namespace: a same-page link to one of
+     * them was namespaced with it ([fragmentOnly]). Iterative, as deep markup is walked without recursion.
+     */
+    private fun namespacedIds(root: Element): Set<String> {
+        val out = HashSet<String>()
+        val stack = ArrayList<Node>()
+        stack += root
+        while (stack.isNotEmpty()) {
+            val n = stack.removeAt(stack.size - 1)
+            if (n !is Element) continue
+            n.getAttribute("id")?.trim()?.let { if (it.startsWith(AuthorAttributes.AUTHOR_ID_PREFIX)) out += it }
+            for (k in n.childNodes.indices.reversed()) stack += n.childNodes[k]
+        }
+        return out
     }
 
     private fun parse(html: String): Document = try {
@@ -144,14 +162,14 @@ object BlockBuilder {
     }
 
     /** What a tap on [el] does, ignoring chips, cards and videos; null for no (or an unsafe) target. */
-    internal fun anchorTarget(el: Element): LinkTarget? {
+    internal fun anchorTarget(el: Element, namespacedIds: Set<String> = emptySet()): LinkTarget? {
         val cls = classes(el)
         val href = el.getAttribute("data-href")?.takeIf { it.isNotBlank() } ?: el.getAttribute("href")?.takeIf { it.isNotBlank() }
         return when {
             "markdown-external-link" in cls -> {
                 val yt = el.getAttribute("data-youtube")
                 if (!yt.isNullOrEmpty()) SafeTarget.youtube(yt, parseIntJs(el.getAttribute("data-start-time")))
-                else fragmentOnly(href)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
+                else fragmentOnly(href, namespacedIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
             }
             "markdown-author-link" in cls -> SafeTarget.author(el.getAttribute("data-author"))
             "markdown-post-link" in cls -> postTarget(el.getAttribute("data-author"), el.getAttribute("data-permlink"))
@@ -159,7 +177,7 @@ object BlockBuilder {
             "markdown-tag-link" in cls -> SafeTarget.tagTarget(el.getAttribute("data-tag"), el.getAttribute("data-filter"))
             "markdown-witnesses-link" in cls || "markdown-proposal-link" in cls -> SafeTarget.external(href)
             "markdown-community-link" in cls -> SafeTarget.communityTarget(el.getAttribute("data-community"), el.getAttribute("data-filter"))
-            else -> fragmentOnly(href)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
+            else -> fragmentOnly(href, namespacedIds)?.let { LinkTarget.Anchor(it) } ?: SafeTarget.external(href)
         }
     }
 
@@ -185,10 +203,17 @@ object BlockBuilder {
     /** What a Kotlin regex `.` does not match. JS's `.` does match U+0085; this keeps the old regex's reading. */
     private fun isLineTerminator(c: Char) = c == '\n' || c == '\r' || c == '\u0085' || c == '\u2028' || c == '\u2029'
 
-    /** The fragment of a `#id` href (`#` alone is the top, an empty id), or null when [href] is more than that. */
-    internal fun fragmentOnly(href: String?): String? {
+    /**
+     * The fragment of a `#id` href (`#` alone is the top, an empty id), or null when [href] is more than that. The
+     * namespace comes off only when the sanitizer put it there, a link to one of the document's [namespacedIds]: a
+     * fragment written as `#user-content-x` to a `data-id` of that name stays as written. The length limit applies
+     * to the author's id, after the namespace is removed.
+     */
+    internal fun fragmentOnly(href: String?, namespacedIds: Set<String> = emptySet()): String? {
         val h = href?.trim() ?: return null
-        return if (h.startsWith("#")) fragment(h.substring(1))?.let(::authorId) else null
+        if (!h.startsWith("#")) return null
+        val decoded = decodeFragment(h.substring(1))
+        return checkedId(if (decoded in namespacedIds) authorId(decoded) else decoded)
     }
 
     /**
@@ -196,7 +221,7 @@ object BlockBuilder {
      * exactly once per render. The blocks keep the author's own names, so a link from elsewhere (`.../post#x`) and one
      * in the body land on the same place.
      */
-    internal fun authorId(id: String): String = id.removePrefix(com.ecency.core.render.sanitize.AuthorAttributes.AUTHOR_ID_PREFIX)
+    internal fun authorId(id: String): String = id.removePrefix(AuthorAttributes.AUTHOR_ID_PREFIX)
 
     /** A post link's `#id` (never `#@author/permlink`, the comment form [postTarget] reads), or null. */
     internal fun fragmentOf(href: String?): String? {
@@ -204,15 +229,15 @@ object BlockBuilder {
         val at = h.indexOf('#')
         if (at < 0) return null
         val f = h.substring(at + 1)
-        return if (f.isEmpty() || f.startsWith("@")) null else fragment(f)
+        return if (f.isEmpty() || f.startsWith("@")) null else checkedId(decodeFragment(f))
     }
 
-    /** Percent-decoded as a browser matches a fragment to an id; null when it cannot be an id (too long, a control). */
-    private fun fragment(raw: String): String? {
-        val decoded = runCatching { com.ecency.core.render.js.Js.decodeUriComponent(raw) }.getOrDefault(raw)
-        if (decoded.length > MAX_ANCHOR_ID || decoded.any { it < ' ' }) return null
-        return decoded
-    }
+    /** Percent-decoded as a browser matches a fragment to an id. */
+    private fun decodeFragment(raw: String): String =
+        runCatching { com.ecency.core.render.js.Js.decodeUriComponent(raw) }.getOrDefault(raw)
+
+    /** [id], or null when it cannot be an id (too long, a control). */
+    private fun checkedId(id: String): String? = if (id.length > MAX_ANCHOR_ID || id.any { it < ' ' }) null else id
 
     /** The longest id an anchor jump matches. */
     internal const val MAX_ANCHOR_ID = 256
@@ -277,7 +302,7 @@ private sealed interface Piece {
     class Break(override val link: LinkRef?) : Piece
 }
 
-private class Walker(private val options: BuildOptions) {
+private class Walker(private val options: BuildOptions, private val namespacedIds: Set<String>) {
     private var out: MutableList<Block> = ArrayList()
     private val pieces = ArrayList<Piece>()
 
@@ -531,7 +556,7 @@ private class Walker(private val options: BuildOptions) {
             out += preview(post.author, post.permlink, el)
             return
         }
-        val target = BlockBuilder.anchorTarget(el)
+        val target = BlockBuilder.anchorTarget(el, namespacedIds)
         if (target == null) {
             children(el, ctx.with(imageLink = null))
             return
@@ -644,7 +669,7 @@ private class Walker(private val options: BuildOptions) {
                         else -> {
                             var inner = c
                             if (tag == "a") {
-                                val ref = BlockBuilder.anchorTarget(n)?.let { LinkRef(it) }
+                                val ref = BlockBuilder.anchorTarget(n, namespacedIds)?.let { LinkRef(it) }
                                 inner = if (ref != null) c.with(link = ref, imageLink = if (onlyImage(n)) ref else null) else c.with(imageLink = null)
                             }
                             val block = tag in BlockBuilder.BLOCK_TAGS

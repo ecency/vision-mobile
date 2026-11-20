@@ -127,4 +127,28 @@ class BlockAnchorsTest {
         assertIs<Block.Anchor>(heading[BlockAnchors.index(heading).getValue("sec-1")])
         assertIs<Block.Heading>(heading[BlockAnchors.index(heading).getValue("sec-1") + 1])
     }
+
+    private fun firstLink(blocks: List<Block>): LinkTarget? {
+        for (b in blocks) if (b is Block.Paragraph) b.inlines.firstNotNullOfOrNull { (it as? Inline.Link)?.target }?.let { return it }
+        return null
+    }
+
+    /** Review of #3714: a fragment the sanitizer did not namespace is kept as written, so it finds a `data-id` of that name. */
+    @Test
+    fun aDataIdThatLooksNamespacedIsFoundByItsOwnName() {
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("<a data-id=\"user-content-section\"></a>\n\n## Elsewhere\n\nback to [the section](#user-content-section)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+        val at = BlockAnchors.jump(built, target, here)
+        assertEquals(BlockAnchors.index(built)["user-content-section"], at)
+        assertIs<Block.Anchor>(built[at!!])
+    }
+
+    /** Review of #3714: the anchor length limit applies to the author's id, not to its namespaced form (13 longer). */
+    @Test
+    fun aLongAuthorIdIsStillAJumpTarget() {
+        val id = "a".repeat(BlockBuilder.MAX_ANCHOR_ID - 12)
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"$id\">Far</h2>\n\nback to [far](#$id)", forApp = true))
+        assertEquals(LinkTarget.Anchor(id), firstLink(built))
+        assertEquals(BlockAnchors.index(built)[id], BlockAnchors.jump(built, LinkTarget.Anchor(id), here))
+    }
 }
