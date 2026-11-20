@@ -348,6 +348,8 @@ final class AppContainer: ObservableObject {
             if UserDefaults.standard.string(forKey: "demoChat") == "offline" { DemoAuthServices.shared.chat?.refuseSignIn() }
             // -demoChat loading: the chat sign-in never answers, so the chats list stays on its first load (UI tests)
             if UserDefaults.standard.string(forKey: "demoChat") == "loading" { DemoAuthServices.shared.chat?.holdSignIn = true }
+            // -demoChat moderator: the viewer moderates the Ecency community, so its channel offers Pin, Remove and @all
+            if UserDefaults.standard.string(forKey: "demoChat") == "moderator" { DemoAuthServices.shared.chat?.moderate(community: "hive-125125") }
             // -demoNoPro YES: nobody is on the Pro roster until a demo Pro purchase (Pro screenshots, UI tests)
             if UserDefaults.standard.bool(forKey: "demoNoPro") { DemoAuthServices.shared.clearDemoPro() }
             // -demoProMember <name>: one more account on the Pro roster (badge UI tests)

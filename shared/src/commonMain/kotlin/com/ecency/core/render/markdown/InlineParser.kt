@@ -5,13 +5,21 @@ internal typealias InlineRule = (state: StateInline, silent: Boolean) -> Boolean
 
 /** remarkable's StateInline. `pending` is a builder; JS concatenates strings. */
 internal class StateInline(
-    val src: String,
+    src: String,
     val parser: InlineParser,
     val env: Env,
     val tokens: MutableList<Token>,
 ) {
+    /** Mutable for the escaped `&` pairing (render-helper 2.5.46): swapped while a link parses, same length. */
+    var src: String = src
     var pos = 0
     var posMax = src.length
+
+    // render-helper `PairState`: the paired source computed once per state, and whether it is in place
+    var ampPairedDone = false
+    var ampPaired: String? = null
+    var ampInside = false
+    var ampOriginal: String? = null
     var level = 0
     val pending = StringBuilder()
     var pendingLevel = 0
@@ -69,8 +77,8 @@ internal class InlineParser private constructor(
             listOf(
                 InlineRules::text, InlineRules::newline, InlineRules::escape, InlineRules::backticks,
                 InlineRules::del, InlineRules::ins, InlineRules::mark, InlineRules::emphasis, InlineRules::sub,
-                InlineRules::sup, InlineRules::links, InlineRules::footnoteInline, InlineRules::footnoteRef,
-                InlineRules::autolink, InlineRules::htmltag, InlineRules::entity,
+                InlineRules::sup, AmpPairing::links, InlineRules::footnoteInline, InlineRules::footnoteRef,
+                AmpPairing::autolink, InlineRules::htmltag, InlineRules::entity,
             )
         } else {
             listOf(

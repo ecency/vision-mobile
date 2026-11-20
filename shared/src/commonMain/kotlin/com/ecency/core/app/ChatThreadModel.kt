@@ -1,8 +1,8 @@
 package com.ecency.core.app
 
 import com.ecency.core.api.chat.ChatApiException
-import com.ecency.core.api.chat.ChatChannel
 import com.ecency.core.api.chat.ChatPost
+import com.ecency.core.api.chat.ChatPostsPage
 import com.ecency.core.api.chat.ChatReaction
 import com.ecency.core.api.chat.ChatUser
 import com.ecency.core.api.chat.firstText
@@ -95,6 +95,25 @@ data class ChatNoticeItem(override val id: String, val text: String, override va
 /** A mention suggestion (RN MentionSuggestions): `@name` and a display name when different. */
 data class ChatMention(val user: ChatUser, val name: String, val displayName: String?)
 
+/** A channel-wide mention suggestion (web CHANNEL_WIDE_MENTIONS): `@here` notifies who is around, the others everyone. */
+data class ChatWideMention(val name: String) {
+    val label: String get() = "@$name"
+    val description: String get() = if (name == HERE) L.native.chatThread.mentionHereDescription else L.native.chatThread.mentionAllDescription
+
+    companion object {
+        private const val HERE = "here"
+
+        /** Web's order. */
+        val ALL: List<ChatWideMention> = listOf(HERE, "channel", "all", "everyone").map(::ChatWideMention)
+
+        /** Web: those that start with [query] (any case); none without a query of at least one character. */
+        fun matching(query: String?): List<ChatWideMention> {
+            val q = query?.lowercase()?.takeIf { it.isNotEmpty() } ?: return emptyList()
+            return ALL.filter { it.name.startsWith(q) }
+        }
+    }
+}
+
 /** A member in the members sheet (RN OnlineUsersModal). */
 data class ChatMemberRow(val userId: String, val username: String, val displayName: String, val online: Boolean, val account: String?)
 
@@ -147,7 +166,17 @@ data class ChatThreadState(
     val ban: ChatBanInfo? = null,
     val banText: String? = null,
     val showDmWarning: Boolean = false,
+    /** The server says the viewer moderates this channel's community (Remove anyone's message, Pin). */
     val canModerate: Boolean = false,
+    /** The server says the viewer may notify the whole channel (a moderator, anyone in a direct message). */
+    val canMentionEveryone: Boolean = false,
+    /** Channel-wide mentions matching the `@` query, offered when [canMentionEveryone]. */
+    val wideMentions: List<ChatWideMention> = emptyList(),
+    /**
+     * The `@` query matches a channel-wide mention the viewer may not use: say they are for moderators (web). Only in
+     * an open (community) channel, once the server has said what the viewer may do.
+     */
+    val wideMentionsLimited: Boolean = false,
     val viewerId: String? = null,
     val connected: Boolean = false,
     /** An alert to show once (an image the account cannot sign); the UI calls [ChatThreadModel.clearAlert]. */
@@ -207,7 +236,6 @@ class ChatThreadModel internal constructor(
     private var groupRenamedLive = false
     private var groupUsers: List<ChatUser> = emptyList()
     private var channelName: String = ""
-    private var channelHeader: String = ""
     private var loadJob: Job? = null
     private var previewJob: Job? = null
     private var banJob: Job? = null
@@ -264,6 +292,13 @@ class ChatThreadModel internal constructor(
     /** The list (or a profile) handed over what it knew about the channel. */
     private val hinted: Boolean = env.chat.hints[channelId]?.channel != null
     private var dead = false
+
+    /** A posts page has said what the viewer may do ([applyRights]): until then no "for moderators" notice. */
+    private var rightsKnown = false
+
+    /** Posts reads in the order they were sent, and the latest whose rights stand: an older read landing late never overrides a newer one. */
+    private var rightsAsked = 0
+    private var rightsHeld = 0
     private val repliedHere = mutableSetOf<String>()
     private val typingUntil = mutableMapOf<String, Long>()
     private var lastTypingSent = 0L
@@ -299,7 +334,6 @@ class ChatThreadModel internal constructor(
         val channel = hint?.channel
         hint?.users?.let { lookup.putAll(it) }
         channelName = hint?.title ?: channel?.shownName.orEmpty()
-        channelHeader = channel?.header ?: channel?.purpose.orEmpty()
         anchor = channel?.let { c -> listOf(c.lastViewedAt, c.lastViewAt).firstOrNull { it != null && it != 0L } }
         groupUsers = channel?.groupUsers.orEmpty()
         groupUsers.forEach { u -> lookup.getOrPut(u.id) { u } }
@@ -374,7 +408,7 @@ class ChatThreadModel internal constructor(
             launch { loadMembers(u) }
             launch { loadPinnedCount(u) }
             // without the list's details (a conversation restored after the app was closed), and for a group always
-            if (current.isGroup || !hinted) launch { refreshChannel(u) } else launch { resolveModeration(u) }
+            if (current.isGroup || !hinted) launch { refreshChannel(u) }
             load(refresh = false)
             if (active) connect()
         }
@@ -415,45 +449,44 @@ class ChatThreadModel internal constructor(
         }
     }
 
-    /** RN resolveModeration: the viewer moderates the community this channel belongs to (owner, admin, mod). */
-    private suspend fun resolveModeration(u: String) {
-        val community = if (current.isGroup) null else ChatsModel.communityOf(ChatChannel(channelId, name = channelName, displayName = channelName, header = channelHeader))
-        if (community == null) {
-            setState { it.copy(canModerate = false) }
-            return
+    /**
+     * What the viewer may do here, as the server decides it for every delete, pin and send (web reads the same
+     * fields). A flag the answer leaves out keeps what the thread had; `canMentionEveryone` left out follows
+     * `canModerate` when that is there (an older server), as web does.
+     */
+    private fun applyRights(page: ChatPostsPage, asked: Int) {
+        if (page.canModerate == null && page.canMentionEveryone == null) return
+        if (asked < rightsHeld) return
+        rightsHeld = asked
+        rightsKnown = true
+        setState {
+            it.copy(
+                canModerate = page.canModerate ?: it.canModerate,
+                canMentionEveryone = page.canMentionEveryone ?: page.canModerate ?: it.canMentionEveryone,
+            )
         }
-        try {
-            val c = env.communityApi.community(community, u)
-            val role = c?.team?.firstOrNull { it.account == u }?.role
-            if (user != null) setState { it.copy(canModerate = role in MODERATOR_ROLES) }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            ErrorReports.quiet(e, "chatThread.moderation")
-            setState { it.copy(canModerate = false) }
-        }
+        updateMentions(current.text)
     }
 
     /**
      * RN: a group's name, owner and members from the list, so a rename made elsewhere is never stale; for a channel
-     * opened without the list (restored), its name and header, then whether the viewer moderates it.
+     * opened without the list (restored), its name and header.
      */
     private suspend fun refreshChannel(u: String) {
         try {
             val c = env.chat.call(u) { env.chat.api.channels(it.token) }.firstOrNull { it.id == channelId }
-            if (c == null) {
-                resolveModeration(u)
-                return
-            }
+            if (c == null) return
             if (user == null) return
             // opened by id alone (a restored screen, a debug link): the channel says what it is
-            if (current.type.isEmpty() && c.type.isNotEmpty()) setState { it.copy(type = c.type, groupOwner = c.groupOwner, groupName = c.groupName.orEmpty()) }
+            if (current.type.isEmpty() && c.type.isNotEmpty()) {
+                setState { it.copy(type = c.type, groupOwner = c.groupOwner, groupName = c.groupName.orEmpty()) }
+                // the rights may have come first: a query typed meanwhile is offered the channel-wide mentions now
+                updateMentions(current.text)
+            }
             if (!hinted) {
                 channelName = if (c.isDirect) channelName.ifEmpty { c.directUser?.hiveName ?: c.shownName } else c.shownName
-                channelHeader = c.header.ifEmpty { c.purpose }
                 if (anchor == null) anchor = listOf(c.lastViewedAt, c.lastViewAt).firstOrNull { it != null && it != 0L }
             }
-            resolveModeration(u)
             groupUsers = c.groupUsers
             groupUsers.forEach { x -> lookup.getOrPut(x.id) { x } }
             setState { it.copy(groupOwner = c.groupOwner, groupName = if (groupRenamedLive) it.groupName else c.groupName.orEmpty()) }
@@ -518,6 +551,7 @@ class ChatThreadModel internal constructor(
         val before = missedFrom
         scope.launch {
             try {
+                val asked = ++rightsAsked
                 val page = env.chat.call(u) { env.chat.api.posts(it.token, channelId, null, current.viewerId) }
                 if (user == null) return@launch
                 if (gen != refreshGen) {
@@ -534,6 +568,8 @@ class ChatThreadModel internal constructor(
                     return@launch
                 }
                 page.users.forEach { lookup[it.id] = it }
+                // a moderator given or taken while away (unless a newer page has spoken since)
+                applyRights(page, asked)
                 val now = posts.associateBy { it.id }
                 val read = page.posts.filter { it.id !in deletedIds }.map { p -> withLiveChanges(p, now[p.id]) }
                 val fresh = read.map { it.id }.toSet()
@@ -591,6 +627,7 @@ class ChatThreadModel internal constructor(
                 // the viewer decides which messages are own (Edit, Remove): a first session read in start() that failed
                 // must not leave it unknown for as long as the screen lives
                 val viewer = current.viewerId ?: env.chat.call(u) { it.userId }?.also { id -> setState { it.copy(viewerId = id) } }
+                val asked = ++rightsAsked
                 val page = try {
                     env.chat.call(u) { env.chat.api.posts(it.token, channelId, from, viewer) }
                 } catch (e: ChatApiException) {
@@ -603,6 +640,7 @@ class ChatThreadModel internal constructor(
                 page.users.forEach { lookup[it.id] = it }
                 page.memberCount?.let { c -> setState { it.copy(memberCount = c) } }
                 page.onlineUserIds?.let { onlineIds = it }
+                applyRights(page, asked)
                 // the read time the posts page carries, when neither the list nor the members gave one
                 if (anchor == null) page.lastViewedAt?.takeIf { it != 0L }?.let { anchor = it }
                 posts = if (refresh) page.posts else (posts + page.posts).distinctBy { it.id }
@@ -976,12 +1014,18 @@ class ChatThreadModel internal constructor(
     private fun updateMentions(text: String) {
         val q = ChatText.mentionQuery(text)
         val users = ChatText.suggestions(lookup.values.toList(), q?.second)
+        // web offers them in open channels only: a group has no moderators, a DM reaches one person
+        val wide = if (current.type == "O") ChatWideMention.matching(q?.second) else emptyList()
         setState { s ->
-            s.copy(mentions = users.map { u ->
-                val name = ChatText.mentionName(u)
-                val display = firstText(u.safeNickname, u.safeName, u.username, name)
-                ChatMention(u, name, display?.takeIf { it != name })
-            })
+            s.copy(
+                mentions = users.map { u ->
+                    val name = ChatText.mentionName(u)
+                    val display = firstText(u.safeNickname, u.safeName, u.username, name)
+                    ChatMention(u, name, display?.takeIf { it != name })
+                },
+                wideMentions = if (s.canMentionEveryone) wide else emptyList(),
+                wideMentionsLimited = rightsKnown && !s.canMentionEveryone && wide.isNotEmpty(),
+            )
         }
     }
 
@@ -991,6 +1035,13 @@ class ChatThreadModel internal constructor(
         val q = ChatText.mentionQuery(text)
         val next = ChatText.insertMention(text, q?.first, q?.second, m.name)
         replaceText(next)
+    }
+
+    /** A channel-wide suggestion was tapped: the `@query` becomes `@all ` (web applyMention). */
+    fun selectWideMention(m: ChatWideMention) {
+        val text = current.text
+        val q = ChatText.mentionQuery(text)
+        replaceText(ChatText.insertMention(text, q?.first, q?.second, m.name))
     }
 
     private fun replaceText(text: String) {
@@ -1071,6 +1122,8 @@ class ChatThreadModel internal constructor(
                 replyTo = if (s.replyTo?.postId == sent.replyTo) null else s.replyTo,
                 preview = if (s.preview?.url == sent.previewUrl) null else s.preview,
                 mentions = if (clearText || s.mentions == sent.mentions) emptyList() else s.mentions,
+                wideMentions = if (clearText) emptyList() else s.wideMentions,
+                wideMentionsLimited = s.wideMentionsLimited && !clearText,
             )
         }
     }
@@ -1369,7 +1422,6 @@ class ChatThreadModel internal constructor(
 
     companion object {
         internal const val SPAN_CACHE_MAX = 5_000
-        val MODERATOR_ROLES = setOf("owner", "admin", "mod")
         const val AUTO_FILL_ROWS = 15
         const val ECHO_WINDOW_MILLIS = 30_000L
         const val SEND_BOUND_MILLIS = 30_000L
@@ -1382,6 +1434,8 @@ class ChatThreadModel internal constructor(
         val NEW_MESSAGES: String get() = L.chats.newMessages
         val PLACEHOLDER: String get() = L.profile.message
         val EDITING: String get() = L.chats.editingMessage
+        val WIDE_MENTIONS_TITLE: String get() = L.native.chatThread.wideMentionsTitle
+        val WIDE_MENTIONS_LIMITED: String get() = L.native.chatThread.wideMentionsLimited
         val REACTION_ERROR: String get() = L.chats.reactionError
         val REMOVE_TITLE: String get() = L.chats.removeMessage
         val REMOVE_BODY: String get() = L.chats.removeMessageBody

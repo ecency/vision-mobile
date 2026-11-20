@@ -27,7 +27,12 @@ import kotlin.time.ExperimentalTime
 
 /** Node pools, mirroring the RN app (`src/constants/options/api.ts`). */
 object HiveNodes {
-    /** The app's SERVER_LIST, in the app's order. */
+    /**
+     * The app's SERVER_LIST, in the app's order, then techcoderx.com and hiveapi.actifit.io last, as SDK 2.9.6 lists
+     * them. Until 2026-11 both were left out: their condenser_api.get_accounts served posting_json_metadata stripped,
+     * which silently emptied wallet token settings. Re-checked by the SDK on 2026-11-19 (metadata identical to
+     * api.hive.blog); if wallet tokens go missing again, compare get_accounts on these two against api.hive.blog first.
+     */
     val DEFAULT: List<String> = listOf(
         "https://api.deathwing.me",
         "https://rpc.mahdiyari.info",
@@ -35,23 +40,17 @@ object HiveNodes {
         "https://api.c0ff33a.uk",
         "https://api.hive.blog",
         "https://api.syncad.com",
+        "https://techcoderx.com",
+        "https://hiveapi.actifit.io",
     )
-
-    /**
-     * Nodes that must never serve the app: they answer condenser_api.get_accounts with
-     * posting_json_metadata stripped, which silently empties wallet token settings.
-     */
-    val BLOCKED: List<String> = listOf("https://techcoderx.com", "https://hiveapi.actifit.io")
 
     private fun normalize(node: String) = node.trim().trimEnd('/').lowercase()
 
-    fun isBlocked(node: String): Boolean = BLOCKED.any { normalize(it) == normalize(node) }
-
     private val HTTP = Regex("^https?://.+", RegexOption.IGNORE_CASE)
 
-    /** Drops blocked nodes, anything but http(s) URLs, duplicates and trailing slashes, keeping order (SDK setNodes). */
+    /** Drops anything but http(s) URLs, duplicates and trailing slashes, keeping order (SDK setNodes). */
     fun sanitize(nodes: List<String>): List<String> =
-        nodes.map { it.trim().trimEnd('/') }.filter { HTTP.matches(it) && !isBlocked(it) }.distinctBy(::normalize)
+        nodes.map { it.trim().trimEnd('/') }.filter { HTTP.matches(it) }.distinctBy(::normalize)
 
     /**
      * A node from the published list must be https and name no user or password (`https://user@host` would send
@@ -73,8 +72,8 @@ object HiveNodes {
     const val REMOTE_LIST_URL = "https://ecency.com/public-nodes.json"
 
     /**
-     * RN getNodes: the published list without blocked nodes, or null when the body is not a non-empty list of
-     * names (the caller then keeps [DEFAULT]). A list that held only blocked nodes is null too.
+     * RN getNodes: the published list ([sanitize]d), or null when the body is not a non-empty list of usable names
+     * (the caller then keeps [DEFAULT]).
      */
     fun parseRemote(body: String): List<String>? = parseRemote(SafeJson.parseOrNull(body))
 
@@ -100,8 +99,8 @@ object HiveNodes {
     fun withFirst(server: String, list: List<String>): List<String> = sanitize(listOf(server) + list)
 }
 
-/** What [HiveRpcClient.callWithFallback] got: the result and the method that answered it. */
-data class FallbackResult(val result: JsonElement, val method: String)
+/** What [HiveRpcClient.callWithFallback] got: the result, the method that answered it and the node that did. */
+data class FallbackResult(val result: JsonElement, val method: String, val node: String = "")
 
 /** Base class for everything the data layer throws about talking to Hive nodes. */
 sealed class HiveApiException(message: String, cause: Throwable? = null) : EcencyException(message, cause)
@@ -143,7 +142,10 @@ class RpcTimeoutException(val node: String, val method: String, val timeoutMilli
 
 /** No attempt answered usefully. [failures] holds one entry per attempt, in order (reads may ask a node twice). */
 class AllNodesFailedException(val method: String, val failures: List<HiveApiException>) :
-    HiveApiException("$method failed on all ${failures.size} nodes: ${failures.lastOrNull()?.message}", failures.lastOrNull())
+    HiveApiException(
+        if (failures.isEmpty()) "$method: no node could be asked" else "$method failed on all ${failures.size} nodes: ${failures.last().message}",
+        failures.lastOrNull(),
+    )
 
 /**
  * JSON-RPC 2.0 client over a pool of Hive nodes, with the node selection and failover of @ecency/sdk 2.4.26
@@ -200,7 +202,7 @@ class HiveRpcClient(
     /** The node the next call would start with (no re-probe is spent on asking). */
     val currentNode: String get() = health.orderedNodes(nodes, probe = false).first()
 
-    /** Replaces the pool (e.g. a user-chosen node first). Blocked nodes are dropped; what was learned about each node stays. */
+    /** Replaces the pool (e.g. a user-chosen node first), [HiveNodes.sanitize]d; what was learned about each node stays. */
     @Throws(EcencyException::class)
     fun setNodes(newNodes: List<String>) {
         val sanitized = HiveNodes.sanitize(newNodes)
@@ -289,7 +291,7 @@ class HiveRpcClient(
                 } else {
                     health.recordSuccess(node, NodeHealthTracker.apiOf(asked), nowMillis() - started, asked)
                     recordHeadBlock(node, asked, result)
-                    return FallbackResult(result, asked)
+                    return FallbackResult(result, asked, node)
                 }
             } catch (e: RpcErrorException) {
                 if (!isNodeLevelError(e.code, e.rpcMessage)) throw e
@@ -336,6 +338,28 @@ class HiveRpcClient(
      */
     internal suspend fun ask(node: String, method: String, params: JsonElement, timeoutMillis: Long): JsonElement =
         attempt(node, method, params, timeoutMillis)
+
+    /**
+     * [ask], with the answer counted for the node's health as a read counts it: a rate limit, a timeout or a broken
+     * node cools it, an answer keeps it in favour. No failover, no retry (the post double-check, #3712, picks nodes),
+     * and the full [readTimeoutMillis] rather than a read's adaptive per-node bound.
+     */
+    internal suspend fun askCounted(node: String, method: String, params: JsonElement): JsonElement {
+        val api = NodeHealthTracker.apiOf(method)
+        val started = nowMillis()
+        val result = try {
+            attempt(node, method, params, readTimeoutMillis)
+        } catch (e: HiveApiException) {
+            val nodeLevel = e !is RpcErrorException || isNodeLevelError(e.code, e.rpcMessage)
+            if (nodeLevel && (e is RpcErrorException || e is NodeFailureException || e is RpcTimeoutException)) {
+                record(node, e, api)
+                health.recordSlowFailure(node, nowMillis() - started, method)
+            }
+            throw e
+        }
+        health.recordSuccess(node, api, nowMillis() - started, method)
+        return result
+    }
 
     private fun HiveApiException.nodeOf(): String = when (this) {
         is NodeFailureException -> node

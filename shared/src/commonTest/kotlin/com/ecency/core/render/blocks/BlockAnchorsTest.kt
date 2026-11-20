@@ -6,6 +6,7 @@ import com.ecency.core.render.RenderHelper
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -126,5 +127,74 @@ class BlockAnchorsTest {
         val heading = BlockBuilder.build("<p>before</p><h2 id=\"sec-1\">Section</h2>")
         assertIs<Block.Anchor>(heading[BlockAnchors.index(heading).getValue("sec-1")])
         assertIs<Block.Heading>(heading[BlockAnchors.index(heading).getValue("sec-1") + 1])
+    }
+
+    private fun firstLink(blocks: List<Block>): LinkTarget? {
+        for (b in blocks) if (b is Block.Paragraph) b.inlines.firstNotNullOfOrNull { (it as? Inline.Link)?.target }?.let { return it }
+        return null
+    }
+
+    /** Review of #3714: a fragment the sanitizer did not namespace is kept as written, so it finds a `data-id` of that name. */
+    @Test
+    fun aDataIdThatLooksNamespacedIsFoundByItsOwnName() {
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("<a data-id=\"user-content-section\"></a>\n\n## Elsewhere\n\nback to [the section](#user-content-section)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+        val at = BlockAnchors.jump(built, target, here)
+        assertEquals(BlockAnchors.index(built)["user-content-section"], at)
+        assertIs<Block.Anchor>(built[at!!])
+    }
+
+    /** Review of #3714: the anchor length limit applies to the author's id, not to its namespaced form (13 longer). */
+    @Test
+    fun aLongAuthorIdIsStillAJumpTarget() {
+        val id = "a".repeat(BlockBuilder.MAX_ANCHOR_ID - 12)
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"$id\">Far</h2>\n\nback to [far](#$id)", forApp = true))
+        assertEquals(LinkTarget.Anchor(id), firstLink(built))
+        assertEquals(BlockAnchors.index(built)[id], BlockAnchors.jump(built, LinkTarget.Anchor(id), here))
+    }
+
+    /** Review of #3714: an id the sanitizer drops (not on a, span, div, p or a heading) still namespaced its link; the link jumps. */
+    @Test
+    fun aLinkToAnIdTheSanitizerDroppedStillJumps() {
+        val center = BlockBuilder.build(RenderHelper().renderPostBody("<center id=\"top\">Title</center>\n\ntext\n\n[back](#top)", forApp = true))
+        assertEquals(LinkTarget.Anchor("top"), firstLink(center))
+        val bold = BlockBuilder.build(RenderHelper().renderPostBody("<b id=\"intro\">x</b>\n\n## Intro\n\n[go](#intro)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(bold))
+        val at = BlockAnchors.jump(bold, target, here)
+        assertIs<Block.Heading>(bold[assertNotNull(at, "the heading of that name")])
+    }
+
+    /**
+     * Review of #3714: with a heading `id="sec"` and a `data-id="user-content-sec"`, the sanitizer makes `#sec` and
+     * `#user-content-sec` the same link; it goes to the author's heading, the common case.
+     */
+    @Test
+    fun aLinkToANamespacedNameGoesToTheHeadingWhenADataIdSharesIt() {
+        for (link in listOf("#sec", "#user-content-sec")) {
+            val built = BlockBuilder.build(RenderHelper().renderPostBody("<h2 id=\"sec\">Heading</h2>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go]($link)", forApp = true))
+            val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+            val at = assertNotNull(BlockAnchors.jump(built, target, here), link)
+            val index = BlockAnchors.index(built)
+            assertEquals(index["sec"], at, "$link: $index")
+            assertTrue(at < index.getValue("user-content-sec"), "$link: the heading's place, before the data-id")
+        }
+    }
+
+    /** Review of #3714: an author id the blocks hold no anchor for (inside code) leaves the link to the `data-id` of that name. */
+    @Test
+    fun anUnreachableAuthorIdFallsBackToTheDataId() {
+        for (link in listOf("#sec", "#user-content-sec")) {
+            val built = BlockBuilder.build(RenderHelper().renderPostBody("<pre><code><span id=\"sec\">c</span></code></pre>\n\ntext\n\n<a data-id=\"user-content-sec\"></a>\n\n[go]($link)", forApp = true))
+            val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+            assertEquals(BlockAnchors.index(built)["user-content-sec"], assertNotNull(BlockAnchors.jump(built, target, here), link), link)
+        }
+    }
+
+    /** Review of #3714: a heading link is not taken by a later `data-id` of the namespaced name. */
+    @Test
+    fun aHeadingLinkStaysWithTheHeadingOverALaterNamespacedDataId() {
+        val built = BlockBuilder.build(RenderHelper().renderPostBody("## Intro\n\ntext\n\n<a data-id=\"user-content-intro\"></a>\n\n[go](#intro)", forApp = true))
+        val target = assertIs<LinkTarget.Anchor>(firstLink(built))
+        assertIs<Block.Heading>(built[assertNotNull(BlockAnchors.jump(built, target, here))])
     }
 }

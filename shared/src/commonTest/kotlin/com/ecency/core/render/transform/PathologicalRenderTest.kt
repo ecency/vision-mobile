@@ -2,14 +2,9 @@ package com.ecency.core.render.transform
 
 import com.ecency.core.render.LinearScaling
 import com.ecency.core.render.RenderHelper
-import com.ecency.core.render.dom.RenderBodyParser
-import com.ecency.core.render.markdown.Markdown
 import com.ecency.core.render.methods.Traverse
-import com.ecency.core.render.sanitize.HtmlSanitizer
-import com.ecency.core.render.sanitize.SanitizeOptions
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -44,24 +39,26 @@ class PathologicalRenderTest {
         }
     }
 
-    /** What markdownToHTML returns when both DOM passes fail: the sanitized markdown output. */
-    private fun sanitizeOnly(md: String): String {
-        val opts = SanitizeOptions(proxyBase = RenderCases.PROXY_BASE)
-        return RenderBodyParser.finish(HtmlSanitizer.sanitize(Markdown.render(md), opts), opts)
+    /** render-helper 2.5.45 (#1920): an adjacent run of tags is linked in one pass, at any length (no nesting). */
+    @Test
+    fun aTagChainPastTheDepthLimitIsLinkedWhole() {
+        val count = Traverse.MAX_DEPTH + 200
+        val out = helper.renderPostBody("#a".repeat(count), true)
+        assertEquals(count, Regex("markdown-tag-link").findAll(out).count())
     }
 
     /**
-     * ROBUSTNESS DEVIATION: a tag chain nesting deeper than [Traverse.MAX_DEPTH] but less deep than
-     * V8's stack (about 5,450 tags in Node) renders sanitize-only here, linkified in Node.
+     * render-helper 2.5.45 (#1920): past [Traverse.MAX_DEPTH] levels a subtree is reduced to its plain text instead of
+     * being walked, so the rest of the body is still transformed and nothing below the cap ships untransformed.
      */
     @Test
-    fun nestingPastTheDepthLimitFallsBackToSanitizeOnly() {
-        val md = "#a".repeat(Traverse.MAX_DEPTH + 200)
+    fun nestingPastTheDepthLimitIsFlattenedToText() {
+        val depth = Traverse.MAX_DEPTH + 50
+        val md = "<div>".repeat(depth) + "deep @spike-alice" + "</div>".repeat(depth) + "\n\nafter @spike-bob"
         val out = helper.renderPostBody(md, true)
-        assertEquals(sanitizeOnly(md), out)
-        assertTrue(!out.contains("markdown-tag-link"))
-        // Below the limit the chain is linkified as in render-helper.
-        assertNotEquals(sanitizeOnly("#a".repeat(1000)), helper.renderPostBody("#a".repeat(1000), true))
+        assertTrue("deep @spike-alice" in out, out.takeLast(300))
+        assertTrue("data-author=\"spike-alice\"" !in out)
+        assertTrue("data-author=\"spike-bob\"" in out, "the rest of the body is still transformed")
     }
 
     /** time(4n) / time(n) stays near 4 (quadratic would be 16); see [LinearScaling]. */
@@ -70,15 +67,32 @@ class PathologicalRenderTest {
 
     @Test
     fun tagChainsPastTheLimitStayLinear() {
-        // 6,000 and 24,000 tags: both past the depth limit (5,000), so both take the sanitize-only path; fixed sizes,
-        // so a raised or removed limit shows up as growth instead of moving the sizes with it
+        // 6,000 and 24,000 tags, each run linked in one pass (render-helper 2.5.45); fixed sizes, so growth shows
         assertLinear("tag chain", { n -> "#a".repeat(n) }, 6_000)
+    }
+
+    /** The 2.5.52 port's new scanners (review of #3711): each guarded against going quadratic on author input. */
+    @Test
+    fun theNewScannersStayLinear() {
+        // removeDuplicateAttributes' scan budget: unclosed tags whose only `>` sits inside a quoted value (the
+        // render escapes this shape before it gets there, so the scanner is driven directly)
+        LinearScaling.assertLinear("unclosed tags, quoted >", 4_000, { n -> "<a b ".repeat(n) + "c=\">\"" }) {
+            com.ecency.core.render.dom.HtmlStringFixes.removeDuplicateAttributes(it)
+        }
+        // collectDeclaredIds: many author ids and links to them
+        assertLinear("declared ids", { n -> (1..n).joinToString("") { "<a id=\"i$it\" href=\"#i$it\">x</a> " } }, 1_000)
+        // CodeRanges: fences inside nested quote and list containers
+        assertLinear("nested fences", { n -> "> - ```\ncode &amp; x\n```\n".repeat(n) }, 1_000)
+        // EntityProtection: URL runs with parentheses and entities
+        assertLinear("entity url runs", { n -> "https://x.example/(a&amp;b ".repeat(n) }, 2_000)
     }
 
     @Test
     fun mentionChainsStayLinear() {
         assertLinear("mention chain", { n -> "@" + "a.".repeat(n) + "a" }, 20_000)
         assertLinear("mention repeat", { n -> "@a.".repeat(n) }, 10_000)
+        // a run whose first mention is refused (17 characters): the run is not collected past it (review of #3714)
+        assertLinear("refused mention runs", { n -> "@aaaaaaaaaaaaaaaaa#-".repeat(n) }, 2_000)
     }
 
     @Test

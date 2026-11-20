@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.42 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.52 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -277,8 +277,29 @@ const bylines2542 = {
   footer_liketu_clips: 'Body\n\n_Posted from Liketu Clips: a short video, trimmed and shared_',
   footer_liketu_clips_half: 'I _posted from Liketu Clips_ yesterday',
 }
+// Rules added in 2.5.43 to 2.5.52 (#3711). Kept out of FRAGMENTS, as the bylines above.
+const rules2552 = {
+  yt_t_minutes: 'Watch https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s now',
+  yt_t_hms_link: '[clip](https://youtu.be/dQw4w9WgXcQ?t=1h2m3s) and [bad](https://youtu.be/dQw4w9WgXcQ?t=-5&start=007)',
+  img_query_suffix: 'https://example.com/i.png?name=a.jpg&sig=x',
+  img_text_after: 'see https://example.com/i.png & friends',
+  img_balanced_parens: '![p](https://example.com/photo_(1).png) and https://example.com/photo_(2).png',
+  not_image_ext: 'https://example.com/.icons/readme and https://example.com/photo.jpg.html',
+  tel_link: '[call](tel:+15550100) <a href="TEL:+15550101">x</a> [h](web+example:op)',
+  img_entity: '![x](https://example.com/a.png?x=1&amp;y=2) <img src="https://example.com/b.png?x=1&times=2">',
+  img_escaped_amp: '![x](https://example.com/a.png?q=\\&copy;) [t](https://example.com/?a=1\\&amp;b)',
+  iframe_refused: '<iframe src="https://evil.example.com/watch?v=dQw4w9WgXcQ"></iframe> and <iframe src="https://www.youtube.com/shorts/abc"></iframe>',
+  list_tab_fence: '-\t```\n\t&amp; <b>\n\t```\n',
+  list_space_tab_fence: '- a\n \t```\n &amp; &lt;\n```',
+  author_marker: '<a class="markdown-author-link" data-author="example-user" href="https://evil.example.com">x</a> <span class="markdown-tag-link" data-tag="x">t</span>',
+  author_id_fragment: '<h2 id="intro">Intro</h2>\n\n[jump](#intro) <a href="#missing">no</a> <a href="#in%74ro">enc</a>',
+  author_classes: '<div class="pull-right fixed inset-0">x</div><span class="ecency-text-color-ff0000 z-50">y</span>',
+  video_poster: '<video src="https://example.com/v.mp4" poster="https://example.com/p.jpg?a=1&amp;times=2"></video>',
+  code_entities: '`&amp; &lt;b&gt;`\n\n```\n&copy; &#169;\n```',
+}
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -334,6 +355,7 @@ const FRAGMENTS = [
   '@example-user', '#tag', 'text ', 'https://', '/@', 'é', '🐝', '<img src="', '" />', '<iframe src="', '"></iframe>',
 ]
 Object.assign(handcrafted, bylines2542)
+Object.assign(handcrafted, rules2552)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)

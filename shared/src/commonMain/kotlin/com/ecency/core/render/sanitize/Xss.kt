@@ -14,7 +14,9 @@ import com.ecency.core.render.js.Js
 internal class Xss(
     whiteList: Map<String, List<String>>,
     private val stripIgnoreTagBody: List<String>,
-    private val onTagAttr: (tag: String, name: String, value: String) -> String?,
+    /** xss `onTag`, told the raw source of every tag before its attributes are walked (2.5.45 render boundary). */
+    private val onTagSeen: ((rawTag: String) -> Unit)? = null,
+    private val onTagAttr: (tag: String, name: String, value: String, isWhiteAttr: Boolean) -> String?,
 ) {
     private val whiteList: Map<String, List<String>> =
         whiteList.entries.associate { (k, v) -> Js.lower(k) to v.map { Js.lower(it) } }
@@ -30,6 +32,7 @@ internal class Xss(
     }
 
     private fun onTag(tag: String, html: String, isClosing: Boolean, position: Int, strip: StripTagBody): String {
+        onTagSeen?.invoke(html)
         val attrList = whiteList[tag]
         if (attrList == null) {
             // onIgnoreTag: stripIgnoreTagBody wrapping onIgnoreTagStripAll.
@@ -39,7 +42,7 @@ internal class Xss(
         val attrs = getAttrs(html)
         val attrsHtml = parseAttr(attrs.html) { name, value ->
             val isWhiteAttr = name in attrList
-            val ret = onTagAttr(tag, name, value)
+            val ret = onTagAttr(tag, name, value, isWhiteAttr)
             when {
                 ret != null -> ret
                 isWhiteAttr -> {
@@ -332,7 +335,7 @@ internal class Xss(
 
         // ---- default.js helpers ----
 
-        private fun safeAttrValue(name: String, value0: String): String {
+        internal fun safeAttrValue(name: String, value0: String): String {
             var value = friendlyAttrValue(value0)
             if (name == "href" || name == "src") {
                 value = Js.trim(value)

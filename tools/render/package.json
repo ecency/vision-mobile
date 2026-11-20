@@ -4,7 +4,7 @@
   "description": "Offline golden oracle for the native renderer. Never shipped in the app.",
   "type": "module",
   "dependencies": {
-    "@ecency/render-helper": "2.5.42",
+    "@ecency/render-helper": "2.5.52",
     "htmlparser2": "10.1.0"
   }
 }

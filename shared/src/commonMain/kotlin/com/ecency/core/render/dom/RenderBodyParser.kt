@@ -104,7 +104,7 @@ object RenderBodyParser {
         return sb.toString()
     }
 
-    /** `/<\/?html[^>]*>/g`. */
+    /** `/<\/?html(?=[\s/>])[^>]*>/g` (2.5.45: exact tag name). */
     private fun removeHtmlTags(s: String): String {
         var i = s.indexOf("html")
         if (i < 0) return s
@@ -115,7 +115,7 @@ object RenderBodyParser {
             val lt = s.indexOf('<', from)
             if (lt < 0) break
             val nameAt = if (lt + 1 < s.length && s[lt + 1] == '/') lt + 2 else lt + 1
-            if (s.startsWith("html", nameAt)) {
+            if (s.startsWith("html", nameAt) && nameAt + 4 < s.length && isTagNameEnd(s[nameAt + 4])) {
                 val gt = s.indexOf('>', nameAt + 4)
                 if (gt < 0) break // no '>' left, so no later "<html" can match either
                 sb.append(s, last, lt)
@@ -129,7 +129,9 @@ object RenderBodyParser {
         return sb.toString()
     }
 
-    /** `/<head[^>]*>[\s\S]*?<\/head>/g`. */
+    private fun isTagNameEnd(c: Char) = Js.isSpace(c) || c == '/' || c == '>'
+
+    /** `/<head(?=[\s/>])[^>]*>[\s\S]*?<\/head>/g` (2.5.45: exact tag name). */
     private fun removeHeads(s: String): String {
         if (s.indexOf("<head") < 0) return s
         val sb = StringBuilder(s.length)
@@ -138,6 +140,10 @@ object RenderBodyParser {
         while (true) {
             val i = s.indexOf("<head", from)
             if (i < 0) break
+            if (i + 5 >= s.length || !isTagNameEnd(s[i + 5])) {
+                from = i + 1
+                continue
+            }
             val gt = s.indexOf('>', i + 5)
             val close = if (gt < 0) -1 else s.indexOf("</head>", gt + 1)
             if (close >= 0) {

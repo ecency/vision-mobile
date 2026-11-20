@@ -7,7 +7,7 @@
 //   signature must recover to the same key).
 //
 // Same scratch install as generate-wallet.mjs:
-//   npm install --prefix /tmp/golden-wallet @ecency/sdk@2.8.0 @noble/curves@2 @noble/hashes@2 @tanstack/react-query@5 react
+//   npm install --prefix /tmp/golden-wallet @ecency/sdk@2.9.6 @noble/curves@2 @noble/hashes@2 @tanstack/react-query@5 react
 //   GOLDEN_MODULES=/tmp/golden-wallet node tools/golden/generate-platform.mjs \
 //     shared/src/commonTest/kotlin/com/ecency/core/hive/PlatformGoldenVectors.kt
 //
@@ -28,7 +28,7 @@ const out = process.argv[2]
 if (!out) throw new Error('usage: generate-platform.mjs <output.kt>')
 const version = (pkg) => JSON.parse(readFileSync(join(base, 'node_modules', pkg, 'package.json'), 'utf8')).version
 const sdkVersion = version('@ecency/sdk')
-if (sdkVersion !== '2.8.0') throw new Error(`expected @ecency/sdk 2.8.0, found ${sdkVersion}`)
+if (sdkVersion !== '2.9.6') throw new Error(`expected @ecency/sdk 2.9.6, found ${sdkVersion}`)
 
 const hex = (b) => Buffer.from(b).toString('hex')
 const SEED = 'ecency-native-spike-golden-vector-throwaway'

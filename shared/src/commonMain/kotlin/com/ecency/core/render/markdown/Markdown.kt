@@ -44,23 +44,32 @@ object Markdown {
     fun render(src: String): String = renderFull(src, linkify = true, rawFences = true)
 
     /**
+     * render-helper 2.5.46 full render: [ampEscapes] pairs escaped `&` in links ([AmpPairing]); destinations are
+     * decoded once before linkify. Fenced code is escaped (the highlighter is not loaded, as in the goldens).
+     */
+    fun render(src: String, ampEscapes: Boolean): String = renderFull(src, linkify = true, rawFences = false, full = true, ampEscapes = ampEscapes)
+
+    /**
      * The same rule set without linkify and with remarkable's default highlight (escaped fences):
      * render-helper's `postBodySummary` renderer.
      */
     fun renderSummary(src: String): String = renderFull(src, linkify = false, rawFences = false)
 
-    private fun renderFull(src: String, linkify: Boolean, rawFences: Boolean): String {
+    private fun renderFull(src: String, linkify: Boolean, rawFences: Boolean, full: Boolean = false, ampEscapes: Boolean = false): String {
         val env = Env()
+        env.ampEscapes = ampEscapes
         var tokens: MutableList<Token> = ArrayList()
         // core rules: block, abbr, references, inline, footnote_tail, abbr2, (replacements and
         // smartquotes are no-ops without typographer), linkify
         block.parse(src, inline, env, tokens)
         CoreRules.abbr(tokens, inline, env)
-        CoreRules.references(tokens, inline, env)
+        AmpPairing.references(tokens, inline, env)
         CoreRules.inline(tokens, inline, env)
         tokens = CoreRules.footnoteTail(tokens, env)
         CoreRules.abbr2(tokens, env)
+        if (full) AmpPairing.decodeDestinations(tokens, env)
         if (linkify) Linkify.parseTokens(tokens)
-        return Renderer.render(tokens, rawFences)
+        val html = Renderer.render(tokens, rawFences)
+        return if (ampEscapes) AmpPairing.sourceAmp(html) else html
     }
 }

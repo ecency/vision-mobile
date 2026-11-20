@@ -20,6 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -1013,8 +1015,21 @@ private fun Composer(env: AppEnvironment, model: ChatThreadModel, s: com.ecency.
         if (field.text != model.current.text) field = androidx.compose.ui.text.input.TextFieldValue(model.current.text, androidx.compose.ui.text.TextRange(model.current.text.length))
     }
     Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
-        if (s.mentions.isNotEmpty()) {
-            Column(Modifier.fillMaxWidth().heightIn(max = 220.dp).padding(horizontal = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.lightBackground).testTag("mentions")) {
+        if (s.mentions.isNotEmpty() || s.wideMentions.isNotEmpty() || s.wideMentionsLimited) {
+            Column(Modifier.fillMaxWidth().heightIn(max = 220.dp).padding(horizontal = 12.dp).clip(RoundedCornerShape(10.dp)).background(colors.lightBackground).verticalScroll(rememberScrollState()).testTag("mentions")) {
+                // web: channel-wide mentions first for who may use them, a one-line notice for the others
+                if (s.wideMentions.isNotEmpty()) {
+                    Text(ChatThreadModel.WIDE_MENTIONS_TITLE, color = colors.darkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp))
+                    s.wideMentions.forEach { m ->
+                        Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.selectWideMention(m) }.padding(8.dp).testTag("wideMention:${m.name}")) {
+                            Text(m.label, fontWeight = FontWeight.Bold, color = colors.text, fontSize = 13.sp)
+                            Text(m.description, color = colors.darkGray, fontSize = 12.sp)
+                        }
+                    }
+                }
+                if (s.wideMentionsLimited) {
+                    Text(ChatThreadModel.WIDE_MENTIONS_LIMITED, color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(8.dp).testTag("wideMentionsLimited"))
+                }
                 s.mentions.forEach { m ->
                     Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.selectMention(m) }.padding(8.dp).testTag("mention:${m.name}"), verticalAlignment = Alignment.CenterVertically) {
                         Avatar(PostCard.avatarUrl(m.name, env.proxyBase), 24.dp)

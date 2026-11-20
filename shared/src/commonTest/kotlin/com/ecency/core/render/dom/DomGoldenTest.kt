@@ -20,23 +20,9 @@ class DomGoldenTest {
      * belong here (see docs/upstream-render-helper-issues.md); every listed case must still
      * differ, so the set cannot go stale. Their output is held to [IframeInvariant] instead.
      */
-    private val securityDeviations: Map<String, String> = run {
-        val iframeSrc = "iframe src outside the embed allow list is dropped on every path; " +
-            "render-helper keeps it whenever its iframe() transform does not run"
-        val sandbox = "author sandbox tokens beyond the ones iframe() grants are dropped"
-        mapOf(
-            "raw_iframe_evil" to iframeSrc,
-            "raw_iframe_attack_xmldom" to "$iframeSrc; $sandbox",
-            "raw_iframe_attack_repaired" to "$iframeSrc; $sandbox",
-            "raw_iframe_attack_sanitized" to "$iframeSrc; $sandbox",
-            "raw_iframe_attack_protocol_relative" to iframeSrc,
-            "raw_iframe_attack_lookalike" to iframeSrc,
-            "raw_iframe_attack_entity_scheme" to iframeSrc,
-            "raw_iframe_allowed_author_sandbox" to sandbox,
-            "random_22" to iframeSrc,
-            "attr_60_iframe_src" to iframeSrc,
-        )
-    }
+    // render-helper 2.5.45 (#1919) enforces the embed allow list and the sandbox grants in its own sanitizer on every
+    // path, the rules the native port kept as deviations until 2.5.42: none left.
+    private val securityDeviations: Map<String, String> = emptyMap()
 
     private fun options(preserve: Boolean) =
         SanitizeOptions(preserveImageDimensions = preserve, proxyBase = DomFixtures.PROXY_BASE)
@@ -80,7 +66,7 @@ class DomGoldenTest {
             }
             check(mismatches, c.name, "path", c.path, parsed.path.name.lowercase())
             if (c.path == "repaired") {
-                check(mismatches, c.name, "repaired", c.repaired, HtmlRepair.repair(HtmlSanitizer.sanitize(c.html, opts)))
+                check(mismatches, c.name, "repaired", c.repaired, HtmlRepair.repair(HtmlSanitizer.sanitize(c.html, opts, beforeTransform = true)))
             }
             val serialized = parsed.document?.let { XmlSerializer.serializeToString(it) } ?: parsed.sanitizedHtml ?: ""
             check(mismatches, c.name, "serialized", c.serialized, serialized)

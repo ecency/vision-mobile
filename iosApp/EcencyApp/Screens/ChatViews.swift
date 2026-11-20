@@ -1268,25 +1268,57 @@ struct ChatComposer: View {
 
     private var thread: ChatThreadModel { observed.model as! ChatThreadModel }
 
+    private func mentionList(_ s: ChatThreadState) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // web: channel-wide mentions first for who may use them, a one-line notice for the others
+            if !s.wideMentions.isEmpty {
+                Text(ChatThreadModel.companion.WIDE_MENTIONS_TITLE).scaledFont(12, weight: .bold).foregroundStyle(theme.secondary)
+                    .padding(.horizontal, 8).padding(.top, 8)
+                ForEach(s.wideMentions, id: \.name) { m in
+                    Button { thread.selectWideMention(m: m) } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(m.label).scaledFont(13, weight: .bold).foregroundStyle(theme.text)
+                            Text(m.description_).scaledFont(12).foregroundStyle(theme.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(8).frame(minHeight: minTapTarget).contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("chat-wide-mention-\(m.name)")
+                }
+            }
+            if s.wideMentionsLimited {
+                Text(ChatThreadModel.companion.WIDE_MENTIONS_LIMITED).scaledFont(12).foregroundStyle(theme.secondary)
+                    .padding(8).accessibilityIdentifier("chat-wide-mentions-limited")
+            }
+            ForEach(s.mentions, id: \.name) { m in
+                Button { thread.selectMention(m: m) } label: {
+                    HStack(spacing: 8) {
+                        AvatarView(url: PostCard.companion.avatarUrl(account: m.name, proxyBase: app.env.proxyBase, size: "small"), size: 24)
+                        Text("@\(m.name)").scaledFont(13, weight: .bold).foregroundStyle(theme.text)
+                        if let d = m.displayName { Text(d).scaledFont(12).foregroundStyle(theme.secondary).lineLimit(1) }
+                        Spacer()
+                    }
+                    .padding(8).frame(minHeight: minTapTarget).contentShape(Rectangle())
+                }
+                .accessibilityIdentifier("chat-mention-\(m.name)")
+            }
+        }
+    }
+
     var body: some View {
         let s = observed.state
         VStack(spacing: 6) {
-            if !s.mentions.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(s.mentions, id: \.name) { m in
-                        Button { thread.selectMention(m: m) } label: {
-                            HStack(spacing: 8) {
-                                AvatarView(url: PostCard.companion.avatarUrl(account: m.name, proxyBase: app.env.proxyBase, size: "small"), size: 24)
-                                Text("@\(m.name)").scaledFont(13, weight: .bold).foregroundStyle(theme.text)
-                                if let d = m.displayName { Text(d).scaledFont(12).foregroundStyle(theme.secondary).lineLimit(1) }
-                                Spacer()
-                            }
-                            .padding(8).frame(minHeight: minTapTarget).contentShape(Rectangle())
-                        }
-                        .accessibilityIdentifier("chat-mention-\(m.name)")
-                    }
+            if !s.mentions.isEmpty || !s.wideMentions.isEmpty || s.wideMentionsLimited {
+                // as Android: a long list scrolls inside a bounded panel, so the field stays in view over the keyboard
+                ViewThatFits(in: .vertical) {
+                    mentionList(s)
+                    ScrollView { mentionList(s) }.scrollBounceBehavior(.basedOnSize)
                 }
+                .frame(maxHeight: 220)
                 .background(RoundedRectangle(cornerRadius: 10).fill(theme.lightBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("chat-mentions")
                 .padding(.horizontal, 12)
             }
             HStack(alignment: .bottom, spacing: 8) {

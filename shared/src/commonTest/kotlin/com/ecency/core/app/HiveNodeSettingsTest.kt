@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 
 /** The node pool at start and the settings server picker (RN initSdkConfig, getNodes, `_changeApi`). */
 class HiveNodeSettingsTest {
-    private val published = """{"hived":["https://pub-a.example","https://pub-b.example","https://techcoderx.com"]}"""
+    private val published = """{"hived":["https://pub-a.example","https://pub-b.example"]}"""
 
     private fun TestScope.app(
         list: () -> HttpResult? = { HttpResult(200, published) },
@@ -49,10 +49,11 @@ class HiveNodeSettingsTest {
         app.env.hiveNodes.start()
         assertEquals(listOf("https://pub-a.example", "https://pub-b.example"), app.env.api.client.nodes, "listed: keeps its place")
 
+        // SDK 2.9.6: a node once left out for stripped metadata is a server like any other again
         app = app()
         app.env.prefs.putString(HiveNodeSettings.PREFS_KEY, "https://techcoderx.com")
         app.env.hiveNodes.start()
-        assertTrue(app.env.api.client.nodes.none(HiveNodes::isBlocked))
+        assertEquals(listOf("https://techcoderx.com", "https://pub-a.example", "https://pub-b.example"), app.env.api.client.nodes)
     }
 
     @Test
@@ -71,7 +72,7 @@ class HiveNodeSettingsTest {
 
     @Test
     fun anUnreadableListKeepsTheBuiltInOne() = runTest {
-        for (answer in listOf(HttpResult(500, ""), HttpResult(200, "<html>"), HttpResult(200, "[]"), HttpResult(200, """["https://techcoderx.com"]"""))) {
+        for (answer in listOf(HttpResult(500, ""), HttpResult(200, "<html>"), HttpResult(200, "[]"))) {
             val app = app(list = { answer })
             app.env.prefs.putString(HiveNodeSettings.PREFS_KEY, "https://mine.example")
             app.env.hiveNodes.start()
@@ -116,7 +117,6 @@ class HiveNodeSettingsTest {
         assertEquals(ServerCheck.UNREACHABLE, app.env.hiveNodes.select("https://dead.example", list))
         assertEquals(5_000, testScheduler.currentTime, "the check gives up after 5 s")
         assertEquals(2, app.transport.sent.size - before, "one request each, no failover")
-        assertEquals(ServerCheck.UNREACHABLE, app.env.hiveNodes.select("https://hiveapi.actifit.io", list))
         assertEquals(ServerCheck.UNREACHABLE, app.env.hiveNodes.select("not a url", list))
         assertEquals("https://pub-b.example", app.env.hiveNodes.selected())
         assertEquals(listOf("https://pub-b.example", "https://pub-a.example"), app.env.api.client.nodes)

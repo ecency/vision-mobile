@@ -2538,6 +2538,10 @@
     },
     "chat_thread": {
       "group": "Group",
+      "mention_here_description": "Notify everyone in this channel unless they have it muted.",
+      "mention_all_description": "Notify all channel members unless they muted the channel.",
+      "wide_mentions_title": "Channel-wide mentions",
+      "wide_mentions_limited": "Channel-wide mentions (@here, @channel, @all, @everyone) are limited to moderators.",
       "unable_to_load_messages": "Unable to load messages.",
       "someone": "Someone",
       "renamed_the_group_to": "{actor} renamed the group to \"{name}\"",

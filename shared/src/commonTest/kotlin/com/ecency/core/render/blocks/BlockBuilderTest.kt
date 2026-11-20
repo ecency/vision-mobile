@@ -18,6 +18,14 @@ class BlockBuilderTest {
     private fun p(vararg inlines: Inline, style: BlockStyle = BlockStyle.Default) = Block.Paragraph(inlines.toList(), style)
     private val center = BlockStyle(align = BlockStyle.Align.Center)
 
+    /** Rendered HTML that xmldom refuses is repaired, and the classes the render stamped still make chips. */
+    @Test
+    fun aRepairedRenderKeepsTheRendersChips() {
+        val html = "<p><a class=\"markdown-author-link\" data-author=\"spike-alice\" href=\"https://ecency.com/@spike-alice\">@spike-alice</a> hi <b>open</p><p>next</p>"
+        val inlines = BlockBuilder.build(html).filterIsInstance<Block.Paragraph>().flatMap { it.inlines }
+        assertTrue(Inline.Mention("spike-alice") in inlines, "$inlines")
+    }
+
     @Test
     fun everyInputKeepsItsWords() {
         assertEquals(BlockInputs.html.keys, BlockInputs.words.keys)
@@ -178,7 +186,8 @@ class BlockBuilderTest {
         assertEquals(listOf(Block.Video("https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1", thumb, "dQw4w9WgXcQ", 42)), build("youtube_start"))
         assertEquals(listOf(Block.Video("https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1", thumb, "dQw4w9WgXcQ", 0)), build("youtube_short"))
         assertEquals(
-            listOf(p(t("Watch "), Inline.Link(LinkTarget.Youtube("dQw4w9WgXcQ", 1), listOf(t("the clip"))), t(" now."))),
+            // render-helper 2.5.44 (#2090): t=1m30s is 90 seconds (it was parseInt: 1)
+            listOf(p(t("Watch "), Inline.Link(LinkTarget.Youtube("dQw4w9WgXcQ", 90), listOf(t("the clip"))), t(" now."))),
             build("youtube_named"),
         )
         assertEquals(listOf(Block.Video("https://play.3speak.tv/watch?v=spike-user/abcdefgh&mode=iframe", null)), build("threespeak"))
@@ -456,9 +465,9 @@ class BlockBuilderTest {
     @Test
     fun bodyImagesAlwaysLoadThroughTheProxy() {
         fun html(body: String) = BlockBuilder.build(body, BuildOptions())
-        // through the whole pipeline: an author's own class="no-replace" survives render-helper and skips its proxy
-        val rendered = com.ecency.core.render.RenderHelper().renderPostBody("""<img class="no-replace" src="https://tracker.example/pixel.png">""", true)
-        assertTrue("tracker.example/pixel.png" in rendered && "no-replace" in rendered, rendered)
+        // through the whole pipeline: render-helper 2.5.45 (#1919) drops an author's class="no-replace" and proxies it
+        val rendered = com.ecency.core.render.RenderHelper("https://images.ecency.com").renderPostBody("""<img class="no-replace" src="https://tracker.example/pixel.png">""", true)
+        assertTrue("tracker.example/pixel.png" !in rendered && "no-replace" !in rendered, rendered)
         assertTrue(BlockBuilder.build(rendered, BuildOptions()).filterIsInstance<Block.Image>().all { it.src.startsWith("https://images.ecency.com/") }, rendered)
         // render-helper leaves class="no-replace" images unproxied, so an author could make every reader's device
         // fetch from their own server (the reader's IP); the app only loads images through the proxy

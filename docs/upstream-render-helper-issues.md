@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.52 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -44,14 +44,16 @@ through `iframe()`: iframes of allowed hosts whose path the allow list rejects (
 path, for example) lose their `src`, and author sandbox tokens beyond the three above are
 dropped. Golden cases that differ for this reason are listed in `DomGoldenTest.securityDeviations`.
 
-An iframe whose `src` the allow list rejects is not left behind as an empty `<iframe>`: it is
-replaced by the placeholder `iframe()` itself emits for unsupported embeds
-(`<div class="unsupported-iframe">(Unsupported <src>)</div>`). On the DOM paths the native
-traverse does this right after `iframe()` (so the placeholder is processed exactly like one
-`iframe()` built); on the sanitize-only path the sanitizer does it. The pre-sanitize of the repair
-path leaves iframe sources to `iframe()` and the final sanitizer, as render-helper does, so an
-allowed embed written in a form `iframe()` normalizes (protocol-relative, `m.youtube.com`) still
-plays. Transform goldens that differ for this reason are listed in `TransformDeviations.security`.
+An iframe whose `src` the allow list rejects becomes, on the DOM paths, the placeholder `iframe()`
+itself emits for unsupported embeds (`<div class="unsupported-iframe">(Unsupported <src>)</div>`):
+the native traverse builds it right after `iframe()`, so it is processed exactly like one `iframe()`
+built. The sanitize-only path builds no DOM and no placeholder: the sanitizer drops the refused `src`,
+then the iframe left without one (its opening tag and a directly following `</iframe>`), as
+render-helper 2.5.45 does. The pre-sanitize of the repair path leaves iframe sources to `iframe()`
+and the final sanitizer, as render-helper does, so an allowed embed written in a form `iframe()`
+normalizes (protocol-relative, `m.youtube.com`) still plays.
+
+**Status (2.5.45, #1919): fixed upstream.** `sanitizeHtml` enforces the allow list and the sandbox grants on every path and drops an iframe left without a src; the port now matches it and lists no deviation.
 
 ## Embeds `iframe()` accepts but the embed allow list rejects
 
@@ -76,6 +78,8 @@ allow list accept what `iframe()` emits (and normalize case in `iframe()`).
 
 **Native port.** Keeps the allow list as upstream defines it and shows the placeholder.
 
+**Status (2.5.45): fixed upstream.** Every host has a path shape (Spotify `embed-podcast` included), `iframe()` lower-cases `/EMBED/`, frames BitChute and Brighteon pages as their embed route, refuses a Shorts URL without an 11-character id, and `canonicalEmbedSrc` gives both checks one spelling. Ported.
+
 ## Unbounded nesting from re-linkified text
 
 **Where.** `text()` and `traverse()` (`methods/text.method.ts`, `methods/traverse.method.ts`).
@@ -96,6 +100,8 @@ descending (no per-node ancestor walk), and imposes `Traverse.MAX_DEPTH = 5000`:
 throws and takes the same sanitize-only fallback. Bodies nested between 5,000 levels and V8's actual
 limit (about 5,075 nested elements, about 5,450 chained tags in Node) render sanitize-only natively
 but linkified in Node; Hermes has its own limit. Tested in `PathologicalRenderTest`.
+
+**Status (2.5.45, #1920): fixed upstream.** Adjacent tag and mention runs are linked in one pass and traverse has a 2,000-level cap that flattens deeper subtrees to text. Ported (`Traverse.MAX_DEPTH` is now 2,000, no sanitize-only fallback).
 
 ## Deep nesting overflows the stack in the repair step
 
@@ -120,3 +126,5 @@ go to the author). URLs over the proxy's 2,048 character limit are also left unp
 **Native.** The HTML stays identical to render-helper's. `BlockBuilder.image` loads body images
 only through the image proxy and leaves out an image the proxy cannot serve
 (`BlockBuilderTest.bodyImagesAlwaysLoadThroughTheProxy`). Upstream: ecency/vision-web#1999.
+
+**Status (2.5.45, #1919): fixed upstream.** Author classes are limited to the formatting set, so `no-replace` is dropped and the image is proxied; the full render also holds every image to the proxy. The block layer's own guard stays.

@@ -285,6 +285,11 @@ class Element internal constructor(
         ownerDocument!!.touch()
     }
 
+    /** `removeAttributeNode`: this exact attribute, whatever its spelling. */
+    fun removeAttributeNode(attr: Attr) {
+        if (attrList.remove(attr)) ownerDocument!!.touch()
+    }
+
     /** NamedNodeMap.setNamedItem: replaces an attribute with the same namespace and local name in place. */
     internal fun setAttributeNode(attr: Attr) {
         for (i in attrList.indices) {

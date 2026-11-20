@@ -93,7 +93,7 @@ internal object Scanners {
 
     private fun isAsciiAlnum(c: Char) = c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9'
 
-    private fun entityEnd(s: String, amp: Int): Int {
+    internal fun entityEnd(s: String, amp: Int): Int {
         var j = amp + 1
         val n = s.length
         // [a-z0-9]+ ; (greedy; a shorter run would be followed by an alnum, not ';')

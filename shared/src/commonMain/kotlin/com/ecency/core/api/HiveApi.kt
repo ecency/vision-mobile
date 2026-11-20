@@ -11,6 +11,8 @@ import com.ecency.core.api.model.arr
 import com.ecency.core.api.model.obj
 import com.ecency.core.api.model.long
 import com.ecency.core.api.model.str
+import com.ecency.core.api.rpc.AllNodesFailedException
+import com.ecency.core.api.rpc.HiveApiException
 import com.ecency.core.api.rpc.HiveRpcClient
 import com.ecency.core.api.rpc.NodeFailureException
 import com.ecency.core.api.rpc.RpcErrorException
@@ -114,17 +116,67 @@ class HiveApi(val client: HiveRpcClient) {
     /** `bridge.get_post_v2` (or `bridge.get_post` on a node without it). Null when the post does not exist. */
     @Throws(EcencyException::class, CancellationException::class)
     suspend fun post(author: String, permlink: String, observer: String? = null): Post? = notFoundAsNull {
-        Post.fromJson(
-            bridgeV2(
-                "get_post",
-                buildJsonObject {
-                    put("author", author)
-                    put("permlink", permlink)
-                    observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
-                },
-            ),
-            observer?.takeIf { it.isNotBlank() }.orEmpty(),
-        )
+        Post.fromJson(bridgeV2("get_post", postParams(author, permlink, observer)), observer?.takeIf { it.isNotBlank() }.orEmpty())
+    }
+
+    /**
+     * [post] for the post screen: a node that has not the post (null, or hivemind's "does not exist") may only lag
+     * behind the chain, so other nodes are asked before it is "not found" (SDK 2.9.0 getPostQueryOptions +
+     * verifyPostOnAlternateNode, #3712). Only the post screen double-checks, as in the SDK: feeds, link cards and the
+     * editor take the one answer. The SDK double-checks a null only; hivemind answers a post it lacks with the
+     * assert, so here that is checked too.
+     */
+    @Throws(EcencyException::class, CancellationException::class)
+    suspend fun postVerified(author: String, permlink: String, observer: String? = null): Post? {
+        val viewer = observer?.takeIf { it.isNotBlank() }.orEmpty()
+        val params = postParams(author, permlink, observer)
+        val answeredBy = try {
+            val first = client.callWithFallback("bridge.get_post_v2", params, "bridge.get_post")
+            Post.fromJson(first.result, viewer)?.let { return it }
+            first.node
+        } catch (e: RpcErrorException) {
+            if (!isNotFound(e)) throw e
+            e.node
+        }
+        return postOnOtherNodes(author, permlink, params, answeredBy, viewer)
+    }
+
+    private fun postParams(author: String, permlink: String, observer: String?) = buildJsonObject {
+        put("author", author)
+        put("permlink", permlink)
+        observer?.takeIf { it.isNotBlank() }?.let { put("observer", it) }
+    }
+
+    /**
+     * SDK verifyPostOnAlternateNode: other nodes than [primary] in turn for v1 `bridge.get_post`, which every node
+     * serves. The post when one has it. Null when another node answered without it (null, another post, or "does not
+     * exist" from a node that is not broken), or when the pool has no other node. When no other node answered (each
+     * failed, said something else, or was cooling), the read failed: a lookup that never got an answer is not "not found". Unlike the SDK (every
+     * node, at random), only nodes healthy for the bridge when their turn comes are asked, healthiest first, at most
+     * [VERIFY_NODES], so a missing post costs a bounded wait; what they answer counts for their health.
+     */
+    private suspend fun postOnOtherNodes(author: String, permlink: String, params: JsonElement, primary: String, viewer: String): Post? {
+        if (client.nodes.none { it != primary }) return null
+        var asked = 0
+        var answered = false
+        val failures = mutableListOf<HiveApiException>()
+        for (node in client.health.orderedNodes(client.nodes, "bridge", probe = false)) {
+            if (asked == VERIFY_NODES) break
+            if (node == primary || !client.health.isNodeHealthy(node, "bridge")) continue
+            asked++
+            try {
+                val post = Post.fromJson(client.askCounted(node, "bridge.get_post", params), viewer)
+                if (post != null && post.author == author && post.permlink == permlink) return post
+                answered = true
+            } catch (e: RpcErrorException) {
+                if (isNotFound(e)) answered = true else failures += e
+            } catch (e: HiveApiException) {
+                failures += e
+            }
+        }
+        if (answered) return null
+        // a check that got no answer, whatever each node failed with: the post screen's failed read (or local copy)
+        throw AllNodesFailedException("bridge.get_post", failures)
     }
 
     /** `bridge.get_discussion_v2` (or v1): the root and every reply below it, keyed "author/permlink". */
@@ -354,8 +406,13 @@ class HiveApi(val client: HiveRpcClient) {
     }
 
     companion object {
+        /** The most other nodes [postVerified] asks after a "not found". */
+        const val VERIFY_NODES = 3
+
+        /** The chain's "no such thing"; a broken node's error that reads the same ("Method not found", a missing table) is not. */
         internal fun isNotFound(e: RpcErrorException): Boolean =
-            Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
+            !HiveRpcClient.isNodeLevelError(e.code, e.rpcMessage) &&
+                Regex("does not exist|not found|unknown account", RegexOption.IGNORE_CASE).containsMatchIn(e.rpcMessage)
     }
 }
 

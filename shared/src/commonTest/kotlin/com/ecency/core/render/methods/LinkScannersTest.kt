@@ -6,6 +6,7 @@ import com.ecency.core.render.transform.RenderCases
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** The Vimeo and Twitter href matchers against render-helper's regexes, and their scaling. */
 class LinkScannersTest {
@@ -70,5 +71,26 @@ class LinkScannersTest {
         LinearScaling.assertLinear("twitter href", 500, { n -> link("https://twitter.com/" + "https://twitter.com/".repeat(n)) }) {
             helper.renderPostBody(it, true)
         }
+    }
+
+    /**
+     * render-helper's bare URL token regexes carry the `i` flag, so `&(?!lt;|gt;)` stops at `&GT;` and `&Lt;` too
+     * (review of #3714). Expected values are render-helper 2.5.52's `getEntryImageRawUrl` on the same bodies.
+     */
+    @Test
+    fun bareImageTokensEndAtLtAndGtInAnyCase() {
+        val helper = RenderHelper(RenderCases.PROXY_BASE)
+        val cases = mapOf(
+            "see https://example.com/a.jpg?x=1&GT;caption" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&Lt;b" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&gT;b" to "https://example.com/a.jpg?x=1",
+            "see https://example.com/a.jpg?x=1&amp;y=2&LT;b" to "https://example.com/a.jpg?x=1&y=2",
+        )
+        for ((body, expected) in cases) assertEquals(expected, helper.getEntryImageRawUrl(body), body)
+        // the render's linkify reads the same tokens: the image ends there, the rest is text (render-helper 2.5.52)
+        assertTrue(helper.renderPostBody("see https://example.com/a.jpg?x=1&GT;caption", forApp = false).endsWith("</picture>&gt;caption</p>"))
+        assertTrue(helper.renderPostBody("see https://example.com/a.jpg?x=1&Lt;b more", forApp = false).endsWith("</picture>\u226ab more</p>"))
+        // a literal "&GT;" in an HTML text node reaches the token scan as written
+        assertTrue(helper.renderPostBody("<p>https://example.com/a.jpg?x=1&amp;GT;caption</p>", forApp = false).endsWith("</picture>&gt;caption</span></p>"))
     }
 }

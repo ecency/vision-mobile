@@ -3,6 +3,7 @@ package com.ecency.core.render
 import com.ecency.core.render.js.Js
 import com.ecency.core.render.methods.Helper
 import com.ecency.core.render.methods.Scanners
+import com.ecency.core.render.sanitize.RenderText
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -118,7 +119,133 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return fromRender(body, w, h)
     }
 
-    fun bodyImageRawUrl(body: String): String? = findFirstImageUrl(body, true)?.let { Helper.decodeImageSrc(it) }
+    /**
+     * `bodyImageRawUrl` (2.5.52): the first image candidate, decoded the way the render reads that kind of candidate.
+     * An `<img src>` is an attribute value; a markdown destination keeps its escapes' meaning and is refused with a
+     * control character; a bare URL on an HTML block line is HTML text; any other bare URL loses trailing sentence
+     * punctuation first.
+     */
+    fun bodyImageRawUrl(body: String): String? {
+        val candidate = findFirstImageCandidate(prepareBody(body), true).candidate ?: return null
+        if (candidate.kind == Candidate.HTML) return Helper.decodeDomImageSrc(Helper.decodeAttributeEntities(candidate.url))
+        val ampEscapes = !Helper.hasAmpSentinel(body)
+        if (candidate.kind == Candidate.DESTINATION) {
+            val url = Helper.decodeRawBodyImageSrc(candidate.url, true, ampEscapes)
+            return if (url.any { it < ' ' || it == '\u007F' }) null else url
+        }
+        if (markLines(asciiLower(codeBlanked(body))).block[candidate.pos]) return htmlTextImageUrl(body, candidate.pos)
+        val after = candidate.pos + candidate.url.length
+        val url = withoutTrailingPunctuation(candidate.url, jsSlice(body, after, after + 4))
+        return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeRawBodyImageSrc(url, false, ampEscapes)
+    }
+
+    /** `codeBlanked`: fences and inline code blanked, nothing else. */
+    private fun codeBlanked(body: String): String = blankInlineCode(blankFences(blankFences(body, "```"), "~~~"))
+
+    /** `asciiLower`: only A-Z lowered, so positions stay those of the text. */
+    private fun asciiLower(s: String): String {
+        for (c in s) if (c in 'A'..'Z') return buildString(s.length) { for (ch in s) append(Js.asciiLower(ch)) }
+        return s
+    }
+
+    /**
+     * `withoutTrailingPunctuation`: `.,;:!?` at the end of a bare URL are the sentence's, unless a `)` or `</a>`
+     * follows (the author closed the URL there) or the `;` ends a character reference.
+     */
+    private fun withoutTrailingPunctuation(url: String, after: String): String {
+        if (after.startsWith(")") || (Js.startsWithCi(after, "</a") && after.length > 3 && (Js.isSpace(after[3]) || after[3] == '>'))) return url
+        var end = url.length
+        while (end > 0) {
+            val c = url[end - 1]
+            if (c == ';' && endsWithReference(url, maxOf(0, end - 34), end - 1)) break
+            if (".,;:!?".indexOf(c) < 0) break
+            end--
+        }
+        return url.substring(0, end)
+    }
+
+    /** `/&#?[a-z\d]+$/i` on `s[from, to)`. */
+    private fun endsWithReference(s: String, from: Int, to: Int): Boolean {
+        var i = to
+        while (i > from && (Js.isAsciiAlpha(s[i - 1]) || Js.isDigit(s[i - 1]))) i--
+        if (i == to) return false
+        if (i > from && s[i - 1] == '#') i--
+        return i > from && s[i - 1] == '&'
+    }
+
+    /**
+     * `htmlTextImageUrl`: a bare URL on an HTML block line is read as HTML text (references decoded, `&lt;`/`&gt;`
+     * end it), then cut where [Helper.imageUrlEnd] says.
+     */
+    private fun htmlTextImageUrl(body: String, pos: Int): String? {
+        var end = pos
+        while (end < body.length && !Js.isSpace(body[end]) && body[end] != '<') end++
+        val text = decodeHtmlText(body.substring(pos, end))
+        val q = Scanners.schemeEnd(text, 0)
+        if (q < 0) return null
+        var e = q
+        while (e < text.length) {
+            val c = text[e]
+            if (Js.isSpace(c) || c == '<' || c == '>' || c == '"' || c == '\'') break
+            if (c == '&' && (Js.startsWithCi(text, "lt;", e + 1) || Js.startsWithCi(text, "gt;", e + 1))) break
+            e++
+        }
+        if (e == q) return null
+        val token = text.substring(0, e)
+        val urlEnd = Helper.imageUrlEnd(token)
+        return if (urlEnd == -1) null else Helper.decodeDomImageSrc(token.substring(0, urlEnd))
+    }
+
+    /**
+     * `decodeHtmlText`: `/&(?:#\d{1,7};?|#[xX][\da-fA-F]{1,6};?|([A-Za-z][A-Za-z\d]{0,31});?)/g`, a numeric reference
+     * decoded as HTML text, a named one only when its whole name is a reference (with or without its `;`).
+     */
+    private fun decodeHtmlText(text: String): String {
+        var amp = text.indexOf('&')
+        if (amp < 0) return text
+        val out = StringBuilder(text.length)
+        var last = 0
+        while (amp >= 0) {
+            var p = amp + 1
+            var named = false
+            if (p < text.length && text[p] == '#') {
+                p++
+                val d = run(text, p, 7) { Js.isDigit(it) }
+                p = if (d > p) d else if (p < text.length && (text[p] == 'x' || text[p] == 'X')) run(text, p + 1, 6) { Js.isHexDigit(it) }.let { if (it > p + 1) it else -1 } else -1
+            } else if (p < text.length && Js.isAsciiAlpha(text[p])) {
+                p = run(text, p + 1, 31) { Js.isAsciiAlpha(it) || Js.isDigit(it) }
+                named = true
+            } else {
+                p = -1
+            }
+            if (p < 0) {
+                amp = text.indexOf('&', amp + 1)
+                continue
+            }
+            val nameEnd = p
+            if (p < text.length && text[p] == ';') p++
+            val ref = text.substring(amp, p)
+            out.append(text, last, amp)
+            if (named) {
+                val strict = "&" + text.substring(amp + 1, nameEnd) + ";"
+                val whole = RenderText.decodeStrict(strict)
+                out.append(if (whole == strict) ref else whole)
+            } else {
+                out.append(RenderText.decodeEntities(ref))
+            }
+            last = p
+            amp = text.indexOf('&', p)
+        }
+        out.append(text, last, text.length)
+        return out.toString()
+    }
+
+    /** End of a run of at most [max] characters from [from] that satisfy [ok]. */
+    private inline fun run(s: String, from: Int, max: Int, ok: (Char) -> Boolean): Int {
+        var i = from
+        while (i < s.length && i - from < max && ok(s[i])) i++
+        return i
+    }
 
     fun entryImageRawUrl(entry: Entry): String? {
         val meta = parseMeta(entry.jsonMetadata)
@@ -146,7 +273,13 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private class Prepared(val cleaned: String, val image: ScanText, val video: ScanText)
 
-    private class Candidate(val url: String, val pos: Int)
+    private class Candidate(val url: String, val pos: Int, val kind: Int = BARE) {
+        companion object {
+            const val BARE = 0
+            const val HTML = 1
+            const val DESTINATION = 2
+        }
+    }
 
     private class CandidateResult(val candidate: Candidate?, val ambiguous: Boolean)
 
@@ -198,7 +331,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 if (m.start > 0 && cleaned[m.start - 1] == '!') continue
                 val href = m.href
                 if (href.isNotEmpty() && isImageHref(href) && deAmp(m.label) == deAmp(href)) {
-                    candidates.add(Candidate(href, m.start))
+                    candidates.add(Candidate(href, m.start, Candidate.DESTINATION))
                     break
                 }
             }
@@ -213,7 +346,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (!isSafeUrl(href)) return false
         var d = href.indexOf('.')
         while (d >= 0) {
-            if (extLen(href, d) > 0) return true
+            // 2.5.46: not `.ico` in `.icons/readme` nor `.jpg` in `photo.jpg.html` (imageUrlEnd)
+            if (extLen(href, d) > 0) return Helper.imageUrlEnd(href) != -1
             d = href.indexOf('.', d + 1)
         }
         return false
@@ -686,7 +820,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private fun isUrlTokenChar(c: Char) = !Js.isSpace(c) && c != '<' && c != '>' && c != '"' && c != '\'' &&
         c != '(' && c != ')' && c != '[' && c != ']'
 
-    /** `URL_TOKEN_RE = /https?:\/\/[^\s<>"'()[\]]+/gi`, standalone tokens only, classified. */
+    /** `URL_TOKEN_RE = /https?:\/\/(?:[^\s<>"'()[\]&]|&(?!lt;|gt;))+/gi` (2.5.51), standalone tokens only, classified. */
     private fun standaloneMatches(scan: ScanText, classify: (String) -> String?): Sequence<Candidate> = sequence {
         val s = scan.text
         var p = 0
@@ -699,7 +833,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 continue
             }
             var e = q
-            while (e < s.length && isUrlTokenChar(s[e])) e++
+            // the regex is `/gi`: its `&(?!lt;|gt;)` refuses `&GT;` too
+            while (e < s.length && isUrlTokenChar(s[e]) && !(s[e] == '&' && (Js.startsWithCi(s, "lt;", e + 1) || Js.startsWithCi(s, "gt;", e + 1)))) e++
             if (e == q) {
                 p = h + 1
                 continue
@@ -721,20 +856,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return 0
     }
 
+    /** 2.5.46: the image URL a bare token denotes, read as linkify reads it ([Helper.imageUrlEnd]). */
     private fun imageToken(token: String): String? {
-        var end = -1
-        var i = 0
-        while (i < token.length) {
-            val l = extLen(token, i)
-            if (l > 0) {
-                end = i + l
-                i += l
-            } else {
-                i++
-            }
-        }
+        val end = Helper.imageUrlEnd(token)
         if (end == -1) return null
-        if (end < token.length && (token[end] == '?' || token[end] == '#')) end = token.length
         val url = token.substring(0, end)
         return if (isSafeUrl(url)) url else null
     }
@@ -817,7 +942,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             val le = labelEnd(s, p + 1)
             if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
                 val t = parenTail(s, le + 1, { c -> c != ')' && !isWs(c) }, 2048)
-                if (t != null) return Candidate(s.substring(t[0], t[1]), p)
+                if (t != null) return Candidate(s.substring(t[0], t[1]), p, Candidate.DESTINATION)
             }
             p = s.indexOf("![", p + 1)
         }
@@ -875,7 +1000,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                             if (i < s.length && (s[i] == '"' || s[i] == '\'')) {
                                 var e = i + 1
                                 while (e < s.length && s[e] != '"' && s[e] != '\'') e++
-                                if (e > i + 1 && e < s.length) return Candidate(s.substring(i + 1, e), p)
+                                if (e > i + 1 && e < s.length) return Candidate(s.substring(i + 1, e), p, Candidate.HTML)
                             }
                         }
                     }

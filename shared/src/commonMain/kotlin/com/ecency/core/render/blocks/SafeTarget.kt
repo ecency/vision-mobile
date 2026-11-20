@@ -106,12 +106,23 @@ object SafeTarget {
      */
     fun embed(url: String?): String? {
         val u = url?.trim()?.takeIf { it.isNotEmpty() } ?: return null
-        if (!EmbedSrc.isAllowedEmbedSrc(u)) return null
+        if (!EmbedSrc.isAllowedEmbedSrc(u)) return mediaFile(u)
         val parsed = WebUrl.parse(u) ?: return null
         val host = parsed.hostname.lowercase()
         if (EmbedSrc.hasPathPattern(host)) return u
         val rule = PLAYER_PATHS[host] ?: PLAYER_PATHS.entries.firstOrNull { (h, _) -> h.startsWith(".") && host.endsWith(h) }?.value
         return u.takeIf { rule != null && rule(parsed.pathname) }
+    }
+
+    /**
+     * A video file iframe() turns into a `<video>` (Skatehive's IPFS gateway). render-helper 2.5.45 took that host off
+     * the iframe allow list, as no iframe may point at it; the app plays the file itself, on the same rule as before.
+     */
+    private fun mediaFile(u: String): String? {
+        if (!u.startsWith("https://", ignoreCase = true)) return null
+        val parsed = WebUrl.parse(u) ?: return null
+        if (parsed.protocol != "https:" || parsed.hostname.lowercase() !in MEDIA_FILE_HOSTS) return null
+        return u.takeIf { IPFS_VIDEO.matches(parsed.pathname) }
     }
 
     /**
@@ -139,8 +150,6 @@ object SafeTarget {
         "brandnewtube.com" to { p -> BRAND_NEW_TUBE_PLAYER.matches(p) },
         // LBRY_REGEX: /$/embed/...
         "lbry.tv" to { p -> p.startsWith("/$/embed/") || p.startsWith("/%24/embed/") },
-        // SKATEHIVE_IPFS_REGEX: /ipfs/<cid> (render-helper makes it a video tag), or a video file in that folder
-        "ipfs.skatehive.app" to { p -> IPFS_VIDEO.matches(p) },
         // SKATEHYPE_EMBED_REGEX: /ifplay.php?v=<n>
         "www.skatehype.com" to { p -> p == "/ifplay.php" },
         "skatehype.com" to { p -> p == "/ifplay.php" },

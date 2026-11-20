@@ -13,7 +13,11 @@ object XmlSerializer {
 
     private class Frame(val node: Node, val ns: List<Ns>, val closeTag: String?)
 
-    fun serializeToString(node: Node): String {
+    /**
+     * [filter]: xmldom's `nodeFilter`, called on every node before it is written: a String result is written
+     * verbatim, null skips the node, a Node is written (render-helper's render boundary).
+     */
+    fun serializeToString(node: Node, filter: ((Node) -> Any?)? = null): String {
         val sb = StringBuilder()
         val ref: Node = (node as? Document)?.documentElement ?: node
         var visible: List<Ns> = emptyList()
@@ -23,11 +27,11 @@ object XmlSerializer {
                 visible = listOf(Ns(null, uri))
             }
         }
-        write(node, sb, visible)
+        write(node, sb, visible, filter)
         return sb.toString()
     }
 
-    private fun write(root: Node, sb: StringBuilder, rootNs: List<Ns>) {
+    private fun write(root: Node, sb: StringBuilder, rootNs: List<Ns>, filter: ((Node) -> Any?)? = null) {
         // Iterative so that deeply nested posts cannot overflow the stack.
         val stack = ArrayList<Any>()
         stack.add(Frame(root, rootNs, null))
@@ -38,7 +42,17 @@ object XmlSerializer {
                 continue
             }
             val frame = item as Frame
-            val n = frame.node
+            var n = frame.node
+            if (filter != null) {
+                when (val r = filter(n)) {
+                    null -> continue
+                    is String -> {
+                        sb.append(r)
+                        continue
+                    }
+                    else -> n = r as Node
+                }
+            }
             when (n) {
                 is Element -> {
                     val childNs = enterElement(n, sb, frame.ns) ?: continue

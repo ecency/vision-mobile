@@ -314,23 +314,23 @@ class NodeFailoverTest {
 
     @Test
     fun remoteListParsing() {
-        assertEquals(listOf("https://a.example", "https://b.example"), HiveNodes.parseRemote("""{"hived":["https://a.example/","https://b.example","https://techcoderx.com"]}"""))
+        assertEquals(listOf("https://a.example", "https://b.example", "https://techcoderx.com"), HiveNodes.parseRemote("""{"hived":["https://a.example/","https://b.example","https://techcoderx.com"]}"""))
         assertEquals(listOf("https://a.example"), HiveNodes.parseRemote("""["https://a.example"]"""))
         // https only, no user info; a port is fine
         assertEquals(listOf("https://c.example:8443"), HiveNodes.parseRemote("""["http://a.example","https://user:pw@b.example","https://evil.example@good.example","https://c.example:8443"]"""))
         assertTrue(HiveNodes.isSafeRemote("https://api.hive.blog/rpc?x=1"))
         for (u in listOf("HTTP://a.example", "https://", "https://:443", "https://a b.example", "https://u@a.example/")) assertTrue(!HiveNodes.isSafeRemote(u), u)
-        for (bad in listOf("", "{}", """{"hived":[]}""", """{"hived":"x"}""", "[1,2]", """["ftp://a.example"]""", """["https://hiveapi.actifit.io"]""", "<html>")) {
+        for (bad in listOf("", "{}", """{"hived":[]}""", """{"hived":"x"}""", "[1,2]", """["ftp://a.example"]""", "<html>")) {
             assertNull(HiveNodes.parseRemote(bad), bad)
         }
     }
 
     @Test
-    fun savedServerGoesFirstUnlessAlreadyListedOrBlocked() {
+    fun savedServerGoesFirstUnlessAlreadyListed() {
         val fetched = listOf("https://a.example", "https://b.example")
         assertEquals(listOf("https://mine.example") + fetched, HiveNodes.pool("https://mine.example/", fetched))
         assertEquals(fetched, HiveNodes.pool("https://b.example", fetched), "a listed server keeps its place (RN initSdkConfig)")
-        assertEquals(fetched, HiveNodes.pool("https://techcoderx.com", fetched))
+        assertEquals(listOf("https://techcoderx.com") + fetched, HiveNodes.pool("https://techcoderx.com", fetched))
         assertEquals(fetched, HiveNodes.pool(" ", fetched))
         assertEquals(fetched, HiveNodes.pool(null, fetched))
         assertEquals(listOf("https://b.example", "https://a.example"), HiveNodes.withFirst("https://b.example", fetched))

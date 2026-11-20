@@ -22,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import com.ecency.core.api.chat.ChatPostsPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -35,6 +36,8 @@ class ChatFixture(
     users: List<String> = listOf(USER),
     pin: String? = null,
     val team: List<Pair<String, String>> = emptyList(),
+    /** The communities whose channels the server says the viewer moderates (`canModerate`). */
+    moderates: Set<String> = emptySet(),
 ) {
     val app = TestApp(scope) { request ->
         TestApp.chain(request) ?: when (request.method) {
@@ -62,6 +65,7 @@ class ChatFixture(
         if (pin != null) PinLock(vault, 16).setPin(pin)
         app.authBackend.rest = { request -> before?.invoke(request) ?: chat.http(request) ?: HttpResult(503, "{}") }
         app.relay.chat = HasSocketFactory { chat.socket() }
+        chat.moderates += moderates
         app.clock = { TestApp.NOW + scope.testScheduler.currentTime }
     }
 
@@ -738,7 +742,7 @@ class ChatThreadTest {
 
     @Test
     fun sendingEditingReactingPinningAndRemoving() = runTest {
-        val f = ChatFixture(this, team = listOf(ChatFixture.USER to "mod"))
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
         f.start()
         val m = thread(f, "ch-ecency", "O", "Ecency")
         assertTrue(m.current.canModerate && m.current.canPin)
@@ -1709,6 +1713,216 @@ class ChatThreadTest {
         assertEquals(4, rows.size)
         assertEquals("spike-alice", rows.first().username, "online first")
         assertEquals("4 members • 1 online", group.membersSubtitle(rows))
+    }
+
+    /** #3710: the server decides moderation; a community channel names its community only in `name`. */
+    @Test
+    fun aModeratorOfTheChannelsCommunityMayPinAndRemoveOthersMessages() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        assertTrue(m.current.canModerate)
+        val other = m.current.items.filterIsInstance<ChatMessageItem>().first { !it.own && it.post.message.startsWith("Has anyone") }
+        assertTrue(ChatMessageAction.PIN in m.actions(other) && ChatMessageAction.REMOVE in m.actions(other), "${m.actions(other)}")
+    }
+
+    /** #3710: the server's `canModerate: false` wins over a team row the client could read. */
+    @Test
+    fun withoutTheServersSayAMessageOfSomeoneElseOffersNeitherPinNorRemove() = runTest {
+        val f = ChatFixture(this, team = listOf(ChatFixture.USER to "mod"))
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        assertFalse(m.current.canModerate)
+        val other = m.current.items.filterIsInstance<ChatMessageItem>().first { !it.own && it.post.message.startsWith("Has anyone") }
+        assertFalse(ChatMessageAction.PIN in m.actions(other) || ChatMessageAction.REMOVE in m.actions(other), "${m.actions(other)}")
+    }
+
+    /** #3710: the flags are booleans or nothing; anything else is not the server's word. */
+    @Test
+    fun aPostsPageReadsTheRightsOnlyFromBooleans() {
+        fun page(json: String) = ChatPostsPage.parse(kotlinx.serialization.json.Json.parseToJsonElement(json), null)
+        assertEquals(true to false, page("""{"posts":{},"order":[],"canModerate":true,"canMentionEveryone":false}""").let { it.canModerate to it.canMentionEveryone })
+        assertEquals(null to null, page("""{"posts":{},"order":[]}""").let { it.canModerate to it.canMentionEveryone })
+        assertEquals(null to null, page("""{"posts":{},"order":[],"canModerate":"true","canMentionEveryone":1}""").let { it.canModerate to it.canMentionEveryone })
+    }
+
+    /** #3710: an answer without `canMentionEveryone` follows `canModerate` (web); one without either keeps both. */
+    @Test
+    fun rightsAFlagLeftOutKeepsOrFollowsCanModerate() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        var drop = setOf("canMentionEveryone")
+        f.before = { r ->
+            if (r.method == "GET" && Regex("/channels/ch-ecency/posts(\\?|$)").containsMatchIn(r.url)) {
+                val answer = f.chat.http(r)!!
+                val o = kotlinx.serialization.json.Json.parseToJsonElement(answer.body).jsonObject
+                answer.copy(body = kotlinx.serialization.json.JsonObject(o.filterKeys { it !in drop }).toString())
+            } else null
+        }
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        assertTrue(m.current.canModerate)
+        assertTrue(m.current.canMentionEveryone, "follows canModerate")
+        drop = setOf("canModerate", "canMentionEveryone")
+        f.chat.moderates.clear()
+        m.refresh()
+        f.idle()
+        assertTrue(m.current.canModerate && m.current.canMentionEveryone, "an answer without the flags keeps them")
+    }
+
+    /** Review of #3714: a moderator given or taken while the thread was away shows on the read that catches it up. */
+    @Test
+    fun rightsGivenOrTakenWhileAwayShowOnTheCatchUp() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue(m.current.canModerate && m.current.canMentionEveryone)
+            for (moderator in listOf(false, true)) {
+                f.chat.dropSockets()
+                f.run(1)
+                if (moderator) f.chat.moderates += "hive-125125" else f.chat.moderates.clear()
+                f.chat.incoming("ch-ecency", "sent while away, moderator $moderator")
+                f.run(60_000)
+                f.run(1)
+                assertTrue("sent while away, moderator $moderator" in texts(m), "caught up")
+                assertEquals(moderator, m.current.canModerate, "canModerate after the catch-up")
+                assertEquals(moderator, m.current.canMentionEveryone, "canMentionEveryone after the catch-up")
+            }
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3714: a catch-up read that lands after a newer page has the older rights: they do not come back. */
+    @Test
+    fun anOlderCatchUpDoesNotRestoreRightsANewerPageTookAway() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.chat.seedHistory("ch-ecency", read = 40)
+        f.start()
+        val m = thread(f, "ch-ecency", "O", "Ecency")
+        try {
+            m.setActive(true)
+            f.run(1)
+            assertTrue(m.current.canModerate && m.current.hasMore)
+            m.setActive(false)
+            f.run(1)
+            f.chat.incoming("ch-ecency", "sent while away")
+            val held = f.holdNext { it.url.contains("/posts") }
+            m.setActive(true)
+            f.run(1)
+            f.run(1)
+            // taken away while the catch-up read is out; an older page read now says so
+            f.chat.moderates.clear()
+            m.loadMore()
+            f.run(1)
+            f.run(1)
+            assertFalse(m.current.canModerate, "the newer page")
+            held.complete(Unit)
+            f.run(1)
+            f.run(1)
+            assertTrue("sent while away" in texts(m), "the catch-up's messages still land")
+            assertFalse(m.current.canModerate, "the older catch-up read gave the rights back")
+            assertFalse(m.current.canMentionEveryone)
+        } finally {
+            m.setActive(false)
+            f.run(1)
+        }
+    }
+
+    /** Review of #3714: a restored thread learns it is an open channel after its rights; a query typed is offered then. */
+    @Test
+    fun aRestoredThreadOffersTheMentionsOnceItsTypeIsKnown() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val list = f.holdNext { it.method == "GET" && it.url.substringBefore('?').endsWith("/api/mattermost/channels") }
+        val m = f.env.chat.threadModel("ch-ecency", "")
+        m.setText("hi @a")
+        m.start()
+        f.idle()
+        assertTrue(m.current.canMentionEveryone, "the rights came first")
+        assertEquals("", m.current.type)
+        list.complete(Unit)
+        f.idle()
+        assertEquals("O", m.current.type)
+        assertEquals(listOf("all"), m.current.wideMentions.map { it.name })
+    }
+
+    /** Review of #3714: a sent draft takes its channel-wide offer or notice with it. */
+    @Test
+    fun sendingClearsTheChannelWideOfferAndNotice() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val mod = thread(f, "ch-ecency", "O", "Ecency")
+        mod.setText("hi @a")
+        assertTrue(mod.current.wideMentions.isNotEmpty())
+        mod.send()
+        f.idle()
+        assertEquals("", mod.current.text)
+        assertTrue(mod.current.wideMentions.isEmpty(), "no offer left over an empty composer")
+        val member = thread(f, "ch-photo", "O", "Photography")
+        member.setText("hi @a")
+        assertTrue(member.current.wideMentionsLimited)
+        member.send()
+        f.idle()
+        assertEquals("", member.current.text)
+        assertFalse(member.current.wideMentionsLimited, "no notice left over an empty composer")
+    }
+
+    /** #3710: text typed before the first page brings the rights is offered the mentions once it does. */
+    @Test
+    fun aQueryTypedBeforeTheRightsArriveIsOfferedTheMentionsThen() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        f.env.chat.hint("ch-ecency", ChatHint(null, "Ecency", emptyMap()), ChatFixture.USER)
+        val m = f.env.chat.threadModel("ch-ecency", "O")
+        m.setText("hi @a")
+        assertFalse(m.current.wideMentionsLimited, "no rights yet: no notice")
+        m.start()
+        f.idle()
+        assertEquals(listOf("all"), m.current.wideMentions.map { it.name })
+        assertFalse(m.current.wideMentionsLimited)
+    }
+
+    /** #3710 (web parity): channel-wide mentions are offered to who may use them, and explained to the others. */
+    @Test
+    fun channelWideMentionsAreOfferedToModeratorsAndExplainedToOthers() = runTest {
+        val f = ChatFixture(this, moderates = setOf("hive-125125"))
+        f.start()
+        val mod = thread(f, "ch-ecency", "O", "Ecency")
+        assertTrue(mod.current.canMentionEveryone)
+        mod.setText("hi @a")
+        assertEquals(listOf("all"), mod.current.wideMentions.map { it.name })
+        assertEquals("@all", mod.current.wideMentions.single().label)
+        assertFalse(mod.current.wideMentionsLimited)
+        mod.selectWideMention(mod.current.wideMentions.single())
+        assertEquals("hi @all ", mod.current.text)
+        assertTrue(mod.current.wideMentions.isEmpty())
+        mod.setText("@")
+        assertTrue(mod.current.wideMentions.isEmpty(), "web: not on a bare @")
+        mod.setText("@e")
+        assertEquals(listOf("everyone"), mod.current.wideMentions.map { it.name })
+
+        val other = thread(f, "ch-photo", "O", "Photography")
+        assertFalse(other.current.canMentionEveryone)
+        other.setText("hi @a")
+        assertTrue(other.current.wideMentions.isEmpty())
+        assertTrue(other.current.wideMentionsLimited)
+        other.setText("hi @spike")
+        assertFalse(other.current.wideMentionsLimited)
+        other.setText("no mention")
+        assertFalse(other.current.wideMentionsLimited)
+
+        // web: open channels only; a direct message reaches one person, a group has no moderators
+        val dm = thread(f, "ch-dm-alice", "D", "spike-alice")
+        assertTrue(dm.current.canMentionEveryone)
+        dm.setText("@h")
+        assertTrue(dm.current.wideMentions.isEmpty() && !dm.current.wideMentionsLimited)
+        val group = thread(f, "ch-group", "G")
+        group.setText("@a")
+        assertTrue(group.current.wideMentions.isEmpty() && !group.current.wideMentionsLimited)
     }
 
     @Test
