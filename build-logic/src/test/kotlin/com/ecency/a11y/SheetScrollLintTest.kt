@@ -176,7 +176,7 @@ class SheetScrollLintTest {
                 throw AssertionError("$file:${line(src, from)}: raw string never closes")
             }
 
-            /** The end of the expression body whose `=` is at [eq]: past its brackets, and on through lines that go on with `.`, `?.` or `?:`. */
+            /** The end of the expression body whose `=` is at [eq]: past its brackets, on through lines that go on with `.`, `?.` or `?:`, up to a `;`. */
             fun expressionEnd(file: String, src: String, eq: Int): Int {
                 var i = eq + 1
                 while (i < src.length && src[i].isWhitespace()) i++
@@ -185,7 +185,7 @@ class SheetScrollLintTest {
                     if (literalEnd != null) { i = literalEnd; continue }
                     when (src[i]) {
                         '(', '{' -> i = closing(file, src, i)
-                        ')', '}' -> return i
+                        ')', '}', ';' -> return i
                         '\n' -> {
                             var k = i
                             while (k < src.length && src[k].isWhitespace()) k++
@@ -349,6 +349,15 @@ class SheetScrollLintTest {
             @Composable fun C() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("c")) { Chained() } } }
         """.trimIndent()
         assertEquals(mapOf("a" to true, "b" to false, "c" to true), scan("T.kt" to src))
+    }
+
+    @Test
+    fun anExpressionBodyEndsAtASemicolon() {
+        val src = """
+            @Composable fun A() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("a")) { Fixed() } } }
+            @Composable fun Fixed() = Text("fixed"); @Composable fun Unused() { LazyColumn {} }
+        """.trimIndent()
+        assertEquals(mapOf("a" to false), scan("T.kt" to src))
     }
 
     @Test
