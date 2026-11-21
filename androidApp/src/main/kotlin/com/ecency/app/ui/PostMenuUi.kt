@@ -197,7 +197,8 @@ fun FeedxOverlays(ui: FeedxUi) {
     ui.menu?.let { request ->
         val items by produceState<List<PostMenuItem>?>(null, request) { value = env.postActions.menu(request.post, request.context) }
         ModalBottomSheet(onDismissRequest = { ui.menu = null }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-            Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp).testTag("postMenu")) {
+            // scrolls: the menu is taller than a short window at a larger text size
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 12.dp).testTag("postMenu")) {
                 val list = items
                 if (list == null) {
                     LoadingBlock()
@@ -280,8 +281,9 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
         }
     }
     var picking by remember { mutableStateOf(false) }
-    ModalBottomSheet(onDismissRequest = { if (!state.isPublishing) ui.crossPost = null }, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("crossPostSheet")) {
+    ModalBottomSheet(onDismissRequest = { if (!state.isPublishing) ui.crossPost = null }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the community picker, the message and the keyboard can push Publish below the screen
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("crossPostSheet")) {
             Text(ReadingUiCopy.CROSS_POST, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Text(
                 state.selected?.title ?: ReadingUiCopy.SELECT_COMMUNITY,
@@ -291,7 +293,9 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
             )
             if (picking) {
                 OutlinedTextField(state.query, model::search, placeholder = { Text(UiCopy.SEARCH) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
-                LazyColumn(Modifier.heightIn(max = 220.dp)) {
+                // a lazy list bounded to 220 dp: a finite height is safe inside the sheet's scroll, and an account
+                // with many subscriptions composes only the rows on screen
+                LazyColumn(Modifier.heightIn(max = 220.dp).testTag("communityList")) {
                     if (state.isLoading) item { LoadingBlock() }
                     items(state.filtered, key = { it.name }) { c ->
                         Text(
@@ -310,7 +314,7 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
                 fontSize = 12.sp, color = colors.darkGray, modifier = Modifier.padding(top = 8.dp),
             )
             Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = { ui.crossPost = null }, enabled = !state.isPublishing) { Text(UiCopy.CLOSE_CAPS) }
+                TextButton(onClick = { ui.crossPost = null }, enabled = !state.isPublishing, modifier = Modifier.testTag("crossPostClose")) { Text(UiCopy.CLOSE_CAPS) }
                 Button(
                     onClick = model::publish, enabled = state.canPublish,
                     colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue),
@@ -425,9 +429,9 @@ private fun QuickProfileSheet(ui: FeedxUi, username: String) {
     DisposableEffect(model) { onDispose { model.close() } }
     LaunchedEffect(model) { model.start() }
     val s by model.state.collectAsState()
-    ModalBottomSheet(onDismissRequest = { ui.quickProfile = null }, containerColor = colors.background) {
+    ModalBottomSheet(onDismissRequest = { ui.quickProfile = null }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("quickProfile"),
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("quickProfile"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -502,8 +506,9 @@ private fun CustomiseFiltersSheet(ui: FeedxUi) {
     val colors = LocalEcencyColors.current
     val selected = remember { mutableStateListOf<FeedFilter>().apply { addAll(FeedTabs.saved(ui.env.prefs)) } }
     var alert by remember { mutableStateOf<String?>(null) }
-    ModalBottomSheet(onDismissRequest = { ui.customise = false }, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("customiseSheet")) {
+    ModalBottomSheet(onDismissRequest = { ui.customise = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: every filter, selected and available, is taller than a short window
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("customiseSheet")) {
             Text(ReadingUiCopy.CUSTOMISE_FILTERS, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Text(ReadingUiCopy.SELECTED_FILTERS, fontWeight = FontWeight.Bold, color = colors.darkGray, modifier = Modifier.padding(top = 12.dp))
             if (selected.isEmpty()) Text(ReadingUiCopy.PLEASE_ADD_FROM_AVAILABLE, fontSize = 12.sp, color = colors.darkGray)

@@ -9,6 +9,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performSemanticsAction
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -476,5 +478,44 @@ class Gaps2FlowsTest {
             assertTrue("$tag ($box) on screen", box.left >= -1f && box.right <= width + 1f && box.width > 0f)
         }
         compose.assertNothingClipped("comment row")
+    }
+
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick).
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheDigestSheetScrollsToCancel() {
+        signIn()
+        newsletterBackend()
+        openPost(fontScale = 1.3f)
+        compose.scrollListTo("postList", hasTestTag("digestPrompt"))
+        click("digestPromptSubscribe")
+        waitFor("digestCadence:weekly")
+        compose.awaitScrolledTo("digestCancel").performClick()
+        compose.await("the sheet closed") { !exists("digestSheet") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowThePostStatsScrollToPromote() {
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.endsWith("/api/stats")) {
+                HttpResult(200, """{"results":[{"metrics":[120,1534,1800,95],"dimensions":["Mobile"]},{"metrics":[60,700,900,95],"dimensions":["Desktop"]},{"metrics":[10,90,100,95],"dimensions":["Tablet"]}],"query":{"metrics":["visitors","visits","pageviews","visit_duration"]}}""")
+            } else base?.invoke(r)
+        }
+        signIn()
+        val navigator = com.ecency.app.ui.Navigator(com.ecency.core.app.NavState().push(com.ecency.core.app.AppScreen.Post("alice", "trending-one")))
+        compose.setContent {
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, 1.3f)) {
+                EcencyTheme(dark = false) { EcencyApp(env, host, navigator) }
+            }
+        }
+        waitFor("postViews")
+        click("postViews")
+        waitFor("device:Tablet")
+        compose.awaitScrolledTo("statsPromote").performClick()
+        compose.await("the promote screen") { navigator.state.top == com.ecency.core.app.AppScreen.Redeem("promote", "alice/trending-one") }
     }
 }

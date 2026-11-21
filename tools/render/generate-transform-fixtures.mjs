@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.52 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.57 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -20,7 +20,8 @@ const internalsPath = join(here, 'node_modules/.rh-transform-internals.mjs')
 writeFileSync(internalsPath, readFileSync(bundlePath, 'utf8') +
   '\nexport { cleanReply as __cleanReply, linkify as __linkify, extractYtStartTime as __extractYtStartTime,' +
   ' isValidUsername as __isValidUsername, sanitizePermlink as __sanitizePermlink, decodeImageSrc as __decodeImageSrc,' +
-  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass };\n')
+  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd, decodeDomImageSrc as __decodeDomImageSrc,' +
+  ' plainDestination as __plainDestination, withoutLoneSurrogates as __withoutLoneSurrogates };\n')
 const rh = await import(pathToFileURL(internalsPath).href)
 rh.setSlowRenderThresholdMs(0)
 
@@ -297,9 +298,327 @@ const rules2552 = {
   video_poster: '<video src="https://example.com/v.mp4" poster="https://example.com/p.jpg?a=1&amp;times=2"></video>',
   code_entities: '`&amp; &lt;b&gt;`\n\n```\n&copy; &#169;\n```',
 }
+// Rules added in 2.5.53 and 2.5.54 (#2154 entity protection, #2155 render edges, #2165 placeholder guard), from the
+// upstream specs' inputs with example hosts and accounts. Kept out of FRAGMENTS, as the rules above.
+const allDelimiters = '​⁠⁡⁢⁣⁤' + Array.from({ length: 0xf8ff - 0xe100 + 1 }, (_, i) => String.fromCharCode(0xe100 + i)).join('')
+const rules2554 = {
+  angle_amp_plain: '[x](https://example.com/?q=&amp;amp;amp;)',
+  angle_amp: '[x](<https://example.com/?q=&amp;amp;amp;>)',
+  angle_paren: '[open](<https://example.test/a)b?x=1&amp;y=2>)',
+  angle_space: '[x](<https://example.com/a b?q=1&amp;r=2>)',
+  angle_img: '![x](<https://example.com/a.png?q=&amp;amp;amp;>)',
+  angle_img_plain: '![x](https://example.com/a.png?q=&amp;amp;amp;)',
+  angle_ref: '[x][r]\n\n[r]: <https://example.com/?q=&amp;amp;amp;>',
+  angle_ref_plain: '[x][r]\n\n[r]: https://example.com/?q=&amp;amp;amp;',
+  lookalike_code: '`​0​` and &amp;',
+  lookalike_text: '​0​ and &amp;',
+  indented_code_entity: 'para\n\n    a &amp; b\n',
+  no_fence_entity: '```bad`info\n\nx &copy;\n',
+  backticks_per_block: 'one ` tick\n\ntwo &copy;\n\nthree `code`',
+  path_entity_slash: '[x](/&#47;evil.example/@example-user/X_y)',
+  path_entity_post: 'zero​width\n\n[x](/&#47;evil.example/@example-user/some-post)',
+  path_entity_private: 'a​⁠⁡⁢⁣⁤b\n\n[x](/&#92;evil.example/@example-user/posts)',
+  path_entity_pair: `${allDelimiters}\n\n[x](/&#47;evil.example/@example-user/some-post)`,
+  ref_first_wins: '[a]: https://example.com/?q=&amp;\n[a]: <https://example.com/?q=&amp;amp;>\n\n[x][a]',
+  ref_failed_first: '[a]: <https://example.com/?q=&amp;amp;> junk\n\n[a]: https://example.com/?q=&amp;\n\n[x][a]',
+  tab_fence: '```\nx&lt;\ty\n```',
+  tab_indented: '    x&lt;\ty &amp;\tz\n',
+  tab_after_text: 'a\tb\n\n```\n&copy;\t|\n```',
+  angle_text_no_link: 'see <https://example.com/my page &copy; more> end',
+  angle_text_escaped: 'x &copy; <https://example.com/a\\> y &copy; z > w &copy;',
+  encoded_delimiter: 'https://example.com/&#8203;0&#8203; and &copy;',
+  angle_after_bare_url: '[https://a.example](<https://example.com/a b?x=1&amp;y=2>)',
+  angle_after_bare_url_text: '[see https://a.example](<https://example.com/a b?x=1&amp;y=2>)',
+  angle_ref_bare_url_label: '[https://a.example]: <https://example.com/a b?x=1&amp;y=2>\n\n[x][https://a.example]',
+  cr_breaks: 'a\r\r\n\r\r\nb &amp;',
+  cr_breaks_lead: '&amp;\r\r\nx',
+  ls_tab: 'a \tb &amp;\r\n\tc',
+  heading_definition: '[a]: <https://example.com/?q=&amp;amp;amp;>\n\n# [a]: <https://example.com/?q=&amp;amp;amp;>\n\n[x][a]',
+  angle_ls: 'x (<https://example.com/a b &copy; c>) y',
+  angle_nel: 'x (<https://example.com/a\u0085b &copy; c>) y',
+  angle_2424: 'x (<https://example.com/a␤b &copy; c>) y',
+  angle_ref_ls: '[r]: <https://example.com/a b &copy; c>',
+  angle_ref_nel: '[r]: <https://example.com/a\u0085b &copy; c>',
+  angle_escaped_ls: '[x](<https://example.com/a\\ b?q=&copy;&amp;z=1>)',
+  angle_escaped_lf: '[x](<https://example.com/a\\\nb?q=&copy;&amp;z=1>)',
+  angle_escaped_crlf: '[x](<https://example.com/a\\\r\nb?q=&copy;&amp;z=1>)',
+  angle_escaped_crnel: '[x](<https://example.com/a\\\r\u0085b?q=&copy;&amp;z=1>)',
+  prose_angle_paren: 'see (<https://example.com/a b &copy; c>) end',
+  prose_angle_paren_space: 'see ( <https://example.com/a b &copy;>) end',
+  prose_angle_label: 'text ]: <https://example.com/a b &copy;> end',
+  angle_mailto: '[x](<mailto:example-user@example.com?subject=One&amp;body=Two>)',
+  angle_relative: '[x](</path?q=&amp;amp;>)',
+  angle_lt_inside: '[x](<https://example.com/a<b?q=&amp;z>)',
+  angle_quote_escaped_lf: '> [x](<https://example.com/a\\\n> b?q=&copy;>)',
+  empty_label_plain: '[]: https://example.com/?q=&amp;amp;\n\n[x][]',
+  empty_label_angle: '[]: <https://example.com/?q=&amp;amp;>\n\n[x][]',
+  empty_label_first_wins: '[]: https://example.com/?q=&amp;\n[ ]: <https://example.com/?q=&amp;amp;>\n\n[x][]',
+  all_delimiters_taken: `${allDelimiters}\n\nx &copy; y`,
+  ref_paragraph_end: '[q] and ]: stuff\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[x][b]',
+  ref_note_line: '[a]: <https://example.com/u>\nNote: [b]: <https://example.com/a b?q=&amp;amp;>\n\n[b]: <https://example.com/a b?q=&amp;amp;>\n\n[x][b]',
+  ref_empty_after_title: '[a]: <https://example.com/u> "t\n[]: <https://example.com/c d?q=&copy;&amp;>"\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_empty_wide_indent: '[r]: <https://example.com/u>\n　[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_quote: '[a]: <https://example.com/u> "t\n[]: https://example.com/fake"\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_paren: '[a]: <https://example.com/u> (t\n[]: https://example.com/fake)\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_empty_chain: '[x]:\n[]:\n[]: <https://example.com/a b?q=&amp;amp;>\n\n[][]',
+  ref_title_not_definition: '[a]: <https://example.com/u> "t\n[]: not-a-definition"\n[]: <https://example.com/?q=&amp;amp;>\n\n[][]',
+  img_paren_query: '(https://host.example/photo.jpg?size=1)',
+  img_paren_query_div: '<div>(https://host.example/photo.jpg?size=1)</div>',
+  img_paren_query_p: '<p>(https://host.example/photo.jpg?size=1)</p>',
+  dapplr_nested: '<iframe src="https://player.eu.dapplr.in/file/dapplr-videos/x.mp4"></iframe>',
+  dapplr_cdn: '<iframe src="https://cdn.dapplr.in/file/dapplr-videos/x.mp4"></iframe>',
+  dapplr_refused: ['https://.dapplr.in/file/dapplr-videos/x.mp4', 'https://a..dapplr.in/file/dapplr-videos/x.mp4',
+    'https://a_b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in:8443/file/dapplr-videos/x.mp4',
+    'https://u:p@a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a.dapplr.in\\file\\dapplr-videos\\x',
+    'https:///a.b.dapplr.in/file/dapplr-videos/x.mp4', 'https://a%2eb.dapplr.in/file/dapplr-videos/x.mp4']
+    .map((src) => `<iframe src="${src}"></iframe>`).join('\n\n'),
+  web_path_2060: '<a href="/topic⁠/@example-user/some-post">x</a>',
+  guard_2060: '[x](/topic⁠/@example-user/some-post)',
+  guard_2060_entity: 'a &amp; b\n\n[x](/topic⁠/@example-user/some-post)',
+  guard_private: '[x](/topic/@example-user/some-post)',
+  guard_private_entity: 'a &amp; b\n\n[x](/topic/@example-user/some-post)',
+  guard_zwsp_path: '[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
+  guard_zwsp_path_entity: 'a &amp; b\n\n[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
+}
+// Rules added in 2.5.55 (#2156 to #2160, #2167, #2169, #2170, #2174), from the upstream specs' inputs with example
+// hosts and accounts. Kept out of FRAGMENTS, as the rules above.
+const rules2555 = {
+  angle_img_amp: '![x](<https://example.com/a.png?q=&amp;amp;>)',
+  angle_img_space: '![x](<https://example.com/a b.png>)',
+  plain_img_space: '![x](https://example.com/a%20b.png)',
+  bare_paren_entity: 'https://h.example/p.jpg?a=1&#41;',
+  bare_paren_balanced: 'https://h.example/p.jpg?a=(1)',
+  bare_paren_double: 'https://h.example/p.jpg?a=1))',
+  bare_paren_text: '(https://h.example/p.jpg?size=1)text',
+  angle_lone_surrogate: 'text\n\n[y](<https://example.com/\ud800?q=1>)',
+  autolink_entities: '<https://example.com/a b?q=&copy;&amp;z=1>',
+  ref_percent_plain: '[x][k]\n\n[k]: https://example.com/%',
+  ref_percent_angle: '[x][k]\n\n[k]: <https://example.com/%>',
+  link_accent_plain: '[x](https://example.com/é)',
+  link_accent_angle: '[x](<https://example.com/é>)',
+  upper_scheme: 'HTTPS://A.example/p and Http://a.example and HTTP://a.example/x?y=1',
+  paren_entity_tail: 'see https://example.com/a)&amp;x end',
+  adjacent_images_entity: '![a](https://example.com/i.png)![b](https://example.com/j.png?x=1&amp;y=2)',
+  link_then_bare_entity: '[a](https://example.com/1)https://example.com/2?x=1&amp;y=2',
+  linkify_paren_entity_1: '(https://example.com/a)&amp;x',
+  linkify_quote_entity: "https://example.com/a'&amp;x",
+  linkify_parens_entity: 'https://example.com/a))&amp;x',
+  linkify_open_entity: 'https://example.com/a)(&amp;x',
+  linkify_text_paren_entity: 'x https://example.com/a)&amp;x',
+  card_emphasis: '**https://h.example/p.jpg** *https://h.example/q.jpg* ~~https://h.example/r.jpg~~',
+  card_constructs: 'https://h.example/p.jpg[^1] https://h.example/p.jpg[x](https://example.com)',
+  underscore_host: 'https://my_bucket.s3.example.com/a/p.jpg',
+  angle_img_percent: '![x](<https://example.com/50% off.png>)',
+  plain_img_percent: '![x](https://example.com/50%25%20off.png)',
+  angle_img_escape: '![x](<https://example.com/a\\_b.png>)',
+  angle_link_percent: '[x](<https://example.com/50% off>)',
+  emphasis_star_url: '*italic*https://example.com/a*b.png',
+  emphasis_under_url: '_**https://example.com/a_b.png**_',
+  url_then_label: 'https://example.com/a.png[a[b]](c)',
+  url_then_ref: 'https://example.com/a.png[x]\n\n[x]: /u',
+  invalid_numeric_ref: 'see www.example.com/it&#146;s now',
+  app_paren_entity_img: 'https://example.com/p.png)&amp;x',
+  app_quote_entity_img: "https://example.com/p.png'&amp;",
+  app_copy_img: 'https://example.com/p.png&copy;',
+  entity_boundary_semicolon: 'Visit www.example.com/q?x=1&y; now',
+  entity_boundary_foo: 'see https://example.com/a)&foo; there',
+  entity_boundary_email: 'joe@exam&bne;ple.com',
+  nested_bare_iframes: '<iframe>a<iframe>b<iframe>c</iframe>d</iframe>e</iframe>f',
+  private_use: 'ab ab ab a\u{F0000}b',
+  img_hash_escape: '![x](https://example.com/a%23b.png)',
+  img_signed_query: '![x](https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b)',
+  img_slash_escape: '![x](https://example.com/dir%2Fa.png)',
+  img_query_escape: '![x](https://example.com/a.png?x=%3F)',
+  img_double_escape: '![x](https://example.com/a%2520b.png)',
+  img_wrapper_url: '![x](https://wsrv.example/?url=https%3A%2F%2Fother.example%2Fx.png&w=600)',
+  img_ref_param: '![x](https://cdn.example.com/img.png?ref=https%3A%2F%2Fsite.example%2Fp&sig=a%2Bb%3D)',
+  img_utf8_escape: '![x](https://example.com/caf%C3%A9.png)',
+  html_img_hash: '<img src="https://example.com/a%23b.png">',
+  html_img_space: '<img src="https://example.com/a%20b.png">',
+  video_poster_hash: '<video poster="https://example.com/a%23b.png"></video>',
+  legacy_steemit: '![x](https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)',
+  legacy_hive: '![x](https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png)',
+  legacy_ecency: '![x](https://images.ecency.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)',
+  legacy_half: '![x](https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png)',
+  malformed_escape: '![x](https://example.com/a%zz%23.png)',
+  legacy_passthrough_hash: '![x](https://images.ecency.com/0x0/https://example.com/p/a%23b.png)',
+  legacy_passthrough_nl: '![x](https://images.hive.blog/0x0/https://example.com/p/a%0Ab.png)',
+  angle_img_surrogate: '![x](<https://example.com/\ud800 a%zz.png>)',
+  angle_img_surrogate_low: '![x](<https://example.com/a b\udc00.png>)',
+  angle_img_surrogate_pct: '![x](<https://example.com/\ud800%.png>)',
+  wmp_anchor: "<a href='http://worldmappin.com/@example-user'>This user on Worldmappin</a>",
+  wmp_user: 'http://worldmappin.com/@example-user https://worldmappin.com/@example-user',
+  wmp_post: '[x](https://worldmappin.com/@example-user/example-post) https://worldmappin.com/@example-user/example-post',
+  wmp_tag_post: '[x](https://worldmappin.com/travel/@example-user/example-post)',
+  wmp_map_route: "<a href='http://worldmappin.com/p/example-post'>post</a>",
+}
+// Card and post image bodies of 2.5.55 (#2157, #2169, #2174): the card reads a bare URL as the render's linkify does.
+const cardBodies2555 = [
+  'https://h.example/p.jpg?a=1&#41;', 'https://h.example/p.jpg?a=(1)', 'https://h.example/p.jpg?a=1))', '(https://h.example/p.jpg?size=1)text',
+  '![x](<https://example.com/a.png?q=&amp;amp;>)', '![x](https://example.com/a.png?q=&amp;amp;)', '![x](<https://example.com/a b.png>)',
+  '**https://h.example/p.jpg**', '*https://h.example/p.jpg*', '~~https://h.example/p.jpg~~', 'text **https://h.example/p.jpg**.',
+  'https://h.example/p.jpg[^1]', 'https://h.example/p.jpg[x](https://example.com)', 'https://h.example/p.jpg![x](https://example.com/q.png)',
+  'https://my_bucket.s3.example.com/a/p.jpg', '![x](<https://example.com/50% off.png>)', '![x](https://example.com/50%25%20off.png)',
+  '![x](<https://example.com/a\\_b.png>)', '*italic*https://example.com/a*b.png', '_**https://example.com/a_b.png**_',
+  'https://example.com/a.png[a[b]](c)', 'https://example.com/a.png[x]\n\n[x]: /u',
+  '**https://example.com/p.png.**', '**https://example.com/p.png)**', '*https://example.com/p.png&#42;', '*Source: https://example.com/p.png*',
+  '_Source: https://example.com/p.png_', '**Source: https://example.com/p.png**', '~~old https://example.com/p.png~~', '*Source: https://example.com/p.png.*',
+  '(https://x.y_z.example/p.jpg)', '(https://a.b_c.example/p.jpg).', 'https://example.com/p.gif&#91;_', 'https://example.com/p.png&lt;~',
+  'https://example.com/p.png?_', 'Is it https://example.com/p.png?*', 'https://example.com/p.png?v=2_',
+  'https://a_b.c_d.example/p.jpg', 'https://example.com?i=p.png..', 'a*https://example.com/p.gif*', 'x~https://example.com/p.gif~',
+  '**https://example.com/p.png**;', '*https://example.com/p.png*_', '**https://example.com/p.png**_', '(**https://example.com/p.jpeg**)',
+  '"**https://example.com/p.jpeg**"', '**https://example.com/p.jpeg**)', '*https://example.com/p.png*)',
+  '_(https://example.com/p.png)_', '_(Source: https://example.com/p.png)_', '(https://example.com/p.png)_a_', '- _(https://example.com/p.png)_',
+  '==(https://example.com/p.png)==', '++(https://example.com/p.png)++', '| a | b |\n|---|---|\n|(https://example.com/p.png)|x|',
+  'https://example.com/p.png&#41;*', 'a@https://example.com/p.png))', '@HTTPS://example.com/p.jpg))',
+  'x # https://example.com/p.png.)', '^https://example.com/p.png))^', 'https://example.com/p.png\ud83d', 'https://example.com/\ud83dp.png',
+  'x # y https://example.com/p.png))', 'Step # 2 (see image https://example.com/p.png))', 'x # y https://example.com/p.png?a=1))',
+  'x &num; y https://example.com/p.png))', 'x &#35; y https://example.com/p.png))', 'x \\# y https://example.com/p.png))', 'x (#) y https://example.com/p.png))',
+  '- x #, y https://example.com/p.png))', 'C# y https://example.com/p.png))', 'C# https://example.com/p.png))', 'x # y\nhttps://example.com/p.png?a=(1)',
+  '## Title https://example.com/p.png?a=(1)', '#tag https://example.com/p.png?a=(1)', 'x #1 https://example.com/p.png?a=(1)',
+  '_x_# https://example.com/p.png))', 'a_# https://example.com/p.png))', '²# https://example.com/p.png))', '#² https://example.com/p.png))',
+  '(#hive) https://example.com/p.png))', '"#hive" https://example.com/p.png))', '#😀 https://example.com/p.png))', '#_x https://example.com/p.png))',
+  '> x #! y https://example.com/p.png))',
+  '![x](https://example.com/a%20b.png)', '![x](https://example.com/caf%C3%A9.png)', '<img src="https://example.com/a%20b.png">',
+  '![x](https://images.ecency.com/0x0/https://example.com/a%23b.png)', '![x](https://images.ecency.com/0x0/https://example.com/p/a%23b.png)',
+  '![x](https://steemitimages.com/0x0/https://www.example.com/p/Bx%23y/media.jpg)', '![x](https://images.hive.blog/0x0/https://example.com/p/a%0Ab.png)',
+  '![x](<https://example.com/\ud800 a%zz.png>)', '![x](<https://example.com/a b\udc00.png>)', '![x](<https://example.com/\ud800%.png>)',
+  '![x](https://example.com/a%23b.png)', '![x](https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b)', '![x](https://example.com/dir%2Fa.png)',
+  '![x](https://example.com/a.png?x=%3F)', '![x](https://example.com/a%2520b.png)', '![x](https://wsrv.example/?url=https%3A%2F%2Fother.example%2Fx.png&w=600)',
+  '![x](https://cdn.example.com/img.png?ref=https%3A%2F%2Fsite.example%2Fp&sig=a%2Bb%3D)', '<img src="https://example.com/a%23b.png">',
+  '![x](https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)', '![x](https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png)',
+  '![x](https://images.ecency.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)', '![x](https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png)',
+  '![x](https://example.com/a%zz%23.png)',
+  // a reference definition's destination and a raw anchor's text are not autolinked: develop's reading
+  '[r]: https://h.example/p.jpg?a=(1)', '[r]:\n  https://h.example/p.jpg?a=(1)\n\n[x][r]', '[r]: \t https://h.example/p.jpg?a=1))',
+  '<a href="https://example.com">https://h.example/p.jpg?a=(1)</a>', '<a href="https://example.com">https://h.example/p.jpg?a=1)</A >',
+  'x <a href="https://h.example/p.jpg?a=1&#41;"> https://h.example/p.jpg?a=1&#41;</a> y',
+  'x <a href="https://h.example/p.jpg?a=&#40;1&#41;"> https://h.example/p.jpg?a=&#40;1&#41;</a> y',
+]
+// Rules of 2.5.56 (#2176): the render reads its input as before (shared helpers, no output change); these bodies pin
+// the input pass the card now copies. From the upstream spec's inputs with example hosts. Kept out of FRAGMENTS.
+const rules2556 = {
+  leo_post_img: '![x](https://inleo.io/posts/a/b.png)',
+  leo_thread_img: '![x](https://leofinance.io/threads/view/a/b.png)',
+  leo_tab_stop: 'https://inleo.io/posts/a/b ![x](<https://example.com/c\td.png>)',
+  angle_tab_mid: 'a\tb\n![x](<https://example.com/c\td.png>)',
+  angle_tab_after: 'ab\t\n x\t![x](<https://example.com/c\t\td.png>)',
+  angle_nbsp: '![x](<https://example.com/a\u00a0b.png>)',
+  angle_line_sep: '![x](<https://example.com/a\u2028b.png>)',
+  plain_escaped_paren: '![x](https://example.com/a\\).png)',
+  plain_escaped_quote: '![x](https://example.com/a\\"b.png)',
+  title_mismatch: '![x](<https://example.com/a b.png> "t\')',
+  img_nbsp: '<img src="https://example.com/a\u00a0b.png">',
+  img_tab: 'x\t<img src="https://example.com/a\tb\tc.png">',
+  label_setext: '![a\n--\nb](<https://example.com/a b.png>)',
+  label_table: '![a|b\n-|- \nc](<https://example.com/a b.png>)',
+  label_list_indent: '10. ![a\n    --\n    b](<https://example.com/a b.png>)',
+  byline_then_img: '![x](https://example.com/a.png) Posted using [LeoFinance](https://leofinance.io)\n\n![y](https://example.com/b.png)',
+}
+// Card and post image bodies of 2.5.56 (#2176): the card reads the text the parser reads (the render's input pass,
+// then Remarkable's), and its markdown image pattern follows the parser's separators, escapes and block starts.
+const angleDestinations2556 = ['a b', 'a\\b', '50%', '50%%20off', 'a%zz', 'a%20b', 'café', 'caf%C3%A9', '\ud800x', 'x\udc00 y', 'a"b',
+  'a[1]', 'a{b}|c', 'a^b`c', 'a\tb', '\ta', 'ab\t\tc', 'a\u00a0b', 'a\u2028b', 'a\u0085b', 'a\u2424b']
+const cardBodies2556 = [
+  ...angleDestinations2556.map((d) => `![x](<https://example.com/${d}.png>)`),
+  'a\tb\n![x](<https://example.com/c\td.png>)', 'ab\t\n x\t![x](<https://example.com/c\t\td.png>)', '\t\t\n![x](<https://example.com/\tc\td.png>)',
+  '![](\u3000<https://example.com/a b.png>)', '![](<https://example.com/a b.png>\ufeff)', '![](<https://example.com/a.png>\u3000"t")',
+  '![](\r<https://example.com/a b.png>)', '![](https://example.com/a.png\u3000)', '![](\u000b<https://example.com/a b.png>)',
+  '![]( \n <https://example.com/a b.png> \n )', '![](<https://example.com/a b.png>\n\n)', '![x\n\ny](<https://example.com/a b.png>)',
+  '![](<https://example.com/a b.png>\n \t\n)', '![](<https://example.com/a b.png>\u2028\u2028)',
+  '![](https://example.com/a.png\u0085)', '![](https://example.com/a\u0085b.png)', '![](https://example.com/a\u007fb.png)',
+  '![](https://example.com/a\u0001b.png)', '![](https://example.com/a\u2424b.png)',
+  '<img src="https://example.com/a\u00a0b.png">', '<img src="https://example.com/a\tb.png">', 'x\t<img src="https://example.com/a\tb\tc.png">',
+  'https://example.com/a.png\u0085text', 'text\u0085https://example.com/a.png', 'text\u00a0https://example.com/a.png',
+  '![x](https://example.com/a\\).png)', '![x](https://example.com/a\\_b.png)', '![x](https://example.com/a\\\\b.png)',
+  '![x](https://example.com/a\\(b.png)', '![x](https://example.com/a\\&amp;b.png)', '![x](https://example.com/a\\"b.png)',
+  '![x](<https://example.com/a b.png> "t\')', "![x](<https://example.com/a b.png> 't\")",
+  '![a\n# b](<https://example.com/a b.png>)', '![a\n> b](<https://example.com/a b.png>)', '![a\n- b](<https://example.com/a b.png>)',
+  '> ![a\n>\n> b](<https://example.com/a b.png>)',
+  '![x](https://inleo.io/posts/a/b.png)', '![x](https://leofinance.io/threads/view/a/b.png)', 'https://inleo.io/posts/a/b ![x](<https://example.com/c\td.png>)',
+  '![x](https://example.com/\ud800x.png)', '<img src="https://example.com/\udc00x.png">',
+  '![x](https://example.com/a\\ b.png)', '![x](https://example.com/a\\\nb.png)',
+  '![a\n___\nb](<https://example.com/a b.png>)', '![a\n<div>b</div>](<https://example.com/a b.png>)',
+  '![a\n--\nb](<https://example.com/a b.png>)', '![a|b\n-|- \nc](<https://example.com/a b.png>)', '![a|b\n:-|-:\nc](<https://example.com/a b.png>)',
+  '![a\n: b](<https://example.com/a b.png>)', '![a\n~ b](<https://example.com/a b.png>)',
+  '![a|\n:-:\nb](<https://example.com/a b.png>)', '![a|\n-:\nb](<https://example.com/a b.png>)', '|![a\n:-\nb](<https://example.com/a b.png>)',
+  '10. ![a\n    --\n    b](<https://example.com/a b.png>)', '10. ![a\n    : b](<https://example.com/a b.png>)',
+  '10. ![a|b\n    -|-\n    c](<https://example.com/a b.png>)', '10. ![a\n    # h\n    b](<https://example.com/a b.png>)',
+  '- item\n  - ![a\n    ===\n    b](<https://example.com/a b.png>)', '1. - ![a|b\n     -|-\n     c](<https://example.com/a b.png>)',
+  '![x](https://example.com/a.png) Posted using [LeoFinance](https://leofinance.io)\n\n![y](https://example.com/b.png)',
+  // multi-line images the card still reads in fast mode
+  '![Sunset over the bay\n2023 trip](https://example.com/a.png)', '![a\n-b](https://example.com/a.png)', '![a\n#b](https://example.com/a.png)',
+  '![a\n1999-01 photo](https://example.com/a.png)', '![x](\n<https://example.com/a b.png>)', '![x](\nhttps://example.com/a.png)',
+  '![a\n<3 you](https://example.com/a.png)', '![a\n--b](https://example.com/a.png)', '![a\n:b](https://example.com/a.png)',
+  '![a\n~b](https://example.com/a.png)', '![a\n-:b](https://example.com/a.png)',
+  // titles and separators around a plain destination, a stray escape and the length bound
+  '![x](https://example.com/a.png "t")', '![x](https://example.com/a.png\n"t"\n)', '![x](https://example.com/a.png"t")',
+  '![x](https://example.com/a.png \'t\n\nu\')', '![x](https://example.com/a.png "t\nu")', '![x](https://example.com/a.png\\)',
+  '![x](https://example.com/50%\\\\x.png)', `![x](https://example.com/${'a'.repeat(2100)}.png) ![y](https://example.com/b.png)`,
+  '![x](<https://example.com/a.png>\n"t")', '![x](<https://example.com/a.png>  \n  )', 'a\u00a0![x](https://example.com/a.png)',
+  '<div>\n![a\n<p>b](https://example.com/a.png)\n</div>', '![a\n   <section>b](https://example.com/a.png)', '![a\n    <div>b](https://example.com/a.png)',
+]
+// Rules of 2.5.57 (#2178, #2179): cleanReply drops a whole-line [via Inbox] byline in any case; render bodies with a
+// stray `%` beside an escape, bracketed labels and an escaped `!`. Kept out of FRAGMENTS.
+const rules2557 = {
+  inbox_byline: 'Hello\n<sub>Posted [via Inbox](https://example.com)</sub>',
+  inbox_byline_upper: 'Hello\n<SUB>POSTED [VIA INBOX](https://example.com/x)</SUB>',
+  inbox_bare: 'Hello\n[via Inbox](https://example.com)\nnext',
+  inbox_empty_dest: 'Hello\n[via Inbox]()',
+  inbox_prose: 'I got this [via Inbox] yesterday ![x](https://example.com/a.png)\nnext',
+  inbox_no_link: 'Hello\nvia inbox, no link',
+  stray_pct_escape: '![x](https://example.com/50%\\x.png)',
+  stray_pct_escape_hex: '![x](https://example.com/50%\\x%41.png)',
+  label_brackets: '![a [b] c](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  escaped_bang: '\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  escaped_bang_url_label: '\\![https://example.com/a.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  lone_surrogate_bare: 'https://example.com/\ud800x.png',
+}
+// Card and post image bodies of 2.5.57 (#2179), from the upstream spec's inputs with example hosts.
+const cardBodies2557 = [
+  '![x](https://example.com/50%\\x.png)', '![x](https://example.com/50%\\x%41.png)', '![x](https://example.com/50%\\_x.png)',
+  '![x](https://example.com/50%\\\\_x.png)', '![x](https://example.com/50%\\.png)', '![x](https://example.com/50%25\\_x.png)',
+  '![x](https://example.com/a\\_x%zz.png)', '![x](<https://example.com/50%\\x.png>)',
+  '![a [b] c](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  '![a [b [c]] d](https://example.com/a.png) <img src="https://example.com/b.png">',
+  '![a [b [c [d]]] e](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  '![a [b [c [d]]] e](https://example.com/a.png) <img src="https://example.com/b.png">',
+  '![a [b [c]] d](https://example.com/a.png)', '![a [b] c](<https://example.com/a b.png>)',
+  '![a [b\n] c](https://example.com/a.png)', '![a [b\n\nc]](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  '\\![a [b] c](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![a \\[b](https://example.com/a.png) ![d](https://example.com/b.png)',
+  'x \\![a [b] c](https://example.com/a.png)\n\n![d](https://example.com/b.png)',
+  '\\\\![a [b] c](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/p) ![d](https://example.com/b.png)',
+  '\\\\\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  '![\\[1] my photo](https://example.com/page)\n\n![d](https://example.com/b.png)',
+  '![a \\[b] c](https://example.com/page) ![d](https://example.com/b.png)',
+  '![a [b\\] c](https://example.com/a.png) x](https://example.com/b.png)',
+  '![a\\](https://example.com/page) b](https://example.com/b.png)',
+  '![a \\] b](https://example.com/a.png)\n\n<img src="https://example.com/b.png">',
+  '![a\\\nb](https://example.com/a.png)',
+  '![a](<https://example.com/a b.png> "t\n[^1]: x")', '![a\n[^1]: b](<https://example.com/a b.png>)',
+  '![a\n1234567890. b](<https://example.com/a b.png>)', '![a\n1234567890) b](<https://example.com/a b.png>)',
+  '![a\n12345678901. b](https://example.com/a.png)',
+  'https://example.com/\ud800x.png', 'x https://example.com/\udc00x.png\n\n![y](https://example.com/b.png)',
+  `https://www.youtube.com/watch?v=${YT}\n\nhttps://example.com/\ud800x.png`,
+  `https://example.com/\ud800x.png\n\nhttps://www.youtube.com/watch?v=${YT}`,
+  '\\![a [b\n\n![c](https://example.com/b.png)', '\\![a [b] c](x) ![d](https://example.com/b.png)',
+  'Hello\n<sub>Posted [via Inbox](https://example.com/a.png)</sub>\n\n![y](https://example.com/b.png)',
+  `![x](https://example.com/${'a'.repeat(2100)}.png) ![y](https://example.com/b.png)`,
+  // an escaped image whose text holds a URL: one the image pattern captures, one only the presence check sees
+  '\\![a [b] https://example.com/x.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/a b.png) ![d](https://example.com/b.png)',
+]
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2555)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2556)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2557)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -356,6 +675,10 @@ const FRAGMENTS = [
 ]
 Object.assign(handcrafted, bylines2542)
 Object.assign(handcrafted, rules2552)
+Object.assign(handcrafted, rules2554)
+Object.assign(handcrafted, rules2555)
+Object.assign(handcrafted, rules2556)
+Object.assign(handcrafted, rules2557)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)
@@ -462,6 +785,38 @@ imageBodies.forEach((body, i) => {
   imageCases.push({ name: `strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
   imageCases.push({ name: `strraw_${i}`, kind: 'rawstring', body, meta: null, w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(body) })
 })
+// 2.5.53 (#2155): a bare image URL with a query inside parentheses, on the card and the post image.
+;['(https://host.example/photo.jpg?size=1)', '<div>(https://host.example/photo.jpg?size=1)</div>', '<p>(https://host.example/photo.jpg?size=1)</p>'].forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `paren-${i}`, last_update: '2026-11-20T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `paren_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `parencard_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `parenraw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+})
+cardBodies2555.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2555-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2555_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2555sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
+  imageCases.push({ name: `c2555card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2555raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+})
+cardBodies2557.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2557-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2557_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2557fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
+  imageCases.push({ name: `c2557card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2557raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  imageCases.push({ name: `c2557str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
+  imageCases.push({ name: `c2557strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
+})
+cardBodies2556.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2556-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2556_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2556fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
+  imageCases.push({ name: `c2556card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2556raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  imageCases.push({ name: `c2556str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
+  imageCases.push({ name: `c2556strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
+})
 // Rendered bodies from the render set through the full lookup too.
 bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
   imageCases.push({ name: `body_${name}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
@@ -470,7 +825,19 @@ bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
 
 // ---- simpleMarkdownToHTML and helpers ------------------------------------------------------
 
-const simpleCases = bodies.filter((_, i) => i % 6 === 0).map(([name, md]) => ({ name, input: md, expected: rh.simpleMarkdownToHTML(md) }))
+// Since 2.5.57 (#2178) simpleMarkdownToHTML reads a lone surrogate as U+FFFD, as the render does, instead of throwing.
+const simpleBodies2557 = [
+  ['surrogate_high_dest', 'text\n\n[y](<https://example.com/\ud800?q=1>)'],
+  ['surrogate_low_dest', 'text\n\n[y](<https://example.com/\udc00?q=1>)'],
+  ['surrogate_plain_dest', '[y](https://example.com/\ud800x)'],
+  ['surrogate_autolink', 'see https://example.com/\udc00x and <https://example.com/\ud800>'],
+  ['surrogate_text', 'a\ud800b'],
+  ['surrogate_pair', 'a😀b'],
+  ['surrogate_reversed', '\udc00\ud800 *x*'],
+  ['surrogate_image', '![a\ud800](https://example.com/\ud800.png)'],
+]
+const simpleCases = bodies.filter((_, i) => i % 6 === 0).concat(simpleBodies2557)
+  .map(([name, md]) => ({ name, input: md, expected: rh.simpleMarkdownToHTML(md) }))
 
 const helperInputs = {
   extractYtStartTime: urls.filter((u) => /you/i.test(u)).concat(['not a url', 'https://x.com/?t=12abc', 'https://x.com/?t=+7', 'https://x.com/?t=%20%2012',
@@ -480,6 +847,20 @@ const helperInputs = {
   isValidPermlink: ['example-post', 'Example', 'photo.png', 'post?x=1', 'a_b', 're-x-20260101t000000z', 'x.jpg?y', '', '-'],
   decodeImageSrc: ['https://example.com/a.png', ' https://example.com/a%20b.png ', 'https://example.com/%zz', '&amp;x=1', '&#0065;', '%E2%82%AC', '%E2%82'],
   stripHtmlTags: ['<b>x</b>', 'a <> b', 'a < b', '<<x>>', '<a href="x">y</a>tail<'],
+  // 2.5.53 (#2155): an unbalanced `)` after a query or fragment is prose
+  imageUrlEnd: ['https://host.example/photo.jpg?size=1)', 'https://host.example/photo.jpg)', 'https://host.example/photo.jpg#a)',
+    'https://host.example/photo.jpg?a=(1)', 'https://host.example/photo.jpg?a=)&amp;b=(1)', 'https://host.example/photo.jpg?a=)&b=(1))',
+    'https://host.example/photo.jpg?a=1))', 'https://host.example/photo.jpg?a=((1)', 'https://host.example/photo.jpg', 'https://host.example/a.png?x=1).'],
+  // 2.5.55 (#2174): escaped delimiters and %25 stay escaped; a legacy sized proxy path still decodes whole
+  decodeDomImageSrc: ['https://example.com/a%23b.png', 'https://example.com/a%20b.png', 'https://example.com/caf%C3%A9.png', 'https://example.com/a%2520b.png',
+    'https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b', 'https://example.com/a%zz%23.png', ' https://example.com/a%2Fb.png ', 'https://example.com/%E2%82',
+    'https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png', 'https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png',
+    'https://IMAGES.ECENCY.COM/0x0/HTTPS%3a%2f%2fexample.com%2Fa.png', 'https://i.ecency.com/10x20/https%3A//example.com/a%23.png',
+    'https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png', 'https://steemitimages.com/0x0/https://example.com/a%23b.png', '%25', '%2525', '%'],
+  // 2.5.56 (#2176): the destination helpers the card and the render share
+  plainDestination: ['https://example.com/café a%20b.png', 'a\\b"c<d>[e]^f`g{h|i}', 'https://example.com/ok.png', '50%%20off a', 'a%zz b', 'a\u00a0b', 'a\u2028b', '%',
+    'a b%20c', 'café %E2%82', 'https://example.com/a%2Fb c'],
+  withoutLoneSurrogates: ['a\ud800b\udc00c😀', '\udc00\ud800', 'plain'],
   youtubeVideoLinkClass: ['https://www.youtube.com/shorts/x', 'https://YOUTUBE.com/Shorts/x', 'https://youtu.be/x'],
   cleanReply: Object.values(handcrafted).filter((s) => /posted|via|watch on/i.test(s)).concat(['', 'a\n---\n\n\n*posted via lumen*\nb', '---\noriginally posted through [scrobble.life', 'x\n-----\t\n_Originally Posted Through [Scrobble.Life_',
     // 2.5.42: 3Speak separator lookahead and whole-line footer filter
@@ -491,7 +872,12 @@ const helperInputs = {
     'a\n<sub>posted via [hivesuite](x)</sub>\n<SUB>Posted Via [HIVESUITE](y)</SUB>\n<sub>posted via [hivesuite] (z)</sub>',
     'a\n_posted from liketu clips_ short video, trimmed\nshort video, trimmed\n_POSTED FROM LIKETU CLIPS_ - SHORT VIDEO, TRIMMED',
     // Two dashes are not a separator; three are.
-    'a\n--\n*posted via lumen*\nb', 'a\n--\n\u25B6 [Watch on 3speak.tv](https://3speak.tv/watch?v=a/b)', '--\n*posted via lumen*']),
+    'a\n--\n*posted via lumen*\nb', 'a\n--\n\u25B6 [Watch on 3speak.tv](https://3speak.tv/watch?v=a/b)', '--\n*posted via lumen*',
+    // 2.5.57 (#2179): a whole-line [via Inbox] byline in any case, with or without <sub> and "posted"
+    'Hello\n<sub>Posted [via Inbox](https://example.com)</sub>', 'Hello\n[via Inbox]()', 'Hello\nvia inbox, no link',
+    'I got this [via Inbox] yesterday ![x](https://example.com/a.png)\nnext', ' \t<SUB>\tPOSTED\t[VIA INBOX](https://example.com/x)\t</SUB> \r\nb',
+    'a\nposted [via inbox](https://example.com/x)\nb', 'a\n[via Inbox](https://example.com/a b)\nb', 'a\n<sub>[via Inbox](x)</sub> tail\nb',
+    'a\n<sub>Posted  [via Inbox](x)</sub>\nb', 'a\nPosted[via Inbox](x)\nb', 'a\n[via Inbox](x)\u00a0\nb', 'a\n[via Inbox](x)\r']),
 }
 const helperCases = []
 for (const [fn, inputs] of Object.entries(helperInputs)) {

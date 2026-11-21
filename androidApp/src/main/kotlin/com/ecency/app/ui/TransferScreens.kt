@@ -605,13 +605,17 @@ fun TipSheet(model: TipModel, onDismiss: () -> Unit) {
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { !s.busy }),
         containerColor = colors.background,
     ) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp).testTag("tipSheet")) {
+        // scrolls: with the keyboard up on a phone, or at a larger text size, Send stays reachable (user report:
+        // the gift could not send a tip on Android; iOS draws this sheet in a scrolling Form)
+        Column(Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("tipSheet")) {
             Text(TipCopy.TITLE, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.semantics { heading() })
             Text(TipCopy.supportAuthor(s.author), color = colors.darkGray)
             Text("${TipCopy.EXISTING} (${s.tipsCount})", color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
             s.tipsTotals.forEach { (cur, total) -> Text("$total $cur", color = colors.text, fontSize = 12.sp) }
             Text(TipCopy.TOKEN, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 10.dp))
-            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // one row that scrolls sideways (RN tippingDialogContent, iOS): every token held is offered, so a wrapping
+            // grid of many Hive Engine tokens pushed the amount and Send off the sheet (user report)
+            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).testTag("tipCurrencies"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 s.currencies.forEach { c ->
                     val selected = c.symbol == s.currency
                     Column(
@@ -697,8 +701,9 @@ private fun FavoritesSheet(model: com.ecency.core.app.TransferFavoritesModel, on
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).testTag("favoritesSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the favourites grow with the account
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("favoritesSheet")) {
             // RN: the title, and the button that opens or closes the add row
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(TransferFavoritesCopy.TITLE, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))

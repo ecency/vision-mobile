@@ -3,6 +3,7 @@ package com.ecency.app
 import androidx.compose.ui.test.onNodeWithText
 
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performFirstLinkClick
 
 import androidx.compose.ui.semantics.getOrNull
@@ -75,9 +76,13 @@ class ChatNode {
     val requests: MutableList<AuthHttpRequest> = Collections.synchronizedList(mutableListOf())
     var mono = 0L
 
+    /** The translation service's answer (the JSON body), or none. */
+    @Volatile var translation: String? = null
+
     private val http = AuthHttp { request ->
         requests += request
         chat.http(request) ?: when {
+            request.url.endsWith("/translate") -> translation?.let { HttpResult(200, it) } ?: HttpResult(400, "{}")
             request.url.endsWith("/auth-api/hs-token-refresh") -> HttpResult(503, "{}")
             "/private-api/" in request.url -> HttpResult(200, "{}")
             else -> HttpResult(400, "{}")
@@ -154,8 +159,8 @@ class ChatFlowsTest {
 
     private lateinit var navigator: Navigator
 
-    private fun launch(tab: AppTab = AppTab.CHATS, fontScale: Float = 1f) {
-        navigator = Navigator(NavState(tab = tab))
+    private fun launch(tab: AppTab = AppTab.CHATS, fontScale: Float = 1f, state: NavState = NavState(tab = tab)) {
+        navigator = Navigator(state)
         compose.setContent { androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale)) { EcencyApp(env, host, navigator) } }
     }
 
@@ -664,6 +669,57 @@ class ChatFlowsTest {
         assertTrue("the star is inside the row $row: $star", star.left >= row.left - 0.5f && star.right <= row.right + 0.5f && star.top >= row.top - 0.5f && star.bottom <= row.bottom + 0.5f)
         assertFalse("the star does not cover the name $text: $star", star.overlaps(text.deflate(0.5f)))
     }
-}
 
-private fun androidx.compose.ui.test.SemanticsNodeInteractionCollection.onFirst() = this[0]
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick).
+
+    private fun openMessageOptionsOnAShortWindow() {
+        node.signIn()
+        launch(fontScale = 1.3f, state = NavState(tab = AppTab.CHATS).push(AppScreen.ChatThread("ch-ecency", "O")))
+        waitFor("messages")
+        waitUntil { runCatching { compose.onNodeWithTag("messages").performScrollToKey("p4") }.isSuccess }
+        waitFor("message:p4")
+        compose.onNodeWithTag("bubble:p4").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
+        waitFor("option:COPY")
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheMessageOptionsScrollToTheLastOption() {
+        openMessageOptionsOnAShortWindow()
+        val last = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("an option") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("option:") == true })
+            .fetchSemanticsNodes().last().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag]
+        compose.awaitScrolledTo(last).performClick()
+        waitUntil { !exists("chatOptionsSheet") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun aLongTranslationOfAMessageScrollsInItsSheet() {
+        node.translation = """{"translatedText":"${(1..80).joinToString("\\n") { "Translated line $it" }}"}"""
+        openMessageOptionsOnAShortWindow()
+        compose.awaitScrolledTo("option:TRANSLATE").performClick()
+        waitUntil { compose.onAllNodes(hasTestTag("chatTranslated") and hasText("Translated line 80", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(androidx.compose.ui.test.hasScrollAction() and androidx.compose.ui.test.hasAnyDescendant(hasTestTag("chatTranslated")), useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowANewGroupWithPeopleChosenScrollsToCreate() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        waitFor("chatsNewGroup")
+        tap("chatsNewGroup")
+        waitFor("newGroupSheet")
+        compose.awaitScrolledTo("groupSearch").performTextInput("spike")
+        waitFor("person:spike-bob")
+        tap("person:spike-bob")
+        waitFor("chip:spike-bob")
+        compose.onNodeWithTag("groupSearch").performTextInput("carol")
+        waitFor("person:spike-carol")
+        tap("person:spike-carol")
+        waitFor("chip:spike-carol")
+        compose.onNodeWithTag("groupCreate").performScrollTo().assertIsDisplayed().performClick()
+        waitUntil { (navigator.state.top as? AppScreen.ChatThread)?.type == "G" }
+    }
+}

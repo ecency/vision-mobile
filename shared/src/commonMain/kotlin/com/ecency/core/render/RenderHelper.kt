@@ -1,6 +1,7 @@
 package com.ecency.core.render
 
 import com.ecency.core.render.methods.CleanReply
+import com.ecency.core.render.methods.Helper
 import com.ecency.core.render.methods.MarkdownToHtml
 import com.ecency.core.render.methods.RenderContext
 import com.ecency.core.render.methods.isFatal
@@ -90,7 +91,9 @@ class RenderHelper(proxyBase: String = ImageProxy.DEFAULT_BASE) {
     /** `simpleMarkdownToHTML`: remarkable's default preset plus linkify, then the sanitizer. */
     fun simpleMarkdownToHTML(input: String): String {
         if (input.isEmpty()) return ""
-        return HtmlSanitizer.sanitize(Markdown.renderDefault(input, linkify = true), SanitizeOptions(proxyBase = proxy.base))
+        // A lone surrogate reads as U+FFFD, as markdownToHTML reads it: the parser's encodeURI throws on one (2.5.57, #2178).
+        val text = Helper.withoutLoneSurrogates(input)
+        return HtmlSanitizer.sanitize(Markdown.renderDefault(text, linkify = true), SanitizeOptions(proxyBase = proxy.base))
     }
 
     /** `postBodySummary(body, length, platform)`: plain-text summary; [length] 0 means no truncation. */

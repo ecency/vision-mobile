@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.click
@@ -295,13 +296,17 @@ class EditorFlowsTest {
         settle()
     }
 
-    private fun launchSignedIn() {
+    /** [fontScale] overrides the configured one; null keeps it (tests that set a scale on the configuration). */
+    private fun launchSignedIn(fontScale: Float? = null) {
         val vault = KeyVault(node.store)
         vault.save(VaultAccount("tester", AuthType.POSTING_KEY, postingKey = node.key.toWif(), accessToken = "access-tester"))
         vault.save(VaultAccount("second", AuthType.POSTING_KEY, postingKey = node.key.toWif(), accessToken = "access-second"))
         vault.setCurrentUsername("tester")
         compose.setContent {
-            androidx.compose.runtime.CompositionLocalProvider(com.ecency.app.ui.LocalVideoPreview provides previewPlayer) { EcencyApp(env, host, navigator) }
+            androidx.compose.runtime.CompositionLocalProvider(
+                com.ecency.app.ui.LocalVideoPreview provides previewPlayer,
+                androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale ?: androidx.compose.ui.platform.LocalDensity.current.fontScale),
+            ) { EcencyApp(env, host, navigator) }
         }
         waitUntil { env.session.current.username == "tester" }
         waitFor("card:alice/trending-one")
@@ -1361,5 +1366,61 @@ class EditorFlowsTest {
         waitFor("optionsSheet")
         compose.onNodeWithTag("thumbHint", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("benef:tester", useUnmergedTree = true).assertExists()
+    }
+
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick).
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheTranslateSheetScrollsToApply() {
+        launchSignedIn(fontScale = 1.3f)
+        openEditor()
+        write(body = longBody)
+        compose.onNodeWithTag("toolTranslate").performScrollTo().performClick()
+        waitFor("translateRun")
+        settle()
+        compose.onNodeWithTag("translateRun").performScrollTo().assertIsDisplayed().performClick()
+        waitFor("translatePreview")
+        compose.onNodeWithTag("translateApply").performScrollTo().assertIsDisplayed().performClick()
+        waitUntil { !exists("translateSheet") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheDictationSheetScrollsToDone() {
+        launchSignedIn(fontScale = 1.3f)
+        openEditor()
+        write(body = "Typed.")
+        openFromAiAssist("aiToolDictate")
+        waitFor("dictationMain")
+        settle()
+        compose.onNodeWithTag("dictationDone").performScrollTo().assertIsDisplayed().performClick()
+        waitUntil { !exists("dictationSheet") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheVideoSheetScrollsToUpload() {
+        launchSignedIn(fontScale = 1.3f)
+        openEditor()
+        write(body = "Start")
+        compose.onNodeWithTag("toolVideo").performScrollTo().performClick()
+        waitFor("videoChoose")
+        val video = editorEntry().peek<com.ecency.core.app.VideoUploadModel>("video")!!
+        val bytes = ByteArray(1_000) { (it % 31).toByte() }
+        compose.runOnUiThread {
+            val pick = video.pick(com.ecency.core.app.PickedVideo(object : com.ecency.core.api.speak.TusSource {
+                override val name = "holiday.mp4"
+                override val size = bytes.size.toLong()
+                override fun read(offset: Long, length: Int) = bytes.copyOfRange(offset.toInt(), offset.toInt() + length)
+            }, 12_000))!!
+            video.setThumbs(pick, (1..3).map { PickedImage(byteArrayOf(it.toByte()), "frame$it.jpg", "image/jpeg", 16, 9) })
+        }
+        waitFor("videoStart")
+        settle()
+        compose.onNodeWithTag("videoStart").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("videoClose").performScrollTo().assertIsDisplayed().performClick()
+        waitUntil { !exists("videoSheet") }
     }
 }

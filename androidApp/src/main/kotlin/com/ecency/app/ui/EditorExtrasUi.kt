@@ -111,7 +111,7 @@ internal fun ComposeTranslateSheet(model: ComposeTranslateModel, onDismiss: () -
     val state by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding().testTag("translateSheet")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).navigationBarsPadding().testTag("translateSheet")) {
             Text(ComposeTranslateModel.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(bottom = 8.dp))
             when {
                 state.loading -> LoadingBlock(Modifier.padding(vertical = 24.dp))
@@ -405,7 +405,7 @@ internal fun DictationSheet(model: DictationModel, onDismiss: () -> Unit) {
     // with the sheet or its composer, on logout, an account change and the wipe, and is held when the lock engages
     val busy = state.busy
     ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding().testTag("dictationSheet"), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).navigationBarsPadding().testTag("dictationSheet"), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(DictationModel.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(bottom = 8.dp))
             if (state.unavailable) Text(DictationModel.UNAVAILABLE, color = colors.redText, fontSize = 13.sp, modifier = Modifier.testTag("dictationUnavailable"))
             if (state.denied) Text(DictationModel.DENIED, color = colors.redText, fontSize = 13.sp, modifier = Modifier.testTag("dictationDenied"))
@@ -591,7 +591,7 @@ internal fun VideoUploadSheet(model: VideoUploadModel, onRecord: (() -> com.ecen
     val inFront = lifecycleState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)
     LaunchedEffect(state.done) { if (state.done) onDismiss() }
     ModalBottomSheet(onDismissRequest = { if (!state.uploading) close() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding().testTag("videoSheet")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).navigationBarsPadding().testTag("videoSheet")) {
             Text(VideoUploadModel.SELECT_SOURCE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(bottom = 8.dp))
             if (!state.hasVideo) {
                 TextButton(

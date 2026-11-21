@@ -26,7 +26,11 @@ internal object Linkify {
     fun parseTokens(blockTokens: List<Token>) {
         for (blockToken in blockTokens) {
             if (blockToken.type != "inline") continue
-            var tokens = blockToken.children
+            val tokens = blockToken.children
+            // remarkable splices each linked token's nodes into a new copy of the children list, which made a
+            // paragraph of many linked tokens quadratic. The scan runs from the end and never reads a replaced
+            // index again, so the replacements are kept (highest index first) and the list is rebuilt once.
+            val replacements = ArrayList<Pair<Int, List<Token>>>()
             var htmlLinkLevel = 0
             var i = tokens.size - 1
             while (i >= 0) {
@@ -85,15 +89,21 @@ internal object Linkify {
                         }
                     }
                     if (start < text.length) nodes.add(Token("text", level, text.substring(start)))
-                    val replaced = ArrayList<Token>(tokens.size + nodes.size)
-                    replaced.addAll(tokens.subList(0, i))
-                    replaced.addAll(nodes)
-                    replaced.addAll(tokens.subList(i + 1, tokens.size))
-                    tokens = replaced
-                    blockToken.children = tokens
+                    replacements.add(i to nodes)
                 }
                 i--
             }
+            if (replacements.isEmpty()) continue
+            val rebuilt = ArrayList<Token>(tokens.size + replacements.sumOf { it.second.size })
+            var next = 0
+            for (r in replacements.indices.reversed()) {
+                val (at, nodes) = replacements[r]
+                rebuilt.addAll(tokens.subList(next, at))
+                rebuilt.addAll(nodes)
+                next = at + 1
+            }
+            rebuilt.addAll(tokens.subList(next, tokens.size))
+            blockToken.children = rebuilt
         }
     }
 }

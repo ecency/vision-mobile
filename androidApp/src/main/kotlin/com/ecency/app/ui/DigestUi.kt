@@ -9,6 +9,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,7 +66,7 @@ private fun DigestSheet(env: AppEnvironment, state: DigestState) {
     val model = env.digest
     ModalBottomSheet(onDismissRequest = model::dismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp).imePadding().navigationBarsPadding().padding(bottom = 24.dp).testTag("digestSheet"),
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).imePadding().navigationBarsPadding().padding(bottom = 24.dp).testTag("digestSheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when {

@@ -638,4 +638,21 @@ class WavesFlowsTest {
         assertEquals(tag, listOf(name), node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
     }
 
+
+    /**
+     * Many pinned tags and the trending ones (a short window at a larger text size): the tag picker scrolls, so its
+     * last chip stays reachable by a real tap.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun withManyPinnedTagsThePickerScrollsToTheTrendingTags() {
+        env.prefs.putString(com.ecency.core.app.WavesTabsModel.TAGS_KEY, (1..20).joinToString(",") { "pinnedtag$it" })
+        launch(fontScale = 1.3f)
+        openWaves()
+        click("waves:add")
+        waitFor("waves:picker")
+        waitFor("waves:trending:art")
+        compose.awaitScrolledTo("waves:trending:art").performClick()
+        waitFor("waves:pinned:art")
+    }
 }

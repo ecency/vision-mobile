@@ -87,9 +87,11 @@ internal fun rememberInlineText(inlines: List<Inline>, actions: PostActions): In
             val widthDp = chipWidthDp(with(density) { labelSize.width.toDp() }.value, avatar != null) + 1
             // RN's chip is 18 high; with a large font scale the label needs more, so grow with it.
             val heightDp = maxOf(CHIP_HEIGHT_DP.toFloat(), with(density) { labelSize.height.toDp() }.value + 4)
-            // Placeholder sizes are in sp; divide out the font scale so the chip box stays in dp.
-            val heightSp = (heightDp / density.fontScale).sp
-            chips[id] = InlineTextContent(Placeholder((widthDp / density.fontScale).sp, heightSp, PlaceholderVerticalAlign.TextCenter)) {
+            // Placeholder sizes are in sp; the density converts back, so the chip box stays in dp. Not dp / fontScale:
+            // Android 14 scales large sizes less than small ones, which made the chip narrower than its label and cut
+            // long names (user report: @annephilbrick drawn as @annephilbr).
+            val (widthSp, heightSp) = with(density) { widthDp.dp.toSp() to heightDp.dp.toSp() }
+            chips[id] = InlineTextContent(Placeholder(widthSp, heightSp, PlaceholderVerticalAlign.TextCenter)) {
                 Chip(label, avatar, onLongClick = longPress) { actions.onLink(target) }
             }
         }

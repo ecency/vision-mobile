@@ -8,6 +8,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performKeyInput
@@ -72,9 +74,13 @@ class ReplyToolbarFlowsTest {
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
     private fun waitFor(tag: String) = compose.await("a node tagged $tag") { exists(tag) }
 
-    private fun openReplySheet() {
+    private fun openReplySheet(fontScale: Float = 1f) {
         node.signIn()
-        compose.setContent { EcencyTheme(dark = false) { EcencyApp(env, host) } }
+        compose.setContent {
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale)) {
+                EcencyTheme(dark = false) { EcencyApp(env, host) }
+            }
+        }
         waitFor("open:alice/trending-one")
         compose.onNodeWithTag("open:alice/trending-one").performClick()
         waitFor("postActions")
@@ -175,4 +181,27 @@ class ReplyToolbarFlowsTest {
         assertEquals(tag, listOf(name), node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
     }
 
+
+    /**
+     * A long reply: the field grows up to RN's 200 (quickPostModal inputContainer maxHeight) and scrolls inside, so
+     * Reply stays in sight under however many lines.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h740dp")
+    fun aLongReplyLeavesReplyInSight() {
+        openReplySheet()
+        compose.onNodeWithTag("replyText").performTextInput((1..40).joinToString("\n") { "Line $it of a long reply" })
+        compose.waitForIdle()
+        compose.onNodeWithTag("replySend").assertIsDisplayed()
+    }
+
+    /** A short window (a phone with the keyboard up, or larger text): Reply stays reachable by a real tap. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheReplySheetScrollsToReply() {
+        openReplySheet(fontScale = 1.3f)
+        compose.onNodeWithTag("replyText").performTextInput("A reply long enough to send from a short window")
+        compose.onNodeWithTag("replySend").performScrollTo().assertIsDisplayed().performClick()
+        compose.await("the reply was broadcast") { node.broadcasts().isNotEmpty() }
+    }
 }

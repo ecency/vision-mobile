@@ -11,6 +11,7 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ripple
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -375,8 +376,9 @@ fun PostViewCount(env: com.ecency.core.app.AppEnvironment, post: com.ecency.core
 fun PostStatsSheet(model: com.ecency.core.app.PostStatsModel, onPromote: () -> Unit, onDismiss: () -> Unit) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp).testTag("postStats")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the devices and the pitch can push PROMOTE POST below a short window
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp).testTag("postStats")) {
             Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 listOf(
                     Triple("visitors", com.ecency.core.app.StatsCopy.VISITORS, s.stats.visitors),

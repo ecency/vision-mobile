@@ -2,6 +2,10 @@ package com.ecency.app
 
 import android.os.Looper
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performScrollToNode
@@ -40,6 +44,15 @@ fun ComposeTestRule.await(what: String, boundMillis: Long = FAILURE_BOUND_MILLIS
  */
 fun ComposeTestRule.scrollListTo(listTag: String, target: SemanticsMatcher) = await("$target in $listTag") {
     runCatching { onNode(hasTestTag(listTag)).performScrollToNode(target) }.isSuccess
+}
+
+/**
+ * Scrolls a sheet to the node tagged [tag] until it is displayed, then returns it for a real click: a sheet that is
+ * still sliding in can leave a scrolled-to control under the screen's edge for a few frames.
+ */
+fun ComposeTestRule.awaitScrolledTo(tag: String): SemanticsNodeInteraction {
+    await("$tag displayed after a scroll") { runCatching { onNodeWithTag(tag).performScrollTo().assertIsDisplayed() }.isSuccess }
+    return onNodeWithTag(tag)
 }
 
 /** Only reached by a failing test. */

@@ -32,7 +32,7 @@ data class SanitizeOptions(
 }
 
 /**
- * Port of @ecency/render-helper 2.5.52 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
+ * Port of @ecency/render-helper 2.5.55 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
  * xss with the render-helper whitelist and attribute policy, then the `<source>` and image
  * dimension post-passes. String in, string out, byte for byte the JS result.
  */
@@ -253,7 +253,9 @@ object HtmlSanitizer {
             }
             // Always emit exactly the string that was validated.
             if (isWhiteAttr && name == "href") {
-                return if (hrefSchemeAllowed || Xss.safeAttrValue(name, decoded).isNotEmpty()) "href=\"${escapeAttr(decoded)}\"" else "href"
+                // 2.5.55 (#2159): xss's own rule reads http(s) case-sensitively; the scheme is checked and written lower-cased
+                val href = lowerHttpScheme(decoded)
+                return if (hrefSchemeAllowed || Xss.safeAttrValue(name, href).isNotEmpty()) "href=\"${escapeAttr(href)}\"" else "href"
             }
             if (!beforeTransform && isWhiteAttr && isUrlAttribute(tag, name)) return "$name=\"${escapeAttr(decoded)}\""
             return null
@@ -448,16 +450,192 @@ object HtmlSanitizer {
         return i == n - 1 && raw[i] == '>'
     }
 
-    /** Drops an iframe start tag without a quoted src (and a close tag right after), repeated until stable. */
+    /** `dropRefusedIframes` repeated until stable, so dropping one tag never joins its neighbours into a new `<iframe`. */
     private fun dropBareIframes(html: String): String {
         var current = html
         while (true) {
-            val next = replaceTags(current, "iframe", trailingClose = true) { tag ->
-                if (quotedAttrs(tag).any { Js.toLowerCase(it.name) == "src" }) tag else ""
-            }
+            val next = dropRefusedIframes(current)
             if (next == current) return current
             current = next
         }
+    }
+
+    /**
+     * render-helper 2.5.53 `dropRefusedIframes` (#2155): drops each iframe whose src was refused (no quoted src left),
+     * with its `</iframe>`. The close is its own only when no other iframe opens first; an unclosed one loses only its
+     * opening tag. Plain text between the two is the author's fallback, which a browser never shows, so it goes too;
+     * markup there stays, so the tags around it stay balanced. A close that closes no kept iframe goes as well. A kept
+     * iframe's content runs to the next close (raw text), and the closes of kept iframes nested in it are kept. Linear:
+     * the next close and the next opening are each looked up again only once the scan passed them.
+     */
+    private fun dropRefusedIframes(html: String): String {
+        val whole = wholeIframeElements(html)
+        val out = StringBuilder(html.length)
+        var last = 0
+        var kept = false
+        var inner = 0
+        var surplus = 0
+        var closeAt = -2
+        var closeEnd = 0
+        var nextAt = -2
+        var from = 0
+        while (true) {
+            val tag = nextIframeTag(html, from) ?: break
+            from = tag.end
+            if (kept && tag.open) {
+                if (hasQuotedSrc(tag.raw(html))) inner++
+                continue
+            }
+            if (!tag.open) {
+                if (kept) {
+                    kept = false
+                    surplus += inner
+                    inner = 0
+                    continue
+                }
+                if (surplus > 0) {
+                    surplus--
+                    continue
+                }
+                out.append(html, last, tag.start)
+                last = tag.end
+                continue
+            }
+            if (hasQuotedSrc(tag.raw(html))) {
+                kept = true
+                continue
+            }
+            out.append(html, last, tag.start)
+            last = tag.end
+            // 2.5.55 (#2170): nested only in iframes and text, it goes whole, as the DOM path drops the element
+            val element = whole[tag.start]
+            if (element != null) {
+                last = element
+                from = last
+                continue
+            }
+            if (closeAt != -1 && closeAt < last) {
+                val close = nextIframeClose(html, last)
+                closeAt = close?.start ?: -1
+                closeEnd = close?.end ?: 0
+            }
+            if (closeAt == -1) continue
+            if (nextAt != -1 && nextAt < last) nextAt = nextIframeStart(html, last)
+            if (nextAt != -1 && nextAt < closeAt) continue
+            if (html.indexOf('<', last).let { it in 0 until closeAt }) out.append(html, last, closeAt)
+            last = closeEnd
+            from = last
+        }
+        out.append(html, last, html.length)
+        return out.toString()
+    }
+
+    /**
+     * render-helper 2.5.55 `wholeIframeElements` (#2170): each iframe opening's close by nesting, as the DOM path pairs
+     * them, when nothing but text and iframe tags lies between (opening start to close end). One pass with a stack over
+     * `ANY_TAG` (`/<(\/?)iframe\b(?:[^>"']|"[^"]*"|'[^']*')*>|<[a-zA-Z!/]/gi`).
+     */
+    private fun wholeIframeElements(html: String): Map<Int, Int> {
+        val whole = HashMap<Int, Int>()
+        val starts = ArrayList<Int>()
+        val othersAt = ArrayList<Int>()
+        var others = 0
+        var i = html.indexOf('<')
+        while (i >= 0) {
+            val close = i + 1 < html.length && html[i + 1] == '/'
+            val name = if (close) i + 2 else i + 1
+            var end = -1
+            if (Js.regionMatchesLower(html, name, "iframe") && name + 6 < html.length && !Js.isWordChar(html[name + 6])) {
+                end = startTagEnd(html, name + 6)
+            }
+            if (end >= 0) {
+                if (!close) {
+                    starts.add(i)
+                    othersAt.add(others)
+                } else if (starts.isNotEmpty()) {
+                    val start = starts.removeAt(starts.size - 1)
+                    if (othersAt.removeAt(othersAt.size - 1) == others) whole[start] = end
+                }
+                i = html.indexOf('<', end)
+                continue
+            }
+            if (i + 1 < html.length && html[i + 1].let { Js.isAsciiAlpha(it) || it == '!' || it == '/' }) {
+                others++
+                i = html.indexOf('<', i + 2)
+                continue
+            }
+            i = html.indexOf('<', i + 1)
+        }
+        return whole
+    }
+
+    private class IframeTag(val start: Int, val end: Int, val open: Boolean) {
+        fun raw(html: String) = html.substring(start, end)
+    }
+
+    private fun hasQuotedSrc(tag: String) = quotedAttrs(tag).any { Js.toLowerCase(it.name) == "src" }
+
+    /** `/<iframe\b/gi` from [from]: the next opening's start, or -1. */
+    private fun nextIframeStart(html: String, from: Int): Int {
+        var i = indexOfIgnoreCase(html, "<iframe", from)
+        while (i >= 0 && i + 7 < html.length && Js.isWordChar(html[i + 7])) i = indexOfIgnoreCase(html, "<iframe", i + 1)
+        return i
+    }
+
+    /** `/<\/iframe\s*>/gi` from [from]. */
+    private fun nextIframeClose(html: String, from: Int): IframeTag? {
+        var i = indexOfIgnoreCase(html, "</iframe", from)
+        while (i >= 0) {
+            val end = closeEndAt(html, i)
+            if (end >= 0) return IframeTag(i, end, open = false)
+            i = indexOfIgnoreCase(html, "</iframe", i + 1)
+        }
+        return null
+    }
+
+    private fun closeEndAt(html: String, i: Int): Int {
+        var p = i + 8
+        while (p < html.length && Js.isSpace(html[p])) p++
+        return if (p < html.length && html[p] == '>') p + 1 else -1
+    }
+
+    /** `IFRAME_TAG` (`/<iframe\b((?:[^>"']|"[^"]*"|'[^']*')*)>|<\/iframe\s*>/gi`) from [from]. */
+    private fun nextIframeTag(html: String, from: Int): IframeTag? {
+        var i = html.indexOf('<', from)
+        while (i >= 0) {
+            if (Js.regionMatchesLower(html, i, "<iframe") && i + 7 < html.length && !Js.isWordChar(html[i + 7])) {
+                val end = startTagEnd(html, i + 7)
+                if (end >= 0) return IframeTag(i, end, open = true)
+            } else if (Js.regionMatchesLower(html, i, "</iframe")) {
+                val end = closeEndAt(html, i)
+                if (end >= 0) return IframeTag(i, end, open = false)
+            }
+            i = html.indexOf('<', i + 1)
+        }
+        return null
+    }
+
+    /** The end of a start tag whose attributes begin at [p] (quoted spans consumed whole), or -1. */
+    private fun startTagEnd(html: String, from: Int): Int {
+        var p = from
+        while (p < html.length) {
+            val c = html[p]
+            if (c == '>') return p + 1
+            if (c == '"' || c == '\'') {
+                val close = html.indexOf(c, p + 1)
+                if (close < 0) return -1
+                p = close + 1
+            } else {
+                p++
+            }
+        }
+        return -1
+    }
+
+    /** `value.replace(/^https?:/i, (scheme) => scheme.toLowerCase())`. */
+    private fun lowerHttpScheme(value: String): String {
+        val n = if (Js.regionMatchesLower(value, 0, "https:")) 6 else if (Js.regionMatchesLower(value, 0, "http:")) 5 else 0
+        return if (n == 0) value else value.substring(0, n).lowercase() + value.substring(n)
     }
 
     /** `/^https?:\/\//` on an already lower-cased value. */
@@ -540,7 +718,7 @@ object HtmlSanitizer {
      * `html.replace(/<name\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi, fn)`: a start tag of [name] whose
      * quoted spans are consumed whole (a `>` inside quotes does not end it).
      */
-    internal fun replaceTags(html: String, name: String, trailingClose: Boolean = false, fn: (String) -> String): String {
+    internal fun replaceTags(html: String, name: String, fn: (String) -> String): String {
         var i = indexOfIgnoreCase(html, "<$name", 0)
         if (i < 0) return html
         val sb = StringBuilder(html.length)
@@ -568,12 +746,6 @@ object HtmlSanitizer {
             if (end < 0) {
                 i = indexOfIgnoreCase(html, "<$name", i + 1)
                 continue
-            }
-            if (trailingClose) {
-                // `(?:\s*<\/name>)?` after the tag
-                var p = end
-                while (p < html.length && Js.isSpace(html[p])) p++
-                if (Js.regionMatchesLower(html, p, "</$name>")) end = p + name.length + 3
             }
             sb.append(html, last, i)
             sb.append(fn(html.substring(i, end)))

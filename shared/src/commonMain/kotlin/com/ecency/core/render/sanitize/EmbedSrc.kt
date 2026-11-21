@@ -67,6 +67,10 @@ object EmbedSrc {
         ".dapplr.in" to { p -> p.startsWith("/file/dapplr-videos/") },
     )
 
+    private val SUFFIX_TRANSFORM_PATTERNS: Map<String, Regex> by lazy {
+        mapOf(".dapplr.in" to com.ecency.core.render.methods.Consts.DAPPLR_REGEX)
+    }
+
     /** Whether render-helper itself limits the paths of [host] (lower case). */
     internal fun hasPathPattern(host: String): Boolean = host in PATH_PATTERNS
 
@@ -97,7 +101,11 @@ object EmbedSrc {
         // a real label must precede the suffix
         val suffix = ALLOWED_SUFFIXES.firstOrNull { host.endsWith(it) && host.length > it.length && !host.startsWith(".") } ?: return false
         val pattern = SUFFIX_PATH_PATTERNS[suffix]
-        return pattern == null || pattern(url.pathname)
+        if (pattern != null && !pattern(url.pathname)) return false
+        // 2.5.53 (#2155): the src as written must also be one iframe() frames, so the two never disagree (no empty
+        // inner label, port, credentials or backslash path the URL parser would normalise away).
+        val transform = SUFFIX_TRANSFORM_PATTERNS[suffix]
+        return transform == null || transform.containsMatchIn(trimmed)
     }
 
     private val SCHEME_SLASHES = JsRegex.compile("^(?:https?:)?//", ignoreCase = true)

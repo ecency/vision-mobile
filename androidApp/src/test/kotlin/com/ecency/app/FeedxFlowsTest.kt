@@ -11,6 +11,9 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import coil3.ImageLoader
@@ -67,7 +70,11 @@ class FeedxFlowsTest {
     @After
     fun tearDown() = SingletonImageLoader.reset()
 
-    private fun launch() = compose.setContent { EcencyTheme(dark = false) { EcencyApp(env, host) } }
+    private fun launch(fontScale: Float = 1f, navigator: com.ecency.app.ui.Navigator = com.ecency.app.ui.Navigator()) = compose.setContent {
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale)) {
+            EcencyTheme(dark = false) { EcencyApp(env, host, navigator) }
+        }
+    }
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
     private fun waitFor(tag: String) = compose.await("exists(tag)") { exists(tag) }
     /** Spinners never settle while a broadcast runs: drive the main looper and the clock by hand (as SliceFlowsTest). */
@@ -257,5 +264,69 @@ class FeedxFlowsTest {
         waitFor("quickProfile")
         compose.onNodeWithTag("qpName").assertExists()
         assertTrue(compose.onAllNodes(hasText("@alice")).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick).
+
+    private fun lastTagged(prefix: String): String =
+        compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher(prefix) { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith(prefix) == true })
+            .fetchSemanticsNodes().last().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag]
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowThePostMenuScrollsToItsLastItem() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        openCardMenu()
+        val last = lastTagged("menu:")
+        compose.awaitScrolledTo(last).performClick()
+        compose.await("$last acted: the menu closed") { !exists("postMenu") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheCrossPostSheetScrollsToPublish() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        openCardMenu()
+        compose.onNodeWithTag("menu:cross-post").performScrollTo().performClick()
+        waitFor("crossPostSheet")
+        settle()
+        compose.onNodeWithTag("pickCommunity").performClick()
+        val community = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("a community") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("community:") == true })
+        compose.await("the subscriptions loaded") { community.fetchSemanticsNodes().isNotEmpty() }
+        community[0].performClick()
+        compose.awaitScrolledTo("crossPostMessage").performTextInput("Worth a read")
+        compose.awaitScrolledTo("publish").performClick()
+        pump { node.broadcasts().isNotEmpty() }
+        assertTrue(node.broadcasts().single(), "Worth a read" in node.broadcasts().single())
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheQuickProfileScrollsToTheFullProfile() {
+        val navigator = com.ecency.app.ui.Navigator()
+        node.signIn()
+        launch(fontScale = 1.3f, navigator = navigator)
+        waitFor("card:alice/trending-one")
+        compose.onAllNodes(hasTestTag("author") and hasAnyAncestor(hasTestTag("card:alice/trending-one")))[0].performClick()
+        waitFor("quickProfile")
+        settle()
+        compose.onNodeWithTag("qpFull").performScrollTo().assertIsDisplayed().performClick()
+        compose.await("the profile") { navigator.state.top == com.ecency.core.app.AppScreen.Profile("alice") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheCustomiseSheetScrollsToApply() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        waitFor("customise")
+        compose.onNodeWithTag("customise").performClick()
+        waitFor("customiseSheet")
+        settle()
+        compose.onNodeWithTag("applyFilters").performScrollTo().assertIsDisplayed().performClick()
+        compose.await("applied") { !exists("customiseSheet") || compose.onAllNodes(androidx.compose.ui.test.hasText("Please select 3 filters")).fetchSemanticsNodes().isNotEmpty() }
     }
 }

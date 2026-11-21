@@ -47,7 +47,7 @@ internal object AmpPairing {
     fun links(state: StateInline, silent: Boolean): Boolean {
         if (!state.env.ampEscapes || state.ampInside) return InlineRules.links(state, silent)
         if (!state.ampPairedDone) {
-            state.ampPaired = pairedSource(state.src)
+            state.ampPaired = state.pairedSource()
             state.ampPairedDone = true
         }
         val paired = state.ampPaired ?: return InlineRules.links(state, silent)

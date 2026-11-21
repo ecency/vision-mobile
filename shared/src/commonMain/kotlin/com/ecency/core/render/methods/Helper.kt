@@ -23,9 +23,100 @@ internal object Helper {
      * parser (or the markdown destination decode) already decoded exactly once: only percent-encoding is left.
      */
     fun decodeDomImageSrc(src: String): String = try {
-        Js.trim(Js.decodeUriComponent(src))
+        val full = Js.decodeUriComponent(src)
+        // 2.5.55 (#2174): escaped delimiters (`%23`, `%2F`, `%3F`, ...) and `%25` stay escaped, so the URL names the
+        // resource the author did; a legacy sized proxy path with an encoded inner URL still decodes whole.
+        if (LEGACY_ENCODED_INNER.containsMatchIn(src)) Js.trim(full) else Js.trim(Js.decodeUri(PERCENT_25.replace(src, "%2525")))
     } catch (e: UriError) {
         Js.trim(src)
+    }
+
+    private val LEGACY_ENCODED_INNER by lazy {
+        JsRegex.compile(
+            """^https?:\/\/(?:images\.hive\.blog|steemitimages\.com|images\.ecency\.com|i\.ecency\.com)\/\d+x\d+\/https?(?::%2F%2F|%3A%2F%2F|%3A\/\/)""",
+            ignoreCase = true,
+        )
+    }
+    private val PERCENT_25 = Regex("%25", RegexOption.IGNORE_CASE)
+
+    /**
+     * `text.replace(/[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g, ...)`: each lone surrogate as U+FFFD, as a
+     * browser reads it (render-helper 2.5.55, #2158). A pair stays.
+     */
+    fun withoutLoneSurrogates(text: String): String {
+        var sb: StringBuilder? = null
+        var i = 0
+        while (i < text.length) {
+            val c = text[i]
+            if (c.isHighSurrogate() && i + 1 < text.length && text[i + 1].isLowSurrogate()) {
+                sb?.append(c)?.append(text[i + 1])
+                i += 2
+                continue
+            }
+            if (c.isSurrogate()) {
+                if (sb == null) sb = StringBuilder(text.length).append(text, 0, i)
+                sb.append('\uFFFD')
+            } else {
+                sb?.append(c)
+            }
+            i++
+        }
+        return sb?.toString() ?: text
+    }
+
+    // Destination normalisation the render (InlineRules) and the card scanner (CatchPostImage) share, so both name an
+    // image by the same URL (render-helper 2.5.56 helper.ts, #2156, #2169, #2176).
+
+    /** `uriNormalized`: a URL as Remarkable's normalizeLink ends, `decodeURI` then `encodeURI`; a malformed URI kept. */
+    fun uriNormalized(url: String): String {
+        val decoded = try {
+            Js.decodeUri(url)
+        } catch (_: UriError) {
+            url
+        }
+        return Js.encodeUri(decoded)
+    }
+
+    /** `PLAIN_UNSAFE`: JS whitespace, controls and ``"<>[\]^`{|}``. */
+    private fun isPlainUnsafe(c: Char): Boolean =
+        Js.isSpace(c) || c.code < 0x20 || c.code == 0x7F || "\"<>[\\]^`{|}".indexOf(c) >= 0
+
+    private fun isHexDigit(c: Char) = c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F'
+
+    /** `/%(?![\da-f]{2})/i`: a `%` that starts no escape. */
+    private fun hasStrayPercent(url: String): Boolean {
+        var i = url.indexOf('%')
+        while (i >= 0) {
+            if (!(i + 2 < url.length && isHexDigit(url[i + 1]) && isHexDigit(url[i + 2]))) return true
+            i = url.indexOf('%', i + 1)
+        }
+        return false
+    }
+
+    /**
+     * `plainDestination` (2.5.55 `plainForm`, #2158; shared in 2.5.56, #2176): a destination as Remarkable normalises
+     * it (encodeURI) but for `%` and non-ASCII, which stay as written, so the angle and plain forms of one URL name it
+     * alike. The ASCII characters encodeURI encodes are still encoded; a URL with a `%` that starts no escape is
+     * normalised as Remarkable does.
+     */
+    fun plainDestination(url: String): String {
+        if (url.none(::isPlainUnsafe)) return url
+        if (hasStrayPercent(url)) return uriNormalized(url)
+        val sb = StringBuilder(url.length + 16)
+        for (c in url) if (isPlainUnsafe(c)) sb.append(Js.encodeUri(c.toString())) else sb.append(c)
+        return sb.toString()
+    }
+
+    private val LEO_LINK_PREFIXES = listOf(
+        "https://leofinance.io/threads/view/", "https://leofinance.io/posts/", "https://leofinance.io/threads/",
+        "https://inleo.io/threads/view/", "https://inleo.io/posts/", "https://inleo.io/threads/",
+    )
+
+    /** `internalizeLeoLinks`: leofinance.io and inleo.io post and thread links as `/@`, as the render reads its input. */
+    fun internalizeLeoLinks(input: String): String {
+        var out = input
+        for (prefix in LEO_LINK_PREFIXES) out = Js.replaceAll(out, prefix, "/@")
+        return out
     }
 
     private const val TRAILING_PUNCTUATION = ".,;:!)]}*_~"
@@ -40,13 +131,34 @@ internal object Helper {
     /**
      * `imageUrlEnd` (2.5.46, #2094): where the image URL in a bare URL token ends, or -1 when it is not one. A token
      * holding an image extension is an image taken whole, suffixes and query included; only prose punctuation at the
-     * end of a URL without a query or fragment is left out. An extension a letter or digit runs on from (`.icons`),
+     * end of a URL without a query or fragment is left out, and with one an unbalanced trailing `)` (2.5.53). An extension a letter or digit runs on from (`.icons`),
      * or that another extension follows (`photo.jpg.html`), does not count. Linear.
      */
     fun imageUrlEnd(token: String): Int {
         var contentEnd = token.length
         if (token.indexOf('?') < 0 && token.indexOf('#') < 0) {
             while (contentEnd > 0 && TRAILING_PUNCTUATION.indexOf(token[contentEnd - 1]) >= 0) contentEnd--
+        } else {
+            // 2.5.53 (#2155): with a query or fragment only an unbalanced `)` at the end is prose, read in source
+            // order (`?a=)&b=(1)` keeps the `)` that closes `(1)`).
+            var open = 0
+            var unmatchedTail = 0
+            for (c in token) {
+                when (c) {
+                    '(' -> {
+                        open++
+                        unmatchedTail = 0
+                    }
+                    ')' -> if (open > 0) {
+                        open--
+                        unmatchedTail = 0
+                    } else {
+                        unmatchedTail++
+                    }
+                    else -> unmatchedTail = 0
+                }
+            }
+            contentEnd -= unmatchedTail
         }
         var i = 0
         while (i < token.length) {
@@ -133,25 +245,27 @@ internal object Helper {
      * [ampEscapes] is off), complete references decoded once, then percent-encoding.
      */
     fun decodeRawBodyImageSrc(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
-        val unescaped = if (destination) {
-            val sb = StringBuilder(src.length)
-            var i = 0
-            while (i < src.length) {
-                val c = src[i]
-                if (c == '\\' && i + 1 < src.length && MD_ESCAPABLE.indexOf(src[i + 1]) >= 0) {
-                    val e = src[i + 1]
-                    sb.append(if (e == '&' && ampEscapes) "&amp;" else e.toString())
-                    i += 2
-                } else {
-                    sb.append(c)
-                    i++
-                }
-            }
-            sb.toString()
-        } else {
-            src.replace("\\&", "&amp;")
-        }
+        val unescaped = if (destination) unescapeDestination(src, ampEscapes) else src.replace("\\&", "&amp;")
         return decodeDomImageSrc(decodeCompleteReferences(unescaped))
+    }
+
+    /** `unescapeDestination`: a markdown destination's backslash escapes resolved as Remarkable resolves them; an escaped `&` is a literal one (`&amp;`) when [ampEscapes]. */
+    fun unescapeDestination(src: String, ampEscapes: Boolean = true): String {
+        if (src.indexOf('\\') < 0) return src
+        val sb = StringBuilder(src.length)
+        var i = 0
+        while (i < src.length) {
+            val c = src[i]
+            if (c == '\\' && i + 1 < src.length && MD_ESCAPABLE.indexOf(src[i + 1]) >= 0) {
+                val e = src[i + 1]
+                sb.append(if (e == '&' && ampEscapes) "&amp;" else e.toString())
+                i += 2
+            } else {
+                sb.append(c)
+                i++
+            }
+        }
+        return sb.toString()
     }
 
     /** `createDoc`: `<body>` wrapped xmldom parse, null for blank input or a parse error. */

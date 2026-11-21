@@ -20,14 +20,14 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules in the 2.5.52 port
+## Custom rules in the 2.5.57 port
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.
 
 | Rule | Kotlin |
 |---|---|
-| App bylines and promo footers dropped before rendering (`cleanReply`): Partiko, Dapplr, LeoFinance, InLeo, Neoxian, First Context, StemGeeks, Bilpcoin, SportsTalkSocial, aeneas.blog, ProofOfBrain, Hypnochain, WeedCash, NaturalMedicine, MusicForLife, Truvvl, TravelFeed (.io and, 2.5.42, .com), dPorn, inji, Liketu, Liketu Speak (two-part match), Liketu Clips (2.5.42, two-part match), scrobble.life, Lumen, HiveSuite (2.5.42), old and new 3Speak footers (2.5.42: whole-line `▶ [Watch on 3speak.tv](https://3speak.tv/watch...)`), `[via apps from]` | `CleanReply` |
+| App bylines and promo footers dropped before rendering (`cleanReply`): Partiko, Dapplr, LeoFinance, InLeo, Neoxian, First Context, StemGeeks, Bilpcoin, SportsTalkSocial, aeneas.blog, ProofOfBrain, Hypnochain, WeedCash, NaturalMedicine, MusicForLife, Truvvl, TravelFeed (.io and, 2.5.42, .com), dPorn, inji, Liketu, Liketu Speak (two-part match), Liketu Clips (2.5.42, two-part match), scrobble.life, Lumen, HiveSuite (2.5.42), old and new 3Speak footers (2.5.42: whole-line `▶ [Watch on 3speak.tv](https://3speak.tv/watch...)`), `[via apps from]`, a whole-line `[via Inbox]` byline in any case (2.5.57, #2179) | `CleanReply` |
 | The `---` separator right before a scrobble.life, Lumen or (2.5.42) 3Speak byline | `CleanReply.removeBylineSeparator` |
 | Ad and banner removal: D.Buzz promo link, hive.engage banners (two forms), Actifit app badges | `CleanReply.TAIL_REMOVALS` |
 | Internal link rewriting for whitelisted Hive frontends (posts, profiles, topics, communities, `ccc`), author and tag chips, inert chips, external profile base | `AMethod`, `Traverse`, `Consts.WHITE_LIST` |
@@ -44,12 +44,19 @@ Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port 
 | (2.5.45) Embed allow list on every path, a path shape for every host, `canonicalEmbedSrc`, author sandbox reduced to the granted tokens, `<video poster>` through the proxy, images held to the proxy on the full render | `sanitize/EmbedSrc`, `IframeMethod`, `VideoMethod`, `sanitize/SanitizeHtml` |
 | (2.5.45, #1920) Adjacent tag and mention runs linked in one pass; traverse depth cap 2,000 (deeper subtrees flattened to text); linear attribute pre-pass | `Linkify`, `Traverse`, `HtmlStringFixes` |
 | (2.5.45, #2085) Raw-HTML attribute values decoded as a browser decodes them (`&times=` kept) | `HtmlStringFixes.removeDuplicateAttributes` |
-| (2.5.45, #2092, #2093) App render: entity placeholders never inside URLs or code | `EntityProtection`, `CodeRanges` (`MarkdownToHtml.kt`) |
+| (2.5.45, #2092, #2093; 2.5.53, #2154) App render: entity placeholders never inside URLs; their delimiter a character the body does not hold, tabs expanded first, code given its entities back from the parser's code tokens | `EntityProtection` (`MarkdownToHtml.kt`), `Markdown.restoreCodeEntities` |
 | (2.5.46, #2092, #2094) Markdown destinations decoded exactly once, escaped `\&` literal in links; bare image URLs end where `imageUrlEnd` says (query and suffix kept, `.icons`/`photo.jpg.html` not images, text after them stays) | `markdown/AmpPairing`, `Helper.imageUrlEnd`, `Linkify`, `AMethod`, `CatchPostImage` |
 | (2.5.46) `insights` and `notifications` profile sections | `Consts.SECTION_LIST` |
 | (2.5.46, #2095) A refused iframe's placeholder is not linkified | `Traverse` |
 | (2.5.47, #2099, #2107) `tel:` and `web+` links kept as written; an href keeps only the schemes `a()` writes | `Consts.EXTERNAL_SCHEME`, `sanitize/SanitizeHtml` |
 | (2.5.50) Chip classes only as whole tokens on in-site hrefs, author `rel`/`target` dropped, exact `html`/`head` wrapper strip | `AMethod`, `RenderBodyParser` |
+| (2.5.53, #2154) Angle-bracket destinations (`[x](<url>)`, `[r]: <url>`) decoded once, as the plain form | `InlineRules.undecodedAngleDestination`, `CoreRules` |
+| (2.5.53, #2155) A refused iframe on the sanitize-only path dropped with its fallback text and close; a bare image URL with a query drops an unbalanced trailing `)`; Dapplr frames any label chain and the allow list requires the same | `sanitize/SanitizeHtml`, `Helper.imageUrlEnd`, `Consts.DAPPLR_REGEX`, `sanitize/EmbedSrc` |
+| (2.5.54, #2165) The in-site path guard rejects a zero-width space and only the delimiter this render chose | `AMethod`, `RenderContext.placeholderDelimiter` |
+| (2.5.55, #2156 to #2160) A lone surrogate reads as U+FFFD; angle destinations and autolinks keep the author's spelling (plain form); app linkify reads the text its entities decode to; `HTTP://` hrefs kept, scheme lower-cased; the card reads angle image destinations and bare URLs with parentheses as the render does | `MarkdownToHtml`, `Helper.plainDestination`, `markdown/DecodedLinkify`, `sanitize/SanitizeHtml`, `CatchPostImage` |
+| (2.5.55, #2167, #2169, #2170, #2174) WorldMapPin user and post links internal; card and body proxy the same percent-decoded image, escaped delimiters and `%25` stay escaped (legacy sized proxy paths still unwrapped); a refused iframe nested only in iframes and text dropped whole on the sanitize-only path | `Consts.WHITE_LIST`, `Helper.decodeDomImageSrc`, `CatchPostImage`, `sanitize/SanitizeHtml` |
+| (2.5.56, #2176) The card reads the text the render's parser reads (cleanReply, leofinance and inleo links internalised, U+00A0, line separators and tabs as the block parser rewrites them) and finds a markdown image as the parser does: only spaces and newlines around the destination and title, nothing across a blank line, a title closed by its own quote, escapes in a plain destination resolved; an image with a line that may open a block, or a backslash before a space in a plain destination, is left to the render. Card and render share `plainDestination`, `uriNormalized` and `internalizeLeoLinks` | `CatchPostImage`, `Helper`, `markdown/BlockParser.parserText` |
+| (2.5.57, #2178, #2179) `simpleMarkdownToHTML` reads a lone surrogate as U+FFFD, as the render does, instead of throwing; the card's markdown image pattern takes labels with brackets balanced two levels deep and backslash escapes (`\[` and `\]` are no brackets), skips an escaped `\![...](url)` (a link) unless its text holds a URL, and leaves to the render an image whose plain destination has a backslash and a stray `%`, a footnote definition or an ordered list marker of any length on a line inside it, or a label opening a deeper `[`; fast mode gives up on a first bare URL holding a lone surrogate unless a video poster comes first | `RenderHelper.simpleMarkdownToHTML`, `CatchPostImage` |
 
 RN app rules outside render-helper (`src/components/postHtmlRenderer`): `<center>` to `text-center`
 and span flattening are in `BlockBuilder`; the waves image grid is `BuildOptions.waves`; the waves

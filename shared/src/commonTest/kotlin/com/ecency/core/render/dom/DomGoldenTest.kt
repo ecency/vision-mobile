@@ -123,6 +123,18 @@ class DomGoldenTest {
         report("isAllowedEmbedSrc", EmbedFixtures.cases.size, mismatches)
     }
 
+    /** The sanitize-only fallback of markdownToHTML (`untransformed`): refused iframes go whole (render-helper 2.5.53, #2155). */
+    @Test
+    fun untransformedSanitizeMatchesRenderHelper() {
+        val mismatches = ArrayList<Mismatch>()
+        for (c in UntransformedFixtures.cases) {
+            val actual = HtmlSanitizer.sanitize(c.input, options(false).copy(untransformed = true))
+            check(mismatches, c.name, "sanitized", c.expected, actual)
+            IframeInvariant.violation(actual)?.let { fail("iframe invariant broken in ${c.name}: $it") }
+        }
+        report("sanitizeHtml untransformed", UntransformedFixtures.cases.size, mismatches)
+    }
+
     @Test
     fun blockLevelFixMatchesRenderHelper() {
         val mismatches = ArrayList<Mismatch>()
