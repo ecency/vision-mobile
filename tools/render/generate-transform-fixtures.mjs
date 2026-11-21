@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.56 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.57 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -558,12 +558,67 @@ const cardBodies2556 = [
   '![x](<https://example.com/a.png>\n"t")', '![x](<https://example.com/a.png>  \n  )', 'a\u00a0![x](https://example.com/a.png)',
   '<div>\n![a\n<p>b](https://example.com/a.png)\n</div>', '![a\n   <section>b](https://example.com/a.png)', '![a\n    <div>b](https://example.com/a.png)',
 ]
+// Rules of 2.5.57 (#2178, #2179): cleanReply drops a whole-line [via Inbox] byline in any case; render bodies with a
+// stray `%` beside an escape, bracketed labels and an escaped `!`. Kept out of FRAGMENTS.
+const rules2557 = {
+  inbox_byline: 'Hello\n<sub>Posted [via Inbox](https://example.com)</sub>',
+  inbox_byline_upper: 'Hello\n<SUB>POSTED [VIA INBOX](https://example.com/x)</SUB>',
+  inbox_bare: 'Hello\n[via Inbox](https://example.com)\nnext',
+  inbox_empty_dest: 'Hello\n[via Inbox]()',
+  inbox_prose: 'I got this [via Inbox] yesterday ![x](https://example.com/a.png)\nnext',
+  inbox_no_link: 'Hello\nvia inbox, no link',
+  stray_pct_escape: '![x](https://example.com/50%\\x.png)',
+  stray_pct_escape_hex: '![x](https://example.com/50%\\x%41.png)',
+  label_brackets: '![a [b] c](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  escaped_bang: '\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  escaped_bang_url_label: '\\![https://example.com/a.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  lone_surrogate_bare: 'https://example.com/\ud800x.png',
+}
+// Card and post image bodies of 2.5.57 (#2179), from the upstream spec's inputs with example hosts.
+const cardBodies2557 = [
+  '![x](https://example.com/50%\\x.png)', '![x](https://example.com/50%\\x%41.png)', '![x](https://example.com/50%\\_x.png)',
+  '![x](https://example.com/50%\\\\_x.png)', '![x](https://example.com/50%\\.png)', '![x](https://example.com/50%25\\_x.png)',
+  '![x](https://example.com/a\\_x%zz.png)', '![x](<https://example.com/50%\\x.png>)',
+  '![a [b] c](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  '![a [b [c]] d](https://example.com/a.png) <img src="https://example.com/b.png">',
+  '![a [b [c [d]]] e](https://example.com/a.png)\n\n![y](https://example.com/b.png)',
+  '![a [b [c [d]]] e](https://example.com/a.png) <img src="https://example.com/b.png">',
+  '![a [b [c]] d](https://example.com/a.png)', '![a [b] c](<https://example.com/a b.png>)',
+  '![a [b\n] c](https://example.com/a.png)', '![a [b\n\nc]](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  '\\![a [b] c](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![a \\[b](https://example.com/a.png) ![d](https://example.com/b.png)',
+  'x \\![a [b] c](https://example.com/a.png)\n\n![d](https://example.com/b.png)',
+  '\\\\![a [b] c](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/p) ![d](https://example.com/b.png)',
+  '\\\\\\![a](https://example.com/a.png) ![c](https://example.com/b.png)',
+  '![\\[1] my photo](https://example.com/page)\n\n![d](https://example.com/b.png)',
+  '![a \\[b] c](https://example.com/page) ![d](https://example.com/b.png)',
+  '![a [b\\] c](https://example.com/a.png) x](https://example.com/b.png)',
+  '![a\\](https://example.com/page) b](https://example.com/b.png)',
+  '![a \\] b](https://example.com/a.png)\n\n<img src="https://example.com/b.png">',
+  '![a\\\nb](https://example.com/a.png)',
+  '![a](<https://example.com/a b.png> "t\n[^1]: x")', '![a\n[^1]: b](<https://example.com/a b.png>)',
+  '![a\n1234567890. b](<https://example.com/a b.png>)', '![a\n1234567890) b](<https://example.com/a b.png>)',
+  '![a\n12345678901. b](https://example.com/a.png)',
+  'https://example.com/\ud800x.png', 'x https://example.com/\udc00x.png\n\n![y](https://example.com/b.png)',
+  `https://www.youtube.com/watch?v=${YT}\n\nhttps://example.com/\ud800x.png`,
+  `https://example.com/\ud800x.png\n\nhttps://www.youtube.com/watch?v=${YT}`,
+  '\\![a [b\n\n![c](https://example.com/b.png)', '\\![a [b] c](x) ![d](https://example.com/b.png)',
+  'Hello\n<sub>Posted [via Inbox](https://example.com/a.png)</sub>\n\n![y](https://example.com/b.png)',
+  `![x](https://example.com/${'a'.repeat(2100)}.png) ![y](https://example.com/b.png)`,
+  // an escaped image whose text holds a URL: one the image pattern captures, one only the presence check sees
+  '\\![a [b] https://example.com/x.png](https://example.com/a.png) ![d](https://example.com/b.png)',
+  '\\![https://example.com/a.png](https://example.com/a b.png) ![d](https://example.com/b.png)',
+]
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2555)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2556)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2557)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -623,6 +678,7 @@ Object.assign(handcrafted, rules2552)
 Object.assign(handcrafted, rules2554)
 Object.assign(handcrafted, rules2555)
 Object.assign(handcrafted, rules2556)
+Object.assign(handcrafted, rules2557)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)
@@ -743,6 +799,15 @@ cardBodies2555.forEach((body, i) => {
   imageCases.push({ name: `c2555card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
   imageCases.push({ name: `c2555raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
 })
+cardBodies2557.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2557-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2557_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2557fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
+  imageCases.push({ name: `c2557card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2557raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  imageCases.push({ name: `c2557str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
+  imageCases.push({ name: `c2557strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
+})
 cardBodies2556.forEach((body, i) => {
   const entry = { author: 'example-user', permlink: `card2556-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
   imageCases.push({ name: `c2556_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
@@ -760,15 +825,19 @@ bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
 
 // ---- simpleMarkdownToHTML and helpers ------------------------------------------------------
 
-// simpleMarkdownToHTML still throws (encodeURI) on a lone surrogate in a link destination; such bodies are left out.
-const simpleOrNull = (md) => {
-  try {
-    return rh.simpleMarkdownToHTML(md)
-  } catch {
-    return null
-  }
-}
-const simpleCases = bodies.filter((_, i) => i % 6 === 0).map(([name, md]) => ({ name, input: md, expected: simpleOrNull(md) })).filter((c) => c.expected !== null)
+// Since 2.5.57 (#2178) simpleMarkdownToHTML reads a lone surrogate as U+FFFD, as the render does, instead of throwing.
+const simpleBodies2557 = [
+  ['surrogate_high_dest', 'text\n\n[y](<https://example.com/\ud800?q=1>)'],
+  ['surrogate_low_dest', 'text\n\n[y](<https://example.com/\udc00?q=1>)'],
+  ['surrogate_plain_dest', '[y](https://example.com/\ud800x)'],
+  ['surrogate_autolink', 'see https://example.com/\udc00x and <https://example.com/\ud800>'],
+  ['surrogate_text', 'a\ud800b'],
+  ['surrogate_pair', 'a😀b'],
+  ['surrogate_reversed', '\udc00\ud800 *x*'],
+  ['surrogate_image', '![a\ud800](https://example.com/\ud800.png)'],
+]
+const simpleCases = bodies.filter((_, i) => i % 6 === 0).concat(simpleBodies2557)
+  .map(([name, md]) => ({ name, input: md, expected: rh.simpleMarkdownToHTML(md) }))
 
 const helperInputs = {
   extractYtStartTime: urls.filter((u) => /you/i.test(u)).concat(['not a url', 'https://x.com/?t=12abc', 'https://x.com/?t=+7', 'https://x.com/?t=%20%2012',
@@ -803,7 +872,12 @@ const helperInputs = {
     'a\n<sub>posted via [hivesuite](x)</sub>\n<SUB>Posted Via [HIVESUITE](y)</SUB>\n<sub>posted via [hivesuite] (z)</sub>',
     'a\n_posted from liketu clips_ short video, trimmed\nshort video, trimmed\n_POSTED FROM LIKETU CLIPS_ - SHORT VIDEO, TRIMMED',
     // Two dashes are not a separator; three are.
-    'a\n--\n*posted via lumen*\nb', 'a\n--\n\u25B6 [Watch on 3speak.tv](https://3speak.tv/watch?v=a/b)', '--\n*posted via lumen*']),
+    'a\n--\n*posted via lumen*\nb', 'a\n--\n\u25B6 [Watch on 3speak.tv](https://3speak.tv/watch?v=a/b)', '--\n*posted via lumen*',
+    // 2.5.57 (#2179): a whole-line [via Inbox] byline in any case, with or without <sub> and "posted"
+    'Hello\n<sub>Posted [via Inbox](https://example.com)</sub>', 'Hello\n[via Inbox]()', 'Hello\nvia inbox, no link',
+    'I got this [via Inbox] yesterday ![x](https://example.com/a.png)\nnext', ' \t<SUB>\tPOSTED\t[VIA INBOX](https://example.com/x)\t</SUB> \r\nb',
+    'a\nposted [via inbox](https://example.com/x)\nb', 'a\n[via Inbox](https://example.com/a b)\nb', 'a\n<sub>[via Inbox](x)</sub> tail\nb',
+    'a\n<sub>Posted  [via Inbox](x)</sub>\nb', 'a\nPosted[via Inbox](x)\nb', 'a\n[via Inbox](x)\u00a0\nb', 'a\n[via Inbox](x)\r']),
 }
 const helperCases = []
 for (const [fn, inputs] of Object.entries(helperInputs)) {
