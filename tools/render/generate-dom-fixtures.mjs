@@ -605,6 +605,14 @@ const untransformedInputs = {
   refused_then_refused: `${EVIL_IFRAME}a${EVIL_IFRAME}b</iframe>c</iframe>d`,
   dapplr_kept: '<iframe src="https://cdn.dapplr.in/file/dapplr-videos/x.mp4"></iframe>x',
   dapplr_refused: '<iframe src="https://a_b.dapplr.in/file/dapplr-videos/x.mp4">fb</iframe>x',
+  // 2.5.55 (#2170): a refused iframe nested only in iframes and text goes whole
+  nested_whole: '<iframe>a<iframe>b</iframe>c</iframe>d',
+  nested_whole_src: `${EVIL_IFRAME}a${EVIL_IFRAME}b</iframe>c</iframe>d`,
+  nested_markup: `${EVIL_IFRAME}a<b>x</b><iframe>b</iframe>c</iframe>d`,
+  nested_kept_inside: `${EVIL_IFRAME}a${YT_IFRAME}</iframe>c</iframe>d`,
+  nested_unbalanced: '<iframe>a<iframe>b</iframe>c',
+  nested_extra_close: '<iframe>a</iframe>b</iframe>c',
+  nested_deep: '<iframe>'.repeat(6) + 'x' + '</iframe>'.repeat(6) + 'y',
 }
 const untransformedCases = Object.entries(untransformedInputs).map(([name, html]) => ({
   name: `untransformed_${name}`, input: html, expected: rh.__sanitizeHtml(html, { untransformed: true }),

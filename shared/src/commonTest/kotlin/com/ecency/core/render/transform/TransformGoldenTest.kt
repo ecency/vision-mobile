@@ -175,6 +175,7 @@ class TransformGoldenTest {
                 "youtubeVideoLinkClass" -> Helper.youtubeVideoLinkClass(c.input)
                 "cleanReply" -> CleanReply.cleanReply(c.input)
                 "imageUrlEnd" -> Helper.imageUrlEnd(c.input).toString()
+                "decodeDomImageSrc" -> Helper.decodeDomImageSrc(c.input)
                 else -> error("fn ${c.fn}")
             }
             if (actual != c.expected) mismatches.add(Mismatch("${c.fn}(${c.input.take(40)})", c.input, c.expected, actual))

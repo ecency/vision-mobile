@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.54 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.55 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -20,7 +20,7 @@ const internalsPath = join(here, 'node_modules/.rh-transform-internals.mjs')
 writeFileSync(internalsPath, readFileSync(bundlePath, 'utf8') +
   '\nexport { cleanReply as __cleanReply, linkify as __linkify, extractYtStartTime as __extractYtStartTime,' +
   ' isValidUsername as __isValidUsername, sanitizePermlink as __sanitizePermlink, decodeImageSrc as __decodeImageSrc,' +
-  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd };\n')
+  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd, decodeDomImageSrc as __decodeDomImageSrc };\n')
 const rh = await import(pathToFileURL(internalsPath).href)
 rh.setSlowRenderThresholdMs(0)
 
@@ -379,10 +379,126 @@ const rules2554 = {
   guard_zwsp_path: '[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
   guard_zwsp_path_entity: 'a &amp; b\n\n[x](/topic​/@example-user/some-post) [y](/​/evil.example/@example-user/some-post)',
 }
+// Rules added in 2.5.55 (#2156 to #2160, #2167, #2169, #2170, #2174), from the upstream specs' inputs with example
+// hosts and accounts. Kept out of FRAGMENTS, as the rules above.
+const rules2555 = {
+  angle_img_amp: '![x](<https://example.com/a.png?q=&amp;amp;>)',
+  angle_img_space: '![x](<https://example.com/a b.png>)',
+  plain_img_space: '![x](https://example.com/a%20b.png)',
+  bare_paren_entity: 'https://h.example/p.jpg?a=1&#41;',
+  bare_paren_balanced: 'https://h.example/p.jpg?a=(1)',
+  bare_paren_double: 'https://h.example/p.jpg?a=1))',
+  bare_paren_text: '(https://h.example/p.jpg?size=1)text',
+  angle_lone_surrogate: 'text\n\n[y](<https://example.com/\ud800?q=1>)',
+  autolink_entities: '<https://example.com/a b?q=&copy;&amp;z=1>',
+  ref_percent_plain: '[x][k]\n\n[k]: https://example.com/%',
+  ref_percent_angle: '[x][k]\n\n[k]: <https://example.com/%>',
+  link_accent_plain: '[x](https://example.com/é)',
+  link_accent_angle: '[x](<https://example.com/é>)',
+  upper_scheme: 'HTTPS://A.example/p and Http://a.example and HTTP://a.example/x?y=1',
+  paren_entity_tail: 'see https://example.com/a)&amp;x end',
+  adjacent_images_entity: '![a](https://example.com/i.png)![b](https://example.com/j.png?x=1&amp;y=2)',
+  link_then_bare_entity: '[a](https://example.com/1)https://example.com/2?x=1&amp;y=2',
+  linkify_paren_entity_1: '(https://example.com/a)&amp;x',
+  linkify_quote_entity: "https://example.com/a'&amp;x",
+  linkify_parens_entity: 'https://example.com/a))&amp;x',
+  linkify_open_entity: 'https://example.com/a)(&amp;x',
+  linkify_text_paren_entity: 'x https://example.com/a)&amp;x',
+  card_emphasis: '**https://h.example/p.jpg** *https://h.example/q.jpg* ~~https://h.example/r.jpg~~',
+  card_constructs: 'https://h.example/p.jpg[^1] https://h.example/p.jpg[x](https://example.com)',
+  underscore_host: 'https://my_bucket.s3.example.com/a/p.jpg',
+  angle_img_percent: '![x](<https://example.com/50% off.png>)',
+  plain_img_percent: '![x](https://example.com/50%25%20off.png)',
+  angle_img_escape: '![x](<https://example.com/a\\_b.png>)',
+  angle_link_percent: '[x](<https://example.com/50% off>)',
+  emphasis_star_url: '*italic*https://example.com/a*b.png',
+  emphasis_under_url: '_**https://example.com/a_b.png**_',
+  url_then_label: 'https://example.com/a.png[a[b]](c)',
+  url_then_ref: 'https://example.com/a.png[x]\n\n[x]: /u',
+  invalid_numeric_ref: 'see www.example.com/it&#146;s now',
+  app_paren_entity_img: 'https://example.com/p.png)&amp;x',
+  app_quote_entity_img: "https://example.com/p.png'&amp;",
+  app_copy_img: 'https://example.com/p.png&copy;',
+  entity_boundary_semicolon: 'Visit www.example.com/q?x=1&y; now',
+  entity_boundary_foo: 'see https://example.com/a)&foo; there',
+  entity_boundary_email: 'joe@exam&bne;ple.com',
+  nested_bare_iframes: '<iframe>a<iframe>b<iframe>c</iframe>d</iframe>e</iframe>f',
+  private_use: 'ab ab ab a\u{F0000}b',
+  img_hash_escape: '![x](https://example.com/a%23b.png)',
+  img_signed_query: '![x](https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b)',
+  img_slash_escape: '![x](https://example.com/dir%2Fa.png)',
+  img_query_escape: '![x](https://example.com/a.png?x=%3F)',
+  img_double_escape: '![x](https://example.com/a%2520b.png)',
+  img_wrapper_url: '![x](https://wsrv.example/?url=https%3A%2F%2Fother.example%2Fx.png&w=600)',
+  img_ref_param: '![x](https://cdn.example.com/img.png?ref=https%3A%2F%2Fsite.example%2Fp&sig=a%2Bb%3D)',
+  img_utf8_escape: '![x](https://example.com/caf%C3%A9.png)',
+  html_img_hash: '<img src="https://example.com/a%23b.png">',
+  html_img_space: '<img src="https://example.com/a%20b.png">',
+  video_poster_hash: '<video poster="https://example.com/a%23b.png"></video>',
+  legacy_steemit: '![x](https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)',
+  legacy_hive: '![x](https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png)',
+  legacy_ecency: '![x](https://images.ecency.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)',
+  legacy_half: '![x](https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png)',
+  malformed_escape: '![x](https://example.com/a%zz%23.png)',
+  legacy_passthrough_hash: '![x](https://images.ecency.com/0x0/https://example.com/p/a%23b.png)',
+  legacy_passthrough_nl: '![x](https://images.hive.blog/0x0/https://example.com/p/a%0Ab.png)',
+  angle_img_surrogate: '![x](<https://example.com/\ud800 a%zz.png>)',
+  angle_img_surrogate_low: '![x](<https://example.com/a b\udc00.png>)',
+  angle_img_surrogate_pct: '![x](<https://example.com/\ud800%.png>)',
+  wmp_anchor: "<a href='http://worldmappin.com/@example-user'>This user on Worldmappin</a>",
+  wmp_user: 'http://worldmappin.com/@example-user https://worldmappin.com/@example-user',
+  wmp_post: '[x](https://worldmappin.com/@example-user/example-post) https://worldmappin.com/@example-user/example-post',
+  wmp_tag_post: '[x](https://worldmappin.com/travel/@example-user/example-post)',
+  wmp_map_route: "<a href='http://worldmappin.com/p/example-post'>post</a>",
+}
+// Card and post image bodies of 2.5.55 (#2157, #2169, #2174): the card reads a bare URL as the render's linkify does.
+const cardBodies2555 = [
+  'https://h.example/p.jpg?a=1&#41;', 'https://h.example/p.jpg?a=(1)', 'https://h.example/p.jpg?a=1))', '(https://h.example/p.jpg?size=1)text',
+  '![x](<https://example.com/a.png?q=&amp;amp;>)', '![x](https://example.com/a.png?q=&amp;amp;)', '![x](<https://example.com/a b.png>)',
+  '**https://h.example/p.jpg**', '*https://h.example/p.jpg*', '~~https://h.example/p.jpg~~', 'text **https://h.example/p.jpg**.',
+  'https://h.example/p.jpg[^1]', 'https://h.example/p.jpg[x](https://example.com)', 'https://h.example/p.jpg![x](https://example.com/q.png)',
+  'https://my_bucket.s3.example.com/a/p.jpg', '![x](<https://example.com/50% off.png>)', '![x](https://example.com/50%25%20off.png)',
+  '![x](<https://example.com/a\\_b.png>)', '*italic*https://example.com/a*b.png', '_**https://example.com/a_b.png**_',
+  'https://example.com/a.png[a[b]](c)', 'https://example.com/a.png[x]\n\n[x]: /u',
+  '**https://example.com/p.png.**', '**https://example.com/p.png)**', '*https://example.com/p.png&#42;', '*Source: https://example.com/p.png*',
+  '_Source: https://example.com/p.png_', '**Source: https://example.com/p.png**', '~~old https://example.com/p.png~~', '*Source: https://example.com/p.png.*',
+  '(https://x.y_z.example/p.jpg)', '(https://a.b_c.example/p.jpg).', 'https://example.com/p.gif&#91;_', 'https://example.com/p.png&lt;~',
+  'https://example.com/p.png?_', 'Is it https://example.com/p.png?*', 'https://example.com/p.png?v=2_',
+  'https://a_b.c_d.example/p.jpg', 'https://example.com?i=p.png..', 'a*https://example.com/p.gif*', 'x~https://example.com/p.gif~',
+  '**https://example.com/p.png**;', '*https://example.com/p.png*_', '**https://example.com/p.png**_', '(**https://example.com/p.jpeg**)',
+  '"**https://example.com/p.jpeg**"', '**https://example.com/p.jpeg**)', '*https://example.com/p.png*)',
+  '_(https://example.com/p.png)_', '_(Source: https://example.com/p.png)_', '(https://example.com/p.png)_a_', '- _(https://example.com/p.png)_',
+  '==(https://example.com/p.png)==', '++(https://example.com/p.png)++', '| a | b |\n|---|---|\n|(https://example.com/p.png)|x|',
+  'https://example.com/p.png&#41;*', 'a@https://example.com/p.png))', '@HTTPS://example.com/p.jpg))',
+  'x # https://example.com/p.png.)', '^https://example.com/p.png))^', 'https://example.com/p.png\ud83d', 'https://example.com/\ud83dp.png',
+  'x # y https://example.com/p.png))', 'Step # 2 (see image https://example.com/p.png))', 'x # y https://example.com/p.png?a=1))',
+  'x &num; y https://example.com/p.png))', 'x &#35; y https://example.com/p.png))', 'x \\# y https://example.com/p.png))', 'x (#) y https://example.com/p.png))',
+  '- x #, y https://example.com/p.png))', 'C# y https://example.com/p.png))', 'C# https://example.com/p.png))', 'x # y\nhttps://example.com/p.png?a=(1)',
+  '## Title https://example.com/p.png?a=(1)', '#tag https://example.com/p.png?a=(1)', 'x #1 https://example.com/p.png?a=(1)',
+  '_x_# https://example.com/p.png))', 'a_# https://example.com/p.png))', '²# https://example.com/p.png))', '#² https://example.com/p.png))',
+  '(#hive) https://example.com/p.png))', '"#hive" https://example.com/p.png))', '#😀 https://example.com/p.png))', '#_x https://example.com/p.png))',
+  '> x #! y https://example.com/p.png))',
+  '![x](https://example.com/a%20b.png)', '![x](https://example.com/caf%C3%A9.png)', '<img src="https://example.com/a%20b.png">',
+  '![x](https://images.ecency.com/0x0/https://example.com/a%23b.png)', '![x](https://images.ecency.com/0x0/https://example.com/p/a%23b.png)',
+  '![x](https://steemitimages.com/0x0/https://www.example.com/p/Bx%23y/media.jpg)', '![x](https://images.hive.blog/0x0/https://example.com/p/a%0Ab.png)',
+  '![x](<https://example.com/\ud800 a%zz.png>)', '![x](<https://example.com/a b\udc00.png>)', '![x](<https://example.com/\ud800%.png>)',
+  '![x](https://example.com/a%23b.png)', '![x](https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b)', '![x](https://example.com/dir%2Fa.png)',
+  '![x](https://example.com/a.png?x=%3F)', '![x](https://example.com/a%2520b.png)', '![x](https://wsrv.example/?url=https%3A%2F%2Fother.example%2Fx.png&w=600)',
+  '![x](https://cdn.example.com/img.png?ref=https%3A%2F%2Fsite.example%2Fp&sig=a%2Bb%3D)', '<img src="https://example.com/a%23b.png">',
+  '![x](https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)', '![x](https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png)',
+  '![x](https://images.ecency.com/0x0/https%3A%2F%2Fexample.com%2Fa.png)', '![x](https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png)',
+  '![x](https://example.com/a%zz%23.png)',
+  // a reference definition's destination and a raw anchor's text are not autolinked: develop's reading
+  '[r]: https://h.example/p.jpg?a=(1)', '[r]:\n  https://h.example/p.jpg?a=(1)\n\n[x][r]', '[r]: \t https://h.example/p.jpg?a=1))',
+  '<a href="https://example.com">https://h.example/p.jpg?a=(1)</a>', '<a href="https://example.com">https://h.example/p.jpg?a=1)</A >',
+  'x <a href="https://h.example/p.jpg?a=1&#41;"> https://h.example/p.jpg?a=1&#41;</a> y',
+  'x <a href="https://h.example/p.jpg?a=&#40;1&#41;"> https://h.example/p.jpg?a=&#40;1&#41;</a> y',
+]
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2555)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -440,6 +556,7 @@ const FRAGMENTS = [
 Object.assign(handcrafted, bylines2542)
 Object.assign(handcrafted, rules2552)
 Object.assign(handcrafted, rules2554)
+Object.assign(handcrafted, rules2555)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)
@@ -553,6 +670,13 @@ imageBodies.forEach((body, i) => {
   imageCases.push({ name: `parencard_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
   imageCases.push({ name: `parenraw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
 })
+cardBodies2555.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2555-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2555_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2555sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
+  imageCases.push({ name: `c2555card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2555raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+})
 // Rendered bodies from the render set through the full lookup too.
 bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
   imageCases.push({ name: `body_${name}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
@@ -561,7 +685,15 @@ bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
 
 // ---- simpleMarkdownToHTML and helpers ------------------------------------------------------
 
-const simpleCases = bodies.filter((_, i) => i % 6 === 0).map(([name, md]) => ({ name, input: md, expected: rh.simpleMarkdownToHTML(md) }))
+// simpleMarkdownToHTML still throws (encodeURI) on a lone surrogate in a link destination; such bodies are left out.
+const simpleOrNull = (md) => {
+  try {
+    return rh.simpleMarkdownToHTML(md)
+  } catch {
+    return null
+  }
+}
+const simpleCases = bodies.filter((_, i) => i % 6 === 0).map(([name, md]) => ({ name, input: md, expected: simpleOrNull(md) })).filter((c) => c.expected !== null)
 
 const helperInputs = {
   extractYtStartTime: urls.filter((u) => /you/i.test(u)).concat(['not a url', 'https://x.com/?t=12abc', 'https://x.com/?t=+7', 'https://x.com/?t=%20%2012',
@@ -575,6 +707,12 @@ const helperInputs = {
   imageUrlEnd: ['https://host.example/photo.jpg?size=1)', 'https://host.example/photo.jpg)', 'https://host.example/photo.jpg#a)',
     'https://host.example/photo.jpg?a=(1)', 'https://host.example/photo.jpg?a=)&amp;b=(1)', 'https://host.example/photo.jpg?a=)&b=(1))',
     'https://host.example/photo.jpg?a=1))', 'https://host.example/photo.jpg?a=((1)', 'https://host.example/photo.jpg', 'https://host.example/a.png?x=1).'],
+  // 2.5.55 (#2174): escaped delimiters and %25 stay escaped; a legacy sized proxy path still decodes whole
+  decodeDomImageSrc: ['https://example.com/a%23b.png', 'https://example.com/a%20b.png', 'https://example.com/caf%C3%A9.png', 'https://example.com/a%2520b.png',
+    'https://example.com/i.png?sig=ab%2Bcd%3D&u=a%26b', 'https://example.com/a%zz%23.png', ' https://example.com/a%2Fb.png ', 'https://example.com/%E2%82',
+    'https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png', 'https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png',
+    'https://IMAGES.ECENCY.COM/0x0/HTTPS%3a%2f%2fexample.com%2Fa.png', 'https://i.ecency.com/10x20/https%3A//example.com/a%23.png',
+    'https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png', 'https://steemitimages.com/0x0/https://example.com/a%23b.png', '%25', '%2525', '%'],
   youtubeVideoLinkClass: ['https://www.youtube.com/shorts/x', 'https://YOUTUBE.com/Shorts/x', 'https://youtu.be/x'],
   cleanReply: Object.values(handcrafted).filter((s) => /posted|via|watch on/i.test(s)).concat(['', 'a\n---\n\n\n*posted via lumen*\nb', '---\noriginally posted through [scrobble.life', 'x\n-----\t\n_Originally Posted Through [Scrobble.Life_',
     // 2.5.42: 3Speak separator lookahead and whole-line footer filter
