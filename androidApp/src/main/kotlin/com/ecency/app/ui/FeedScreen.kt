@@ -167,6 +167,23 @@ class FeedActions(
 )
 
 /**
+ * [actions] with what needs the card's post, which [model] holds: the options menu and the payout breakdown (RN
+ * PostCard, the same in a feed and on a profile).
+ */
+@Composable
+fun rememberCardActions(actions: FeedActions, model: FeedModel?): FeedActions {
+    val feedx = LocalFeedx.current
+    return remember(actions, model, feedx) {
+        if (feedx == null || model == null) actions else FeedActions(
+            actions.onOpen, actions.onAuthor, actions.onCommunity, actions.onVote,
+            onMenu = { card -> model.post(card.key)?.let { feedx.openMenu(it) } },
+            onVoters = actions.onVoters, onReblogs = actions.onReblogs, onTip = actions.onTip,
+            payoutPost = { card -> model.post(card.key) },
+        )
+    }
+}
+
+/**
  * A feed: pull to refresh, infinite scroll (the next page starts 3 cards before the end), a
  * full-screen state for the first page and a footer for later pages.
  */
@@ -188,16 +205,7 @@ fun FeedList(
     val state by model.state.collectAsState()
     val colors = LocalEcencyColors.current
     OnShow(model) { model.start() }
-    // the options menu needs the card's post, which this feed holds
-    val feedx = LocalFeedx.current
-    val cardActions = remember(actions, model, feedx) {
-        if (feedx == null) actions else FeedActions(
-            actions.onOpen, actions.onAuthor, actions.onCommunity, actions.onVote,
-            onMenu = { card -> model.post(card.key)?.let { feedx.openMenu(it) } },
-            onVoters = actions.onVoters, onReblogs = actions.onReblogs, onTip = actions.onTip,
-            payoutPost = { card -> model.post(card.key) },
-        )
-    }
+    val cardActions = rememberCardActions(actions, model)
 
     val nearEnd by remember(listState) {
         derivedStateOf {
