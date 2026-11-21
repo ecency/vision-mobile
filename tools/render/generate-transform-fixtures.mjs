@@ -1,6 +1,6 @@
 // Golden fixtures for the native port of the render-helper post transforms (traverse, a, img,
 // iframe, text, linkify, clean-reply, markdown-to-html), postBodySummary, catchPostImage and the
-// helpers, produced by @ecency/render-helper 2.5.55 itself. All inputs are synthetic: example
+// helpers, produced by @ecency/render-helper 2.5.56 itself. All inputs are synthetic: example
 // accounts, example hosts and made-up ids. JS never runs in the app.
 //
 //   cd tools/render && npm ci
@@ -20,7 +20,8 @@ const internalsPath = join(here, 'node_modules/.rh-transform-internals.mjs')
 writeFileSync(internalsPath, readFileSync(bundlePath, 'utf8') +
   '\nexport { cleanReply as __cleanReply, linkify as __linkify, extractYtStartTime as __extractYtStartTime,' +
   ' isValidUsername as __isValidUsername, sanitizePermlink as __sanitizePermlink, decodeImageSrc as __decodeImageSrc,' +
-  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd, decodeDomImageSrc as __decodeDomImageSrc };\n')
+  ' stripHtmlTags as __stripHtmlTags, youtubeVideoLinkClass as __youtubeVideoLinkClass, imageUrlEnd as __imageUrlEnd, decodeDomImageSrc as __decodeDomImageSrc,' +
+  ' plainDestination as __plainDestination, withoutLoneSurrogates as __withoutLoneSurrogates };\n')
 const rh = await import(pathToFileURL(internalsPath).href)
 rh.setSlowRenderThresholdMs(0)
 
@@ -494,11 +495,75 @@ const cardBodies2555 = [
   'x <a href="https://h.example/p.jpg?a=1&#41;"> https://h.example/p.jpg?a=1&#41;</a> y',
   'x <a href="https://h.example/p.jpg?a=&#40;1&#41;"> https://h.example/p.jpg?a=&#40;1&#41;</a> y',
 ]
+// Rules of 2.5.56 (#2176): the render reads its input as before (shared helpers, no output change); these bodies pin
+// the input pass the card now copies. From the upstream spec's inputs with example hosts. Kept out of FRAGMENTS.
+const rules2556 = {
+  leo_post_img: '![x](https://inleo.io/posts/a/b.png)',
+  leo_thread_img: '![x](https://leofinance.io/threads/view/a/b.png)',
+  leo_tab_stop: 'https://inleo.io/posts/a/b ![x](<https://example.com/c\td.png>)',
+  angle_tab_mid: 'a\tb\n![x](<https://example.com/c\td.png>)',
+  angle_tab_after: 'ab\t\n x\t![x](<https://example.com/c\t\td.png>)',
+  angle_nbsp: '![x](<https://example.com/a\u00a0b.png>)',
+  angle_line_sep: '![x](<https://example.com/a\u2028b.png>)',
+  plain_escaped_paren: '![x](https://example.com/a\\).png)',
+  plain_escaped_quote: '![x](https://example.com/a\\"b.png)',
+  title_mismatch: '![x](<https://example.com/a b.png> "t\')',
+  img_nbsp: '<img src="https://example.com/a\u00a0b.png">',
+  img_tab: 'x\t<img src="https://example.com/a\tb\tc.png">',
+  label_setext: '![a\n--\nb](<https://example.com/a b.png>)',
+  label_table: '![a|b\n-|- \nc](<https://example.com/a b.png>)',
+  label_list_indent: '10. ![a\n    --\n    b](<https://example.com/a b.png>)',
+  byline_then_img: '![x](https://example.com/a.png) Posted using [LeoFinance](https://leofinance.io)\n\n![y](https://example.com/b.png)',
+}
+// Card and post image bodies of 2.5.56 (#2176): the card reads the text the parser reads (the render's input pass,
+// then Remarkable's), and its markdown image pattern follows the parser's separators, escapes and block starts.
+const angleDestinations2556 = ['a b', 'a\\b', '50%', '50%%20off', 'a%zz', 'a%20b', 'café', 'caf%C3%A9', '\ud800x', 'x\udc00 y', 'a"b',
+  'a[1]', 'a{b}|c', 'a^b`c', 'a\tb', '\ta', 'ab\t\tc', 'a\u00a0b', 'a\u2028b', 'a\u0085b', 'a\u2424b']
+const cardBodies2556 = [
+  ...angleDestinations2556.map((d) => `![x](<https://example.com/${d}.png>)`),
+  'a\tb\n![x](<https://example.com/c\td.png>)', 'ab\t\n x\t![x](<https://example.com/c\t\td.png>)', '\t\t\n![x](<https://example.com/\tc\td.png>)',
+  '![](\u3000<https://example.com/a b.png>)', '![](<https://example.com/a b.png>\ufeff)', '![](<https://example.com/a.png>\u3000"t")',
+  '![](\r<https://example.com/a b.png>)', '![](https://example.com/a.png\u3000)', '![](\u000b<https://example.com/a b.png>)',
+  '![]( \n <https://example.com/a b.png> \n )', '![](<https://example.com/a b.png>\n\n)', '![x\n\ny](<https://example.com/a b.png>)',
+  '![](<https://example.com/a b.png>\n \t\n)', '![](<https://example.com/a b.png>\u2028\u2028)',
+  '![](https://example.com/a.png\u0085)', '![](https://example.com/a\u0085b.png)', '![](https://example.com/a\u007fb.png)',
+  '![](https://example.com/a\u0001b.png)', '![](https://example.com/a\u2424b.png)',
+  '<img src="https://example.com/a\u00a0b.png">', '<img src="https://example.com/a\tb.png">', 'x\t<img src="https://example.com/a\tb\tc.png">',
+  'https://example.com/a.png\u0085text', 'text\u0085https://example.com/a.png', 'text\u00a0https://example.com/a.png',
+  '![x](https://example.com/a\\).png)', '![x](https://example.com/a\\_b.png)', '![x](https://example.com/a\\\\b.png)',
+  '![x](https://example.com/a\\(b.png)', '![x](https://example.com/a\\&amp;b.png)', '![x](https://example.com/a\\"b.png)',
+  '![x](<https://example.com/a b.png> "t\')', "![x](<https://example.com/a b.png> 't\")",
+  '![a\n# b](<https://example.com/a b.png>)', '![a\n> b](<https://example.com/a b.png>)', '![a\n- b](<https://example.com/a b.png>)',
+  '> ![a\n>\n> b](<https://example.com/a b.png>)',
+  '![x](https://inleo.io/posts/a/b.png)', '![x](https://leofinance.io/threads/view/a/b.png)', 'https://inleo.io/posts/a/b ![x](<https://example.com/c\td.png>)',
+  '![x](https://example.com/\ud800x.png)', '<img src="https://example.com/\udc00x.png">',
+  '![x](https://example.com/a\\ b.png)', '![x](https://example.com/a\\\nb.png)',
+  '![a\n___\nb](<https://example.com/a b.png>)', '![a\n<div>b</div>](<https://example.com/a b.png>)',
+  '![a\n--\nb](<https://example.com/a b.png>)', '![a|b\n-|- \nc](<https://example.com/a b.png>)', '![a|b\n:-|-:\nc](<https://example.com/a b.png>)',
+  '![a\n: b](<https://example.com/a b.png>)', '![a\n~ b](<https://example.com/a b.png>)',
+  '![a|\n:-:\nb](<https://example.com/a b.png>)', '![a|\n-:\nb](<https://example.com/a b.png>)', '|![a\n:-\nb](<https://example.com/a b.png>)',
+  '10. ![a\n    --\n    b](<https://example.com/a b.png>)', '10. ![a\n    : b](<https://example.com/a b.png>)',
+  '10. ![a|b\n    -|-\n    c](<https://example.com/a b.png>)', '10. ![a\n    # h\n    b](<https://example.com/a b.png>)',
+  '- item\n  - ![a\n    ===\n    b](<https://example.com/a b.png>)', '1. - ![a|b\n     -|-\n     c](<https://example.com/a b.png>)',
+  '![x](https://example.com/a.png) Posted using [LeoFinance](https://leofinance.io)\n\n![y](https://example.com/b.png)',
+  // multi-line images the card still reads in fast mode
+  '![Sunset over the bay\n2023 trip](https://example.com/a.png)', '![a\n-b](https://example.com/a.png)', '![a\n#b](https://example.com/a.png)',
+  '![a\n1999-01 photo](https://example.com/a.png)', '![x](\n<https://example.com/a b.png>)', '![x](\nhttps://example.com/a.png)',
+  '![a\n<3 you](https://example.com/a.png)', '![a\n--b](https://example.com/a.png)', '![a\n:b](https://example.com/a.png)',
+  '![a\n~b](https://example.com/a.png)', '![a\n-:b](https://example.com/a.png)',
+  // titles and separators around a plain destination, a stray escape and the length bound
+  '![x](https://example.com/a.png "t")', '![x](https://example.com/a.png\n"t"\n)', '![x](https://example.com/a.png"t")',
+  '![x](https://example.com/a.png \'t\n\nu\')', '![x](https://example.com/a.png "t\nu")', '![x](https://example.com/a.png\\)',
+  '![x](https://example.com/50%\\\\x.png)', `![x](https://example.com/${'a'.repeat(2100)}.png) ![y](https://example.com/b.png)`,
+  '![x](<https://example.com/a.png>\n"t")', '![x](<https://example.com/a.png>  \n  )', 'a\u00a0![x](https://example.com/a.png)',
+  '<div>\n![a\n<p>b](https://example.com/a.png)\n</div>', '![a\n   <section>b](https://example.com/a.png)', '![a\n    <div>b](https://example.com/a.png)',
+]
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
 for (const [name, body] of Object.entries(bylines2542)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2552)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2554)) bodies.push([name, body])
 for (const [name, body] of Object.entries(rules2555)) bodies.push([name, body])
+for (const [name, body] of Object.entries(rules2556)) bodies.push([name, body])
 
 // ---- render configurations ---------------------------------------------------------------------
 
@@ -557,6 +622,7 @@ Object.assign(handcrafted, bylines2542)
 Object.assign(handcrafted, rules2552)
 Object.assign(handcrafted, rules2554)
 Object.assign(handcrafted, rules2555)
+Object.assign(handcrafted, rules2556)
 const SEED = Number(process.env.SEED || 0x7a11)
 const RANDOM_COUNT = Number(process.env.RANDOM_COUNT || 400)
 const rnd = prng(SEED)
@@ -677,6 +743,15 @@ cardBodies2555.forEach((body, i) => {
   imageCases.push({ name: `c2555card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
   imageCases.push({ name: `c2555raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
 })
+cardBodies2556.forEach((body, i) => {
+  const entry = { author: 'example-user', permlink: `card2556-${i}`, last_update: '2026-11-21T00:00:00', body, json_metadata: '{}' }
+  imageCases.push({ name: `c2556_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
+  imageCases.push({ name: `c2556fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
+  imageCases.push({ name: `c2556card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
+  imageCases.push({ name: `c2556raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  imageCases.push({ name: `c2556str_${i}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
+  imageCases.push({ name: `c2556strfast_${i}`, kind: 'string', body, meta: null, w: 300, h: 0, fast: true, expected: rh.catchPostImage(body, 300, 0, 'match', { fast: true }) })
+})
 // Rendered bodies from the render set through the full lookup too.
 bodies.filter((_, i) => i % 4 === 1).forEach(([name, body]) => {
   imageCases.push({ name: `body_${name}`, kind: 'string', body, meta: null, w: 0, h: 0, fast: false, expected: rh.catchPostImage(body) })
@@ -713,6 +788,10 @@ const helperInputs = {
     'https://steemitimages.com/0x0/https%3A%2F%2Fexample.com%2Fa.png', 'https://images.hive.blog/640x0/https%3A%2F%2Fexample.com%2Fa%20b.png',
     'https://IMAGES.ECENCY.COM/0x0/HTTPS%3a%2f%2fexample.com%2Fa.png', 'https://i.ecency.com/10x20/https%3A//example.com/a%23.png',
     'https://steemitimages.com/0x0/https:%2F%2Fexample.com%2Fa.png', 'https://steemitimages.com/0x0/https://example.com/a%23b.png', '%25', '%2525', '%'],
+  // 2.5.56 (#2176): the destination helpers the card and the render share
+  plainDestination: ['https://example.com/café a%20b.png', 'a\\b"c<d>[e]^f`g{h|i}', 'https://example.com/ok.png', '50%%20off a', 'a%zz b', 'a\u00a0b', 'a\u2028b', '%',
+    'a b%20c', 'café %E2%82', 'https://example.com/a%2Fb c'],
+  withoutLoneSurrogates: ['a\ud800b\udc00c😀', '\udc00\ud800', 'plain'],
   youtubeVideoLinkClass: ['https://www.youtube.com/shorts/x', 'https://YOUTUBE.com/Shorts/x', 'https://youtu.be/x'],
   cleanReply: Object.values(handcrafted).filter((s) => /posted|via|watch on/i.test(s)).concat(['', 'a\n---\n\n\n*posted via lumen*\nb', '---\noriginally posted through [scrobble.life', 'x\n-----\t\n_Originally Posted Through [Scrobble.Life_',
     // 2.5.42: 3Speak separator lookahead and whole-line footer filter
