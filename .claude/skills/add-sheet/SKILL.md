@@ -52,8 +52,21 @@ profile sheet models (`app/ChatSheets.kt`, `app/ProfileSheetModels.kt`).
   `ThemedBackgroundLintTest` unless allowlisted there with a reason (media viewers).
 - Hoist the trigger as nullable state and clear it on dismiss, as the vote sheet in `ui/EcencyApp.kt`:
   `voteTarget?.let { card -> VoteSheet(card, onVote = { ...; voteTarget = null }, onDismiss = { voteTarget = null }) }`.
-- Content: `Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding()
-  .testTag("xSheet"))` so it wraps its content and scrolls at the largest font scale; `imePadding()` with a field.
+- Content scrolls (README "Android app", Sheets scroll): `Column(Modifier.fillMaxWidth()
+  .verticalScroll(rememberScrollState()).navigationBarsPadding().testTag("xSheet"))` so it wraps its content and its
+  last control stays reachable with the keyboard up or at the largest font scale; `imePadding()` inside the scroll
+  with a field. When the controls sit low (a confirm button under a form), open at full height:
+  `rememberModalBottomSheetState(skipPartiallyExpanded = true)`.
+- Lists inside the scroll are bounded: a plain column of rows, or a `LazyColumn` / `LazyVerticalGrid` with a finite
+  `heightIn(max = ...)`. Never an unbounded lazy list inside `verticalScroll` (it throws at measure). A sheet that
+  fills the window never relies on `weight(1f).heightIn(min = ...)`: a weighted child gets fixed constraints and
+  the minimum is dead. Use a layout that gives the field the leftover height with a floor, as `FillColumn` in
+  `ui/WavesScreen.kt` (`fillMaxHeight()` before `verticalScroll`), and test the field's height on a short window.
+- build-logic `SheetScrollLintTest` fails on a `ModalBottomSheet` whose content holds no `verticalScroll`,
+  `LazyColumn` or `LazyVerticalGrid`. Only a sheet that is fixed height by design (a media player or viewer) goes in
+  `androidApp/sheet-scroll-allowed.txt`, with a one-line reason.
+- Test: Robolectric on `@Config(qualifiers = "w360dp-h400dp")` (font scale 1.3 where text matters) that opens the
+  sheet, `compose.awaitScrolledTo("lastControl").performClick()` (ComposeAwait.kt) and asserts the click's effect.
 - A sheet that must stay open while sending: `rememberModalBottomSheetState(confirmValueChange = { it !=
   SheetValue.Hidden || !sending })` and an `onDismissRequest` that ignores the call while sending (`ReplySheet` in
   `ui/Sheets.kt`).
@@ -66,5 +79,7 @@ profile sheet models (`app/ChatSheets.kt`, `app/ProfileSheetModels.kt`).
 - [ ] iOS `.themedSheet` (no raw `.sheet(`), root sheets through `AppSheet`; Android `ModalBottomSheet` from
       `ui/Windows.kt` with `colors.background`
 - [ ] No dismissal while a send runs, when the result belongs on screen
+- [ ] Android content scrolls (`SheetScrollLintTest`), full height when controls sit low, inner lists bounded; a
+      `w360dp-h400dp` test taps the last control
 - [ ] Fits and scrolls at the largest text size; identifiers and test tags for tests
 - [ ] No literal UI text (l10n lints), copy keys in `src/config/locales/en-US.json` only

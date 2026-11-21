@@ -79,6 +79,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -678,6 +679,36 @@ internal fun WaveImagePickers(env: AppEnvironment, attacher: com.ecency.core.app
     }
 }
 
+/** The wave text's least height: below it the composer scrolls instead of squeezing the text. */
+private val WAVE_TEXT_MIN_HEIGHT = 120.dp
+
+private const val FILL = "fill"
+
+/**
+ * A column whose child marked `layoutId(FILL)` takes the height the others leave, but never less than [minFill]:
+ * Column's `weight` gives a child the leftover height as fixed constraints (down to nothing), so a minimum on it
+ * cannot hold. Its target is the bounded height, or under a vertical scroll the least height it is given
+ * (`fillMaxHeight()` before `verticalScroll`); taller content makes it taller, and the scroll takes over.
+ */
+@Composable
+private fun FillColumn(minFill: androidx.compose.ui.unit.Dp, modifier: Modifier, content: @Composable () -> Unit) =
+    androidx.compose.ui.layout.Layout(content, modifier) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0, maxHeight = androidx.compose.ui.unit.Constraints.Infinity)
+        val fillAt = measurables.indexOfFirst { it.layoutId == FILL }
+        val others = measurables.mapIndexed { i, m -> if (i == fillAt) null else m.measure(loose) }
+        val fixed = others.sumOf { it?.height ?: 0 }
+        val target = if (constraints.hasBoundedHeight) constraints.maxHeight else constraints.minHeight
+        val fillHeight = maxOf(minFill.roundToPx(), target - fixed)
+        val fill = measurables.getOrNull(fillAt)?.measure(loose.copy(minHeight = fillHeight, maxHeight = fillHeight))
+        val placeables = others.mapIndexed { i, p -> p ?: fill!!.takeIf { i == fillAt } }.filterNotNull()
+        val height = placeables.sumOf { it.height }.coerceAtLeast(constraints.minHeight)
+            .let { if (constraints.hasBoundedHeight) it.coerceAtMost(constraints.maxHeight) else it }
+        layout(constraints.maxWidth, height) {
+            var y = 0
+            placeables.forEach { it.placeRelative(0, y); y += it.height }
+        }
+    }
+
 /**
  * RN quick post modal in wave mode: "Publishing in Waves", the counter, the close button, avatar and name, the
  * text, the short content hint, the attached image and PUBLISH. While a publish runs the sheet stays.
@@ -705,8 +736,14 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
     ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
     ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }, sheetState = sheetState, containerColor = colors.background) {
         // the whole sheet height: the text fills down to the toolbar, and the toolbar sits on the keyboard (or on
-        // the navigation bar without one), with no empty stripe between them
-        Column(Modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 16.dp).imePadding().navigationBarsPadding().padding(bottom = 4.dp).testTag("waveComposer")) {
+        // the navigation bar without one), with no empty stripe between them. On a short window (the keyboard up, a
+        // large font, an attachment) the text keeps its least height and the composer scrolls, so PUBLISH stays
+        // reachable (FillColumn: a weighted child of a Column would shrink to nothing instead)
+        FillColumn(
+            WAVE_TEXT_MIN_HEIGHT + 8.dp, // the text and the 8 dp above it
+            Modifier.fillMaxWidth().fillMaxHeight().imePadding().navigationBarsPadding().verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp).padding(bottom = 4.dp).testTag("waveComposer"),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(ReadingUiCopy.PUBLISHING_IN_WAVES, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.weight(1f))
                 Text(
@@ -727,7 +764,7 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
                 enabled = !state.isSending,
                 placeholder = { Text(ReadingUiCopy.WHATS_HAPPENING, color = Color(0xFFC1C5C7)) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = colors.text, unfocusedTextColor = colors.text, focusedBorderColor = colors.blueText, unfocusedBorderColor = colors.icon),
-                modifier = Modifier.fillMaxWidth().weight(1f).heightIn(min = 120.dp).padding(top = 8.dp).focusRequester(focus).testTag("waveText"),
+                modifier = Modifier.layoutId(FILL).fillMaxWidth().padding(top = 8.dp).focusRequester(focus).testTag("waveText"),
             )
             if (state.showsShortHint) {
                 Text(

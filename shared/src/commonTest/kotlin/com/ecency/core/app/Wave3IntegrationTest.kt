@@ -674,7 +674,7 @@ class Wave3IntegrationTest {
         val firstParty = listOf(
             "${env.auth.tokenHost}/private-api/drafts", "${env.auth.tokenHost}/search-api/search", "${env.auth.tokenHost}/auth-api/hs-token-refresh",
             "${env.auth.tokenHost}/private-api/waves/feed", "${env.rest.translateHost}/translate", "${env.rest.pollsHost}/rpc/poll",
-            "${env.imageHost}/hs/token", "${com.ecency.core.render.ImageProxy.DEFAULT_BASE}/p/x", "HTTPS://ECENCY.COM/private-api/quests", "https://ecency.com",
+            "${env.imageHost}/hs", "${com.ecency.core.render.ImageProxy.DEFAULT_BASE}/p/x", "HTTPS://ECENCY.COM/private-api/quests", "https://ecency.com",
             // HiveSigner's API, which sign-in goes through
             "https://hivesigner.com/api/me", "https://hivesigner.com/api/oauth2/token", "https://api.hivesigner.com/x", "HTTPS://HIVESIGNER.COM/api/broadcast",
         )
@@ -708,7 +708,7 @@ class Wave3IntegrationTest {
         var answer: () -> HttpResult = { HttpResult(200, """{"url":"https://images.example/DQm/photo.jpg"}""") }
 
         override suspend fun upload(url: String, authorization: String, file: UploadFile, onProgress: (Long, Long) -> Unit): HttpResult {
-            signers += com.ecency.core.auth.HiveSignerMessages.decode(url.substringAfter("/hs/")).authors.single()
+            signers += com.ecency.core.auth.HiveSignerMessages.decode(authorization.removePrefix("Bearer ")).authors.single()
             gate?.await()
             return answer()
         }
@@ -961,8 +961,10 @@ class Wave3IntegrationTest {
     }
 
     @Test
-    fun anUploadFailureNeverCarriesTheUploadAddress() = runTest {
-        val leaky = ImageUploadTransport { url, _, _, _ -> throw IllegalStateException("Request timeout has expired [url=$url]", RuntimeException("connect $url")) }
+    fun anUploadFailureNeverCarriesTheTokenFromItsAddressOrHeader() = runTest {
+        val leaky = ImageUploadTransport { url, authorization, _, _ ->
+            throw IllegalStateException("Request timeout has expired [url=$url, Authorization: $authorization]", RuntimeException("connect $url with $authorization"))
+        }
         val error = runCatching { ImageUploader(leaky, "https://images.example", retryDelayMillis = { 0 }).upload(file, "SECRET-UPLOAD-TOKEN") }.exceptionOrNull()!!
         var e: Throwable? = error
         while (e != null) {

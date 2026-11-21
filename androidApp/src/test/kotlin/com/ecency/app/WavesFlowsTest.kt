@@ -655,4 +655,33 @@ class WavesFlowsTest {
         compose.awaitScrolledTo("waves:trending:art").performClick()
         waitFor("waves:pinned:art")
     }
+
+    /**
+     * A window too short for the composer's rows (a small phone with the keyboard up, or a split window) at a larger
+     * text size, with an image attached, the clipboard chip and the short content hint: the text keeps its least
+     * height (120 dp) and the composer scrolls, so PUBLISH stays reachable by a real tap.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h300dp")
+    fun onAShortWindowTheComposerKeepsTheTextAndScrollsToPublish() {
+        node.signIn()
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        clipboard.setPrimaryClip(android.content.ClipData("img", arrayOf("image/png"), android.content.ClipData.Item(android.net.Uri.parse("content://fake/clip.png"))))
+        launch(fontScale = 1.3f)
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        waitFor("waveClipboardChip")
+        compose.runOnUiThread { env.waves.composer().pickUploaded("https://images.ecency.com/DQmShort/wave.png") }
+        waitFor("waveImage")
+        compose.onNodeWithTag("waveText").performTextInput("Hi")
+        waitFor("waveShortHint")
+        compose.waitForIdle()
+        val text = compose.onNodeWithTag("waveText").fetchSemanticsNode().boundsInRoot
+        assertTrue("the text keeps its least height: ${text.height / compose.density.density} dp", text.height >= 120 * compose.density.density - 0.5f)
+        compose.awaitScrolledTo("wavePublish").performClick()
+        pump { node.broadcasts().isNotEmpty() || env.waves.composer().current.error != null }
+        assertTrue(node.broadcasts().single(), "Hi" in node.broadcasts().single())
+    }
 }

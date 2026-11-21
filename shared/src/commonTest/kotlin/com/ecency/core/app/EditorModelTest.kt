@@ -1824,8 +1824,8 @@ class EditorModelTest {
         assertEquals(0, m.current.uploading)
         assertNull(uploads.current.progress)
         val (url, authorization, _) = host.requests.single()
-        assertEquals("https://images.example", authorization)
-        val token = url.removePrefix("https://images.example/hs/")
+        assertEquals("https://images.example/hs", url)
+        val token = authorization.removePrefix("Bearer ")
         assertEquals(HiveSignerMessages.imageUploadToken(user, com.ecency.core.hive.PrivateKey.fromWif(GoldenVectors.WIF), TestApp.NOW), token)
         assertEquals(listOf(user), HiveSignerMessages.decode(token).authors)
         // the size known at upload gives the ratio at publish
@@ -1934,7 +1934,7 @@ class EditorModelTest {
         testScheduler.advanceUntilIdle()
         uploads.upload(listOf(image("a.jpg")), insert = true)
         testScheduler.advanceUntilIdle()
-        assertEquals(listOf(user), HiveSignerMessages.decode(host.requests.single().first.substringAfter("/hs/")).authors, "signed for the editor's account, not the one signed in now")
+        assertEquals(listOf(user), HiveSignerMessages.decode(host.requests.single().second.removePrefix("Bearer ")).authors, "signed for the editor's account, not the one signed in now")
 
         val hs = VaultAccount("hs-user", AuthType.HIVE_SIGNER, accessToken = "hs-access-token")
         assertEquals("hs-access-token", com.ecency.core.api.ecency.ImageSigning.token(hs, TestApp.NOW))

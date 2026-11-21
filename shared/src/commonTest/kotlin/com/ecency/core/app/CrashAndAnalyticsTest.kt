@@ -29,6 +29,17 @@ class CrashAndAnalyticsTest {
         assertEquals(CrashScrubber.MAX_TEXT, CrashScrubber.scrub("x".repeat(100_000))!!.length)
     }
 
+    /** #3722: older installs post to `/hs/<token>`; a tag route `/hs/@author/permlink` is no secret. */
+    @Test
+    fun theScrubberRedactsAnUploadTokenInTheImageHostsPath() {
+        val signed = "eyJzaWduZWRfbWVzc2FnZSI6eyJ0eXBlIjoiY29kZSJ9LCJhdXRob3JzIjpbImFsaWNlIl19"
+        assertEquals("POST https://images.ecency.com/hs/<redacted>", CrashScrubber.scrub("POST https://images.ecency.com/hs/$signed"))
+        assertEquals("POST https://images.ecency.com/webp/hs/<redacted>?x=1", CrashScrubber.scrub("POST https://images.ecency.com/webp/hs/abc123opaque?x=1"))
+        assertEquals("""failed "https://images.ecency.com/hs/<redacted>" 502""", CrashScrubber.scrub("""failed "https://images.ecency.com/hs/$signed" 502"""))
+        assertEquals("https://ecency.com/hs/@alice/some-post", CrashScrubber.scrub("https://ecency.com/hs/@alice/some-post"))
+        assertEquals("POST https://images.ecency.com/hs", CrashScrubber.scrub("POST https://images.ecency.com/hs"))
+    }
+
     @Test
     fun theScrubberRedactsVaultFieldsPasswordsAndTokensAfterTheirNames() {
         // a Hive master password shape (P5 + base58), made up for the test
