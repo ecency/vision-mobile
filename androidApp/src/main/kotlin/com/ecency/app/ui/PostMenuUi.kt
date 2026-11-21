@@ -293,10 +293,11 @@ private fun CrossPostSheet(ui: FeedxUi, post: Post) {
             )
             if (picking) {
                 OutlinedTextField(state.query, model::search, placeholder = { Text(UiCopy.SEARCH) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
-                // a bounded scroll of its own inside the sheet's (no lazy list inside a scrolling column)
-                Column(Modifier.heightIn(max = 220.dp).verticalScroll(rememberScrollState())) {
-                    if (state.isLoading) LoadingBlock()
-                    state.filtered.forEach { c ->
+                // a lazy list bounded to 220 dp: a finite height is safe inside the sheet's scroll, and an account
+                // with many subscriptions composes only the rows on screen
+                LazyColumn(Modifier.heightIn(max = 220.dp).testTag("communityList")) {
+                    if (state.isLoading) item { LoadingBlock() }
+                    items(state.filtered, key = { it.name }) { c ->
                         Text(
                             c.title, color = colors.text,
                             modifier = Modifier.fillMaxWidth().clickable(role = Role.Button) { model.select(c); picking = false }.padding(vertical = 10.dp).testTag("community:${c.name}"),
