@@ -257,7 +257,8 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
         sheetState = sheetState,
         containerColor = colors.background,
     ) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).imePadding().navigationBarsPadding().padding(bottom = 12.dp).testTag("replySheet")) {
+        // scrolls: with the keyboard up on a short window, or at a larger text size, Reply stays reachable
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).imePadding().navigationBarsPadding().padding(bottom = 12.dp).testTag("replySheet")) {
             Text(ReadingUiCopy.replyTo(model.parent.author), fontWeight = FontWeight.Bold, color = colors.text, fontSize = 16.sp)
             OutlinedTextField(
                 value = state.text,
@@ -268,7 +269,8 @@ fun ReplySheet(env: com.ecency.core.app.AppEnvironment, model: ComposeReplyModel
                     focusedTextColor = colors.text, unfocusedTextColor = colors.text,
                     focusedBorderColor = colors.blueText, unfocusedBorderColor = colors.icon,
                 ),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp).padding(top = 8.dp).testTag("replyText"),
+                // RN quickPostModal inputContainer: 120 to 200 high, a longer reply scrolls inside, so Reply stays in sight
+                modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp, max = 200.dp).padding(top = 8.dp).testTag("replyText"),
             )
             state.error?.let {
                 Text(it.message, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(top = 6.dp).testTag("replyError"))
