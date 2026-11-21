@@ -184,6 +184,18 @@ class PathologicalRenderTest {
         LinearScaling.assertLinear("one-paragraph definitions, paired source", 4_000, paired) { helper.renderPostBody(it, true) }
     }
 
+    /** Many links in one paragraph, each in its own text token: linkify rebuilds the paragraph's tokens once. */
+    @Test
+    fun manyLinkedTokensInOneParagraphStayLinear() {
+        val unit = "**x** user&#64;example&#46;com "
+        val make = { n: Int -> unit.repeat(n) }
+        // checked once, untimed: each unit's email is still linked
+        val two = helper.renderPostBody(make(2), true)
+        assertEquals(2, Regex("data-href=\"mailto:user@example\\.com\">user@example\\.com</a>").findAll(two).count(), two)
+        LinearScaling.assertLinear("linked tokens (app)", 5_000, make) { helper.renderPostBody(it, true) }
+        LinearScaling.assertLinear("linked tokens (web)", 5_000, make) { helper.renderPostBody(it, false) }
+    }
+
     @Test
     fun mentionChainsStayLinear() {
         assertLinear("mention chain", { n -> "@" + "a.".repeat(n) + "a" }, 20_000)
