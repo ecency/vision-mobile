@@ -534,4 +534,35 @@ class PlatformFlowsTest {
         compose.onNodeWithTag("bridgeConfirmButton").performScrollTo().assertIsDisplayed().performClick()
         compose.await("broadcast") { idleMain(); node.broadcasts().size == 1 }
     }
+
+    /** A short window at a larger text size: the share chooser scrolls, so its last choice stays reachable by a real tap. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheShareChooserScrollsToWave() {
+        launchSignedIn(fontScale = 1.3f)
+        compose.runOnUiThread { env.share.receive(listOf("A quick update"), emptyList()) }
+        waitFor("shareChooser")
+        compose.awaitScrolledTo("shareWave").performClick()
+        compose.await("waves tab") { idleMain(); navigator.state.tab == AppTab.WAVES }
+    }
+
+    /** A short window at a larger text size: the proposal's dismiss sheet scrolls, so Later stays reachable by a real tap. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheProposalDismissSheetScrollsToLater() {
+        node.extra = { method, _ ->
+            when (method) {
+                "database_api.list_proposals" -> """{"proposals":[{"id":1,"proposal_id":342,"creator":"ecency","status":"active"}]}"""
+                "database_api.list_proposal_votes" -> """{"proposal_votes":[]}"""
+                else -> null
+            }
+        }
+        launchSignedIn(fontScale = 1.3f)
+        waitFor("proposalCard")
+        compose.onNodeWithTag("proposalDismiss").performClick()
+        waitFor("proposalDismissSheet")
+        compose.awaitScrolledTo("proposalLater").performClick()
+        compose.await("hidden") { idleMain(); !exists("proposalCard") }
+        assertNotNull(env.prefs.keys().firstOrNull { it.startsWith(com.ecency.core.app.ProposalVoteModel.KEY_PREFIX) })
+    }
 }
