@@ -153,6 +153,12 @@ class PathologicalRenderTest {
         LinearScaling.assertLinear("one-paragraph definitions (web)", 4_000, make) { helper.renderPostBody(it, false) }
         val plain = { n: Int -> (0 until n).joinToString("\n") { "[r$it]: https://e.example/p$it?a=1" } + "\n\n[x][r0]" }
         LinearScaling.assertLinear("one-paragraph plain definitions", 4_000, plain) { helper.renderPostBody(it, true) }
+        // each definition's state shares the paragraph's scans: a `<` label with no `>` anywhere (autolink's last `>`),
+        // and a `\&` in the body with labels holding a terminator character (the paired source)
+        val angle = { n: Int -> (0 until n).joinToString("\n") { "[<a$it]: /x" } + "\n\n[x][<a0]" }
+        LinearScaling.assertLinear("one-paragraph definitions, angle labels", 4_000, angle) { helper.renderPostBody(it, true) }
+        val paired = { n: Int -> "a \\& b\n\n" + (0 until n).joinToString("\n") { "[a:$it]: /x" } + "\n\n[x][a:0]" }
+        LinearScaling.assertLinear("one-paragraph definitions, paired source", 4_000, paired) { helper.renderPostBody(it, true) }
     }
 
     @Test

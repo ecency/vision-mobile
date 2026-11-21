@@ -60,11 +60,11 @@ internal object CoreRules {
      * remarkable's parseReference on `str.slice(from, end)`, read in place: positions are [str]'s, and the parse
      * stops at [end] as it would at the end of that slice. Returns where the definition ends, or -1.
      */
-    private fun parseReference(str: String, from: Int, end: Int, inline: InlineParser, env: Env): Int {
+    private fun parseReference(str: String, from: Int, end: Int, inline: InlineParser, env: Env, scans: SourceScans): Int {
         if (Js.cc(str, from) != 0x5B) return -1
         val colon = str.indexOf("]:", from)
         if (colon == -1 || colon + 2 > end) return -1
-        val state = StateInline(str, inline, env, ArrayList())
+        val state = StateInline(str, inline, env, ArrayList(), scans)
         state.posMax = end
         state.cacheBase = from
         val labelEnd = inline.parseLinkLabel(state, from)
@@ -121,8 +121,9 @@ internal object CoreRules {
                 var from = 0
                 var end = content.length
                 var consumed = false
+                val scans = SourceScans(content)
                 while (from < end) {
-                    val pos = parseReference(content, from, end, inline, env)
+                    val pos = parseReference(content, from, end, inline, env, scans)
                     if (pos < 0) break
                     if (!consumed) {
                         // the rest is trimmed from here on: String.prototype.trim at both ends
