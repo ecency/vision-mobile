@@ -20,14 +20,14 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules in the 2.5.56 port
+## Custom rules in the 2.5.57 port
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.
 
 | Rule | Kotlin |
 |---|---|
-| App bylines and promo footers dropped before rendering (`cleanReply`): Partiko, Dapplr, LeoFinance, InLeo, Neoxian, First Context, StemGeeks, Bilpcoin, SportsTalkSocial, aeneas.blog, ProofOfBrain, Hypnochain, WeedCash, NaturalMedicine, MusicForLife, Truvvl, TravelFeed (.io and, 2.5.42, .com), dPorn, inji, Liketu, Liketu Speak (two-part match), Liketu Clips (2.5.42, two-part match), scrobble.life, Lumen, HiveSuite (2.5.42), old and new 3Speak footers (2.5.42: whole-line `▶ [Watch on 3speak.tv](https://3speak.tv/watch...)`), `[via apps from]` | `CleanReply` |
+| App bylines and promo footers dropped before rendering (`cleanReply`): Partiko, Dapplr, LeoFinance, InLeo, Neoxian, First Context, StemGeeks, Bilpcoin, SportsTalkSocial, aeneas.blog, ProofOfBrain, Hypnochain, WeedCash, NaturalMedicine, MusicForLife, Truvvl, TravelFeed (.io and, 2.5.42, .com), dPorn, inji, Liketu, Liketu Speak (two-part match), Liketu Clips (2.5.42, two-part match), scrobble.life, Lumen, HiveSuite (2.5.42), old and new 3Speak footers (2.5.42: whole-line `▶ [Watch on 3speak.tv](https://3speak.tv/watch...)`), `[via apps from]`, a whole-line `[via Inbox]` byline in any case (2.5.57, #2179) | `CleanReply` |
 | The `---` separator right before a scrobble.life, Lumen or (2.5.42) 3Speak byline | `CleanReply.removeBylineSeparator` |
 | Ad and banner removal: D.Buzz promo link, hive.engage banners (two forms), Actifit app badges | `CleanReply.TAIL_REMOVALS` |
 | Internal link rewriting for whitelisted Hive frontends (posts, profiles, topics, communities, `ccc`), author and tag chips, inert chips, external profile base | `AMethod`, `Traverse`, `Consts.WHITE_LIST` |
@@ -56,6 +56,7 @@ Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port 
 | (2.5.55, #2156 to #2160) A lone surrogate reads as U+FFFD; angle destinations and autolinks keep the author's spelling (plain form); app linkify reads the text its entities decode to; `HTTP://` hrefs kept, scheme lower-cased; the card reads angle image destinations and bare URLs with parentheses as the render does | `MarkdownToHtml`, `Helper.plainDestination`, `markdown/DecodedLinkify`, `sanitize/SanitizeHtml`, `CatchPostImage` |
 | (2.5.55, #2167, #2169, #2170, #2174) WorldMapPin user and post links internal; card and body proxy the same percent-decoded image, escaped delimiters and `%25` stay escaped (legacy sized proxy paths still unwrapped); a refused iframe nested only in iframes and text dropped whole on the sanitize-only path | `Consts.WHITE_LIST`, `Helper.decodeDomImageSrc`, `CatchPostImage`, `sanitize/SanitizeHtml` |
 | (2.5.56, #2176) The card reads the text the render's parser reads (cleanReply, leofinance and inleo links internalised, U+00A0, line separators and tabs as the block parser rewrites them) and finds a markdown image as the parser does: only spaces and newlines around the destination and title, nothing across a blank line, a title closed by its own quote, escapes in a plain destination resolved; an image with a line that may open a block, or a backslash before a space in a plain destination, is left to the render. Card and render share `plainDestination`, `uriNormalized` and `internalizeLeoLinks` | `CatchPostImage`, `Helper`, `markdown/BlockParser.parserText` |
+| (2.5.57, #2178, #2179) `simpleMarkdownToHTML` reads a lone surrogate as U+FFFD, as the render does, instead of throwing; the card's markdown image pattern takes labels with brackets balanced two levels deep and backslash escapes (`\[` and `\]` are no brackets), skips an escaped `\![...](url)` (a link) unless its text holds a URL, and leaves to the render an image whose plain destination has a backslash and a stray `%`, a footnote definition or an ordered list marker of any length on a line inside it, or a label opening a deeper `[`; fast mode gives up on a first bare URL holding a lone surrogate unless a video poster comes first | `RenderHelper.simpleMarkdownToHTML`, `CatchPostImage` |
 
 RN app rules outside render-helper (`src/components/postHtmlRenderer`): `<center>` to `text-center`
 and span flattening are in `BlockBuilder`; the waves image grid is `BuildOptions.waves`; the waves

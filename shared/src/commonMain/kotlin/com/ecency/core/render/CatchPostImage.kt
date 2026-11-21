@@ -495,6 +495,11 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (strict.ambiguous) return null
         val bare = findFirstImageCandidate(prepared, true).candidate
         val poster = findFirstVideoPoster(prepared)
+        // 2.5.57 (#2179): the render ends a bare URL at a lone surrogate (#2158), which the full lookup reads its own
+        // way: give up rather than name another URL, unless a poster comes first and wins on source order anyway.
+        if (bare != null && bare.kind == Candidate.BARE && loneSurrogateAt(bare.url) != -1 && !(poster != null && poster.pos < bare.pos)) {
+            return null
+        }
         if (poster != null && (bare == null || poster.pos < bare.pos)) {
             return proxifyFound(proxy.proxify(poster.url), w, h)
         }
@@ -549,8 +554,13 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             if (mdUrl.isEmpty() || !isSafeUrl(mdUrl) || (!md.angle && mdUrl.contains('(')) ||
                 // 2.5.56 (#2176): a line inside the image that may open a block, which can end the paragraph first
                 opensBlockInside(cleaned, md.pos, md.end) ||
+                // An escaped `!` before a link whose text holds a URL (2.5.57, #2181 review): only the parser reads it.
+                escapedAt(cleaned, md.pos) ||
                 // A backslash before whitespace or a control escapes nothing in a plain destination.
-                (!md.angle && escapesBlank(md.raw))
+                (!md.angle && escapesBlank(md.raw)) ||
+                // 2.5.57 (#2179): with a `%` that starts no escape, the render normalises the escaped destination and
+                // decodes it once, which only the parser reads exactly.
+                (!md.angle && md.raw.indexOf('\\') >= 0 && hasStrayPercent(md.raw))
             ) {
                 return CandidateResult(null, true)
             }
@@ -1175,6 +1185,9 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     /** A markdown image match: its destination as written, where the match starts and ends, and its form. */
     private class MdImage(val raw: String, val pos: Int, val end: Int, val angle: Boolean)
 
+    /** How deep `MD_IMAGE_RE`'s label nests balanced brackets (2.5.57, #2179). */
+    private val mdLabelDepth = 2
+
     /**
      * `MD_IMAGE_RE` (2.5.56, #2176), first match:
      * `!\[(?:[^[\]\n]|\n(?! *\n))*\]\( *(?:\n *)?(?:<((?:[^<>\n\\]|\\[^\n]){1,2048})>|((?:[^)\\ CONTROLS]|\\[\s\S]){1,2048}))`
@@ -1188,26 +1201,65 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private fun mdImageFind(s: String): MdImage? {
         val tails = HashMap<Int, Int>()
         fun tail(from: Int): Int = tails.getOrPut(from) { mdTailEnd(s, from) }
+        val urls = SchemeScan(s)
         var p = s.indexOf("![")
         while (p >= 0) {
             val le = mdLabelEnd(s, p + 2)
             if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
                 val i = skipSeparator(s, le + 2)
+                var found: MdImage? = null
                 val close = angleContentEnd(s, i)
                 if (close >= 0) {
                     val e = tail(close + 1)
-                    if (e >= 0) return MdImage(s.substring(i + 1, close), p, e, true)
+                    if (e >= 0) found = MdImage(s.substring(i + 1, close), p, e, true)
                 }
-                val he = plainDestinationEnd(s, i)
-                if (he > i) {
-                    val e = tail(he)
-                    if (e >= 0) return MdImage(s.substring(i, he), p, e, false)
+                if (found == null) {
+                    val he = plainDestinationEnd(s, i)
+                    if (he > i) {
+                        val e = tail(he)
+                        if (e >= 0) found = MdImage(s.substring(i, he), p, e, false)
+                    }
                 }
+                // firstUnescapedImage (2.5.57, #2179): an escaped `\![...](url)` is a link, and the scan resumes past its
+                // `![`, unless the text before the match's last `](` holds a URL (the caller defers that one).
+                if (found != null && (!escapedAt(s, p) || urls.holdsUrl(p, s.lastIndexOf("](", found.end - 2)))) return found
             }
             p = s.indexOf("![", p + 1)
         }
         return null
     }
+
+    /**
+     * `escapedLabelHoldsUrl` on the match starting at a rising position: whether `://` sits in `s[from, to)`. The
+     * first `://` at or after [from] is kept, so the matches together scan the text once.
+     */
+    private class SchemeScan(private val s: String) {
+        private var at = -2
+
+        fun holdsUrl(from: Int, to: Int): Boolean {
+            if (at != -1 && at < from) at = s.indexOf("://", from)
+            return at >= 0 && at + 3 <= to
+        }
+    }
+
+    /** `escapedAt`: the character at [pos] follows an odd run of backslashes. */
+    private fun escapedAt(text: String, pos: Int): Boolean {
+        var k = pos - 1
+        while (k >= 0 && text[k] == '\\') k--
+        return (pos - 1 - k) % 2 == 1
+    }
+
+    /** `STRAY_PCT_RE = /%(?![\da-f]{2})/i`: a `%` that starts no percent escape. */
+    private fun hasStrayPercent(raw: String): Boolean {
+        var i = raw.indexOf('%')
+        while (i >= 0) {
+            if (i + 2 >= raw.length || !isHexDigit(raw[i + 1]) || !isHexDigit(raw[i + 2])) return true
+            i = raw.indexOf('%', i + 1)
+        }
+        return false
+    }
+
+    private fun isHexDigit(c: Char) = c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F'
 
     /** At the newline [nl], `\n(?! *\n)` fails: spaces, then another newline (a blank line). */
     private fun blankLineAt(s: String, nl: Int): Boolean {
@@ -1216,13 +1268,26 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return k < s.length && s[k] == '\n'
     }
 
-    /** `(?:[^[\]\n]|\n(?! *\n))*\]` from [from]: the index of the `]`, or -1. */
+    /**
+     * The label of `MD_IMAGE_RE` (2.5.57, #2179) from [from]: the index of its closing `]`, or -1. Each unit is
+     * `[^[\]\n\\]`, a backslash escape `\\[^\n]` (one unit, so `\[` and `\]` are no brackets), a backslash before a
+     * newline, `\n(?! *\n)`, or a bracketed group holding the same, balanced two levels deep; a third `[` fails the
+     * match (the uncaptured-image check defers it). Every unit has one reading, so the scan never backtracks.
+     */
     private fun mdLabelEnd(s: String, from: Int): Int {
+        var depth = 0
         var i = from
         while (i < s.length) {
-            val c = s[i]
-            if (c == ']') return i
-            if (c == '[' || (c == '\n' && blankLineAt(s, i))) return -1
+            when (s[i]) {
+                '\\' -> {
+                    if (i + 1 >= s.length) return -1
+                    i += if (s[i + 1] == '\n') 1 else 2
+                    continue
+                }
+                '\n' -> if (blankLineAt(s, i)) return -1
+                '[' -> if (depth == mdLabelDepth) return -1 else depth++
+                ']' -> if (depth == 0) return i else depth--
+            }
             i++
         }
         return -1
@@ -1313,8 +1378,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     /**
      * `opensBlockInside` (2.5.56, #2176) on the image match `s[from, to)`: a line inside it that may open a block as
      * the parser reads one, so the image is left to the render. `BLOCK_START_LINE_RE`, any indent:
-     * `\n *(?:#{1,6}(?=[ \n]|$)|>|[-*+](?=[ \n]|$)|\d{1,9}[.)](?=[ \n]|$)|`{3,}|~{3,}|<[!?]|(?:[-*_] *){3,}(?=\n|$)|`
-     * `=+ *(?=\n|$)|[-:][-:| ]*(?=\n|$)|[:~] |\|)`, or `HTML_LINE_TAG_RE` (`\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)`) naming
+     * `\n *(?:#{1,6}(?=[ \n]|$)|>|[-*+](?=[ \n]|$)|\d+[.)](?=[ \n]|$)|`{3,}|~{3,}|<[!?]|(?:[-*_] *){3,}(?=\n|$)|`
+     * `=+ *(?=\n|$)|[-:][-:| ]*(?=\n|$)|[:~] |\[\^[^\]\n]*\]:|\|)` (2.5.57: no digit cap, footnote definitions), or `HTML_LINE_TAG_RE` (`\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)`) naming
      * a block tag. Each newline is checked on its own line only, so the scan is linear.
      */
     private fun opensBlockInside(s: String, from: Int, to: Int): Boolean {
@@ -1348,9 +1413,18 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 if (endsLine(k)) return true
             }
             in '0'..'9' -> {
+                // `\d+[.)]`: an ordered list marker of any length (2.5.57, #2179)
                 var k = q
                 while (k < to && s[k] in '0'..'9') k++
-                if (k - q <= 9 && k < to && (s[k] == '.' || s[k] == ')') && spaceOrEnd(k + 1)) return true
+                if (k < to && (s[k] == '.' || s[k] == ')') && spaceOrEnd(k + 1)) return true
+            }
+            '[' -> {
+                // `\[\^[^\]\n]*\]:`: a footnote definition (2.5.57, #2179)
+                if (q + 1 < to && s[q + 1] == '^') {
+                    var k = q + 2
+                    while (k < to && s[k] != ']' && s[k] != '\n') k++
+                    if (k + 1 < to && s[k] == ']' && s[k + 1] == ':') return true
+                }
             }
         }
         if ((c == '-' || c == '*' || c == '+') && spaceOrEnd(q + 1)) return true
@@ -1391,16 +1465,24 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return asciiLower(s.substring(nameStart, k)) in HTML_BLOCK_TAGS
     }
 
-    /** `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*\]\(\s*[^\s)]/` */
+    /**
+     * `firstUnescapedImage(s, MD_IMAGE_PRESENT_RE)` (2.5.57, #2179), `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*(?:\]\(\s*[^\s)]|\[)/g`:
+     * an image the pattern may not have captured, a label opening a nested `[` included. An escaped `\![` is a link
+     * and does not count, unless its label holds a URL (the render may turn that link into an image).
+     */
     private fun mdImagePresent(s: String): Boolean {
         var p = s.indexOf("![")
         while (p >= 0) {
-            val le = labelEnd(s, p + 1)
-            if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
-                var i = le + 2
-                while (i < s.length && isWs(s[i])) i++
-                if (i < s.length && s[i] != ')') return true
+            var i = p + 2
+            while (i < s.length && s[i] != '[' && s[i] != ']') i++
+            var matched = i < s.length && s[i] == '['
+            if (!matched && i + 1 < s.length && s[i + 1] == '(') {
+                var k = i + 2
+                while (k < s.length && isWs(s[k])) k++
+                matched = k < s.length && s[k] != ')'
             }
+            // the match text before its `](` (or all of it) is the label, scanned once per start
+            if (matched && (!escapedAt(s, p) || s.substring(p, i).contains("://"))) return true
             p = s.indexOf("![", p + 1)
         }
         return false

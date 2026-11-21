@@ -145,6 +145,26 @@ class PathologicalRenderTest {
         LinearScaling.assertLinear("parser input pass", 2_000, { n -> "a\t$nbspAndSeparator\t".repeat(n) + "![x](<https://e.example/c\td.png>)" }) { card(it) }
     }
 
+    /** The 2.5.57 port's card scanners (#2179): nested labels, escaped `!`, stray percents and the new block starts. */
+    @Test
+    fun the2557CardScannersStayLinear() {
+        val fast = { body: String -> helper.catchPostImage(body, 0, 0, true) }
+        // labels opening brackets to the nesting limit, never closed (mdLabelEnd per start)
+        LinearScaling.assertLinear("nested labels", 2_000, { n -> "![x [b] ".repeat(n) + "![y](https://e.example/b.png)" }) { fast(it) }
+        // one label of balanced groups, long, then a later image
+        LinearScaling.assertLinear("long bracketed label", 2_000, { n -> "![a " + "[b [c]] \\[ \\] ".repeat(n) + "](https://e.example/a.png)" }) { fast(it) }
+        // escaped images skipped one by one, each with a long destination (firstUnescapedImage, last `](`)
+        LinearScaling.assertLinear("escaped images", 1_000, { n -> "\\![a](https://e.example/${"x".repeat(200)}.png) ".repeat(n) + "![y](https://e.example/b.png)" }) { fast(it) }
+        // escaped image fragments before the first image (MD_IMAGE_PRESENT_RE with its `[` branch)
+        LinearScaling.assertLinear("escaped fragments", 2_000, { n -> "\\![a [b ".repeat(n) + "\n\n![y](https://e.example/b.png)" }) { fast(it) }
+        // backslash runs before each `![` (escapedAt)
+        LinearScaling.assertLinear("backslash runs", 1_000, { n -> ("\\".repeat(41) + "![a](https://e.example/a.png) ").repeat(n) }) { fast(it) }
+        // footnote-like and long ordered-marker lines inside a title (opensBlockInside)
+        LinearScaling.assertLinear("footnote lines", 2_000, { n -> "![a](<https://e.example/a b.png> \"t\n" + "[^1 x\n1111111111x\n".repeat(n) + "\")" }) { fast(it) }
+        // stray percents with an escape in a plain destination
+        LinearScaling.assertLinear("stray percents", 2_000, { n -> "![x](https://e.example/50%\\x.png) ".repeat(n) }) { fast(it) }
+    }
+
     /** Reference definitions in one paragraph: render-helper 2.5.54 renders them in linear time on both renders. */
     @Test
     fun definitionsInOneParagraphStayLinear() {

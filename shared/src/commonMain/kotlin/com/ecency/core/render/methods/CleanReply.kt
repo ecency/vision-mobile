@@ -17,8 +17,7 @@ internal object CleanReply {
     private val LINE_FILTERS_AFTER = listOf(
         "originally posted through [scrobble.life", "*posted via lumen", "<sub>posted via [hivesuite](",
         "view this post <a href=\"https://travelfeed.com/",
-        // "[via Inbox]" is compared against the lower-cased line, so it never matches; kept for parity.
-        "[via Inbox]", "<sub>[via apps from](",
+        "<sub>[via apps from](",
     )
 
     private val TAIL_REMOVALS = listOf(
@@ -42,6 +41,7 @@ internal object CleanReply {
                     LINE_FILTERS_AFTER.none { l.contains(it) } &&
                     !isThreeSpeakFooterLine(item) &&
                     !isHiveSuiteViaLine(l) &&
+                    !isInboxBylineLine(item) &&
                     !(l.contains("_posted from liketu clips") && l.contains("short video, trimmed"))
             }.joinToString("\n")
         }
@@ -96,6 +96,36 @@ internal object CleanReply {
     }
 
     /**
+     * A whole-line [via Inbox] byline in any case (2.5.57, #2179),
+     * `/^[ \t]*(?:<sub>[ \t]*)?(?:posted[ \t]+)?\[via inbox\]\([^)\s]+\)(?:[ \t]*<\/sub>)?[ \t\r]*$/i`.
+     * Every quantifier is forced: each optional part either matches whole or not at all.
+     */
+    private fun isInboxBylineLine(line: String): Boolean {
+        var i = skipBlanks(line, 0)
+        if (Js.startsWithCi(line, "<sub>", i)) i = skipBlanks(line, i + "<sub>".length)
+        if (Js.startsWithCi(line, "posted", i)) {
+            val after = skipBlanks(line, i + "posted".length)
+            if (after > i + "posted".length) i = after
+        }
+        if (!Js.startsWithCi(line, INBOX_LINK, i)) return false
+        i += INBOX_LINK.length
+        val dest = i
+        while (i < line.length && line[i] != ')' && !Js.isSpace(line[i])) i++
+        if (i == dest || i >= line.length || line[i] != ')') return false
+        i++
+        val beforeClose = skipBlanks(line, i)
+        if (Js.startsWithCi(line, "</sub>", beforeClose)) i = beforeClose + "</sub>".length
+        while (i < line.length && (line[i] == ' ' || line[i] == '\t' || line[i] == '\r')) i++
+        return i == line.length
+    }
+
+    private fun skipBlanks(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length && (s[i] == ' ' || s[i] == '\t')) i++
+        return i
+    }
+
+    /**
      * The newer 3Speak footer line (also the separator lookahead, which sees one line),
      * `/^[ \t]*▶\uFE0F?[ \t]*\[watch on 3speak\.tv\]\(https:\/\/3speak\.tv\/watch[^)\s]*\)\s*$/i`.
      */
@@ -121,6 +151,7 @@ internal object CleanReply {
         return if (i < s.length && s[i] == ')') i + 1 else -1
     }
 
+    private const val INBOX_LINK = "[via inbox]("
     private const val HIVESUITE_VIA = "<sub>[via hivesuite](https://hivesuite.app/"
     private const val THREE_SPEAK_LINK = "[watch on 3speak.tv](https://3speak.tv/watch"
 }

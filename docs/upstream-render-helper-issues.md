@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.56 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.57 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -181,5 +181,23 @@ then named another image than the body showed for such bodies.
 **Status (2.5.56, #2175): fixed upstream, ported.** `CatchPostImage.parserInput` (with
 `BlockParser.parserText`), `mdImageFind` after the new `MD_IMAGE_RE`, `opensBlockInside` and the plain destination's
 escapes; the destination helpers live in `Helper` (`plainDestination`, `uriNormalized`, `internalizeLeoLinks`), shared
-by the render and the card. The rare bodies the card still reads differently are upstream's open #2179; native follows
-upstream's output for them.
+by the render and the card. The rare bodies the card still read differently are #2179, below.
+
+## Remaining card and render gaps, and a throwing simple render (#2178, #2179)
+
+**What happened.** After 2.5.56: `simpleMarkdownToHTML` threw `URIError` on a lone surrogate in a link destination that
+`renderPostBody` renders (#2178; the native port threw too, for parity). The card named another image than the body
+showed, or none, for rare bodies (#2179): a plain destination with a backslash and a stray `%`, a label holding
+brackets, an escaped `!` before an image, a footnote definition or an ordered list marker of ten or more digits inside
+an image, and a bare URL holding a lone surrogate in fast mode. cleanReply's `[via Inbox]` filter compared a
+lower-cased line with a mixed-case literal, so it never matched.
+
+**Status (2.5.57, #2181): fixed upstream, ported.** `RenderHelper.simpleMarkdownToHTML` runs
+`Helper.withoutLoneSurrogates` first; `CleanReply` drops a whole-line `[via Inbox]` byline in any case; in
+`CatchPostImage`, `mdLabelEnd` reads balanced brackets two levels deep and backslash escapes, `mdImageFind` skips an
+escaped image unless its text holds a URL (`escapedAt`, `SchemeScan`), `mdImagePresent` also counts a label opening a
+nested `[`, `opensBlockInside` knows footnote definitions and uncapped list markers, a stray `%` beside an escape and
+an escaped match defer to the render, and fast mode gives up on a bare URL with a lone surrogate unless a poster comes
+first. Still open upstream (reported in #2179's comments, not fixed by 2.5.57): when the first image's URL is longer
+than `proxifyImageSrc` accepts and another image follows, the render shows the second image but `catchPostImage`
+returns null (fast mode too); native follows upstream's output (`c2556_*` and `c2557_*` goldens).
