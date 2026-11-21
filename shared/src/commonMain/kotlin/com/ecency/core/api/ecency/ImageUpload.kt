@@ -111,7 +111,8 @@ class KtorImageUploadTransport(client: HttpClient) : ImageUploadTransport {
 }
 
 /**
- * RN uploadImage + useMediaUploadMutation: `POST <host>/hs/<token>` with the file, one try for as long as bytes keep moving (see [untilStalled]; RN: a flat 120 s), up to two more
+ * RN uploadImage + useMediaUploadMutation: `POST <host>/hs` with the file and the token in `Authorization: Bearer <token>`
+ * (imagehoster#84, @ecency/sdk 2.9.7; RN put it in the path, `/hs/<token>`, where logs and crash breadcrumbs record it), one try for as long as bytes keep moving (see [untilStalled]; RN: a flat 120 s), up to two more
  * tries after 502/503/504, a timeout or a network error (1 s then 2 s apart). Cancelling the caller cancels the request.
  */
 class ImageUploader(
@@ -126,7 +127,7 @@ class ImageUploader(
         var failures = 0
         while (true) {
             val error: EcencyHttpException = try {
-                val response = withTimeout(MAX_TRY_MILLIS) { untilStalled { moved -> transport.upload("$host/hs/$token", host, file) { sent, total -> moved(sent); onProgress(sent, total) } } }
+                val response = withTimeout(MAX_TRY_MILLIS) { untilStalled { moved -> transport.upload("$host/hs", "Bearer $token", file) { sent, total -> moved(sent); onProgress(sent, total) } } }
                 if (response.status in 200..299) {
                     return runCatching { Json.parseToJsonElement(response.body) }.getOrNull().obj()?.str("url")?.takeIf { it.isNotEmpty() }
                         ?: throw EcencyHttpException(response.status, "Returning response missing media data")
@@ -142,8 +143,8 @@ class ImageUploader(
                 throw e
             } catch (e: Exception) {
                 // not reported: mapped to a status 0 failure that is retried or thrown below
-                // The address holds the upload token, and HTTP stacks put the address into their messages: neither
-                // the message nor the cause of what leaves here carries it, only the kind of failure.
+                // The token is in a header now, but HTTP stacks put request details into their messages: neither the
+                // message nor the cause of what leaves here carries them, only the kind of failure.
                 EcencyHttpException(0, "network error (${e::class.simpleName ?: "unknown"})")
             }
             val retryable = error.status == 0 || error.status in RETRY_STATUSES

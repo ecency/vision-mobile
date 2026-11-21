@@ -102,6 +102,10 @@ object CrashScrubber {
     private val NAMED_TOKEN = Regex("(?i)\\b((?:$SECRET_NAMES)\\b\\s*[:=]?\\s*)[\"']?[A-Za-z0-9_~+/=.-]{16,}[\"']?")
     private val EMAIL = Regex("[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\\.[A-Za-z]{2,24}")
 
+    // an image upload token in the path, `/hs/<token>` (installs from before #3722); `/hs/@author/permlink` is a tag
+    // route and stays (vision-web's scrubber rule)
+    private val UPLOAD_PATH_TOKEN = Regex("(/hs/)(?!@)[^?#\\s\"'/][^?#\\s\"']*")
+
     /** Keys whose value is dropped whole in breadcrumb data and contexts. */
     private val SECRET_KEYS: Set<String> = SECRET_NAMES.split('|').map { it.lowercase() }.toSet() + setOf("authorization", "cookie", "x-mm-token", "x-hs-token")
 
@@ -110,7 +114,8 @@ object CrashScrubber {
         if (text == null) return null
         return try {
             val t = if (text.length > MAX_TEXT) text.substring(0, MAX_TEXT) else text
-            t.replace(WIF, "<redacted-key>")
+            t.replace(UPLOAD_PATH_TOKEN) { "${it.groupValues[1]}<redacted>" }
+                .replace(WIF, "<redacted-key>")
                 .replace(MASTER_PASSWORD, "<redacted-password>")
                 .replace(BEARER) { "${it.groupValues[1]} <redacted>" }
                 .replace(JWT, "<redacted-token>")
