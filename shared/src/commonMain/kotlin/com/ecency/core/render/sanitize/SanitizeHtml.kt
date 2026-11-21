@@ -32,7 +32,7 @@ data class SanitizeOptions(
 }
 
 /**
- * Port of @ecency/render-helper 2.5.54 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
+ * Port of @ecency/render-helper 2.5.55 `sanitizeHtml` (`methods/sanitize-html.method.ts`):
  * xss with the render-helper whitelist and attribute policy, then the `<source>` and image
  * dimension post-passes. String in, string out, byte for byte the JS result.
  */
@@ -253,7 +253,9 @@ object HtmlSanitizer {
             }
             // Always emit exactly the string that was validated.
             if (isWhiteAttr && name == "href") {
-                return if (hrefSchemeAllowed || Xss.safeAttrValue(name, decoded).isNotEmpty()) "href=\"${escapeAttr(decoded)}\"" else "href"
+                // 2.5.55 (#2159): xss's own rule reads http(s) case-sensitively; the scheme is checked and written lower-cased
+                val href = lowerHttpScheme(decoded)
+                return if (hrefSchemeAllowed || Xss.safeAttrValue(name, href).isNotEmpty()) "href=\"${escapeAttr(href)}\"" else "href"
             }
             if (!beforeTransform && isWhiteAttr && isUrlAttribute(tag, name)) return "$name=\"${escapeAttr(decoded)}\""
             return null
@@ -467,6 +469,7 @@ object HtmlSanitizer {
      * the next close and the next opening are each looked up again only once the scan passed them.
      */
     private fun dropRefusedIframes(html: String): String {
+        val whole = wholeIframeElements(html)
         val out = StringBuilder(html.length)
         var last = 0
         var kept = false
@@ -504,6 +507,13 @@ object HtmlSanitizer {
             }
             out.append(html, last, tag.start)
             last = tag.end
+            // 2.5.55 (#2170): nested only in iframes and text, it goes whole, as the DOM path drops the element
+            val element = whole[tag.start]
+            if (element != null) {
+                last = element
+                from = last
+                continue
+            }
             if (closeAt != -1 && closeAt < last) {
                 val close = nextIframeClose(html, last)
                 closeAt = close?.start ?: -1
@@ -518,6 +528,45 @@ object HtmlSanitizer {
         }
         out.append(html, last, html.length)
         return out.toString()
+    }
+
+    /**
+     * render-helper 2.5.55 `wholeIframeElements` (#2170): each iframe opening's close by nesting, as the DOM path pairs
+     * them, when nothing but text and iframe tags lies between (opening start to close end). One pass with a stack over
+     * `ANY_TAG` (`/<(\/?)iframe\b(?:[^>"']|"[^"]*"|'[^']*')*>|<[a-zA-Z!/]/gi`).
+     */
+    private fun wholeIframeElements(html: String): Map<Int, Int> {
+        val whole = HashMap<Int, Int>()
+        val starts = ArrayList<Int>()
+        val othersAt = ArrayList<Int>()
+        var others = 0
+        var i = html.indexOf('<')
+        while (i >= 0) {
+            val close = i + 1 < html.length && html[i + 1] == '/'
+            val name = if (close) i + 2 else i + 1
+            var end = -1
+            if (Js.regionMatchesLower(html, name, "iframe") && name + 6 < html.length && !Js.isWordChar(html[name + 6])) {
+                end = startTagEnd(html, name + 6)
+            }
+            if (end >= 0) {
+                if (!close) {
+                    starts.add(i)
+                    othersAt.add(others)
+                } else if (starts.isNotEmpty()) {
+                    val start = starts.removeAt(starts.size - 1)
+                    if (othersAt.removeAt(othersAt.size - 1) == others) whole[start] = end
+                }
+                i = html.indexOf('<', end)
+                continue
+            }
+            if (i + 1 < html.length && html[i + 1].let { Js.isAsciiAlpha(it) || it == '!' || it == '/' }) {
+                others++
+                i = html.indexOf('<', i + 2)
+                continue
+            }
+            i = html.indexOf('<', i + 1)
+        }
+        return whole
     }
 
     private class IframeTag(val start: Int, val end: Int, val open: Boolean) {
@@ -581,6 +630,12 @@ object HtmlSanitizer {
             }
         }
         return -1
+    }
+
+    /** `value.replace(/^https?:/i, (scheme) => scheme.toLowerCase())`. */
+    private fun lowerHttpScheme(value: String): String {
+        val n = if (Js.regionMatchesLower(value, 0, "https:")) 6 else if (Js.regionMatchesLower(value, 0, "http:")) 5 else 0
+        return if (n == 0) value else value.substring(0, n).lowercase() + value.substring(n)
     }
 
     /** `/^https?:\/\//` on an already lower-cased value. */

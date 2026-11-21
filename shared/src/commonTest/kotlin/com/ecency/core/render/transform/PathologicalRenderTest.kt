@@ -110,6 +110,25 @@ class PathologicalRenderTest {
         assertLinear("tabs after entities", { n -> "a&lt;\tb\t&amp;\tc\n".repeat(n) }, 2_000)
     }
 
+    /** The 2.5.55 port's new scanners (#2156 to #2160, #2170): each guarded against going quadratic on author input. */
+    @Test
+    fun the2555ScannersStayLinear() {
+        val untransformed = com.ecency.core.render.sanitize.SanitizeOptions(proxyBase = RenderCases.PROXY_BASE, untransformed = true)
+        fun sanitize(html: String) = com.ecency.core.render.sanitize.HtmlSanitizer.sanitize(html, untransformed)
+        // wholeIframeElements: deep and many nested bare iframes, other tags between
+        LinearScaling.assertLinear("nested bare iframes", 2_000, { n -> "<iframe>a".repeat(n) + "</iframe>b".repeat(n) }) { sanitize(it) }
+        LinearScaling.assertLinear("iframes and tags", 1_000, { n -> "<iframe>a<b>x</b><iframe>c</iframe></iframe>".repeat(n) }) { sanitize(it) }
+        // withDecodedLinkify: one text token of many URLs and entities on the app render
+        assertLinear("linkify over entities", { n -> "see https://e.example/a)&amp;x &copy; www.e.example/q?x=1&y; ".repeat(n) }, 1_000)
+        // withAutolinkSource and plainForm: many autolinks with entities and spaces
+        assertLinear("autolinks", { n -> "<https://e.example/a?q=&copy;&amp;z=1> <a@b.example> ".repeat(n) }, 1_000)
+        // the card's bare URL reading (autolinkUrlEnd, strayHashBefore, markdownTextSpan), as upstream's own spec
+        val card = { body: String -> helper.getEntryCardImageRawUrl(com.ecency.core.render.Entry(body = body)) }
+        LinearScaling.assertLinear("card emphasis runs", 5_000, { n -> "*".repeat(n) + "https://e.example/x.png" + ("*".repeat(n - 1) + "a").repeat(2) }) { card(it) }
+        LinearScaling.assertLinear("card parentheses", 5_000, { n -> "x # y https://e.example/p.png?a=" + "(".repeat(n) + ")".repeat(n + 1) }) { card(it) }
+        LinearScaling.assertLinear("card long host", 5_000, { n -> "(https://" + "a-b.".repeat(n) + "example/p.png)" }) { card(it) }
+    }
+
     /** Reference definitions in one paragraph: render-helper 2.5.54 renders them in linear time on both renders. */
     @Test
     fun definitionsInOneParagraphStayLinear() {

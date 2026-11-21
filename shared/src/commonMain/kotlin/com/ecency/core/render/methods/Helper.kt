@@ -23,9 +23,45 @@ internal object Helper {
      * parser (or the markdown destination decode) already decoded exactly once: only percent-encoding is left.
      */
     fun decodeDomImageSrc(src: String): String = try {
-        Js.trim(Js.decodeUriComponent(src))
+        val full = Js.decodeUriComponent(src)
+        // 2.5.55 (#2174): escaped delimiters (`%23`, `%2F`, `%3F`, ...) and `%25` stay escaped, so the URL names the
+        // resource the author did; a legacy sized proxy path with an encoded inner URL still decodes whole.
+        if (LEGACY_ENCODED_INNER.containsMatchIn(src)) Js.trim(full) else Js.trim(Js.decodeUri(PERCENT_25.replace(src, "%2525")))
     } catch (e: UriError) {
         Js.trim(src)
+    }
+
+    private val LEGACY_ENCODED_INNER by lazy {
+        JsRegex.compile(
+            """^https?:\/\/(?:images\.hive\.blog|steemitimages\.com|images\.ecency\.com|i\.ecency\.com)\/\d+x\d+\/https?(?::%2F%2F|%3A%2F%2F|%3A\/\/)""",
+            ignoreCase = true,
+        )
+    }
+    private val PERCENT_25 = Regex("%25", RegexOption.IGNORE_CASE)
+
+    /**
+     * `text.replace(/[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g, ...)`: each lone surrogate as U+FFFD, as a
+     * browser reads it (render-helper 2.5.55, #2158). A pair stays.
+     */
+    fun withoutLoneSurrogates(text: String): String {
+        var sb: StringBuilder? = null
+        var i = 0
+        while (i < text.length) {
+            val c = text[i]
+            if (c.isHighSurrogate() && i + 1 < text.length && text[i + 1].isLowSurrogate()) {
+                sb?.append(c)?.append(text[i + 1])
+                i += 2
+                continue
+            }
+            if (c.isSurrogate()) {
+                if (sb == null) sb = StringBuilder(text.length).append(text, 0, i)
+                sb.append('\uFFFD')
+            } else {
+                sb?.append(c)
+            }
+            i++
+        }
+        return sb?.toString() ?: text
     }
 
     private const val TRAILING_PUNCTUATION = ".,;:!)]}*_~"
@@ -154,25 +190,27 @@ internal object Helper {
      * [ampEscapes] is off), complete references decoded once, then percent-encoding.
      */
     fun decodeRawBodyImageSrc(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
-        val unescaped = if (destination) {
-            val sb = StringBuilder(src.length)
-            var i = 0
-            while (i < src.length) {
-                val c = src[i]
-                if (c == '\\' && i + 1 < src.length && MD_ESCAPABLE.indexOf(src[i + 1]) >= 0) {
-                    val e = src[i + 1]
-                    sb.append(if (e == '&' && ampEscapes) "&amp;" else e.toString())
-                    i += 2
-                } else {
-                    sb.append(c)
-                    i++
-                }
-            }
-            sb.toString()
-        } else {
-            src.replace("\\&", "&amp;")
-        }
+        val unescaped = if (destination) unescapeDestination(src, ampEscapes) else src.replace("\\&", "&amp;")
         return decodeDomImageSrc(decodeCompleteReferences(unescaped))
+    }
+
+    /** `unescapeDestination`: a markdown destination's backslash escapes resolved as Remarkable resolves them; an escaped `&` is a literal one (`&amp;`) when [ampEscapes]. */
+    fun unescapeDestination(src: String, ampEscapes: Boolean = true): String {
+        if (src.indexOf('\\') < 0) return src
+        val sb = StringBuilder(src.length)
+        var i = 0
+        while (i < src.length) {
+            val c = src[i]
+            if (c == '\\' && i + 1 < src.length && MD_ESCAPABLE.indexOf(src[i + 1]) >= 0) {
+                val e = src[i + 1]
+                sb.append(if (e == '&' && ampEscapes) "&amp;" else e.toString())
+                i += 2
+            } else {
+                sb.append(c)
+                i++
+            }
+        }
+        return sb.toString()
     }
 
     /** `createDoc`: `<body>` wrapped xmldom parse, null for blank input or a parse error. */

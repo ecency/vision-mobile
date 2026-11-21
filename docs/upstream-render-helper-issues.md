@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.54 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.55 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -151,3 +151,21 @@ label chain and the allow list also requires it. 2.5.54 rejects only the render'
 space) in an in-site path (`RenderContext.placeholderDelimiter`, per render instead of upstream's module global, so
 concurrent renders never share it). Goldens: `rules2554` in `generate-transform-fixtures.mjs`, the untransformed
 cases in `generate-dom-fixtures.mjs`.
+
+## Follow-ups to the entity and render edges (#2156 to #2160, #2167, #2169, #2170, #2174)
+
+**What happened.** After 2.5.54: the card image missed angle-bracket image destinations and read bare URLs with
+parentheses differently from the render's linkify; a lone surrogate in a destination emptied the whole body; angle and
+plain destinations and autolinks could name different URLs; `HTTP://` hrefs lost their URL on the web sanitizer; on
+the app render linkify stopped a URL at an entity placeholder; the LCP preload and card proxied a different URL than
+the body for percent-escaped images, and the image decode turned escaped delimiters (`%23`, `%2F`) into live ones; the
+sanitize-only path kept the text of a refused iframe nested in other iframes.
+
+**Status (2.5.55, #2173): fixed upstream, ported.** `Helper.withoutLoneSurrogates` before the parse,
+`InlineRules.plainForm` for angle destinations and autolinks, `DecodedLinkify` (linkify over the decoded text, the
+placeholders put back outside links), the lower-cased http(s) scheme in `HtmlSanitizer`, `Helper.decodeDomImageSrc`
+(escaped delimiters and `%25` kept, legacy sized proxy paths still unwrapped; also the video poster),
+`HtmlSanitizer.wholeIframeElements`, `worldmappin.com` in `Consts.WHITE_LIST`, and in `CatchPostImage` the angle image
+destination, `proxifyFound`'s percent decode and the bare URL read as Autolinker reads it (`autolinkUrlEnd`, with its
+word character table generated from the oracle by `tools/render/generate-card-tables.mjs`). The LCP preload
+(`getEntryLcpImage`) has no native counterpart.

@@ -10,7 +10,7 @@ import com.ecency.core.render.markdown.BlockParser
 import com.ecency.core.render.markdown.Markdown
 import com.ecency.core.render.sanitize.HtmlSanitizer
 
-/** render-helper `methods/markdown-to-html.method.ts` (2.5.54). */
+/** render-helper `methods/markdown-to-html.method.ts` (2.5.55). */
 internal object MarkdownToHtml {
     private val LEO_PREFIXES = listOf(
         "https://leofinance.io/threads/view/", "https://leofinance.io/posts/", "https://leofinance.io/threads/",
@@ -18,7 +18,8 @@ internal object MarkdownToHtml {
     )
 
     fun markdownToHTML(source: String, context: RenderContext): String {
-        var input = source
+        // 2.5.55 (#2158): a lone surrogate becomes U+FFFD, as a browser reads it (the parser's encodeURI threw on one)
+        var input = Helper.withoutLoneSurrogates(source)
         for (prefix in LEO_PREFIXES) input = Js.replaceAll(input, prefix, "/@")
         if (input.isEmpty()) return ""
 
@@ -47,9 +48,11 @@ internal object MarkdownToHtml {
         }
         val unswap: (String) -> String = { text -> if (delimiter == null) text else EntityProtection.restore(text, entityPlaceholders, delimiter) }
         val codeUnswap = if (delimiter != null) unswap else null
+        val linkifyView: ((String) -> com.ecency.core.render.markdown.LinkifyView?)? =
+            if (delimiter == null) null else { text -> EntityProtection.linkifyView(text, entityPlaceholders, delimiter) }
         // a's in-site path guard reads which delimiter this render chose (2.5.54, #2165)
         val ctx = context.withPlaceholderDelimiter(delimiter)
-        fun renderMarkdown() = Markdown.render(input, ampEscapes, unswap, codeUnswap)
+        fun renderMarkdown() = Markdown.render(input, ampEscapes, unswap, codeUnswap, linkifyView)
 
         val nonce = RenderBoundary.createRenderNonce()
         var output = ""
@@ -226,38 +229,97 @@ internal object EntityProtection {
     }
 
     /**
-     * `unswap`: `/<delimiter>(0|[1-9]\d*)<delimiter>/g` back to the entities, one pass; a match whose index is not
-     * ours stays as it is (the delimiter is not in the body, so that is never the author's text).
+     * Each match of `/<delimiter>(0|[1-9]\d*)<delimiter>/g` in [text], as a global regex finds them: [found] gets its
+     * start, its end and the entity it stands for (null when the index is not one of ours).
      */
-    fun restore(output: String, entities: List<String>, delimiter: String): String {
-        var i = output.indexOf(delimiter)
-        if (i < 0) return output
+    private inline fun forEachPlaceholder(text: String, entities: List<String>, delimiter: String, found: (Int, Int, String?) -> Unit) {
         val d = delimiter.length
-        val sb = StringBuilder(output.length)
-        var last = 0
+        var i = text.indexOf(delimiter)
         while (i >= 0) {
             var j = i + d
-            val ok = if (j < output.length && output[j] == '0') {
+            val ok = if (j < text.length && text[j] == '0') {
                 j++
                 true
-            } else if (j < output.length && output[j] in '1'..'9') {
-                while (j < output.length && output[j] in '0'..'9') j++
+            } else if (j < text.length && text[j] in '1'..'9') {
+                while (j < text.length && text[j] in '0'..'9') j++
                 true
             } else {
                 false
             }
-            if (!ok || !output.startsWith(delimiter, j)) {
-                i = output.indexOf(delimiter, i + 1)
+            if (!ok || !text.startsWith(delimiter, j)) {
+                i = text.indexOf(delimiter, i + 1)
                 continue
             }
-            val digits = output.substring(i + d, j)
-            val entity = if (digits.length > 9) null else entities.getOrNull(digits.toInt())
+            val digits = text.substring(i + d, j)
             val end = j + d
-            sb.append(output, last, i).append(entity ?: output.substring(i, end))
+            found(i, end, if (digits.length > 9) null else entities.getOrNull(digits.toInt()))
+            i = text.indexOf(delimiter, end)
+        }
+    }
+
+    /** `unswap`: the placeholders back to their entities, one pass; one whose index is not ours stays as it is. */
+    fun restore(output: String, entities: List<String>, delimiter: String): String {
+        if (output.indexOf(delimiter) < 0) return output
+        val sb = StringBuilder(output.length)
+        var last = 0
+        forEachPlaceholder(output, entities, delimiter) { start, end, entity ->
+            sb.append(output, last, start).append(entity ?: output.substring(start, end))
             last = end
-            i = output.indexOf(delimiter, end)
         }
         sb.append(output, last, output.length)
         return sb.toString()
+    }
+
+    /** render-helper 2.5.55 `linkifyView` (#2160): [source] with its placeholders decoded, or null when it holds none. */
+    fun linkifyView(source: String, entities: List<String>, delimiter: String): com.ecency.core.render.markdown.LinkifyView? {
+        if (source.indexOf(delimiter) < 0) return null
+        val text = StringBuilder(source.length)
+        val at = ArrayList<Int>(source.length + 1)
+        val spanOf = ArrayList<Int>(source.length + 1)
+        val spans = ArrayList<IntArray>()
+        var last = 0
+        forEachPlaceholder(source, entities, delimiter) { start, end, entity ->
+            if (entity == null) return@forEachPlaceholder
+            for (i in last until start) {
+                at.add(i)
+                spanOf.add(-1)
+            }
+            text.append(source, last, start)
+            val decoded = entityRuleDecode(entity)
+            spans.add(intArrayOf(text.length, text.length + decoded.length, start, end))
+            for (i in decoded.indices) {
+                at.add(if (i == 0) start else end)
+                spanOf.add(spans.size - 1)
+            }
+            text.append(decoded)
+            last = end
+        }
+        for (i in last until source.length) {
+            at.add(i)
+            spanOf.add(-1)
+        }
+        at.add(source.length)
+        spanOf.add(-1)
+        text.append(source, last, source.length)
+        return com.ecency.core.render.markdown.LinkifyView(text.toString(), at.toIntArray(), spanOf.toIntArray(), spans)
+    }
+
+    /**
+     * `entityRuleDecode`: an entity as Remarkable's inline entity rule decodes it in text. A numeric reference it
+     * refuses (`&#0;`, `&#146;`, a surrogate) is U+FFFD there, which replaceEntities leaves as written.
+     */
+    private fun entityRuleDecode(entity: String): String {
+        // `/^&#(x[\da-f]+|\d+);$/i`
+        if (entity.length > 3 && entity[1] == '#' && entity.endsWith(";")) {
+            val body = entity.substring(2, entity.length - 1)
+            val hex = body.isNotEmpty() && (body[0] == 'x' || body[0] == 'X')
+            val digits = if (hex) body.substring(1) else body
+            val ok = digits.isNotEmpty() && digits.all { if (hex) it.digitToIntOrNull(16) != null && it.code < 0x80 else it in '0'..'9' }
+            if (ok) {
+                val code = digits.toLong(if (hex) 16 else 10)
+                return if (com.ecency.core.render.markdown.Utils.isValidEntityCode(code)) Js.fromCodePoint(code.toInt()) else "\uFFFD"
+            }
+        }
+        return com.ecency.core.render.markdown.Utils.replaceEntities(entity)
     }
 }

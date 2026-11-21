@@ -429,11 +429,57 @@ internal object InlineRules {
      */
     fun undecodedAngleDestination(value: String, raw: String, unswap: (String) -> String): String? = try {
         if (value != uriNormalized(Utils.replaceEntities(Utils.unescapeMd(raw)))) null
-        else uriNormalized(Utils.unescapeMd(unswap(raw)))
+        else plainForm(Utils.unescapeMd(unswap(raw)))
     } catch (e: Throwable) {
         // not reported: untrusted author destination; as upstream, a malformed one keeps Remarkable's value
         if (com.ecency.core.render.methods.isFatal(e)) throw e
         null
+    }
+
+    /** `PLAIN_UNSAFE`: JS whitespace, controls and ``"<>[\]^`{|}``. */
+    private fun isPlainUnsafe(c: Char): Boolean =
+        Js.isSpace(c) || c.code < 0x20 || c.code == 0x7F || "\"<>[\\]^`{|}".indexOf(c) >= 0
+
+    /** `/%(?![\da-f]{2})/i`: a `%` that starts no escape. */
+    private fun hasStrayPercent(url: String): Boolean {
+        var i = url.indexOf('%')
+        while (i >= 0) {
+            if (!(i + 2 < url.length && isHex(url[i + 1].code) && isHex(url[i + 2].code))) return true
+            i = url.indexOf('%', i + 1)
+        }
+        return false
+    }
+
+    /**
+     * render-helper 2.5.55 `plainForm` (#2158): a destination as Remarkable normalises it (encodeURI) but for `%` and
+     * non-ASCII, which stay as written, so the angle and plain forms of one URL name it alike. The ASCII characters
+     * encodeURI encodes are still encoded; a URL with a `%` that starts no escape is normalised as Remarkable does.
+     */
+    fun plainForm(url: String): String {
+        if (url.none(::isPlainUnsafe)) return url
+        if (hasStrayPercent(url)) return uriNormalized(url)
+        val sb = StringBuilder(url.length + 16)
+        for (c in url) if (isPlainUnsafe(c)) sb.append(Js.encodeUri(c.toString())) else sb.append(c)
+        return sb.toString()
+    }
+
+    /**
+     * render-helper 2.5.55 `withAutolinkSource` (#2158): an autolink's href is its source as written (placeholders
+     * back to their entities), in [plainForm], when [href] is exactly what Remarkable makes of it (with or without
+     * `mailto:`). Remarkable decoded it and decode_destinations decoded it again.
+     */
+    private fun autolinkSourceHref(href: String, raw: String, unswap: (String) -> String): String {
+        for (prefix in arrayOf("", "mailto:")) {
+            try {
+                if (href != uriNormalized(Utils.replaceEntities(prefix + raw))) continue
+            } catch (e: Throwable) {
+                // not reported: untrusted author link; as upstream, a malformed one tries the next form
+                if (com.ecency.core.render.methods.isFatal(e)) throw e
+                continue
+            }
+            return plainForm(unswap(prefix + raw))
+        }
+        return href
     }
 
     fun links(state: StateInline, silent: Boolean): Boolean {
@@ -679,7 +725,9 @@ internal object InlineRules {
             val fullUrl = Utils.normalizeLink(url)
             if (!Utils.validateLink(url)) return false
             if (!silent) {
-                state.push(Token("link_open", state.level).also { it.href = fullUrl })
+                val unswap = state.env.angleUnswap
+                val href = if (unswap != null) autolinkSourceHref(fullUrl, url, unswap) else fullUrl
+                state.push(Token("link_open", state.level).also { it.href = href })
                 state.push(Token("text", state.level + 1, url))
                 state.push(Token("link_close", state.level))
             }
@@ -693,7 +741,9 @@ internal object InlineRules {
             val fullUrl = Utils.normalizeLink("mailto:$url")
             if (!Utils.validateLink(fullUrl)) return false
             if (!silent) {
-                state.push(Token("link_open", state.level).also { it.href = fullUrl })
+                val unswap = state.env.angleUnswap
+                val href = if (unswap != null) autolinkSourceHref(fullUrl, url, unswap) else fullUrl
+                state.push(Token("link_open", state.level).also { it.href = href })
                 state.push(Token("text", state.level + 1, url))
                 state.push(Token("link_close", state.level))
             }

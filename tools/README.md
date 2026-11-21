@@ -7,7 +7,7 @@ test reads only that output.
 They run the npm packages the app's behaviour is defined by, so the fixtures stay a second opinion on the Kotlin code:
 
 - `render/`: `@ecency/render-helper` (post bodies, Markdown, URLs, proxied images, speak and video embeds, the
-  block inputs). Run these again after a render-helper release (docs/upstream-render-helper-issues.md).
+  block inputs, and `generate-card-tables.mjs`, the card image's Autolinker word character table in `commonMain`). Run these again after a render-helper release (docs/upstream-render-helper-issues.md).
 - `golden/`: `@ecency/sdk`, `diff-match-patch`, `speakingurl` (operations and their serialization,
   signing, wallet and resource credit math, feeds, profiles, slugs, edit history diffs). `golden/generate-wax.mjs`
   serializes every transaction those vectors pin again with Hive's own `@hiveio/wax` (hived's protocol code as

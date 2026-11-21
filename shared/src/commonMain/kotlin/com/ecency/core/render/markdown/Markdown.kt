@@ -54,8 +54,16 @@ object Markdown {
      * [unswap] puts the app render's placeholders back), and, when [codeUnswap] is given, code and fence tokens get
      * their entities back before linkify (`restore_code_entities`), exactly in the code the parser found.
      */
-    fun render(src: String, ampEscapes: Boolean, unswap: (String) -> String, codeUnswap: ((String) -> String)?): String =
-        renderFull(src, linkify = true, rawFences = false, full = true, ampEscapes = ampEscapes, unswap = unswap, codeUnswap = codeUnswap)
+    internal fun render(
+        src: String,
+        ampEscapes: Boolean,
+        unswap: (String) -> String,
+        codeUnswap: ((String) -> String)?,
+        linkifyView: ((String) -> LinkifyView?)? = null,
+    ): String = renderFull(
+        src, linkify = true, rawFences = false, full = true, ampEscapes = ampEscapes, unswap = unswap, codeUnswap = codeUnswap,
+        linkifyView = linkifyView,
+    )
 
     /**
      * The same rule set without linkify and with remarkable's default highlight (escaped fences):
@@ -71,6 +79,7 @@ object Markdown {
         ampEscapes: Boolean = false,
         unswap: ((String) -> String)? = null,
         codeUnswap: ((String) -> String)? = null,
+        linkifyView: ((String) -> LinkifyView?)? = null,
     ): String {
         val env = Env()
         env.ampEscapes = ampEscapes
@@ -86,7 +95,10 @@ object Markdown {
         CoreRules.abbr2(tokens, env)
         if (full) AmpPairing.decodeDestinations(tokens, env)
         if (codeUnswap != null) restoreCodeEntities(tokens, codeUnswap)
-        if (linkify) Linkify.parseTokens(tokens)
+        if (linkify) {
+            // 2.5.55 (#2160): on the app render linkify reads the text with its placeholders decoded
+            if (linkifyView != null) DecodedLinkify.parseTokens(tokens, linkifyView) else Linkify.parseTokens(tokens)
+        }
         val html = Renderer.render(tokens, rawFences)
         return if (ampEscapes) AmpPairing.sourceAmp(html) else html
     }

@@ -12,6 +12,8 @@ internal object Consts {
         "ecency.com", "hive.blog", "peakd.com", "snapie.io", "hivesuite.app", "travelfeed.io", "dapplr.in", "leofinance.io",
         "inleo.io", "proofofbrain.io", "stemgeeks.net", "hiveblockexplorer.com", "proofofbrain.blog", "weedcash.network",
         "dapplr.in", "liketu.com", "bilpcoin.com", "inji.com",
+        // WorldMapPin, the travel map (2.5.55, #2167): only its /@user and /@user/permlink forms become internal
+        "worldmappin.com",
     )
 
     val SECTION_LIST = listOf(
