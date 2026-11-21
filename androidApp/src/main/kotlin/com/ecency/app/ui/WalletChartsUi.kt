@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -77,7 +78,7 @@ fun BalanceAnalyticsSheet(env: AppEnvironment, username: String, coinType: Strin
     LaunchedEffect(model) { model.start() }
     val s by model.state.collectAsState()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().heightIn(min = 350.dp).navigationBarsPadding().padding(bottom = 32.dp).testTag("balanceAnalytics")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = 350.dp).navigationBarsPadding().padding(bottom = 32.dp).testTag("balanceAnalytics")) {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp).clip(RoundedCornerShape(20.dp)).background(colors.lightBackground)) {
                 Tab(UiCopy.BALANCE_HISTORY, s.tab == AnalyticsTab.HISTORY, "analyticsHistoryTab", Modifier.weight(1f)) { model.selectTab(AnalyticsTab.HISTORY) }
                 Tab(s.summaryTitle, s.tab == AnalyticsTab.SUMMARY, "analyticsSummaryTab", Modifier.weight(1f)) { model.selectTab(AnalyticsTab.SUMMARY) }

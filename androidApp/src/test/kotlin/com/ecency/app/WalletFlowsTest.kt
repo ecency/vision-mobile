@@ -787,4 +787,30 @@ class WalletFlowsTest {
         until { exists("receiveSheet") }
         compose.awaitScrolledTo("receiveCopy").performClick()
     }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheBalanceAnalyticsSheetScrollsToItsLastGranularity() {
+        val base = node.auth.rest
+        val gets = java.util.Collections.synchronizedList(mutableListOf<String>())
+        node.auth.rest = { r ->
+            when {
+                "/balance-api/accounts/tester/balance-history" in r.url -> HttpResult(200, """{"total_pages":1,"operations_result":[{"balance":"12345","timestamp":"2026-10-05T10:00:00"}]}""")
+                "/balance-api/accounts/tester/aggregated-history" in r.url -> {
+                    gets += r.url
+                    HttpResult(200, """[{"date":"2026-10-05","balance":{"balance":"12345"},"min_balance":{"balance":"2000"},"max_balance":{"balance":"12345"}}]""")
+                }
+                else -> base?.invoke(r)
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.AssetDetails("HIVE"))), fontScale = 1.3f)
+        until { exists("openAnalytics") }
+        compose.onNodeWithTag("openAnalytics").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        until { exists("analyticsSummaryTab") }
+        compose.awaitScrolledTo("analyticsSummaryTab").performClick()
+        until { exists("summaryMax") }
+        compose.awaitScrolledTo("summaryMax").assertIsDisplayed()
+        compose.awaitScrolledTo("granularity:daily").performClick()
+        until { gets.any { it.endsWith("granularity=daily") } }
+    }
 }
