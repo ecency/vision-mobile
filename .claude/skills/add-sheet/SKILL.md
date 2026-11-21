@@ -59,8 +59,9 @@ profile sheet models (`app/ChatSheets.kt`, `app/ProfileSheetModels.kt`).
   `rememberModalBottomSheetState(skipPartiallyExpanded = true)`.
 - Lists inside the scroll are bounded: a plain column of rows, or a `LazyColumn` / `LazyVerticalGrid` with a finite
   `heightIn(max = ...)`. Never an unbounded lazy list inside `verticalScroll` (it throws at measure). A sheet that
-  fills the window (the wave composer) wraps its column in `BoxWithConstraints` and gives it `heightIn(min =
-  maxHeight)` after the `verticalScroll`, so a `weight(1f)` field still fills the room.
+  fills the window never relies on `weight(1f).heightIn(min = ...)`: a weighted child gets fixed constraints and
+  the minimum is dead. Use a layout that gives the field the leftover height with a floor, as `FillColumn` in
+  `ui/WavesScreen.kt` (`fillMaxHeight()` before `verticalScroll`), and test the field's height on a short window.
 - build-logic `SheetScrollLintTest` fails on a `ModalBottomSheet` whose content holds no `verticalScroll`,
   `LazyColumn` or `LazyVerticalGrid`. Only a sheet that is fixed height by design (a media player or viewer) goes in
   `androidApp/sheet-scroll-allowed.txt`, with a one-line reason.
