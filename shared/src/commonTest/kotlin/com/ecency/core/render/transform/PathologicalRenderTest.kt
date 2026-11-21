@@ -110,6 +110,16 @@ class PathologicalRenderTest {
         assertLinear("tabs after entities", { n -> "a&lt;\tb\t&amp;\tc\n".repeat(n) }, 2_000)
     }
 
+    /** Reference definitions in one paragraph: render-helper 2.5.54 renders them in linear time on both renders. */
+    @Test
+    fun definitionsInOneParagraphStayLinear() {
+        val make = { n: Int -> (0 until n).joinToString("\n") { "[r$it]: <https://e.example/p$it?a=1&amp;b=2>" } + "\n\n[x][r0]" }
+        LinearScaling.assertLinear("one-paragraph definitions (app)", 4_000, make) { helper.renderPostBody(it, true) }
+        LinearScaling.assertLinear("one-paragraph definitions (web)", 4_000, make) { helper.renderPostBody(it, false) }
+        val plain = { n: Int -> (0 until n).joinToString("\n") { "[r$it]: https://e.example/p$it?a=1" } + "\n\n[x][r0]" }
+        LinearScaling.assertLinear("one-paragraph plain definitions", 4_000, plain) { helper.renderPostBody(it, true) }
+    }
+
     @Test
     fun mentionChainsStayLinear() {
         assertLinear("mention chain", { n -> "@" + "a.".repeat(n) + "a" }, 20_000)

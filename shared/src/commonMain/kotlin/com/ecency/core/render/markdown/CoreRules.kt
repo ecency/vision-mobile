@@ -56,12 +56,19 @@ internal object CoreRules {
 
     // ---- references: `[label]: href "title"` definitions --------------------------------------
 
-    private fun parseReference(str: String, inline: InlineParser, env: Env): Int {
-        if (Js.cc(str, 0) != 0x5B) return -1
-        if (str.indexOf("]:") == -1) return -1
+    /**
+     * remarkable's parseReference on `str.slice(from, end)`, read in place: positions are [str]'s, and the parse
+     * stops at [end] as it would at the end of that slice. Returns where the definition ends, or -1.
+     */
+    private fun parseReference(str: String, from: Int, end: Int, inline: InlineParser, env: Env): Int {
+        if (Js.cc(str, from) != 0x5B) return -1
+        val colon = str.indexOf("]:", from)
+        if (colon == -1 || colon + 2 > end) return -1
         val state = StateInline(str, inline, env, ArrayList())
-        val labelEnd = inline.parseLinkLabel(state, 0)
-        if (labelEnd < 0 || Js.cc(str, labelEnd + 1) != 0x3A) return -1
+        state.posMax = end
+        state.cacheBase = from
+        val labelEnd = inline.parseLinkLabel(state, from)
+        if (labelEnd < 0 || labelEnd + 1 >= end || Js.cc(str, labelEnd + 1) != 0x3A) return -1
         val max = state.posMax
         var pos = labelEnd + 2
         while (pos < max) {
@@ -95,24 +102,39 @@ internal object CoreRules {
         }
         while (pos < max && Js.cc(state.src, pos) == 0x20) pos++
         if (pos < max && Js.cc(state.src, pos) != 0x0A) return -1
-        val label = Utils.normalizeReference(Js.slice(str, 1, labelEnd))
+        val label = Utils.normalizeReference(Js.slice(str, from + 1, labelEnd))
         if (!env.references.containsKey(label)) env.references[label] = href to title
         return pos
     }
 
+    /**
+     * remarkable's references rule. Each definition is read in place from where the trimmed rest of the paragraph
+     * starts (remarkable slices and trims the rest after each one, which copies it here: quadratic on a paragraph of
+     * many definitions, where JS slices share the string).
+     */
     fun references(tokens: List<Token>, inline: InlineParser, env: Env) {
         var i = 1
         val l = tokens.size - 1
         while (i < l) {
             if (tokens[i].type == "inline" && tokens[i - 1].type == "paragraph_open" && tokens[i + 1].type == "paragraph_close") {
-                var content = tokens[i].content
-                while (content.isNotEmpty()) {
-                    val pos = parseReference(content, inline, env)
+                val content = tokens[i].content
+                var from = 0
+                var end = content.length
+                var consumed = false
+                while (from < end) {
+                    val pos = parseReference(content, from, end, inline, env)
                     if (pos < 0) break
-                    content = Js.trim(Js.slice(content, pos))
+                    if (!consumed) {
+                        // the rest is trimmed from here on: String.prototype.trim at both ends
+                        consumed = true
+                        while (end > 0 && Js.isSpace(content[end - 1])) end--
+                    }
+                    from = pos
+                    while (from < end && Js.isSpace(content[from])) from++
                 }
-                tokens[i].content = content
-                if (content.isEmpty()) {
+                val rest = if (consumed) content.substring(minOf(from, end), end) else content
+                tokens[i].content = rest
+                if (rest.isEmpty()) {
                     tokens[i - 1].tight = true
                     tokens[i + 1].tight = true
                 }
