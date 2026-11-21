@@ -1,0 +1,4 @@
+# Android bottom sheets whose content does not scroll, by design (see build-logic SheetScrollLintTest).
+# One per line: File.kt<TAB>sheet (its first test tag, else its function)<TAB>why it is fixed height.
+Sheets.kt	videoSheet	the video player: one 16:9 player and nothing below it
+Sheets.kt	gallery	the image viewer: its controls sit in the top row and the pager fits the rest; a scroll would take the pinch and pan gestures

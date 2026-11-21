@@ -26,6 +26,7 @@ tasks.test {
     val repoRoot = layout.projectDirectory.dir("..")
     inputs.dir(repoRoot.dir("androidApp/src/main")).withPropertyName("androidSources").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.file(repoRoot.file("androidApp/l10n-literals-allowed.txt")).withPropertyName("literalAllowlist").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(repoRoot.file("androidApp/sheet-scroll-allowed.txt")).withPropertyName("sheetScrollAllowlist").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir(repoRoot.dir("shared/src")).withPropertyName("sharedSources").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir(repoRoot.dir("shared/l10n")).withPropertyName("sharedL10n").withPathSensitivity(PathSensitivity.RELATIVE)
     // the Swift sources SwiftCopyLintTest and RnReuseTest read (Generated/ is build output, left out)
