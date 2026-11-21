@@ -280,9 +280,8 @@ class FeedxFlowsTest {
         launch(fontScale = 1.3f)
         openCardMenu()
         val last = lastTagged("menu:")
-        compose.onNodeWithTag(last).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithTag("menu:copy").performScrollTo().assertIsDisplayed().performClick()
-        compose.await("the menu closed") { !exists("postMenu") }
+        compose.awaitScrolledTo(last).performClick()
+        compose.await("$last acted: the menu closed") { !exists("postMenu") }
     }
 
     @Test
@@ -295,10 +294,13 @@ class FeedxFlowsTest {
         waitFor("crossPostSheet")
         settle()
         compose.onNodeWithTag("pickCommunity").performClick()
-        compose.onNodeWithTag("crossPostMessage").performScrollTo().performTextInput("Worth a read")
-        compose.onNodeWithTag("publish").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithTag("crossPostClose").performScrollTo().assertIsDisplayed().performClick()
-        compose.await("the sheet closed") { !exists("crossPostSheet") }
+        val community = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("a community") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("community:") == true })
+        compose.await("the subscriptions loaded") { community.fetchSemanticsNodes().isNotEmpty() }
+        community[0].performClick()
+        compose.awaitScrolledTo("crossPostMessage").performTextInput("Worth a read")
+        compose.awaitScrolledTo("publish").performClick()
+        pump { node.broadcasts().isNotEmpty() }
+        assertTrue(node.broadcasts().single(), "Worth a read" in node.broadcasts().single())
     }
 
     @Test

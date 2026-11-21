@@ -652,8 +652,7 @@ class WavesFlowsTest {
         click("waves:add")
         waitFor("waves:picker")
         waitFor("waves:trending:art")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("waves:trending:art").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("waves:trending:art").performClick()
         waitFor("waves:pinned:art")
     }
 }

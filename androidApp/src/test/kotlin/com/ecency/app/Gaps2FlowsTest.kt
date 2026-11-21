@@ -492,8 +492,7 @@ class Gaps2FlowsTest {
         compose.scrollListTo("postList", hasTestTag("digestPrompt"))
         click("digestPromptSubscribe")
         waitFor("digestCadence:weekly")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("digestCancel").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("digestCancel").performClick()
         compose.await("the sheet closed") { !exists("digestSheet") }
     }
 
@@ -516,8 +515,7 @@ class Gaps2FlowsTest {
         waitFor("postViews")
         click("postViews")
         waitFor("device:Tablet")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("statsPromote").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("statsPromote").performClick()
         compose.await("the promote screen") { navigator.state.top == com.ecency.core.app.AppScreen.Redeem("promote", "alice/trending-one") }
     }
 }

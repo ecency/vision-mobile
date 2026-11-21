@@ -681,7 +681,6 @@ class ChatFlowsTest {
         waitFor("message:p4")
         compose.onNodeWithTag("bubble:p4").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
         waitFor("option:COPY")
-        compose.mainClock.advanceTimeBy(2_000)
     }
 
     @Test
@@ -690,7 +689,7 @@ class ChatFlowsTest {
         openMessageOptionsOnAShortWindow()
         val last = compose.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("an option") { it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("option:") == true })
             .fetchSemanticsNodes().last().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag]
-        compose.onNodeWithTag(last).performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo(last).performClick()
         waitUntil { !exists("chatOptionsSheet") }
     }
 
@@ -699,7 +698,7 @@ class ChatFlowsTest {
     fun aLongTranslationOfAMessageScrollsInItsSheet() {
         node.translation = """{"translatedText":"${(1..80).joinToString("\\n") { "Translated line $it" }}"}"""
         openMessageOptionsOnAShortWindow()
-        compose.onNodeWithTag("option:TRANSLATE").performScrollTo().performClick()
+        compose.awaitScrolledTo("option:TRANSLATE").performClick()
         waitUntil { compose.onAllNodes(hasTestTag("chatTranslated") and hasText("Translated line 80", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(androidx.compose.ui.test.hasScrollAction() and androidx.compose.ui.test.hasAnyDescendant(hasTestTag("chatTranslated")), useUnmergedTree = true).assertExists()
     }
@@ -712,8 +711,7 @@ class ChatFlowsTest {
         waitFor("chatsNewGroup")
         tap("chatsNewGroup")
         waitFor("newGroupSheet")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("groupSearch").performTextInput("spike")
+        compose.awaitScrolledTo("groupSearch").performTextInput("spike")
         waitFor("person:spike-bob")
         tap("person:spike-bob")
         waitFor("chip:spike-bob")

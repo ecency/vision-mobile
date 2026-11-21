@@ -296,7 +296,8 @@ class EditorFlowsTest {
         settle()
     }
 
-    private fun launchSignedIn(fontScale: Float = 1f) {
+    /** [fontScale] overrides the configured one; null keeps it (tests that set a scale on the configuration). */
+    private fun launchSignedIn(fontScale: Float? = null) {
         val vault = KeyVault(node.store)
         vault.save(VaultAccount("tester", AuthType.POSTING_KEY, postingKey = node.key.toWif(), accessToken = "access-tester"))
         vault.save(VaultAccount("second", AuthType.POSTING_KEY, postingKey = node.key.toWif(), accessToken = "access-second"))
@@ -304,7 +305,7 @@ class EditorFlowsTest {
         compose.setContent {
             androidx.compose.runtime.CompositionLocalProvider(
                 com.ecency.app.ui.LocalVideoPreview provides previewPlayer,
-                androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale),
+                androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale ?: androidx.compose.ui.platform.LocalDensity.current.fontScale),
             ) { EcencyApp(env, host, navigator) }
         }
         waitUntil { env.session.current.username == "tester" }

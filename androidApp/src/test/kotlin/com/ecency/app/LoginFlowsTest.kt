@@ -500,8 +500,7 @@ class LoginFlowsTest {
         waitFor("account")
         openAccounts()
         waitFor("accountSwitcher")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("accountLogoutAll").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("accountLogoutAll").performClick()
         waitFor("logoutConfirm")
     }
 
@@ -515,8 +514,7 @@ class LoginFlowsTest {
         var outcome: Result<*>? = null
         CoroutineScope(Dispatchers.Main).launch { outcome = runCatching { env.signing.broadcast("tester", ops) } }
         waitFor("authUpgrade")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("upgradeCancel").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("upgradeCancel").performClick()
         until { outcome != null }
         assertTrue(node.broadcasts().isEmpty())
     }
@@ -530,8 +528,7 @@ class LoginFlowsTest {
         val vote = HiveUri.encodeOps(JsonArray(listOf(OperationJson.encode(Vote("__signer", "alice", "trending-one", 10000)))), HiveUri.Params(callback = "otherapp://done"))
         compose.runOnIdle { env.authLinks.handle(vote) }
         waitFor("signConfirm")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("signCancel").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("signCancel").performClick()
         until { callbacks.isNotEmpty() }
     }
 
@@ -543,8 +540,7 @@ class LoginFlowsTest {
         compose.runOnIdle { env.session.startHiveAuth("tester") }
         compose.onNodeWithTag("loginHiveAuth").performScrollTo().performClick()
         waitFor("hiveAuthQr")
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("hiveAuthCancel").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("hiveAuthCancel").performClick()
         until { env.session.current.hiveAuth == null }
     }
 
@@ -560,8 +556,7 @@ class LoginFlowsTest {
         CoroutineScope(Dispatchers.Main).launch { outcome = runCatching { env.signing.broadcast("tester", ops) } }
         waitFor("hiveAuthBroadcast")
         until { compose.onAllNodes(hasText(com.ecency.core.app.HiveAuthCopy.OPEN_WALLET), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("hiveAuthBroadcastCancel").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("hiveAuthBroadcastCancel").performClick()
         until { outcome != null }
         assertTrue(outcome!!.isFailure)
         assertFalse(exists("hiveAuthBroadcast"))

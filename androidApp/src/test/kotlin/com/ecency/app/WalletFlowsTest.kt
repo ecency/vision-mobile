@@ -739,8 +739,7 @@ class WalletFlowsTest {
         until { exists("transferFavorites") }
         compose.onNodeWithTag("transferFavorites").performScrollTo().performClick()
         until { exists("favorite:friend-30") }
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("favorite:friend-30").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("favorite:friend-30").performClick()
         until { !exists("favoritesSheet") }
         assertTrue(compose.onAllNodes(hasTestTag("transferTo") and hasText("friend-30", substring = true)).fetchSemanticsNodes().isNotEmpty())
     }
@@ -752,8 +751,7 @@ class WalletFlowsTest {
         until { exists("historyFilter") }
         compose.onNodeWithTag("historyFilter").performClick()
         until { exists("filterSheet") }
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("filterApply").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("filterApply").performClick()
         until { !exists("filterSheet") }
     }
 
@@ -774,8 +772,10 @@ class WalletFlowsTest {
         until { exists(row) }
         compose.onNodeWithTag(row).performScrollTo().performClick()
         until { exists("recurrentSheet") }
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("recurrentDelete:payee-15").performScrollTo().assertIsDisplayed()
+        compose.awaitScrolledTo("recurrentDelete:payee-15").performClick()
+        // the delete asks first (RN), naming the schedule it ends
+        until { exists("detailsConfirm") }
+        assertTrue(compose.onAllNodes(androidx.compose.ui.test.hasText("payee-15", substring = true)).fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
@@ -785,7 +785,6 @@ class WalletFlowsTest {
         until { exists("walletReceive") }
         compose.onNodeWithTag("walletReceive").performClick()
         until { exists("receiveSheet") }
-        compose.mainClock.advanceTimeBy(2_000)
-        compose.onNodeWithTag("receiveCopy").performScrollTo().assertIsDisplayed().performClick()
+        compose.awaitScrolledTo("receiveCopy").performClick()
     }
 }
