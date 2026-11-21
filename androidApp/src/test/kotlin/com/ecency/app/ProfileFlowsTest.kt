@@ -237,6 +237,23 @@ class ProfileFlowsTest {
 
     private fun hasTextNode(text: String) = compose.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
+    /**
+     * User report: a tap on a card's payout showed the breakdown in feeds but not on a profile. As RN (the same post card
+     * on both), a profile's post cards show the payout breakdown and the options button.
+     */
+    @Test
+    fun aProfileCardsPayoutShowsItsBreakdownAndTheCardHasItsOptions() {
+        launch(AppScreen.Profile("alice"))
+        waitFor("profileSummary")
+        compose.await("the blog row in the profile list") { idleMain(); runCatching { compose.onNodeWithTag("profileList").performScrollToKey("blog:alice/blog-one") }.isSuccess }
+        waitFor("card:alice/blog-one")
+        val inCard = androidx.compose.ui.test.hasAnyAncestor(hasTestTag("card:alice/blog-one"))
+        assertTrue("the card has its options button", compose.onAllNodes(hasTestTag("options") and inCard, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        compose.onAllNodes(hasTestTag("payout") and inCard, useUnmergedTree = true)[0].performScrollTo().performClick()
+        waitFor("payoutPopover")
+        assertTrue(exists("payoutRow:${com.ecency.core.app.PayoutCopy.POTENTIAL}"))
+    }
+
     @Test
     fun profileShowsTheSummaryTabsAndBlog() {
         node.signIn()

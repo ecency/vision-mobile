@@ -205,12 +205,9 @@ internal object Traverse {
 internal object VideoMethod {
     fun video(el: Element, ctx: RenderContext) {
         val poster = el.getAttribute("poster") ?: return
-        // the parser already decoded the entities once; only percent-encoding is left
-        val decoded = try {
-            Js.trim(Js.decodeUriComponent(poster))
-        } catch (e: com.ecency.core.render.js.UriError) {
-            Js.trim(poster)
-        }
+        // the parser already decoded the entities once; only percent-encoding is left, decoded as the image path
+        // does (2.5.55, #2174)
+        val decoded = Helper.decodeDomImageSrc(poster)
         if (decoded.startsWith(Helper.trimTrailingSlash(ctx.proxy.base) + "/")) return
         val proxied = if (Js.regionMatchesLower(decoded, 0, "http://") || Js.regionMatchesLower(decoded, 0, "https://")) {
             ctx.proxy.proxify(decoded, forceProxy = true)

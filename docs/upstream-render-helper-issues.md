@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.52 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.56 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -128,3 +128,58 @@ only through the image proxy and leaves out an image the proxy cannot serve
 (`BlockBuilderTest.bodyImagesAlwaysLoadThroughTheProxy`). Upstream: ecency/vision-web#1999.
 
 **Status (2.5.45, #1919): fixed upstream.** Author classes are limited to the formatting set, so `no-replace` is dropped and the image is proxied; the full render also holds every image to the proxy. The block layer's own guard stays.
+
+## App render entity placeholders and render edges (#2154, #2155, #2165)
+
+**Where.** `markdownToHTML` (`methods/markdown-to-html.method.ts`), `sanitizeHtml`, `imageUrlEnd` (`helper.ts`),
+`DAPPLR_REGEX` and `isAllowedEmbedSrc`, `a()`'s in-site path guard.
+
+**What happened.** Found while porting 2.5.52: the app render's zero-width-space placeholders could be spelled by
+the author (`\u200B0\u200B`) or misplaced by the fenced-code scan (indented code, backticks paired across blocks,
+a line that opens no fence), an angle-bracket destination (`[x](<url>)`, `[r]: <url>`) was decoded twice, a tab
+after a placeholder landed on another tab stop, a refused iframe on the sanitize-only path left its fallback text
+and close tag, a bare image URL with a query kept a closing `)` of the prose around it, and the Dapplr transform
+and allow list disagreed on hosts such as `player.eu.dapplr.in`.
+
+**Status (2.5.53, #2162; 2.5.54, #2166): fixed upstream, ported.** The placeholder delimiter is a character the body
+does not hold (`EntityProtection.placeholderDelimiter`), tabs are expanded first as the parser would, code gets its
+entities back from the parser's own code tokens (`Markdown.restoreCodeEntities`; `CodeRanges` is gone), angle
+destinations keep their source undecoded (`InlineRules.undecodedAngleDestination`, read where the native links and
+reference rules parse them instead of re-walking the source as upstream's wrappers do), refused iframes go whole
+(`HtmlSanitizer.dropRefusedIframes`), `Helper.imageUrlEnd` drops an unbalanced trailing `)`, `DAPPLR_REGEX` takes any
+label chain and the allow list also requires it. 2.5.54 rejects only the render's chosen delimiter (and a zero-width
+space) in an in-site path (`RenderContext.placeholderDelimiter`, per render instead of upstream's module global, so
+concurrent renders never share it). Goldens: `rules2554` in `generate-transform-fixtures.mjs`, the untransformed
+cases in `generate-dom-fixtures.mjs`.
+
+## Follow-ups to the entity and render edges (#2156 to #2160, #2167, #2169, #2170, #2174)
+
+**What happened.** After 2.5.54: the card image missed angle-bracket image destinations and read bare URLs with
+parentheses differently from the render's linkify; a lone surrogate in a destination emptied the whole body; angle and
+plain destinations and autolinks could name different URLs; `HTTP://` hrefs lost their URL on the web sanitizer; on
+the app render linkify stopped a URL at an entity placeholder; the LCP preload and card proxied a different URL than
+the body for percent-escaped images, and the image decode turned escaped delimiters (`%23`, `%2F`) into live ones; the
+sanitize-only path kept the text of a refused iframe nested in other iframes.
+
+**Status (2.5.55, #2173): fixed upstream, ported.** `Helper.withoutLoneSurrogates` before the parse,
+`InlineRules.plainForm` (since 2.5.56 `Helper.plainDestination`) for angle destinations and autolinks, `DecodedLinkify` (linkify over the decoded text, the
+placeholders put back outside links), the lower-cased http(s) scheme in `HtmlSanitizer`, `Helper.decodeDomImageSrc`
+(escaped delimiters and `%25` kept, legacy sized proxy paths still unwrapped; also the video poster),
+`HtmlSanitizer.wholeIframeElements`, `worldmappin.com` in `Consts.WHITE_LIST`, and in `CatchPostImage` the angle image
+destination, `proxifyFound`'s percent decode and the bare URL read as Autolinker reads it (`autolinkUrlEnd`, with its
+word character table generated from the oracle by `tools/render/generate-card-tables.mjs`). The LCP preload
+(`getEntryLcpImage`) has no native counterpart.
+
+## Card and render read different text (#2176)
+
+**What happened.** After 2.5.55 the card scanner still read the raw body, where the render's parser reads it after
+cleanReply, the leofinance and inleo link rewrite and remarkable's block pre-pass (U+00A0 as a space, line separators
+as newlines, tabs to their stops); its markdown image pattern skipped any whitespace around a destination, let a label
+or title run across a blank line, closed a title with either quote and stopped a plain destination at `\)`. The card
+then named another image than the body showed for such bodies.
+
+**Status (2.5.56, #2175): fixed upstream, ported.** `CatchPostImage.parserInput` (with
+`BlockParser.parserText`), `mdImageFind` after the new `MD_IMAGE_RE`, `opensBlockInside` and the plain destination's
+escapes; the destination helpers live in `Helper` (`plainDestination`, `uriNormalized`, `internalizeLeoLinks`), shared
+by the render and the card. The rare bodies the card still reads differently are upstream's open #2179; native follows
+upstream's output for them.

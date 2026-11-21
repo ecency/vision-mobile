@@ -305,7 +305,8 @@ fun ProfileScreen(
                                 if (tab.isComments) {
                                     CommentRow(card, nowMillis, feedActions)
                                 } else {
-                                    PostCardView(card, nowMillis, voteInFlight(votes, card.key), feedActions)
+                                    // the options menu and the payout breakdown, as in a feed (user report: no breakdown on a profile)
+                                    PostCardView(card, nowMillis, voteInFlight(votes, card.key), rememberCardActions(feedActions, feed))
                                 }
                             }
                             if (feedState.items.isNotEmpty()) item(key = "footer") {

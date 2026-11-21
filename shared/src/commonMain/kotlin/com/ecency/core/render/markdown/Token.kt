@@ -40,4 +40,12 @@ internal class Env {
 
     /** render-helper 2.5.46 `ampEscapes` (module-global there, per render here): pair escaped `&` in links. */
     var ampEscapes = false
+
+    /**
+     * render-helper 2.5.53 (#2154) `withAngleDestinations` / `withAngleReferences`, set on the full render only: an
+     * angle-bracket destination goes back to its source, URI-normalised but undecoded, with the app render's
+     * placeholders put back first (this function; the identity on the web render), so decode_destinations decodes it
+     * once like every other destination.
+     */
+    var angleUnswap: ((String) -> String)? = null
 }

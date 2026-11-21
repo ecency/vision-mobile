@@ -40,6 +40,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -225,7 +227,7 @@ private fun AssetCard(row: AssetRow, onOpen: () -> Unit, onClaim: () -> Unit) {
 fun ReceiveSheet(env: AppEnvironment, username: String, onDismiss: () -> Unit) {
     val colors = LocalEcencyColors.current
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(20.dp).testTag("receiveSheet"), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(20.dp).testTag("receiveSheet"), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(WalletCopy.RECEIVE, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.semantics { heading() })
             Text(WalletCopy.RECEIVE_DESC, color = colors.darkGray, fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 8.dp))
             Box(Modifier.background(Color.White).padding(8.dp)) { QrCode(ReceiveQr.uri(username), 200.dp) }
@@ -469,7 +471,8 @@ private fun HistoryFilterSheet(symbol: String, selected: List<String>?, onApply:
     val all = WalletHistory.opsFor(symbol)
     var picked by remember { mutableStateOf(selected ?: all) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).testTag("filterSheet")) {
+        // scrolls: every operation of the asset is taller than a short window, and Apply sits under them
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(16.dp).testTag("filterSheet")) {
             Text(WalletCopy.FILTER_TITLE, color = colors.text, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             Text(WalletCopy.FILTER_DESC, color = colors.darkGray, fontSize = 13.sp)
             TextButton(onClick = { picked = if (picked.size == all.size) emptyList() else all }) { Text(if (picked.size == all.size) WalletCopy.FILTER_NONE else WalletCopy.FILTER_ALL, color = colors.blueText) }
@@ -493,8 +496,9 @@ private fun HistoryFilterSheet(symbol: String, selected: List<String>?, onApply:
 @Composable
 private fun RecurrentSheet(list: List<RecurrentSchedule>, onUser: (String) -> Unit, onDelete: (RecurrentSchedule) -> Unit, onDismiss: () -> Unit) {
     val colors = LocalEcencyColors.current
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).testTag("recurrentSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the schedules grow with the account
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(16.dp).testTag("recurrentSheet")) {
             Text(RecurrentCopy.title(list.size), color = colors.text, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             list.forEach { r ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {

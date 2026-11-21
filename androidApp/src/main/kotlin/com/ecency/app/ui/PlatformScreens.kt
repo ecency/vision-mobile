@@ -512,7 +512,7 @@ fun BridgeConfirmSheet(prompt: BridgePrompt, onConfirm: () -> Unit, onReject: ()
     val colors = LocalEcencyColors.current
     val reject by rememberUpdatedState(onReject)
     ModalBottomSheet(onDismissRequest = { reject() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("bridgeConfirm")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("bridgeConfirm")) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { Glyph(AppIcon.VERIFIED_USER, colors.blueText, 40.dp) }
             Text(prompt.title, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }.fillMaxWidth().padding(top = 12.dp).testTag("bridgeTitle"), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             Box(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp), contentAlignment = Alignment.Center) {

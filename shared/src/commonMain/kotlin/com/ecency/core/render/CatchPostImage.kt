@@ -1,6 +1,8 @@
 package com.ecency.core.render
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.markdown.BlockParser
+import com.ecency.core.render.methods.CleanReply
 import com.ecency.core.render.methods.Helper
 import com.ecency.core.render.methods.Scanners
 import com.ecency.core.render.sanitize.RenderText
@@ -77,7 +79,15 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return null
     }
 
-    private fun proxifyFound(src: String, w: Int, h: Int): String = proxy.proxify(Helper.decodeEntities(src), w, h)
+    /**
+     * `proxifyFound` (2.5.55, #2169): percent-decoded as the render decodes its `<img>` src before proxying, so the
+     * card names the image the body shows. A legacy passthrough (not a `/p/` hash on the proxy) keeps it as written.
+     */
+    private fun proxifyFound(src: String, w: Int, h: Int): String {
+        val entityDecoded = Helper.decodeEntities(src)
+        val proxied = proxy.proxify(Helper.decodeDomImageSrc(entityDecoded), w, h)
+        return if (proxied.startsWith("${proxy.base}/p/")) proxied else proxy.proxify(entityDecoded, w, h)
+    }
 
     private fun getImage(entry: Entry, w: Int, h: Int, fast: Boolean): String? {
         val meta = parseMeta(entry.jsonMetadata)
@@ -125,7 +135,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
      * control character; a bare URL on an HTML block line is HTML text; any other bare URL loses trailing sentence
      * punctuation first.
      */
-    fun bodyImageRawUrl(body: String): String? {
+    fun bodyImageRawUrl(raw: String): String? {
+        val body = parserInput(raw)
         val candidate = findFirstImageCandidate(prepareBody(body), true).candidate ?: return null
         if (candidate.kind == Candidate.HTML) return Helper.decodeDomImageSrc(Helper.decodeAttributeEntities(candidate.url))
         val ampEscapes = !Helper.hasAmpSentinel(body)
@@ -134,10 +145,201 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             return if (url.any { it < ' ' || it == '\u007F' }) null else url
         }
         if (markLines(asciiLower(codeBlanked(body))).block[candidate.pos]) return htmlTextImageUrl(body, candidate.pos)
-        val after = candidate.pos + candidate.url.length
-        val url = withoutTrailingPunctuation(candidate.url, jsSlice(body, after, after + 4))
-        return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeRawBodyImageSrc(url, false, ampEscapes)
+        val afterAt = candidate.pos + candidate.url.length
+        val after = jsSlice(body, afterAt, afterAt + 4)
+        // A lone surrogate reads as U+FFFD in the render (2.5.55, #2158), which ends the URL there.
+        val loneAt = loneSurrogateAt(candidate.url)
+        val token = if (loneAt == -1) candidate.url else candidate.url.substring(0, loneAt)
+        fun tokenUrl(): String? {
+            val url = withoutTrailingPunctuation(token, if (loneAt == -1) after else "")
+            return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeRawBodyImageSrc(url, false, ampEscapes)
+        }
+        // A raw anchor's text and a reference definition's destination are not autolinked.
+        if (isAnchorClose(after) || definitionDestinationAt(body, candidate.pos)) return tokenUrl()
+        // 2.5.55 (#2157): markdown text with a parenthesis in the URL is read as the render's linkify (Autolinker)
+        // reads it, only where nothing else can end the text first; everything else as before.
+        val raw = markdownTextSpan(body, candidate.pos)
+        val span = Helper.withoutLoneSurrogates(Helper.decodeCompleteReferences(raw.replace("\\&", "&amp;")))
+        var k = candidate.pos - 1
+        while (k >= 0 && (body[k] == ' ' || body[k] == '\t')) k--
+        val before = if (k < 0) '\n' else body[k]
+        val plain = (if (k == candidate.pos - 1) before == '\n' || before == '(' else before != '@') && !strayHashBefore(body, candidate.pos)
+        if ((span.indexOf('(') < 0 && span.indexOf(')') < 0) || hasInlineDelimiter(span) || !plain) return tokenUrl()
+        val url = span.substring(0, autolinkUrlEnd(span))
+        return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeDomImageSrc(url)
     }
+
+    /** `/^<\/a[\s>]/i` on the four characters after the URL. */
+    private fun isAnchorClose(after: String): Boolean =
+        after.length >= 4 && after[0] == '<' && after[1] == '/' && (after[2] == 'a' || after[2] == 'A') && (Js.isSpace(after[3]) || after[3] == '>')
+
+    /** `/[*~_|^]|==|\+\+/`: an inline delimiter the parser may take. */
+    private fun hasInlineDelimiter(span: String): Boolean {
+        for (i in span.indices) {
+            val c = span[i]
+            if (c == '*' || c == '~' || c == '_' || c == '|' || c == '^') return true
+            if ((c == '=' || c == '+') && i + 1 < span.length && span[i + 1] == c) return true
+        }
+        return false
+    }
+
+    /** `markdownTextSpan`: the text a bare URL at [pos] sits in, to whitespace, `<` or `[`. */
+    private fun markdownTextSpan(body: String, pos: Int): String {
+        var end = pos
+        while (end < body.length && !Js.isSpace(body[end]) && body[end] != '<' && body[end] != '[') end++
+        return body.substring(pos, end)
+    }
+
+    /** `loneSurrogateAt`: the index of the first lone surrogate in [text], or -1. */
+    private fun loneSurrogateAt(text: String): Int {
+        var i = 0
+        while (i < text.length) {
+            val c = text[i]
+            if (c.isHighSurrogate()) {
+                if (i + 1 < text.length && text[i + 1].isLowSurrogate()) {
+                    i += 2
+                    continue
+                }
+                return i
+            }
+            if (c.isLowSurrogate()) return i
+            i++
+        }
+        return -1
+    }
+
+    /** `definitionDestinationAt`: whether [pos] starts a reference definition's destination (`]:`, blanks, at most one line break). */
+    private fun definitionDestinationAt(body: String, pos: Int): Boolean {
+        var k = pos - 1
+        fun skipBlanks() {
+            while (k >= 0 && (body[k] == ' ' || body[k] == '\t')) k--
+        }
+        skipBlanks()
+        if (k >= 0 && body[k] == '\n') {
+            k--
+            skipBlanks()
+        }
+        return k >= 1 && body[k] == ':' && body[k - 1] == ']'
+    }
+
+    /**
+     * `strayHashBefore`: whether the line before [pos] holds a `#` that is neither a hashtag nor after an Autolinker
+     * word character; Autolinker's hashtag matcher then drops the URL. A heading's own marker is not text.
+     */
+    private fun strayHashBefore(body: String, pos: Int): Boolean {
+        val lineStart = if (pos == 0) 0 else body.lastIndexOf('\n', pos - 1) + 1
+        var line = body.substring(lineStart, pos)
+        // `/^ {0,3}#{1,6}(?=[ \t])/`
+        var sp = 0
+        while (sp < 3 && sp < line.length && line[sp] == ' ') sp++
+        var h = sp
+        while (h < line.length && h - sp < 6 && line[h] == '#') h++
+        if (h > sp && h < line.length && (line[h] == ' ' || line[h] == '\t')) line = line.substring(h)
+        line = Helper.decodeCompleteReferences(line)
+        var i = line.indexOf('#')
+        while (i != -1) {
+            val prev = if (i > 0) line[i - 1] else null
+            val next = if (i + 1 < line.length) line[i + 1] else null
+            if (!(prev != null && autolinkWordChar(prev)) && !(next != null && (autolinkWordChar(next) || next == '_'))) return true
+            i = line.indexOf('#', i + 1)
+        }
+        return false
+    }
+
+    private val autolinkWordChars: BooleanArray by lazy {
+        val set = BooleanArray(0x10000)
+        for (range in CardAutolinkTable.WORD_CHARS.split(',')) {
+            val dash = range.indexOf('-')
+            for (c in range.substring(0, dash).toInt(16)..range.substring(dash + 1).toInt(16)) set[c] = true
+        }
+        set
+    }
+
+    /** `autolinkWordChar`: a letter, mark or decimal digit, or one of Autolinker's emoji code units. */
+    private fun autolinkWordChar(c: Char): Boolean = autolinkWordChars[c.code]
+
+    /**
+     * `autolinkUrlEnd` (2.5.55, #2157): where Autolinker 3.16 ends a scheme URL at the start of [text], ported from
+     * url-matcher.js as render-helper's card does: the host's labels, a port, a path, query or fragment to its last
+     * allowed end character; then a trailing `?` dropped, and either one closing bracket the match does not open
+     * dropped, or the match cut where matchHasInvalidCharAfterTld cuts it. Linear.
+     */
+    private fun autolinkUrlEnd(text: String): Int {
+        val hostStart = when {
+            Js.startsWithCi(text, "https://") -> 8
+            Js.startsWithCi(text, "http://") -> 7
+            else -> return 0
+        }
+        var end = hostStart
+        var pos = hostStart
+        while (pos < text.length && autolinkWordChar(text[pos])) {
+            var k = pos
+            var lastWord = pos
+            while (k < text.length && (autolinkWordChar(text[k]) || text[k] == '-' || text[k] == '_')) {
+                if (autolinkWordChar(text[k])) lastWord = k
+                k++
+            }
+            end = lastWord + 1
+            if (end >= text.length || text[end] != '.' || end + 1 >= text.length || !autolinkWordChar(text[end + 1])) break
+            pos = end + 1
+        }
+        if (end == hostStart) return 0
+        // `/^:[0-9]+/`
+        if (end < text.length && text[end] == ':') {
+            var p = end + 1
+            while (p < text.length && text[p] in '0'..'9') p++
+            if (p > end + 1) end = p
+        }
+        if (end < text.length && (text[end] == '/' || text[end] == '?' || text[end] == '#')) {
+            var last = end + 1
+            for (i in end + 1 until text.length) {
+                val c = text[i]
+                val word = autolinkWordChar(c)
+                if (!word && AUTOLINK_PUNCT.indexOf(c) < 0) break
+                if (word || AUTOLINK_END.indexOf(c) >= 0) last = i + 1
+            }
+            end = last
+        }
+        if (text[end - 1] == '?') end--
+        val close = text[end - 1]
+        val open = when (close) {
+            ')' -> '('
+            ']' -> '['
+            '}' -> '{'
+            else -> null
+        }
+        if (open != null) {
+            var depth = 0
+            for (i in 0 until end - 1) {
+                if (text[i] == open) depth++ else if (text[i] == close) depth = maxOf(depth - 1, 0)
+            }
+            if (depth == 0) return end - 1
+        }
+        // matchHasInvalidCharAfterTld: the longest `[-.w]*[-w]\.[-w]+` after the `//`, and a cut there when what
+        // follows is not one of `[-.A-Za-z0-9:/?#]`
+        var tld = -1
+        var dotOk = false
+        for (i in hostStart until end) {
+            val c = text[i]
+            if (c == '.') {
+                dotOk = i > hostStart && text[i - 1] != '.'
+            } else if (c == '-' || autolinkWordChar(c)) {
+                if (dotOk) tld = i + 1
+            } else {
+                break
+            }
+        }
+        if (tld != -1 && tld < end) {
+            val c = text[tld]
+            val allowed = c == '-' || c == '.' || Js.isAsciiAlpha(c) || c in '0'..'9' || c == ':' || c == '/' || c == '?' || c == '#'
+            if (!allowed) return tld
+        }
+        return end
+    }
+
+    /** card-image.ts `AUTOLINK_PUNCT` and `AUTOLINK_END`. */
+    private val AUTOLINK_PUNCT = "-+&@#/%=~_()|'\$*[]{}?!:,.;^\u2713"
+    private val AUTOLINK_END = "-+&@#/%=~_()|'\$*[]{}\u2713"
 
     /** `codeBlanked`: fences and inline code blanked, nothing else. */
     private fun codeBlanked(body: String): String = blankInlineCode(blankFences(blankFences(body, "```"), "~~~"))
@@ -284,10 +486,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private class CandidateResult(val candidate: Candidate?, val ambiguous: Boolean)
 
     private fun findFirstImageUrl(body: String, includeBare: Boolean): String? =
-        findFirstImageCandidate(prepareBody(body), includeBare).candidate?.url
+        findFirstImageCandidate(prepareBody(parserInput(body)), includeBare).candidate?.url
 
-    private fun fastBodyImage(body: String, w: Int, h: Int): String? {
-        val prepared = prepareBody(body)
+    private fun fastBodyImage(raw: String, w: Int, h: Int): String? {
+        val prepared = prepareBody(parserInput(raw))
         val strict = findFirstImageCandidate(prepared, false)
         strict.candidate?.let { return proxifyFound(it.url, w, h) }
         if (strict.ambiguous) return null
@@ -297,6 +499,25 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             return proxifyFound(proxy.proxify(poster.url), w, h)
         }
         return bare?.let { proxifyFound(it.url, w, h) }
+    }
+
+    /**
+     * `parserInput` (2.5.56, #2176): the body as the render's parser reads it, so the card scans the same text. First
+     * the render's own input pass: cleanReply (the render drops platform byline lines) and leofinance/inleo links
+     * internalised; its lone surrogate pass keeps every offset and the scans read a lone surrogate where it sits
+     * (#2158), so it is not repeated here. Then remarkable's block pre-pass: U+00A0 as a space, the line separators as
+     * newlines, each tab to its four-column stop. Raw HTML is part of that text too.
+     */
+    private fun parserInput(raw: String): String {
+        val body = Helper.internalizeLeoLinks(CleanReply.cleanReply(raw))
+        if (body.none(::isParserRewritten)) return body
+        return BlockParser.parserText(body)
+    }
+
+    /** `PARSER_REWRITTEN_RE = /[\u00a0\t\r\u2424\u2028\u0085]/` */
+    private fun isParserRewritten(c: Char): Boolean = when (c.code) {
+        0xA0, 0x09, 0x0D, 0x2424, 0x2028, 0x85 -> true
+        else -> false
     }
 
     private fun prepareBody(body: String): Prepared {
@@ -314,15 +535,31 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (cleaned.isEmpty()) return CandidateResult(null, false)
         val md = mdImageFind(cleaned)
         val html = htmlImageFind(cleaned)
-        if (md != null) {
-            val url = md.url
-            if (url.isEmpty() || !isSafeUrl(url) || url.contains('(')) return CandidateResult(null, true)
+        // An angle destination is whole whatever it holds, read in its plain spelling (2.5.55, #2156); a plain one
+        // with `(` may have been cut short by the capture class. A plain destination's escapes resolve as an angle
+        // one's do (`\)` is `)`, 2.5.56, #2176); one without a backslash is unchanged.
+        val mdUrl = md?.let {
+            if (it.angle || it.raw.indexOf('\\') >= 0) {
+                Helper.plainDestination(Helper.withoutLoneSurrogates(Helper.unescapeDestination(it.raw, !Helper.hasAmpSentinel(cleaned))))
+            } else {
+                it.raw
+            }
+        }
+        if (md != null && mdUrl != null) {
+            if (mdUrl.isEmpty() || !isSafeUrl(mdUrl) || (!md.angle && mdUrl.contains('(')) ||
+                // 2.5.56 (#2176): a line inside the image that may open a block, which can end the paragraph first
+                opensBlockInside(cleaned, md.pos, md.end) ||
+                // A backslash before whitespace or a control escapes nothing in a plain destination.
+                (!md.angle && escapesBlank(md.raw))
+            ) {
+                return CandidateResult(null, true)
+            }
         }
         val prior = if (md != null) cleaned.substring(0, md.pos) else cleaned
         if (mdImagePresent(prior)) return CandidateResult(null, true)
 
         val candidates = ArrayList<Candidate>()
-        if (md != null) candidates.add(md)
+        if (md != null && !mdUrl.isNullOrEmpty()) candidates.add(Candidate(mdUrl, md.pos, Candidate.DESTINATION))
         if (html != null && html.url.isNotEmpty() && isSafeUrl(html.url)) candidates.add(html)
         if (includeBare) {
             val bare = standaloneMatches(prepared.image, ::imageToken).firstOrNull()
@@ -935,18 +1172,223 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return if (i < s.length && s[i] == ']') i else -1
     }
 
-    /** `MD_IMAGE_RE = /!\[[^[\]]*\]\(\s*([^)\s]{1,2048})(?:\s+["'][^"']*["'])?\s*\)/`, first match. */
-    private fun mdImageFind(s: String): Candidate? {
+    /** A markdown image match: its destination as written, where the match starts and ends, and its form. */
+    private class MdImage(val raw: String, val pos: Int, val end: Int, val angle: Boolean)
+
+    /**
+     * `MD_IMAGE_RE` (2.5.56, #2176), first match:
+     * `!\[(?:[^[\]\n]|\n(?! *\n))*\]\( *(?:\n *)?(?:<((?:[^<>\n\\]|\\[^\n]){1,2048})>|((?:[^)\\ CONTROLS]|\\[\s\S]){1,2048}))`
+     * `(?:(?= |\n) *(?:\n *)?(?:"(?:[^"\n]|\n(?! *\n))*"|'(?:[^'\n]|\n(?! *\n))*'))? *(?:\n *)?\)`, where CONTROLS is
+     * U+0000 to U+0020 and U+007F. As the parser reads an image: only spaces and newlines around the destination and
+     * title, no part across a blank line; an angle destination (group 1) to its first unescaped `>` on the line
+     * (2.5.55, #2156), a plain one (group 2) to a space or control, a backslash escaping the character after it.
+     * No part can backtrack to another split, so one pass per `![` finds the match. Several `![` can share one
+     * destination end, so the tail scans (a title can be long) are kept per start.
+     */
+    private fun mdImageFind(s: String): MdImage? {
+        val tails = HashMap<Int, Int>()
+        fun tail(from: Int): Int = tails.getOrPut(from) { mdTailEnd(s, from) }
         var p = s.indexOf("![")
         while (p >= 0) {
-            val le = labelEnd(s, p + 1)
+            val le = mdLabelEnd(s, p + 2)
             if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
-                val t = parenTail(s, le + 1, { c -> c != ')' && !isWs(c) }, 2048)
-                if (t != null) return Candidate(s.substring(t[0], t[1]), p, Candidate.DESTINATION)
+                val i = skipSeparator(s, le + 2)
+                val close = angleContentEnd(s, i)
+                if (close >= 0) {
+                    val e = tail(close + 1)
+                    if (e >= 0) return MdImage(s.substring(i + 1, close), p, e, true)
+                }
+                val he = plainDestinationEnd(s, i)
+                if (he > i) {
+                    val e = tail(he)
+                    if (e >= 0) return MdImage(s.substring(i, he), p, e, false)
+                }
             }
             p = s.indexOf("![", p + 1)
         }
         return null
+    }
+
+    /** At the newline [nl], `\n(?! *\n)` fails: spaces, then another newline (a blank line). */
+    private fun blankLineAt(s: String, nl: Int): Boolean {
+        var k = nl + 1
+        while (k < s.length && s[k] == ' ') k++
+        return k < s.length && s[k] == '\n'
+    }
+
+    /** `(?:[^[\]\n]|\n(?! *\n))*\]` from [from]: the index of the `]`, or -1. */
+    private fun mdLabelEnd(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length) {
+            val c = s[i]
+            if (c == ']') return i
+            if (c == '[' || (c == '\n' && blankLineAt(s, i))) return -1
+            i++
+        }
+        return -1
+    }
+
+    /** ` *(?:\n *)?` from [from]: where it ends. */
+    private fun skipSeparator(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length && s[i] == ' ') i++
+        if (i < s.length && s[i] == '\n') {
+            i++
+            while (i < s.length && s[i] == ' ') i++
+        }
+        return i
+    }
+
+    /** Group 2 at [i]: the end of its 1 to 2048 units, or [i] when it matches nothing there. */
+    private fun plainDestinationEnd(s: String, i: Int): Int {
+        var j = i
+        var units = 0
+        while (j < s.length) {
+            val c = s[j]
+            if (c == '\\') {
+                if (j + 1 >= s.length) break
+                j += 2
+            } else if (c == ')' || c.code <= 0x20 || c.code == 0x7F) {
+                break
+            } else {
+                j++
+            }
+            // a 2049th unit starts no title, separator or `)`, so nothing matches at this `![`
+            if (++units > 2048) return i
+        }
+        return j
+    }
+
+    /** `/\\[\u0000- ]/`: a backslash before a space or a control. */
+    private fun escapesBlank(raw: String): Boolean {
+        var i = raw.indexOf('\\')
+        while (i >= 0) {
+            if (i + 1 < raw.length && raw[i + 1].code <= 0x20) return true
+            i = raw.indexOf('\\', i + 1)
+        }
+        return false
+    }
+
+    /** `<((?:[^<>\n\\]|\\[^\n]){1,2048})>` at [i]: the index of the closing `>`, or -1. */
+    private fun angleContentEnd(s: String, i: Int): Int {
+        if (i >= s.length || s[i] != '<') return -1
+        var j = i + 1
+        var units = 0
+        while (j < s.length) {
+            val c = s[j]
+            if (c == '>') break
+            if (c == '<' || c == '\n') return -1
+            if (c == '\\') {
+                if (j + 1 >= s.length || s[j + 1] == '\n') return -1
+                j += 2
+            } else {
+                j++
+            }
+            if (++units > 2048) return -1
+        }
+        return if (j < s.length && units > 0) j else -1
+    }
+
+    /**
+     * `(?:(?= |\n) *(?:\n *)?(?:"(?:[^"\n]|\n(?! *\n))*"|'(?:[^'\n]|\n(?! *\n))*'))? *(?:\n *)?\)` at [from]: the match
+     * end, or -1. A title closes with the quote that opened it.
+     */
+    private fun mdTailEnd(s: String, from: Int): Int {
+        if (from < s.length && (s[from] == ' ' || s[from] == '\n')) {
+            val q = skipSeparator(s, from)
+            if (q < s.length && (s[q] == '"' || s[q] == '\'')) {
+                val quote = s[q]
+                var m = q + 1
+                while (m < s.length && s[m] != quote && !(s[m] == '\n' && blankLineAt(s, m))) m++
+                if (m < s.length && s[m] == quote) {
+                    val k = skipSeparator(s, m + 1)
+                    if (k < s.length && s[k] == ')') return k + 1
+                }
+            }
+        }
+        val k = skipSeparator(s, from)
+        return if (k < s.length && s[k] == ')') k + 1 else -1
+    }
+
+    /**
+     * `opensBlockInside` (2.5.56, #2176) on the image match `s[from, to)`: a line inside it that may open a block as
+     * the parser reads one, so the image is left to the render. `BLOCK_START_LINE_RE`, any indent:
+     * `\n *(?:#{1,6}(?=[ \n]|$)|>|[-*+](?=[ \n]|$)|\d{1,9}[.)](?=[ \n]|$)|`{3,}|~{3,}|<[!?]|(?:[-*_] *){3,}(?=\n|$)|`
+     * `=+ *(?=\n|$)|[-:][-:| ]*(?=\n|$)|[:~] |\|)`, or `HTML_LINE_TAG_RE` (`\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)`) naming
+     * a block tag. Each newline is checked on its own line only, so the scan is linear.
+     */
+    private fun opensBlockInside(s: String, from: Int, to: Int): Boolean {
+        var nl = s.indexOf('\n', from)
+        while (nl in 0 until to) {
+            var q = nl + 1
+            while (q < to && s[q] == ' ') q++
+            if (blockStartAt(s, q, to) || htmlBlockTagAt(s, nl + 1, to)) return true
+            nl = s.indexOf('\n', nl + 1)
+        }
+        return false
+    }
+
+    /** One alternative of `BLOCK_START_LINE_RE` at [q], the text ending at [to] (`$`). */
+    private fun blockStartAt(s: String, q: Int, to: Int): Boolean {
+        if (q >= to) return false
+        fun endsLine(k: Int) = k >= to || s[k] == '\n'
+        fun spaceOrEnd(k: Int) = k >= to || s[k] == ' ' || s[k] == '\n'
+        val c = s[q]
+        when (c) {
+            '#' -> {
+                val k = runOf(s, q, to, '#')
+                if (k - q <= 6 && spaceOrEnd(k)) return true
+            }
+            '>', '|' -> return true
+            '`', '~' -> if (runOf(s, q, to, c) - q >= 3) return true
+            '<' -> if (q + 1 < to && (s[q + 1] == '!' || s[q + 1] == '?')) return true
+            '=' -> {
+                var k = runOf(s, q, to, '=')
+                while (k < to && s[k] == ' ') k++
+                if (endsLine(k)) return true
+            }
+            in '0'..'9' -> {
+                var k = q
+                while (k < to && s[k] in '0'..'9') k++
+                if (k - q <= 9 && k < to && (s[k] == '.' || s[k] == ')') && spaceOrEnd(k + 1)) return true
+            }
+        }
+        if ((c == '-' || c == '*' || c == '+') && spaceOrEnd(q + 1)) return true
+        if (c == '-' || c == '*' || c == '_') {
+            // (?:[-*_] *){3,}(?=\n|$): only the whole run of marks and spaces can be followed by the line end
+            var k = q
+            var marks = 0
+            while (k < to && (s[k] == '-' || s[k] == '*' || s[k] == '_' || s[k] == ' ')) {
+                if (s[k] != ' ') marks++
+                k++
+            }
+            if (marks >= 3 && endsLine(k)) return true
+        }
+        if (c == '-' || c == ':') {
+            var k = q + 1
+            while (k < to && (s[k] == '-' || s[k] == ':' || s[k] == '|' || s[k] == ' ')) k++
+            if (endsLine(k)) return true
+        }
+        return (c == ':' || c == '~') && q + 1 < to && s[q + 1] == ' '
+    }
+
+    private fun runOf(s: String, from: Int, to: Int, c: Char): Int {
+        var k = from
+        while (k < to && s[k] == c) k++
+        return k
+    }
+
+    /** `\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)` with the line starting at [start]: the name is a block tag. */
+    private fun htmlBlockTagAt(s: String, start: Int, to: Int): Boolean {
+        var k = start
+        while (k < to && k - start < 3 && s[k] == ' ') k++
+        if (k >= to || s[k] != '<') return false
+        k++
+        if (k < to && s[k] == '/') k++
+        val nameStart = k
+        if (k >= to || !(s[k] in 'a'..'z' || s[k] in 'A'..'Z')) return false
+        while (k < to && (s[k] in 'a'..'z' || s[k] in 'A'..'Z' || s[k] in '0'..'9' || s[k] == '-')) k++
+        return asciiLower(s.substring(nameStart, k)) in HTML_BLOCK_TAGS
     }
 
     /** `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*\]\(\s*[^\s)]/` */

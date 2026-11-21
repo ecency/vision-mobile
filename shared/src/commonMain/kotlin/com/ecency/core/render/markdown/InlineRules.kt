@@ -1,6 +1,7 @@
 package com.ecency.core.render.markdown
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.methods.Helper
 /** remarkable's inline rules (lib/rules_inline) and link helpers (lib/helpers). */
 internal object InlineRules {
     private const val MAX_NESTING = BlockRules.MAX_NESTING
@@ -409,6 +410,41 @@ internal object InlineRules {
 
     private fun isSpaceOrNewline(code: Int) = code == 0x20 || code == 0x0A
 
+    /**
+     * render-helper 2.5.53 `undecodedAngleDestination` (#2154): Remarkable decodes an angle destination itself
+     * (normalizeLink) and decode_destinations decoded it again, so `<?q=&amp;amp;>` named `?q=&` where the plain form
+     * names `?q=&amp;`. The value goes back to [raw] (the source between `<` and `>`, with the app render's
+     * placeholders back to their entities), URI-normalised but undecoded; only when [value] is exactly what Remarkable
+     * makes of that source. Null keeps [value].
+     */
+    fun undecodedAngleDestination(value: String, raw: String, unswap: (String) -> String): String? = try {
+        if (value != Helper.uriNormalized(Utils.replaceEntities(Utils.unescapeMd(raw)))) null
+        else Helper.plainDestination(Utils.unescapeMd(unswap(raw)))
+    } catch (e: Throwable) {
+        // not reported: untrusted author destination; as upstream, a malformed one keeps Remarkable's value
+        if (com.ecency.core.render.methods.isFatal(e)) throw e
+        null
+    }
+
+    /**
+     * render-helper 2.5.55 `withAutolinkSource` (#2158): an autolink's href is its source as written (placeholders
+     * back to their entities), in [Helper.plainDestination], when [href] is exactly what Remarkable makes of it (with or without
+     * `mailto:`). Remarkable decoded it and decode_destinations decoded it again.
+     */
+    private fun autolinkSourceHref(href: String, raw: String, unswap: (String) -> String): String {
+        for (prefix in arrayOf("", "mailto:")) {
+            try {
+                if (href != Helper.uriNormalized(Utils.replaceEntities(prefix + raw))) continue
+            } catch (e: Throwable) {
+                // not reported: untrusted author link; as upstream, a malformed one tries the next form
+                if (com.ecency.core.render.methods.isFatal(e)) throw e
+                continue
+            }
+            return Helper.plainDestination(unswap(prefix + raw))
+        }
+        return href
+    }
+
     fun links(state: StateInline, silent: Boolean): Boolean {
         var isImage = false
         val oldPos = state.pos
@@ -426,13 +462,16 @@ internal object InlineRules {
         if (labelEnd < 0) return false
 
         var pos = labelEnd + 1
-        val href: String
+        var href: String
         val title: String
+        var angleRaw: String? = null
         if (pos < max && Js.cc(state.src, pos) == 0x28) {
             pos++
             while (pos < max && isSpaceOrNewline(Js.cc(state.src, pos))) pos++
             if (pos >= max) return false
             if (parseLinkDestination(state, pos)) {
+                // the raw text between `<` and `>` of an angle destination (2.5.53 withAngleDestinations)
+                if (Js.cc(state.src, pos) == 0x3C && state.env.angleUnswap != null) angleRaw = Js.slice(state.src, pos + 1, state.pos - 1)
                 href = state.linkContent
                 pos = state.pos
             } else {
@@ -479,6 +518,7 @@ internal object InlineRules {
         }
 
         if (!silent) {
+            if (angleRaw != null) href = undecodedAngleDestination(href, angleRaw, state.env.angleUnswap!!) ?: href
             state.pos = labelStart
             state.posMax = labelEnd
             if (isImage) {
@@ -648,7 +688,9 @@ internal object InlineRules {
             val fullUrl = Utils.normalizeLink(url)
             if (!Utils.validateLink(url)) return false
             if (!silent) {
-                state.push(Token("link_open", state.level).also { it.href = fullUrl })
+                val unswap = state.env.angleUnswap
+                val href = if (unswap != null) autolinkSourceHref(fullUrl, url, unswap) else fullUrl
+                state.push(Token("link_open", state.level).also { it.href = href })
                 state.push(Token("text", state.level + 1, url))
                 state.push(Token("link_close", state.level))
             }
@@ -662,7 +704,9 @@ internal object InlineRules {
             val fullUrl = Utils.normalizeLink("mailto:$url")
             if (!Utils.validateLink(fullUrl)) return false
             if (!silent) {
-                state.push(Token("link_open", state.level).also { it.href = fullUrl })
+                val unswap = state.env.angleUnswap
+                val href = if (unswap != null) autolinkSourceHref(fullUrl, url, unswap) else fullUrl
+                state.push(Token("link_open", state.level).also { it.href = href })
                 state.push(Token("text", state.level + 1, url))
                 state.push(Token("link_close", state.level))
             }

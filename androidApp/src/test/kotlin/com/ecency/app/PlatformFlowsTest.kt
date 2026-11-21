@@ -13,6 +13,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performSemanticsAction
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -105,9 +106,13 @@ class PlatformFlowsTest {
         settle()
     }
 
-    private fun launchSignedIn() {
+    private fun launchSignedIn(fontScale: Float = 1f) {
         node.signIn()
-        compose.setContent { EcencyApp(env, host, navigator) }
+        compose.setContent {
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale)) {
+                EcencyApp(env, host, navigator)
+            }
+        }
         compose.await("signed in") { idleMain(); env.session.current.username == "tester" }
         waitFor("card:alice/trending-one")
     }
@@ -505,5 +510,28 @@ class PlatformFlowsTest {
         tap("proposalForever")
         compose.await("hidden") { idleMain(); !exists("proposalCard") }
         assertNotNull(env.prefs.keys().firstOrNull { it.startsWith(com.ecency.core.app.ProposalVoteModel.KEY_PREFIX) })
+    }
+
+    /** A short window (a phone at a larger text size): Confirm and Cancel stay reachable by a real tap. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheBridgeSheetScrollsToConfirm() {
+        launchSignedIn(fontScale = 1.3f)
+        push(AppScreen.DappBrowser("https://dapp.example/"))
+        waitFor("dappPage")
+        val model = browser()
+        val page = Page()
+        compose.runOnUiThread {
+            model.bridgeMessage(
+                model.current.activeTabId, "https://dapp.example", true,
+                """{"name":"swRequest_hive","request_id":3,"data":{"type":"vote","username":"tester","author":"alice","permlink":"trending-one","weight":10000,"domain":"https://ecency.com"}}""",
+                page.reply,
+            )
+        }
+        waitFor("bridgeConfirm")
+        settle()
+        compose.onNodeWithTag("bridgeCancel").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("bridgeConfirmButton").performScrollTo().assertIsDisplayed().performClick()
+        compose.await("broadcast") { idleMain(); node.broadcasts().size == 1 }
     }
 }

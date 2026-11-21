@@ -9,6 +9,8 @@ internal class StateInline(
     val parser: InlineParser,
     val env: Env,
     val tokens: MutableList<Token>,
+    /** Scans of the source a caller shares between states over the same string (one paragraph's definitions). */
+    private val scans: SourceScans? = null,
 ) {
     /** Mutable for the escaped `&` pairing (render-helper 2.5.46): swapped while a link parses, same length. */
     var src: String = src
@@ -31,7 +33,10 @@ internal class StateInline(
     var labelUnmatchedScopes = 0
 
     /** Last index of '>' in [src]; `src.indexOf('>', pos) < 0` is `pos > lastGt` without a scan. */
-    val lastGt: Int by lazy { src.lastIndexOf('>') }
+    val lastGt: Int by lazy { scans?.lastGt ?: src.lastIndexOf('>') }
+
+    /** render-helper `PairState`'s paired source of [src], from the shared scans when there are some. */
+    fun pairedSource(): String? = if (scans != null) scans.paired else AmpPairing.pairedSource(src)
 
     fun pushPending() {
         tokens.add(Token("text", pendingLevel, pending.toString()))
@@ -44,13 +49,24 @@ internal class StateInline(
         pendingLevel = level
     }
 
+    /**
+     * The first position the cache holds: a state that parses only the rest of its source from [cacheBase] on
+     * (reference definitions) keeps a cache the size of that rest, not of the whole source.
+     */
+    var cacheBase = 0
+
     fun cacheSet(key: Int, value: Int) {
-        if (key >= cache.size) cache = cache.copyOf(maxOf(key + 1, cache.size * 2, 16))
-        if (key >= cacheSize) cacheSize = key + 1
-        cache[key] = value
+        val k = key - cacheBase
+        if (k < 0) return
+        if (k >= cache.size) cache = cache.copyOf(maxOf(k + 1, cache.size * 2, 16))
+        if (k >= cacheSize) cacheSize = k + 1
+        cache[k] = value
     }
 
-    fun cacheGet(key: Int): Int = if (key < cacheSize) cache[key] else 0
+    fun cacheGet(key: Int): Int {
+        val k = key - cacheBase
+        return if (k in 0 until cacheSize) cache[k] else 0
+    }
 }
 
 /** remarkable's ParserInline with every inline rule enabled, as render-helper configures it. */
@@ -165,4 +181,10 @@ internal class InlineParser private constructor(
         state.isInLabel = oldFlag
         return labelEnd
     }
+}
+
+/** Whole-source scans computed once for every [StateInline] over [src]: each definition of a paragraph parses its own state. */
+internal class SourceScans(private val src: String) {
+    val lastGt: Int by lazy { src.lastIndexOf('>') }
+    val paired: String? by lazy { AmpPairing.pairedSource(src) }
 }

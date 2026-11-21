@@ -312,7 +312,8 @@ private struct ProfileTabFeed: View {
                     if tab.isComments {
                         ProfileCommentRow(card: card)
                     } else {
-                        PostCardView(card: card, width: width)
+                        // the payout breakdown, as in a feed (user report: none on a profile)
+                        PostCardView(card: card, width: width, payoutPost: { model.post(key: card.key) })
                         Rectangle().fill(theme.lightBackground).frame(height: 4)
                     }
                 }
