@@ -82,7 +82,10 @@ class PathologicalRenderTest {
         // collectDeclaredIds: many author ids and links to them
         assertLinear("declared ids", { n -> (1..n).joinToString("") { "<a id=\"i$it\" href=\"#i$it\">x</a> " } }, 1_000)
         // fences inside nested quote and list containers (code entities come back from the code tokens since 2.5.53)
-        assertLinear("nested fences", { n -> "> - ```\ncode &amp; x\n```\n".repeat(n) }, 1_000)
+        val nestedFences = { n: Int -> "> - ```\n>   code &amp; x\n>   ```\n".repeat(n) }
+        // the code line sits inside the quoted list item's fence, its entity kept literal (checked once, untimed)
+        assertTrue("<li><pre><code>code &amp;amp; x\n</code></pre></li>" in helper.renderPostBody(nestedFences(2), true))
+        assertLinear("nested fences", nestedFences, 1_000)
         // EntityProtection: URL runs with parentheses and entities
         assertLinear("entity url runs", { n -> "https://x.example/(a&amp;b ".repeat(n) }, 2_000)
     }
