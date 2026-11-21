@@ -178,13 +178,17 @@ internal class BlockParser(full: Boolean = true, chat: Boolean = false) {
 
     fun parse(input: String, inline: InlineParser, env: Env, outTokens: MutableList<Token>) {
         if (input.isEmpty()) return
-        var str = normalize(input)
-        if (str.indexOf('\t') >= 0) str = expandTabs(str)
-        val state = StateBlock(str, this, inline, env, outTokens)
+        val state = StateBlock(parserText(input), this, inline, env, outTokens)
         tokenize(state, state.line, state.lineMax)
     }
 
     companion object {
+        /** The text remarkable's block parser reads: [normalize], then each tab to its four-column stop. */
+        internal fun parserText(input: String): String {
+            val str = normalize(input)
+            return if (str.indexOf('\t') >= 0) expandTabs(str) else str
+        }
+
         /** ` ` to space, then NEWLINES_RE (`\r[\n\u0085]|[␤ \u0085]`) to `\n`. */
         internal fun normalize(s: String): String {
             val sb = StringBuilder(s.length)

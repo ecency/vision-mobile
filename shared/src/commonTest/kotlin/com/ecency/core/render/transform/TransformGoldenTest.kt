@@ -176,7 +176,7 @@ class TransformGoldenTest {
                 "cleanReply" -> CleanReply.cleanReply(c.input)
                 "imageUrlEnd" -> Helper.imageUrlEnd(c.input).toString()
                 "decodeDomImageSrc" -> Helper.decodeDomImageSrc(c.input)
-                "plainDestination" -> com.ecency.core.render.markdown.InlineRules.plainForm(c.input)
+                "plainDestination" -> Helper.plainDestination(c.input)
                 "withoutLoneSurrogates" -> Helper.withoutLoneSurrogates(c.input)
                 else -> error("fn ${c.fn}")
             }

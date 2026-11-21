@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.55 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.56 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -162,10 +162,24 @@ the body for percent-escaped images, and the image decode turned escaped delimit
 sanitize-only path kept the text of a refused iframe nested in other iframes.
 
 **Status (2.5.55, #2173): fixed upstream, ported.** `Helper.withoutLoneSurrogates` before the parse,
-`InlineRules.plainForm` for angle destinations and autolinks, `DecodedLinkify` (linkify over the decoded text, the
+`InlineRules.plainForm` (since 2.5.56 `Helper.plainDestination`) for angle destinations and autolinks, `DecodedLinkify` (linkify over the decoded text, the
 placeholders put back outside links), the lower-cased http(s) scheme in `HtmlSanitizer`, `Helper.decodeDomImageSrc`
 (escaped delimiters and `%25` kept, legacy sized proxy paths still unwrapped; also the video poster),
 `HtmlSanitizer.wholeIframeElements`, `worldmappin.com` in `Consts.WHITE_LIST`, and in `CatchPostImage` the angle image
 destination, `proxifyFound`'s percent decode and the bare URL read as Autolinker reads it (`autolinkUrlEnd`, with its
 word character table generated from the oracle by `tools/render/generate-card-tables.mjs`). The LCP preload
 (`getEntryLcpImage`) has no native counterpart.
+
+## Card and render read different text (#2176)
+
+**What happened.** After 2.5.55 the card scanner still read the raw body, where the render's parser reads it after
+cleanReply, the leofinance and inleo link rewrite and remarkable's block pre-pass (U+00A0 as a space, line separators
+as newlines, tabs to their stops); its markdown image pattern skipped any whitespace around a destination, let a label
+or title run across a blank line, closed a title with either quote and stopped a plain destination at `\)`. The card
+then named another image than the body showed for such bodies.
+
+**Status (2.5.56, #2175): fixed upstream, ported.** `CatchPostImage.parserInput` (with
+`BlockParser.parserText`), `mdImageFind` after the new `MD_IMAGE_RE`, `opensBlockInside` and the plain destination's
+escapes; the destination helpers live in `Helper` (`plainDestination`, `uriNormalized`, `internalizeLeoLinks`), shared
+by the render and the card. The rare bodies the card still reads differently are upstream's open #2179; native follows
+upstream's output for them.

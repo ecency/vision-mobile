@@ -129,6 +129,22 @@ class PathologicalRenderTest {
         LinearScaling.assertLinear("card long host", 5_000, { n -> "(https://" + "a-b.".repeat(n) + "example/p.png)" }) { card(it) }
     }
 
+    /** The 2.5.56 port's card scanners (#2176): the parser's input pass, the markdown image pattern and its block starts. */
+    @Test
+    fun the2556CardScannersStayLinear() {
+        val card = { body: String -> helper.getEntryCardImageRawUrl(com.ecency.core.render.Entry(body = body)) }
+        val fast = { body: String -> helper.catchPostImage(body, 0, 0, true) }
+        // many `![` sharing one destination end before a long unclosed title (mdTailEnd kept per start)
+        LinearScaling.assertLinear("images sharing a title", 2_000, { n -> "![](".repeat(n) + "x \"" + "a ".repeat(n * 20) }) { fast(it) }
+        // titles that each close on the next image's opening quote
+        LinearScaling.assertLinear("titles closing late", 2_000, { n -> "![](https://e.example/a.png \"t\n".repeat(n) }) { card(it) }
+        // one long label of lines, some that look like block starts, inside an image (opensBlockInside)
+        LinearScaling.assertLinear("long image label", 2_000, { n -> "![" + "a\n-b\n<3 x\n#c\n".repeat(n) + "](https://e.example/a.png)" }) { fast(it) }
+        // tabs, no-break spaces and line separators to rewrite before the scans (parserInput)
+        val nbspAndSeparator = "b" + Char(0xA0) + "c" + Char(0x2028)
+        LinearScaling.assertLinear("parser input pass", 2_000, { n -> "a\t$nbspAndSeparator\t".repeat(n) + "![x](<https://e.example/c\td.png>)" }) { card(it) }
+    }
+
     /** Reference definitions in one paragraph: render-helper 2.5.54 renders them in linear time on both renders. */
     @Test
     fun definitionsInOneParagraphStayLinear() {

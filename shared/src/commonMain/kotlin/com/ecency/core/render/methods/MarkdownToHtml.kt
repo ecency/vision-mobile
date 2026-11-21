@@ -10,17 +10,13 @@ import com.ecency.core.render.markdown.BlockParser
 import com.ecency.core.render.markdown.Markdown
 import com.ecency.core.render.sanitize.HtmlSanitizer
 
-/** render-helper `methods/markdown-to-html.method.ts` (2.5.55). */
+/** render-helper `methods/markdown-to-html.method.ts` (2.5.56). */
 internal object MarkdownToHtml {
-    private val LEO_PREFIXES = listOf(
-        "https://leofinance.io/threads/view/", "https://leofinance.io/posts/", "https://leofinance.io/threads/",
-        "https://inleo.io/threads/view/", "https://inleo.io/posts/", "https://inleo.io/threads/",
-    )
-
     fun markdownToHTML(source: String, context: RenderContext): String {
         // 2.5.55 (#2158): a lone surrogate becomes U+FFFD, as a browser reads it (the parser's encodeURI threw on one)
         var input = Helper.withoutLoneSurrogates(source)
-        for (prefix in LEO_PREFIXES) input = Js.replaceAll(input, prefix, "/@")
+        // leofinance.io and inleo.io links internalised (shared with the card scanner, 2.5.56, #2176)
+        input = Helper.internalizeLeoLinks(input)
         if (input.isEmpty()) return ""
 
         val ampEscapes = input.contains("\\&") && !Helper.hasAmpSentinel(input)

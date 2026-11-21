@@ -20,7 +20,7 @@ mismatches only.
 
 WebView is used only for third-party video players after the user taps a thumbnail.
 
-## Custom rules in the 2.5.55 port
+## Custom rules in the 2.5.56 port
 
 Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port has it
 (`render/methods` unless noted). Goldens: `TransformGoldenTest`; real content: the corpus run.
@@ -53,8 +53,9 @@ Every Ecency-specific rule of `@ecency/render-helper` and where the Kotlin port 
 | (2.5.53, #2154) Angle-bracket destinations (`[x](<url>)`, `[r]: <url>`) decoded once, as the plain form | `InlineRules.undecodedAngleDestination`, `CoreRules` |
 | (2.5.53, #2155) A refused iframe on the sanitize-only path dropped with its fallback text and close; a bare image URL with a query drops an unbalanced trailing `)`; Dapplr frames any label chain and the allow list requires the same | `sanitize/SanitizeHtml`, `Helper.imageUrlEnd`, `Consts.DAPPLR_REGEX`, `sanitize/EmbedSrc` |
 | (2.5.54, #2165) The in-site path guard rejects a zero-width space and only the delimiter this render chose | `AMethod`, `RenderContext.placeholderDelimiter` |
-| (2.5.55, #2156 to #2160) A lone surrogate reads as U+FFFD; angle destinations and autolinks keep the author's spelling (plain form); app linkify reads the text its entities decode to; `HTTP://` hrefs kept, scheme lower-cased; the card reads angle image destinations and bare URLs with parentheses as the render does | `MarkdownToHtml`, `InlineRules.plainForm`, `markdown/DecodedLinkify`, `sanitize/SanitizeHtml`, `CatchPostImage` |
+| (2.5.55, #2156 to #2160) A lone surrogate reads as U+FFFD; angle destinations and autolinks keep the author's spelling (plain form); app linkify reads the text its entities decode to; `HTTP://` hrefs kept, scheme lower-cased; the card reads angle image destinations and bare URLs with parentheses as the render does | `MarkdownToHtml`, `Helper.plainDestination`, `markdown/DecodedLinkify`, `sanitize/SanitizeHtml`, `CatchPostImage` |
 | (2.5.55, #2167, #2169, #2170, #2174) WorldMapPin user and post links internal; card and body proxy the same percent-decoded image, escaped delimiters and `%25` stay escaped (legacy sized proxy paths still unwrapped); a refused iframe nested only in iframes and text dropped whole on the sanitize-only path | `Consts.WHITE_LIST`, `Helper.decodeDomImageSrc`, `CatchPostImage`, `sanitize/SanitizeHtml` |
+| (2.5.56, #2176) The card reads the text the render's parser reads (cleanReply, leofinance and inleo links internalised, U+00A0, line separators and tabs as the block parser rewrites them) and finds a markdown image as the parser does: only spaces and newlines around the destination and title, nothing across a blank line, a title closed by its own quote, escapes in a plain destination resolved; an image with a line that may open a block, or a backslash before a space in a plain destination, is left to the render. Card and render share `plainDestination`, `uriNormalized` and `internalizeLeoLinks` | `CatchPostImage`, `Helper`, `markdown/BlockParser.parserText` |
 
 RN app rules outside render-helper (`src/components/postHtmlRenderer`): `<center>` to `text-center`
 and span flattening are in `BlockBuilder`; the waves image grid is `BuildOptions.waves`; the waves

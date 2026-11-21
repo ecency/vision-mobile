@@ -1,6 +1,8 @@
 package com.ecency.core.render
 
 import com.ecency.core.render.js.Js
+import com.ecency.core.render.markdown.BlockParser
+import com.ecency.core.render.methods.CleanReply
 import com.ecency.core.render.methods.Helper
 import com.ecency.core.render.methods.Scanners
 import com.ecency.core.render.sanitize.RenderText
@@ -133,7 +135,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
      * control character; a bare URL on an HTML block line is HTML text; any other bare URL loses trailing sentence
      * punctuation first.
      */
-    fun bodyImageRawUrl(body: String): String? {
+    fun bodyImageRawUrl(raw: String): String? {
+        val body = parserInput(raw)
         val candidate = findFirstImageCandidate(prepareBody(body), true).candidate ?: return null
         if (candidate.kind == Candidate.HTML) return Helper.decodeDomImageSrc(Helper.decodeAttributeEntities(candidate.url))
         val ampEscapes = !Helper.hasAmpSentinel(body)
@@ -483,10 +486,10 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private class CandidateResult(val candidate: Candidate?, val ambiguous: Boolean)
 
     private fun findFirstImageUrl(body: String, includeBare: Boolean): String? =
-        findFirstImageCandidate(prepareBody(body), includeBare).candidate?.url
+        findFirstImageCandidate(prepareBody(parserInput(body)), includeBare).candidate?.url
 
-    private fun fastBodyImage(body: String, w: Int, h: Int): String? {
-        val prepared = prepareBody(body)
+    private fun fastBodyImage(raw: String, w: Int, h: Int): String? {
+        val prepared = prepareBody(parserInput(raw))
         val strict = findFirstImageCandidate(prepared, false)
         strict.candidate?.let { return proxifyFound(it.url, w, h) }
         if (strict.ambiguous) return null
@@ -496,6 +499,25 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             return proxifyFound(proxy.proxify(poster.url), w, h)
         }
         return bare?.let { proxifyFound(it.url, w, h) }
+    }
+
+    /**
+     * `parserInput` (2.5.56, #2176): the body as the render's parser reads it, so the card scans the same text. First
+     * the render's own input pass: cleanReply (the render drops platform byline lines) and leofinance/inleo links
+     * internalised; its lone surrogate pass keeps every offset and the scans read a lone surrogate where it sits
+     * (#2158), so it is not repeated here. Then remarkable's block pre-pass: U+00A0 as a space, the line separators as
+     * newlines, each tab to its four-column stop. Raw HTML is part of that text too.
+     */
+    private fun parserInput(raw: String): String {
+        val body = Helper.internalizeLeoLinks(CleanReply.cleanReply(raw))
+        if (body.none(::isParserRewritten)) return body
+        return BlockParser.parserText(body)
+    }
+
+    /** `PARSER_REWRITTEN_RE = /[\u00a0\t\r\u2424\u2028\u0085]/` */
+    private fun isParserRewritten(c: Char): Boolean = when (c.code) {
+        0xA0, 0x09, 0x0D, 0x2424, 0x2028, 0x85 -> true
+        else -> false
     }
 
     private fun prepareBody(body: String): Prepared {
@@ -514,18 +536,24 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         val md = mdImageFind(cleaned)
         val html = htmlImageFind(cleaned)
         // An angle destination is whole whatever it holds, read in its plain spelling (2.5.55, #2156); a plain one
-        // with `(` may have been cut short by the capture class.
+        // with `(` may have been cut short by the capture class. A plain destination's escapes resolve as an angle
+        // one's do (`\)` is `)`, 2.5.56, #2176); one without a backslash is unchanged.
         val mdUrl = md?.let {
-            if (it.angle) {
-                com.ecency.core.render.markdown.InlineRules.plainForm(
-                    Helper.withoutLoneSurrogates(Helper.unescapeDestination(it.raw, !Helper.hasAmpSentinel(cleaned))),
-                )
+            if (it.angle || it.raw.indexOf('\\') >= 0) {
+                Helper.plainDestination(Helper.withoutLoneSurrogates(Helper.unescapeDestination(it.raw, !Helper.hasAmpSentinel(cleaned))))
             } else {
                 it.raw
             }
         }
         if (md != null && mdUrl != null) {
-            if (mdUrl.isEmpty() || !isSafeUrl(mdUrl) || (!md.angle && mdUrl.contains('('))) return CandidateResult(null, true)
+            if (mdUrl.isEmpty() || !isSafeUrl(mdUrl) || (!md.angle && mdUrl.contains('(')) ||
+                // 2.5.56 (#2176): a line inside the image that may open a block, which can end the paragraph first
+                opensBlockInside(cleaned, md.pos, md.end) ||
+                // A backslash before whitespace or a control escapes nothing in a plain destination.
+                (!md.angle && escapesBlank(md.raw))
+            ) {
+                return CandidateResult(null, true)
+            }
         }
         val prior = if (md != null) cleaned.substring(0, md.pos) else cleaned
         if (mdImagePresent(prior)) return CandidateResult(null, true)
@@ -1144,27 +1172,101 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return if (i < s.length && s[i] == ']') i else -1
     }
 
-    private class MdImage(val raw: String, val pos: Int, val angle: Boolean)
+    /** A markdown image match: its destination as written, where the match starts and ends, and its form. */
+    private class MdImage(val raw: String, val pos: Int, val end: Int, val angle: Boolean)
 
     /**
-     * `MD_IMAGE_RE = /!\[[^[\]]*\]\(\s*(?:<((?:[^<>\n\\]|\\[^\n]){1,2048})>|([^)\s]{1,2048}))(?:\s+["'][^"']*["'])?\s*\)/`,
-     * first match. 2.5.55 (#2156): an angle destination (group 1) is read to its first unescaped `>` on the line.
+     * `MD_IMAGE_RE` (2.5.56, #2176), first match:
+     * `!\[(?:[^[\]\n]|\n(?! *\n))*\]\( *(?:\n *)?(?:<((?:[^<>\n\\]|\\[^\n]){1,2048})>|((?:[^)\\ CONTROLS]|\\[\s\S]){1,2048}))`
+     * `(?:(?= |\n) *(?:\n *)?(?:"(?:[^"\n]|\n(?! *\n))*"|'(?:[^'\n]|\n(?! *\n))*'))? *(?:\n *)?\)`, where CONTROLS is
+     * U+0000 to U+0020 and U+007F. As the parser reads an image: only spaces and newlines around the destination and
+     * title, no part across a blank line; an angle destination (group 1) to its first unescaped `>` on the line
+     * (2.5.55, #2156), a plain one (group 2) to a space or control, a backslash escaping the character after it.
+     * No part can backtrack to another split, so one pass per `![` finds the match. Several `![` can share one
+     * destination end, so the tail scans (a title can be long) are kept per start.
      */
     private fun mdImageFind(s: String): MdImage? {
+        val tails = HashMap<Int, Int>()
+        fun tail(from: Int): Int = tails.getOrPut(from) { mdTailEnd(s, from) }
         var p = s.indexOf("![")
         while (p >= 0) {
-            val le = labelEnd(s, p + 1)
+            val le = mdLabelEnd(s, p + 2)
             if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
-                var i = le + 2
-                while (i < s.length && isWs(s[i])) i++
+                val i = skipSeparator(s, le + 2)
                 val close = angleContentEnd(s, i)
-                if (close >= 0 && tailEnd(s, close + 1) >= 0) return MdImage(s.substring(i + 1, close), p, true)
-                val t = parenTail(s, le + 1, { c -> c != ')' && !isWs(c) }, 2048)
-                if (t != null) return MdImage(s.substring(t[0], t[1]), p, false)
+                if (close >= 0) {
+                    val e = tail(close + 1)
+                    if (e >= 0) return MdImage(s.substring(i + 1, close), p, e, true)
+                }
+                val he = plainDestinationEnd(s, i)
+                if (he > i) {
+                    val e = tail(he)
+                    if (e >= 0) return MdImage(s.substring(i, he), p, e, false)
+                }
             }
             p = s.indexOf("![", p + 1)
         }
         return null
+    }
+
+    /** At the newline [nl], `\n(?! *\n)` fails: spaces, then another newline (a blank line). */
+    private fun blankLineAt(s: String, nl: Int): Boolean {
+        var k = nl + 1
+        while (k < s.length && s[k] == ' ') k++
+        return k < s.length && s[k] == '\n'
+    }
+
+    /** `(?:[^[\]\n]|\n(?! *\n))*\]` from [from]: the index of the `]`, or -1. */
+    private fun mdLabelEnd(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length) {
+            val c = s[i]
+            if (c == ']') return i
+            if (c == '[' || (c == '\n' && blankLineAt(s, i))) return -1
+            i++
+        }
+        return -1
+    }
+
+    /** ` *(?:\n *)?` from [from]: where it ends. */
+    private fun skipSeparator(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length && s[i] == ' ') i++
+        if (i < s.length && s[i] == '\n') {
+            i++
+            while (i < s.length && s[i] == ' ') i++
+        }
+        return i
+    }
+
+    /** Group 2 at [i]: the end of its 1 to 2048 units, or [i] when it matches nothing there. */
+    private fun plainDestinationEnd(s: String, i: Int): Int {
+        var j = i
+        var units = 0
+        while (j < s.length) {
+            val c = s[j]
+            if (c == '\\') {
+                if (j + 1 >= s.length) break
+                j += 2
+            } else if (c == ')' || c.code <= 0x20 || c.code == 0x7F) {
+                break
+            } else {
+                j++
+            }
+            // a 2049th unit starts no title, separator or `)`, so nothing matches at this `![`
+            if (++units > 2048) return i
+        }
+        return j
+    }
+
+    /** `/\\[\u0000- ]/`: a backslash before a space or a control. */
+    private fun escapesBlank(raw: String): Boolean {
+        var i = raw.indexOf('\\')
+        while (i >= 0) {
+            if (i + 1 < raw.length && raw[i + 1].code <= 0x20) return true
+            i = raw.indexOf('\\', i + 1)
+        }
+        return false
     }
 
     /** `<((?:[^<>\n\\]|\\[^\n]){1,2048})>` at [i]: the index of the closing `>`, or -1. */
@@ -1187,22 +1289,106 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return if (j < s.length && units > 0) j else -1
     }
 
-    /** `(?:\s+["'][^"']*["'])?\s*\)` at [from]: the match end, or -1. */
-    private fun tailEnd(s: String, from: Int): Int {
-        var j = from
-        while (j < s.length && isWs(s[j])) j++
-        if (j > from && j < s.length && (s[j] == '"' || s[j] == '\'')) {
-            var k = j + 1
-            while (k < s.length && s[k] != '"' && s[k] != '\'') k++
-            if (k < s.length) {
-                k++
-                while (k < s.length && isWs(s[k])) k++
-                if (k < s.length && s[k] == ')') return k + 1
+    /**
+     * `(?:(?= |\n) *(?:\n *)?(?:"(?:[^"\n]|\n(?! *\n))*"|'(?:[^'\n]|\n(?! *\n))*'))? *(?:\n *)?\)` at [from]: the match
+     * end, or -1. A title closes with the quote that opened it.
+     */
+    private fun mdTailEnd(s: String, from: Int): Int {
+        if (from < s.length && (s[from] == ' ' || s[from] == '\n')) {
+            val q = skipSeparator(s, from)
+            if (q < s.length && (s[q] == '"' || s[q] == '\'')) {
+                val quote = s[q]
+                var m = q + 1
+                while (m < s.length && s[m] != quote && !(s[m] == '\n' && blankLineAt(s, m))) m++
+                if (m < s.length && s[m] == quote) {
+                    val k = skipSeparator(s, m + 1)
+                    if (k < s.length && s[k] == ')') return k + 1
+                }
             }
         }
-        var k = from
-        while (k < s.length && isWs(s[k])) k++
+        val k = skipSeparator(s, from)
         return if (k < s.length && s[k] == ')') k + 1 else -1
+    }
+
+    /**
+     * `opensBlockInside` (2.5.56, #2176) on the image match `s[from, to)`: a line inside it that may open a block as
+     * the parser reads one, so the image is left to the render. `BLOCK_START_LINE_RE`, any indent:
+     * `\n *(?:#{1,6}(?=[ \n]|$)|>|[-*+](?=[ \n]|$)|\d{1,9}[.)](?=[ \n]|$)|`{3,}|~{3,}|<[!?]|(?:[-*_] *){3,}(?=\n|$)|`
+     * `=+ *(?=\n|$)|[-:][-:| ]*(?=\n|$)|[:~] |\|)`, or `HTML_LINE_TAG_RE` (`\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)`) naming
+     * a block tag. Each newline is checked on its own line only, so the scan is linear.
+     */
+    private fun opensBlockInside(s: String, from: Int, to: Int): Boolean {
+        var nl = s.indexOf('\n', from)
+        while (nl in 0 until to) {
+            var q = nl + 1
+            while (q < to && s[q] == ' ') q++
+            if (blockStartAt(s, q, to) || htmlBlockTagAt(s, nl + 1, to)) return true
+            nl = s.indexOf('\n', nl + 1)
+        }
+        return false
+    }
+
+    /** One alternative of `BLOCK_START_LINE_RE` at [q], the text ending at [to] (`$`). */
+    private fun blockStartAt(s: String, q: Int, to: Int): Boolean {
+        if (q >= to) return false
+        fun endsLine(k: Int) = k >= to || s[k] == '\n'
+        fun spaceOrEnd(k: Int) = k >= to || s[k] == ' ' || s[k] == '\n'
+        val c = s[q]
+        when (c) {
+            '#' -> {
+                val k = runOf(s, q, to, '#')
+                if (k - q <= 6 && spaceOrEnd(k)) return true
+            }
+            '>', '|' -> return true
+            '`', '~' -> if (runOf(s, q, to, c) - q >= 3) return true
+            '<' -> if (q + 1 < to && (s[q + 1] == '!' || s[q + 1] == '?')) return true
+            '=' -> {
+                var k = runOf(s, q, to, '=')
+                while (k < to && s[k] == ' ') k++
+                if (endsLine(k)) return true
+            }
+            in '0'..'9' -> {
+                var k = q
+                while (k < to && s[k] in '0'..'9') k++
+                if (k - q <= 9 && k < to && (s[k] == '.' || s[k] == ')') && spaceOrEnd(k + 1)) return true
+            }
+        }
+        if ((c == '-' || c == '*' || c == '+') && spaceOrEnd(q + 1)) return true
+        if (c == '-' || c == '*' || c == '_') {
+            // (?:[-*_] *){3,}(?=\n|$): only the whole run of marks and spaces can be followed by the line end
+            var k = q
+            var marks = 0
+            while (k < to && (s[k] == '-' || s[k] == '*' || s[k] == '_' || s[k] == ' ')) {
+                if (s[k] != ' ') marks++
+                k++
+            }
+            if (marks >= 3 && endsLine(k)) return true
+        }
+        if (c == '-' || c == ':') {
+            var k = q + 1
+            while (k < to && (s[k] == '-' || s[k] == ':' || s[k] == '|' || s[k] == ' ')) k++
+            if (endsLine(k)) return true
+        }
+        return (c == ':' || c == '~') && q + 1 < to && s[q + 1] == ' '
+    }
+
+    private fun runOf(s: String, from: Int, to: Int, c: Char): Int {
+        var k = from
+        while (k < to && s[k] == c) k++
+        return k
+    }
+
+    /** `\n {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)` with the line starting at [start]: the name is a block tag. */
+    private fun htmlBlockTagAt(s: String, start: Int, to: Int): Boolean {
+        var k = start
+        while (k < to && k - start < 3 && s[k] == ' ') k++
+        if (k >= to || s[k] != '<') return false
+        k++
+        if (k < to && s[k] == '/') k++
+        val nameStart = k
+        if (k >= to || !(s[k] in 'a'..'z' || s[k] in 'A'..'Z')) return false
+        while (k < to && (s[k] in 'a'..'z' || s[k] in 'A'..'Z' || s[k] in '0'..'9' || s[k] == '-')) k++
+        return asciiLower(s.substring(nameStart, k)) in HTML_BLOCK_TAGS
     }
 
     /** `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*\]\(\s*[^\s)]/` */
