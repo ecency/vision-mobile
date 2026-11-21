@@ -14,6 +14,19 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
+ * [CardAutolinkTable] decoded once per process (every lookup builds its own [CatchPostImage]): one flag per UTF-16
+ * code unit, never written after it is built.
+ */
+private val autolinkWordChars: BooleanArray by lazy {
+    val set = BooleanArray(0x10000)
+    for (range in CardAutolinkTable.WORD_CHARS.split(',')) {
+        val dash = range.indexOf('-')
+        for (c in range.substring(0, dash).toInt(16)..range.substring(dash + 1).toInt(16)) set[c] = true
+    }
+    set
+}
+
+/**
  * render-helper `catch-post-image.ts`: the card image of a post. Metadata first, then a regex
  * fast path over the raw body (code, comments, hidden HTML and unequal anchors blanked out,
  * offsets preserved), then the full render. Every regex of the JS file is a scanner here; the
@@ -244,15 +257,6 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             i = line.indexOf('#', i + 1)
         }
         return false
-    }
-
-    private val autolinkWordChars: BooleanArray by lazy {
-        val set = BooleanArray(0x10000)
-        for (range in CardAutolinkTable.WORD_CHARS.split(',')) {
-            val dash = range.indexOf('-')
-            for (c in range.substring(0, dash).toInt(16)..range.substring(dash + 1).toInt(16)) set[c] = true
-        }
-        set
     }
 
     /** `autolinkWordChar`: a letter, mark or decimal digit, or one of Autolinker's emoji code units. */
