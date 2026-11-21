@@ -722,4 +722,21 @@ class ChatFlowsTest {
         compose.onNodeWithTag("groupCreate").performScrollTo().assertIsDisplayed().performClick()
         waitUntil { (navigator.state.top as? AppScreen.ChatThread)?.type == "G" }
     }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheRenameSheetScrollsToSaveAndCancel() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        waitFor("chatOptions:ch-group")
+        tap("chatOptions:ch-group")
+        waitFor("option:RENAME")
+        tap("option:RENAME")
+        waitFor("renameSheet")
+        compose.awaitScrolledTo("renameField").performTextInput("Book club")
+        compose.awaitScrolledTo("renameCancel").assertIsDisplayed()
+        compose.awaitScrolledTo("renameSave").performClick()
+        waitUntil { node.chatCalls().any { it.endsWith("channels/ch-group/name") } }
+        waitUntil { !exists("renameSheet") }
+    }
 }

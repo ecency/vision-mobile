@@ -427,14 +427,14 @@ private fun RenameGroupSheet(model: ChatRenameModel, onDismiss: () -> Unit) {
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(s.saved) { if (s.saved != null) onDismiss() }
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().imePadding().padding(bottom = 16.dp).testTag("renameSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).verticalScroll(rememberScrollState()).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("renameSheet")) {
             Text(ChatRenameState.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Text(ChatRenameState.HINT, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(vertical = 8.dp))
             SheetField(s.value, ChatRenameState.PLACEHOLDER, "renameField", onChange = model::setValue)
             s.message?.let { Text(it, color = colors.redText, fontSize = 13.sp, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.padding(top = 6.dp).testTag("renameError")) }
             SheetButton(UiCopy.SAVE, enabled = s.canSave, busy = s.saving, tag = "renameSave", onClick = model::save)
-            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text(UiCopy.CANCEL, color = colors.darkGray) }
+            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth().testTag("renameCancel")) { Text(UiCopy.CANCEL, color = colors.darkGray) }
         }
     }
 }
