@@ -55,6 +55,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -404,8 +405,9 @@ private fun OptionsSheet(
     title: String?, options: List<Pair<String, Boolean>>, ids: List<String>, onDismiss: () -> Unit, header: @Composable () -> Unit = {}, onPick: (Int) -> Unit,
 ) {
     val colors = LocalEcencyColors.current
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp).testTag("chatOptionsSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: a message's options under its reactions row are taller than a short window at a larger text size
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 16.dp).testTag("chatOptionsSheet")) {
             title?.let { Text(it, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colors.text, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) }
             header()
             options.forEachIndexed { i, (label, destructive) ->
@@ -444,8 +446,9 @@ private fun NewGroupSheet(env: AppEnvironment, model: ChatNewGroupModel, onCreat
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(s.createdChannelId) { s.createdChannelId?.let(onCreated) }
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().imePadding().padding(bottom = 16.dp).testTag("newGroupSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the chosen people, the results and the keyboard can push Create below the screen
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding().imePadding().padding(bottom = 16.dp).testTag("newGroupSheet")) {
             Text(ChatNewGroupState.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Text(ChatNewGroupState.HINT, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(vertical = 8.dp))
             if (s.selected.isNotEmpty()) {
@@ -470,8 +473,9 @@ private fun NewGroupSheet(env: AppEnvironment, model: ChatNewGroupModel, onCreat
                     when {
                         s.searching && visible.isEmpty() -> Spinner(Modifier.align(Alignment.CenterHorizontally).padding(12.dp), size = 24.dp)
                         visible.isEmpty() -> Text(s.emptyText, fontSize = 13.sp, color = colors.darkGray, modifier = Modifier.padding(vertical = 8.dp).testTag("groupEmpty"))
-                        else -> LazyColumn {
-                            items(visible, key = { it.username }) { p ->
+                        // a search's few results, in a bounded scroll of their own (no lazy list inside the sheet's scroll)
+                        else -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                            visible.forEach { p ->
                                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.add(p.username) }.padding(vertical = 8.dp).testTag("person:${p.username}"), verticalAlignment = Alignment.CenterVertically) {
                                     Avatar(p.account?.let { PostCard.avatarUrl(it, env.proxyBase) }.orEmpty(), 28.dp)
                                     Text("@${p.username}", color = colors.text, modifier = Modifier.padding(start = 10.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1223,7 +1227,7 @@ private fun ChatTranslationSheet(thread: ChatThreadModel, item: ChatMessageItem,
     DisposableEffect(model) { onDispose { model.close() } }
     LaunchedEffect(model) { model.start() }
     val state by model.state.collectAsState()
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("chatTranslation")) {
             Text(UiCopy.TRANSLATE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Row(Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1232,11 +1236,12 @@ private fun ChatTranslationSheet(thread: ChatThreadModel, item: ChatMessageItem,
                 Text(com.ecency.core.app.Languages.name(state.target), color = colors.blueText)
             }
             Text(state.original, maxLines = 3, overflow = TextOverflow.Ellipsis, fontSize = 13.sp, color = colors.darkGray)
-            Box(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 80.dp)) {
+            // the rest of the sheet's height, scrolling: a long message's translation can be taller than the screen
+            Box(Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(top = 12.dp).heightIn(min = 80.dp)) {
                 when {
                     state.isLoading -> Spinner(size = 24.dp)
                     state.error != null -> Text(state.error!!, color = colors.redText, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-                    else -> Text(state.translated ?: "", color = colors.text)
+                    else -> Text(state.translated ?: "", color = colors.text, modifier = Modifier.testTag("chatTranslated"))
                 }
             }
         }
