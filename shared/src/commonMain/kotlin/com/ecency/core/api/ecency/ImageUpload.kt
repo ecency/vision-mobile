@@ -36,7 +36,7 @@ class UploadFile(val bytes: ByteArray, val name: String, val mime: String)
 /** The account cannot sign uploads (RN SIGN_IMAGE_UNAVAILABLE): no posting key and no token. */
 class ImageSigningUnavailable : EcencyException("SIGN_IMAGE_UNAVAILABLE")
 
-/** RN `signImage`: the token that goes into the upload url. */
+/** RN `signImage`: the upload token, sent as `Authorization: Bearer <token>` (#3722). */
 object ImageSigning {
     /**
      * A key account that holds a posting key signs a `posting` message with it; every other account (HiveSigner,

@@ -40,7 +40,7 @@ object HiveSignerMessages {
 
     /**
      * The image host's upload token for a posting key account, RN `signImage` (type `posting`, whole seconds as
-     * `Math.floor(Date.now() / 1000)`): it goes into the upload url, `/hs/<token>`. b64u encoded.
+     * `Math.floor(Date.now() / 1000)`): sent as `Authorization: Bearer <token>` to `/hs` (#3722). b64u encoded.
      */
     fun imageUploadToken(account: String, key: PrivateKey, nowMillis: Long): String =
         B64u.encode(signed(message("posting", null, account, nowMillis / 1000 * 1000), key))
