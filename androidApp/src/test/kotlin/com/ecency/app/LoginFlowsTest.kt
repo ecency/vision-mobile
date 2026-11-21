@@ -547,4 +547,24 @@ class LoginFlowsTest {
         compose.onNodeWithTag("hiveAuthCancel").performScrollTo().assertIsDisplayed().performClick()
         until { env.session.current.hiveAuth == null }
     }
+
+    /** A HiveAuth account's broadcast waits for the wallet: on a short window its Cancel stays reachable by a real tap. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheHiveAuthBroadcastSheetScrollsToCancel() {
+        store(VaultAccount("tester", AuthType.HIVE_AUTH, hiveAuthKey = "ui-test-key", hiveAuthToken = "ui-test-token", hiveAuthExpiry = 1_900_000_000_000L))
+        launch(fontScale = 1.3f)
+        waitFor("account")
+        val ops = JsonArray(listOf(OperationJson.encode(Vote("tester", "alice", "trending-one", 10000))))
+        var outcome: Result<*>? = null
+        CoroutineScope(Dispatchers.Main).launch { outcome = runCatching { env.signing.broadcast("tester", ops) } }
+        waitFor("hiveAuthBroadcast")
+        until { compose.onAllNodes(hasText(com.ecency.core.app.HiveAuthCopy.OPEN_WALLET), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("hiveAuthBroadcastCancel").performScrollTo().assertIsDisplayed().performClick()
+        until { outcome != null }
+        assertTrue(outcome!!.isFailure)
+        assertFalse(exists("hiveAuthBroadcast"))
+        assertTrue(node.broadcasts().isEmpty())
+    }
 }

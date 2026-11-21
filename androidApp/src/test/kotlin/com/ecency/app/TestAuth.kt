@@ -17,7 +17,7 @@ import java.util.Collections
 /**
  * Ecency's token endpoint and a HiveAuth relay for UI tests, nothing on the network: a locally signed code
  * exchanges for tokens of its author, `refresh-<user>` refreshes; the relay answers `auth_req` with an
- * `auth_wait` (expiring at [hiveAuthExpire]) and never approves, so the sheet stays on the QR.
+ * `auth_wait` and `sign_req` with a `sign_wait` (expiring at [hiveAuthExpire]) and never approves, so the sheets stay waiting.
  */
 class TestAuth {
     val requests: MutableList<AuthHttpRequest> = Collections.synchronizedList(mutableListOf())
@@ -47,6 +47,7 @@ class TestAuth {
             override suspend fun send(text: String) {
                 relaySent += text
                 if ("\"auth_req\"" in text) incoming.trySend("""{"cmd":"auth_wait","uuid":"ui-test","expire":$hiveAuthExpire}""")
+                if ("\"sign_req\"" in text) incoming.trySend("""{"cmd":"sign_wait","uuid":"ui-sign","expire":$hiveAuthExpire}""")
             }
             override val incoming: ReceiveChannel<String> = incoming
             override suspend fun close() { incoming.close() }

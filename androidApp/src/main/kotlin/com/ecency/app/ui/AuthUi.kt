@@ -309,9 +309,10 @@ private fun HiveAuthBroadcastSheet(env: AppEnvironment, host: AppHost, prompt: S
             walletMissing = !host.openWallet(link)
         }
     }
-    ModalBottomSheet(onDismissRequest = env.signing::cancel, containerColor = colors.background) {
+    ModalBottomSheet(onDismissRequest = env.signing::cancel, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: on a short window at a larger text size Open wallet and Cancel sat below the screen
         Column(
-            Modifier.fillMaxWidth().padding(24.dp).navigationBarsPadding().testTag("hiveAuthBroadcast"),
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp).navigationBarsPadding().testTag("hiveAuthBroadcast"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(HiveAuthCopy.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
@@ -326,7 +327,7 @@ private fun HiveAuthBroadcastSheet(env: AppEnvironment, host: AppHost, prompt: S
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 ) { Text(HiveAuthCopy.OPEN_WALLET, color = Color.White) }
             }
-            TextButton(onClick = env.signing::cancel) { Text(AccountCopy.CANCEL, color = colors.darkGray) }
+            TextButton(onClick = env.signing::cancel, modifier = Modifier.testTag("hiveAuthBroadcastCancel")) { Text(AccountCopy.CANCEL, color = colors.darkGray) }
         }
     }
 }
