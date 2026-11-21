@@ -114,7 +114,11 @@ class LoginFlowsTest {
         compose.onNodeWithTag("drawerAccounts", useUnmergedTree = true).performClick()
     }
 
-    private fun launch(navigator: Navigator = Navigator()) = compose.setContent { EcencyTheme(dark = false) { EcencyApp(env, host, navigator) } }
+    private fun launch(navigator: Navigator = Navigator(), fontScale: Float = 1f) = compose.setContent {
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(androidx.compose.ui.platform.LocalDensity.current.density, fontScale)) {
+            EcencyTheme(dark = false) { EcencyApp(env, host, navigator) }
+        }
+    }
 
     private fun exists(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
     private fun waitFor(tag: String) = until { exists(tag) }
@@ -483,5 +487,64 @@ class LoginFlowsTest {
         waitFor("menuBackupKeys")
         compose.onNodeWithTag("menuBackupKeys").performScrollTo().performClick()
         waitFor("backupKeys")
+    }
+
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick), however many accounts or fields it holds.
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun withManyAccountsTheSwitcherScrollsToLogoutAll() {
+        store(*(1..8).map { tester("tester-$it") }.toTypedArray())
+        launch(fontScale = 1.3f)
+        waitFor("account")
+        openAccounts()
+        waitFor("accountSwitcher")
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("accountLogoutAll").performScrollTo().assertIsDisplayed().performClick()
+        waitFor("logoutConfirm")
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheAuthUpgradeSheetScrollsToCancel() {
+        store(tester())
+        launch(fontScale = 1.3f)
+        waitFor("account")
+        val ops = JsonArray(listOf(OperationJson.encode(Transfer("tester", "bob", Asset.parse("1.000 HIVE"), ""))))
+        var outcome: Result<*>? = null
+        CoroutineScope(Dispatchers.Main).launch { outcome = runCatching { env.signing.broadcast("tester", ops) } }
+        waitFor("authUpgrade")
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("upgradeCancel").performScrollTo().assertIsDisplayed().performClick()
+        until { outcome != null }
+        assertTrue(node.broadcasts().isEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheSignConfirmSheetScrollsToItsButtons() {
+        store(tester())
+        launch(fontScale = 1.3f)
+        waitFor("account")
+        val vote = HiveUri.encodeOps(JsonArray(listOf(OperationJson.encode(Vote("__signer", "alice", "trending-one", 10000)))), HiveUri.Params(callback = "otherapp://done"))
+        compose.runOnIdle { env.authLinks.handle(vote) }
+        waitFor("signConfirm")
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("signCancel").performScrollTo().assertIsDisplayed().performClick()
+        until { callbacks.isNotEmpty() }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheHiveAuthLoginSheetScrollsPastTheQrCode() {
+        launch(Navigator(NavState().push(AppScreen.Login)), fontScale = 1.3f)
+        waitFor("login")
+        compose.runOnIdle { env.session.startHiveAuth("tester") }
+        compose.onNodeWithTag("loginHiveAuth").performScrollTo().performClick()
+        waitFor("hiveAuthQr")
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("hiveAuthCancel").performScrollTo().assertIsDisplayed().performClick()
+        until { env.session.current.hiveAuth == null }
     }
 }

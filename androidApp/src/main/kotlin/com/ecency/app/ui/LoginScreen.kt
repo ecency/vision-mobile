@@ -257,7 +257,7 @@ fun HiveAuthLoginSheet(env: AppEnvironment, host: AppHost, initialUsername: Stri
         containerColor = colors.background,
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 20.dp).testTag("hiveAuthSheet"),
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 20.dp).testTag("hiveAuthSheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(HiveAuthCopy.TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })

@@ -116,7 +116,8 @@ fun AccountSwitcherSheet(
     var confirmLogout by remember { mutableStateOf<String?>(null) }
     var confirmAll by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp).testTag("accountSwitcher")) {
+        // scrolls: many accounts, or a short window, would push Add, Create and Log out all below the screen
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 12.dp).testTag("accountSwitcher")) {
             state.accounts.forEach { account ->
                 AccountRow(env, account, switching = state.switchingTo == account.username,
                     onSwitch = {
@@ -240,7 +241,7 @@ fun AuthUpgradeSheet(env: AppEnvironment, prompt: SigningPrompt.AuthUpgrade) {
         containerColor = colors.background,
         // screenshots stay allowed (bug reports): the key field hides what is typed; only the keys screen is secure
     ) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("authUpgrade")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).imePadding().navigationBarsPadding().padding(bottom = 16.dp).testTag("authUpgrade")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Glyph(AppIcon.KEY, colors.blueText, 28.dp)
                 Text(AccountCopy.UPGRADE_TITLE, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() }.padding(start = 10.dp))
@@ -382,7 +383,7 @@ private fun ConfirmAlert(message: String, tag: String, links: AuthLinkModel, tit
 fun SignConfirmSheet(prompt: LinkPrompt.SignConfirm, onApprove: () -> Unit, onCancel: () -> Unit) {
     val colors = LocalEcencyColors.current
     ModalBottomSheet(onDismissRequest = onCancel, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("signConfirm")) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).navigationBarsPadding().padding(bottom = 16.dp).testTag("signConfirm")) {
             Text(AccountCopy.CONFIRM_TX, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = colors.text, modifier = Modifier.semantics { heading() })
             Text(AuthLinkModel.signWarning(prompt.authority), color = colors.darkGray, fontSize = 13.sp, modifier = Modifier.padding(vertical = 8.dp))
             Text(prompt.title, fontWeight = FontWeight.Bold, color = colors.text)
