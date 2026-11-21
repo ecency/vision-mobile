@@ -701,8 +701,9 @@ private fun FavoritesSheet(model: com.ecency.core.app.TransferFavoritesModel, on
     val colors = LocalEcencyColors.current
     val s by model.state.collectAsState()
     LaunchedEffect(model) { model.start() }
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.background) {
-        Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).testTag("favoritesSheet")) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // scrolls: the favourites grow with the account
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp).testTag("favoritesSheet")) {
             // RN: the title, and the button that opens or closes the add row
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(TransferFavoritesCopy.TITLE, color = colors.text, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))

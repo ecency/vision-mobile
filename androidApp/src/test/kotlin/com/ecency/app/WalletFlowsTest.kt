@@ -722,4 +722,70 @@ class WalletFlowsTest {
     }
 
     private fun androidx.compose.ui.test.SemanticsNodeInteractionCollection.onFirst() = this[0]
+
+    // A short window (a phone with the keyboard up, or larger text): a sheet's last control must stay reachable by a
+    // real tap (performScrollTo, then performClick), however many entries the account has.
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun withManyFavouritesTheSheetScrollsToTheLastOne() {
+        val saved = (1..30).map { "friend-$it" }
+        val base = node.auth.rest
+        node.auth.rest = { r ->
+            if (r.url.contains("/private-api/favorites?format=wrapped")) HttpResult(200, saved.mapIndexed { i, a -> """{"_id":"f$i","account":"$a","timestamp":$i}""" }.joinToString(",", "[", "]"))
+            else base?.invoke(r)
+        }
+        launch(Navigator(NavState().push(AppScreen.Transfer("transfer", "HIVE", "hive"))), fontScale = 1.3f)
+        until { exists("transferFavorites") }
+        compose.onNodeWithTag("transferFavorites").performScrollTo().performClick()
+        until { exists("favorite:friend-30") }
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("favorite:friend-30").performScrollTo().assertIsDisplayed().performClick()
+        until { !exists("favoritesSheet") }
+        assertTrue(compose.onAllNodes(hasTestTag("transferTo") and hasText("friend-30", substring = true)).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheHistoryFilterScrollsToApply() {
+        launch(Navigator(NavState().push(AppScreen.AssetDetails("HIVE"))), fontScale = 1.3f)
+        until { exists("historyFilter") }
+        compose.onNodeWithTag("historyFilter").performClick()
+        until { exists("filterSheet") }
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("filterApply").performScrollTo().assertIsDisplayed().performClick()
+        until { !exists("filterSheet") }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun withManyRecurrentTransfersTheSheetScrollsToTheLastOne() {
+        node.extra.let { base ->
+            node.extra = { m, r ->
+                if (m == "condenser_api.find_recurrent_transfers") {
+                    (1..15).joinToString(",", "[", "]") { """{"id":$it,"from":"tester","to":"payee-$it","amount":"1.000 HIVE","memo":"","recurrence":24,"remaining_executions":3,"trigger_date":"2026-10-07T10:00:00"}""" }
+                } else {
+                    base?.invoke(m, r)
+                }
+            }
+        }
+        launch(Navigator(NavState().push(AppScreen.AssetDetails("HIVE"))), fontScale = 1.3f)
+        val row = "summary:${com.ecency.core.app.WalletCopy.TOTAL_RECURRENT}"
+        until { exists(row) }
+        compose.onNodeWithTag(row).performScrollTo().performClick()
+        until { exists("recurrentSheet") }
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("recurrentDelete:payee-15").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheReceiveSheetScrollsToTheAccountName() {
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)), fontScale = 1.3f)
+        until { exists("walletReceive") }
+        compose.onNodeWithTag("walletReceive").performClick()
+        until { exists("receiveSheet") }
+        compose.mainClock.advanceTimeBy(2_000)
+        compose.onNodeWithTag("receiveCopy").performScrollTo().assertIsDisplayed().performClick()
+    }
 }
