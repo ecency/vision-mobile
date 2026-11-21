@@ -13,9 +13,10 @@ import kotlin.test.assertTrue
  * directly or in a composable of the app the content calls (two levels deep). Sheets of a fixed height by design are
  * listed with a reason in `androidApp/sheet-scroll-allowed.txt`; an entry nothing matches fails too.
  *
- * The scan reads source text, no compiler, and fails closed: comments are blanked before anything is read, brackets
- * that never balance fail the test, a sheet opened inside the content (or inside a composable it calls) is not the
- * content's scroll, and a called name defined in more than one file counts only when the calling file defines it.
+ * The scan reads source text, no compiler, and fails closed: comments and the text inside literals are blanked before
+ * anything is read, brackets that never balance fail the test, a sheet opened inside the content (or inside a
+ * composable it calls) is not the content's scroll, a called name defined in more than one file counts only when the
+ * calling file defines it, and a name with overloads counts only when every overload scrolls.
  */
 class SheetScrollLintTest {
     private val root = generateSequence(File("").absoluteFile) { it.parentFile }.first { it.resolve("src/config/locales/en-US.json").isFile }
@@ -36,42 +37,47 @@ class SheetScrollLintTest {
     class Scan(files: Map<String, String>) {
         private val code: Map<String, String> = files.mapValues { (name, src) -> blankComments(name, src) }
 
-        private val scrollers = Regex("""(?<!\w)(verticalScroll|LazyColumn|LazyVerticalGrid|LazyVerticalStaggeredGrid)\s*\(""")
+        /** [code] with the inside of every string blanked too: text a sheet shows is not its code. */
+        private val bare: Map<String, String> = code.mapValues { (name, src) -> blankLiterals(name, src) }
+
+        private val scrollers = Regex("""(?<!\w)(verticalScroll|LazyColumn|LazyVerticalGrid|LazyVerticalStaggeredGrid)\s*[({]""")
         private val sheetCall = Regex("""(?<![\w.])ModalBottomSheet\s*\(""")
         private val decl = Regex("""(?<!\w)fun\s+(?:[\w.<>?]+\.)?([A-Za-z]\w*)\s*\(""")
 
-        /** Each function by name: the files that define it and its text there (overloads joined). */
-        private val functions: Map<String, Map<String, String>> = buildMap<String, MutableMap<String, String>> {
-            code.forEach { (file, src) ->
+        /** Each function by name: the files that define it and, in each, the text of every overload. */
+        private val functions: Map<String, Map<String, List<String>>> = buildMap<String, MutableMap<String, MutableList<String>>> {
+            bare.forEach { (file, src) ->
                 decl.findAll(src).forEach { m ->
                     var i = closing(file, src, m.range.last)
-                    // skip a return type, then take the body (a block, or an expression body to the end of its line)
+                    // skip a return type, then take the body (a block, or an expression body)
                     while (i < src.length && src[i] != '{' && src[i] != '=' && src[i] != '\n') i++
                     val body = when {
                         i < src.length && src[i] == '{' -> src.substring(i, closing(file, src, i))
-                        i < src.length && src[i] == '=' -> src.substring(i, src.indexOf('\n', i).let { if (it < 0) src.length else it })
+                        i < src.length && src[i] == '=' -> src.substring(i, expressionEnd(file, src, i))
                         else -> ""
                     }
-                    val byFile = getOrPut(m.groupValues[1]) { mutableMapOf() }
-                    byFile[file] = (byFile[file] ?: "") + "\n" + body
+                    getOrPut(m.groupValues[1]) { mutableMapOf() }.getOrPut(file) { mutableListOf() } += body
                 }
             }
         }
 
-        /** [text] without the sheets opened in it (their call and content): a sheet opened there scrolls for itself. */
+        /** [text] with the sheets opened in it (their call and content) blanked in place: a sheet opened there scrolls for itself. */
         private fun withoutSheets(file: String, text: String): String {
-            val out = StringBuilder()
+            val out = StringBuilder(text)
             var at = 0
             while (true) {
                 val m = sheetCall.find(text, at) ?: break
-                out.append(text, at, m.range.first)
                 at = lambdaEnd(file, text, m.range.last)
+                for (k in m.range.first until at) if (out[k] != '\n') out[k] = ' '
             }
-            return out.append(text.substring(minOf(at, text.length))).toString()
+            return out.toString()
         }
 
-        /** The text of [name] as [file] calls it: its own definition first; a name only other files define counts when one file does. */
-        private fun resolve(file: String, name: String): Pair<String, String>? {
+        /**
+         * The overloads of [name] as [file] calls it: its own definitions first; a name only other files define counts
+         * when one file does. Which overload a call picks is not read, so the content scrolls only when all of them do.
+         */
+        private fun resolve(file: String, name: String): Pair<String, List<String>>? {
             val defs = functions[name] ?: return null
             return defs[file]?.let { file to it } ?: defs.entries.singleOrNull()?.toPair()
         }
@@ -82,16 +88,19 @@ class SheetScrollLintTest {
             if (scrollers.containsMatchIn(own)) return true
             if (depth == 0) return false
             val called = Regex("""(?<![\w.])([A-Z]\w*)\s*[({]""").findAll(own).map { it.groupValues[1] }.toSet() - "ModalBottomSheet"
-            return called.any { name -> resolve(file, name)?.let { (where, body) -> scrolls(where, body, depth - 1) } == true }
+            return called.any { name -> resolve(file, name)?.let { (where, bodies) -> bodies.all { scrolls(where, it, depth - 1) } } == true }
         }
 
         /** Each `ModalBottomSheet(...) { content }` call (the wrapper in ui/Windows.kt is the definition, skipped). */
-        val sheets: List<Sheet> = code.flatMap { (file, src) ->
+        val sheets: List<Sheet> = bare.flatMap { (file, src) ->
             sheetCall.findAll(src).filter { m -> !src.substring(maxOf(0, m.range.first - 4), m.range.first).endsWith("fun ") }.map { m ->
                 val end = lambdaEnd(file, src, m.range.last)
                 val argsEnd = closing(file, src, m.range.last)
                 val content = src.substring(argsEnd, end)
-                val tag = Regex("""testTag\("([^"]+)"\)""").find(withoutSheets(file, content))?.groupValues?.get(1)
+                // the tag is read where literals keep their text ([code] and [bare] match index for index), nested sheets left out
+                val kept = withoutSheets(file, content)
+                val shown = code.getValue(file).substring(argsEnd, end).mapIndexed { k, c -> if (kept[k] == content[k]) c else ' ' }.joinToString("")
+                val tag = Regex("""testTag\("([^"]+)"\)""").find(shown)?.groupValues?.get(1)
                 val fn = decl.findAll(src.substring(0, m.range.first)).lastOrNull()?.groupValues?.get(1)
                 Sheet(file, src.substring(0, m.range.first).count { it == '\n' } + 1, tag ?: fn ?: "?", scrolls(file, content, 2))
             }.toList()
@@ -165,6 +174,42 @@ class SheetScrollLintTest {
                     }
                 }
                 throw AssertionError("$file:${line(src, from)}: raw string never closes")
+            }
+
+            /** The end of the expression body whose `=` is at [eq]: past its brackets, and on through lines that go on with `.`, `?.` or `?:`. */
+            fun expressionEnd(file: String, src: String, eq: Int): Int {
+                var i = eq + 1
+                while (i < src.length && src[i].isWhitespace()) i++
+                while (i < src.length) {
+                    val literalEnd = literal(file, src, i)
+                    if (literalEnd != null) { i = literalEnd; continue }
+                    when (src[i]) {
+                        '(', '{' -> i = closing(file, src, i)
+                        ')', '}' -> return i
+                        '\n' -> {
+                            var k = i
+                            while (k < src.length && src[k].isWhitespace()) k++
+                            if (src.startsWith(".", k) || src.startsWith("?.", k) || src.startsWith("?:", k)) i = k else return i
+                        }
+                        else -> i++
+                    }
+                }
+                return i
+            }
+
+            /** [src] with the inside of every string blanked (a char holds no call); quotes and newlines stay, so it still scans as code. */
+            fun blankLiterals(file: String, src: String): String {
+                val out = StringBuilder(src)
+                var i = 0
+                while (i < src.length) {
+                    val end = literal(file, src, i)
+                    if (end == null) { i++; continue }
+                    if (src[i] == '\'') { i = end; continue }
+                    val quote = if (src.startsWith("\"\"\"", i)) 3 else 1
+                    for (k in i + quote until end - quote) if (out[k] != '\n') out[k] = ' '
+                    i = end
+                }
+                return out.toString()
             }
 
             /** [src] with every comment's characters blanked (newlines kept, so lines still count). */
@@ -283,6 +328,50 @@ class SheetScrollLintTest {
         // the sheet's own file defines the scrolling one, or it is the only one
         assertEquals(mapOf("a" to true), scan("A.kt" to sheet + "\n" + scrolling, "C.kt" to fixed))
         assertEquals(mapOf("a" to true), scan("A.kt" to sheet, "B.kt" to scrolling))
+    }
+
+    @Test
+    fun aHelperWhoseExpressionBodyStartsOnTheNextLineIsRead() {
+        val src = """
+            @Composable fun A() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("a")) { Body() } } }
+            @Composable fun Body() =
+                LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                    item { Text("x") }
+                }
+            @Composable fun Fixed() =
+                Column {}
+                    .let { it }
+            @Composable fun Other() { LazyColumn {} }
+            @Composable fun B() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("b")) { Fixed() } } }
+            @Composable fun Chained() =
+                Wrapper()
+                    .verticalScroll(s)
+            @Composable fun C() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("c")) { Chained() } } }
+        """.trimIndent()
+        assertEquals(mapOf("a" to true, "b" to false, "c" to true), scan("T.kt" to src))
+    }
+
+    @Test
+    fun anOverloadThatScrollsIsNoEvidenceForOneThatDoesNot() {
+        val sheet = """@Composable fun A() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("a")) { Body() } } }"""
+        val fixed = """@Composable fun Body() { Column {} }"""
+        val scrolling = """@Composable fun Body(items: List<String>) { LazyColumn {} }"""
+        assertEquals(mapOf("a" to false), scan("A.kt" to listOf(sheet, fixed, scrolling).joinToString("\n")))
+        // every overload scrolls: whichever is called, the content scrolls
+        val alsoScrolling = """@Composable fun Body() { Column(Modifier.verticalScroll(s)) {} }"""
+        assertEquals(mapOf("a" to true), scan("A.kt" to listOf(sheet, alsoScrolling, scrolling).joinToString("\n")))
+    }
+
+    @Test
+    fun aScrollerNamedInAStringIsNoScroll() {
+        val src = """
+            @Composable fun A() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("a")) { Text("Use LazyColumn(") ; Text(""${'"'}"verticalScroll(""${'"'}") ; Text("Body(") } } }
+            @Composable fun B() { ModalBottomSheet(onDismissRequest = {}) { LazyColumn(Modifier.testTag("b")) {} } }
+            @Composable fun Body() { LazyColumn {} }
+            @Composable fun C() { ModalBottomSheet(onDismissRequest = {}) { Column(Modifier.testTag("c")) { Hint() } } }
+            @Composable fun Hint() { Text("scroll with verticalScroll(") }
+        """.trimIndent()
+        assertEquals(mapOf("a" to false, "b" to true, "c" to false), scan("T.kt" to src))
     }
 
     @Test
