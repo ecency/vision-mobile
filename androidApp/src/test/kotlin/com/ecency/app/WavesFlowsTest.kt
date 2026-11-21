@@ -655,4 +655,19 @@ class WavesFlowsTest {
         compose.awaitScrolledTo("waves:trending:art").performClick()
         waitFor("waves:pinned:art")
     }
+
+    /** A short window at a larger text size, as with the keyboard up: the composer scrolls, so PUBLISH stays reachable. */
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowTheComposerScrollsToPublish() {
+        node.signIn()
+        launch(fontScale = 1.3f)
+        openWaves()
+        click("createFab")
+        waitFor("waveComposer")
+        compose.onNodeWithTag("waveText").performTextInput("A wave from the native app, long enough to count")
+        compose.awaitScrolledTo("wavePublish").performClick()
+        pump { node.broadcasts().isNotEmpty() || env.waves.composer().current.error != null }
+        assertTrue(node.broadcasts().single(), "A wave from the native app, long enough to count" in node.broadcasts().single())
+    }
 }

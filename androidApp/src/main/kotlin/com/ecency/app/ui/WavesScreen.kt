@@ -705,80 +705,84 @@ fun WaveComposerSheet(env: AppEnvironment, model: WaveComposeModel, onDismiss: (
     ClipboardImageWatch(model) { model.setClipboardHasImage(it) }
     ModalBottomSheet(onDismissRequest = { if (!busy) onDismiss() }, sheetState = sheetState, containerColor = colors.background) {
         // the whole sheet height: the text fills down to the toolbar, and the toolbar sits on the keyboard (or on
-        // the navigation bar without one), with no empty stripe between them
-        Column(Modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 16.dp).imePadding().navigationBarsPadding().padding(bottom = 4.dp).testTag("waveComposer")) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(ReadingUiCopy.PUBLISHING_IN_WAVES, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                Text(
-                    state.counter, fontSize = 13.sp, color = if (state.lengthExceeded) colors.redText else colors.icon,
-                    modifier = Modifier.padding(end = 12.dp).testTag("waveCounter"),
-                )
-                Box(Modifier.clip(CircleShape).clickable(enabled = !state.isSending, onClick = onDismiss, role = Role.Button).padding(6.dp).testTag("waveClose")) {
-                    Glyph(AppIcon.CLOSE, colors.icon, 22.dp, description = UiCopy.CLOSE)
-                }
-            }
-            Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Avatar(com.ecency.core.app.PostCard.avatarUrl(model.owner.orEmpty(), env.proxyBase), 32.dp)
-                Text("@${model.owner.orEmpty()}", fontWeight = FontWeight.Bold, color = colors.text, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
-            }
-            OutlinedTextField(
-                value = state.text,
-                onValueChange = model::setText,
-                enabled = !state.isSending,
-                placeholder = { Text(ReadingUiCopy.WHATS_HAPPENING, color = Color(0xFFC1C5C7)) },
-                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = colors.text, unfocusedTextColor = colors.text, focusedBorderColor = colors.blueText, unfocusedBorderColor = colors.icon),
-                modifier = Modifier.fillMaxWidth().weight(1f).heightIn(min = 120.dp).padding(top = 8.dp).focusRequester(focus).testTag("waveText"),
-            )
-            if (state.showsShortHint) {
-                Text(
-                    ReadingUiCopy.shortContentHint(com.ecency.core.api.waves.WavePublish.QUEST_MIN_CONTENT_LENGTH),
-                    color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp).testTag("waveShortHint"),
-                )
-            }
-            if (state.isVideoUploading) {
-                Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("waveVideoUploading"), contentAlignment = Alignment.Center) {
-                    Spinner(size = 22.dp)
-                }
-            }
-            if (state.videoEmbedUrl != null) {
-                // RN _videoPreview: "Video attached" with the minus badge; a tap takes the video off. The image hides.
-                Box(
-                    Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground)
-                        .clickable(enabled = !state.isSending && !state.isVideoUploading, role = Role.Button) { model.removeVideo() }.testTag("waveVideo"),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(ReadingUiCopy.VIDEO_ATTACHED, color = colors.blueText, fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                    Box(Modifier.align(Alignment.TopEnd).padding(2.dp).size(18.dp).clip(CircleShape).background(colors.red), contentAlignment = Alignment.Center) {
-                        Text("-", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        // the navigation bar without one), with no empty stripe between them. On a short window (the keyboard up, a
+        // large font) the text keeps its least height and the column scrolls, so PUBLISH stays reachable: at least
+        // the height above the keyboard, the column lets the weighted text fill it while there is room
+        BoxWithConstraints(Modifier.fillMaxWidth().fillMaxHeight().imePadding().navigationBarsPadding()) {
+            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = maxHeight).padding(horizontal = 16.dp).padding(bottom = 4.dp).testTag("waveComposer")) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(ReadingUiCopy.PUBLISHING_IN_WAVES, color = colors.darkGray, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                    Text(
+                        state.counter, fontSize = 13.sp, color = if (state.lengthExceeded) colors.redText else colors.icon,
+                        modifier = Modifier.padding(end = 12.dp).testTag("waveCounter"),
+                    )
+                    Box(Modifier.clip(CircleShape).clickable(enabled = !state.isSending, onClick = onDismiss, role = Role.Button).padding(6.dp).testTag("waveClose")) {
+                        Glyph(AppIcon.CLOSE, colors.icon, 22.dp, description = UiCopy.CLOSE)
                     }
                 }
-            } else {
-                AttachedImageThumb(state.imageUrl, state.isAttaching, "waveImage", enabled = !state.isSending, onRemove = model::removeImage)
-            }
-            if (state.clipboardChip) {
-                ClipboardImageChip("wave", enabled = !state.isSending && !state.isAttaching, onPaste = model::pasteClipboardImage, onDismiss = model::dismissClipboardChip)
-            }
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                QuickComposeTools(
-                    "wave", state.isSending, state.isAttaching, onImage = { uploadsSheet = true },
-                    onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.weight(1f),
-                    middle = {
-                        // RN's poll button (the editor's poll wizard); blue once a poll is attached
-                        QuickTool(AppIcon.CHART_BAR, if (state.poll != null) com.ecency.core.app.WaveComposeCopy.EDIT_POLL else com.ecency.core.app.WaveComposeCopy.ADD_POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null) { pollSheet = true }
-                        // RN video-outline: blue and off while a video is attached or on its way
-                        QuickTool(AppIcon.VIDEO, com.ecency.core.app.WaveComposeCopy.ADD_VIDEO, "waveVideoButton", enabled = state.canAddVideo, color = if (state.videoEmbedUrl != null) colors.blueText else null) { showVideo = true }
-                    },
+                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Avatar(com.ecency.core.app.PostCard.avatarUrl(model.owner.orEmpty(), env.proxyBase), 32.dp)
+                    Text("@${model.owner.orEmpty()}", fontWeight = FontWeight.Bold, color = colors.text, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
+                }
+                OutlinedTextField(
+                    value = state.text,
+                    onValueChange = model::setText,
+                    enabled = !state.isSending,
+                    placeholder = { Text(ReadingUiCopy.WHATS_HAPPENING, color = Color(0xFFC1C5C7)) },
+                    colors = OutlinedTextFieldDefaults.colors(focusedTextColor = colors.text, unfocusedTextColor = colors.text, focusedBorderColor = colors.blueText, unfocusedBorderColor = colors.icon),
+                    modifier = Modifier.fillMaxWidth().weight(1f).heightIn(min = 120.dp).padding(top = 8.dp).focusRequester(focus).testTag("waveText"),
                 )
-                Spacer(Modifier.width(8.dp))
-                // PUBLISH turns into its own progress while the wave goes out (Motion.kt)
-                val phase = rememberSendPhase(state.isSending, sent = state.sent, holdsDone = false)
-                Button(
-                    onClick = model::send,
-                    // off also over an empty composer, and it shows: the grey of iOS's disabled PUBLISH, not a faded blue
-                    enabled = state.publishEnabled,
-                    colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue, disabledContainerColor = colors.icon),
-                    modifier = Modifier.testTag("wavePublish"),
-                ) { SendContent(phase, Color.White, 18.dp) { Text(ReadingUiCopy.PUBLISH, color = Color.White, fontWeight = FontWeight.Bold) } }
+                if (state.showsShortHint) {
+                    Text(
+                        ReadingUiCopy.shortContentHint(com.ecency.core.api.waves.WavePublish.QUEST_MIN_CONTENT_LENGTH),
+                        color = colors.darkGray, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp).testTag("waveShortHint"),
+                    )
+                }
+                if (state.isVideoUploading) {
+                    Box(Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground).testTag("waveVideoUploading"), contentAlignment = Alignment.Center) {
+                        Spinner(size = 22.dp)
+                    }
+                }
+                if (state.videoEmbedUrl != null) {
+                    // RN _videoPreview: "Video attached" with the minus badge; a tap takes the video off. The image hides.
+                    Box(
+                        Modifier.padding(top = 8.dp).size(72.dp).clip(RoundedCornerShape(8.dp)).background(colors.grayBackground)
+                            .clickable(enabled = !state.isSending && !state.isVideoUploading, role = Role.Button) { model.removeVideo() }.testTag("waveVideo"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(ReadingUiCopy.VIDEO_ATTACHED, color = colors.blueText, fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Box(Modifier.align(Alignment.TopEnd).padding(2.dp).size(18.dp).clip(CircleShape).background(colors.red), contentAlignment = Alignment.Center) {
+                            Text("-", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else {
+                    AttachedImageThumb(state.imageUrl, state.isAttaching, "waveImage", enabled = !state.isSending, onRemove = model::removeImage)
+                }
+                if (state.clipboardChip) {
+                    ClipboardImageChip("wave", enabled = !state.isSending && !state.isAttaching, onPaste = model::pasteClipboardImage, onDismiss = model::dismissClipboardChip)
+                }
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    QuickComposeTools(
+                        "wave", state.isSending, state.isAttaching, onImage = { uploadsSheet = true },
+                        onDictate = { aiSheet = "dictation" }, onAiAssist = { aiSheet = "aiAssist" }, modifier = Modifier.weight(1f),
+                        middle = {
+                            // RN's poll button (the editor's poll wizard); blue once a poll is attached
+                            QuickTool(AppIcon.CHART_BAR, if (state.poll != null) com.ecency.core.app.WaveComposeCopy.EDIT_POLL else com.ecency.core.app.WaveComposeCopy.ADD_POLL, "wavePoll", enabled = !state.isSending, color = if (state.poll != null) colors.blueText else null) { pollSheet = true }
+                            // RN video-outline: blue and off while a video is attached or on its way
+                            QuickTool(AppIcon.VIDEO, com.ecency.core.app.WaveComposeCopy.ADD_VIDEO, "waveVideoButton", enabled = state.canAddVideo, color = if (state.videoEmbedUrl != null) colors.blueText else null) { showVideo = true }
+                        },
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    // PUBLISH turns into its own progress while the wave goes out (Motion.kt)
+                    val phase = rememberSendPhase(state.isSending, sent = state.sent, holdsDone = false)
+                    Button(
+                        onClick = model::send,
+                        // off also over an empty composer, and it shows: the grey of iOS's disabled PUBLISH, not a faded blue
+                        enabled = state.publishEnabled,
+                        colors = ButtonDefaults.buttonColors(contentColor = androidx.compose.ui.graphics.Color.White, containerColor = colors.blue, disabledContainerColor = colors.icon),
+                        modifier = Modifier.testTag("wavePublish"),
+                    ) { SendContent(phase, Color.White, 18.dp) { Text(ReadingUiCopy.PUBLISH, color = Color.White, fontWeight = FontWeight.Bold) } }
+                }
             }
         }
     }
