@@ -961,8 +961,10 @@ class Wave3IntegrationTest {
     }
 
     @Test
-    fun anUploadFailureNeverCarriesTheUploadAddress() = runTest {
-        val leaky = ImageUploadTransport { url, _, _, _ -> throw IllegalStateException("Request timeout has expired [url=$url]", RuntimeException("connect $url")) }
+    fun anUploadFailureNeverCarriesTheTokenFromItsAddressOrHeader() = runTest {
+        val leaky = ImageUploadTransport { url, authorization, _, _ ->
+            throw IllegalStateException("Request timeout has expired [url=$url, Authorization: $authorization]", RuntimeException("connect $url with $authorization"))
+        }
         val error = runCatching { ImageUploader(leaky, "https://images.example", retryDelayMillis = { 0 }).upload(file, "SECRET-UPLOAD-TOKEN") }.exceptionOrNull()!!
         var e: Throwable? = error
         while (e != null) {

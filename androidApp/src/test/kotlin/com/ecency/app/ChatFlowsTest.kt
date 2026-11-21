@@ -19,6 +19,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performSemanticsAction
@@ -733,8 +734,16 @@ class ChatFlowsTest {
         waitFor("option:RENAME")
         tap("option:RENAME")
         waitFor("renameSheet")
-        compose.awaitScrolledTo("renameField").performTextInput("Book club")
-        compose.awaitScrolledTo("renameCancel").assertIsDisplayed()
+        // Cancel, the sheet's last control, closes it and renames nothing
+        compose.awaitScrolledTo("renameField").performTextInput("Not this")
+        compose.awaitScrolledTo("renameCancel").performClick()
+        waitUntil { !exists("renameSheet") }
+        assertTrue(node.chatCalls().none { it.endsWith("channels/ch-group/name") })
+        tap("chatOptions:ch-group")
+        waitFor("option:RENAME")
+        tap("option:RENAME")
+        waitFor("renameSheet")
+        compose.awaitScrolledTo("renameField").performTextReplacement("Reading circle")
         compose.awaitScrolledTo("renameSave").performClick()
         waitUntil { node.chatCalls().any { it.endsWith("channels/ch-group/name") } }
         waitUntil { !exists("renameSheet") }
