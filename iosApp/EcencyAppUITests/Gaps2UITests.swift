@@ -32,8 +32,8 @@ final class Gaps2UITests: XCTestCase {
     /// User report: the breakdown showed in feeds but not on a profile's post cards (RN: the same card on both).
     func testTappingAPayoutOnAProfileShowsTheBreakdown() {
         let app = launch(["-openScreen", "route:PROFILE:spike-alice"])
+        // wait for the profile's cards before acting; the card sits below the header, and tap() scrolls it into view
         let payout = element(app, "payout")
-        for _ in 0..<6 where !(payout.exists && payout.isHittable) { app.swipeUp() }
         XCTAssertTrue(payout.waitForExistence(timeout: 15), app.debugDescription)
         payout.tap()
         XCTAssertTrue(element(app, "payout-popover").waitForExistence(timeout: 10), app.debugDescription)
