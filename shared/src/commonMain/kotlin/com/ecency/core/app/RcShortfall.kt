@@ -5,8 +5,11 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /**
  * Out-of-RC counts (issue #3727, README "Crash reporting"): each time an account runs out of Resource Credits is one
- * Sentry event, message [MESSAGE] at level info with the one fingerprint `["rc-shortfall"]`, so all of them group into
- * one issue that never alerts as an error. The web app sends the same (vision-web#2196), so one query covers both.
+ * Sentry event at level info, message `rc-shortfall: <stage>/<op>` with the one fingerprint `["rc-shortfall"]`, so all
+ * of them group into one issue that never alerts as an error. The stage and op are in the message as well as the tags
+ * because Sentry's dedupe drops an event whose message and fingerprint equal the previous one, tags aside: a shared
+ * message would keep a pre-check and drop the rejection right after it. The web app sends the same
+ * (vision-web#2196), so one query covers both.
  *
  * - `rc.stage`: [STAGE_REJECTED] when the chain refused a broadcast ([ErrorReports.handled] with
  *   [ErrorKind.RESOURCE_CREDITS]); [STAGE_PRECHECK] when the editor's estimate warned (once per account per run).
@@ -68,7 +71,7 @@ object RcShortfall {
             ErrorReports.emit(
                 CrashReport(
                     type = MESSAGE,
-                    message = MESSAGE,
+                    message = "$MESSAGE: $stage/$op",
                     tags = mapOf("rc.stage" to stage, "rc.op" to op),
                     fingerprint = listOf(MESSAGE),
                     isMessage = true,

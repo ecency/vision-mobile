@@ -112,13 +112,13 @@ class SentryMappingTest {
     fun anOutOfRcCountIsAnInfoMessageWithNoUser() {
         // #3727: one grouped info issue, never an error alert, and no account
         val report = com.ecency.core.app.CrashReport(
-            type = "rc-shortfall", message = "rc-shortfall", tags = mapOf("rc.stage" to "rejected", "rc.op" to "post"),
+            type = "rc-shortfall", message = "rc-shortfall: rejected/post", tags = mapOf("rc.stage" to "rejected", "rc.op" to "post"),
             fingerprint = listOf("rc-shortfall"), isMessage = true, level = "info",
         )
         val event = SentryReporting.Reporter.event(report).apply { user = io.sentry.protocol.User().apply { username = "tester" } }
         val out = configured(id).beforeSend!!.execute(event, io.sentry.Hint())!!
         assertEquals(io.sentry.SentryLevel.INFO, out.level)
-        assertEquals("rc-shortfall", out.message!!.message)
+        assertEquals("the scrubber keeps it as it is", "rc-shortfall: rejected/post", out.message!!.message)
         assertEquals(listOf("rc-shortfall"), out.fingerprints)
         assertEquals("post", out.getTag("rc.op"))
         assertNull(out.user)

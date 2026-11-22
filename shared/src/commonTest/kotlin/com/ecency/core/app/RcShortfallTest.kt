@@ -18,7 +18,7 @@ class RcShortfallTest {
     @AfterTest
     fun uninstall() = ErrorReports.install({ CrashReporter.None }, { 0L })
 
-    private fun shortfalls() = reporter.reports.filter { it.message == RcShortfall.MESSAGE }
+    private fun shortfalls() = reporter.reports.filter { it.fingerprint == listOf(RcShortfall.MESSAGE) }
 
     private fun outOfRc() = BroadcastException.InsufficientResourceCredits(RuntimeException("Account: spike has 100 RC, needs 2000 RC. Please wait to transact, or power up HIVE."))
 
@@ -26,6 +26,7 @@ class RcShortfallTest {
     fun aPublishRejectedForResourceCreditsIsOneShortfallReport() {
         AppError.fromBroadcast(outOfRc(), "editor.publish")
         val r = shortfalls().single()
+        assertEquals("rc-shortfall: rejected/post", r.message, "the web app's message (vision-web#2199)")
         assertEquals("info", r.level)
         assertEquals(listOf("rc-shortfall"), r.fingerprint)
         assertTrue(r.isMessage, "a message, not an exception")
@@ -72,6 +73,7 @@ class RcShortfallTest {
         assertEquals(2, sent.size)
         assertEquals(listOf("precheck", "precheck"), sent.map { it.tags["rc.stage"] })
         assertEquals(listOf("post", "comment"), sent.map { it.tags["rc.op"] })
+        assertEquals(listOf("rc-shortfall: precheck/post", "rc-shortfall: precheck/comment"), sent.map { it.message })
         assertTrue(sent.none { r -> r.tags.values.any { it == "alice" || it == "bob" } && r.message.contains("alice") }, "no account in the report")
     }
 

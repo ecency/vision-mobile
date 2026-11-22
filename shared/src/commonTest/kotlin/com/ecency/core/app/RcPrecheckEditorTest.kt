@@ -107,7 +107,7 @@ class RcPrecheckEditorTest {
         w.idle()
         m.setBody("Some more text again", TextSelection(20))
         w.idle()
-        val sent = reporter.reports.filter { it.message == RcShortfall.MESSAGE }
+        val sent = reporter.reports.filter { it.fingerprint == listOf(RcShortfall.MESSAGE) }
         assertEquals(1, sent.size)
         assertEquals("precheck", sent.single().tags["rc.stage"])
         assertEquals("post", sent.single().tags["rc.op"])

@@ -32,7 +32,7 @@ final class CrashReportingTests: XCTestCase {
     /// #3727: an out-of-RC count is one grouped info issue, never an error alert, and carries no account.
     func testAnOutOfRcCountIsAnInfoMessageWithNoUser() {
         let report = CrashReport(
-            type: "rc-shortfall", message: "rc-shortfall", tags: ["rc.stage": "rejected", "rc.op": "post"],
+            type: "rc-shortfall", message: "rc-shortfall: rejected/post", tags: ["rc.stage": "rejected", "rc.op": "post"],
             fingerprint: ["rc-shortfall"], contextName: "", context: [:], isMessage: true, level: "info"
         )
         let event = CrashReporting.Reporter.event(report)
@@ -41,7 +41,7 @@ final class CrashReportingTests: XCTestCase {
         event.user = user
         let sent = CrashReporting.beforeSend(event)
         XCTAssertEqual(sent?.level, .info)
-        XCTAssertEqual(sent?.message?.formatted, "rc-shortfall")
+        XCTAssertEqual(sent?.message?.formatted, "rc-shortfall: rejected/post", "the scrubber keeps it as it is")
         XCTAssertEqual(sent?.fingerprint ?? [], ["rc-shortfall"])
         XCTAssertEqual(sent?.tags?["rc.op"], "post")
         XCTAssertNil(sent?.user)
