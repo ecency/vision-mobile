@@ -335,7 +335,12 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                     // the chain may stand elsewhere than the card read it (a proxy cleared meanwhile): read it again
                     reload()
                 }
-                else -> setState { it.copy(sending = false) }
+                else -> {
+                    // nothing was signed: the sheet stays to confirm again, unless the chain now says there is nothing to sign
+                    // (a read during the send kept the card only because it was sending)
+                    setState { it.copy(sending = false) }
+                    reload()
+                }
             }
         }
     }
