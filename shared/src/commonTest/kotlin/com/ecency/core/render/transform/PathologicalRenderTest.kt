@@ -188,6 +188,8 @@ class PathologicalRenderTest {
             LinearScaling.assertLinear("card: $unit", 4_000 / unit.length, { n -> unit.repeat(n) + tail }) { lookups(it) }
         }
         LinearScaling.assertLinear("card: definitions", 200, { n -> (0 until n).joinToString("") { "[r$it]: https://e.example/n.png\n" } + "\n![x]($a)" }) { lookups(it) }
+        // one long line of short links, no image (knownLabelCloses reads each link's own text only)
+        LinearScaling.assertLinear("card: a line of links", 5_000, { n -> "[a](https://e.example/q) ".repeat(n) + "\n\nend" }) { lookups(it) }
         LinearScaling.assertLinear("card: urls in a title", 200, { n -> "<div title=\"" + "https://e.example/t.png ".repeat(n) + "\">\n\n![x]($a)" }) { lookups(it) }
         // the `<img` grammar, one pass: unclosed tags and a gallery of closed ones without a src, then an image
         for (unit in listOf("<img ", "<img a", "(<img src =)", "<img>", "<img alt=\"x\">", "<img alt=\"a\rb\">")) {

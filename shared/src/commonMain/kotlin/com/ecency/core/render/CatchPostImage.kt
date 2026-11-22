@@ -1910,14 +1910,18 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return LabelCloses(closes, untrusted)
     }
 
-    /** `/\n[ \t]*\n/` in `s[from, to)`. */
+    /** `/\n[ \t]*\n/` in `s[from, to)`, read only there (a line of many links must not rescan the rest per link). */
     private fun hasBlankLine(s: String, from: Int, to: Int): Boolean {
-        var nl = s.indexOf('\n', from)
-        while (nl in from until to) {
-            var k = nl + 1
-            while (k < to && (s[k] == ' ' || s[k] == '\t')) k++
-            if (k < to && s[k] == '\n') return true
-            nl = s.indexOf('\n', nl + 1)
+        var nl = from
+        while (nl < to) {
+            if (s[nl] == '\n') {
+                var k = nl + 1
+                while (k < to && (s[k] == ' ' || s[k] == '\t')) k++
+                if (k < to && s[k] == '\n') return true
+                nl = k
+            } else {
+                nl++
+            }
         }
         return false
     }

@@ -1161,6 +1161,8 @@ const summaryBodies = [
   ['summary_surrogate_dest', 'text\n\n[y](<https://example.com/\ud800?q=1>)'],
   ['summary_surrogate_bare', 'https://example.com/\ud800x.png'],
   ['summary_surrogate_prose', 'see https://example.com/\udc00x.png now'],
+  // 2.5.58 (#2185): a refused IPFS image keeps the text around it
+  ['summary_refused_ipfs', `Read this first. https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png And this after.`],
 ]
 const summaryCases = []
 summaryBodies.forEach(([name, md], i) => {
@@ -1258,7 +1260,7 @@ cardBodies2557.forEach((body, i) => {
   imageCases.push({ name: `c2558fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
   imageCases.push({ name: `c2558raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
   // a kept proxy URL over the limit: sized, the proxy will not take it again
-  if (body.length > 1500 && body.includes(PROXY_BASE)) {
+  if (body.length > 1500 && /\/(?:p|u)\/[Zz]{2100}/.test(body)) {
     imageCases.push({ name: `c2558sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
     imageCases.push({ name: `c2558strsized_${i}`, kind: 'string', body, meta: null, w: 600, h: 500, fast: false, expected: rh.catchPostImage(body, 600, 500, 'match') })
   }
