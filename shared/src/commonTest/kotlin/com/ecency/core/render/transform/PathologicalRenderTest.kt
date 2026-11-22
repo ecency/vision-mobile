@@ -168,6 +168,33 @@ class PathologicalRenderTest {
         LinearScaling.assertLinear("stray percents", 2_000, { n -> "![x](https://e.example/50%\\x.png) ".repeat(n) }) { fast(it) }
     }
 
+    /** The 2.5.58 port's card scanners (#2180, #2185): label closes, what comes before the image, the `<img` grammar. */
+    @Test
+    fun the2558CardScannersStayLinear() {
+        val a = "https://e.example/a.png"
+        val lookups = { body: String ->
+            helper.catchPostImage(body, 0, 0, true)
+            helper.getEntryImageRawUrl(body)
+        }
+        // upstream's units (card-image-2185.spec.ts "the new scans are linear"), each repeated before an image
+        val units = listOf(
+            "](" to "![x]($a)",
+            "](a " to "![x]($a)",
+            "](a " to "\n$a",
+            "<a href=\"https://e.example/q\">https://youtu.be/abcdefghijk</a> " to "![x]($a)",
+            "<a href=\"https://e.example/q\">$a</a> " to "![x]($a)",
+        )
+        for ((unit, tail) in units) {
+            LinearScaling.assertLinear("card: $unit", 4_000 / unit.length, { n -> unit.repeat(n) + tail }) { lookups(it) }
+        }
+        LinearScaling.assertLinear("card: definitions", 200, { n -> (0 until n).joinToString("") { "[r$it]: https://e.example/n.png\n" } + "\n![x]($a)" }) { lookups(it) }
+        LinearScaling.assertLinear("card: urls in a title", 200, { n -> "<div title=\"" + "https://e.example/t.png ".repeat(n) + "\">\n\n![x]($a)" }) { lookups(it) }
+        // the `<img` grammar, one pass: unclosed tags and a gallery of closed ones without a src, then an image
+        for (unit in listOf("<img ", "<img a", "(<img src =)", "<img>", "<img alt=\"x\">", "<img alt=\"a\rb\">")) {
+            LinearScaling.assertLinear("img scan: $unit", 1_500, { n -> unit.repeat(n) + "<img src=\"$a\">" }) { lookups(it) }
+        }
+    }
+
     /** Reference definitions in one paragraph: render-helper 2.5.54 renders them in linear time on both renders. */
     @Test
     fun definitionsInOneParagraphStayLinear() {

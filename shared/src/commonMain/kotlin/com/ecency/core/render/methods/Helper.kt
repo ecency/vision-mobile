@@ -246,13 +246,14 @@ internal object Helper {
     private const val MD_ESCAPABLE = "\\!\"#$%&'()*+,./:;<=>?@[]^_`{|}~-"
 
     /**
-     * `decodeRawBodyImageSrc`: a body image URL from the raw post body (the card image scan), decoded the way the
-     * render reads it. A markdown [destination] is unescaped as Remarkable does (an escaped `&` stays literal unless
-     * [ampEscapes] is off), complete references decoded once, then percent-encoding.
+     * `rawBodySource` (2.5.58): a body image URL from the raw post body (the card image scan) with its references
+     * decoded the way the render's DOM holds it; the percent-encoding is left for [decodeDomImageSrc]. A markdown
+     * [destination] is unescaped as Remarkable does (an escaped `&` stays literal unless [ampEscapes] is off), complete
+     * references decoded once.
      */
-    fun decodeRawBodyImageSrc(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
+    fun rawBodySource(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
         val unescaped = if (destination) unescapeDestination(src, ampEscapes) else src.replace("\\&", "&amp;")
-        return decodeDomImageSrc(decodeCompleteReferences(unescaped))
+        return decodeCompleteReferences(unescaped)
     }
 
     /** `unescapeDestination`: a markdown destination's backslash escapes resolved as Remarkable resolves them; an escaped `&` is a literal one (`&amp;`) when [ampEscapes]. */

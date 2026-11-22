@@ -146,7 +146,7 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
         }
 
         private const val LEGACY_BASE = "https://images.ecency.com"
-        private const val MAX_PROXIED_URL_LENGTH = 2048
+        internal const val MAX_PROXIED_URL_LENGTH = 2048
         // about base58 of MAX_PROXIED_URL_LENGTH bytes: a longer hash is not decoded and keeps the match srcset.
         private const val MAX_HASH_LENGTH = 2800
         private val SRCSET_WIDTHS = listOf(320, 600, 800, 1024, 1280)

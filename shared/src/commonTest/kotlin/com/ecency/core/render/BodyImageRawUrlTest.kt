@@ -7,8 +7,8 @@ import kotlin.test.assertEquals
 /**
  * `getEntryImageRawUrl` on a body: render-helper 2.5.52's `bodyImageRawUrl` decodes each kind of candidate its own
  * way (an `<img src>` as an attribute, a markdown destination with its escapes, a bare URL with trailing punctuation
- * trimmed, a bare URL on an HTML block line as HTML text). Expected values are render-helper 2.5.52's output on the
- * same bodies (review of #3714).
+ * trimmed, a bare URL on an HTML block line as HTML text). Expected values are render-helper's output on the same
+ * bodies (2.5.52, review of #3714; checked again on 2.5.58).
  */
 class BodyImageRawUrlTest {
     private val helper = RenderHelper(RenderCases.PROXY_BASE)
@@ -31,10 +31,11 @@ class BodyImageRawUrlTest {
         "<center>\n\nhttps://example.com/a%20b.jpg?x=1&lt;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
         "<center>\n\nhttps://example.com/a%20b.jpg?x=1&LT;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
         "<center>\n\nhttps://example.com/a%20b.jpg?x=1&Gt;b\n\n</center>" to "https://example.com/a b.jpg?x=1",
-        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;LT;b\n\n</center>" to "https://example.com/a.jpg?x=1&LT;b",
-        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;gT;b\n\n</center>" to "https://example.com/a.jpg?x=1&gT;b",
+        // a reference written twice (`&amp;LT;`) is the render's to read since 2.5.58 (#2185)
+        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;LT;b\n\n</center>" to null,
+        "<center>\n\nhttps://example.com/a.jpg?x=1&amp;gT;b\n\n</center>" to null,
         // on the HTML block's own line: decoded first, then the token ends at lt; or gt; in any case (render-helper /gi)
-        "<div>\nhttps://example.com/a.jpg?x=1&amp;LT;b\n</div>" to "https://example.com/a.jpg?x=1",
+        "<div>\nhttps://example.com/a.jpg?x=1&amp;LT;b\n</div>" to null,
         "<div>\nhttps://example.com/a.jpg?x=1&lT;b\n</div>" to "https://example.com/a.jpg?x=1",
         "<div>\nhttps://example.com/a.jpg?x=1&#38;gT;b\n</div>" to "https://example.com/a.jpg?x=1",
         "https://example.com/a.jpg?x=1&amp;y=2&GT;z" to "https://example.com/a.jpg?x=1&y=2",
