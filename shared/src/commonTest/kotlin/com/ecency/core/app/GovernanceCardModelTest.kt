@@ -179,7 +179,9 @@ class GovernanceCardModelTest {
         assertFalse(model.current.done)
         assertFalse(model.current.sending)
         assertTrue(model.current.visible)
-        assertTrue(app.env.ui.current.toast?.text.orEmpty().startsWith(GovernanceCopy.FAIL), app.env.ui.current.toast?.text)
+        // one catalog message with the reason in it (native.governance.failed_with)
+        val toast = app.env.ui.current.toast?.text.orEmpty()
+        assertTrue(toast.startsWith(com.ecency.core.l10n.L.native.governance.failedWith(message = "")) && toast.contains("Proxy must change"), toast)
     }
 
     @Test
@@ -429,5 +431,80 @@ class GovernanceCardModelTest {
         model.refresh()
         testScheduler.advanceUntilIdle()
         assertFalse(model.current.visible, "the choice stands")
+    }
+
+    @Test
+    fun dontShowAgainOnInactiveEndsWhenTheVotesCountEvenIfFirstSeenExpiring() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain)
+        val model = start(this, app)
+        model.dismiss(GovernanceDismiss.FOREVER)
+        // the next read already finds the renewed votes in their last month
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 10 * day), votes = listOf("good-karma"))
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertEquals(GovernanceStatus.EXPIRING, model.current.status)
+        chain.fields[alice] = governance(Governance.EXPIRED_TS)
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible, "the earlier choice was about the earlier lapse")
+    }
+
+    @Test
+    fun aReadLandingWhileSendingKeepsTheSheet() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.runCurrent()
+            // set on another device meanwhile: the read says the votes count
+            chain.fields[alice] = governance(chainTime(TestApp.NOW + 200 * day), proxy = "ecency")
+            model.refresh()
+            testScheduler.runCurrent()
+            assertTrue(model.current.sending)
+            assertTrue(model.current.visible, "a read does not hide a card that is sending")
+            assertTrue(model.current.confirming, "nor close its sheet")
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun aConfirmedSendReadsTheAccountAgainAndKeepsItsThanks() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain)
+        val model = start(this, app)
+        model.askConfirm()
+        model.confirm()
+        // the chain now holds the proxy
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 365 * day), proxy = "ecency")
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.done)
+        assertTrue(model.current.visible, "the thanks stay")
+        assertEquals("ecency", model.current.proxy, "the card follows the chain")
+        assertEquals(GovernanceStatus.ACTIVE, model.current.status)
+    }
+
+    @Test
+    fun noDismissalWhileASendRuns() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.advanceTimeBy(60_000)
+            testScheduler.runCurrent()
+            assertTrue(model.current.sending)
+            model.askDismiss()
+            assertFalse(model.current.askingDismiss)
+            model.dismiss(GovernanceDismiss.FOREVER)
+            assertTrue(model.current.visible)
+            assertFalse(app.env.prefs.keys().any { it.startsWith(GovernanceCardModel.KEY_PREFIX) }, "nothing kept that could hide the card a failed send needs")
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
     }
 }

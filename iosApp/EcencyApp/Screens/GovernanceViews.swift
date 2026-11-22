@@ -37,7 +37,7 @@ struct GovernanceCardView: View {
                             }
                             .buttonStyle(.borderless)
                             .accessibilityIdentifier("governance-vote-yourself")
-                            Button(GovernanceCopy.shared.DISMISS) { model.askDismiss() }.buttonStyle(.borderless).accessibilityIdentifier("governance-dismiss")
+                            Button(GovernanceCopy.shared.DISMISS) { model.askDismiss() }.buttonStyle(.borderless).disabled(state.sending).accessibilityIdentifier("governance-dismiss")
                         }
                         .padding(.top, 4)
                     }
@@ -97,6 +97,8 @@ private struct GovernanceConfirmSheet: View {
             }
             .padding(24)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("governance-sheet")
         .presentationDetents([.medium, .large])
         // never closed while it signs and sends
         .interactiveDismissDisabled(state.sending)

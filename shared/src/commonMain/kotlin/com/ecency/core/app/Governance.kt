@@ -208,29 +208,34 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 env.session.awaitLoaded()
                 val user = env.session.current.username
                 if (current.username != user) setState { fresh(user) }
-                if (user == null || current.done) return@launch
+                if (user == null) return@launch
                 val accounts = env.api.hive.accounts(listOf(user, PROXY))
                 if (env.session.current.username != user) return@launch
                 val account = accounts.firstOrNull { it.name == user } ?: return@launch
                 val ecency = accounts.firstOrNull { it.name == PROXY }
                 val status = Governance.status(account, env.nowMillis())
                 val episode = if (status == GovernanceStatus.EXPIRING) "expiring.${account.governanceVoteExpiration}" else INACTIVE
-                // the votes count again: a "Don't show again" was about that lapse, not the next one (only on what says
-                // so: a date ahead, votes or a proxy; a node leaving the field out proves nothing)
+                // the votes count again, expiring or not: a "Don't show again" was about that lapse, not the next one
+                // (only on what says so: a date ahead, votes or a proxy; a node leaving the field out proves nothing)
                 val counts = Governance.expiresAt(account) != null || account.proxy.isNotEmpty() || account.witnessVotes.isNotEmpty()
-                if (status == GovernanceStatus.ACTIVE && counts) env.prefs.putString(key(user, INACTIVE), null)
+                if (counts) env.prefs.putString(key(user, INACTIVE), null)
                 setState { s ->
                     if (s.username != user) {
                         s
                     } else {
+                        val sending = user in inFlight
+                        // a read never hides a card that is sending or says thanks; an idle card follows the chain
+                        val visible = sending || s.done || (status != GovernanceStatus.ACTIVE && !hidden(user, episode))
                         s.copy(
                             status = status,
                             expiresAt = Governance.expiresAt(account),
                             proxy = account.proxy,
                             ecencyProxy = ecency?.proxy?.takeIf { it.isNotEmpty() },
                             episode = episode,
-                            visible = status != GovernanceStatus.ACTIVE && !hidden(user, episode),
-                            sending = user in inFlight,
+                            visible = visible,
+                            sending = sending,
+                            confirming = s.confirming && visible,
+                            askingDismiss = s.askingDismiss && visible,
                         )
                     }
                 }
@@ -315,6 +320,8 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 is SendPhase.Done -> {
                     setState { it.copy(sending = false, confirming = false, done = true, visible = true) }
                     env.ui.toast(GovernanceCopy.THANK_YOU)
+                    // the card keeps its thanks; its proxy, status and expiry follow the chain
+                    reload()
                 }
                 is SendPhase.Unconfirmed -> {
                     setState { it.copy(sending = false, confirming = false) }
@@ -338,19 +345,21 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
         val message = phase.error.text
         return when {
             phase.error.undecided && message.isNotEmpty() -> message
-            message.isNotEmpty() -> "${GovernanceCopy.FAIL}: $message"
+            message.isNotEmpty() -> L.native.governance.failedWith(message = message)
             else -> GovernanceCopy.FAIL
         }
     }
 
+    /** Not while a send runs: a dismissal then could hide the card a failed send needs. */
     fun askDismiss() {
-        if (current.visible && !current.done) setState { it.copy(askingDismiss = true) }
+        if (current.visible && !current.done && !current.sending) setState { it.copy(askingDismiss = true) }
     }
 
     /** Hides the card for good or for 3 days; null closes the choice without changing anything. */
     fun dismiss(choice: GovernanceDismiss?) {
         val s = current
         setState { it.copy(askingDismiss = false) }
+        if (s.sending) return
         val user = s.username ?: return
         val episode = s.episode ?: return
         when (choice) {

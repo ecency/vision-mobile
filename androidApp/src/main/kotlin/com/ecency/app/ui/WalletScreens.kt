@@ -106,7 +106,8 @@ fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: 
                         else -> "--:--"
                     },
                     updating = state.isUpdating,
-                    onRefresh = model::refresh,
+                    // the governance card reads its account too, as pull to refresh does
+                    onRefresh = { model.refresh(); env.governanceCard.refresh() },
                     onManage = { push(AppScreen.AssetsSelect) },
                     onSend = { push(AppScreen.Transfer("transfer", "HIVE", "hive")) },
                     onReceive = { receive = true },

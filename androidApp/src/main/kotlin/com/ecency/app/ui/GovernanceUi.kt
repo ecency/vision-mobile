@@ -57,7 +57,7 @@ fun GovernanceCard(env: AppEnvironment, openExternal: (String) -> Unit) {
                     TextButton(onClick = { openExternal(GovernanceCardModel.VOTE_URL) }, modifier = Modifier.testTag("governanceVoteYourself")) {
                         Text(GovernanceCopy.VOTE_YOURSELF, color = colors.blueText)
                     }
-                    TextButton(onClick = model::askDismiss, modifier = Modifier.testTag("governanceDismiss")) {
+                    TextButton(onClick = model::askDismiss, enabled = !state.sending, modifier = Modifier.testTag("governanceDismiss")) {
                         Text(GovernanceCopy.DISMISS, color = colors.blueText)
                     }
                 }

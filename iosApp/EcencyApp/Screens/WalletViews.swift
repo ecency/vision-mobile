@@ -81,7 +81,8 @@ struct WalletTabView: View {
                 }
                 FormRowGap(minLength: 0)
                 HStack(spacing: 0) {
-                Button { model.refresh() } label: {
+                // the governance card reads its account too, as pull to refresh does
+                Button { model.refresh(); app.env.governanceCard.refresh() } label: {
                     Group { if s.isUpdating { ProgressView() } else { Image(appIcon: .refresh).foregroundStyle(theme.icon) } }.tapTarget()
                 }
                 .buttonStyle(.borderless).accessibilityLabel(WalletUiCopy.shared.REFRESH).largeContent(WalletUiCopy.shared.REFRESH, appIcon: .refresh)

@@ -261,6 +261,7 @@ final class WalletUITests: XCTestCase {
         let confirm = app.buttons["governance-confirm"]
         XCTAssertTrue(confirm.waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["governance-point-0"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["governance-sheet"].exists)
         WalletShots.save("governance-sheet")
         confirm.tap()
         // the demo account holds no active key: signing asks for the active key upgrade (the proxy needs active)
