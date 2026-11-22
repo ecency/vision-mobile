@@ -1,7 +1,7 @@
 # Upstream issues found while porting @ecency/render-helper
 
 Found during the native port (oracle: `@ecency/render-helper` 2.5.41). Each item says what the
-native port does instead, so the deviation is deliberate and tested. Status as of 2.5.57 under each.
+native port does instead, so the deviation is deliberate and tested. Status as of 2.5.58 under each.
 
 ## Iframe allow list is skipped by the sanitize-only fallback
 
@@ -201,3 +201,25 @@ an escaped match defer to the render, and fast mode gives up on a bare URL with 
 first. Still open upstream (reported in #2179's comments, not fixed by 2.5.57): when the first image's URL is longer
 than `proxifyImageSrc` accepts and another image follows, the render shows the second image but `catchPostImage`
 returns null (fast mode too); native follows upstream's output (`c2556_*` and `c2557_*` goldens).
+
+**Status (2.5.58, #2186): fixed upstream, ported.** The render leaves an image the proxy refuses without a src and the
+card takes the next image (`CatchPostImage.droppedImageEnd`, `fromRender` reading the first `<img>` with a src); see
+the next section.
+
+## Card lookups name the image the body shows, or defer (#2180, #2182, #2183, #2185, #2191, #2194)
+
+**What happened.** After 2.5.57 the card, fast card and raw lookups could name another image than the body showed:
+a URL after a `](` the scans misread, a query reference or parenthesis read differently per lookup, a spaced legacy
+proxy `src`, a bare URL in link text, a title, a definition or code, a `src` inside another attribute's value, a fence
+the scans closed early, a video poster before an image, and an already proxied image named in a different rendition
+than the body requested. An image link the proxy refused threw in `a()` and dropped every image in the post.
+
+**Status (2.5.58, #2186): fixed upstream, ported.** `CatchPostImage` follows upstream's `card-image.ts` function by
+function (`knownLabelCloses`, `matchHtmlImage`, `tagBreaksParagraph`, `unreadBefore`, `bareShown`, `posterShown`,
+`nextFenceState`, `candidateSource`, `proxifySource`, `regexTierImage`), each regex a scanner. The body side is
+`ImgMethod.bodyImageSources`, `AMethod`'s refused image link, `ImageProxy`'s re-escaped legacy swap,
+`Helper.decodeDomImageSrc` trimming first and the summary's lone surrogate pass. Goldens: the 346 bodies of upstream's
+`card-and-summary-2182-2183.spec.ts` and `card-image-2185.spec.ts` (`c2558*` in `TransformGoldenTest`); linear time:
+`PathologicalRenderTest.the2558CardScannersStayLinear`. The LCP preload lookup (`getEntryLcpImage`) has no native
+counterpart. Known and left upstream: malformed tag soup such as `<iframe><div class="<video>![x](A)` shows an image
+on the web page that the `forApp` render the card uses does not.
