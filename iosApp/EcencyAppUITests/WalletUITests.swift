@@ -263,8 +263,12 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["governance-point-0"].exists)
         WalletShots.save("governance-sheet")
         confirm.tap()
-        // the fake chain refuses every broadcast: the card stays and still offers the proxy
-        XCTAssertTrue(app.buttons["governance-set-proxy"].waitForExistence(timeout: 20))
+        // the fake chain refuses every broadcast: the sheet closes, the card stays and still offers the proxy
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: confirm)
+        waitForExpectations(timeout: 20)
+        let setProxy = app.buttons["governance-set-proxy"]
+        XCTAssertTrue(setProxy.waitForExistence(timeout: 10))
+        XCTAssertTrue(setProxy.isHittable, "the card, not a sheet over it")
     }
 
     /// "Remind Later" hides the card (the choice is a dialog; its buttons show twice in the tree, so firstMatch).
@@ -285,6 +289,7 @@ final class WalletUITests: XCTestCase {
     func testAWalletWhoseGovernanceCountsHasNoCard() {
         let app = launch(["-startTab", "WALLET"])
         XCTAssertTrue(app.buttons["asset-POINTS"].waitForExistence(timeout: 30))
-        XCTAssertFalse(app.descendants(matching: .any)["governance-card"].exists)
+        // the card's read runs apart from the wallet's: give it time to show before saying it does not
+        XCTAssertFalse(app.descendants(matching: .any)["governance-card"].waitForExistence(timeout: 8))
     }
 }

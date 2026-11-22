@@ -863,6 +863,8 @@ class WalletFlowsTest {
         governance = ""","proxy":"","witness_votes":["good-karma"],"governance_vote_expiration_ts":"2027-07-14T15:38:51""""
         launch(Navigator(NavState().selectTab(AppTab.WALLET)))
         until { exists("asset:POINTS") }
+        // the card's own read (the account with @ecency) has landed before the card is looked for
+        until { node.sent.any { it.contains("condenser_api.get_accounts") && it.contains("\"ecency\"") } }
         compose.waitForIdle()
         assertFalse(exists("governanceCard"))
     }
