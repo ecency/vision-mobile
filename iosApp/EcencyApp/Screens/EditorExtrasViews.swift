@@ -412,7 +412,7 @@ struct DictationSheet: View {
         let recording = state.phase == DictationPhase.recording
         NavigationStack {
             // scrolls when large text needs more than the sheet's height
-            ScrollView {
+            FittedSheetScroll {
             VStack(spacing: 8) {
                 if state.unavailable { Text(texts.UNAVAILABLE).font(.footnote).foregroundStyle(theme.dangerText).announces(texts.UNAVAILABLE) }
                 if state.denied { Text(texts.DENIED).font(.footnote).foregroundStyle(theme.dangerText).announces(texts.DENIED).accessibilityIdentifier("dictation-denied") }
@@ -451,10 +451,9 @@ struct DictationSheet: View {
             }
             .padding(16)
             }
-            .scrollBounceBehavior(.basedOnSize)
             .navigationTitle(texts.TITLE).navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .interactiveDismissDisabled(state.busy)
         .alert(
             state.alertTitle ?? UiCopy.shared.FAIL,
@@ -531,7 +530,7 @@ struct VideoUploadSheet: View {
         let state = video.state
         NavigationStack {
             // scrolls when large text needs more than the sheet's height
-            ScrollView {
+            FittedSheetScroll {
             VStack(alignment: .leading, spacing: 12) {
                 if !state.hasVideo {
                     Button(VideoUploadModel.companion.RECORD) {
@@ -597,10 +596,9 @@ struct VideoUploadSheet: View {
             }
             .padding(16)
             }
-            .scrollBounceBehavior(.basedOnSize)
             .navigationTitle(VideoUploadModel.companion.SELECT_SOURCE).navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .interactiveDismissDisabled(state.uploading)
         .themedSheet(item: $picker) { which in
             switch which {

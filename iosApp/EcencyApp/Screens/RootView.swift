@@ -69,8 +69,7 @@ struct RootView: View {
                         app.sheet = nil
                         app.env.postActions.confirm(item: r.item, shown: r.post, asUser: r.user, notes: notes)
                     }
-                    // room for the notes at large text sizes
-                    .presentationDetents([.medium, .large])
+                    .fittedDetents()
                 case let .quickProfile(name): QuickProfileSheet(username: name, env: app.env)
                 case let .reply(r): MenuReplySheet(request: r)
                 case .customiseFilters: CustomiseFiltersSheet()

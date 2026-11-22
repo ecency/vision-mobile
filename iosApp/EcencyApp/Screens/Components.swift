@@ -356,6 +356,66 @@ extension View {
     }
 }
 
+/// Sheet heights (#3728): a sheet opens at its content's height, never at half the screen with an empty band under its
+/// last row. Its scrolling part is a `FittedSheetScroll`; `.fittedDetents()` on the sheet's root adds what sits around
+/// it (a navigation bar, a fixed footer). Taller content scrolls, up to the full sheet. `.medium` is never a sheet
+/// detent (`SheetDetentLintTests`).
+private struct SheetContentHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+private struct SheetViewportHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+/// A sheet's scrolling content, measured for `.fittedDetents()`.
+struct FittedSheetScroll<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        ScrollView {
+            content.background(GeometryReader { Color.clear.preference(key: SheetContentHeightKey.self, value: $0.size.height) })
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .background(GeometryReader { Color.clear.preference(key: SheetViewportHeightKey.self, value: $0.size.height) })
+    }
+}
+
+private struct FittedDetents: ViewModifier {
+    @State private var sheet: CGFloat = 0
+    @State private var content: CGFloat = 0
+    @State private var viewport: CGFloat = 0
+    @State private var fitted: CGFloat?
+    /// Half the screen only until the content is measured (a sheet still loading).
+    @State private var detent: PresentationDetent = .medium
+
+    func body(content view: Content) -> some View {
+        view
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sheet = $0; refit() }
+            .onPreferenceChange(SheetContentHeightKey.self) { content = $0; refit() }
+            .onPreferenceChange(SheetViewportHeightKey.self) { viewport = $0; refit() }
+            .presentationDetents(fitted.map { [.height($0), .large] } ?? [.medium, .large], selection: $detent)
+    }
+
+    /// The sheet's height less the scroller's is what sits around it; that plus the content is the fitted height. It
+    /// holds at any sheet height, so a resize settles at once. A sheet pulled up to full height stays there.
+    private func refit() {
+        guard sheet > 0, viewport > 0, content > 0 else { return }
+        let height = (sheet - viewport + content).rounded(.up)
+        if let fitted, abs(fitted - height) < 1 { return }
+        let followed = detent == (fitted.map { .height($0) } ?? .medium)
+        fitted = height
+        if followed { detent = .height(height) }
+    }
+}
+
+extension View {
+    /// The sheet opens at its `FittedSheetScroll`'s content height plus what sits around it.
+    func fittedDetents() -> some View { modifier(FittedDetents()) }
+}
+
 /// A Form whose rows are theme cards on the theme background (the system grouped colours are black in dark mode).
 struct ThemedForm<Content: View>: View {
     @ViewBuilder let content: Content

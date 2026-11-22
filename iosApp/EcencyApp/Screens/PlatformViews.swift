@@ -288,7 +288,7 @@ struct DappBrowserScreen: View {
         }
         .themedSheet(item: Binding(get: { state.prompt.map(PromptItem.init) }, set: { if $0 == nil { model.reject() } })) { item in
             BridgeConfirmSheet(prompt: item.prompt, onConfirm: { model.confirm() }, onReject: { model.reject() })
-                .presentationDetents([.medium, .large])
+                .fittedDetents()
         }
         .overlay {
             if state.working {
@@ -460,7 +460,8 @@ struct BridgeConfirmSheet: View {
     var body: some View {
         // the details scroll; Confirm and Cancel stay pinned below them with the phishing warning, so the answer and
         // the warning are always on screen, whatever the text size
-        ScrollView {
+        VStack(spacing: 0) {
+        FittedSheetScroll {
         VStack(spacing: 0) {
             Image(appIcon: .verifiedUser, filled: true).font(.system(size: 40)).foregroundStyle(theme.accentText).padding(.top, 20).accessibilityHidden(true)
             Text(prompt.title).scaledFont(18, weight: .bold).foregroundStyle(theme.text).padding(.top, 12).accessibilityAddTraits(.isHeader).accessibilityIdentifier("bridge-title")
@@ -485,7 +486,6 @@ struct BridgeConfirmSheet: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 16)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
             if prompt.blacklisted != nil {
                 HStack(alignment: .top, spacing: 8) {
@@ -520,7 +520,6 @@ struct BridgeConfirmSheet: View {
             .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
             .background(theme.background)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("bridge-sheet")
     }
@@ -714,7 +713,6 @@ private struct CameraPreview: UIViewRepresentable {
 struct ShareSheetHost: View {
     @StateObject private var share: Observed<ShareState>
     @EnvironmentObject private var app: AppContainer
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     init(env: AppEnvironment) {
         _share = StateObject(wrappedValue: Observed(env.share, ownsModel: false))
@@ -725,8 +723,8 @@ struct ShareSheetHost: View {
     var body: some View {
         Color.clear.frame(width: 0, height: 0).allowsHitTesting(false)
             .themedSheet(isPresented: Binding(get: { share.state.choosing }, set: { if !$0 && share.state.choosing { model.choose(target: nil) } })) {
-                // RN's short sheet at the usual text sizes; it grows (and scrolls) with large text
-                ShareChooserSheet { model.choose(target: $0) }.presentationDetents(typeSize > .large ? [.medium, .large] : [.height(260), .large])
+                // RN's short sheet; it grows (and scrolls) with large text
+                ShareChooserSheet { model.choose(target: $0) }.fittedDetents()
             }
             .onChange(of: share.state.navigation as? NSObject) { _, _ in follow(share.state.navigation) }
     }
@@ -748,7 +746,7 @@ struct ShareChooserSheet: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        ScrollView {
+        FittedSheetScroll {
         VStack(alignment: .leading, spacing: 8) {
             Text(ShareCopy.shared.TITLE).scaledFont(18, weight: .semibold).foregroundStyle(theme.text).padding(.bottom, 12).accessibilityAddTraits(.isHeader)
             option(.compose, ShareCopy.shared.BLOG, ShareCopy.shared.BLOG_DESC, "share-blog") { onChoose(.blog) }
@@ -757,7 +755,6 @@ struct ShareChooserSheet: View {
         .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("share-chooser")
     }

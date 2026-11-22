@@ -293,7 +293,7 @@ struct ReceiveSheet: View {
 
     var body: some View {
         // scrolls when large text needs more than the sheet's height
-        ScrollView {
+        FittedSheetScroll {
         VStack(spacing: 12) {
             Text(copy.RECEIVE).font(.headline).accessibilityAddTraits(.isHeader)
             Text(copy.RECEIVE_DESC).font(.footnote).foregroundStyle(theme.secondary).multilineTextAlignment(.center)
@@ -303,8 +303,7 @@ struct ReceiveSheet: View {
         }
         .padding(24)
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .presentationDetents([.medium, .large])
+        .fittedDetents()
         .accessibilityIdentifier("receive-sheet")
     }
 }
