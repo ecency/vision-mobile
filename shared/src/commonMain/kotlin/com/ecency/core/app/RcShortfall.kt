@@ -37,6 +37,9 @@ object RcShortfall {
 
     private const val DAY_MILLIS = 86_400_000L
 
+    /** Wallet operations outside the `wallet.` and `transfer.` sites: a tip, a swap, a points redeem, a power down route. */
+    private val WALLET_SITES = setOf("tip.confirm", "trade.swap", "redeem.confirm", "powerDown.route")
+
     private class State(val sent: Int, val recent: List<Throwable>)
 
     private val EMPTY = State(0, emptyList())
@@ -50,8 +53,10 @@ object RcShortfall {
         where == "editor.publish" || where == "crossPost.publish" -> OP_POST
         where == "composeReply.send" || where == "waveCompose.send" || where == "community.send" -> OP_COMMENT
         where == "post.vote" || where == "poll.vote" -> "vote"
-        where == "postActions.reblog" -> "reblog"
-        where.startsWith("wallet.") || where.startsWith("transfer.") -> "transfer"
+        // the community reblog after a publish is a reblog, as on the web
+        where == "postActions.reblog" || where == "editor.reblog" -> "reblog"
+        // every wallet operation is a transfer, as on the web
+        where.startsWith("wallet.") || where.startsWith("transfer.") || where in WALLET_SITES -> "transfer"
         else -> "other"
     }
 

@@ -59,7 +59,11 @@ class RcShortfallTest {
             "editor.publish" to "post", "crossPost.publish" to "post",
             "composeReply.send" to "comment", "waveCompose.send" to "comment", "community.send" to "comment",
             "post.vote" to "vote", "poll.vote" to "vote", "postActions.reblog" to "reblog",
+            // the community reblog after a publish is a reblog (the web app's rule too)
+            "editor.reblog" to "reblog",
+            // every wallet operation is a transfer, as on the web
             "wallet.send" to "transfer", "wallet.claim" to "transfer", "transfer.confirm" to "transfer",
+            "tip.confirm" to "transfer", "trade.swap" to "transfer", "redeem.confirm" to "transfer", "powerDown.route" to "transfer",
             "chat.send" to "other", "" to "other",
         )
         expected.forEach { (where, op) -> assertEquals(op, RcShortfall.opOf(where), where) }
