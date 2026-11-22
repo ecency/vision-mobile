@@ -33,7 +33,8 @@ internal object UrlScanner {
     private val decimal by lazy { ranges(AutolinkerData.URL_DECIMAL) }
     private val suffix by lazy { ranges(AutolinkerData.URL_SUFFIX) }
     private val suffixEnd by lazy { ranges(AutolinkerData.URL_SUFFIX_END) }
-    private val canon: CharArray by lazy {
+    /** JS Canonicalize per code unit (`/i` without `u`), shared with the card's reference labels. */
+    internal val canon: CharArray by lazy {
         val table = CharArray(0x10000)
         for (run in AutolinkerData.CANON_TABLE.split(',')) {
             val dash = run.indexOf('-')

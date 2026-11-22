@@ -97,6 +97,12 @@ data class Account(
     /** The raw metadata strings, for a profile edit that must keep everything it does not change. */
     val postingJsonMetadata: String = "",
     val jsonMetadata: String = "",
+    /** Governance (#3724): the witness proxy (empty: none), the witnesses voted for, and `governance_vote_expiration_ts` as the node sends it. */
+    val proxy: String = "",
+    val witnessVotes: List<String> = emptyList(),
+    val governanceVoteExpiration: String = "",
+    /** `can_vote`: false once the account declined voting rights; the chain then refuses a proxy. */
+    val canVote: Boolean = true,
 ) {
     /** Neither metadata string is set: legitimate for a new account, or a node that stripped them. */
     val isMetadataStripped: Boolean get() = postingJsonMetadata.isEmpty() && jsonMetadata.isEmpty()
@@ -133,6 +139,10 @@ data class Account(
                 },
                 postingJsonMetadata = (o["posting_json_metadata"] as? JsonPrimitive)?.takeIf { it.isString }?.content.orEmpty(),
                 jsonMetadata = (o["json_metadata"] as? JsonPrimitive)?.takeIf { it.isString }?.content.orEmpty(),
+                proxy = o.str("proxy").orEmpty(),
+                witnessVotes = o["witness_votes"].arr().orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content },
+                governanceVoteExpiration = o.str("governance_vote_expiration_ts").orEmpty(),
+                canVote = (o["can_vote"] as? JsonPrimitive)?.takeIf { !it.isString }?.content?.toBooleanStrictOrNull() ?: true,
             )
         }
     }

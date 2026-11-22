@@ -60,6 +60,14 @@ object PlatformGoldenVectors {
             txId = "bd3c6374c501d5cd77248e922e264832ae4e30e3",
             signature = "20e2a51dc5843c4314087f29166792058fd105ca39cacfde6ed0efdc0e7fb8e10e260c0663a85123e8f42fa81da8ddd66d5c52e9c22e0a6b5bf8944a673de6e00e",
         ),
+        WalletVector(
+            name = "account_witness_proxy_renew",
+            operationsJson = "[[\"account_witness_proxy\",{\"account\":\"spike-voter\",\"proxy\":\"\"}],[\"account_witness_proxy\",{\"account\":\"spike-voter\",\"proxy\":\"ecency\"}]]",
+            serialized = "3930d368b7c8c0e2c46a020d0b7370696b652d766f746572000d0b7370696b652d766f746572066563656e637900",
+            digest = "0c6088a7ba00e52d934b3b0607343ccdbe22d7543181cf82102a6f36680f6008",
+            txId = "b9aac19714bb40fb286ee87a1f17160bf6f20841",
+            signature = "20eb413ab6197f585698da6b9bba537ad27a5a8e06f320befce0b3dddfef966d541ab3e146f9f3a2906f102ea31d868c77e7491756aad3fa81fe882678cf296286",
+        ),
     )
 
     /** RN useHiveBridgeHandler._buildOperations on synthetic Keychain requests: [dataJson] in, [operationsJson] out. */

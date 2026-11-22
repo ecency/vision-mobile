@@ -56,7 +56,8 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
         val routeThroughProxy = width > 0 || height > 0 || blur || forceProxy
 
         if (isLegacyForeignProxyUrl(url) && !(isLegacySizedProxyUrl(url) && routeThroughProxy)) {
-            return url.replaceFirst("https://images.hive.blog", base).replaceFirst("https://steemitimages.com", base)
+            // 2.5.58 (#2185): served as written, so whitespace or a control character a decode put in it is escaped again
+            return escapeControls(url.replaceFirst("https://images.hive.blog", base).replaceFirst("https://steemitimages.com", base))
         }
 
         if (url.startsWith("$LEGACY_BASE/") && !routeThroughProxy) {
@@ -145,7 +146,7 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
         }
 
         private const val LEGACY_BASE = "https://images.ecency.com"
-        private const val MAX_PROXIED_URL_LENGTH = 2048
+        internal const val MAX_PROXIED_URL_LENGTH = 2048
         // about base58 of MAX_PROXIED_URL_LENGTH bytes: a longer hash is not decoded and keeps the match srcset.
         private const val MAX_HASH_LENGTH = 2800
         private val SRCSET_WIDTHS = listOf(320, 600, 800, 1024, 1280)
@@ -155,6 +156,22 @@ class ImageProxy(val base: String = DEFAULT_BASE) {
         private val HTTP_PREFIX = Regex("https?://")
 
         fun isLegacySizedProxyUrl(url: String?): Boolean = url != null && LEGACY_SIZED_PROXY_RE.matches(url)
+
+        /** `.replace(/[\u0000-\u0020\u007f]/g, encodeURIComponent)`. */
+        private fun escapeControls(url: String): String {
+            if (url.none { it.code <= 0x20 || it.code == 0x7f }) return url
+            val sb = StringBuilder(url.length + 8)
+            for (c in url) {
+                if (c.code <= 0x20 || c.code == 0x7f) {
+                    sb.append('%').append(HEX[c.code shr 4]).append(HEX[c.code and 15])
+                } else {
+                    sb.append(c)
+                }
+            }
+            return sb.toString()
+        }
+
+        private const val HEX = "0123456789ABCDEF"
 
         private fun isLegacyForeignProxyUrl(url: String) =
             (url.startsWith("https://images.hive.blog/") && !url.startsWith("https://images.hive.blog/D")) ||

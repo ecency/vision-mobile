@@ -23,7 +23,7 @@ interface Prefs {
 object AccountPrefs {
     val PREFIXES = listOf(
         DigestModel.OFFERED_PREFIX, WavesOnboardingModel.KEY_PREFIX, TranslateModel.DISMISSED_PREFIX, PointActivities.KEY_PREFIX,
-        SpotlightModel.DISMISSED_PREFIX, ProposalVoteModel.KEY_PREFIX, PURCHASES_PREFIX, DigestTarget.PROMPT_PREFIX,
+        SpotlightModel.DISMISSED_PREFIX, ProposalVoteModel.KEY_PREFIX, GovernanceCardModel.KEY_PREFIX, PURCHASES_PREFIX, DigestTarget.PROMPT_PREFIX,
     )
 
     /** Saved purchase targets (account names, a paid account's e-mail) and receipt marks ([PurchaseService]). */

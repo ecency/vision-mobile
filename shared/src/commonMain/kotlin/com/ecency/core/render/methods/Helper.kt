@@ -22,7 +22,13 @@ internal object Helper {
      * `decodeDomImageSrc` (2.5.46, #2092): a body image URL read from the parsed document, whose entities the
      * parser (or the markdown destination decode) already decoded exactly once: only percent-encoding is left.
      */
-    fun decodeDomImageSrc(src: String): String = try {
+    fun decodeDomImageSrc(raw: String): String {
+        // 2.5.58 (#2183): trimmed first, so surrounding spaces cannot hide the legacy branch
+        val src = Js.trim(raw)
+        return decodeTrimmedImageSrc(src)
+    }
+
+    private fun decodeTrimmedImageSrc(src: String): String = try {
         val full = Js.decodeUriComponent(src)
         // 2.5.55 (#2174): escaped delimiters (`%23`, `%2F`, `%3F`, ...) and `%25` stay escaped, so the URL names the
         // resource the author did; a legacy sized proxy path with an encoded inner URL still decodes whole.
@@ -240,13 +246,14 @@ internal object Helper {
     private const val MD_ESCAPABLE = "\\!\"#$%&'()*+,./:;<=>?@[]^_`{|}~-"
 
     /**
-     * `decodeRawBodyImageSrc`: a body image URL from the raw post body (the card image scan), decoded the way the
-     * render reads it. A markdown [destination] is unescaped as Remarkable does (an escaped `&` stays literal unless
-     * [ampEscapes] is off), complete references decoded once, then percent-encoding.
+     * `rawBodySource` (2.5.58): a body image URL from the raw post body (the card image scan) with its references
+     * decoded the way the render's DOM holds it; the percent-encoding is left for [decodeDomImageSrc]. A markdown
+     * [destination] is unescaped as Remarkable does (an escaped `&` stays literal unless [ampEscapes] is off), complete
+     * references decoded once.
      */
-    fun decodeRawBodyImageSrc(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
+    fun rawBodySource(src: String, destination: Boolean = false, ampEscapes: Boolean = true): String {
         val unescaped = if (destination) unescapeDestination(src, ampEscapes) else src.replace("\\&", "&amp;")
-        return decodeDomImageSrc(decodeCompleteReferences(unescaped))
+        return decodeCompleteReferences(unescaped)
     }
 
     /** `unescapeDestination`: a markdown destination's backslash escapes resolved as Remarkable resolves them; an escaped `&` is a literal one (`&amp;`) when [ampEscapes]. */

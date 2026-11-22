@@ -58,8 +58,12 @@ class WalletFlowsTest {
     private val node = TestNode()
     private val env by lazy { node.env() }
     private val copied = mutableListOf<String>()
+    private val opened = mutableListOf<String>()
+
+    /** The tester account's governance fields (#3724); empty: none, so no governance card. */
+    private var governance = ""
     private val host = object : AppHost {
-        override fun openExternal(url: String) {}
+        override fun openExternal(url: String) { opened += url }
         override fun toast(text: String) {}
         override fun copy(text: String) { copied += text }
     }
@@ -90,7 +94,7 @@ class WalletFlowsTest {
                 "condenser_api.get_accounts" ->
                     """[{"name":"tester","balance":"12.345 HIVE","hbd_balance":"5.000 HBD","reward_vesting_balance":"1000.000000 VESTS","vesting_shares":"100000.000000 VESTS",
                        "posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},
-                       "active":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},"memo_key":"${node.key.publicKey()}","posting_json_metadata":"","json_metadata":""}]"""
+                       "active":{"weight_threshold":1,"account_auths":[],"key_auths":[["${node.key.publicKey()}",1]]},"memo_key":"${node.key.publicKey()}","posting_json_metadata":"","json_metadata":""$governance}]"""
                 "condenser_api.get_account_history" -> """[[7,{"trx_id":"${"ab".repeat(20)}","timestamp":"2026-10-05T10:00:00","op":["transfer",{"from":"spike-bob","to":"tester","amount":"2.000 HIVE","memo":"hello"}]}]]"""
                 "condenser_api.get_savings_withdraw_from", "condenser_api.get_conversion_requests", "condenser_api.get_collateralized_conversion_requests",
                 "condenser_api.get_open_orders", "condenser_api.find_recurrent_transfers" -> "[]"
@@ -812,5 +816,56 @@ class WalletFlowsTest {
         compose.awaitScrolledTo("summaryMax").assertIsDisplayed()
         compose.awaitScrolledTo("granularity:daily").performClick()
         until { gets.any { it.endsWith("granularity=daily") } }
+    }
+
+    // ---- governance card (#3724) ----
+
+    private val inactive = ""","proxy":"","witness_votes":[],"governance_vote_expiration_ts":"1969-12-31T23:59:59""""
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun onAShortWindowAnInactiveAccountSetsTheEcencyProxyFromItsWallet() {
+        governance = inactive
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)), fontScale = 1.3f)
+        compose.awaitScrolledTo("governanceSetProxy").performClick()
+        until { exists("governanceSheet") }
+        assertTrue(node.broadcasts().isEmpty())
+        compose.awaitScrolledTo("governanceConfirm").performClick()
+        until { node.broadcasts().isNotEmpty() }
+        val sent = node.broadcasts().single()
+        assertTrue(sent, sent.contains("\"account_witness_proxy\",{\"account\":\"tester\",\"proxy\":\"ecency\"}"))
+        until { !exists("governanceSheet") && text("governanceTitle") == com.ecency.core.app.GovernanceCopy.TITLE_DONE }
+        assertFalse(exists("governanceSetProxy"))
+    }
+
+    @Test
+    fun voteYourselfOpensTheWitnessesPage() {
+        governance = inactive
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)))
+        compose.awaitScrolledTo("governanceVoteYourself").performClick()
+        assertEquals(listOf(com.ecency.core.app.GovernanceCardModel.VOTE_URL), opened)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h400dp")
+    fun remindLaterHidesTheGovernanceCard() {
+        governance = inactive
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)), fontScale = 1.3f)
+        compose.awaitScrolledTo("governanceDismiss").performClick()
+        until { exists("governanceDismissSheet") }
+        compose.awaitScrolledTo("governanceLater").performClick()
+        until { !exists("governanceCard") }
+        assertTrue(node.broadcasts().isEmpty())
+    }
+
+    @Test
+    fun aWalletWithGovernanceThatCountsShowsNoCard() {
+        governance = ""","proxy":"","witness_votes":["good-karma"],"governance_vote_expiration_ts":"2027-07-14T15:38:51""""
+        launch(Navigator(NavState().selectTab(AppTab.WALLET)))
+        until { exists("asset:POINTS") }
+        // the card's own read has been applied (its episode is set only by a read) before the card is looked for
+        until { env.governanceCard.current.episode != null }
+        compose.waitForIdle()
+        assertFalse(exists("governanceCard"))
     }
 }

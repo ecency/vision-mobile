@@ -93,13 +93,54 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     }
 
     /**
-     * `proxifyFound` (2.5.55, #2169): percent-decoded as the render decodes its `<img>` src before proxying, so the
-     * card names the image the body shows. A legacy passthrough (not a `/p/` hash on the proxy) keeps it as written.
+     * `proxifyFound`: a found src with its references decoded, proxied as the body reads any image src
+     * ([proxifySource]).
      */
-    private fun proxifyFound(src: String, w: Int, h: Int): String {
-        val entityDecoded = Helper.decodeEntities(src)
-        val proxied = proxy.proxify(Helper.decodeDomImageSrc(entityDecoded), w, h)
-        return if (proxied.startsWith("${proxy.base}/p/")) proxied else proxy.proxify(entityDecoded, w, h)
+    private fun proxifyFound(src: String, w: Int, h: Int): String = proxifySource(Helper.decodeEntities(src), w, h)
+
+    /** `onProxy` (2.5.58): a src already on the proxy (`/p/`, `/u/`, a sized route), which the body keeps as written. */
+    private fun onProxy(src: String): Boolean {
+        val base = proxy.base
+        if (src.startsWith("$base/p/") || src.startsWith("$base/u/")) return true
+        if (!src.startsWith("$base/")) return false
+        // `/^\d+x\d+\//` after the base
+        var i = base.length + 1
+        val d1 = i
+        while (i < src.length && src[i] in '0'..'9') i++
+        if (i == d1 || i >= src.length || src[i] != 'x') return false
+        i++
+        val d2 = i
+        while (i < src.length && src[i] in '0'..'9') i++
+        return i > d2 && i < src.length && src[i] == '/'
+    }
+
+    /**
+     * `proxifySource` (2.5.58, #2185, #2191): a src as the body reads it (`bodyImageSources`): one already on the
+     * proxy is kept as written (unsized, the card is that src), any other goes through `/p/`, legacy sized hosts
+     * included. Empty when the proxy refuses it.
+     */
+    private fun proxifySource(written: String, w: Int, h: Int): String {
+        val source = Js.trim(written)
+        if (!onProxy(source)) return proxy.proxify(Helper.decodeDomImageSrc(source), w, h, forceProxy = true)
+        if (w == 0 && h == 0) return source
+        val proxied = proxy.proxify(Helper.decodeDomImageSrc(source), w, h)
+        return if (proxied.startsWith("${proxy.base}/p/")) proxied else proxy.proxify(source, w, h)
+    }
+
+    /**
+     * `regexTierImage` (2.5.58): the full lookup's regex tier, the first body image when it is a markdown or HTML
+     * image the scans read, proxied, or null to leave the body to the render. A bare URL or promoted link first is the
+     * render's to read (#2180), and so is an image the proxy refuses (#2182), and one after a video poster (#2185).
+     */
+    private fun regexTierImage(raw: String, w: Int, h: Int): String? {
+        val body = parserInput(raw)
+        val prepared = prepareBody(body)
+        val found = findFirstImageCandidate(prepared).candidate ?: return null
+        if (!(found.kind == Candidate.HTML || found.md)) return null
+        val poster = findFirstVideoPoster(prepared)
+        if (poster != null && poster.pos < found.pos) return null
+        val source = candidateSource(body, found) ?: return null
+        return proxifySource(source, w, h).ifEmpty { null }
     }
 
     private fun getImage(entry: Entry, w: Int, h: Int, fast: Boolean): String? {
@@ -120,52 +161,72 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             }
         }
         if (fast) return fastBodyImage(entry.body, w, h)
-        findFirstImageUrl(entry.body, false)?.let { return proxifyFound(it, w, h) }
+        regexTierImage(entry.body, w, h)?.let { return it }
         return fromRender(entry.body, w, h)
     }
 
     private fun fromRender(body: String, w: Int, h: Int): String? {
         val html = helper.renderPostBody(body, true)
         val doc = Helper.createDoc(html) ?: return null
-        val imgs = doc.getElementsByTagName("img")
-        if (imgs.isEmpty()) return null
-        val src = imgs[0].getAttribute("src")
-        if (src.isNullOrEmpty()) return null
-        return proxifyFound(src, w, h)
+        // 2.5.58 (#2182): the render leaves an image the proxy refuses without a src, so the first image shown is the
+        // first one that has a src
+        val src = doc.getElementsByTagName("img").firstNotNullOfOrNull { img -> img.getAttribute("src")?.takeIf { it.isNotEmpty() } }
+            ?: return null
+        // a kept proxy URL the proxy would not take again (over its length limit) is the rendered src as it stands
+        return proxifyFound(src, w, h).ifEmpty { src }
     }
 
     fun forEntry(entry: Entry, w: Int, h: Int, fast: Boolean): String? = getImage(entry, w, h, fast)
 
     fun forBody(body: String, w: Int, h: Int, fast: Boolean): String? {
         if (fast) return fastBodyImage(body, w, h)
-        findFirstImageUrl(body, false)?.let { return proxifyFound(it, w, h) }
+        regexTierImage(body, w, h)?.let { return it }
         return fromRender(body, w, h)
     }
 
     /**
-     * `bodyImageRawUrl` (2.5.52): the first image candidate, decoded the way the render reads that kind of candidate.
-     * An `<img src>` is an attribute value; a markdown destination keeps its escapes' meaning and is refused with a
-     * control character; a bare URL on an HTML block line is HTML text; any other bare URL loses trailing sentence
-     * punctuation first.
+     * `bodyImageRawUrl` (2.5.58): the first body image as the render holds it ([candidateSource]), percent-decoded as
+     * its `<img>` src is. Null when a video poster comes first, the proxy refuses it, a kept proxy URL would be named
+     * decoded, or a destination decodes to a control character.
      */
     fun bodyImageRawUrl(raw: String): String? {
         val body = parserInput(raw)
-        val candidate = findFirstImageCandidate(prepareBody(body), true).candidate ?: return null
-        if (candidate.kind == Candidate.HTML) return Helper.decodeDomImageSrc(Helper.decodeAttributeEntities(candidate.url))
+        val prepared = prepareBody(body)
+        val candidate = findFirstImageCandidate(prepared).candidate ?: return null
+        val poster = findFirstVideoPoster(prepared)
+        if (poster != null && poster.pos < candidate.pos) return null
+        val source = candidateSource(body, candidate) ?: return null
+        val url = Helper.decodeDomImageSrc(source)
+        if (url.length > ImageProxy.MAX_PROXIED_URL_LENGTH) return null
+        val trimmed = Js.trim(source)
+        if (onProxy(trimmed) && url != trimmed) return null
+        return if (candidate.kind == Candidate.DESTINATION && url.any { it < ' ' || it == '\u007F' }) null else url
+    }
+
+    /**
+     * `candidateSource` (2.5.58, #2183): a candidate's URL as the render's DOM holds it, references decoded by where it
+     * came from (an HTML attribute, a markdown destination, HTML block text or markdown text), percent-encoding still
+     * as written. Every lookup reads a candidate through this, so they name one URL. Null where the render differs.
+     */
+    private fun candidateSource(body: String, candidate: Candidate): String? {
+        if (candidate.kind == Candidate.HTML) return Helper.decodeAttributeEntities(candidate.url)
         val ampEscapes = !Helper.hasAmpSentinel(body)
-        if (candidate.kind == Candidate.DESTINATION) {
-            val url = Helper.decodeRawBodyImageSrc(candidate.url, true, ampEscapes)
-            return if (url.any { it < ' ' || it == '\u007F' }) null else url
-        }
-        if (markLines(asciiLower(codeBlanked(body))).block[candidate.pos]) return htmlTextImageUrl(body, candidate.pos)
+        if (candidate.kind == Candidate.DESTINATION) return Helper.rawBodySource(candidate.url, true, ampEscapes)
+        if (lineMasks(body).block[candidate.pos]) return htmlTextImageUrl(body, candidate.pos)
         val afterAt = candidate.pos + candidate.url.length
         val after = jsSlice(body, afterAt, afterAt + 4)
+        // The token stops before a `;` that may close a reference (`.png&quot;`) or be punctuation after literal text.
+        if (after.startsWith(";") && endsWithReference(candidate.url, 0, candidate.url.length)) return null
         // A lone surrogate reads as U+FFFD in the render (2.5.55, #2158), which ends the URL there.
         val loneAt = loneSurrogateAt(candidate.url)
         val token = if (loneAt == -1) candidate.url else candidate.url.substring(0, loneAt)
         fun tokenUrl(): String? {
             val url = withoutTrailingPunctuation(token, if (loneAt == -1) after else "")
-            return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeRawBodyImageSrc(url, false, ampEscapes)
+            return if (Helper.imageUrlEnd(url) == -1) null else Helper.rawBodySource(url, false, ampEscapes)
+        }
+        // An autolink is its whole URL; one holding a reference is left to the render.
+        if (candidate.pos > 0 && body[candidate.pos - 1] == '<' && after.startsWith(">")) {
+            return if (loneAt != -1 || token.contains('&')) null else token
         }
         // A raw anchor's text and a reference definition's destination are not autolinked.
         if (isAnchorClose(after) || definitionDestinationAt(body, candidate.pos)) return tokenUrl()
@@ -179,7 +240,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         val plain = (if (k == candidate.pos - 1) before == '\n' || before == '(' else before != '@') && !strayHashBefore(body, candidate.pos)
         if ((span.indexOf('(') < 0 && span.indexOf(')') < 0) || hasInlineDelimiter(span) || !plain) return tokenUrl()
         val url = span.substring(0, autolinkUrlEnd(span))
-        return if (Helper.imageUrlEnd(url) == -1) null else Helper.decodeDomImageSrc(url)
+        return if (Helper.imageUrlEnd(url) == -1) null else url
     }
 
     /** `/^<\/a[\s>]/i` on the four characters after the URL. */
@@ -399,7 +460,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         if (e == q) return null
         val token = text.substring(0, e)
         val urlEnd = Helper.imageUrlEnd(token)
-        return if (urlEnd == -1) null else Helper.decodeDomImageSrc(token.substring(0, urlEnd))
+        return if (urlEnd == -1) null else token.substring(0, urlEnd)
     }
 
     /**
@@ -477,9 +538,20 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private class ScanText(val text: String, val inTag: BooleanArray)
 
-    private class Prepared(val cleaned: String, val image: ScanText, val video: ScanText)
+    private class Prepared(val source: String, val cleaned: String, val image: ScanText, val video: ScanText) {
+        /** `rawTagsOf`: tag marks on the code-stripped text before any anchor is blanked. */
+        var rawTags: BooleanArray? = null
+    }
 
-    private class Candidate(val url: String, val pos: Int, val kind: Int = BARE) {
+    private class Candidate(
+        val url: String,
+        val pos: Int,
+        val kind: Int = BARE,
+        /** A markdown image (`![](url)`), as opposed to a link the render promotes. */
+        val md: Boolean = false,
+        /** A video poster whose context the scans could not confirm. */
+        val uncertain: Boolean = false,
+    ) {
         companion object {
             const val BARE = 0
             const val HTML = 1
@@ -489,25 +561,32 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private class CandidateResult(val candidate: Candidate?, val ambiguous: Boolean)
 
-    private fun findFirstImageUrl(body: String, includeBare: Boolean): String? =
-        findFirstImageCandidate(prepareBody(parserInput(body)), includeBare).candidate?.url
-
+    /**
+     * `fastBodyImage` (2.5.58, #2185): the first `<img>` the render shows in source order, an image, a promoted link
+     * or a video poster, without rendering; null where the scans cannot decide.
+     */
     private fun fastBodyImage(raw: String, w: Int, h: Int): String? {
-        val prepared = prepareBody(parserInput(raw))
-        val strict = findFirstImageCandidate(prepared, false)
-        strict.candidate?.let { return proxifyFound(it.url, w, h) }
-        if (strict.ambiguous) return null
-        val bare = findFirstImageCandidate(prepared, true).candidate
+        val body = parserInput(raw)
+        val prepared = prepareBody(body)
+        val found = findFirstImageCandidate(prepared)
+        if (found.ambiguous) return null
+        val first = found.candidate
         val poster = findFirstVideoPoster(prepared)
+        val posterFirst = poster != null && (first == null || poster.pos < first.pos)
+        // a poster first whose context is unconfirmed may be link text or a title
+        if (posterFirst && poster!!.uncertain) return null
+        if (first != null && (first.kind == Candidate.HTML || first.md) && !posterFirst) {
+            val source = candidateSource(body, first) ?: return null
+            return proxifySource(source, w, h).ifEmpty { null }
+        }
         // 2.5.57 (#2179): the render ends a bare URL at a lone surrogate (#2158), which the full lookup reads its own
         // way: give up rather than name another URL, unless a poster comes first and wins on source order anyway.
-        if (bare != null && bare.kind == Candidate.BARE && loneSurrogateAt(bare.url) != -1 && !(poster != null && poster.pos < bare.pos)) {
-            return null
-        }
-        if (poster != null && (bare == null || poster.pos < bare.pos)) {
-            return proxifyFound(proxy.proxify(poster.url), w, h)
-        }
-        return bare?.let { proxifyFound(it.url, w, h) }
+        if (first != null && first.kind != Candidate.DESTINATION && loneSurrogateAt(first.url) != -1 && !posterFirst) return null
+        if (posterFirst) return proxifyFound(proxy.proxify(poster!!.url), w, h)
+        if (first == null) return null
+        val source = candidateSource(body, first) ?: return null
+        // a URL the proxy refuses is one the render drops
+        return proxifySource(source, w, h).ifEmpty { null }
     }
 
     /**
@@ -531,19 +610,22 @@ internal class CatchPostImage(private val helper: RenderHelper) {
 
     private fun prepareBody(body: String): Prepared {
         val cleaned = if (body.isEmpty()) "" else stripCodeRegions(body)
-        if (cleaned.isEmpty()) return Prepared(cleaned, ScanText("", BooleanArray(0)), ScanText("", BooleanArray(0)))
+        if (cleaned.isEmpty()) return Prepared(body, cleaned, ScanText("", BooleanArray(0)), ScanText("", BooleanArray(0)))
         val imageText = blankUnequalAnchors(cleaned, false)
         val videoText = blankUnequalAnchors(cleaned, true)
-        return Prepared(cleaned, ScanText(imageText, markInsideTags(imageText)), ScanText(videoText, markInsideTags(videoText)))
+        return Prepared(body, cleaned, ScanText(imageText, markInsideTags(imageText)), ScanText(videoText, markInsideTags(videoText)))
     }
 
     private fun isSafeUrl(s: String) = Js.startsWithCi(s, "http://") || Js.startsWithCi(s, "https://")
 
-    private fun findFirstImageCandidate(prepared: Prepared, includeBare: Boolean): CandidateResult {
+    private val NONE = CandidateResult(null, false)
+    private val AMBIGUOUS = CandidateResult(null, true)
+
+    private fun findFirstImageCandidate(prepared: Prepared): CandidateResult {
         val cleaned = prepared.cleaned
-        if (cleaned.isEmpty()) return CandidateResult(null, false)
+        if (cleaned.isEmpty()) return NONE
         val md = mdImageFind(cleaned)
-        val html = htmlImageFind(cleaned)
+        val html = matchHtmlImage(cleaned)
         // An angle destination is whole whatever it holds, read in its plain spelling (2.5.55, #2156); a plain one
         // with `(` may have been cut short by the capture class. A plain destination's escapes resolve as an angle
         // one's do (`\)` is `)`, 2.5.56, #2176); one without a backslash is unchanged.
@@ -566,32 +648,96 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 // decodes it once, which only the parser reads exactly.
                 (!md.angle && md.raw.indexOf('\\') >= 0 && hasStrayPercent(md.raw))
             ) {
-                return CandidateResult(null, true)
+                return AMBIGUOUS
             }
         }
         val prior = if (md != null) cleaned.substring(0, md.pos) else cleaned
-        if (mdImagePresent(prior)) return CandidateResult(null, true)
+        val seen = BooleanArray(1)
+        if (hasUndecidedImage(prior, seen)) return AMBIGUOUS
 
         val candidates = ArrayList<Candidate>()
-        if (md != null && !mdUrl.isNullOrEmpty()) candidates.add(Candidate(mdUrl, md.pos, Candidate.DESTINATION))
-        if (html != null && html.url.isNotEmpty() && isSafeUrl(html.url)) candidates.add(html)
-        if (includeBare) {
-            val bare = standaloneMatches(prepared.image, ::imageToken).firstOrNull()
-            if (bare != null && isSafeUrl(bare.url)) candidates.add(bare)
-            for (m in mdLinks(cleaned)) {
-                if (m.start > 0 && cleaned[m.start - 1] == '!') continue
-                val href = m.href
-                if (href.isNotEmpty() && isImageHref(href) && deAmp(m.label) == deAmp(href)) {
-                    candidates.add(Candidate(href, m.start, Candidate.DESTINATION))
-                    break
-                }
+        if (md != null && !mdUrl.isNullOrEmpty()) candidates.add(Candidate(mdUrl, md.pos, Candidate.DESTINATION, md = true))
+        // 2.5.58: `data-src`, `x-src`: which attribute the render takes is its own to say, where it may come first
+        val dashSrc = html != null && html.dashed
+        if (dashSrc && !(md != null && !mdUrl.isNullOrEmpty() && md.pos < html!!.index)) return AMBIGUOUS
+        // the render trims the attribute (#2185)
+        if (html != null && !dashSrc && isSafeUrl(Js.trim(html.src))) candidates.add(Candidate(html.src, html.index, Candidate.HTML))
+        // 2.5.58 (#2180): a URL after a `](` that closes no label the scans read is text the render linkifies, maybe
+        // into an image: the first one defers when it comes before every candidate.
+        val scan = prepared.image
+        val labels = knownLabelCloses(cleaned)
+        val untrusted = labels.untrusted
+        var undecidedAt = -1
+        var range = 0
+        for (m in urlTokens(scan.text)) {
+            val idx = m.pos
+            if (scan.inTag[idx]) continue
+            val url = imageToken(m.url) ?: continue
+            while (range < untrusted.size && untrusted[range][1] <= idx) range++
+            if (range < untrusted.size && untrusted[range][0] <= idx) {
+                undecidedAt = idx
+                break
+            }
+            val close = labelCloseBefore(cleaned, idx)
+            if (close != -1) {
+                if (close in labels.closes) continue
+                undecidedAt = idx
+                break
+            }
+            if (!isStandalone(scan, idx) || !isSafeUrl(url)) continue
+            candidates.add(Candidate(url, idx))
+            break
+        }
+        // `[url](url)`: a markdown link the render promotes to an image (a.method); an angle destination is the URL
+        // inside the brackets (2.5.58)
+        for (m in mdLinks(cleaned)) {
+            if (m.start > 0 && cleaned[m.start - 1] == '!') continue
+            val href = if (isAngleOnly(m.href)) m.href.substring(1, m.href.length - 1) else m.href
+            if (href.isNotEmpty() && isImageHref(href) && promotesToImage(m.label, href)) {
+                candidates.add(Candidate(href, m.start, Candidate.DESTINATION))
+                break
             }
         }
-        if (candidates.isEmpty()) return CandidateResult(null, false)
-        return CandidateResult(candidates.sortedBy { it.pos }[0], false) // sortedBy is stable, like Array.sort
+        if (undecidedAt != -1 && candidates.all { undecidedAt < it.pos }) return AMBIGUOUS
+        candidates.sortBy { it.pos } // stable, like Array.sort
+        val first = candidates.firstOrNull()
+        // Past a dropped image only the plain case is read (#2182): dropped images and whitespace, then a markdown
+        // image, read as written.
+        if (seen[0] && !(first != null && first.md && onlyDroppedBefore(prepared.source, first.pos))) return AMBIGUOUS
+        if (first == null) return NONE
+        // What comes before the first image must hold nothing the scans cannot read, and the image must sit where the
+        // render shows it (#2185).
+        if (unreadBefore(prepared, labels.closes, first.pos)) return AMBIGUOUS
+        if (first.md && !mdImageShown(prepared, first.pos)) return AMBIGUOUS
+        val bare = !(first.kind == Candidate.HTML || first.md)
+        if (bare && !bareShown(prepared, first)) return AMBIGUOUS
+        if (bare) {
+            // a bare URL in an HTML block with an image on its line: the DOM may nest or reorder the two
+            val lineEnd = cleaned.indexOf('\n', first.pos)
+            if (lineMasks(prepared.source).block[first.pos] &&
+                candidates.any { it !== first && (it.kind == Candidate.HTML || it.md) && (lineEnd == -1 || it.pos < lineEnd) }
+            ) {
+                return AMBIGUOUS
+            }
+        }
+        return CandidateResult(first, false)
     }
 
-    private fun deAmp(s: String) = Js.trim(s).replace("&amp;", "&")
+    /** `/^<[^<>]*>$/` */
+    private fun isAngleOnly(s: String): Boolean {
+        if (s.length < 2 || s[0] != '<' || s[s.length - 1] != '>') return false
+        for (i in 1 until s.length - 1) if (s[i] == '<' || s[i] == '>') return false
+        return true
+    }
+
+    /**
+     * `promotesToImage`: a.method compares the href as the DOM reads it with the label's serialized HTML, `&amp;` read
+     * as `&` on both sides; both hold their complete references decoded, and the label is serialized again (#2098).
+     */
+    private fun promotesToImage(label: String, href: String): Boolean {
+        val serialized = Helper.decodeCompleteReferences(Js.trim(label)).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return Helper.decodeCompleteReferences(Js.trim(href)).replace("&amp;", "&") == serialized.replace("&amp;", "&")
+    }
 
     private fun isImageHref(href: String): Boolean {
         if (!isSafeUrl(href)) return false
@@ -621,7 +767,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             }
         }
         val b = best ?: return null
-        return Candidate("https://img.youtube.com/vi/${b.url.substringBefore('?')}/hqdefault.jpg", b.pos)
+        return Candidate("https://img.youtube.com/vi/${b.url.substringBefore('?')}/hqdefault.jpg", b.pos, uncertain = !posterShown(prepared, b.pos))
     }
 
     // ---- code and hidden regions ------------------------------------------------------------
@@ -1071,9 +1217,8 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     private fun isUrlTokenChar(c: Char) = !Js.isSpace(c) && c != '<' && c != '>' && c != '"' && c != '\'' &&
         c != '(' && c != ')' && c != '[' && c != ']'
 
-    /** `URL_TOKEN_RE = /https?:\/\/(?:[^\s<>"'()[\]&]|&(?!lt;|gt;))+/gi` (2.5.51), standalone tokens only, classified. */
-    private fun standaloneMatches(scan: ScanText, classify: (String) -> String?): Sequence<Candidate> = sequence {
-        val s = scan.text
+    /** `URL_TOKEN_RE = /https?:\/\/(?:[^\s<>"'()[\]&]|&(?!lt;|gt;))+/gi` (2.5.51): every match, as (token, position). */
+    private fun urlTokens(s: String): Sequence<Candidate> = sequence {
         var p = 0
         while (true) {
             val h = Js.indexOfCi(s, "http", p)
@@ -1090,13 +1235,14 @@ internal class CatchPostImage(private val helper: RenderHelper) {
                 p = h + 1
                 continue
             }
-            if (isStandalone(scan, h)) {
-                val v = classify(s.substring(h, e))
-                if (v != null) yield(Candidate(v, h))
-            }
+            yield(Candidate(s.substring(h, e), h))
             p = e
         }
     }
+
+    /** `standaloneMatches`: the standalone URL tokens, classified. */
+    private fun standaloneMatches(scan: ScanText, classify: (String) -> String?): Sequence<Candidate> =
+        urlTokens(scan.text).mapNotNull { m -> if (isStandalone(scan, m.pos)) classify(m.url)?.let { Candidate(it, m.pos) } else null }
 
     private val EXTS = arrayOf("tiff", "tif", "jpeg", "jpg", "gif", "png", "svg", "ico", "heic", "webp", "arw")
 
@@ -1187,7 +1333,7 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     }
 
     /** A markdown image match: its destination as written, where the match starts and ends, and its form. */
-    private class MdImage(val raw: String, val pos: Int, val end: Int, val angle: Boolean)
+    private class MdImage(val raw: String, val pos: Int, val end: Int, val angle: Boolean, val labelEnd: Int)
 
     /** How deep `MD_IMAGE_RE`'s label nests balanced brackets (2.5.57, #2179). */
     private val mdLabelDepth = 2
@@ -1204,33 +1350,49 @@ internal class CatchPostImage(private val helper: RenderHelper) {
      */
     private fun mdImageFind(s: String): MdImage? {
         val tails = HashMap<Int, Int>()
-        fun tail(from: Int): Int = tails.getOrPut(from) { mdTailEnd(s, from) }
         val urls = SchemeScan(s)
         var p = s.indexOf("![")
         while (p >= 0) {
-            val le = mdLabelEnd(s, p + 2)
-            if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
-                val i = skipSeparator(s, le + 2)
-                var found: MdImage? = null
-                val close = angleContentEnd(s, i)
-                if (close >= 0) {
-                    val e = tail(close + 1)
-                    if (e >= 0) found = MdImage(s.substring(i + 1, close), p, e, true)
-                }
-                if (found == null) {
-                    val he = plainDestinationEnd(s, i)
-                    if (he > i) {
-                        val e = tail(he)
-                        if (e >= 0) found = MdImage(s.substring(i, he), p, e, false)
-                    }
-                }
-                // firstUnescapedImage (2.5.57, #2179): an escaped `\![...](url)` is a link, and the scan resumes past its
-                // `![`, unless the text before the match's last `](` holds a URL (the caller defers that one).
-                if (found != null && (!escapedAt(s, p) || urls.holdsUrl(p, s.lastIndexOf("](", found.end - 2)))) return found
-            }
+            val found = mdImageAt(s, p, tails)
+            // firstUnescapedImage (2.5.57, #2179): an escaped `\![...](url)` is a link, and the scan resumes past its
+            // `![`, unless the text before the match's last `](` holds a URL (the caller defers that one).
+            if (found != null && (!escapedAt(s, p) || urls.holdsUrl(p, s.lastIndexOf("](", found.end - 2)))) return found
             p = s.indexOf("![", p + 1)
         }
         return null
+    }
+
+    /** `MD_IMAGE_RE` at the `![` at [p], or null. [tails] keeps the tail scans per start (several `![` can share one). */
+    private fun mdImageAt(s: String, p: Int, tails: HashMap<Int, Int>): MdImage? {
+        val le = mdLabelEnd(s, p + 2)
+        if (le < 0 || le + 1 >= s.length || s[le + 1] != '(') return null
+        val i = skipSeparator(s, le + 2)
+        val close = angleContentEnd(s, i)
+        if (close >= 0) {
+            val e = tails.getOrPut(close + 1) { mdTailEnd(s, close + 1) }
+            if (e >= 0) return MdImage(s.substring(i + 1, close), p, e, true, le)
+        }
+        val he = plainDestinationEnd(s, i)
+        if (he > i) {
+            val e = tails.getOrPut(he) { mdTailEnd(s, he) }
+            if (e >= 0) return MdImage(s.substring(i, he), p, e, false, le)
+        }
+        return null
+    }
+
+    /** `regexMatches(s, MD_IMAGE_RE_G)`: every match, each search resuming at the previous match's end. */
+    private fun mdImages(s: String): Sequence<MdImage> = sequence {
+        val tails = HashMap<Int, Int>()
+        var p = s.indexOf("![")
+        while (p >= 0) {
+            val m = mdImageAt(s, p, tails)
+            if (m != null) {
+                yield(m)
+                p = s.indexOf("![", m.end)
+            } else {
+                p = s.indexOf("![", p + 1)
+            }
+        }
     }
 
     /**
@@ -1470,29 +1632,785 @@ internal class CatchPostImage(private val helper: RenderHelper) {
     }
 
     /**
-     * `firstUnescapedImage(s, MD_IMAGE_PRESENT_RE)` (2.5.57, #2179), `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*(?:\]\(\s*[^\s)]|\[)/g`:
-     * an image the pattern may not have captured, a label opening a nested `[` included. An escaped `\![` is a link
-     * and does not count, unless its label holds a URL (the render may turn that link into an image).
+     * `MD_IMAGE_PRESENT_RE = /!\[[^[\]]*(?:\]\(\s*[^\s)]|\[)/g` at the `![` at [p]: the match end and where its label
+     * stops (the `[` or `]`), or null. Every part has one reading.
      */
-    private fun mdImagePresent(s: String): Boolean {
-        var p = s.indexOf("![")
-        while (p >= 0) {
-            var i = p + 2
-            while (i < s.length && s[i] != '[' && s[i] != ']') i++
-            var matched = i < s.length && s[i] == '['
-            if (!matched && i + 1 < s.length && s[i + 1] == '(') {
-                var k = i + 2
-                while (k < s.length && isWs(s[k])) k++
-                matched = k < s.length && s[k] != ')'
+    private fun presentAt(s: String, p: Int): IntArray? {
+        var i = p + 2
+        while (i < s.length && s[i] != '[' && s[i] != ']') i++
+        if (i >= s.length) return null
+        if (s[i] == '[') return intArrayOf(i + 1, i)
+        if (i + 1 >= s.length || s[i + 1] != '(') return null
+        var k = i + 2
+        while (k < s.length && isWs(s[k])) k++
+        return if (k < s.length && s[k] != ')') intArrayOf(k + 1, i) else null
+    }
+
+    /**
+     * `hasUndecidedImage` (2.5.58, #2182): whether [text] holds a markdown image the scans may not have captured (an
+     * escaped `\![` is a link unless its label holds a URL, 2.5.57), skipping one the render drops for its length;
+     * `seen[0]` is set when one was skipped.
+     */
+    private fun hasUndecidedImage(text: String, seen: BooleanArray): Boolean {
+        var from = 0
+        while (true) {
+            var p = text.indexOf("![", from)
+            var m: IntArray? = null
+            while (p >= 0) {
+                m = presentAt(text, p)
+                if (m != null) break
+                p = text.indexOf("![", p + 1)
             }
-            // the match text before its `](` (or all of it) is the label, scanned once per start
-            if (matched && (!escapedAt(s, p) || s.substring(p, i).contains("://"))) return true
-            p = s.indexOf("![", p + 1)
+            if (p < 0 || m == null) return false
+            // escapedLabelHoldsUrl: the match text before its `](` (or all of it)
+            if (escapedAt(text, p) && !text.substring(p, m[1]).contains("://")) {
+                from = p + 2
+                continue
+            }
+            val end = droppedImageEnd(text, p)
+            if (end == -1) return true
+            seen[0] = true
+            from = end
+        }
+    }
+
+    /**
+     * `DROPPED_IMAGE_RE = /!\[[^[\]\n\\`<>]*\]\((https?:\/\/[^\s()<>[\]\\`&"']+)\)/y` at [pos]: (url start, url end,
+     * match end), or null. A plain label and a plain URL with nothing the render would shorten.
+     */
+    private fun droppedImageMatch(text: String, pos: Int): IntArray? {
+        if (!text.startsWith("![", pos)) return null
+        var i = pos + 2
+        while (i < text.length && text[i] != '[' && text[i] != ']' && text[i] != '\n' && text[i] != '\\' && text[i] != '`' &&
+            text[i] != '<' && text[i] != '>'
+        ) {
+            i++
+        }
+        if (!text.startsWith("](", i)) return null
+        val us = i + 2
+        // `https?:\/\/`, case-sensitive
+        val q = when {
+            text.startsWith("https://", us) -> us + 8
+            text.startsWith("http://", us) -> us + 7
+            else -> return null
+        }
+        var e = q
+        while (e < text.length) {
+            val c = text[e]
+            if (Js.isSpace(c) || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '\\' || c == '`' ||
+                c == '&' || c == '"' || c == '\''
+            ) {
+                break
+            }
+            e++
+        }
+        if (e == q || e >= text.length || text[e] != ')') return null
+        return intArrayOf(us, e, e + 1)
+    }
+
+    /** `droppedImageEnd` (2.5.58, #2182): the end of the image at [pos] when the render drops it for its length, else -1. */
+    private fun droppedImageEnd(text: String, pos: Int): Int {
+        val m = droppedImageMatch(text, pos) ?: return -1
+        val length = m[1] - m[0]
+        // an existing proxy URL is kept as written, whatever its length
+        if (length <= ImageProxy.MAX_PROXIED_URL_LENGTH || text.startsWith("${proxy.base}/", m[0])) return -1
+        if (text.indexOf('%', m[0]).let { it in m[0] until m[1] }) {
+            // dropped for sure only when even every escape decoded is over the limit: each shrinks it by under three
+            var escapes = 0
+            var k = m[0]
+            while (k < m[1]) {
+                if (text[k] == '%' && k + 2 < m[1] && isHexDigit(text[k + 1]) && isHexDigit(text[k + 2])) {
+                    escapes++
+                    k += 3
+                } else {
+                    k++
+                }
+            }
+            if (length - 3 * escapes <= ImageProxy.MAX_PROXIED_URL_LENGTH) return -1
+        }
+        return m[2]
+    }
+
+    /** `onlyDroppedBefore`: whether [text] before [pos] is only `DROPPED_IMAGE_G` matches and whitespace. */
+    private fun onlyDroppedBefore(text: String, pos: Int): Boolean {
+        val prefix = text.substring(0, pos)
+        var i = 0
+        while (i < prefix.length) {
+            val m = if (prefix[i] == '!') droppedImageMatch(prefix, i) else null
+            if (m != null) {
+                i = m[2]
+                continue
+            }
+            if (!Js.isSpace(prefix[i])) return false
+            i++
+        }
+        return true
+    }
+
+    /** An `<img` tag `matchHtmlImage` read: where it starts, its src, and whether the name only ends in `src`. */
+    private class HtmlImage(val index: Int, val src: String, val dashed: Boolean)
+
+    /** `SPACE_CHARS = ' \t\n\r\f'` */
+    private fun isTagSpace(c: Char) = c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\u000C'
+
+    private fun skipTagSpaces(text: String, from: Int): Int {
+        var i = from
+        while (i < text.length && isTagSpace(text[i])) i++
+        return i
+    }
+
+    /**
+     * `matchHtmlImage` (2.5.58, #2185): the first `<img` tag with a quoted `src`, in one forward pass. A tag is read by
+     * the HTML tag grammar attribute by attribute, a quoted value whole, so a `src` inside another attribute's value
+     * is text. The first `src` decides, empty or not; a name that only ends in `src` (`data-src`) is reported as
+     * dashed. At the first `<img` the grammar does not read, or one across a line that ends its paragraph, the scan
+     * stops with null (unreadBefore defers on that `<img`).
+     */
+    private fun matchHtmlImage(text: String): HtmlImage? {
+        val footnotes = text.contains("[^")
+        var p = Js.indexOfCi(text, "<img", 0)
+        while (p >= 0) {
+            // `\b`: no word character after the name
+            if (p + 4 < text.length && isWordChar(text[p + 4])) {
+                p = Js.indexOfCi(text, "<img", p + 1)
+                continue
+            }
+            val start = p
+            var i = start + 4
+            var found: HtmlImage? = null
+            var srcSeen = false
+            while (true) {
+                val spaced = skipTagSpaces(text, i)
+                // `/\/?>/y`
+                if (spaced < text.length && text[spaced] == '>') {
+                    i = spaced + 1
+                    break
+                }
+                if (spaced + 1 < text.length && text[spaced] == '/' && text[spaced + 1] == '>') {
+                    i = spaced + 2
+                    break
+                }
+                // `/[A-Za-z_:][\w.:-]*/y`, after whitespace only
+                if (spaced == i || spaced >= text.length) return null
+                val c0 = text[spaced]
+                if (!(Js.isAsciiAlpha(c0) || c0 == '_' || c0 == ':')) return null
+                var ne = spaced + 1
+                while (ne < text.length && (isWordChar(text[ne]) || text[ne] == '.' || text[ne] == ':' || text[ne] == '-')) ne++
+                i = ne
+                var value: String? = null
+                val eq = skipTagSpaces(text, i)
+                if (eq < text.length && text[eq] == '=') {
+                    // `/"([^"]*)"|'([^']*)'|[^\s"'=<>`]+/y`: an unquoted value is read but holds no src
+                    val v = skipTagSpaces(text, eq + 1)
+                    if (v < text.length && (text[v] == '"' || text[v] == '\'')) {
+                        val close = text.indexOf(text[v], v + 1)
+                        if (close >= 0) {
+                            i = close + 1
+                            value = text.substring(v + 1, close)
+                        } else {
+                            var u = v
+                            while (u < text.length && isUnquotedValueChar(text[u])) u++
+                            if (u > v) i = u
+                        }
+                    } else {
+                        var u = v
+                        while (u < text.length && isUnquotedValueChar(text[u])) u++
+                        if (u > v) i = u
+                    }
+                }
+                val name = asciiLower(text.substring(spaced, ne))
+                if (name == "src") {
+                    if (!srcSeen && found == null && !value.isNullOrEmpty()) found = HtmlImage(start, value, false)
+                    srcSeen = true
+                } else if (found == null && !srcSeen && !value.isNullOrEmpty() && name.endsWith("src") && name.length >= 4 &&
+                    !isWordChar(name[name.length - 4])
+                ) {
+                    found = HtmlImage(start, value, true)
+                }
+            }
+            if (tagBreaksParagraph(text, start, i, footnotes)) return null
+            if (found != null) return found
+            p = Js.indexOfCi(text, "<img", i)
+        }
+        return null
+    }
+
+    /** `[^\s"'=<>`]` */
+    private fun isUnquotedValueChar(c: Char) = !Js.isSpace(c) && c != '"' && c != '\'' && c != '=' && c != '<' && c != '>' && c != '`'
+
+    /**
+     * `tagBreaksParagraph` (2.5.58, #2194): whether a line inside `text[from, to)` ends the paragraph the tag is in (a
+     * blank line, or one starting what can begin a block), or any line break when the tag's own line is a block of
+     * one line (a heading, a table row) or the body has a footnote. A lone `\r` breaks a line too.
+     */
+    private fun tagBreaksParagraph(text: String, from: Int, to: Int, footnotes: Boolean): Boolean {
+        var multiline = false
+        var k = from
+        while (k < to) {
+            val c = text[k]
+            if (c != '\n' && !(c == '\r' && (k + 1 >= text.length || text[k + 1] != '\n'))) {
+                k++
+                continue
+            }
+            multiline = true
+            var j = k + 1
+            while (j < to && (text[j] == ' ' || text[j] == '\t')) j++
+            if (j >= to || text[j] == '\n' || text[j] == '\r' || BLOCK_START_CHARS.indexOf(text[j]) >= 0) return true
+            k = j
+        }
+        if (!multiline) return false
+        if (footnotes) return true
+        var lineStart = from
+        while (lineStart > 0 && text[lineStart - 1] != '\n' && text[lineStart - 1] != '\r') lineStart--
+        for (i in lineStart until from) if (text[i] == '#' || text[i] == '|' || text[i] == '[') return true
+        return false
+    }
+
+    private val BLOCK_START_CHARS = "-*_=#>+|<`~:[0123456789"
+
+    /** `labelCloseBefore` (2.5.58, #2180): the `]` of a `](` the URL at [idx] follows as a destination would, or -1. */
+    private fun labelCloseBefore(text: String, idx: Int): Int {
+        var k = idx - 1
+        if (k >= 0 && text[k] == '<') k--
+        while (k >= 0 && text[k] == ' ') k--
+        if (k >= 0 && text[k] == '\n') {
+            k--
+            while (k >= 0 && text[k] == ' ') k--
+        }
+        return if (k >= 1 && text[k] == '(' && text[k - 1] == ']') k - 1 else -1
+    }
+
+    private class LabelCloses(val closes: HashSet<Int>, val untrusted: List<IntArray>)
+
+    /**
+     * `knownLabelCloses` (2.5.58, #2180): the `]` closing the label of every link or image the scans can read, and the
+     * destinations of links the parser may read otherwise, in source order.
+     */
+    private fun knownLabelCloses(cleaned: String): LabelCloses {
+        val closes = HashSet<Int>()
+        val untrusted = ArrayList<IntArray>()
+        for (m in mdImages(cleaned)) {
+            // an escaped `!` makes a link, which the loop below reads
+            if (escapedAt(cleaned, m.pos)) continue
+            closes.add(m.labelEnd)
+        }
+        for (m in mdLinks(cleaned)) {
+            val open = m.start
+            val close = open + 1 + m.label.length
+            if (escapedAt(cleaned, open) || escapedAt(cleaned, close)) continue
+            if (hasBlankLine(cleaned, open, m.end) || (open > 0 && cleaned[open - 1] == ']') ||
+                ((m.href.indexOf('<') >= 0 || m.href.indexOf('>') >= 0) && !isAngleOnly(m.href)) ||
+                (!m.href.startsWith("<") && m.href.indexOf('(') >= 0)
+            ) {
+                untrusted.add(intArrayOf(close + 2, m.end))
+                continue
+            }
+            closes.add(close)
+        }
+        return LabelCloses(closes, untrusted)
+    }
+
+    /** `/\n[ \t]*\n/` in `s[from, to)`, read only there (a line of many links must not rescan the rest per link). */
+    private fun hasBlankLine(s: String, from: Int, to: Int): Boolean {
+        var nl = from
+        while (nl < to) {
+            if (s[nl] == '\n') {
+                var k = nl + 1
+                while (k < to && (s[k] == ' ' || s[k] == '\t')) k++
+                if (k < to && s[k] == '\n') return true
+                nl = k
+            } else {
+                nl++
+            }
         }
         return false
     }
 
-    private class MdLink(val start: Int, val label: String, val href: String)
+    /** `markLines(asciiLower(codeBlanked(source)))`, kept for the last source read (one lookup reads one body). */
+    private var linesSource: String? = null
+    private var linesMasks: LineMasks? = null
+
+    private fun lineMasks(source: String): LineMasks {
+        if (linesSource !== source) {
+            linesMasks = markLines(asciiLower(codeBlanked(source)))
+            linesSource = source
+        }
+        return linesMasks!!
+    }
+
+    /** A code fence as it opened: its marker run and the prefix before it. */
+    private class Fence(val run: String, val prefix: String)
+
+    /** Past a line that may or may not have closed a fence: from there on nothing is read as known. */
+    private val UNKNOWN_FENCE = Fence("", "")
+
+    /**
+     * `nextFenceState` (2.5.58, #2185): the fence state after [line] (null outside a fence). `FENCE_LINE_RE =
+     * /^[ \t>*+\-\d.)]*(`{3,}|~{3,})/`. A closer is the opener's character, at least as long, with nothing after it
+     * but spaces: behind the opener's own prefix it closes; after an opener at the margin, a closer indented up to
+     * three spaces closes and one indented four is code; any other prefix is a line the scans cannot place.
+     */
+    private fun nextFenceState(state: Fence?, line: String): Fence? {
+        if (state === UNKNOWN_FENCE) return state
+        var p = 0
+        while (p < line.length && isFencePrefixChar(line[p])) p++
+        if (p >= line.length || (line[p] != '`' && line[p] != '~')) return state
+        val marker = line[p]
+        var e = p
+        while (e < line.length && line[e] == marker) e++
+        if (e - p < 3) return state
+        val run = line.substring(p, e)
+        val prefix = line.substring(0, p)
+        val rest = line.substring(e)
+        if (state == null) {
+            // a backtick in the info string makes it no fence
+            if (rest.indexOf('`') >= 0) return UNKNOWN_FENCE
+            return Fence(run, prefix)
+        }
+        if (run[0] != state.run[0] || run.length < state.run.length || Js.trim(rest).isNotEmpty()) return state
+        if (prefix == state.prefix) return null
+        if (state.prefix.isEmpty() && prefix.all { it == ' ' }) return if (prefix.length <= 3) null else state
+        return UNKNOWN_FENCE
+    }
+
+    /** `[ \t>*+\-\d.)]` */
+    private fun isFencePrefixChar(c: Char) = c == ' ' || c == '\t' || c == '>' || c == '*' || c == '+' || c == '-' || c in '0'..'9' ||
+        c == '.' || c == ')'
+
+    /** `fenceOpen`: whether a code fence may be open at [pos], reading the line [pos] is on whole. */
+    private fun fenceOpen(source: String, pos: Int): Boolean {
+        val eol = source.indexOf('\n', pos)
+        var state: Fence? = null
+        for (line in source.substring(0, if (eol == -1) source.length else eol).split('\n')) state = nextFenceState(state, line)
+        return state != null
+    }
+
+    /** `LOOSE_URL_RE = /https?:\/\/[^\s<>"'`]+/gi`: every match, as (token, position). */
+    private fun looseUrls(s: String): Sequence<Candidate> = sequence {
+        var p = 0
+        while (true) {
+            val h = Js.indexOfCi(s, "http", p)
+            if (h < 0) break
+            val q = Scanners.schemeEnd(s, h)
+            if (q < 0) {
+                p = h + 1
+                continue
+            }
+            var e = q
+            while (e < s.length && isLooseUrlChar(s[e])) e++
+            if (e == q) {
+                p = h + 1
+                continue
+            }
+            yield(Candidate(s.substring(h, e), h))
+            p = e
+        }
+    }
+
+    private fun isLooseUrlChar(c: Char) = !Js.isSpace(c) && c != '<' && c != '>' && c != '"' && c != '\'' && c != '`'
+
+    private val HIDING_TAGS = arrayOf("iframe", "head", "script", "style", "textarea", "title", "noscript", "template", "object", "svg", "select")
+
+    /** `HIDING_TAG_RE = /<(\/?)(iframe|head|...|select)\b/g` on lowered text: how many such elements are still open. */
+    private fun openHidingTags(lower: String): Int {
+        var open = 0
+        var p = lower.indexOf('<')
+        while (p >= 0) {
+            val closing = p + 1 < lower.length && lower[p + 1] == '/'
+            val n = if (closing) p + 2 else p + 1
+            var matchedEnd = -1
+            for (tag in HIDING_TAGS) {
+                if (lower.startsWith(tag, n) && (n + tag.length >= lower.length || !isWordChar(lower[n + tag.length]))) {
+                    matchedEnd = n + tag.length
+                    break
+                }
+            }
+            if (matchedEnd >= 0) {
+                open += if (closing) -1 else 1
+                p = lower.indexOf('<', matchedEnd)
+            } else {
+                p = lower.indexOf('<', p + 1)
+            }
+        }
+        return open
+    }
+
+    /** `/<(\/?)a\b/g` positions: whether anchors nest anywhere in [lower] (the scan text blanks the outer one whole). */
+    private fun nestedAnchors(lower: String): Boolean {
+        var depth = 0
+        var p = lower.indexOf('<')
+        while (p >= 0) {
+            val closing = p + 1 < lower.length && lower[p + 1] == '/'
+            val n = if (closing) p + 2 else p + 1
+            if (n < lower.length && lower[n] == 'a' && (n + 1 >= lower.length || !isWordChar(lower[n + 1]))) {
+                depth = if (closing) maxOf(0, depth - 1) else depth + 1
+                if (depth > 1) return true
+                p = lower.indexOf('<', n + 1)
+            } else {
+                p = lower.indexOf('<', p + 1)
+            }
+        }
+        return false
+    }
+
+    /**
+     * `unreadBefore` (2.5.58, #2185): whether the body before [pos] holds something the scans cannot read, so the first
+     * image is the render's to say: an image URL the scans did not take, an element that hides its content still
+     * open, a processing instruction, a code fence, or another `<img` tag.
+     */
+    private fun unreadBefore(prepared: Prepared, closes: Set<Int>, pos: Int): Boolean {
+        val source = prepared.source
+        val cleaned = prepared.cleaned
+        val scan = prepared.image
+        val prefix = cleaned.substring(0, pos)
+        val lowerPrefix = asciiLower(prefix)
+        if (hasImgTag(lowerPrefix)) return true
+        if (fenceOpen(source, pos)) return true
+        if (openHidingTags(lowerPrefix) > 0) return true
+        if (lowerPrefix.lastIndexOf("<?") > lowerPrefix.lastIndexOf("?>")) return true
+        val lastAnchorClose = lowerPrefix.lastIndexOf("</a")
+        val nested = nestedAnchors(lowerPrefix)
+        var tagMarks: BooleanArray? = null
+        var tagOpen: IntArray? = null
+        for (m in looseUrls(source)) {
+            val idx = m.pos
+            if (idx >= pos) break
+            if (Helper.imageUrlEnd(m.url) == -1) continue
+            // inside an anchor the render keeps a link that closes before the image
+            if (!Js.startsWithCi(scan.text, "http", idx) && Js.startsWithCi(cleaned, "http", idx) && lastAnchorClose >= idx && !nested) continue
+            if (tagMarks == null || tagOpen == null) {
+                tagMarks = markInsideTags(prefix)
+                tagOpen = IntArray(prefix.length)
+                var lt = -1
+                var nl = -1
+                for (i in prefix.indices) {
+                    if (prefix[i] == '<') lt = i
+                    if (prefix[i] == '\n') nl = i
+                    tagOpen[i] = if (lt > nl) lt else -1
+                }
+            }
+            // an attribute value, in a tag that opens on the same line
+            if (tagMarks[idx] && tagOpen[idx] != -1) continue
+            val close = labelCloseBefore(cleaned, idx)
+            if (close != -1 && close in closes) continue
+            return true
+        }
+        return false
+    }
+
+    /** `/<img\b/` on lowered text. */
+    private fun hasImgTag(lower: String): Boolean {
+        var p = lower.indexOf("<img")
+        while (p >= 0) {
+            if (p + 4 >= lower.length || !isWordChar(lower[p + 4])) return true
+            p = lower.indexOf("<img", p + 1)
+        }
+        return false
+    }
+
+    /**
+     * `inTextContext` (2.5.58): whether a paragraph's text before an image puts it in a definition (`]:`) or an open
+     * link title (`](url "`), or still inside a destination. One pass.
+     */
+    private fun inTextContext(text: String): Boolean {
+        if (text.contains("]:")) return true
+        var inDestination = false
+        var i = 0
+        while (i < text.length) {
+            val c = text[i]
+            if (c == ']' && i + 1 < text.length && text[i + 1] == '(') {
+                inDestination = true
+                i++
+            } else if (inDestination) {
+                if (c == ')') {
+                    inDestination = false
+                } else if (Js.isSpace(c) && i + 1 < text.length && (text[i + 1] == '"' || text[i + 1] == '\'' || text[i + 1] == '(')) {
+                    return true
+                }
+            }
+            i++
+        }
+        return inDestination
+    }
+
+    /** `mdImageShown` (2.5.58): whether the render shows the markdown image at [pos] where it stands. */
+    private fun mdImageShown(prepared: Prepared, pos: Int): Boolean {
+        if (prepared.image.inTag[pos]) return false
+        val text = prepared.cleaned
+        val blank = text.lastIndexOf("\n\n", pos)
+        return !inTextContext(text.substring(if (blank == -1) 0 else blank, pos))
+    }
+
+    /**
+     * `inlineBacktick` (2.5.58): whether the paragraph `source[from, to)` has a backtick outside code fences, the
+     * fences read from the start of the body.
+     */
+    private fun inlineBacktick(source: String, from: Int, to: Int): Boolean {
+        var state: Fence? = null
+        var at = 0
+        for (line in source.substring(0, to).split('\n')) {
+            val before = state
+            state = nextFenceState(state, line)
+            val lineStart = at
+            at += line.length + 1
+            if (lineStart < from) continue
+            if (before != null || state != null) continue
+            if (line.indexOf('`') >= 0) return true
+        }
+        return false
+    }
+
+    /** `URL_SYNTAX_RE = /[`|^]|\+\+|==|~~/` */
+    private fun hasUrlSyntax(url: String): Boolean {
+        for (i in url.indices) {
+            val c = url[i]
+            if (c == '`' || c == '|' || c == '^') return true
+            if ((c == '+' || c == '=' || c == '~') && i + 1 < url.length && url[i + 1] == c) return true
+        }
+        return false
+    }
+
+    /**
+     * `markdownBracketAt` (2.5.58, #2185): whether the `[` at [at] starts markdown the parser reads before linkify, in
+     * the shapes proven to: an inline link `[x](url)`, or a reference whose definition stands on its own line after a
+     * blank one, outside a code fence.
+     */
+    private fun markdownBracketAt(source: String, at: Int): Boolean {
+        val head = jsSlice(source, at, at + 2200)
+        if (inlineLinkHead(head)) return true
+        // `/^\[([^[\]\n]{1,100})\](?:\[([^[\]\n]{0,100})\])?/`
+        val e1 = plainLabelEnd(head, 1)
+        if (e1 < 0 || e1 - 1 < 1) return false
+        var label = head.substring(1, e1)
+        if (e1 + 1 < head.length && head[e1 + 1] == '[') {
+            val e2 = plainLabelEnd(head, e1 + 2)
+            if (e2 >= 0 && e2 > e1 + 2) label = head.substring(e1 + 2, e2)
+        }
+        label = Js.trim(label)
+        if (label.isEmpty()) return false
+        val def = definitionStart(source, label)
+        return def >= 0 && !fenceOpen(source, def)
+    }
+
+    /** `[^[\]\n]{0,100}` from [from] then `]`: the index of the `]`, or -1. */
+    private fun plainLabelEnd(s: String, from: Int): Int {
+        var i = from
+        while (i < s.length && i - from < 100 && s[i] != '[' && s[i] != ']' && s[i] != '\n') i++
+        return if (i < s.length && s[i] == ']') i else -1
+    }
+
+    /** `/^\[(?:[^[\]\n]|\[[^[\]\n]{0,100}\]){0,100}\]\([^\s()<>]*\)/` */
+    private fun inlineLinkHead(head: String): Boolean {
+        if (head.isEmpty() || head[0] != '[') return false
+        var i = 1
+        var units = 0
+        while (i < head.length && units < 100) {
+            val c = head[i]
+            if (c == '[') {
+                val e = plainLabelEnd(head, i + 1)
+                if (e < 0) break
+                i = e + 1
+            } else if (c == ']' || c == '\n') {
+                break
+            } else {
+                i++
+            }
+            units++
+        }
+        if (!head.startsWith("](", i)) return false
+        var k = i + 2
+        while (k < head.length && !Js.isSpace(head[k]) && head[k] != '(' && head[k] != ')' && head[k] != '<' && head[k] != '>') k++
+        return k < head.length && head[k] == ')'
+    }
+
+    /**
+     * `(?:^|\n[ \t]*\n)( {0,3}\[LABEL\]:[ \t]*\S+[ \t]*)(?:\n|$)` with the `i` flag on [source], first match: its start
+     * (the `\n` that begins it, or 0), or -1. The label compares as JS case folding without `u` does.
+     */
+    private fun definitionStart(source: String, label: String): Int {
+        if (definitionAt(source, 0, label)) return 0
+        var nl = source.indexOf('\n')
+        while (nl >= 0) {
+            var j = nl + 1
+            while (j < source.length && (source[j] == ' ' || source[j] == '\t')) j++
+            if (j < source.length && source[j] == '\n' && definitionAt(source, j + 1, label)) return nl
+            nl = source.indexOf('\n', nl + 1)
+        }
+        return -1
+    }
+
+    private fun definitionAt(s: String, from: Int, label: String): Boolean {
+        var i = from
+        while (i < s.length && i - from < 3 && s[i] == ' ') i++
+        if (i >= s.length || s[i] != '[') return false
+        i++
+        if (i + label.length > s.length) return false
+        for (k in label.indices) if (jsCaseFold(s[i + k]) != jsCaseFold(label[k])) return false
+        i += label.length
+        if (!s.startsWith("]:", i)) return false
+        i += 2
+        while (i < s.length && (s[i] == ' ' || s[i] == '\t')) i++
+        val run = i
+        while (i < s.length && !Js.isSpace(s[i])) i++
+        if (i == run) return false
+        while (i < s.length && (s[i] == ' ' || s[i] == '\t')) i++
+        return i >= s.length || s[i] == '\n'
+    }
+
+    /**
+     * JS `Canonicalize` without `u`, from the JS-generated table: a character whose full upper case is longer than one
+     * (`ᾀ`) stays itself, unlike Kotlin's simple mapping.
+     */
+    private fun jsCaseFold(c: Char): Char = com.ecency.core.render.markdown.UrlScanner.canon[c.code]
+
+    private fun rawTagsOf(prepared: Prepared): BooleanArray =
+        prepared.rawTags ?: markInsideTags(prepared.cleaned).also { prepared.rawTags = it }
+
+    /** `/&amp;(?:[a-z][a-z\d]*|#\d+|#x[\da-f]+);/i`: a reference written twice. */
+    private fun hasDoubledReference(url: String): Boolean {
+        var p = Js.indexOfCi(url, "&amp;", 0)
+        while (p >= 0) {
+            var k = p + 5
+            if (k < url.length && Js.isAsciiAlpha(url[k])) {
+                k++
+                while (k < url.length && (Js.isAsciiAlpha(url[k]) || Js.isDigit(url[k]))) k++
+                if (k < url.length && url[k] == ';') return true
+            } else if (k < url.length && url[k] == '#') {
+                k++
+                val d = k
+                while (k < url.length && Js.isDigit(url[k])) k++
+                if (k > d && k < url.length && url[k] == ';') return true
+                k = d
+                if (k < url.length && (url[k] == 'x' || url[k] == 'X')) {
+                    k++
+                    val h = k
+                    while (k < url.length && isHexDigit(url[k])) k++
+                    if (k > h && k < url.length && url[k] == ';') return true
+                }
+            }
+            p = Js.indexOfCi(url, "&amp;", p + 1)
+        }
+        return false
+    }
+
+    /** `/^<(\/?)([a-z][a-z\d]*)/i` on `s.slice(at, at + 40)` with the slash given: the lowered name, or null. */
+    private fun tagNameAt(s: String, at: Int, closing: Boolean): String? {
+        val end = minOf(s.length, at + 40)
+        var i = at
+        if (i >= end || s[i] != '<') return null
+        i++
+        if (closing) {
+            if (i >= end || s[i] != '/') return null
+            i++
+        }
+        if (i >= end || !Js.isAsciiAlpha(s[i])) return null
+        val n = i
+        while (i < end && (Js.isAsciiAlpha(s[i]) || Js.isDigit(s[i]))) i++
+        return asciiLower(s.substring(n, i))
+    }
+
+    /** `/^<a\b/i` at [at]. */
+    private fun anchorOpenAt(s: String, at: Int): Boolean =
+        at + 1 < s.length && s[at] == '<' && (s[at + 1] == 'a' || s[at + 1] == 'A') && (at + 2 >= s.length || !isWordChar(s[at + 2]))
+
+    /**
+     * `bareShown` (2.5.58, #2185): whether the render shows a bare URL or promoted link at the candidate's position as
+     * an image rather than as text in a construct the scans cannot see (a link's text or title, a definition or
+     * footnote, code, an attribute, an escape, an autolink in an HTML block, an anchor read its own way). Read on its
+     * paragraph as written.
+     */
+    private fun bareShown(prepared: Prepared, candidate: Candidate): Boolean {
+        val source = prepared.source
+        val cleaned = prepared.cleaned
+        val pos = candidate.pos
+        val url = candidate.url
+        if (prepared.image.inTag[pos] || rawTagsOf(prepared)[pos]) return false
+        var slashes = 0
+        while (pos - 1 - slashes >= 0 && source[pos - 1 - slashes] == '\\') slashes++
+        if (slashes % 2 == 1) return false
+        val blank = source.lastIndexOf("\n\n", pos)
+        val paraStart = if (blank == -1) 0 else blank + 2
+        val para = source.substring(paraStart, pos)
+        if (inTextContext(para)) return false
+        // an open `[`: link text; a `]` in an attribute closes nothing
+        var depth = 0
+        var i = 0
+        while (i < para.length) {
+            val c = para[i]
+            if (c == '\\') {
+                i++
+            } else if (c == '[') {
+                depth++
+            } else if (c == ']' && !prepared.image.inTag[paraStart + i]) {
+                depth = maxOf(0, depth - 1)
+            }
+            i++
+        }
+        if (depth > 0) return false
+        if (inlineBacktick(source, paraStart, pos) || hasUrlSyntax(url)) return false
+        // an autolink in an HTML block is text to the parser
+        if (pos > 0 && source[pos - 1] == '<' && lineMasks(source).block[pos]) return false
+        // an anchor around it opened across lines, or nested, is read its own way
+        val lowerPara = asciiLower(cleaned.substring(paraStart, pos))
+        if (nestedAnchors(lowerPara)) return false
+        val lt = lowerPara.lastIndexOf("<a")
+        if (lt != -1 && anchorOpenAt(lowerPara.substring(lt, minOf(lowerPara.length, lt + 3)), 0) && lowerPara.indexOf('\n', lt) >= 0) return false
+        val nextAt = pos + url.length
+        val next = if (nextAt < source.length) source[nextAt] else null
+        if (next == '\'') return false
+        // literal brackets the linkify takes into the URL, unlike a link or defined reference the parser takes first
+        if (next == '[' && !markdownBracketAt(source, nextAt)) return false
+        // a closing tag right after it that does not close the tag right before it
+        val closing = tagNameAt(source, nextAt, true)
+        if (closing != null) {
+            val ltc = cleaned.lastIndexOf('<', pos)
+            val opening = if (ltc == -1) null else tagNameAt(cleaned, ltc, false)
+            if (opening == null || opening != closing) return false
+        }
+        if (next != null && (next == '*' || next == '_' || next == '~') && para.indexOf(next) < 0) return false
+        if (url.endsWith("\\")) return false
+        // a reference written twice, or one without its `;` in an anchor's text
+        if (hasDoubledReference(url)) return false
+        val tag = cleaned.lastIndexOf('<', pos)
+        if (tag != -1 && anchorOpenAt(cleaned.substring(tag, minOf(cleaned.length, tag + 3)), 0) &&
+            decodeHtmlText(url) != Helper.decodeCompleteReferences(url)
+        ) {
+            return false
+        }
+        return true
+    }
+
+    /**
+     * `posterShown` (2.5.58, #2185): whether the render shows the video link at [pos] as a poster, read in the contexts
+     * a bare image URL is. A link the checks cannot place is uncertain: the caller defers.
+     */
+    private fun posterShown(prepared: Prepared, pos: Int): Boolean {
+        val source = prepared.source
+        val cleaned = prepared.cleaned
+        // `/^https?:\/\/[^\s<>"'`]+/i` on `source.slice(pos, pos + 2100)`
+        val limit = minOf(source.length, pos + 2100)
+        val q = Scanners.schemeEnd(source, pos)
+        var e = q
+        if (q >= 0) while (e < limit && isLooseUrlChar(source[e])) e++
+        val token = if (q >= 0 && q <= limit && e > q) source.substring(pos, e) else null
+        val candidate = if (token != null) Candidate(token, pos) else Candidate("", pos, Candidate.DESTINATION)
+        // a destination (`[]( URL )`) is a link, never a poster
+        if (token != null && labelCloseBefore(cleaned, pos) != -1) return false
+        // in an HTML block with an image later on its line, the DOM may reorder them
+        var lineEnd = source.indexOf('\n', pos)
+        if (lineEnd == -1) lineEnd = source.length
+        if (lineMasks(source).block[pos] && imageOnLine(source, pos, lineEnd)) return false
+        return bareShown(prepared, candidate) && !unreadBefore(prepared, knownLabelCloses(cleaned).closes, pos)
+    }
+
+    /** `/!\[|<img\b/i` on `source.slice(pos, lineEnd)`. */
+    private fun imageOnLine(source: String, pos: Int, lineEnd: Int): Boolean {
+        val line = source.substring(pos, lineEnd)
+        return line.contains("![") || hasImgTag(asciiLower(line))
+    }
+
+    /** A `MD_LINK_RE` match: where it starts and ends (`m[0]`), its label (`m[1]`) and its href (`m[2]`). */
+    private class MdLink(val start: Int, val label: String, val href: String, val end: Int)
 
     /** `MD_LINK_RE = /\[([^[\]]*)\]\(\s*([^)\s[]+)(?:\s+["'][^"']*["'])?\s*\)/g` */
     private fun mdLinks(s: String): Sequence<MdLink> = sequence {
@@ -1502,43 +2420,13 @@ internal class CatchPostImage(private val helper: RenderHelper) {
             if (le >= 0 && le + 1 < s.length && s[le + 1] == '(') {
                 val t = parenTail(s, le + 1, { c -> c != ')' && c != '[' && !isWs(c) }, Int.MAX_VALUE)
                 if (t != null) {
-                    yield(MdLink(p, s.substring(p + 1, le), s.substring(t[0], t[1])))
+                    yield(MdLink(p, s.substring(p + 1, le), s.substring(t[0], t[1]), t[2]))
                     p = s.indexOf('[', t[2])
                     continue
                 }
             }
             p = s.indexOf('[', p + 1)
         }
-    }
-
-    /** `HTML_IMAGE_RE = /<img\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']/i`, first match. */
-    private fun htmlImageFind(s: String): Candidate? {
-        var p = Js.indexOfCi(s, "<img", 0)
-        while (p >= 0) {
-            val a = p + 4
-            if (a >= s.length || !isWordChar(s[a])) {
-                var q = a
-                while (true) {
-                    if (q < s.length && Js.startsWithCi(s, "src", q) && !isWordChar(s[q - 1])) {
-                        var i = q + 3
-                        while (i < s.length && isWs(s[i])) i++
-                        if (i < s.length && s[i] == '=') {
-                            i++
-                            while (i < s.length && isWs(s[i])) i++
-                            if (i < s.length && (s[i] == '"' || s[i] == '\'')) {
-                                var e = i + 1
-                                while (e < s.length && s[e] != '"' && s[e] != '\'') e++
-                                if (e > i + 1 && e < s.length) return Candidate(s.substring(i + 1, e), p, Candidate.HTML)
-                            }
-                        }
-                    }
-                    if (q >= s.length || s[q] == '>') break
-                    q++
-                }
-            }
-            p = Js.indexOfCi(s, "<img", p + 1)
-        }
-        return null
     }
 
     private fun isWordChar(c: Char) = c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9' || c == '_'

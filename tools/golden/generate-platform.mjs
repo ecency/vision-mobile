@@ -45,6 +45,8 @@ const cases = [
   ['account_witness_unvote', [sdk.buildWitnessVoteOp(U, 'ecency', false)]],
   ['account_witness_proxy', [sdk.buildWitnessProxyOp(U, 'ecency')]],
   ['account_witness_proxy_clear', [sdk.buildWitnessProxyOp(U, '')]],
+  // the governance card's Renew (#3724): the same proxy cannot be set twice, so it is cleared and set in one transaction
+  ['account_witness_proxy_renew', [sdk.buildWitnessProxyOp(U, ''), sdk.buildWitnessProxyOp(U, 'ecency')]],
 ]
 
 /** The SDK's own serializer on its JSON: the bytes hived signs (no signatures); generate-wax.mjs checks them against hived. */

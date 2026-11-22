@@ -82,20 +82,20 @@ import com.ecency.core.app.WalletUiCopy
 /** RN walletScreen (the Wallet tab): header with the estimated balance, quick actions, journal notices, asset cards. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: (AppScreen) -> Unit) {
+fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: (AppScreen) -> Unit, openExternal: (String) -> Unit = {}) {
     val colors = LocalEcencyColors.current
     val model = env.wallet
     val state by model.state.collectAsState()
     val journal by env.sendJournal.state.collectAsState()
     var receive by remember { mutableStateOf(false) }
-    LaunchedEffect(model) { model.start(); env.sendJournal.start() }
+    LaunchedEffect(model) { model.start(); env.sendJournal.start(); env.governanceCard.shown() }
     DisposableEffect(model) {
         model.visible(true)
         onDispose { model.visible(false) }
     }
     val mine = state.account == username
     val rows = if (mine) state.rows else emptyList()
-    PullToRefreshBox(isRefreshing = state.isRefreshing, onRefresh = { model.refresh(); env.sendJournal.recheck() }, modifier = Modifier.fillMaxSize().testTag("walletTab")) {
+    PullToRefreshBox(isRefreshing = state.isRefreshing, onRefresh = { model.refresh(); env.sendJournal.recheck(); env.governanceCard.refresh() }, modifier = Modifier.fillMaxSize().testTag("walletTab")) {
         LazyColumn(Modifier.fillMaxSize().testTag("walletList"), state = list) {
             item(key = "header") {
                 WalletHeader(
@@ -106,7 +106,8 @@ fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: 
                         else -> "--:--"
                     },
                     updating = state.isUpdating,
-                    onRefresh = model::refresh,
+                    // the governance card reads its account too, as pull to refresh does
+                    onRefresh = { model.refresh(); env.governanceCard.refresh() },
                     onManage = { push(AppScreen.AssetsSelect) },
                     onSend = { push(AppScreen.Transfer("transfer", "HIVE", "hive")) },
                     onReceive = { receive = true },
@@ -114,6 +115,7 @@ fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: 
                     onGetPoints = { push(AppScreen.of(com.ecency.core.app.RouteName.BOOST, username)) },
                 )
             }
+            if (mine) item(key = "governance") { GovernanceCard(env, openExternal) }
             items(journal.forAccount(username), key = { "journal:${it.actionId}" }) { JournalNotice(it, onDismiss = { env.sendJournal.dismiss(it) }) }
             if (state.showError) item(key = "error") {
                 Column(Modifier.fillMaxWidth().padding(16.dp).testTag("walletError"), horizontalAlignment = Alignment.CenterHorizontally) {

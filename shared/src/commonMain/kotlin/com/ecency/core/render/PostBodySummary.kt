@@ -32,7 +32,8 @@ internal object PostBodySummary {
             }
         }
         var text = try {
-            Markdown.renderSummary(body)
+            // 2.5.58 (#2182): a lone surrogate reads as U+FFFD, as the body render reads it, instead of throwing
+            Markdown.renderSummary(Helper.withoutLoneSurrogates(body))
         } catch (e: Exception) {
             ErrorReports.quiet(e, "render.summary")
             ""

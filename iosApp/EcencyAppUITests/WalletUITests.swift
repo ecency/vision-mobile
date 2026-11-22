@@ -248,4 +248,56 @@ final class WalletUITests: XCTestCase {
             app.terminate()
         }
     }
+
+    /// #3724: an inactive account's wallet offers the @ecency proxy; the sheet explains it before anything is signed.
+    func testAnInactiveAccountsWalletOffersTheEcencyProxy() {
+        let app = launch(["-startTab", "WALLET", "-demoGovernance", "inactive"])
+        let card = app.descendants(matching: .any)["governance-card"]
+        XCTAssertTrue(card.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.buttons["governance-vote-yourself"].exists)
+        XCTAssertTrue(app.buttons["governance-dismiss"].exists)
+        WalletShots.save("governance-card")
+        app.buttons["governance-set-proxy"].tap()
+        let confirm = app.buttons["governance-confirm"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["governance-point-0"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["governance-sheet"].exists)
+        WalletShots.save("governance-sheet")
+        confirm.tap()
+        // the demo account holds no active key: signing asks for the active key upgrade (the proxy needs active)
+        let upgradeCancel = app.buttons["upgrade-cancel"]
+        XCTAssertTrue(upgradeCancel.waitForExistence(timeout: 20))
+        upgradeCancel.tap()
+        // nothing was signed: the governance sheet is back, ready to confirm again or cancel
+        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: confirm)
+        waitForExpectations(timeout: 10)
+        app.buttons["governance-cancel"].tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: confirm)
+        waitForExpectations(timeout: 10)
+        let setProxy = app.buttons["governance-set-proxy"]
+        XCTAssertTrue(setProxy.waitForExistence(timeout: 10))
+        XCTAssertTrue(setProxy.isHittable, "the card, not a sheet over it")
+    }
+
+    /// "Remind Later" hides the card (the choice is a dialog; its buttons show twice in the tree, so firstMatch).
+    func testRemindLaterHidesTheGovernanceCard() {
+        let app = launch(["-startTab", "WALLET", "-demoGovernance", "inactive"])
+        let dismiss = app.buttons["governance-dismiss"]
+        XCTAssertTrue(dismiss.waitForExistence(timeout: 30))
+        dismiss.tap()
+        let later = app.buttons["governance-later"]
+        XCTAssertTrue(later.firstMatch.waitForExistence(timeout: 10))
+        later.firstMatch.tap()
+        let card = app.descendants(matching: .any)["governance-card"]
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: card)
+        waitForExpectations(timeout: 10)
+    }
+
+    /// Without the demo flag the fake accounts' governance counts: no card.
+    func testAWalletWhoseGovernanceCountsHasNoCard() {
+        let app = launch(["-startTab", "WALLET"])
+        XCTAssertTrue(app.buttons["asset-POINTS"].waitForExistence(timeout: 30))
+        // the card's read runs apart from the wallet's: give it time to show before saying it does not
+        XCTAssertFalse(app.descendants(matching: .any)["governance-card"].waitForExistence(timeout: 8))
+    }
 }
