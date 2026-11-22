@@ -106,7 +106,8 @@ final class PlatformUITests: XCTestCase {
     }
 
     func testTheProposalCardIsDismissedForever() {
-        let app = launch([])
+        // an established account: a new one sees the card only after Getting started (#3728)
+        let app = launch(["-demoEstablished", "YES"])
         let card = any(app, "proposal-card")
         XCTAssertTrue(card.waitForExistence(timeout: 20))
         XCTAssertEqual(app.staticTexts["proposal-title"].label, "Enjoying Ecency!")

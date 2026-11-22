@@ -81,6 +81,9 @@ class TestNode {
     /** Answers a method before the fixtures below (wallet reads); null falls through. */
     @Volatile var extra: ((String, kotlinx.serialization.json.JsonObject) -> String?)? = null
 
+    /** The tester's post count; none: a new account (the proposal card waits for Getting started, #3728). */
+    @Volatile var postCount: Int? = null
+
     /** Extra markdown appended to the post body (e.g. images for the gallery). */
     @Volatile var postBodyExtra = ""
 
@@ -140,7 +143,7 @@ class TestNode {
                     """"carol/re-one":${entry("carol", "re-one", parent = "alice" to "trending-one", extra = commentBodyExtra)}}""",
             )
             "condenser_api.get_accounts" -> ok(
-                """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${key.publicKey()}",1]]},"memo_key":"${key.publicKey()}"}]""",
+                """[{"name":"tester","posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["${key.publicKey()}",1]]},"memo_key":"${key.publicKey()}"${postCount?.let { ",\"post_count\":$it" } ?: ""}}]""",
             )
             "condenser_api.get_dynamic_global_properties" -> ok(
                 """{"head_block_number":100003,"head_block_id":"000186a3${"11".repeat(16)}","time":"2026-10-06T11:59:00"}""",

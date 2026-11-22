@@ -185,10 +185,13 @@ final class FakeHiveTransport: NSObject, RpcTransport {
     static func account(_ user: String) -> [String: Any] {
         func auth(_ role: KeyRole) -> [String: Any] { ["weight_threshold": 1, "account_auths": [], "key_auths": [[key(user, role), 1]]] }
         var fields: [String: Any] = ["name": user, "owner": auth(.owner), "active": auth(.active), "posting": auth(.posting), "memo_key": key(user, .memo),
-                "json_metadata": "", "posting_json_metadata": metadata(user), "reputation": 0, "post_count": 1,
+                "json_metadata": "", "posting_json_metadata": metadata(user), "reputation": 0,
                 "created": "2021-03-14T09:00:00", "vesting_shares": "1000.000000 VESTS", "delegated_vesting_shares": "0.000000 VESTS",
                 "received_vesting_shares": "0.000000 VESTS", "vesting_withdraw_rate": "0.000000 VESTS", "to_withdraw": 0, "withdrawn": 0,
                 "voting_manabar": ["current_mana": "873000000", "last_update_time": Int(Date().timeIntervalSince1970)]]
+        // `-demoEstablished YES` (#3728): 50 posts, an established account (no Getting started card; the proposal card
+        // asks at once); otherwise one post, a new account
+        fields["post_count"] = UserDefaults.standard.bool(forKey: "demoEstablished") ? 50 : 1
         // wallet balances, rewards and savings of the demo accounts
         for (key, value) in DemoWallet.shared.accountFields() { fields[key] = value.content }
         // `-demoGovernance inactive` (#3724): the current account's governance votes expired, so the wallet shows its card
