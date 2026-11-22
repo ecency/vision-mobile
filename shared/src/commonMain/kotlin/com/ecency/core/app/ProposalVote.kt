@@ -112,12 +112,17 @@ enum class ProposalDismiss { FOREVER, LATER }
  *   HiveSigner, HiveAuth) as one action with its own id; never retried by itself. Success: "Thank You!", the card
  *   says thanks for the rest of the run, the vote is remembered as processed. Failure: "Fail!: <message>".
  * - An account change resets the card for the new account.
+ * - Not for a new account the Getting started card still asks things of (#3728): the card waits for a later run of
+ *   the app, after the checklist was finished or dismissed; never in the same run as the checklist.
  */
 class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
     StateModel<ProposalCardState>(ProposalCardState(), env.dispatchers) {
 
     private var loadJob: Job? = null
     private var started = false
+
+    /** Accounts the Getting started card asked things of in this run (#3728): no proposal card for them until the next. */
+    private val onboarding = HashSet<String>()
 
     fun start() {
         if (started) return
@@ -144,9 +149,13 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 val proposal = env.proposalApi.proposals().filter { it.creator == ECENCY && it.status != "expired" }.maxByOrNull { it.id }
                     ?: return@launch
                 val voted = env.proposalApi.votedIds(user)
+                if (user !in onboarding) {
+                    val account = env.api.accounts.getAccount(user) ?: return@launch
+                    if (env.wavesOnboarding.pendingFor(user, account.created, account.postCount)) onboarding += user
+                }
                 if (env.session.current.username != user) return@launch
                 setState { s ->
-                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user))
+                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user) && user !in onboarding)
                 }
             } catch (e: CancellationException) {
                 throw e

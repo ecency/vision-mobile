@@ -196,8 +196,13 @@ class PlatformModelsTest {
         {"id":3,"proposal_id":350,"creator":"ecency","status":"inactive"},
         {"id":4,"proposal_id":400,"creator":"someone","status":"active"}]}"""
 
-    private suspend fun proposalApp(scope: TestScope, voted: List<Long> = emptyList(), signedIn: Boolean = true) = app(scope, signedIn) { req ->
+    /** [newAccount]: one post, so the Getting started card still asks things of it (`WavesOnboarding.isNewAccount`). */
+    private suspend fun proposalApp(scope: TestScope, voted: List<Long> = emptyList(), signedIn: Boolean = true, newAccount: Boolean = false) = app(scope, signedIn) { req ->
         when (req.method) {
+            "condenser_api.get_accounts" -> FakeTransport.result(
+                req,
+                "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":${if (newAccount) 1 else 50}") + "]",
+            )
             "database_api.list_proposals" -> FakeTransport.result(req, proposals)
             "database_api.list_proposal_votes" -> FakeTransport.result(
                 req,
@@ -219,12 +224,41 @@ class PlatformModelsTest {
     }
 
     @Test
+    fun aNewAccountGetsTheProposalCardOnlyOnALaterRunAfterGettingStarted() = runTest {
+        val app = proposalApp(this, newAccount = true)
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible, "not while the Getting started card still asks things")
+        // the checklist is dismissed in this run: the card still waits for a later one
+        app.env.wavesOnboarding.start()
+        testScheduler.advanceUntilIdle()
+        app.env.wavesOnboarding.dismiss()
+        app.env.proposalVote.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible, "never in the same run as the checklist")
+        val nextRun = ProposalVoteModel(app.env)
+        nextRun.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(nextRun.current.visible, "a later run asks")
+    }
+
+    @Test
+    fun anEstablishedAccountGetsTheProposalCardAtOnce() = runTest {
+        val app = proposalApp(this)
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        assertTrue(app.env.proposalVote.current.visible)
+    }
+
+    @Test
     fun theCardStartedBeforeTheAccountsWereReadShowsForTheAccount() = runTest {
         val base = appWithAccounts(this)
         val app = TestApp(this) { req ->
             when (req.method) {
                 "database_api.list_proposals" -> FakeTransport.result(req, proposals)
                 "database_api.list_proposal_votes" -> FakeTransport.result(req, """{"proposal_votes":[]}""")
+                // an established account (a new one waits for Getting started, #3728)
+                "condenser_api.get_accounts" -> FakeTransport.result(req, "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":50") + "]")
                 else -> base.handler(this, req)
             }
         }
