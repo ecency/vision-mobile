@@ -191,6 +191,12 @@ final class FakeHiveTransport: NSObject, RpcTransport {
                 "voting_manabar": ["current_mana": "873000000", "last_update_time": Int(Date().timeIntervalSince1970)]]
         // wallet balances, rewards and savings of the demo accounts
         for (key, value) in DemoWallet.shared.accountFields() { fields[key] = value.content }
+        // `-demoGovernance inactive` (#3724): the current account's governance votes expired, so the wallet shows its card
+        if user == "spike-alice", UserDefaults.standard.string(forKey: "demoGovernance") == "inactive" {
+            fields["proxy"] = ""
+            fields["witness_votes"] = [String]()
+            fields["governance_vote_expiration_ts"] = Governance.shared.EXPIRED_TS
+        }
         return fields
     }
 

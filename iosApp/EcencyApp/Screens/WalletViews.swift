@@ -13,11 +13,14 @@ struct WalletTabView: View {
     @Environment(\.appTheme) private var theme
     @StateObject private var wallet: Observed<WalletState>
     @StateObject private var journal: Observed<SendJournalState>
+    /// #3724: the row is added only while the card shows (a List row with nothing in it is never built).
+    @StateObject private var governance: Observed<GovernanceCardState>
     @State private var receive = false
 
     init(env: AppEnvironment) {
         _wallet = StateObject(wrappedValue: Observed(env.wallet, ownsModel: false))
         _journal = StateObject(wrappedValue: Observed(env.sendJournal, ownsModel: false))
+        _governance = StateObject(wrappedValue: Observed(env.governanceCard, ownsModel: false))
     }
 
     private var model: WalletModel { app.env.wallet }
@@ -28,6 +31,7 @@ struct WalletTabView: View {
         let mine = s.account == user
         List {
             header(s, mine: mine).listRowSeparator(.hidden).listRowInsets(EdgeInsets()).themedRow()
+            if mine && governance.state.visible { GovernanceCardView(env: app.env).listRowSeparator(.hidden).themedRow() }
             ForEach(journal.state.forAccount(account: user), id: \.actionId) { entry in
                 JournalNoticeView(entry: entry) { app.env.sendJournal.dismiss(entry: entry) }.listRowSeparator(.hidden).themedRow()
             }
@@ -54,8 +58,8 @@ struct WalletTabView: View {
         }
         .listStyle(.plain)
         .themedList()
-        .refreshable { model.refresh(); app.env.sendJournal.recheck() }
-        .onAppear { model.start(); app.env.sendJournal.start(); model.visible(shown: true) }
+        .refreshable { model.refresh(); app.env.sendJournal.recheck(); app.env.governanceCard.refresh() }
+        .onAppear { model.start(); app.env.sendJournal.start(); app.env.governanceCard.start(); model.visible(shown: true) }
         .onDisappear { model.visible(shown: false) }
         .themedSheet(isPresented: $receive) { ReceiveSheet(username: user) }
         .accessibilityIdentifier("wallet-tab")

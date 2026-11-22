@@ -248,4 +248,29 @@ final class WalletUITests: XCTestCase {
             app.terminate()
         }
     }
+
+    /// #3724: an inactive account's wallet offers the @ecency proxy; the sheet explains it before anything is signed.
+    func testAnInactiveAccountsWalletOffersTheEcencyProxy() {
+        let app = launch(["-startTab", "WALLET", "-demoGovernance", "inactive"])
+        let card = app.descendants(matching: .any)["governance-card"]
+        XCTAssertTrue(card.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.buttons["governance-vote-yourself"].exists)
+        XCTAssertTrue(app.buttons["governance-dismiss"].exists)
+        WalletShots.save("governance-card")
+        app.buttons["governance-set-proxy"].tap()
+        let confirm = app.buttons["governance-confirm"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["governance-point-0"].exists)
+        WalletShots.save("governance-sheet")
+        confirm.tap()
+        // the fake chain refuses every broadcast: the card stays and still offers the proxy
+        XCTAssertTrue(app.buttons["governance-set-proxy"].waitForExistence(timeout: 20))
+    }
+
+    /// Without the demo flag the fake accounts' governance counts: no card.
+    func testAWalletWhoseGovernanceCountsHasNoCard() {
+        let app = launch(["-startTab", "WALLET"])
+        XCTAssertTrue(app.buttons["asset-POINTS"].waitForExistence(timeout: 30))
+        XCTAssertFalse(app.descendants(matching: .any)["governance-card"].exists)
+    }
 }
