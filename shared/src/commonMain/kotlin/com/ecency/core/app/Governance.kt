@@ -8,8 +8,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -173,6 +177,14 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
     private var loadJob: Job? = null
     private var started = false
 
+    /**
+     * The send in flight per account (main thread): an account change and back builds a fresh card, which must still
+     * wait on it (no second send), and its outcome is reported whichever account is shown then.
+     */
+    private val inFlight = HashMap<String, String>()
+
+    private fun fresh(user: String?) = GovernanceCardState(username = user, sending = user != null && user in inFlight)
+
     fun start() {
         if (started) return
         started = true
@@ -190,12 +202,12 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
 
     private fun reload() {
         loadJob?.cancel()
-        setState { s -> if (s.username == env.session.current.username) s else GovernanceCardState(username = env.session.current.username) }
+        setState { s -> if (s.username == env.session.current.username) s else fresh(env.session.current.username) }
         loadJob = scope.launch {
             try {
                 env.session.awaitLoaded()
                 val user = env.session.current.username
-                if (current.username != user) setState { GovernanceCardState(username = user) }
+                if (current.username != user) setState { fresh(user) }
                 if (user == null || current.done) return@launch
                 val accounts = env.api.hive.accounts(listOf(user, PROXY))
                 if (env.session.current.username != user) return@launch
@@ -203,8 +215,10 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 val ecency = accounts.firstOrNull { it.name == PROXY }
                 val status = Governance.status(account, env.nowMillis())
                 val episode = if (status == GovernanceStatus.EXPIRING) "expiring.${account.governanceVoteExpiration}" else INACTIVE
-                // the votes count again: a "Don't show again" was about that lapse, not the next one
-                if (status == GovernanceStatus.ACTIVE) env.prefs.putString(key(user, INACTIVE), null)
+                // the votes count again: a "Don't show again" was about that lapse, not the next one (only on what says
+                // so: a date ahead, votes or a proxy; a node leaving the field out proves nothing)
+                val counts = Governance.expiresAt(account) != null || account.proxy.isNotEmpty() || account.witnessVotes.isNotEmpty()
+                if (status == GovernanceStatus.ACTIVE && counts) env.prefs.putString(key(user, INACTIVE), null)
                 setState { s ->
                     if (s.username != user) {
                         s
@@ -216,6 +230,7 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                             ecencyProxy = ecency?.proxy?.takeIf { it.isNotEmpty() },
                             episode = episode,
                             visible = status != GovernanceStatus.ACTIVE && !hidden(user, episode),
+                            sending = user in inFlight,
                         )
                     }
                 }
@@ -251,11 +266,12 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
         val s = current
         val user = s.username ?: return
         val action = s.action ?: return
-        if (!s.confirming || s.sending || env.session.current.username != user) return
+        if (!s.confirming || s.sending || user in inFlight || env.session.current.username != user) return
         setState { it.copy(sending = true) }
         val proxies = if (action == GovernanceAction.RENEW) listOf("", PROXY) else listOf(PROXY)
         val ops = buildJsonArray { proxies.forEach { add(proxyOp(user, it)) } }
         val actionId = env.idempotencyKey()
+        inFlight[user] = actionId
         scope.launch {
             val final = CompletableDeferred<WalletSend>()
             env.walletSends.send(user, ops, KeyRole.ACTIVE, actionId) { final.complete(it) }
@@ -266,13 +282,35 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 // the app keeps asking the chain: the sheet gives way, the card waits with its button off
                 setState { if (it.username == user) it.copy(confirming = false) else it }
             }
+            // a logout cancels the send without an outcome: its entry leaves the sends
+            val gone = async { env.walletSends.state.map { actionId in it.sends }.dropWhile { !it }.first { !it } }
             val result = try {
-                final.await()
+                select<WalletSend?> {
+                    final.onAwait { it }
+                    gone.onAwait { null }
+                }
             } finally {
                 checking.cancel()
-                withContext(NonCancellable + env.dispatchers.main) { env.walletSends.disown(actionId) }
+                gone.cancel()
+                withContext(NonCancellable + env.dispatchers.main) {
+                    if (inFlight[user] == actionId) inFlight.remove(user)
+                    env.walletSends.disown(actionId)
+                }
             }
-            if (current.username != user) return@launch
+            if (result == null) {
+                setState { if (it.username == user) it.copy(sending = false, confirming = false) else it }
+                return@launch
+            }
+            if (current.username != user) {
+                // another account is shown: the outcome is still this user's to hear
+                when (val phase = result.phase) {
+                    is SendPhase.Done -> env.ui.toast(GovernanceCopy.THANK_YOU)
+                    is SendPhase.Unconfirmed -> env.ui.toast(phase.message)
+                    is SendPhase.Failed -> env.ui.toast(failText(phase), phase.error)
+                    else -> Unit
+                }
+                return@launch
+            }
             when (val phase = result.phase) {
                 is SendPhase.Done -> {
                     setState { it.copy(sending = false, confirming = false, done = true, visible = true) }
@@ -281,16 +319,27 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 is SendPhase.Unconfirmed -> {
                     setState { it.copy(sending = false, confirming = false) }
                     env.ui.toast(phase.message)
+                    // it may have gone through: read the account again
+                    reload()
                 }
                 is SendPhase.Failed -> {
                     setState { it.copy(sending = false, confirming = false) }
-                    val message = phase.error.text
-                    env.ui.toast(if (message.isNotEmpty()) "${GovernanceCopy.FAIL}: $message" else GovernanceCopy.FAIL, phase.error)
+                    env.ui.toast(failText(phase), phase.error)
                     // the chain may stand elsewhere than the card read it (a proxy cleared meanwhile): read it again
                     reload()
                 }
                 else -> setState { it.copy(sending = false) }
             }
+        }
+    }
+
+    /** An undecided outcome ("may already have gone through") is no failure to announce. */
+    private fun failText(phase: SendPhase.Failed): String {
+        val message = phase.error.text
+        return when {
+            phase.error.undecided && message.isNotEmpty() -> message
+            message.isNotEmpty() -> "${GovernanceCopy.FAIL}: $message"
+            else -> GovernanceCopy.FAIL
         }
     }
 

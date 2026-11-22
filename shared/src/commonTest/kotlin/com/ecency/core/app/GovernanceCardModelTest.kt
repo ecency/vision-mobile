@@ -332,4 +332,102 @@ class GovernanceCardModelTest {
         testScheduler.advanceUntilIdle()
         assertTrue(model.current.visible)
     }
+
+    @Test
+    fun switchingAwayAndBackWhileASendIsCheckedStartsNoSecondSend() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.advanceTimeBy(60_000)
+            testScheduler.runCurrent()
+            assertTrue(model.current.sending)
+            // away to Bob and back: the fresh card for Alice still waits on her send
+            app.env.session.switchTo(bob)
+            testScheduler.runCurrent()
+            app.env.session.switchTo(alice)
+            testScheduler.runCurrent()
+            assertEquals(alice, model.current.username)
+            assertTrue(model.current.sending, "her send is still in flight")
+            model.askConfirm()
+            model.confirm()
+            testScheduler.runCurrent()
+            // node failover sends the same signed transaction again; a second send would be another transaction
+            assertEquals(1, app.broadcasts().map { it.params.toString() }.distinct().size, "no second send")
+            // the first send lands: Alice's card thanks
+            chain.txStatus = "within_irreversible_block"
+            testScheduler.advanceTimeBy(WalletSends.RECHECK_MILLIS + 1)
+            testScheduler.advanceUntilIdle()
+            assertTrue(model.current.done)
+            assertFalse(model.current.sending)
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun anOutcomeWhileAnotherAccountIsShownIsStillToasted() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.advanceTimeBy(60_000)
+            testScheduler.runCurrent()
+            app.env.session.switchTo(bob)
+            testScheduler.runCurrent()
+            // the earlier toasts read and gone
+            while (true) app.env.ui.dismiss(app.env.ui.current.toast?.id ?: break)
+            chain.txStatus = "within_irreversible_block"
+            testScheduler.advanceTimeBy(WalletSends.RECHECK_MILLIS + 1)
+            testScheduler.advanceUntilIdle()
+            assertEquals(GovernanceCopy.THANK_YOU, app.env.ui.current.toast?.text)
+            assertEquals(bob, model.current.username)
+            assertFalse(model.current.done, "Bob's card is not Alice's")
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun aLogoutDuringASendEndsTheWait() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.runCurrent()
+            assertTrue(model.current.sending)
+            app.env.session.logout(alice)
+            testScheduler.advanceUntilIdle()
+            // logging Alice in again finds no send of hers in flight
+            KeyVault(app.store).run { save(stored(alice)); setCurrentUsername(alice) }
+            app.env.session.switchTo(alice)
+            testScheduler.advanceUntilIdle()
+            assertEquals(alice, model.current.username)
+            assertFalse(model.current.sending, "the cancelled send no longer holds the card")
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun aMissingExpiryDoesNotUndoDontShowAgain() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain)
+        val model = start(this, app)
+        model.dismiss(GovernanceDismiss.FOREVER)
+        // a node that leaves the field out: no card, and no proof the votes count
+        chain.fields[alice] = """"proxy":"","witness_votes":[]"""
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        chain.fields[alice] = governance(Governance.EXPIRED_TS)
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.visible, "the choice stands")
+    }
 }
