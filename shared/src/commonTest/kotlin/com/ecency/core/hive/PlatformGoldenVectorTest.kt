@@ -28,7 +28,7 @@ class PlatformGoldenVectorTest {
 
     @Test
     fun governanceOperationsSerializeLikeDhiveAndSignLikeTheSdk() {
-        assertEquals(6, PlatformGoldenVectors.transactions.size)
+        assertEquals(7, PlatformGoldenVectors.transactions.size)
         PlatformGoldenVectors.transactions.forEach { v ->
             val ops = sdkOps(v).map { OperationJson.decode(it as JsonArray) }
             val t = tx(ops)
@@ -51,6 +51,11 @@ class PlatformGoldenVectorTest {
         same("account_witness_unvote", AccountWitnessVote(u, "ecency", false))
         same("account_witness_proxy", AccountWitnessProxy(u, "ecency"))
         same("account_witness_proxy_clear", AccountWitnessProxy(u, ""))
+        assertEquals(
+            sdkOps(PlatformGoldenVectors.transactions.first { it.name == "account_witness_proxy_renew" }),
+            WalletOps.ops(listOf(AccountWitnessProxy(u, ""), AccountWitnessProxy(u, "ecency"))),
+            "the governance card's Renew (#3724)",
+        )
     }
 
     @Test

@@ -258,6 +258,9 @@ class AppEnvironment(
     /** RN ProposalVoteRequest: the proposal card on the main feed. One per app. */
     val proposalVote: ProposalVoteModel by lazy { ProposalVoteModel(this) }
 
+    /** #3724: the wallet's governance card (proxy to @ecency); one per process, it follows the session. */
+    val governanceCard: GovernanceCardModel by lazy { GovernanceCardModel(this) }
+
     val localVotes = LocalVotes { security.monotonicMillis() }
 
     /** Non-secret preferences (feed tabs, content filters). Each platform sets its own store at start. */
