@@ -2253,11 +2253,11 @@ internal class CatchPostImage(private val helper: RenderHelper) {
         return i >= s.length || s[i] == '\n'
     }
 
-    /** JS `Canonicalize` without `u`: the single-character upper case, never mapping a non-ASCII character into ASCII. */
-    private fun jsCaseFold(c: Char): Char {
-        val u = c.uppercaseChar()
-        return if (c.code >= 128 && u.code < 128) c else u
-    }
+    /**
+     * JS `Canonicalize` without `u`, from the JS-generated table: a character whose full upper case is longer than one
+     * (`ᾀ`) stays itself, unlike Kotlin's simple mapping.
+     */
+    private fun jsCaseFold(c: Char): Char = com.ecency.core.render.markdown.UrlScanner.canon[c.code]
 
     private fun rawTagsOf(prepared: Prepared): BooleanArray =
         prepared.rawTags ?: markInsideTags(prepared.cleaned).also { prepared.rawTags = it }

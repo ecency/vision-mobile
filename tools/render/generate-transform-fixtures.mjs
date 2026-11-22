@@ -1011,7 +1011,14 @@ const cardBodies2558 = (() => {
     ...[2024, 2100, 3000].map((n) => `![x](https://example.com/${'a'.repeat(n)}.png) ![y](https://example.com/b.png)`),
     `![x](https://example.com/${'a'.repeat(2100)}%41.png) ![y](https://example.com/b.png)`,
     // #2185: a long bare URL, an IPFS one, as a link
-    `https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png\n\n![x](${B})`, `[https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png](https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png)\n\n![x](${B})`,
+    `https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png\n\n![x](${B})`,
+    // review of the port: reference labels JS folds differently from a simple upper case, a destination on the next
+    // line, and images already on this proxy base (the specs' H and W use another host)
+    `${A}[\u1f80]\n\n[\u1f88]: https://example.net/q`, `${A}[\u1fb3]\n\n[\u1fbc]: https://example.net/q`, `${A}[\u1f88]\n\n[\u1f88]: https://example.net/q`,
+    `[x](\n${A}) ![d](${B})`, `[x](\n  ${A}) ![d](${B})`, `[x](  ${A}) ![d](${B})`,
+    `![x](${PROXY_BASE}/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png)`, `${PROXY_BASE}/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png`,
+    `<img src=" ${PROXY_BASE}/600x400/https://example.com/a.png ">`, `![x](${PROXY_BASE}/600x400/https://example.com/a.png)`,
+    `<img src="${PROXY_BASE}/u/example-user/avatar/small">`, `${PROXY_BASE}/u/${'z'.repeat(2100)}.png`, `[https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png](https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png)\n\n![x](${B})`,
   ]
 })()
 // Rules of 2.5.58 (#2182, #2183, #2185, #2191): an image link the proxy refuses stays a link, an IPFS one too, and the
@@ -1036,6 +1043,8 @@ const rules2558 = {
   // the proxy, an HTML image the proxy refuses
   author_no_replace: '<img class="no-replace video-thumbnail" src="https://example.com/a.png">',
   foreign_srcset: '<img src="https://images.ecency.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk" srcset="https://example.org/a.png 1x, https://images.ecency.com/p/x 2x">',
+  kept_p_png: '![x](https://images.ecency.com/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png)',
+  kept_sized_html: '<img src="https://images.ecency.com/600x400/https://example.com/a.png">',
   refused_img_html: `<img src="https://example.org/${'a'.repeat(2040)}.png"> ![y](https://example.com/b.png)`,
 }
 for (const [name, body] of Object.entries(handcrafted)) bodies.push([name, body])
@@ -1245,6 +1254,11 @@ cardBodies2557.forEach((body, i) => {
   imageCases.push({ name: `c2558_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.catchPostImage(entry, 0, 0, 'match') })
   imageCases.push({ name: `c2558fast_${i}`, kind: 'entry', body, meta: '{}', w: 0, h: 0, fast: true, expected: rh.catchPostImage(entry, 0, 0, 'match', { fast: true }) })
   imageCases.push({ name: `c2558raw_${i}`, kind: 'raw', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryImageRawUrl(entry) })
+  // a kept proxy URL over the limit: sized, the proxy will not take it again
+  if (body.length > 1500 && body.includes(PROXY_BASE)) {
+    imageCases.push({ name: `c2558sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
+    imageCases.push({ name: `c2558strsized_${i}`, kind: 'string', body, meta: null, w: 600, h: 500, fast: false, expected: rh.catchPostImage(body, 600, 500, 'match') })
+  }
   if (body.length > 1500) return
   imageCases.push({ name: `c2558card_${i}`, kind: 'card', body, meta: '{}', w: 0, h: 0, fast: false, expected: rh.getEntryCardImageRawUrl(entry) })
   imageCases.push({ name: `c2558sized_${i}`, kind: 'entry', body, meta: '{}', w: 600, h: 500, fast: false, expected: rh.catchPostImage(entry, 600, 500, 'match') })
