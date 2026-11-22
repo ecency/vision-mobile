@@ -1018,7 +1018,10 @@ const cardBodies2558 = (() => {
     `[x](\n${A}) ![d](${B})`, `[x](\n  ${A}) ![d](${B})`, `[x](  ${A}) ![d](${B})`,
     `![x](${PROXY_BASE}/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png)`, `${PROXY_BASE}/p/2bP4pJr4wVimqCWjYimXJe2cnCgnAhYxiBtbXg5JBpk.png`,
     `<img src=" ${PROXY_BASE}/600x400/https://example.com/a.png ">`, `![x](${PROXY_BASE}/600x400/https://example.com/a.png)`,
-    `<img src="${PROXY_BASE}/u/example-user/avatar/small">`, `${PROXY_BASE}/u/${'z'.repeat(2100)}.png`, `[https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png](https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png)\n\n![x](${B})`,
+    `<img src="${PROXY_BASE}/u/example-user/avatar/small">`, `${PROXY_BASE}/u/${'z'.repeat(2100)}.png`,
+    // a video poster, then a URL only the parser reads: the lookups defer
+    `https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n[x][y](${A})\n\n[y]: https://example.net/z`,
+    `https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n[x](<${A}>x)`, `https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n\\[x](${A})`, `[https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png](https://ipfs.io/ipfs/QmTest/${'a'.repeat(2100)}.png)\n\n![x](${B})`,
   ]
 })()
 // Rules of 2.5.58 (#2182, #2183, #2185, #2191): an image link the proxy refuses stays a link, an IPFS one too, and the
