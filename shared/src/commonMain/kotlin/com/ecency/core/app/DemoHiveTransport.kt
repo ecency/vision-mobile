@@ -176,6 +176,11 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
         put("vesting_withdraw_rate", "0.000000 VESTS"); put("to_withdraw", 0); put("withdrawn", 0)
         DemoWallet.accountFields().forEach { (k, v) -> put(k, v) }
         putJsonObject("voting_manabar") { put("current_mana", "873000000"); put("last_update_time", nowSeconds()) }
+        // `--ez demoGovernance true` (#3728, iOS `-demoGovernance inactive`): spike-alice's governance votes expired, so
+        // the wallet shows its governance card
+        if (user == AUTHORS[0] && demoGovernanceInactive) {
+            put("proxy", ""); putJsonArray("witness_votes") {}; put("governance_vote_expiration_ts", Governance.EXPIRED_TS)
+        }
     }
 
     private fun profile(user: String) = buildJsonObject {
@@ -236,6 +241,9 @@ class DemoHiveTransport(private val nowSeconds: () -> Long = { 0L }) : RpcTransp
     }
 
     companion object {
+        /** Debug launch flag: the first demo account's governance votes expired (`--ez demoGovernance true`). */
+        var demoGovernanceInactive: Boolean = false
+
         val AUTHORS = listOf("spike-alice", "spike-bob", "spike-carol", "spike-dave", "spike-erin", "spike-frank")
         const val COMMUNITY = "hive-100001"
 
