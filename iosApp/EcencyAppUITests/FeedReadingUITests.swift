@@ -35,7 +35,8 @@ final class FeedReadingUITests: XCTestCase {
     /// The first home tab carries the proposal card above its list; an account that voted (or dismissed it for good)
     /// has no card there, and the list under it still shows its posts, whichever filter is first.
     func testTheFirstTabShowsItsPostsWithoutTheProposalCard() {
-        let app = launch(["-seedAccounts", "YES", "-prefs.customTabs.mainTabs", "trending,friends,hot",
+        // an established account, so only the processed vote keeps the card away (a new one waits for Getting started)
+        let app = launch(["-seedAccounts", "YES", "-demoEstablished", "YES", "-prefs.customTabs.mainTabs", "trending,friends,hot",
                           "-prefs.proposal.vote.342_spike-alice", "processed"])
         let first = app.buttons["filter-TRENDING"]
         XCTAssertTrue(first.waitForExistence(timeout: 15))

@@ -506,6 +506,8 @@ class MainActivity : FragmentActivity() {
             if (savedInstanceState == null) intent.getStringExtra("demoHeldPurchase")?.let { order -> (env.store as? com.ecency.core.app.DemoStore)?.holdForReview(order) }
             // `--ez demoGovernance true`: the demo account's governance votes expired, so the wallet shows its card (#3728)
             com.ecency.core.app.DemoHiveTransport.demoGovernanceInactive = intent.getBooleanExtra("demoGovernance", false)
+            // `--ez demoEstablished true`: the demo accounts have 50 posts, so they are not new (the proposal card shows at once)
+            com.ecency.core.app.DemoHiveTransport.demoEstablished = intent.getBooleanExtra("demoEstablished", false)
             com.ecency.core.app.DemoAuthServices.demoReleaseTag = if (intent.getBooleanExtra("demoUpdate", false)) "99.1.0" else null
             // `--ei demoChatHistory <n>`: n older messages and one long one in the demo channel, DM and group
             val history = intent.getIntExtra("demoChatHistory", 0)

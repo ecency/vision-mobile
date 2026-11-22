@@ -146,16 +146,18 @@ class ProposalVoteModel internal constructor(private val env: AppEnvironment) :
                 val user = env.session.current.username
                 setState { if (it.username == user) it else ProposalCardState(username = user) }
                 if (user == null) return@launch
-                val proposal = env.proposalApi.proposals().filter { it.creator == ECENCY && it.status != "expired" }.maxByOrNull { it.id }
-                    ?: return@launch
-                val voted = env.proposalApi.votedIds(user)
+                // first, so a later read failing or finding no proposal cannot let the card into this run
                 if (user !in onboarding) {
                     val account = env.api.accounts.getAccount(user) ?: return@launch
                     if (env.wavesOnboarding.pendingFor(user, account.created, account.postCount)) onboarding += user
                 }
+                if (user in onboarding) return@launch
+                val proposal = env.proposalApi.proposals().filter { it.creator == ECENCY && it.status != "expired" }.maxByOrNull { it.id }
+                    ?: return@launch
+                val voted = env.proposalApi.votedIds(user)
                 if (env.session.current.username != user) return@launch
                 setState { s ->
-                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user) && user !in onboarding)
+                    if (s.username != user) s else s.copy(proposalId = proposal.id, visible = proposal.id !in voted && !hiddenByChoice(proposal.id, user))
                 }
             } catch (e: CancellationException) {
                 throw e

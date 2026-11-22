@@ -1546,39 +1546,41 @@ struct PinnedSheet: View {
             Label(ChatPinnedModel.companion.TITLE, appIcon: .pin).scaledFont(18, weight: .bold).foregroundStyle(theme.text).accessibilityAddTraits(.isHeader)
             // every state inside the measured scroller, so the sheet fits the spinner, the notice or the rows (#3728)
             FittedSheetScroll {
-            VStack(alignment: .leading, spacing: 0) {
-            if s.isLoading {
-                ProgressView().frame(maxWidth: .infinity).padding(32)
-            } else if let error = s.error {
-                Text(error).foregroundStyle(theme.dangerText).padding(32).announces(error)
-            } else if s.items.isEmpty {
-                Text(ChatPinnedModel.companion.EMPTY).foregroundStyle(theme.secondary).padding(32)
-            } else {
-                    VStack(spacing: 8) {
-                        ForEach(s.items, id: \.post.id) { row in
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(row.author).scaledFont(14, weight: .semibold).foregroundStyle(theme.accentText)
-                                    Spacer()
-                                    Text(row.time).scaledFont(12).foregroundStyle(theme.secondary)
-                                    if canUnpin {
-                                        Button { pinned.unpin(row: row) } label: { Image(appIcon: .close).foregroundStyle(theme.icon).tapTarget() }
-                                            .accessibilityLabel(ChatUiCopy.shared.UNPIN).accessibilityIdentifier("unpin-\(row.post.id)")
+                VStack(alignment: .leading, spacing: 0) {
+                    if s.isLoading {
+                        ProgressView().frame(maxWidth: .infinity).padding(32)
+                    } else if let error = s.error {
+                        Text(error).foregroundStyle(theme.dangerText).padding(32).announces(error)
+                    } else if s.items.isEmpty {
+                        Text(ChatPinnedModel.companion.EMPTY).foregroundStyle(theme.secondary).padding(32)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(s.items, id: \.post.id) { row in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Text(row.author).scaledFont(14, weight: .semibold).foregroundStyle(theme.accentText)
+                                        Spacer()
+                                        Text(row.time).scaledFont(12).foregroundStyle(theme.secondary)
+                                        if canUnpin {
+                                            Button { pinned.unpin(row: row) } label: { Image(appIcon: .close).foregroundStyle(theme.icon).tapTarget() }
+                                                .accessibilityLabel(ChatUiCopy.shared.UNPIN).accessibilityIdentifier("unpin-\(row.post.id)")
+                                        }
                                     }
+                                    Text(row.text).scaledFont(14).foregroundStyle(theme.text).lineLimit(3)
                                 }
-                                Text(row.text).scaledFont(14).foregroundStyle(theme.text).lineLimit(3)
+                                .padding(12)
+                                .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
+                                .onTapGesture { onOpen(row.post.id) }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityAddTraits(.isButton)
+                                .accessibilityAction { onOpen(row.post.id) }
+                                .accessibilityIdentifier("pinned-\(row.post.id)")
                             }
-                            .padding(12)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(theme.lightBackground))
-                            .onTapGesture { onOpen(row.post.id) }
-                            .accessibilityElement(children: .combine)
-                            .accessibilityAddTraits(.isButton)
-                            .accessibilityAction { onOpen(row.post.id) }
-                            .accessibilityIdentifier("pinned-\(row.post.id)")
                         }
                     }
-            }
-            }
+                }
+                // a notice keeps to the leading edge, as before the rows were measured
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .padding(16)
@@ -1628,6 +1630,7 @@ struct MembersSheet: View {
                         .accessibilityIdentifier("member-\(m.userId)")
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .padding(16)

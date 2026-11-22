@@ -360,14 +360,22 @@ extension View {
 /// last row. Its scrolling part is a `FittedSheetScroll`; `.fittedDetents()` on the sheet's root adds what sits around
 /// it (a navigation bar, a fixed footer). Taller content scrolls, up to the full sheet. `.medium` is never a sheet
 /// detent (`SheetDetentLintTests`).
-private struct SheetContentHeightKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+private struct SheetMetrics: Equatable {
+    var sheet: CGFloat = 0
+    var viewport: CGFloat = 0
+    var content: CGFloat = 0
 }
 
-private struct SheetViewportHeightKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+/// The sheet's, the scroller's and the content's heights, all from one layout pass: a sheet resized by a drag, the
+/// keyboard or a fold never pairs a new sheet height with an old scroller height.
+private struct SheetMetricsKey: PreferenceKey {
+    static let defaultValue = SheetMetrics()
+    static func reduce(value: inout SheetMetrics, nextValue: () -> SheetMetrics) {
+        let next = nextValue()
+        value.sheet = max(value.sheet, next.sheet)
+        value.viewport = max(value.viewport, next.viewport)
+        value.content = max(value.content, next.content)
+    }
 }
 
 /// A sheet's scrolling content, measured for `.fittedDetents()`.
@@ -376,34 +384,30 @@ struct FittedSheetScroll<Content: View>: View {
 
     var body: some View {
         ScrollView {
-            content.background(GeometryReader { Color.clear.preference(key: SheetContentHeightKey.self, value: $0.size.height) })
+            content.background(GeometryReader { Color.clear.preference(key: SheetMetricsKey.self, value: SheetMetrics(content: $0.size.height)) })
         }
         .scrollBounceBehavior(.basedOnSize)
-        .background(GeometryReader { Color.clear.preference(key: SheetViewportHeightKey.self, value: $0.size.height) })
+        .background(GeometryReader { Color.clear.preference(key: SheetMetricsKey.self, value: SheetMetrics(viewport: $0.size.height)) })
     }
 }
 
 private struct FittedDetents: ViewModifier {
-    @State private var sheet: CGFloat = 0
-    @State private var content: CGFloat = 0
-    @State private var viewport: CGFloat = 0
     @State private var fitted: CGFloat?
     /// Half the screen only until the content is measured (a sheet still loading).
     @State private var detent: PresentationDetent = .medium
 
     func body(content view: Content) -> some View {
         view
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sheet = $0; refit() }
-            .onPreferenceChange(SheetContentHeightKey.self) { content = $0; refit() }
-            .onPreferenceChange(SheetViewportHeightKey.self) { viewport = $0; refit() }
+            .background(GeometryReader { Color.clear.preference(key: SheetMetricsKey.self, value: SheetMetrics(sheet: $0.size.height)) })
+            .onPreferenceChange(SheetMetricsKey.self) { refit($0) }
             .presentationDetents(fitted.map { [.height($0), .large] } ?? [.medium, .large], selection: $detent)
     }
 
     /// The sheet's height less the scroller's is what sits around it; that plus the content is the fitted height. It
     /// holds at any sheet height, so a resize settles at once. A sheet pulled up to full height stays there.
-    private func refit() {
-        guard sheet > 0, viewport > 0, content > 0 else { return }
-        let height = (sheet - viewport + content).rounded(.up)
+    private func refit(_ m: SheetMetrics) {
+        guard m.sheet > 0, m.viewport > 0, m.content > 0 else { return }
+        let height = (m.sheet - m.viewport + m.content).rounded(.up)
         if let fitted, abs(fitted - height) < 1 { return }
         let followed = detent == (fitted.map { .height($0) } ?? .medium)
         fitted = height

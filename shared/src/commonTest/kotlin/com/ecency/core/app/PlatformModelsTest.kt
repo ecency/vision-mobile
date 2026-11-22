@@ -197,8 +197,12 @@ class PlatformModelsTest {
         {"id":4,"proposal_id":400,"creator":"someone","status":"active"}]}"""
 
     /** [newAccount]: one post, so the Getting started card still asks things of it (`WavesOnboarding.isNewAccount`). */
+    /** list_proposals fails while this is set (a node down at launch). */
+    private var proposalsDown = false
+
     private suspend fun proposalApp(scope: TestScope, voted: List<Long> = emptyList(), signedIn: Boolean = true, newAccount: Boolean = false) = app(scope, signedIn) { req ->
         when (req.method) {
+            "database_api.list_proposals" -> if (proposalsDown) HttpResult(500, "") else FakeTransport.result(req, proposals)
             "condenser_api.get_accounts" -> FakeTransport.result(
                 req,
                 "[" + AppTestKeys.accountJson(alice).replace("\"post_count\":1", "\"post_count\":${if (newAccount) 1 else 50}") + "]",
@@ -240,6 +244,22 @@ class PlatformModelsTest {
         nextRun.start()
         testScheduler.advanceUntilIdle()
         assertTrue(nextRun.current.visible, "a later run asks")
+    }
+
+    @Test
+    fun aNewAccountsFailedFirstReadStillKeepsTheCardOutOfThisRun() = runTest {
+        proposalsDown = true
+        val app = proposalApp(this, newAccount = true)
+        app.env.proposalVote.start()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible)
+        proposalsDown = false
+        app.env.wavesOnboarding.start()
+        testScheduler.advanceUntilIdle()
+        app.env.wavesOnboarding.dismiss()
+        app.env.proposalVote.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(app.env.proposalVote.current.visible, "Getting started was asked of it in this run")
     }
 
     @Test
