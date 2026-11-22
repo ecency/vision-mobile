@@ -14,11 +14,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -40,7 +40,6 @@ import com.ecency.core.app.GovernanceDismiss
 fun GovernanceCard(env: AppEnvironment, openExternal: (String) -> Unit) {
     val colors = LocalEcencyColors.current
     val model = env.governanceCard
-    LaunchedEffect(model) { model.start() }
     val state by model.state.collectAsState()
     if (!state.visible) return
     val primary = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = colors.blue)
@@ -66,7 +65,9 @@ fun GovernanceCard(env: AppEnvironment, openExternal: (String) -> Unit) {
         }
     }
     if (state.confirming) {
-        ModalBottomSheet(onDismissRequest = { if (!state.sending) model.cancelConfirm() }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = colors.background) {
+        // never closed while it signs and sends (a swipe or back would leave the card waiting on a sheet nobody sees)
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { it != SheetValue.Hidden || !model.current.sending })
+        ModalBottomSheet(onDismissRequest = model::cancelConfirm, sheetState = sheetState, containerColor = colors.background) {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp).navigationBarsPadding().testTag("governanceSheet")) {
                 Text(state.sheetTitle, color = colors.text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }.padding(bottom = 12.dp))
                 state.sheetPoints.forEach { point -> Text("•  $point", color = colors.text, modifier = Modifier.padding(bottom = 8.dp)) }

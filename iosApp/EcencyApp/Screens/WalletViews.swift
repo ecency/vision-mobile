@@ -59,7 +59,7 @@ struct WalletTabView: View {
         .listStyle(.plain)
         .themedList()
         .refreshable { model.refresh(); app.env.sendJournal.recheck(); app.env.governanceCard.refresh() }
-        .onAppear { model.start(); app.env.sendJournal.start(); app.env.governanceCard.start(); model.visible(shown: true) }
+        .onAppear { model.start(); app.env.sendJournal.start(); app.env.governanceCard.shown(); model.visible(shown: true) }
         .onDisappear { model.visible(shown: false) }
         .themedSheet(isPresented: $receive) { ReceiveSheet(username: user) }
         .accessibilityIdentifier("wallet-tab")

@@ -55,6 +55,8 @@ object Governance {
     }
 
     fun status(account: Account, nowMillis: Long): GovernanceStatus {
+        // the suggested proxy itself, and an account that declined voting rights (the chain refuses its proxy)
+        if (account.name == GovernanceCardModel.PROXY || !account.canVote) return GovernanceStatus.ACTIVE
         if (account.governanceVoteExpiration == EXPIRED_TS) {
             return if (account.proxy.isEmpty() && account.witnessVotes.isEmpty()) GovernanceStatus.INACTIVE else GovernanceStatus.ACTIVE
         }
@@ -180,12 +182,15 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
         reload()
     }
 
-    /** Reads the account again (pull to refresh, the wallet opening). */
+    /** Reads the account again (pull to refresh); the card stays as it is until the answer lands. */
     fun refresh() = reload()
+
+    /** The wallet opened: the first time starts the card, later ones read the account again ("Remind Later" ends). */
+    fun shown() = if (!started) start() else reload()
 
     private fun reload() {
         loadJob?.cancel()
-        setState { s -> if (s.done && s.username == env.session.current.username) s else GovernanceCardState(username = env.session.current.username) }
+        setState { s -> if (s.username == env.session.current.username) s else GovernanceCardState(username = env.session.current.username) }
         loadJob = scope.launch {
             try {
                 env.session.awaitLoaded()
@@ -197,7 +202,9 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                 val account = accounts.firstOrNull { it.name == user } ?: return@launch
                 val ecency = accounts.firstOrNull { it.name == PROXY }
                 val status = Governance.status(account, env.nowMillis())
-                val episode = if (status == GovernanceStatus.EXPIRING) "expiring.${account.governanceVoteExpiration}" else "inactive"
+                val episode = if (status == GovernanceStatus.EXPIRING) "expiring.${account.governanceVoteExpiration}" else INACTIVE
+                // the votes count again: a "Don't show again" was about that lapse, not the next one
+                if (status == GovernanceStatus.ACTIVE) env.prefs.putString(key(user, INACTIVE), null)
                 setState { s ->
                     if (s.username != user) {
                         s
@@ -234,7 +241,10 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
         if (s.visible && s.action != null && !s.sending) setState { it.copy(confirming = true) }
     }
 
-    fun cancelConfirm() = setState { it.copy(confirming = false) }
+    /** Closes the sheet, never while it signs and sends. */
+    fun cancelConfirm() {
+        if (!current.sending) setState { it.copy(confirming = false) }
+    }
 
     /** Signs what the open sheet says. */
     fun confirm() {
@@ -253,6 +263,8 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
             val checking = launch {
                 env.walletSends.state.first { it.sends[actionId]?.phase is SendPhase.Checking }
                 env.ui.toast(com.ecency.core.api.broadcast.BroadcastException.UNDECIDED_MESSAGE)
+                // the app keeps asking the chain: the sheet gives way, the card waits with its button off
+                setState { if (it.username == user) it.copy(confirming = false) else it }
             }
             val result = try {
                 final.await()
@@ -271,9 +283,11 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
                     env.ui.toast(phase.message)
                 }
                 is SendPhase.Failed -> {
-                    setState { it.copy(sending = false) }
+                    setState { it.copy(sending = false, confirming = false) }
                     val message = phase.error.text
                     env.ui.toast(if (message.isNotEmpty()) "${GovernanceCopy.FAIL}: $message" else GovernanceCopy.FAIL, phase.error)
+                    // the chain may stand elsewhere than the card read it (a proxy cleared meanwhile): read it again
+                    reload()
                 }
                 else -> setState { it.copy(sending = false) }
             }
@@ -316,6 +330,7 @@ class GovernanceCardModel internal constructor(private val env: AppEnvironment) 
         /** Device preference per account and state; a wipe removes it ([AccountPrefs]). */
         const val KEY_PREFIX = "governance.card."
         private const val FOREVER = "forever"
+        private const val INACTIVE = "inactive"
 
         fun key(user: String, episode: String) = "$KEY_PREFIX${user}.$episode"
     }

@@ -57,4 +57,15 @@ class GovernanceStatusTest {
         assertEquals(GovernanceStatus.ACTIVE, Governance.status(account(""), now))
         assertEquals(GovernanceStatus.ACTIVE, Governance.status(account("not a date"), now))
     }
+
+    @Test
+    fun noCardForTheProxyItselfOrAnAccountThatCannotVote() {
+        val ecency = Account(name = GovernanceCardModel.PROXY, governanceVoteExpiration = Governance.EXPIRED_TS)
+        assertEquals(GovernanceStatus.ACTIVE, Governance.status(ecency, now))
+        val declined = Account(name = "spike-alice", governanceVoteExpiration = Governance.EXPIRED_TS, canVote = false)
+        assertEquals(GovernanceStatus.ACTIVE, Governance.status(declined, now))
+        assertEquals(false, Account.fromJson(Json.parseToJsonElement("""{"name":"spike-bob","can_vote":false}"""))!!.canVote)
+        assertEquals(true, Account.fromJson(Json.parseToJsonElement("""{"name":"spike-bob"}"""))!!.canVote)
+    }
 }
+

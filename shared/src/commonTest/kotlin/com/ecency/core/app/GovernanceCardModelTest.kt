@@ -32,13 +32,17 @@ class GovernanceCardModelTest {
     private fun chainTime(millis: Long) = kotlin.time.Instant.fromEpochMilliseconds(millis).toString().removeSuffix("Z")
 
     /** The governance fields of each account on the fake chain; @ecency proxies to @good-karma. */
-    private class Chain(val fields: MutableMap<String, String>, var failBroadcast: Boolean = false)
+    private class Chain(val fields: MutableMap<String, String>, var failBroadcast: Boolean = false, var hangBroadcast: Boolean = false) {
+        /** find_transaction's answer while a send is checked. */
+        var txStatus = "unknown"
+    }
 
     private fun governance(expiration: String, proxy: String = "", votes: List<String> = emptyList()) =
         """"proxy":"$proxy","witness_votes":[${votes.joinToString(",") { "\"$it\"" }}],"governance_vote_expiration_ts":"$expiration""""
 
     private suspend fun app(scope: TestScope, chain: Chain): TestApp {
-        val app = appWithAccounts(scope, known = setOf(alice, bob, GovernanceCardModel.PROXY)) { req ->
+        val base = appWithAccounts(scope, known = setOf(alice, bob, GovernanceCardModel.PROXY))
+        val app = TestApp(scope) { req ->
             when (req.method) {
                 "condenser_api.get_accounts" -> {
                     val names = req.params.jsonArray[0].jsonArray.map { it.jsonPrimitive.content }
@@ -47,9 +51,13 @@ class GovernanceCardModelTest {
                         names.joinToString(",", "[", "]") { n -> AppTestKeys.accountJson(n).removeSuffix("}") + (chain.fields[n]?.let { ",$it" } ?: "") + "}" },
                     )
                 }
-                "condenser_api.broadcast_transaction" ->
-                    if (chain.failBroadcast) FakeTransport.error(req, -31000, "Assert Exception: Account has declined the ability to vote") else null
-                else -> null
+                "condenser_api.broadcast_transaction" -> when {
+                    chain.hangBroadcast -> kotlinx.coroutines.awaitCancellation()
+                    chain.failBroadcast -> FakeTransport.error(req, -31000, "Assert Exception: Proxy must change.")
+                    else -> base.handler(this, req)
+                }
+                "transaction_status_api.find_transaction" -> FakeTransport.result(req, """{"status":"${chain.txStatus}"}""")
+                else -> base.handler(this, req)
             }
         }
         KeyVault(app.store).run { save(stored(alice)); save(stored(bob)); setCurrentUsername(alice) }
@@ -229,6 +237,98 @@ class GovernanceCardModelTest {
         assertEquals(bob, model.current.username)
         assertFalse(model.current.visible)
         app.env.session.switchTo(alice)
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible)
+    }
+
+    private fun reads(app: TestApp) = app.transport.sent.count { it.method == "condenser_api.get_accounts" }
+
+    @Test
+    fun aRefreshKeepsTheCardWhileItReads() = runTest {
+        val app = app(this, chain(governance(Governance.EXPIRED_TS)))
+        val model = start(this, app)
+        model.refresh()
+        assertTrue(model.current.visible, "no blank card while the account is read again")
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible)
+    }
+
+    @Test
+    fun theWalletOpeningReadsAgainSoRemindLaterComesBack() = runTest {
+        val app = app(this, chain(governance(Governance.EXPIRED_TS)))
+        val model = app.env.governanceCard
+        model.shown()
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible)
+        model.dismiss(GovernanceDismiss.LATER)
+        app.now += GovernanceCardModel.RE_REQUEST_MILLIS + 1
+        model.shown()
+        testScheduler.advanceUntilIdle()
+        assertTrue(model.current.visible)
+    }
+
+    @Test
+    fun theSheetStaysWhileSendingAndClosesOnceTheChainIsAsked() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS)).also { it.hangBroadcast = true }
+        val app = app(this, chain)
+        // the send keeps asking the chain until it answers: answer even when an assertion fails, so the test ends
+        try {
+            val model = start(this, app)
+            model.askConfirm()
+            model.confirm()
+            testScheduler.runCurrent()
+            assertTrue(model.current.sending)
+            model.cancelConfirm()
+            assertTrue(model.current.confirming, "the sheet cannot be closed while it signs and sends")
+            // every node times out: the send may have landed, the app keeps asking; the sheet gives way to the card
+            testScheduler.advanceTimeBy(60_000)
+            testScheduler.runCurrent()
+            assertFalse(model.current.confirming)
+            assertTrue(model.current.sending)
+            assertTrue(model.current.visible)
+            model.askConfirm()
+            assertFalse(model.current.confirming, "no second send while the first is checked")
+            // the chain says it is in: the card thanks
+            chain.txStatus = "within_irreversible_block"
+            testScheduler.advanceTimeBy(WalletSends.RECHECK_MILLIS + 1)
+            testScheduler.runCurrent()
+            testScheduler.advanceUntilIdle()
+            assertTrue(model.current.done)
+            assertFalse(model.current.sending)
+        } finally {
+            chain.txStatus = "within_irreversible_block"
+        }
+    }
+
+    @Test
+    fun aFailedSendReadsTheAccountAgain() = runTest {
+        // the chain cleared the expiring proxy after the card was read: Renew is refused ("Proxy must change")
+        val chain = chain(governance(chainTime(TestApp.NOW + 10 * day), proxy = "ecency")).also { it.failBroadcast = true }
+        val app = app(this, chain)
+        val model = start(this, app)
+        assertEquals(GovernanceAction.RENEW, model.current.action)
+        chain.fields[alice] = governance(Governance.EXPIRED_TS)
+        val before = reads(app)
+        model.askConfirm()
+        model.confirm()
+        testScheduler.advanceUntilIdle()
+        assertTrue(reads(app) > before)
+        assertEquals(GovernanceAction.SET_PROXY, model.current.action, "the card now offers what the chain accepts")
+    }
+
+    @Test
+    fun dontShowAgainOnInactiveEndsOnceTheVotesCountAgain() = runTest {
+        val chain = chain(governance(Governance.EXPIRED_TS))
+        val app = app(this, chain)
+        val model = start(this, app)
+        model.dismiss(GovernanceDismiss.FOREVER)
+        chain.fields[alice] = governance(chainTime(TestApp.NOW + 200 * day), votes = listOf("good-karma"))
+        model.refresh()
+        testScheduler.advanceUntilIdle()
+        assertFalse(model.current.visible)
+        // a year later the votes expired again: the earlier choice was about the earlier expiry
+        chain.fields[alice] = governance(Governance.EXPIRED_TS)
+        model.refresh()
         testScheduler.advanceUntilIdle()
         assertTrue(model.current.visible)
     }

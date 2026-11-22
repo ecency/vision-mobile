@@ -35,8 +35,9 @@ struct GovernanceCardView: View {
                             Button(GovernanceCopy.shared.VOTE_YOURSELF) {
                                 if let url = URL(string: GovernanceCardModel.companion.VOTE_URL) { app.sheetURL(url) }
                             }
+                            .buttonStyle(.borderless)
                             .accessibilityIdentifier("governance-vote-yourself")
-                            Button(GovernanceCopy.shared.DISMISS) { model.askDismiss() }.accessibilityIdentifier("governance-dismiss")
+                            Button(GovernanceCopy.shared.DISMISS) { model.askDismiss() }.buttonStyle(.borderless).accessibilityIdentifier("governance-dismiss")
                         }
                         .padding(.top, 4)
                     }
@@ -97,5 +98,7 @@ private struct GovernanceConfirmSheet: View {
             .padding(24)
         }
         .presentationDetents([.medium, .large])
+        // never closed while it signs and sends
+        .interactiveDismissDisabled(state.sending)
     }
 }

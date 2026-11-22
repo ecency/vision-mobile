@@ -101,6 +101,8 @@ data class Account(
     val proxy: String = "",
     val witnessVotes: List<String> = emptyList(),
     val governanceVoteExpiration: String = "",
+    /** `can_vote`: false once the account declined voting rights; the chain then refuses a proxy. */
+    val canVote: Boolean = true,
 ) {
     /** Neither metadata string is set: legitimate for a new account, or a node that stripped them. */
     val isMetadataStripped: Boolean get() = postingJsonMetadata.isEmpty() && jsonMetadata.isEmpty()
@@ -140,6 +142,7 @@ data class Account(
                 proxy = o.str("proxy").orEmpty(),
                 witnessVotes = o["witness_votes"].arr().orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content },
                 governanceVoteExpiration = o.str("governance_vote_expiration_ts").orEmpty(),
+                canVote = (o["can_vote"] as? JsonPrimitive)?.takeIf { !it.isString }?.content?.toBooleanStrictOrNull() ?: true,
             )
         }
     }

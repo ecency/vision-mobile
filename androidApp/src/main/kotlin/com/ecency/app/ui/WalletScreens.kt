@@ -88,7 +88,7 @@ fun WalletTab(env: AppEnvironment, username: String, list: LazyListState, push: 
     val state by model.state.collectAsState()
     val journal by env.sendJournal.state.collectAsState()
     var receive by remember { mutableStateOf(false) }
-    LaunchedEffect(model) { model.start(); env.sendJournal.start() }
+    LaunchedEffect(model) { model.start(); env.sendJournal.start(); env.governanceCard.shown() }
     DisposableEffect(model) {
         model.visible(true)
         onDispose { model.visible(false) }

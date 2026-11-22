@@ -267,6 +267,20 @@ final class WalletUITests: XCTestCase {
         XCTAssertTrue(app.buttons["governance-set-proxy"].waitForExistence(timeout: 20))
     }
 
+    /// "Remind Later" hides the card (the choice is a dialog; its buttons show twice in the tree, so firstMatch).
+    func testRemindLaterHidesTheGovernanceCard() {
+        let app = launch(["-startTab", "WALLET", "-demoGovernance", "inactive"])
+        let dismiss = app.buttons["governance-dismiss"]
+        XCTAssertTrue(dismiss.waitForExistence(timeout: 30))
+        dismiss.tap()
+        let later = app.buttons["governance-later"]
+        XCTAssertTrue(later.firstMatch.waitForExistence(timeout: 10))
+        later.firstMatch.tap()
+        let card = app.descendants(matching: .any)["governance-card"]
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: card)
+        waitForExpectations(timeout: 10)
+    }
+
     /// Without the demo flag the fake accounts' governance counts: no card.
     func testAWalletWhoseGovernanceCountsHasNoCard() {
         let app = launch(["-startTab", "WALLET"])
