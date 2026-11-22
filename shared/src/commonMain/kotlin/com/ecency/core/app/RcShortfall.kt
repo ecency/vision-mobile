@@ -12,11 +12,14 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  * (vision-web#2196), so one query covers both.
  *
  * - `rc.stage`: [STAGE_REJECTED] when the chain refused a broadcast ([ErrorReports.handled] with
- *   [ErrorKind.RESOURCE_CREDITS]); [STAGE_PRECHECK] when the editor's estimate warned (once per account per run).
+ *   [ErrorKind.RESOURCE_CREDITS]); [STAGE_PRECHECK] when the editor's estimate warned, once per account and op per
+ *   UTC day on this device (kept in the preferences, as the web app keeps it per browser), so precheck events
+ *   approximate the users a day.
  * - `rc.op`: what was being done, from the failure's `where` ([opOf]).
  * - No account: the adapters clear the Sentry user, and per-user numbers come from the chain.
  * - Counted, not throttled: a failure handled twice (model and screen) is one event, every other one is its own, up to
- *   [MAX_EVENTS] per run.
+ *   [MAX_EVENTS] per run. No Sentry exemption is needed, unlike the web app's: neither native SDK drops repeated
+ *   message events (Android's duplicate filter only drops the same exception object, iOS has none).
  *
  * Total: it never throws into the caller.
  */
@@ -32,9 +35,11 @@ object RcShortfall {
     /** How many reported failures are remembered by identity (one failure is handled again right where it was). */
     private const val RECENT = 16
 
-    private class State(val sent: Int, val recent: List<Throwable>, val prechecked: Set<String>)
+    private const val DAY_MILLIS = 86_400_000L
 
-    private val EMPTY = State(0, emptyList(), emptySet())
+    private class State(val sent: Int, val recent: List<Throwable>)
+
+    private val EMPTY = State(0, emptyList())
     private val state = AtomicReference(EMPTY)
 
     /** With [ErrorReports.install]: a fresh run. */
@@ -52,12 +57,23 @@ object RcShortfall {
 
     /** The chain refused [failure] at [where] for Resource Credits. */
     internal fun rejected(failure: Throwable, where: String) = record(STAGE_REJECTED, opOf(where)) { s ->
-        if (s.recent.any { it === failure }) null else State(s.sent + 1, (s.recent + failure).takeLast(RECENT), s.prechecked)
+        if (s.recent.any { it === failure }) null else State(s.sent + 1, (s.recent + failure).takeLast(RECENT))
     }
 
-    /** The editor's estimate says [account]'s credits are too low for what is written ([op]: [OP_POST] or [OP_COMMENT]). */
-    fun precheck(account: String, op: String) = record(STAGE_PRECHECK, op) { s ->
-        if (account in s.prechecked) null else State(s.sent + 1, s.recent, s.prechecked + account)
+    /**
+     * The editor's estimate says [account]'s credits are too low for what is written ([op]: [OP_POST] or
+     * [OP_COMMENT]): sent once per account and op per UTC day, remembered in [prefs] (the account stays on the device).
+     */
+    fun precheck(prefs: Prefs, nowMillis: Long, account: String, op: String) {
+        try {
+            val key = "rcShortfall.precheck.$account.$op"
+            val day = (nowMillis / DAY_MILLIS).toString()
+            if (prefs.getString(key) == day) return
+            prefs.putString(key, day)
+            record(STAGE_PRECHECK, op) { s -> State(s.sent + 1, s.recent) }
+        } catch (t: Throwable) {
+            // not reported: counting must never fail the caller
+        }
     }
 
     private fun record(stage: String, op: String, next: (State) -> State?) {

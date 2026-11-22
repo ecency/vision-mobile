@@ -66,15 +66,26 @@ class RcShortfallTest {
     }
 
     @Test
-    fun thePrecheckIsReportedOncePerAccountPerRun() {
-        repeat(3) { RcShortfall.precheck("alice", RcShortfall.OP_POST) }
-        RcShortfall.precheck("bob", RcShortfall.OP_COMMENT)
+    fun thePrecheckIsReportedOncePerAccountAndOpPerUtcDay() {
+        // as the web app: precheck events approximate unique users a day (vision-web#2199)
+        val prefs = InMemoryPrefs()
+        val day = 86_400_000L
+        val noon = 20_000 * day + day / 2
+        repeat(3) { RcShortfall.precheck(prefs, noon, "alice", RcShortfall.OP_POST) }
+        RcShortfall.precheck(prefs, noon, "alice", RcShortfall.OP_COMMENT)
+        RcShortfall.precheck(prefs, noon, "bob", RcShortfall.OP_COMMENT)
+        // the app restarted the same day: still counted
+        ErrorReports.install({ reporter }, { now })
+        RcShortfall.precheck(prefs, noon + day / 4, "alice", RcShortfall.OP_POST)
+        // the next UTC day counts again
+        RcShortfall.precheck(prefs, noon + day, "alice", RcShortfall.OP_POST)
         val sent = shortfalls()
-        assertEquals(2, sent.size)
-        assertEquals(listOf("precheck", "precheck"), sent.map { it.tags["rc.stage"] })
-        assertEquals(listOf("post", "comment"), sent.map { it.tags["rc.op"] })
-        assertEquals(listOf("rc-shortfall: precheck/post", "rc-shortfall: precheck/comment"), sent.map { it.message })
-        assertTrue(sent.none { r -> r.tags.values.any { it == "alice" || it == "bob" } && r.message.contains("alice") }, "no account in the report")
+        assertEquals(
+            listOf("rc-shortfall: precheck/post", "rc-shortfall: precheck/comment", "rc-shortfall: precheck/comment", "rc-shortfall: precheck/post"),
+            sent.map { it.message },
+        )
+        assertTrue(sent.all { it.tags["rc.stage"] == "precheck" })
+        assertTrue(sent.none { r -> "alice" in r.message || "bob" in r.message || r.tags.values.any { it == "alice" || it == "bob" } }, "no account in the report")
     }
 
     @Test
@@ -85,6 +96,6 @@ class RcShortfallTest {
         } }, { now })
         val error = AppError.fromBroadcast(outOfRc(), "editor.publish")
         assertEquals(ErrorKind.RESOURCE_CREDITS, error.kind)
-        RcShortfall.precheck("alice", RcShortfall.OP_POST)
+        RcShortfall.precheck(InMemoryPrefs(), now, "alice", RcShortfall.OP_POST)
     }
 }
